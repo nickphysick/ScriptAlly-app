@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Record response &amp; correcting an entry</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#f2ede7;--parchment:#fdfaf5;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#ece0d2;--sage:#8a9e88;--sage-tx:#5a6e58;--sage-bg:#e9ede6;--pink:#f5e2da;--pink-br:#e8c8bc;--rim:rgba(124,58,42,.16);--d:1;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);padding:24px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px #e0d5c8;}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.05em;padding:6px 11px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:var(--muted);font-style:italic;}
+
+.page{background:var(--parchment);border-radius:14px;padding:22px 24px 24px;max-width:1180px;
+  box-shadow:inset 0 0 0 1px var(--rim),0 8px 26px rgba(58,28,20,.07);}
+.ph{display:flex;align-items:flex-end;gap:14px;padding-bottom:13px;margin-bottom:16px;box-shadow:inset 0 -1px 0 var(--hair);}
+.ph h1{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;}
+
+/* ── takeover shell, same shape as Logging new query ── */
+.take{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:inset 0 0 0 1px #e0d5c8,0 8px 24px rgba(58,28,20,.08);}
+.tk-h{display:flex;align-items:flex-start;gap:14px;padding-bottom:13px;box-shadow:inset 0 -1px 0 var(--hair);}
+.tk-m{width:44px;height:44px;flex:0 0 44px;border-radius:9px;background:#eef1ec;box-shadow:inset 0 0 0 1px #dfe5dc;display:flex;align-items:center;justify-content:center;}
+.tk-m svg{width:23px;height:23px;stroke:var(--sage-tx);fill:none;stroke-width:1.4;}
+.tk-t{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;}
+.tk-s{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+.tk-chips{display:flex;gap:12px;margin-top:8px;}
+.tk-chips span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);}
+.ring{width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #d3c6b8;position:relative;}
+.ring.dash::after{content:'';position:absolute;left:3px;top:5.5px;width:7px;height:1.5px;background:#c3b3a3;border-radius:1px;}
+.ring.done{background:var(--sage);box-shadow:inset 0 0 0 1.5px var(--sage);}
+.ring.done::after{content:'';position:absolute;left:4px;top:2px;width:4px;height:7px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+.tk-a{margin-left:auto;display:flex;gap:9px;align-items:center;}
+.tk-b{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.07em;background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;color:var(--ink-soft);border-radius:9px;padding:9px 14px;cursor:pointer;}
+.tk-b.pk{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+.tk-b.pk:disabled{opacity:.5;cursor:default;}
+
+.body{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;padding-top:16px;align-items:start;}
+.flow{display:flex;flex-direction:column;gap:9px;}
+.srow{display:flex;align-items:center;gap:12px;background:#fbf8f3;border-radius:10px;padding:12px 15px;box-shadow:inset 0 0 0 1px var(--hair);cursor:pointer;}
+.srow:hover{background:#fff;box-shadow:inset 0 0 0 1px #dcc9bb;}
+.srow b{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--ink-soft);}
+.srow .hint{font-size:12.5px;color:#a89686;}
+.srow .val{margin-left:auto;font-size:12.5px;color:var(--ink-soft);}
+.srow .chev{margin-left:10px;color:#c8b8a8;}
+.sopen{background:#fff;border-radius:11px;padding:16px 18px;box-shadow:inset 0 0 0 1px #e0d5c8,0 5px 16px rgba(58,28,20,.06);}
+.so-h{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.so-n{width:21px;height:21px;flex:0 0 21px;border-radius:50%;background:var(--pink);color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9.5px;display:flex;align-items:center;justify-content:center;}
+.so-h h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.lede{font-size:12px;color:var(--muted);margin:0 0 13px 31px;}
+.so-in{margin-left:31px;}
+.so-f{display:flex;align-items:center;margin:16px 0 0 31px;padding-top:13px;box-shadow:inset 0 1px 0 var(--hair);}
+.so-f .b-next{margin-left:auto;}
+.fl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+
+/* outcome grid */
+.outs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
+.out{display:flex;align-items:center;gap:10px;background:#fbf8f3;border-radius:10px;padding:12px 13px;cursor:pointer;
+  box-shadow:inset 0 0 0 1px var(--hair);transition:box-shadow .15s,background .15s;}
+.out:hover{background:#fff;box-shadow:inset 0 0 0 1px #dcc9bb;}
+.out.on{background:#fff;box-shadow:inset 0 0 0 2px var(--sage);}
+.out .m{width:24px;height:24px;flex:0 0 24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.out .m.in{background:var(--sage-bg);box-shadow:inset 0 0 0 2px var(--sage);color:var(--sage-tx);}
+.out .m.out{background:#f8e7dc;box-shadow:inset 0 0 0 2px var(--burg);color:var(--burg);}
+.out .m.shut{background:#efe7dd;box-shadow:inset 0 0 0 2px #c3b3a3;color:#a89686;}
+.out b{display:block;font-size:13px;font-weight:500;}
+.out i{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:1px;}
+
+.chipset{display:flex;gap:7px;flex-wrap:wrap;}
+.ch{background:#fff;border-radius:9px;padding:9px 13px;font-size:12.5px;cursor:pointer;box-shadow:inset 0 0 0 1px #e0d5c8;}
+.ch.on{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);font-weight:500;}
+.m2{display:inline-flex;align-items:center;gap:8px;background:#fbf8f3;border-radius:9px;padding:9px 13px;cursor:pointer;box-shadow:inset 0 0 0 1px var(--hair);font-size:13px;}
+.m2.on{background:#fff;box-shadow:inset 0 0 0 1px var(--pink-br);}
+.m2 .bx{width:15px;height:15px;flex:0 0 15px;border-radius:4px;background:#fff;box-shadow:inset 0 0 0 1.5px #d3c6b8;position:relative;}
+.m2.on .bx{background:var(--sage);box-shadow:inset 0 0 0 1.5px var(--sage);}
+.m2.on .bx::after{content:'';position:absolute;left:4.5px;top:2px;width:4px;height:8px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+.numf{width:70px;background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;border-radius:7px;padding:6px 8px;font-size:12.5px;text-align:right;font-family:'Inter';outline:none;}
+.units{display:flex;background:#f4ede4;border-radius:7px;padding:2px;gap:2px;box-shadow:inset 0 0 0 1px #e6dbcd;}
+.units span{font-family:'JetBrains Mono',monospace;font-size:8px;padding:4px 6px;border-radius:5px;cursor:pointer;color:var(--ink-soft);}
+.units span.on{background:#fff;color:var(--burg);font-weight:500;}
+.ta{width:100%;min-height:82px;background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;border-radius:9px;padding:10px 12px;font-family:'Inter';font-size:13px;resize:vertical;outline:none;}
+.derived{margin-top:9px;font-size:11.5px;color:var(--muted);}
+
+/* reference panel */
+.refp{background:var(--parchment);border-radius:11px;border:1px dashed rgba(124,58,42,.28);overflow:hidden;}
+.rp-cap{padding:11px 13px;box-shadow:inset 0 -1px 0 rgba(124,58,42,.14);}
+.rp-t{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;}
+.rp-sub{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.rp-row{padding:9px 13px;box-shadow:inset 0 -1px 0 rgba(124,58,42,.10);}
+.rp-row:last-child{box-shadow:none;}
+.rp-lb{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.rp-tx{font-size:12px;line-height:1.4;}
+
+/* ── timeline / correction ── */
+.tl{max-width:640px;}
+.tle{position:relative;display:flex;gap:13px;padding:13px 14px;border-radius:10px;background:#fbf8f3;box-shadow:inset 0 0 0 1px var(--hair);margin-bottom:9px;}
+.tle .m{width:26px;height:26px;flex:0 0 26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.tle .m.out{background:#f8e7dc;box-shadow:inset 0 0 0 2px var(--burg);color:var(--burg);}
+.tle .m.in{background:var(--sage-bg);box-shadow:inset 0 0 0 2px var(--sage);color:var(--sage-tx);}
+.tle b{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;}
+.tle .sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.tle .rt{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.tle .dt{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);}
+.corr{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--burg);opacity:0;transition:opacity .15s;cursor:pointer;}
+.tle:hover .corr{opacity:1;}
+.edited{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#bfae9e;cursor:help;}
+.editor{background:#fff;border-radius:10px;padding:14px 15px;box-shadow:inset 0 0 0 1px var(--pink-br),0 6px 18px rgba(58,28,20,.08);margin-bottom:9px;}
+.editor .eh{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+.editor .eh b{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;}
+.editor .eh span{font-size:11.5px;color:var(--muted);}
+.erow{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+.efield{background:#fff;border:0;box-shadow:inset 0 0 0 1px #e0d5c8;border-radius:8px;padding:8px 10px;font-size:12.5px;font-family:'Inter';outline:none;}
+.ef{display:flex;gap:9px;margin-top:13px;padding-top:12px;box-shadow:inset 0 1px 0 var(--hair);}
+.ef .del{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.09em;color:#a8524a;background:none;border:0;cursor:pointer;}
+
+body:not([data-v="resp"]) #v-resp{display:none;}
+body:not([data-v="corr"]) #v-corr{display:none;}
+body:not([data-o="req"]) .only-req{display:none;}
+body:not([data-o="rej"]) .only-rej{display:none;}
+body:not([data-o="off"]) .only-off{display:none;}
+
+.legend{max-width:1180px;margin-top:22px;padding:16px 20px;background:#f8f2ea;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+</style>
+</head>
+<body data-v="resp" data-o="none">
+
+<div class="ctl">
+  <b>Journey</b>
+  <div class="seg" id="seg">
+    <button data-v="resp" class="on">Record response</button>
+    <button data-v="corr">Correcting an entry</button>
+  </div>
+  <span class="note">Pick an outcome to see the steps change.</span>
+</div>
+
+<!-- ════ RECORD RESPONSE ════ -->
+<div id="v-resp">
+<div class="page">
+  <div class="ph"><h1>Daniel O'Rourke · Inkwell &amp; Stone</h1></div>
+
+  <div class="take">
+    <div class="tk-h">
+      <span class="tk-m"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h14"/><path d="m9 6-6 6 6 6"/><path d="M21 5v14"/></svg></span>
+      <div>
+        <div class="tk-t">Recording a response</div>
+        <div class="tk-s">What came back, and when — the rest follows from that.</div>
+        <div class="tk-chips">
+          <span><i class="ring" id="c1"></i>Outcome</span>
+          <span><i class="ring" id="c2"></i>Date</span>
+        </div>
+      </div>
+      <div class="tk-a"><button class="tk-b">Cancel</button><button class="tk-b pk" id="save" disabled>➤ Save response</button></div>
+    </div>
+
+    <div class="body">
+      <div class="flow">
+        <!-- step 1 -->
+        <div class="sopen">
+          <div class="so-h"><span class="so-n">1</span><h3>What came back?</h3></div>
+          <div class="lede">Sent 9 August · queried 2 days ago.</div>
+          <div class="so-in">
+            <div class="outs" id="outs">
+              <div class="out" data-k="req" data-l="Partial requested"><span class="m in">←</span><span><b>Partial requested</b><i>They want to read more</i></span></div>
+              <div class="out" data-k="req" data-l="Full requested"><span class="m in">←</span><span><b>Full requested</b><i>They want the manuscript</i></span></div>
+              <div class="out" data-k="req" data-l="Revise &amp; resubmit"><span class="m in">✎</span><span><b>Revise &amp; resubmit</b><i>Changes, then send again</i></span></div>
+              <div class="out" data-k="off" data-l="Offer"><span class="m out">★</span><span><b>Offer</b><i>Representation offered</i></span></div>
+              <div class="out" data-k="rej" data-l="Rejection"><span class="m shut">×</span><span><b>Rejection</b><i>A pass</i></span></div>
+              <div class="out" data-k="rej" data-l="Closed — no reply"><span class="m shut">×</span><span><b>Closed — no reply</b><i>Their stated window has passed</i></span></div>
+            </div>
+          </div>
+          <div class="so-f"><button class="tk-b pk" id="n1" disabled>Next: When →</button></div>
+        </div>
+
+        <!-- collapsed remainder -->
+        <div class="srow"><b>When</b><span class="hint">The date it arrived</span><span class="chev">›</span></div>
+        <div class="srow only-req"><b>What they asked for</b><span class="hint">Materials, and any deadline</span><span class="chev">›</span></div>
+        <div class="srow only-off"><b>The offer</b><span class="hint">Terms, and when you must reply</span><span class="chev">›</span></div>
+        <div class="srow only-rej"><b>Anything they said</b><span class="hint">Optional — feedback worth keeping</span><span class="chev">›</span></div>
+        <div class="srow"><b>Notes</b><span class="hint">Optional</span><span class="chev">›</span></div>
+      </div>
+
+      <div class="refp">
+        <div class="rp-cap"><div class="rp-t">This agent at a glance</div><div class="rp-sub">Daniel O'Rourke</div></div>
+        <div class="rp-row"><div class="rp-lb">You sent</div><div class="rp-tx">Query letter · Synopsis<br>9 August, by email</div></div>
+        <div class="rp-row"><div class="rp-lb">Expected reply</div><div class="rp-tx">~4 October · 8 weeks</div></div>
+        <div class="rp-row"><div class="rp-lb">Your history</div><div class="rp-tx">1 open · 1 closed</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ════ CORRECTING AN ENTRY ════ -->
+<div id="v-corr">
+<div class="page">
+  <div class="ph"><h1>Tracking · Daniel O'Rourke</h1></div>
+  <div class="tl">
+    <div class="tle">
+      <span class="m in">←</span>
+      <div><b>Partial requested</b><div class="sub">First 50 pages · replied in 6 days</div></div>
+      <span class="rt"><span class="edited" id="ed" style="display:none" title="Edited 10 Aug 2026">Edited</span><span class="dt">15 AUG</span><span class="corr" id="fix">Correct this</span></span>
+    </div>
+
+    <div class="editor" id="editor" style="display:none">
+      <div class="eh"><b>Correcting an entry</b><span>Changing what was recorded, not adding something new.</span></div>
+      <div class="erow">
+        <div><div class="fl">Outcome</div><input class="efield" value="Partial requested" style="width:190px"></div>
+        <div><div class="fl">Date it arrived</div><input class="efield" value="15 August 2026" style="width:150px"></div>
+        <div><div class="fl">They asked for</div><input class="efield" value="50 pages" style="width:120px"></div>
+      </div>
+      <div class="ef">
+        <button class="tk-b pk" id="esave">Save correction</button>
+        <button class="tk-b" id="ecancel">Cancel</button>
+        <button class="del" id="edel">Delete this entry</button>
+      </div>
+    </div>
+
+    <div class="tle">
+      <span class="m out">→</span>
+      <div><b>Query sent</b><div class="sub">Query letter · Synopsis · by email</div></div>
+      <span class="rt"><span class="dt">9 AUG</span><span class="corr">Correct this</span></span>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="legend">
+  <b>The grammar</b>
+  <ul>
+    <li><b>Something happened → Record response.</b> One journey, one entry point, same shape as Logging new query — same stagger, same step stack, same three exits. "Mark closed" folds in as an outcome; the inline "What happened next?" panel goes, because two doors into one room is what made the all-queried block confusing.</li>
+    <li><b>I got a fact wrong → correct that entry.</b> Attached to the entry in the timeline, on hover. Never a global Edit — a toolbar button cannot know which of five recorded events you meant.</li>
+    <li><b>Which means Edit does not survive as a toolbar verb.</b> Every real use of it is one of the three: record a response, correct an entry, or change a record detail in place (materials, sent date, agent) where "What you sent" already does this with MARK SENT and + ADD.</li>
+  </ul>
+  <br>
+  <b>How the fork got answered</b>
+  <ul>
+    <li>The original question was "did something change, or am I fixing a mistake?" — but asking it as a modal makes the writer classify their own intent before they can act. <b>Where they clicked already answers it.</b> Record response appends; Correct this edits. No fork, no dialogue.</li>
+    <li><b>Step 1 decides the journey.</b> Requests ask what was wanted and by when; an offer asks the terms and the reply-by date; a rejection asks only whether anything was said worth keeping. The step stack changes with the outcome — try each.</li>
+    <li><b>A correction leaves a quiet marker.</b> The entry carries a muted "Edited" with the date on hover. Honest without turning a typo fix into an event. Save the correction to see it appear.</li>
+    <li><b>Deleting is inside the correction editor</b>, not on the row. Removing a recorded event is a correction, and it should require having opened the thing first.</li>
+  </ul>
+  <br>
+  <b>The thing to watch:</b> <code>recomputeQuery</code> derives status from the log, so correcting an old entry can move the query's current status and its pipeline dates. The editor should say what will change before it saves — that is a build question, and worth settling in the prompt rather than in the UI.
+</div>
+
+<script>
+var body=document.body;
+document.getElementById('seg').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  body.dataset.v=b.dataset.v;
+  [].forEach.call(e.currentTarget.children,function(x){x.classList.toggle('on',x===b);});});
+document.querySelectorAll('.out').forEach(function(o){
+  o.addEventListener('click',function(){
+    document.querySelectorAll('.out').forEach(function(x){x.classList.remove('on');});
+    o.classList.add('on'); body.dataset.o=o.dataset.k;
+    document.getElementById('c1').className='ring done';
+    document.getElementById('n1').disabled=false;
+    document.getElementById('save').disabled=false;
+  });
+});
+var fix=document.getElementById('fix'),ed=document.getElementById('editor');
+fix.addEventListener('click',function(){ed.style.display='block';});
+document.getElementById('ecancel').addEventListener('click',function(){ed.style.display='none';});
+document.getElementById('esave').addEventListener('click',function(){
+  ed.style.display='none';document.getElementById('ed').style.display='inline';});
+document.getElementById('edel').addEventListener('click',function(){
+  ed.style.display='none';});
+</script>
+</body>
+</html>
