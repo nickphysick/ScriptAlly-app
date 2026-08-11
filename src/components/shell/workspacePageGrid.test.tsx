@@ -142,10 +142,19 @@ describe("the three-row grid — chrome outside the scroller", () => {
    * out, and not before.
    */
   it("⚠️ THE CONVERSION IS PARTIAL, and both halves are asserted", () => {
+    /* ⚠️ THE PREDICATE IS `variant="workspace"`, NOT `toolbar=`, AND THE FIRST VERSION WAS WRONG.
+       It listed only pages that pass a toolbar — so Discover, Submission packages and Analytics were
+       absent from BOTH halves while all three still rendered the sticky plate. The census would have
+       read "empty" with three pages still depending on `.wsh-wrap`, the reservation and the frost,
+       and the cleanup commit would have deleted machinery in use. Anything that renders the plate is
+       on one path or the other; that is what has to be enumerated. */
     const CONVERTED = [
       ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../AllManuscripts.tsx"],
       ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
+      ["Discover", "../DiscoverNewAgents.tsx"],
+      ["Submission packages", "../SubmissionPackages.tsx"],
+      ["Analytics", "../QueryAnalytics.tsx"],
     ] as const;
     const NOT_YET = [
       ["Tasks family", "../todo/TasksPageLayout.tsx"],
@@ -159,7 +168,7 @@ describe("the three-row grid — chrome outside the scroller", () => {
     for (const [page, file] of NOT_YET) {
       const t = readFileSync(resolve(__dirname, file), "utf8");
       expect(t, `${page} converted — move it into CONVERTED above, and check whether this was the LAST one`).not.toContain("WorkspacePageGrid");
-      expect(t, `${page} is still on the old path, so it must still pass its toolbar to the plate`).toContain("toolbar=");
+      expect(t, `${page} is still on the old path, so it must still render the plate the old way`).toContain('variant="workspace"');
     }
     /* the legacy path must survive while anything is still on it */
     const ph = readFileSync(resolve(__dirname, "PageHeader.tsx"), "utf8");

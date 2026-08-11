@@ -55,12 +55,22 @@
    ⚠️ TOP 28 → 14, HALVED, for the reason the agent list halved: the header moved OUT of `.dv-wrap`
    and now sits inside this padding, so the top value stopped being breathing room above the content
    and became empty paper above a header that already carries its own 78px. */
+/* ⚠️ `flex: 1 0 auto` BECOMES `flex: 1; min-height: 0` (amendment 9). The old value let the page
+   GROW past its container — right while the page was one long document scrolled by the shell. Row 3
+   owns the scrolling now, so the page must fill its frame and not exceed it, or the grid has no
+   bounded height to give its scroll row.
+   ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER, where it scrolls with the last card. */
 .dv2 {
-  flex: 1 0 auto;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   color: var(--dv-ink-body);
   --pg-gut: 60px;
-  padding: 14px var(--pg-gut) 48px;
+  padding: 14px var(--pg-gut) 0;
 }
+.dv-wpg { flex: 1; min-height: 0; }
+.dv2 .wpg-scroll { padding-bottom: 48px; }
 .dv-wrap {
   max-width: 1240px;
   margin: 0 auto;

@@ -68,11 +68,20 @@
    ⚠️ THE HEADER IS NO LONGER EXCLUDED (amendment 7). It used to be `> :not(.wsh)`, because a band
    was chrome and bled past this cap. A PLATE is an object whose edges must meet the cards below it,
    so its sticky host takes the same cap they do. */
-.pkgw > * {
+/* ⚠️ THE CAP MOVED TO THE GRID ROOT (amendment 9). It was `.pkgw > *` — every child capped
+   individually because chrome and content were siblings under one parent. They are rows of a grid
+   now, so one cap governs them all and the selector stops having to enumerate anything. */
+.pkgw-wpg {
+  flex: 1;
+  min-height: 0;
   width: 100%;
   max-width: calc(var(--content-max-read) - 2 * var(--pg-gut));
   margin-inline: auto;
 }
+/* ⚠️ ROW 3 KEEPS THIS PAGE'S FLEX COLUMN, because its contents (the strip, the tabs, the workshop)
+   were laid out by `.pkgw`'s own `display:flex; flex-direction:column; gap:14px` and that gap is the
+   page's vertical rhythm. Moving them into a block scroll row would collapse every gap at once. */
+.pkgw .wpg-scroll { display: flex; flex-direction: column; gap: 14px; }
 
 /* ── Tabs ─────────────────────────────────────────────────────────────────────
    A sibling block beneath PageHeader, never inside it: PageHeader draws title +

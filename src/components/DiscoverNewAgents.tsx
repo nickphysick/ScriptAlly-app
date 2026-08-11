@@ -53,6 +53,7 @@ import {
 import { getHomeCountry, flagFor, countryName } from "../lib/territory";
 import { agentInitials, agentPrimary, agentSecondary } from "../lib/agentDisplay";
 import { PageHeader } from "./shell/PageHeader";
+import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import {
   ShieldCheck,
   Check,
@@ -465,35 +466,40 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
       {/* ⚠️ THE HEADER IS BACK INSIDE `.dv-wrap`, reversing the previous pass on purpose: a band was
           chrome and spanned the window, a PLATE is an object whose edges must meet the first and
           last card — and past the cap this centred column is the only place they agree. */}
-      <div className="dv-wrap">
-      <PageHeader
-          variant="workspace"
-          mark="discover"
-          title="Discover new agents"
-          description="Verified agents matched to your manuscript — with the reasons they fit."
-          titleAdornment={<span className="dv-propill">Pro</span>}
-          actionsSlot={
-            selected ? (
-              pickable.length >= 2 ? (
-                <button
-                  type="button"
-                  className="dv-msel"
-                  onClick={tryNextManuscript}
-                  title="Switch manuscript"
-                >
-                  <span className="k">Finding for</span>
-                  {selected.title}
-                  <ChevronDown aria-hidden="true" />
-                </button>
-              ) : (
-                <span className="dv-msel">
-                  <span className="k">Finding for</span>
-                  {selected.title}
-                </span>
-              )
-            ) : undefined
-          }
+      {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate is row 1; the matches scroll
+          in row 3. Discover passes NO toolbar, so the grid renders no row 2 and no hairline — it
+          reserves nothing for a row it does not have. */}
+      <WorkspacePageGrid className="dv-wpg" scrollLabel="Discover" plate={
+        <PageHeader
+            variant="workspace"
+            mark="discover"
+            title="Discover new agents"
+            description="Verified agents matched to your manuscript — with the reasons they fit."
+            titleAdornment={<span className="dv-propill">Pro</span>}
+            actionsSlot={
+              selected ? (
+                pickable.length >= 2 ? (
+                  <button
+                    type="button"
+                    className="dv-msel"
+                    onClick={tryNextManuscript}
+                    title="Switch manuscript"
+                  >
+                    <span className="k">Finding for</span>
+                    {selected.title}
+                    <ChevronDown aria-hidden="true" />
+                  </button>
+                ) : (
+                  <span className="dv-msel">
+                    <span className="k">Finding for</span>
+                    {selected.title}
+                  </span>
+                )
+              ) : undefined
+            }
         />
+      }>
+      <div className="dv-wrap">
         <div>
           {/* The vetting strip earns its place beside real matches; in the first-run state the
               no-match message takes this position instead. */}
@@ -733,6 +739,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
           )}
         </div>
       </div>
+      </WorkspacePageGrid>
     </div>
   );
 };

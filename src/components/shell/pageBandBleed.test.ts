@@ -199,54 +199,22 @@ describe("the header plate — one gutter token, and the plate inside the column
    * applies to EVERY child — the header included, which is the change amendment 7 made. On the
    * other two the header is nested inside the capped element in the TSX, asserted below.
    */
-  it("Comps and Packages cap EVERY child — the plate is no longer excluded from the column", () => {
-    /* ⚠️ COMPARABLE TITLES LEFT THIS CASE (amendment 9, conversion 3). Its cap is on the GRID ROOT
-       now, which governs all three rows at once — an all-children selector is what you need when the
-       chrome and the content are siblings sharing a parent, and they no longer are. PACKAGES IS THE
-       LAST SUBJECT; when it converts this case should be DELETED rather than left asserting nothing.
-       Its sibling assertion below (`> :not(.wsh)` must not return) still applies to it. */
-    for (const [page, file, root] of [
-      ["Submission packages", "components/packages/packageWorkshop.css", ".pkgw"],
-    ] as const) {
-      const css = read(file);
-      expect(
-        css,
-        `${page} still excludes the header from its content cap (\`${root} > :not(.wsh)\`). That was the BAND's bleed expressed as a selector; the plate must take the same cap the panels below it take, or its edges miss them past the cap.`,
-      ).not.toContain(`${root} > :not(.wsh)`);
-      expect(
-        blocksFor(css, `${root} > *`).length,
-        `${page} has no all-children cap — with the route slot no longer capping, content and the plate both run to the full window width`,
-      ).toBeGreaterThan(0);
-    }
-  });
-
-  it("Contact list, Discover and Manuscripts nest the plate INSIDE their capped column", () => {
-    /* ⚠️ ASSERTED ON ORDER, NOT PRESENCE. Both the wrapper and the PageHeader exist either way —
-       what changed is which encloses which, so a `toContain` on both would pass in the broken
-       arrangement too. */
-    /* ⚠️ CONTACT LIST LEFT THIS LIST (amendment 9) — retargeted, NOT relaxed. Its plate is row 1 of
-       a `WorkspacePageGrid` now, so it is no longer inside the content wrapper at all; the CAP moved
-       up to the grid root, where it governs all three rows at once and the alignment stops depending
-       on the plate and the cards sharing a container. The assertion that replaces it is in
-       `workspacePageGrid.test.tsx`. The two pages below are still on the old arrangement. */
-    /* ⚠️ MANUSCRIPTS LEFT TOO (amendment 9, conversion 2) — its plate is row 1 of a grid and the cap
-       moved above both chrome and content, so "inside the same wrapper" stopped being the thing that
-       aligns them. DISCOVER IS THE LAST PAGE STILL ON THE OLD ARRANGEMENT here; when it converts,
-       this case has no subjects left and should be DELETED rather than left asserting nothing. */
-    for (const [page, file, wrapper] of [
-      ["Discover", "components/DiscoverNewAgents.tsx", "dv-wrap"],
-    ] as const) {
-      const tsx = read(file);
-      const wrapAt = tsx.indexOf(`className="${wrapper}"`);
-      const headerAt = tsx.indexOf("variant=\"workspace\"");
-      expect(wrapAt, `${page}: \`.${wrapper}\` is gone — the content column it names no longer exists`).toBeGreaterThan(-1);
-      expect(headerAt, `${page}: no workspace header found`).toBeGreaterThan(-1);
-      expect(
-        wrapAt,
-        `${page}: the plate is rendered BEFORE \`.${wrapper}\` opens, so it sits outside the capped column and its edges will miss the cards past the cap. That was correct for a window-spanning band and is wrong for a plate.`,
-      ).toBeLessThan(headerAt);
-    }
-  });
+  /**
+   * ⚠️ TWO CASES WERE DELETED HERE, NOT DISABLED (amendment 9, conversions 4–6), and each said so
+   * in advance: "when its last subject converts this case should be DELETED rather than left
+   * asserting nothing".
+   *
+   *   · "Comps and Packages cap EVERY child" — an all-children selector is what a page needs when
+   *     chrome and content are SIBLINGS under one parent. They are rows of a grid now, so the cap
+   *     sits on the grid root and there is no child list to enumerate.
+   *   · "… nest the plate INSIDE their capped column" — sharing a container was what aligned the
+   *     plate with the cards. The cap is ABOVE both now, so the containment it asserted is not the
+   *     mechanism any more.
+   *
+   * A test kept past its subject is worse than no test: it goes green over an arrangement it was
+   * never written for. What replaced both is in `workspacePageGrid.test.tsx` — the census, and the
+   * grid's own row/cap contract.
+   */
 
   it("the plate's colours and shadows are TOKENS, and the condensed border derives from ours", () => {
     const wsh = blocksFor(headerCss, ".wsh")[0] + blocksFor(headerCss, ".wsh--scrolled")[0];
