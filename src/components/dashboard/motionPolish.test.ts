@@ -33,10 +33,20 @@ describe.each(SHEETS)("%s sheet — motion is transform/opacity only", (_name, p
    * and rewriting either to a transform is an architecture change, not a polish one. They are
    * listed here so they stay VISIBLE: the assertion still fails on a THIRD, which is what stops
    * "there are already some" becoming the reason for the next one.
+   *
+   * ⚠️ AND THE SIDEBAR-COLLAPSE PACK'S TRANSITIONS ARE ALLOWED BY SIGNATURE, not by count. That
+   * pack MANDATES width/padding/max-width/margin animation — its own global rule records why a
+   * transform is forbidden there (a transform on any ancestor of the panel's illustrated marks
+   * creates a stacking context that isolates mix-blend-mode). Every one of its transitions
+   * carries the pack's curve, `240ms cubic-bezier(0.32, 0.72, 0.28, 1)`, so the curve IS the
+   * exception's name: a layout transition WITHOUT it still fails here, which keeps the door as
+   * narrow as it was — new layout motion must either be this pack's, on its curve, or argue its
+   * own case in this comment.
    */
-  const ALLOWED = [/transition:\s*width\s/, /transition:\s*max-height\s/];
+  const COLLAPSE_SIG = /240ms cubic-bezier\(0\.32, 0\.72, 0\.28, 1\)/;
+  const ALLOWED = [/transition:\s*width\s/, /transition:\s*max-height\s/, COLLAPSE_SIG];
 
-  it("no `transition:` names a layout property, apart from the two named legacy ones", () => {
+  it("no `transition:` names a layout property, apart from the named exceptions", () => {
     const decls = bare.match(/transition:\s*[^;}]+/g) ?? [];
     expect(decls.length).toBeGreaterThan(0);
     for (const d of decls) {
@@ -47,9 +57,11 @@ describe.each(SHEETS)("%s sheet — motion is transform/opacity only", (_name, p
     }
   });
 
-  it("⚠️ the legacy exceptions have not multiplied", () => {
+  it("⚠️ the legacy exceptions have not multiplied — collapse-pack decls identified by curve", () => {
     const decls = bare.match(/transition:\s*[^;}]+/g) ?? [];
-    const layout = decls.filter((d) => LAYOUT_PROPS.some((p) => new RegExp(`(^|[\\s,:])${p}(\\s|,|$)`).test(d)));
+    const layout = decls
+      .filter((d) => !COLLAPSE_SIG.test(d))
+      .filter((d) => LAYOUT_PROPS.some((p) => new RegExp(`(^|[\\s,:])${p}(\\s|,|$)`).test(d)));
     expect(layout.length, `layout transitions found:\n${layout.join("\n")}`).toBeLessThanOrEqual(2);
   });
 

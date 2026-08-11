@@ -308,7 +308,15 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     className="ws-msopen"
                     aria-haspopup={manyMs ? "menu" : undefined}
                     aria-expanded={manyMs ? msOpen : undefined}
-                    onClick={() => { if (manyMs) setMsOpen((o) => !o); }}
+                    onClick={() => {
+                      /* ⚠️ COLLAPSED, THE TILE EXPANDS THE SIDEBAR RATHER THAN OPENING THE MENU
+                         (sidebar-collapse pack, a decision the pack's ref does not draw). The
+                         flyout is absolutely positioned against the panel and spans its width —
+                         at 72px it would render as a 72px sliver of menu. Expanding first costs
+                         one click and keeps the menu one component with one geometry. */
+                      if (sidebar.collapsed) { sidebar.setCollapsed(false); return; }
+                      if (manyMs) setMsOpen((o) => !o);
+                    }}
                   >
                     {/* ⚠️ TWO STATES, AND THE FRAME IS THE DIFFERENCE (polish §5). A real cover is
                         FRAMED — parchment, hairline, soft shadow — because it is an object with an
@@ -390,7 +398,13 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                       onClick={() => go(ch.path)}
                     >
                       <span className="ws-ic">{icons[ch.icon ?? ch.id] ?? icons[sec.id]}</span>
-                      {ch.label}
+                      {/* ⚠️ A SPAN, SO THE LABEL CAN COLLAPSE (sidebar-collapse pack, Phase 2). A
+                          bare text node cannot carry max-width/opacity. The 10px that separated
+                          icon from label moved from the row's `gap` onto this span's margin —
+                          pixel-identical expanded, and collapsing to zero WITH the label, where a
+                          flex gap beside a zero-width child would hold itself open and park the
+                          icon 5px off the rail's centre. */}
+                      <span className="ws-lbl">{ch.label}</span>
                       {typeof ch.count === "number" && <CountChip count={ch.count} urgent={ch.urgent} />}
                     </button>
                   );

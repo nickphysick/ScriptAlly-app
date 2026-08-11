@@ -154,7 +154,8 @@
   height: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
+  /* gap 0 + margin on .ws-mstt — the shared collapse mechanism (see .ws-ni) */
+  gap: 0;
   /* ⚠️ THE RIGHT PADDING RESERVES THE ARROWS' LANE, so a long title runs UNDER them rather than
      to the card's edge and out of reach beneath a control. */
   padding: 0 46px 0 10px;
@@ -198,7 +199,7 @@
 .ws-mcov.illus { background: none; border: 0; box-shadow: none; }
 .ws-mcov.illus img { width: 30px; height: 30px; object-fit: contain; display: block; }
 .ws-mcov svg { width: 14px; height: 14px; stroke-width: 1.6; }
-.ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
+.ws-mstt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; line-height: 1.2; margin-left: 10px; overflow: hidden; }
 .ws-msg {
   font-size: 11.5px;
   color: var(--shell-muted);
@@ -279,7 +280,10 @@
   height: 36px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  /* ⚠️ gap 0 + `.ws-lbl { margin-left: 10px }` — the icon–label 10px moved onto the label so it
+     collapses WITH it (sidebar-collapse pack, Phase 2). A flex gap beside a zero-width child
+     holds itself open and parks the icon 5px off the rail's centre. Pixel-identical expanded. */
+  gap: 0;
   padding: 0 10px;
   border: 0;
   border-radius: 8px;
@@ -293,7 +297,10 @@
   outline: none;
   width: 100%;
   text-align: left;
+  /* the collapsed corner badge positions against the row */
+  position: relative;
 }
+.ws-lbl { display: inline-block; margin-left: 10px; max-width: 200px; overflow: hidden; white-space: nowrap; }
 .ws-ic { display: flex; flex: none; opacity: 0.9; color: inherit; }
 .ws-ic svg { width: 17px; height: 17px; stroke-width: 1.7; }
 .ws-ni:hover { background: rgba(242, 237, 231, 0.6); color: var(--shell-ink); }
@@ -382,7 +389,9 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
+  /* gap 0 + margins on the text column and the pill — the same collapse mechanism as the nav
+     rows (see .ws-ni): a flex gap beside zero-width children holds itself open. */
+  gap: 0;
   padding: 9px 10px;
   border-radius: 9px;
   cursor: pointer;
@@ -410,6 +419,8 @@
 .ws-pl { display: block; font-size: 12px; color: var(--shell-muted); line-height: 1.3; }
 .ws-upg {
   flex: none;
+  /* the foot row's former gap, carried here so it collapses with the pill (see .ws-uacct) */
+  margin-left: 10px;
   font: inherit;
   font-size: 12px;
   font-weight: 600;
@@ -617,7 +628,7 @@
   font-family: "JetBrains Mono", monospace; font-size: 10.5px; color: #8a7a6c;
   display: grid; place-items: center;
 }
-.ws-utext { min-width: 0; flex: 1; }
+.ws-utext { min-width: 0; flex: 1; margin-left: 10px; }
 
 /* ══ the page area ══ */
 .ws-main {
@@ -730,13 +741,17 @@
 }
 
 /* ══ POLISH P3 — shell micro-interactions (transform/opacity only, pack rule 7) ══════════════ */
-/* nav rows: the label steps right, the count swells — the ROW does not move, so the list stays
-   still under the cursor and only the thing you are pointing at responds */
+/* nav rows: the count nudges on hover — the ROW does not move, so the list stays still under the
+   cursor and only the thing you are pointing at responds.
+   ⚠️ SCOPED TO `.sp-ct` WHEN THE LABEL BECAME A SPAN (sidebar-collapse pack, Phase 2). The old
+   `span:not(.ws-ic)` selector DESCRIBED the label but only ever MATCHED the count chip, because
+   the label was a bare text node — so "the label steps right" was written intent that never
+   rendered, and the wrapped label would have picked the nudge up as a silent behaviour change.
+   The nav is locked: today-exact wins over restoring two-week-old intent. (`.sp-count` in the old
+   pair matched nothing — CountChip renders `sp-ct` — recorded in the pack report.) */
 .ws-ni { transition: background-color 0.14s ease, color 0.14s ease; }
-.ws-ni > span:not(.ws-ic) { display: inline-block; transition: transform 0.14s ease; }
-.ws-ni:hover > span:not(.ws-ic) { transform: translateX(2px); }
-.ws-ni .sp-count { transition: transform 0.14s ease; }
-.ws-ni:hover .sp-count { transform: scale(1.06); }
+.ws-ni > .sp-ct { transition: transform 0.14s ease; }
+.ws-ni:hover > .sp-ct { transform: translateX(2px); }
 
 /* manuscript selector: the edge warms and the mark tilts */
 .ws-mspill { transition: border-color 0.16s ease, background-color 0.16s ease; }
@@ -802,6 +817,94 @@
 .ws-msdots { display: flex; justify-content: center; gap: 4px; margin-top: 5px; }
 .ws-msdot { width: 4px; height: 4px; border-radius: 50%; background: #d6cdbf; transition: background-color 0.14s ease; }
 .ws-msdot.on { background: #8a7a6c; }
+
+/* ══ SIDEBAR COLLAPSE — the icon rail (sidebar-collapse pack, Phase 2; ref
+   design-refs/sidebar-collapse-v1.html) ═══════════════════════════════════════════════════════
+   ONE sidebar whose width narrows in place: 264px ↔ 72px, `width` and `padding` only — never
+   `transform`, which would create a stacking context over the panel's illustrated marks and
+   isolate any blend. The content pane is `flex: 1 1 auto; min-width: 0` (.ws-main) and simply
+   reflows; it gets no width sums of its own.
+
+   ⚠️ EVERY TRANSITION HERE IS GATED ON `.sb-ready` — added two rAFs after mount — because the
+   collapsed state is restored SYNCHRONOUSLY and must not animate shut from the stylesheet's
+   expanded values on load. The panel's legacy 0.22s width transition (the sv2 `.shut` era's,
+   consumer-swept) is silenced outside sb-ready for the same reason. */
+.ws-panel:not(.sb-ready) { transition: none; }
+.ws-panel.sb-ready,
+.ws-panel.sb-ready .ws-pin {
+  transition: width 240ms cubic-bezier(0.32, 0.72, 0.28, 1), padding 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
+}
+/* 72px, the researched band's upper end — deliberately, because the rail carries mini-badges. */
+.ws-panel.sb-collapsed,
+.sb-collapsed .ws-pin { width: 72px; }
+
+/* the collapsing text: opacity leads (140ms), the box follows on the rail's own curve */
+.ws-panel.sb-ready .ws-lbl,
+.ws-panel.sb-ready .ws-mstt,
+.ws-panel.sb-ready .ws-utext,
+.ws-panel.sb-ready .ws-upg,
+.ws-panel.sb-ready .ws-msnav {
+  transition: opacity 140ms ease, max-width 240ms cubic-bezier(0.32, 0.72, 0.28, 1),
+    margin 240ms cubic-bezier(0.32, 0.72, 0.28, 1);
+}
+
+/* nav rows: the icon centres; the label collapses in place. Radius, hover and the parchment
+   active card are UNTOUCHED — the pack adds a state, not a restyle. */
+.sb-collapsed .ws-ni { justify-content: center; padding: 0; }
+.sb-collapsed .ws-lbl { opacity: 0; max-width: 0; margin-left: 0; }
+
+/* ⚠️ THE COUNT BECOMES A CORNER MINI-BADGE — same element, same value, restyled in place (the
+   mockup snaps this swap with display, so the snap is sanctioned). The dot hides: the pink badge
+   IS the alert at this size. No count → CountChip never rendered → no badge, for free. */
+.sb-collapsed .ws-ni .sp-ct {
+  position: absolute;
+  top: 3px;
+  right: 7px;
+  gap: 0;
+  background: #f5e2da;
+  border: 1px solid #e8c8bc;
+  border-radius: 8px;
+  padding: 2px 4px;
+  font-size: 8.5px;
+  line-height: 1;
+  color: var(--shell-ink);
+}
+.sb-collapsed .ws-ni .sp-ct-dot { display: none; }
+.sb-collapsed .ws-ni:hover > .sp-ct { transform: none; }
+
+/* section headings: the mono label yields to a centred hairline. `color: transparent`, never
+   display — the text keeps its exact box (the 22px-rhythm rule) and stays in the a11y tree. */
+.sb-collapsed .ws-glabel { position: relative; color: transparent; user-select: none; }
+.sb-collapsed .ws-glabel::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 22px;
+  height: 1px;
+  background: #e7ddd2;
+}
+
+/* manuscript selector: the 40px book tile alone, centred; title, meta and arrows collapse.
+   (Its 10px gap moved onto .ws-mstt as margin — same mechanism as the nav rows.) */
+.sb-collapsed .ws-msopen { justify-content: center; padding: 0 6px; }
+.sb-collapsed .ws-mstt { flex: 0 1 0%; max-width: 0; opacity: 0; margin-left: 0; }
+.sb-collapsed .ws-msnav { opacity: 0; pointer-events: none; }
+.sb-collapsed .ws-msdots { display: none; }
+
+/* user row: the avatar alone. The Upgrade pill zeroes its border and padding — a collapsed pill
+   that kept them would survive as a stray 10px lozenge of border beside the avatar. */
+.sb-collapsed .ws-uacct { justify-content: center; padding: 9px 0; }
+.sb-collapsed .ws-utext { flex: 0 1 0%; max-width: 0; opacity: 0; margin-left: 0; }
+.sb-collapsed .ws-upg {
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0;
+  padding: 0;
+  border-width: 0;
+  pointer-events: none;
+}
 
 /* ⚠️ LAST IN THE FILE, DELIBERATELY — equal specificity means source order decides, so a rule
    added below this block would be exempt from it without anyone noticing. */
