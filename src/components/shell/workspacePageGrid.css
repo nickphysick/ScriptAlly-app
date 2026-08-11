@@ -1,0 +1,68 @@
+/* ── WorkspacePageGrid — chrome outside the scroller (amendment 9) ────────────────────────────
+   Three rows: plate · toolbar · scroller. The chrome rows are SIBLINGS of the scrolling row, so
+   they are pinned by construction. Nothing here is `position: sticky` and nothing takes a `top`
+   offset — there is no number to compute, and therefore none to get wrong on any page type. */
+
+/* ⚠️ `minmax(0, 1fr)` ON THE SCROLL ROW, NOT `1fr`. A grid track's automatic minimum is its
+   content, so a plain `1fr` row grows to fit a long list and the grid pushes past the frame
+   instead of scrolling inside it — the same `min-height: 0` fault the Tasks viewport lock
+   documents, in grid's own spelling. */
+.wpg {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  /* ⚠️ THE GRID ITSELF NEVER SCROLLS. Only row 3 does; anything escaping here is a bug in a row. */
+  overflow: hidden;
+}
+
+/* ⚠️ ONE RULE PER SELECTOR, and the row placement is folded INTO it rather than declared in a
+   tidy block of its own. A second single-class rule for the same element is the duplicate-selector
+   trap this codebase keeps re-teaching: the two never overlap until the day they do, and then they
+   resolve on source order alone. Splitting these cost a green test that was reading the wrong half.
+
+   ⚠️ EVERY ROW IS PLACED EXPLICITLY, and that is not decoration. With auto-placement a page that
+   passes NO toolbar would put its scroller in track 2 — an `auto` track — so the scroller would
+   size to its content and never scroll, on exactly the pages with least to show. */
+.wpg-plate { grid-row: 1; min-width: 0; }
+
+/* ⚠️ THE TOOLBAR HAS NO CONTAINER — no border, no shadow, no background, and no state change on
+   scroll. Just the controls and ONE hairline beneath, which is the line between chrome and content.
+   Giving it a frame would make it read as a second plate stacked under the first, which is the
+   arrangement amendment 9 exists to undo. */
+.wpg-tools {
+  grid-row: 2;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--ws-edge);
+}
+
+.wpg-scroll {
+  grid-row: 3;
+  min-width: 0;
+  overflow-y: auto;
+  min-height: 0;
+  /* the sentinel is absolute against this row, so the row is its containing block */
+  position: relative;
+  /* ⚠️ `scroll-padding-top` WAS MISSING THROUGHOUT, and it is what keeps `scrollIntoView` and
+     keyboard focus from landing an element flush against the row's top edge. It is a scroll-anchor
+     inset, NOT an offset for the chrome above — the chrome is outside this scrollport entirely, so
+     nothing here needs to clear it. */
+  scroll-padding-top: var(--wpg-scroll-pad, 12px);
+}
+
+/* ⚠️ 1px, ABSOLUTE, AND IT COSTS NO LAYOUT HEIGHT. In flow it would add a pixel to every page's
+   content; absolute at the content top it scrolls out of the scrollport exactly as the first line
+   of content does, which is the boundary the observer is watching for. */
+.wpg-sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
