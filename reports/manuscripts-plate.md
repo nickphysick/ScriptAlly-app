@@ -85,8 +85,8 @@ only this phase's four new files**:
 | Phase 5 (HEAD `024e8ab`) | exit 0 | exit 0 | **256 files · 4185 passed · 2 skipped** |
 | Naming fix (HEAD `7563e87`) | exit 0 | exit 0 | 256 files · 4187 passed · 2 skipped |
 
-**Phase 6 ran on a clean tree**, so no isolated worktree was needed — HEAD and the working tree
-agreed for the first time in this build:
+**Phase 6's three commits each ran on a clean tree** — HEAD and the working tree agreed for the
+first time in this build, so no isolated worktree was needed at commit time:
 
 | At `a7b5d54` | tsc | build | vitest |
 |---|---|---|---|
@@ -96,6 +96,26 @@ agreed for the first time in this build:
 
 237 rather than 256 because `a7b5d54` landed ~19 test-file deletions for retired markup — the gap
 I had reported between HEAD and the shared tree, now closed in the committed direction.
+
+### ⚠️ HEAD went red again AFTER this build's commits, and not from them
+
+Recorded because "gates green" above would otherwise mislead. `5852e52`
+(*"restore the workspace plate — 4ddc3d4 was a stale-base revert"*) landed between Phase 5 and
+Phase 6 and **restored `PageHeader.tsx` importing two modules `a7b5d54` had deleted**:
+
+- `../dashboard/OneScreenMark` — not in HEAD
+- `./WorkspacePageGrid` — not in HEAD
+
+At HEAD that is **tsc exit 2 (2 errors), a FAILING production build** (rollup cannot resolve the
+imports) and **6 spec files that cannot load** — including `materialsPageSmoke.test.tsx`, which
+fails only because the page chain it renders reaches `PageHeader`.
+
+**None of it is in this touch set**, and the working tree already holds the fix, staged and
+uncommitted: it removes exactly those two imports and returns `variant?: "full"`. On that tree —
+the one every Phase 6 commit was measured against — **tsc 0, build 0, 237 files · 3923 passed**.
+
+Not fixed here: `PageHeader.tsx` is the header stream's file and the workspace-variant question was
+explicitly fenced off. **Flagged for Nick — main will not build until that staged fix is committed.**
 
 No phase adds a failure. The isolated run is the one to believe; the primary tree's red belongs to `Queries.tsx` and will clear when that stream lands.
 Test totals move between rows because other streams commit throughout — recorded fresh each time,
