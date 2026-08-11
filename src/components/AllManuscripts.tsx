@@ -177,7 +177,38 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
               </div>
             </div>
           </div>
-        ) : selected ? (
+        ) : (
+          <>
+            {/*
+              ⚠️ AT EXACTLY ONE MANUSCRIPT THE SWITCHER DOES NOT RENDER AT ALL. Most writers have
+              one, and a switcher offering a single choice is furniture that teaches nothing. It is
+              absent rather than disabled — a one-item control implies there could be more and that
+              you are somehow not seeing them.
+            */}
+            {ordered.length > 1 && selected && (
+              <div className="msv-switcher" role="tablist" aria-label="Your manuscripts">
+                {ordered.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={m.id === selected.id}
+                    className={`msv-swtab${m.id === selected.id ? " on" : ""}${isShelvedPresentation(m) ? " shelved" : ""}`}
+                    onClick={() => selectMs(m.id)}
+                  >
+                    {m.title}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className="msv-swadd"
+                  onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
+                >
+                  ＋ Add
+                </button>
+              </div>
+            )}
+          {selected ? (
           /*
            * ⚠️ ONE CARD, NOT A PLATE PER MANUSCRIPT. The shelf switcher above picks the subject;
            * the card renders it. Most writers have exactly one manuscript, so a list of one read as
@@ -287,7 +318,9 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
               />
             )}
           </div>
-        ) : null}
+          ) : null}
+          </>
+        )}
       </div>
 
       {/* ── edit modal (comps field deliberately absent — managed on the shelf sub-page) ── */}

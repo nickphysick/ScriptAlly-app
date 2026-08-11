@@ -44,6 +44,7 @@ const ADDED = [
   "--msv-spine1", "--msv-spine2", "--msv-spine3", "--msv-dash",
   "--msv-stripbg", "--msv-stripbd", "--msv-stripkey",
   "--msv-prbd", "--msv-count", "--msv-countnone",
+  "--msv-swbg", "--msv-swbd", "--msv-swon",
 ] as const;
 
 describe("the additions are complete — every new token, in every theme", () => {
@@ -154,6 +155,16 @@ describe("⚠️ EDITORIAL IS MONOCHROME — THE PLATEBAND MUST NOT BE SAGE", ()
    * has to survive as LIGHTNESS, because the theme has no hues to rotate through. Three identical
    * greys would silently retire a distinction the design draws.
    */
+  /**
+   * ⚠️ THE SWITCHER'S ACTIVE FILL IS PINK IN THE WARM THEMES AND MUST NOT BE IN EDITORIAL — the
+   * same rule as the plateband and the tile plates, applied to a third surface. It is covered by
+   * the chroma sweep above; this states the intent so the sweep's failure is legible.
+   */
+  it("the switcher's selected state is a grey step, not a pink one", () => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(edn("--msv-swon").slice(i, i + 2), 16));
+    expect(Math.max(r, g, b) - Math.min(r, g, b)).toBeLessThanOrEqual(6);
+  });
+
   it("the three comp spines stay distinguishable in Editorial — by value, not by hue", () => {
     const spines = [edn("--msv-spine1"), edn("--msv-spine2"), edn("--msv-spine3")];
     expect(new Set(spines).size).toBe(3);

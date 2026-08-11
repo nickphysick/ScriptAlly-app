@@ -41,6 +41,7 @@
   --msv-spine1: #8a9e88; --msv-spine2: #c9a06a; --msv-spine3: #a98ba0;
   --msv-dash: 1.5px dashed #d9cdbc;
   --msv-count: #5a6e58; --msv-countnone: #c4b5a5;
+  --msv-swbg: #ffffff; --msv-swbd: 1px solid #e2dacf; --msv-swon: #f5e2da;
   --msv-stripbg: rgba(255, 255, 255, 0.62); --msv-stripbd: 1px solid rgba(138, 158, 136, 0.3);
   --msv-stripkey: #6a7a68;
   --msv-prbd: 1px solid #e8c8bc;
@@ -55,6 +56,7 @@
   --msv-spine1: #8a9e88; --msv-spine2: #c9a06a; --msv-spine3: #a98ba0;
   --msv-dash: 1.5px dashed #1d1712;
   --msv-count: #1d1712; --msv-countnone: #a9a29c;
+  --msv-swbg: #fffefb; --msv-swbd: 1.5px solid #1d1712; --msv-swon: #f8dcd8;
   --msv-stripbg: #fffefb; --msv-stripbd: 1.5px solid #1d1712;
   --msv-stripkey: #6a625c;
   --msv-prbd: 1.5px solid #1d1712;
@@ -72,6 +74,8 @@
   --msv-spine1: #9a9a9a; --msv-spine2: #6f6f6f; --msv-spine3: #c2c2c2;
   --msv-dash: 1.5px dashed #d6d6d4;
   --msv-count: #4a4a4a; --msv-countnone: #b4b4b4;
+  /* ⚠️ NO PINK ACTIVE FILL — Editorial's selected state is a grey step, per the chroma rule. */
+  --msv-swbg: #ffffff; --msv-swbd: 1px solid #e3e2e0; --msv-swon: #e9eaeb;
   --msv-stripbg: #ffffff; --msv-stripbd: 1px solid #e3e2e0;
   --msv-stripkey: #6b6b6b;
   --msv-prbd: 1px solid transparent;
@@ -314,3 +318,24 @@
 /* The empty slot is quieter than a filled one, but it is still SAID. */
 .msv-fcount.none { color: var(--msv-countnone); }
 .msv-frowfoot { margin-top: 20px; }
+
+/* ── shelf switcher — renders ONLY above one manuscript ── */
+.msv-switcher {
+  display: inline-flex; align-items: center; gap: 4px; margin-bottom: 14px;
+  background: var(--msv-swbg); border: var(--msv-swbd); border-radius: 22px; padding: 4px;
+  max-width: 100%; overflow-x: auto;
+}
+.msv-swtab {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--msv-muted); background: none; border: none;
+  border-radius: 18px; padding: 7px 14px; cursor: pointer; white-space: nowrap;
+}
+.msv-swtab:hover { color: var(--msv-head); }
+.msv-swtab.on { background: var(--msv-swon); color: var(--msv-hue); font-weight: 600; }
+/* A shelved manuscript reads quieter in the switcher, exactly as it did among the plates. */
+.msv-swtab.shelved { opacity: 0.55; }
+.msv-swadd {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--msv-hue); background: none; border: none;
+  border-radius: 18px; padding: 7px 14px; cursor: pointer; white-space: nowrap;
+}

@@ -78,6 +78,14 @@ describe("/manuscripts renders", () => {
     expect(renderPageSeeded(page(), "/manuscripts")).toContain('aria-label="More actions"');
   });
 
+  /**
+   * ⚠️ AT ONE MANUSCRIPT THE SWITCHER IS ABSENT, NOT DISABLED. The seed carries exactly one, which
+   * is also the commonest real shelf — so this is the state most users see, and a switcher offering
+   * a single choice would imply there are others they cannot reach.
+   */
+  it("…and renders NO shelf switcher above a single manuscript", () => {
+    expect(renderPageSeeded(page(), "/manuscripts")).not.toContain("msv-switcher");
+  });
 });
 
 describe("/manuscripts/comps renders", () => {
