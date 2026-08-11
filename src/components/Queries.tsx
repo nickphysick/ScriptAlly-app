@@ -32,10 +32,9 @@ import { prefersReducedMotion } from "../lib/reducedMotion";
 import { ResponsePane, type RespStepId } from "./queries/ResponsePane";
 import {
   emptyResponseDraft, responseReady, responseChips, responseDraftToPayload, OUTCOME_LABEL,
-  type ResponseDraft,
+  stepsFor, type ResponseDraft, type RespStep,
 } from "../lib/responseDraft";
-import { jumpIn, advanceIn } from "../lib/stepStack";
-import { RESP_STEP_ORDER } from "./queries/ResponsePane";
+import { jumpIn, advanceIn, reseatInto } from "../lib/stepStack";
 
 /** The receipt channel for a logged query — see ToastOptions.replaces. Named once so the save and
  *  the save-and-log-another cannot end up on two channels and stack after all. */
@@ -353,6 +352,9 @@ export const Queries: React.FC<{
   const [respQueryId, setRespQueryId] = useState<string | null>(null);
   const [respStep, setRespStep] = useState<{ active: RespStepId; reached: RespStepId }>({ active: "outcome", reached: "outcome" });
   const [respOpened, setRespOpened] = useState({ when: false });
+  /* What the last change of outcome discarded. Held here rather than in the pane so it survives the
+     re-render that the change itself causes, and so it can be cleared on the next deliberate move. */
+  const [respDropped, setRespDropped] = useState<RespStep[]>([]);
   const [respSaving, setRespSaving] = useState(false);
   const [respError, setRespError] = useState<string | null>(null);
   const [respEntering, setRespEntering] = useState(false);
@@ -442,6 +444,7 @@ export const Queries: React.FC<{
     setRespError(null);
     setRespSaving(false);
     setRespOpened({ when: false });
+    setRespDropped([]);
     setRespStep({ active: "outcome", reached: "outcome" });
     setRespCancelling(false);
     setRespExiting(false);
@@ -3458,15 +3461,31 @@ export const Queries: React.FC<{
                   manuscripts={manuscripts}
                   active={respStep.active}
                   reached={respStep.reached}
+                  /* The order is the DRAFT's, not a constant — the stack changes with the outcome,
+                     so the two movers have to ask the same question the renderer does. */
                   onJump={(id) => {
-                    const n = jumpIn(RESP_STEP_ORDER, id, respStep.reached);
+                    const n = jumpIn(stepsFor(respDraft.outcome), id, respStep.reached);
                     setRespStep(n);
                     if (n.reached === "when" || n.active === "when") setRespOpened({ when: true });
                   }}
                   onAdvance={() => {
-                    const n = advanceIn(RESP_STEP_ORDER, respStep.active, respStep.reached);
+                    const n = advanceIn(stepsFor(respDraft.outcome), respStep.active, respStep.reached);
                     setRespStep(n);
                     if (n.active === "when" || n.reached === "when") setRespOpened({ when: true });
+                  }}
+                  dropped={respDropped}
+                  /* ⚠️ THE POSITION IS RESEATED WITH THE FIELDS. `reached` can point at a step the
+                     new journey does not have, and a stack whose shape has just changed is one the
+                     writer has to look at again — so it is clamped into the new order rather than
+                     left dangling. */
+                  onOutcomeChange={(next, lost) => {
+                    setRespDraft(next);
+                    setRespDropped(lost);
+                    const order = stepsFor(next.outcome);
+                    setRespStep((cur) => {
+                      const n = reseatInto(order, order, cur.active, cur.reached);
+                      return { active: n.active, reached: n.reached };
+                    });
                   }}
                   onSave={() => void saveResponse()}
                   canSave={responseReady(respDraft)}

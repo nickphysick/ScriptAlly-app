@@ -18,26 +18,16 @@ import { StepStack } from "./StepStack";
 import { statesIn } from "../../lib/stepStack";
 import {
   OUTCOME_ORDER, OUTCOME_LABEL, OUTCOME_DESC, OUTCOME_TONE,
-  repliedIn, type ResponseDraft, type ResponseOutcome,
+  RESP_STEP_SHORT, RESP_STEP_TITLE, RESP_STEP_HINT, RESP_STEP_OPTIONAL,
+  stepsFor, changeOutcome, droppedNotice,
+  repliedIn, type ResponseDraft, type ResponseOutcome, type RespStep,
 } from "../../lib/responseDraft";
 import { responseRefRows } from "../../lib/responseContext";
 import { agentPrimary } from "../../lib/agentDisplay";
 
-/** §1 opens with the outcome and the date; §2 branches the rest by outcome. */
-export type RespStepId = "outcome" | "when" | "notes";
-export const RESP_STEP_ORDER: readonly RespStepId[] = ["outcome", "when", "notes"] as const;
-
-const SHORT: Record<RespStepId, string> = { outcome: "Outcome", when: "When", notes: "Notes" };
-const TITLE: Record<RespStepId, string> = {
-  outcome: "What came back?",
-  when: "When it arrived",
-  notes: "Notes",
-};
-const HINT: Record<RespStepId, string> = {
-  outcome: "What the agent said",
-  when: "The day their reply arrived",
-  notes: "Optional — anything worth remembering",
-};
+/** ⚠️ THE ORDER IS DERIVED FROM THE OUTCOME, never a constant. Before one is chosen the stack holds
+ *  only the question that decides it — there is nothing honest to put beneath it yet. */
+export type RespStepId = RespStep;
 
 export interface ResponsePaneProps {
   draft: ResponseDraft;
@@ -49,6 +39,11 @@ export interface ResponsePaneProps {
   reached: RespStepId;
   onJump: (id: RespStepId) => void;
   onAdvance: () => void;
+  /** ⚠️ ONE DOOR for changing the outcome: the new draft AND what it discarded, together. Two
+   *  callbacks could be wired up singly, and then the fields would clear without the notice. */
+  onOutcomeChange: (next: ResponseDraft, dropped: RespStep[]) => void;
+  /** The notice for the last such change — cleared by the host once it has been read. */
+  dropped: RespStep[];
   onSave?: () => void;
   canSave?: boolean;
   saving?: boolean;
@@ -58,26 +53,153 @@ export interface ResponsePaneProps {
 
 export const ResponsePane: React.FC<ResponsePaneProps> = ({
   draft, onChange, query, agent, manuscripts, active, reached,
-  onJump, onAdvance, onSave, canSave = false, saving = false, sentISO,
+  onJump, onAdvance, onOutcomeChange, dropped, onSave, canSave = false, saving = false, sentISO,
 }) => {
   const set = (patch: Partial<ResponseDraft>) => onChange({ ...draft, ...patch });
-  const states = statesIn(RESP_STEP_ORDER, active, reached);
+  const order = stepsFor(draft.outcome);
+  const states = statesIn(order, active, reached);
+  const notice = droppedNotice(dropped);
+  /* ⚠️ CHANGING THE OUTCOME GOES THROUGH ONE DOOR, so the discard and the notice cannot come apart.
+     Setting `outcome` directly would keep the fields of a journey the writer has just left. */
+  const pickOutcome = (o: ResponseOutcome) => {
+    const { draft: next, dropped: lost } = changeOutcome(draft, o);
+    onOutcomeChange(next, lost);
+  };
   const msTitle = manuscripts.find((m) => m.id === query.manuscriptId)?.title;
   const rows = responseRefRows(query, agent, [], msTitle);
   const interval = repliedIn(sentISO, draft.dateArrived);
 
-  const summaries: Record<RespStepId, string> = {
+  /* One line each, and only once the step has something to say. */
+  const summaries: Partial<Record<RespStepId, string>> = {
     outcome: draft.outcome ? OUTCOME_LABEL[draft.outcome] : "",
     when: draft.dateArrived,
-    notes: draft.notes.trim() ? "Added" : "None",
+    asked: [draft.askedFor, draft.deadline && `by ${draft.deadline}`].filter(Boolean).join(" · "),
+    offer: [draft.offerTerms, draft.offerReplyBy && `reply by ${draft.offerReplyBy}`].filter(Boolean).join(" · "),
+    said: draft.theirWords.trim() ? "Kept" : "",
+    notes: draft.notes.trim() ? "Added" : "",
+  };
+
+  const BODY: Record<RespStepId, React.ReactNode> = {
+    /* ⚠️ THREE ACROSS, AND THE MARK CARRIES THE FAMILY — sage for what the agent did, burgundy for
+       an offer, muted for an ending. No red: a rejection is not a failure state. */
+    outcome: (
+      <div className="qr-outs" role="radiogroup" aria-label="What came back">
+        {OUTCOME_ORDER.map((o: ResponseOutcome) => (
+          <button
+            key={o}
+            type="button"
+            role="radio"
+            aria-checked={draft.outcome === o}
+            className={`qr-out${draft.outcome === o ? " on" : ""}`}
+            onClick={() => pickOutcome(o)}
+          >
+            <span className={`qr-m qr-m-${OUTCOME_TONE[o]}`} aria-hidden="true" />
+            <span className="qr-outtx">
+              <b>{OUTCOME_LABEL[o]}</b>
+              <i>{OUTCOME_DESC[o]}</i>
+            </span>
+          </button>
+        ))}
+      </div>
+    ),
+    when: (
+      <div>
+        <div className="qc-fl">Date arrived</div>
+        <input
+          type="date"
+          className="qr-date"
+          value={draft.dateArrived}
+          onChange={(e) => set({ dateArrived: e.target.value })}
+          aria-label="Date the response arrived"
+        />
+        {/* ⚠️ A FACT, NOT A VERDICT. How long they took, stated plainly — the app does not tell the
+            writer whether that was fast or slow. */}
+        {interval && <div className="qc-derived">{interval}</div>}
+      </div>
+    ),
+    /* ⚠️ THE MATERIALS CHIPS AND THE UNIT-AWARE STEPPER ARE NOT HERE YET, deliberately. They are
+       welded into create's What step (~120 lines) and reusing them means extracting them, which is
+       its own pure-refactor commit with its own proof — copying the markup is the drift this pack
+       has been avoiding. Until then this step holds what it can state honestly: what they asked
+       for, in the writer's own words, and the date they want it by. */
+    asked: (
+      <div>
+        <div className="qc-fl">What they asked for</div>
+        <textarea
+          className="qc-note"
+          value={draft.askedFor}
+          onChange={(e) => set({ askedFor: e.target.value })}
+          placeholder="The first fifty pages, a synopsis…"
+          aria-label="What they asked for"
+        />
+        <div className="qc-fl" style={{ marginTop: 12 }}>By when — optional</div>
+        <input
+          type="date"
+          className="qr-date"
+          value={draft.deadline}
+          onChange={(e) => set({ deadline: e.target.value })}
+          aria-label="Deadline they gave"
+        />
+      </div>
+    ),
+    offer: (
+      <div>
+        <div className="qc-fl">The offer</div>
+        <textarea
+          className="qc-note"
+          value={draft.offerTerms}
+          onChange={(e) => set({ offerTerms: e.target.value })}
+          placeholder="Terms, commission, what they said about the book…"
+          aria-label="The offer"
+        />
+        {/* An offer usually comes with a date they need an answer by, and it is the one thing here
+            that has a deadline attached to it. */}
+        <div className="qc-fl" style={{ marginTop: 12 }}>They need an answer by — optional</div>
+        <input
+          type="date"
+          className="qr-date"
+          value={draft.offerReplyBy}
+          onChange={(e) => set({ offerReplyBy: e.target.value })}
+          aria-label="Date a reply to the offer is due"
+        />
+      </div>
+    ),
+    said: (
+      <div>
+        <div className="qc-fl">Anything they said — optional</div>
+        <textarea
+          className="qc-note"
+          value={draft.theirWords}
+          onChange={(e) => set({ theirWords: e.target.value })}
+          placeholder="Their words, if you want to keep them…"
+          aria-label="Anything they said"
+        />
+      </div>
+    ),
+    notes: (
+      <>
+        <textarea
+          className="qc-note"
+          value={draft.notes}
+          onChange={(e) => set({ notes: e.target.value })}
+          placeholder="Anything worth remembering about this reply…"
+          aria-label="Notes on this response"
+        />
+        <p className="qc-notecap">Saved with this query · only you see it</p>
+      </>
+    ),
   };
 
   return (
     <div className="f12-detail qc-take-body" style={{ display: "flex", flexDirection: "column", minHeight: 0, gap: 12 }}>
       <div className="qc-two qr-two">
         <div className="qc-form f12-quiet-scroll">
+          {/* ⚠️ IT SAYS SO WHEN A CHANGE COST SOMETHING — and only then. A notice that fires when
+              nothing was discarded teaches the writer to ignore it, which is exactly when it
+              matters. `role="status"` so it is announced without stealing focus. */}
+          {notice && <p className="qr-dropped" role="status">{notice}</p>}
           <StepStack
-            order={RESP_STEP_ORDER}
+            order={order}
             active={active}
             states={states}
             onJump={onJump}
@@ -86,74 +208,15 @@ export const ResponsePane: React.FC<ResponsePaneProps> = ({
             canSave={canSave}
             saving={saving}
             saveLabel="Save response"
-            steps={[
-              {
-                id: "outcome",
-                short: SHORT.outcome, title: TITLE.outcome, hint: HINT.outcome,
-                summary: summaries.outcome,
-                body: (
-                  /* ⚠️ §1 RENDERS THE CHOICE; §2 GIVES IT THE THREE-ACROSS TREATMENT AND BRANCHES
-                     THE STACK BEHIND IT. Kept real rather than stubbed so the header's chips have
-                     something to report and the shell is walkable on its own. */
-                  <div className="qr-outs" role="radiogroup" aria-label="What came back">
-                    {OUTCOME_ORDER.map((o: ResponseOutcome) => (
-                      <button
-                        key={o}
-                        type="button"
-                        role="radio"
-                        aria-checked={draft.outcome === o}
-                        className={`qr-out${draft.outcome === o ? " on" : ""}`}
-                        onClick={() => set({ outcome: o })}
-                      >
-                        <span className={`qr-m qr-m-${OUTCOME_TONE[o]}`} aria-hidden="true" />
-                        <span className="qr-outtx">
-                          <b>{OUTCOME_LABEL[o]}</b>
-                          <i>{OUTCOME_DESC[o]}</i>
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                ),
-              },
-              {
-                id: "when",
-                short: SHORT.when, title: TITLE.when, hint: HINT.when,
-                summary: summaries.when,
-                body: (
-                  <div>
-                    <div className="qc-fl">Date arrived</div>
-                    <input
-                      type="date"
-                      className="qr-date"
-                      value={draft.dateArrived}
-                      onChange={(e) => set({ dateArrived: e.target.value })}
-                      aria-label="Date the response arrived"
-                    />
-                    {/* ⚠️ A FACT, NOT A VERDICT. How long they took, stated plainly — the app does
-                        not tell the writer whether that was fast or slow. */}
-                    {interval && <div className="qc-derived">{interval}</div>}
-                  </div>
-                ),
-              },
-              {
-                id: "notes",
-                short: SHORT.notes, title: TITLE.notes, hint: HINT.notes,
-                optional: true,
-                summary: summaries.notes,
-                body: (
-                  <>
-                    <textarea
-                      className="qc-note"
-                      value={draft.notes}
-                      onChange={(e) => set({ notes: e.target.value })}
-                      placeholder="Anything worth remembering about this reply…"
-                      aria-label="Notes on this response"
-                    />
-                    <p className="qc-notecap">Saved with this query · only you see it</p>
-                  </>
-                ),
-              },
-            ]}
+            steps={order.map((id) => ({
+              id,
+              short: RESP_STEP_SHORT[id],
+              title: RESP_STEP_TITLE[id],
+              hint: RESP_STEP_HINT[id],
+              optional: RESP_STEP_OPTIONAL[id],
+              summary: summaries[id],
+              body: BODY[id],
+            }))}
           />
         </div>
 

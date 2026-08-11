@@ -103,12 +103,27 @@ export interface ResponseDraft {
   /** ISO yyyy-mm-dd — when the reply arrived. */
   dateArrived: string;
   notes: string;
+  /* Per-journey. Each belongs to exactly one step, which is what lets a change of outcome know
+     precisely what it would discard — see STEP_FIELDS. */
+  /** request — what they asked to see, and by when. */
+  askedFor: string;
+  deadline: string;
+  /** offer — the terms, and the day they need an answer. */
+  offerTerms: string;
+  offerReplyBy: string;
+  /** ending — their words, if the writer wants to keep them. */
+  theirWords: string;
 }
 
 export const emptyResponseDraft = (dateArrived: string): ResponseDraft => ({
   outcome: null,
   dateArrived,
   notes: "",
+  askedFor: "",
+  deadline: "",
+  offerTerms: "",
+  offerReplyBy: "",
+  theirWords: "",
 });
 
 /**
@@ -197,4 +212,99 @@ export function responseDraftToPayload(d: ResponseDraft): RecordResponseData {
     closingReason: "No response after expected window",
     closingNotes: d.outcome === "noreply" ? d.notes : "",
   };
+}
+
+/* ══ §2 · THE STACK CHANGES WITH THE OUTCOME ════════════════════════════════════════════════ */
+
+/** Every step this journey can hold. Which of them apply depends on what came back. */
+export type RespStep = "outcome" | "when" | "asked" | "offer" | "said" | "notes";
+
+/**
+ * ⚠️ THE OUTCOME DECIDES THE STACK, and the three shapes are genuinely different questions rather
+ * than one question with fields hidden. A request wants to know what they asked for and by when; an
+ * offer wants the terms and when they need an answer; an ending wants whatever they said, if
+ * anything. Presenting all of it and hiding two thirds would make the writer read past questions
+ * that do not apply to them.
+ */
+export const JOURNEY_STEPS: Record<ResponseJourney, readonly RespStep[]> = {
+  request: ["outcome", "when", "asked", "notes"],
+  offer: ["outcome", "when", "offer", "notes"],
+  ending: ["outcome", "when", "said", "notes"],
+};
+
+/** The stack for a draft — before an outcome is chosen there is only the question that decides it. */
+export const stepsFor = (o: ResponseOutcome | null): readonly RespStep[] =>
+  o ? JOURNEY_STEPS[OUTCOME_JOURNEY[o]] : (["outcome"] as const);
+
+export const RESP_STEP_SHORT: Record<RespStep, string> = {
+  outcome: "Outcome", when: "When", asked: "What", offer: "Offer", said: "Reply", notes: "Notes",
+};
+export const RESP_STEP_TITLE: Record<RespStep, string> = {
+  outcome: "What came back?",
+  when: "When it arrived",
+  asked: "What they asked for",
+  offer: "The offer",
+  said: "Anything they said",
+  notes: "Notes",
+};
+export const RESP_STEP_HINT: Record<RespStep, string> = {
+  outcome: "What the agent said",
+  when: "The day their reply arrived",
+  asked: "Materials, and any deadline",
+  offer: "Terms, and when they need an answer",
+  said: "Optional — their words, if you want them",
+  notes: "Optional — anything worth remembering",
+};
+/** ⚠️ Everything after the outcome and the date is optional BY CONSTRUCTION (see responseReady). */
+export const RESP_STEP_OPTIONAL: Record<RespStep, boolean> = {
+  outcome: false, when: false, asked: true, offer: true, said: true, notes: true,
+};
+
+/** Which draft fields belong to which step — the basis for knowing what a change would discard. */
+const STEP_FIELDS: Partial<Record<RespStep, (keyof ResponseDraft)[]>> = {
+  asked: ["askedFor", "deadline"],
+  offer: ["offerTerms", "offerReplyBy"],
+  said: ["theirWords"],
+};
+
+/** True when the writer has actually put something into that step. */
+export function stepHasContent(d: ResponseDraft, step: RespStep): boolean {
+  return (STEP_FIELDS[step] ?? []).some((f) => String(d[f] ?? "").trim() !== "");
+}
+
+/**
+ * Change the outcome, and report what that costs.
+ *
+ * ⚠️ IT DISCARDS WHAT NO LONGER APPLIES AND SAYS SO — never silently, and never by keeping it. An
+ * offer's terms carried into a rejection would be an answer to a question nobody asked, riding into
+ * the record; keeping the fields and hiding them is the same thing with a longer fuse. So the
+ * fields are cleared, and the steps whose content went are NAMED back to the caller.
+ *
+ * ⚠️ AND IT ONLY SPEAKS WHEN THERE WAS SOMETHING TO LOSE. Switching between two endings before
+ * typing anything drops nothing, and announcing a discard that discarded nothing teaches the writer
+ * to ignore the notice — which is exactly when it matters.
+ */
+export function changeOutcome(
+  d: ResponseDraft,
+  next: ResponseOutcome,
+): { draft: ResponseDraft; dropped: RespStep[] } {
+  const before = stepsFor(d.outcome);
+  const after = stepsFor(next);
+  const leaving = before.filter((s) => !after.includes(s));
+  const dropped = leaving.filter((s) => stepHasContent(d, s));
+  let draft: ResponseDraft = { ...d, outcome: next };
+  for (const s of leaving) {
+    for (const f of STEP_FIELDS[s] ?? []) draft = { ...draft, [f]: "" };
+  }
+  return { draft, dropped };
+}
+
+/** The sentence the pane shows when a change cost something. */
+export function droppedNotice(dropped: RespStep[]): string | null {
+  if (dropped.length === 0) return null;
+  const names = dropped.map((s) => RESP_STEP_TITLE[s].toLowerCase());
+  const list = names.length === 1
+    ? names[0]
+    : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  return `Changing the outcome cleared what you'd entered under ${list}.`;
 }
