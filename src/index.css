@@ -105,7 +105,9 @@
      band rather than set on a plate. The CONDENSED height is deliberately unchanged — 56px is
      sized by the 18px scrolled title, which did not move. */
   --wsh-plate-h: 96px;
-  --wsh-plate-h-scrolled: 56px;
+  /* ⚠️ 56 → 52 (consolidated spec §2 + ref 84, which states `--strip:52px`). The strip is the
+     17px title's line box plus its breathing room; it is not derived from the rest height. */
+  --wsh-plate-h-scrolled: 52px;
   --wsh-plate-gap: 18px;
   --wsh-plate-bg: #ffffff;
   --wsh-plate-bg-scrolled: rgba(255, 255, 255, 0.62);

@@ -49,7 +49,35 @@
    twice its padding — the header overflowed by 400px in the measuring harness for exactly this
    reason. The app inherits `border-box` from Tailwind's preflight; a rule whose maths depends on
    the box model states it rather than inheriting it, per the house rule. */
-.wpg-plate { grid-row: 1; padding-inline: calc(var(--content-gutter) + var(--header-inset)); }
+/**
+ * ⚠️ ROW 1 IS WHERE THE WIDTH CHANGE HAPPENS, NOT THE HEADER (spec §2). At rest the row insets the
+ * plate by gutter + inset; working, the inset goes to 0 and the header fills the container. The
+ * header itself never states a width — it fills its row in both states — so "the strip is full
+ * width" is one padding transition rather than two rules that have to agree.
+ *
+ * ⚠️ THE HAIRLINE BELONGS TO THE ROW, NOT THE PLATE, and spans the full container. On the plate it
+ * would stop at the plate's edges and leave two gaps where the inset used to be; it is the line
+ * between chrome and content, so it has to reach both walls. It fades rather than appears: the
+ * plate's own border is still dissolving over .22s, and a line snapping in at t=0 reads as a
+ * second, unrelated event.
+ */
+.wpg-plate {
+  grid-row: 1;
+  position: relative;
+  padding-block: var(--wsh-plate-gap) 0;
+  padding-inline: calc(var(--content-gutter) + var(--header-inset));
+  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
+}
+.wpg-plate--working { padding: 0; }
+.wpg-plate::after {
+  content: "";
+  position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  background: var(--ws-edge);
+  opacity: 0;
+  transition: opacity .14s ease;
+  pointer-events: none;
+}
+.wpg-plate--working::after { opacity: 1; }
 
 /* ⚠️ THE TOOLBAR HAS NO CONTAINER — no border, no shadow, no background, and no state change on
    scroll. Just the controls and ONE hairline beneath, which is the line between chrome and content.

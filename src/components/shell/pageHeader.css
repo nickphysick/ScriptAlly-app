@@ -215,7 +215,9 @@
   border: 1px solid var(--ws-edge);
   border-radius: var(--wsh-plate-radius);
   box-shadow: var(--wsh-plate-sh);
-  transition: height .2s ease, background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
+  transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
+    border-color .22s cubic-bezier(.4, 0, .2, 1), border-radius .22s cubic-bezier(.4, 0, .2, 1),
+    box-shadow .22s cubic-bezier(.4, 0, .2, 1);
 }
 /**
  * ⚠️ THE STICKY WRAPPER PAINTS NOTHING. Giving it a fill would put an opaque strip across the
@@ -256,15 +258,35 @@
 /* ⚠️ CONDENSED. `backdrop-filter` is what makes the plate read as glass over moving content — and
    it CREATES A STACKING CONTEXT, which is why the illustrated mark's `mix-blend-mode` has to be
    verified in this state rather than assumed (see the mark rules below). */
+/**
+ * ⚠️ THE WORKING STATE IS A STRIP, NOT A SMALLER CARD (spec §2, ref 84). Everything that made the
+ * header an OBJECT goes at once — border, radius, shadow — and the row it sits in loses its inset,
+ * so what remains reads as the page's own top edge. Halving the height and keeping the frame is
+ * what this rule did before, and it read as a card that had been squashed.
+ *
+ * ⚠️ NO TRANSLUCENCY AND NO BLUR, and their absence is the point. Nothing overlaps: the scroller is
+ * the row BENEATH, so content arriving at the hairline has run out of room rather than sliding
+ * under glass. `--wsh-plate-bg-scrolled`, `--wsh-plate-blur` and `--wsh-plate-edge-scrolled` are no
+ * longer read; they are deleted at step 3 together with the token lock that still demands them.
+ */
 .wsh--scrolled {
   height: var(--wsh-plate-h-scrolled);
-  background: var(--wsh-plate-bg-scrolled);
-  -webkit-backdrop-filter: var(--wsh-plate-blur);
-          backdrop-filter: var(--wsh-plate-blur);
-  border-color: var(--wsh-plate-edge-scrolled);
-  box-shadow: var(--wsh-plate-sh-scrolled);
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
 }
-.wsh-row { display: flex; align-items: center; gap: 16px; height: 100%; padding: 0 30px; }
+/* ⚠️ 30px AT REST, THE CONTENT GUTTER WHEN WORKING (spec §2), AND IT LIVES HERE. Layout is on the
+   inner row, never on `.wsh` — `.wsh` carries the state class, and a single-class layout rule
+   sharing an element with a multi-class state rule is how the last two mockups broke.
+   The working value is not a chosen number: at `--content-gutter` the strip's title starts on the
+   same vertical as the cards below it, which is what makes the strip read as the page's top edge
+   rather than a narrower band laid on it. Ref 84 shows 26px at rest against its own single 70px
+   gutter — a different geometry from ours, so the spec's 30 is what applies. */
+.wsh-row {
+  display: flex; align-items: center; gap: 16px; height: 100%;
+  padding: 0 30px;
+  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
+}
 
 /* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: the description truncates first. Title and
    actions never shrink — a clipped action is unusable and a clipped title is a lie.
@@ -272,7 +294,9 @@
    and no page passes a count; leaving the rule would let a future caller half-render a strip the
    markup no longer has. What it used to carry on two pages was REHOMED, not dropped — see the
    notes in AllManuscripts.tsx and ComparableTitlesPage.tsx. */
-.wsh-mark { flex: 0 0 38px; transition: flex-basis .2s ease; }
+/* ⚠️ .22s ON GEOMETRY, .14s ON FADES (spec §2, ref 84). One curve throughout — a fade that outlasts
+   the collapse leaves the mark visible over a row that has already closed. */
+.wsh-mark { flex: 0 0 38px; transition: flex-basis .22s cubic-bezier(.4, 0, .2, 1), width .22s cubic-bezier(.4, 0, .2, 1), margin-right .22s cubic-bezier(.4, 0, .2, 1), opacity .14s ease; }
 .wsh-mark--xl { flex: 0 0 64px; }
 .wsh-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 0 1 auto; }
 /* ⚠️ 600 IS A TOKEN, NOT A LITERAL, AND IT MUST NOT PROPAGATE (amendment 12). Every other Playfair
@@ -283,7 +307,7 @@
 .wsh-title {
   font-family: var(--font-serif); font-size: 33px; font-weight: var(--wsh-plate-title-w);
   color: var(--shell-ink); margin: 0; white-space: nowrap; line-height: 1.12;
-  transition: font-size .2s ease;
+  transition: font-size .22s cubic-bezier(.4, 0, .2, 1);
 }
 /* ⚠️ NO DESCRIPTION → THE TITLE STEPS UP. The plate's HEIGHT does not change with it — the two
    states must read as deliberate side by side, not as one page missing something.
@@ -295,16 +319,21 @@
   margin: 0; font-size: 14px; color: #6b5a51;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
   max-height: 20px;
-  transition: opacity .15s ease, max-height .2s ease, margin .2s ease;
+  transition: opacity .14s ease, max-height .22s cubic-bezier(.4, 0, .2, 1), margin .22s cubic-bezier(.4, 0, .2, 1);
 }
 /* ⚠️ THE DESCRIPTION FADES AND COLLAPSES TOGETHER. Opacity alone would leave its box holding the
    title off-centre in a 56px plate; `max-height:0` is what actually gives the space back. */
+.wsh--scrolled .wsh-row { padding: 0 var(--content-gutter); }
 .wsh--scrolled .wsh-sub { opacity: 0; max-height: 0; margin-top: 0; }
-.wsh--scrolled .wsh-title { font-size: 18px; }
-.wsh--scrolled .wsh-mark { flex-basis: 34px; }
+.wsh--scrolled .wsh-title { font-size: 17px; }
+/* ⚠️ THE MARK IS REMOVED, NOT SHRUNK. It went to 34px before, leaving a small illustration beside
+   a 17px title — two sizes of one thing arguing. Basis and width go to 0 so the row closes over
+   it; the negative margin absorbs the row's gap, or a 16px hole survives where the mark was. */
+.wsh--scrolled .wsh-mark,
+.wsh--scrolled .wsh-mark--xl { flex-basis: 0; width: 0; opacity: 0; margin-right: -16px; }
 .wsh--scrolled .wsh-mark .os-mark,
-.wsh--scrolled .wsh-mark--xl .os-mark { width: 34px; height: 34px; flex-basis: 34px; }
-.wsh--scrolled .svh-btn { padding: 8px 15px; font-size: 12.5px; }
+.wsh--scrolled .wsh-mark--xl .os-mark { width: 0; height: 0; flex-basis: 0; border-width: 0; }
+.wsh--scrolled .svh-btn { padding: 7px 13px; font-size: 12px; }
 .wsh-grow { flex: 1 1 auto; min-width: 10px; }
 .wsh-acts { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 

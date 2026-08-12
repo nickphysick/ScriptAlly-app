@@ -195,3 +195,86 @@ describe("the tool row", () => {
     expect(html).not.toContain("svh-more");
   });
 });
+
+/**
+ * ⚠️ THE TWO STATES (consolidated header spec §2; ref design-refs/84-header-strip-toolbar-below.html).
+ *
+ * The header has a REST state and a WORKING state, and the difference is not a size — it is
+ * whether the header is an object on the page or the page's own top edge. Ten properties change
+ * together; asserting the height alone would let a squashed card pass, which is exactly what the
+ * previous version was.
+ *
+ * ⚠️ THE STATE IS SPLIT ACROSS TWO STYLESHEETS AND BOTH HALVES ARE READ HERE. The plate's own
+ * treatment is `.wsh--scrolled` in pageHeader.css; the WIDTH change and the hairline belong to the
+ * grid row (`.wpg-plate--working`), because the header fills its row in both states and it is the
+ * row's inset that opens and closes. Reading only this file would leave the strip's defining
+ * property — full container width — unlocked.
+ */
+describe("the header's two states", () => {
+  const hdrCss = readFileSync(resolve(__dirname, "./pageHeader.css"), "utf8");
+  const gridCss = readFileSync(resolve(__dirname, "./workspacePageGrid.css"), "utf8");
+  /** every block for a selector, joined — never the first (see the grouped-rule note in CLAUDE.md) */
+  const all = (css: string, sel: string): string => {
+    const out: string[] = [];
+    for (let i = css.indexOf(sel + " {"); i > -1; i = css.indexOf(sel + " {", i + 1)) {
+      out.push(css.slice(i, css.indexOf("}", i)));
+    }
+    return out.join("\n");
+  };
+
+  it("at rest the header is an OBJECT — border, radius, shadow, and its own inset", () => {
+    const wsh = all(hdrCss, ".wsh");
+    expect(wsh, "the plate lost its border").toContain("border: 1px solid var(--ws-edge)");
+    expect(wsh, "the plate lost its radius").toContain("border-radius: var(--wsh-plate-radius)");
+    expect(wsh, "the plate lost its shadow — it would read as a band, not an object").toContain("box-shadow: var(--wsh-plate-sh)");
+    expect(all(gridCss, ".wpg-plate"), "row 1 stopped insetting the header — it would already be full width at rest")
+      .toContain("padding-inline: calc(var(--content-gutter) + var(--header-inset))");
+  });
+
+  it("⚠️ working, EVERY object property drops at once — not a smaller card", () => {
+    const strip = all(hdrCss, ".wsh--scrolled");
+    expect(strip, "the strip kept its border").toContain("border-color: transparent");
+    expect(strip, "the strip kept its radius").toContain("border-radius: 0");
+    expect(strip, "the strip kept its shadow").toContain("box-shadow: none");
+    expect(strip, "the strip is not taking the strip height").toContain("height: var(--wsh-plate-h-scrolled)");
+    expect(all(gridCss, ".wpg-plate--working"), "the row kept its inset — the strip would not reach the container's edges")
+      .toContain("padding: 0");
+  });
+
+  it("⚠️ NO TRANSLUCENCY, NO BLUR — nothing overlaps, so nothing needs to be seen through", () => {
+    const strip = all(hdrCss, ".wsh--scrolled");
+    expect(strip, "the strip went translucent again — the scroller is the row BENEATH it, so there is nothing behind it to reveal").not.toContain("--wsh-plate-bg-scrolled");
+    expect(strip, "a backdrop-filter came back — it also creates a stacking context, which is its own class of bug").not.toContain("backdrop-filter");
+    expect(strip, "the scrolled edge token came back").not.toContain("--wsh-plate-edge-scrolled");
+  });
+
+  it("the mark is REMOVED, not shrunk, and the row closes over it", () => {
+    const mark = all(hdrCss, ".wsh--scrolled .wsh-mark,\n.wsh--scrolled .wsh-mark--xl");
+    expect(mark, "the mark is still occupying width — a small illustration beside a 17px title is two sizes of one thing arguing").toContain("flex-basis: 0");
+    expect(mark, "the mark is still visible").toContain("opacity: 0");
+    expect(mark, "the row's gap survives where the mark was, leaving a hole").toContain("margin-right: -16px");
+  });
+
+  it("the type steps down, and the description collapses rather than fading in place", () => {
+    expect(all(hdrCss, ".wsh--scrolled .wsh-title"), "the working title is not 17px").toContain("font-size: 17px");
+    const sub = all(hdrCss, ".wsh--scrolled .wsh-sub");
+    expect(sub, "the description faded but kept its box, holding the title off-centre in a 52px strip").toContain("max-height: 0");
+  });
+
+  it("⚠️ THE HAIRLINE IS THE ROW'S, FULL WIDTH, AND IT FADES", () => {
+    const after = all(gridCss, ".wpg-plate::after");
+    expect(after, "the hairline is missing — nothing separates chrome from content once the plate's border goes").toContain("height: 1px");
+    expect(after, "the hairline stops at the plate's edges, leaving a gap where the inset was").toMatch(/left:\s*0;\s*right:\s*0/);
+    expect(after, "the hairline is visible at rest, where the plate's own border already does that job").toContain("opacity: 0");
+    expect(all(gridCss, ".wpg-plate--working::after"), "the hairline never appears when working").toContain("opacity: 1");
+  });
+
+  it("⚠️ ONE CURVE, ONE PAIR OF DURATIONS — .22s on geometry, .14s on fades", () => {
+    for (const [sel, css] of [[".wsh", hdrCss], [".wsh-row", hdrCss], [".wpg-plate", gridCss]] as const) {
+      expect(all(css, sel), `${sel} is not on the .22s geometry curve — a row that eases differently from the plate inside it reads as two events`)
+        .toContain(".22s cubic-bezier(.4, 0, .2, 1)");
+    }
+    expect(all(gridCss, ".wpg-plate::after"), "the hairline is not on the .14s fade — it would snap in while the border is still dissolving").toContain(".14s");
+    expect(all(hdrCss, ".wsh--scrolled .wsh-mark,\n.wsh--scrolled .wsh-mark--xl"), "").not.toContain("transition");
+  });
+});

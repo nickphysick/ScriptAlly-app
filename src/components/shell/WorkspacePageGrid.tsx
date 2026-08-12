@@ -100,7 +100,10 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   return (
     <PlateCondensedContext.Provider value={condensed}>
       <div className={`wpg${className ? ` ${className}` : ""}`}>
-        <div className="wpg-plate">{plate}</div>
+        {/* ⚠️ ROW 1 CARRIES THE STATE CLASS TOO, not just the header inside it. The width change and
+            the hairline are the ROW's (the header fills its row in both states), so the row has to
+            know. Same boolean, one source — it cannot disagree with the header. */}
+        <div className={`wpg-plate${condensed ? " wpg-plate--working" : ""}`}>{plate}</div>
         {toolbar && <div className="wpg-tools">{toolbar}</div>}
         <div
           className="wpg-scroll"
