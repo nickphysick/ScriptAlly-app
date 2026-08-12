@@ -11,7 +11,10 @@
  * the resolution table.
  */
 
-export const MARKETING_PATHS = new Set(["/", "/pricing"]);
+// ⚠️ "/pricing" IS TEMPORARILY OUT. The page that rendered there was a developer sandbox on a
+// public route; it is deleted, and a real public pricing page returns in phase 5, at which point
+// this set gains "/pricing" back. TODO(phase-5).
+export const MARKETING_PATHS = new Set(["/"]);
 
 /** The workspace route set — the capsule-shell tier (every authenticated route). */
 export const WORKSPACE_PATHS = new Set([

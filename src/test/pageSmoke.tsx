@@ -158,15 +158,42 @@ export const seededDbStub: Record<string, unknown> = new Proxy(
 );
 
 /**
+ * ⚠️ THE SIGNED-OUT STUB — `currentUser: null`, the state a public route actually meets.
+ *
+ * Every other stub here supplies `SMOKE_USER`, which is right for workspace pages (they are all
+ * behind the auth gate) and WRONG for the marketing tier. That gap had a cost: `/pricing` opened
+ * with `if (!currentUser) return null`, so a logged-out visitor got an empty page inside the
+ * marketing chrome — and its smoke test rendered it under a mock that always supplied a user, so
+ * the test passed on a page that showed nothing. A public route must be smoked logged OUT.
+ */
+export const signedOutDbStub: Record<string, unknown> = new Proxy(
+  { ...DB_DATA, currentUser: null },
+  {
+    get(target, key) {
+      if (typeof key === "symbol") return undefined;
+      if (key in target) return target[key as string];
+      return asyncNoop;
+    },
+    has: () => true,
+  },
+);
+
+/**
  * Factory for `vi.mock("…/lib/db", …)`.
  *
  * The hook reads a module-level switch rather than taking an argument, because `vi.mock` is
- * hoisted and its factory cannot close over anything a test sets later. `useSeededDb()` flips it.
+ * hoisted and its factory cannot close over anything a test sets later. `useSignedOutDb()` flips
+ * it, so ONE test file can cover both the logged-out and signed-in renders of the same route.
  */
 let seeded = false;
+let signedOut = false;
+
+/** Render as a logged-out visitor until `restoreSmokeUser()`. Pair them in beforeEach/afterEach. */
+export const useSignedOutDb = () => { signedOut = true; };
+export const restoreSmokeUser = () => { signedOut = false; };
 
 export const dbMock = () => ({
-  useScriptAllyDb: () => (seeded ? seededDbStub : dbStub),
+  useScriptAllyDb: () => (signedOut ? signedOutDbStub : seeded ? seededDbStub : dbStub),
   DbProvider: ({ children }: { children?: React.ReactNode }) => children as React.ReactElement,
 });
 

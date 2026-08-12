@@ -20,7 +20,6 @@ vi.mock("../lib/firebase", async () => (await import("./pageSmoke")).firebaseMoc
 vi.mock("../components/toast/ToastProvider", async () => (await import("./pageSmoke")).toastMock());
 
 import { StatusDotDemo } from "../components/StatusDotDemo";
-import { NotesStoreScan } from "../components/NotesStoreScan";
 import { NotesLab } from "../components/notes/NotesLab";
 import { PkgLab } from "../components/packages/PkgLab";
 import { DiaryLab } from "../components/dashboard/DiaryLab";
@@ -33,7 +32,6 @@ import { SidebarShell } from "../components/shell/SidebarShell";
 
 const surfaces: [hash: string, chrome: string, node: () => React.ReactElement][] = [
   ["#/status-dots", "StatusDot", () => <StatusDotDemo />],
-  ["#/notes-scan", "Notes-store scan", () => <NotesStoreScan />],
   ["#/notes-lab", "Notes — lab", () => <NotesLab />],
   ["#/pkg-lab", "Package Workshop", () => <PkgLab />],
   ["#/diary-lab", "Dates for the diary", () => <DiaryLab />],

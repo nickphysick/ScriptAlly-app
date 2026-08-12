@@ -7,7 +7,6 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { DbProvider, useScriptAllyDb } from "./lib/db";
 import { ToastProvider } from "./components/toast/ToastProvider";
-import { NotesStoreScan } from "./components/NotesStoreScan"; // ⚠️ TEMP — notes-store scan; delete with the route
 import { BrandProvider } from "./lib/brand";
 import { Auth } from "./components/Auth";
 import { AppShell, StagePage } from "./components/shell/AppShell";
@@ -26,7 +25,6 @@ import { SubmissionPackages } from "./components/SubmissionPackages";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { AllManuscripts } from "./components/AllManuscripts";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
-import { Pricing } from "./components/Pricing";
 import { ImportCsv } from "./components/ImportCsv";
 import { BrandStudio } from "./components/BrandStudio";
 import { AddAgentFocusForm } from "./components/AddAgentFocusForm";
@@ -332,10 +330,11 @@ function pathFor(tab: string, subPageName?: string): string {
       if (subPageName === "Comparable titles") return "/manuscripts/comps";
       return "/manuscripts";
     }
-    // Two distinct pricing surfaces, exactly as before the router: the "pricing" tab renders
-    // Pricing; "plans" (user-menu Plans/Upgrade, MaterialsField Pro gate) renders the
-    // presentational PlansPage. Consolidating them is a separate decision — not this commit.
-    case "pricing": return "/pricing";
+    // ⚠️ THE "pricing" TAB IS GONE FOR NOW, and the case is deliberately absent rather than
+    // aliased: the old /pricing page was a developer sandbox on a PUBLIC route (it rendered null
+    // when logged out, and offered signed-in visitors a free "Activate Pro account now" button).
+    // A real public pricing page returns in phase 5; until then every caller lands on /plans,
+    // which is honest about there being no payment path. TODO(phase-5): restore the case.
     case "plans": return "/plans";
     case "import": return "/import";
     case "help": return "/help";
@@ -419,13 +418,10 @@ function AppContent() {
   if (isStatusDotDemo && import.meta.env.DEV) {
     return <StatusDotDemo />;
   }
-  // ⚠️ TEMPORARY (notes-store convergence) — DELETE this branch with the component. Deliberately NOT
-  // DEV-gated: the numbers that matter come from a PRODUCTION build run locally (npm run build →
-  // npm run preview), where import.meta.env.DEV is false. Read-only; reads only the signed-in user's
-  // own documents, rules-enforced. Sign in first, then visit #/notes-scan.
-  if (hash === "#/notes-scan") {
-    return <NotesStoreScan />;
-  }
+  // (The ungated #/notes-scan branch is GONE. It was marked temporary in its own comment and was
+  // deliberately NOT DEV-gated, so in production any signed-in user reaching that hash had the
+  // entire app replaced by a diagnostic table. A one-off measurement surface is not worth a live
+  // route; if the numbers are needed again, take them from a local build behind the DEV gate.)
   // Dev-only review surface for the presentational plans page (same pattern as #/status-dots).
   // It's also registered in the activeTab switch below; this hash hatch lets it be reviewed
   // without signing in. In prod the hash simply falls through to the normal app/landing.
@@ -506,8 +502,10 @@ function AppContent() {
     );
   }
 
-  // ── Marketing tier (public): "/" and "/pricing" render for EVERYONE. A signed-in user is
+  // ── Marketing tier (public): "/" renders for EVERYONE. A signed-in user is
   // never auto-redirected away from the landing — their nav shows "Open dashboard" instead.
+  // (/pricing left this tier with the sandbox page it used to render; phase 5 brings a real one
+  // back here. TODO(phase-5).)
   // The pre-auth hashes stay the auth transport on these routes (#/login · #/signin → sign-in,
   // #/signup → create account — the holding page's existing links keep working); once auth
   // completes while a hash is set, the journey finishes in the workspace.
@@ -523,7 +521,7 @@ function AppContent() {
     }
     return (
       <MarketingShell user={currentUser} onNavigate={handleNavigate} path={path}>
-        {path === "/pricing" ? <Pricing /> : <Landing onNavigate={handleNavigate} />}
+        <Landing onNavigate={handleNavigate} />
       </MarketingShell>
     );
   }

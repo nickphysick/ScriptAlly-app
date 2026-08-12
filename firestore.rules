@@ -485,6 +485,26 @@ service cloud.firestore {
       allow create: if isOwner(userId) && isValidUser(incoming());
       allow update: if isOwner(userId) && isValidUser(incoming()) && (
         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'plan', 'trialStartDate', 'subscriptionStatus', 'onboardingComplete', 'queryingStage', 'journeyStage', 'homeCountry', 'queriesTheme', 'hasSeenTour', 'personalGenres', 'mutedTaskRules', 'tourSeenAt', 'tags', 'goalTarget', 'goalPeriod', 'tourCompletedAt', 'tourDismissed', 'todoPrefs'])
+        /**
+         * ⚠️ A CLIENT MAY NOT CHANGE ITS OWN `plan` — THIS LINE IS THE WHOLE GUARD.
+         *
+         * `plan` stays in the allowlist above and `isValidUser` still checks its VALUE is
+         * 'Free' | 'Pro' — neither of those stops anything, because 'Pro' is a legal value. Any
+         * client could simply write itself one, and two surfaces did exactly that: the public
+         * /pricing page's "Activate Pro account now" button, and the CSV importer's `user` row
+         * type, which mapped a spreadsheet column onto the field. Both are deleted.
+         *
+         * ⚠️ IT IS AN EQUALITY CLAUSE, NOT A REMOVAL FROM THE ALLOWLIST, AND THAT IS DELIBERATE.
+         * The allowlist governs which KEYS an update may touch; this governs which VALUES may
+         * move. Keeping the key listed means an ordinary whole-document write that carries an
+         * UNCHANGED plan still succeeds — which matters, because updateUserProfile sends merged
+         * documents — while any actual change is denied. Dropping the key instead would deny
+         * those innocent writes too.
+         *
+         * A plan change is a billing event: it belongs to a server with a payment processor
+         * behind it. Locked in tests/rules/firestore.rules.test.ts.
+         */
+        && incoming().plan == existing().plan
       );
 
       // ROUTE: Manuscripts

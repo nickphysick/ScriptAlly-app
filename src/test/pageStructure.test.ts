@@ -36,7 +36,8 @@ export const PAGE_SOURCES = [
   "components/AccountSettings.tsx",
   "components/PlansPage.tsx",
   "components/HelpCentre.tsx",
-  "components/Pricing.tsx",
+  // funnel MVP phase 1: Pricing.tsx left this census by being deleted — it was a developer
+  // sandbox on a public route. TODO(phase-5): the real public pricing page rejoins here.
   "components/Auth.tsx",
   "components/Onboarding.tsx",
   "components/todo/ToDoPage.tsx",

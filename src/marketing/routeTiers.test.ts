@@ -10,9 +10,18 @@ import { tierForPath, MARKETING_PATHS, WORKSPACE_PATHS } from "./routeTiers";
 import { marketingNavState } from "./marketingNav";
 
 describe("tierForPath", () => {
-  it("puts the landing and public pricing in the marketing tier", () => {
+  it("puts the landing in the marketing tier", () => {
     expect(tierForPath("/")).toBe("marketing");
-    expect(tierForPath("/pricing")).toBe("marketing");
+  });
+
+  /**
+   * ⚠️ /pricing IS UNRESOLVED, NOT WORKSPACE. The sandbox page that used to render there is
+   * deleted, and the real public one arrives in phase 5. Until then the path must fall through to
+   * the unknown branch — an assertion, not an omission, so re-adding it lands deliberately.
+   * TODO(phase-5): back to "marketing".
+   */
+  it("public pricing is temporarily unresolved while its page is rebuilt", () => {
+    expect(tierForPath("/pricing")).toBeNull();
   });
 
   it("the focus tier is retired — account, plans and help are workspace routes (capsule fixes P5)", () => {

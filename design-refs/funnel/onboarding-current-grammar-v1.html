@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScriptAlly — onboarding in current grammar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f8f4ee;
+  --card:#fefdf8;
+  --white:#ffffff;
+  --sage-a:#d7ded4; --sage-b:#dadfd7; --sage-chip:#dae7d8; --sage-ink:#5a6e58;
+  --blush-a:#f8e6dc; --blush-b:#f4ddd1; --blush-bd:#eccdbe;
+  --ink:#241711; --ink-btn:#1c130f;
+  --muted:#6f635b; --faint:#a5988e;
+  --hair:#ece6dc; --hair-strong:#e2d9cc;
+  --burg:#773c2d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"Source Sans 3",system-ui,sans-serif;font-size:15px;line-height:1.55}
+.lbl{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase}
+
+/* switcher */
+.switch{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:0;
+  background:var(--card);border:1px solid var(--hair-strong);border-radius:11px;overflow:hidden;
+  box-shadow:0 2px 6px rgba(58,28,20,.06),0 10px 28px rgba(58,28,20,.07)}
+.switch button{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  padding:10px 18px;border:0;background:transparent;color:var(--muted);cursor:pointer;transition:.18s}
+.switch button.on{background:var(--ink-btn);color:#f6f2ec}
+.switch button:focus-visible{outline:2px solid var(--burg);outline-offset:-2px}
+
+/* stage */
+.stage{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:86px 20px 48px}
+.stage[hidden]{display:none}
+
+/* the card */
+.card{width:100%;max-width:588px;background:var(--card);border:1px solid var(--hair);border-radius:16px;
+  overflow:hidden;box-shadow:0 1px 2px rgba(58,28,20,.04),0 6px 22px rgba(58,28,20,.07)}
+.band{background:linear-gradient(135deg,var(--sage-a),var(--sage-b));padding:14px 22px;
+  display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(90,110,88,.18)}
+.band .plate{width:44px;height:44px;border-radius:11px;background:var(--white);
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  box-shadow:0 1px 2px rgba(58,28,20,.07)}
+.band .who{flex:1;min-width:0}
+.band .who .lbl{color:var(--sage-ink);display:block}
+.band .who .step{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.12em;
+  color:rgba(90,110,88,.72);text-transform:uppercase}
+.band .mark{display:block}
+
+.body{padding:26px 30px 12px}
+h1{font-family:"Playfair Display",serif;font-weight:600;font-size:31px;line-height:1.15;margin:0 0 7px;letter-spacing:-.01em}
+.lede{color:var(--muted);margin:0 0 22px;font-size:15.5px;max-width:46ch}
+
+/* option rows */
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:13px;align-items:flex-start;width:100%;text-align:left;cursor:pointer;
+  background:var(--white);border:1px solid var(--hair-strong);border-radius:12px;padding:13px 15px;
+  font-family:inherit;font-size:15px;color:var(--ink);transition:border-color .16s,box-shadow .16s,background .16s}
+.opt:hover{border-color:#d8cbbc;box-shadow:0 2px 8px rgba(58,28,20,.05)}
+.opt:focus-visible{outline:2px solid var(--burg);outline-offset:2px}
+.opt[aria-pressed="true"]{border-color:var(--sage-ink);background:#fbfdfa;
+  box-shadow:0 0 0 3px rgba(138,158,136,.16)}
+.opt .ring{width:17px;height:17px;border-radius:50%;border:1.5px solid #cabcae;flex:0 0 auto;margin-top:3px;
+  display:flex;align-items:center;justify-content:center;transition:.16s}
+.opt[aria-pressed="true"] .ring{border-color:var(--sage-ink);background:var(--sage-ink)}
+.opt .ring svg{opacity:0;transition:opacity .16s}
+.opt[aria-pressed="true"] .ring svg{opacity:1}
+.opt .t{font-weight:600;display:block;line-height:1.3}
+.opt .d{color:var(--muted);font-size:13.5px;display:block;margin-top:1px;line-height:1.4}
+
+/* upload hero */
+.hero{border:1.5px dashed var(--hair-strong);border-radius:13px;background:var(--white);
+  padding:24px 20px;text-align:center;cursor:pointer;transition:.16s}
+.hero:hover{border-color:var(--sage-ink);background:#fbfdfa}
+.hero .plate2{width:62px;height:62px;margin:0 auto 12px;border-radius:14px;background:var(--white);
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(58,28,20,.09)}
+.hero .t{font-family:"Playfair Display",serif;font-size:19px;font-weight:600}
+.hero .d{color:var(--muted);font-size:13.5px;margin-top:3px}
+.hero .tag{display:inline-block;margin-top:11px;background:var(--sage-chip);color:var(--sage-ink);
+  font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px}
+.orline{display:flex;align-items:center;gap:12px;margin:16px 0 12px;color:var(--faint)}
+.orline::before,.orline::after{content:"";height:1px;background:var(--hair-strong);flex:1}
+.orline span{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase}
+.alt{display:flex;gap:9px}
+.alt button{flex:1;background:var(--white);border:1px solid var(--hair-strong);border-radius:11px;
+  padding:12px 13px;text-align:left;cursor:pointer;font-family:inherit;color:var(--ink);transition:.16s}
+.alt button:hover{border-color:#d8cbbc}
+.alt .t{font-weight:600;font-size:14px;display:block}
+.alt .d{color:var(--muted);font-size:12.5px;display:block;margin-top:1px}
+
+.note{display:flex;gap:9px;align-items:flex-start;margin-top:16px;padding:11px 13px;
+  background:var(--sage-chip);border-radius:11px;color:var(--sage-ink);font-size:13.5px;line-height:1.45}
+.hand{font-family:Caveat,cursive;font-size:19px;color:var(--muted);margin-top:14px;display:block}
+
+/* footer */
+.foot{display:flex;align-items:center;gap:12px;padding:16px 30px 22px;margin-top:6px}
+.ghost{background:none;border:0;color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:10.5px;
+  letter-spacing:.09em;text-transform:uppercase;cursor:pointer;padding:9px 2px}
+.ghost:hover{color:var(--ink)}
+.spacer{flex:1}
+.skip{background:none;border:0;color:var(--faint);font-size:13.5px;cursor:pointer;text-decoration:underline;
+  text-underline-offset:3px;padding:9px 4px}
+.skip:hover{color:var(--muted)}
+.primary{background:var(--ink-btn);color:#f6f2ec;border:0;border-radius:11px;padding:12px 22px;cursor:pointer;
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  transition:.16s;display:inline-flex;align-items:center;gap:8px}
+.primary:hover{background:#000}
+.primary:disabled{background:#e6ded3;color:#a5988e;cursor:not-allowed}
+.primary:focus-visible,.ghost:focus-visible,.skip:focus-visible{outline:2px solid var(--burg);outline-offset:2px}
+
+.caption{max-width:588px;margin:16px auto 0;color:var(--faint);font-size:12px;text-align:center;
+  font-family:"JetBrains Mono",monospace;letter-spacing:.06em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:620px){
+  .body{padding:22px 20px 10px} .foot{padding:14px 20px 20px;flex-wrap:wrap}
+  h1{font-size:26px} .alt{flex-direction:column} .stage{padding:78px 14px 36px}
+}
+</style>
+</head>
+<body>
+
+<div class="switch" role="group" aria-label="Frame">
+  <button id="b1" class="on">Where you are</button>
+  <button id="b2">Bring it across</button>
+</div>
+
+<!-- ============ FRAME 1 ============ -->
+<section class="stage" id="s1">
+ <div>
+  <div class="card">
+    <div class="band">
+      <span class="plate">
+        <!-- placeholder for the illustrated compass/desk mark -->
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <circle cx="13" cy="13" r="9.5" stroke="#5a6e58" stroke-width="1.3"/>
+          <path d="M16.5 9.5 11.6 11.6 9.5 16.5 14.4 14.4Z" fill="#f4ddd1" stroke="#773c2d" stroke-width="1.1" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="who">
+        <span class="lbl">Getting set up</span>
+        <span class="step">Step 1 of 3</span>
+      </span>
+    </div>
+
+    <div class="body">
+      <h1>Where are you right now?</h1>
+      <p class="lede">This only sets what we show you first. Nothing here locks you in — you can change any of it later.</p>
+
+      <div class="opts" id="opts">
+        <button class="opt" aria-pressed="false">
+          <span class="ring"><svg width="9" height="7" viewBox="0 0 9 7"><path d="M1 3.6 3.3 6 8 1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><span class="t">Just getting started</span><span class="d">Nothing sent yet. Maybe still writing.</span></span>
+        </button>
+        <button class="opt" aria-pressed="false">
+          <span class="ring"><svg width="9" height="7" viewBox="0 0 9 7"><path d="M1 3.6 3.3 6 8 1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><span class="t">A few queries out</span><span class="d">A handful sent, mostly still waiting.</span></span>
+        </button>
+        <button class="opt" aria-pressed="false">
+          <span class="ring"><svg width="9" height="7" viewBox="0 0 9 7"><path d="M1 3.6 3.3 6 8 1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><span class="t">Deep in it</span><span class="d">A list on the go and a record to bring across.</span></span>
+        </button>
+        <button class="opt" aria-pressed="false">
+          <span class="ring"><svg width="9" height="7" viewBox="0 0 9 7"><path d="M1 3.6 3.3 6 8 1" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><span class="t">Had some interest</span><span class="d">Requests in, and pages out with agents.</span></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="foot">
+      <button class="skip">Skip this</button>
+      <span class="spacer"></span>
+      <button class="primary" id="p1" disabled>Continue
+        <svg width="12" height="9" viewBox="0 0 12 9" fill="none" aria-hidden="true"><path d="M1 4.5h9M7 1l3.5 3.5L7 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+  <p class="caption">Ground #f8f4ee · card #fefdf8 · sage band · ink primary · no mount frame</p>
+ </div>
+</section>
+
+<!-- ============ FRAME 2 ============ -->
+<section class="stage" id="s2" hidden>
+ <div>
+  <div class="card">
+    <div class="band">
+      <span class="plate">
+        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <rect x="4.5" y="6" width="17" height="14" rx="2" stroke="#5a6e58" stroke-width="1.3" fill="#fff"/>
+          <path d="M4.5 10.5h17M10 10.5V20" stroke="#5a6e58" stroke-width="1.1"/>
+          <path d="M13 3v5m0 0 2-2m-2 2-2-2" stroke="#773c2d" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="who">
+        <span class="lbl">Bring it across</span>
+        <span class="step">Step 3 of 3</span>
+      </span>
+    </div>
+
+    <div class="body">
+      <h1>You've already started.</h1>
+      <p class="lede">Bring your record across and ScriptAlly picks up where you are, rather than starting you at zero.</p>
+
+      <div class="hero" tabindex="0" role="button">
+        <span class="plate2">
+          <svg width="30" height="30" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+            <path d="M6 22V8a2 2 0 0 1 2-2h8l6 6v10a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2Z" fill="#fff" stroke="#241711" stroke-width="1.3" stroke-linejoin="round"/>
+            <path d="M16 6v6h6" stroke="#241711" stroke-width="1.3" stroke-linejoin="round"/>
+            <path d="M10.5 15.5h9M10.5 18.5h6" stroke="#8a9e88" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <div class="t">Drop your spreadsheet here</div>
+        <div class="d">CSV or Excel — whatever shape it's in.</div>
+        <span class="tag">We read it for you</span>
+      </div>
+
+      <div class="orline"><span>or</span></div>
+
+      <div class="alt">
+        <button><span class="t">Add them by hand</span><span class="d">A few at a time, in the app.</span></button>
+        <button><span class="t">Start fresh</span><span class="d">Log queries from today onward.</span></button>
+      </div>
+
+      <div class="note">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex:0 0 auto;margin-top:2px" aria-hidden="true">
+          <circle cx="8" cy="8" r="6.5" stroke="#5a6e58" stroke-width="1.2"/>
+          <path d="M8 7.4v3.6M8 5.2v.9" stroke="#5a6e58" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span>You'll see everything we read before any of it is saved, and you can change any line.</span>
+      </div>
+
+      <span class="hand">No spreadsheet? The by-hand route is quick.</span>
+    </div>
+
+    <div class="foot">
+      <button class="ghost">← Back</button>
+      <span class="spacer"></span>
+      <button class="skip">Skip setup</button>
+    </div>
+  </div>
+  <p class="caption">Illustrated marks are placeholders — real ones sit on white plates as on the dashboard</p>
+ </div>
+</section>
+
+<script>
+const b1=document.getElementById('b1'),b2=document.getElementById('b2'),
+      s1=document.getElementById('s1'),s2=document.getElementById('s2');
+function show(n){s1.hidden=n!==1;s2.hidden=n!==2;b1.classList.toggle('on',n===1);b2.classList.toggle('on',n===2);}
+b1.onclick=()=>show(1); b2.onclick=()=>show(2);
+
+document.querySelectorAll('#opts .opt').forEach(o=>{
+  o.onclick=()=>{
+    document.querySelectorAll('#opts .opt').forEach(x=>x.setAttribute('aria-pressed','false'));
+    o.setAttribute('aria-pressed','true');
+    document.getElementById('p1').disabled=false;
+  };
+});
+</script>
+</body>
+</html>

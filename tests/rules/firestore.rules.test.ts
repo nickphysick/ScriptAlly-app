@@ -351,6 +351,60 @@ describe('/users/{userId}', () => {
     );
   });
 
+  /**
+   * ⚠️ A CLIENT MAY NOT CHANGE ITS OWN `plan`, and these are the tests that say so.
+   *
+   * `plan` is allowlisted and `isValidUser` checks only that the VALUE is 'Free' | 'Pro' — so
+   * 'Pro' was a perfectly legal write from the browser, and two surfaces made it for real (the
+   * public /pricing page's upgrade button, and the CSV importer's `user` row type). The guard is
+   * an equality clause: `incoming().plan == existing().plan`.
+   *
+   * ⚠️ THE VALID-VALUE CASE IS THE ONE THAT MATTERS. A test asserting only that an INVALID plan
+   * is rejected would pass just as happily with the guard deleted, because `isValidUser` already
+   * rejects it. Free → Pro is the write that has to fail.
+   */
+  it('rejects a plan change, even to a valid plan value', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE), validUser(ALICE)); // seeded 'Free'
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(updateDoc(doc(db, 'users', ALICE), { plan: 'Pro' }));
+  });
+
+  it('rejects a plan change smuggled alongside an allowlisted field', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE), validUser(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(updateDoc(doc(db, 'users', ALICE), { name: 'Alice Author', plan: 'Pro' }));
+  });
+
+  it('rejects a downgrade too — the direction is not the point, the writer is', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE), { ...validUser(ALICE), plan: 'Pro' });
+    });
+    const db = aliceCtx().firestore();
+    await assertFails(updateDoc(doc(db, 'users', ALICE), { plan: 'Free' }));
+  });
+
+  it('still allows an ordinary update that carries an UNCHANGED plan', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE), validUser(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    // The counterpart: the guard must not break whole-document writes, which is why it is an
+    // equality clause rather than a removal of `plan` from the allowlist.
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE), { name: 'Alice Author', plan: 'Free' }));
+  });
+
+  it('still allows an update that touches only allowlisted fields', async () => {
+    await asAdmin(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'users', ALICE), validUser(ALICE));
+    });
+    const db = aliceCtx().firestore();
+    await assertSucceeds(updateDoc(doc(db, 'users', ALICE), { name: 'Alice Author' }));
+  });
+
   // ── Smart Import entitlement subdoc: users/{uid}/private/entitlement is owner-readable but
   //    NO client can write or delete it (server/admin-SDK only). ──
   it('owner can read their entitlement subdoc', async () => {

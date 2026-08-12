@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScriptAlly — review shell, current grammar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f8f4ee;
+  --card:#fefdf8;
+  --white:#ffffff;
+  --sage-a:#d7ded4; --sage-b:#dadfd7; --sage-chip:#dae7d8; --sage-ink:#5a6e58; --sage-line:#8a9e88;
+  --blush-a:#f8e6dc; --blush-b:#f4ddd1; --blush-bd:#eccdbe; --blush-chip:#f8ded3;
+  --ink:#241711; --ink-btn:#1c130f;
+  --muted:#6f635b; --faint:#a5988e;
+  --hair:#ece6dc; --hair-strong:#e2d9cc;
+  --burg:#773c2d;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--ink);overflow:hidden;
+  font-family:"Source Sans 3",system-ui,sans-serif;font-size:14.5px;line-height:1.5}
+.lbl{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+
+.app{height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr);padding:0 20px 20px}
+
+/* ---------- top nav ---------- */
+.nav{height:60px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:9px;font-family:"Playfair Display",serif;font-weight:600;font-size:18px}
+.brand svg{display:block}
+.rail{display:flex;align-items:center;gap:6px;margin-left:14px}
+.rail .stop{display:flex;align-items:center;gap:7px;padding:5px 11px;border-radius:20px;
+  font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.rail .stop .pip{width:6px;height:6px;border-radius:50%;background:#ddd3c6}
+.rail .stop.done{color:var(--sage-ink)}
+.rail .stop.done .pip{background:var(--sage-line)}
+.rail .stop.here{background:var(--white);color:var(--ink);border:1px solid var(--hair-strong)}
+.rail .stop.here .pip{background:var(--burg)}
+.rail .sep{width:14px;height:1px;background:var(--hair-strong)}
+.nav .spacer{flex:1}
+.skip{background:none;border:0;color:var(--faint);font-size:13.5px;cursor:pointer;text-decoration:underline;
+  text-underline-offset:3px;padding:8px 4px}
+.skip:hover{color:var(--muted)}
+
+/* state switcher (mockup only) */
+.demo{display:flex;border:1px solid var(--hair-strong);border-radius:9px;overflow:hidden;background:var(--card)}
+.demo button{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  padding:8px 13px;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.demo button.on{background:var(--ink-btn);color:#f6f2ec}
+
+/* ---------- the window ---------- */
+.window{background:var(--white);border:1px solid var(--hair);border-radius:18px;overflow:hidden;
+  display:grid;grid-template-rows:auto minmax(0,1fr) auto;min-height:0;
+  box-shadow:0 1px 2px rgba(58,28,20,.04),0 8px 28px rgba(58,28,20,.08)}
+
+/* band — carries the state */
+.band{display:flex;align-items:center;gap:14px;padding:15px 22px;border-bottom:1px solid var(--hair);
+  background:linear-gradient(135deg,var(--blush-a),var(--blush-b));transition:background .4s}
+body.clear .band{background:linear-gradient(135deg,var(--sage-a),var(--sage-b))}
+.band .plate{width:46px;height:46px;border-radius:11px;background:var(--white);flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(58,28,20,.08)}
+.band .txt{flex:1;min-width:0}
+.band .txt .lbl{color:var(--burg);display:block;margin-bottom:1px;transition:color .4s}
+body.clear .band .txt .lbl{color:var(--sage-ink)}
+.band h1{font-family:"Playfair Display",serif;font-weight:600;font-size:22px;margin:0;line-height:1.2}
+.band .tallies{display:flex;gap:8px;flex:0 0 auto}
+.tally{background:var(--white);border:1px solid rgba(58,28,20,.09);border-radius:11px;padding:7px 13px;text-align:center;min-width:74px}
+.tally b{font-family:"Playfair Display",serif;font-size:20px;font-weight:600;display:block;line-height:1.05}
+.tally span{font-family:"JetBrains Mono",monospace;font-size:8.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.tally.att b{color:var(--burg)}
+.tally.ok b{color:var(--sage-ink)}
+
+/* body split */
+.split{display:grid;grid-template-columns:minmax(0,1fr) 336px;min-height:0}
+.main{min-height:0;overflow:auto;padding:20px 22px 24px;scrollbar-gutter:stable}
+.side{min-height:0;overflow:auto;border-left:1px solid var(--hair);background:var(--card);padding:18px 18px 24px}
+
+.mainhead{display:flex;align-items:baseline;gap:10px;margin:0 2px 13px}
+.mainhead h2{font-family:"Playfair Display",serif;font-weight:600;font-size:17px;margin:0}
+.mainhead .lbl{color:var(--faint)}
+.mainhead .spacer{flex:1}
+.reset{background:none;border:0;color:var(--faint);font-family:"JetBrains Mono",monospace;font-size:9.5px;
+  letter-spacing:.09em;text-transform:uppercase;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.reset:hover{color:var(--muted)}
+
+/* record rows */
+.rec{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;gap:13px;align-items:center;
+  background:var(--card);border:1px solid var(--hair);border-radius:13px;padding:12px 14px;margin-bottom:8px;
+  transition:border-color .16s,box-shadow .16s}
+.rec:hover{border-color:var(--hair-strong);box-shadow:0 2px 9px rgba(58,28,20,.05)}
+.rec .disc{width:38px;height:38px;border-radius:10px;background:#f4ece4;border:1px solid #e6d8ca;
+  display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;
+  font-size:14px;color:var(--burg);font-weight:600}
+.rec .who{min-width:0}
+.rec .who .n{font-family:"Playfair Display",serif;font-size:16.5px;font-weight:600;line-height:1.2}
+.rec .who .ag{font-family:"Playfair Display",serif;font-style:italic;font-size:14px;color:var(--muted)}
+.rec .who .meta{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--faint);margin-top:3px}
+.pill{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px;white-space:nowrap}
+.pill.ok{background:var(--sage-chip);color:var(--sage-ink)}
+.pill.att{background:var(--blush-chip);color:var(--burg)}
+.pill.aside{background:#efe9e1;color:var(--muted)}
+.rowbtn{background:var(--white);border:1px solid var(--hair-strong);border-radius:9px;padding:7px 12px;cursor:pointer;
+  font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.rowbtn:hover{border-color:#d5c7b8;background:var(--card)}
+.rec .flag{grid-column:2 / -1;display:flex;gap:8px;align-items:flex-start;margin-top:9px;padding-top:9px;
+  border-top:1px solid var(--hair);color:var(--muted);font-size:13px;line-height:1.4}
+body.clear .rec .flag{display:none}
+body.clear .pill.att{background:var(--sage-chip);color:var(--sage-ink)}
+
+.groupline{display:flex;align-items:center;gap:11px;margin:18px 2px 11px;color:var(--faint)}
+.groupline::after{content:"";flex:1;height:1px;background:var(--hair)}
+
+/* sidebar board */
+.board{background:var(--white);border:1px solid var(--hair);border-radius:13px;padding:14px;margin-bottom:12px}
+.board > .lbl{color:var(--faint);display:block;margin-bottom:9px}
+.board h3{font-family:"Playfair Display",serif;font-weight:600;font-size:16px;margin:0 0 6px}
+.board p{margin:0 0 8px;color:var(--muted);font-size:13.5px;line-height:1.45}
+.board p:last-child{margin-bottom:0}
+.barrow{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.barrow .k{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);width:78px;flex:0 0 auto}
+.barrow .track{flex:1;height:7px;border-radius:20px;background:#efe9e1;overflow:hidden}
+.barrow .fill{height:100%;border-radius:20px}
+.barrow .v{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--ink);width:22px;text-align:right}
+.faq{border-top:1px solid var(--hair);padding:10px 0 0;margin-top:10px}
+.faq details{border-bottom:1px solid var(--hair)}
+.faq details:last-child{border-bottom:0}
+.faq summary{cursor:pointer;padding:9px 0;font-weight:600;font-size:13.5px;list-style:none;display:flex;gap:8px;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::before{content:"+";font-family:"JetBrains Mono",monospace;color:var(--faint);font-size:13px}
+.faq details[open] summary::before{content:"–"}
+.faq p{padding:0 0 10px;color:var(--muted);font-size:13px;line-height:1.45;margin:0}
+.hand{font-family:Caveat,cursive;font-size:18px;color:var(--muted);display:block;margin-top:10px}
+
+/* footer */
+.foot{display:flex;align-items:center;gap:14px;padding:13px 22px;border-top:1px solid var(--hair);background:var(--card)}
+.ghost{background:none;border:0;color:var(--muted);font-family:"JetBrains Mono",monospace;font-size:10.5px;
+  letter-spacing:.09em;text-transform:uppercase;cursor:pointer;padding:9px 2px}
+.ghost:hover{color:var(--ink)}
+.foot .spacer{flex:1}
+.foot .status{color:var(--muted);font-size:13.5px}
+.foot .status b{color:var(--ink);font-weight:600}
+.primary{background:var(--ink-btn);color:#f6f2ec;border:0;border-radius:11px;padding:12px 20px;cursor:pointer;
+  font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:8px}
+.primary:hover{background:#000}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--burg);outline-offset:2px}
+
+@media (max-width:980px){
+  .split{grid-template-columns:minmax(0,1fr)}
+  .side{border-left:0;border-top:1px solid var(--hair)}
+  .band{flex-wrap:wrap}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---- LOCKED identity line (supersedes any italic/agency styling above) ---- */
+.who .ag{font-style:normal !important;color:var(--muted);font-family:"Playfair Display",serif}
+.who .ag::before{content:"";display:inline-block;width:1px;height:14px;background:#dbcfc0;
+  margin:0 10px 0 6px;vertical-align:-2px}
+.who .meta{display:block !important;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="nav">
+    <span class="brand">
+      <svg width="21" height="21" viewBox="0 0 21 21" fill="none" aria-hidden="true">
+        <path d="M2 10.5 19 3l-6 16-3-6.5L2 10.5Z" fill="#f4ddd1" stroke="#241711" stroke-width="1.3" stroke-linejoin="round"/>
+      </svg>
+      ScriptAlly
+    </span>
+    <span class="rail">
+      <span class="stop done"><span class="pip"></span>Duplicates</span>
+      <span class="sep"></span>
+      <span class="stop here"><span class="pip"></span>Agents</span>
+      <span class="sep"></span>
+      <span class="stop"><span class="pip"></span>Queries</span>
+    </span>
+    <span class="spacer"></span>
+    <span class="demo" role="group" aria-label="Demo state">
+      <button id="d1" class="on">Needs a look</button>
+      <button id="d2">All clear</button>
+    </span>
+    <button class="skip">Skip setup</button>
+  </div>
+
+  <div class="window">
+
+    <!-- band carries the state -->
+    <div class="band">
+      <span class="plate">
+        <svg width="27" height="27" viewBox="0 0 27 27" fill="none" aria-hidden="true">
+          <rect x="4" y="7" width="19" height="14" rx="2" fill="#fff" stroke="#241711" stroke-width="1.3"/>
+          <path d="M4 11h19" stroke="#241711" stroke-width="1.2"/>
+          <circle cx="9.5" cy="16" r="2.4" stroke="#5a6e58" stroke-width="1.2"/>
+          <path d="M14.5 15h5.5M14.5 18h3.5" stroke="#8a9e88" stroke-width="1.2" stroke-linecap="round"/>
+          <path d="M8 7V4.5h11V7" stroke="#773c2d" stroke-width="1.2" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span class="txt">
+        <span class="lbl" id="bandlbl">3 need a look</span>
+        <h1 id="bandtitle">The agents we found</h1>
+      </span>
+      <span class="tallies">
+        <span class="tally ok"><b id="t-ok">13</b><span>Ready</span></span>
+        <span class="tally att"><b id="t-att">3</b><span>Flagged</span></span>
+        <span class="tally"><b>2</b><span>Set aside</span></span>
+      </span>
+    </div>
+
+    <div class="split">
+      <!-- records -->
+      <div class="main">
+        <div class="mainhead">
+          <h2>18 agents</h2>
+          <span class="lbl">read from your file</span>
+          <span class="spacer"></span>
+          <button class="reset">Reset changes</button>
+        </div>
+
+        <article class="rec">
+          <span class="disc">DO</span>
+          <span class="who">
+            <span class="n">Daniel O'Rourke</span> <span class="ag">Inkwell &amp; Stone</span>
+            <span class="meta">Email · 8 weeks · 4 queries</span>
+          </span>
+          <span class="pill ok">Ready</span>
+          <button class="rowbtn">Make changes</button>
+        </article>
+
+        <article class="rec">
+          <span class="disc">PL</span>
+          <span class="who">
+            <span class="n">Penhallow Literary</span>
+            <span class="meta">No name recorded · 2 queries</span>
+          </span>
+          <span class="pill att">Needs a look</span>
+          <button class="rowbtn">Make changes</button>
+          <span class="flag">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex:0 0 auto;margin-top:2px" aria-hidden="true">
+              <circle cx="7.5" cy="7.5" r="6" stroke="#773c2d" stroke-width="1.2"/>
+              <path d="M7.5 4.6v4M7.5 10.2v.9" stroke="#773c2d" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span>We have an agency but no person's name. Add one to sharpen this record — or carry on and file them under the agency.</span>
+          </span>
+        </article>
+
+        <article class="rec">
+          <span class="disc">TE</span>
+          <span class="who">
+            <span class="n">Tom Ellery</span> <span class="ag">The Marsh Agency</span>
+            <span class="meta">Email · 6 weeks · 1 query</span>
+          </span>
+          <span class="pill ok">Ready</span>
+          <button class="rowbtn">Make changes</button>
+        </article>
+
+        <article class="rec">
+          <span class="disc">GP</span>
+          <span class="who">
+            <span class="n">Greg Panetta</span> <span class="ag">Foxglove Literary</span>
+            <span class="meta">Method not recorded · 3 queries</span>
+          </span>
+          <span class="pill att">Needs a look</span>
+          <button class="rowbtn">Make changes</button>
+          <span class="flag">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex:0 0 auto;margin-top:2px" aria-hidden="true">
+              <circle cx="7.5" cy="7.5" r="6" stroke="#773c2d" stroke-width="1.2"/>
+              <path d="M7.5 4.6v4M7.5 10.2v.9" stroke="#773c2d" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            <span>Your file didn't say how you submitted. Nothing depends on it — set it now or leave it blank.</span>
+          </span>
+        </article>
+
+        <article class="rec">
+          <span class="disc">WT</span>
+          <span class="who">
+            <span class="n">William Tan</span> <span class="ag">Foxglove Literary</span>
+            <span class="meta">Post · 12 weeks · 1 query</span>
+          </span>
+          <span class="pill ok">Ready</span>
+          <button class="rowbtn">Make changes</button>
+        </article>
+
+        <div class="groupline"><span class="lbl">Set aside</span></div>
+
+        <article class="rec">
+          <span class="disc" style="color:var(--faint)">—</span>
+          <span class="who">
+            <span class="n" style="color:var(--muted)">Row 14</span>
+            <span class="meta">No name, no agency</span>
+          </span>
+          <span class="pill aside">Set aside</span>
+          <button class="rowbtn">Bring back</button>
+        </article>
+      </div>
+
+      <!-- board -->
+      <div class="side">
+        <div class="board">
+          <span class="lbl">Where this stands</span>
+          <div class="barrow">
+            <span class="k">Ready</span>
+            <span class="track"><span class="fill" style="width:72%;background:var(--sage-line)"></span></span>
+            <span class="v" id="b-ok">13</span>
+          </div>
+          <div class="barrow">
+            <span class="k">Flagged</span>
+            <span class="track"><span class="fill" id="b-att-fill" style="width:17%;background:#d9a58f"></span></span>
+            <span class="v" id="b-att">3</span>
+          </div>
+          <div class="barrow">
+            <span class="k">Set aside</span>
+            <span class="track"><span class="fill" style="width:11%;background:#d8ccbe"></span></span>
+            <span class="v">2</span>
+          </div>
+          <p style="margin-top:11px" id="boardnote">Nothing here blocks you. Flags are chances to sharpen a record, not gates.</p>
+        </div>
+
+        <div class="board">
+          <span class="lbl">What happens next</span>
+          <h3>Then your queries</h3>
+          <p>Once agents are settled you'll see the queries we read from the same file, matched to these names.</p>
+          <p>Nothing is saved until you press Bring it in on the last screen.</p>
+          <span class="hand">You can change any of it afterwards.</span>
+        </div>
+
+        <div class="board">
+          <span class="lbl">Questions</span>
+          <div class="faq" style="border-top:0;padding-top:0;margin-top:0">
+            <details>
+              <summary>Is the agency name required?</summary>
+              <p>No. An agent needs a name or an agency — either one is enough. We file them under whichever we have.</p>
+            </details>
+            <details>
+              <summary>What if two rows are the same agent?</summary>
+              <p>We grouped those on the previous screen. Anything you left unresolved comes through as separate records.</p>
+            </details>
+            <details>
+              <summary>Can I fix this later?</summary>
+              <p>Yes. Every field here is editable in your contact list once the import lands.</p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <button class="ghost">← Duplicates</button>
+      <span class="spacer"></span>
+      <span class="status" id="footstatus"><b>3</b> flagged — you can carry on without touching them</span>
+      <button class="primary">Review queries
+        <svg width="12" height="9" viewBox="0 0 12 9" fill="none" aria-hidden="true"><path d="M1 4.5h9M7 1l3.5 3.5L7 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const d1=document.getElementById('d1'),d2=document.getElementById('d2');
+function setState(clear){
+  document.body.classList.toggle('clear',clear);
+  d1.classList.toggle('on',!clear); d2.classList.toggle('on',clear);
+  document.getElementById('bandlbl').textContent = clear ? 'All clear' : '3 need a look';
+  document.getElementById('bandtitle').textContent = clear ? 'The agents we found' : 'The agents we found';
+  document.getElementById('t-ok').textContent = clear ? '16' : '13';
+  document.getElementById('t-att').textContent = clear ? '0' : '3';
+  document.getElementById('b-ok').textContent = clear ? '16' : '13';
+  document.getElementById('b-att').textContent = clear ? '0' : '3';
+  document.getElementById('b-att-fill').style.width = clear ? '0%' : '17%';
+  document.getElementById('boardnote').textContent = clear
+    ? 'Every record read cleanly. Nothing needs you here.'
+    : 'Nothing here blocks you. Flags are chances to sharpen a record, not gates.';
+  document.getElementById('footstatus').innerHTML = clear
+    ? 'All <b>16</b> read cleanly'
+    : '<b>3</b> flagged — you can carry on without touching them';
+}
+d1.onclick=()=>setState(false); d2.onclick=()=>setState(true);
+</script>
+</body>
+</html>

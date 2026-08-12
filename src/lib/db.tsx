@@ -197,9 +197,11 @@ interface DbContextType {
   signup: (name: string, email: string, password?: string) => Promise<boolean>;
   resetPassword: (email: string) => Promise<void>;
   logout: () => Promise<void>;
-  upgradeToPro: () => Promise<void>;
-  downgradeToFree: () => Promise<void>;
-  
+  // ⚠️ NO upgradeToPro / downgradeToFree, DELIBERATELY. They wrote `plan` straight from the
+  // browser, and `plan` is no longer in the rules' user-update allowlist — so re-adding them
+  // would produce a silent permission denial rather than an upgrade. A plan change is a billing
+  // event and needs a server with a payment processor behind it.
+
   // Manuscript Actions
   addManuscript: (m: Omit<Manuscript, "id" | "userId" | "statusChangedDate"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateManuscript: (id: string, fields: Partial<Manuscript>) => Promise<void>;
@@ -292,9 +294,12 @@ interface DbContextType {
   logNudge: (queryId: string, args: { checkBackDate: string; note?: string; eventDate?: string }) => Promise<{ success: boolean; error?: string }>;
   recordOfferDecision: (queryId: string, decision: OfferDecision) => Promise<{ success: boolean; error?: string }>;
 
-  // Clean Utilities
-  cleanDuplicates: () => Promise<{ manuscriptsRemoved: number; agentsRemoved: number; queriesMapped: number; queriesRemoved?: number }>;
-  wipeAndResetDatabase: () => Promise<void>;
+  // ⚠️ NO cleanDuplicates / wipeAndResetDatabase / seedUserDatabase. They backed two panels on the
+  // /import page that were reachable by every signed-in user, with no plan, admin or DEV gate —
+  // and /import is a direct onboarding exit. "Wipe & Recreate Data" deleted every document in nine
+  // subcollections behind a single in-page toggle and replaced them with demo seed data; there was
+  // no typed confirmation and no undo. A destructive account-wide operation needs a real guard
+  // (ConfirmDestroy's manifest pattern) before it can exist again, not a red button.
 }
 
 const DbContext = createContext<DbContextType | undefined>(undefined);
@@ -328,42 +333,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   // Temporary buffer to retain signup pen names
   const signupTempNameRef = useRef<string | null>(null);
-
-  // Helper inside standard DB seeding
-  const seedUserDatabase = async (uid: string) => {
-    try {
-      // Seed Manuscripts
-      for (const ms of seedManuscripts) {
-        await setDoc(doc(db, "users", uid, "manuscripts", ms.id), { ...ms, userId: uid });
-      }
-      // Seed Versions
-      for (const ver of seedVersions) {
-        await setDoc(doc(db, "users", uid, "versions", ver.id), { ...ver, userId: uid });
-      }
-      // Seed Packages
-      for (const pkg of seedPackages) {
-        await setDoc(doc(db, "users", uid, "packages", pkg.id), { ...pkg, userId: uid });
-      }
-      // Seed Agents
-      for (const ag of seedAgents) {
-        await setDoc(doc(db, "users", uid, "agents", ag.id), { ...ag, userId: uid });
-      }
-      // Seed Queries
-      for (const q of seedQueries) {
-        await setDoc(doc(db, "users", uid, "queries", q.id), { ...q, userId: uid });
-      }
-      // Seed Activities
-      for (const act of seedActivities) {
-        await setDoc(doc(db, "users", uid, "activities", act.id), { ...act, userId: uid });
-      }
-      // Seed Journal Entries
-      for (const j of seedJournalEntries) {
-        await setDoc(doc(db, "users", uid, "journalEntries", j.id), { ...j, userId: uid });
-      }
-    } catch (e) {
-      handleFirestoreError(e, OperationType.WRITE, `users/${uid}/[seed]`);
-    }
-  };
 
   // Synchronous database tracking in active real-time subscriber model
   useEffect(() => {
@@ -1062,29 +1031,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const upgradeToPro = async () => {
-    if (!currentUser) return;
-    try {
-      await updateDoc(doc(db, "users", currentUser.id), {
-        plan: UserPlan.PRO,
-        subscriptionStatus: "active"
-      });
-    } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}`);
-    }
-  };
-
-  const downgradeToFree = async () => {
-    if (!currentUser) return;
-    try {
-      await updateDoc(doc(db, "users", currentUser.id), {
-        plan: UserPlan.FREE,
-        subscriptionStatus: "none"
-      });
-    } catch (e) {
-      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}`);
-    }
-  };
 
   // Add Manuscript Action with limits checks
   const addManuscript = async (
@@ -2513,190 +2459,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const cleanDuplicates = async (): Promise<{ manuscriptsRemoved: number; agentsRemoved: number; queriesMapped: number; queriesRemoved?: number }> => {
-    if (!currentUser) return { manuscriptsRemoved: 0, agentsRemoved: 0, queriesMapped: 0, queriesRemoved: 0 };
-
-    // Part 1: Manuscripts
-    const msGroup: { [title: string]: Manuscript[] } = {};
-    for (const m of manuscripts) {
-      const key = m.title.trim().toLowerCase();
-      if (!msGroup[key]) {
-        msGroup[key] = [];
-      }
-      msGroup[key].push(m);
-    }
-
-    const mKeep: Manuscript[] = [];
-    const mDeleteIds: string[] = [];
-    const msIdMap: { [dupId: string]: string } = {}; // maps duplicateId -> masterId
-
-    for (const key of Object.keys(msGroup)) {
-      const list = msGroup[key];
-      const master = list[0];
-      mKeep.push(master);
-      for (let i = 1; i < list.length; i++) {
-        mDeleteIds.push(list[i].id);
-        msIdMap[list[i].id] = master.id;
-      }
-    }
-
-    // Part 2: Agents
-    const agGroup: { [name: string]: Agent[] } = {};
-    for (const a of agents) {
-      const key = a.name.trim().toLowerCase();
-      if (!agGroup[key]) {
-        agGroup[key] = [];
-      }
-      agGroup[key].push(a);
-    }
-
-    const aKeep: Agent[] = [];
-    const aDeleteIds: string[] = [];
-    const agIdMap: { [dupId: string]: string } = {}; // maps duplicateId -> masterId
-
-    for (const key of Object.keys(agGroup)) {
-      const list = agGroup[key];
-      const master = list[0];
-      aKeep.push(master);
-      for (let i = 1; i < list.length; i++) {
-        aDeleteIds.push(list[i].id);
-        agIdMap[list[i].id] = master.id;
-      }
-    }
-
-    // Part 3: Map Queries & Remap IDs
-    let queriesMappedCount = 0;
-    const mappedQueries = queries.map(q => {
-      let isChanged = false;
-      let newMsId = q.manuscriptId;
-      let newAgentId = q.agentId;
-
-      if (msIdMap[q.manuscriptId]) {
-        newMsId = msIdMap[q.manuscriptId];
-        isChanged = true;
-      }
-      if (agIdMap[q.agentId]) {
-        newAgentId = agIdMap[q.agentId];
-        isChanged = true;
-      }
-
-      if (isChanged) {
-        queriesMappedCount++;
-        return {
-          ...q,
-          manuscriptId: newMsId,
-          agentId: newAgentId
-        };
-      }
-      return q;
-    });
-
-    // Part 4: Deduplicate identical queries (pointing to same manuscript and agent)
-    const qGroup: { [key: string]: Query[] } = {};
-    for (const q of mappedQueries) {
-      const key = `${q.manuscriptId}_${q.agentId}`;
-      if (!qGroup[key]) {
-        qGroup[key] = [];
-      }
-      qGroup[key].push(q);
-    }
-
-    const qKeep: Query[] = [];
-    const qDeleteIds: string[] = [];
-    for (const key of Object.keys(qGroup)) {
-      const list = qGroup[key];
-      const master = list[0];
-      qKeep.push(master);
-      for (let i = 1; i < list.length; i++) {
-        qDeleteIds.push(list[i].id);
-      }
-    }
-
-    // Save outputs
-    // Online DB updates - delete duplicate manuscripts
-    for (const dId of mDeleteIds) {
-      try {
-        await deleteDoc(doc(db, "users", currentUser.id, "manuscripts", dId));
-      } catch (e) {
-        console.error("Error deleting duplicate manuscript", dId, e);
-      }
-    }
-
-    // Delete duplicate agents
-    for (const aId of aDeleteIds) {
-      try {
-        await deleteDoc(doc(db, "users", currentUser.id, "agents", aId));
-      } catch (e) {
-        console.error("Error deleting duplicate agent", aId, e);
-      }
-    }
-
-    // Delete duplicate queries
-    for (const qId of qDeleteIds) {
-      try {
-        await deleteDoc(doc(db, "users", currentUser.id, "queries", qId));
-      } catch (e) {
-        console.error("Error deleting duplicate query", qId, e);
-      }
-    }
-
-    // Update mapped remaining queries in Firestore
-    for (const q of qKeep) {
-      if (msIdMap[q.manuscriptId] || agIdMap[q.agentId]) {
-        try {
-          await updateDoc(doc(db, "users", currentUser.id, "queries", q.id), {
-            manuscriptId: q.manuscriptId,
-            agentId: q.agentId
-          });
-        } catch (e) {
-          console.error("Error updating query mapping", q.id, e);
-        }
-      }
-    }
-
-    // Trigger local React state refreshes so the UI automatically re-reflects correct totals instantly!
-    setManuscripts(mKeep);
-    setAgents(aKeep);
-    setQueries(qKeep);
-
-    return {
-      manuscriptsRemoved: mDeleteIds.length,
-      agentsRemoved: aDeleteIds.length,
-      queriesMapped: queriesMappedCount,
-      queriesRemoved: qDeleteIds.length
-    };
-  };
-
-  const wipeAndResetDatabase = async (): Promise<void> => {
-    if (!currentUser) return;
-    const uid = currentUser.id;
-
-    const subcollections = [
-      "manuscripts",
-      "versions",
-      "packages",
-      "agents",
-      "queries",
-      "activities",
-      "journalEntries",
-      "notes",
-      "dismissedTasks"
-    ];
-
-    for (const subcol of subcollections) {
-      try {
-        const snapshot = await getDocs(collection(db, "users", uid, subcol));
-        for (const docSnap of snapshot.docs) {
-          await deleteDoc(doc(db, "users", uid, subcol, docSnap.id));
-        }
-      } catch (e) {
-        console.error(`Error deleting subcollection ${subcol}:`, e);
-      }
-    }
-
-    await seedUserDatabase(uid);
-  };
-
   return (
     <DbContext.Provider
       value={{
@@ -2724,8 +2486,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         signup,
         resetPassword,
         logout,
-        upgradeToPro,
-        downgradeToFree,
         addManuscript,
         updateManuscript,
         deleteManuscript,
@@ -2765,9 +2525,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         updateUserProfile,
         dismissTask,
         logNudge,
-        recordOfferDecision,
-        cleanDuplicates,
-        wipeAndResetDatabase
+        recordOfferDecision
       }}
     >
       {children}

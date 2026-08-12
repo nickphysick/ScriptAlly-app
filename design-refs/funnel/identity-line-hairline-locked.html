@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ScriptAlly — hairline separator, locked</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f8f4ee; --card:#fefdf8; --white:#ffffff;
+  --ink:#241711; --muted:#6f635b; --faint:#a5988e;
+  --hair:#ece6dc; --hair-strong:#e2d9cc; --rule:#dbcfc0;
+  --burg:#773c2d; --sage-line:#8a9e88; --sage-ink:#5a6e58;
+  --sage-chip:#dae7d8; --blush-chip:#f8ded3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);padding:34px 26px 70px;
+  font-family:"Source Sans 3",system-ui,sans-serif;font-size:14.5px;line-height:1.5}
+.lbl{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+.sheet{max-width:900px;margin:0 auto}
+h1{font-family:"Playfair Display",serif;font-weight:600;font-size:29px;margin:6px 0 4px}
+.intro{color:var(--muted);max-width:62ch;margin:0 0 24px}
+.pane{background:var(--white);border:1px solid var(--hair);border-radius:15px;padding:16px 18px;margin-bottom:20px;
+  box-shadow:0 1px 2px rgba(58,28,20,.04),0 6px 20px rgba(58,28,20,.06)}
+.panehead{display:flex;align-items:baseline;gap:10px;margin:0 2px 12px}
+.panehead h2{font-family:"Playfair Display",serif;font-weight:600;font-size:17px;margin:0}
+.panehead .lbl{color:var(--faint)}
+
+/* ---------- the identity line ---------- */
+.idline{display:flex;align-items:center;min-width:0}
+.nm{font-family:"Playfair Display",serif;font-weight:600;font-size:16.5px;line-height:1.25;flex:0 0 auto}
+.rule{width:1px;height:15px;background:var(--rule);margin:0 11px;flex:0 0 auto}
+.ag{font-family:"Playfair Display",serif;font-size:15px;color:var(--muted);line-height:1.25;
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{display:block;font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--faint);margin-top:4px}
+
+/* ---------- rows ---------- */
+.qrec{display:grid;grid-template-columns:22px minmax(0,1fr) 122px 116px auto;gap:14px;align-items:center;
+  background:var(--card);border:1px solid var(--hair);border-radius:13px;padding:13px 14px;margin-bottom:7px;
+  transition:border-color .16s,box-shadow .16s}
+.arec{display:grid;grid-template-columns:38px minmax(0,1fr) auto auto;gap:13px;align-items:center;
+  background:var(--card);border:1px solid var(--hair);border-radius:13px;padding:12px 14px;margin-bottom:7px;
+  transition:border-color .16s,box-shadow .16s}
+.qrec:hover,.arec:hover{border-color:var(--hair-strong);box-shadow:0 2px 9px rgba(58,28,20,.05)}
+.qrec:last-child,.arec:last-child{margin-bottom:0}
+.who{min-width:0}
+.disc{width:38px;height:38px;border-radius:10px;background:#f4ece4;border:1px solid #e6d8ca;
+  display:flex;align-items:center;justify-content:center;font-family:"Playfair Display",serif;
+  font-size:14px;color:var(--burg);font-weight:600}
+.date{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.05em;color:var(--muted)}
+.date.none{color:var(--burg)}
+.stat{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.pill{font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 10px;border-radius:20px;white-space:nowrap}
+.pill.ok{background:var(--sage-chip);color:var(--sage-ink)}
+.pill.att{background:var(--blush-chip);color:var(--burg)}
+.pill.aside{background:#efe9e1;color:var(--muted)}
+.btn{background:var(--white);border:1px solid var(--hair-strong);border-radius:9px;padding:7px 12px;cursor:pointer;
+  font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.btn:hover{border-color:#d5c7b8;background:var(--card)}
+.flag{grid-column:2 / -1;display:flex;gap:8px;align-items:flex-start;margin-top:9px;padding-top:9px;
+  border-top:1px solid var(--hair);color:var(--muted);font-size:13px;line-height:1.4}
+
+/* edge case captions */
+.edge{margin-bottom:9px}
+.edge:last-child{margin-bottom:0}
+.edge .cap{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--burg);margin:0 2px 6px}
+.edge .cap span{color:var(--faint);text-transform:none;letter-spacing:0;font-family:"Source Sans 3",sans-serif;
+  font-size:12.5px;margin-left:8px}
+
+.spec{background:var(--card);border:1px solid var(--hair);border-radius:13px;padding:15px 17px}
+.spec h3{font-family:"Playfair Display",serif;font-weight:600;font-size:16px;margin:0 0 9px}
+.spec ul{margin:0;padding-left:17px;color:var(--muted);font-size:13.5px;line-height:1.6}
+.spec code{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--ink);background:#f2ece3;
+  padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <span class="lbl" style="color:var(--muted)">Review shell · identity line</span>
+  <h1>Hairline separator</h1>
+  <p class="intro">A 1px rule between name and agency, both in Playfair, agency muted and roman. The rule renders only when both values exist.</p>
+
+  <!-- QUERIES -->
+  <div class="pane">
+    <div class="panehead"><h2>Queries stage</h2><span class="lbl">31 queries · matched to 16 agents</span></div>
+
+    <article class="qrec">
+      <span><svg width="15" height="15" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6.2" fill="#f8e7dc" stroke="#773c2d" stroke-width="1.5"/><path d="M5.2 7.5h4.6M8.2 5.9l1.7 1.6-1.7 1.6" stroke="#773c2d" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="who">
+        <span class="idline"><span class="nm">Daniel O'Rourke</span><span class="rule"></span><span class="ag">Inkwell &amp; Stone</span></span>
+        <span class="meta">Murphy's Day Out · query letter + 10pp</span>
+      </span>
+      <span class="date">14 MAR 2026</span><span class="stat">Queried</span><button class="btn">Make changes</button>
+    </article>
+
+    <article class="qrec">
+      <span><svg width="15" height="15" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6.2" fill="#e9ede6" stroke="#8a9e88" stroke-width="1.5"/><path d="M9.8 7.5H5.2M6.8 5.9 5.1 7.5l1.7 1.6" stroke="#5a6e58" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="who">
+        <span class="idline"><span class="nm">Tom Ellery</span><span class="rule"></span><span class="ag">The Marsh Agency</span></span>
+        <span class="meta">Murphy's Day Out · full requested</span>
+      </span>
+      <span class="date">2 MAY 2026</span><span class="stat">Full requested</span><button class="btn">Make changes</button>
+    </article>
+
+    <article class="qrec">
+      <span><svg width="15" height="15" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6.2" fill="#f8e7dc" stroke="#773c2d" stroke-width="1.5"/><path d="M5.2 7.5h4.6M8.2 5.9l1.7 1.6-1.7 1.6" stroke="#773c2d" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span class="who">
+        <span class="idline"><span class="nm">Greg Panetta</span><span class="rule"></span><span class="ag">Foxglove Literary</span></span>
+        <span class="meta">Murphy's Day Out</span>
+      </span>
+      <span class="date none">No date</span><span class="stat">Queried</span><button class="btn">Make changes</button>
+      <span class="flag">
+        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex:0 0 auto;margin-top:2px"><circle cx="7.5" cy="7.5" r="6" stroke="#773c2d" stroke-width="1.2"/><path d="M7.5 4.6v4M7.5 10.2v.9" stroke="#773c2d" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <span>Your file had no date for this one, and we won't guess. Add it now, or bring it in undated and set it later.</span>
+      </span>
+    </article>
+
+    <article class="qrec">
+      <span><svg width="15" height="15" viewBox="0 0 15 15"><circle cx="7.5" cy="7.5" r="6.2" fill="none" stroke="#b3aaa1" stroke-width="1.5"/><path d="M5.4 5.4l4.2 4.2M9.6 5.4l-4.2 4.2" stroke="#b3aaa1" stroke-width="1.2" stroke-linecap="round"/></svg></span>
+      <span class="who">
+        <span class="idline"><span class="nm">Jonathan Marsh</span><span class="rule"></span><span class="ag">The Marsh Agency</span></span>
+        <span class="meta">Murphy's Day Out · closed</span>
+      </span>
+      <span class="date">29 JUL 2026</span><span class="stat">Closed</span><button class="btn">Make changes</button>
+    </article>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="pane">
+    <div class="panehead"><h2>Agents stage</h2><span class="lbl">18 agents · read from your file</span></div>
+
+    <article class="arec">
+      <span class="disc">DO</span>
+      <span class="who">
+        <span class="idline"><span class="nm">Daniel O'Rourke</span><span class="rule"></span><span class="ag">Inkwell &amp; Stone</span></span>
+        <span class="meta">Email · 8 weeks · 4 queries</span>
+      </span>
+      <span class="pill ok">Ready</span><button class="btn">Make changes</button>
+    </article>
+
+    <article class="arec">
+      <span class="disc">TE</span>
+      <span class="who">
+        <span class="idline"><span class="nm">Tom Ellery</span><span class="rule"></span><span class="ag">The Marsh Agency</span></span>
+        <span class="meta">Email · 6 weeks · 1 query</span>
+      </span>
+      <span class="pill ok">Ready</span><button class="btn">Make changes</button>
+    </article>
+  </div>
+
+  <!-- EDGE CASES -->
+  <div class="pane">
+    <div class="panehead"><h2>Edge cases</h2><span class="lbl">what the rule does when a value is missing</span></div>
+
+    <div class="edge">
+      <p class="cap">No name <span>agency moves up to the Playfair line, no rule</span></p>
+      <article class="arec">
+        <span class="disc">PL</span>
+        <span class="who">
+          <span class="idline"><span class="nm">Penhallow Literary</span></span>
+          <span class="meta">No name recorded · 2 queries</span>
+        </span>
+        <span class="pill att">Needs a look</span><button class="btn">Make changes</button>
+      </article>
+    </div>
+
+    <div class="edge">
+      <p class="cap">No agency <span>name alone, no dangling rule</span></p>
+      <article class="arec">
+        <span class="disc">RH</span>
+        <span class="who">
+          <span class="idline"><span class="nm">Rachel Hume</span></span>
+          <span class="meta">No agency recorded · 1 query</span>
+        </span>
+        <span class="pill att">Needs a look</span><button class="btn">Make changes</button>
+      </article>
+    </div>
+
+    <div class="edge">
+      <p class="cap">Long agency <span>agency truncates, name and rule never move</span></p>
+      <article class="arec">
+        <span class="disc">MC</span>
+        <span class="who">
+          <span class="idline"><span class="nm">Marianne Castellan-Wright</span><span class="rule"></span><span class="ag">The Castellan Wright Literary &amp; Dramatic Representation Agency</span></span>
+          <span class="meta">Post · 12 weeks · 2 queries</span>
+        </span>
+        <span class="pill ok">Ready</span><button class="btn">Make changes</button>
+      </article>
+    </div>
+
+    <div class="edge">
+      <p class="cap">Neither <span>set aside; no identity line at all</span></p>
+      <article class="arec">
+        <span class="disc" style="color:var(--faint)">—</span>
+        <span class="who">
+          <span class="idline"><span class="nm" style="color:var(--muted)">Row 14</span></span>
+          <span class="meta">No name, no agency</span>
+        </span>
+        <span class="pill aside">Set aside</span><button class="btn">Bring back</button>
+      </article>
+    </div>
+  </div>
+
+  <div class="spec">
+    <h3>What to bake</h3>
+    <ul>
+      <li>Rule: <code>1px × 15px</code>, <code>#dbcfc0</code>, <code>margin: 0 11px</code>, a flex child with <code>flex: 0 0 auto</code> — never a border on the name, which would move with its text.</li>
+      <li>Identity line is <code>display:flex; align-items:center; min-width:0</code>. Name is <code>flex: 0 0 auto</code>; agency takes the remainder and truncates with an ellipsis rather than wrapping.</li>
+      <li>The rule renders only when both a name and an agency exist. One value alone occupies the Playfair slot at full weight — no rule, no placeholder.</li>
+      <li>Agency is Playfair roman <code>15px</code> in <code>--muted</code>, not italic.</li>
+      <li>Same component serves both stages, so <code>agentPrimary</code> / <code>agentAgencyLine</code> decide which values are present rather than the row doing its own checks.</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

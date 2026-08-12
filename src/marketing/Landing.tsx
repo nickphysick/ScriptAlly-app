@@ -38,13 +38,14 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
       a.click();
       return;
     }
-    if (row.key === "email") { onNavigate("pricing"); return; }
+    if (row.key === "email") { onNavigate("plans"); return; } // TODO(phase-5): → "pricing"
     openSignup();
   };
 
   return (
     <div>
-      <Hero onStart={openSignup} onPricing={() => onNavigate("pricing")} />
+      {/* TODO(phase-5): → "pricing" once the public page exists again. */}
+      <Hero onStart={openSignup} onPricing={() => onNavigate("plans")} />
       <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
       <CtaBand onStart={openSignup} />
       <footer className="mk-foot">
@@ -53,7 +54,8 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
           <span className="mk-wordmark">ScriptAlly</span>
         </div>
         <div className="mk-footlinks">
-          <button type="button" onClick={() => onNavigate("pricing")}>Pricing</button>
+          {/* TODO(phase-5): → "pricing" once the public page exists again. */}
+          <button type="button" onClick={() => onNavigate("plans")}>Pricing</button>
           <span style={{ marginRight: 18 }}>Privacy</span>
           <span>Terms</span>
         </div>

@@ -49,7 +49,8 @@ export const MarketingShell: React.FC<{
           </button>
           <div className="mk-links">
             <button type="button" onClick={toFeatures}>Features</button>
-            <button type="button" onClick={() => onNavigate("pricing")}>Pricing</button>
+            {/* TODO(phase-5): back to "pricing" once the public page exists again. */}
+            <button type="button" onClick={() => onNavigate("plans")}>Pricing</button>
           </div>
           <div className="mk-navright">
             {nav.showLogIn && (

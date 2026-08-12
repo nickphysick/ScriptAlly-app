@@ -166,7 +166,11 @@ function normalizeQueryStatus(val: string): QueryStatus {
   return QueryStatus.QUERIED; // Default
 }
 
-type ImportType = "agents" | "manuscripts" | "queries" | "activities" | "user";
+// ⚠️ NO "user" ROW TYPE. It mapped spreadsheet columns onto the signed-in user's own profile —
+// including `plan`, so a cell reading "Pro" upgraded the account for free. `plan` has been removed
+// from the rules' user-update allowlist, so the writer could not work now even if it returned.
+// An import brings the writer's QUERYING HISTORY across; it does not edit their account.
+type ImportType = "agents" | "manuscripts" | "queries" | "activities";
 
 export const ImportCsv: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -180,19 +184,12 @@ export const ImportCsv: React.FC<{
     addManuscript,
     addQuery,
     addActivity,
-    updateUserProfile,
-    cleanDuplicates,
-    wipeAndResetDatabase
   } = useScriptAllyDb();
-
-  const [confirmReset, setConfirmReset] = useState<boolean>(false);
-  const [isResetting, setIsResetting] = useState<boolean>(false);
-  const [resetSuccess, setResetSuccess] = useState<boolean>(false);
 
   const [importType, setImportType] = useState<ImportType>("agents");
   const [subTab, setSubTab] = useState<"wizard" | "grids">("wizard");
   const [gridSearch, setGridSearch] = useState<string>("");
-  const [activeGridTab, setActiveGridTab] = useState<"agents" | "manuscripts" | "queries" | "activities" | "user">("agents");
+  const [activeGridTab, setActiveGridTab] = useState<"agents" | "manuscripts" | "queries" | "activities">("agents");
   const [step, setStep] = useState<number>(1); // Step 1: Input, Step 2: Mapping, Step 3: Run
   const [rawText, setRawText] = useState<string>("");
   const [csvRows, setCsvRows] = useState<string[][]>([]);
@@ -203,8 +200,6 @@ export const ImportCsv: React.FC<{
   
   // Execution variables
   const [isImporting, setIsImporting] = useState<boolean>(false);
-  const [isCleaning, setIsCleaning] = useState<boolean>(false);
-  const [cleanStats, setCleanStats] = useState<{ manuscriptsRemoved: number; agentsRemoved: number; queriesMapped: number; queriesRemoved?: number } | null>(null);
   const [importProgress, setImportProgress] = useState<number>(0);
   const [importResults, setImportResults] = useState<{
     successful: number;
@@ -249,9 +244,6 @@ export const ImportCsv: React.FC<{
       demoString = `"Related Query","Related Title","Event Type","Description","Date","Extras"
 "My Pitch Query","The Clockwork Citadel","Query Sent","Sent initial query email directly to Agent Alexandra Stone","2026-04-12","Submitted via online form successfully."
 "Feedback follow up","Shadows on the Moors","Status Changed","Agent Jonathan Vance requested partial sample chapters!","2026-05-15","Requested 3 chapters."`;
-    } else if (importType === "user") {
-      demoString = `"Pen Name","Registered Email","Plan Tier","Sign up Date","Subscription State"
-"Jane Doe","jane.doe@example.com","Pro","2026-06-01","active"`;
     }
     setRawText(demoString);
   };
@@ -585,44 +577,6 @@ export const ImportCsv: React.FC<{
             failedCount++;
             errorsList.push(`Activity row fail: ${res.error || "System error"}`);
           }
-        } else if (importType === "user") {
-          const name = getMappedValue("name");
-          const email = getMappedValue("email");
-          const planInput = getMappedValue("plan");
-          const trialRaw = getMappedValue("trialStartDate");
-          const subStatusInput = getMappedValue("subscriptionStatus");
-
-          const updateFields: any = {};
-          if (name) updateFields.name = name;
-          if (email) updateFields.email = email;
-          
-          if (planInput) {
-            const planClean = planInput.toLowerCase();
-            if (planClean.includes("pro")) {
-              updateFields.plan = UserPlan.PRO;
-            } else if (planClean.includes("free")) {
-              updateFields.plan = UserPlan.FREE;
-            }
-          }
-          if (trialRaw) {
-            updateFields.trialStartDate = new Date(trialRaw).toISOString();
-          }
-          if (subStatusInput) {
-            const statusClean = subStatusInput.toLowerCase();
-            if (statusClean.includes("active") || statusClean === "active") updateFields.subscriptionStatus = "active";
-            else if (statusClean.includes("trial") || statusClean === "trialing") updateFields.subscriptionStatus = "trialing";
-            else if (statusClean.includes("cancel") || statusClean === "canceled") updateFields.subscriptionStatus = "canceled";
-            else updateFields.subscriptionStatus = "none";
-          }
-
-          if (Object.keys(updateFields).length > 0) {
-            await updateUserProfile(updateFields);
-            successfulCount++;
-            runLogs.push(`Successfully updated your user settings with: ${JSON.stringify(updateFields)}`);
-          } else {
-            failedCount++;
-            errorsList.push(`Row ${index + 2} ignored: no user fields matched column descriptors.`);
-          }
         }
       } catch (err: any) {
         failedCount++;
@@ -697,139 +651,6 @@ export const ImportCsv: React.FC<{
             <span>B. Live Database Grid Viewer</span>
           </button>
         </div>
-
-        {/* DEDU_PLICATE DATA SANITATION PANEL */}
-        <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex gap-3">
-            <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 text-amber-600 self-start">
-              <Sparkles className="w-5 h-5 flex-shrink-0" />
-            </div>
-            <div>
-              <h3 className="font-serif font-bold text-stone-800 text-[14px]">
-                Deduplicate & Sanitize Repository Rows
-              </h3>
-              <p className="text-[12px] text-stone-500 max-w-lg mt-0.5">
-                Scan all manuscripts and agents for matching name duplicates. We'll automatically merge those matching records and re-map active pitch query timelines so there are no broken links.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={async () => {
-              setIsCleaning(true);
-              setCleanStats(null);
-              try {
-                const stats = await cleanDuplicates();
-                setCleanStats(stats);
-              } catch (e) {
-                console.error("Deduplication error", e);
-              } finally {
-                setIsCleaning(false);
-              }
-            }}
-            disabled={isCleaning}
-            className={`px-4 py-2 text-xs font-bold font-mono tracking-wide rounded-xl uppercase transition-all flex items-center gap-2 shrink-0 ${
-              isCleaning
-                ? "bg-stone-100 text-stone-400 cursor-not-allowed border border-stone-200"
-                : "bg-stone-50 border border-stone-200 hover:border-amber-600/30 text-amber-800 hover:bg-amber-50/20"
-            }`}
-          >
-            {isCleaning ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            <span>{isCleaning ? "Cleaning..." : "Deduplicate Data"}</span>
-          </button>
-        </div>
-
-        {cleanStats && (
-          <div className="bg-green-50/50 border border-green-200 rounded-2xl p-4 mb-4 text-xs text-green-800 flex items-start gap-3 animate-fadeIn">
-            <CheckCircle className="w-5 h-5 text-green-600 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold text-green-950 mb-1 leading-none">Database Sanitize Successful!</p>
-              <ul className="list-disc list-inside space-y-1 text-stone-600 mt-2 font-mono text-[11px]">
-                <li>Manuscripts merged and duplicates removed: <span className="font-bold text-stone-800">{cleanStats.manuscriptsRemoved}</span></li>
-                <li>Agents merged and duplicates removed: <span className="font-bold text-stone-800">{cleanStats.agentsRemoved}</span></li>
-                <li>Queries correctly re-routed and synchronized: <span className="font-bold text-stone-800">{cleanStats.queriesMapped}</span></li>
-                {cleanStats.queriesRemoved !== undefined && cleanStats.queriesRemoved > 0 && (
-                  <li>Duplicate queries merged and deleted: <span className="font-bold text-stone-800">{cleanStats.queriesRemoved}</span></li>
-                )}
-              </ul>
-              <button
-                onClick={() => setCleanStats(null)}
-                className="text-[11px] font-bold text-[#7c3a2a] underline hover:text-[#5e2b1e] mt-3 block"
-              >
-                Dismiss notification
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* RESET DATABASE & SEED SAMPLE DATA PANEL */}
-        <div className="bg-white p-5 rounded-2xl border border-red-200/60 shadow-[0_2px_8px_rgba(239,68,68,0.02)] mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex gap-3">
-            <div className="p-3 bg-red-50 rounded-xl border border-red-100 text-red-600 self-start shrink-0">
-              <Trash2 className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-serif font-bold text-red-950 text-[14px]">
-                Wipe All Data & Recreate Sample Data
-              </h3>
-              <p className="text-[12px] text-stone-500 max-w-lg mt-0.5">
-                Wipes all manuscripts, agent contacts, pitch logs, versions, and activities entirely, and provisions a pristine set of fresh premium sample data. This is great for getting a fully populated environment immediately!
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0 w-full md:w-auto">
-            {confirmReset ? (
-              <>
-                <button
-                  onClick={async () => {
-                    setIsResetting(true);
-                    try {
-                      await wipeAndResetDatabase();
-                      setResetSuccess(true);
-                      setConfirmReset(false);
-                      setTimeout(() => setResetSuccess(false), 5000);
-                    } catch (e) {
-                      console.error("Reset error", e);
-                    } finally {
-                      setIsResetting(false);
-                    }
-                  }}
-                  disabled={isResetting}
-                  className="px-4 py-2 text-xs font-bold font-mono tracking-wide rounded-xl uppercase transition-all bg-red-600 hover:bg-red-700 text-white shrink-0 flex items-center justify-center gap-2"
-                >
-                  <AlertTriangle className="w-4 h-4 animate-pulse" />
-                  <span>{isResetting ? "Wiping..." : "Yes, Wipe & Reset!"}</span>
-                </button>
-                <button
-                  onClick={() => setConfirmReset(false)}
-                  disabled={isResetting}
-                  className="px-4 py-2 text-xs font-bold font-mono tracking-wide rounded-xl uppercase transition-all border border-stone-200 hover:bg-stone-50 text-stone-600 shrink-0 text-center"
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setConfirmReset(true)}
-                className="px-4 py-2 text-xs font-bold font-mono tracking-wide rounded-xl uppercase transition-all bg-stone-50 border border-red-200 hover:border-red-600/30 text-red-800 hover:bg-red-50/20 shrink-0 text-center flex items-center justify-center gap-2"
-              >
-                <Trash2 className="w-4 h-4 text-red-600" />
-                <span>Wipe & Recreate Data</span>
-              </button>
-            )}
-          </div>
-        </div>
-
-        {resetSuccess && (
-          <div className="bg-[#3B6D11]/10 border border-[#3B6D11]/30 rounded-2xl p-4 mb-8 text-xs text-[#3B6D11] flex items-start gap-3 animate-fadeIn">
-            <CheckCircle className="w-5 h-5 text-[#3B6D11] shrink-0 mt-0.5" />
-            <div>
-              <p className="font-bold text-[#2A4D0C] mb-1 leading-none">Database Successfully Wiped & Reconstructed!</p>
-              <p className="text-stone-600 mt-1">
-                All data tables were successfully cleared, and a fresh premium sample dataset containing manuscripts, queried agents, and linked timelines was fully seeded.
-              </p>
-            </div>
-          </div>
-        )}
 
         {subTab === "wizard" && (
           <>
@@ -908,18 +729,6 @@ export const ImportCsv: React.FC<{
                   <span className="text-[10px] opacity-75 font-light font-sans hidden sm:block">Historic notifications/records</span>
                 </button>
 
-                <button
-                  onClick={() => setImportType("user")}
-                  className={`p-4 rounded-xl border flex flex-col items-center gap-2 text-center transition-all ${
-                    importType === "user"
-                      ? "border-[#7c3a2a] bg-[#FAF1EF] text-[#7c3a2a]"
-                      : "border-stone-200 hover:border-[#7c3a2a]/30 text-stone-600 bg-[#FCFAF7]"
-                  }`}
-                >
-                  <UserIcon className="w-5 h-5 shrink-0" />
-                  <span className="text-xs font-serif font-bold">User profile</span>
-                  <span className="text-[10px] opacity-75 font-light font-sans hidden sm:block">Pen names, email, plan settings</span>
-                </button>
               </div>
             </div>
 
@@ -1227,8 +1036,7 @@ export const ImportCsv: React.FC<{
                 { id: "agents", label: `Agents Directory (${agents.length})`, icon: Users },
                 { id: "manuscripts", label: `Manuscripts (${manuscripts.length})`, icon: BookOpen },
                 { id: "queries", label: `Query Logs (${queries.length})`, icon: FileSpreadsheet },
-                { id: "activities", label: `Activities (${useScriptAllyDb().activities.length})`, icon: ActivityIcon },
-                { id: "user", label: "User Pen Profile", icon: UserIcon }
+                { id: "activities", label: `Activities (${useScriptAllyDb().activities.length})`, icon: ActivityIcon }
               ].map(tab => {
                 const Icon = tab.icon;
                 const isActive = activeGridTab === tab.id;
@@ -1469,37 +1277,7 @@ export const ImportCsv: React.FC<{
               )}
 
               {/* USER GRID */}
-              {activeGridTab === "user" && (
-                <div className="p-6 bg-white space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-[#FCFAF7] p-4 rounded-xl border border-stone-200">
-                      <span className="text-[10px] uppercase font-mono text-stone-400 font-bold block mb-1">Writer Pen Name</span>
-                      <p className="text-sm font-serif font-bold text-[#3a1c14]">{currentUser?.name || "Unconfigured Profile"}</p>
-                    </div>
-                    
-                    <div className="bg-[#FCFAF7] p-4 rounded-xl border border-stone-200">
-                      <span className="text-[10px] uppercase font-mono text-stone-400 font-bold block mb-1">Registered Address / Email</span>
-                      <p className="text-sm font-mono text-[#7c3a2a]">{currentUser?.email || "No account logged"}</p>
-                    </div>
-
-                    <div className="bg-[#FCFAF7] p-4 rounded-xl border border-stone-200">
-                      <span className="text-[10px] uppercase font-mono text-stone-400 font-bold block mb-1">Account Service Subscription tier</span>
-                      <span className="inline-block mt-1 bg-[#FAF1EF] text-[#7c3a2a] border border-[#7c3a2a]/20 text-xs font-bold font-mono px-2 py-0.5 rounded uppercase">
-                        {currentUser?.plan || "Free"}
-                      </span>
-                    </div>
-
-                    <div className="bg-[#FCFAF7] p-4 rounded-xl border border-stone-200">
-                      <span className="text-[10px] uppercase font-mono text-stone-400 font-bold block mb-1">Firebase Syncing Link Status</span>
-                      <span className="inline-block mt-1 text-xs font-bold font-mono px-2 py-0.5 rounded uppercase bg-green-150 text-[#3B6D11] border border-green-250">
-                        Cloud Real-Time Synchronization Enabled
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-            </div>
+              </div>
             
           </div>
         )}
