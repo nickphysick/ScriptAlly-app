@@ -389,7 +389,7 @@ No visual verification; onboarding is auth-gated.
 
 ## Phase 4 — `journeyStage`
 
-**Commit:** _(hash in the next log commit)_
+**Commit:** `7c1d439`
 **Gates:** tsc **0** · build **✓** · Vitest **259 files, 4239 passed | 2 skipped (4241)**
 
 ### ⚠️ THIS COMMIT ALSO CHANGES `firestore.rules` (second of two).
