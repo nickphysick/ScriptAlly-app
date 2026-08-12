@@ -10,6 +10,16 @@ coverage/
 # web config is not a secret (it ships to every browser).
 .env
 .env*.local
+
+# ── Playwright (real-browser measurement; local only, never CI yet) ──
+# ⚠️ THESE GO IN BEFORE THE TOOL IS INSTALLED, not after. `storageState` is a LOGGED-IN SESSION
+# for the dev test account — a credential in every meaningful sense — and a run writes it the
+# first time it authenticates. An ignore added afterwards does not un-stage what a `git add -A`
+# already caught, and this repo has had `git add -A` reach for things twice.
+tests/e2e/.auth/
+test-results/
+playwright-report/
+blob-report/
 .firebase/
 .claude/
 COMMUNITY_AGENTS_RECON.md
