@@ -696,3 +696,32 @@ const STATUS_PROSE_RE = new RegExp(
 );
 export const quoteStatuses = (text: string): string =>
   text.replace(STATUS_PROSE_RE, (_m, s: string) => `'${s.toLowerCase()}'`);
+
+/**
+ * ⚠️ ONE DEFINITION OF "ALL CLEAR", SHARED BY EVERY SCREEN IN THE REVIEW.
+ *
+ * The chassis used to signal this with an animated rim, and each stage handed it a different
+ * computation — the agents screen its own `needCount`, the queries screen `qLookCount`, the
+ * duplicates screen `clusters.length` — while the overview used a fourth (the tallies). Four
+ * answers to one question, on screens a writer moves between in seconds. Whatever carries the
+ * state, it has to be reading the same number, or "all clear" means something different depending
+ * on where you are standing.
+ *
+ * `fix` and `sharpen` both count: nothing in this flow BLOCKS, but a duplicate still awaits a real
+ * decision and a sharpen is still something a writer has not looked at.
+ */
+export function reviewNeedCount(agents: ReviewAgent[], queries: ReviewQuery[]): number {
+  const t = reviewTallies(agents, queries);
+  return t.agents.fix + t.agents.sharpen + t.queries.sharpen;
+}
+
+/** True when nothing anywhere in the import is waiting on the writer. */
+export const reviewAllClear = (agents: ReviewAgent[], queries: ReviewQuery[]): boolean =>
+  reviewNeedCount(agents, queries) === 0;
+
+/**
+ * What the band says. States the count in words — never a bare number, and never a verdict about
+ * whether that count is a lot (the app reports, it does not appraise).
+ */
+export const reviewBandLabel = (needCount: number): string =>
+  needCount === 0 ? "All clear" : needCount === 1 ? "1 needs a look" : `${needCount} need a look`;

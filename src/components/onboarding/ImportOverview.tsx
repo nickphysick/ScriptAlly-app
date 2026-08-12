@@ -21,7 +21,7 @@
  */
 import React from "react";
 import { SmartImportResult } from "../../types/smartImport";
-import { parseModel, reviewTallies } from "../../lib/smartImportReviewModel";
+import { parseModel, reviewTallies, reviewNeedCount } from "../../lib/smartImportReviewModel";
 import { overviewLead } from "../../lib/smartImportConfirm";
 import { ReviewShell } from "./SmartImportReview";
 
@@ -94,7 +94,7 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userN
   const userInitial = userName ? userName[0].toUpperCase() : "?";
 
   return (
-    <ReviewShell userInitial={userInitial} allClear={allClear} fit>
+    <ReviewShell userInitial={userInitial} needCount={reviewNeedCount(agents, queries)} fit>
       <div style={{ position: "relative", padding: "32px 40px 0", flex: "0 1 auto", minHeight: 0, overflowY: "auto" }}>
         {/* Scrawled corner note — muted grey handwriting, no card, slight tilt */}
         <div style={{ position: "absolute", top: 22, right: 30, width: 210, textAlign: "right", zIndex: 5, pointerEvents: "none" }}>

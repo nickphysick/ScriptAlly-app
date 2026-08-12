@@ -580,3 +580,111 @@ rows select in sage and report `aria-pressed`.
 absent and the tokens are the app's, which is what a test can prove. It cannot tell you whether the
 card looks right. Onboarding is auth-gated, so the browser pane cannot reach it — **needs an
 eyeball on dev, on both branches, before this is called done.**
+
+---
+
+## Phase 7 — the review shell (7a, 7b, 7c and part of 7d)
+
+**Commit:** _(hash in the next log commit)_
+**Gates:** tsc **0** · build **✓** · Vitest **261 files, 4297 passed | 2 skipped (4299)**
+
+**⚠️ THIS PHASE IS PARTIAL AND I AM NOT CALLING IT DONE.** 7a, 7b, 7c and the flags half of 7d
+landed; the rest of 7d did not. What remains is listed at the end of this section. I took the
+scoped landing over either rushing the rest or leaving the whole phase unstarted — every piece
+below is self-contained and independently correct.
+
+### 7a — the chassis
+
+`.sa-rv-window` is now the app's content surface: white on a `#e9e2d7` hairline, radius 15, the
+dashboard card's shadow. **Deleted: the `::after { inset: 7px }` burgundy inner frame, the
+`.sa-rv-rim` overlay, the `.sa-rv-band` sweep, `@keyframes saRvRimCross`, and both `--rim-*`
+custom properties.** Keyframes included, per the baked decision — a paused rim is the same element
+waiting to be switched back on. It was the only thing in the app that moved continuously while a
+writer was trying to read, and it encoded the review's state in a colour nobody could name.
+
+### 7b — the band carries the state
+
+A real band element at the window head: blush gradient while anything needs a look, sage on
+all-clear, with a mono eyebrow stating the count **in words** — "All clear" / "1 needs a look" /
+"4 need a look". Locked against appraising adverbs.
+
+**⚠️ This was a behaviour change, and the thing it fixed is worse than the rim.** Each stage was
+passing `ReviewShell` its **own** idea of all-clear — the agents screen `needCount`, the queries
+screen `qLookCount`, the duplicates screen `clusters.length` — while the overview computed a
+fourth from the tallies. Four answers to one question, on screens a writer crosses in seconds. New
+`reviewNeedCount` / `reviewAllClear` / `reviewBandLabel` in `smartImportReviewModel.ts` are the
+single derivation, and **all four call sites read it**. The boolean prop is gone, so a stage can no
+longer invent its own answer; a test asserts every `<ReviewShell` call contains
+`needCount={reviewNeedCount(`.
+
+### 7c — the identity line
+
+New `IdentityLine.tsx`, per `identity-line-hairline-locked.html` (which the pack makes
+authoritative, and which I followed over the shell refs). Flex row, `min-width: 0`; name Playfair
+600 at `flex: 0 0 auto`; separator a **1px × 15px sibling element** with `flex: 0 0 auto`; agency
+Playfair **roman**, muted, truncating with an ellipsis.
+
+The rule renders **only when both values exist**. Presence is decided by `agentPrimary`, not by the
+row. Four states tested — both, name-only, agency-only, neither (renders nothing) — with the
+single-value cases asserting **no rule element exists**, plus locks that the separator is not a
+border or a `::before` (the shell refs fake it with a `::before`; that is a ref-only patch).
+
+**It is wired in, not left as a component nobody renders**: the agent card's two-line
+name-over-mono-agency block now renders `IdentityLine`. That removed a `"No agency yet"`
+placeholder — an absence asserted as a fault, when an agency-less agent is a complete valid record
+here and the StateChip beside it already says whether anything is wanted.
+
+### 7d — flags render inline, always
+
+Un-gated. And this turned up something worse than the pack described:
+
+**⚠️ `InlineNote` is rendered in exactly ONE place in the file, and it was gated behind
+`compact` — which is `matchMedia("(max-width: 999px)")`. There is no `!compact` branch anywhere.
+So above 1000px an agent's flags rendered NOWHERE AT ALL.** The comment above the block called it
+a "mobile fallback" for margin post-its; those post-its do not exist in this file. A desktop writer
+was told a record "needs a look" by the chip and never shown why. Flags are now in the row at every
+width, and `AgentCard`'s dead `compact` prop is gone with the gate.
+
+`compact` survives for `GuidanceBanner`'s density (padding, label truncation) — a genuine
+responsive adaptation, not the post-it fallback, and removing it would make the banner cramped on
+narrow screens, which is the opposite of what Phase 8 wants.
+
+### 7e — both questions, answered from the code
+
+**1. Does `ReconcileCard` let the user choose which record survives a merge? — YES.**
+`ReconcileCard.tsx:52` takes `defaultKeptId` ("engine-derived current row's id → pre-selected on
+mount"); `:82` holds it in `selectedId`; `:326` marks the selected row and `:344` draws a burgundy
+left bar on it; clicking a row re-selects in the working state; `:304` commits via
+`onLooksRight(selected.id)`. **Design decision, logged and NOT built:** the pack asks for a
+selection affordance "consistent with the sage selection grammar", which means restyling that
+burgundy bar to the sage-border-plus-ring treatment now used by `SelectRow` and the upload hero.
+That is part of the un-landed 7d and is listed below.
+
+**2. Does an undated query count as needs-check in `queryStatusOf`? — YES, they overlap.**
+`smartImportReviewModel.ts:159-160`: `queryStatusOf` is
+`hasOpenQueryReasons(q) ? "needs-check" : "captured"`, and an undated query raises a `no-date`
+reason (resolved by "Leave undated" at `SmartImportReview.tsx:510`). **So the action was: do not
+introduce a separate Undated tally.** None exists today — line 1045's "Undated" is a per-row date
+label, not a count — so there is nothing to remove, and the new band deliberately states one
+number rather than two that would double-count.
+
+### ⚠️ NOT DONE — the rest of 7d
+
+1. Rows and cards restyled to dashboard grammar (surfaces, radii, shadows on the record cards
+   themselves — the chassis around them is done, the cards inside are not).
+2. The manuscript/materials line as a **block** beneath the identity line in mono.
+3. Query rows carrying the real `StatusDot` at default size, and the sidebar legend rendering the
+   real component.
+4. The duplicates pane: hairline seam, panes labelled by source row, **only disagreeing fields**
+   highlighted, resolved pairs collapsing to a sage bar with Undo.
+5. `ReconcileCard`'s selection affordance moved to the sage grammar (7e question 1).
+
+`FocusOverlay` was fenced by the pack and I did not touch it. It now dims a white window rather
+than a bordered one; **that is unverified visually** and may need a look.
+
+### Not verified
+
+**No visual verification of any of this.** The review shell is reachable only mid-import behind
+auth. The suite proves the rim and its keyframes are gone, that one derivation feeds the band, and
+that the identity line renders its three states correctly — none of which tells you how the screen
+looks. **Needs an eyeball on dev.**

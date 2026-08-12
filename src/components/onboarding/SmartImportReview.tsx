@@ -20,9 +20,11 @@ import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import { statusBurgundy, statusSageRing, statusSageMark } from "../../lib/designTokens";
 import { PinkButton } from "../dashboard/HeroCard";
 import { SheenWave } from "./SheenWave";
+import { IdentityLine } from "./IdentityLine";
 import {
   ReviewAgent, ReviewQuery, ReasonItem, CheckReason, AgentStatus,
   agentStatus, resolveReason, queryStatusOf, fmtDate, QUERY_STATUS_OPTIONS,
+  reviewNeedCount, reviewBandLabel,
   dupNoteOpen, dupNoteKept, dupNoteMerged, parseModel, modelToResult, applyAgentRemoval, seedUnidentifiedSetAside, decideStageEntry,
   currentDate, quoteStatuses, queryReasonText, statusDirectionChoices, removeDuplicateRecord, buildClusters, doneStageMessage,
   keepBothLabel, keptClusterLabel, mergedAwayByKeeper, focusReasonMeta,
@@ -1108,7 +1110,6 @@ interface AgentCardProps {
   highlighted: boolean;
   onHoverPair: (on: boolean) => void;
   pulse: boolean;
-  compact: boolean;
   /** Rendered inside a duplicate stack — a deeper shadow gives the upper card depth over the next. */
   stacked?: boolean;
   onResolveReason: (kind: CheckReason) => void;
@@ -1116,7 +1117,7 @@ interface AgentCardProps {
 }
 
 const AgentCard: React.FC<AgentCardProps> = ({
-  agent, queryCount, dupOpen, open, onToggleOpen, onPatch, onDelete, cardRef, highlighted, onHoverPair, pulse, compact, stacked, onResolveReason, onReopenReason,
+  agent, queryCount, dupOpen, open, onToggleOpen, onPatch, onDelete, cardRef, highlighted, onHoverPair, pulse, stacked, onResolveReason, onReopenReason,
 }) => {
   const [confirming, setConfirming] = useState(false);
   // If the card unmounts while the bin is pending (e.g. user navigated to Queries before clicking
@@ -1171,10 +1172,13 @@ const AgentCard: React.FC<AgentCardProps> = ({
           {agent.name ? <Monogram name={agent.name} /> : agent.agency ? <AgencyIcon /> : <PersonIcon />}
         </span>
         <div style={{ flex: 1, minWidth: 0 }}>
+          {/* ⚠️ ONE IDENTITY LINE, SHARED WITH THE QUERIES STAGE (see IdentityLine). Name and
+              agency used to sit on two lines with a mono "No agency yet" beneath — a placeholder
+              asserting an absence that is not a fault, since an agency-less agent is a complete,
+              valid record here. The StateChip beside it already says whether anything is wanted. */}
           {disp
-            ? <div style={{ fontFamily: SERIF, fontSize: 15, color: "#2e2018", lineHeight: 1.1 }}>{disp}</div>
+            ? <IdentityLine agent={agent} />
             : <div style={{ fontFamily: SERIF, fontSize: 15, color: "#a89684", fontStyle: "italic", lineHeight: 1.1 }}>Name this agent</div>}
-          <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: "0.02em", color: C.meta, marginTop: 3 }}>{agent.agency || "No agency yet"}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0, marginRight: 18 }}>
           <StateChip status={status} />
@@ -1246,9 +1250,13 @@ const AgentCard: React.FC<AgentCardProps> = ({
         </div>
       )}
 
-      {/* inline notes (mobile fallback): the margin post-its can't fit, so each reason renders here.
-          The derived needs-agency note shows here too (no manual tick; clears when an agency is typed). */}
-      {compact && (invalid || agent.reasons.length > 0) && (
+      {/* ⚠️ FLAGS RENDER IN THE ROW, ALWAYS — this is no longer a "mobile fallback".
+          They used to live in the margin as post-its above 1000px and only drop into the row
+          below it, so what a writer saw beside a record depended on their window width, and the
+          narrow layout was the one nobody reviewed. A flag belongs to its record; the row is where
+          it can always be. (The derived needs-agency note shows here too — no manual tick; it
+          clears when an agency is typed.) */}
+      {(invalid || agent.reasons.length > 0) && (
         <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 8, marginTop: 11 }}>
           {invalid && (
             <InlineNote key="agency" text={agencyNoteText(agent.name)} resolved={false} kind="mapping" undoable={false} agencyBlocked={true}
@@ -1780,23 +1788,25 @@ const FaqList: React.FC<{ items: { q: string; a: string }[]; open: Set<number>; 
 // render as cleanly as the dashboard's.
 const REVIEW_SHELL_CSS = `
 .sa-rv-root{ position:fixed; inset:0; z-index:50; background:#f2ede7; display:flex; flex-direction:column; overflow:hidden; }
+/* ⚠️ THE WINDOW IS THE APP'S CONTENT SURFACE — white on the workspace ground, one hairline, the
+   dashboard card's radius and shadow. It used to carry a burgundy inset frame 7px in and an
+   animated pink→sage rim sweeping across it on a 16s loop. Both are deleted, keyframes included:
+   the rim was the only thing in the whole app that moved continuously while a writer was trying to
+   read, and it encoded the review's state in a colour nobody could name. The BAND carries that
+   state now, in words. */
 .sa-rv-window{ position:relative; flex:1 1 auto; min-height:0; width:100%; max-width:1200px; margin:18px auto;
-  background:#fff; border:1px solid #ddd2c0; border-radius:22px; box-shadow:0 30px 70px -42px rgba(60,40,28,.45);
-  overflow:hidden; display:flex; flex-direction:column;
-  --rim-glow:rgba(238,196,180,.8); --rim-base:rgba(238,196,180,.13); }
-.sa-rv-window.allclear{ --rim-glow:rgba(138,158,136,.72); --rim-base:rgba(138,158,136,.16); }
-/* burgundy inset frame, 7px from the window edge */
-.sa-rv-window::after{ content:""; position:absolute; inset:7px; border:1px solid rgba(124,58,42,.3);
-  border-radius:15px; pointer-events:none; z-index:3; }
-/* pink wave — dashboard hero rim, recoloured; fills the full 7px band, edge-to-frame */
-.sa-rv-rim{ position:absolute; inset:0; border-radius:22px; padding:7px; z-index:1; pointer-events:none; overflow:hidden;
-  background:var(--rim-base); transition:background .55s ease;
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;
-          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);  mask-composite:exclude; }
-.sa-rv-band{ position:absolute; top:-10%; bottom:-10%; width:60%; filter:blur(4px);
-  background:linear-gradient(95deg, transparent 0%, var(--rim-glow) 50%, transparent 100%);
-  animation:saRvRimCross 16s linear infinite; }
-@keyframes saRvRimCross{ 0%{left:-60%} 100%{left:114%} }
+  background:#ffffff; border:1px solid #e9e2d7; border-radius:15px;
+  box-shadow:0 1px 2px rgba(58,28,20,.04), 0 5px 18px rgba(58,28,20,.06);
+  overflow:hidden; display:flex; flex-direction:column; }
+
+/* ── The state band: blush while anything needs a look, sage when nothing does. ── */
+.sa-rv-statusband{ display:flex; align-items:center; gap:10px; flex:0 0 auto;
+  padding:11px 30px; border-bottom:1px solid #e9e2d7;
+  background:linear-gradient(135deg,#f8e6dc,#f4ddd1); transition:background .3s ease; }
+.sa-rv-window.allclear .sa-rv-statusband{ background:linear-gradient(135deg,#dce0d9,#d0d6cc); }
+.sa-rv-statusband .sa-rv-eyebrow{ font-family:"JetBrains Mono",monospace; font-size:10px;
+  letter-spacing:.15em; text-transform:uppercase; color:#7a4636; }
+.sa-rv-window.allclear .sa-rv-statusband .sa-rv-eyebrow{ color:#5a6e58; }
 .sa-rv-grid{ display:grid; grid-template-columns:1fr 340px; gap:38px; height:100%; padding:28px 30px;
   align-items:stretch; overflow:hidden; position:relative; z-index:2; }
 .sa-rv-main{ display:flex; flex-direction:column; min-height:0; }
@@ -1863,26 +1873,55 @@ const REVIEW_SHELL_CSS = `
 /* the coachmark intro's CSS now lives in COACHMARK_CSS, self-injected by <CoachmarkIntro> so it also
    styles correctly on the duplicates stage (which renders its own layout, not ReviewShell). */
 @media(max-width:880px){ .sa-rv-grid{ grid-template-columns:1fr; } }
-@media(prefers-reduced-motion:reduce){ .sa-rv-band{ animation:none; opacity:0; } *{ animation-duration:0.001ms !important; } }
+@media(prefers-reduced-motion:reduce){ *{ animation-duration:0.001ms !important; } }
 /* fit variant (overview): window is only as tall as its content, vertically centred below the nav,
    capped so it never spills off-screen — content scrolls inside the card, never the page. */
 .sa-rv-window.fit{ flex:0 1 auto; height:auto; max-height:calc(100vh - 116px); margin:auto; }
+/* ⚠️ MOBILE FLOOR: the two-up main+sidebar collapses at 880px (below), and the band's tally must
+   WRAP rather than push the window wide. The records column stays the only scroller. */
+@media(max-width:760px){
+  .sa-rv-statusband{ padding:10px 18px; flex-wrap:wrap; row-gap:4px; }
+  .sa-rv-window{ margin:10px auto; border-radius:13px; }
+}
 `;
 
 /** Full-viewport windowed shell: cream ground, full-width nav, white window with the recoloured rim.
  *  `fit` sizes the window to its content and centres it (for the short overview); without it the
  *  window fills the viewport for the scrolling review screens. */
-export const ReviewShell: React.FC<{ userInitial: string; allClear: boolean; fit?: boolean; modal?: React.ReactNode; children: React.ReactNode }> = ({ userInitial, allClear, fit, modal, children }) => (
-  <div className="sa-rv-root" style={{ fontFamily: "Source Sans Pro, sans-serif", color: "#2a2521" }}>
-    <style>{REVIEW_SHELL_CSS}</style>
-    {modal}
-    <OnbNav userInitial={userInitial} />
-    <div className={`sa-rv-window${allClear ? " allclear" : ""}${fit ? " fit" : ""}`}>
-      <div className="sa-rv-rim" aria-hidden="true"><div className="sa-rv-band" /></div>
-      {children}
+/**
+ * ⚠️ THE BAND CARRIES THE STATE, AND IT TAKES A COUNT RATHER THAN A BOOLEAN.
+ *
+ * That is not a cosmetic difference. Each stage used to hand this shell its OWN idea of all-clear
+ * — the agents screen `needCount`, the queries screen `qLookCount`, the duplicates screen
+ * `clusters.length` — while the overview used a fourth. Four answers to one question, on screens a
+ * writer crosses in seconds. The count now comes from `reviewNeedCount`, the single derivation the
+ * overview reads too, so the band cannot disagree with the page beneath it.
+ *
+ * The eyebrow states the number in words. It never appraises — no "only", no "just".
+ */
+export const ReviewShell: React.FC<{
+  userInitial: string;
+  /** Outstanding items across the WHOLE import, from reviewNeedCount. */
+  needCount: number;
+  fit?: boolean;
+  modal?: React.ReactNode;
+  children: React.ReactNode;
+}> = ({ userInitial, needCount, fit, modal, children }) => {
+  const allClear = needCount === 0;
+  return (
+    <div className="sa-rv-root" style={{ fontFamily: "Source Sans Pro, sans-serif", color: "#2a2521" }}>
+      <style>{REVIEW_SHELL_CSS}</style>
+      {modal}
+      <OnbNav userInitial={userInitial} />
+      <div className={`sa-rv-window${allClear ? " allclear" : ""}${fit ? " fit" : ""}`}>
+        <div className="sa-rv-statusband">
+          <span className="sa-rv-eyebrow">{reviewBandLabel(needCount)}</span>
+        </div>
+        {children}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /** Records card: parchment rim → burgundy hairline frame (clipping context) → internally-scrolling
  *  region with 28px scroll-edge fades (top/bottom, only mid-scroll). */
@@ -2373,7 +2412,6 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       highlighted={hl.cards.has(a.id)}
       onHoverPair={(on) => setHoverTarget(on ? { type: "card", id: a.id } : null)}
       pulse={pulseIds.includes(a.id)}
-      compact={compact}
       stacked={stacked}
       onResolveReason={(kind) => { if (kind === "mapping") resolveMapping(a.id); }}
       onReopenReason={(kind) => reopenReason(a.id, kind)}
@@ -2639,7 +2677,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     ) : null;
 
     return (
-      <ReviewShell userInitial={userInitial} allClear={needCount === 0}
+      <ReviewShell userInitial={userInitial} needCount={reviewNeedCount(agents, queries)}
         modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : (agentsIntro ?? agentsOverlay ?? addDetailsCoach)}>
         <div className="sa-rv-grid" key={screen}>
 
@@ -2785,7 +2823,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     ) : null;
 
     return (
-      <ReviewShell userInitial={userInitial} allClear={qLookCount === 0}
+      <ReviewShell userInitial={userInitial} needCount={reviewNeedCount(agents, queries)}
         modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : (queriesIntro ?? queriesOverlay)}>
         <div className="sa-rv-grid" key={screen}>
 
@@ -2897,7 +2935,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
     : clusters.length === 2 ? "A couple look like the same agent"
     : "A few look like the same agent";
   return (
-    <ReviewShell userInitial={userInitial} allClear={clusters.length === 0}
+    <ReviewShell userInitial={userInitial} needCount={reviewNeedCount(agents, queries)}
       modal={showSkipModal ? <SkipSetupModal onClose={() => setShowSkipModal(false)} onSkip={onSkip} /> : duplicatesIntro}>
       <style>{`@keyframes saImpPulse{0%{box-shadow:0 0 0 0 rgba(176,74,58,0.55)}70%{box-shadow:0 0 0 7px rgba(176,74,58,0)}100%{box-shadow:0 0 0 0 rgba(176,74,58,0)}}
         @keyframes saDupBarIn{from{opacity:0;max-height:0;transform:translateY(-4px);margin-top:0}to{opacity:1;max-height:60px;transform:none;margin-top:7px}}
