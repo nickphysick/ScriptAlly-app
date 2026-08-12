@@ -78,7 +78,10 @@ describe("the three-row grid — chrome outside the scroller", () => {
     expect(t, "the toolbar gained a fill — it is controls and a hairline, not a second plate").not.toMatch(/(^|[;\s])background\s*:/);
     expect(t, "the toolbar gained a shadow").not.toMatch(/(^|[;\s])box-shadow\s*:/);
     expect(t, "the toolbar gained a full border — the one line beneath it is the chrome/content boundary").not.toMatch(/(^|[;\s])border\s*:/);
-    expect(t, "the hairline beneath the toolbar went").toContain("border-bottom: 1px solid var(--ws-edge)");
+    /* ⚠️ REVERSED: THE TOOLBAR MUST NOT DRAW A HAIRLINE. This required one, from before the line
+       moved to row 1 — so every toolbar page rendered TWO lines 20px apart in the working state.
+       The boundary between chrome and content is row 1's bottom edge; row 2 is below it. */
+    expect(t, "the toolbar drew a hairline of its own — that is a second line under the header's").not.toMatch(/(^|[;\s])border-bottom\s*:/);
   });
 
   /**

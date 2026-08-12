@@ -88,16 +88,6 @@
    nothing here states a width. A `max-width` here would re-create the centred column whose
    scrollbar ate 15px of content under classic scrollbars. */
 .msv-wrap { width: 100%; }
-/* ⚠️ THE TALLY ROW — the toolbar slot, read off the Contact list's `.agl-count` rather than
-   re-derived, so the two pages state their figures in one voice. THE RULE: the plate carries
-   identity, this row carries tallies and view state. `margin-left:auto` is what pushes it to the
-   end of the row, and it is why this is a ROW and not a bare span — a tally with nothing to be
-   pushed away from would just sit left and read as a stray caption. */
-.msv-tally {
-  margin-left: auto; white-space: nowrap;
-  font-family: 'JetBrains Mono', monospace; font-size: 9px;
-  letter-spacing: 0.11em; text-transform: uppercase; color: var(--msv-muted);
-}
 .msv-lab {
   font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.17em;
   text-transform: uppercase; font-weight: 500; color: var(--msv-label);

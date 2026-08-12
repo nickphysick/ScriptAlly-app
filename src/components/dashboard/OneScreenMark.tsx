@@ -21,6 +21,7 @@
  * shipping as body text. The placeholder shows the slot NAME in mono, nothing more.
  */
 import React, { useState } from "react";
+import rolodexMark from "../../assets/shell/agents-on-file-icon.png";
 import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 
 /** The four marks, and the brief each one is waiting for. */
@@ -74,15 +75,20 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
   /**
    * a rolodex — cards, a spine and a phone. THE BRIEF IS THIS COMMENT AND NEVER RENDERS.
    *
-   * ⚠️ THE ARTWORK IS GONE AND THE SLOT IS DOING ITS JOB. `agents-on-file-icon.png` was deleted
-   * when the dashboard's painted marks were retired — the file no longer exists, so the import
-   * resolved to nothing and the production build failed on it while `tsc` passed (an image import
-   * is loosely typed; only the bundler looks for the file). This is precisely the case the module
-   * was built for: `src` ABSENT is a first-class state, and the monoline figure below is the
-   * degrade path. Restoring the drawing means adding one `src` line back, nothing else.
+   * ⚠️ THE ARTWORK IS BACK, AND THIS IS THE ONE-LINE CHANGE THE NOTE PROMISED. The asset was
+   * deleted with the dashboard's painted marks, the import failed the production build, and this
+   * entry dropped to the monoline degrade path — correct behaviour for a missing file. The file
+   * exists again, so the `src` returns and the Contact list's header takes the rolodex at 64px,
+   * bare, instead of a 38px glyph on a plate.
+   *
+   * ⚠️ THE SAME ASSET SERVES THE DASHBOARD'S "Agents on file" COUNTER at 44px. One drawing, two
+   * mounts, sizes at the call sites — the slot's box is independent of its contents, which is what
+   * lets 44 and 64 share a file. The monoline figure stays as the degrade path, per the ArtSlot
+   * rule: a 404 must not leave a broken-image glyph in a header.
    */
   contacts: {
     label: "figure",
+    src: rolodexMark,
     icon: <><circle cx="12" cy="8" r="4" /><path d="M4 21v-1a8 8 0 0 1 16 0v1" /></>,
   },
   /* a wrapped parcel, string and all */

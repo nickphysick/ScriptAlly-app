@@ -91,7 +91,11 @@
   gap: 10px;
   flex-wrap: wrap;
   padding: var(--content-top-gap) var(--content-gutter) 12px;
-  border-bottom: 1px solid var(--ws-edge);
+  /* ⚠️ NO BORDER — THE HAIRLINE IS ROW 1'S, AND THIS DREW A SECOND ONE (spec §3). Row 2 carried
+     its own `border-bottom`, so any page with a toolbar showed TWO lines in the working state,
+     20px apart: the header row's, then the toolbar's. Reported on Manuscripts, but it was every
+     toolbar page. The line belongs to the chrome/content boundary, which is row 1's bottom edge;
+     row 2 sits BELOW that boundary and reads as page content, so it gains no chrome at all. */
 }
 
 .wpg-scroll {

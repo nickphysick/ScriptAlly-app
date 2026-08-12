@@ -29,7 +29,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { Plus, Pencil, MoreHorizontal, Archive, Trash2, X, Check } from "lucide-react";
-import { isShelvedPresentation, activeQueryCount } from "../lib/manuscriptPage";
+import { isShelvedPresentation } from "../lib/manuscriptPage";
 import { manuscriptComps, withCompRemoved } from "../lib/comps";
 import { isProUser, scoutLive } from "../lib/suggestComps";
 import { plateStats } from "../lib/manuscriptPlate";
@@ -176,14 +176,14 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
           }]}
           />
         }
-        /* ⚠️ `undefined`, NOT an empty node, on the empty state — the grid then renders no tool row
-           and no hairline at all rather than a bare rule under the plate. "0 MANUSCRIPTS · 0 IN
-           SUBMISSION" beside "Your library is empty" states the same nothing twice. */
-        toolbar={ordered.length > 0 ? (
-          <span className="msv-tally">
-            {manuscripts.length} manuscripts · {manuscripts.filter((m) => activeQueryCount(queries.filter((q) => q.manuscriptId === m.id)) > 0).length} in submission
-          </span>
-        ) : undefined}
+        /* ⚠️ NO TOOLBAR AT ALL. The `{n} MANUSCRIPTS · {m} IN SUBMISSION` tally is DELETED, not
+           rehomed again. It was rescued from the grand slab into the count slot, then into this
+           row, and at every stop it read as a stray caption for the same reason: it was the only
+           thing in its row, so `margin-left: auto` pushed it away from nothing. The figures are on
+           the plate beneath it in any case.
+           ⚠️ AND WITH IT GOES THE SECOND HAIRLINE. Row 2 drew its own rule under the tally, so
+           Manuscripts showed two lines 20px apart in the working state. No toolbar → no row 2, and
+           the 20px gap comes from the scroll row instead (`.wpg--tools` governs which pays). */
       >
       <div className="msv-wrap">
         {ordered.length === 0 ? (
