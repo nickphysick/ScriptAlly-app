@@ -813,6 +813,19 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                 </div>
                 </div>
               </section>
+
+              {/* ── The close — what happens next, stated rather than sold ── */}
+              <section className="dv-close">
+                <span className="dv-soon">Coming soon</span>
+                <p>
+                  Discover opens to Pro members shortly after launch, as the verified catalogue
+                  grows.
+                </p>
+                <small>
+                  Your manuscripts are already set up — matches will appear here the moment it
+                  opens.
+                </small>
+              </section>
             </>
           )}
         </div>

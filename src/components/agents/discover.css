@@ -700,7 +700,9 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
   position: relative;
   width: 920px;
   max-width: 100%;
-  height: 400px;
+  /* The ref's 400 was sized to its taller card; ours finishes at 294 with the lowest note ending
+     near 320, so 400 left ~80px of empty parchment reading as a gap before the close. */
+  height: 340px;
   margin: 58px auto 0;
   container-type: inline-size;
 }
@@ -758,9 +760,15 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
   width: 200px;
   margin: 0;
 }
+/* ⚠️ THE THIRD NOTE SITS 52px ABOVE THE REF'S, AND THE REF IS NOT WRONG — ITS CARD IS TALLER.
+   The ref draws a ~360px specimen; the app's card measures 294, because its type scale is the
+   agent list's, not the mockup's. Taken literally, the third leader ended at y 314 with the card
+   finishing at 294 and the actions row at 245–279: a dotted line into blank parchment, pointing at
+   nothing. The OFFSETS are the ref's intent (a leader from the margin to the actions row); the
+   NUMBERS have to answer to the card the app actually renders. Measured, not guessed. */
 .dv-note.n1 { right: 0; top: 2px; text-align: left; }
 .dv-note.n2 { left: 0; top: 186px; text-align: right; }
-.dv-note.n3 { right: 0; top: 296px; text-align: left; }
+.dv-note.n3 { right: 0; top: 244px; text-align: left; }
 .dv-conn { position: absolute; pointer-events: none; overflow: visible; }
 .dv-conn path {
   fill: none;
@@ -772,7 +780,7 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
 .dv-conn circle { fill: var(--dv-note-line); }
 .dv-conn.c1 { left: 648px; top: 14px; }
 .dv-conn.c2 { left: 206px; top: 206px; }
-.dv-conn.c3 { left: 684px; top: 300px; }
+.dv-conn.c3 { left: 684px; top: 248px; }
 
 /* ⚠️ THE ANNOTATIONS ARE GATED ON THE EXHIBIT'S WIDTH, NOT THE VIEWPORT'S — and the viewport is
    the wrong proxy the moment a rail sits beside the content. Every offset above is measured
@@ -804,6 +812,32 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
   }
   .dv-note,
   .dv-conn { display: none; }
+}
+
+/* ── The close ─────────────────────────────────────────────────────────────
+   The chip is the SAME `.dv-soon` the band carries, not a second one dressed to match: the page
+   opens and closes on one state marker, so the two cannot drift apart. */
+.dv-close {
+  text-align: center;
+  padding: 70px 0 78px;
+}
+.dv-close .dv-soon { margin-bottom: 20px; }
+.dv-close p {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--dv-ink-head);
+  max-width: 520px;
+  margin: 0 auto;
+}
+.dv-close small {
+  display: block;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--dv-muted);
+}
+@media (max-width: 980px) {
+  .dv-close { padding: 48px 0 56px; }
 }
 
 .dv-ctl:focus-visible,
