@@ -10,7 +10,13 @@
  */
 
 /* ── per-theme tokens (from the design ref .shell.t-*) ── */
-.t-capp .ctpage {
+.t-capp /* ⚠️ NO HORIZONTAL PADDING ON THE PAGE ROOT (strip-fixes §3/§4). The grid is INSIDE this
+   element, so any side padding here insets the whole grid — header, toolbar and scroller
+   alike — and the scroller stops being the full container. Two consequences, both seen on
+   dev: the scrollbar floats inland with dead space beyond it, and this page's header sits
+   at a different inset from every page without such padding. The gutter is the scroller's,
+   declared once. */
+.ctpage {
   --ct-desk: #e8ddd0; --ct-card: #fffefb; --ct-bd: #e6ddd0; --ct-bdw: 1px;
   --ct-band-a: #dce0d9; --ct-band-b: #d0d6cc; --ct-band-hair: rgba(90, 110, 88, .2);
   --ct-ink: #3a1c14; --ct-ink-soft: #8a7868; --ct-label: #9c8878; --ct-accent: #7c3a2a;
@@ -55,7 +61,7 @@
 /* ── page shell (workspace-fills: masthead flex-none, split fills, panels scroll) ── */
 .ctpage {
   height: 100%; display: flex; flex-direction: column; overflow: hidden;
-  background: var(--ct-desk); color: var(--ct-ink); padding: 22px 28px 20px; /* masthead gutter mirrors the Queries hub */
+  background: var(--ct-desk); color: var(--ct-ink); padding: 22px 0 20px;
   font-family: 'Inter', 'Source Sans Pro', sans-serif;
 }
 /* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both moved to the grid: row 3 carries

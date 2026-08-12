@@ -74,7 +74,7 @@
   position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
   background: var(--ws-edge);
   opacity: 0;
-  transition: opacity .14s ease;
+  transition: opacity .16s ease;
   pointer-events: none;
 }
 .wpg-plate--working::after { opacity: 1; }
@@ -154,4 +154,14 @@
 .wpg-plate .wsh-wrap {
   position: static;
   padding: 0;
+  /* ⚠️ AND THE RESERVED HEIGHT GOES TOO — this was the strip's real height bug. `.wsh-wrap` is
+     `height: calc(var(--wsh-plate-h) + 2 * var(--wsh-plate-gap))`, a RESERVATION for the sticky
+     path: the plate shrinks inside a wrapper that keeps the rest height, so condensing cannot pull
+     the content below it upwards. On the grid there is nothing to reserve — the row is a grid
+     track and the scroller is a sibling — so the reservation just held the header block at 132px
+     while the plate inside it collapsed to 52px, and the hairline landed 80px below the strip.
+     ⚠️ IT LOOKED LIKE THE ROW'S PADDING WAS NOT TRANSITIONING, WHICH IS WHY A PADDING LOCK WOULD
+     HAVE PASSED. The padding was fine; a third element between row and plate was holding the
+     height open. Assert the row's HEIGHT, never its padding. */
+  height: auto;
 }

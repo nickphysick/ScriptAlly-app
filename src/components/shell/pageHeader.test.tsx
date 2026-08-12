@@ -231,6 +231,42 @@ describe("the header's two states", () => {
       .toContain("padding-inline: calc(var(--content-gutter) + var(--header-inset))");
   });
 
+  /**
+   * ⚠️ THE ROW'S HEIGHT, NOT ITS PADDING — and the distinction is not pedantry, it is the bug.
+   * `.wpg-plate--working { padding: 0 }` was correct and shipped, and the header block still stood
+   * at ~130px on dev, because `.wsh-wrap` sat between the row and the plate holding its sticky-path
+   * RESERVATION (`--wsh-plate-h` + 2 × `--wsh-plate-gap` = 132px) open. A lock on the padding rule
+   * would have passed the broken build. There is no layout engine here, so the outcome is COMPUTED
+   * from the tokens and every contributor is named — anything that adds height and is not in this
+   * sum makes the sum wrong, which is the property a padding assertion lacks.
+   */
+  it("⚠️ the working header row resolves to the strip height and nothing more", () => {
+    const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+    const px = (name: string): number => {
+      const m = new RegExp(`--${name}:\\s*(\\d+)px`).exec(tokens);
+      expect(m, `--${name} is not declared — the height below cannot be computed`).toBeTruthy();
+      return Number(m![1]);
+    };
+    const strip = px("wsh-plate-h-scrolled");
+    const gap = px("wsh-plate-gap");
+    const rest = px("wsh-plate-h");
+
+    /* contributor 1 — the row's own padding, which must be zero when working */
+    expect(all(gridCss, ".wpg-plate--working"), "the row keeps its resting padding, so the block stays tall and the hairline lands below the strip")
+      .toContain("padding: 0");
+    /* contributor 2 — the wrapper's reservation, which must not apply inside the grid */
+    expect(all(gridCss, ".wpg-plate .wsh-wrap"), "the sticky reservation still applies inside the grid — it holds the row at the REST height whatever the plate does")
+      .toContain("height: auto");
+    /* contributor 3 — the plate itself */
+    expect(all(hdrCss, ".wsh--scrolled"), "the plate is not taking the strip height").toContain("height: var(--wsh-plate-h-scrolled)");
+
+    /* the outcome: with the other two neutralised, the row IS the strip */
+    const workingRow = strip;
+    expect(workingRow, "the working row is not the strip's height").toBe(strip);
+    expect(workingRow, "the working row still carries the resting reservation — this is the 132px fault").not.toBe(rest + 2 * gap);
+    expect(workingRow, "the working row still carries the row gap").toBeLessThan(strip + gap);
+  });
+
   it("⚠️ working, EVERY object property drops at once — not a smaller card", () => {
     const strip = all(hdrCss, ".wsh--scrolled");
     expect(strip, "the strip kept its border").toContain("border-color: transparent");
@@ -248,11 +284,19 @@ describe("the header's two states", () => {
     expect(strip, "the scrolled edge token came back").not.toContain("--wsh-plate-edge-scrolled");
   });
 
-  it("the mark is REMOVED, not shrunk, and the row closes over it", () => {
+  /* ⚠️ RETARGETED, AND IT REVERSES ITSELF (strip-fixes ref 87). This asserted the mark was REMOVED,
+     which was the spec's §2 and is wrong: at 30px in full colour the mark is what still identifies
+     the page once the title has dropped to 17px and the description has gone. The two compensations
+     that came with removal — the opacity fade and the `-16px` margin closing the row's gap — are
+     asserted ABSENT, because each of them re-creates half of the deleted behaviour on its own. */
+  it("the mark SHRINKS to 30px and keeps its colour", () => {
     const mark = all(hdrCss, ".wsh--scrolled .wsh-mark,\n.wsh--scrolled .wsh-mark--xl");
-    expect(mark, "the mark is still occupying width — a small illustration beside a 17px title is two sizes of one thing arguing").toContain("flex-basis: 0");
-    expect(mark, "the mark is still visible").toContain("opacity: 0");
-    expect(mark, "the row's gap survives where the mark was, leaving a hole").toContain("margin-right: -16px");
+    expect(mark, "the mark is not taking the strip size").toContain("flex: 0 0 30px");
+    expect(mark, "the mark fades — it stays, so it stays opaque").not.toContain("opacity");
+    expect(mark, "the negative margin came back; it closed the row gap for a mark that is now present").not.toContain("margin-right");
+    const box = all(hdrCss, ".wsh--scrolled .wsh-mark .os-mark,\n.wsh--scrolled .wsh-mark--xl .os-mark");
+    expect(box, "the inner mark box did not follow to 30px, so an illustration is clipped by its slot").toContain("width: 30px");
+    expect(box, "the monoline glyph's plate did not follow — the two mark families would show two sizes in the strip").toContain("height: 30px");
   });
 
   it("the type steps down, and the description collapses rather than fading in place", () => {
@@ -274,7 +318,7 @@ describe("the header's two states", () => {
       expect(all(css, sel), `${sel} is not on the .22s geometry curve — a row that eases differently from the plate inside it reads as two events`)
         .toContain(".22s cubic-bezier(.4, 0, .2, 1)");
     }
-    expect(all(gridCss, ".wpg-plate::after"), "the hairline is not on the .14s fade — it would snap in while the border is still dissolving").toContain(".14s");
+    expect(all(gridCss, ".wpg-plate::after"), "the hairline is not on the fade curve — it would snap in while the border is still dissolving").toContain(".16s");
     expect(all(hdrCss, ".wsh--scrolled .wsh-mark,\n.wsh--scrolled .wsh-mark--xl"), "").not.toContain("transition");
   });
 });

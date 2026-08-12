@@ -92,10 +92,14 @@
 /* ⚠️ THE BREAKPOINTS MOVE THE TOKEN, NEVER A LITERAL — a literal would leave the header bleeding by
    the desktop gutter on a phone: inset at one step and overhanging at the next. */
 @media (max-width: 900px) {
-  .dv2 { padding: 24px 28px 44px; }
+  /* ⚠️ SIDES STAY 0 AT EVERY BREAKPOINT (strip-fixes §3/§4). The narrow-window override used to
+     re-gutter the page root, which insets the whole grid again below 900px — the desktop fault
+     restored on a phone. The gutter is the scroller's, and `--content-gutter` already steps to
+     16px below md, so the narrow case is handled where the value lives. */
+  .dv2 { padding: 24px 0 44px; }
 }
 @media (max-width: 640px) {
-  .dv2 { padding: 22px 18px 40px; }
+  .dv2 { padding: 22px 0 40px; }
 }
 
 /* ── Header parity ────────────────────────────────────────────────────────

@@ -373,11 +373,15 @@
 .aglist .agl-empty .small { font-size: 13px; font-weight: 300; }
 
 @media (max-width: 900px) {
-  .aglist .agl-page { padding: 24px 28px 44px; }
+  /* ⚠️ SIDES STAY 0 AT EVERY BREAKPOINT (strip-fixes §3/§4). The narrow-window override used to
+     re-gutter the page root, which insets the whole grid again below 900px — the desktop fault
+     restored on a phone. The gutter is the scroller's, and `--content-gutter` already steps to
+     16px below md, so the narrow case is handled where the value lives. */
+  .aglist .agl-page { padding: 24px 0 44px; }
 }
 /* the 640px hand-rolled breakpoint migrated to md (Mobile Pass 1 breakpoint law) */
 @media (max-width: 767.98px) {
-  .aglist .agl-page { padding: 18px 16px 40px; }
+  .aglist .agl-page { padding: 18px 0 40px; }
   .aglist .agl-h1 { font-size: 38px; }
   .aglist .agl-search { min-width: 0; width: 100%; }
 }

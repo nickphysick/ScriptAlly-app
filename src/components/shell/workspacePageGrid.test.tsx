@@ -126,6 +126,48 @@ describe("the three-row grid — chrome outside the scroller", () => {
     }
   });
 
+  /**
+   * ⚠️ THE SCROLLER IS THE FULL CONTAINER, AND THE PAGE ROOT IS WHAT BREAKS IT (strip-fixes §3/§4).
+   * The grid lives INSIDE each page's root element, so a horizontal padding there insets the whole
+   * grid — header, toolbar and scroller alike. Two faults follow, and both shipped: the scrollbar
+   * floats inland with dead space beyond it instead of sitting at the container edge, and that
+   * page's header lands at a different inset from every page without such padding. Contact list at
+   * 0 beside Submission packages at 28 is why the ten pages did not agree.
+   *
+   * ⚠️ AND IT MUST READ THE MARKUP TOO. Packages declared its 28px INLINE, so the CSS-only width
+   * lock added at step 1 passed this page while it was visibly wrong. A lock that can only see one
+   * of the two places a value can live is a lock with a blind spot, not a lock.
+   */
+  it("⚠️ no page root insets the grid — the scroller is the full container", () => {
+    const ROOTS: [string, string, string][] = [
+      ["Contact list", "components/agents/agentList.css", ".aglist .agl-page"],
+      ["Discover", "components/agents/discover.css", ".dv2"],
+      ["Manuscripts", "components/manuscripts/manuscripts.css", ".msv1"],
+      ["Comparable titles", "components/manuscripts/comps.css", ".ctpage"],
+    ];
+    for (const [page, file, sel] of ROOTS) {
+      const pageCss = readFileSync(resolve(__dirname, "../..", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      const blocks: string[] = [];
+      for (let i = pageCss.indexOf(`${sel} {`); i > -1; i = pageCss.indexOf(`${sel} {`, i + 1)) {
+        blocks.push(pageCss.slice(i, pageCss.indexOf("}", i)));
+      }
+      expect(blocks.length, `${page}: no \`${sel} {\` rule — the check below would be vacuous`).toBeGreaterThan(0);
+      for (const m of blocks.join("\n").matchAll(/padding:\s*([^;]+)/g)) {
+        const parts = m[1].trim().split(/\s+/);
+        /* `padding: A B C` and `padding: A B` both set the sides from the SECOND value */
+        const sides = parts.length === 1 ? parts[0] : parts[1];
+        expect(sides, `${page}: its root pads the sides (\`padding: ${m[1].trim()}\`), which insets the whole grid and makes this page's header a different width from every other`).toMatch(/^0(px)?$/);
+      }
+    }
+    /* the inline half — the one that got through */
+    const pkg = readFileSync(resolve(__dirname, "../SubmissionPackages.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rootStyle = /className="pkg-root pkgw" style=\{\{([^}]*)\}\}/.exec(pkg);
+    expect(rootStyle, "the Packages root changed shape — this assertion no longer reads it").toBeTruthy();
+    const pad = /padding:\s*"([^"]+)"/.exec(rootStyle![1]);
+    expect(pad, "the Packages root lost its inline padding entirely — check the top value survived").toBeTruthy();
+    expect(pad![1].trim().split(/\s+/)[1], `Packages pads its root's sides inline (\`${pad![1]}\`) — invisible to every stylesheet lock`).toMatch(/^0(px)?$/);
+  });
+
   /* ⚠️ NO PAGE MAY RE-STATE A WIDTH. The caps lived on five page stylesheets and a per-page gutter
      on four of them; both are the grid's job now. A page that caps again puts the scrollbar back
      outside its content column, and does it on one page only — the hardest kind to notice. */

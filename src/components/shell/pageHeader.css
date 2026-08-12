@@ -296,7 +296,7 @@
    notes in AllManuscripts.tsx and ComparableTitlesPage.tsx. */
 /* ⚠️ .22s ON GEOMETRY, .14s ON FADES (spec §2, ref 84). One curve throughout — a fade that outlasts
    the collapse leaves the mark visible over a row that has already closed. */
-.wsh-mark { flex: 0 0 38px; transition: flex-basis .22s cubic-bezier(.4, 0, .2, 1), width .22s cubic-bezier(.4, 0, .2, 1), margin-right .22s cubic-bezier(.4, 0, .2, 1), opacity .14s ease; }
+.wsh-mark { flex: 0 0 38px; transition: flex-basis .22s cubic-bezier(.4, 0, .2, 1), width .22s cubic-bezier(.4, 0, .2, 1), height .22s cubic-bezier(.4, 0, .2, 1); }
 .wsh-mark--xl { flex: 0 0 64px; }
 .wsh-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 0 1 auto; }
 /* ⚠️ 600 IS A TOKEN, NOT A LITERAL, AND IT MUST NOT PROPAGATE (amendment 12). Every other Playfair
@@ -326,13 +326,19 @@
 .wsh--scrolled .wsh-row { padding: 0 var(--content-gutter); }
 .wsh--scrolled .wsh-sub { opacity: 0; max-height: 0; margin-top: 0; }
 .wsh--scrolled .wsh-title { font-size: 17px; }
-/* ⚠️ THE MARK IS REMOVED, NOT SHRUNK. It went to 34px before, leaving a small illustration beside
-   a 17px title — two sizes of one thing arguing. Basis and width go to 0 so the row closes over
-   it; the negative margin absorbs the row's gap, or a 16px hole survives where the mark was. */
+/* ⚠️ THE MARK STAYS, AT 30px, AND THIS REVERSES THE SPEC (strip-fixes ref 87). §2 said the mark
+   was removed on collapse; it is not. At 30px in full colour it is what still IDENTIFIES the page
+   once the title has dropped to 17px and the description has gone — a strip with no mark is a line
+   of text, and every page's line of text looks alike.
+   ⚠️ NO OPACITY CHANGE AND NO NEGATIVE MARGIN. Both were compensations for a mark that vanished:
+   the fade because it was leaving, the `-16px` because the row's gap would otherwise hold a hole
+   open where it had been. The mark is present, so the gap is wanted and the mark is opaque.
+   ⚠️ A PAGE WITH NO ILLUSTRATION SHRINKS ON THE SAME RULE — its 38px monoline glyph on its
+   parchment plate goes to 30 as well, so the two mark families keep one size in the strip. */
 .wsh--scrolled .wsh-mark,
-.wsh--scrolled .wsh-mark--xl { flex-basis: 0; width: 0; opacity: 0; margin-right: -16px; }
+.wsh--scrolled .wsh-mark--xl { flex: 0 0 30px; width: 30px; }
 .wsh--scrolled .wsh-mark .os-mark,
-.wsh--scrolled .wsh-mark--xl .os-mark { width: 0; height: 0; flex-basis: 0; border-width: 0; }
+.wsh--scrolled .wsh-mark--xl .os-mark { width: 30px; height: 30px; flex-basis: 30px; }
 .wsh--scrolled .svh-btn { padding: 7px 13px; font-size: 12px; }
 .wsh-grow { flex: 1 1 auto; min-width: 10px; }
 .wsh-acts { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
@@ -373,7 +379,7 @@
 .wsh-mark--xl .os-mark svg { width: 34px; height: 34px; }  /* the degrade path, still centred */
 .agl-anim .wsh .wsh-mark--xl .os-mark img { opacity: 0; }
 /* the plate's own size transition, so the mark condenses WITH it rather than snapping */
-.wsh-mark .os-mark { transition: width .2s ease, height .2s ease, flex-basis .2s ease; }
+.wsh-mark .os-mark { transition: width .22s cubic-bezier(.4, 0, .2, 1), height .22s cubic-bezier(.4, 0, .2, 1), flex-basis .22s cubic-bezier(.4, 0, .2, 1); }
 
 /**
  * ⚠️ REDUCED MOTION KILLS THE TRANSITIONS, NEVER THE STATES. The plate must still condense — the
