@@ -83,6 +83,27 @@ const SPARK_GLYPH: Record<typeof SPARK_KINDS[number], React.ReactNode> = {
 const prefersReduced = () =>
   typeof window !== "undefined" && !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+/**
+ * ⚠️ THE SCATTER NEEDS ROOM IT DOES NOT HAVE ON A PHONE, so below this width it does not scatter.
+ *
+ * The `SCATTER` table below is a set of ABSOLUTE offsets from the stage centre, out to ±332px
+ * horizontally — about 700px of spread plus a 440px card. Under roughly 1400px the outer cards
+ * begin leaving the viewport, and on a phone most of the writer's own rows would simply be
+ * off-screen while a loader told them their file was being read.
+ *
+ * ⚠️ IT REUSES THE REDUCED-MOTION PATH RATHER THAN ADDING A SECOND FALLBACK. That path already
+ * produces exactly what is wanted here — no drift, no sparks, no fly-in, just the easing bar, the
+ * rotating status text and then the clean settled stack — and it is a path that already gets
+ * exercised. A parallel narrow-screen branch would be a second thing to keep in step with every
+ * future change to the loader, for no different outcome.
+ */
+const NARROW_BP = 900;
+const isNarrow = () =>
+  typeof window !== "undefined" && !!window.matchMedia && window.matchMedia(`(max-width: ${NARROW_BP - 1}px)`).matches;
+
+/** Static presentation: either the writer asked for less motion, or the screen cannot hold the scatter. */
+const prefersStatic = () => prefersReduced() || isNarrow();
+
 const CARD_W = 440;        // wide while messy (holds the full raw row)
 const RESOLVED_W = 268;    // tightens to the on-brand card width on crystallise (grid-friendly)
 
@@ -108,7 +129,7 @@ const formFields = (messy: string, kind: FormKind): [string, string] => {
 };
 
 export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards, complete, total, onProceed, onTimeout, userName }) => {
-  const reduced = prefersReduced();
+  const reduced = prefersStatic();
   const userInitial = userName ? userName[0].toUpperCase() : "?";
   const n = cards.length;
   const [introDone, setIntroDone] = useState(reduced); // intro beat over → the Work zone (drift) begins

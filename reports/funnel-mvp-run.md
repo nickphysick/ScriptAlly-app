@@ -688,3 +688,52 @@ than a bordered one; **that is unverified visually** and may need a look.
 auth. The suite proves the rim and its keyframes are gone, that one derivation feeds the band, and
 that the identity line renders its three states correctly — none of which tells you how the screen
 looks. **Needs an eyeball on dev.**
+
+---
+
+## Phase 8 — mobile floor
+
+**Commit:** _(hash in the next log commit)_
+**Gates:** tsc **0** · build **✓** · Vitest **262 files, 4306 passed | 2 skipped (4308)**
+
+The onboarding half landed with Phase 6 (`onboarding.css`, ≤640px). This commit adds the loader and
+the review shell, and the locks for all three.
+
+### The scatter loader
+
+Below **900px** it renders the **static settled stack** instead of scattering.
+
+**⚠️ It reuses the reduced-motion path rather than adding a second fallback**, as the pack
+required: `prefersStatic() = prefersReduced() || isNarrow()`, one switch. That path already
+produces exactly the wanted result — no drift, no sparks, no fly-in, just the easing bar, the
+rotating status text, then the clean stack — and it is a path that already gets exercised. A
+parallel narrow-screen branch would be a second thing to keep in step with every future change to
+this loader, for no different outcome.
+
+The numbers behind the threshold, from the loader's own table: `SCATTER` is **absolute** offsets out
+to **±332px** from the stage centre, plus a **440px** card. Below roughly 1400px the outer cards
+start leaving the viewport; on a phone most of the writer's own rows would be off-screen while the
+loader claimed to be showing them their file.
+
+### The review shell
+
+The 880px stack was already there; added a ≤760px step so the **state band wraps** rather than
+pushing the window wide, and tightened the window's margin and radius.
+
+### The viewport lock, asserted the way this codebase requires
+
+**⚠️ The records column is asserted to be a real SCROLLER** (`overflow-y: auto` on
+`.sa-rv-scroll`), not merely a region that happens not to overflow, plus `.sa-rv-root` being
+`overflow: hidden` so the window never becomes the scroller itself. "Page scroll is zero" is the
+weak form — **clipping satisfies it equally**, which is the failure this phrasing exists to
+exclude.
+
+### Not touched
+
+The dashboard tour's 1024px suppression, as instructed.
+
+### Not verified
+
+**No visual verification at any width.** The locks assert that the rules exist and that the static
+path is reused; they cannot tell you the screens look right on a phone. **Everything in this phase
+needs an eyeball at ~375px.**
