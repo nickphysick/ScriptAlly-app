@@ -130,12 +130,29 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   React.useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
-    /* the page must still scroll AFTER the strip reclaims its height, or entering is unsafe */
+    /**
+     * The page must still scroll AFTER the strip reclaims its height, or entering is unsafe.
+     *
+     * ⚠️ THIS CREATES A DEAD ZONE AND THE DEAD ZONE IS CORRECT. A page whose content exceeds the
+     * viewport by LESS than the reclaim keeps its resting card, and it reads as "the header does
+     * not respond to scrolling". Measured on Manuscripts at a real window: `scrollHeight` 694,
+     * `clientHeight` 652, overflow 42 against a 62px reclaim. Stripping would take the scroller to
+     * 714 — taller than the content — so overflow would become ZERO, the browser would clamp
+     * `scrollTop` to 0, and it would cycle.
+     *
+     * ⚠️ AND EVERY MEASUREMENT OF THIS TAKEN THROUGH A DOCKED CONSOLE IS WRONG, because DevTools
+     * shortens the viewport by 300-400px, which INFLATES the overflow past the threshold. The same
+     * page read 267 docked and 42 undocked. If this is ever investigated again, undock first — the
+     * act of measuring is what moves the value.
+     */
     const safeToStrip = () => root.scrollHeight - root.clientHeight > reclaimedPx();
 
     let frame = 0;
     const evaluate = () => {
       frame = 0;
+      /* ⚠️ ONE EXPRESSION, AND A LOCK READS ITS ASYMMETRY HERE. Splitting it into a block hid that
+         from the lock — which is how the temporary instrumentation for the Manuscripts diagnosis
+         first went in, and why it was reshaped rather than the lock relaxed. */
       setStuck((was) => (was ? root.scrollTop > 4 : root.scrollTop > 4 && safeToStrip()));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
