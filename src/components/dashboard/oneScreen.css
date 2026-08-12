@@ -1407,8 +1407,9 @@
    `height: 44px; padding: 0 14px` — appended below the sheet's `.os-ahead, .os-th2 { height: 51px }`,
    so it WON, and the Community band rendered 7px shorter than every other band on the page. Only
    the mark and the chip are this tile's; the band is the shared one. */
-.os-commic { display: flex; flex: none; color: #5f6f5b; }
-.os-commic svg { width: 16px; height: 16px; stroke-width: 1.7; }
+/* ⚠️ `.os-commic` IS DELETED WITH THE BESPOKE SPAN IT STYLED — the band reads `OneScreenMark`
+   now, so the plate, its fill, its hairline and its icon size all come from `.os-mark`. A
+   leftover rule for a fourth copy is how the copy comes back. */
 /* ⚠️ A STATEMENT ABOUT THE DATA, NOT THE CODE — it goes when the cohorts are populated enough
    that most readers see real figures, not when the feature is "finished". */
 .os-commbeta {
@@ -1417,14 +1418,51 @@
   background: #fffdf9; border: 1px solid #cbd3c8; color: #5f6f5b;
   border-radius: 999px; padding: 3px 7px;
 }
-.os-commbody { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 16px 16px; }
-.os-commempty {
-  margin: 0; font-size: 12.5px; line-height: 1.5; color: #6b6058; max-width: 30ch;
+/* ⚠️ CENTRED ON BOTH AXES — the hero layout, baked. `justify-content: center` is what makes the
+   tile FILL its row without a spacer: the column centres in whatever height the tasks card sets,
+   so the old `margin-top: auto` footer would now push the hero upward rather than hold it down. */
+.os-commbody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 14px 16px 18px;
+  text-align: center;
 }
-/* ⚠️ THIS IS WHAT MAKES THE TILE FILL A ROW IT DOES NOT SIZE. The tasks card sets the row's
-   height; without a footer taking the slack the tile's text would sit vertically centred in
-   whatever is left, drifting as the task list changes length. */
-.os-commfoot { margin-top: auto; }
+/* ⚠️ 84px AGAINST A 100px SOURCE — never above 100, and never upscaled to fill space. The asset is
+   a 1x raster carrying a whole empty state; a 2x or SVG re-export is wanted (reported). */
+.os-commseed { width: 84px; height: 84px; object-fit: contain; display: block; flex: none; }
+.os-commempty {
+  margin: 0; font-size: 12.5px; line-height: 1.5; color: #6b6058; max-width: 34ch;
+}
+/* ⚠️ QUIET BY DEFAULT, WARM ON HOVER — a transparent pill with a hairline, not a filled button.
+   It sits in an empty state; a solid CTA here would outrank the sentence explaining why the tile
+   is empty. Colours inline-critical per the house rule, so Tailwind cannot quietly repaint them. */
+.os-commshare {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 14px;
+  font: inherit; font-size: 12px; font-weight: 600;
+  color: #7c3a2a;
+  background: transparent;
+  border: 1px solid #e3d9cc;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.os-commshare svg { width: 13px; height: 13px; display: block; flex: none; }
+.os-commshare:hover:not(:disabled) { background: #f8ece4; border-color: #e8c8bc; }
+.os-commshare:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; }
+/* ⚠️ THE DISABLED STATE IS PHASE 1'S, AND IT IS HONEST — the control is not wired yet, so it says
+   so rather than accepting a click that does nothing. `cursor: default`, not `not-allowed`:
+   nothing is forbidden here, it simply is not ready. */
+.os-commshare:disabled { opacity: 0.55; cursor: default; }
+/* ⚠️ `.os-commfoot` IS DELETED. It existed to push a TOP-ALIGNED paragraph's slack to the bottom;
+   the body centres on both axes now, so a spacer would fight the centring it was there to
+   prevent. Rule and element removed together — a `margin-top: auto` left in this file would
+   silently un-centre the hero the next time someone re-added the div. */
 
 /* ══ §P4 · REDUCED MOTION ═══════════════════════════════════════════════════════════════════
    ⚠️ THIS BLOCK MUST STAY LAST — it wins on source order at equal specificity, and every rule

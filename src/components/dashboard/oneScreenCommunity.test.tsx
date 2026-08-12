@@ -23,11 +23,22 @@ const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
 const html = renderToStaticMarkup(<OneScreenCommunity loading={false} />);
 
 describe("the empty state is the whole of Phase 1", () => {
+  /* ⚠️ RETARGETED (empty-state pack): the copy changed wholesale. Both strings were stated
+     verbatim by their own pack; this one is current. Locked as an exact string because "verbatim"
+     is the whole contract — a paraphrase is the failure this catches. */
   it("renders the pack's copy verbatim", () => {
     expect(COMMUNITY_EMPTY).toBe(
-      "You're early. Community figures need writers at your stage to compare with. This tile stays quiet until there are.",
+      "As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.",
     );
-    expect(html).toContain("Community figures need writers at your stage");
+    expect(html).toContain("benchmark your key stats against other writers");
+  });
+
+  /* ⚠️ NO EXCLAMATION MARK, ANYWHERE — nothing else in the app uses one, and the button's label
+     lost the one Nick's original copy carried. */
+  it("⚠️ the tile's prose carries no exclamation mark", () => {
+    expect(COMMUNITY_EMPTY).not.toContain("!");
+    expect(html).toContain("Spread the word");
+    expect(html).not.toContain("Spread the word!");
   });
 
   it("the band carries the title and the BETA chip", () => {
@@ -91,11 +102,51 @@ describe("the tile fills a row it does not size", () => {
      jsdom cannot do a flex/grid height chain. What IS assertable is the mechanism: a footer with
      `margin-top: auto`, so the body sits to the top rather than drifting as the task list changes
      length. Browser-measured at 1440: tile 302×147, tasks 500×147 — the tile is not the taller. */
-  it("a footer region takes the slack", () => {
-    expect(html).toContain("os-commfoot");
-    const at = cssRules.indexOf(".os-commfoot");
+  /* ⚠️ RETARGETED (empty-state pack): the `margin-top: auto` FOOTER IS GONE and its absence is
+     the assertion. It pushed a top-aligned paragraph's slack downward; the body centres on both
+     axes now, so a spacer would fight the centring — and a stray `margin-top: auto` left in the
+     sheet would silently un-centre the hero the moment anyone re-added the div. */
+  it("⚠️ the body centres itself — no spacer, and none left in the sheet", () => {
+    expect(html).not.toContain("os-commfoot");
+    expect(cssRules).not.toContain(".os-commfoot");
+    const at = cssRules.indexOf(".os-commbody {");
     expect(at).toBeGreaterThan(-1);
-    expect(cssRules.slice(at, cssRules.indexOf("}", at))).toContain("margin-top: auto");
+    const body = cssRules.slice(at, cssRules.indexOf("}", at));
+    expect(body).toContain("align-items: center");
+    expect(body).toContain("justify-content: center");
+  });
+
+  /* ⚠️ THE PLATE IS EXTENDED, NEVER DUPLICATED. The band rendered a bespoke `.os-commic` span —
+     a fourth copy of a plate three headers already shared. It reads `OneScreenMark` now, so the
+     28px box, its fill, its hairline and the degrade path all come from one place. */
+  it("⚠️ the band uses the SHARED mark slot, and the fourth copy is deleted", () => {
+    const src = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
+    expect(src).toContain('<OneScreenMark name="community" />');
+    expect(html).toContain('data-mark="community"');
+    expect(html).toContain("os-mark");
+    expect(cssRules).not.toContain(".os-commic");
+  });
+
+  /* ⚠️ 84px AGAINST A 100px SOURCE — never above 100, never upscaled to fill space. */
+  it("the seedling is decorative and capped below its intrinsic size", () => {
+    expect(html).toContain('alt=""');
+    expect(html).toContain('aria-hidden="true"');
+    const at = cssRules.indexOf(".os-commseed");
+    expect(at).toBeGreaterThan(-1);
+    expect(cssRules.slice(at, cssRules.indexOf("}", at))).toContain("width: 84px");
+  });
+
+  /* ⚠️ INERT MEANS `disabled`, NOT A SILENT NO-OP. An enabled button with no handler looks live
+     and does nothing — the pack forbids exactly that, and Phase 2 drops the attribute. */
+  it("⚠️ the share button is disabled in Phase 1, with no placeholder handler", () => {
+    const src = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
+    expect(html).toContain("disabled");
+    /* ⚠️ COMMENT-STRIPPED — the tombstone trap, hit by this test's first draft: the TODO beside
+       the button explains that an enabled control with no `onClick` is the forbidden shape, and
+       the guard caught its own explanation. */
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+    expect(code).not.toContain("onClick");
+    expect(src).toContain("TODO(phase-2)");
   });
 
   /* ⚠️ ONE DECLARATION FOR BOTH ROWS — the spine. Two matched pairs of numbers drift; one rule

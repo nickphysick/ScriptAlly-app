@@ -26,7 +26,7 @@ import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 
 /** The four marks, and the brief each one is waiting for. */
 export type MarkName =
-  | "active-queries" | "goals" | "activity" | "tasks"
+  | "active-queries" | "goals" | "activity" | "tasks" | "community"
   /* the page-band keys — one per page that mounts variant="band" */
   | "queries" | "todo" | "calendar" | "contacts" | "packages" | "analytics"
   | "noteboard" | "discover" | "settings" | "manuscripts" | "comps";
@@ -63,6 +63,19 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
   tasks: {
     label: "list",
     icon: <><path d="M4 6h10M4 12h7M4 18h5" /><path d="M15 15l5-5 2 2-5 5-3 1z" /></>,
+  },
+  /**
+   * two figures, one behind the other — the cohort, not a single writer.
+   *
+   * ⚠️ THE COMMUNITY BAND JOINED THE SHARED SLOT RATHER THAN KEEPING ITS OWN (community empty-state
+   * pack). It rendered a bespoke `.os-commic` span holding a lucide `<Users />` — a FOURTH copy of
+   * a plate the other three headers already shared, at a different size with no plate at all. It
+   * reads the map now, which means it inherits the 28px box, the swap-ready geometry and the
+   * degrade path for free, and it takes an illustrated mark the same one-line way the others will.
+   */
+  community: {
+    label: "figures",
+    icon: <><circle cx="9" cy="8" r="3.2" /><path d="M3.2 19v-.8A5.8 5.8 0 0 1 9 12.4a5.8 5.8 0 0 1 5.8 5.8v.8" /><path d="M15.4 5.2a3.2 3.2 0 0 1 0 6M17 12.7a5.8 5.8 0 0 1 3.8 5.5v.8" /></>,
   },
 
   /* ── the page-band marks. Briefs in comments only, per the ArtSlot convention. ── */
