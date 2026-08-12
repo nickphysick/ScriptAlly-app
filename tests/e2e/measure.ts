@@ -14,6 +14,8 @@
  * That trap has cost time three times.
  */
 import { Page, expect } from "@playwright/test";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 /**
  * ⚠️⚠️ THIS BROWSER CANNOT PRODUCE A CLASSIC SCROLLBAR, AND EVERY REPORT MUST SAY SO.
@@ -49,6 +51,23 @@ const KILL_MOTION = `
     scroll-behavior: auto !important;
   }`;
 
+
+/**
+ * ⚠️ EVERY PAGE IS MOUNTED AT ONCE, so `document.querySelector(".wpg")` IS THE WRONG GRID.
+ * `StagePage` keeps dashboard/queries/agents/manuscripts as persistent slots and toggles their
+ * DISPLAY — page-local state has to survive navigation — so the document holds several grids and
+ * the first one in source order is almost never the one on screen. The hidden ones measure zero.
+ *
+ * That produced a full run of 0s that PASSED: identical children on all four pages, `.tpl-zone`
+ * present on the Contact list, every rect zero. It is the same fault as every harness this tool
+ * replaces — confident numbers about something the user is not looking at — reproduced inside the
+ * replacement. Picking the grid with a non-zero box is what makes the reading the visible page's.
+ */
+const VISIBLE_GRID = `(() => {
+  const grids = [...document.querySelectorAll('.wpg')];
+  return grids.find((g) => g.getBoundingClientRect().height > 0) || null;
+})()`;
+
 export interface Box { x: number; y: number; w: number; h: number }
 export interface ChildReading {
   tag: string; cls: string; h: number; centreDelta: number; offCentre: boolean;
@@ -68,15 +87,55 @@ export interface HeaderReading {
 
 const round = (n: number) => Math.round(n * 10) / 10;
 
+/** The shell's own roots. `.ws-panel` is the sidebar, `.ws-work` the content wrapper. */
+const SHELL = ".ws-panel, .ws-work, .ws-window, #app-stage-scroll";
+
+/**
+ * ⚠️ `storageState` DOES NOT CARRY A FIREBASE SESSION, and the failure looks like a broken
+ * selector. Firebase Auth persists to IndexedDB; Playwright's `storageState` captures cookies and
+ * localStorage only. So the saved state restored a signed-OUT browser, every route fell through to
+ * the marketing landing, and four runs timed out waiting for a sidebar the app was correctly not
+ * rendering. Signing in per run costs a few seconds and is the honest fix — the alternative is
+ * changing the app's auth persistence to suit its test harness.
+ */
+export async function ensureSignedIn(page: Page) {
+  if (await page.locator(SHELL).first().count()) return;
+  const pw = process.env.SA_E2E_PASSWORD ?? passwordFromEnvLocal();
+  if (!pw) throw new Error("No SA_E2E_PASSWORD — see tests/e2e/auth.setup.ts");
+  await page.goto("/#/signin");
+  await page.locator("#au-email").fill(process.env.SA_E2E_EMAIL ?? "harness@scriptally.test");
+  await page.locator("#au-pw").fill(pw);
+  await page.getByRole("button", { name: /^Sign in$/ }).last().click();
+  await expect(page.locator(SHELL).first()).toBeVisible({ timeout: 30_000 });
+}
+
+/** `.env.local` is not loaded by this process, so read it directly. */
+function passwordFromEnvLocal(): string | null {
+  const p = resolve(process.cwd(), ".env.local");
+  if (!existsSync(p)) return null;
+  for (const line of readFileSync(p, "utf8").split("\n")) {
+    const m = /^\s*SA_E2E_PASSWORD\s*=\s*(.*)$/.exec(line);
+    if (m) return m[1].trim().replace(/^["']|["']$/g, "") || null;
+  }
+  return null;
+}
+
 /** Open a route on the deployed dev site and wait for the workspace to be real, not a skeleton. */
 export async function openRoute(page: Page, route: string, viewport?: { width: number; height: number }) {
   if (viewport) await page.setViewportSize(viewport);
   await page.goto(route);
+  await ensureSignedIn(page);
+  await page.goto(route);
   await page.addStyleTag({ content: FORCE_CLASSIC_SCROLLBARS });
   await page.addStyleTag({ content: KILL_MOTION });
   /* the shell first, then the page's own grid if it has one */
-  await expect(page.locator("#app-stage-scroll, .ws-panel, .sv2-app").first()).toBeVisible({ timeout: 30_000 });
-  await page.waitForLoadState("networkidle").catch(() => { /* long-poll listeners never idle */ });
+  await expect(page.locator(SHELL).first()).toBeVisible({ timeout: 30_000 });
+  /* ⚠️ NEVER `networkidle` ON THIS APP, AND A BARE `.catch()` DOES NOT SAVE YOU. Firestore holds
+     long-poll listeners open, so the network is never idle — the call HANGS rather than rejecting,
+     and four runs died on the test timeout pointing at the line after it. A short settle beats a
+     condition that cannot be met. */
+  await page.waitForLoadState("domcontentloaded").catch(() => {});
+  await page.waitForTimeout(2500);
   await page.addStyleTag({ content: KILL_MOTION });
 }
 
@@ -103,7 +162,7 @@ export async function scrollbarWidth(page: Page): Promise<number> {
  */
 export async function readHeader(page: Page, label: string, state: "REST" | "WORKING"): Promise<HeaderReading | null> {
   return page.evaluate(({ label, state }) => {
-    const grid = document.querySelector(".wpg");
+    const grid = [...document.querySelectorAll(".wpg")].find((g) => g.getBoundingClientRect().height > 0);
     if (!grid) return null;
     const row = grid.querySelector(".wpg-plate") as HTMLElement;
     const wrap = grid.querySelector(".wsh-wrap") as HTMLElement | null;
@@ -163,9 +222,10 @@ export async function readHeader(page: Page, label: string, state: "REST" | "WOR
 /** Scroll geometry, read in the RESTING state — which is what `safeToStrip()` sees. */
 export async function readScroll(page: Page) {
   return page.evaluate(() => {
-    const grid = document.querySelector(".wpg");
+    const grid = [...document.querySelectorAll(".wpg")].find((g) => g.getBoundingClientRect().height > 0);
     const scroll = grid?.querySelector(".wpg-scroll") as HTMLElement | null;
-    const zone = document.querySelector(".tpl-zone") as HTMLElement | null;
+    /* scoped to the visible grid for the same reason — a hidden page's zone is not this page's */
+    const zone = (grid?.querySelector(".tpl-zone") ?? null) as HTMLElement | null;
     const cs = getComputedStyle(document.documentElement);
     const tok = (n: string) => parseFloat(cs.getPropertyValue(n)) || 0;
     const reclaim = tok("--wsh-plate-h") + tok("--wsh-plate-gap") - tok("--wsh-plate-h-scrolled");
