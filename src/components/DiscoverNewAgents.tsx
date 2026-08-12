@@ -75,6 +75,26 @@ interface DiscoverNewAgentsProps {
   ) => void;
 }
 
+/**
+ * ⚠️ DISCOVER SHIPS AS A FEATURE PAGE AT LAUNCH — flip to `true` to restore the live matching view.
+ *
+ * The verified catalogue is not stocked yet, so a page that tried to match would spend its whole
+ * life in an empty state. It states what the feature is instead, and says plainly that it is
+ * coming — which is why there is NO empty state on the feature page: nothing attempts to match, so
+ * nothing can come back empty.
+ *
+ * ⚠️ THIS IS A GATE, NOT A DELETION. Every derivation, handler and branch of the live view below is
+ * intact and unreferenced while the flag is false — including all three branches of
+ * `renderNoMatch()`, which are the LIVE view's first-run states and belong to it. Flipping this one
+ * constant restores the page exactly as it was; nothing has to be rebuilt.
+ *
+ * ⚠️ AND IT IS TYPED `boolean`, NOT LEFT TO INFER `false`. A literal-`false` const narrows every
+ * `DISCOVER_LIVE && …` to dead code, which is how a "temporarily gated" branch quietly rots: the
+ * compiler stops checking the JSX inside it. Typed wide, the live view keeps being typechecked on
+ * every build, so it is still correct on the day someone flips it.
+ */
+const DISCOVER_LIVE: boolean = false;
+
 /** Two display groups (the approved ref shows Strong / Possible only): the engine's `good` tier
  *  reads as a possible fit rather than earning its own band. */
 const isStrong = (e: DiscoverEntry) => e.tier === "strong";
@@ -458,6 +478,133 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
     );
   };
 
+  /**
+   * The live matching view — the results list and its two control rows.
+   *
+   * ⚠️ A `const` ARROW DECLARED ABOVE THE RETURN, like its siblings `renderCard` / `section` /
+   * `renderNoMatch`, and NOT below it. A helper the render calls that reads a `const` declared
+   * after the return sits in the temporal dead zone and throws on every render — the fault
+   * `pageStructure.test.ts` exists to catch, which `tsc` cannot see through a nested function.
+   */
+  const renderLiveResults = () => (
+    <>
+      {/* ── Controls (below the Pro strip) ── */}
+      <div className="dv-line">
+        <span className="dv-cnt">Ranked by</span>
+        {lenses.map((l) => (
+          <button
+            key={l}
+            type="button"
+            className={`dv-ctl${activeLens === l ? " act" : ""}`}
+            aria-pressed={activeLens === l}
+            onClick={() => setLens(l)}
+          >
+            {LENS_META[l].label}
+          </button>
+        ))}
+        <span className="dv-push" />
+        <span className="dv-cnt">
+          {visible.length} {visible.length === 1 ? "match" : "matches"}
+        </span>
+      </div>
+      <div className="dv-line">
+        <span className="dv-cnt">Filters</span>
+        <button
+          type="button"
+          className={`dv-ctl${openOnly ? " act" : ""}`}
+          aria-pressed={openOnly}
+          onClick={() => setOpenOnly((v) => !v)}
+        >
+          {openOnly && <Check aria-hidden="true" strokeWidth={2.6} />}
+          Open to submissions
+        </button>
+        <button
+          type="button"
+          className={`dv-ctl${hideHeld ? " act" : ""}`}
+          aria-pressed={hideHeld}
+          onClick={() => setHideHeld((v) => !v)}
+        >
+          {hideHeld && <Check aria-hidden="true" strokeWidth={2.6} />}
+          Not already in my database
+        </button>
+        {hasLocations && (
+          <button
+            type="button"
+            className={`dv-ctl${ukiOnly ? " act" : ""}`}
+            aria-pressed={ukiOnly}
+            onClick={() => setUkiOnly((v) => !v)}
+          >
+            {ukiOnly && <Check aria-hidden="true" strokeWidth={2.6} />}
+            UK &amp; Ireland only
+          </button>
+        )}
+      </div>
+
+      {visible.length === 0 ? (
+        <div className="dv-nomatch" style={{ marginTop: 26 }}>
+          <div>
+            <div className="nm1">
+              Nothing showing for <b>{selected?.title}</b>
+            </div>
+            <div className="nm2">
+              {hiddenByFilters > 0
+                ? `${hiddenByFilters} ${hiddenByFilters === 1 ? "match is" : "matches are"} hidden by your filters.`
+                : "Every match has been set aside this session."}
+            </div>
+          </div>
+          <span className="sp" />
+          <button
+            type="button"
+            className="go"
+            onClick={() => {
+              setOpenOnly(false);
+              setHideHeld(false);
+              setUkiOnly(false);
+              setDismissed(new Set());
+              setLastDismissed(null);
+            }}
+          >
+            Show everything
+          </button>
+        </div>
+      ) : (
+        <>
+          {section("Strong fits", "strong", strongFits)}
+          {section("Possible fits", "possible", possibleFits)}
+          {hiddenByFilters > 0 && (
+            <div className="dv-undo" style={{ marginTop: 22 }}>
+              <span>
+                {hiddenByFilters} more {hiddenByFilters === 1 ? "agent is" : "agents are"}{" "}
+                hidden by your filters.
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpenOnly(false);
+                  setHideHeld(false);
+                  setUkiOnly(false);
+                }}
+              >
+                Show them
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {lastDismissed && (
+        <div className="dv-undo">
+          <span>
+            Removed <strong>{lastDismissed.name}</strong> from your matches
+          </span>
+          <button type="button" onClick={undoDismiss}>
+            Undo
+          </button>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <div className="dv2">
       {/* THE shared page header — identical to the agent list's but for two things: the Pro pill
@@ -476,50 +623,66 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
             title="Discover"
             description="Verified agents matched to your manuscript — with the reasons they fit."
             titleAdornment={<span className="dv-propill">Pro</span>}
+            /* ⚠️ THE SLOT IS THE ONLY THING THE BAND EXPOSES, AND THAT IS DELIBERATE. `PageHeader`
+               is a locked component; what changes here is what this page HANDS it, never the band
+               itself. Live, the slot carries the manuscript selector; as a feature page it carries
+               a static state chip — a control that switched manuscripts would promise matching the
+               page is not doing. */
             actionsSlot={
-              selected ? (
-                pickable.length >= 2 ? (
-                  <button
-                    type="button"
-                    className="dv-msel"
-                    onClick={tryNextManuscript}
-                    title="Switch manuscript"
-                  >
-                    <span className="k">Finding for</span>
-                    {selected.title}
-                    <ChevronDown aria-hidden="true" />
-                  </button>
-                ) : (
-                  <span className="dv-msel">
-                    <span className="k">Finding for</span>
-                    {selected.title}
-                  </span>
-                )
-              ) : undefined
+              DISCOVER_LIVE ? (
+                selected ? (
+                  pickable.length >= 2 ? (
+                    <button
+                      type="button"
+                      className="dv-msel"
+                      onClick={tryNextManuscript}
+                      title="Switch manuscript"
+                    >
+                      <span className="k">Finding for</span>
+                      {selected.title}
+                      <ChevronDown aria-hidden="true" />
+                    </button>
+                  ) : (
+                    <span className="dv-msel">
+                      <span className="k">Finding for</span>
+                      {selected.title}
+                    </span>
+                  )
+                ) : undefined
+              ) : (
+                <span className="dv-soon">Coming soon</span>
+              )
             }
         />
       }>
       <div className="dv-wrap">
         <div>
-          {/* The vetting strip earns its place beside real matches; in the first-run state the
-              no-match message takes this position instead. */}
-          {!firstRun && (
-            <div className="dv-trust">
-              <ShieldCheck aria-hidden="true" />
-              <span>
-                <b>Every agent here is vetted.</b> A real agency, hand-checked and kept current —
-                and never one that charges a fee.{" "}
-                <button type="button" className="dv-verify" onClick={() => onNavigate?.("help")}>
-                  How we verify →
-                </button>
-              </span>
-            </div>
-          )}
-
-          {firstRun ? (
+          {/* ⚠️ ONE CONDITION SPLITS THE PAGE, AND IT IS NOT `firstRun`. The live RESULTS view is
+              `DISCOVER_LIVE && !firstRun`; everything else — the gated first run AND the feature
+              page — renders the marketing body. Written this way the live view is byte-identical
+              to what it always was the moment the flag flips, and the no-match strip stays where
+              it belongs: inside the live view, which is the only view that attempts a match. */}
+          {DISCOVER_LIVE && !firstRun ? (
             <>
-              {/* The no-match message takes the vetting strip's position, directly under the rule. */}
-              {renderNoMatch()}
+              {/* The vetting strip earns its place beside real matches; in the first-run state the
+                  no-match message takes this position instead. */}
+              <div className="dv-trust">
+                <ShieldCheck aria-hidden="true" />
+                <span>
+                  <b>Every agent here is vetted.</b> A real agency, hand-checked and kept current —
+                  and never one that charges a fee.{" "}
+                  <button type="button" className="dv-verify" onClick={() => onNavigate?.("help")}>
+                    How we verify →
+                  </button>
+                </span>
+              </div>
+              {renderLiveResults()}
+            </>
+          ) : (
+            <>
+              {/* The no-match message takes the vetting strip's position, directly under the rule.
+                  Live only: on the feature page nothing has been matched, so nothing is missing. */}
+              {DISCOVER_LIVE && renderNoMatch()}
 
               {/* ── The centred feature reel — sits ON the page, no card wrapper ── */}
               <section className="dv-reel">
@@ -618,123 +781,6 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                   </article>
                 </div>
               </section>
-            </>
-          ) : (
-            <>
-              {/* ── Controls (below the Pro strip) ── */}
-              <div className="dv-line">
-                <span className="dv-cnt">Ranked by</span>
-                {lenses.map((l) => (
-                  <button
-                    key={l}
-                    type="button"
-                    className={`dv-ctl${activeLens === l ? " act" : ""}`}
-                    aria-pressed={activeLens === l}
-                    onClick={() => setLens(l)}
-                  >
-                    {LENS_META[l].label}
-                  </button>
-                ))}
-                <span className="dv-push" />
-                <span className="dv-cnt">
-                  {visible.length} {visible.length === 1 ? "match" : "matches"}
-                </span>
-              </div>
-              <div className="dv-line">
-                <span className="dv-cnt">Filters</span>
-                <button
-                  type="button"
-                  className={`dv-ctl${openOnly ? " act" : ""}`}
-                  aria-pressed={openOnly}
-                  onClick={() => setOpenOnly((v) => !v)}
-                >
-                  {openOnly && <Check aria-hidden="true" strokeWidth={2.6} />}
-                  Open to submissions
-                </button>
-                <button
-                  type="button"
-                  className={`dv-ctl${hideHeld ? " act" : ""}`}
-                  aria-pressed={hideHeld}
-                  onClick={() => setHideHeld((v) => !v)}
-                >
-                  {hideHeld && <Check aria-hidden="true" strokeWidth={2.6} />}
-                  Not already in my database
-                </button>
-                {hasLocations && (
-                  <button
-                    type="button"
-                    className={`dv-ctl${ukiOnly ? " act" : ""}`}
-                    aria-pressed={ukiOnly}
-                    onClick={() => setUkiOnly((v) => !v)}
-                  >
-                    {ukiOnly && <Check aria-hidden="true" strokeWidth={2.6} />}
-                    UK &amp; Ireland only
-                  </button>
-                )}
-              </div>
-
-              {visible.length === 0 ? (
-                <div className="dv-nomatch" style={{ marginTop: 26 }}>
-                  <div>
-                    <div className="nm1">
-                      Nothing showing for <b>{selected?.title}</b>
-                    </div>
-                    <div className="nm2">
-                      {hiddenByFilters > 0
-                        ? `${hiddenByFilters} ${hiddenByFilters === 1 ? "match is" : "matches are"} hidden by your filters.`
-                        : "Every match has been set aside this session."}
-                    </div>
-                  </div>
-                  <span className="sp" />
-                  <button
-                    type="button"
-                    className="go"
-                    onClick={() => {
-                      setOpenOnly(false);
-                      setHideHeld(false);
-                      setUkiOnly(false);
-                      setDismissed(new Set());
-                      setLastDismissed(null);
-                    }}
-                  >
-                    Show everything
-                  </button>
-                </div>
-              ) : (
-                <>
-                  {section("Strong fits", "strong", strongFits)}
-                  {section("Possible fits", "possible", possibleFits)}
-                  {hiddenByFilters > 0 && (
-                    <div className="dv-undo" style={{ marginTop: 22 }}>
-                      <span>
-                        {hiddenByFilters} more {hiddenByFilters === 1 ? "agent is" : "agents are"}{" "}
-                        hidden by your filters.
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setOpenOnly(false);
-                          setHideHeld(false);
-                          setUkiOnly(false);
-                        }}
-                      >
-                        Show them
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {lastDismissed && (
-                <div className="dv-undo">
-                  <span>
-                    Removed <strong>{lastDismissed.name}</strong> from your matches
-                  </span>
-                  <button type="button" onClick={undoDismiss}>
-                    Undo
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>

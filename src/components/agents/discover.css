@@ -37,6 +37,12 @@
   --dv-sage-band: #dce0d9;
   --dv-sage-rule: #8a9e88;
   --dv-sage-deep: #5a6e58;
+  /* Coming-soon chip — the feature page's state marker (ref `--sage-a`/`--sage-b`/border).
+     Its INK is `--dv-sage-deep`, which is already the ref's `--sage-text` to the digit, so the
+     chip reads as the same sage family the strong-fit band does rather than a fourth green. */
+  --dv-soon-a: #d7ddd5;
+  --dv-soon-b: #d5dbd3;
+  --dv-soon-line: #c4cdc1;
   /* Hard letterpress offset — the ink-bordered card sitting proud of the canvas. */
   --dv-print: 2px 3px 0 rgba(49, 30, 25, 0.07);
 }
@@ -156,6 +162,28 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
   color: var(--dv-muted);
 }
 .dv-msel svg { width: 13px; height: 13px; color: var(--dv-muted); flex: none; }
+
+/* ── The coming-soon chip — what the actions slot carries while DISCOVER_LIVE is false ──
+   ⚠️ THE SOURCE STRING IS SENTENCE CASE AND THE CAPS ARE `text-transform`. Every mono label on
+   this page works that way, and one of them is load-bearing: `agentsPageSmoke.test.tsx` asserts
+   the rendered HTML contains "Discover new agents", which only holds while the eyebrow's source
+   stays sentence case. Typing a label in caps at source is the shape that breaks it. */
+.dv-soon {
+  display: inline-flex;
+  align-items: center;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--dv-sage-deep);
+  background: linear-gradient(135deg, var(--dv-soon-a), var(--dv-soon-b));
+  border: 1px solid var(--dv-soon-line);
+  border-radius: 999px;
+  padding: 7px 16px;
+  white-space: nowrap;
+  flex: none;
+}
 
 /* ── The vetting strip — POPULATED STATE ONLY. In the first-run state the no-match message takes
       this position instead (the claim only does work beside real matches). ── */

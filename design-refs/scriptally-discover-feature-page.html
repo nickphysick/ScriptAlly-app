@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Discover (feature page)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f2ede7;
+    --parchment:#fdfaf5;
+    --ink:#311e19;
+    --body:#4a3a32;
+    --muted:#8a7a6c;
+    --label:#9c8878;
+    --burgundy:#7c3a2a;
+    --burgundy-deep:#6b3023;
+    --sage-a:#d7ddd5;
+    --sage-b:#d5dbd3;
+    --sage-accent:#8a9e88;
+    --sage-text:#5a6e58;
+    --pink-bg:#f5e2da;
+    --pink-border:#e8c8bc;
+    --slate:#6A89A7;
+    --hairline:#ece0d2;
+    --card-border:#e8e0d6;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--cream);
+    font-family:'Inter',sans-serif;
+    color:var(--body);
+    -webkit-font-smoothing:antialiased;
+    padding:28px;
+  }
+  .page{
+    max-width:1240px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 1px 3px rgba(58,28,20,0.05), 0 10px 30px rgba(58,28,20,0.07);
+    overflow:hidden;
+  }
+
+  /* ---------- Workspace band (locked component — content only changes) ---------- */
+  .band{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 26px;
+    border-bottom:1px solid var(--hairline);
+    background:var(--parchment);
+  }
+  .band-left{display:flex;align-items:center;gap:14px;}
+  .band-icon{
+    width:38px;height:38px;border-radius:10px;
+    background:#f6efe6;border:1px solid var(--card-border);
+    display:flex;align-items:center;justify-content:center;color:var(--burgundy);
+  }
+  .band-title{display:flex;align-items:baseline;gap:8px;}
+  .band-title h1{font-family:'Playfair Display',serif;font-weight:500;font-size:24px;color:var(--ink);}
+  .chip-pro{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;
+    background:#dfe8ef;color:#41637f;border-radius:999px;padding:3px 9px;font-weight:500;
+    position:relative;top:-2px;
+  }
+  .band-desc{font-size:13px;color:var(--muted);margin-top:1px;}
+  .chip-soon{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;
+    color:var(--sage-text);
+    background:linear-gradient(135deg,var(--sage-a),var(--sage-b));
+    border:1px solid #c4cdc1;border-radius:999px;padding:7px 16px;font-weight:500;
+    white-space:nowrap;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{text-align:center;padding:84px 40px 26px;}
+  .eyebrow{
+    display:inline-block;
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.18em;
+    color:#41637f;background:#e7edf2;border:1px solid #d3dde6;
+    border-radius:999px;padding:6px 16px;font-weight:500;
+  }
+  .hero h2{
+    font-family:'Playfair Display',serif;font-weight:500;
+    font-size:52px;line-height:1.14;color:var(--ink);
+    max-width:820px;margin:26px auto 0;
+  }
+  .hero p{
+    font-size:16.5px;line-height:1.65;color:var(--body);
+    max-width:640px;margin:22px auto 0;
+  }
+
+  /* ---------- Feature reel ---------- */
+  .reel{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+    padding:56px 48px 72px;max-width:1180px;margin:0 auto;
+  }
+  .feature{
+    background:var(--parchment);
+    border:1px solid var(--card-border);
+    border-radius:14px;
+    padding:14px 14px 30px;
+    text-align:center;
+  }
+  .anim-slot{
+    border:1.5px dashed #d8cbbd;border-radius:10px;
+    background:linear-gradient(160deg,#fbf7f1, #f3f0f6 60%, #eef1f4);
+    height:180px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    color:#a9b6c4;
+  }
+  .anim-slot svg{width:34px;height:34px;}
+  .anim-slot span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;}
+  .feature h3{
+    font-family:'Playfair Display',serif;font-weight:500;
+    font-size:23px;color:var(--ink);margin:26px 18px 12px;
+  }
+  .feature p{font-size:14px;line-height:1.62;color:var(--body);margin:0 22px;}
+
+  /* ---------- Specimen stage ---------- */
+  .stage{
+    background:var(--parchment);
+    border-top:1px solid var(--hairline);
+    border-bottom:1px solid var(--hairline);
+    padding:74px 40px 84px;
+    text-align:center;
+  }
+  .stage-head h2{
+    font-family:'Playfair Display',serif;font-weight:500;
+    font-size:38px;color:var(--ink);
+  }
+  .stage-head p{
+    font-size:15.5px;line-height:1.6;color:var(--body);
+    max-width:560px;margin:14px auto 0;
+  }
+  .exhibit{
+    position:relative;
+    width:920px;max-width:100%;
+    margin:58px auto 0;
+    height:400px;
+  }
+
+  /* the example card */
+  .match{
+    position:absolute;left:50%;top:0;transform:translateX(-50%);
+    width:440px;text-align:left;
+    background:#ffffff;
+    border:1px solid #e2dcd2;
+    border-radius:12px;
+    box-shadow:0 2px 6px rgba(58,28,20,0.06), 0 14px 34px rgba(58,28,20,0.10);
+  }
+  .match-tab{
+    position:absolute;top:-13px;left:22px;
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.18em;
+    background:#e4e9e1;border:1px solid #cfd6cc;border-bottom:none;
+    color:var(--sage-text);
+    border-radius:7px 7px 0 0;padding:5px 13px 3px;
+    z-index:1;
+  }
+  .match-top{
+    display:flex;align-items:center;justify-content:space-between;
+    background:#eef1ec;
+    border-bottom:1px solid #dfe4dc;
+    border-radius:11px 11px 0 0;
+    padding:11px 16px;
+  }
+  .fit-pill{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.12em;
+    border:1px solid var(--sage-accent);color:var(--sage-text);
+    border-radius:999px;padding:4px 11px;background:#f2f5f0;
+  }
+  .verified{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;
+    color:var(--sage-text);display:flex;align-items:center;gap:5px;
+  }
+  .match-body{padding:18px 20px 0;display:flex;gap:14px;}
+  .avatar{
+    width:46px;height:46px;border-radius:50%;flex-shrink:0;
+    background:#f3e6dc;border:1px solid #e4d2c4;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--burgundy);
+  }
+  .who h4{font-family:'Playfair Display',serif;font-weight:500;font-size:21px;color:var(--ink);}
+  .who .agency{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#6a5a50;margin-top:1px;}
+  .who .loc{font-size:12.5px;color:var(--body);margin-top:7px;}
+  .who .meta{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.13em;
+    color:var(--label);margin-top:8px;
+  }
+  .who .site{font-size:12.5px;color:var(--burgundy);margin-top:8px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:#d8b5a8;}
+  .why{
+    margin:16px 20px 0;padding-top:14px;border-top:0.5px solid var(--hairline);
+  }
+  .why .lbl{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;color:var(--label);
+  }
+  .why p{font-size:13.5px;line-height:1.55;color:var(--body);margin-top:7px;}
+  .why .hit{color:var(--burgundy);font-weight:500;}
+  .match-actions{
+    display:flex;align-items:center;gap:10px;
+    padding:16px 20px 18px;
+  }
+  .btn-pink{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.05em;font-weight:500;
+    background:var(--pink-bg);border:1px solid var(--pink-border);color:var(--burgundy-deep);
+    border-radius:9px;padding:9px 16px;cursor:default;
+  }
+  .btn-ghost{
+    font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:0.05em;font-weight:500;
+    background:#fff;border:1px solid #e0d5c8;color:#6a5a50;
+    border-radius:9px;padding:9px 16px;cursor:default;
+  }
+  .btn-text{
+    font-size:12.5px;color:var(--muted);margin-left:auto;cursor:default;
+  }
+
+  /* annotations */
+  .note{
+    position:absolute;
+    font-family:'Caveat',cursive;font-weight:500;
+    font-size:21px;line-height:1.25;color:#5f5348;
+    width:190px;
+  }
+  .note.n1{right:0;top:2px;width:200px;text-align:left;}
+  .note.n2{left:0;top:186px;width:200px;text-align:right;}
+  .note.n3{right:0;top:296px;width:200px;text-align:left;}
+  .connector{position:absolute;pointer-events:none;overflow:visible;}
+  .connector path{fill:none;stroke:#a89a8a;stroke-width:1.4;stroke-dasharray:1 5;stroke-linecap:round;}
+  .connector circle{fill:#a89a8a;}
+  .c1{left:648px;top:14px;}
+  .c2{left:206px;top:206px;}
+  .c3{left:684px;top:300px;}
+
+  /* ---------- Close ---------- */
+  .close-sect{text-align:center;padding:70px 40px 78px;}
+  .close-sect .chip-soon{margin-bottom:20px;display:inline-block;}
+  .close-sect p{
+    font-family:'Playfair Display',serif;font-size:19px;color:var(--ink);
+    max-width:520px;margin:0 auto;line-height:1.5;
+  }
+  .close-sect small{
+    display:block;margin-top:14px;font-size:13px;color:var(--muted);
+  }
+
+  @media (max-width:980px){
+    .reel{grid-template-columns:1fr;padding:40px 24px 56px;}
+    .exhibit{height:auto;}
+    .match{position:relative;left:auto;transform:none;margin:0 auto;}
+    .note,.connector{display:none;}
+    .hero h2{font-size:38px;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Workspace band — locked component; only the right-side pill changes -->
+  <div class="band">
+    <div class="band-left">
+      <div class="band-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><polygon points="15.5,8.5 13.5,13.5 8.5,15.5 10.5,10.5" fill="currentColor" stroke="none"/></svg>
+      </div>
+      <div>
+        <div class="band-title">
+          <h1>Discover</h1>
+          <span class="chip-pro">PRO</span>
+        </div>
+        <div class="band-desc">Verified agents matched to your manuscript — with the reasons they fit.</div>
+      </div>
+    </div>
+    <span class="chip-soon">COMING SOON</span>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <span class="eyebrow">PRO&nbsp;&nbsp;·&nbsp;&nbsp;DISCOVER NEW AGENTS</span>
+    <h2>The right agents are already looking for a book like yours.</h2>
+    <p>ScriptAlly scores every agent in its hand-checked catalogue against your manuscript — genre, age category and wish-list overlap — and shows you why each one fits before you query.</p>
+  </section>
+
+  <!-- Feature reel: animation + caption merged into one card each -->
+  <section class="reel">
+    <div class="feature">
+      <div class="anim-slot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M18.5 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>
+        <span>ANIMATION</span>
+      </div>
+      <h3>Matched to your book</h3>
+      <p>Ranked by real overlap with your genre and themes — not an alphabetical directory to trawl.</p>
+    </div>
+    <div class="feature">
+      <div class="anim-slot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M18.5 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>
+        <span>ANIMATION</span>
+      </div>
+      <h3>Every agent vetted</h3>
+      <p>Real agencies, hand-checked and kept current — and never one that charges a reading fee.</p>
+    </div>
+    <div class="feature">
+      <div class="anim-slot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z"/><path d="M18.5 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>
+        <span>ANIMATION</span>
+      </div>
+      <h3>A head start on your query</h3>
+      <p>Each match pulls out the wish-list line to lead your letter with — the personalisation, found for you.</p>
+    </div>
+  </section>
+
+  <!-- Specimen stage: the example card as an annotated exhibit -->
+  <section class="stage">
+    <div class="stage-head">
+      <h2>What a match looks like</h2>
+      <p>Every match tells you how strongly it fits and why. When one looks right, add them in a click — or start the query there and then.</p>
+    </div>
+
+    <div class="exhibit">
+
+      <!-- annotations -->
+      <div class="note n1">hand-checked, and re-checked — never a stale listing</div>
+      <svg class="connector c1" width="70" height="26"><path d="M66,8 C 46,2 24,8 4,18"/><circle cx="4" cy="18" r="2.2"/></svg>
+
+      <div class="note n2">the exact wish-list line to open your letter with</div>
+      <svg class="connector c2" width="36" height="28"><path d="M2,8 C 14,12 24,18 32,24"/><circle cx="32" cy="24" r="2.2"/></svg>
+
+      <div class="note n3">one click to your contact list — or straight into a query</div>
+      <svg class="connector c3" width="34" height="18"><path d="M32,4 C 22,8 12,10 3,14"/><circle cx="3" cy="14" r="2.2"/></svg>
+
+      <!-- example match card -->
+      <div class="match">
+        <span class="match-tab">EXAMPLE</span>
+        <div class="match-top">
+          <span class="fit-pill">STRONG FIT</span>
+          <span class="verified">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 3v6c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V5z"/><path d="M9 12l2 2 4-4"/></svg>
+            VERIFIED JUN 2026
+          </span>
+        </div>
+        <div class="match-body">
+          <div class="avatar">EW</div>
+          <div class="who">
+            <h4>Eleanor Whitcombe</h4>
+            <div class="agency">Marsh &amp; Tide Literary</div>
+            <div class="loc">🇬🇧&nbsp; London</div>
+            <div class="meta">OPEN TO QUERIES&nbsp;&nbsp;·&nbsp;&nbsp;REPLIES ~8 WKS</div>
+            <div class="site">marshandtide.co.uk</div>
+          </div>
+        </div>
+        <div class="why">
+          <span class="lbl">WHY IT FITS</span>
+          <p>Literary Fiction · wish list matches <span class="hit">family</span>, <span class="hit">memory</span>, <span class="hit">coastal communities</span></p>
+        </div>
+        <div class="match-actions">
+          <span class="btn-pink">+&nbsp; Add to my agents</span>
+          <span class="btn-ghost">Draft a query</span>
+          <span class="btn-text">Not a fit</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Close -->
+  <section class="close-sect">
+    <span class="chip-soon">COMING SOON</span>
+    <p>Discover opens to Pro members shortly after launch, as the verified catalogue grows.</p>
+    <small>Your manuscripts are already set up — matches will appear here the moment it opens.</small>
+  </section>
+
+</div>
+</body>
+</html>
