@@ -244,7 +244,16 @@ export const BrandProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       /* 1. Font Family Overrides */
-      .font-serif, h1, h2, h3, .font-serif-header {
+      /* ⚠️ SHELL CHROME IS EXCLUDED — the brand system themes the user's CONTENT, not the app's
+         own furniture, and a bare \`h1 { … !important }\` reached both. The workspace header's title
+         is an \`<h1>\`, so this rule has silently owned its font all along: it beat the header's own
+         stylesheet AND an inline style, and nobody noticed because the brand default is Playfair,
+         which is what the resting masthead wants anyway. It surfaced the moment the working state
+         asked for the mono label — the label rendered at 11.5px, weight 500, 0.2em, uppercase, in
+         PLAYFAIR: every property from the header's rule except the one this override held.
+         Excluding it changes nothing at rest (same family, same weight) and hands the header's own
+         title back to the header's own stylesheet, which is where it belongs. */
+      .font-serif, h1:not(.wsh-title), h2, h3, .font-serif-header {
         font-family: "${headingFontName}", Garamond, Georgia, serif !important;
       }
       .font-sans, p, span, div, button, input, select, textarea, label {
