@@ -26,6 +26,20 @@ const read = (page: Page) => page.evaluate(() => {
   const sc = g.querySelector(".wpg-scroll") as HTMLElement;
   return {
     stripH: r((g.querySelector(".wsh") as HTMLElement).getBoundingClientRect().height),
+    /* ⚠️ QUERY CENTRE'S WORKING STATE IS MODE-DRIVEN, NOT SCROLL-DRIVEN, so the matrix never sees
+       it: the page is a fill page, nothing scrolls, and its strip only appears on entering a
+       journey. It is therefore the ONE page whose working register the cross-page equality cannot
+       reach — which is exactly the page a "same on every page" rule most needs to cover. */
+    titleReg: (() => {
+      const t = g.querySelector(".wsh-title") as HTMLElement | null;
+      if (!t) return "—";
+      const c = getComputedStyle(t);
+      return `${c.fontFamily.split(",")[0].replace(/"/g, "")}/${c.fontSize}/${c.fontWeight}/${c.letterSpacing}/${c.textTransform}`;
+    })(),
+    markGone: (() => {
+      const m = g.querySelector(".wsh-mark") as HTMLElement | null;
+      return m ? (m.getBoundingClientRect().width === 0 && getComputedStyle(m).opacity === "0") : true;
+    })(),
     pageScroll: sc.scrollHeight - sc.clientHeight,
     scrollTop: r(sc.scrollTop),
     list: box(".f12-list"),
@@ -120,6 +134,10 @@ test("§4 — browsing, create, record: the panes scroll and the page does not",
   await openCreate(page);
   const create = (await read(page))!;
   expect(create.stripH, "the strip did not condense on entering the journey").toBe(52);
+  /* the same label the other nine pages wear — asserted here because nothing else can reach it */
+  expect(create.titleReg, "Query Centre's working title is not the mono label the other pages wear")
+    .toBe("JetBrains Mono/11.5px/500/2.3px/uppercase");
+  expect(create.markGone, "the mark is still drawn in Query Centre's working strip").toBe(true);
   expect(create.pageScroll, "the takeover introduced an outer scroller").toBe(0);
   /* the takeover replaces the WHOLE work area — list and the browsing toolbar both go */
   expect(create.list!.display, "the list is still rendered under the takeover").toBe("none");
@@ -146,6 +164,8 @@ test("§4 — browsing, create, record: the panes scroll and the page does not",
   await openRecord(page);
   const rec = (await read(page))!;
   expect(rec.stripH, "the strip did not condense on the response journey").toBe(52);
+  expect(rec.titleReg, "the response journey's title is not the mono label").toBe("JetBrains Mono/11.5px/500/2.3px/uppercase");
+  expect(rec.markGone, "the mark is still drawn in the response journey's strip").toBe(true);
   expect(rec.pageScroll, "the response takeover introduced an outer scroller").toBe(0);
   expect(rec.list!.display, "the list is still rendered beside the response takeover").toBe("none");
   expect(rec.toolbar, "the browsing verbs are still drawn above the query being recorded").toBeNull();

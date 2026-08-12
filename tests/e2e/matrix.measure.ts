@@ -116,7 +116,18 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
       .filter((el) => el.getBoundingClientRect().height > 0)
       .map((el) => getComputedStyle(el).fontSize))],
     titlePx: title ? getComputedStyle(title).fontSize : "—",
+    /* ⚠️ THE WHOLE REGISTER, NOT JUST THE SIZE (§4). The working title is a different VOICE —
+       family, weight, letterspacing and case all change together — so a run that compared only the
+       size would pass a page that had kept Playfair at 11.5px. Reported as one string so a single
+       cross-page comparison covers all five. */
+    titleReg: title ? (() => {
+      const c = getComputedStyle(title);
+      return `${c.fontFamily.split(",")[0].replace(/"/g, "")}/${c.fontSize}/${c.fontWeight}/${c.letterSpacing}/${c.textTransform}`;
+    })() : "—",
+    titleInk: title ? getComputedStyle(title).color : "—",
     markW: mark ? r(mark.getBoundingClientRect().width) : -1,
+    /* the mark drops entirely when working — width AND opacity, on every page */
+    markGone: mark ? (r(mark.getBoundingClientRect().width) === 0 && getComputedStyle(mark).opacity === "0") : true,
     offCentre: [...inner.children].filter((el) => {
       const b = el.getBoundingClientRect();
       return b.height > 0 && Math.abs(b.top + b.height / 2 - hc) > 0.5;
@@ -212,8 +223,10 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
         restCardH: rest.headerH, workCardH: work!.headerH,
         restBtn: rest.btnH.join("|") || "—", workBtn: work!.btnH.join("|") || "—",
         restPill: rest.pillFs.join("|") || "—", workPill: work!.pillFs.join("|") || "—",
+        restReg: rest.titleReg, workReg: work!.titleReg,
+        workInk: work!.titleInk, markGone: work!.markGone,
         contentL: rest.contentL, chain: rest.chain.join(" · ") || "clean",
-        topGap: rest.topGap,
+        topGap: rest.topGap, workGap: work!.topGap,
         zeroKids: rest.zeroKids.join(" · ") || "none",
         hemRest: `${rest.hemTop} ${rest.hemBot}`, hemWork: `${work!.hemTop} ${work!.hemBot}`,
         stacked: rest.stackedFades.join(",") || "none",
@@ -240,7 +253,20 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
       const vals = [...new Set(all.map((r) => String(r[key])))];
       expect(vals, `${key} differs across pages: ${JSON.stringify(all.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
     }
-    for (const key of ["workH", "workMark", "workHdrL", "workHdrR", "hairL", "hairR"] as const) {
+    /* ══ §4 — THE WORKING REGISTER IS IDENTICAL ON EVERY PAGE ═════════════════════════════════
+       ⚠️ CROSS-PAGE, NOT AGAINST CONSTANTS — a literal would pass while all ten drifted together. */
+    for (const key of ["workReg", "workInk"] as const) {
+      const vals = [...new Set(scrollers.map((r) => String(r[key])))];
+      expect(vals, `${key} differs across pages: ${JSON.stringify(scrollers.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
+    }
+    /* ⚠️ AND IT IS ACTUALLY THE LABEL. The equality above would hold if every page had kept its
+       masthead, so the register is also named — once, here, rather than per page. */
+    const reg = String(scrollers[0]?.workReg ?? "");
+    expect(reg, `the working title is not the mono label: ${reg}`).toMatch(/^JetBrains Mono\/11\.5px\/500\/[\d.]+px\/uppercase$/);
+    for (const r of scrollers) {
+      expect(r.markGone, `${r.page}: the mark is still drawn in the working strip`).toBe(true);
+    }
+    for (const key of ["workH", "workHdrL", "workHdrR", "hairL", "hairR"] as const) {
       const vals = [...new Set(scrollers.map((r) => String(r[key])))];
       expect(vals, `${key} differs across pages: ${JSON.stringify(scrollers.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
     }
@@ -316,8 +342,17 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     /* ══ §2 — ONE GAP, 70px, PAID ONCE ══════════════════════════════════════════════════════ */
     for (const r of all) {
       const [first, second] = String(r.topGap).split("+").map(Number);
-      expect(first, `${r.page}: the gap under the hairline is ${first}, not 70`).toBe(70);
+      expect(first, `${r.page}: the resting gap under the hairline is ${first}, not 70`).toBe(70);
       expect(second, `${r.page}: the gap is paid twice — the toolbar row AND the scroll row`).toBe(0);
+    }
+    /* ⚠️ AND THE WORKING GAP, which the first version left unasserted — it read the RESTING value
+       in both columns, so §2 could have shipped without halving anything and the case would have
+       passed. The reclaim in §3 is computed from the difference between these two, so an
+       unasserted working value is also an unasserted invariance. */
+    for (const r of scrollers) {
+      const [first, second] = String(r.workGap).split("+").map(Number);
+      expect(first, `${r.page}: the working gap is ${first}, not 35 — the strip is lighter and takes less separation`).toBe(35);
+      expect(second, `${r.page}: the working gap is paid twice`).toBe(0);
     }
 
     /* ══ §3 — THE HEMS ARE PRESENT, PINNED, AND EACH IS A STATE ═════════════════════════════
@@ -362,6 +397,8 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
       expect([33, 35], `an unexpected rest title size ${size} — only the 33px default and the 35px solo step are legitimate`)
         .toContain(parseInt(String(size), 10));
     }
+    /* ⚠️ `workMark` LEFT THE EQUALITY LIST because the mark is GONE — every page reads 0, which the
+       markGone check states directly and by its actual meaning rather than as a shared number. */
     expect([...new Set(scrollers.map((r) => String(r.workTitle)))],
       `the WORKING title differs across pages — the solo step applies at rest only: ${JSON.stringify(scrollers.map((r) => [r.page, r.workTitle]))}`)
       .toHaveLength(1);

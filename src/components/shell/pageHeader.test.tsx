@@ -178,6 +178,8 @@ describe("the tool row", () => {
 describe("the header's two states", () => {
   const hdrCss = readFileSync(resolve(__dirname, "./pageHeader.css"), "utf8");
   const gridCss = readFileSync(resolve(__dirname, "./workspacePageGrid.css"), "utf8");
+  /* the swap's arming lives in the component, not the stylesheet — both halves or neither */
+  const hdrSrc = readFileSync(resolve(__dirname, "./PageHeader.tsx"), "utf8");
   /** every block for a selector, joined — never the first (see the grouped-rule note in CLAUDE.md) */
   const all = (css: string, sel: string): string => {
     const out: string[] = [];
@@ -254,20 +256,75 @@ describe("the header's two states", () => {
      the page once the title has dropped to 17px and the description has gone. The two compensations
      that came with removal — the opacity fade and the `-16px` margin closing the row's gap — are
      asserted ABSENT, because each of them re-creates half of the deleted behaviour on its own. */
-  it("the mark SHRINKS to 30px and keeps its colour", () => {
+  /**
+   * ⚠️ THE MARK DROPS ENTIRELY, AND THIS CASE PREVIOUSLY ASSERTED THE OPPOSITE. It read "the mark
+   * SHRINKS to 30px and keeps its colour", with the fade and the negative margin asserted ABSENT
+   * because each re-created half of a deleted behaviour. Under the label treatment (ref 90, option
+   * E) the reasoning inverts: the strip is carried by a mono uppercase label, and a 30px
+   * illustration beside it is two voices doing one job. The whole case is rewritten rather than
+   * softened — a half-updated version would have kept arguing for the mark.
+   */
+  it("the mark drops entirely — width and opacity both to zero", () => {
     const mark = all(hdrCss, ".wsh--scrolled .wsh-mark,\n.wsh--scrolled .wsh-mark--xl");
-    expect(mark, "the mark is not taking the strip size").toContain("flex: 0 0 30px");
-    expect(mark, "the mark fades — it stays, so it stays opaque").not.toContain("opacity");
-    expect(mark, "the negative margin came back; it closed the row gap for a mark that is now present").not.toContain("margin-right");
+    expect(mark, "the mark still takes width in the strip").toContain("width: 0");
+    expect(mark, "the mark is still holding a flex basis — it would keep the row's gap open").toContain("flex: 0 0 0");
+    expect(mark, "the mark did not fade — it appears and vanishes on the frame the class lands").toContain("opacity: 0");
     const box = all(hdrCss, ".wsh--scrolled .wsh-mark .os-mark,\n.wsh--scrolled .wsh-mark--xl .os-mark");
-    expect(box, "the inner mark box did not follow to 30px, so an illustration is clipped by its slot").toContain("width: 30px");
-    expect(box, "the monoline glyph's plate did not follow — the two mark families would show two sizes in the strip").toContain("height: 30px");
+    expect(box, "the inner box kept its height — an illustration would still paint in a zero-width slot").toContain("height: 0");
+    expect(box, "the monoline glyph's plate border survived — a 1px hairline with no box inside it").toContain("border: none");
+    /* it fades rather than snapping: the property has to be transitioned on the resting rule */
+    expect(all(hdrCss, ".wsh-mark"), "the mark has no opacity transition, so it disappears on one frame").toContain("opacity");
   });
 
-  it("the type steps down, and the description collapses rather than fading in place", () => {
-    expect(all(hdrCss, ".wsh--scrolled .wsh-title"), "the working title is not 17px").toContain("font-size: 17px");
+  /**
+   * ⚠️ THE TITLE CHANGES REGISTER, IT DOES NOT STEP DOWN. 17px Playfair was a masthead shrunk, and
+   * a masthead shrunk reads as squashed. The working title is the page's name as a LABEL, in the
+   * mono the shell already speaks.
+   */
+  it("the title becomes an editorial label, and the description collapses rather than fading in place", () => {
+    const t = all(hdrCss, ".wsh--scrolled .wsh-title");
+    expect(t, "the working title is still display type").toContain("font-family: var(--font-mono)");
+    expect(t, "the label size changed").toContain("font-size: 11.5px");
+    expect(t, "the label weight changed").toContain("font-weight: 500");
+    expect(t, "the letterspacing that makes it read as a label is gone").toContain("letter-spacing: 0.2em");
+    expect(t, "the label is not uppercase").toContain("text-transform: uppercase");
+    /* ⚠️ A TOKEN, NOT A LITERAL — and specifically not the tertiary muted, which is the
+       counts-and-captions tier: the page's own identity must not be fainter than a tally. */
+    expect(t, "the label colour is a literal, or dropped to the counts tier").toContain("color: var(--shell-ink-soft)");
     const sub = all(hdrCss, ".wsh--scrolled .wsh-sub");
     expect(sub, "the description faded but kept its box, holding the title off-centre in a 52px strip").toContain("max-height: 0");
+  });
+
+  /**
+   * ⚠️ THE REGISTER CANNOT BE TRANSITIONED, so the swap is hidden inside a fade. `font-family` and
+   * `text-transform` do not interpolate — they flip on the frame the class lands — and a
+   * size-and-spacing transition running through that flip is what reads as a glitch.
+   */
+  it("⚠️ the register swap is a cross-fade, and it never plays on mount", () => {
+    for (const name of ["wsh-title-to-label", "wsh-title-to-masthead"]) {
+      const kf = hdrCss.slice(hdrCss.indexOf(`@keyframes ${name}`), hdrCss.indexOf("}", hdrCss.indexOf(`@keyframes ${name}`) + 400));
+      expect(kf, `${name} is missing — one direction of the swap does not fade`).not.toBe("");
+      expect(kf, `${name} does not go invisible, so the swap happens in view`).toContain("opacity: 0");
+      /* ⚠️ THE OUTGOING VALUES ARE NAMED IN THE KEYFRAMES. Without them the element already wears
+         the new register when the animation starts, so there is nothing to fade OUT — only in. */
+      expect(kf, `${name} does not hold the outgoing family, so the old register is never shown fading`)
+        .toMatch(/font-family:\s*var\(--font-(serif|mono)\)/);
+      /* the invisible window: 45% out, 55% back — the discrete flip lands at 50%, between them */
+      expect(kf, `${name}'s invisible window is gone — the swap would show mid-fade`).toMatch(/55%\s*\{\s*opacity:\s*0/);
+      /* ⚠️ AND THE DESTINATION IS NAMED, not left implicit. Measured: with the target values
+         omitted from 55%/100%, `font-family` stayed on its last stated keyframe — Playfair at
+         11.5px uppercase, the squashed masthead wearing the label's metrics — while every
+         interpolable property landed correctly. An implicit final keyframe does not return a
+         non-interpolable property to the underlying value. */
+      expect((kf.match(/font-family/g) ?? []).length, `${name} names its family at only one end — the swap lands on the wrong one`)
+        .toBeGreaterThan(2);
+    }
+    /* ⚠️ ARMED BY A CLASS, NOT BY THE RESTING RULE. Hung on `.wsh-title` it plays on MOUNT: every
+       page load would show its title, blink it out and fade it back — nine pages' worth of a
+       worse artefact than the one this removes. */
+    expect(hdrCss, "the swap is not gated on the armed class").toContain(".wsh--swap.wsh--scrolled .wsh-title");
+    expect(hdrSrc, "nothing arms the swap class, so the fade never runs").toContain("wsh--swap");
+    expect(hdrSrc, "the arming does not skip the first render — the fade would play on mount").toContain("firstState");
   });
 
   it("⚠️ THE HAIRLINE IS THE ROW'S, FULL WIDTH, AND IT FADES", () => {

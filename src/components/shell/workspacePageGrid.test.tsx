@@ -235,8 +235,15 @@ describe("the three-row grid — chrome outside the scroller", () => {
        FIRST below the hairline: the toolbar row where a page has one, the scroll row where it does
        not. `.wpg--tools` zeroes the scroll row's copy so a page gains and loses a toolbar without
        gaining or losing its top margin — two elements, one gap, never both. */
+    /* ⚠️ TWO VALUES NOW, AND BOTH ARE TOKENS BECAUSE §3 SUBTRACTS THEM. The gap halves when the
+       strip is working — the strip is lighter than the card and needs proportionally less
+       separation — and the invariance padding below is computed from the DIFFERENCE, so a literal
+       in either place is the failure mode this whole section exists to prevent. */
     const header = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
-    expect(header, "the gap token changed value without this case changing with it").toContain("--content-top-gap: 70px");
+    expect(header, "the resting gap changed value without this case changing with it").toContain("--content-top-gap-rest: 70px");
+    expect(header, "the working gap changed value without this case changing with it").toContain("--content-top-gap-work: 35px");
+    expect(header, "the gap everything reads is no longer the resting one").toContain("--content-top-gap: var(--content-top-gap-rest)");
+    expect(block(".wpg--working"), "the working state does not halve the gap").toContain("--content-top-gap: var(--content-top-gap-work)");
     expect(block(".wpg-scroll"), "the scroll row stopped paying the gap").toContain("padding-top: var(--content-top-gap)");
     expect(block(".wpg-tools"), "the toolbar row stopped paying the gap").toContain("var(--content-top-gap)");
     const both = block(".wpg--tools > .wpg-scroll") + block(".wpg--tools .wpg-scroll");
@@ -352,8 +359,16 @@ describe("the three-row grid — chrome outside the scroller", () => {
     const rule = block(".wpg--working > .wpg-scroll");
     expect(rule, "the invariance contribution is missing — stripping shrinks max scroll and a barely-scrolling page oscillates")
       .toContain("--wpg-reclaim-pad");
-    expect(rule, "the contribution is not the reclaim — it must be the same three tokens the height change uses")
-      .toContain("calc(var(--wsh-plate-h) + var(--wsh-plate-gap) - var(--wsh-plate-h-scrolled))");
+    /* ⚠️ THE HEADER DELTA *PLUS* THE GAP DELTA, and the second term is the one that goes missing.
+       Stripping now gives back the card's extra height AND 35px of the gap under the hairline; a
+       padding that only replaces the first drops max scroll by 35 on every page, the browser clamps
+       `scrollTop`, and the oscillation comes back on anything near the boundary. Four tokens, no
+       literals — each the same token the thing it compensates for reads. */
+    for (const term of ["var(--wsh-plate-h)", "var(--wsh-plate-gap)", "var(--wsh-plate-h-scrolled)",
+                        "var(--content-top-gap-rest)", "var(--content-top-gap-work)"]) {
+      expect(rule, `the reclaim no longer names ${term} — it is compensating for something it cannot see`).toContain(term);
+    }
+    expect(/\d+px/.test(rule.replace(/\/\*[\s\S]*?\*\//g, "")), "the reclaim contains a literal length — it must be a calc from the same tokens").toBe(false);
     expect(rule, "the padding is transitioned — it must land on the same frame as the height").not.toContain("transition");
     const scroll = block(".wpg-scroll");
     expect(scroll, "the scroll row stopped summing the two contributions — a page's foot gutter would override the reclaim again")

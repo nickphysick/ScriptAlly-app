@@ -106,6 +106,8 @@
   gap: 10px;
   flex-wrap: wrap;
   padding: var(--content-top-gap) var(--content-gutter) 12px;
+  /* the gap halves with the strip (§2) — it must land on the same frame as the collapse */
+  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
   /* ⚠️ NO BORDER — THE HAIRLINE IS ROW 1'S, AND THIS DREW A SECOND ONE (spec §3). Row 2 carried
      its own `border-bottom`, so any page with a toolbar showed TWO lines in the working state,
      20px apart: the header row's, then the toolbar's. Reported on Manuscripts, but it was every
@@ -148,6 +150,7 @@
      boundary keeps its air either way. `.wpg--tools` zeroes it when the toolbar has already
      paid — two elements, one gap, never both. */
   padding-top: var(--content-top-gap);
+  transition: padding-top .22s cubic-bezier(.4, 0, .2, 1);
   /* ⚠️ THE FOOT PADDING IS A SUM, NOT A VALUE, AND A COLLISION IS WHY. The invariance padding was
      written as `padding-bottom` on `.wpg--working > .wpg-scroll` (0-2-0) and three pages declare
      `.aglist .wpg-scroll { padding-bottom: 48px }` at the SAME specificity, later in the bundle —
@@ -258,6 +261,25 @@
  * The cost is ~62px of empty scrollable space at the very bottom of a stripped page, where 30px of
  * padding already sits. Accepted deliberately.
  */
+/* ⚠️ THE WORKING GAP IS HALVED HERE, ON THE GRID — not on `:root` — so it cascades to whichever
+   row is first below the hairline and transitions with everything else (§2). */
+.wpg--working { --content-top-gap: var(--content-top-gap-work); }
+
+/**
+ * ⚠️ THE RECLAIM IS THE HEADER DELTA *PLUS* THE GAP DELTA, and missing the second term is a silent
+ * failure this file already exists to prevent. Stripping gives back the card's extra height, and
+ * now ALSO 35px of the gap under the hairline; if the padding only replaces the first, max scroll
+ * falls by 35 on every page, the browser clamps `scrollTop`, and the oscillation the invariance was
+ * built to make impossible comes back on anything sitting near the boundary. Manuscripts — 70px of
+ * overflow — finds it first.
+ *
+ * ⚠️ FOUR TOKENS, NO LITERALS. Every term is the same token the thing it compensates for reads, so
+ * changing a height or a gap moves the padding with it. The lock that proves this is not here: it
+ * is the matrix's invariance column, measured on the real pages in both states.
+ */
 .wpg--working > .wpg-scroll {
-  --wpg-reclaim-pad: calc(var(--wsh-plate-h) + var(--wsh-plate-gap) - var(--wsh-plate-h-scrolled));
+  --wpg-reclaim-pad: calc(
+    var(--wsh-plate-h) + var(--wsh-plate-gap) - var(--wsh-plate-h-scrolled)
+    + var(--content-top-gap-rest) - var(--content-top-gap-work)
+  );
 }

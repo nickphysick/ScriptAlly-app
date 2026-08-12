@@ -200,6 +200,24 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       "comes from the grid through context; without one it can never condense.",
     );
   }
+  /**
+   * ⚠️ THE CROSS-FADE IS ARMED ONLY AFTER THE FIRST STATE CHANGE, never on mount. The register swap
+   * is a keyframe animation (see the note in pageHeader.css — `font-family` cannot be
+   * transitioned), and an animation hung on the resting rule alone plays as soon as the element
+   * exists: every page load would show its title, blink it out and fade it back. That is a worse
+   * artefact than the glitch the fade removes, and it would appear on nine pages rather than
+   * during one interaction.
+   *
+   * ⚠️ IT LATCHES ON, deliberately. Once the page has changed state at all, every later change
+   * should animate — including the return — so this is "has this ever moved", not "is it moving".
+   */
+  const [swapArmed, setSwapArmed] = React.useState(false);
+  const firstState = React.useRef(true);
+  React.useEffect(() => {
+    if (firstState.current) { firstState.current = false; return; }
+    setSwapArmed(true);
+  }, [condensed]);
+
   React.useEffect(() => {
     if (!moreOpen) return;
     const onDown = (e: PointerEvent) => {
@@ -293,7 +311,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         {/* ⚠️ BOTH CLASSES ARE DERIVED — one from `description`, one from the scroller's position.
             There is no height prop and must never be one; see the knob-versus-rule note in the
             stylesheet. */}
-        <header ref={plateRef} className={`wsh${description ? "" : " wsh--solo"}${condensed ? " wsh--scrolled" : ""}`}>
+        <header ref={plateRef} className={`wsh${description ? "" : " wsh--solo"}${condensed ? " wsh--scrolled" : ""}${swapArmed ? " wsh--swap" : ""}`}>
         <div className="wsh-row">
           {/* ⚠️ DERIVED FROM THE ARTWORK, NEVER PASSED IN — see the `markHasArt` note. */}
           {mark && (
