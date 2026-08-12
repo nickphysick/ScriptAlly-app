@@ -1414,10 +1414,29 @@
    that most readers see real figures, not when the feature is "finished". */
 .os-commbeta {
   margin-left: auto; flex: none;
-  font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: 0.16em;
-  background: #fffdf9; border: 1px solid #cbd3c8; color: #5f6f5b;
-  border-radius: 999px; padding: 3px 7px;
+  font-family: "JetBrains Mono", monospace; font-size: 8.5px; letter-spacing: 0.16em;
+  background: rgba(255, 255, 255, 0.62); border: 1px solid rgba(138, 158, 136, 0.42); color: #5a6e58;
+  border-radius: 11px; padding: 4px 8px;
 }
+/* ⚠️ THE REF'S BAND AND PLATE VALUES ARE NOT FOLLOWED, AND THE REF SAYS SO ITSELF. Both are SHARED
+   surfaces, and design-refs/community-empty-state-v1.html closes with the instruction that governs
+   them: "Reuse, don't rebuild. Active queries, Activity and Tasks already render this plate — the
+   build should extend that existing component or class rather than introducing a fourth copy…
+   My values here are read off the screenshot; the live ones win where they differ." They differ:
+
+     · the BAND — ref 56px; `.os-ahead` is 51px and is the same element on Active queries,
+       Activity and the chart. Matching the ref would silently retune three cards to fix one.
+     · the PLATE — ref 34px, radius 10, opaque fill, SAGE hairline, dark-sage icon. Live `.os-mark`
+       is 28px, radius 7, a TRANSLUCENT parchment fill and a burgundy icon. The ref draws the
+       existing headers the same way in its comparison strip, so the strip is checking the ref
+       against itself, not against the app.
+
+   ⚠️ AND THE REF'S SECOND FOOTNOTE DESCRIBES A BEHAVIOUR THE LIVE PLATE DOES NOT HAVE: "the plate
+   borrows its band's tint… on the pink Tasks band it takes a pink hairline and ink icon." It does
+   not — the hairline is burgundy on every band, Tasks included. What IS true is that the fill is
+   translucent, so the plate takes its band's colour that way. A real per-band tint is a four-header
+   change and remains reported rather than smuggled in under a one-tile task. */
+
 /* ⚠️ CENTRED ON BOTH AXES — the hero layout, baked. `justify-content: center` is what makes the
    tile FILL its row without a spacer: the column centres in whatever height the tasks card sets,
    so the old `margin-top: auto` footer would now push the hero upward rather than hold it down. */
@@ -1428,32 +1447,33 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 14px 16px 18px;
+  gap: 14px;
+  padding: 18px 22px;
   text-align: center;
 }
 /* ⚠️ 84px AGAINST A 100px SOURCE — never above 100, and never upscaled to fill space. The asset is
-   a 1x raster carrying a whole empty state; a 2x or SVG re-export is wanted (reported). */
+   a 1x raster carrying a whole empty state; a 2x or SVG re-export is wanted (reported).
+   The ref (design-refs/community-empty-state-v1.html) sizes it the same, `width="84"` on the tag. */
 .os-commseed { width: 84px; height: 84px; object-fit: contain; display: block; flex: none; }
 .os-commempty {
-  margin: 0; font-size: 12.5px; line-height: 1.5; color: #6b6058; max-width: 34ch;
+  margin: 0; font-size: 12.5px; line-height: 1.6; font-weight: 300; color: #5c4d44; max-width: 34ch;
 }
 /* ⚠️ QUIET BY DEFAULT, WARM ON HOVER — a transparent pill with a hairline, not a filled button.
    It sits in an empty state; a solid CTA here would outrank the sentence explaining why the tile
    is empty. Colours inline-critical per the house rule, so Tailwind cannot quietly repaint them. */
 .os-commshare {
   display: inline-flex; align-items: center; gap: 7px;
-  padding: 7px 14px;
-  font: inherit; font-size: 12px; font-weight: 600;
+  padding: 8px 15px;
+  font: inherit; font-size: 12px;
   color: #7c3a2a;
   background: transparent;
-  border: 1px solid #e3d9cc;
-  border-radius: 999px;
+  border: 1px solid #e7ddd2;
+  border-radius: 20px;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 .os-commshare svg { width: 13px; height: 13px; display: block; flex: none; }
-.os-commshare:hover:not(:disabled) { background: #f8ece4; border-color: #e8c8bc; }
+.os-commshare:hover:not(:disabled) { background: #f3e0d6; border-color: #e8c8bc; }
 .os-commshare:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; }
 /* ⚠️ THE DISABLED STATE IS PHASE 1'S, AND IT IS HONEST — the control is not wired yet, so it says
    so rather than accepting a click that does nothing. `cursor: default`, not `not-allowed`:
