@@ -693,7 +693,7 @@ looks. **Needs an eyeball on dev.**
 
 ## Phase 8 — mobile floor
 
-**Commit:** _(hash in the next log commit)_
+**Commit:** `82bedc1`
 **Gates:** tsc **0** · build **✓** · Vitest **262 files, 4306 passed | 2 skipped (4308)**
 
 The onboarding half landed with Phase 6 (`onboarding.css`, ≤640px). This commit adds the loader and
