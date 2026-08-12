@@ -89,7 +89,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   plate, toolbar, children, className, scrollLabel, condensed: condensedByMode = false,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
-  const sentinelRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
   /* ⚠️ THE UNION, AND IT IS AN `||` RATHER THAN A PRIORITY. Neither half outranks the other: a
      journey opened part-way down a scrolled page is still working, and closing it while still
@@ -97,34 +96,9 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   const condensed = stuck || condensedByMode;
 
   /**
-   * ⚠️ AN INTERSECTION OBSERVER ON A 1px SENTINEL, NOT A SCROLL LISTENER. The condense is a
-   * BOUNDARY event — it happens once, when the top of the content passes the top of the scroller —
-   * so it should be reported at the boundary rather than recomputed on every frame of every scroll.
-   *
-   * The sentinel is absolutely positioned at the scroll row's content top, so it scrolls out of the
-   * scrollport with the content and costs no layout height. `root` is the scroll row itself: with
-   * the default (the viewport) it would report on the wrong scrollport entirely.
-   */
-  /**
-   * ⚠️ STRIPPING RECLAIMS HEIGHT, WHICH CAN UN-SCROLL THE PAGE — a feedback loop, not a broken
-   * scroller, and Manuscripts hit it because its content only just exceeds the viewport:
-   *
-   *   1. content overflows by a little, the sentinel leaves, the header strips;
-   *   2. row 1 goes from rest height to strip height, so row 3 GROWS by the difference;
-   *   3. `scrollHeight − clientHeight` falls; if the original overflow was smaller than the
-   *      height just reclaimed, maximum scroll becomes 0;
-   *   4. the browser clamps `scrollTop` to 0, the sentinel returns, the header expands, the
-   *      content overflows again — and it oscillates.
-   *
-   * ⚠️ THE FIX IS A GUARD, NOT HYSTERESIS. Hysteresis would damp the bounce while leaving the page
-   * in whichever state it settled, which is arbitrary. The honest rule is that stripping must be
-   * SAFE: only strip when the page would still scroll afterwards. Below that threshold the page
-   * keeps its resting card, which is right on its own terms — a page that barely scrolls has
-   * nothing to gain from the working state.
-   *
-   * ⚠️ THE THRESHOLD IS COMPUTED FROM THE TOKENS, never a literal, because it IS the reclaimed
-   * height: the row's rest height (plate + its top gap) minus the strip. Read at call time so a
-   * token change cannot leave a stale number behind.
+   * ⚠️ THE THRESHOLD IS THE RECLAIM, COMPUTED FROM THE TOKENS AT CALL TIME. It is exactly the
+   * height stripping gives back — the row's rest height plus its gap, less the strip — so a token
+   * change cannot leave a stale number behind.
    */
   const reclaimedPx = React.useCallback((): number => {
     if (typeof window === "undefined") return 0;
@@ -133,25 +107,52 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     return n("--wsh-plate-h") + n("--wsh-plate-gap") - n("--wsh-plate-h-scrolled");
   }, []);
 
+  /**
+   * ⚠️ THE STATE IS DERIVED FROM `scrollTop` ON EVERY FRAME, NOT REPORTED BY AN OBSERVER.
+   *
+   * An IntersectionObserver fires only on a CHANGE of intersection, so a single missed or mistimed
+   * event leaves the header permanently in the wrong state with nothing left to re-evaluate it.
+   * That is what shipped, and it is why running a diagnostic appeared to "fix" the page: the
+   * diagnostic scrolled the scroller, which produced the change the observer had missed. Measured
+   * on a real account — `overflow: 267`, `reclaim: 62`, `safeToStrip: true`, and both classes
+   * absent — the arithmetic was never wrong; the mechanism was.
+   *
+   * ⚠️ SO IT IS STATELESS. No cached decision can go stale, a remounted node cannot orphan it, and
+   * a missed frame self-corrects on the next one. The handler compares against the CURRENT boolean
+   * and writes only on a change, so a scroll costs one comparison per frame and no renders.
+   *
+   * ⚠️ AND THE LATCH IS ASYMMETRIC ON PURPOSE. Entry is `scrollTop > 4 && safeToStrip()`; exit is
+   * `scrollTop <= 4` ALONE. Making exit the inverse of entry is what oscillates: stripping reclaims
+   * height, which lowers max scroll, which can clamp `scrollTop` below where it was — re-testing
+   * the entry condition then flips the header back, and it cycles. Once working, only returning to
+   * the top ends it.
+   */
   React.useEffect(() => {
     const root = scrollRef.current;
-    const sentinel = sentinelRef.current;
-    if (!root || !sentinel) return;
-    /* the sentinel says the content has moved; this says the page can afford it to */
+    if (!root) return;
+    /* the page must still scroll AFTER the strip reclaims its height, or entering is unsafe */
     const safeToStrip = () => root.scrollHeight - root.clientHeight > reclaimedPx();
-    const io = new IntersectionObserver(
-      ([entry]) => setStuck(!entry.isIntersecting && safeToStrip()),
-      { root, threshold: 0 },
-    );
-    io.observe(sentinel);
-    /* ⚠️ AND THE GUARD IS RE-EVALUATED WHEN THE PAGE RESIZES, because a window that gets shorter
-       can push a page over the threshold without the sentinel moving at all. Without this a page
-       could sit un-strippable after a resize until something happened to scroll it. */
-    const ro = new ResizeObserver(() => {
-      setStuck((was) => (was && !safeToStrip() ? false : was));
-    });
+
+    let frame = 0;
+    const evaluate = () => {
+      frame = 0;
+      setStuck((was) => (was ? root.scrollTop > 4 : root.scrollTop > 4 && safeToStrip()));
+    };
+    /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
+
+    root.addEventListener("scroll", onScroll, { passive: true });
+    evaluate();
+
+    /* ⚠️ THE RESIZE OBSERVER STAYS. A window that gets shorter can cross the threshold without any
+       scroll at all, and nothing else would re-evaluate until the user happened to scroll. */
+    const ro = new ResizeObserver(evaluate);
     ro.observe(root);
-    return () => { io.disconnect(); ro.disconnect(); };
+    return () => {
+      root.removeEventListener("scroll", onScroll);
+      ro.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [reclaimedPx]);
 
   return (
@@ -170,7 +171,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
           role={scrollLabel ? "region" : undefined}
           aria-label={scrollLabel}
         >
-          <div className="wpg-sentinel" ref={sentinelRef} aria-hidden="true" />
           {children}
         </div>
       </div>

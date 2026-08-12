@@ -141,17 +141,6 @@
   scrollbar-gutter: stable both-edges;
 }
 
-/* ⚠️ 1px, ABSOLUTE, AND IT COSTS NO LAYOUT HEIGHT. In flow it would add a pixel to every page's
-   content; absolute at the content top it scrolls out of the scrollport exactly as the first line
-   of content does, which is the boundary the observer is watching for. */
-.wpg-sentinel {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-}
 
 /**
  * ⚠️ A GRID-HOSTED PLATE IS NOT STICKY, and this is the seam that keeps the conversion safe.

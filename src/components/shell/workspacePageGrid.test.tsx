@@ -223,16 +223,37 @@ describe("the three-row grid — chrome outside the scroller", () => {
     expect(block(".wpg-scroll")).toContain("scroll-padding-top");
   });
 
-  it("⚠️ the sentinel costs NO layout height", () => {
-    const s = block(".wpg-sentinel").replace(/\s+/g, " ");
-    expect(s, "the sentinel left absolute positioning — in flow it adds a pixel to every page").toContain("position: absolute");
-    expect(s).toContain("height: 1px");
+
+  /**
+   * ⚠️ REVERSED: THE STATE IS DERIVED EVERY FRAME, NOT OBSERVED AT A BOUNDARY. This required an
+   * `IntersectionObserver`, on the reasoning that condensing is a boundary event and should be
+   * reported once rather than recomputed. The flaw is that an observer fires only on a CHANGE, so
+   * one missed or mistimed event leaves the header permanently wrong with nothing to re-evaluate
+   * it — measured on a real account as `overflow: 267`, `reclaim: 62`, `safeToStrip: true` and
+   * both classes absent. The arithmetic was never wrong. Deriving from `scrollTop` is stateless:
+   * no cached decision can go stale and a missed frame self-corrects on the next one.
+   */
+  it("⚠️ the state is derived from scrollTop every frame, and nothing caches it", () => {
+    expect(srcCode, "the IntersectionObserver came back — it reports only on a change, so a missed event is permanent").not.toContain("IntersectionObserver");
+    expect(srcCode, "the sentinel came back with it").not.toContain("wpg-sentinel");
+    expect(srcCode, "the scroll listener went — nothing would re-evaluate the state").toContain('addEventListener("scroll"');
+    expect(srcCode, "the evaluation is not rAF-throttled — it would run per wheel event rather than per painted frame").toContain("requestAnimationFrame");
+    expect(srcCode, "the resize observer went — a shortening window crosses the threshold with no scroll at all").toContain("new ResizeObserver");
   });
 
-  it("⚠️ the condense is observed at the BOUNDARY, not recomputed on every scroll frame", () => {
-    expect(srcCode, "the scroll listener came back — the condense is a boundary event and should be reported as one").not.toContain("addEventListener(\"scroll\"");
-    expect(src, "the IntersectionObserver went").toContain("new IntersectionObserver");
-    expect(src, "the observer lost its `root` — with the default it watches the VIEWPORT, which is the wrong scrollport entirely").toMatch(/\{\s*root,/);
+  /**
+   * ⚠️ THE LATCH IS ASYMMETRIC, AND SYMMETRY IS THE BUG IT PREVENTS. Entry needs BOTH a scroll and
+   * `safeToStrip()`; exit needs only a return to the top. Making exit the inverse of entry
+   * oscillates: stripping reclaims height, max scroll falls, the browser clamps `scrollTop` below
+   * where it was, the entry condition re-tests false and the header flips back.
+   */
+  it("⚠️ entry tests safeToStrip, exit tests only the scroll position", () => {
+    const latch = /setStuck\(\(was\) => \(was \? ([^:]+) : ([^)]+)\)\)/.exec(srcCode);
+    expect(latch, "the latch is not written as one expression — its asymmetry cannot be read").toBeTruthy();
+    const [, whenWorking, whenResting] = latch!;
+    expect(whenResting, "entry stopped checking safeToStrip — a page that cannot afford the strip would enter it and oscillate").toContain("safeToStrip");
+    expect(whenWorking, "exit gained the safeToStrip test, making it the inverse of entry — that is the oscillation").not.toContain("safeToStrip");
+    expect(whenWorking, "exit stopped testing the scroll position").toContain("scrollTop");
   });
 
   it("⚠️ THE PLATE IS TOLD, IT DOES NOT LOOK — no DOM traversal, no class strings", () => {
@@ -277,11 +298,12 @@ describe("the three-row grid — chrome outside the scroller", () => {
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(src, "the union is not computed in one place — two derivations of one state is how the row and the header come to disagree")
       .toMatch(/const condensed = stuck \|\| condensedByMode;/);
-    /* ⚠️ TWO WRITERS NOW, AND BOTH ARE THE SAME SIGNAL. The observer sets it when the sentinel
-       moves; the resize observer CLEARS it when the page stops being able to afford the strip.
-       Neither invents a scroll position — the count is 2 rather than 1, and what the lock is
-       really for is that no page-level code writes it. */
-    expect((src.match(/setStuck\(/g) ?? []).length, "an extra writer of the scroll half appeared — a synthesised scroll signal is the thing to prevent").toBe(2);
+    /* ⚠️ ONE WRITER AGAIN, AND FEWER IS THE POINT. The observer era had two — one to set on the
+       sentinel moving, one to clear on resize. The derived version has a single `evaluate()` that
+       both the scroll listener and the ResizeObserver call, so there is exactly one place the
+       state is computed and no second path that can disagree with it. What the lock is for is
+       unchanged: no page-level code may write it, and nothing may synthesise a scroll position. */
+    expect((src.match(/setStuck\(/g) ?? []).length, "the state is written from more than one place — two derivations of one boolean is how they come to disagree").toBe(1);
     expect(src, "the safe-to-strip guard went — stripping reclaims height, which can un-scroll a page and start it oscillating").toContain("safeToStrip");
     expect(src, "the threshold is a literal — it must be the reclaimed height, read from the tokens")
       .toMatch(/--wsh-plate-h[\s\S]{0,120}--wsh-plate-h-scrolled/);
