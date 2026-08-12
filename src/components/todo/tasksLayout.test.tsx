@@ -64,11 +64,22 @@ describe("⚠️ one token, one geometry — equal title offsets by construction
 /* ── the HORIZONTAL half (tasks-audit addendum) ────────────────────────────────────────────── */
 
 describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", () => {
-  it("⚠️ the layout's stylesheet restates NO horizontal padding — the gutter is .tdb-col's token", () => {
-    expect(layoutCss).not.toMatch(/\.tpl[^{]*\{[^}]*padding-left/);
-    expect(layoutCss).not.toMatch(/\.tpl[^{]*\{[^}]*padding-right/);
-    expect(layoutCss).not.toMatch(/\.tpl[^{]*\{[^}]*padding-inline/);
-    expect(layoutCss).toContain("--tdb-col-gutter"); // named in the contract, so the tie is stated
+  /**
+   * ⚠️ REVERSED: THE GUTTER IS THE GRID'S NOW, AND `.tdb-col`'s IS CANCELLED HERE. This asserted
+   * that `tasksLayout.css` restated no horizontal padding, because the gutter belonged to
+   * `.tdb-col`'s token and two sources would drift. The grid owns it for all ten pages — so
+   * `.tdb-col`'s cap and gutter are what drift now: they sit ABOVE the grid and inset the header,
+   * the toolbar and the scroller together, which measured as the Tasks pages' hairline landing
+   * 40px further in than every other page's (367/143 against 327/103).
+   * The cancellation is scoped to `.tpl` so the board's other surfaces keep their own column, and
+   * the vertical values are untouched — they gutter content, which is a different job.
+   */
+  it("⚠️ the Tasks column cancels its own cap and gutter — the grid owns both", () => {
+    const rule = /\.tdb-col\.tpl\s*\{([^}]*)\}/.exec(layoutCss);
+    expect(rule, "the cancellation went — .tdb-col's 1360px cap and 40px gutter would inset the grid again").toBeTruthy();
+    expect(rule![1], "the cap survives, so this page's header is narrower than every other").toContain("max-width: none");
+    expect(rule![1], "the left gutter survives").toContain("padding-left: 0");
+    expect(rule![1], "the right gutter survives").toContain("padding-right: 0");
   });
 
   it("…and .tdb-col carries the gutter token + the one cap, auto-centred", () => {

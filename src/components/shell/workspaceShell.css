@@ -551,7 +551,13 @@
    so its 30px inset the header, the toolbar and the scroller together — Analytics measured 60px
    narrower than its sibling `read` pages on top of their shared cap. It lives in THIS file
    rather than a page stylesheet, which is why the page-CSS width lock could not see it. */
-.qa-wrap { padding: 17px 0 30px; height: 100%; display: flex; flex-direction: column; }
+/* ⚠️ NO TOP PADDING. The grid's own header row owns the gap above the card (`--wsh-plate-gap`),
+   so a wrapper inset here would sit UNDER the header and push this one page's card lower than
+   every other page's — the exact per-page divergence the spec's one-object rule exists to stop. */
+.qa-wrap { padding: 0 0 30px; height: 100%; display: flex; flex-direction: column; }
+/* the grid must take the remaining height, or it measures zero and the page reads as unconverted */
+/* ⚠️ ONE RULE PER SELECTOR — this was declared twice, identically. A duplicate is harmless until
+   a lock slices on `indexOf(".qa-wpg {")` and reads whichever half comes first. */
 .qa-wpg { flex: 1; min-height: 0; }
 
 

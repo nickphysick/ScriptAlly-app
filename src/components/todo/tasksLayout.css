@@ -60,6 +60,15 @@
 /* ⚠️ `align-items: stretch`, NOT `flex-start` — see the viewport lock below: under a window the
    sidebar and body must take the frame's full height, or their scrollzones have no height to be
    100% of. `flex-start` sized each to its content, which is right only for a scrolling page. */
+/* ⚠️ THE SCROLL ROW IS A FLEX COLUMN, AND WITHOUT THIS THE VIEWPORT LOCK LEAKS. `.tpl-cols` says
+   `flex: 1; min-height: 0` — written when its parent was `.tdb-wrap`, a flex column. Under the
+   grid its parent is `.wpg-scroll`, a BLOCK, so `flex` and `min-height: 0` both applied to nothing,
+   `.tpl-cols` sized to its content, and the frame the lock says never scrolls had 696px of
+   overflow — a second scroller stacked outside the `.tpl-zone` that is meant to own all of it.
+   Nothing here changes the chain below `.tpl-cols`; it gives the chain the flex parent it was
+   always written against. */
+.tpl-wpg > .wpg-scroll { display: flex; flex-direction: column; }
+
 .tpl-cols { display: flex; align-items: stretch; gap: 26px; margin-top: 6px; flex: 1; min-height: 0; }
 .tpl-side { flex: 0 0 auto; overflow: auto; min-height: 0; }
 .tpl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
@@ -102,7 +111,20 @@
    to be an item of. */
 .spine-root { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
-.tdb-col.tpl { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+/* ⚠️ THE COLUMN CANCELS ITS OWN CAP AND GUTTER HERE, FOLDED INTO ITS ONE RULE. `.tdb-col` carries
+   `max-width: var(--tdb-col-max)` (1360) and `padding: … var(--tdb-col-gutter) …` (40px), and both
+   sit ABOVE the grid — so they inset the header, the toolbar and the scroller together, exactly as
+   the route slots' `contentVariant` caps did. Measured: the Tasks pages' hairline landed 40px
+   further in than every other page's, 367/143 against 327/103.
+   ⚠️ FOLDED, NOT APPENDED. A second `.tdb-col.tpl` block made the selector ambiguous and the lock
+   read the wrong half — the duplicate-selector trap, caught by its own lock this time. The
+   vertical padding survives: it gutters content, which is a different job. */
+.tdb-col.tpl {
+  display: flex; flex-direction: column; flex: 1; min-height: 0;
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
 /* ⚠️ `.tdb-wrap`'s OWN rule is edited IN PLACE in todo.css (it is where `overflow-y: auto` was
    declared). A second single-class rule here would have equal specificity and win or lose on
    source order alone — the kind of pair that works until an import moves. */
@@ -130,3 +152,4 @@
   .tpl-cols { flex-wrap: wrap; }
   .tpl-body { width: 100%; }
 }
+
