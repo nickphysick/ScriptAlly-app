@@ -85,7 +85,9 @@
   font: inherit;
   font-size: 13px;
   white-space: nowrap;
-  transition: background 0.18s, border-color 0.18s;
+  transition: background 0.18s, border-color 0.18s,
+    height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
+    font-size .22s cubic-bezier(.4, 0, .2, 1);
 }
 .svh-btn svg { width: 15px; height: 15px; flex: none; }
 .svh-btn-ghost { background: var(--shell-card); border-color: var(--shell-line); color: var(--shell-ink); }
@@ -343,7 +345,16 @@
 .wsh--scrolled .wsh-mark--xl { flex: 0 0 30px; width: 30px; }
 .wsh--scrolled .wsh-mark .os-mark,
 .wsh--scrolled .wsh-mark--xl .os-mark { width: 30px; height: 30px; flex-basis: 30px; }
-.wsh--scrolled .svh-btn { padding: 7px 13px; font-size: 12px; }
+/* ⚠️ THE HEIGHT, NOT THE PADDING — and the padding version was a no-op. `.svh-btn` is a FIXED
+   `height: 38px`, so `padding: 7px 13px` changed nothing at all: the vertical values are ignored
+   inside a fixed height and the button stayed 38px in a 52px strip. Measured on the seeded dev
+   account: Contact list and Manuscripts 38, Submission packages 30 — the inconsistency was real
+   and it was on the pages I had NOT touched, because `.pkgw-btn` gained an explicit working height
+   in the last pass while the shared button never did.
+   ⚠️ AND THIS IS WHY THE EMPTY ACCOUNT HID IT. `.wsh-acts` renders only when a page has actions to
+   show; on an empty account Packages had none, so the one element that differed was absent from
+   every measurement and all six headers "matched". */
+.wsh--scrolled .svh-btn { height: 30px; padding: 0 13px; font-size: 12px; }
 .wsh-grow { flex: 1 1 auto; min-width: 10px; }
 .wsh-acts { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 
