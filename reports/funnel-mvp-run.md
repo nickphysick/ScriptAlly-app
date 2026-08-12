@@ -503,7 +503,7 @@ and `/privacy` at desktop and ~375px before launch** — the CSS is new and unre
 
 ## Phase 6 — the onboarding card, retokened
 
-**Commit:** _(hash in the next log commit)_
+**Commit:** `c3df9e7`
 **Gates:** tsc **0** · build **✓** · Vitest **260 files, 4279 passed | 2 skipped (4281)**
 `Onboarding.tsx` 681 → 459 lines (1288 at the start of the run).
 
