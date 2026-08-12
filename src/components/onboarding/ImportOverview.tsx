@@ -4,14 +4,25 @@
  *
  * Smart Import — the overview screen ("Here's what we found"). A positive arrival between processing
  * and the review stages. The tally is grouped BY POPULATION (Agents | Queries), never pooled — each
- * column reconciles to its own total. Agents have a blocking "A quick fix" tier (gold: missing agency
- * or a duplicate group); queries are never blocking, only optional "Chances to sharpen" (pink). Counts
- * are derived live via reviewTallies. Built to fit one viewport — totals fold into the column headers,
- * the manuscript is a chip, the why-line is a single strip, the top tip is a scrawl in the corner.
+ * column reconciles to its own total. Counts are derived live via reviewTallies. Built to fit one
+ * viewport — totals fold into the column headers, the manuscript is a chip, the why-line is a single
+ * strip, the top tip is a scrawl in the corner.
+ *
+ * ⚠️ NOTHING HERE BLOCKS, and this docblock used to say otherwise. It described agents as having a
+ * "blocking 'A quick fix' tier (missing agency or a duplicate group)", which stopped being true when
+ * a missing agency became an optional sharpen — `agentTierOf` returns "sharpen" unconditionally, and
+ * every proceed control on every review stage stays live. The one real decision, an unresolved
+ * duplicate, gets its own stage BEFORE the review rather than a gate inside it.
+ *
+ * ⚠️ THE LEAD SENTENCE IS COMPOSED FROM THE COUNTS (`overviewLead`), never chosen from a fixed pair.
+ * A single hardcoded "some agents need a fix, some queries need sharpening" line was rendered
+ * whenever ANY of the three counts was non-zero, so it routinely named a category showing zero in
+ * the column directly beneath it.
  */
 import React from "react";
 import { SmartImportResult } from "../../types/smartImport";
 import { parseModel, reviewTallies } from "../../lib/smartImportReviewModel";
+import { overviewLead } from "../../lib/smartImportConfirm";
 import { ReviewShell } from "./SmartImportReview";
 
 const MONO = "'JetBrains Mono',monospace";
@@ -95,9 +106,7 @@ export const ImportOverview: React.FC<Props> = ({ result, manuscriptTitle, userN
         <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: C.muted, fontWeight: 500 }}>We've read your file</div>
         <h1 style={{ fontFamily: SERIF, fontWeight: 600, fontSize: 31, margin: "7px 0 0", color: C.ink, lineHeight: 1.1 }}>Here's what we found</h1>
         <p style={{ fontFamily: CAVEAT, fontSize: 21, color: C.burgundy, margin: "9px 0 4px", maxWidth: 600, lineHeight: 1.35 }}>
-          {allClear
-            ? "It all read cleanly — your history's ready to come straight in."
-            : "Most of it's ready to go. A couple of agents need a quick fix first — and a handful of queries are chances to sharpen."}
+          {overviewLead({ agentsFix: t.agents.fix, agentsSharpen: t.agents.sharpen, queriesSharpen: t.queries.sharpen })}
         </p>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: MONO, fontSize: 11, color: C.muted, background: C.parchment, border: `1px solid ${C.hairline}`, borderRadius: 7, padding: "5px 11px", marginTop: 6 }}>
           📄 1 manuscript · {manuscriptTitle || "Your book"}

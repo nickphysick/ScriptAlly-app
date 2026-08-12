@@ -1404,8 +1404,13 @@ const BANNER: Record<"agents" | "queries", { line: React.ReactNode; faqs: Banner
   agents: {
     line: <>Here are the agents we found. Anything in <span style={{ textDecoration: "underline", textDecorationColor: "rgba(124,58,42,0.35)" }}>pink</span> needs a quick look — a missing agency, or a possible duplicate. Sort those, then carry on to your queries.</>,
     faqs: [
-      { q: "Why does an agent need an agency?", a: "We file agents under their agency, so each record needs one — the name's optional. Add it via Make changes, or remove the record." },
-      { q: "What if I don't know the name?", a: "That's fine — we'll reference them by agency. Just fill the agency in." },
+      // ⚠️ A NAME **OR** AN AGENCY IS ENOUGH — never assert that an agency is required. These two
+      // answers used to say each record "needs" an agency, while the fix panel on this very screen
+      // offered "use their name instead" and `agentTierOf` returned "sharpen" for every flag. The
+      // code was right and the FAQ was wrong; a writer who believed it would have deleted good
+      // records to satisfy a rule that does not exist.
+      { q: "Does an agent need an agency?", a: "No — a name or an agency is enough. Adding the agency sharpens the record, and you can do it any time; nothing is lost without one." },
+      { q: "What if I don't know the name?", a: "That's fine — we'll track them by agency alone, and you can add the name whenever you find it." },
       { q: "What's a duplicate?", a: "When the same agent looks like it came in twice, we group them so you can keep one (their queries combine) or keep both." },
       { q: "Can I change this later?", a: "Yes — everything's editable in your agent database after import." },
     ],
@@ -2563,7 +2568,9 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, on
       { q: 'What does “needs a look” mean?', a: "We've flagged something worth a glance — a suspected duplicate, or a missing agency. Everything else is ready to import as-is." },
       { q: "Can I add more agents later?", a: "Any time, from your dashboard — by import or by hand." },
       { q: "What if I don't have the agent's name?", a: "Leave the name blank and we'll track them by agency only. Add it whenever you find out." },
-      { q: "Is the agency name required?", a: "Yes — every agent needs at least an agency, even when the person's name is blank." },
+      // ⚠️ See the note on BANNER.agents.faqs — a name OR an agency is enough. This answer said
+      // "Yes", directly contradicting the fix panel a few centimetres to its left.
+      { q: "Is the agency name required?", a: "No — a name or an agency is enough. An agency sharpens the record and can be added at any time." },
       { q: "What happens when I delete a duplicate?", a: "We import just one of the two records and merge any queries from the duplicate onto that single agent — so nothing's lost." },
     ];
 

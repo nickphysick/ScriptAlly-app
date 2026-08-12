@@ -114,7 +114,7 @@ No item came back BLOCKED — nothing this pack needs lives in a do-not-touch fi
 
 ## Phase 1 — close the money hole and the destructive surfaces
 
-**Commit:** _(hash appended below)_
+**Commit:** `b42df4f`
 **Gates:** tsc **0** · build **✓ 5.00s** · Vitest **256 files, 4200 passed | 2 skipped (4202)**
 Baseline was 4201 | 2 (4203); the −1 is deletions, explained under "test count" below.
 
@@ -226,3 +226,83 @@ do not run in this suite. Net −1, all accounted for.
 
 No visual verification anywhere in this phase. The affected surfaces are auth-gated or deleted, and
 the browser pane cannot sign in (established during the recon).
+
+---
+
+## Phase 2 — truth pass
+
+**Commit:** `e952039`
+**Gates:** tsc **0** · build **✓** · Vitest **258 files, 4217 passed | 2 skipped (4219)** (was 256/4200)
+
+### 2a — the filename on the confirm screen
+
+`setFileName(file.name)` moved from the top of `runMapping` into `pickFile`. The confirm screen is
+the only reader, and `runMapping` is what its own primary button calls — so the name used to arrive
+one screen after the screen that existed to show it.
+
+**Decision (mine):** the sentence is now a pure `confirmFileLead()` in the new
+`src/lib/smartImportConfirm.ts`, rather than a ternary inline in the JSX. A pure function can be
+tested; the inline could not, because reaching the confirm screen needs an interaction and this
+repo has no jsdom. Its test covers named and unnamed (including whitespace-only).
+
+**⚠️ But the bug was wiring, not copy, and a pure test cannot see wiring.** So there is a second
+test asserting at source that `pickFile` contains `setFileName(file.name)` and that `runMapping`
+does not — each slice restating and asserting its own anchor first, per the house slice rule.
+
+### 2b — the overview's claim
+
+New pure `overviewLead({agentsFix, agentsSharpen, queriesSharpen})` composes the sentence from the
+counts that are actually non-zero, joining surviving clauses as prose. The old single hardcoded
+string was chosen by `allClear`, so zero agent problems + three query flags still announced that
+agents needed a fix, directly above an Agents column showing zero of both non-ready tiers.
+
+Six tests, including the two cases the old copy got wrong in each direction, singular/plural
+agreement, and a reports-never-appraises check (no `only|just|already|still|good|bad|slow|…`).
+
+Docblock corrected: it described a blocking agent tier that `agentTierOf` has not returned for some
+time. It now says plainly that nothing here blocks and that the one real decision (an unresolved
+duplicate) has its own stage before the review.
+
+### 2c — the FAQ contradictions
+
+Both answers now say a name **or** an agency is enough:
+- `BANNER.agents.faqs[0]`: "Why does an agent need an agency?" → "Does an agent need an agency?" /
+  "No — a name or an agency is enough…"
+- `FAQ_ITEMS`: "Is the agency name required?" → "No — a name or an agency is enough…"
+
+New lock `reviewCopyClaims.test.ts`. Two things worth recording about building it, because both
+were false alarms of the kind that teach people to weaken locks:
+
+1. **It first failed on my own comment.** The comments beside the fix quote the old wording
+   verbatim so the next reader knows what was wrong; the lock read them. `//` lines are now
+   stripped before matching — safe here because every answer lives in an object literal, never in
+   a comment.
+2. **Then it failed on the new question.** "Does an agent need an agency?" contains "need an
+   agency" — a perfectly good question. The patterns now match **answers only**, extracted via
+   `a: "…"`, with an anchor assertion that the table yielded any answers at all.
+
+**Verified red before being believed:** restoring the original "Yes — every agent needs at least an
+agency" answer fails 2 of the 8 cases; restored immediately after.
+
+### 2d — the "Founding Members open" pill
+
+Deleted from `Auth.tsx`. Nothing read a cap, a count or a date, so it asserted an open programme
+whatever the truth was. The comment left behind points at the waitlist machinery
+(`functions/src/waitlist.ts`, `counters/waitlist`) that could back such a claim and notes it is not
+wired to any live page.
+
+### 2e — the mapping fallback's silent catch-all
+
+The fallback is now explicitly `screen === "fallback"`. The genuine unhandled case became its own
+branch: it `console.error`s the screen value and what state was missing, and renders "That step
+didn't load" — *"Something didn't load on our side. Your file hasn't been imported and nothing has
+been saved"* — with Back, add-by-hand and the Import-desk hatch all live.
+
+That distinction is the point: as the function's bare final `return`, the fallback rendered for any
+unhandled state, so a branch whose data never arrived (`"overview"` with a null `validated`) told
+the writer *"We couldn't read that one automatically"* — blaming their file for our own missing
+state.
+
+### Not verified
+
+No visual verification. All five surfaces are inside the onboarding flow, which is auth-gated.

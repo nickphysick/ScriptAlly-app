@@ -24,6 +24,7 @@ import { ImportTidyAnimation } from "./ImportTidyAnimation";
 import { ImportingLoader } from "./ImportingLoader";
 import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { fmtDate } from "../../lib/smartImportReviewModel";
+import { confirmFileLead } from "../../lib/smartImportConfirm";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
@@ -149,11 +150,16 @@ export const BranchB: React.FC<BranchBProps> = ({
       return;
     }
     setPendingFile(file);
+    /* ⚠️ THE NAME IS RECORDED HERE, NOT IN runMapping — the confirm screen is the ONLY reader.
+       It used to be set at the top of runMapping, which the confirm screen's own primary button
+       calls: so by the time the name existed, the screen asking you to confirm it was gone. The
+       screen therefore always took its unnamed fallback ("We'll read your file…") on the one
+       screen whose whole job is naming the file about to spend a one-shot entitlement. */
+    setFileName(file.name);
     setScreen("confirm");
   };
 
   const runMapping = async (file: File) => {
-    setFileName(file.name);
     setRawSample([]); setExtractComplete(false); setValidated(null);
     setScreen("reading"); // the scatter-settle loader takes over from here
     // Display-only: show the writer's actual raw cells the instant they upload, scattered, while the
@@ -335,8 +341,12 @@ export const BranchB: React.FC<BranchBProps> = ({
         onPrimary={() => { if (pendingFile) void runMapping(pendingFile); }}
       >
         <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 10px" }}>
-          {fileName ? <>We'll read <strong>{fileName}</strong> and show you everything </> : <>We'll read your file and show you everything </>}
-          before anything is saved — you confirm what lands.
+          {(() => {
+            const lead = confirmFileLead(fileName);
+            return lead.name
+              ? <>{lead.before}<strong>{lead.name}</strong>{lead.after}</>
+              : <>{lead.before}</>;
+          })()}
         </p>
         <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9c8878", lineHeight: 1.55, margin: 0 }}>
           {isPro
@@ -497,7 +507,50 @@ export const BranchB: React.FC<BranchBProps> = ({
     );
   }
 
-  // ── Fallback — template-first (the v2 layout) when the mapping call fails ─
+  /**
+   * ── Fallback — template-first (the v2 layout) when the mapping call fails ─
+   *
+   * ⚠️ THIS BRANCH IS EXPLICITLY CONDITIONED, and the unhandled case below it is separate.
+   * It used to be the function's bare final `return`, which made it the render for ANY screen
+   * value that fell through — so a state that arrived without its data (e.g. `"overview"` with a
+   * null `validated`) silently showed "We couldn't read that one automatically", blaming the
+   * writer's file for what was actually our own missing state. The two are different failures and
+   * now say different things.
+   */
+  const mappingFailed = screen === "fallback";
+  if (!mappingFailed) {
+    /* The genuinely-unhandled case: a screen value with no branch, or a branch whose data never
+       arrived. Never silent — log it for whoever is reading the console, and say honestly that
+       the step could not be shown rather than inventing a cause. Every route out stays live. */
+    console.error("BranchB: unhandled screen state", { screen, hasValidated: !!validated, hasOutcome: !!outcome });
+    return (
+      <Form11Card
+        dotIndex={2}
+        onSkip={onSkip}
+        pre="Your pipeline"
+        name="That step didn't load"
+        sub="Nothing is lost — pick up from here"
+        motif={<InboxMotif />}
+        onBack={() => setScreen("pipeline")}
+        primaryLabel="Back to the start of this step →"
+        onPrimary={() => setScreen("pipeline")}
+      >
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 12px" }}>
+          Something didn't load on our side. Your file hasn't been imported and nothing has been
+          saved — start this step again, or add your agents by hand.
+        </p>
+        <SelectRow
+          icon={HandIcon}
+          title="Add them by hand"
+          desc="Only a few out there? Add your agents one at a time."
+          selected={false}
+          onClick={onAddByHand}
+        />
+        <EscapeHatch onOpen={onOpenImportDesk} />
+      </Form11Card>
+    );
+  }
+
   return (
     <Form11Card
       dotIndex={2}

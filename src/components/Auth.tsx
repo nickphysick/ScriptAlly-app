@@ -135,7 +135,10 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
           <span className="nav-word">ScriptAlly</span>
         </div>
         <div className="nav-right">
-          <span className="nav-pill"><span className="dot" />Founding Members open</span>
+          {/* ⚠️ NO "Founding Members open" PILL. It was hardcoded — nothing read a cap, a count or
+              a date, so it asserted an open programme whatever the truth was. The waitlist machinery
+              that could back a claim like this (functions/src/waitlist.ts, counters/waitlist) is not
+              wired to any live page. A status pill needs a status behind it. */}
           <a className="nav-link" href="https://scriptally.ink">
             Back to site
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M9 7h8v8" /></svg>
