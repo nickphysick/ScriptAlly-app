@@ -427,7 +427,7 @@ No visual verification. The rules change is committed and **not deployed** (see 
 
 ## Phase 5 — pricing and legal
 
-**Commit:** _(hash in the next log commit)_
+**Commit:** `b0baaf5`
 **Gates:** tsc **0** · build **✓** · Vitest **259 files, 4261 passed | 2 skipped (4263)**
 
 ### 5a — a public `/pricing` that sells nothing
