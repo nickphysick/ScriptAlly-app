@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — Query Centre, header by mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --window:#fff;--parch:#faf6f0;--ground:#f7f4ee;
+  --burg:#7c3a2a;--burgd:#632e22;--ink:#3a1c14;--ink2:#311e19;
+  --edge:#e4ddd1;--hair:#e8e2d8;--mut:#8a7a70;
+  --sage-a:#d7ddd5;--sage-b:#d5dbd3;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --gut:56px;--pgap:16px;--strip:52px;--rest:96px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:#e9e4dc;font-family:'Inter',sans-serif;color:var(--ink);padding:18px 22px 40px}
+ .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+ .bar h1{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;margin-right:8px}
+ .lab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#7d7267;margin:0 3px 0 10px}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:10.5px;padding:7px 11px;border:1px solid #cfc6b8;border-radius:8px;background:#f4efe7;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#fdfaf5;border-color:var(--ink)}
+ .note{font-size:12.5px;color:#6b5f56;margin:4px 2px 12px;max-width:1100px;line-height:1.55;min-height:34px}
+
+ .shell{display:flex;width:100%;max-width:1500px;height:660px;background:var(--ground);border-radius:14px;overflow:hidden;box-shadow:0 2px 6px rgba(58,28,20,.08),0 14px 34px rgba(58,28,20,.10)}
+ .side{flex:0 0 200px;background:var(--window);border-right:1px solid var(--hair);padding:15px 12px;display:flex;flex-direction:column;gap:7px}
+ .logo{display:flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:17px}
+ .logo .m{width:23px;height:23px;border-radius:50%;background:#e7ecf3;display:grid;place-items:center;font-size:12px;color:#5b6c85}
+ .navh{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#a2968c;margin:5px 4px 0}
+ .nv{display:flex;align-items:center;gap:9px;font-size:12px;padding:6px 8px;border-radius:8px;color:#4d3b33}
+ .nv.on{background:var(--ground);font-weight:600}
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .crumbrow{flex:0 0 auto;padding:11px 18px 9px;font-size:12.5px;color:#6b5a51}
+ .crumbrow b{color:var(--ink)}
+
+ .window{position:relative;background:var(--window);border:1px solid var(--edge);border-radius:16px 16px 0 0;margin:0 14px;
+         flex:1;min-height:0;overflow:hidden;display:grid;grid-template-rows:auto auto minmax(0,1fr);
+         box-shadow:0 1px 2px rgba(58,28,20,.05),0 8px 26px rgba(58,28,20,.07)}
+
+ /* row 1 — header */
+ .hrow{padding:var(--pgap) var(--gut) 0;position:relative;transition:padding .22s cubic-bezier(.4,0,.2,1)}
+ body.work .hrow{padding:0}
+ .hrow::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--hair);opacity:0;transition:opacity .18s}
+ body.work .hrow::after{opacity:1}
+ .hdr{display:flex;align-items:center;gap:14px;height:var(--rest);padding:0 24px;background:#fff;
+      border:1px solid var(--edge);border-radius:2px;
+      box-shadow:0 1px 2px rgba(58,28,20,.05),0 6px 18px rgba(58,28,20,.09);
+      transition:height .22s cubic-bezier(.4,0,.2,1),border-color .22s,box-shadow .22s,border-radius .22s,padding .22s cubic-bezier(.4,0,.2,1)}
+ body.work .hdr{height:var(--strip);padding:0 var(--gut);border-color:transparent;box-shadow:none;border-radius:0}
+ .mk{flex:0 0 60px;width:60px;height:60px;display:grid;place-items:center;transition:flex-basis .22s cubic-bezier(.4,0,.2,1),width .22s,opacity .14s,margin-right .22s}
+ .mk svg{width:52px;height:52px;stroke:var(--burg);fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+ body.work .mk{flex-basis:0;width:0;opacity:0;margin-right:-14px}
+ .t{font-family:'Playfair Display',serif;font-size:33px;font-weight:600;color:var(--ink2);white-space:nowrap;line-height:1.1;transition:font-size .22s cubic-bezier(.4,0,.2,1)}
+ body.work .t{font-size:17px}
+ .sp{flex:1 1 auto;min-width:10px}
+ .b-ghost{border:1px solid #d9cfc2;background:#fff;color:var(--ink);border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:500;white-space:nowrap;transition:padding .22s,font-size .22s}
+ .cta{border:1px solid var(--ink2);background:var(--ink2);color:#fdfaf5;border-radius:9px;padding:10px 17px;font-size:13px;font-weight:600;white-space:nowrap;transition:padding .22s,font-size .22s}
+ body.work .cta,body.work .b-ghost{padding:7px 13px;font-size:12px}
+ .exit{display:none;border:1px solid #d9cfc2;background:#fff;color:var(--ink);border-radius:9px;padding:7px 13px;font-size:12px;font-weight:500;white-space:nowrap}
+ body.work .exit{display:block}
+ body.work .browseacts{display:none}
+
+ /* row 2 — panel bar: CONTENT, below the hairline */
+ .prow{padding:14px var(--gut) 10px;display:flex;align-items:center;gap:18px}
+ .pcount{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;white-space:nowrap}
+ .verbs{display:flex;gap:16px;font-size:12.5px;color:#6b5a51;white-space:nowrap;overflow:hidden}
+ .verbs span{display:flex;gap:6px;align-items:center}
+ .verbs .off{color:#bdb2a6}
+ .del{margin-left:auto;font-size:12.5px;color:#a05a45;white-space:nowrap}
+
+ /* row 3 — master/detail, internal scrollers */
+ .cols{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;padding:0 var(--gut) 18px;min-height:0}
+ .qpanel{display:flex;flex-direction:column;min-height:0;border:1px solid #eee4d6;border-radius:12px;overflow:hidden;background:#fff}
+ .qsearch{flex:0 0 auto;margin:9px;background:var(--parch);border:1px solid #eee4d6;border-radius:999px;padding:8px 13px;font-size:12px;color:#a2968c}
+ .qscroll{overflow:auto;min-height:0;padding:0 6px 6px}
+ .qscroll::-webkit-scrollbar{width:8px}
+ .qscroll::-webkit-scrollbar-thumb{background:#e2d9cb;border-radius:6px;border:2px solid #fff}
+ .qrow{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:10px;border:1px solid transparent}
+ .qrow.sel{background:#f2ede7;border-color:#e6ddd0}
+ .avr{flex:0 0 28px;width:28px;height:28px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--burgd)}
+ .qmeta{min-width:0;flex:1}
+ .qmeta b{font-size:12.5px;font-weight:600;display:block}
+ .qmeta span{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.09em;color:#a2968c}
+ .qd{font-family:'JetBrains Mono',monospace;font-size:9px;color:#a2968c;white-space:nowrap}
+ .qfoot{flex:0 0 auto;padding:8px 12px;border-top:1px solid #f2ece2;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#a2968c}
+
+ .pane{min-height:0;overflow:auto;padding-right:2px}
+ .pane::-webkit-scrollbar{width:8px}
+ .pane::-webkit-scrollbar-thumb{background:#e2d9cb;border-radius:6px;border:2px solid #fff}
+ .agent{background:var(--parch);border:1px solid #eee4d6;border-radius:13px;padding:15px 18px;display:flex;align-items:center;gap:15px}
+ .av{flex:0 0 50px;width:50px;height:50px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-family:'Playfair Display',serif;font-size:17px;color:var(--burgd)}
+ .agent h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:500}
+ .agent p{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#6b5a51;margin-top:1px}
+ .chip{display:inline-flex;gap:6px;background:#f8e7dc;border:1px solid #eccbb8;color:var(--burgd);border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;padding:3px 10px;margin-top:6px}
+ .rec{margin-left:auto;border:1px solid var(--pinkb);background:var(--pink);color:var(--burgd);border-radius:9px;padding:9px 15px;font-size:12.5px;font-weight:600;white-space:nowrap}
+ .trio{display:flex;gap:12px;margin-top:14px}
+ .card{flex:1;min-width:0;border:1px solid #eee4d6;border-radius:12px;overflow:hidden;background:#fff}
+ .cband{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:8px 12px;font-size:12.5px;font-weight:600;color:#2f3a2e}
+ .cbody{padding:11px 13px;font-size:11.5px;color:#8a7a70;line-height:1.6;min-height:88px}
+
+ /* journeys */
+ .journey{display:none}
+ body.work .journey{display:block}
+ body.work .browsepane{display:none}
+ .jhead{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+ .jhead h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:500}
+ .jhead .who{font-family:'Playfair Display',serif;font-style:italic;font-size:13.5px;color:#6b5a51}
+ .step{border:1px solid #eee4d6;border-radius:12px;margin-bottom:10px;overflow:hidden;background:#fff}
+ .step.done .sh{background:var(--parch)}
+ .sh{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:600}
+ .sn{width:22px;height:22px;border-radius:50%;background:var(--pink);color:var(--burgd);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:10px}
+ .step.done .sn{background:var(--burg);color:#fff}
+ .sv{margin-left:auto;font-size:12px;color:#8a7a70;font-weight:400}
+ .sb{padding:0 14px 14px;border-top:1px solid #f4eee4}
+ .opts{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+ .opt{border:1px solid #e6ddd0;background:var(--parch);border-radius:10px;padding:10px 15px;font-size:12.5px;color:#5d4d44;display:flex;gap:8px;align-items:center}
+ .opt.pick{border-color:var(--burg);background:#f8e7dc;color:var(--burgd);font-weight:600}
+ .jfoot{display:flex;gap:9px;margin-top:14px}
+</style></head><body>
+
+<div class="bar">
+ <h1>Query Centre &mdash; header by mode</h1>
+ <span class="lab">MODE</span>
+ <button class="tab on" data-m="browse">BROWSING</button>
+ <button class="tab" data-m="record">RECORD A RESPONSE</button>
+ <button class="tab" data-m="log">LOG A QUERY</button>
+</div>
+<div class="note" id="note"></div>
+
+<div class="shell">
+ <aside class="side">
+  <div class="logo"><span class="m">S</span>ScriptAlly</div>
+  <div class="navh">TASKS</div><div class="nv">To-do list</div><div class="nv">Calendar</div>
+  <div class="navh">QUERIES</div><div class="nv on">Query Centre</div><div class="nv">Analytics</div>
+  <div class="navh">AGENTS</div><div class="nv">Contact list</div><div class="nv">Discover</div>
+ </aside>
+ <div class="main">
+  <div class="crumbrow">/ Queries / <b>Query Centre</b></div>
+  <div class="window">
+
+   <div class="hrow"><div class="hdr">
+     <div class="mk"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></div>
+     <div class="t">Query Centre</div>
+     <div class="sp"></div>
+     <div class="browseacts" style="display:flex;gap:9px">
+       <button class="b-ghost">&#8595; Export</button>
+       <button class="cta">&#65291; Log query</button>
+     </div>
+     <button class="exit">&#10005; Close</button>
+   </div></div>
+
+   <div class="prow">
+     <div class="pcount">22 queries</div>
+     <div class="verbs">
+       <span>&#8801; View tasks</span><span>&#9998; Edit</span><span>&#128276; Nudge</span><span>&#9003; Mark closed</span>
+       <span class="off">&#9679; Agent</span><span class="off">&#9633; Manuscript</span>
+     </div>
+     <div class="del">&#128465; Delete</div>
+   </div>
+
+   <div class="cols">
+     <div class="qpanel">
+       <div class="qsearch">&#8981; Search</div>
+       <div class="qscroll"><div class="qrow sel"><div class="avr">DO</div><div class="qmeta"><b>Daniel O'Rourke</b><span>INKWELL &amp; STONE</span></div><div class="qd">9 Aug</div></div><div class="qrow"><div class="avr">WT</div><div class="qmeta"><b>William Tan</b><span>FOXGLOVE LITERARY</span></div><div class="qd">29 Jul</div></div><div class="qrow"><div class="avr">FS</div><div class="qmeta"><b>Fenella Str</b><span>BRIGHTWATER BOOKS</span></div><div class="qd">14 Mar</div></div><div class="qrow"><div class="avr">SD</div><div class="qmeta"><b>Sophie Dunn</b><span>CURTIS VANE</span></div><div class="qd">15 Jan</div></div><div class="qrow"><div class="avr">TE</div><div class="qmeta"><b>Tom Ellery</b><span>CURTIS VANE</span></div><div class="qd">3 Mar</div></div><div class="qrow"><div class="avr">PR</div><div class="qmeta"><b>Priya Raman</b><span>NO AGENCY</span></div><div class="qd">—</div></div><div class="qrow"><div class="avr">MR</div><div class="qmeta"><b>Marcus Reed</b><span>HARTLEY &amp; CO</span></div><div class="qd">20 Feb</div></div><div class="qrow"><div class="avr">JO</div><div class="qmeta"><b>Joseph Okafor</b><span>SABLE &amp; FINCH</span></div><div class="qd">2 Feb</div></div><div class="qrow"><div class="avr">NA</div><div class="qmeta"><b>Nina Alvarez</b><span>REDGATE BOOKS</span></div><div class="qd">18 Jan</div></div><div class="qrow"><div class="avr">HQ</div><div class="qmeta"><b>Hester Quill</b><span>BELLROPE BOOKS</span></div><div class="qd">4 Jan</div></div></div>
+       <div class="qfoot">SHOWING 22 OF 22</div>
+     </div>
+
+     <div class="pane">
+       <div class="browsepane">
+         <div class="agent">
+           <div class="av">DO</div>
+           <div><h3>Daniel O'Rourke</h3><p>Inkwell &amp; Stone</p><span class="chip">&#9678; QUERIED</span></div>
+           <button class="rec">&#9992; Record response</button>
+         </div>
+         <div class="trio">
+           <div class="card"><div class="cband">Tracking</div><div class="cbody">Query sent 9 Aug via email.<br>Waiting to hear back &middot; 1 day.<br>Expected by ~4 Oct.</div></div>
+           <div class="card"><div class="cband">What you sent</div><div class="cbody">Murphy's Day Out<br>Query letter &middot; synopsis<br>Opening 50 pages</div></div>
+           <div class="card"><div class="cband">Notes</div><div class="cbody">Your notes on this query appear here &mdash; first impressions, things they said.</div></div>
+         </div>
+       </div>
+
+       <div class="journey">
+         <div class="jhead"><h3 id="jt">Record a response</h3><span class="who" id="jw">Daniel O'Rourke &middot; Inkwell &amp; Stone</span></div>
+
+         <div class="step done" id="s1">
+           <div class="sh"><span class="sn">1</span><span id="s1t">What happened?</span><span class="sv" id="s1v">Partial requested</span></div>
+         </div>
+         <div class="step" id="s2">
+           <div class="sh"><span class="sn">2</span><span id="s2t">When did they reply?</span></div>
+           <div class="sb"><div class="opts">
+             <div class="opt pick">Today &middot; 12 Aug</div><div class="opt">Yesterday</div><div class="opt">Pick a date</div>
+           </div></div>
+         </div>
+         <div class="step" id="s3">
+           <div class="sh"><span class="sn">3</span><span id="s3t">What did they ask for?</span></div>
+           <div class="sb"><div class="opts">
+             <div class="opt">First 3 chapters</div><div class="opt pick">First 50 pages</div><div class="opt">Other</div>
+           </div></div>
+         </div>
+         <div class="step" id="s4">
+           <div class="sh"><span class="sn">4</span><span>Anything worth noting?</span><span class="sv">Optional</span></div>
+         </div>
+
+         <div class="jfoot">
+           <button class="cta">Save response</button>
+           <button class="b-ghost">Cancel</button>
+         </div>
+       </div>
+     </div>
+   </div>
+
+  </div>
+ </div>
+</div>
+
+<script>
+const N={
+ browse:"Browsing. The header is the resting 96px card \u2014 the user is choosing what to work on. \u201822 queries\u2019 and the verb row sit below it as content, and both panes scroll internally, so the page scroller never moves.",
+ record:"Recording a response. Entering the journey flattens the header to the 52px strip \u2014 same target as the scroll pages, different trigger. The list stays visible so the user can see where they are in the run; the reading pane becomes the workspace. Whether the list persists is the one thing to verify in code.",
+ log:"Logging a query. Same rule, same strip. Note the header\u2019s own actions give way to a single Close \u2014 while a journey is open, \u2018Log query\u2019 in the header would start a second one."
+};
+const note=document.getElementById('note');
+function set(m){
+ document.body.className = m==='browse' ? '' : 'work';
+ document.querySelectorAll('.tab[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+ note.textContent=N[m];
+ if(m==='log'){
+  jt.textContent='Log a query'; jw.textContent='New submission \u00b7 Murphy\u2019s Day Out';
+  s1t.textContent='Which agent?'; s1v.textContent='William Tan \u00b7 Foxglove Literary';
+  s2t.textContent='When did you send it?'; s3t.textContent='What did you send?';
+ } else {
+  jt.textContent='Record a response'; jw.innerHTML='Daniel O\u2019Rourke &middot; Inkwell &amp; Stone';
+  s1t.textContent='What happened?'; s1v.textContent='Partial requested';
+  s2t.textContent='When did they reply?'; s3t.textContent='What did they ask for?';
+ }
+}
+document.querySelectorAll('.tab[data-m]').forEach(b=>b.onclick=()=>set(b.dataset.m));
+set('browse');
+</script></body></html>
