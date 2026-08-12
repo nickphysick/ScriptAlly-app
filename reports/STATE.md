@@ -798,3 +798,19 @@ Smaller, flagged rather than done: the six remaining orphan-component candidates
 evidence in `reports/todo-pages.md`), the orphaned `.sv2-*` rules left by the retired capsule
 panel, and "Help me pick", which survives as a function but lost its mount with the Today corner —
 its next home is the Today page's add flow.
+
+## Follow-up · Comparable titles renders two scrollbars at once (12 Aug)
+Measured on the built stylesheet, classic scrollbars, at 2400px: every converted page's
+content resolves to 2210px except Comparable titles, at **2195px**. The 15px is a second
+reserved scrollbar — `.ct-desk` declares `overflow-y: auto` INSIDE the grid's `.wpg-scroll`,
+so the page has a nested scrollport.
+
+⚠️ NOT A STRAY DECLARATION, AND NOT FIXED HERE. It is the documents-hug architecture doing
+what it was built to do: the comps desk's two panes scroll internally, which is the shape
+that makes the page a fixed-height master–detail surface rather than a document. The 15px
+is the honest cost of that.
+
+What is worth a look on its own terms is the PRESENTATION: two scrollbars visible
+simultaneously, one inside the other, on a page where only the inner one usually moves.
+Options are to make the outer scrollport non-scrolling on this page (it has nothing to
+scroll when the desk fills the row), or to hide the outer bar. Neither is a width fix.
