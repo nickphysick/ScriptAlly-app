@@ -40,6 +40,13 @@ const read = (page: Page) => page.evaluate(() => {
       const m = g.querySelector(".wsh-mark") as HTMLElement | null;
       return m ? (m.getBoundingClientRect().width === 0 && getComputedStyle(m).opacity === "0") : true;
     })(),
+    /* the band, for the same reason the label is here: the matrix cannot reach this page's
+       working state, so its ground and edge are unchecked anywhere else */
+    band: (() => {
+      const h = g.querySelector(".wsh") as HTMLElement;
+      const c = getComputedStyle(h);
+      return `${c.backgroundColor} / ${c.borderBottomWidth} ${c.borderBottomColor}`;
+    })(),
     pageScroll: sc.scrollHeight - sc.clientHeight,
     scrollTop: r(sc.scrollTop),
     list: box(".f12-list"),
@@ -138,6 +145,7 @@ test("§4 — browsing, create, record: the panes scroll and the page does not",
   expect(create.titleReg, "Query Centre's working title is not the mono label the other pages wear")
     .toBe("JetBrains Mono/11.5px/500/2.3px/uppercase");
   expect(create.markGone, "the mark is still drawn in Query Centre's working strip").toBe(true);
+  expect(create.band, "Query Centre's band is not the parchment ground with its own edge").toMatch(/^rgb\(253, 250, 245\) \/ 1px rgb/);
   expect(create.pageScroll, "the takeover introduced an outer scroller").toBe(0);
   /* the takeover replaces the WHOLE work area — list and the browsing toolbar both go */
   expect(create.list!.display, "the list is still rendered under the takeover").toBe("none");
@@ -166,6 +174,7 @@ test("§4 — browsing, create, record: the panes scroll and the page does not",
   expect(rec.stripH, "the strip did not condense on the response journey").toBe(52);
   expect(rec.titleReg, "the response journey's title is not the mono label").toBe("JetBrains Mono/11.5px/500/2.3px/uppercase");
   expect(rec.markGone, "the mark is still drawn in the response journey's strip").toBe(true);
+  expect(rec.band, "the response journey's band is not the parchment ground with its own edge").toMatch(/^rgb\(253, 250, 245\) \/ 1px rgb/);
   expect(rec.pageScroll, "the response takeover introduced an outer scroller").toBe(0);
   expect(rec.list!.display, "the list is still rendered beside the response takeover").toBe("none");
   expect(rec.toolbar, "the browsing verbs are still drawn above the query being recorded").toBeNull();

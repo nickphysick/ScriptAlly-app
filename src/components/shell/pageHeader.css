@@ -228,6 +228,7 @@
   border-radius: var(--wsh-plate-radius);
   box-shadow: var(--wsh-plate-sh);
   transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
+    background .22s cubic-bezier(.4, 0, .2, 1),
     border-color .22s cubic-bezier(.4, 0, .2, 1), border-radius .22s cubic-bezier(.4, 0, .2, 1),
     box-shadow .22s cubic-bezier(.4, 0, .2, 1);
 }
@@ -281,9 +282,24 @@
  * under glass. `--wsh-plate-bg-scrolled`, `--wsh-plate-blur` and `--wsh-plate-edge-scrolled` are no
  * longer read; they are deleted at step 3 together with the token lock that still demands them.
  */
+/**
+ * ⚠️ A BAND, NOT A CARD ON WHITE (ref 91). The working state takes the parchment ground and draws
+ * its OWN bottom edge — no border on the other three sides, no radius, no shadow, exactly as
+ * before.
+ *
+ * ⚠️ THE EDGE IS THE EXISTING BORDER BOX RE-COLOURED, not a new element. Three sides go
+ * transparent and the fourth becomes the band's line, so it inherits the `border-color` transition
+ * already declared above and the strip stays exactly 52px (`box-sizing: border-box` — the 1px
+ * comes out of the content, not off the height the matrix asserts).
+ *
+ * ⚠️ AND IT REPLACES THE GRID ROW'S FLOATING HAIRLINE, which is DELETED rather than hidden.
+ * Keeping both drew two lines a pixel apart — and the row's version was inset to the content
+ * gutter while this one spans the container, so they would not even have agreed on their length.
+ */
 .wsh--scrolled {
   height: var(--wsh-plate-h-scrolled);
-  border-color: transparent;
+  background: var(--wsh-band-bg);
+  border-color: transparent transparent var(--wsh-band-edge);
   border-radius: 0;
   box-shadow: none;
 }

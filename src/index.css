@@ -110,6 +110,12 @@
   --wsh-plate-h-scrolled: 52px;
   --wsh-plate-gap: 18px;
   --wsh-plate-bg: #ffffff;
+  /* ⚠️ THE WORKING STATE IS A BAND, NOT A CARD ON WHITE (ref 91). Its ground is the parchment the
+     shell already uses for card surfaces — `--shell-card`, resolved here rather than restated —
+     and its bottom edge is its own, replacing the free-floating hairline the grid row used to
+     draw. One line, belonging to the thing that draws it. */
+  --wsh-band-bg: var(--shell-card);
+  --wsh-band-edge: #dfe4dc;
   --wsh-plate-radius: 2px;
   --wsh-plate-sh: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.09);
 

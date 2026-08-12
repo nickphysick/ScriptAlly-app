@@ -125,6 +125,14 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
       return `${c.fontFamily.split(",")[0].replace(/"/g, "")}/${c.fontSize}/${c.fontWeight}/${c.letterSpacing}/${c.textTransform}`;
     })() : "—",
     titleInk: title ? getComputedStyle(title).color : "—",
+    /* ⚠️ THE BAND'S GROUND AND ITS EDGE (ref 91) — read off the header itself, because the edge is
+       the header's own border rather than a rule drawn by the row beneath it. */
+    bandBg: getComputedStyle(wsh).backgroundColor,
+    bandEdge: `${getComputedStyle(wsh).borderBottomWidth} ${getComputedStyle(wsh).borderBottomColor}`,
+    /* and the row's floating hairline must be gone — a leftover is invisible at rest and a
+       double line the moment anyone scrolls */
+    ghostRule: getComputedStyle(row, "::after").content !== "none"
+      && parseFloat(getComputedStyle(row, "::after").height || "0") > 0,
     markW: mark ? r(mark.getBoundingClientRect().width) : -1,
     /* the mark drops entirely when working — width AND opacity, on every page */
     markGone: mark ? (r(mark.getBoundingClientRect().width) === 0 && getComputedStyle(mark).opacity === "0") : true,
@@ -225,6 +233,9 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
         restPill: rest.pillFs.join("|") || "—", workPill: work!.pillFs.join("|") || "—",
         restReg: rest.titleReg, workReg: work!.titleReg,
         workInk: work!.titleInk, markGone: work!.markGone,
+        restBg: rest.bandBg, workBg: work!.bandBg,
+        restEdge: rest.bandEdge, workEdge: work!.bandEdge,
+        ghost: rest.ghostRule || work!.ghostRule,
         contentL: rest.contentL, chain: rest.chain.join(" · ") || "clean",
         topGap: rest.topGap, workGap: work!.topGap,
         zeroKids: rest.zeroKids.join(" · ") || "none",
@@ -255,6 +266,29 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     }
     /* ══ §4 — THE WORKING REGISTER IS IDENTICAL ON EVERY PAGE ═════════════════════════════════
        ⚠️ CROSS-PAGE, NOT AGAINST CONSTANTS — a literal would pass while all ten drifted together. */
+    /* ⚠️ THE BAND IS THE SAME SURFACE ON EVERY PAGE — ground and edge, cross-page, not against
+       constants. And the row's old hairline is asserted absent everywhere: keeping both drew two
+       lines a pixel apart that did not even agree on their length. */
+    /* ⚠️ LIKE WITH LIKE, AGAIN — the working columns compare across the SCROLLERS only. A page with
+       no working state reports its RESTING value under `work*`, so comparing all ten flagged a
+       split of white against parchment that is the mechanism working, not a page disagreeing.
+       Query Centre reads white here for the same reason and is not an exception: its working state
+       is mode-driven, so its band is asserted in the journeys gate, as its label already is. */
+    for (const key of ["restBg", "restEdge"] as const) {
+      const vals = [...new Set(all.map((r) => String(r[key])))];
+      expect(vals, `${key} differs across pages: ${JSON.stringify(all.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
+    }
+    for (const key of ["workBg", "workEdge"] as const) {
+      const vals = [...new Set(scrollers.map((r) => String(r[key])))];
+      expect(vals, `${key} differs across pages: ${JSON.stringify(scrollers.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
+    }
+    for (const r of all) {
+      expect(r.ghost, `${r.page}: the row still draws its own hairline — with the band's edge that is two lines`).toBe(false);
+    }
+    /* the working band must actually differ from the resting card, or "it becomes a band" is a no-op */
+    expect(String(scrollers[0]?.workBg), "the working band did not take the parchment ground").not.toBe(String(scrollers[0]?.restBg));
+    expect(String(scrollers[0]?.workEdge), `the band has no bottom edge: ${scrollers[0]?.workEdge}`).toMatch(/^1px rgb/);
+
     for (const key of ["workReg", "workInk"] as const) {
       const vals = [...new Set(scrollers.map((r) => String(r[key])))];
       expect(vals, `${key} differs across pages: ${JSON.stringify(scrollers.map((r) => [r.page, r[key]]))}`).toHaveLength(1);

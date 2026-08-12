@@ -327,15 +327,32 @@ describe("the header's two states", () => {
     expect(hdrSrc, "the arming does not skip the first render — the fade would play on mount").toContain("firstState");
   });
 
-  it("⚠️ THE HAIRLINE IS THE ROW'S, FULL WIDTH, AND IT FADES", () => {
-    const after = all(gridCss, ".wpg-plate::after");
-    expect(after, "the hairline is missing — nothing separates chrome from content once the plate's border goes").toContain("height: 1px");
-    /* ⚠️ REVERSED: IT INSETS TO THE CONTENT GUTTER. Full width was the earlier rule; the hairline
-       now sits with the content it separates, on the same token the toolbar and cards use. */
-    expect(after, "the hairline left the content gutter — it reads as a rule drawn across the page rather than part of it")
-      .toMatch(/left:\s*var\(--content-gutter\);\s*right:\s*var\(--content-gutter\)/);
-    expect(after, "the hairline is visible at rest, where the plate's own border already does that job").toContain("opacity: 0");
-    expect(all(gridCss, ".wpg-plate--working::after"), "the hairline never appears when working").toContain("opacity: 1");
+  /**
+   * ⚠️ THE LINE MOVED HOUSE, AND THIS CASE REVERSES TWICE OVER. It first asserted a FULL-WIDTH
+   * hairline on the grid row; then the opposite, inset to the content gutter, "sitting with the
+   * content it separates". Both described a rule the ROW drew, floating beneath a card. The
+   * working state is a BAND now (ref 91): it takes the parchment ground and draws its own bottom
+   * edge, spanning the container. Keeping the row's rule as well gave two lines a pixel apart that
+   * did not even agree on their length — one gutter-inset, one full-bleed.
+   *
+   * The line belongs to the thing that draws it. Asserted as ABSENT here, because a leftover
+   * `::after` would be invisible at rest and a double rule the moment anyone scrolled.
+   */
+  it("⚠️ THE BAND DRAWS ITS OWN EDGE — the row's floating hairline is GONE", () => {
+    expect(all(gridCss, ".wpg-plate::after"), "the row's hairline came back — with the band's edge it draws two lines a pixel apart").toBe("");
+    expect(all(gridCss, ".wpg-plate--working::after"), "the row's working hairline came back").toBe("");
+    const band = all(hdrCss, ".wsh--scrolled");
+    expect(band, "the band has no ground — it is still a card floating on the window's white").toContain("background: var(--wsh-band-bg)");
+    /* ⚠️ THE EXISTING BORDER BOX RE-COLOURED, not a new element: three sides transparent, the
+       fourth the band's line. It inherits the `border-color` transition and the 1px comes out of
+       the content rather than off the 52px the matrix asserts. */
+    expect(band, "the band's bottom edge is missing, or it grew a border on the other three sides")
+      .toContain("border-color: transparent transparent var(--wsh-band-edge)");
+    expect(band, "the band grew a radius or a shadow — it is a band, not a card").toContain("box-shadow: none");
+    /* the ground is the token, never a literal — and it resolves to the parchment already in use */
+    const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+    expect(tokens, "the band ground is a literal — it must resolve to the existing parchment").toContain("--wsh-band-bg: var(--shell-card)");
+    expect(tokens, "the band's edge token is missing").toMatch(/--wsh-band-edge:\s*#[0-9a-f]{6}/i);
   });
 
   it("⚠️ ONE CURVE, ONE PAIR OF DURATIONS — .22s on geometry, .14s on fades", () => {
@@ -343,7 +360,11 @@ describe("the header's two states", () => {
       expect(all(css, sel), `${sel} is not on the .22s geometry curve — a row that eases differently from the plate inside it reads as two events`)
         .toContain(".22s cubic-bezier(.4, 0, .2, 1)");
     }
-    expect(all(gridCss, ".wpg-plate::after"), "the hairline is not on the fade curve — it would snap in while the border is still dissolving").toContain(".16s");
+    /* ⚠️ THE HAIRLINE'S OWN .16s FADE IS GONE WITH THE HAIRLINE. The band's edge is part of the
+       header's border box, so it rides the `border-color` transition already asserted above —
+       there is no second curve to keep in step, which was the whole reason this line existed. */
+    expect(all(hdrCss, ".wsh"), "the band's edge left the border-color transition — it would snap while the height is still easing")
+      .toContain("border-color .22s cubic-bezier(.4, 0, .2, 1)");
     expect(all(hdrCss, ".wsh--scrolled .wsh-mark,\n.wsh--scrolled .wsh-mark--xl"), "").not.toContain("transition");
   });
 });
