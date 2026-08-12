@@ -40,17 +40,33 @@ const rule = (selector: string): string => {
 };
 
 describe("the list hides; it does not shrink", () => {
+  /**
+   * ⚠️ IT IS `.qh-take`, NOT `.qh-create`, AND THAT IS A FIX RATHER THAN A RENAME. Both journeys
+   * replace the work area — the spec's words are "the query list and the reading pane both go" —
+   * but the rule was keyed on create alone, so recording a response drew its step flow at 588px
+   * wide beside the list it had already replaced. The narrow measure read as the journey being
+   * cramped, which is why it survived: nothing looked absent, one thing looked squeezed.
+   * `.qh-create` still exists for what really is create's alone.
+   */
   it("display: none, not a width collapse", () => {
-    const r = rule(".qh-create .f12-list");
+    const r = rule(".qh-take .f12-list");
     expect(r, "the stand-down rule is missing").not.toBe("");
     expect(r, "a 0px flex item still takes part in layout — the point is that it does not")
       .toContain("display: none");
   });
 
+  it("⚠️ BOTH journeys stand the list down — not create alone", () => {
+    expect(rule(".qh-create .f12-list"), "the rule went back to create only — recording a response would draw beside a list it has replaced")
+      .toBe("");
+    /* the class is armed for both, at source: create OR record */
+    expect(queries, "`qh-take` is not applied — the stylesheet rule would match nothing")
+      .toContain("creating || recording ? \" qh-take\"");
+  });
+
   it("desktop only — below md the pusher already does this job", () => {
     const at = css.indexOf("@media (min-width: 768px) {");
     expect(at, "the rule escaped its desktop scope").toBeGreaterThan(-1);
-    expect(css.indexOf(".qh-create .f12-list")).toBeGreaterThan(at);
+    expect(css.indexOf(".qh-take .f12-list")).toBeGreaterThan(at);
   });
 
   it("the width transition went with the rail — nothing animates a width any more", () => {

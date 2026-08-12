@@ -45,8 +45,13 @@ describe("the toolbar is a pane row now", () => {
      it: the record verbs do not apply to a query that does not exist, and the illustrated header
      below is the create view's one action surface. The seat stays empty rather than holding a
      row of greyed buttons. */
-  it("create mode vacates the seat entirely — it no longer takes it over", () => {
-    expect(code).toContain("if (creating) return null;");
+  /* ⚠️ EITHER TAKEOVER VACATES THE SEAT, and the rule used to name create alone. The stated reason
+     was create-specific — "the record verbs do not apply to a query that does not exist" — which is
+     true and is not the reason. The reason is that a takeover replaces the WORK AREA, so recording
+     a response drew Nudge · Agent · Manuscript · ⋯ · Delete in a 48px bar above the very query the
+     writer had left browsing to work on: live verbs pointing at the record under the takeover. */
+  it("either takeover vacates the seat entirely — neither takes it over", () => {
+    expect(code).toContain("if (creating || recording) return null;");
     expect(code, "the takeover bar came back").not.toContain("f12-ctl-create");
   });
 });

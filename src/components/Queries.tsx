@@ -2493,7 +2493,12 @@ export const Queries: React.FC<{
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
-    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-create" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
+    /* ⚠️ `qh-take` IS BOTH JOURNEYS, AND `qh-create` WAS ONLY ONE. Both takeovers replace the whole
+       work area — list and reading pane — but only create hid the list, so recording a response
+       drew its journey squeezed into 588px beside a list it had already replaced. The class the
+       rule needs is "a takeover is open", not "the create takeover is open"; `qh-create` stays for
+       the things that really are create's alone. */
+    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-create" : ""}${creating || recording ? " qh-take" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}
@@ -2991,6 +2996,14 @@ export const Queries: React.FC<{
             business inside the scrollport they cover. */}
         <WorkspacePageGrid
           className="qc-wpg"
+          /* ⚠️ A FILL PAGE — the panes scroll, the page does not, and this is the declaration that
+             makes that true. `.f12-body` says `flex: 1; min-height: 0`, written when its parent was
+             `.f12-root`; against a block scroll row both apply to nothing, so browsing grew past the
+             row (729px of page scroll where the spec says zero) and the journey — which hides the
+             list that was propping the row open — collapsed its whole body to 0px with every
+             element inside it mounted and correct. Proven on the deployed build: this one
+             declaration took `.qc-take-body` from 0 to 418px. */
+          fill
           scrollLabel="Query Centre"
           condensed={creating || recording}
           plate={
@@ -3364,12 +3377,16 @@ export const Queries: React.FC<{
               const waitingOnAgent = ctrlAction?.ballHolder === "agent";
               const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
 
-              /* ⚠️ CREATE MODE HIDES THE TOOLBAR ENTIRELY (ref qc-create-v2.html) — it does not
-                 disable it, and it no longer takes it over. None of the record verbs applies to a
-                 query that does not exist yet, so a row of dead or greyed buttons is chrome that
-                 states nothing. The illustrated header below IS the create view's action surface;
-                 two of them would be two homes for one job. */
-              if (creating) return null;
+              /* ⚠️ EITHER TAKEOVER HIDES THE TOOLBAR ENTIRELY (ref qc-create-v2.html) — it does
+                 not disable it, and it no longer takes it over. The takeover's own header IS the
+                 journey's action surface; two of them would be two homes for one job.
+                 ⚠️ AND `recording` WAS MISSING FROM THIS TEST. The rule was written for create,
+                 where none of the record verbs applies to a query that does not exist yet — true,
+                 but not the reason. The reason is that a takeover replaces the work area, and the
+                 response journey drew Nudge · Agent · Manuscript · ⋯ · Delete in a 48px bar above
+                 the very query it was recording a response for: live verbs pointing at a record
+                 the writer had already left browsing to work on. */
+              if (creating || recording) return null;
 
               return (
                 <div className="f12-ctl">

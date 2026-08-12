@@ -68,6 +68,24 @@ export interface WorkspacePageGridProps {
   /** Accessible name for the scroll region, when the page has one worth stating. */
   scrollLabel?: string;
   /**
+   * ⚠️ THE SCROLL ROW BECOMES A FLEX COLUMN — for pages whose content FILLS the row and scrolls in
+   * its own panes, rather than flowing past it.
+   *
+   * ⚠️ IT EXISTS BECAUSE THE SAME BUG HAS NOW LANDED TWICE, and both times it hid behind content
+   * that happened to size the container. A page written as a viewport-locked column says
+   * `flex: 1; min-height: 0` all the way down, and those declarations need a FLEX PARENT to mean
+   * anything. Under the grid the parent is `.wpg-scroll`, a block — so the chain silently stops
+   * being load-bearing and the page's own height arithmetic evaluates to nothing. `.tpl-cols` hit
+   * it (696px of overflow through a frame whose lock says it never scrolls) and `.f12-body` hit it
+   * again: `flex: 1 1 0%` with `min-height: 0` contributes ZERO to a content-sized container and
+   * has no free space to grow into, so it computes to exactly 0. Query Centre's whole journey body
+   * measured 0px tall while every element in it was mounted and correct.
+   *
+   * ⚠️ OPT-IN, NOT THE DEFAULT. On a flowing page a `flex: 1` child would start filling the row
+   * instead of flowing past it, which changes what scrolls. The pages that need it say so.
+   */
+  fill?: boolean;
+  /**
    * ⚠️ THE MODE HALF OF THE WORKING STATE (spec §4). The strip means the user is WORKING rather
    * than browsing. On a scrolling page, scrolling is the proxy for that — the sentinel reports it.
    * On a workspace page nothing scrolls, and the real signal is entering a journey: Query Centre
@@ -86,7 +104,7 @@ export interface WorkspacePageGridProps {
 }
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  plate, toolbar, children, className, scrollLabel, condensed: condensedByMode = false,
+  plate, toolbar, children, className, scrollLabel, fill = false, condensed: condensedByMode = false,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
@@ -177,7 +195,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
 
   return (
     <PlateCondensedContext.Provider value={condensed}>
-      <div className={`wpg${condensed ? " wpg--working" : ""}${toolbar ? " wpg--tools" : ""}${className ? ` ${className}` : ""}`}>
+      <div className={`wpg${condensed ? " wpg--working" : ""}${toolbar ? " wpg--tools" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}>
         {/* ⚠️ ROW 1 CARRIES THE STATE CLASS TOO, not just the header inside it. The width change and
             the hairline are the ROW's (the header fills its row in both states), so the row has to
             know. Same boolean, one source — it cannot disagree with the header. */}

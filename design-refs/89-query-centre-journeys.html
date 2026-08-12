@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — Query Centre journeys</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --window:#fff;--parch:#faf6f0;--ground:#f7f4ee;
+  --burg:#7c3a2a;--burgd:#632e22;--ink:#3a1c14;--ink2:#311e19;
+  --edge:#e4ddd1;--hair:#e8e2d8;--mut:#8a7a70;
+  --sage:#8a9e88;--sagec:#e9ede6;--saged:#5a6e58;
+  --sage-a:#d7ddd5;--sage-b:#d5dbd3;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --cgut:48px;--hins:80px;--pgap:14px;--strip:52px;--rest:96px;--topgap:34px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:#e9e4dc;font-family:'Inter',sans-serif;color:var(--ink);padding:14px 18px 34px}
+ .bar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
+ .bar h1{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;margin-right:6px}
+ .lab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:#7d7267;margin:0 3px 0 9px}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:10px;padding:6px 10px;border:1px solid #cfc6b8;border-radius:7px;background:#f4efe7;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#fdfaf5;border-color:var(--ink)}
+ .note{font-size:12px;color:#6b5f56;margin:3px 2px 10px;max-width:1150px;line-height:1.55;min-height:32px}
+
+ .shell{display:flex;width:100%;max-width:1520px;height:700px;background:var(--ground);border-radius:13px;overflow:hidden;box-shadow:0 2px 6px rgba(58,28,20,.08),0 14px 34px rgba(58,28,20,.10)}
+ .side{flex:0 0 180px;background:var(--window);border-right:1px solid var(--hair);padding:13px 10px;display:flex;flex-direction:column;gap:5px}
+ .logo{display:flex;align-items:center;gap:7px;font-family:'Playfair Display',serif;font-size:15px}
+ .logo .m{width:20px;height:20px;border-radius:50%;background:#e7ecf3;display:grid;place-items:center;font-size:10px;color:#5b6c85}
+ .navh{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:#a2968c;margin:5px 4px 0}
+ .nv{font-size:11px;padding:5px 7px;border-radius:7px;color:#4d3b33}
+ .nv.on{background:var(--ground);font-weight:600}
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .crumbrow{flex:0 0 auto;padding:9px 14px 7px;font-size:11.5px;color:#6b5a51}
+ .crumbrow b{color:var(--ink)}
+
+ .window{position:relative;background:var(--window);border:1px solid var(--edge);border-radius:14px 14px 0 0;margin:0 12px;
+         flex:1;min-height:0;overflow:hidden;display:grid;grid-template-rows:auto minmax(0,1fr)}
+
+ /* ── header ── */
+ .hrow{padding:var(--pgap) calc(var(--cgut) + var(--hins)) 0;position:relative;transition:padding .22s cubic-bezier(.4,0,.2,1)}
+ body.work .hrow{padding:0}
+ .hrow::after{content:'';position:absolute;left:var(--cgut);right:var(--cgut);bottom:0;height:1px;background:var(--hair);opacity:0;transition:opacity .16s}
+ body.work .hrow::after{opacity:1}
+ .hdr{display:flex;align-items:center;gap:12px;height:var(--rest);padding:0 22px;background:#fff;
+      border:1px solid var(--edge);border-radius:2px;box-shadow:0 1px 2px rgba(58,28,20,.05),0 6px 18px rgba(58,28,20,.09);
+      transition:height .22s cubic-bezier(.4,0,.2,1),padding .22s cubic-bezier(.4,0,.2,1),border-color .22s,box-shadow .22s,border-radius .22s}
+ body.work .hdr{height:var(--strip);padding:0 var(--cgut);border-color:transparent;box-shadow:none;border-radius:0}
+ .mk{flex:0 0 50px;width:50px;height:50px;display:grid;place-items:center;transition:all .22s cubic-bezier(.4,0,.2,1)}
+ .mk svg{width:42px;height:42px;stroke:var(--burg);fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;transition:all .22s}
+ body.work .mk{flex-basis:26px;width:26px;height:26px}
+ body.work .mk svg{width:22px;height:22px}
+ .t{font-family:'Playfair Display',serif;font-size:28px;font-weight:600;color:var(--ink2);white-space:nowrap;transition:font-size .22s cubic-bezier(.4,0,.2,1)}
+ body.work .t{font-size:16px}
+ .d{font-size:12.5px;color:#6b5a51;margin-top:2px;white-space:nowrap;overflow:hidden;max-height:20px;transition:opacity .14s,max-height .2s,margin .2s}
+ body.work .d{opacity:0;max-height:0;margin-top:0}
+ .sp{flex:1}
+ .b-ghost{border:1px solid #d9cfc2;background:#fff;color:var(--ink);border-radius:8px;padding:8px 13px;font-size:11.5px;font-weight:500;white-space:nowrap}
+ .cta{border:1px solid var(--ink2);background:var(--ink2);color:#fdfaf5;border-radius:8px;padding:9px 14px;font-size:12px;font-weight:600;white-space:nowrap}
+ .exit{display:none;border:1px solid #d9cfc2;background:#fff;color:var(--ink);border-radius:8px;padding:6px 12px;font-size:11.5px;font-weight:500}
+ body.work .exit{display:block}
+ body.work .browseacts{display:none}
+ .browseacts{display:flex;gap:7px}
+
+ /* ── work area ── */
+ .warea{min-height:0;padding:var(--topgap) var(--cgut) 14px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:11px;transition:padding .22s}
+ body.work .warea{grid-template-rows:minmax(0,1fr);padding-top:22px}
+ .phead{display:flex;align-items:center;gap:14px}
+ body.work .phead{display:none}
+ .pcount{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;white-space:nowrap}
+ .verbs{display:flex;gap:13px;font-size:11.5px;color:#6b5a51;white-space:nowrap;overflow:hidden}
+ .verbs .off{color:#bdb2a6}
+ .del{margin-left:auto;font-size:11.5px;color:#a05a45}
+
+ .cols{display:grid;grid-template-columns:270px minmax(0,1fr);gap:13px;min-height:0}
+ body.work .cols{display:none}
+ .qpanel{display:flex;flex-direction:column;min-height:0;border:1px solid #eee4d6;border-radius:11px;overflow:hidden;background:#fff}
+ .qsearch{flex:0 0 auto;margin:7px;background:var(--parch);border:1px solid #eee4d6;border-radius:999px;padding:6px 11px;font-size:11px;color:#a2968c}
+ .qscroll{overflow:auto;min-height:0;padding:0 5px 5px}
+ .qscroll::-webkit-scrollbar{width:7px}
+ .qscroll::-webkit-scrollbar-thumb{background:#e2d9cb;border-radius:6px;border:2px solid #fff}
+ .qrow{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:8px;border:1px solid transparent}
+ .qrow.sel{background:#f2ede7;border-color:#e6ddd0}
+ .avr{flex:0 0 24px;width:24px;height:24px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--burgd)}
+ .qmeta{min-width:0;flex:1}
+ .qmeta b{font-size:11.5px;font-weight:600;display:block}
+ .qmeta span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;color:#a2968c}
+ .qd{font-family:'JetBrains Mono',monospace;font-size:8px;color:#a2968c;white-space:nowrap}
+ .qfoot{flex:0 0 auto;padding:6px 10px;border-top:1px solid #f2ece2;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#a2968c}
+ .pane{min-height:0;overflow:auto;padding-right:2px}
+ .pane::-webkit-scrollbar{width:7px}
+ .pane::-webkit-scrollbar-thumb{background:#e2d9cb;border-radius:6px;border:2px solid #fff}
+ .agent{background:var(--parch);border:1px solid #eee4d6;border-radius:11px;padding:13px 15px;display:flex;align-items:center;gap:12px}
+ .av{flex:0 0 42px;width:42px;height:42px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-family:'Playfair Display',serif;font-size:15px;color:var(--burgd)}
+ .agent h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:500}
+ .agent p{font-family:'Playfair Display',serif;font-style:italic;font-size:12px;color:#6b5a51}
+ .chip0{display:inline-flex;gap:5px;background:#f8e7dc;border:1px solid #eccbb8;color:var(--burgd);border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;padding:3px 8px;margin-top:4px}
+ .rec{margin-left:auto;border:1px solid var(--pinkb);background:var(--pink);color:var(--burgd);border-radius:8px;padding:8px 12px;font-size:11.5px;font-weight:600;white-space:nowrap;cursor:pointer}
+ .trio{display:flex;gap:10px;margin-top:11px}
+ .card{flex:1;min-width:0;border:1px solid #eee4d6;border-radius:10px;overflow:hidden;background:#fff}
+ .cband{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:6px 10px;font-size:11.5px;font-weight:600;color:#2f3a2e}
+ .cbody{padding:9px 11px;font-size:10.5px;color:#8a7a70;line-height:1.6;min-height:110px}
+
+ /* ── takeover ── */
+ .tko{display:none;min-height:0;grid-template-rows:auto minmax(0,1fr);gap:14px}
+ body.work .tko{display:grid}
+ .tkhead{display:flex;align-items:flex-start;gap:14px}
+ .tkmotif{flex:0 0 54px;width:54px;height:54px;display:grid;place-items:center;background:var(--parch);border:1px solid #eee4d6;border-radius:12px}
+ .tkmotif svg{width:32px;height:32px;stroke:var(--burg);fill:none;stroke-width:1.2;stroke-linecap:round;stroke-linejoin:round}
+ .tkt{font-family:'Playfair Display',serif;font-size:26px;font-weight:500}
+ .tki{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:#6b5a51;margin-top:2px}
+ .chips{display:flex;gap:14px;margin-top:9px}
+ .ch{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#8a7a70}
+ .ch .mkc{width:15px;height:15px;border-radius:50%;border:1.5px solid #d6c9ba;display:grid;place-items:center;font-size:8px;color:#fff}
+ .ch.pre .mkc{border-color:#c3b8ab;color:#a2968c;font-family:'JetBrains Mono',monospace}
+ .ch.done{color:var(--ink);font-weight:600}
+ .ch.done .mkc{background:var(--saged);border-color:var(--saged)}
+ .tkacts{margin-left:auto;display:flex;gap:8px;align-items:center;padding-top:4px}
+ .esc{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:#a2968c;margin-right:2px}
+ .b-cancel{border:1px solid #d9cfc2;background:#fff;color:var(--ink);border-radius:8px;padding:9px 14px;font-size:12px;font-weight:500}
+ .b-save{border:1px solid var(--pinkb);background:var(--pink);color:var(--burgd);border-radius:8px;padding:9px 15px;font-size:12px;font-weight:600}
+ .b-save.off{opacity:.42}
+ .b-alt{border:1px solid #d9cfc2;background:#fff;color:#6b5a51;border-radius:8px;padding:9px 13px;font-size:11.5px}
+
+ .tkbody{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;min-height:0}
+ .steps{overflow:auto;min-height:0;padding-right:4px}
+ .steps::-webkit-scrollbar{width:7px}
+ .steps::-webkit-scrollbar-thumb{background:#e2d9cb;border-radius:6px;border:2px solid #fff}
+ .step{border:1px solid #eee4d6;border-radius:11px;margin-bottom:9px;background:#fff;overflow:hidden}
+ .step.done .sh{background:var(--parch)}
+ .step.now{border-color:var(--pinkb)}
+ .step.now .sh{background:#fdf6f2}
+ .sh{display:flex;align-items:center;gap:9px;padding:10px 13px;font-size:12.5px;font-weight:600}
+ .sn{width:19px;height:19px;border-radius:50%;background:var(--pink);color:var(--burgd);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;flex:0 0 19px}
+ .step.done .sn{background:var(--saged);color:#fff}
+ .sv{margin-left:auto;font-size:11.5px;color:#8a7a70;font-weight:400}
+ .sb{padding:11px 13px 13px;border-top:1px solid #f4eee4}
+ .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+ .oc{border:1px solid #e6ddd0;background:#fff;border-radius:10px;padding:11px;cursor:pointer;text-align:left}
+ .oc:hover{border-color:#d6c9ba}
+ .oc.pick{border-color:var(--burg);background:#f8e7dc}
+ .oc .dot{width:17px;height:17px;border-radius:50%;border:2px solid var(--sage);background:var(--sagec);margin-bottom:7px;display:grid;place-items:center;font-size:9px;color:var(--saged)}
+ .oc.offer .dot{background:var(--burg);border-color:var(--burg);color:#fdf3ec}
+ .oc.end .dot{border-color:#c3b8ab;background:#efeae2;color:#8a7a70}
+ .oc b{display:block;font-size:12px;margin-bottom:2px}
+ .oc span{font-size:10.5px;color:#8a7a70;line-height:1.45;display:block}
+ .opts{display:flex;gap:7px;flex-wrap:wrap}
+ .opt{border:1px solid #e6ddd0;background:var(--parch);border-radius:8px;padding:7px 12px;font-size:11.5px;color:#5d4d44}
+ .opt.pick{border-color:var(--burg);background:#f8e7dc;color:var(--burgd);font-weight:600}
+ .fact{font-size:11.5px;color:#8a7a70;margin-top:8px}
+ .qtyrow{display:flex;gap:7px;align-items:center;margin-top:9px}
+ .qty{border:1px solid #e2d8ca;border-radius:8px;padding:6px 10px;font-size:11.5px;background:#fff;min-width:52px;text-align:center}
+ .unit{border:1px solid #e2d8ca;border-radius:8px;padding:6px 10px;font-size:11.5px;background:#fff;color:#5d4d44}
+ .ta{width:100%;min-height:78px;border:1px solid #e2d8ca;border-radius:9px;background:#fff;padding:9px 11px;font-size:11.5px;color:#a2968c;font-family:'Inter',sans-serif}
+
+ /* reference panel */
+ .refp{border:1px solid #eee4d6;border-radius:12px;background:var(--parch);overflow:hidden;align-self:start;position:sticky;top:0}
+ .refb{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#2f3a2e}
+ .refbody{padding:13px}
+ .refag{display:flex;align-items:center;gap:10px;padding-bottom:11px;border-bottom:1px solid #eae1d4}
+ .refag .av{width:38px;height:38px;flex-basis:38px;font-size:13px}
+ .refag b{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;display:block}
+ .refag span{font-family:'Playfair Display',serif;font-style:italic;font-size:11.5px;color:#6b5a51}
+ .refrow{padding:10px 0;border-bottom:1px solid #eae1d4}
+ .refrow:last-child{border-bottom:0}
+ .refk{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;color:#a2968c;display:block;margin-bottom:3px}
+ .refv{font-size:11.5px;color:#4d3b33;line-height:1.5}
+ .qp{display:flex;align-items:center;gap:8px;padding:7px;border:1px solid #e6ddd0;border-radius:8px;background:#fff;margin-bottom:6px;font-size:11px}
+ .qp .avr{width:22px;height:22px;flex-basis:22px;font-size:7.5px}
+</style></head><body>
+
+<div class="bar">
+ <h1>Query Centre &mdash; the two journeys</h1>
+ <span class="lab">STATE</span>
+ <button class="tab on" data-m="browse">BROWSING</button>
+ <button class="tab" data-m="log">LOG A QUERY</button>
+ <button class="tab" data-m="rec">RECORD A RESPONSE</button>
+ <span class="lab">OUTCOME</span>
+ <button class="tab on" data-o="req">PARTIAL REQ.</button>
+ <button class="tab" data-o="offer">OFFER</button>
+ <button class="tab" data-o="end">REJECTION</button>
+</div>
+<div class="note" id="note"></div>
+
+<div class="shell">
+ <aside class="side">
+  <div class="logo"><span class="m">S</span>ScriptAlly</div>
+  <div class="navh">QUERIES</div><div class="nv on">Query Centre</div><div class="nv">Analytics</div>
+  <div class="navh">AGENTS</div><div class="nv">Contact list</div><div class="nv">Discover</div>
+  <div class="navh">MATERIALS</div><div class="nv">Manuscripts</div><div class="nv">Submission packages</div>
+ </aside>
+ <div class="main">
+  <div class="crumbrow">/ Queries / <b>Query Centre</b></div>
+  <div class="window">
+
+   <div class="hrow"><div class="hdr">
+     <div class="mk"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></div>
+     <div><div class="t">Query Centre</div><div class="d">Every query you've sent, and exactly where each one stands.</div></div>
+     <div class="sp"></div>
+     <div class="browseacts"><button class="b-ghost">&#8595; Export</button><button class="cta" onclick="set('log')">&#65291; Log query</button></div>
+     <button class="exit" onclick="set('browse')">&#10005; Close</button>
+   </div></div>
+
+   <div class="warea">
+     <div class="phead">
+       <div class="pcount">22 queries</div>
+       <div class="verbs"><span>&#8801; View tasks</span><span>&#9998; Edit</span><span>&#128276; Nudge</span><span class="off">&#9679; Agent</span><span class="off">&#9633; Manuscript</span></div>
+       <div class="del">&#128465; Delete</div>
+     </div>
+
+     <div class="cols">
+       <div class="qpanel">
+         <div class="qsearch">&#8981; Search</div>
+         <div class="qscroll"><div class="qrow sel"><div class="avr">DO</div><div class="qmeta"><b>Daniel O'Rourke</b><span>INKWELL &amp; STONE</span></div><div class="qd">9 Aug</div></div><div class="qrow"><div class="avr">WT</div><div class="qmeta"><b>William Tan</b><span>FOXGLOVE LITERARY</span></div><div class="qd">29 Jul</div></div><div class="qrow"><div class="avr">FS</div><div class="qmeta"><b>Fenella Str</b><span>BRIGHTWATER BOOKS</span></div><div class="qd">14 Mar</div></div><div class="qrow"><div class="avr">SD</div><div class="qmeta"><b>Sophie Dunn</b><span>CURTIS VANE</span></div><div class="qd">15 Jan</div></div><div class="qrow"><div class="avr">TE</div><div class="qmeta"><b>Tom Ellery</b><span>CURTIS VANE</span></div><div class="qd">3 Mar</div></div><div class="qrow"><div class="avr">PR</div><div class="qmeta"><b>Priya Raman</b><span>NO AGENCY</span></div><div class="qd">—</div></div><div class="qrow"><div class="avr">MR</div><div class="qmeta"><b>Marcus Reed</b><span>HARTLEY &amp; CO</span></div><div class="qd">20 Feb</div></div><div class="qrow"><div class="avr">JO</div><div class="qmeta"><b>Joseph Okafor</b><span>SABLE &amp; FINCH</span></div><div class="qd">2 Feb</div></div><div class="qrow"><div class="avr">NA</div><div class="qmeta"><b>Nina Alvarez</b><span>REDGATE BOOKS</span></div><div class="qd">18 Jan</div></div><div class="qrow"><div class="avr">HQ</div><div class="qmeta"><b>Hester Quill</b><span>BELLROPE BOOKS</span></div><div class="qd">4 Jan</div></div><div class="qrow"><div class="avr">IM</div><div class="qmeta"><b>Ivo Marchetti</b><span>NORTHGATE LIT</span></div><div class="qd">2 Jan</div></div><div class="qrow"><div class="avr">CB</div><div class="qmeta"><b>Cara Boyne</b><span>TWO RIVERS LIT</span></div><div class="qd">28 Dec</div></div></div>
+         <div class="qfoot">SHOWING 22 OF 22</div>
+       </div>
+       <div class="pane">
+         <div class="agent">
+           <div class="av">DO</div>
+           <div><h3>Daniel O'Rourke</h3><p>Inkwell &amp; Stone</p><span class="chip0">&#9678; QUERIED</span></div>
+           <button class="rec" onclick="set('rec')">&#9992; Record response</button>
+         </div>
+         <div class="trio">
+           <div class="card"><div class="cband">Tracking</div><div class="cbody">Query sent 9 Aug via email.<br><br>Waiting to hear back &middot; 3 days.<br>Expected by ~4 Oct.</div></div>
+           <div class="card"><div class="cband">What you sent</div><div class="cbody">Murphy's Day Out<br>Thriller &middot; 50,000 words<br><br>Query letter &middot; synopsis</div></div>
+           <div class="card"><div class="cband">Notes</div><div class="cbody">Your notes on this query appear here — first impressions, things they said.</div></div>
+         </div>
+       </div>
+     </div>
+
+     <!-- ── takeover ── -->
+     <div class="tko">
+       <div class="tkhead">
+         <div class="tkmotif" id="motif"></div>
+         <div>
+           <div class="tkt" id="tkt"></div>
+           <div class="tki" id="tki"></div>
+           <div class="chips" id="chips"></div>
+         </div>
+         <div class="tkacts" id="tkacts"></div>
+       </div>
+       <div class="tkbody">
+         <div class="steps" id="steps"></div>
+         <div class="refp" id="refp"></div>
+       </div>
+     </div>
+
+   </div>
+  </div>
+ </div>
+</div>
+
+<script>
+const N={
+ browse:"Browsing. Full 96px card, panel heading and verb row, list and reading pane each scrolling internally. The header's own actions are Export and Log query.",
+ log:"Logging a query. Header strips to 52px and its actions become a single Close. The takeover owns the whole work area \u2014 list and reading pane both go. <b>[SUPERSEDED: this frame draws quick picks in a right-hand column at stage 1; the built page is SINGLE-COLUMN there and that is a considered decision, not a gap. The picker GRID takes the width the panel would have had, and the quick picks \u2014 never-queried contacts, with the ArtSlot fallback \u2014 live inside the step flow. Reasoning in QueryCreatePane.tsx: matching stage-1/stage-2 geometry was never worth a column of suggestions nobody had asked for. Nick confirmed 12 Aug: the brief asking for the column was reconstructed from a session summary, not from the code, and the code's decision stands. Everything else in this frame is authoritative.]</b> Actions are Cancel \u00b7 Save &amp; log another \u00b7 Save query; save enables on agent + manuscript + date.",
+ rec:"Recording a response. Identical shell. The reference panel is present from the first frame \u2014 the agent is already known, so it carries what you sent, the expected window, and your history. Step 1 decides the stack: try the three outcomes above."
+};
+const MOTIF_LOG='<svg viewBox="0 0 24 24"><path d="M4 20h16M6 16l10-10 3 3-10 10H6z"/><path d="M13 5l3 3"/></svg>';
+const MOTIF_REC='<svg viewBox="0 0 24 24"><path d="M3 6h18v13H3z"/><path d="M3 6l9 7 9-7"/></svg>';
+
+function chips(a){return a.map(c=>`<div class="ch ${c[2]}"><span class="mkc">${c[2]==='done'?'&#10003;':c[2]==='pre'?'&ndash;':''}</span>${c[0]}${c[1]?' <b style="font-weight:600;color:#3a1c14">'+c[1]+'</b>':''}</div>`).join('');}
+
+const REF_QP=`<div class="refb">QUICK PICKS &middot; NEVER QUERIED</div><div class="refbody">
+ <div class="qp"><span class="avr">LF</span><div><b>Lena Fitch</b><br><span style="color:#a2968c;font-size:9.5px">ASHGROVE AGENCY</span></div></div>
+ <div class="qp"><span class="avr">DV</span><div><b>Dermot Vale</b><br><span style="color:#a2968c;font-size:9.5px">KESTREL LITERARY</span></div></div>
+ <div class="qp"><span class="avr">MS</span><div><b>Mira Sandoval</b><br><span style="color:#a2968c;font-size:9.5px">BLUE HARBOUR</span></div></div>
+ <div style="font-size:10.5px;color:#8a7a70;margin-top:9px;line-height:1.5">Three contacts you haven't queried yet. Pick one, or search all sixteen in the step.</div>
+</div>`;
+const REF_AG=`<div class="refb">FOR REFERENCE</div><div class="refbody">
+ <div class="refag"><div class="av">DO</div><div><b>Daniel O'Rourke</b><span>Inkwell &amp; Stone</span></div></div>
+ <div class="refrow"><span class="refk">WHAT YOU SENT</span><div class="refv">Murphy's Day Out &middot; 9 Aug<br>Query letter, synopsis</div></div>
+ <div class="refrow"><span class="refk">EXPECTED RESPONSE TIME</span><div class="refv">~6 weeks &mdash; due around 4 Oct</div></div>
+ <div class="refrow"><span class="refk">PREFERRED SUBMISSION METHOD</span><div class="refv">Email</div></div>
+ <div class="refrow"><span class="refk">YOUR HISTORY</span><div class="refv">Three queries with this agent.<br>One partial requested, Feb 2025.</div></div>
+</div>`;
+
+const STEPS_LOG=`
+<div class="step done"><div class="sh"><span class="sn">&#10003;</span>Which manuscript?<span class="sv">Murphy's Day Out</span></div></div>
+<div class="step now"><div class="sh"><span class="sn">2</span>Which agent?</div>
+ <div class="sb">
+  <div class="opts"><div class="opt">&#8981; Search all agents</div><div class="opt">&#65291; Someone new</div></div>
+  <div class="fact">Or choose from the quick picks on the right.</div>
+ </div></div>
+<div class="step"><div class="sh"><span class="sn">3</span>When did you send it?</div>
+ <div class="sb"><div class="opts"><div class="opt pick">Today &middot; 12 Aug</div><div class="opt">Yesterday</div><div class="opt">Pick a date</div></div></div></div>
+<div class="step"><div class="sh"><span class="sn">4</span>What did you send?<span class="sv">Optional</span></div>
+ <div class="sb"><div class="opts"><div class="opt pick">Query letter</div><div class="opt pick">Synopsis</div><div class="opt">Sample pages</div><div class="opt">A package&hellip;</div></div>
+ <div class="qtyrow"><span style="font-size:11.5px;color:#6b5a51">Sample</span><span class="qty">50</span><span class="unit">Pages &#9662;</span></div></div></div>
+<div class="step"><div class="sh"><span class="sn">5</span>Anything worth noting?<span class="sv">Optional</span></div>
+ <div class="sb"><div class="ta">Personalisation, comps you mentioned, anything you want to remember.</div></div></div>`;
+
+function stepsRec(o){
+ const grid=`<div class="step done"><div class="sh"><span class="sn">&#10003;</span>What happened?<span class="sv">${o==='req'?'Partial requested':o==='offer'?'Offer of representation':'Rejection'}</span></div>
+  <div class="sb"><div class="grid3">
+   <button class="oc ${o==='req'?'pick':''}" onclick="setO('req')"><span class="dot">&#8592;</span><b>Partial requested</b><span>They want to read more</span></button>
+   <button class="oc"><span class="dot">&#8592;</span><b>Full requested</b><span>They want the manuscript</span></button>
+   <button class="oc"><span class="dot">&#9998;</span><b>Revise &amp; resubmit</b><span>Changes, then send again</span></button>
+   <button class="oc offer ${o==='offer'?'pick':''}" onclick="setO('offer')"><span class="dot">&#10003;</span><b>Offer</b><span>Representation offered</span></button>
+   <button class="oc end ${o==='end'?'pick':''}" onclick="setO('end')"><span class="dot">&times;</span><b>Rejection</b><span>A pass</span></button>
+   <button class="oc end"><span class="dot">&times;</span><b>Closed &mdash; no reply</b><span>Their window has passed</span></button>
+  </div></div></div>
+ <div class="step now"><div class="sh"><span class="sn">2</span>When did they reply?</div>
+  <div class="sb"><div class="opts"><div class="opt pick">Today &middot; 12 Aug</div><div class="opt">Yesterday</div><div class="opt">Pick a date</div></div>
+  <div class="fact">Replied in 3 days.</div></div></div>`;
+ const mid = o==='req'
+  ? `<div class="step"><div class="sh"><span class="sn">3</span>What did they ask for?</div>
+      <div class="sb"><div class="opts"><div class="opt">First 3 chapters</div><div class="opt pick">First 50 pages</div><div class="opt">Other</div></div>
+      <div class="qtyrow"><span class="qty">50</span><span class="unit">Pages &#9662;</span><span style="font-size:11.5px;color:#8a7a70;margin-left:6px">Deadline, if they gave one</span><span class="opt">Add</span></div></div></div>`
+  : o==='offer'
+  ? `<div class="step"><div class="sh"><span class="sn">3</span>The offer</div>
+      <div class="sb"><div class="ta">Terms as they put them &mdash; commission, territories, anything said about the deal.</div>
+      <div class="qtyrow"><span style="font-size:11.5px;color:#6b5a51">Reply due by</span><span class="opt">Pick a date</span></div></div></div>`
+  : `<div class="step"><div class="sh"><span class="sn">3</span>Anything they said?<span class="sv">Optional</span></div>
+      <div class="sb"><div class="ta">Their words, if you want to keep them.</div></div></div>`;
+ return grid+mid+`<div class="step"><div class="sh"><span class="sn">4</span>Anything worth noting?<span class="sv">Optional</span></div>
+   <div class="sb"><div class="ta">For you &mdash; what you make of it, what you'll do next.</div></div></div>`;
+}
+
+let mode='browse', out='req';
+function render(){
+ document.body.className = mode==='browse' ? '' : 'work';
+ document.querySelectorAll('.tab[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+ document.querySelectorAll('.tab[data-o]').forEach(b=>b.classList.toggle('on',b.dataset.o===out));
+ note.textContent=N[mode];
+ if(mode==='browse')return;
+ const log = mode==='log';
+ motif.innerHTML = log?MOTIF_LOG:MOTIF_REC;
+ tkt.textContent = log?'Logging new query':'Recording a response';
+ tki.textContent = log?'Needs an agent, a manuscript and a date — everything else can wait.'
+                     :'What came back, and when — the rest follows from that.';
+ chipsEl.innerHTML = log
+  ? chips([['Agent','','' ],['Manuscript','Murphy\u2019s Day Out','pre'],['Date','12 Aug','done']])
+  : chips([['Outcome','Partial requested','done'],['Date','12 Aug','done']]);
+ tkacts.innerHTML = log
+  ? `<span class="esc">ESC</span><button class="b-cancel">Cancel</button><button class="b-alt">Save &amp; log another</button><button class="b-save off">&#9992; Save query</button>`
+  : `<span class="esc">ESC</span><button class="b-cancel">Cancel</button><button class="b-save">&#10003; Save response</button>`;
+ steps.innerHTML = log?STEPS_LOG:stepsRec(out);
+ refp.innerHTML = log?REF_QP:REF_AG;
+}
+const chipsEl=document.getElementById('chips');
+function set(m){mode=m;render();}
+function setO(o){out=o;render();}
+document.querySelectorAll('.tab[data-m]').forEach(b=>b.onclick=()=>set(b.dataset.m));
+document.querySelectorAll('.tab[data-o]').forEach(b=>b.onclick=()=>{setO(b.dataset.o); if(mode!=='rec')set('rec');});
+render();
+</script></body></html>

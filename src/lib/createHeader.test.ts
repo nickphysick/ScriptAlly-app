@@ -58,8 +58,10 @@ describe("the pane footer is GONE — one home per action", () => {
 });
 
 describe("the command bar is retired, not restyled", () => {
-  it("create mode returns no toolbar at all", () => {
-    expect(queries).toContain("if (creating) return null;");
+  /* ⚠️ BOTH TAKEOVERS, not create alone — a takeover replaces the work area, and the response
+     journey was drawing the browsing verbs above the query it had replaced. */
+  it("either takeover returns no toolbar at all", () => {
+    expect(queries).toContain("if (creating || recording) return null;");
   });
 
   for (const dead of [".f12-ctl-create", ".qcb-ctx", ".qcb-req", ".qcb-esc", ".qcb-err", ".qcb-dot"]) {

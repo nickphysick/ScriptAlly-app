@@ -79,6 +79,33 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
       }
       return out;
     })(),
+    /**
+     * ⚠️ THE ZERO-HEIGHT SWEEP. A direct child of the scroll row that has rendered content and
+     * measures 0 is the fill-chain fault: `flex: 1 1 0%` with `min-height: 0` written against a
+     * flex parent, given a block one. It contributes nothing to a content-sized container and then
+     * has no free space to grow into, so it computes to EXACTLY zero — silently, with every
+     * element inside it mounted, styled and correct.
+     *
+     * ⚠️ "HAS RENDERED CONTENT" IS THE WHOLE DISCRIMINATOR. A genuinely empty child is 0 tall and
+     * fine; the fault is a child with descendants that measure real height sitting inside a box
+     * that measures none. Both times this landed (`.tpl-cols`, `.f12-body`) it hid behind content
+     * that happened to size the container, so a source scan would not have found either.
+     */
+    zeroKids: (() => {
+      const out: string[] = [];
+      const walk = (el: Element, depth: number) => {
+        for (const kid of Array.from(el.children)) {
+          const k = kid as HTMLElement;
+          const h = k.getBoundingClientRect().height;
+          const inner = Math.max(0, ...[...k.querySelectorAll("*")].map((x) => x.getBoundingClientRect().height));
+          if (h < 1 && inner > 1 && getComputedStyle(k).display !== "none") {
+            out.push(`${k.className.toString().slice(0, 28) || k.tagName.toLowerCase()} 0px holding ${Math.round(inner)}px`);
+          } else if (depth < 2) walk(k, depth + 1);
+        }
+      };
+      walk(sc, 0);
+      return out;
+    })(),
     /* the content's own left edge, so a double gutter shows as a number rather than as a rule */
     contentL: (() => {
       const first = sc.firstElementChild as HTMLElement | null;
@@ -187,6 +214,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
         restPill: rest.pillFs.join("|") || "—", workPill: work!.pillFs.join("|") || "—",
         contentL: rest.contentL, chain: rest.chain.join(" · ") || "clean",
         topGap: rest.topGap,
+        zeroKids: rest.zeroKids.join(" · ") || "none",
         hemRest: `${rest.hemTop} ${rest.hemBot}`, hemWork: `${work!.hemTop} ${work!.hemBot}`,
         stacked: rest.stackedFades.join(",") || "none",
         backToRest: !back!.working,
@@ -272,6 +300,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
        narrower than every other page while its CSS names the correct token. */
     for (const r of all) {
       expect(r.chain, `${r.page}: something between the scroll row and the content declares its own width — ${r.chain}`).toBe("clean");
+      expect(r.zeroKids, `${r.page}: a box in the scroll row measures 0 while holding rendered content — the fill chain is broken (${r.zeroKids}). The page needs the grid's \`fill\` prop.`).toBe("none");
     }
     /* ⚠️ `-1` MEANS "NO CONTENT AT ALL", NOT "AN EDGE OF -1". Analytics renders `{null}` into row
        3 — a placeholder that deliberately shows nothing rather than plausible-looking figures — so

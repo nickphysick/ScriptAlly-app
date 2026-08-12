@@ -158,6 +158,36 @@
   scrollbar-gutter: stable both-edges;
 }
 
+/**
+ * ══ THE FILL VARIANT — the scroll row as a flex column ════════════════════════════════════════
+ *
+ * ⚠️ THIS ONE DECLARATION IS THE WHOLE OF TWO SEPARATE PAGE FAILURES, and it is opt-in because it
+ * changes what scrolls. A page written as a viewport-locked column says `flex: 1; min-height: 0`
+ * down its whole chain, and those need a FLEX PARENT to mean anything; under the grid the parent is
+ * `.wpg-scroll`, a block, so the chain quietly stops being load-bearing.
+ *
+ *   `.tpl-cols` — sized to content, stacking a second scroller outside the `.tpl-zone` that the
+ *   Tasks viewport lock says owns all scrolling. 696px of overflow through a frame that never
+ *   scrolls.
+ *
+ *   `.f12-body` — worse, because `flex: 1 1 0%` with `min-height: 0` contributes ZERO to a
+ *   content-sized container and then has no free space to grow into. It computed to exactly 0, and
+ *   took Query Centre's entire journey body with it: `.qc-take-body` 0px, `.qc-two` 0px,
+ *   `.qc-form` 0px — with a 167px step stack mounted and correct inside them, clipped to nothing.
+ *
+ * Both hid behind content that happened to size the container: Tasks looked fine because its
+ * columns had height of their own, Query Centre's browsing state because the query list's content
+ * propped the row open. The journey, which hides the list, had nothing left to prop it.
+ *
+ * ⚠️ THE PAGE-SCROLLS SYMPTOM IS THE SAME FAULT. A fill page whose chain has stopped resolving
+ * grows past the row and the ROW scrolls — so "the panes scroll, the page does not" quietly
+ * inverts. Query Centre measured 729px of page scroll in a state whose spec says zero.
+ */
+.wpg--fill > .wpg-scroll {
+  display: flex;
+  flex-direction: column;
+}
+
 /* ══ THE SCROLL HEMS (uniformity pass §3; ref 88) ══════════════════════════════════════════════
  *
  * ⚠️ THEY SHARE ROW 3 WITH THE SCROLLER RATHER THAN SITTING INSIDE IT. A child of a scrollport

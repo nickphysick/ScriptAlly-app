@@ -1047,7 +1047,10 @@
 @media (min-width: 768px) {
   /* `display: none` and not a width collapse: a 0px flex item still takes part in layout, and
      the point here is that the list has no part to play. */
-  .qh-create .f12-list { display: none; }
+  /* ⚠️ `.qh-take`, NOT `.qh-create` — BOTH journeys replace the work area. Recording a response
+     drew its step flow at 588px wide beside the list it was supposed to have replaced, and the
+     narrow measure read as the journey being cramped rather than as the list still being there. */
+  .qh-take .f12-list { display: none; }
 }
 
 /* ── QUIET SCROLLBARS — the To-do pattern, reused (todo.css .tdb-tmid2): invisible at rest,

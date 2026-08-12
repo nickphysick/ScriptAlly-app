@@ -130,6 +130,12 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
      */}
     <WorkspacePageGrid
       className="tpl-wpg"
+      /* ⚠️ THE VIEWPORT LOCK NEEDS THE FLEX PARENT. `.tpl-cols` says `flex: 1; min-height: 0`,
+         written when its parent was `.tdb-wrap`; without this the scroll row is a block, both
+         declarations apply to nothing and the frame the lock says never scrolls takes 696px of
+         overflow. This was a bespoke rule in tasksLayout.css until Query Centre needed the
+         identical one — see the variant's note in workspacePageGrid.css. */
+      fill
       scrollLabel={title}
       plate={<PageHeader variant="workspace" mark={mark} title={title} description={subtitle} />}
       /* ⚠️ THE EYEBROW RIDES THE TOOL ROW. Mono context — a date, a week count — and the rule is

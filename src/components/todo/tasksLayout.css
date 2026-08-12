@@ -61,14 +61,10 @@
 /* ⚠️ `align-items: stretch`, NOT `flex-start` — see the viewport lock below: under a window the
    sidebar and body must take the frame's full height, or their scrollzones have no height to be
    100% of. `flex-start` sized each to its content, which is right only for a scrolling page. */
-/* ⚠️ THE SCROLL ROW IS A FLEX COLUMN, AND WITHOUT THIS THE VIEWPORT LOCK LEAKS. `.tpl-cols` says
-   `flex: 1; min-height: 0` — written when its parent was `.tdb-wrap`, a flex column. Under the
-   grid its parent is `.wpg-scroll`, a BLOCK, so `flex` and `min-height: 0` both applied to nothing,
-   `.tpl-cols` sized to its content, and the frame the lock says never scrolls had 696px of
-   overflow — a second scroller stacked outside the `.tpl-zone` that is meant to own all of it.
-   Nothing here changes the chain below `.tpl-cols`; it gives the chain the flex parent it was
-   always written against. */
-.tpl-wpg > .wpg-scroll { display: flex; flex-direction: column; }
+/* ⚠️ THE FLEX PARENT `.tpl-cols` WAS ALWAYS WRITTEN AGAINST is the grid's `fill` variant now —
+   `.tpl-wpg > .wpg-scroll` was this file's own copy of it, written when Tasks was the only page
+   known to need it. Query Centre needed the identical declaration a pass later, so the concept is
+   named once in workspacePageGrid.css and both pages opt in through the `fill` prop. */
 
 .tpl-cols { display: flex; align-items: stretch; gap: 26px; margin-top: 6px; flex: 1; min-height: 0; }
 .tpl-side { flex: 0 0 auto; overflow: auto; min-height: 0; }
