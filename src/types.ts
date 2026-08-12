@@ -16,13 +16,20 @@ export interface User {
   trialStartDate: string; // ISO String
   subscriptionStatus: "active" | "trialing" | "canceled" | "none";
   onboardingComplete?: boolean;
-  // Where the writer is in their querying journey, captured on the onboarding welcome step.
-  // The granular answer — Branch B reads this for its import default (early → add by hand;
-  // deep/interest → Smart Import).
+  /**
+   * Where the writer is in their querying journey, captured on the onboarding welcome step.
+   * Branch B reads it for its import default (early → add by hand; deep/interest → Smart Import),
+   * and it is read from THIS stored field, not from onboarding's local state — which is the whole
+   * reason it earns its place in the document.
+   *
+   * ⚠️ THERE IS NO `journeyStage`. A collapsed 3-way ("starting" | "querying" | "exploring") was
+   * derived from this field and written to the profile in four places, and **nothing anywhere ever
+   * read it** — not a component, not a selector, not a hook. It was a stored, rules-validated,
+   * allowlisted, write-only field: three layers of ceremony around a value with no consumer, and a
+   * standing invitation to build personalisation on data that had never been checked against
+   * reality. If a collapsed view is wanted later it is one line off this field, at read time.
+   */
   queryingStage?: "starting" | "early" | "deep" | "interest";
-  // The collapsed 3-way that drives the onboarding branch: starting → Branch A,
-  // querying → Branch B, exploring → Branch C (skip). Derived from queryingStage at the welcome step.
-  journeyStage?: "starting" | "querying" | "exploring";
   // The writer's home market — ISO 3166-1 alpha-2 (e.g. "GB"). Seeded silently from the browser locale
   // at signup (never IP), defaults to "GB" at read time via getHomeCountry(), editable in settings.
   // Drives the home-vs-foreign distinction on the agent database. Absent === not set (never null/"").

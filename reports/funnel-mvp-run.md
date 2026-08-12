@@ -384,3 +384,41 @@ first ran it.
 ### Not verified
 
 No visual verification; onboarding is auth-gated.
+
+---
+
+## Phase 4 — `journeyStage`
+
+**Commit:** _(hash in the next log commit)_
+**Gates:** tsc **0** · build **✓** · Vitest **259 files, 4239 passed | 2 skipped (4241)**
+
+### ⚠️ THIS COMMIT ALSO CHANGES `firestore.rules` (second of two).
+
+`journeyStage` deleted from `types.ts`, from all four `persistProfile` calls (and the
+`finishOnboarding` parameter that carried two of them), from `isValidUser`, and from the user-update
+allowlist. `STAGE_TO_JOURNEY` went with it. Nothing anywhere read it — not a component, not a
+selector, not a hook: a stored, rules-validated, allowlisted, write-only field, which is three
+layers of ceremony around a value with no consumer and a standing invitation to build
+personalisation on data nobody had ever checked.
+
+### `queryingStage` kept, and given a real reader
+
+New pure `src/lib/onboardingStage.ts`: `importDefaultForStage(stage)` and
+`effectiveQueryingStage(stored, inSession)`. Branch B's `defaultImport` now reads
+`currentUser?.queryingStage`.
+
+**Decision (mine — the pack said "read the persisted value" without addressing the timing):** the
+helper prefers the **stored** value and falls back to the session one. That fallback is not a way
+back to reading local state. Onboarding writes the profile fire-and-forget on purpose — an awaited
+write can hang the flow when a field is silently denied by the rules — so there is a genuine window
+where the answer has been given and the document has not returned. The stored value leads, because
+that is what a writer who reloads mid-flow still has; the session value covers the window only.
+Both branches are tested.
+
+11 tests, including the phase's actual claim: that `Onboarding.tsx` reads
+`currentUser?.queryingStage` and that the value read is what drives `defaultImport`. Without that
+pair, "the field has a reader" is an assertion about intent rather than about code.
+
+### Not verified
+
+No visual verification. The rules change is committed and **not deployed** (see the deploy note).

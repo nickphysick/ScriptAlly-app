@@ -11,6 +11,7 @@ import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
+import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
 import { Check } from "lucide-react";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -80,13 +81,6 @@ const STAGE_TO_BRANCH: Record<QueryingStage, Branch> = {
   early: "B",
   deep: "B",
   interest: "B",
-};
-// The collapsed 3-way persisted to the profile (User.journeyStage) for later personalisation.
-const STAGE_TO_JOURNEY: Record<QueryingStage, "starting" | "querying" | "exploring"> = {
-  starting: "starting",
-  early: "querying",
-  deep: "querying",
-  interest: "querying",
 };
 // Distinct ScreenTransition keys per flow phase. Deliberately one key per BRANCH, not per branch
 // step — the key remounts ScreenTransition's child, so a per-step key would wipe the branch
@@ -431,7 +425,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   };
 
   /* Welcome step → straight into the branch the chosen stage maps to. Continue persists the
-     granular stage and the collapsed journeyStage (separate writes, non-blocking).
+     stage (non-blocking).
 
      ⚠️ NO TRANSITION BEAT. A cream "Understood." card used to hold the flow for a fixed 1200ms
      between the answer and the branch — an unskippable pause with no Back and nothing to read,
@@ -451,10 +445,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const handleStageSkip = async () => {
     if (b2DraftRef.current) {
       await ensureBranchBManuscript();
-      await finishOnboarding({ journeyStage: "querying" });
+      await finishOnboarding();
       return;
     }
-    await finishOnboarding({ journeyStage: "exploring" });
+    await finishOnboarding();
   };
 
   // Save/limit error surfaced inside the active branch screen.
@@ -550,12 +544,11 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   // draft, so a later Skip can't resurrect a manuscript the user has moved on from.
   const forgetB2Draft = () => { setB2Draft(null); b2DraftRef.current = null; b2IdCache.current = { id: null }; };
 
-  // The single completion path: mark onboardingComplete (+ optional journeyStage) and exit to the
+  // The single completion path: mark onboardingComplete and exit to the
   // dashboard. Every "Skip setup" and every branch finish routes through here. Writes are
   // non-blocking (see persistProfile) so a denied field can never trap the exit.
-  const finishOnboarding = async (extra?: { journeyStage?: "starting" | "querying" | "exploring" }) => {
+  const finishOnboarding = async () => {
     localStorage.removeItem(STORAGE_KEY);
-    if (extra?.journeyStage) persistProfile({ journeyStage: extra.journeyStage });
     persistProfile({ onboardingComplete: true });
     onComplete();
   };
@@ -611,7 +604,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               onSaveBook={handleBranchBSaveBook}
               initialBook={b2Draft}
               onEnsureManuscript={ensureBranchBManuscript}
-              defaultImport={queryingStage === "early" ? "byhand" : "smart"}
+              /* ⚠️ READS THE STORED ANSWER, not this component's local state — see
+                 lib/onboardingStage. The field used to be written to the profile and never read
+                 back from it. */
+              defaultImport={importDefaultForStage(effectiveQueryingStage(currentUser?.queryingStage, queryingStage))}
               onAddByHand={async () => {
                 // Manual-add finish: create the held manuscript once, then finish onto the agent
                 // list, where the app's real Add-an-agent form lives.
