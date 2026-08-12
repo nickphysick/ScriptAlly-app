@@ -8,8 +8,8 @@
  * (#/signup — App.tsx renders Auth for it; a signed-in visitor is bounced straight to the
  * workspace instead). "See pricing"/Pricing → /pricing; "See what Pro adds" → /pricing;
  * the import-template link downloads the real template; the remaining row text-links point
- * at sign-up (the app is the explainer). Privacy/Terms have no pages yet — rendered inert,
- * logged in BUILD-REPORT.md. The footer deliberately has NO Help link: /help is a workspace
+ * at sign-up (the app is the explainer). Privacy/Terms are real public routes now.
+ * The footer deliberately has NO Help link: /help is a workspace
  * route, so for a logged-out visitor it dead-ended on the signup screen (Tier 2 · Phase 3);
  * no marketing help page exists, and inventing one is a separate decision.
  */
@@ -38,14 +38,13 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
       a.click();
       return;
     }
-    if (row.key === "email") { onNavigate("plans"); return; } // TODO(phase-5): → "pricing"
+    if (row.key === "email") { onNavigate("pricing"); return; }
     openSignup();
   };
 
   return (
     <div>
-      {/* TODO(phase-5): → "pricing" once the public page exists again. */}
-      <Hero onStart={openSignup} onPricing={() => onNavigate("plans")} />
+      <Hero onStart={openSignup} onPricing={() => onNavigate("pricing")} />
       <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
       <CtaBand onStart={openSignup} />
       <footer className="mk-foot">
@@ -54,10 +53,12 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
           <span className="mk-wordmark">ScriptAlly</span>
         </div>
         <div className="mk-footlinks">
-          {/* TODO(phase-5): → "pricing" once the public page exists again. */}
-          <button type="button" onClick={() => onNavigate("plans")}>Pricing</button>
-          <span style={{ marginRight: 18 }}>Privacy</span>
-          <span>Terms</span>
+          <button type="button" onClick={() => onNavigate("pricing")}>Pricing</button>
+          {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist —
+              which is a worse answer than an unfinished page, because a reader cannot tell the
+              difference between "no policy yet" and "the link is broken". */}
+          <button type="button" onClick={() => onNavigate("privacy")}>Privacy</button>
+          <button type="button" onClick={() => onNavigate("terms")}>Terms</button>
         </div>
       </footer>
     </div>

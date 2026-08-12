@@ -422,3 +422,79 @@ pair, "the field has a reader" is an assertion about intent rather than about co
 ### Not verified
 
 No visual verification. The rules change is committed and **not deployed** (see the deploy note).
+
+---
+
+## Phase 5 — pricing and legal
+
+**Commit:** _(hash in the next log commit)_
+**Gates:** tsc **0** · build **✓** · Vitest **259 files, 4261 passed | 2 skipped (4263)**
+
+### 5a — a public `/pricing` that sells nothing
+
+New `src/marketing/PricingPage.tsx` in the `mk-` system, copy in `landingCopy.ts`
+(`PRICING_TIERS`), styles appended to `marketing.css` using only existing tokens
+(`--mk-card`, `--mk-parch`, `--mk-hair`, `--mk-head`, `--mk-sage`) — **no new colour introduced.**
+
+**⚠️ The component takes no user and never imports the db.** That is what makes the logged-out
+render impossible to get wrong a second time; the page it replaces opened with
+`if (!currentUser) return null`. The Free card's CTA opens sign-up; the Pro card carries the
+`ComingSoonPill` pattern and **no control at all**, because there is no payment path.
+
+**Decision (mine):** the Pro card states its price as *"Price to be confirmed"* with a mono
+`no payment path yet` note, rather than inventing a number. Every Pro feature listed is one that
+exists and is gated today — nothing on that list is a roadmap promise. A comment in `landingCopy.ts`
+says so, and asks that a line which stops being true be deleted rather than softened.
+
+Locked: the source must not contain `useScriptAllyDb`, `upgradeToPro`, `downgradeToFree`,
+`updateUserProfile` or `plan:`; the render must contain "Coming soon" and must not match
+`/Activate Pro/i`.
+
+### 5b — `/terms` and `/privacy` as real routes
+
+`LegalPage.tsx` + `legalCopy.ts`, both added to `MARKETING_PATHS`, both public, both rendering for
+logged-out visitors. Routes rather than files because **both hosting configs rewrite `**` to
+`/index.html`** — a static page at those paths is served the SPA, which is why the sign-up screen
+spent a long time linking to documents that could not exist.
+
+**The bodies are placeholders and say so on the page**, in a bordered notice, not only in a
+comment: *"This is a placeholder, not the final wording."* Section headings are stubbed so the
+shape a reader expects is visible, and replacing the copy is an edit to `legalCopy.ts` alone.
+
+**⚠️ OUTSTANDING, AND NAMED IN THE DRAFT SO IT CANNOT BE QUIETLY MISSED: the privacy policy must
+cover third-party processing.** Three features send the writer's own content to Anthropic's API —
+Smart Import sends the **contents of the uploaded spreadsheet** (their entire agent list and
+querying history), the email drop sends the body of an agent's reply, and the comps suggester sends
+the manuscript's details. Nothing on any current surface tells them. The privacy draft has a
+section named for exactly this, and a test asserts the rendered page mentions Anthropic and Smart
+Import, so the section cannot be dropped in a tidy-up.
+
+### 5c — `Auth`'s outbound links
+
+"Back to site" and both legal links now navigate in-app via `useNavigate` instead of pointing at
+`https://scriptally.ink`.
+
+**Decision (mine — a real trap the pack did not mention):** `goPublic()` clears the pre-auth hash
+before navigating. Without that, `#/signup` survives the navigation and `App`'s marketing branch
+re-renders the Auth screen straight over the page you asked for, so the link would appear to do
+nothing.
+
+### Phase 1's TODOs retired
+
+All four `TODO(phase-5)` link retargets are back on `"pricing"`; `routeTiers.test.ts` asserts
+marketing tier for `/pricing`, `/terms` and `/privacy`; the smoke's `PUBLIC_ROUTES` table now
+drives all four public routes logged-out first, then signed-in.
+
+### Note on a small duplication
+
+`stripComments` is now a shared export from `src/test/pageSmoke.tsx` — this is the **third** lock
+in this run to fail against its own explanatory comment (Phases 2, 3, then 5). The two earlier
+files keep their local copies; consolidating them is tidy-up, not a fix, and I did not want to
+touch committed phases to do it.
+
+### Not verified
+
+**No visual verification of any new page.** These three are the only surfaces in the whole run a
+browser could actually reach logged-out, but the run is headless and I did not start a dev server;
+the smokes assert structure and content, not appearance. **Worth eyeballing `/pricing`, `/terms`
+and `/privacy` at desktop and ~375px before launch** — the CSS is new and unreviewed by eye.

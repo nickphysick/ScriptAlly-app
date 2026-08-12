@@ -158,6 +158,22 @@ export const seededDbStub: Record<string, unknown> = new Proxy(
 );
 
 /**
+ * Strip `//` lines and block comments from a source string before matching against it.
+ *
+ * ⚠️ AN ABSENCE LOCK MUST NOT READ ITS OWN EXPLANATION. Tests that assert something is GONE are
+ * routinely written next to a comment recording what went and why — so the comment necessarily
+ * names the forbidden thing, the lock fails on its own documentation, and the obvious response to
+ * that false alarm is to delete the explanation. Code is what these locks are about; prose about
+ * code is not code.
+ */
+export const stripComments = (src: string): string =>
+  src
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .split("\n")
+    .filter((line) => !line.trim().startsWith("//"))
+    .join("\n");
+
+/**
  * ⚠️ THE SIGNED-OUT STUB — `currentUser: null`, the state a public route actually meets.
  *
  * Every other stub here supplies `SMOKE_USER`, which is right for workspace pages (they are all

@@ -11,10 +11,12 @@
  * the resolution table.
  */
 
-// ⚠️ "/pricing" IS TEMPORARILY OUT. The page that rendered there was a developer sandbox on a
-// public route; it is deleted, and a real public pricing page returns in phase 5, at which point
-// this set gains "/pricing" back. TODO(phase-5).
-export const MARKETING_PATHS = new Set(["/"]);
+/**
+ * ⚠️ /terms AND /privacy ARE ROUTES, NOT FILES, AND THAT IS FORCED. Both hosting configs rewrite
+ * `**` to `/index.html`, so a static legal page at those paths would be served the SPA instead.
+ * The sign-up screen linked to them for a long time while they could not exist.
+ */
+export const MARKETING_PATHS = new Set(["/", "/pricing", "/terms", "/privacy"]);
 
 /** The workspace route set — the capsule-shell tier (every authenticated route). */
 export const WORKSPACE_PATHS = new Set([

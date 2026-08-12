@@ -37,6 +37,8 @@ import { RecordResponseScreen } from "./components/RecordResponseScreen";
 // one capsule shell (the focus tier is retired — capsule fixes P5).
 import { MarketingShell } from "./marketing/MarketingShell";
 import { Landing } from "./marketing/Landing";
+import { PricingPage } from "./marketing/PricingPage";
+import { LegalPage } from "./marketing/LegalPage";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
@@ -330,12 +332,15 @@ function pathFor(tab: string, subPageName?: string): string {
       if (subPageName === "Comparable titles") return "/manuscripts/comps";
       return "/manuscripts";
     }
-    // ⚠️ THE "pricing" TAB IS GONE FOR NOW, and the case is deliberately absent rather than
-    // aliased: the old /pricing page was a developer sandbox on a PUBLIC route (it rendered null
-    // when logged out, and offered signed-in visitors a free "Activate Pro account now" button).
-    // A real public pricing page returns in phase 5; until then every caller lands on /plans,
-    // which is honest about there being no payment path. TODO(phase-5): restore the case.
+    // Two pricing surfaces, and they answer different questions: PUBLIC /pricing is the shop
+    // window (marketing tier, writes nothing, sells nothing yet); /plans is the signed-in view of
+    // your own account. Consolidating them is a separate decision.
+    case "pricing": return "/pricing";
     case "plans": return "/plans";
+    // Public legal documents — routes rather than static files, because hosting rewrites ** to
+    // /index.html and a file at these paths would be served the app instead.
+    case "terms": return "/terms";
+    case "privacy": return "/privacy";
     case "import": return "/import";
     case "help": return "/help";
     case "account": return "/account";
@@ -502,10 +507,9 @@ function AppContent() {
     );
   }
 
-  // ── Marketing tier (public): "/" renders for EVERYONE. A signed-in user is
-  // never auto-redirected away from the landing — their nav shows "Open dashboard" instead.
-  // (/pricing left this tier with the sandbox page it used to render; phase 5 brings a real one
-  // back here. TODO(phase-5).)
+  // ── Marketing tier (public): "/", "/pricing", "/terms" and "/privacy" render for EVERYONE. A
+  // signed-in user is never auto-redirected away from the landing — their nav shows
+  // "Open dashboard" instead.
   // The pre-auth hashes stay the auth transport on these routes (#/login · #/signin → sign-in,
   // #/signup → create account — the holding page's existing links keep working); once auth
   // completes while a hash is set, the journey finishes in the workspace.
@@ -521,7 +525,10 @@ function AppContent() {
     }
     return (
       <MarketingShell user={currentUser} onNavigate={handleNavigate} path={path}>
-        <Landing onNavigate={handleNavigate} />
+        {path === "/pricing" ? <PricingPage onNavigate={handleNavigate} />
+          : path === "/terms" ? <LegalPage doc="terms" onNavigate={handleNavigate} />
+          : path === "/privacy" ? <LegalPage doc="privacy" onNavigate={handleNavigate} />
+          : <Landing onNavigate={handleNavigate} />}
       </MarketingShell>
     );
   }

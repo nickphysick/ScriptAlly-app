@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { signInWithGoogle, sendReset, isValidEmail } from "../lib/authActions";
 import { LoginDashboardPreview } from "./auth/LoginDashboardPreview";
@@ -30,6 +31,17 @@ const BannerIcon: React.FC<{ type: "error" | "success" }> = ({ type }) =>
 
 export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMode }) => {
   const { login, signup } = useScriptAllyDb();
+  /* ⚠️ IN-APP NAVIGATION, NOT href. This screen used to link out to https://scriptally.ink for
+     "Back to site" and to /terms and /privacy on that host — pages which could not exist, because
+     both hosting configs rewrite ** to /index.html and would serve the app instead. Leaving the
+     screen at all also meant losing any deep link the visitor arrived on. The clearing of the
+     pre-auth hash matters: without it, #/signup survives the navigation and App re-renders this
+     same screen over the page you asked for. */
+  const navigate = useNavigate();
+  const goPublic = (path: string) => {
+    if (window.location.hash) window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    navigate(path);
+  };
 
   // Default mode is Create account — the page is the founding-members front door. `initialMode`
   // only forces sign-in when something explicitly asks for it (e.g. a #/login deep link).
@@ -139,10 +151,10 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
               a date, so it asserted an open programme whatever the truth was. The waitlist machinery
               that could back a claim like this (functions/src/waitlist.ts, counters/waitlist) is not
               wired to any live page. A status pill needs a status behind it. */}
-          <a className="nav-link" href="https://scriptally.ink">
+          <button type="button" className="nav-link" onClick={() => goPublic("/")}>
             Back to site
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M9 7h8v8" /></svg>
-          </a>
+          </button>
         </div>
       </div>
 
@@ -299,7 +311,11 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
 
               <div className="spacer" />
               {view === "auth" && !isSignin && (
-                <p className="terms">By continuing you agree to our <a href="https://scriptally.ink/terms">Terms</a> &amp; <a href="https://scriptally.ink/privacy">Privacy Policy</a>.</p>
+                <p className="terms">
+                  By continuing you agree to our{" "}
+                  <button type="button" onClick={() => goPublic("/terms")}>Terms</button> &amp;{" "}
+                  <button type="button" onClick={() => goPublic("/privacy")}>Privacy Policy</button>.
+                </p>
               )}
             </div>
 

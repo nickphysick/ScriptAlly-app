@@ -133,3 +133,63 @@ export const FEATURE_ROWS: FeatureRow[] = [
     primary: "Start tracking",
   },
 ];
+
+/* ══════════════ Pricing (public, marketing tier) ══════════════
+   ⚠️ THE PRO CARD DESCRIBES WHAT PRO WILL INCLUDE AND SELLS NOTHING. There is no payment path, so
+   the page states the position and offers no control — the honest shape, and the opposite of the
+   sandbox page it replaces (which wrote `plan: 'Pro'` from the browser for free).
+   Every Pro line below is a feature that EXISTS in the product and is gated today; nothing here is
+   a roadmap promise. If a line stops being true, delete it rather than softening it. */
+
+export const PRICING_DOCUMENT_TITLE = "ScriptAlly — Plans";
+export const PRICING_H1 = "Start free. Stay free if it suits you.";
+export const PRICING_SUB =
+  "Tracking your querying is the whole job, and it costs nothing. Pro adds the parts that read " +
+  "your post for you.";
+
+export interface PricingTier {
+  key: "free" | "pro";
+  name: string;
+  price: string;
+  priceNote?: string;
+  summary: string;
+  includes: string[];
+  action: string;
+}
+
+export const PRICING_TIERS: PricingTier[] = [
+  {
+    key: "free",
+    name: "Free",
+    price: "£0",
+    summary: "Everything you need to run a querying campaign.",
+    includes: [
+      "One manuscript",
+      "Unlimited agents and queries",
+      "The full query pipeline, with dates and response windows",
+      "Submission packages and comparable titles",
+      "Notes to self, and your to-do list",
+      "One Smart Import to bring your history across",
+    ],
+    action: "Start tracking — it's free",
+  },
+  {
+    key: "pro",
+    name: "Pro",
+    price: "Price to be confirmed",
+    priceNote: "no payment path yet",
+    summary: "For writers running more than one book, or more than one campaign.",
+    includes: [
+      "Unlimited manuscripts",
+      "A Smart Import every month",
+      "Smart email drop — forward a reply and it becomes a tracked update",
+      "Comparable-title suggestions from your manuscript",
+      "Everything in Free",
+    ],
+    action: "Coming soon",
+  },
+];
+
+export const PRICING_FOOTNOTE =
+  "Pro is not on sale yet. When it is, you will be able to upgrade from inside the app — nothing " +
+  "here charges you, and nothing changes on your account.";

@@ -14,7 +14,10 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
-import { renderPage, noNavigate, SMOKE_USER, useSignedOutDb, restoreSmokeUser } from "../test/pageSmoke";
+import { readFileSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
+import { renderPage, noNavigate, SMOKE_USER, useSignedOutDb, restoreSmokeUser, stripComments } from "../test/pageSmoke";
 
 vi.mock("../lib/db", async () => (await import("../test/pageSmoke")).dbMock());
 vi.mock("../lib/firebase", async () => (await import("../test/pageSmoke")).firebaseMock());
@@ -22,11 +25,15 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 
 import { Landing } from "./Landing";
 import { MarketingShell } from "./MarketingShell";
+import { PricingPage } from "./PricingPage";
+import { LegalPage } from "./LegalPage";
 
 /** The public marketing routes and a string each must actually render. */
 const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain: string][] = [
   ["/", () => <Landing onNavigate={noNavigate} />, "Take control of your querying journey"],
-  // TODO(phase-5): add ["/pricing", …] when the public pricing page returns.
+  ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Start free"],
+  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of use"],
+  ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy policy"],
 ];
 
 describe("every public marketing route renders for a LOGGED-OUT visitor", () => {
@@ -58,6 +65,55 @@ describe("the same routes still render for a SIGNED-IN visitor", () => {
       expect(renderPage(node(), path)).toContain(mustContain);
     });
   }
+});
+
+/**
+ * ⚠️ THE PRICING PAGE MUST NOT BE ABLE TO CHARGE, UPGRADE OR WRITE ANYTHING. The page it replaces
+ * offered a signed-in visitor "Activate Pro account now", which wrote plan: 'Pro' to their user
+ * document for free — on a PUBLIC route. This is the assertion that stops that returning by
+ * accident: the component takes no user, touches no db, and states its Pro tier as copy.
+ */
+describe("the public pricing page sells nothing and writes nothing", () => {
+  // Comments stripped: the docblock necessarily names what the page must never do again.
+  const source = stripComments(
+    readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "PricingPage.tsx"), "utf8"),
+  );
+
+  it("does not reach the db at all", () => {
+    expect(source).not.toContain("useScriptAllyDb");
+  });
+
+  for (const forbidden of ["upgradeToPro", "downgradeToFree", "updateUserProfile", "plan:"]) {
+    it(`never mentions ${forbidden}`, () => {
+      expect(source).not.toContain(forbidden);
+    });
+  }
+
+  it("marks the Pro tier as unavailable rather than offering a control", () => {
+    const html = renderPage(<PricingPage onNavigate={noNavigate} />, "/pricing");
+    expect(html).toContain("Coming soon");
+    expect(html).not.toMatch(/Activate Pro/i);
+  });
+});
+
+/**
+ * ⚠️ THE LEGAL PAGES MUST SAY THEY ARE PLACEHOLDERS, ON THE PAGE. A legal document that looks
+ * finished and is not is worse than an obviously unfinished one, because nobody chases it.
+ */
+describe("the legal pages are honest about being drafts", () => {
+  for (const doc of ["terms", "privacy"] as const) {
+    it(`/${doc} carries a visible placeholder notice`, () => {
+      const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
+      expect(html).toContain("placeholder");
+    });
+  }
+
+  /** The gap that must not be forgotten when the real policy is written. */
+  it("the privacy draft names the third-party processing Smart Import performs", () => {
+    const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
+    expect(html).toContain("Anthropic");
+    expect(html).toMatch(/Smart Import/);
+  });
 });
 
 describe("the marketing chrome renders in both of its states", () => {

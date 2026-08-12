@@ -14,14 +14,18 @@ describe("tierForPath", () => {
     expect(tierForPath("/")).toBe("marketing");
   });
 
+  it("puts the public pricing page in the marketing tier", () => {
+    expect(tierForPath("/pricing")).toBe("marketing");
+  });
+
   /**
-   * ⚠️ /pricing IS UNRESOLVED, NOT WORKSPACE. The sandbox page that used to render there is
-   * deleted, and the real public one arrives in phase 5. Until then the path must fall through to
-   * the unknown branch — an assertion, not an omission, so re-adding it lands deliberately.
-   * TODO(phase-5): back to "marketing".
+   * ⚠️ THE LEGAL PAGES ARE MARKETING-TIER ROUTES, AND THEY HAVE TO BE ROUTES. Both hosting configs
+   * rewrite `**` to `/index.html`, so a static file at these paths is served the SPA instead —
+   * which is why the sign-up screen spent a long time linking to pages that could not exist.
    */
-  it("public pricing is temporarily unresolved while its page is rebuilt", () => {
-    expect(tierForPath("/pricing")).toBeNull();
+  it("puts the legal documents in the marketing tier, public to everyone", () => {
+    expect(tierForPath("/terms")).toBe("marketing");
+    expect(tierForPath("/privacy")).toBe("marketing");
   });
 
   it("the focus tier is retired — account, plans and help are workspace routes (capsule fixes P5)", () => {
