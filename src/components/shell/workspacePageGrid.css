@@ -69,9 +69,15 @@
   transition: padding .22s cubic-bezier(.4, 0, .2, 1);
 }
 .wpg-plate--working { padding: 0; }
+/* ⚠️ THE HAIRLINE INSETS TO THE CONTENT GUTTER, AND THIS REVERSES THE EARLIER RULE. It spanned
+   the full container on the reasoning that it is the boundary between chrome and content, so it
+   should reach both walls. The counter-argument won: it now sits with the CONTENT it separates —
+   the same 80px the toolbar and the cards take — so it reads as part of the page rather than a
+   rule drawn across it. `--content-gutter`, never a literal, so it cannot drift from the row
+   beneath it. */
 .wpg-plate::after {
   content: "";
-  position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+  position: absolute; left: var(--content-gutter); right: var(--content-gutter); bottom: 0; height: 1px;
   background: var(--ws-edge);
   opacity: 0;
   transition: opacity .16s ease;

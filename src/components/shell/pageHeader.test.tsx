@@ -308,7 +308,10 @@ describe("the header's two states", () => {
   it("⚠️ THE HAIRLINE IS THE ROW'S, FULL WIDTH, AND IT FADES", () => {
     const after = all(gridCss, ".wpg-plate::after");
     expect(after, "the hairline is missing — nothing separates chrome from content once the plate's border goes").toContain("height: 1px");
-    expect(after, "the hairline stops at the plate's edges, leaving a gap where the inset was").toMatch(/left:\s*0;\s*right:\s*0/);
+    /* ⚠️ REVERSED: IT INSETS TO THE CONTENT GUTTER. Full width was the earlier rule; the hairline
+       now sits with the content it separates, on the same token the toolbar and cards use. */
+    expect(after, "the hairline left the content gutter — it reads as a rule drawn across the page rather than part of it")
+      .toMatch(/left:\s*var\(--content-gutter\);\s*right:\s*var\(--content-gutter\)/);
     expect(after, "the hairline is visible at rest, where the plate's own border already does that job").toContain("opacity: 0");
     expect(all(gridCss, ".wpg-plate--working::after"), "the hairline never appears when working").toContain("opacity: 1");
   });
