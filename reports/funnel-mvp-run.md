@@ -231,7 +231,7 @@ the browser pane cannot sign in (established during the recon).
 
 ## Phase 2 — truth pass
 
-**Commit:** `e952039`
+**Commit:** `79e0bca`
 **Gates:** tsc **0** · build **✓** · Vitest **258 files, 4217 passed | 2 skipped (4219)** (was 256/4200)
 
 ### 2a — the filename on the confirm screen
