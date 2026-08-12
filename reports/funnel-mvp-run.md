@@ -585,7 +585,7 @@ eyeball on dev, on both branches, before this is called done.**
 
 ## Phase 7 — the review shell (7a, 7b, 7c and part of 7d)
 
-**Commit:** _(hash in the next log commit)_
+**Commit:** `67ffeb1`
 **Gates:** tsc **0** · build **✓** · Vitest **261 files, 4297 passed | 2 skipped (4299)**
 
 **⚠️ THIS PHASE IS PARTIAL AND I AM NOT CALLING IT DONE.** 7a, 7b, 7c and the flags half of 7d
