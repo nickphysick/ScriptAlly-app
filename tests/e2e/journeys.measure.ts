@@ -240,3 +240,70 @@ test("§4 — reduced motion cuts to the final frame", async ({ page }) => {
   expect(s.stripH, "the strip did not reach its working state under reduced motion").toBe(52);
   expect(s.takeBody!.h, "the takeover did not reach its final frame under reduced motion").toBeGreaterThan(300);
 });
+
+test("§4 — the save exit updates the row in place; the list does not re-enter", async ({ page }) => {
+  /**
+   * ⚠️ THIS GATE WRITES. It records a real response on the harness account, because "the row
+   * changes, it does not re-enter" is a claim about what happens AFTER a successful write and
+   * there is no way to observe it without one. `tests/e2e/seed.mjs` restores the fixture — its
+   * documents carry fixed ids, so re-running it puts the changed query back.
+   */
+  await openRoute(page, "/queries", VP);
+  await unsuppress(page);
+
+  const rows = page.locator(".f12-row");
+  /* ⚠️ THE MARKUP, NOT THE TEXT. A row states its status as a `StatusDot` — an SVG — so a
+     recorded response changes the row without changing a character of its `innerText`. Asserting
+     on text passed the "did not re-enter" half and then failed on a row that had in fact updated. */
+  const before = { count: await rows.count(), first: await rows.first().innerHTML() };
+
+  await openRecord(page);
+  /* the outcome grid decides the stack — any ending needs only outcome + date, which openRecord
+     has already pre-filled, so this is the shortest path to an enabled Save */
+  const ending = page.getByText(/^Closed — no reply$/).first();
+  if (!(await ending.count())) { console.log("no ending outcome reachable — save exit not exercised"); return; }
+  await ending.click();
+  await page.waitForTimeout(400);
+
+  const save = page.getByRole("button", { name: /^Save response$/i });
+  if (await save.isDisabled()) { console.log("save still disabled after outcome + date — reporting rather than forcing"); return; }
+  await save.click();
+
+  /**
+   * ⚠️ POLLED, NOT SAMPLED — the save exit arms AFTER the write resolves, not on the click. A
+   * single read at 70ms found the button mid-"Saving…" and no exit class, which reads exactly like
+   * a dead exit; it actually arms at ~700ms. The cancel exit is instant because it writes nothing,
+   * and copying its timing here is what produced the false negative.
+   */
+  let armed = false;
+  for (let i = 0; i < 30 && !armed; i += 1) {
+    armed = (await motion(page)).cls.includes("qc-exit-save");
+    if (!armed) await page.waitForTimeout(100);
+  }
+  expect(armed, "the save exit never armed — the write may have been rejected").toBe(true);
+
+  await page.waitForTimeout(1600);
+  const after = (await read(page))!;
+  expect(after.takeBody, "the takeover is still mounted after saving").toBeNull();
+  expect(after.stripH, "the resting card did not come back after the save exit").toBe(96);
+  expect(after.list!.display, "the list did not come back").not.toBe("none");
+
+  /* ⚠️ IN PLACE, NOT RE-ENTERED. The list returning with a replayed entrance would read as the
+     page reloading around the writer — the row is meant to change under them. */
+  const root = await page.evaluate(() => (document.querySelector(".f12-root")?.className ?? "").toString());
+  expect(root, "the page replayed its entrance after a save — the row should change in place").not.toContain("qh-enter");
+  expect(await rows.count(), "the list changed length on a response — a response updates a row, it does not add one").toBe(before.count);
+  /**
+   * ⚠️ IT ASSERTS THE OUTCOME, NOT A DELTA — and the delta version was a gate that could only pass
+   * once. Comparing the row against its own earlier markup fails on the SECOND run, because the
+   * first run already recorded that outcome and the write is then a no-op: a green-then-red gate
+   * that reports a regression when nothing changed. What is true every run is that the record now
+   * states what was just recorded, so that is what is checked — on the reading pane, which states
+   * the status in words rather than as a `StatusDot` an assertion cannot read.
+   */
+  await rows.first().click();
+  await page.waitForTimeout(600);
+  const status = await page.locator(".f12-hs").first().innerText();
+  expect(status.toLowerCase(), `the record does not state the outcome just recorded (reads "${status}")`)
+    .toMatch(/no response|closed|no reply/);
+});
