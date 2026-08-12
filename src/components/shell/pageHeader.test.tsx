@@ -46,39 +46,14 @@ describe("PageHeader — full", () => {
  * The distinction is the point: a variant forks the layout, a flag tunes it. Anyone adding the
  * next one should ask which they are doing.
  */
-describe("PageHeader — the compact VARIANT stays retired; the compact FLAG is sanctioned", () => {
-  it("the type union still carries no compact member", () => {
-    // @ts-expect-error — "compact" must not typecheck as a variant
-    const rejected: React.ComponentProps<typeof PageHeader>["variant"] = "compact";
-    expect(rejected).toBe("compact"); // runtime string; the line above is the real assertion
-  });
-
-  it("the boolean exists, drops the subtitle, and keeps the rule", () => {
-    const html = renderToStaticMarkup(
-      <PageHeader compact title="Queries Hub" description="Every query you've sent." />,
-    );
-    expect(html).toContain("svh--compact");
-    expect(html, "compact must not render the subtitle").not.toContain("svh-sub");
-    expect(html, "the description is still ACCEPTED — the copy stays where it lives").toContain("Queries Hub");
-    expect(html, "the hairline divider is untouched").toContain("svh-rule");
-  });
-
-  it("default is off — every other page renders exactly as before", () => {
-    const html = renderToStaticMarkup(<PageHeader title="T" description="D" />);
-    expect(html).not.toContain("svh--compact");
-    expect(html, "the subtitle still renders where compact isn't set").toContain("svh-sub");
-  });
-
-  it("only the density changes: same face, same weight, same ink", () => {
-    const css = readFileSync(new URL("./pageHeader.css", import.meta.url), "utf8");
-    const compact = css.slice(css.indexOf(".svh--compact .svh-top"));
-    const block = compact.slice(0, compact.indexOf("\n\n") + 1 || compact.length);
-    expect(block).toContain("font-size: 26px");
-    for (const forbidden of ["font-family", "font-weight", "color:"]) {
-      expect(block, `compact changed ${forbidden} — it is a density flag, not a restyle`).not.toContain(forbidden);
-    }
-  });
-});
+/**
+ * ⚠️ THE `compact` FLAG IS RETIRED TOO, and its describe block goes with it. It was sanctioned as
+ * a DENSITY flag on one layout — 117px of masthead down to 63 — for Query Centre, which was its
+ * only caller. Query Centre is on the grid now, so nothing passes it: the prop, its branches, the
+ * `svh--compact` class and these tests all had exactly one reason to exist and it is gone.
+ * The rule the block protected still stands and is stated in PageHeader.tsx: `variant: "compact"`
+ * as a SECOND LAYOUT stays retired, and the flag's removal is not licence to bring it back.
+ */
 
 describe("PageHeader — the greeting variant is retired (flyouts pack P4)", () => {
   it("the type union carries no greeting member and no kicker prop survives", () => {
@@ -159,14 +134,10 @@ describe("the tool row", () => {
     expect(html.indexOf("svh-tools")).toBeLessThan(html.indexOf("svh-rule"));
   });
 
-  it("⚠️ COMPACT keeps the actions INLINE — the row would add back the height it removes", () => {
-    // On a fixed-height master–detail surface, header height is taken from the panes below.
-    const html = renderToStaticMarkup(
-      <PageHeader compact title="Queries Hub" actions={[{ label: "Log a query", onClick: () => {}, primary: true }]} />
-    );
-    expect(html).toContain("svh-acts");
-    expect(html).not.toContain("svh-tools");
-  });
+  /* ⚠️ THE COMPACT DENSITY TEST GOES WITH THE FLAG. It asserted that compact kept its actions
+     INLINE rather than on their own row, because a row added back exactly the height compact
+     existed to remove. Nothing passes compact now — Query Centre was its only caller and it is on
+     the grid — so the flag, the branch and this are retired together. */
 
   it("⚠️ THE TWO-ACTION CAP SURVIVED THE ROW — a third is a type error, and sliced at runtime", () => {
     expect(src).toContain("MAX TWO ACTIONS");
@@ -188,12 +159,6 @@ describe("the tool row", () => {
     expect(html).not.toContain("Export CSV");
   });
 
-  it("a compact header has no overflow — its actions are inline and capped at two", () => {
-    const html = renderToStaticMarkup(
-      <PageHeader compact title="Queries Hub" overflow={[{ label: "Export CSV", onClick: () => {} }]} />
-    );
-    expect(html).not.toContain("svh-more");
-  });
 });
 
 /**

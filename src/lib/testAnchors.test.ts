@@ -54,7 +54,14 @@ interface Finding { file: string; line: number; literal: string; matches: number
 const scan = (): Finding[] => {
   const found: Finding[] = [];
   for (const file of walk(ROOT)) {
-    const src = readFileSync(file, "utf8");
+    /* ⚠️ READ THE CODE, NOT THE PROSE — this scanner caught its own warning. A comment in
+       `createSaveMotion.test.ts` QUOTES `indexOf("closeCreate();")` as an example of the mistake
+       this file exists to prevent, and the scanner reported that quotation as an ambiguous anchor.
+       The same trap is recorded twice already in this repo, for `position: sticky` and for
+       `querySelector` in shell comments; a rule about code must be asserted against code. */
+    const src = readFileSync(file, "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^\s*\/\/.*$/gm, "");
     /* `const NAME = read("REL")` — the repo's one idiom for pulling a source file into a test. */
     const vars = new Map<string, string>();
     for (const m of src.matchAll(/const\s+(\w+)\s*=\s*read\("([^"]+)"\)/g)) {

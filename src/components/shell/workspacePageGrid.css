@@ -138,6 +138,13 @@
      boundary keeps its air either way. `.wpg--tools` zeroes it when the toolbar has already
      paid — two elements, one gap, never both. */
   padding-top: var(--content-top-gap);
+  /* ⚠️ THE FOOT PADDING IS A SUM, NOT A VALUE, AND A COLLISION IS WHY. The invariance padding was
+     written as `padding-bottom` on `.wpg--working > .wpg-scroll` (0-2-0) and three pages declare
+     `.aglist .wpg-scroll { padding-bottom: 48px }` at the SAME specificity, later in the bundle —
+     so they won, the reclaim was never added, and exactly those three measured max scroll falling
+     by 62 while the others held. Pages contribute `--wpg-foot`; the working state contributes
+     `--wpg-reclaim-pad`; both land here and ADD. Nothing overrides anything. */
+  padding-bottom: calc(var(--wpg-foot, 0px) + var(--wpg-reclaim-pad, 0px));
   scrollbar-gutter: stable both-edges;
 }
 
@@ -155,20 +162,31 @@
  * frosted state go together and this goes with them. It outranks `.wsh-wrap--scrolled` (0,2,0 to
  * 0,1,0), so the reservation cannot come back through the condensed state.
  */
-.wpg-plate .wsh-wrap {
-  position: static;
-  padding: 0;
-  /* ⚠️ AND THE RESERVED HEIGHT GOES TOO — this was the strip's real height bug. `.wsh-wrap` is
-     `height: calc(var(--wsh-plate-h) + 2 * var(--wsh-plate-gap))`, a RESERVATION for the sticky
-     path: the plate shrinks inside a wrapper that keeps the rest height, so condensing cannot pull
-     the content below it upwards. On the grid there is nothing to reserve — the row is a grid
-     track and the scroller is a sibling — so the reservation just held the header block at 132px
-     while the plate inside it collapsed to 52px, and the hairline landed 80px below the strip.
-     ⚠️ IT LOOKED LIKE THE ROW'S PADDING WAS NOT TRANSITIONING, WHICH IS WHY A PADDING LOCK WOULD
-     HAVE PASSED. The padding was fine; a third element between row and plate was holding the
-     height open. Assert the row's HEIGHT, never its padding. */
-  height: auto;
-}
+/* the seam that neutralised the sticky path is no longer needed — the path is deleted */
+.wpg-plate .wsh-wrap { height: auto; }
 
 /* the toolbar exists → it has already paid the gap, so the scroller must not pay it twice */
 .wpg--tools > .wpg-scroll { padding-top: 0; }
+
+/**
+ * ⚠️ STRIPPING MUST NOT CHANGE MAX SCROLL — this is what makes the state a pure function.
+ *
+ * Row 1 shrinks by the reclaim when the header strips, which grows `clientHeight` by that amount.
+ * Left alone, max scroll falls by the same amount: a page overflowing by less than the reclaim is
+ * clamped to 0, the header returns, and it oscillates. That used to be guarded against, at the
+ * cost of a dead zone where a barely-scrolling page never stripped at all.
+ *
+ * Adding exactly the reclaim as `padding-bottom` grows `scrollHeight` by the same amount, so
+ * `scrollHeight − clientHeight` is IDENTICAL in both states and `scrollTop` can never be clamped
+ * by the state change. The oscillation is impossible rather than avoided.
+ *
+ * ⚠️ INSTANT, NEVER TRANSITIONED. The padding must be in place on the same frame the height
+ * changes; easing it would open a window in which max scroll is briefly wrong, which is the clamp
+ * again, just harder to see.
+ *
+ * The cost is ~62px of empty scrollable space at the very bottom of a stripped page, where 30px of
+ * padding already sits. Accepted deliberately.
+ */
+.wpg--working > .wpg-scroll {
+  --wpg-reclaim-pad: calc(var(--wsh-plate-h) + var(--wsh-plate-gap) - var(--wsh-plate-h-scrolled));
+}

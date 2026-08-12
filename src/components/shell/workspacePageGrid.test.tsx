@@ -242,18 +242,44 @@ describe("the three-row grid — chrome outside the scroller", () => {
   });
 
   /**
-   * ⚠️ THE LATCH IS ASYMMETRIC, AND SYMMETRY IS THE BUG IT PREVENTS. Entry needs BOTH a scroll and
-   * `safeToStrip()`; exit needs only a return to the top. Making exit the inverse of entry
-   * oscillates: stripping reclaims height, max scroll falls, the browser clamps `scrollTop` below
-   * where it was, the entry condition re-tests false and the header flips back.
+   * ⚠️ SYMMETRIC AND STATELESS — and the asymmetry this replaces existed only to survive a clamp
+   * that can no longer happen. The latch was `scrollTop > 4 && safeToStrip()` to enter and
+   * `scrollTop <= 4` to leave, because stripping shrank max scroll and could clamp `scrollTop`
+   * below the entry threshold. `.wpg--working > .wpg-scroll` now adds the reclaim back as
+   * `padding-bottom`, so max scroll is identical in both states and the clamp is impossible.
+   *
+   * With the clamp gone the guard, the dead zone and the asymmetry all go together: the state is
+   * `scrollTop > 2` and nothing else. A page that can scroll at all strips the moment it does.
    */
-  it("⚠️ entry tests safeToStrip, exit tests only the scroll position", () => {
-    const latch = /setStuck\(\(was\) => \(was \? ([^:]+) : ([^)]+)\)\)/.exec(srcCode);
-    expect(latch, "the latch is not written as one expression — its asymmetry cannot be read").toBeTruthy();
-    const [, whenWorking, whenResting] = latch!;
-    expect(whenResting, "entry stopped checking safeToStrip — a page that cannot afford the strip would enter it and oscillate").toContain("safeToStrip");
-    expect(whenWorking, "exit gained the safeToStrip test, making it the inverse of entry — that is the oscillation").not.toContain("safeToStrip");
-    expect(whenWorking, "exit stopped testing the scroll position").toContain("scrollTop");
+  it("⚠️ the state is one symmetric expression of scrollTop, with nothing cached", () => {
+    expect(srcCode, "safeToStrip came back — with the padding in place there is nothing for it to guard, and it only ever bought a dead zone").not.toContain("safeToStrip");
+    expect(srcCode, "the reclaim is being computed in JS again — it belongs in the stylesheet, as a calc the padding and the height share").not.toContain("reclaimedPx");
+    const setter = /setStuck\(([^;]+)\);/.exec(srcCode);
+    expect(setter, "the state is not written in one place").toBeTruthy();
+    expect(setter![1].trim(), "the state stopped being a pure function of scrollTop").toBe("root.scrollTop > 2");
+    expect(srcCode, "the updater takes the previous value again — that is a latch, and a latch is a cached decision").not.toMatch(/setStuck\(\(was\)/);
+  });
+
+  /**
+   * ⚠️ THE PADDING IS WHAT MAKES THE ABOVE SAFE, so it is locked beside it rather than in the
+   * stylesheet's own file. It must equal the reclaim exactly and must not be transitioned: easing
+   * it opens a frame in which max scroll is wrong, which is the clamp again, just harder to see.
+   */
+  it("⚠️ stripping does not change max scroll — the reclaim is added back as padding", () => {
+    /* ⚠️ IT CONTRIBUTES A TOKEN RATHER THAN SETTING THE PADDING, and a collision is why. Written as
+       `padding-bottom` this rule is 0-2-0, and three pages declare `.aglist .wpg-scroll {
+       padding-bottom: 48px }` at the same specificity LATER in the bundle — so they won silently
+       and exactly those three measured max scroll falling by 62 while the rest held. Both values
+       now land in one `calc` on `.wpg-scroll` and add. */
+    const rule = block(".wpg--working > .wpg-scroll");
+    expect(rule, "the invariance contribution is missing — stripping shrinks max scroll and a barely-scrolling page oscillates")
+      .toContain("--wpg-reclaim-pad");
+    expect(rule, "the contribution is not the reclaim — it must be the same three tokens the height change uses")
+      .toContain("calc(var(--wsh-plate-h) + var(--wsh-plate-gap) - var(--wsh-plate-h-scrolled))");
+    expect(rule, "the padding is transitioned — it must land on the same frame as the height").not.toContain("transition");
+    const scroll = block(".wpg-scroll");
+    expect(scroll, "the scroll row stopped summing the two contributions — a page's foot gutter would override the reclaim again")
+      .toContain("padding-bottom: calc(var(--wpg-foot, 0px) + var(--wpg-reclaim-pad, 0px))");
   });
 
   it("⚠️ THE PLATE IS TOLD, IT DOES NOT LOOK — no DOM traversal, no class strings", () => {
@@ -304,9 +330,7 @@ describe("the three-row grid — chrome outside the scroller", () => {
        state is computed and no second path that can disagree with it. What the lock is for is
        unchanged: no page-level code may write it, and nothing may synthesise a scroll position. */
     expect((src.match(/setStuck\(/g) ?? []).length, "the state is written from more than one place — two derivations of one boolean is how they come to disagree").toBe(1);
-    expect(src, "the safe-to-strip guard went — stripping reclaims height, which can un-scroll a page and start it oscillating").toContain("safeToStrip");
-    expect(src, "the threshold is a literal — it must be the reclaimed height, read from the tokens")
-      .toMatch(/--wsh-plate-h[\s\S]{0,120}--wsh-plate-h-scrolled/);
+    expect(src, "the reclaim moved back into JS — it is a stylesheet calc now, shared by the height and the padding").not.toContain("reclaimedPx");
   });
 
   it("⚠️ the context default is `null`, distinguishable from `false`", () => {
@@ -391,7 +415,12 @@ describe("the three-row grid — chrome outside the scroller", () => {
     /* the legacy path must survive while anything is still on it */
     const ph = readFileSync(resolve(__dirname, "PageHeader.tsx"), "utf8");
     expect(ph, "PageHeader stopped consuming the grid — converted pages would fall back to the scroll listener and condense on the wrong element").toContain("PlateCondensedContext");
-    expect(ph, "the legacy scroll listener went while pages are still on it — they would stop condensing entirely").toContain("useCondensed");
+    /* ⚠️ REVERSED: THE LEGACY LISTENER IS RETIRED. It found its own scroller by walking up from the
+       plate, and existed only for pages not yet on the grid. There are none — Query Centre was the
+       last — so it is deleted, and a workspace header mounted outside a grid THROWS in development
+       instead of silently attaching to the shell's scroller and condensing on the wrong element. */
+    expect(ph, "the legacy scroll listener came back — nothing needs it, and it condenses on the wrong element").not.toContain("useCondensed");
+    expect(ph, "the dev throw went — a header outside a grid would silently never condense").toContain("mounted outside a WorkspacePageGrid");
   });
 
   /**

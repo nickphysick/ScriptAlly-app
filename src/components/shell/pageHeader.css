@@ -118,10 +118,6 @@
    The title row CENTRES against the actions instead of baseline-aligning, because at 26px the
    baseline sat oddly high beside a 36px button. The rule's 22px margin is folded into the block's
    own 12px padding — the divider itself is untouched. ── */
-.svh--compact .svh-top { align-items: center; padding: 12px 0; }
-.svh--compact .svh-title { font-size: 26px; }
-.svh--compact .svh-acts { padding-bottom: 0; }
-.svh--compact .svh-rule { margin-top: 0; }
 
 /* (The compact variant is RETIRED — flyouts pack P3: one header grammar app-wide.) */
 
@@ -254,13 +250,16 @@
    `display:flex; flex-direction:column`, so the wrapper is a flex ITEM there and would otherwise
    shrink under the default `flex-shrink:1` — taking the reserved height with it and reintroducing
    the very reflow the reservation exists to stop, but only on those two pages. */
+/* ⚠️ THE STICKY PATH AND ITS RESERVATION ARE RETIRED — the wrapper is now a plain box. It carried
+   `position: sticky; top: 0`, a `z-index`, and a height of `--wsh-plate-h + 2 * --wsh-plate-gap`
+   so the plate could shrink INSIDE a wrapper that kept the rest height, stopping the condense from
+   pulling content up. On the grid there is nothing to reserve: row 1 is a grid track and the
+   scroller is a sibling. The reservation was also the strip's real height bug, holding the header
+   block at 132px while the plate inside collapsed to 52.
+   The element itself survives because it is the plate's mount point in the markup; only its
+   behaviour is gone. */
 .wsh-wrap {
-  position: sticky;
-  top: 0;
-  z-index: 6;
-  flex: none;
-  padding: var(--wsh-plate-gap) 0;
-  height: calc(var(--wsh-plate-h) + 2 * var(--wsh-plate-gap));
+  padding: 0;
   box-sizing: border-box;
   background: none;
 }

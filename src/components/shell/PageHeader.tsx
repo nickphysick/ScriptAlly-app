@@ -47,19 +47,6 @@ const nearestScroller = (from: HTMLElement): HTMLElement | null => {
 };
 
 /** Condensed once the scroller has moved at all — the pack's `scrollTop > 4`. */
-const useCondensed = (ref: React.RefObject<HTMLElement | null>, enabled: boolean): boolean => {
-  const [condensed, setCondensed] = React.useState(false);
-  React.useEffect(() => {
-    if (!enabled || !ref.current) return;
-    const sc = nearestScroller(ref.current);
-    if (!sc) return;
-    const read = () => setCondensed(sc.scrollTop > 4);
-    read(); // a remounting page (the stage keeps pages alive) can arrive already scrolled
-    sc.addEventListener("scroll", read, { passive: true });
-    return () => sc.removeEventListener("scroll", read);
-  }, [ref, enabled]);
-  return condensed;
-};
 
 export interface PageHeaderAction {
   label: string;
@@ -162,7 +149,6 @@ export interface PageHeaderProps {
    * header layout for every page is the win worth keeping. This is a density flag on the one
    * layout. See pageHeader.test.tsx, which locks both halves of that distinction.
    */
-  compact?: boolean;
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
@@ -175,7 +161,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   titleAdornment,
   actionsSlot,
   overflow,
-  compact = false,
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
   const wsActs = (actions ?? []).slice(0, 2);
@@ -200,9 +185,21 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
    * wrapper, the reservation padding and the frosted state. Until then the old path must stay alive,
    * because a half-converted app is the one thing worse than a slow conversion.
    */
-  const gridCondensed = React.useContext(PlateCondensedContext);
-  const legacyCondensed = useCondensed(plateRef, variant === "workspace" && gridCondensed === null);
-  const condensed = gridCondensed ?? legacyCondensed;
+  /**
+   * ⚠️ THE HEADER IS TOLD, AND THERE IS NO LONGER ANYTHING TO FALL BACK TO. Every page that
+   * renders this variant is inside a `WorkspacePageGrid`, so the context always has a value. The
+   * legacy scroll listener — which found its own scroller by walking up from the plate — is
+   * deleted with the last page that needed it, and a mount outside a grid now THROWS in
+   * development rather than silently attaching to the shell's scroller and condensing on the
+   * wrong element.
+   */
+  const condensed = React.useContext(PlateCondensedContext);
+  if (condensed === null && variant === "workspace" && process.env.NODE_ENV !== "production") {
+    throw new Error(
+      "PageHeader variant=\"workspace\" was mounted outside a WorkspacePageGrid. The working state " +
+      "comes from the grid through context; without one it can never condense.",
+    );
+  }
   React.useEffect(() => {
     if (!moreOpen) return;
     const onDown = (e: PointerEvent) => {
@@ -235,7 +232,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         </button>
       ))}
       {/* OVERFLOW — everything that is a real page operation but not one of the two primaries. */}
-      {!compact && overflow && overflow.length > 0 && (
+      {overflow && overflow.length > 0 && (
         <div className="svh-morewrap" ref={moreRef}>
           <button
             type="button"
@@ -287,8 +284,12 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
          row shrinks (88 → 56), so the wrapper gives back exactly that 32px as padding while it is
          condensed — which keeps the page below from sliding up. It is done with a class rather than
          a measured height because the TOOL ROW's height is unknown to CSS, so the old fixed
-         `calc(88 + 2·gap)` reservation could not survive a second row. */
-      <div className={`wsh-wrap${condensed ? " wsh-wrap--scrolled" : ""}`}>
+         `calc(88 + 2·gap)` reservation could not survive a second row.
+
+         ⚠️ AND IT CARRIES NO STATE CLASS. `wsh-wrap--scrolled` was written for rules governing the
+         sticky reservation; both are deleted, so the class had no reader left — a class the markup
+         emits and no stylesheet consumes is exactly what a bundle sweep is for. */
+      <div className="wsh-wrap">
         {/* ⚠️ BOTH CLASSES ARE DERIVED — one from `description`, one from the scroller's position.
             There is no height prop and must never be one; see the knob-versus-rule note in the
             stylesheet. */}
@@ -342,24 +343,19 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   }
 
   return (
-    <header className={`svh svh--full${compact ? " svh--compact" : ""}`}>
+    <header className={"svh svh--full"}>
       <div className="svh-top">
         <div className="svh-txt">
           <h1 className="svh-title">
             {title}
             {titleAdornment}
           </h1>
-          {description && !compact && <div className="svh-sub">{description}</div>}
+          {description && <div className="svh-sub">{description}</div>}
         </div>
-        {/* ⚠️ COMPACT KEEPS THE ACTIONS INLINE on the title row. On a fixed-height master–detail
-            surface, header height is taken directly from the panes below — which is the whole
-            reason compact exists, and giving the actions their own row would add back exactly
-            the height it was built to remove. */}
-        {compact && (acts.length > 0 || actionsSlot) && <div className="svh-acts">{controls}</div>}
       </div>
       {/* THE TOOL ROW (Baked 10) — the default: the page's actions on their own row, above the
           hairline, primary pink at the RIGHT. */}
-      {!compact && (acts.length > 0 || actionsSlot || (overflow && overflow.length > 0)) && (
+      {(acts.length > 0 || actionsSlot || (overflow && overflow.length > 0)) && (
         <div className="svh-tools">{controls}</div>
       )}
       <div className="svh-rule" />

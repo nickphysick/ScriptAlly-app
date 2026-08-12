@@ -56,10 +56,13 @@ describe("agent list · the page column", () => {
          3 it would be fixed space the list could never scroll into. */
       "the page padding changed — the sides belong to the grid's scroll row, so only the top is stated here",
     ).toContain("padding: 14px 0 0");
+    /* ⚠️ A CONTRIBUTION, NOT A PADDING. It sets `--wpg-foot`, which the grid sums with the working
+       state's reclaim — as a raw `padding-bottom` this rule silently overrode the reclaim, because
+       both are 0-2-0 and the page sheet comes later in the bundle. */
     expect(
       block(".aglist .wpg-scroll"),
       "the bottom gutter left the scroller — the last card butts against the frame with nothing under it",
-    ).toContain("padding-bottom: 48px");
+    ).toContain("--wpg-foot: 48px");
     expect(
       css,
       "the inner column took a width again — it must simply fill the guttered scroll row",

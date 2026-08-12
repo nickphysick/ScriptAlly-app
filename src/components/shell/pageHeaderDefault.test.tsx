@@ -18,8 +18,18 @@ import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { PageHeader } from "./PageHeader";
+import { WorkspacePageGrid } from "./WorkspacePageGrid";
 
+/**
+ * ⚠️ THE WORKSPACE VARIANT MUST BE MOUNTED INSIDE A GRID, and rendering it bare now THROWS in
+ * development — deliberately. Its working state comes from the grid through context; outside one
+ * it can never condense, and the old fallback that walked up to find a scroller is deleted. These
+ * tests rendered it bare and the throw caught every one of them, which is the guard working.
+ */
 const render = (el: React.ReactElement) => renderToStaticMarkup(el);
+/** the workspace variant only — it reads its state from the grid and throws without one */
+const renderInGrid = (el: React.ReactElement) =>
+  renderToStaticMarkup(<WorkspacePageGrid plate={el}>{null}</WorkspacePageGrid>);
 
 describe("⚠️ the default variant is frozen", () => {
   it("title only — byte for byte", () => {
@@ -65,7 +75,7 @@ describe("⚠️ the default variant is frozen", () => {
 
 describe("the workspace variant", () => {
   it("renders title, mark and actions", () => {
-    const out = render(
+    const out = renderInGrid(
       <PageHeader
         variant="workspace"
         title="Query Centre"
@@ -83,32 +93,32 @@ describe("the workspace variant", () => {
   it("⚠️ THE COUNT SLOT IS GONE FROM THE MARKUP, not merely unused (amendment 7)", () => {
     /* The prop is deleted, so nothing CAN pass one; this guards the other half — that no residue
        of the strip survives in the rendered plate for a future caller to half-render. */
-    const out = render(<PageHeader variant="workspace" title="Settings" mark="settings" />);
+    const out = renderInGrid(<PageHeader variant="workspace" title="Settings" mark="settings" />);
     expect(out).not.toContain("wsh-count");
   });
 
   it("⚠️ THE PLATE IS WRAPPED BY ITS STICKY HOST, and that host paints nothing", () => {
     /* The wrapper is what sticks; the plate is what condenses. A backing fill here would put an
        opaque band across the gutters beside the plate — the dead margin the ref exists to rule out. */
-    const out = render(<PageHeader variant="workspace" title="T" mark="todo" />);
+    const out = renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />);
     expect(out).toMatch(/<div class="wsh-wrap"><header class="wsh( wsh--solo)?"><div class="wsh-row">/);
   });
 
   it("⚠️ AT REST THE PLATE IS NOT CONDENSED — the scrolled class is never server-rendered", () => {
     /* `wsh--scrolled` is driven by a scroll listener, so the first paint must be the rest state.
        If it ever rendered condensed, every page would flash 88 → 56 → 88 on mount. */
-    expect(render(<PageHeader variant="workspace" title="T" mark="todo" />)).not.toContain("wsh--scrolled");
+    expect(renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />)).not.toContain("wsh--scrolled");
   });
 
   it("⚠️ NO DESCRIPTION → no sub element and the title steps up — but the PLATE KEEPS ITS HEIGHT", () => {
     /* ⚠️ AMENDED (amendment 7): the height half of this is gone. The plate is one height, 88px, and
        56px once scrolled — the 78/60 pair went with the band. `wsh--solo` now governs the TYPE
        only, which is why it is still asserted while no height claim is. */
-    const solo = render(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
+    const solo = renderInGrid(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
     expect(solo).not.toContain("wsh-sub");
     expect(solo).toContain("wsh-title--solo"); // the type step, not a height
     expect(solo).toContain("wsh--solo");
-    const withSub = render(<PageHeader variant="workspace" title="Contact list" mark="contacts" description="Everyone you're querying." />);
+    const withSub = renderInGrid(<PageHeader variant="workspace" title="Contact list" mark="contacts" description="Everyone you're querying." />);
     expect(withSub).toContain("wsh-sub");
     expect(withSub).not.toContain("wsh-title--solo");
     expect(withSub).not.toContain("wsh--solo");
@@ -118,7 +128,7 @@ describe("the workspace variant", () => {
   it("every mark key renders", () => {
     for (const m of ["queries", "todo", "calendar", "contacts", "packages", "analytics",
       "noteboard", "discover", "settings"] as const) {
-      expect(render(<PageHeader variant="workspace" title="T" mark={m} />), m).toContain(`data-mark="${m}"`);
+      expect(renderInGrid(<PageHeader variant="workspace" title="T" mark={m} />), m).toContain(`data-mark="${m}"`);
     }
   });
 });
@@ -142,8 +152,9 @@ describe("⚠️ the shell never mounts PageHeader", () => {
  * the variants that were removed.
  */
 describe("no prop can choose the header's height", () => {
+  /* the workspace variant reads its state from the grid, so it must be mounted in one */
   const heightClass = (el: React.ReactElement) =>
-    /class="wsh( wsh--solo)?"/.exec(renderToStaticMarkup(el))?.[0];
+    /class="wsh( wsh--solo)?"/.exec(renderInGrid(el))?.[0];
 
   it("only `description` moves it — everything else is inert", () => {
     const tall = 'class="wsh"', short = 'class="wsh wsh--solo"';
@@ -155,7 +166,10 @@ describe("no prop can choose the header's height", () => {
       { count: "9 THINGS" },
       { actions: [{ label: "A", onClick: () => {} }] as const },
       { titleAdornment: <span>Pro</span> },
-      { compact: true },          // ⚠️ the retired knob must NOT reach this variant
+      /* ⚠️ `compact` IS GONE FROM THE TYPE, so it can no longer be passed even by mistake — the
+         prop, its branches and its own describe block were retired with Query Centre, its last
+         caller. The row is kept as a note: this list is "every other prop", and the one that was
+         most tempting to let through is now impossible rather than merely inert. */
       { overflow: [{ label: "X", onClick: () => {} }] as const },
     ]) {
       expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" {...(extra as object)} />), JSON.stringify(Object.keys(extra))).toBe(short);

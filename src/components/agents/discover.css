@@ -83,7 +83,9 @@
   padding: 14px 0 0;
 }
 .dv-wpg { flex: 1; min-height: 0; }
-.dv2 .wpg-scroll { padding-bottom: 48px; }
+/* the page's own foot gutter — a CONTRIBUTION, not a padding, so the working state's
+   reclaim adds to it rather than being overridden by it (see workspacePageGrid.css) */
+.dv2 .wpg-scroll { --wpg-foot: 48px; }
 /* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both moved to the grid: row 3 carries
    `--content-gutter` as padding, so this page's content is the window minus the gutter and
    nothing here states a width. A `max-width` here would re-create the centred column whose

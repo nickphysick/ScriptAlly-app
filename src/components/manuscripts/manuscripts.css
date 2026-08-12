@@ -40,7 +40,9 @@
   min-height: 0;
   width: 100%;
   }
-.msv1 .wpg-scroll { padding-bottom: 48px; }
+/* the page's own foot gutter — a CONTRIBUTION, not a padding, so the working state's
+   reclaim adds to it rather than being overridden by it (see workspacePageGrid.css) */
+.msv1 .wpg-scroll { --wpg-foot: 48px; }
 
 .t-capp .msv1 {
   --msv-card: #fdfaf5; --msv-cardbd: 1px solid #d8cebf; --msv-crad: 10px;

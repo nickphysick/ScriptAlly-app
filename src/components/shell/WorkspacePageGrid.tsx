@@ -96,64 +96,31 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   const condensed = stuck || condensedByMode;
 
   /**
-   * ⚠️ THE THRESHOLD IS THE RECLAIM, COMPUTED FROM THE TOKENS AT CALL TIME. It is exactly the
-   * height stripping gives back — the row's rest height plus its gap, less the strip — so a token
-   * change cannot leave a stale number behind.
-   */
-  const reclaimedPx = React.useCallback((): number => {
-    if (typeof window === "undefined") return 0;
-    const cs = getComputedStyle(document.documentElement);
-    const n = (name: string) => parseFloat(cs.getPropertyValue(name)) || 0;
-    return n("--wsh-plate-h") + n("--wsh-plate-gap") - n("--wsh-plate-h-scrolled");
-  }, []);
-
-  /**
-   * ⚠️ THE STATE IS DERIVED FROM `scrollTop` ON EVERY FRAME, NOT REPORTED BY AN OBSERVER.
+   * ⚠️ THE STATE IS A PURE FUNCTION OF `scrollTop`, AND THE CLAMP IT USED TO FEAR IS IMPOSSIBLE.
    *
-   * An IntersectionObserver fires only on a CHANGE of intersection, so a single missed or mistimed
-   * event leaves the header permanently in the wrong state with nothing left to re-evaluate it.
-   * That is what shipped, and it is why running a diagnostic appeared to "fix" the page: the
-   * diagnostic scrolled the scroller, which produced the change the observer had missed. Measured
-   * on a real account — `overflow: 267`, `reclaim: 62`, `safeToStrip: true`, and both classes
-   * absent — the arithmetic was never wrong; the mechanism was.
+   * Stripping reclaims row 1's height, which used to grow the scrollport and shrink max scroll —
+   * so a page that only just overflowed could be clamped to 0, bringing the header back, and it
+   * cycled. That was guarded against with `safeToStrip()`, which bought safety at the price of a
+   * DEAD ZONE: a page overflowing by less than the reclaim never stripped at all. Manuscripts lived
+   * in it — 42px of overflow against a 62px reclaim.
    *
-   * ⚠️ SO IT IS STATELESS. No cached decision can go stale, a remounted node cannot orphan it, and
-   * a missed frame self-corrects on the next one. The handler compares against the CURRENT boolean
-   * and writes only on a change, so a scroll costs one comparison per frame and no renders.
+   * ⚠️ THE FIX IS IN THE STYLESHEET, NOT HERE. `.wpg--working .wpg-scroll` takes a `padding-bottom`
+   * of exactly the reclaim, so stripping grows `scrollHeight` and `clientHeight` by the SAME
+   * amount and max scroll is identical in both states. `scrollTop` cannot be clamped by the state
+   * change in either direction, so the oscillation is impossible rather than avoided — and the
+   * guard, the dead zone and the asymmetric latch all go with it.
    *
-   * ⚠️ AND THE LATCH IS ASYMMETRIC ON PURPOSE. Entry is `scrollTop > 4 && safeToStrip()`; exit is
-   * `scrollTop <= 4` ALONE. Making exit the inverse of entry is what oscillates: stripping reclaims
-   * height, which lowers max scroll, which can clamp `scrollTop` below where it was — re-testing
-   * the entry condition then flips the header back, and it cycles. Once working, only returning to
-   * the top ends it.
+   * What remains is symmetric and stateless: `scrollTop > 2`, evaluated per painted frame, written
+   * only on a change. No cached decision, nothing to go stale, a missed frame self-corrects.
    */
   React.useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
-    /**
-     * The page must still scroll AFTER the strip reclaims its height, or entering is unsafe.
-     *
-     * ⚠️ THIS CREATES A DEAD ZONE AND THE DEAD ZONE IS CORRECT. A page whose content exceeds the
-     * viewport by LESS than the reclaim keeps its resting card, and it reads as "the header does
-     * not respond to scrolling". Measured on Manuscripts at a real window: `scrollHeight` 694,
-     * `clientHeight` 652, overflow 42 against a 62px reclaim. Stripping would take the scroller to
-     * 714 — taller than the content — so overflow would become ZERO, the browser would clamp
-     * `scrollTop` to 0, and it would cycle.
-     *
-     * ⚠️ AND EVERY MEASUREMENT OF THIS TAKEN THROUGH A DOCKED CONSOLE IS WRONG, because DevTools
-     * shortens the viewport by 300-400px, which INFLATES the overflow past the threshold. The same
-     * page read 267 docked and 42 undocked. If this is ever investigated again, undock first — the
-     * act of measuring is what moves the value.
-     */
-    const safeToStrip = () => root.scrollHeight - root.clientHeight > reclaimedPx();
 
     let frame = 0;
     const evaluate = () => {
       frame = 0;
-      /* ⚠️ ONE EXPRESSION, AND A LOCK READS ITS ASYMMETRY HERE. Splitting it into a block hid that
-         from the lock — which is how the temporary instrumentation for the Manuscripts diagnosis
-         first went in, and why it was reshaped rather than the lock relaxed. */
-      setStuck((was) => (was ? root.scrollTop > 4 : root.scrollTop > 4 && safeToStrip()));
+      setStuck(root.scrollTop > 2);
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
@@ -161,8 +128,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     root.addEventListener("scroll", onScroll, { passive: true });
     evaluate();
 
-    /* ⚠️ THE RESIZE OBSERVER STAYS. A window that gets shorter can cross the threshold without any
-       scroll at all, and nothing else would re-evaluate until the user happened to scroll. */
+    /* ⚠️ THE RESIZE OBSERVER STAYS. A window change can move the scroll position without a scroll
+       event — nothing else would re-evaluate until the user happened to scroll. */
     const ro = new ResizeObserver(evaluate);
     ro.observe(root);
     return () => {
@@ -170,11 +137,11 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
       ro.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [reclaimedPx]);
+  }, []);
 
   return (
     <PlateCondensedContext.Provider value={condensed}>
-      <div className={`wpg${toolbar ? " wpg--tools" : ""}${className ? ` ${className}` : ""}`}>
+      <div className={`wpg${condensed ? " wpg--working" : ""}${toolbar ? " wpg--tools" : ""}${className ? ` ${className}` : ""}`}>
         {/* ⚠️ ROW 1 CARRIES THE STATE CLASS TOO, not just the header inside it. The width change and
             the hairline are the ROW's (the header fills its row in both states), so the row has to
             know. Same boolean, one source — it cannot disagree with the header. */}
