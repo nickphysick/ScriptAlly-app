@@ -684,8 +684,11 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                   Live only: on the feature page nothing has been matched, so nothing is missing. */}
               {DISCOVER_LIVE && renderNoMatch()}
 
-              {/* ── The centred feature reel — sits ON the page, no card wrapper ── */}
-              <section className="dv-reel">
+              {/* ── The hero — the page opens here, directly beneath the band ──
+                  ⚠️ THE EYEBROW'S SOURCE STAYS SENTENCE CASE. The ref draws it in capitals and the
+                  capitals are `text-transform`; `agentsPageSmoke` asserts the rendered HTML
+                  contains "Discover new agents". */}
+              <section className="dv-hero">
                 <span className="dv-eyebrow">Pro · Discover new agents</span>
                 <h2>The right agents are already looking for a book like yours.</h2>
                 <p className="lead">
@@ -693,31 +696,35 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                   manuscript — genre, age category and wish-list overlap — and shows you why each
                   one fits before you query.
                 </p>
-                <div className="dv-cols">
-                  <div className="dv-col">
-                    <AnimationSlot label="Matched to your book" />
-                    <h3>Matched to your book</h3>
-                    <p>
-                      Ranked by real overlap with your genre and themes — not an alphabetical
-                      directory to trawl.
-                    </p>
-                  </div>
-                  <div className="dv-col">
-                    <AnimationSlot label="Every agent vetted" />
-                    <h3>Every agent vetted</h3>
-                    <p>
-                      Real agencies, hand-checked and kept current — and never one that charges a
-                      reading fee.
-                    </p>
-                  </div>
-                  <div className="dv-col">
-                    <AnimationSlot label="A head start on your query" />
-                    <h3>A head start on your query</h3>
-                    <p>
-                      Each match pulls out the wish-list line to lead your letter with — the
-                      personalisation, found for you.
-                    </p>
-                  </div>
+              </section>
+
+              {/* ── The feature reel — three cards, each holding its own animation slot ──
+                  The slot, the heading and the copy were always one block per column; what the
+                  ref adds is the card around them. */}
+              <section className="dv-reel">
+                <div className="dv-feature">
+                  <AnimationSlot label="Matched to your book" />
+                  <h3>Matched to your book</h3>
+                  <p>
+                    Ranked by real overlap with your genre and themes — not an alphabetical
+                    directory to trawl.
+                  </p>
+                </div>
+                <div className="dv-feature">
+                  <AnimationSlot label="Every agent vetted" />
+                  <h3>Every agent vetted</h3>
+                  <p>
+                    Real agencies, hand-checked and kept current — and never one that charges a
+                    reading fee.
+                  </p>
+                </div>
+                <div className="dv-feature">
+                  <AnimationSlot label="A head start on your query" />
+                  <h3>A head start on your query</h3>
+                  <p>
+                    Each match pulls out the wish-list line to lead your letter with — the
+                    personalisation, found for you.
+                  </p>
                 </div>
               </section>
 
