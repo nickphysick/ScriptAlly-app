@@ -26,8 +26,11 @@ import seedling from "../../assets/shell/new-shoots-icon.png";
 /**
  * ⚠️ VERBATIM COPY, and it REPLACED a different verbatim string — the earlier "You're early…"
  * paragraph. Both were stated by their pack; this one is current. No appraisal, no encouragement,
- * no exclamation: nothing else in the app uses one, which is also why the button below is
- * "Spread the word" and not "Spread the word!".
+ * no exclamation: nothing else in the app uses one.
+ *
+ * ⚠️ AND IT IS NOW THE TILE'S ONLY WORDS. The share button that sat beneath it is REMOVED — see the
+ * note on the body below. A sentence that was written to sit above a call to action is carrying the
+ * whole tile on its own, so it must keep reading as a statement rather than a lead-in.
  */
 export const COMMUNITY_EMPTY =
   "As our community builds, you'll be able to benchmark your key stats against other writers at a similar stage.";
@@ -51,26 +54,21 @@ export const OneScreenCommunity: React.FC<{ loading: boolean }> = ({ loading }) 
         paragraph it balanced. The tile still FILLS a row whose height the TASKS card sets — but a
         centred column fills by centring, so a spacer would now push the hero off-centre rather
         than hold it in place. The tile must never be the taller card; if it grows past tasks the
-        fix is to shrink the seedling, never to stretch tasks. */}
+        fix is to shrink the seedling, never to stretch tasks.
+
+        ⚠️ THE SHARE BUTTON IS REMOVED, AND THE CENTRING NEEDED NO CHANGE TO SURVIVE IT — which is
+        the point of centring rather than spacing. `justify-content: center` centres whatever the
+        column contains, so dropping a child re-centres the remaining two by construction; a
+        `margin-top: auto` footer would have left the pair pinned where the three used to sit.
+        (Browser-verified after the removal, not assumed: the seedling+copy block is centred in the
+        body box to within a pixel.) `.os-commshare` went with it, rule and element together —
+        a leftover rule is how a deleted control comes back. */}
     <div className="os-commbody">
       {/* Decorative: the sentence beneath carries the meaning, so the illustration is announced to
           nobody. `alt=""` AND `aria-hidden` — belt and braces, since a decorative image with a
           filename-derived accessible name is the usual way this leaks. */}
       <img className="os-commseed" src={seedling} alt="" aria-hidden="true" />
       <p className="os-commempty">{COMMUNITY_EMPTY}</p>
-      {/* ⚠️ INERT IN PHASE 1, AND `disabled` RATHER THAN A SILENT NO-OP. A button that looks live
-          and does nothing is worse than one that says it is not ready: the pack forbids a
-          placeholder handler, and an enabled control with no `onClick` is exactly that.
-          TODO(phase-2): wire to copy the share URL and confirm through the global toast
-          (`useToast`, which recon confirmed exists app-wide) — then drop `disabled`. */}
-      <button type="button" className="os-commshare" disabled>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6}
-             strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="18" cy="5" r="2.6" /><circle cx="6" cy="12" r="2.6" /><circle cx="18" cy="19" r="2.6" />
-          <path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3" />
-        </svg>
-        Spread the word
-      </button>
     </div>
   </div>
 );

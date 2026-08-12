@@ -1458,27 +1458,17 @@
 .os-commempty {
   margin: 0; font-size: 12.5px; line-height: 1.6; font-weight: 300; color: #5c4d44; max-width: 34ch;
 }
-/* ⚠️ QUIET BY DEFAULT, WARM ON HOVER — a transparent pill with a hairline, not a filled button.
-   It sits in an empty state; a solid CTA here would outrank the sentence explaining why the tile
-   is empty. Colours inline-critical per the house rule, so Tailwind cannot quietly repaint them. */
-.os-commshare {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 8px 15px;
-  font: inherit; font-size: 12px;
-  color: #7c3a2a;
-  background: transparent;
-  border: 1px solid #e7ddd2;
-  border-radius: 20px;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.os-commshare svg { width: 13px; height: 13px; display: block; flex: none; }
-.os-commshare:hover:not(:disabled) { background: #f3e0d6; border-color: #e8c8bc; }
-.os-commshare:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; }
-/* ⚠️ THE DISABLED STATE IS PHASE 1'S, AND IT IS HONEST — the control is not wired yet, so it says
-   so rather than accepting a click that does nothing. `cursor: default`, not `not-allowed`:
-   nothing is forbidden here, it simply is not ready. */
-.os-commshare:disabled { opacity: 0.55; cursor: default; }
+/* ⚠️ `.os-commshare` IS DELETED — the "Spread the word" pill is removed from the tile, and its five
+   rules went with the element rather than being left behind for a Phase 2 that may never want that
+   control. This file has now made the same call three times (`.os-commic`, `.os-commfoot`, this):
+   a stylesheet that still describes a deleted node is how the node comes back, because the next
+   person to add markup finds it already styled and reads that as intent.
+
+   ⚠️ NOTHING WAS ADDED TO RE-CENTRE THE REMAINDER, AND NOTHING SHOULD BE. `.os-commbody` already
+   centres on both axes, so it centres whatever it contains — dropping a child re-centres the
+   other two by construction. The failure mode being avoided is the reflex fix: a `margin` or a
+   `padding-bottom` here to "balance" the pair would re-introduce the exact off-centre the spacer
+   below caused, this time with nothing to point at. */
 /* ⚠️ `.os-commfoot` IS DELETED. It existed to push a TOP-ALIGNED paragraph's slack to the bottom;
    the body centres on both axes now, so a spacer would fight the centring it was there to
    prevent. Rule and element removed together — a `margin-top: auto` left in this file would

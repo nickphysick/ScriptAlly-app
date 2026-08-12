@@ -33,12 +33,12 @@ describe("the empty state is the whole of Phase 1", () => {
     expect(html).toContain("benchmark your key stats against other writers");
   });
 
-  /* ⚠️ NO EXCLAMATION MARK, ANYWHERE — nothing else in the app uses one, and the button's label
-     lost the one Nick's original copy carried. */
+  /* ⚠️ NO EXCLAMATION MARK, ANYWHERE — nothing else in the app uses one. Originally this also
+     pinned the share button's label (which had lost the exclamation Nick's first copy carried);
+     the button is gone, so the rule now stands on the sentence alone. */
   it("⚠️ the tile's prose carries no exclamation mark", () => {
     expect(COMMUNITY_EMPTY).not.toContain("!");
-    expect(html).toContain("Spread the word");
-    expect(html).not.toContain("Spread the word!");
+    expect(html).not.toContain("!");
   });
 
   it("the band carries the title and the BETA chip", () => {
@@ -114,6 +114,25 @@ describe("the tile fills a row it does not size", () => {
     const body = cssRules.slice(at, cssRules.indexOf("}", at));
     expect(body).toContain("align-items: center");
     expect(body).toContain("justify-content: center");
+    /* ⚠️ AND NO COMPENSATION — this is what makes the centring survive a child being removed. When
+       the share button went, the reflex fix is a `margin` or `padding-bottom` here to "balance"
+       the remaining pair; that re-creates the off-centre the deleted spacer caused, with nothing
+       left to point at. Centring centres what it contains — asserted, so the reflex fails here. */
+    expect(body).not.toContain("margin");
+    expect(body).not.toMatch(/padding-(top|bottom)/);
+  });
+
+  /* ⚠️ TWO CHILDREN, AND THAT IS THE TILE. Seedling and sentence — the count is the invariant the
+     centring rests on, since anything re-added lands inside the same centred column and shifts
+     both. Asserted against RENDERED output rather than source, so a conditional that smuggles a
+     third child back in at runtime fails here too. */
+  it("⚠️ the hero is the seedling and the sentence, nothing else", () => {
+    const at = html.indexOf('class="os-commbody"');
+    expect(at, "the body must exist to count its children").toBeGreaterThan(-1);
+    const body = html.slice(at);
+    expect(body).toContain("os-commseed");
+    expect(body).toContain("os-commempty");
+    expect((body.match(/<(img|p|button|a|div|span)\b/g) ?? []).length).toBe(2);
   });
 
   /* ⚠️ THE PLATE IS EXTENDED, NEVER DUPLICATED. The band rendered a bespoke `.os-commic` span —
@@ -136,17 +155,27 @@ describe("the tile fills a row it does not size", () => {
     expect(cssRules.slice(at, cssRules.indexOf("}", at))).toContain("width: 84px");
   });
 
-  /* ⚠️ INERT MEANS `disabled`, NOT A SILENT NO-OP. An enabled button with no handler looks live
-     and does nothing — the pack forbids exactly that, and Phase 2 drops the attribute. */
-  it("⚠️ the share button is disabled in Phase 1, with no placeholder handler", () => {
+  /* ⚠️ INVERTED (Nick's call): the tile carries NO CONTROL AT ALL. It was a disabled "Spread the
+     word" pill awaiting Phase 2 wiring; it is removed, so the assertion flips from "the button is
+     inert" to "there is no button" — and it holds for both shapes, since a disabled control and an
+     enabled one are equally forbidden now. The tile is a statement, not a call to action.
+
+     ⚠️ THE RULES GO WITH THE ELEMENT. `.os-commshare` is asserted absent from the SHEET too: this
+     file has watched three deleted nodes (`.os-commic`, `.os-commfoot`, this) and orphaned styling
+     is how each of them would come back — the next person to add markup finds it pre-styled and
+     reads that as intent. */
+  it("⚠️ the share button is gone — element and rules together, with no handler left behind", () => {
     const src = readFileSync(resolve(__dirname, "./OneScreenCommunity.tsx"), "utf8");
-    expect(html).toContain("disabled");
+    expect(html).not.toContain("<button");
+    expect(html).not.toContain("Spread the word");
+    expect(html).not.toContain("os-commshare");
+    expect(cssRules).not.toContain(".os-commshare");
     /* ⚠️ COMMENT-STRIPPED — the tombstone trap, hit by this test's first draft: the TODO beside
-       the button explains that an enabled control with no `onClick` is the forbidden shape, and
-       the guard caught its own explanation. */
+       the button explained that an enabled control with no `onClick` is the forbidden shape, and
+       the guard caught its own explanation. The prose still names the control, so the strip stays. */
     const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
     expect(code).not.toContain("onClick");
-    expect(src).toContain("TODO(phase-2)");
+    expect(code).not.toContain("button");
   });
 
   /* ⚠️ ONE DECLARATION FOR BOTH ROWS — the spine. Two matched pairs of numbers drift; one rule
