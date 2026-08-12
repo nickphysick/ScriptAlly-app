@@ -52,6 +52,38 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
     btnH: [...new Set([...inner.querySelectorAll("button, a[role='button'], [class*='btn'], [class*='chip']")]
       .filter((el) => el.getBoundingClientRect().height > 0)
       .map((el) => r(el.getBoundingClientRect().height)))].sort((x, y) => x - y),
+    /* ⚠️ THE CHAIN FROM THE SCROLL ROW TO THE CONTENT — anything declaring a width, a cap, an auto
+       margin or a side padding between them is a page re-doing the grid's job. Query Centre's
+       frame did exactly that through a `calc` that named the shared token, so its content sat
+       160px in from each edge against every other page's 80. */
+    chain: (() => {
+      const out: string[] = [];
+      let el = sc.firstElementChild as HTMLElement | null;
+      for (let i = 0; el && i < 3; i += 1) {
+        const c = getComputedStyle(el);
+        const bad: string[] = [];
+        if (c.maxWidth !== "none") bad.push(`maxW ${c.maxWidth}`);
+        if (c.marginLeft === "auto" || c.marginRight === "auto") bad.push("auto margin");
+        /* ⚠️ A BORDERED BOX'S PADDING IS ITS OWN, AND THAT IS A REAL DISTINCTION RATHER THAN AN
+           EXEMPTION FOR THE PAGE THAT FAILED. Query Centre's `.f12-body` draws the workspace
+           hairline; its 22px is the space between that line and the panes inside it, the same as
+           any card's padding. What the rule is against is a BARE wrapper that insets its children
+           — the shape that pays the gutter a second time, invisibly, because nothing is drawn at
+           the edge to show where the inset came from. A frame you can see is not that. */
+        const framed = parseFloat(c.borderLeftWidth) > 0 || c.backgroundImage !== "none"
+          || (c.backgroundColor !== "rgba(0, 0, 0, 0)" && c.backgroundColor !== "transparent");
+        if (!framed && c.paddingLeft !== "0px") bad.push(`padL ${c.paddingLeft}`);
+        if (!framed && c.paddingRight !== "0px") bad.push(`padR ${c.paddingRight}`);
+        if (bad.length) out.push(`${el.className.toString().slice(0, 22)}: ${bad.join(", ")}`);
+        el = el.firstElementChild as HTMLElement | null;
+      }
+      return out;
+    })(),
+    /* the content's own left edge, so a double gutter shows as a number rather than as a rule */
+    contentL: (() => {
+      const first = sc.firstElementChild as HTMLElement | null;
+      return first ? r(first.getBoundingClientRect().left - sb.left) : -1;
+    })(),
     /* anything inline with the title — PRO pills, badges — by font size */
     pillFs: [...new Set((title ? [...title.querySelectorAll("*")] : [])
       .filter((el) => el.getBoundingClientRect().height > 0)
@@ -124,6 +156,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
         restCardH: rest.headerH, workCardH: work!.headerH,
         restBtn: rest.btnH.join("|") || "—", workBtn: work!.btnH.join("|") || "—",
         restPill: rest.pillFs.join("|") || "—", workPill: work!.pillFs.join("|") || "—",
+        contentL: rest.contentL, chain: rest.chain.join(" · ") || "clean",
         backToRest: !back!.working,
         offCentre: rest.offCentre.length + work!.offCentre.length,
         overflowRest: rest.overflow, overflowWork: work!.overflow,
@@ -201,6 +234,23 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     }
     const pills = [...new Set(scrollers.filter((x) => x.workPill !== "—").map((x) => String(x.workPill)))];
     expect(pills.length, `pills scale to different sizes across pages: ${JSON.stringify(scrollers.map((x) => [x.page, x.workPill]))}`).toBeLessThan(2);
+
+    /* ⚠️ NOTHING BETWEEN THE SCROLL ROW AND THE CONTENT RE-DECLARES GEOMETRY. §4's chain rule,
+       measured rather than read: the grid pays the gutter once, and a page that pays it again is
+       narrower than every other page while its CSS names the correct token. */
+    for (const r of all) {
+      expect(r.chain, `${r.page}: something between the scroll row and the content declares its own width — ${r.chain}`).toBe("clean");
+    }
+    /* ⚠️ `-1` MEANS "NO CONTENT AT ALL", NOT "AN EDGE OF -1". Analytics renders `{null}` into row
+       3 — a placeholder that deliberately shows nothing rather than plausible-looking figures — so
+       it has no first child to measure. Comparing its sentinel against nine real edges failed on
+       the one page whose emptiness is the point. It is excluded by that sentinel and not by name,
+       so any page that loses its content is excluded too — which is why the count is asserted. */
+    const withContent = all.filter((x) => x.contentL !== -1);
+    expect(withContent.length, "more than one page has no content in its scroll row — one is the Analytics placeholder; a second is a page that failed to render")
+      .toBe(all.length - 1);
+    expect([...new Set(withContent.map((x) => String(x.contentL)))],
+      `the content's left edge differs across pages: ${JSON.stringify(withContent.map((x) => [x.page, x.contentL]))}`).toHaveLength(1);
 
     /* ⚠️ THE TASKS VIEWPORT LOCK: the frame is a window and NEVER scrolls — all scrolling belongs
        to the internal `.tpl-zone`s. It leaked once: `.tpl-cols` says `flex: 1; min-height: 0`,

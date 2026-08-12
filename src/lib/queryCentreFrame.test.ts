@@ -79,24 +79,36 @@ describe("the workspace frame", () => {
     expect(body, "hairline only — a shadow would make it a card inside a card").not.toContain("box-shadow");
   });
 
-  /* The frame insets by exactly one --sa-col-gut a side, at EVERY width — the same token the
-     header pads by, so the two track each other through the narrow step (where the gutter drops
-     to 16px) instead of being kept in step by hand.
-     ⚠️ IT MUST NOT CAP. It briefly carried `max-width: var(--sa-col-max)` to align with the
-     title, which worked and cost the margin: capped-and-centred, the inset is half the surplus,
-     so it read 60px at a 1026px sheet, 87px at 1414 and ~230px at 1700 — browser-measured
-     against the built CSS. Alignment holds only while the sheet is under the header's own
-     1360px cap (measured deltas: 0 at 1026, 27px at 1414, 170px at 1700). A constant margin was
-     the choice; do not reinstate the cap to recover the alignment without re-taking that call. */
-  it("insets by one gutter at every width, and never caps", () => {
-    const body = rule(f12, ".f12-body");
+  /* ⚠️ THE FRAME STATES NO INSET OF ITS OWN, AND THAT REVERSES THIS CASE'S WHOLE PREMISE. It read
+     "insets by exactly one --sa-col-gut a side, at EVERY width — the same token the header pads
+     by, so the two track each other" — which was true of the token and false of the result. The
+     page lives inside `.wpg-scroll`, which already carries `padding-inline: var(--content-gutter)`
+     on all ten pages, so a second inset here put Query Centre's working area 80px narrower a side
+     than every other page's. Naming the shared token is not the same as sharing the gutter.
+     The tracking the old note wanted is now structural: the header row and this frame are children
+     of the same padded row, so they share an edge without either stating a number.
+     ⚠️ NO CAP, unchanged — a cap makes the margin a share of the surplus (60px at a 1026px sheet,
+     ~230px at 1700, browser-measured). And no AUTO MARGINS: at `width: 100%` they resolve to zero,
+     so they are merely dead — but a dead auto margin is how a cap returns unnoticed, since the
+     centring it needs is already in place. */
+  it("fills the scroll row, states no inset of its own, and never caps", () => {
+    /* ⚠️ COMMENT-STRIPPED. The rule's own explanatory note NAMES `--sa-col-gut` — it exists to say
+       why the token is not read here — and the assertion matched the prose describing the retired
+       token. Third time in this repo: `position: sticky` in a shell comment, `closeCreate()`
+       quoted in a test, and now this. A rule about code is asserted against code. */
+    const code = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
+    const body = code(rule(f12, ".f12-body"));
     expect(body, "the frame is back on its own width system").not.toContain("var(--maxw)");
     expect(body, "a cap makes the margin grow with the window").not.toContain("max-width:");
-    expect(body).toContain("width: calc(100% - 2 * var(--sa-col-gut))");
+    expect(body, "the frame re-declared a side inset — the scroll row already pays the gutter")
+      .not.toContain("--sa-col-gut");
+    expect(body, "the frame stopped filling the row").toContain("width: 100%");
+    expect(body, "an auto margin returned — dead at 100% width, and the seat a cap comes back into")
+      .not.toContain("auto");
   });
 
   it("the vertical rhythm is untouched by the inset", () => {
-    expect(rule(f12, ".f12-body")).toContain("margin: 22px auto 26px");
+    expect(rule(f12, ".f12-body")).toContain("margin: 22px 0 26px");
     expect(rule(f12, ".f12-body")).toContain("padding: 20px 22px");
   });
 

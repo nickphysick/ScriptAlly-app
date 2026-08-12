@@ -210,12 +210,21 @@ describe("the three-row grid — chrome outside the scroller", () => {
       ["Comparable titles", "components/manuscripts/comps.css"],
       ["Discover", "components/agents/discover.css"],
       ["Submission packages", "components/packages/packageWorkshop.css"],
+      /* ⚠️ QUERY CENTRE JOINED THE CENSUS LAST, and it was the alias's only caller. */
+      ["Query Centre", "components/shell/f12.css"],
     ];
     for (const [page, file] of PAGES) {
       const pageCss = readFileSync(resolve(__dirname, "../..", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
       expect(pageCss, `${page} still declares --wpg-cap — the cap token is retired`).not.toContain("--wpg-cap");
       expect(pageCss, `${page} still declares --pg-gut — the gutter is the grid's, declared once`).not.toContain("--pg-gut:");
       expect(pageCss, `${page} reads --sa-col-max, which no longer exists — its width resolves to nothing`).not.toContain("--sa-col-max");
+      /* ⚠️ AND `--sa-col-gut`, WHICH WAS THE MORE DANGEROUS OF THE TWO. It resolved to
+         `--content-gutter`, so a rule reading it looked like it was sharing the shared gutter —
+         while in fact adding a second one on top of the scroll row's, which already pays it.
+         Query Centre's working frame was 80px narrower a side than every other page's for that
+         reason, through a `calc` that named the right token. A retired alias that still
+         evaluates is worse than one that breaks: nothing goes wrong loudly. */
+      expect(pageCss, `${page} reads --sa-col-gut — the alias is retired; the scroll row already pays the gutter`).not.toContain("--sa-col-gut");
     }
   });
 

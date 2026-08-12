@@ -31,9 +31,11 @@
  * prose and gives the arithmetic that only 120 satisfies, so the reasoned value in prose wins over
  * the unreasoned one in the artefact — the same call already recorded for `--wsh-plate-bg-scrolled`.
  *
- * ⚠️ `--sa-col-max` AND `--sa-col-gut` ARE GONE, and `--sa-col-gut` survives here ONLY as an alias
- * pointing at the gutter, because Query Centre's `.f12-*` column still reads it and converts later
- * in this pack. When it does, the alias goes with its last caller. Nothing new may read it.
+ * ⚠️ `--sa-col-max` AND `--sa-col-gut` ARE BOTH GONE, and the alias was worse than the token it
+ * replaced. It was kept one pass longer so Query Centre's `.f12-*` column could convert without a
+ * rename in the same commit — but reading `--sa-col-gut: var(--content-gutter)` made that page's
+ * rules LOOK like they were sharing the gutter while they were in fact adding a second one on top
+ * of the scroll row's. An alias that resolves to the right value can still say the wrong thing.
  */
 :root {
   --content-gutter: 80px;
@@ -45,8 +47,6 @@
      ⚠️ IT DOES NOT CHANGE WHEN THE HEADER STRIPS. The gap is the distance from the boundary to
      the content, and the boundary does not move — only what is above it does. */
   --content-top-gap: 20px;
-  /* LEGACY ALIAS — Query Centre only. Delete with the `compact` variant. */
-  --sa-col-gut: var(--content-gutter);
 }
 
 .svh { margin-bottom: 26px; }

@@ -73,11 +73,9 @@
    (.f12-body); that differential is exactly the ref's Guides view, not an accident. */
 /* Query Centre (ref design-refs/query-centre-final.html): ~30px of air above the title, and the
    header block owns its own bottom spacing. The compact masthead's own 12px sits inside this. */
-/* ⚠️ UNCAPPED (header spec §1). `--sa-col-max` is retired app-wide — the column is the window
-   minus the content gutter, like every other page. Query Centre still reads `--sa-col-gut`,
-   which is now an alias for `--content-gutter`; both go when this page converts. */
-.f12-hd2 { flex: none; width: 100%; margin: 0 auto; padding: 18px var(--sa-col-gut) 0; }
-.f12-hd2 .svh { margin-bottom: 0; }
+/* ⚠️ `.f12-hd2` IS DELETED — the grid's header row replaced the element when this page converted,
+   and the rule outlived it. A rule for markup nobody renders is not inert: the next person reading
+   this file learns a layout the page does not have. */
 
 /* asymmetric vertical padding (more on top) drops the buttons toward the content below rather
    than centring them mid-bar — they were reading closer to the breadcrumb than the panes.
@@ -967,7 +965,12 @@
 .f12-quick button:hover { color: var(--ink); border-color: var(--muted); background: var(--paper); }
 
 /* active-filter chips — beneath the control bar, on the oat (the panes never resize) */
-.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; margin: 0 auto; padding: 0 var(--sa-col-gut) 9px; }
+/* ⚠️ NO SIDE PADDING AND NO AUTO MARGIN — the scroll row already paid the gutter. Everything in
+   here is inside `.wpg-scroll`, which carries `padding-inline: var(--content-gutter)` on all ten
+   pages; a second gutter on the page's own elements inset Query Centre's content TWICE, to 160px
+   against every other page's 80. The alias made that invisible: `--sa-col-gut` resolved to
+   `--content-gutter`, so the rule read as though it were sharing the token it was doubling. */
+.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; padding: 0 0 9px; }
 .f12-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.07em; padding: 4px 5px 4px 10px; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); border-radius: 99px; }
 .f12-chip button { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; color: inherit; opacity: 0.6; }
 .f12-chip button:hover { opacity: 1; background: rgba(138, 64, 48, 0.12); }
@@ -982,20 +985,15 @@
    of growing it (see .ws-work--fit for the other half of that chain). ── */
 .f12-body {
   flex: 1; display: flex; gap: var(--gut); min-height: 0;
-  /* ⚠️ THE FRAME'S OUTER EDGE IS THE HEADER'S INNER EDGE — alignment is STRUCTURAL, not a
-     matched number. The frame reads the header's own column tokens (--sa-col-max / --sa-col-gut),
-     so its left border lands on the "Query Centre" title's left edge and its right border on the
-     Export/Log query buttons' right edge, at every breakpoint including the narrow step where
-     --sa-col-gut drops to 16px. It previously used --maxw (1520px) with no inset, which is why
-     the hairline ran to the sheet's edges. Vertical margins are untouched. */
-  /* ⚠️ NO CAP — the inset is a constant, not a share of the leftover. With `max-width` the frame
-     capped at --sa-col-max and CENTRED, so past ~1360px of sheet the margins stopped being the
-     gutter and became half the surplus: 87px at 1440, ~280px at 1800. The frame is now simply the
-     sheet minus one gutter each side, at every width.
-     THE TRADE, deliberate: the header column still caps and centres, so past that width the frame
-     is WIDER than the header and the title/buttons sit inside its edges rather than on them —
-     the old workspace differential, but inset by the gutter instead of running to the sheet. */
-  width: calc(100% - 2 * var(--sa-col-gut)); margin: 22px auto 26px;
+  /* ⚠️ THE FRAME FILLS THE SCROLL ROW — it does not inset itself, and the note that stood here
+     explaining WHICH inset it used was describing the bug. The row already carries
+     `padding-inline: var(--content-gutter)`, so `calc(100% - 2 * var(--sa-col-gut))` bought a
+     SECOND gutter and put this page's working area 80px narrower a side than every other page's.
+     Alignment with the header is structural for the same reason it is on the other nine: both are
+     children of the same padded row, so they share an edge without either naming a number.
+     ⚠️ NO AUTO MARGINS. At `width: 100%` they resolve to zero, so they are merely dead — but a
+     dead auto margin is how a cap comes back unnoticed, because it is already there to centre it. */
+  width: 100%; margin: 22px 0 26px;
   padding: 20px 22px;
   border: 1px solid var(--line); border-radius: 18px;
 }

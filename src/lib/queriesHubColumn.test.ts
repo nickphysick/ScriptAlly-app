@@ -43,15 +43,23 @@ describe("Queries hub · the header block sits in the SHARED content column", ()
      content gutter, on every page, so Query Centre and the agent list line up by sharing the
      GUTTER rather than by sharing a cap. Asserting the cap would fail correctly and read as a
      regression.
-     ⚠️ `--sa-col-gut` SURVIVES HERE AS AN ALIAS FOR `--content-gutter`, and only until this page
-     converts to the grid — at which point both it and these two rules go. That is why the gutter
-     half of the lock is kept and sharpened rather than dropped: it is the thing still doing the
-     aligning. */
-  for (const sel of [".f12-hd2", ".f12-chips"]) {
-    it(`${sel} shares the content gutter, and states no cap of its own`, () => {
+     ⚠️ AND THE GUTTER HALF IS WITHDRAWN TOO, one pass later. It asserted that these rules read
+     `--sa-col-gut` — "the thing still doing the aligning" — which was exactly backwards: the page
+     sits inside `.wpg-scroll`, which already carries `padding-inline: var(--content-gutter)`, so
+     naming the gutter again bought a SECOND one and made Query Centre's content 160px inset a
+     side against every other page's 80. The lock was pinning the fault in place, and it read as
+     correct because the alias resolved to the right token. Alignment is structural now: both the
+     header row and the content are children of the same padded row.
+     ⚠️ `.f12-hd2` IS GONE FROM THE LIST — the grid's header row replaced the element; the rule
+     outlived the markup by a pass. */
+  for (const sel of [".f12-chips"]) {
+    it(`${sel} states no gutter and no cap of its own — the scroll row pays both`, () => {
       const rule = block(sel);
       expect(rule, `${sel} is missing from f12.css`).not.toBe("");
-      expect(rule, `${sel} lost the shared gutter — Query Centre's header stops lining up with every other page`).toContain("var(--sa-col-gut)");
+      expect(rule, `${sel} re-declared a side gutter — the scroll row already pays it, so the content insets twice`)
+        .not.toContain("--sa-col-gut");
+      const pad = /padding\s*:\s*([^;]*)/.exec(rule)?.[1]?.trim() ?? "";
+      expect(["0 0 9px", "0"], `${sel}'s padding names a side value: "${pad}"`).toContain(pad);
       expect(
         rule,
         `${sel} took a max-width — widths are relationships now, and a cap here re-creates the centred column whose scrollbar ate the content`,
@@ -79,13 +87,31 @@ describe("Queries hub · the header block sits in the SHARED content column", ()
      one gutter. THE COST, measured and accepted: past a 1360px sheet the header still caps
      while the frame does not, so the title sits INSIDE the frame's edge — 27px at 1414, 170px
      at 1700. Alignment at every width and a constant margin cannot both hold; the margin won. */
-  it("the WORKSPACE insets by one gutter and does NOT cap — a constant margin, not centring", () => {
-    const body = block(".f12-body");
+  /* ⚠️ THE FRAME STATES NO INSET OF ITS OWN, AND THAT REVERSES THIS CASE'S WHOLE PREMISE. It read
+     "insets by exactly one --sa-col-gut a side, at EVERY width — the same token the header pads
+     by, so the two track each other" — which was true of the token and false of the result. The
+     page lives inside `.wpg-scroll`, which already carries `padding-inline: var(--content-gutter)`
+     on all ten pages, so a second inset here put Query Centre's working area 80px narrower a side
+     than every other page's. Naming the shared token is not the same as sharing the gutter.
+     The tracking the old note wanted is now structural: the header row and this frame are children
+     of the same padded row, so they share an edge without either stating a number.
+     ⚠️ NO CAP, unchanged — a cap makes the margin a share of the surplus (60px at a 1026px sheet,
+     ~230px at 1700, browser-measured). And no AUTO MARGINS: at `width: 100%` they resolve to zero,
+     so they are merely dead — but a dead auto margin is how a cap returns unnoticed, since the
+     centring it needs is already in place. */
+  it("the WORKSPACE fills the scroll row — no second gutter, no cap, no auto margin", () => {
+    /* ⚠️ COMMENT-STRIPPED. The rule's own explanatory note NAMES `--sa-col-gut` — it exists to say
+       why the token is not read here — and the assertion matched the prose describing the retired
+       token. Third time in this repo: `position: sticky` in a shell comment, `closeCreate()`
+       quoted in a test, and now this. A rule about code is asserted against code. */
+    const code = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
+    const body = code(block(".f12-body"));
     expect(body, "the frame went back to its own wider cap").not.toContain("var(--maxw)");
     expect(body, "a cap turns the margin back into a share of the surplus")
       .not.toContain("max-width:");
-    expect(body, "the inset must read the header's gutter, not a hand-matched number")
-      .toContain("width: calc(100% - 2 * var(--sa-col-gut))");
+    expect(body, "the frame re-declared a side inset — the scroll row already pays the gutter")
+      .not.toContain("--sa-col-gut");
+    expect(body, "the frame stopped filling the row").toContain("width: 100%");
   });
 
   it("the action row right-aligns; the --listw spacer that locked it to the list pane is gone", () => {
