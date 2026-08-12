@@ -311,7 +311,7 @@ No visual verification. All five surfaces are inside the onboarding flow, which 
 
 ## Phase 3 — delete the legacy tail
 
-**Commit:** _(hash in the next log commit)_
+**Commit:** `2a5b3d8`
 **Gates:** tsc **0** · build **✓** · Vitest **258 files, 4228 passed | 2 skipped (4230)**
 `Onboarding.tsx` 1288 → 681 lines.
 
