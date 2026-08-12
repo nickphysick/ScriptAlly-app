@@ -67,14 +67,34 @@ export interface WorkspacePageGridProps {
   className?: string;
   /** Accessible name for the scroll region, when the page has one worth stating. */
   scrollLabel?: string;
+  /**
+   * ⚠️ THE MODE HALF OF THE WORKING STATE (spec §4). The strip means the user is WORKING rather
+   * than browsing. On a scrolling page, scrolling is the proxy for that — the sentinel reports it.
+   * On a workspace page nothing scrolls, and the real signal is entering a journey: Query Centre
+   * strips on `log a query` and on `record a response`, and returns on leaving.
+   *
+   * ⚠️ THE UNION IS TAKEN HERE, AND THE HEADER NEVER LEARNS WHICH HALF FIRED. It receives one
+   * boolean through context, so a page cannot grow a second way of being condensed and the header
+   * cannot start behaving differently depending on why.
+   *
+   * ⚠️ NEVER SYNTHESISE A SCROLL SIGNAL TO GET THIS. A non-scrolling page that fakes a scroll
+   * position to make itself strip has two sources of truth for one state and no way to reconcile
+   * them. Pages that neither scroll nor open a journey keep the card permanently, and that is
+   * correct rather than a gap.
+   */
+  condensed?: boolean;
 }
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  plate, toolbar, children, className, scrollLabel,
+  plate, toolbar, children, className, scrollLabel, condensed: condensedByMode = false,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const sentinelRef = React.useRef<HTMLDivElement>(null);
-  const [condensed, setCondensed] = React.useState(false);
+  const [stuck, setStuck] = React.useState(false);
+  /* ⚠️ THE UNION, AND IT IS AN `||` RATHER THAN A PRIORITY. Neither half outranks the other: a
+     journey opened part-way down a scrolled page is still working, and closing it while still
+     scrolled must not restore the card. Everything below reads this one value. */
+  const condensed = stuck || condensedByMode;
 
   /**
    * ⚠️ AN INTERSECTION OBSERVER ON A 1px SENTINEL, NOT A SCROLL LISTENER. The condense is a
@@ -90,7 +110,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     const sentinel = sentinelRef.current;
     if (!root || !sentinel) return;
     const io = new IntersectionObserver(
-      ([entry]) => setCondensed(!entry.isIntersecting),
+      ([entry]) => setStuck(!entry.isIntersecting),
       { root, threshold: 0 },
     );
     io.observe(sentinel);

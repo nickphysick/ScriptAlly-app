@@ -241,6 +241,42 @@ describe("the three-row grid — chrome outside the scroller", () => {
     expect(src, "the context is gone — the plate would have to go looking again").toContain("PlateCondensedContext");
   });
 
+  /**
+   * ⚠️ THE UNION DRIVER (spec §4). `condensed = stuck || mode`, and the point is that the header
+   * never learns which half fired — it takes one boolean through context, so a page cannot grow a
+   * second way of being condensed and the header cannot behave differently depending on why.
+   *
+   * ⚠️ `||`, NOT A PRIORITY. A journey opened part-way down a scrolled page is still working, and
+   * closing it while the page is still scrolled must not restore the card. Either half alone is
+   * sufficient and neither can veto the other.
+   */
+  it("⚠️ the mode half condenses with no scrolling at all", () => {
+    const seen: (boolean | null)[] = [];
+    const Probe: React.FC = () => { seen.push(React.useContext(PlateCondensedContext)); return null; };
+    renderToStaticMarkup(
+      <WorkspacePageGrid plate={<Probe />} condensed>{null}</WorkspacePageGrid>,
+    );
+    /* there is no IntersectionObserver in this environment, so `stuck` can only be false here —
+       which is exactly the case worth locking: the mode alone must be enough */
+    expect(seen[0], "the mode input does not reach the header — a workspace page would never strip, because nothing scrolls on it").toBe(true);
+  });
+
+  it("without the mode, an unscrolled page is at rest", () => {
+    const seen: (boolean | null)[] = [];
+    const Probe: React.FC = () => { seen.push(React.useContext(PlateCondensedContext)); return null; };
+    renderToStaticMarkup(<WorkspacePageGrid plate={<Probe />}>{null}</WorkspacePageGrid>);
+    expect(seen[0], "the grid condenses by default — every page would open in the working state").toBe(false);
+  });
+
+  it("⚠️ the row and the header read ONE value, so they cannot disagree", () => {
+    const html = renderToStaticMarkup(<WorkspacePageGrid plate={<span />} condensed>{null}</WorkspacePageGrid>);
+    expect(html, "row 1 did not take the working class from the mode — the header would flatten inside a row still holding its inset").toContain("wpg-plate--working");
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(src, "the union is not computed in one place — two derivations of one state is how the row and the header come to disagree")
+      .toMatch(/const condensed = stuck \|\| condensedByMode;/);
+    expect((src.match(/setStuck\(/g) ?? []).length, "something other than the observer writes the scroll half — that is a synthesised scroll signal").toBe(1);
+  });
+
   it("⚠️ the context default is `null`, distinguishable from `false`", () => {
     /* `false` would be a plausible default and a plate mounted outside a grid would read it and
        quietly never condense. `null` means "no grid above me", which a consumer can complain about. */
