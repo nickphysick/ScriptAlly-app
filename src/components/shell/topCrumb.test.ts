@@ -99,7 +99,14 @@ describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () 
     expect(queries).toMatch(/className=\{`t-f12 f12-root\$\{/);
     // Amendment 1 (H2): renamed Queries Hub → Query Centre, so nav, crumb and page agree.
     expect(queries).toContain('title="Query Centre"'); // the PageHeader carries the name
-    expect(queries).toContain('variant="full"'); // flyouts P3: the compact variant is retired
+    /* ⚠️  NOW — Query Centre is on the grid, the last of the ten pages to
+       convert. `full` was the flyouts-P3 shape, and `compact` before it; both are retired. */
+    expect(queries).toContain('variant="workspace"');
+    /* ⚠️ COMMENT-STRIPPED, because "compact" appears in this page's PROSE — I wrote this
+       assertion against the raw text and it failed on the notes describing the retired variant,
+       one edit after fixing the identical fault in the anchor scanner. */
+    const code = queries.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code, 'the compact variant came back — it has no callers and is deleted').not.toContain('compact');
     expect(queries.includes('className="qhbar"')).toBe(false);
   });
 

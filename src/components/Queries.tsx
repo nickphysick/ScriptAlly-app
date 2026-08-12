@@ -45,6 +45,7 @@ const RESPONSE_RECEIPT_CHANNEL = "query-response";
 import { pickableManuscripts } from "../lib/lifecycle";
 import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
+import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
 import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, listHeadLabel } from "../lib/queryAmbient";
 import {
@@ -2978,20 +2979,47 @@ export const Queries: React.FC<{
             query, rule beneath. Export runs the existing filtered-CSV handler (the list foot
             keeps its copy for now — same handler, flagged in the report); Log query is the
             existing interception, relocated here from the control bar's left zone. ── */}
-        <div className="f12-hd2">
+        {/* ⚠️ THE GRID, LAST OF THE TEN. Measured before converting: chrome from header-top to
+            pane-top was 116px and becomes 134 (plate 96 + gap 18 + topGap 20), so the panes lose
+            18px — inside the ~20px threshold the spec sets for proceeding.
+            ⚠️ IT STRIPS ON MODE, NOT ON SCROLL. Nothing scrolls at page level here — the list and
+            reading panes scroll internally, so `.wpg-scroll` never moves and the derived state
+            would never fire. `creating || recording` is the union, computed from the two flags
+            that already exist rather than a third boolean; the offer and R&R branches run inside
+            `recording` and strip on the same flag for free.
+            ⚠️ THE MODALS STAY OUTSIDE THE GRID, below it — fixed-position overlays have no
+            business inside the scrollport they cover. */}
+        <WorkspacePageGrid
+          className="qc-wpg"
+          scrollLabel="Query Centre"
+          condensed={creating || recording}
+          plate={
           <PageHeader
-            variant="full"
+            variant="workspace"
+            mark="queries"
             /* The workspace masthead: this page is a fixed-height master–detail surface, so
                header height is working area taken from the panes. The description is KEPT as a
                prop though compact doesn't render it — the copy stays where it lives, so bringing
                it back is a flag flip rather than a hunt. */
-            compact
             /* ⚠️ RENAMED (Amendment 1, H2): "Queries Hub" → "Query Centre". The nav, the crumb
                and the page's own heading must say the same thing — a page whose sidebar entry
                and title disagree makes you check you are where you think you are. */
             title="Query Centre"
             description="Every query you've sent, and exactly where each one stands."
-            actions={queries.length > 0
+            /* ⚠️ A JOURNEY REPLACES THE ACTIONS WITH A SINGLE CLOSE. `Log query` in the strip
+               would start a SECOND journey on top of the open one, and disabling it leaves a dead
+               control where the only useful action belongs. Close reuses the page's own exits —
+               `closeCreate` and `closeRecord`, the same handlers the in-pane Cancel buttons call —
+               so the dirty check, the focus return and the exit choreography are not duplicated. */
+            actions={creating || recording
+              ? [
+                  {
+                    label: "Close",
+                    onClick: () => { if (creating) closeCreate(); else closeRecord(); },
+                    disabled: createSaving || respSaving,
+                  },
+                ]
+              : queries.length > 0
               ? [
                   {
                     label: "Export",
@@ -3018,7 +3046,8 @@ export const Queries: React.FC<{
                   },
                 ]}
           />
-        </div>
+          }
+        >
 
         {/* `&& !creating`: create mode lives in the populated branch, so without this a
             first-run "Log your first query" set a draft that NOTHING rendered — the CTA read as
@@ -4032,6 +4061,7 @@ export const Queries: React.FC<{
         })()}
         </>
         )}
+        </WorkspacePageGrid>
 
         </div>{/* closes the F12 work-area column */}
       </div>{/* closes main container */}

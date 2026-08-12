@@ -1494,3 +1494,7 @@
   background: var(--paper); border-radius: 8px; padding: 9px 12px; margin: 0 0 10px;
   box-shadow: inset 0 0 0 1px var(--hairline);
 }
+
+/* Query Centre's grid: a flex item in the page column, so it takes the remaining height and its
+   row 3 has something definite to divide. Same shape as every other converted page. */
+.qc-wpg { flex: 1; min-height: 0; }
