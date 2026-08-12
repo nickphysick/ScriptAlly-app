@@ -76,6 +76,32 @@ describe("no shell rule reads a token that does not exist", () => {
   // workspaceShell.css and primitives.css are the surfaces that replaced it, and they are held
   // to the same no-raw-hex rule.
   const shellFiles = ["./shellV2.css", "./workspaceShell.css", "./primitives.css", "./accountMenu.css", "./searchPalette.css", "./topNav.css", "./pageHeader.css"];
+  /**
+   * ⚠️ THE THREE TRANSLUCENCY TOKENS ARE RETIRED, AND THIS IS WHAT KEEPS THEM RETIRED.
+   *
+   * `--wsh-plate-bg-scrolled`, `--wsh-plate-blur` and `--wsh-plate-edge-scrolled` gave the
+   * condensed header a frosted fill, from when it overlapped the content it condensed over. It
+   * does not overlap anything: the scroller is the row BENEATH it, so there is nothing behind the
+   * strip to see through, and `backdrop-filter` additionally creates a stacking context — its own
+   * class of bug, already recorded against the illustrated marks.
+   *
+   * ⚠️ THIS LOCK EXISTS BECAUSE THE TOKENS WERE RESTORED ONCE, CORRECTLY. The consumption guard
+   * below requires every `var(--x)` a shell sheet READS to resolve; when `--wsh-plate-*` went
+   * missing while `pageHeader.css` still read them, restoring the definitions was the right fix
+   * for the lock as written. A guard that only checks in one direction cannot tell "deleted by
+   * mistake" from "deleted on purpose", so the direction is stated here instead: these three must
+   * NOT exist. Nothing reads them, and nothing may define them again.
+   */
+  it("⚠️ the header's translucency tokens are GONE, and must not come back", () => {
+    for (const token of ["--wsh-plate-bg-scrolled", "--wsh-plate-blur", "--wsh-plate-edge-scrolled"]) {
+      expect(css, `${token} was reinstated — the strip is opaque and overlaps nothing, so a frosted fill has nothing to frost`)
+        .not.toContain(`${token}:`);
+    }
+    const hdr = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(hdr, "a backdrop-filter came back onto the header — it frosts nothing and creates a stacking context")
+      .not.toContain("backdrop-filter");
+  });
+
   it("every var(--x) in the shell stylesheets resolves to a definition", () => {
     const defined = new Set<string>();
     for (const m of css.matchAll(/(--[a-z0-9-]+)\s*:/gi)) defined.add(m[1]);

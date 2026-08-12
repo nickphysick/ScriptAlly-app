@@ -255,9 +255,6 @@
   box-sizing: border-box;
   background: none;
 }
-/* ⚠️ CONDENSED. `backdrop-filter` is what makes the plate read as glass over moving content — and
-   it CREATES A STACKING CONTEXT, which is why the illustrated mark's `mix-blend-mode` has to be
-   verified in this state rather than assumed (see the mark rules below). */
 /**
  * ⚠️ THE WORKING STATE IS A STRIP, NOT A SMALLER CARD (spec §2, ref 84). Everything that made the
  * header an OBJECT goes at once — border, radius, shadow — and the row it sits in loses its inset,
