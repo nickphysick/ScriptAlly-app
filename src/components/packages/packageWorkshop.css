@@ -92,10 +92,13 @@
    A sibling block beneath PageHeader, never inside it: PageHeader draws title +
    description + its own closing rule, and has no tabs slot (nor a meta slot — the
    header law). Playfair, burgundy underline on the active tab. */
+/* ⚠️ THE `-8px` TUCK IS GONE, AND ITS COMMENT SAID WHAT IT WAS FOR: "tuck under PageHeader's own
+   rule". That rule no longer exists — the header is a plate, and at rest its bottom edge is 20px
+   away — so the negative margin was pulling the tab row up into a gap for no reason. Same page and
+   same assumption as `.pkgw-strip` above; found by sweeping for the shape rather than the symptom. */
 .pkgw-tabs {
   display: flex;
   gap: 22px;
-  margin-top: -8px;               /* tuck under PageHeader's own rule */
   border-bottom: 1px solid var(--pkg-linesoft);
   flex: none;
 }
@@ -548,10 +551,29 @@
 .pkgw-ctl svg { width: 14px; height: 14px; color: var(--pkg-muted); }
 
 /* The Pro claim strip — hangs off the rule, so the two read as one block. */
+/**
+ * ⚠️ A COMPLETE FRAME, UNCONDITIONALLY — it is a notice card, not a lid.
+ *
+ * It carried `border-top: 0` and `border-radius: 0 0 12px 12px`: drawn to tuck into the bottom of
+ * a bordered header card. MEASURED at rest on dev, it does not tuck into anything — the header's
+ * bottom edge is 20px above it (`--content-top-gap`) and the strip runs 105px WIDER on each side,
+ * because content takes the gutter while the header takes gutter + inset. So it was a lidless box
+ * with two square corners floating below a card it was never aligned with.
+ *
+ * ⚠️ AND IT LOOKED LIKE A BROKEN HEADER. Once the header strips — losing its own border and radius
+ * — this band was the nearest thing with a frame and a paragraph in it, so the page read as "the
+ * header is taller, still bordered, still showing its description" while the header itself
+ * measured a correct 52px with `wsh--scrolled` applied. Reported as a header fault three times;
+ * every measurement of the header was right and pointed at the wrong element.
+ *
+ * ⚠️ NO STATE-DEPENDENT RULES HERE, DELIBERATELY. Content must not restyle on chrome state: the
+ * strip is identical whether the header is a card or a strip, which is what stops it reading as
+ * part of the chrome at all.
+ */
 .pkgw-strip {
   display: flex; align-items: center; gap: 11px;
-  background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3); border-top: 0;
-  border-radius: 0 0 12px 12px; padding: 11px 16px;
+  background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3);
+  border-radius: 12px; padding: 11px 16px;
 }
 .pkgw-strip .sh { width: 20px; height: 20px; color: var(--slate); flex: none; }
 .pkgw-strip .stx { font-size: 12px; color: var(--pkg-ink-soft); line-height: 1.5; }
