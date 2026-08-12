@@ -737,3 +737,162 @@ The dashboard tour's 1024px suppression, as instructed.
 **No visual verification at any width.** The locks assert that the rules exist and that the static
 path is reused; they cannot tell you the screens look right on a phone. **Everything in this phase
 needs an eyeball at ~375px.**
+
+---
+---
+
+# Phase 9 — final report
+
+**All eight phases landed. No phase was reverted.** Run base `efc123d` → HEAD `9b8b18c`.
+
+## 1 · Gates, baseline versus final
+
+| Gate | Baseline | Final | Delta |
+|---|---|---|---|
+| `npx tsc --noEmit` | 0 errors | **0 errors** | — |
+| `npm run build` | exit 0 | **exit 0** | — |
+| Vitest — files | 256 passed | **262 passed** | +6 |
+| Vitest — tests | 4201 passed \| 2 skipped | **4306 passed \| 2 skipped** | **+105** |
+
+**Nothing was made worse.** No test was weakened or deleted to make a phase pass; the only removed
+tests are the two `/pricing` smokes and one `#/notes-scan` dev-surface smoke, whose subjects were
+deleted, and both are more than replaced.
+
+**⚠️ One suite in this repo did not run here: the Firestore rules tests** (`npm run test:rules`)
+need the emulator, and this environment has no Java. **Nine rules assertions are committed and
+unexecuted** — five for the `plan` guard, four pre-existing ones touched by the `journeyStage`
+removal. They run in CI; watch the first push.
+
+## 2 · Commits
+
+| Phase | Commit | What landed |
+|---|---|---|
+| 1 | **`b42df4f`** | `plan` no longer client-writable; `/pricing` sandbox, both destructive `/import` panels and the ungated `#/notes-scan` deleted |
+| 2 | **`79e0bca`** | Six claims the code could not back |
+| 3 | **`2a5b3d8`** | The legacy onboarding tail deleted, not repaired |
+| 4 | **`7c1d439`** | `journeyStage` deleted; `queryingStage` given a real reader |
+| 5 | **`b0baaf5`** | Public `/pricing` rebuilt; `/terms` and `/privacy` as real routes |
+| 6 | **`c3df9e7`** | Form 11 retired from onboarding; one card, app tokens |
+| 7 | **`67ffeb1`** | Review-shell rim deleted; band carries state; identity line (**partial phase**) |
+| 8 | **`82bedc1`** | Mobile floor |
+
+Plus seven one-line `docs(run-log)` commits recording each hash (amending the hash into its own
+commit changes that hash, so the log entry follows it).
+
+## 3 · ⚠️ DEPLOY INSTRUCTION
+
+**`firestore.rules` changed in TWO commits — `b42df4f` (the `plan` guard) and `7c1d439`
+(`journeyStage` removed from `isValidUser` and the update allowlist).**
+
+This ships as:
+
+```bash
+firebase deploy --only firestore:rules,hosting --project scriptally-dev
+```
+
+**not hosting alone.** Deploying hosting without the rules leaves the `plan` hole open on live data
+while the client that exploited it is gone — the hole is the part that matters, and it is the rules
+that close it. (Dev target shown; prod is yours, and per the house rule every deploy names its
+project explicitly.)
+
+## 4 · The two Phase 7e questions
+
+**1. Does `ReconcileCard` let the user choose which record survives a merge? — YES.**
+`src/components/onboarding/ReconcileCard.tsx`: `:52` `defaultKeptId` ("engine-derived current row's
+id → pre-selected on mount"); `:82` `const [selectedId, setSelectedId] = useState(defaultKeptId)`
+with "clicking a row re-selects (working state only)"; `:326` `const isSelected = row.id ===
+selectedId`; `:344` a burgundy left bar marks it; `:304` commits `onLooksRight(selected.id)`.
+Per the pack I logged the design decision rather than half-building it: the affordance exists and
+works, but wears the **old burgundy** selection treatment, not the sage grammar now used by
+`SelectRow` and the upload hero. Restyling it is listed in the un-landed 7d work below.
+
+**2. Does an undated query count as needs-check in `queryStatusOf`? — YES, they overlap.**
+`src/lib/smartImportReviewModel.ts:159-160`: `queryStatusOf` is
+`hasOpenQueryReasons(q) ? "needs-check" : "captured"`, and an undated query carries a `no-date`
+reason (resolved by "Leave undated", `SmartImportReview.tsx:510`). **So: no separate Undated tally
+may be introduced — and none exists to remove.** `SmartImportReview.tsx:1045`'s "Undated" is a
+per-row date label, not a count. The new state band states one number for exactly this reason.
+
+## 5 · Missing illustrated marks (6b)
+
+**Two, and I did not invent them.** The ref's band plate holds an illustrated mark and its own
+markup calls its SVGs placeholders. No illustrated asset exists for either screen —
+`manuscriptMarks.tsx` has five inline SVGs (none a book-setup or inbox mark) and `src/assets/`
+carries the manuscript notebook and shell brand art only.
+
+- **A manuscript / setup mark** → `BookMotif` in `chrome.tsx`
+- **An inbox / import mark** → `InboxMotif` in `chrome.tsx`
+
+Existing monoline glyphs carry the plate meanwhile, recoloured to sage. Each drops in with no other
+change.
+
+## 6 · Decisions this document did not make for me
+
+1. **The `plan` guard is an equality clause, not an allowlist removal** (Phase 1). Removing `'plan'`
+   turned the suite red: a do-not-touch todo test slices `firestore.rules` on a literal containing
+   it. `incoming().plan == existing().plan` achieves the same security, keeps innocent
+   whole-document writes working, and is the better rule on its merits. Full reasoning in the
+   Phase 1 entry.
+2. **Proceeded despite a concurrent session** in the checkout (its changes were confined to
+   do-not-touch paths).
+3. **Filed the four design refs from `~/Downloads`** rather than hard-stopping — they were misfiled,
+   not missing.
+4. **Deleted `/import`'s read-only `user` grid tab** alongside the `user` import type (its type
+   union no longer admitted it).
+5. **Extracted `confirmFileLead` / `overviewLead` as pure functions** so the sentences could be
+   tested at all.
+6. **Kept `queryingStage`'s session fallback** behind the stored value, because onboarding's writes
+   are deliberately non-blocking and there is a real propagation window.
+7. **Priced Pro as "Price to be confirmed"** rather than inventing a number.
+8. **`goPublic()` clears the pre-auth hash** before navigating, or the auth screen re-renders over
+   the page you asked for.
+9. **Deleted the onboarding dot row immediately** rather than shipping a lying one for a phase.
+10. **`normalizeStep` sends every saved step to the welcome** — deletion would otherwise strand a
+    returning writer on a blank full-screen overlay.
+11. **Landed Phase 7 partially and said so**, rather than rushing 7d or landing none of it.
+12. **Kept `compact` for `GuidanceBanner`'s density** while deleting the post-it gate it shared.
+13. **Comment-stripping in absence locks** (`stripComments`, now shared) — three separate locks
+    failed against their own explanatory comments.
+
+## 7 · Fenced or skipped
+
+- **`FocusOverlay`** — fenced by the pack, untouched. It now dims a white window rather than a
+  bordered one; **unverified visually.**
+- **The dashboard tour's 1024px suppression** — untouched, as instructed.
+- **`holding/`, `DashboardDemo.tsx`, `demoTimeline.ts`, `FormPeek.tsx`** — out of scope, untouched.
+- **No do-not-touch file was edited.** The one collision (a `src/components/todo/**` test reading
+  `firestore.rules`) was resolved by changing my own rules shape, not their file.
+- **Two `stripComments` duplicates** remain local to the Phase 2 and 3 test files; consolidating
+  them would mean touching committed phases for a tidy-up.
+
+## 8 · ⚠️ Nothing in this run was visually verified
+
+Every phase note says so individually; it belongs in one place too. The run was headless, and every
+surface this pack touched except `/pricing`, `/terms` and `/privacy` sits behind auth or mid-import,
+which the browser pane cannot reach. **The tests prove absences, derivations and structure. They
+cannot tell you any of it looks right.**
+
+Before this is called done, eyeball on dev:
+
+1. **Onboarding, both branches** — the new card (Phase 6) is a wholesale visual change.
+2. **The Smart Import review** — rim gone, band in its place, identity line in the rows (Phase 7).
+3. **`/pricing`, `/terms`, `/privacy`** — brand-new pages, CSS unreviewed by eye.
+4. **All of the above at ~375px** (Phase 8).
+
+## 9 · Outstanding for launch, beyond this pack
+
+1. **The legal copy is a placeholder** and says so on the page. It must be written — and the
+   **privacy policy must cover Smart Import, the email drop and the comps suggester sending the
+   writer's own content to Anthropic's API.** Nothing on any live surface tells them.
+2. **The rules tests have never been run.** CI, first push.
+3. **The rest of 7d** — record-card surfaces, the materials block, `StatusDot` in query rows, the
+   duplicates pane treatment, `ReconcileCard`'s sage selection.
+4. **Two illustrated marks** (§5).
+5. **No payment path exists.** `/pricing` and `/plans` both say so honestly; a real one is a
+   product decision, and `plan` is now server-only by design.
+6. **The holding page's waitlist Join button is still a stub** — empty handler, counter hardcoded
+   to `0 / 100`, while `functions/src/waitlist.ts` and its rewrite both exist. Out of scope
+   (`holding/` is yours), but it is a dead button on a live public page.
+7. **`ANTHROPIC_API_KEY` rotation** is still unconfirmed (pre-existing, in CLAUDE.md).
+8. **Auth still links "Back to site" to `/`** — fine now, but if `scriptally.ink` is repointed at
+   the holding site that link and the domain will disagree.
