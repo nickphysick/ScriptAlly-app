@@ -33,7 +33,8 @@ export default defineConfig({
   fullyParallel: false,
   reporter: [["list"]],
   /* each measurement signs in — Firebase auth lives in IndexedDB, which storageState cannot carry */
-  timeout: 120_000,
+  /* nine pages, two viewports, a wheel gesture each — the matrix is one long test by design */
+  timeout: 420_000,
   use: {
     baseURL: BASE_URL,
     /**

@@ -99,7 +99,15 @@ const SHELL = ".ws-panel, .ws-work, .ws-window, #app-stage-scroll";
  * changing the app's auth persistence to suit its test harness.
  */
 export async function ensureSignedIn(page: Page) {
-  if (await page.locator(SHELL).first().count()) return;
+  /* ⚠️ WAIT FOR ONE OF THE TWO, DO NOT COUNT IMMEDIATELY. Checking `count()` straight after a
+     `goto` reads a document the app has not rendered into yet, so it always looked signed-out —
+     and then tried to sign in again, on a route that redirects away from the form when the session
+     is live, and hung until the test timed out. Racing the shell against the form settles it. */
+  const settled = await Promise.race([
+    page.locator(SHELL).first().waitFor({ state: "attached", timeout: 15_000 }).then(() => "shell").catch(() => null),
+    page.locator("#au-email").waitFor({ state: "attached", timeout: 15_000 }).then(() => "form").catch(() => null),
+  ]);
+  if (settled === "shell") return;
   const pw = process.env.SA_E2E_PASSWORD ?? passwordFromEnvLocal();
   if (!pw) throw new Error("No SA_E2E_PASSWORD — see tests/e2e/auth.setup.ts");
   await page.goto("/#/signin");
