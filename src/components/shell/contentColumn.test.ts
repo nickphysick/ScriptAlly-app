@@ -90,18 +90,18 @@ describe("no competing per-page cap survives (folded into the wrapper)", () => {
    * the one lives. The old bespoke 1150px must still never come back — that was a THIRD value, and
    * the assertion against it is kept verbatim.
    */
-  it("manuscripts .msv-wrap carries the ONE cap — tied to the read token, never the old bespoke 1150", () => {
-    expect(msv, "the bespoke 1150px cap came back — it is a third value that agrees with neither the read cap nor the gutter").not.toContain("max-width: 1150px");
-    /* ⚠️ RETARGETED AGAIN, AND UP A LEVEL (amendment 9). The cap was on `.msv-wrap`; it is on the
-       GRID ROOT now, where it governs the plate, the toolbar and the shelf at once — so the three
-       cannot disagree, which capping only the content could never guarantee. Still the same
-       expression: the read cap minus this page's own gutter, never a literal. */
-    expect(
-      msv,
-      "the content cap left the grid root — nothing else caps now, and the shelf plus its chrome stretch the full width of an ultrawide monitor",
-    ).toMatch(/\.msv-wpg\s*\{[^}]*--wpg-cap:\s*calc\(var\(--content-max-read\) - 2 \* var\(--pg-gut\)\)/s);
-    /* ⚠️ RETARGETED (amendment 11): the grid root DECLARES the cap; the content column READS it, and
-       row 3 spans full width so the scrollbar comes off the page rather than off the content. */
-    expect(msv, "the content column stopped reading the cap token").toContain("max-width: var(--wpg-cap)");
+  it("manuscripts states NO cap and NO gutter — both are the grid's now", () => {
+    /* ⚠️ THE ONE-CAP RULE IS RETIRED, NOT MOVED AGAIN (header spec §1). This lock has been
+       retargeted three times as the single cap travelled — `.msv-wrap` → the route slot → the grid
+       root — and each move kept the same premise: that somewhere there is exactly one maximum
+       width. There is now none. Content is the window minus `--content-gutter`, stated once on the
+       grid's three rows, so a page that names any width at all is the fault.
+       ⚠️ THE BESPOKE 1150 ASSERTION IS KEPT VERBATIM. It was a THIRD value agreeing with neither
+       the cap nor the gutter, and it is exactly the kind of number that comes back when the rule
+       above it changes shape. */
+    expect(msv, "the bespoke 1150px cap came back — a page-local width, which is the fault this rule has always been about").not.toContain("max-width: 1150px");
+    expect(msv, "manuscripts declared --wpg-cap again — the cap token is retired app-wide").not.toContain("--wpg-cap");
+    expect(msv, "manuscripts declared a gutter of its own — the gutter is declared once, on :root").not.toMatch(/--pg-gut:/);
+    expect(msv, "the content column took a width again — it must fill the guttered scroll row").toContain(".msv-wrap { width: 100%; }");
   });
 });

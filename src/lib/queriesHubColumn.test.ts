@@ -38,18 +38,27 @@ describe("Queries hub · the header block sits in the SHARED content column", ()
      reading pane now — flush with the cards beneath it — not a page-width band straddling the
      list, so binding it to the shared column would be wrong. The header seat still reads the
      column, and that is what keeps Query Centre lining up with the agent list. */
+  /* ⚠️ THE CAP HALF IS WITHDRAWN (header spec §1). These asserted `--sa-col-max` — a MAXIMUM
+     width, and there are none anywhere in the workspace now: content is the window minus the
+     content gutter, on every page, so Query Centre and the agent list line up by sharing the
+     GUTTER rather than by sharing a cap. Asserting the cap would fail correctly and read as a
+     regression.
+     ⚠️ `--sa-col-gut` SURVIVES HERE AS AN ALIAS FOR `--content-gutter`, and only until this page
+     converts to the grid — at which point both it and these two rules go. That is why the gutter
+     half of the lock is kept and sharpened rather than dropped: it is the thing still doing the
+     aligning. */
   for (const sel of [".f12-hd2", ".f12-chips"]) {
-    it(`${sel} reads the shared column tokens, not the workspace cap`, () => {
+    it(`${sel} shares the content gutter, and states no cap of its own`, () => {
       const rule = block(sel);
       expect(rule, `${sel} is missing from f12.css`).not.toBe("");
+      expect(rule, `${sel} lost the shared gutter — Query Centre's header stops lining up with every other page`).toContain("var(--sa-col-gut)");
       expect(
         rule,
-        `${sel} left the shared column — the Queries header would stop lining up with the agent list's`,
-      ).toContain("var(--sa-col-max)");
-      expect(rule, `${sel} lost the shared gutter`).toContain("var(--sa-col-gut)");
+        `${sel} took a max-width — widths are relationships now, and a cap here re-creates the centred column whose scrollbar ate the content`,
+      ).not.toContain("max-width");
       expect(
         rule,
-        `${sel} is back on the workspace cap — the header would run wider than the agent list's`,
+        `${sel} is back on the workspace cap — the header would run wider than every other page`,
       ).not.toContain("var(--maxw)");
     });
   }

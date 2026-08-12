@@ -73,7 +73,10 @@
    (.f12-body); that differential is exactly the ref's Guides view, not an accident. */
 /* Query Centre (ref design-refs/query-centre-final.html): ~30px of air above the title, and the
    header block owns its own bottom spacing. The compact masthead's own 12px sits inside this. */
-.f12-hd2 { flex: none; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 18px var(--sa-col-gut) 0; }
+/* ⚠️ UNCAPPED (header spec §1). `--sa-col-max` is retired app-wide — the column is the window
+   minus the content gutter, like every other page. Query Centre still reads `--sa-col-gut`,
+   which is now an alias for `--content-gutter`; both go when this page converts. */
+.f12-hd2 { flex: none; width: 100%; margin: 0 auto; padding: 18px var(--sa-col-gut) 0; }
 .f12-hd2 .svh { margin-bottom: 0; }
 
 /* asymmetric vertical padding (more on top) drops the buttons toward the content below rather
@@ -964,7 +967,7 @@
 .f12-quick button:hover { color: var(--ink); border-color: var(--muted); background: var(--paper); }
 
 /* active-filter chips — beneath the control bar, on the oat (the panes never resize) */
-.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; max-width: calc(var(--sa-col-max) + 2 * var(--sa-col-gut)); margin: 0 auto; padding: 0 var(--sa-col-gut) 9px; }
+.f12-chips { flex: none; display: flex; flex-wrap: wrap; gap: 5px; width: 100%; margin: 0 auto; padding: 0 var(--sa-col-gut) 9px; }
 .f12-chip { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.07em; padding: 4px 5px 4px 10px; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); border-radius: 99px; }
 .f12-chip button { display: flex; align-items: center; justify-content: center; width: 14px; height: 14px; border-radius: 50%; font-size: 10px; color: inherit; opacity: 0.6; }
 .f12-chip button:hover { opacity: 1; background: rgba(138, 64, 48, 0.12); }

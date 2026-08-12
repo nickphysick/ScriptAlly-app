@@ -24,20 +24,32 @@
    ⚠️ EVERY ROW IS PLACED EXPLICITLY, and that is not decoration. With auto-placement a page that
    passes NO toolbar would put its scroller in track 2 — an `auto` track — so the scroller would
    size to its content and never scroll, on exactly the pages with least to show. */
-/* ⚠️ `--wpg-cap` IS THE ONE CAP TOKEN, and the duplication it governs is the whole risk here.
-   ROW 3 SPANS FULL WIDTH so its scrollbar rides the PAGE edge; the cap lives on an inner column
-   inside it. Rows 1 and 2 are capped here. That is two declarations of one cap — and two places
-   expressing one number is exactly how four different page paddings happened, so BOTH read this
-   token and NEITHER carries a literal.
-   ⚠️ WHY NOT CAP THE GRID ROOT (what shipped, and the bug): the scroller then sits INSIDE the cap,
-   so a classic scrollbar's 15px comes off the CONTENT column instead of the page margin. Measured
-   1240 → 1225 with classic scrollbars; invisible under overlay scrollbars, which is how it shipped.
-   ⚠️ AND NOT `scrollbar-gutter: stable` EITHER: that reserves the space symmetrically but the
-   content is still 15px narrower. It treats the symptom. */
-.wpg { --wpg-cap: none; }
+/* ⚠️ NO CAP ANYWHERE — WIDTHS ARE PADDING (consolidated header spec §1). `--wpg-cap` is retired
+   along with `--sa-col-max` and the four per-page gutter values. Every row is FULL container
+   width and states its own inset as padding:
+
+     row 1 header   →  --content-gutter + --header-inset   (at rest)
+     row 2 toolbar  →  --content-gutter
+     row 3 scroller →  --content-gutter
+
+   ⚠️ THE GUTTER GOES INSIDE ROW 3, AND ROW 3 RESERVES THE SCROLLBAR ON BOTH EDGES. A `max-width`
+   column centred in a full-width scroller left the scrollbar OUTSIDE the column, so a classic
+   scrollbar's 15px came off the content — measured 1240 → 1225, invisible under overlay
+   scrollbars, which is how it shipped. Padding fixes the CAP fault but not the scrollbar: it sits
+   inside the scrollport wherever the padding goes. `stable both-edges` keeps the two gutters
+   symmetric and, more importantly, stops the content jumping sideways when a scrollbar appears or
+   disappears — see the rule itself for the measurements. It goes with the cap.
+
+   ⚠️ AND PADDING, NOT MARGIN, ON ROW 3: a margin would move the scrollbar inward with the content
+   and put the fault back. */
 .wpg-plate,
-.wpg-tools { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
-.wpg-plate { grid-row: 1; min-width: 0; }
+.wpg-tools { width: 100%; min-width: 0; box-sizing: border-box; }
+/* ⚠️ EACH ROW DECLARES ITS OWN `box-sizing`, and that is not belt-and-braces. These widths are
+   `width: 100%` PLUS padding, so under `content-box` every row is wider than its container by
+   twice its padding — the header overflowed by 400px in the measuring harness for exactly this
+   reason. The app inherits `border-box` from Tailwind's preflight; a rule whose maths depends on
+   the box model states it rather than inheriting it, per the house rule. */
+.wpg-plate { grid-row: 1; padding-inline: calc(var(--content-gutter) + var(--header-inset)); }
 
 /* ⚠️ THE TOOLBAR HAS NO CONTAINER — no border, no shadow, no background, and no state change on
    scroll. Just the controls and ONE hairline beneath, which is the line between chrome and content.
@@ -50,13 +62,14 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 10px 0 12px;
+  padding: 10px var(--content-gutter) 12px;
   border-bottom: 1px solid var(--ws-edge);
 }
 
 .wpg-scroll {
   grid-row: 3;
   min-width: 0;
+  box-sizing: border-box;
   overflow-y: auto;
   min-height: 0;
   /* the sentinel is absolute against this row, so the row is its containing block */
@@ -66,13 +79,22 @@
      inset, NOT an offset for the chrome above — the chrome is outside this scrollport entirely, so
      nothing here needs to clear it. */
   scroll-padding-top: var(--wpg-scroll-pad, 12px);
-  /* ⚠️ `both-edges`, AND IT IS ABOUT CENTRING, NOT SPACE. Row 3 spans full width, so a classic
-     scrollbar makes its CONTENT box 15px narrower than its border box — and a centred column inside
-     it then sits 7.5px left of the chrome rows above, which centre in the full width. Measured
-     exactly that: plate 280–1520 against content 272.5–1512.5. Reserving the gutter on BOTH edges
-     makes the content box symmetric again, so one cap resolves to one position for all three rows.
-     ⚠️ NOT the same use as `scrollbar-gutter: stable` alone, which was rejected as option 1 — that
-     was proposed to hide a width loss. This restores alignment; the width is already right. */
+  /* ⚠️ A CLASSIC SCROLLBAR SITS INSIDE THE SCROLLPORT WHEREVER THE GUTTER IS APPLIED — measured,
+     because the spec said otherwise and the spec was wrong. Gutter on this row and gutter on an
+     inner wrapper measure IDENTICALLY: content 1105 in a 1280 window, gutters 80 left / 95 right.
+     Moving the padding around cannot help; the scrollbar is inside the padding box either way.
+
+     ⚠️ SO THE RESERVATION IS BACK, AND FOR A DIFFERENT REASON THAN LAST TIME — LAYOUT SHIFT, not
+     alignment. Without it the gutters are 80/80 while nothing scrolls and 80/95 the moment
+     something does, so filtering a sixteen-agent list down to two results makes the scrollbar
+     vanish and the content jump 7.5px sideways. A jitter on a common interaction is worse than a
+     static asymmetry, and it is the case nobody measures because it only exists mid-interaction.
+
+     ⚠️ THIS IS NOT THE USE THAT WAS REJECTED. `stable both-edges` was previously deleted because it
+     was hiding a width loss caused by a cap in the wrong place — treating a symptom. The cap is
+     gone and the width is now correct; the reservation is doing its actual job. The cost is the
+     scrollbar's width off each side of the nominal gutter, under 1.5% at any real window. */
+  padding-inline: var(--content-gutter);
   scrollbar-gutter: stable both-edges;
 }
 

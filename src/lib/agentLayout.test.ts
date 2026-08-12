@@ -23,61 +23,47 @@ const block = (selector: string): string => {
 };
 
 describe("agent list · the page column", () => {
-  // v4 P1: the two numbers now come from the SHARED column tokens (pageHeader.css) so the Queries
-  // header can sit in the same column. The values are unchanged — these locks therefore check the
-  // token wiring AND that the tokens still carry 60px / 1240px, which is a strictly stronger
-  // guarantee than the old literal match (it catches a drift at the definition too).
+  /* ⚠️ RETARGETED ONTO THE WIDTH RELATIONSHIP (header spec §1). These two locks pinned
+     `--sa-col-gut: 60px` and `--sa-col-max: 1240px` — a gutter and a CAP. Both are retired:
+     widths are the window minus a gutter, the header that minus an inset, and no maximum exists
+     anywhere. Asserting the old pair would now fail correctly and read as a regression.
+     What still has to hold on THIS page is that it states no width of its own — the grid states
+     them all — which is what the two locks below check. */
   const headerCss = readFileSync(new URL("../components/shell/pageHeader.css", import.meta.url), "utf8");
 
-  it("the shared column tokens still carry the agent list's canonical geometry", () => {
+  it("the shared gutter is declared once, and this page does not restate it", () => {
     expect(
       headerCss,
-      "--sa-col-gut moved off 60px — that silently re-guttters BOTH the agent list and the Queries header",
-    ).toMatch(/--sa-col-gut:\s*60px/);
+      "--content-gutter left :root — every page's content width becomes unresolvable at once",
+    ).toMatch(/--content-gutter:\s*\d+px/);
     expect(
-      headerCss,
-      "--sa-col-max moved off 1240px — that silently re-caps BOTH pages' content columns",
-    ).toMatch(/--sa-col-max:\s*1240px/);
+      css,
+      "the agent list declared a gutter of its own again — two gutters is how four different page paddings happened",
+    ).not.toMatch(/--pg-gut:/);
+    expect(
+      css,
+      "a cap came back to this page — the scrollbar comes out of the content column again, on this page alone",
+    ).not.toContain("max-width: var(--wpg-cap)");
   });
 
-  it("padding rides the page, the CAP rides the inner column — two elements, two jobs", () => {
+  it("padding rides the page, the gutter rides the grid — two elements, two jobs", () => {
     expect(
       block(".aglist .agl-page"),
-      /* ⚠️ THE TOP IS 14px, HALVED FROM 28 (Contact list pass). The workspace header now sits
-         INSIDE this padding, so the top value stopped being breathing room above the content and
-         became a band of empty paper above a header that is already generous. The gutter and the
-         48px bottom are untouched — they gutter the CONTENT, which is a different job, and
-         merging them with the cap would still tie the two together.
-         ⚠️ RETARGETED, NOT RELAXED (band-tier full-bleed pass): the side value is now read through
-         `--pg-gut` rather than straight from `--sa-col-gut`. That indirection is the POINT — the
-         header's bleed reads the same token back to cancel it, so the rule spans the page while the
-         content stays guttered. `--pg-gut` is still DEFINED as `var(--sa-col-gut)` on this rule, so
-         the shared column token is still what sets the number. */
-      /* ⚠️ THE BOTTOM IS 0, NOT 48 (amendment 9) — retargeted, not relaxed. The 48px moved INTO the
-         scroller: below row 3 it would be fixed space the list could never scroll into, a permanent
-         dead band at the foot of the page. */
-      "the page padding changed — 14px top / the gutter token / 0 bottom, because the bottom gutter is the scroller's now",
-    ).toContain("padding: 14px var(--pg-gut) 0");
+      /* ⚠️ THE SIDE GUTTER LEFT THIS RULE (header spec §1). The top stays 14px — the workspace
+         header sits inside this padding, so it is the band above a header that is already
+         generous, not breathing room above content. The sides are the scroll row's now, and the
+         48px bottom already moved into the scroller at amendment 9 for the same reason: below row
+         3 it would be fixed space the list could never scroll into. */
+      "the page padding changed — the sides belong to the grid's scroll row, so only the top is stated here",
+    ).toContain("padding: 14px 0 0");
     expect(
       block(".aglist .wpg-scroll"),
       "the bottom gutter left the scroller — the last card butts against the frame with nothing under it",
     ).toContain("padding-bottom: 48px");
-    /* ⚠️ THE CAP MOVED UP A LEVEL, to the grid root, and that is a STRONGER guarantee: it governs
-       plate, toolbar and cards at once, so the three cannot disagree. Capping the inner column alone
-       left the chrome rows full width and made the alignment three rules hoping to match. */
-    /* ⚠️ RETARGETED (amendment 11): the grid root DECLARES the cap as a token now, it does not carry
-       `max-width` itself. Row 3 must span FULL width so its scrollbar rides the page edge — capping
-       the root put the scroller inside the cap and a classic scrollbar took 15px off the content
-       (measured 1240 → 1225, invisible under overlay scrollbars). The chrome rows and the content
-       column both read `--wpg-cap`; the equality that matters is locked in workspacePageGrid.test. */
-    expect(
-      block(".aglist .agl-wpg"),
-      "the grid root stopped declaring --wpg-cap — the cap resolves to `none` and the page runs full width",
-    ).toContain("--wpg-cap: var(--sa-col-max)");
     expect(
       css,
-      "the content column stopped reading the cap token, so content and chrome can now resolve different widths",
-    ).toContain(".aglist .agl-inner { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }");
+      "the inner column took a width again — it must simply fill the guttered scroll row",
+    ).toContain(".aglist .agl-inner { width: 100%; }");
   });
 
   it("NO compensating right-hand padding anywhere — the gutter is fixed at its cause", () => {

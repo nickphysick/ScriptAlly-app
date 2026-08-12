@@ -146,11 +146,10 @@
    ⚠️ MEASURED, because the old comment was wrong: before the bleed this rule was inset 61px per
    side at a 1700px window, NOT full-bleed as `f5be3af` claimed. */
 .aglist .agl-page {
-  --pg-gut: var(--sa-col-gut);
   /* ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER (amendment 9). At 48px here it would be fixed
      space BELOW row 3 — a permanent dead band the list could never scroll into. It is the
      scroller's own bottom padding now, so it scrolls with the last card as it always read. */
-  padding: 14px var(--pg-gut) 0;
+  padding: 14px 0 0;
   flex: 1;
   min-height: 0;
   display: flex;
@@ -164,14 +163,14 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  --wpg-cap: var(--sa-col-max);
   }
 /* `.agl-inner` survives as a plain wrapper inside the scroller — the cap it used to carry is above
    it now, so it only has to be full width. */
-/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
-   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
-   edge; this is what keeps the content the same width it was before the grid. */
-.aglist .agl-inner { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
+/* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both moved to the grid: row 3 carries
+   `--content-gutter` as padding, so this page's content is the window minus the gutter and
+   nothing here states a width. A `max-width` here would re-create the centred column whose
+   scrollbar ate 15px of content under classic scrollbars. */
+.aglist .agl-inner { width: 100%; }
 .aglist .wpg-scroll { padding-bottom: 48px; }
 /* the toolbar sits in the grid's row, so its sibling-era top margin would push it off the hairline */
 .aglist .wpg-tools .agl-toolbar { margin: 0; flex: 1 1 auto; }

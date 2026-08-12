@@ -28,10 +28,9 @@
      ⚠️ TOP 22 → 11, HALVED, for the reason the agent list halved: the header sits inside this
      padding and already carries its own 78px, so the top value was empty paper above it. The side
      and bottom values gutter the CONTENT, which is a different job, and are untouched. */
-  --pg-gut: 28px;
   /* ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER. Below row 3 it would be fixed space the shelf
      could never scroll into — a dead band under the last plate. */
-  padding: 11px var(--pg-gut) 0;
+  padding: 11px 0 0;
 }
 /* ⚠️ THE CAP IS ON THE GRID ROOT, not the content wrapper, so plate, toolbar and plates below are
    one column wide BY CONSTRUCTION rather than by separate rules agreeing. Same expression as
@@ -40,7 +39,6 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  --wpg-cap: calc(var(--content-max-read) - 2 * var(--pg-gut));
   }
 .msv1 .wpg-scroll { padding-bottom: 48px; }
 
@@ -85,10 +83,11 @@
    1144. Writing `1144px` here would be a magic number that silently stops matching the day either
    the cap or the gutter moves; this stays correct through both. Measured before and after: 1144. */
 /* the cap moved up to `.msv-wpg`; this survives as a plain full-width wrapper in the scroller */
-/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
-   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
-   edge; this is what keeps the content the same width it was before the grid. */
-.msv-wrap { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
+/* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both moved to the grid: row 3 carries
+   `--content-gutter` as padding, so this page's content is the window minus the gutter and
+   nothing here states a width. A `max-width` here would re-create the centred column whose
+   scrollbar ate 15px of content under classic scrollbars. */
+.msv-wrap { width: 100%; }
 /* ⚠️ THE TALLY ROW — the toolbar slot, read off the Contact list's `.agl-count` rather than
    re-derived, so the two pages state their figures in one voice. THE RULE: the plate carries
    identity, this row carries tallies and view state. `margin-left:auto` is what pushes it to the

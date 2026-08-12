@@ -80,15 +80,15 @@
   display: flex;
   flex-direction: column;
   color: var(--dv-ink-body);
-  --pg-gut: 60px;
-  padding: 14px var(--pg-gut) 0;
+  padding: 14px 0 0;
 }
-.dv-wpg { flex: 1; min-height: 0; --wpg-cap: 1240px; }
+.dv-wpg { flex: 1; min-height: 0; }
 .dv2 .wpg-scroll { padding-bottom: 48px; }
-/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
-   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
-   edge; that is what keeps the content the width it was before the grid. */
-.dv-wrap { width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
+/* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both moved to the grid: row 3 carries
+   `--content-gutter` as padding, so this page's content is the window minus the gutter and
+   nothing here states a width. A `max-width` here would re-create the centred column whose
+   scrollbar ate 15px of content under classic scrollbars. */
+.dv-wrap { width: 100%; }
 /* ⚠️ THE BREAKPOINTS MOVE THE TOKEN, NEVER A LITERAL — a literal would leave the header bleeding by
    the desktop gutter on a phone: inset at one step and overhanging at the next. */
 @media (max-width: 900px) {

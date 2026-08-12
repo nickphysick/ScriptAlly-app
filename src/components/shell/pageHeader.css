@@ -11,7 +11,36 @@
    A page whose WORKSPACE is deliberately wider keeps its own wider cap BELOW the header — the
    Queries hub's list + reading pane stay on --maxw (.f12-body). That differential is the point
    of the ref's Guides view, not an accident. */
-:root { --sa-col-max: 1240px; --sa-col-gut: 60px; }
+/**
+ * ⚠️ WIDTHS ARE RELATIONSHIPS, NOT CAPS (consolidated header spec §1). There is no maximum width
+ * anywhere in the workspace any more. Two tokens, and everything derives:
+ *
+ *     content = window − 2 × --content-gutter        (toolbar, cards, panes)
+ *     header  = content − 2 × --header-inset         (at rest)
+ *     header  = the full container                   (stripped)
+ *
+ * At a 2000px window: content 1840, header 1600, strip 2000.
+ *
+ * ⚠️ THEY ARE PADDING, NEVER `max-width`. A cap centres a column and leaves the SCROLLBAR outside
+ * it, which is how a classic scrollbar came to eat 15px of the content column while overlay
+ * scrollbars hid the fault entirely. The gutter is applied INSIDE the scroll row, so the scrollbar
+ * rides the row's edge and the content keeps its width in both scrollbar modes.
+ *
+ * ⚠️ THE INSET IS 120px, AND THE REF SAYS 56. `content-gutter-header-inset.html` is a TUNER — its
+ * `--hins:56` is the preset marked `on`, with 0/32/56/80/120 all offered. The spec names 120 in
+ * prose and gives the arithmetic that only 120 satisfies, so the reasoned value in prose wins over
+ * the unreasoned one in the artefact — the same call already recorded for `--wsh-plate-bg-scrolled`.
+ *
+ * ⚠️ `--sa-col-max` AND `--sa-col-gut` ARE GONE, and `--sa-col-gut` survives here ONLY as an alias
+ * pointing at the gutter, because Query Centre's `.f12-*` column still reads it and converts later
+ * in this pack. When it does, the alias goes with its last caller. Nothing new may read it.
+ */
+:root {
+  --content-gutter: 80px;
+  --header-inset: 120px;
+  /* LEGACY ALIAS — Query Centre only. Delete with the `compact` variant. */
+  --sa-col-gut: var(--content-gutter);
+}
 
 .svh { margin-bottom: 26px; }
 .svh-top {
@@ -95,7 +124,7 @@
    phone; the :root token line above stays the locked desktop value), and the header compacts.
    ≥768px this block changes nothing. ── */
 @media (max-width: 767.98px) {
-  :root { --sa-col-gut: 16px; }
+  :root { --content-gutter: 16px; }
   .svh { margin-bottom: 16px; }
   .svh-title { font-size: 26px; }
   .svh-sub { font-size: 14px; margin-top: 6px; }

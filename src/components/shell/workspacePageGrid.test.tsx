@@ -82,24 +82,54 @@ describe("the three-row grid — chrome outside the scroller", () => {
   });
 
   /**
-   * ⚠️ THE CAP IS TWO DECLARATIONS OF ONE TOKEN, and this asserts the token — never the number.
+   * ⚠️ THE EQUALITY ASSERTION IS WITHDRAWN. It required the header's edges to EQUAL the content's
+   * — true while both read one cap, and false by design now: the header sits an inset further in.
+   * Kept as a note because the old test would fail correctly and the failure would read as a
+   * regression.
    *
-   * Row 3 spans FULL WIDTH so its scrollbar rides the page edge; the cap lives on an inner column
-   * inside it, and on the two chrome rows. Capping the grid root instead put the scroller inside the
-   * cap, so a classic scrollbar's 15px came off the CONTENT column: measured 1240 → 1225. Invisible
-   * under overlay scrollbars, which is how it shipped.
-   *
-   * ⚠️ A TEST PINNED TO 1240 WOULD PASS WHILE THE ALIGNMENT ROTTED. What has to hold is that the
-   * chrome rows and the content column resolve the SAME cap — so this checks they read one token and
-   * that neither states a literal. Layout equality itself needs a browser and is checked there.
+   * ⚠️ AND WIDTHS ARE NO LONGER CAPS, SO THERE IS NO PIXEL TO ASSERT. Content is the window minus
+   * a gutter, the header is that minus an inset, and the strip is the whole container. What has to
+   * hold is the RELATIONSHIP, so this reads both tokens out of the stylesheet and computes the
+   * edges at three window widths rather than naming a figure — a hardcoded number here would have
+   * to be edited every time either token moved, which is how a lock stops describing the design.
    */
-  it("⚠️ ONE TOKEN, TWO DECLARATIONS — the chrome rows and the content column cannot drift", () => {
-    const rows = block(".wpg-plate,\n.wpg-tools") || block(".wpg-plate") + block(".wpg-tools");
-    expect(rows, "the chrome rows stopped reading the cap token").toContain("max-width: var(--wpg-cap)");
-    expect(rows, "the chrome rows stopped centring — they would pin left of the content").toContain("margin-inline: auto");
-    expect(block(".wpg-scroll"), "row 3 took a cap. It must span FULL width, or the scrollbar comes out of the content column again — that is the bug this replaced.").not.toContain("max-width");
+  it("⚠️ the header's edges sit exactly the inset inside the content's, at three widths", () => {
+    /* ⚠️ THE TOKENS LIVE IN pageHeader.css, NOT THIS SHEET — the grid READS them and defines
+       neither, which is the point: one declaration, three consumers. */
+    const tokenCss = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
+    const root = /:root\s*\{[^}]*--content-gutter:\s*(\d+)px[^}]*--header-inset:\s*(\d+)px[^}]*\}/s.exec(tokenCss);
+    expect(root, "the two width tokens are not both declared on :root — every width below is unresolvable").toBeTruthy();
+    const gutter = Number(root![1]);
+    const inset = Number(root![2]);
+    expect(gutter, "the gutter went to zero — content would touch the window edge").toBeGreaterThan(0);
+    expect(inset, "the inset went to zero — the header would be the content's width and the card would read as a band").toBeGreaterThan(0);
 
-    /* every converted page: its content column reads the token, and NOBODY states a literal cap */
+    /* the three rows state those tokens as PADDING — a max-width anywhere re-creates the centred
+       column whose scrollbar took 15px off the content under classic scrollbars */
+    expect(block(".wpg-plate"), "the header row stopped reading gutter + inset")
+      .toContain("padding-inline: calc(var(--content-gutter) + var(--header-inset))");
+    expect(block(".wpg-tools"), "the toolbar row left the content gutter — it would not line up with the cards beneath it")
+      .toContain("var(--content-gutter)");
+    expect(block(".wpg-scroll"), "the gutter left the scrollport, so the scrollbar comes out of the content column again")
+      .toContain("padding-inline: var(--content-gutter)");
+    for (const sel of [".wpg-plate", ".wpg-tools", ".wpg-scroll"]) {
+      expect(block(sel), `${sel} took a max-width — widths are relationships, not caps`).not.toContain("max-width");
+    }
+
+    /* the relationship itself, computed at three windows — no figure is written down */
+    for (const win of [1280, 1700, 2400]) {
+      const content = win - 2 * gutter;
+      const header = content - 2 * inset;
+      expect(header, `at ${win}px the header is not ${inset}px inside the content on each side`).toBe(win - 2 * (gutter + inset));
+      expect(content - header, `at ${win}px the header/content difference is not twice the inset`).toBe(2 * inset);
+      expect(header, `at ${win}px the header has collapsed — the inset is too large for this window`).toBeGreaterThan(0);
+    }
+  });
+
+  /* ⚠️ NO PAGE MAY RE-STATE A WIDTH. The caps lived on five page stylesheets and a per-page gutter
+     on four of them; both are the grid's job now. A page that caps again puts the scrollbar back
+     outside its content column, and does it on one page only — the hardest kind to notice. */
+  it("⚠️ no converted page states a cap or a gutter of its own", () => {
     const PAGES: [string, string][] = [
       ["Contact list", "components/agents/agentList.css"],
       ["Manuscripts", "components/manuscripts/manuscripts.css"],
@@ -108,11 +138,10 @@ describe("the three-row grid — chrome outside the scroller", () => {
       ["Submission packages", "components/packages/packageWorkshop.css"],
     ];
     for (const [page, file] of PAGES) {
-      const css = readFileSync(resolve(__dirname, "../..", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-      expect(css, `${page}: no content column reads --wpg-cap, so its content and its chrome resolve different widths`)
-        .toContain("max-width: var(--wpg-cap)");
-      const gridRoot = /--wpg-cap:\s*([^;]+);/.exec(css);
-      expect(gridRoot, `${page}: nothing declares --wpg-cap, so the cap resolves to \`none\` and the page runs full width`).toBeTruthy();
+      const pageCss = readFileSync(resolve(__dirname, "../..", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(pageCss, `${page} still declares --wpg-cap — the cap token is retired`).not.toContain("--wpg-cap");
+      expect(pageCss, `${page} still declares --pg-gut — the gutter is the grid's, declared once`).not.toContain("--pg-gut:");
+      expect(pageCss, `${page} reads --sa-col-max, which no longer exists — its width resolves to nothing`).not.toContain("--sa-col-max");
     }
   });
 

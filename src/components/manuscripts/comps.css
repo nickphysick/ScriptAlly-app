@@ -58,10 +58,11 @@
   background: var(--ct-desk); color: var(--ct-ink); padding: 22px 28px 20px; /* masthead gutter mirrors the Queries hub */
   font-family: 'Inter', 'Source Sans Pro', sans-serif;
 }
-/* ⚠️ THE CONTENT COLUMN READS THE SAME `--wpg-cap` THE CHROME ROWS DO — one token, two
-   declarations, no literal in either. Row 3 is full width so the scrollbar rides the page
-   edge; this is what keeps the content the same width it was before the grid. */
-.ct-desk { flex: 1; min-height: 0; width: 100%; max-width: var(--wpg-cap); margin-inline: auto; }
+/* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both moved to the grid: row 3 carries
+   `--content-gutter` as padding, so this page's content is the window minus the gutter and
+   nothing here states a width. A `max-width` here would re-create the centred column whose
+   scrollbar ate 15px of content under classic scrollbars. */
+.ct-desk { flex: 1; min-height: 0; width: 100%; }
 /* ⚠️ ROW 3 IS A FLEX COLUMN ON THIS PAGE, and without it the desk collapses. `.ct-desk` fills by
    `flex: 1; min-height: 0`, which needs a flex parent — inside a plain block scroll row those two
    declarations mean nothing and the two panels lose the height they are 100% of. The page still
@@ -88,7 +89,6 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  --wpg-cap: calc(var(--content-max-read) - 2 * var(--pg-gut));
   }
 .ct-split { display: grid; grid-template-columns: 1fr 396px; gap: 22px; height: 100%; }
 @media (max-width: 1180px) {
