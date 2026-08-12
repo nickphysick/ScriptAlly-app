@@ -90,6 +90,16 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
+  /**
+   * ⚠️ THE HEMS ARE DRIVEN BY THE SAME EVALUATION AS THE HEADER, and that is the whole reason they
+   * live here rather than in a page. A second scroll listener would be a second answer to "where
+   * is this scroller", and the two would disagree on exactly the frames anyone would notice.
+   *
+   * ⚠️ AND EACH IS A STATE, NOT DECORATION. A top fade on an unscrolled page, or a bottom fade at
+   * the end of the content, reads as a rendering fault rather than as an affordance — the same
+   * argument the shell's own foot fade already makes for itself.
+   */
+  const [hem, setHem] = React.useState({ top: false, bot: false });
   /* ⚠️ THE UNION, AND IT IS AN `||` RATHER THAN A PRIORITY. Neither half outranks the other: a
      journey opened part-way down a scrolled page is still working, and closing it while still
      scrolled must not restore the card. Everything below reads this one value. */
@@ -120,7 +130,13 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     let frame = 0;
     const evaluate = () => {
       frame = 0;
-      setStuck(root.scrollTop > 2);
+      const top = root.scrollTop;
+      setStuck(top > 2);
+      /* ⚠️ COMPARED BEFORE IT IS WRITTEN. A fresh object every frame would re-render the whole
+         page on every wheel tick even when nothing changed — the header's `setStuck` is free of
+         that only because a boolean compares by value. */
+      const next = { top: top > 2, bot: top < root.scrollHeight - root.clientHeight - 2 };
+      setHem((prev) => (prev.top === next.top && prev.bot === next.bot ? prev : next));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
@@ -128,13 +144,33 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     root.addEventListener("scroll", onScroll, { passive: true });
     evaluate();
 
-    /* ⚠️ THE RESIZE OBSERVER STAYS. A window change can move the scroll position without a scroll
-       event — nothing else would re-evaluate until the user happened to scroll. */
+    /**
+     * ⚠️ THE OBSERVER WATCHES THE CONTENT, NOT ONLY THE ROW — and watching only the row is a bug
+     * the browser will never report. A `ResizeObserver` on a scroller fires when the SCROLLER's
+     * box changes; it says nothing when `scrollHeight` grows because content arrived inside it. So
+     * on a page whose data loads after mount, the single evaluation at mount saw
+     * `scrollHeight === clientHeight`, concluded there was nothing below, and nothing re-evaluated
+     * until the user scrolled. Measured on the deployed build: Query Centre reported no bottom hem
+     * at rest with 729px of content beneath the fold, while every synchronously-rendered page was
+     * correct — which is exactly the shape that survives a whole pass unnoticed.
+     *
+     * The direct children are what grow, so they are observed too, and a `MutationObserver`
+     * re-syncs that list when the page swaps its content. A window change is still caught by the
+     * row's own entry.
+     */
     const ro = new ResizeObserver(evaluate);
-    ro.observe(root);
+    const watch = () => {
+      ro.disconnect();
+      ro.observe(root);
+      for (const child of Array.from(root.children)) ro.observe(child);
+    };
+    watch();
+    const mo = new MutationObserver(() => { watch(); evaluate(); });
+    mo.observe(root, { childList: true });
     return () => {
       root.removeEventListener("scroll", onScroll);
       ro.disconnect();
+      mo.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
@@ -157,6 +193,15 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         >
           {children}
         </div>
+        {/* ⚠️ THE HEMS ARE GRID CHILDREN OF ROW 3, NOT CHILDREN OF THE SCROLLER. Inside the
+            scrollport they would scroll with the content, which is what makes the obvious version
+            of this wrong; placed in the same grid cell with `align-self: start` / `end` they sit
+            against the row's edges and stay there, and the grid's own `overflow: hidden` clips
+            them to the window's rounded corners for free. No wrapper element, no absolute
+            positioning, no mask on the scroller — a mask interacts badly with `scrollbar-gutter`,
+            which this row depends on. */}
+        <div className={`wpg-hem wpg-hem--top${hem.top ? " on" : ""}`} aria-hidden="true" />
+        <div className={`wpg-hem wpg-hem--bot${hem.bot ? " on" : ""}`} aria-hidden="true" />
       </div>
     </PlateCondensedContext.Provider>
   );

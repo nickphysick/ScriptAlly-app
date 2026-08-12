@@ -10,6 +10,13 @@
 .wpg {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
+  /* ⚠️ ONE EXPLICIT COLUMN, AND EVERY ROW NAMES IT — because grid auto-placement NEVER OVERLAPS.
+     The hems share row 3 with the scroller, and the moment they claimed column 1 the auto-placed
+     scroller was pushed into an implicit column 2: the header rows measured 688px of right margin
+     against Contact list's 449, varying with the viewport, on nine of ten pages. Two items can
+     only occupy one cell when BOTH are explicitly positioned, so `grid-column: 1` is not
+     decoration on any of these four rules — remove it from one and that row leaves the column. */
+  grid-template-columns: minmax(0, 1fr);
   height: 100%;
   min-height: 0;
   /* ⚠️ THE GRID ITSELF NEVER SCROLLS. Only row 3 does; anything escaping here is a bug in a row. */
@@ -63,6 +70,7 @@
  */
 .wpg-plate {
   grid-row: 1;
+  grid-column: 1;
   position: relative;
   padding-block: var(--wsh-plate-gap) 0;
   padding-inline: calc(var(--content-gutter) + var(--header-inset));
@@ -91,6 +99,7 @@
    arrangement amendment 9 exists to undo. */
 .wpg-tools {
   grid-row: 2;
+  grid-column: 1;
   min-width: 0;
   display: flex;
   align-items: center;
@@ -106,6 +115,7 @@
 
 .wpg-scroll {
   grid-row: 3;
+  grid-column: 1;
   min-width: 0;
   box-sizing: border-box;
   overflow-y: auto;
@@ -146,6 +156,37 @@
      `--wpg-reclaim-pad`; both land here and ADD. Nothing overrides anything. */
   padding-bottom: calc(var(--wpg-foot, 0px) + var(--wpg-reclaim-pad, 0px));
   scrollbar-gutter: stable both-edges;
+}
+
+/* ══ THE SCROLL HEMS (uniformity pass §3; ref 88) ══════════════════════════════════════════════
+ *
+ * ⚠️ THEY SHARE ROW 3 WITH THE SCROLLER RATHER THAN SITTING INSIDE IT. A child of a scrollport
+ * scrolls with its content — including an absolutely positioned one, because the scrollport is its
+ * containing block — so the obvious version of this drags the fade up the page. As grid items in
+ * the same cell they are laid out against the ROW's edges and stay put, and `.wpg`'s own
+ * `overflow: hidden` clips them to the window's rounded corners without either of them knowing
+ * about the radius.
+ *
+ * ⚠️ WHITE, BECAUSE THE WINDOW IS WHITE. `.ws-window` is `background: #ffffff`; the fade resolves
+ * INTO the ground it sits on, so a token that drifts from that ground would show as a wash of the
+ * wrong colour rather than as no fade at all — which is how the shell's own foot fade once ended
+ * up dissolving to a colour the page no longer had.
+ */
+.wpg-hem {
+  grid-row: 3;
+  grid-column: 1;
+  z-index: 3;
+  height: var(--wpg-hem-h, 44px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.wpg-hem--top { align-self: start; background: linear-gradient(to bottom, #ffffff 12%, rgba(255, 255, 255, 0)); }
+.wpg-hem--bot { align-self: end; background: linear-gradient(to top, #ffffff 12%, rgba(255, 255, 255, 0)); }
+.wpg-hem.on { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  /* the STATE still changes — only the crossfade goes, exactly as the header's collapse does */
+  .wpg-hem { transition: none; }
 }
 
 

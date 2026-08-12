@@ -228,6 +228,68 @@ describe("the three-row grid — chrome outside the scroller", () => {
     }
   });
 
+  /* ══ §2 — THE GAP UNDER THE HAIRLINE ═════════════════════════════════════════════════════════ */
+  it("⚠️ the gap is 70px, ONE token, and it is never paid twice", () => {
+    /* ⚠️ NOTHING ASSERTED THIS TOKEN AT ALL BEFORE NOW — it had gone 20 → 70 with no lock on
+       either the value or, more importantly, the once-only rule. The gap sits above whatever comes
+       FIRST below the hairline: the toolbar row where a page has one, the scroll row where it does
+       not. `.wpg--tools` zeroes the scroll row's copy so a page gains and loses a toolbar without
+       gaining or losing its top margin — two elements, one gap, never both. */
+    const header = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
+    expect(header, "the gap token changed value without this case changing with it").toContain("--content-top-gap: 70px");
+    expect(block(".wpg-scroll"), "the scroll row stopped paying the gap").toContain("padding-top: var(--content-top-gap)");
+    expect(block(".wpg-tools"), "the toolbar row stopped paying the gap").toContain("var(--content-top-gap)");
+    const both = block(".wpg--tools > .wpg-scroll") + block(".wpg--tools .wpg-scroll");
+    expect(both, "a page with a toolbar pays the gap twice — the toolbar row and the scroll row both")
+      .toMatch(/padding-top:\s*0/);
+  });
+
+  /* ══ §3 — THE SCROLL HEMS ═══════════════════════════════════════════════════════════════════ */
+  it("⚠️ the hems are grid children of row 3, NOT children of the scroller", () => {
+    /* ⚠️ THIS IS THE WHOLE CORRECTNESS OF THE FEATURE, and the obvious version is wrong in a way
+       that looks right until you scroll: a child of a scrollport scrolls with its content —
+       including an absolutely positioned one, because the scrollport is its containing block — so
+       the fade drags up the page instead of hemming it. Asserted at source because there is no
+       jsdom here and no layout to measure; the Playwright matrix takes the pixels. */
+    const hem = block(".wpg-hem");
+    expect(hem, "the hems left the grid — as children of the scroller they scroll with the content").toContain("grid-row: 3");
+    /* ⚠️ EVERY ROW MUST NAME THE COLUMN, because grid auto-placement NEVER OVERLAPS: two items
+       share a cell only when BOTH are explicitly positioned. Without this the hems took column 1
+       and the auto-placed scroller was pushed into an implicit column 2 — browser-measured, the
+       header rows read 688px of right margin against 449 on nine of ten pages. */
+    for (const sel of [".wpg", ".wpg-plate", ".wpg-tools", ".wpg-scroll", ".wpg-hem"]) {
+      expect(block(sel), `${sel} does not name its grid column — an auto-placed row cannot share a cell with the hems`)
+        .toMatch(/grid-(column|template-columns):/);
+    }
+    expect(hem, "the hems must not take pointer events — they sit over the scroller").toContain("pointer-events: none");
+    expect(block(".wpg-hem--top"), "the top hem is not pinned to the row's top edge").toContain("align-self: start");
+    expect(block(".wpg-hem--bot"), "the bottom hem is not pinned to the row's bottom edge").toContain("align-self: end");
+    /* ⚠️ NO MASK ON THE SCROLLER — it interacts badly with `scrollbar-gutter`, which this row
+       depends on for the reservation that stops content jumping sideways mid-filter. */
+    expect(block(".wpg-scroll"), "a mask went on the scroller — it fights `scrollbar-gutter`").not.toContain("mask");
+    /* the hems are rendered by the grid, so every page gets them identically or none does */
+    expect(srcCode, "the hems are not mounted").toContain("wpg-hem--top");
+    expect(srcCode, "the hems are not mounted").toContain("wpg-hem--bot");
+  });
+
+  it("⚠️ the hems are driven by the SAME evaluation as the header — never a second listener", () => {
+    /* Two listeners are two answers to "where is this scroller", and they disagree on exactly the
+       frames anyone would notice. One `evaluate`, one rAF, both states written from it. */
+    expect((srcCode.match(/addEventListener\("scroll"/g) ?? []).length,
+      "a second scroll listener appeared — the hems and the header would disagree mid-scroll").toBe(1);
+    expect((srcCode.match(/requestAnimationFrame/g) ?? []).length,
+      "a second animation frame loop appeared").toBe(1);
+    const evaluate = srcCode.slice(srcCode.indexOf("const evaluate ="), srcCode.indexOf("const onScroll"));
+    expect(evaluate, "the evaluate block was not found — the slice below is testing nothing").toContain("setStuck");
+    expect(evaluate, "the hems are not written from the same evaluation as the header").toContain("setHem");
+    /* ⚠️ EACH HEM IS A STATE. A top fade on an unscrolled page or a bottom fade at the end of the
+       content reads as a rendering fault rather than an affordance. */
+    expect(evaluate, "the bottom hem is not conditioned on content remaining below").toContain("scrollHeight - root.clientHeight");
+    /* ⚠️ AND THE OBJECT IS COMPARED BEFORE IT IS WRITTEN — a fresh one per frame re-renders the
+       whole page on every wheel tick, which a boolean state does not. */
+    expect(evaluate, "the hem state is written unconditionally — every wheel tick would re-render the page").toContain("prev");
+  });
+
   it("the scroll row carries `scroll-padding-top` — missing throughout before this", () => {
     expect(block(".wpg-scroll")).toContain("scroll-padding-top");
   });
@@ -263,9 +325,16 @@ describe("the three-row grid — chrome outside the scroller", () => {
   it("⚠️ the state is one symmetric expression of scrollTop, with nothing cached", () => {
     expect(srcCode, "safeToStrip came back — with the padding in place there is nothing for it to guard, and it only ever bought a dead zone").not.toContain("safeToStrip");
     expect(srcCode, "the reclaim is being computed in JS again — it belongs in the stylesheet, as a calc the padding and the height share").not.toContain("reclaimedPx");
+    /* ⚠️ IT PINNED THE EXPRESSION VERBATIM AND THAT WAS TOO TIGHT BY EXACTLY ONE REFACTOR. The
+       hems read the same scroll position, so `root.scrollTop` is now read once into a local and
+       both states derive from it — which is MORE of what this case wants, not less, and the
+       literal match failed on it. What matters is the shape: one read, a bare comparison against
+       the threshold, and nothing cached or conditional in between. */
     const setter = /setStuck\(([^;]+)\);/.exec(srcCode);
     expect(setter, "the state is not written in one place").toBeTruthy();
-    expect(setter![1].trim(), "the state stopped being a pure function of scrollTop").toBe("root.scrollTop > 2");
+    expect(setter![1].trim(), "the state stopped being a bare comparison against the threshold")
+      .toMatch(/^\w[\w.]* > 2$/);
+    expect(srcCode, "the scroll position is no longer read from the scroller itself").toMatch(/=\s*root\.scrollTop\b|root\.scrollTop\s*>\s*2/);
     expect(srcCode, "the updater takes the previous value again — that is a latch, and a latch is a cached decision").not.toMatch(/setStuck\(\(was\)/);
   });
 

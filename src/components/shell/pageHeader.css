@@ -46,7 +46,9 @@
      page gains and loses a toolbar without gaining or losing its top margin.
      ⚠️ IT DOES NOT CHANGE WHEN THE HEADER STRIPS. The gap is the distance from the boundary to
      the content, and the boundary does not move — only what is above it does. */
-  --content-top-gap: 20px;
+  /* ⚠️ 70px (uniformity pass §2) — 20 + the additional 50 the ref calls for. Same token, same
+     single application; it is still paid ONCE, by whichever element sits first below the hairline. */
+  --content-top-gap: 70px;
 }
 
 .svh { margin-bottom: 26px; }

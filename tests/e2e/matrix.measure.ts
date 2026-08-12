@@ -106,6 +106,35 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
       return (oy === "auto" || oy === "scroll") && e.scrollHeight - e.clientHeight > 2;
     }),
     scrollTop: r(sc.scrollTop),
+    /* ⚠️ THE HEMS, MEASURED WHERE THEY ARE RATHER THAN WHERE THEY WERE MOUNTED. Their whole
+       correctness is that they do NOT move with the content, so the reading is their top/bottom
+       against the scroll row's — a hem that scrolled would drift by exactly `scrollTop`. */
+    hemTop: (() => {
+      const h = g.querySelector(".wpg-hem--top") as HTMLElement | null;
+      if (!h) return "absent";
+      const b2 = h.getBoundingClientRect();
+      return `${getComputedStyle(h).opacity === "1" ? "on" : "off"}@${r(b2.top - sb.top)}`;
+    })(),
+    hemBot: (() => {
+      const h = g.querySelector(".wpg-hem--bot") as HTMLElement | null;
+      if (!h) return "absent";
+      const b2 = h.getBoundingClientRect();
+      return `${getComputedStyle(h).opacity === "1" ? "on" : "off"}@${r(sb.bottom - b2.bottom)}`;
+    })(),
+    /* ⚠️ ONE HEM PER SCROLLER. `.tbd-fade` and `.sv2-fade` predate the grid's; where a legacy fade
+       sits on the SAME scroller the two stack and the gradient doubles. They are kept where they
+       cover a DIFFERENT scroller — `.sv2-fade` is the shell stage's, `.tbd-fade` rides an internal
+       `.tpl-zone` — so the check is overlap, not existence. */
+    stackedFades: [...sc.querySelectorAll(".tbd-fade, .sv2-fade, [class*='-fade']")]
+      .filter((el) => (el as HTMLElement).getBoundingClientRect().height > 0)
+      .map((el) => el.className.toString().slice(0, 24)),
+    /* the gap under the hairline, paid by whichever row is first below it — and paid once */
+    topGap: (() => {
+      const tools = g.querySelector(".wpg-tools") as HTMLElement | null;
+      const a2 = parseFloat(getComputedStyle(tools ?? sc).paddingTop) || 0;
+      const b2 = tools ? parseFloat(getComputedStyle(sc).paddingTop) || 0 : 0;
+      return `${a2}+${b2}`;
+    })(),
     gutter: getComputedStyle(document.documentElement).getPropertyValue("--content-gutter").trim(),
     inset: getComputedStyle(document.documentElement).getPropertyValue("--header-inset").trim(),
   };
@@ -157,6 +186,9 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
         restBtn: rest.btnH.join("|") || "—", workBtn: work!.btnH.join("|") || "—",
         restPill: rest.pillFs.join("|") || "—", workPill: work!.pillFs.join("|") || "—",
         contentL: rest.contentL, chain: rest.chain.join(" · ") || "clean",
+        topGap: rest.topGap,
+        hemRest: `${rest.hemTop} ${rest.hemBot}`, hemWork: `${work!.hemTop} ${work!.hemBot}`,
+        stacked: rest.stackedFades.join(",") || "none",
         backToRest: !back!.working,
         offCentre: rest.offCentre.length + work!.offCentre.length,
         overflowRest: rest.overflow, overflowWork: work!.overflow,
@@ -251,6 +283,43 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
       .toBe(all.length - 1);
     expect([...new Set(withContent.map((x) => String(x.contentL)))],
       `the content's left edge differs across pages: ${JSON.stringify(withContent.map((x) => [x.page, x.contentL]))}`).toHaveLength(1);
+
+    /* ══ §2 — ONE GAP, 70px, PAID ONCE ══════════════════════════════════════════════════════ */
+    for (const r of all) {
+      const [first, second] = String(r.topGap).split("+").map(Number);
+      expect(first, `${r.page}: the gap under the hairline is ${first}, not 70`).toBe(70);
+      expect(second, `${r.page}: the gap is paid twice — the toolbar row AND the scroll row`).toBe(0);
+    }
+
+    /* ══ §3 — THE HEMS ARE PRESENT, PINNED, AND EACH IS A STATE ═════════════════════════════
+       ⚠️ THE POSITION IS THE POINT. A hem inside the scrollport scrolls with the content, so it
+       would drift by exactly `scrollTop` — `@0` in both states is what proves it did not. */
+    for (const r of all) {
+      expect(r.hemRest, `${r.page}: the hems are missing`).not.toContain("absent");
+      for (const reading of [String(r.hemRest), String(r.hemWork)].flatMap((x) => x.split(" "))) {
+        expect(reading, `${r.page}: a hem drifted off the row's edge — it is scrolling with the content (${r.hemRest} / ${r.hemWork})`)
+          .toMatch(/@0$/);
+      }
+    }
+    /* at the top of a scrolling page: no top hem, bottom hem lit. Once scrolled: top hem lit. */
+    /* ⚠️ ONE ASSERTION PER HEM, because a combined one blames the wrong element. The first version
+       compared the pair as a string and reported "a top fade at the top of the page" about a
+       reading whose TOP hem was correct and whose bottom hem was dark — I chased the wrong half
+       until I printed the value. A message that names something the reading does not say is worse
+       than no message. */
+    for (const r of scrollers) {
+      const [restTop, restBot] = String(r.hemRest).split(" ");
+      expect(restTop, `${r.page}: a top fade at the top of the page — it reads as a rendering fault`).toBe("off@0");
+      expect(restBot, `${r.page}: no bottom fade with content below the fold — the observer is not seeing the content grow`).toBe("on@0");
+      expect(String(r.hemWork).split(" ")[0], `${r.page}: no top fade once scrolled`).toBe("on@0");
+    }
+    for (const r of all) {
+      expect(r.stacked, `${r.page}: a legacy fade sits inside the grid's own scroller — two gradients on one edge (${r.stacked})`).toBe("none");
+    }
+    /* a page that cannot scroll shows neither — nothing is hidden in either direction */
+    for (const r of all.filter((x) => !x.canScroll)) {
+      expect(r.hemRest, `${r.page}: a fade on a page with nothing hidden past either edge`).toBe("off@0 off@0");
+    }
 
     /* ⚠️ THE TASKS VIEWPORT LOCK: the frame is a window and NEVER scrolls — all scrolling belongs
        to the internal `.tpl-zone`s. It leaked once: `.tpl-cols` says `flex: 1; min-height: 0`,
