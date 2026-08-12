@@ -547,7 +547,11 @@
    aligns to, as on every other band-tier page.
    ⚠️ TOP 34 → 17, HALVED, for the reason every other page halved: the plate carries its own 88px,
    so the old value was a band of empty paper above a header that is already generous. */
-.qa-wrap { --pg-gut: 30px; padding: 17px var(--pg-gut) 30px; height: 100%; display: flex; flex-direction: column; }
+/* ⚠️ NO SIDE PADDING AND NO GUTTER OF ITS OWN (header spec §1). This root sits ABOVE the grid,
+   so its 30px inset the header, the toolbar and the scroller together — Analytics measured 60px
+   narrower than its sibling `read` pages on top of their shared cap. It lives in THIS file
+   rather than a page stylesheet, which is why the page-CSS width lock could not see it. */
+.qa-wrap { padding: 17px 0 30px; height: 100%; display: flex; flex-direction: column; }
 .qa-wpg { flex: 1; min-height: 0; }
 
 

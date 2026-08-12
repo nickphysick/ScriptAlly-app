@@ -90,7 +90,7 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 10px var(--content-gutter) 12px;
+  padding: var(--content-top-gap) var(--content-gutter) 12px;
   border-bottom: 1px solid var(--ws-edge);
 }
 
@@ -123,6 +123,11 @@
      gone and the width is now correct; the reservation is doing its actual job. The cost is the
      scrollbar's width off each side of the nominal gutter, under 1.5% at any real window. */
   padding-inline: var(--content-gutter);
+  /* ⚠️ THE NO-TOOLBAR CASE. With a toolbar the gap is that row's top padding; without one the
+     scroll row is the first thing under the hairline and carries it here instead, so the
+     boundary keeps its air either way. `.wpg--tools` zeroes it when the toolbar has already
+     paid — two elements, one gap, never both. */
+  padding-top: var(--content-top-gap);
   scrollbar-gutter: stable both-edges;
 }
 
@@ -165,3 +170,6 @@
      height open. Assert the row's HEIGHT, never its padding. */
   height: auto;
 }
+
+/* the toolbar exists → it has already paid the gap, so the scroller must not pay it twice */
+.wpg--tools > .wpg-scroll { padding-top: 0; }

@@ -127,44 +127,73 @@ describe("the three-row grid — chrome outside the scroller", () => {
   });
 
   /**
-   * ⚠️ THE SCROLLER IS THE FULL CONTAINER, AND THE PAGE ROOT IS WHAT BREAKS IT (strip-fixes §3/§4).
-   * The grid lives INSIDE each page's root element, so a horizontal padding there insets the whole
-   * grid — header, toolbar and scroller alike. Two faults follow, and both shipped: the scrollbar
-   * floats inland with dead space beyond it instead of sitting at the container edge, and that
-   * page's header lands at a different inset from every page without such padding. Contact list at
-   * 0 beside Submission packages at 28 is why the ten pages did not agree.
+   * ⚠️ THE WIDTH CHAIN, ASSERTED AS A RELATIONSHIP — because enumerating forbidden properties has
+   * now been short TWICE.
    *
-   * ⚠️ AND IT MUST READ THE MARKUP TOO. Packages declared its 28px INLINE, so the CSS-only width
-   * lock added at step 1 passed this page while it was visibly wrong. A lock that can only see one
-   * of the two places a value can live is a lock with a blind spot, not a lock.
+   * v1 forbade `--wpg-cap`, `--pg-gut` and `--sa-col-max` in the page stylesheets. It passed while
+   * Submission packages carried 28px INLINE and three `@media` overrides re-guttered two roots.
+   * v2 added side padding and the Packages markup. It passed while FOUR pages were capped by
+   * `contentVariant` on the route SLOT — an ancestor, in App.tsx, that no page stylesheet mentions.
+   * Measured at 2400px against the built stylesheet: Contact list 2400, Discover 1600, Manuscripts
+   * 1200, Analytics 1140. Four regimes, six pages, two tokens, and a green lock.
+   *
+   * ⚠️ SO THIS ENUMERATES THE CHAIN, NOT THE PROPERTIES. Every element from the route slot down to
+   * the content is walked, and each is required to introduce NO width of its own — a cap, a fixed
+   * width, an auto margin or a side padding. The list that has to stay complete is the list of
+   * ANCESTORS, which is fixed by the DOM, rather than the list of ways to be narrow, which is not.
    */
-  it("⚠️ no page root insets the grid — the scroller is the full container", () => {
-    const ROOTS: [string, string, string][] = [
-      ["Contact list", "components/agents/agentList.css", ".aglist .agl-page"],
-      ["Discover", "components/agents/discover.css", ".dv2"],
-      ["Manuscripts", "components/manuscripts/manuscripts.css", ".msv1"],
-      ["Comparable titles", "components/manuscripts/comps.css", ".ctpage"],
+  it("⚠️ nothing between the window and the content states a width of its own", () => {
+    const CHAIN: [string, string, string[]][] = [
+      ["Contact list", "components/agents/agentList.css", [".aglist", ".aglist .agl-page", ".aglist .agl-inner", ".aglist .agl-wpg"]],
+      ["Discover", "components/agents/discover.css", [".dv2", ".dv-wpg", ".dv-wrap"]],
+      ["Manuscripts", "components/manuscripts/manuscripts.css", [".msv1", ".msv-wpg", ".msv-wrap"]],
+      ["Comparable titles", "components/manuscripts/comps.css", [".ctpage", ".ct-wpg", ".ct-desk"]],
+      ["Submission packages", "components/packages/packageWorkshop.css", [".pkgw", ".pkgw-wpg"]],
+      ["Analytics", "components/shell/workspaceShell.css", [".qa-wrap"]],
     ];
-    for (const [page, file, sel] of ROOTS) {
+      /* ⚠️ EXTRACT THE VALUE, NEVER LOOK AHEAD PAST IT — and this file already says so, about a
+         different rule, after the same failure. `width\s*:\s*(?!100%)` MATCHES `width: 100%`,
+         because `\s*` backtracks to zero width and the lookahead then tests the SPACE. Reading each
+         declaration and comparing it says what is meant and cannot be defeated by backtracking. */
+      const NARROWS = (decl: string, value: string): boolean => {
+        const v = value.trim().replace(/\s*!important$/, "");
+        if (decl === "max-width") return v !== "none";
+        if (decl === "width") return !["100%", "auto", "0", "0px"].includes(v);
+        if (decl === "margin" || decl === "margin-inline") return /\bauto\b/.test(v);
+        return false;
+      };
+    for (const [page, file, selectors] of CHAIN) {
       const pageCss = readFileSync(resolve(__dirname, "../..", file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-      const blocks: string[] = [];
-      for (let i = pageCss.indexOf(`${sel} {`); i > -1; i = pageCss.indexOf(`${sel} {`, i + 1)) {
-        blocks.push(pageCss.slice(i, pageCss.indexOf("}", i)));
-      }
-      expect(blocks.length, `${page}: no \`${sel} {\` rule — the check below would be vacuous`).toBeGreaterThan(0);
-      for (const m of blocks.join("\n").matchAll(/padding:\s*([^;]+)/g)) {
-        const parts = m[1].trim().split(/\s+/);
-        /* `padding: A B C` and `padding: A B` both set the sides from the SECOND value */
-        const sides = parts.length === 1 ? parts[0] : parts[1];
-        expect(sides, `${page}: its root pads the sides (\`padding: ${m[1].trim()}\`), which insets the whole grid and makes this page's header a different width from every other`).toMatch(/^0(px)?$/);
+      for (const sel of selectors) {
+        const blocks: string[] = [];
+        for (let i = pageCss.indexOf(sel + " {"); i > -1; i = pageCss.indexOf(sel + " {", i + 1)) {
+          blocks.push(pageCss.slice(i, pageCss.indexOf("}", i)));
+        }
+        for (const b of blocks) {
+          for (const m of b.matchAll(/(^|[;{])\s*(max-width|width|margin|margin-inline)\s*:\s*([^;}]+)/g)) {
+            expect(NARROWS(m[2], m[3]), `${page}: \`${sel}\` narrows the chain with \`${m[2]}: ${m[3].trim()}\` — every element between the window and the content must simply fill its parent`)
+              .toBe(false);
+          }
+          for (const m of b.matchAll(/padding(-inline)?:\s*([^;]+)/g)) {
+            const parts = m[2].trim().split(/\s+/);
+            const sides = m[1] ? parts[0] : (parts.length === 1 ? parts[0] : parts[1]);
+            expect(sides, `${page}: \`${sel}\` pads its sides (\`${m[0]}\`), insetting everything below it`).toMatch(/^0(px)?$/);
+          }
+        }
       }
     }
-    /* the inline half — the one that got through */
+    /* the two ancestors that live OUTSIDE any page stylesheet, and each got through a lock once */
+    const app = readFileSync(resolve(__dirname, "../../App.tsx"), "utf8");
+    for (const route of ['routeKey === "agents"', 'routeKey === "manuscripts"', "active={queriesAnalytics}"]) {
+      const at = app.indexOf(route);
+      expect(at, `${route} is not mounted here any more`).toBeGreaterThan(-1);
+      expect(app.slice(at, app.indexOf(">", at)), `${route}'s slot caps the page from an ancestor no page stylesheet can see`)
+        .not.toContain("contentVariant");
+    }
     const pkg = readFileSync(resolve(__dirname, "../SubmissionPackages.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const rootStyle = /className="pkg-root pkgw" style=\{\{([^}]*)\}\}/.exec(pkg);
     expect(rootStyle, "the Packages root changed shape — this assertion no longer reads it").toBeTruthy();
     const pad = /padding:\s*"([^"]+)"/.exec(rootStyle![1]);
-    expect(pad, "the Packages root lost its inline padding entirely — check the top value survived").toBeTruthy();
     expect(pad![1].trim().split(/\s+/)[1], `Packages pads its root's sides inline (\`${pad![1]}\`) — invisible to every stylesheet lock`).toMatch(/^0(px)?$/);
   });
 

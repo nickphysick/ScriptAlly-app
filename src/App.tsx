@@ -640,7 +640,13 @@ function AppContent() {
 
         {/* Amendment 1 (H3) — Analytics is a real destination so the nav carries no dead link.
             The page itself is a placeholder and says so; TODO(analytics-page). */}
-        <StagePage active={queriesAnalytics} contentVariant="read">
+        {/* ⚠️ NO `contentVariant` (header spec §1). The ultrawide caps — `work` 1600 and
+            `read` 1200 — are retired for every grid page: they sit on the route SLOT, an
+            ancestor of the page, so they capped the header, the toolbar and the scroller
+            together and centred the lot. Measured at 2400px against the built stylesheet:
+            Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
+            1200 — four width regimes across six pages that share two tokens. */}
+        <StagePage active={queriesAnalytics}>
           <QueryAnalytics />
         </StagePage>
 
@@ -672,14 +678,26 @@ function AppContent() {
 
         {/* The agents slot is SPLIT (F12): Discover keeps the capped work column;
             the Contact List page renders the F12 shell (its own chrome), so its slot is bare. */}
-        <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn" contentVariant="work">
+        {/* ⚠️ NO `contentVariant` (header spec §1). The ultrawide caps — `work` 1600 and
+            `read` 1200 — are retired for every grid page: they sit on the route SLOT, an
+            ancestor of the page, so they capped the header, the toolbar and the scroller
+            together and centred the lot. Measured at 2400px against the built stylesheet:
+            Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
+            1200 — four width regimes across six pages that share two tokens. */}
+        <StagePage active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
           <DiscoverNewAgents onNavigate={handleNavigate} />
         </StagePage>
         <StagePage active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
           <Agents searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
         </StagePage>
 
-        <StagePage active={routeKey === "manuscripts"} layout="fill" contentVariant="read">
+        {/* ⚠️ NO `contentVariant` (header spec §1). The ultrawide caps — `work` 1600 and
+            `read` 1200 — are retired for every grid page: they sit on the route SLOT, an
+            ancestor of the page, so they capped the header, the toolbar and the scroller
+            together and centred the lot. Measured at 2400px against the built stylesheet:
+            Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
+            1200 — four width regimes across six pages that share two tokens. */}
+        <StagePage active={routeKey === "manuscripts"} layout="fill">
           {manuscriptsPackages ? (
             <SubmissionPackages />
           ) : manuscriptsComps ? (

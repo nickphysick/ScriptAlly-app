@@ -38,6 +38,13 @@
 :root {
   --content-gutter: 80px;
   --header-inset: 120px;
+  /* ⚠️ THE AIR UNDER THE HAIRLINE, AND IT IS A PROPERTY OF THE BOUNDARY — not of the toolbar.
+     Content began flush against the hairline. The gap therefore sits above whatever comes FIRST
+     below the line: the toolbar row where a page has one, the scroll row where it does not, so a
+     page gains and loses a toolbar without gaining or losing its top margin.
+     ⚠️ IT DOES NOT CHANGE WHEN THE HEADER STRIPS. The gap is the distance from the boundary to
+     the content, and the boundary does not move — only what is above it does. */
+  --content-top-gap: 20px;
   /* LEGACY ALIAS — Query Centre only. Delete with the `compact` variant. */
   --sa-col-gut: var(--content-gutter);
 }

@@ -64,12 +64,33 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
 });
 
 describe("route variants — declared once at the mount", () => {
-  it("workspace hubs declare their width kind; the F12 pages self-chrome (no cap)", () => {
-    // Queries (and, from Stage 4, Agents) render the F12 shell — their own full-bleed header
-    // + centred --maxw column — so their slots carry NO contentVariant. Other routes keep theirs.
-    expect(app).not.toMatch(/routeKey === "queries"[^>]*contentVariant/s);
-    expect(app).toMatch(/routeKey === "manuscripts"[^>]*contentVariant="read"/s);
-    expect(app).toContain('<StagePage active contentVariant="read"><ImportCsv');
+  /**
+   * ⚠️ REVERSED: NO GRID ROUTE DECLARES A WIDTH KIND (header spec §1). `contentVariant` puts a cap
+   * — `work` 1600 or `read` 1200 — on the route SLOT, which is an ANCESTOR of the page and
+   * therefore of the whole grid, so it capped the header, the toolbar and the scroller together
+   * and centred the result. Measured at 2400px against the built stylesheet before this changed:
+   *
+   *     Contact list (no variant)  header 2000  scroller 2400   ← the two tokens, correct
+   *     Discover     (`work`)      header 1200  scroller 1600
+   *     Manuscripts  (`read`)      header  800  scroller 1200
+   *     Analytics    (`read` +30)  header  740  scroller 1140
+   *
+   * Four regimes across six pages that share two tokens, and the page-CSS width lock passed all
+   * four — it reads page stylesheets, and this constraint is in App.tsx.
+   *
+   * ⚠️ IMPORT KEEPS ITS `read`, and that is not an oversight: it is out of the header spec's scope
+   * and still on the compact slab, so its cap is the only thing giving it a column.
+   */
+  it("no grid route declares a width kind — the caps are the grid's job now", () => {
+    for (const route of ['routeKey === "queries"', 'routeKey === "manuscripts"', 'routeKey === "agents"', "active={queriesAnalytics}"]) {
+      const at = app.indexOf(route);
+      expect(at, `${route} is not mounted here any more — this assertion is vacuous`).toBeGreaterThan(-1);
+      const slot = app.slice(at, app.indexOf(">", at));
+      expect(slot, `${route} still declares a contentVariant — it caps the header, toolbar and scroller together, from an ancestor no page stylesheet can see`)
+        .not.toContain("contentVariant");
+    }
+    expect(app, "Import lost its cap — it is out of scope for the header spec and the cap is what gives it a column")
+      .toContain('<StagePage active contentVariant="read"><ImportCsv');
   });
 
   it("the dashboard stays exempt (no contentVariant on its slot)", () => {
