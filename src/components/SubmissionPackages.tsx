@@ -139,20 +139,23 @@ export const SubmissionPackages: React.FC = () => {
   );
 
   // Header right slot: the manuscript selector chip. One manuscript = plain; 2+ = a switcher menu.
-  const chipShell: React.CSSProperties = {
-    display: "inline-flex", alignItems: "center", gap: 9, fontFamily: FONT_SERIF, fontSize: 15, fontWeight: 600,
-    color: "var(--ink)", background: "#fffefb", border: "var(--bdw) solid var(--bd)", borderRadius: 10,
-  };
+  /* ⚠️ THE CHIP IS A CLASS, NOT AN INLINE STYLE, AND THAT IS WHAT LETS IT SCALE. Inline styles
+     cannot be reached by `.wsh--scrolled`, so while this was a style object the selector sat at its
+     resting 15px/9px in a 52px strip where every other element had stepped down — the header's
+     height was right and its contents were not. It is also the third time an inline style on this
+     page has been invisible to a rule that needed it (the root's `overflowY`, then its 28px side
+     padding). `.pkgw-mschip` carries the same declarations. */
+  const chipShell: React.CSSProperties = {};
   const msSelector = activeMs ? (
     <div ref={msMenuRef} style={{ position: "relative" }}>
       {multiMs ? (
-        <button type="button" onClick={() => setMsMenuOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={msMenuOpen} style={{ ...chipShell, padding: "9px 14px", cursor: "pointer" }}>
+        <button type="button" onClick={() => setMsMenuOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={msMenuOpen} className="pkgw-mschip">
           {bookIcon}
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 220 }}>{activeMs.title}</span>
           <ChevronDown style={{ width: 15, height: 15, color: "var(--muted)", flexShrink: 0, transform: msMenuOpen ? "rotate(180deg)" : "none", transition: "transform .15s" }} aria-hidden="true" />
         </button>
       ) : (
-        <span style={{ ...chipShell, padding: "9px 16px" }}>
+        <span className="pkgw-mschip pkgw-mschip--static">
           {bookIcon}
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 240 }}>{activeMs.title}</span>
         </span>

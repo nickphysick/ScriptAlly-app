@@ -722,3 +722,29 @@
 .pkgw-complegend .k-rep { background: var(--pkg-ink); }
 .pkgw-complegend .k-wait { background: repeating-linear-gradient(45deg, #e2d8cc, #e2d8cc 3px, #efe8df 3px, #efe8df 6px); }
 .pkgw-complegend .k-non { background: var(--pkg-fill); }
+
+/* ══ THE HEADER'S PER-PAGE ELEMENTS SCALE WITH THE STATE ══════════════════════════════════════
+ * ⚠️ THE ROW'S HEIGHT WAS NEVER THE PROBLEM — measured identical on all six pages, 96 at rest and
+ * 52 working. What differed was the CONTENTS: this page's chip, primary button and Pro pill each
+ * held their resting size inside a 52px strip while the title, mark and shared buttons stepped
+ * down, so the strip read as fuller and tighter than every other page's at the same height.
+ * A page element with no working-state size is the exception that is wrong, not the row.
+ */
+.pkgw-mschip {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 600;
+  color: var(--ink); background: #fffefb; border: var(--bdw) solid var(--bd); border-radius: 10px;
+  height: 38px; padding: 0 14px; cursor: pointer;
+  transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
+    font-size .22s cubic-bezier(.4, 0, .2, 1);
+}
+.pkgw-mschip--static { cursor: default; padding: 0 16px; }
+.wsh--scrolled .pkgw-mschip { height: 30px; padding: 0 11px; font-size: 13px; }
+.wsh--scrolled .pkgw-btn { height: 30px; padding: 0 12px; font-size: 12px; }
+/* the Pro pill is type, so it steps by type — and its `top` nudge is tuned to the resting title */
+.wsh--scrolled .pkgw-propill { font-size: 7px; padding: 3px 8px; top: 1px; }
+.wsh--scrolled .pkgw-propill svg { width: 9px; height: 9px; }
+.pkgw-btn, .pkgw-propill {
+  transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
+    font-size .22s cubic-bezier(.4, 0, .2, 1);
+}

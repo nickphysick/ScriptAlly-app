@@ -142,10 +142,15 @@ describe("⚠️ the order: header block → hairline → sidebar and body on th
     expect(html.slice(cols)).not.toContain("tpl-title");
   });
 
-  it("the hairline is the tool row's own bottom edge", () => {
-    const i = layoutCss.indexOf(".tpl-tools {");
-    const rule = layoutCss.slice(i, layoutCss.indexOf("}", i));
-    expect(rule).toContain("border-bottom: 1px solid");
+  it("the hairline is the GRID row's, not this page's", () => {
+    /* ⚠️ RETARGETED (step 5). `.tpl-tools` drew the line while the Tasks pages hand-assembled their
+       own header. They are on the shared grid now, where the boundary between chrome and content is
+       row 1's bottom edge — and a line here as well would be the second hairline just removed from
+       every other page. What this file still owns is the row's CONTENT. */
+    expect(layoutCss, "the Tasks tool row drew its own hairline again — that is a second line under the header's")
+      .not.toMatch(/\.tpl-tools\s*\{[^}]*border-bottom/s);
+    const grid = readFileSync(join(here, "..", "shell", "workspacePageGrid.css"), "utf8");
+    expect(grid, "the shared row lost the hairline these pages now depend on").toContain(".wpg-plate::after");
   });
 
   it("the sidebar is OPTIONAL — absent means no aside at all, never an empty gutter", () => {

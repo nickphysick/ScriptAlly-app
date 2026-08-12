@@ -39,6 +39,7 @@
  */
 import React from "react";
 import { PageHeader } from "../shell/PageHeader";
+import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { MarkName } from "../dashboard/OneScreenMark";
 import "./tasksLayout.css";
 
@@ -112,39 +113,43 @@ export const TasksPageLayout: React.FC<TasksPageLayoutProps> = ({
   /* `.tdb-col` is the SINGLE geometry owner (max-width, gutters, and the top token) — the layout
      wears it rather than restating its numbers. `.tpl` adds only what the contract needs. */
   <div className="tdb-col tpl">
-    <header className="tpl-head">
-      {/**
-       * ⚠️ THE PLATE REPLACES THE TITLE BLOCK, and it replaces it HERE rather than in each page —
-       * which is the whole reason this component exists. Converting the three Tasks pages one at a
-       * time would have had them disagreeing about their top edge between commits, the exact fault
-       * this file was written to end.
-       *
-       * ⚠️ AND IT WILL NOT CONDENSE ON THESE PAGES, by construction and correctly. `.tpl-head` is
-       * `flex: 0 0 auto` and never scrolls; `.tpl-zone` below it is "the only thing that scrolls".
-       * So the plate has no scroller to stick within and stays at its 88px rest height — which is
-       * right, because it is never covering anything that needs to get past it. Comparable titles
-       * already behaves this way for the same reason. Do NOT "fix" this by moving the plate into
-       * the zone: it would then scroll away with the list, and reaching for the `min-height: 0`
-       * chain to avoid that is explicitly out of bounds (see the chain note in tasksLayout.css).
-       */}
-      <PageHeader variant="workspace" mark={mark} title={title} description={subtitle} />
-      {/* the hairline lives on this row's bottom edge — the header ends where the columns begin.
-          An empty tool row would draw a bare rule, so a page with neither controls nor an eyebrow
-          renders none.
-          ⚠️ THE EYEBROW RIDES THIS ROW NOW. It is mono context — a date and a week count — and the
-          rule this pack settled is that the plate carries identity while the tool row carries
-          tallies and context. It also gains a style here for the first time: `.tpl-eyebrow` had NO
-          CSS rule at all and had been rendering as unstyled body text. */}
-      {(tools || eyebrow) && (
+    {/**
+     * ⚠️ THE GRID, WITH THE SAME CHROME THE OTHER SIX PAGES USE (step 5). These three were the last
+     * pages on the sticky path, which is the only reason `.wsh-wrap`'s `position: sticky`, its
+     * reservation and the legacy scroll listener still exist — converting them is what lets those
+     * be deleted.
+     *
+     * ⚠️ THEY NEVER STRIP, AND THAT IS CORRECT RATHER THAN A GAP (§4). Their content scrolls in an
+     * internal `.tpl-zone`, so the grid's own scroll row never moves and its sentinel never leaves.
+     * They still need the grid: chrome belongs OUTSIDE the scroller, and it is the grid that puts
+     * it there and gives all nine pages one width.
+     *
+     * ⚠️ THE `min-height: 0` CHAIN IS BROWSER-VERIFIED AND IS NOT TOUCHED. The grid's rows sit
+     * ABOVE `.tpl-cols`; everything from there down — `.tpl-body`, `.tdb-centre`, `.tpl-zone` — is
+     * unchanged. No `dvh`, no `--head` arithmetic, nothing added to the chain.
+     */}
+    <WorkspacePageGrid
+      className="tpl-wpg"
+      scrollLabel={title}
+      plate={<PageHeader variant="workspace" mark={mark} title={title} description={subtitle} />}
+      /* ⚠️ THE EYEBROW RIDES THE TOOL ROW. Mono context — a date, a week count — and the rule is
+         that the plate carries identity while the tool row carries tallies and context. Absent
+         both, the grid renders no row and no hairline rather than a bare rule. */
+      /* ⚠️ `.tpl-tools tdb-tools` SURVIVES AS THE ROW'S CONTENT, not as the row. Its own spacing
+         and hairline move to the grid's row — but two descendant rules hang off it, the 34px
+         button step and the house disabled grammar, and both would silently stop applying if the
+         wrapper went. The class stays, its box does not. */
+      toolbar={(tools || eyebrow) ? (
         <div className="tpl-tools tdb-tools">
           {eyebrow && <span className="tpl-eyebrow">{eyebrow}</span>}
           {tools}
         </div>
-      )}
-    </header>
-    <div className="tpl-cols">
-      {sidebar && <aside className="tpl-side">{sidebar}</aside>}
-      <div className="tpl-body">{children}</div>
-    </div>
+      ) : undefined}
+    >
+      <div className="tpl-cols">
+        {sidebar && <aside className="tpl-side">{sidebar}</aside>}
+        <div className="tpl-body">{children}</div>
+      </div>
+    </WorkspacePageGrid>
   </div>
 );

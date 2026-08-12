@@ -105,17 +105,54 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * scrollport with the content and costs no layout height. `root` is the scroll row itself: with
    * the default (the viewport) it would report on the wrong scrollport entirely.
    */
+  /**
+   * ⚠️ STRIPPING RECLAIMS HEIGHT, WHICH CAN UN-SCROLL THE PAGE — a feedback loop, not a broken
+   * scroller, and Manuscripts hit it because its content only just exceeds the viewport:
+   *
+   *   1. content overflows by a little, the sentinel leaves, the header strips;
+   *   2. row 1 goes from rest height to strip height, so row 3 GROWS by the difference;
+   *   3. `scrollHeight − clientHeight` falls; if the original overflow was smaller than the
+   *      height just reclaimed, maximum scroll becomes 0;
+   *   4. the browser clamps `scrollTop` to 0, the sentinel returns, the header expands, the
+   *      content overflows again — and it oscillates.
+   *
+   * ⚠️ THE FIX IS A GUARD, NOT HYSTERESIS. Hysteresis would damp the bounce while leaving the page
+   * in whichever state it settled, which is arbitrary. The honest rule is that stripping must be
+   * SAFE: only strip when the page would still scroll afterwards. Below that threshold the page
+   * keeps its resting card, which is right on its own terms — a page that barely scrolls has
+   * nothing to gain from the working state.
+   *
+   * ⚠️ THE THRESHOLD IS COMPUTED FROM THE TOKENS, never a literal, because it IS the reclaimed
+   * height: the row's rest height (plate + its top gap) minus the strip. Read at call time so a
+   * token change cannot leave a stale number behind.
+   */
+  const reclaimedPx = React.useCallback((): number => {
+    if (typeof window === "undefined") return 0;
+    const cs = getComputedStyle(document.documentElement);
+    const n = (name: string) => parseFloat(cs.getPropertyValue(name)) || 0;
+    return n("--wsh-plate-h") + n("--wsh-plate-gap") - n("--wsh-plate-h-scrolled");
+  }, []);
+
   React.useEffect(() => {
     const root = scrollRef.current;
     const sentinel = sentinelRef.current;
     if (!root || !sentinel) return;
+    /* the sentinel says the content has moved; this says the page can afford it to */
+    const safeToStrip = () => root.scrollHeight - root.clientHeight > reclaimedPx();
     const io = new IntersectionObserver(
-      ([entry]) => setStuck(!entry.isIntersecting),
+      ([entry]) => setStuck(!entry.isIntersecting && safeToStrip()),
       { root, threshold: 0 },
     );
     io.observe(sentinel);
-    return () => io.disconnect();
-  }, []);
+    /* ⚠️ AND THE GUARD IS RE-EVALUATED WHEN THE PAGE RESIZES, because a window that gets shorter
+       can push a page over the threshold without the sentinel moving at all. Without this a page
+       could sit un-strippable after a resize until something happened to scroll it. */
+    const ro = new ResizeObserver(() => {
+      setStuck((was) => (was && !safeToStrip() ? false : was));
+    });
+    ro.observe(root);
+    return () => { io.disconnect(); ro.disconnect(); };
+  }, [reclaimedPx]);
 
   return (
     <PlateCondensedContext.Provider value={condensed}>

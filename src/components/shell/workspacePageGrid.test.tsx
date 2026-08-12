@@ -277,7 +277,14 @@ describe("the three-row grid — chrome outside the scroller", () => {
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(src, "the union is not computed in one place — two derivations of one state is how the row and the header come to disagree")
       .toMatch(/const condensed = stuck \|\| condensedByMode;/);
-    expect((src.match(/setStuck\(/g) ?? []).length, "something other than the observer writes the scroll half — that is a synthesised scroll signal").toBe(1);
+    /* ⚠️ TWO WRITERS NOW, AND BOTH ARE THE SAME SIGNAL. The observer sets it when the sentinel
+       moves; the resize observer CLEARS it when the page stops being able to afford the strip.
+       Neither invents a scroll position — the count is 2 rather than 1, and what the lock is
+       really for is that no page-level code writes it. */
+    expect((src.match(/setStuck\(/g) ?? []).length, "an extra writer of the scroll half appeared — a synthesised scroll signal is the thing to prevent").toBe(2);
+    expect(src, "the safe-to-strip guard went — stripping reclaims height, which can un-scroll a page and start it oscillating").toContain("safeToStrip");
+    expect(src, "the threshold is a literal — it must be the reclaimed height, read from the tokens")
+      .toMatch(/--wsh-plate-h[\s\S]{0,120}--wsh-plate-h-scrolled/);
   });
 
   it("⚠️ the context default is `null`, distinguishable from `false`", () => {
@@ -329,6 +336,8 @@ describe("the three-row grid — chrome outside the scroller", () => {
       ["Discover", "../DiscoverNewAgents.tsx"],
       ["Submission packages", "../SubmissionPackages.tsx"],
       ["Analytics", "../QueryAnalytics.tsx"],
+      /* the last three, converted at step 5 — which is what lets the sticky path be deleted */
+      ["Tasks family", "../todo/TasksPageLayout.tsx"],
     ] as const;
     /* ⚠️ THE CENSUS BRIEFLY GREW A "NO PLATE" HALF, AND THAT WAS THE CENSUS BEING WRONG RATHER
        THAN THE WORLD MOVING. `ee0094b` put the plate on all three Tasks pages; `a7b5d54` reverted
@@ -340,9 +349,12 @@ describe("the three-row grid — chrome outside the scroller", () => {
        ever describe what is there. It cannot tell a decision from a revert, so when its two halves
        stop fitting, the first question is which commit last moved the page — not which half to
        widen. */
-    const NOT_YET = [
-      ["Tasks family", "../todo/TasksPageLayout.tsx"],
-    ] as const;
+    /* ⚠️ NOT_YET IS EMPTY, AND THAT IS THE SIGNAL TO DELETE THE OLD PATH. Every page that renders a
+       plate is on the grid. `.wsh-wrap`'s `position: sticky`, its height reservation and the legacy
+       scroll listener exist ONLY for pages on the other path, and there are none — step 7 removes
+       them. Until then the half stays declared and empty rather than deleted, so the fact that it
+       is empty is asserted rather than merely true. */
+    const NOT_YET: readonly (readonly [string, string])[] = [];
     for (const [page, file] of CONVERTED) {
       expect(
         readFileSync(resolve(__dirname, file), "utf8"),

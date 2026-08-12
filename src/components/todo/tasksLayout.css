@@ -32,10 +32,13 @@
 
 /* the tool row — margin/rule per the ref (.tools): the hairline is ITS bottom edge, so the
    header ends exactly where the columns begin. */
+/* ⚠️ THE ROW IS THE GRID'S NOW (step 5) — this is its CONTENT. The spacing and the hairline moved
+   to `.wpg-tools`, which owns them for all nine pages; keeping them here would double the gap and
+   draw a second line under the header, which is the fault just removed from the shared row. The
+   class survives because two descendant rules hang off it (see below) and would stop applying
+   silently if it went. */
 .tpl-tools {
-  display: flex; align-items: center; gap: 8px;
-  margin-top: 8px; padding-bottom: 12px;
-  border-bottom: 1px solid #f0e9dd;
+  display: flex; align-items: center; gap: 8px; width: 100%;
 }
 .tpl-grow { flex: 1; }
 
