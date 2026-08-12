@@ -13,6 +13,10 @@ import { test, expect, Page } from "@playwright/test";
 import { openRoute, scrollbarWidth } from "./measure";
 
 const SCROLLING: [string, string][] = [
+  /* ⚠️ THE QUERY CENTRE IS IN THE LIST, and it was missing from the first version — the one page
+     the same run had just converted. A matrix that omits the page you changed is the "all six
+     headers identical" report all over again. */
+  ["Query Centre", "/queries"],
   ["Contact list", "/agents"],
   ["Discover", "/agents/discover"],
   ["Manuscripts", "/manuscripts"],
