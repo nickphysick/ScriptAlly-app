@@ -306,3 +306,81 @@ state.
 ### Not verified
 
 No visual verification. All five surfaces are inside the onboarding flow, which is auth-gated.
+
+---
+
+## Phase 3 — delete the legacy tail
+
+**Commit:** _(hash in the next log commit)_
+**Gates:** tsc **0** · build **✓** · Vitest **258 files, 4228 passed | 2 skipped (4230)**
+`Onboarding.tsx` 1288 → 681 lines.
+
+Recon Part B items 1, 2, 4 and 6 all lived on the two deleted screens. None was repaired; all four
+went with their screens, which is the point — every one of them was a consequence of the screens
+existing rather than of how they were written.
+
+### 3a — the screens
+
+`Screen5Agents`, `Screen6Complete` and `handleScreen5Continue` deleted, with them the `addAgent`
+call carrying six invented facts (`starRating: 3`, `responseTimeWeeks: 12`, `submissionStatus:
+OPEN`, `noResponseMeansNo: false`, `submissionMethod: EMAIL`, `materialsWanted: ["Query Letter"]`).
+**Onboarding no longer calls `addAgent` at all**, so it cannot invent an agent's facts.
+
+Dead helpers removed with them: `ProgressDots`, `SkipButton`, `BackButton`, `ModalFooter`,
+`SelectableCard` + its props interface, `FormField`, `InputField`, `SelectField`,
+`TOTAL_MODAL_STEPS`, plus the now-unused imports (`Send`, `UserPlus`, `ArrowRight`, `ChevronLeft`,
+`Upload`, `Download`, `AnimatePresence`, `useEffect`, `SubmissionStatus`, `SubmissionMethod`) and
+`addAgent` from the db destructure.
+
+### 3b — the exits
+
+Branch A's ready-to-query path and Branch B's add-by-hand both now set
+`sessionStorage["scriptally_post_onboarding_tab"] = "agents"` and finish — the mechanism Branch A3b
+already used. Onboarding ends where the real work starts, at the agent list, whose Add-an-agent
+form stores what it asks for.
+
+### 3c/3d — the beat and the dots
+
+`CreamUnderstood` deleted from `chrome.tsx`; the `"understood"` flow state, its 1200ms timeout and
+its `FLOW_KEY` entry are gone, so the welcome's Continue enters the mapped branch directly.
+
+**Decision (mine — the pack said "delete `ProgressDots` and `DOT_TOTAL`" without saying what the
+chrome row becomes):** `OnbChrome` keeps the Skip link and loses the dot row entirely, and the
+`dotIndex` prop is removed from `Form11Card` and all nine call sites. Five dots were drawn while
+Branch A only ever passed index 1 and Branch B 1 or 2 — the row never advanced for one branch and
+never passed the second dot for the other, telling every writer they were two steps into a
+five-step flow that did not exist. Phase 6 introduces the ref's mono step marker in its place;
+shipping a lying dot row for one phase in the meantime was the worse option.
+
+### 3e — the unreachable screen
+
+`ImportTidyAnimation.tsx` and its test deleted; `"tidying"` removed from the `B3Screen` union along
+with its render guard. `setScreen("tidying")` was never called from anywhere.
+
+### 3f — the resume path
+
+**⚠️ This is the one thing deletion could genuinely have broken, and it is worth stating plainly.**
+`normalizeStep` used to preserve saved steps 5 and 6. Those screens no longer exist, so a writer
+returning mid-flight from an earlier build would have resumed onto nothing — and the onboarding
+overlay is `position: fixed; inset: 0` at `z-index: 9999` over the whole app, so "nothing" means a
+blank screen with no way out. It now sends **every** saved step to the welcome, which is a real
+screen that can reach everywhere else. Locked.
+
+### Locks
+
+New `onboardingTail.test.ts`, 14 cases: the screens are gone, onboarding writes no agent and names
+none of the invented fields, no completion screen claims agents are on file, both branch exits use
+the hatch and neither calls `goTo(5)`, nothing routes to any numbered step above zero, no
+`CreamUnderstood` in either file, no `"understood"` state or `1200`, no dots, no `"tidying"`, and
+`normalizeStep` resolves everything to 0.
+
+**⚠️ Same false-alarm shape as Phase 2, and worth recording as a pattern:** four of these failed
+first time against my own explanatory comments, which necessarily name the things they document as
+deleted. The file strips `//` lines and `/* */` blocks before matching. The alternative — deleting
+the explanations to satisfy the lock — would have thrown away exactly the knowledge worth keeping.
+One of the four was a real miss, though: `CreamUnderstood` was still defined in `chrome.tsx` when I
+first ran it.
+
+### Not verified
+
+No visual verification; onboarding is auth-gated.

@@ -3,24 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import React, { useState, useRef } from "react";
+import { motion } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
-import { ManuscriptStatus, SubmissionStatus, SubmissionMethod } from "../types";
-import { CreamUnderstood } from "./onboarding/chrome";
+import { ManuscriptStatus } from "../types";
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
-import {
-  Send,
-  UserPlus,
-  ArrowRight,
-  Check,
-  ChevronLeft,
-  Upload,
-  Download,
-} from "lucide-react";
+import { Check } from "lucide-react";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -57,8 +48,6 @@ const ACCENT_COLORS: Record<number, string> = {
   6: C.green,
 };
 
-const TOTAL_MODAL_STEPS = 5; // steps 2–6
-
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface OnboardingProps {
   onComplete: () => void;
@@ -68,8 +57,6 @@ interface ProgressData {
   step: number;
   manuscriptTitle: string;
   manuscriptGenre: string;
-  agentName: string;
-  agentAgency: string;
   queryingStage: QueryingStage | null;
 }
 
@@ -104,7 +91,7 @@ const STAGE_TO_JOURNEY: Record<QueryingStage, "starting" | "querying" | "explori
 // Distinct ScreenTransition keys per flow phase. Deliberately one key per BRANCH, not per branch
 // step — the key remounts ScreenTransition's child, so a per-step key would wipe the branch
 // component's internal state on every internal navigation.
-const FLOW_KEY: Record<"understood" | "A" | "B", number> = { understood: -2, A: 100, B: 200 };
+const FLOW_KEY: Record<Branch, number> = { A: 100, B: 200 };
 
 // Centres a screen in the full-height onboarding overlay.
 const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -157,53 +144,6 @@ const Subtitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </p>
 );
 
-const SkipButton: React.FC<{ onSkip: () => void }> = ({ onSkip }) => (
-  <button
-    onClick={onSkip}
-    style={{
-      position: "absolute",
-      top: 20,
-      right: 20,
-      fontFamily: FONT_MONO,
-      fontSize: 10,
-      letterSpacing: "0.06em",
-      color: C.muted,
-      background: "none",
-      border: "none",
-      cursor: "pointer",
-      padding: "4px 8px",
-      borderRadius: 6,
-      transition: "color 0.15s",
-    }}
-    onMouseEnter={e => (e.currentTarget.style.color = C.ink)}
-    onMouseLeave={e => (e.currentTarget.style.color = C.muted)}
-  >
-    Skip setup
-  </button>
-);
-
-const ProgressDots: React.FC<{ currentStep: number }> = ({ currentStep }) => {
-  const dotStep = currentStep - 1; // 1-indexed into 1..5
-  return (
-    <div style={{ display: "flex", gap: 5, marginBottom: 28 }}>
-      {Array.from({ length: TOTAL_MODAL_STEPS }, (_, i) => {
-        const idx = i + 1;
-        const isActive = idx === dotStep;
-        const isDone = idx < dotStep;
-        return (
-          <div key={i} style={{
-            height: 5,
-            width: isActive ? 16 : 5,
-            borderRadius: 3,
-            background: isDone ? C.dusty : isActive ? C.burgundy : C.border,
-            transition: "width 0.3s ease, background 0.3s ease",
-          }} />
-        );
-      })}
-    </div>
-  );
-};
-
 const PrimaryButton: React.FC<{
   onClick: () => void;
   children: React.ReactNode;
@@ -234,200 +174,6 @@ const PrimaryButton: React.FC<{
     >
       {children}
     </button>
-  );
-};
-
-const BackButton: React.FC<{ onClick: () => void }> = ({ onClick }) => {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        fontFamily: FONT_MONO,
-        fontSize: 11,
-        letterSpacing: "0.06em",
-        color: hovered ? C.ink : C.dusty,
-        background: "none",
-        border: "none",
-        cursor: "pointer",
-        padding: "10px 12px",
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-        transition: "color 0.15s",
-      }}
-    >
-      <ChevronLeft size={13} />
-      Back
-    </button>
-  );
-};
-
-const ModalFooter: React.FC<{
-  onBack?: () => void;
-  onContinue: () => void;
-  continueLabel?: string;
-  continueDisabled?: boolean;
-}> = ({ onBack, onContinue, continueLabel = "Continue →", continueDisabled }) => (
-  <div style={{
-    background: C.card3,
-    borderTop: `0.5px solid rgba(235,220,211,0.5)`,
-    borderRadius: "0 0 20px 20px",
-    padding: "16px 24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  }}>
-    {onBack ? <BackButton onClick={onBack} /> : <div />}
-    <PrimaryButton onClick={onContinue} disabled={continueDisabled}>
-      {continueLabel}
-    </PrimaryButton>
-  </div>
-);
-
-interface SelectableCardProps {
-  selected: boolean;
-  onSelect: () => void;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  tag: string;
-}
-
-const SelectableCard: React.FC<SelectableCardProps> = ({ selected, onSelect, icon, title, description, tag }) => {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onSelect}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 12,
-        width: "100%",
-        textAlign: "left",
-        background: selected ? "#fff0eb" : hovered ? C.card2 : C.card,
-        border: `${selected ? "1px" : "1px"} solid ${selected ? C.burgundy : hovered ? C.dusty : C.border}`,
-        borderRadius: 14,
-        padding: "13px 16px",
-        cursor: "pointer",
-        transition: "all 0.15s ease",
-        marginBottom: 8,
-      }}
-    >
-      <div style={{
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        background: selected ? C.burgundy : C.card2,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-        transition: "background 0.15s",
-        color: selected ? "#f5ede8" : C.dusty,
-      }}>
-        {icon}
-      </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-          <span style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 500, color: C.ink }}>
-            {title}
-          </span>
-          <span style={{
-            fontFamily: FONT_MONO,
-            fontSize: 9,
-            letterSpacing: "0.06em",
-            background: C.sandyBg,
-            border: `0.5px solid ${C.sandyBorder2}`,
-            color: C.muted,
-            borderRadius: 6,
-            padding: "2px 6px",
-            whiteSpace: "nowrap",
-          }}>
-            {tag}
-          </span>
-        </div>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.muted, margin: 0, lineHeight: 1.5 }}>
-          {description}
-        </p>
-      </div>
-    </button>
-  );
-};
-
-const FormField: React.FC<{
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}> = ({ label, required, children }) => (
-  <div style={{ marginBottom: 14 }}>
-    <label style={{
-      fontFamily: FONT_MONO,
-      fontSize: 9,
-      textTransform: "uppercase",
-      letterSpacing: "0.1em",
-      color: C.muted,
-      display: "block",
-      marginBottom: 5,
-    }}>
-      {label}{required && <span style={{ color: C.burgundy, marginLeft: 3 }}>*</span>}
-    </label>
-    {children}
-  </div>
-);
-
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  background: C.card2,
-  border: `0.5px solid ${C.dustyBorder}`,
-  borderRadius: 10,
-  padding: "11px 14px",
-  fontFamily: FONT_SANS,
-  fontSize: 13,
-  color: C.ink,
-  outline: "none",
-  boxSizing: "border-box",
-  transition: "border-color 0.15s, box-shadow 0.15s",
-};
-
-const InputField: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => {
-  const [focused, setFocused] = useState(false);
-  return (
-    <input
-      {...props}
-      style={{
-        ...inputStyle,
-        border: `0.5px solid ${focused ? C.dusty : C.dustyBorder}`,
-        boxShadow: focused ? "0 0 0 3px rgba(201,168,158,0.15)" : "none",
-        ...props.style,
-      }}
-      onFocus={e => { setFocused(true); props.onFocus?.(e); }}
-      onBlur={e => { setFocused(false); props.onBlur?.(e); }}
-    />
-  );
-};
-
-const SelectField: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (props) => {
-  const [focused, setFocused] = useState(false);
-  return (
-    <select
-      {...props}
-      style={{
-        ...inputStyle,
-        appearance: "none",
-        WebkitAppearance: "none",
-        cursor: "pointer",
-        border: `0.5px solid ${focused ? C.dusty : C.dustyBorder}`,
-        boxShadow: focused ? "0 0 0 3px rgba(201,168,158,0.15)" : "none",
-        ...props.style,
-      }}
-      onFocus={e => { setFocused(true); props.onFocus?.(e); }}
-      onBlur={e => { setFocused(false); props.onBlur?.(e); }}
-    />
   );
 };
 
@@ -624,306 +370,10 @@ const WelcomeStageScreen: React.FC<{
   );
 };
 
-// ─── Screen 5: Agents ─────────────────────────────────────────────────────────
-
-type AgentOption = "add" | "import" | "skip" | null;
-
-const Screen5Agents: React.FC<{
-  onBack: () => void;
-  onContinue: (agentName: string, agentAgency: string, option: AgentOption) => void;
-  onSkip: () => void;
-  initialAgentName?: string;
-  initialAgentAgency?: string;
-}> = ({ onBack, onContinue, onSkip, initialAgentName = "", initialAgentAgency = "" }) => {
-  const [option, setOption] = useState<AgentOption>(null);
-  const [agentName, setAgentName] = useState(initialAgentName);
-  const [agentAgency, setAgentAgency] = useState(initialAgentAgency);
-  const [agentEmail, setAgentEmail] = useState("");
-  const [agentGenres, setAgentGenres] = useState("");
-
-  const handleContinue = () => {
-    onContinue(agentName, agentAgency, option);
-  };
-
-  return (
-    <ModalCard step={5}>
-      <div style={{ padding: "28px 28px 0", position: "relative" }}>
-        <SkipButton onSkip={onSkip} />
-        <ProgressDots currentStep={5} />
-        <Eyebrow>Step 2 of 2</Eyebrow>
-        <ModalTitle>Now let's add your agents.</ModalTitle>
-        <Subtitle>Choose whichever works best for you.</Subtitle>
-
-        <SelectableCard
-          selected={option === "add"}
-          onSelect={() => setOption("add")}
-          icon={<UserPlus size={16} />}
-          title="Add an agent now"
-          description="Enter one or two agents you have in mind — takes 60 seconds each."
-          tag="Guided form"
-        />
-
-        {/* Reveal: agent add form */}
-        <motion.div
-          initial={false}
-          animate={{ maxHeight: option === "add" ? 300 : 0, opacity: option === "add" ? 1 : 0 }}
-          transition={{ duration: 0.35, ease: "easeInOut" }}
-          style={{ overflow: "hidden" }}
-        >
-          <div style={{ padding: "12px 4px 4px" }}>
-            <FormField label="Agent name">
-              <InputField
-                type="text"
-                value={agentName}
-                onChange={e => setAgentName(e.target.value)}
-                placeholder="e.g. Sarah Latham"
-              />
-            </FormField>
-            <FormField label="Agency">
-              <InputField
-                type="text"
-                value={agentAgency}
-                onChange={e => setAgentAgency(e.target.value)}
-                placeholder="e.g. Curtis Brown"
-              />
-            </FormField>
-            <FormField label="Email (optional)">
-              <InputField
-                type="email"
-                value={agentEmail}
-                onChange={e => setAgentEmail(e.target.value)}
-                placeholder="e.g. sarah@curtisbrown.co.uk"
-              />
-            </FormField>
-            <FormField label="Genres (optional)">
-              <InputField
-                type="text"
-                value={agentGenres}
-                onChange={e => setAgentGenres(e.target.value)}
-                placeholder="e.g. Literary Fiction, Historical Fiction"
-              />
-            </FormField>
-          </div>
-        </motion.div>
-
-        <SelectableCard
-          selected={option === "import"}
-          onSelect={() => setOption("import")}
-          icon={<Upload size={16} />}
-          title="Bring my existing list"
-          description="I have agents in a spreadsheet. Download our template, fill it in, upload it."
-          tag="CSV import · recommended for migrators"
-        />
-
-        {/* Reveal: CSV import box */}
-        <motion.div
-          initial={false}
-          animate={{ maxHeight: option === "import" ? 160 : 0, opacity: option === "import" ? 1 : 0 }}
-          transition={{ duration: 0.35, ease: "easeInOut" }}
-          style={{ overflow: "hidden" }}
-        >
-          <div style={{
-            border: `1.5px dashed ${C.dustyBorder}`,
-            borderRadius: 12,
-            padding: "16px",
-            margin: "8px 4px 4px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-            alignItems: "center",
-          }}>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.muted, margin: 0, textAlign: "center" }}>
-              Download our CSV template, fill it in with your agents, then upload it to import everything at once.
-            </p>
-            <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={onSkip} style={{
-                fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.06em",
-                background: "none", border: `0.5px solid ${C.dustyBorder}`, color: C.muted,
-                borderRadius: 8, padding: "7px 14px", cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 5,
-              }}>
-                <Download size={12} /> Download template
-              </button>
-              <button onClick={onSkip} style={{
-                fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.06em",
-                background: C.burgundy, border: "none", color: "#f5ede8",
-                borderRadius: 8, padding: "7px 14px", cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 5,
-              }}>
-                <Upload size={12} /> Upload my spreadsheet
-              </button>
-            </div>
-          </div>
-        </motion.div>
-
-        <SelectableCard
-          selected={option === "skip"}
-          onSelect={() => setOption("skip")}
-          icon={<ArrowRight size={16} />}
-          title="I'll add agents as I go"
-          description="Take me to the dashboard — I'll add them when I'm ready to send a query."
-          tag="Skip this step"
-        />
-      </div>
-      <ModalFooter
-        onBack={onBack}
-        onContinue={handleContinue}
-        continueLabel="Go to my dashboard →"
-        continueDisabled={!option}
-      />
-    </ModalCard>
-  );
-};
-
-// ─── Screen 6: Complete ───────────────────────────────────────────────────────
-
-const Screen6Complete: React.FC<{
-  manuscriptTitle: string;
-  agentCount: number;
-  onDone: () => void;
-}> = ({ manuscriptTitle, agentCount, onDone }) => {
-  const [hovered, setHovered] = useState(false);
-
-  const summaryRows = [
-    { label: "Manuscript", value: manuscriptTitle || undefined },
-    { label: "Agents added", value: agentCount > 0 ? String(agentCount) : undefined },
-    { label: "First query", value: undefined, placeholder: "Waiting for you →" },
-  ];
-
-  const nextSteps = [
-    "Send your first query from the dashboard",
-    "Explore the agent database and add MSWL",
-    "Set response windows so you never miss a deadline",
-  ];
-
-  return (
-    <ModalCard step={6}>
-      {/* Accent bar already rendered in ModalCard — override top bar to green */}
-      <div style={{ padding: "32px 28px 0", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-        {/* Check circle */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.15 }}
-          style={{
-            width: 64,
-            height: 64,
-            borderRadius: "50%",
-            background: C.card2,
-            border: `1px solid ${C.dustyBorder}`,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 16,
-          }}
-        >
-          <Check size={26} color={C.greenDark} strokeWidth={2.5} />
-        </motion.div>
-
-        <Eyebrow>Setup complete</Eyebrow>
-        <ModalTitle style={{ textAlign: "center" }}>You're all set, let's do this.</ModalTitle>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 300, color: C.muted, lineHeight: 1.6, marginBottom: 8 }}>
-          Your manuscript is ready and your agents are on file.<br />
-          <em style={{ fontFamily: FONT_SERIF, fontStyle: "italic", color: C.mutedDark }}>One step closer to yes.</em>
-        </p>
-
-        {/* Summary block */}
-        <div style={{
-          background: C.card2,
-          border: `0.5px solid ${C.border}`,
-          borderRadius: 12,
-          padding: "14px 16px",
-          width: "100%",
-          marginBottom: 20,
-          textAlign: "left",
-        }}>
-          {summaryRows.map((row, i) => (
-            <div key={i} style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              paddingTop: i > 0 ? 10 : 0,
-              paddingBottom: i < summaryRows.length - 1 ? 10 : 0,
-              borderBottom: i < summaryRows.length - 1 ? `0.5px solid ${C.border}` : "none",
-            }}>
-              <span style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase", letterSpacing: "0.08em", color: C.muted }}>
-                {row.label}
-              </span>
-              {row.value ? (
-                <span style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 500, color: C.ink }}>{row.value}</span>
-              ) : (
-                <span style={{ fontFamily: FONT_SERIF, fontSize: 12, fontStyle: "italic", color: C.dusty }}>
-                  {row.placeholder || "Not added"}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Next steps */}
-        <div style={{ width: "100%", marginBottom: 8 }}>
-          {nextSteps.map((step, i) => (
-            <div key={i} style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              background: C.card,
-              border: `0.5px solid ${C.border}`,
-              borderRadius: 10,
-              padding: "10px 14px",
-              marginBottom: 6,
-            }}>
-              <span style={{
-                fontFamily: FONT_MONO,
-                fontSize: 9,
-                color: C.dusty,
-                background: C.card2,
-                borderRadius: 6,
-                padding: "3px 7px",
-                flexShrink: 0,
-              }}>
-                {i + 1}
-              </span>
-              <span style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.mutedDark, flex: 1, lineHeight: 1.4 }}>
-                {step}
-              </span>
-              <ArrowRight size={12} color={C.dusty} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ padding: "16px 28px 28px" }}>
-        <button
-          onClick={onDone}
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          style={{
-            width: "100%",
-            fontFamily: FONT_MONO,
-            fontSize: 12,
-            letterSpacing: "0.06em",
-            background: hovered ? C.burgundyDeep : C.burgundy,
-            color: "#f5ede8",
-            border: "none",
-            borderRadius: 10,
-            padding: "13px",
-            cursor: "pointer",
-            transition: "all 0.15s",
-            transform: hovered ? "translateY(-1px)" : "none",
-          }}
-        >
-          Open my dashboard →
-        </button>
-      </div>
-    </ModalCard>
-  );
-};
-
 // ─── Main Onboarding component ────────────────────────────────────────────────
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-  const { currentUser, manuscripts, addManuscript, addAgent, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, addManuscript, updateUserProfile } = useScriptAllyDb();
 
   const STORAGE_KEY = `scriptally_onboarding_progress_${currentUser?.id || "anon"}`;
 
@@ -938,20 +388,20 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   const saved = loadProgress();
 
-  // Step 0 = the welcome / querying-stage step. Only the agents step (5) and completion (6)
-  // survive from the legacy flow — a saved step pointing at a deleted screen (the old splash 1
-  // or intro/path/manuscript 2–4, now covered by the branches) resumes at the welcome instead.
-  const normalizeStep = (s: number | undefined): number => (s === 5 || s === 6 ? s : 0);
+  /* ⚠️ THERE IS ONLY ONE STEP NOW, AND `normalizeStep` IS WHAT KEEPS THAT TRUE FOR RETURNING
+     WRITERS. Every numbered screen except the welcome is deleted, so a saved `step` from any
+     earlier build — the old splash 1, the intro/path/manuscript 2–4, the agents 5 or the
+     completion 6 — points at a screen that no longer exists. All of them resume at the welcome,
+     which is a real screen that can reach everywhere else. Dropping this function instead would
+     leave a mid-flight writer on a blank overlay with no way out. */
+  const normalizeStep = (_s: number | undefined): number => 0;
   const [step, setStep] = useState(normalizeStep(saved.step));
   const [queryingStage, setQueryingStage] = useState<QueryingStage | null>(saved.queryingStage ?? null);
-  // The post-welcome flow: null = on the welcome step (or the legacy resume), "understood" = the
-  // cream transition beat, "A"/"B" = inside a branch. Branch C (exploring) exits immediately.
-  const [flow, setFlow] = useState<"understood" | Branch | null>(null);
+  // The post-welcome flow: null = on the welcome step, "A"/"B" = inside a branch. Branch C
+  // (exploring) exits immediately and has no screen of its own.
+  const [flow, setFlow] = useState<Branch | null>(null);
   const [manuscriptTitle, setManuscriptTitle] = useState(saved.manuscriptTitle ?? "");
   const [manuscriptGenre, setManuscriptGenre] = useState(saved.manuscriptGenre ?? "");
-  const [agentName, setAgentName] = useState(saved.agentName ?? "");
-  const [agentAgency, setAgentAgency] = useState(saved.agentAgency ?? "");
-  const [agentCount, setAgentCount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const saveProgress = (updates: Partial<ProgressData>) => {
@@ -960,8 +410,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       queryingStage,
       manuscriptTitle,
       manuscriptGenre,
-      agentName,
-      agentAgency,
       ...updates,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
@@ -982,14 +430,19 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     );
   };
 
-  // Welcome step → cream "Understood" beat → the branch the chosen stage maps to. Continue
-  // persists the granular stage and the collapsed journeyStage (separate writes, non-blocking).
+  /* Welcome step → straight into the branch the chosen stage maps to. Continue persists the
+     granular stage and the collapsed journeyStage (separate writes, non-blocking).
+
+     ⚠️ NO TRANSITION BEAT. A cream "Understood." card used to hold the flow for a fixed 1200ms
+     between the answer and the branch — an unskippable pause with no Back and nothing to read,
+     restating the click that had just happened. It also wore a third card style of its own, so
+     the journey changed visual language twice in three screens. The answer is acknowledged by the
+     next screen appearing. */
   const handleStageContinue = () => {
     if (!queryingStage) return;
     saveProgress({ queryingStage });
     persistProfile({ queryingStage });
-    persistProfile({ journeyStage: STAGE_TO_JOURNEY[queryingStage] });
-    setFlow("understood");
+    setFlow(STAGE_TO_BRANCH[queryingStage]);
   };
 
   // "Skip setup" from the welcome step → Branch C (exploring): mark complete and go to the dashboard.
@@ -1003,13 +456,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     }
     await finishOnboarding({ journeyStage: "exploring" });
   };
-
-  // After the cream beat shows (~1.2s), enter the branch the chosen stage maps to.
-  useEffect(() => {
-    if (flow !== "understood" || !queryingStage) return;
-    const t = setTimeout(() => setFlow(STAGE_TO_BRANCH[queryingStage]), 1200);
-    return () => clearTimeout(t);
-  }, [flow, queryingStage]);
 
   // Save/limit error surfaced inside the active branch screen.
   const [branchError, setBranchError] = useState<string | null>(null);
@@ -1053,11 +499,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     }
   };
 
-  // A3a (Ready to Query / Revising): save, then continue to the existing agents step.
+  // A3a (Ready to Query / Revising): save, then finish onboarding onto the agent list — the same
+  // exit A3b already used. Onboarding ends where the real work starts; the old in-flow agents step
+  // asked for one agent through a lesser form than the app's own, then threw two of its four fields
+  // away and stamped six invented defaults on what survived.
   const handleBranchASaveReady = async (r: BranchAResult) => {
     if (await saveBranchManuscript(r.fields, r.status)) {
-      setFlow(null);
-      goTo(5);
+      sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
+      await finishOnboarding();
     }
   };
 
@@ -1118,41 +567,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     await finishOnboarding();
   };
 
-  const handleScreen5Continue = async (name: string, agency: string, agentOption: AgentOption) => {
-    setAgentName(name);
-    setAgentAgency(agency);
-    saveProgress({ agentName: name, agentAgency: agency });
-
-    let addedCount = 0;
-    if (agentOption === "add" && name.trim()) {
-      setIsSubmitting(true);
-      try {
-        await addAgent({
-          name: name.trim(),
-          agency: agency.trim(),
-          email: "",
-          website: "",
-          genres: [],
-          mswlNotes: "",
-          starRating: 3,
-          submissionStatus: SubmissionStatus.OPEN,
-          responseTimeWeeks: 12,
-          noResponseMeansNo: false,
-          submissionMethod: SubmissionMethod.EMAIL,
-          materialsWanted: ["Query Letter"],
-          notes: "",
-        });
-        addedCount = 1;
-      } catch (e) {
-        console.error("Onboarding addAgent error:", e);
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
-    setAgentCount(addedCount);
-    localStorage.removeItem(STORAGE_KEY);
-    goTo(6);
-  };
+  /* ⚠️ THE HARDCODED-DEFAULTS AGENT WRITER IS GONE WITH THE SCREEN IT SERVED.
+     It stamped six facts nobody had stated — starRating 3, responseTimeWeeks 12, submissionStatus
+     OPEN, noResponseMeansNo false, submissionMethod EMAIL, materialsWanted ["Query Letter"] — on
+     the writer's very first agent. Absence is a first-class state for the first three, so that
+     agent was born in a condition the rest of the app treats as impossible for a new record, and
+     the invented rating fed the agent list's default sort as if it were real. It also captured an
+     email and a genre list and then dropped both on the floor. Agents are added on the agent list
+     now, through the form that stores what it asks for. */
 
   // Overlay wrapper
   return (
@@ -1167,10 +589,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       overflowY: "auto",
     }}>
       <ScreenTransition stepKey={flow ? FLOW_KEY[flow] : step}>
-        {flow === "understood" && (
-          <CenterWrap><CreamUnderstood /></CenterWrap>
-        )}
-
         {/* Branch A — manuscript-led setup: A2 readiness → A3a details / A3b still-writing. */}
         {flow === "A" && (
           <CenterWrap>
@@ -1195,8 +613,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               onEnsureManuscript={ensureBranchBManuscript}
               defaultImport={queryingStage === "early" ? "byhand" : "smart"}
               onAddByHand={async () => {
-                // Manual-add finish: create the held manuscript once, then drop into the agents step.
-                if (await ensureBranchBManuscript()) { setBranchError(null); setFlow(null); goTo(5); }
+                // Manual-add finish: create the held manuscript once, then finish onto the agent
+                // list, where the app's real Add-an-agent form lives.
+                if (await ensureBranchBManuscript()) {
+                  setBranchError(null);
+                  sessionStorage.setItem("scriptally_post_onboarding_tab", "agents");
+                  await finishOnboarding();
+                }
               }}
               onOpenImportDesk={async () => {
                 // Escape hatch into the Import desk: create the manuscript first (best-effort), then finish.
@@ -1235,36 +658,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           </div>
         )}
 
-        {/* Steps 5 (agents) and 6 (complete) are the only legacy steps left — the branches replaced
-            the old intro/path/manuscript screens (2–4) and the old splash (1). */}
-        {!flow && (step === 5 || step === 6) && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            minHeight: "100%",
-            padding: "32px 16px",
-            boxSizing: "border-box",
-          }}>
-            {step === 5 && (
-              <Screen5Agents
-                onBack={() => goTo(0)}
-                onContinue={handleScreen5Continue}
-                onSkip={handleSkip}
-                initialAgentName={agentName}
-                initialAgentAgency={agentAgency}
-              />
-            )}
-            {step === 6 && (
-              <Screen6Complete
-                manuscriptTitle={manuscriptTitle}
-                agentCount={agentCount}
-                onDone={handleSkip}
-              />
-            )}
-          </div>
-        )}
       </ScreenTransition>
 
       {/* Submitting overlay */}

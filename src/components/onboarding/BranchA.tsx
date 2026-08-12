@@ -78,7 +78,6 @@ export const BranchA: React.FC<BranchAProps> = ({ onSkip, onExit, onSaveReady, o
   if (screen === "readiness") {
     return (
       <Form11Card
-        dotIndex={1}
         onSkip={onSkip}
         pre="Your manuscript"
         name="Where are you with it?"
@@ -106,7 +105,6 @@ export const BranchA: React.FC<BranchAProps> = ({ onSkip, onExit, onSaveReady, o
   // A3 — details, in the variant the readiness answer picked.
   return (
     <Form11Card
-      dotIndex={1}
       onSkip={onSkip}
       pre="Your manuscript"
       name={stillWriting ? "No rush at all" : "A little about it"}

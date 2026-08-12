@@ -20,7 +20,6 @@ import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
 import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
 import { SmartImportReview } from "./SmartImportReview";
 import { ImportOverview } from "./ImportOverview";
-import { ImportTidyAnimation } from "./ImportTidyAnimation";
 import { ImportingLoader } from "./ImportingLoader";
 import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { fmtDate } from "../../lib/smartImportReviewModel";
@@ -57,7 +56,12 @@ export interface BranchBProps {
   error?: string | null;
 }
 
-type B3Screen = "book" | "pipeline" | "confirm" | "blocked" | "reading" | "tidying" | "overview" | "review" | "fallback" | "importing" | "done";
+/* ⚠️ NO "tidying" MEMBER. It sat in this union with a render branch guarding it, and
+   `setScreen("tidying")` was never called from anywhere — the reading screen routes straight to
+   the overview. The component behind it (ImportTidyAnimation) and its test are deleted with it:
+   a screen no path reaches is not a feature in waiting, it is a claim the union was making about
+   the flow that the flow did not honour. */
+type B3Screen = "book" | "pipeline" | "confirm" | "blocked" | "reading" | "overview" | "review" | "fallback" | "importing" | "done";
 
 /** A blocked Smart Import attempt — the structured reason the gate (or the pre-check) surfaced. */
 type Blocked = { reason: "free_used" | "pro_month_used"; nextAvailable?: string };
@@ -228,7 +232,6 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "book") {
     return (
       <Form11Card
-        dotIndex={1}
         onSkip={onSkip}
         pre="Your manuscript"
         name="The book you're querying"
@@ -257,7 +260,6 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "pipeline") {
     return (
       <Form11Card
-        dotIndex={2}
         onSkip={onSkip}
         pre="Your pipeline"
         name="Bring it across"
@@ -329,7 +331,6 @@ export const BranchB: React.FC<BranchBProps> = ({
     const isPro = entitlement.tier === "pro";
     return (
       <Form11Card
-        dotIndex={2}
         onSkip={onSkip}
         pre="Your pipeline"
         name="This uses your Smart Import"
@@ -366,7 +367,6 @@ export const BranchB: React.FC<BranchBProps> = ({
       : "next month";
     return (
       <Form11Card
-        dotIndex={2}
         onSkip={onSkip}
         pre="Your pipeline"
         name={isFreeUsed ? "Smart Import already used" : "Next Smart Import next month"}
@@ -430,11 +430,6 @@ export const BranchB: React.FC<BranchBProps> = ({
     );
   }
 
-  // ── Tidying beat — the writer's own messy values straighten into clean lines before the Overview.
-  if (screen === "tidying" && validated) {
-    return <ImportTidyAnimation result={validated.result} onDone={() => setScreen("overview")} />;
-  }
-
   // ── Overview — "Here's what we found". Positive arrival before any work; reads the parsed result
   //    for live tier counts, then "Let's work through it" routes into the review stages. ─
   if (screen === "overview" && validated) {
@@ -470,7 +465,6 @@ export const BranchB: React.FC<BranchBProps> = ({
     const ok = outcome.queriesImported > 0;
     return (
       <Form11Card
-        dotIndex={2}
         onSkip={onSkip}
         pre="Your pipeline"
         name={ok ? "Brought across" : "That didn't work"}
@@ -525,7 +519,6 @@ export const BranchB: React.FC<BranchBProps> = ({
     console.error("BranchB: unhandled screen state", { screen, hasValidated: !!validated, hasOutcome: !!outcome });
     return (
       <Form11Card
-        dotIndex={2}
         onSkip={onSkip}
         pre="Your pipeline"
         name="That step didn't load"
@@ -553,7 +546,6 @@ export const BranchB: React.FC<BranchBProps> = ({
 
   return (
     <Form11Card
-      dotIndex={2}
       onSkip={onSkip}
       pre="Your pipeline"
       name="Bring it across"

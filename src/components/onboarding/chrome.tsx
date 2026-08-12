@@ -37,16 +37,17 @@ export const InboxMotif: React.FC = () => (
   </svg>
 );
 
-const DOT_TOTAL = 5;
-
-/** The progress-dots row (active = elongated burgundy pill) + a Skip-setup link, above the card. */
-export const OnbChrome: React.FC<{ dotIndex: number; onSkip: () => void; total?: number }> = ({
-  dotIndex,
-  onSkip,
-  total = DOT_TOTAL,
-}) => (
-  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
-    <Dots dotIndex={dotIndex} total={total} />
+/**
+ * The chrome row above the card: a Skip-setup link.
+ *
+ * ⚠️ THE PROGRESS DOTS ARE GONE, AND THE `dotIndex` PROP WITH THEM. Five dots were drawn on every
+ * screen while Branch A only ever passed index 1 and Branch B 1 or 2 — so the row never advanced
+ * for one branch, never got past the second dot for the other, and told every writer they were
+ * two steps into a five-step flow that did not exist. A progress indicator that cannot state real
+ * progress is worse than none: it invites you to count screens that were never coming.
+ */
+export const OnbChrome: React.FC<{ onSkip: () => void }> = ({ onSkip }) => (
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 4px" }}>
     <button
       onClick={onSkip}
       style={{
@@ -61,65 +62,7 @@ export const OnbChrome: React.FC<{ dotIndex: number; onSkip: () => void; total?:
   </div>
 );
 
-const Dots: React.FC<{ dotIndex: number; total: number }> = ({ dotIndex, total }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-    {Array.from({ length: total }).map((_, i) => (
-      <span
-        key={i}
-        style={{
-          height: 6,
-          width: i === dotIndex ? 22 : 6,
-          borderRadius: i === dotIndex ? 3 : "50%",
-          background: i === dotIndex ? "#7c3a2a" : "#d8cec4",
-          transition: "all 0.25s",
-        }}
-      />
-    ))}
-  </div>
-);
-
-/** Cream-shell transition card — used only for the "Understood" beat. Caller controls timing. */
-export const CreamUnderstood: React.FC<{ dotIndex?: number; eyebrow?: string; title?: string; sub?: string }> = ({
-  dotIndex = 1,
-  eyebrow = "Got it",
-  title = "Understood.",
-  sub = "Setting things up around where you are — one moment.",
-}) => (
-  <div
-    style={{
-      width: "100%", maxWidth: 560, background: "#FDF9F4", borderRadius: 24,
-      boxShadow: "0 1px 2px rgba(58,28,20,0.05),0 18px 50px rgba(58,28,20,0.10)",
-      position: "relative", overflow: "hidden",
-    }}
-  >
-    <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 5, background: "linear-gradient(90deg,#d9b6ad,#c79a93)" }} />
-    <div style={{ display: "flex", justifyContent: "flex-start", padding: "26px 34px 0" }}>
-      <Dots dotIndex={dotIndex} total={DOT_TOTAL} />
-    </div>
-    <div style={{ textAlign: "center", padding: "50px 34px 56px" }}>
-      <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 24 }}>
-        {[0, 1, 2].map((i) => (
-          <span
-            key={i}
-            style={{
-              width: 9, height: 9, borderRadius: "50%", background: "#7c3a2a",
-              animation: `sa-ob-pulse 1.2s infinite ease-in-out`, animationDelay: `${i * 0.2}s`,
-            }}
-          />
-        ))}
-      </div>
-      <div style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: "#C49A9A", marginBottom: 12 }}>
-        {eyebrow}
-      </div>
-      <div style={{ fontFamily: FONT_SERIF, fontSize: 30, fontWeight: 500, color: "#3A2018", marginBottom: 8 }}>{title}</div>
-      <p style={{ fontSize: 15, color: "#8C8079", lineHeight: 1.55 }}>{sub}</p>
-    </div>
-    <style>{`@keyframes sa-ob-pulse{0%,100%{opacity:0.25;transform:scale(0.85);}50%{opacity:1;transform:scale(1);}}`}</style>
-  </div>
-);
-
 export interface Form11CardProps {
-  dotIndex: number;
   onSkip: () => void;
   pre: string;
   name: string;
@@ -136,10 +79,10 @@ export interface Form11CardProps {
 
 /** A full Form 11 onboarding screen: chrome row, parchment card (band + body), footer. */
 export const Form11Card: React.FC<Form11CardProps> = ({
-  dotIndex, onSkip, pre, name, sub, motif, children, onBack, primaryLabel, onPrimary, primaryDisabled, primaryFilled,
+  onSkip, pre, name, sub, motif, children, onBack, primaryLabel, onPrimary, primaryDisabled, primaryFilled,
 }) => (
   <div style={{ width: "100%", maxWidth: 440, display: "flex", flexDirection: "column", gap: 12 }}>
-    <OnbChrome dotIndex={dotIndex} onSkip={onSkip} />
+    <OnbChrome onSkip={onSkip} />
     <div
       style={{
         borderRadius: 14, background: "#fdfaf5", backgroundImage: PAPER_TEXTURE, position: "relative",
