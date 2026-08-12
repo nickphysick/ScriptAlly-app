@@ -2,36 +2,74 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Shared onboarding chrome for the branched flows (A/B/C). Two card skins, ported verbatim from
- * the approved sketches: the cream "Understood" transition and the Form 11 parchment skin used by
- * every form screen. Presentational only — Onboarding.tsx owns state and routing.
+ * THE onboarding card — one card for the whole journey (ref: design-refs/funnel/
+ * onboarding-current-grammar-v1.html).
+ *
+ * ⚠️ FORM 11 IS RETIRED FROM THIS JOURNEY, AND THE RENAME IS THE POINT. This file used to export
+ * `Form11Card`: a parchment surface with a paper-texture data-URI, a 6px inset burgundy rim and a
+ * soft-pink primary. It made the screens that introduce the app look like a different product from
+ * the app itself — and a writer met three card styles in four screens on the way in (the welcome's
+ * own `ModalCard`, a cream transition card, then this). The internals are replaced rather than a
+ * second component added alongside, because this was already the choke point every branch screen
+ * rendered through; the name changed so nothing inherits the old one's assumptions.
+ *
+ * ⚠️ COLOURS COME FROM `designTokens`, NEVER FROM THE MOCKUP. The ref's hexes were sampled off a
+ * screenshot and drift from the live values (it carries #f8f4ee where index.css defines
+ * --ws-ground #f7f4ee). The card is the app's dashboard card: same surface, same hairline, same
+ * radius, same shadow.
+ *
+ * ⚠️ THE BAND IS THE CARD'S OWN HEADER — a real element, not an overlay and not a `::before`. It
+ * is clipped by the card's own `overflow: hidden`, which is the canonical header-fill structure
+ * here, so no rim overlay is needed at all.
  */
 import React from "react";
+import "./onboarding.css";
+import {
+  sageBandGradient,
+  sageBandRule,
+  sageText,
+  onbSurface,
+  onbHairline,
+  onbRadius,
+  onbShadow,
+  onbPrimaryBg,
+  onbPrimaryBgHover,
+  onbPrimaryInk,
+  onbPrimaryDisabledBg,
+  onbPrimaryDisabledInk,
+  onbPlate,
+  onbOptionSelectedFill,
+  onbOptionRest,
+  onbOptionEdge,
+  onbFaint,
+  onbMuted,
+  onbHeadingInk,
+} from "../../lib/designTokens";
 
 const FONT_SERIF = "'Playfair Display', Georgia, serif";
 const FONT_SANS = "'Source Sans Pro', system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', 'Fira Mono', monospace";
 
-const PAPER_TEXTURE =
-  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E\")";
-
-/** The book-spine motif used in the band of every Form 11 onboarding screen. */
+/**
+ * ⚠️ THE MARKS ARE MONOLINE GLYPHS, AND THAT IS A RECORDED FALLBACK, NOT A CHOICE.
+ *
+ * The ref draws illustrated marks on the band's plate and says so in its own markup
+ * ("placeholder for the illustrated compass/desk mark"). No illustrated asset for either screen
+ * exists in this repo: `manuscriptMarks.tsx` holds five inline SVGs, none of which is a
+ * book-setup or an inbox mark, and `src/assets/` carries the manuscript notebook and shell brand
+ * art only. Shipping the ref's own placeholders would be shipping a placeholder as a design, and
+ * inventing illustrations is not a build task — so the existing monoline glyphs carry the plate
+ * until the real marks arrive. The run report names the two that are missing.
+ */
 export const BookMotif: React.FC = () => (
-  <svg
-    style={{ position: "absolute", right: 20, top: "50%", transform: "translateY(-50%)", color: "#3a1c14", opacity: 0.78, zIndex: 1 }}
-    width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round"
-  >
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={sageText} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M12 6c-1.6-1-4.2-1.6-6.3-1.6-.9 0-1.7.1-1.7.1v13s.8-.1 1.7-.1c2.1 0 4.7.6 6.3 1.6 1.6-1 4.2-1.6 6.3-1.6.9 0 1.7.1 1.7.1v-13s-.8-.1-1.7-.1c-2.1 0-4.7.6-6.3 1.6z" />
     <path d="M12 6v13" />
   </svg>
 );
 
-/** Inbox/tray motif for the pipeline screens. */
 export const InboxMotif: React.FC = () => (
-  <svg
-    style={{ position: "absolute", right: 20, top: "50%", transform: "translateY(-50%)", color: "#3a1c14", opacity: 0.78, zIndex: 1 }}
-    width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"
-  >
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={sageText} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
     <path d="M12 3v12M7 8l5-5 5 5" />
   </svg>
@@ -43,115 +81,147 @@ export const InboxMotif: React.FC = () => (
  * ⚠️ THE PROGRESS DOTS ARE GONE, AND THE `dotIndex` PROP WITH THEM. Five dots were drawn on every
  * screen while Branch A only ever passed index 1 and Branch B 1 or 2 — so the row never advanced
  * for one branch, never got past the second dot for the other, and told every writer they were
- * two steps into a five-step flow that did not exist. A progress indicator that cannot state real
- * progress is worse than none: it invites you to count screens that were never coming.
+ * two steps into a five-step flow that did not exist. Where a screen genuinely knows its position,
+ * the card's band states it in words instead (`step`).
  */
 export const OnbChrome: React.FC<{ onSkip: () => void }> = ({ onSkip }) => (
   <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 4px" }}>
     <button
       onClick={onSkip}
       style={{
-        fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.04em", color: "#9c8878",
-        background: "none", border: "none", cursor: "pointer", padding: 0, transition: "color 0.15s",
+        fontFamily: FONT_SANS, fontSize: 13.5, color: onbFaint, background: "none", border: "none",
+        cursor: "pointer", padding: 0, textDecoration: "underline", textUnderlineOffset: 3,
+        transition: "color 0.15s",
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.color = "#7c3a2a")}
-      onMouseLeave={(e) => (e.currentTarget.style.color = "#9c8878")}
+      onMouseEnter={(e) => (e.currentTarget.style.color = onbMuted)}
+      onMouseLeave={(e) => (e.currentTarget.style.color = onbFaint)}
     >
       Skip setup
     </button>
   </div>
 );
 
-export interface Form11CardProps {
+export interface OnboardingCardProps {
   onSkip: () => void;
+  /** Mono eyebrow in the band — the phase of setup, not a step count. */
   pre: string;
+  /** The screen's heading, in the body. */
   name: string;
+  /** Supporting line beneath the heading. */
   sub: string;
+  /** The mark on the band's plate. */
   motif?: React.ReactNode;
+  /** An honest step marker ("Step 1 of 2") — omitted when the screen does not know its position. */
+  step?: string;
   children: React.ReactNode;
   onBack?: () => void;
   primaryLabel: string;
   onPrimary: () => void;
   primaryDisabled?: boolean;
-  /** Use the filled burgundy button instead of the soft-pink one (import-confirm). */
-  primaryFilled?: boolean;
 }
 
-/** A full Form 11 onboarding screen: chrome row, parchment card (band + body), footer. */
-export const Form11Card: React.FC<Form11CardProps> = ({
-  onSkip, pre, name, sub, motif, children, onBack, primaryLabel, onPrimary, primaryDisabled, primaryFilled,
-}) => (
-  <div style={{ width: "100%", maxWidth: 440, display: "flex", flexDirection: "column", gap: 12 }}>
-    <OnbChrome onSkip={onSkip} />
-    <div
-      style={{
-        borderRadius: 14, background: "#fdfaf5", backgroundImage: PAPER_TEXTURE, position: "relative",
-        boxShadow: "0 1px 2px rgba(58,28,20,0.06),0 6px 24px rgba(58,28,20,0.1)",
-      }}
-    >
-      <div style={{ position: "absolute", inset: 6, border: "1px solid rgba(124,58,42,0.28)", borderRadius: 10, pointerEvents: "none", zIndex: 3 }} />
-      {/* sage band */}
+/** A full onboarding screen: chrome row, card (band + body), footer. */
+export const OnboardingCard: React.FC<OnboardingCardProps> = ({
+  onSkip, pre, name, sub, motif, step, children, onBack, primaryLabel, onPrimary, primaryDisabled,
+}) => {
+  const [hoverPrimary, setHoverPrimary] = React.useState(false);
+  return (
+    <div style={{ width: "100%", maxWidth: 588, display: "flex", flexDirection: "column", gap: 12 }}>
+      <OnbChrome onSkip={onSkip} />
       <div
+        className="sa-onb-card"
         style={{
-          background: "linear-gradient(135deg,#dce0d9 0%,#d0d6cc 100%)", padding: "18px 24px 16px",
-          position: "relative", overflow: "hidden", borderRadius: "8px 8px 0 0", margin: "6px 6px 0", minHeight: 78,
+          background: onbSurface,
+          border: `1px solid ${onbHairline}`,
+          borderRadius: onbRadius,
+          boxShadow: onbShadow,
+          overflow: "hidden",
         }}
       >
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "rgba(90,110,88,0.2)" }} />
-        {motif}
-        <div style={{ display: "flex", alignItems: "center", gap: 11, position: "relative", zIndex: 2 }}>
-          <div
-            style={{
-              width: 38, height: 38, borderRadius: "50%", background: "#fdfaf5", border: "1px solid rgba(124,58,42,0.25)",
-              display: "flex", alignItems: "center", justifyContent: "center", color: "#7c3a2a", flexShrink: 0,
-              boxShadow: "0 1px 2px rgba(58,28,20,0.05)",
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 19a9 9 0 0 1 9 0 9 9 0 0 1 9 0" /><path d="M3 6a9 9 0 0 1 9 0 9 9 0 0 1 9 0" /><path d="M3 6v13M21 6v13M12 6v13" />
-            </svg>
-          </div>
-          <div>
-            <div style={{ fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase", color: "#5a6e58", marginBottom: 1 }}>{pre}</div>
-            <div style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 500, color: "#2e3a2c", lineHeight: 1.1 }}>{name}</div>
-            <div style={{ fontSize: 11, color: "#6a7e68", fontWeight: 300, marginTop: 1 }}>{sub}</div>
-          </div>
-        </div>
-      </div>
-      {/* body */}
-      <div style={{ padding: "20px 22px 18px", margin: "0 6px", position: "relative" }}>{children}</div>
-      {/* footer */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", margin: "0 6px 6px", padding: "15px 22px", borderTop: "0.5px solid #ece2d6" }}>
-        {onBack ? (
-          <button
-            onClick={onBack}
-            style={{ fontFamily: FONT_MONO, fontSize: 11, letterSpacing: "0.04em", color: "#b0a294", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#7c3a2a")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#b0a294")}
-          >
-            ‹ Back
-          </button>
-        ) : (
-          <span />
-        )}
-        <button
-          onClick={onPrimary}
-          disabled={primaryDisabled}
+        {/* Band — the card's own header, clipped to the card's top corners. */}
+        <div
+          className="sa-onb-band"
           style={{
-            fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: "0.07em",
-            background: primaryFilled ? "#7c3a2a" : "#f5e2da",
-            color: primaryFilled ? "#f5e9e2" : "#7c3a2a",
-            border: primaryFilled ? "none" : "0.5px solid #e8c8bc",
-            borderRadius: 10, padding: "11px 22px", cursor: primaryDisabled ? "not-allowed" : "pointer",
-            opacity: primaryDisabled ? 0.55 : 1, whiteSpace: "nowrap", transition: "all 0.2s",
+            background: sageBandGradient,
+            borderBottom: `1px solid ${sageBandRule}`,
+            padding: "14px 22px",
+            display: "flex",
+            alignItems: "center",
+            gap: 13,
           }}
         >
-          {primaryLabel}
-        </button>
+          <span
+            className="sa-onb-plate"
+            style={{
+              width: 44, height: 44, borderRadius: 11, background: onbPlate, flexShrink: 0,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 1px 2px rgba(58,28,20,0.06)",
+            }}
+          >
+            {motif}
+          </span>
+          <span style={{ flex: 1, minWidth: 0 }}>
+            <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".15em", textTransform: "uppercase", color: sageText, display: "block" }}>
+              {pre}
+            </span>
+            {step && (
+              <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase", color: sageText, opacity: 0.75, display: "block", marginTop: 2 }}>
+                {step}
+              </span>
+            )}
+          </span>
+        </div>
+
+        {/* Body */}
+        <div className="sa-onb-body" style={{ padding: "26px 30px 12px" }}>
+          <h1 style={{ fontFamily: FONT_SERIF, fontSize: 29, fontWeight: 600, color: onbHeadingInk, margin: 0, lineHeight: 1.2, letterSpacing: "-0.01em" }}>
+            {name}
+          </h1>
+          <p style={{ fontFamily: FONT_SANS, fontSize: 15.5, color: onbMuted, margin: "8px 0 22px", lineHeight: 1.55, maxWidth: "46ch" }}>
+            {sub}
+          </p>
+          {children}
+        </div>
+
+        {/* Footer — ghost Back, spacer, near-black primary. Never pink, never burgundy. */}
+        <div className="sa-onb-foot" style={{ display: "flex", alignItems: "center", gap: 12, padding: "16px 30px 22px", marginTop: 6 }}>
+          {onBack ? (
+            <button
+              onClick={onBack}
+              style={{
+                background: "none", border: 0, color: onbMuted, fontFamily: FONT_MONO,
+                fontSize: 10.5, letterSpacing: ".09em", textTransform: "uppercase", cursor: "pointer", padding: 0,
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = onbHeadingInk)}
+              onMouseLeave={(e) => (e.currentTarget.style.color = onbMuted)}
+            >
+              ‹ Back
+            </button>
+          ) : (
+            <span />
+          )}
+          <span style={{ flex: 1 }} />
+          <button
+            onClick={onPrimary}
+            disabled={primaryDisabled}
+            onMouseEnter={() => setHoverPrimary(true)}
+            onMouseLeave={() => setHoverPrimary(false)}
+            style={{
+              background: primaryDisabled ? onbPrimaryDisabledBg : hoverPrimary ? onbPrimaryBgHover : onbPrimaryBg,
+              color: primaryDisabled ? onbPrimaryDisabledInk : onbPrimaryInk,
+              border: 0, borderRadius: 11, padding: "12px 22px",
+              cursor: primaryDisabled ? "not-allowed" : "pointer",
+              fontFamily: FONT_MONO, fontSize: 10.5, letterSpacing: ".09em", textTransform: "uppercase",
+              transition: "background .16s", whiteSpace: "nowrap",
+            }}
+          >
+            {primaryLabel}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export interface SelectRowProps {
   icon: React.ReactNode;
@@ -161,26 +231,49 @@ export interface SelectRowProps {
   onClick: () => void;
 }
 
-/** A selectable option row in the Form 11 onboarding body. */
+/**
+ * A selectable option row.
+ *
+ * ⚠️ SELECTION IS SAGE, AND THE RING IS THE MARKER. The old row filled soft pink with a burgundy
+ * border — the treatment the app reserves for a surface asking something of you, which is the
+ * opposite of what a chosen option means.
+ */
 export const SelectRow: React.FC<SelectRowProps> = ({ icon, title, desc, selected, onClick }) => (
-  <div
+  <button
+    type="button"
     onClick={onClick}
+    aria-pressed={selected}
     style={{
-      display: "flex", alignItems: "flex-start", gap: 13, background: selected ? "#f8ece6" : "#ffffff",
-      border: selected ? "1.5px solid #7c3a2a" : "0.5px solid #e0d5c8", borderRadius: 10, padding: "13px 15px",
-      cursor: "pointer", marginBottom: 10, boxShadow: "inset 0 1px 2px rgba(58,28,20,0.02)", transition: "all 0.15s",
+      display: "flex", gap: 13, alignItems: "flex-start", width: "100%", textAlign: "left",
+      background: selected ? onbOptionSelectedFill : onbOptionRest,
+      border: `1px solid ${selected ? sageText : onbOptionEdge}`,
+      borderRadius: 12, padding: "14px 15px", cursor: "pointer", marginBottom: 9,
+      transition: "border-color .16s, background .16s", fontFamily: FONT_SANS,
     }}
-    onMouseEnter={(e) => { if (!selected) e.currentTarget.style.borderColor = "#c9a89e"; }}
-    onMouseLeave={(e) => { if (!selected) e.currentTarget.style.borderColor = "#e0d5c8"; }}
+    onMouseEnter={(e) => { if (!selected) e.currentTarget.style.borderColor = "#d8cbbc"; }}
+    onMouseLeave={(e) => { if (!selected) e.currentTarget.style.borderColor = onbOptionEdge; }}
   >
-    <div style={{ width: 36, height: 36, borderRadius: 9, background: "#f5e2da", display: "flex", alignItems: "center", justifyContent: "center", color: "#7c3a2a", flexShrink: 0 }}>
-      {icon}
-    </div>
-    <div>
-      <div style={{ fontSize: 14, fontWeight: 500, color: "#3a1c14", marginBottom: 2 }}>{title}</div>
-      <div style={{ fontSize: 12, color: "#9c8878", lineHeight: 1.45 }}>{desc}</div>
-    </div>
-  </div>
+    <span
+      style={{
+        width: 17, height: 17, borderRadius: "50%", flex: "0 0 auto", marginTop: 3,
+        border: `1.5px solid ${selected ? sageText : "#cabcae"}`,
+        background: selected ? sageText : "transparent",
+        display: "flex", alignItems: "center", justifyContent: "center",
+      }}
+    >
+      {selected && (
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      )}
+    </span>
+    <span style={{ minWidth: 0 }}>
+      <span style={{ fontWeight: 600, display: "block", lineHeight: 1.3, fontSize: 14.5, color: onbHeadingInk }}>{title}</span>
+      <span style={{ color: onbMuted, fontSize: 13.5, display: "block", marginTop: 1, lineHeight: 1.4 }}>{desc}</span>
+    </span>
+    <span style={{ flex: 1 }} />
+    <span aria-hidden="true" style={{ flexShrink: 0, marginTop: 1, color: sageText, opacity: 0.85 }}>{icon}</span>
+  </button>
 );
 
-export { FONT_SERIF, FONT_SANS, FONT_MONO, PAPER_TEXTURE };
+export { FONT_SERIF, FONT_SANS, FONT_MONO };

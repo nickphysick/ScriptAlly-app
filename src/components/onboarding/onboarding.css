@@ -1,0 +1,26 @@
+/**
+ * Onboarding card — the mobile floor (funnel MVP phase 8).
+ *
+ * ⚠️ THE JOURNEY HAD NO BREAKPOINT AT ALL. Onboarding.tsx and chrome.tsx between them carried zero
+ * `@media` rules, so the card kept its 30px body padding, its 29px heading and its 44px band plate
+ * at every width. It never overflowed — the overlay scrolls and the card is `width:100%` inside a
+ * 16px-padded centre wrap — so this is a legibility and reach fix, not an overflow one.
+ *
+ * The values follow the ref's own 620px step (design-refs/funnel/onboarding-current-grammar-v1.html),
+ * which is where its two-up alternatives stack; the ≤640px rule below matches the rest of this
+ * codebase's small breakpoint.
+ */
+
+@media (max-width: 640px) {
+  .sa-onb-body { padding: 22px 20px 10px; }
+  .sa-onb-body h1 { font-size: 25px; }
+  .sa-onb-body p { font-size: 14.5px; }
+
+  .sa-onb-band { padding: 12px 16px; gap: 11px; }
+  .sa-onb-plate { width: 38px; height: 38px; border-radius: 10px; }
+
+  /* ⚠️ THE FOOT WRAPS RATHER THAN SHRINKING THE PRIMARY. A "Save & explore agents" label at
+     10.5px mono is already near its floor; squeezing it further to keep one line would make the
+     one control that moves the flow on the hardest thing on the screen to read. */
+  .sa-onb-foot { padding: 14px 20px 20px; flex-wrap: wrap; row-gap: 12px; }
+}

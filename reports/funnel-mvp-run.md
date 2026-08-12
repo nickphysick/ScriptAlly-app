@@ -498,3 +498,85 @@ touch committed phases to do it.
 browser could actually reach logged-out, but the run is headless and I did not start a dev server;
 the smokes assert structure and content, not appearance. **Worth eyeballing `/pricing`, `/terms`
 and `/privacy` at desktop and ~375px before launch** — the CSS is new and unreviewed by eye.
+
+---
+
+## Phase 6 — the onboarding card, retokened
+
+**Commit:** _(hash in the next log commit)_
+**Gates:** tsc **0** · build **✓** · Vitest **260 files, 4279 passed | 2 skipped (4281)**
+`Onboarding.tsx` 681 → 459 lines (1288 at the start of the run).
+
+### 6a — one card
+
+`Form11Card` renamed to **`OnboardingCard`** with its internals replaced, exactly as the pack
+directed — it was already the choke point all eight branch screens rendered through. The welcome's
+own `ModalCard` and `StageCard` fold into it, so the journey has **one** card instead of three.
+
+Gone: the parchment surface, the paper-texture data-URI, the 6px inset burgundy rim, the pink
+primary. In their place, the app's own dashboard card — surface `#fffdf9` (`.os-card`), hairline
+`#e9e2d7` (`--ws-edge`), radius 15, the `.os-card` shadow — and a near-black primary.
+
+**⚠️ Every value is sourced from the live modules, not the ref**, which is the pack's own rule and
+matters more than it sounds: the ref carries `#f8f4ee` where `index.css` defines `--ws-ground:
+#f7f4ee`. A card built to the mockup's numbers would be a *near-miss* of the app it introduces,
+which reads worse than an obvious difference. There is a test asserting `#f8f4ee` appears nowhere.
+
+**Tokens added** (`designTokens.ts`, `onb*` group, all documented in place): `onbGround`,
+`onbSurface`, `onbHairline`, `onbRadius`, `onbShadow`, `onbPrimaryBg`, `onbPrimaryBgHover`,
+`onbPrimaryInk`, `onbPrimaryDisabledBg`, `onbPrimaryDisabledInk`, `onbPlate`,
+`onbOptionSelectedFill`, `onbOptionRest`, `onbOptionEdge`, `onbFaint`, `onbMuted`, `onbHeadingInk`.
+Existing `sageBandGradient` / `sageBandRule` / `sageText` are reused rather than restated — the
+ref's sage is within a hair of the app's, and the app's wins.
+
+**The local palette is deleted.** `Onboarding.tsx` carried a private 19-hex object (`const C`),
+none of it shared with the app. That object is what allowed the drift in the first place, so it is
+gone rather than repointed, with a comment saying a screen needing a colour the `onb*` group lacks
+is a signal the card is under-specified.
+
+`primaryFilled` is gone too: there is one primary treatment now, so the escape hatch that let the
+confirm screen render a solid burgundy button has nothing to switch between.
+
+### 6b — marks: **two are missing, and I did not invent them**
+
+The ref's band plate holds an illustrated mark, and the ref's own markup calls its SVGs
+placeholders ("placeholder for the illustrated compass/desk mark"). **No illustrated asset exists
+for either screen**: `manuscriptMarks.tsx` holds five inline SVGs (none a book-setup or inbox
+mark), and `src/assets/` carries the manuscript notebook and shell brand art only.
+
+Per the pack, the existing **monoline glyphs** carry the plate — recoloured to `sageText` so they
+sit correctly on the white plate. **Outstanding: a manuscript/setup mark and an inbox/import
+mark.** They drop into `BookMotif` and `InboxMotif` with no other change.
+
+### 6c — the branch screens
+
+Inheritance did most of it. **Four places in `BranchB` needed their own conversion, which the pack
+asked me to log as a signal:** the upload hero's dashed border and fill, its icon plate, its inner
+"Choose a file" cue and the template link were all Form 11 pink/burgundy inline. The hero is the
+telling one — a burgundy dash on a pink wash is the *primary* treatment applied to a chooser, so it
+read louder than the actual primary in the footer. It now uses the same sage selection as
+`SelectRow`, and the inner cue is an outline rather than a second filled button.
+
+That is a fair verdict on the old card: it under-specified selection, so screens invented it.
+
+### Phase 8's onboarding half, landed here
+
+New `onboarding.css` with a `≤640px` step (body padding, 25px heading, 38px band plate, wrapping
+foot). **The journey previously had zero `@media` rules anywhere.** It never overflowed — the
+overlay scrolls and the card is fluid — so this is legibility, not overflow. The foot wraps rather
+than shrinking the primary: at 10.5px mono, "Save & explore agents" is already at its floor.
+
+### Locks
+
+`onboardingCard.test.ts`, 18 cases: no `Form11Card`, no paper texture, no inset burgundy rim, no
+parchment, no pink primary pair, no burgundy background, no `primaryFilled`; ground/surface/hairline
+match the app's tokens and not the ref's samples; the welcome renders the shared card and its own
+cards are gone; no private palette; the step marker is optional and no dot row survives; option
+rows select in sage and report `aria-pressed`.
+
+### Not verified
+
+**⚠️ This phase is a visual change and I could not look at it.** The suite proves the old skin is
+absent and the tokens are the app's, which is what a test can prove. It cannot tell you whether the
+card looks right. Onboarding is auth-gated, so the browser pane cannot reach it — **needs an
+eyeball on dev, on both branches, before this is called done.**

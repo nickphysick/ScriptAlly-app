@@ -11,7 +11,7 @@
  */
 import React, { useState } from "react";
 import { ManuscriptStatus } from "../../types";
-import { Form11Card, SelectRow, BookMotif, FONT_SANS } from "./chrome";
+import { OnboardingCard, SelectRow, BookMotif, FONT_SANS } from "./chrome";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
 
 export interface BranchAResult {
@@ -77,7 +77,7 @@ export const BranchA: React.FC<BranchAProps> = ({ onSkip, onExit, onSaveReady, o
 
   if (screen === "readiness") {
     return (
-      <Form11Card
+      <OnboardingCard
         onSkip={onSkip}
         pre="Your manuscript"
         name="Where are you with it?"
@@ -98,13 +98,13 @@ export const BranchA: React.FC<BranchAProps> = ({ onSkip, onExit, onSaveReady, o
             onClick={() => setStatus(r.status)}
           />
         ))}
-      </Form11Card>
+      </OnboardingCard>
     );
   }
 
   // A3 — details, in the variant the readiness answer picked.
   return (
-    <Form11Card
+    <OnboardingCard
       onSkip={onSkip}
       pre="Your manuscript"
       name={stillWriting ? "No rush at all" : "A little about it"}
@@ -156,6 +156,6 @@ export const BranchA: React.FC<BranchAProps> = ({ onSkip, onExit, onSaveReady, o
       {shownError && (
         <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#a0392a", margin: "10px 2px 0" }}>{shownError}</p>
       )}
-    </Form11Card>
+    </OnboardingCard>
   );
 };

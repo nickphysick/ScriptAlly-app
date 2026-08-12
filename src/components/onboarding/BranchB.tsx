@@ -17,7 +17,8 @@ import { runSmartImport, validateSmartImport, ValidatedImport, sampleRawRecords,
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import { agentAgencyLine } from "../../lib/agentDisplay";
 import { commitSmartImport, CommitOutcome } from "../../lib/smartImportCommit";
-import { Form11Card, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
+import { OnboardingCard, SelectRow, BookMotif, InboxMotif, FONT_SANS, FONT_MONO } from "./chrome";
+import { sageText, onbOptionEdge, onbOptionRest, onbOptionSelectedFill, onbPlate, onbHairline, onbMuted } from "../../lib/designTokens";
 import { SmartImportReview } from "./SmartImportReview";
 import { ImportOverview } from "./ImportOverview";
 import { ImportingLoader } from "./ImportingLoader";
@@ -231,7 +232,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   // ── B2 · the book ────────────────────────────────────────────────────────
   if (screen === "book") {
     return (
-      <Form11Card
+      <OnboardingCard
         onSkip={onSkip}
         pre="Your manuscript"
         name="The book you're querying"
@@ -252,14 +253,14 @@ export const BranchB: React.FC<BranchBProps> = ({
       >
         <ManuscriptFields value={fields} onChange={(v) => { setFields(v); if (fieldError) setFieldError(null); }} />
         {shownError && <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#a0392a", margin: "10px 2px 0" }}>{shownError}</p>}
-      </Form11Card>
+      </OnboardingCard>
     );
   }
 
   // ── B3 · bring it across — Smart Import is the hero ──────────────────────
   if (screen === "pipeline") {
     return (
-      <Form11Card
+      <OnboardingCard
         onSkip={onSkip}
         pre="Your pipeline"
         name="Bring it across"
@@ -284,13 +285,16 @@ export const BranchB: React.FC<BranchBProps> = ({
         <div
           onClick={() => { setImportOption("smart"); fileInputRef.current?.click(); }}
           style={{
-            border: importOption === "smart" ? "1.5px dashed #7c3a2a" : "1.5px dashed #d8c5b6",
-            background: importOption === "smart" ? "#f8ece6" : "#fdfaf5",
+            /* ⚠️ SELECTED IS SAGE HERE TOO. The hero used a burgundy dash on a pink wash, which
+               was the Form 11 primary treatment applied to a chooser — it read louder than the
+               actual primary in the footer. It now matches SelectRow's sage selection exactly. */
+            border: `1.5px dashed ${importOption === "smart" ? sageText : onbOptionEdge}`,
+            background: importOption === "smart" ? onbOptionSelectedFill : onbOptionRest,
             borderRadius: 12, padding: "22px 18px", textAlign: "center", cursor: "pointer",
             marginBottom: 12, transition: "all 0.15s",
           }}
         >
-          <div style={{ width: 44, height: 44, borderRadius: 11, background: "#f5e2da", display: "flex", alignItems: "center", justifyContent: "center", color: "#7c3a2a", margin: "0 auto 10px" }}>
+          <div style={{ width: 44, height: 44, borderRadius: 11, background: onbPlate, border: `1px solid ${onbHairline}`, display: "flex", alignItems: "center", justifyContent: "center", color: sageText, margin: "0 auto 10px" }}>
             {UploadIcon}
           </div>
           <div style={{ fontFamily: FONT_SANS, fontSize: 14.5, fontWeight: 500, color: "#3a1c14", marginBottom: 5 }}>
@@ -299,7 +303,8 @@ export const BranchB: React.FC<BranchBProps> = ({
           <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9c8878", lineHeight: 1.55, margin: "0 0 12px", maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
             Drop in whatever you use — a spreadsheet, an export, any layout — and we'll read it into ScriptAlly for you.
           </p>
-          <span style={{ fontFamily: FONT_MONO, fontSize: 11, fontWeight: 500, letterSpacing: "0.05em", background: "#f5e2da", color: "#7c3a2a", border: "0.5px solid #e8c8bc", borderRadius: 9, padding: "9px 18px", display: "inline-block" }}>
+          {/* A cue inside the hero, not a second primary — the footer owns the primary. */}
+          <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, fontWeight: 500, letterSpacing: "0.09em", textTransform: "uppercase", background: "transparent", color: sageText, border: `1px solid ${sageText}`, borderRadius: 9, padding: "9px 18px", display: "inline-block" }}>
             Choose a file →
           </span>
         </div>
@@ -307,7 +312,7 @@ export const BranchB: React.FC<BranchBProps> = ({
         {/* Template, demoted to a quiet secondary line. */}
         <p style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: "#a8968a", textAlign: "center", margin: "0 0 14px" }}>
           Prefer to start from a clean template?{" "}
-          <a href="/ScriptAlly-pipeline-import-template.xlsx" download style={{ color: "#7c3a2a", textDecoration: "none", borderBottom: "0.5px solid #cdbdae" }}>
+          <a href="/ScriptAlly-pipeline-import-template.xlsx" download style={{ color: onbMuted, textDecoration: "underline", textUnderlineOffset: 3 }}>
             Download one.
           </a>
         </p>
@@ -320,7 +325,7 @@ export const BranchB: React.FC<BranchBProps> = ({
           onClick={() => setImportOption("byhand")}
         />
         <EscapeHatch onOpen={onOpenImportDesk} />
-      </Form11Card>
+      </OnboardingCard>
     );
   }
 
@@ -330,7 +335,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "confirm") {
     const isPro = entitlement.tier === "pro";
     return (
-      <Form11Card
+      <OnboardingCard
         onSkip={onSkip}
         pre="Your pipeline"
         name="This uses your Smart Import"
@@ -338,7 +343,6 @@ export const BranchB: React.FC<BranchBProps> = ({
         motif={<InboxMotif />}
         onBack={() => { setPendingFile(null); setScreen("pipeline"); }}
         primaryLabel="Read my file →"
-        primaryFilled
         onPrimary={() => { if (pendingFile) void runMapping(pendingFile); }}
       >
         <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 10px" }}>
@@ -354,7 +358,7 @@ export const BranchB: React.FC<BranchBProps> = ({
             ? "This is this month's Smart Import. Your next one is available next month."
             : "This is your one free Smart Import. Upgrade to Pro later for one every month."}
         </p>
-      </Form11Card>
+      </OnboardingCard>
     );
   }
 
@@ -366,7 +370,7 @@ export const BranchB: React.FC<BranchBProps> = ({
       ? new Date(`${blocked.nextAvailable}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
       : "next month";
     return (
-      <Form11Card
+      <OnboardingCard
         onSkip={onSkip}
         pre="Your pipeline"
         name={isFreeUsed ? "Smart Import already used" : "Next Smart Import next month"}
@@ -374,7 +378,6 @@ export const BranchB: React.FC<BranchBProps> = ({
         motif={<InboxMotif />}
         onBack={() => { setBlocked(null); setScreen("pipeline"); }}
         primaryLabel={isFreeUsed ? "Upgrade to Pro →" : "Add them by hand →"}
-        primaryFilled={isFreeUsed}
         onPrimary={() => (isFreeUsed ? (onUpgrade ? onUpgrade() : onAddByHand()) : onAddByHand())}
       >
         <p style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.6, margin: "0 0 12px" }}>
@@ -390,7 +393,7 @@ export const BranchB: React.FC<BranchBProps> = ({
             Add them by hand instead
           </button>
         )}
-      </Form11Card>
+      </OnboardingCard>
     );
   }
 
@@ -464,7 +467,7 @@ export const BranchB: React.FC<BranchBProps> = ({
     const skippedReasons = [...new Set((validated?.skipped || []).map((s) => s.reason))];
     const ok = outcome.queriesImported > 0;
     return (
-      <Form11Card
+      <OnboardingCard
         onSkip={onSkip}
         pre="Your pipeline"
         name={ok ? "Brought across" : "That didn't work"}
@@ -497,7 +500,7 @@ export const BranchB: React.FC<BranchBProps> = ({
             </div>
           )}
         </div>
-      </Form11Card>
+      </OnboardingCard>
     );
   }
 
@@ -518,7 +521,7 @@ export const BranchB: React.FC<BranchBProps> = ({
        the step could not be shown rather than inventing a cause. Every route out stays live. */
     console.error("BranchB: unhandled screen state", { screen, hasValidated: !!validated, hasOutcome: !!outcome });
     return (
-      <Form11Card
+      <OnboardingCard
         onSkip={onSkip}
         pre="Your pipeline"
         name="That step didn't load"
@@ -540,12 +543,12 @@ export const BranchB: React.FC<BranchBProps> = ({
           onClick={onAddByHand}
         />
         <EscapeHatch onOpen={onOpenImportDesk} />
-      </Form11Card>
+      </OnboardingCard>
     );
   }
 
   return (
-    <Form11Card
+    <OnboardingCard
       onSkip={onSkip}
       pre="Your pipeline"
       name="Bring it across"
@@ -579,6 +582,6 @@ export const BranchB: React.FC<BranchBProps> = ({
         onClick={onAddByHand}
       />
       <EscapeHatch onOpen={onOpenImportDesk} />
-    </Form11Card>
+    </OnboardingCard>
   );
 };

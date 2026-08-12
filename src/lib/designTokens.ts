@@ -159,3 +159,44 @@ export const shellCardPad = 12; // sidebar card padding (px)
 export const shellInk = "#2e2723"; // chrome ink
 export const shellInkSoft = "#6a615a"; // secondary chrome ink
 export const shellMuted = "#9c8878"; // muted chrome ink (=== labelColor — role twin, kept named)
+
+/* ══════════════ Onboarding card (funnel MVP phase 6) ══════════════
+   ⚠️ FORM 11 IS RETIRED FROM THE ONBOARDING JOURNEY. Parchment ground, paper texture, the 6px
+   inset burgundy rim and the pink primary are gone from these screens: they made onboarding look
+   like a different product from the app it introduces, and the writer met three card styles in
+   four screens getting there.
+
+   Values are sourced from the LIVE modules, not from the mockup — design-refs/funnel's hexes were
+   sampled off a screenshot and drift (it carries #f8f4ee where index.css defines --ws-ground
+   #f7f4ee). The ground, surface and hairline below therefore restate the app's own dashboard card,
+   so the first screen a writer sees is made of the same material as the desk they land on.
+
+   ⚠️ BURGUNDY SURVIVES ONLY AS SMALL STATE INK AND INSIDE ILLUSTRATED MARKS — never as chrome,
+   never as a button. The primary is near-black. */
+
+/** The onboarding overlay's ground — the app's workspace ground (index.css --ws-ground). */
+export const onbGround = "#f7f4ee";
+/** The card surface — the dashboard's .os-card fill. */
+export const onbSurface = "#fffdf9";
+/** The card hairline — the app's single content-edge hairline (index.css --ws-edge). */
+export const onbHairline = "#e9e2d7";
+/** The dashboard card's radius and shadow, restated so the card cannot drift from .os-card. */
+export const onbRadius = 15;
+export const onbShadow = "0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06)";
+/** The near-black primary. NOT pink, NOT burgundy — see the note above. */
+export const onbPrimaryBg = "#1c130f";
+export const onbPrimaryBgHover = "#000000";
+export const onbPrimaryInk = "#f6f2ec";
+export const onbPrimaryDisabledBg = "#e6ded3";
+export const onbPrimaryDisabledInk = "#a5988e";
+/** The band's white plate, which holds the screen's mark. */
+export const onbPlate = "#ffffff";
+/** Option-row selection: sage border + the palest sage wash, never a pink fill. */
+export const onbOptionSelectedFill = "#fbfdfa";
+export const onbOptionRest = "#ffffff";
+export const onbOptionEdge = "#e2d9cc";
+/** Faint ink for the skip link and captions. */
+export const onbFaint = "#a5988e";
+export const onbMuted = "#6f635b";
+/** Heading ink for the body — plain ink, never burgundy. */
+export const onbHeadingInk = "#241711";

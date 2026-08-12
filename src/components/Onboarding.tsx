@@ -7,6 +7,8 @@ import React, { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptStatus } from "../types";
+import { OnboardingCard, SelectRow, BookMotif, FONT_MONO } from "./onboarding/chrome";
+import { onbFaint, onbGround, onbMuted } from "../lib/designTokens";
 import { BranchA, BranchAResult } from "./onboarding/BranchA";
 import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
@@ -15,39 +17,12 @@ import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboarding
 import { Check } from "lucide-react";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-const C = {
-  bg:            "#F5F0EA",
-  sageBg:        "#DCE0D9",
-  card:          "#FFFDF9",
-  card2:         "#fdf5f0",
-  card3:         "#faf8f5",
-  ink:           "#3a1c14",
-  burgundy:      "#7c3a2a",
-  burgundyDeep:  "#5a2a1e",
-  dusty:         "#c9a89e",
-  dustyBorder:   "#e0ccc0",
-  sandy:         "#EBDCD3",
-  sandyBg:       "#FAF1EF",
-  sandyBorder2:  "#F2DDD5",
-  muted:         "#a08070",
-  mutedDark:     "#7a5848",
-  amber:         "#c97c5a",
-  green:         "#c0dd97",
-  greenDark:     "#3B6D11",
-  border:        "#EBDCD3",
-};
-
-const FONT_SERIF  = "'Playfair Display', Georgia, serif";
-const FONT_SANS   = "'Source Sans Pro', system-ui, sans-serif";
-const FONT_MONO   = "'JetBrains Mono', 'Fira Mono', monospace";
-
-const ACCENT_COLORS: Record<number, string> = {
-  2: C.dusty,
-  3: C.burgundy,
-  4: C.burgundy,
-  5: C.burgundy,
-  6: C.green,
-};
+/* ⚠️ THE LOCAL PALETTE IS GONE. This file carried its own 19-hex token object — a parchment
+   ground, a burgundy primary, a pink dusty border — none of it shared with the app and none of it
+   matching the dashboard a writer lands on 40 seconds later. Every colour in this journey now
+   comes from designTokens (the `onb*` group), which restates the app's own card. If a screen here
+   ever needs a colour that group does not have, that is a signal the card is under-specified, not
+   an invitation to add a local hex. */
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface OnboardingProps {
@@ -96,81 +71,6 @@ const CenterWrap: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const Eyebrow: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span style={{
-    fontFamily: FONT_MONO,
-    fontSize: 10,
-    textTransform: "uppercase",
-    letterSpacing: "0.1em",
-    color: C.dusty,
-    display: "block",
-    marginBottom: 8,
-  }}>
-    {children}
-  </span>
-);
-
-const ModalTitle: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
-  <h2 style={{
-    fontFamily: FONT_SERIF,
-    fontSize: 26,
-    fontWeight: 500,
-    letterSpacing: "-0.02em",
-    color: C.ink,
-    margin: "0 0 8px",
-    lineHeight: 1.25,
-    ...style,
-  }}>
-    {children}
-  </h2>
-);
-
-const Subtitle: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p style={{
-    fontFamily: FONT_SANS,
-    fontSize: 13,
-    fontWeight: 300,
-    color: C.muted,
-    margin: "0 0 24px",
-    lineHeight: 1.6,
-  }}>
-    {children}
-  </p>
-);
-
-const PrimaryButton: React.FC<{
-  onClick: () => void;
-  children: React.ReactNode;
-  disabled?: boolean;
-  fullWidth?: boolean;
-}> = ({ onClick, children, disabled, fullWidth }) => {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        fontFamily: FONT_MONO,
-        fontSize: 11,
-        letterSpacing: "0.06em",
-        background: disabled ? C.dustyBorder : hovered ? C.burgundyDeep : C.burgundy,
-        color: "#f5ede8",
-        border: "none",
-        borderRadius: 10,
-        padding: "10px 20px",
-        cursor: disabled ? "not-allowed" : "pointer",
-        transition: "background 0.15s, transform 0.15s",
-        transform: hovered && !disabled ? "translateY(-1px)" : "none",
-        width: fullWidth ? "100%" : undefined,
-      }}
-    >
-      {children}
-    </button>
-  );
-};
-
 // ─── Screen wrappers ──────────────────────────────────────────────────────────
 
 // Keyed enter-only fade between screens. Deliberately NO framer-motion here: exit-completion
@@ -184,185 +84,51 @@ const ScreenTransition: React.FC<{ stepKey: number; children: React.ReactNode }>
   </div>
 );
 
-const ModalCard: React.FC<{ step: number; children: React.ReactNode }> = ({ step, children }) => (
-  <div style={{
-    background: C.card,
-    border: `0.5px solid ${C.border}`,
-    borderRadius: 20,
-    width: "100%",
-    maxWidth: 500,
-    overflow: "hidden",
-    boxShadow: "0 8px 40px rgba(58,28,20,0.12)",
-  }}>
-    {/* Accent bar */}
-    <div style={{ height: 3, background: ACCENT_COLORS[step] || C.dusty }} />
-    {children}
-  </div>
-);
-
-// ─── Step 0: Welcome / querying-stage capture ─────────────────────────────────
-
-// Single-select option card: title + descriptor + soft-burgundy selected state + tick.
-// Mirrors SelectableCard's selection treatment using the shared C tokens (kept separate so the
-// existing SelectableCard / Screen3Path is untouched).
-const StageCard: React.FC<{
-  selected: boolean;
-  onSelect: () => void;
-  title: string;
-  descriptor: string;
-}> = ({ selected, onSelect, title, descriptor }) => {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      onClick={onSelect}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 12,
-        width: "100%",
-        textAlign: "left",
-        background: selected ? "#fff0eb" : hovered ? C.card2 : C.card,
-        border: `1px solid ${selected ? C.burgundy : hovered ? C.dusty : C.border}`,
-        borderRadius: 14,
-        padding: "13px 16px",
-        cursor: "pointer",
-        transition: "all 0.15s ease",
-        marginBottom: 8,
-      }}
-    >
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: FONT_SANS, fontSize: 13, fontWeight: 500, color: C.ink, marginBottom: 2 }}>
-          {title}
-        </div>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 12, fontWeight: 300, color: C.muted, margin: 0, lineHeight: 1.5 }}>
-          {descriptor}
-        </p>
-      </div>
-      <div style={{
-        width: 22,
-        height: 22,
-        borderRadius: "50%",
-        flexShrink: 0,
-        background: selected ? C.burgundy : "transparent",
-        border: `1px solid ${selected ? C.burgundy : C.dustyBorder}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        color: "#f5ede8",
-        transition: "all 0.15s",
-      }}>
-        {selected && <Check size={13} strokeWidth={2.5} />}
-      </div>
-    </button>
-  );
-};
-
+/**
+ * The welcome step — the same card as every other screen in this journey.
+ *
+ * ⚠️ IT USED TO BE ITS OWN CARD, and that was the first of three styles a writer met on the way
+ * in. `ModalCard` had no paper texture and no inset rim, so it matched neither the Form 11 branch
+ * screens that followed nor the app it introduces; its band carried a burgundy "S" monogram
+ * standing in for the wordmark. One card, one grammar: this screen is now `OnboardingCard` with a
+ * book mark on the plate, like the manuscript screens it leads to.
+ */
 const WelcomeStageScreen: React.FC<{
   selected: QueryingStage | null;
   onSelect: (s: QueryingStage) => void;
   onContinue: () => void;
   onSkip: () => void;
-}> = ({ selected, onSelect, onContinue, onSkip }) => {
-  const [skipHovered, setSkipHovered] = useState(false);
-  return (
-    <ModalCard step={1}>
-      {/* Sage header band: brand mark · mono eyebrow · Playfair wordmark */}
-      <div style={{
-        background: "linear-gradient(135deg, #dce0d9 0%, #d0d6cc 100%)",
-        borderBottom: "1px solid rgba(90,110,88,0.2)",
-        padding: "18px 28px",
-        display: "flex",
-        alignItems: "center",
-        gap: 11,
-      }}>
-        <div style={{
-          width: 38,
-          height: 38,
-          background: C.burgundy,
-          borderRadius: 9,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: FONT_SERIF,
-          fontWeight: 700,
-          fontSize: 17,
-          color: "#f5ede8",
-          flexShrink: 0,
-        }}>
-          S
-        </div>
-        <div>
-          <span style={{
-            fontFamily: FONT_MONO,
-            fontSize: 9,
-            textTransform: "uppercase",
-            letterSpacing: "0.1em",
-            color: "#5a6e58",
-            display: "block",
-            marginBottom: 1,
-          }}>
-            Welcome to
-          </span>
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 19, fontWeight: 600, color: "#2e3a2c", letterSpacing: "-0.01em" }}>
-            ScriptAlly
-          </span>
-        </div>
-      </div>
-
-      <div style={{ padding: "26px 28px 24px" }}>
-        <ModalTitle>
-          Let's set things up around your{" "}
-          <em style={{ fontStyle: "italic", color: C.burgundy }}>journey.</em>
-        </ModalTitle>
-        <Subtitle>
-          A calm home for every query, agent, and deadline. No wrong answer here — it just helps us
-          shape what you see first.
-        </Subtitle>
-
-        <Eyebrow>Where are you in your querying journey?</Eyebrow>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 0, marginBottom: 20 }}>
-          {STAGE_OPTIONS.map(opt => (
-            <StageCard
-              key={opt.id}
-              selected={selected === opt.id}
-              onSelect={() => onSelect(opt.id)}
-              title={opt.title}
-              descriptor={opt.descriptor}
-            />
-          ))}
-        </div>
-
-        <PrimaryButton onClick={onContinue} disabled={!selected} fullWidth>
-          Continue →
-        </PrimaryButton>
-
-        <div style={{ textAlign: "center", marginTop: 12 }}>
-          <button
-            onClick={onSkip}
-            onMouseEnter={() => setSkipHovered(true)}
-            onMouseLeave={() => setSkipHovered(false)}
-            style={{
-              fontFamily: FONT_MONO,
-              fontSize: 10,
-              letterSpacing: "0.06em",
-              color: skipHovered ? C.ink : C.muted,
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px 8px",
-              transition: "color 0.15s",
-            }}
-          >
-            Skip this step
-          </button>
-        </div>
-      </div>
-    </ModalCard>
-  );
-};
+}> = ({ selected, onSelect, onContinue, onSkip }) => (
+  <OnboardingCard
+    onSkip={onSkip}
+    pre="Getting set up"
+    name="Let's set things up around your journey"
+    sub="A calm home for every query, agent and deadline. No wrong answer here — it just shapes what you see first."
+    motif={<BookMotif />}
+    primaryLabel="Continue"
+    primaryDisabled={!selected}
+    onPrimary={onContinue}
+  >
+    <span
+      style={{
+        fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.15em", textTransform: "uppercase",
+        color: onbFaint, display: "block", marginBottom: 11,
+      }}
+    >
+      Where are you in your querying journey?
+    </span>
+    {STAGE_OPTIONS.map((opt) => (
+      <SelectRow
+        key={opt.id}
+        icon={null}
+        title={opt.title}
+        desc={opt.descriptor}
+        selected={selected === opt.id}
+        onClick={() => onSelect(opt.id)}
+      />
+    ))}
+  </OnboardingCard>
+);
 
 // ─── Main Onboarding component ────────────────────────────────────────────────
 
@@ -574,7 +340,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     <div style={{
       position: "fixed",
       inset: 0,
-      background: C.bg,
+      background: onbGround,
       zIndex: 9999,
       display: "flex",
       alignItems: step === 1 ? "stretch" : "center",
@@ -661,13 +427,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         <div style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(245,240,234,0.6)",
+          background: "rgba(247,244,238,0.72)",
           zIndex: 10000,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}>
-          <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: C.muted, letterSpacing: "0.08em" }}>
+          <span style={{ fontFamily: FONT_MONO, fontSize: 11, color: onbMuted, letterSpacing: "0.08em" }}>
             Saving…
           </span>
         </div>
