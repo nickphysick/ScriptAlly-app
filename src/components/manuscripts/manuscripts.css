@@ -30,7 +30,8 @@
      and bottom values gutter the CONTENT, which is a different job, and are untouched. */
   /* ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER. Below row 3 it would be fixed space the shelf
      could never scroll into — a dead band under the last plate. */
-  padding: 11px 0 0;
+  /* no top inset — the grid owns the gap above the header (see agentList.css) */
+  padding: 0 0 0;
 }
 /* ⚠️ THE CAP IS ON THE GRID ROOT, not the content wrapper, so plate, toolbar and plates below are
    one column wide BY CONSTRUCTION rather than by separate rules agreeing. Same expression as

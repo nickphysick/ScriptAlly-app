@@ -44,6 +44,18 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
   return {
     working: row.classList.contains("wpg-plate--working"),
     rowH: r(rb.height), headerH: r(hb.height),
+    /* ⚠️ THE STRIP'S DISTANCE FROM THE WINDOW'S TOP EDGE — the last place a page could still
+       disagree about the header, and it did: five different page insets above the grid put this
+       at 87.3, 98.3, 101.3, 103.3 and 109.3 while every reading INSIDE the strip matched. */
+    headerTop: r(hb.top),
+    /* every control in the strip, whatever class it wears */
+    btnH: [...new Set([...inner.querySelectorAll("button, a[role='button'], [class*='btn'], [class*='chip']")]
+      .filter((el) => el.getBoundingClientRect().height > 0)
+      .map((el) => r(el.getBoundingClientRect().height)))].sort((x, y) => x - y),
+    /* anything inline with the title — PRO pills, badges — by font size */
+    pillFs: [...new Set((title ? [...title.querySelectorAll("*")] : [])
+      .filter((el) => el.getBoundingClientRect().height > 0)
+      .map((el) => getComputedStyle(el).fontSize))],
     titlePx: title ? getComputedStyle(title).fontSize : "—",
     markW: mark ? r(mark.getBoundingClientRect().width) : -1,
     offCentre: [...inner.children].filter((el) => {
@@ -108,6 +120,10 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
         workH: work!.rowH, workTitle: work!.titlePx, workMark: work!.markW,
         workHdrL: work!.headerL, workHdrR: work!.headerR,
         hairL: work!.hairL, hairR: work!.hairR,
+        restTop: rest.headerTop, workTop: work!.headerTop,
+        restCardH: rest.headerH, workCardH: work!.headerH,
+        restBtn: rest.btnH.join("|") || "—", workBtn: work!.btnH.join("|") || "—",
+        restPill: rest.pillFs.join("|") || "—", workPill: work!.pillFs.join("|") || "—",
         backToRest: !back!.working,
         offCentre: rest.offCentre.length + work!.offCentre.length,
         overflowRest: rest.overflow, overflowWork: work!.overflow,
@@ -144,6 +160,47 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     for (const w of [...new Set(all.map((r) => r.restMark))]) {
       expect([38, 64], `an unexpected rest mark ${w} — only the 38px glyph and the 64px illustration are legitimate`).toContain(w);
     }
+
+    /* ══ §1 — THE STRIP IS THE SAME OBJECT ON EVERY PAGE ══════════════════════════════════════
+       ⚠️ THE HEIGHT IS THE TOKEN, NEVER THE CONTENT. 96 at rest on every page including the
+       title-only ones — a page with no description centres its title in the same 96 rather than
+       shrinking the card — and 52 working on every page that has a working state. */
+    for (const r of all) {
+      expect(r.restCardH, `${r.page}: the resting card is not 96 — its height is following its content`).toBe(96);
+    }
+    for (const r of scrollers) {
+      expect(r.workCardH, `${r.page}: the working strip is not 52`).toBe(52);
+    }
+    /* ⚠️ AND IT SITS AT THE SAME PLACE ON THE PAGE. Cross-page equality in BOTH states — a page
+       inset above the grid moves the strip without changing anything measurable inside it. */
+    const topSame = (key: "restTop" | "workTop", set: typeof all) => {
+      const vals = [...new Set(set.map((x) => String(x[key])))];
+      expect(vals, `${key} differs across pages — a page-level inset above the grid: ${JSON.stringify(set.map((x) => [x.page, x[key]]))}`).toHaveLength(1);
+    };
+    topSame("restTop", all);
+    /* ⚠️ THE WORKING TOP IS COMPARED ACROSS THE SCROLLERS ONLY, and that is not a weakening. A
+       page with no working state reports its RESTING position under `workTop`, which is 18px
+       lower by construction — the plate gap the strip gives back when it condenses. Comparing all
+       ten flagged a split of exactly 87.3 / 69.3, i.e. exactly `--wsh-plate-gap`, which is the
+       mechanism working rather than a page disagreeing. `restTop` is still checked across all ten,
+       and that is the reading a page inset actually moves. */
+    topSame("workTop", scrollers);
+    /* ⚠️ EVERY CONTROL IN THE STRIP IS 30px WORKING, whatever class its page gave it. `.pkgw-btn`
+       measured 30 here for a whole pass while being a second implementation that had simply been
+       written its own working height — the check is the value, the fix was removing the copy. */
+    for (const r of scrollers.filter((x) => x.workBtn !== "—")) {
+      expect(r.workBtn, `${r.page}: a control in the working strip is not 30px`).toBe("30");
+    }
+    for (const r of all.filter((x) => x.restBtn !== "—")) {
+      expect(r.restBtn, `${r.page}: a control in the resting strip is not 38px`).toBe("38");
+    }
+    /* ⚠️ NOTHING INLINE WITH THE TITLE KEEPS ITS REST SIZE. Discover's PRO pill held 8.5px in both
+       states — it had never been written a scrolled rule, and nothing said one was missing. */
+    for (const r of scrollers.filter((x) => x.restPill !== "—")) {
+      expect(r.workPill, `${r.page}: something inline with the title kept its resting size through the collapse`).not.toBe(r.restPill);
+    }
+    const pills = [...new Set(scrollers.filter((x) => x.workPill !== "—").map((x) => String(x.workPill)))];
+    expect(pills.length, `pills scale to different sizes across pages: ${JSON.stringify(scrollers.map((x) => [x.page, x.workPill]))}`).toBeLessThan(2);
 
     /* ⚠️ THE TASKS VIEWPORT LOCK: the frame is a window and NEVER scrolls — all scrolling belongs
        to the internal `.tpl-zone`s. It leaked once: `.tpl-cols` says `flex: 1; min-height: 0`,

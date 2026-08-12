@@ -2,7 +2,8 @@
  * TasksPageLayout — the one page grid (tasks-pages pack, Phase 1; horizontal half tasks-audit
  * addendum; ref design-refs/tasks-pages.html).
  *
- * ⚠️ BOTH AXES ARE `.tdb-col`'s TOKENS: top `--tdb-chrome-gap`, gutter `--tdb-col-gutter`, plus
+ * ⚠️ THE GUTTER IS `.tdb-col`'s TOKEN `--tdb-col-gutter` (the top inset and its
+ * `--tdb-chrome-gap` are RETIRED — the grid owns the gap above the header), plus
  * its max width + auto-centring — this file must NOT restate a top OR horizontal padding of its
  * own, and no route slot may add a second cap (contentVariant stays OFF the Tasks slots). Every
  * Tasks page title sits at the same offset on both axes because every page renders the same

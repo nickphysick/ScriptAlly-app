@@ -49,13 +49,15 @@ describe("agent list · the page column", () => {
   it("padding rides the page, the gutter rides the grid — two elements, two jobs", () => {
     expect(
       block(".aglist .agl-page"),
-      /* ⚠️ THE SIDE GUTTER LEFT THIS RULE (header spec §1). The top stays 14px — the workspace
-         header sits inside this padding, so it is the band above a header that is already
-         generous, not breathing room above content. The sides are the scroll row's now, and the
-         48px bottom already moved into the scroller at amendment 9 for the same reason: below row
-         3 it would be fixed space the list could never scroll into. */
-      "the page padding changed — the sides belong to the grid's scroll row, so only the top is stated here",
-    ).toContain("padding: 14px 0 0");
+      /* ⚠️ THE TOP LEFT TOO, AND THAT REVERSES THE NOTE THAT STOOD HERE. It read "the top stays
+         14px — the workspace header sits inside this padding", which was true of this page and of
+         nothing else: measured across the ten pages the same inset was 0, 11, 14, 16 and 22, so
+         the one element every page shares sat at five different distances from the window's top
+         edge. The gap above the header is `--wsh-plate-gap`, owned by the grid. Sides went to the
+         scroll row at header spec §1; the 48px bottom went into the scroller at amendment 9. What
+         is left is nothing, stated. */
+      "the page reintroduced an inset — every side of this rule belongs to the grid now",
+    ).toContain("padding: 0 0 0");
     /* ⚠️ A CONTRIBUTION, NOT A PADDING. It sets `--wpg-foot`, which the grid sums with the working
        state's reclaim — as a raw `padding-bottom` this rule silently overrode the reclaim, because
        both are 0-2-0 and the page sheet comes later in the bundle. */

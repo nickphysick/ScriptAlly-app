@@ -531,13 +531,18 @@
 .pkgw .svh-rule { height: 2px; border-radius: 2px; background: var(--slate); opacity: .5; }
 .pkgw .svh-acts { align-items: center; }
 
+/* ⚠️ THE SIZES COME FROM THE HEADER'S LADDER, the paint stays here. This pill and Discover's were
+   two implementations of the same idea and only one of them scaled — see the ladder's note in
+   pageHeader.css. Reading the tokens means neither page can be given a state the other lacks. */
 .pkgw-propill {
   display: inline-flex; align-items: center; gap: 5px;
-  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .14em; text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase;
+  font-size: var(--wsh-pill-fs, 8px);
   color: var(--slate); background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3);
-  border-radius: 99px; padding: 4px 10px; position: relative; top: 2px; flex: none;
+  border-radius: 99px; padding: var(--wsh-pill-pad, 4px 10px);
+  position: relative; top: var(--wsh-pill-dy, 2px); flex: none;
 }
-.pkgw-propill svg { width: 10px; height: 10px; }
+.pkgw-propill svg { width: var(--wsh-pill-icon, 10px); height: var(--wsh-pill-icon, 10px); }
 
 /* The right cluster — manuscript selector + primary action, on the title's line. Both go
    through actionsSlot because PageHeader treats `actions` and `actionsSlot` as exclusive. */
@@ -756,17 +761,14 @@
   display: inline-flex; align-items: center; gap: 9px;
   font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 600;
   color: var(--ink); background: #fffefb; border: var(--bdw) solid var(--bd); border-radius: 10px;
-  height: 38px; padding: 0 14px; cursor: pointer;
+  height: var(--wsh-ctl-h, 38px); padding: var(--wsh-ctl-pad, 0 14px); cursor: pointer;
   transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
     font-size .22s cubic-bezier(.4, 0, .2, 1);
 }
 .pkgw-mschip--static { cursor: default; padding: 0 16px; }
-.wsh--scrolled .pkgw-mschip { height: 30px; padding: 0 11px; font-size: 13px; }
-.wsh--scrolled .pkgw-btn { height: 30px; padding: 0 12px; font-size: 12px; }
-/* the Pro pill is type, so it steps by type — and its `top` nudge is tuned to the resting title */
-.wsh--scrolled .pkgw-propill { font-size: 7px; padding: 3px 8px; top: 1px; }
-.wsh--scrolled .pkgw-propill svg { width: 9px; height: 9px; }
-.pkgw-btn, .pkgw-propill {
-  transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
-    font-size .22s cubic-bezier(.4, 0, .2, 1);
-}
+/* ⚠️ FIVE `.wsh--scrolled` OVERRIDES WERE DELETED HERE, not moved. The chip, the button and the
+   pill each carried their own working sizes — three ladders, one of which (the button's) is why
+   `.pkgw-btn` measured correct in a header it should never have been in. The chip reads the shared
+   tokens above; the button is now the shared `.svh-btn`; the pill reads the same tokens Discover's
+   does. Anything a page mounts in the strip scales because the strip says so, not because someone
+   remembered to write it a second rule. */

@@ -446,7 +446,7 @@ describe("doc pass P2 — the width tier (≥1700 → 4-up with Today)", () => {
   });
   it("the edge gutter is the 32px token (the pack's 48→32), padded on the wrap", () => {
     // SHELL POLISH P1: the gutters moved to the centred column; the wrap is the bare scroller
-    expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
+    expect(rule(".tdb-col")).toContain("padding: 0 var(--tdb-col-gutter) 48px");
     expect(rule(".tdb-col")).toContain("max-width: var(--tdb-col-max)");
     /* ⚠️ SUPERSEDED 7 Aug 2026 — THE LEFT GUTTER IS LAW. `.tdb-col` carried `margin-inline: auto`,
        which centred it on its 1360px measure; a centred column's LEFT EDGE MOVES with the width

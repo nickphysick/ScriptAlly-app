@@ -51,15 +51,18 @@ describe("shell polish P1 — the centred column + the chrome gap", () => {
     const w = rule(".tdb-wrap");
     expect(w).toContain("--tdb-col-max: 1360px");
     expect(w).toContain("--tdb-col-gutter: 40px");
-    /* ⚠️ THE CHROME GAP TIGHTENED 44 → 16 (fix pack, 10 Aug). The pinned block measured 282px at
-       1440×900, leaving a scroll window barely eight rows tall, which reads as a page that will
-       not scroll. It came out of GAPS only — no control moved, resized or restyled — and this is
-       the largest of them. What the case protects is that the value is a TOKEN on `.tdb-wrap`
-       feeding `.tdb-col`'s padding, so all four Tasks pages keep ONE top offset; the number itself
-       is a design figure, and pinning it here made a deliberate change look like a regression. */
-    expect(w).toMatch(/--tdb-chrome-gap: \d+px/);
-    // the chrome gap is the column's top padding (air under the bar)
-    expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
+    /* ⚠️ THE CHROME GAP IS RETIRED, AND ITS WHOLE PURPOSE MOVED UP A LEVEL (uniformity pass §1).
+       It went 44 → 16 to stop the pinned block eating the scroll window, and this case protected
+       the fact that it was a TOKEN feeding `.tdb-col`'s padding "so all four Tasks pages keep ONE
+       top offset". That was the right idea one level too low: the Tasks pages agreed with each
+       other and with nobody else. Measured across the ten workspace pages the same inset read 0,
+       11, 14, 16 and 22, so the strip sat at five distances from the window's top edge. The gap
+       above the header is `--wsh-plate-gap` now, owned by the grid, and a token no rule reads is
+       worse than no token — it reads as load-bearing. */
+    expect(w, "the chrome gap came back — the gap above the header belongs to the grid's --wsh-plate-gap")
+      .not.toMatch(/--tdb-chrome-gap/);
+    expect(rule(".tdb-col"), "a top inset returned to the Tasks column — it would put these three pages' strip lower than the other seven")
+      .toContain("padding: 0 var(--tdb-col-gutter) 48px");
   });
   it("the hero row and the panel share the SAME edges (both flush to the column, no side inset)", () => {
     // the hero row has no side padding, and the panel fills the column — so title-left ==
@@ -218,7 +221,7 @@ describe("alignment fixes P1 — equal gutters + the grid fills the panel", () =
     /* ⚠️ `margin-inline: 0` — an auto margin on a flex cross axis disables the stretch and
        collapsed three of four pages (7 Aug, second pass). */
     expect(rule(".tdb-col")).toContain("margin-inline: 0;");
-    expect(rule(".tdb-col")).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px");
+    expect(rule(".tdb-col")).toContain("padding: 0 var(--tdb-col-gutter) 48px");
     expect(rule(".tdb-col")).not.toMatch(/padding-left|padding-right/);
   });
   it("the grid is FOUR columns at the standard tier (the tightening P3 supersedes the fluid auto-fill)", () => {
@@ -318,7 +321,7 @@ describe("centring fix P1 — the single geometry owner (architecture, not pixel
     expect(col).toContain("margin-inline: 0;");
     expect(col).not.toContain("margin-inline: auto");
     expect(col).not.toContain("margin-inline: 0 auto");
-    expect(col).toContain("padding: var(--tdb-chrome-gap) var(--tdb-col-gutter) 48px"); // equal L/R via one token
+    expect(col).toContain("padding: 0 var(--tdb-col-gutter) 48px"); // equal L/R via one token
   });
   it("NO other chain element carries a max-width, an auto margin, or a one-sided horizontal pad", () => {
     for (const sel of CHAIN) {

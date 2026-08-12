@@ -186,7 +186,7 @@ export const SubmissionPackages: React.FC = () => {
      grid in a scrollport of its own, so the plate and tool row scrolled away on this page while
      every other converted page pinned them. The grid's row 3 is the scroller. */
   return (
-    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "22px 0 16px", gap: 14, overflow: "hidden" }}>
+    <div className="pkg-root pkgw" style={{ height: "100%", display: "flex", flexDirection: "column", padding: "0 0 16px" /* no top inset — the grid owns the gap above the header */, gap: 14, overflow: "hidden" }}>
       <style>{`
         .pkg-msopt:hover { background: linear-gradient(135deg, var(--band-a), var(--band-b)) !important; }
         @media (max-width: 768px) { .pkg-root { height: auto; min-height: 100%; overflow: visible; } }
@@ -214,7 +214,14 @@ export const SubmissionPackages: React.FC = () => {
           actionsSlot={activeMs ? (
             <div className="pkgw-hact">
               {msSelector}
-              <button type="button" className="pkgw-btn pkgw-btn--primary" onClick={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}>
+              {/* ⚠️ THE SHARED BUTTON, NOT `.pkgw-btn`. A page-specific button class in a header is a
+                  second implementation of the strip's control ladder — this one happened to agree
+                  (38 → 30) because it was given an explicit working height in a previous pass,
+                  which is exactly how it read as correct while being a copy. `--primary` and
+                  `svh-btn-primary` resolve to the same three constants (`--pink` / `--pink-b` /
+                  `--burg`), so nothing about it looks different; it simply stops being separate.
+                  `.pkgw-btn` survives for the page BODY, where it belongs. */}
+              <button type="button" className="svh-btn svh-btn-primary" onClick={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}>
                 <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
               </button>
             </div>

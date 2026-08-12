@@ -149,7 +149,12 @@
   /* ⚠️ THE BOTTOM GUTTER MOVED INTO THE SCROLLER (amendment 9). At 48px here it would be fixed
      space BELOW row 3 — a permanent dead band the list could never scroll into. It is the
      scroller's own bottom padding now, so it scrolls with the last card as it always read. */
-  padding: 14px 0 0;
+  /* ⚠️ NO TOP PADDING — the grid's `--wsh-plate-gap` owns the space above the header, on every
+     page. Measured across the ten: this was 14 here, 14 on Discover, 11 on Manuscripts, 22 on
+     Packages and Comps, 16 on the Tasks family and 0 on Query Centre and Analytics — so the strip
+     sat at six different distances from the window's top edge while every reading INSIDE it
+     matched. The page's own inset is the last place a page can still disagree about the header. */
+  padding: 0 0 0;
   flex: 1;
   min-height: 0;
   display: flex;
