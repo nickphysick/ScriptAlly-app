@@ -52,6 +52,19 @@
   --dv-anim-c: #eef1f4;
   --dv-anim-line: #d8cbbd;
   --dv-anim-ink: #a9b6c4;
+  /* The specimen stage. The card goes WHITE on parchment and its edge goes soft: on the page's own
+     canvas an ink border and a hard offset make a printed record, but on this band they would make
+     a second, louder object competing with the copy above it. The sage survives on the band and
+     the tab only — an accent on the card, never a field behind it. */
+  --dv-exhairline: #ece0d2;
+  --dv-exline: #e2dcd2;
+  --dv-exshadow: 0 2px 6px rgba(58, 28, 20, 0.06), 0 14px 34px rgba(58, 28, 20, 0.1);
+  --dv-exband: #eef1ec;
+  --dv-exbandline: #dfe4dc;
+  --dv-extab: #e4e9e1;
+  --dv-extabline: #cfd6cc;
+  --dv-note-ink: #5f5348;
+  --dv-note-line: #a89a8a;
   /* Hard letterpress offset — the ink-bordered card sitting proud of the canvas. */
   --dv-print: 2px 3px 0 rgba(49, 30, 25, 0.07);
 }
@@ -653,61 +666,144 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
 }
 .dv-nomatch .go:hover { filter: brightness(0.97); }
 
-/* ── "What a match looks like" — centred, copy left / example card right ── */
-/* Centre-weighted rule: the Pro segment sits in the middle rather than at the left edge. */
-.dv-exrule {
-  height: 2px;
-  border-radius: 2px;
-  margin: 44px auto 0;
-  background: linear-gradient(
-    90deg,
-    var(--dv-linesoft) 0 calc(50% - 44px),
-    var(--slate-line, #c7d6e3) calc(50% - 44px) calc(50% + 44px),
-    var(--dv-linesoft) calc(50% + 44px)
-  );
+/* ── "What a match looks like" — the specimen stage ────────────────────────
+   ⚠️ FULL-BLEED IS A NEGATIVE MARGIN THAT READS THE GUTTER TOKEN, NEVER A LITERAL. The scroll row
+   carries `padding-inline: var(--content-gutter)`; the stage cancels exactly that and pays it
+   straight back as its own padding, so the parchment reaches both window edges while the copy
+   stays on the same measure as the reel above it. A literal here would inset the band at one
+   breakpoint and overhang it at the next, because `--content-gutter` steps below md. */
+.dv-stage {
+  margin-inline: calc(var(--content-gutter) * -1);
+  padding: 74px var(--content-gutter) 84px;
+  background: var(--dv-card);
+  border-top: 1px solid var(--dv-exhairline);
+  border-bottom: 1px solid var(--dv-exhairline);
+  text-align: center;
 }
-.dv-matchsec {
-  margin: 34px auto 0;
-  max-width: 940px;
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 52px;
-  align-items: center;
-}
-.dv-matchsec h2 {
+.dv-stagehead h2 {
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 30px;
+  font-size: 38px;
   font-weight: 500;
-  line-height: 1.14;
   color: var(--dv-ink-head);
   margin: 0;
 }
-.dv-matchsec p {
-  font-size: 13.5px;
+.dv-stagehead p {
+  font-size: 15.5px;
+  line-height: 1.6;
   color: var(--dv-ink-body);
-  line-height: 1.7;
-  margin-top: 14px;
+  max-width: 560px;
+  margin: 14px auto 0;
 }
-.dv-exhold { position: relative; }
+
+/* The exhibit — a fixed-height stage the card is centred on and the notes hang off. */
+.dv-exhibit {
+  position: relative;
+  width: 920px;
+  max-width: 100%;
+  height: 400px;
+  margin: 58px auto 0;
+  container-type: inline-size;
+}
+.dv-exhold {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  width: 440px;
+  text-align: left;
+}
 /* The example is a picture of the feature — never interactive. */
 .dv-exhold .dv-ac { pointer-events: none; }
+/* ⚠️ THE SPECIMEN'S SURFACE IS THE REF'S; ITS INSIDES ARE THE APP'S. `.dv-ac` is the LIVE match
+   card and keeps its own grammar — ink border, letterpress offset, sage band — for the cards
+   behind `DISCOVER_LIVE`. Here it sits on parchment, where an ink-bordered card with a hard offset
+   reads as a different object from the one the app draws; so the exhibit restates only the
+   surface: white paper, a soft edge, a lifted shadow and a paler band. Scoped, so nothing the live
+   view renders is touched. */
+.dv-exhold .dv-ac {
+  border: 1px solid var(--dv-exline);
+  border-radius: 12px;
+  box-shadow: var(--dv-exshadow);
+}
+.dv-exhold .dv-ac .band.strong {
+  background: var(--dv-exband);
+  border-bottom-color: var(--dv-exbandline);
+  border-radius: 11px 11px 0 0;
+}
 .dv-exflag {
   position: absolute;
-  top: -11px;
-  left: 14px;
-  z-index: 2;
+  top: -13px;
+  left: 22px;
+  z-index: 1;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8px;
-  letter-spacing: 0.14em;
+  font-size: 9px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  background: var(--shell-canvas, #fdfbf8);
-  border: 1px solid var(--dv-line);
-  border-radius: 99px;
-  padding: 3px 10px;
-  color: var(--dv-muted);
+  background: var(--dv-extab);
+  border: 1px solid var(--dv-extabline);
+  border-bottom: none;
+  border-radius: 7px 7px 0 0;
+  padding: 5px 13px 3px;
+  color: var(--dv-sage-deep);
 }
-@media (max-width: 1000px) {
-  .dv-matchsec { grid-template-columns: 1fr; gap: 28px; max-width: 420px; }
+
+/* ── The annotations — the one flourish this page is allowed ── */
+.dv-note {
+  position: absolute;
+  font-family: "Caveat", cursive;
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 1.25;
+  color: var(--dv-note-ink);
+  width: 200px;
+  margin: 0;
+}
+.dv-note.n1 { right: 0; top: 2px; text-align: left; }
+.dv-note.n2 { left: 0; top: 186px; text-align: right; }
+.dv-note.n3 { right: 0; top: 296px; text-align: left; }
+.dv-conn { position: absolute; pointer-events: none; overflow: visible; }
+.dv-conn path {
+  fill: none;
+  stroke: var(--dv-note-line);
+  stroke-width: 1.4;
+  stroke-dasharray: 1 5;
+  stroke-linecap: round;
+}
+.dv-conn circle { fill: var(--dv-note-line); }
+.dv-conn.c1 { left: 648px; top: 14px; }
+.dv-conn.c2 { left: 206px; top: 206px; }
+.dv-conn.c3 { left: 684px; top: 300px; }
+
+/* ⚠️ THE ANNOTATIONS ARE GATED ON THE EXHIBIT'S WIDTH, NOT THE VIEWPORT'S — and the viewport is
+   the wrong proxy the moment a rail sits beside the content. Every offset above is measured
+   against a 920px stage: the leaders start at x 648/206/684 and end on the centred 440px card. Let
+   the stage shrink to 700 and the card re-centres while the leaders do not, so all three point at
+   blank paper — with nothing clipped, nothing overflowing and nothing to show in a source diff.
+   The ref hides them below 980px because ITS page is a standalone 1240px card with no rail; here
+   980px of window is only ~700px of stage. A container query asks the question that actually
+   matters: has the stage got its full 920? */
+@container (max-width: 919px) {
+  .dv-note,
+  .dv-conn { display: none; }
+}
+
+/* ⚠️ BELOW 980 THE ANNOTATIONS GO ENTIRELY — they are not reflowed. Their whole meaning is WHERE
+   they point; a leader line aimed at nothing is worse than no annotation, and stacking the notes
+   under the card turns three captions into three orphaned sentences. The card stops being
+   absolutely placed and simply centres. */
+@media (max-width: 980px) {
+  .dv-stage { padding: 52px var(--content-gutter) 60px; }
+  .dv-exhibit { height: auto; width: 100%; margin-top: 40px; }
+  .dv-exhold {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    margin: 0 auto;
+    max-width: 100%;
+  }
+  .dv-note,
+  .dv-conn { display: none; }
 }
 
 .dv-ctl:focus-visible,

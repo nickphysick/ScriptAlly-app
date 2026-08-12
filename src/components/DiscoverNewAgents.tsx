@@ -728,19 +728,43 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                 </div>
               </section>
 
-              {/* ── What a match looks like — copy left, an inert ILLUSTRATION right ── */}
-              <div className="dv-exrule" />
-              <section className="dv-matchsec">
-                <div>
+              {/* ── What a match looks like — the specimen, staged and annotated ──
+                  The long paragraph that used to sit beside the card is gone: the annotations
+                  carry that detail now, each against the part of the card it describes, which is
+                  what a caption can do and a block of prose cannot. */}
+              <section className="dv-stage">
+                <div className="dv-stagehead">
                   <h2>What a match looks like</h2>
                   <p>
-                    Every match tells you how strongly it fits and why — the genre overlap, and the
-                    exact wish-list lines your book speaks to, ready to lead your query letter with.
-                    You'll see where they're based, how long they take to reply, and a link straight
-                    to their submission page. When one looks right, add them in a click — or start
-                    the query there and then.
+                    Every match tells you how strongly it fits and why. When one looks right, add
+                    them in a click — or start the query there and then.
                   </p>
                 </div>
+
+                {/* ⚠️ THE ANNOTATIONS ARE REAL TEXT, THE CONNECTORS ARE DECORATION. The dotted
+                    leaders are `aria-hidden`; the notes are not, because they say something the
+                    card (itself `aria-hidden`) no longer says to a reader who cannot see it. */}
+                <div className="dv-exhibit">
+                  <p className="dv-note n1">hand-checked, and re-checked — never a stale listing</p>
+                  <svg className="dv-conn c1" width="70" height="26" aria-hidden="true">
+                    <path d="M66,8 C 46,2 24,8 4,18" />
+                    <circle cx="4" cy="18" r="2.2" />
+                  </svg>
+
+                  <p className="dv-note n2">the exact wish-list line to open your letter with</p>
+                  <svg className="dv-conn c2" width="36" height="28" aria-hidden="true">
+                    <path d="M2,8 C 14,12 24,18 32,24" />
+                    <circle cx="32" cy="24" r="2.2" />
+                  </svg>
+
+                  <p className="dv-note n3">
+                    one click to your contact list — or straight into a query
+                  </p>
+                  <svg className="dv-conn c3" width="34" height="18" aria-hidden="true">
+                    <path d="M32,4 C 22,8 12,10 3,14" />
+                    <circle cx="3" cy="14" r="2.2" />
+                  </svg>
+
                 <div className="dv-exhold">
                   <span className="dv-exflag">Example</span>
                   <article className="dv-ac" aria-hidden="true">
@@ -786,6 +810,7 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
                       </div>
                     </div>
                   </article>
+                </div>
                 </div>
               </section>
             </>
