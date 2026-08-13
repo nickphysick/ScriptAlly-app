@@ -9,7 +9,7 @@
  *   npx playwright test --project=measure journeys
  */
 import { test, expect, Page } from "@playwright/test";
-import { openRoute } from "./measure";
+import { openRoute, liftMotionSuppression } from "./measure";
 
 const VP = { width: 1440, height: 900 };
 
@@ -93,11 +93,12 @@ const motion = (page: Page) => page.evaluate(() => {
 /** `openRoute` injects `animation: none !important` so geometry can be read mid-transition — right
  *  for every other measurement and fatal for this one. It reported `animationName: none` on a class
  *  whose entire job is to run an animation, and I nearly filed working motion as dead. */
-const unsuppress = (page: Page) => page.evaluate(() => {
-  document.querySelectorAll("style").forEach((s) => {
-    if (s.textContent?.includes("animation: none !important")) s.remove();
-  });
-});
+/* ⚠️ BY MARKER, NOT BY TEXT. Matching on the declaration deleted three of the app's OWN stylesheets
+   under `vite dev`, which serves each CSS file as an injected `<style>` — `f12.css` carries that
+   exact string in a reduced-motion block. It could not show against the deployed build, where the
+   CSS is one linked file, and it presented as the header band measuring 24px with a computed
+   height of 24: the rule was not overridden, its stylesheet was gone. */
+const unsuppress = liftMotionSuppression;
 
 const openCreate = async (page: Page) => {
   await page.getByRole("button", { name: /^Log query$/i }).first().click();

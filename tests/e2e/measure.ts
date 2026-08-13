@@ -43,7 +43,18 @@ const FORCE_CLASSIC_SCROLLBARS = `
   *::-webkit-scrollbar-track { background: #f6f1e9; }
   *::-webkit-scrollbar-thumb { background: #c9bfb2; }`;  /* attempted; measured ineffective — see above */
 
-/** Injected once per page. `!important` because it must beat the shorthand that set them running. */
+/**
+ * Injected once per page. `!important` because it must beat the shorthand that set them running.
+ *
+ * ⚠️ IT CARRIES AN ID, AND LIFTING IT MUST MATCH THAT ID RATHER THAN ITS TEXT. A helper that
+ * removed every `<style>` CONTAINING "animation: none !important" deleted three of the app's own
+ * stylesheets under `vite dev`, which serves each CSS file as an injected `<style>` — `f12.css`
+ * alone carries that exact declaration in a reduced-motion block. The symptom was the header band
+ * measuring 24px instead of 52 with a computed `height` of 24: not an animation override, not a
+ * transform — the rule was simply gone, because its stylesheet was. It could never show against
+ * the deployed build, where the CSS is one linked file.
+ */
+export const KILL_MOTION_ID = "sa-e2e-kill-motion";
 const KILL_MOTION = `
   *, *::before, *::after {
     transition: none !important;
@@ -135,7 +146,7 @@ export async function openRoute(page: Page, route: string, viewport?: { width: n
   await ensureSignedIn(page);
   await page.goto(route);
   await page.addStyleTag({ content: FORCE_CLASSIC_SCROLLBARS });
-  await page.addStyleTag({ content: KILL_MOTION });
+  await page.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}` });
   /* the shell first, then the page's own grid if it has one */
   await expect(page.locator(SHELL).first()).toBeVisible({ timeout: 30_000 });
   /* ⚠️ NEVER `networkidle` ON THIS APP, AND A BARE `.catch()` DOES NOT SAVE YOU. Firestore holds
@@ -144,7 +155,7 @@ export async function openRoute(page: Page, route: string, viewport?: { width: n
      condition that cannot be met. */
   await page.waitForLoadState("domcontentloaded").catch(() => {});
   await page.waitForTimeout(2500);
-  await page.addStyleTag({ content: KILL_MOTION });
+  await page.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}` });
 }
 
 /**
@@ -264,4 +275,19 @@ export function format(h: HeaderReading): string {
     `    hairline  leftInset ${h.hairline.leftInset}  rightInset ${h.hairline.rightInset}  h ${h.hairline.height}  opacity ${h.hairline.opacity}`,
     rows,
   ].join("\n");
+}
+
+/**
+ * Lift the motion suppression — for any test that CHANGES STATE, since a suppressed animation
+ * never fires `animationend` and anything torn down by that event never leaves.
+ *
+ * ⚠️ IT MATCHES THE MARKER, NOT THE DECLARATION. See KILL_MOTION_ID above for what text-matching
+ * cost: three of the app's own stylesheets, deleted, under the dev server only.
+ */
+export async function liftMotionSuppression(page: import("@playwright/test").Page): Promise<void> {
+  await page.evaluate((id) => {
+    document.querySelectorAll("style").forEach((s) => {
+      if (s.textContent?.startsWith(`/*${id}*/`)) s.remove();
+    });
+  }, KILL_MOTION_ID);
 }
