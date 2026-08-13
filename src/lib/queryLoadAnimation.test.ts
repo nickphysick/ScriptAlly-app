@@ -47,8 +47,27 @@ describe("the motion itself is CSS — no JS drives a frame", () => {
   });
 
   it("no var() inside a keyframe percentage selector (the recurring silent-failure trap)", () => {
+    /**
+     * ⚠️ THE SELECTOR, NOT THE WHOLE BLOCK — and this was widened by accident rather than by
+     * argument. The documented failure (CLAUDE.md, and this case's own title) is a `var()` in a
+     * keyframe PERCENTAGE: the block is dropped and the animation silently does not play.
+     * `background: var(--pink-t)` in a `from` DECLARATION is ordinary, supported CSS.
+     *
+     * ⚠️ AND THE BLANKET FORM WAS ONLY PASSING BECAUSE IT COULD NOT SEE `f12-settle`. That keyframe
+     * has used `var()` since it was written and works; written on ONE LINE it had no `\n}` for this
+     * regex to reach, and `[^@]*?` cannot cross the next `@keyframes`, so the match failed and the
+     * block was never extracted. Reformatting it to the house multi-line form made it visible — so
+     * the choice was to narrow a rule that overreached or to rewrite a working animation to satisfy
+     * it. `createSaveMotion` already checks the selector form; this now matches it.
+     */
     for (const kf of css.match(/@keyframes[^{]*\{[^@]*?\n\}/g) ?? []) {
-      expect(kf, `${kf.slice(0, 40)} put a var() in a keyframe — it fails silently`).not.toContain("var(");
+      for (const line of kf.split("\n")) {
+        const sel = line.split("{")[0];
+        if (/\d+%|\b(from|to)\b/.test(sel)) {
+          expect(sel, `${kf.slice(0, 40)} put a var() in a keyframe SELECTOR — it fails silently`)
+            .not.toContain("var(");
+        }
+      }
     }
   });
 });

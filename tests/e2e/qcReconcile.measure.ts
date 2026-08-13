@@ -116,7 +116,7 @@ async function geometry(page: Page) {
       panelPos: panel ? getComputedStyle(panel).position : null,
       chips: document.querySelectorAll(".qc-sheet .qch-rq").length,
       chipsEmpty: document.querySelectorAll(".qc-sheet .qch-empty").length,
-      agentBand: (() => { const el = q(".qc-sheet .qc-hero"); return el ? Math.round(el.getBoundingClientRect().height) : null; })(),
+      agentBand: (() => { const el = q(".qc-sheet .qc-agband"); return el ? Math.round(el.getBoundingClientRect().height) : null; })(),
     };
   });
 }

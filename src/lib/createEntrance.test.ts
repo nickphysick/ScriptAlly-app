@@ -93,7 +93,10 @@ describe("the children stagger in reading order, on the ref's timings", () => {
      same place — so they share a delay rather than drifting apart as two numbers. */
   it("stage 2's hero takes the question's beat", () => {
     const r = rule(".qc-entering .qc-askq");
-    expect(r).toContain(".qc-entering .qc-hero");
+    /* ⚠️ THE BAND REPLACED THE HERO (§3), and the stagger followed it. What this case protects is
+       unchanged — the selected-agent row arrives on its own beat, between the header and the steps
+       — but the element it arrives as is one row now, not a 118px card. */
+    expect(r).toContain(".qc-entering .qc-agband");
   });
 });
 

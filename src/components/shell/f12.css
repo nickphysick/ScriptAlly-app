@@ -13,7 +13,10 @@
   transform: translateX(-120%);
   animation: tl-sweep 2.4s ease-in-out infinite;
 }
-@keyframes tl-sweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(320%); } }
+@keyframes tl-sweep {
+  0%   { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
 @media (prefers-reduced-motion: reduce) { .t-f12 .tl-gracebar .tl-sweep { animation: none; } }
 
 /* page root — viewport-locked column (lives in a fill StagePage slot). No bespoke ground
@@ -742,28 +745,75 @@
    That is now the only confirmation beat, and it was always the one that landed. ── */
 
 /* SAVE beat 4 — the settle: a soft pink flash easing down to the selected tint */
-@keyframes f12-settle { from { background: var(--pink-t); } to { background: var(--blue-t); } }
+/* ⚠️ MULTI-LINE, TERMINATED BY `\n}` — the house form, and it is load-bearing for a LOCK rather than
+   for taste. Two standing tests extract keyframes with `/@keyframes[^{]*\{[^@]*?\n\}/` to check none
+   contains a `var()` (which fails SILENTLY inside a keyframe). A one-line block has no `\n}` to stop
+   at, so the match runs on through whatever rules follow and reports THEIR `var()` as if it were in
+   here. It bit `qc-scrim-in` in the sheet pack and bit these two the moment §3's band rules landed
+   below them — the locks were right both times; the format was the fault. */
+@keyframes f12-settle {
+  from { background: var(--pink-t); }
+  to   { background: var(--blue-t); }
+}
 .f12-row.f12-settle { animation: f12-settle 0.9s ease-out both; }
 
 /* SAVE beat 5 — hidden by the current filter: the row collapses out AFTER the settle has read
    (the 0.7s delay is CSS, not a timer), and the toast fires from its animationend. */
-@keyframes f12-collapse { from { height: 56px; opacity: 1; } to { height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; border-width: 0; } }
+@keyframes f12-collapse {
+  from { height: 56px; opacity: 1; }
+  to   { height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; border-width: 0; }
+}
 .f12-row.f12-row-leaving { animation: f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; overflow: hidden; pointer-events: none; }
 /* both at once — separate rules would OVERRIDE rather than compose (the `animation` property is
    not additive), so the settle would be cancelled the moment the row started leaving. */
 .f12-row.f12-settle.f12-row-leaving { animation: f12-settle 0.9s ease-out both, f12-collapse 0.3s cubic-bezier(0.22, 0.9, 0.3, 1) 0.7s both; }
 
-/* ── COMPACT CREATE HERO (ref qdb-focus-spotlight.html) — the height the columns needed came
-   from two places: the retired footer bar (~95px) and this (~90px). Padding tightens, the mark
-   drops to 54px, and the title/subtitle move BESIDE the search field instead of above it. Scoped
-   to .qc-hero so the reading pane's own record hero is untouched. */
-.f12-hero.qc-hero { padding: 16px 20px; gap: 16px; }
-.qc-mark { flex: none; width: 54px; height: 54px; border-radius: 50%; background: var(--pink-t); border: 1.5px dashed var(--pink-b); color: var(--pink-i); display: flex; align-items: center; justify-content: center; font-size: 19px; }
-.qc-htxt { flex: none; min-width: 0; }
-.qc-hero .qc-head { font-size: 20px; line-height: 1.1; }
-.qc-hero .qc-sub { font-size: 13px; margin: 0; }
-/* Below the two-up width the text block would squeeze the field, so it stacks back. */
-@media (max-width: 980px) { .f12-hero.qc-hero { flex-wrap: wrap; } .qc-htxt { flex: 1 0 100%; } }
+/* ⚠️ `.qc-hero` IS RETIRED WITH THE CARD IT DRESSED (§3). It was create's 118px selected-agent
+   hero; the band above replaces it, and nothing renders the class any more. Deleted rather than
+   left in the sheet, because a rule matching nothing is indistinguishable from a rule whose
+   element someone forgot to render — and the next reader has no way to tell which. The reading
+   pane's own `.f12-hero` is untouched: that was always a different element, which is why these
+   rules were scoped `.f12-hero.qc-hero` in the first place. */
+
+/* ══ THE SELECTED AGENT — A BAND (§3, ref 98-sheet-crumb.html `.agband`) ══════════════════════
+   ⚠️ IT REPLACED A 118px HERO CARD, and the argument is about what the row is FOR. The writer chose
+   this agent two seconds ago and the glance panel beside it carries everything about them; a
+   headline-sized restatement of a decision they just made reads as the app being unsure it landed.
+   One row of confirmation, and the first question starts where the eye already is.
+
+   ⚠️ THE OPEN-QUERIES LINE STAYS ON IT. It is the one fact here the writer did NOT already know —
+   and the only reason to reconsider before sending — so it keeps its link rather than being
+   dropped with the card that happened to hold it.
+
+   Colour is the existing vocabulary: the paper ground and hairline every quiet row on this surface
+   uses, and the pink monogram pair the list rows already draw. */
+.qc-agband {
+  flex: none; display: flex; align-items: center; gap: 13px;
+  padding: 10px 14px;
+  /* ⚠️ NO `margin-bottom`. The ref carries one because its container has no gap; `.qc-form` is a
+     flex column with `gap: 12px`, so a margin here is ADDED to it — measured 26px of slack where the
+     rest of the column reads 12. Two elements, one gap, never both. */
+  border-radius: var(--r-lg);
+  background: var(--paper);
+  box-shadow: inset 0 0 0 1px var(--hairline);
+}
+.qc-agav {
+  width: 36px; height: 36px; flex: 0 0 36px; border-radius: 50%;
+  background: var(--pink-av); color: var(--ink);
+  font-family: var(--f12-serif); font-size: 13px; font-weight: 600;
+  display: grid; place-items: center;
+}
+.qc-agwho { min-width: 0; }
+.qc-agwho b { display: block; font-family: var(--f12-serif); font-size: 16.5px; font-weight: 600; line-height: 1.15; color: var(--ink); }
+.qc-agwho i { font-style: normal; font-family: var(--f12-serif); font-size: 12px; color: var(--muted); }
+.qc-agacts { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: 11.5px; }
+/* ⚠️ THE DUPLICATE WARNING KEEPS ITS WEIGHT ON ONE LINE. It was a paragraph under the name; inline
+   it must still read as a caution rather than as a caption, so it holds the burgundy ink. */
+.qc-agdupe { color: var(--burg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 980px) {
+  .qc-agband { flex-wrap: wrap; }
+  .qc-agacts { margin-left: 0; flex-basis: 100%; }
+}
 
 /* ══ THE ILLUSTRATED CREATE HEADER (ref design-refs/qc-create-v2.html) ══════════════════════
    RETIRES the create-mode command bar (.f12-ctl-create / .qcb-*) outright. That bar squeezed
@@ -1152,7 +1202,10 @@
  * separate entrance. On the way out it travels with the cancel gesture rather than reversing the
  * stagger, because a reverse stagger reads as the page dismantling itself.
  */
-@keyframes qc-dock-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes qc-dock-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
 .qc-dock-in { animation: qc-dock-rise 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 410ms backwards; }
 .qc-dock-out { animation: qc-dock-rise 200ms cubic-bezier(0.5, 0, 0.75, 0) reverse forwards; }
 @media (prefers-reduced-motion: reduce) {
@@ -1501,7 +1554,7 @@
 /* The question, per stage: stage 1 asks it in words, stage 2 has answered it and shows the agent.
    One delay, because they occupy the same beat and the same place. */
 .qc-entering .qc-askq,
-.qc-entering .qc-hero { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 200ms backwards; }
+.qc-entering .qc-agband { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 200ms backwards; }
 .qc-entering .qc-pickhead { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 250ms backwards; }
 .qc-entering .qc-stack > .qc-sec:nth-child(1) { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 310ms backwards; }
 .qc-entering .qc-stack > .qc-sec:nth-child(2) { animation: qc-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 360ms backwards; }
@@ -1512,7 +1565,7 @@
    the pane forever. This block is the second belt, for the preference changing mid-flight. */
 @media (prefers-reduced-motion: reduce) {
   .qc-entering .qch,
-  .qc-entering .qc-askq, .qc-entering .qc-hero,
+  .qc-entering .qc-askq, .qc-entering .qc-agband,
   .qc-entering .qc-pickhead,
   .qc-entering .qc-stack > .qc-sec { animation: none; }
 }

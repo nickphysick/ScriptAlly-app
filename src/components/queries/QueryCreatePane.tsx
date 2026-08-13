@@ -311,31 +311,41 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
           form simply has the width to itself. ── */}
       <div className="qc-two">
         <div className="qc-form f12-quiet-scroll">
-      <div className="f12-hero qc-hero" style={{ flex: "none", alignItems: "center" }}>
-        <span className="f12-bigav" aria-hidden="true">{agentInitials(agent)}</span>
-        <div style={{ minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap" }}>
-            <span className="f12-hn">{agentPrimary(agent)}</span>
-            {/* Changing your mind is one click, and it re-derives everything seeded from the
-                agent — the materials checklist and the nudge suggestion both follow the new
-                pick rather than silently keeping the old one's. */}
-            <button type="button" className="qc-change" onClick={() => set({ agentId: null, materials: materialRowsForDraft(null) })}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
-              Change
-            </button>
-          </div>
-          <div className="f12-ha">{agentAgencyLine(agent)}</div>
+      {/**
+        * ⚠️ A BAND, NOT A CARD (§3; ref 98-sheet-crumb.html `.agband`). This was a 118px hero —
+        * 76px avatar, headline name, agency beneath — presenting a fact the writer chose two
+        * seconds ago and can see in the panel beside it. Restating a decision at that size reads as
+        * the app being unsure it landed. One row now, so the first question starts ~80px higher.
+        *
+        * ⚠️ THE OPEN-QUERIES LINE MOVES ONTO IT RATHER THAN BEING DROPPED. It is the one thing here
+        * the writer did NOT already know, and it is the reason to reconsider before sending — so it
+        * keeps its link, on the same line, at the end where the actions are.
+        */}
+      <div className="qc-agband">
+        <span className="qc-agav" aria-hidden="true">{agentInitials(agent)}</span>
+        <div className="qc-agwho">
+          <b>{agentPrimary(agent)}</b>
+          <i>{agentAgencyLine(agent)}</i>
+        </div>
+        <span className="qc-agacts">
           {dupe && (
-            <p className="qc-dupe">
+            <span className="qc-agdupe">
               {duplicateLine(dupe, agentPrimary(agent))}
               {onOpenQuery && (
                 <button type="button" className="qc-dupelink" onClick={() => onOpenQuery(dupe.latest.id)}>
                   {dupe.count === 1 ? "Open it" : "Open the most recent"}
                 </button>
               )}
-            </p>
+            </span>
           )}
-        </div>
+          {/* Changing your mind is one click, and it re-derives everything seeded from the
+              agent — the materials checklist and the nudge suggestion both follow the new
+              pick rather than silently keeping the old one's. */}
+          <button type="button" className="qc-change" onClick={() => set({ agentId: null, materials: materialRowsForDraft(null) })}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+            Change
+          </button>
+        </span>
       </div>
 
       {/* ── The three columns, in the reading pane's own chrome (qc-cols stacks them <md —
