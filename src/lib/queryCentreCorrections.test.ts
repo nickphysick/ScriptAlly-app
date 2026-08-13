@@ -190,3 +190,58 @@ describe("§4 · the right stack fills honestly", () => {
     expect(rule(".qp-stack")).toContain("min-height: 0");
   });
 });
+
+describe("§5 · tighten, never scroll", () => {
+  /* Measured at 1024x700, 1024x768, 1440x900 and 1920x1080: page `scrollHeight` equals
+     `clientHeight` at all four (483, 551, 696, 876), and the reading column's overflow is 0. */
+  it("the reading column hides its own overflow — the scrollers are the list and a card body", () => {
+    expect(code, "the pane stopped hiding its overflow").toContain('overflow: "hidden"');
+  });
+
+  /**
+   * ⚠️ THE TOKEN, NOT THE PROPERTY. `.wsh-title` reads `--wsh-title-size`, and the shell derives the
+   * plate's height from its own token — so the short-viewport step is set where the shell already
+   * looks for it, and copying the ref's absolute would have pinned this page to a number the shared
+   * header does not use. The ref drops 22 to 19 (a factor of 0.86); against the live 33 that is 28.
+   */
+  it("the masthead steps down through the shell's token", () => {
+    const m = rules("max-height: 768px");
+    expect(m, "the short-viewport block is missing").not.toBe("");
+    expect(css, "the masthead's step sets a raw font-size instead of the token")
+      .toContain("--wsh-title-size: 28px");
+  });
+
+  it("the hero gives up scale first, and the stats keep their figures", () => {
+    expect(css).toContain(".f12-heroband .f12-bigav { width: 40px");
+    expect(css, "the stats lost a figure rather than their air").toContain(".qp-statn { font-size: 20px; }");
+  });
+
+  /**
+   * ⚠️ THE CHIPS ARE THE SACRIFICE, NOT THE NUDGE EVENT — a content decision, taken against the
+   * prompt's default and argued rather than preferred.
+   *
+   * The chips repeat VERBATIM in "What you sent", one column over and on the same screen, so
+   * dropping them here costs the writer nothing: the information has not left the page. The nudge
+   * event appears NOWHERE else on this card — it is the only statement of when the scheduled
+   * follow-up lands — so dropping it would take a fact the writer may need to plan around, and
+   * leave no way to recover it without opening something else.
+   *
+   * ⚠️ ONE OR THE OTHER, NEVER BOTH.
+   */
+  it("at 700 the chips go and every timeline event stays", () => {
+    const at = css.indexOf("@media (max-height: 700px)");
+    expect(at, "the 700px block is missing").toBeGreaterThan(-1);
+    const block = css.slice(at, css.indexOf("}", css.indexOf("{", at) + 1) + 1);
+    expect(block, "the chips are not what gives way").toContain(".tl-pills { display: none; }");
+    /* nothing in either short-viewport block may drop a timeline row */
+    for (const b of ["@media (max-height: 768px)", "@media (max-height: 700px)"]) {
+      const i = css.indexOf(b);
+      const chunk = css.slice(i, css.indexOf("\n}", i));
+      expect(chunk, "an event was dropped — the chips were the sacrifice, not the nudge")
+        .not.toContain(".tl-rowbody");
+    }
+    /* and the pills carry a class, or nothing could target them */
+    const tl = read("../components/reading-pane/QueryTimeline.tsx");
+    expect(tl, "the pills have no class to drop").toContain('className="tl-pills"');
+  });
+});

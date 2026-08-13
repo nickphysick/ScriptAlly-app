@@ -2223,3 +2223,53 @@
 .qp-statn { font-family: var(--f12-serif); font-size: 25px; line-height: 1; color: var(--ink); }
 .qp-statn small { font-size: 13px; color: var(--ink-2); }
 .qp-statk { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 5px; }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * SHORT VIEWPORTS — TIGHTEN, NEVER SCROLL (fix pack §5)
+ *
+ * ⚠️ THE PAGE ALREADY DOES NOT SCROLL, at any of the four sizes measured — 483/483, 551/551,
+ * 696/696 and 876/876 of `scrollHeight` against `clientHeight`. What these rules protect is the
+ * CONTENT inside a card that is running out of room: the two stats and the composer must stay
+ * visible without a card body growing its own scrollbar for the sake of one line.
+ *
+ * ⚠️ RE-DERIVED AGAINST THE LIVE TYPE SCALE, NOT COPIED OFF THE REF. The mockup's `data-h` block
+ * sets `.mast h1` to 19px against its own 22px; this page's masthead is the shared `PageHeader`,
+ * whose resting size is a shell token — so the step is expressed as a proportion of what the app
+ * actually renders rather than as the ref's absolute. Same for the hero: the ref drops a 52px
+ * avatar to 44; the band's is 46, and the equivalent step lands at 40.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+@media (max-height: 768px) {
+  /* ⚠️ THE TOKEN, NOT THE PROPERTY. `.wsh-title` reads `--wsh-title-size` (33px resting), and the
+     shell also derives the plate's height from its own token — so the step is set where the shell
+     already looks for it and the two stay in proportion. The ref drops 22 to 19, a factor of 0.86;
+     against a live 33 that lands at 28. */
+  .qc-wpg .wsh { --wsh-title-size: 28px; }
+  /* the hero band gives up its portrait scale first: it is the least information per pixel here */
+  .f12-heroband { padding: 10px 0; }
+  .f12-heroband .f12-bigav { width: 40px; height: 40px; font-size: 15px; }
+  .f12-heroband .f12-hn { font-size: 19px; }  /* 21 resting, the same 0.86 step */
+  /* the stats keep their figures and lose their air */
+  .qp-stat { padding: 10px 15px; }
+  .qp-statn { font-size: 20px; }
+  .qp-stats { margin-bottom: 12px; }
+  /* and the columns close up */
+  .qp-cols { padding: 12px 20px 14px !important; gap: 12px !important; }
+  .qp-stack { gap: 12px; }
+}
+
+/**
+ * ⚠️ AT 700 THE CARD GIVES UP THE MATERIALS CHIPS, NOT THE NUDGE EVENT — a CONTENT decision, and the
+ * argument is what makes it defensible rather than a preference.
+ *
+ * The chips repeat, verbatim, in "What you sent" one column over and on the same screen: dropping
+ * them here costs the writer nothing, because the information has not left the page. The nudge event
+ * appears NOWHERE else on this card — it is the one place the scheduled follow-up date is stated —
+ * so dropping it would mean a writer on a short viewport cannot see when their own nudge lands, and
+ * that is a fact they may need in order to plan around it.
+ *
+ * ⚠️ ONE OR THE OTHER, NEVER BOTH. The prompt offered the nudge event as the default and the chips
+ * as the alternative; this takes the alternative, and the timeline keeps every event it has.
+ */
+@media (max-height: 700px) {
+  .tl-pills { display: none; }
+}

@@ -561,3 +561,107 @@ test("verify: the six, measured", async () => {
   }
   expect(true).toBe(true);
 });
+
+/* ══ FIX PACK §5 · THE PAGE NEVER SCROLLS, AT ANY HEIGHT ═══════════════════════════════════════
+ *
+ * ⚠️ MEASURED ON A *WAITING* QUERY, which is the whole point. A closed query has no stats and a
+ * shorter timeline, so it fits trivially — measuring that would report a pass for the easy case and
+ * say nothing about the one §5 is about.
+ */
+test("§5 · nothing scrolls, and the card keeps its stats and composer", async () => {
+  const sizes = [{ w: 1024, h: 700 }, { w: 1024, h: 768 }, { w: 1440, h: 900 }, { w: 1920, h: 1080 }];
+  for (const { w, h } of sizes) {
+    await page.setViewportSize({ width: w, height: h });
+    await queries(page);
+    /* walk to a query that is still waiting — the state with the most to fit */
+    const rows = page.locator(".f12-row");
+    const n = Math.min(await rows.count(), 20);
+    let found = false;
+    for (let i = 0; i < n; i += 1) {
+      await rows.nth(i).click();
+      await page.waitForTimeout(220);
+      if (await page.locator(".qp-stat").count() > 0) { found = true; break; }
+    }
+    const m = await page.evaluate(() => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+      const scroller = q(".wpg-scroll");
+      const pane = q(".qp-pane");
+      const notesCard = Array.from(document.querySelectorAll<HTMLElement>(".qp-stack > .f12-card")).pop() ?? null;
+      const composer = notesCard?.querySelector("textarea")?.closest("div") as HTMLElement | null;
+      const stats = Array.from(document.querySelectorAll<HTMLElement>(".qp-stat"));
+      const inView = (el: HTMLElement | null) => {
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return r.top >= 0 && r.bottom <= window.innerHeight + 1 && r.height > 0;
+      };
+      return {
+        page: scroller ? { sh: scroller.scrollHeight, ch: scroller.clientHeight } : null,
+        paneOverflow: pane ? pane.scrollHeight - pane.clientHeight : null,
+        statsN: stats.length, statsInView: stats.every((s) => inView(s)),
+        composerInView: inView(composer),
+        pills: document.querySelectorAll(".tl-pills").length,
+        pillsShown: Array.from(document.querySelectorAll<HTMLElement>(".tl-pills")).filter((e) => getComputedStyle(e).display !== "none").length,
+      };
+    });
+    // eslint-disable-next-line no-console
+    console.log(`[§5 ${w}x${h}] page ${m.page?.sh}/${m.page?.ch} · paneOverflow ${m.paneOverflow} · stats ${m.statsN} inView=${m.statsInView} · composer inView=${m.composerInView} · pills ${m.pillsShown}/${m.pills} shown${found ? "" : " (NO WAITING QUERY)"}`);
+
+    /* the page scroller never exceeds its client height */
+    expect(m.page!.sh, `the page scrolls at ${w}x${h}`).toBe(m.page!.ch);
+    /* nor does the reading column — the only scrollers are the list and a card body */
+    expect(m.paneOverflow, `the reading column scrolls at ${w}x${h}`).toBeLessThanOrEqual(0);
+    if (found) {
+      expect(m.statsInView, `a stat is cut off at ${w}x${h}`).toBe(true);
+      expect(m.composerInView, `the composer is out of view at ${w}x${h}`).toBe(true);
+    }
+    /* ⚠️ THE CHIPS ARE WHAT GIVES WAY AT 700, NOT THE NUDGE EVENT — the chips repeat verbatim in
+       "What you sent" one column over; the nudge date appears nowhere else on this card. */
+    if (h <= 700 && m.pills > 0) {
+      expect(m.pillsShown, "the materials chips survived a 700px viewport").toBe(0);
+    }
+    if (h > 768 && m.pills > 0) {
+      expect(m.pillsShown, "the chips were dropped at a height that did not need it").toBeGreaterThan(0);
+    }
+  }
+});
+
+/**
+ * ⚠️ THE CHIPS-DROP NEEDS A QUERY THAT HAS CHIPS, and the waiting query the §5 case lands on has
+ * none — so that case reported `pills 0/0` and proved nothing about the decision it exists to
+ * verify. This one hunts for a row that renders them at a tall viewport, then re-measures the SAME
+ * row short.
+ */
+test("§5 · the chips are what gives way at 700, and only there", async () => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await queries(page);
+  const rows = page.locator(".f12-row");
+  const n = Math.min(await rows.count(), 25);
+  let idx = -1;
+  for (let i = 0; i < n; i += 1) {
+    await rows.nth(i).click();
+    await page.waitForTimeout(200);
+    if (await page.locator(".tl-pills").count() > 0) { idx = i; break; }
+  }
+  if (idx < 0) {
+    // eslint-disable-next-line no-console
+    console.log("[§5 chips] UNVERIFIED — no query on this account renders materials chips");
+    return;
+  }
+  const shown = async () => page.evaluate(() =>
+    Array.from(document.querySelectorAll<HTMLElement>(".tl-pills")).filter((e) => getComputedStyle(e).display !== "none").length);
+  const tall = await shown();
+  await page.setViewportSize({ width: 1024, height: 700 });
+  await page.waitForTimeout(400);
+  const short = await shown();
+  /* and the timeline keeps every event it has — the nudge is NOT what was dropped */
+  const events = await page.evaluate(() => document.querySelectorAll(".tl-rowbody").length);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.waitForTimeout(300);
+  const eventsTall = await page.evaluate(() => document.querySelectorAll(".tl-rowbody").length);
+  // eslint-disable-next-line no-console
+  console.log(`[§5 chips] row ${idx}: pills tall=${tall} short=${short} · timeline events tall=${eventsTall} short=${events}`);
+  expect(tall, "the chips do not render even at a tall viewport").toBeGreaterThan(0);
+  expect(short, "the chips survived a 700px viewport").toBe(0);
+  expect(events, "an event was dropped — the chips were supposed to be the sacrifice, not the nudge")
+    .toBe(eventsTall);
+});

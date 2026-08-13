@@ -284,9 +284,15 @@ describe("§5 · reduced motion cuts to the final frame", () => {
      desk that says the rest of the page is not currently theirs. */
   it("all three are suppressed, and none of them is deleted", () => {
     const m = moment();
+    /* ⚠️ BOUNDED AT BOTH ENDS. This sliced to END OF FILE, so it read every rule appended after the
+       reduced-motion block — and the moment a `max-height` block landed below it, the lock reported
+       "reduced motion HID the seal" about a `display: none` belonging to something else entirely.
+       Third open-ended slice caught this way; an unbounded slice bets nothing will be added below. */
     const at = m.lastIndexOf("@media (prefers-reduced-motion: reduce)");
     expect(at, "the §5 reduced-motion block is missing").toBeGreaterThan(-1);
-    const block = m.slice(at);
+    const close = m.indexOf("\n}", at);
+    expect(close, "the reduced-motion block never closes").toBeGreaterThan(at);
+    const block = m.slice(at, close + 2);
     expect(block, "the dim keeps travelling").toContain("#root.qc-lamp { transition: none; }");
     expect(block, "the beat keeps playing").toContain(".qc-entering .qc-motif::after { animation: none; }");
     expect(block, "the seal keeps stamping").toContain(".qc-seal { animation: none; }");

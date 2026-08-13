@@ -293,8 +293,12 @@ export const TimelineRows: React.FC<{
               </span>
             </div>
             {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
+            {/* ⚠️ A CLASS, SO A SHORT VIEWPORT CAN DROP THESE (fix pack §5). They are the ONE thing on
+                this card repeated verbatim one column over — "What you sent" lists the same
+                materials — so when the card must give something up, this costs the writer nothing.
+                See the `max-height` rule in f12.css for why these rather than the nudge event. */}
             {row.pills && row.pills.length > 0 && (
-              <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
+              <div className="tl-pills" style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
             )}
           </div>
         </div>
