@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Manuscript library concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f8f4ee; --window:#ffffff; --card:#fefdf8; --line:#e2dacf; --line-soft:#ece4d8;
+  --band-sage:#dadfd7; --band-sage-2:#d5dbd3;
+  --sage-pale:#e7ede3; --sage-acc:#8a9e88; --sage-txt:#5a6e58;
+  --burg:#7c3a2a; --burg-deep:#6b3023; --ink:#3a1c14; --head-ink:#241611;
+  --label:#9c8878; --pink:#f5e2da; --pink-bd:#e8c8bc; --pink-hov:#efd5ca; --pink-chip:#f8ede4;
+  --shadow-card:0 1px 2px rgba(58,28,20,.04), 0 6px 18px rgba(58,28,20,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+
+/* shell */
+.shell{display:grid;grid-template-rows:64px 1fr;height:100vh}
+.topnav{display:flex;align-items:center;gap:24px;padding:0 24px}
+.brand{display:flex;align-items:center;gap:10px;width:240px;flex:0 0 auto}
+.brand .wordmark{font-family:'Playfair Display',serif;font-weight:700;font-size:22px;color:var(--head-ink)}
+.crumb{flex:1;display:flex;align-items:baseline;gap:10px;font-family:'Playfair Display',serif;font-size:19px;color:#4a3a30}
+.crumb b{font-weight:600;color:var(--head-ink)}.crumb .sep{color:#b9a898}
+.crumb .saved{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#b3a293;border-left:1px solid var(--line);padding-left:14px;text-transform:uppercase}
+.nav-right{display:flex;align-items:center;gap:12px}
+.searchbox{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:24px;padding:9px 16px;width:210px;color:#b3a293;font-size:13px}
+.btn-new{background:var(--head-ink);color:#fdfaf5;border:none;border-radius:24px;padding:11px 20px;font-size:13.5px;font-weight:500;cursor:pointer}
+.help{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:#8a7a6c}
+.below{display:grid;grid-template-columns:264px 1fr;min-height:0}
+.sidebar{display:flex;flex-direction:column;padding:0 16px 14px;min-height:0}
+.ms-selector{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.ms-selector .thumb{width:40px;height:40px;border-radius:8px;background:var(--sage-pale);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ms-selector .t{font-weight:600;font-size:13.5px;color:var(--head-ink);line-height:1.25}
+.ms-selector .s{font-size:11.5px;color:#8a7a6c}
+.ms-selector .arrows{margin-left:auto;color:#c4b5a5;font-size:13px}
+.side-rule{border-top:1px solid var(--line);margin:6px 4px 14px}
+.navscroll{flex:1;overflow:auto;min-height:0}
+.sect{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.18em;color:#a2907f;margin:16px 10px 8px;text-transform:uppercase}
+.nitem{display:flex;align-items:center;gap:12px;padding:9.5px 12px;border-radius:10px;font-size:14.5px;color:#3f3229;cursor:pointer}
+.nitem:hover{background:rgba(255,255,255,.55)}
+.nitem.active{background:#fff;font-weight:600;color:var(--head-ink);border:1px solid var(--line)}
+.nitem .ic{width:18px;height:18px;flex:0 0 auto;color:#6a5a50}
+.nitem .count{margin-left:auto;font-size:13px;color:#8a7a6c}
+.side-foot{margin-top:10px;border-top:1px solid var(--line);padding-top:12px;display:flex;align-items:center;gap:10px}
+.uav{width:38px;height:38px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#6a5a50}
+.uname{font-weight:600;font-size:13.5px;color:var(--head-ink);line-height:1.2}
+.uplan{font-size:11.5px;color:#8a7a6c}
+.upg{margin-left:auto;border:1px solid var(--pink-bd);background:#fff;color:var(--burg);border-radius:20px;padding:7px 14px;font-size:12.5px;cursor:pointer}
+.content{min-height:0;overflow:auto;padding:0 16px 16px 4px}
+.window{background:var(--window);border-radius:18px;min-height:100%;padding:34px 40px 44px;box-shadow:0 1px 3px rgba(58,28,20,.05),0 10px 30px rgba(58,28,20,.05)}
+body[data-view="doss"] .window{min-height:0;padding:24px 40px 28px}
+.inner{max-width:1240px;margin:0 auto}
+
+/* common */
+.pagehead{padding-bottom:20px;border-bottom:1px solid var(--line-soft);margin-bottom:24px;display:flex;align-items:flex-end;gap:24px}
+.pagehead h1{font-family:'Playfair Display',serif;font-weight:600;font-size:40px;color:var(--head-ink);line-height:1.05}
+.pagehead .desc{font-size:13.5px;font-weight:300;color:#7d6d60;margin-top:8px}
+.ph-right{margin-left:auto;display:flex;align-items:center;gap:18px;padding-bottom:4px}
+.btn-pink{display:inline-flex;align-items:center;gap:7px;background:var(--pink);border:1px solid var(--pink-bd);color:var(--burg);border-radius:10px;padding:11px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+.btn-pink:hover{background:var(--pink-hov)}
+.btn-ghost{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);color:#6a5a50;border-radius:10px;padding:11px 20px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+.btn-sm{padding:8px 14px;font-size:10px}
+.pill{display:inline-flex;align-items:center;gap:7px;background:var(--pink-chip);border:1px solid var(--pink-bd);border-radius:20px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--burg);text-transform:uppercase;font-weight:500}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--burg)}
+.pill.drafting{background:#fff;border-color:var(--line);color:#8a7a6c}.pill.drafting .dot{background:#b8a894}
+.gp{background:var(--sage-pale);border:1px solid rgba(138,158,136,.3);border-radius:20px;padding:4px 12px;font-size:11.5px;color:#4a5a48}
+.linkline{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--burg);text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.linkline:hover{color:var(--burg-deep)}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.17em;color:#a2907f;text-transform:uppercase}
+
+/* ================= VIEW 1 — LIBRARY GRID ================= */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.book{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-card);overflow:hidden;cursor:pointer;transition:box-shadow .15s,border-color .15s;display:flex;flex-direction:column}
+.book:hover{border-color:#d3c2ae;box-shadow:0 2px 4px rgba(58,28,20,.05),0 12px 30px rgba(58,28,20,.09)}
+.book .cover{background:linear-gradient(135deg,var(--band-sage),var(--band-sage-2));padding:24px 20px 20px;text-align:center;border-bottom:1px solid rgba(138,158,136,.35);position:relative}
+.book .cover .pill{position:absolute;top:12px;right:12px}
+.book .plate{width:84px;height:84px;background:#fff;border:1px solid var(--line);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(58,28,20,.07)}
+.book h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:var(--head-ink);line-height:1.15;margin:14px 0 8px}
+.book .meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;align-items:center}
+.book .wcx{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.12em;color:#5f7060;text-transform:uppercase}
+.book .body{padding:16px 20px 14px;flex:1;display:flex;flex-direction:column}
+.book .logl{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:#4a3a30;text-align:center;line-height:1.45}
+.book .logl.none{color:#b3a293;font-size:13px}
+.shelfmeter{margin-top:auto;padding-top:14px}
+.shelfmeter .row{display:flex;align-items:center;gap:8px}
+.seg{flex:1;height:5px;border-radius:3px;background:#efe8dd}
+.seg.on{background:var(--sage-acc)}
+.shelfmeter .txt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#a2907f;text-transform:uppercase;margin-top:8px;display:flex;justify-content:space-between}
+.book .foot{border-top:1px solid var(--line-soft);padding:11px 20px;display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;color:#8a7a6c;text-transform:uppercase}
+.book .foot b{color:var(--head-ink);font-weight:600}
+.book .foot .linkline{margin-left:auto}
+.addbook{border:1.5px dashed #d9cdbc;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:320px;cursor:pointer;transition:border-color .15s,background .15s}
+.addbook:hover{border-color:var(--burg);background:var(--card)}
+.addbook .al{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.17em;color:#6a5a50;text-transform:uppercase}
+.addbook .ah{font-style:italic;font-weight:300;font-size:12.5px;color:#9a8c80}
+
+/* ================= VIEW 2 — DOSSIER ================= */
+.backline{margin-bottom:16px;flex:0 0 auto}
+.dcard{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-card);overflow:hidden}
+.plateband{display:flex;align-items:center;gap:26px;padding:26px 32px;background:linear-gradient(135deg,var(--band-sage),var(--band-sage-2));border-bottom:1px solid rgba(138,158,136,.35)}
+.plateband .plate{width:104px;height:104px;background:#fff;border:1px solid var(--line);border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(58,28,20,.06);flex:0 0 auto}
+.plateband h2{font-family:'Playfair Display',serif;font-weight:600;font-size:32px;color:var(--head-ink);line-height:1.1;margin:8px 0 10px}
+.plateband .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.plateband .logl{font-family:'Playfair Display',serif;font-style:italic;font-size:15.5px;color:#4a3a30;margin-top:12px}
+.plateband .side{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:14px;flex:0 0 auto}
+.statstrip{display:flex;background:rgba(255,255,255,.62);border:1px solid rgba(138,158,136,.3);border-radius:14px;overflow:hidden}
+.statstrip .stat{padding:11px 18px;text-align:center}
+.statstrip .stat+.stat{border-left:1px solid rgba(138,158,136,.25)}
+.statstrip .n{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--head-ink);line-height:1}
+.statstrip .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.15em;color:#6a7a68;text-transform:uppercase;margin-top:6px}
+.tabs{display:flex;gap:26px;border-bottom:1px solid var(--line-soft);padding:0 32px}
+.tab{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#7a6a5c;padding:13px 2px;border-bottom:2px solid transparent;cursor:pointer}
+.tab:hover{color:var(--head-ink)}
+.tab.on{border-bottom-color:var(--burg);color:var(--head-ink);font-weight:600}
+
+/* pitch shelf */
+.pbody{padding:24px 30px 30px}
+.pitchstrip{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 22px;display:flex;align-items:center;gap:18px;margin-bottom:18px}
+.pitchstrip .pv{font-family:'Playfair Display',serif;font-size:18px;color:var(--head-ink);margin-top:6px}
+.pitchstrip .pv .m{color:#8a7a6c;font-family:'Inter',sans-serif;font-size:13px;font-weight:300;padding:0 5px}
+.pitchstrip .oa{margin-left:auto;display:flex;gap:10px}
+.assets{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.asset{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px 22px;display:flex;flex-direction:column;transition:box-shadow .15s}
+.asset:hover{box-shadow:var(--shadow-card)}
+.asset.wide{grid-column:1 / -1}
+.asset .ahead{display:flex;align-items:baseline;gap:10px}
+.asset .an{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.17em;color:#7a6a5c;text-transform:uppercase;font-weight:600}
+.asset .ahint{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:#c4b5a5;text-transform:uppercase}
+.asset .acts{margin-left:auto;display:flex;gap:12px}
+.asset .content{font-size:13.5px;font-weight:300;color:#3f3229;line-height:1.6;margin-top:12px}
+.asset .content.serif{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;font-weight:400;color:#4a3a30}
+.asset .ameta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;color:#b3a293;text-transform:uppercase;margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft)}
+.asset.empty{border-style:dashed;background:transparent;border-color:#d9cdbc}
+.asset.empty .placeholder{font-size:12.5px;font-weight:300;font-style:italic;color:#9a8c80;line-height:1.55;margin-top:10px}
+.asset.empty .write{margin-top:14px}
+/* editing state */
+.asset.editing{border-color:rgba(124,58,42,.4);box-shadow:0 8px 24px rgba(58,28,20,.08)}
+.asset textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:12px 14px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:300;line-height:1.6;color:#3f3229;resize:vertical;margin-top:12px}
+.asset textarea:focus{outline:none;border-color:rgba(124,58,42,.4)}
+.asset .editfoot{display:flex;align-items:center;gap:12px;margin-top:12px}
+.asset .wc-live{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;color:#a2907f;text-transform:uppercase}
+.asset .editfoot .btns{margin-left:auto;display:flex;gap:10px}
+
+.viewv{display:none}
+body[data-view="lib"] .v-lib{display:block}
+body[data-view="doss"] .v-doss{display:flex;flex-direction:column;flex:1;min-height:0}
+/* dossier fits the viewport; only the pane body scrolls */
+body[data-view="doss"] .content{display:flex;flex-direction:column;overflow:hidden}
+body[data-view="doss"] .window{flex:1;display:flex;flex-direction:column;min-height:0}
+body[data-view="doss"] .inner{flex:1;display:flex;flex-direction:column;min-height:0;width:100%}
+body[data-view="doss"] .dcard{flex:1;display:flex;flex-direction:column;min-height:0}
+body[data-view="doss"] .plateband{flex:0 0 auto;padding:20px 32px}
+body[data-view="doss"] .plateband .plate{width:92px;height:92px}
+body[data-view="doss"] .tabs{flex:0 0 auto}
+body[data-view="doss"] .pbody{flex:1;min-height:0;overflow-y:auto;scrollbar-gutter:stable both-edges}
+body.m-one .only-many{display:none!important}
+
+.devbar{position:fixed;bottom:16px;right:16px;background:var(--head-ink);border-radius:12px;padding:8px 10px;display:flex;gap:6px;z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.devbar .lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#b3a293;text-transform:uppercase;align-self:center;margin:0 4px}
+.devbar button{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1px solid rgba(253,250,245,.25);color:#d8cabb;border-radius:8px;padding:6px 10px;cursor:pointer}
+.devbar button.on{background:var(--pink);border-color:var(--pink);color:var(--burg);font-weight:600}
+@media (max-width:1150px){.assets{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-view="lib" class="m-many">
+
+<div class="shell">
+  <div class="topnav">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none"><path d="M6 24 C10 20 18 12 27 7 L24 13 L15 21 Z" fill="#241611"/><path d="M9 27 c-1.5 1.5 -3 1.2 -4 .5 c1.8 -.2 2.4 -1.6 2.6 -2.8" stroke="#241611" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+      <span class="wordmark">ScriptAlly</span>
+    </div>
+    <div class="crumb"><span>ScriptAlly</span><span class="sep">/</span><span>Materials</span><span class="sep">/</span><b>Manuscripts</b><span class="saved">All changes saved</span></div>
+    <div class="nav-right"><div class="searchbox">Search</div><div class="help">?</div><button class="btn-new">＋ New</button></div>
+  </div>
+
+  <div class="below">
+    <div class="sidebar">
+      <div class="ms-selector">
+        <div class="thumb"><svg width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="4" width="13" height="16" rx="1.5" fill="#cdd8ca" stroke="#5a6e58" stroke-width="1.1"/><path d="M8 8h7M8 11h7M8 14h5" stroke="#5a6e58" stroke-width="1" stroke-linecap="round"/></svg></div>
+        <div><div class="t">Murphy's Day Out</div><div class="s">Thriller · 50,000 words</div></div>
+        <div class="arrows">‹ ›</div>
+      </div>
+      <div class="side-rule"></div>
+      <div class="navscroll">
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</div>
+        <div class="sect">Queries</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12 21 4l-4 16-6-5z"/></svg>Query Centre</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 20h18"/><path d="M5 17l4-6 4 3 6-9"/></svg>Analytics</div>
+        <div class="sect">Agents</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20c.6-3.4 2.8-5 5.5-5s4.9 1.6 5.5 5"/></svg>Contact list</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>Discover</div>
+        <div class="sect">Materials</div>
+        <div class="nitem active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4v16M9 4v16M13 5l4 15"/></svg>Manuscripts</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="12" height="15" rx="1.5"/><path d="M8 3h12v15"/></svg>Comparable titles</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 9v11"/></svg>Submission packages</div>
+        <div class="sect">Tasks</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m4 7 2 2 3-3"/><path d="M12 7h9"/><path d="m4 15 2 2 3-3"/><path d="M12 15h9"/></svg>To-do list<span class="count">16</span></div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h9l4 4v14H6z"/></svg>Noteboard</div>
+        <div class="sect">Account</div>
+        <div class="nitem"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.1-.4.1-.8.1-1.2z"/></svg>Settings</div>
+      </div>
+      <div class="side-foot">
+        <div class="uav">BC</div>
+        <div><div class="uname">Bethany Carter</div><div class="uplan">Free plan</div></div>
+        <button class="upg">Upgrade</button>
+      </div>
+    </div>
+
+    <div class="content"><div class="window"><div class="inner">
+
+      <!-- ================= LIBRARY ================= -->
+      <div class="viewv v-lib">
+        <div class="pagehead">
+          <div><h1>Your manuscripts</h1><div class="desc">Everything you've written about each book, ready to use in a query.</div></div>
+          <div class="ph-right"><button class="btn-pink">＋ Add manuscript</button></div>
+        </div>
+
+        <div class="grid">
+          <!-- book 1 -->
+          <div class="book" onclick="go('doss')">
+            <div class="cover">
+              <span class="pill"><span class="dot"></span>Querying</span>
+              <div class="plate"><svg width="56" height="56" viewBox="0 0 64 64"><rect x="12" y="10" width="34" height="44" rx="3" fill="#e9ede6" stroke="#3a1c14" stroke-width="1.4"/><rect x="12" y="10" width="7" height="44" rx="2" fill="#b9c6b4" stroke="#3a1c14" stroke-width="1.2"/><path d="M25 20h15M25 26h15M25 32h11M25 38h15M25 44h8" stroke="#5a6e58" stroke-width="1.4" stroke-linecap="round"/><path d="M40 52 54 30l5 3-14 22-6 2z" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+              <h3>Murphy's Day Out</h3>
+              <div class="meta"><span class="gp">Young Adult</span><span class="gp">Thriller</span><span class="wcx">50,000 words</span></div>
+            </div>
+            <div class="body">
+              <div class="logl">Murphy catches a fly</div>
+              <div class="shelfmeter">
+                <div class="row"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg"></span><span class="seg"></span></div>
+                <div class="txt"><span>3 of 5 pitch pieces written</span><span>Synopses to go</span></div>
+              </div>
+            </div>
+            <div class="foot"><span><b>24</b> queries</span><span><b>11</b> responses</span><span class="linkline">Open →</span></div>
+          </div>
+
+          <!-- book 2 -->
+          <div class="book only-many" onclick="go('doss')">
+            <div class="cover">
+              <span class="pill"><span class="dot"></span>Querying</span>
+              <div class="plate"><svg width="56" height="56" viewBox="0 0 64 64"><rect x="12" y="10" width="34" height="44" rx="3" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.4"/><rect x="12" y="10" width="7" height="44" rx="2" fill="#e8c8bc" stroke="#3a1c14" stroke-width="1.2"/><path d="M25 20h15M25 26h15M25 32h11M25 38h15" stroke="#7c3a2a" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+              <h3>The Cartographer's Wife</h3>
+              <div class="meta"><span class="gp">Adult</span><span class="gp">Literary</span><span class="wcx">84,000 words</span></div>
+            </div>
+            <div class="body">
+              <div class="logl">A map of everything except the way home</div>
+              <div class="shelfmeter">
+                <div class="row"><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span><span class="seg on"></span></div>
+                <div class="txt"><span>All 5 pitch pieces written</span></div>
+              </div>
+            </div>
+            <div class="foot"><span><b>11</b> queries</span><span><b>5</b> responses</span><span class="linkline">Open →</span></div>
+          </div>
+
+          <!-- book 3 -->
+          <div class="book only-many" onclick="go('doss')">
+            <div class="cover">
+              <span class="pill drafting"><span class="dot"></span>Drafting</span>
+              <div class="plate"><svg width="56" height="56" viewBox="0 0 64 64"><rect x="12" y="10" width="34" height="44" rx="3" fill="#fdfaf5" stroke="#3a1c14" stroke-width="1.4"/><rect x="12" y="10" width="7" height="44" rx="2" fill="#d8cec0" stroke="#3a1c14" stroke-width="1.2"/><path d="M25 20h15M25 26h10" stroke="#8a7a6c" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+              <h3>Hedge Kings</h3>
+              <div class="meta"><span class="gp">Middle Grade</span><span class="gp">Adventure</span><span class="wcx">41,500 words</span></div>
+            </div>
+            <div class="body">
+              <div class="logl none">No logline yet</div>
+              <div class="shelfmeter">
+                <div class="row"><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span></div>
+                <div class="txt"><span>Pitch shelf empty</span><span>Start with the logline</span></div>
+              </div>
+            </div>
+            <div class="foot"><span>No queries yet</span><span class="linkline">Open →</span></div>
+          </div>
+
+          <!-- add -->
+          <div class="addbook">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#a2907f" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg>
+            <span class="al">Add a manuscript</span>
+            <span class="ah">— the shelf holds more than one.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= DOSSIER ================= -->
+      <div class="viewv v-doss">
+        <div class="backline"><span class="linkline" onclick="go('lib')">← All manuscripts</span></div>
+        <div class="dcard">
+          <div class="plateband">
+            <div class="plate"><svg width="66" height="66" viewBox="0 0 64 64"><rect x="12" y="10" width="34" height="44" rx="3" fill="#e9ede6" stroke="#3a1c14" stroke-width="1.4"/><rect x="12" y="10" width="7" height="44" rx="2" fill="#b9c6b4" stroke="#3a1c14" stroke-width="1.2"/><path d="M25 20h15M25 26h15M25 32h11M25 38h15M25 44h8" stroke="#5a6e58" stroke-width="1.4" stroke-linecap="round"/><path d="M40 52 54 30l5 3-14 22-6 2z" fill="#f5e2da" stroke="#3a1c14" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
+            <div>
+              <span class="pill"><span class="dot"></span>Querying</span>
+              <h2>Murphy's Day Out</h2>
+              <div class="meta"><span class="gp">Young Adult</span><span class="gp">Thriller</span><span class="wcx" style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:#5f7060;text-transform:uppercase">50,000 words</span></div>
+              <div class="logl">Murphy catches a fly</div>
+            </div>
+            <div class="side">
+              <div class="statstrip">
+                <div class="stat"><div class="n">24</div><div class="k">Queries</div></div>
+                <div class="stat"><div class="n">11</div><div class="k">Responses</div></div>
+                <div class="stat"><div class="n">13 Aug</div><div class="k">Last activity</div></div>
+              </div>
+              <div style="display:flex;gap:10px"><button class="btn-ghost btn-sm">Edit details</button><button class="btn-pink btn-sm">Send a query</button></div>
+            </div>
+          </div>
+
+          <div class="tabs">
+            <div class="tab on">The pitch</div>
+            <div class="tab">The record</div>
+            <div class="tab">Comparable titles</div>
+            <div class="tab">Submission packages</div>
+          </div>
+
+          <div class="pbody">
+            <!-- derived pitch line -->
+            <div class="pitchstrip">
+              <div>
+                <div class="lab">The 'X meets Y' of your pitch — from your comp shelf</div>
+                <div class="pv"><i>Stormbreak</i><span class="m">meets</span><i>A Good Girl's Guide to Murder</i></div>
+              </div>
+              <div class="oa"><button class="btn-ghost btn-sm">Copy</button></div>
+            </div>
+
+            <div class="assets">
+              <!-- logline: written, full width -->
+              <div class="asset wide">
+                <div class="ahead">
+                  <span class="an">Logline</span><span class="ahint">One sentence</span>
+                  <div class="acts"><span class="linkline">Copy</span><span class="linkline">Edit</span></div>
+                </div>
+                <div class="content serif">Murphy catches a fly</div>
+                <div class="ameta">12 words · Edited 12 June</div>
+              </div>
+
+              <!-- elevator pitch: written -->
+              <div class="asset">
+                <div class="ahead">
+                  <span class="an">Elevator pitch</span><span class="ahint">~50 words</span>
+                  <div class="acts"><span class="linkline">Copy</span><span class="linkline">Edit</span></div>
+                </div>
+                <div class="content">When sixteen-year-old Murphy Blake films a stranger's drowning that the police insist never happened, her seaside town closes ranks. The only person who believes her is the boy whose father she's accusing.</div>
+                <div class="ameta">34 words · Edited 3 August</div>
+              </div>
+
+              <!-- blurb: editing state -->
+              <div class="asset editing">
+                <div class="ahead">
+                  <span class="an">Back-cover blurb</span><span class="ahint">100–150 words</span>
+                </div>
+                <textarea>Nobody swims at Gullpoint after dark. Murphy Blake knows why — she has it on film. But the footage shows a man the town swears doesn't exist, drowning in a sea the coastguard swears was empty…</textarea>
+                <div class="editfoot">
+                  <span class="wc-live">38 words · aim 100–150</span>
+                  <div class="btns"><button class="btn-ghost btn-sm">Cancel</button><button class="btn-pink btn-sm">Save</button></div>
+                </div>
+              </div>
+
+              <!-- one-page synopsis: empty -->
+              <div class="asset empty">
+                <div class="ahead"><span class="an">One-page synopsis</span><span class="ahint">~500 words</span></div>
+                <div class="placeholder">The whole story, ending included — most agencies ask for this alongside the query letter.</div>
+                <div class="write"><button class="btn-ghost btn-sm">Write it</button></div>
+              </div>
+
+              <!-- full synopsis: empty -->
+              <div class="asset empty">
+                <div class="ahead"><span class="an">Full synopsis</span><span class="ahint">2–3 pages</span></div>
+                <div class="placeholder">The longer version, for agencies that want chapter-level detail.</div>
+                <div class="write"><button class="btn-ghost btn-sm">Write it</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div></div></div>
+  </div>
+</div>
+
+<div class="devbar">
+  <span class="lbl">View</span>
+  <button data-view="lib" class="on">Library</button>
+  <button data-view="doss">Dossier</button>
+  <span class="lbl">Shelf</span>
+  <button data-m="m-many" class="on">3</button>
+  <button data-m="m-one">1</button>
+</div>
+
+<script>
+function go(v){
+  document.body.dataset.view=v;
+  document.querySelectorAll('.devbar [data-view]').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+}
+document.querySelectorAll('.devbar [data-view]').forEach(b=>b.onclick=()=>go(b.dataset.view));
+document.querySelectorAll('.devbar [data-m]').forEach(b=>b.onclick=()=>{
+  document.body.classList.toggle('m-one',b.dataset.m==='m-one');
+  document.querySelectorAll('.devbar [data-m]').forEach(x=>x.classList.toggle('on',x===b));
+});
+</script>
+</body>
+</html>

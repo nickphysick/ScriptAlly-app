@@ -179,6 +179,22 @@ export interface Manuscript {
   ageCategory: string;
   wordCount: number;
   logline: string;
+  /**
+   * The pitch shelf's two stored pieces, beside the `logline` above. Derived helpers live in
+   * src/lib/manuscriptPitch.ts; the shelf's fourth card (Synopsis) stores NOTHING here — it surfaces
+   * a `ManuscriptVersion` with `componentType: SYNOPSIS`, which is that prose's single home.
+   *
+   * ⚠️ ABSENT MEANS UNWRITTEN, AND THAT IS NOT THE SAME SHAPE AS `logline`'S EMPTINESS. `logline` is
+   * required and empties to `""`; these two are cleared by OMITTING the key (`deleteField()`), never
+   * by storing `""`. The asymmetry is real — `isValidManuscript` demands `logline is string` — and
+   * `manuscriptPitch.ts` resolves both through one `has()` so no caller has to know.
+   *
+   * ⚠️ NEITHER KEY IS IN THE FIRESTORE UPDATE ALLOWLIST YET, so a write carrying one is SILENTLY
+   * DENIED (the affectedKeys gotcha) until the rules deploy. Draft rule in
+   * reports/manuscripts-reframe.md.
+   */
+  elevatorPitch?: string;
+  backCoverBlurb?: string;
   // The manuscript's cover image (the panel selector's 30x40 slot renders it framed; absent shows
   // the illustrated mark, unframed). ⚠️ NOTHING WRITES THIS YET — the slot was built to accept an
   // image ahead of upload landing, so the field is a forward declaration only. TODO(cover-upload):

@@ -1,0 +1,169 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The library grid — the manuscripts page's browsing surface.
+ * Reference: design-refs/manuscript-library.html, view 1 (`.grid` / `.book` / `.addbook`).
+ *
+ * ⚠️ EVERY SURFACE HERE REUSES THE `--msv-*` SET, which is defined on `.t-{theme} .msv1` in
+ * manuscripts.css and manuscriptPlate.css. The cover is the SAME `--msv-plateA/B` sage band the
+ * dossier plateband wears, so the card a writer clicks and the band that greets them are one
+ * surface by token rather than two values someone matched by hand.
+ *
+ * Only the meter needed roles the set does not carry, and those are declared per theme below.
+ *
+ * ⚠️ EDITORIAL IS CHECKED BY CHROMA SPREAD, NOT BY HUE NAME. A rule reading "must not be sage" is
+ * passed by pink; the lock rejects any colour in a `.t-edn` block whose channels spread more than 6.
+ * Both values below are true greys (spread 0).
+ */
+
+/* ── meter roles, per theme ── */
+.t-capp .msv1 { --mlib-segon: #8a9e88; --mlib-segoff: #efe8dd; }
+.t-bold .msv1 { --mlib-segon: #1d1712; --mlib-segoff: #eee4df; }
+.t-edn  .msv1 { --mlib-segon: #6b6b6b; --mlib-segoff: #e8e8e8; }
+
+/* ── grid ── */
+.mlib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* ── the book card ──
+   A <button>, so the whole card is one keyboard-reachable control with one accessible name —
+   a clickable <div> with a nested link would give the same card two tab stops and two names. */
+.mlib-book {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  text-align: inherit;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  background: var(--msv-card);
+  border: var(--msv-cardbd);
+  border-radius: var(--msv-crad);
+  box-shadow: var(--msv-cardshadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s, opacity 0.15s;
+}
+.mlib-book:hover,
+.mlib-book:focus-visible {
+  box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 12px 30px rgba(58, 28, 20, 0.09);
+}
+.mlib-book:focus-visible { outline: 2px solid var(--msv-hue); outline-offset: 2px; }
+
+/* A shelved book is kept, not gone — dimmed on the shelf, full on hover so it can still be read. */
+.mlib-book.shelved { opacity: 0.62; }
+.mlib-book.shelved:hover,
+.mlib-book.shelved:focus-visible { opacity: 1; }
+
+.mlib-cover {
+  position: relative;
+  padding: 24px 20px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, var(--msv-plateA), var(--msv-plateB));
+  border-bottom: var(--msv-plateline);
+}
+.mlib-cover .msv-statuspill { position: absolute; top: 12px; right: 12px; }
+
+.mlib-plate {
+  width: 84px; height: 84px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #ffffff;
+  border: 1px solid var(--msv-hair);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(58, 28, 20, 0.07);
+}
+/* `contain`, and no blend mode — the asset carries a white field the plate already provides. */
+.mlib-plate img { width: 56px; height: 56px; object-fit: contain; }
+
+.mlib-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px; font-weight: 600; line-height: 1.15;
+  color: var(--msv-head);
+  margin: 14px 0 8px;
+}
+.mlib-meta {
+  display: flex; justify-content: center; align-items: center;
+  gap: 8px; flex-wrap: wrap;
+}
+.mlib-wc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--msv-paletx);
+}
+
+.mlib-body { flex: 1; display: flex; flex-direction: column; padding: 16px 20px 14px; }
+.mlib-logl {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 14px; line-height: 1.45; text-align: center;
+  color: var(--msv-ink);
+}
+.mlib-logl.none { font-size: 13px; color: var(--msv-muted); }
+
+/* `margin-top:auto` pins the meter to the card's foot, so meters line up across a row of cards
+   whose loglines are different lengths. */
+.mlib-meter { margin-top: auto; padding-top: 14px; }
+/* ⚠️ NOT `mlib-segs` — a container class that is a PREFIX of its children's (`mlib-seg`) makes every
+   prefix-matching selector and test read the container as a segment. It did exactly that here. */
+.mlib-meterrow { display: flex; align-items: center; gap: 8px; }
+.mlib-seg { flex: 1; height: 5px; border-radius: 3px; background: var(--mlib-segoff); }
+.mlib-seg.on { background: var(--mlib-segon); }
+.mlib-metertxt {
+  display: flex; justify-content: space-between; gap: 10px; margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--msv-label);
+}
+
+.mlib-foot {
+  display: flex; align-items: center; gap: 14px;
+  padding: 11px 20px;
+  border-top: 1px solid var(--msv-hair);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: var(--msv-muted);
+}
+.mlib-foot b { font-weight: 600; color: var(--msv-head); }
+.mlib-open { margin-left: auto; color: var(--msv-hue); }
+
+/* ── add tile ── */
+.mlib-add {
+  box-sizing: border-box;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px;
+  min-height: 320px;
+  padding: 0;
+  font: inherit;
+  background: transparent;
+  border: var(--msv-dash);
+  border-radius: var(--msv-crad);
+  color: var(--msv-label);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.mlib-add:hover, .mlib-add:focus-visible { border-color: var(--msv-hue); background: var(--msv-card); }
+.mlib-add:focus-visible { outline: 2px solid var(--msv-hue); outline-offset: 2px; }
+.mlib-addl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.17em; text-transform: uppercase;
+  color: var(--msv-btntx);
+}
+.mlib-addh { font-style: italic; font-weight: 300; font-size: 12.5px; color: var(--msv-muted); }
+
+/* ── back link (Phase 1 minimum; Phase 2 restyles the dossier shell around it) ── */
+.mlib-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 16px; padding: 0;
+  background: none; border: none; cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--msv-hue);
+}
+.mlib-back:hover { text-decoration: underline; }
+
+@media (prefers-reduced-motion: reduce) {
+  .mlib-book, .mlib-add { transition: none; }
+}

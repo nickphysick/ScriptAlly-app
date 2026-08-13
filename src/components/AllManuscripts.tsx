@@ -39,6 +39,9 @@ import { ManuscriptTabs, DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manu
 import { ManuscriptDetailTiles } from "./manuscripts/ManuscriptDetailTiles";
 import { ManuscriptCompsPane } from "./manuscripts/ManuscriptCompsPane";
 import { ManuscriptPackagesPane } from "./manuscripts/ManuscriptPackagesPane";
+import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/ManuscriptLibraryCard";
+import { pitchAssets, pitchMeter } from "../lib/manuscriptPitch";
+import { genreDisplay } from "../lib/genres";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the comps + packages sub-pages — the section's single active-manuscript pointer. */
@@ -55,13 +58,19 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
     useScriptAllyDb();
 
   /**
-   * ⚠️ SELECTION AND TAB LIVE HERE, ABOVE THE CARD, so switching manuscripts swaps the plate and
-   * panes WITHOUT remounting the card — and the chosen tab therefore survives the switch. Seeded
-   * from the shared active-manuscript pointer the comps and packages sub-pages already read.
+   * ⚠️ THE PAGE IS TWO VIEWS AND `openId` IS THE ONLY THING THAT SAYS WHICH. Null renders the
+   * library grid; an id renders that manuscript's dossier. It does NOT seed from the stored pointer:
+   * the page opens on the shelf, because arriving inside one book is a claim about which book you
+   * wanted, and the grid is the whole point of the reframe.
+   *
+   * ⚠️ THE MECHANISM IS THESE THREE LINES AND NOTHING ELSE (openDossier / closeDossier / dossier),
+   * so replacing local state with a `?m=<id>` param or a nested route is one edit here and no edit
+   * anywhere else. Routing is Nick's call and is deliberately not taken by this phase.
+   *
+   * ⚠️ TAB STATE LIVES ABOVE THE CARD so the chosen tab survives a manuscript switch. It is LOCAL:
+   * no route, no URL param, no persistence.
    */
-  const [selectedId, setSelectedId] = useState<string | null>(() => {
-    try { return localStorage.getItem(ACTIVE_MS_KEY); } catch { return null; }
-  });
+  const [openId, setOpenId] = useState<string | null>(null);
   const [tab, setTab] = useState<ManuscriptTabKey>(DEFAULT_MANUSCRIPT_TAB);
   const [menuOpen, setMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -75,12 +84,18 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
 
   if (!currentUser) return null;
 
-  /** The card's subject. A stale pointer (deleted manuscript) falls back to the first plate. */
-  const selected = ordered.find((m) => m.id === selectedId) ?? ordered[0] ?? null;
+  /**
+   * The dossier's subject, or null for the library grid. A stale id (the manuscript was deleted
+   * under us) resolves to null and returns to the shelf rather than to some other writer's book.
+   */
+  const selected = openId ? ordered.find((m) => m.id === openId) ?? null : null;
+
+  /** Writes the pointer the comps and packages sub-pages read. Not view state — a section-wide seat. */
   const selectMs = (id: string) => {
-    setSelectedId(id);
     try { localStorage.setItem(ACTIVE_MS_KEY, id); } catch { /* private mode — selection is session-only */ }
   };
+  const openDossier = (id: string) => { selectMs(id); setOpenId(id); };
+  const closeDossier = () => setOpenId(null);
 
   // ── lifecycle (carried over: reversible shelve flag-flip with Undo; deferred delete) ──
   const toggleShelved = async (ms: Manuscript) => {
@@ -207,35 +222,49 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
         ) : (
           <>
             {/*
-              ⚠️ AT EXACTLY ONE MANUSCRIPT THE SWITCHER DOES NOT RENDER AT ALL. Most writers have
-              one, and a switcher offering a single choice is furniture that teaches nothing. It is
-              absent rather than disabled — a one-item control implies there could be more and that
-              you are somehow not seeing them.
+              ⚠️ THE GRID IS THE SWITCHER NOW. The shelf switcher that used to sit here is DELETED,
+              not hidden: it existed to pick the one card's subject, and the library does that by
+              being a library. Keeping both would have given the page two controls for one job.
+
+              ⚠️ AND THE ADD TILE RENDERS AT EVERY COUNT, INCLUDING ONE. One card beside one dashed
+              tile is the intended appearance — the old switcher's "absent below two manuscripts"
+              rule was about a control that taught nothing at one, which is not true of a shelf.
             */}
-            {ordered.length > 1 && selected && (
-              <div className="msv-switcher" role="tablist" aria-label="Your manuscripts">
-                {ordered.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={m.id === selected.id}
-                    className={`msv-swtab${m.id === selected.id ? " on" : ""}${isShelvedPresentation(m) ? " shelved" : ""}`}
-                    onClick={() => selectMs(m.id)}
-                  >
-                    {m.title}
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  className="msv-swadd"
-                  onClick={() => onNavigate?.("manuscripts", "Add a manuscript")}
-                >
-                  ＋ Add
-                </button>
+            {!selected && (
+              <div className="mlib-grid">
+                {ordered.map((m) => {
+                  const mq = queries.filter((q) => q.manuscriptId === m.id);
+                  const mv = versions.filter((v) => v.manuscriptId === m.id);
+                  return (
+                    <ManuscriptLibraryCard
+                      key={m.id}
+                      title={m.title}
+                      status={isShelvedPresentation(m) ? "Shelved" : m.status}
+                      shelved={isShelvedPresentation(m)}
+                      /* ⚠️ RESOLVED THROUGH `genreDisplay`, NOT RENDERED RAW. `GenrePicker` stores
+                         canonical IDS ("gothic-horror"), so printing the stored value shows the id
+                         to the writer. Personal genres only resolve with the user's own list. */
+                      genres={[
+                        m.ageCategory,
+                        m.genre ? genreDisplay(m.genre, currentUser.personalGenres ?? []) : "",
+                      ].filter(Boolean)}
+                      wordCount={m.wordCount}
+                      logline={m.logline}
+                      stats={plateStats(mq)}
+                      meter={pitchMeter(pitchAssets(m, mv))}
+                      onOpen={() => openDossier(m.id)}
+                    />
+                  );
+                })}
+                <ManuscriptAddTile onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")} />
               </div>
             )}
           {selected ? (
+          <>
+            {/* Phase 1 minimum so the dossier has a way out; Phase 2 restyles the shell around it. */}
+            <button type="button" className="mlib-back" onClick={closeDossier}>
+              ← All manuscripts
+            </button>
           /*
            * ⚠️ ONE CARD, NOT A PLATE PER MANUSCRIPT. The shelf switcher above picks the subject;
            * the card renders it. Most writers have exactly one manuscript, so a list of one read as
@@ -345,6 +374,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
               />
             )}
           </div>
+          </>
           ) : null}
           </>
         )}

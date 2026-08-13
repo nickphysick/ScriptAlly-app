@@ -1,0 +1,143 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Theme verification for the library grid.
+ *
+ * ⚠️ CHECKED FROM CONSUMPTION TO DEFINITION, NOT THE OTHER WAY. `var()` on an UNDEFINED custom
+ * property yields nothing and CSS says nothing — the declaration is simply dropped. That is how a
+ * shell selector once rendered 0px wide through a green typecheck, a green build and a green suite.
+ * Grepping for the tokens we ADDED cannot catch a token we REFERENCED and never wrote, so this
+ * walks every `var(--x)` this stylesheet reads and demands a definition for it.
+ *
+ * ⚠️ AND EDITORIAL IS CHECKED BY CHROMA SPREAD, NOT BY HUE NAME. A rule saying "no sage in
+ * Editorial" names one hue and is passed by pink — which is exactly how the plate tiles' pink once
+ * went straight through a check written to the letter of that ruling.
+ */
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+const here = (f: string) => strip(readFileSync(resolve(__dirname, f), "utf8"));
+
+const LIB = here("./manuscriptLibrary.css");
+/** Where the `--msv-*` set the grid consumes is actually defined. */
+const DEFINED_IN = [LIB, here("./manuscriptPlate.css"), here("./manuscripts.css")].join("\n");
+
+const THEMES = [".t-capp .msv1", ".t-bold .msv1", ".t-edn  .msv1"] as const;
+
+function block(css: string, selector: string): string {
+  const re = new RegExp(`${selector.replace(/[.\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`, "m");
+  const m = re.exec(css);
+  expect(m, `${selector} must exist as a rule of its own`).not.toBeNull();
+  return m![1];
+}
+
+/**
+ * Every declaration that applies to `selector`, joined across ALL its blocks.
+ *
+ * ⚠️ A GROUPED RULE MAKES FIRST-MATCH SLICING AMBIGUOUS, and this file met that immediately: the
+ * hover treatment is written `.mlib-book:hover, .mlib-book:focus-visible { … }`, so a helper that
+ * finds one block by exact-match returns nothing and the lock reports a missing rule. Joining every
+ * block that lists the selector cannot be defeated by grouping or by a second rule added later.
+ */
+function rule(css: string, selector: string): string {
+  const bodies = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+    .filter(([, sel]) => sel.split(",").some((s) => s.trim() === selector))
+    .map(([, , body]) => body);
+  expect(bodies.length, `${selector} must appear in at least one rule`).toBeGreaterThan(0);
+  return bodies.join("\n");
+}
+
+const token = (css: string, selector: string, name: string): string => {
+  const m = new RegExp(`${name}\\s*:\\s*([^;]+);`).exec(block(css, selector));
+  expect(m, `${name} must be defined on ${selector}`).not.toBeNull();
+  return m![1].trim();
+};
+
+describe("every token the grid READS resolves to a definition", () => {
+  it("reads at least one — a zero-length sweep would pass against an empty file", () => {
+    expect([...LIB.matchAll(/var\((--[a-z0-9-]+)/gi)].length).toBeGreaterThan(10);
+  });
+
+  it("and no rule reads a token that does not exist", () => {
+    const read = new Set([...LIB.matchAll(/var\((--[a-z0-9-]+)/gi)].map((m) => m[1]));
+    for (const name of read) {
+      /* A definition is `--x:` anywhere in the manuscripts sheet set. `--msv-hue`/`--msv-huec`
+         resolve one further hop, to --sd-hue/--sd-centre in index.css — manuscripts.css defines
+         them, so they are caught here like any other. */
+      const defined = new RegExp(`${name}\\s*:`).test(DEFINED_IN);
+      expect(defined, `${name} is read by manuscriptLibrary.css and defined nowhere`).toBe(true);
+    }
+  });
+});
+
+describe("the meter's two roles are declared in every theme", () => {
+  it.each(THEMES)("%s defines both", (sel) => {
+    expect(token(LIB, sel, "--mlib-segon")).toBeTruthy();
+    expect(token(LIB, sel, "--mlib-segoff")).toBeTruthy();
+  });
+
+  /** A token defined in two files is a silent override — which one wins becomes load order. */
+  it("and the grid redefines nothing the plate or page sheets already own", () => {
+    const mine = new Set(
+      [...LIB.matchAll(/(--mlib-[a-z0-9-]+)\s*:/gi)].map((m) => m[1])
+    );
+    expect(mine.size).toBeGreaterThan(0);
+    for (const name of [...LIB.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((m) => m[1])) {
+      if (mine.has(name)) continue;
+      expect(name, `${name} is redefined by the library sheet`).toBe("");
+    }
+  });
+});
+
+describe("Editorial stays monochrome", () => {
+  const edn = (name: string) => token(LIB, ".t-edn  .msv1", name);
+
+  it.each(["--mlib-segon", "--mlib-segoff"])("%s carries no hue", (name) => {
+    const hex = edn(name);
+    expect(hex, `${name} must be a hex so its chroma can be measured`).toMatch(/^#[0-9a-f]{6}$/i);
+    const ch = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+    const chroma = Math.max(...ch) - Math.min(...ch);
+    expect(chroma, `${hex} carries a hue (chroma ${chroma}) and Editorial is monochrome`).toBeLessThanOrEqual(6);
+  });
+
+  /* A filled segment and an empty one must stay distinguishable once hue is gone — by value. */
+  it("and its filled segment still reads against its empty one", () => {
+    const v = (name: string) => parseInt(edn(name).slice(1, 3), 16);
+    expect(Math.abs(v("--mlib-segon") - v("--mlib-segoff"))).toBeGreaterThanOrEqual(24);
+  });
+});
+
+describe("the card's structure holds the rules that make it work", () => {
+  /**
+   * ⚠️ `margin-top: auto` IS WHAT LINES THE METERS UP. Cards in a row have loglines of different
+   * lengths; without it each meter sits directly under its own prose and the row reads as ragged.
+   */
+  it("pins the meter to the card's foot", () => {
+    expect(block(LIB, ".mlib-meter")).toContain("margin-top: auto");
+  });
+
+  /**
+   * ⚠️ THE SEGMENT CONTAINER MUST NOT BE A PREFIX OF THE SEGMENT CLASS. `mlib-segs` wrapping
+   * `mlib-seg` made every prefix-matching selector and test read the container as a fifth segment —
+   * it did exactly that when this card was built.
+   */
+  it("keeps the meter row's class clear of the segment's prefix", () => {
+    expect(LIB).toContain(".mlib-meterrow");
+    expect(LIB).not.toContain(".mlib-segs");
+  });
+
+  /**
+   * ⚠️ A CARD FLUSH TO A CLIPPING BOUNDARY HOVERS BY SHADOW, NEVER BY LIFT — the rule the spine and
+   * the detail tiles already carry, and which was lost once before by an in-flight revision.
+   */
+  it("hovers by shadow, never by lift", () => {
+    const hover = rule(LIB, ".mlib-book:hover");
+    expect(hover).toContain("box-shadow");
+    expect(hover).not.toContain("translate");
+    /* And nowhere else on the card either — a lift added to the resting rule is the same bug. */
+    expect(rule(LIB, ".mlib-book")).not.toContain("translate");
+  });
+});

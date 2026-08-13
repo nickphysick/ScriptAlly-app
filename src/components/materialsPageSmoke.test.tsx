@@ -42,53 +42,63 @@ describe("/manuscripts renders", () => {
    * so this is the only thing standing between a derivation that crashes and a page that will not
    * load — the exact failure mode that once shipped through a fully green suite.
    */
-  it("renders the plate card without throwing once there is a manuscript", () => {
+  it("renders the library grid without throwing once there is a manuscript", () => {
     expect(() => renderPageSeeded(page(), "/manuscripts")).not.toThrow();
   });
 
-  it("…and the manuscript reaches the plateband", () => {
+  /**
+   * ⚠️ THE POPULATED STATE IS THE LIBRARY GRID NOW, NOT THE DOSSIER. The page opens on the shelf and
+   * a card click opens one book, so the plateband these assertions used to reach is behind an
+   * interaction — and this repo's specs read source with no jsdom, so nothing here can click.
+   *
+   * ⚠️ AND THAT LEAVES A REAL, NAMED GAP: the dossier branch's wiring (its tabs, its four Details
+   * tiles and the lifecycle menu) is executed by NO smoke until `ManuscriptDossier` is extracted as
+   * a props-only component with its own render spec — the first task of Phase 2. The gap is
+   * narrower than it looks (`plateStats` still runs here, on the card; the tile derivations keep
+   * their own unit tests and `ManuscriptDetailTiles` its own render spec) but it is not nothing,
+   * and it is recorded rather than quietly accepted.
+   */
+  it("…and the manuscript reaches its card on the shelf", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
     expect(html).toContain("The Smoke Test");
-    expect(html).toContain("msv-plateband");
+    expect(html).toContain("mlib-grid");
+    expect(html).toContain("mlib-book");
   });
 
   /**
-   * ⚠️ ASSERT THE FIGURE, NOT THE LABEL. The three keys render whatever the numbers are, so a
-   * plate fed constants — or fed the wrong manuscript's queries — passes a key-only check. The
-   * seed carries exactly one query, so the strip must SAY one.
+   * ⚠️ ASSERT THE FIGURE, NOT THE LABEL. The foot renders whatever the numbers are, so a card fed
+   * constants — or fed the wrong manuscript's queries — passes a label-only check. The seed carries
+   * exactly one query and no response, so the card must SAY one query, and must agree in number.
    */
-  it("…with its three derived figures beside it, and the figures are the real ones", () => {
+  it("…with its derived counts, and the counts are the real ones", () => {
     const html = renderPageSeeded(page(), "/manuscripts");
-    for (const key of ["Queries", "Responses", "Last activity"]) expect(html).toContain(key);
-    expect(html).toContain('<div class="msv-statn">1</div>');
-  });
-
-  it("…and the three tabs, opening on Details", () => {
-    const html = renderPageSeeded(page(), "/manuscripts");
-    for (const t of ["Details", "Comparable titles", "Submission packages"]) expect(html).toContain(t);
-    expect(/aria-selected="true"[^>]*>Details</.test(html)).toBe(true);
-  });
-
-  /** The Details pane is the default, so its four derivations run on every first paint. */
-  it("…and the Details pane's four tiles", () => {
-    const html = renderPageSeeded(page(), "/manuscripts");
-    for (const label of ["Out in the world", "Comparable titles", "On the shelf", "Submission materials"]) {
-      expect(html).toContain(label);
-    }
-  });
-
-  /** ⚠️ The lifecycle menu has no other home on this page — losing it is a silent regression. */
-  it("…and keeps the shelve/delete affordance the plate list carried", () => {
-    expect(renderPageSeeded(page(), "/manuscripts")).toContain('aria-label="More actions"');
+    expect(html).toContain("<b>1</b> query");
+    expect(html).toContain("<b>0</b> responses");
   });
 
   /**
-   * ⚠️ AT ONE MANUSCRIPT THE SWITCHER IS ABSENT, NOT DISABLED. The seed carries exactly one, which
-   * is also the commonest real shelf — so this is the state most users see, and a switcher offering
-   * a single choice would imply there are others they cannot reach.
+   * The pitch meter is the one derivation that reads BOTH the manuscript and its versions, so it is
+   * the card's deepest one. The seed has a logline and nothing else, which is 1 of 4.
    */
-  it("…and renders NO shelf switcher above a single manuscript", () => {
+  it("…and the pitch meter, reporting the real state of the shelf", () => {
+    const html = renderPageSeeded(page(), "/manuscripts");
+    expect(html).toContain("1 of 4 pitch pieces written");
+    expect(html).toContain("mlib-seg on");
+  });
+
+  /** The add tile renders at every count, including one — one card beside it is the intended shelf. */
+  it("…beside the add tile, which renders at every count", () => {
+    expect(renderPageSeeded(page(), "/manuscripts")).toContain("mlib-add");
+  });
+
+  /**
+   * ⚠️ THE SHELF SWITCHER IS DELETED, NOT HIDDEN. It existed to pick the single card's subject, and
+   * the library does that by being a library — keeping both would give the page two controls for
+   * one job. This asserts it is gone at every count, not merely absent at one.
+   */
+  it("…and renders NO shelf switcher, at any count", () => {
     expect(renderPageSeeded(page(), "/manuscripts")).not.toContain("msv-switcher");
+    expect(renderPage(page(), "/manuscripts")).not.toContain("msv-switcher");
   });
 });
 
