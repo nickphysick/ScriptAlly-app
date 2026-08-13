@@ -3099,47 +3099,15 @@ export const Queries: React.FC<{
               </span>
             </div>
           ) : undefined}
-          toolbar={!creating && !recording && queries.length > 0 ? (
-                  <div className="f12-lhead">
-                    <div className="f12-lsearch">
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                      <input
-                        type="text"
-                        placeholder="Search"
-                        value={listSearch}
-                        onChange={(e) => setListSearch(e.target.value)}
-                        aria-label="Search queries"
-                      />
-                    </div>
-                    {/* v4 P1 — labelled pills in the agent list's grammar (icon · label · chevron), so the
-                        controls state what they do without a hover. Wiring unchanged. */}
-                    <div className="f12-popwrap">
-                      <PillTrig
-                        ref={filterTrigRef}
-                        label="Filter"
-                        open={filterPopOpen}
-                        active={activeFilterCount > 0}
-                        count={activeFilterCount}
-                        onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
-                        icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
-                      />
-                      {filterPopOpen && renderFilterPopover()}
-                    </div>
-                    <div className="f12-popwrap">
-                      <PillTrig
-                        ref={sortTrigRef}
-                        label="Sort"
-                        open={sortPopOpen}
-                        active={sortKey !== "last_activity"}
-                        value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
-                        onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
-                        icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
-                      />
-                      {sortPopOpen && renderSortPopover()}
-                    </div>
-                  </div>
-          ) : undefined}
-          condensed={creating || recording}
+          /* ⚠️ NO `toolbar` PROP (§1c). Search, Filter and Sort act on the LIST and nothing else,
+             so they sit at the head of the list COLUMN rather than in a page-wide strip. The grid's
+             row 2 is gone from this page entirely; `.wpg-scroll`'s own `padding-top` pays the
+             18px gap instead, which is the grid's documented no-toolbar case ("two elements, one
+             gap, never both") — so the rhythm is unchanged by the move. */
+          /* ⚠️ NO `condensed` PROP EITHER (§2). It stripped the header band on `creating ||
+             recording`, which was right while a journey REPLACED the page. A journey is an overlay
+             now: the desk stays whole underneath it, band and all, and stripping the chrome behind
+             a scrim would animate a page the writer is not looking at. */
           plate={
           <PageHeader
             variant="workspace"
@@ -3361,10 +3329,57 @@ export const Queries: React.FC<{
                   filtering. See listHeadLabel. */}
               <h2>{listHeadLabel(sortedList.length, queries.length, listNarrowed)}</h2>
             </div>
-            {/* ⚠️ THE LIST'S CONTROLS MOVED UP TO THE GRID'S TOOLBAR ROW (§1c) — search, Filter and
-                Sort are the three things that act on the LIST, and they now sit in a slim strip
-                beneath the masthead where the grid already draws a row for exactly this. Nothing
-                about their wiring changed; only where they are. */}
+            {/* ⚠️ THE LIST'S CONTROLS SIT AT THE HEAD OF THE LIST COLUMN (§1c) — and they came back
+                DOWN here from the grid's page-wide toolbar row, which is the correction. Search,
+                Filter and Sort narrow the list; they do nothing to the reading pane beside it. A
+                strip spanning both columns claimed a reach they do not have, and put the controls
+                further from the rows they govern than from the pane they do not.
+
+                ⚠️ NOT GATED ON THE JOURNEY. The old `toolbar` prop dropped these on
+                `creating || recording` because the list was hidden then. It is not hidden any more
+                (§2) — it sits under the scrim, whole, with `inert` doing the disabling. A head that
+                vanished while the sheet was open would animate the desk behind the writer's back.
+
+                Wiring is untouched: same handlers, same popovers, same refs. */}
+            <div className="f12-lhead">
+              <div className="f12-lsearch">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                <input
+                  type="text"
+                  placeholder="Search"
+                  value={listSearch}
+                  onChange={(e) => setListSearch(e.target.value)}
+                  aria-label="Search queries"
+                />
+              </div>
+              {/* ⚠️ ICON-ONLY, AND THE NAME SURVIVES THE ICON. `title` gives it back on hover, the
+                  `aria-label` gives it to a screen reader, and each popover names itself in its own
+                  header — so the word is available three ways to anyone who cannot hover. */}
+              <div className="f12-popwrap">
+                <PillTrig
+                  ref={filterTrigRef}
+                  label="Filter"
+                  open={filterPopOpen}
+                  active={activeFilterCount > 0}
+                  count={activeFilterCount}
+                  onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
+                />
+                {filterPopOpen && renderFilterPopover()}
+              </div>
+              <div className="f12-popwrap">
+                <PillTrig
+                  ref={sortTrigRef}
+                  label="Sort"
+                  open={sortPopOpen}
+                  active={sortKey !== "last_activity"}
+                  value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
+                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
+                />
+                {sortPopOpen && renderSortPopover()}
+              </div>
+            </div>
             <div ref={listScrollRef} onScroll={scheduleListFades} className="f12-rows" role="listbox" aria-label="Queries">
               {renderList.map((q) => {
                 const agent = agents.find(a => a.id === q.agentId);

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — the sheet on the desk</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--paper:#fffdfa;--side:#f7f3ec;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#e9dfd2;--hair2:#e0d5c8;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage:#8a9e88;--sage-tx:#5a6e58;
+--pink:#f5e2da;--pink-br:#e8c8bc;--cream:#fbf7f1;}
+body{font-family:'Inter',sans-serif;background:#e7e1d8;color:var(--ink);padding:20px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:11px;margin-bottom:14px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#8d7d6e;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--hair2);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.gb{font-family:'JetBrains Mono',monospace;font-size:10px;background:#fff;border:0;box-shadow:inset 0 0 0 1px var(--hair2);color:var(--ink-soft);border-radius:9px;padding:8px 13px;cursor:pointer;}
+.gb.pk{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+.note{font-size:11px;color:#a08f7e;font-style:italic;}
+
+.app{position:relative;display:grid;grid-template-columns:216px minmax(0,1fr);background:var(--paper);border-radius:12px;overflow:hidden;
+  height:820px;box-shadow:0 12px 34px rgba(58,28,20,.14);max-width:1460px;}
+.side{background:var(--side);box-shadow:inset -1px 0 0 var(--hair);padding:15px 13px;font-size:12.5px;}
+.brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;margin:2px 4px 14px;}
+.nsec{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.15em;text-transform:uppercase;color:#b5a596;margin:12px 6px 4px;}
+.nav{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:8px;color:var(--ink-soft);}
+.nav.on{background:#fff;box-shadow:inset 0 0 0 1px var(--hair);color:var(--ink);}
+.nav i{width:13px;height:13px;border-radius:4px;background:#e3dace;flex:0 0 13px;}
+.main{position:relative;display:flex;flex-direction:column;min-height:0;}
+.top{display:flex;align-items:center;gap:12px;padding:11px 20px;box-shadow:inset 0 -1px 0 var(--hair);}
+.crumb{font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink-soft);}
+.crumb b{color:var(--ink);font-weight:500;}
+
+/* the desk beneath — the resting list, visible behind */
+.desk{flex:1 1 auto;min-height:0;padding:20px 30px;overflow:hidden;}
+.dmast{display:flex;align-items:center;gap:13px;padding-bottom:11px;box-shadow:inset 0 -1px 0 var(--hair);margin-bottom:12px;}
+.dmast h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;}
+.dcnt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.dcols{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;}
+.qi{display:flex;align-items:center;gap:10px;border-radius:9px;padding:8px 10px;}
+.qi.on{background:var(--cream);box-shadow:inset 0 0 0 1px var(--hair);}
+.av{width:27px;height:27px;flex:0 0 27px;border-radius:50%;background:#f3ded6;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:8.5px;display:flex;align-items:center;justify-content:center;}
+.qi b{font-size:12px;font-weight:500;display:block;line-height:1.2;}
+.qi i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
+.c3{border-radius:11px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair);overflow:hidden;}
+.c3 .h{padding:8px 11px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));font-family:'Playfair Display',serif;font-size:12.5px;font-weight:500;}
+.c3 .b{padding:10px 11px;font-size:11px;color:var(--ink-soft);min-height:80px;}
+.cards3{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:12px;}
+
+/* ══ the backdrop ══ */
+.scrim{position:absolute;inset:0;z-index:20;opacity:0;pointer-events:none;transition:opacity .45s ease;
+  background:radial-gradient(120% 90% at 50% 42%,rgba(58,28,20,.10) 0%,rgba(58,28,20,.34) 55%,rgba(58,28,20,.52) 100%);}
+body[data-lift] .scrim{opacity:1;pointer-events:auto;}
+body[data-lift="deep"] .scrim{background:radial-gradient(120% 90% at 50% 40%,rgba(58,28,20,.16) 0%,rgba(58,28,20,.46) 55%,rgba(58,28,20,.66) 100%);}
+body[data-lift="laid"] .scrim{background:radial-gradient(130% 100% at 50% 45%,rgba(58,28,20,.05) 0%,rgba(58,28,20,.20) 60%,rgba(58,28,20,.32) 100%);}
+
+/* ══ the sheet ══ */
+.sheet{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(1080px,calc(100% - 84px));max-height:calc(100% - 76px);display:none;flex-direction:column;
+  background:#fffefc;border-radius:0;overflow:hidden;}
+body[data-lift] .sheet{display:flex;animation:lay 420ms cubic-bezier(.2,.7,.3,1) both;}
+@keyframes lay{from{opacity:0;transform:translate(-50%,-50%) translateY(14px) scale(.985);}to{opacity:1;transform:translate(-50%,-50%);}}
+
+/* three depths */
+body[data-lift="laid"] .sheet{
+  box-shadow:0 1px 0 rgba(58,28,20,.16),0 2px 3px rgba(58,28,20,.10),0 10px 18px -6px rgba(58,28,20,.18);}
+body[data-lift="lift"] .sheet{
+  box-shadow:0 1px 0 rgba(58,28,20,.14),0 4px 8px rgba(58,28,20,.10),0 22px 40px -10px rgba(58,28,20,.28),0 44px 80px -30px rgba(58,28,20,.30);}
+body[data-lift="deep"] .sheet{
+  box-shadow:0 1px 0 rgba(58,28,20,.14),0 6px 12px rgba(58,28,20,.12),0 34px 60px -12px rgba(58,28,20,.36),0 70px 120px -40px rgba(58,28,20,.42);}
+
+/* paper edge: a hairline plus a lighter inner line = a cut sheet, not a box */
+.sheet::after{content:'';position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(58,28,20,.14),inset 0 0 0 2px rgba(255,255,255,.55);}
+
+.sh-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:24px 28px 0;}
+.jh{display:flex;align-items:flex-start;gap:16px;padding-bottom:15px;box-shadow:inset 0 -1px 0 var(--hair);}
+.jm{position:relative;width:54px;height:54px;flex:0 0 54px;border-radius:10px;background:#eef1ec;box-shadow:inset 0 0 0 1px #dfe5dc;display:flex;align-items:center;justify-content:center;}
+.jm svg{width:28px;height:28px;stroke:var(--sage-tx);fill:none;stroke-width:1.3;}
+.jm::after{content:'';position:absolute;inset:-3px;border-radius:13px;border:1.5px solid var(--sage);opacity:0;}
+body[data-lift] .jm::after{animation:beat 900ms ease-out .3s 1;}
+@keyframes beat{0%{opacity:.6;transform:scale(.94);}100%{opacity:0;transform:scale(1.45);}}
+.jt{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;}
+.jt i{font-style:normal;color:var(--ink-soft);}
+.jplace{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+.jplace b{color:var(--sage-tx);font-weight:500;}
+.jchips{margin-left:auto;display:flex;gap:12px;align-self:center;}
+.jchips span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);}
+.ring{width:13px;height:13px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #d3c6b8;position:relative;}
+.ring.done{background:var(--sage);box-shadow:inset 0 0 0 1.5px var(--sage);}
+.ring.done::after{content:'';position:absolute;left:4px;top:2px;width:4px;height:7px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+
+.jbody{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:24px;flex:1 1 auto;min-height:0;padding-top:18px;}
+.jcol{display:flex;flex-direction:column;min-width:0;}
+.sopen{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:inset 0 0 0 1px var(--hair2),0 4px 12px rgba(58,28,20,.05);}
+.so-h{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.so-n{width:21px;height:21px;flex:0 0 21px;border-radius:50%;background:var(--pink);color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9.5px;display:flex;align-items:center;justify-content:center;}
+.so-h h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.outs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
+.out{display:flex;align-items:center;gap:10px;background:var(--cream);border-radius:10px;padding:12px 13px;cursor:pointer;box-shadow:inset 0 0 0 1px var(--hair);transition:box-shadow .15s,background .15s;}
+.out:hover{background:#fff;box-shadow:inset 0 0 0 1px #dcc9bb;}
+.out.on{background:#fff;box-shadow:inset 0 0 0 2px var(--sage);}
+.out.on[data-k="offer"]{box-shadow:inset 0 0 0 2px var(--burg);}
+.out .m{width:24px;height:24px;flex:0 0 24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.out .m.in{background:#e9ede6;box-shadow:inset 0 0 0 2px var(--sage);color:var(--sage-tx);}
+.out .m.off{background:#f8e7dc;box-shadow:inset 0 0 0 2px var(--burg);color:var(--burg);}
+.out .m.shut{background:#efe7dd;box-shadow:inset 0 0 0 2px #c3b3a3;color:#a89686;}
+.out b{display:block;font-size:13px;font-weight:500;}
+.out i{display:block;font-style:normal;font-size:10.5px;color:var(--muted);margin-top:1px;}
+.queue{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:16px 0;}
+.st{display:flex;align-items:center;gap:11px;background:var(--cream);border-radius:10px;padding:11px 15px;box-shadow:inset 0 0 0 1px var(--hair);}
+.st b{font-family:'Playfair Display',serif;font-size:14px;font-weight:500;color:var(--ink-soft);}
+.st span{font-size:11.5px;color:#a89686;}
+
+.panel{background:#fff;border-radius:11px;border:1px dashed rgba(124,58,42,.26);overflow:hidden;align-self:start;}
+.pc{display:flex;align-items:flex-start;gap:7px;padding:9px 11px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));box-shadow:inset 0 -1px 0 rgba(124,58,42,.12);}
+.pgl{width:19px;height:19px;flex:0 0 19px;border-radius:6px;background:rgba(253,250,245,.72);box-shadow:inset 0 0 0 1px rgba(124,58,42,.13);display:flex;align-items:center;justify-content:center;}
+.pgl svg{width:11px;height:11px;stroke:var(--burg);fill:none;stroke-width:1.5;}
+.pc b{font-family:'Playfair Display',serif;font-size:12.5px;font-weight:500;display:block;line-height:1.2;}
+.pc i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);}
+.pill{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:20px;color:var(--sage-tx);background:rgba(253,250,245,.75);}
+.pstats{display:grid;grid-template-columns:1fr 1fr;box-shadow:inset 0 -1px 0 rgba(124,58,42,.12);}
+.pstat{padding:9px 10px;}
+.pstat+.pstat{box-shadow:inset 1px 0 0 rgba(124,58,42,.1);}
+.pv2{font-family:'Playfair Display',serif;font-size:14px;line-height:1;}
+.pv2 small{font-size:9px;}
+.pk2{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.ppol{padding:7px 11px;font-size:10.5px;color:var(--ink-soft);font-style:italic;box-shadow:inset 0 -1px 0 rgba(124,58,42,.12);}
+.pr{padding:8px 11px;box-shadow:inset 0 -1px 0 rgba(124,58,42,.09);}
+.pl{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.pv{font-size:11px;line-height:1.45;}
+.pf{padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);box-shadow:inset 0 1px 0 rgba(124,58,42,.12);}
+
+.dock{display:flex;align-items:center;gap:14px;padding:12px 28px;background:#fdfbf7;box-shadow:inset 0 1px 0 var(--hair);}
+.cons{font-size:12px;color:var(--muted);}
+.cons b{color:var(--ink-soft);font-weight:500;}
+.dock .r{margin-left:auto;display:flex;gap:9px;align-items:center;position:relative;}
+.esc{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#c8b8a8;}
+.seal{position:absolute;right:6px;top:50%;width:42px;height:42px;margin-top:-21px;border-radius:50%;display:none;align-items:center;justify-content:center;pointer-events:none;
+  box-shadow:0 2px 8px rgba(58,28,20,.35),inset 0 0 0 2px rgba(253,250,245,.25);}
+.seal.sage{background:radial-gradient(circle at 35% 30%,#9aae98,var(--sage) 60%,#6d8270);}
+.seal.burg{background:radial-gradient(circle at 35% 30%,#9a4a36,var(--burg) 60%,#5f2c20);}
+.seal.grey{background:radial-gradient(circle at 35% 30%,#c9bcae,#b0a191 60%,#8d7f70);}
+.seal svg{width:19px;height:19px;stroke:#f9f4ec;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.seal.play{display:flex;animation:stamp 650ms cubic-bezier(.2,.85,.3,1) both;}
+@keyframes stamp{0%{opacity:0;transform:scale(1.7) rotate(-8deg);}55%{opacity:1;transform:scale(.96) rotate(1deg);}100%{opacity:1;transform:scale(1);}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+
+.legend{max-width:1460px;margin-top:20px;padding:16px 20px;background:#fdfaf5;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+</style>
+</head>
+<body data-lift="lift">
+
+<div class="ctl">
+  <b>Depth</b>
+  <div class="seg" id="d">
+    <button data-l="laid">Laid on the desk</button>
+    <button data-l="lift" class="on">Lifted</button>
+    <button data-l="deep">Deep stage</button>
+  </div>
+  <button class="gb" id="close">Close (see the desk)</button>
+  <button class="gb pk" id="save">➤ Save response</button>
+  <span class="note">Pick an outcome, then save. Close to see what's behind it.</span>
+</div>
+
+<div class="app">
+  <div class="side">
+    <div class="brand">✈ ScriptAlly</div>
+    <div class="nav"><i></i>Dashboard</div>
+    <div class="nsec">Queries</div>
+    <div class="nav on"><i></i>Query Centre</div>
+    <div class="nav"><i></i>Analytics</div>
+    <div class="nsec">Agents</div>
+    <div class="nav"><i></i>Contact list</div>
+    <div class="nav"><i></i>Discover</div>
+    <div class="nsec">Materials</div>
+    <div class="nav"><i></i>Manuscripts</div>
+    <div class="nav"><i></i>Submission packages</div>
+  </div>
+
+  <div class="main">
+    <div class="top"><span class="crumb">ScriptAlly / Queries / <b>Query Centre</b></span></div>
+
+    <div class="desk">
+      <div class="dmast"><div><h1>Query Centre</h1><div class="dcnt">24 queries · 16 awaiting reply</div></div></div>
+      <div class="dcols">
+        <div>
+          <div class="qi on"><span class="av">EW</span><span><b>Eleanor Whitfield</b><i>Greenfield Literary</i></span></div>
+          <div class="qi"><span class="av">HV</span><span><b>Harriet Vane-Coe</b><i>Stillwater Reps</i></span></div>
+          <div class="qi"><span class="av">DO</span><span><b>Daniel O'Rourke</b><i>Inkwell &amp; Stone</i></span></div>
+          <div class="qi"><span class="av">WT</span><span><b>William Tan</b><i>Foxglove Literary</i></span></div>
+          <div class="qi"><span class="av">FS</span><span><b>Fenella Str</b><i>Brightwater Books</i></span></div>
+        </div>
+        <div>
+          <div class="cards3">
+            <div class="c3"><div class="h">Tracking</div><div class="b">Query sent · 13 Aug<br>Waiting · 0 days</div></div>
+            <div class="c3"><div class="h">What you sent</div><div class="b">Murphy's Day Out<br>Query letter · Synopsis</div></div>
+            <div class="c3"><div class="h">Notes</div><div class="b">notes</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="scrim" id="scrim"></div>
+
+    <div class="sheet" id="sheet">
+      <div class="sh-body">
+        <div class="jh">
+          <span class="jm"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8 6 8-6"/><path d="M4 8v10h16V8"/><path d="M4 8l8-4 8 4"/></svg></span>
+          <div>
+            <div class="jt">Recording a response <i>· Eleanor Whitfield</i></div>
+            <div class="jplace">The <b>9th</b> response you've received for Murphy's Day Out</div>
+          </div>
+          <div class="jchips"><span><i class="ring" id="rOut"></i>Outcome</span><span><i class="ring"></i>Date</span></div>
+        </div>
+
+        <div class="jbody">
+          <div class="jcol">
+            <div class="sopen">
+              <div class="so-h"><span class="so-n">1</span><h3>What came back?</h3></div>
+              <div class="outs" id="outs">
+                <div class="out" data-k="req" data-n="Partial requested"><span class="m in">←</span><span><b>Partial requested</b><i>They want to read more</i></span></div>
+                <div class="out" data-k="req" data-n="Full requested"><span class="m in">←</span><span><b>Full requested</b><i>They want the manuscript</i></span></div>
+                <div class="out" data-k="req" data-n="Revise &amp; resubmit"><span class="m in">✎</span><span><b>Revise &amp; resubmit</b><i>Changes, then send again</i></span></div>
+                <div class="out" data-k="offer" data-n="Offer"><span class="m off">★</span><span><b>Offer</b><i>Representation offered</i></span></div>
+                <div class="out" data-k="end" data-n="Rejection"><span class="m shut">×</span><span><b>Rejection</b><i>A pass</i></span></div>
+                <div class="out" data-k="end" data-n="Closed — no reply"><span class="m shut">×</span><span><b>Closed — no reply</b><i>Their stated window has passed</i></span></div>
+              </div>
+            </div>
+            <div class="queue">
+              <div class="st"><i class="ring"></i><b>When it arrived</b><span>You sent this on 13 August</span></div>
+              <div class="st"><i class="ring"></i><b>Notes</b><span>Optional</span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="pc"><span class="pgl"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c.6-3.7 3.4-5.6 7-5.6s6.4 1.9 7 5.6"/></svg></span>
+              <span><b>This agent at a glance</b><i>Eleanor Whitfield</i></span><span class="pill">Open</span></div>
+            <div class="pstats">
+              <div class="pstat"><div class="pv2">4 <small>weeks</small></div><div class="pk2">Expected response</div></div>
+              <div class="pstat"><div class="pv2" style="font-size:11px">Email</div><div class="pk2">Preferred method</div></div>
+            </div>
+            <div class="ppol">No reply after 4 weeks means a pass.</div>
+            <div class="pr"><div class="pl">You sent</div><div class="pv">Query letter · Synopsis · First 3 chapters<br>13 August, by email</div></div>
+            <div class="pr" id="ctx"><div class="pl">Their reply window</div><div class="pv">~4 weeks · would be ~10 September</div></div>
+            <div class="pr"><div class="pl">Your history</div><div class="pv">2 open · last sent 14 Mar 2024</div></div>
+            <div class="pf">Updated 25 Jun</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dock">
+        <span class="cons" id="cons">Pick an outcome — the save states its consequence here first.</span>
+        <div class="r"><span class="esc">Esc</span><button class="gb">Cancel</button><button class="gb pk">➤ Save response</button>
+          <span class="seal" id="seal"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>Why square corners are right here, and why they are right only here</b>
+  <ul>
+    <li><b>Paper is cut, not moulded.</b> Every surface in this app has a radius — cards, panels, chips, the shell. A sheet with square corners is the one thing that reads as <i>a physical page laid on the desk</i> rather than another UI container. The departure is the point: it is the only square-cornered surface in the product, so it can only ever mean "this is the sheet".</li>
+    <li><b>The edge is two lines, not one.</b> A hairline of ink plus an inner line of white — the way a cut sheet catches light along its edge. One line alone reads as a border; two read as thickness.</li>
+    <li><b>The scrim is a warm radial, not a flat black.</b> The desk falls away toward the corners and stays lightest behind the sheet, so the light appears to come from above the page. Flat black would say "modal"; this says "the lamp is on the letter".</li>
+  </ul>
+  <br>
+  <b>The three depths</b>
+  <ul>
+    <li><b>Laid on the desk</b> — a close, tight shadow and the faintest scrim. The sheet is resting, not hovering. Most restrained; risks reading as flat at a glance.</li>
+    <li><b>Lifted</b> — a layered shadow (contact line, mid, and a long ambient) with a moderate scrim. The sheet is a few millimetres off the desk. <b>My pick:</b> unmistakably raised, still furniture rather than theatre.</li>
+    <li><b>Deep stage</b> — the room goes properly dark and the sheet floats. Genuinely dramatic, and I would keep it in reserve: use it for <b>Offer</b> alone if you want one outcome to feel different, rather than making every reply this heavy. A journey used weekly should not be a stage every time.</li>
+  </ul>
+  <br>
+  <b>What it costs:</b> the sheet is a real overlay, so it needs a focus trap, Esc, scrim-click to cancel, and <code>aria-modal</code> — the shell has none of that today, and this is the change that turns the takeover into a dialogue. Worth naming in the prompt rather than discovering later. Motion is a 420ms lay-down; reduced motion cuts to the final frame with the scrim still applied.
+</div>
+
+<script>
+var CONS={'Partial requested':'Saves as <b>Partial requested</b> · your turn — the row will offer <b>Mark sent</b>.',
+'Full requested':'Saves as <b>Full requested</b> · your turn — the row will offer <b>Mark sent</b>.',
+'Revise &amp; resubmit':'Saves as <b>Revise &amp; resubmit</b> · this starts <b>revision round 2</b>.',
+'Offer':'Saves as <b>Offer received</b> — the reply-by clock now runs against you, not them.',
+'Rejection':'Saves as <b>Closed — rejected</b> · <b>15 of your queries remain active.</b>',
+'Closed — no reply':'Saves as <b>Closed — no response</b> · dated by her own stated window.'};
+var CTX={'Partial requested':['After you save','Your turn — send the pages, then mark them sent'],
+'Full requested':['After you save','Your turn — send the manuscript'],
+'Revise &amp; resubmit':['Revision round','This will be round 2'],
+'Offer':['Answer due','Set the reply-by date in the next step'],
+'Rejection':['Also active','15 other queries for Murphy\u2019s Day Out'],
+'Closed — no reply':['Her stated policy','No reply after 4 weeks means a pass']};
+var SEAL={req:'sage',offer:'burg',end:'grey'},picked=null;
+document.getElementById('outs').addEventListener('click',function(e){
+ var o=e.target.closest('.out');if(!o)return;picked=o;
+ [].forEach.call(this.children,function(x){x.classList.toggle('on',x===o);});
+ document.getElementById('rOut').className='ring done';
+ document.getElementById('cons').innerHTML=CONS[o.dataset.n]||'';
+ var c=CTX[o.dataset.n];document.getElementById('ctx').innerHTML='<div class="pl">'+c[0]+'</div><div class="pv">'+c[1]+'</div>';
+});
+document.getElementById('d').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ document.body.dataset.lift=b.dataset.l;
+ [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});
+document.getElementById('close').addEventListener('click',function(){
+ if(document.body.dataset.lift){document.body.dataset.savedLift=document.body.dataset.lift;document.body.removeAttribute('data-lift');this.textContent='Open the sheet';}
+ else{document.body.dataset.lift=document.body.dataset.savedLift||'lift';this.textContent='Close (see the desk)';}});
+document.getElementById('save').addEventListener('click',function(){
+ if(!picked)return;var s=document.getElementById('seal');
+ s.className='seal '+SEAL[picked.dataset.k];void s.offsetWidth;s.classList.add('play');});
+</script>
+</body>
+</html>

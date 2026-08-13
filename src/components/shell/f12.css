@@ -884,7 +884,26 @@
 /* v5 P1 — COMPACT: 36px icon-only circles, so the search takes the rest of the row. The label
    moved to the tooltip/aria-label and to each popover's own header, so nothing is lost. Filter
    carries a count badge; Sort deliberately carries no marker — its state reads in its popover. */
-.f12-pill { position: relative; flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); font-family: inherit; color: var(--ink-2); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+/* ══ ONE BUTTON VOCABULARY (§1c) ═══════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE LIST HEAD'S TRIGGERS AND THE HERO'S KEBAB ARE ONE SHAPE, READ FROM ONE PAIR OF TOKENS.
+ * They were a 36px circle and a padding-sized rounded rectangle: two icon-only controls, one row
+ * apart, differing in both size and shape. Neither difference read as a decision — a page with two
+ * icon-button shapes just looks like two people built it.
+ *
+ * ⚠️ SIZE IS A TOKEN AND RADIUS IS THE EXISTING `--r-md` (9px), which is what `.f12-act` — and so
+ * the kebab — already read. Inventing a second radius token beside an identical one is how the two
+ * drift apart again.
+ *
+ * ⚠️ `--f12-icon-btn` IS DECLARED HERE, NOT IN index.css, and deliberately: a parallel stream holds
+ * index.css open, and this file already carries that exact precedent (`--mono-tonal`, further down,
+ * with the same note). Fold it into index.css's `.t-f12` block when the tree is quiet.
+ */
+.t-f12 { --f12-icon-btn: 34px; }
+.f12-pill { position: relative; flex: none; display: grid; place-items: center; width: var(--f12-icon-btn); height: var(--f12-icon-btn); border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line); font-family: inherit; color: var(--ink-2); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+/* The kebab: the same two values, stated rather than left to `.f12-act`'s text padding — an icon
+   button whose size comes from its glyph is a size that changes when the glyph does. */
+.qc-kebab { flex: none; display: grid; place-items: center; width: var(--f12-icon-btn); height: var(--f12-icon-btn); padding: 0; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--panel); }
 .f12-pill:hover, .f12-pill.f12-active { background: var(--paper); border-color: var(--muted); }
 .f12-pill svg { flex: none; width: 15px; height: 15px; color: var(--ink-2); stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 /* the count sits as a corner dot, ringed in the card colour so it reads as ON the button.
@@ -1143,12 +1162,12 @@
 .f12-lhtitle h2 { font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
 /* list head — search takes the remaining width; Filter/Sort(/Group) triggers sit to its right */
 .f12-lhead { flex: none; display: flex; align-items: center; gap: 6px; margin: 0 0 10px; }
-/* ⚠️ THE ROW'S CONTROLS ARE ONE HEIGHT — the field matches the pills (36px), it is not merely
-   centred against them. At its own 34px, `align-items: center` set it 1px BELOW the Filter/Sort
-   pills and the hero card opposite (104 vs 103, browser-measured): a difference too small to
-   look deliberate and too real to be nothing. Equal heights align the tops AND the bottoms,
-   which no amount of margin arithmetic can do while the heights differ. */
-.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: 36px; }
+/* ⚠️ THE ROW'S CONTROLS ARE ONE HEIGHT, and the height is now the TOKEN rather than a number
+   matched by hand. The field used to restate `36px` to meet the pills' 36; both now read
+   `--f12-icon-btn`, so the row cannot go out of step the next time the button size moves — which is
+   exactly what §1c just moved it. Equal heights align the tops AND the bottoms, which no amount of
+   margin arithmetic can do while the heights differ. */
+.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: var(--f12-icon-btn); }
 .f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid transparent; color: var(--muted); font-size: 12.5px; transition: border-color 0.12s; }
 .f12-lsearch:hover, .f12-lsearch:focus-within { border-color: var(--line); }
 .f12-lsearch svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }

@@ -128,15 +128,31 @@ describe("Queries hub · the list card's Filter / Sort are LABELLED pills", () =
     expect(queries).toContain('label="Sort"');
   });
 
-  // v5 P1 re-dressed these as COMPACT icon-only circles (the v4 label + chevron are retired), so
-  // the search takes the rest of the row. The guarantees move with the dress: the trigger must
-  // still SAY what it is to a non-hovering user, and the count must still be visible.
-  it("PillTrig is a 36px icon-only circle", () => {
+  /* v5 P1 re-dressed these as COMPACT icon-only triggers (the v4 label + chevron are retired), so
+     the search takes the rest of the row. The guarantees move with the dress: the trigger must
+     still SAY what it is to a non-hovering user, and the count must still be visible.
+
+     ⚠️ ONE BUTTON VOCABULARY (§1c) — and this case USED to demand the opposite. It asserted a 36px
+     `border-radius: 999px` circle, which was true and was the fault: the kebab eight pixels away in
+     the hero is a 9px-radius rounded square, so the page carried two icon-button shapes at two
+     sizes. The page now states one, from one pair of tokens. The circle assertion is DELETED rather
+     than loosened — left standing it would re-mint the divergence the moment anyone ran the suite. */
+  it("PillTrig and the kebab are ONE shape, from one pair of tokens", () => {
     expect(shellComp).toContain("f12-pill");
     const pill = block(".f12-pill");
-    expect(pill, "the compact trigger lost its square geometry").toContain("width: 36px");
-    expect(pill).toContain("height: 36px");
-    expect(pill, "an icon-only control must be circular, not a rounded rectangle").toContain("border-radius: 999px");
+    const keb = block(".qc-kebab");
+    expect(keb, "the kebab has no rule of its own — its size would come from its glyph").not.toBe("");
+    for (const [name, r] of [["pill", pill], ["kebab", keb]] as const) {
+      expect(r, `the ${name} restated a size instead of reading the token`).toContain("width: var(--f12-icon-btn)");
+      expect(r, `the ${name} restated a size instead of reading the token`).toContain("height: var(--f12-icon-btn)");
+      expect(r, `the ${name} left the shared radius — two icon-button shapes on one page`).toContain("border-radius: var(--r-md)");
+    }
+    /* ⚠️ WHOLE-STRING, NOT `block(".t-f12")`. There are TWO `.t-f12 {` rules in this stylesheet —
+       this token and `--mono-tonal` — so a first-match slice reads whichever happens to come first
+       and would silently start testing the other one the day they swap order. The repo has been
+       caught by that shape twice already; a declaration this exact needs no slice at all. */
+    expect(f12, "the size token is not declared").toContain("--f12-icon-btn: 34px");
+    expect(pill, "the circle came back — it is what made the two controls read as two components").not.toContain("border-radius: 999px");
     expect(shellComp, "the v4 chevron is retired with the label").not.toContain("f12-cv");
   });
 

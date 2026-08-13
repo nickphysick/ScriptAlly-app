@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Query Centre at rest, final</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--paper:#fffdfa;--side:#f7f3ec;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#e9dfd2;--hair2:#e0d5c8;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage:#8a9e88;--sage-tx:#5a6e58;
+--pink:#f5e2da;--pink-br:#e8c8bc;--cream:#fbf7f1;}
+body{font-family:'Inter',sans-serif;background:#e7e1d8;color:var(--ink);padding:20px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:11px;margin-bottom:14px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#8d7d6e;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--hair2);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:#a08f7e;font-style:italic;}
+
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);background:var(--paper);border-radius:12px;overflow:hidden;
+  height:840px;box-shadow:0 12px 34px rgba(58,28,20,.14);max-width:1500px;}
+.side{background:var(--side);box-shadow:inset -1px 0 0 var(--hair);padding:15px 13px;display:flex;flex-direction:column;font-size:12.5px;}
+.brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;margin:2px 4px 12px;}
+.mscard{background:#fff;border-radius:10px;padding:8px 10px;box-shadow:inset 0 0 0 1px var(--hair);margin-bottom:6px;}
+.mscard b{font-size:12px;font-weight:500;display:block;}
+.mscard span{font-size:10px;color:var(--muted);}
+.nsec{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.15em;text-transform:uppercase;color:#b5a596;margin:11px 6px 4px;}
+.nav{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:8px;color:var(--ink-soft);}
+.nav.on{background:#fff;box-shadow:inset 0 0 0 1px var(--hair);color:var(--ink);}
+.nav i{width:13px;height:13px;border-radius:4px;background:#e3dace;flex:0 0 13px;}
+.nav em{margin-left:auto;font-style:normal;font-size:10px;color:var(--burg);}
+.side .foot{margin-top:auto;display:flex;align-items:center;gap:8px;padding:8px 6px 2px;box-shadow:inset 0 1px 0 var(--hair);}
+.side .foot .av{width:26px;height:26px;border-radius:50%;background:#e9ddd0;font-family:'JetBrains Mono',monospace;font-size:8.5px;display:flex;align-items:center;justify-content:center;color:var(--ink-soft);}
+.side .foot b{font-size:11.5px;font-weight:500;display:block;}
+.side .foot span{font-size:9.5px;color:var(--muted);}
+
+.main{display:flex;flex-direction:column;min-height:0;}
+.top{display:flex;align-items:center;gap:12px;padding:11px 20px;box-shadow:inset 0 -1px 0 var(--hair);flex:0 0 auto;}
+.crumb{font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink-soft);}
+.crumb b{color:var(--ink);font-weight:500;}
+.saved{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:#c2b2a2;}
+.tsearch{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border-radius:9px;padding:7px 12px;box-shadow:inset 0 0 0 1px var(--hair2);color:#b8a898;font-size:12px;width:190px;}
+.newb{background:#2f1c15;color:#f6ece5;border-radius:20px;padding:7px 14px;font-size:12px;}
+
+/* ── the page: 18px below the band ── */
+.page{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:18px 30px 0;}
+
+.mast{display:flex;align-items:center;gap:13px;padding-bottom:12px;box-shadow:inset 0 -1px 0 var(--hair);}
+.mico{width:38px;height:38px;flex:0 0 38px;border-radius:9px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--hair);display:flex;align-items:center;justify-content:center;}
+.mico svg{width:20px;height:20px;stroke:var(--burg);fill:none;stroke-width:1.4;}
+.mast h1{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;line-height:1.05;}
+.mcnt{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.mast .r{margin-left:auto;display:flex;gap:9px;}
+.gb{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;background:#fff;border:0;box-shadow:inset 0 0 0 1px var(--hair2);color:var(--ink-soft);border-radius:9px;padding:9px 14px;cursor:pointer;white-space:nowrap;}
+.gb.dark{background:#2f1c15;box-shadow:none;color:#f6ece5;}
+.gb.pk{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+
+/* list-scope strip — the only controls here act on the list */
+.qhead{display:flex;align-items:center;gap:7px;padding:0 18px 10px 0;}
+.lsearch{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:8px;background:#fff;border-radius:9px;padding:8px 11px;box-shadow:inset 0 0 0 1px var(--hair2);color:#b8a898;font-size:12px;}
+.ico{position:relative;width:34px;height:34px;flex:0 0 34px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);font-size:12px;}
+.ico:hover{background:var(--cream);}
+.ico.act{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+.ico b{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--burg);color:#fff;font-family:'JetBrains Mono',monospace;font-size:7.5px;display:flex;align-items:center;justify-content:center;}
+.qfoot{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:#c2b2a2;padding:12px 18px 16px 10px;}
+
+.cols{display:grid;grid-template-columns:296px minmax(0,1fr);flex:1 1 auto;min-height:0;padding-top:14px;}
+.qwrap{display:flex;flex-direction:column;min-height:0;box-shadow:inset -1px 0 0 var(--hair);}
+.qcol{flex:1 1 auto;padding:0 18px 0 0;overflow:auto;min-height:0;}
+.rcol{padding:0 0 0 20px;min-width:0;overflow:auto;min-height:0;}
+.qi{display:flex;align-items:center;gap:10px;border-radius:9px;padding:9px 10px;cursor:pointer;}
+.qi:hover{background:var(--cream);}
+.qi.on{background:var(--cream);box-shadow:inset 0 0 0 1px var(--hair);}
+.av{width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:#f3ded6;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.qi b{font-size:12.5px;font-weight:500;display:block;line-height:1.2;}
+.qi i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
+.qmeta{margin-left:auto;text-align:right;}
+.qmeta em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);display:block;}
+.dot{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--burg);display:inline-flex;align-items:center;justify-content:center;font-size:8px;color:var(--burg);margin-bottom:2px;}
+.dot.sg{box-shadow:inset 0 0 0 1.5px var(--sage);color:var(--sage-tx);}
+.dot.gr{box-shadow:inset 0 0 0 1.5px #c3b3a3;color:#a89686;}
+
+.hero{position:relative;display:flex;align-items:center;gap:15px;background:var(--cream);border-radius:12px;padding:14px 17px;box-shadow:inset 0 0 0 1px var(--hair);}
+.hero .big{width:56px;height:56px;flex:0 0 56px;border-radius:50%;background:#f3ded6;color:var(--burg);font-family:'Playfair Display',serif;font-size:18px;display:flex;align-items:center;justify-content:center;}
+.hero h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;line-height:1.05;}
+.hero .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:var(--ink-soft);margin-top:1px;}
+.hero .r{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.keb{width:34px;height:34px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair2);color:var(--ink-soft);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.menu{position:absolute;right:0;top:calc(100% + 6px);width:224px;background:#fff;border-radius:11px;
+  box-shadow:0 1px 0 rgba(58,28,20,.06),0 14px 30px -10px rgba(58,28,20,.3),inset 0 0 0 1px var(--hair2);
+  padding:5px;z-index:10;display:none;}
+body[data-menu="1"] .menu{display:block;}
+.mi{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:12.5px;color:var(--ink);cursor:pointer;}
+.mi:hover{background:var(--cream);}
+.mi i{width:14px;height:14px;border-radius:4px;background:#eee4d7;flex:0 0 14px;}
+.mi.off{color:#c2b2a2;cursor:default;}
+.mi.off i{background:#f4ede4;}
+.mi.off em{margin-left:auto;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;}
+.msep{height:1px;background:var(--hair);margin:5px 8px;}
+.mi.del{color:var(--burg);}
+
+.cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:13px;padding-bottom:20px;}
+.c3{position:relative;border-radius:11px;background:#fff;}
+.c3::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 0 1px var(--hair);}
+.c3 .fr{border-radius:11px;overflow:hidden;}
+.c3 .h{display:flex;align-items:center;gap:8px;padding:9px 12px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;}
+.c3 .h i{width:17px;height:17px;border-radius:5px;background:rgba(253,250,245,.72);box-shadow:inset 0 0 0 1px rgba(124,58,42,.13);flex:0 0 17px;}
+.c3 .b{padding:12px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+.c3 .b b{color:var(--ink);font-family:'Playfair Display',serif;font-size:13px;}
+.c3 .b .k{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);display:block;margin:9px 0 3px;}
+
+/* empty selection */
+.nosel{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:6px;color:var(--muted);}
+.nosel h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:400;color:var(--ink-soft);}
+.nosel p{font-size:12px;}
+body[data-sel="1"] .nosel{display:none;}
+body[data-sel="0"] .selview{display:none;}
+body[data-sel="0"] .qi.on{background:transparent;box-shadow:none;}
+
+.legend{max-width:1500px;margin-top:20px;padding:16px 20px;background:#fdfaf5;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+</style>
+</head>
+<body data-sel="1" data-menu="0">
+
+<div class="ctl">
+  <b>State</b>
+  <div class="seg" id="s"><button data-s="1" class="on">Query selected</button><button data-s="0">Nothing selected</button></div>
+  <button class="gb" id="mb">Toggle the kebab menu</button>
+  <span class="note">Every verb that needs a selected query lives in that menu — nothing in the strip above goes dead.</span>
+</div>
+
+<div class="app">
+  <div class="side">
+    <div class="brand">✈ ScriptAlly</div>
+    <div class="mscard"><b>Murphy's Day Out</b><span>Thriller · 50,000 words</span></div>
+    <div class="nav"><i></i>Dashboard</div>
+    <div class="nsec">Queries</div>
+    <div class="nav on"><i></i>Query Centre</div>
+    <div class="nav"><i></i>Analytics</div>
+    <div class="nsec">Agents</div>
+    <div class="nav"><i></i>Contact list</div>
+    <div class="nav"><i></i>Discover</div>
+    <div class="nsec">Materials</div>
+    <div class="nav"><i></i>Manuscripts</div>
+    <div class="nav"><i></i>Comparable titles</div>
+    <div class="nav"><i></i>Submission packages</div>
+    <div class="nsec">Tasks</div>
+    <div class="nav"><i></i>To-do list<em>16</em></div>
+    <div class="nav"><i></i>Calendar</div>
+    <div class="nav"><i></i>Noteboard</div>
+    <div class="foot"><span class="av">BC</span><span><b>Bethany Carter</b><span>Free plan</span></span></div>
+  </div>
+
+  <div class="main">
+    <div class="top">
+      <span class="crumb">ScriptAlly / Queries / <b>Query Centre</b></span><span class="saved">All changes saved</span>
+      <span class="tsearch">⌕ Search</span><span class="newb">+ New</span>
+    </div>
+
+    <div class="page">
+      <div class="mast">
+        <span class="mico"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg></span>
+        <div><h1>Query Centre</h1><div class="mcnt">24 queries · 16 awaiting reply</div></div>
+        <div class="r"><button class="gb">↓ Export</button><button class="gb dark">+ Log query</button></div>
+      </div>
+
+      <div class="cols">
+        <div class="qwrap">
+          <div class="qhead">
+            <span class="lsearch">⌕ Search queries</span>
+            <span class="ico act" title="Filter">⚟<b>1</b></span>
+            <span class="ico" title="Sort">⇅</span>
+          </div>
+          <div class="qcol">
+          <div class="qi on"><span class="av">EW</span><span><b>Eleanor Whitfield</b><i>Greenfield Literary</i></span><span class="qmeta"><span class="dot">✈</span><em>13 AUG</em></span></div>
+          <div class="qi"><span class="av">HV</span><span><b>Harriet Vane-Coe</b><i>Stillwater Reps</i></span><span class="qmeta"><span class="dot">✈</span><em>12 AUG</em></span></div>
+          <div class="qi"><span class="av">DO</span><span><b>Daniel O'Rourke</b><i>Inkwell &amp; Stone</i></span><span class="qmeta"><span class="dot">✈</span><em>9 AUG</em></span></div>
+          <div class="qi"><span class="av">WT</span><span><b>William Tan</b><i>Foxglove Literary</i></span><span class="qmeta"><span class="dot">✈</span><em>29 JUL</em></span></div>
+          <div class="qi"><span class="av">FS</span><span><b>Fenella Str</b><i>Brightwater Books</i></span><span class="qmeta"><span class="dot gr">×</span><em>14 MAR</em></span></div>
+          <div class="qi"><span class="av">SD</span><span><b>Sophie Dunn</b><i>Curtis Vane</i></span><span class="qmeta"><span class="dot sg">←</span><em>15 JAN</em></span></div>
+          <div class="qi"><span class="av">TE</span><span><b>Tom Ellery</b><i>Curtis Vane</i></span><span class="qmeta"><span class="dot sg">★</span><em>3 MAR</em></span></div>
+          <div class="qi"><span class="av">MR</span><span><b>Marcus Reed</b><i>Hartley &amp; Co</i></span><span class="qmeta"><span class="dot gr">×</span><em>20 FEB</em></span></div>
+          <div class="qi"><span class="av">PR</span><span><b>Priya Raman</b><i>No agency</i></span><span class="qmeta"><span class="dot">✈</span><em>2 FEB</em></span></div>
+          <div class="qfoot"><span>Showing 24 of 24</span><span>Export CSV</span></div>
+          </div>
+        </div>
+
+        <div class="rcol">
+          <div class="nosel">
+            <h3>Choose a query</h3>
+            <p>Pick one from the list to see where it stands.</p>
+          </div>
+
+          <div class="selview">
+            <div class="hero">
+              <span class="big">EW</span>
+              <div><h2>Eleanor Whitfield</h2><div class="ag">Greenfield Literary · Queried 13 Aug</div></div>
+              <div class="r">
+                <button class="gb pk">✈ Record response</button>
+                <span class="keb" id="keb">⋯</span>
+              </div>
+              <div class="menu">
+                <div class="mi"><i></i>View tasks</div>
+                <div class="mi"><i></i>Nudge Eleanor</div>
+                <div class="msep"></div>
+                <div class="mi off"><i></i>Agent details<em>Soon</em></div>
+                <div class="mi off"><i></i>Manuscript<em>Soon</em></div>
+                <div class="msep"></div>
+                <div class="mi"><i></i>Download as PDF</div>
+                <div class="mi del"><i></i>Delete this query</div>
+              </div>
+            </div>
+
+            <div class="cards3">
+              <div class="c3"><div class="fr"><div class="h"><i></i>Tracking</div><div class="b">
+                <b>Query sent</b> · 13 Aug, by email
+                <span class="k">Waiting</span>0 days · expected by ~8 Oct
+                <span class="k">Nudge</span>A task appears on 10 Sep
+              </div></div></div>
+              <div class="c3"><div class="fr"><div class="h"><i></i>What you sent</div><div class="b">
+                <b>Murphy's Day Out</b><br>Thriller · 50,000 words
+                <span class="k">Sent with this query</span>Query letter ✓<br>Synopsis ✓<br>First 3 chapters
+              </div></div></div>
+              <div class="c3"><div class="fr"><div class="h"><i></i>Notes</div><div class="b">
+                Mentioned her interest in coastal settings — worth referencing if she asks for more.
+                <span class="k">13 Aug, 13:48</span>
+              </div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>The rest state, tidied</b>
+  <ul>
+    <li><b>18px below the header band</b> — the page-scoped exception, and both gap tokens scoped together on this page so the invariance term stays coherent rather than inverting.</li>
+    <li><b>The masthead carries the facts:</b> <i>24 queries · 16 awaiting reply</i>, replacing the subtitle that described the page to someone already on it. Export and Log query stay where they are.</li>
+    <li><b>Search and the two controls sit at the head of the list column</b>, not across the page. They only ever act on that column, so spanning the full width was both a scope lie and a waste of height — the reading pane starts ~46px higher and the hero, cards and list all gain that room.</li>
+    <li><b>Filter and Sort are icon-only</b>, 34px, matching the kebab's size and shape so the page has one button vocabulary. An active filter shows a burgundy count badge — the state is visible without spending a word on it, and the label returns on hover and in the menu each one opens.</li>
+    <li><b>"Showing 24 of 24" sits at the foot of the list</b> with Export CSV, where it reads as the end of the column rather than a header competing with the masthead's own count.</li>
+    <li><b>Every selected-query verb is behind the hero kebab</b> — View tasks, Nudge, Agent, Manuscript, Download as PDF, Delete. The recon was right and my first split was wrong: all six are gated on a selection, so putting any of them in the list strip would have left dead controls in a live row. Coming-soon items stay visible and inert with their label, per the standing row grammar; Delete sits below a rule, in burgundy.</li>
+    <li><b>The count moved out of the list column.</b> "24 queries" was a heading over the list; the masthead now says it once, with the awaiting figure that actually tells you something.</li>
+    <li><b>Status returns to the row</b> as the locked StatusDot — ring for queried, sage for incoming, grey for closed — beside the date, so the list reads as a state at a glance rather than a set of names.</li>
+    <li><b>Nothing selected</b> is a real state now (toggle it): the pane says so plainly instead of showing an empty frame, and the kebab is simply absent — there is nothing for it to act on.</li>
+  </ul>
+</div>
+
+<script>
+document.getElementById('s').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ document.body.dataset.sel=b.dataset.s;document.body.dataset.menu='0';
+ [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});
+function tog(){document.body.dataset.menu=document.body.dataset.menu==='1'?'0':'1';}
+document.getElementById('mb').addEventListener('click',tog);
+document.getElementById('keb').addEventListener('click',tog);
+[].forEach.call(document.querySelectorAll('.qcol .qi'),function(r){r.addEventListener('click',function(){
+ [].forEach.call(document.querySelectorAll('.qcol .qi'),function(x){x.classList.remove('on');});
+ r.classList.add('on');document.body.dataset.sel='1';document.body.dataset.menu='0';
+ [].forEach.call(document.querySelectorAll('#s button'),function(x){x.classList.toggle('on',x.dataset.s==='1');});});});
+</script>
+</body>
+</html>

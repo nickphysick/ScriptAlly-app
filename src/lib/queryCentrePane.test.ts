@@ -62,17 +62,43 @@ describe("the query's verbs live in one kebab, not a bar", () => {
     expect(items, "Nudge stopped stating when it does not apply").toContain("disabled: !heroWaitingOnAgent");
   });
 
-  it("the list's own controls went the OTHER way — into the grid's toolbar row", () => {
-    const toolbarProp = code.indexOf("toolbar={");
-    expect(toolbarProp, "the grid has no toolbar row").toBeGreaterThan(-1);
-    const slice = code.slice(toolbarProp, toolbarProp + 2200);
-    expect(slice, "the list strip is not in the toolbar row").toContain('className="f12-lhead"');
+  /**
+   * ⚠️ AMENDED (§1c): the list's controls went DOWN into the list COLUMN, not up into a page-wide
+   * toolbar row. The scope argument is unchanged and is the whole point — search, Filter and Sort
+   * narrow the LIST — but a strip spanning both columns claimed a reach over the reading pane that
+   * they do not have, and sat further from the rows they govern than from the pane they do not.
+   * The grid's `toolbar` prop is gone from this page entirely.
+   */
+  it("the list's own controls sit in the LIST column, not in a page-wide row", () => {
+    expect(code, "the page-wide toolbar row came back").not.toContain("toolbar={");
+    /* ⚠️ ANCHOR ON THE POPULATED BRANCH, NOT THE FIRST `.f12-list`. The empty-database branch
+       renders its own list column — placeholder rows and a disabled foot — and it comes FIRST in
+       the file, so an unqualified `indexOf` measures that one and compares it against the populated
+       branch's head. Caught by this very case on the first run: it reported the head sitting below
+       the rows, comparing two different columns. The populated body is the one WITHOUT
+       `f12-body-empty`. */
+    const body = code.indexOf('className="f12-body">');
+    expect(body, "the populated list/pane row is missing").toBeGreaterThan(-1);
+    const list = code.indexOf('className="f12-list"', body);
+    const head = code.indexOf('className="f12-lhead"', body);
+    const rows = code.indexOf('className="f12-rows"', body);
+    expect(list, "the list column is missing").toBeGreaterThan(-1);
+    expect(head, "the list head is missing").toBeGreaterThan(-1);
+    expect(rows, "the rows container is missing").toBeGreaterThan(-1);
+    expect(head, "the head escaped the list column").toBeGreaterThan(list);
+    expect(head, "the head is below the rows — it must be the column's head, and it stays fixed while they scroll")
+      .toBeLessThan(rows);
+
     /* ⚠️ AND NOTHING SELECTED-QUERY-SCOPED CAME WITH IT. `View tasks` and `Nudge` sound page-level
-       and are not: both are gated on `!sel`. In a list-scope strip they would be dead controls
+       and are not: both are gated on `!sel`. In a list-scope head they would be dead controls
        whenever nothing is selected — the fault the split exists to remove. */
+    const slice = code.slice(head, rows);
     for (const verb of ["Nudge", "View tasks", "Delete"]) {
-      expect(slice, `${verb} acts on the selected query and must not be in the list strip`).not.toContain(verb);
+      expect(slice, `${verb} acts on the selected query and must not be in the list head`).not.toContain(verb);
     }
+    /* ⚠️ NOTHING IN THE HEAD IS EVER DISABLED (§1 tests). These three act on the list, which always
+       exists in this branch — a control here that could go dead would be the very fault §1c cured. */
+    expect(slice, "a control in the list head can go dead").not.toContain("disabled");
   });
 
   /* ⚠️ SUPERSEDED (create-mode v2 P3). Create mode used to TAKE the toolbar's seat — same box,

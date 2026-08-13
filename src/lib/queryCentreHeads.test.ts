@@ -67,13 +67,18 @@ describe("the row beneath each head starts on one line", () => {
 
   /* Tops can only agree if the heights do. Centred in the row, a 34px field sat 1px below the
      36px pills (104 vs 103) — and no margin can fix that while the heights differ: solving
-     mt = (34 + 2·mt − 36) / 2 gives 0 = −1. Equal heights align top AND bottom. */
-  it("the search field is the pills' height, not merely centred against them", () => {
+     mt = (34 + 2·mt − 36) / 2 gives 0 = −1. Equal heights align top AND bottom.
+     ⚠️ ASSERTED AS THE SAME TOKEN, NOT THE SAME NUMBER (§1c). Both used to restate `36px`, which
+     held only while nobody moved either — and §1c moved both, to 34, to match the kebab. Two rules
+     matching by literal agree until the day one is edited; two rules reading one token cannot
+     disagree at all. So the case now tests the mechanism rather than the current value. */
+  it("the search field is the pills' height, by reading the same token rather than the same number", () => {
     const inRow = rule(css, ".f12-lhead .f12-lsearch");
     const pill = rule(css, ".f12-pill");
     expect(inRow, "the in-row search override is missing").not.toBe("");
-    expect(inRow).toContain("height: 36px");
-    expect(pill, "the pill height moved — the field must move with it").toContain("height: 36px");
+    expect(pill, "the pill rule is missing").not.toBe("");
+    expect(inRow, "the field went back to a hand-matched number").toContain("height: var(--f12-icon-btn)");
+    expect(pill, "the pill went back to a hand-matched number").toContain("height: var(--f12-icon-btn)");
   });
 
   it("the row centres, so a control that ever differs in height fails visibly rather than quietly", () => {

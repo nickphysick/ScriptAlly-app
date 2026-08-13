@@ -1,0 +1,249 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre · §1 — THE REST STATE (ref design-refs/93-rest-final.html).
+ *
+ * Most of §1 landed with the rhythm pack; this file locks the whole of it in one place, including
+ * the parts that were already true, because "already true" is exactly what stops being true
+ * unwatched. What §1c actually moved is the list's three controls — down out of the grid's
+ * page-wide toolbar row and into the head of the list COLUMN — and the button vocabulary that
+ * followed them there.
+ *
+ * ⚠️ THIS REPO'S TESTS READ SOURCE (`vitest.config.ts` is `environment: 'node'` — no jsdom, no
+ * testing-library), so nothing here proves a pixel. It proves the CAUSES the pixels follow from.
+ * The seam's full height and the 34px agreement are browser-measured in the report; what is locked
+ * here is the mechanism that makes them hold — that the seam is declared on the stretched column
+ * rather than on any row, and that both buttons read one token rather than matching by hand.
+ *
+ * ⚠️ EVERY SLICE ANCHORS FIRST. The empty-database branch renders its OWN `.f12-list` earlier in
+ * the file, so an unqualified `indexOf` measures that column and silently compares it against the
+ * populated one. That is not hypothetical — it failed this file's first run.
+ */
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "fs";
+import { QueryStatus } from "../types";
+import { queriesMastheadCounts } from "./queryAmbient";
+
+const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
+const queries = read("../components/Queries.tsx");
+const css = read("../components/shell/f12.css");
+/** Comment-stripped: a rule ABOUT code must never be satisfied by prose describing it. */
+const code = queries.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
+const rule = (selector: string): string => {
+  const i = css.indexOf("\n" + selector + " {");
+  return i < 0 ? "" : css.slice(i, css.indexOf("}", i) + 1);
+};
+
+/** The POPULATED list/pane row — the empty branch's body carries `f12-body-empty` and comes first. */
+const populated = (): number => {
+  const at = code.indexOf('className="f12-body">');
+  expect(at, "the populated list/pane row is missing — every slice below would read the empty branch")
+    .toBeGreaterThan(-1);
+  return at;
+};
+
+describe("§1c · the list's controls sit at the head of the list column", () => {
+  it("the head is inside the list column, above the rows, and the page-wide row is gone", () => {
+    expect(code, "the grid's toolbar row came back — it spanned the pane too").not.toContain("toolbar={");
+    const body = populated();
+    const list = code.indexOf('className="f12-list"', body);
+    const head = code.indexOf('className="f12-lhead"', body);
+    const rows = code.indexOf('className="f12-rows"', body);
+    expect(list, "the list column is missing").toBeGreaterThan(-1);
+    expect(head, "the list head is missing").toBeGreaterThan(-1);
+    expect(rows, "the rows container is missing").toBeGreaterThan(-1);
+    expect(head).toBeGreaterThan(list);
+    expect(head, "the head fell below the rows — it must head the column, not scroll with it").toBeLessThan(rows);
+  });
+
+  it("the head holds exactly the three list-scope controls", () => {
+    const body = populated();
+    const head = code.indexOf('className="f12-lhead"', body);
+    const slice = code.slice(head, code.indexOf('className="f12-rows"', body));
+    expect(slice, "the search field left the head").toContain('aria-label="Search queries"');
+    expect(slice, "Filter left the head").toContain('label="Filter"');
+    expect(slice, "Sort left the head").toContain('label="Sort"');
+  });
+
+  /* ⚠️ THE POINT OF THE WHOLE SPLIT. Six selected-query verbs used to sit above the list, all six
+     dead until a row was picked. A control in a list-scope head governs the list, which always
+     exists in this branch — so nothing here has a state in which it can go dead. */
+  it("no control in the head is ever disabled, and no selected-query verb reached it", () => {
+    const body = populated();
+    const head = code.indexOf('className="f12-lhead"', body);
+    const slice = code.slice(head, code.indexOf('className="f12-rows"', body));
+    expect(slice, "a control in the list head can go dead").not.toContain("disabled");
+    for (const verb of ["View tasks", "Nudge", "Download as PDF", "Delete"]) {
+      expect(slice, `${verb} acts on the selected query and must not be in the list head`).not.toContain(verb);
+    }
+  });
+
+  /* ⚠️ NOT GATED ON THE JOURNEY (§2). The old `toolbar` prop dropped these on
+     `creating || recording` because the list was hidden then. The list stays mounted and visible
+     under the sheet now, so a head that vanished would animate the desk behind the writer. */
+  it("the head does not vanish while a journey is open", () => {
+    const body = populated();
+    const head = code.indexOf('className="f12-lhead"', body);
+    const before = code.slice(code.indexOf('className="f12-list"', body), head);
+    expect(before, "the head grew a journey gate — the desk must not change while the sheet is over it")
+      .not.toMatch(/creating|recording/);
+  });
+});
+
+describe("§1c · one button vocabulary", () => {
+  /* Two icon-only controls one row apart, in two shapes and two sizes, read as two components
+     rather than as one page. Both now read `--f12-icon-btn` and `--r-md` — matching by TOKEN, so
+     they cannot drift; matching by literal only holds until someone edits one of them. */
+  it("the pill, the kebab and the search field all read the same size token", () => {
+    for (const sel of [".f12-pill", ".qc-kebab", ".f12-lhead .f12-lsearch"]) {
+      const r = rule(sel);
+      expect(r, `${sel} has no rule — it would take its size from its contents`).not.toBe("");
+      expect(r, `${sel} restated a number instead of reading the token`).toContain("height: var(--f12-icon-btn)");
+    }
+    expect(css, "the size token is not declared").toContain("--f12-icon-btn: 34px");
+  });
+
+  it("the pill and the kebab share the radius the rest of the page's buttons use", () => {
+    for (const sel of [".f12-pill", ".qc-kebab"]) {
+      expect(rule(sel), `${sel} left the shared radius`).toContain("border-radius: var(--r-md)");
+    }
+    expect(rule(".f12-pill"), "the circle came back — that is the divergence, restored")
+      .not.toContain("border-radius: 999px");
+  });
+
+  /* An icon-only control still has to announce itself. The word survives three ways: hover, the
+     accessible name, and the header of the popover each one opens. */
+  it("dropping the label did not drop the name", () => {
+    const shell = read("../components/shell/F12Shell.tsx");
+    expect(shell, "no tooltip: an icon-only control the user must hover to identify").toContain("title={label}");
+    expect(shell, "the accessible name went with the label").toContain("aria-label={value ? `${label}: ${value}` : label}");
+  });
+
+  it("an active filter carries a count badge; Sort carries none", () => {
+    const badge = rule(".f12-pill .f12-pcount");
+    expect(badge, "the count badge is missing").not.toBe("");
+    expect(badge).toContain("background: var(--burg)");
+    const body = populated();
+    const at = code.indexOf('label="Sort"', body);
+    expect(at, "the Sort trigger is missing").toBeGreaterThan(-1);
+    const sort = code.slice(at, at + 400);
+    expect(sort, "Sort grew a count badge — a single-choice control states itself in its popover")
+      .not.toContain("count=");
+  });
+});
+
+describe("§1c · the seam runs the full height of both columns", () => {
+  /**
+   * ⚠️ DECLARED ON THE COLUMN, NOT ON THE ROWS — which is the whole mechanism. `.f12-list` is a
+   * stretched flex child of `.f12-body`, so its right border spans the row's height whatever the
+   * rows inside it come to. Move the line onto `.f12-rows` and it stops at the last row, which is
+   * exactly the "short list" case §1c names. The measurement is in the report; this locks the cause.
+   */
+  it("the line is the list COLUMN's right edge", () => {
+    const list = rule(".f12-list");
+    expect(list, "the list column rule is missing").not.toBe("");
+    expect(list, "the seam left the column").toContain("border-right: 1px solid var(--hairline)");
+    expect(rule(".f12-rows"), "the seam moved onto the scrolling rows — it would stop at the last one")
+      .not.toContain("border-right");
+  });
+
+  it("the row that holds both columns stretches them, so neither can be short of the other", () => {
+    const body = rule(".f12-body");
+    expect(body, "the body rule is missing").not.toBe("");
+    expect(body, "the row stopped being a flex row").toContain("display: flex");
+    /* `align-items` unset means `stretch`, which is what makes the column full-height. Naming a
+       different value here is the one edit that would silently shorten the seam. */
+    expect(body, "the row set a cross-axis alignment — anything but stretch shortens the seam")
+      .not.toMatch(/align-items\s*:/);
+  });
+});
+
+describe("§1b · the masthead states counts, from the shared derivation", () => {
+  it("the page reads the selector rather than counting for itself", () => {
+    expect(code, "the masthead stopped reading the shared derivation")
+      .toContain("description={queriesMastheadCounts(mastheadScopedQueries)}");
+    expect(code, "the masthead grew a count of its own").not.toMatch(/description=\{`\$\{\w+\.length\}/);
+  });
+
+  /* Composed from `queryBucket` — the same function the filter pills and `getPrimaryAction` read —
+     so the masthead cannot disagree with the list beneath it about whose turn anything is. */
+  it("the counts are the buckets, and the awaiting clause omits itself at zero", () => {
+    const q = (status: QueryStatus) => ({ status });
+    expect(queriesMastheadCounts([q(QueryStatus.QUERIED), q(QueryStatus.REJECTED)]))
+      .toBe("2 queries · 1 awaiting reply");
+    expect(queriesMastheadCounts([q(QueryStatus.REJECTED)]), "a zero clause was printed").toBe("1 query");
+    expect(queriesMastheadCounts([]), "an empty page printed a clause about nothing").toBe("0 queries");
+  });
+});
+
+describe("§1d · the list column's own foot", () => {
+  it("count and Export CSV close the column", () => {
+    const body = populated();
+    const foot = code.indexOf('className="f12-lfoot"', body);
+    expect(foot, "the list foot is missing").toBeGreaterThan(-1);
+    const slice = code.slice(foot, foot + 400);
+    expect(slice, "the count left the foot").toContain("SHOWING");
+    expect(slice, "Export CSV left the foot").toContain("EXPORT CSV");
+  });
+});
+
+describe("§1e / §1f · the kebab has a subject, or it is absent", () => {
+  /* ⚠️ ABSENT, NOT GREYED. A menu with no subject is not a menu that cannot run; it is a menu that
+     has nothing to be about. Greying it would advertise six verbs against a record that does not
+     exist. (The verbs INSIDE it grey individually — that is the to-do row grammar, and a different
+     question: there the subject exists and one verb does not apply to it.) */
+  it("the kebab lives inside the selected-query branch, so it cannot outlive its subject", () => {
+    const branch = code.indexOf("activeQuery && activeAgent && activeMs ?");
+    const kebab = code.indexOf('ariaLabel="Actions for this query"');
+    expect(branch, "the selected-query branch is missing").toBeGreaterThan(-1);
+    expect(kebab, "the kebab is missing").toBeGreaterThan(branch);
+    /* and the two subject-less branches come AFTER it, so neither can contain it */
+    const noMatch = code.indexOf("qc-nomatch");
+    expect(noMatch, "the filtered-to-zero branch is missing").toBeGreaterThan(kebab);
+  });
+
+  it("all six verbs are in the menu and nowhere else on the page", () => {
+    const at = code.indexOf('ariaLabel="Actions for this query"');
+    const items = code.slice(at, code.indexOf("]}", at));
+    expect(items, "the item list was not found — this slice is testing nothing").toContain("label:");
+    for (const verb of ["View tasks", "Nudge", "Agent", "Manuscript", "Download as PDF", "Delete query"]) {
+      expect(items, `${verb} left the kebab`).toContain(verb);
+    }
+    /* Coming-soon verbs are visible and inert, with their label — never hidden. */
+    expect(items, "a coming-soon verb stopped stating that it exists").toContain("disabled: true");
+  });
+
+  /* §1f, re-scoped by recon: an auto-select fallback means "nothing selected" is only reachable
+     when the FILTER matched nothing. So that is the state to design, and the pane is where it
+     belongs — the list is empty by definition, and a note inside an empty column is a note nobody
+     is looking at. */
+  it("filtered-to-zero states the cause in the pane and offers the way back", () => {
+    const at = code.indexOf("qc-nomatch");
+    expect(at, "the filtered-to-zero state is missing").toBeGreaterThan(-1);
+    const slice = code.slice(at, at + 700);
+    expect(slice, "the state stopped naming its cause").toContain("No queries match these filters");
+    expect(slice, "the way back went — a dead end is not a state, it is a trap").toContain("Clear filters");
+    /* clears the SEARCH too: a search term is just as likely to be what emptied the view, and a
+       button that restores only half the view does not restore the view. */
+    expect(slice, "Clear filters stopped clearing the search").toContain("setListSearch(\"\")");
+  });
+
+  it("the auto-select fallback stays — it is what makes the empty-filter state the only subject-less one", () => {
+    expect(code, "the auto-select went, and 'nothing selected' became reachable with queries on file")
+      .toContain("setSelectedQueryId(sortedList[0].id)");
+  });
+});
+
+describe("§1g · the row carries status through the real StatusDot", () => {
+  it("the dot is the imported component, beside the date, never a recreation", () => {
+    expect(queries, "StatusDot is not imported").toMatch(/import .*StatusDot.*from/);
+    const body = populated();
+    const rows = code.indexOf('className="f12-rows"', body);
+    const end = code.indexOf('className="f12-lfoot"', body);
+    const slice = code.slice(rows, end);
+    expect(slice, "the row's status dot is gone").toContain("<StatusDot status={q.status}");
+    expect(slice, "the date left the row").toContain('className="f12-d2"');
+  });
+});
