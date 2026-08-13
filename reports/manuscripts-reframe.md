@@ -531,3 +531,102 @@ described a page the app never serves, which is the standing warning about harne
   band `background-image: none` (no gradient), plate chroma 2, strip 1, pill 2 — all monochrome.
 
 **The app itself is still auth-gated and was not verified live.**
+
+---
+
+## Phase 3 — The pitch shelf
+
+Commit: `manuscripts: pitch shelf` (names `src/types.ts` and `src/lib/db.tsx`).
+
+### ⚠️ RULES FIRST — the two new fields are DENIED until Nick deploys
+
+`firestore.rules:520` gates manuscript updates on an exact `affectedKeys().hasOnly([...])`. Neither
+new key is in it, so **an elevator-pitch or blurb save is silently denied today**. The logline saves
+(it is already in the list). Nothing is worked around and `firestore.rules` was not edited.
+
+Deploy alongside the next hosting deploy: `firebase deploy --only firestore:rules --project scriptally-dev`
+(and per the dual-database note, with **both** configs, verifying by release `updateTime` rather than
+by the success line).
+
+```
+// isValidManuscript — beside the other optional clauses
+&& (!data.keys().hasAll(['elevatorPitch'])  || (data.elevatorPitch  is string && data.elevatorPitch.size()  <= 2048))
+&& (!data.keys().hasAll(['backCoverBlurb']) || (data.backCoverBlurb is string && data.backCoverBlurb.size() <= 4096))
+
+// the manuscript update allowlist — two keys appended
+incoming().diff(existing()).affectedKeys().hasOnly([
+  'title', 'genre', 'subGenres', 'ageCategory', 'wordCount', 'logline', 'comps',
+  'status', 'shelvedReason', 'statusChangedDate', 'notes', 'shelved', 'activePackageId',
+  'elevatorPitch', 'backCoverBlurb'
+])
+```
+
+### What landed
+
+| File | |
+|---|---|
+| `manuscripts/ManuscriptPitchPane.tsx` | NEW — the shelf: strip, four cards, inline editing. |
+| `manuscripts/manuscriptPitchPane.test.tsx` | NEW — 18 locks. |
+| `lib/manuscriptPitch.ts` | descriptions, derived word counts, the live-count label. |
+| `lib/db.tsx` | **+`updateManuscriptQuiet`** — additive; the existing writer is untouched. |
+| `manuscripts/ManuscriptTabs.tsx` | `The pitch` added, **first, and the default**. |
+| `manuscripts/ManuscriptDossier.tsx` | renders the pane. |
+| `AllManuscripts.tsx` | `savePitch`, the derivations, the wiring. |
+| `manuscriptLibrary.css` | the shelf's surfaces, all on `--msv-*`. |
+
+### Decisions taken inside the phase
+
+- **The quiet writer is in use.** Polishing a blurb three times is not three events in the query
+  journey; `updateManuscript` would have written three identical *"You updated a manuscript's
+  details"* entries into the global feed. `updateManuscriptQuiet` still stamps `statusChangedDate`
+  on a status move, because that stamp is **data the plate and tiles read**, not narration.
+- **⚠️ THE TWO EMPTINESSES ARE NOT THE SAME SHAPE, and one place knows it.** `logline` is required by
+  `isValidManuscript` (`data.logline is string`) so clearing it writes `""`; the two new fields are
+  optional and are cleared by **deleting the key**, because a stored `""` is a value claiming the
+  piece exists. `savePitch` resolves both so no caller has to.
+- **The logline and the synopsis span both columns**; the middle two share a row. A one-sentence
+  logline reads badly in a narrow column, and the synopsis is the longest piece and the only
+  read-only one — a ragged 2×2 with a hole in it was the alternative.
+- **The synopsis is read-only here and its Edit is a deep link.** Both its Edit and its Write it land
+  in the Package Workshop, which stays the single editing home for that prose.
+- **`The pitch` is first and is the default** — the reframe's complaint about the old page was that
+  nothing on it had been put there by the writer, so the shelf is what the dossier opens on. The
+  Phase 2 lock forbidding the tab came out and was **replaced by one asserting the pairing**: no tab
+  may render without something behind it, checked for all four.
+
+### ⚠️ Two open items, both stated rather than resolved
+
+1. **No "Edited {date}" on the three manuscript-backed pieces.** The ref draws `12 words · Edited 12
+   June`, but the ruling was **two new fields** and a per-asset timestamp needs a third (a
+   `pitchEdited` map). Nothing else on the manuscript carries an honest edit date, and deriving one
+   from another field would be a plausible number stating something untrue — so the footer states
+   the word count alone. **The synopsis card DOES have a real date** (its version's `createdDate`)
+   and says so. One small addition if you want the others; say the word.
+2. **A link-mode synopsis reads as unwritten** (carried from Phase 1). A version in `link` mode has a
+   URL and no prose — nothing to show, nothing for Copy — so it fills no segment. That under-reports
+   a writer who keeps their synopsis in a linked document.
+
+### Two faults this phase's own locks caught
+
+- **A description said "you".** *"The pitch you would give in a lift"* tripped the no-coaching lock.
+  Reworded to *"A lift-length pitch: premise, character, and what is at stake."* — the sentence now
+  describes the artefact rather than the reader.
+- **An assertion was over-broad.** The "states the threshold rather than urging" test swept the
+  **whole pane** for `your`, and failed on `PITCH_LABEL` — *"…of your pitch — from your comp shelf"* —
+  where the possessive is descriptive and correct. Narrowed to the threshold strings, which is what
+  the rule is actually about.
+
+### Verification
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | green |
+| Vitest | **284 files, 4687 passed, 2 skipped, 0 failed** |
+| `npm run build` | green |
+
+Measured against the built stylesheet at 1180px: grid `531 · 531`; **logline and synopsis 1078px
+(spanning both columns)**; elevator and blurb 531px each, same row, **same height (215px)**.
+Editorial checked on the rendered pane — strip 1, asset 1, textarea 0, meta 0, dashed border 2. All
+monochrome; the editing card's accent border is the app-wide `--msv-hue`, not a new colour.
+
+**The app itself is auth-gated and was not verified live.**

@@ -17,27 +17,30 @@
 import React from "react";
 import "./manuscriptPlate.css";
 
-export type ManuscriptTabKey = "details" | "comps" | "packages";
+export type ManuscriptTabKey = "pitch" | "details" | "comps" | "packages";
 
 /**
  * ⚠️ THE KEYS ARE INTERNAL, THE LABELS ARE THE PRODUCT. `details` reads "The record" now — the
  * reframe's name for the pane — and the key is left alone because renaming it would churn every
  * call site to say the same thing twice.
  *
- * ⚠️ AND `The pitch` IS DELIBERATELY NOT HERE YET. The reframe makes it the fourth tab and the
- * default, but its pane is Phase 3's build — so adding the tab now would open the dossier onto
- * nothing for one commit. The house law is that the shell renders what EXISTS, never what is
- * planned; a tab that goes nowhere teaches the wrong shape of the page. It arrives WITH its pane,
- * and takes the default with it.
+ * ⚠️ `The pitch` ARRIVED WITH ITS PANE, in Phase 3, and took the default with it — it was held back
+ * from Phase 2 precisely so the dossier never opened onto a tab with nothing behind it. The house
+ * law is that the shell renders what EXISTS, never what is planned.
+ *
+ * ⚠️ AND IT IS FIRST BECAUSE IT IS WHAT THE PAGE IS FOR. The reframe's whole complaint about the
+ * old page was that nothing on it had been put there by the writer; the pitch shelf is the answer,
+ * so it is what the dossier opens on.
  */
 export const MANUSCRIPT_TABS: { key: ManuscriptTabKey; label: string }[] = [
+  { key: "pitch", label: "The pitch" },
   { key: "details", label: "The record" },
   { key: "comps", label: "Comparable titles" },
   { key: "packages", label: "Submission packages" },
 ];
 
 /** The tab the card opens on. */
-export const DEFAULT_MANUSCRIPT_TAB: ManuscriptTabKey = "details";
+export const DEFAULT_MANUSCRIPT_TAB: ManuscriptTabKey = "pitch";
 
 export interface ManuscriptTabsProps {
   active: ManuscriptTabKey;

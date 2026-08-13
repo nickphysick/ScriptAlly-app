@@ -15,6 +15,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ManuscriptDossier, ManuscriptDossierProps } from "./ManuscriptDossier";
 import { MANUSCRIPT_TABS, DEFAULT_MANUSCRIPT_TAB } from "./ManuscriptTabs";
+import { pitchAssets } from "../../lib/manuscriptPitch";
 import { Manuscript, ManuscriptStatus, Query, QueryStatus } from "../../types";
 
 const ms = (over: Partial<Manuscript> = {}): Manuscript =>
@@ -44,6 +45,12 @@ const BASE: ManuscriptDossierProps = {
   comps: [],
   isPro: false,
   scoutAvailable: true,
+  pitchAssets: pitchAssets(ms(), []),
+  pitch: { kind: "none" },
+  pitchText: null,
+  synopsisVersionCount: 0,
+  synopsisDate: null,
+  onSavePitch: noop,
   now: Date.parse("2026-08-13T00:00:00.000Z"),
   currentYear: 2026,
   tab: DEFAULT_MANUSCRIPT_TAB,
@@ -112,26 +119,30 @@ describe("the dossier renders one manuscript", () => {
 });
 
 describe("the tab row", () => {
-  it("renders the three built tabs, opening on The record", () => {
+  it("renders the four tabs, opening on The pitch", () => {
     const html = doss();
     for (const t of MANUSCRIPT_TABS) expect(html).toContain(t.label);
-    expect(/aria-selected="true"[^>]*>The record</.test(html)).toBe(true);
+    expect(/aria-selected="true"[^>]*>The pitch</.test(html)).toBe(true);
   });
 
   /**
-   * ⚠️ `The pitch` IS NOT BUILT YET AND MUST NOT APPEAR. The reframe makes it the fourth tab and the
-   * default, but its pane is Phase 3 — so shipping the tab now would open the dossier onto nothing.
-   * The house law is that the shell renders what exists, never what is planned. This lock fails the
-   * moment the tab arrives without its pane, and comes out when Phase 3 lands both.
+   * ⚠️ THE TAB AND ITS PANE ARRIVED TOGETHER, which is why the Phase 2 lock that forbade the tab
+   * could come out here. A tab is only allowed to exist once something is behind it — this asserts
+   * the pairing directly, so neither half can ship alone.
    */
-  it("does not advertise a pane that does not exist", () => {
-    expect(doss()).not.toContain("The pitch");
-    expect(MANUSCRIPT_TABS.map((t) => t.key)).not.toContain("pitch");
+  it("advertises no tab without a pane behind it", () => {
+    for (const t of MANUSCRIPT_TABS) {
+      const html = doss({ tab: t.key });
+      expect(html, `${t.label} renders an empty pane`).toContain('class="msv-dpane"');
+      expect(html.split('class="msv-dpane"')[1]?.trim().startsWith("></div>"), `${t.label} has nothing behind it`).toBe(false);
+    }
   });
 
   /* Each assertion names something only THAT pane renders — a marker common to all three (the back
      link, the plateband) would pass on every tab and prove nothing about switching. */
   it("renders each pane on its own tab, and only its own", () => {
+    expect(doss({ tab: "pitch" })).toContain("of your pitch");
+
     const record = doss({ tab: "details" });
     expect(record).toContain("Out in the world");
     expect(record).not.toContain("Materials on file");

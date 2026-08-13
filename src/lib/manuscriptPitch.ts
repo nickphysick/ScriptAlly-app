@@ -128,6 +128,48 @@ export function pitchShelf(ms: Manuscript, versions: ManuscriptVersion[]): Pitch
   };
 }
 
+/**
+ * What each piece IS, in one factual sentence, shown on the empty card.
+ *
+ * ⚠️ THESE DESCRIBE THE ARTEFACT, NEVER THE WRITER. No "you should", no "don't forget", no
+ * encouragement — a shelf states what belongs in an empty slot, it does not coach. Locked against an
+ * imperative-and-appraisal list in `manuscriptPitch.test.ts`.
+ */
+export const PITCH_DESCRIPTION: Record<PitchAssetKey, string> = {
+  logline: "The book in one sentence — the hook an agent reads first.",
+  elevator: "A lift-length pitch: premise, character, and what is at stake.",
+  blurb: "The back of the jacket — voice and situation, ending withheld.",
+  synopsis: "The whole story, ending included — most agencies ask for this alongside the query letter.",
+};
+
+/**
+ * Words in a piece of prose, derived at render.
+ *
+ * ⚠️ DERIVED, NEVER STORED. A stored count is a second fact about one string, and the two disagree
+ * the first time anything writes the string without updating the count.
+ */
+export function wordCount(text: string | null | undefined): number {
+  if (!text) return 0;
+  const t = text.trim();
+  return t ? t.split(/\s+/).length : 0;
+}
+
+/** "34 words" — and "1 word", because the count is the subject of the phrase. */
+export function wordCountLabel(text: string | null | undefined): string {
+  const n = wordCount(text);
+  return `${n} ${n === 1 ? "word" : "words"}`;
+}
+
+/**
+ * The live count while editing, against the piece's conventional length.
+ *
+ * ⚠️ IT STATES THE LENGTH, IT DOES NOT JUDGE THE DRAFT. "38 words · aim 100–150" reports two facts
+ * side by side; "38 words · too short" would be the app having an opinion about someone's writing.
+ */
+export function liveCountLabel(text: string, hint: string): string {
+  return `${wordCountLabel(text)} · aim ${hint.replace(/^About\s+/i, "").replace(/^~/, "")}`;
+}
+
 export interface PitchMeter {
   written: number;
   total: number;

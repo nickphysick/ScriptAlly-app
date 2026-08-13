@@ -205,6 +205,16 @@ interface DbContextType {
   // Manuscript Actions
   addManuscript: (m: Omit<Manuscript, "id" | "userId" | "statusChangedDate"> & { id?: string }, bypassLimits?: boolean) => Promise<{ success: boolean; error?: string; id?: string }>;
   updateManuscript: (id: string, fields: Partial<Manuscript>) => Promise<void>;
+  /**
+   * The same write with NO activity entry. `updateManuscript` appends a MANUSCRIPT_UPDATED
+   * ("You updated a manuscript's details") on every call, which is right for a details edit and
+   * wrong for field maintenance: inline plate editing and the pitch shelf would put three identical
+   * entries in the global feed for one writer polishing a blurb three times. The feed records the
+   * QUERY JOURNEY, not keystrokes. Precedent: `setActivePackage`, a few lines below.
+   *
+   * ⚠️ ADDITIVE — `updateManuscript` is untouched and still owns every edit that IS an event.
+   */
+  updateManuscriptQuiet: (id: string, fields: Partial<Manuscript>) => Promise<void>;
   deleteManuscript: (id: string) => Promise<void>;
   /** Shelve/reactivate — a reversible lifecycle overlay (hides from picker/suggestions; keeps everything). */
   setManuscriptShelved: (id: string, shelved: boolean) => Promise<void>;
@@ -1106,6 +1116,28 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         date: dateStr,
         details: ""
       });
+    }
+  };
+
+  /**
+   * A manuscript write that does NOT narrate itself into the activity feed. See the interface note.
+   *
+   * ⚠️ IT STILL STAMPS `statusChangedDate` when the status moves, because that stamp is DATA the
+   * plate and the tiles read — not narration. Dropping it here would make a quiet status change
+   * produce a manuscript whose stamp disagrees with its status.
+   */
+  const updateManuscriptQuiet = async (id: string, fields: Partial<Manuscript>) => {
+    if (!currentUser) return;
+    const existingMs = manuscripts.find(m => m.id === id);
+    if (!existingMs) return;
+    try {
+      const hasStatusChanged = fields.status && fields.status !== existingMs.status;
+      await updateDoc(doc(db, "users", currentUser.id, "manuscripts", id), {
+        ...fields,
+        ...(hasStatusChanged ? { statusChangedDate: new Date().toISOString() } : {}),
+      });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/manuscripts/${id}`);
     }
   };
 
@@ -2488,6 +2520,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         logout,
         addManuscript,
         updateManuscript,
+        updateManuscriptQuiet,
         deleteManuscript,
         setManuscriptShelved,
         addVersion,

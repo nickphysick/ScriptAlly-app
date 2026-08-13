@@ -24,6 +24,7 @@
  * edit modal carry over unchanged; comps are deliberately absent from the modal.
  */
 import React, { useState } from "react";
+import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../lib/db";
 import { destroyManifest } from "../lib/cascade";
 import { ConfirmDestroy } from "./ConfirmDestroy";
@@ -33,13 +34,13 @@ import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { Plus, X, Check } from "lucide-react";
 import { isShelvedPresentation } from "../lib/manuscriptPage";
-import { manuscriptComps, withCompRemoved } from "../lib/comps";
+import { manuscriptComps, withCompRemoved, pitchLine, pitchLineText } from "../lib/comps";
 import { isProUser, scoutLive } from "../lib/suggestComps";
-import { plateStats } from "../lib/manuscriptPlate";
+import { plateStats, formatPlateDate } from "../lib/manuscriptPlate";
 import { DEFAULT_MANUSCRIPT_TAB, ManuscriptTabKey } from "./manuscripts/ManuscriptTabs";
 import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/ManuscriptLibraryCard";
-import { pitchAssets, pitchMeter } from "../lib/manuscriptPitch";
+import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
 import { genreDisplay } from "../lib/genres";
 import "./manuscripts/manuscripts.css";
 
@@ -53,7 +54,7 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) => {
-  const { currentUser, manuscripts, queries, packages, versions, activities, taskFlags, updateManuscript, deleteManuscript, setManuscriptShelved } =
+  const { currentUser, manuscripts, queries, packages, versions, activities, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved } =
     useScriptAllyDb();
 
   /**
@@ -103,6 +104,30 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
    */
   const msGenres = (m: Manuscript): string[] =>
     [m.ageCategory, m.genre ? genreDisplay(m.genre, currentUser.personalGenres ?? []) : ""].filter(Boolean);
+
+  /**
+   * Save one pitch piece.
+   *
+   * ⚠️ THE QUIET WRITER, DELIBERATELY. Polishing a blurb three times is not three events in the
+   * query journey; `updateManuscript` would put three identical "You updated a manuscript's
+   * details" entries in the global feed. See `updateManuscriptQuiet`'s note in db.tsx.
+   *
+   * ⚠️ AND THE TWO EMPTINESSES ARE NOT THE SAME SHAPE. `logline` is REQUIRED by `isValidManuscript`
+   * (`data.logline is string`), so clearing it writes `""`; the two new fields are optional and are
+   * cleared by DELETING the key, because a stored `""` is a value claiming the piece exists. One
+   * place knows the difference so no caller has to.
+   *
+   * ⚠️ NEITHER NEW KEY IS IN THE FIRESTORE UPDATE ALLOWLIST YET, so an elevator-pitch or blurb save
+   * is SILENTLY DENIED until the rules deploy. The logline saves today. Draft rule at the top of
+   * reports/manuscripts-reframe.md's Phase 3 section.
+   */
+  const savePitch = (key: PitchAssetKey, text: string) => {
+    if (!selected) return;
+    const value = text.trim();
+    if (key === "logline") { void updateManuscriptQuiet(selected.id, { logline: value }); return; }
+    const field = key === "elevator" ? "elevatorPitch" : "backCoverBlurb";
+    void updateManuscriptQuiet(selected.id, { [field]: value ? value : deleteField() } as any);
+  };
 
   // ── lifecycle (carried over: reversible shelve flag-flip with Undo; deferred delete) ──
   const toggleShelved = async (ms: Manuscript) => {
@@ -162,6 +187,10 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
     ? packages.filter((p) => p.manuscriptId === selected.id && p.status !== "Retired")
     : [];
   const msComps = selected ? manuscriptComps(selected) : [];
+  /* The pitch shelf's four pieces + the version facts its synopsis card states. All derived. */
+  const msPitch = selected ? pitchAssets(selected, msVersions) : [];
+  const msSynVersions = synopsisVersions(msVersions);
+  const msSynDate = msSynVersions.find((v) => v.contentDraft?.trim())?.createdDate ?? null;
 
   return (
     <div className="msv1">
@@ -277,6 +306,12 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
               comps={msComps}
               isPro={isProUser(currentUser)}
               scoutAvailable={scoutLive()}
+              pitchAssets={msPitch}
+              pitch={pitchLine(msComps)}
+              pitchText={pitchLineText(msComps)}
+              synopsisVersionCount={msSynVersions.length}
+              synopsisDate={msSynDate ? formatPlateDate(Date.parse(msSynDate)) : null}
+              onSavePitch={savePitch}
               now={Date.now()}
               currentYear={new Date().getFullYear()}
               tab={tab}

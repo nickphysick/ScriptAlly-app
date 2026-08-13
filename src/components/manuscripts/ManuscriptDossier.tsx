@@ -30,6 +30,9 @@ import { ManuscriptTabs, ManuscriptTabKey } from "./ManuscriptTabs";
 import { ManuscriptDetailTiles } from "./ManuscriptDetailTiles";
 import { ManuscriptCompsPane } from "./ManuscriptCompsPane";
 import { ManuscriptPackagesPane } from "./ManuscriptPackagesPane";
+import { ManuscriptPitchPane } from "./ManuscriptPitchPane";
+import { PitchAsset, PitchAssetKey } from "../../lib/manuscriptPitch";
+import { PitchLine } from "../../lib/comps";
 import "./manuscriptLibrary.css";
 
 export interface ManuscriptDossierProps {
@@ -42,6 +45,13 @@ export interface ManuscriptDossierProps {
   comps: CompTitle[];
   isPro: boolean;
   scoutAvailable: boolean;
+  /** The pitch shelf's four pieces, derived by the page. */
+  pitchAssets: PitchAsset[];
+  pitch: PitchLine;
+  pitchText: string | null;
+  synopsisVersionCount: number;
+  synopsisDate: string | null;
+  onSavePitch: (key: PitchAssetKey, text: string) => void;
   now: number;
   currentYear: number;
   tab: ManuscriptTabKey;
@@ -68,6 +78,12 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   comps,
   isPro,
   scoutAvailable,
+  pitchAssets,
+  pitch,
+  pitchText,
+  synopsisVersionCount,
+  synopsisDate,
+  onSavePitch,
   now,
   currentYear,
   tab,
@@ -157,6 +173,20 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           shorter than its content instead of pushing the card past the viewport.
         */}
         <div className="msv-dpane">
+          {tab === "pitch" && (
+            <ManuscriptPitchPane
+              assets={pitchAssets}
+              pitch={pitch}
+              pitchText={pitchText}
+              synopsisVersionCount={synopsisVersionCount}
+              synopsisDate={synopsisDate}
+              onCopy={onCopyPitch}
+              onSave={onSavePitch}
+              /* Both the synopsis's Edit and its Write it land in the Workshop — the single home. */
+              onOpenWorkshop={onOpenPackageBuilder}
+            />
+          )}
+
           {tab === "details" && (
             <div className="msv-dbody">
               <ManuscriptDetailTiles

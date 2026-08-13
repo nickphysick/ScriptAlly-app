@@ -175,17 +175,18 @@ describe("the tab row", () => {
   /* ⚠️ THE KEYS ARE INTERNAL, THE LABELS ARE THE PRODUCT. The reframe renames the first pane to
      "The record"; the key stays `details` because renaming it would churn every call site to say
      the same thing twice. */
-  it("is the three tabs, in order", () => {
-    expect(MANUSCRIPT_TABS.map((t) => t.key)).toEqual(["details", "comps", "packages"]);
+  it("is the four tabs, in order", () => {
+    expect(MANUSCRIPT_TABS.map((t) => t.key)).toEqual(["pitch", "details", "comps", "packages"]);
     expect(MANUSCRIPT_TABS.map((t) => t.label)).toEqual([
-      "The record", "Comparable titles", "Submission packages",
+      "The pitch", "The record", "Comparable titles", "Submission packages",
     ]);
   });
 
-  /* ⚠️ THE PITCH TAB TAKES THIS DEFAULT WHEN IT ARRIVES WITH ITS PANE, in Phase 3. Until then the
-     card opens on The record, because a default pointing at an unbuilt pane opens onto nothing. */
-  it("opens on The record", () => {
-    expect(DEFAULT_MANUSCRIPT_TAB).toBe("details");
+  /* ⚠️ THE PITCH IS FIRST AND IS THE DEFAULT because it is what the page is FOR. The reframe's
+     complaint about the old page was that nothing on it had been put there by the writer; the pitch
+     shelf is the answer, so it is what the dossier opens on. */
+  it("opens on The pitch", () => {
+    expect(DEFAULT_MANUSCRIPT_TAB).toBe("pitch");
   });
 
   /** The selected label, read back off the rendered row — attribute order is React's, not ours. */
@@ -193,10 +194,11 @@ describe("the tab row", () => {
     /aria-selected="true"[^>]*>([^<]+)</.exec(html)?.[1] ?? null;
 
   it("marks exactly one tab active, and it moves with the prop", () => {
+    expect(selectedLabel(tabs("pitch"))).toBe("The pitch");
     expect(selectedLabel(tabs("details"))).toBe("The record");
     expect(selectedLabel(tabs("comps"))).toBe("Comparable titles");
     expect(selectedLabel(tabs("packages"))).toBe("Submission packages");
-    for (const active of ["details", "comps", "packages"] as const) {
+    for (const active of ["pitch", "details", "comps", "packages"] as const) {
       expect(tabs(active).match(/aria-selected="true"/g)).toHaveLength(1);
       expect(tabs(active).match(/msv-tab on/g)).toHaveLength(1);
     }
@@ -207,7 +209,7 @@ describe("the tab row", () => {
     const row = ManuscriptTabs({ active: "details", onChange: (k) => seen.push(k) }) as React.ReactElement;
     const children = (row.props as { children: React.ReactElement[] }).children;
     children.forEach((c) => (c.props as { onClick: () => void }).onClick());
-    expect(seen).toEqual(["details", "comps", "packages"]);
+    expect(seen).toEqual(["pitch", "details", "comps", "packages"]);
   });
 
   /**
@@ -216,7 +218,7 @@ describe("the tab row", () => {
    * caused a Pro-selling landing to be retired from packages once.
    */
   it("carries NO Pro chip on any tab", () => {
-    for (const active of ["details", "comps", "packages"] as const) {
+    for (const active of ["pitch", "details", "comps", "packages"] as const) {
       expect(tabs(active)).not.toMatch(/prochip|>Pro</i);
     }
   });
