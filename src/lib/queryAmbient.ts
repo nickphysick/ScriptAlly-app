@@ -12,6 +12,10 @@ import { Query, QueryStatus } from "../types";
 /* the CTA engine — the consequence line promises what the ROW will offer, so it must ask the same
    function the row asks rather than restating the map */
 import { getPrimaryAction } from "./queryPrimaryAction";
+/* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
+   same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
+   stored flag cannot disagree about what counts as a reply. */
+import { AGENT_RESPONSE_STATUSES } from "./queryDerivation";
 
 /**
  * Filter-bar STATUS bucket — the derived state the CTA engine (getPrimaryAction, Queries.tsx)
@@ -333,14 +337,47 @@ export interface PlaceLineInput {
   /** queries already logged against this manuscript, EXCLUDING the one being composed */
   priorForManuscript?: number;
   manuscriptTitle?: string;
-  /** across the whole database, how many are waiting on an agent */
-  awaitingReply?: number;
-  /** record only — days since the query went out, and replies already recorded for the book */
-  sentDaysAgo?: number;
+  /** record only — agent replies already in the log for this book, EXCLUDING this query's */
   priorRepliesForManuscript?: number;
 }
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+/**
+ * ⚠️ HOW MANY REPLIES AN AGENT HAS ACTUALLY SENT FOR THIS BOOK (§4). Three things about this are
+ * corrections rather than choices, and each was a way of being plausibly wrong:
+ *
+ * 1. IT READS `AGENT_RESPONSE_STATUSES` DIRECTLY, never `responsesReceivedCount`. That selector
+ *    falls back to a legacy status set including `Partial Sent` and `Full Sent` — the WRITER'S
+ *    sends. Fine for a dashboard's tolerance; wrong in a sentence, because a line that counts your
+ *    own send as a response from an agent is the exact confusion this journey exists to prevent.
+ *    And the fallback fires only on unmigrated imports, which is precisely when nobody would catch
+ *    it.
+ *
+ * 2. THE UNIT IS ACTIVITIES, NOT QUERIES. A query that went partial → full → offer is THREE
+ *    responses received, not one. Counting queries-with-a-reply would make the ordinal drift
+ *    quietly and permanently as a campaign matured — always low, never obviously wrong.
+ *
+ * 3. THE QUERY BEING RECORDED IS EXCLUDED. Correct for a new record and for a correction to an
+ *    existing one: without it, re-recording a reply on a query that already has one counts that
+ *    query's history twice.
+ *
+ * ⚠️ AND SILENCE IS NOT A REPLY. `NO_RESPONSE` is absent from `AGENT_RESPONSE_STATUSES` — closing a
+ * query as "no reply" cannot increment this, which is asserted rather than assumed, because it
+ * holds only while that set stays honest.
+ */
+export function agentRepliesForManuscript(
+  activities: readonly { manuscriptId?: string; queryId?: string; resultingStatus?: QueryStatus }[],
+  manuscriptId: string | undefined,
+  excludeQueryId?: string,
+): number | undefined {
+  if (!manuscriptId) return undefined;
+  return activities.filter(
+    (a) =>
+      a.manuscriptId === manuscriptId &&
+      a.queryId !== excludeQueryId &&
+      a.resultingStatus !== undefined &&
+      AGENT_RESPONSE_STATUSES.has(a.resultingStatus),
+  ).length;
+}
 
 /** 1st, 2nd, 3rd, 4th … — English ordinals, including the teens that break the pattern. */
 export function ordinal(n: number): string {
@@ -354,26 +391,24 @@ export function ordinal(n: number): string {
   }
 }
 
+/**
+ * ⚠️ ONE FACT, NOT A LIST (§4). Both lines used to join two clauses with an interpunct — the place
+ * plus a running total ("· 12 currently awaiting reply", "You sent this 3 days ago · …"). The
+ * header's job is to say WHERE this act sits, once; a second figure beside it turns a position into
+ * a status readout, and the writer has to read both to find the one they wanted. The dropped
+ * clauses are not relocated — they were context nobody asked for at the moment of composing.
+ *
+ * ⚠️ A MISSING FIGURE OMITS THE WHOLE LINE, never prints a zero or a placeholder. "Your 0th query"
+ * and "…for undefined" are both worse than saying nothing.
+ */
 export function createPlaceLine(i: PlaceLineInput): string {
-  const parts: string[] = [];
-  if (i.priorForManuscript !== undefined && i.manuscriptTitle) {
-    parts.push(`Your ${ordinal(i.priorForManuscript + 1)} query for ${i.manuscriptTitle}`);
-  }
-  if (i.awaitingReply !== undefined && i.awaitingReply > 0) {
-    parts.push(`${i.awaitingReply} currently awaiting reply`);
-  }
-  return parts.join(" · ");
+  if (i.priorForManuscript === undefined || !i.manuscriptTitle) return "";
+  return `Your ${ordinal(i.priorForManuscript + 1)} query for ${i.manuscriptTitle}`;
 }
 
 export function recordPlaceLine(i: PlaceLineInput): string {
-  const parts: string[] = [];
-  if (i.sentDaysAgo !== undefined && i.sentDaysAgo >= 0) {
-    parts.push(i.sentDaysAgo === 0 ? "You sent this today" : `You sent this ${plural(i.sentDaysAgo, "day", "days")} ago`);
-  }
-  if (i.priorRepliesForManuscript !== undefined && i.manuscriptTitle) {
-    parts.push(`the ${ordinal(i.priorRepliesForManuscript + 1)} reply you've recorded for ${i.manuscriptTitle}`);
-  }
-  return parts.join(" · ");
+  if (i.priorRepliesForManuscript === undefined || !i.manuscriptTitle) return "";
+  return `The ${ordinal(i.priorRepliesForManuscript + 1)} response you've received for ${i.manuscriptTitle}`;
 }
 
 /**

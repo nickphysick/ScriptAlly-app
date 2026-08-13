@@ -48,7 +48,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, consequenceLine, listHeadLabel, DAY } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, listHeadLabel, DAY } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -1716,26 +1716,32 @@ export const Queries: React.FC<{
    * THE PLACE LINES (§2b) — where the act being composed sits in the campaign. Derived at render,
    * never stored, and every clause omits itself when its figure is unavailable.
    */
-  const awaitingReplyCount = queries.filter((q) => queryBucket(q.status as QueryStatus) === "waiting").length;
   const createPlace = createDraft ? createPlaceLine({
     priorForManuscript: createDraft.manuscriptId
       ? queries.filter((q) => q.manuscriptId === createDraft.manuscriptId).length : undefined,
     manuscriptTitle: manuscripts.find((m) => m.id === createDraft.manuscriptId)?.title,
-    awaitingReply: awaitingReplyCount,
   }) : "";
   const respPlace = (() => {
     if (!respQueryId) return "";
     const q = queries.find((x) => x.id === respQueryId);
     if (!q) return "";
-    const sent = (q as { dateSent?: string }).dateSent;
-    /* ⚠️ A REPLY IS A QUERY THAT HAS LEFT THE WAITING BUCKET — the same split every other surface
-       reads, rather than a second definition of "replied". */
-    const priorReplies = queries.filter((x) => x.manuscriptId === q.manuscriptId
-      && x.id !== q.id && queryBucket(x.status as QueryStatus) !== "waiting").length;
+    /**
+     * ⚠️ REPLIES IN THE LOG, NOT QUERIES THAT HAVE LEFT A BUCKET (§4). The old rule here was
+     * `queryBucket(...) !== "waiting"` — which counted a query CLOSED WITH NO REPLY as a response
+     * received, because "closed" is not "waiting". Silence became a reply, quietly, in the one
+     * sentence whose whole job is to say how many times an agent has actually written back.
+     *
+     * It also counted queries rather than replies, so a query that went partial → full → offer
+     * contributed one instead of three — an ordinal that drifted further from the truth the longer
+     * a campaign ran.
+     *
+     * `agentRepliesForManuscript` counts activity rungs in `AGENT_RESPONSE_STATUSES`, excluding
+     * this query's own, so both faults go together and a correction to an existing response cannot
+     * double-count its history.
+     */
     return recordPlaceLine({
-      sentDaysAgo: sent ? Math.max(0, Math.floor((Date.now() - new Date(sent).getTime()) / DAY)) : undefined,
       manuscriptTitle: manuscripts.find((m) => m.id === q.manuscriptId)?.title,
-      priorRepliesForManuscript: priorReplies,
+      priorRepliesForManuscript: agentRepliesForManuscript(activities, q.manuscriptId, q.id),
     });
   })();
 
@@ -3551,11 +3557,18 @@ export const Queries: React.FC<{
                   <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
                   <div className="qch-txt">
                     <h2 className="qch-title">Recording a response</h2>
-                    {/* ONE LINE, TWO JOBS — the standing line by default, the save error in burgundy
-                        when there is one. A failure belongs beside the button that failed. */}
-                    <p className={`qch-sub${respError ? " qch-err" : ""}`} aria-live="assertive" aria-atomic="true">
-                      {respError ?? "What came back, and when — the rest follows from that."}
-                    </p>
+                    {/* ⚠️ THE LEDE IS GONE (§4); THE ERROR IS NOT. This one element did two jobs —
+                        a standing line, and the save failure announced in burgundy — so deleting
+                        the copy meant keeping the announcer. It renders only when there IS a
+                        failure now, which is also the honest shape: a live region that is populated
+                        at rest has nothing to announce when it changes.
+
+                        The header is two lines: what this is, and where it sits. The lede said
+                        neither — "the rest follows from that" describes the form's own behaviour,
+                        which the chips and the enabled-on-a-pair Save already state by BEING it. */}
+                    {respError && (
+                      <p className="qch-sub qch-err" aria-live="assertive" aria-atomic="true">{respError}</p>
+                    )}
                     {/* ⚠️ THE PLACE LINE (§2b) — where this act sits in the campaign, as FACT. No
                         adjective, no encouragement, no streak: "your 17th query for X" is a
                         position, "your 17th — keep going" is a coach. Rendered only when it has
@@ -3643,15 +3656,25 @@ export const Queries: React.FC<{
                         role="alert" to an element already in the tree is unreliably announced
                         across screen readers. aria-atomic because the line replaces its text
                         rather than appending to it. */}
-                    <p className={`qch-sub${createError ? " qch-err" : ""}`} aria-live="assertive" aria-atomic="true">
-                      {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
-                    </p>
-                    {/* ⚠️ THE PLACE LINE (§2b) — where this act sits in the campaign, as FACT. No
+                    {/* ⚠️ THE LEDE IS GONE (§4); THE ERROR IS NOT. This element did two jobs — a
+                        standing requirement line, and the save failure in burgundy — so deleting the
+                        copy meant keeping the announcer, which now renders only when there IS a
+                        failure. That is also the honest shape for a live region: one populated at
+                        rest has nothing to announce when it changes.
+
+                        "Needs an agent, a manuscript and a date — everything else can wait" promised
+                        a queue that does not exist. The chips state the same requirement, and the
+                        Save that enables on the trio states it as BEHAVIOUR rather than as a claim.
+                        The header is two lines now: what this is, and where it sits. */}
+                    {createError && (
+                      <p className="qch-sub qch-err" aria-live="assertive" aria-atomic="true">{createError}</p>
+                    )}
+                    {/* ⚠️ THE PLACE LINE — where this act sits in the campaign, as FACT. No
                         adjective, no encouragement, no streak: "your 17th query for X" is a
                         position, "your 17th — keep going" is a coach. Rendered only when it has
-                        something to say; a clause whose figure is missing omits itself rather than
-                        printing a zero. It is NOT a live region — the lede above already is one,
-                        and two announcers on one block talk over each other. */}
+                        something to say; a line whose figure is missing omits itself rather than
+                        printing a zero. It is NOT a live region — the error above is one when it
+                        appears, and two announcers on one block talk over each other. */}
                     {createPlace && <p className="qch-place">{createPlace}</p>}
                     {/* ⚠️ THE PIPS READ THE DRAFT, NEVER THE STEPS — required ≠ sequential. Two
                         are green on arrival because openCreate seeds the manuscript and today's

@@ -138,10 +138,38 @@ describe("the header band", () => {
 });
 
 describe("the error rehomes to the subtitle", () => {
-  it("one line does both jobs, and the error is burgundy", () => {
-    expect(queries).toContain("{createError ?? \"Needs an agent, a manuscript and a date — everything else can wait.\"}");
-    expect(queries).toContain("`qch-sub${createError ? \" qch-err\" : \"\"}`");
+  /**
+   * ⚠️ THE LEDE IS DELETED AND THIS LOCK IS INVERTED (§4). It held the exact string
+   * "Needs an agent, a manuscript and a date — everything else can wait." — a `toContain` on copy
+   * that has now gone, so leaving it standing would have failed the suite on a change that is
+   * correct. Deleted rather than loosened: a lock on removed copy is not a weaker lock, it is a
+   * lock pointing at nothing.
+   *
+   * ⚠️ WHAT THE LINE DID FOR THE ERROR IS KEPT, because that half was never the problem. The
+   * element did two jobs — a standing lede, and the save failure announced in burgundy — and only
+   * the lede was a claim about a queue that does not exist. The announcer now renders ONLY when
+   * there is a failure, which is also the more honest live region: one populated at rest has
+   * nothing to announce when it changes.
+   */
+  it("the error still lands beside the button that failed, in burgundy", () => {
+    expect(queries, "the error announcer went with the lede")
+      .toContain('<p className="qch-sub qch-err" aria-live="assertive" aria-atomic="true">{createError}</p>');
+    expect(queries, "the error renders at rest — a live region with standing copy announces nothing")
+      .toContain("{createError && (");
     expect(rule(".qch-err")).toContain("color: var(--pink-i)");
+  });
+
+  /* ⚠️ AND THE PHRASE IS GONE FROM THE PAGE, not merely from this assertion. It promised a queue
+     the product does not have; the chips and the enabled-on-a-trio Save state the same requirement
+     as behaviour rather than as a claim. */
+  it("no lede survives in either journey", () => {
+    /* ⚠️ COMMENT-STRIPPED. Both deleted ledes are QUOTED in the comments that replaced them —
+       explaining what went and why is worth more than the two lines it costs — so a raw scan finds
+       the copy it is asserting is gone. Sixth time in this repo; a rule about code is asserted
+       against code, always. */
+    const code = queries.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code, "the create lede came back").not.toContain("everything else can wait");
+    expect(code, "the record lede came back").not.toContain("the rest follows from that");
   });
 
   /* ⚠️ THE LIVE REGION IS PERMANENT, not a role switched on when the error arrives. A live
