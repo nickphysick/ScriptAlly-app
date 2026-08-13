@@ -445,6 +445,11 @@ for (const { w, h } of WIDTHS) {
       return {
         grid: cols ? getComputedStyle(cols).gridTemplateColumns : null,
         colsH: h2(cols), leftH: h2(left), stackH: h2(stack),
+        /* ⚠️ READ, NOT ASSUMED. §5's short-viewport rule tightens this to 12; a hardcoded 16 made
+           the sum miss by 4 at 1024x768 and reported "the stacked cards do not fill their column"
+           about a column they filled exactly. Two rules agreeing on a literal agree only until one
+           of them is edited. */
+        stackGap: stack ? Math.round(parseFloat(getComputedStyle(stack).rowGap || "0")) : 0,
         stackedH: stacked.map((c) => Math.round(c.getBoundingClientRect().height)),
         metas: Array.from(document.querySelectorAll(".qp-cardmeta")).map((e) => (e as HTMLElement).innerText.trim()),
         stats: document.querySelectorAll(".qp-stat").length,
@@ -457,7 +462,8 @@ for (const { w, h } of WIDTHS) {
     /* the stack fills Tracking's height — neither card trails into white */
     expect(m.stackH, `the stacked column is short of Tracking at ${w}`).toBe(m.leftH);
     const sum = m.stackedH.reduce((a, b) => a + b, 0);
-    expect(Math.abs(sum + 16 - m.stackH!), `the stacked cards do not fill their column at ${w}`)
+    const gaps = (m.stackedH.length - 1) * m.stackGap;
+    expect(Math.abs(sum + gaps - m.stackH!), `the stacked cards do not fill their column at ${w}`)
       .toBeLessThanOrEqual(2);
     /* the ratio is the one the pack names — read off the rendered tracks, not the declaration */
     const tracks = (m.grid ?? "").split(" ").map(Number);
