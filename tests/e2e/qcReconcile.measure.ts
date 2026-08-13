@@ -278,3 +278,43 @@ test("stage 1's ghosts hug rather than sink — the measured decision, restored"
   expect(Math.max(...slacks), "stage 1 grew a hole — `.qc-ghosts` measured 12px without the margin")
     .toBeLessThanOrEqual(24);
 });
+
+/**
+ * ══ §2 · THE PANELS ARE INDISTINGUISHABLE IN CHASSIS ═══════════════════════════════════════════
+ *
+ * ⚠️ EQUALITY, NOT PIXEL VALUES ON EITHER SIDE. Record had its own chassis and the two drifted to
+ * 326×427 / `flex-start` against 300×642 / `stretch`, with neither wrong on its own terms. A lock on
+ * create's 326 or record's 300 would have passed throughout.
+ *
+ * ⚠️ AND ONLY AT 1440 AND 1920. Both panels are `display: none` below 1100px, so at 1024 they
+ * measure 0×0 — an equality assertion there passes because there is nothing to compare, which is a
+ * test that cannot fail. Absence is what 1024 asserts instead.
+ */
+test("the two journeys' panels are the same chassis, where they render at all", () => {
+  for (const w of [1440, 1920]) {
+    const c = shots.createOpen[w];
+    const r = shots.recordNone[w];
+    if (!c || !r || !c.panelW || !r.panelW) continue;
+    // eslint-disable-next-line no-console
+    console.log(`[glance ${w}] create ${c.panelW}x${c.panelH} align=${c.panelAlign} pos=${c.panelPos} top=${c.panelTop} · record ${r.panelW}x${r.panelH} align=${r.panelAlign} pos=${r.panelPos} top=${r.panelTop}`);
+    expect(r.panelW, `panel widths differ at ${w}`).toBe(c.panelW);
+    expect(r.panelAlign, `panel alignment differs at ${w}`).toBe(c.panelAlign);
+    expect(r.panelPos, `panel positioning differs at ${w}`).toBe(c.panelPos);
+    expect(r.panelClass, `the two panels are different elements at ${w}`).toBe(c.panelClass);
+    expect(Math.abs(r.panelTop! - c.panelTop!), `panel top offsets differ at ${w}`).toBeLessThanOrEqual(2);
+    /* ⚠️ HEIGHT IS CONTENT, NOT CHASSIS — the two carry different rows, so they SHOULD differ. What
+       must not differ is that either one stretches: both hug, so both are shorter than the column. */
+    expect(r.panelH!, "record's panel is stretching again").toBeLessThan(r.dockTop! - r.panelTop!);
+    expect(c.panelH!, "create's panel is stretching").toBeLessThan(c.dockTop! - c.panelTop!);
+  }
+});
+
+/* ⚠️ ASSERTED ABSENT, NOT ASSERTED EQUAL. Below 1100px the column is too narrow for a reference
+   table — every row wraps to three lines and the form loses its measure — so both panels hide. */
+test("below 1100px neither panel renders", () => {
+  for (const key of ["createOpen", "recordNone"] as const) {
+    const m = shots[key][1024];
+    if (!m) continue;
+    expect(m.panelW ?? 0, `${key}'s panel is visible at 1024`).toBe(0);
+  }
+});

@@ -3702,6 +3702,10 @@ export const Queries: React.FC<{
                   canSave={responseReady(respDraft)}
                   saving={respSaving}
                   sentISO={(queries.find((q) => q.id === respQueryId) as { dateSent?: string } | undefined)?.dateSent}
+                  /* ⚠️ THE HISTORY ROW HAD NO DATA TO WORK WITH. `responseRefRows` was called with a
+                     literal `[]`, so `historyRow` returned null on every reply ever recorded and the
+                     row silently never appeared. */
+                  queries={queries}
                 />
               </div>
             ) : createDraft ? (

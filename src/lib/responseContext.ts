@@ -20,6 +20,8 @@
  */
 import type { Agent, Query } from "../types";
 import { isTerminalStatus } from "./agentList";
+import { formatQueryMaterial } from "./materials";
+import type { ResponseOutcome } from "./responseDraft";
 
 export interface RefRow { label: string; text: string }
 
@@ -45,13 +47,30 @@ export const refDate = (v: unknown): string => {
   return new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 };
 
-/** "What you sent, and when" — the send this reply is answering. */
+/**
+ * "You sent" — the materials, the date and the method.
+ *
+ * ⚠️ THE MANUSCRIPT TITLE IS NO LONGER THE SUBJECT (§2). It named the book, which the journey's own
+ * place line already names two inches above; what this row is for is what physically went out, and
+ * a reply lands differently depending on whether it is answering a query letter or a full.
+ *
+ * ⚠️ MATERIALS READ THROUGH `formatQueryMaterial`, NEVER `String(m)`. `materialsWanted` is a
+ * `(string | QueryMaterial)[]`, so a bare join renders "[object Object]" for every structured entry
+ * — the repo law, and this would have been a third surface to hit it.
+ */
 export function sentRow(query: Query, manuscriptTitle?: string): RefRow | null {
+  const mats = ((query as { materialsWanted?: (string | never)[] }).materialsWanted ?? [])
+    .map((m) => formatQueryMaterial(m as never))
+    .filter(Boolean);
   const when = refDate((query as { dateSent?: unknown }).dateSent);
-  const title = manuscriptTitle?.trim();
-  if (!when && !title) return null;
-  const text = title && when ? `${title} · ${when}` : title || when;
-  return { label: "What you sent", text };
+  const method = String((query as { sendMethod?: unknown }).sendMethod ?? "").trim();
+  const parts = [mats.join(" · "), when, method].filter(Boolean);
+  /* the title survives ONLY as a fallback for a query with nothing else recorded */
+  if (!parts.length) {
+    const title = manuscriptTitle?.trim();
+    return title ? { label: "You sent", text: title } : null;
+  }
+  return { label: "You sent", text: parts.join(" · ") };
 }
 
 /**
@@ -64,6 +83,36 @@ export function windowRow(agent: Agent | null): RefRow | null {
   const weeks = agent?.responseTimeWeeks;
   if (!weeks || weeks <= 0) return null;
   return { label: "They said", text: `Around ${weeks} week${weeks === 1 ? "" : "s"} to reply` };
+}
+
+/**
+ * THE ONE CONTEXTUAL ROW (§2) — the middle row changes with the outcome, because what is worth
+ * knowing changes with it.
+ *
+ *   · no choice yet     → the reply window they stated, so the writer can see what this is against
+ *   · an offer          → that an answer is owed, which is the only deadline landing on the WRITER
+ *   · closed, no reply  → what the agency actually said about silence
+ *
+ * ⚠️ EVERY OTHER OUTCOME GETS THE WINDOW, not a bespoke line. A row obliged to say something for
+ * six outcomes says something bland for four of them, and a reference panel earns its place by
+ * being worth reading.
+ *
+ * ⚠️ THE OFFER ROW STATES NO DATE, and that is deliberate. An offer's answer-by is a fact the AGENT
+ * gives; deriving one from a house window would put a deadline in front of the writer that nobody
+ * set. The step below collects the real one.
+ */
+export function contextRow(agent: Agent | null, outcome: ResponseOutcome | null): RefRow | null {
+  if (outcome === "offer") {
+    return { label: "An answer is owed", text: "Whatever you agree with them — the step below records it." };
+  }
+  if (outcome === "noreply") {
+    const nrn = (agent as { noResponseMeansNo?: boolean } | null)?.noResponseMeansNo;
+    const text = nrn === true ? "No reply means no."
+      : nrn === false ? "They reply either way."
+      : "Not stated.";
+    return { label: "Their stated policy", text };
+  }
+  return windowRow(agent);
 }
 
 /**
@@ -88,13 +137,19 @@ export function historyRow(agent: Agent | null, queries: Query[], excludeQueryId
   };
 }
 
-/** The whole panel. Empty array → the caller renders nothing at all. */
+/**
+ * The whole panel. Empty array → the caller renders nothing at all.
+ *
+ * ⚠️ `outcome` IS WHAT MAKES THE MIDDLE ROW LIVE. Without it this returned the agent's stated window
+ * and nothing else, whatever the writer had chosen.
+ */
 export function responseRefRows(
   query: Query,
   agent: Agent | null,
   queries: Query[],
   manuscriptTitle?: string,
+  outcome: ResponseOutcome | null = null,
 ): RefRow[] {
-  return [sentRow(query, manuscriptTitle), windowRow(agent), historyRow(agent, queries, query.id)]
+  return [sentRow(query, manuscriptTitle), contextRow(agent, outcome), historyRow(agent, queries, query.id)]
     .filter((r): r is RefRow => r !== null);
 }

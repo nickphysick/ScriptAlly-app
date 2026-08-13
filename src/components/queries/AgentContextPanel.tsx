@@ -25,6 +25,25 @@ export interface AgentContextPanelProps {
   queries: Query[];
   /** Opens a query from the history line — the same discard-then-select door the form's warning uses. */
   onOpenQuery?: (id: string) => void;
+  /**
+   * ⚠️ THE CONTENT SEAM (Pack A §2). The CHASSIS is shared and is what makes the two journeys' panels
+   * the same object: the sage cap and its glyph, the Playfair title over the mono agent name, the
+   * status pill, the two-up stats strip, the italic policy line, the footer stamp, the dashed rim
+   * and the tilt. Only the BODY differs — create's answers "who am I writing to", record's answers
+   * "what am I looking at".
+   *
+   * Absent, it renders create's own body, so every existing call site is untouched. This is an
+   * extension, not a fork: a second panel is how 326×427 and 300×642 with different alignment
+   * happened, and neither was wrong on its own terms.
+   */
+  body?: React.ReactNode;
+  /**
+   * ⚠️ THE POLICY LINE IS SUPPRESSIBLE FOR EXACTLY ONE CASE. Record's contextual row states the
+   * agency's no-reply policy when the outcome IS "closed — no reply", and the chassis states it
+   * always. Rendering the same sentence twice in one small panel reads as a rendering fault rather
+   * than as emphasis. The row wins there, because it is the row the outcome asked for.
+   */
+  suppressPolicy?: boolean;
 }
 
 const PersonIcon = () => (
@@ -54,7 +73,7 @@ const STAT_GLYPH: Record<string, React.ReactNode> = {
   ),
 };
 
-export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, queries, onOpenQuery }) => {
+export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, queries, onOpenQuery, body, suppressPolicy }) => {
   /* The wish list is clamped to four lines and this opens it. ⚠️ THE CLAMP IS WHAT KEEPS THE
      PANEL COMPACT — a long MSWL is otherwise the whole column, and the sections beneath it stop
      being findable. */
@@ -113,9 +132,13 @@ export const AgentContextPanel: React.FC<AgentContextPanelProps> = ({ agent, que
 
       {/* A sentence, not a statistic — "Yes" under "No reply = pass" says the shape of a fact
           without saying the fact. */}
-      {policy && <p className="qc-ctxpolicy">{policy}</p>}
+      {policy && !suppressPolicy && <p className="qc-ctxpolicy">{policy}</p>}
 
-      {state === "name-only" ? (
+      {body !== undefined ? (
+        /* ⚠️ THE SUPPLIED BODY STILL GETS THE SCROLLER AND THE QUIET BAR. The chassis owns how the
+           body behaves when it overflows; a caller passing rows should not have to remember to. */
+        <div className="qc-ctxbody f12-quiet-scroll">{body}</div>
+      ) : state === "name-only" ? (
         <div className="qc-ctxbody">
           <p className="qc-ctxthin">{NAME_ONLY_NOTE}</p>
           <ArtSlot name="agent-unknown" maxWidth={200} />

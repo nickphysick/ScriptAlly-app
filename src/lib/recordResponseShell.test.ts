@@ -115,18 +115,66 @@ describe("the header's two chips", () => {
 });
 
 describe("the reference panel is there on the first frame", () => {
-  /* Unlike create's, where the agent is unknown until stage 2 and the column has nothing to say. */
+  /**
+   * ⚠️ IT IS CREATE'S PANEL NOW (Pack A §2). `.qr-ref` was a SECOND chassis for the same job, and
+   * the two drifted exactly as a fork does — browser-measured 326x427 with `align-self: flex-start`
+   * in create against 300x642 with `align-self: stretch` here. Neither was wrong on its own terms,
+   * which is why the lock is cross-journey equality (queryCentreGlance.test.ts) rather than a pixel
+   * value on either side. What survives here is the property this case was always about: the panel
+   * is present from the FIRST frame, unlike create's, where the agent is unknown until stage 2.
+   */
   it("it renders beside the flow rather than after a stage", () => {
-    expect(pane).toContain('className="qc-ref qr-ref"');
+    /* ⚠️ COMMENT-STRIPPED. The deletion is EXPLAINED in prose sitting where the panel used to be —
+       naming `.qr-ref` and the measurements that condemned it — so a raw scan finds the very string
+       it asserts is gone. Eighth time in this stream of work; a rule about code is asserted against
+       code, always. */
+    const paneCode = pane.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(paneCode, "record grew its own panel again").not.toContain("qr-ref");
+    expect(pane, "it must render the shared chassis").toContain("<AgentContextPanel");
     expect(pane, "it must not wait on a stage the way create's does").not.toContain("stackAvailable");
   });
 
   it("and it states what a reply needs, not what a send needs", () => {
-    const q = { id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: "2026-06-01" } as never;
+    const q = { id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: "2026-06-01",
+      materialsWanted: ["Query Letter"], sendMethod: "Email" } as never;
     const agent = { id: "a1", name: "Elinor Hale", responseTimeWeeks: 8 } as never;
     const rows = responseRefRows(q, agent, [], "Murphy's Day Out");
-    expect(rows.map((r) => r.label)).toContain("What you sent");
+    /* ⚠️ "You sent" NAMES THE MATERIALS, not the manuscript. The book is in the place line two
+       inches above; what this row is for is what physically went out, because a reply lands
+       differently depending on whether it answers a query letter or a full. */
+    const sent = rows.find((r) => r.label === "You sent");
+    expect(sent, "the send row is missing").toBeTruthy();
+    /* `formatQueryMaterial` normalises the casing — the row shows what the app calls it, not what
+       the stored string happens to be capitalised as. */
+    expect(sent!.text.toLowerCase()).toContain("query letter");
+    expect(sent!.text).toContain("Email");
     expect(rows.map((r) => r.label)).toContain("They said");
+  });
+
+  /**
+   * ⚠️ THE MIDDLE ROW CHANGES WITH THE OUTCOME (§2) — before a choice it is the window they stated,
+   * an offer says an answer is owed, and a closed-no-reply states what they said about silence.
+   * Every other outcome keeps the window rather than inventing a line: a row obliged to say
+   * something for six outcomes says something bland for four of them.
+   */
+  it("the contextual row follows the outcome", () => {
+    const q = { id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: "2026-06-01" } as never;
+    const agent = { id: "a1", name: "Elinor Hale", responseTimeWeeks: 8, noResponseMeansNo: true } as never;
+    const labels = (o: never | null) => responseRefRows(q, agent, [], "X", o as never).map((r) => r.label);
+    expect(labels(null), "no choice yet — the window they stated").toContain("They said");
+    expect(labels("offer" as never)).toContain("An answer is owed");
+    expect(labels("noreply" as never)).toContain("Their stated policy");
+    expect(labels("rejected" as never), "an ordinary outcome keeps the window").toContain("They said");
+  });
+
+  /* ⚠️ AND THE OFFER ROW STATES NO DATE. An offer's answer-by is a fact the AGENT gives; deriving
+     one from a house window would put a deadline in front of the writer that nobody set. */
+  it("the offer row promises no date the app does not have", () => {
+    const q = { id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED } as never;
+    const agent = { id: "a1", name: "E", responseTimeWeeks: 8 } as never;
+    const row = responseRefRows(q, agent, [], "X", "offer" as never).find((r) => r.label === "An answer is owed");
+    expect(row, "the offer row is missing").toBeTruthy();
+    expect(row!.text, "a date was invented").not.toMatch(/\d{4}|\bweeks?\b/);
   });
 
   /* ⚠️ OMITS RATHER THAN BLANKS. A labelled empty row states that we hold nothing, which is noise

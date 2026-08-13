@@ -642,9 +642,17 @@
    only its own function. The disc is a wash bleeding off the top-right corner — it is what stops
    the gradient reading as a flat tinted strip — and it is `overflow: hidden`'s job to crop it,
    which is why the header clips rather than the panel doing it for both. */
-.qc-glance { flex: none; position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; padding: 13px 15px; background: linear-gradient(135deg, #f4efe6, #faf7f2); border-bottom: 1px solid var(--hairline); }
-.qc-glance::after { content: ""; position: absolute; right: -18px; top: -18px; width: 76px; height: 76px; border-radius: 50%; background: rgba(180, 90, 64, 0.05); }
-.qc-glancemk { width: 30px; height: 30px; flex: none; border-radius: 9px; background: var(--panel); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; position: relative; z-index: 1; }
+/* ⚠️ THE CAP IS SAGE, AND IT IS THE READING PANE'S OWN GRADIENT (ref 96, treatment B's rationale;
+   the panel cap in that study is `--sage-a`/`--sage-b`). It was a warm cream that belonged to
+   nothing else in the app, so the glance panel was the one card on this surface without the
+   grammar every other card has. Tokens, not the ref's literals: `--sage-band`/`--sage-band-2` are
+   what `.f12-card .f12-chh` already reads. */
+.qc-glance { flex: none; position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; padding: 13px 15px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); }
+.qc-glance::after { content: ""; position: absolute; right: -18px; top: -18px; width: 76px; height: 76px; border-radius: 50%; background: rgba(90, 110, 88, 0.06); }
+/* ⚠️ THE GLYPH CHIP FOLLOWS THE CAP. A pink-bordered chip on a sage band reads as a control that
+   wandered in from somewhere else; the reading pane's own card heads put a translucent paper chip
+   on this gradient, which is what this now is. */
+.qc-glancemk { width: 30px; height: 30px; flex: none; border-radius: 9px; background: rgba(253, 250, 245, 0.8); border: 1px solid var(--sage-edge); color: var(--sageD); display: grid; place-items: center; position: relative; z-index: 1; }
 .qc-glancemk svg { width: 15px; height: 15px; }
 .qc-glancet { min-width: 0; position: relative; z-index: 1; }
 .qc-glanceh { font-family: var(--f12-serif); font-weight: 700; font-size: 15px; line-height: 1.1; color: var(--ink); }
@@ -1625,44 +1633,31 @@
   text-transform: uppercase; color: var(--faint); margin-bottom: 7px;
 }
 
-/* ── the reference panel ──────────────────────────────────────────────────────────────────── */
-/* ⚠️ THE MARGINALIA TREATMENT, REUSED. Read-only surfaces recede by dropping their affordance
-   signals, not by taking a new hue — and the text colour does not change, because a reference
-   panel that is harder to read has failed at the only thing it does. The dashed rim is the one
-   sanctioned exception to dashed-means-provisional; it is scoped here as it is in create. */
-/**
- * ⚠️ IT STRETCHES, AND THE STICKY IS DELETED RATHER THAN LEFT BEHIND (§2a). `position: sticky;
- * top: 0` was how a short panel stayed in view beside a scrolling column; a panel that IS the
- * column's height has nothing to stick to and nowhere to travel, so the property would be a dead
- * declaration that reads as load-bearing to the next person.
- *
- * ⚠️ ITS OWN FLEX COLUMN IS WHAT LETS THE SLACK LAND SOMEWHERE. Stretching a block would leave the
- * extra height below the last row as a gap inside the frame; as a column with the last row taking
- * the slack, the rows keep their rhythm and the stamp sits at the foot.
- */
-.qr-ref {
-  width: 300px; flex: none; align-self: stretch;
-  display: flex; flex-direction: column;
-  background: var(--qc-ref-plate, var(--paper)); border-radius: 11px;
-  border: 1px dashed var(--qc-ref-rim, var(--hairline)); overflow: hidden;
-}
-.qr-refcap { padding: 11px 13px; box-shadow: inset 0 -1px 0 var(--qc-ref-rule, var(--hairline)); }
-.qr-reft { font-family: var(--f12-serif); font-size: 14px; font-weight: 500; color: var(--ink); }
-.qr-refsub {
-  font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.13em; text-transform: uppercase;
-  color: var(--faint); margin-top: 3px;
-}
-.qr-refrow { padding: 9px 13px; box-shadow: inset 0 -1px 0 var(--qc-ref-rule, var(--hairline)); }
-.qr-refrow:last-child { box-shadow: none; flex: 1; }
-.qr-reflb {
-  font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--faint); margin-bottom: 4px;
-}
-.qr-reftx { font-size: 12px; line-height: 1.4; color: var(--ink); }
+/* ⚠️ THE RECORD JOURNEY'S OWN REFERENCE PANEL IS DELETED (Pack A §2). `.qr-ref` and its `qr-ref*`
+   children were a SECOND chassis for the same job — a 300px stretched frame with a "FOR REFERENCE"
+   caption bar — beside create's `.qc-ctx`. Measured, the two had drifted to 326x427 against
+   300x642 with different `align-self`, and neither was wrong on its own terms. Record renders
+   `AgentContextPanel` now; only the ROWS differ.
 
-/* Below the breakpoint the form takes the width to itself, as create's does — a squeezed
-   reference table wraps every row to three lines and costs the form its measure. */
-@media (max-width: 1100px) { .qr-ref { display: none; } }
+   ⚠️ THE `--qc-ref-*` TOKENS STAY. They are create's marginalia treatment (`--qc-ref-plate`,
+   `--qc-ref-rim`, `--qc-ref-rule` in index.css) and `.qc-ctx` is a live consumer — deleting them
+   with these rules would have taken the surviving panel's rim with it. Nothing here is dead. */
+/* ── the record panel's rows, inside the shared chassis ─────────────────────────────────────── */
+.qc-ctxrow { padding: 9px 0; box-shadow: inset 0 -1px 0 var(--qc-ref-rule, var(--hairline)); }
+.qc-ctxrow:last-child { box-shadow: none; }
+.qc-ctxrk { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); margin-bottom: 3px; }
+.qc-ctxrv { font-size: 12.5px; line-height: 1.45; color: var(--ink-2); }
+
+/* ⚠️ THE BREAKPOINT HIDE IS CREATE'S NOW TOO, and this rule is retired rather than repointed —
+   `.qc-ctx` already carries its own `display: none` below 1100px (line ~715), so a second rule for
+   the same element at the same breakpoint would be one more thing to keep in step for no gain.
+   Below it the form takes the width to itself: a squeezed reference table wraps every row to three
+   lines and costs the form its measure.
+
+   ⚠️ STANDING FLAG, NOT THIS PACK'S: hiding the panel below 1100px means a writer on a 13" laptop
+   in a split window loses the glance entirely during BOTH journeys — including the agent's stated
+   policy, which record's copy leans on. Worth a decision before the mobile pass rather than a
+   rediscovery during it. */
 
 /* ⚠️ THE MOTIF IS SAGE HERE, BURGUNDY IN CREATE — the one visual difference in the two headers,
    and it earns its place: burgundy is the sending colour throughout this app, and this journey is

@@ -24,6 +24,7 @@ import {
 } from "../../lib/responseDraft";
 import { responseRefRows } from "../../lib/responseContext";
 import { agentPrimary } from "../../lib/agentDisplay";
+import { AgentContextPanel } from "./AgentContextPanel";
 
 /** ⚠️ THE ORDER IS DERIVED FROM THE OUTCOME, never a constant. Before one is chosen the stack holds
  *  only the question that decides it — there is nothing honest to put beneath it yet. */
@@ -49,11 +50,19 @@ export interface ResponsePaneProps {
   saving?: boolean;
   /** The date the query went out — the floor the When step's picker is bounded by (§3). */
   sentISO?: string;
+  /**
+   * ⚠️ EVERY query, for the glance panel's history row — and it was missing, so that row never
+   * rendered. `responseRefRows` was being handed a literal `[]`, which made `historyRow` return
+   * null on every reply ever recorded. A row that silently never appears is worse than one that is
+   * absent by design, because nothing about the code says which it is.
+   */
+  queries?: Query[];
 }
 
 export const ResponsePane: React.FC<ResponsePaneProps> = ({
   draft, onChange, query, agent, manuscripts, active, reached,
   onJump, onAdvance, onOutcomeChange, dropped, onSave, canSave = false, saving = false, sentISO,
+  queries = [],
 }) => {
   const set = (patch: Partial<ResponseDraft>) => onChange({ ...draft, ...patch });
   const order = stepsFor(draft.outcome);
@@ -66,7 +75,7 @@ export const ResponsePane: React.FC<ResponsePaneProps> = ({
     onOutcomeChange(next, lost);
   };
   const msTitle = manuscripts.find((m) => m.id === query.manuscriptId)?.title;
-  const rows = responseRefRows(query, agent, [], msTitle);
+  const rows = responseRefRows(query, agent, queries, msTitle, draft.outcome);
   const interval = repliedIn(sentISO, draft.dateArrived);
 
   /* One line each, and only once the step has something to say. */
@@ -220,21 +229,44 @@ export const ResponsePane: React.FC<ResponsePaneProps> = ({
           />
         </div>
 
-        {/* ⚠️ THE PANEL RENDERS ON THE FIRST FRAME — see the module header. It states what is
-            relevant to a REPLY, never to a send. */}
-        {rows.length > 0 && (
-          <aside className="qc-ref qr-ref" aria-label={`What is on file about ${agentPrimary(agent ?? ({} as never)) || "this agent"}`}>
-            <div className="qr-refcap">
-              <div className="qr-reft">{agentPrimary(agent ?? ({} as never)) || "This agent"}</div>
-              <div className="qr-refsub">FOR REFERENCE</div>
-            </div>
-            {rows.map((r) => (
-              <div className="qr-refrow" key={r.label}>
-                <div className="qr-reflb">{r.label}</div>
-                <div className="qr-reftx">{r.text}</div>
-              </div>
-            ))}
-          </aside>
+        {/**
+          * ⚠️ ONE GLANCE PANEL, TWO ROW-SETS (§2). This used to be a second panel — `.qr-ref`, its
+          * own 300px chassis with a "FOR REFERENCE" caption bar — and the two drifted exactly as a
+          * fork does: measured 326×427 with `align-self: flex-start` in create against 300×642 with
+          * `align-self: stretch` here. Neither was wrong on its own terms, which is why per-journey
+          * pixel locks could never have caught it; the lock is now cross-journey EQUALITY.
+          *
+          * ⚠️ NO `position: sticky`, AND THAT IS INHERITED REASONING RATHER THAN AN OMISSION. The
+          * spec asks for a panel that does not scroll away with the flow, and it does not: `.qc-form`
+          * is the scroll container, the panel is its SIBLING, and `.qc-two` itself never scrolls.
+          * Browser-measured on create — scrolling the flow 104px moved the panel 0.0px. There is no
+          * scrolling ancestor for a sticky element to stick within, so the property would resolve to
+          * `relative` and mislead the next reader into thinking it was load-bearing. The chassis's
+          * `align-self: flex-start; height: auto; max-height: 100%` is what delivers the behaviour.
+          *
+          * ⚠️ AND THE STRETCH IS GONE WITH IT. A panel that IS the column's height is a frame around
+          * dead space, and dead space reads as something that failed to load.
+          *
+          * ⚠️ THE POLICY LINE IS SUPPRESSED FOR ONE OUTCOME. The chassis states the agency's no-reply
+          * policy always; the contextual row states it too when the outcome IS "closed — no reply".
+          * The row wins, because it is the row the outcome asked for.
+          */}
+        {agent && (
+          <AgentContextPanel
+            agent={agent}
+            queries={queries}
+            suppressPolicy={draft.outcome === "noreply"}
+            body={
+              <section className="qc-ctxsec">
+                {rows.map((r) => (
+                  <div className="qc-ctxrow" key={r.label}>
+                    <div className="qc-ctxrk">{r.label}</div>
+                    <div className="qc-ctxrv">{r.text}</div>
+                  </div>
+                ))}
+              </section>
+            }
+          />
         )}
       </div>
     </div>

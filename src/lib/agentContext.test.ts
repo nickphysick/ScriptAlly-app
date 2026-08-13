@@ -181,20 +181,31 @@ describe("the panel reads as quieter than the form", () => {
 
   /* The disc is a wash bleeding off the top-right corner — it is what stops the gradient reading
      as a flat tinted strip. The pill must sit ABOVE it or the wash tints it a different green
-     from every other pill in the app. */
-  it("a soft gradient ground with a burgundy disc bleeding off the corner", () => {
-    expect(rule(".qc-glance")).toContain("linear-gradient(135deg, #f4efe6, #faf7f2)");
+     from every other pill in the app.
+     ⚠️ THE CAP IS SAGE NOW (Pack A §2, ref 96). It was a warm cream that belonged to nothing else in
+     the app, so the glance panel was the one card on this surface without the grammar every other
+     card has — and record renders this same chassis, which is what made the divergence visible.
+     Asserted as the TOKENS the reading pane's card heads already read, not as literals. */
+  it("a sage gradient ground with a soft disc bleeding off the corner", () => {
+    const cap = rule(".qc-glance");
+    expect(cap).toContain("linear-gradient(180deg, var(--sage-band), var(--sage-band-2))");
+    expect(cap, "the cap went back to a literal — it must read the shared band tokens")
+      .not.toContain("#f4efe6");
     const disc = rule(".qc-glance::after");
     expect(disc).toContain("border-radius: 50%");
-    expect(disc).toContain("rgba(180, 90, 64, 0.05)");
+    expect(disc, "the blush disc was tuned to the cream cap and would read as a stain on sage")
+      .toContain("rgba(90, 110, 88, 0.06)");
     expect(rule(".qc-ctxpill"), "the disc would tint the pill").toContain("z-index: 1");
   });
 
+  /* ⚠️ THE CHIP FOLLOWS THE CAP. A pink-bordered chip on a sage band reads as a control that
+     wandered in from another surface; the reading pane's own card heads put a translucent paper
+     chip on this gradient, which is what this is. Bordered either way — the point of the case. */
   it("the person mark is bordered, not a bare glyph", () => {
     const mk = rule(".qc-glancemk");
     expect(mk).toContain("width: 30px");
-    expect(mk).toContain("var(--pink-b)");
-    expect(mk).toContain("var(--pink-i)");
+    expect(mk).toContain("var(--sage-edge)");
+    expect(mk).toContain("var(--sageD)");
   });
 
   it("but the one fact the left column does not carry survives — their door", () => {
