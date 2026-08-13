@@ -282,7 +282,11 @@ describe("Enter accepts and advances; ⌘↵ saves", () => {
   });
 
   it("⌘/Ctrl+Enter saves, gated on the same readiness as the buttons", () => {
-    expect(queries).toContain('(e.key === "Enter") && (e.metaKey || e.ctrlKey)');
+    /* ⚠️ THE GUARD INVERTED WHEN ESCAPE MOVED OUT (§3). This effect used to handle two keys, so it
+       tested Enter POSITIVELY and fell through to the Escape branch; Escape belongs to the sheet's
+       overlay primitive now, leaving one key and an early return. Same gate, same readiness, one
+       fewer responsibility — matched on the readiness check below, which is the part that matters. */
+    expect(queries).toContain('if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;');
     expect(queries, "the shortcut must not do what a disabled button would not")
       .toContain("if (!createReadyRef.current || createSavingRef.current) return;");
   });

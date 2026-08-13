@@ -30,12 +30,23 @@ describe("⚠️ BOTH ARE SHEETS OVER THE PAGE, NEVER ROUTES", () => {
     }
   });
 
+  /* ⚠️ THE MECHANISM MOVED, THE GUARANTEE DID NOT (§3). The scroll lock and the focus restore were
+     inlined in every sheet that wanted them — the same twenty lines, copied. They live in
+     `useOverlay` now, so a sheet DEMONSTRATES this by composing the primitive rather than by
+     containing the lines, and the primitive itself is asserted once, below.
+     ⚠️ TAGS STILL INLINES ITS OWN and has not been migrated: it was not one of the two copies §3
+     extracted, and folding a third call site in unreviewed is how an extraction quietly changes
+     behaviour. Stated rather than skipped, so the remaining copy is visible. */
   it("both are modal dialogs that lock the stage's scroll and return focus on close", () => {
+    const overlay = readFileSync(new URL("../shell/useOverlay.ts", import.meta.url), "utf8");
+    expect(overlay, "the primitive stopped locking the stage").toContain("lockStageScroll()");
+    expect(overlay, "the primitive stopped returning focus to the invoker").toContain("invoker?.focus?.()");
     for (const [name, src] of [["settings", settings], ["tags", tagsSheet]] as const) {
       expect(src, name).toContain('role="dialog"');
       expect(src, name).toContain('aria-modal="true"');
-      expect(src, name).toContain("lockStageScroll()");
-      expect(src, name).toContain("invoker?.focus?.()");
+      const composed = src.includes("useOverlay(");
+      const inlined = src.includes("lockStageScroll()") && src.includes("invoker?.focus?.()");
+      expect(composed || inlined, `${name} neither composes useOverlay nor locks and restores itself`).toBe(true);
     }
   });
 

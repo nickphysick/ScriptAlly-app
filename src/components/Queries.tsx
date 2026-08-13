@@ -1265,44 +1265,35 @@ export const Queries: React.FC<{
   const createSavingRef = useRef(false);
   const saveCreateRef = useRef<() => void>(() => {});
 
-  // v4 P2 — Esc leaves create mode. Declared here (not with the other create handlers) because it
-  // reads the popover state above: an open Filter/Sort popover owns Escape first.
+  /**
+   * ⚠️ ESCAPE IS THE SHEET'S NOW (§3), AND THERE MUST BE EXACTLY ONE. Two window-level listeners
+   * both calling `closeCreate()` would run the dirty guard twice — two confirm dialogs stacked on
+   * one keypress, the second asking about a draft the first has already discarded. `useOverlay`
+   * binds it for both journeys, from the first frame of the entrance, which is what the deleted
+   * record-side comment was protecting and remains true.
+   *
+   * ⚠️ THE POPOVER GATE (`filterPopOpen || sortPopOpen`) WENT WITH THEM, AND IS NOT NEEDED. It let
+   * an open Filter/Sort popover own Escape first — a real precedence problem while the journey and
+   * the list controls shared one page-level listener. They no longer do: the popovers are in the
+   * list head BEHIND the scrim, on a background that is `inert` while the sheet is open, so neither
+   * can be open at the same time as a journey.
+   *
+   * What is kept below is the half that was never about Escape.
+   */
+  // ⌘/Ctrl+Enter SAVES FROM ANYWHERE in create mode — including inside the notes textarea, where
+  // plain Enter is a newline and therefore cannot be the finish key. Gated on the same readiness
+  // the buttons read, so the shortcut can never do what a disabled button would not.
   useEffect(() => {
     if (!creating) return;
     const onKey = (e: KeyboardEvent) => {
-      /* ⌘/Ctrl+Enter SAVES FROM ANYWHERE in create mode — including inside the notes textarea,
-         where plain Enter is a newline and therefore cannot be the finish key. Gated on the same
-         readiness the buttons read, so the shortcut can never do what a disabled button would
-         not. */
-      if ((e.key === "Enter") && (e.metaKey || e.ctrlKey)) {
-        if (!createReadyRef.current || createSavingRef.current) return;
-        e.preventDefault();
-        saveCreateRef.current();
-        return;
-      }
-      if (e.key !== "Escape" || filterPopOpen || sortPopOpen) return;
+      if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
+      if (!createReadyRef.current || createSavingRef.current) return;
       e.preventDefault();
-      closeCreate();
+      saveCreateRef.current();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [creating, createDraft, createBase, filterPopOpen, sortPopOpen]);
-
-  /* Esc leaves the response takeover, exactly as it leaves create's — and it is live from the
-     moment the takeover opens, not once it has finished arriving, so a writer who opened it by
-     accident does not have to sit through the entrance to undo it. */
-  useEffect(() => {
-    if (!recording) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape" || filterPopOpen || sortPopOpen) return;
-      e.preventDefault();
-      closeRecord();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [recording, respDraft, respBase, respCancelling, filterPopOpen, sortPopOpen]);
+  }, [creating]);
 
   // Portalled popovers anchor to their icon triggers via the codebase's fixed-position utility
   // (chrome revision — the list pane keeps overflow:hidden; the portal escapes the clip).
@@ -3458,6 +3449,13 @@ export const Queries: React.FC<{
               open={creating || recording}
               register={recording ? "record" : "create"}
               ariaLabel={recording ? "Recording a response" : "Logging a new query"}
+              /* ⚠️ ONE EXIT, THREE ROUTES (§3). Escape, a backdrop click and the dock's Cancel all
+                 call this — which is the SAME handler Cancel already called, so the dirty guard is
+                 inherited rather than rebuilt. `closeCreate` / `closeRecord` diff the draft against
+                 the baseline captured at open and confirm only when it is dirty; an untouched sheet
+                 closes silently, and every seeded default (today's date, the house nudge, a
+                 pre-selected manuscript) is part of that baseline and therefore already clean. */
+              onRequestClose={() => (recording ? closeRecord() : closeCreate())}
               /* ⚠️ THE SAME THREE CLASSES, ON THE NEW FRAME. They were a template literal on the
                  pane and stay one here — the classes did not change, only what wears them, and
                  keeping the expression shape means the locks that guard them still read as prose

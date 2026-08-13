@@ -161,13 +161,29 @@ describe("the door still asks before it leaves", () => {
 
   /* Esc is bound for as long as create mode is open, so it works DURING the entrance too — the
      writer who opened this by accident does not have to wait 650ms to undo it. */
-  it("Escape is live from the moment create mode opens, not once it has finished arriving", () => {
-    const at = queries.indexOf("if (!creating) return;");
-    expect(at, "the Escape effect's gate is missing").toBeGreaterThan(-1);
-    const effect = queries.slice(at, queries.indexOf("window.addEventListener(\"keydown\", onKey);", at));
-    expect(effect).not.toBe("");
-    expect(effect, "Escape must not wait on the entrance").not.toContain("createEntering");
-    expect(effect).toContain("closeCreate();");
+  /**
+   * ⚠️ ESCAPE LEFT THIS FILE FOR THE SHEET (§3), AND THE GUARANTEE IS UNCHANGED. It used to be a
+   * page-level `useEffect` gated on `creating`; it is now bound by `useOverlay`, which the journey
+   * sheet mounts. What this case protects — that Escape works DURING the entrance rather than after
+   * it — is if anything better served there: the listener is on the window and armed at mount, so
+   * it is live on the first frame of the 420ms lay-down.
+   *
+   * ⚠️ AND THERE MUST BE EXACTLY ONE. Two window listeners both calling `closeCreate()` would run
+   * the dirty guard twice — two confirms on one keypress, the second asking about a draft the first
+   * already discarded. That is what the second half of this case now checks.
+   */
+  it("Escape is live from the moment the sheet opens, and is bound in exactly one place", () => {
+    const overlay = read("../components/shell/useOverlay.ts");
+    expect(overlay, "the primitive stopped binding Escape").toContain('if (e.key !== "Escape") return;');
+    expect(overlay, "Escape must not wait on the entrance — window-bound, armed at mount")
+      .toContain('window.addEventListener("keydown", onKey, captureEscape)');
+    /* the sheet routes it at the page's one exit, which is the same handler Cancel calls */
+    expect(queries, "the sheet stopped routing Escape through the page's exit")
+      .toContain("onRequestClose={() => (recording ? closeRecord() : closeCreate())}");
+    /* and the page's own copies are gone: no keydown listener left that closes a journey */
+    const code = queries.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code, "a second Escape handler came back — the dirty guard would run twice")
+      .not.toMatch(/e\.key !== "Escape"/);
   });
 });
 

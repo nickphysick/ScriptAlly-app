@@ -15,14 +15,27 @@ const sheet = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "TaskSe
 const page = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "ToDoPage.tsx"), "utf8");
 
 describe("TaskSettingsSheet — source locks", () => {
-  it("reuses the journey presentation: scrim + sheet + lockStageScroll + Tab trap + exit + Esc", () => {
+  /* ⚠️ "REUSES THE JOURNEY PRESENTATION" IS NOW LITERALLY TRUE (§3). It used to mean "contains the
+     same twenty lines as FocusFlow"; the scroll lock, the focus capture and return, the Tab trap
+     and the backdrop test are one primitive, and this sheet composes it. The obligations are
+     asserted where they now live; what stays asserted HERE is what is this sheet's own — the
+     surfaces, the exit, and the fact that a backdrop click CLOSES rather than nudging, because
+     there is no staged model to lose. */
+  it("reuses the journey presentation by composing the shared overlay primitive", () => {
     expect(sheet).toContain('className="tdb-ff"');
     expect(sheet).toContain('className="tdb-ffsheet tdb-tset"');
-    expect(sheet).toContain("lockStageScroll()");
-    expect(sheet).toContain('e.key !== "Tab"');
+    expect(sheet, "the sheet stopped composing the primitive").toContain("useOverlay(rootRef");
+    expect(sheet, "the trap is no longer wired to the root").toContain("onKeyDown={trapTab}");
+    expect(sheet, "the backdrop test is no longer wired to the root").toContain("onClick={scrimClick}");
+    expect(sheet, "Escape stopped routing to the close").toContain("onEscape: onClose");
+    expect(sheet, "a backdrop click stopped closing — this sheet has nothing staged to lose")
+      .toContain("onScrimClick: onClose");
     // C1 — the exit is the shared corner circle on the wrapper (the labelled pill is retired)
     expect(sheet).toContain('className="tdb-ffx" aria-label="Back to my desk" onClick={onClose}');
-    expect(sheet).toContain('e.key === "Escape"');
+    /* and the obligations themselves, once, where they live */
+    const overlay = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "..", "shell", "useOverlay.ts"), "utf8");
+    expect(overlay).toContain("lockStageScroll()");
+    expect(overlay).toContain('e.key !== "Tab"');
   });
   it("switches apply immediately (no staged model): role=switch → updateUserProfile(setTypeMute)", () => {
     expect(sheet).toContain('role="switch"');

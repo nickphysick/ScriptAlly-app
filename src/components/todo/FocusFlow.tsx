@@ -35,7 +35,7 @@ import { JOURNEY_ART, JourneyArtKey } from "./journeyArt";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { OfferDecision } from "../../lib/offerDecision";
 import { notifyGroups, reminderFields, NotifyRow } from "../../lib/offerNotify";
-import { lockStageScroll } from "../../lib/stageScroll";
+import { useOverlay } from "../shell/useOverlay";
 import { reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, SeedCandidate } from "../../lib/todoBoard";
 import { clampSnoozeDays } from "../../lib/todoActions";
 import { agentPrimary } from "../../lib/agentDisplay";
@@ -156,28 +156,22 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   // invoking control, trapped in the sheet, and returned on close. Scrim clicks NUDGE, never close.
   const rootRef = useRef<HTMLDivElement>(null);
   const [nudged, setNudged] = useState(false);
-  useEffect(() => {
-    const invoker = document.activeElement as HTMLElement | null;
-    const release = lockStageScroll();
-    rootRef.current?.focus();
-    return () => { release(); invoker?.focus?.(); };
-  }, []);
-  const trapTab = (e: React.KeyboardEvent) => {
-    if (e.key !== "Tab") return;
-    const root = rootRef.current;
-    if (!root) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
-      .filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
-    if (!els.length) return;
-    const first = els[0];
-    const last = els[els.length - 1];
-    if (e.shiftKey && (document.activeElement === first || document.activeElement === root)) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  };
-  const scrimClick = (e: React.MouseEvent) => {
-    const t = e.target as HTMLElement;
-    if (!reduce && (t.classList.contains("tdb-ff") || t.classList.contains("tdb-ffstage"))) setNudged(true);
-  };
+  /* ⚠️ THE PRESENTATION IS THE SHARED PRIMITIVE NOW (§3). Focus capture and return, the
+     stage-scroll lock and the Tab trap were the same twenty lines here and in
+     `TaskSettingsSheet.tsx`; they live in `useOverlay` and this file no longer keeps a copy.
+
+     ⚠️ WHAT STAYS THIS FILE'S OWN IS THE BACKDROP MEANING, and it is the opposite of the settings
+     sheet's: a stray click on the scrim NUDGES rather than closes, because this journey holds a
+     STAGED model that a misplaced click must not discard. That difference is why the primitive
+     takes `onScrimClick` instead of assuming one.
+
+     ⚠️ AND ESCAPE STAYS HERE TOO, deliberately. It routes through `requestExit`, which is async and
+     may open a confirm, and it reads `staged.length` — so it is a handler with its own dependencies
+     rather than the primitive's plain callback. `onEscape` is omitted for exactly this case. */
+  const { trapTab, scrimClick } = useOverlay(rootRef, {
+    scrimClasses: ["tdb-ff", "tdb-ffstage"],
+    onScrimClick: () => { if (!reduce) setNudged(true); },
+  });
   const atReview = qi >= items.length;
   const item = atReview ? undefined : items[qi];
 

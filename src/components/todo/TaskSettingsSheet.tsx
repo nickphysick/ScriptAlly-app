@@ -9,11 +9,11 @@
  * scrim re-derives live, which is the feedback. HIDDEN RIGHT NOW restores via existing primitives
  * only (rule removal / flag unset). Home is the board (per the pack), not Account Settings.
  */
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { todoPrefs, STALE_MONTHS_CHOICES, staleLabel } from "../../lib/todoPrefs";
 import { TagsSheet } from "./TagsSheet";
-import { lockStageScroll } from "../../lib/stageScroll";
+import { useOverlay } from "../shell/useOverlay";
 import { TASK_SETTING_ROWS, GROUP_LABEL, TaskSettingGroup, typeIsOn, setTypeMute, hiddenItems, HiddenItem } from "../../lib/taskSettings";
 
 const GROUPS: TaskSettingGroup[] = ["urgent", "housekeeping", "rituals"];
@@ -23,33 +23,20 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
   const muted = currentUser?.mutedTaskRules;
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // journey presentation: capture focus, lock scroll, trap Tab, return focus on close
-  useLayoutEffect(() => {
-    const invoker = document.activeElement as HTMLElement | null;
-    const release = lockStageScroll();
-    rootRef.current?.focus();
-    return () => { release(); invoker?.focus?.(); };
-  }, []);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
-  const trapTab = (e: React.KeyboardEvent) => {
-    if (e.key !== "Tab") return;
-    const root = rootRef.current;
-    if (!root) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>('button, [href], input, [tabindex]:not([tabindex="-1"])'))
-      .filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
-    if (!els.length) return;
-    const first = els[0], last = els[els.length - 1];
-    if (e.shiftKey && (document.activeElement === first || document.activeElement === root)) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  };
-  const scrimClick = (e: React.MouseEvent) => {
-    const t = e.target as HTMLElement;
-    if (t.classList.contains("tdb-ff") || t.classList.contains("tdb-ffstage")) onClose(); // no staged model — closing is safe
-  };
+  /* ⚠️ THE JOURNEY PRESENTATION IS THE SHARED PRIMITIVE NOW (§3) — focus capture and return, the
+     stage-scroll lock, the Tab trap and the backdrop test all came out of this file and
+     `FocusFlow.tsx`, where they were the same twenty lines twice. What is left here is the one
+     thing that was genuinely this sheet's own: a backdrop click CLOSES, because every switch has
+     already been written and there is nothing staged to lose. (FocusFlow's nudges instead.)
+
+     The trap also gained `select` and `textarea`, which this copy was missing — an accidental
+     difference rather than a decision, and it meant Tab walked out of this sheet the moment
+     anything with a dropdown was added to it. */
+  const { trapTab, scrimClick } = useOverlay(rootRef, {
+    onEscape: onClose,
+    scrimClasses: ["tdb-ff", "tdb-ffstage"],
+    onScrimClick: onClose,
+  });
 
   const setSwitch = (key: NonNullable<(typeof TASK_SETTING_ROWS)[number]["key"]>, on: boolean) => {
     void updateUserProfile({ mutedTaskRules: setTypeMute(key, muted, on) });

@@ -32,8 +32,9 @@
  * The dock sits INSIDE the sheet, at its foot. It used to be row 4 of WorkspacePageGrid; a dock
  * belongs to the composition it commits, not to the page the composition is lying on top of.
  */
-import React from "react";
+import React, { useRef } from "react";
 import { createPortal } from "react-dom";
+import { useOverlay } from "../shell/useOverlay";
 
 export const QueryJourneySheet: React.FC<{
   open: boolean;
@@ -52,18 +53,71 @@ export const QueryJourneySheet: React.FC<{
   stateClass?: string;
   onAnimationEnd?: React.AnimationEventHandler<HTMLDivElement>;
   dock?: React.ReactNode;
+  /**
+   * Leave — Escape or a backdrop click. §3: this is the SAME handler the dock's Cancel calls, so
+   * all three routes go through the page's existing dirty guard rather than through three ideas of
+   * what leaving means. The guard is not rebuilt here and must not be: `closeCreate` / `closeRecord`
+   * already diff the draft against its baseline and confirm only when it is dirty.
+   */
+  onRequestClose: () => void;
   children: React.ReactNode;
-}> = ({ open, register, ariaLabel, stateClass, onAnimationEnd, dock, children }) => {
+}> = ({ open, ...rest }) => {
+  /* ⚠️ THE INNER SPLIT IS A HOOKS RULE, NOT A STYLE CHOICE. `useOverlay` arms everything on MOUNT —
+     the focus capture, the scroll lock, the background seal — so the component that calls it must
+     exist only while the sheet is open. Calling it up here behind an `if (!open)` would be a
+     conditional hook; calling it unconditionally would lock the page's scroll for the whole
+     session. */
   if (!open || typeof document === "undefined") return null;
+  return <SheetInner {...rest} />;
+};
+
+const SheetInner: React.FC<{
+  register: "create" | "record";
+  ariaLabel: string;
+  stateClass?: string;
+  onAnimationEnd?: React.AnimationEventHandler<HTMLDivElement>;
+  dock?: React.ReactNode;
+  onRequestClose: () => void;
+  children: React.ReactNode;
+}> = ({ register, ariaLabel, stateClass, onAnimationEnd, dock, onRequestClose, children }) => {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  /**
+   * ⚠️ WHAT AN OVERLAY OWES (§3), through the shell's one primitive rather than a third copy of it:
+   * focus trapped and returned to the trigger, Escape from the first frame, a backdrop click, the
+   * page behind sealed to assistive technology and to Tab, and its scroll locked.
+   *
+   * ⚠️ ESCAPE IS *NOT* CAPTURED HERE, and that is deliberate. `captureEscape` exists for chrome
+   * sitting over a page that owns the key for something else; this sheet IS the page's current
+   * business, and swallowing Escape on the capture phase would reach past the sheet into handlers
+   * that have a right to it (an open picker inside the journey closes itself first).
+   *
+   * ⚠️ AND ESCAPE IS BOUND ON THE WINDOW, so it works DURING the 420ms lay-down — before anything
+   * inside has been focused. A writer who opened this by accident should not have to watch it
+   * arrive before undoing it.
+   */
+  const { trapTab, scrimClick } = useOverlay(rootRef, {
+    onEscape: onRequestClose,
+    scrimClasses: ["qc-sheet-layer", "qc-sheet-scrim"],
+    onScrimClick: onRequestClose,
+  });
 
   return createPortal(
-    <div className={`t-f12 qc-sheet-layer qc-sheet--${register}`}>
+    <div
+      ref={rootRef}
+      tabIndex={-1}
+      role="dialog"
+      aria-modal="true"
+      aria-label={ariaLabel}
+      className={`t-f12 qc-sheet-layer qc-sheet--${register}`}
+      onKeyDown={trapTab}
+      onClick={scrimClick}
+    >
       {/* The scrim is a sibling, never the sheet's parent: a parent would put its opacity on the
           sheet's own compositing chain, and the sheet is not what is being dimmed. */}
       <div className="qc-sheet-scrim" aria-hidden="true" />
       <div
         className={`qc-sheet${stateClass ? " " + stateClass : ""}`}
-        aria-label={ariaLabel}
         onAnimationEnd={onAnimationEnd}
       >
         <div className="qc-sheet-body">{children}</div>

@@ -138,7 +138,13 @@ describe("§2 · the desk stays mounted behind it", () => {
   it("the scrim is the sheet's sibling, never its parent", () => {
     /* a parent's opacity lands on the sheet's own compositing chain, and the sheet is not what is
        being dimmed */
-    const layer = sheet.indexOf("qc-sheet-layer");
+    /* ⚠️ ANCHORED ON THE className, NOT ON THE BARE CLASS NAME. `qc-sheet-layer` occurs twice in
+       that file — once as the layer's class and once in `scrimClasses`, where it names what counts
+       as the backdrop — so a bare `indexOf` would measure whichever is written first and keep
+       passing until the two moved apart. Caught by `testAnchors`, this repo's meta-lock for exactly
+       this shape, on this file's first run. */
+    const layer = sheet.indexOf("className={`t-f12 qc-sheet-layer");
+    expect(layer, "the layer's className is missing").toBeGreaterThan(-1);
     const scrim = sheet.indexOf("qc-sheet-scrim", layer);
     const box = sheet.indexOf("className={`qc-sheet$", layer);
     expect(scrim, "the scrim is missing").toBeGreaterThan(-1);
