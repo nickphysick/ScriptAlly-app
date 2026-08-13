@@ -432,3 +432,88 @@
 @media (prefers-reduced-motion: reduce) {
   .ct-crow .grip, .ct-crow .acts, .ct-ck svg { transition: none; }
 }
+
+/* ══ PHASE 3 — add, edit and remove, all inside the card ══════════════════════════════════════ */
+/*
+ * ⚠️ NO MODAL. The Form 11 shell is withdrawn for these three journeys: a writer adding comps is
+ * looking at the hero line they are building and at the rows already in it, and a modal covers
+ * exactly that. The form takes the add row's place, or the edited row's place, and everything else
+ * stays on screen and stays true.
+ */
+.ct-cform { border-top: 1px solid var(--ct-band-hair); background: var(--ct-sect); padding: 18px 20px 16px; animation: ct-land .22s ease; }
+.ct-cform .fhead { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+.ct-cform .ftitle { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; color: var(--ct-ink); }
+.ct-cform .esc { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .1em; text-transform: uppercase; color: var(--ct-label); }
+/* Title / Author · then Publisher / Year / Media · then the match line and the note, full width */
+.ct-fgrid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 12px; }
+.ct-fgrid.three { grid-template-columns: minmax(0, 1fr) 108px 132px; margin-top: 12px; }
+@media (max-width: 640px) { .ct-fgrid, .ct-fgrid.three { grid-template-columns: minmax(0, 1fr); } }
+.ct-fld { min-width: 0; }
+.ct-fld.wide { margin-top: 12px; }
+.ct-fld label { display: block; font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--ct-label); margin-bottom: 6px; }
+.ct-fld label .opt { letter-spacing: 0; text-transform: none; color: var(--ct-label); opacity: .8; }
+.ct-fld input {
+  width: 100%; background: var(--ct-card); border: 1px solid var(--ct-taupe-bd); border-radius: 9px;
+  padding: 10px 12px; font-size: 13.5px; color: var(--ct-ink); font-family: inherit;
+}
+.ct-fld input::placeholder { color: var(--ct-label); }
+.ct-fld input:focus { border-color: var(--ct-accent); box-shadow: 0 0 0 3px var(--ct-pink); outline: none; }
+/* ⚠️ AMBER, NEVER RED — there is no red on this page, and a missing title is not an error worth
+   alarming anyone about. The hairline and the note say the same thing at the same volume. */
+.ct-fld input.warn { border-color: var(--ct-warn-bd); box-shadow: 0 0 0 3px var(--ct-warn-bg); }
+.ct-fnote {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--ct-warn); margin-top: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.ct-fnote button {
+  background: none; border: none; color: var(--ct-accent); text-decoration: underline; cursor: pointer;
+  font-family: inherit; font-size: 8.5px; letter-spacing: .09em; text-transform: uppercase; padding: 0;
+}
+.ct-fbot { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+.ct-fbot .hint { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ct-label); }
+.ct-fbot .btns { margin-left: auto; display: flex; gap: 9px; }
+.ct-btn-pink {
+  background: var(--ct-pink); border: 1px solid var(--ct-pink-bd); color: var(--ct-mocha); border-radius: 11px;
+  padding: 10px 22px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+}
+.ct-btn-pink:hover { background: var(--ct-pink-hover); }
+.ct-btn-quiet {
+  background: var(--ct-card); border: 1px solid var(--ct-taupe-bd); color: var(--ct-ink-soft); border-radius: 10px;
+  padding: 9px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; cursor: pointer;
+}
+.ct-btn-quiet:hover { border-color: var(--ct-accent); color: var(--ct-ink); }
+
+/* ⚠️ THE ROW LANDS AND WARM-FLASHES, so a save that happens below the fold is still findable. The
+   flash is the same gesture SHOW ME uses to point at an existing row — one language for "here". */
+@keyframes ct-land { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes ct-flash { 0% { background: var(--ct-sect); } 100% { background: transparent; } }
+.ct-crow.land { animation: ct-land .34s cubic-bezier(.2, .8, .3, 1), ct-flash 1.5s ease .3s; }
+.ct-crow.leaving { transition: opacity .24s ease, transform .24s ease; opacity: 0; transform: translateX(-10px); }
+
+/* ══ EMPTY STATES — the illustration slots are DELIBERATELY PROVISIONAL ══════════════════════ */
+/*
+ * ⚠️ THE DASHED FRAME AND THE MONO STAMP ARE THE POINT. The artwork is commissioned and not here;
+ * a placeholder that looked finished would quietly become the finished thing. It reads as a slot
+ * awaiting a drawing, and swapping the real asset in touches one import.
+ */
+.ct-estate { padding: 34px 24px 30px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.ct-islot {
+  position: relative; width: 200px; height: 150px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px; border: 1px dashed var(--ct-taupe-bd); border-radius: 14px;
+}
+.ct-islot::after {
+  content: "ILLUSTRATION SLOT · 200×150"; position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .13em; color: var(--ct-label); white-space: nowrap;
+}
+.ct-estate .em { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; margin-top: 8px; color: var(--ct-ink); }
+.ct-estate .es { font-size: 12.5px; color: var(--ct-ink-soft); margin-top: 8px; max-width: 330px; line-height: 1.55; }
+.ct-estate .eacts { display: flex; gap: 9px; margin-top: 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* ⚠️ THE ROW STILL LANDS AND STILL LEAVES — only the tweening goes. A row that vanished with no
+     transition at all would read as a rendering fault rather than as a removal. */
+  .ct-cform, .ct-crow.land { animation: none; }
+  .ct-crow.leaving { transition: none; }
+}

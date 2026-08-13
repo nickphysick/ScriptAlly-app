@@ -24,6 +24,17 @@ export interface ToastOptions {
   undo?: () => void | Promise<void>;
   /** Overrides the "UNDO" button label (upper-cased in the chip). */
   undoLabel?: string;
+  /**
+   * A second, quieter line beneath the message — mono, uppercase.
+   *
+   * ⚠️ IT STATES A CONSEQUENCE, NOT A REPETITION. The comps page uses it to say what the action did
+   * to something the user cannot see from the row they just acted on ("YOUR QUERY LINE HAS BEEN
+   * UPDATED" / "NO CHANGE TO YOUR QUERY LINE"). A subtext that merely rephrases the message earns
+   * nothing and makes every receipt taller.
+   *
+   * Additive: omit it and the toast renders exactly as before.
+   */
+  sub?: string;
   /** ms before auto-dismiss; default 6000. */
   duration?: number;
   /**
@@ -132,7 +143,22 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           <div className="sa-toasts" role="status" aria-live="polite">
             {toasts.map((t) => (
               <div key={t.id} className="sa-toast">
-                <span>{t.message}</span>
+                <span>
+                  {t.message}
+                  {t.sub && <span className="sa-toast-sub">{t.sub}</span>}
+                </span>
+                {/* ⚠️ THE RING IS THE LIFETIME MADE VISIBLE, and it reads the SAME `duration` the
+                    dismissal timer does — passed as a CSS variable rather than restated, so the
+                    drawing cannot disagree with the clock it is drawing. It renders only beside an
+                    UNDO, because a countdown on a toast with nothing to undo is a deadline for a
+                    decision the user does not have to make. */}
+                {t.undo && (
+                  <svg className="sa-toast-ring" viewBox="0 0 24 24" aria-hidden="true"
+                       style={{ ["--sa-toast-life" as string]: `${t.duration ?? 6000}ms` }}>
+                    <circle className="bg" cx="12" cy="12" r="9" />
+                    <circle className="fg" cx="12" cy="12" r="9" />
+                  </svg>
+                )}
                 {t.undo && (
                   <button type="button" className="sa-toast-undo" onClick={() => runUndo(t)}>
                     {(t.undoLabel ?? "UNDO").toUpperCase()}

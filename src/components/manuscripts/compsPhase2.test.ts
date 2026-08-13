@@ -147,14 +147,24 @@ describe("Phase 2 — accessibility carried into the build, not after it", () =>
   });
 });
 
-describe("Phase 2 — the caption advertises nothing that does not exist", () => {
+describe("the page advertises no shortcut it does not have", () => {
   /**
-   * ⚠️ NO `N` HINT UNTIL THE SHORTCUT EXISTS. The inline form and its key land in Phase 3; a hint
-   * now would advertise a shortcut the app does not have — the standing rule that kept ⌘L/⌘N off
-   * the shell's quick actions.
+   * ⚠️ INVERTED BY PHASE 3, NOT DELETED — the RULE never moved. Phase 2 rendered no `N` hint because
+   * the shortcut did not exist; a hint for a dead key is the fault, in either direction. Now that
+   * the handler is here the hint is correct, so the gate asserts the PAIR rather than the absence:
+   * the affordance and the key ship together or neither ships. (Same rule that kept ⌘L/⌘N off the
+   * shell's quick actions while no registry existed.)
    */
-  it("the add row shows no keyboard hint yet", () => {
-    const add = tsx.slice(tsx.indexOf('className="ct-addrow"'), tsx.indexOf("ct-cfoot"));
-    expect(add).not.toContain("ct-kbd");
+  it("the N affordance and the N handler exist together", () => {
+    const add = src.slice(src.indexOf('className="ct-addrow"'), src.indexOf("ct-cfoot"));
+    const hintShown = add.includes("ct-kbd");
+    const handlerExists = /e\.key\.toLowerCase\(\) !== "n"/.test(src);
+    expect(hintShown, "the add row hints a key the page does not handle").toBe(handlerExists);
+  });
+
+  /** ⚠️ AND IT MUST NOT FIRE WHILE SOMEONE IS TYPING — a bare letter shortcut inside a field. */
+  it("the N shortcut stands down inside an editable", () => {
+    expect(src).toMatch(/INPUT\|TEXTAREA\|SELECT/);
+    expect(src).toContain("isContentEditable");
   });
 });

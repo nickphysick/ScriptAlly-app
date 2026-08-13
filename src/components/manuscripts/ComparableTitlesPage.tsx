@@ -22,7 +22,6 @@ import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
 import { PageHeader } from "../shell/PageHeader";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
-import { FormShell } from "../forms/FormShell";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import {
@@ -37,7 +36,8 @@ import {
   MAX_COMPS,
 } from "../../lib/comps";
 import { QueryFormat, compAge, compCounts, compMedia, compRole, currentYear, queryLine } from "../../lib/compsPage";
-import { CompsSavedMark, InYourQueryMark, VerifiedMark } from "./compMarks";
+import { CompsSavedMark, InYourQueryMark, VerifiedMark, CompsEmptySketch, ScoutEmptySketch } from "./compMarks";
+import { useToast } from "../toast/ToastProvider";
 import {
   CompSuggestion,
   SuggestCompsInput,
@@ -76,105 +76,153 @@ function monogram(title: string): string {
 
 
 
-// ── add / edit a comp manually (locked FormShell + BrandDropdown) ──
-const CompForm: React.FC<{
+// ── add / edit a comp, INSIDE the card ──
+/**
+ * ⚠️ THE MODAL IS WITHDRAWN (Amendment 1 §4). A writer adding comps is looking at the hero line they
+ * are building and at the rows already in it, and a Form 11 shell covers exactly that. This takes
+ * the add row's place, or the edited row's place, and everything else stays on screen.
+ */
+const CompInlineForm: React.FC<{
   mode: "add" | "edit";
-  manuscriptTitle: string;
   initial?: CompTitle;
+  /** Every other comp's title — the duplicate check, case-insensitively. */
+  otherTitles: { title: string; index: number }[];
   onSave: (draft: CompDraft) => void;
-  onClose: () => void;
-}> = ({ mode, manuscriptTitle, initial, onSave, onClose }) => {
+  onCancel: () => void;
+  /** SHOW ME — cancels this form and points at the row already holding the title. */
+  onShowExisting: (index: number) => void;
+}> = ({ mode, initial, otherTitles, onSave, onCancel, onShowExisting }) => {
   const [title, setTitle] = useState(initial?.title ?? "");
   const [author, setAuthor] = useState(initial?.author ?? "");
   const [publisher, setPublisher] = useState(initial?.publisher ?? "");
   const [year, setYear] = useState(initial?.year != null ? String(initial.year) : "");
   const [media, setMedia] = useState<CompMedia>(initial?.media ?? "book");
   const [axis, setAxis] = useState(initial?.matchAxis ?? "");
-  /* ⚠️ CARRIED, NOT EDITED — YET, and carrying it is the whole point of this fix. The form has no
-     note input until the pack's rebuild adds "Your note" beneath the match line; until then the
-     draft passes the STORED note through untouched, so saving an edit cannot destroy it. When the
-     input lands this becomes state and nothing else in this component changes. */
-  const note = initial?.note;
+  const [note, setNote] = useState(initial?.note ?? "");
+  /** null = fine · {kind:"empty"} = no title · {kind:"dup"} = already on the list */
+  const [problem, setProblem] = useState<null | { kind: "empty" } | { kind: "dup"; title: string; index: number }>(null);
+  const titleRef = useRef<HTMLInputElement>(null);
 
-  const dirty =
-    title !== (initial?.title ?? "") ||
-    author !== (initial?.author ?? "") ||
-    publisher !== (initial?.publisher ?? "") ||
-    year !== (initial?.year != null ? String(initial.year) : "") ||
-    media !== (initial?.media ?? "book") ||
-    axis !== (initial?.matchAxis ?? "");
+  useEffect(() => { titleRef.current?.focus(); }, []);
 
-  const submit = () => {
+  const commit = () => {
     const parsedYear = Number.parseInt(year, 10);
     onSave({
       title: title.trim(),
       author: author.trim() || undefined,
       publisher: publisher.trim() || undefined,
       year: Number.isFinite(parsedYear) && parsedYear >= 1000 && parsedYear <= 2100 ? parsedYear : undefined,
-      note,
+      note: note.trim() || undefined,
       media,
       matchAxis: axis.trim() || undefined,
     });
-    onClose();
+  };
+
+  /**
+   * ⚠️ PRESENCE-ONLY ON TITLE. A comp is never validated for quality or recency and a save is never
+   * blocked because a year is old — that would be the page appraising through the back door.
+   *
+   * ⚠️ A DUPLICATE IS REPORTED, NEVER REFUSED. The writer may have a reason; the app states the
+   * collision factually and offers both outs. Refusing outright would make it the app's list.
+   */
+  const save = () => {
+    const t = title.trim();
+    if (!t) { setProblem({ kind: "empty" }); titleRef.current?.focus(); return; }
+    const dup = otherTitles.find((o) => o.title.trim().toLowerCase() === t.toLowerCase());
+    if (dup && problem?.kind !== "dup") { setProblem({ kind: "dup", title: dup.title, index: dup.index }); return; }
+    commit();
   };
 
   return (
-    <FormShell
-      preLabel={mode === "edit" ? "Editing a comp for" : "Adding a comp to"}
-      name={manuscriptTitle}
-      avatarInitials={monogram(manuscriptTitle)}
-      buttonLabel={mode === "edit" ? "Save changes" : "Add to list"}
-      submitDisabled={!title.trim()}
-      onSubmit={submit}
-      onClose={onClose}
-      dirty={dirty}
+    <div
+      className="ct-cform"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") { e.preventDefault(); onCancel(); }
+        /* Enter and ⌘↵ both save — the second is the habit, the first is what the form looks like */
+        if (e.key === "Enter") { e.preventDefault(); save(); }
+      }}
     >
-      <label className="sa-label" htmlFor="ct-comp-title">Title</label>
-      <input
-        id="ct-comp-title"
-        className="sa-input"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="The comparable title"
-        autoFocus
-      />
-
-      <div className="sa-row2">
-        <div>
-          <label className="sa-label" htmlFor="ct-comp-author">Author / creator</label>
-          <input id="ct-comp-author" className="sa-input" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="e.g. Susanna Clarke" />
-        </div>
-        <div>
-          <label className="sa-label" htmlFor="ct-comp-pub">Publisher</label>
-          <input id="ct-comp-pub" className="sa-input" value={publisher} onChange={(e) => setPublisher(e.target.value)} placeholder="Imprint / studio" />
-        </div>
+      <div className="fhead">
+        <span className="ftitle">{mode === "edit" ? "Edit comp" : "Add a comp"}</span>
+        <span className="esc">Esc to cancel · ⌘↵ to save</span>
       </div>
 
-      <div className="sa-row2">
-        <div>
-          <label className="sa-label" htmlFor="ct-comp-year">Year</label>
+      <div className="ct-fgrid">
+        <div className="ct-fld">
+          <label htmlFor="ct-f-title">Title</label>
           <input
-            id="ct-comp-year"
-            className="sa-input"
-            inputMode="numeric"
-            value={year}
-            onChange={(e) => setYear(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
-            placeholder="YYYY"
+            id="ct-f-title" ref={titleRef} value={title} autoComplete="off"
+            className={problem ? "warn" : undefined}
+            placeholder="e.g. The Appeal"
+            onChange={(e) => { setTitle(e.target.value); setProblem(null); }}
           />
         </div>
-        <div>
-          <label className="sa-label">Media</label>
-          <BrandDropdown
-            value={media}
-            options={MEDIA_OPTIONS}
-            onChange={(v) => setMedia(v as CompMedia)}
-          />
+        <div className="ct-fld">
+          <label htmlFor="ct-f-author">Author</label>
+          <input id="ct-f-author" value={author} autoComplete="off" placeholder="e.g. Janice Hallett"
+                 onChange={(e) => setAuthor(e.target.value)} />
         </div>
       </div>
 
-      <label className="sa-label" htmlFor="ct-comp-axis">Match axis</label>
-      <input id="ct-comp-axis" className="sa-input" value={axis} onChange={(e) => setAxis(e.target.value)} placeholder="e.g. tone · atmosphere" />
-    </FormShell>
+      <div className="ct-fgrid three">
+        <div className="ct-fld">
+          <label htmlFor="ct-f-pub">Publisher</label>
+          <input id="ct-f-pub" value={publisher} autoComplete="off" placeholder="Imprint / studio"
+                 onChange={(e) => setPublisher(e.target.value)} />
+        </div>
+        <div className="ct-fld">
+          <label htmlFor="ct-f-year">Year</label>
+          <input id="ct-f-year" value={year} inputMode="numeric" maxLength={4} placeholder="2024"
+                 onChange={(e) => setYear(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))} />
+        </div>
+        <div className="ct-fld">
+          <label>Media</label>
+          <BrandDropdown value={media} options={MEDIA_OPTIONS} onChange={(v) => setMedia(v as CompMedia)} />
+        </div>
+      </div>
+
+      {/* ⚠️ ONE FREE-TEXT FIELD, NOT TWO. This IS `matchAxis` — the v5 ref called it "Why it comps"
+          without knowing the field existed. Same storage, the ref's label. */}
+      <div className="ct-fld wide">
+        <label htmlFor="ct-f-axis">Why it comps <span className="opt">— optional</span></label>
+        <input id="ct-f-axis" value={axis} placeholder="One line on what it shares with your book"
+               onChange={(e) => setAxis(e.target.value)} />
+      </div>
+
+      <div className="ct-fld wide">
+        <label htmlFor="ct-f-note">Your note <span className="opt">— optional</span></label>
+        <input id="ct-f-note" value={note} placeholder="Anything you want to remember about it"
+               onChange={(e) => setNote(e.target.value)} />
+      </div>
+
+      {problem && (
+        <div className="ct-fnote">
+          {problem.kind === "empty" ? (
+            <span>A title is needed to save this comp.</span>
+          ) : (
+            <>
+              <span>{problem.title} is already on your list.</span>
+              <button type="button" onClick={() => { onCancel(); onShowExisting(problem.index); }}>Show me</button>
+              <button type="button" onClick={commit}>Add anyway</button>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="ct-fbot">
+        <span className="hint">
+          {mode === "edit"
+            ? "Changes apply to your query line immediately"
+            : "Only a title is required — fill in the rest whenever"}
+        </span>
+        <div className="btns">
+          <button type="button" className="ct-btn-quiet" onClick={onCancel}>Cancel</button>
+          <button type="button" className="ct-btn-pink" onClick={save}>
+            {mode === "edit" ? "Save changes" : "Add comp"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -387,8 +435,17 @@ const ScoutPanel: React.FC<{
         <div className="ct-scout-err">The Scout couldn’t be reached just now — try again in a moment.</div>
       )}
 
+      {/* ⚠️ FACTUAL, NOT CONGRATULATORY — "you've worked through every suggestion", never "well
+          done". And the slot is provisional like its twin in Your comps. */}
       {phase === "empty" && (
-        <div className="ct-notyet">No fresh comps this time — your list may already cover the space.</div>
+        <div className="ct-estate">
+          <div className="ct-islot"><ScoutEmptySketch /></div>
+          <div className="em">Nothing left from this run.</div>
+          <div className="es">
+            You&rsquo;ve worked through every suggestion. Send the Scout out again whenever your
+            manuscript or your list has moved on.
+          </div>
+        </div>
       )}
 
       {phase === "done" && (
@@ -447,12 +504,35 @@ export const ComparableTitlesPage: React.FC<{
      has to model. */
   const [format, setFormat] = useState<QueryFormat>("readers");
   const [dragIndex, setDragIndex] = useState<number | null>(null);
+  /* the row that just landed or was pointed at — the nonce restarts the animation on a repeat */
+  const [flash, setFlash] = useState<{ index: number; nonce: number } | null>(null);
+  /* the row sliding out; the write happens when it has gone, so the receipt and the gap agree */
+  const [leaving, setLeaving] = useState<number | null>(null);
+  const addRowRef = useRef<HTMLButtonElement>(null);
+  const { showToast } = useToast();
   // null = closed; { index: null } = adding; { index } = editing that comp.
   const [formState, setFormState] = useState<{ index: number | null } | null>(null);
 
   const ordered = [...manuscripts].sort(
     (a, b) => Number(isShelvedPresentation(a)) - Number(isShelvedPresentation(b))
   );
+
+  /**
+   * ⚠️ `N` OPENS THE ADD FORM, AND ONLY WHEN NOTHING EDITABLE HAS FOCUS. A bare letter shortcut that
+   * fired while someone was typing a title would insert nothing and open a second form underneath
+   * them. The hint on the add row is rendered now that the key exists — and not before.
+   */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() !== "n" || e.metaKey || e.ctrlKey || e.altKey) return;
+      const el = e.target as HTMLElement | null;
+      if (el && (/^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable)) return;
+      e.preventDefault();
+      setFormState({ index: null });
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
 
   if (!currentUser) return null;
 
@@ -466,6 +546,14 @@ export const ComparableTitlesPage: React.FC<{
   /* derived at render from the record, like every other count on this page — never stored */
   const verifiedCount = comps.filter(isVerified).length;
 
+  /**
+   * ⚠️ AN UNDO INVERTS THE CURRENT LIST, NEVER THE ONE IT WAS BORN WITH. A receipt lives six
+   * seconds, which is long enough for another edit to land first; a closure over `comps` would then
+   * write back a snapshot and silently discard whatever happened in between.
+   */
+  const compsRef = useRef(comps);
+  compsRef.current = comps;
+
   // ── comp writes (the single editing path) ──
   const writeComps = (next: CompTitle[]) => {
     if (!activeMs) return;
@@ -473,13 +561,66 @@ export const ComparableTitlesPage: React.FC<{
   };
   const toggleInQuery = (index: number) =>
     writeComps(comps.map((c, i) => (i === index ? { ...c, inQuery: !c.inQuery } : c)));
-  const removeComp = (index: number) => writeComps(withCompRemoved(comps, index));
   const moveComp = (from: number, to: number) => {
     if (to < 0 || to >= comps.length) return;
     writeComps(withCompMoved(comps, from, to));
   };
-  const addComp = (draft: CompDraft) => writeComps(withCompAdded(comps, { ...draft, source: "user" }));
-  const editComp = (index: number, draft: CompDraft) => writeComps(withCompEdited(comps, index, draft));
+  const pointAt = (index: number) => setFlash({ index, nonce: Date.now() });
+
+  const addComp = (draft: CompDraft) => {
+    const next = withCompAdded(comps, { ...draft, source: "user" });
+    writeComps(next);
+    setFormState(null);
+    pointAt(next.length - 1);
+    /* ⚠️ FOCUS RETURNS TO THE ADD ROW. A writer adds three comps in one sitting; without this each
+       one costs a trip back to the mouse. */
+    window.setTimeout(() => addRowRef.current?.focus(), 40);
+    showToast({
+      message: `${draft.title} added`,
+      sub: "Tick it to use it in your query line",
+      undo: () => writeComps(compsRef.current.filter((c) => c !== next[next.length - 1])),
+    });
+  };
+
+  /** ⚠️ AN EDIT IS UNDOABLE TOO, not just a deletion — the receipt restores the previous values. */
+  const editComp = (index: number, draft: CompDraft) => {
+    const before = comps[index];
+    writeComps(withCompEdited(comps, index, draft));
+    setFormState(null);
+    pointAt(index);
+    showToast({
+      message: `${draft.title} updated`,
+      sub: "Changes saved",
+      undo: () => writeComps(compsRef.current.map((c, i) => (i === index ? before : c))),
+    });
+  };
+
+  /**
+   * ⚠️ THE RECEIPT STATES THE CONSEQUENCE THE ROW CANNOT SHOW. Removing a ticked comp rewrites the
+   * query line above; removing an unticked one does not. The writer is looking at the gap in the
+   * list, not at the sentence, so the receipt is where that difference gets said.
+   *
+   * ⚠️ AND UNDO RESTORES IT AT ITS ORIGINAL INDEX, never appended — position is the query line's
+   * order, so putting it back at the end would quietly rewrite the sentence it was undoing.
+   */
+  const removeComp = (index: number) => {
+    const gone = comps[index];
+    setLeaving(index);
+    window.setTimeout(() => {
+      setLeaving(null);
+      writeComps(withCompRemoved(compsRef.current, index));
+      showToast({
+        message: `${gone.title} removed`,
+        sub: gone.inQuery ? "Your query line has been updated" : "No change to your query line",
+        undo: () => {
+          const back = [...compsRef.current];
+          back.splice(index, 0, gone);
+          writeComps(back);
+          pointAt(index);
+        },
+      });
+    }, 240);
+  };
 
   const copyLine = async () => {
     if (qline.kind !== "line") return;
@@ -621,9 +762,23 @@ export const ComparableTitlesPage: React.FC<{
                 <span className="bmeta">{counts.total} {counts.total === 1 ? "comp" : "comps"}</span>
               </div>
 
-              {comps.length === 0 ? (
-                <div className="ct-listempty">No comps yet — add one below.</div>
-              ) : (
+              {/* ⚠️ A STATE, NOT A FAILURE — and no upsell in this card. Free comps are unlimited;
+                  the Pro boundary is the Scout and nothing else. */}
+              {comps.length === 0 && formState?.index !== null ? (
+                <div className="ct-estate">
+                  <div className="ct-islot"><CompsEmptySketch /></div>
+                  <div className="em">No comps yet.</div>
+                  <div className="es">
+                    Add the books your manuscript sits beside — the ones an agent would recognise — or
+                    let the Scout find them for you.
+                  </div>
+                  <div className="eacts">
+                    <button type="button" className="ct-btn-pink" onClick={() => setFormState({ index: null })}>
+                      Add a comp
+                    </button>
+                  </div>
+                </div>
+              ) : comps.length === 0 ? null : (
                 <>
                   {/* the tick column reads as a column, rather than an unlabelled control */}
                   <div className="ct-thead">
@@ -637,10 +792,26 @@ export const ComparableTitlesPage: React.FC<{
                     const media = compMedia(c);
                     const age = compAge(c, now);
                     const meta = [c.author, c.publisher].filter(Boolean).join(" · ");
+                    /* ⚠️ THE FORM TAKES THE ROW'S PLACE, HOLDING ITS INDEX — the list does not
+                       reflow around an editor appended somewhere else, and the rows above and below
+                       stay exactly where the writer left them. */
+                    if (formState?.index === i) {
+                      return (
+                        <CompInlineForm
+                          key={`edit-${i}`}
+                          mode="edit"
+                          initial={c}
+                          otherTitles={comps.map((x, xi) => ({ title: x.title, index: xi })).filter((x) => x.index !== i)}
+                          onSave={(draft) => editComp(i, draft)}
+                          onCancel={() => setFormState(null)}
+                          onShowExisting={pointAt}
+                        />
+                      );
+                    }
                     return (
                       <div
                         key={i}
-                        className={`ct-crow${dragIndex === i ? " dragging" : ""}`}
+                        className={`ct-crow${dragIndex === i ? " dragging" : ""}${flash?.index === i ? " land" : ""}${leaving === i ? " leaving" : ""}`}
                         draggable
                         onDragStart={() => setDragIndex(i)}
                         onDragEnd={() => setDragIndex(null)}
@@ -722,18 +893,29 @@ export const ComparableTitlesPage: React.FC<{
                 </>
               )}
 
-              {/* ⚠️ NO `N` KEY HINT YET. The shortcut lands with the inline form in Phase 3, and a
-                  hint for a key that does nothing advertises a shortcut the app does not have —
-                  the same standing rule that kept ⌘L/⌘N off the shell's quick actions. */}
-              <button
-                type="button"
-                className="ct-addrow"
-                disabled={comps.length >= MAX_COMPS}
-                onClick={() => setFormState({ index: null })}
-              >
-                <span className="plus"><Plus /></span>
-                {comps.length >= MAX_COMPS ? "This list is full" : "Add a comp manually"}
-              </button>
+              {/* ⚠️ THE HINT APPEARS ONLY NOW THAT THE KEY WORKS. Phase 2 deliberately rendered no
+                  `N` affordance because the shortcut did not exist yet. */}
+              {formState?.index === null ? (
+                <CompInlineForm
+                  mode="add"
+                  otherTitles={comps.map((x, xi) => ({ title: x.title, index: xi }))}
+                  onSave={addComp}
+                  onCancel={() => setFormState(null)}
+                  onShowExisting={pointAt}
+                />
+              ) : (
+                <button
+                  type="button"
+                  ref={addRowRef}
+                  className="ct-addrow"
+                  disabled={comps.length >= MAX_COMPS}
+                  onClick={() => setFormState({ index: null })}
+                >
+                  <span className="plus"><Plus /></span>
+                  {comps.length >= MAX_COMPS ? "This list is full" : "Add a comp manually"}
+                  {comps.length < MAX_COMPS && <span className="ct-kbd">N</span>}
+                </button>
+              )}
 
               {/* ⚠️ A STATEMENT ABOUT THE INDUSTRY, NOT ABOUT THIS LIST. It must never be reworded
                   into advice about the writer's own comps — that is the appraisal the sweep removed,
@@ -772,15 +954,6 @@ export const ComparableTitlesPage: React.FC<{
       </div>
       </WorkspacePageGrid>
 
-      {formState && activeMs && (
-        <CompForm
-          mode={formState.index == null ? "add" : "edit"}
-          manuscriptTitle={activeMs.title}
-          initial={editingComp}
-          onSave={(draft) => (formState.index == null ? addComp(draft) : editComp(formState.index, draft))}
-          onClose={() => setFormState(null)}
-        />
-      )}
     </div>
   );
 };

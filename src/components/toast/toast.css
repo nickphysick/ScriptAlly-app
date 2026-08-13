@@ -19,6 +19,22 @@
   animation: sa-toast-rise 0.18s ease;
 }
 .sa-toast > span { line-height: 1.3; }
+/* the consequence line — quieter than the message, never the same words */
+.sa-toast .sa-toast-sub {
+  display: block; margin-top: 3px; font-family: 'JetBrains Mono', monospace; font-size: 8.5px;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--label, #a2937f);
+}
+/* ⚠️ THE RING DRAINS OVER THE TOAST'S OWN LIFETIME — `--sa-toast-life` is set inline from the same
+   `duration` the dismissal timer uses, so there is one number and the drawing cannot drift from it. */
+.sa-toast .sa-toast-ring { width: 20px; height: 20px; flex: 0 0 auto; margin-left: auto; }
+.sa-toast .sa-toast-ring circle { fill: none; stroke-width: 2.4; }
+.sa-toast .sa-toast-ring .bg { stroke: var(--hair, #eadfd0); }
+.sa-toast .sa-toast-ring .fg {
+  stroke: var(--pink-i, #8a4030); stroke-linecap: round; stroke-dasharray: 56.5;
+  transform: rotate(-90deg); transform-origin: 50% 50%;
+  animation: sa-toast-drain var(--sa-toast-life, 6000ms) linear forwards;
+}
+@keyframes sa-toast-drain { from { stroke-dashoffset: 0; } to { stroke-dashoffset: 56.5; } }
 .sa-toast .sa-toast-undo {
   font-family: var(--f12-mono, ui-monospace, monospace); font-size: 9px; letter-spacing: 0.1em;
   font-weight: 600; color: var(--ink, #1e1a16); background: var(--pink-btn, #f6cfc9);
@@ -77,4 +93,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sa-toast, .sa-confirm-scrim, .sa-confirm { animation: none; }
+  /* ⚠️ THE RING STOPS DRAINING, THE TOAST STILL EXPIRES. Suppressing the animation must not be read
+     as suppressing the deadline — the timer is JavaScript and is untouched. The ring simply shows
+     its full circle rather than animating one. */
+  .sa-toast .sa-toast-ring .fg { animation: none; stroke-dashoffset: 0; }
 }
