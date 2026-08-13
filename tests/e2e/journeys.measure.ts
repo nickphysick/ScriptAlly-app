@@ -189,7 +189,11 @@ test("§4 — browsing, create, record: the panes scroll and the page does not",
      cramped rather than wrong, which is why it survived. It takes the work area now. */
   expect(rec.takeBody!.w, "the response takeover is squeezed — something is still sharing the work area").toBeGreaterThan(800);
   expect(rec.steps!.overflowY, "the step flow does not scroll internally").toMatch(/auto|scroll/);
-  expect(rec.ref!.position, "the reference panel is not sticky").toBe("sticky");
+  /* ⚠️ REVERSED (rhythm §2a): the panel STRETCHES to the column's height now, so there is nothing
+     to stick to and nowhere to travel — the sticky was deleted rather than left as a dead property
+     that reads as load-bearing. What matters is that it reaches the foot, which is asserted in
+     qcRhythm at all three widths; here we only guard against the sticky coming back. */
+  expect(rec.ref!.position, "the sticky came back on a panel that fills its column").not.toBe("sticky");
   expect(rec.zeroKids, `a box measures 0 while holding content: ${rec.zeroKids.join(" · ")}`).toEqual([]);
 });
 

@@ -380,9 +380,19 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
       `the content's left edge differs across pages: ${JSON.stringify(withContent.map((x) => [x.page, x.contentL]))}`).toHaveLength(1);
 
     /* ══ §2 — ONE GAP, 70px, PAID ONCE ══════════════════════════════════════════════════════ */
+    /**
+     * ⚠️ ONE PAGE HAS A SANCTIONED OVERRIDE, AND IT IS NAMED RATHER THAN EXCUSED. Query Centre
+     * starts its content 18px below the band instead of 70 — a deliberate page-scoped exception
+     * (rhythm §1a): it is the most-visited workspace and earns a tighter start. Relaxing this check
+     * to "whatever each page says" would let the other nine drift silently, which is the whole
+     * reason it compares across pages. The exception is a literal here so adding a second one is a
+     * decision someone has to write down.
+     */
+    const GAP_OVERRIDE: Record<string, [number, number]> = { "Query Centre": [18, 9] };
     for (const r of all) {
       const [first, second] = String(r.topGap).split("+").map(Number);
-      expect(first, `${r.page}: the resting gap under the hairline is ${first}, not 70`).toBe(70);
+      const [wantRest] = GAP_OVERRIDE[String(r.page)] ?? [70, 35];
+      expect(first, `${r.page}: the resting gap under the hairline is ${first}, not ${wantRest}`).toBe(wantRest);
       expect(second, `${r.page}: the gap is paid twice — the toolbar row AND the scroll row`).toBe(0);
     }
     /* ⚠️ AND THE WORKING GAP, which the first version left unasserted — it read the RESTING value
@@ -391,7 +401,8 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
        unasserted working value is also an unasserted invariance. */
     for (const r of scrollers) {
       const [first, second] = String(r.workGap).split("+").map(Number);
-      expect(first, `${r.page}: the working gap is ${first}, not 35 — the strip is lighter and takes less separation`).toBe(35);
+      const [, wantWork] = GAP_OVERRIDE[String(r.page)] ?? [70, 35];
+      expect(first, `${r.page}: the working gap is ${first}, not ${wantWork} — the strip is lighter and takes less separation`).toBe(wantWork);
       expect(second, `${r.page}: the working gap is paid twice`).toBe(0);
     }
 

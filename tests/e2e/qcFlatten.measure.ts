@@ -81,7 +81,10 @@ const journeyState = (page: Page) => page.evaluate(() => {
     stripH: Math.round(strip.getBoundingClientRect().height),
     stripActions: [...g.querySelectorAll(".wsh-acts button")].map((b) => (b.textContent ?? "").trim()),
     open: !!g.querySelector(".qc-take-body"),
-    inPaneCancel: [...g.querySelectorAll(".qch-acts button")].map((b) => (b.textContent ?? "").trim()),
+    /* ⚠️ THE EXIT MOVED TO THE DOCK (rhythm §3). It was in `.qch-acts` in the journey header; the
+       header keeps identity and progress, the dock carries the actions. The rule this gate exists
+       for is unchanged — a journey must offer exactly one exit, and it must be reachable. */
+    inPaneCancel: [...g.querySelectorAll(".qc-dock-acts button, .qch-acts button")].map((b) => (b.textContent ?? "").trim()),
   };
 });
 
@@ -112,7 +115,9 @@ test("§2 — the strip keeps its band and loses its duplicate exit", async ({ p
   /* and Cancel closes */
   await page.getByRole("button", { name: /^Log query$/i }).first().click();
   await page.waitForTimeout(800);
-  await page.locator(".qch-acts button", { hasText: /^Cancel$/ }).first().click();
+  /* the Cancel is in the dock now (rhythm §3) — the reading above was updated and this click was
+     not, so it waited 7 minutes on a button that had moved one element away */
+  await page.locator(".qc-dock-acts button", { hasText: /^Cancel$/ }).first().click();
   await page.waitForTimeout(900);
   const after = await journeyState(page);
   expect(after.open, "Cancel did not close the journey").toBe(false);
