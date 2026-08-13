@@ -7,6 +7,7 @@ import {
   pitchLine,
   pitchLineText,
   withCompAdded,
+  withCompEdited,
   withCompRemoved,
   MAX_COMPS,
 } from "./comps";
@@ -139,6 +140,69 @@ describe("withCompAdded / withCompRemoved", () => {
   it("refuses to grow past the shelf cap", () => {
     const full = Array.from({ length: MAX_COMPS }, (_, i) => c(`T${i}`));
     expect(withCompAdded(full, c("overflow"))).toBe(full);
+  });
+});
+
+/**
+ * ⚠️ THE REGRESSION THESE GUARD IS SILENT AND CROSS-PAGE. The comps page used to rebuild an edited
+ * comp from the draft alone, so `note` — which that page neither writes nor renders — was destroyed
+ * on every save, and the only place it shows is the Manuscripts card. Nothing on screen changed at
+ * the moment the data went. Verified red against the old `{ ...draft, source, inQuery }` shape
+ * before the fix was believed.
+ */
+describe("withCompEdited", () => {
+  const stored: CompTitle = {
+    title: "Piranesi",
+    author: "Susanna Clarke",
+    publisher: "Bloomsbury",
+    year: 2020,
+    note: "the corridors, the tides",
+    matchAxis: "tone · atmosphere",
+    inQuery: true,
+    source: "suggested",
+  };
+  const shelf: CompTitle[] = [{ title: "Gideon the Ninth", source: "user" }, stored];
+
+  it("round-trips a note through an edit that changes another field", () => {
+    /* the draft the form actually builds — it carries the stored note through untouched */
+    const edited = withCompEdited(shelf, 1, {
+      title: "Piranesi",
+      author: "Susanna Clarke",
+      publisher: "Bloomsbury",
+      year: 2021,
+      note: stored.note,
+      media: "book",
+      matchAxis: "tone · atmosphere",
+    });
+    expect(edited[1].note).toBe("the corridors, the tides");
+    expect(edited[1].year).toBe(2021);
+  });
+
+  it("keeps a note the draft does not carry at all — the shape the bug had", () => {
+    const edited = withCompEdited(shelf, 1, { title: "Piranesi" });
+    expect(edited[1].note).toBe("the corridors, the tides");
+  });
+
+  it("keeps inQuery and source, which are the writer's and the shelf's, never the form's", () => {
+    const edited = withCompEdited(shelf, 1, { title: "Piranesi", note: stored.note });
+    expect(edited[1].inQuery).toBe(true);
+    expect(edited[1].source).toBe("suggested");
+  });
+
+  it("defaults an absent source to user rather than letting it go absent", () => {
+    const edited = withCompEdited([{ title: "Legacy" }], 0, { title: "Legacy" });
+    expect(edited[0].source).toBe("user");
+  });
+
+  it("still lets the form clear a field it does carry", () => {
+    const edited = withCompEdited(shelf, 1, { title: "Piranesi", publisher: undefined });
+    expect(edited[1].publisher).toBeUndefined();
+  });
+
+  it("leaves the other rows alone and does not mutate the input", () => {
+    const edited = withCompEdited(shelf, 1, { title: "Renamed", note: stored.note });
+    expect(edited[0]).toBe(shelf[0]);
+    expect(shelf[1].title).toBe("Piranesi");
   });
 });
 

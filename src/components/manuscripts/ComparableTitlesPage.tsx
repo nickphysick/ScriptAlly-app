@@ -25,7 +25,7 @@ import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { FormShell } from "../forms/FormShell";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
-import { manuscriptComps, withCompAdded, withCompRemoved, MAX_COMPS } from "../../lib/comps";
+import { CompDraft, manuscriptComps, withCompAdded, withCompEdited, withCompRemoved, MAX_COMPS } from "../../lib/comps";
 import { compCounts, compMedia, compRole, currentYear, queryHealth, queryLine, recencyFlag } from "../../lib/compsPage";
 import {
   CompSuggestion,
@@ -81,8 +81,6 @@ export function normalizeComp(c: CompTitle): CompTitle {
   return out;
 }
 
-/** The editable subset of a comp — everything the manual form lets a writer set. */
-type CompDraft = Pick<CompTitle, "title" | "author" | "publisher" | "year" | "media" | "matchAxis">;
 
 // ── the right-of-masthead manuscript selector (design-ref .ms-header) ──
 const CompsMsSelect: React.FC<{
@@ -167,6 +165,11 @@ const CompForm: React.FC<{
   const [year, setYear] = useState(initial?.year != null ? String(initial.year) : "");
   const [media, setMedia] = useState<CompMedia>(initial?.media ?? "book");
   const [axis, setAxis] = useState(initial?.matchAxis ?? "");
+  /* ⚠️ CARRIED, NOT EDITED — YET, and carrying it is the whole point of this fix. The form has no
+     note input until the pack's rebuild adds "Your note" beneath the match line; until then the
+     draft passes the STORED note through untouched, so saving an edit cannot destroy it. When the
+     input lands this becomes state and nothing else in this component changes. */
+  const note = initial?.note;
 
   const dirty =
     title !== (initial?.title ?? "") ||
@@ -183,6 +186,7 @@ const CompForm: React.FC<{
       author: author.trim() || undefined,
       publisher: publisher.trim() || undefined,
       year: Number.isFinite(parsedYear) && parsedYear >= 1000 && parsedYear <= 2100 ? parsedYear : undefined,
+      note,
       media,
       matchAxis: axis.trim() || undefined,
     });
@@ -543,12 +547,7 @@ export const ComparableTitlesPage: React.FC<{
     writeComps(comps.map((c, i) => (i === index ? { ...c, inQuery: !c.inQuery } : c)));
   const removeComp = (index: number) => writeComps(withCompRemoved(comps, index));
   const addComp = (draft: CompDraft) => writeComps(withCompAdded(comps, { ...draft, source: "user" }));
-  const editComp = (index: number, draft: CompDraft) =>
-    writeComps(
-      comps.map((c, i) =>
-        i === index ? { ...draft, source: c.source ?? "user", inQuery: c.inQuery } : c
-      )
-    );
+  const editComp = (index: number, draft: CompDraft) => writeComps(withCompEdited(comps, index, draft));
 
   const copyLine = async () => {
     if (qline.kind !== "line") return;

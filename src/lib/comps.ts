@@ -79,3 +79,30 @@ export function withCompAdded(comps: CompTitle[], comp: CompTitle): CompTitle[] 
 export function withCompRemoved(comps: CompTitle[], index: number): CompTitle[] {
   return comps.filter((_, i) => i !== index);
 }
+
+/** The editable subset of a comp — every field the manual form sets. */
+export type CompDraft = Pick<
+  CompTitle,
+  "title" | "author" | "publisher" | "year" | "note" | "media" | "matchAxis"
+>;
+
+/**
+ * ⚠️ AN EDIT MERGES ONTO THE STORED COMP — it never rebuilds one from the draft alone, and that
+ * distinction was live data loss rather than a style preference.
+ *
+ * The page used to write `{ ...draft, source, inQuery }`, so any stored field the draft did not
+ * carry was destroyed on every save. `note` was exactly that field: nothing on the comps page
+ * writes it or renders it, and its ONLY renderer is `ManuscriptCompsPane` on the Manuscripts card
+ * — so the loss happened on one page and showed on another, which is why it survived unnoticed.
+ *
+ * Spreading the stored comp FIRST means a field the form does not carry survives by default. That
+ * is the property that was missing; `note` was the instance of it, not the whole of it. Do not
+ * "simplify" this back into a rebuild, and do not fix it by naming `note` explicitly — the next
+ * field the form does not carry would go the same way.
+ *
+ * `inQuery` rides through on the spread (it is the writer's tick, never the form's), and `source`
+ * keeps its long-standing "absent reads as user" default rather than silently going absent.
+ */
+export function withCompEdited(comps: CompTitle[], index: number, draft: CompDraft): CompTitle[] {
+  return comps.map((c, i) => (i === index ? { ...c, ...draft, source: c.source ?? "user" } : c));
+}
