@@ -107,9 +107,12 @@ service cloud.firestore {
         // Structured comps — a list of maps {title, author?, publisher?, year?, note?, media?,
         // matchAxis?, inQuery?, source?}. Per-item shape is client-enforced (rules can't iterate a
         // list); optional-when-present so docs written before any field was added stay updatable.
-        // The comps-page v2 fields (publisher/media/matchAxis/inQuery) needed NO rule change — the
-        // list is only size-capped, and `comps` is already in the update allowlist. Capped at 12.
-        && (!data.keys().hasAll(['comps']) || (data.comps is list && data.comps.size() <= 12))
+        // The comps-page v2 fields (publisher/media/matchAxis/inQuery) and `verification` needed NO
+        // rule change — the list is only size-capped, and `comps` is already in the update allowlist.
+        // Capped at 100: a document-size and write-cost guard, NOT a commercial limit (free users get
+        // unlimited comps; the Pro boundary is the Scout). ARTEFACT-LOCKED to MAX_COMPS in
+        // src/lib/comps.ts — if the two drift, the client permits a write this rule denies SILENTLY.
+        && (!data.keys().hasAll(['comps']) || (data.comps is list && data.comps.size() <= 100))
         && data.status is string && (
           data.status == 'Drafting' ||
           data.status == 'Revising' ||

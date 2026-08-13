@@ -725,7 +725,11 @@ export const ComparableTitlesPage: React.FC<{
                   onClick={() => setFormState({ index: null })}
                 >
                   <Plus size={12} />
-                  {comps.length >= MAX_COMPS ? "Shelf full (12)" : "Add a comp manually"}
+                  {/* ⚠️ THE CAP IS NEVER NAMED (baked decision 21). It read "Shelf full (12)",
+                      which advertised a limit — and a stated limit invites the question of how to
+                      raise it, which on this card has no answer and must not grow one. Full states
+                      the fact and offers nothing; there is no counter and no bar anywhere. */}
+                  {comps.length >= MAX_COMPS ? "This list is full" : "Add a comp manually"}
                 </button>
               </div>
             </section>

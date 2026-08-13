@@ -102,8 +102,28 @@ export function compsSearchText(m: Manuscript): string {
     .join(" ");
 }
 
-/** Shelf cap — mirrors the Firestore rules cap (`comps` list ≤ 12). */
-export const MAX_COMPS = 12;
+/**
+ * ⚠️ A DOCUMENT-SIZE AND WRITE-COST GUARD, NEVER A COMMERCIAL CAP (baked decision 21). Free users
+ * get unlimited manual comps; the Pro boundary is the Scout and nothing else. Nothing in the UI may
+ * state this number — no `8 of 100` counter, no progress bar, no upgrade prompt at the limit. If it
+ * is ever reached the add row says the list is full and offers nothing.
+ *
+ * ⚠️ AND THE BINDING CONSTRAINT IS THE WHOLE-ARRAY REWRITE, NOT THE 1 MiB DOCUMENT CEILING. `comps`
+ * is an array on the manuscript document, so EVERY add, edit, remove, tick and reorder rewrites the
+ * entire list. At Firestore's own sizing (string = UTF-8 bytes + 1, number 8, bool 1, map 32 +
+ * fields) a comp with all nine fields at generous lengths is ~1,146 bytes and a typical one ~263 —
+ * so 100 costs ~115 KB worst case and ~26 KB typical per interaction, roughly 11% and 2.5% of the
+ * document budget. That leaves an order of magnitude of headroom while keeping a drag-reorder cheap
+ * on a phone.
+ *
+ * ⚠️ 1,000 WAS REJECTED for a reason worth keeping: at worst-case field lengths it is ~1.15 MB, so
+ * it can EXCEED the document limit — a guard that can be exceeded has stopped guarding.
+ *
+ * ⚠️ ARTEFACT-LOCKED TO `firestore.rules`. The rules cap the same list, and if the two disagree the
+ * client permits a write the rules reject — which is denied SILENTLY, the same class of fault as the
+ * affectedKeys allowlist. Change both together; `compsCap.test.ts` fails if they drift.
+ */
+export const MAX_COMPS = 100;
 
 /**
  * A comp published five or more years ago reads as "older" — derived at render, never stored.
