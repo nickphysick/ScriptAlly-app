@@ -20,6 +20,37 @@ const rule = (sel: string): string => {
   return i < 0 ? "" : css.slice(i, css.indexOf("}", i) + 1);
 };
 
+/**
+ * EVERY block whose selector list mentions `sel`, joined.
+ *
+ * ⚠️ `rule()` READS THE FIRST MATCH, AND A GROUPED SELECTOR MAKES THAT AMBIGUOUS — the trap CLAUDE.md
+ * records twice, and §3's own shared rule created a third instance of it. `.f12-hero .f12-bigav,\n
+ * .f12-heroband .f12-bigav { … }` means a first-match slice for the band finds the SHARED block and
+ * never reaches the size-only one, so an assertion about scale reads the wrong rule and fails while
+ * describing something true.
+ *
+ * The repo offers two fixes and prefers folding the shared property into each selector's own rule —
+ * but here the SHARING is the point: one declaration list is what stops the disc drifting between
+ * the two containers again. So the other fix applies: the helper joins every block.
+ */
+const rules = (sel: string): string => {
+  /* Split on block ends and keep every block whose SELECTOR half mentions `sel`. Plainer than a
+     regex, and it cannot be defeated by a selector list, a newline between selectors, or the
+     escaping of a dotted class name. */
+  const out: string[] = [];
+  for (const chunk of css.split("}")) {
+    const brace = chunk.lastIndexOf("{");
+    if (brace < 0) continue;
+    const selector = chunk.slice(0, brace);
+    if (!selector.includes(sel)) continue;
+    /* skip a comment that merely names the selector — a rule about code is asserted against code */
+    if (selector.replace(/\/\*[\s\S]*?\*\//g, "").includes(sel)) {
+      out.push(selector.replace(/\/\*[\s\S]*?\*\//g, "").trim() + " {" + chunk.slice(brace + 1) + "}");
+    }
+  }
+  return out.join("\n");
+};
+
 describe("§1 · the list finishes becoming furniture", () => {
   /**
    * ⚠️ THE FADE HAD ALREADY STOPPED RENDERING, AND ITS MACHINERY HAD NOT. `listFade` was recomputed
@@ -88,5 +119,43 @@ describe("§2 · rows on one grid", () => {
     expect(rule(".f12-row:hover")).toContain("background: var(--panel)");
     expect(rule(".f12-row.f12-sel")).toContain("background: var(--white)");
     expect(rule(".f12-row.f12-sel::before"), "the spine went back to ink").toContain("background: var(--burg)");
+  });
+});
+
+describe("§3 · the hero keeps its initials", () => {
+  /**
+   * ⚠️ A REGRESSION FROM PACK B §1h, AND ITS SHAPE IS THE LESSON. The avatar's whole skin — radius,
+   * fill, ink, centring, serif — was scoped to `.f12-hero`; renaming the container to
+   * `.f12-heroband` brought across only width, height and font-size, so the disc degraded to two
+   * bare letters. Nothing errored: the element rendered, its text was right, and only the treatment
+   * that tied it to the clicked row was gone.
+   *
+   * ⚠️ ONE DECLARATION LIST FOR BOTH SCALES is the fix, not a copy. A second treatment beside the
+   * first is how the two drift apart the next time the disc is edited — which is exactly how this
+   * happened.
+   */
+  it("the disc is declared once, for both containers", () => {
+    const all = rules(".f12-heroband .f12-bigav");
+    expect(all, "the band's avatar has no rule at all — it would render bare text").not.toBe("");
+    /* the disc reaches the band through a selector list that also names the card */
+    expect(all, "the band no longer shares the card's disc").toContain(".f12-hero .f12-bigav");
+    expect(all).toContain("border-radius: 50%");
+    expect(all).toContain("background: var(--pink-av)");
+    expect(all, "the monogram lost its serif").toContain("font-family: var(--f12-serif)");
+  });
+
+  /* Only the SIZE is per-container: a band's height is its row, not its portrait. */
+  it("the two differ by scale and nothing else", () => {
+    expect(rules(".f12-hero .f12-bigav"), "the card's scale went").toContain("width: 76px");
+    expect(rules(".f12-heroband .f12-bigav"), "the band's scale went").toContain("width: 46px");
+    /* exactly one radius declaration across everything that dresses either avatar */
+    const discs = (rules(".f12-bigav").match(/border-radius/g) ?? []).length;
+    expect(discs, "the disc is declared more than once — the two can drift apart again").toBe(1);
+  });
+
+  /* the initials come from the shared helper the row uses, so the two cannot disagree */
+  it("the hero and the row read the same initials", () => {
+    expect(code, "the hero stopped using the shared display helper").toContain("agentInitials(");
+    expect(code).toContain('className="f12-bigav"');
   });
 });
