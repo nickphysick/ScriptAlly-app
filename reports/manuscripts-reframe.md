@@ -630,3 +630,106 @@ Editorial checked on the rendered pane — strip 1, asset 1, textarea 0, meta 0,
 monochrome; the editing card's accent border is the app-wide `--msv-hue`, not a new colour.
 
 **The app itself is auth-gated and was not verified live.**
+
+---
+
+## Phase 4 — Inline editing on the plate
+
+Commit: `manuscripts: inline plate editing` (names `src/lib/genres.ts` and `src/components/forms/GenrePicker.tsx`).
+
+The plate is the form. Title, word count and genre edit where they are rendered; the logline jumps
+to the pitch shelf, which is its home.
+
+### One standing grammar, stated once
+
+`plateEdit.ts` states it and all three obey it: **hover reveals the affordance · click opens it
+seeded with the current value and selects it · Enter saves · Escape cancels and restores · a brief
+mono "Saved" confirms.** Every write goes through the **quiet** writer — including the title, per the
+ruling: the activity feed records the query journey, not field maintenance.
+
+### Genre — what `GenrePicker` already did, and what I extended
+
+Extended **in place**, never wrapped or forked, because a second picker would fork the
+personal-genre creation path.
+
+**It already had** the search-first portalled popover, ghost completion, the visibly-ringed ⏎
+target, the helper line, chips with removal, alias resolution, the personal-genre escape (with its
+cap/junk/dedupe guardrails), single vs multi mode, Escape and outside-click dismissal, and
+ID-not-label storage.
+
+**I added two props**, both optional so every existing caller is unchanged:
+
+- `cap` — at the cap the picker **states the fact and refuses**, rather than silently dropping the
+  click. Three for a manuscript (`MAX_MANUSCRIPT_GENRES`).
+- `ageCategory` — the category's shortcut pills, offered **before typing** and changing with the
+  category.
+
+Plus `COMMON_GENRES_BY_AGE` + `commonGenresFor` in `lib/genres.ts` (additive), because **no age
+dimension existed** in the taxonomy and none is added here — it is a per-category ordering of
+existing ids.
+
+> **⚠️ IT IS A SHORTCUT, NOT A CONSTRAINT, AND THE LOCK SAYS SO.** Every canonical genre stays
+> reachable by typing for every category; nothing validates against the list and nothing warns about
+> a choice absent from it. A Middle Grade horror is a real book. The lock proves it by pointing at
+> `horror`, which appears in **no** shortcut list and is still canonical. An unknown category yields
+> an empty list — no pills, rather than the wrong ones.
+
+### The word-count range retirement
+
+`WORD_COUNT_HINT` is `null` and the plate renders no range, no target, no placeholder range. The
+rejection note is one line stating what is wrong (`Word count is a number.`), locked against
+addressing the writer.
+
+> **⚠️ THE RETIREMENT IS INCOMPLETE AND THAT IS DELIBERATE.** `genreWordCountRange`
+> (`lib/manuscripts.ts`) is still read by **`AddManuscriptFocusForm.tsx:476`** (the placeholder) and
+> **`onboarding/ManuscriptFields.tsx:76`**; `wordCountWhisper` (`lib/manuscriptPage.ts`) survives
+> unrendered. Those files are outside this pass's file set, so the retirement there is **reported,
+> not silently done**. Two small edits when someone is next in them.
+
+Separators are accepted (`50,000`, `84 000`) because **the plate prints them** — rejecting a writer's
+own displayed value would be the field disagreeing with itself. An empty field is `null`, not zero:
+clearing a field is not a claim that the manuscript is empty.
+
+### ⚠️ Deviation — "Edit details" left the plate but not the app
+
+The reframe says the button disappears. **It disappears from the plate**, which is what the change
+was about. The form itself moved into the dossier's ⋯ menu, because **three fields have no inline
+editor and no other surface on this page: status, shelved reason and notes.** Deleting it outright
+would strand them — a functional regression wearing a design decision's clothes. Status leaves that
+form when Phase 6's decision sheet lands; the other two need a home before the form can go. Locked
+in both directions: the menu has it, and `ManuscriptPlate` no longer takes the prop at all.
+
+### ⚠️ Deviation — the genre editor is an inline row, not a popover
+
+`GenrePicker` **portals its own popover**. Nesting it inside a second portalled popover would stack
+two layers for one control. Inline, the picker behaves exactly as it does in every other form.
+
+Relatedly: the prompt says popovers use `PortalMenu`/`splitMenu`. **`PortalMenu` is a grouped
+item-list menu** (`{anchor, groups, openSub, onPick}`) and cannot host a numeric stepper. The shared
+piece that actually matters is **`useFixedMenu`**, the positioning hook `GenrePicker` itself uses,
+and that is what the word-count popover uses — one positioning implementation, not a second.
+
+### Verification
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | green |
+| Vitest | **285 files, 4707 passed, 2 skipped, 0 failed** |
+| `npm run build` | green |
+
+Measured against the built stylesheet:
+
+- **The title does not jump when clicked.** Input vs `<h2>`: same family (Playfair Display), size
+  (34px), weight (600), ink (`rgb(93,64,55)`), line-height (37.4px), and the **glyph left edge is
+  identical — 201 vs 201, drift 0**.
+- Word popover anchored under its trigger, **332 × 122** against a 100px trigger, fits the viewport.
+- Genre row 55px, sitting between the meta line and the logline.
+
+**One dead declaration found and removed:** `.msv-wordpop` carried `min-width: 236px`, but
+`useFixedMenu` writes an **inline** `minWidth` (the trigger's width) and inline always wins —
+measured `100.023px`. It could never apply. The popover sizes to its content instead, and the rule
+now says why rather than carrying a number nobody could read off the page.
+
+**The app itself is auth-gated and was not verified live.** The three editors are stateful, and a
+static harness cannot drive React state — it verified the resting, title-editing, genre-open and
+popover-open states as geometry, which is what a harness may answer.

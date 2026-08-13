@@ -79,6 +79,33 @@ export const CANONICAL_GENRES: CanonicalGenre[] = [
 
 /** Lowercase, fold `&`→"and", strip punctuation to spaces, collapse — the comparison key. So
  *  "Sci-Fi", "sci fi" and "SCIFI"→"sci fi"/"scifi" all normalise to a stable form. */
+/**
+ * A SHORTCUT LIST per age category — the handful of genres offered as one-click pills before the
+ * writer types anything, and nothing more than that.
+ *
+ * ⚠️ IT IS A SHORTCUT, NOT A RECOMMENDATION, AND NOT A CONSTRAINT. Every canonical genre stays
+ * reachable by typing for every category; these are simply the ones a writer in that category most
+ * often reaches for, so the common case is one click instead of eight keystrokes. Nothing validates
+ * against it and nothing warns when a choice is absent from it — a Middle Grade horror is a real
+ * book, and the picker must never imply otherwise.
+ *
+ * ⚠️ EDITORIAL JUDGEMENT WITH NOTHING DERIVING FROM IT. There is no age dimension in
+ * CANONICAL_GENRES and this does not add one; it is a per-category ordering of existing ids. An
+ * unknown category yields an empty list, which renders no pills rather than a wrong set.
+ */
+export const COMMON_GENRES_BY_AGE: Record<string, string[]> = {
+  "Picture Book": ["picture-book", "childrens"],
+  "Early Reader": ["childrens", "action-adventure", "fantasy"],
+  "Middle Grade": ["middle-grade", "fantasy", "action-adventure", "mystery", "contemporary"],
+  "Young Adult": ["young-adult", "fantasy", "contemporary", "romance", "thriller", "dystopian"],
+  Adult: ["literary-fiction", "commercial-fiction", "crime", "thriller", "romance", "fantasy", "historical-fiction"],
+};
+
+/** The shortcut pills for a category — empty for an unknown one, so nothing wrong is offered. */
+export function commonGenresFor(ageCategory: string | undefined): string[] {
+  return COMMON_GENRES_BY_AGE[(ageCategory ?? "").trim()] ?? [];
+}
+
 export function matchKey(raw: string): string {
   return String(raw)
     .toLowerCase()

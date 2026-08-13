@@ -22,6 +22,8 @@ import {
   resolveGenre,
   genreDisplay,
   normaliseStoredGenre,
+  commonGenresFor,
+  canonicalGenreById,
   type PersonalGenre,
 } from "../../lib/genres";
 import "./genrePicker.css";
@@ -36,7 +38,22 @@ export const GenrePicker: React.FC<{
   onCreatePersonal: (raw: string) => Promise<{ ok: true; id: string; label: string } | { ok: false; reason: string }>;
   /** true (default) = multi-select (agents); false = single (manuscript primary genre). */
   multi?: boolean;
-}> = ({ value, onChange, personal = [], onCreatePersonal, multi = true }) => {
+  /**
+   * ⚠️ EXTENDED IN PLACE for the manuscript plate (reframe Phase 4) rather than wrapped or forked —
+   * a second picker would fork the personal-genre creation path, which is the one thing this
+   * component must stay single-sourced.
+   *
+   * `cap` — the most genres this field accepts. Absent = no cap (every existing caller). At the cap
+   * the picker states the fact and stops adding; it never silently drops a choice.
+   */
+  cap?: number;
+  /**
+   * `ageCategory` — when set, the popover offers that category's shortcut pills BEFORE the writer
+   * types, and they change with the category. A SHORTCUT, never a constraint: every genre stays
+   * reachable by typing, and nothing warns about a choice that is not on the list.
+   */
+  ageCategory?: string;
+}> = ({ value, onChange, personal = [], onCreatePersonal, multi = true, cap, ageCategory }) => {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const { triggerRef, menuStyle } = useFixedMenu<HTMLButtonElement>(open);
@@ -73,6 +90,14 @@ export const GenrePicker: React.FC<{
     ? { id: resolution.id, label: resolution.label, kind: "new" as const }
     : null;
 
+  /** The category's shortcut ids, resolved to labels and minus anything already chosen. */
+  const shortcuts = useMemo(() => {
+    if (!ageCategory) return [] as Opt[];
+    return commonGenresFor(ageCategory)
+      .filter((id) => !selectedIds.has(id))
+      .map((id) => ({ id, label: canonicalGenreById(id)?.label ?? id, personal: false }));
+  }, [ageCategory, selectedIds]);
+
   const visible = useMemo(() => (key ? options.filter((o) => matchKey(o.label).includes(key)) : options), [key, options]);
 
   useEffect(() => {
@@ -87,9 +112,14 @@ export const GenrePicker: React.FC<{
     return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("mousedown", onDown); };
   }, [open]);
 
+  const atCap = cap !== undefined && value.length >= cap;
+
   const toggle = (id: string) => {
     if (multi) {
-      onChange(isOn(id) ? value.filter((v) => normaliseStoredGenre(v, personal) !== id) : [...value, id]);
+      if (isOn(id)) { onChange(value.filter((v) => normaliseStoredGenre(v, personal) !== id)); return; }
+      /* At the cap, adding is refused rather than silently dropped — the helper line says so. */
+      if (atCap) return;
+      onChange([...value, id]);
     } else {
       onChange([id]);
       setOpen(false);
@@ -105,6 +135,8 @@ export const GenrePicker: React.FC<{
   };
 
   const helper: React.ReactNode = (() => {
+    /* The cap is stated whether or not anything is typed — it is why the next click will do nothing. */
+    if (atCap) return <span className="gp-warn">{cap} genres is the most this holds. Remove one to add another.</span>;
     if (!q.trim()) return null;
     if (target?.kind === "existing") return isOn(target.id) ? <><b>{target.label}</b> is already added.</> : <>⏎ adds <b>{target.label}</b>.</>;
     if (target?.kind === "new") return <>⏎ to add “{target.label}” as your own.</>;
@@ -157,6 +189,17 @@ export const GenrePicker: React.FC<{
               />
             </div>
             {helper && <div className="gp-note">{helper}</div>}
+            {/* Shortcut pills for the chosen age category — only before typing, and never a filter
+                on the list below: everything stays reachable. */}
+            {!q.trim() && !atCap && shortcuts.length > 0 && (
+              <div className="gp-common">
+                {shortcuts.map((o) => (
+                  <button key={o.id} type="button" className="gp-commonpill" onClick={() => toggle(o.id)}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="gp-list">
               {visible.filter((o) => !o.personal).map(renderOpt)}
               {visible.some((o) => o.personal) && <div className="gp-group">Your genres</div>}

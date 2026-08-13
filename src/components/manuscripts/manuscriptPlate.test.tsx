@@ -143,18 +143,21 @@ describe("the figures are DERIVED from queries, never passed as stored counters"
   });
 });
 
-describe("the two actions", () => {
-  it("both render, and Send is the primary", () => {
+describe("the plate's actions", () => {
+  /**
+   * ⚠️ "EDIT DETAILS" IS GONE FROM THE PLATE — the plate IS the form now. It survives in the
+   * dossier's ⋯ menu because status, shelved reason and notes have no inline editor and no other
+   * surface; that is asserted in manuscriptDossier.test.tsx, where the menu lives.
+   */
+  it("carries Send a query and no Edit details button", () => {
     const html = plate();
-    expect(html).toContain("Edit details");
     expect(html).toContain("Send a query");
     expect(html).toContain("msv-primary");
+    expect(html).not.toContain("Edit details");
   });
 
-  it("⚠️ a shelved manuscript offers Edit but NOT Send — the plate list's existing rule", () => {
-    const html = plate({ shelved: true });
-    expect(html).toContain("Edit details");
-    expect(html).not.toContain("Send a query");
+  it("⚠️ a shelved manuscript offers NO Send — the plate list's existing rule", () => {
+    expect(plate({ shelved: true })).not.toContain("Send a query");
   });
 });
 

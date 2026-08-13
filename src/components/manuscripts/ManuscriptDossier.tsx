@@ -20,7 +20,7 @@
  * component that called `Date.now()` itself could not be asserted against a fixed date.
  */
 import React, { useState } from "react";
-import { MoreHorizontal, Archive, Trash2 } from "lucide-react";
+import { MoreHorizontal, Archive, Trash2, Pencil } from "lucide-react";
 import { Manuscript, ManuscriptVersion, SubmissionPackage, Query, CompTitle } from "../../types";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { plateStats } from "../../lib/manuscriptPlate";
@@ -32,6 +32,7 @@ import { ManuscriptCompsPane } from "./ManuscriptCompsPane";
 import { ManuscriptPackagesPane } from "./ManuscriptPackagesPane";
 import { ManuscriptPitchPane } from "./ManuscriptPitchPane";
 import { PitchAsset, PitchAssetKey } from "../../lib/manuscriptPitch";
+import { ManuscriptPlateEdit } from "./ManuscriptPlate";
 import { PitchLine } from "../../lib/comps";
 import "./manuscriptLibrary.css";
 
@@ -52,6 +53,14 @@ export interface ManuscriptDossierProps {
   synopsisVersionCount: number;
   synopsisDate: string | null;
   onSavePitch: (key: PitchAssetKey, text: string) => void;
+  /**
+   * The plate's inline editors. Absent → the plate is read-only, which is the state every spec that
+   * predates the reframe still asserts.
+   *
+   * ⚠️ `onLogline` IS WIRED HERE, NOT PASSED THROUGH. The logline is a pitch-shelf asset, so its
+   * edit is a TAB SWITCH to the shelf — one home per asset, and the page never needs to know.
+   */
+  plateEdit?: Omit<ManuscriptPlateEdit, "onLogline">;
   now: number;
   currentYear: number;
   tab: ManuscriptTabKey;
@@ -84,6 +93,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
   synopsisVersionCount,
   synopsisDate,
   onSavePitch,
+  plateEdit,
   now,
   currentYear,
   tab,
@@ -123,7 +133,7 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
           logline={manuscript.logline}
           stats={plateStats(queries)}
           onSendQuery={onSendQuery}
-          onEditDetails={onEditDetails}
+          edit={plateEdit ? { ...plateEdit, onLogline: () => onTabChange("pitch") } : undefined}
           /* Shelve / reactivate / guarded delete — the design draws two actions and this is a third,
              quiet one. It has no other surface on this page; see ManuscriptPlate's prop note. */
           lifecycle={
@@ -143,6 +153,23 @@ export const ManuscriptDossier: React.FC<ManuscriptDossierProps> = ({
                 <>
                   <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
                   <div className="absolute right-0 top-[34px] z-40 bg-white border border-[#e8e0d8] rounded-[11px] shadow-[0_12px_30px_rgba(58,28,20,0.16)] p-1.5 min-w-[186px]">
+                    {/*
+                      ⚠️ "EDIT DETAILS" LIVES HERE NOW, and this is a deliberate deviation from
+                      "the button disappears". It disappears FROM THE PLATE, which is what the
+                      reframe was about — but three fields have no inline editor and no other
+                      surface on this page: STATUS, SHELVED REASON and NOTES. Deleting the form
+                      outright would strand them, which is a functional regression wearing a design
+                      decision's clothes. Status leaves this form when Phase 6's decision sheet
+                      lands; the other two need a home before the form can go.
+                    */}
+                    <button
+                      onClick={() => { setMenuOpen(false); onEditDetails(); }}
+                      className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                      Edit details…
+                    </button>
+                    <div className="h-px bg-[#f0eae2] my-1 mx-1" />
                     <button
                       onClick={() => { setMenuOpen(false); onShelveToggle(); }}
                       className="flex items-center gap-2.5 w-full text-left px-2.5 py-2 rounded-[7px] text-[13px] text-[#3a1c14] hover:bg-[rgba(138,158,136,0.14)] cursor-pointer"

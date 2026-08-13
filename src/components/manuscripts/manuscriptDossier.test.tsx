@@ -11,6 +11,8 @@
  * green typecheck, a green build and 4,632 green tests. The first assertion below is that one.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ManuscriptDossier, ManuscriptDossierProps } from "./ManuscriptDossier";
@@ -108,6 +110,34 @@ describe("the dossier renders one manuscript", () => {
   /** ⚠️ The lifecycle menu has no other home on this page — losing it is a silent regression. */
   it("keeps the shelve/delete affordance", () => {
     expect(doss()).toContain('aria-label="More actions"');
+  });
+
+  /**
+   * ⚠️ "EDIT DETAILS" LEFT THE PLATE AND LANDED HERE, deliberately. The reframe deletes the button
+   * from the plate — the plate is the form — but STATUS, SHELVED REASON and NOTES have no inline
+   * editor and no other surface on this page, so deleting the form outright would strand them.
+   * Status leaves it when Phase 6's decision sheet lands; the other two need a home first.
+   */
+  it("rehomes Edit details into the lifecycle menu rather than deleting the form", () => {
+    const src = readFileSync(resolve(__dirname, "./ManuscriptDossier.tsx"), "utf8");
+    expect(src).toContain("Edit details…");
+    expect(src).toContain("onEditDetails()");
+    /* And it is NOT on the plate — that component no longer takes the prop at all. */
+    const plateSrc = readFileSync(resolve(__dirname, "./ManuscriptPlate.tsx"), "utf8");
+    expect(plateSrc).not.toContain("onEditDetails");
+  });
+
+  /* Editing is opt-in on the plate, and the dossier is the caller that opts in. */
+  it("hands the plate its editors when the page supplies them", () => {
+    const withEdit = doss({
+      plateEdit: {
+        onTitle: noop, onWordCount: noop,
+        genre: { ageCategory: "Adult", ids: ["thriller"], personal: [], onCreatePersonal: async () => ({ ok: false, reason: "x" }), onSave: noop },
+      },
+    });
+    expect(withEdit).toContain("msv-platetitle editable");
+    /* …and stays read-only without them, so neither mode is an accident. */
+    expect(doss()).not.toContain("editable");
   });
 
   it("hides Send a query on a shelved manuscript, and greys its pill", () => {

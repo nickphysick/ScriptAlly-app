@@ -373,3 +373,85 @@
   text-transform: uppercase; color: var(--msv-hue); background: none; border: none;
   border-radius: 18px; padding: 7px 14px; cursor: pointer; white-space: nowrap;
 }
+
+/* ── the plate as a form (reframe Phase 4) ──
+   ⚠️ HOVER REVEALS THE AFFORDANCE, and the tint is --msv-edithov rather than a translucent white:
+   variant D's band IS white, so a white wash on it is invisible. Same reason the stat strip had to
+   be repointed. */
+.msv-platetitle.editable,
+.msv-gp.editable,
+.msv-wc.editable,
+.msv-platelog.editable {
+  cursor: pointer; border-radius: 6px;
+  transition: background 0.12s;
+}
+.msv-platetitle.editable:hover,
+.msv-gp.editable:hover,
+.msv-wc.editable:hover,
+.msv-platelog.editable:hover { background: var(--msv-edithov); }
+.msv-platetitle.editable { margin-left: -6px; padding-left: 6px; padding-right: 6px; }
+
+/* The title input is the title — same face, same size, same ink, so the line does not jump. */
+.msv-titleinput {
+  display: block; width: 100%; margin-left: -7px; padding: 0 6px;
+  background: var(--msv-card); border: 1px solid var(--msv-hue); border-radius: 6px;
+}
+.msv-titleinput:focus { outline: none; }
+
+/* The editable word count and logline are BUTTONS — one tab stop each, one accessible name each. */
+.msv-wc.editable, .msv-platelog.editable {
+  font: inherit; color: inherit; background: none; border: none; padding: 2px 6px;
+  text-align: left;
+}
+.msv-platelog.editable { display: block; }
+
+/* The receipt. Mono, brief, and it never occupies space the layout depends on. */
+.msv-receipt {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--msv-hue);
+}
+
+/* ── genre: an inline row, not a popover (GenrePicker portals its own) ── */
+.msv-genreedit {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  margin-top: 12px; padding: 12px; border-radius: 10px;
+  background: var(--msv-card); border: 1px solid var(--msv-hair);
+}
+.msv-ageseg { display: flex; flex-wrap: wrap; gap: 4px; }
+.msv-agebtn {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; cursor: pointer;
+  background: none; border: 1px solid var(--msv-hair); color: var(--msv-muted);
+  border-radius: 20px; padding: 5px 11px;
+}
+.msv-agebtn:hover { background: var(--msv-edithov); }
+.msv-agebtn.on { background: var(--msv-huec); border-color: var(--msv-hue); color: var(--msv-hue); font-weight: 600; }
+.msv-genredone { margin-left: auto; }
+
+/* ── word count: a small popover, positioned by the shared useFixedMenu ── */
+.msv-wordpop {
+  background: var(--msv-card); border: var(--msv-cardbd); border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(58, 28, 20, 0.16);
+  padding: 12px; z-index: 60;
+  /* ⚠️ NO `min-width` HERE — `useFixedMenu` writes an INLINE `minWidth` (the trigger's width) and
+     inline always wins, so a declaration in this rule can never apply. It sizes to its content:
+     measured 332px against a 100px trigger. Writing one anyway would be a value nobody could read
+     off the page and nobody could change from this file. */
+}
+.msv-wordrow { display: flex; align-items: center; gap: 8px; }
+.msv-wordinput {
+  flex: 1; min-width: 0; text-align: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--msv-ink);
+  background: var(--msv-sub); border: 1px solid var(--msv-hair); border-radius: 8px;
+  padding: 7px 8px;
+}
+.msv-wordinput:focus { outline: none; border-color: var(--msv-hue); }
+.msv-worderr {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--msv-hue); margin-top: 8px;
+}
+.msv-wordfoot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .msv-platetitle.editable, .msv-gp.editable, .msv-wc.editable, .msv-platelog.editable { transition: none; }
+}

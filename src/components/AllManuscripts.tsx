@@ -42,6 +42,7 @@ import { ManuscriptDossier } from "./manuscripts/ManuscriptDossier";
 import { ManuscriptLibraryCard, ManuscriptAddTile } from "./manuscripts/ManuscriptLibraryCard";
 import { pitchAssets, pitchMeter, PitchAssetKey, synopsisVersions } from "../lib/manuscriptPitch";
 import { genreDisplay } from "../lib/genres";
+import { genreList, splitGenres } from "./manuscripts/plateEdit";
 import "./manuscripts/manuscripts.css";
 
 /** Shared with the comps + packages sub-pages — the section's single active-manuscript pointer. */
@@ -54,7 +55,7 @@ interface AllManuscriptsProps {
 }
 
 export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) => {
-  const { currentUser, manuscripts, queries, packages, versions, activities, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved } =
+  const { currentUser, manuscripts, queries, packages, versions, activities, taskFlags, updateManuscript, updateManuscriptQuiet, deleteManuscript, setManuscriptShelved, addPersonalGenre } =
     useScriptAllyDb();
 
   /**
@@ -312,6 +313,26 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
               synopsisVersionCount={msSynVersions.length}
               synopsisDate={msSynDate ? formatPlateDate(Date.parse(msSynDate)) : null}
               onSavePitch={savePitch}
+              /*
+               * ⚠️ EVERY INLINE PLATE EDIT IS QUIET, INCLUDING THE TITLE. The activity feed records
+               * the query journey, not field maintenance — a writer correcting a typo in their own
+               * title has not done something the feed should narrate.
+               */
+              plateEdit={{
+                onTitle: (t) => void updateManuscriptQuiet(selected.id, { title: t }),
+                onWordCount: (n) => void updateManuscriptQuiet(selected.id, { wordCount: n }),
+                genre: {
+                  ageCategory: selected.ageCategory,
+                  ids: genreList(selected.genre, selected.subGenres),
+                  personal: currentUser.personalGenres ?? [],
+                  onCreatePersonal: addPersonalGenre,
+                  onSave: (next) =>
+                    void updateManuscriptQuiet(selected.id, {
+                      ageCategory: next.ageCategory,
+                      ...splitGenres(next.ids),
+                    }),
+                },
+              }}
               now={Date.now()}
               currentYear={new Date().getFullYear()}
               tab={tab}

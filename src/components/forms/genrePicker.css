@@ -53,3 +53,13 @@
 .gp-tick { color: var(--blue-i, #2b4a6b); font-size: 11px; }
 .gp-group { padding: 10px 10px 4px; font-family: var(--f12-mono, ui-monospace, monospace); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint, #a89e91); }
 .gp-empty { padding: 12px 10px; font-size: 12px; color: var(--faint, #a89e91); }
+
+/* Shortcut pills for the chosen age category (reframe Phase 4). A SHORTCUT, not a filter — the full
+   list sits directly below them and nothing here narrows it. */
+.gp-common { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px 4px; }
+.gp-commonpill {
+  font: inherit; font-size: 12px; cursor: pointer;
+  background: var(--f12-sub, #f4f1ea); border: 1px solid var(--f12-line, #e2dacf);
+  color: inherit; border-radius: 20px; padding: 4px 11px;
+}
+.gp-commonpill:hover { background: var(--f12-hov, #efe8dd); }
