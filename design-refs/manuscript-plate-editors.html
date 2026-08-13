@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — Plate editors, corrected</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#f8f4ee; --window:#fff; --card:#fefdf8; --line:#e2dacf; --line-soft:#ece4d8;
+  --sage-pale:#e7ede3; --sage-acc:#8a9e88; --sage-txt:#5a6e58;
+  --burg:#7c3a2a; --burg-deep:#6b3023; --ink:#3a1c14; --head-ink:#241611;
+  --pink:#f5e2da; --pink-bd:#e8c8bc; --pink-hov:#efd5ca; --pink-chip:#f8ede4;
+  --shadow-pop:0 4px 12px rgba(58,28,20,.1), 0 16px 44px rgba(58,28,20,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);font-size:14px;padding:34px 40px 90px;-webkit-font-smoothing:antialiased}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.17em;color:#a2907f;text-transform:uppercase;margin:34px 0 12px}
+.lbl:first-child{margin-top:0}
+.note{font-size:12.5px;font-weight:300;color:#7d6d60;line-height:1.6;max-width:720px;margin-bottom:16px}
+
+/* plate strip */
+.plate-demo{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 28px;display:flex;align-items:center;gap:24px;position:relative;max-width:900px}
+.plate{width:88px;height:88px;background:var(--sage-pale);border:1px solid rgba(138,158,136,.35);border-radius:16px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.pill{display:inline-flex;align-items:center;gap:7px;background:var(--pink-chip);border:1px solid var(--pink-bd);border-radius:20px;padding:5px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--burg);text-transform:uppercase;font-weight:500}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--burg)}
+h2{font-family:'Playfair Display',serif;font-weight:600;font-size:30px;color:var(--head-ink);line-height:1.1;margin:8px 0 10px}
+.meta{display:flex;align-items:center;gap:10px;position:relative}
+.gp{background:var(--sage-pale);border:1px solid rgba(138,158,136,.3);border-radius:20px;padding:4px 12px;font-size:11.5px;color:#4a5a48}
+.pillgroup{display:inline-flex;gap:8px;padding:2px;border-radius:20px;cursor:pointer}
+.pillgroup:hover{background:#f7f2ea}
+.wcx{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;color:#7a6a5c;text-transform:uppercase;padding:4px 6px;border-radius:6px;cursor:text}
+.wcx:hover{background:#f7f2ea}
+.logl{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:#4a3a30;margin-top:10px}
+
+.btn-pink{display:inline-flex;align-items:center;gap:6px;background:var(--pink);border:1px solid var(--pink-bd);color:var(--burg);border-radius:9px;padding:7px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+.btn-pink:hover{background:var(--pink-hov)}
+.btn-ghost{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);color:#6a5a50;border-radius:9px;padding:7px 14px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+.plab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.17em;color:#a2907f;text-transform:uppercase}
+
+/* ======= popover shell ======= */
+.pop{position:absolute;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-pop);z-index:30;display:none}
+.pop.open{display:block}
+.pop .phead{padding:13px 16px 7px}
+.pfoot{display:flex;justify-content:flex-end;gap:9px;padding:11px 16px 13px;border-top:1px solid var(--line-soft);margin-top:8px}
+
+/* ======= WORD COUNT — corrected ======= */
+.pop.wc{width:270px;top:calc(100% + 10px);left:180px}
+.stepper{display:flex;align-items:stretch;margin:2px 16px 0;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+.stepper:focus-within{border-color:rgba(124,58,42,.45);box-shadow:0 0 0 3px rgba(124,58,42,.08)}
+.stepper input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'JetBrains Mono',monospace;font-size:17px;color:var(--head-ink);padding:11px 0 11px 13px;letter-spacing:.03em;-moz-appearance:textfield}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stepper .unit{align-self:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;color:#a2907f;text-transform:uppercase;padding:0 11px 0 6px}
+.steps{display:flex;flex-direction:column;border-left:1px solid var(--line);width:36px;flex:0 0 auto}
+.steps button{flex:1;border:none;background:#fdfaf5;color:#6a5a50;cursor:pointer;font-size:8px;display:flex;align-items:center;justify-content:center;padding:0}
+.steps button:hover{background:var(--pink-chip);color:var(--burg)}
+.steps button:first-child{border-bottom:1px solid var(--line)}
+.wcerr{padding:8px 16px 0;font-size:12px;color:var(--burg);display:none}
+.wcerr.on{display:block}
+.wchint{padding:8px 16px 0;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:#c4b5a5;text-transform:uppercase}
+
+/* ======= GENRE variants ======= */
+/* A — stacked */
+.pop.gA{width:392px;top:calc(100% + 10px);left:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px;padding:2px 16px 12px}
+.segbtn{border:1px solid var(--line);background:#fff;border-radius:18px;padding:6px 13px;font-size:12px;color:#5a4a3e;cursor:pointer}
+.segbtn.on{background:var(--sage-pale);border-color:rgba(138,158,136,.55);color:#3f4f3d;font-weight:600}
+.tafield{margin:0 16px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:7px 9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tafield:focus-within{border-color:rgba(124,58,42,.45);box-shadow:0 0 0 3px rgba(124,58,42,.08)}
+.tachip{display:inline-flex;align-items:center;gap:5px;background:var(--sage-pale);border:1px solid rgba(138,158,136,.4);border-radius:16px;padding:3px 6px 3px 11px;font-size:12px;color:#3f4f3d}
+.tachip .x{cursor:pointer;color:#6a7a68;font-size:13px;line-height:1;padding:0 2px}
+.tachip .x:hover{color:var(--burg)}
+.tafield input{flex:1;min-width:110px;border:none;outline:none;background:transparent;font-size:13px;color:#3f3229;padding:4px 2px}
+.tafield input::placeholder{color:#b3a293}
+.results{max-height:170px;overflow-y:auto;margin:6px 8px 0}
+.res{padding:8px 12px;border-radius:8px;font-size:13px;color:#3f3229;cursor:pointer;display:flex;align-items:center;gap:8px}
+.res.hi{background:#f2ece2}
+.res .mark{font-weight:600;color:var(--burg)}
+.res .grp{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#b3a293;text-transform:uppercase}
+.common{padding:0 16px}
+.commonrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.cchip{border:1px solid var(--line);background:#fff;border-radius:16px;padding:5px 12px;font-size:12px;color:#5a4a3e;cursor:pointer}
+.cchip:hover{border-color:var(--sage-acc);background:var(--sage-pale)}
+
+/* B — two column */
+.pop.gB{width:520px;top:calc(100% + 10px);left:0}
+.cols{display:grid;grid-template-columns:186px 1fr}
+.colL{border-right:1px solid var(--line-soft);padding-bottom:8px}
+.agerow{display:flex;align-items:center;gap:9px;padding:9px 16px;font-size:13px;color:#3f3229;cursor:pointer}
+.agerow:hover{background:#f7f2ea}
+.agerow.on{font-weight:600;color:var(--head-ink)}
+.agerow .tick{margin-left:auto;color:var(--sage-txt);visibility:hidden}
+.agerow.on .tick{visibility:visible}
+.agerow .bar{width:3px;height:16px;border-radius:2px;background:transparent}
+.agerow.on .bar{background:var(--sage-acc)}
+.colR{padding-bottom:8px}
+
+/* C — single field */
+.pop.gC{width:400px;top:calc(100% + 10px);left:0}
+.selrow{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px}
+.selchip{display:inline-flex;align-items:center;gap:5px;border-radius:16px;padding:4px 7px 4px 12px;font-size:12px}
+.selchip.age{background:var(--pink-chip);border:1px solid var(--pink-bd);color:var(--burg)}
+.selchip.gen{background:var(--sage-pale);border:1px solid rgba(138,158,136,.4);color:#3f4f3d}
+.selchip .x{cursor:pointer;font-size:13px;line-height:1;opacity:.65}
+.selchip .x:hover{opacity:1}
+.onefield{margin:0 16px;border:1px solid var(--line);border-radius:10px;background:#fff;display:flex;align-items:center;gap:8px;padding:9px 12px}
+.onefield:focus-within{border-color:rgba(124,58,42,.45);box-shadow:0 0 0 3px rgba(124,58,42,.08)}
+.onefield input{flex:1;border:none;outline:none;background:transparent;font-size:13px;padding:0}
+.res .kind{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;border-radius:10px;padding:2px 6px}
+.res .kind.age{background:var(--pink-chip);color:var(--burg)}
+.res .kind.gen{background:var(--sage-pale);color:var(--sage-txt)}
+
+.bar{position:fixed;bottom:16px;right:16px;background:var(--head-ink);border-radius:12px;padding:8px 10px;display:flex;gap:6px;z-index:80;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.bar .l{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#b3a293;text-transform:uppercase;align-self:center;margin:0 4px}
+.bar button{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1px solid rgba(253,250,245,.25);color:#d8cabb;border-radius:8px;padding:6px 10px;cursor:pointer}
+.bar button.on{background:var(--pink);border-color:var(--pink);color:var(--burg);font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="lbl">1 · Word count — corrected</div>
+<div class="note">The built version is a flat row of three text labels. It should be a real field: the number left-aligned in mono, the unit muted, stacked steppers on the right edge inside the same bordered box. Opens on the current value, selected. ↑ ↓ keys step ±500 as well as the buttons. Letters, <code>e</code>, <code>+</code>, <code>−</code> and decimals are rejected.</div>
+
+<div class="plate-demo">
+  <div class="plate"><svg width="52" height="52" viewBox="0 0 64 64"><rect x="12" y="10" width="34" height="44" rx="3" fill="#e9ede6" stroke="#3a1c14" stroke-width="1.4"/><rect x="12" y="10" width="7" height="44" rx="2" fill="#b9c6b4" stroke="#3a1c14" stroke-width="1.2"/><path d="M25 20h15M25 26h15M25 32h11M25 38h15" stroke="#5a6e58" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  <div>
+    <span class="pill"><span class="dot"></span>Querying</span>
+    <h2>Murphy's Day Out</h2>
+    <div class="meta">
+      <span class="pillgroup"><span class="gp">Young Adult</span><span class="gp">Thriller</span></span>
+      <span class="wcx" id="wcView">50,000 words</span>
+      <div class="pop wc open" id="wcPop">
+        <div class="phead plab">Word count</div>
+        <div class="stepper">
+          <input id="wcInput" type="number" value="50000">
+          <span class="unit">words</span>
+          <div class="steps"><button id="wcUp">▲</button><button id="wcDown">▼</button></div>
+        </div>
+        <div class="wcerr" id="wcErr">Numbers only.</div>
+        <div class="wchint">↑ ↓ steps 500</div>
+        <div class="pfoot"><button class="btn-ghost">Cancel</button><button class="btn-pink">Save</button></div>
+      </div>
+    </div>
+    <div class="logl">Murphy catches a fly</div>
+  </div>
+</div>
+
+<div class="lbl">2 · Genre — three formats</div>
+<div class="note">The built version is an inline bar that pushes the logline down and gives every option the same weight, so age category and genre are told apart only by colour. All three below are popovers that float over the plate instead of reflowing it, and all three label the two things separately. Switch with the bar bottom-right. These are presentation only — the underlying picker and taxonomy stay <code>GenrePicker</code> / <code>lib/genres.ts</code>.</div>
+
+<div class="plate-demo">
+  <div class="plate"><svg width="52" height="52" viewBox="0 0 64 64"><rect x="12" y="10" width="34" height="44" rx="3" fill="#e9ede6" stroke="#3a1c14" stroke-width="1.4"/><rect x="12" y="10" width="7" height="44" rx="2" fill="#b9c6b4" stroke="#3a1c14" stroke-width="1.2"/><path d="M25 20h15M25 26h15M25 32h11M25 38h15" stroke="#5a6e58" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  <div>
+    <span class="pill"><span class="dot"></span>Querying</span>
+    <h2>Murphy's Day Out</h2>
+    <div class="meta">
+      <span class="pillgroup" id="gv"><span class="gp">Young Adult</span><span class="gp">Thriller</span></span>
+      <span class="wcx">50,000 words</span>
+
+      <!-- A stacked -->
+      <div class="pop gA" id="popA">
+        <div class="phead plab">Age category</div>
+        <div class="seg" data-age>
+          <span class="segbtn">Picture Book</span><span class="segbtn">Early Reader</span><span class="segbtn">Middle Grade</span><span class="segbtn on">Young Adult</span><span class="segbtn">Adult</span>
+        </div>
+        <div class="phead plab">Genre <span style="text-transform:none;letter-spacing:0;color:#c4b5a5">— up to three</span></div>
+        <div class="tafield" data-ta>
+          <input placeholder="Search genres…" autocomplete="off">
+        </div>
+        <div class="common" data-common><div class="plab" style="margin-top:11px">Common in Young Adult</div><div class="commonrow"></div></div>
+        <div class="results" data-res style="display:none"></div>
+        <div class="pfoot"><button class="btn-ghost">Cancel</button><button class="btn-pink">Done</button></div>
+      </div>
+
+      <!-- B two column -->
+      <div class="pop gB" id="popB">
+        <div class="cols">
+          <div class="colL">
+            <div class="phead plab">Age category</div>
+            <div data-agelist>
+              <div class="agerow"><span class="bar"></span>Picture Book<span class="tick">✓</span></div>
+              <div class="agerow"><span class="bar"></span>Early Reader<span class="tick">✓</span></div>
+              <div class="agerow"><span class="bar"></span>Middle Grade<span class="tick">✓</span></div>
+              <div class="agerow on"><span class="bar"></span>Young Adult<span class="tick">✓</span></div>
+              <div class="agerow"><span class="bar"></span>Adult<span class="tick">✓</span></div>
+            </div>
+          </div>
+          <div class="colR">
+            <div class="phead plab">Genre <span style="text-transform:none;letter-spacing:0;color:#c4b5a5">— up to three</span></div>
+            <div class="tafield" data-ta style="margin:0 16px"><input placeholder="Search genres…" autocomplete="off"></div>
+            <div class="common" data-common><div class="plab" style="margin-top:11px">Common in Young Adult</div><div class="commonrow"></div></div>
+            <div class="results" data-res style="display:none"></div>
+          </div>
+        </div>
+        <div class="pfoot"><button class="btn-ghost">Cancel</button><button class="btn-pink">Done</button></div>
+      </div>
+
+      <!-- C one field -->
+      <div class="pop gC" id="popC">
+        <div class="phead plab">Category &amp; genre</div>
+        <div class="selrow" data-sel></div>
+        <div class="onefield">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#b3a293" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input placeholder="Search categories and genres…" autocomplete="off" data-one>
+        </div>
+        <div class="common" data-common><div class="plab" style="margin-top:11px">Common in Young Adult</div><div class="commonrow"></div></div>
+        <div class="results" data-res style="display:none"></div>
+        <div class="pfoot"><button class="btn-ghost">Cancel</button><button class="btn-pink">Done</button></div>
+      </div>
+    </div>
+    <div class="logl">Murphy catches a fly</div>
+  </div>
+</div>
+
+<div class="bar">
+  <span class="l">Genre</span>
+  <button data-g="A" class="on">A stacked</button><button data-g="B">B two-column</button><button data-g="C">C one field</button>
+</div>
+
+<script>
+/* ---- word count ---- */
+const wI=document.getElementById('wcInput'),wErr=document.getElementById('wcErr');
+function step(n){const c=parseInt(wI.value||'0',10)||0;wI.value=Math.max(0,Math.min(500000,c+n));wErr.classList.remove('on');}
+document.getElementById('wcUp').onclick=()=>step(500);
+document.getElementById('wcDown').onclick=()=>step(-500);
+wI.onkeydown=e=>{
+  if(e.key==='ArrowUp'){e.preventDefault();step(500);}
+  if(e.key==='ArrowDown'){e.preventDefault();step(-500);}
+  if(['e','E','+','-','.'].includes(e.key)){e.preventDefault();wErr.classList.add('on');}
+};
+wI.oninput=()=>wErr.classList.remove('on');
+wI.focus();wI.select();
+
+/* ---- genre data ---- */
+const AGES=['Picture Book','Early Reader','Middle Grade','Young Adult','Adult'];
+const GENRES=[['Thriller','Crime'],['Psychological thriller','Crime'],['Mystery','Crime'],['Crime','Crime'],
+['Fantasy','Speculative'],['Epic fantasy','Speculative'],['Urban fantasy','Speculative'],['Romantasy','Speculative'],
+['Science fiction','Speculative'],['Dystopian','Speculative'],['Horror','Speculative'],['Magical realism','Speculative'],
+['Romance','Romance'],['Romantic comedy','Romance'],['Historical romance','Romance'],
+['Literary fiction','General'],['Upmarket fiction','General'],['Book club fiction','General'],['Contemporary fiction','General'],
+['Historical fiction','Historical'],['Saga','Historical'],['Adventure','Action'],['Coming of age','Action']];
+const COMMON={'Picture Book':['Adventure','Coming of age'],'Early Reader':['Adventure','Fantasy'],
+'Middle Grade':['Adventure','Fantasy','Mystery','Coming of age'],
+'Young Adult':['Thriller','Fantasy','Romance','Contemporary fiction','Horror'],
+'Adult':['Literary fiction','Thriller','Crime','Historical fiction','Book club fiction']};
+
+let age='Young Adult', genres=['Thriller'];
+
+function renderAll(){
+  document.querySelectorAll('.pop').forEach(pop=>{
+    // age segmented
+    const seg=pop.querySelector('[data-age]');
+    if(seg)seg.querySelectorAll('.segbtn').forEach(b=>b.classList.toggle('on',b.textContent===age));
+    const list=pop.querySelector('[data-agelist]');
+    if(list)list.querySelectorAll('.agerow').forEach(r=>r.classList.toggle('on',r.textContent.replace('✓','').trim()===age));
+    // token field
+    const ta=pop.querySelector('[data-ta]');
+    if(ta){
+      [...ta.querySelectorAll('.tachip')].forEach(c=>c.remove());
+      const inp=ta.querySelector('input');
+      genres.forEach(g=>{
+        const s=document.createElement('span');s.className='tachip';
+        s.innerHTML=g+' <span class="x">×</span>';
+        s.querySelector('.x').onclick=ev=>{ev.stopPropagation();genres=genres.filter(x=>x!==g);renderAll();};
+        ta.insertBefore(s,inp);
+      });
+      inp.placeholder=genres.length>=3?'Three is the maximum':(genres.length?'Add another…':'Search genres…');
+      inp.disabled=genres.length>=3;
+    }
+    // C selection row
+    const sel=pop.querySelector('[data-sel]');
+    if(sel){
+      sel.innerHTML='';
+      const a=document.createElement('span');a.className='selchip age';a.innerHTML=age+' <span class="x">×</span>';sel.appendChild(a);
+      genres.forEach(g=>{
+        const s=document.createElement('span');s.className='selchip gen';s.innerHTML=g+' <span class="x">×</span>';
+        s.querySelector('.x').onclick=()=>{genres=genres.filter(x=>x!==g);renderAll();};
+        sel.appendChild(s);
+      });
+    }
+    // common
+    const cw=pop.querySelector('[data-common]');
+    if(cw){
+      cw.querySelector('.plab').textContent='Common in '+age;
+      const row=cw.querySelector('.commonrow');row.innerHTML='';
+      (COMMON[age]||[]).filter(g=>!genres.includes(g)).forEach(g=>{
+        const c=document.createElement('span');c.className='cchip';c.textContent=g;
+        c.onclick=()=>{if(genres.length<3){genres.push(g);renderAll();}};
+        row.appendChild(c);
+      });
+    }
+  });
+  document.getElementById('gv').innerHTML=[age,...genres].map(t=>`<span class="gp">${t}</span>`).join('');
+}
+
+/* age clicks */
+document.querySelectorAll('[data-age] .segbtn').forEach(b=>b.onclick=()=>{age=b.textContent;renderAll();});
+document.querySelectorAll('[data-agelist] .agerow').forEach(r=>r.onclick=()=>{age=r.textContent.replace('✓','').trim();renderAll();});
+
+/* search */
+function wire(pop,both){
+  const inp=pop.querySelector('input[placeholder*="Search"]'),box=pop.querySelector('[data-res]'),cw=pop.querySelector('[data-common]');
+  if(!inp)return;
+  inp.oninput=()=>{
+    const q=inp.value.trim().toLowerCase();
+    if(!q){box.style.display='none';cw.style.display='block';return;}
+    cw.style.display='none';box.style.display='block';box.innerHTML='';
+    let hits=GENRES.filter(([n])=>n.toLowerCase().includes(q)&&!genres.includes(n)).map(([n,g])=>[n,g,'gen']);
+    if(both)hits=AGES.filter(n=>n.toLowerCase().includes(q)&&n!==age).map(n=>[n,'Category','age']).concat(hits);
+    hits=hits.slice(0,8);
+    if(!hits.length){box.innerHTML='<div class="res" style="color:#9a8c80;font-style:italic">No match.</div>';return;}
+    hits.forEach(([n,g,kind])=>{
+      const i=n.toLowerCase().indexOf(q);
+      const d=document.createElement('div');d.className='res';
+      d.innerHTML=(both?`<span class="kind ${kind}">${kind==='age'?'Category':'Genre'}</span>`:'')
+        +n.slice(0,i)+'<span class="mark">'+n.slice(i,i+q.length)+'</span>'+n.slice(i+q.length)
+        +(both?'':`<span class="grp">${g}</span>`);
+      d.onclick=()=>{
+        if(kind==='age')age=n; else if(genres.length<3)genres.push(n);
+        inp.value='';box.style.display='none';cw.style.display='block';renderAll();
+      };
+      box.appendChild(d);
+    });
+  };
+}
+wire(document.getElementById('popA'),false);
+wire(document.getElementById('popB'),false);
+wire(document.getElementById('popC'),true);
+
+/* variant switch */
+function show(v){
+  ['A','B','C'].forEach(x=>document.getElementById('pop'+x).classList.toggle('open',x===v));
+  document.querySelectorAll('.bar button').forEach(b=>b.classList.toggle('on',b.dataset.g===v));
+}
+document.querySelectorAll('.bar button').forEach(b=>b.onclick=()=>show(b.dataset.g));
+renderAll();show('A');
+</script>
+</body>
+</html>
