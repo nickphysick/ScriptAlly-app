@@ -151,6 +151,38 @@ describe("the dossier fills, and only its pane body scrolls", () => {
   });
 });
 
+/**
+ * ⚠️ THE DOSSIER CONDENSES THE PAGE HEADER, AND IT DOES SO BY MODE, NOT BY SCROLL. This page's
+ * scroll row never moves once a manuscript is open — the pane body scrolls instead — so a
+ * sentinel-driven strip would never fire. `WorkspacePageGrid` already unions `stuck ||
+ * condensedByMode` for Query Centre's journeys; the dossier is a SECOND CONSUMER of that prop, not
+ * a second mechanism, and the header receives one boolean so it never learns which half fired.
+ */
+describe("the dossier condenses the header by mode", () => {
+  const RAW = readFileSync(resolve(__dirname, "../AllManuscripts.tsx"), "utf8");
+  /* ⚠️ COMMENTS STRIPPED FIRST — this rule is about CODE. The page's own comment EXPLAINS the union
+     by naming `stuck`, so a bare-string sweep flagged the prose describing the decision as if it
+     were the decision being broken. It caught this test on its first run. */
+  const PAGE = RAW.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+
+  it("reads as code once the prose is gone — the strip did not empty the file", () => {
+    expect(PAGE).toContain("export const AllManuscripts");
+    expect(PAGE).not.toContain("⚠️");
+  });
+
+  it("passes the grid's existing `condensed` prop, driven by whether a dossier is open", () => {
+    expect(PAGE).toContain("condensed={!!selected}");
+  });
+
+  /* ⚠️ AND SYNTHESISES NO SCROLL SIGNAL TO GET THERE — two sources of truth for one state, with no
+     way to reconcile them, is the failure the grid's own comment forbids. */
+  it("and invents no scroll signal of its own", () => {
+    for (const s of ["scrollTop", "IntersectionObserver", "stuck", "onScroll"]) {
+      expect(PAGE, `the page grew its own scroll signal (${s})`).not.toContain(s);
+    }
+  });
+});
+
 describe("the card's structure holds the rules that make it work", () => {
   /**
    * ⚠️ `margin-top: auto` IS WHAT LINES THE METERS UP. Cards in a row have loglines of different

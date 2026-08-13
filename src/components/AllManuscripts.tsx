@@ -212,6 +212,18 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
            Measured twice in this repo. `fill` makes the scroll row a flex column; the library grid
            opts back out with `flex: 0 0 auto` so a growing shelf still scrolls the page. */
         fill
+        /*
+         * ⚠️ THE DOSSIER IS A SECOND CONSUMER OF `condensedByMode`, not a second mechanism. Opening
+         * a manuscript turns the page into a workspace whose panes scroll internally, so the
+         * resting header card is spending height on chrome nobody is choosing from — and the height
+         * it releases goes to the pane body, which is already the flex child that grows.
+         *
+         * ⚠️ AND IT CANNOT BE SCROLL-DRIVEN HERE. This page's scroll row never moves in the dossier
+         * (the pane body scrolls instead), so a sentinel would never fire. `WorkspacePageGrid` takes
+         * the union `stuck || condensedByMode` and the header receives ONE boolean, so it never
+         * learns which half fired — exactly as Query Centre's journeys already work.
+         */
+        condensed={!!selected}
         plate={
           <PageHeader
             variant="workspace"
