@@ -26,6 +26,7 @@ import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
 import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { QueryJourneySheet } from "./queries/QueryJourneySheet";
+import { PaneCard } from "./queries/PaneCard";
 import { QueryCreatePane } from "./queries/QueryCreatePane";
 import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, todayInputDate, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
 import { requirements } from "../lib/createSteps";
@@ -4003,19 +4004,84 @@ export const Queries: React.FC<{
                   );
                 })()}
 
-                {/* Columns — three FULL-HEIGHT equal columns (workspace fill): the row takes all the
-                    space below the agent band, each column scrolls independently behind its own edge
-                    fade, the Journal composer pins to its column foot. */}
-                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16, padding: "16px 20px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
+                {/**
+                  * ⚠️ TWO COLUMNS, NOT THREE (§2, ref 95-tracking-half.html at "Tracking slightly
+                  * wider"). Tracking is the only card with a STORY; the other two are inventories.
+                  * Equal thirds flattered the short cards and starved the long one — and that is the
+                  * reason worth keeping, because a later pass looking only at the widths would read
+                  * `1.15fr .85fr` as an arbitrary tuning.
+                  *
+                  * ⚠️ THE EQUALISATION CHANGES SHAPE WITH THE GRID. It used to come from three
+                  * siblings sharing a row under `align-items: stretch`; the right column is a STACK
+                  * now, so it has to come from that stack filling its own column. Browser-measured
+                  * at three widths — a stacked card trailing into white is the failure this replaces.
+                  */}
+                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 16, padding: "16px 20px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
-                  <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
-                      {/* sage gradient header band (matches the dashboard diary bands) */}
-                      <div className="f12-chh">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>
-                        <span>Tracking</span>
-                      </div>
-                      <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
+                  <PaneCard
+                    title="Tracking"
+                    /* ⚠️ THE META IS THE STATUS, FROM THE ONE DERIVATION. `statusDisplayLabel` is what
+                       the hero band's badge reads, so the band and the card cannot disagree about
+                       what state this query is in. */
+                    meta={statusDisplayLabel(activeQuery)}
+                    glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>}
+                  >
+                      <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "0 0 18px" }} fade="var(--panel, #fffdfb)">
+                        {/**
+                          * ⚠️ THE TWO STATS LEAD THE BODY (§2), in the comps page's grammar: icon
+                          * plate, Playfair number, mono caption, one hairline between them.
+                          *
+                          * ⚠️ THEY ARE THE LIVE PAIR, AND THE HERO BAND HAS THE STATIC ONE. The band
+                          * states the queried date; these two move, and they are the numbers the
+                          * progress bar below reads against — so all three of them stay in one place
+                          * rather than being split across two surfaces that would then restate each
+                          * other.
+                          *
+                          * ⚠️ FROM `queryAmbientStatus`, THE SAME DERIVATION THE COMMAND BAR AND THE
+                          * TRACKING BLOCK READ. A second count of "days waiting" on this page is a
+                          * second answer to one question.
+                          *
+                          * Each cell omits itself when its figure is underivable — an undated import
+                          * has no days and no expected date, and a dash against a caption states
+                          * nothing while taking a line to do it.
+                          */}
+                        {(() => {
+                          const ta0 = getPrimaryAction(activeQuery.status as QueryStatus);
+                          const amb = queryAmbientStatus(activeQuery, ta0.ballHolder, ta0.kind === "mark-sent" ? ta0.markKind : undefined);
+                          const cells: { key: string; glyph: React.ReactNode; value: string; unit?: string; caption: string }[] = [];
+                          if (amb.mode === "waiting" && amb.sentMs != null) {
+                            cells.push({
+                              key: "waiting",
+                              glyph: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>,
+                              value: String(amb.nDays), unit: amb.nDays === 1 ? "day" : "days", caption: "Waiting so far",
+                            });
+                          }
+                          if (amb.expMs != null) {
+                            cells.push({
+                              key: "expected",
+                              glyph: <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" /><path d="M3.5 10h17M8 3.5v3M16 3.5v3" /></svg>,
+                              value: new Date(amb.expMs).toLocaleDateString("en-GB", { day: "numeric" }),
+                              unit: new Date(amb.expMs).toLocaleDateString("en-GB", { month: "short" }),
+                              caption: "Reply expected by",
+                            });
+                          }
+                          if (!cells.length) return null;
+                          return (
+                            <div className="qp-stats">
+                              {cells.map((c) => (
+                                <div className="qp-stat" key={c.key}>
+                                  <span className="qp-statgl" aria-hidden="true">{c.glyph}</span>
+                                  <div>
+                                    <div className="qp-statn">{c.value}{c.unit && <small> {c.unit}</small>}</div>
+                                    <div className="qp-statk">{c.caption}</div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()}
+                        <div style={{ padding: "0 16px" }}>
                         {(() => {
                           // Pass the same open-state fact the command bar uses, so the trailing block
                           // switches agent's-turn / writer's-turn / closed identically.
@@ -4041,16 +4107,30 @@ export const Queries: React.FC<{
                             composer that behaved differently, in one room. The takeover is the
                             single door now, and the primary above opens it. TimelineComposer
                             itself survives for the dashboard's own flows; only this mount went. */}
+                        </div>
                       </EdgeFadeScroll>
-                    </div>{/* ── end sub-card 1: Tracking ── */}
+                  </PaneCard>
+
+                  {/**
+                    * ⚠️ THE RIGHT COLUMN IS A STACK, AND IT IS WHAT MAKES THE HEIGHTS EQUAL NOW. With
+                    * three siblings in one row, `align-items: stretch` did it for free; with two
+                    * columns, the second has to FILL its own column and share that height between
+                    * its members, or the shorter card trails off into white above the taller one.
+                    */}
+                  <div className="qp-stack">
 
                   {/* ── Sub-card 2: What you sent ── */}
-                  <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
-                      {/* pink header band */}
-                      <div className="f12-chh">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
-                        <span>What you sent</span>
-                      </div>
+                  <PaneCard
+                    title="What you sent"
+                    /* ⚠️ COUNTED FROM THE LIST THE BODY RENDERS, never a second read of the query.
+                       `baseMaterialsFor` is what this card's own spec sheet walks, so the band's
+                       figure and the rows beneath it cannot come apart. */
+                    meta={(() => {
+                      const n = baseMaterialsFor(activeQuery, activeAgent).length;
+                      return n > 0 ? `${n} item${n === 1 ? "" : "s"}` : undefined;
+                    })()}
+                    glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>}
+                  >
                       {/* spec sheet */}
                       <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
                         {(() => {
@@ -4213,15 +4293,17 @@ export const Queries: React.FC<{
                           );
                         })()}
                       </EdgeFadeScroll>
-                    </div>{/* ── end sub-card 2: What you sent ── */}
+                  </PaneCard>
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
-                  <div className="f12-card" style={{ minWidth: 0, minHeight: 0 }}>
-                      {/* pink header band */}
-                      <div className="f12-chh">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>
-                        <span>Notes</span>
-                      </div>
+                  <PaneCard
+                    title="Notes"
+                    /* ⚠️ THE COUNT LIVES IN THE BAND SO THE BODY NEVER RESTATES IT, and it omits
+                       itself at zero: "0 notes" is a sentence about nothing on a card whose empty
+                       state already says so in words. */
+                    meta={journalEntries.length > 0 ? `${journalEntries.length} note${journalEntries.length === 1 ? "" : "s"}` : undefined}
+                    glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>}
+                  >
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
                         {(() => {
@@ -4283,7 +4365,8 @@ export const Queries: React.FC<{
                           );
                         })()}
                       </div>
-                  </div>{/* ── end sub-card 3: Notes ── */}
+                  </PaneCard>
+                  </div>{/* end the stacked right column */}
 
                 </div>{/* end sub-cards row */}
 

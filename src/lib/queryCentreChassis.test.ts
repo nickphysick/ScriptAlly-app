@@ -171,3 +171,62 @@ describe("§1d/e/g · already landed, and still true", () => {
     expect(code.indexOf("qc-nomatch"), "the empty state can reach the kebab").toBeGreaterThan(kebab);
   });
 });
+
+describe("§2 · the reading pane", () => {
+  it("two columns at 1.15fr 0.85fr, with the right one stacked", () => {
+    expect(code, "the pane went back to three equal columns")
+      .toContain('gridTemplateColumns: "1.15fr 0.85fr"');
+    expect(code, "the right column is not a stack").toContain('className="qp-stack"');
+    /* ⚠️ THE EQUALISATION MOVED WITH THE GRID. Three siblings got it free from `align-items:
+       stretch`; a stack has to FILL its column and divide that height between its members. */
+    expect(rule(".qp-stack"), "the stack does not fill").toContain("min-height: 0");
+    expect(rule(".qp-stack > .f12-card"), "the stacked cards do not share the height")
+      .toContain("flex: 1 1 0");
+  });
+
+  /* ⚠️ ONE SHELL, THREE BODIES. Three hand-rolled `.f12-card` copies is why the headers could
+     drift — one already had a pink band where the other two had sage. The bodies are NOT
+     parameterised: a timeline, an inventory and a thread are genuinely different, and a component
+     describing all three would be a worse version of JSX. */
+  it("all three cards render through one shell", () => {
+    expect((code.match(/<PaneCard/g) ?? []).length, "a card was left hand-rolled").toBe(3);
+    expect(code, "a card still builds its own band").not.toMatch(/className="f12-card"[^>]*>\s*<div className="f12-chh">/);
+  });
+
+  it("each header states its own meta, from a selector the body already reads", () => {
+    /* Tracking's is the status — the same derivation the hero band's badge reads, so the two
+       cannot disagree about what state this query is in. */
+    expect(code).toContain("meta={statusDisplayLabel(activeQuery)}");
+    /* What you sent counts the list it renders, not the query a second time. */
+    expect(code).toContain("baseMaterialsFor(activeQuery, activeAgent).length");
+    /* Notes counts its entries and omits at zero — "0 notes" is a sentence about nothing. */
+    expect(code).toContain("journalEntries.length > 0 ?");
+  });
+
+  /**
+   * ⚠️ THE PROGRESS BAR IS NOT REBUILT, AND THAT IS A DECISION. §2 asks for one reading against the
+   * agent's stated window; `QueryTimeline` already draws it, with three states this pack's ref does
+   * not have — within-window, overdue with a hatch zone past the expected marker, and grace against
+   * a nudge horizon. Building the ref's single-fill bar beside it would have been a second, poorer
+   * answer to the same question on the same card.
+   */
+  it("the timeline and its bar stay with QueryTimeline", () => {
+    expect(code, "Tracking stopped rendering the shared timeline").toContain("<QueryTimeline");
+    expect(code, "a second progress bar was built beside the existing one").not.toContain("qp-bar");
+  });
+
+  /* ⚠️ ONE EVENT PER REAL ACTIVITY, never a fixed three. The ref draws sent / waiting / nudge
+     because it is a mockup with three; the page maps whatever the activity feed holds. */
+  it("the timeline is fed from the activity feed", () => {
+    expect(code).toContain("events={trackingEvents}");
+    const at = code.indexOf("setTrackingEvents(events)");
+    expect(at, "the events are not derived from activities").toBeGreaterThan(-1);
+  });
+
+  /* Each cell omits itself when its figure is underivable — a closed query has neither, and a dash
+     against a caption states nothing while taking a line to do it. */
+  it("the two stats read the shared ambient derivation and omit when it has nothing", () => {
+    expect(code).toContain("queryAmbientStatus(activeQuery, ta0.ballHolder");
+    expect(code, "the stats render unconditionally").toContain("if (!cells.length) return null;");
+  });
+});

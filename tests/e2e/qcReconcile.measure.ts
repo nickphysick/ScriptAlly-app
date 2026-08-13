@@ -424,3 +424,87 @@ test("§1f · the proportions hold at 1100 and above, and 768-1100 is a known ga
     console.log(`[§1f 1024] KNOWN GAP — list ${narrow.listW} pane ${narrow.paneW} in a ${narrow.bodyW}px column; needs single-column mode, not a ratio`);
   }
 });
+
+/* ══ Pack B §2 · THE READING PANE ══════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE EQUALISATION CHANGED SHAPE, WHICH IS WHY THIS IS MEASURED AND NOT ASSUMED. It used to come
+ * from three siblings sharing a row under `align-items: stretch`; the right column is a STACK now,
+ * so it has to come from that stack filling its own column. A stacked card trailing into white
+ * above the other is the exact failure this replaces, and no source lock can see it.
+ */
+for (const { w, h } of WIDTHS) {
+  test(`pane at ${w}x${h}`, async () => {
+    await page.setViewportSize({ width: w, height: h });
+    await queries(page);
+    const m = await page.evaluate(() => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+      const cols = q(".qp-cols"), stack = q(".qp-stack");
+      const left = document.querySelector(".qp-cols > .f12-card") as HTMLElement | null;
+      const stacked = Array.from(document.querySelectorAll<HTMLElement>(".qp-stack > .f12-card"));
+      const h2 = (el: HTMLElement | null) => (el ? Math.round(el.getBoundingClientRect().height) : null);
+      return {
+        grid: cols ? getComputedStyle(cols).gridTemplateColumns : null,
+        colsH: h2(cols), leftH: h2(left), stackH: h2(stack),
+        stackedH: stacked.map((c) => Math.round(c.getBoundingClientRect().height)),
+        metas: Array.from(document.querySelectorAll(".qp-cardmeta")).map((e) => (e as HTMLElement).innerText.trim()),
+        stats: document.querySelectorAll(".qp-stat").length,
+        overflowX: cols ? cols.scrollWidth - cols.clientWidth : null,
+      };
+    });
+    // eslint-disable-next-line no-console
+    console.log(`[pane ${w}] grid ${m.grid} · left ${m.leftH} stack ${m.stackH} [${m.stackedH.join("+")}] · metas ${JSON.stringify(m.metas)} stats=${m.stats} overflowX=${m.overflowX}`);
+
+    /* the stack fills Tracking's height — neither card trails into white */
+    expect(m.stackH, `the stacked column is short of Tracking at ${w}`).toBe(m.leftH);
+    const sum = m.stackedH.reduce((a, b) => a + b, 0);
+    expect(Math.abs(sum + 16 - m.stackH!), `the stacked cards do not fill their column at ${w}`)
+      .toBeLessThanOrEqual(2);
+    /* the ratio is the one the pack names — read off the rendered tracks, not the declaration */
+    const tracks = (m.grid ?? "").split(" ").map(Number);
+    if (tracks.length === 2 && tracks.every((n) => !Number.isNaN(n))) {
+      expect(tracks[0] / tracks[1], `the ratio drifted at ${w}`).toBeCloseTo(1.15 / 0.85, 1);
+    }
+    expect(m.overflowX, `the pane scrolls sideways at ${w} — a chip row is wrapping badly`).toBeLessThanOrEqual(0);
+  });
+}
+
+/**
+ * ⚠️ THE STATS OMIT THEMSELVES ON A CLOSED QUERY, which is correct and is why the pane cases above
+ * report `stats=0`: the harness's first row happens to be a No Response, and a closed query has no
+ * days-waiting and no expected date. A cell with nothing true to say does not render.
+ *
+ * So they have to be verified on a query that IS waiting — otherwise the whole device is unproven
+ * by a measurement that looks like it passed.
+ */
+test("§2 · the two stats render on a waiting query, and omit on a closed one", async () => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await queries(page);
+  const rows = page.locator(".f12-row");
+  const n = Math.min(await rows.count(), 20);
+  let waiting: { stats: number; text: string } | null = null;
+  let closed: number | null = null;
+  for (let i = 0; i < n; i += 1) {
+    await rows.nth(i).click();
+    await page.waitForTimeout(280);
+    const m = await page.evaluate(() => ({
+      stats: document.querySelectorAll(".qp-stat").length,
+      text: Array.from(document.querySelectorAll(".qp-statk")).map((e) => (e as HTMLElement).innerText.trim()).join(" | "),
+      meta: (document.querySelector(".qp-cardmeta") as HTMLElement | null)?.innerText.trim() ?? "",
+    }));
+    if (m.stats > 0 && !waiting) waiting = { stats: m.stats, text: m.text };
+    if (m.stats === 0 && closed === null) closed = 0;
+    if (waiting && closed !== null) break;
+  }
+  // eslint-disable-next-line no-console
+  console.log(`[stats] waiting=${waiting ? `${waiting.stats} cells (${waiting.text})` : "NONE FOUND"} · closed renders ${closed ?? "n/a"}`);
+  if (!waiting) {
+    /* ⚠️ REPORTED, NOT SILENTLY PASSED. If no waiting query exists on the harness account the device
+       is simply unverified, and saying so is worth more than a green tick. */
+    // eslint-disable-next-line no-console
+    console.log("[stats] UNVERIFIED — no waiting query on this account");
+    return;
+  }
+  expect(waiting.stats, "a waiting query should show both cells").toBe(2);
+  expect(waiting.text.toLowerCase()).toContain("waiting so far");
+  expect(waiting.text.toLowerCase()).toContain("reply expected by");
+});

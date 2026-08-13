@@ -75,11 +75,14 @@ describe("the three sections keep the columns' vocabulary and their split", () =
 
 describe("one name for one thing, across modes", () => {
   it("the reading pane's column is Notes too", () => {
-    expect(queries).toContain("<span>Notes</span>");
+    /* ⚠️ THE HEADER IS A COMPONENT NOW (Pack B §2). The three cards were three hand-rolled copies of
+       one band, which is why their glyphs and titles could drift; `PaneCard` takes the title as a
+       prop. The NAME is what this case is about and it is unchanged. */
+    expect(queries).toContain('title="Notes"');
     expect(queries, "the reading pane still says Journal").not.toContain("<span>Journal</span>");
   });
 
   it("Tracking is left alone — it shows the activity timeline, not send facts", () => {
-    expect(queries).toContain("<span>Tracking</span>");
+    expect(queries).toContain('title="Tracking"');
   });
 });
