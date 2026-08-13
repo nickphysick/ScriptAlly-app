@@ -63,12 +63,35 @@ setup("authenticate", async ({ page }) => {
        which is a DIFFERENT onboarding component, and the selector matched nothing while the run
        failed on a timeout that named the shell instead. Reading the buttons off the real page is
        what found it. */
-    const skip = page.getByRole("button", { name: /^Skip this step$/ });
+    /* ⚠️ `/^Skip/`, NOT `/^Skip this step$/`. The steps do not agree on the wording — one offers
+       "Skip this step" and the gated one offers "Skip setup" — so an anchored exact match found
+       nothing on the very step that most needed skipping, and the walk fell through to a Continue
+       it could not enable. The prefix matches both, and skipping is what this walk wants anyway:
+       it is getting a test account past the gate, not exercising onboarding. */
+    const skip = page.getByRole("button", { name: /^Skip/ });
     const cont = page.getByRole("button", { name: /^Continue/ });
-    const option = page.getByRole("button", { name: /Just getting started/ });
     if (await skip.count()) { await skip.first().click(); }
-    else if (await option.count()) { await option.first().click(); await cont.first().click(); }
-    else if (await cont.count()) { await cont.first().click(); }
+    else if (await cont.count()) {
+      /* ⚠️ NEVER CLICK A DISABLED CONTINUE — IT LOOKS EXACTLY LIKE A HUNG PAGE. A gated step keeps
+         Continue disabled until a choice is made, and Playwright's auto-wait then retries the click
+         until the whole run times out: 796 attempts over seven minutes, reported as a click failure
+         on a button that was simply waiting for an answer. This previously named ONE option
+         (/Just getting started/), so the first step whose choices were worded differently — "Where
+         are you with it?" — wedged the setup and took every measurement down with it.
+
+         ⚠️ SO THE CHOICE IS TAKEN BY SHAPE, NOT BY LABEL. Any enabled button in the flow that is not
+         one of the flow's own verbs is a choice; the walk takes the first and moves on. What the
+         answers ARE does not matter — this is only getting a test account through the gate — so
+         matching structure survives copy edits that matching wording cannot. */
+      if (await cont.first().isDisabled()) {
+        const choice = page
+          .getByRole("button")
+          .filter({ hasNotText: /^(Continue|Back|Skip|Sign out|Log out)/ })
+          .filter({ visible: true });
+        if (await choice.count()) await choice.first().click();
+      }
+      await cont.first().click();
+    }
     else break;
     await page.waitForTimeout(1200);
   }
