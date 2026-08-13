@@ -9,6 +9,36 @@
  * established `--frame-show` / `::before` pattern.
  */
 
+/*
+ * ⚠️ NO RED ON THIS PAGE, AND IT WAS BROKEN IN TWO THEMES. `--ct-warn` resolved to `#a3453a` in
+ * Bold and `#a35648` in Editorial — both reds — while painting four things: the recency chip, the
+ * query-line note, the Scout's error box and the remove button's hover. All three themes now take
+ * the HOUSE gold advisory values (`#7d621d` / `#f6efdd` / `#e7d9b8`), which is what
+ * design-refs/themes.md already tells anyone facing this: use the established advisory surface
+ * "rather than reinventing a gold or yellow". Cappuccino's own `#ba7517` is superseded with it, so
+ * the app carries ONE amber rather than two — and the house gold is the stronger of the pair
+ * anyway (~5.1:1 on its ground against ~3.5:1).
+ *
+ * ⚠️ THE REMOVE BUTTON IS NOT AN ADVISORY AND NO LONGER BORROWS THE TOKEN. Its hover is burgundy
+ * (`--ct-accent`). Removing a comp is an ordinary, undoable action; dressing it as a caution said
+ * something about the act that is not true, and it was the only consumer of `--ct-warn` that was
+ * not stating a fact about a comp.
+ *
+ * ⚠️ `--ct-pro-*` IS RETIRED, and it had to be. One token meant FOUR things at once — the Scout's
+ * surfaces, the Pro tier tag, the media chip and the verified chip — so none of them could be
+ * recoloured without dragging the other three with it. Split into three sets by what they mean,
+ * nothing was left reading it, and a defined-but-unread token is the next person's false lead:
+ *   · `--ct-scout-*`    the Scout's own surfaces (pastille blue). Blue marks the TIER, never the
+ *                       verb: ADD stays soft pink, like every action in the app.
+ *   · `--ct-verified-*` the ✓ VERIFIED chip — SAGE, in every theme, and the same treatment in
+ *                       both cards. One component, one colour: a chip that meant sage in the list
+ *                       and blue in the panel would read as two different claims.
+ *   · the media chip    a neutral. It states what KIND of work a comp is; it never had anything to
+ *                       do with the Pro tier and only looked blue because it read that token.
+ * The PRO tag itself reads `--ct-scout-*`: on this page blue IS the tier, so the tag and the panel
+ * it labels are the same family by construction rather than by two values being matched by hand.
+ */
+
 /* ── per-theme tokens (from the design ref .shell.t-*) ── */
 .t-capp /* ⚠️ NO HORIZONTAL PADDING ON THE PAGE ROOT (strip-fixes §3/§4). The grid is INSIDE this
    element, so any side padding here insets the whole grid — header, toolbar and scroller
@@ -24,9 +54,14 @@
   --ct-pink: #f5e2da; --ct-pink-bd: #e8c8bc; --ct-pink-hover: #efd5ca; --ct-taupe-bd: #ded3c2;
   --ct-sect: #f6f0e8; --ct-cardrad: 13px; --ct-hard: none;
   --ct-frame-show: block; --ct-frame: 1px solid rgba(124, 58, 42, .28); --ct-paper: .03;
-  --ct-warn: #ba7517; --ct-warn-bg: #f9efdc; --ct-warn-bd: #ecd6a8;
-  --ct-pro: #6a89a7; --ct-pro-deep: #557191; --ct-pro-bg: #eef2f5; --ct-pro-bd: #d3e0e8;
-  --ct-pro-ink: #33475a; --ct-pro-tile: #e6edf2;
+  /* ⚠️ ADVISORY IS GOLD, NOT RED, AND THE VALUES ARE THE HOUSE ONES. See the caution note below. */
+  --ct-warn: #7d621d; --ct-warn-bg: #f6efdd; --ct-warn-bd: #e7d9b8;
+  /* ⚠️ THE SCOUT IS PASTILLE BLUE — the TIER's colour, never the verb's. See the note below. */
+  --ct-scout: #7f96b0; --ct-scout-deep: #2f4761; --ct-scout-ink: #3f556e;
+  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #ccd9e7; --ct-scout-tile: #dfe8f2;
+  --ct-scout-band-a: #d6e0ea; --ct-scout-band-b: #d1dce8; --ct-scout-hover: #fafcfe;
+  /* ⚠️ VERIFIED IS SAGE IN EVERY THEME AND BOTH CARDS — one component, one colour. */
+  --ct-verified: #4c5c49; --ct-verified-bg: #e9ede6; --ct-verified-bd: #ccd6c9;
   --ct-panel-sh: 0 1px 2px rgba(58, 28, 20, .05), 0 6px 22px rgba(58, 28, 20, .07);
   --ct-card-sh: none;
 }
@@ -38,9 +73,14 @@
   --ct-pink: #f5e2da; --ct-pink-bd: #1d1712; --ct-pink-hover: #f8dcd8; --ct-taupe-bd: #1d1712;
   --ct-sect: #f4ece2; --ct-cardrad: 14px; --ct-hard: 3px 3px 0 #1d1712;
   --ct-frame-show: none; --ct-frame: none; --ct-paper: 0;
-  --ct-warn: #a3453a; --ct-warn-bg: #f7e2df; --ct-warn-bd: #1d1712;
-  --ct-pro: #6a89a7; --ct-pro-deep: #557191; --ct-pro-bg: #dbe7ef; --ct-pro-bd: #1d1712;
-  --ct-pro-ink: #2c4356; --ct-pro-tile: #cfe0ec;
+  /* ⚠️ WAS #a3453a — A RED, on a page whose spec says no red anywhere. Same gold as every theme;
+     only the BORDER differs, because a 1.5px ink edge is Bold's universal grammar, not a caution
+     signal. Bold says "notice this" with the ink frame it puts on everything. */
+  --ct-warn: #7d621d; --ct-warn-bg: #f6efdd; --ct-warn-bd: #1d1712;
+  --ct-scout: #7f96b0; --ct-scout-deep: #2f4761; --ct-scout-ink: #3f556e;
+  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #1d1712; --ct-scout-tile: #dbe7ef;
+  --ct-scout-band-a: #d6e0ea; --ct-scout-band-b: #d1dce8; --ct-scout-hover: #fafcfe;
+  --ct-verified: #4c5c49; --ct-verified-bg: #e9ede6; --ct-verified-bd: #1d1712;
   --ct-panel-sh: var(--ct-hard); --ct-card-sh: var(--ct-hard);
 }
 .t-edn .ctpage {
@@ -51,9 +91,13 @@
   --ct-pink: #eef1f3; --ct-pink-bd: #d7dee3; --ct-pink-hover: #e6ebee; --ct-taupe-bd: #dcdcdb;
   --ct-sect: #f5f6f4; --ct-cardrad: 11px; --ct-hard: none;
   --ct-frame-show: none; --ct-frame: none; --ct-paper: 0;
-  --ct-warn: #a35648; --ct-warn-bg: #f4ebe9; --ct-warn-bd: #e6d6d2;
-  --ct-pro: #6a89a7; --ct-pro-deep: #557191; --ct-pro-bg: #eef2f5; --ct-pro-bd: #d7dee3;
-  --ct-pro-ink: #33475a; --ct-pro-tile: #e6edf2;
+  /* ⚠️ WAS #a35648 — also a red. Same gold as every theme; Editorial takes the gold hairline too,
+     since its old border was a pink-family neutral belonging to the red this replaces. */
+  --ct-warn: #7d621d; --ct-warn-bg: #f6efdd; --ct-warn-bd: #e7d9b8;
+  --ct-scout: #7f96b0; --ct-scout-deep: #2f4761; --ct-scout-ink: #3f556e;
+  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #ccd9e7; --ct-scout-tile: #dfe8f2;
+  --ct-scout-band-a: #d6e0ea; --ct-scout-band-b: #d1dce8; --ct-scout-hover: #fafcfe;
+  --ct-verified: #4c5c49; --ct-verified-bg: #e9ede6; --ct-verified-bd: #ccd6c9;
   --ct-panel-sh: 0 1px 2px rgba(20, 20, 20, .04), 0 16px 38px rgba(20, 20, 20, .07);
   --ct-card-sh: none;
 }
@@ -170,7 +214,7 @@
   padding: 4px 9px; border-radius: 20px; font-weight: 500;
 }
 .ct-tag.free { background: var(--ct-card); color: var(--ct-mocha); border: 1px solid var(--ct-taupe-bd); }
-.ct-tag.pro { background: var(--ct-pro); color: #fff; }
+.ct-tag.pro { background: var(--ct-card); color: var(--ct-scout-ink); border: 1px solid var(--ct-scout-bd); }
 .ct-body { padding: 16px 18px; overflow-y: auto; flex: 1; min-height: 0; }
 .t-capp .ctpage .ct-body { margin: 0 6px 6px; }
 
@@ -229,7 +273,7 @@
   padding: 3px 9px; border-radius: 20px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;
 }
 .ct-chip.axis { background: var(--ct-sect); color: var(--ct-ink-soft); text-transform: none; letter-spacing: .02em; border: 1px solid var(--ct-band-hair); }
-.ct-chip.media { background: var(--ct-pro-bg); color: var(--ct-pro-ink); border: 1px solid var(--ct-pro-bd); }
+.ct-chip.media { background: var(--ct-sect); color: var(--ct-ink-soft); border: 1px solid var(--ct-band-hair); }
 .ct-chip.warn { background: var(--ct-warn-bg); color: var(--ct-warn); border: 1px solid var(--ct-warn-bd); }
 .ct-chip .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .ct-cc-side { display: flex; flex-direction: column; align-items: flex-end; gap: 9px; flex-shrink: 0; }
@@ -251,7 +295,7 @@
 }
 .ct-editbtn svg, .ct-x svg { width: 13px; height: 13px; }
 .ct-editbtn:hover { background: var(--ct-sect); color: var(--ct-accent); opacity: 1; }
-.ct-x:hover { background: var(--ct-warn-bg); color: var(--ct-warn); opacity: 1; }
+.ct-x:hover { background: var(--ct-sect); color: var(--ct-accent); opacity: 1; }
 .ct-addman {
   width: 100%; background: transparent; border: 1px dashed var(--ct-taupe-bd); border-radius: 10px; padding: 11px;
   font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
@@ -266,31 +310,31 @@
 /* ── The Scout ── */
 .ct-scout-what { font-size: 12px; color: var(--ct-ink-soft); line-height: 1.55; margin-bottom: 14px; }
 .ct-scout-what b { color: var(--ct-ink); }
-.ct-how { background: var(--ct-pro-bg); border: 1px solid var(--ct-pro-bd); border-radius: 11px; padding: 13px 14px; margin-bottom: 14px; }
-.ct-how .ht { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ct-pro); margin-bottom: 10px; }
+.ct-how { background: var(--ct-scout-bg); border: 1px solid var(--ct-scout-bd); border-radius: 11px; padding: 13px 14px; margin-bottom: 14px; }
+.ct-how .ht { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ct-scout-ink); margin-bottom: 10px; }
 .ct-step { display: flex; gap: 11px; align-items: flex-start; margin-bottom: 11px; }
 .ct-step:last-child { margin-bottom: 0; }
 .ct-step .num {
-  width: 22px; height: 22px; border-radius: 50%; background: var(--ct-pro); color: #fff; display: flex;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--ct-scout-deep); color: #fff; display: flex;
   align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; flex-shrink: 0;
 }
 .ct-step .st { font-size: 12px; font-weight: 600; color: var(--ct-ink); }
 .ct-step .sd { font-size: 11px; color: var(--ct-ink-soft); line-height: 1.45; margin-top: 1px; }
 .ct-btn-pro {
-  width: 100%; background: var(--ct-pro); border: none; color: #fff; border-radius: 10px; padding: 12px;
+  width: 100%; background: var(--ct-scout-deep); border: none; color: #fff; border-radius: 10px; padding: 12px;
   font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
   font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all .18s; box-shadow: 0 2px 10px rgba(106, 137, 167, .28);
+  transition: all .18s; box-shadow: 0 2px 10px rgba(47, 71, 97, .24);
 }
-.ct-btn-pro:hover:not(:disabled) { background: var(--ct-pro-deep); }
+.ct-btn-pro:hover:not(:disabled) { background: var(--ct-scout-ink); }
 .ct-btn-pro:disabled { opacity: .7; cursor: default; }
 .ct-btn-pro svg { width: 15px; height: 15px; }
 .ct-btn-pro .spin { width: 13px; height: 13px; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%; animation: ct-spin .7s linear infinite; }
 @keyframes ct-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .ct-btn-pro .spin { animation: none; } }
 .ct-scan { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; }
-.ct-scanline { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ct-pro-ink); display: flex; gap: 8px; opacity: 0; animation: ct-fadeup .35s forwards; }
-.ct-scanline .tick { color: var(--ct-pro); }
+.ct-scanline { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ct-scout-ink); display: flex; gap: 8px; opacity: 0; animation: ct-fadeup .35s forwards; }
+.ct-scanline .tick { color: var(--ct-scout); }
 @keyframes ct-fadeup { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .ct-scanline { animation: none; opacity: 1; } }
 .ct-notyet {
@@ -305,27 +349,31 @@
 .ct-rc-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; line-height: 1.15; color: var(--ct-ink); }
 .ct-rc-year { font-family: 'JetBrains Mono', monospace; font-size: 9px; background: var(--ct-sect); color: var(--ct-mocha); padding: 2px 7px; border-radius: 20px; border: 1px solid var(--ct-band-hair); }
 .ct-rc-meta { font-size: 11px; color: var(--ct-ink-soft); margin-top: 3px; }
-.ct-verified { display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .04em; text-transform: uppercase; color: var(--ct-pro); margin-top: 7px; }
-.ct-verified svg { width: 11px; height: 11px; }
-.ct-why { margin-top: 10px; background: var(--ct-pro-bg); border-radius: 8px; padding: 9px 11px; }
-.ct-why-cap { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; color: var(--ct-pro); margin-bottom: 4px; }
+/* ⚠️ ONE CHIP, BOTH CARDS. `.ct-chip.verified` is mounted identically in the comp row and in the
+   Scout result; there is deliberately no second treatment. It was `.ct-verified` reading
+   `--ct-pro`, which meant it turned blue with the Scout and could only ever exist in the
+   right-hand column — the claim would have changed colour depending on where it was standing. */
+.ct-chip.verified { background: var(--ct-verified-bg); color: var(--ct-verified); border: 1px solid var(--ct-verified-bd); }
+.ct-chip.verified svg { width: 10px; height: 10px; }
+.ct-why { margin-top: 10px; background: var(--ct-scout-bg); border-radius: 8px; padding: 9px 11px; }
+.ct-why-cap { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; color: var(--ct-scout-ink); margin-bottom: 4px; }
 .ct-why-txt { font-size: 11.5px; line-height: 1.5; color: var(--ct-ink); }
-.ct-why-txt b { color: var(--ct-pro-ink); }
-.ct-agent-hook { margin-top: 9px; display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--ct-pro-ink); background: var(--ct-pro-tile); border-radius: 8px; padding: 8px 10px; }
-.ct-agent-hook svg { color: var(--ct-pro); flex-shrink: 0; width: 13px; height: 13px; }
+.ct-why-txt b { color: var(--ct-scout-ink); }
+.ct-agent-hook { margin-top: 9px; display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--ct-scout-ink); background: var(--ct-scout-tile); border-radius: 8px; padding: 8px 10px; }
+.ct-agent-hook svg { color: var(--ct-scout-deep); flex-shrink: 0; width: 13px; height: 13px; }
 .ct-agent-hook b { font-weight: 600; }
 .ct-rc-foot { margin-top: 11px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid var(--ct-band-hair); }
 .ct-links { display: flex; gap: 9px; }
 .ct-links a { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ct-ink-soft); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
-.ct-links a:hover { color: var(--ct-pro); }
+.ct-links a:hover { color: var(--ct-scout-ink); }
 .ct-links a svg { width: 11px; height: 11px; }
 .ct-addshelf {
   font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .04em; text-transform: uppercase;
-  background: var(--ct-pro); border: none; color: #fff; border-radius: 9px; padding: 8px 12px; cursor: pointer;
+  background: var(--ct-pink); border: 1px solid var(--ct-pink-bd); color: var(--ct-mocha); border-radius: 9px; padding: 8px 12px; cursor: pointer;
   display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all .16s;
 }
-.ct-addshelf:hover:not(:disabled) { background: var(--ct-pro-deep); }
-.ct-addshelf:disabled { background: var(--ct-pro-bg); color: var(--ct-pro-ink); border: 1px solid var(--ct-pro-bd); cursor: default; }
+.ct-addshelf:hover:not(:disabled) { background: var(--ct-pink-hover); }
+.ct-addshelf:disabled { background: var(--ct-sect); color: var(--ct-ink-soft); border: 1px solid var(--ct-band-hair); cursor: default; }
 .ct-addshelf svg { width: 12px; height: 12px; }
 .ct-foot-note { margin-top: 12px; font-size: 10px; line-height: 1.5; color: var(--ct-label); font-style: italic; text-align: center; }
 .ct-scout-err { margin-top: 14px; padding: 12px 14px; background: var(--ct-warn-bg); border: 1px solid var(--ct-warn-bd); border-radius: 10px; font-size: 11.5px; line-height: 1.5; color: var(--ct-warn); text-align: center; }
@@ -334,10 +382,10 @@
 .ct-upsell { text-align: center; padding-top: 6px; }
 .ct-upsell .ghost { filter: blur(3px); opacity: .45; pointer-events: none; margin-bottom: -40px; }
 .ct-upsell .lockwrap { position: relative; z-index: 2; background: linear-gradient(180deg, transparent, var(--ct-card) 30%); padding-top: 30px; }
-.ct-upsell .lock { width: 44px; height: 44px; border-radius: 50%; background: var(--ct-pro); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 4px 14px rgba(106, 137, 167, .3); }
+.ct-upsell .lock { width: 44px; height: 44px; border-radius: 50%; background: var(--ct-scout-deep); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 4px 14px rgba(47, 71, 97, .26); }
 .ct-upsell .lock svg { width: 19px; height: 19px; }
 .ct-upsell h3 { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; margin-bottom: 8px; color: var(--ct-ink); }
-.ct-upsell p { font-size: 11.5px; color: var(--ct-pro-ink); line-height: 1.55; margin-bottom: 16px; }
+.ct-upsell p { font-size: 11.5px; color: var(--ct-scout-ink); line-height: 1.55; margin-bottom: 16px; }
 
 /* no-manuscript empty state */
 .ct-blank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; text-align: center; color: var(--ct-ink-soft); }

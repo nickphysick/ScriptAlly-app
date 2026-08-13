@@ -27,6 +27,7 @@ import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import {
   CompDraft,
+  isVerified,
   manuscriptComps,
   normalizeComp,
   withCompAdded,
@@ -288,9 +289,12 @@ const ScoutResultCard: React.FC<{
       {/* ⚠️ UNCONDITIONAL, AND THAT IS THE CONTRACT — every suggestion carries a verification record
           or the validator dropped it, so there is no unverified row for a branch to handle. It also
           NAMES the catalogue now rather than saying the word "catalogue": the record exists, so the
-          chip can state which one answered instead of asserting that one did. */}
-      <div className="ct-verified">
-        <Check size={11} /> Verified · {s.verification.catalogue}
+          chip can state which one answered instead of asserting that one did.
+          ⚠️ SAME CLASS AS THE COMP ROW'S — one chip, both cards. */}
+      <div className="ct-chips" style={{ marginTop: 7 }}>
+        <span className="ct-chip verified">
+          <Check size={10} /> Verified · {s.verification.catalogue}
+        </span>
       </div>
       <div className="ct-why">
         <div className="ct-why-cap">Why this fits</div>
@@ -657,6 +661,16 @@ export const ComparableTitlesPage: React.FC<{
                           {meta && <div className="ct-cc-meta">{meta}</div>}
                           <div className="ct-cc-roleline">{role.line}</div>
                           <div className="ct-chips">
+                            {/* ⚠️ DERIVED FROM THE RECORD, NEVER FROM A FLAG — and a manual comp
+                                simply has no chip, which is the honest outcome rather than a gap.
+                                This is the mount that could not exist before 211ccc5 persisted the
+                                verification: the chip lived only in the Scout column, so a
+                                suggestion lost its standing the moment it landed here. */}
+                            {isVerified(c) && (
+                              <span className="ct-chip verified">
+                                <Check size={10} /> Verified · {c.verification!.catalogue}
+                              </span>
+                            )}
                             {media !== "book" && <span className="ct-chip media">{MEDIA_LABEL[media]}</span>}
                             {c.matchAxis && <span className="ct-chip axis">{c.matchAxis}</span>}
                             {flag && (

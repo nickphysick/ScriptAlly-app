@@ -1473,3 +1473,85 @@ to is the only one with a length worth stating.
 - **The sage status pill is untouched** — it is a state signal, not part of the surface treatment.
 - **⚠️ RECEDED IS NOT DISABLED.** No `pointer-events`, no `tabindex`, no dimmed links: the panel stays keyboard-navigable and its values keep the standard ink token. Captions, labels and the footer stamp are the muted ones, and already were.
 - **Bold Pastille and Editorial are untouched.** Bold is locked and correct in dev; Editorial is monochrome and has nothing to recede from. Both keep the base sheet's dotted rim.
+
+## Comparable titles — the retone (comps pack, Amendment 1 §3 + Amendment 3; 13 Aug 2026)
+
+Page-scoped `--ct-*` tokens in `src/components/manuscripts/comps.css`, declared per theme under
+`.ctpage` / `.t-bold .ctpage` / `.t-edn .ctpage`. Locked by `compsTokens.test.ts`.
+
+### Advisory is gold — the page had a red in two themes
+
+`--ct-warn` resolved to **`#a3453a` in Bold Pastille** and **`#a35648` in Editorial**, both reds, on a
+page whose spec says *no red anywhere*. It was painting four things: the recency chip, the query-line
+note, the Scout's error box and the remove button's hover.
+
+All three themes now take **the house gold advisory values** — the trio this document already
+records at `--gold-t #f6efdd` / `--gold-b #e7d9b8` / `--gold-i #7d621d`, and already tells anyone
+facing this question to use *"rather than reinventing a gold or yellow"*.
+
+| Token | Capp | Bold | Editorial |
+|---|---|---|---|
+| `--ct-warn` | `#7d621d` | `#7d621d` | `#7d621d` |
+| `--ct-warn-bg` | `#f6efdd` | `#f6efdd` | `#f6efdd` |
+| `--ct-warn-bd` | `#e7d9b8` | `#1d1712` | `#e7d9b8` |
+
+- **Cappuccino's own `#ba7517` is SUPERSEDED**, so the app carries one amber rather than two. The
+  house gold is also the stronger of the pair on its ground (~5.1:1 against ~3.5:1).
+- **Bold keeps an ink border** because a 1.5px ink edge is Bold's universal grammar, not a caution
+  signal — Bold says "notice this" with the frame it puts on everything.
+- **⚠️ The `--gold-*` tokens live under `.t-f12`, not `:root`**, so the three app themes cannot read
+  them. The comps page states the values itself, per its own page-scoped-hex convention. If the
+  advisory family ever moves to `:root`, these three blocks should read it instead.
+- **The remove button no longer borrows the token.** Its hover is burgundy (`--ct-accent`). Removing
+  a comp is an ordinary undoable action; dressing it as a caution said something untrue about the
+  act, and it was the only consumer of `--ct-warn` not stating a fact about a comp.
+
+### The Scout is pastille blue — and `--ct-pro-*` is retired
+
+One token meant **four things at once** — the Scout's surfaces, the Pro tier tag, the media chip and
+the ✓ VERIFIED chip — so none could be recoloured without dragging the other three. Split by meaning;
+`--ct-pro-*` was left reading nothing and is **deleted rather than left defined-and-unread**.
+
+| Token | All three themes | Bold override |
+|---|---|---|
+| `--ct-scout` | `#7f96b0` | — |
+| `--ct-scout-deep` | `#2f4761` | — |
+| `--ct-scout-ink` | `#3f556e` | — |
+| `--ct-scout-bg` | `#eaf0f7` | — |
+| `--ct-scout-bd` | `#ccd9e7` | `#1d1712` |
+| `--ct-scout-band-a` / `-b` | `#d6e0ea` / `#d1dce8` | — |
+| `--ct-scout-hover` | `#fafcfe` | — |
+| `--ct-scout-tile` | `#dfe8f2` | `#dbe7ef` |
+
+- **Blue marks the TIER, never the verb.** `ADD` stays soft pink like every action in the app; a blue
+  ADD would say the button belonged to Pro rather than to the writer. Asserted.
+- **The media chip left the Pro family for a neutral.** It states what KIND of work a comp is and
+  never had anything to do with the tier — it only looked blue because it read that token.
+
+### ✓ VERIFIED is sage, in every theme, in both cards
+
+`--ct-verified #4c5c49` / `--ct-verified-bg #e9ede6` / `--ct-verified-bd #ccd6c9` (Bold: `#1d1712`).
+
+**One component, one colour.** It was `.ct-verified` reading `--ct-pro`, so it turned blue with the
+Scout — a claim that changed colour depending on which column it stood in. There is now a single
+`.ct-chip.verified` treatment mounted identically in the comp row and the Scout result, and the old
+second treatment is deleted rather than left unused. Sage in Editorial too: the rule is one colour
+everywhere, and this page's Editorial block already carries hue elsewhere.
+
+### ⚠️ REPORTED DIVERGENCE — the PRO tag is no longer slate on this page
+
+This document states, one section above: *"Slate already means **Pro** in this app and must not come
+to mean 'reference' as well — one colour, one meaning."* The comps page's `PRO` tag now renders as a
+**white plate with a `#ccd9e7` border and `#3f556e` text**, per Amendment 1 §3, so it no longer
+matches the slate `#6A89A7` badge used by the Package Builder, `manuscriptPlate.css`, `Queries.tsx`
+and `manuscripts.css` — the last of which is pinned by `manuscriptPlateTokens.test.ts`.
+
+Amendment 1 §3 asked to **stop and report** if a conflicting PRO token were locked elsewhere; the
+conflict is slate rather than the amber it anticipated, so it is recorded here rather than resolved.
+Its own principle — *"the tier colour should be one colour everywhere"* — is the thing at stake.
+**Nothing app-wide was touched.** Two ways out, both one token:
+
+1. Comps' PRO returns to slate, and pastille blue governs only the Scout's surfaces.
+2. Slate retires app-wide in favour of pastille blue — a larger change, five mounts and a lock.
+
+Awaiting a ruling at the Prompt 1 review checkpoint.
