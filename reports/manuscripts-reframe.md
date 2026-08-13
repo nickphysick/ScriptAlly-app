@@ -733,3 +733,118 @@ now says why rather than carrying a number nobody could read off the page.
 **The app itself is auth-gated and was not verified live.** The three editors are stateful, and a
 static harness cannot drive React state — it verified the resting, title-editing, genre-open and
 popover-open states as geometry, which is what a harness may answer.
+
+---
+
+## Plate editor and dossier header fixes (follows Phase 4)
+
+Ref: `design-refs/manuscript-plate-editors.html`, variant **B**. Four commits.
+
+### Step 2 — the dossier condenses the page header
+
+A **second consumer** of `WorkspacePageGrid`'s existing `condensed` prop, not a second mechanism.
+The grid already unions `stuck || condensedByMode` for Query Centre's journeys and passes the header
+**one boolean** through context, so it never learns which half fired. The page supplies
+`condensed={!!selected}` and nothing in the grid changed. Verified the mechanism was reachable and
+not mid-change from the other stream before building.
+
+**No scroll signal is synthesised** — the dossier's scroll row never moves (the pane body scrolls
+instead), so a sentinel would never fire. Locked against the page growing `scrollTop` /
+`IntersectionObserver` / `stuck` / `onScroll`.
+
+> The lock **strips comments before reading the source**. The page's own comment explains the union
+> *by naming `stuck`*, so a bare-string sweep flagged the prose describing the decision as if it were
+> the decision being broken. It caught this test on its first run.
+
+### Step 3 — the word-count field
+
+Replaced three text labels in a row with the ref's field: **one bordered box** holding the number
+(JetBrains Mono 17px, left), a muted mono `WORDS` unit, and a **36px stacked ▲▼ column inside the
+same border** behind a 1px divider, its two buttons split by a hairline. **The focus ring is on the
+box**, not the bare input — that is what makes three parts one field. Native spinners suppressed in
+both engines.
+
+- **`e E + - .` are rejected at the keystroke, not at save.** Every one is valid to a numeric input
+  and none is valid as a word count — and the browser then reports the value as `""` rather than the
+  text typed, so a save-time check could not even say what went wrong. `Numbers only.`, clearing on
+  the next valid input.
+- **Cancel restores** rather than merely closing; otherwise the next open shows an abandoned edit as
+  if it were stored.
+- **A blank field steps from the stored value, not from zero** — clearing the box to retype is normal
+  half-way through, and stepping from 0 would discard the number being edited.
+- Hint `↑ ↓ steps 500`, reading its step from `WORD_STEP`. It states what the KEYS do; no range, no
+  target, no placeholder range — that stays retired and is asserted.
+
+Measured: popover **270px**, steps column **36px** with a 1px left border, input **17px** mono,
+`-moz-appearance: textfield`, ring on the box (none → 3px) with the input's own outline `none`.
+
+> **The lock caught its own parser first.** A flat `selector { body }` sweep **desyncs at the first
+> at-rule** — it reads `@media (…)` as a selector and that block's first inner rule as its body, and
+> every rule after is off by one. It reported `.msv-stepper` missing from a stylesheet that declares
+> it. Comments are stripped and `@media` unwrapped before parsing, with an assertion that the sweep
+> parses at all.
+
+### Step 4 — the genre popover
+
+Variant B: a **520px portalled, fixed popover** anchored under the pills. Two columns —
+`AGE CATEGORY` (186px, hairline right, a row each with a 3px accent bar, weight 600 and a
+right-aligned tick on the current) and `GENRE — up to three` (token field with chips inside it).
+**Buffered**: Cancel discards, Done commits both fields in one quiet write.
+
+**Measured: removing the popover moves the plateband 0px and the logline 0px** — which is the fix.
+Columns 186px + 1fr, bar 3px, tick visible only on the current row.
+
+**The picker was extended in place, not forked**, with an `embedded` mode that renders its search and
+results inline instead of behind a trigger that opens its own portalled popover. Every piece of
+logic is shared verbatim — matching, the ⏎ target, aliases, the personal-genre escape and its
+guardrails, the cap, the shortcut pills. Added alongside it: ↑↓ walking the list, Enter taking the
+highlight, Backspace on an **empty** input removing the last chip, and the typed span marked.
+
+Two deviations worth stating:
+
+- **`PortalMenu` could not host this, and I checked rather than asserted it.** It takes
+  `groups: MenuGroup[]` and renders `role="menu"` with `role="menuitem"` buttons — fixed markup, no
+  children slot, and wrong ARIA around a text input. **`placeMenu`, the pure placement it positions
+  with (flip at the viewport edge included), IS shared** and is what this uses. That is the part of
+  the machinery that is genuinely reusable.
+- **The right-hand "family" slot carries the only grouping the taxonomy has.** `CANONICAL_GENRES`
+  has no family dimension; inventing one would be a second taxonomy. Personal genres say `Yours` and
+  canonical ones render nothing — absence omits its clause rather than filling the slot with a guess.
+
+### ⚠️ A theme leak found by measurement, twice
+
+`genrePicker.css` is written for the `.t-f12` wrapper its own popover portals into, so every colour
+is `var(--something, <warm fallback>)`. **Embedded there is no `.t-f12` ancestor, so the fallbacks
+applied — in every theme.** Measured in Editorial on the rendered popover: the chosen chip at chroma
+**26 / 44 / 90**, the tick at **64 (blue)**, option ink at 14, the personal-genre border at 25 — in a
+theme whose limit is 6.
+
+**The first fix was incomplete because the first sweep was hand-picked.** Probing a list of surfaces
+I had authored missed the chip, the option text and the tick, which belong to the picker. Only
+walking **every element and every colour property** found them.
+
+The fix is to **define the variables the picker reads**, scoped to `.msv1`, rather than override its
+rules one at a time — which also covers the rules nobody probed. Re-swept afterwards: **zero
+elements above chroma 6** in Editorial, excluding `--msv-hue` itself (`#44484d`, chroma 9), the
+app-wide Editorial accent already used by the active tab and the primary button.
+
+### Also fixed at the cause
+
+`msv-gpgroup` was a **prefix of `msv-gp`**, so the "no genres means no pills" lock failed on a plate
+rendering no pills. Renamed `msv-genreanchor`. Second time this shape has bitten in this build; the
+fix is always the name, never the assertion.
+
+And one lock **did not fail red on its first check**: `toContain("placeMenu(")` is satisfied by
+`XplaceMenu(`. Re-anchored to `/\bplaceMenu\(/` and re-verified red.
+
+### Verification
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | green |
+| Vitest | **4,737 passed, 2 skipped, 0 failed** |
+| `npm run build` | green |
+| New locks verified red | yes — condensed prop, placeMenu anchor |
+
+**The app itself is auth-gated and was not verified live.** No claim is made about behaviour behind
+the gate; the editors are stateful and a static harness verified their geometry only.

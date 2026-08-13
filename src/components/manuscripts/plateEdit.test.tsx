@@ -283,3 +283,97 @@ describe("the word-count field is one box", () => {
     expect(SRC).toContain("onClick={cancelWords}");
   });
 });
+
+
+/**
+ * The genre editor is a POPOVER over the plate, not a row inside it. The fault being fixed was
+ * structural — an inline bar reflowed the plateband and pushed the logline down, and age category
+ * and genre were told apart only by chip colour — so these read structure, not behaviour.
+ */
+describe("the genre editor floats, and its two columns carry the distinction", () => {
+  const SRC = read(resolve(__dirname, "./ManuscriptPlate.tsx"), "utf8");
+  const CSS = read(resolve(__dirname, "./manuscriptPlate.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/@media[^{]*\{/g, "");
+  const rule = (sel: string) => {
+    const bodies = [...CSS.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .filter(([, s]) => s.split(",").some((x) => x.trim() === sel))
+      .map(([, , b]) => b);
+    expect(bodies.length, `${sel} must appear in at least one rule`).toBeGreaterThan(0);
+    return bodies.join("\n");
+  };
+
+  /* ⚠️ PORTALLED AND FIXED — an in-flow editor moves the plate every time it opens. */
+  it("is portalled and positioned out of flow", () => {
+    expect(SRC).toContain('className="msv-genrepop"');
+    expect(SRC).toContain("createPortal");
+    expect(rule(".msv-genrepop")).toContain("position: fixed");
+  });
+
+  /* The inline bar is GONE, not merely unused — it was the fault. */
+  it("leaves none of the inline bar behind", () => {
+    for (const dead of ["msv-genreedit", "msv-ageseg", "msv-agebtn", "msv-genredone"]) {
+      expect(SRC, `${dead} survives in the markup`).not.toContain(dead);
+      expect(CSS, `${dead} survives in the stylesheet`).not.toContain(dead);
+    }
+  });
+
+  /**
+   * ⚠️ THE COLUMNS ARE THE DISTINCTION. Age category and genre are told apart by sitting in
+   * different columns under their own labels — not by colour, which is what failed.
+   */
+  it("splits the two into columns with a rule between them", () => {
+    expect(rule(".msv-gcols")).toContain("grid-template-columns: 186px 1fr");
+    expect(rule(".msv-gcolL")).toContain("border-right");
+    expect(SRC).toContain(">Age category<");
+    expect(SRC).toMatch(/Genre <span className="msv-glabsub">/);
+  });
+
+  it("marks the current category with a bar, weight and a tick", () => {
+    expect(rule(".msv-agerow.on")).toContain("font-weight: 600");
+    expect(rule(".msv-agerow.on .msv-agebar")).toContain("background");
+    expect(rule(".msv-agerow.on .msv-agetick")).toContain("visibility: visible");
+    expect(rule(".msv-agetick")).toContain("visibility: hidden");
+  });
+
+  /**
+   * ⚠️ BUFFERED — Cancel discards, Done commits BOTH fields in one write. Saving on each change
+   * would leave Cancel with nothing to cancel back to.
+   */
+  it("buffers a draft and commits once", () => {
+    expect(SRC).toContain("const [genreDraft, setGenreDraft]");
+    expect(SRC).toContain("const saveGenre");
+    expect(SRC).toContain("edit.genre.onSave(genreDraft)");
+    expect(SRC).toMatch(/onClick=\{close\}>Cancel</);
+    expect(SRC).toMatch(/onClick=\{saveGenre\}>Done</);
+  });
+
+  /**
+   * ⚠️ PLACEMENT IS THE SHARED `placeMenu` — the same pure function `PortalMenu` positions with,
+   * flip at the viewport edge included. The COMPONENT cannot host this (it renders a `MenuGroup[]`
+   * of `role="menuitem"` buttons and has no slot for a token field); its placement is the part that
+   * is genuinely shared, and this is that part.
+   */
+  it("positions with the shared placeMenu rather than a second implementation", () => {
+    expect(SRC).toContain('import { placeMenu } from "../../lib/todoMenu"');
+    /* ⚠️ WORD-ANCHORED, NOT A SUBSTRING. `toContain("placeMenu(")` is satisfied by `XplaceMenu(` —
+       it passed a deliberately-broken source on its first red check, which is the whole reason this
+       is a regex with a boundary rather than a substring. */
+    expect(SRC).toMatch(/\bplaceMenu\(/);
+  });
+
+  /* ⚠️ ONE PICKER, ONE TAXONOMY. A second genre list would fork personal-genre creation. */
+  it("uses the shared picker in its embedded shell", () => {
+    expect(SRC).toContain("<GenrePicker");
+    expect(SRC).toContain("embedded");
+    expect(SRC).toContain(`cap={MAX_MANUSCRIPT_GENRES}`);
+    /* …and builds no genre list of its own. */
+    expect(SRC).not.toContain("CANONICAL_GENRES");
+  });
+
+  /* The anchor wraps the pills, and its class must not be a prefix of theirs. */
+  it("anchors on the pill group under a name that is not a prefix of the pills'", () => {
+    expect(SRC).toContain('className="msv-genreanchor"');
+    expect(SRC).not.toContain("msv-gpgroup");
+  });
+});

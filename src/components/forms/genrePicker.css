@@ -56,10 +56,41 @@
 
 /* Shortcut pills for the chosen age category (reframe Phase 4). A SHORTCUT, not a filter — the full
    list sits directly below them and nothing here narrows it. */
-.gp-common { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 10px 4px; }
+.gp-common { padding: 8px 16px 4px; }
+.gp-commonlab {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.17em;
+  text-transform: uppercase; color: var(--faint, #a2907f); margin-bottom: 8px;
+}
+.gp-commonrow { display: flex; flex-wrap: wrap; gap: 7px; }
 .gp-commonpill {
   font: inherit; font-size: 12px; cursor: pointer;
   background: var(--f12-sub, #f4f1ea); border: 1px solid var(--f12-line, #e2dacf);
   color: inherit; border-radius: 20px; padding: 4px 11px;
 }
 .gp-commonpill:hover { background: var(--f12-hov, #efe8dd); }
+
+/* ── embedded shell (manuscript plate's genre popover) ──
+   ⚠️ THE CHIPS SIT INSIDE THE FIELD. One bordered token field holding the chosen genres and the
+   input is what makes it read as a field rather than as a list with a search box above it. */
+.gp-embedded { display: block; }
+.gp-tafield {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+  margin: 0 16px; padding: 7px 9px;
+  background: #fff; border: 1px solid var(--f12-line, #e2dacf); border-radius: 10px;
+}
+.gp-tafield:focus-within {
+  border-color: rgba(124, 58, 42, 0.45);
+  box-shadow: 0 0 0 3px rgba(124, 58, 42, 0.08);
+}
+.gp-embedded .gp-search { flex: 1; min-width: 110px; padding: 0; border: none; background: none; }
+.gp-embedded .gp-search input { width: 100%; border: none; outline: none; background: transparent; font-size: 13px; padding: 4px 2px; }
+.gp-embedded .gp-list { max-height: 170px; overflow-y: auto; margin: 6px 8px 0; }
+
+/* The typed span, and the only grouping the taxonomy actually has. */
+.gp-mark { font-weight: 600; color: var(--f12-burg, #7c3a2a); }
+.gp-fam {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--faint, #b3a293);
+}
+.gp-opt.hi { background: var(--paper, #f2ece2); }

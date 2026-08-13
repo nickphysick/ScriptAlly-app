@@ -411,22 +411,87 @@
   text-transform: uppercase; color: var(--msv-hue);
 }
 
-/* ── genre: an inline row, not a popover (GenrePicker portals its own) ── */
-.msv-genreedit {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
-  margin-top: 12px; padding: 12px; border-radius: 10px;
-  background: var(--msv-card); border: 1px solid var(--msv-hair);
+/* ── genre: a two-column popover, floating over the plate ──
+   ⚠️ IT MUST NOT REFLOW THE PLATEBAND. The inline bar it replaces pushed the logline down every
+   time it opened; this is portalled and fixed, so the plate does not move.
+   ⚠️ AND THE TWO COLUMNS CARRY THE DISTINCTION STRUCTURALLY. Age category and genre are told apart
+   by being in different columns under their own labels — never by chip colour, which is the
+   specific failure being fixed. */
+/* ⚠️ NOT `msv-gpgroup` — a wrapper class that is a PREFIX of its children's (`msv-gp`) makes every
+   prefix-matching selector and test read the wrapper as a pill. It did exactly that on its first
+   run, failing the "no genres means no pills" lock on a plate rendering no pills. Second time this
+   shape has bitten in this build; the fix is always the name, never the assertion. */
+.msv-genreanchor { display: contents; }
+.msv-genrepop {
+  position: fixed; width: 520px; z-index: 60;
+  background: var(--msv-card); border: var(--msv-cardbd); border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(58, 28, 20, 0.16);
+  padding: 13px 0 0;
 }
-.msv-ageseg { display: flex; flex-wrap: wrap; gap: 4px; }
-.msv-agebtn {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.12em;
-  text-transform: uppercase; cursor: pointer;
-  background: none; border: 1px solid var(--msv-hair); color: var(--msv-muted);
-  border-radius: 20px; padding: 5px 11px;
+.msv-gcols { display: grid; grid-template-columns: 186px 1fr; }
+.msv-gcolL { border-right: 1px solid var(--msv-hair); padding-bottom: 8px; }
+.msv-gcolR { padding-bottom: 8px; min-width: 0; }
+.msv-glab {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.17em;
+  text-transform: uppercase; color: var(--msv-label); padding: 0 16px 7px;
 }
-.msv-agebtn:hover { background: var(--msv-edithov); }
-.msv-agebtn.on { background: var(--msv-huec); border-color: var(--msv-hue); color: var(--msv-hue); font-weight: 600; }
-.msv-genredone { margin-left: auto; }
+.msv-glabsub { text-transform: none; letter-spacing: 0; color: var(--msv-muted); }
+
+.msv-agerow {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 9px 16px; font: inherit; font-size: 13px; text-align: left;
+  background: none; border: none; color: var(--msv-ink); cursor: pointer;
+}
+.msv-agerow:hover { background: var(--msv-edithov); }
+.msv-agerow.on { font-weight: 600; color: var(--msv-head); }
+.msv-agebar { width: 3px; height: 16px; border-radius: 2px; background: transparent; flex: 0 0 auto; }
+.msv-agerow.on .msv-agebar { background: var(--msv-hue); }
+.msv-agetick { margin-left: auto; color: var(--msv-hue); visibility: hidden; }
+.msv-agerow.on .msv-agetick { visibility: visible; }
+
+/* ⚠️ THE EMBEDDED PICKER IS RE-THEMED BY DEFINING THE VARIABLES IT READS, not by overriding its
+   rules one at a time — and this was a MEASURED leak, found twice.
+
+   `genrePicker.css` is written for the `.t-f12` wrapper its own popover portals into, so every
+   colour is `var(--something, <warm fallback>)`. Embedded, there is no `.t-f12` ancestor and the
+   FALLBACKS apply — in every theme. Measured in Editorial on the rendered popover: the chosen chip
+   at chroma 26/44/90, the tick at 64 (blue), option ink at 14, the personal-genre border at 25, in
+   a theme whose limit is 6.
+
+   ⚠️ AND THE FIRST FIX WAS INCOMPLETE BECAUSE THE FIRST SWEEP WAS HAND-PICKED. Probing a list of
+   surfaces I had authored missed the chip, the option text and the tick, which belong to the picker.
+   Only walking EVERY element and EVERY colour property found them. Defining the variables fixes the
+   rules nobody probed too, which a per-selector list can never promise.
+
+   Scoped to `.msv1` so the picker's own popover keeps its f12 treatment untouched. */
+.msv1 .gp-embedded {
+  --hairline: var(--msv-hair);
+  --line: var(--msv-hair);
+  --ink: var(--msv-head);
+  --ink-2: var(--msv-ink);
+  --muted: var(--msv-muted);
+  --faint: var(--msv-label);
+  --paper: var(--msv-edithov);
+  --panel: var(--msv-card);
+  /* The picker's accent trio — selected tint, selected border, accent ink — plus its tick, which is
+     the one BLUE in the sheet. All four become the theme's own accent pair. */
+  --pink-t: var(--msv-huec);
+  --pink-b: var(--msv-hue);
+  --pink-i: var(--msv-hue);
+  --blue-i: var(--msv-hue);
+  --f12-line: var(--msv-hair);
+  --f12-sub: var(--msv-sub);
+  --f12-hov: var(--msv-edithov);
+  --f12-burg: var(--msv-hue);
+}
+/* The two rules the picker hardcodes without a variable, and one of them is mine. */
+.msv1 .gp-tafield { background: var(--msv-card); }
+.msv1 .gp-opt.hi { background: var(--msv-edithov); }
+
+.msv-gfoot {
+  display: flex; justify-content: flex-end; gap: 9px;
+  padding: 11px 16px 13px; margin-top: 8px; border-top: 1px solid var(--msv-hair);
+}
 
 /* ── word count: one field, positioned by the shared useFixedMenu ──
    ⚠️ NO `min-width` HERE — `useFixedMenu` writes an INLINE `minWidth` (the trigger's width) and

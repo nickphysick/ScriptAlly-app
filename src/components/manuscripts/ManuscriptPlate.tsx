@@ -22,13 +22,14 @@
  * activity reads `—`, because there is no date and a `0` there would assert an event that never
  * happened. The split lives in `plateStatCells`, so every caller resolves absence the same way.
  */
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { PlateStats, plateStatCells } from "../../lib/manuscriptPlate";
 import { AGE_CATEGORIES } from "../../lib/manuscripts";
 import { genreDisplay, type PersonalGenre } from "../../lib/genres";
 import { GenrePicker } from "../forms";
 import { useFixedMenu } from "../forms/useFixedMenu";
+import { placeMenu } from "../../lib/todoMenu";
 import {
   SAVED_RECEIPT,
   SAVED_RECEIPT_MS,
@@ -100,6 +101,15 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
   const [wordError, setWordError] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const wordRef = useRef<HTMLInputElement>(null);
+  const genreAnchor = useRef<HTMLSpanElement>(null);
+  const genrePopRef = useRef<HTMLDivElement>(null);
+  /**
+   * ⚠️ THE GENRE POPOVER IS BUFFERED — Cancel discards and Done commits both fields in ONE write.
+   * A draft is the only way `Cancel` can mean anything: saving on each change would leave nothing
+   * to cancel back to.
+   */
+  const [genreDraft, setGenreDraft] = useState<{ ageCategory: string; ids: string[] } | null>(null);
+  const [genrePos, setGenrePos] = useState<{ left: number; top: number } | null>(null);
   const { triggerRef: wordTrigger, menuStyle: wordMenu } = useFixedMenu<HTMLButtonElement>(open === "words");
 
   /** The receipt is the only thing that says a write happened; it clears itself. */
@@ -116,7 +126,36 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
     if (open === "words") { wordRef.current?.focus(); wordRef.current?.select(); }
   }, [open]);
 
-  const close = () => { setOpen(null); setWordError(false); };
+  const close = () => { setOpen(null); setWordError(false); setGenreDraft(null); setGenrePos(null); };
+
+  const openGenre = () => {
+    if (!edit) return;
+    setGenreDraft({ ageCategory: edit.genre.ageCategory, ids: edit.genre.ids });
+    setOpen("genre");
+  };
+  const saveGenre = () => {
+    if (!edit || !genreDraft) return;
+    const changed =
+      genreDraft.ageCategory !== edit.genre.ageCategory ||
+      genreDraft.ids.join("\u0000") !== edit.genre.ids.join("\u0000");
+    if (changed) { edit.genre.onSave(genreDraft); confirm(); }
+    close();
+  };
+
+  /**
+   * ⚠️ PLACED BY THE SHARED `placeMenu`, the same pure function `PortalMenu` uses — including its
+   * flip at the viewport's bottom edge. `PortalMenu` itself renders a `MenuGroup[]` of
+   * `role="menuitem"` buttons and has no slot for a token field, so the COMPONENT cannot host this;
+   * its placement is the part that is genuinely shared, and this is that part.
+   */
+  useLayoutEffect(() => {
+    const el = genrePopRef.current;
+    const anchor = genreAnchor.current;
+    if (open !== "genre" || !el || !anchor) return;
+    const p = placeMenu(anchor.getBoundingClientRect(), { w: el.offsetWidth, h: el.offsetHeight },
+      { w: window.innerWidth, h: window.innerHeight });
+    setGenrePos({ left: p.left, top: p.top });
+  }, [open, genreDraft]);
 
   const openTitle = () => { if (!edit) return; setTitleDraft(title); setOpen("title"); };
   const saveTitle = () => {
@@ -197,15 +236,19 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
         )}
 
         <div className="msv-platemeta">
-          {pills.map((g) => (
-            <span
-              key={g}
-              className={`msv-gp${edit ? " editable" : ""}`}
-              onClick={() => edit && setOpen(open === "genre" ? null : "genre")}
-            >
-              {g}
-            </span>
-          ))}
+          {/* One anchor around the pills — the popover hangs off the group, not off whichever pill
+              happened to be clicked. */}
+          <span className="msv-genreanchor" ref={genreAnchor}>
+            {pills.map((g) => (
+              <span
+                key={g}
+                className={`msv-gp${edit ? " editable" : ""}`}
+                onClick={() => edit && (open === "genre" ? close() : openGenre())}
+              >
+                {g}
+              </span>
+            ))}
+          </span>
           {wordCount !== undefined && (
             edit ? (
               <button
@@ -226,36 +269,68 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
         </div>
 
         {/*
-          ⚠️ THE GENRE EDITOR IS AN INLINE ROW, NOT A POPOVER — a deliberate deviation. `GenrePicker`
-          portals its OWN popover, so nesting it inside a second portalled popover would stack two
-          layers for one control. Inline, the picker behaves exactly as it does in every other form.
+          ⚠️ A POPOVER, NOT AN INLINE ROW. The inline bar reflowed the plateband and pushed the
+          logline down every time it opened; this floats over the plate and moves nothing. Placement
+          is the SHARED `placeMenu` — the same pure function `PortalMenu` positions with, including
+          its flip at the viewport's bottom edge.
+
+          ⚠️ AND IT IS BUFFERED. Cancel discards; Done commits BOTH fields in one write. The two
+          columns are what tell age category from genre — never chip colour, which is the specific
+          failure this replaces.
         */}
-        {open === "genre" && edit && (
-          <div className="msv-genreedit">
-            <div className="msv-ageseg" role="radiogroup" aria-label="Age category">
-              {AGE_CATEGORIES.map((a) => (
-                <button
-                  key={a}
-                  type="button"
-                  role="radio"
-                  aria-checked={a === edit.genre.ageCategory}
-                  className={`msv-agebtn${a === edit.genre.ageCategory ? " on" : ""}`}
-                  onClick={() => { edit.genre.onSave({ ageCategory: a, ids: edit.genre.ids }); confirm(); }}
-                >
-                  {a}
-                </button>
-              ))}
+        {open === "genre" && edit && genreDraft && createPortal(
+          <div className="msv1">
+            <div
+              ref={genrePopRef}
+              className="msv-genrepop"
+              style={genrePos ? { left: genrePos.left, top: genrePos.top } : { left: 0, top: 0, visibility: "hidden" }}
+              role="dialog"
+              aria-label="Age category and genre"
+            >
+              <div className="msv-gcols">
+                <div className="msv-gcolL">
+                  <div className="msv-glab">Age category</div>
+                  <div role="radiogroup" aria-label="Age category">
+                    {AGE_CATEGORIES.map((a) => (
+                      <button
+                        key={a}
+                        type="button"
+                        role="radio"
+                        aria-checked={a === genreDraft.ageCategory}
+                        className={`msv-agerow${a === genreDraft.ageCategory ? " on" : ""}`}
+                        onClick={() => setGenreDraft({ ...genreDraft, ageCategory: a })}
+                      >
+                        <span className="msv-agebar" aria-hidden="true" />
+                        {a}
+                        <span className="msv-agetick" aria-hidden="true">✓</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="msv-gcolR">
+                  <div className="msv-glab">
+                    Genre <span className="msv-glabsub">— up to {MAX_MANUSCRIPT_GENRES}</span>
+                  </div>
+                  {/* The shared picker, in its embedded shell — one component, one taxonomy, one
+                      personal-genre path. */}
+                  <GenrePicker
+                    embedded
+                    value={genreDraft.ids}
+                    onChange={(ids) => setGenreDraft({ ...genreDraft, ids })}
+                    personal={edit.genre.personal}
+                    onCreatePersonal={edit.genre.onCreatePersonal}
+                    cap={MAX_MANUSCRIPT_GENRES}
+                    ageCategory={genreDraft.ageCategory}
+                  />
+                </div>
+              </div>
+              <div className="msv-gfoot">
+                <button type="button" className="msv-btn sm" onClick={close}>Cancel</button>
+                <button type="button" className="msv-btn sm msv-primary" onClick={saveGenre}>Done</button>
+              </div>
             </div>
-            <GenrePicker
-              value={edit.genre.ids}
-              onChange={(ids) => { edit.genre.onSave({ ageCategory: edit.genre.ageCategory, ids }); confirm(); }}
-              personal={edit.genre.personal}
-              onCreatePersonal={edit.genre.onCreatePersonal}
-              cap={MAX_MANUSCRIPT_GENRES}
-              ageCategory={edit.genre.ageCategory}
-            />
-            <button type="button" className="msv-btn sm msv-genredone" onClick={close}>Done</button>
-          </div>
+          </div>,
+          document.body
         )}
 
         {/* No logline → nothing. A prompt to write one belongs on the pitch shelf, which owns it. */}
