@@ -11,13 +11,13 @@
  * internally). The masthead is the standard PageHeader with the manuscript selector in its
  * tools slot (ChromeSlab and HubHeaderBar are both long deleted — shell rollout Phase 6 /
  * follow-up P3).
- * Store only facts + one intent (`inQuery`); role / query line / health / recency are derived
+ * Store only facts + one intent (`inQuery`); role / query line / composition / age are derived
  * at render (src/lib/compsPage.ts). Comp writes go through the shared updateManuscript path (a first
  * write on a legacy-string doc converts it to the structured array); every write runs through
  * normalizeComp so optional fields stay omit-empty (Firestore maps reject undefined).
  */
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, Plus, Copy, Check, Pencil, X, AlertTriangle, Sparkles, Lock, RefreshCw, BookOpen, Star } from "lucide-react";
+import { ChevronDown, Plus, Copy, Check, Pencil, X, Sparkles, Lock, RefreshCw, BookOpen, Star } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
 import { PageHeader } from "../shell/PageHeader";
@@ -35,7 +35,7 @@ import {
   withCompRemoved,
   MAX_COMPS,
 } from "../../lib/comps";
-import { compCounts, compMedia, compRole, currentYear, queryHealth, queryLine, recencyFlag } from "../../lib/compsPage";
+import { compAge, compCounts, compMedia, compRole, compositionLine, currentYear, queryLine } from "../../lib/compsPage";
 import {
   CompSuggestion,
   SuggestCompsInput,
@@ -533,7 +533,7 @@ export const ComparableTitlesPage: React.FC<{
   const now = currentYear();
   const counts = compCounts(comps);
   const qline = queryLine(comps);
-  const health = queryHealth(comps, now);
+  const composition = compositionLine(comps, now);
 
   // ── comp writes (the single editing path) ──
   const writeComps = (next: CompTitle[]) => {
@@ -624,12 +624,13 @@ export const ComparableTitlesPage: React.FC<{
                       <QueryLineText parts={qline.parts} />
                     </div>
                   )}
-                  {health.status !== "empty" && (
-                    <div className={`ct-hnote ${health.status}`}>
-                      {health.status === "ok" ? <Check size={13} /> : <AlertTriangle size={13} />}
-                      {health.text}
-                    </div>
-                  )}
+                  {/* ⚠️ A COUNT, NOT A VERDICT — and it carries no icon. The tick/warning pair it
+                      replaces was the appraisal in glyph form: one said "good", the other "look
+                      out". A composition is neither.
+                      ⚠️ IT LANDS IN THE HERO CAPTION at Phase 2, appended after `IN LIST ORDER`.
+                      It sits in the strategy strip until the hero exists so the information is not
+                      lost between commits. */}
+                  {composition && <div className="ct-comp-line">{composition}</div>}
                   {qline.kind === "line" && (
                     <button type="button" className="ct-qcopy" onClick={copyLine}>
                       {copied ? <Check size={11} /> : <Copy size={11} />}
@@ -648,7 +649,7 @@ export const ComparableTitlesPage: React.FC<{
                   comps.map((c, i) => {
                     const role = compRole(c, now);
                     const media = compMedia(c);
-                    const flag = recencyFlag(c, now);
+                    const age = compAge(c, now);
                     const meta = [c.author, c.publisher].filter(Boolean).join(" · ");
                     return (
                       <div key={i} className={`ct-card${c.inQuery ? " inq" : ""}`}>
@@ -673,12 +674,12 @@ export const ComparableTitlesPage: React.FC<{
                             )}
                             {media !== "book" && <span className="ct-chip media">{MEDIA_LABEL[media]}</span>}
                             {c.matchAxis && <span className="ct-chip axis">{c.matchAxis}</span>}
-                            {flag && (
-                              <span className="ct-chip warn">
-                                <span className="dot" />
-                                Old for a market comp
-                              </span>
-                            )}
+                            {/* ⚠️ `N YRS AGO`, IN THE NEUTRAL CHIP — baked decision 8. It read
+                                "Old for a market comp" in the caution treatment, which told the
+                                writer their comp was the wrong one for the job. The age is a fact
+                                about the book; what to do about it is theirs, and the card footer
+                                states the industry norm without pointing at any row. */}
+                            {age !== null && <span className="ct-chip age">{age} yrs ago</span>}
                           </div>
                         </div>
                         <div className="ct-cc-side">

@@ -1538,20 +1538,45 @@ Scout — a claim that changed colour depending on which column it stood in. The
 second treatment is deleted rather than left unused. Sage in Editorial too: the rule is one colour
 everywhere, and this page's Editorial block already carries hue elsewhere.
 
-### ⚠️ REPORTED DIVERGENCE — the PRO tag is no longer slate on this page
+### The PRO tag stays slate — reported, then ruled
 
-This document states, one section above: *"Slate already means **Pro** in this app and must not come
-to mean 'reference' as well — one colour, one meaning."* The comps page's `PRO` tag now renders as a
-**white plate with a `#ccd9e7` border and `#3f556e` text**, per Amendment 1 §3, so it no longer
-matches the slate `#6A89A7` badge used by the Package Builder, `manuscriptPlate.css`, `Queries.tsx`
-and `manuscripts.css` — the last of which is pinned by `manuscriptPlateTokens.test.ts`.
+Amendment 1 §3 specified a white plate with a `#ccd9e7` edge for this page's `PRO` tag, and asked
+that a conflicting locked PRO token be **reported rather than reconciled**. It anticipated amber; the
+conflict was **slate** — this document's own line, one section above: *"Slate already means Pro in
+this app and must not come to mean 'reference' as well — one colour, one meaning."*
 
-Amendment 1 §3 asked to **stop and report** if a conflicting PRO token were locked elsewhere; the
-conflict is slate rather than the amber it anticipated, so it is recorded here rather than resolved.
-Its own principle — *"the tier colour should be one colour everywhere"* — is the thing at stake.
-**Nothing app-wide was touched.** Two ways out, both one token:
+**Ruled: comps' PRO returns to slate**, and pastille blue governs the Scout's surfaces only. The
+white-and-blue plate is superseded.
 
-1. Comps' PRO returns to slate, and pastille blue governs only the Scout's surfaces.
-2. Slate retires app-wide in favour of pastille blue — a larger change, five mounts and a lock.
+- **⚠️ It reads the app-wide `--slate` (`:root`, index.css), NOT a page-scoped copy.** A duplicated
+  hex would satisfy "one colour, one meaning" on the day it was written and drift the first time the
+  app's slate moved. Reading the token means comps' PRO cannot diverge from the Package Builder's,
+  `manuscriptPlate.css`'s or `Queries.tsx`'s — they are one value, not several kept in step by hand.
+- `--ct-pro-*` is **not** reinstated. It was deleted for meaning four things at once; the tier tag
+  needs one colour and now reads the app's.
+- Locked: `.ct-tag.pro` reads `--slate` and never `--ct-scout-*`, and no theme block re-declares a
+  page-scoped slate.
 
-Awaiting a ruling at the Prompt 1 review checkpoint.
+### Nothing on this page appraises a comp (baked decision 17)
+
+The appraisal sweep removed three surfaces whose **styling carried the verdict as much as the copy**.
+
+- **`queryHealth` is deleted, not reworded** — along with its `status: "empty" | "ok" | "tip"` type.
+  The verdict lived in the type, so every consumer inherited it whatever the copy said. Its copy read
+  *"a strong, current case"*, *"solid"*, and *"add one so agents see a live market"* — two adjectives
+  about the writer's choices and one instruction about their specific list.
+- **Replaced by a count**: `N OF M PUBLISHED IN THE LAST FIVE YEARS`, mono, muted, iconless, absent
+  when nothing is ticked. The denominator is every ticked comp — a ticked film counts in the total
+  and never in the count, which keeps the sentence true and keeps the total agreeing with the
+  `BUILT FROM N TICKED COMPS` beside it.
+- **`.ct-hnote` and its `.ok` / `.tip` states are deleted.** The tick and the caution colour *were*
+  the appraisal in glyph form: one said "good", the other "look out".
+- **The recency chip is `N YRS AGO` in the NEUTRAL chip**, not "Old for a market comp" in the caution
+  treatment. `.ct-chip.warn` and its dot are deleted with it. Baked decision 8: old comps get a fact,
+  and nothing on this page tells a writer their comp is bad.
+- **Role lines lost their adjectives** — *"perfect for signalling mood"*, *"recent enough to show
+  agents there's a live audience"*, *"Older — leans on voice & feel"*. A yearless book also gained
+  its own branch: it used to be told it was published more than five years ago, which the data
+  cannot support.
+- After the sweep the only consumer of `--ct-warn` is the Scout's error box — which is an advisory,
+  and the one place on the page that should be.

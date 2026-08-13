@@ -7,9 +7,9 @@ import { CompTitle } from "../types";
 import {
   compMedia,
   compRole,
-  recencyFlag,
+  compAge,
   queryLine,
-  queryHealth,
+  compositionLine,
   compCounts,
 } from "./compsPage";
 
@@ -53,22 +53,64 @@ describe("compRole", () => {
   it("names the media in the tone line for non-book comps", () => {
     expect(compRole(comp({ title: "A", media: "film" }), NOW).line).toContain("film");
   });
+
+  /**
+   * ⚠️ THE LINES STATE, THEY DO NOT APPRAISE (baked decision 17). Asserted as a BAN LIST rather than
+   * as four exact strings, so a future rewording cannot smuggle a judgement back in under new
+   * wording — which is what "reworded, not deleted" would have allowed.
+   */
+  it("carries no adjective about the writer's choice, in any branch", () => {
+    const banned = /\b(perfect|strong|solid|weak|great|good|poor|best|enough|ideal|should|just|simply)\b/i;
+    const lines = [
+      compRole(comp({ title: "A", media: "film" }), NOW).line,
+      compRole(comp({ title: "A", media: "book", year: 2024 }), NOW).line,
+      compRole(comp({ title: "A", media: "book", year: 2001 }), NOW).line,
+      compRole(comp({ title: "A", media: "book" }), NOW).line,
+    ];
+    for (const line of lines) expect(line, `"${line}" appraises`).not.toMatch(banned);
+  });
+
+  /**
+   * ⚠️ A CORRECTNESS FIX, NOT A REWORDING. The yearless book shared the older-book line, so a comp
+   * with NO year recorded was told it had been published more than five years ago — a claim the
+   * data cannot support.
+   */
+  it("never tells a yearless book when it was published", () => {
+    const line = compRole(comp({ title: "A", media: "book" }), NOW).line;
+    expect(line).toBe("No publication year recorded.");
+    expect(compRole(comp({ title: "A", media: "book", year: 2001 }), NOW).line)
+      .toBe("Published more than five years ago.");
+  });
 });
 
-describe("recencyFlag", () => {
-  it("flags an old book only when it is in the query", () => {
-    expect(recencyFlag(comp({ title: "A", media: "book", year: 2010, inQuery: true }), NOW)).toBe(true);
-    expect(recencyFlag(comp({ title: "A", media: "book", year: 2010, inQuery: false }), NOW)).toBe(false);
-    expect(recencyFlag(comp({ title: "A", media: "book", year: 2010 }), NOW)).toBe(false);
+describe("compAge", () => {
+  /**
+   * ⚠️ IT RETURNS THE NUMBER, because the chip states the number. A boolean could only ever produce
+   * a verdict ("Old for a market comp") — the shape left nothing else to say.
+   */
+  it("gives the age of a book older than five years", () => {
+    expect(compAge(comp({ title: "A", media: "book", year: 2010 }), NOW)).toBe(16);
+    expect(compAge(comp({ title: "A", media: "book", year: 2020 }), NOW)).toBe(6);
   });
-  it("never flags a recent book", () => {
-    expect(recencyFlag(comp({ title: "A", media: "book", year: 2023, inQuery: true }), NOW)).toBe(false);
+
+  it("is null at exactly five years and younger — the chip simply omits itself", () => {
+    expect(compAge(comp({ title: "A", media: "book", year: 2021 }), NOW)).toBeNull();
+    expect(compAge(comp({ title: "A", media: "book", year: 2026 }), NOW)).toBeNull();
   });
-  it("never flags non-book media, even old and in-query", () => {
-    expect(recencyFlag(comp({ title: "A", media: "film", year: 2006, inQuery: true }), NOW)).toBe(false);
+
+  /**
+   * ⚠️ THE `inQuery` GATE IS GONE, deliberately. It fired only on a ticked comp, on the reasoning
+   * that it was "being asked to carry a market case it can't" — reasoning that is itself an
+   * appraisal. An age is a fact about the book either way.
+   */
+  it("does not care whether the comp is ticked", () => {
+    expect(compAge(comp({ title: "A", media: "book", year: 2010, inQuery: true }), NOW)).toBe(16);
+    expect(compAge(comp({ title: "A", media: "book", year: 2010, inQuery: false }), NOW)).toBe(16);
   });
-  it("never flags a book with no year", () => {
-    expect(recencyFlag(comp({ title: "A", media: "book", inQuery: true }), NOW)).toBe(false);
+
+  it("is null for non-book media and for a book with no year", () => {
+    expect(compAge(comp({ title: "A", media: "film", year: 2006 }), NOW)).toBeNull();
+    expect(compAge(comp({ title: "A", media: "book" }), NOW)).toBeNull();
   });
 });
 
@@ -128,24 +170,48 @@ describe("queryLine", () => {
   });
 });
 
-describe("queryHealth", () => {
+describe("compositionLine", () => {
   const recentBook = (t: string) => comp({ title: t, media: "book", year: 2023, inQuery: true });
   const oldBook = (t: string) => comp({ title: t, media: "book", year: 2008, inQuery: true });
 
-  it("is empty when nothing is in the query", () => {
-    expect(queryHealth([comp({ title: "A" })], NOW).status).toBe("empty");
+  it("is null when nothing is ticked — there is no composition to state", () => {
+    expect(compositionLine([comp({ title: "A" })], NOW)).toBeNull();
+    expect(compositionLine([], NOW)).toBeNull();
   });
-  it("is ok/strong at two or more recent books in-query", () => {
-    expect(queryHealth([recentBook("A"), recentBook("B")], NOW).status).toBe("ok");
-    expect(queryHealth([recentBook("A"), recentBook("B"), recentBook("C")], NOW).status).toBe("ok");
+
+  it("counts the recent books against every ticked comp", () => {
+    expect(compositionLine([recentBook("A"), recentBook("B"), oldBook("C")], NOW))
+      .toBe("2 of 3 published in the last five years");
+    expect(compositionLine([oldBook("A")], NOW)).toBe("0 of 1 published in the last five years");
   });
-  it("is ok/solid at exactly one recent book in-query", () => {
-    const r = queryHealth([recentBook("A"), oldBook("B")], NOW);
-    expect(r.status).toBe("ok");
-    expect(r.text).toMatch(/solid/i);
+
+  /**
+   * ⚠️ THE DENOMINATOR IS EVERY TICKED COMP, films included. It keeps the sentence true (the film is
+   * not published in the last five years) AND keeps the total agreeing with the `BUILT FROM N
+   * TICKED COMPS` beside it. A books-only denominator would silently disagree with its own caption.
+   */
+  it("counts a ticked film in the total and never in the count", () => {
+    const film = comp({ title: "F", media: "film", year: 2025, inQuery: true });
+    expect(compositionLine([recentBook("A"), film], NOW)).toBe("1 of 2 published in the last five years");
   });
-  it("tips when in-query comps have no recent book", () => {
-    expect(queryHealth([oldBook("A"), comp({ title: "F", media: "film", year: 2025, inQuery: true })], NOW).status).toBe("tip");
+
+  it("ignores unticked comps entirely", () => {
+    const untickedRecent = comp({ title: "U", media: "book", year: 2024 });
+    expect(compositionLine([recentBook("A"), untickedRecent], NOW))
+      .toBe("1 of 1 published in the last five years");
+  });
+
+  /**
+   * ⚠️ THE POINT OF DELETING `queryHealth` RATHER THAN REWORDING IT. Its verdict lived in its TYPE
+   * (`status: "empty" | "ok" | "tip"`), so every consumer inherited the judgement whatever the copy
+   * said. This asserts the replacement states a fact and recommends nothing.
+   */
+  it("never appraises, never recommends, never states a threshold", () => {
+    const banned = /\b(strong|solid|weak|current case|anchoring|add one|should|need|try|good|poor|only|just)\b/i;
+    for (const comps of [[recentBook("A"), recentBook("B")], [recentBook("A"), oldBook("B")], [oldBook("A")]]) {
+      const line = compositionLine(comps, NOW)!;
+      expect(line, `"${line}" appraises`).not.toMatch(banned);
+    }
   });
 });
 

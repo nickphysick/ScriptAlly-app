@@ -40,40 +40,53 @@ export interface CompRole {
 }
 
 /**
- * Derived role. Non-book media can only ever be a tone comp; a book recent enough (≤5 years) carries
- * the market case; an older book (or a book with no year) leans on tone. Surfaced as a label + line.
+ * Derived role — a CLASSIFICATION and the fact behind it, never a verdict on the comp.
+ *
+ * ⚠️ THE LINES STATE, THEY DO NOT APPRAISE (baked decision 17). Three of the four used to editorialise:
+ * "perfect for signalling mood" (an adjective on the writer's choice), "recent enough to show agents
+ * there's a live audience" (a judgement of sufficiency, dressed as a fact), and "Older — leans on
+ * voice & feel" (a comparative). The labels do the classifying; the lines now only say what is true
+ * of the record.
+ *
+ * ⚠️ THE YEARLESS BOOK GAINED ITS OWN BRANCH, AND THAT IS A CORRECTNESS FIX, NOT A REDESIGN. It used
+ * to share the older-book line, so a comp with NO year recorded was told it was published more than
+ * five years ago — a statement the data cannot support and which the old wording ("Older") asserted
+ * anyway.
  */
 export function compRole(c: CompTitle, now: number): CompRole {
   const media = compMedia(c);
   if (media !== "book") {
-    return {
-      kind: "tone",
-      label: "Tone comp",
-      line: `A ${media} comp — perfect for signalling mood, not the market case.`,
-    };
+    return { kind: "tone", label: "Tone comp", line: `A ${media} comp — signals tone rather than the market.` };
   }
   if (isRecentBook(c, now)) {
-    return {
-      kind: "market",
-      label: "Market comp",
-      line: "Recent enough to show agents there’s a live audience.",
-    };
+    return { kind: "market", label: "Market comp", line: "Published within the last five years." };
   }
-  return {
-    kind: "tone",
-    label: "Tone comp",
-    line: "Older — leans on voice & feel rather than proving a current market.",
-  };
+  if (compYear(c) === null) {
+    return { kind: "tone", label: "Tone comp", line: "No publication year recorded." };
+  }
+  return { kind: "tone", label: "Tone comp", line: "Published more than five years ago." };
 }
 
 /**
- * The recency flag fires ONLY when an old book is ticked into the query — it is being asked to carry
- * a market case it can't. Films and older tone comps that aren't in-query never flag.
+ * A book's age in years, when it is old enough for the row to state it — otherwise null.
+ *
+ * ⚠️ IT RETURNS THE NUMBER BECAUSE THE CHIP STATES THE NUMBER. It was a boolean feeding a chip that
+ * read "Old for a market comp" — an assessment of that comp's fit, which is precisely what baked
+ * decision 8 forbids: old comps get a factual `N YRS AGO` and nothing on this page tells a writer
+ * their comp is bad. A boolean cannot say "12"; the wording had to be a verdict because the shape
+ * left nothing else to say.
+ *
+ * ⚠️ AND IT NO LONGER REQUIRES `inQuery`. The old gate fired only on a ticked comp, on the reasoning
+ * that it was "being asked to carry a market case it can't" — reasoning that is itself an appraisal.
+ * An age is a fact about the book whether or not the writer has ticked it, and both the pack (Phase
+ * 2) and the v5 ref show it unconditionally.
  */
-export function recencyFlag(c: CompTitle, now: number): boolean {
-  if (!c.inQuery || compMedia(c) !== "book") return false;
+export function compAge(c: CompTitle, now: number): number | null {
+  if (compMedia(c) !== "book") return null;
   const y = compYear(c);
-  return y !== null && now - y > 5;
+  if (y === null) return null;
+  const age = now - y;
+  return age > 5 ? age : null;
 }
 
 /** The surname used in the "(Surname, Year)" attribution — the last whitespace token of the author. */
@@ -121,27 +134,32 @@ export function queryLine(comps: CompTitle[]): QueryLine {
   return { kind: "line", text: `For readers of ${joined}.`, parts };
 }
 
-export interface QueryHealth {
-  status: "empty" | "ok" | "tip";
-  /** The note to show; "" for the empty state (no note rendered). */
-  text: string;
-}
-
 /**
- * Health of the query line, driven by how many RECENT BOOK comps are in-query:
- *   ≥2 → strong/current · 1 → solid · 0 (with comps in-query) → prompt for a recent title.
- * No in-query comps at all → empty (the empty query line already tells the writer what to do).
+ * The composition of the query line, stated as a count.
+ *
+ * ⚠️ THIS REPLACES `queryHealth`, WHICH WAS DELETED RATHER THAN REWORDED (baked decision 17). Its
+ * information was worth keeping and its framing was not: it read "a strong, current case", "solid",
+ * and "add one so agents see a live market" — two adjectives about the writer's choices and one
+ * instruction about their specific list, which Phase 2 forbids in nearly those words. Worse, its
+ * TYPE was the verdict: `status: "empty" | "ok" | "tip"` encoded a quality judgement in the data,
+ * so every consumer inherited it whatever the copy said. Rewording would have left that in place.
+ *
+ * Count and state. No adjective, no recommendation, no threshold to fall short of — a writer reading
+ * "1 OF 3" can draw their own conclusion, which is the difference between reporting and appraising.
+ *
+ * ⚠️ THE DENOMINATOR IS EVERY TICKED COMP, not just the books. A ticked film counts in the total and
+ * never in the count, so the sentence stays true ("2 of 3 published in the last five years" — the
+ * film is not), and the total agrees with the `BUILT FROM N TICKED COMPS` beside it. A books-only
+ * denominator would silently disagree with the caption it sits in.
+ *
+ * Null when nothing is ticked: there is no composition to state, and the line above is already
+ * telling the writer to tick something.
  */
-export function queryHealth(comps: CompTitle[], now: number): QueryHealth {
+export function compositionLine(comps: CompTitle[], now: number): string | null {
   const inq = comps.filter((c) => c.inQuery);
-  if (inq.length === 0) return { status: "empty", text: "" };
+  if (inq.length === 0) return null;
   const recent = inq.filter((c) => isRecentBook(c, now)).length;
-  if (recent >= 2) return { status: "ok", text: "Two recent market comps — a strong, current case." };
-  if (recent === 1) return { status: "ok", text: "One recent comp anchoring the market — solid." };
-  return {
-    status: "tip",
-    text: "No recent book in your query — add one so agents see a live market.",
-  };
+  return `${recent} of ${inq.length} published in the last five years`;
 }
 
 /** Masthead + strategy-strip counts. */

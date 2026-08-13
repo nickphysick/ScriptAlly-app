@@ -21,6 +21,15 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const css = readFileSync(join(here, "comps.css"), "utf8");
 
+/**
+ * ⚠️ THE "IS IT GONE" CHECKS READ THE SHEET WITHOUT ITS COMMENTS, and they have to. A deletion worth
+ * asserting is usually worth EXPLAINING in place, so the retired name appears in the prose that
+ * records why it went — and a whole-file `toContain` cannot tell a rule from a mention, so it fails
+ * on the comment that documents the fix. Stripping first also makes the assertion honest in the
+ * other direction: someone re-adding the rule while leaving the comment cannot hide behind it.
+ */
+const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+
 /** Every declaration block for a selector, joined — see the grouped-rule note above. */
 function rule(selector: string): string {
   const out: string[] = [];
@@ -150,7 +159,56 @@ describe("comps.css — ✓ VERIFIED is sage, and it is one chip in both cards",
   });
 
   it("has exactly ONE treatment — the old second one is gone, not merely unused", () => {
-    expect(css).not.toContain(".ct-verified {");
+    expect(rules).not.toContain(".ct-verified {");
+  });
+});
+
+describe("comps.css — the PRO tag is slate, one colour app-wide", () => {
+  /**
+   * ⚠️ IT READS THE APP'S `--slate`, NOT A PAGE-SCOPED COPY. themes.md: "slate already means Pro in
+   * this app… one colour, one meaning." A copied hex would satisfy that sentence on the day it was
+   * written and drift the first time the app's slate moved; reading the :root token cannot.
+   */
+  it("reads --slate and never the Scout's blue", () => {
+    const tag = rule(".ct-tag.pro");
+    expect(tag).toContain("var(--slate)");
+    expect(tag).not.toContain("--ct-scout");
+  });
+
+  it("defines no page-scoped slate of its own to drift from", () => {
+    for (const theme of Object.keys(THEMES) as (keyof typeof THEMES)[]) {
+      expect(token(theme, "ct-pro"), `${theme} re-introduced a page slate`).toBeNull();
+    }
+  });
+});
+
+describe("comps.css — nothing on this page appraises a comp", () => {
+  /**
+   * ⚠️ THE STYLING WAS HALF THE VERDICT. The age chip sat in the caution treatment while reading
+   * "Old for a market comp", and the composition note had `.ok` (tick) and `.tip` (caution) states.
+   * The wording and the colour agreed the writer had chosen badly. Both treatments are DELETED, not
+   * merely unused — a state nothing sets is the next person's invitation to set it.
+   */
+  it("the age chip is neutral, never the caution treatment", () => {
+    const chip = rule(".ct-chip.age");
+    expect(chip).not.toContain("--ct-warn");
+    expect(chip).toContain("var(--ct-sect)");
+  });
+
+  it("the old caution chip and its dot are gone", () => {
+    expect(rules).not.toContain(".ct-chip.warn");
+    expect(rules).not.toContain(".ct-chip .dot");
+  });
+
+  it("the health note and its ok/tip states are gone", () => {
+    expect(rules).not.toContain(".ct-hnote");
+  });
+
+  it("the composition line carries no state class and no icon rule", () => {
+    const line = rule(".ct-comp-line");
+    expect(line).not.toContain("--ct-warn");
+    expect(rules).not.toContain(".ct-comp-line.ok");
+    expect(rules).not.toContain(".ct-comp-line.tip");
   });
 });
 
@@ -169,7 +227,7 @@ describe("comps.css — the retired token set", () => {
   });
 
   it("and nothing reads it", () => {
-    expect(css).not.toMatch(/var\(\s*--ct-pro/);
+    expect(rules).not.toMatch(/var\(\s*--ct-pro/);
   });
 });
 
