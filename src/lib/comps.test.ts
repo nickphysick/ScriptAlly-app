@@ -10,6 +10,7 @@ import {
   normalizeComp,
   withCompAdded,
   withCompEdited,
+  withCompMoved,
   withCompRemoved,
   MAX_COMPS,
 } from "./comps";
@@ -274,6 +275,43 @@ describe("normalizeComp", () => {
     expect(out.inQuery).toBe(true);
     expect("media" in out).toBe(false);
     expect(normalizeComp({ title: "T", media: "film" }).media).toBe("film");
+  });
+});
+
+describe("withCompMoved", () => {
+  const shelf = (...t: string[]): CompTitle[] => t.map((title) => ({ title }));
+  const titles = (c: CompTitle[]) => c.map((x) => x.title);
+
+  it("moves a comp down and up, closing the gap behind it", () => {
+    expect(titles(withCompMoved(shelf("A", "B", "C"), 0, 2))).toEqual(["B", "C", "A"]);
+    expect(titles(withCompMoved(shelf("A", "B", "C"), 2, 0))).toEqual(["C", "A", "B"]);
+    expect(titles(withCompMoved(shelf("A", "B", "C"), 1, 0))).toEqual(["B", "A", "C"]);
+  });
+
+  it("returns the list unchanged for a no-op or an out-of-range index", () => {
+    const s = shelf("A", "B");
+    expect(withCompMoved(s, 1, 1)).toBe(s);
+    expect(withCompMoved(s, 0, -1)).toBe(s);
+    expect(withCompMoved(s, 0, 5)).toBe(s);
+    expect(withCompMoved(s, -1, 0)).toBe(s);
+  });
+
+  it("does not mutate the input", () => {
+    const s = shelf("A", "B", "C");
+    withCompMoved(s, 0, 2);
+    expect(titles(s)).toEqual(["A", "B", "C"]);
+  });
+
+  /**
+   * ⚠️ ORDER IS ARRAY POSITION — there is no stored `order` field to keep in step (baked decision 15
+   * as amended). Comps live as an array on the manuscript document, so the index already IS explicit
+   * stored order; a per-item field would be a second source of truth for the same fact.
+   */
+  it("carries every field with the moved comp, and adds no ordering field", () => {
+    const rich: CompTitle = { title: "B", author: "X", inQuery: true, note: "n", source: "suggested" };
+    const out = withCompMoved([{ title: "A" }, rich, { title: "C" }], 1, 0);
+    expect(out[0]).toEqual(rich);
+    expect("order" in out[0]).toBe(false);
   });
 });
 

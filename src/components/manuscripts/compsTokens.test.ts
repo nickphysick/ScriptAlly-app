@@ -101,8 +101,15 @@ describe("comps.css — no red anywhere on this page", () => {
     expect(token("bold", "ct-warn-bd")).toBe("#1d1712");
   });
 
-  it("the remove button no longer borrows the caution token — removing a comp is not a warning", () => {
-    const hover = rule(".ct-x:hover");
+  /**
+   * ⚠️ RETARGETED, NOT RELAXED (Phase 2). The remove control was `.ct-x`; the row rebuild made both
+   * row actions `.ct-iconbtn`, so this gate was reading an empty string and would have passed on
+   * anything. The rule it guards is unchanged: removing a comp is an ordinary undoable action and
+   * must never wear the advisory treatment. `rule()` now throws rather than returning "" when its
+   * selector is missing, so the next rename fails loudly instead of quietly.
+   */
+  it("the row actions never borrow the caution token — removing a comp is not a warning", () => {
+    const hover = rule(".ct-iconbtn:hover");
     expect(hover).not.toContain("--ct-warn");
     expect(hover).toContain("var(--ct-accent)");
   });
@@ -204,11 +211,19 @@ describe("comps.css — nothing on this page appraises a comp", () => {
     expect(rules).not.toContain(".ct-hnote");
   });
 
-  it("the composition line carries no state class and no icon rule", () => {
-    const line = rule(".ct-comp-line");
-    expect(line).not.toContain("--ct-warn");
-    expect(rules).not.toContain(".ct-comp-line.ok");
-    expect(rules).not.toContain(".ct-comp-line.tip");
+  /**
+   * ⚠️ RETARGETED (Phase 2): the composition moved from its own `.ct-comp-line` into the hero
+   * caption, which is where Amendment 3 always said it belonged. The rule it guards is unchanged —
+   * the composition is a count and must never acquire a state class or the advisory colour, which
+   * is how `.ct-hnote`'s ok/tip pair became the verdict in the first place.
+   */
+  it("the composition sits in the caption, with no state class and no advisory colour", () => {
+    const cap = rule(".ct-hero-cap");
+    expect(cap).not.toContain("--ct-warn");
+    expect(cap).toContain("var(--ct-label)");
+    expect(rules).not.toContain(".ct-hero-cap.ok");
+    expect(rules).not.toContain(".ct-hero-cap.tip");
+    expect(rules).not.toContain(".ct-comp-line");
   });
 });
 

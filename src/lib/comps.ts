@@ -167,6 +167,26 @@ export type CompDraft = Pick<
 >;
 
 /**
+ * Move a comp from one index to another, preserving every other position.
+ *
+ * ⚠️ ARRAY POSITION *IS* THE ORDER (baked decision 15, as amended). There is no stored `order`
+ * field and there must not be one: comps live as an array on the manuscript document, so the index
+ * is already explicit, stored order. A per-item `order` would be a second source of truth for the
+ * same fact, needing to be kept in step with the index it duplicates.
+ *
+ * ⚠️ AND THE ORDER IS LOAD-BEARING, NOT COSMETIC — the query line composes in list order, which is
+ * why the caption says so and why the list has to be rearrangeable at all. A writer who wants a
+ * particular comp first would otherwise have to untick and retick the whole list.
+ */
+export function withCompMoved(comps: CompTitle[], from: number, to: number): CompTitle[] {
+  if (from === to || from < 0 || to < 0 || from >= comps.length || to >= comps.length) return comps;
+  const next = [...comps];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved);
+  return next;
+}
+
+/**
  * ⚠️ AN EDIT MERGES ONTO THE STORED COMP — it never rebuilds one from the draft alone, and that
  * distinction was live data loss rather than a style preference.
  *

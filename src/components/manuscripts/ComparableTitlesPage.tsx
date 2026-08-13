@@ -17,7 +17,7 @@
  * normalizeComp so optional fields stay omit-empty (Firestore maps reject undefined).
  */
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, Plus, Copy, Check, Pencil, X, Sparkles, Lock, RefreshCw, BookOpen, Star } from "lucide-react";
+import { ChevronDown, Plus, Copy, Check, Pencil, X, Sparkles, Lock, RefreshCw, BookOpen, Star, GripVertical } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
 import { PageHeader } from "../shell/PageHeader";
@@ -32,10 +32,12 @@ import {
   normalizeComp,
   withCompAdded,
   withCompEdited,
+  withCompMoved,
   withCompRemoved,
   MAX_COMPS,
 } from "../../lib/comps";
-import { compAge, compCounts, compMedia, compRole, compositionLine, currentYear, queryLine } from "../../lib/compsPage";
+import { QueryFormat, compAge, compCounts, compMedia, compRole, currentYear, queryLine } from "../../lib/compsPage";
+import { CompsSavedMark, InYourQueryMark, VerifiedMark } from "./compMarks";
 import {
   CompSuggestion,
   SuggestCompsInput,
@@ -73,75 +75,6 @@ function monogram(title: string): string {
 }
 
 
-
-// ── the right-of-masthead manuscript selector (design-ref .ms-header) ──
-const CompsMsSelect: React.FC<{
-  active: Manuscript;
-  manuscripts: Manuscript[];
-  onSelect: (id: string) => void;
-}> = ({ active, manuscripts, onSelect }) => {
-  const [open, setOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  return (
-    <div className="ct-mssel-wrap" ref={wrapRef}>
-      <button
-        type="button"
-        className="ct-mssel"
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="mono">{monogram(active.title)}</span>
-        <span>
-          <span className="lab">Working on</span>
-          <span className="val" style={{ display: "block" }}>{active.title}</span>
-        </span>
-        <ChevronDown size={15} />
-      </button>
-      {open && (
-        <div className="ct-msmenu" role="listbox">
-          {manuscripts.map((m) => {
-            const shelved = isShelvedPresentation(m);
-            const n = manuscriptComps(m).length;
-            return (
-              <button
-                key={m.id}
-                type="button"
-                role="option"
-                aria-selected={m.id === active.id}
-                className={`ct-msopt${m.id === active.id ? " on" : ""}${shelved ? " shelved" : ""}`}
-                onClick={() => {
-                  onSelect(m.id);
-                  setOpen(false);
-                }}
-              >
-                <span className="t">{m.title}</span>
-                <span className="c">{shelved ? "SHELVED" : `${n} ${n === 1 ? "COMP" : "COMPS"}`}</span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
 
 // ── add / edit a comp manually (locked FormShell + BrandDropdown) ──
 const CompForm: React.FC<{
@@ -499,10 +432,21 @@ export const ComparableTitlesPage: React.FC<{
 }> = ({ onNavigate }) => {
   const { currentUser, manuscripts, updateManuscript } = useScriptAllyDb();
 
-  const [selectedMsId, setSelectedMsId] = useState<string | null>(
-    () => localStorage.getItem(ACTIVE_MS_KEY)
-  );
+  /**
+   * ⚠️ SCOPE IS THE SHELL'S, AND IT IS READ EVERY RENDER — never held in state here. The page's own
+   * "Working on" chip is removed (baked decision 9): the shell's scope control writes
+   * `scriptally_active_manuscript_id` and re-navigates, so a `useState` initialiser would latch the
+   * value at mount and this page would quietly keep showing the previous book while the chrome above
+   * it named the new one. Two controls for one fact was the reason to delete ours, not to keep a
+   * copy of its state.
+   */
+  const selectedMsId = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
   const [copied, setCopied] = useState(false);
+  /* ⚠️ LOCAL, NOT ROUTED AND NOT PERSISTED. The format is a way of looking at the same ticked comps,
+     not a place in the app — writing it to the URL would turn a toggle into navigation the shell
+     has to model. */
+  const [format, setFormat] = useState<QueryFormat>("readers");
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   // null = closed; { index: null } = adding; { index } = editing that comp.
   const [formState, setFormState] = useState<{ index: number | null } | null>(null);
 
@@ -510,30 +454,17 @@ export const ComparableTitlesPage: React.FC<{
     (a, b) => Number(isShelvedPresentation(a)) - Number(isShelvedPresentation(b))
   );
 
-  useEffect(() => {
-    if (ordered.length === 0) {
-      if (selectedMsId !== null) setSelectedMsId(null);
-      return;
-    }
-    if (!selectedMsId || !ordered.some((m) => m.id === selectedMsId)) {
-      setSelectedMsId(ordered[0].id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [manuscripts]);
-
   if (!currentUser) return null;
 
-  const selectMs = (id: string) => {
-    setSelectedMsId(id);
-    localStorage.setItem(ACTIVE_MS_KEY, id);
-  };
-
-  const activeMs = selectedMsId ? manuscripts.find((m) => m.id === selectedMsId) : null;
+  /* the shell's key may name a manuscript that has since gone; fall back to the first rather than
+     rendering the no-manuscript state over a shelf that has books in it */
+  const activeMs = manuscripts.find((m) => m.id === selectedMsId) ?? ordered[0] ?? null;
   const comps = activeMs ? manuscriptComps(activeMs) : [];
   const now = currentYear();
   const counts = compCounts(comps);
-  const qline = queryLine(comps);
-  const composition = compositionLine(comps, now);
+  const qline = queryLine(comps, activeMs?.title ?? "", format, now);
+  /* derived at render from the record, like every other count on this page — never stored */
+  const verifiedCount = comps.filter(isVerified).length;
 
   // ── comp writes (the single editing path) ──
   const writeComps = (next: CompTitle[]) => {
@@ -543,6 +474,10 @@ export const ComparableTitlesPage: React.FC<{
   const toggleInQuery = (index: number) =>
     writeComps(comps.map((c, i) => (i === index ? { ...c, inQuery: !c.inQuery } : c)));
   const removeComp = (index: number) => writeComps(withCompRemoved(comps, index));
+  const moveComp = (from: number, to: number) => {
+    if (to < 0 || to >= comps.length) return;
+    writeComps(withCompMoved(comps, from, to));
+  };
   const addComp = (draft: CompDraft) => writeComps(withCompAdded(comps, { ...draft, source: "user" }));
   const editComp = (index: number, draft: CompDraft) => writeComps(withCompEdited(comps, index, draft));
 
@@ -587,150 +522,226 @@ export const ComparableTitlesPage: React.FC<{
           description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           />
         }
-          toolbar={activeMs ? (
-            <>
-              <span className="ct-tally">{comps.length} {comps.length === 1 ? "comp" : "comps"}</span>
-              <CompsMsSelect active={activeMs} manuscripts={ordered} onSelect={selectMs} />
-            </>
-          ) : undefined}
+          /* ⚠️ NO TOOLBAR ROW ON THIS PAGE (Amendment 1 §1). The tally moved into the hero's stat
+             rail and the manuscript selector is the shell's; what remained would have been an empty
+             row drawing a hairline over nothing. The grid renders neither when the prop is absent. */
       >
-      <div className="ct-desk">
+      <div className="ct-pagebody">
         {!activeMs ? (
-          <div className="ct-panel" style={{ height: "100%" }}>
+          <div className="ct-panel">
             <div className="ct-blank">
               <div className="q">No manuscript to compare yet.</div>
               <span className="lab">Add a manuscript to build its comp list</span>
             </div>
           </div>
         ) : (
-          <div className="ct-split">
+          <>
+            {/* ══ THE HERO — the composed line is the page; the list is the instrument that builds
+                it (baked decision 1). ══ */}
+            <div className="ct-hero">
+              <div className="ct-hero-l">
+                <div className="ct-eyebrow">
+                  <span className="ct-lbl">Query letter line</span>
+                  <span className="ct-chip ms">{activeMs.title}</span>
+                </div>
+                {/* ⚠️ `aria-live="polite"` ON THE LINE, announcing ONCE per tick. It is the region
+                    that changes, so the whole recomposed sentence is read — not each fragment as it
+                    arrives, which is what marking the segments live would produce. */}
+                <div
+                  className={`ct-hero-line${qline.kind === "line" ? "" : " empty"}`}
+                  aria-live="polite"
+                >
+                  {qline.kind === "line"
+                    ? qline.segments.map((seg, i) => (
+                        <span key={i} className={seg.emphasis ?? undefined}>{seg.text}</span>
+                      ))
+                    : qline.prompt}
+                </div>
+                <div className="ct-hero-ctl">
+                  <div className="ct-seg" role="group" aria-label="Query line format">
+                    <button
+                      type="button"
+                      className={format === "readers" ? "on" : ""}
+                      aria-pressed={format === "readers"}
+                      onClick={() => setFormat("readers")}
+                    >
+                      For readers of
+                    </button>
+                    <button
+                      type="button"
+                      className={format === "meets" ? "on" : ""}
+                      aria-pressed={format === "meets"}
+                      onClick={() => setFormat("meets")}
+                    >
+                      X meets Y
+                    </button>
+                  </div>
+                  {qline.kind === "line" && (
+                    <button type="button" className="ct-copyb" onClick={copyLine}>
+                      {copied ? <Check /> : <Copy />}
+                      {copied ? "Copied" : "Copy line"}
+                    </button>
+                  )}
+                  {qline.caption && <span className="ct-hero-cap">{qline.caption}</span>}
+                </div>
+              </div>
+              {/* ⚠️ THREE STACKED ROWS WITH ILLUSTRATED MARKS — baked decision 3, not a box row.
+                  All three counts are computed from the comps array; nothing here is stored. */}
+              <div className="ct-hero-r">
+                <div className="ct-hstat">
+                  <span className="mark"><CompsSavedMark /></span>
+                  <div>
+                    <div className="n">{counts.total}</div>
+                    <div className="l">Comps saved</div>
+                  </div>
+                </div>
+                <div className="ct-hstat">
+                  <span className="mark"><InYourQueryMark /></span>
+                  <div>
+                    <div className="n">{counts.inQuery}</div>
+                    <div className="l">In your query</div>
+                  </div>
+                </div>
+                <div className="ct-hstat">
+                  <span className="mark"><VerifiedMark /></span>
+                  <div>
+                    <div className="n">{verifiedCount}</div>
+                    <div className="l">Verified</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="ct-split">
             {/* ── Your comps ── */}
             <section className="ct-panel">
               <div className="ct-band">
                 <span className="bt">Your comps</span>
                 <span className="ct-tag free">Free</span>
-                <span className="bmeta">{counts.total} saved</span>
+                <span className="bmeta">{counts.total} {counts.total === 1 ? "comp" : "comps"}</span>
               </div>
-              <div className="ct-body">
-                {/* strategy strip */}
-                <div className="ct-strat">
-                  <div className="cap">
-                    <span className="n">{counts.inQuery} in query</span> Query letter line · years verified
+
+              {comps.length === 0 ? (
+                <div className="ct-listempty">No comps yet — add one below.</div>
+              ) : (
+                <>
+                  {/* the tick column reads as a column, rather than an unlabelled control */}
+                  <div className="ct-thead">
+                    <span />
+                    <span>Query</span>
+                    <span className="h3">Title</span>
+                    <span className="h5">Edit</span>
                   </div>
-                  {qline.kind === "empty" ? (
-                    <div className="ct-qtxt empty">{qline.prompt}</div>
-                  ) : (
-                    <div className="ct-qtxt">
-                      <QueryLineText parts={qline.parts} />
-                    </div>
-                  )}
-                  {/* ⚠️ A COUNT, NOT A VERDICT — and it carries no icon. The tick/warning pair it
-                      replaces was the appraisal in glyph form: one said "good", the other "look
-                      out". A composition is neither.
-                      ⚠️ IT LANDS IN THE HERO CAPTION at Phase 2, appended after `IN LIST ORDER`.
-                      It sits in the strategy strip until the hero exists so the information is not
-                      lost between commits. */}
-                  {composition && <div className="ct-comp-line">{composition}</div>}
-                  {qline.kind === "line" && (
-                    <button type="button" className="ct-qcopy" onClick={copyLine}>
-                      {copied ? <Check size={11} /> : <Copy size={11} />}
-                      {copied ? "Copied" : "Copy for query letter"}
-                    </button>
-                  )}
-                </div>
-
-                <div className="ct-listcap">
-                  All comps <span className="ln" /> tick the ones for your query
-                </div>
-
-                {comps.length === 0 ? (
-                  <div className="ct-listempty">No comps yet — add one below, or send the Scout out.</div>
-                ) : (
-                  comps.map((c, i) => {
+                  {comps.map((c, i) => {
                     const role = compRole(c, now);
                     const media = compMedia(c);
                     const age = compAge(c, now);
                     const meta = [c.author, c.publisher].filter(Boolean).join(" · ");
                     return (
-                      <div key={i} className={`ct-card${c.inQuery ? " inq" : ""}`}>
-                        <div className="ct-cc-main">
-                          <div className="ct-cc-titlerow">
-                            <span className="ct-cc-title">{c.title}</span>
-                            {c.year != null && <span className="ct-cc-year">{c.year}</span>}
-                            <span className="ct-cc-role">{role.label}</span>
+                      <div
+                        key={i}
+                        className={`ct-crow${dragIndex === i ? " dragging" : ""}`}
+                        draggable
+                        onDragStart={() => setDragIndex(i)}
+                        onDragEnd={() => setDragIndex(null)}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          if (dragIndex !== null) moveComp(dragIndex, i);
+                          setDragIndex(null);
+                        }}
+                      >
+                        {/* ⚠️ THE GRIP IS A BUTTON, NOT A DECORATION — reorder must be reachable
+                            without a pointer. ⌥↑ / ⌥↓ on the focused grip moves the row, and the
+                            move is announced politely rather than silently rearranging the list
+                            under a keyboard user. */}
+                        <button
+                          type="button"
+                          className="grip"
+                          aria-label={`Reorder ${c.title}. Position ${i + 1} of ${comps.length}. Use Option with the up and down arrows to move it.`}
+                          onKeyDown={(e) => {
+                            if (!e.altKey) return;
+                            if (e.key === "ArrowUp") { e.preventDefault(); moveComp(i, i - 1); }
+                            if (e.key === "ArrowDown") { e.preventDefault(); moveComp(i, i + 1); }
+                          }}
+                        >
+                          <GripVertical />
+                        </button>
+                        {/* ⚠️ `role="switch"` WITH `aria-checked`, LABELLED WITH ITS COMP. A bare
+                            button would announce "In query" on every row with nothing to say which
+                            comp it belonged to or whether it was on. */}
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={!!c.inQuery}
+                          aria-label={`Use ${c.title} in your query line`}
+                          className={`ct-ck${c.inQuery ? " on" : ""}`}
+                          onClick={() => toggleInQuery(i)}
+                        >
+                          <Check />
+                        </button>
+                        <div>
+                          <div className="t">{c.title}</div>
+                          <div className="a">
+                            {meta || "—"}{c.year != null ? ` · ${c.year}` : ""}
                           </div>
-                          {meta && <div className="ct-cc-meta">{meta}</div>}
-                          <div className="ct-cc-roleline">{role.line}</div>
-                          <div className="ct-chips">
-                            {/* ⚠️ DERIVED FROM THE RECORD, NEVER FROM A FLAG — and a manual comp
-                                simply has no chip, which is the honest outcome rather than a gap.
-                                This is the mount that could not exist before 211ccc5 persisted the
-                                verification: the chip lived only in the Scout column, so a
-                                suggestion lost its standing the moment it landed here. */}
-                            {isVerified(c) && (
-                              <span className="ct-chip verified">
-                                <Check size={10} /> Verified · {c.verification!.catalogue}
-                              </span>
-                            )}
-                            {media !== "book" && <span className="ct-chip media">{MEDIA_LABEL[media]}</span>}
-                            {c.matchAxis && <span className="ct-chip axis">{c.matchAxis}</span>}
-                            {/* ⚠️ `N YRS AGO`, IN THE NEUTRAL CHIP — baked decision 8. It read
-                                "Old for a market comp" in the caution treatment, which told the
-                                writer their comp was the wrong one for the job. The age is a fact
-                                about the book; what to do about it is theirs, and the card footer
-                                states the industry norm without pointing at any row. */}
-                            {age !== null && <span className="ct-chip age">{age} yrs ago</span>}
-                          </div>
+                          {c.matchAxis && <div className="why">{c.matchAxis}</div>}
+                          {c.note && <div className="why note">{c.note}</div>}
+                          <div className="ct-roleline">{role.line}</div>
                         </div>
-                        <div className="ct-cc-side">
+                        <div className="chips">
+                          {isVerified(c) && (
+                            <span className="ct-chip verified">
+                              <Check /> Verified · {c.verification!.catalogue}
+                            </span>
+                          )}
+                          {media !== "book" && <span className="ct-chip media">{MEDIA_LABEL[media]}</span>}
+                          {age !== null && <span className="ct-chip age">{age} yrs ago</span>}
+                        </div>
+                        <div className="acts">
                           <button
                             type="button"
-                            className={`ct-inq${c.inQuery ? " on" : ""}`}
-                            aria-pressed={!!c.inQuery}
-                            onClick={() => toggleInQuery(i)}
+                            className="ct-iconbtn"
+                            aria-label={`Edit ${c.title}`}
+                            onClick={() => setFormState({ index: i })}
                           >
-                            <span className="box">
-                              <Check size={9} />
-                            </span>
-                            In query
+                            <Pencil />
                           </button>
-                          <div style={{ display: "flex", gap: 2 }}>
-                            <button
-                              type="button"
-                              className="ct-editbtn"
-                              aria-label={`Edit ${c.title}`}
-                              onClick={() => setFormState({ index: i })}
-                            >
-                              <Pencil size={13} />
-                            </button>
-                            <button
-                              type="button"
-                              className="ct-x"
-                              aria-label={`Remove ${c.title}`}
-                              onClick={() => removeComp(i)}
-                            >
-                              <X size={13} />
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            className="ct-iconbtn"
+                            aria-label={`Remove ${c.title}`}
+                            onClick={() => removeComp(i)}
+                          >
+                            <X />
+                          </button>
                         </div>
                       </div>
                     );
-                  })
-                )}
+                  })}
+                </>
+              )}
 
-                <button
-                  type="button"
-                  className="ct-addman"
-                  disabled={comps.length >= MAX_COMPS}
-                  onClick={() => setFormState({ index: null })}
-                >
-                  <Plus size={12} />
-                  {/* ⚠️ THE CAP IS NEVER NAMED (baked decision 21). It read "Shelf full (12)",
-                      which advertised a limit — and a stated limit invites the question of how to
-                      raise it, which on this card has no answer and must not grow one. Full states
-                      the fact and offers nothing; there is no counter and no bar anywhere. */}
-                  {comps.length >= MAX_COMPS ? "This list is full" : "Add a comp manually"}
-                </button>
+              {/* ⚠️ NO `N` KEY HINT YET. The shortcut lands with the inline form in Phase 3, and a
+                  hint for a key that does nothing advertises a shortcut the app does not have —
+                  the same standing rule that kept ⌘L/⌘N off the shell's quick actions. */}
+              <button
+                type="button"
+                className="ct-addrow"
+                disabled={comps.length >= MAX_COMPS}
+                onClick={() => setFormState({ index: null })}
+              >
+                <span className="plus"><Plus /></span>
+                {comps.length >= MAX_COMPS ? "This list is full" : "Add a comp manually"}
+              </button>
+
+              {/* ⚠️ A STATEMENT ABOUT THE INDUSTRY, NOT ABOUT THIS LIST. It must never be reworded
+                  into advice about the writer's own comps — that is the appraisal the sweep removed,
+                  returning by the back door. */}
+              <div className="ct-cfoot">
+                <span className="ct-lbl">
+                  Agents typically look for comps published within the last five years
+                </span>
               </div>
             </section>
 
@@ -755,7 +766,8 @@ export const ComparableTitlesPage: React.FC<{
                 onUpgrade={() => onNavigate?.("plans")}
               />
             </section>
-          </div>
+            </div>
+          </>
         )}
       </div>
       </WorkspacePageGrid>

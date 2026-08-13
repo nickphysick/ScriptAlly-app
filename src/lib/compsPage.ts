@@ -89,49 +89,100 @@ export function compAge(c: CompTitle, now: number): number | null {
   return age > 5 ? age : null;
 }
 
-/** The surname used in the "(Surname, Year)" attribution — the last whitespace token of the author. */
-function surname(author?: string): string {
-  const a = (author ?? "").trim();
-  if (!a) return "";
-  const parts = a.split(/\s+/);
-  return parts[parts.length - 1];
-}
+/**
+ * ⚠️ TWO FORMATS, AND THE WORDING IS THE PACK'S — it differs from what this file used to produce.
+ * The old line was "For readers of A (Clarke, 2020)." from the earlier flat ref; Phase 2 and the v5
+ * ref both give `{Manuscript} will appeal to readers of A, B and C.` with NO parenthetical
+ * attributions. The manuscript is named IN the sentence, which is what makes it a line a writer can
+ * paste rather than a fragment they have to finish.
+ */
+export type QueryFormat = "readers" | "meets";
 
-/** "(Surname, Year)" / "(Surname)" / "(Year)" / "" — whichever parts are present. */
-function attribution(c: CompTitle): string {
-  const y = compYear(c);
-  const bits = [surname(c.author), y !== null ? String(y) : ""].filter(Boolean);
-  return bits.length ? ` (${bits.join(", ")})` : "";
-}
-
-export interface QueryLinePart {
-  title: string;
-  /** The parenthetical, e.g. " (Marske, 2021)" — empty when no author/year. */
-  attribution: string;
+/** One run of the composed line — `emphasis` drives WEIGHT only, never colour or italics. */
+export interface LineSeg {
+  text: string;
+  /** ms = the manuscript title (700) · title = a comp title (600) · absent = the connecting prose. */
+  emphasis?: "ms" | "title";
 }
 
 export type QueryLine =
-  | { kind: "empty"; prompt: string }
-  | { kind: "line"; text: string; parts: QueryLinePart[] };
+  /** Nothing ticked — the same prompt in either format. */
+  | { kind: "empty"; prompt: string; caption: string | null }
+  /** X-meets-Y with anything other than two ticked: state the rule, state the count, no scolding. */
+  | { kind: "unavailable"; prompt: string; caption: string }
+  | { kind: "line"; text: string; segments: LineSeg[]; caption: string };
+
+/** "A, B and C" as segments — commas between, "and" before the last, no Oxford comma. */
+function joinTitles(titles: string[]): LineSeg[] {
+  const out: LineSeg[] = [];
+  titles.forEach((t, i) => {
+    if (i > 0) out.push({ text: i === titles.length - 1 ? " and " : ", " });
+    out.push({ text: t, emphasis: "title" });
+  });
+  return out;
+}
+
+const segText = (segs: LineSeg[]): string => segs.map((s) => s.text).join("");
 
 /**
- * The query-letter line assembled from the in-query comps, in shelf order:
- *   "For readers of A (Surname, Year), B (Surname, Year) and C (Surname, Year)."
- * `text` is the flat sentence (clipboard + tests); `parts` lets the strategy strip bold the titles.
- * Zero in-query comps returns the graceful empty prompt.
+ * The query-letter line, composed from the ticked comps IN LIST ORDER.
+ *
+ * ⚠️ LIST ORDER IS THE CONTRACT, which is why the list is reorderable and why the caption says so.
+ * Sorting here — by year, by recency, by anything — would silently overrule the writer's own
+ * arrangement of their sentence.
+ *
+ * ⚠️ THE CAPTION APPENDS THE COMPOSITION, never a verdict on it. See `compositionLine`.
  */
-export function queryLine(comps: CompTitle[]): QueryLine {
+export function queryLine(
+  comps: CompTitle[],
+  manuscriptTitle: string,
+  format: QueryFormat,
+  now: number
+): QueryLine {
   const inq = comps.filter((c) => c.inQuery);
   if (inq.length === 0) {
-    return { kind: "empty", prompt: "Tick a comp below to start building your query line." };
+    return { kind: "empty", prompt: "Tick a comp below to start building your query line.", caption: null };
   }
-  const parts: QueryLinePart[] = inq.map((c) => ({ title: c.title, attribution: attribution(c) }));
-  const rendered = parts.map((p) => `${p.title}${p.attribution}`);
-  const joined =
-    rendered.length === 1
-      ? rendered[0]
-      : `${rendered.slice(0, -1).join(", ")} and ${rendered[rendered.length - 1]}`;
-  return { kind: "line", text: `For readers of ${joined}.`, parts };
+  const composition = compositionLine(comps, now);
+  const plural = inq.length === 1 ? "" : "s";
+
+  if (format === "meets") {
+    if (inq.length !== 2) {
+      /* factual: what the format needs, and how many are ticked. No instruction, no "only". */
+      return {
+        kind: "unavailable",
+        prompt: "The X-meets-Y format takes exactly two comps.",
+        caption: `${inq.length} ticked`,
+      };
+    }
+    const segments: LineSeg[] = [
+      { text: inq[0].title, emphasis: "title" },
+      { text: " meets " },
+      { text: inq[1].title, emphasis: "title" },
+      { text: "." },
+    ];
+    return {
+      kind: "line",
+      text: segText(segments),
+      segments,
+      caption: [`built from 2 ticked comps`, composition].filter(Boolean).join(" · "),
+    };
+  }
+
+  const segments: LineSeg[] = [
+    { text: manuscriptTitle, emphasis: "ms" },
+    { text: " will appeal to readers of " },
+    ...joinTitles(inq.map((c) => c.title)),
+    { text: "." },
+  ];
+  return {
+    kind: "line",
+    text: segText(segments),
+    segments,
+    caption: [`built from ${inq.length} ticked comp${plural}`, "in list order", composition]
+      .filter(Boolean)
+      .join(" · "),
+  };
 }
 
 /**

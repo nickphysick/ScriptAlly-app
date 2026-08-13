@@ -102,96 +102,172 @@
   --ct-card-sh: none;
 }
 
-/* ── page shell (workspace-fills: masthead flex-none, split fills, panels scroll) ── */
+/* ── page shell — the page scrolls, the panels do not (Phase 2, v5) ── */
+/*
+ * ⚠️ THE PANES STOPPED SCROLLING AND THE PAGE STARTED, and the deleted rule mattered more than the
+ * change. `.ctpage .wpg-scroll { display:flex; flex-direction:column }` was this page doing the
+ * GRID's `fill` job from its own stylesheet — 0-2-0, identical specificity to `.wpg--fill >
+ * .wpg-scroll`, winning only because a page sheet lands later in the bundle. That is the exact
+ * shape that cost three other pages their scroll-invariance padding, and it is gone.
+ *
+ * ⚠️ AND NOTHING REPLACES IT — the page passes NO `fill` prop. `fill` is for content that FILLS the
+ * row and scrolls in its own panes; this page FLOWS past it, and the grid's own note is explicit
+ * that on a flowing page a `flex: 1` child "would start filling the row instead of flowing past it,
+ * which changes what scrolls". Passing it here would rebuild the thing being removed.
+ *
+ * ⚠️ BOTTOM PADDING GOES ON AN INNER ELEMENT, never on `.wpg-scroll`. That scroller's
+ * `padding-bottom` is a SUM of two tokens — the page's `--wpg-foot` and the working state's
+ * `--wpg-reclaim-pad` — so a `padding-bottom` here replaces both, and setting either token from a
+ * page would clobber the other contributor. `.ct-pagebody` carries it and touches neither.
+ */
 .ctpage {
   height: 100%; display: flex; flex-direction: column; overflow: hidden;
-  background: var(--ct-desk); color: var(--ct-ink); padding: 0 0 20px /* no top inset — the grid owns the gap above the header */;
+  background: var(--ct-desk); color: var(--ct-ink);
   font-family: 'Inter', 'Source Sans Pro', sans-serif;
 }
-/* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both moved to the grid: row 3 carries
-   `--content-gutter` as padding, so this page's content is the window minus the gutter and
-   nothing here states a width. A `max-width` here would re-create the centred column whose
-   scrollbar ate 15px of content under classic scrollbars. */
-.ct-desk { flex: 1; min-height: 0; width: 100%; }
-/* ⚠️ ROW 3 IS A FLEX COLUMN ON THIS PAGE, and without it the desk collapses. `.ct-desk` fills by
-   `flex: 1; min-height: 0`, which needs a flex parent — inside a plain block scroll row those two
-   declarations mean nothing and the two panels lose the height they are 100% of. The page still
-   does not scroll at page level: the desk fills row 3 exactly and the panels scroll inside
-   themselves, exactly as before. */
-.ctpage .wpg-scroll { display: flex; flex-direction: column; }
-/* ⚠️ THE CAP MOVED HERE FROM THE ROUTE SLOT, and it is the SAME cap — `contentVariant="read"` capped
-   the slot at 1200px, which wrapped the HEADER too and stopped its rule short of the window. Capping
-   content is a content concern, so it now sits on the content.
-   ⚠️ EXPRESSED AS THE CAP MINUS THIS PAGE'S OWN GUTTER, never as a literal 1144: the slot cap was an
-   OUTER width that the page's padding then ate. A literal would silently stop matching the day
-   either number moved.
-   ⚠️ AND IT IS EVERY CHILD, NOT `.ct-desk` ALONE, because the manuscript selector row is a SIBLING
-   of the desk — capping the desk alone would leave the selector flying out to the full window.
-   ⚠️ THE HEADER IS NO LONGER EXCLUDED (amendment 7). It used to be `> :not(.wsh)`, because a band
-   was chrome and bled past this cap on purpose. A PLATE is an object whose edges must meet the
-   panels below it, so it takes the same cap they do — `.wsh-wrap` is its sticky host and is capped
-   with everything else. */
-/* ⚠️ THE CAP MOVED TO THE GRID ROOT (amendment 9). It was `.ctpage > *` — every child capped
-   individually, which worked but meant the plate, the tool row and the desk agreed only because
-   three elements happened to read one rule. On the grid root ONE cap governs all three rows, and
-   the modals below it are excluded for free rather than by a selector that has to remember them. */
-.ct-wpg {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  }
-.ct-split { display: grid; grid-template-columns: 1fr 396px; gap: 22px; height: 100%; }
-@media (max-width: 1180px) {
-  .ct-desk { overflow-y: auto; }
-  .ct-split { grid-template-columns: 1fr; height: auto; }
+/* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both belong to the grid: row 3 carries
+   `--content-gutter` as padding, so this page's content is the window minus the gutter and nothing
+   here states a width. The v5 ref's 1460/44 are placeholders from a standalone file — this app
+   retired `--wpg-cap` precisely because a cap in the wrong place ate content under classic
+   scrollbars. */
+.ct-wpg { flex: 1; min-height: 0; width: 100%; }
+.ct-pagebody { padding: 22px 0 110px; }
+
+/* ⚠️ THE TWO COLUMNS COLLAPSE, THEY DO NOT SHRINK. The Scout's column is fixed so its rows keep the
+   flush right edge the pack's alignment spec exists to protect; below the breakpoint it stacks. */
+.ct-split { display: grid; grid-template-columns: minmax(0, 1fr) 448px; gap: 20px; align-items: start; margin-top: 20px; }
+@media (max-width: 1220px) {
+  .ct-split { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ── the hero: the composed query line, and what it is made of ── */
+.ct-hero {
+  background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-radius: 20px;
+  box-shadow: var(--ct-panel-sh); display: grid; grid-template-columns: minmax(0, 1fr) auto; overflow: hidden;
+}
+@media (max-width: 900px) { .ct-hero { grid-template-columns: minmax(0, 1fr); } }
+.ct-hero-l { padding: 26px 34px 24px; min-width: 0; }
+.ct-eyebrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+/* ⚠️ PLAYFAIR ROMAN IN INK — baked decision 2, an explicit correction. No italics, no burgundy.
+   WEIGHT is the only emphasis device: the manuscript title 700, the comp titles 600. Colour,
+   italics or an underline here would make the line look like a UI element rather than the sentence
+   the writer is about to paste into a letter. */
+.ct-hero-line {
+  font-family: 'Playfair Display', serif; font-size: 31px; font-weight: 400; line-height: 1.32;
+  letter-spacing: -.012em; margin-top: 13px; max-width: 980px; color: var(--ct-ink);
+}
+.ct-hero-line .ms { font-weight: 700; }
+.ct-hero-line .ttl { font-weight: 600; }
+.ct-hero-line.empty { color: var(--ct-label); font-size: 22px; }
+.ct-hero-ctl { display: flex; align-items: center; gap: 10px; margin-top: 19px; flex-wrap: wrap; }
+.ct-seg { display: flex; background: var(--ct-card); border: 1px solid var(--ct-taupe-bd); border-radius: 11px; overflow: hidden; }
+.ct-seg button {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .09em; padding: 8px 13px;
+  border: none; background: transparent; color: var(--ct-label); cursor: pointer; text-transform: uppercase;
+}
+.ct-seg button.on { background: var(--ct-pink); color: var(--ct-mocha); font-weight: 500; }
+.ct-copyb {
+  display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 8.5px;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--ct-mocha); background: var(--ct-card);
+  border: 1px solid var(--ct-taupe-bd); border-radius: 11px; padding: 8px 14px; cursor: pointer;
+}
+.ct-copyb:hover { background: var(--ct-pink); border-color: var(--ct-pink-bd); }
+.ct-copyb svg { width: 11px; height: 11px; }
+/* the caption — see the composition-line note; it states, it does not appraise */
+.ct-hero-cap {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ct-label);
+}
+.ct-hero-r {
+  border-left: 1px solid var(--ct-band-hair); display: flex; flex-direction: column; justify-content: center;
+  padding: 14px 24px; min-width: 246px;
+}
+@media (max-width: 900px) { .ct-hero-r { border-left: none; border-top: 1px solid var(--ct-band-hair); } }
+/* ⚠️ THREE STACKED ROWS, NOT A HORIZONTAL BOX ROW — baked decision 3. */
+.ct-hstat { display: flex; align-items: center; gap: 14px; padding: 10px 0; }
+.ct-hstat + .ct-hstat { border-top: 1px solid var(--ct-band-hair); }
+.ct-hstat .mark { width: 44px; height: 44px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
+.ct-hstat .n { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; line-height: 1; color: var(--ct-ink); }
+.ct-hstat .l {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--ct-label); margin-top: 6px; white-space: nowrap;
+}
+
+/* ── the comp rows ── */
+/* ⚠️ `align-items: start` ON BOTH ROW GRIDS — baked decision 4, and it was the alignment fix. Rows
+   centred, so any row carrying a match line dragged its neighbours' tick and buttons out of line.
+   ⚠️ AND THE ACTION COLUMN IS A FIXED WIDTH, never content-sized: that is what keeps every row's
+   right edge flush regardless of title length. Centring either, or sizing the action column to its
+   contents, reverts the fix. */
+.ct-thead {
+  display: grid; grid-template-columns: 22px 36px minmax(0, 1fr) auto 66px; gap: 0 14px;
+  padding: 9px 20px; background: var(--ct-sect); border-bottom: 1px solid var(--ct-band-hair);
+}
+.ct-thead span {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .14em; color: var(--ct-label);
+}
+.ct-thead .h3 { grid-column: 3; }
+.ct-thead .h5 { grid-column: 5; text-align: right; }
+.ct-crow {
+  display: grid; grid-template-columns: 22px 36px minmax(0, 1fr) auto 66px; gap: 0 14px;
+  align-items: start; padding: 15px 20px;
+}
+.ct-crow + .ct-crow { border-top: 1px solid var(--ct-band-hair); }
+.ct-crow:hover { background: var(--ct-sect); }
+.ct-crow .grip { opacity: 0; color: var(--ct-label); cursor: grab; padding-top: 4px; transition: opacity .13s; background: none; border: none; }
+.ct-crow:hover .grip, .ct-crow:focus-within .grip { opacity: 1; }
+.ct-crow .grip svg { width: 11px; height: 11px; }
+.ct-crow .t { font-family: 'Playfair Display', serif; font-size: 16.5px; font-weight: 600; line-height: 1.25; color: var(--ct-ink); }
+.ct-crow .a { font-size: 12px; color: var(--ct-label); margin-top: 2px; }
+/* ⚠️ ROMAN, NOT ITALIC — the pack's Phase 2. It is the writer's own note about the comp, not a quote. */
+.ct-crow .why { font-size: 12px; color: var(--ct-ink-soft); margin-top: 4px; line-height: 1.45; font-style: normal; }
+.ct-crow .chips { display: flex; gap: 6px; padding-top: 3px; flex-wrap: wrap; }
+/* ⚠️ REVEALED ON HOVER **AND** `:focus-within` — a keyboard user must be able to reach edit and
+   remove, and a hover-only reveal makes them unreachable without a pointer. */
+.ct-crow .acts { display: flex; gap: 5px; justify-content: flex-end; opacity: 0; transition: opacity .13s; }
+.ct-crow:hover .acts, .ct-crow:focus-within .acts { opacity: 1; }
+/* the tick — a real switch; see the role="switch" note at the call site */
+.ct-ck {
+  margin-top: 2px; width: 19px; height: 19px; border-radius: 6px; border: 1.5px solid var(--ct-taupe-bd);
+  background: var(--ct-card); display: flex; align-items: center; justify-content: center; padding: 0;
+  flex: 0 0 auto; cursor: pointer;
+}
+.ct-ck svg { opacity: 0; width: 11px; height: 11px; color: var(--ct-mocha); transition: opacity .12s; }
+.ct-ck.on { background: var(--ct-pink); border-color: var(--ct-pink-bd); }
+.ct-ck.on svg { opacity: 1; }
+.ct-iconbtn {
+  width: 28px; height: 28px; border-radius: 9px; background: var(--ct-card); border: 1px solid var(--ct-taupe-bd);
+  color: var(--ct-label); display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer;
+}
+.ct-iconbtn:hover { color: var(--ct-accent); border-color: var(--ct-pink-bd); }
+.ct-iconbtn svg { width: 12px; height: 12px; }
+.ct-addrow {
+  display: flex; align-items: center; gap: 10px; padding: 13px 20px; border: none;
+  border-top: 1px solid var(--ct-band-hair); color: var(--ct-mocha); background: transparent; width: 100%;
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+}
+.ct-addrow:hover:not(:disabled) { background: var(--ct-sect); color: var(--ct-accent); }
+.ct-addrow:disabled { color: var(--ct-label); cursor: default; }
+.ct-addrow .plus {
+  width: 22px; height: 22px; border-radius: 7px; border: 1.5px dashed var(--ct-taupe-bd);
+  display: flex; align-items: center; justify-content: center;
+}
+.ct-addrow .plus svg { width: 11px; height: 11px; }
+.ct-addrow .kbd { margin-left: auto; }
+/* ⚠️ A NORMS STATEMENT ABOUT THE INDUSTRY, NEVER ADVICE ABOUT THIS LIST (pack Phase 2). It says what
+   agents typically look for; it does not point at any row, and rewording it into "your comps are…"
+   would put the appraisal back that the sweep took out. */
+.ct-cfoot {
+  display: flex; align-items: center; gap: 10px; padding: 11px 20px;
+  border-top: 1px solid var(--ct-band-hair); background: var(--ct-sect);
 }
 
 /* manuscript selector on the right of the masthead */
-.ct-mssel-wrap { position: relative; }
-.ct-mssel {
-  display: flex; align-items: center; gap: 11px; background: var(--ct-card);
-  border: var(--ct-bdw) solid var(--ct-bd); border-radius: 12px; padding: 8px 13px 8px 8px;
-  cursor: pointer; box-shadow: var(--ct-hard); transition: border-color .15s; white-space: nowrap;
-}
-.ct-mssel:hover { border-color: var(--ct-accent); }
-.ct-mssel .mono {
-  width: 34px; height: 34px; border-radius: 8px; background: var(--ct-pink); color: var(--ct-accent);
-  display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif;
-  font-size: 15px; flex-shrink: 0;
-}
-.ct-mssel .lab {
-  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .09em;
-  text-transform: uppercase; color: var(--ct-label);
-}
-.ct-mssel .val {
-  font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ct-ink);
-  line-height: 1.15; margin-top: 1px; max-width: 220px; overflow: hidden; text-overflow: ellipsis;
-}
-.ct-mssel svg { color: var(--ct-accent); flex-shrink: 0; transition: transform .18s; }
-.ct-mssel[aria-expanded="true"] svg { transform: rotate(180deg); }
-.ct-msmenu {
-  position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; min-width: 240px;
-  background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(20, 14, 10, .18); padding: 6px; max-height: 320px; overflow-y: auto;
-}
-.ct-msopt {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
-  text-align: left; background: transparent; border: none; cursor: pointer; border-radius: 8px;
-  padding: 9px 11px; color: var(--ct-ink);
-}
-.ct-msopt:hover { background: var(--ct-sect); }
-.ct-msopt.on { background: var(--ct-pink); }
-.ct-msopt .t { font-family: 'Playfair Display', serif; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ct-msopt .c {
-  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
-  color: var(--ct-label); flex-shrink: 0;
-}
-.ct-msopt.shelved .t { opacity: .55; }
 
 /* ── panels ── */
 .ct-panel {
   background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-radius: var(--ct-cardrad);
-  position: relative; box-shadow: var(--ct-panel-sh); display: flex; flex-direction: column; min-height: 0;
+  position: relative; box-shadow: var(--ct-panel-sh); 
 }
 .ct-panel::before {
   content: ''; display: var(--ct-frame-show); position: absolute; inset: 6px; border: var(--ct-frame);
@@ -221,62 +297,20 @@
    Amendment 1 §3's white-and-blue plate is superseded; pastille blue governs the Scout's surfaces
    only, and the tier keeps its own colour. */
 .ct-tag.pro { background: var(--slate); color: #fff; }
-.ct-body { padding: 16px 18px; overflow-y: auto; flex: 1; min-height: 0; }
+/* ⚠️ NO LONGER AN INTERNAL SCROLLER. The page scrolls now, so `overflow-y: auto` here would give
+   the Scout a scrollbar inside a scrolling page — two scrollers for one column, and the inner one
+   swallows the wheel. */
+.ct-body { padding: 16px 18px; }
 .t-capp .ctpage .ct-body { margin: 0 6px 6px; }
 
 /* ── strategy strip ── */
-.ct-strat { background: var(--ct-sect); border: 1px solid var(--ct-band-hair); border-radius: 10px; padding: 13px 15px; margin-bottom: 18px; }
-.ct-strat .cap {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .07em; text-transform: uppercase;
-  color: var(--ct-ink-soft); margin-bottom: 8px; display: flex; align-items: center; gap: 7px;
-}
-.ct-strat .cap .n { background: var(--ct-pink); color: var(--ct-mocha); border-radius: 20px; padding: 2px 8px; letter-spacing: .03em; }
-.ct-qtxt { font-family: 'Playfair Display', serif; font-size: 14.5px; font-style: italic; line-height: 1.55; color: var(--ct-ink); }
-.ct-qtxt b { font-style: normal; font-weight: 600; color: var(--ct-accent); }
-.ct-qtxt.empty { color: var(--ct-ink-soft); font-style: normal; font-family: 'Inter', sans-serif; font-size: 12.5px; }
 /* ⚠️ THE COMPOSITION LINE — mono, muted, iconless. It replaces `.ct-hnote`, whose `.ok` tick and
    `.tip` caution colour WERE the appraisal: one glyph said "good", the other "look out", and the
    caution state pulled the advisory token so the sentence arrived pre-judged. A count needs neither.
    The `.ok` / `.tip` variants are deleted rather than left unused — a state nothing sets is the next
    person's invitation to set it. */
-.ct-comp-line {
-  margin-top: 9px; font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .09em;
-  text-transform: uppercase; color: var(--ct-label);
-}
-.ct-qcopy {
-  margin-top: 12px; background: var(--ct-pink); border: 1px solid var(--ct-pink-bd); color: var(--ct-mocha);
-  border-radius: 9px; padding: 9px 14px; font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
-  letter-spacing: .05em; text-transform: uppercase; cursor: pointer; display: inline-flex; align-items: center;
-  gap: 7px; box-shadow: var(--ct-hard);
-}
-.ct-qcopy:hover { background: var(--ct-pink-hover); }
-.ct-qcopy svg { width: 11px; height: 11px; }
-
-.ct-listcap {
-  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .09em; text-transform: uppercase;
-  color: var(--ct-label); margin-bottom: 11px; display: flex; align-items: center; gap: 8px;
-}
-.ct-listcap .ln { flex: 1; height: 1px; background: var(--ct-band-hair); }
 
 /* ── comp card ── */
-.ct-card {
-  background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-left: 3px solid var(--ct-taupe-bd);
-  border-radius: 11px; padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; margin-bottom: 10px;
-  transition: all .18s; box-shadow: var(--ct-card-sh);
-}
-.ct-card:hover { border-color: var(--ct-accent); }
-.ct-card.inq { border-left-color: var(--ct-accent); background: linear-gradient(90deg, var(--ct-sect), var(--ct-card) 60%); }
-.t-edn .ctpage .ct-card.inq { border-left-color: #44484d; }
-.ct-cc-main { flex: 1; min-width: 0; }
-.ct-cc-titlerow { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-.ct-cc-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; line-height: 1.15; color: var(--ct-ink); }
-.ct-cc-year {
-  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .03em; background: var(--ct-sect);
-  color: var(--ct-mocha); padding: 2px 8px; border-radius: 20px; flex-shrink: 0; border: 1px solid var(--ct-band-hair);
-}
-.ct-cc-role { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--ct-ink-soft); }
-.ct-cc-meta { font-size: 11.5px; color: var(--ct-ink-soft); margin-top: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.ct-cc-roleline { margin-top: 6px; font-size: 11px; color: var(--ct-ink-soft); font-style: italic; line-height: 1.4; }
 .ct-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 9px; }
 .ct-chip {
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .04em; text-transform: uppercase;
@@ -290,35 +324,6 @@
    chip as everything else that states one. `.ct-chip.warn` and its dot are deleted: the last thing
    reading them was this chip, and the Scout's error box has its own rule. */
 .ct-chip.age { background: var(--ct-sect); color: var(--ct-ink-soft); border: 1px solid var(--ct-band-hair); }
-.ct-cc-side { display: flex; flex-direction: column; align-items: flex-end; gap: 9px; flex-shrink: 0; }
-.ct-inq {
-  display: inline-flex; align-items: center; gap: 7px; font-family: 'JetBrains Mono', monospace; font-size: 8.5px;
-  letter-spacing: .03em; text-transform: uppercase; padding: 6px 11px 6px 8px; border-radius: 20px;
-  border: 1px solid var(--ct-taupe-bd); background: var(--ct-card); color: var(--ct-ink-soft); cursor: pointer;
-  transition: all .16s; white-space: nowrap;
-}
-.ct-inq:hover { border-color: var(--ct-accent); color: var(--ct-accent); }
-.ct-inq .box { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; }
-.ct-inq .box svg { opacity: 0; width: 9px; height: 9px; }
-.ct-inq.on { background: var(--ct-pink); border-color: var(--ct-pink-bd); color: var(--ct-mocha); font-weight: 600; }
-.ct-inq.on .box { background: var(--ct-mocha); border-color: var(--ct-mocha); color: var(--ct-card); }
-.ct-inq.on .box svg { opacity: 1; }
-.ct-editbtn, .ct-x {
-  width: 24px; height: 24px; border-radius: 7px; border: none; background: transparent; color: var(--ct-ink-soft);
-  opacity: .5; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .16s;
-}
-.ct-editbtn svg, .ct-x svg { width: 13px; height: 13px; }
-.ct-editbtn:hover { background: var(--ct-sect); color: var(--ct-accent); opacity: 1; }
-.ct-x:hover { background: var(--ct-sect); color: var(--ct-accent); opacity: 1; }
-.ct-addman {
-  width: 100%; background: transparent; border: 1px dashed var(--ct-taupe-bd); border-radius: 10px; padding: 11px;
-  font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .05em; text-transform: uppercase;
-  color: var(--ct-mocha); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;
-  transition: all .16s; margin-top: 4px;
-}
-.ct-addman:hover:not(:disabled) { border-color: var(--ct-accent); color: var(--ct-accent); border-style: solid; }
-.ct-addman:disabled { opacity: .45; cursor: default; }
-.ct-addman svg { width: 12px; height: 12px; }
 .ct-listempty { padding: 24px 4px; text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--ct-ink-soft); }
 
 /* ── The Scout ── */
@@ -405,3 +410,25 @@
 .ct-blank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; text-align: center; color: var(--ct-ink-soft); }
 .ct-blank .q { font-family: 'Playfair Display', serif; font-style: italic; font-size: 17px; color: var(--ct-ink); }
 .ct-blank .lab { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: var(--ct-label); }
+
+/* ── Phase 2 additions ── */
+.ct-lbl { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: var(--ct-label); }
+/* the manuscript chip in the hero eyebrow — the page's only statement of scope now that the
+   floating "Working on" chip is gone */
+.ct-chip.ms { background: var(--ct-sect); color: var(--ct-mocha); border: 1px solid var(--ct-band-hair); }
+/* the derived role, beneath the writer's own lines — see compRole: it states, it does not appraise */
+.ct-roleline { margin-top: 6px; font-size: 11px; color: var(--ct-label); line-height: 1.4; }
+/* the writer's private note, distinguished from the match line by tone, never by a label */
+.ct-crow .why.note { color: var(--ct-label); }
+.ct-crow.dragging { opacity: .35; }
+.ct-listempty { padding: 30px 4px; text-align: center; font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ct-ink-soft); }
+.ct-blank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 60px 20px; text-align: center; color: var(--ct-ink-soft); }
+
+/*
+ * ⚠️ REDUCED MOTION KILLS THE TWEENING, NEVER THE STATE. A row still lands and a drag still
+ * reorders; only the animating goes. Suppressing the state as well would make the list appear to
+ * ignore the interaction.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .ct-crow .grip, .ct-crow .acts, .ct-ck svg { transition: none; }
+}

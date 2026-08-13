@@ -115,58 +115,103 @@ describe("compAge", () => {
 });
 
 describe("queryLine", () => {
-  it("returns the empty prompt when nothing is in the query", () => {
-    const r = queryLine([comp({ title: "A", inQuery: false }), comp({ title: "B" })]);
-    expect(r.kind).toBe("empty");
-    if (r.kind === "empty") expect(r.prompt).toMatch(/tick a comp/i);
-  });
-  it("assembles a single in-query comp with attribution", () => {
-    const r = queryLine([comp({ title: "Piranesi", author: "Susanna Clarke", year: 2020, inQuery: true })]);
-    expect(r.kind).toBe("line");
-    if (r.kind === "line") expect(r.text).toBe("For readers of Piranesi (Clarke, 2020).");
-  });
-  it("joins two in-query comps with 'and'", () => {
-    const r = queryLine([
-      comp({ title: "A Marvellous Light", author: "Freya Marske", year: 2021, inQuery: true }),
-      comp({ title: "Piranesi", author: "Susanna Clarke", year: 2020, inQuery: true }),
-    ]);
-    if (r.kind === "line")
-      expect(r.text).toBe(
-        "For readers of A Marvellous Light (Marske, 2021) and Piranesi (Clarke, 2020)."
-      );
-  });
-  it("joins three in-query comps with commas then 'and' (Oxford-less)", () => {
-    const r = queryLine([
-      comp({ title: "A", author: "One Alpha", year: 2021, inQuery: true }),
-      comp({ title: "B", author: "Two Beta", year: 2022, inQuery: true }),
-      comp({ title: "C", author: "Three Gamma", year: 2023, inQuery: true }),
-    ]);
-    if (r.kind === "line")
-      expect(r.text).toBe(
-        "For readers of A (Alpha, 2021), B (Beta, 2022) and C (Gamma, 2023)."
-      );
-  });
-  it("skips only-out-of-query comps and keeps shelf order", () => {
-    const r = queryLine([
-      comp({ title: "First", author: "AA", year: 2021, inQuery: true }),
-      comp({ title: "Skip", author: "ZZ", year: 2019, inQuery: false }),
-      comp({ title: "Second", author: "BB", year: 2022, inQuery: true }),
-    ]);
-    if (r.kind === "line") {
-      expect(r.parts.map((p) => p.title)).toEqual(["First", "Second"]);
-      expect(r.text).toBe("For readers of First (AA, 2021) and Second (BB, 2022).");
+  const MS = "Murphy's Day Out";
+  const tick = (title: string, over: Partial<CompTitle> = {}) =>
+    comp({ title, inQuery: true, media: "book", year: 2024, ...over });
+  const text = (r: ReturnType<typeof queryLine>) => (r.kind === "line" ? r.text : "");
+  const cap = (r: ReturnType<typeof queryLine>) => (r.kind === "empty" ? r.caption : r.caption);
+
+  it("prompts identically in both formats when nothing is ticked", () => {
+    for (const f of ["readers", "meets"] as const) {
+      const r = queryLine([comp({ title: "A" })], MS, f, NOW);
+      expect(r.kind).toBe("empty");
+      if (r.kind === "empty") {
+        expect(r.prompt).toMatch(/tick a comp/i);
+        expect(r.caption).toBeNull();
+      }
     }
   });
-  it("degrades attribution gracefully when author/year are missing", () => {
-    expect(
-      (queryLine([comp({ title: "Solo", inQuery: true })]) as { text: string }).text
-    ).toBe("For readers of Solo.");
-    expect(
-      (queryLine([comp({ title: "Yr", year: 2020, inQuery: true })]) as { text: string }).text
-    ).toBe("For readers of Yr (2020).");
-    expect(
-      (queryLine([comp({ title: "Au", author: "Jane Doe", inQuery: true })]) as { text: string }).text
-    ).toBe("For readers of Au (Doe).");
+
+  /**
+   * ⚠️ THE WORDING IS THE PACK'S AND IT CHANGED. This file used to produce "For readers of A
+   * (Clarke, 2020)." from the earlier flat ref; Phase 2 and the v5 ref both name the MANUSCRIPT in
+   * the sentence and drop the parenthetical attributions.
+   */
+  it("names the manuscript and joins the ticked titles, no attributions", () => {
+    const r = queryLine([tick("The Appeal"), tick("Magpie Murders"), tick("A Tidy Ending")], MS, "readers", NOW);
+    expect(text(r)).toBe(
+      "Murphy's Day Out will appeal to readers of The Appeal, Magpie Murders and A Tidy Ending."
+    );
+  });
+
+  it("uses one title, and two joined by 'and', without an Oxford comma", () => {
+    expect(text(queryLine([tick("Solo")], MS, "readers", NOW)))
+      .toBe("Murphy's Day Out will appeal to readers of Solo.");
+    expect(text(queryLine([tick("A"), tick("B")], MS, "readers", NOW)))
+      .toBe("Murphy's Day Out will appeal to readers of A and B.");
+  });
+
+  /**
+   * ⚠️ WEIGHT IS THE ONLY EMPHASIS DEVICE — baked decision 2, an explicit correction. The segments
+   * carry `ms` / `title` and nothing else; there is no colour or italic channel to misuse.
+   */
+  it("marks the manuscript and the comp titles for weight, and nothing else", () => {
+    const r = queryLine([tick("The Appeal")], MS, "readers", NOW);
+    if (r.kind !== "line") throw new Error("expected a line");
+    expect(r.segments.find((x) => x.emphasis === "ms")?.text).toBe(MS);
+    expect(r.segments.filter((x) => x.emphasis === "title").map((x) => x.text)).toEqual(["The Appeal"]);
+    expect(r.segments.every((x) => x.emphasis === undefined || x.emphasis === "ms" || x.emphasis === "title")).toBe(true);
+  });
+
+  it("skips unticked comps and keeps LIST ORDER, never a sort of its own", () => {
+    const r = queryLine(
+      [tick("First"), comp({ title: "Skip" }), tick("Second", { year: 1999 })],
+      MS, "readers", NOW
+    );
+    expect(text(r)).toBe("Murphy's Day Out will appeal to readers of First and Second.");
+  });
+
+  describe("the X-meets-Y format", () => {
+    it("composes from exactly two", () => {
+      const r = queryLine([tick("A"), tick("B")], MS, "meets", NOW);
+      expect(text(r)).toBe("A meets B.");
+    });
+
+    /** ⚠️ STATES THE RULE AND THE COUNT — no instruction, no "only", no scolding. */
+    it("states the rule and how many are ticked at any other count", () => {
+      for (const n of [1, 3]) {
+        const r = queryLine(Array.from({ length: n }, (_, i) => tick(`T${i}`)), MS, "meets", NOW);
+        expect(r.kind).toBe("unavailable");
+        if (r.kind === "unavailable") {
+          expect(r.prompt).toBe("The X-meets-Y format takes exactly two comps.");
+          expect(r.caption).toBe(`${n} ticked`);
+        }
+      }
+    });
+  });
+
+  describe("the caption", () => {
+    it("states the count, the ordering rule and the composition, in that order", () => {
+      const r = queryLine([tick("A"), tick("B"), tick("C", { year: 2001 })], MS, "readers", NOW);
+      expect(cap(r)).toBe("built from 3 ticked comps · in list order · 2 of 3 published in the last five years");
+    });
+
+    it("agrees in singular", () => {
+      expect(cap(queryLine([tick("A")], MS, "readers", NOW)))
+        .toBe("built from 1 ticked comp · in list order · 1 of 1 published in the last five years");
+    });
+
+    /** X-meets-Y has no ordering to state — two comps have no arrangement worth naming. */
+    it("drops the ordering clause in the meets format", () => {
+      expect(cap(queryLine([tick("A"), tick("B")], MS, "meets", NOW)))
+        .toBe("built from 2 ticked comps · 2 of 2 published in the last five years");
+    });
+
+    /** ⚠️ THE CAPTION AGREES WITH ITSELF: the composition's denominator is the same ticked count. */
+    it("uses one ticked count for both clauses, films included", () => {
+      const r = queryLine([tick("A"), tick("F", { media: "film" })], MS, "readers", NOW);
+      expect(cap(r)).toBe("built from 2 ticked comps · in list order · 1 of 2 published in the last five years");
+    });
   });
 });
 
