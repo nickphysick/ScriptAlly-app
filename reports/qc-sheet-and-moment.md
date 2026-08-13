@@ -315,3 +315,100 @@ marker inside it.
 ---
 
 **Not deployed. Not pushed.**
+
+---
+
+# Pack C — verified, and the one section that was new
+
+Refs: `96-form-colour.html` · `98-sheet-crumb.html` · `100-sheet-watermark-lab.html` ·
+`Sent_queries_final.png`. Commit `bf1cab8`. **Not deployed, not pushed.**
+
+## Gates
+
+| | tsc | `vite build` | Vitest |
+|---|---|---|---|
+| **Baseline** | pass | pass | 285 files / **4707 passed**, 0 failed |
+| **Final** | pass | pass | 285 files / **4713 passed**, 0 failed |
+
+Run in an isolated worktree carrying only this stream's files, per the pack.
+
+## §0 — the six findings, re-verified
+
+| # | Finding | Status |
+|---|---|---|
+| 1 | Portal to `document.body`; `.f12-root` clipped by two `overflow:hidden` ancestors | **still true** |
+| 2a | `f12.css:1181`'s `.qh-take .f12-list { display:none }` | **gone** — 0 occurrences; removed with the sheet |
+| 2b | `condensed` readers | **gone from Queries**; the prop survives on `WorkspacePageGrid` for the other nine pages |
+| 3 | `dock` prop on `WorkspacePageGrid` | **gone** — the dock is the sheet's |
+| 4 | The two To-do traps | **both migrated** to `useOverlay`; no local copies, so no drift is possible |
+| 5 | Stacking | sheet **200** · toast **300** · confirm **320** — unchanged |
+| 6 | `AgentContextPanel`'s content seam | **record uses it** (`body={` in `ResponsePane`), so the sheet inherits it unchanged |
+
+So §1, §2, §4 and §5 were **already built** in this session and are locked rather than rebuilt.
+§4b's "kept as built" items are already the state.
+
+## §2's gate — no collision
+
+`ManuscriptPlate.tsx` imports `createPortal` and renders `role="dialog" aria-label="Word count"`,
+but it is an **anchored popover** (`useFixedMenu`), not an overlay: no `aria-modal`, no focus trap,
+no scrim, no scroll lock. Same category as `TasksPopover`. **No second overlay primitive is being
+born**, so §2 had nothing to stop for.
+
+## §3 — measured
+
+| | 1024 | 1440 | 1920 |
+|---|---|---|---|
+| band ground (create) | `rgb(247,227,221)` | same | same |
+| controls in the band | **0** | 0 | 0 |
+| open step's cap | `linear-gradient(…)` | same | same |
+| watermark | `Sent_queries_final.png`, opacity **0.17**, `z-index: 0` | same | same |
+| dock | `z-index: 2` on `rgb(255,253,251)`, overlapping the mark | same | same |
+
+### ⚠️ The 1024 overlap — reported, not adjusted
+
+The pack predicted it and it is real, but the number is sharper than "an overlap will show":
+
+| | how far the collapsed rows reach into the 390px mark | text rows over it |
+|---|---|---|
+| 1440 | **32px** — a graze at its left edge | 2 |
+| 1920 | **32px** | 1 |
+| **1024** | **392px — the rows span the mark entirely** | **2** |
+
+At 1440 and 1920 the mark is essentially clear of the rows. At 1024 the two-column body compresses
+enough that the collapsed *What* and *Notes* rows cover the whole illustration, with two rows of
+text over it at 0.17. **Opacity not adjusted** — the options are a lower opacity at that width, a
+smaller mark, or hiding it below 1100 as the glance panels already do, and that is a design call.
+
+### The crumb reads a stale name
+
+The band renders **"SCRIPTALLY / QUERYING / QUERIES HUB / LOG A QUERY"** — but the page's masthead,
+six inches above and behind the scrim, says **Query Centre**. `shellCrumbForPath` is faithful; the
+**nav data is stale**. CLAUDE.md states the rule directly: *"The nav, the crumb and the page's own
+heading must say the same thing."* The rename was applied to the page and never to the nav.
+
+**Not fixed here.** "Queries Hub" appears across `index.css`, `types.ts`, `topNav.ts` and eight
+components and tests — an app-wide rename, its own pass. Fixing it in the band alone would only move
+the disagreement from the band-versus-masthead to the band-versus-sidebar.
+
+### The illustration was already there
+
+`public/Sent queries final.png` exists, **byte-identical** (md5 `d38d2f47…`), spaced, and referenced
+by nothing. The underscored copy is used instead — a space in a URL is a known footgun — and the
+spaced duplicate is reported rather than deleted.
+
+## Locks
+
+`.qc-sheet .qc-dock` was briefly declared twice (§2's and §3's), so a first-match slice read the
+wrong block and the lock reported the dock had stopped drawing above the mark. **Folded into one
+rule per selector** — the fix this repo prefers where sharing is not the point. Third instance of
+that trap across these packs; the previous two were the avatar disc and `.f12-lhtitle`.
+
+## Unexercised
+
+- **`.qc-sheet--record::before`** — the sage hue-rotation is locked at source but not browser-checked,
+  because reaching the record sheet needs a query whose primary is *Record response* and the §3 walk
+  opens create.
+- The chips-drop at 700 and the twenty-note case remain unexercised from the previous pack, for the
+  same reason: no query on the harness account carries materials, and none carries notes.
+
+**Not deployed. Not pushed.**
