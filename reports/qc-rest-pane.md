@@ -269,3 +269,114 @@ variant, while one read inside a `calc()` resolves at the use site — why `--co
 override failed and `--header-inset`'s worked, when the two look identical from a distance.
 
 **Not deployed. Not pushed.**
+
+---
+
+# Fix pack 2 — the agent header and the list edge
+
+Two reversals of Pack B, both from Nick's walkthrough against `102-rest-signed-off.html`.
+Three commits: `add89c1` (the ref + a harness repair), `18987f7` (§1), `efdaac6` (§2).
+
+## §1 — the header is a contained plate again
+
+Pack B's §1h dissolved the hero into an open row closed by a hairline, on the reasoning that a card
+inside a card is one frame too many. Against the signed-off ref it is not: the header is the query's
+identity, and identity needs an edge — without one it reads as a caption drifting above the columns
+rather than as the thing they belong to.
+
+The plate wears `.f12-card`'s **tokens**, not its numbers — `var(--panel)`, `1px solid var(--line)`,
+`var(--r-lg)`, `var(--sh-1)`. Restating `12px` and a literal hex would have agreed with the cards
+today and drifted the first time a theme moved either. Browser-confirmed identical at all three
+widths:
+
+| | radius | ground | rim |
+|---|---|---|---|
+| `.f12-heroband` | 12px | `rgb(255,253,251)` | `1px rgb(230,220,205)` |
+| `.qp-cols .f12-card` | 12px | `rgb(255,253,251)` | `1px rgb(230,220,205)` |
+
+All four controls measured **inside** the plate at 1024/1440/1920 — avatar, status pill, primary,
+kebab.
+
+### The plate's height, with and without a status pill
+
+The pack asks specifically whether the plate is stable when the pill is absent. This suite is
+`environment: 'node'` with no box model, so the clause is carried by measurement: `fp2` hides the
+pill and re-reads the plate.
+
+| viewport | with pill | without pill |
+|---|---|---|
+| 1024×768 | 65px | **65px** |
+| 1440×900 | 76px | **76px** |
+| 1920×1080 | 76px | **76px** |
+
+The avatar sets the row; the pill never did. What the source lock holds is the *cause* — a centred
+flex row, so a shorter child cannot pull the height down with it.
+
+### One casualty, repaired
+
+`queryCentreHeads` asserted the literal `margin: 0 20px`, bundling two independent facts: the side
+inset (load-bearing — it is what lines the header up with the cards beneath it) and the top margin
+(incidental — `0` only because the band began where the masthead's rule ended). The plate takes a top
+gap, so the case failed for the one reason that was never its subject. It now reads the side value
+out of the shorthand and compares that alone. **Testing the shorthand tested more than the case
+meant** — the same shape will bite any lock that asserts a whole shorthand to pin one of its parts.
+
+## §2 — the list runs flush
+
+**Mostly already true, and reported as that rather than rebuilt.** Pack B's §1c gave the list its
+ground and seam with no radius, and §1b spanned the masthead across the body. Measured before a line
+was changed:
+
+| viewport | masthead left | list left | pane left | list radius | list margins | seam |
+|---|---|---|---|---|---|---|
+| 1024 | 327 | **327** | 673 → **661** | 0px | 0px/0px | 533/533 (full) |
+| 1440 | 327 | **327** | 673 → **661** | 0px | 0px/0px | 678/678 (full) |
+| 1920 | 327 | **327** | 673 → **661** | 0px | 0px/0px | 858/858 (full) |
+
+The one thing genuinely still wrong was the **channel**: `.f12-body` carried `gap: var(--gut)`,
+leaving 12px of page showing to the *right* of the seam. So the division the seam is supposed to
+**be** was a line plus a stripe, and that is what made the list read as a widget resting on the page.
+The ref's own split (`.cols`) has no gap either. Removing it moves the pane's left edge from 673 to
+661 — exactly onto the list's right edge.
+
+It costs no breathing room, because the inset was never the gap's job: the list's children carry
+`padding-inline: var(--gut)` and the pane's carry their own 20px, so nothing lands against the line.
+That is also what lets the ground and the seam run edge to edge, and it is locked, because deleting
+the children's inset would put the rows against the seam with no obvious cause.
+
+## A harness repair, and one unexercised assertion
+
+The e2e onboarding walk matched `"Skip this step"` anchored and exact. One gated step
+(*"Where are you with it?"*) offers **"Skip setup"** instead, so on that step the match found
+nothing, the walk fell through to a Continue that stays disabled until a choice is made, and
+Playwright auto-waited on it: **796 click attempts over seven minutes**, reported as a click failure
+on a button that was only waiting for an answer. A prefix match reaches both wordings. The fallback
+beneath it now takes a choice by **shape** rather than by label — any enabled button in the flow that
+is not one of the flow's own verbs — because naming one option (`/Just getting started/`) is exactly
+what failed here.
+
+**⚠️ The dev e2e account has lost its query fixture.** After the walk was fixed and the run reached
+the page, `/queries` rendered its empty branch — "No queries", "first query" — so there is no
+selected query, no `.qp-pane`, and no plate. Every clause this pack specifies was measured earlier in
+the session against a populated account and this exact CSS, and those are the numbers above. One
+assertion added afterwards while repairing the heads lock — that the plate's left edge equals the
+cards' — is **in the harness but has not yet run**. Stated rather than implied: it is not verified.
+The fixture needs restoring before the next measurement run, which will otherwise fail at the same
+line for the same reason.
+
+## Gates
+
+Baseline before editing: tsc pass, build pass, **285 files / 4713 tests, 0 failures**.
+
+The manuscripts stream went live mid-run (`bbd466c`, `4103a7b`, four files dirty), and its
+`plateEdit.test.tsx` was red in the shared tree — not mine. Gates therefore ran in an isolated
+worktree at HEAD carrying only my files: **tsc pass, build pass, 285 files / 4720 tests, 0 failures**
+at the final state, and green at each of the three commits independently.
+
+Both new locks were verified **red before believed**: restoring the band shape fails the plate case,
+and restoring the gap fails the channel case — each alone, neither spuriously.
+
+**Nothing under `src/types.ts`, `AllManuscripts.tsx` or `manuscripts/**` was touched, staged or
+reformatted** — confirmed against all three commits.
+
+**Not deployed. Not pushed.**
