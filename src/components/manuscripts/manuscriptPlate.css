@@ -33,8 +33,19 @@
    quietly wrong while every other theme looked right.
    ── */
 .t-capp .msv1 {
+  /* ⚠️ --msv-plateA/B AND --msv-plateline ARE NOW THE LIBRARY CARD'S COVER, NOT THE DOSSIER BAND.
+     The reframe turns the dossier's plateband WHITE (variant D); the sage band survives on the
+     card in the grid, which is what these three now paint. Both surfaces still read one token set,
+     so the shelf and the book it opens cannot drift apart. */
   --msv-plateA: #dadfd7; --msv-plateB: #d5dbd3;
   --msv-plateline: 1px solid rgba(138, 158, 136, 0.35);
+  /* Variant D — white band, hairline only; sage survives in the plate fill and the genre pills. */
+  --msv-bandbg: #ffffff; --msv-bandline: 1px solid #ece4d8;
+  --msv-platefill: #e7ede3; --msv-platefillbd: 1px solid rgba(138, 158, 136, 0.35);
+  /* ⚠️ ONE DIGIT FROM --msv-btnhov (#f7f2e9) AND A DIFFERENT ROLE. This tints TEXT that turns out
+     to be editable; that one paints a control. Do not "reconcile" them — the near-match is the
+     house warm hover, not a typo, and the ref names this value for this job. */
+  --msv-edithov: #f7f2ea;
   --msv-palebg: #e7ede3; --msv-palebd: 1px solid rgba(138, 158, 136, 0.3);
   --msv-paletx: #4a5a48;
   --msv-pinkplate: #f8ede4;
@@ -42,14 +53,25 @@
   --msv-dash: 1.5px dashed #d9cdbc;
   --msv-count: #5a6e58; --msv-countnone: #c4b5a5;
   --msv-swbg: #ffffff; --msv-swbd: 1px solid #e2dacf; --msv-swon: #f5e2da;
-  --msv-stripbg: rgba(255, 255, 255, 0.62); --msv-stripbd: 1px solid rgba(138, 158, 136, 0.3);
-  --msv-stripkey: #6a7a68;
+  /* ⚠️ REPOINTED FOR THE WHITE BAND. These were a translucent white on sage; on variant D's white
+     band a translucent white is nothing at all. The strip now sits on PARCHMENT with a warm
+     hairline — a real step off the band — and its keys take the muted label ink. */
+  --msv-stripbg: #fdfaf5; --msv-stripbd: 1px solid #e2dacf;
+  --msv-stripkey: #a2907f;
   --msv-prbd: 1px solid #e8c8bc;
 }
 .t-bold .msv1 {
   /* Bold's band is pink and closes on an ink rule — the plateband wears the same identity. */
   --msv-plateA: #f4c7c2; --msv-plateB: #f4c7c2;
   --msv-plateline: 1.5px solid #1d1712;
+  /* ⚠️ BOLD'S "HAIRLINE" IS ITS INK RULE, and that is not a deviation from variant D. Every edge in
+     this theme is 1.5px ink; a thin warm hairline here would be the one soft line on the page.
+     ⚠️ AND THE PLATE FILL IS PINK, NOT WHITE. --msv-palebg is #ffffff in Bold (the genre pills are
+     white with an ink border), so reusing it would put a white plate on a white band and the plate
+     would vanish. Sage's ROLE in Bold is pink; this is that role, not a second opinion about it. */
+  --msv-bandbg: #fffefb; --msv-bandline: 1.5px solid #1d1712;
+  --msv-platefill: #f8dcd8; --msv-platefillbd: 1.5px solid #1d1712;
+  --msv-edithov: #f5e9e7;
   --msv-palebg: #ffffff; --msv-palebd: 1px solid #1d1712;
   --msv-paletx: #1d1712;
   --msv-pinkplate: #f8ede4;
@@ -65,6 +87,10 @@
   /* ⚠️ NO SAGE. Editorial is monochrome — the band is a pale grey step off the white card. */
   --msv-plateA: #f4f4f5; --msv-plateB: #efeff0;
   --msv-plateline: 1px solid #e3e2e0;
+  /* Variant D in a monochrome theme: the band is white and the plate is a grey step off it. */
+  --msv-bandbg: #ffffff; --msv-bandline: 1px solid #ececeb;
+  --msv-platefill: #f1f1ef; --msv-platefillbd: 1px solid #e3e2e0;
+  --msv-edithov: #f4f4f5;
   --msv-palebg: #f1f1ef; --msv-palebd: 1px solid transparent;
   --msv-paletx: #555555;
   /* ⚠️ NO PINK EITHER — the plane sits on a neutral step, distinct from --msv-palebg but hueless. */
@@ -76,8 +102,9 @@
   --msv-count: #4a4a4a; --msv-countnone: #b4b4b4;
   /* ⚠️ NO PINK ACTIVE FILL — Editorial's selected state is a grey step, per the chroma rule. */
   --msv-swbg: #ffffff; --msv-swbd: 1px solid #e3e2e0; --msv-swon: #e9eaeb;
-  --msv-stripbg: #ffffff; --msv-stripbd: 1px solid #e3e2e0;
-  --msv-stripkey: #6b6b6b;
+  /* A white strip on a white band is no strip; Editorial's step is a faint grey. */
+  --msv-stripbg: #f7f7f8; --msv-stripbd: 1px solid #e3e2e0;
+  --msv-stripkey: #8b8b8b;
   --msv-prbd: 1px solid transparent;
 }
 
@@ -94,11 +121,14 @@
   overflow: hidden;
 }
 
-/* ── the sage plateband ── */
+/* ── the white plateband (variant D plain) ──
+   ⚠️ WHITE, HAIRLINE ONLY, NO GRADIENT. Sage survives in exactly two places on this band: the
+   plate's fill and the genre pills. The sage GRADIENT it used to wear now paints the library
+   card's cover instead (--msv-plateA/B), so the token did not die, it moved surface. */
 .msv-plateband {
   display: flex; align-items: center; gap: 30px; padding: 28px 32px;
-  background: linear-gradient(135deg, var(--msv-plateA), var(--msv-plateB));
-  border-bottom: var(--msv-plateline);
+  background: var(--msv-bandbg);
+  border-bottom: var(--msv-bandline);
 }
 /* ⚠️ NO `transform` HERE OR ON ANY ANCESTOR OF THE PLATE.
    A transform isolates a blend group, which is what used to bring the white field back on the
@@ -106,10 +136,13 @@
    `src/` today, so the trap is not armed — and this plate's PNG never needed a blend mode anyway
    (`.os-msicon` carries none). Kept because a hover lift added here later would arm it again for
    anything raster that moved in. Offset with position/top if ever needed. */
+/* ⚠️ THE PLATE TAKES THE SAGE FILL AND LOSES ITS SHADOW. It was a white plate lifted off a sage
+   band; on a white band that reads as nothing at all, so the two swap: the band goes white and the
+   plate carries the colour. The shadow goes with the swap — a lifted card on a flat white band is
+   the only thing casting, and it read as a sticker. */
 .msv-plateimg {
   flex: 0 0 auto; width: 118px; height: 118px; border-radius: 18px;
-  background: #ffffff; border: var(--msv-cardbd);
-  box-shadow: 0 2px 10px rgba(58, 28, 20, 0.06);
+  background: var(--msv-platefill); border: var(--msv-platefillbd);
   display: grid; place-items: center; padding: 22px;
 }
 /* Matches how OneScreenAuthor renders this same asset: contained, block, no blend mode. */

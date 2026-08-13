@@ -40,6 +40,8 @@ const token = (css: string, selector: string, name: string): string => {
 const THEMES = [".t-capp .msv1", ".t-bold .msv1", ".t-edn .msv1"] as const;
 const ADDED = [
   "--msv-plateA", "--msv-plateB", "--msv-plateline",
+  /* Variant D's additions — the white band, the hairline, the plate's fill, the inline-edit hover. */
+  "--msv-bandbg", "--msv-bandline", "--msv-platefill", "--msv-platefillbd", "--msv-edithov",
   "--msv-palebg", "--msv-palebd", "--msv-paletx", "--msv-pinkplate",
   "--msv-spine1", "--msv-spine2", "--msv-spine3", "--msv-dash",
   "--msv-stripbg", "--msv-stripbd", "--msv-stripkey",
@@ -87,8 +89,32 @@ describe("Cappuccino resolves to the values the design was drawn at", () => {
     expect(capp("--msv-palebg")).toBe("#e7ede3");
   });
 
-  it("the stat strip is a white wash on the band", () => {
-    expect(capp("--msv-stripbg")).toBe("rgba(255, 255, 255, 0.62)");
+  /**
+   * ⚠️ REPOINTED BY THE WHITE PLATEBAND (variant D), and the old value is the reason this lock has
+   * to change rather than bend. A translucent white wash was a real surface ON SAGE; on a white band
+   * it is nothing at all. The strip now sits on parchment with a warm hairline — a step off the
+   * band rather than a tint of it.
+   */
+  it("the stat strip is parchment, so it reads against the white band", () => {
+    expect(capp("--msv-stripbg")).toBe("#fdfaf5");
+    expect(capp("--msv-stripbd")).toBe("1px solid #e2dacf");
+  });
+
+  /** Variant D: the band is white and closes on a hairline; no gradient anywhere on it. */
+  it("the plateband is white with a hairline, and the sage gradient moved to the library card", () => {
+    expect(capp("--msv-bandbg")).toBe("#ffffff");
+    expect(capp("--msv-bandline")).toBe("1px solid #ece4d8");
+    const band = block(PLATE, ".msv-plateband");
+    expect(band).toContain("var(--msv-bandbg)");
+    expect(band).not.toContain("linear-gradient");
+  });
+
+  /** Sage survives in exactly two places on the band: the plate's fill, and the genre pills. */
+  it("the plate carries the sage fill the band gave up", () => {
+    expect(capp("--msv-platefill")).toBe("#e7ede3");
+    const plate = block(PLATE, ".msv-plateimg");
+    expect(plate).toContain("var(--msv-platefill)");
+    expect(plate).not.toContain("box-shadow");
   });
 
   /** The accent pair is the theme's own — Cappuccino's --sd-hue IS the ref's burgundy #7c3a2a. */
@@ -110,6 +136,26 @@ describe("Bold Pastille wears its own band, not a recoloured sage one", () => {
   it("and closes on Bold's 1.5px ink rule — the theme's signature, kept", () => {
     expect(bold("--msv-plateline")).toBe("1.5px solid #1d1712");
     expect(bold("--msv-stripbd")).toContain("1.5px");
+  });
+
+  /**
+   * ⚠️ BOLD'S VARIANT-D "HAIRLINE" IS ITS INK RULE, and that is not a deviation. Every edge in this
+   * theme is 1.5px ink; a thin warm hairline here would be the one soft line on the page.
+   */
+  it("takes the white band with an ink rule rather than a hairline", () => {
+    expect(bold("--msv-bandbg")).toBe("#fffefb");
+    expect(bold("--msv-bandline")).toBe("1.5px solid #1d1712");
+  });
+
+  /**
+   * ⚠️ AND ITS PLATE FILL IS PINK, NOT --msv-palebg. That token is #ffffff in Bold (the genre pills
+   * are white with an ink border), so reusing it would put a white plate on a white band and the
+   * plate would disappear. Sage's ROLE in Bold is pink; this is that role.
+   */
+  it("fills the plate with pink, because its pale token is white", () => {
+    expect(bold("--msv-platefill")).toBe("#f8dcd8");
+    expect(bold("--msv-platefill")).not.toBe(bold("--msv-palebg"));
+    expect(bold("--msv-platefill")).not.toBe(bold("--msv-bandbg"));
   });
 });
 

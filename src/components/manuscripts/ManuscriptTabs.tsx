@@ -19,8 +19,19 @@ import "./manuscriptPlate.css";
 
 export type ManuscriptTabKey = "details" | "comps" | "packages";
 
+/**
+ * ⚠️ THE KEYS ARE INTERNAL, THE LABELS ARE THE PRODUCT. `details` reads "The record" now — the
+ * reframe's name for the pane — and the key is left alone because renaming it would churn every
+ * call site to say the same thing twice.
+ *
+ * ⚠️ AND `The pitch` IS DELIBERATELY NOT HERE YET. The reframe makes it the fourth tab and the
+ * default, but its pane is Phase 3's build — so adding the tab now would open the dossier onto
+ * nothing for one commit. The house law is that the shell renders what EXISTS, never what is
+ * planned; a tab that goes nowhere teaches the wrong shape of the page. It arrives WITH its pane,
+ * and takes the default with it.
+ */
 export const MANUSCRIPT_TABS: { key: ManuscriptTabKey; label: string }[] = [
-  { key: "details", label: "Details" },
+  { key: "details", label: "The record" },
   { key: "comps", label: "Comparable titles" },
   { key: "packages", label: "Submission packages" },
 ];

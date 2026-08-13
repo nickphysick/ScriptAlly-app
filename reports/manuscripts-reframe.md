@@ -419,3 +419,115 @@ mode as one that shipped through a fully green suite once before.
 **The fix is the first task of Phase 2**: extract `ManuscriptDossier` as a props-only component with
 its own render spec. Phase 2 rewrites that wrapper anyway (white plateband, four tabs, `fill`), so
 extracting it is the natural first step rather than churn.
+
+---
+
+## Phase 2 — Dossier shell, white plateband, viewport fit
+
+Commit: `manuscripts: dossier shell and white plateband`.
+
+### ⚠️ The Phase 1 coverage gap bit before Phase 2 could close it
+
+Phase 1 recorded that the dossier branch was executed by no smoke. Opening this phase's first file
+found the consequence already shipped: a `/* … */` block left in **JSX children position** was
+rendering as **literal comment text at the top of the dossier card**.
+
+JSX treats a block comment outside braces as text. It is invisible to `tsc`, invisible to the
+production build, and invisible to every source-string spec — and it went to `main` through a green
+typecheck, a green build and **4,632 green tests**. Nothing but rendering the dossier could have
+caught it.
+
+Extracting `ManuscriptDossier` as a props-only component with its own spec is the fix, and the
+spec's first assertion is now that no `/*`, `*/` or `⚠️` reaches the output.
+
+### What landed
+
+| File | |
+|---|---|
+| `manuscripts/ManuscriptDossier.tsx` | NEW — the dossier, props only, its own menu state. |
+| `manuscripts/manuscriptDossier.test.tsx` | NEW — 12 locks incl. the comment-leak assertion. |
+| `manuscripts/manuscriptPlate.css` | variant D tokens + the white band, per theme. |
+| `manuscripts/manuscriptLibrary.css` | the height chain, `.msv-wrap--doss`, back link. |
+| `manuscripts/ManuscriptTabs.tsx` | `Details` → **The record**. |
+| `manuscripts/manuscriptLibraryTokens.test.ts` | +6 locks for the chain. |
+| `manuscripts/manuscriptPlateTokens.test.ts` | variant D values; superseded strip lock rewritten. |
+| `manuscripts/manuscriptPlate.test.tsx` | tab labels. |
+| `AllManuscripts.tsx` | 111 lines of inline dossier deleted; `fill`; shared genre resolver. |
+
+### Variant D, as built
+
+White band, `1px` hairline bottom, **no gradient**. Sage survives in exactly two places: the plate's
+fill and the genre pills. Three consequences worth naming:
+
+- **The plate and the band swapped roles.** It was a white plate lifted off a sage band; on a white
+  band that reads as nothing, so the band went white and **the plate took the colour**. Its shadow
+  went with the swap — the only thing casting on a flat white band read as a sticker.
+- **The stat strip was repointed, not restyled.** `--msv-stripbg` was `rgba(255,255,255,.62)` — a
+  real surface *on sage*, and nothing at all on white. It is parchment with a warm hairline now.
+- **⚠️ Bold's plate fill is PINK, and could not be `--msv-palebg`.** That token is `#ffffff` in Bold
+  (its genre pills are white with an ink border), so the obvious reuse would have put a white plate
+  on a white band and the plate would have vanished. Sage's *role* in Bold is pink. Bold's
+  "hairline" is likewise its 1.5px ink rule — every edge in that theme is ink, and one soft warm
+  line would have been the odd one out. Both locked with the reasoning attached.
+
+### ⚠️ The height chain was measured BROKEN before it was measured working
+
+Passing `fill` is necessary and was **not sufficient**. `fill` makes `.wpg-scroll` a flex column, but
+the page's own `.msv-wrap` sits between it and the card **as a plain block** — so `.msv-doss`'s
+`flex: 1` had no flex parent, the card sized to its content, and:
+
+> the **scroll row** scrolled **1810px** while the pane, **1456px tall**, scrolled **not at all**.
+
+Every element mounted, styled and correct. This is the documented trap pointing the other way, and
+its tell is exactly as CLAUDE.md states it: *a page that scrolls where its spec says the panes do*.
+The fix is `.msv-wrap--doss`, a **modifier** rather than a base rule — the library shares that
+wrapper and must keep flowing, or a filling wrapper would stretch the grid to the row's height and
+strand the cards at the top of a tall box.
+
+**It is locked link by link** (`.msv-wrap--doss` → `.msv-doss` → `.msv-dcard` → `.msv-dpane`), and
+the lock was verified failing red by deleting the link.
+
+### ⚠️ The second internal-scroll exception, recorded
+
+This is the app's **second deliberate internal-scroll exception**, after the to-do page. The dossier
+does not scroll the page; its pane body scrolls. The **library view keeps normal page scroll** — a
+shelf that grows is meant to grow. No `dvh`, no header arithmetic, and that is asserted.
+
+### Deviation: three tabs, not four
+
+The reframe makes `The pitch` the fourth tab **and the default**, but its pane is Phase 3's build.
+Shipping the tab now would open the dossier onto nothing for one commit, and the standing law is
+that the shell renders what EXISTS, never what is planned. So Phase 2 ships **three** tabs with
+`The record` as the default; **the pitch tab arrives with its pane in Phase 3 and takes the default
+with it**. A lock fails the moment the tab appears without the pane.
+
+### Also fixed here
+
+- **The plateband's genre ids.** It printed `genres={[ageCategory, genre]}` raw, so the writer saw
+  `literary-fiction`. Both surfaces now share one `msGenres` resolver, which needs `currentUser` for
+  personal genres and so lives on the page rather than in either component.
+- **The status pill reconciled.** Phase 1 deferred the ref's muted `.pill.drafting` variant rather
+  than make card and plate disagree. Both surfaces still read the one rule (shelved → grey), so
+  there is nothing to reconcile — recorded as settled rather than carried forward.
+
+### Verification
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | green |
+| Vitest | **283 files, 4653 passed, 2 skipped, 0 failed** |
+| `npm run build` | green |
+| Chain lock verified RED | yes — deleting `.msv-wrap--doss` fails it |
+
+Measured against the **built stylesheet**, with the harness DOM matching the app's real nesting
+(`.msv1 > .wpg > .wpg-scroll > .msv-wrap > …`) — the first harness had it wrong and its numbers
+described a page the app never serves, which is the standing warning about harnesses:
+
+- **Dossier**: pane 280px visible / 1456px content, **the only scroller**. Scrolling it 600px moved
+  the plateband **0px** and the tab row **0px**; `.wpg-scroll` stayed at 0 and the body did not
+  scroll.
+- **Library**: modifier off, row scrolls again (825 > 682), grid `flex: 0 0 auto`, cards at the top.
+- **Three themes**: Capp white band + sage plate; Bold white band + ink rule + pink plate; Editorial
+  band `background-image: none` (no gradient), plate chroma 2, strip 1, pill 2 — all monochrome.
+
+**The app itself is still auth-gated and was not verified live.**

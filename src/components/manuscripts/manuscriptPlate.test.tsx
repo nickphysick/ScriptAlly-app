@@ -172,14 +172,19 @@ describe("the tab row", () => {
   const tabs = (active = DEFAULT_MANUSCRIPT_TAB) =>
     renderToStaticMarkup(React.createElement(ManuscriptTabs, { active, onChange: () => {} }));
 
+  /* ⚠️ THE KEYS ARE INTERNAL, THE LABELS ARE THE PRODUCT. The reframe renames the first pane to
+     "The record"; the key stays `details` because renaming it would churn every call site to say
+     the same thing twice. */
   it("is the three tabs, in order", () => {
     expect(MANUSCRIPT_TABS.map((t) => t.key)).toEqual(["details", "comps", "packages"]);
     expect(MANUSCRIPT_TABS.map((t) => t.label)).toEqual([
-      "Details", "Comparable titles", "Submission packages",
+      "The record", "Comparable titles", "Submission packages",
     ]);
   });
 
-  it("opens on Details", () => {
+  /* ⚠️ THE PITCH TAB TAKES THIS DEFAULT WHEN IT ARRIVES WITH ITS PANE, in Phase 3. Until then the
+     card opens on The record, because a default pointing at an unbuilt pane opens onto nothing. */
+  it("opens on The record", () => {
     expect(DEFAULT_MANUSCRIPT_TAB).toBe("details");
   });
 
@@ -188,7 +193,7 @@ describe("the tab row", () => {
     /aria-selected="true"[^>]*>([^<]+)</.exec(html)?.[1] ?? null;
 
   it("marks exactly one tab active, and it moves with the prop", () => {
-    expect(selectedLabel(tabs("details"))).toBe("Details");
+    expect(selectedLabel(tabs("details"))).toBe("The record");
     expect(selectedLabel(tabs("comps"))).toBe("Comparable titles");
     expect(selectedLabel(tabs("packages"))).toBe("Submission packages");
     for (const active of ["details", "comps", "packages"] as const) {

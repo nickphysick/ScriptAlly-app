@@ -153,7 +153,49 @@
 }
 .mlib-addh { font-style: italic; font-weight: 300; font-size: 12.5px; color: var(--msv-muted); }
 
-/* ── back link (Phase 1 minimum; Phase 2 restyles the dossier shell around it) ── */
+/* ── the dossier: fills the viewport, and only the pane body scrolls ──
+ *
+ * ⚠️ THE CHAIN HANGS OFF `WorkspacePageGrid`'s `fill` PROP AND IS NOT HAND-ROLLED. `.wpg-scroll` is
+ * a BLOCK by default, and `flex: 1 1 0%` with `min-height: 0` under a non-flex parent computes to
+ * EXACTLY 0 — every element inside it mounted, styled, and the box zero pixels tall. That is
+ * measured twice in this repo (`.tpl-cols`, `.f12-body`), both times hidden behind content that
+ * happened to size the container. `fill` makes the scroll row a flex column; everything below is
+ * then a real chain rather than four declarations applying to nothing.
+ *
+ * ⚠️ THIS IS THE APP'S SECOND DELIBERATE INTERNAL-SCROLL EXCEPTION, after the to-do page. The page
+ * does not scroll; the dossier's pane body does. The LIBRARY view keeps normal page scroll — a
+ * shelf that grows is meant to grow.
+ *
+ * ⚠️ NO `dvh`, NO HEADER ARITHMETIC. Nothing here subtracts a bar height, because nothing here
+ * knows one. The height arrives from the grid row and is passed down.
+ */
+/* ⚠️ `.msv-wrap` IS IN THE CHAIN AND IS NOT OPTIONAL — this was measured broken before it was
+ * measured working. `fill` makes `.wpg-scroll` a flex column, but the page's own content wrapper
+ * sits BETWEEN it and the dossier as a plain block, so `.msv-doss`'s `flex: 1` applied to nothing
+ * and the card sized to its content: the SCROLL ROW scrolled 1810px while the pane, 1456px tall,
+ * scrolled not at all. Every element mounted, styled and correct — the exact shape of the trap,
+ * pointing the other way (the tell is a page that scrolls where its spec says the panes do).
+ *
+ * ⚠️ AND IT IS A MODIFIER, NOT THE BASE RULE. The library view shares this wrapper and must keep
+ * flowing — a filling `.msv-wrap` would stretch the grid to the row's height and strand the cards
+ * at the top of a tall box. Only the dossier asks for the height. */
+.msv-wrap--doss { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+
+.msv-doss { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.msv-dcard { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.msv-dcard > .msv-plateband,
+.msv-dcard > .msv-tabs { flex: 0 0 auto; }
+.msv-dpane {
+  flex: 1; min-height: 0; overflow-y: auto;
+  /* Both edges, so the pane's content stays centred whether or not the bar is showing. */
+  scrollbar-gutter: stable both-edges;
+}
+
+/* ⚠️ THE LIBRARY IS NOT IN THE CHAIN. `.wpg--fill` makes the scroll row a flex column, which would
+   otherwise stretch the grid to the row's height and strand the cards at the top of a tall box. */
+.mlib-grid { flex: 0 0 auto; }
+
+/* ── back link ── */
 .mlib-back {
   display: inline-flex; align-items: center; gap: 6px;
   margin-bottom: 16px; padding: 0;

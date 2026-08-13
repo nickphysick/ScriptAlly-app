@@ -110,6 +110,47 @@ describe("Editorial stays monochrome", () => {
   });
 });
 
+/**
+ * ⚠️ THE DOSSIER'S HEIGHT CHAIN, LOCKED LINK BY LINK — because it was measured BROKEN before it was
+ * measured working, and the break was silent. `fill` makes `.wpg-scroll` a flex column, but the
+ * page's own `.msv-wrap` sits between it and the card as a plain block; without the modifier,
+ * `.msv-doss`'s `flex: 1` had no flex parent, the card sized to its content, and the SCROLL ROW
+ * scrolled 1810px while the pane — 1456px tall — scrolled not at all. Every element mounted, styled
+ * and correct. The tell is a page that scrolls where its spec says the panes do.
+ *
+ * A missing link cannot be seen in a screenshot and cannot be seen by tsc. It can be seen here.
+ */
+describe("the dossier fills, and only its pane body scrolls", () => {
+  const CHAIN = [".msv-wrap--doss", ".msv-doss", ".msv-dcard"] as const;
+
+  it.each(CHAIN)("%s is a flex column that may be shorter than its content", (sel) => {
+    const r = rule(LIB, sel);
+    expect(r).toContain("flex-direction: column");
+    expect(r).toContain("min-height: 0");
+    expect(r).toContain("flex: 1");
+  });
+
+  it("the pane body is the scroller, and the chrome above it is not", () => {
+    const pane = rule(LIB, ".msv-dpane");
+    expect(pane).toContain("overflow-y: auto");
+    expect(pane).toContain("min-height: 0");
+    expect(pane).toContain("scrollbar-gutter: stable both-edges");
+    expect(rule(LIB, ".msv-dcard > .msv-plateband")).toContain("flex: 0 0 auto");
+  });
+
+  /* ⚠️ THE LIBRARY OPTS OUT, and must. `.wpg--fill` would otherwise stretch the grid to the row's
+     height and strand the cards at the top of a tall box; a growing shelf is meant to scroll. */
+  it("the library grid stays out of the chain", () => {
+    expect(rule(LIB, ".mlib-grid")).toContain("flex: 0 0 auto");
+  });
+
+  /* No `dvh`, and no arithmetic against a bar height — the height arrives from the grid row. */
+  it("computes no height of its own", () => {
+    expect(LIB).not.toContain("dvh");
+    expect(LIB).not.toMatch(/calc\([^)]*100vh/);
+  });
+});
+
 describe("the card's structure holds the rules that make it work", () => {
   /**
    * ⚠️ `margin-top: auto` IS WHAT LINES THE METERS UP. Cards in a row have loglines of different
