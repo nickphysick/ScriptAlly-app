@@ -508,3 +508,56 @@ test("§2 · the two stats render on a waiting query, and omit on a closed one",
   expect(waiting.text.toLowerCase()).toContain("waiting so far");
   expect(waiting.text.toLowerCase()).toContain("reply expected by");
 });
+
+/* ══ FIX PACK 1 · §0 — VERIFY THE SIX ══════════════════════════════════════════════════════════ */
+const VP = [
+  { w: 1024, h: 700 }, { w: 1024, h: 768 }, { w: 1440, h: 900 }, { w: 1920, h: 1080 },
+] as const;
+
+test("verify: the six, measured", async () => {
+  for (const { w, h } of VP) {
+    await page.setViewportSize({ width: w, height: h });
+    await queries(page);
+    const m = await page.evaluate(() => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+      const rows = Array.from(document.querySelectorAll<HTMLElement>(".f12-row"));
+      const dates = rows.map((r) => { const d = r.querySelector(".f12-d2") as HTMLElement | null; return d ? Math.round(d.getBoundingClientRect().left) : null; });
+      const av = q(".f12-heroband .f12-bigav");
+      const scroller = q(".wpg-scroll");
+      const notesCard = Array.from(document.querySelectorAll<HTMLElement>(".qp-stack > .f12-card")).pop() ?? null;
+      const composer = notesCard?.querySelector("textarea")?.closest("div") as HTMLElement | null;
+      const listEl = q(".f12-list"), rowsEl = q(".f12-rows"), body = q(".f12-body");
+      const cs = (el: HTMLElement | null, p: string) => (el ? getComputedStyle(el).getPropertyValue(p) : null);
+      return {
+        /* §1 */
+        listRadius: cs(listEl, "border-radius"), listBorder: cs(listEl, "border"),
+        rowsMask: [cs(rowsEl, "mask-image"), cs(rowsEl, "-webkit-mask-image")].join("|"),
+        fadeEls: document.querySelectorAll(".f12-list [class*='fade'], .f12-rows + *").length,
+        seamList: listEl ? Math.round(listEl.getBoundingClientRect().height) : null,
+        seamBody: body ? Math.round(body.getBoundingClientRect().height) : null,
+        /* §2 */
+        rowHs: Array.from(new Set(rows.map((r) => Math.round(r.getBoundingClientRect().height)))),
+        dateXs: Array.from(new Set(dates.filter((d) => d !== null))),
+        rowDisplay: rows[0] ? getComputedStyle(rows[0]).display : null,
+        agencyWrap: rows.map((r) => { const a = r.querySelector(".f12-ag") as HTMLElement | null; return a ? getComputedStyle(a).whiteSpace : null; })[0],
+        /* §3 */
+        avatarR: av ? getComputedStyle(av).borderRadius : null,
+        avatarBg: av ? getComputedStyle(av).backgroundColor : null,
+        avatarText: av ? av.innerText.trim() : null,
+        /* §4 */
+        composerVisible: (() => {
+          if (!composer || !notesCard) return null;
+          const c = composer.getBoundingClientRect(), n = notesCard.getBoundingClientRect();
+          return c.bottom <= n.bottom + 2 && c.top >= n.top;
+        })(),
+        notesMeta: notesCard?.querySelector(".qp-cardmeta")?.textContent?.trim() ?? null,
+        /* §5 */
+        pageScroll: scroller ? { sh: scroller.scrollHeight, ch: scroller.clientHeight } : null,
+        statsVisible: document.querySelectorAll(".qp-stat").length,
+      };
+    });
+    // eslint-disable-next-line no-console
+    console.log(`[verify ${w}x${h}] §1 radius=${m.listRadius} border=${m.listBorder} mask=${m.rowsMask} seam ${m.seamList}/${m.seamBody} · §2 rowH=${JSON.stringify(m.rowHs)} dateX=${JSON.stringify(m.dateXs)} display=${m.rowDisplay} agencyWS=${m.agencyWrap} · §3 avatar r=${m.avatarR} bg=${m.avatarBg} "${m.avatarText}" · §4 composer=${m.composerVisible} meta=${m.notesMeta} · §5 scroll ${m.pageScroll?.sh}/${m.pageScroll?.ch} stats=${m.statsVisible}`);
+  }
+  expect(true).toBe(true);
+});

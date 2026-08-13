@@ -1475,27 +1475,19 @@ export const Queries: React.FC<{
 
   // Chat scroll container ref
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
-  // Query-list scroll container + scroll-aware edge fades: top/bottom overlays show only when there
-  // is content beyond that edge. Default hidden; recomputed on scroll, resize, and list change.
+  /**
+   * ⚠️ THE LIST'S EDGE FADES ARE GONE, AND THEY HAD ALREADY STOPPED RENDERING (fix pack §1). The
+   * state was computed on every scroll, every resize and every ResizeObserver burst — rAF-throttled,
+   * with a timeout fallback, an observer on two elements and a bail-out guard against loops — and
+   * `listFade` was READ BY NOTHING. A whole mechanism, carefully built, driving no pixels.
+   *
+   * ⚠️ AND THE FADE SHOULD NOT COME BACK. A fade at the foot of this list claims there is more below
+   * it; directly beneath sits a foot stating "Showing 24 of 24", so the two contradict each other on
+   * one screen. Scroll is signalled by the scrollbar and by that count.
+   *
+   * The ref survives because the rows container still needs one for keyboard scroll-into-view.
+   */
   const listScrollRef = React.useRef<HTMLDivElement>(null);
-  const [listFade, setListFade] = useState<{ top: boolean; bottom: boolean }>({ top: false, bottom: false });
-  const recomputeListFades = React.useCallback(() => {
-    const el = listScrollRef.current;
-    const nextTop = !!el && el.scrollHeight > el.clientHeight + 3 && el.scrollTop > 3;
-    const nextBottom = !!el && el.scrollHeight > el.clientHeight + 3 && el.scrollTop + el.clientHeight < el.scrollHeight - 3;
-    // Bail out (return prev) when unchanged so the resize/content effects can't loop.
-    setListFade(prev => (prev.top === nextTop && prev.bottom === nextBottom ? prev : { top: nextTop, bottom: nextBottom }));
-  }, []);
-  // rAF-throttled recompute for the high-frequency sources (scroll, ResizeObserver bursts). The
-  // timeout is the fallback for throttled/backgrounded windows where rAF never runs.
-  const listFadeTick = React.useRef(false);
-  const scheduleListFades = React.useCallback(() => {
-    if (listFadeTick.current) return;
-    listFadeTick.current = true;
-    const run = () => { if (!listFadeTick.current) return; listFadeTick.current = false; recomputeListFades(); };
-    requestAnimationFrame(run);
-    window.setTimeout(run, 80);
-  }, [recomputeListFades]);
   // Stable refs for keyboard navigation (updated each render before return)
   const sortedListRef = useRef<any[]>([]);
   const selectedQueryIdRef = useRef<string | null>(null);
@@ -1977,21 +1969,6 @@ export const Queries: React.FC<{
 
   // Keep the list edge-fades in sync as content height, grouping, or selection changes, and on
   // viewport resize. Scroll-driven updates come from the container's onScroll handler. The
-  // ResizeObserver covers the display-toggled page slot: data usually lands while this page is
-  // hidden (persistent StagePage, display:none → clientHeight 0, fades computed off), and nothing
-  // else re-runs when the slot becomes visible — the observer fires on that 0 → real size flip.
-  useEffect(() => {
-    recomputeListFades();
-    const el = listScrollRef.current;
-    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(scheduleListFades) : null;
-    if (ro && el) {
-      ro.observe(el);
-      if (el.firstElementChild) ro.observe(el.firstElementChild); // rows wrapper — content growth
-    }
-    window.addEventListener("resize", scheduleListFades);
-    return () => { ro?.disconnect(); window.removeEventListener("resize", scheduleListFades); };
-  }, [recomputeListFades, scheduleListFades, sortedList.length, selectedQueryId]);
-
   // Reactive date sent change handler that automatically projects response due expectations
   // Query-field editing (manuscript, dates, method, materials/package, personalisation, deadline,
   // if-no-response, rejection details) now lives in the Edit Query drawer (openEditQuery), which
@@ -3389,7 +3366,7 @@ export const Queries: React.FC<{
                 {sortPopOpen && renderSortPopover()}
               </div>
             </div>
-            <div ref={listScrollRef} onScroll={scheduleListFades} className="f12-rows" role="listbox" aria-label="Queries">
+            <div ref={listScrollRef} className="f12-rows" role="listbox" aria-label="Queries">
               {renderList.map((q) => {
                 const agent = agents.find(a => a.id === q.agentId);
                 const ms = manuscripts.find(m => m.id === q.manuscriptId);
