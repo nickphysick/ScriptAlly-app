@@ -85,6 +85,22 @@ describe("§2 · the sheet is paper, not another card", () => {
     expect(r, "the width stopped leaving room for the desk").toContain("width: min(1080px, calc(100% - 84px))");
     expect(r, "the height stopped leaving room for the desk").toContain("max-height: calc(100% - 76px)");
   });
+
+  /**
+   * ⚠️ IT FILLS, AND THIS CASE EXISTS BECAUSE THE BROWSER FOUND IT. With `max-height` alone the
+   * sheet is a CONTENT-SIZED container, and every box inside the journey says `flex: 1 1 0` with
+   * `min-height: 0` — which contributes zero to a content-sized parent and then has no free space
+   * to grow into. Measured at 1024/1440/1920: **182px** at every width, header and dock only, with
+   * the whole journey body at zero and every element inside it mounted and correct.
+   *
+   * The same fault is recorded twice in CLAUDE.md (`.tpl-cols`, `.f12-body`); this was a third
+   * arrival, through a new parent. A definite `height` is what the chain hangs from.
+   */
+  it("the sheet has a definite height, or the journey inside it computes to zero", () => {
+    const r = rule(".qc-sheet");
+    expect(r, "the sheet went back to hugging — the journey body would collapse to 0px")
+      .toContain("height: calc(100% - 76px)");
+  });
 });
 
 describe("§2 · one surface, two registers", () => {

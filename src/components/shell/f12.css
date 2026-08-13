@@ -1715,9 +1715,25 @@
    ⚠️ AND THE SIZE IS A RELATIONSHIP, NOT A BOX. `100% - 84px` / `100% - 76px` against the layer,
    which is the viewport — so the desk stays visible on all four sides at every width, which is what
    makes it a sheet ON something rather than a screen. */
+/**
+ * ⚠️ IT FILLS, IT DOES NOT HUG — AND THE MEASUREMENT IS WHY. Written with `max-height` alone (the
+ * ref's shape) the sheet is a CONTENT-SIZED container, and everything inside the journey says
+ * `flex: 1 1 0` with `min-height: 0` — which contributes ZERO to a content-sized parent and then
+ * has no free space to grow into. Browser-measured at 1024/1440/1920: the sheet came out **182px**
+ * at every width, header and dock only, with the entire journey body collapsed to nothing and every
+ * element inside it mounted, styled and correct.
+ *
+ * This is the fault CLAUDE.md records twice — `.tpl-cols` and `.f12-body` — arriving a third time
+ * through a new parent. The chain did not change; the thing it hangs from stopped having a height.
+ *
+ * ⚠️ AND FILLING IS ALSO THE RIGHT ANSWER ON THE MERITS, not merely the fix that works. The desk
+ * rule's second clause: a DOCUMENT you consult hugs, a WORKSPACE you act on fills. A journey is a
+ * live process, and the pane it was lifted out of filled for exactly this reason.
+ */
 .qc-sheet {
   position: relative;
   width: min(1080px, calc(100% - 84px));
+  height: calc(100% - 76px);
   max-height: calc(100% - 76px);
   display: flex;
   flex-direction: column;
