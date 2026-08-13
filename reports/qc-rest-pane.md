@@ -167,3 +167,105 @@ locked at source as one-event-per-activity rather than a fixed three, but not re
 ---
 
 **Not deployed. Not pushed.**
+
+---
+
+# Fix pack 1 — the walkthrough corrections
+
+Ref: `design-refs/101-rest-corrections.html`. Commits `75fdc3f` → `e36052d`. **Not deployed, not
+pushed.**
+
+## Gates
+
+| | tsc | `vite build` | Vitest |
+|---|---|---|---|
+| **Baseline** | pass | pass | 281 files / **4632 passed**, 0 failed |
+| **Final** | pass* | pass | 282 files / **4648 passed**, 0 failed |
+
+\* The manuscripts stream has `AllManuscripts.tsx` mid-edit and `tsc` red **in that file**. Nothing
+outside it errors. Every gate from §1 on was run in an **isolated worktree** at HEAD carrying only
+this stream's files; the figures above are that run.
+
+## The six, verified before building
+
+| # | Fault | Status | Measurement |
+|---|---|---|---|
+| 1 | Fade at the list foot; radius/border on the container | **landed, with dead machinery** | radius 0, no border, `mask-image: none`, seam full height at all four sizes. But `listFade` was recomputed on every scroll/resize/RO burst and **read by nothing** |
+| 2 | Ragged dates, wrapping agency | **partial** | Row heights already uniform (56) and agency already `nowrap` — but dates at **two x positions, 600 and 606**. After: **578** everywhere |
+| 3 | Hero avatar degraded to bare text | **absent — a regression from Pack B §1h** | `border-radius: 0px`, `background: rgba(0,0,0,0)`. After: `50%`, `rgb(246,215,207)` |
+| 4 | Notes: composer pinned, true count, list shows many | **partial** | Composer already visible at all four sizes; the **meta counted every note in the account** rather than this query's |
+| 5 | Page scrolls at short heights | **landed** | `scrollHeight == clientHeight` at all four sizes before any change |
+| 6 | Progress bar placement (confirm only) | **not as described** | It is a trailing block **after** `TimelineRows`, not within the waiting event — see below |
+
+## §5 — the four viewports
+
+Measured on a **waiting** query (a closed one has no stats and a shorter timeline, so it fits
+trivially and would report a pass for the easy case):
+
+| viewport | page `scrollHeight` / `clientHeight` | reading column overflow | stats in view | composer in view |
+|---|---|---|---|---|
+| 1024 × 700 | **483 / 483** | 0 | 2 ✓ | ✓ |
+| 1024 × 768 | **551 / 551** | 0 | 2 ✓ | ✓ |
+| 1440 × 900 | **696 / 696** | 0 | 2 ✓ | ✓ |
+| 1920 × 1080 | **876 / 876** | 0 | 2 ✓ | ✓ |
+
+## The content decision at 700 — **the chips, not the nudge event**
+
+I took the prompt's stated alternative rather than its default.
+
+**The materials chips repeat verbatim in *What you sent*, one column over, on the same screen.**
+Dropping them at 700 costs the writer nothing: the information has not left the page, only the
+duplicate has. **The nudge event appears nowhere else on this card** — it is the only statement of
+when the scheduled follow-up lands, and a writer on a short viewport may need that date precisely in
+order to plan around it. Losing it would be losing a fact; losing the chips is losing a repetition.
+
+One or the other, never both: the timeline keeps every event it has, and that is asserted rather
+than assumed.
+
+⚠️ **And the chips-drop is unverified in the browser.** No query on the harness account renders
+materials chips, so the rule is correct and locked at source but never exercised. The measurement
+**reports** that rather than going green on an empty selector — which is exactly the failure the
+stats case would have had if it had not been re-run against a waiting query.
+
+## Kept as built — and one that is not as described
+
+- **The progress bar stays as `QueryTimeline` renders it.** Its three states (within, overdue with a
+  hatch zone past the expected marker, grace against the nudge horizon) are richer than the ref's
+  single fill.
+- ⚠️ **But it does *not* sit within the waiting event.** It is a trailing open-state block rendered
+  **after** `<TimelineRows>`. Notably, **the ref does the same** — its `.wait` box follows `.tl`
+  rather than sitting inside an `.ev`. So the prompt's sentence differs from both the code and its
+  own ref. I have **left it**, because that section is headed *do not change*, because moving it
+  would restructure a component the To-do sheet also renders, and because the ref does not support
+  the change either. **Flagged for your call rather than done quietly.**
+- §1f's ≥1100 scoping and the 1024 gap log stand.
+- The retired collinearity lock stays retired.
+
+## Locks
+
+Three existing locks caught real faults; one more was over-broad:
+
+1. The **grouped-selector trap**, for a third time — §3's shared disc rule made a first-match slice
+   read the wrong block. Fixed with a helper that joins **every** block for a selector, written as a
+   split rather than a regex so a selector list, a newline between selectors or a dotted class name
+   cannot defeat it.
+2. **A third unbounded slice** — `queryCentreMoment`'s reduced-motion case ran to end of file, so
+   §5's new `max-height` block landed inside it and it reported "reduced motion HID the seal" about
+   a `display: none` belonging to something else. Bounded at both ends.
+3. Pack B's own Notes-meta case was amended to assert the **filter**, not the count — the count
+   alone was what looked right.
+
+## Untouched
+
+Nothing under `src/types.ts`, `src/components/AllManuscripts.tsx`, `src/components/manuscripts/**`,
+`src/lib/manuscriptPitch.ts` or the manuscripts reports was touched, staged or reformatted. Every
+commit used `git commit --only -- <explicit paths>`; `git add -A` was never run. The stream's own
+`tsc` error in `AllManuscripts.tsx` was left alone.
+
+## Also landed
+
+One line to `CLAUDE.md`: a custom property computed at `:root` cannot be overridden by a lower
+variant, while one read inside a `calc()` resolves at the use site — why `--content-top-gap`'s
+override failed and `--header-inset`'s worked, when the two look identical from a distance.
+
+**Not deployed. Not pushed.**
