@@ -405,17 +405,46 @@
    retired. Reusing the name would have given one class two unrelated meanings in one sheet and
    quietly resurrected a rule someone deliberately removed. */
 /**
- * ⚠️ THE STACK PUSHES TO THE BOTTOM OF THE COLUMN IT ALREADY FILLS (§2a) — `margin-top: auto`, and
- * that is the whole change. The pack asked for a `min-height: 100%` chain; measured, NOTHING needed
- * filling. `.f12-body`, `.qp-pane`, `.qc-take-body`, `.qc-two` and `.qc-form` all carry
- * `flex: 1 1 0%` and all reach the bottom already — 487.8px at 1440×900. The void was INSIDE
- * `.qc-form`: a `flex: 0 0 auto` stack sitting at the top of it with 320.8px beneath.
+ * ══ THE DISTRIBUTION RULE ═════════════════════════════════════════════════════════════════════
  *
- * ⚠️ SO IT IS DISTRIBUTION, NOT FILL. Adding a min-height chain would have changed nothing visible
- * and left a second sizing mechanism arguing with the first. The stack sits nearest the dock,
- * which is where the acting happens.
+ * ⚠️ THE ACTIVE STEP ANCHORS TO THE TOP; ONLY THE COLLAPSED REMAINDER SINKS.
+ *
+ *   · The open step sits directly beneath the header block. It IS the work — it stays with the
+ *     question it answers.
+ *   · `margin-top: auto` goes on the first collapsed section AFTER the active one, which in a flex
+ *     column absorbs the slack there and carries the rest of the queue to the dock with it.
+ *   · When the active step fills the column there is no slack, and nothing moves.
+ *
+ * ⚠️ THERE IS NO "EVERYTHING COLLAPSED" CASE HERE, and the correction is worth stating because the
+ * obvious third clause — "when every step is collapsed the whole stack is remainder and sinks" —
+ * has no live surface. Both callers always name an active step, and the one all-collapsed surface
+ * in either journey is create's stage-1 GHOSTS, which are a different element with a MEASURED
+ * decision not to sink: `.qc-ghosts` records 514px of dead space with an auto margin against 12px
+ * without, because that column also holds a picker, a panel and a grid. Removing `margin-top: auto`
+ * from `.qc-stack` restores that decision — stage 1 measured 341/473/653 with it and a constant 12
+ * without, which is the number `.qc-ghosts` predicted.
+ *
+ * ⚠️ THIS COMMENT USED TO STATE THE FAULT AS THE RULE, and rewriting it is half the fix. It said
+ * "THE STACK PUSHES TO THE BOTTOM OF THE COLUMN IT ALREADY FILLS" with `margin-top: auto` on
+ * `.qc-stack` — true and correct for create's STAGE 1, where every step is collapsed and the stack
+ * really is all remainder. Generalised to a rule it sinks the ACTIVE step too, so the outcome grid
+ * sat far below the question it answers: measured gaps from header to active step of 130/195/375
+ * (create) and 226/358/538 (record) at 1024/1440/1920 — growing with the viewport, which is the
+ * signature of the whole stack being pushed rather than the queue.
+ *
+ * ⚠️ A RULE DERIVED FROM ONE STATE, WRITTEN INTO A COMMENT, BECOMES LOAD-BEARING. The comment made
+ * it look decided, so the next reader had no reason to re-derive it. That is the mechanism worth
+ * remembering, not this particular property.
+ *
+ * ⚠️ AND THE OBSERVATION THE OLD COMMENT GOT RIGHT IS KEPT: it is DISTRIBUTION, not fill. Nothing
+ * needed a `min-height: 100%` chain — `.f12-body`, `.qp-pane`, `.qc-take-body`, `.qc-two` and
+ * `.qc-form` all carry `flex: 1 1 0%` and already reach the bottom. Adding one would have left a
+ * second sizing mechanism arguing with the first.
  */
-.qc-stack { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+.qc-stack { display: flex; flex-direction: column; gap: 10px; }
+/* Everything from the first collapsed section after the active one travels to the foot together. */
+.qc-stack > .qc-sec.qc-active + .qc-sec { margin-top: auto; }
+
 .qc-sec { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; transition: border-color 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), box-shadow 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), opacity 0.28s ease; }
 .qc-sum { display: flex; align-items: center; gap: 10px; padding: 11px 15px; font-size: 13px; }
 .qc-sum b { font-family: var(--f12-serif); font-weight: 700; }

@@ -130,6 +130,15 @@ export function StepStack<T extends string>({
     );
   };
 
+  /**
+   * ⚠️ THIS STACK ALWAYS HAS AN OPEN STEP, so it carries no "everything is collapsed" variant — see
+   * the distribution rule in f12.css. Both callers always name an active step (`respStep.active`
+   * starts at "outcome"; create's starts at the first unanswered one), so a modifier for the
+   * all-collapsed case would be a class that never applies keying a rule that never matches.
+   *
+   * The only all-collapsed surface in either journey is create's stage-1 GHOSTS, which are not this
+   * component and which deliberately do not sink — `.qc-ghosts` carries the measurement.
+   */
   return (
     <div
       className="qc-stack"
