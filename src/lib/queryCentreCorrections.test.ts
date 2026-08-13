@@ -245,3 +245,74 @@ describe("§5 · tighten, never scroll", () => {
     expect(tl, "the pills have no class to drop").toContain('className="tl-pills"');
   });
 });
+
+describe("Pack C §3 · the letterhead, the caps and the watermark", () => {
+  const sheet = read("../components/queries/QueryJourneySheet.tsx");
+
+  /**
+   * ⚠️ THE BAND READS THE APP'S CRUMB RATHER THAN RESTATING IT. The sheet needs a trail because the
+   * real one is behind the scrim and unreadable by design — but a second hand-written trail is two
+   * answers to "where am I", and they would diverge the first time a page was renamed.
+   */
+  it("the trail composes the shell's own crumb and appends the act", () => {
+    const nav = read("../components/shell/shellV2Nav.ts");
+    expect(nav, "the journey crumb is not derived from the shell's").toContain("export function journeyCrumb");
+    expect(nav, "it stopped reading the app's crumb").toMatch(/journeyCrumb[\s\S]{0,400}shellCrumbForPath/);
+    expect(sheet, "the band does not render the derived trail").toContain("journeyCrumb(");
+  });
+
+  /* ⚠️ TEXT, NOT LINKS, and no close control. The sheet is modal: a trail whose segments look
+     clickable and are not is worse than plain words, and navigating from one would leave a journey
+     by a door with no dirty guard on it. The dock already carries Esc and Cancel — the ref's "Esc ×"
+     in the band is the duplicate the old chrome bar was retired for. */
+  it("nothing in the band is a control", () => {
+    const at = sheet.indexOf('className="qc-crumb"');
+    expect(at, "the band is missing").toBeGreaterThan(-1);
+    const band = sheet.slice(at, sheet.indexOf("</div>", at));
+    for (const ctl of ["<a ", "<button", "onClick"]) {
+      expect(band, `the band grew a control (${ctl})`).not.toContain(ctl);
+    }
+  });
+
+  it("the band carries the register", () => {
+    expect(rule(".qc-crumb"), "the create band lost its ground").toContain("background: var(--pink-t)");
+    expect(rule(".qc-sheet--record .qc-crumb"), "record's band is not sage").toContain("var(--sageC)");
+    expect(rule(".qc-crumbcur"), "the current segment lost its colour").toContain("var(--burg)");
+  });
+
+  /* §3b — the open step wears the same gradient every card on the reading pane already has. */
+  it("the open step is sage-capped, and no second band sits inside it", () => {
+    const cap = rule(".qc-sec.qc-active > .qc-shead");
+    expect(cap, "the cap rule is missing").not.toBe("");
+    expect(cap).toContain("linear-gradient(180deg, var(--sage-band), var(--sage-band-2))");
+    /* the direct-child selector is what stops a nested header taking the cap too */
+    expect(cap, "the cap would reach a nested header — that is the striped-box risk ref 96 names")
+      .toContain("> .qc-shead");
+  });
+
+  /**
+   * ⚠️ THE DOCK CROP IS THE POINT, AND IT ONLY SURVIVES IF THE STACKING IS EXACT. The mark sits at
+   * `z-index: 0` inside the sheet; the dock draws above it with an OPAQUE ground, so the
+   * illustration passes beneath the desk edge. Get either half wrong and the mark floats over the
+   * dock or vanishes behind the sheet.
+   */
+  it("the watermark sits at the sheet's floor and the dock crops it", () => {
+    const mark = rule(".qc-sheet::before");
+    expect(mark, "the watermark rule is missing").not.toBe("");
+    expect(mark).toContain("Sent_queries_final.png");
+    expect(mark).toContain("opacity: 0.17");
+    expect(mark).toContain("rotate(6deg)");
+    expect(mark).toContain("transform-origin: right bottom");
+    expect(mark, "the mark left the sheet's floor").toContain("z-index: 0");
+    expect(mark, "the mark would swallow clicks").toContain("pointer-events: none");
+    const dock = rule(".qc-sheet .qc-dock");
+    expect(dock, "the dock stopped drawing above the mark").toContain("z-index: 2");
+    expect(dock, "the dock's ground is transparent — the mark would show through it")
+      .toContain("background: var(--panel)");
+  });
+
+  /* one mark, two registers — hue-rotated rather than a second illustration */
+  it("record hue-rotates the same mark", () => {
+    expect(rule(".qc-sheet--record::before"), "record grew its own illustration").toContain("hue-rotate");
+  });
+});

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — giving the forms definition</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--paper:#fffdfa;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#e9dfd2;--hair2:#e0d5c8;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage:#8a9e88;--sage-tx:#5a6e58;
+--pink:#f5e2da;--pink-br:#e8c8bc;--cream:#fbf7f1;--well:#f7f2ea;}
+body{font-family:'Inter',sans-serif;background:#cfc7bb;color:var(--ink);padding:20px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:11px;margin-bottom:14px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b5c4e;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--hair2);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:#5f5348;font-style:italic;}
+
+/* sheet */
+.sheet{position:relative;background:#fffefc;max-width:1180px;padding:26px 30px 0;display:flex;flex-direction:column;height:800px;
+  box-shadow:0 1px 0 rgba(58,28,20,.14),0 4px 8px rgba(58,28,20,.10),0 22px 40px -10px rgba(58,28,20,.28),0 44px 80px -30px rgba(58,28,20,.30);}
+.sheet::after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(58,28,20,.14),inset 0 0 0 2px rgba(255,255,255,.55);}
+
+.jh{display:flex;align-items:flex-start;gap:16px;padding-bottom:15px;box-shadow:inset 0 -1px 0 var(--hair);}
+.jm{width:52px;height:52px;flex:0 0 52px;border-radius:10px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--hair);display:flex;align-items:center;justify-content:center;}
+.jm svg{width:27px;height:27px;stroke:var(--burg);fill:none;stroke-width:1.3;}
+.jt{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;}
+.jplace{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:6px;}
+.jplace b{color:var(--burg);font-weight:500;}
+.jchips{margin-left:auto;display:flex;gap:12px;align-self:center;}
+.jchips span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);}
+.ring{width:13px;height:13px;border-radius:50%;background:var(--sage);box-shadow:inset 0 0 0 1.5px var(--sage);position:relative;}
+.ring::after{content:'';position:absolute;left:4px;top:2px;width:4px;height:7px;border:1.5px solid #fff;border-top:0;border-left:0;transform:rotate(42deg);}
+body[data-stage="1"] .jchips{display:none;}
+
+.jbody{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:26px;flex:1 1 auto;min-height:0;padding-top:18px;}
+.jcol{display:flex;flex-direction:column;min-width:0;}
+
+/* selected agent — compact band, not a giant card */
+.agband{display:flex;align-items:center;gap:13px;padding:11px 14px;border-radius:11px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--hair);margin-bottom:14px;}
+.agband .av{width:40px;height:40px;flex:0 0 40px;border-radius:50%;background:#f3ded6;color:var(--burg);font-family:'Playfair Display',serif;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.agband b{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;display:block;line-height:1.15;}
+.agband i{font-style:normal;font-family:'Playfair Display',serif;font-size:12px;color:var(--ink-soft);}
+.agband .lnk{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:11.5px;}
+.agband .lnk a{color:var(--burg);cursor:pointer;}
+
+/* ══ the step card — three treatments ══ */
+.step{position:relative;border-radius:12px;background:#fff;overflow:hidden;box-shadow:inset 0 0 0 1px var(--hair2);}
+.sh{display:flex;align-items:center;gap:10px;padding:12px 16px;}
+.sh .n{width:22px;height:22px;flex:0 0 22px;border-radius:50%;background:var(--pink);color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;}
+.sh h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;}
+.sh .meta{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.sb{padding:16px;}
+
+/* A · tinted wells */
+body[data-t="wells"] .sb{background:#fff;}
+body[data-t="wells"] .fld,body[data-t="both"] .fld{background:var(--well);box-shadow:inset 0 0 0 1px var(--hair);}
+body[data-t="wells"] .sh{box-shadow:inset 0 -1px 0 var(--hair);}
+
+/* B · sage-capped */
+body[data-t="sage"] .sh,body[data-t="both"] .sh{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));box-shadow:inset 0 -1px 0 rgba(124,58,42,.12);}
+body[data-t="sage"] .sh .n,body[data-t="both"] .sh .n{background:rgba(253,250,245,.8);}
+body[data-t="sage"] .sh .meta,body[data-t="both"] .sh .meta{color:var(--sage-tx);}
+
+/* C · both + a warm ground under the fields */
+body[data-t="both"] .sb{background:linear-gradient(180deg,#fdfbf7,#fffefc);}
+
+.grp{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:20px;}
+.lbl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.fld{background:#fff;border-radius:9px;box-shadow:inset 0 0 0 1px var(--hair2);padding:10px 12px;font-size:13px;display:flex;align-items:center;}
+.fld em{margin-left:auto;font-style:normal;color:#c3b3a3;}
+.seg2{display:flex;background:var(--well);border-radius:10px;padding:3px;box-shadow:inset 0 0 0 1px var(--hair);}
+.seg2 span{flex:1;text-align:center;padding:7px 4px;font-size:12.5px;border-radius:7px;color:var(--ink-soft);cursor:pointer;}
+.seg2 span.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(58,28,20,.08),inset 0 0 0 1px var(--hair);}
+.pills{display:flex;flex-wrap:wrap;gap:7px;}
+.pill{font-size:12px;padding:7px 13px;border-radius:20px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair2);cursor:pointer;}
+.pill.on{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);font-weight:500;}
+.hint{font-size:11.5px;color:var(--muted);margin-top:10px;font-style:italic;}
+.sfoot{display:flex;padding:12px 16px;box-shadow:inset 0 1px 0 var(--hair);background:rgba(251,247,241,.5);}
+.next{margin-left:auto;background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);border:0;border-radius:9px;padding:9px 15px;font-family:'JetBrains Mono',monospace;font-size:10.5px;cursor:pointer;}
+
+.queue{margin-top:auto;display:flex;flex-direction:column;gap:8px;padding:14px 0 0;}
+.st{display:flex;align-items:center;gap:12px;background:var(--cream);border-radius:10px;padding:12px 15px;box-shadow:inset 0 0 0 1px var(--hair);cursor:pointer;}
+.st b{font-family:'Playfair Display',serif;font-size:14.5px;font-weight:500;color:var(--ink-soft);}
+.st span{font-size:12px;color:#a89686;}
+.st em{margin-left:auto;font-style:normal;color:#c3b3a3;}
+
+/* glance panel — the correct one */
+.panel{background:#fff;border-radius:11px;border:1px dashed rgba(124,58,42,.26);overflow:hidden;align-self:start;position:sticky;top:0;}
+.pc{display:flex;align-items:flex-start;gap:7px;padding:9px 11px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));box-shadow:inset 0 -1px 0 rgba(124,58,42,.12);}
+.pgl{width:19px;height:19px;flex:0 0 19px;border-radius:6px;background:rgba(253,250,245,.72);box-shadow:inset 0 0 0 1px rgba(124,58,42,.13);display:flex;align-items:center;justify-content:center;}
+.pgl svg{width:11px;height:11px;stroke:var(--burg);fill:none;stroke-width:1.5;}
+.pc b{font-family:'Playfair Display',serif;font-size:12.5px;font-weight:500;display:block;line-height:1.2;}
+.pc i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);}
+.pill2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:20px;color:var(--sage-tx);background:rgba(253,250,245,.75);}
+.pstats{display:grid;grid-template-columns:1fr 1fr;box-shadow:inset 0 -1px 0 rgba(124,58,42,.12);}
+.pstat{padding:9px 10px;}
+.pstat+.pstat{box-shadow:inset 1px 0 0 rgba(124,58,42,.1);}
+.pv2{font-family:'Playfair Display',serif;font-size:14px;line-height:1;}
+.pv2 small{font-size:9px;}
+.pk2{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+.ppol{padding:7px 11px;font-size:10.5px;color:var(--ink-soft);font-style:italic;box-shadow:inset 0 -1px 0 rgba(124,58,42,.12);}
+.pr{padding:8px 11px;box-shadow:inset 0 -1px 0 rgba(124,58,42,.09);}
+.pl{font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.pv{font-size:11px;line-height:1.45;}
+.pf{padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);box-shadow:inset 0 1px 0 rgba(124,58,42,.12);}
+
+.dock{display:flex;align-items:center;gap:14px;padding:12px 0;margin:0 -30px;padding-left:30px;padding-right:30px;background:#fdfbf7;box-shadow:inset 0 1px 0 var(--hair);}
+.cons{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.dock .r{margin-left:auto;display:flex;gap:9px;align-items:center;}
+.gb{font-family:'JetBrains Mono',monospace;font-size:10px;background:#fff;border:0;box-shadow:inset 0 0 0 1px var(--hair2);color:var(--ink-soft);border-radius:9px;padding:9px 14px;cursor:pointer;}
+.gb.pk{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+.esc{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#c8b8a8;}
+
+.legend{max-width:1180px;margin-top:20px;padding:16px 20px;background:#fdfaf5;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+</style>
+</head>
+<body data-t="wells" data-stage="2">
+
+<div class="ctl">
+  <b>Form definition</b>
+  <div class="seg" id="t">
+    <button data-t="wells" class="on">A · Tinted wells</button>
+    <button data-t="sage">B · Sage-capped steps</button>
+    <button data-t="both">C · Both</button>
+  </div>
+  <b>Chips</b>
+  <div class="seg" id="s"><button data-s="1">Stage 1 (none yet)</button><button data-s="2" class="on">After Next</button></div>
+</div>
+
+<div class="sheet">
+  <div class="jh">
+    <span class="jm"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/><path d="M9 12h6M9 16h4"/></svg></span>
+    <div><div class="jt">Logging new query</div><div class="jplace">Your <b>25th</b> query for Murphy's Day Out</div></div>
+    <div class="jchips"><span><i class="ring"></i>Agent</span><span><i class="ring"></i>Date</span></div>
+  </div>
+
+  <div class="jbody">
+    <div class="jcol">
+      <div class="agband">
+        <span class="av">EW</span>
+        <div><b>Eleanor Whitfield</b><i>Greenfield Literary</i></div>
+        <span class="lnk"><span>3 open queries · <a>Open the most recent</a></span><a>Change</a></span>
+      </div>
+
+      <div class="step">
+        <div class="sh"><span class="n">1</span><h3>When you sent it</h3><span class="meta">Step 1 of 3</span></div>
+        <div class="sb">
+          <div class="grp">
+            <div><div class="lbl">Date sent</div><div class="fld">13 August 2026<em>▤</em></div></div>
+            <div><div class="lbl">How you sent it</div><div class="seg2"><span class="on">Email</span><span>Form</span><span>Post</span></div></div>
+            <div><div class="lbl">Nudge me after</div>
+              <div class="pills"><span class="pill">6 wks</span><span class="pill">8 wks</span><span class="pill">12 wks</span><span class="pill on">4 wks</span><span class="pill">Pick a date</span><span class="pill">No nudge</span></div>
+              <div class="hint">A task appears on 10 September 2026.</div>
+            </div>
+          </div>
+        </div>
+        <div class="sfoot"><button class="next">Next: What →</button></div>
+      </div>
+
+      <div class="queue">
+        <div class="st"><b>What</b><span>Manuscript and materials</span><em>›</em></div>
+        <div class="st"><b>Notes</b><span>Optional — first impressions, personalisation</span><em>›</em></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="pc"><span class="pgl"><svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c.6-3.7 3.4-5.6 7-5.6s6.4 1.9 7 5.6"/></svg></span>
+        <span><b>This agent at a glance</b><i>Eleanor Whitfield</i></span><span class="pill2">Open</span></div>
+      <div class="pstats">
+        <div class="pstat"><div class="pv2">4 <small>weeks</small></div><div class="pk2">Expected response</div></div>
+        <div class="pstat"><div class="pv2" style="font-size:11px">Email</div><div class="pk2">Preferred method</div></div>
+      </div>
+      <div class="ppol">No reply after 4 weeks means a pass.</div>
+      <div class="pr"><div class="pl">She asks for</div><div class="pv">Query letter · Synopsis · 50 pages</div></div>
+      <div class="pr"><div class="pl">Your history</div><div class="pv">3 open · last sent 13 Aug</div></div>
+      <div class="pf">Updated 25 Jun</div>
+    </div>
+  </div>
+
+  <div class="dock">
+    <span class="cons">Saves as Queried · waiting on them — the row will offer Record response</span>
+    <div class="r"><span class="esc">Esc</span><button class="gb">Cancel</button><button class="gb">Save &amp; log another</button><button class="gb pk">➤ Save query</button></div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>Giving the form definition — three ways</b>
+  <ul>
+    <li><b>A · Tinted wells.</b> The step keeps a white body, but every input sits in a warm well (`#f7f2ea`) with a hairline. Definition comes from the fields themselves — you can see where to type without a single new band. Quietest, and it survives a long form best.</li>
+    <li><b>B · Sage-capped steps.</b> The step header takes the same sage gradient as every card on the reading pane, so the journey stops being the one place in the app without that grammar. Strongest structure; the risk is that with several steps open it starts to look striped.</li>
+    <li><b>C · Both</b> — sage cap, tinted wells, and a barely-there warm gradient under the body. My pick: the cap says <i>this is a section</i>, the wells say <i>this is where you write</i>, and they do different jobs rather than competing. The gradient is doing about 3% of the work and can go if it reads as dirty on your screen.</li>
+  </ul>
+  <br>
+  <b>Also corrected here</b>
+  <ul>
+    <li><b>Chips appear only once earned.</b> At stage 1 the header carries no chips at all — nothing has been confirmed, so a row of empty rings is just noise where the eye should be going to the question. Each chip appears, ticked, as its phase is completed. Toggle <i>Stage 1</i> to see the header without them.</li>
+    <li><b>The selected agent is a band, not a card.</b> It was a 130px hero for a fact you just chose. Name, agency, the open-queries line and Change — one row, and the step below starts ~90px higher.</li>
+    <li><b>The glance panel is the specced one</b> in both journeys — sage cap with glyph, status pill, two-up stats, italic policy line, ruled rows, footer stamp, dashed rim. Record must use this same chassis with reply-oriented rows; the pink "FOR REFERENCE" block in your screenshot is the old FocusForm styling, which the fix pack replaces.</li>
+  </ul>
+</div>
+
+<script>
+document.getElementById('t').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ document.body.dataset.t=b.dataset.t;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});
+document.getElementById('s').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ document.body.dataset.stage=b.dataset.s;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});
+</script>
+</body>
+</html>

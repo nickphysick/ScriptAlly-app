@@ -671,3 +671,76 @@ test("§5 · the chips are what gives way at 700, and only there", async () => {
   expect(events, "an event was dropped — the chips were supposed to be the sacrifice, not the nudge")
     .toBe(eventsTall);
 });
+
+/* ══ PACK C §3 · LETTERHEAD, STEPS, WATERMARK ══════════════════════════════════════════════════ */
+test("§3 · the band, the caps and the watermark", async () => {
+  for (const { w, h } of [{ w: 1024, h: 768 }, { w: 1440, h: 900 }, { w: 1920, h: 1080 }]) {
+    await page.setViewportSize({ width: w, height: h });
+    await openCreate(page);
+    /* ⚠️ THE CAP NEEDS AN OPEN STEP, and stage 1 has none — every step is a ghost until an agent is
+       chosen, so measuring here would report `cap=null` and say nothing about §3b. */
+    const picked = await pickAgent(page);
+    const m = await page.evaluate(() => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+      const sheet = q(".qc-sheet"), crumb = q(".qc-crumb"), dock = q(".qc-sheet .qc-dock");
+      const cs = sheet ? getComputedStyle(sheet, "::before") : null;
+      const cap = q(".qc-sec.qc-active > .qc-shead");
+      /* the mark's box, derived the same way the rule states it */
+      const sr = sheet?.getBoundingClientRect();
+      const dr = dock?.getBoundingClientRect();
+      const markRight = sr ? sr.right - 26 : 0;
+      const markBottom = sr ? sr.bottom - 21 : 0;
+      const markTop = markBottom - 390, markLeft = markRight - 390;
+      /* the collapsed rows in the right column, nearest the corner */
+      const collapsed = Array.from(document.querySelectorAll<HTMLElement>(".qc-sheet .qc-sec:not(.qc-active)"))
+        .map((e) => e.getBoundingClientRect());
+      const overlapping = collapsed.filter((r) => r.right > markLeft && r.bottom > markTop && r.top < markBottom).length;
+      /* ⚠️ HOW FAR IN, not merely whether the boxes touch. The mark is anchored bottom-right and the
+         rows span the column, so a bounding-box test says "overlap" for any row at that height —
+         what matters is how much of the row's WIDTH the mark reaches, and whether its text does. */
+      const deepest = collapsed.reduce((max, r) => {
+        const into = Math.max(0, r.right - markLeft);
+        return into > max ? into : max;
+      }, 0);
+      const textOver = Array.from(document.querySelectorAll<HTMLElement>(".qc-sheet .qc-sec:not(.qc-active) .qc-sum"))
+        .filter((e) => { const r = e.getBoundingClientRect(); return r.right > markLeft && r.bottom > markTop && r.top < markBottom; }).length;
+      return {
+        crumbText: crumb ? crumb.innerText.replace(/\s+/g, " ").trim() : null,
+        crumbBg: crumb ? getComputedStyle(crumb).backgroundColor : null,
+        crumbLinks: crumb ? crumb.querySelectorAll("a,button").length : null,
+        capBg: cap ? getComputedStyle(cap).backgroundImage.slice(0, 22) : null,
+        markImg: cs ? cs.backgroundImage.includes("Sent_queries_final") : null,
+        markOpacity: cs ? cs.opacity : null,
+        markZ: cs ? cs.zIndex : null,
+        dockZ: dock ? getComputedStyle(dock).zIndex : null,
+        dockBg: dock ? getComputedStyle(dock).backgroundColor : null,
+        dockCrops: !!(dr && sr) && dr.top < markBottom,
+        overlapping, deepest: Math.round(deepest), textOver,
+        collapsedN: collapsed.length,
+        markW: 390,
+      };
+    });
+    // eslint-disable-next-line no-console
+    console.log(`[§3 ${w}] crumb "${m.crumbText}" bg=${m.crumbBg} links=${m.crumbLinks} · cap=${m.capBg} · mark img=${m.markImg} op=${m.markOpacity} z=${m.markZ} · dock z=${m.dockZ} bg=${m.dockBg} crops=${m.dockCrops} · collapsed rows over the mark: ${m.overlapping}/${m.collapsedN}, deepest ${m.deepest}px into a 390px mark, text rows over it: ${m.textOver}${picked ? "" : " (NO AGENT PICKED)"}`);
+
+    /* ⚠️ CASE-INSENSITIVE. The band is `text-transform: uppercase`, and `innerText` returns the
+       TRANSFORMED text in Chromium — so a literal "ScriptAlly" never matches what is rendered. */
+    expect(m.crumbText?.toLowerCase(), "the band states no trail").toContain("scriptally");
+    expect(m.crumbText?.toLowerCase(), "the act is not appended").toContain("log a query");
+    expect(m.crumbLinks, "the trail is clickable — an inert-looking link in a modal").toBe(0);
+    expect(m.markImg, "the watermark is not the illustration").toBe(true);
+    expect(m.markOpacity).toBe("0.17");
+    expect(Number(m.markZ), "the mark left the sheet's floor").toBe(0);
+    expect(Number(m.dockZ), "the dock stopped drawing above the mark").toBeGreaterThan(0);
+    expect(m.dockBg, "the dock's ground is transparent — the mark would show through it")
+      .not.toBe("rgba(0, 0, 0, 0)");
+    expect(m.dockCrops, "the dock does not overlap the mark — there is no crop").toBe(true);
+    if (picked) {
+      expect(m.capBg, "the open step lost its sage cap").toContain("linear-gradient");
+    }
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(500);
+    const disc = page.getByRole("button", { name: /^Discard$/ });
+    if (await disc.count()) { await disc.first().click(); await page.waitForTimeout(400); }
+  }
+});

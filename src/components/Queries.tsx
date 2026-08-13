@@ -3499,6 +3499,7 @@ export const Queries: React.FC<{
                  else changes it: a pass is not darker, just quieter, and a room that dimmed for a
                  rejection would be reacting to bad news on the writer's behalf. */
               lamp={recording ? (respDraft?.outcome === "offer" ? "offer" : "record") : "create"}
+              act={recording ? "Record a response" : "Log a query"}
               /* ⚠️ THE SAME THREE CLASSES, ON THE NEW FRAME. They were a template literal on the
                  pane and stay one here — the classes did not change, only what wears them, and
                  keeping the expression shape means the locks that guard them still read as prose

@@ -175,3 +175,33 @@ export function shellCrumbForPath(
   if (!hit) return null;
   return { section: hit.section ? hit.section.label : hit.page.label, page: hit.page.label };
 }
+
+
+/**
+ * THE JOURNEY SHEET'S OWN BREADCRUMB (Pack C §3a).
+ *
+ * ⚠️ IT READS THE APP'S CRUMB RATHER THAN RESTATING IT, which is why it lives here beside
+ * `shellCrumbForPath` rather than in the sheet. The sheet needs a trail because the real one is
+ * behind the scrim and unreadable by design — but a second hand-written trail is two answers to
+ * "where am I", and they would diverge the first time a page was renamed.
+ *
+ * ⚠️ THE ACT IS APPENDED, NOT SUBSTITUTED. "Log a query" is where you are WITHIN Query Centre, so
+ * the page keeps its place in the trail and the act extends it.
+ *
+ * Returns segments with the last marked current; the caller renders them as TEXT. Nothing here is a
+ * link: the sheet is modal, and an inert control that looks like one is worse than plain words.
+ */
+export function journeyCrumb(
+  pathname: string,
+  act: string,
+): { label: string; current: boolean }[] {
+  const crumb = shellCrumbForPath(pathname);
+  const parts = ["ScriptAlly"];
+  if (crumb) {
+    parts.push(crumb.section);
+    /* a flat page states one name for both halves — do not print it twice */
+    if (crumb.page && crumb.page !== crumb.section) parts.push(crumb.page);
+  }
+  parts.push(act);
+  return parts.map((label, i) => ({ label, current: i === parts.length - 1 }));
+}

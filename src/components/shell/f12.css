@@ -2015,7 +2015,14 @@
 /* ⚠️ THE DOCK IS A CHILD OF THE SHEET NOW, not row 4 of the page grid. `flex: none` so it holds its
    height while the body scrolls, and the hairline sits on top of it because it closes the sheet
    from inside rather than dividing the page. */
-.qc-sheet .qc-dock { flex: none; margin: 0; border-radius: 0; }
+/* ⚠️ ONE RULE FOR THIS SELECTOR. §3's watermark needs the dock to draw ABOVE the mark on an opaque
+   ground — that is what crops the illustration under the desk edge — and declaring it in a second
+   `.qc-sheet .qc-dock` block made a first-match slice read whichever came first. Same trap as the
+   avatar disc; the repo prefers folding into the selector's own rule where sharing is not the point. */
+.qc-sheet .qc-dock {
+  flex: none; margin: 0; border-radius: 0;
+  position: relative; z-index: 2; background: var(--panel);
+}
 
 /* ⚠️ REDUCED MOTION CUTS TO THE FINAL FRAME, SCRIM INCLUDED — it does not remove the overlay, it
    removes the travel. A reader who has asked for less motion is still owed the dimmed desk that
@@ -2273,3 +2280,80 @@
 @media (max-height: 700px) {
   .tl-pills { display: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE LETTERHEAD, THE STEPS, AND THE WATERMARK (Pack C §3)
+ * refs: 98-sheet-crumb.html · 96-form-colour.html (treatment B) · 100-sheet-watermark-lab.html
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ §3a · THE BAND CARRIES THE REGISTER, and it is the sheet's own trail because the app's is
+ * behind the scrim — dimmed and unreadable by design. Full-bleed to the sheet's edges (the body
+ * pays the padding, so the band cancels it with a negative inline margin), closing on one hairline.
+ *
+ * ⚠️ NO CLOSE CONTROL. The ref draws an "Esc ×" at the band's right; the dock already carries Esc
+ * and Cancel, and a second exit is the duplicate the old chrome bar was retired for.
+ */
+.qc-crumb {
+  flex: none;
+  display: flex; align-items: center; gap: 9px;
+  padding: 11px 18px;
+  font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.11em; text-transform: uppercase;
+  background: var(--pink-t); box-shadow: inset 0 -1px 0 rgba(124, 58, 42, 0.14);
+  color: var(--pink-i);
+  /* above the watermark, which sits at the sheet's floor */
+  position: relative; z-index: 1;
+}
+.qc-crumbsep { opacity: 0.5; }
+/* only the current segment takes colour — the rest are the band's own muted ink */
+.qc-crumbcur { color: var(--burg); font-weight: 500; }
+.qc-sheet--record .qc-crumb { background: var(--sageC); box-shadow: inset 0 -1px 0 rgba(90, 110, 88, 0.2); color: var(--sageD); }
+.qc-sheet--record .qc-crumbcur { color: var(--sageD); }
+
+/**
+ * ⚠️ §3b · SAGE-CAPPED STEPS (ref 96, treatment B — the chosen one). The open step's header takes
+ * the same gradient every card on the reading pane already wears, so the journey stops being the one
+ * surface in the product without that grammar.
+ *
+ * ⚠️ AND NO THIRD BAND INSIDE A STEP. The cap is the step's one band; a second inside it would make
+ * a striped box of a form, which is the risk 96 names against this treatment.
+ */
+.qc-sec.qc-active > .qc-shead {
+  background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2));
+  box-shadow: inset 0 -1px 0 var(--sage-edge);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.qc-sec.qc-active > .qc-shead .qc-n { background: rgba(253, 250, 245, 0.8); color: var(--sageD); }
+
+/**
+ * ══ §3c · THE WATERMARK ═══════════════════════════════════════════════════════════════════════
+ *
+ * Three planes at the sheet's foot, sliding under the desk edge.
+ *
+ * ⚠️ THE DOCK CROP IS THE POINT, AND IT ONLY SURVIVES IF THE STACKING IS EXACT. The mark sits at
+ * `z-index: 0` INSIDE the sheet; the dock renders above it with an OPAQUE ground, so the
+ * illustration passes beneath the desk edge rather than over it. Get either half wrong and the mark
+ * floats on top of the dock or disappears behind the sheet entirely.
+ *
+ * ⚠️ A PSEUDO-ELEMENT, NOT AN `<img>`. It is decoration with no meaning to announce, and an image
+ * element would be a tab stop's worth of DOM and a thing screen readers must be told to ignore.
+ */
+.qc-sheet::before {
+  content: "";
+  position: absolute;
+  right: 26px; bottom: 21px;
+  width: 390px; height: 390px;
+  background: url("/Sent_queries_final.png") right bottom / contain no-repeat;
+  opacity: 0.17;
+  transform: rotate(6deg);
+  transform-origin: right bottom;
+  pointer-events: none;
+  z-index: 0;
+}
+/* ⚠️ IDENTICAL GEOMETRY, HUE-ROTATED — one mark, two registers, so the two journeys cannot drift
+   into two illustrations. */
+.qc-sheet--record::before { filter: hue-rotate(72deg) saturate(0.85); }
+/* the sheet's own children ride above the mark; the dock's opaque ground (folded into its one rule
+   above) is what crops it */
+.qc-sheet-body { position: relative; z-index: 1; }

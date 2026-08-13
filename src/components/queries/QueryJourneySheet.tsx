@@ -35,6 +35,7 @@
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useOverlay } from "../shell/useOverlay";
+import { journeyCrumb } from "../shell/shellV2Nav";
 
 /**
  * ⚠️ THE LAMPLIGHT DIM (§5, device 1). The chrome outside the sheet falls back and desaturates —
@@ -93,6 +94,8 @@ export const QueryJourneySheet: React.FC<{
    * would make the room react to bad news.
    */
   lamp: "create" | "record" | "offer";
+  /** What the writer is doing, appended to the app's own trail — "Log a query" / "Record a response". */
+  act: string;
   children: React.ReactNode;
 }> = ({ open, ...rest }) => {
   /* ⚠️ THE INNER SPLIT IS A HOOKS RULE, NOT A STYLE CHOICE. `useOverlay` arms everything on MOUNT —
@@ -112,8 +115,9 @@ const SheetInner: React.FC<{
   dock?: React.ReactNode;
   onRequestClose: () => void;
   lamp: "create" | "record" | "offer";
+  act: string;
   children: React.ReactNode;
-}> = ({ register, ariaLabel, stateClass, onAnimationEnd, dock, onRequestClose, lamp, children }) => {
+}> = ({ register, ariaLabel, stateClass, onAnimationEnd, dock, onRequestClose, lamp, act, children }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   useLamplight(lamp);
 
@@ -155,6 +159,29 @@ const SheetInner: React.FC<{
         className={`qc-sheet${stateClass ? " " + stateClass : ""}`}
         onAnimationEnd={onAnimationEnd}
       >
+        {/**
+          * ⚠️ THE SHEET NEEDS ITS OWN TRAIL BECAUSE THE APP'S IS BEHIND THE SCRIM (§3a) — dimmed and
+          * unreadable, by design. It reads `journeyCrumb`, which composes the shell's own
+          * `shellCrumbForPath` and appends the act, so the two cannot diverge the first time a page
+          * is renamed.
+          *
+          * ⚠️ TEXT, NOT LINKS. The sheet is modal: a trail whose segments look clickable and are
+          * not is worse than plain words, and making them navigate would mean leaving a journey by
+          * a door with no dirty guard on it. Only the current segment takes colour.
+          *
+          * ⚠️ AND NO CLOSE CONTROL. The ref draws an "Esc ×" at the band's right; the dock already
+          * carries Esc and Cancel, and a second exit is exactly the duplicate the old chrome bar was
+          * retired for.
+          */}
+        <div className="qc-crumb" aria-hidden="true">
+          {journeyCrumb(typeof window === "undefined" ? "/queries" : window.location.pathname, act)
+            .map((seg, i) => (
+              <React.Fragment key={seg.label}>
+                {i > 0 && <span className="qc-crumbsep">/</span>}
+                <span className={seg.current ? "qc-crumbcur" : undefined}>{seg.label}</span>
+              </React.Fragment>
+            ))}
+        </div>
         <div className="qc-sheet-body">{children}</div>
         {dock}
       </div>
