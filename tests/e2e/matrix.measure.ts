@@ -70,7 +70,13 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
            any card's padding. What the rule is against is a BARE wrapper that insets its children
            — the shape that pays the gutter a second time, invisibly, because nothing is drawn at
            the edge to show where the inset came from. A frame you can see is not that. */
-        const framed = parseFloat(c.borderLeftWidth) > 0 || c.backgroundImage !== "none"
+        /* ⚠️ ANY BORDER SIDE, NOT JUST THE LEFT. Query Centre's list column draws the seam between
+           the two independently scrolling panes on its RIGHT edge, with `--gut` of air inside it —
+           a drawn boundary with its own padding, which is exactly the case this carve-out is for.
+           Testing `borderLeftWidth` alone flagged it as a bare wrapper. */
+        const bordered = ["borderLeftWidth", "borderRightWidth", "borderTopWidth", "borderBottomWidth"]
+          .some((k) => parseFloat(c[k as keyof CSSStyleDeclaration] as string) > 0);
+        const framed = bordered || c.backgroundImage !== "none"
           || (c.backgroundColor !== "rgba(0, 0, 0, 0)" && c.backgroundColor !== "transparent");
         if (!framed && c.paddingLeft !== "0px") bad.push(`padL ${c.paddingLeft}`);
         if (!framed && c.paddingRight !== "0px") bad.push(`padR ${c.paddingRight}`);

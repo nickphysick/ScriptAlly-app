@@ -129,6 +129,11 @@ test("§4 — browsing, create, record: the panes scroll and the page does not",
    * letting the animations run: the harness waits instead of freezing.
    */
   await unsuppress(page);
+  /* ⚠️ AND THEN WAIT, WHICH THIS CALL SITE DID NOT. Lifting the suppression restarts whatever was
+     frozen at its start value, so the first frames after it are mid-transition: browsing measured
+     7px of overflow at +0ms, 1px at +100ms and 0 from +300ms on. The note above already says every
+     reading here is taken after a transition has settled — this was the one place that did not. */
+  await page.waitForTimeout(400);
 
   const browse = (await read(page))!;
   expect(browse.stripH, "browsing does not hold the resting card").toBe(96);
