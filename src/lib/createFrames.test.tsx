@@ -20,10 +20,19 @@
  *
  *     SA_UPDATE_CREATE_FRAMES=1 npx vitest run src/lib/createFrames.test.tsx
  *
- * ⚠️ EVERY INPUT IS FIXED. No `Date.now()`, no randomness, no live data — the draft's date comes
- * from the fixture agents, not from today, or this would go red at midnight for nobody's benefit.
+ * ⚠️ EVERY INPUT IS FIXED — AND IT WAS NOT, WHICH IS WHY THE CLOCK IS FROZEN BELOW. This note used
+ * to claim "the draft's date comes from the fixture agents, not from today, or this would go red at
+ * midnight for nobody's benefit". It went red at midnight. `emptyDraft()` seeds TODAY, so every
+ * frame carries the current date twice over — the field, the whole date-picker grid (which day is
+ * `today`, which is `sel`, which are `off`), the derived task date and the nudge whisper. The
+ * fixture was generated on 12 August and the suite turned red on the 13th, for nobody's benefit,
+ * exactly as predicted by the sentence that was supposed to prevent it.
+ *
+ * ⚠️ REGENERATING WOULD HAVE HIDDEN IT FOR ONE DAY. The clock is pinned instead, so the fixture is
+ * now genuinely date-independent and the promise above is true rather than aspirational. Midday UTC
+ * so the date is the same in every timezone this runs in.
  */
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync, writeFileSync } from "fs";
 import React from "react";
@@ -72,7 +81,13 @@ const frames = (): string => [
   render(seeded(AGENT), [AGENT], MS2),
 ].join("\n\n");
 
+/** The day the committed fixture was rendered. Moving it means regenerating the fixture. */
+const FIXTURE_DAY = new Date("2026-08-12T12:00:00Z");
+
 describe("create mode renders the frames it is committed to", () => {
+  beforeAll(() => { vi.useFakeTimers(); vi.setSystemTime(FIXTURE_DAY); });
+  afterAll(() => { vi.useRealTimers(); });
+
   it("every frame is byte-identical to the fixture", () => {
     const now = frames();
     if (process.env.SA_UPDATE_CREATE_FRAMES) {
