@@ -807,6 +807,7 @@ test("fp2 · edges line up, and the plate is a card", async () => {
     expect(m.listRadius, `the list took a radius at ${w}`).toMatch(/^0px/);
     expect(m.listMargin, `the list took a horizontal margin at ${w}`).toBe("0px/0px");
     expect(Math.abs(m.seamList! - m.seamBody!), `the seam is short at ${w}`).toBeLessThanOrEqual(1);
+    expect(m.paneL, `a channel of page shows between the seam and the pane at ${w}`).toBe(m.listR);
     /* §1 — the plate wears the reading-pane card's treatment */
     expect(m.plateRadius, `the plate's radius differs from a card's at ${w}`).toBe(m.cardRadius);
     expect(m.plateBg, `the plate's ground differs from a card's at ${w}`).toBe(m.cardBg);

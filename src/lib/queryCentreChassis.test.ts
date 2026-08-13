@@ -197,6 +197,42 @@ describe("§1 (fp2) · the hero is a contained plate", () => {
   });
 });
 
+/**
+ * ⚠️ FIX PACK 2 §2 — THE LIST RUNS FLUSH, AND THE SEAM IS THE ONLY DIVISION. Two of the three
+ * clauses were already true when this pack arrived (Pack B §1c gave the list its ground and seam
+ * with no radius, and §1b spanned the masthead across the body), so this is mostly a lock over
+ * ground already held — recorded as such rather than rebuilt. The one thing genuinely still wrong
+ * was the CHANNEL: `.f12-body` carried `gap: var(--gut)`, leaving 12px of page showing to the RIGHT
+ * of the seam, so the division was a line plus a stripe and the list read as a widget resting on
+ * the page. Removing it costs no breathing room, because the inset lives on the children.
+ */
+describe("§2 (fp2) · the list is flush and the seam is the only division", () => {
+  it("the list declares no radius and no horizontal inset", () => {
+    const r = rule(".f12-list");
+    expect(r, "the list rule is missing").not.toBe("");
+    for (const p of ["border-radius", "margin-left", "margin-right", "margin-inline"]) {
+      expect(r, `the list took ${p} — it is one half of a split, not a card on a page`)
+        .not.toContain(p);
+    }
+    expect(r, "the seam went with it").toContain("border-right: 1px solid var(--hairline)");
+  });
+
+  it("the columns sit against each other, with no channel between them", () => {
+    const r = rule(".f12-body");
+    expect(r, "the body rule is missing").not.toBe("");
+    expect(r, "the channel came back — the seam stops being the only division")
+      .not.toMatch(/(?:^|;|\{)\s*gap\s*:/);
+  });
+
+  /* ⚠️ THE INSET MOVED TO THE CHILDREN, and that is what lets the ground and the seam run edge to
+     edge while nothing lands against the line. Delete this and the rows touch the seam. */
+  it("the inset the list gave up is carried by its children", () => {
+    expect(cssCode, "the children lost their inset").toMatch(
+      /\.f12-list > \*\s*\{[^}]*padding-inline:\s*var\(--gut\)/
+    );
+  });
+});
+
 describe("§1d/e/g · already landed, and still true", () => {
   it("the list's controls are in its own head, and none can go dead", () => {
     const head = code.indexOf('className="f12-lhead"');

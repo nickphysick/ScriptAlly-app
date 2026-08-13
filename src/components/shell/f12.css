@@ -1114,7 +1114,15 @@
    inside a card. `min-height: 0` down this chain is what lets the page fit the viewport instead
    of growing it (see .ws-work--fit for the other half of that chain). ── */
 .f12-body {
-  flex: 1; display: flex; gap: var(--gut); min-height: 0;
+  /* ⚠️ NO GAP BETWEEN THE COLUMNS (fix pack 2 §2). The row carried `gap: var(--gut)`, which left
+     12px of page showing to the RIGHT of the seam — so the list read as a widget resting on the
+     page rather than as one half of a split, and the "single division" the seam is supposed to be
+     was a line plus a channel. The ref's own split has no gap either.
+
+     ⚠️ THE CONTENT KEEPS ITS INSET; only the CHANNEL goes. The list's children carry
+     `padding-inline: var(--gut)` and the pane's carry their own 20px, so nothing lands against the
+     line — which is why removing the gap costs no breathing room, only the stripe of page. */
+  flex: 1; display: flex; min-height: 0;
   /**
    * ⚠️ IT IS NOT A CONTAINER ANY MORE — no border, no radius, no padding, no margin. It is the flex
    * row that puts the list beside the pane, and nothing else.
