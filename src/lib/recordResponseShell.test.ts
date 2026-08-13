@@ -214,11 +214,17 @@ describe("no red anywhere, and the palette is the app's own", () => {
 describe("a response belongs to one query", () => {
   /* No "save and record another": there is no next response to move on to, and offering one would
      invent a batch that does not exist. */
+  /* ⚠️ THE SAVE LIVES IN THE DOCK NOW (§3) — this sliced the journey HEADER, which no longer holds
+     any action. The rule it protects is unchanged: a response belongs to one query, so there is no
+     next one to move on to and a batch action here would invent one. */
   it("there is no save-and-record-another", () => {
-    const head = queries.slice(queries.indexOf("Recording a response"), queries.indexOf("<ResponsePane"));
-    expect(head).not.toBe("");
-    expect(head).toContain("Save response");
-    expect(head, "a batch action here would be inventing one").not.toContain("log another");
+    const at = queries.indexOf('<span className="qc-dock-acts">');
+    expect(at, "the dock's action cluster is missing").toBeGreaterThan(-1);
+    const dock = queries.slice(at, queries.indexOf("</span>", queries.indexOf("Save query")));
+    expect(dock, "the response save is missing from the dock").toContain("Save response");
+    /* the record BRANCH of the dock — the create branch legitimately has one */
+    const recBranch = dock.slice(dock.indexOf("recording ?"), dock.indexOf(") : ("));
+    expect(recBranch, "a batch action in the record branch would be inventing one").not.toContain("log another");
   });
 
   /* ⚠️ ITS OWN RECEIPT CHANNEL. Logging a query and recording a reply are different facts; sharing

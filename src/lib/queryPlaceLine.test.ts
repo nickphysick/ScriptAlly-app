@@ -5,7 +5,9 @@
  * THE PLACE LINE (§2b) — where an act sits in the campaign, stated as fact.
  */
 import { describe, it, expect } from "vitest";
-import { createPlaceLine, recordPlaceLine, ordinal } from "./queryAmbient";
+import { createPlaceLine, recordPlaceLine, ordinal, consequenceLine } from "./queryAmbient";
+import { getPrimaryAction } from "./queryPrimaryAction";
+import { QueryStatus } from "../types";
 
 describe("ordinals", () => {
   it("the ordinary cases", () => {
@@ -78,4 +80,44 @@ describe("⚠️ the app reports, it never appraises", () => {
       expect(s, "the place line exclaims").not.toContain("!");
     });
   }
+});
+
+describe("the consequence line (§3)", () => {
+  /**
+   * ⚠️ IT STATES WHAT THE SAVE WILL DO, NEVER WHAT TO DO ABOUT IT. "your turn — the row will offer
+   * Mark sent" is a consequence; "your turn — remember to send it" is an instruction, and the app
+   * does not instruct.
+   */
+  it("reads its empty state before an outcome is chosen", () => {
+    expect(consequenceLine(null)).toBe("Nothing saved yet");
+  });
+
+  it("states the outcome, whose turn it leaves, and what the row will offer", () => {
+    expect(consequenceLine(QueryStatus.PARTIAL_REQUESTED))
+      .toBe("Saves as Partial Requested · your turn — the row will offer Mark partial as sent");
+    expect(consequenceLine(QueryStatus.QUERIED))
+      .toBe("Saves as Queried · waiting on them — the row will offer Record response");
+  });
+
+  it("says closed for a terminal outcome rather than inventing a turn", () => {
+    expect(consequenceLine(QueryStatus.REJECTED)).toContain("· closed —");
+  });
+
+  /* ⚠️ IT READS THE CTA ENGINE, so the promise cannot differ from what the row actually offers a
+     second later. Asserted against `getPrimaryAction` itself, not against a literal — a literal
+     would go green the day someone changed both in the same wrong direction. */
+  it("promises exactly what the row will offer, for every status", () => {
+    for (const status of Object.values(QueryStatus)) {
+      const line = consequenceLine(status as QueryStatus);
+      expect(line, `${status}: the promise and the CTA engine disagree`)
+        .toContain(getPrimaryAction(status as QueryStatus).label);
+    }
+  });
+
+  it("never instructs", () => {
+    const INSTRUCTION = /\b(remember|don't forget|make sure|should|need to|try to|be sure)\b/i;
+    for (const status of Object.values(QueryStatus)) {
+      expect(consequenceLine(status as QueryStatus), `${status} instructs`).not.toMatch(INSTRUCTION);
+    }
+  });
 });

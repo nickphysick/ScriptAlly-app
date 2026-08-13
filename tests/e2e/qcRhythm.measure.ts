@@ -133,3 +133,89 @@ for (const vp of [{ width: 1024, height: 768 }, { width: 1440, height: 900 }, { 
     expect(s.place, "the place line is missing").not.toBe("");
   });
 }
+
+/* ── §3 — the dock ───────────────────────────────────────────────────────────────────────────── */
+
+const dockState = (page: Page) => page.evaluate(() => {
+  const r = (n: number) => Math.round(n * 10) / 10;
+  const g = [...document.querySelectorAll(".wpg")].find((x) => x.getBoundingClientRect().height > 0) as HTMLElement;
+  const d = g.querySelector(".qc-dock") as HTMLElement | null;
+  const row = g.querySelector(".wpg-dock") as HTMLElement | null;
+  const sc = g.querySelector(".wpg-scroll") as HTMLElement;
+  if (!d || !row) return null;
+  const db = row.getBoundingClientRect(); const gb = g.getBoundingClientRect(); const sb = sc.getBoundingClientRect();
+  return {
+    say: (d.querySelector(".qc-dock-say")?.textContent ?? "").trim(),
+    acts: [...d.querySelectorAll("button")].map((b) => (b.textContent ?? "").trim()),
+    /* outside the scroller, flush to the working area's foot */
+    insideScroller: sc.contains(d),
+    gapToFoot: r(gb.bottom - db.bottom),
+    belowScroller: r(db.top - sb.bottom),
+    hairline: getComputedStyle(row).borderTopWidth,
+    anim: getComputedStyle(d).animationName,
+  };
+});
+
+test("§3 — the dock, create", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.getByRole("button", { name: /^Log query$/i }).first().click();
+  await page.waitForTimeout(900);
+  const s = (await dockState(page))!;
+  console.log("dock create: " + JSON.stringify(s));
+  expect(s, "the dock did not render").not.toBeNull();
+  /* ⚠️ OUTSIDE THE SCROLLPORT BY CONSTRUCTION — a fourth grid row, not a sticky inside row 3. */
+  expect(s.insideScroller, "the dock is inside the scroller — it would scroll away").toBe(false);
+  expect(s.gapToFoot, "the dock is not flush with the working area's foot").toBeLessThanOrEqual(1);
+  expect(s.belowScroller, "the dock overlaps the scroll row").toBeGreaterThanOrEqual(0);
+  expect(s.hairline, "the dock has no hairline above it").toBe("1px");
+  /* create has the continuation; record must not */
+  expect(s.acts.join(" | "), "Save & log another is missing from create").toContain("log another");
+  expect(s.say, "the consequence line does not read its empty state before a save is possible").not.toBe("");
+});
+
+test("§3 — the dock stays put while the content scrolls", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1024, height: 768 });
+  await page.getByRole("button", { name: /^Log query$/i }).first().click();
+  await page.waitForTimeout(900);
+  const before = (await dockState(page))!;
+  const col = await page.locator(".qc-form").first().boundingBox();
+  if (col) { await page.mouse.move(col.x + col.width / 2, col.y + col.height / 2); await page.mouse.wheel(0, 400); await page.waitForTimeout(400); }
+  const after = (await dockState(page))!;
+  expect(after.gapToFoot, "the dock moved when the content scrolled").toBe(before.gapToFoot);
+});
+
+test("§3 — record: no batch action, and the consequence updates with the outcome", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.locator(".f12-row").first().click();
+  await page.waitForTimeout(600);
+  await page.getByRole("button", { name: /Record response|Mark sent|Record resubmission|Reopen/i }).first().click();
+  await page.waitForTimeout(900);
+  const start = (await dockState(page))!;
+  console.log("dock record (before outcome): " + JSON.stringify(start));
+  expect(start.acts.join(" | "), "a response is one query — there is no batch to log another of").not.toContain("log another");
+  expect(start.say, "the dock does not read its empty state before an outcome is chosen").toBe("Nothing saved yet");
+
+  /* ⚠️ IT UPDATES WITH THE OUTCOME — the whole point of stating a consequence before it happens. */
+  const pick = page.getByText(/^Rejection$/).first();
+  if (await pick.count()) {
+    await pick.click();
+    await page.waitForTimeout(400);
+    const after = (await dockState(page))!;
+    console.log("dock record (after outcome): " + JSON.stringify(after));
+    expect(after.say, "the consequence line did not update with the outcome").not.toBe(start.say);
+    expect(after.say, "the consequence line does not state what the save will do").toMatch(/^Saves as /);
+  }
+});
+
+test("§3 — reduced motion cuts to the final frame", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.evaluate(() => document.querySelectorAll("style").forEach((s) => {
+    if (s.textContent?.startsWith("/*sa-e2e-kill-motion*/")) s.remove();
+  }));
+  await page.getByRole("button", { name: /^Log query$/i }).first().click();
+  await page.waitForTimeout(80);
+  const s = (await dockState(page))!;
+  expect(s.anim, "the dock still animates under reduced motion").toBe("none");
+  expect(s.gapToFoot, "the dock did not reach its final position under reduced motion").toBeLessThanOrEqual(1);
+});

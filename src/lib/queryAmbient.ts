@@ -9,6 +9,9 @@
  */
 
 import { Query, QueryStatus } from "../types";
+/* the CTA engine — the consequence line promises what the ROW will offer, so it must ask the same
+   function the row asks rather than restating the map */
+import { getPrimaryAction } from "./queryPrimaryAction";
 
 /**
  * Filter-bar STATUS bucket — the derived state the CTA engine (getPrimaryAction, Queries.tsx)
@@ -371,4 +374,27 @@ export function recordPlaceLine(i: PlaceLineInput): string {
     parts.push(`the ${ordinal(i.priorRepliesForManuscript + 1)} reply you've recorded for ${i.manuscriptTitle}`);
   }
   return parts.join(" · ");
+}
+
+/**
+ * THE CONSEQUENCE LINE (§3) — what the save will do, before it happens.
+ *
+ * ⚠️ REPORTING, NOT COACHING. It states the outcome, whose turn it leaves, and what the row will
+ * offer next. It never says what to do about it: "your turn — the row will offer Mark sent" is a
+ * consequence; "your turn — remember to send it" is an instruction, and the app does not instruct.
+ *
+ * ⚠️ IT READS `getPrimaryAction`, THE SAME CTA ENGINE the row, the hero and the To-do flows read,
+ * so the promise made here cannot differ from what the row actually offers a second later. A
+ * hand-written "the row will offer …" would be a second answer to whose turn it is.
+ *
+ * ⚠️ AND IT HAS AN EMPTY STATE. Before an outcome is chosen there is no consequence to state, and
+ * a blank bar reads as a bar that has failed to load.
+ */
+export function consequenceLine(next: QueryStatus | null): string {
+  if (!next) return "Nothing saved yet";
+  const action = getPrimaryAction(next);
+  const turn = action.ballHolder === "writer" ? "your turn"
+    : action.ballHolder === "agent" ? "waiting on them"
+    : "closed";
+  return `Saves as ${next} · ${turn} — the row will offer ${action.label}`;
 }

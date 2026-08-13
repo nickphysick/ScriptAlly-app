@@ -68,6 +68,20 @@ export interface WorkspacePageGridProps {
   /** Accessible name for the scroll region, when the page has one worth stating. */
   scrollLabel?: string;
   /**
+   * Row 4 — a bottom-anchored dock, outside the scrollport.
+   *
+   * ⚠️ A GRID ROW, NOT A STICKY OR AN ABSOLUTE. Row 3 is the only thing that scrolls; a dock as a
+   * fourth row is outside it BY CONSTRUCTION rather than by a rule that has to keep winning. It
+   * needs no z-index against the content and cannot be scrolled away from.
+   *
+   * ⚠️ IT TAKES HEIGHT FROM THE SCROLL ROW, WHICH MATTERS ON A PAGE THAT SCROLLS. Row 3 is
+   * `minmax(0, 1fr)`, so the dock's height comes out of the scrollport — and if a dock appears in
+   * one header state only, `clientHeight` changes in that state and the invariance padding gains a
+   * term it does not know about. Query Centre never scrolls, so nothing there can be clamped; a
+   * scrolling page adding a dock must extend `--wpg-reclaim-pad` to cover it.
+   */
+  dock?: React.ReactNode;
+  /**
    * ⚠️ THE SCROLL ROW BECOMES A FLEX COLUMN — for pages whose content FILLS the row and scrolls in
    * its own panes, rather than flowing past it.
    *
@@ -104,7 +118,7 @@ export interface WorkspacePageGridProps {
 }
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  plate, toolbar, children, className, scrollLabel, fill = false, condensed: condensedByMode = false,
+  plate, toolbar, children, className, scrollLabel, dock, fill = false, condensed: condensedByMode = false,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
@@ -220,6 +234,9 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             which this row depends on. */}
         <div className={`wpg-hem wpg-hem--top${hem.top ? " on" : ""}`} aria-hidden="true" />
         <div className={`wpg-hem wpg-hem--bot${hem.bot ? " on" : ""}`} aria-hidden="true" />
+        {/* ⚠️ ROW 4, AFTER THE HEMS — the hems are absolute-ish grid items in row 3, so the dock
+            must be its own row or it would share their cell and overlap the scroller's foot. */}
+        {dock && <div className="wpg-dock">{dock}</div>}
       </div>
     </PlateCondensedContext.Provider>
   );

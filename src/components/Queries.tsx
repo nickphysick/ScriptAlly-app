@@ -32,7 +32,7 @@ import { prefersReducedMotion } from "../lib/reducedMotion";
 import { ResponsePane, type RespStepId } from "./queries/ResponsePane";
 import {
   emptyResponseDraft, responseReady, responseChips, responseDraftToPayload, OUTCOME_LABEL,
-  stepsFor, type ResponseDraft, type RespStep,
+  stepsFor, OUTCOME_STATUS, type ResponseDraft, type RespStep,
 } from "../lib/responseDraft";
 import { jumpIn, advanceIn, reseatInto } from "../lib/stepStack";
 
@@ -47,7 +47,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, listHeadLabel, DAY } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, consequenceLine, listHeadLabel, DAY } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -3046,6 +3046,59 @@ export const Queries: React.FC<{
              ⚠️ THE GRID ALREADY DRAWS THIS ROW. It has had a `toolbar` slot since the conversion
              and this page never used one, so the controls lived inside the list column instead —
              which is why they read as the list's chrome rather than the page's. */
+          /**
+           * ⚠️ THE DOCK (§3) — the composition runs from the top edge to the bottom edge whatever
+           * the content height. Cancel and Save left the journey header for it: the header states
+           * what this is and how far along it is; the dock states what committing it will do, next
+           * to the button that commits it.
+           *
+           * ⚠️ DESKTOP ONLY, BECAUSE THE MOBILE DOCK ALREADY EXISTS. `.qh-mcmd` is Query Centre's
+           * own floating command bar below md — the same idea at the other breakpoint, and it
+           * carries the Mark-sent anchor. Rendering both would stack two bottom bars over a tab
+           * bar; the mobile one keeps the job it already has.
+           *
+           * ⚠️ AND THE TOAST HOST FLOATS OVER IT, WHICH IS CORRECT. `.sa-toasts` is z:300 against
+           * the dock's place in normal flow, so a receipt sits ABOVE the dock rather than pushing
+           * it — a confirmation should never move the control you just used.
+           */
+          dock={(creating || recording) && !isMobile ? (
+            <div className={`qc-dock${createEntering || respEntering ? " qc-dock-in" : ""}${createCancelling || respCancelling ? " qc-dock-out" : ""}`}>
+              <span className="qc-dock-say">
+                {/* ⚠️ `OUTCOME_STATUS`, NOT A CAST. `respDraft.outcome` is an outcome KEY ("rr",
+                    "noreply", "rejected") and casting it to `QueryStatus` typechecks while producing
+                    a value the enum never contains — measured, the dock read "Saves as rejected" in
+                    lowercase and `getPrimaryAction` fell through to its default, so the line
+                    promised "closed — the row will offer Record response", which contradicts
+                    itself. `responseDraft.ts` owns this map: "This module maps outcomes to
+                    statuses; it never sets one." */}
+                {recording && respDraft
+                  ? consequenceLine(respDraft.outcome ? OUTCOME_STATUS[respDraft.outcome] : null)
+                  : consequenceLine(createReady ? QueryStatus.QUERIED : null)}
+              </span>
+              <span className="qc-dock-acts">
+                <span className="qch-esc" aria-hidden="true">Esc</span>
+                {recording ? (
+                  <>
+                    <button type="button" className="f12-btn-sec" onClick={() => closeRecord()} disabled={respSaving}>Cancel</button>
+                    {/* ⚠️ NO "SAVE AND RECORD ANOTHER" — a response belongs to one query, so there is
+                        no next one to move on to and offering it would invent a batch. */}
+                    <button type="button" className="f12-btn-pri" onClick={() => void saveResponse()}
+                      disabled={!responseReady(respDraft!) || respSaving}>
+                      {respSaving ? "Saving…" : "Save response"}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
+                    <button type="button" className="qch-tert" onClick={() => saveCreate(true)} disabled={!createReady || createSaving}>Save &amp; log another</button>
+                    <button type="button" className="f12-btn-pri" onClick={() => saveCreate()} disabled={!createReady || createSaving}>
+                      {createSaving ? "Saving…" : "Save query"}
+                    </button>
+                  </>
+                )}
+              </span>
+            </div>
+          ) : undefined}
           toolbar={!creating && !recording && queries.length > 0 ? (
                   <div className="f12-lhead">
                     <div className="f12-lsearch">
@@ -3465,21 +3518,10 @@ export const Queries: React.FC<{
                       ))}
                     </div>
                   </div>
-                  <div className="qch-acts">
-                    <span className="qch-esc" aria-hidden="true">Esc</span>
-                    <button type="button" className="f12-btn-sec" onClick={() => closeRecord()} disabled={respSaving}>Cancel</button>
-                    {/* ⚠️ NO "SAVE AND RECORD ANOTHER" HERE. A response belongs to one query; there
-                        is no next one to move on to, and offering it would invent a batch that does
-                        not exist. */}
-                    <button
-                      type="button"
-                      className="f12-btn-pri"
-                      onClick={() => void saveResponse()}
-                      disabled={!responseReady(respDraft) || respSaving}
-                    >
-                      {respSaving ? "Saving…" : "Save response"}
-                    </button>
-                  </div>
+                  {/* ⚠️ THE ACTIONS MOVED TO THE DOCK (§3). The journey header keeps IDENTITY AND
+                      PROGRESS only — motif, title, lede, place line, chips. Two jobs, two places:
+                      what this is and how far along it is here, what happens when you commit it at
+                      the foot, next to the button that commits it. */}
                 </div>
                 <ResponsePane
                   draft={respDraft}
@@ -3582,34 +3624,20 @@ export const Queries: React.FC<{
                       ))}
                     </div>
                   </div>
-                  <div className="qch-acts">
-                    {/* ⚠️ THE TALLY IS THE ONLY THING THAT COUNTS. It appears once this sitting has
-                        produced something, and it is why the receipt replaces rather than stacks:
-                        between them, one line says what just happened and one says how far you have
-                        got. Absent at zero — "0 logged" is a statement about nothing. */}
+                  {/* ⚠️ THE ACTIONS MOVED TO THE DOCK (§3). The journey header keeps IDENTITY AND
+                      PROGRESS only — motif, title, lede, place line, chips. Two jobs, two places:
+                      what this is and how far along it is here, what happens when you commit it at
+                      the foot, next to the button that commits it. */}
+                    {/* ⚠️ THE TALLY STAYS IN THE HEADER, and it nearly went to the dock with the
+                        buttons it was sitting beside. It is PROGRESS — how far this sitting has
+                        got — which is the header's half of the split, not the dock's. The dock
+                        states what the NEXT save will do; this states what the previous ones did.
+                        Absent at zero: "0 logged" is a statement about nothing. */}
                     {sessionLogged > 0 && (
                       <span className="qch-tally" aria-live="polite">
                         {sessionLogged} logged
                       </span>
                     )}
-                    <span className="qch-esc" aria-hidden="true">Esc</span>
-                    <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
-                    <button
-                      type="button"
-                      className="qch-tert"
-                      onClick={() => saveCreate(true)}
-                      disabled={!createReady || createSaving}
-                    >Save &amp; log another</button>
-                    <button
-                      type="button"
-                      className="f12-btn-pri"
-                      onClick={() => saveCreate()}
-                      disabled={!createReady || createSaving}
-                    >
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-                      {createSaving ? "Saving…" : "Save query"}
-                    </button>
-                  </div>
                 </div>
                 <QueryCreatePane
                   draft={createDraft}

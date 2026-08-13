@@ -9,7 +9,9 @@
    documents, in grid's own spelling. */
 .wpg {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  /* rows: plate · toolbar · the scroller · the dock. Row 4 is `auto`, so it costs nothing when no
+     page passes one — and when one does, its height comes out of row 3 (see the `dock` prop). */
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   /* ⚠️ ONE EXPLICIT COLUMN, AND EVERY ROW NAMES IT — because grid auto-placement NEVER OVERLAPS.
      The hems share row 3 with the scroller, and the moment they claimed column 1 the auto-placed
      scroller was pushed into an implicit column 2: the header rows measured 688px of right margin
@@ -180,6 +182,24 @@
 .wpg--fill > .wpg-scroll {
   display: flex;
   flex-direction: column;
+}
+
+/**
+ * ══ THE DOCK — row 4 ══════════════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ OUTSIDE THE SCROLLPORT BY CONSTRUCTION, not by a sticky that has to keep winning. It cannot
+ * be scrolled away from because it is not in the thing that scrolls.
+ *
+ * ⚠️ A HAIRLINE ABOVE AND A TRANSLUCENT GROUND — the content runs up to it, so the boundary has to
+ * be stated, and the ground has to admit there is content beneath rather than pretending to be a
+ * page edge.
+ */
+.wpg-dock {
+  grid-row: 4;
+  grid-column: 1;
+  border-top: 1px solid var(--ws-edge);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(6px);
 }
 
 /* ══ THE SCROLL HEMS (uniformity pass §3; ref 88) ══════════════════════════════════════════════

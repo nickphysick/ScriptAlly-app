@@ -1067,6 +1067,43 @@
   color: var(--shell-muted);
 }
 
+/**
+ * ══ THE DOCK (§3) ═════════════════════════════════════════════════════════════════════════════
+ *
+ * The grid owns the row (`.wpg-dock` — hairline, translucent ground, outside the scroller); this
+ * is only what sits inside it.
+ *
+ * ⚠️ THE CONSEQUENCE LINE IS ON THE LEFT, THE ACTIONS ON THE RIGHT, and the line is allowed to
+ * truncate while the buttons never shrink. A clipped sentence is still readable; a clipped button
+ * is unusable — the same rule the header's flex contract already states.
+ */
+.qc-dock {
+  display: flex; align-items: center; gap: 16px;
+  padding: 11px var(--content-gutter);
+  min-height: 58px;
+}
+.qc-dock-say {
+  flex: 1 1 auto; min-width: 0;
+  font-family: var(--f12-mono);
+  font-size: 10px; letter-spacing: 0.07em; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qc-dock-acts { flex: none; display: flex; align-items: center; gap: 9px; }
+
+/**
+ * ⚠️ IT ARRIVES ON THE STAGGER'S LAST BEAT AND LEAVES AS ONE MOVEMENT. 410ms matches
+ * `.qc-entering .qc-stack > .qc-sec:last-child` — the dock is the beat after the final step, not a
+ * separate entrance. On the way out it travels with the cancel gesture rather than reversing the
+ * stagger, because a reverse stagger reads as the page dismantling itself.
+ */
+@keyframes qc-dock-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.qc-dock-in { animation: qc-dock-rise 240ms cubic-bezier(0.2, 0.7, 0.3, 1) 410ms backwards; }
+.qc-dock-out { animation: qc-dock-rise 200ms cubic-bezier(0.5, 0, 0.75, 0) reverse forwards; }
+@media (prefers-reduced-motion: reduce) {
+  /* the STATE still lands — only the travel goes */
+  .qc-dock-in, .qc-dock-out { animation: none; }
+}
+
 /* ⚠️ THE PLACE LINE (§2b) — mono, quiet, one line under the lede. It states a position, so it
    reads at the weight of a caption rather than of the lede it sits beneath. */
 .qch-place {

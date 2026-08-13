@@ -103,10 +103,15 @@ describe("the header band", () => {
     expect(rule(".qch-sub")).toContain("font-style: italic");
   });
 
+  /**
+   * ⚠️ THE ACTIONS ARE IN THE DOCK NOW (§3), not the header band. The order, the weights and the
+   * quiet tertiary are all unchanged — only the room they stand in. The header keeps identity and
+   * progress; the dock states what committing will do, beside the button that commits it.
+   */
   it("the four actions, in the ref's order and weights", () => {
-    const at = queries.indexOf('<div className="qch-acts">');
-    expect(at, "the action cluster is missing").toBeGreaterThan(-1);
-    const acts = queries.slice(at, queries.indexOf("</div>", queries.indexOf("Save query")));
+    const at = queries.indexOf('<span className="qc-dock-acts">');
+    expect(at, "the dock's action cluster is missing").toBeGreaterThan(-1);
+    const acts = queries.slice(at, queries.indexOf("Save query") + 40);
     expect(acts.indexOf("qch-esc")).toBeLessThan(acts.indexOf("Cancel"));
     expect(acts.indexOf("Cancel")).toBeLessThan(acts.indexOf("Save &amp; log another"));
     expect(acts.indexOf("Save &amp; log another")).toBeLessThan(acts.indexOf("Save query"));
