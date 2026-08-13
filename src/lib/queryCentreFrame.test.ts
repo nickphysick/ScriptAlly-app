@@ -145,7 +145,13 @@ describe("the workspace frame", () => {
     const list = rule(f12, ".f12-list");
     expect(list, "the seam is gone — two independently scrolling regions with no boundary").toContain("border-right");
     expect(list, "the seam is not on the hairline token").toContain("var(--hairline)");
-    expect(list, "the seam has no air inside it — content would sit against the line").toContain("padding-right: var(--gut)");
+    /* ⚠️ THE AIR MOVED TO THE CHILDREN (§1c), because a TINTED column cannot pay its own gutter as
+       `padding-right`: the ground would stop short of the hairline and leave a stripe of page
+       between the two. The column fills to the seam; its children carry the inset, so the air is
+       still there and the tint reaches the line. */
+    expect(list, "the column stopped filling to the seam").not.toContain("padding-right: var(--gut)");
+    expect(rule(f12, ".f12-list > *"), "the children lost the inset — content would sit on the line")
+      .toContain("padding-inline: var(--gut)");
     /* and it is the ONLY one: a border on the body or the pane would be the frame coming back */
     const body = rule(f12, ".f12-body").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(body, "the row drew a border again").not.toContain("border");

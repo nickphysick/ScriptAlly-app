@@ -45,11 +45,20 @@ describe("the head reuses To-do's values, it does not approximate them", () => {
      part of the sentence — "21 queries" / "Showing 12 of 21 queries" — so there is no trailing
      figure left to style and the mono rule is gone with the span. What survives from To-do is
      the Playfair 17/700 and the warm hairline, asserted above; only the count moved. */
-  it("the count is INSIDE the label now — no separate mono figure", () => {
+  /**
+   * ⚠️ THE COLUMN'S HEADING IS GONE (Pack B §1a), so this case moved to the FOOT. The head read
+   * "20 queries" — the same figure the masthead states directly above it, twice on one screen. A
+   * pane does not introduce itself.
+   *
+   * ⚠️ AND THE FOOT'S COUNT IS NOT THE SAME FACT, which is why it stays. The masthead counts the
+   * whole scope; the foot counts what the FILTER left. They diverge the moment anything is
+   * narrowed, which is exactly when the second number earns its place.
+   */
+  it("the count is stated once on the page — at the foot, where it means something else", () => {
     expect(rule(css, ".f12-lhtitle .f12-lhcount"), "the dead count rule is still in the sheet").toBe("");
     expect(queries, "the count span outlived its rule").not.toContain('className="f12-lhcount"');
     expect(queries, "the head must read the shared label helper, not build a string inline")
-      .toContain("listHeadLabel(sortedList.length, queries.length, listNarrowed)");
+      .toContain("SHOWING <b>{sortedList.length}</b> OF {queries.length}");
   });
 });
 
@@ -59,10 +68,23 @@ describe("the list is de-carded", () => {
     expect(queries.match(/className="f12-list"/g)?.length ?? 0).toBe(2);
   });
 
-  it("and .f12-list paints nothing of its own", () => {
+  /**
+   * ⚠️ INVERTED (Pack B §1c), AND THE OLD RULE WAS RIGHT FOR A DIFFERENT PAGE. "De-carded" meant the
+   * list stopped being a bordered `.f12-pane` floating on the desk — a card inside a card — and
+   * that deletion stands: no border, no radius, no shadow, no float. What it must NOT be is
+   * paintless. The column is FURNITURE now: it runs flush from the masthead to the foot on a faint
+   * ground, which is what makes it read as a fixed part of the page rather than as content that
+   * happens to sit on the left.
+   *
+   * A ground tint is not a card. The distinction is the whole of §1c.
+   */
+  it("it is furniture — a ground and one seam, never a card", () => {
     const list = rule(css, ".f12-list");
-    for (const prop of ["background", "border:", "box-shadow"]) {
-      expect(list, `.f12-list still carries ${prop} — it should be a bare column`).not.toContain(prop);
+    expect(list, "the column lost its ground — it goes back to being loose content")
+      .toContain("background: var(--paper)");
+    expect(list, "the seam went").toContain("border-right: 1px solid var(--hairline)");
+    for (const prop of ["border-radius", "box-shadow"]) {
+      expect(list, `.f12-list carries ${prop} — furniture is not a card`).not.toContain(prop);
     }
     expect(list).toContain("display: flex");
     expect(list).toContain("min-height: 0");
@@ -73,7 +95,14 @@ describe("the selected row wears a bookmark, not a full-height edge", () => {
   it("3px of ink, inset from top and bottom, with rounded ends", () => {
     const sel = rule(css, ".f12-row.f12-sel");
     const mark = rule(css, ".f12-row.f12-sel::before");
-    expect(sel, "the tint stays").toContain("background: var(--blue-t)");
+    /* ⚠️ THE FILL INVERTED WITH THE COLUMN (§1c). On a white column the selected row was the tinted
+       one; on a tinted column it LIFTS to white and takes a ring — the ref's `.qi.on`, and the more
+       literal reading of a card picked up off a desk. The bookmark is unchanged and is what this
+       case is actually about.
+       ⚠️ AND THE BLUE IS GONE with it: `--blue-t` was a cool #e7eef6 on a warm parchment page, read
+       in exactly two places, both here. */
+    expect(sel, "the selected row stopped lifting").toContain("background: var(--white)");
+    expect(sel, "the blue came back").not.toContain("--blue-t");
     expect(sel, "the full-height inset edge should be gone").not.toContain("inset 3px 0 0");
     expect(mark, "the bookmark is missing").not.toBe("");
     expect(mark).toContain("width: 3px");

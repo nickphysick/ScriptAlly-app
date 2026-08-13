@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — rest state: ledger vs dossier</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--paper:#fffdfa;--side:#f7f3ec;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#e9dfd2;--hair2:#e0d5c8;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage:#8a9e88;--sage-tx:#5a6e58;
+--pink:#f5e2da;--pink-br:#e8c8bc;--cream:#fbf7f1;}
+body{font-family:'Inter',sans-serif;background:#e7e1d8;color:var(--ink);padding:20px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:11px;margin-bottom:14px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#8d7d6e;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--hair2);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:#a08f7e;font-style:italic;}
+
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);background:var(--paper);border-radius:12px;overflow:hidden;
+  height:840px;box-shadow:0 12px 34px rgba(58,28,20,.14);max-width:1500px;}
+.side{background:var(--side);box-shadow:inset -1px 0 0 var(--hair);padding:15px 13px;display:flex;flex-direction:column;font-size:12.5px;}
+.brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;margin:2px 4px 12px;}
+.nsec{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.15em;text-transform:uppercase;color:#b5a596;margin:11px 6px 4px;}
+.nav{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:8px;color:var(--ink-soft);}
+.nav.on{background:#fff;box-shadow:inset 0 0 0 1px var(--hair);color:var(--ink);}
+.nav i{width:13px;height:13px;border-radius:4px;background:#e3dace;flex:0 0 13px;}
+.main{display:flex;flex-direction:column;min-height:0;}
+.top{display:flex;align-items:center;gap:12px;padding:11px 20px;box-shadow:inset 0 -1px 0 var(--hair);}
+.crumb{font-family:'Playfair Display',serif;font-size:13.5px;color:var(--ink-soft);}
+.crumb b{color:var(--ink);font-weight:500;}
+.newb{margin-left:auto;background:#2f1c15;color:#f6ece5;border-radius:20px;padding:7px 14px;font-size:12px;}
+
+/* single masthead over the whole split — one title, once */
+.mast{display:flex;align-items:center;gap:13px;padding:14px 26px 12px;box-shadow:inset 0 -1px 0 var(--hair);}
+.mico{width:36px;height:36px;flex:0 0 36px;border-radius:9px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--hair);display:flex;align-items:center;justify-content:center;}
+.mico svg{width:19px;height:19px;stroke:var(--burg);fill:none;stroke-width:1.4;}
+.mast h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:500;line-height:1.05;}
+.mcnt{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.mast .r{margin-left:auto;display:flex;gap:9px;}
+.gb{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.06em;background:#fff;border:0;box-shadow:inset 0 0 0 1px var(--hair2);color:var(--ink-soft);border-radius:9px;padding:9px 14px;cursor:pointer;white-space:nowrap;}
+.gb.dark{background:#2f1c15;box-shadow:none;color:#f6ece5;}
+.gb.pk{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+
+/* balanced split: list ~1/3, pane ~2/3, no page gutter around the list */
+.cols{display:grid;grid-template-columns:340px minmax(0,1fr);flex:1 1 auto;min-height:0;}
+.qwrap{display:flex;flex-direction:column;min-height:0;background:#fcfaf6;box-shadow:inset -1px 0 0 var(--hair);}
+.qhead{display:flex;align-items:center;gap:7px;padding:12px 14px 10px;}
+.lsearch{flex:1;display:flex;align-items:center;gap:8px;background:#fff;border-radius:9px;padding:8px 11px;box-shadow:inset 0 0 0 1px var(--hair2);color:#b8a898;font-size:12px;}
+.ico{position:relative;width:34px;height:34px;flex:0 0 34px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);font-size:12px;}
+.ico.act{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);}
+.ico b{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:var(--burg);color:#fff;font-family:'JetBrains Mono',monospace;font-size:7.5px;display:flex;align-items:center;justify-content:center;}
+.qcol{flex:1;overflow:auto;min-height:0;padding:2px 8px 0;}
+.qi{display:flex;align-items:center;gap:10px;border-radius:9px;padding:9px 8px;cursor:pointer;}
+.qi:hover{background:var(--cream);}
+.qi.on{background:#fff;box-shadow:inset 0 0 0 1px var(--hair),0 1px 2px rgba(58,28,20,.04);}
+.av{width:29px;height:29px;flex:0 0 29px;border-radius:50%;background:#f3ded6;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.qi b{font-size:12.5px;font-weight:500;display:block;line-height:1.2;}
+.qi i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
+.qmeta{margin-left:auto;text-align:right;}
+.qmeta em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);display:block;}
+.dot{width:14px;height:14px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--burg);display:inline-flex;align-items:center;justify-content:center;font-size:7.5px;color:var(--burg);margin-bottom:2px;}
+.dot.sg{box-shadow:inset 0 0 0 1.5px var(--sage);color:var(--sage-tx);}
+.dot.gr{box-shadow:inset 0 0 0 1.5px #c3b3a3;color:#a89686;}
+.qfoot{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:#c2b2a2;padding:11px 16px;box-shadow:inset 0 1px 0 var(--hair);}
+
+.rcol{min-width:0;overflow:auto;min-height:0;padding:16px 26px 22px 24px;}
+
+/* hero: a band, not a box */
+.hero{display:flex;align-items:center;gap:15px;padding-bottom:14px;box-shadow:inset 0 -1px 0 var(--hair);}
+.hero .big{width:52px;height:52px;flex:0 0 52px;border-radius:50%;background:#f3ded6;color:var(--burg);font-family:'Playfair Display',serif;font-size:17px;display:flex;align-items:center;justify-content:center;}
+.hero h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;line-height:1.05;}
+.hero .ag{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:var(--ink-soft);margin-top:1px;}
+.hero .r{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.keb{width:34px;height:34px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair2);color:var(--ink-soft);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* ══ A · ledger: equal cards on a shared grid ══ */
+.cards3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px;align-items:stretch;}
+.c3{position:relative;border-radius:11px;background:#fff;display:flex;flex-direction:column;}
+.c3::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 0 1px var(--hair);}
+.c3 .fr{border-radius:11px;overflow:hidden;display:flex;flex-direction:column;flex:1;}
+.c3 .h{display:flex;align-items:center;gap:8px;padding:9px 12px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;}
+.c3 .h i{width:17px;height:17px;border-radius:5px;background:rgba(253,250,245,.72);box-shadow:inset 0 0 0 1px rgba(124,58,42,.13);flex:0 0 17px;}
+.c3 .b{padding:12px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;flex:1;}
+.c3 .b b{color:var(--ink);font-family:'Playfair Display',serif;font-size:13px;}
+.c3 .b .k{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);display:block;margin:9px 0 3px;}
+.c3 .b .k:first-child{margin-top:0;}
+.cfoot{margin-top:auto;padding:8px 12px;box-shadow:inset 0 1px 0 var(--hair);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#c2b2a2;display:flex;justify-content:space-between;}
+.cfoot a{color:var(--burg);cursor:pointer;}
+
+/* ══ B · dossier: one sheet, ruled sections ══ */
+.doss{margin-top:16px;background:#fffefc;position:relative;}
+.doss::after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(58,28,20,.13),inset 0 0 0 2px rgba(255,255,255,.5);}
+.doss{box-shadow:0 1px 0 rgba(58,28,20,.1),0 6px 14px -6px rgba(58,28,20,.14);}
+.dsec{display:grid;grid-template-columns:150px minmax(0,1fr);}
+.dsec+.dsec{box-shadow:inset 0 1px 0 var(--hair);}
+.dcap{padding:13px 14px;background:linear-gradient(90deg,rgba(215,221,213,.5),rgba(215,221,213,0));display:flex;align-items:flex-start;gap:8px;}
+.dcap i{width:17px;height:17px;border-radius:5px;background:rgba(253,250,245,.9);box-shadow:inset 0 0 0 1px rgba(124,58,42,.13);flex:0 0 17px;}
+.dcap b{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;}
+.dbody{padding:13px 16px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+.dbody b{color:var(--ink);font-family:'Playfair Display',serif;font-size:13px;}
+.drow{display:flex;gap:26px;flex-wrap:wrap;}
+.dk{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+.dchip{display:inline-flex;align-items:center;gap:5px;font-size:11px;background:var(--cream);box-shadow:inset 0 0 0 1px var(--hair);border-radius:16px;padding:3px 9px;margin:0 4px 4px 0;}
+.dnote{background:var(--cream);border-radius:9px;box-shadow:inset 0 0 0 1px var(--hair);padding:9px 11px;font-size:11.5px;}
+.dnote .t{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;color:#b8a898;margin-top:4px;}
+.dcompose{display:flex;gap:8px;margin-top:9px;}
+.dcompose span{flex:1;background:#fff;border-radius:9px;box-shadow:inset 0 0 0 1px var(--hair2);padding:8px 11px;font-size:11.5px;color:#c8b8a8;}
+
+body[data-v="a"] .only-b{display:none;}
+body[data-v="b"] .only-a{display:none;}
+
+.legend{max-width:1500px;margin-top:20px;padding:16px 20px;background:#fdfaf5;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+</style>
+</head>
+<body data-v="a">
+
+<div class="ctl">
+  <b>Layout</b>
+  <div class="seg" id="v"><button data-v="a" class="on">A · The ledger</button><button data-v="b">B · The dossier</button></div>
+  <span class="note">Same masthead and list in both — the difference is what the reading pane is made of.</span>
+</div>
+
+<div class="app">
+  <div class="side">
+    <div class="brand">✈ ScriptAlly</div>
+    <div class="nav"><i></i>Dashboard</div>
+    <div class="nsec">Queries</div>
+    <div class="nav on"><i></i>Query Centre</div>
+    <div class="nav"><i></i>Analytics</div>
+    <div class="nsec">Agents</div>
+    <div class="nav"><i></i>Contact list</div>
+    <div class="nav"><i></i>Discover</div>
+    <div class="nsec">Materials</div>
+    <div class="nav"><i></i>Manuscripts</div>
+    <div class="nav"><i></i>Comparable titles</div>
+    <div class="nav"><i></i>Submission packages</div>
+    <div class="nsec">Tasks</div>
+    <div class="nav"><i></i>To-do list</div>
+    <div class="nav"><i></i>Calendar</div>
+  </div>
+
+  <div class="main">
+    <div class="top"><span class="crumb">ScriptAlly / Queries / <b>Query Centre</b></span><span class="newb">+ New</span></div>
+
+    <div class="mast">
+      <span class="mico"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg></span>
+      <div><h1>Query Centre</h1><div class="mcnt">24 queries · 16 awaiting reply</div></div>
+      <div class="r"><button class="gb">↓ Export</button><button class="gb dark">+ Log query</button></div>
+    </div>
+
+    <div class="cols">
+      <div class="qwrap">
+        <div class="qhead">
+          <span class="lsearch">⌕ Search queries</span>
+          <span class="ico act">⚟<b>1</b></span>
+          <span class="ico">⇅</span>
+        </div>
+        <div class="qcol">
+          <div class="qi on"><span class="av">EW</span><span><b>Eleanor Whitfield</b><i>Greenfield Literary</i></span><span class="qmeta"><span class="dot">✈</span><em>13 AUG</em></span></div>
+          <div class="qi"><span class="av">HV</span><span><b>Harriet Vane-Coe</b><i>Stillwater Reps</i></span><span class="qmeta"><span class="dot">✈</span><em>12 AUG</em></span></div>
+          <div class="qi"><span class="av">DO</span><span><b>Daniel O'Rourke</b><i>Inkwell &amp; Stone</i></span><span class="qmeta"><span class="dot">✈</span><em>9 AUG</em></span></div>
+          <div class="qi"><span class="av">WT</span><span><b>William Tan</b><i>Foxglove Literary</i></span><span class="qmeta"><span class="dot">✈</span><em>29 JUL</em></span></div>
+          <div class="qi"><span class="av">FS</span><span><b>Fenella Str</b><i>Brightwater Books</i></span><span class="qmeta"><span class="dot gr">×</span><em>14 MAR</em></span></div>
+          <div class="qi"><span class="av">SD</span><span><b>Sophie Dunn</b><i>Curtis Vane</i></span><span class="qmeta"><span class="dot sg">←</span><em>15 JAN</em></span></div>
+          <div class="qi"><span class="av">TE</span><span><b>Tom Ellery</b><i>Curtis Vane</i></span><span class="qmeta"><span class="dot sg">★</span><em>3 MAR</em></span></div>
+          <div class="qi"><span class="av">MR</span><span><b>Marcus Reed</b><i>Hartley &amp; Co</i></span><span class="qmeta"><span class="dot gr">×</span><em>20 FEB</em></span></div>
+          <div class="qi"><span class="av">PR</span><span><b>Priya Raman</b><i>No agency</i></span><span class="qmeta"><span class="dot">✈</span><em>2 FEB</em></span></div>
+        </div>
+        <div class="qfoot"><span>Showing 24 of 24</span><span>Export CSV</span></div>
+      </div>
+
+      <div class="rcol">
+        <div class="hero">
+          <span class="big">EW</span>
+          <div><h2>Eleanor Whitfield</h2><div class="ag">Greenfield Literary · Queried 13 Aug · waiting 0 days</div></div>
+          <div class="r"><button class="gb pk">✈ Record response</button><span class="keb">⋯</span></div>
+        </div>
+
+        <!-- A: the ledger -->
+        <div class="only-a">
+          <div class="cards3">
+            <div class="c3"><div class="fr"><div class="h"><i></i>Tracking</div><div class="b">
+              <span class="k">Sent</span><b>13 Aug</b> · by email
+              <span class="k">Waiting</span>0 days · expected by ~8 Oct
+              <span class="k">Nudge</span>A task appears on 10 Sep
+            </div><div class="cfoot"><span>On schedule</span></div></div></div>
+            <div class="c3"><div class="fr"><div class="h"><i></i>What you sent</div><div class="b">
+              <b>Murphy's Day Out</b><br>Thriller · 50,000 words
+              <span class="k">With this query</span>Query letter ✓ · Synopsis ✓<br>First 3 chapters
+            </div><div class="cfoot"><span>3 materials</span><a>Change</a></div></div></div>
+            <div class="c3"><div class="fr"><div class="h"><i></i>Notes</div><div class="b">
+              Mentioned her interest in coastal settings — worth referencing if she asks for more.
+              <span class="k">13 Aug, 13:48</span>
+            </div><div class="cfoot"><a>Write a note</a></div></div></div>
+          </div>
+        </div>
+
+        <!-- B: the dossier -->
+        <div class="only-b">
+          <div class="doss">
+            <div class="dsec">
+              <div class="dcap"><i></i><b>Tracking</b></div>
+              <div class="dbody"><div class="drow">
+                <span><span class="dk">Sent</span><b>13 Aug</b> · by email</span>
+                <span><span class="dk">Waiting</span>0 days · expected ~8 Oct</span>
+                <span><span class="dk">Nudge</span>Task on 10 Sep</span>
+              </div></div>
+            </div>
+            <div class="dsec">
+              <div class="dcap"><i></i><b>What you sent</b></div>
+              <div class="dbody">
+                <b>Murphy's Day Out</b> · Thriller · 50,000 words<br>
+                <div style="margin-top:7px"><span class="dchip">Query letter ✓</span><span class="dchip">Synopsis ✓</span><span class="dchip">First 3 chapters</span></div>
+              </div>
+            </div>
+            <div class="dsec">
+              <div class="dcap"><i></i><b>Notes</b></div>
+              <div class="dbody">
+                <div class="dnote">Mentioned her interest in coastal settings — worth referencing if she asks for more.<div class="t">13 AUG, 13:48</div></div>
+                <div class="dcompose"><span>Write a note…</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>What was clunky, named</b>
+  <ul>
+    <li><b>The page said "24 queries" twice</b> — masthead and list heading. The guidance is one title over the whole split; panes don't introduce themselves. The list's heading is gone; the masthead says it once.</li>
+    <li><b>The masthead was an island</b> — a centred card with ~120px of dead white each side and content starting ~310px down. It is now a slim band across the whole split, and the working area starts ~150px higher.</li>
+    <li><b>The list floated in a page gutter.</b> It now runs flush from the masthead to the foot on a faint ground tint, one hairline from the pane — the split reads as furniture, not as two cards on a page. Selection inverts: rows sit on the tinted ground and the selected one lifts to white.</li>
+    <li><b>Proportions were off.</b> The list takes ~340px (~a third at 1200 of working width) against the guidance's balanced split; the pane stops being the leftover.</li>
+    <li><b>The hero was a box in a pane of boxes.</b> It becomes a band under the masthead — same grammar as every flattened header on this page — and its facts (queried date, days waiting) move onto its line, which lets the Tracking card stop half-repeating them.</li>
+  </ul>
+  <br>
+  <b>A · The ledger</b> — keeps the three sage cards but disciplines them: equal heights from a shared grid row, a footer line on each (status / count-plus-action / write-a-note) so no card trails off into white, and interior density evened with the same label-value rhythm in all three. Least change from what's built.
+  <br><br>
+  <b>B · The dossier</b> — the pane becomes <b>one sheet: the query's file</b>. Sage caps move to the left edge as section labels; Tracking, What you sent and Notes are ruled sections of a single document with the sheet's two-line cut edge. No box-in-box anywhere, reads top to bottom like a record card, and it rhymes with the journey sheet — the journeys lay a sheet on the desk; at rest, the selected query <i>is</i> a sheet on the desk. My pick, and the honest reason against it: it re-cards what we just de-carded, so it must be the <i>only</i> drawn surface in the pane — hero stays a band, nothing else boxed.
+</div>
+
+<script>
+document.getElementById('v').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ document.body.dataset.v=b.dataset.v;
+ [].forEach.call(e.currentTarget.children,function(x){x.classList.toggle('on',x===b);});});
+</script>
+</body>
+</html>

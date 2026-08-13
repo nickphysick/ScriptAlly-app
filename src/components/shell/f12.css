@@ -763,7 +763,10 @@
    below them — the locks were right both times; the format was the fault. */
 @keyframes f12-settle {
   from { background: var(--pink-t); }
-  to   { background: var(--blue-t); }
+  /* ⚠️ IT LANDS ON THE SELECTED FILL, whatever that is — the arriving row settles INTO selection,
+     so this end frame and `.f12-row.f12-sel` are one decision. They were `--blue-t` together and
+     they are `--white` together. */
+  to   { background: var(--white); }
 }
 .f12-row.f12-settle { animation: f12-settle 0.9s ease-out both; }
 
@@ -1153,6 +1156,36 @@
  * this repo has recorded twice. Both states are named explicitly at 0-2-0 instead.
  */
 .qc-wpg:not(.wpg--working) { --content-top-gap: 18px; }
+
+/**
+ * ══ §1b · THE MASTHEAD IS A BAND, NOT AN ISLAND ═══════════════════════════════════════════════
+ *
+ * ⚠️ ONE TOKEN, PAGE-SCOPED — the same shape as the gap above, and for the same reason. The shell's
+ * law is `header = content − 2 × --header-inset` with the inset at 120px, which is a REASONED,
+ * shell-wide decision documented in pageHeader.css and read by all ten pages. This does not argue
+ * with it; it opts this page out. Measured before: the plate was 770px starting at x=447 while the
+ * working body was 1010px starting at x=327 — inset 120px a side, with dead space either side of a
+ * centred card sitting over a full-width split.
+ *
+ * ⚠️ AND OVERRIDING THE TOKEN WORKS HERE WHERE IT DID NOT FOR THE GAP. `--content-top-gap` is
+ * COMPUTED at `:root` from its `-rest` variant, so overriding the variant lower down changed
+ * nothing; `--header-inset` is read directly inside a `calc()` on `.wpg-plate`, and a custom
+ * property resolves at its USE site. Different shape, so a different answer — worth stating,
+ * because the two look identical from a distance.
+ */
+.qc-wpg { --header-inset: 0px; }
+/**
+ * ⚠️ A BAND HAS ONE RULE, NOT FOUR EDGES. The shared plate is a card — border, radius, shadow —
+ * which is right when it floats in a gutter and wrong when it spans the working width: a card whose
+ * left and right edges touch the container's is just a box with two pointless lines in it. Scoped
+ * to this page; the other nine keep the card.
+ */
+.qc-wpg .wsh {
+  border: 0;
+  border-bottom: 1px solid var(--ws-edge);
+  border-radius: 0;
+  box-shadow: none;
+}
 .qc-wpg.wpg--working { --content-top-gap: 9px; }
 
 /**
@@ -1244,11 +1277,21 @@
  * and the row's `gap: var(--gut)` outside, so it is centred in the channel without either side
  * naming a number the other has to match.
  */
+/**
+ * ⚠️ §1c · THE LIST IS FURNITURE. It runs flush from the masthead to the foot on a faint ground, so
+ * it reads as a fixed part of the page rather than as content that happens to be on the left. The
+ * ground is `--paper`, the surface this theme already uses for a receding fill — not a new tint.
+ *
+ * ⚠️ AND THE PADDING MOVES INSIDE. A tinted column cannot pay its gutter as `padding-right`, or the
+ * tint stops short of the hairline and leaves a stripe of page between them. The column fills to
+ * the seam; its CHILDREN carry the inset.
+ */
 .f12-list {
   flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0;
-  padding-right: var(--gut);
+  background: var(--paper);
   border-right: 1px solid var(--hairline);
 }
+.f12-list > * { padding-inline: var(--gut); }
 
 /* The head reuses TO-DO'S values verbatim (todo.css .tdb-sec / .tdb-cn / .tdb-secrule) rather
    than approximating them: Playfair 17/700, a mono count, over a 1px #ece5d9 warm hairline.
@@ -1307,11 +1350,24 @@
 .f12-rows:hover::-webkit-scrollbar-thumb, .f12-rows:focus-within::-webkit-scrollbar-thumb,
 .f12-quiet-scroll:hover::-webkit-scrollbar-thumb, .f12-quiet-scroll:focus-within::-webkit-scrollbar-thumb { background: var(--hairline); }
 .f12-row { position: relative; display: flex; align-items: center; gap: 11px; width: 100%; height: 56px; padding: 0 14px; border-bottom: 1px solid var(--hairline); cursor: pointer; transition: background 0.1s; }
-.f12-row:hover { background: var(--paper); }
+/**
+ * ⚠️ SELECTION INVERTS (§1c). On a white column a tinted row was the selected one; on a tinted
+ * column the selected row LIFTS to white and takes a hairline, which is the ref's `.qi.on` and the
+ * more literal reading of a card picked up off a desk.
+ *
+ * ⚠️ AND THE BLUE IS GONE. `--blue-t` (#e7eef6) was the selected fill — a cool blue on a warm
+ * parchment page, off-palette for everything around it. It was read in exactly two places, both on
+ * this page, so nothing else decides this. `--blue-b` was already read by nothing at all; both are
+ * reported rather than deleted from index.css, which is a shared file and not this section's job.
+ *
+ * Three steps from three existing tokens: ground `--paper`, hover `--panel`, selected `--white`
+ * with a ring. Hover and selected differ by the ring and the lift, exactly as the ref has it.
+ */
+.f12-row:hover { background: var(--panel); }
 /* Selected: the tint stays; the full-height inset edge becomes a BOOKMARK — 3px of ink inset
    9px from the row's top and bottom, with rounded ends, so it reads as a marker placed on the
    row rather than as the row's own border. */
-.f12-row.f12-sel { background: var(--blue-t); }
+.f12-row.f12-sel { background: var(--white); box-shadow: inset 0 0 0 1px var(--hairline), 0 1px 2px rgba(58, 28, 20, 0.04); }
 .f12-row.f12-sel::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--ink); }
 .f12-row .f12-av { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; }
 /* Smaller-tonal monogram (monogram-styles.html) — the QUERY-LIST instance only (via the additive
@@ -1337,6 +1393,35 @@
 .f12-detail { flex: 1; min-width: 0; }
 .f12-dscroll { flex: 1; overflow-y: auto; min-height: 0; background: var(--paper); padding: 20px; }
 /* agent header — sage LEFT SPINE (::before clipped by the card radius; no top rule) */
+/**
+ * ══ §1h · THE HERO IS A BAND ══════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ IT WAS A BOX INSIDE A PANE OF BOXES. A bordered, shadowed, sage-spined card sitting above
+ * three more framed cards — four objects of equal weight, so the pane had no hierarchy at all. One
+ * row now, closed by a single rule, exactly as the masthead above it is.
+ *
+ * ⚠️ THE OLD `.f12-hero` RULES ARE LEFT WHERE THEY ARE. The class still dresses the CREATE journey's
+ * chassis children (`.f12-bigav`, `.f12-hn`, `.f12-hs`), which this band reuses — so the skin is
+ * replaced by not applying it, rather than by deleting rules the reused children still read.
+ */
+.f12-heroband {
+  display: flex; align-items: center; gap: 15px;
+  margin: 0 20px;
+  padding: 14px 0;
+  box-shadow: inset 0 -1px 0 var(--hairline);
+}
+/* the avatar comes down from the card's 76px — a band's height is its row, not its portrait */
+.f12-heroband .f12-bigav { width: 46px; height: 46px; font-size: 17px; }
+.f12-heroband .f12-hn { font-size: 21px; }
+/* ⚠️ ONE META LINE. Agency and the queried date are both quiet facts about this record; two stacked
+   lines made a three-line block out of a row. The interpunct is drawn by the rule, so either half
+   can omit itself without leaving a stray separator. */
+.f12-hmeta { display: flex; align-items: center; gap: 8px; margin-top: 2px; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); min-width: 0; }
+.f12-hmeta > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f12-hmeta > span + span::before { content: "·"; margin-right: 8px; color: var(--line); }
+/* the status badge loses the card's top margin — it is inline in a row now */
+.f12-heroband .f12-hs { margin-top: 0; }
+
 .f12-hero { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px 26px 24px 32px; display: flex; align-items: center; gap: 22px; box-shadow: var(--sh-1); overflow: hidden; }
 .f12-hero::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 5px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); }
 .f12-hero .f12-bigav { flex: none; width: 76px; height: 76px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-serif); font-size: 25px; font-weight: 600; }

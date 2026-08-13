@@ -49,7 +49,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, listHeadLabel, DAY } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, DAY } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -61,6 +61,8 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials } from "../lib/agentDisplay";
+/* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
+import { refDate } from "../lib/responseContext";
 import { formatQueryMaterial, materialLabel, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
@@ -3326,16 +3328,15 @@ export const Queries: React.FC<{
               56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
               pills, no manuscript spine — the row is avatar · name/agency · StatusDot + date. ── */}
           <div className="f12-list">
-            {/* Editorial head — To-do's grammar, reused verbatim (Playfair 17/700 + mono count
-                over a 1px #ece5d9 hairline). The search and the Filter/Sort pills keep their own
-                row beneath it, wiring untouched. */}
-            <div className="f12-lhtitle">
-              {/* ONE sentence, not a label beside a figure: the count IS the label. The
-                  "Showing" form is keyed on the CONTROLS being active, never on the two counts
-                  differing — a filter that happens to match everything still says it is
-                  filtering. See listHeadLabel. */}
-              <h2>{listHeadLabel(sortedList.length, queries.length, listNarrowed)}</h2>
-            </div>
+            {/* ⚠️ THE COLUMN'S OWN HEADING IS GONE (§1a). It read "20 queries" — the same figure
+                the masthead states directly above it, on one screen, twice. Panes do not introduce
+                themselves: the page is titled once, and the count belongs to the title.
+
+                ⚠️ THE FOOT STILL STATES "SHOWING n OF m", AND THAT IS NOT THE SAME FACT. The
+                masthead counts the whole scope; the foot counts what the FILTER left. They differ
+                the moment anything is narrowed, which is when the second number starts earning its
+                place. `listHeadLabel` keeps its own tests but has no caller — reported, not deleted
+                here, because a lib function with a live test suite is a separate decision. */}
             {/* ⚠️ THE LIST'S CONTROLS SIT AT THE HEAD OF THE LIST COLUMN (§1c) — and they came back
                 DOWN here from the grid's page-wide toolbar row, which is the correction. Search,
                 Filter and Sort narrow the list; they do nothing to the reading pane beside it. A
@@ -3877,25 +3878,45 @@ export const Queries: React.FC<{
                   /* the kebab's two state-dependent facts, derived where the hero's own are */
                   const heroWaitingOnAgent = heroAction.ballHolder === "agent";
                   const heroTaskCount = queryTaskBadge(tasks, activeQuery.id).count;
+                  /* ⚠️ THROUGH `refDate`, WHICH OMITS RATHER THAN PRINTING "Invalid Date". Undated
+                     imports exist, and `new Date(junk).toLocaleDateString()` is a literal string
+                     this app has shown a writer before. */
+                  const heroQueriedOn = refDate((activeQuery as { dateSent?: unknown }).dateSent);
                   const heroClosed = activeQuery.status === QueryStatus.REJECTED || activeQuery.status === QueryStatus.WITHDRAWN || activeQuery.status === QueryStatus.NO_RESPONSE;
                   const heroIsMark = heroAction.kind === "mark-sent" && !heroClosed;
                   const heroLabel = heroClosed ? "Reopen"
                     : heroAction.kind === "mark-sent" ? (heroAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
                     : "Record response";
                   return (
-                    <div className="f12-hero" style={{ margin: "var(--f12-headgap) 20px 0", flexShrink: 0 }}>
+                    /* ⚠️ A BAND, NOT A BOX INSIDE A PANE OF BOXES (§1h). This was a bordered,
+                       shadowed, sage-spined card sitting above three more cards — four framed
+                       objects stacked, so nothing in the pane was more important than anything
+                       else. It is one row beneath the masthead now, closed by a single rule.
+
+                       ⚠️ IT TAKES THE QUERIED DATE AND LEAVES THE LIVE PAIR TO TRACKING. The date is
+                       STATIC and belongs to identity — when this went out. "Days waiting" and
+                       "expected by" move, and they are the two numbers Tracking's progress bar reads
+                       against, so they stay where the bar is. Splitting them this way is what stops
+                       either surface restating the other. */
+                    <div className="f12-heroband" style={{ flexShrink: 0 }}>
                       <span className="f12-bigav" aria-hidden="true">{initials}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="f12-hn" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
-                        {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
-                          <div className="f12-ha">{activeAgent.agency}</div>
-                        )}
-                        {/* The status badge draws the real StatusDot — never a recreation. */}
-                        <span className="f12-hs" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                          <StatusDot status={activeQuery.status} overrideSize={13} />
-                          {statusDisplayLabel(activeQuery)}
-                        </span>
+                        {/* ⚠️ ONE META LINE, NOT TWO STACKED. Agency and the queried date are both
+                            quiet facts about this record; giving each its own line made a three-line
+                            block out of a row. Either half omits itself when absent. */}
+                        <div className="f12-hmeta">
+                          {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
+                            <span>{activeAgent.agency}</span>
+                          )}
+                          {heroQueriedOn && <span>Queried {heroQueriedOn}</span>}
+                        </div>
                       </div>
+                      {/* The status badge draws the real StatusDot — never a recreation. */}
+                      <span className="f12-hs" style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                        <StatusDot status={activeQuery.status} overrideSize={13} />
+                        {statusDisplayLabel(activeQuery)}
+                      </span>
                       <button
                         // Mobile Pass 1: below md the floating command bar's primary carries
                         // the Mark-sent anchor instead (this button is display:none there, and

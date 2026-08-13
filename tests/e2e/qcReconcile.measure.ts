@@ -352,3 +352,75 @@ test("no chips on arrival, and earning one moves neither the title nor the place
     if (s1) expect(s1.chips, "create opened with chips already showing").toBe(0);
   }
 });
+
+/* ══ Pack B §1 · THE CHASSIS, MEASURED ═════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE PROPORTIONS ARE ASSERTED AT >=1100 ONLY, AND THE BAND BELOW IT IS A KNOWN GAP. At 1024 the
+ * whole working column is 594px, so a 334px list leaves the pane 248 — narrower than the list — and
+ * no ratio fixes that, because both halves lose. The page already has a seam at 1100 (the glance
+ * panel is `display: none` below it), so that is where the two-column contract starts. What
+ * 768–1100 actually needs is a single-column mode — list, then detail with a back control — which
+ * is the mobile pass's shape, not a ratio tweak.
+ */
+const chassis: Record<number, { plateW: number|null; plateL: number|null; bodyW: number|null; bodyL: number|null; listW: number|null; paneW: number|null; listBg: string|null; rowBg: string|null; selBg: string|null; heading: boolean; bandH: number|null; seamList: number|null; seamBody: number|null }> = {};
+
+for (const { w, h } of WIDTHS) {
+  test(`chassis at ${w}x${h}`, async () => {
+    await page.setViewportSize({ width: w, height: h });
+    await queries(page);
+    const m = await page.evaluate(() => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+      const r = (el: HTMLElement | null) => (el ? el.getBoundingClientRect() : null);
+      const plate = r(q(".wsh")), body = r(q(".f12-body")), list = r(q(".f12-list")), pane = r(q(".qp-pane"));
+      const listEl = q(".f12-list");
+      return {
+        plateW: plate ? Math.round(plate.width) : null, plateL: plate ? Math.round(plate.left) : null,
+        bodyW: body ? Math.round(body.width) : null, bodyL: body ? Math.round(body.left) : null,
+        listW: list ? Math.round(list.width) : null, paneW: pane ? Math.round(pane.width) : null,
+        listBg: listEl ? getComputedStyle(listEl).backgroundColor : null,
+        rowBg: (() => { const el = q(".f12-row:not(.f12-sel)"); return el ? getComputedStyle(el).backgroundColor : null; })(),
+        selBg: (() => { const el = q(".f12-row.f12-sel"); return el ? getComputedStyle(el).backgroundColor : null; })(),
+        heading: !!q(".f12-lhtitle"),
+        bandH: (() => { const el = q(".f12-heroband"); return el ? Math.round(el.getBoundingClientRect().height) : null; })(),
+        seamList: list ? Math.round(list.height) : null,
+        seamBody: body ? Math.round(body.height) : null,
+      };
+    });
+    chassis[w] = m;
+    // eslint-disable-next-line no-console
+    console.log(`[chassis ${w}] plate ${m.plateW}@${m.plateL} body ${m.bodyW}@${m.bodyL} · list ${m.listW} pane ${m.paneW} · bg ${m.listBg} row ${m.rowBg} sel ${m.selBg} · heading=${m.heading} band=${m.bandH} · seam ${m.seamList}/${m.seamBody}`);
+
+    /* §1b — the masthead spans the working width, at every size */
+    expect(m.plateW, `the masthead is still inset at ${w}`).toBe(m.bodyW);
+    expect(m.plateL, `the masthead is still offset at ${w}`).toBe(m.bodyL);
+    /* §1a — the column states no count of its own */
+    expect(m.heading, "the list column's heading came back").toBe(false);
+    /* §1c — tinted ground, white selected row */
+    expect(m.listBg, "the column has no ground").not.toBe("rgba(0, 0, 0, 0)");
+    expect(m.selBg, "the selected row is not white").toBe("rgb(255, 255, 255)");
+    expect(m.selBg, "the selected row matches the ground — selection is invisible").not.toBe(m.listBg);
+    /* §1c — the seam runs the full height of both columns */
+    expect(Math.abs(m.seamList! - m.seamBody!), `the seam is short by ${m.seamBody! - m.seamList!}px at ${w}`)
+      .toBeLessThanOrEqual(1);
+  });
+}
+
+test("§1f · the proportions hold at 1100 and above, and 768-1100 is a known gap", () => {
+  for (const w of [1440, 1920]) {
+    const m = chassis[w];
+    if (!m) continue;
+    // eslint-disable-next-line no-console
+    console.log(`[§1f ${w}] list ${m.listW} pane ${m.paneW} — pane/list ${(m.paneW! / m.listW!).toFixed(2)}`);
+    expect(m.listW, `the list left the 330-340 band at ${w}`).toBeGreaterThanOrEqual(330);
+    expect(m.listW, `the list left the 330-340 band at ${w}`).toBeLessThanOrEqual(340);
+    expect(m.paneW, `the pane is still the leftover at ${w}`).toBeGreaterThan(m.listW!);
+  }
+  /* ⚠️ REPORTED, NOT ASSERTED, AT 1024. The pane genuinely is narrower than the list there, and
+     that is the known gap — a two-column page in a 594px column. Asserting it would either enforce
+     a fault or demand a fix this pack has ruled out. */
+  const narrow = chassis[1024];
+  if (narrow) {
+    // eslint-disable-next-line no-console
+    console.log(`[§1f 1024] KNOWN GAP — list ${narrow.listW} pane ${narrow.paneW} in a ${narrow.bodyW}px column; needs single-column mode, not a ratio`);
+  }
+});

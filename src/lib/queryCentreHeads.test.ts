@@ -34,35 +34,41 @@ const rule = (sheet: string, selector: string): string => {
   return at < 0 ? "" : sheet.slice(at, sheet.indexOf("}", at) + 1);
 };
 
-describe("the head band is one height, shared", () => {
-  it("both tokens are defined — a var() that resolves to nothing drops the declaration silently", () => {
-    expect(indexCss, "--f12-headh is read but never defined").toContain("--f12-headh: 48px");
-    expect(indexCss, "--f12-headgap is read but never defined").toContain("--f12-headgap: 20px");
-  });
-
-  it("the list head and the pane toolbar take their height from the SAME token", () => {
-    const head = rule(css, ".f12-lhtitle");
-    const ctl = rule(css, ".f12-ctl");
-    expect(head, "the list head rule is missing").not.toBe("");
-    expect(ctl, "the toolbar rule is missing").not.toBe("");
-    expect(head).toContain("height: var(--f12-headh)");
-    expect(ctl).toContain("height: var(--f12-headh)");
-    expect(ctl, "the toolbar restated the number instead of reading the token").not.toContain("height: 48px");
-  });
-
-  it("the head's height is what holds the rule — padding would let the type move it", () => {
-    const head = rule(css, ".f12-lhtitle");
-    expect(head, "padding-bottom is back; the rule will drift with the label")
-      .not.toContain("padding-bottom");
-    expect(head, "the head still closes with To-do's hairline").toContain("border-bottom: 1px solid #ece5d9");
+/**
+ * ⚠️ THE HEAD BAND HAS NO MEMBERS LEFT, AND THIS DESCRIBE IS RETIRED RATHER THAN LEFT PASSING.
+ *
+ * It locked the collinearity of two elements: the list column's own `.f12-lhtitle` heading and the
+ * pane's `.f12-ctl` toolbar. The toolbar was retired an earlier pack ago (its six verbs went to the
+ * hero's kebab); the heading goes with Pack B §1a, because it read "20 queries" directly beneath a
+ * masthead stating the same figure. Neither renders anywhere.
+ *
+ * The CSS for both survives and is REPORTED as dead rather than deleted here — a housekeeping
+ * commit's job, and the same call Pack A made about `.qr-ref`'s tokens. What must not survive is a
+ * test that keeps passing while describing two elements the app no longer draws: a green assertion
+ * about nothing is worse than no assertion, because it reads as coverage.
+ *
+ * `listHeadLabel` is in the same position — a pure helper with a full suite below and no caller.
+ * Its cases are KEPT: they test the function, which is still correct, and they are what makes
+ * bringing the heading back cheap if that is ever wanted.
+ */
+describe("the retired head band stays retired", () => {
+  it("neither element renders, so neither rule has anything to align", () => {
+    expect(queries, "the list column's own heading came back — the count would be stated twice")
+      .not.toContain('className="f12-lhtitle"');
+    expect(queries, "the pane toolbar came back — its verbs live in the hero's kebab")
+      .not.toMatch(/className="f12-ctl[ "]/);
   });
 });
 
 describe("the row beneath each head starts on one line", () => {
-  it("the head's bottom margin and the hero's top margin are the same token", () => {
-    expect(rule(css, ".f12-lhtitle")).toContain("margin-bottom: var(--f12-headgap)");
-    expect(queries, "the hero went back to a hand-matched 20px — it must read the token")
-      .toContain('margin: "var(--f12-headgap) 20px 0"');
+  /* ⚠️ THE PAIRING IS GONE BECAUSE BOTH HALVES ARE (§1a, §1h). The head this measured against no
+     longer renders, and the hero it measured is a BAND now — closed by the masthead's own rule and
+     beginning where that rule ends, so there is no top margin to match anything with. What is left
+     worth asserting is that the band keeps the column's side inset, which is what still lines it up
+     with the cards beneath it. */
+  it("the hero band shares the pane's side inset", () => {
+    expect(queries, "the hero card came back").not.toContain('className="f12-hero"');
+    expect(rule(css, ".f12-heroband"), "the band lost its side inset").toContain("margin: 0 20px");
   });
 
   /* Tops can only agree if the heights do. Centred in the row, a 34px field sat 1px below the
