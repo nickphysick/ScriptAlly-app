@@ -119,13 +119,17 @@ describe("the completion has something deterministic to listen for", () => {
   });
 
   it("the handler dispatches on that name, and never on a timer", () => {
-    /* ⚠️ THERE ARE TWO `onAnimationEnd` HANDLERS IN THIS FILE — the row's and the pane's — so a
+    /* ⚠️ THERE ARE TWO `onAnimationEnd` HANDLERS IN THIS FILE — the row's and the journey's — so a
        bare `indexOf` anchors on the ROW's and reads the wrong handler entirely. Anchored through
-       the pane's own className first. */
-    const pane = queries.indexOf("className={`qp-pane f12-detail");
-    expect(pane, "the pane's className is missing").toBeGreaterThan(-1);
+       the journey frame first.
+       ⚠️ THE FRAME IS THE SHEET NOW, NOT THE PANE (§2). The anchor used to be the pane's className;
+       the journey is an overlay portalled out of the page, so the lifecycle handler moved with the
+       frame that actually arrives and leaves. Re-anchored rather than loosened — a lock that stops
+       naming a specific element is a lock that will find the wrong one. */
+    const pane = queries.indexOf("<QueryJourneySheet");
+    expect(pane, "the journey sheet is missing").toBeGreaterThan(-1);
     const a = queries.indexOf("onAnimationEnd={(e) => {", pane);
-    expect(a, "the pane's animationend handler is missing").toBeGreaterThan(pane);
+    expect(a, "the sheet's animationend handler is missing").toBeGreaterThan(pane);
     const b = queries.indexOf("}}", a);
     expect(b, "the handler never closes").toBeGreaterThan(a);
     const handler = queries.slice(a, b);

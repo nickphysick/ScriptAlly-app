@@ -25,6 +25,7 @@ import { TypeGlyph } from "./packages/TypeGlyph";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
 import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { QueryJourneySheet } from "./queries/QueryJourneySheet";
 import { QueryCreatePane } from "./queries/QueryCreatePane";
 import { emptyDraft, draftDirty, draftReady, draftToPayload, materialRowsForDraft, todayInputDate, type QueryDraft, type ReminderChoice } from "../lib/queryDraft";
 import { requirements } from "../lib/createSteps";
@@ -2526,12 +2527,13 @@ export const Queries: React.FC<{
        and the sidebar carries the account block, so F12Page's CrumbStrip + F12Account chrome
        retire — the .t-f12 f12-root scope stays (every f12-* class reads it). The page's own
        header is the compact PageHeader in the centred column below. ── */
-    /* ⚠️ `qh-take` IS BOTH JOURNEYS, AND `qh-create` WAS ONLY ONE. Both takeovers replace the whole
-       work area — list and reading pane — but only create hid the list, so recording a response
-       drew its journey squeezed into 588px beside a list it had already replaced. The class the
-       rule needs is "a takeover is open", not "the create takeover is open"; `qh-create` stays for
-       the things that really are create's alone. */
-    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${creating ? " qh-create" : ""}${creating || recording ? " qh-take" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
+    /* ⚠️ `qh-take` AND `qh-create` ARE GONE (§2). Both existed to tell the page a takeover had
+       replaced the work area — `qh-take` hid the list, `qh-create` scoped what was create's alone.
+       A journey is a sheet over the desk now; the desk changes in no way at all when one opens, so
+       there is nothing for either class to key. Deleted rather than left applied-and-unmatched: a
+       className that computes on every render and matches no rule is the shape someone later
+       "restores" on the assumption it once did something. */
+    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}
@@ -3046,59 +3048,15 @@ export const Queries: React.FC<{
              ⚠️ THE GRID ALREADY DRAWS THIS ROW. It has had a `toolbar` slot since the conversion
              and this page never used one, so the controls lived inside the list column instead —
              which is why they read as the list's chrome rather than the page's. */
-          /**
-           * ⚠️ THE DOCK (§3) — the composition runs from the top edge to the bottom edge whatever
-           * the content height. Cancel and Save left the journey header for it: the header states
-           * what this is and how far along it is; the dock states what committing it will do, next
-           * to the button that commits it.
-           *
-           * ⚠️ DESKTOP ONLY, BECAUSE THE MOBILE DOCK ALREADY EXISTS. `.qh-mcmd` is Query Centre's
-           * own floating command bar below md — the same idea at the other breakpoint, and it
-           * carries the Mark-sent anchor. Rendering both would stack two bottom bars over a tab
-           * bar; the mobile one keeps the job it already has.
-           *
-           * ⚠️ AND THE TOAST HOST FLOATS OVER IT, WHICH IS CORRECT. `.sa-toasts` is z:300 against
-           * the dock's place in normal flow, so a receipt sits ABOVE the dock rather than pushing
-           * it — a confirmation should never move the control you just used.
-           */
-          dock={(creating || recording) && !isMobile ? (
-            <div className={`qc-dock${createEntering || respEntering ? " qc-dock-in" : ""}${createCancelling || respCancelling ? " qc-dock-out" : ""}`}>
-              <span className="qc-dock-say">
-                {/* ⚠️ `OUTCOME_STATUS`, NOT A CAST. `respDraft.outcome` is an outcome KEY ("rr",
-                    "noreply", "rejected") and casting it to `QueryStatus` typechecks while producing
-                    a value the enum never contains — measured, the dock read "Saves as rejected" in
-                    lowercase and `getPrimaryAction` fell through to its default, so the line
-                    promised "closed — the row will offer Record response", which contradicts
-                    itself. `responseDraft.ts` owns this map: "This module maps outcomes to
-                    statuses; it never sets one." */}
-                {recording && respDraft
-                  ? consequenceLine(respDraft.outcome ? OUTCOME_STATUS[respDraft.outcome] : null)
-                  : consequenceLine(createReady ? QueryStatus.QUERIED : null)}
-              </span>
-              <span className="qc-dock-acts">
-                <span className="qch-esc" aria-hidden="true">Esc</span>
-                {recording ? (
-                  <>
-                    <button type="button" className="f12-btn-sec" onClick={() => closeRecord()} disabled={respSaving}>Cancel</button>
-                    {/* ⚠️ NO "SAVE AND RECORD ANOTHER" — a response belongs to one query, so there is
-                        no next one to move on to and offering it would invent a batch. */}
-                    <button type="button" className="f12-btn-pri" onClick={() => void saveResponse()}
-                      disabled={!responseReady(respDraft!) || respSaving}>
-                      {respSaving ? "Saving…" : "Save response"}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
-                    <button type="button" className="qch-tert" onClick={() => saveCreate(true)} disabled={!createReady || createSaving}>Save &amp; log another</button>
-                    <button type="button" className="f12-btn-pri" onClick={() => saveCreate()} disabled={!createReady || createSaving}>
-                      {createSaving ? "Saving…" : "Save query"}
-                    </button>
-                  </>
-                )}
-              </span>
-            </div>
-          ) : undefined}
+          /* ⚠️ NO `dock` PROP (§2). The dock left grid row 4 for the SHEET'S foot — it states what
+             committing the composition will do, so it belongs to the composition rather than to the
+             page the composition is lying on. Its definition now sits with the journeys below.
+
+             ⚠️ AND THE RHYTHM PACK'S SCROLLPORT WARNING RETIRES WITH IT. "A dock's height comes out
+             of the scrollport" was true of a grid row and is not true of a child of an overlay:
+             nothing about `--wpg-reclaim-pad` is coupled to it on this page any more. Do not
+             reinstate that coupling here — and note the warning still stands for any page that
+             puts a dock back in row 4. */
           /* ⚠️ NO `toolbar` PROP (§1c). Search, Filter and Sort act on the LIST and nothing else,
              so they sit at the head of the list COLUMN rather than in a page-wide strip. The grid's
              row 2 is gone from this page entirely; `.wpg-scroll`'s own `padding-top` pays the
@@ -3452,34 +3410,13 @@ export const Queries: React.FC<{
               scroll behind their own edge fade (flex:1). The command bar pins to the pane foot in
               Phase 2; the top action toolbar above still exists this phase. */}
           <div
-            /* ⚠️ THE STATE CLASS GOES ON THE CONTAINER, not merely used as a selector — a class
-               that exists only in the stylesheet animates nothing. */
-            /* ⚠️ THE RESPONSE TAKEOVER WEARS THE SAME MOTION CLASSES — one entrance, one cancel,
-               one save exit, shared with create rather than reimplemented. Both journeys arm the
-               same classes; only the state driving them differs. */
-            className={`qp-pane f12-detail ${creating || recording ? "f12-pane-enter-create" : "f12-pane-enter-read"}${createEntering || respEntering ? " qc-entering" : ""}${createCancelling || respCancelling ? " qc-exit-cancel" : ""}${createExiting || respExiting ? " qc-exit-save" : ""}`}
-            /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would
-               drift the moment the timing changed.
-
-               ⚠️ THE OLD COMMENT HERE CLAIMED `animation: none` "still fires animationend". IT DOES
-               NOT — verified in-browser — which is why the reduced-motion path is a branch at the
-               arming site (saveCreate) rather than a second listener. Under reduced motion this
-               handler is never reached, because the class is never applied. */
-            onAnimationEnd={(e) => {
-              if (respCancelling && e.animationName === "qc-exit-cancel") {
-                shutRecord(); recordTriggerRef.current?.focus(); return;
-              }
-              if (respExiting && e.animationName === "qc-exit-save") {
-                shutRecord(); recordTriggerRef.current?.focus(); return;
-              }
-              if (respEntering && e.animationName === "qc-in-last") { setRespEntering(false); return; }
-              if (createCancelling && e.animationName === "qc-exit-cancel") { finishCancelExit(); return; }
-              if (createExiting && e.animationName === "qc-exit-save") { finishSaveExit(); return; }
-              if (createReseating && e.animationName === "qc-reseat") { finishReseat(e.currentTarget); return; }
-              /* ⚠️ NOT WHILE LEAVING. A `qc-in-last` still in flight when Cancel is pressed would
-                 otherwise put focus back into a takeover that is on its way out. */
-              if (!createCancelling && e.animationName === "qc-in-last") finishEntrance(e.currentTarget);
-            }} /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
+            /* ⚠️ THE PANE IS ONLY EVER THE REST STATE NOW (§2). It used to carry the journey's frame
+               animation and the journey's lifecycle handler, because the journey WAS the pane. The
+               journey is a sheet laid over the desk; the pane keeps reading behind it, unchanged,
+               so `f12-pane-enter-read` is unconditional and the takeover's classes have moved to
+               the sheet that actually arrives and leaves. */
+            className="qp-pane f12-detail f12-pane-enter-read"
+            /* ⚠️ NOT a .f12-pane. In the ref the pane column has NO wrapper card: the toolbar row, the
                hero and the three columns are siblings directly inside the workspace frame, and the
                only bordered surfaces are the hero and the columns themselves. Carrying .f12-pane
                here put a bordered, shadowed card around all of them — a card inside the frame,
@@ -3500,6 +3437,115 @@ export const Queries: React.FC<{
                 are dead until you pick something is not a command bar; it is a list of things you
                 cannot do yet. They are one kebab in the hero now, beside the primary, where the
                 query they act on is named. */}
+            {/**
+              * ⚠️ THE JOURNEYS ARE AN OVERLAY, NOT A BRANCH OF THIS PANE (§2). They sit lexically
+              * inside it and render nowhere near it: `QueryJourneySheet` portals to document.body,
+              * so the sheet lands above the whole desk while the JSX stays where the state it reads
+              * already is. Moving 180 lines to move a box was the alternative, and it would have
+              * bought nothing but a diff.
+              *
+              * ⚠️ WHICH MEANS THE PANE KEEPS READING UNDERNEATH. The hero, the columns and the
+              * kebab are all still mounted and still correct while a journey is open — dimmed by
+              * the scrim, not replaced. That is the whole of §2: a sheet laid on the desk rather
+              * than a page that swapped itself out.
+              *
+              * ⚠️ THE LIFECYCLE HANDLER MOVED HERE WITH THE FRAME, AND MUST BE IN EXACTLY ONE
+              * PLACE. React events bubble through the REACT tree, not the DOM one, so an
+              * `animationend` inside the portal still reaches this pane — leaving a copy on the
+              * pane as well would run every teardown twice.
+              */}
+            <QueryJourneySheet
+              open={creating || recording}
+              register={recording ? "record" : "create"}
+              ariaLabel={recording ? "Recording a response" : "Logging a new query"}
+              /* ⚠️ THE SAME THREE CLASSES, ON THE NEW FRAME. They were a template literal on the
+                 pane and stay one here — the classes did not change, only what wears them, and
+                 keeping the expression shape means the locks that guard them still read as prose
+                 about the thing they guard. Both journeys arm the same three; only the state
+                 driving them differs. */
+              stateClass={`${createEntering || respEntering ? " qc-entering" : ""}${createCancelling || respCancelling ? " qc-exit-cancel" : ""}${createExiting || respExiting ? " qc-exit-save" : ""}`.trim()}
+              /* ⚠️ THE JOURNEY GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would
+                 drift the moment the timing changed.
+
+                 ⚠️ THE OLD COMMENT HERE CLAIMED `animation: none` "still fires animationend". IT
+                 DOES NOT — verified in-browser — which is why the reduced-motion path is a branch at
+                 the arming site (saveCreate) rather than a second listener. Under reduced motion
+                 this handler is never reached, because the class is never applied.
+
+                 ⚠️ AND IT NOW ALSO RECEIVES THE SHEET'S OWN `qc-sheet-lay`. Unnamed animations fall
+                 through every branch below and do nothing, which is the correct outcome — but it is
+                 why each branch tests the NAME rather than assuming what fired. */
+              onAnimationEnd={(e) => {
+                if (respCancelling && e.animationName === "qc-exit-cancel") {
+                  shutRecord(); recordTriggerRef.current?.focus(); return;
+                }
+                if (respExiting && e.animationName === "qc-exit-save") {
+                  shutRecord(); recordTriggerRef.current?.focus(); return;
+                }
+                if (respEntering && e.animationName === "qc-in-last") { setRespEntering(false); return; }
+                if (createCancelling && e.animationName === "qc-exit-cancel") { finishCancelExit(); return; }
+                if (createExiting && e.animationName === "qc-exit-save") { finishSaveExit(); return; }
+                if (createReseating && e.animationName === "qc-reseat") { finishReseat(e.currentTarget); return; }
+                /* ⚠️ NOT WHILE LEAVING. A `qc-in-last` still in flight when Cancel is pressed would
+                   otherwise put focus back into a journey that is on its way out. */
+                if (!createCancelling && e.animationName === "qc-in-last") finishEntrance(e.currentTarget);
+              }}
+              dock={!isMobile ? (
+                /* ⚠️ THE DOCK IS INSIDE THE SHEET NOW, not row 4 of WorkspacePageGrid. It states
+                   what committing THIS composition will do, so it belongs to the composition rather
+                   than to the page the composition is lying on.
+
+                   ⚠️ AND THE RHYTHM PACK'S WARNING RETIRES WITH THE MOVE: "a dock's height comes out
+                   of the scrollport" was true while the dock was a grid row. It is not a grid row.
+                   Nothing about `--wpg-reclaim-pad` is affected by it any more — do not reinstate
+                   that coupling on this page.
+
+                   ⚠️ DESKTOP ONLY, BECAUSE THE MOBILE DOCK ALREADY EXISTS. `.qh-mcmd` is Query
+                   Centre's own floating command bar below md — the same idea at the other
+                   breakpoint, and it carries the Mark-sent anchor. Rendering both would stack two
+                   bottom bars over a tab bar.
+
+                   ⚠️ AND THE TOAST HOST FLOATS OVER IT, WHICH IS CORRECT. `.sa-toasts` is z:300
+                   against the sheet's 201, so a receipt sits ABOVE the dock rather than pushing it
+                   — a confirmation should never move the control you just used. */
+                <div className={`qc-dock${createEntering || respEntering ? " qc-dock-in" : ""}${createCancelling || respCancelling ? " qc-dock-out" : ""}`}>
+                  <span className="qc-dock-say">
+                    {/* ⚠️ `OUTCOME_STATUS`, NOT A CAST. `respDraft.outcome` is an outcome KEY ("rr",
+                        "noreply", "rejected") and casting it to `QueryStatus` typechecks while
+                        producing a value the enum never contains — measured, the dock read "Saves as
+                        rejected" in lowercase and `getPrimaryAction` fell through to its default, so
+                        the line promised "closed — the row will offer Record response", which
+                        contradicts itself. `responseDraft.ts` owns this map: "This module maps
+                        outcomes to statuses; it never sets one." */}
+                    {recording && respDraft
+                      ? consequenceLine(respDraft.outcome ? OUTCOME_STATUS[respDraft.outcome] : null)
+                      : consequenceLine(createReady ? QueryStatus.QUERIED : null)}
+                  </span>
+                  <span className="qc-dock-acts">
+                    <span className="qch-esc" aria-hidden="true">Esc</span>
+                    {recording ? (
+                      <>
+                        <button type="button" className="f12-btn-sec" onClick={() => closeRecord()} disabled={respSaving}>Cancel</button>
+                        {/* ⚠️ NO "SAVE AND RECORD ANOTHER" — a response belongs to one query, so there
+                            is no next one to move on to and offering it would invent a batch. */}
+                        <button type="button" className="f12-btn-pri" onClick={() => void saveResponse()}
+                          disabled={!responseReady(respDraft!) || respSaving}>
+                          {respSaving ? "Saving…" : "Save response"}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button type="button" className="f12-btn-sec" onClick={() => closeCreate()} disabled={createSaving}>Cancel</button>
+                        <button type="button" className="qch-tert" onClick={() => saveCreate(true)} disabled={!createReady || createSaving}>Save &amp; log another</button>
+                        <button type="button" className="f12-btn-pri" onClick={() => saveCreate()} disabled={!createReady || createSaving}>
+                          {createSaving ? "Saving…" : "Save query"}
+                        </button>
+                      </>
+                    )}
+                  </span>
+                </div>
+              ) : undefined}
+            >
             {respDraft && respQueryId ? (
               /* ── RECORDING A RESPONSE (§1, ref 83-record-response.html) ── */
               <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
@@ -3677,7 +3723,14 @@ export const Queries: React.FC<{
                   onDiscover={onNavigate ? () => closeCreate(() => onNavigate("agents", "Discover")) : undefined}
                 />
               </div>
-            ) : activeQuery && activeAgent && activeMs ? (
+            ) : null}
+            </QueryJourneySheet>
+
+            {/* ── THE REST STATE, WHICH NO LONGER STANDS DOWN FOR A JOURNEY. These three branches
+                used to sit at the tail of one chain whose head was the two takeovers, so opening a
+                journey unmounted whatever the writer had been reading. They are their own
+                expression now, and the sheet floats over whichever of them is showing. ── */}
+            {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
                   .qp-noteacts{ opacity:0; transition:opacity .14s; }

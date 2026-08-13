@@ -1176,29 +1176,22 @@
 .f12-lsearch .f12-kbd { margin-left: auto; }
 .f12-rows { flex: 1; overflow-y: auto; min-height: 0; }
 
-/* ══ CREATE MODE: THE LIST STANDS DOWN (v3 — supersedes the monogram rail) ══════════════════
-   The scrim was deleted first (v2 P1); the rail that replaced it is deleted now. A 62px column
-   of monograms kept the list PRESENT without keeping it USEFUL: you could not read a name, the
-   selection marker had to stand down, and the one thing worth seeing there — the draft — was a
-   32px circle. It was a smaller version of a thing whose whole value was being readable.
+/* ══ THE LIST NO LONGER STANDS DOWN (§2 — supersedes create mode's hide, and the monogram rail
+   before it) ═══════════════════════════════════════════════════════════════════════════════════
+   The history is worth keeping because the same question was answered three ways. First a scrim,
+   then a 62px column of monograms — which kept the list PRESENT without keeping it USEFUL: you
+   could not read a name, and the one thing worth seeing there was a 32px circle. Then
+   `display: none`, on the reasoning that the list had no part to play while the pane held the
+   whole journey.
 
-   So the list HIDES, and the pane takes the full width. What confirms the save is not a tile
-   growing in a rail: it is the list coming back with your new row in it, wearing the settle the
-   list already draws for an arriving row. One confirmation, in the place you will look.
+   ⚠️ THAT REASONING EXPIRED WITH THE TAKEOVER. The journey is not in the pane any more — it is a
+   sheet portalled over the whole desk (`.qc-sheet-layer`), and a sheet laid on a desk that has
+   deleted half of itself is not laid on anything. The list stays mounted, visible and dimmed under
+   the scrim, which is what makes the overlay read as an overlay.
 
-   ⚠️ DESKTOP ONLY, and that is a design statement rather than a guard. Below md the two panes
-   are two SCREENS and create mode already pushes to the detail one — that is the small
-   breakpoint's version of this, built and unchanged.
-
-   CSS only: .qh-create toggling is the whole mechanism; no JS timer drives a frame. ── */
-@media (min-width: 768px) {
-  /* `display: none` and not a width collapse: a 0px flex item still takes part in layout, and
-     the point here is that the list has no part to play. */
-  /* ⚠️ `.qh-take`, NOT `.qh-create` — BOTH journeys replace the work area. Recording a response
-     drew its step flow at 588px wide beside the list it was supposed to have replaced, and the
-     narrow measure read as the journey being cramped rather than as the list still being there. */
-  .qh-take .f12-list { display: none; }
-}
+   ⚠️ SO THERE IS NOTHING LEFT FOR `.qh-take` TO DO, and it is gone rather than left inert: a class
+   still computed on every render, still in the className, matching no rule, is the shape that gets
+   "restored" by someone who assumes it once worked. ══════════════════════════════════════════ */
 
 /* ── QUIET SCROLLBARS — the To-do pattern, reused (todo.css .tdb-tmid2): invisible at rest,
    a hairline thumb on hover or keyboard focus, so a grey system bar never sits against the
@@ -1659,3 +1652,139 @@
 /* Query Centre's grid: a flex item in the page column, so it takes the remaining height and its
    row 3 has something definite to divide. Same shape as every other converted page. */
 .qc-wpg { flex: 1; min-height: 0; }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE JOURNEY SHEET (§2) — ref design-refs/92-both-sheets.html; depth from 91-sheet-lift.html
+ *
+ * The takeover REPLACED the desk; the sheet is LAID ON it. Everything below serves that one
+ * sentence: the desk stays lit but dimmed, and a square-cornered piece of paper rests above it.
+ *
+ * ⚠️ ONE SET OF GEOMETRY FOR BOTH JOURNEYS. Create and record differ by accent and by nothing else
+ * — same width, same shadow, same scrim, same dock, same motion. A writer who has logged a query
+ * already knows how to record a response, and that is only true if the object is the same object.
+ * The register modifiers at the foot of this block set colour and nothing structural; keep it so.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠️ THE SCRIM AND THE SHADOW ARE THE SAME INK, and it is ink this stylesheet already uses —
+   `--float-sh` in the `.t-f12` block is built from `rgba(58, 28, 20, …)`. Declared once as
+   channels so the two can never drift into two different browns, and so neither is a new colour.
+   A flat black would say "modal"; this says the lamp is on the letter. */
+.t-f12 { --qc-ink-rgb: 58, 28, 20; }
+
+/* ⚠️ z-200/201, AND THE CEILING MATTERS AS MUCH AS THE FLOOR. Above every page popover (30–70) so
+   nothing from the desk can draw through it; BELOW the toast host (300) and `showConfirm` (320),
+   because the dirty guard's confirm must draw over the sheet it is asking about, and a save receipt
+   must be readable above it. Neither of those is incidental — raise this above 300 and the guard
+   opens behind the thing it is guarding. */
+.qc-sheet-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+}
+
+/* ⚠️ RADIAL, NOT FLAT: lightest behind the sheet and deepening toward the corners, so the light
+   reads as coming from above the page rather than as a panel of darkness laid over it. Values are
+   the ref's Lifted stops — the moderate scrim that pairs with the Lifted shadow below. */
+.qc-sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    120% 90% at 50% 42%,
+    rgba(var(--qc-ink-rgb), 0.10) 0%,
+    rgba(var(--qc-ink-rgb), 0.34) 55%,
+    rgba(var(--qc-ink-rgb), 0.52) 100%
+  );
+  animation: qc-scrim-in 420ms ease both;
+}
+/* ⚠️ MULTI-LINE, TERMINATED BY `\n}` — the house form, and it is load-bearing for a LOCK rather
+   than for taste. `queryCreateMotion.test.ts` extracts keyframes with `/@keyframes[^{]*\{[^@]*?\n\}/`
+   to check none of them contains a `var()` (which fails silently inside a keyframe). Written on one
+   line this block has no `\n}` to stop at, so the match ran on through the rules below it and
+   reported a `var()` from `.qc-sheet` as if it were in here. The lock was right to fail; the format
+   was the fault. */
+@keyframes qc-scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ⚠️ SQUARE. `border-radius: 0` is the one deliberate exception in a product where every other
+   surface is radiused, and it is the whole reason the thing reads as paper rather than as a bigger
+   card. Locked; do not soften.
+   ⚠️ AND THE SIZE IS A RELATIONSHIP, NOT A BOX. `100% - 84px` / `100% - 76px` against the layer,
+   which is the viewport — so the desk stays visible on all four sides at every width, which is what
+   makes it a sheet ON something rather than a screen. */
+.qc-sheet {
+  position: relative;
+  width: min(1080px, calc(100% - 84px));
+  max-height: calc(100% - 76px);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--panel);
+  border-radius: 0;
+  overflow: hidden;
+  /* THE LIFTED DEPTH (91-sheet-lift.html, treatment 2 of 3): a contact line, a mid shadow, and two
+     long ambients. `Laid` reads flat at a glance and `Deep` turns a weekly errand into a stage —
+     Lifted is unmistakably raised and still furniture. Deep is NOT shipped and there is no toggle:
+     a depth control on a journey is a preference nobody has. */
+  box-shadow:
+    0 1px 0 rgba(var(--qc-ink-rgb), 0.14),
+    0 4px 8px rgba(var(--qc-ink-rgb), 0.10),
+    0 22px 40px -10px rgba(var(--qc-ink-rgb), 0.28),
+    0 44px 80px -30px rgba(var(--qc-ink-rgb), 0.30);
+  animation: qc-sheet-lay 420ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* ⚠️ THE CUT EDGE IS A PSEUDO-ELEMENT RING, NOT A BORDER — the house rule about rims and children.
+   A border participates in layout and is inherited into the box model of everything sized against
+   it; a ring is drawn over the top and costs the content nothing. Two lines, because one line is a
+   box and two are a cut sheet: an ink hairline outside, a lighter line just inside it. */
+.qc-sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--qc-ink-rgb), 0.14),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.55);
+}
+
+/* ⚠️ THE LAY-DOWN IS A FADE WITH A SMALL RISE, and `both` because the sheet must hold its final
+   frame — without it there is a frame between the animation ending and anything else happening
+   where the sheet sits at its `from` offset. The transform is free to be a plain translate because
+   the layer centres by grid: see the component header for why that matters. */
+@keyframes qc-sheet-lay {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/**
+ * ⚠️ THE EXITS ARE RESTATED AT 0-2-0 ON PURPOSE. `.qc-exit-cancel` and `.qc-exit-save` are 0-1-0
+ * and so is `.qc-sheet`, so which one won would be decided by bundle order — the equal-specificity
+ * collision this repo has recorded more than once. Naming both classes settles it in the rule
+ * rather than in the file's line numbers.
+ *
+ * ⚠️ TWO NAMES, ONE GESTURE. The exit reverses the lay-down either way; the names stay distinct
+ * because `onAnimationEnd` tells cancel from save BY NAME, and collapsing them to one animation
+ * would make the two teardowns indistinguishable to the handler that runs them.
+ */
+.qc-sheet.qc-exit-cancel { animation: qc-exit-cancel 150ms ease-in both; }
+.qc-sheet.qc-exit-save { animation: qc-exit-save 220ms cubic-bezier(0.5, 0, 0.75, 0) both; }
+
+/* The journey's own content, scrolling inside the sheet. The sheet is capped against the viewport,
+   so a long composition scrolls HERE rather than growing the sheet past the desk. */
+.qc-sheet-body { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ⚠️ THE DOCK IS A CHILD OF THE SHEET NOW, not row 4 of the page grid. `flex: none` so it holds its
+   height while the body scrolls, and the hairline sits on top of it because it closes the sheet
+   from inside rather than dividing the page. */
+.qc-sheet .qc-dock { flex: none; margin: 0; border-radius: 0; }
+
+/* ⚠️ REDUCED MOTION CUTS TO THE FINAL FRAME, SCRIM INCLUDED — it does not remove the overlay, it
+   removes the travel. A reader who has asked for less motion is still owed the dimmed desk that
+   says the rest of the page is not currently theirs. */
+@media (prefers-reduced-motion: reduce) {
+  .qc-sheet, .qc-sheet-scrim { animation: none; }
+}

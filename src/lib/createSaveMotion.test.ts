@@ -146,13 +146,16 @@ describe("the motion laws hold", () => {
   /* ⚠️ THE TAKEOVER GOES WHEN THE ANIMATION ENDS, not after a hardcoded delay that would drift the
      moment a timing changed. */
   it("the close is bound to animationend, never to a timer", () => {
-    /* ⚠️ TWO `onAnimationEnd` HANDLERS LIVE IN THIS FILE — the row's and the pane's. A bare
+    /* ⚠️ TWO `onAnimationEnd` HANDLERS LIVE IN THIS FILE — the row's and the journey's. A bare
        `indexOf` anchors on the row's and reads a slice spanning everything in between, which is
-       how a lock ends up green while looking at code it was never pointed at. */
-    const pane = queries.indexOf("className={`qp-pane f12-detail");
-    expect(pane, "the pane's className is missing").toBeGreaterThan(-1);
+       how a lock ends up green while looking at code it was never pointed at.
+       ⚠️ RE-ANCHORED ON THE SHEET (§2): the journey's frame left the pane for a portalled overlay,
+       and the handler went with it. The hazard this comment describes is unchanged — only the
+       element that ends the animation is. */
+    const pane = queries.indexOf("<QueryJourneySheet");
+    expect(pane, "the journey sheet is missing").toBeGreaterThan(-1);
     const a = queries.indexOf("onAnimationEnd={(e) => {", pane);
-    expect(a, "the pane's animationend handler is missing").toBeGreaterThan(pane);
+    expect(a, "the sheet's animationend handler is missing").toBeGreaterThan(pane);
     /* One handler, dispatching on the animation NAME — the entrance and the exit both end on this
        element, so a handler that did not discriminate would close the takeover the moment it had
        finished arriving. */
