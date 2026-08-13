@@ -207,9 +207,18 @@ export const QueryCreatePane: React.FC<QueryCreatePaneProps> = ({
   /* ⚠️ REPORTED UP, NOT DUPLICATED. `reached` is the pane's own state and the chips are the
      header's, so one of them has to tell the other; deriving "opened" a second time in Queries.tsx
      would give two answers to one question the moment the stack's rules changed. */
+  /* ⚠️ STRICTLY PAST, NOT "REACHED" (§4). `>=` was true for the FIRST step from the first frame —
+     `reached` starts at "when" — so the Date chip arrived already ticked before the writer had
+     looked at anything, which is the row of unearned marks §4 exists to remove. Measured: create's
+     header opened with one chip showing at every viewport size.
+
+     ⚠️ AND `requirements`' OWN RULE IS UNCHANGED. "Opening a step ticks it even when the writer
+     changes nothing" is still true and still locked — a writer who opened the When step and kept
+     today's date HAS confirmed it. What changed is when this pane reports a step as opened, and
+     these two booleans have exactly one consumer: the header's chips. */
   useEffect(() => {
     const i = stepIndex(reached);
-    onStepsOpened?.({ when: i >= stepIndex("when"), what: i >= stepIndex("what") });
+    onStepsOpened?.({ when: i > stepIndex("when"), what: i > stepIndex("what") });
   }, [reached, onStepsOpened]);
 
   /* ⚠️ ONE DOOR. Typing a name, creating one inline and clicking a quick pick must do exactly

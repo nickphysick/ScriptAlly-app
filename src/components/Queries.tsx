@@ -34,6 +34,7 @@ import { ResponsePane, type RespStepId } from "./queries/ResponsePane";
 import {
   emptyResponseDraft, responseReady, responseChips, responseDraftToPayload, OUTCOME_LABEL,
   stepsFor, OUTCOME_STATUS, OUTCOME_SEAL, type SealKind, type ResponseDraft, type RespStep,
+  type ResponseOutcome,
 } from "../lib/responseDraft";
 import { jumpIn, advanceIn, reseatInto } from "../lib/stepStack";
 
@@ -236,6 +237,18 @@ const readLastViewedQueryId = (): string | null => {
 };
 const writeLastViewedQueryId = (id: string | null) => {
   try { if (id) localStorage.setItem(LAST_VIEWED_KEY, id); else localStorage.removeItem(LAST_VIEWED_KEY); } catch { /* private mode — the preference is optional */ }
+};
+
+/**
+ * Has the writer moved BEYOND the When step? (§4)
+ *
+ * ⚠️ THE ORDER IS THE DRAFT'S, NOT A CONSTANT — the record stack changes shape with the outcome, so
+ * "which step is after When" is a question only `stepsFor` can answer. Asking a fixed list would be
+ * right for the commonest journey and wrong for the others.
+ */
+const pastWhen = (outcome: ResponseOutcome | null, reached: RespStepId): boolean => {
+  const order = stepsFor(outcome);
+  return order.indexOf(reached) > order.indexOf("when");
 };
 
 export const Queries: React.FC<{
@@ -3649,11 +3662,14 @@ export const Queries: React.FC<{
                         marks are create's: empty until answered, a DASH for what we pre-filled, a
                         tick only once the writer has opened the step carrying it. */}
                     <div className="qch-reqs">
-                      {responseChips(respDraft, respOpened).map((r) => (
-                        <span key={r.key} className={`qch-rq qch-${r.state}`}>
-                          <span className="qch-c" aria-hidden="true">
-                            {r.state === "empty" ? "" : r.state === "prefilled" ? "–" : "✓"}
-                          </span>
+                      {/* ⚠️ ONLY THE EARNED ONES (§4) — see create's note. `done`, never `prefilled`:
+                          the arrival date is seeded to today, and a tick against a date nobody has
+                          looked at claims a confirmation that did not happen. */}
+                      {responseChips(respDraft, respOpened)
+                        .filter((r) => r.state === "done")
+                        .map((r) => (
+                        <span key={r.key} className="qch-rq qch-answered">
+                          <span className="qch-c" aria-hidden="true">✓</span>
                           {r.label}
                         </span>
                       ))}
@@ -3674,15 +3690,19 @@ export const Queries: React.FC<{
                   reached={respStep.reached}
                   /* The order is the DRAFT's, not a constant — the stack changes with the outcome,
                      so the two movers have to ask the same question the renderer does. */
+                  /* ⚠️ PAST THE STEP, NOT ON IT (§4). This armed on `reached === "when" || active
+                     === "when"`, so the Date chip ticked the moment the writer LANDED on the When
+                     step rather than when they finished with it — the same unearned mark create's
+                     header carried, one step later. `pastWhen` is the shared predicate. */
                   onJump={(id) => {
                     const n = jumpIn(stepsFor(respDraft.outcome), id, respStep.reached);
                     setRespStep(n);
-                    if (n.reached === "when" || n.active === "when") setRespOpened({ when: true });
+                    if (pastWhen(respDraft.outcome, n.reached)) setRespOpened({ when: true });
                   }}
                   onAdvance={() => {
                     const n = advanceIn(stepsFor(respDraft.outcome), respStep.active, respStep.reached);
                     setRespStep(n);
-                    if (n.active === "when" || n.reached === "when") setRespOpened({ when: true });
+                    if (pastWhen(respDraft.outcome, n.reached)) setRespOpened({ when: true });
                   }}
                   dropped={respDropped}
                   /* ⚠️ THE POSITION IS RESEATED WITH THE FIELDS. `reached` can point at a step the
@@ -3773,11 +3793,19 @@ export const Queries: React.FC<{
                         outlined tick still reads as done, which is the claim this exists to stop
                         making. The tick arrives only once that step has been opened. */}
                     <div className="qch-reqs">
-                      {requirements(createDraft, createBase, createOpened).map((r) => (
-                        <span key={r.key} className={`qch-rq qch-${r.state}`}>
-                          <span className="qch-c" aria-hidden="true">
-                            {r.state === "empty" ? "" : r.state === "prefilled" ? "–" : "✓"}
-                          </span>
+                      {/* ⚠️ ONLY THE EARNED ONES (§4). Every chip used to render from the first
+                          frame, so the header opened with a row of empty rings exactly where the eye
+                          should be going to the question. A chip appears when its phase is COMPLETE
+                          — answered by the writer, not merely pre-filled for them — and it appears
+                          already ticked, because there is no other state it can be in.
+                          ⚠️ `answered`, NOT `answered || prefilled`. `prefilled` is the app's own
+                          seeding: today's date and a manuscript the writer has not looked at. A chip
+                          for that is a tick against work nobody did. */}
+                      {requirements(createDraft, createBase, createOpened)
+                        .filter((r) => r.state === "answered")
+                        .map((r) => (
+                        <span key={r.key} className="qch-rq qch-answered">
+                          <span className="qch-c" aria-hidden="true">✓</span>
                           {r.label}
                         </span>
                       ))}

@@ -163,7 +163,15 @@ describe("the chips are labels and a mark — no values, and no premature tick",
     }
     const queries = readFileSync(new URL("../components/Queries.tsx", import.meta.url), "utf8");
     expect(queries, "the chip must not render a value").not.toContain('className="qch-v"');
-    expect(queries).toContain('{r.state === "empty" ? "" : r.state === "prefilled" ? "–" : "✓"}');
+    /* ⚠️ THE THREE MARKS COLLAPSED TO ONE AT THE RENDER (§4), and the derivation is untouched. Chips
+       used to render from the first frame in all three states, so the header opened with a row of
+       empty rings where the eye should be going to the question. Only `answered` chips render now,
+       and an `answered` chip can only be ticked — so the ternary that chose between an empty ring,
+       a dash and a tick has nothing left to choose. `requirements` still returns all three states
+       (the cases above), because they are what the FILTER reads. */
+    expect(queries, "the chip render went back to drawing unearned states")
+      .not.toContain('r.state === "prefilled" ? "–"');
+    expect(queries).toContain('.filter((r) => r.state === "answered")');
   });
 
   /* ⚠️ SAVE SEMANTICS ARE UNCHANGED — a valid query saves whatever the chips say. This assertion

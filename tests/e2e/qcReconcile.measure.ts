@@ -115,6 +115,9 @@ async function geometry(page: Page) {
       panelAlign: panel ? getComputedStyle(panel).alignSelf : null,
       panelPos: panel ? getComputedStyle(panel).position : null,
       chips: document.querySelectorAll(".qc-sheet .qch-rq").length,
+      chipText: Array.from(document.querySelectorAll(".qc-sheet .qch-rq")).map((e) => (e as HTMLElement).innerText.replace(/\s+/g, " ").trim()).join(" | "),
+      titleTop: (() => { const el = q(".qc-sheet .qch-title"); return el ? Math.round(el.getBoundingClientRect().top) : null; })(),
+      placeTop: (() => { const el = q(".qc-sheet .qch-place"); return el ? Math.round(el.getBoundingClientRect().top) : null; })(),
       chipsEmpty: document.querySelectorAll(".qc-sheet .qch-empty").length,
       agentBand: (() => { const el = q(".qc-sheet .qc-agband"); return el ? Math.round(el.getBoundingClientRect().height) : null; })(),
     };
@@ -175,7 +178,7 @@ async function leave(page: Page) {
 
 const log = (w: number, label: string, m: { [k: string]: unknown }) => {
   // eslint-disable-next-line no-console
-  console.log(`[${w}] ${label} slack=${m.slack} gap=${m.gap} activeTop=${m.activeTop} activeH=${m.activeH} queueTop=${m.queueTop} dockTop=${m.dockTop} band=${m.agentBand} chips=${m.chips}/${m.chipsEmpty}empty panel=${m.panelClass} ${m.panelW}x${m.panelH} top=${m.panelTop} align=${m.panelAlign} pos=${m.panelPos}`);
+  console.log(`[${w}] ${label} slack=${m.slack} gap=${m.gap} activeTop=${m.activeTop} activeH=${m.activeH} queueTop=${m.queueTop} dockTop=${m.dockTop} band=${m.agentBand} chips=${m.chips}[${m.chipText}] panel=${m.panelClass} ${m.panelW}x${m.panelH} top=${m.panelTop} align=${m.panelAlign} pos=${m.panelPos}`);
 };
 
 test.describe.configure({ mode: "serial" });
@@ -183,7 +186,7 @@ let page: Page;
 test.beforeAll(async ({ browser }) => { page = await browser.newPage(); await signIn(page); });
 test.afterAll(async () => { await page.close(); });
 
-type Shot = { gap: number | null; slack: number | null; activeTop: number | null; activeH: number | null; queueTop: number | null; dockTop: number | null; agentBand: number | null; chips: number; chipsEmpty: number; panelClass: string | null; panelW: number | null; panelH: number | null; panelTop: number | null; panelAlign: string | null; panelPos: string | null; stackTop: number | null; headerBottom: number | null; formH: number | null };
+type Shot = { titleTop: number | null; placeTop: number | null; chipText: string; gap: number | null; slack: number | null; activeTop: number | null; activeH: number | null; queueTop: number | null; dockTop: number | null; agentBand: number | null; chips: number; chipsEmpty: number; panelClass: string | null; panelW: number | null; panelH: number | null; panelTop: number | null; panelAlign: string | null; panelPos: string | null; stackTop: number | null; headerBottom: number | null; formH: number | null };
 
 const shots: Record<string, Record<number, Shot>> = { stage1: {}, createOpen: {}, recordNone: {}, recordOutcome: {} };
 
@@ -316,5 +319,36 @@ test("below 1100px neither panel renders", () => {
     const m = shots[key][1024];
     if (!m) continue;
     expect(m.panelW ?? 0, `${key}'s panel is visible at 1024`).toBe(0);
+  }
+});
+
+/**
+ * ══ §4 · CHIPS APPEAR ONLY ONCE EARNED, AND THEIR ARRIVAL MOVES NOTHING ════════════════════════
+ *
+ * ⚠️ THE NO-REFLOW HALF CANNOT BE SOURCE-TESTED. `min-height` on the row is the cause; whether the
+ * title and place line actually hold their y is a rendered fact, and this repo's suite has no
+ * layout engine to ask.
+ */
+test("no chips on arrival, and earning one moves neither the title nor the place line", () => {
+  for (const w of [1024, 1440, 1920]) {
+    const before = shots.recordNone[w];
+    const after = shots.recordOutcome[w];
+    if (!before || !after) continue;
+    // eslint-disable-next-line no-console
+    console.log(`[chips ${w}] record ${before.chips} → ${after.chips} · title ${before.titleTop} → ${after.titleTop} · place ${before.placeTop} → ${after.placeTop}`);
+    expect(before.chips, "record opened with chips already showing").toBe(0);
+    expect(after.chips, "choosing an outcome earned no chip").toBeGreaterThan(0);
+    if (before.titleTop != null && after.titleTop != null) {
+      expect(after.titleTop, "the title moved when a chip arrived").toBe(before.titleTop);
+    }
+    if (before.placeTop != null && after.placeTop != null) {
+      expect(after.placeTop, "the place line moved when a chip arrived").toBe(before.placeTop);
+    }
+  }
+
+  /* create's stage 1 has nothing answered either */
+  for (const w of [1024, 1440, 1920]) {
+    const s1 = shots.stage1[w];
+    if (s1) expect(s1.chips, "create opened with chips already showing").toBe(0);
   }
 });

@@ -165,7 +165,17 @@
    does this still need" is answered without reading the form. Sage tick, and it is the BAND
    sage — index.css locks --sage/--sageC/--sageD to StatusDots, and a requirement pip is not a
    query status. ── */
-.qch-reqs { display: flex; gap: 13px; margin-top: 6px; }
+/**
+ * ⚠️ THE ROW'S HEIGHT IS RESERVED, so a chip arriving cannot move the title or the place line above
+ * it (§4). Chips now appear one at a time as their phase completes, and an unreserved row would
+ * make the header grow by a line the first time the writer advanced — the copy they are reading
+ * jumping upward at the exact moment they act. `min-height` is one chip's box (15px roundel against
+ * a 12px label's line box), so the row is the same height empty or full.
+ *
+ * ⚠️ RESERVED, NOT ANIMATED. A height transition would still move everything below it for 200ms;
+ * holding the space means nothing ever moves at all, which is the stronger reading of the rule.
+ */
+.qch-reqs { display: flex; gap: 13px; margin-top: 6px; min-height: 18px; }
 /* ══ THE REQUIREMENT CHECKLIST — THREE MARKS, NOT TWO ═══════════════════════════════════════
    ⚠️ THE OUTLINED TICK IS THE WHOLE POINT. The manuscript and the date are pre-filled by
    openCreate, and a solid green tick beside them claimed the writer had completed something they
