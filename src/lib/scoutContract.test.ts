@@ -83,18 +83,12 @@ describe("the Pro gate — the client half of two", () => {
    * `scoutComps` in Prompt 3 — client gating alone is not a gate on a paid API.
    */
   it("refuses to dispatch for a free user, before any network call", async () => {
-    await expect(fetchCompRun({
-      manuscriptId: "m", manuscriptTitle: "T", ageCategory: "Adult", genre: "Crime",
-      logline: "", shelfTitles: [],
-    }, false)).rejects.toBeInstanceOf(SuggestCompsError);
+    await expect(fetchCompRun({ manuscriptId: "m" }, false)).rejects.toBeInstanceOf(SuggestCompsError);
   });
 
   it("reports it as a permission refusal rather than a network fault", async () => {
     try {
-      await fetchCompRun({
-        manuscriptId: "m", manuscriptTitle: "T", ageCategory: "Adult", genre: "Crime",
-        logline: "", shelfTitles: [],
-      }, false);
+      await fetchCompRun({ manuscriptId: "m" }, false);
       throw new Error("expected a refusal");
     } catch (e) {
       expect((e as SuggestCompsError).code).toBe("permission-denied");

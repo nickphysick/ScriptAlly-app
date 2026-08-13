@@ -1,27 +1,35 @@
 /**
  * Comp suggestions — PURE CORE (no Firebase, no Firestore, no secrets).
  *
- * Everything unit-runnable without the Functions runtime: the caution allow-list, the system
- * prompt, the user-message builder, and the parse/validate/normalise step. `suggestFromModel`
- * takes an already-built Anthropic client, so tests drive it with a mock — no emulator.
+ * The model proposes CANDIDATES; `compCatalogue.ts` turns candidates into SUGGESTIONS by checking
+ * each one against a real catalogue. Nothing the model says about a book's existence reaches the
+ * client unchecked.
  *
- * The callable wrapper (suggestComps.ts) does auth, the Pro gate, input validation and builds
- * the client; it hands off here. READ-ONLY — nothing writes to Firestore.
+ * ⚠️ THE CONTRACT CHANGED SHAPE, AND THE OLD ONE COULD NOT BE MADE HONEST. It returned
+ * `{title, author, year, rationale, cautions}` and asked the model, in prose, not to invent books.
+ * There was no `verification` field because there was no verification: a careful model and a
+ * hallucinating one produced identical output. The client now derives its ✓ VERIFIED chip from a
+ * record, so the record has to exist — see CompVerification in the app's src/types.ts.
+ *
+ * ⚠️ AND `facts` IS DELIBERATELY ABSENT (baked decision 20). An earlier contract carried a
+ * model-composed display string ("MYSTERY · DEBUT · 2024") to fill a chip. A factual-looking chip
+ * with nothing behind it but the model's word is the exact shape the trust rule exists to stop; the
+ * client composes that chip at render from structured fields instead.
  */
+import { CatalogueRecord, FetchLike, verifyTitle } from "./compCatalogue";
 
-/* Only these scale cautions may come from the model; anything else is dropped. The age caution
- * ("N YEARS OLD") is DERIVED CLIENT-SIDE from `year` — never emitted here. */
-export const ALLOWED_CAUTIONS = ["MEGA-BESTSELLER", "FRANCHISE-SCALE"] as const;
-const CAUTION_SET: ReadonlySet<string> = new Set(ALLOWED_CAUTIONS);
-
-/* ── Model config — mirrors emailImportCore, except temperature: suggestions want variety
- *    between Refresh passes, extraction wants determinism. ── */
-export const MODEL = "claude-sonnet-4-6";
-export const MAX_TOKENS = 1200;
-export const TEMPERATURE = 0.7;
+/**
+ * ⚠️ NO `temperature` ANYWHERE IN THIS FILE, and its absence is load-bearing rather than an
+ * oversight. The previous version set `temperature: 0.7` for variety between runs; sampling
+ * parameters are REMOVED on this model tier and a request carrying one returns a 400. Variety now
+ * comes from the web search actually returning different current titles, which is a better source
+ * of it than sampling noise.
+ */
+export const MODEL = "claude-opus-5";
+export const MAX_TOKENS = 8_000;
 
 export const MAX_SUGGESTIONS = 6;
-export const MAX_RATIONALE_CHARS = 160;
+export const MAX_WHY_CHARS = 200;
 
 export interface SuggestInput {
   manuscriptTitle: string;
@@ -33,16 +41,28 @@ export interface SuggestInput {
   shelfTitles: string[];
 }
 
+/** What the model proposes. Not yet a suggestion — nothing here has been checked. */
+export interface Candidate {
+  title: string;
+  author: string;
+  media: "book" | "film" | "tv" | "other";
+  why: string;
+  matchAxis?: string;
+}
+
+/** What the client receives. `verification` is present by construction — see the note above. */
 export interface Suggestion {
   title: string;
   author: string;
   year: number;
-  rationale: string;
-  cautions: string[];
+  publisher?: string;
+  media: "book" | "film" | "tv" | "other";
+  why: string;
+  matchAxis?: string;
+  verification: CatalogueRecord;
 }
 
-/** Thrown when the model output can't be parsed/validated even after one retry. The callable
- *  maps this to HttpsError('internal', …); everything else is a transport error. */
+/** Thrown when the model output can't be parsed even after one retry. */
 export class MalformedSuggestionsError extends Error {
   code = "MALFORMED";
   constructor(message: string) {
@@ -52,38 +72,60 @@ export class MalformedSuggestionsError extends Error {
 }
 
 /* ── System prompt ─────────────────────────────────────────────────────── */
+/**
+ * ⚠️ IT DOES NOT ASK THE MODEL TO AVOID INVENTING BOOKS, because that instruction was the old
+ * design's entire verification story and it cannot work. It tells the model the truth instead: an
+ * unverifiable title is dropped downstream, so proposing one wastes a slot. That aligns the model's
+ * incentive with the check rather than substituting for it.
+ *
+ * ⚠️ `why` AND `matchAxis` MUST NOT APPRAISE (baked decision 17, extended to the Scout by
+ * Amendment 3). They state what a title SHARES with the manuscript — form, register, structure,
+ * length, audience, recency — never how well it fits, never a score, never ranking language. The
+ * page reports; it does not judge the writer's list, and a model-written "a strong match" would put
+ * the appraisal back that the client-side sweep removed.
+ */
 export const SYSTEM_PROMPT = `
-You suggest comparable titles ("comps") for a fiction writer's query letter. You are given their
+You find comparable titles ("comps") for a fiction writer's query letter. You are given their
 manuscript's age category, genre, logline (and sometimes a synopsis), plus the comps already on
-their shelf.
+their list.
 
-Suggest 4–6 REAL, PUBLISHED, VERIFIABLE books. Inventing a title, author or year is far worse
-than returning fewer suggestions — if you are not certain a book is real, leave it out.
+Use web search to find titles published recently — your training data is older than the market the
+writer is querying into, and a comp's job is partly to show an agent there is a live audience.
 
-Selection rules — enforce all of them:
-- STRONGLY prefer books published in the LAST FIVE YEARS. An older book is only worth including
-  when it is genuinely the closest match, and never more than one or two.
-- Match on age category, genre and tone — a comp tells an agent where the book sits on the shelf.
-- NEVER suggest a title already on the writer's shelf (they are listed). Do not suggest the
-  writer's own manuscript.
-- "cautions" may ONLY contain values from this exact set, and is usually empty:
-  ["MEGA-BESTSELLER", "FRANCHISE-SCALE"]. Use MEGA-BESTSELLER for era-defining phenomenon-scale
-  books that read as naive in a query letter; FRANCHISE-SCALE for franchise/IP-scale properties.
-  Do NOT flag age — the app derives that from "year".
+Every title you propose is checked against a real book catalogue before it reaches the writer, and
+anything the catalogue cannot confirm is discarded. A title you are unsure about therefore costs a
+slot and returns nothing — propose fewer, and only ones you can name precisely.
+
+Selection rules:
+- STRONGLY prefer books published in the last five years.
+- Match on age category, genre, register and form.
+- NEVER propose a title already on the writer's list (they are listed below), or the writer's own
+  manuscript.
+- Order carries no meaning. Do not rank, and do not present one title as better than another.
+
+Writing "why" and "matchAxis":
+- "why" is ONE factual sentence about what the title SHARES with the manuscript — its form,
+  register, structure, length, audience or recency.
+- "matchAxis" is an optional short label for that shared quality, e.g. "tone · atmosphere".
+- Neither may appraise. Do not write that a comp is strong, weak, perfect, ideal, a great fit, the
+  best match, or any judgement of how well it works. State what is shared and stop.
 
 Return ONLY a single valid JSON object — no prose, no markdown, no code fences. Exact shape:
 
 {
-  "suggestions": [
+  "candidates": [
     {
-      "title": "<the book's exact title>",
+      "title": "<the work's exact title>",
       "author": "<the author's name>",
-      "year": <first publication year, integer>,
-      "rationale": "<why it comps, one line, max ${MAX_RATIONALE_CHARS} characters>",
-      "cautions": []
+      "media": "book",
+      "why": "<one factual sentence, max ${MAX_WHY_CHARS} characters>",
+      "matchAxis": "<optional short label>"
     }
   ]
 }
+
+"media" is one of "book", "film", "tv", "other". Only "book" can be catalogue-checked, so propose
+books unless a screen title is genuinely the closest comparison.
 `.trim();
 
 /* ── User message ──────────────────────────────────────────────────────── */
@@ -100,60 +142,105 @@ export function buildUserMessage(input: SuggestInput): string {
   lines.push(
     "",
     input.shelfTitles.length
-      ? `ALREADY ON THE SHELF (never suggest these): ${input.shelfTitles.join(" · ")}`
-      : "ALREADY ON THE SHELF: (nothing yet)",
+      ? `ALREADY ON THE LIST (never propose these): ${input.shelfTitles.join(" · ")}`
+      : "ALREADY ON THE LIST: (nothing yet)",
     "",
     "Return only the JSON object described in the system prompt."
   );
   return lines.join("\n");
 }
 
-/* ── Parse + validate + normalise ──────────────────────────────────────── */
+/* ── Parse + validate ──────────────────────────────────────────────────── */
 function stripFences(text: string): string {
   return text.replace(/^\s*```(?:json)?/i, "").replace(/```\s*$/i, "").trim();
 }
 
+const MEDIA = new Set(["book", "film", "tv", "other"]);
+
 /**
- * Validate the model's JSON. Hard-fails (throw) only when `suggestions` is not an array —
- * individual malformed items are DROPPED, not fatal. Normalises: trims strings, caps the
- * rationale, filters cautions to the allow-list, de-duplicates (within the list and against the
- * shelf, case-insensitively), caps the list at MAX_SUGGESTIONS.
+ * Validate the model's JSON into candidates. Throws only when `candidates` is not an array —
+ * individual malformed items are DROPPED, never fatal, because one bad item should not cost the
+ * writer the other five.
  */
-export function validateSuggestions(raw: unknown, shelfTitles: string[]): Suggestion[] {
-  if (!raw || typeof raw !== "object" || !Array.isArray((raw as Record<string, unknown>).suggestions)) {
-    throw new MalformedSuggestionsError("suggestions is not an array");
-  }
+export function validateCandidates(raw: unknown, shelfTitles: string[]): Candidate[] {
+  const list = (raw as { candidates?: unknown })?.candidates;
+  if (!Array.isArray(list)) throw new MalformedSuggestionsError("candidates is not an array");
+
   const shelf = new Set(shelfTitles.map((t) => t.trim().toLowerCase()));
   const seen = new Set<string>();
-  const out: Suggestion[] = [];
-  for (const item of (raw as { suggestions: unknown[] }).suggestions) {
+  const out: Candidate[] = [];
+  for (const item of list) {
     if (!item || typeof item !== "object") continue;
     const rec = item as Record<string, unknown>;
     const title = typeof rec.title === "string" ? rec.title.trim() : "";
     const author = typeof rec.author === "string" ? rec.author.trim() : "";
-    const year = typeof rec.year === "number" && Number.isInteger(rec.year) ? rec.year : NaN;
-    const rationale = typeof rec.rationale === "string" ? rec.rationale.trim() : "";
-    if (!title || !author || !Number.isFinite(year) || year < 1000 || year > 2100) continue;
+    const why = typeof rec.why === "string" ? rec.why.trim() : "";
+    if (!title || !author || !why) continue;
     const key = title.toLowerCase();
     if (shelf.has(key) || seen.has(key)) continue;
-    const cautions = Array.isArray(rec.cautions)
-      ? rec.cautions.filter((c): c is string => typeof c === "string" && CAUTION_SET.has(c))
-      : [];
+    const media = typeof rec.media === "string" && MEDIA.has(rec.media)
+      ? (rec.media as Candidate["media"])
+      : "book";
+    const axis = typeof rec.matchAxis === "string" ? rec.matchAxis.trim() : "";
     seen.add(key);
-    out.push({ title, author, year, rationale: rationale.slice(0, MAX_RATIONALE_CHARS), cautions });
+    out.push({
+      title,
+      author,
+      media,
+      why: why.slice(0, MAX_WHY_CHARS),
+      ...(axis ? { matchAxis: axis } : {}),
+    });
     if (out.length >= MAX_SUGGESTIONS) break;
   }
   return out;
 }
 
-/** Minimal structural Anthropic client — no SDK import needed in the core (mirrors emailImportCore,
- *  including the `any` parameter: the real SDK's overloaded create is not assignable to a
- *  narrower structural signature). */
+/**
+ * Check every candidate and keep only what the catalogue confirms.
+ *
+ * ⚠️ A NON-BOOK IS DROPPED, NOT WAVED THROUGH. A book catalogue cannot confirm a film, so a film
+ * candidate has no verification available — and the client's contract has no unverified path. The
+ * writer can still add a film by hand; what the Scout cannot do is claim it checked one.
+ *
+ * ⚠️ THE YEAR COMES FROM THE CATALOGUE. A candidate whose match carries no publication year is
+ * dropped too: `year` is required on the wire and a model-supplied one inside a verified record
+ * would be an unchecked number wearing a checked badge.
+ */
+export async function verifyCandidates(
+  fetchImpl: FetchLike,
+  candidates: Candidate[],
+  now: () => Date
+): Promise<Suggestion[]> {
+  const out: Suggestion[] = [];
+  for (const c of candidates) {
+    if (c.media !== "book") continue;
+    const match = await verifyTitle(fetchImpl, { title: c.title, author: c.author }, now);
+    if (!match || match.year === undefined) continue;
+    out.push({
+      title: match.title,
+      author: match.author,
+      year: match.year,
+      media: "book",
+      why: c.why,
+      verification: match.record,
+      ...(match.publisher ? { publisher: match.publisher } : {}),
+      ...(c.matchAxis ? { matchAxis: c.matchAxis } : {}),
+    });
+  }
+  return out;
+}
+
+/** Minimal structural Anthropic client — keeps the core free of SDK types (and of SDK versions:
+ *  the tool and model strings below are newer than the pinned SDK's unions). */
 export interface AnthropicLike {
   messages: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     create: (args: any) => Promise<{
       content: Array<{ type: string; text?: string }>;
+      /* ⚠️ `| null` MATCHES THE SDK, which types this nullable — and the pinned SDK's union does
+         not include "refusal" at all, so the narrow string is deliberate: the value arrives on the
+         wire whatever the local typings believe. See the SDK-pin note in the report. */
+      stop_reason?: string | null;
       usage?: { input_tokens?: number; output_tokens?: number };
     }>;
   };
@@ -167,46 +254,68 @@ function textOf(msg: { content: Array<{ type: string; text?: string }> }): strin
 }
 
 /**
- * Call Claude, parse + validate, return suggestions. On a malformed first response, retries ONCE
- * with a terse "valid JSON only" nudge; if that also fails, throws MalformedSuggestionsError.
- * Transport/API errors propagate unchanged. Token usage is logged per call for cost visibility.
+ * Ask the model for candidates. Retries ONCE on unparseable output, then gives up.
+ *
+ * ⚠️ WEB SEARCH IS THE POINT OF THE CALL, not a garnish — the model's training data is older than
+ * the market the writer is querying into, and "published in the last five years" cannot be honoured
+ * from memory alone.
+ *
+ * ⚠️ A REFUSAL IS NOT A PARSE FAILURE. This model tier can decline a request outright, returning a
+ * successful response with `stop_reason: "refusal"` and no usable content. Retrying that with a
+ * "return valid JSON" nudge would burn a second call on a request that was never going to be
+ * answered, so it is surfaced as its own error instead.
  */
-export async function suggestFromModel(client: AnthropicLike, input: SuggestInput): Promise<Suggestion[]> {
+export class ScoutRefusedError extends Error {
+  code = "REFUSED";
+  constructor() {
+    super("The request was declined.");
+    this.name = "ScoutRefusedError";
+  }
+}
+
+export async function proposeCandidates(
+  client: AnthropicLike,
+  input: SuggestInput
+): Promise<Candidate[]> {
   const baseMessages = [{ role: "user" as const, content: buildUserMessage(input) }];
 
   const callOnce = async (messages: Array<{ role: "user" | "assistant"; content: string }>) => {
     const res = await client.messages.create({
       model: MODEL,
       max_tokens: MAX_TOKENS,
-      temperature: TEMPERATURE,
       system: SYSTEM_PROMPT,
+      /* adaptive is this model's default; stated so the intent survives a model change */
+      thinking: { type: "adaptive" },
+      tools: [{ type: "web_search_20260209", name: "web_search" }],
       messages,
     });
     console.log(
       `suggestComps: tokens in=${res.usage?.input_tokens ?? "?"} out=${res.usage?.output_tokens ?? "?"}`
     );
+    if (res.stop_reason === "refusal") throw new ScoutRefusedError();
     return res;
   };
 
   const first = await callOnce(baseMessages);
   const firstText = textOf(first);
   try {
-    return validateSuggestions(JSON.parse(stripFences(firstText)), input.shelfTitles);
-  } catch (_e) {
+    return validateCandidates(JSON.parse(stripFences(firstText)), input.shelfTitles);
+  } catch (e) {
+    if (e instanceof ScoutRefusedError) throw e;
     const retryMessages = [
       ...baseMessages,
       { role: "assistant" as const, content: firstText },
       {
         role: "user" as const,
         content:
-          "That was not valid. Return ONLY the JSON object described, with no prose and no code " +
-          "fences, and cautions only from the allowed set.",
+          "That was not valid. Return ONLY the JSON object described, with no prose and no code fences.",
       },
     ];
     const second = await callOnce(retryMessages);
     try {
-      return validateSuggestions(JSON.parse(stripFences(textOf(second))), input.shelfTitles);
+      return validateCandidates(JSON.parse(stripFences(textOf(second))), input.shelfTitles);
     } catch (e2) {
+      if (e2 instanceof ScoutRefusedError) throw e2;
       throw new MalformedSuggestionsError(
         `invalid after retry: ${e2 instanceof Error ? e2.message : String(e2)}`
       );

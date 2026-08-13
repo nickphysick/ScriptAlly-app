@@ -885,14 +885,8 @@ export const ComparableTitlesPage: React.FC<{
               </div>
               <ScoutPanel
                 isPro={isProUser(currentUser)}
-                input={{
-                  manuscriptId: activeMs.id,
-                  manuscriptTitle: activeMs.title,
-                  ageCategory: activeMs.ageCategory,
-                  genre: activeMs.genre,
-                  logline: activeMs.logline || "",
-                  shelfTitles: comps.map((c) => c.title),
-                }}
+                /* the id is the whole input — the function reads the manuscript itself */
+                input={{ manuscriptId: activeMs.id }}
                 shelfTitles={comps.map((c) => c.title)}
                 onAddToShelf={(comp) => writeComps(withCompAdded(comps, comp))}
                 onUpgrade={() => onNavigate?.("plans")}

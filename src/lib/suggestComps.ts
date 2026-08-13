@@ -102,15 +102,16 @@ export function factsChip(s: Pick<CompSuggestion, "media" | "year">): string | n
   return `${s.media} · ${s.year}`;
 }
 
+/**
+ * ⚠️ THE ID IS THE WHOLE INPUT, AND THAT IS A SECURITY PROPERTY. This used to carry the
+ * manuscript's title, genre, age category, logline and shelf titles — so a caller could describe
+ * any manuscript they liked, including one they do not own, and spend a Pro run against it. The
+ * function now reads the document at `users/{uid}/manuscripts/{id}` under the caller's own uid, so
+ * ownership is structural rather than checked, and the prompt inputs come from the same place as
+ * the permission.
+ */
 export interface SuggestCompsInput {
   manuscriptId: string;
-  manuscriptTitle: string;
-  ageCategory: string;
-  genre: string;
-  logline: string;
-  synopsis?: string;
-  /** Current shelf titles — the function excludes these server-side. */
-  shelfTitles: string[];
 }
 
 export class SuggestCompsError extends Error {
