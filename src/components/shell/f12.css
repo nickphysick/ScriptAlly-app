@@ -1788,3 +1788,165 @@
 @media (prefers-reduced-motion: reduce) {
   .qc-sheet, .qc-sheet-scrim { animation: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE MOMENT (§5) — three devices, one per phase, each firing ONCE.
+ *
+ * ⚠️ NOTHING HERE LOOPS. A journey used weekly must not be a performance: a continuous pulse on a
+ * header reads as an alarm and will be resented by the tenth use. Every animation below has an
+ * iteration count of one, stated by having no `infinite` anywhere in the block.
+ *
+ * ⚠️ AND NOTHING HERE DECLARES A PERSISTENT FILL-MODE. `forwards` / `both` outrank inline
+ * transforms, which is how a finished entrance silently discards a FLIP offset and leaves a card
+ * ~7px out of place (recorded in CLAUDE.md, browser-measured). The save path FLIPs the landing row,
+ * so these three settle by their BASE RULE already being the resting state — the keyframes travel
+ * TO it rather than holding it. That is what makes the fill-mode unnecessary rather than merely
+ * omitted.
+ * ══════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ══ 1 · LAMPLIGHT DIM ═════════════════════════════════════════════════════════════════════════
+ *
+ * The chrome outside the sheet falls back and desaturates slightly — the lamp moves to the letter.
+ * NOTHING GOES BLACK AND NOTHING BLURS: a blur says "you cannot read this", and the desk behind is
+ * exactly the thing the writer is meant to still see themselves working on.
+ *
+ * ⚠️ ON `#root`, WHICH THE SHEET IS NOT INSIDE — it portals to `document.body`, so the filter
+ * cannot reach it. That also matters for a reason beyond the dim: a `filter` creates a containing
+ * block for fixed descendants, and if the sheet lived inside `#root` this rule would silently
+ * re-anchor it.
+ *
+ * ⚠️ IT NEVER GATES INTERACTION. `opacity` and `filter` paint; they do not swallow events. Escape,
+ * the backdrop click and the dirty guard all work throughout, and what actually seals the desk is
+ * `inert` (§3) — a separate mechanism, deliberately, because a dim that also disabled things would
+ * be doing two jobs and you could not change one without the other.
+ */
+/* ⚠️ ONE RULE PER SELECTOR — the depth is declared HERE, not in a second `#root.qc-lamp` block
+   below. Two rules for one selector make a lock's first-match slice ambiguous, which is recorded
+   twice in CLAUDE.md and caught this file's depth assertion on its first run: the slice read the
+   paint rule and reported that the dim states no depth.
+
+   ⚠️ THREE DEPTHS, AND ONLY ONE OUTCOME MOVES IT. Record sits deeper than create because a reply is
+   a thing that happened TO you; an offer deepens one further because it is the moment the whole
+   campaign is for. No other outcome changes the light — a pass is not darker, just quieter, and a
+   room that dimmed for a rejection would be reacting to bad news on the writer's behalf. */
+#root.qc-lamp {
+  --qc-lamp: 0.4;
+  opacity: var(--qc-lamp);
+  filter: saturate(0.82);
+  transition: opacity 500ms ease, filter 500ms ease;
+}
+#root.qc-lamp-record { --qc-lamp: 0.34; }
+#root.qc-lamp-offer { --qc-lamp: 0.28; }
+
+/**
+ * ══ 2 · ARRIVAL BEAT ══════════════════════════════════════════════════════════════════════════
+ *
+ * One soft ring off the motif as the sheet lands, then stillness. Burgundy in create, sage in
+ * record — the register's colour, so the beat says which journey this is before the title is read.
+ *
+ * ⚠️ THE RING IS A SIBLING SPAN, NOT `img::after`. An `<img>` is a replaced element and cannot
+ * carry a pseudo-element — the rule would parse, pass every lock, and draw nothing.
+ */
+.qc-motif { position: relative; flex: none; display: inline-flex; }
+.qc-motif .qch-ill { display: block; }
+.qc-motif::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 14px;
+  border: 1.5px solid var(--qc-beat, var(--burg));
+  opacity: 0;
+  pointer-events: none;
+}
+/* armed only while the sheet is arriving, so it cannot re-fire on a re-render */
+.qc-entering .qc-motif::after { animation: qc-beat 900ms ease-out 300ms; }
+.qc-sheet--record .qc-motif::after { --qc-beat: var(--sage); }
+@keyframes qc-beat {
+  0%   { opacity: 0.6; transform: scale(0.94); }
+  100% { opacity: 0; transform: scale(1.45); }
+}
+
+/**
+ * ══ 3 · THE SEAL ══════════════════════════════════════════════════════════════════════════════
+ *
+ * A wax seal stamps beside the primary as the write RESOLVES — never on the click. A seal that
+ * appeared on press would be a promise; this one is a receipt.
+ *
+ * ⚠️ THE BASE RULE IS THE RESTING STATE. The element only renders once there is something to seal,
+ * so it is fully visible by default and the keyframe travels to that — which is why no `forwards`
+ * is needed and the FLIP-clobbering fill-mode never has to be written.
+ */
+/**
+ * ⚠️ THE WAX IS ONE TOKEN PER FAMILY, LIT AND SHADED BY ALPHA — never three hand-mixed hexes per
+ * seal. The ref draws each as a three-stop gradient of literals; written that way it put eight new
+ * hexes into a stylesheet whose whole palette is tokens, and an existing lock caught it. Shading a
+ * token with white and ink alpha gives the same wax bead, tracks the theme, and adds no colour to
+ * the page's vocabulary.
+ */
+.qc-seal {
+  position: relative;
+  flex: none;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--panel);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(circle at 70% 80%, rgba(var(--qc-ink-rgb), 0.28), rgba(var(--qc-ink-rgb), 0) 60%),
+    var(--qc-wax, var(--burg));
+  box-shadow: 0 2px 8px rgba(var(--qc-ink-rgb), 0.35), inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+  animation: qc-seal 650ms cubic-bezier(0.2, 0.85, 0.3, 1);
+}
+.qc-seal svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+/* ⚠️ WARM GREY, NEVER RED. A pass is the commonest thing that happens to a query; sealing it in red
+   would make the ordinary outcome of the work look like a fault the writer caused. An ending is
+   closed with dignity — and `--muted` is the page's own warm grey, not a new one mixed for this. */
+.qc-seal--sage { --qc-wax: var(--sage); }
+.qc-seal--burgundy { --qc-wax: var(--burg); }
+.qc-seal--grey { --qc-wax: var(--muted); }
+@keyframes qc-seal {
+  0%   { opacity: 0; transform: scale(1.7) rotate(-8deg); }
+  55%  { opacity: 1; transform: scale(0.96) rotate(1deg); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* The dock exhales as the row lands behind — brief, matching, and gone. A glow that stayed would be
+   a state; this is a breath.
+   ⚠️ THE COLOUR IS ON THE RULE AND ONLY THE OPACITY IS ANIMATED — because a `var()` inside a
+   keyframe is a documented silent failure in this repo, and two standing locks scan for it. Written
+   as `background: rgba(var(--qc-ink-rgb), .05)` in a keyframe it tripped both, correctly: an
+   overlay whose tint is a custom property must declare the tint where custom properties resolve
+   normally and animate something that interpolates. */
+.qc-dock { position: relative; }
+.qc-dock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(var(--qc-ink-rgb), 0.05);
+  opacity: 0;
+}
+.qc-dock-sealed::before { animation: qc-dock-glow 650ms ease-out; }
+@keyframes qc-dock-glow {
+  0%   { opacity: 0; }
+  40%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/**
+ * ⚠️ REDUCED MOTION CUTS ALL THREE TO THEIR FINAL FRAME — it does not delete them. The dim still
+ * dims (instantly), the seal still shows (it is a receipt, and suppressing it would remove the
+ * confirmation rather than the movement), and only the beat has no final frame worth holding,
+ * because its final frame is invisible by design.
+ *
+ * ⚠️ AND THE SEAL'S SUPPRESSION HAS A SECOND HALF IN THE JS. `animation: none` fires no
+ * `animationend`, so the save path must not wait on one — it branches at the arming site, exactly
+ * as the takeover's exits already do.
+ */
+@media (prefers-reduced-motion: reduce) {
+  #root.qc-lamp { transition: none; }
+  .qc-entering .qc-motif::after { animation: none; }
+  .qc-seal { animation: none; }
+  .qc-dock-sealed { animation: none; }
+}

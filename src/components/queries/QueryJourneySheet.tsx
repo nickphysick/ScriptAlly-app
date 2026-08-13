@@ -32,9 +32,35 @@
  * The dock sits INSIDE the sheet, at its foot. It used to be row 4 of WorkspacePageGrid; a dock
  * belongs to the composition it commits, not to the page the composition is lying on top of.
  */
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useOverlay } from "../shell/useOverlay";
+
+/**
+ * ⚠️ THE LAMPLIGHT DIM (§5, device 1). The chrome outside the sheet falls back and desaturates —
+ * the lamp moves to the letter. Applied to `#root`, which the sheet is NOT inside (it portals to
+ * the body), so the filter cannot reach it.
+ *
+ * ⚠️ IT IS A CLASS SWAP, NOT AN INLINE STYLE, so the values and the transition stay in the
+ * stylesheet where the reduced-motion rule can reach them. An inline `opacity` would be
+ * unsuppressible from CSS.
+ *
+ * ⚠️ AND THE DEPTH IS DRIVEN BY A SINGLE OWNER. Three depths — create, record, and one further
+ * step for an offer — as three mutually exclusive classes rather than three booleans, because two
+ * of them being true at once has no meaning and would resolve by cascade order.
+ */
+function useLamplight(depth: "create" | "record" | "offer") {
+  useEffect(() => {
+    const root = typeof document === "undefined" ? null : document.getElementById("root");
+    if (!root) return;
+    root.classList.add("qc-lamp");
+    root.classList.toggle("qc-lamp-record", depth === "record" || depth === "offer");
+    root.classList.toggle("qc-lamp-offer", depth === "offer");
+    return () => {
+      root.classList.remove("qc-lamp", "qc-lamp-record", "qc-lamp-offer");
+    };
+  }, [depth]);
+}
 
 export const QueryJourneySheet: React.FC<{
   open: boolean;
@@ -60,6 +86,13 @@ export const QueryJourneySheet: React.FC<{
    * already diff the draft against its baseline and confirm only when it is dirty.
    */
   onRequestClose: () => void;
+  /**
+   * How deep the room goes (§5). `create` and `record` are the two registers — a reply is something
+   * that happened TO you, so it sits a step deeper. `offer` deepens one further, and is the ONLY
+   * outcome that moves the light: a pass is not darker, just quieter, and dimming for a rejection
+   * would make the room react to bad news.
+   */
+  lamp: "create" | "record" | "offer";
   children: React.ReactNode;
 }> = ({ open, ...rest }) => {
   /* ⚠️ THE INNER SPLIT IS A HOOKS RULE, NOT A STYLE CHOICE. `useOverlay` arms everything on MOUNT —
@@ -78,9 +111,11 @@ const SheetInner: React.FC<{
   onAnimationEnd?: React.AnimationEventHandler<HTMLDivElement>;
   dock?: React.ReactNode;
   onRequestClose: () => void;
+  lamp: "create" | "record" | "offer";
   children: React.ReactNode;
-}> = ({ register, ariaLabel, stateClass, onAnimationEnd, dock, onRequestClose, children }) => {
+}> = ({ register, ariaLabel, stateClass, onAnimationEnd, dock, onRequestClose, lamp, children }) => {
   const rootRef = useRef<HTMLDivElement>(null);
+  useLamplight(lamp);
 
   /**
    * ⚠️ WHAT AN OVERLAY OWES (§3), through the shell's one primitive rather than a third copy of it:

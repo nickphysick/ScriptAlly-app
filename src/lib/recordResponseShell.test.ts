@@ -177,7 +177,10 @@ describe("it wears the shared motion, not a second copy", () => {
     expect(queries).toContain("setRespEntering(!prefersReducedMotion());");
     const save = queries.slice(queries.indexOf("const saveResponse = async"), queries.indexOf("/** The picker's inline quick-add"));
     expect(save).not.toBe("");
-    expect(save).toContain("if (prefersReducedMotion()) { shutRecord(); recordTriggerRef.current?.focus(); }");
+    /* ⚠️ AMENDED (§5): the branch now also shows the seal at its final frame before completing
+       directly. The reason it must not WAIT is unchanged — `animation: none` fires no
+       `animationend`, so a seal-armed exit would strand the sheet open forever. */
+    expect(save).toContain("if (prefersReducedMotion()) { setSeal({ kind, thenExit: false }); shutRecord(); recordTriggerRef.current?.focus(); }");
     const close = queries.slice(queries.indexOf("const closeRecord = ()"), queries.indexOf("const saveResponse = async"));
     expect(close).toContain("if (prefersReducedMotion()) { shutRecord(); recordTriggerRef.current?.focus(); return; }");
   });
@@ -202,8 +205,17 @@ describe("no red anywhere, and the palette is the app's own", () => {
   });
 
   it("and the marks read existing tokens rather than new literals", () => {
-    const block = css.slice(css.indexOf("/* ══ RECORDING A RESPONSE"));
-    expect(block, "the response block is missing").not.toBe("");
+    /* ⚠️ THE SLICE IS BOUNDED AT BOTH ENDS. It ran to the END OF THE FILE, so it read every rule
+       ever appended after the response block — and the moment §5's devices landed there it reported
+       "the response block introduced literals" about eight hexes in a block it has nothing to do
+       with. An open-ended slice is a bet that nothing will ever be added below it, which is the
+       same bet a `lastIndexOf` anchor makes. (The hexes were a real fault too, and are gone — but
+       the lock had to be able to say WHERE.) */
+    const from = css.indexOf("/* ══ RECORDING A RESPONSE");
+    expect(from, "the response block is missing").toBeGreaterThan(-1);
+    const next = css.indexOf("\n/* ══", from + 1);
+    const block = next > -1 ? css.slice(from, next) : css.slice(from);
+    expect(block, "the response block is empty — this case is testing nothing").not.toBe("");
     for (const m of ["qr-m-in", "qr-m-offer", "qr-m-shut"]) expect(block).toContain(m);
     /* No raw hex anywhere in the response block — every colour is a token. */
     const hexes = block.match(/#[0-9a-fA-F]{3,6}\b/g) ?? [];

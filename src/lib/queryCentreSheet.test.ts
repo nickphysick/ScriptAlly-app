@@ -212,9 +212,15 @@ describe("§2 · motion", () => {
   /* ⚠️ REDUCED MOTION REMOVES THE TRAVEL, NOT THE OVERLAY. A reader who asked for less motion is
      still owed the dimmed desk that says the rest of the page is not currently theirs. */
   it("reduced motion cuts to the final frame with the scrim still applied", () => {
-    const at = css.lastIndexOf("@media (prefers-reduced-motion: reduce)");
-    expect(at, "the reduced-motion block is missing").toBeGreaterThan(-1);
-    const block = css.slice(at, css.indexOf("}\n", css.indexOf("{", at) + 1) + 2);
+    /* ⚠️ ANCHORED ON THE SHEET'S OWN BLOCK, NOT ON THE LAST ONE IN THE FILE. This read
+       `lastIndexOf(...)` and started measuring §5's device block the moment that was appended —
+       reporting "the sheet keeps travelling" about a rule it was no longer looking at. A "last of
+       its kind" anchor is a bet that nothing will ever be added below it. */
+    const at = css.indexOf(".qc-sheet, .qc-sheet-scrim { animation: none; }");
+    expect(at, "the sheet's reduced-motion rule is missing").toBeGreaterThan(-1);
+    const open = css.lastIndexOf("@media (prefers-reduced-motion: reduce)", at);
+    expect(open, "that rule is not inside a reduced-motion block").toBeGreaterThan(-1);
+    const block = css.slice(open, css.indexOf("}\n", at) + 2);
     expect(block, "the sheet keeps travelling under reduced motion").toContain(".qc-sheet");
     expect(block, "the scrim keeps fading under reduced motion").toContain(".qc-sheet-scrim");
     expect(block, "reduced motion HID the scrim — the desk would stop being spoken for")

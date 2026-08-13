@@ -57,6 +57,32 @@ export const OUTCOME_ORDER: readonly ResponseOutcome[] = [
   "partial", "full", "rr", "offer", "rejected", "noreply",
 ] as const;
 
+/** The three colours a saved response can be sealed in. */
+export type SealKind = "sage" | "burgundy" | "grey";
+
+/**
+ * ⚠️ THE SEAL'S COLOUR IS THE OUTCOME'S KIND, NOT ITS NAME — three families, six outcomes.
+ * Sage = they asked for something (a partial, a full, a revision: work continues). Burgundy = an
+ * offer. Warm grey = it ended.
+ *
+ * ⚠️ WARM GREY, NEVER RED, AND THAT IS THE WHOLE POINT OF THE THIRD FAMILY. A pass is the commonest
+ * thing that happens to a query; sealing it in red would make the ordinary outcome of the work look
+ * like an error the writer caused. An ending is closed with dignity — the app reports, it never
+ * appraises.
+ *
+ * ⚠️ AND `rr` IS SAGE, DELIBERATELY. Revise & Resubmit reads like a setback and is a REQUEST: the
+ * agent has asked for more work and wants to see it again. Grouping it with the endings would seal
+ * an invitation in the colour of a door closing.
+ */
+export const OUTCOME_SEAL: Record<ResponseOutcome, SealKind> = {
+  partial: "sage",
+  full: "sage",
+  rr: "sage",
+  offer: "burgundy",
+  rejected: "grey",
+  noreply: "grey",
+};
+
 /** The name and the one line beneath it. Plain description — the app reports, never appraises. */
 export const OUTCOME_LABEL: Record<ResponseOutcome, string> = {
   partial: "Partial requested",

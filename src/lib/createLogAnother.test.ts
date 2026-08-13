@@ -51,13 +51,20 @@ describe("the takeover does not leave", () => {
     expect(again, "nor a teardown").not.toContain("shutCreate");
   });
 
-  /* The exit is armed only for the non-batch save — `if (!logAnother)`. */
+  /* ⚠️ THE EXIT IS STILL ONLY FOR THE NON-BATCH SAVE, but it is armed one beat later (§5). The
+     seal stamps on write resolution and ITS `animationend` arms the exit — so what carries the
+     "am I leaving?" answer is the seal's `thenExit`, and `Save & log another` seals without
+     departing. The guarantee is unchanged; the flag moved from an `if` to a field. */
   it("and the save path only arms one when it is genuinely leaving", () => {
     const a = queries.indexOf("const saveCreate = async");
     expect(a, "saveCreate is missing").toBeGreaterThan(-1);
     const b = queries.indexOf("if (!pendingSave) return;", a);
     expect(b).toBeGreaterThan(a);
-    expect(queries.slice(a, b)).toContain("if (!logAnother) {");
+    const save = queries.slice(a, b);
+    expect(save, "the batch save stopped being distinguished from the departing one")
+      .toContain("thenExit: !logAnother");
+    expect(save, "the batch save arms an exit under reduced motion too")
+      .toContain("if (!logAnother) finishSaveExit();");
   });
 });
 

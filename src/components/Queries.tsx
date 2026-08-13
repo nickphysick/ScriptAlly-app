@@ -33,7 +33,7 @@ import { prefersReducedMotion } from "../lib/reducedMotion";
 import { ResponsePane, type RespStepId } from "./queries/ResponsePane";
 import {
   emptyResponseDraft, responseReady, responseChips, responseDraftToPayload, OUTCOME_LABEL,
-  stepsFor, OUTCOME_STATUS, type ResponseDraft, type RespStep,
+  stepsFor, OUTCOME_STATUS, OUTCOME_SEAL, type SealKind, type ResponseDraft, type RespStep,
 } from "../lib/responseDraft";
 import { jumpIn, advanceIn, reseatInto } from "../lib/stepStack";
 
@@ -362,6 +362,18 @@ export const Queries: React.FC<{
   const [respEntering, setRespEntering] = useState(false);
   const [respCancelling, setRespCancelling] = useState(false);
   const [respExiting, setRespExiting] = useState(false);
+
+  /**
+   * ⚠️ THE SEAL (§5, device 3) — set PAST THE WRITE, never on the click. A seal that appeared on
+   * press would be a promise; this one is a receipt, and a failed save must not have already
+   * stamped one.
+   *
+   * ⚠️ `thenExit` IS WHY THIS IS AN OBJECT AND NOT A COLOUR. The seal is the beat BEFORE the sheet
+   * leaves, so its `animationend` arms the exit — one animation ending starts the next, which is
+   * this page's existing law and the reason no timer sequences any of it. "Save & log another" is
+   * the one save with no exit to arm: it seals, and the sheet stays for the next query.
+   */
+  const [seal, setSeal] = useState<{ kind: SealKind; thenExit: boolean } | null>(null);
   const recording = respDraft !== null;
   /* The control that opened it — focus goes back there on every exit, as create's does. */
   const recordTriggerRef = useRef<HTMLButtonElement>(null);
@@ -429,6 +441,7 @@ export const Queries: React.FC<{
        writer has already finished. */
     setSessionLogged(0);
     setCreateReseating(false);
+    setSeal(null);
   };
 
   /**
@@ -450,12 +463,17 @@ export const Queries: React.FC<{
     setRespStep({ active: "outcome", reached: "outcome" });
     setRespCancelling(false);
     setRespExiting(false);
+    setSeal(null);
     /* Not armed under reduced motion — `animation: none` fires no `animationend`, so the scope
        class would never be cleared (lib/reducedMotion.ts). */
     setRespEntering(!prefersReducedMotion());
   };
 
   const shutRecord = () => {
+    /* ⚠️ THE SEAL IS CLEARED ON EVERY TEARDOWN AND EVERY FRESH OPEN. Under reduced motion it is set
+       without an `animationend` to clear it, so a "Save & log another" would otherwise leave last
+       query's seal sitting in the dock of the next one — a receipt for something else. */
+    setSeal(null);
     setRespDraft(null);
     setRespBase(null);
     setRespQueryId(null);
@@ -509,9 +527,20 @@ export const Queries: React.FC<{
         responseDraftToPayload(respDraft),
       );
       /* ⚠️ PAST THE WRITE, NEVER ON THE CLICK — a failed save must not have already animated a row
-         that then reverts. Reduced motion completes directly, for want of an `animationend`. */
-      if (prefersReducedMotion()) { shutRecord(); recordTriggerRef.current?.focus(); }
-      else setRespExiting(true);
+         that then reverts. Reduced motion completes directly, for want of an `animationend`.
+
+         ⚠️ THE SEAL STAMPS FIRST AND THE EXIT FOLLOWS IT (§5). Armed together the 650ms seal would
+         be cut off a third of the way through by the 220ms exit, so the seal's own `animationend`
+         arms the exit — one animation ending starts the next, which is how every other transition
+         on this page is sequenced and why no timer is involved.
+
+         ⚠️ UNDER REDUCED MOTION THE SEAL IS SHOWN BUT NOT WAITED ON. `animation: none` fires no
+         `animationend`, so waiting would strand the sheet open forever. The seal renders at its
+         final frame — it is a receipt, and suppressing it would remove the confirmation rather than
+         the movement — while the teardown runs directly, exactly as it already did. */
+      const kind = OUTCOME_SEAL[respDraft.outcome!];
+      if (prefersReducedMotion()) { setSeal({ kind, thenExit: false }); shutRecord(); recordTriggerRef.current?.focus(); }
+      else setSeal({ kind, thenExit: true });
       showToast({
         replaces: RESPONSE_RECEIPT_CHANNEL,
         message: `${OUTCOME_LABEL[respDraft.outcome!]} recorded`,
@@ -578,6 +607,10 @@ export const Queries: React.FC<{
        playing only for writers who did not change their mind. */
     setCreateEntering(false);
     setCreateCancelling(false);
+    /* ⚠️ AND THE SEAL, for the same reason the entrance scope is cleared here: under reduced motion
+       it is armed with no `animationend` to retire it, so a stale receipt would greet the next
+       sitting. */
+    setSeal(null);
     const restore = stashedSelection && queries.some((q) => q.id === stashedSelection)
       ? stashedSelection
       : (sortedListRef.current[0]?.id ?? null);
@@ -750,9 +783,15 @@ export const Queries: React.FC<{
          `animationend` (see lib/reducedMotion.ts), so arming it there would leave the pane wearing
          a rule that is `opacity: 0` with no event left to clear it — every save blanking the
          reading pane for the rest of the session. The completion runs directly instead. */
-      if (!logAnother) {
-        if (prefersReducedMotion()) finishSaveExit();
-        else setCreateExiting(true);
+      /* ⚠️ CREATE ALWAYS SEALS BURGUNDY (§5). There is one thing that can have happened here — a
+         query went out — so there is nothing for the colour to vary with, and varying it would
+         invent a distinction. `Save & log another` seals too and does NOT exit: the seal marks the
+         save, not the leaving, and the sheet stays for the next one. */
+      if (prefersReducedMotion()) {
+        setSeal({ kind: "burgundy", thenExit: false });
+        if (!logAnother) finishSaveExit();
+      } else {
+        setSeal({ kind: "burgundy", thenExit: !logAnother });
       }
       setLandedId(newId);
       /* THE RECEIPT IS THE APP'S EXISTING TOAST, not a second primitive. `showToast` already owns
@@ -3462,6 +3501,12 @@ export const Queries: React.FC<{
                  closes silently, and every seeded default (today's date, the house nudge, a
                  pre-selected manuscript) is part of that baseline and therefore already clean. */
               onRequestClose={() => (recording ? closeRecord() : closeCreate())}
+              /* ⚠️ OFFER IS THE ONLY OUTCOME THAT MOVES THE LIGHT (§5). Record already sits a step
+                 deeper than create — a reply is something that happened TO you — and an offer
+                 deepens one further because it is the moment the whole campaign is for. Nothing
+                 else changes it: a pass is not darker, just quieter, and a room that dimmed for a
+                 rejection would be reacting to bad news on the writer's behalf. */
+              lamp={recording ? (respDraft?.outcome === "offer" ? "offer" : "record") : "create"}
               /* ⚠️ THE SAME THREE CLASSES, ON THE NEW FRAME. They were a template literal on the
                  pane and stay one here — the classes did not change, only what wears them, and
                  keeping the expression shape means the locks that guard them still read as prose
@@ -3480,6 +3525,16 @@ export const Queries: React.FC<{
                  through every branch below and do nothing, which is the correct outcome — but it is
                  why each branch tests the NAME rather than assuming what fired. */
               onAnimationEnd={(e) => {
+                /* ⚠️ THE SEAL ARMS THE EXIT, AND IT IS CHECKED FIRST. It is the beat between the
+                   write landing and the sheet leaving, so nothing below should run while it plays.
+                   `thenExit` is false for "Save & log another", where the seal marks a save that
+                   is not a departure. */
+                if (seal && e.animationName === "qc-seal") {
+                  const leaving = seal.thenExit;
+                  setSeal(null);
+                  if (leaving) { if (recording) setRespExiting(true); else setCreateExiting(true); }
+                  return;
+                }
                 if (respCancelling && e.animationName === "qc-exit-cancel") {
                   shutRecord(); recordTriggerRef.current?.focus(); return;
                 }
@@ -3512,7 +3567,7 @@ export const Queries: React.FC<{
                    ⚠️ AND THE TOAST HOST FLOATS OVER IT, WHICH IS CORRECT. `.sa-toasts` is z:300
                    against the sheet's 201, so a receipt sits ABOVE the dock rather than pushing it
                    — a confirmation should never move the control you just used. */
-                <div className={`qc-dock${createEntering || respEntering ? " qc-dock-in" : ""}${createCancelling || respCancelling ? " qc-dock-out" : ""}`}>
+                <div className={`qc-dock${createEntering || respEntering ? " qc-dock-in" : ""}${createCancelling || respCancelling ? " qc-dock-out" : ""}${seal ? " qc-dock-sealed" : ""}`}>
                   <span className="qc-dock-say">
                     {/* ⚠️ `OUTCOME_STATUS`, NOT A CAST. `respDraft.outcome` is an outcome KEY ("rr",
                         "noreply", "rejected") and casting it to `QueryStatus` typechecks while
@@ -3526,6 +3581,15 @@ export const Queries: React.FC<{
                       : consequenceLine(createReady ? QueryStatus.QUERIED : null)}
                   </span>
                   <span className="qc-dock-acts">
+                    {/* ⚠️ THE SEAL SITS BESIDE THE PRIMARY, and it is `aria-hidden` because the
+                        toast already announces the save in words. Two announcements of one event
+                        talk over each other, and a wax seal is not information a screen reader
+                        needs — it is the felt half of a confirmation whose spoken half exists. */}
+                    {seal && (
+                      <span className={`qc-seal qc-seal--${seal.kind}`} aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><path d="m5 13 4 4L19 7" /></svg>
+                      </span>
+                    )}
                     <span className="qch-esc" aria-hidden="true">Esc</span>
                     {recording ? (
                       <>
@@ -3554,7 +3618,12 @@ export const Queries: React.FC<{
               /* ── RECORDING A RESPONSE (§1, ref 83-record-response.html) ── */
               <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
                 <div className="qch qch-resp">
-                  <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
+                  {/* ⚠️ THE BEAT NEEDS A WRAPPER (§5). The ring is a `::after`, and an `<img>` is a
+                      replaced element that cannot carry one — hung off the image directly the rule
+                      would parse, pass every lock, and draw nothing at all. */}
+                  <span className="qc-motif">
+                    <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
+                  </span>
                   <div className="qch-txt">
                     <h2 className="qch-title">Recording a response</h2>
                     {/* ⚠️ THE LEDE IS GONE (§4); THE ERROR IS NOT. This one element did two jobs —
@@ -3644,7 +3713,11 @@ export const Queries: React.FC<{
                     command bar. It says what you are doing, what it needs, and offers the three
                     ways out, in one band at the top of the work. ── */}
                 <div className="qch">
-                  <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
+                  {/* ⚠️ THE BEAT NEEDS A WRAPPER — see the record journey's note: a `::after` on a
+                      replaced element draws nothing, silently. */}
+                  <span className="qc-motif">
+                    <img className="qch-ill" src="/Log_Query_Icon.png" alt="" width={64} height={64} />
+                  </span>
                   <div className="qch-txt">
                     <h2 className="qch-title">Logging new query</h2>
                     {/* ⚠️ ONE LINE, TWO JOBS: the requirement by default, the save error in

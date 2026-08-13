@@ -53,15 +53,22 @@ const frames = (name: string): string => {
 describe("nothing animates until the write resolves", () => {
   it("the exit is armed past every early return, not in the click handler", () => {
     const save = saveBody();
-    expect(save).toContain("if (!logAnother) {");
-    expect(save).toContain("else setCreateExiting(true);");
-    /* It must sit AFTER the failure branch — if it were above, a rejected write would animate. */
+    /* ⚠️ AMENDED (§5): the exit is armed by the SEAL's `animationend`, which is itself armed here,
+       past every early return. The property this case exists for — nothing animates until the
+       write resolves — is unchanged and is what `thenExit` now carries. */
+    expect(save).toContain("thenExit: !logAnother");
+    /* ⚠️ WHAT IS ARMED HERE IS THE SEAL (§5) — the exit follows from its `animationend`, so the
+       property this case protects is now stated one link earlier in the same chain: if the seal
+       cannot be armed before the write resolves, the exit cannot either. */
     expect(save.indexOf("setCreateError(res.error"), "the failure branch is missing")
       .toBeGreaterThan(-1);
-    expect(save.indexOf("setCreateExiting(true)"), "the exit must come after the failure return")
+    expect(save.indexOf("setSeal("), "the seal must come after the failure return")
       .toBeGreaterThan(save.indexOf("setCreateError(res.error"));
-    expect(save.indexOf("setCreateExiting(true)"), "and after the write itself")
+    expect(save.indexOf("setSeal("), "and after the write itself")
       .toBeGreaterThan(save.indexOf("await addQuery"));
+    /* and the exit is armed nowhere in this function any more — only off the seal */
+    expect(save, "the exit was armed alongside the seal, so the seal would be cut off by it")
+      .not.toContain("setCreateExiting(true)");
   });
 
   /* A rejected write leaves the takeover open with its error: the early return happens before the
@@ -71,6 +78,8 @@ describe("nothing animates until the write resolves", () => {
     const fail = save.slice(save.indexOf("if (!res.success"), save.indexOf("if (createDraft.journal"));
     expect(fail).toContain("return;");
     expect(fail, "a failed save must not arm the exit").not.toContain("setCreateExiting");
+    expect(fail, "a failed save must not stamp a seal — it would be a receipt for nothing")
+      .not.toContain("setSeal(");
     expect(fail, "nor land a row").not.toContain("setLandedId");
   });
 
@@ -186,10 +195,18 @@ describe("the motion laws hold", () => {
 describe("reduced motion completes without an event that never arrives", () => {
   it("the class is never armed when motion is suppressed", () => {
     const save = saveBody();
-    const at = save.indexOf("if (prefersReducedMotion()) finishSaveExit();");
+    /* ⚠️ AMENDED (§5): reduced motion now also shows the seal — a receipt, whose suppression would
+       remove the confirmation rather than the movement — and then completes DIRECTLY, because
+       `animation: none` fires no `animationend` for the seal to hand off from. */
+    const at = save.indexOf("if (!logAnother) finishSaveExit();");
     expect(at, "the reduced-motion branch is missing").toBeGreaterThan(-1);
-    /* The branch must sit BEFORE the arming, as its alternative — not after it as a repair. */
-    expect(save.indexOf("else setCreateExiting(true);")).toBeGreaterThan(at);
+    expect(save, "reduced motion stopped showing the seal — the receipt would vanish with the motion")
+      .toContain('setSeal({ kind: "burgundy", thenExit: false });');
+    /* The branch must sit BEFORE the motion-armed path, as its alternative — not after it as a
+       repair. Under reduced motion the seal is shown and the teardown runs DIRECTLY; with motion,
+       the seal's `animationend` hands off to the exit. */
+    expect(save.indexOf('thenExit: !logAnother'), "the motion path must be the alternative branch")
+      .toBeGreaterThan(at);
   });
 
   it("it is a branch on the preference, never a timer standing in for the animation", () => {
