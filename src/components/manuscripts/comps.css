@@ -327,75 +327,17 @@
 .ct-listempty { padding: 24px 4px; text-align: center; font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--ct-ink-soft); }
 
 /* ── The Scout ── */
-.ct-scout-what { font-size: 12px; color: var(--ct-ink-soft); line-height: 1.55; margin-bottom: 14px; }
-.ct-scout-what b { color: var(--ct-ink); }
-.ct-how { background: var(--ct-scout-bg); border: 1px solid var(--ct-scout-bd); border-radius: 11px; padding: 13px 14px; margin-bottom: 14px; }
-.ct-how .ht { font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ct-scout-ink); margin-bottom: 10px; }
-.ct-step { display: flex; gap: 11px; align-items: flex-start; margin-bottom: 11px; }
-.ct-step:last-child { margin-bottom: 0; }
-.ct-step .num {
-  width: 22px; height: 22px; border-radius: 50%; background: var(--ct-scout-deep); color: #fff; display: flex;
-  align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 10px; flex-shrink: 0;
-}
-.ct-step .st { font-size: 12px; font-weight: 600; color: var(--ct-ink); }
-.ct-step .sd { font-size: 11px; color: var(--ct-ink-soft); line-height: 1.45; margin-top: 1px; }
-.ct-btn-pro {
-  width: 100%; background: var(--ct-scout-deep); border: none; color: #fff; border-radius: 10px; padding: 12px;
-  font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
-  font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all .18s; box-shadow: 0 2px 10px rgba(47, 71, 97, .24);
-}
-.ct-btn-pro:hover:not(:disabled) { background: var(--ct-scout-ink); }
-.ct-btn-pro:disabled { opacity: .7; cursor: default; }
-.ct-btn-pro svg { width: 15px; height: 15px; }
-.ct-btn-pro .spin { width: 13px; height: 13px; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%; animation: ct-spin .7s linear infinite; }
-@keyframes ct-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .ct-btn-pro .spin { animation: none; } }
-.ct-scan { display: flex; flex-direction: column; gap: 6px; margin: 14px 0; }
-.ct-scanline { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--ct-scout-ink); display: flex; gap: 8px; opacity: 0; animation: ct-fadeup .35s forwards; }
-.ct-scanline .tick { color: var(--ct-scout); }
-@keyframes ct-fadeup { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .ct-scanline { animation: none; opacity: 1; } }
 .ct-notyet {
   margin: 14px 0 0; padding: 14px 15px; background: var(--ct-sect); border: 1px solid var(--ct-band-hair);
   border-radius: 10px; font-size: 11.5px; line-height: 1.55; color: var(--ct-ink-soft); text-align: center;
 }
 .ct-notyet b { color: var(--ct-ink); }
-.ct-results { margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
-.ct-rcard { background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-radius: 12px; padding: 14px; opacity: 0; animation: ct-fadeup .45s forwards; box-shadow: var(--ct-card-sh); }
-@media (prefers-reduced-motion: reduce) { .ct-rcard { animation: none; opacity: 1; } }
-.ct-rc-top { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; }
-.ct-rc-title { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; line-height: 1.15; color: var(--ct-ink); }
-.ct-rc-year { font-family: 'JetBrains Mono', monospace; font-size: 9px; background: var(--ct-sect); color: var(--ct-mocha); padding: 2px 7px; border-radius: 20px; border: 1px solid var(--ct-band-hair); }
-.ct-rc-meta { font-size: 11px; color: var(--ct-ink-soft); margin-top: 3px; }
 /* ⚠️ ONE CHIP, BOTH CARDS. `.ct-chip.verified` is mounted identically in the comp row and in the
    Scout result; there is deliberately no second treatment. It was `.ct-verified` reading
    `--ct-pro`, which meant it turned blue with the Scout and could only ever exist in the
    right-hand column — the claim would have changed colour depending on where it was standing. */
 .ct-chip.verified { background: var(--ct-verified-bg); color: var(--ct-verified); border: 1px solid var(--ct-verified-bd); }
 .ct-chip.verified svg { width: 10px; height: 10px; }
-.ct-why { margin-top: 10px; background: var(--ct-scout-bg); border-radius: 8px; padding: 9px 11px; }
-.ct-why-cap { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .06em; text-transform: uppercase; color: var(--ct-scout-ink); margin-bottom: 4px; }
-.ct-why-txt { font-size: 11.5px; line-height: 1.5; color: var(--ct-ink); }
-.ct-why-txt b { color: var(--ct-scout-ink); }
-.ct-agent-hook { margin-top: 9px; display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--ct-scout-ink); background: var(--ct-scout-tile); border-radius: 8px; padding: 8px 10px; }
-.ct-agent-hook svg { color: var(--ct-scout-deep); flex-shrink: 0; width: 13px; height: 13px; }
-.ct-agent-hook b { font-weight: 600; }
-.ct-rc-foot { margin-top: 11px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 10px; border-top: 1px solid var(--ct-band-hair); }
-.ct-links { display: flex; gap: 9px; }
-.ct-links a { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--ct-ink-soft); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
-.ct-links a:hover { color: var(--ct-scout-ink); }
-.ct-links a svg { width: 11px; height: 11px; }
-.ct-addshelf {
-  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .04em; text-transform: uppercase;
-  background: var(--ct-pink); border: 1px solid var(--ct-pink-bd); color: var(--ct-mocha); border-radius: 9px; padding: 8px 12px; cursor: pointer;
-  display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all .16s;
-}
-.ct-addshelf:hover:not(:disabled) { background: var(--ct-pink-hover); }
-.ct-addshelf:disabled { background: var(--ct-sect); color: var(--ct-ink-soft); border: 1px solid var(--ct-band-hair); cursor: default; }
-.ct-addshelf svg { width: 12px; height: 12px; }
-.ct-foot-note { margin-top: 12px; font-size: 10px; line-height: 1.5; color: var(--ct-label); font-style: italic; text-align: center; }
-.ct-scout-err { margin-top: 14px; padding: 12px 14px; background: var(--ct-warn-bg); border: 1px solid var(--ct-warn-bd); border-radius: 10px; font-size: 11.5px; line-height: 1.5; color: var(--ct-warn); text-align: center; }
 
 /* Pro upsell (free tier) */
 .ct-upsell { text-align: center; padding-top: 6px; }
@@ -516,4 +458,111 @@
      transition at all would read as a rendering fault rather than as a removal. */
   .ct-cform, .ct-crow.land { animation: none; }
   .ct-crow.leaving { transition: none; }
+}
+
+/* ══ THE SCOUT — the panel, rebuilt (Prompt 2) ═══════════════════════════════════════════════ */
+.ct-sctl {
+  display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+  border-bottom: 1px solid var(--ct-band-hair); background: var(--ct-scout-bg);
+}
+.ct-sctl .dotok { width: 8px; height: 8px; border-radius: 50%; background: var(--ct-scout); flex: 0 0 auto; }
+.ct-sctl .status {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ct-scout-ink);
+}
+.ct-btn-blue {
+  margin-left: auto; background: var(--ct-card); border: 1px solid var(--ct-scout-bd); color: var(--ct-scout-ink);
+  border-radius: 10px; padding: 7px 13px; font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  letter-spacing: .08em; text-transform: uppercase; cursor: pointer; white-space: nowrap;
+}
+.ct-btn-blue:hover:not(:disabled) { background: var(--ct-scout-bg); border-color: var(--ct-scout); }
+.ct-btn-blue:disabled { opacity: .6; cursor: default; }
+
+/*
+ * ⚠️ THIS GRID IS THE PACK'S ALIGNMENT SPEC, EXACTLY: `26px minmax(0,1fr) 104px`, `align-items:start`.
+ * The action column is FIXED so every row's right edge is flush whatever the title's length — sizing
+ * it to content is what made the previous version ragged, and is the one change that silently
+ * reverts this. The why-line lives INSIDE column two rather than spanning the grid, which is what
+ * stopped it running underneath the buttons.
+ */
+.ct-srow {
+  display: grid; grid-template-columns: 26px minmax(0, 1fr) 104px; column-gap: 12px;
+  padding: 14px 18px 15px; align-items: start;
+}
+.ct-srow + .ct-srow { border-top: 1px solid var(--ct-band-hair); }
+.ct-srow:hover { background: var(--ct-scout-hover); }
+.ct-srow .idx {
+  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--ct-label);
+  text-align: right; padding-top: 3px;
+}
+.ct-srow .t { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--ct-ink); }
+.ct-srow .a { font-size: 11.5px; color: var(--ct-label); margin-top: 3px; }
+/* roman, not italic — a statement about the book, not a quotation from it */
+.ct-srow .why { font-size: 12px; color: var(--ct-ink-soft); margin-top: 7px; line-height: 1.5; font-style: normal; }
+.ct-srow .ct-chips { margin-top: 9px; }
+.ct-srow .sacts { display: flex; gap: 6px; justify-content: flex-end; padding-top: 1px; }
+.ct-chip.facts { background: var(--ct-scout-bg); color: var(--ct-scout-ink); border: 1px solid var(--ct-scout-bd); }
+/* ⚠️ PINK. Blue marks the tier; the verb belongs to the writer. */
+.ct-sadd {
+  display: flex; align-items: center; gap: 6px; background: var(--ct-pink); border: 1px solid var(--ct-pink-bd);
+  color: var(--ct-mocha); border-radius: 9px; padding: 7px 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; white-space: nowrap;
+}
+.ct-sadd:hover:not(:disabled) { background: var(--ct-pink-hover); }
+.ct-sadd:disabled { background: var(--ct-sect); color: var(--ct-label); border-color: var(--ct-band-hair); cursor: default; }
+.ct-sadd svg { width: 10px; height: 10px; }
+.ct-sdismiss {
+  width: 30px; height: 30px; border-radius: 9px; background: var(--ct-card); border: 1px solid var(--ct-band-hair);
+  color: var(--ct-label); display: flex; align-items: center; justify-content: center; padding: 0; cursor: pointer;
+}
+.ct-sdismiss:hover { color: var(--ct-scout-ink); border-color: var(--ct-scout-bd); }
+.ct-sdismiss svg { width: 12px; height: 12px; }
+.ct-srow.gone { transition: opacity .26s ease, transform .26s ease; opacity: 0; transform: translateX(12px); }
+.ct-sfoot {
+  display: flex; align-items: center; gap: 9px; padding: 11px 18px;
+  border-top: 1px solid var(--ct-band-hair); background: var(--ct-scout-bg);
+}
+.ct-sfoot svg { width: 12px; height: 12px; color: var(--ct-verified); flex: 0 0 auto; }
+.ct-sfoot .ct-lbl { color: var(--ct-scout-ink); }
+
+/* the running state — three steps, advancing */
+.ct-runsteps { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; }
+.ct-runstep {
+  display: flex; align-items: center; gap: 9px; font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--ct-label);
+}
+.ct-runstep.on, .ct-runstep.done { color: var(--ct-scout-ink); }
+.ct-runstep .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--ct-band-hair); flex: 0 0 auto; }
+.ct-runstep.done .pip { background: var(--ct-scout); }
+.ct-runstep.on .pip { background: var(--ct-scout); animation: ct-pulse 1.1s ease-in-out infinite; }
+@keyframes ct-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+/*
+ * ⚠️ THE FREE PREVIEW VEILS SKELETONS, NEVER INVENTED BOOKS. A free user has never run the Scout, so
+ * there are no real suggestions to blur — and blurring a fabricated title does not stop it being
+ * one. This is the card whose footer promises nothing is invented; putting made-up books behind
+ * frosted glass to sell it would break the promise inside the card that makes it.
+ */
+.ct-upsell { position: relative; }
+.ct-upsell .ghost { filter: blur(3px); opacity: .5; pointer-events: none; }
+.ct-upsell .ghost .bar { display: block; height: 9px; border-radius: 4px; background: var(--ct-band-hair); margin-bottom: 7px; }
+.ct-upsell .ghost .bar.w70 { width: 70%; } .ct-upsell .ghost .bar.w40 { width: 40%; } .ct-upsell .ghost .bar.w90 { width: 90%; }
+.ct-upsell .ghost .bar.btn { width: 100%; height: 28px; border-radius: 9px; margin: 0; }
+.ct-upsell .lockwrap {
+  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 20px;
+  background: linear-gradient(rgba(254, 253, 248, .15), var(--ct-card) 66%);
+}
+.ct-upsell .lock {
+  width: 46px; height: 46px; border-radius: 50%; background: var(--ct-sect); border: 1px solid var(--ct-taupe-bd);
+  color: var(--ct-scout-deep); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+}
+.ct-upsell .lock svg { width: 19px; height: 19px; }
+.ct-upsell h3 { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; margin-bottom: 8px; color: var(--ct-ink); }
+.ct-upsell p { font-size: 11.5px; color: var(--ct-ink-soft); line-height: 1.55; margin-bottom: 16px; max-width: 320px; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* the pip stops pulsing; the STEPS still advance — the narration is the state, not the motion */
+  .ct-runstep.on .pip { animation: none; }
+  .ct-srow.gone { transition: none; }
 }

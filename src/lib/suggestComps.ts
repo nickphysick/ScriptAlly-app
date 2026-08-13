@@ -70,6 +70,38 @@ export interface CompSuggestion {
   agentMatch?: number;
 }
 
+/**
+ * One dispatch of the Scout — the envelope the callable returns.
+ *
+ * ⚠️ `runAt` IS THE SERVER'S, NEVER THE CLIENT'S CLOCK. The status strip states when the Scout last
+ * went out; a client timestamp would drift with the device and make "LAST SENT OUT" a claim about
+ * the reader's clock rather than about the run.
+ */
+export interface ScoutRun {
+  /** ISO, from the function. */
+  runAt: string;
+  suggestions: CompSuggestion[];
+}
+
+/**
+ * ⚠️ THE FACTS CHIP IS COMPOSED AT RENDER FROM STRUCTURED FIELDS, NEVER SENT AS PROSE (baked
+ * decision 20). The v5 ref draws `THRILLER · DEBUT · 2024` and the pack's contract carried a `facts`
+ * string to fill it — a model-composed display string that renders as a factual-looking chip with
+ * nothing behind it but the model's word. That field is deliberately NOT in the contract.
+ *
+ * ⚠️ SO IT STATES ONLY WHAT WE CAN SUBSTANTIATE, WHICH TODAY IS THE MEDIUM. Genre and a debut flag
+ * would have to come from the catalogue as structured fields alongside the verification (a Prompt 3
+ * decision); until they do, claiming either would be the fabrication this rule exists to prevent.
+ *
+ * ⚠️ AND IT OMITS ITSELF FOR A BOOK. `media` absent means book, and the year is already stated on the
+ * line above — a `BOOK · 2024` chip would restate one fact and assert a second that is merely the
+ * default. Rows omit themselves when they have nothing to add; so does this.
+ */
+export function factsChip(s: Pick<CompSuggestion, "media" | "year">): string | null {
+  if (!s.media || s.media === "book") return null;
+  return `${s.media} · ${s.year}`;
+}
+
 export interface SuggestCompsInput {
   manuscriptId: string;
   manuscriptTitle: string;
@@ -161,6 +193,20 @@ export function validateSuggestionsPayload(data: unknown): CompSuggestion[] {
   return out;
 }
 
+/**
+ * Validate `{ runAt, suggestions }` from the callable.
+ *
+ * ⚠️ A MISSING OR UNPARSEABLE `runAt` DOES NOT DISCARD THE RUN — it discards the CLAIM about when it
+ * happened. The suggestions are still real and still verified; only the status strip loses its
+ * timestamp and falls back to saying the Scout has been out without saying when. Dropping six
+ * verified titles because a date field was malformed would be the tail wagging the dog.
+ */
+export function validateRunPayload(data: unknown): ScoutRun {
+  const raw = (data as { runAt?: unknown })?.runAt;
+  const runAt = typeof raw === "string" && !Number.isNaN(Date.parse(raw)) ? raw : "";
+  return { runAt, suggestions: validateSuggestionsPayload(data) };
+}
+
 /** Rows still showable: not already on the shelf and not dismissed this session (both case-insensitive). */
 export function visibleSuggestions(
   suggestions: CompSuggestion[],
@@ -198,13 +244,22 @@ export function suggestionToComp(s: CompSuggestion): CompTitle {
   };
 }
 
-export async function fetchCompSuggestions(input: SuggestCompsInput): Promise<CompSuggestion[]> {
+/**
+ * ⚠️ THE CLIENT HALF OF A TWO-SIDED GATE, AND IT IS THE WEAKER HALF ON PURPOSE. A free caller is
+ * refused here so the UI never dispatches, but this refusal is a courtesy, not a control: anyone can
+ * call the callable directly. **The function must reject a non-Pro caller server-side** — that
+ * requirement lands with `scoutComps` in Prompt 3 and is recorded here so it cannot be forgotten
+ * when the stub is swapped for the real thing. Client gating alone is not a gate on a paid API; the
+ * same rule `extractFromEmail` already follows.
+ */
+export async function fetchCompRun(input: SuggestCompsInput, isPro: boolean): Promise<ScoutRun> {
+  if (!isPro) throw new SuggestCompsError("permission-denied", "The Scout is a Pro feature.");
   const mock = (globalThis as { __SA_SUGGEST_COMPS_MOCK?: unknown }).__SA_SUGGEST_COMPS_MOCK;
-  if (mock) return validateSuggestionsPayload(mock);
+  if (mock) return validateRunPayload(mock);
   const fn = httpsCallable(getFunctions(undefined, "europe-west2"), "suggestComps");
   try {
     const res = await fn(input);
-    return validateSuggestionsPayload(res.data);
+    return validateRunPayload(res.data);
   } catch (e: unknown) {
     const err = e as { code?: string; message?: string };
     const code = String(err?.code || "").replace(/^functions\//, "") || "unknown";

@@ -126,10 +126,20 @@ describe("Phase 2 — accessibility carried into the build, not after it", () =>
     expect(tsx).toContain("aria-label={`Use ${c.title} in your query line`}");
   });
 
-  /** ⚠️ THE REGION IS LIVE, NOT THE SEGMENTS — the recomposed sentence is announced once per tick. */
-  it("the hero line announces politely, once", () => {
-    expect(tsx).toContain('aria-live="polite"');
-    expect(src.match(/aria-live/g) ?? []).toHaveLength(1);
+  /**
+   * ⚠️ THE REGION IS LIVE, NOT THE SEGMENTS — the recomposed sentence is announced once per tick
+   * rather than fragment by fragment as each `<span>` arrives.
+   *
+   * ⚠️ RETARGETED (Prompt 2), NOT RELAXED. The count was `1` because the hero line was the page's
+   * only live region; the Scout's run narration is legitimately a second one — a writer who cannot
+   * see the steps advancing should still be told the Scout is working. Counting live regions was
+   * never the rule; where they sit is. So this now asserts the hero line's own region and that the
+   * segments carry none of their own.
+   */
+  it("the hero line is one live region, and its segments are not", () => {
+    const hero = src.slice(src.indexOf('className={`ct-hero-line'), src.indexOf("ct-hero-ctl"));
+    expect(hero, "the hero line lost its live region").toContain('aria-live="polite"');
+    expect((hero.match(/aria-live/g) ?? []).length, "the segments announce individually").toBe(1);
   });
 
   it("reorder is reachable from the keyboard, and says so", () => {

@@ -40,23 +40,17 @@ import { CompsSavedMark, InYourQueryMark, VerifiedMark, CompsEmptySketch, ScoutE
 import { useToast } from "../toast/ToastProvider";
 import {
   CompSuggestion,
+  ScoutRun,
   SuggestCompsInput,
-  fetchCompSuggestions,
+  factsChip,
+  fetchCompRun,
   isProUser,
   scoutLive,
   suggestionToComp,
+  visibleSuggestions,
 } from "../../lib/suggestComps";
 import "./comps.css";
 
-/** The Scout's scan narration — shown while the live discovery runs (dev/preview until the fn ships). */
-const SCAN_STEPS = [
-  "Reading logline & synopsis…",
-  "Searching recent titles & best-of lists…",
-  "Verifying candidates against catalogue…",
-  "Cross-checking your agents’ wishlists…",
-  "Ranking by fit — ready",
-];
-const sleep = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
 
 /** Shared with the overview + the Package Builder — the section's single active-manuscript pointer. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
@@ -227,94 +221,74 @@ const CompInlineForm: React.FC<{
 };
 
 // ── The Scout (Pro; flagged) ──
-const HowItWorks: React.FC<{ heading: string }> = ({ heading }) => (
-  <div className="ct-how">
-    <div className="ht">{heading}</div>
-    <div className="ct-step">
-      <span className="num">1</span>
-      <div>
-        <div className="st">Reads your book</div>
-        <div className="sd">Your genre, logline &amp; synopsis — not just keywords.</div>
-      </div>
-    </div>
-    <div className="ct-step">
-      <span className="num">2</span>
-      <div>
-        <div className="st">Searches the web</div>
-        <div className="sd">Recent titles, best-of lists &amp; debuts in your exact space.</div>
-      </div>
-    </div>
-    <div className="ct-step">
-      <span className="num">3</span>
-      <div>
-        <div className="st">Verifies every title</div>
-        <div className="sd">Checked against a real catalogue — nothing invented.</div>
-      </div>
-    </div>
-  </div>
-);
 
-const ScoutResultCard: React.FC<{
+/**
+ * ⚠️ THE RUNNING STATE NARRATES WHAT IS HAPPENING, and its three steps are the three things the
+ * function actually does. Copy that promised a fourth stage the function does not perform would be a
+ * claim like any other.
+ */
+const RUN_STEPS = ["Reading your manuscript", "Searching recent titles", "Verifying against a catalogue"];
+/** ⚠️ A FLOOR, NOT A DELAY. A run that returns in 90ms would otherwise flash three steps and vanish. */
+const RUN_FLOOR_MS = 450;
+
+const sleepMs = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
+
+/** `LAST SENT OUT — 13 AUG, 09:41`, or null when the run carried no usable timestamp. */
+function lastSentOut(runAt: string): string | null {
+  if (!runAt) return null;
+  const d = new Date(runAt);
+  if (Number.isNaN(d.getTime())) return null;
+  const date = d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return `Last sent out — ${date}, ${time}`;
+}
+
+/**
+ * One suggestion row.
+ *
+ * ⚠️ THE GRID IS THE ALIGNMENT SPEC AND IT IS EXACT: `26px minmax(0,1fr) 104px`, `align-items:start`.
+ * The action column is a FIXED width so every row's right edge is flush regardless of title length —
+ * sizing it to content is what made the previous version ragged. And the why-line lives INSIDE
+ * column two rather than spanning the grid, which is what stopped it running under the buttons.
+ */
+const ScoutRow: React.FC<{
   s: CompSuggestion;
+  index: number;
   onShelf: boolean;
+  leaving: boolean;
   onAdd: () => void;
-}> = ({ s, onShelf, onAdd }) => {
-  const meta = [s.author, s.publisher].filter(Boolean).join(" · ");
+  onDismiss: () => void;
+}> = ({ s, index, onShelf, leaving, onAdd, onDismiss }) => {
+  const facts = factsChip(s);
   return (
-    <div className="ct-rcard">
-      <div className="ct-rc-top">
-        <span className="ct-rc-title">{s.title}</span>
-        <span className="ct-rc-year">{s.year}</span>
-      </div>
-      {meta && <div className="ct-rc-meta">{meta}</div>}
-      {/* ⚠️ UNCONDITIONAL, AND THAT IS THE CONTRACT — every suggestion carries a verification record
-          or the validator dropped it, so there is no unverified row for a branch to handle. It also
-          NAMES the catalogue now rather than saying the word "catalogue": the record exists, so the
-          chip can state which one answered instead of asserting that one did.
-          ⚠️ SAME CLASS AS THE COMP ROW'S — one chip, both cards. */}
-      <div className="ct-chips" style={{ marginTop: 7 }}>
-        <span className="ct-chip verified">
-          <Check size={10} /> Verified · {s.verification.catalogue}
-        </span>
-      </div>
-      <div className="ct-why">
-        <div className="ct-why-cap">Why this fits</div>
-        <div className="ct-why-txt">{s.why}</div>
-      </div>
-      {s.agentMatch != null && s.agentMatch > 0 && (
-        <div className="ct-agent-hook">
-          <Star size={13} />
-          <span>
-            <b>
-              {s.agentMatch} agent{s.agentMatch > 1 ? "s" : ""}
-            </b>{" "}
-            on your list wishlist books like this
-          </span>
+    <div className={`ct-srow${leaving ? " gone" : ""}`}>
+      {/* a spine for the column, and the count legible at a glance */}
+      <div className="idx">{String(index + 1).padStart(2, "0")}</div>
+      <div>
+        <div className="t">{s.title}</div>
+        <div className="a">{s.author} · {s.year}</div>
+        {/* roman, not italic — it is a statement about the book, not a quotation */}
+        <div className="why">{s.why}</div>
+        <div className="ct-chips">
+          {/* ⚠️ THE SAME CHIP AS THE COMP ROW'S — one component, one colour, both cards. */}
+          <span className="ct-chip verified"><Check /> Verified · {s.verification.catalogue}</span>
+          {facts && <span className="ct-chip facts">{facts}</span>}
         </div>
-      )}
-      <div className="ct-rc-foot">
-        <div className="ct-links">
-          {s.links?.bookshop && (
-            <a href={s.links.bookshop} target="_blank" rel="noreferrer">
-              <BookOpen size={11} /> Bookshop
-            </a>
-          )}
-          {s.links?.googleBooks && (
-            <a href={s.links.googleBooks} target="_blank" rel="noreferrer">
-              <BookOpen size={11} /> Google Books
-            </a>
-          )}
-        </div>
-        <button type="button" className="ct-addshelf" disabled={onShelf} onClick={onAdd}>
-          {onShelf ? <Check size={12} /> : <Plus size={12} />}
-          {onShelf ? "Added" : "Add to list"}
+      </div>
+      <div className="sacts">
+        {/* ⚠️ ADD IS PINK. Blue marks the tier; the verb belongs to the writer, like every action. */}
+        <button type="button" className="ct-sadd" disabled={onShelf} onClick={onAdd}>
+          {onShelf ? <Check /> : <Plus />}{onShelf ? "Added" : "Add"}
+        </button>
+        <button type="button" className="ct-sdismiss" aria-label={`Dismiss ${s.title}`} onClick={onDismiss}>
+          <X />
         </button>
       </div>
     </div>
   );
 };
 
-type ScoutPhase = "idle" | "scanning" | "done" | "empty" | "notyet" | "error";
+type ScoutPhase = "idle" | "running" | "done" | "notyet" | "error";
 
 const ScoutPanel: React.FC<{
   isPro: boolean;
@@ -324,100 +298,93 @@ const ScoutPanel: React.FC<{
   onUpgrade: () => void;
 }> = ({ isPro, input, shelfTitles, onAddToShelf, onUpgrade }) => {
   const [phase, setPhase] = useState<ScoutPhase>("idle");
-  const [results, setResults] = useState<CompSuggestion[]>([]);
-  const [added, setAdded] = useState<Set<string>>(new Set());
-  const shelf = new Set(shelfTitles.map((t) => t.trim().toLowerCase()));
+  const [run, setRun] = useState<ScoutRun | null>(null);
+  const [dismissed, setDismissed] = useState<string[]>([]);
+  const [leaving, setLeaving] = useState<string | null>(null);
+  const [step, setStep] = useState(0);
 
-  const runScout = async () => {
-    if (!scoutLive()) {
-      setPhase("notyet");
-      return;
-    }
-    setPhase("scanning");
-    setResults([]);
+  const visible = run ? visibleSuggestions(run.suggestions, shelfTitles, dismissed) : [];
+
+  const send = async () => {
+    if (!scoutLive()) { setPhase("notyet"); return; }
+    setPhase("running");
+    setStep(0);
+    const advance = window.setInterval(() => setStep((n) => Math.min(n + 1, RUN_STEPS.length - 1)), 320);
     try {
-      const [data] = await Promise.all([fetchCompSuggestions(input), sleep(1500)]);
-      setResults(data);
-      setPhase(data.length ? "done" : "empty");
+      const [data] = await Promise.all([fetchCompRun(input, isPro), sleepMs(RUN_FLOOR_MS)]);
+      setRun(data);
+      setDismissed([]);
+      setPhase("done");
     } catch {
       setPhase("error");
+    } finally {
+      window.clearInterval(advance);
     }
   };
 
-  const addOne = (s: CompSuggestion) => {
-    onAddToShelf(suggestionToComp(s));
-    setAdded((prev) => new Set(prev).add(s.title.trim().toLowerCase()));
+  /** ⚠️ THE ROW LEAVES BEFORE THE LIST CHANGES, so the gap and the receipt agree. */
+  const slideOut = (title: string, after: () => void) => {
+    setLeaving(title);
+    window.setTimeout(() => { setLeaving(null); after(); }, 240);
   };
 
-  // Free tier — how-it-works + the Pro lock/upsell.
+  /**
+   * ⚠️ THE FREE STATE SHOWS THE SHAPE OF THE FEATURE, NEVER INVENTED BOOKS.
+   *
+   * The pack asks for the three most recent REAL suggestions, blurred. A free user has never run the
+   * Scout — they cannot — so there are none, and the only way to fill that space is to make some up.
+   * Blurring a fabricated title does not stop it being one, and this is the card whose footer
+   * promises that nothing is invented: undercutting that promise inside the same card to sell the
+   * feature the promise is about would be the worst place in the app to do it.
+   *
+   * So the veil sits over three empty row SKELETONS. The writer sees the shape, the density and the
+   * fixed action column — everything the feature looks like — and no title they could mistake for a
+   * real book. Deliberate deviation, reported.
+   */
   if (!isPro) {
     return (
       <div className="ct-body">
-        <div className="ct-scout-what">
-          Your standing research assistant — finds verified, recent comps matched to your book.
-        </div>
-        <HowItWorks heading="What the Scout does" />
         <div className="ct-upsell">
-          <div className="ghost">
-            <div className="ct-rcard" style={{ opacity: 1, animation: "none" }}>
-              <div className="ct-rc-top">
-                <span className="ct-rc-title">A Marvellous Light</span>
-                <span className="ct-rc-year">2021</span>
+          <div className="ghost" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="ct-srow skeleton">
+                <div className="idx">{String(i + 1).padStart(2, "0")}</div>
+                <div>
+                  <span className="bar w70" /><span className="bar w40" /><span className="bar w90" />
+                </div>
+                <div className="sacts"><span className="bar btn" /></div>
               </div>
-              <div className="ct-rc-meta">Freya Marske · Tor</div>
-              <div className="ct-why">
-                <div className="ct-why-txt">Recent, magic-as-machinery, strong voice…</div>
-              </div>
-            </div>
+            ))}
           </div>
           <div className="lockwrap">
-            <div className="lock">
-              <Lock size={19} />
-            </div>
+            <div className="lock"><Lock /></div>
             <h3>Unlock the Scout</h3>
-            <p>
-              Let ScriptAlly find verified comps you’d never surface alone — and add them straight to
-              your list.
-            </p>
-            <button type="button" className="ct-btn-pro" onClick={onUpgrade}>
-              Upgrade to Pro
-            </button>
+            <p>Verified, recent comps matched to your book — found for you, added straight to your list.</p>
+            <button type="button" className="ct-btn-pink" onClick={onUpgrade}>See Pro plans</button>
           </div>
         </div>
       </div>
     );
   }
 
-  // Pro tier — the live discovery (behind SCOUT_LIVE).
+  const sent = run ? lastSentOut(run.runAt) : null;
   return (
-    <div className="ct-body">
-      <div className="ct-scout-what">
-        Your standing research assistant. It hunts down <b>verified, recent comps</b> matched to this
-        manuscript — so you find books you’d never surface alone.
+    <>
+      <div className="ct-sctl">
+        <span className="dotok" aria-hidden="true" />
+        {/* ⚠️ IT STATES WHETHER THE SCOUT HAS BEEN OUT, and says WHEN only when the run carried a
+            usable timestamp. A malformed date loses the claim, never the suggestions. */}
+        <span className="status">{run ? (sent ?? "Sent out this session") : "Not sent out yet"}</span>
+        <button type="button" className="ct-btn-blue" onClick={send} disabled={phase === "running"}>
+          {phase === "running" ? "Sending…" : run ? "Send again" : "Send the Scout out"}
+        </button>
       </div>
-      <HowItWorks heading="How it works" />
 
-      <button type="button" className="ct-btn-pro" onClick={runScout} disabled={phase === "scanning"}>
-        {phase === "scanning" ? (
-          <>
-            <span className="spin" /> Scouring &amp; verifying…
-          </>
-        ) : phase === "idle" || phase === "notyet" ? (
-          <>
-            <Sparkles size={15} /> Send the Scout out
-          </>
-        ) : (
-          <>
-            <RefreshCw size={15} /> Send out again
-          </>
-        )}
-      </button>
-
-      {phase === "scanning" && (
-        <div className="ct-scan">
-          {SCAN_STEPS.map((step, i) => (
-            <div key={i} className="ct-scanline" style={{ animationDelay: `${i * 0.12}s` }}>
-              <span className="tick">{i === SCAN_STEPS.length - 1 ? "✓" : "◇"}</span> {step}
+      {phase === "running" && (
+        <div className="ct-runsteps" role="status" aria-live="polite">
+          {RUN_STEPS.map((label, i) => (
+            <div key={label} className={`ct-runstep${i === step ? " on" : ""}${i < step ? " done" : ""}`}>
+              <span className="pip" aria-hidden="true" />{label}
             </div>
           ))}
         </div>
@@ -425,19 +392,17 @@ const ScoutPanel: React.FC<{
 
       {phase === "notyet" && (
         <div className="ct-notyet">
-          <b>The Scout goes live soon.</b> We’re finishing its catalogue checks so every title it
-          brings back is a real book with a real year — never invented. Until then, add your own comps
-          on the left.
+          <b>The Scout goes live soon.</b> Its catalogue checks are being finished, so every title it
+          brings back is a real book with a real year. Until then, add your own comps on the left.
         </div>
       )}
 
+      {/* ⚠️ STATES WHAT HAPPENED AND WHAT TO DO. No apology, no red, no stack detail. */}
       {phase === "error" && (
-        <div className="ct-scout-err">The Scout couldn’t be reached just now — try again in a moment.</div>
+        <div className="ct-notyet">The Scout couldn&rsquo;t complete this run. Try sending it out again.</div>
       )}
 
-      {/* ⚠️ FACTUAL, NOT CONGRATULATORY — "you've worked through every suggestion", never "well
-          done". And the slot is provisional like its twin in Your comps. */}
-      {phase === "empty" && (
+      {phase === "done" && visible.length === 0 && (
         <div className="ct-estate">
           <div className="ct-islot"><ScoutEmptySketch /></div>
           <div className="em">Nothing left from this run.</div>
@@ -448,41 +413,26 @@ const ScoutPanel: React.FC<{
         </div>
       )}
 
-      {phase === "done" && (
-        <>
-          <div className="ct-results">
-            {results.map((s, i) => (
-              <ScoutResultCard
-                key={i}
-                s={s}
-                onShelf={shelf.has(s.title.trim().toLowerCase()) || added.has(s.title.trim().toLowerCase())}
-                onAdd={() => addOne(s)}
-              />
-            ))}
-          </div>
-          <div className="ct-foot-note">
-            Starting points to research — read them before you pitch them.
-          </div>
-        </>
-      )}
-    </div>
+      {phase === "done" && visible.map((s, i) => (
+        <ScoutRow
+          key={s.title}
+          s={s}
+          index={i}
+          onShelf={shelfTitles.some((t) => t.trim().toLowerCase() === s.title.trim().toLowerCase())}
+          leaving={leaving === s.title}
+          onAdd={() => slideOut(s.title, () => onAddToShelf(suggestionToComp(s)))}
+          onDismiss={() => slideOut(s.title, () => setDismissed((d) => [...d, s.title]))}
+        />
+      ))}
+
+      {/* ⚠️ THE CLAIM THE WHOLE CONTRACT EXISTS TO EARN — see `verification`. */}
+      <div className="ct-sfoot">
+        <Check />
+        <span className="ct-lbl">Every title checked against a real catalogue — nothing invented</span>
+      </div>
+    </>
   );
 };
-
-/** The bold-title query-letter line rendered from derived parts. */
-const QueryLineText: React.FC<{ parts: { title: string; attribution: string }[] }> = ({ parts }) => (
-  <>
-    For readers of{" "}
-    {parts.map((p, i) => (
-      <React.Fragment key={i}>
-        {i > 0 && (i === parts.length - 1 ? " and " : ", ")}
-        <b>{p.title}</b>
-        {p.attribution}
-      </React.Fragment>
-    ))}
-    .
-  </>
-);
 
 export const ComparableTitlesPage: React.FC<{
   onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;

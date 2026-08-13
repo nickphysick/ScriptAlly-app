@@ -144,8 +144,14 @@ describe("comps.css — the Scout is pastille blue, the tier's colour", () => {
    * ⚠️ THE VERB STAYS PINK. Blue marks the TIER; ADD is an action, and every action in this app is
    * soft pink. A blue ADD would say the button belonged to Pro rather than to the writer.
    */
+  /**
+   * ⚠️ RETARGETED (Prompt 2): the Scout's add button was `.ct-addshelf` on the old result card and is
+   * `.ct-sadd` on the rebuilt row. The RULE has not moved an inch — blue marks the tier, the verb
+   * belongs to the writer — and `rule()` throws on a missing selector, which is how the rename was
+   * caught rather than quietly passing against an empty string.
+   */
   it("ADD stays soft pink and never turns blue", () => {
-    const add = rule(".ct-addshelf");
+    const add = rule(".ct-sadd");
     expect(add).toContain("var(--ct-pink)");
     expect(add).not.toContain("--ct-scout");
   });
