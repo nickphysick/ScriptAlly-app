@@ -404,7 +404,18 @@
    corrections round 2 for one bordered control — and there is a live assertion keeping it
    retired. Reusing the name would have given one class two unrelated meanings in one sheet and
    quietly resurrected a rule someone deliberately removed. */
-.qc-stack { display: flex; flex-direction: column; gap: 10px; }
+/**
+ * ⚠️ THE STACK PUSHES TO THE BOTTOM OF THE COLUMN IT ALREADY FILLS (§2a) — `margin-top: auto`, and
+ * that is the whole change. The pack asked for a `min-height: 100%` chain; measured, NOTHING needed
+ * filling. `.f12-body`, `.qp-pane`, `.qc-take-body`, `.qc-two` and `.qc-form` all carry
+ * `flex: 1 1 0%` and all reach the bottom already — 487.8px at 1440×900. The void was INSIDE
+ * `.qc-form`: a `flex: 0 0 auto` stack sitting at the top of it with 320.8px beneath.
+ *
+ * ⚠️ SO IT IS DISTRIBUTION, NOT FILL. Adding a min-height chain would have changed nothing visible
+ * and left a second sizing mechanism arguing with the first. The stack sits nearest the dock,
+ * which is where the acting happens.
+ */
+.qc-stack { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
 .qc-sec { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; transition: border-color 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), box-shadow 0.28s cubic-bezier(0.22, 0.9, 0.3, 1), opacity 0.28s ease; }
 .qc-sum { display: flex; align-items: center; gap: 10px; padding: 11px 15px; font-size: 13px; }
 .qc-sum b { font-family: var(--f12-serif); font-weight: 700; }
@@ -1056,6 +1067,16 @@
   color: var(--shell-muted);
 }
 
+/* ⚠️ THE PLACE LINE (§2b) — mono, quiet, one line under the lede. It states a position, so it
+   reads at the weight of a caption rather than of the lede it sits beneath. */
+.qch-place {
+  font-family: var(--f12-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+  margin: 5px 0 0;
+}
+
 /**
  * ⚠️ THE VERTICAL SEAM — ADDED, NOT KEPT. The pack said "that seam stays", which assumed one
  * existed; there was none. With the card's border gone the only thing between a list column and a
@@ -1485,7 +1506,9 @@
 
 /* The two columns. `align-items: start` so the panel ends where its content ends rather than
    stretching — a thin record in a full-height frame reads as something failing to load. */
-.qr-two { align-items: start; }
+/* ⚠️ `stretch`, NOT `start` (§2a) — the panel takes the column's full height so its footer stamp
+   sits at the foot rather than floating mid-page beside a stack that reaches the bottom. */
+.qr-two { align-items: stretch; }
 
 /* ── the outcome grid ─────────────────────────────────────────────────────────────────────── */
 .qr-outs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
@@ -1529,8 +1552,19 @@
    signals, not by taking a new hue — and the text colour does not change, because a reference
    panel that is harder to read has failed at the only thing it does. The dashed rim is the one
    sanctioned exception to dashed-means-provisional; it is scoped here as it is in create. */
+/**
+ * ⚠️ IT STRETCHES, AND THE STICKY IS DELETED RATHER THAN LEFT BEHIND (§2a). `position: sticky;
+ * top: 0` was how a short panel stayed in view beside a scrolling column; a panel that IS the
+ * column's height has nothing to stick to and nowhere to travel, so the property would be a dead
+ * declaration that reads as load-bearing to the next person.
+ *
+ * ⚠️ ITS OWN FLEX COLUMN IS WHAT LETS THE SLACK LAND SOMEWHERE. Stretching a block would leave the
+ * extra height below the last row as a gap inside the frame; as a column with the last row taking
+ * the slack, the rows keep their rhythm and the stamp sits at the foot.
+ */
 .qr-ref {
-  width: 300px; flex: none; align-self: start; position: sticky; top: 0;
+  width: 300px; flex: none; align-self: stretch;
+  display: flex; flex-direction: column;
   background: var(--qc-ref-plate, var(--paper)); border-radius: 11px;
   border: 1px dashed var(--qc-ref-rim, var(--hairline)); overflow: hidden;
 }
@@ -1541,7 +1575,7 @@
   color: var(--faint); margin-top: 3px;
 }
 .qr-refrow { padding: 9px 13px; box-shadow: inset 0 -1px 0 var(--qc-ref-rule, var(--hairline)); }
-.qr-refrow:last-child { box-shadow: none; }
+.qr-refrow:last-child { box-shadow: none; flex: 1; }
 .qr-reflb {
   font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--faint); margin-bottom: 4px;

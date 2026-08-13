@@ -47,7 +47,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, listHeadLabel } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, listHeadLabel, DAY } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -1719,6 +1719,33 @@ export const Queries: React.FC<{
   const mastheadScopedQueries = selectedManuscriptFilter === "All"
     ? queries
     : queries.filter((q) => q.manuscriptId === selectedManuscriptFilter);
+
+  /**
+   * THE PLACE LINES (§2b) — where the act being composed sits in the campaign. Derived at render,
+   * never stored, and every clause omits itself when its figure is unavailable.
+   */
+  const awaitingReplyCount = queries.filter((q) => queryBucket(q.status as QueryStatus) === "waiting").length;
+  const createPlace = createDraft ? createPlaceLine({
+    priorForManuscript: createDraft.manuscriptId
+      ? queries.filter((q) => q.manuscriptId === createDraft.manuscriptId).length : undefined,
+    manuscriptTitle: manuscripts.find((m) => m.id === createDraft.manuscriptId)?.title,
+    awaitingReply: awaitingReplyCount,
+  }) : "";
+  const respPlace = (() => {
+    if (!respQueryId) return "";
+    const q = queries.find((x) => x.id === respQueryId);
+    if (!q) return "";
+    const sent = (q as { dateSent?: string }).dateSent;
+    /* ⚠️ A REPLY IS A QUERY THAT HAS LEFT THE WAITING BUCKET — the same split every other surface
+       reads, rather than a second definition of "replied". */
+    const priorReplies = queries.filter((x) => x.manuscriptId === q.manuscriptId
+      && x.id !== q.id && queryBucket(x.status as QueryStatus) !== "waiting").length;
+    return recordPlaceLine({
+      sentDaysAgo: sent ? Math.max(0, Math.floor((Date.now() - new Date(sent).getTime()) / DAY)) : undefined,
+      manuscriptTitle: manuscripts.find((m) => m.id === q.manuscriptId)?.title,
+      priorRepliesForManuscript: priorReplies,
+    });
+  })();
 
   const filteredList = queries.filter(matchesFilters);
 
@@ -3417,6 +3444,13 @@ export const Queries: React.FC<{
                     <p className={`qch-sub${respError ? " qch-err" : ""}`} aria-live="assertive" aria-atomic="true">
                       {respError ?? "What came back, and when — the rest follows from that."}
                     </p>
+                    {/* ⚠️ THE PLACE LINE (§2b) — where this act sits in the campaign, as FACT. No
+                        adjective, no encouragement, no streak: "your 17th query for X" is a
+                        position, "your 17th — keep going" is a coach. Rendered only when it has
+                        something to say; a clause whose figure is missing omits itself rather than
+                        printing a zero. It is NOT a live region — the lede above already is one,
+                        and two announcers on one block talk over each other. */}
+                    {respPlace && <p className="qch-place">{respPlace}</p>}
                     {/* ⚠️ TWO CHIPS ONLY, because Save waits for exactly two facts. The three-state
                         marks are create's: empty until answered, a DASH for what we pre-filled, a
                         tick only once the writer has opened the step carrying it. */}
@@ -3511,6 +3545,13 @@ export const Queries: React.FC<{
                     <p className={`qch-sub${createError ? " qch-err" : ""}`} aria-live="assertive" aria-atomic="true">
                       {createError ?? "Needs an agent, a manuscript and a date — everything else can wait."}
                     </p>
+                    {/* ⚠️ THE PLACE LINE (§2b) — where this act sits in the campaign, as FACT. No
+                        adjective, no encouragement, no streak: "your 17th query for X" is a
+                        position, "your 17th — keep going" is a coach. Rendered only when it has
+                        something to say; a clause whose figure is missing omits itself rather than
+                        printing a zero. It is NOT a live region — the lede above already is one,
+                        and two announcers on one block talk over each other. */}
+                    {createPlace && <p className="qch-place">{createPlace}</p>}
                     {/* ⚠️ THE PIPS READ THE DRAFT, NEVER THE STEPS — required ≠ sequential. Two
                         are green on arrival because openCreate seeds the manuscript and today's
                         date; only the agent is genuinely open. They are deliberately NOT a live

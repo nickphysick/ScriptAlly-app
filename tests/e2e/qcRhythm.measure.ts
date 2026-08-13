@@ -69,3 +69,67 @@ test("§1a — the shared rhythm is unchanged on another page", async ({ page })
   expect(gap.token, `the shared top gap moved to ${gap.token} — the override is not page-scoped`).toBe("70px");
   expect(gap.applied, "the shared gap is no longer paid by the first row under the hairline").toBe("70px");
 });
+
+/* ── §2 — the journeys distribute ────────────────────────────────────────────────────────────
+ * ⚠️ BROWSER-MEASURED, BECAUSE JSDOM CANNOT SEE THIS. There is no layout engine there: a flex
+ * chain reports `auto`, and a test asserting the elements exist passes against a broken layout.
+ */
+const fill = (page: Page) => page.evaluate(() => {
+  const r = (n: number) => Math.round(n * 10) / 10;
+  const g = [...document.querySelectorAll(".wpg")].find((x) => x.getBoundingClientRect().height > 0) as HTMLElement;
+  const box = (s: string) => { const e = g.querySelector(s) as HTMLElement | null; return e ? e.getBoundingClientRect() : null; };
+  const form = box(".qc-form"); const stack = box(".qc-stack"); const ref = box(".qc-ref");
+  const sc = g.querySelector(".wpg-scroll") as HTMLElement;
+  return {
+    formH: form ? r(form.height) : -1,
+    stackH: stack ? r(stack.height) : -1,
+    /* the gap BELOW the stack — the void §2a is about */
+    slackBelowStack: form && stack ? r(form.bottom - stack.bottom) : -1,
+    refH: ref ? r(ref.height) : -1,
+    refSlack: form && ref ? r(form.bottom - ref.bottom) : -1,
+    refPosition: ref ? getComputedStyle(g.querySelector(".qc-ref")!).position : "—",
+    /* ⚠️ THE PANEL IS `display: none` BELOW 1100px BY DECISION — "the measured point at which the
+       panel stops helping", the same rule the create context panel follows. Its height is 0 there
+       for a reason that has nothing to do with the stretch. */
+    refShown: (() => { const e = g.querySelector(".qc-ref") as HTMLElement | null; return !!e && getComputedStyle(e).display !== "none"; })(),
+    place: (g.querySelector(".qch-place")?.textContent ?? "").trim(),
+    pageScroll: sc.scrollHeight - sc.clientHeight,
+  };
+});
+
+for (const vp of [{ width: 1024, height: 768 }, { width: 1440, height: 900 }, { width: 1920, height: 1080 }]) {
+  test(`§2 — create distributes (${vp.width}x${vp.height})`, async ({ page }) => {
+    await openRoute(page, "/queries", vp);
+    await page.getByRole("button", { name: /^Log query$/i }).first().click();
+    await page.waitForTimeout(900);
+    const s = await fill(page);
+    console.log(`create ${vp.width}: ${JSON.stringify(s)}`);
+    /* the stack reaches the bottom of the column it sits in — it used to sit at the top with
+       320.8px beneath it at 1440x900 */
+    expect(s.slackBelowStack, `${vp.width}: ${s.slackBelowStack}px of void below the stack`).toBeLessThanOrEqual(1);
+    expect(s.pageScroll, "the journey introduced an outer scroller").toBe(0);
+    expect(s.place, "the place line is missing").not.toBe("");
+  });
+
+  test(`§2 — record distributes (${vp.width}x${vp.height})`, async ({ page }) => {
+    await openRoute(page, "/queries", vp);
+    await page.locator(".f12-row").first().click();
+    await page.waitForTimeout(600);
+    await page.getByRole("button", { name: /Record response|Mark sent|Record resubmission|Reopen/i }).first().click();
+    await page.waitForTimeout(900);
+    const s = await fill(page);
+    console.log(`record ${vp.width}: ${JSON.stringify(s)}`);
+    expect(s.slackBelowStack, `${vp.width}: ${s.slackBelowStack}px of void below the stack`).toBeLessThanOrEqual(1);
+    /* the panel takes the column's full height, and the sticky went with the reason for it */
+    if (s.refShown) {
+      expect(s.refSlack, `${vp.width}: the reference panel stops ${s.refSlack}px short of the foot`).toBeLessThanOrEqual(1);
+      expect(s.refPosition, "the sticky survived the stretch — a dead property that reads as load-bearing").not.toBe("sticky");
+    } else {
+      /* below 1100 it is hidden by decision; assert THAT rather than skipping silently */
+      expect(vp.width, `the panel is hidden at ${vp.width}px, which the 1100px rule does not allow`).toBeLessThanOrEqual(1100);
+      console.log(`  (panel hidden at ${vp.width} — the documented below-1100px rule)`);
+    }
+    expect(s.pageScroll, "the journey introduced an outer scroller").toBe(0);
+    expect(s.place, "the place line is missing").not.toBe("");
+  });
+}

@@ -314,3 +314,61 @@ export function listHeadLabel(shown: number, total: number, narrowed: boolean): 
   const noun = total === 1 ? "query" : "queries";
   return narrowed ? `Showing ${shown} of ${total} ${noun}` : `${total} ${noun}`;
 }
+
+/**
+ * THE PLACE LINE (§2b) — where this act sits in the campaign, stated as fact.
+ *
+ * ⚠️ FACT ONLY. No adjective, no encouragement, no streak. "Your 17th query for Murphy's Day Out"
+ * is a position; "your 17th — keep going" is a coach, and the app reports rather than appraises.
+ * The locks assert the absence of that vocabulary, because it is the kind of copy that arrives one
+ * cheerful word at a time.
+ *
+ * ⚠️ A MISSING FIGURE OMITS ITS CLAUSE, never prints a zero or a placeholder. "the 0th reply" and
+ * "· — currently awaiting reply" are both worse than saying less.
+ */
+export interface PlaceLineInput {
+  /** queries already logged against this manuscript, EXCLUDING the one being composed */
+  priorForManuscript?: number;
+  manuscriptTitle?: string;
+  /** across the whole database, how many are waiting on an agent */
+  awaitingReply?: number;
+  /** record only — days since the query went out, and replies already recorded for the book */
+  sentDaysAgo?: number;
+  priorRepliesForManuscript?: number;
+}
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+
+/** 1st, 2nd, 3rd, 4th … — English ordinals, including the teens that break the pattern. */
+export function ordinal(n: number): string {
+  const rem100 = n % 100;
+  if (rem100 >= 11 && rem100 <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1: return `${n}st`;
+    case 2: return `${n}nd`;
+    case 3: return `${n}rd`;
+    default: return `${n}th`;
+  }
+}
+
+export function createPlaceLine(i: PlaceLineInput): string {
+  const parts: string[] = [];
+  if (i.priorForManuscript !== undefined && i.manuscriptTitle) {
+    parts.push(`Your ${ordinal(i.priorForManuscript + 1)} query for ${i.manuscriptTitle}`);
+  }
+  if (i.awaitingReply !== undefined && i.awaitingReply > 0) {
+    parts.push(`${i.awaitingReply} currently awaiting reply`);
+  }
+  return parts.join(" · ");
+}
+
+export function recordPlaceLine(i: PlaceLineInput): string {
+  const parts: string[] = [];
+  if (i.sentDaysAgo !== undefined && i.sentDaysAgo >= 0) {
+    parts.push(i.sentDaysAgo === 0 ? "You sent this today" : `You sent this ${plural(i.sentDaysAgo, "day", "days")} ago`);
+  }
+  if (i.priorRepliesForManuscript !== undefined && i.manuscriptTitle) {
+    parts.push(`the ${ordinal(i.priorRepliesForManuscript + 1)} reply you've recorded for ${i.manuscriptTitle}`);
+  }
+  return parts.join(" · ");
+}
