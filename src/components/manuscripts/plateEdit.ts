@@ -18,8 +18,6 @@
 export const SAVED_RECEIPT_MS = 1600;
 export const SAVED_RECEIPT = "Saved";
 
-/** The stepper's button and arrow-key increment. Both count from the CURRENT value, never from 0. */
-export const WORD_STEP = 500;
 
 /**
  * ⚠️ NO RANGE, NO GUIDANCE, NO PLACEHOLDER RANGE — anywhere. The writer types the number.
@@ -31,8 +29,27 @@ export const WORD_STEP = 500;
  */
 export const WORD_COUNT_HINT = null;
 
+/** The stepper's button and arrow-key increment. Both count from the CURRENT value, never from 0. */
+export const WORD_STEP = 500;
+
 /** The one-line note a non-numeric entry gets. States what is wrong; asks for nothing. */
-export const WORD_COUNT_REJECTED = "Word count is a number.";
+export const WORD_COUNT_REJECTED = "Numbers only.";
+
+/** The mono line under the field, stating what the arrow keys do. */
+export const WORD_COUNT_HINT_LINE = `↑ ↓ steps ${WORD_STEP}`;
+
+/**
+ * Keys a word-count field refuses outright.
+ *
+ * ⚠️ `type="number"` ACCEPTS ALL OF THESE AND THEN REPORTS AN EMPTY VALUE. `e`/`E` are exponent
+ * notation, `+`/`-` are sign, `.` is a decimal point — every one is valid to the input and none is
+ * valid as a word count, and the browser hands back `""` rather than the text the writer typed. So
+ * they are rejected at the keystroke instead, where the note can say why.
+ */
+export const REJECTED_KEYS = ["e", "E", "+", "-", "."];
+export function isRejectedKey(key: string): boolean {
+  return REJECTED_KEYS.includes(key);
+}
 
 /**
  * Parse a typed word count.

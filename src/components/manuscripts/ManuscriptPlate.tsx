@@ -34,6 +34,8 @@ import {
   SAVED_RECEIPT_MS,
   WORD_STEP,
   WORD_COUNT_REJECTED,
+  WORD_COUNT_HINT_LINE,
+  isRejectedKey,
   parseWordCount,
   stepWordCount,
   MAX_MANUSCRIPT_GENRES,
@@ -126,7 +128,13 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
   };
 
   const openWords = () => { if (!edit) return; setWordDraft(String(wordCount ?? 0)); setWordError(false); setOpen("words"); };
+  /* ⚠️ CANCEL RESTORES, it does not merely close — leaving the draft behind would mean the next
+     open showed an abandoned edit as if it were the stored value. */
+  const cancelWords = () => { setWordDraft(String(wordCount ?? 0)); close(); };
   const step = (delta: number) => {
+    /* ⚠️ A BLANK FIELD STEPS FROM THE STORED VALUE, NOT FROM ZERO. Clearing the box to retype is a
+       normal thing to do half-way through; stepping from 0 there would silently discard the number
+       the writer is editing. */
     const from = parseWordCount(wordDraft) ?? wordCount ?? 0;
     setWordDraft(String(stepWordCount(from, delta)));
     setWordError(false);
@@ -285,29 +293,43 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
       {open === "words" && edit && createPortal(
         <div className="msv1">
           <div className="msv-wordpop" style={{ ...wordMenu }} role="dialog" aria-label="Word count">
-            <div className="msv-wordrow">
-              <button type="button" className="msv-btn sm" aria-label={`Down ${WORD_STEP}`} onClick={() => step(-WORD_STEP)}>−{WORD_STEP}</button>
+            <div className="msv-wordlab">Word count</div>
+            {/*
+              ⚠️ ONE BORDERED BOX HOLDS ALL OF IT, and the focus ring is on the BOX rather than the
+              bare input — three loose controls in a row read as three controls, not as one field.
+              The stacked ▲▼ column sits inside the same border behind a divider.
+            */}
+            <div className="msv-stepper">
               <input
                 ref={wordRef}
-                className="msv-wordinput"
+                className="msv-stepinput"
                 value={wordDraft}
                 inputMode="numeric"
                 aria-label="Word count"
                 onChange={(e) => { setWordDraft(e.target.value); setWordError(false); }}
                 onKeyDown={(e) => {
+                  /* ⚠️ REJECTED AT THE KEYSTROKE, not at save. `e E + - .` are all valid to a numeric
+                     field and none is valid as a word count; the note says which. */
+                  if (isRejectedKey(e.key)) { e.preventDefault(); setWordError(true); return; }
                   /* ↑ ↓ step from the CURRENT value, exactly as the buttons do. */
                   if (e.key === "ArrowUp") { e.preventDefault(); step(WORD_STEP); return; }
                   if (e.key === "ArrowDown") { e.preventDefault(); step(-WORD_STEP); return; }
                   onKey(e, saveWords);
                 }}
               />
-              <button type="button" className="msv-btn sm" aria-label={`Up ${WORD_STEP}`} onClick={() => step(WORD_STEP)}>+{WORD_STEP}</button>
+              <span className="msv-stepunit">words</span>
+              <span className="msv-steps">
+                <button type="button" aria-label={`Up ${WORD_STEP}`} onClick={() => step(WORD_STEP)}>▲</button>
+                <button type="button" aria-label={`Down ${WORD_STEP}`} onClick={() => step(-WORD_STEP)}>▼</button>
+              </span>
             </div>
-            {/* One line, stating what is wrong. No range, no guidance, no target — the writer types
-                the number. */}
+            {/* One line, stating what is wrong. It clears on the next valid input. */}
             {wordError && <div className="msv-worderr">{WORD_COUNT_REJECTED}</div>}
+            {/* ⚠️ THE HINT STATES WHAT THE KEYS DO — it is NOT a range, a target or guidance about
+                how long a manuscript should be. That is retired. */}
+            <div className="msv-wordhint">{WORD_COUNT_HINT_LINE}</div>
             <div className="msv-wordfoot">
-              <button type="button" className="msv-btn sm" onClick={close}>Cancel</button>
+              <button type="button" className="msv-btn sm" onClick={cancelWords}>Cancel</button>
               <button type="button" className="msv-btn sm msv-primary" onClick={saveWords}>Save</button>
             </div>
           </div>

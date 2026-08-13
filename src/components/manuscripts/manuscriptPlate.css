@@ -428,29 +428,66 @@
 .msv-agebtn.on { background: var(--msv-huec); border-color: var(--msv-hue); color: var(--msv-hue); font-weight: 600; }
 .msv-genredone { margin-left: auto; }
 
-/* ── word count: a small popover, positioned by the shared useFixedMenu ── */
+/* ── word count: one field, positioned by the shared useFixedMenu ──
+   ⚠️ NO `min-width` HERE — `useFixedMenu` writes an INLINE `minWidth` (the trigger's width) and
+   inline always wins, so a declaration in this rule can never apply. It sizes to its content. */
 .msv-wordpop {
-  background: var(--msv-card); border: var(--msv-cardbd); border-radius: 12px;
+  background: var(--msv-card); border: var(--msv-cardbd); border-radius: 14px;
   box-shadow: 0 12px 30px rgba(58, 28, 20, 0.16);
-  padding: 12px; z-index: 60;
-  /* ⚠️ NO `min-width` HERE — `useFixedMenu` writes an INLINE `minWidth` (the trigger's width) and
-     inline always wins, so a declaration in this rule can never apply. It sizes to its content:
-     measured 332px against a 100px trigger. Writing one anyway would be a value nobody could read
-     off the page and nobody could change from this file. */
+  width: 270px; padding: 13px 0; z-index: 60;
 }
-.msv-wordrow { display: flex; align-items: center; gap: 8px; }
-.msv-wordinput {
-  flex: 1; min-width: 0; text-align: center;
-  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--msv-ink);
-  background: var(--msv-sub); border: 1px solid var(--msv-hair); border-radius: 8px;
-  padding: 7px 8px;
+.msv-wordlab {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.17em;
+  text-transform: uppercase; color: var(--msv-label); padding: 0 16px 7px;
 }
-.msv-wordinput:focus { outline: none; border-color: var(--msv-hue); }
-.msv-worderr {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--msv-hue); margin-top: 8px;
+
+/* ⚠️ ONE BOX, AND THE RING IS ON THE BOX. Three loose controls in a row read as three controls;
+   the border plus `:focus-within` is what makes the number, its unit and its spinner one field. */
+.msv-stepper {
+  display: flex; align-items: stretch; margin: 2px 16px 0; overflow: hidden;
+  background: var(--msv-sub); border: 1px solid var(--msv-hair); border-radius: 10px;
 }
-.msv-wordfoot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.msv-stepper:focus-within {
+  border-color: var(--msv-hue);
+  box-shadow: 0 0 0 3px var(--msv-huec);
+}
+.msv-stepinput {
+  flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+  font-family: 'JetBrains Mono', monospace; font-size: 17px; letter-spacing: 0.03em;
+  color: var(--msv-head); padding: 11px 0 11px 13px;
+  /* ⚠️ THE STACKED BUTTONS ARE THE ONLY SPINNER. A native spinner beside them is a second control
+     for one job, at a size nobody can hit. */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.msv-stepinput::-webkit-outer-spin-button,
+.msv-stepinput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.msv-stepunit {
+  align-self: center; padding: 0 11px 0 6px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--msv-label);
+}
+.msv-steps {
+  display: flex; flex-direction: column; width: 36px; flex: 0 0 auto;
+  border-left: 1px solid var(--msv-hair);
+}
+.msv-steps button {
+  flex: 1; border: none; background: var(--msv-card); color: var(--msv-muted); cursor: pointer;
+  font-size: 8px; display: flex; align-items: center; justify-content: center; padding: 0;
+}
+.msv-steps button:hover { background: var(--msv-huec); color: var(--msv-hue); }
+.msv-steps button:first-child { border-bottom: 1px solid var(--msv-hair); }
+
+.msv-worderr { padding: 8px 16px 0; font-size: 12px; color: var(--msv-hue); }
+.msv-wordhint {
+  padding: 8px 16px 0;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--msv-label);
+}
+.msv-wordfoot {
+  display: flex; justify-content: flex-end; gap: 9px;
+  padding: 11px 16px 0; margin-top: 8px; border-top: 1px solid var(--msv-hair);
+}
 
 @media (prefers-reduced-motion: reduce) {
   .msv-platetitle.editable, .msv-gp.editable, .msv-wc.editable, .msv-platelog.editable { transition: none; }

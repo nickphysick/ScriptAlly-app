@@ -18,8 +18,12 @@ import {
   WORD_STEP,
   WORD_COUNT_HINT,
   WORD_COUNT_REJECTED,
+  WORD_COUNT_HINT_LINE,
+  REJECTED_KEYS,
+  isRejectedKey,
   MAX_MANUSCRIPT_GENRES,
 } from "./plateEdit";
+import { readFileSync as read } from "node:fs";
 import { commonGenresFor, COMMON_GENRES_BY_AGE, canonicalGenreById } from "../../lib/genres";
 
 const noop = () => {};
@@ -74,9 +78,29 @@ describe("a word count is a number the writer types, and nothing suggests one", 
 
   it("rejects anything that is not a number, and says so in one line", () => {
     for (const bad of ["abc", "50k", "12.5", "-400", ""]) expect(parseWordCount(bad)).toBeNull();
-    expect(WORD_COUNT_REJECTED).toBe("Word count is a number.");
+    expect(WORD_COUNT_REJECTED).toBe("Numbers only.");
     /* States what is wrong; asks for nothing and blames nobody. */
     expect(WORD_COUNT_REJECTED).not.toMatch(/\b(you|your|please|try|must|should)\b/i);
+  });
+
+  /**
+   * ⚠️ REJECTED AT THE KEYSTROKE, NOT AT SAVE. Every one of these is valid to a numeric input and
+   * none is valid as a word count — and the browser then reports the value as `""` rather than as
+   * the text that was typed, so a save-time check cannot even say what went wrong.
+   */
+  it("refuses the keys a numeric field would otherwise accept", () => {
+    expect(REJECTED_KEYS).toEqual(["e", "E", "+", "-", "."]);
+    for (const k of REJECTED_KEYS) expect(isRejectedKey(k)).toBe(true);
+    /* …and refuses nothing else: digits, editing keys and the steppers all pass. */
+    for (const k of ["0", "9", "Backspace", "ArrowUp", "ArrowDown", "Enter", "Escape", "Tab"]) {
+      expect(isRejectedKey(k), `${k} must not be rejected`).toBe(false);
+    }
+  });
+
+  /* ⚠️ THE HINT SAYS WHAT THE KEYS DO. It is not a range and not a target — those are retired. */
+  it("hints at the keys, and reads its step from the one constant", () => {
+    expect(WORD_COUNT_HINT_LINE).toBe(`↑ ↓ steps ${WORD_STEP}`);
+    expect(WORD_COUNT_HINT_LINE).not.toMatch(/\b(typical|aim|target|recommended|between)\b/i);
   });
 
   /* An empty field is not zero — a writer clearing it has not said the manuscript is empty. */
@@ -180,5 +204,82 @@ describe("editing is opt-in — the plate is read-only without it", () => {
   /* The genre editor renders the age row only when opened, so the resting plate stays a plate. */
   it("keeps the genre editor closed at rest", () => {
     expect(plate({ edit: EDIT })).not.toContain("msv-ageseg");
+  });
+});
+
+
+/**
+ * The corrected field is ONE box, not three controls in a row. These read the built markup and the
+ * stylesheet, because the fault being fixed was structural rather than behavioural.
+ */
+describe("the word-count field is one box", () => {
+  const SRC = read(resolve(__dirname, "./ManuscriptPlate.tsx"), "utf8");
+  /**
+   * ⚠️ COMMENTS STRIPPED AND `@media` UNWRAPPED BEFORE PARSING. A flat `selector { body }` sweep
+   * DESYNCS at the first at-rule: it reads `@media (…)` as a selector and that block's first inner
+   * rule as its body, and every rule after it is then off by one. This file has a `max-width` media
+   * query above the stepper, and the first version of this lock reported `.msv-stepper` missing from
+   * a stylesheet that declares it.
+   */
+  const CSS = read(resolve(__dirname, "./manuscriptPlate.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/@media[^{]*\{/g, "");
+
+  /** Every declaration for a selector, joined — grouping must not defeat the anchor. */
+  const rule = (sel: string) => {
+    const bodies = [...CSS.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .filter(([, s]) => s.split(",").some((x) => x.trim() === sel))
+      .map(([, , b]) => b);
+    expect(bodies.length, `${sel} must appear in at least one rule`).toBeGreaterThan(0);
+    return bodies.join("\n");
+  };
+
+  it("parses the stylesheet at all — a desynced sweep finds nothing and blames the source", () => {
+    expect(rule(".msv-plateband")).toContain("background:");
+    expect(rule(".msv-wordpop")).toContain("width: 270px");
+  });
+
+  it("wraps the input, its unit and the steppers in one bordered box", () => {
+    expect(SRC).toContain('className="msv-stepper"');
+    expect(SRC).toContain('className="msv-stepinput"');
+    expect(SRC).toContain('className="msv-stepunit"');
+    expect(SRC).toContain('className="msv-steps"');
+    const box = rule(".msv-stepper");
+    expect(box).toContain("border:");
+    expect(box).toContain("border-radius");
+  });
+
+  /* ⚠️ THE RING IS ON THE BOX, not the bare input — that is what makes the three parts one field. */
+  it("puts the focus ring on the box", () => {
+    expect(rule(".msv-stepper:focus-within")).toContain("box-shadow");
+    expect(rule(".msv-stepinput")).toContain("outline: none");
+  });
+
+  /* ⚠️ THE STACKED BUTTONS ARE THE ONLY SPINNER — a native one beside them is a second control. */
+  it("suppresses the native spinners, in both engines", () => {
+    expect(rule(".msv-stepinput")).toContain("-moz-appearance: textfield");
+    expect(CSS).toContain("::-webkit-inner-spin-button");
+    expect(CSS).toContain("::-webkit-outer-spin-button");
+    expect(CSS).toContain("-webkit-appearance: none");
+  });
+
+  it("divides the stepper column from the field, and its two buttons from each other", () => {
+    expect(rule(".msv-steps")).toContain("border-left");
+    expect(rule(".msv-steps")).toContain("width: 36px");
+    expect(rule(".msv-steps button:first-child")).toContain("border-bottom");
+  });
+
+  /* ⚠️ THE OLD SHAPE IS GONE, not merely unused — three labels in a row was the fault. */
+  it("leaves none of the three-in-a-row markup behind", () => {
+    for (const dead of ["msv-wordrow", "msv-wordinput"]) {
+      expect(CSS, `${dead} survives in the stylesheet`).not.toContain(dead);
+      expect(SRC, `${dead} survives in the markup`).not.toContain(dead);
+    }
+  });
+
+  /* Cancel restores rather than merely closing, so the next open never shows an abandoned edit. */
+  it("restores the stored value on Cancel", () => {
+    expect(SRC).toContain("const cancelWords");
+    expect(SRC).toContain("onClick={cancelWords}");
   });
 });
