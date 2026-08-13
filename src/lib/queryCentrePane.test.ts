@@ -98,12 +98,56 @@ describe("the scrim system is gone, and stays gone", () => {
   });
 });
 
-/* ⚠️ DELETED WITH THE SCRIM (create-mode v2, Phase 1) — a stacking-context audit over every
-   ancestor of a "lit" element, a z-order comparison, and a check that the scrim stayed a child
-   of the page root rather than being portalled. Every one of them was load-bearing while the
-   focus system existed; none has a subject now. Recorded rather than dropped silently, because
-   the reasoning is worth keeping: a `position: fixed` overlay mounted at body level would have
-   painted OVER the pane during the 180ms `pageIn` window, when the stage slot is both a
-   stacking context and the containing block for fixed positioning. Anyone reaching for an
-   overlay on this page again should read that before mounting it. */
+describe("the journey's strip offers no exit of its own", () => {
+  /**
+   * ⚠️ IT WAS A DUPLICATE, NOT AN EXIT. The strip carried a `Close` whose handler was byte for byte
+   * the one the in-pane `Cancel` already calls — the same act offered twice, eight pixels apart, on
+   * the same screen. Cancel and Esc keep doing the job, on the journey's own header, which is where
+   * the writer is looking.
+   *
+   * ⚠️ THE HEADER BAND ITSELF STAYS, and that distinction is the whole of this case. The band is
+   * the page's own chrome; it strips on `creating || recording`, and removing it would undo three
+   * packs of that work. What a journey must not do is offer a SECOND way out of itself.
+   */
+  it("a journey renders no actions at all", () => {
+    expect(code, "the journey's action list is not empty").toContain("actions={creating || recording\n              ? []");
+  });
 
+  it("and no `Close` label survives in the header's actions", () => {
+    const at = code.indexOf("actions={creating || recording");
+    expect(at, "the actions prop moved — this slice is testing nothing").toBeGreaterThan(-1);
+    const slice = code.slice(at, at + 400);
+    expect(slice, "the duplicate exit came back").not.toContain('label: "Close"');
+  });
+
+  /* ⚠️ REPO LAW, RESTATED WHERE IT CAN BE BROKEN: nothing in this page's height chain may be sized
+     to the viewport. The takeover fills because the PAGE fills — a `100vh` or a `calc(100vh - Npx)`
+     anywhere here would be bar-offset arithmetic, which the shell forbids outright. */
+  it("no viewport unit appears in the height chain", () => {
+    /* ⚠️ THE CHAIN, NOT THE FILE. A blanket scan flags `.f12-pop-body { max-height: min(520px,
+       70vh) }` — a POPOVER bounded by the viewport, which is both legitimate and nowhere near the
+       page's height chain. The law is about the chain: the elements between the scroll row and the
+       takeover's content, where a viewport unit would be the bar-offset arithmetic the shell
+       forbids. Naming them is also what makes this fail if someone adds one. */
+    /* ⚠️ `.qc-take-body` IS DELIBERATELY ABSENT FROM THIS LIST. It carries no CSS rule at all —
+       QueryCreatePane calls it "a hook only: no layout hangs off it", precisely so the height chain
+       stays where it can be read. Its box comes from inline styles, which the source scan below
+       covers. Asserting it as a CSS rule failed, correctly. */
+    const CHAIN = [".f12-root", ".f12-body", ".f12-list", ".f12-detail",
+                   ".qc-two", ".qc-form", ".qc-stack"];
+    for (const sel of CHAIN) {
+      const at = css.indexOf(`\n${sel} {`);
+      expect(at, `${sel} is missing from f12.css — this case would be testing nothing`).toBeGreaterThan(-1);
+      const rule = css.slice(at, css.indexOf("}", at)).replace(/\/\*[\s\S]*?\*\//g, "");
+      expect(rule, `${sel} sizes itself to the viewport`).not.toMatch(/\b\d+(\.\d+)?(vh|dvh|svh|lvh)\b/);
+    }
+    /* and no INLINE style in the journey's own components reaches for the viewport either —
+       that is where `.qc-take-body` and the takeover column get their boxes */
+    for (const rel of ["../components/Queries.tsx", "../components/queries/QueryCreatePane.tsx",
+                       "../components/queries/ResponsePane.tsx", "../components/queries/StepStack.tsx"]) {
+      const src = read(rel).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+      expect(src, `${rel} sizes something to the viewport inline`).not.toMatch(/\b\d+(\.\d+)?(vh|dvh|svh|lvh)\b/);
+      expect(src, `${rel} is doing bar-offset arithmetic`).not.toMatch(/calc\(100vh/);
+    }
+  });
+});

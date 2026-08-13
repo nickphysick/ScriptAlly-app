@@ -3019,19 +3019,18 @@ export const Queries: React.FC<{
                and title disagree makes you check you are where you think you are. */
             title="Query Centre"
             description="Every query you've sent, and exactly where each one stands."
-            /* ⚠️ A JOURNEY REPLACES THE ACTIONS WITH A SINGLE CLOSE. `Log query` in the strip
-               would start a SECOND journey on top of the open one, and disabling it leaves a dead
-               control where the only useful action belongs. Close reuses the page's own exits —
-               `closeCreate` and `closeRecord`, the same handlers the in-pane Cancel buttons call —
-               so the dirty check, the focus return and the exit choreography are not duplicated. */
+            /* ⚠️ A JOURNEY LEAVES THE ACTIONS EMPTY, AND THE `Close` THAT WAS HERE IS GONE. The
+               reason the strip carries no actions during a journey is unchanged: `Log query` would
+               start a SECOND journey on top of the open one, and disabling it leaves a dead control
+               where the only useful action belongs.
+               ⚠️ WHAT WENT WAS A DUPLICATE, NOT AN EXIT. `Close` called `closeCreate` /
+               `closeRecord` — byte for byte the handlers the in-pane Cancel already calls — so the
+               same act was offered twice, eight pixels apart, on the same screen. Cancel and Esc
+               keep doing the job, on the journey's own header, which is where the writer is
+               looking. The header BAND itself stays: it is the page's own chrome, it strips on
+               `creating || recording`, and removing it would undo three packs of that work. */
             actions={creating || recording
-              ? [
-                  {
-                    label: "Close",
-                    onClick: () => { if (creating) closeCreate(); else closeRecord(); },
-                    disabled: createSaving || respSaving,
-                  },
-                ]
+              ? []
               : queries.length > 0
               ? [
                   {

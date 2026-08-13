@@ -8,7 +8,7 @@
  *   SA_E2E_BASE_URL=http://localhost:3000 npx playwright test --project=measure qcFlatten
  */
 import { test, expect, Page } from "@playwright/test";
-import { openRoute } from "./measure";
+import { openRoute, liftMotionSuppression } from "./measure";
 
 const read = (page: Page) => page.evaluate(() => {
   const r = (n: number) => Math.round(n * 10) / 10;
@@ -71,3 +71,50 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1024, height: 800 }, { 
     expect(s.pageScroll, "the page scrolls — the fill chain changed, and it must not have").toBe(0);
   });
 }
+
+/* ── §2 — the journey's strip offers no exit of its own ──────────────────────────────────────── */
+
+const journeyState = (page: Page) => page.evaluate(() => {
+  const g = [...document.querySelectorAll(".wpg")].find((x) => x.getBoundingClientRect().height > 0) as HTMLElement;
+  const strip = g.querySelector(".wsh") as HTMLElement;
+  return {
+    stripH: Math.round(strip.getBoundingClientRect().height),
+    stripActions: [...g.querySelectorAll(".wsh-acts button")].map((b) => (b.textContent ?? "").trim()),
+    open: !!g.querySelector(".qc-take-body"),
+    inPaneCancel: [...g.querySelectorAll(".qch-acts button")].map((b) => (b.textContent ?? "").trim()),
+  };
+});
+
+test("§2 — the strip keeps its band and loses its duplicate exit", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  /* ⚠️ SUPPRESSION OFF: the takeover tears down on `animationend`, which a suppressed animation
+     never fires — it reads exactly like a broken exit. And it is lifted BY MARKER: the text-matching
+     version deleted three of the app's own stylesheets under `vite dev` (see measure.ts). */
+  await liftMotionSuppression(page);
+
+  await page.getByRole("button", { name: /^Log query$/i }).first().click();
+  await page.waitForTimeout(800);
+  const open = await journeyState(page);
+  console.log("journey open:", JSON.stringify(open));
+  expect(open.open, "the takeover did not open").toBe(true);
+  /* the BAND stays — it is the page's own chrome and strips on the journey */
+  expect(open.stripH, "the header band left with the Close button — it should stay").toBe(52);
+  /* ...and offers no exit of its own */
+  expect(open.stripActions, `the strip still offers an action: ${open.stripActions.join(", ")}`).toEqual([]);
+  /* the exit the writer uses is on the journey's own header */
+  expect(open.inPaneCancel.some((t) => /cancel/i.test(t)), "the in-pane Cancel is missing — the journey has no exit at all").toBe(true);
+
+  /* Esc closes */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(900);
+  expect((await journeyState(page)).open, "Escape did not close the journey").toBe(false);
+
+  /* and Cancel closes */
+  await page.getByRole("button", { name: /^Log query$/i }).first().click();
+  await page.waitForTimeout(800);
+  await page.locator(".qch-acts button", { hasText: /^Cancel$/ }).first().click();
+  await page.waitForTimeout(900);
+  const after = await journeyState(page);
+  expect(after.open, "Cancel did not close the journey").toBe(false);
+  expect(after.stripH, "the resting card did not come back after Cancel").toBe(96);
+});
