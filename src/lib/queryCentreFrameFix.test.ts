@@ -34,17 +34,22 @@ describe("no double container", () => {
     }
   });
 
-  it("and the frame itself is still hairline-only", () => {
-    const body = rule(".f12-body");
-    expect(body).toContain("border: 1px solid var(--line)");
-    expect(body, "the frame must never gain a fill").not.toContain("background:");
-    expect(body, "hairline only").not.toContain("box-shadow");
+  /* ⚠️ REVERSED — the frame is gone entirely (flatten §1). "Hairline-only" was the right rule for
+     a container that should not have existed; the fill and the shadow are still forbidden, and now
+     so is the hairline. */
+  it("and there is no frame at all", () => {
+    const body = rule(".f12-body").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(body, "the frame came back").not.toContain("border:");
+    expect(body, "the working area must never gain a fill").not.toContain("background:");
+    expect(body, "hairline only — and not even that now").not.toContain("box-shadow");
   });
 });
 
 describe("frame interior padding", () => {
-  it("~20px top/bottom, 22px left/right — nothing sits against the hairline", () => {
-    expect(rule(".f12-body")).toContain("padding: 20px 22px;");
+  /* ⚠️ THERE IS NO INTERIOR, because there is no frame. The padding existed so content did not sit
+     against a hairline; with the hairline gone it is a second gutter inside the row's own. */
+  it("is gone with the frame — the row's gutters are the only ones", () => {
+    expect(rule(".f12-body").replace(/\/\*[\s\S]*?\*\//g, ""), "an interior padding came back").not.toContain("padding:");
   });
 });
 

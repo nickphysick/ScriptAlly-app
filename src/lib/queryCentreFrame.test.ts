@@ -70,13 +70,25 @@ describe("⚠️ the modifier changes flex, not just min-height — and that is 
 });
 
 describe("the workspace frame", () => {
-  it("is ONE hairline around list and pane together — no fill, no shadow", () => {
-    const body = rule(f12, ".f12-body");
+  /**
+   * ⚠️ THE FRAME IS GONE, AND THIS CASE ASSERTED ITS EXISTENCE. It read "is ONE hairline around
+   * list and pane together" — a real decision at the time, and the wrong object: the working area
+   * is not a thing the writer needs a boundary for. What the border actually did was frame the
+   * empty space a FILL page legitimately has when its content is short (measured 373px at
+   * 1440×900), turning "page with room below the content" into "broken card". Unframed, the same
+   * space is simply page. The height chain is untouched.
+   *
+   * Asserted ABSENT rather than deleted, because a border re-added here would look like a tidy-up.
+   */
+  it("draws NOTHING — no border, no radius, no fill, no shadow", () => {
+    /* comment-stripped: these rules explain in prose why the properties are absent */
+    const code = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
+    const body = code(rule(f12, ".f12-body"));
     expect(body, "the .f12-body rule is missing").not.toBe("");
-    expect(body).toContain("border: 1px solid var(--line)");
-    expect(body).toContain("border-radius: 18px");
-    expect(body, "the frame must not paint a second surface").not.toContain("background:");
-    expect(body, "hairline only — a shadow would make it a card inside a card").not.toContain("box-shadow");
+    expect(body, "the frame came back — it framed the empty space rather than any object").not.toContain("border:");
+    expect(body, "a radius came back, which only a container has").not.toContain("border-radius");
+    expect(body, "the working area must not paint a surface").not.toContain("background:");
+    expect(body, "a shadow makes it a card again").not.toContain("box-shadow");
   });
 
   /* ⚠️ THE FRAME STATES NO INSET OF ITS OWN, AND THAT REVERSES THIS CASE'S WHOLE PREMISE. It read
@@ -107,9 +119,36 @@ describe("the workspace frame", () => {
       .not.toContain("auto");
   });
 
-  it("the vertical rhythm is untouched by the inset", () => {
-    expect(rule(f12, ".f12-body")).toContain("margin: 22px 0 26px");
-    expect(rule(f12, ".f12-body")).toContain("padding: 20px 22px");
+  /* ⚠️ THE INSET WENT WITH THE FRAME. Its padding was interior space for a border that no longer
+     exists, and its margin was the card's own separation from the row. Both gutters are the scroll
+     row's — `--content-gutter` and `--content-top-gap`, the same tokens the other nine pages read.
+     Restating either here is how this page bought a SECOND gutter twice already. */
+  it("states no inset of its own — the scroll row pays both gutters", () => {
+    /* comment-stripped: these rules explain in prose why the properties are absent */
+    const code = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
+    const body = code(rule(f12, ".f12-body"));
+    expect(body, "an interior padding came back — there is no hairline left for it to hold off").not.toContain("padding:");
+    expect(body, "a margin came back — the row's top gap already separates this from the chrome").not.toContain("margin:");
+  });
+
+  /**
+   * ⚠️ ONE RULE INSIDE THE WORKING AREA, AND IT IS THE SEAM — added, not kept. The pack said "that
+   * seam stays", which assumed one existed; there was none. With the card's border gone the only
+   * thing between a list column and a reading pane that scroll and select INDEPENDENTLY would be
+   * 12px of air, and two independent regions need a boundary. Everything else in here is gutters
+   * and the rules the masthead and toolbar already own.
+   *
+   * ⚠️ SYMMETRIC BY CONSTRUCTION, not by matched numbers: `--gut` of padding inside the line and
+   * the row's `gap: var(--gut)` outside it, so neither side states a figure the other must track.
+   */
+  it("the list and the pane are separated by ONE vertical hairline", () => {
+    const list = rule(f12, ".f12-list");
+    expect(list, "the seam is gone — two independently scrolling regions with no boundary").toContain("border-right");
+    expect(list, "the seam is not on the hairline token").toContain("var(--hairline)");
+    expect(list, "the seam has no air inside it — content would sit against the line").toContain("padding-right: var(--gut)");
+    /* and it is the ONLY one: a border on the body or the pane would be the frame coming back */
+    const body = rule(f12, ".f12-body").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(body, "the row drew a border again").not.toContain("border");
   });
 
   it("the fit chain runs the whole way down", () => {

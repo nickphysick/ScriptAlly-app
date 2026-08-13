@@ -985,23 +985,48 @@
    of growing it (see .ws-work--fit for the other half of that chain). ── */
 .f12-body {
   flex: 1; display: flex; gap: var(--gut); min-height: 0;
-  /* ⚠️ THE FRAME FILLS THE SCROLL ROW — it does not inset itself, and the note that stood here
-     explaining WHICH inset it used was describing the bug. The row already carries
-     `padding-inline: var(--content-gutter)`, so `calc(100% - 2 * var(--sa-col-gut))` bought a
-     SECOND gutter and put this page's working area 80px narrower a side than every other page's.
-     Alignment with the header is structural for the same reason it is on the other nine: both are
-     children of the same padded row, so they share an edge without either naming a number.
-     ⚠️ NO AUTO MARGINS. At `width: 100%` they resolve to zero, so they are merely dead — but a
-     dead auto margin is how a cap comes back unnoticed, because it is already there to centre it. */
-  width: 100%; margin: 22px 0 26px;
-  padding: 20px 22px;
-  border: 1px solid var(--line); border-radius: 18px;
+  /**
+   * ⚠️ IT IS NOT A CONTAINER ANY MORE — no border, no radius, no padding, no margin. It is the flex
+   * row that puts the list beside the pane, and nothing else.
+   *
+   * ⚠️ THE BORDER WAS THE FAULT, NOT THE SPACE IT ENCLOSED. This page is a FILL page: the panes
+   * scroll internally and the page does not, so when the takeover's content is short the column is
+   * legitimately taller than what is in it — measured 373px at 1440×900. Framed, that reads as a
+   * broken card with a screen of empty inside it; unframed it is simply page, which is what a fill
+   * page looks like when its content is short. So the height chain is UNTOUCHED — no
+   * mode-dependent hugging, no viewport arithmetic, and the invariance padding's premise stands.
+   *
+   * ⚠️ THE GUTTERS ARE THE ROW'S, NOT THIS RULE'S. `.wpg-scroll` already carries
+   * `padding-inline: var(--content-gutter)` and `padding-top: var(--content-top-gap)`, the same
+   * tokens the other nine pages read. Restating any of them here is how this page drifted twice
+   * already — once with `--sa-col-max`, once with `--sa-col-gut`, both of which bought a SECOND
+   * gutter while naming the right token.
+   *
+   * ⚠️ AND NO CAP. `--maxw: 1520px` survives in index.css with no reader at all; widths are
+   * relationships applied as padding, never a cap. It is reported, not resurrected.
+   */
+  width: 100%;
 }
 .f12-pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-2); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 /* ── THE EDITORIAL LIST (ref query-centre-final.html) — DE-CARDED. It is no longer a .f12-pane:
    inside the workspace frame a bordered card would be a card inside a card, so the list is now
    just a column of rows separated by hairlines. ── */
-.f12-list { flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0; }
+/**
+ * ⚠️ THE VERTICAL SEAM — ADDED, NOT KEPT. The pack said "that seam stays", which assumed one
+ * existed; there was none. With the card's border gone the only thing between a list column and a
+ * reading pane that scroll and select independently would be 12px of air, and two independent
+ * regions need a boundary. It is the ONE rule drawn inside the working area: everything else is
+ * gutters and the rules the masthead and toolbar already own.
+ *
+ * ⚠️ SYMMETRIC BY CONSTRUCTION. The line sits at the list's own right edge with `--gut` inside it
+ * and the row's `gap: var(--gut)` outside, so it is centred in the channel without either side
+ * naming a number the other has to match.
+ */
+.f12-list {
+  flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0;
+  padding-right: var(--gut);
+  border-right: 1px solid var(--hairline);
+}
 
 /* The head reuses TO-DO'S values verbatim (todo.css .tdb-sec / .tdb-cn / .tdb-secrule) rather
    than approximating them: Playfair 17/700, a mono count, over a 1px #ece5d9 warm hairline.

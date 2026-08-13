@@ -36,11 +36,14 @@ describe("no container between the sheet and the cards paints a ground", () => {
     }
   });
 
-  it("the frame is still hairline-only over that white", () => {
+  /* ⚠️ THE FRAME IS GONE (flatten §1); what this case still protects is the GROUND — nothing
+     between the sheet and the cards may paint one, and that now includes the element that used to
+     draw the hairline over it. */
+  it("nothing is drawn over that white at all", () => {
     const at = css.indexOf("\n.f12-body {");
-    const rule = css.slice(at, css.indexOf("}", at));
-    expect(rule).toContain("border: 1px solid var(--line)");
-    expect(rule, "the frame must never gain a fill").not.toContain("background:");
+    const rule = css.slice(at, css.indexOf("}", at)).replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(rule, "the frame came back").not.toContain("border:");
+    expect(rule, "the working area must never gain a fill").not.toContain("background:");
   });
 
   it("the page root paints nothing either", () => {
