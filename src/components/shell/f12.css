@@ -1012,6 +1012,51 @@
    inside the workspace frame a bordered card would be a card inside a card, so the list is now
    just a column of rows separated by hairlines. ── */
 /**
+ * ══ QUERY CENTRE'S OWN RHYTHM (§1a) ═══════════════════════════════════════════════════════════
+ *
+ * ⚠️ 18px FROM THE BAND, AND IT IS A PAGE-SCOPED EXCEPTION, NOT A CHANGE OF THE SHARED RHYTHM.
+ * `--content-top-gap` is 70/35 shell-wide and stays that way; this is the most-visited workspace
+ * and earns a tighter start. The shared tokens are untouched — only what this page reads.
+ *
+ * ⚠️ IT SETS THE RESOLVED VALUE, NOT THE `-rest`/`-work` PAIR, and that avoids an equal-specificity
+ * collision. `:root` computes `--content-top-gap: var(--content-top-gap-rest)` AT :root, so
+ * overriding `--content-top-gap-rest` further down changes nothing — the inherited value is already
+ * resolved. Setting `--content-top-gap` directly on `.qc-wpg` (0-1-0) would then tie with
+ * `.wpg--working` (0-1-0) on the SAME element and be decided by bundle order, which is the fault
+ * this repo has recorded twice. Both states are named explicitly at 0-2-0 instead.
+ */
+.qc-wpg:not(.wpg--working) { --content-top-gap: 18px; }
+.qc-wpg.wpg--working { --content-top-gap: 9px; }
+
+/**
+ * ⚠️ THE INVARIANCE PADDING IS INERT ON THIS PAGE, SO IT IS ZEROED HERE — and the reason matters
+ * more than the removal. `--wpg-reclaim-pad` keeps max scroll identical between the resting card
+ * and the working strip, so `scrollTop` can never be clamped and the collapse cannot oscillate.
+ * That guards a page whose ROW scrolls. Query Centre's row never does: it is a fill page, the list
+ * and the panes scroll internally, and `scrollHeight - clientHeight` measures 0 in all three states
+ * — browsing, create and record. A 97px pad at the foot of a scroller that cannot scroll is 97px of
+ * nothing, and with the dock below it, 97px of nothing BETWEEN the content and the dock.
+ *
+ * ⚠️ DO NOT COPY THIS ONTO A PAGE THAT SCROLLS. There the reclaim is load-bearing, and a dock that
+ * takes grid height makes it MORE so: the dock shrinks the scroll row in working mode only, which
+ * changes `clientHeight` in one state and adds a term the reclaim does not know about. Harmless
+ * here because there is no scroll to clamp; on Contact list or Manuscripts it would put the
+ * oscillation straight back.
+ */
+.qc-wpg.wpg--working > .wpg-scroll { --wpg-reclaim-pad: 0px; }
+
+/**
+ * ⚠️ THE MASTHEAD'S SUBTITLE IS MONO NOW — it carries counts, not prose (§1b). Page-scoped, so the
+ * shared header keeps its 14px description on the other nine pages.
+ */
+.qc-wpg .wsh-sub {
+  font-family: var(--f12-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--shell-muted);
+}
+
+/**
  * ⚠️ THE VERTICAL SEAM — ADDED, NOT KEPT. The pack said "that seam stays", which assumed one
  * existed; there was none. With the card's border gone the only thing between a list column and a
  * reading pane that scroll and select independently would be 12px of air, and two independent

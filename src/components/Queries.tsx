@@ -47,7 +47,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, listHeadLabel } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, listHeadLabel } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -1714,6 +1714,12 @@ export const Queries: React.FC<{
 
     return true;
   };
+  /* The masthead's set: manuscript scope only — the status filter and the search narrow the LIST,
+     never the page's own totals (the rule `queriesPulse` already follows). */
+  const mastheadScopedQueries = selectedManuscriptFilter === "All"
+    ? queries
+    : queries.filter((q) => q.manuscriptId === selectedManuscriptFilter);
+
   const filteredList = queries.filter(matchesFilters);
 
   // ── F12 sort (ref sort popover: Activity / Dates / Pipeline) — all derived from fields
@@ -3005,6 +3011,54 @@ export const Queries: React.FC<{
              declaration took `.qc-take-body` from 0 to 418px. */
           fill
           scrollLabel="Query Centre"
+          /* ⚠️ THE LIST STRIP (§1c) — the three controls that act on the LIST, and only those.
+             `View tasks` and `Nudge` are NOT here despite sounding page-level: both are gated on
+             `!sel`, so both act on the selected query, and putting them in a list-scope strip
+             would leave two dead controls whenever nothing is selected — the exact fault the
+             split exists to remove. They are behind the hero's kebab with the other three.
+             ⚠️ THE GRID ALREADY DRAWS THIS ROW. It has had a `toolbar` slot since the conversion
+             and this page never used one, so the controls lived inside the list column instead —
+             which is why they read as the list's chrome rather than the page's. */
+          toolbar={!creating && !recording && queries.length > 0 ? (
+                  <div className="f12-lhead">
+                    <div className="f12-lsearch">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                      <input
+                        type="text"
+                        placeholder="Search"
+                        value={listSearch}
+                        onChange={(e) => setListSearch(e.target.value)}
+                        aria-label="Search queries"
+                      />
+                    </div>
+                    {/* v4 P1 — labelled pills in the agent list's grammar (icon · label · chevron), so the
+                        controls state what they do without a hover. Wiring unchanged. */}
+                    <div className="f12-popwrap">
+                      <PillTrig
+                        ref={filterTrigRef}
+                        label="Filter"
+                        open={filterPopOpen}
+                        active={activeFilterCount > 0}
+                        count={activeFilterCount}
+                        onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
+                        icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
+                      />
+                      {filterPopOpen && renderFilterPopover()}
+                    </div>
+                    <div className="f12-popwrap">
+                      <PillTrig
+                        ref={sortTrigRef}
+                        label="Sort"
+                        open={sortPopOpen}
+                        active={sortKey !== "last_activity"}
+                        value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
+                        onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
+                        icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
+                      />
+                      {sortPopOpen && renderSortPopover()}
+                    </div>
+                  </div>
+          ) : undefined}
           condensed={creating || recording}
           plate={
           <PageHeader
@@ -3018,7 +3072,14 @@ export const Queries: React.FC<{
                and the page's own heading must say the same thing — a page whose sidebar entry
                and title disagree makes you check you are where you think you are. */
             title="Query Centre"
-            description="Every query you've sent, and exactly where each one stands."
+            /* ⚠️ THE COUNTS, NOT A DESCRIPTION (§1b). "Every query you've sent, and exactly where
+               each one stands" told the reader what page they were on while they stood on it. These
+               are two facts they cannot get by looking, and both come from `queryBucket` — the same
+               function the filter pills and `getPrimaryAction` read — so the masthead cannot
+               disagree with the list beneath it about whose turn anything is.
+               ⚠️ MANUSCRIPT-SCOPED, NOT VIEW-SCOPED, matching `queriesPulse`'s existing rule: the
+               status filter and the search narrow the LIST, not the page's own totals. */
+            description={queriesMastheadCounts(mastheadScopedQueries)}
             /* ⚠️ A JOURNEY LEAVES THE ACTIONS EMPTY, AND THE `Close` THAT WAS HERE IS GONE. The
                reason the strip carries no actions during a journey is unchanged: `Log query` would
                start a SECOND journey on top of the open one, and disabling it leaves a dead control
@@ -3200,7 +3261,11 @@ export const Queries: React.FC<{
         {/* ── Split — list pane beside the reading pane, in the SAME centred column as the
             Contact List page (.f12-body: max-width --maxw, auto margins, --gut bottom gap;
             the two panes are --listw / flex:1, locked to the control-bar zones above). ── */}
-        <div className="f12-body" style={{ paddingTop: activeFilterChips.length ? 0 : "var(--gut)" }}>
+        {/* ⚠️ NO INLINE TOP PADDING (§1a). It added `--gut` when no filter chips were showing, which
+            on top of the row's own gap made the band-to-content distance 82px in the commonest
+            state and 70 in the other. The page states ONE offset now, 18px, and states it on the
+            row where every other page's lives. */}
+        <div className="f12-body">
 
           {/* ── List pane (F12, ref queries-hub-v14.html .list): search field only at the top,
               56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
@@ -3216,44 +3281,10 @@ export const Queries: React.FC<{
                   filtering. See listHeadLabel. */}
               <h2>{listHeadLabel(sortedList.length, queries.length, listNarrowed)}</h2>
             </div>
-            <div className="f12-lhead">
-              <div className="f12-lsearch">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
-                <input
-                  type="text"
-                  placeholder="Search"
-                  value={listSearch}
-                  onChange={(e) => setListSearch(e.target.value)}
-                  aria-label="Search queries"
-                />
-              </div>
-              {/* v4 P1 — labelled pills in the agent list's grammar (icon · label · chevron), so the
-                  controls state what they do without a hover. Wiring unchanged. */}
-              <div className="f12-popwrap">
-                <PillTrig
-                  ref={filterTrigRef}
-                  label="Filter"
-                  open={filterPopOpen}
-                  active={activeFilterCount > 0}
-                  count={activeFilterCount}
-                  onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
-                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
-                />
-                {filterPopOpen && renderFilterPopover()}
-              </div>
-              <div className="f12-popwrap">
-                <PillTrig
-                  ref={sortTrigRef}
-                  label="Sort"
-                  open={sortPopOpen}
-                  active={sortKey !== "last_activity"}
-                  value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
-                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
-                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
-                />
-                {sortPopOpen && renderSortPopover()}
-              </div>
-            </div>
+            {/* ⚠️ THE LIST'S CONTROLS MOVED UP TO THE GRID'S TOOLBAR ROW (§1c) — search, Filter and
+                Sort are the three things that act on the LIST, and they now sit in a slim strip
+                beneath the masthead where the grid already draws a row for exactly this. Nothing
+                about their wiring changed; only where they are. */}
             <div ref={listScrollRef} onScroll={scheduleListFades} className="f12-rows" role="listbox" aria-label="Queries">
               {renderList.map((q) => {
                 const agent = agents.find(a => a.id === q.agentId);
@@ -3368,94 +3399,12 @@ export const Queries: React.FC<{
                 left = FILTER + SORT pill triggers (nothing else); right = the query actions as
                 QUIET buttons (no filled button in this bar), PDF + Delete right-aligned. The old
                 masthead + hub-grammar filter bar and the foot control-row cards are retired. ── */}
-            {(() => {
-              const sel = !!(activeQuery && activeAgent && activeMs);
-              const status = activeQuery ? (activeQuery.status as QueryStatus) : null;
-              const ctrlAction = status ? getPrimaryAction(status) : null;
-              const isClosed = status === QueryStatus.REJECTED || status === QueryStatus.WITHDRAWN || status === QueryStatus.NO_RESPONSE;
-              const waitingOnAgent = ctrlAction?.ballHolder === "agent";
-              const taskCount = sel && activeQuery ? queryTaskBadge(tasks, activeQuery.id).count : 0;
-
-              /* ⚠️ EITHER TAKEOVER HIDES THE TOOLBAR ENTIRELY (ref qc-create-v2.html) — it does
-                 not disable it, and it no longer takes it over. The takeover's own header IS the
-                 journey's action surface; two of them would be two homes for one job.
-                 ⚠️ AND `recording` WAS MISSING FROM THIS TEST. The rule was written for create,
-                 where none of the record verbs applies to a query that does not exist yet — true,
-                 but not the reason. The reason is that a takeover replaces the work area, and the
-                 response journey drew Nudge · Agent · Manuscript · ⋯ · Delete in a 48px bar above
-                 the very query it was recording a response for: live verbs pointing at a record
-                 the writer had already left browsing to work on. */
-              if (creating || recording) return null;
-
-              return (
-                <div className="f12-ctl">
-                  {/* v4 P1 — the empty --listw spacer is gone with the bar's move into the header
-                      column: it existed to lock the bar to the list pane, which now sits in the wider
-                      workspace column below. The verbs simply right-align in the header column (ref). */}
-
-                  {/* Verbs, then the link group, then danger. The contextual primary lives on the
-                      reading pane's record header. */}
-                  <div className="f12-zone-read">
-                    <span className="f12-popwrap" style={{ display: "inline-flex" }}>
-                      <button ref={tasksTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="dialog" aria-expanded={isTasksOpen} onClick={() => setIsTasksOpen(o => !o)}>
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M4 12h10M4 18h10" /><path d="m17 6 1.5 1.5L21.5 4" /><path d="m17 12 1.5 1.5L21.5 10" /></svg>
-                        View tasks
-                        {taskCount > 0 && <span className="f12-cnt">{taskCount}</span>}
-                      </button>
-                      {isTasksOpen && activeQuery && (
-                        <TasksPopover scope={{ queryId: activeQuery.id }} style={tasksMenuStyle} onClose={() => setIsTasksOpen(false)} />
-                      )}
-                    </span>
-                    {/* ⚠️ THE GENERIC "Edit" IS GONE (§1). Every real use of it was one of three
-                        things: recording a response (the takeover), correcting an entry (its own
-                        work, drawn in the ref but not built here), or changing a record detail in
-                        place — which "What you sent" already does with MARK SENT and + ADD. A verb
-                        that means "change something, somewhere" is not an action. */}
-                    <button type="button" className="f12-act" disabled={!sel || !waitingOnAgent} onClick={() => setIsNudgeOpen(true)} title={sel && !waitingOnAgent ? "Available while you're waiting on the agent" : undefined}>
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
-                      Nudge
-                    </button>
-                    {/* ⚠️ "Mark closed" IS GONE (§1). Closing a query is one of the things that can
-                        come back, so it lives in the response takeover as the outcome "Closed — no
-                        reply" rather than as a toolbar verb with its own menu and its own write
-                        path. Withdrawing — which is NOT a response — becomes its own action (§5). */}
-                    {/* link group — pushed right by margin-left:auto */}
-                    <div className="f12-grp-links">
-                      <button type="button" className="f12-act" disabled title="Coming soon — jump to the agent's record">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6" /></svg>
-                        Agent
-                      </button>
-                      <button type="button" className="f12-act" disabled title="Coming soon — jump to the manuscript">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z" /></svg>
-                        Manuscript
-                      </button>
-                    </div>
-                    <span className="f12-divv2" aria-hidden="true" />
-                    <div className="f12-popwrap">
-                      <button ref={moreTrigRef} type="button" className="f12-act" disabled={!sel} aria-haspopup="menu" aria-expanded={isMoreOpen} onClick={() => setIsMoreOpen(o => !o)} title="More actions">⋯</button>
-                      <F12Menu
-                        open={isMoreOpen}
-                        onClose={() => setIsMoreOpen(false)}
-                        style={moreMenuStyle}
-                        ariaLabel="More query actions"
-                        items={[
-                          {
-                            label: isGeneratingPDF ? "Generating…" : "Download as PDF",
-                            disabled: isGeneratingPDF,
-                            icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
-                            onClick: () => handleDownloadPDF(),
-                          },
-                        ]}
-                      />
-                    </div>
-                    <button type="button" className="f12-act f12-del" disabled={!sel} onClick={askDeleteQuery} title="Delete this query">
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
+            {/* ⚠️ THE PANE TOOLBAR IS GONE (§1c). It held six controls and EVERY ONE of them was
+                gated on `!sel` — View tasks, Nudge, Agent, Manuscript, ⋯ and Delete all act on the
+                SELECTED QUERY, not on the list and not on the workspace. A row of six verbs that
+                are dead until you pick something is not a command bar; it is a list of things you
+                cannot do yet. They are one kebab in the hero now, beside the primary, where the
+                query they act on is named. */}
             {respDraft && respQueryId ? (
               /* ── RECORDING A RESPONSE (§1, ref 83-record-response.html) ── */
               <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, padding: "16px 20px 20px" }}>
@@ -3662,6 +3611,9 @@ export const Queries: React.FC<{
                   // from the control bar, same derivation + composer-shortcut behaviour + the
                   // Mark-sent anchor ref. The plane ornament yields its seat to the action.
                   const heroAction = getPrimaryAction(activeQuery.status as QueryStatus);
+                  /* the kebab's two state-dependent facts, derived where the hero's own are */
+                  const heroWaitingOnAgent = heroAction.ballHolder === "agent";
+                  const heroTaskCount = queryTaskBadge(tasks, activeQuery.id).count;
                   const heroClosed = activeQuery.status === QueryStatus.REJECTED || activeQuery.status === QueryStatus.WITHDRAWN || activeQuery.status === QueryStatus.NO_RESPONSE;
                   const heroIsMark = heroAction.kind === "mark-sent" && !heroClosed;
                   const heroLabel = heroClosed ? "Reopen"
@@ -3694,6 +3646,75 @@ export const Queries: React.FC<{
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
                         {heroLabel}
                       </button>
+                      {/**
+                        * ⚠️ THE KEBAB (§1c) — every verb that acts on THIS query, in one place, beside
+                        * the primary that also acts on it. Six controls used to sit in a bar above the
+                        * list, all six dead until a row was picked.
+                        *
+                        * ⚠️ INAPPLICABLE VERBS STAY GREYED AND INERT, NEVER ABSENT — the standing
+                        * to-do row grammar. A menu whose length changes with state makes you re-read
+                        * it every time; a greyed row tells you the verb exists and why it cannot run.
+                        *
+                        * ⚠️ `F12Menu`, NOT A SECOND MENU. This page already portals three menus
+                        * through it (the old ⋯, the send-method picker, the manuscript picker).
+                        * `PortalMenu` is To-do's equivalent; using it here would put two menu
+                        * components on one page, which is the thing the rule forbids.
+                        */}
+                      <div className="f12-popwrap" style={{ flexShrink: 0 }}>
+                        <button
+                          ref={moreTrigRef}
+                          type="button"
+                          className="f12-act qc-kebab"
+                          aria-haspopup="menu"
+                          aria-expanded={isMoreOpen}
+                          onClick={() => setIsMoreOpen((o) => !o)}
+                          title="More actions for this query"
+                        >⋯</button>
+                        <F12Menu
+                          open={isMoreOpen}
+                          onClose={() => setIsMoreOpen(false)}
+                          style={moreMenuStyle}
+                          ariaLabel="Actions for this query"
+                          items={[
+                            {
+                              label: heroTaskCount > 0 ? `View tasks (${heroTaskCount})` : "View tasks",
+                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>,
+                              onClick: () => setIsTasksOpen(true),
+                            },
+                            {
+                              /* Nudging is only meaningful while the agent holds the ball — stated,
+                                 not hidden, so the verb's existence is not a surprise later. */
+                              label: "Nudge",
+                              disabled: !heroWaitingOnAgent,
+                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>,
+                              onClick: () => setIsNudgeOpen(true),
+                            },
+                            {
+                              label: "Agent",
+                              disabled: true,
+                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6" /></svg>,
+                              onClick: () => {},
+                            },
+                            {
+                              label: "Manuscript",
+                              disabled: true,
+                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z" /></svg>,
+                              onClick: () => {},
+                            },
+                            {
+                              label: isGeneratingPDF ? "Generating…" : "Download as PDF",
+                              disabled: isGeneratingPDF,
+                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
+                              onClick: () => handleDownloadPDF(),
+                            },
+                            {
+                              label: "Delete query",
+                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>,
+                              onClick: () => askDeleteQuery(),
+                            },
+                          ]}
+                        />
+                      </div>
                     </div>
                   );
                 })()}

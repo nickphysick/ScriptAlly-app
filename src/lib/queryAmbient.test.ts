@@ -82,9 +82,12 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
     // the verbs simply right-align. No foot control-row cards remain.
     // The bar also carries `qh-dim` since focus mode landed, so match the CLASS, not the whole
     // attribute — an exact-attribute assertion breaks every time a state class is added.
-    expect(src).toMatch(/className="f12-ctl[ "]/);
+    /* ⚠️ REVERSED (§1c): THERE IS NO CONTROL BAR. Every verb in it was gated on `!sel`, so the
+       bar was six selected-query actions parked above the list. They are one kebab in the hero.
+       The zone classes went with it — `f12-zone-read` was the right-alignment the bar needed. */
+    expect(src, "the control bar came back").not.toMatch(/className="f12-ctl[ "]/);
     expect(src).not.toContain('className="f12-zone-list"'); // the spacer that locked it to the list
-    expect(src).toContain('className="f12-zone-read"');
+    expect(src, "the bar's alignment zone outlived the bar").not.toContain('className="f12-zone-read"');
     expect(src.includes("gridColumn: 1, gridRow: 2")).toBe(false); // foot list card gone
     expect(src.includes("gridColumn: 2, gridRow: 2")).toBe(false); // foot ribbon card gone
     expect(src.includes("qp-controlbar")).toBe(false);

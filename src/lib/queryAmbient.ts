@@ -42,6 +42,29 @@ export function queriesPulse(queries: Pick<Query, "status">[], scope: string): s
   return `Tracking ${scope} · ${n} ${n === 1 ? "query" : "queries"} · ${m} awaiting your move`;
 }
 
+/**
+ * The masthead's two facts: how many queries, and how many are waiting on an agent.
+ *
+ * ⚠️ IT COMPOSES `queryBucket`, IT DOES NOT RE-DERIVE. "Awaiting reply" is the `waiting` bucket —
+ * the agent has the ball — which is the SAME split `getPrimaryAction` draws and the filter bar's
+ * pills use. A second rule for "waiting" here would be a second answer to whose turn it is, and
+ * this page has three surfaces that would then be free to disagree.
+ *
+ * ⚠️ IT REPLACES A SUBTITLE, NOT A COUNT. What stood here described the page to someone already
+ * standing on it; these are facts they cannot get by looking.
+ *
+ * ⚠️ AND `awaiting reply` IS NOT `awaiting your move`. `queriesPulse` states the other side of the
+ * same split — what the WRITER owes. Both read one function; neither restates the membership.
+ */
+export function queriesMastheadCounts(queries: Pick<Query, "status">[]): string {
+  const n = queries.length;
+  const waiting = queries.filter((q) => queryBucket(q.status as QueryStatus) === "waiting").length;
+  const head = `${n} ${n === 1 ? "query" : "queries"}`;
+  /* ⚠️ THE CLAUSE IS OMITTED, NEVER ZERO-FILLED. "0 awaiting reply" is a sentence about nothing;
+     with none outstanding the count of queries is the whole fact. */
+  return waiting > 0 ? `${head} · ${waiting} awaiting reply` : head;
+}
+
 export const DAY = 86400000;
 /** Stage response windows in WEEKS (not per-agent) — expected reply = send date + window. */
 export const STAGE_RESPONSE_WINDOWS = { query: 8, partial: 12, full: 12 } as const;

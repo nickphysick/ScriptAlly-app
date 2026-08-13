@@ -23,21 +23,56 @@ const rule = (selector: string): string => {
   return at < 0 ? "" : css.slice(at, css.indexOf("}", at) + 1);
 };
 
-describe("the toolbar is a pane row now", () => {
-  it("it renders INSIDE the reading pane, not in the page column", () => {
-    const pane = code.indexOf("qp-pane f12-detail ");
-    const bar = code.indexOf('className="f12-ctl', pane);
-    const body = code.indexOf('className="f12-body"');
-    expect(pane, "the pane is missing").toBeGreaterThan(-1);
-    expect(bar, "the toolbar is not inside the pane").toBeGreaterThan(pane);
-    expect(bar, "the toolbar is still above the panes in the page column").toBeGreaterThan(body);
+describe("the query's verbs live in one kebab, not a bar", () => {
+  /**
+   * ⚠️ THE TOOLBAR IS RETIRED (§1c), AND THIS DESCRIBE USED TO BE ABOUT WHERE IT SAT. It moved from
+   * the page column into the pane, which was an improvement to the wrong object: all six of its
+   * controls — View tasks, Nudge, Agent, Manuscript, ⋯, Delete — were gated on `!sel`, so it was
+   * six selected-query verbs parked above a list, dead until you picked a row.
+   *
+   * They are one kebab in the reading pane's hero now, beside the primary that acts on the same
+   * query. Scope decides placement: the LIST's three controls (search, Filter, Sort) went the other
+   * way, up into the grid's toolbar row.
+   */
+  it("no toolbar renders anywhere", () => {
+    expect(code, "the pane toolbar came back").not.toMatch(/className="f12-ctl[ "]/);
   });
 
-  it("and it is styled as a pane row — no page gutters, no centring", () => {
-    const ctl = rule(".f12-ctl");
-    expect(ctl).toContain("border-bottom: 1px solid var(--hairline)");
-    expect(ctl, "the page-width band should be gone").not.toContain("var(--sa-col-max)");
-    expect(ctl, "it no longer centres itself in the content column").not.toContain("margin: 0 auto");
+  it("the verbs are in a kebab, in the hero, through F12Menu", () => {
+    const hero = code.indexOf("f12-hero");
+    const kebab = code.indexOf('ariaLabel="Actions for this query"');
+    expect(kebab, "the kebab is missing").toBeGreaterThan(-1);
+    expect(kebab, "the kebab is not in the hero row").toBeGreaterThan(hero);
+    /* ⚠️ `F12Menu`, NOT A SECOND MENU COMPONENT. This page already portals three menus through it;
+       `PortalMenu` is To-do's equivalent and would make two on one page. */
+    const slice = code.slice(kebab - 800, kebab + 200);
+    expect(slice, "the kebab does not go through F12Menu").toContain("<F12Menu");
+    expect(code, "a second menu component arrived on this page").not.toContain("PortalMenu");
+  });
+
+  it("⚠️ inapplicable verbs stay greyed and inert, never absent", () => {
+    /* the to-do row grammar: a menu whose LENGTH changes with state must be re-read every time;
+       a greyed row says the verb exists and why it cannot run. */
+    const at = code.indexOf('ariaLabel="Actions for this query"');
+    const items = code.slice(at, code.indexOf("]}", at));
+    expect(items, "the item list was not found — this slice is testing nothing").toContain("label:");
+    for (const verb of ["View tasks", "Nudge", "Agent", "Manuscript", "Download as PDF", "Delete query"]) {
+      expect(items, `${verb} left the kebab`).toContain(verb);
+    }
+    expect(items, "Nudge stopped stating when it does not apply").toContain("disabled: !heroWaitingOnAgent");
+  });
+
+  it("the list's own controls went the OTHER way — into the grid's toolbar row", () => {
+    const toolbarProp = code.indexOf("toolbar={");
+    expect(toolbarProp, "the grid has no toolbar row").toBeGreaterThan(-1);
+    const slice = code.slice(toolbarProp, toolbarProp + 2200);
+    expect(slice, "the list strip is not in the toolbar row").toContain('className="f12-lhead"');
+    /* ⚠️ AND NOTHING SELECTED-QUERY-SCOPED CAME WITH IT. `View tasks` and `Nudge` sound page-level
+       and are not: both are gated on `!sel`. In a list-scope strip they would be dead controls
+       whenever nothing is selected — the fault the split exists to remove. */
+    for (const verb of ["Nudge", "View tasks", "Delete"]) {
+      expect(slice, `${verb} acts on the selected query and must not be in the list strip`).not.toContain(verb);
+    }
   });
 
   /* ⚠️ SUPERSEDED (create-mode v2 P3). Create mode used to TAKE the toolbar's seat — same box,
@@ -45,14 +80,20 @@ describe("the toolbar is a pane row now", () => {
      it: the record verbs do not apply to a query that does not exist, and the illustrated header
      below is the create view's one action surface. The seat stays empty rather than holding a
      row of greyed buttons. */
-  /* ⚠️ EITHER TAKEOVER VACATES THE SEAT, and the rule used to name create alone. The stated reason
-     was create-specific — "the record verbs do not apply to a query that does not exist" — which is
-     true and is not the reason. The reason is that a takeover replaces the WORK AREA, so recording
-     a response drew Nudge · Agent · Manuscript · ⋯ · Delete in a 48px bar above the very query the
-     writer had left browsing to work on: live verbs pointing at the record under the takeover. */
-  it("either takeover vacates the seat entirely — neither takes it over", () => {
-    expect(code).toContain("if (creating || recording) return null;");
-    expect(code, "the takeover bar came back").not.toContain("f12-ctl-create");
+  /**
+   * ⚠️ THE SEAT IS GONE, NOT MERELY VACATED (§1c). This asserted `if (creating || recording) return
+   * null;` — the toolbar's early return during a journey. There is no toolbar to return from now.
+   *
+   * What the case protected remains true and is worth keeping: a takeover must not draw browsing
+   * verbs over the record it has replaced. With the verbs inside the reading pane's hero, and the
+   * hero replaced wholesale by the journey, that holds by construction.
+   */
+  it("a journey replaces the hero, so its verbs go with it", () => {
+    const kebab = code.indexOf('ariaLabel="Actions for this query"');
+    const heroBranch = code.indexOf("activeQuery && activeAgent && activeMs ?");
+    expect(heroBranch, "the selected-query branch is missing").toBeGreaterThan(-1);
+    expect(kebab, "the kebab escaped the selected-query branch — it would outlive the record it acts on")
+      .toBeGreaterThan(heroBranch);
   });
 });
 

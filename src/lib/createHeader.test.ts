@@ -58,10 +58,20 @@ describe("the pane footer is GONE — one home per action", () => {
 });
 
 describe("the command bar is retired, not restyled", () => {
-  /* ⚠️ BOTH TAKEOVERS, not create alone — a takeover replaces the work area, and the response
-     journey was drawing the browsing verbs above the query it had replaced. */
-  it("either takeover returns no toolbar at all", () => {
-    expect(queries).toContain("if (creating || recording) return null;");
+  /**
+   * ⚠️ THE TOOLBAR IS GONE ENTIRELY (§1c), so "the takeover vacates it" no longer has a seat to
+   * vacate. It held six controls and EVERY one was gated on `!sel` — View tasks, Nudge, Agent,
+   * Manuscript, ⋯ and Delete all act on the SELECTED QUERY. A row of six verbs dead until you pick
+   * something is not a command bar; it is a list of things you cannot do yet. They are one kebab in
+   * the reading pane's hero now, beside the primary, where the query they act on is named.
+   *
+   * What survives from the old rule is its point: a takeover must not draw browsing verbs over the
+   * record it has replaced. With no toolbar at all, that holds by construction — asserted here so
+   * the bar cannot come back quietly.
+   */
+  it("there is no toolbar to return at all", () => {
+    expect(queries, "the pane toolbar came back").not.toMatch(/className="f12-ctl[ "]/);
+    expect(queries, "the query's verbs are not in a kebab").toContain('ariaLabel="Actions for this query"');
   });
 
   for (const dead of [".f12-ctl-create", ".qcb-ctx", ".qcb-req", ".qcb-esc", ".qcb-err", ".qcb-dot"]) {
