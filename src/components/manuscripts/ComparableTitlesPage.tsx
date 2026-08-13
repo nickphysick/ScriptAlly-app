@@ -845,7 +845,10 @@ export const ComparableTitlesPage: React.FC<{
 
               {/* ⚠️ THE HINT APPEARS ONLY NOW THAT THE KEY WORKS. Phase 2 deliberately rendered no
                   `N` affordance because the shortcut did not exist yet. */}
-              {formState?.index === null ? (
+              {/* ⚠️ THE ADD ROW STANDS DOWN WHILE THE EMPTY STATE IS UP. Both offer the same action,
+                  and they stacked — a pink ADD A COMP directly above ADD A COMP MANUALLY. The empty
+                  state's button is the one with the explanation around it, so the row yields. */}
+              {comps.length === 0 && formState?.index !== null ? null : formState?.index === null ? (
                 <CompInlineForm
                   mode="add"
                   otherTitles={comps.map((x, xi) => ({ title: x.title, index: xi }))}
@@ -879,7 +882,10 @@ export const ComparableTitlesPage: React.FC<{
 
             {/* ── The Scout ── */}
             <section className="ct-panel">
-              <div className="ct-band">
+              {/* ⚠️ `blue` IS THE HALF THAT WAS MISSING. The tokens existed and were asserted; no
+                  rule read them and no element asked for them, so this band drew sage like its
+                  neighbour. */}
+              <div className="ct-band blue">
                 <span className="bt">The Scout</span>
                 <span className="ct-tag pro">Pro</span>
               </div>

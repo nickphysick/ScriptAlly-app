@@ -46,60 +46,55 @@
    dev: the scrollbar floats inland with dead space beyond it, and this page's header sits
    at a different inset from every page without such padding. The gutter is the scroller's,
    declared once. */
-.ctpage {
-  --ct-desk: #e8ddd0; --ct-card: #fffefb; --ct-bd: #e6ddd0; --ct-bdw: 1px;
+.ctpage { --ct-card: #fffefb; --ct-bd: #e6ddd0; --ct-bdw: 1px;
   --ct-band-a: #dce0d9; --ct-band-b: #d0d6cc; --ct-band-hair: rgba(90, 110, 88, .2);
   --ct-ink: #3a1c14; --ct-ink-soft: #8a7868; --ct-label: #9c8878; --ct-accent: #7c3a2a;
   --ct-mocha: #5d4037; --ct-hdrtx: #2e3a2c; --ct-hdrsub: #6a7e68;
   --ct-pink: #f5e2da; --ct-pink-bd: #e8c8bc; --ct-pink-hover: #efd5ca; --ct-taupe-bd: #ded3c2;
   --ct-sect: #f6f0e8; --ct-cardrad: 13px; --ct-hard: none;
-  --ct-frame-show: block; --ct-frame: 1px solid rgba(124, 58, 42, .28); --ct-paper: .03;
+  --ct-frame-show: block; --ct-frame: 1px solid rgba(124, 58, 42, .28);
   /* ⚠️ ADVISORY IS GOLD, NOT RED, AND THE VALUES ARE THE HOUSE ONES. See the caution note below. */
   --ct-warn: #7d621d; --ct-warn-bg: #f6efdd; --ct-warn-bd: #e7d9b8;
   /* ⚠️ THE SCOUT IS PASTILLE BLUE — the TIER's colour, never the verb's. See the note below. */
   --ct-scout: #7f96b0; --ct-scout-deep: #2f4761; --ct-scout-ink: #3f556e;
-  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #ccd9e7; --ct-scout-tile: #dfe8f2;
+  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #ccd9e7;
   --ct-scout-band-a: #d6e0ea; --ct-scout-band-b: #d1dce8; --ct-scout-hover: #fafcfe;
   /* ⚠️ VERIFIED IS SAGE IN EVERY THEME AND BOTH CARDS — one component, one colour. */
   --ct-verified: #4c5c49; --ct-verified-bg: #e9ede6; --ct-verified-bd: #ccd6c9;
   --ct-panel-sh: 0 1px 2px rgba(58, 28, 20, .05), 0 6px 22px rgba(58, 28, 20, .07);
-  --ct-card-sh: none;
 }
-.t-bold .ctpage {
-  --ct-desk: #c3cfdb; --ct-card: #ffffff; --ct-bd: #1d1712; --ct-bdw: 1.5px;
+.t-bold .ctpage { --ct-card: #ffffff; --ct-bd: #1d1712; --ct-bdw: 1.5px;
   --ct-band-a: #f5c7c2; --ct-band-b: #f2bdb7; --ct-band-hair: rgba(29, 23, 18, .26);
   --ct-ink: #1d1712; --ct-ink-soft: #6a5f56; --ct-label: #8a7d70; --ct-accent: #1d1712;
   --ct-mocha: #1d1712; --ct-hdrtx: #1d1712; --ct-hdrsub: #6a5f56;
   --ct-pink: #f5e2da; --ct-pink-bd: #1d1712; --ct-pink-hover: #f8dcd8; --ct-taupe-bd: #1d1712;
   --ct-sect: #f4ece2; --ct-cardrad: 14px; --ct-hard: 3px 3px 0 #1d1712;
-  --ct-frame-show: none; --ct-frame: none; --ct-paper: 0;
+  --ct-frame-show: none; --ct-frame: none;
   /* ⚠️ WAS #a3453a — A RED, on a page whose spec says no red anywhere. Same gold as every theme;
      only the BORDER differs, because a 1.5px ink edge is Bold's universal grammar, not a caution
      signal. Bold says "notice this" with the ink frame it puts on everything. */
   --ct-warn: #7d621d; --ct-warn-bg: #f6efdd; --ct-warn-bd: #1d1712;
   --ct-scout: #7f96b0; --ct-scout-deep: #2f4761; --ct-scout-ink: #3f556e;
-  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #1d1712; --ct-scout-tile: #dbe7ef;
+  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #1d1712;
   --ct-scout-band-a: #d6e0ea; --ct-scout-band-b: #d1dce8; --ct-scout-hover: #fafcfe;
   --ct-verified: #4c5c49; --ct-verified-bg: #e9ede6; --ct-verified-bd: #1d1712;
-  --ct-panel-sh: var(--ct-hard); --ct-card-sh: var(--ct-hard);
+  --ct-panel-sh: var(--ct-hard);
 }
-.t-edn .ctpage {
-  --ct-desk: #edeeec; --ct-card: #ffffff; --ct-bd: #e6e5e3; --ct-bdw: 1px;
+.t-edn .ctpage { --ct-card: #ffffff; --ct-bd: #e6e5e3; --ct-bdw: 1px;
   --ct-band-a: #eef0f0; --ct-band-b: #e7ebec; --ct-band-hair: rgba(20, 20, 20, .08);
   --ct-ink: #20211f; --ct-ink-soft: #6b6d6a; --ct-label: #9a9b98; --ct-accent: #44484d;
   --ct-mocha: #44484d; --ct-hdrtx: #20211f; --ct-hdrsub: #6b6d6a;
   --ct-pink: #eef1f3; --ct-pink-bd: #d7dee3; --ct-pink-hover: #e6ebee; --ct-taupe-bd: #dcdcdb;
   --ct-sect: #f5f6f4; --ct-cardrad: 11px; --ct-hard: none;
-  --ct-frame-show: none; --ct-frame: none; --ct-paper: 0;
+  --ct-frame-show: none; --ct-frame: none;
   /* ⚠️ WAS #a35648 — also a red. Same gold as every theme; Editorial takes the gold hairline too,
      since its old border was a pink-family neutral belonging to the red this replaces. */
   --ct-warn: #7d621d; --ct-warn-bg: #f6efdd; --ct-warn-bd: #e7d9b8;
   --ct-scout: #7f96b0; --ct-scout-deep: #2f4761; --ct-scout-ink: #3f556e;
-  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #ccd9e7; --ct-scout-tile: #dfe8f2;
+  --ct-scout-bg: #eaf0f7; --ct-scout-bd: #ccd9e7;
   --ct-scout-band-a: #d6e0ea; --ct-scout-band-b: #d1dce8; --ct-scout-hover: #fafcfe;
   --ct-verified: #4c5c49; --ct-verified-bg: #e9ede6; --ct-verified-bd: #ccd6c9;
   --ct-panel-sh: 0 1px 2px rgba(20, 20, 20, .04), 0 16px 38px rgba(20, 20, 20, .07);
-  --ct-card-sh: none;
 }
 
 /* ── page shell — the page scrolls, the panels do not (Phase 2, v5) ── */
@@ -120,9 +115,19 @@
  * `--wpg-reclaim-pad` — so a `padding-bottom` here replaces both, and setting either token from a
  * page would clobber the other contributor. `.ct-pagebody` carries it and touches neither.
  */
+/*
+ * ⚠️ THE PAGE PAINTS NO GROUND, BECAUSE THE DASHBOARD DOES NOT EITHER. It used to fill itself with
+ * `--ct-desk` (#e8ddd0 in Cappuccino — a distinctly warm tan) inside the shell's content capsule,
+ * which is `--shell-canvas` #f7f2e9. Two grounds, one inside the other, and the inner one squared
+ * off where the capsule rounds: that is the inset treatment, and it was an artefact of the second
+ * ground rather than a decision. Letting the capsule through removes both at once.
+ *
+ * ⚠️ AND `--ct-desk` IS DELETED WITH IT, not left defined. A ground token nothing paints is the next
+ * person's invitation to paint with it — the wiring guard now fails on exactly that.
+ */
 .ctpage {
   height: 100%; display: flex; flex-direction: column; overflow: hidden;
-  background: var(--ct-desk); color: var(--ct-ink);
+  color: var(--ct-ink);
   font-family: 'Inter', 'Source Sans Pro', sans-serif;
 }
 /* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both belong to the grid: row 3 carries
@@ -146,7 +151,13 @@
   box-shadow: var(--ct-panel-sh); display: grid; grid-template-columns: minmax(0, 1fr) auto; overflow: hidden;
 }
 @media (max-width: 900px) { .ct-hero { grid-template-columns: minmax(0, 1fr); } }
-.ct-hero-l { padding: 26px 34px 24px; min-width: 0; }
+/* ⚠️ CENTRED AGAINST THE RAIL. The rail's three stat rows set the card's height; the left column
+   stretched to match and anchored its content at the top, leaving a void under the format toggle
+   whenever the line was short — which is exactly the zero-ticked first-run state. */
+.ct-hero-l {
+  padding: 26px 34px 24px; min-width: 0;
+  display: flex; flex-direction: column; justify-content: center;
+}
 .ct-eyebrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 /* ⚠️ PLAYFAIR ROMAN IN INK — baked decision 2, an explicit correction. No italics, no burgundy.
    WEIGHT is the only emphasis device: the manuscript title 700, the comp titles 600. Colour,
@@ -257,6 +268,16 @@
 /* ⚠️ A NORMS STATEMENT ABOUT THE INDUSTRY, NEVER ADVICE ABOUT THIS LIST (pack Phase 2). It says what
    agents typically look for; it does not point at any row, and rewording it into "your comps are…"
    would put the appraisal back that the sweep took out. */
+/*
+ * ⚠️ SWEPT IN PHASE 2, RE-RENDERED IN PHASE 3, AND NOBODY NOTICED. The class was removed from this
+ * sheet when nothing used it (correct at the time); Phase 3 put the markup back without the rule, so
+ * the `N` drew as bare text. The Phase 3 lock asserted the class was PRESENT in the markup — which
+ * it was. Presence in the DOM and presence of a rule are different facts.
+ */
+.ct-kbd {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; border: 1px solid var(--ct-taupe-bd);
+  border-radius: 4px; padding: 2px 4px; color: var(--ct-label); background: var(--ct-card);
+}
 .ct-cfoot {
   display: flex; align-items: center; gap: 10px; padding: 11px 20px;
   border-top: 1px solid var(--ct-band-hair); background: var(--ct-sect);
@@ -265,9 +286,20 @@
 /* manuscript selector on the right of the masthead */
 
 /* ── panels ── */
+/*
+ * ⚠️ IT CLIPS, AND IT NEVER DID — this is not a Phase 2 regression. The v5 ref's `.card` carries
+ * `overflow: hidden`; I ported that property to `.ct-hero` and missed `.ct-panel` in the same
+ * commit, one of two. Nothing showed until a child gained a background AT the card's edge: the
+ * Scout's foot strip then painted square past the radius and poked out below the border.
+ *
+ * ⚠️ THE CLIP BELONGS ON THE CARD, NOT ON THE CHILD THAT EXPOSED IT. `MountPanel` has carried
+ * `overflow: hidden` on its frame all along; this page hand-rolls its own card instead of using it,
+ * which is why the property had to be remembered rather than inherited. Putting it here makes the
+ * page's card primitive whole — but the standing question is why there are two card primitives.
+ */
 .ct-panel {
   background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-radius: var(--ct-cardrad);
-  position: relative; box-shadow: var(--ct-panel-sh); 
+  position: relative; box-shadow: var(--ct-panel-sh); overflow: hidden;
 }
 .ct-panel::before {
   content: ''; display: var(--ct-frame-show); position: absolute; inset: 6px; border: var(--ct-frame);
@@ -441,12 +473,14 @@
  * awaiting a drawing, and swapping the real asset in touches one import.
  */
 .ct-estate { padding: 34px 24px 30px; text-align: center; display: flex; flex-direction: column; align-items: center; }
+/* ⚠️ THE STAMP SITS BELOW THE FRAME, NOT ON IT. At `bottom: -4px` it overlapped the sketch it was
+   labelling; the slot now reserves room beneath itself and the label sits in that gap. */
 .ct-islot {
   position: relative; width: 200px; height: 150px; display: flex; align-items: center; justify-content: center;
-  margin-bottom: 18px; border: 1px dashed var(--ct-taupe-bd); border-radius: 14px;
+  margin-bottom: 30px; border: 1px dashed var(--ct-taupe-bd); border-radius: 14px;
 }
 .ct-islot::after {
-  content: "ILLUSTRATION SLOT · 200×150"; position: absolute; left: 50%; bottom: -4px; transform: translateX(-50%);
+  content: "ILLUSTRATION SLOT · 200×150"; position: absolute; left: 50%; top: calc(100% + 8px); transform: translateX(-50%);
   font-family: 'JetBrains Mono', monospace; font-size: 7.5px; letter-spacing: .13em; color: var(--ct-label); white-space: nowrap;
 }
 .ct-estate .em { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; margin-top: 8px; color: var(--ct-ink); }
@@ -485,6 +519,15 @@
  * reverts this. The why-line lives INSIDE column two rather than spanning the grid, which is what
  * stopped it running underneath the buttons.
  */
+/*
+ * ⚠️ THE BLUE BAND, ACTUALLY WIRED. `--ct-scout-band-a/-b` were defined in all three themes, carried
+ * the right hexes, were asserted equal to those hexes by a green lock — and were read by NOTHING.
+ * There was no `.ct-band.blue` rule and the Scout's markup carried no modifier, so both cards drew
+ * `--ct-band-a/-b`, the sage pair. A value assertion cannot see this; the wiring guard can.
+ */
+.ct-band.blue { background: linear-gradient(135deg, var(--ct-scout-band-a), var(--ct-scout-band-b)); }
+.ct-band.blue .ic { color: var(--ct-scout-deep); }
+
 .ct-srow {
   display: grid; grid-template-columns: 26px minmax(0, 1fr) 104px; column-gap: 12px;
   padding: 14px 18px 15px; align-items: start;
