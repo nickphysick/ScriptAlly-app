@@ -744,3 +744,78 @@ test("§3 · the band, the caps and the watermark", async () => {
     if (await disc.count()) { await disc.first().click(); await page.waitForTimeout(400); }
   }
 });
+
+/* ══ FIX PACK 2 · THE PLATE AND THE LIST EDGE ══════════════════════════════════════════════════ */
+test("fp2 · edges line up, and the plate is a card", async () => {
+  for (const { w, h } of [{ w: 1024, h: 768 }, { w: 1440, h: 900 }, { w: 1920, h: 1080 }]) {
+    await page.setViewportSize({ width: w, height: h });
+    await queries(page);
+    const m = await page.evaluate(() => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+      const r = (el: HTMLElement | null) => (el ? el.getBoundingClientRect() : null);
+      const mast = r(q(".wsh")), list = r(q(".f12-list")), pane = r(q(".qp-pane")), body = r(q(".f12-body"));
+      const listEl = q(".f12-list"), plate = q(".f12-heroband"), card = q(".qp-cols .f12-card");
+      const cs = (el: HTMLElement | null, p: string) => (el ? getComputedStyle(el).getPropertyValue(p) : null);
+      const pill = q(".f12-heroband .f12-hs");
+      return {
+        mastL: mast ? Math.round(mast.left) : null,
+        listL: list ? Math.round(list.left) : null,
+        paneL: pane ? Math.round(pane.left) : null,
+        listRadius: cs(listEl, "border-radius"),
+        listMargin: cs(listEl, "margin-left") + "/" + cs(listEl, "margin-right"),
+        seamList: list ? Math.round(list.height) : null,
+        seamBody: body ? Math.round(body.height) : null,
+        /* the plate against a reading-pane card */
+        plateRadius: cs(plate, "border-radius"), cardRadius: cs(card, "border-radius"),
+        plateBg: cs(plate, "background-color"), cardBg: cs(card, "background-color"),
+        plateBorder: cs(plate, "border-top-width") + " " + cs(plate, "border-top-color"),
+        cardBorder: cs(card, "border-top-width") + " " + cs(card, "border-top-color"),
+        plateH: plate ? Math.round(plate.getBoundingClientRect().height) : null,
+        pillPresent: !!pill,
+        /* ⚠️ THE NO-PILL HEIGHT IS MEASURED, NOT REASONED. The plate must not shrink when a query
+           has no status pill to show, or the header would change size with its content. Hiding the
+           pill and re-reading is the only way to see that from outside — a source lock can say the
+           avatar is 48px, but only the browser says what actually sets the row's height. */
+        plateHNoPill: (() => {
+          if (!plate || !pill) return null;
+          const prev = pill.style.display;
+          pill.style.display = "none";
+          const h = Math.round(plate.getBoundingClientRect().height);
+          pill.style.display = prev;
+          return h;
+        })(),
+        /* the pane begins where the list's seam ends — no channel of page between them */
+        listR: list ? Math.round(list.right) : null,
+        /* ⚠️ the plate's left edge against the cards beneath it — the alignment the side inset is
+           FOR. Asserting the inset in CSS says the number is present; only this says it lands. */
+        plateL: plate ? Math.round(plate.getBoundingClientRect().left) : null,
+        cardL: card ? Math.round(card.getBoundingClientRect().left) : null,
+        /* every right-hand control inside the plate? */
+        inPlate: plate ? {
+          avatar: !!plate.querySelector(".f12-bigav"),
+          pill: !!plate.querySelector(".f12-hs"),
+          primary: !!plate.querySelector(".f12-btn-pri"),
+          kebab: !!plate.querySelector(".qc-kebab"),
+        } : null,
+      };
+    });
+    // eslint-disable-next-line no-console
+    console.log(`[fp2 ${w}] left mast=${m.mastL} list=${m.listL} pane=${m.paneL} · list radius=${m.listRadius} margin=${m.listMargin} · seam ${m.seamList}/${m.seamBody} · plate r=${m.plateRadius} bg=${m.plateBg} border=${m.plateBorder} h=${m.plateH}/${m.plateHNoPill} nopill pill=${m.pillPresent} · plate/card left ${m.plateL}/${m.cardL} · card r=${m.cardRadius} bg=${m.cardBg} border=${m.cardBorder} · in plate ${JSON.stringify(m.inPlate)}`);
+
+    /* §2 — the list is flush with the masthead and carries no radius or inset */
+    expect(m.listL, `the list is inset from the masthead at ${w}`).toBe(m.mastL);
+    expect(m.listRadius, `the list took a radius at ${w}`).toMatch(/^0px/);
+    expect(m.listMargin, `the list took a horizontal margin at ${w}`).toBe("0px/0px");
+    expect(Math.abs(m.seamList! - m.seamBody!), `the seam is short at ${w}`).toBeLessThanOrEqual(1);
+    /* §1 — the plate wears the reading-pane card's treatment */
+    expect(m.plateRadius, `the plate's radius differs from a card's at ${w}`).toBe(m.cardRadius);
+    expect(m.plateBg, `the plate's ground differs from a card's at ${w}`).toBe(m.cardBg);
+    expect(m.plateBorder, `the plate's rim differs from a card's at ${w}`).toBe(m.cardBorder);
+    expect(m.inPlate, "the plate is missing").not.toBeNull();
+    expect(m.plateHNoPill, `the plate shrinks when the status pill is absent at ${w}`).toBe(m.plateH);
+    expect(m.plateL, `the plate is out of line with the cards beneath it at ${w}`).toBe(m.cardL);
+    for (const [k, v] of Object.entries(m.inPlate!)) {
+      expect(v, `${k} renders outside the plate at ${w}`).toBe(true);
+    }
+  }
+});

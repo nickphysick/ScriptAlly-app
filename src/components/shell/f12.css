@@ -1430,11 +1430,30 @@
  * chassis children (`.f12-bigav`, `.f12-hn`, `.f12-hs`), which this band reuses — so the skin is
  * replaced by not applying it, rather than by deleting rules the reused children still read.
  */
+/**
+ * ⚠️ A CONTAINED PLATE, AND THIS REVERSES PACK B §1h (ref 102, which supersedes 101 for the hero).
+ * "The hero becomes a band" was right in isolation and wrong in context: flattening a header works
+ * when its neighbours are flat, and everything around this one is contained — two sage-capped cards
+ * below, the list panel beside it, the masthead plate above. One uncontained element among them
+ * reads as unfinished rather than as deliberate.
+ *
+ * ⚠️ AND IT HAS A CLUSTER TO HOLD. Avatar, name, agency, queried date, status pill, primary and
+ * kebab — with no container the button group floats free of the name it belongs to, which is the
+ * practical half of the same argument.
+ *
+ * ⚠️ THE SAME TREATMENT AS A READING-PANE CARD, so it belongs to their family rather than
+ * approximating it: `.f12-card`'s ground, rim and radius, stated through the same tokens. A plate
+ * that merely LOOKED like the cards would drift from them the first time the card was retuned.
+ */
 .f12-heroband {
+  flex: none;
   display: flex; align-items: center; gap: 15px;
-  margin: 0 20px;
-  padding: 14px 0;
-  box-shadow: inset 0 -1px 0 var(--hairline);
+  margin: var(--f12-headgap) 20px 0;
+  padding: 14px 17px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
 }
 /**
  * ⚠️ THE AVATAR'S WHOLE SKIN WAS SCOPED TO `.f12-hero`, AND THE BAND IS NOT THAT. `.f12-hero
@@ -2252,7 +2271,10 @@
      against a live 33 that lands at 28. */
   .qc-wpg .wsh { --wsh-title-size: 28px; }
   /* the hero band gives up its portrait scale first: it is the least information per pixel here */
-  .f12-heroband { padding: 10px 0; }
+  /* ⚠️ THE PLATE'S PADDING, NOT A MARGIN (fix pack 2 §1). The band had none to give; a plate does,
+     and taking it from the padding is what keeps the container while the row gets shorter. The step
+     is the same 0.86 the masthead takes — 14/17 resting lands at 10/14. */
+  .f12-heroband { padding: 10px 14px; }
   .f12-heroband .f12-bigav { width: 40px; height: 40px; font-size: 15px; }
   .f12-heroband .f12-hn { font-size: 19px; }  /* 21 resting, the same 0.86 step */
   /* the stats keep their figures and lose their air */

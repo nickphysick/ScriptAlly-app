@@ -109,29 +109,70 @@ describe("§1c · the list is furniture, and selection inverts", () => {
   });
 });
 
-describe("§1h · the hero is a band", () => {
-  it("it is a row closed by one rule, not a bordered card", () => {
-    expect(code, "the hero card came back").not.toContain('className="f12-hero"');
-    const r = rule(".f12-heroband");
-    expect(r, "the band rule is missing").not.toBe("");
-    expect(r, "the band lost its closing rule").toContain("box-shadow: inset 0 -1px 0 var(--hairline)");
-    for (const p of ["border:", "border-radius"]) {
-      expect(r, `the band took ${p} — it is a row, not a fourth card`).not.toContain(p);
+/**
+ * ⚠️ FIX PACK 2 §1 — THE HEADER IS A CONTAINED PLATE AGAIN, REVERSING PACK B §1h. That instruction
+ * dissolved it into an open row closed by a hairline, on the reasoning that a card inside a card is
+ * one frame too many. It is not: the header is the query's IDENTITY, and identity needs an edge —
+ * without one it read as a caption drifting above the columns rather than as the thing they belong
+ * to. The lock that asserted the band shape is REPLACED rather than deleted, because a deleted lock
+ * would let the band come back silently the next time someone reasons their way to it again.
+ *
+ * ⚠️ AND IT WEARS `.f12-card`'s TOKENS, NOT ITS OWN NUMBERS. If the plate restated `12px` and
+ * `1px solid #e6dccd`, it would agree with the reading-pane cards today and drift the first time a
+ * theme moved either. The test therefore compares the two rules' VALUES rather than asserting a
+ * literal, so the plate cannot be right by coincidence.
+ */
+describe("§1 (fp2) · the hero is a contained plate", () => {
+  const val = (r: string, prop: string): string => {
+    const m = new RegExp("(?:^|;|\\{)\\s*" + prop + "\\s*:\\s*([^;}]+)").exec(r);
+    return m ? m[1].trim() : "";
+  };
+
+  it("it takes the reading-pane card's radius, rim and ground — by token, not by literal", () => {
+    const plate = rule(".f12-heroband");
+    const card = rule(".f12-card");
+    expect(plate, "the plate rule is missing").not.toBe("");
+    expect(card, "the card rule is missing").not.toBe("");
+    /* ⚠️ first-match slicing: prove this is the BASE rule and not the short-viewport override,
+       which declares padding alone and would pass every check below vacuously. */
+    expect(plate, "rule() found the short-viewport override, not the base rule").toContain("background");
+    for (const prop of ["border-radius", "border", "background"]) {
+      const a = val(plate, prop), b = val(card, prop);
+      expect(a, `the plate declares no ${prop}`).not.toBe("");
+      expect(a, `the plate's ${prop} differs from a reading-pane card's`).toBe(b);
     }
+    expect(val(plate, "box-shadow"), "the plate sits flat while the cards are lifted")
+      .toBe(val(card, "box-shadow"));
+    expect(plate, "the band's closing hairline survived the reversal")
+      .not.toContain("inset 0 -1px 0 var(--hairline)");
   });
 
   /**
-   * ⚠️ THE BAND TAKES THE STATIC FACT AND LEAVES THE LIVE PAIR TO TRACKING. The queried date is part
-   * of identity — when this went out. "Days waiting" and "expected by" move, and they are the two
-   * numbers Tracking's progress bar reads against, so they belong where the bar is. That split is
-   * what stops either surface restating the other.
+   * ⚠️ THE HEIGHT CLAUSE IS CARRIED BY MEASUREMENT, NOT BY THIS FILE. "The plate does not shrink
+   * when the status pill is absent" is a fact about layout, and this suite is `environment: 'node'`
+   * — no jsdom, no box model. `tests/e2e/qcReconcile.measure.ts` ("fp2") hides the pill and re-reads
+   * the plate: 65/65 at 1024 and 76/76 at 1440 and 1920, so the avatar sets the row and the pill
+   * never did. What this file CAN hold is the cause: a centred flex row, so a shorter child cannot
+   * pull the height down with it.
+   */
+  it("it is a centred row, so its height comes from the avatar rather than the pill", () => {
+    const plate = rule(".f12-heroband");
+    expect(plate, "the plate stopped being a flex row").toContain("display: flex");
+    expect(plate, "the plate stopped centring its children").toContain("align-items: center");
+  });
+
+  /**
+   * ⚠️ THE STATIC FACT STAYS, THE LIVE PAIR STAYS OUT. Unchanged by this reversal: the queried date
+   * is identity — when this went out — while "days waiting" and "expected by" move, and they are the
+   * two numbers Tracking's bar reads against. The plate gaining an edge is no reason to let it
+   * restate them.
    */
   it("it carries the queried date, and neither figure Tracking owns", () => {
     const at = code.indexOf('className="f12-heroband"');
-    expect(at, "the band is missing").toBeGreaterThan(-1);
+    expect(at, "the plate is missing").toBeGreaterThan(-1);
     const band = code.slice(at, code.indexOf("</div>", code.indexOf("f12-hmeta", at)));
-    expect(band, "the queried date is not on the band").toContain("Queried {heroQueriedOn}");
-    expect(band, "the band took a figure that moves — Tracking's bar reads those")
+    expect(band, "the queried date is not on the plate").toContain("Queried {heroQueriedOn}");
+    expect(band, "the plate took a figure that moves — Tracking's bar reads those")
       .not.toMatch(/days|waiting|expected/i);
   });
 
@@ -142,11 +183,17 @@ describe("§1h · the hero is a band", () => {
     expect(code, "the date renders unconditionally").toContain("{heroQueriedOn && <span>Queried");
   });
 
-  it("the primary and the kebab sit at its right", () => {
+  /**
+   * ⚠️ EVERYTHING IS INSIDE THE EDGE. A plate whose avatar or actions sat outside it would be the
+   * band bug wearing a frame — the container would enclose some of the identity and not the rest.
+   * Browser-confirmed too: fp2 reads all four inside `.f12-heroband` at 1024/1440/1920.
+   */
+  it("the avatar, the primary and the kebab all sit inside it", () => {
     const at = code.indexOf('className="f12-heroband"');
     const band = code.slice(at, code.indexOf('ariaLabel="Actions for this query"', at) + 60);
-    expect(band, "the primary left the band").toContain('className="f12-btn-pri"');
-    expect(band, "the kebab left the band").toContain("qc-kebab");
+    expect(band, "the avatar left the plate").toContain("f12-bigav");
+    expect(band, "the primary left the plate").toContain('className="f12-btn-pri"');
+    expect(band, "the kebab left the plate").toContain("qc-kebab");
   });
 });
 

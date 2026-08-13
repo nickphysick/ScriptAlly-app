@@ -62,13 +62,24 @@ describe("the retired head band stays retired", () => {
 
 describe("the row beneath each head starts on one line", () => {
   /* ⚠️ THE PAIRING IS GONE BECAUSE BOTH HALVES ARE (§1a, §1h). The head this measured against no
-     longer renders, and the hero it measured is a BAND now — closed by the masthead's own rule and
-     beginning where that rule ends, so there is no top margin to match anything with. What is left
-     worth asserting is that the band keeps the column's side inset, which is what still lines it up
-     with the cards beneath it. */
-  it("the hero band shares the pane's side inset", () => {
+     longer renders. What is left worth asserting is that the header keeps the column's SIDE inset,
+     which is what lines it up with the cards beneath it.
+
+     ⚠️ AND THE SIDE INSET IS NOW READ ON ITS OWN, NOT AS A SHORTHAND SUBSTRING. This asserted the
+     literal `margin: 0 20px`, which bundled two independent facts: the side inset (load-bearing —
+     it is the alignment) and the top margin (incidental — it was 0 only because the band began
+     where the masthead's rule ended). Fix pack 2 restored the contained plate, which takes a top
+     gap, and the case failed for the one reason that was never its subject. Testing the shorthand
+     tested more than the case meant. */
+  it("the hero plate shares the pane's side inset", () => {
     expect(queries, "the hero card came back").not.toContain('className="f12-hero"');
-    expect(rule(css, ".f12-heroband"), "the band lost its side inset").toContain("margin: 0 20px");
+    const m = /(?:^|;|\{)\s*margin\s*:\s*([^;}]+)/.exec(rule(css, ".f12-heroband"));
+    expect(m, "the plate declares no margin at all").not.toBeNull();
+    const parts = m![1].trim().split(/\s+/);
+    /* one value = all round; two/three = the second is the side; four = the fourth is the left */
+    const side = parts.length === 1 ? parts[0] : parts.length === 4 ? parts[3] : parts[1];
+    expect(side, "the plate lost the 20px side inset that lines it up with the cards")
+      .toBe("20px");
   });
 
   /* Tops can only agree if the heights do. Centred in the row, a 34px field sat 1px below the
