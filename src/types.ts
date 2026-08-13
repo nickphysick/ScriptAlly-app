@@ -116,6 +116,32 @@ export enum ManuscriptStatus {
 export type CompMedia = "book" | "film" | "tv" | "other";
 
 /**
+ * The catalogue check standing behind a comp's ✓ VERIFIED chip.
+ *
+ * ⚠️ THERE IS NO `verified` BOOLEAN ANYWHERE, AND ITS ABSENCE IS THE WHOLE MECHANISM. A stored
+ * boolean is a trust claim with nothing behind it — whoever writes it merely asserts the check
+ * happened, and the Scout card's footer ("EVERY TITLE CHECKED AGAINST A REAL CATALOGUE — NOTHING
+ * INVENTED") then rests on an assertion rather than on evidence. The PRESENCE of this record IS the
+ * claim, so the chip cannot render without the thing it is claiming. `verified` is derived at
+ * render by `isVerified()` (src/lib/comps.ts) and stored nowhere.
+ *
+ * ⚠️ WRITTEN BY EXACTLY ONE PATH: `suggestionToComp`, copying a record the Scout payload validator
+ * already accepted. Never the manual form, never an import, never by hand — a manual comp has no
+ * record and therefore no chip, and that is correct rather than a gap to fill later.
+ *
+ * `checkedAt` is an ISO string, the house convention for dates on this document (cf.
+ * `statusChangedDate`). `externalId` is OMITTED when the catalogue gave none — never null.
+ */
+export interface CompVerification {
+  /** The catalogue that answered, e.g. "Google Books". */
+  catalogue: string;
+  /** ISO string. */
+  checkedAt: string;
+  /** The catalogue's own identifier for the title, when it gave one. */
+  externalId?: string;
+}
+
+/**
  * One comparable title on a manuscript's comp shelf. `source` records how it arrived —
  * 'user' (typed, imported or added by hand) or 'suggested' (accepted from the Scout).
  * Presentation facts (the derived role, the query line, the recency flag) are computed at render
@@ -140,6 +166,8 @@ export interface CompTitle {
   /** The only stored intent: is this comp part of the query-letter line? Absent === false. */
   inQuery?: boolean;
   source?: "user" | "suggested";
+  /** The catalogue check behind the ✓ VERIFIED chip. Absent on every manual comp, by design. */
+  verification?: CompVerification;
 }
 
 export interface Manuscript {

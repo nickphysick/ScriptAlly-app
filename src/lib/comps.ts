@@ -9,7 +9,67 @@
  * parses that at read time so no consumer ever sees the string. The legacy field is never
  * written back.
  */
-import { CompTitle, Manuscript } from "../types";
+import { CompTitle, CompVerification, Manuscript } from "../types";
+
+/**
+ * ⚠️ THE ✓ VERIFIED CHIP IS DERIVED FROM EVIDENCE, NEVER FROM A FLAG (baked decision 23). There is
+ * no stored `verified` boolean to read, and there must never be one: a boolean is an assertion that
+ * the check happened, while a record is the check. The Scout card's footer claims every title was
+ * checked against a real catalogue — this predicate is what makes that claim structural rather than
+ * a promise.
+ *
+ * It validates the record rather than merely testing for its presence, because a half-written one
+ * (`{}` from a bad payload, a blank catalogue name) would otherwise light the chip while naming
+ * nothing. A manual comp has no record and no chip — the correct outcome, not a missing feature.
+ */
+export function isVerified(c: Pick<CompTitle, "verification">): boolean {
+  const v = c.verification;
+  return (
+    !!v &&
+    typeof v.catalogue === "string" && v.catalogue.trim() !== "" &&
+    typeof v.checkedAt === "string" && v.checkedAt.trim() !== ""
+  );
+}
+
+/** A verification record with its optional key omitted when empty (Firestore maps reject undefined). */
+function normalizeVerification(v: CompVerification): CompVerification {
+  const out: CompVerification = { catalogue: v.catalogue.trim(), checkedAt: v.checkedAt.trim() };
+  const id = v.externalId?.trim();
+  if (id) out.externalId = id;
+  return out;
+}
+
+/**
+ * ⚠️ THE SINGLE WRITE NORMALISER — every comp write goes through this, and it is an ALLOWLIST BY
+ * CONSTRUCTION: it names each field it keeps, so a field added to `CompTitle` and forgotten here is
+ * silently dropped on the next save. That is a real failure mode in this file's history (see
+ * `withCompEdited`), so a new field lands in both places or in neither.
+ *
+ * Empty optionals are OMITTED rather than written as undefined or null — Firestore rejects
+ * undefined inside a map, and an explicit null would make "not stated" a different value from
+ * "absent" on a page whose whole grammar is that rows omit themselves.
+ *
+ * Moved here from ComparableTitlesPage so it sits beside the other write helpers and can be tested
+ * without pulling React in (this suite is `environment: 'node'`).
+ */
+export function normalizeComp(c: CompTitle): CompTitle {
+  const out: CompTitle = { title: c.title.trim() };
+  const author = c.author?.trim();
+  if (author) out.author = author;
+  const publisher = c.publisher?.trim();
+  if (publisher) out.publisher = publisher;
+  if (typeof c.year === "number" && Number.isFinite(c.year)) out.year = c.year;
+  const note = c.note?.trim();
+  if (note) out.note = note;
+  const axis = c.matchAxis?.trim();
+  if (axis) out.matchAxis = axis;
+  if (c.media && c.media !== "book") out.media = c.media;
+  if (c.inQuery) out.inQuery = true;
+  if (c.source) out.source = c.source;
+  /* validated, not merely present — a malformed record must not survive a write and light the chip */
+  if (c.verification && isVerified(c)) out.verification = normalizeVerification(c.verification);
+  return out;
+}
 
 /**
  * Parse a legacy comparable-titles string into structured comps: split on " meets " then commas,

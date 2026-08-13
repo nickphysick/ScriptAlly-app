@@ -15,7 +15,7 @@
  * supplies canned results without a function.
  */
 import { getFunctions, httpsCallable } from "firebase/functions";
-import { CompMedia, CompTitle, User, UserPlan } from "../types";
+import { CompMedia, CompTitle, CompVerification, User, UserPlan } from "../types";
 
 /**
  * Feature flag — the Scout's live discovery stays dark until the suggestComps function is deployed.
@@ -37,8 +37,21 @@ export interface CompSuggestionLinks {
   googleBooks?: string;
 }
 
-/** One Scout result. `verified` gates the "Verified · catalogue" badge; `agentMatch` gates the
- *  agent-bridge hook (rendered only when present — the matching logic is a later prompt). */
+/**
+ * One Scout result.
+ *
+ * ⚠️ `verification` IS REQUIRED, AND THAT IS THE CONTRACT: every suggestion carries a catalogue
+ * record or it is not a suggestion. There is no unverified-suggestion path in the UI, so there must
+ * be no unverified-suggestion shape in the type — the invariant is held by the compiler and by the
+ * validator rather than by a branch someone has to remember to write.
+ *
+ * ⚠️ AND THERE IS NO `verified` BOOLEAN. It used to be one, accepted from the payload as
+ * `rec.verified === true`, which made the trust claim fabricable by whatever wrote the payload.
+ * `verified` is now derived from this record by `isVerified()` and stored nowhere.
+ *
+ * `agentMatch` gates the agent-bridge hook (rendered only when present — the matching logic is a
+ * later prompt). `links` is carried but not yet rendered.
+ */
 export interface CompSuggestion {
   title: string;
   author: string;
@@ -46,10 +59,12 @@ export interface CompSuggestion {
   year: number;
   media: CompMedia;
   matchAxis?: string;
-  /** "Why this fits" — the model's one-liner. */
+  /** "Why this fits" — the model's one factual line. Never appraising: it states what the title
+   *  shares (form, register, structure, length, audience, recency), never how well it fits. The
+   *  same constraint binds `matchAxis`; both are model-generated free text on a page that reports. */
   why: string;
-  /** True only when the title was checked against a real catalogue. */
-  verified: boolean;
+  /** The catalogue check. Its presence IS the verified claim — see CompVerification. */
+  verification: CompVerification;
   links?: CompSuggestionLinks;
   /** How many of the writer's agents wishlist books like this — omitted when unknown. */
   agentMatch?: number;
@@ -84,6 +99,24 @@ function optString(v: unknown): string | undefined {
   return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }
 
+/**
+ * A catalogue record from the payload, or null when there isn't a usable one.
+ *
+ * ⚠️ NULL MEANS THE SUGGESTION IS DROPPED, NEVER DOWNGRADED. The tempting alternative — keep the
+ * title and simply withhold the chip — quietly turns "we could not verify this" into "here is a
+ * comp", which is the fabrication the trust rule exists to prevent: the card footer promises every
+ * title was checked, and a row that survived without a check makes that footer false.
+ */
+function parseVerification(v: unknown): CompVerification | null {
+  if (!v || typeof v !== "object") return null;
+  const rec = v as Record<string, unknown>;
+  const catalogue = optString(rec.catalogue);
+  const checkedAt = optString(rec.checkedAt);
+  if (!catalogue || !checkedAt) return null;
+  const externalId = optString(rec.externalId);
+  return { catalogue, checkedAt, ...(externalId ? { externalId } : {}) };
+}
+
 /** Validate `{ suggestions: [...] }` from the callable; drop malformed items silently. */
 export function validateSuggestionsPayload(data: unknown): CompSuggestion[] {
   const list = (data as { suggestions?: unknown })?.suggestions;
@@ -97,6 +130,12 @@ export function validateSuggestionsPayload(data: unknown): CompSuggestion[] {
     const year = typeof rec.year === "number" && Number.isInteger(rec.year) ? rec.year : NaN;
     const why = typeof rec.why === "string" ? rec.why.trim() : "";
     if (!title || !author || !why || !Number.isFinite(year) || year < 1000 || year > 2100) continue;
+    /* ⚠️ NO RECORD, NO SUGGESTION — and `rec.verified` is deliberately never read. A payload
+       claiming `verified: true` without a record is REJECTED rather than silently downgraded to an
+       unverified row, because the row would then be a title the Scout could not stand behind
+       sitting under a footer that says it checked everything. */
+    const verification = parseVerification(rec.verification);
+    if (!verification) continue;
     const media = MEDIA_VALUES.includes(rec.media as CompMedia) ? (rec.media as CompMedia) : "book";
     const linksRaw = rec.links as Record<string, unknown> | undefined;
     const bookshop = optString(linksRaw?.bookshop);
@@ -112,7 +151,7 @@ export function validateSuggestionsPayload(data: unknown): CompSuggestion[] {
       year,
       media,
       why,
-      verified: rec.verified === true,
+      verification,
       ...(optString(rec.publisher) ? { publisher: optString(rec.publisher) } : {}),
       ...(optString(rec.matchAxis) ? { matchAxis: optString(rec.matchAxis) } : {}),
       ...(links ? { links } : {}),
@@ -136,14 +175,23 @@ export function visibleSuggestions(
   });
 }
 
-/** An accepted suggestion becomes a shelf comp, UNTICKED — empty optionals omitted (Firestore maps
- *  reject undefined); `media` omitted when "book" (the additive default); the writer decides inQuery. */
+/**
+ * An accepted suggestion becomes a shelf comp, UNTICKED — empty optionals omitted (Firestore maps
+ * reject undefined); `media` omitted when "book" (the additive default); the writer decides inQuery.
+ *
+ * ⚠️ THIS IS THE ONLY WRITER OF `verification` IN THE APP (baked decision 23), and carrying it is
+ * what lets the ✓ VERIFIED chip exist on a comp at all. Before it did, a Scout comp lost its
+ * verified standing the instant it landed in the list: the chip could only ever appear in the
+ * right-hand column, on a suggestion still in flight. The record is copied, not re-derived — this
+ * function makes no claim of its own, it carries one the validator already accepted.
+ */
 export function suggestionToComp(s: CompSuggestion): CompTitle {
   return {
     title: s.title,
     source: "suggested",
     author: s.author,
     year: s.year,
+    verification: s.verification,
     ...(s.publisher ? { publisher: s.publisher } : {}),
     ...(s.matchAxis ? { matchAxis: s.matchAxis } : {}),
     ...(s.media && s.media !== "book" ? { media: s.media } : {}),

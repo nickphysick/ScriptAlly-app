@@ -25,7 +25,15 @@ import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { FormShell } from "../forms/FormShell";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
-import { CompDraft, manuscriptComps, withCompAdded, withCompEdited, withCompRemoved, MAX_COMPS } from "../../lib/comps";
+import {
+  CompDraft,
+  manuscriptComps,
+  normalizeComp,
+  withCompAdded,
+  withCompEdited,
+  withCompRemoved,
+  MAX_COMPS,
+} from "../../lib/comps";
 import { compCounts, compMedia, compRole, currentYear, queryHealth, queryLine, recencyFlag } from "../../lib/compsPage";
 import {
   CompSuggestion,
@@ -63,23 +71,6 @@ function monogram(title: string): string {
   return (title.trim()[0] || "·").toUpperCase();
 }
 
-/** Strip empty optionals / defaults so a comp map never carries undefined or a redundant default. */
-export function normalizeComp(c: CompTitle): CompTitle {
-  const out: CompTitle = { title: c.title.trim() };
-  const author = c.author?.trim();
-  if (author) out.author = author;
-  const publisher = c.publisher?.trim();
-  if (publisher) out.publisher = publisher;
-  if (typeof c.year === "number" && Number.isFinite(c.year)) out.year = c.year;
-  const note = c.note?.trim();
-  if (note) out.note = note;
-  const axis = c.matchAxis?.trim();
-  if (axis) out.matchAxis = axis;
-  if (c.media && c.media !== "book") out.media = c.media;
-  if (c.inQuery) out.inQuery = true;
-  if (c.source) out.source = c.source;
-  return out;
-}
 
 
 // ── the right-of-masthead manuscript selector (design-ref .ms-header) ──
@@ -294,11 +285,13 @@ const ScoutResultCard: React.FC<{
         <span className="ct-rc-year">{s.year}</span>
       </div>
       {meta && <div className="ct-rc-meta">{meta}</div>}
-      {s.verified && (
-        <div className="ct-verified">
-          <Check size={11} /> Verified · catalogue
-        </div>
-      )}
+      {/* ⚠️ UNCONDITIONAL, AND THAT IS THE CONTRACT — every suggestion carries a verification record
+          or the validator dropped it, so there is no unverified row for a branch to handle. It also
+          NAMES the catalogue now rather than saying the word "catalogue": the record exists, so the
+          chip can state which one answered instead of asserting that one did. */}
+      <div className="ct-verified">
+        <Check size={11} /> Verified · {s.verification.catalogue}
+      </div>
       <div className="ct-why">
         <div className="ct-why-cap">Why this fits</div>
         <div className="ct-why-txt">{s.why}</div>

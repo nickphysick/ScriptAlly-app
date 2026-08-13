@@ -6,6 +6,8 @@ import {
   isOlderComp,
   pitchLine,
   pitchLineText,
+  isVerified,
+  normalizeComp,
   withCompAdded,
   withCompEdited,
   withCompRemoved,
@@ -203,6 +205,75 @@ describe("withCompEdited", () => {
     const edited = withCompEdited(shelf, 1, { title: "Renamed", note: stored.note });
     expect(edited[0]).toBe(shelf[0]);
     expect(shelf[1].title).toBe("Piranesi");
+  });
+});
+
+/**
+ * ⚠️ BOTH DIRECTIONS, DELIBERATELY (baked decision 23 + the pack's trust rule). A one-way test —
+ * "a record lights the chip" — would pass just as happily against a stored boolean, which is the
+ * thing this model exists to abolish. The direction that matters is that NOTHING lights it without
+ * evidence, including a half-written record.
+ */
+describe("isVerified", () => {
+  const rec = { catalogue: "Google Books", checkedAt: "2026-08-13T09:41:00.000Z" };
+
+  it("is true only with a complete record", () => {
+    expect(isVerified({ verification: rec })).toBe(true);
+    expect(isVerified({ verification: { ...rec, externalId: "gb-1" } })).toBe(true);
+  });
+
+  it("is false for a manual comp, which has no record and should have no chip", () => {
+    expect(isVerified({})).toBe(false);
+    expect(isVerified({ verification: undefined })).toBe(false);
+  });
+
+  it("is false for a half-written record, which would otherwise name nothing", () => {
+    expect(isVerified({ verification: {} as never })).toBe(false);
+    expect(isVerified({ verification: { catalogue: "  ", checkedAt: rec.checkedAt } })).toBe(false);
+    expect(isVerified({ verification: { catalogue: "Google Books", checkedAt: "" } })).toBe(false);
+  });
+
+  it("cannot be lit by a stored boolean — there is no such field to read", () => {
+    expect(isVerified({ verified: true } as never)).toBe(false);
+  });
+});
+
+describe("normalizeComp", () => {
+  const rec = { catalogue: "Google Books", checkedAt: "2026-08-13T09:41:00.000Z" };
+
+  it("carries a valid verification record through a write", () => {
+    const out = normalizeComp({ title: "Piranesi", source: "suggested", verification: rec });
+    expect(out.verification).toEqual(rec);
+  });
+
+  it("drops a malformed record rather than storing one that would light the chip", () => {
+    const out = normalizeComp({ title: "Piranesi", verification: { catalogue: "", checkedAt: "" } });
+    expect("verification" in out).toBe(false);
+  });
+
+  it("omits externalId when the catalogue gave none, and keeps it when it did", () => {
+    expect("externalId" in (normalizeComp({ title: "T", verification: rec }).verification ?? {})).toBe(false);
+    expect(normalizeComp({ title: "T", verification: { ...rec, externalId: "gb-1" } }).verification?.externalId).toBe("gb-1");
+  });
+
+  it("writes no undefined values — Firestore rejects them inside a map", () => {
+    const out = normalizeComp({ title: " Piranesi ", author: "  ", year: NaN, note: "", verification: rec });
+    expect(Object.values(out).some((v) => v === undefined)).toBe(false);
+    expect(out.title).toBe("Piranesi");
+    expect("author" in out).toBe(false);
+    expect("year" in out).toBe(false);
+    expect("note" in out).toBe(false);
+  });
+
+  it("keeps note, matchAxis and inQuery, and omits a redundant book media", () => {
+    const out = normalizeComp({
+      title: "T", note: "the tides", matchAxis: "tone", inQuery: true, media: "book",
+    });
+    expect(out.note).toBe("the tides");
+    expect(out.matchAxis).toBe("tone");
+    expect(out.inQuery).toBe(true);
+    expect("media" in out).toBe(false);
+    expect(normalizeComp({ title: "T", media: "film" }).media).toBe("film");
   });
 });
 

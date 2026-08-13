@@ -8,7 +8,10 @@ import {
   suggestionToComp,
   CompSuggestion,
 } from "./suggestComps";
-import { UserPlan } from "../types";
+import { isVerified } from "./comps";
+import { CompTitle, UserPlan } from "../types";
+
+const REC = { catalogue: "Google Books", checkedAt: "2026-08-13T09:41:00.000Z" };
 
 const sugg = (over: Partial<CompSuggestion> = {}): CompSuggestion => ({
   title: "Gilded",
@@ -16,7 +19,7 @@ const sugg = (over: Partial<CompSuggestion> = {}): CompSuggestion => ({
   year: 2021,
   media: "book",
   why: "Craft-guild magic with a darkening bargain.",
-  verified: true,
+  verification: REC,
   ...over,
 });
 
@@ -64,20 +67,61 @@ describe("validateSuggestionsPayload", () => {
     expect(out[1].agentMatch).toBe(2);
   });
 
-  it("defaults media to book and verified to false", () => {
+  it("defaults media to book, and keeps a valid non-book media", () => {
+    const out = validateSuggestionsPayload({
+      suggestions: [
+        { title: "T", author: "A", year: 2020, why: "w", verification: REC },
+        { title: "F", author: "A", year: 2006, why: "w", media: "film", verification: REC },
+      ],
+    });
+    expect(out[0].media).toBe("book");
+    expect(out[1].media).toBe("film");
+  });
+
+  /**
+   * ⚠️ THE TRUST RULE, ASSERTED IN THE DIRECTION THAT CAN FABRICATE. Dropping the row is not
+   * pedantry: the card footer promises every title was checked against a real catalogue, so a row
+   * that survived WITHOUT a check makes that sentence false. Downgrading it to an unverified row
+   * would keep a title the Scout cannot stand behind — which is the same claim, quieter.
+   */
+  it("drops a suggestion with no verification record at all", () => {
     const out = validateSuggestionsPayload({
       suggestions: [{ title: "T", author: "A", year: 2020, why: "w" }],
     });
-    expect(out[0].media).toBe("book");
-    expect(out[0].verified).toBe(false);
+    expect(out).toEqual([]);
   });
 
-  it("keeps a valid non-book media and a true verified", () => {
+  it("REJECTS a payload claiming verified:true without a record — never downgrades it", () => {
     const out = validateSuggestionsPayload({
-      suggestions: [{ title: "T", author: "A", year: 2006, why: "w", media: "film", verified: true }],
+      suggestions: [{ title: "T", author: "A", year: 2020, why: "w", verified: true }],
     });
-    expect(out[0].media).toBe("film");
-    expect(out[0].verified).toBe(true);
+    expect(out).toEqual([]);
+  });
+
+  it("drops a half-written record, and never reads a stored boolean", () => {
+    const out = validateSuggestionsPayload({
+      suggestions: [
+        { title: "A", author: "A", year: 2020, why: "w", verification: {} },
+        { title: "B", author: "A", year: 2020, why: "w", verification: { catalogue: "Google Books" } },
+        { title: "C", author: "A", year: 2020, why: "w", verification: { checkedAt: REC.checkedAt } },
+        { title: "D", author: "A", year: 2020, why: "w", verification: REC, verified: false },
+      ],
+    });
+    /* D survives on its RECORD, with `verified: false` sitting in the payload and ignored */
+    expect(out.map((s) => s.title)).toEqual(["D"]);
+    expect("verified" in out[0]).toBe(false);
+  });
+
+  it("carries the record through, omitting externalId when the catalogue gave none", () => {
+    const out = validateSuggestionsPayload({
+      suggestions: [
+        sugg(),
+        sugg({ title: "Z", verification: { ...REC, externalId: "gb-1" } }),
+      ],
+    });
+    expect(out[0].verification).toEqual(REC);
+    expect("externalId" in out[0].verification).toBe(false);
+    expect(out[1].verification.externalId).toBe("gb-1");
   });
 
   it("drops items missing title/author/why or with a nonsense year", () => {
@@ -125,11 +169,27 @@ describe("suggestionToComp", () => {
       source: "suggested",
       author: "Marissa Meyer",
       year: 2021,
+      verification: REC,
       publisher: "Feiwel",
       matchAxis: "premise · voice",
     });
     expect("inQuery" in comp).toBe(false);
     expect(Object.values(comp).some((v) => v === undefined)).toBe(false);
+  });
+
+  /**
+   * ⚠️ THE GAP THIS CLOSES: before the record was persisted, a Scout comp lost its verified
+   * standing the moment it landed, so the chip could only ever exist in the right-hand column on a
+   * suggestion still in flight. Asserted through `isVerified` rather than by field presence — the
+   * chip's real predicate is what has to survive the write, not the key.
+   */
+  it("carries the verification record onto the comp, so the chip survives the landing", () => {
+    expect(isVerified(suggestionToComp(sugg()))).toBe(true);
+  });
+
+  it("gives a manual comp no record and therefore no chip", () => {
+    const manual: CompTitle = { title: "Typed by hand", source: "user" };
+    expect(isVerified(manual)).toBe(false);
   });
   it("omits media when the suggestion is a book, keeps it otherwise", () => {
     expect("media" in suggestionToComp(sugg({ media: "book" }))).toBe(false);
