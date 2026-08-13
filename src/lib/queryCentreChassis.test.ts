@@ -199,8 +199,11 @@ describe("§2 · the reading pane", () => {
     expect(code).toContain("meta={statusDisplayLabel(activeQuery)}");
     /* What you sent counts the list it renders, not the query a second time. */
     expect(code).toContain("baseMaterialsFor(activeQuery, activeAgent).length");
-    /* Notes counts its entries and omits at zero — "0 notes" is a sentence about nothing. */
-    expect(code).toContain("journalEntries.length > 0 ?");
+    /* ⚠️ NOTES COUNTS *THIS QUERY'S* ENTRIES, and it did not — `journalEntries` is every note in
+       the account while the body filters by `queryId`, so the band stated one number and the list
+       showed another. Fixed in fix pack §4; asserted on the filter, because the count alone was
+       what looked right. Omits at zero: "0 notes" is a sentence about nothing. */
+    expect(code).toContain("journalEntries.filter((e) => e.queryId === activeQuery.id).length");
   });
 
   /**

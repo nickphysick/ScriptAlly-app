@@ -159,3 +159,34 @@ describe("§3 · the hero keeps its initials", () => {
     expect(code).toContain('className="f12-bigav"');
   });
 });
+
+describe("§4 · the right stack fills honestly", () => {
+  /**
+   * ⚠️ THE BAND COUNTED A DIFFERENT SET FROM THE LIST BENEATH IT. `journalEntries` is every note in
+   * the account; the body filters it to `entry.queryId === activeQuery.id`. So the header stated one
+   * number and the list showed another — the exact failure a shared header's meta exists to prevent,
+   * reintroduced by counting the wrong set one line above the right one.
+   */
+  it("the meta counts THIS query's notes, the same set the body renders", () => {
+    expect(code, "the meta counts every note in the account")
+      .toContain("journalEntries.filter((e) => e.queryId === activeQuery.id).length");
+    expect(code, "the body stopped filtering to this query")
+      .toContain("journalEntries\n                            .filter(entry => entry.queryId === activeQuery.id)");
+  });
+
+  /* The list takes the remaining height and scrolls inside it; the composer holds its own. */
+  it("the list absorbs the height and the composer keeps its place", () => {
+    const body = code.slice(code.indexOf('title="Notes"'), code.indexOf("</PaneCard>", code.indexOf('title="Notes"')));
+    expect(body, "the notes body stopped filling its card").toContain("flex: 1, minHeight: 0");
+    expect(body, "the note list is not a scroller").toContain("<EdgeFadeScroll");
+    expect(body, "the composer can be squeezed out by a long list").toContain("flexShrink: 0");
+  });
+
+  /* ⚠️ AND THE STACK IS WHAT GIVES IT A HEIGHT TO DIVIDE. Pack B's `flex: 1 1 0` on the stacked
+     cards is what stops the card growing with its content; without it a twentieth note makes the
+     column taller than the row and the page starts scrolling. */
+  it("the stacked cards still share a fixed height", () => {
+    expect(rule(".qp-stack > .f12-card")).toContain("flex: 1 1 0");
+    expect(rule(".qp-stack")).toContain("min-height: 0");
+  });
+});

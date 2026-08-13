@@ -4277,8 +4277,17 @@ export const Queries: React.FC<{
                     title="Notes"
                     /* ⚠️ THE COUNT LIVES IN THE BAND SO THE BODY NEVER RESTATES IT, and it omits
                        itself at zero: "0 notes" is a sentence about nothing on a card whose empty
-                       state already says so in words. */
-                    meta={journalEntries.length > 0 ? `${journalEntries.length} note${journalEntries.length === 1 ? "" : "s"}` : undefined}
+                       state already says so in words.
+
+                       ⚠️ AND IT COUNTS THIS QUERY'S NOTES, WHICH IT DID NOT. `journalEntries` is
+                       every note in the account; the body beneath filters it to
+                       `entry.queryId === activeQuery.id`. So the band stated one number and the list
+                       showed another — the precise failure a shared header's meta exists to prevent,
+                       reintroduced by counting the wrong set one line above the right one. */
+                    meta={(() => {
+                      const n = journalEntries.filter((e) => e.queryId === activeQuery.id).length;
+                      return n > 0 ? `${n} note${n === 1 ? "" : "s"}` : undefined;
+                    })()}
                     glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>}
                   >
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
