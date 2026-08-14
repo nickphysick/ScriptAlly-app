@@ -334,6 +334,47 @@ describe("§2 (fp3) · the list's ground meets the masthead rule", () => {
   });
 });
 
+/**
+ * ⚠️ FIX PACK 3 §4 — ONE LINE FOR BOTH COLUMNS. The list's head sat flush at the top of its column
+ * while the pane's header carried `--f12-headgap`, so the split began at two different heights and
+ * read as two panels that were placed rather than as one interface.
+ */
+describe("§4 (fp3) · the columns start on the same line", () => {
+  /**
+   * ⚠️ ASSERTED AS THE SAME TOKEN, NOT THE SAME NUMBER. Two rules matching by literal agree until
+   * the day one is edited; two rules reading one token cannot disagree at all. This repo has paid
+   * for the difference twice already — the list's search field and its pills were hand-matched at
+   * 36px and then both moved to 34. So the case tests the MECHANISM, and the browser carries the
+   * resulting equality (fp3 in `tests/e2e/qcReconcile.measure.ts`, at 1024/1440/1920).
+   */
+  it("both heads take their top offset from --f12-headgap", () => {
+    const head = rule(".f12-lhead");
+    const plate = rule(".f12-heroband");
+    expect(head, "the list head's rule is missing").not.toBe("");
+    expect(plate, "the plate's rule is missing").not.toBe("");
+    const top = (r: string): string => {
+      const m = declValue(r, "margin");
+      expect(m, "the rule declares no margin").not.toBe("");
+      const parts = m.split(/\s+/);
+      return parts[0];
+    };
+    expect(top(head), "the list head went back to a hand-written number")
+      .toBe("var(--f12-headgap)");
+    expect(top(head), "the two heads stopped reading the same token").toBe(top(plate));
+  });
+
+  /* ⚠️ AND ONLY THE PANE IS PADDED SIDEWAYS. The list's inset lives on `.f12-list > *` so the
+     ground and the seam can run edge to edge; giving the list container horizontal padding is the
+     one edit that would undo §2 while looking like it belongs to §4. */
+  it("the list's head carries no horizontal margin of its own", () => {
+    const m = declValue(rule(".f12-lhead"), "margin");
+    const parts = m.split(/\s+/);
+    expect(parts.length, `the list head's margin is not a three-value shorthand: ${m}`).toBe(3);
+    expect(parts[1], "the list head took a side margin — its inset belongs to .f12-list > *")
+      .toBe("0");
+  });
+});
+
 describe("§1d/e/g · already landed, and still true", () => {
   it("the list's controls are in its own head, and none can go dead", () => {
     const head = code.indexOf('className="f12-lhead"');

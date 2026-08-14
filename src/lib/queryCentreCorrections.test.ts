@@ -178,7 +178,12 @@ describe("§4 · the right stack fills honestly", () => {
   it("the list absorbs the height and the composer keeps its place", () => {
     const body = code.slice(code.indexOf('title="Notes"'), code.indexOf("</PaneCard>", code.indexOf('title="Notes"')));
     expect(body, "the notes body stopped filling its card").toContain("flex: 1, minHeight: 0");
-    expect(body, "the note list is not a scroller").toContain("<EdgeFadeScroll");
+    /* ⚠️ THE SCROLLER, NOT THE FADE. This named `<EdgeFadeScroll` as its proxy for "this is a
+       scroller", which was fair while the app had exactly one internal-scroll wrapper and made this
+       case fail for a reason it was never about the moment fix pack 3 §1 removed the fade from this
+       page. The two are separate concerns now: `PaneScroll` is the layout contract, `EdgeFadeScroll`
+       is that contract plus a gradient. What this case cares about is the former. */
+    expect(body, "the note list is not a scroller").toContain("<PaneScroll");
     expect(body, "the composer can be squeezed out by a long list").toContain("flexShrink: 0");
   });
 

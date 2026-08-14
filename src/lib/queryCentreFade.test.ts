@@ -72,10 +72,10 @@ describe("§1 · mechanism 2 — the page's own foot does not fade", () => {
    */
   it("a fill page renders no hems, and a normal page still does", () => {
     const fill = renderToStaticMarkup(
-      React.createElement(WorkspacePageGrid, { fill: true, plate: null }, "body"),
+      React.createElement(WorkspacePageGrid, { fill: true, plate: null, children: "body" }),
     );
     const normal = renderToStaticMarkup(
-      React.createElement(WorkspacePageGrid, { plate: null }, "body"),
+      React.createElement(WorkspacePageGrid, { plate: null, children: "body" }),
     );
     expect(fill, "the fill page's foot fade came back").not.toContain("wpg-hem");
     expect(normal, "the opt-out escaped onto every page in the shell").toContain("wpg-hem");

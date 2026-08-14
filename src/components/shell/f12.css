@@ -1329,7 +1329,23 @@
 .f12-lhtitle { flex: none; display: flex; align-items: center; height: var(--f12-headh); border-bottom: 1px solid #ece5d9; margin-bottom: var(--f12-headgap); }
 .f12-lhtitle h2 { font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
 /* list head — search takes the remaining width; Filter/Sort(/Group) triggers sit to its right */
-.f12-lhead { flex: none; display: flex; align-items: center; gap: 6px; margin: 0 0 10px; }
+/**
+ * ⚠️ FIX PACK 3 §4 — THE TWO COLUMNS START ON THE SAME LINE, AND THEY DO IT BY READING ONE TOKEN.
+ * The list's head sat flush at the top of its column while the pane's header carried
+ * `--f12-headgap`, so the split began at two different heights and read as two panels that were
+ * placed rather than as one interface. The gap was never wrong — it was only on one side.
+ *
+ * ⚠️ THE SAME TOKEN, NOT THE SAME NUMBER. Writing `margin-top: 20px` here would agree with the
+ * plate today and drift the moment either is touched; this repo has recorded that exact failure
+ * twice (the search field and the pills, matched at 36 and then both moved to 34). Two rules
+ * reading one token cannot disagree at all.
+ *
+ * ⚠️ AND THE AIR IS THE CHILDREN'S, NOT THE CONTAINER'S. §2 took the gap off the scroll row so the
+ * columns' GROUND starts at the masthead hairline; this puts the same distance back as a margin on
+ * the two heads. The ground reaches the rule, nothing lands against it, and the difference between
+ * those two facts is the difference between a working area and a panel placed on a page.
+ */
+.f12-lhead { flex: none; display: flex; align-items: center; gap: 6px; margin: var(--f12-headgap) 0 10px; }
 /* ⚠️ THE ROW'S CONTROLS ARE ONE HEIGHT, and the height is now the TOKEN rather than a number
    matched by hand. The field used to restate `36px` to meet the pills' 36; both now read
    `--f12-icon-btn`, so the row cannot go out of step the next time the button size moves — which is

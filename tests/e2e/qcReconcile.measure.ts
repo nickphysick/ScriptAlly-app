@@ -808,15 +808,82 @@ test("fp2 · edges line up, and the plate is a card", async () => {
     expect(m.listMargin, `the list took a horizontal margin at ${w}`).toBe("0px/0px");
     expect(Math.abs(m.seamList! - m.seamBody!), `the seam is short at ${w}`).toBeLessThanOrEqual(1);
     expect(m.paneL, `a channel of page shows between the seam and the pane at ${w}`).toBe(m.listR);
-    /* §1 — the plate wears the reading-pane card's treatment */
-    expect(m.plateRadius, `the plate's radius differs from a card's at ${w}`).toBe(m.cardRadius);
-    expect(m.plateBg, `the plate's ground differs from a card's at ${w}`).toBe(m.cardBg);
-    expect(m.plateBorder, `the plate's rim differs from a card's at ${w}`).toBe(m.cardBorder);
+    /* ⚠️ §1's TREATMENT ASSERTIONS ARE SUPERSEDED BY FIX PACK 3 §3, AND INVERTED RATHER THAN
+       DELETED. This used to require the plate to match a reading-pane card exactly. Above two
+       sage-capped cards that made it the weakest surface on the page, so it is now one step
+       brighter and one step firmer, and must NEVER be identical again. The radius still agrees:
+       that belongs to the page's shape language, not to the hierarchy. */
+    expect(m.plateRadius, `the plate's radius drifted from a card's at ${w}`).toBe(m.cardRadius);
+    expect(m.plateBg, `the plate's ground fell back to the cards' at ${w}`).not.toBe(m.cardBg);
+    expect(m.plateBorder, `the plate's rim fell back to the cards' at ${w}`).not.toBe(m.cardBorder);
     expect(m.inPlate, "the plate is missing").not.toBeNull();
     expect(m.plateHNoPill, `the plate shrinks when the status pill is absent at ${w}`).toBe(m.plateH);
     expect(m.plateL, `the plate is out of line with the cards beneath it at ${w}`).toBe(m.cardL);
     for (const [k, v] of Object.entries(m.inPlate!)) {
       expect(v, `${k} renders outside the plate at ${w}`).toBe(true);
     }
+  }
+});
+
+/**
+ * fix pack 3 §2 + §4 — the four edges, and the one line the columns start on.
+ *
+ * ⚠️ ONE TEST, THREE WIDTHS, NO SWEEP. §2's radius and left edge and §4's top-edge equality are all
+ * facts about the same two boxes, so they are read in one pass rather than in four.
+ */
+test("fp3 · the list is flush on all four edges and the columns share a top line", async () => {
+  for (const { w, h } of [{ w: 1024, h: 768 }, { w: 1440, h: 900 }, { w: 1920, h: 1080 }]) {
+    await page.setViewportSize({ width: w, height: h });
+    await queries(page);
+    const m = await page.evaluate(() => {
+      const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+      const r = (el: HTMLElement | null) => (el ? el.getBoundingClientRect() : null);
+      const mast = r(q(".wsh")), list = r(q(".f12-list")), scroll = r(q(".wpg-scroll"));
+      const lhead = r(q(".f12-lhead")), plate = r(q(".f12-heroband"));
+      const listEl = q(".f12-list");
+      const cs = getComputedStyle;
+      return {
+        mastL: mast ? Math.round(mast.left) : null,
+        mastBottom: mast ? Math.round(mast.bottom) : null,
+        listL: list ? Math.round(list.left) : null,
+        listTop: list ? Math.round(list.top) : null,
+        listBottom: list ? Math.round(list.bottom) : null,
+        scrollBottom: scroll ? Math.round(scroll.bottom) : null,
+        radii: listEl
+          ? ["border-top-left-radius", "border-top-right-radius", "border-bottom-left-radius", "border-bottom-right-radius"]
+              .map((p) => cs(listEl).getPropertyValue(p))
+          : null,
+        lheadTop: lhead ? Math.round(lhead.top) : null,
+        plateTop: plate ? Math.round(plate.top) : null,
+        /* ⚠️ SCOPED TO THIS PAGE'S OWN GRID, because the workspace pages stay MOUNTED. An
+           unscoped `.wpg-hem` count reads 6 on a correct build — the hems belonging to Dashboard,
+           Agents and Manuscripts, which are display-toggled rather than unmounted. Counting them
+           here would have reported the opt-out as broken while it was working, which is the same
+           wrong-element mistake that let the fade survive the last pack, pointing the other way. */
+        hems: document.querySelectorAll(".qc-wpg .wpg-hem").length,
+        hemsAnywhere: document.querySelectorAll(".wpg-hem").length,
+      };
+    });
+    // eslint-disable-next-line no-console
+    console.log(`[fp3 ${w}] mastL=${m.mastL} listL=${m.listL} · radii=${JSON.stringify(m.radii)} · listTop=${m.listTop} mastBottom=${m.mastBottom} · listBottom=${m.listBottom} scrollBottom=${m.scrollBottom} · lheadTop=${m.lheadTop} plateTop=${m.plateTop} · hems(this page)=${m.hems} (elsewhere ${m.hemsAnywhere})`);
+
+    /* §2 — all four edges */
+    expect(m.listL, `the list is inset from the masthead at ${w}`).toBe(m.mastL);
+    for (const v of m.radii!) {
+      expect(["0px", "0"], `the list took a corner radius at ${w}: ${v}`).toContain(v.trim());
+    }
+    expect(Math.abs(m.listTop! - m.mastBottom!), `a gap sits between the masthead rule and the list's ground at ${w}`)
+      .toBeLessThanOrEqual(1);
+    expect(Math.abs(m.listBottom! - m.scrollBottom!), `the list's ground stops short of the working area's foot at ${w}`)
+      .toBeLessThanOrEqual(1);
+
+    /* §1 — no page hems on this fill page */
+    expect(m.hems, `the page's foot fade came back at ${w}`).toBe(0);
+    /* and the opt-out stayed local — the other mounted pages keep theirs */
+    expect(m.hemsAnywhere, `the opt-out escaped onto the other mounted pages at ${w}`).toBeGreaterThan(0);
+
+    /* §4 — one line for both columns */
+    expect(m.plateTop, `the agent header is missing at ${w}`).not.toBeNull();
+    expect(m.lheadTop, `the columns start on different lines at ${w}`).toBe(m.plateTop);
   }
 });
