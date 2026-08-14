@@ -1358,9 +1358,7 @@ export const Queries: React.FC<{
   // straight to the query (updateQuery is a plain patch; both keys are in the query update allowlist)
   // with an undo. The Edit drawer stays the home for everything else (agent, dates, materials…).
   const [methodPickOpen, setMethodPickOpen] = useState(false);
-  const [msPickOpen, setMsPickOpen] = useState(false);
   const { triggerRef: methodPickTrigRef, menuStyle: methodPickMenuStyle } = useFixedMenu<HTMLButtonElement>(methodPickOpen);
-  const { triggerRef: msPickTrigRef, menuStyle: msPickMenuStyle } = useFixedMenu<HTMLButtonElement>(msPickOpen);
   // Phase 6 — the What-you-sent sample-materials inline editor (unit toggle + quantity). Wired to the
   // existing QueryMaterial.type/quantity via updateQuery — no new fields.
   const [sampleEditorOpen, setSampleEditorOpen] = useState(false);
@@ -1537,14 +1535,6 @@ export const Queries: React.FC<{
     const id = activeQuery.id, prev = activeQuery.sendMethod;
     void updateQuery(id, { sendMethod: m });
     showToast({ message: `Sent by ${sentViaLabel(m)}`, undo: () => void updateQuery(id, prev ? { sendMethod: prev } : { sendMethod: deleteField() as unknown as string }) });
-  };
-  const pickManuscript = (msId: string) => {
-    setMsPickOpen(false);
-    if (!activeQuery || msId === activeQuery.manuscriptId) return;
-    const id = activeQuery.id, prev = activeQuery.manuscriptId;
-    void updateQuery(id, { manuscriptId: msId });
-    const to = manuscripts.find(m => m.id === msId)?.title || "another manuscript";
-    showToast({ message: `Moved to ${to}`, undo: () => void updateQuery(id, { manuscriptId: prev }) });
   };
   // Phase 6 — What-you-sent material writes. The query's own materialsWanted is the record of what was
   // sent; when it's empty we DISPLAY the agent's expected set, and the first edit promotes that set onto
@@ -4128,7 +4118,6 @@ export const Queries: React.FC<{
                           const method = sentViaLabel(activeQuery.sendMethod || activeAgent.submissionMethod);
                           // dateSent is optional (undated imports) — render the date only when present, never invent one.
                           const sentDate = activeQuery.dateSent ? new Date(activeQuery.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
-                          const genreWords = [activeMs.genre, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString("en-GB")} words` : ""].filter(Boolean).join(" · ");
 
                           const proChip = (auto?: boolean) => (<span style={{ ...(auto ? { marginLeft: "auto" } : { marginLeft: 6 }), fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", borderRadius: 6, padding: "3px 7px", whiteSpace: "nowrap" as const }}>PRO</span>);
                           const addlinkStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#8f877b", marginTop: 14, cursor: "pointer" };
@@ -4213,34 +4202,20 @@ export const Queries: React.FC<{
 
                           return (
                             <>
-                              {/* manuscript header — cover plate + title (5d click-to-reassign) + genre · word count */}
-                              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                                <div style={{ width: 40, height: 52, borderRadius: 4, flexShrink: 0, background: "linear-gradient(135deg,#efe6d8,#e3d5c1)", border: "1px solid #d8c9b3", display: "grid", placeItems: "center" }} aria-hidden="true">
-                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6f4e37" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h11l3 3v15H5zM9 3v6l2-1 2 1V3" /></svg>
-                                </div>
-                                <div style={{ minWidth: 0 }}>
-                                  <div style={{ display: "flex", fontFamily: FONT_SERIF, fontWeight: 700, fontSize: 18, color: "var(--hub-item, #1a1512)", lineHeight: 1.15 }}>
-                                    <span className="f12-popwrap" style={{ minWidth: 0, display: "inline-flex" }}>
-                                      <button ref={msPickTrigRef} type="button" className="qce-pick" aria-haspopup="menu" aria-expanded={msPickOpen} title="Move this query to a different manuscript" onClick={() => setMsPickOpen(o => !o)} style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", font: "inherit", color: "inherit", background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}>
-                                        {activeMs.title}
-                                      </button>
-                                      <F12Menu open={msPickOpen} onClose={() => setMsPickOpen(false)} style={msPickMenuStyle} ariaLabel="Reassign manuscript"
-                                        items={[
-                                          ...manuscripts.map((m) => ({ label: m.title, icon: m.id === activeQuery.manuscriptId ? <span aria-hidden="true">✓</span> : undefined, onClick: () => pickManuscript(m.id) })),
-                                          "divider" as const,
-                                          { label: "＋ Add a manuscript", onClick: () => onNavigate?.("manuscripts", "Add a manuscript") },
-                                        ]}
-                                      />
-                                    </span>
-                                  </div>
-                                  {genreWords && <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#8f877b", marginTop: 5 }}>{genreWords}</div>}
-                                </div>
-                              </div>
+                              {/* ⚠️ THE MANUSCRIPT BLOCK IS GONE (fix pack 4 §5, overriding the ref, which still
+                                  draws it). Title, genre and word count are all stated in the sidebar's
+                                  manuscript card, and none of the three is a fact about THIS query — they
+                                  describe the book, which does not change because you sent it somewhere.
+                                  The card now opens with the two facts that are about this send.
 
+                                  ⚠️ THE CLICK-TO-REASSIGN CONTROL WENT WITH IT, and that is a real loss of a
+                                  shortcut rather than of a capability: the Edit Query drawer carries its own
+                                  manuscript selector, so a query can still be moved. Flagged rather than
+                                  quietly dropped. */}
                               {sentLine}
 
-                              {/* Sent with this query — the document rows (Query letter / Synopsis / Sample materials) */}
-                              <div style={eyebrow}>Sent with this query</div>
+                              {/* Materials sent — the document rows (Query letter / Synopsis / Sample materials) */}
+                              <div style={eyebrow}>Materials sent</div>
                               <div>
                                 {docRow("query", "Query letter", qlSent, ComponentType.QUERY_LETTER)}
                                 {docRow("synopsis", "Synopsis", synSent, ComponentType.SYNOPSIS)}

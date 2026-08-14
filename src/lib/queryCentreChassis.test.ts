@@ -504,6 +504,60 @@ describe("§4 (fp4) · the notes", () => {
   });
 });
 
+/**
+ * ⚠️ FIX PACK 4 §5 — "WHAT YOU SENT" STATES WHAT WAS SENT, AND OVERRIDES THE REF, which still draws
+ * the manuscript block. Title, genre and word count are all stated in the sidebar's manuscript card,
+ * and none of the three is a fact about THIS query — they describe the book, which does not change
+ * because you sent it somewhere.
+ */
+describe("§5 (fp4) · what you sent", () => {
+  const card = (() => {
+    const at = code.indexOf('title="What you sent"');
+    return at < 0 ? "" : code.slice(at, code.indexOf("</PaneCard>", at));
+  })();
+
+  it("the card is there to test", () => {
+    expect(card, "the What you sent card is missing — every case below would pass vacuously")
+      .not.toBe("");
+  });
+
+  it("it states no manuscript title, genre or word count", () => {
+    for (const t of ["activeMs.title", "activeMs.genre", "activeMs.wordCount", "genreWords"]) {
+      expect(card, `${t} is still stated here — it is a fact about the book, not about this query`)
+        .not.toContain(t);
+    }
+  });
+
+  it("the heading names the materials rather than the query", () => {
+    expect(card, "the heading did not change").toContain("Materials sent");
+    expect(card, "the old heading survived").not.toContain("Sent with this query");
+  });
+
+  /* ⚠️ THE TWO FACTS THAT ARE ABOUT THIS SEND STAY, and they now open the card. */
+  it("it opens with how and when it was sent", () => {
+    expect(card, "the send line left the card").toContain("{sentLine}");
+  });
+
+  /* ⚠️ AND THE ROWS AND THEIR MARKS ARE UNTOUCHED — the section removed a block, not the card. */
+  it("the material rows and their sent marks are unchanged", () => {
+    for (const t of ["docRow(", "sampleRow", "sentPip("]) {
+      expect(card, `${t} went with the manuscript block`).toContain(t);
+    }
+  });
+
+  /**
+   * ⚠️ THE REASSIGN MACHINERY WENT WITH THE BLOCK IT LIVED IN, rather than being left behind as
+   * state nothing reads. The capability survives in the Edit Query drawer's own manuscript
+   * selector — what was lost is the shortcut, which is worth knowing and was not worth keeping as
+   * dead code.
+   */
+  it("the block's now-unreachable machinery was swept, not orphaned", () => {
+    for (const t of ["msPickOpen", "msPickTrigRef", "msPickMenuStyle", "pickManuscript"]) {
+      expect(code, `${t} is still declared with nothing rendering it`).not.toContain(t);
+    }
+  });
+});
+
 describe("§1d/e/g · already landed, and still true", () => {
   it("the list's controls are in its own head, and none can go dead", () => {
     const head = code.indexOf('className="f12-lhead"');
