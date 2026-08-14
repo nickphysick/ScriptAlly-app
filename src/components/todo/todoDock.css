@@ -252,3 +252,30 @@
   font-weight: 500;
   margin: 0 0 9px;
 }
+
+/* ⚠️ THE BAND'S FACTS STRIP — the rail's figure pairing, in the card (visual rebuild, Phase 5).
+   Mono label over a Playfair value, right-aligned inside the band. The match with `.tdg-fig` is
+   the point: the figure you scanned in the list is the figure you land on here. */
+.tdk-facts { margin-left: auto; display: flex; gap: 26px; position: relative; z-index: 2; }
+.tdk-fact { text-align: right; display: block; }
+
+.tdk-fact .k {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #5a6e58;
+  opacity: 0.8;
+}
+
+.tdk-fact .v {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  color: #2b2118;
+  margin-top: 2px;
+}
+
+/* the pink band is the offer's — its labels take the burgundy family rather than the sage */
+.tdk-band.fam-urgent .tdk-fact .k { color: #9a6a56; }

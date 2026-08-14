@@ -1518,7 +1518,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                      subject line. An absent agent yields an absent link, which greys and says so. */
                   handoff={(c) => {
                     const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
-                    return { email: ag?.email, website: ag?.website, msTitle: c.msTitle };
+                    const f = figureFor(c);
+                    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+                    return {
+                      email: ag?.email, website: ag?.website, msTitle: c.msTitle,
+                      /* ⚠️ THE STRIP READS THE ROW'S OWN FIGURE — literally the same derivation, so
+                         the number you scanned in the rail is the number you land on in the card.
+                         That is baked decision 5, and reading it rather than recomputing it is
+                         what makes the match structural instead of maintained. */
+                      sentLabel: q?.dateSent ? "Requested" : undefined,
+                      sentValue: q?.dateSent
+                        ? new Date(q.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "long" })
+                        : undefined,
+                      waitLabel: f.label,
+                      waitValue: f.value ? `${f.value}${f.unit ? ` ${f.unit}` : ""}` : undefined,
+                    };
                   }}
                 />
               ) : (

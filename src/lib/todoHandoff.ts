@@ -16,6 +16,7 @@
  */
 import { BoardCard } from "./todoBoard";
 import { sendSpecFor } from "./todoDock";
+import { cardBucket, Bucket } from "./todoBuckets";
 
 export interface HandoffLink {
   /** The href, or null where the record has nothing to build one from. */
@@ -138,12 +139,26 @@ const SECTION_LABEL: Record<PaneSectionId, string> = {
  * say something about, including your own tasks, and a card that offers the note on four kinds
  * out of five teaches a rule nobody can hold.
  */
+/**
+ * ⚠️ DECLARED PER BUCKET (visual rebuild, Phase 5) — one table, read at a glance, and a new kind
+ * is a ROW rather than a fifth `if` inside the card. It was keyed on "does this send", which was
+ * the same answer for Send and Decide and hid that they are different acts.
+ */
+const BUCKET_SECTIONS: Record<Bucket, PaneSectionId[]> = {
+  /* a material is going: what the record shows, what is on file, where to send it */
+  send: ["record", "materials", "handoff", "note"],
+  /* a judgement: the record and the ask, and somewhere to think on paper. An offer needs no
+     "where to send it" — answering it opens the offer flow, which is its own surface. */
+  decide: ["record", "note"],
+  /* a chase IS a message, so it hands off — but there is no package to list */
+  chase: ["record", "handoff", "note"],
+  close: ["record", "note"],
+  fix: ["record", "note"],
+  note: ["record", "note"],
+};
+
 export function paneSections(card: BoardCard): PaneSection[] {
-  const sends = !!sendSpecFor(card);
-  const ids: PaneSectionId[] = sends
-    ? ["record", "materials", "handoff", "note"]
-    : ["record", "note"];
-  return ids.map((id) => ({ id, label: SECTION_LABEL[id] }));
+  return BUCKET_SECTIONS[cardBucket(card)].map((id) => ({ id, label: SECTION_LABEL[id] }));
 }
 
 /* ── the empty pane's second line (Phase 5) ──────────────────────────────────────────────────── */
@@ -215,4 +230,34 @@ export function tasksCsv(rows: CsvRow[]): string {
   const body = rows.map((r) =>
     [r.bucket, r.deed, r.agent, r.agency, r.figureLabel, r.figure].map(csvField).join(","));
   return `﻿${[head.join(","), ...body].join("\n")}\n`;
+}
+
+/* ── the band's facts strip (visual rebuild, Phase 5) ────────────────────────────────────────── */
+
+export interface BandFact {
+  /** The mono label. */
+  k: string;
+  /** The Playfair value beneath it. */
+  v: string;
+}
+
+/**
+ * ⚠️ THE SAME PAIRING THE RAIL'S FIGURE COLUMN USES — mono label over a Playfair value — and that
+ * match is not decoration. It is what makes the two panes read as one page: the figure you scanned
+ * in the list is the figure you land on in the card, in the same two registers.
+ *
+ * ⚠️ AND IT REPORTS. `Requested / 2 August` is a date the record holds; `Waiting / 12 days` is
+ * arithmetic on it. Neither is a judgement, and a fact with no value behind it is OMITTED rather
+ * than shown as a dash — the strip is short by design and an empty column in it reads as a fault.
+ */
+export function bandFacts(
+  sentLabel: string | null,
+  sentValue: string | null,
+  waitLabel: string | null,
+  waitValue: string | null,
+): BandFact[] {
+  const out: BandFact[] = [];
+  if (sentLabel && sentValue) out.push({ k: sentLabel, v: sentValue });
+  if (waitLabel && waitValue) out.push({ k: waitLabel, v: waitValue });
+  return out;
 }

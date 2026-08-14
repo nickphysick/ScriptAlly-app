@@ -29,7 +29,7 @@ import { ArtSlot } from "./ArtSlot";
 import { bandFamily } from "../../lib/todoColumns";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
 import { SnoozeDial } from "./SnoozeDial";
-import { handoffFor, panePosition, paneSections, HANDOFF_NOTE } from "../../lib/todoHandoff";
+import { handoffFor, panePosition, paneSections, bandFacts, HANDOFF_NOTE } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
@@ -58,7 +58,11 @@ export interface TodoDockProps {
   onMore: (card: BoardCard) => void;
   /** The agent's own contact fields and the manuscript's title — the hand-off is built from the
    *  record or is absent; the pane never invents either. */
-  handoff?: (card: BoardCard) => { email?: string; website?: string; msTitle?: string };
+  handoff?: (card: BoardCard) => {
+    email?: string; website?: string; msTitle?: string;
+    /** The band's facts strip — derived by the page, which holds the query and the clock. */
+    sentLabel?: string; sentValue?: string; waitLabel?: string; waitValue?: string;
+  };
   /** tasks-pages P5 — MOUNT 2 of 3: the item sheet's tag surface. The page supplies the ONE
    *  TagPicker for user-task cards; derived work cannot be tagged, so the slot stays empty. */
   tagsSlot?: (card: BoardCard) => React.ReactNode;
@@ -109,6 +113,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
      `taskType` would grow a private opinion about each kind. */
   const sections = paneSections(card);
   const src = handoff?.(card) ?? {};
+  const facts = bandFacts(src.sentLabel ?? null, src.sentValue ?? null, src.waitLabel ?? null, src.waitValue ?? null);
   const hoff = handoffFor(card, src.email, src.website, src.msTitle);
   const who = card.who || "them";
 
@@ -149,6 +154,21 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             the flourish returns the day a completion has a home in this surface again. */}
         <div className={`tdk-band fam-${bandFamily(card)}`}>
           <i>{[card.kind, card.due].filter(Boolean).join(" · ")}</i>
+          {/* ⚠️ THE FACTS STRIP USES THE RAIL'S OWN PAIRING — mono label over a Playfair value —
+              and that match is not decoration. It is what makes the two panes read as one page:
+              the figure you scanned in the list is the figure you land on in the card, in the same
+              two registers. A fact with no value behind it is OMITTED rather than dashed; the
+              strip is short by design and an empty column in it reads as a fault. */}
+          {facts.length > 0 && (
+            <span className="tdk-facts">
+              {facts.map((f) => (
+                <span className="tdk-fact" key={f.k}>
+                  <span className="k">{f.k}</span>
+                  <span className="v">{f.v}</span>
+                </span>
+              ))}
+            </span>
+          )}
           <button type="button" className="tdk-x" aria-label="Back to the board" onClick={onClose}>
             <X size={13} aria-hidden />
           </button>

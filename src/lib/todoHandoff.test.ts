@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, HANDOFF_NOTE,
+  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, HANDOFF_NOTE,
 } from "./todoHandoff";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -190,5 +190,52 @@ describe("⚠️ THE EMPTY PANE REPORTS AND NEVER APPRAISES", () => {
       expect(line, line).not.toMatch(/!/);
       expect(line, line).not.toMatch(/\b(great|well done|nice|good job|congrat|proud|smashed|crushed|amazing|only|just|still need|behind|ahead)\b/i);
     }
+  });
+});
+
+describe("⚠️ THE SECTION SET IS DECLARED PER BUCKET — one table, not a fifth `if`", () => {
+  const withType = (t?: string, over: Partial<BoardCard> = {}) => card({ taskType: t, ...over });
+
+  it("a Send carries the materials and the hand-off; a Decide carries neither", () => {
+    expect(paneSections(withType("full_requested")).map((s) => s.id))
+      .toEqual(["record", "materials", "handoff", "note"]);
+    /* ⚠️ AN OFFER NEEDS NO "WHERE TO SEND IT" — answering it opens the offer flow, which is its
+       own surface. Keying on "does this send" gave Send and Decide the same answer and hid that
+       they are different acts. */
+    expect(paneSections(withType("offer_received")).map((s) => s.id)).toEqual(["record", "note"]);
+  });
+
+  it("a Chase hands off but has no package to list", () => {
+    /* a chase IS a message — it needs the mailto and the subject — but nothing is being sent */
+    expect(paneSections(withType("nudge_overdue")).map((s) => s.id))
+      .toEqual(["record", "handoff", "note"]);
+  });
+
+  it("every bucket has a set, and every set opens with the record and ends with the note", () => {
+    for (const t of ["full_requested", "offer_received", "nudge_overdue", "no_response_close", "data_quality_poor"]) {
+      const ids = paneSections(withType(t)).map((s) => s.id);
+      expect(ids[0], t).toBe("record");
+      expect(ids[ids.length - 1], t).toBe("note");
+    }
+    expect(paneSections(card({ userTaskId: "u1", taskType: undefined })).map((s) => s.id))
+      .toEqual(["record", "note"]);
+  });
+});
+
+describe("⚠️ THE BAND'S FACTS STRIP IS THE RAIL'S PAIRING, IN THE CARD", () => {
+  it("both facts render when both exist", () => {
+    expect(bandFacts("Requested", "2 August", "Waiting", "12 days"))
+      .toEqual([{ k: "Requested", v: "2 August" }, { k: "Waiting", v: "12 days" }]);
+  });
+
+  /**
+   * ⚠️ A FACT WITH NO VALUE IS OMITTED, NEVER DASHED. The strip is short by design — two columns
+   * at most — and an empty column in it reads as a fault rather than as an absence. This is the
+   * opposite of the manuscript card's `—` rows, and deliberately: there, a named slot standing
+   * empty IS the information; here, the strip is a summary and a summary of nothing is noise.
+   */
+  it("a fact with no value is omitted, and an empty strip is empty", () => {
+    expect(bandFacts("Requested", null, "Waiting", "12 days")).toEqual([{ k: "Waiting", v: "12 days" }]);
+    expect(bandFacts(null, null, null, null)).toEqual([]);
   });
 });
