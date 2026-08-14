@@ -393,3 +393,56 @@ describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
       .toBe("");
   });
 });
+
+/**
+ * ══ FIX PACK 6 §3 · THE AGENT HEADER PLATE IS TALLER ══════════════════════════════════════════
+ *
+ * ⚠️ THE HEIGHT COMES FROM THE PADDING, AND THAT IS THE WHOLE CONSTRAINT. The plate is a CENTRED
+ * flex row whose height is set by the avatar, so growing the avatar or the type would have changed
+ * what the plate says in order to change how tall it is. Padding adds room without touching either.
+ *
+ * ⚠️ AND IT MUST STAY PILL-INDEPENDENT. "The plate does not shrink when the status pill is absent"
+ * is a fact about layout that this suite cannot compute — `environment: 'node'`, no jsdom, no box
+ * model — and it is carried by `qcReconcile.measure.ts`, which hides the pill and re-reads the
+ * plate. What is held HERE is the cause: uniform vertical padding on a centred row, so a shorter
+ * child still cannot pull the height down with it. A padding change is uniform by construction,
+ * which is exactly why it is the safe lever.
+ */
+describe("fix pack 6 §3 · the plate is taller, through padding alone", () => {
+  const padOf = (r: string) => (/padding:\s*([^;]+);/.exec(r.replace(/\/\*[\s\S]*?\*\//g, ""))?.[1] ?? "").trim().split(/\s+/);
+
+  it("⚠️ THE VERTICAL PADDING GREW — and the horizontal did not", () => {
+    const plate = rule(".f12-heroband");
+    expect(plate, "the plate rule is missing").not.toBe("");
+    const [block, inline] = padOf(plate);
+    /* extracted and compared, never a `(?!14px)` lookahead — the backtracking trap this repo bans */
+    expect(parseFloat(block), `the plate's vertical padding went back down: ${block}`).toBeGreaterThan(14);
+    expect(inline, "the plate's horizontal inset moved — §3 is a height change, and widening it would pull the identity off the edge the pane aligns to").toBe("17px");
+  });
+
+  it("⚠️ THE PILL-INDEPENDENCE CAUSE IS INTACT — a centred row, uniform padding", () => {
+    const plate = rule(".f12-heroband");
+    expect(plate, "the plate stopped centring its children — a shorter child could pull the height down").toContain("align-items: center");
+    expect(plate, "the plate stopped being a flex row").toContain("display: flex");
+    /* one value for both vertical sides: an asymmetric pair would make the row's centre and the
+       plate's centre two different lines, and the avatar would stop setting the height cleanly */
+    expect(padOf(plate).length, "the plate's padding is no longer the two-value form — top and bottom could differ").toBe(2);
+  });
+
+  it("⚠️ THE SHORT-VIEWPORT STEP TRACKS THE BASE, or it reclaims more than it used to", () => {
+    /* ⚠️ READ FROM THE RAW SHEET, ANCHORED ON THE MEDIA QUERY. `rules()` rebuilds each block from a
+       split on `}`, which does not survive being nested inside an `@media` — the helper returned the
+       block and the padding was not in it, so the case failed while the rule was plainly correct. */
+    const short = /@media \(max-height: 768px\)[\s\S]*?\.f12-heroband \{[^}]*\}/.exec(css)?.[0] ?? "";
+    expect(short, "the short-viewport plate step is missing").not.toBe("");
+    const m = /padding:\s*([^;]+);/.exec(short);
+    expect(m, "the short-viewport plate step is gone").toBeTruthy();
+    const stepBlock = parseFloat(m![1].trim().split(/\s+/)[0]);
+    const restBlock = parseFloat(padOf(rule(".f12-heroband"))[0]);
+    expect(stepBlock, "the step stopped reclaiming anything").toBeLessThan(restBlock);
+    /* it kept its proportion rather than its absolute: left at the old 10px against a taller base it
+       would take 12px off a plate that had just gained 8, on the viewport with least room to spare */
+    expect(stepBlock / restBlock, `the short-viewport step drifted from its proportion: ${stepBlock}/${restBlock}`)
+      .toBeGreaterThan(0.6);
+  });
+});

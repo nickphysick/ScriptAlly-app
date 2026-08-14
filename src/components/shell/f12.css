@@ -1610,7 +1610,13 @@
   flex: none;
   display: flex; align-items: center; gap: 15px;
   margin: var(--f12-headgap) 20px 0;
-  padding: 14px 17px;
+  /* ⚠️ 14 → 22 VERTICAL (fix pack 6 §3). The plate was short for what it holds and for the weight
+     it now carries beside a 128px masthead. The height comes from the PADDING, deliberately: growing
+     the avatar or the type would change what the plate says, and the avatar is also what sets the
+     row's height — so the padding is the one lever that adds room without touching either.
+     ⚠️ THE HORIZONTAL IS UNTOUCHED. This is a height change; widening the inset as well would move
+     the identity away from the edge the rest of the pane aligns to. */
+  padding: 22px 17px;
   /* ⚠️ FIX PACK 3 §3 — THE PLATE IS RAISED, AND IT NO LONGER MATCHES THE CARDS. Fix pack 2 gave it
      a reading-pane card's exact treatment, which fixed the drifting-caption problem and created the
      next one: sitting above two sage-capped cards, an identical fourth surface read as the WEAKEST
@@ -2499,7 +2505,12 @@
   /* ⚠️ THE PLATE'S PADDING, NOT A MARGIN (fix pack 2 §1). The band had none to give; a plate does,
      and taking it from the padding is what keeps the container while the row gets shorter. The step
      is the same 0.86 the masthead takes — 14/17 resting lands at 10/14. */
-  .f12-heroband { padding: 10px 14px; }
+  /* ⚠️ 10 → 16 VERTICAL, tracking §3's base. The short-viewport step is a RECLAIM, so it keeps the
+     same proportion of the resting padding it always did (14 → 10); against a 22px base that lands
+     at 16. Left at 10 it would have taken 12px off a plate that had just gained 8, which is a
+     steeper drop on the one viewport with least room to absorb it. The horizontal step is
+     unchanged, because §3 did not change the horizontal. */
+  .f12-heroband { padding: 16px 14px; }
   .f12-heroband .f12-bigav { width: 40px; height: 40px; font-size: 15px; }
   .f12-heroband .f12-hn { font-size: 19px; }  /* 21 resting, the same 0.86 step */
   /* the stats keep their figures and lose their air */
