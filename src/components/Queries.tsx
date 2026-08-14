@@ -4070,11 +4070,14 @@ export const Queries: React.FC<{
                         {/* ⚠️ ONE META LINE, NOT TWO STACKED. Agency and the queried date are both
                             quiet facts about this record; giving each its own line made a three-line
                             block out of a row. Either half omits itself when absent. */}
+                        {/* ⚠️ THE AGENCY ALONE (§6). The queried date left this line for the state's
+                            own caption on the right, where "when did it last move" belongs beside
+                            "where does it stand". The interpunct rule survives for the case where a
+                            second fact is ever added back — it draws only between siblings. */}
                         <div className="f12-hmeta">
                           {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
                             <span>{activeAgent.agency}</span>
                           )}
-                          {heroQueriedOn && <span>Queried {heroQueriedOn}</span>}
                         </div>
                         {/* ⚠️ EMAIL AND WEBSITE ARE PILLS BENEATH THE AGENCY (§2), NOT MENU ITEMS.
                             Their subject is the AGENT, who is named on the line above them — which
@@ -4108,10 +4111,27 @@ export const Queries: React.FC<{
                           </a>
                         </div>
                       </div>
-                      {/* The status badge draws the real StatusDot — never a recreation. */}
-                      <span className="f12-hs" style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
-                        <StatusDot status={activeQuery.status} overrideSize={13} />
-                        {statusDisplayLabel(activeQuery)}
+                      {/* ⚠️ THE STATE, PLAIN (§6) — Playfair word, dot OUTBOARD of it, and beneath
+                          the word only the date of the most recent development. The dot is the real
+                          `StatusDot`: burgundy outgoing, sage incoming, grey closed, from the locked
+                          component, never a recreation.
+
+                          ⚠️ AND THE DATE IS `lastStatusChange`, NOT `dateSent`. The send date is
+                          where the story starts and Tracking's first rung already carries it; what
+                          belongs beside a STATE is when the query last entered one. It falls back to
+                          the send date only when nothing has happened since — which is true rather
+                          than a substitution, because on a query with no developments the send IS
+                          the most recent one. Both go through `refDate`, which omits an unparseable
+                          value rather than printing "Invalid Date". */}
+                      <span className="f12-hs">
+                        <span>
+                          <span className="f12-hsw">{statusDisplayLabel(activeQuery)}</span>
+                          {(() => {
+                            const moved = refDate((activeQuery as { lastStatusChange?: unknown }).lastStatusChange) || heroQueriedOn;
+                            return moved ? <div className="f12-hsd">{moved}</div> : null;
+                          })()}
+                        </span>
+                        <StatusDot status={activeQuery.status} overrideSize={26} />
                       </span>
                       {/* ⚠️ THE PRIMARY AND THE KEBAB LEFT THIS BAND (§1). They act on the query, not
                           on the identity card that names it, and they now sit in the pane's control

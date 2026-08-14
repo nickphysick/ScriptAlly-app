@@ -100,3 +100,71 @@ describe("§3 · one button rule, app-wide on this page", () => {
     expect((row.match(/qc-btn-shrink/g) || []).length, "the shrinking set is not the three secondaries").toBe(3);
   });
 });
+
+describe("§6 · the agent header", () => {
+  it("the portrait is 58 and the name is Playfair 27", () => {
+    expect(rule(".f12-heroband .f12-bigav"), "the portrait is not 58px").toContain("width: 58px");
+    const n = rule(".f12-heroband .f12-hn");
+    expect(declValue(n, "font-size"), "the name is not 27px").toBe("27px");
+    expect(declValue(n, "font-family"), "the name lost its serif").toBe("var(--f12-serif)");
+  });
+
+  /**
+   * ⚠️ NO TILE, NO FILL — and the reason is sharper than "the ref draws it plain". The state was a
+   * bordered pink capsule, which made a FACT look like a control; §2 then put two REAL pills in the
+   * same band (Email, Website), so the one thing that could not be pressed looked exactly like the
+   * two that could.
+   */
+  it("the state is plain — no pill, no fill, no border", () => {
+    const r = rule(".f12-hs");
+    expect(r, "the state rule is missing").not.toBe("");
+    expect(declValue(r, "background"), "the state took a fill again").toBe("none");
+    expect(declValue(r, "border"), "the state took a rim again").toBe("0");
+    expect(declValue(r, "border-radius"), "the state went back to a capsule").toBe("0");
+    expect(declValue(rule(".f12-hs .f12-hsw"), "font-family"), "the status word is not Playfair").toBe("var(--f12-serif)");
+  });
+
+  /* ⚠️ THE DOT IS THE LOCKED COMPONENT AND IT SITS OUTBOARD OF THE WORD — never a recreation, and
+     never tucked inside a label where it reads as decoration. */
+  it("the dot is the real StatusDot, outboard of the word", () => {
+    const at = code.indexOf('className="f12-hs"');
+    expect(at, "the state block is missing").toBeGreaterThan(-1);
+    const block = code.slice(at, code.indexOf("</span>", code.indexOf("<StatusDot", at)));
+    expect(block, "the status dot went").toContain("<StatusDot status={activeQuery.status}");
+    /* the word is declared BEFORE the dot in source, so the dot renders to its right */
+    expect(block.indexOf("f12-hsw"), "the dot came inboard of the word").toBeLessThan(block.indexOf("<StatusDot"));
+  });
+
+  it("the contact pills sit on their own line, and grey rather than vanish", () => {
+    expect(rule(".qp-hlinks"), "the pills' row is missing").not.toBe("");
+    expect(declValue(rule(".qp-lnk-off"), "pointer-events"), "a pill with no target is still clickable").toBe("none");
+    expect(code, "the email pill stopped stating its absence")
+      .toContain("No email address on this agent's record");
+  });
+});
+
+describe("§5 · the list's groups, as rendered", () => {
+  it("the rules are drawn from the shared order and labels, never restated", () => {
+    expect(code, "the render stopped reading the shared order").toContain("GROUP_ORDER");
+    expect(code, "the render restates a group label").toContain("{GROUP_LABEL[g]} · {items.length}");
+  });
+
+  /* ⚠️ AN EMPTY GROUP DRAWS NOTHING. "OVERDUE · 0" is a heading for a state you are not in. */
+  it("an empty group draws no rule", () => {
+    expect(code, "empty groups still draw their rule").toContain(".filter((s) => s.items.length > 0)");
+  });
+
+  it("the fold is the closed group's alone, and only once it earns its place", () => {
+    expect(code, "the fold stopped being gated on the shared threshold")
+      .toContain('const foldable = g === "closed" && foldClosed(items.length)');
+    expect(code, "the fold is not reachable by keyboard").toContain('e.key === "Enter" || e.key === " "');
+    expect(code, "the fold does not state which way it goes").toContain('{shut ? "show" : "hide"}');
+  });
+
+  /* ⚠️ THE OVERDUE TINT IS NOT `--burg`. Burgundy means OUTGOING on every dot in the list beneath. */
+  it("overdue is terracotta, and the row ladder still rides on its tint", () => {
+    expect(declValue(rule(".qc-gh-od span"), "color"), "the overdue label is not terracotta").toBe("#a05a45");
+    expect(rule(".f12-row-od"), "the overdue tint went").toContain("background: #fdf6f3");
+    expect(rule(".f12-row-od:hover"), "an overdue row stopped answering the pointer").not.toBe("");
+  });
+});

@@ -268,25 +268,36 @@ describe("§1 (fp2) · the hero is a contained plate", () => {
   });
 
   /**
-   * ⚠️ THE STATIC FACT STAYS, THE LIVE PAIR STAYS OUT. Unchanged by this reversal: the queried date
-   * is identity — when this went out — while "days waiting" and "expected by" move, and they are the
-   * two numbers Tracking's bar reads against. The plate gaining an edge is no reason to let it
-   * restate them.
+   * ⚠️ THE DATE MOVED WITHIN THE PLATE (§6), AND THE CLAUSE THAT MATTERS IS UNCHANGED: the plate
+   * carries a STATIC fact, and neither of the two figures Tracking's bar reads against. What
+   * changed is WHICH static fact. It stated the send date beside the agency; it states the date of
+   * the most recent DEVELOPMENT beneath the state, because "when did it last move" is what belongs
+   * next to "where does it stand", and the send date is Tracking's first rung.
+   *
+   * ⚠️ AND THE SEND DATE IS THE FALLBACK, WHICH IS TRUE RATHER THAN A SUBSTITUTION: on a query with
+   * no developments the send IS the most recent one.
    */
-  it("it carries the queried date, and neither figure Tracking owns", () => {
+  it("it carries one static date, and neither figure Tracking owns", () => {
     const at = code.indexOf('className="f12-heroband"');
     expect(at, "the plate is missing").toBeGreaterThan(-1);
-    const band = code.slice(at, code.indexOf("</div>", code.indexOf("f12-hmeta", at)));
-    expect(band, "the queried date is not on the plate").toContain("Queried {heroQueriedOn}");
+    const band = code.slice(at, code.indexOf("})()}", at));
+    expect(band, "the band slice is empty").toContain("f12-hmeta");
+    expect(band, "the plate lost its date").toContain("f12-hsd");
+    expect(band, "the date is not the most recent development").toContain("lastStatusChange");
+    expect(band, "the send-date fallback went — a query with no developments would show nothing")
+      .toContain("|| heroQueriedOn");
     expect(band, "the plate took a figure that moves — Tracking's bar reads those")
       .not.toMatch(/days|waiting|expected/i);
   });
 
   /* ⚠️ THROUGH `refDate`, which omits an unparseable date rather than printing "Invalid Date" —
-     a literal string this app has shown a writer before. Undated imports exist. */
+     a literal string this app has shown a writer before. Undated imports exist, and §6 added a
+     SECOND date to the plate, so both go through it and both omit together. */
   it("an undated query shows no date rather than a broken one", () => {
     expect(code).toContain("const heroQueriedOn = refDate(");
-    expect(code, "the date renders unconditionally").toContain("{heroQueriedOn && <span>Queried");
+    expect(code, "the development date bypasses the omitting formatter")
+      .toContain("refDate((activeQuery as { lastStatusChange?: unknown }).lastStatusChange)");
+    expect(code, "the date renders unconditionally").toContain("moved ? <div className=\"f12-hsd\">{moved}</div> : null");
   });
 
   /**

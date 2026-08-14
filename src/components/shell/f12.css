@@ -1879,16 +1879,36 @@
   font-family: var(--f12-serif); font-weight: 600;
 }
 .f12-hero .f12-bigav { width: 76px; height: 76px; font-size: 25px; }
-/* a band's height is its row, not its portrait */
-.f12-heroband .f12-bigav { width: 46px; height: 46px; font-size: 17px; }
-.f12-heroband .f12-hn { font-size: 21px; }
+/* ⚠️ 46 → 58, AND THE OLD NOTE ("a band's height is its row, not its portrait") IS SUPERSEDED, not
+   contradicted. It was written when the band held the primary and the kebab: the row's height came
+   from a 32px control, so a portrait bigger than the row would have set the height instead. §1 took
+   the controls out. The band is now identity ALONE — a portrait, a name, an agency, two pills and a
+   state — and the portrait is entitled to set the height of a row it is the subject of. */
+.f12-heroband .f12-bigav { width: 58px; height: 58px; font-size: 21px; }
+.f12-heroband .f12-hn { font-family: var(--f12-serif); font-size: 27px; font-weight: 500; line-height: 1.05; }
 /* ⚠️ ONE META LINE. Agency and the queried date are both quiet facts about this record; two stacked
    lines made a three-line block out of a row. The interpunct is drawn by the rule, so either half
    can omit itself without leaving a stray separator. */
 .f12-hmeta { display: flex; align-items: center; gap: 8px; margin-top: 2px; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); min-width: 0; }
 .f12-hmeta > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .f12-hmeta > span + span::before { content: "·"; margin-right: 8px; color: var(--line); }
-/* the status badge loses the card's top margin — it is inline in a row now */
+/**
+ * ⚠️ §6 — THE STATE IS PLAIN: NO TILE, NO FILL, NO PILL. It was a bordered pink capsule, which made
+ * a fact about the query look like a control you could press — and it was the only pill in a band
+ * that now also carries two real pills (Email, Website), so the one thing that could NOT be clicked
+ * looked exactly like the two that could.
+ *
+ * ⚠️ THE DOT IS OUTBOARD OF THE WORD, on the far right, and it is the real `StatusDot` — burgundy
+ * outgoing, sage incoming, grey closed, from the locked component, never a recreation. Outboard
+ * because the dot is the thing the eye finds when scanning a column of these; a dot tucked inside a
+ * pill is decoration on a label.
+ */
+.f12-hs { display: flex; align-items: center; gap: 13px; text-align: right; margin-left: auto; flex: none; background: none; border: 0; padding: 0; border-radius: 0; }
+.f12-hs .f12-hsw { font-family: var(--f12-serif); font-size: 21px; font-weight: 600; color: var(--ink-2); line-height: 1; }
+/* ⚠️ AND BENEATH IT, ONLY THE DATE OF THE MOST RECENT DEVELOPMENT — not the send date. The send date
+   is where the story STARTS and Tracking's first rung already carries it; what belongs beside a
+   state is when the query last entered it. */
+.f12-hs .f12-hsd { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); margin-top: 6px; white-space: nowrap; }
 .f12-heroband .f12-hs { margin-top: 0; }
 
 .f12-hero { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px 26px 24px 32px; display: flex; align-items: center; gap: 22px; box-shadow: var(--sh-1); overflow: hidden; }

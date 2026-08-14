@@ -153,10 +153,14 @@ describe("§3 · the hero keeps its initials", () => {
     expect(all, "the monogram lost its serif").toContain("font-family: var(--f12-serif)");
   });
 
-  /* Only the SIZE is per-container: a band's height is its row, not its portrait. */
+  /* Only the SIZE is per-container. ⚠️ THE BAND'S IS 58 SINCE §6: the old note said "a band's height
+     is its row, not its portrait", which was true while the band held a 32px primary and a kebab —
+     the row's height came from a control, so a larger portrait would have set it instead. §1 took
+     the controls out; the band is identity alone now, and the portrait may set the height of a row
+     it is the subject of. */
   it("the two differ by scale and nothing else", () => {
     expect(rules(".f12-hero .f12-bigav"), "the card's scale went").toContain("width: 76px");
-    expect(rules(".f12-heroband .f12-bigav"), "the band's scale went").toContain("width: 46px");
+    expect(rules(".f12-heroband .f12-bigav"), "the band's scale went").toContain("width: 58px");
     /* exactly one radius declaration across everything that dresses either avatar */
     const discs = (rules(".f12-bigav").match(/border-radius/g) ?? []).length;
     expect(discs, "the disc is declared more than once — the two can drift apart again").toBe(1);
