@@ -162,26 +162,39 @@
   color: #a0958a;
 }
 
-/* THE PANEL. White, one hairline, generous radius, the faintest lift — it is a sheet of paper on
-   the cream page. The 6px block padding is what lets the first and last rows breathe without a
-   divider above or below them. */
+/* ⚠️ THE PANEL DISSOLVED WITH THE SPLIT (P3). It was a white sheet of paper on a cream page; the
+   rail IS white now, so a white card with a hairline and a lift sat on its own colour and read as
+   a box drawn for no reason. The rows sit directly on the rail, as the ref draws them. The element
+   survives as the rows' container — the fold's stagger and the skeleton both hang off it — but it
+   paints nothing.
+
+   ⚠️ IT KEEPS NO HORIZONTAL PADDING EITHER. The rail owns the inset now; a second one here would
+   push the selected row's bleeding edge rule off its own gutter. */
 .tdg-panel {
-  background: #fff;
-  border: 1px solid #ece4d6;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(58, 28, 20, 0.045);
-  padding: 6px 16px;
+  padding: 2px 0;
 }
 
 /* ── THE ROW ────────────────────────────────────────────────────────────────────────────────
-   Six tracks: tick · title (the only flexible one) · status pill · journey · age · verbs. */
+   FOUR tracks (rail + workspace P3; ref todo-workspace-concept-v3.html `.trow`):
+   checkbox · StatusDot · content · actions.
+
+   ⚠️ THE PILL AND THE AGE LOST THEIR LANES TO THE CAPTION, and the journey meter moved inside the
+   content cell. At the 440px rail, five lanes at the pack's own sizes left the TITLE 33px — and
+   the title is the only part of a row that says what the row is. Neither the pill nor the age was
+   ever a column of facts you scan down; they are two clauses about one row, which is what a
+   caption is for.
+
+   ⚠️ `align-items: start`, NOT `center`. The content cell is now three stacked things (title,
+   caption, meter) and its neighbours are single marks; centring would float the checkbox and the
+   dot against the middle of a three-line cell instead of against its first line. */
 .tdg-row {
   display: grid;
-  /* the last track is the CLUSTER's: 4 × 30px + 3 × 5px gap = 135, in a 152px seat */
-  grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 152px;
-  align-items: center;
-  padding: 16px 14px;
-  border-radius: 11px;
+  grid-template-columns: 20px 15px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding: 11px 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
   position: relative;
   transition: background var(--tdg-emph) var(--tdg-ease);
 }
@@ -191,64 +204,121 @@
 .tdg-row::after {
   content: "";
   position: absolute;
-  left: 14px;
-  right: 14px;
+  left: 10px;
+  right: 10px;
   bottom: -1px;
   height: 1px;
   background: #f6f1e9;
 }
 
 .tdg-row:last-child::after { display: none; }
-.tdg-row:hover { background: #fbf7f1; }
+
+/* ⚠️ HOVER IS A LIGHTER TINT ONLY — no border, no edge rule, nothing that could be mistaken for
+   the selected state a pointer is about to produce. */
+.tdg-row:hover { background: #faf7f2; }
 .tdg-row:hover::after { background: transparent; }
 
-.tdg-cc { display: flex; align-items: center; justify-content: center; }
+/* ⚠️ SELECTED IS THE PARCHMENT TINT, A HAIRLINE, AND A BURGUNDY EDGE RULE THAT BLEEDS INTO THE
+   GUTTER. The bleed is the point: the rule sits at `left: -6px`, OUTSIDE the row's own box, so it
+   reads as a marker in the margin rather than as a fifth lane inside the row. The row already
+   carries a transparent 1px border at rest, so gaining a visible one here costs no layout — a
+   border appearing on selection would shift every lane by a pixel. */
+.tdg-row.sel { background: #faf5ee; border-color: #efe4d5; }
+.tdg-row.sel::after { background: transparent; }
 
-/* ⚠️ THE AGE'S INSET IS INSIDE ITS TRACK, NEVER A SEVENTH TRACK OR A COLUMN GAP. Browser-measured
-   at 1360: the age ends at exactly the x the primary button begins, so a right-aligned figure sat
-   flush against an ink fill and read as a collision. The six tracks are the measure and they are
-   untouched; the 10px is padding within the cell. */
-.tdg-cr { display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; }
+.tdg-row.sel::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 10px;
+  bottom: 10px;
+  width: 2.5px;
+  border-radius: 3px;
+  background: #7c3a2a;
+}
+
+/* the two mark lanes — pinned to the content's FIRST line rather than to its middle */
+.tdg-cc { display: flex; align-items: flex-start; justify-content: center; }
+
+/* the content cell: title, then caption, then the meter — a stack, not a row */
+.tdg-content { min-width: 0; }
+
+/* ⚠️ THE IDLE RING IS NOT A STATUS. Housekeeping and the writer's own items carry no `status`, so
+   there is no pipeline position to draw; a dashed ring says "not on that path", which is the true
+   thing. A default dot would state a position in a submission that does not exist. */
+.tdg-idle {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.5px dashed #cbbfb2;
+  display: block;
+  margin-top: 3px;
+}
+
+/* (`.tdg-cr` — the age's right-aligned cell — retired with the age lane, P3. Its whole job was
+   keeping a right-aligned figure off the primary button's ink fill; the age is a caption clause
+   now and the button it was avoiding is gone from four groups out of five.) */
 
 /* the tick. A row that cannot be completed draws no circle at all — `isTickable` decides, and a
    tick that does nothing is worse than no tick. */
+/* ⚠️ A ROUNDED SQUARE, NOT A CIRCLE (P3; ref `.trow .cb`). A circle beside a StatusDot in the very
+   next lane read as two dots of different sizes — one of them a control and one of them a fact,
+   with nothing but size to tell them apart. The square is unmistakably a checkbox. */
 .tdg-tick {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   padding: 0;
-  border-radius: 50%;
-  border: 1.6px solid #d7cabb;
+  border-radius: 6px;
+  border: 1.5px solid #d5c8ba;
   background: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: transparent;
   cursor: pointer;
+  margin-top: 1px;
+  transition: all var(--tdg-emph) var(--tdg-ease);
 }
 
-.tdg-row:hover .tdg-tick { border-color: #8a9e88; color: #cfdccb; }
+.tdg-row:hover .tdg-tick { border-color: #7c3a2a; background: #fdf6f2; }
 
+/* completing FILLS it sage — the one place on the row where a fill means "finished" */
 .tdg-tick.dn {
-  background: #e6ece4;
+  background: #8a9e88;
   border-color: #8a9e88;
-  color: #4a5f48;
+  color: #fdfaf5;
 }
 
 /* ⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED — it is the only part of a row that says what the
    row IS. The subtitle sits BENEATH it rather than competing for the same line's width, and the
    measure is paid for out of the flexible track. (Carried from the retired Up-next rail's law.) */
+/* ⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED — it is the only part of a row that says what the
+   row IS, and it now has the whole flexible track to itself.
+
+   ⚠️ REGULAR, WITH ONLY THE NAME AT 600 — and NO Playfair and no burgundy italic anywhere in a
+   row. The stationery register belongs to the workspace card; the rail is a directory, and a
+   sixteen-row list set in a serif with italic names is a page you read rather than scan. The
+   emphasis falls on `who`, which is the one span the data can prove (see `rowTitleParts`). */
 .tdg-t {
-  font-size: 14px;
-  font-weight: 600;
-  color: #2b2118;
-  line-height: 1.35;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: #43332a;
+  line-height: 1.4;
   overflow-wrap: anywhere;
 }
 
-/* ⚠️ THE STRIKE GOES ON THE TITLE, NEVER THE ROW — the time and the Undo must stay legible. */
-.tdg-row.done .tdg-t {
+.tdg-t b {
+  font-weight: 600;
+  color: #2b2118;
+}
+
+/* ⚠️ THE STRIKE GOES ON THE TITLE, NEVER THE ROW — the caption and the actions must stay legible.
+   Both weights take it, or a struck sentence would keep one word standing. */
+.tdg-row.done .tdg-t,
+.tdg-row.done .tdg-t b {
   text-decoration: line-through;
-  color: #9aa197;
+  text-decoration-color: #d5c8ba;
+  color: #b8a898;
 }
 
 .tdg-sub {
@@ -257,41 +327,55 @@
   margin-top: 5px;
 }
 
-/* the status pill — one width, so the meters beside them line up down the panel */
+/* ⚠️ ONE CAPTION LINE, CARRYING THE PILL AND THE DATE FACT (P3). It wraps rather than truncating:
+   at 440px a row with a long kind and a long age would otherwise silently lose the age, which is
+   the half that says when. */
+.tdg-cap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b3a496;
+}
+
+.tdg-row.done .tdg-cap { opacity: 0.55; }
+
+/* ⚠️ THE PILL IS AN INLINE CLAUSE NOW, NOT A FIXED-WIDTH LANE (P3). Its 124px width existed so
+   the meters beside it lined up down the panel; the meters are inside the content cell now, so
+   there is nothing to line up with and a fixed width would just pad every short kind. */
 .tdg-pill {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 124px;
-  box-sizing: border-box;
-  height: 25px;
-  border-radius: 7px;
+  border-radius: 999px;
+  padding: 2.5px 8px;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 7px;
-  font-weight: 600;
-  letter-spacing: 0.11em;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
-/* ⚠️ NINE TONES, ONE PER LIVE KIND (P3; ref tasks-states.html sheet 1) — SUPERSEDING the four
-   family tones this file shipped with in P2. The families answer "how urgent is this"; the page
-   already answers that with its group headings, so a pill repeating it said one thing twice while
-   the thing a pill is FOR — which kind of work this is — went unsaid. The values are the ref's own
-   `.sp.*` hexes verbatim; `tasksList.test.tsx` pins each against `lib/taskRow`'s tone union, so a
-   tone can never exist in one place and not the other. */
-.tdg-pill.tone-offer { background: #f8ded2; color: #8a4a36; border: 1px solid #eecabb; }
-.tdg-pill.tone-wait { background: #fbeae3; color: #96604c; border: 1px solid #f0dad0; }
-.tdg-pill.tone-rr { background: #f3e8f0; color: #75496a; border: 1px solid #e5d3e0; }
-.tdg-pill.tone-sweep { background: #f4eee4; color: #6b5a4e; border: 1px solid #e6ddcd; }
-.tdg-pill.tone-stale { background: #f6efe0; color: #7a6844; border: 1px solid #e8dcc4; }
-.tdg-pill.tone-yours { background: #eef2ec; color: #4a5f48; border: 1px solid #d7e0d4; }
-.tdg-pill.tone-note { background: #f9f1dc; color: #7a6530; border: 1px solid #ecdfba; }
-.tdg-pill.tone-snoozed { background: #f2ede7; color: #6b5a4e; border: 1px solid #e2d8c8; }
-.tdg-pill.tone-done { background: #f0f3ef; color: #6b7a68; border: 1px solid #dfe5dd; }
+/* ⚠️ FIVE FAMILY TONES, RESTATED FROM `todoFamily`'s FAMILY_PILL AND LOCKED EQUAL TO IT — CSS
+   cannot read TS, which is the same arrangement FAMILY_BAND has lived under since the board.
+   ⚠️ AND THE NINE PER-KIND TONES THEY REPLACE ARE NOT SIMPLY REVERSED. That set was written
+   against a real fault — a family-coloured pill "said one thing twice while the thing a pill is
+   FOR, which kind of work this is, went unsaid". The complaint was about a pill carrying the
+   family in BOTH its colour and its words. Here the WORDS still name the kind — Offer, Chase,
+   Data gap, Stale — and only the hue drops to the family, so the kind is still said, in the
+   register that can actually say it. Nine hues were never legible as nine meanings. */
+.tdg-pill.fam-urgent { background: #fbeee7; color: #a05a42; border: 1px solid #f2dccf; }
+.tdg-pill.fam-housekeeping { background: #eef1ec; color: #5a6e58; border: 1px solid #dfe5dc; }
+.tdg-pill.fam-yours { background: #faf4e8; color: #a08a58; border: 1px solid #efe4cc; }
+.tdg-pill.fam-done { background: #f2f4f1; color: #7a8878; border: 1px solid #dfe5dd; }
+.tdg-pill.fam-snoozed { background: #f3f0ec; color: #8a7666; border: 1px solid #e6ded4; }
 
-/* the journey column — the meter NAMES THE STAGE rather than counting a percentage, because
-   "60% of a submission" is not a thing anybody can act on. */
-.tdg-jrny { width: 152px; }
+/* the journey meter — INSIDE the content cell now, under the caption. It keeps its full measure
+   because it no longer competes with the title for the rail's width. */
+.tdg-jrny { width: 172px; max-width: 100%; margin-top: 9px; }
 
 /* the three-stage journey: query out · partial in hand · full in hand */
 .tdg-steps { display: flex; align-items: center; gap: 5px; }
@@ -329,13 +413,10 @@
   white-space: nowrap;
 }
 
-.tdg-age {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8px;
-  letter-spacing: 0.07em;
-  color: #a5988c;
-  white-space: nowrap;
-}
+/* ⚠️ THE AGE INHERITS THE CAPTION'S TYPE rather than restating it — it is a clause on that line
+   now, not a lane with a voice of its own. Only the no-wrap survives: a date fact broken across
+   two lines is unreadable. */
+.tdg-age { white-space: nowrap; }
 
 /* ── THE ROW'S ACTIONS: FOUR ICONS, REVEALED ────────────────────────────────────────────────
    (icon-cluster pack; ref design-refs/todo-iconcluster-v2.html — which SUPERSEDES the splitguard
@@ -608,11 +689,13 @@
   height: 11px;
 }
 
-.tdg-sk.pill { height: 25px; width: 124px; border-radius: 7px; }
-.tdg-sk.tick { height: 20px; width: 20px; border-radius: 50%; }
+/* ⚠️ THE PLACEHOLDERS MATCH THE FOUR TRACKS (P3). `.pill` and `.age` went with their lanes — a
+   skeleton holding shapes the loaded row no longer has is the exact fault this block's own note
+   warns about, pointed the other way. The tick is a rounded square because the real one is. */
+.tdg-sk.tick { height: 18px; width: 18px; border-radius: 6px; }
+.tdg-sk.dot { height: 13px; width: 13px; border-radius: 50%; }
 .tdg-sk.t { height: 13px; width: 62%; }
 .tdg-sk.sub { height: 10px; width: 38%; margin-top: 7px; }
-.tdg-sk.age { height: 9px; width: 54px; }
 
 @keyframes tdgShim { to { background-position: -200% 0; } }
 

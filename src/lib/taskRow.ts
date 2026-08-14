@@ -27,10 +27,18 @@ import { BoardCard } from "./todoBoard";
 import { isSweepCard, TodoColumnId } from "./todoColumns";
 import { cardMenu, MenuItemId } from "./todoMenu";
 import { completionVia } from "./todoActions";
+import { liveFamily } from "./todoFamily";
 
 /* ── the kind pill ─────────────────────────────────────────────────────────────────────────── */
 
-export type PillTone = "offer" | "wait" | "rr" | "sweep" | "stale" | "yours" | "note" | "snoozed" | "done";
+/**
+ * ⚠️ THE TONE IS THE FAMILY NOW, NOT THE KIND (rail + workspace, Phase 3). Nine per-kind hues
+ * became five family tones, and the WORDS did not change — the pill still says Offer, Chase,
+ * Data gap, Stale, because that is what a pill is for. Nine hues were never legible as nine
+ * meanings; the words always were. The paint lives in `todoFamily`'s FAMILY_PILL with every other
+ * colour vocabulary in this app, so the row component restates no hex.
+ */
+export type PillTone = "urgent" | "housekeeping" | "yours" | "done" | "snoozed";
 
 export interface RowPill {
   /** The words — always the card's own derived `kind`. */
@@ -55,17 +63,46 @@ export interface RowPill {
  */
 export function rowPill(c: BoardCard, column: TodoColumnId): RowPill | null {
   if (!c.kind) return null;
+  /* ⚠️ THE TWO STATES ARE STILL CONSULTED FIRST, and the live case now DEFERS TO `liveFamily`
+     rather than re-deciding. That is the whole gain: the pill, the group heading and the sidebar
+     badge cannot file one card three ways, because there is one answer to "what family is this"
+     and this reads it. The nine-branch ladder that used to sit here was a fourth derivation of
+     facts `liveFamily` already holds. */
   const tone: PillTone =
     column === "done" || c.done ? "done"
     : column === "snoozed" ? "snoozed"
-    : c.nature === "note" ? "note"
-    : c.userTaskId || c.nature === "task" ? "yours"
-    : isSweepCard(c) ? "sweep"
-    : c.taskType === "no_response_close" ? "stale"
-    : c.taskType === "offer_received" ? "offer"
-    : c.taskType === "revise_resubmit" ? "rr"
-    : "wait";
+    : liveFamily(c);
   return { label: c.kind, tone };
+}
+
+/* ── the title's two weights ───────────────────────────────────────────────────────────────── */
+
+export interface RowTitleParts {
+  before: string;
+  /** The emphasised span — empty when there is nothing to emphasise. */
+  name: string;
+  after: string;
+}
+
+/**
+ * ⚠️ THE NAME IS BOLD INSIDE A REGULAR TITLE, AND THE SPLIT IS DATA-BACKED (Phase 3). `BoardCard`
+ * carries `who` — "the emphasised name (agent / subject) inside the title", its own words — so
+ * this finds that substring rather than guessing at one. No markup is built and nothing is parsed:
+ * the caller renders three plain strings.
+ *
+ * ⚠️ THE VERB IS NOT SEPARABLE AND SO IT IS NOT BOLDED. The ref bolds the verb as well, but its
+ * fixtures carry `<b>` inside the title string; the app composes the title as one sentence
+ * ("Send your full to Bethany Carter") and records only the NAME as a distinct field. Bolding a
+ * leading word count would be a guess that breaks on the first title that does not start with its
+ * verb — "Bethany Carter has made an offer". One weight change, on the half the data can prove.
+ *
+ * Absent `who`, or a `who` that does not occur in the title, yields the whole title unemphasised:
+ * a user's own task has no subject, and a fabricated emphasis is worse than none.
+ */
+export function rowTitleParts(c: BoardCard): RowTitleParts {
+  const i = c.who ? c.title.indexOf(c.who) : -1;
+  if (i === -1) return { before: c.title, name: "", after: "" };
+  return { before: c.title.slice(0, i), name: c.who, after: c.title.slice(i + c.who.length) };
 }
 
 /* ── the primary verb's name ───────────────────────────────────────────────────────────────── */
@@ -141,36 +178,36 @@ export function rowJourney(c: BoardCard, column: TodoColumnId): RowJourney | nul
   }
 }
 
-/* ── the cluster's first glyph (icon-cluster pack; ref design-refs/todo-iconcluster-v2.html) ──── */
+/* ── the reversal glyph (rail + workspace, Phase 3) ───────────────────────────────────────────── */
 
 /**
- * ⚠️ ONLY THE FIRST GLYPH VARIES. Positions two, three and four are the same three deeds on every
- * row in the app, which is what makes them muscle memory after a day; if the first one moved too,
- * there would be nothing to learn.
+ * ⚠️ THE VARYING FIRST GLYPH IS RETIRED, AND THE CUT FALLS ON KIND-VERSUS-STATE. It used to name
+ * every row's primary deed in seven marks; the workspace pane made all seven redundant at once,
+ * because on the three KIND groups the deed is now something an existing control already does:
  *
- * ⚠️ AND IT DERIVES FROM THE SAME FACTS AS `rowPrimaryLabel`, DELIBERATELY. The glyph and the word
- * are two renderings of ONE answer — "what does this row's primary do" — so they are computed from
- * the same branches in the same order. A separate table would be a second answer, and the failure
- * would be a plane icon on a button whose tooltip says "Close".
+ *   urgent, housekeeping  →  it fired `openDock`, which CLICKING THE ROW does
+ *   yours                 →  it fired the tick, which THE CHECKBOX IN LANE 1 does
  *
- * ⚠️ WEIGHT-BY-GROUP IS RETIRED WITH THE SPLIT BUTTON, and the group thread went with it. The kind
- * is more precise than the group ever was: `now` held sends, closes and offers together, so a
- * group-derived glyph could not have distinguished them.
+ * A control whose only job is to repeat its neighbour is what the icon-cluster rewrite existed to
+ * remove; it had simply reappeared one layer up once the pane made the row's deed visible.
+ *
+ * ⚠️ WHAT SURVIVES IS TWO STATE GROUPS WITH ONE CONSTANT GLYPH EACH — Done undoes, Snoozed
+ * returns. Neither varies WITHIN its group, so the objection that killed the varying glyph does
+ * not reach them: there is nothing to learn, because on any row that has one it is always the
+ * same mark. Both are reversals of a state rather than acts on a record, which is why they are
+ * the two that have no other home on the row.
+ *
+ * ⚠️ AND `↵` NO LONGER FOLLOWS IT. The key used to be bound to this glyph's deed exactly; it is
+ * bound to OPEN now, on every group, because that is the row's deed on all five. A key that meant
+ * open on three groups and reverse on two would be worse than any icon asymmetry — an icon has a
+ * glyph and a tooltip to explain itself, and a key has neither.
  */
-export type PrimaryIcon = "send" | "close" | "task" | "offer" | "sweep" | "undo" | "return";
+export type ReversalIcon = "undo" | "return";
 
-export function rowPrimaryIcon(c: BoardCard, column: TodoColumnId): PrimaryIcon {
-  /* the branch order is `rowPrimaryLabel`'s, line for line */
+export function rowReversalIcon(c: BoardCard, column: TodoColumnId): ReversalIcon | null {
   if (column === "done" || c.done) return "undo";
   if (column === "snoozed") return "return";
-  if (isSweepCard(c)) return "sweep";
-  if (c.taskType === "no_response_close") return "close";
-  /* ⚠️ THE REF NAMES FOUR AND THE APP RAISES SEVEN. Done, Snoozed and sweeps are states the ref's
-     three panels do not draw, and forcing them into one of the four would have put a paper plane
-     on "Undo". They get their own marks, recorded here rather than invented at the call site. */
-  if (c.taskType === "offer_received") return "offer";
-  if (completionVia(c) === "user-task") return "task";
-  return "send";
+  return null;
 }
 
 /* ── the split button's menu (fix pack Fix 4; ref design-refs/todo-splitguard-v1.html) ────────── */

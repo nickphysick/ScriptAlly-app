@@ -2111,6 +2111,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           hkExpanded={hkExpanded}
           onToggleHk={() => setHkExpanded(true)}
           onOpen={(c) => openDock(dockAllCards(), c.key)}
+          /* ⚠️ THE MARK IS THE PANE'S OWN KEY, NOT A SECOND SELECTION. The rail marks what the
+             workspace is showing, so the two cannot disagree about which one is current — and
+             when nothing is docked, nothing is marked. */
+          selectedKey={dock?.activeKey}
           onTick={(c) => void quickDone(c)}
           onVerb={(c, v, column) => performCardVerb(c, v, column)}
           /* ⚠️ THE DIAL DECIDES NOTHING — it hands over an ALREADY-CLAMPED value and the page

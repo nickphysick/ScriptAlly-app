@@ -21,7 +21,8 @@ import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
 import { BoardColumns } from "../../lib/todoColumns";
 import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow } from "../../lib/todoGroups";
-import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, rowPrimaryIcon } from "../../lib/taskRow";
+import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, rowReversalIcon, rowTitleParts } from "../../lib/taskRow";
+import { FAMILY_PILL } from "../../lib/todoFamily";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { TodoColumnId } from "../../lib/todoColumns";
 import { SNOOZE_STOPS, reachableStops, snoozeDateLabel } from "../../lib/todoActions";
@@ -112,16 +113,32 @@ describe("⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID — never `display
     expect(decls(list)).not.toContain("display: contents");
   });
 
-  it("the six tracks, exactly — tick · title · pill · journey · age · verbs", () => {
-    expect(rule(".tdg-row {")).toContain(
-      "grid-template-columns: 34px minmax(0, 1fr) 144px 172px 104px 152px",  // 216 → 118 with the split (Fix 4)
-    );
+  /**
+   * ⚠️ FOUR TRACKS SINCE THE RAIL (P3) — checkbox · StatusDot · content · actions. Six lanes at
+   * the pack's own sizes left the TITLE 33px inside a 440px rail, and the title is the only part
+   * of a row that says what the row is. The pill and the age became caption clauses and the
+   * journey meter moved inside the content cell; neither was ever a column of facts you scan
+   * down.
+   */
+  it("the four tracks, exactly — checkbox · dot · content · actions", () => {
+    expect(rule(".tdg-row {")).toContain("grid-template-columns: 20px 15px minmax(0, 1fr) auto");
   });
 
-  it("ONE flexible track: the title's. Everything else is fixed, so figures line up down the panel", () => {
+  it("ONE flexible track: the content's. The two marks are fixed and the cluster sizes itself", () => {
     const tracks = rule(".tdg-row {").match(/grid-template-columns:([^;]*)/)![1];
     expect(tracks.match(/fr\b/g)).toHaveLength(1);
     expect(tracks).toContain("minmax(0, 1fr)"); // ⚠️ the ZERO min — a bare 1fr floors at min-content
+  });
+
+  /**
+   * ⚠️ THE LANES ALIGN TO THE CONTENT'S FIRST LINE, NOT ITS MIDDLE. The content cell is three
+   * stacked things now (title, caption, meter) while its neighbours are single marks — `center`
+   * would float the checkbox and the dot against the middle of a three-line cell, which reads as
+   * two controls that have slipped rather than two marks belonging to the title.
+   */
+  it("the row aligns its lanes to the top", () => {
+    expect(rule(".tdg-row {")).toContain("align-items: start");
+    expect(rule(".tdg-cc {")).toContain("align-items: flex-start");
   });
 
   it("the divider is the ROW's own inset line, and it yields to hover rather than cutting across it", () => {
@@ -152,8 +169,47 @@ describe("⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED, and the why-line sits 
 
   it("the subtitle is its own block under the title", () => {
     expect(rule(".tdg-sub {")).toContain("margin-top: 5px");
-    const html = render(cols({ todo: [card()] }));
+    const html = render(cols({ todo: [card({ subtitle: "On MURPHY'S DAY OUT" })] }));
+    expect(html).toContain("tdg-sub");
     expect(html.indexOf("tdg-sub")).toBeGreaterThan(html.indexOf("tdg-t"));
+  });
+
+  /**
+   * ⚠️ THE NAME IS THE ONLY THING BOLDED, AND THE SPLIT IS DATA-BACKED (P3). `who` is the card's
+   * own "emphasised name inside the title" field, so nothing is parsed or guessed. The ref bolds
+   * the VERB too, but its fixtures carry `<b>` inside the title string; this app composes the
+   * title as one sentence and records only the name, so bolding a leading word count would break
+   * on the first title that does not start with its verb ("Bethany Carter has made an offer").
+   */
+  it("the title is regular with the NAME at 600 — never Playfair, never a burgundy italic", () => {
+    const t = rule(".tdg-t {");
+    expect(t).toContain("font-weight: 400");
+    expect(t).not.toContain("Playfair");
+    expect(t).not.toContain("italic");
+    expect(rule(".tdg-t b {")).toContain("font-weight: 600");
+    const html = render(cols({ todo: [card({ title: "Send your full to Ada Vane", who: "Ada Vane" })] }));
+    expect(html).toContain("Send your full to <b>Ada Vane</b>");
+  });
+
+  it("⚠️ AN UNMATCHED OR ABSENT `who` EMPHASISES NOTHING — a fabricated bold is worse than none", () => {
+    expect(rowTitleParts(card({ title: "Water the plants", who: "" })))
+      .toEqual({ before: "Water the plants", name: "", after: "" });
+    expect(rowTitleParts(card({ title: "Water the plants", who: "Ada Vane" })))
+      .toEqual({ before: "Water the plants", name: "", after: "" });
+    expect(render(cols({ todo: [card({ title: "Water the plants", who: "" })] }))).not.toContain("<b>");
+  });
+
+  /**
+   * ⚠️ NO PLAYFAIR AND NO BURGUNDY ITALIC ANYWHERE IN A ROW (P3). The stationery register belongs
+   * to the workspace card; the rail is a directory. Asserted over the row's whole block rather
+   * than one selector, because the fault would arrive on whichever child someone reached for.
+   */
+  it("the row's block carries no serif and no italic at all", () => {
+    const i = css.indexOf("/* ── THE ROW ");
+    expect(i, "the row's block marker is gone — this case reads nothing").toBeGreaterThan(-1);
+    const block = decls(css.slice(i, css.indexOf("── THE ROW'S ACTIONS", i)));
+    expect(block).not.toContain("Playfair");
+    expect(block).not.toContain("italic");
   });
 });
 
@@ -209,50 +265,81 @@ describe("⚠️ THE SPLIT BUTTON AND ITS FOUR GUARDS ARE EXTINCT", () => {
 });
 
 /**
- * ⚠️ FOUR ICONS, FIXED WIDTH, NOTHING AT REST (ref todo-iconcluster-v2.html, panel 1).
+ * ⚠️ THREE ICONS ON A KIND ROW, FOUR ON A STATE ROW (P3).
  *
- * Only the FIRST glyph varies. Positions two, three and four are the same three deeds on every row
- * in the app, which is what makes them muscle memory after a day; if the first one moved too there
- * would be nothing to learn.
+ * The varying first glyph is retired. On urgent and housekeeping it fired `openDock`, which
+ * CLICKING THE ROW does; on `yours` it fired the tick, which the checkbox in lane one does. With
+ * the workspace pane showing the row's deed, all three were controls repeating a neighbour.
+ * Done and Snoozed keep ONE CONSTANT verb each — undo, return — so nothing varies within a group.
  */
 describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
-  it("all four render on every row — the cluster is fixed-width whatever a card can do", () => {
+  it("a KIND row carries three — clock, dismiss, more", () => {
     const html = render(cols({ todo: [card({ key: "n1" })] }));
-    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
-    /* 4 × 30 + 3 × 5 = 135, seated in the row's last track */
-    expect(rule(".tdg-row {")).toContain("104px 152px");
+    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(3);
+    expect(html).not.toContain('class="tdg-ic prim"');
     expect(rule(".tdg-ic {")).toContain("width: 30px");
     expect(rule(".tdg-ic {")).toContain("height: 30px");
     expect(rule(".tdg-ic {")).toContain("border-radius: 8px");
     expect(rule(".tdg-acts {")).toContain("gap: 5px");
   });
 
+  /**
+   * ⚠️ THE FIRST SLOT IS CONDITIONAL NOW, AND THE RULE IT BREAKS NO LONGER APPLIES. The
+   * icon-cluster pack fixed that slot so every primary in a panel started at the same x. The
+   * cluster is RIGHT-aligned, so a three-icon row and a four-icon row still END on the same edge
+   * — and Done and Snoozed are whole GROUPS, not rows scattered through one, so no panel ever
+   * mixes the two counts.
+   */
+  it("a STATE row carries four — the reversal, then the same three", () => {
+    /* ⚠️ DONE ONLY, AND THE REASON IS THE SNOOZED FOLD. Snoozed renders as a slim collapsed fold
+       (`snzOpen` is false at rest — "it is the one group you asked for less of"), so its rows are
+       not in the markup to count. Its glyph is asserted from the derivation in the case below;
+       pretending to render it here would be a case that proves nothing while looking thorough. */
+    const html = render(cols({ done: [card({ key: "s-done", done: true })] }));
+    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
+    expect(html).toContain('class="tdg-ic prim');
+    /* the NAME is always the deed's; a dim one appends its reason, which is the dim-in-place
+       grammar and not a different label */
+    expect(html).toContain('aria-label="Undo');
+  });
+
+  it("⚠️ NEITHER STATE GLYPH VARIES WITHIN ITS GROUP — that is why these two survived the cut", () => {
+    expect(rowReversalIcon(card({ done: true }), "done")).toBe("undo");
+    expect(rowReversalIcon(card({ taskType: "offer_received", done: true }), "done")).toBe("undo");
+    expect(rowReversalIcon(card({}), "snoozed")).toBe("return");
+    expect(rowReversalIcon(sweepCard({}), "snoozed")).toBe("return");
+    /* and it is absent on all three KIND groups, whatever the card is */
+    for (const c of [card({}), card({ taskType: "offer_received" }), sweepCard({}), card({ userTaskId: "t1" })]) {
+      expect(rowReversalIcon(c, "todo")).toBeNull();
+    }
+  });
+
   it("⚠️ AN INAPPLICABLE ICON DIMS IN PLACE — it is NEVER removed, or the column would reflow", () => {
     /* An offer cannot be dismissed. The slot stays, greyed, with the reason in its label — an
        absent slot would shift every icon on that row out of line with the rows above it. */
     const offer = render(cols({ todo: [card({ key: "o1", taskType: "offer_received" })] }));
-    expect((offer.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
+    expect((offer.match(/class="tdg-ic/g) ?? [])).toHaveLength(3);
     expect(offer).toContain("tdg-ic dz off");
     expect(offer).toContain("Offers cannot be dismissed");
     expect(rule(".tdg-ic.off")).toBeTruthy();
   });
 
-  it("⚠️ A WRITER'S OWN ITEM COMPLETES FROM ICON 1 — and yes, that duplicates its tick", () => {
-    /* ⚠️ STATED AS A DECISION, because it breaks a rule this page held for two packs: `cardMenu`
-       offers a user task NO primary, on the grounds that the tick is the act and a second verb
-       beside the circle is two names for one thing. That held while the control was a BUTTON
-       PRINTING A WORD. The cluster's first slot is fixed and always drawn, so the alternative is
-       a permanently dead icon down the whole of "Your tasks" — and a dim control that could have
-       worked teaches less than a duplicate that does. The ref draws the tick here too. */
+  /**
+   * ⚠️ THE DUPLICATION THAT WAS ONCE ACCEPTED IS NOW THE REASON THE SLOT IS GONE. This case used
+   * to assert that a writer's own item completed from icon 1 AND from its tick, stated as a
+   * decision: the slot was fixed and always drawn, so the alternative was a permanently dead icon
+   * down the whole of "Your tasks". The slot is no longer fixed, so the alternative is simply not
+   * drawing it — and a control that repeats the checkbox beside it has no argument left.
+   */
+  it("⚠️ A WRITER'S OWN ITEM HAS ONE COMPLETION CONTROL: THE CHECKBOX", () => {
     const mine = card({ key: "u1", userTaskId: "t1", kind: "", taskType: undefined, relatedRecordId: undefined, stream: "do", nature: "task" });
     const html = render(cols({ todo: [mine] }));
-    expect(html).toContain("tdg-tick");                        // the circle
-    expect(html).toContain('class="tdg-ic prim"');             // …and the deed, live, not dim
-    expect(html).toContain('aria-label="Complete"');           // named for what it does
-    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
-    /* the word is `rowPrimaryLabel`'s, in the same branch position as the glyph's */
+    expect(html).toContain("tdg-tick");                        // the circle, and only the circle
+    expect(html).not.toContain('class="tdg-ic prim"');
+    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(3);
+    expect(rowReversalIcon(mine, "todo")).toBeNull();
+    /* the WORD survives for the workspace pane's action row (Phase 5) — only the icon went */
     expect(rowPrimaryLabel(mine, "todo")).toBe("Complete");
-    expect(rowPrimaryIcon(mine, "todo")).toBe("task");
   });
 
   it("⚠️ NOTHING AT REST, AND IT ARRIVES FOR A KEYBOARD TOO", () => {
@@ -275,47 +362,54 @@ describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
 });
 
 /**
- * ⚠️ ONLY THE FIRST GLYPH VARIES, AND IT IS THE SAME DERIVATION AS THE WORD.
- *
- * `rowPrimaryIcon` walks `rowPrimaryLabel`'s branches in the same order, so the glyph and the
- * tooltip are two renderings of ONE answer. A separate table would be a second answer, and the
- * failure mode is a paper plane above a tooltip reading "Close".
+ * ⚠️ TWO GLYPHS, NOT SEVEN (P3). The five KIND marks — send, close, offer, task, sweep — went with
+ * the varying first icon. What is left is one constant reversal per STATE group.
  */
-describe("⚠️ THE FIRST GLYPH IS THE ROW'S KIND, NOT ITS GROUP", () => {
-  it("the four the ref names, off the card's own facts", () => {
-    expect(rowPrimaryIcon(card({}), "todo")).toBe("send");
-    expect(rowPrimaryIcon(card({ taskType: "no_response_close" }), "todo")).toBe("close");
-    expect(rowPrimaryIcon(card({ taskType: "offer_received" }), "todo")).toBe("offer");
-    expect(rowPrimaryIcon(card({ userTaskId: "t1", taskType: undefined, relatedRecordId: undefined }), "todo")).toBe("task");
+describe("⚠️ THE REVERSAL GLYPH IS THE STATE'S, AND THERE ARE ONLY TWO", () => {
+  it("Done undoes, Snoozed returns, and every kind row has none", () => {
+    expect(rowReversalIcon(card({ done: true }), "done")).toBe("undo");
+    expect(rowReversalIcon(card({}), "snoozed")).toBe("return");
+    expect(rowReversalIcon(card({}), "todo")).toBeNull();
+    expect(rowReversalIcon(card({ taskType: "no_response_close" }), "todo")).toBeNull();
+    expect(rowReversalIcon(card({ taskType: "offer_received" }), "todo")).toBeNull();
+    expect(rowReversalIcon(sweepCard({}), "todo")).toBeNull();
   });
 
-  it("…and the three the ref does NOT draw, which the app can still raise", () => {
-    /* Forcing Done, Snoozed and sweeps into one of the four would have put a paper plane on
-       "Undo". They get their own marks rather than an approximation. */
-    expect(rowPrimaryIcon(card({ done: true }), "done")).toBe("undo");
-    expect(rowPrimaryIcon(card({}), "snoozed")).toBe("return");
-    expect(rowPrimaryIcon(sweepCard({}), "todo")).toBe("sweep");
+  it("⚠️ GLYPH AND WORD STILL CANNOT DISAGREE on the two rows that have both", () => {
+    expect(rowReversalIcon(card({ done: true }), "done")).toBe("undo");
+    expect(rowPrimaryLabel(card({ done: true }), "done")).toBe("Undo");
+    expect(rowReversalIcon(card({}), "snoozed")).toBe("return");
+    expect(rowPrimaryLabel(card({}), "snoozed")).toBe("Return");
   });
 
-  it("⚠️ GLYPH AND WORD CANNOT DISAGREE — same branches, same order, asserted in pairs", () => {
-    const pairs: [BoardCard, TodoColumnId, string, string][] = [
-      [card({ done: true }), "done", "undo", "Undo"],
-      [card({}), "snoozed", "return", "Return"],
-      [sweepCard({}), "todo", "sweep", "Start"],
-      [card({ taskType: "no_response_close" }), "todo", "close", "Close"],
-      [card({}), "todo", "send", "Action"],
-    ];
-    for (const [c, col, icon, label] of pairs) {
-      expect(rowPrimaryIcon(c, col)).toBe(icon);
-      expect(rowPrimaryLabel(c, col)).toBe(label);
-    }
+  /**
+   * ⚠️ `rowPrimaryLabel` KEEPS ITS FIVE KIND BRANCHES ON PURPOSE — the workspace pane's action
+   * row needs the named verb in Phase 5. Deleting the words with the glyphs would have taken the
+   * pane's copy with them, and `TodoDock` currently derives the same verb a SECOND time
+   * (`primaryLabel`); Phase 5 reconciles toward this one.
+   */
+  it("the WORDS survive the glyph cut, because the pane needs them", () => {
+    expect(rowPrimaryLabel(sweepCard({}), "todo")).toBe("Start");
+    expect(rowPrimaryLabel(card({ taskType: "no_response_close" }), "todo")).toBe("Close");
+    expect(rowPrimaryLabel(card({}), "todo")).toBe("Action");
   });
+});
 
+describe("⚠️ THE GLYPH MAP AND ITS UNION CANNOT DRIFT", () => {
   it("every key in the derivation has a glyph — a missing one renders `undefined` and throws", () => {
     /* The map is in the component and the keys are in the lib; nothing type-links them at the
        point of use, so the census is the link. */
-    for (const k of ["send", "close", "task", "offer", "sweep", "undo", "return"]) {
-      expect(list, `PRIMARY_GLYPH has no ${k}`).toMatch(new RegExp(`\\n  ${k}:`));
+    for (const k of ["undo", "return"]) {
+      expect(list, `REVERSAL_GLYPH has no ${k}`).toMatch(new RegExp(`\\n  ${k}:`));
+    }
+  });
+
+  it("⚠️ AND THE FIVE KIND GLYPHS ARE GONE FROM THE COMPONENT, not merely unreferenced", () => {
+    /* An unused import is a map somebody re-wires; the icons were removed from the import list
+       too, so reinstating one is a deliberate act rather than a one-word edit. */
+    expect(list).not.toContain("PRIMARY_GLYPH");
+    for (const glyph of ["Send", "Archive", "Award", "ListChecks"]) {
+      expect(list, glyph).not.toMatch(new RegExp(`\\b${glyph}\\b`));
     }
   });
 });
@@ -362,8 +456,12 @@ describe("⚠️ EVERY ICON CARRIES A TOOLTIP, ON FOCUS AS WELL AS HOVER", () =>
   it("the tip names the deed and shows the key, in the ref's two registers", () => {
     expect(tipSrc).toContain("{hint && <span className=\"tdg-tipk\">{hint}</span>}");
     expect(rule(".tdg-tipk")).toContain("JetBrains Mono");
-    /* the four keys the cluster advertises */
-    for (const k of ['hint="↵"', 'hint="S"', 'hint="X"', 'hint="."']) expect(list).toContain(k);
+    /* ⚠️ THREE KEYS, NOT FOUR (P3). `↵` left the cluster with the varying first icon: it is bound
+       to OPEN now, on every group, so advertising it on a button that exists on two groups out of
+       five would teach a key that means something else everywhere else. The reversal icon carries
+       no hint for exactly that reason. */
+    for (const k of ['hint="S"', 'hint="X"', 'hint="."']) expect(list).toContain(k);
+    expect(list).not.toContain('hint="↵"');
   });
 });
 
@@ -548,12 +646,19 @@ describe("⚠️ ONE SNOOZE SURFACE, AND FOUR WAYS IN", () => {
 /* ── 3. the panels and their headings ───────────────────────────────────────────────────────── */
 
 describe("the panels: white sheets separated by SPACE, with the heading outside and above", () => {
-  it("the panel's own measures", () => {
+  /**
+   * ⚠️ THE PANEL DISSOLVED WITH THE SPLIT (P3). It was a white sheet of paper on a CREAM page; the
+   * rail is white now, so a white card with a hairline and a lift sat on its own colour and read
+   * as a box drawn for no reason. The element survives — the fold's stagger and the skeleton both
+   * hang off it — but it paints nothing, and it keeps no horizontal padding either, because a
+   * second inset would push the selected row's bleeding edge rule off the rail's gutter.
+   */
+  it("the panel paints nothing — the rail IS the sheet now", () => {
     const p = rule(".tdg-panel {");
-    expect(p).toContain("background: #fff");
-    expect(p).toContain("border: 1px solid #ece4d6");
-    expect(p).toContain("border-radius: 16px");
-    expect(p).toContain("padding: 6px 16px");
+    expect(p).not.toContain("background");
+    expect(p).not.toContain("border");
+    expect(p).not.toContain("box-shadow");
+    expect(p).toContain("padding: 2px 0");
   });
 
   it("26px between sections, and NO hairline doing the separating", () => {
@@ -593,37 +698,69 @@ describe("the panels: white sheets separated by SPACE, with the heading outside 
   });
 });
 
-describe("⚠️ ONE TONE PER LIVE KIND, AND THE CSS COPY IS LOCKED TO THE TONE UNION", () => {
-  /* ⚠️ SUPERSEDES P2's FOUR FAMILY TONES (9 Aug, P3). The families answer "how urgent is this" —
-     which the group headings already answer, permanently and in words — so a pill repeating it
-     said one thing twice while the thing a pill is FOR went unsaid. The values are the ref's own.
+describe("⚠️ FIVE FAMILY TONES, AND THE CSS COPY IS LOCKED TO `todoFamily`'s MAP", () => {
+  /* ⚠️ SUPERSEDES P3's NINE PER-KIND TONES — and it is not the reversal it looks like. That set
+     was written against a real fault: a family-coloured pill "said one thing twice while the thing
+     a pill is FOR, which kind of work this is, went unsaid". The complaint was about a pill
+     carrying the family in BOTH its colour and its words. Here the WORDS still name the kind —
+     Offer, Chase, Data gap, Stale — and only the hue drops to the family, so the kind is still
+     said, in the register that can actually say it. Nine hues were never legible as nine meanings.
 
-     CSS cannot read TypeScript, so the tones have to be restated in the stylesheet, and the
-     moment they are restated they are a second copy. This is what stops it being a silent one:
-     every member of the `PillTone` union must have a rule, and no rule may exist without a
-     member. That map has shipped wrong twice in this repo, both times through a second copy. */
-  const TONES: PillTone[] = ["offer", "wait", "rr", "sweep", "stale", "yours", "note", "snoozed", "done"];
+     CSS cannot read TypeScript, so the tones are restated in the stylesheet, and the moment they
+     are restated they are a second copy. This is what stops it being a silent one — the same
+     arrangement FAMILY_BAND has lived under since the board. */
+  const TONES: PillTone[] = ["urgent", "housekeeping", "yours", "done", "snoozed"];
 
-  it("every tone has a rule, and every rule has a tone", () => {
-    for (const t of TONES) expect(rule(`.tdg-pill.tone-${t} {`), t).toContain("background:");
-    const declared = [...css.matchAll(/\.tdg-pill\.tone-([a-z]+) \{/g)].map((m) => m[1]);
+  it("every tone has a rule, every rule has a tone, and no `tone-` class survives", () => {
+    for (const t of TONES) expect(rule(`.tdg-pill.fam-${t} {`), t).toContain("background:");
+    const declared = [...css.matchAll(/\.tdg-pill\.fam-([a-z]+) \{/g)].map((m) => m[1]);
     expect(declared.sort()).toEqual([...TONES].sort());
+    expect(css).not.toContain(".tdg-pill.tone-");
   });
 
-  it("the pill takes ONE width, so the meters beside them line up down the panel", () => {
-    expect(rule(".tdg-pill {")).toContain("width: 124px");
+  it("⚠️ THE CSS VALUES ARE `FAMILY_PILL`'s, ASSERTED AGAINST IT rather than against literals", () => {
+    /* A hex on each side goes green the day someone changes both in the same wrong direction. */
+    for (const t of TONES) {
+      const r = rule(`.tdg-pill.fam-${t} {`);
+      expect(r, t).toContain(`background: ${FAMILY_PILL[t].bg}`);
+      expect(r, t).toContain(`color: ${FAMILY_PILL[t].tx}`);
+      expect(r, t).toContain(`border: 1px solid ${FAMILY_PILL[t].bd}`);
+    }
   });
 
-  it("⚠️ THE WORDS ARE THE CARD'S OWN `kind` — only the tone is per-kind", () => {
-    /* A per-kind label table here would be a SECOND vocabulary beside the one the facet chips,
-       the snoozed band and the counting law all already speak. */
-    expect(rowPill(card({ kind: "AGENT WAITING" }), "todo")).toEqual({ label: "AGENT WAITING", tone: "wait" });
-    expect(rowPill(card({ kind: "OFFER", taskType: "offer_received" }), "todo")?.tone).toBe("offer");
-    expect(rowPill(card({ kind: "R&R", taskType: "revise_resubmit" }), "todo")?.tone).toBe("rr");
-    expect(rowPill(card({ kind: "STALE", taskType: "no_response_close" }), "todo")?.tone).toBe("stale");
-    expect(rowPill(sweepCard(), "todo")?.tone).toBe("sweep");
+  it("⚠️ THE TONE IS `liveFamily`'s ANSWER, not a fourth derivation of the same facts", () => {
+    /* The pill, the group heading and the sidebar badge cannot file one card three ways. */
+    expect(rowPill(card({ kind: "OFFER", stream: "do" }), "todo")!.tone).toBe("urgent");
+    expect(rowPill(card({ kind: "STALE", stream: "hk" }), "todo")!.tone).toBe("housekeeping");
+    expect(rowPill(card({ kind: "NOTE", userTaskId: "t1" }), "todo")!.tone).toBe("yours");
+    /* …and the two STATES still beat the family, as they always did */
+    expect(rowPill(card({ kind: "OFFER", stream: "do", done: true }), "done")!.tone).toBe("done");
+    expect(rowPill(card({ kind: "OFFER", stream: "do" }), "snoozed")!.tone).toBe("snoozed");
+  });
+
+  it("the pill is an inline clause now — no fixed width to pad every short kind", () => {
+    const r = rule(".tdg-pill {");
+    expect(r).not.toContain("width: 124px");
+    expect(r).toContain("white-space: nowrap");
+  });
+
+  /**
+   * ⚠️ THE WORDS ARE THE CARD'S OWN `kind`, AND THAT IS WHAT MAKES THE FAMILY TONE HONEST. A
+   * per-kind label table here would be a SECOND vocabulary beside the one the facet chips, the
+   * snoozed band and the counting law all already speak — and it is precisely because the words
+   * still carry the kind that the HUE is free to carry the family. The two halves of the pill say
+   * different things; that is the whole arrangement.
+   */
+  it("⚠️ THE WORDS ARE THE CARD'S OWN `kind` — five kinds, one family, one tone", () => {
+    expect(rowPill(card({ kind: "AGENT WAITING", stream: "do" }), "todo")).toEqual({ label: "AGENT WAITING", tone: "urgent" });
+    /* five DIFFERENT kinds inside the housekeeping lane, each keeping its own word */
+    for (const kind of ["CHASE", "CLOSE", "DATA GAP", "MATERIALS", "STALE"]) {
+      const pill = rowPill(card({ kind, stream: "hk" }), "todo")!;
+      expect(pill.label, kind).toBe(kind);
+      expect(pill.tone, kind).toBe("housekeeping");
+    }
     expect(rowPill(card({ kind: "YOUR TASK", userTaskId: "t" }), "todo")?.tone).toBe("yours");
-    expect(rowPill(card({ kind: "NOTE", nature: "note" }), "todo")?.tone).toBe("note");
+    expect(rowPill(card({ kind: "NOTE", nature: "note" }), "todo")?.tone).toBe("yours");
   });
 
   it("⚠️ STATE BEATS KIND — done and snoozed are consulted before the task type", () => {
@@ -688,13 +825,17 @@ describe("⚠️ THE PRIMARY'S NAME IS PER KIND; WHETHER IT EXISTS IS THE MENU'S
     expect(rowPrimaryLabel(card({ done: true }), "done")).toBe("Undo");
   });
 
-  it("rendered: a stale row says Close, a sweep says Start — in the LABEL, since the verb is a glyph now", () => {
-    /* ⚠️ THE WORD MOVED, IT DID NOT GO. The split button printed the verb; the cluster draws it as
-       an icon, so the name lives in `aria-label` and in the tooltip. That is exactly why the
-       tooltip is not optional — and it is why this case still asserts the words: a glyph whose
-       accessible name went missing would be a button that says nothing to anyone not looking. */
-    expect(render(cols({ todo: [card({ key: "st", stream: "hk", kind: "STALE", taskType: "no_response_close" })] }))).toContain('aria-label="Close"');
-    expect(render(cols({ todo: [sweepCard({ key: "sw" })] }))).toContain('aria-label="Start"');
+  it("⚠️ THE VERB IS NO LONGER ON THE ROW AT ALL — the derivation stands, its icon does not", () => {
+    /* ⚠️ THE WORD MOVED TWICE. The split button PRINTED it; the cluster drew it as a glyph with
+       the name in `aria-label`; the rail draws neither, because on a kind row the deed is what
+       clicking the row does. `rowPrimaryLabel` survives untouched for the workspace pane's action
+       row (Phase 5) — which is the surface that will print the word again. */
+    const stale = render(cols({ todo: [card({ key: "st", stream: "hk", kind: "STALE", taskType: "no_response_close" })] }));
+    expect(stale).not.toContain('aria-label="Close"');
+    expect(render(cols({ todo: [sweepCard({ key: "sw" })] }))).not.toContain('aria-label="Start"');
+    /* the derivation is intact — this is a RENDER change, not a model one */
+    expect(rowPrimaryLabel(card({ taskType: "no_response_close" }), "todo")).toBe("Close");
+    expect(rowPrimaryLabel(sweepCard({}), "todo")).toBe("Start");
   });
 
   /* ⚠️ TWO OF THE REF'S THIRTEEN ROWS ARE NOT BUILT, AND THAT IS THE LAW RATHER THAN AN OMISSION.
@@ -753,10 +894,14 @@ describe("⚠️ THE RIGHT LANE NEVER MIRRORS ITS NEIGHBOUR — one figure, stat
     expect(html).toContain('<span class="tdg-age">—</span>');
   });
 
-  it("the age's clearance is INSIDE its track — six tracks, never a seventh or a column gap", () => {
-    const cr = rule(".tdg-cr {");
-    expect(cr).toContain("padding-right: 10px");
-    expect(rule(".tdg-row {")).not.toContain("gap:");
+  it("⚠️ THE AGE IS A CAPTION CLAUSE NOW, and its old right-aligned cell is gone with its lane", () => {
+    /* `.tdg-cr`'s whole job was keeping a right-aligned figure off the primary button's ink fill.
+       The age sits on the caption line and the button it was avoiding is gone from four groups
+       out of five, so the cell has nothing left to do. */
+    expect(css).not.toContain(".tdg-cr {");
+    expect(rule(".tdg-age {")).toContain("white-space: nowrap");
+    /* it inherits the caption's type rather than restating it — one voice on that line */
+    expect(rule(".tdg-age {")).not.toContain("font-size");
   });
 });
 
@@ -764,9 +909,11 @@ describe("⚠️ THE STRIKE GOES ON THE TITLE, NEVER THE ROW", () => {
   /* If the row is struck, the completion time and the Undo control are struck with it — the two
      things a finished row exists to offer. (Carried from todoFinishing, whose host page changed
      twice while the primitive never did.) */
-  it("the line-through is scoped to the title inside a done row", () => {
-    const r = rule(".tdg-row.done .tdg-t {");
+  it("the line-through is scoped to the title inside a done row — BOTH its weights", () => {
+    /* ⚠️ THE BOLD NAME TAKES IT TOO, or a struck sentence keeps one word standing upright. */
+    const r = rule(".tdg-row.done .tdg-t,");
     expect(r).toContain("text-decoration: line-through");
+    expect(r).toContain(".tdg-t b");
     expect(css).not.toMatch(/\.tdg-row\.done \{[^}]*line-through/);
   });
 });

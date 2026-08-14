@@ -123,16 +123,29 @@ describe("⚠️ THE FOCUSED ROW IS THE BROWSER'S OWN FOCUS", () => {
  * and it would be a quiet lie, because nobody checks a shortcut against a picture.
  */
 describe("⚠️ EACH CLUSTER KEY CALLS WHAT ITS ICON CALLS", () => {
-  it("`↵` and icon 1 are ONE function — they used to be two, and they disagreed", () => {
-    /* Enter called `onOpen(c)` — the dock, whatever the row was — while the control resolved a
-       per-column leaf. On a Done row the button said "Undo" and the key opened the dock. */
-    expect(list).toContain("const firePrimary = (c: BoardCard, column: TodoColumnId) => {");
-    expect(list).toContain("onFire={() => firePrimary(c, column)}");
-    expect(list).toContain('if (action === "primary") { firePrimary(c, column); return; }');
-    expect(code(list)).not.toContain('if (action === "primary") { onOpen(c); return; }');
-    /* and ONE derivation of which leaf the primary is, read by both */
+  /**
+   * ⚠️ `↵` OPENS, ON EVERY GROUP — AND THAT IS THE OPPOSITE OF WHAT THIS CASE USED TO ASSERT
+   * (rail + workspace, Phase 3). The old binding tied the key to icon 1's deed exactly, which was
+   * right while icon 1 existed on every row: the key and the picture reached one call, so the
+   * tooltip taught the shortcut.
+   *
+   * Icon 1 is gone from the three KIND groups, so that binding would now mean the key REVERSED on
+   * Done and Snoozed and OPENED everywhere else — two deeds behind one key, with no glyph and no
+   * tooltip to say which you were about to get. An icon can explain itself; a key cannot. So the
+   * key follows the ROW'S deed, which is "open it in the pane" on all five groups, and the
+   * reversal icons deliberately advertise no key at all.
+   *
+   * The rule the old case protected is untouched: a key and the icon above it must never reach
+   * subtly different calls. There is simply no icon above this key any more.
+   */
+  it("`↵` opens the row in the pane, on every group — and advertises no icon it could contradict", () => {
+    expect(list).toContain('if (action === "primary") { onOpen(c); return; }');
+    expect(code(list)).not.toContain("firePrimary");
+    /* the reversal carries no `hint`, so no tooltip teaches a key that means something else */
+    expect(list).not.toContain('hint="↵"');
+    /* and the reversal's own fire path is still ONE derivation of which leaf it is */
+    expect(list).toContain("const fireReversal = (c: BoardCard, column: TodoColumnId) => {");
     expect(list).toContain("const primaryId = (c: BoardCard, column: TodoColumnId): MenuItemId | null =>");
-    expect(list).toContain("const primary = primaryId(c, column);");
   });
 
   it("`S`, `X`, `.` and `O` each reach the icon's own handler, with the icon's own permission", () => {
@@ -188,9 +201,25 @@ describe("⚠️ SELECTION IS STILL NOT BUILT — and `x` is no longer free for 
     expect(lib).toContain("`x` is taken");
   });
 
-  it("⚠️ THE ROW'S `.sel` STATE IS NOT SHIPPED EITHER — a state with no producer is dormant code", () => {
+  /**
+   * ⚠️ `.sel` NOW HAS A PRODUCER, AND THAT IS WHY IT SHIPS (rail + workspace, Phase 3). The rule
+   * was forbidden while nothing could set it — a state with no producer is dormant code. The
+   * workspace pane supplies one: `selectedKey` is the DOCK'S OWN `activeKey`, so the rail marks
+   * exactly what the pane is showing and the two cannot hold different ideas of "the current
+   * one". The lock is inverted rather than deleted — the rule and its producer must ship together
+   * in BOTH directions, which is the thing the original was protecting.
+   *
+   * ⚠️ THIS IS STILL NOT ROW SELECTION IN THE BATCH SENSE. There is no multi-select, `x` is still
+   * dismiss, and the cases above stand unchanged.
+   */
+  it("⚠️ `.sel` SHIPS WITH ITS PRODUCER, OR NOT AT ALL — asserted both ways", () => {
     const groupsCss = readFileSync(join(here, "todoGroups.css"), "utf8");
-    expect(groupsCss).not.toContain(".tdg-row.sel");
+    const listSrc = readFileSync(join(here, "TaskList.tsx"), "utf8");
+    const pageSrc = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    expect(groupsCss).toContain(".tdg-row.sel");
+    expect(listSrc).toContain('c.key === selectedKey ? " sel" : ""');
+    /* the producer is the PANE'S key, not a second selection the list keeps for itself */
+    expect(pageSrc).toContain("selectedKey={dock?.activeKey}");
   });
 });
 

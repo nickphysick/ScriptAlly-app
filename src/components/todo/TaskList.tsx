@@ -18,29 +18,32 @@
  * either changes nothing true.
  *
  * ⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID. Never `display: contents` on the row with the
- * cells promoted to grid items: `contents` deletes the row's box, so hover, focus and any future
- * selected band fracture into six separate rectangles and the divider has nothing to hang off.
- * The rule is load-bearing enough to be tested rather than commented (`tasksList.test.tsx`).
+ * cells promoted to grid items: `contents` deletes the row's box, so hover, focus and the selected
+ * band fracture into separate rectangles and the divider has nothing to hang off. The rule is
+ * load-bearing enough to be tested rather than commented (`tasksList.test.tsx`).
  *
- * ⚠️ WHICH VERB SLOTS FILL IS ASKED OF THE MENU MODEL, NEVER OF A SECOND PER-KIND TABLE. The four
- * slots are fixed tracks and an absent verb leaves its slot standing, so every primary in a panel
- * starts at the same x and an absence is legible. Phase 3 added the per-kind NAMES (Start, Close,
- * Return, Undo) and the pill tones and journeys in `lib/taskRow` — presentation the menu has no
- * opinion about. The split is the point: the menu says WHETHER, taskRow says WHAT IT IS CALLED,
- * so the row and the menu cannot disagree about what a card allows.
+ * ⚠️ FOUR TRACKS SINCE THE RAIL (rail + workspace, Phase 3) — checkbox · StatusDot · content ·
+ * actions. The pill and the age lost their lanes to the CAPTION and the journey meter moved
+ * INSIDE the content cell, because at a 440px rail six lanes left the title 33px. Neither was
+ * ever a column of facts you scan down; they are clauses about one row.
+ *
+ * ⚠️ WHICH VERB SLOTS FILL IS ASKED OF THE MENU MODEL, NEVER OF A SECOND PER-KIND TABLE. The
+ * menu says WHETHER, `taskRow` says WHAT IT IS CALLED, so the row and the menu cannot disagree
+ * about what a card allows.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronRight, ChevronDown, Check,
-  Send, Archive, Award, ListChecks, Undo2, RotateCcw, Clock, X, MoreHorizontal,
+  Undo2, RotateCcw, Clock, X, MoreHorizontal,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
 /* P3 — what the row SAYS about its kind: the pill's tone, the primary's name, the journey.
    (Whether a verb exists at all stays `cardMenu`'s answer — see below.) */
-import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, rowPrimaryIcon, PrimaryIcon } from "../../lib/taskRow";
+import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, rowReversalIcon, rowTitleParts, ReversalIcon } from "../../lib/taskRow";
+import { StatusDot } from "../StatusDot";
 import { RowTip, useTipShow } from "./RowTip";
 import { isTickable, completionVia } from "../../lib/todoActions";
 import { listKey, isTypingTarget, KEY_MAP } from "../../lib/taskShortcuts";
@@ -70,6 +73,15 @@ export interface TaskListProps {
   /** ⚠️ THE DIAL'S ONE WRITE — already clamped and re-labelled by `clampSnooze` on its way out,
    *  so the page performs rather than decides, exactly as it does for every ⋯ verb. */
   onSnooze: (card: BoardCard, days: number, when: string) => void;
+  /**
+   * ⚠️ WHAT THE WORKSPACE PANE IS SHOWING — and it is the PANE'S key, never a second selection
+   * the list keeps for itself (rail + workspace, Phase 3). Two surfaces holding their own idea of
+   * "the current one" is the drift this whole page is built against; the rail marks what the pane
+   * has, which is why the mark cannot be wrong.
+   *
+   * Absent means nothing is open, and no row is marked. The rail is legible either way.
+   */
+  selectedKey?: string;
 }
 
 /**
@@ -106,25 +118,34 @@ function offers(groups: ReturnType<typeof cardMenu>, id: MenuItemId): boolean {
 export const RING_MS = 600;
 
 /**
+ * ⚠️ THE TITLE'S TWO WEIGHTS, RENDERED AS NODES RATHER THAN MARKUP. `rowTitleParts` finds `who`
+ * inside `title` — a field the card already carries for exactly this — and this wraps that span.
+ * Nothing is parsed and no HTML is built, so a manuscript called `<b>` is just a title.
+ */
+function titleNode(c: BoardCard): React.ReactNode {
+  const { before, name, after } = rowTitleParts(c);
+  if (!name) return before;
+  return <>{before}<b>{name}</b>{after}</>;
+}
+
+/**
  * ⚠️ THE SKELETON IS THE REAL ROW, WEARING PLACEHOLDERS (sheet 3). It reuses `.tdg-row` and its
- * six tracks — so nothing shifts by a pixel when the data lands. A bespoke skeleton with its own
+ * tracks — so nothing shifts by a pixel when the data lands. A bespoke skeleton with its own
  * measurements would be a second layout to keep in step with the first, and the day they drift is
- * the day the page jumps on load.
+ * the day the page jumps on load. FOUR tracks since Phase 3, and it follows: a skeleton on the old
+ * six would have been a placeholder for a shape the loaded row no longer has, which is precisely
+ * the fault its own note below warns about.
  *
- * ⚠️ ITS ACTION CELL IS EMPTY, AND THAT IS THE FAITHFUL SHAPE. It held a placeholder for the split
- * button; the cluster renders NOTHING at rest, so a placeholder there would show a shape the
- * loaded row does not have. The 152px track still reserves the space, which is the only job that
- * mattered.
+ * ⚠️ ITS ACTION CELL IS EMPTY, AND THAT IS THE FAITHFUL SHAPE. The cluster renders NOTHING at
+ * rest, so a placeholder there would show a shape the loaded row does not have.
  *
  * Two groups, as the ref says: in practice the first arrive and the rest follow without a spinner.
  */
 const SkeletonRow: React.FC = () => (
   <div className="tdg-row" aria-hidden>
     <div className="tdg-cc"><span className="tdg-sk tick" /></div>
-    <div style={{ minWidth: 0 }}><div className="tdg-sk t" /><div className="tdg-sk sub" /></div>
-    <div className="tdg-cc"><span className="tdg-sk pill" /></div>
-    <div className="tdg-cc"><div className="tdg-jrny" /></div>
-    <div className="tdg-cr"><span className="tdg-sk age" /></div>
+    <div className="tdg-cc"><span className="tdg-sk dot" /></div>
+    <div className="tdg-content"><div className="tdg-sk t" /><div className="tdg-sk sub" /></div>
     <div className="tdg-acts" />
   </div>
 );
@@ -150,21 +171,15 @@ interface OpenMenu {
 
 
 /**
- * ⚠️ ONLY THE FIRST GLYPH VARIES — this map is the whole of that variation, and the KEY it reads
- * comes from `rowPrimaryIcon`, which walks the same branches as `rowPrimaryLabel`. Glyph and word
- * are two renderings of one answer, so a plane can never appear over a tooltip reading "Close".
+ * ⚠️ TWO GLYPHS, NOT SEVEN — the reversal marks for the two STATE groups, and nothing else. The
+ * five kind glyphs went with the varying first icon: on urgent and housekeeping it repeated the
+ * row click, on `yours` it repeated the checkbox. `rowReversalIcon` carries the reasoning.
  *
- * ⚠️ lucide-react, THE SET ALREADY IN THIS FILE — no new icon library, and no bare `.ti` class
- * (that collides with Tabler). `Award` carries the offer because the deed is answering something
- * that was won; it is the closest the existing set gets, and it is flagged in the report rather
- * than treated as obvious.
+ * ⚠️ NEITHER VARIES WITHIN ITS GROUP. Every Done row shows Undo and every Snoozed row shows
+ * Return, so there is nothing to learn — which is precisely why these two survived a cut made in
+ * the name of not having to learn a moving glyph.
  */
-const PRIMARY_GLYPH: Record<PrimaryIcon, LucideIcon> = {
-  send: Send,          // record that you sent it — the ref's paper plane
-  close: Archive,      // file a query nobody answered
-  task: Check,         // your own item: the deed is finishing it
-  offer: Award,
-  sweep: ListChecks,   // a walk through a pile, not a single act
+const REVERSAL_GLYPH: Record<ReversalIcon, LucideIcon> = {
   undo: Undo2,
   return: RotateCcw,   // wake something you put away
 };
@@ -313,7 +328,7 @@ const SplitMenu: React.FC<{
   );
 };
 
-export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb, onSnooze, loading = false }) => {
+export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb, onSnooze, selectedKey, loading = false }) => {
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   /* ⚠️ THE DIAL IS THE CLOCK'S SURFACE NOW (P4) — it replaced the ⋯ menu's snooze submenu at THIS
      one call site, which is exactly why the clock was routed through a pre-opened submenu in P2
@@ -471,7 +486,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
        icon is the taught form of the key; if they diverged, the tooltip would be teaching a lie.
        Permission is still asked of `cardMenu`, once, exactly as the icons ask it. */
     const el = rowEls.current.get(c.key);
-    if (action === "primary") { firePrimary(c, column); return; }
+    /* ⚠️ `↵` OPENS, ON EVERY GROUP. It used to fire icon 1's deed exactly, which meant it
+       reversed on Done and Snoozed and acted everywhere else; with the pane, opening IS the row's
+       deed on all five groups. A key that meant two things depending on which group you were in
+       would be worse than any icon asymmetry — an icon has a glyph and a tooltip to explain
+       itself, and a key has neither. Undo and Return stay reachable by icon and by ⋯. */
+    if (action === "primary") { onOpen(c); return; }
     if (action === "snooze") {
       if (el && offers(cardMenu(c, column), "snooze-1")) setDial({ card: c, anchor: el });
       return;
@@ -529,12 +549,15 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
     : completionVia(c) === "user-task" ? null
     : "action";
 
-  /** ⚠️ ICON 1 AND `↵` ARE THE SAME DEED, so they are the same call. */
-  const firePrimary = (c: BoardCard, column: TodoColumnId) => {
+  /**
+   * ⚠️ THE REVERSAL FIRES ONLY WHERE THERE IS ONE — Done undoes, Snoozed returns, and nothing
+   * else has this icon at all. `↵` no longer arrives here: the key is bound to OPEN on every
+   * group now, because that is the row's deed on all five. The comment that used to bind icon 1
+   * and the key to one deed is struck rather than edited; it was true and is not now.
+   */
+  const fireReversal = (c: BoardCard, column: TodoColumnId) => {
     const id = primaryId(c, column);
     if (id) fire(c, column, id);
-    /* the writer's own item: no menu verb, the deed IS the completion (icon-cluster P2) */
-    else if (isTickable(c) && !c.done) tick(c);
   };
 
   /* ⚠️ THE GROUP IS THREADED, AND `groupColumn` CANNOT CARRY IT. That function collapses five
@@ -549,19 +572,11 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
     const pill = rowPill(c, column);
     const journey = rowJourney(c, column);
 
-    /* ⚠️ THE PRIMARY. THE MENU SAYS WHETHER, `taskRow` SAYS WHAT IT IS CALLED. Absent where the
-       TICK IS THE ACT: a writer's own item is finished by ticking it, so a second verb beside the
-       circle would be two names for one act.
-       ⚠️ AND IT NO LONGER CARRIES A `ghost` FLAG. It briefly did, meaning "Undo on a finished row
-       is a way back rather than an act" — a ROW-STATE reason wearing the same class the GROUP
-       weight now sets. One class with two reasons behind it is one that eventually contradicts
-       itself, so the row-state flag is deleted and Done reaches the outlined weight the honest
-       way: it is not the urgent group. Same pixels, better rule. */
-    const primary = primaryId(c, column);
+    /* ⚠️ THE REVERSAL, ON THE TWO STATE GROUPS ONLY (Phase 3). On the three KIND groups the old
+       first icon repeated a control already on the row — the row click, or the checkbox in lane
+       one — so it is gone from them; Done and Snoozed keep one constant verb each. */
+    const reversal = rowReversalIcon(c, column);
 
-    /* ⚠️ THE FOUR SLOTS ARE RETIRED (fix pack Fix 4). Snooze and dismiss are in the split's menu
-       now, and with every row carrying ONE identical control the empty-slot alignment device has
-       nothing left to align — so it is deleted rather than left inert. */
     const tickable = isTickable(c);
 
     return (
@@ -569,7 +584,8 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
         key={c.key}
         data-tdgkey={c.key}
         ref={(el) => { if (el) rowEls.current.set(c.key, el); else rowEls.current.delete(c.key); }}
-        className={`tdg-row${c.done ? " done" : ""}${pending.has(c.key) ? " pend" : ""}${rung.has(c.key) ? " rung" : ""}`}
+        className={`tdg-row${c.key === selectedKey ? " sel" : ""}${c.done ? " done" : ""}${pending.has(c.key) ? " pend" : ""}${rung.has(c.key) ? " rung" : ""}`}
+        aria-current={c.key === selectedKey || undefined}
         aria-busy={pending.has(c.key) || undefined}
         role="button"
         tabIndex={0}
@@ -598,73 +614,80 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           )}
         </div>
 
-        <div style={{ minWidth: 0 }}>
-          <div className="tdg-t">{c.title}</div>
-          {/* the why-line sits BENEATH the title rather than competing for its width */}
+        {/* ⚠️ LANE 2 — THE REAL StatusDot, NEVER A RECREATION (the app-wide law). 13px is the
+            dense-timeline override, above the component's own 12px floor.
+            ⚠️ A CARD WITHOUT A STATUS GETS THE IDLE RING, NOT A DEFAULT DOT. Housekeeping and the
+            writer's own items carry no `status` — drawing any pipeline dot for them would state a
+            position in a submission that does not exist. The dashed ring says "not on that path",
+            which is the true thing. */}
+        <div className="tdg-cc">
+          {c.status
+            ? <StatusDot status={c.status} overrideSize={13} decorative />
+            : <span className="tdg-idle" aria-hidden />}
+        </div>
+
+        <div className="tdg-content">
+          <div className="tdg-t">{titleNode(c)}</div>
+          {/* the why-line — the manuscript, or the agency. It sits BETWEEN the title and the
+              caption because it is prose about this row, where the caption is its filing. */}
           {(c.subtitle || c.record) && <div className="tdg-sub">{c.subtitle || c.record}</div>}
-        </div>
-
-        <div className="tdg-cc">
-          {/* ⚠️ GUARDED AT THE DERIVATION: `rowPill` returns null where a card has no kind, so an
-              empty pill — chrome with nothing in it, which reads as a load failure rather than an
-              absence — cannot be drawn from here. The WORDS are the card's own derived `kind`;
-              only the tone is per-kind. */}
-          {pill && <span className={`tdg-pill tone-${pill.tone}`}>{pill.label}</span>}
-        </div>
-
-        <div className="tdg-cc">
-          {/* ⚠️ THE METER NAMES THE STAGE, NOT A PERCENTAGE — except for a sweep, where the count
+          {/* ⚠️ ONE CAPTION LINE, ABSORBING THE PILL AND THE AGE (Phase 3). Both had a lane of
+              their own; at 440px there is no room for six tracks, and neither was ever a COLUMN
+              of facts you scan down — they are two clauses about this row. The pill leads because
+              it says what kind of thing this is; the date fact follows because it says when.
+              ⚠️ THE SWEEP'S EM DASH SURVIVES THE MOVE, and so does its reason: an unstarted
+              sweep's meter label IS `c.due` ("16 TO FIX"), so printing the age here too would
+              state one figure twice on one line — closer together than when they were lanes
+              apart, not further. */}
+          <div className="tdg-cap">
+            {pill && <span className={`tdg-pill fam-${pill.tone}`}>{pill.label}</span>}
+            <span className="tdg-age">{sweep ? "—" : c.due}</span>
+          </div>
+          {/* ⚠️ THE METER SITS INSIDE THE CONTENT CELL NOW, UNDER THE CAPTION — it stopped being a
+              lane. It keeps its full 172px measure under a full-width title instead of competing
+              with one for a 440px rail; five lanes of the pack's sizes left the title 33px.
+              ⚠️ THE METER NAMES THE STAGE, NOT A PERCENTAGE — except for a sweep, where the count
               IS the fact ("5 OF 16 DONE"). The two never appear together: a pile has no journey
               and a journey has no pile. */}
-          <div className="tdg-jrny">
-            {sweep ? (
-              <>
-                <div className="tdg-bar" aria-hidden><i style={{ width: `${fig!.pct}%` }} /></div>
-                <div className="tdg-stlab">{fig!.label}</div>
-              </>
-            ) : journey && (
-              <>
-                <div className="tdg-steps" aria-hidden>
-                  {journey.stages.map((s, i) => <span key={i} className={`tdg-stp ${s}`} />)}
-                </div>
-                <div className="tdg-stlab">{journey.label}</div>
-              </>
-            )}
-          </div>
+          {(sweep || journey) && (
+            <div className="tdg-jrny">
+              {sweep ? (
+                <>
+                  <div className="tdg-bar" aria-hidden><i style={{ width: `${fig!.pct}%` }} /></div>
+                  <div className="tdg-stlab">{fig!.label}</div>
+                </>
+              ) : journey && (
+                <>
+                  <div className="tdg-steps" aria-hidden>
+                    {journey.stages.map((s, i) => <span key={i} className={`tdg-stp ${s}`} />)}
+                  </div>
+                  <div className="tdg-stlab">{journey.label}</div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
-        <div className="tdg-cr">
-          {/* ⚠️ THE AGE NEVER ECHOES THE METER BESIDE IT (browser-measured, 9 Aug). A sweep that
-              has not been started yet takes `c.due` as its meter label ("16 TO FIX"), and the age
-              lane read the same field — so the row stated one figure twice, side by side. It is
-              the board's own band law in a new lane: the right lane must not mirror its
-              neighbour. A sweep has no age, and an em dash is what the ref draws there. */}
-          <span className="tdg-age">{sweep ? "—" : c.due}</span>
-        </div>
-
-        {/* ⚠️ FOUR ICONS, FIXED WIDTH, NOTHING AT REST (ref todo-iconcluster-v2.html). The split
-            button is gone — its seam, its arm-before-press rule, its caret target and its two
-            weights were all solving a problem created by putting a compound control in a row
-            sixteen times over. An inapplicable icon DIMS IN PLACE and is inert; it is never
-            removed, so the column cannot reflow between one row and the next. */}
+        {/* ⚠️ THREE ICONS ON A KIND ROW, FOUR ON A STATE ROW, NOTHING AT REST (ref
+            todo-workspace-concept-v3.html; the icon-cluster pack's dim-in-place rule survives
+            intact). An inapplicable icon DIMS IN PLACE and is inert; it is never removed, so the
+            column cannot reflow between one row and the next.
+            ⚠️ AND THE FIRST SLOT IS NOW CONDITIONAL RATHER THAN FIXED, which is the one thing
+            that pack forbade — for a reason that no longer applies. Its fixed slot existed so
+            every primary in a panel started at the same x; the cluster is RIGHT-aligned, so a row
+            with three icons and a row with four still end on the same edge, and Done and Snoozed
+            are whole groups rather than rows scattered through one. */}
         <div className="tdg-acts" onClick={(e) => e.stopPropagation()}>
-          {/* ⚠️ ICON 1 IS THE ONE THAT TAKES OVER THE SURFACE, and that is a decision rather than
-              an inconsistency. Its deed is the DOCK — `openDock` is the app's one entrance, and
-              its own note says two work surfaces would have to agree about what "done" means. An
-              anchored popover here would have been that second surface. So "nothing opens a modal,
-              the list stays visible" holds for icons 2, 3 and 4; icon 1 is the exception, stated.
-              ⚠️ A WRITER'S OWN ITEM COMPLETES DIRECTLY — no dock, no popover. It is the one row
-              where the deed duplicates the tick beside it; the ref draws it that way, and a
-              permanently dead first slot down the whole of "Your tasks" is the worse reading. */}
-          <RowIcon
-            kind="prim"
-            Glyph={PRIMARY_GLYPH[rowPrimaryIcon(c, column)]}
-            label={rowPrimaryLabel(c, column)}
-            hint="↵"
-            enabled={!!primary || (tickable && !c.done)}
-            why="There is nothing to do on this one."
-            onFire={() => firePrimary(c, column)}
-          />
+          {reversal && (
+            <RowIcon
+              kind="prim"
+              Glyph={REVERSAL_GLYPH[reversal]}
+              label={rowPrimaryLabel(c, column)}
+              enabled={!!primaryId(c, column)}
+              why="There is nothing to put back."
+              onFire={() => fireReversal(c, column)}
+            />
+          )}
           <RowIcon
             Glyph={Clock}
             label="Snooze"

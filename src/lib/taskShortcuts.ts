@@ -68,10 +68,16 @@ export function isTypingTarget(target: EventTarget | null): boolean {
 export type ListAction =
   | "down" | "up"        // j / k — move the focused row
   | "tick"               // space — complete, or open the flow where the tick is not the act
-  | "primary"            // enter — fire the row's primary verb (icon 1's deed, exactly)
-  | "snooze"             // s — open the dial on the focused row (icon 2)
-  | "dismiss"            // x — dismiss the row (icon 3); reversible from its receipt
-  | "more"               // . — open the row's menu (icon 4)
+  /* ⚠️ THE NAME IS HISTORICAL AND THE DEED IS NOT (rail + workspace, P3). This was icon 1's deed
+     exactly, back when every row had one. Icon 1 is gone from the three KIND groups, so the key
+     OPENS the row in the workspace pane instead — the one deed that is true on all five groups.
+     The union member keeps its name because renaming it would touch four call sites to say the
+     same thing; what it MEANS is stated here and in the map below, which is what the overlay
+     prints. */
+  | "primary"            // enter — open the focused row in the workspace pane
+  | "snooze"             // s — open the dial on the focused row (icon 1 of the three)
+  | "dismiss"            // x — dismiss the row (icon 2); reversible from its receipt
+  | "more"               // . — open the row's menu (icon 3)
   | "open"               // o — open the query
   | "edit"               // e — the writer's own items only; the row decides, not this
   | "close"              // esc — close the dial, then the menu (the row decides the order)
@@ -144,7 +150,7 @@ export const SELECTION_STILL_NOT_BUILT = true;
 export const KEY_MAP: { key: string; does: string }[] = [
   { key: "J / K", does: "Move down and up the rows" },
   { key: "Space", does: "Tick the focused row — or open its flow, where the tick is not the act" },
-  { key: "Enter", does: "Fire the primary verb — the first icon's deed" },
+  { key: "Enter", does: "Open the focused row in the workspace" },
   { key: "S", does: "Open the snooze dial on the focused row" },
   { key: "X", does: "Dismiss the focused row — undo from the receipt" },
   { key: ".", does: "Open the row's menu" },

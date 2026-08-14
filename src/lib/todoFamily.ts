@@ -77,6 +77,31 @@ export const FAMILY_BAND: Record<BandFamily, { from: string; to: string; bd: str
 };
 
 /**
+ * ⚠️ THE ROW PILL'S PAINT — BY FAMILY, WHILE ITS WORDS STAY THE KIND (rail + workspace, Phase 3;
+ * ref todo-workspace-concept-v3.html `.pill.*`). Restated in todoGroups.css (CSS cannot read TS)
+ * and LOCKED equal there, exactly as FAMILY_BAND is.
+ *
+ * ⚠️ THIS IS NOT THE REVERSAL IT LOOKS LIKE. The nine per-KIND tones this replaces were written
+ * against a real fault — a family-coloured pill "said one thing twice while the thing a pill is
+ * FOR, which kind of work this is, went unsaid". That complaint was about a pill carrying the
+ * family in BOTH its colour and its words. Here the words still name the kind — Offer, Chase,
+ * Data gap, Stale — and only the hue drops to the family. The kind is still said, in the register
+ * that can actually say it: nine hues were never distinguishable as nine meanings anyway, and the
+ * words always were. So the earlier rationale is satisfied rather than overturned.
+ *
+ * `snoozed` rides beside the four families for the same reason `EXTRA_SWATCH` does: a sleeping
+ * card is a state, not a family, and the Snoozed rows need a tone that is neither its lane's
+ * housekeeping nor an invented sixth family.
+ */
+export const FAMILY_PILL: Record<BandFamily | "snoozed", { bg: string; tx: string; bd: string }> = {
+  urgent: { bg: "#fbeee7", tx: "#a05a42", bd: "#f2dccf" },
+  housekeeping: { bg: "#eef1ec", tx: "#5a6e58", bd: "#dfe5dc" },
+  yours: { bg: "#faf4e8", tx: "#a08a58", bd: "#efe4cc" },
+  done: { bg: "#f2f4f1", tx: "#7a8878", bd: "#dfe5dd" },
+  snoozed: { bg: "#f3f0ec", tx: "#8a7666", bd: "#e6ded4" },
+};
+
+/**
  * ⚠️ THE CALENDAR'S PIP TONES LIVE IN THE SAME MODULE AS THE FAMILY MAP (tasks-pages P3) — the
  * one place colour vocabulary is allowed to live, per this file's own history. The tie to the
  * band families is deliberate and visible: `agent` is the urgent pink family at pip strength,
