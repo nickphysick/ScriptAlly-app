@@ -19,6 +19,18 @@ const css = read("../components/shell/f12.css");
 const queries = read("../components/Queries.tsx");
 const code = queries.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
 const cssCode = css.replace(/\/\*[\s\S]*?\*\//g, "");
+/**
+ * ⚠️ STRIP COMMENTS BEFORE READING A DECLARATION. `rule()` slices the RAW stylesheet, so a rule that
+ * opens with an explanatory comment puts `*​/` immediately before its first declaration — and an
+ * anchor of `(?:^|;|{)` then fails to match a property that is plainly there, reporting "declares no
+ * background" about a rule whose background is on the next line. The inverse is worse: prose inside
+ * the comment that happens to read `box-shadow: …` would be extracted as the rule's own value.
+ */
+const declValue = (r: string, prop: string): string => {
+  const body = r.replace(/\/\*[\s\S]*?\*\//g, "");
+  const m = new RegExp("(?:^|;|\\{)\\s*" + prop + "\\s*:\\s*([^;}]+)").exec(body);
+  return m ? m[1].trim() : "";
+};
 const rule = (sel: string): string => {
   const i = css.indexOf("\n" + sel + " {");
   return i < 0 ? "" : css.slice(i, css.indexOf("}", i) + 1);
@@ -123,12 +135,21 @@ describe("§1c · the list is furniture, and selection inverts", () => {
  * literal, so the plate cannot be right by coincidence.
  */
 describe("§1 (fp2) · the hero is a contained plate", () => {
-  const val = (r: string, prop: string): string => {
-    const m = new RegExp("(?:^|;|\\{)\\s*" + prop + "\\s*:\\s*([^;}]+)").exec(r);
-    return m ? m[1].trim() : "";
-  };
+  const val = declValue;
 
-  it("it takes the reading-pane card's radius, rim and ground — by token, not by literal", () => {
+  /**
+   * ⚠️ SUPERSEDED BY FIX PACK 3 §3, AND REWRITTEN RATHER THAN DELETED. This case used to assert
+   * that the plate wore a reading-pane card's EXACT treatment — same radius, rim, ground and
+   * shadow. That was right for the problem it solved (the header had dissolved into a caption) and
+   * wrong for the page: sitting above two sage-capped cards, an identical fourth surface read as
+   * the weakest thing on screen rather than as its subject.
+   *
+   * ⚠️ SO THE LAW INVERTS: the plate must now be DISTINCT from the cards and must out-rank them.
+   * The old assertion is kept in negative form — if the plate ever matches a card again, this fails
+   * — because "make it match the cards" is exactly the edit a future reader would make from the
+   * old lock's wording, and deleting the case would let it happen silently.
+   */
+  it("it is brighter, firmer and higher than a reading-pane card — never identical to one", () => {
     const plate = rule(".f12-heroband");
     const card = rule(".f12-card");
     expect(plate, "the plate rule is missing").not.toBe("");
@@ -136,15 +157,47 @@ describe("§1 (fp2) · the hero is a contained plate", () => {
     /* ⚠️ first-match slicing: prove this is the BASE rule and not the short-viewport override,
        which declares padding alone and would pass every check below vacuously. */
     expect(plate, "rule() found the short-viewport override, not the base rule").toContain("background");
-    for (const prop of ["border-radius", "border", "background"]) {
-      const a = val(plate, prop), b = val(card, prop);
+
+    const g = declValue;
+    for (const prop of ["background", "border", "box-shadow"]) {
+      const a = g(plate, prop), b = g(card, prop);
       expect(a, `the plate declares no ${prop}`).not.toBe("");
-      expect(a, `the plate's ${prop} differs from a reading-pane card's`).toBe(b);
+      expect(a, `the plate's ${prop} fell back to the cards' — it is the subject, not a peer`)
+        .not.toBe(b);
     }
-    expect(val(plate, "box-shadow"), "the plate sits flat while the cards are lifted")
-      .toBe(val(card, "box-shadow"));
-    expect(plate, "the band's closing hairline survived the reversal")
-      .not.toContain("inset 0 -1px 0 var(--hairline)");
+    /* the radius is the ONE thing that must still agree: it belongs to the page's shape language,
+       not to the hierarchy this section is about */
+    expect(g(plate, "border-radius"), "the plate's radius drifted from the cards'")
+      .toBe(g(card, "border-radius"));
+  });
+
+  /**
+   * ⚠️ THE THREE STEPS ARE NAMED, because "distinct" alone would pass on any difference at all —
+   * including a plate that is DIMMER than the cards, which is the fault this section exists to fix.
+   * Ground brighter (`--white` over the cards' `--panel`), rim firmer (`--oatline` over `--line`),
+   * elevation higher (`--sh-2` over `--sh-1`). All four are existing tokens; none is a literal.
+   */
+  it("it reads the brighter ground, the firmer rim and the higher step of the shadow scale", () => {
+    const plate = rule(".f12-heroband");
+    expect(plate, "the plate's ground is no longer the brightest on the page").toContain("var(--white)");
+    expect(plate, "the plate's rim fell back to the cards' hairline").toContain("var(--oatline)");
+    expect(plate, "the plate lost its lift").toContain("var(--sh-2)");
+    expect(plate, "the plate dropped to the cards' elevation").not.toContain("var(--sh-1)");
+  });
+
+  /**
+   * ⚠️ NO SAGE CAP HERE, EVER. A sage band would make the plate a fourth card — a peer of the
+   * things it contains — which is the whole reason elevation was chosen over colour. The cards'
+   * caps are `.f12-chh`; this asserts the plate never grows the band those are drawn with.
+   */
+  it("it is never given a sage cap", () => {
+    const plate = rule(".f12-heroband");
+    for (const t of ["--sage-band", "--sage-edge", "f12-chh"]) {
+      expect(plate, `the plate took ${t} — elevation was chosen over colour precisely to avoid this`)
+        .not.toContain(t);
+    }
+    expect(cssCode, "a sage cap was attached to the plate from outside its own rule")
+      .not.toMatch(/\.f12-heroband[^{,]*(::(before|after))?\s*\{[^}]*sage-band/);
   });
 
   /**

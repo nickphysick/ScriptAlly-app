@@ -1475,10 +1475,30 @@
   display: flex; align-items: center; gap: 15px;
   margin: var(--f12-headgap) 20px 0;
   padding: 14px 17px;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  /* ⚠️ FIX PACK 3 §3 — THE PLATE IS RAISED, AND IT NO LONGER MATCHES THE CARDS. Fix pack 2 gave it
+     a reading-pane card's exact treatment, which fixed the drifting-caption problem and created the
+     next one: sitting above two sage-capped cards, an identical fourth surface read as the WEAKEST
+     thing on the page rather than its subject. This supersedes that lock deliberately — the plate is
+     now one step brighter, one step firmer and one step higher than the cards.
+
+     ⚠️ ELEVATION, NOT COLOUR, AND NEVER A SAGE CAP. A sage band here would make it a fourth card —
+     a peer of the things it contains. Lifting it says these cards belong to this thing, which is
+     what is actually true. Do not add a cap to this element, now or later.
+
+     ⚠️ EVERY VALUE RE-DERIVED AGAINST THE EXISTING SCALE, none copied from the mockup's rgba
+     literals. The ref pairs a plain hairline on the cards with a firmer one on the hero; this token
+     set has the same pair, so the plate takes `--oatline` (#e0d3c1) where the cards take `--line`
+     (#e6dccd). And the ref's lift is a contact shadow plus a soft ambient — which is exactly what
+     `--sh-2` already is, one step above the cards' `--sh-1`, with a contact term identical to the
+     ref's. Reading the scale gets the mockup's shape for free and keeps it theme-safe.
+
+     ⚠️ THE RIM STAYS A BORDER RATHER THAN BECOMING AN INSET RING. The ref draws it as an inset
+     shadow, which would take 2px out of the plate's height — and the height is asserted stable
+     against the status pill's presence. Same line, same weight, no height change. */
+  background: var(--white);
+  border: 1px solid var(--oatline);
   border-radius: var(--r-lg);
-  box-shadow: var(--sh-1);
+  box-shadow: var(--sh-2);
 }
 /**
  * ⚠️ THE AVATAR'S WHOLE SKIN WAS SCOPED TO `.f12-hero`, AND THE BAND IS NOT THAT. `.f12-hero
