@@ -23,7 +23,20 @@ import { BoardCard } from "./todoBoard";
 import { BoardColumns } from "./todoColumns";
 import { liveFamily } from "./todoFamily";
 
-export type TaskGroupId = "now" | "housekeeping" | "yours" | "snoozed" | "done";
+/**
+ * ⚠️ FIVE MEMBERS, TWO NATURES — three KINDS and two STATES, and the rebuild kept both (rail +
+ * workspace, Phase 1). The three kinds answer "what sort of thing is this"; Snoozed and Done
+ * answer "what has happened to it". Collapsing the states into the kinds was considered and
+ * refused: a card is asleep or finished IN ADDITION to being urgent or housekeeping, so folding
+ * them in would file one card under two questions at once.
+ *
+ * ⚠️ `urgent` WAS `now`, AND THE RENAME IS A UNIFICATION RATHER THAN A PREFERENCE. `TODO_LISTS`
+ * (todoRoutes) already shipped the words "urgent / Urgent" while this module said "now / Needs you
+ * now" — two vocabularies for one set, which is the drift every other law on this page exists to
+ * prevent. The id is not stored anywhere (the one browser-storage key that sounds related,
+ * `sa.todoGroupsOpen`, is keyed by SWEEP RULE), so the rename needed no migration.
+ */
+export type TaskGroupId = "urgent" | "housekeeping" | "yours" | "snoozed" | "done";
 
 export interface TaskGroup {
   id: TaskGroupId;
@@ -39,20 +52,28 @@ export interface TaskGroup {
  * yourself, then what is asleep, then what is finished. It descends from "someone is waiting" to
  * "nothing is waiting", which is the only ordering a writer never has to think about.
  */
-export const TASK_GROUP_ORDER: TaskGroupId[] = ["now", "housekeeping", "yours", "snoozed", "done"];
+export const TASK_GROUP_ORDER: TaskGroupId[] = ["urgent", "housekeeping", "yours", "snoozed", "done"];
 
-const META: Record<TaskGroupId, { label: string; description: string }> = {
-  now: {
-    label: "Needs you now",
+/**
+ * ⚠️ THE NAMES LIVE HERE AND NOWHERE ELSE — `TODO_LISTS` imports them rather than restating them.
+ * Two hand-kept lists is precisely how "Needs you now" and "Urgent" came to name one set.
+ *
+ * ⚠️ THE DESCRIPTIONS KEEP THEIR FULL STOPS. The pack's table prints them without one; a table
+ * dropping terminal punctuation is a typographic habit, not a copy instruction, and this module
+ * already carries a lock reading "a sentence, not a label" over exactly these five strings.
+ */
+export const TASK_GROUP_META: Record<TaskGroupId, { label: string; description: string }> = {
+  urgent: {
+    label: "Urgent",
     description: "An agent is waiting, or a date is.",
   },
   housekeeping: {
     label: "Housekeeping",
-    description: "Small tidying the app can see — none of it urgent.",
+    description: "Small tidying the app can see.",
   },
   yours: {
     label: "Your tasks",
-    description: "Things you set yourself, and notes with a date.",
+    description: "Added by you.",
   },
   snoozed: {
     label: "Snoozed",
@@ -76,13 +97,16 @@ export function taskGroups(cols: BoardColumns): TaskGroup[] {
   const live = [...cols.todo, ...cols.today];
   const byFamily = (f: ReturnType<typeof liveFamily>) => live.filter((c) => liveFamily(c) === f);
 
-  const all: TaskGroup[] = [
-    { id: "now", ...META.now, cards: byFamily("urgent") },
-    { id: "housekeeping", ...META.housekeeping, cards: byFamily("housekeeping") },
-    { id: "yours", ...META.yours, cards: byFamily("yours") },
-    { id: "snoozed", ...META.snoozed, cards: cols.snoozed },
-    { id: "done", ...META.done, cards: cols.done },
-  ];
+  /* ⚠️ BUILT FROM `TASK_GROUP_ORDER`, not from a second hand-written list in the same order. The
+     order and the membership were two places to state one sequence, and the group ids are the
+     `liveFamily` values for the three kinds — so the map below is the only thing that has to
+     know a kind from a state. */
+  const cardsFor = (id: TaskGroupId): BoardCard[] =>
+    id === "snoozed" ? cols.snoozed
+    : id === "done" ? cols.done
+    : byFamily(id);
+
+  const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK_GROUP_META[id], cards: cardsFor(id) }));
   return all.filter((g) => g.cards.length > 0);
 }
 
@@ -133,15 +157,20 @@ export interface TaskStat {
  *
  * "Outstanding" is everything live — it is deliberately NOT the sum of the visible groups, because
  * Snoozed is live work that is merely asleep and Done is not outstanding at all.
+ *
+ * ⚠️ THREE OF THE FOUR CHIPS NAME A GROUP, SO THEY READ THE GROUP'S OWN LABEL. They used to be
+ * literals, and one of them ("Needs you now") outlived the group it named — a chip and a heading
+ * counting the same cards under two different words. Only "Outstanding" and "Estimated" are the
+ * chip row's own, because neither is a group.
  */
 export function taskStats(cols: BoardColumns, estimatedMin: number): TaskStat[] {
   const live = [...cols.todo, ...cols.today];
-  const now = live.filter((c) => liveFamily(c) === "urgent").length;
+  const urgent = live.filter((c) => liveFamily(c) === "urgent").length;
   const out: TaskStat[] = [
     { label: "Outstanding", value: String(live.length) },
-    { label: "Needs you now", value: String(now) },
-    { label: "Done today", value: String(cols.done.length) },
-    { label: "Snoozed", value: String(cols.snoozed.length) },
+    { label: TASK_GROUP_META.urgent.label, value: String(urgent) },
+    { label: TASK_GROUP_META.done.label, value: String(cols.done.length) },
+    { label: TASK_GROUP_META.snoozed.label, value: String(cols.snoozed.length) },
   ];
   /* ⚠️ The estimate chip is absent when nothing carries an estimate — "0 min" states an absence
      as a figure and invites the reader to believe the day is empty. (The same rule the retired

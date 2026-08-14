@@ -561,10 +561,28 @@ describe("the panels: white sheets separated by SPACE, with the heading outside 
     expect(rule(".tdg-shd {")).not.toContain("border-bottom");
   });
 
+  /**
+   * ⚠️ NO PLAYFAIR IN A GROUP HEADING (rail + workspace, Phase 1). The heading is a label saying
+   * which pile you are in; the ROWS are the content. An 18px serif over every panel gave the
+   * five headings the same weight as the work under them, and on a 440px rail that is the whole
+   * left-hand column shouting its own filing system. Both headings demote — `.tdg-fold` is
+   * Snoozed's, and one grammar for four panels plus a fold is the point.
+   */
+  it("both group headings are mono caps at 10px / .15em, muted — never Playfair", () => {
+    for (const sel of [".tdg-shd h3 {", ".tdg-fold h3 {"]) {
+      const r = rule(sel);
+      expect(r, sel).toContain('font-family: "JetBrains Mono"');
+      expect(r, sel).toContain("font-size: 10px");
+      expect(r, sel).toContain("letter-spacing: 0.15em");
+      expect(r, sel).toContain("text-transform: uppercase");
+      expect(r, sel).not.toContain("Playfair");
+    }
+  });
+
   it("rendered: the heading precedes its panel and is not inside it", () => {
     const html = render(cols({ todo: [card()] }));
     expect(html.indexOf("tdg-shd")).toBeLessThan(html.indexOf("tdg-panel"));
-    expect(html).toContain("Needs you now");
+    expect(html).toContain("Urgent");
     expect(html).toContain("An agent is waiting, or a date is."); // the group's own description
   });
 
@@ -701,7 +719,7 @@ describe("⚠️ ONLY HOUSEKEEPING FOLDS — and the urgent group and Done never
     const house = g.find((x) => x.id === "housekeeping")!;
     expect(groupSlice(house, false).more).toBe(9 - HOUSEKEEPING_VISIBLE);
     const urgent = taskGroups(cols({ todo: Array.from({ length: 9 }, (_, i) => card({ key: `u${i}` })) }))
-      .find((x) => x.id === "now")!;
+      .find((x) => x.id === "urgent")!;
     expect(groupSlice(urgent, false).more).toBe(0);
   });
 
@@ -766,7 +784,7 @@ describe("the page wires the list to its EXISTING primitives, and to nothing new
   });
 
   it("the group → column map exists because the MENU speaks states, not columns", () => {
-    expect(groupColumn("now")).toBe("todo");
+    expect(groupColumn("urgent")).toBe("todo");
     expect(groupColumn("housekeeping")).toBe("todo");
     expect(groupColumn("yours")).toBe("todo");
     expect(groupColumn("snoozed")).toBe("snoozed");

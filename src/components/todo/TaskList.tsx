@@ -86,7 +86,7 @@ export function groupColumn(id: TaskGroup["id"]): TodoColumnId {
 
 /** The heading dot — the group's own family tone, so the heading and its pills agree. */
 const GROUP_DOT: Record<TaskGroup["id"], string> = {
-  now: "#d98b74",
+  urgent: "#d98b74",
   housekeeping: "#d9c49a",
   yours: "#a8bca4",
   snoozed: "#c4bcb2",

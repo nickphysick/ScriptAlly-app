@@ -12,8 +12,9 @@
 import { describe, it, expect } from "vitest";
 import {
   taskGroups, taskStats, groupSlice, showMoreLabel,
-  TASK_GROUP_ORDER, HOUSEKEEPING_VISIBLE,
+  TASK_GROUP_ORDER, TASK_GROUP_META, HOUSEKEEPING_VISIBLE,
 } from "./todoGroups";
+import { TODO_LISTS, TodoListId } from "./todoRoutes";
 import { BoardCard } from "./todoBoard";
 import { BoardColumns } from "./todoColumns";
 
@@ -31,7 +32,7 @@ const mine = (k: string) => card({ key: k, userTaskId: `u${k}` });
 
 describe("⚠️ five groups, derived — never a second derivation", () => {
   it("the order descends from 'someone is waiting' to 'nothing is waiting'", () => {
-    expect(TASK_GROUP_ORDER).toEqual(["now", "housekeeping", "yours", "snoozed", "done"]);
+    expect(TASK_GROUP_ORDER).toEqual(["urgent", "housekeeping", "yours", "snoozed", "done"]);
   });
 
   it("each card lands in exactly ONE group, and the live groups partition the live cards", () => {
@@ -44,7 +45,7 @@ describe("⚠️ five groups, derived — never a second derivation", () => {
     const gs = taskGroups(c);
     const keys = gs.flatMap((g) => g.cards.map((x) => x.key));
     expect(new Set(keys).size).toBe(keys.length); // no card counted twice
-    const live = gs.filter((g) => ["now", "housekeeping", "yours"].includes(g.id));
+    const live = gs.filter((g) => ["urgent", "housekeeping", "yours"].includes(g.id));
     expect(live.flatMap((g) => g.cards).length).toBe(4); // todo + today, flattened
   });
 
@@ -52,8 +53,8 @@ describe("⚠️ five groups, derived — never a second derivation", () => {
     /* That split asked the writer to PLACE work. The ranked order is the plan now, so the groups
        answer "what kind of thing is this" rather than "where did you put it". */
     const c = cols({ todo: [urgent("a")], today: [urgent("b")] });
-    const now = taskGroups(c).find((g) => g.id === "now")!;
-    expect(now.cards.map((x) => x.key)).toEqual(["a", "b"]);
+    const g = taskGroups(c).find((x) => x.id === "urgent")!;
+    expect(g.cards.map((x) => x.key)).toEqual(["a", "b"]);
     expect(taskGroups(c).map((g) => g.id)).not.toContain("today");
   });
 
@@ -65,14 +66,39 @@ describe("⚠️ five groups, derived — never a second derivation", () => {
     expect(only.map((g) => g.id)).toEqual(["done"]);
   });
 
-  it("every rendered group carries a Playfair name and a PLAIN description, never a caption", () => {
+  it("every rendered group carries a name and a PLAIN description, never a caption", () => {
     const gs = taskGroups(cols({ todo: [urgent("a"), house("b"), mine("c")], snoozed: [card({ key: "s" })], done: [card({ key: "z" })] }));
     expect(gs.map((g) => g.label)).toEqual([
-      "Needs you now", "Housekeeping", "Your tasks", "Snoozed", "Done today",
+      "Urgent", "Housekeeping", "Your tasks", "Snoozed", "Done today",
     ]);
     for (const g of gs) {
-      expect(g.description.length, g.id).toBeGreaterThan(12);
+      expect(g.description.length, g.id).toBeGreaterThan(11);
       expect(g.description, g.id).toMatch(/\.$/); // a sentence, not a label
+    }
+  });
+
+  /**
+   * ⚠️ THE TWO VOCABULARIES, ASSERTED AGAINST EACH OTHER (rail + workspace, Phase 1). `TODO_LISTS`
+   * shipped "Urgent" while this module shipped "Needs you now" — one set of cards, two names, and
+   * nothing anywhere that could notice. The lock reads the LISTS' label back against the group's,
+   * rather than pinning both to a literal: a literal on each side goes green the day someone
+   * changes both in the same wrong direction, which is the failure it is here to prevent.
+   */
+  it("⚠️ TODO_LISTS TAKES ITS WORDS FROM HERE — the two lists cannot name one set differently", () => {
+    const label = (id: TodoListId) => TODO_LISTS.find((l) => l.id === id)!.label;
+    expect(label("urgent")).toBe(TASK_GROUP_META.urgent.label);
+    expect(label("housekeeping")).toBe(TASK_GROUP_META.housekeeping.label);
+    expect(label("yours")).toBe(TASK_GROUP_META.yours.label);
+    expect(label("snoozed")).toBe(TASK_GROUP_META.snoozed.label);
+    /* `notes` is the one row with no group behind it — the Noteboard's undated notes are not a
+       task group, so it keeps a literal rather than a sixth group being invented to source it. */
+    expect(label("notes")).toBe("Notes to self");
+  });
+
+  it("⚠️ THE IDS AGREE TOO, so a rename on one side cannot leave the other pointing at nothing", () => {
+    for (const id of ["urgent", "housekeeping", "yours", "snoozed"] as const) {
+      expect(TASK_GROUP_ORDER, id).toContain(id);
+      expect(TODO_LISTS.map((l) => l.id), id).toContain(id);
     }
   });
 });
@@ -90,7 +116,7 @@ describe("⚠️ only Housekeeping folds — and never what needs you now", () =
 
   it("⚠️ THE URGENT GROUP IS NEVER FOLDED — hiding what needs you now is the one thing forbidden", () => {
     const many = Array.from({ length: 20 }, (_, i) => urgent(`u${i}`));
-    const g = taskGroups(cols({ todo: many })).find((x) => x.id === "now")!;
+    const g = taskGroups(cols({ todo: many })).find((x) => x.id === "urgent")!;
     const { visible, more } = groupSlice(g, false);
     expect(visible).toHaveLength(20);
     expect(more).toBe(0);
@@ -110,7 +136,7 @@ describe("⚠️ the stat chips — one derivation, cards as the unit", () => {
     });
     expect(taskStats(c, 0)).toEqual([
       { label: "Outstanding", value: "4" },
-      { label: "Needs you now", value: "2" },
+      { label: "Urgent", value: "2" },
       { label: "Done today", value: "2" },
       { label: "Snoozed", value: "1" },
     ]);

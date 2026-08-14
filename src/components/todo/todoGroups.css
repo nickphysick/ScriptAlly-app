@@ -125,15 +125,22 @@
   background: #ece4d6;
 }
 
+/* ⚠️ THE GROUP HEADING IS MONO CAPS, NOT PLAYFAIR (rail + workspace, Phase 1). The stationery
+   register belongs to the workspace card; the rail is a directory, and an 18px serif name over
+   every panel gave five headings the same weight as the thing they were heading. Demoted to the
+   page's own label grammar — 10px / .15em, muted — so the ROWS carry the weight and the heading
+   only says which pile you are in. */
 .tdg-shd h3 {
   display: flex;
   align-items: center;
   gap: 10px;
   margin: 0;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 18px;
-  font-weight: 700;
-  color: #2b2118;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8a7d6e;
 }
 
 .tdg-dot {
@@ -517,15 +524,19 @@
   cursor: pointer;
 }
 
+/* Snoozed's fold is a group heading too, so it demotes with the rest — one grammar for all five,
+   or the slim fold becomes the loudest thing on a page whose point is what needs you. */
 .tdg-fold h3 {
   display: flex;
   align-items: center;
   gap: 10px;
   margin: 0;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 16px;
-  font-weight: 700;
-  color: #6b5a4e;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #8a7d6e;
 }
 
 .tdg-foldchev {

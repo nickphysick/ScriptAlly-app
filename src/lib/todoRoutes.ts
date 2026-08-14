@@ -14,6 +14,7 @@
  * you are.
  */
 import { FAMILY_SWATCH, EXTRA_SWATCH } from "./todoFamily";
+import { TASK_GROUP_META } from "./todoGroups";
 
 /* ⚠️ THREE PAGES SINCE 9 Aug — Today is retired (tasks-consolidation P1). The ranked order of the
    one list IS the plan, so a second page over an overlapping subset of the same tasks was the
@@ -69,13 +70,21 @@ export interface TodoList {
    under a semantic ("sage = your live work") that never matched the board's band families, so
    Urgent wore sage and Your-tasks wore pink, the reverse of every card. The tokens are deleted;
    the family rows read todoFamily's FAMILY_SWATCH, and the two non-family rows (notes, snoozed)
-   read its EXTRA_SWATCH so even the adjacents have one home. */
+   read its EXTRA_SWATCH so even the adjacents have one home.
+
+   ⚠️ AND THE WORDS COME FROM `TASK_GROUP_META` FOR THE SAME REASON (rail + workspace, Phase 1).
+   Four of these five name a group the To-do list also heads a panel with, and until now both
+   lists typed the words out — which is how this file read "Urgent" while `todoGroups` read
+   "Needs you now" for the identical set of cards, with nothing anywhere to notice. `notes` keeps
+   a literal because it is the one row with no group behind it: the Noteboard's undated notes are
+   not a task group, and inventing a sixth group to source one string would be the tail wagging
+   the dog. */
 export const TODO_LISTS: TodoList[] = [
-  { id: "urgent", label: "Urgent", swatch: FAMILY_SWATCH.urgent },
-  { id: "housekeeping", label: "Housekeeping", swatch: FAMILY_SWATCH.housekeeping },
-  { id: "yours", label: "Your tasks", swatch: FAMILY_SWATCH.yours },
+  { id: "urgent", label: TASK_GROUP_META.urgent.label, swatch: FAMILY_SWATCH.urgent },
+  { id: "housekeeping", label: TASK_GROUP_META.housekeeping.label, swatch: FAMILY_SWATCH.housekeeping },
+  { id: "yours", label: TASK_GROUP_META.yours.label, swatch: FAMILY_SWATCH.yours },
   { id: "notes", label: "Notes to self", swatch: EXTRA_SWATCH.notes },
-  { id: "snoozed", label: "Snoozed", swatch: EXTRA_SWATCH.snoozed },
+  { id: "snoozed", label: TASK_GROUP_META.snoozed.label, swatch: EXTRA_SWATCH.snoozed },
 ];
 
 /**
