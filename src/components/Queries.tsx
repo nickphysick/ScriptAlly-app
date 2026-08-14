@@ -3493,7 +3493,41 @@ export const Queries: React.FC<{
                   </button>
                 </>
               );
-            })() : null}
+            })() : (
+              /* ⚠️ THE VERBS FADE AND GO INERT RATHER THAN DISAPPEARING (§9). An absent row would
+                 collapse the control cell and shift both panels up the moment a query was chosen —
+                 so the writer's very first click on the list would move the thing they clicked. The
+                 shapes stay, at ~35%, unpressable; the ghost row also states what this column will
+                 offer, which an empty line cannot.
+
+                 ⚠️ AND THEY ARE `disabled`, NOT MERELY FADED. Opacity is a look; `disabled` is what
+                 keeps them out of the tab order, so nothing here can be reached by keyboard and
+                 fired against a query that is not there. `aria-hidden` for the same reason: it is a
+                 shape, and a screen reader should meet the four verbs when they mean something. */
+              <span className="qc-verbs-inert" aria-hidden="true">
+                <button type="button" className="qc-btn qc-btn-pri" disabled tabIndex={-1}>
+                  <svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                  <span>Record response</span>
+                </button>
+                <button type="button" className="qc-btn qc-btn-shrink" disabled tabIndex={-1}>
+                  <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+                  <span>Nudge</span>
+                </button>
+                <span className="qc-sep" />
+                <button type="button" className="qc-btn qc-btn-shrink" disabled tabIndex={-1}>
+                  <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12a9 9 0 1 1-6.2-8.5" /></svg>
+                  <span>Mark closed</span>
+                </button>
+                <button type="button" className="qc-btn qc-btn-shrink qc-btn-danger" disabled tabIndex={-1}>
+                  <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" /></svg>
+                  <span>Delete</span>
+                </button>
+                <span className="qc-sep" />
+                <button type="button" className="qc-btn qc-btn-icon" disabled tabIndex={-1}>
+                  <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+                </button>
+              </span>
+            )}
           </div>
 
           {/* ── List pane (F12, ref queries-hub-v14.html .list): search field only at the top,
@@ -4629,10 +4663,21 @@ export const Queries: React.FC<{
                 </div>
               </div>
             ) : (
-              /* No selection — placeholder fills the pane; the command bar does NOT render (Phase 2). */
-              <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: 32, color: "#9c8878" }}>
-                <Notebook style={{ width: 48, height: 48, color: "rgba(124,58,42,.2)", marginBottom: 8 }} />
-                <span>Select a query to open the reading pane.</span>
+              /* ══ §9 · NOTHING SELECTED ═══════════════════════════════════════════════════════════
+                 ⚠️ IT NAMES THE THREE THINGS THE PANE HOLDS, and that is the whole of the copy's
+                 job. "Select a query to open the reading pane" described the mechanism to someone
+                 who can already see it; this says what they would GET, in the order the pane gives
+                 it — where it stands, what you sent, what you have noted.
+
+                 ⚠️ A MONOLINE MARK, NOT AN ILLUSTRATION. The pane's other states are dense with real
+                 content; an illustrated empty state would be the loudest thing on a screen that is
+                 empty only because nothing has been asked for yet. */
+              <div className="qc-blank">
+                <span className="qc-blankmark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                </span>
+                <h4>Nothing selected</h4>
+                <p>Pick a query on the left to see where it stands, what you sent, and what you&rsquo;ve noted.</p>
               </div>
             )}
           </div>{/* closes qp-pane */}

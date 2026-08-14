@@ -1300,6 +1300,18 @@
    into a form. */
 /* The manuscript's name, heading What you sent: what you sent, OF WHAT. One row, then the two facts
    about the book as a single mono line — not the three-line block a previous pack removed. */
+/* ── §9 · NOTHING SELECTED ────────────────────────────────────────────────────────────────────
+   ⚠️ THE VERBS FADE AND STAY, so the row does not reflow when a query is chosen. The fade is on a
+   WRAPPER, not on each button, because `.qc-btn:disabled` already recolours them and stacking a
+   second dimming on top of the first would make the ghost row paler than intended and drift the
+   moment either changed. One opacity, one place. */
+.qc-verbs-inert { display: inline-flex; align-items: center; gap: 6px; opacity: 0.35; pointer-events: none; }
+.qc-blank { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 40px 20px; }
+.qc-blankmark { width: 70px; height: 70px; display: grid; place-items: center; margin-bottom: 4px; }
+.qc-blankmark svg { width: 50px; height: 50px; stroke: #d6c9ba; fill: none; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.qc-blank h4 { font-family: var(--f12-serif); font-size: 22px; font-weight: 500; color: var(--muted); margin: 0; }
+.qc-blank p { font-size: 12.5px; color: var(--faint); max-width: 330px; line-height: 1.6; margin: 0; }
+
 /* ── §8 · NOTES EXPANDS ───────────────────────────────────────────────────────────────────────
    ⚠️ LIFTED, NOT RELAID. What you sent HIDES rather than shrinking, and the notes card takes a
    deeper cast — so the state reads as one card raised over the column, which is what it is. A card

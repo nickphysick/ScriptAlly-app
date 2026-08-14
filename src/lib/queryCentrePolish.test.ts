@@ -90,8 +90,11 @@ describe("§3 · one button rule, app-wide on this page", () => {
    */
   it("below ~1300 the three secondaries shed their labels, and the primary is not among them", () => {
     expect(css, "the narrow rule is gone").toMatch(/@media \(max-width: 1299\.98px\) \{[\s\S]*?\.qc-phead \.qc-btn-shrink span \{ display: none; \}/);
+    /* ⚠️ THE LIVE ROW ONLY. §9 added an inert twin below it in the same cell, so a slice to the end
+       of the cell counts both and reports six — which this case did, correctly, on the first run
+       after §9 landed. The boundary is the live branch's own close. */
     const cell = code.indexOf('className="qc-phead"');
-    const row = code.slice(cell, code.indexOf("})() : null}", cell));
+    const row = code.slice(cell, code.indexOf("})() : (", cell));
     expect(row, "the slice is empty — this case is testing nothing").toContain("qc-btn");
     /* the primary does not carry the shrinking modifier … */
     expect(row, "the primary was given the shrinking modifier — it would lose its label at 1280")
@@ -256,5 +259,64 @@ describe("§8 · Notes expands", () => {
     expect(code, "the outside-click collapse went").toContain('document.addEventListener("pointerdown", away)');
     expect(code, "a click inside the card would collapse it").toContain("card.contains(e.target)) return");
     expect(code, "the expansion survives a query change").toContain("useEffect(() => { setNotesOpen(false); setNotesFloor(null); }, [selectedQueryId]);");
+  });
+});
+
+
+describe("§9 · nothing selected", () => {
+  it("the pane names what it would hold, in the order it holds it", () => {
+    expect(code, "the empty state is missing").toContain('className="qc-blank"');
+    expect(code, "the heading changed").toContain("<h4>Nothing selected</h4>");
+    expect(code, "the line stopped naming the three things the pane holds")
+      .toContain("where it stands, what you sent, and what you&rsquo;ve noted");
+    /* ⚠️ AND IT DESCRIBES THE RESULT, NOT THE MECHANISM. "Select a query to open the reading pane"
+       explained the interface to someone already looking at it. */
+    expect(code, "the mechanism copy came back").not.toContain("open the reading pane");
+  });
+
+  /**
+   * ⚠️ THE GHOST ROW MIRRORS THE LIVE ONE, and that is the point rather than a nicety: if the two
+   * differ in shape, choosing a query reflows the row the writer has just clicked next to.
+   */
+  it("the verbs fade and stay, in the same shape as the live row", () => {
+    const cell = code.indexOf('className="qc-phead"');
+    const live = code.slice(cell, code.indexOf("})() : (", cell));
+    const ghost = code.slice(code.indexOf('className="qc-verbs-inert"'), code.indexOf("</span>\n            )}", cell));
+    expect(ghost, "the inert row is missing").toContain("qc-btn-pri");
+    for (const verb of ["Nudge", "Mark closed", "Delete"]) {
+      expect(ghost, `${verb} is missing from the inert row — the row would reflow on selection`).toContain(`<span>${verb}</span>`);
+    }
+    /* same counts of every structural part */
+    for (const part of ["qc-btn-shrink", "qc-sep", "qc-btn-icon"]) {
+      const n = (s: string) => (s.match(new RegExp(part, "g")) || []).length;
+      expect(n(ghost), `the inert row has a different number of ${part} — selection would reflow the row`).toBe(n(live));
+    }
+  });
+
+  it("faded is not the same as reachable — the ghosts are disabled and out of the tab order", () => {
+    const ghost = code.slice(code.indexOf('className="qc-verbs-inert"'), code.indexOf('className="qc-verbs-inert"') + 2200);
+    expect((ghost.match(/disabled/g) || []).length, "an inert verb is still pressable").toBe(5);
+    expect((ghost.match(/tabIndex=\{-1\}/g) || []).length, "an inert verb is still tabbable").toBe(5);
+    expect(declValue(rule(".qc-verbs-inert"), "opacity"), "the fade is not ~35%").toBe("0.35");
+    expect(declValue(rule(".qc-verbs-inert"), "pointer-events"), "the ghost row still takes the pointer").toBe("none");
+  });
+
+  /**
+   * ⚠️ THE UNDO IS NOT BUILT, AND THIS RECORDS WHY RATHER THAN PRETENDING IT IS. Neither verb has an
+   * undoable write today: `updateQueryStatus` returns `Promise<void>` with no revert, and
+   * `deleteQuery` is a hard cascade with no restore path. Wiring `showToast`'s `undo` to something
+   * that cannot revert would be a control that lies — worse than the confirm it was meant to
+   * replace — so Delete keeps its counted dialogue and Mark closed keeps its reason menu.
+   *
+   * The shape the work needs: `updateQueryStatus` returns an undo the way `recordResponse` already
+   * does (`result.undo`, which this page's `undoFnRef` already consumes and which correctly DELETES
+   * the activity records rather than appending compensating ones), and Delete waits for a restore
+   * path or a soft delete — which needs a field, a rules allowlist entry and a prod rules deploy.
+   */
+  it("the delete confirm is still the safety, because nothing can yet undo it", () => {
+    expect(code, "the counted delete confirm went before an undo existed to replace it")
+      .toContain('title: "Delete this query?"');
+    expect(code, "a toast promises an undo the write path cannot perform")
+      .not.toMatch(/undoLabel:\s*"Undo"/);
   });
 });
