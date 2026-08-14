@@ -88,6 +88,8 @@ import {
 /* THE CONSOLIDATED PAGE'S OWN DERIVATIONS — groups, stat chips and the eyebrow, all pure and
    locked away from this component (tasks-consolidation P2). */
 import { taskGroups, taskStats, tasksEyebrow, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
+import { paneRestLine } from "../../lib/todoHandoff";
+import { isTerminalStatus } from "../../lib/agentList";
 import { estimateTotal } from "../../lib/todoEstimate";
 import { longDate } from "../../lib/dashboardStats";
 import {
@@ -696,6 +698,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      used to be `active && !anyVisible`, computed over four `v*` sets built with a DIFFERENT
      filter model from the one the rail rendered — two derivations of "is there anything here",
      which could answer differently. This is the same array the rail maps over. */
+  /**
+   * ⚠️ THE PANE IS NEVER PROVISIONALLY EMPTY (Phase 5). On arrival it takes the FIRST open card in
+   * the current filter, so the workspace is doing its job before you touch anything — a blank
+   * right-hand column beside a full rail is a page that looks broken rather than ready.
+   *
+   * ⚠️ ONCE, AND ONLY WHILE NOTHING IS CHOSEN. It fires on the transition from "no selection" to
+   * "there is work", not on every render with a null key — otherwise closing the pane deliberately
+   * would re-open it on the next frame, which is a control that refuses to be used.
+   */
+  const restedOnce = useRef(false);
+  useEffect(() => {
+    if (dockKey || dockable.length === 0) return;
+    if (restedOnce.current) return;
+    restedOnce.current = true;
+    dockPos.current = 0;
+    setDockKey(dockable[0].key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dockable.length, dockKey]);
+
   const dockSig = dockable.map((c) => c.key).join("|");
   const narrowSig = `${chip}|${search.trim().toLowerCase()}|${tagSel ?? ""}`;
   const lastNarrowSig = useRef(narrowSig);
@@ -1317,11 +1338,32 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     />
                   ) : null}
                   onMore={(c) => openFlowCards([c])}
+                  /* ⚠️ THE HAND-OFF READS THE RECORD OR NOTHING. The agent's own fields and the
+                     manuscript's title, looked up by id — never composed from the card's display
+                     strings, which are prose and would put "Send your full to Marcus Reed" in a
+                     subject line. An absent agent yields an absent link, which greys and says so. */
+                  handoff={(c) => {
+                    const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
+                    return { email: ag?.email, website: ag?.website, msTitle: c.msTitle };
+                  }}
                 />
               ) : (
-                /* PROVISIONAL — Phase 5 puts the task card and its own empty state here. It says
-                   what the pane is for and nothing about how the writer is doing. */
-                <p className="tdw-hint">Choose a task to work on it here</p>
+                /**
+                 * ⚠️ THE EMPTY PANE REPORTS, IT DOES NOT CONGRATULATE (Phase 5). "Nothing needs
+                 * you." is the whole verdict; beneath it are two facts and no adjectives — how
+                 * many queries are out, and when the next reply window falls. No exclamation, no
+                 * "great work", no tally of what you cleared: the app states what is true and
+                 * leaves the feeling to the writer.
+                 *
+                 * ⚠️ AND THE SECOND LINE OMITS WHAT IT CANNOT ANSWER. No live queries → no clause
+                 * about them; no window derivable → no date invented. A sentence assembled from
+                 * whichever facts exist beats one padded with zeroes.
+                 */
+                <div className="tdw-none">
+                  <ArtSlot name="desk-clear" className="tdw-noneart" />
+                  <h3>Nothing needs you.</h3>
+                  <p>{paneRestLine(queries.filter((q) => !isTerminalStatus(q.status)), new Date(now))}</p>
+                </div>
               )}
             </div>
           </div>

@@ -23,12 +23,15 @@
  * decides what to OFFER; it never decides what happens.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Clock, MoreHorizontal, X } from "lucide-react";
+import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
 import { bandFamily } from "../../lib/todoColumns";
 import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, SendSpec } from "../../lib/todoDock";
 import { SnoozeDial } from "./SnoozeDial";
+import { handoffFor, panePosition, paneSections, HANDOFF_NOTE } from "../../lib/todoHandoff";
+import { liveFamily } from "../../lib/todoFamily";
+import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
 
 export interface DockTimelineEvent {
@@ -53,6 +56,9 @@ export interface TodoDockProps {
      dock owns its own tier menu now (capped for offers) and reports the CHOSEN date. */
   onSnoozeDays: (card: BoardCard, days: number, when: string) => void;
   onMore: (card: BoardCard) => void;
+  /** The agent's own contact fields and the manuscript's title — the hand-off is built from the
+   *  record or is absent; the pane never invents either. */
+  handoff?: (card: BoardCard) => { email?: string; website?: string; msTitle?: string };
   /** tasks-pages P5 — MOUNT 2 of 3: the item sheet's tag surface. The page supplies the ONE
    *  TagPicker for user-task cards; derived work cannot be tagged, so the slot stays empty. */
   tagsSlot?: (card: BoardCard) => React.ReactNode;
@@ -78,7 +84,7 @@ function primaryLabel(card: BoardCard): string {
 }
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, onPrimary, onSnoozeDays, onMore, tagsSlot,
+  queue, activeKey, onSelect, onClose, timeline, onPrimary, onSnoozeDays, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -89,6 +95,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
      now, so that reason is spent. */
   const snoozeBtn = useRef<HTMLButtonElement | null>(null);
   const [snoozeOpen, setSnoozeOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   /* ⚠️ ART · DOCK-SEAL (board-optimise P3/P4) — the wax-seal moment: struck the instant a flow
      completes, BEFORE the card animates to Done. It is a flourish over a finished act, so it is
      never mounted under reduced motion at all — the CSS stop is the belt to this brace. */
@@ -119,9 +126,44 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const spec = sendSpecFor(card);
   const flow = dockFlowKind(card);
   const events = timeline(card);
+  /* ⚠️ THE SECTIONS ARE DECLARED, NOT BRANCHED. `paneSections` owns which kinds carry what; this
+     component asks whether a section is present and renders it. A card that branched inline on
+     `taskType` would grow a private opinion about each kind. */
+  const sections = paneSections(card);
+  const src = handoff?.(card) ?? {};
+  const hoff = handoffFor(card, src.email, src.website, src.msTitle);
+  const who = card.who || "them";
 
   return (
     <div className="tdk" role="dialog" aria-label="Work surface" onKeyDown={onKeyDown} tabIndex={-1} ref={surfaceRef}>
+      {/* ⚠️ THE HEAD ROW IS OUTSIDE THE CARD, and it is chrome about the card rather than part of
+          it — where you are in the set, and the two steps through it. The arrows walk the SAME
+          `stepQueue` the ↑↓ keys do, so the pointer path and the keyboard path cannot come to mean
+          different things, and they disable at the ends rather than wrapping: a queue that loops
+          has no end, and "last in the queue" is a fact worth arriving at. */}
+      <div className="tdk-head">
+        <span className="tdk-pos">{panePosition(queue, card.key, TASK_GROUP_META[liveFamily(card)].label) ?? ""}</span>
+        <span className="tdk-headgrow" />
+        <button
+          type="button"
+          className="tdk-nav"
+          aria-label="Previous task"
+          disabled={!stepQueue(queue, card.key, -1)}
+          onClick={() => { const to = stepQueue(queue, card.key, -1); if (to) onSelect(to.key); }}
+        >
+          <ChevronLeft size={15} aria-hidden />
+        </button>
+        <button
+          type="button"
+          className="tdk-nav"
+          aria-label="Next task"
+          disabled={!stepQueue(queue, card.key, 1)}
+          onClick={() => { const to = stepQueue(queue, card.key, 1); if (to) onSelect(to.key); }}
+        >
+          <ChevronRight size={15} aria-hidden />
+        </button>
+      </div>
+
       {/* ── THE WORK SURFACE ─────────────────────────────────────────────── */}
       <section className="tdk-w">
         {sealing && <ArtSlot name="dock-seal" />}
@@ -194,6 +236,71 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               <div className="tdk-note">A gap on the agent's record. Filling it opens their profile at the field.</div>
             )}
           </div>
+
+          {/**
+            * ⚠️ THE HAND-OFF — THE POINT OF THE PAGE (Phase 5). ScriptAlly does not send anything:
+            * the send happens in the writer's own email or on the agency's site, and the app's job
+            * is to hand them over with the recipient and subject already composed, then be told
+            * what happened.
+            *
+            * ⚠️ AN AFFORDANCE WITH NOTHING BEHIND IT GREYS AND SAYS WHY — it never disappears and
+            * it is never fabricated. A vanishing control leaves you wondering whether the app
+            * knows something; a greyed one with "No email address on file for this agent" tells
+            * you what to go and fix.
+            *
+            * ⚠️ AND THE LINK IS CALLED WHAT THE RECORD CALLS IT. There is no submissions-page
+            * field on an agent, so this is "Their website" — labelling it a portal would assert
+            * something the data does not know. (The `SAMPLE_PAGES` → "Opening sample" reasoning.)
+            */}
+          {sections.some((x) => x.id === "handoff") && (
+            <div className="tdk-sect">
+              <div className="tdk-sectk">{sections.find((x) => x.id === "handoff")!.label}</div>
+              <div className="tdk-hoff">
+                <a
+                  className={`tdk-hbtn${hoff.mail.href ? "" : " off"}`}
+                  href={hoff.mail.href ?? undefined}
+                  title={hoff.mail.href ? `Open your email client to ${who}` : hoff.mail.why}
+                  aria-disabled={hoff.mail.href ? undefined : true}
+                  onClick={(e) => { if (!hoff.mail.href) e.preventDefault(); }}
+                >
+                  <Mail size={13} aria-hidden /> Open in email
+                </a>
+                <a
+                  className={`tdk-hbtn quiet${hoff.web.href ? "" : " off"}`}
+                  href={hoff.web.href ?? undefined}
+                  target={hoff.web.href ? "_blank" : undefined}
+                  rel="noreferrer"
+                  title={hoff.web.href ? "Opens their website in a new tab" : hoff.web.why}
+                  aria-disabled={hoff.web.href ? undefined : true}
+                  onClick={(e) => { if (!hoff.web.href) e.preventDefault(); }}
+                >
+                  <Globe size={13} aria-hidden /> Their website
+                </a>
+              </div>
+              {/* ⚠️ THE SUBJECT IS OFFERED AS TEXT AS WELL AS A LINK — a writer who composes in a
+                  web client cannot use a `mailto:`, and would otherwise retype it. */}
+              {hoff.subject && (
+                <div className="tdk-subj">
+                  <code>{hoff.subject}</code>
+                  <button
+                    type="button"
+                    className="tdk-copy"
+                    aria-label="Copy the subject line"
+                    title={copied ? "Copied" : "Copy the subject line"}
+                    onClick={() => {
+                      void navigator.clipboard?.writeText(hoff.subject!).then(() => {
+                        setCopied(true);
+                        window.setTimeout(() => setCopied(false), 1600);
+                      }).catch(() => { /* a refused clipboard is not an error worth a dialogue */ });
+                    }}
+                  >
+                    <Copy size={12} aria-hidden />
+                  </button>
+                </div>
+              )}
+              <p className="tdk-hnote">{HANDOFF_NOTE}</p>
+            </div>
+          )}
           </div>{/* .tdk-work */}
         </div>
 

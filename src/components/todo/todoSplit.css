@@ -177,15 +177,29 @@
 /* the narrowed-to-nothing message sits INSIDE the rail — it is a rail fact, not a page one */
 .tdw-empty { padding: 34px 18px; }
 
-/* The provisional occupant — Phase 5 replaces it with the task card and its own empty state.
-   It states what the pane is for and nothing about how you are doing. */
-.tdw-hint {
-  margin: 0;
-  padding: 40px 32px;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #a5988c;
+/* ⚠️ THE EMPTY PANE REPORTS AND DOES NOT CONGRATULATE (Phase 5). It earns art — a cleared desk is
+   one of the two states that do — but the words beneath it are facts: what is still out, and when
+   the next window falls. No exclamation, no tally, no adjective. */
+.tdw-none {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 64px 24px;
   text-align: center;
+}
+
+.tdw-noneart { margin: 0 auto 18px; display: block; }
+
+.tdw-none h3 {
+  margin: 0 0 8px;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #2b2118;
+}
+
+.tdw-none p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #8a7d6e;
 }

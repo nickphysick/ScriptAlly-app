@@ -11,6 +11,7 @@
 .tdk {
   display: block;
   margin-top: 20px;
+  padding: 0 24px 40px;
   outline: none;
 }
 
@@ -20,8 +21,14 @@
 /* ── the work surface ────────────────────────────────────────────────── */
 /* `position:relative` so the dock-seal's absolute flourish centres on the SHEET (board-optimise
    P4) rather than escaping to the viewport. */
+/* ⚠️ 640 AND CENTRED (Phase 5) — a reading measure, not a pane-width sheet. The card is one task
+   at a time; letting it run the full width of a workspace on a wide screen would set its prose at
+   a line length nobody reads comfortably, and the pane's ground either side is what makes it read
+   as a card ON a desk rather than as the desk. The head row shares the measure. */
 .tdk-w {
   position: relative;
+  max-width: 640px;
+  margin: 0 auto;
   background: #fffefb;
   border: 1px solid var(--bd, #e7ddd2);
   border-radius: 12px;
@@ -128,3 +135,119 @@
    does now: the clock opens the SnoozeDial, which is the same control the rail's clock, the ⋯
    menu and the `s` key reach. Two surfaces for one act is how they come to disagree about a
    ceiling — this one hand-rolled the offer cap by omitting a row.) */
+
+/* ── the head row + the hand-off (rail + workspace, Phase 5) ─────────────────────────────────── */
+
+/* ⚠️ THE CARD IS 640 AND CENTRED, and the head row shares its measure — chrome ABOUT the card,
+   aligned with it, rather than a bar across the whole pane. */
+.tdk-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 640px;
+  margin: 0 auto 14px;
+}
+
+.tdk-pos {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a89684;
+}
+
+.tdk-headgrow { flex: 1; }
+
+/* ⚠️ DISABLED, NOT HIDDEN, AT THE ENDS. A control that vanishes at the edge of a list makes the
+   edge feel like a fault; a dim one says "this is the end" and stays where your hand expects it. */
+.tdk-nav {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  border: 1px solid #ddd2c4;
+  background: #fff;
+  color: #7c3a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.tdk-nav:hover:not(:disabled) { background: #f5e2da; border-color: #d8a89a; }
+.tdk-nav:disabled { opacity: 0.35; cursor: default; }
+
+.tdk-hoff { display: flex; gap: 9px; flex-wrap: wrap; }
+
+/* ⚠️ A GREYED LINK KEEPS ITS TOOLTIP, which is the only thing that explains why it is grey — so
+   it stays a live element with `aria-disabled` rather than becoming unreachable to pointer and
+   keyboard alike. The click is refused in the handler instead. */
+.tdk-hbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 9px;
+  border: 1px solid #d8a89a;
+  background: #f5e2da;
+  color: #7c3a2a;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tdk-hbtn.quiet { background: #fff; border-color: #ddd2c4; color: #4d4238; font-weight: 500; }
+.tdk-hbtn.off { opacity: 0.4; cursor: default; }
+
+.tdk-subj {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 11px;
+  background: #faf7f1;
+  border: 1px solid #ece0d2;
+  border-radius: 9px;
+  padding: 9px 11px;
+}
+
+.tdk-subj code {
+  flex: 1;
+  min-width: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 11px;
+  color: #4d4238;
+  overflow-wrap: anywhere;
+}
+
+.tdk-copy {
+  flex: none;
+  border: 0;
+  background: none;
+  color: #a89684;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 0;
+}
+
+.tdk-copy:hover { color: #7c3a2a; }
+
+/* the one italic line, stating that the app is not the postbox */
+.tdk-hnote {
+  margin: 10px 0 0;
+  font-style: italic;
+  font-size: 12px;
+  color: #8a7d6e;
+}
+
+.tdk-sect { padding: 16px 2px; border-top: 1px solid #efe6da; }
+
+.tdk-sectk {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a89684;
+  font-weight: 500;
+  margin: 0 0 9px;
+}

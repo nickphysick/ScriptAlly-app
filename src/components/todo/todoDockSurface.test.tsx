@@ -369,3 +369,105 @@ describe("⚠️ the DOCK-SEAL fires on completion, and never under reduced moti
     expect(dockSrc).toContain("setSealing(false); }, [activeKey]);");
   });
 });
+
+/* ── the workspace card (rail + workspace, Phase 5) ──────────────────────────────────────────── */
+
+describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the pointer's ↑↓", () => {
+  it("the position names where you are in the set the rail is showing", () => {
+    expect(render("a")).toContain("Task 1 of 3");
+    expect(render("b")).toContain("Task 2 of 3");
+  });
+
+  /**
+   * ⚠️ DISABLED AT THE ENDS, NOT HIDDEN. A control that vanishes at the edge of a list makes the
+   * edge feel like a fault; a dim one says "this is the end" and stays where your hand expects it.
+   * The same reasoning as the row cluster's dim-in-place icons.
+   */
+  it("previous is dead on the first card, next on the last, and neither disappears", () => {
+    const first = render("a");
+    expect((first.match(/class="tdk-nav"/g) ?? [])).toHaveLength(2);
+    expect(first).toContain('aria-label="Previous task" disabled');
+    expect(first).not.toContain('aria-label="Next task" disabled');
+    const last = render("c");
+    expect((last.match(/class="tdk-nav"/g) ?? [])).toHaveLength(2);
+    expect(last).toContain('aria-label="Next task" disabled');
+  });
+
+  it("⚠️ THE ARROWS AND THE KEYS REACH ONE FUNCTION — `stepQueue`, on the queue prop", () => {
+    /* Two ways to walk a list that resolved through different code would eventually disagree
+       about what "next" means, and only one of them would be tested. */
+    expect((dockSrc.match(/stepQueue\(queue, card\??\.?key/g) ?? []).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("the card takes a reading measure, and the head row shares it", () => {
+    expect(dockCssRule(".tdk-w {")).toContain("max-width: 640px");
+    expect(dockCssRule(".tdk-w {")).toContain("margin: 0 auto");
+    expect(dockCssRule(".tdk-head {")).toContain("max-width: 640px");
+  });
+});
+
+/**
+ * ⚠️ THE HAND-OFF IS THE POINT OF THE PAGE. ScriptAlly does not send anything — the work happens
+ * in the writer's own email or on the agency's site — so the card's job is to hand them over with
+ * the recipient and subject composed, and then be told what happened.
+ */
+describe("⚠️ THE HAND-OFF HANDS OVER, and it never invents what it hands", () => {
+  const withAgent = (active = "a") => renderToStaticMarkup(
+    <TodoDock
+      queue={QUEUE} activeKey={active} onSelect={() => {}} onClose={() => {}}
+      timeline={() => []} onPrimary={() => {}} onSnoozeDays={() => {}} onMore={() => {}}
+      handoff={() => ({ email: "b@carter.co.uk", website: "carterlit.com", msTitle: "Murphy's Day Out" })}
+    />,
+  );
+
+  it("a send carries both links, the subject as copyable text, and the one italic line", () => {
+    const html = withAgent("a");
+    expect(html).toContain("mailto:b@carter.co.uk");
+    expect(html).toContain("https://carterlit.com");
+    expect(html).toContain("Requested full");
+    expect(html).toContain("tdk-copy");
+    expect(html).toContain("The send happens in your own email");
+  });
+
+  /**
+   * ⚠️ A MISSING FIELD GREYS AND EXPLAINS — it does not vanish, and it is `aria-disabled` on a
+   * live element rather than `disabled`, because the tooltip that says WHY is the only thing that
+   * explains the grey and a dead control is unreachable by pointer and keyboard alike.
+   */
+  it("no email on file: the control stays, greyed, naming the field", () => {
+    const html = render("a"); // the bare render passes no handoff data at all
+    expect(html).toContain("tdk-hbtn");
+    expect(html).toContain("off");
+    expect(html).toContain("No email address on file");
+    expect(html).not.toContain("mailto:");
+  });
+
+  it("⚠️ ONLY A SEND GETS ONE — a stale query has nobody to send anything to", () => {
+    /* `paneSections` decides; the card asks. A "Where to send it" block over a housekeeping gap
+       would offer to email an agent about a missing postcode. */
+    const stale = withAgent("b");
+    expect(stale).not.toContain("The send happens in your own email");
+    expect(stale).not.toContain("mailto:");
+  });
+
+  it("the card asks `paneSections` rather than branching on the task type itself", () => {
+    expect(dockSrc).toContain("const sections = paneSections(card);");
+    expect(dockSrc).toContain('sections.some((x) => x.id === "handoff")');
+  });
+});
+
+describe("⚠️ THE PANE IS NEVER PROVISIONALLY EMPTY, and never congratulates", () => {
+  it("the page rests on the first open card in the current filter — once, not on every render", () => {
+    expect(page).toContain("setDockKey(dockable[0].key);");
+    expect(page).toContain("if (restedOnce.current) return;");
+    /* otherwise closing the pane deliberately would re-open it on the next frame */
+    expect(page).toContain("restedOnce.current = true;");
+  });
+
+  it("the empty pane states facts and carries no verdict", () => {
+    expect(page).toContain("Nothing needs you.");
+    expect(page).toContain("paneRestLine(");
+    const panel = page.slice(page.indexOf('className="tdw-none"'), page.indexOf('className="tdw-none"') + 700);
+    expect(panel).not.toMatch(/\b(great|well done|congrat|nice work)\b/i);
+  });
+});
