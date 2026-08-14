@@ -58,13 +58,33 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
     expect(head, "the head fell below the rows — it must head the column, not scroll with it").toBeLessThan(rows);
   });
 
-  it("the head holds exactly the three list-scope controls", () => {
+  /**
+   * ⚠️ SPLIT IN TWO BY §1, AND THE SCOPE ARGUMENT IS WHY. All three controls narrow the LIST, which
+   * is what put them in the list COLUMN — that is unchanged. What §1 separates is their two jobs:
+   * the search acts on the rows and stays pinned inside the panel with them; Filter and Sort act on
+   * the SET, so they sit in the control cell over the panel, beside the count of that set.
+   */
+  it("the search stays inside the panel, with the rows it searches", () => {
     const body = populated();
     const head = code.indexOf('className="f12-lhead"', body);
+    expect(head, "the panel's search row is missing").toBeGreaterThan(-1);
     const slice = code.slice(head, code.indexOf('className="f12-rows"', body));
-    expect(slice, "the search field left the head").toContain('aria-label="Search queries"');
-    expect(slice, "Filter left the head").toContain('label="Filter"');
-    expect(slice, "Sort left the head").toContain('label="Sort"');
+    expect(slice, "the slice is empty — this case is testing nothing").toContain("f12-lsearch");
+    expect(slice, "the search field left the panel").toContain('aria-label="Search queries"');
+    /* ⚠️ AND ONE JOB ONLY. Filter and Sort in this row is the state §1 corrected. */
+    expect(slice, "Filter came back to the search row").not.toContain('label="Filter"');
+    expect(slice, "Sort came back to the search row").not.toContain('label="Sort"');
+  });
+
+  it("Filter and Sort sit in the list's control cell, over the count they narrow", () => {
+    const cell = code.indexOf('className="qc-lhead"');
+    expect(cell, "the list's control cell is missing").toBeGreaterThan(-1);
+    const slice = code.slice(cell, code.indexOf('className="qc-phead"'));
+    expect(slice, "the slice is empty — this case is testing nothing").toContain("qc-count");
+    expect(slice, "Filter left the cell").toContain('label="Filter"');
+    expect(slice, "Sort left the cell").toContain('label="Sort"');
+    /* the count is the SCOPE's, from the same bucket function the pills read — never a fresh tally */
+    expect(slice, "the sub-count stopped reading the shared bucket").toContain('queryBucket(q.status as QueryStatus) === "waiting"');
   });
 
   /* ⚠️ THE POINT OF THE WHOLE SPLIT. Six selected-query verbs used to sit above the list, all six
@@ -164,10 +184,15 @@ describe("§1c · the seam runs the full height of both columns", () => {
   it("the row that holds both columns stretches them, so neither can be short of the other", () => {
     const body = rule(".f12-body");
     expect(body, "the body rule is missing").not.toBe("");
-    expect(body, "the row stopped being a flex row").toContain("display: flex");
-    /* `align-items` unset means `stretch`, which is what makes the column full-height. Naming a
-       different value here is the one edit that would silently shorten the seam. */
-    expect(body, "the row set a cross-axis alignment — anything but stretch shortens the seam")
+    /* ⚠️ A GRID SINCE §1, AND THE CLAUSE IS THE SAME ONE. A flex row stretched its two columns by
+       default; a grid stretches its two cells by default, for the same reason and with the same
+       failure mode — naming a cross-axis alignment is still the one edit that silently shortens a
+       column. `minmax(0, 1fr)` on the second row is what lets both scroll internally rather than
+       growing the page, which `min-height: 0` did on the flex row. */
+    expect(body, "the row stopped being a grid").toContain("display: grid");
+    expect(body, "the panel row lost its zero-floor — the columns would grow the page instead of scrolling")
+      .toContain("grid-template-rows: auto minmax(0, 1fr)");
+    expect(body, "the row set a cross-axis alignment — anything but stretch shortens a column")
       .not.toMatch(/align-items\s*:/);
   });
 });
@@ -206,14 +231,19 @@ describe("§1e / §1f · the kebab has a subject, or it is absent", () => {
      has nothing to be about. Greying it would advertise six verbs against a record that does not
      exist. (The verbs INSIDE it grey individually — that is the to-do row grammar, and a different
      question: there the subject exists and one verb does not apply to it.) */
-  it("the kebab lives inside the selected-query branch, so it cannot outlive its subject", () => {
-    const branch = code.indexOf("activeQuery && activeAgent && activeMs ?");
+  /* ⚠️ REPOINTED (§1): the verbs left the pane for its control cell, so they render EARLIER in
+     source than the selected-query branch and the old index comparison would fail while the rule
+     held. The rule is unchanged and is asserted at its new home — the cell's own guard, which
+     renders nothing at all when there is no query and no agent. */
+  it("the kebab has a subject or it is not drawn", () => {
+    const cell = code.indexOf('className="qc-phead"');
     const kebab = code.indexOf('ariaLabel="Actions for this query"');
-    expect(branch, "the selected-query branch is missing").toBeGreaterThan(-1);
-    expect(kebab, "the kebab is missing").toBeGreaterThan(branch);
-    /* and the two subject-less branches come AFTER it, so neither can contain it */
-    const noMatch = code.indexOf("qc-nomatch");
-    expect(noMatch, "the filtered-to-zero branch is missing").toBeGreaterThan(kebab);
+    expect(cell, "the pane's control cell is missing").toBeGreaterThan(-1);
+    expect(kebab, "the kebab is missing").toBeGreaterThan(cell);
+    expect(code.indexOf("{activeQuery && activeAgent ? (() => {", cell), "the cell lost its selection guard")
+      .toBeGreaterThan(cell);
+    /* and the filtered-to-zero branch still exists — it is the state in which nothing is selected */
+    expect(code.indexOf("qc-nomatch"), "the filtered-to-zero branch is missing").toBeGreaterThan(-1);
   });
 
   it("all six verbs are in the menu and nowhere else on the page", () => {

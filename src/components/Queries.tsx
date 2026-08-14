@@ -3292,6 +3292,176 @@ export const Queries: React.FC<{
             row where every other page's lives. */}
         <div className="f12-body">
 
+          {/* ══ §1 · THE CONTROL LAYER, SPLIT BY COLUMN ══════════════════════════════════════════
+              ⚠️ TWO CELLS OF THE SPLIT'S OWN GRID, NOT TWO ROWS ABOVE IT. Alignment is structural:
+              the count sits over the list and the verbs over the pane because all four children
+              read one `grid-template-columns`. See `.f12-body` in f12.css for why a strip spanning
+              both columns was the wrong shape, and why the channel is a `column-gap` now.
+
+              ⚠️ THE COUNT IS THE SCOPE'S, THE FOOT'S IS THE FILTER'S — two different facts, which
+              is what earns the second number its place. `mastheadScopedQueries` is the
+              manuscript-scoped set (the status pills and the search narrow the LIST, never the
+              page's totals), and the sub-count reads `queryBucket`, the same function the filter
+              pills and `getPrimaryAction` read. Three surfaces, one membership.
+
+              ⚠️ REPORTED: the masthead's own `description` states these same two figures at rest.
+              The pack protects the header, so this is deliberate duplication in ONE state — the
+              plate's description is not drawn once the header condenses, which is the state the ref
+              draws and the state this page spends its life in. Flagged, not silently reconciled. */}
+          <div className="qc-lhead">
+            <div className="qc-count">
+              {mastheadScopedQueries.length} {mastheadScopedQueries.length === 1 ? "query" : "queries"}
+              <i>{mastheadScopedQueries.filter((q) => queryBucket(q.status as QueryStatus) === "waiting").length} AWAITING</i>
+            </div>
+            <span className="qc-sp" />
+            {/* ⚠️ FILTER AND SORT LEFT THE SEARCH ROW (§1). They narrow the list, so they stay over
+                the list — but the search does ONE job in the panel below and these two are controls
+                on the set, not on the field. Wiring untouched: same handlers, same popovers, same
+                refs, so every lock that reads them still reads them. */}
+            <div className="f12-popwrap">
+              <PillTrig
+                ref={filterTrigRef}
+                label="Filter"
+                open={filterPopOpen}
+                active={activeFilterCount > 0}
+                count={activeFilterCount}
+                onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
+                icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
+              />
+              {filterPopOpen && renderFilterPopover()}
+            </div>
+            <div className="f12-popwrap">
+              <PillTrig
+                ref={sortTrigRef}
+                label="Sort"
+                open={sortPopOpen}
+                active={sortKey !== "last_activity"}
+                value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
+                onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
+                icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
+              />
+              {sortPopOpen && renderSortPopover()}
+            </div>
+          </div>
+
+          {/* ⚠️ THE PANE'S VERBS CAME UP OUT OF THE HERO BAND (§1). They acted on the selected query
+              from inside the card that names it, which reads as the card's own chrome; a query's
+              verbs belong to the column, above the thing they change, on the same line as the list's.
+              §2 settles WHICH verbs — this row is their seat. */}
+          <div className="qc-phead">
+            <span className="qc-who">THIS QUERY</span>
+            {/* ⚠️ AN IIFE IN THE RENDER, NOT A `const` ABOVE IT. Every handler these verbs call is a
+                `const` arrow declared further down the component; a `paneVerbs` const defined up
+                beside `activeQuery` would read them from their temporal dead zone and throw on the
+                first render — the shape this repo has recorded twice, which `tsc` does not catch
+                when the reference sits inside a helper. Computed here, everything it names is
+                already initialised. */}
+            {activeQuery && activeAgent ? (() => {
+              const verbAction = getPrimaryAction(activeQuery.status as QueryStatus);
+              const verbWaitingOnAgent = verbAction.ballHolder === "agent";
+              const verbTaskCount = queryTaskBadge(tasks, activeQuery.id).count;
+              const verbClosed = activeQuery.status === QueryStatus.REJECTED || activeQuery.status === QueryStatus.WITHDRAWN || activeQuery.status === QueryStatus.NO_RESPONSE;
+              const verbIsMark = verbAction.kind === "mark-sent" && !verbClosed;
+              const verbLabel = verbClosed ? "Reopen"
+                : verbAction.kind === "mark-sent" ? (verbAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
+                : "Record response";
+              return (
+                <>
+                  <button
+                    /* Mobile Pass 1: below md the floating command bar's primary carries the
+                       Mark-sent anchor instead (this row is display:none there, and a hidden
+                       anchor positions a popover at 0,0). */
+                    ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}
+                    type="button"
+                    className="f12-btn-pri"
+                    onClick={() => openRecord(activeQuery)}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
+                    {verbLabel}
+                  </button>
+                  {/* ⚠️ THE KEBAB CAME UP WITH THE PRIMARY AND IS STILL ONE TRIGGER FOR TWO MENUS
+                      (fix pack 6 §4) — the send-method picker lost its own trigger with the line
+                      that held it and anchors here. `useFixedMenu` positions each menu from
+                      whatever its trigger ref points at, so relocating the button relocates both
+                      menus for free. §2 deletes this menu and rehomes every item in it. */}
+                  <div className="f12-popwrap">
+                    <button
+                      ref={(el) => {
+                        (moreTrigRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+                        (methodPickTrigRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+                      }}
+                      type="button"
+                      className="f12-act qc-kebab"
+                      aria-haspopup="menu"
+                      aria-expanded={isMoreOpen}
+                      onClick={() => setIsMoreOpen((o) => !o)}
+                      title="More actions for this query"
+                    >⋯</button>
+                    <F12Menu
+                      open={isMoreOpen}
+                      onClose={() => setIsMoreOpen(false)}
+                      style={moreMenuStyle}
+                      ariaLabel="Actions for this query"
+                      items={[
+                        {
+                          /* ⚠️ REHOMED FROM "What you sent" (fix pack 6 §4) — the only control for a
+                             query's send method anywhere in the app. It states the current value so
+                             the menu answers the question the deleted line answered. */
+                          label: sentViaLabel(activeQuery?.sendMethod) ? `Sent by ${sentViaLabel(activeQuery?.sendMethod)} — change` : "Set send method",
+                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM4 7l8 6 8-6" /></svg>,
+                          onClick: () => { setIsMoreOpen(false); setMethodPickOpen(true); },
+                        },
+                        {
+                          label: verbTaskCount > 0 ? `View tasks (${verbTaskCount})` : "View tasks",
+                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>,
+                          onClick: () => setIsTasksOpen(true),
+                        },
+                        {
+                          /* Nudging is only meaningful while the agent holds the ball — stated,
+                             not hidden, so the verb's existence is not a surprise later. */
+                          label: "Nudge",
+                          disabled: !verbWaitingOnAgent,
+                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>,
+                          onClick: () => setIsNudgeOpen(true),
+                        },
+                        {
+                          label: "Agent",
+                          disabled: true,
+                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6" /></svg>,
+                          onClick: () => {},
+                        },
+                        {
+                          label: "Manuscript",
+                          disabled: true,
+                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z" /></svg>,
+                          onClick: () => {},
+                        },
+                        {
+                          label: isGeneratingPDF ? "Generating…" : "Download as PDF",
+                          disabled: isGeneratingPDF,
+                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
+                          onClick: () => handleDownloadPDF(),
+                        },
+                        {
+                          label: "Delete query",
+                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>,
+                          onClick: () => askDeleteQuery(),
+                        },
+                      ]}
+                    />
+                    <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method"
+                      items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
+                        label: sentViaLabel(m),
+                        icon: activeQuery?.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
+                        onClick: () => pickSendMethod(m),
+                      }))}
+                    />
+                  </div>
+                </>
+              );
+            })() : null}
+          </div>
+
           {/* ── List pane (F12, ref queries-hub-v14.html .list): search field only at the top,
               56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
               pills, no manuscript spine — the row is avatar · name/agency · StatusDot + date. ── */}
@@ -3328,33 +3498,8 @@ export const Queries: React.FC<{
                   aria-label="Search queries"
                 />
               </div>
-              {/* ⚠️ ICON-ONLY, AND THE NAME SURVIVES THE ICON. `title` gives it back on hover, the
-                  `aria-label` gives it to a screen reader, and each popover names itself in its own
-                  header — so the word is available three ways to anyone who cannot hover. */}
-              <div className="f12-popwrap">
-                <PillTrig
-                  ref={filterTrigRef}
-                  label="Filter"
-                  open={filterPopOpen}
-                  active={activeFilterCount > 0}
-                  count={activeFilterCount}
-                  onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
-                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
-                />
-                {filterPopOpen && renderFilterPopover()}
-              </div>
-              <div className="f12-popwrap">
-                <PillTrig
-                  ref={sortTrigRef}
-                  label="Sort"
-                  open={sortPopOpen}
-                  active={sortKey !== "last_activity"}
-                  value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
-                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
-                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
-                />
-                {sortPopOpen && renderSortPopover()}
-              </div>
+              {/* ⚠️ FILTER AND SORT ARE GONE FROM THIS ROW (§1) — they are in the control cell above
+                  the panel now, beside the count they narrow. What is left does ONE job: search. */}
             </div>
             <div ref={listScrollRef} className="f12-rows" role="listbox" aria-label="Queries">
               {renderList.map((q) => {
@@ -3840,22 +3985,15 @@ export const Queries: React.FC<{
                 {(() => {
                   const nameplate = agentPrimary(activeAgent);
                   const initials = agentInitials(activeAgent);
-                  // The record header's contextual action (shell rollout Phase 6) — relocated
-                  // from the control bar, same derivation + composer-shortcut behaviour + the
-                  // Mark-sent anchor ref. The plane ornament yields its seat to the action.
-                  const heroAction = getPrimaryAction(activeQuery.status as QueryStatus);
-                  /* the kebab's two state-dependent facts, derived where the hero's own are */
-                  const heroWaitingOnAgent = heroAction.ballHolder === "agent";
-                  const heroTaskCount = queryTaskBadge(tasks, activeQuery.id).count;
+                  /* ⚠️ THE CTA DERIVATIONS WENT WITH THE BUTTONS (§1). `heroAction`, `heroIsMark`,
+                     `heroLabel`, `heroTaskCount` and `heroWaitingOnAgent` all existed to feed the
+                     primary and the kebab; both now compute in the control cell that renders them,
+                     from the SAME `getPrimaryAction` call. Leaving the derivations here would have
+                     been a second reading of whose turn it is, in a band that no longer acts. */
                   /* ⚠️ THROUGH `refDate`, WHICH OMITS RATHER THAN PRINTING "Invalid Date". Undated
                      imports exist, and `new Date(junk).toLocaleDateString()` is a literal string
                      this app has shown a writer before. */
                   const heroQueriedOn = refDate((activeQuery as { dateSent?: unknown }).dateSent);
-                  const heroClosed = activeQuery.status === QueryStatus.REJECTED || activeQuery.status === QueryStatus.WITHDRAWN || activeQuery.status === QueryStatus.NO_RESPONSE;
-                  const heroIsMark = heroAction.kind === "mark-sent" && !heroClosed;
-                  const heroLabel = heroClosed ? "Reopen"
-                    : heroAction.kind === "mark-sent" ? (heroAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
-                    : "Record response";
                   return (
                     /* ⚠️ A BAND, NOT A BOX INSIDE A PANE OF BOXES (§1h). This was a bordered,
                        shadowed, sage-spined card sitting above three more cards — four framed
@@ -3886,115 +4024,11 @@ export const Queries: React.FC<{
                         <StatusDot status={activeQuery.status} overrideSize={13} />
                         {statusDisplayLabel(activeQuery)}
                       </span>
-                      <button
-                        // Mobile Pass 1: below md the floating command bar's primary carries
-                        // the Mark-sent anchor instead (this button is display:none there, and
-                        // a hidden anchor positions a popover at 0,0).
-                        ref={heroIsMark && !isMobile ? markSentTriggerRef : undefined}
-                        type="button"
-                        className="f12-btn-pri"
-                        style={{ marginLeft: "auto", flexShrink: 0 }}
-                        onClick={() => openRecord(activeQuery)}
-                      >
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-                        {heroLabel}
-                      </button>
-                      {/**
-                        * ⚠️ THE KEBAB (§1c) — every verb that acts on THIS query, in one place, beside
-                        * the primary that also acts on it. Six controls used to sit in a bar above the
-                        * list, all six dead until a row was picked.
-                        *
-                        * ⚠️ INAPPLICABLE VERBS STAY GREYED AND INERT, NEVER ABSENT — the standing
-                        * to-do row grammar. A menu whose length changes with state makes you re-read
-                        * it every time; a greyed row tells you the verb exists and why it cannot run.
-                        *
-                        * ⚠️ `F12Menu`, NOT A SECOND MENU. This page already portals three menus
-                        * through it (the old ⋯, the send-method picker, the manuscript picker).
-                        * `PortalMenu` is To-do's equivalent; using it here would put two menu
-                        * components on one page, which is the thing the rule forbids.
-                        */}
-                      <div className="f12-popwrap" style={{ flexShrink: 0 }}>
-                        <button
-                          /* ⚠️ TWO MENUS, ONE TRIGGER (fix pack 6 §4). The send-method picker lost
-                             its own trigger with the line that held it, so it anchors to the kebab
-                             instead. A callback ref assigns both — `useFixedMenu` positions each
-                             menu from whatever its trigger ref points at, and both now point here. */
-                          ref={(el) => {
-                            (moreTrigRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
-                            (methodPickTrigRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
-                          }}
-                          type="button"
-                          className="f12-act qc-kebab"
-                          aria-haspopup="menu"
-                          aria-expanded={isMoreOpen}
-                          onClick={() => setIsMoreOpen((o) => !o)}
-                          title="More actions for this query"
-                        >⋯</button>
-                        <F12Menu
-                          open={isMoreOpen}
-                          onClose={() => setIsMoreOpen(false)}
-                          style={moreMenuStyle}
-                          ariaLabel="Actions for this query"
-                          items={[
-                            {
-                              /* ⚠️ REHOMED FROM "What you sent" (fix pack 6 §4) — the only control
-                                 for a query's send method anywhere in the app. It states the current
-                                 value so the menu answers the question the deleted line answered. */
-                              label: sentViaLabel(activeQuery?.sendMethod) ? `Sent by ${sentViaLabel(activeQuery?.sendMethod)} — change` : "Set send method",
-                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM4 7l8 6 8-6" /></svg>,
-                              onClick: () => { setIsMoreOpen(false); setMethodPickOpen(true); },
-                            },
-                            {
-                              label: heroTaskCount > 0 ? `View tasks (${heroTaskCount})` : "View tasks",
-                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>,
-                              onClick: () => setIsTasksOpen(true),
-                            },
-                            {
-                              /* Nudging is only meaningful while the agent holds the ball — stated,
-                                 not hidden, so the verb's existence is not a surprise later. */
-                              label: "Nudge",
-                              disabled: !heroWaitingOnAgent,
-                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>,
-                              onClick: () => setIsNudgeOpen(true),
-                            },
-                            {
-                              label: "Agent",
-                              disabled: true,
-                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6" /></svg>,
-                              onClick: () => {},
-                            },
-                            {
-                              label: "Manuscript",
-                              disabled: true,
-                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z" /></svg>,
-                              onClick: () => {},
-                            },
-                            {
-                              label: isGeneratingPDF ? "Generating…" : "Download as PDF",
-                              disabled: isGeneratingPDF,
-                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
-                              onClick: () => handleDownloadPDF(),
-                            },
-                            {
-                              label: "Delete query",
-                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>,
-                              onClick: () => askDeleteQuery(),
-                            },
-                          ]}
-                        />
-                        {/* ⚠️ THE SEND-METHOD PICKER, REHOMED (fix pack 6 §4). It hung off the
-                            "Sent by …" line in What you sent; that line is deleted, but it was the
-                            ONLY control for a query's send method anywhere in the app, so it moved
-                            rather than went. Same menu, same handler, same `useFixedMenu` — only its
-                            trigger changed, and the kebab's callback ref feeds both. */}
-                        <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method"
-                          items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
-                            label: sentViaLabel(m),
-                            icon: activeQuery?.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
-                            onClick: () => pickSendMethod(m),
-                          }))}
-                        />
-                      </div>
+                      {/* ⚠️ THE PRIMARY AND THE KEBAB LEFT THIS BAND (§1). They act on the query, not
+                          on the identity card that names it, and they now sit in the pane's control
+                          cell above — on the same line as the list's count, which is what makes the
+                          two columns read as one interface rather than two panels with their own
+                          chrome. The band keeps IDENTITY: who, where, what state, when. */}
                     </div>
                   );
                 })()}

@@ -100,7 +100,8 @@ describe("Queries.tsx artefacts — one home for actions + regressions", () => {
     // Pass 1: below md the floating command bar's primary carries the anchor instead (the hero
     // button is display:none there, and a hidden anchor positions a popover at 0,0) — still
     // exactly ONE live anchor at any breakpoint.
-    expect(src).toContain("ref={heroIsMark && !isMobile ? markSentTriggerRef : undefined}");
+    // §1 moved that button to the pane's control cell and renamed the derivation with it.
+    expect(src).toContain("ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}");
     expect(src).toContain("ref={isMark ? markSentTriggerRef : undefined}"); // the mobile bar's
     expect(src).toContain("triggerRef={markSentTriggerRef}"); // the popover consumes the same ref
   });

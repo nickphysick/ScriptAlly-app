@@ -38,11 +38,22 @@ describe("the query's verbs live in one kebab, not a bar", () => {
     expect(code, "the pane toolbar came back").not.toMatch(/className="f12-ctl[ "]/);
   });
 
-  it("the verbs are in a kebab, in the hero, through F12Menu", () => {
-    const hero = code.indexOf("f12-hero");
+  /**
+   * ⚠️ REPOINTED (§1) — the kebab left the hero band for the PANE'S CONTROL CELL, one row up. The
+   * argument it was built on is unchanged and is why it moved again: a query's verbs act on the
+   * query, not on the identity card that names it, so they belong to the column rather than to the
+   * card. What must stay true is that they sit in the cell over the READING pane and nowhere else.
+   */
+  it("the verbs are in a kebab, in the pane's control cell, through F12Menu", () => {
+    const cell = code.indexOf('className="qc-phead"');
     const kebab = code.indexOf('ariaLabel="Actions for this query"');
+    expect(cell, "the pane's control cell is missing — this test is anchored on nothing").toBeGreaterThan(-1);
     expect(kebab, "the kebab is missing").toBeGreaterThan(-1);
-    expect(kebab, "the kebab is not in the hero row").toBeGreaterThan(hero);
+    expect(kebab, "the kebab is not in the pane's control cell").toBeGreaterThan(cell);
+    /* and it is in THAT cell, not the list's — the two are adjacent in source, so an anchor on the
+       wrong one would pass while the verbs sat over the list they do not touch. */
+    expect(code.indexOf('className="qc-lhead"'), "the list's control cell is missing").toBeGreaterThan(-1);
+    expect(kebab, "the kebab drifted into the LIST's control cell").toBeGreaterThan(code.indexOf('className="qc-lhead"'));
     /* ⚠️ `F12Menu`, NOT A SECOND MENU COMPONENT. This page already portals three menus through it;
        `PortalMenu` is To-do's equivalent and would make two on one page. */
     const slice = code.slice(kebab - 800, kebab + 200);
@@ -59,7 +70,9 @@ describe("the query's verbs live in one kebab, not a bar", () => {
     for (const verb of ["View tasks", "Nudge", "Agent", "Manuscript", "Download as PDF", "Delete query"]) {
       expect(items, `${verb} left the kebab`).toContain(verb);
     }
-    expect(items, "Nudge stopped stating when it does not apply").toContain("disabled: !heroWaitingOnAgent");
+    /* §1 renamed the derivation with its move (`hero…` → `verb…`) — same `getPrimaryAction` call,
+       computed in the cell that renders the verbs rather than in the band that no longer acts. */
+    expect(items, "Nudge stopped stating when it does not apply").toContain("disabled: !verbWaitingOnAgent");
   });
 
   /**
@@ -114,12 +127,22 @@ describe("the query's verbs live in one kebab, not a bar", () => {
    * verbs over the record it has replaced. With the verbs inside the reading pane's hero, and the
    * hero replaced wholesale by the journey, that holds by construction.
    */
-  it("a journey replaces the hero, so its verbs go with it", () => {
+  /**
+   * ⚠️ REPOINTED WITH THE MOVE (§1), AND THE ANCHOR HAD TO CHANGE DIRECTION. The verbs used to sit
+   * INSIDE the hero's branch, so "after the branch opens" was the proof they could not outlive
+   * their subject. They are a sibling of the pane now and render EARLIER in source, so an index
+   * comparison would fail while the invariant held. The invariant itself is unchanged and is what
+   * this asserts: the cell renders nothing at all unless there is a query and an agent to act on.
+   */
+  it("the verbs cannot outlive their subject — the cell is guarded on the selection", () => {
+    const cell = code.indexOf('className="qc-phead"');
+    expect(cell, "the pane's control cell is missing").toBeGreaterThan(-1);
     const kebab = code.indexOf('ariaLabel="Actions for this query"');
-    const heroBranch = code.indexOf("activeQuery && activeAgent && activeMs ?");
-    expect(heroBranch, "the selected-query branch is missing").toBeGreaterThan(-1);
-    expect(kebab, "the kebab escaped the selected-query branch — it would outlive the record it acts on")
-      .toBeGreaterThan(heroBranch);
+    expect(kebab, "the kebab is missing").toBeGreaterThan(cell);
+    /* the guard sits between the cell opening and the verbs it wraps */
+    const guard = code.indexOf("{activeQuery && activeAgent ? (() => {", cell);
+    expect(guard, "the selection guard is missing from the control cell").toBeGreaterThan(cell);
+    expect(guard, "the verbs render before their own guard").toBeLessThan(kebab);
   });
 });
 

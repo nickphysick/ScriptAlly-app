@@ -115,8 +115,13 @@ describe("the workspace frame", () => {
     expect(body, "the frame re-declared a side inset — the scroll row already pays the gutter")
       .not.toContain("--sa-col-gut");
     expect(body, "the frame stopped filling the row").toContain("width: 100%");
+    /* ⚠️ NARROWED BY §1, AND IT HAD TO BE. This read `.not.toContain("auto")` across the whole
+       rule, which was only ever about `margin: auto` — the seat a width cap comes back into. §1's
+       `grid-template-rows: auto minmax(0, 1fr)` contains the same four letters and means something
+       entirely unrelated, so the broad match would have failed on a correct row. The property is
+       named now rather than the substring, which is what the case was always asserting. */
     expect(body, "an auto margin returned — dead at 100% width, and the seat a cap comes back into")
-      .not.toContain("auto");
+      .not.toMatch(/margin[a-z-]*:[^;]*auto/);
   });
 
   /* ⚠️ THE INSET WENT WITH THE FRAME. Its padding was interior space for a border that no longer

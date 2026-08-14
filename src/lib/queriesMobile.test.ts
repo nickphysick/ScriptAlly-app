@@ -60,8 +60,11 @@ describe("the espresso command bar (concept frame 03)", () => {
     // one derivation — the bar reuses getPrimaryAction exactly as the hero does
     expect(hub).toContain('const label = closed ? "Reopen"');
     expect(hub).toContain("ref={isMark ? markSentTriggerRef : undefined}");
-    // the hero's own button yields the anchor below md (hidden anchors position at 0,0)
-    expect(hub).toContain("ref={heroIsMark && !isMobile ? markSentTriggerRef : undefined}");
+    /* ⚠️ REPOINTED (§1): the desktop primary left the hero band for the pane's control cell, and
+       the derivation was renamed with it (`heroIsMark` → `verbIsMark`) — same `getPrimaryAction`
+       call, computed where it is rendered. The anchor rule is unchanged: exactly ONE live
+       markSentTriggerRef per breakpoint, because the cell is `display: none` below md. */
+    expect(hub).toContain("ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}");
     // and the popover opens UPWARD from the foot-pinned bar
     expect(hub).toContain('isMobile ? { placement: "up" } : undefined');
     expect(css).toContain(".f12-root .f12-hero:not(.qc-hero) > .f12-btn-pri { display: none; }");

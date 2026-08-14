@@ -355,21 +355,32 @@ describe("Pack C §3 · the letterhead, the caps and the watermark", () => {
  */
 describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
   it("⚠️ NO HORIZONTAL INSET ON THE PANEL — its edge IS the content gutter", () => {
+    /* ⚠️ REPOINTED BY §1 — THE INSETS MOVED FROM THE PANEL TO THE GRID, and the clause this case
+       exists for is the one that survives unchanged: the panel's LEFT edge is the shared content
+       gutter, so Query Centre's content sits where every other page's does. It used to prove that
+       by reading a zero in a four-value margin; the panel states no margin at all now, and the
+       zero is structural — it is the grid's own first track, which has no left inset to take.
+
+       ⚠️ WHICH IS A STRONGER PROOF, NOT A WEAKER ONE: a margin can be re-added by anyone, whereas
+       there is no declaration here that could put a left inset back without also moving the two
+       control cells above, which is exactly the coupling §1 was built to get. */
     const list = rule(".f12-list");
-    expect(list, "the anchor this case reads is gone").toContain("margin:");
-    /* ⚠️ THE VALUE IS EXTRACTED AND COMPARED, never a `(?!14px)` lookahead — `\s*` backtracks to
-       zero width and the lookahead runs against the space, which is banned in this repo. */
-    /* ⚠️ FOUR VALUES AGAIN AFTER §2, AND ONLY THE LEFT IS ZERO. §2 gave the panel its fourth inset
-       when the seam went; the LEFT is the one that must stay at the shared gutter, because that is
-       what puts this page's content where every other page's is. */
-    const margin = (/margin:\s*([^;]+);/.exec(list)?.[1] ?? "").trim().split(/\s+/);
-    expect(margin.length, `the panel's margin is not the four-value form: ${margin.join(" ")}`).toBe(4);
-    const [mTop, mRight, mBottom, mLeft] = margin;
-    expect(mLeft, `the panel took a LEFT inset again — its content would sit inside every other page's gutter: ${margin.join(" ")}`).toBe("0");
-    /* the other three survive — fix pack 5's object, plus §2's channel to the pane */
-    for (const [side, v] of [["top", mTop], ["right", mRight], ["bottom", mBottom]] as const) {
-      expect(v, `the panel lost its ${side} inset`).toBe("var(--f12-panel-inset)");
-    }
+    expect(list, "the panel rule is gone — this case is anchored on nothing").not.toBe("");
+    /* ⚠️ EXTRACT AND COMPARE, never a `(?!…)` lookahead — `\s*` backtracks to zero width and the
+       lookahead runs against the space, which is banned in this repo. */
+    const margin = (/margin:\s*([^;]+);/.exec(list)?.[1] ?? "").trim();
+    expect(margin, `the panel took a margin back — it would ADD to the grid's gaps, not replace them: ${margin}`).toBe("");
+    /* ⚠️ COMMENT-STRIPPED, FOURTH TIME IN THIS REPO. The row's own note NAMES
+       `padding-inline: var(--content-gutter)` — it exists to say why the token is not read here —
+       so a raw match found the prose describing the rule instead of the rule. A test about code is
+       asserted against code. */
+    const body = rule(".f12-body").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(body, "the split row is missing").not.toBe("");
+    expect(body, "the stripped rule is empty — this case is testing nothing").toContain("display: grid");
+    const pad = (/padding-inline:\s*([^;]+);/.exec(body)?.[1] ?? "").trim();
+    expect(pad, `the row took a side inset — the scroll row already pays the shared gutter: ${pad}`).toBe("");
+    /* and the channel to the pane is still a real one, now as the row's gap */
+    expect((/column-gap:\s*([^;]+);/.exec(body)?.[1] ?? "").trim(), "the channel to the pane went").toBe("var(--f12-panel-inset)");
   });
 
   it("⚠️ THE SHARED GUTTER IS UNTOUCHED, here and everywhere", () => {

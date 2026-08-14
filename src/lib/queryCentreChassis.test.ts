@@ -283,12 +283,24 @@ describe("§1 (fp2) · the hero is a contained plate", () => {
    * band bug wearing a frame — the container would enclose some of the identity and not the rest.
    * Browser-confirmed too: fp2 reads all four inside `.f12-heroband` at 1024/1440/1920.
    */
-  it("the avatar, the primary and the kebab all sit inside it", () => {
+  /**
+   * ⚠️ AMENDED BY §1 — THE PLATE HOLDS IDENTITY, AND ONLY IDENTITY. The original clause was
+   * "everything is inside the edge", written when the plate held the actions too: a container that
+   * enclosed some of the identity and not the rest was the band bug wearing a frame. §1 removes the
+   * actions from the plate ALTOGETHER rather than moving them outside its edge, so the clause is
+   * satisfied in the other direction — there is nothing left that could sit outside it.
+   */
+  it("everything the plate still owns sits inside it, and the verbs are not among them", () => {
     const at = code.indexOf('className="f12-heroband"');
-    const band = code.slice(at, code.indexOf('ariaLabel="Actions for this query"', at) + 60);
+    expect(at, "the plate is missing — this test is anchored on nothing").toBeGreaterThan(-1);
+    const band = code.slice(at, code.indexOf("})()}", at));
+    expect(band, "the band slice is empty").toContain("f12-hn");
     expect(band, "the avatar left the plate").toContain("f12-bigav");
-    expect(band, "the primary left the plate").toContain('className="f12-btn-pri"');
-    expect(band, "the kebab left the plate").toContain("qc-kebab");
+    expect(band, "the status badge left the plate").toContain("statusDisplayLabel(activeQuery)");
+    /* ⚠️ AND THE VERBS ARE GONE FROM IT, not merely moved to its edge. A primary still drawn here
+       beside one in the control cell would be the same act offered twice on one screen. */
+    expect(band, "the primary came back to the plate").not.toContain('className="f12-btn-pri"');
+    expect(band, "the kebab came back to the plate").not.toContain("qc-kebab");
   });
 });
 
@@ -330,16 +342,27 @@ describe("§ (fp5) · the list is an inset panel", () => {
      * reversal: the panel is still an OBJECT held off the masthead rule and the working area's
      * foot. Only the sideways step goes, and it was never part of that argument.
      */
-    /* ⚠️ FOUR SIDES NOW, AND EXACTLY ONE OF THEM ZERO. §1 put the LEFT edge on the shared content
-       gutter; §2 gave the RIGHT its inset when the seam went, because a rim touching the pane is
-       worse than the channel fix pack 5 was avoiding — and with no seam there is nothing for that
-       channel to sit against. */
-    const m = declValue(r, "margin").split(/\s+/);
-    expect(m.length, `the panel's inset is not the four-value form: ${m.join(" ")}`).toBe(4);
-    const [top, right, bottom, left] = m;
-    expect(left, `the panel took a left inset again — its content sits inside every other page's gutter: ${m.join(" ")}`).toBe("0");
-    for (const [side, v] of [["top", top], ["right", right], ["bottom", bottom]] as const) {
-      expect(v, `the panel lost its ${side} inset`).toBe("var(--f12-panel-inset)");
+    /**
+     * ⚠️ REPOINTED AGAIN BY §1 — THE INSETS ARE THE GRID'S, AND THE PANEL STATES NONE OF ITS OWN.
+     *
+     * Every clause above survives: left edge on the shared content gutter, a real channel on the
+     * right, and the panel held off the top and foot as an OBJECT rather than a wall. What changed
+     * is who pays for them. The control cells are now cells of the same grid, and a MARGIN on the
+     * panel cannot reach them — the count would have sat 14px out of true with the list it counts.
+     * So the row owns all four: `column-gap` is the channel, `padding-top`/`padding-bottom` are the
+     * vertical insets, and the left stays zero by being the grid's own first track.
+     *
+     * ⚠️ AND THE PANEL MUST DECLARE NO MARGIN AT ALL. One left behind would ADD to the grid's gaps
+     * rather than replace them — the silent-doubling shape this repo has recorded on two pages.
+     */
+    expect(declValue(r, "margin"), "the panel took a margin back — it would add to the grid's gaps, not replace them").toBe("");
+    expect(declValue(r, "width"), "the panel restated --listw; the grid's first track already is it").toBe("");
+    const body = rule(".f12-body");
+    expect(body, "the split row is missing").not.toBe("");
+    expect(declValue(body, "grid-template-columns"), "the first track is not the list token").toBe("var(--listw) minmax(0, 1fr)");
+    expect(declValue(body, "column-gap"), "the channel is not the panel-inset token").toBe("var(--f12-panel-inset)");
+    for (const side of ["padding-top", "padding-bottom"] as const) {
+      expect(declValue(body, side), `the row lost its ${side} — the two columns end on different lines`).toBe("var(--f12-panel-inset)");
     }
   });
 
@@ -653,11 +676,16 @@ describe("§1d/e/g · already landed, and still true", () => {
     expect(code, "the empty-filter state went").toContain("qc-nomatch");
   });
 
-  it("the kebab lives inside the selected-query branch", () => {
-    const branch = code.indexOf("activeQuery && activeAgent && activeMs ?");
+  /* ⚠️ REPOINTED (§1): the verbs moved OUT of the pane into its control cell, so they now render
+     earlier in source than the selected-query branch and an index comparison against that branch
+     would fail while the invariant held. The invariant — a verb cannot outlive its subject — is
+     asserted where it now lives: the cell's own guard. */
+  it("the kebab cannot outlive its subject", () => {
+    const cell = code.indexOf('className="qc-phead"');
     const kebab = code.indexOf('ariaLabel="Actions for this query"');
-    expect(kebab).toBeGreaterThan(branch);
-    expect(code.indexOf("qc-nomatch"), "the empty state can reach the kebab").toBeGreaterThan(kebab);
+    expect(cell, "the pane's control cell is missing").toBeGreaterThan(-1);
+    expect(kebab, "the kebab is missing").toBeGreaterThan(cell);
+    expect(code.indexOf("{activeQuery && activeAgent ? (() => {", cell), "the cell lost its selection guard").toBeGreaterThan(cell);
   });
 });
 

@@ -1000,6 +1000,12 @@
  * with the same note). Fold it into index.css's `.t-f12` block when the tree is quiet.
  */
 .t-f12 { --f12-icon-btn: 34px; }
+/* ── §3 · THE ONE BUTTON RULE, AS THREE TOKENS ────────────────────────────────────────────────
+   Height, radius and the single border colour every control on this page reads — the header's
+   Export and Log query included. Declared with the other page tokens rather than at each use site
+   so "one button" is enforceable by grep as well as by eye. §1 reads `--btn-h` for the control
+   cells' `min-height`, which is what keeps the two heads on one line whatever is in them. */
+.t-f12 { --btn-h: 32px; --btn-r: 8px; --btn-line: #e2d8ca; }
 /* ⚠️ ONE TOKEN FOR ALL THREE SIDES AND THE SEAM'S OFFSET. The seam's `left` is computed from it, so
    moving the panel and moving the divider cannot come apart. */
 .t-f12 { --f12-panel-inset: 14px; }
@@ -1117,15 +1123,40 @@
    inside a card. `min-height: 0` down this chain is what lets the page fit the viewport instead
    of growing it (see .ws-work--fit for the other half of that chain). ── */
 .f12-body {
-  /* ⚠️ NO GAP BETWEEN THE COLUMNS (fix pack 2 §2). The row carried `gap: var(--gut)`, which left
-     12px of page showing to the RIGHT of the seam — so the list read as a widget resting on the
-     page rather than as one half of a split, and the "single division" the seam is supposed to be
-     was a line plus a channel. The ref's own split has no gap either.
-
-     ⚠️ THE CONTENT KEEPS ITS INSET; only the CHANNEL goes. The list's children carry
-     `padding-inline: var(--gut)` and the pane's carry their own 20px, so nothing lands against the
-     line — which is why removing the gap costs no breathing room, only the stripe of page. */
-  flex: 1; display: flex; min-height: 0;
+  /**
+   * ══ §1 — ONE GRID CARRIES BOTH CONTROL ROWS AND BOTH COLUMNS ═════════════════════════════════
+   *
+   * ⚠️ THE ALIGNMENT IS STRUCTURAL, NOT TWO PADDINGS THAT HAPPEN TO MATCH. The list's control row
+   * and the pane's control row are CELLS OF THE SAME GRID as the panels beneath them, so the count
+   * sits over the list and the verbs sit over the pane because all four read one
+   * `grid-template-columns` — not because `--listw` was restated on a strip above. Move the token
+   * and all four move together; there is no second number to keep in step.
+   *
+   * ⚠️ WHICH IS WHY THEY ARE NOT SEPARATE ROWS ABOVE THE GRID. A strip spanning both columns was
+   * tried and retired (fix pack §1c): it claimed a reach the controls do not have, and it put the
+   * list's filters further from the rows they govern than from the pane they do not touch. Two
+   * cells, each over its own column, is the same correction expressed as geometry.
+   *
+   * ⚠️ EVERY CHILD DECLARES ITS `grid-column` AND `grid-row`. CSS grid auto-placement never
+   * overlaps: one explicitly-placed child beside auto-placed siblings pushes them into an IMPLICIT
+   * new column and the grid grows sideways in silence — measured elsewhere in this app as 688px of
+   * phantom right margin on nine pages. Four children, four explicit placements, no exceptions.
+   *
+   * ⚠️ THE CHANNEL IS THE GRID'S `column-gap`, NOT THE LIST'S RIGHT MARGIN. It was a margin while
+   * the row was a flex pair; a margin cannot reach the control cells, so the heads would have been
+   * 14px out of true with the panels they head. One value, read by every row.
+   */
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: var(--listw) minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: var(--f12-panel-inset);
+  row-gap: 9px;
+  /* ⚠️ THE BOTTOM INSET IS THE ROW'S, SO BOTH COLUMNS TAKE IT. The list used to buy its own with a
+     margin and the pane bought none, so the two columns ended on different lines — the asymmetry
+     that reads as the pane "hanging". Symmetrically inset, per the pack's gate. */
+  padding-bottom: var(--f12-panel-inset);
+  padding-top: var(--f12-panel-inset);
   /**
    * ⚠️ IT IS NOT A CONTAINER ANY MORE — no border, no radius, no padding, no margin. It is the flex
    * row that puts the list beside the pane, and nothing else.
@@ -1148,6 +1179,23 @@
    */
   width: 100%;
 }
+
+/* ── §1 · THE TWO CONTROL CELLS ───────────────────────────────────────────────────────────────
+   Row 1 of the split. Left cell = what the list IS (count, sub-count) and the two controls that
+   narrow it. Right cell = what the pane is showing, and the verbs that act on it. The two are the
+   same height by `min-height: var(--btn-h)`, so an empty right cell (nothing selected) does not
+   collapse the row and shift the panels up — §9's inert verbs stay on the same line as the count. */
+.qc-lhead { grid-column: 1; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0 2px; min-height: var(--btn-h); min-width: 0; }
+.qc-phead { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0 2px; min-height: var(--btn-h); min-width: 0; overflow: hidden; }
+.qc-sp { flex: 1; }
+/* ⚠️ THE SUB-COUNT IS AN `<i>` INSIDE THE COUNT, not a sibling — the two are one statement about
+   one set ("25 queries, 16 of them awaiting"), and a sibling would be free to wrap away from it. */
+.qc-count { font-family: var(--f12-serif); font-size: 18px; font-weight: 500; line-height: 1; color: var(--ink); white-space: nowrap; }
+.qc-count i { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; color: var(--faint); margin-left: 9px; }
+/* The pane cell's label: whose verbs these are. Mono, quiet, and never a heading — the pane below
+   it already names the query. */
+.qc-who { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-right: 8px; white-space: nowrap; }
+
 .f12-pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-2); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 /* ── THE EDITORIAL LIST (ref query-centre-final.html) — DE-CARDED. It is no longer a .f12-pane:
    inside the workspace frame a bordered card would be a card inside a card, so the list is now
@@ -1365,13 +1413,22 @@
  * page's. Four values, and only one of them is zero.
  */
 .f12-list {
-  flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0;
-  margin: var(--f12-panel-inset) var(--f12-panel-inset) var(--f12-panel-inset) 0;
+  /* ⚠️ NO WIDTH AND NO MARGINS ANY MORE — the grid cell is both (§1). Restating `width: --listw`
+     here while the grid's first track also read it gave the token two consumers that could drift;
+     the margins are the row's `column-gap` / `padding-bottom` for the same reason. */
+  grid-column: 1; grid-row: 2;
+  display: flex; flex-direction: column; min-height: 0; min-width: 0;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   overflow: hidden;
 }
+
+/* ⚠️ THE EMPTY SPLIT OPTS OUT OF THE GRID (§1). It has no control cells to place — there is nothing
+   to count and nothing selected — so it keeps the flex pair it has always been, and its list keeps
+   the margin the grid's gaps took over for the populated case. */
+.f12-body-empty { display: flex; padding-top: 0; padding-bottom: 0; }
+.f12-body-empty > .f12-list { margin: var(--f12-panel-inset) var(--f12-panel-inset) var(--f12-panel-inset) 0; width: var(--listw); flex: none; }
 
 /* ⚠️ THE SEAM, FULL HEIGHT OF BOTH COLUMNS, AND UNDERNEATH THE PANEL'S RIGHT RIM. Positioned one
    pixel back from the column boundary so it is collinear with that rim: over the panel's height the
@@ -1577,7 +1634,10 @@
 .f12-ghead { position: sticky; top: 0; z-index: 1; background: var(--paper); border-bottom: 1px solid var(--hairline); padding: 6px 14px; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); font-weight: 600; }
 
 /* ── reading pane ── */
-.f12-detail { flex: 1; min-width: 0; }
+/* ⚠️ PLACED, NOT AUTO-PLACED (§1) — see `.f12-body`'s note. `flex: 1` survives for the EMPTY split,
+   which is still a flex pair; in the grid it is inert, and the grid placement is inert in the flex
+   pair, so one rule serves both without a second selector. */
+.f12-detail { flex: 1; min-width: 0; grid-column: 2; grid-row: 2; }
 .f12-dscroll { flex: 1; overflow-y: auto; min-height: 0; background: var(--paper); padding: 20px; }
 /* agent header — sage LEFT SPINE (::before clipped by the card radius; no top rule) */
 /**
@@ -1819,8 +1879,13 @@
   .f12-root .qch-acts { margin-left: 0; flex-basis: 100%; }
   .f12-root .qch-esc { display: none; } /* no Esc key on a phone */
 
-  /* THE PUSHER — the body is the viewport; the panes are its two screens */
-  .f12-root .f12-body { position: relative; overflow: hidden; padding: 0 !important; }
+  /* THE PUSHER — the body is the viewport; the panes are its two screens.
+     ⚠️ AND IT IS NOT A GRID HERE. §1's two control cells are DESKTOP chrome: below md the panes are
+     absolutely-positioned screens that slide, and `.qh-mcmd` — the floating command bar — is where
+     the query's verbs live. A grid whose two children are `position: absolute` places nothing, and
+     the two heads would have drawn above a viewport that is supposed to be full-bleed. */
+  .f12-root .f12-body { display: block; position: relative; overflow: hidden; padding: 0 !important; }
+  .f12-root .qc-lhead, .f12-root .qc-phead { display: none; }
   .f12-root .f12-body .f12-pane {
     position: absolute; inset: 0; width: 100%;
     border-left: none; border-right: none; border-radius: 0; box-shadow: none;
