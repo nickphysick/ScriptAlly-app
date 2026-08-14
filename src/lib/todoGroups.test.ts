@@ -277,3 +277,52 @@ describe("⚠️ THE CHIPS ARE THE GROUPS PLUS 'ALL' — never a second facet vo
     }
   });
 });
+
+/**
+ * ⚠️ THE RETURN BOUNDARY — A CARD DUE BACK TODAY IS AWAKE, AND IT IS IN EXACTLY ONE PLACE.
+ *
+ * This is the fixture the grouping most needs and least obviously has: a snoozed flag whose
+ * return date is TODAY. Off by one in either direction and the card is either asleep on the
+ * morning it was meant to come back — the writer never sees it — or in both the Snoozed group and
+ * a live one at once, which makes every count on the page disagree with the panels beneath it.
+ *
+ * `snoozedCards` is where the boundary is choked (tasks-audit P1); this asserts the GROUPS honour
+ * it, since a partition that double-counts is a different failure from a filter that does.
+ */
+describe("⚠️ THE SNOOZED PARTITION AT THE BOUNDARY DATE", () => {
+  it("a card returning today is live, and appears in exactly one group", () => {
+    /* the columns are the input: a returned card has already left `cols.snoozed` by the time the
+       groups see it, so the partition's job is not to put it back */
+    const returning = card({ key: "back-today", stream: "hk" });
+    const c = cols({ todo: [returning], snoozed: [] });
+    const gs = taskGroups(c);
+    const homes = gs.filter((g) => g.cards.some((x) => x.key === "back-today"));
+    expect(homes.map((g) => g.id)).toEqual(["housekeeping"]);
+    expect(gs.map((g) => g.id)).not.toContain("snoozed");
+  });
+
+  it("a card still asleep is in Snoozed and NOWHERE else", () => {
+    const asleep = card({ key: "still-asleep", stream: "hk", snoozes: 1 });
+    const gs = taskGroups(cols({ snoozed: [asleep] }));
+    const homes = gs.filter((g) => g.cards.some((x) => x.key === "still-asleep"));
+    expect(homes.map((g) => g.id)).toEqual(["snoozed"]);
+  });
+
+  /**
+   * ⚠️ AND THE COUNTS FOLLOW, which is the half that would go unnoticed. A card in two groups
+   * still renders once per panel and looks correct; the chips are where the double shows.
+   */
+  it("no card is counted twice — the chips and the panels agree at the boundary", () => {
+    const c = cols({
+      todo: [card({ key: "back-today", stream: "hk" })],
+      snoozed: [card({ key: "still-asleep", stream: "hk", snoozes: 1 })],
+    });
+    const gs = taskGroups(c);
+    const keys = gs.flatMap((g) => g.cards.map((x) => x.key));
+    expect(new Set(keys).size).toBe(keys.length);
+    const chips = railChips(c);
+    expect(chips.find((x) => x.id === "all")!.count).toBe(1);          // the returned one only
+    expect(chips.find((x) => x.id === "snoozed")!.count).toBe(1);      // the sleeping one only
+    expect(chips.find((x) => x.id === "housekeeping")!.count).toBe(1);
+  });
+});

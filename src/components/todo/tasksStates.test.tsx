@@ -153,13 +153,19 @@ describe("⚠️ A FILTERED-EMPTY RESULT IS A DEAD END TO ESCAPE, NOT A MOMENT T
     expect(page).toContain("Clear it to see all {allDockable.length}");
     expect(page).toContain("Clear search");
     expect(page).toContain('"Show all"');
-    const panel = page.slice(page.indexOf('className="tdg-empty tdw-empty"'), page.indexOf('className="tdg-empty tdw-empty"') + 900);
+    const at = page.indexOf('className="tdg-empty tdw-empty"');
+    expect(at, "the rail-empty marker is gone — this slice would read the whole file").toBeGreaterThan(-1);
+    const panel = page.slice(at, at + 900);
     expect(panel).not.toContain("ArtSlot");
   });
 
   it("⚠️ AND THE PANE IS NOT PART OF IT — the empty state is inside the rail, above the split", () => {
     /* the marker sits INSIDE `.tdw-rail`, so the workspace column renders regardless */
-    const rail = page.slice(page.indexOf('className="tdw-rail"'), page.indexOf('className="tdw-work"'));
+    const a = page.indexOf('className="tdw-rail"');
+    const b = page.indexOf('className="tdw-work"');
+    expect(a, "the rail marker is gone").toBeGreaterThan(-1);
+    expect(b, "the workspace marker is gone").toBeGreaterThan(a);
+    const rail = page.slice(a, b);
     expect(rail).toContain("tdw-empty");
     expect(rail).toContain("renderList()");
     /* and the pane reads the HELD card, which is what survives a narrowing */

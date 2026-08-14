@@ -904,7 +904,11 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
        inside the rail, the workspace column renders beside it either way, and the desk states are
        the only branches left above the split. What replaces the order check is a STRONGER claim —
        that the empty state cannot reach the pane. */
-    const rail = page.slice(page.indexOf('className="tdw-rail"'), page.indexOf('className="tdw-work"'));
+    const a = page.indexOf('className="tdw-rail"');
+    const b = page.indexOf('className="tdw-work"');
+    expect(a, "the rail marker is gone").toBeGreaterThan(-1);
+    expect(b, "the workspace marker is gone").toBeGreaterThan(a);
+    const rail = page.slice(a, b);
     expect(rail).toContain("tdw-empty");
     expect(page).toContain("const railEmpty = railGroups().length === 0;");
     /* the desk states still replace the whole body — a first run has no list to put in a rail */

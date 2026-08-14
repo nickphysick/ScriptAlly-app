@@ -467,7 +467,9 @@ describe("⚠️ THE PANE IS NEVER PROVISIONALLY EMPTY, and never congratulates"
   it("the empty pane states facts and carries no verdict", () => {
     expect(page).toContain("Nothing needs you.");
     expect(page).toContain("paneRestLine(");
-    const panel = page.slice(page.indexOf('className="tdw-none"'), page.indexOf('className="tdw-none"') + 700);
+    const at = page.indexOf('className="tdw-none"');
+    expect(at, "the empty pane's marker is gone — this slice would read the whole file").toBeGreaterThan(-1);
+    const panel = page.slice(at, at + 700);
     expect(panel).not.toMatch(/\b(great|well done|congrat|nice work)\b/i);
   });
 });

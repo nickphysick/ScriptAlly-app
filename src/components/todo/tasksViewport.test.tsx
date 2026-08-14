@@ -697,8 +697,11 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
    * from the UNnarrowed list.
    */
   it("the pane closes on `allDockable`, never on the narrowed set", () => {
-    const eff = board.slice(board.indexOf("const lastNarrowSig"), board.indexOf("}, [dockSig, dockKey, narrowSig"));
-    expect(eff, "the effect must exist for this case to mean anything").toContain("setDockKey");
+    const a = board.indexOf("const lastNarrowSig");
+    const b = board.indexOf("}, [dockSig, dockKey, narrowSig");
+    expect(a, "the narrowing effect is gone — this slice would read the whole file").toBeGreaterThan(-1);
+    expect(b, "the effect's dep list is gone").toBeGreaterThan(a);
+    const eff = board.slice(a, b);
     expect(eff).toContain("if (allDockable.length === 0) { setDockKey(null); return; }");
     expect(eff).toContain("if (dockable.length === 0) return;");
     /* the hold must come AFTER the close, or a narrowed-to-nothing rail would close the pane */
@@ -712,7 +715,11 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
    * Distinguished by the narrowing's own signature rather than guessed at.
    */
   it("a narrowing change goes to the FIRST match; a write keeps the position", () => {
-    const eff = board.slice(board.indexOf("const lastNarrowSig"), board.indexOf("}, [dockSig, dockKey, narrowSig"));
+    const a = board.indexOf("const lastNarrowSig");
+    const b = board.indexOf("}, [dockSig, dockKey, narrowSig");
+    expect(a, "the narrowing effect is gone").toBeGreaterThan(-1);
+    expect(b, "the effect's dep list is gone").toBeGreaterThan(a);
+    const eff = board.slice(a, b);
     expect(eff).toContain("const narrowed = lastNarrowSig.current !== narrowSig;");
     expect(eff).toContain("setDockKey(narrowed ? dockable[0].key : (docked.card?.key ?? dockable[0].key));");
     /* the signature is the search, the chip and the tag — everything that changes the SET */
@@ -720,7 +727,11 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
   });
 
   it("⚠️ THE EMPTY MESSAGE IS INSIDE THE RAIL, and the workspace column renders beside it", () => {
-    const rail = board.slice(board.indexOf('className="tdw-rail"'), board.indexOf('className="tdw-work"'));
+    const ra = board.indexOf('className="tdw-rail"');
+    const rb = board.indexOf('className="tdw-work"');
+    expect(ra, "the rail marker is gone").toBeGreaterThan(-1);
+    expect(rb, "the workspace marker is gone").toBeGreaterThan(ra);
+    const rail = board.slice(ra, rb);
     expect(rail).toContain("tdw-empty");
     expect(rail).toContain("renderList()");
     /* and it is read from the groups the rail actually draws — not a parallel predicate */
@@ -734,5 +745,57 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
   it("⚠️ THE PANE'S QUEUE IS THE NARROWED SET, so ↑↓ never walk onto a card the rail is hiding", () => {
     expect(board).toContain("const dockable = allDockable.filter((c) => chipMatchesCard(chip, c));");
     expect(board).toContain("queue={dockable}");
+  });
+});
+
+/**
+ * ⚠️ A SCROLLER AND A CLIP LOOK IDENTICAL TO A "PAGE SCROLL IS ZERO" TEST, and only one of them
+ * is correct. `overflow: hidden` satisfies that assertion perfectly while silently eating every
+ * row past the fold — which is exactly what happened on 9 August, when the frame clipped 2,099px
+ * of list with no scrollbar anywhere and every declaration below it was still right.
+ *
+ * ⚠️ WHAT THIS CAN AND CANNOT PROVE. jsdom computes no layout, so nothing here can watch content
+ * overflow and check that it scrolls. What it CAN pin is that each pane declares the mechanism —
+ * an `auto` overflow, not a `hidden` one — and that nothing between the frame and either scroller
+ * clips instead. The used behaviour stays a browser check, and it is named as such in the report.
+ */
+describe("⚠️ EACH PANE SCROLLS, AND NEITHER CLIPS — the distinction a page-scroll test cannot make", () => {
+  it("the rail's scroller is `overflow: auto`, never hidden", () => {
+    const zone = rule(css, ".tpl-zone {");
+    expect(zone).toContain("overflow: auto");
+    expect(zone).not.toContain("overflow: hidden");
+  });
+
+  it("the workspace's own scroller is `overflow-y: auto`, never hidden", () => {
+    const work = rule(splitCss, ".tdw-work {");
+    expect(work).toContain("overflow-y: auto");
+    expect(work).not.toContain("hidden");
+  });
+
+  /**
+   * ⚠️ AND NOTHING BETWEEN THE FRAME AND EITHER SCROLLER MAY CLIP. A `hidden` on any of these
+   * would swallow the overflow before the scroller ever saw it — the row would simply be gone,
+   * with the pane below it looking perfectly correct.
+   */
+  it("no box in either chain declares `overflow: hidden`", () => {
+    for (const [sheet, sel] of [
+      [css, ".tpl-cols {"], [css, ".tpl-body {"],
+      [splitCss, ".tdw-split {"], [splitCss, ".tdw-rail {"],
+    ] as const) {
+      expect(rule(sheet, sel), sel).not.toContain("overflow");
+    }
+    /* `.tdb-wrap` is the ONE deliberate clip — it is the frame, and the frame is a window. Its
+       `overflow: hidden` is what makes the panes scroll instead of the page, and it is asserted
+       positively above rather than exempted quietly here. */
+    expect(rule(pageCss, ".tdb-wrap {")).toContain("overflow: hidden");
+  });
+
+  it("⚠️ BOTH PANES CAN SHRINK, or their content sizes them and there is nothing to scroll IN", () => {
+    /* The other half of the same failure: a scroller as tall as its content never scrolls, and
+       looks identical to one that has nothing in it. */
+    expect(rule(css, ".tpl-zone {")).toContain("min-height: 0");
+    expect(rule(splitCss, ".tdw-work {")).toContain("min-height: 0");
+    expect(rule(splitCss, ".tdw-rail {")).toContain("min-height: 0");
+    expect(rule(splitCss, ".tdw-split {")).toContain("min-height: 0");
   });
 });
