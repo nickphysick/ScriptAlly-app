@@ -26,6 +26,7 @@ const here = __dirname;
 const css = readFileSync(join(here, "tasksLayout.css"), "utf8");
 const pageCss = readFileSync(join(here, "todo.css"), "utf8");
 const calCss = readFileSync(join(here, "todoCalendar.css"), "utf8");
+const splitCss = readFileSync(join(here, "todoSplit.css"), "utf8");
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const board = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
@@ -561,6 +562,113 @@ describe("⚠️ WIDTHS ARE NEVER TOUCHED BY THE HEIGHT WORK", () => {
        proportion of their own bar rather than a page dimension. */
     for (const [name, src] of [["Calendar", cal], ["Noteboard", note], ["board", board]] as const) {
       expect(src, name).not.toMatch(/style=\{\{[^}]*\bwidth:\s*[`"']?\d+px/);
+    }
+  });
+});
+
+/* ── THE SPLIT (rail + workspace, Phase 2) ──────────────────────────────────────────────────── */
+
+describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", () => {
+  /**
+   * ⚠️ THE CHAIN GAINED TWO LINKS AND BOTH MUST DECLARE THEIR PART. `.tpl-zone` is now a
+   * grandchild of `.tdb-centre` rather than a child, and the two boxes between them are exactly
+   * the kind of wrapper the 9 August failure was: unenumerated, at the default `min-height: auto`,
+   * with every other declaration in the chain still perfectly correct and the zone silently
+   * refusing to scroll. jsdom cannot prove the chain resolves; it can prove nothing is missing.
+   */
+  it("THE CHAIN, EXTENDED — .tdw-split and .tdw-rail each declare min-height: 0", () => {
+    const split = rule(splitCss, ".tdw-split {");
+    expect(split).toContain("min-height: 0");
+    expect(split).toMatch(/flex:\s*1/);          // it grows into the row .tdb-centre gives it
+    const rail = rule(splitCss, ".tdw-rail {");
+    expect(rail).toContain("min-height: 0");
+    expect(rail).toContain("display: flex");     // so .tpl-zone below it is a flex item
+    expect(rail).toContain("flex-direction: column");
+  });
+
+  /**
+   * ⚠️ `minmax(0, 1fr)` ON BOTH AXES, NEVER A BARE `1fr`. A grid item's automatic minimum is its
+   * CONTENT, so a bare `1fr` track cannot be shorter or narrower than what it holds: the workspace
+   * would push the rail off its measure sideways, and the row would grow the frame downwards —
+   * which is the viewport lock defeated by a track definition rather than by a missing
+   * `min-height`. Same failure, a layer the chain does not cover.
+   */
+  it("the tracks refuse to be sized by their content, on BOTH axes", () => {
+    const split = rule(splitCss, ".tdw-split {");
+    expect(split).toContain("grid-template-columns: var(--tdw-rail-w) minmax(0, 1fr)");
+    expect(split).toContain("grid-template-rows: minmax(0, 1fr)");
+    /* the value, stated once and read once — the rail is a fixed measure, the workspace is what
+       is left. 440 rather than the ref's 408: the live row carries seven lanes, not the four the
+       concept sketch drew. */
+    expect(split).toContain("--tdw-rail-w: 440px");
+  });
+
+  it("the WORKSPACE is the second scroller, and it is the pane's own", () => {
+    const work = rule(splitCss, ".tdw-work {");
+    expect(work).toContain("overflow-y: auto");
+    expect(work).toContain("min-height: 0");
+  });
+
+  it("⚠️ THE RAIL SCROLLER IS THE EXISTING ZONE RELOCATED, never a second one", () => {
+    /* One overflow primitive on this page family — the fault `.tpl-zone` was extracted to fix.
+       The rail declares no overflow of its own; it is a flex column and the zone inside it
+       scrolls, exactly as `.tpl-body` did before the split. */
+    expect(rule(splitCss, ".tdw-rail {")).not.toContain("overflow");
+    expect(splitCss).not.toContain(".tpl-zone");   // the primitive is not re-declared here
+    expect(board).toContain('<div className="tdw-rail">{renderList()}</div>');
+  });
+
+  /**
+   * ⚠️ THE GROUND IS ONE TOKEN, NOT TWO HEXES KEPT EQUAL. `.tdg`'s sticky heading paints itself
+   * with `--tdg-ground`, which is declared as `var(--ws-window)` precisely so the pair is
+   * structural. The rail's ground is white where the page's is #fefcfa, so the rail repoints the
+   * token and the heading follows; painting a bare `background: #fff` here would give a heading
+   * that looks correct at rest and grows a pale slab the moment a row scrolls under it.
+   */
+  it("the rail repoints --ws-window rather than painting a literal white", () => {
+    const rail = rule(splitCss, ".tdw-rail {");
+    expect(rail).toContain("--ws-window-rgb: 255, 255, 255");
+    expect(rail).toContain("background: var(--ws-window)");
+    expect(rail).not.toMatch(/background:\s*#fff/);
+    /* and the workspace keeps the page's own ground — the colour that was already showing there,
+       so the pane reads as the page continuing rather than as a third surface */
+    expect(rule(splitCss, ".tdw-work {")).toContain("background: var(--ws-window)");
+    /* the tie this depends on, asserted at its source rather than assumed */
+    expect(readFileSync(join(here, "todoGroups.css"), "utf8"))
+      .toContain("--tdg-ground: var(--ws-window)");
+  });
+
+  /**
+   * ⚠️ THE DOCK MOVED INTO THE PANE; IT DID NOT MULTIPLY. It used to replace the list, which is
+   * how it said "this is where the work happens now". Standing them side by side says the same
+   * thing without hiding what you were reading. `openDock` is still the one entrance and the dock
+   * is still the one recording surface — nothing in the rail records anything.
+   */
+  it("the dock mounts INSIDE the workspace pane, and the list keeps the rail", () => {
+    for (const anchor of ['className="tdw-split"', 'className="tdw-rail"', 'className="tdw-work"', "<TodoDock"]) {
+      expect(board, anchor).toContain(anchor);
+    }
+    expect(board.indexOf('className="tdw-split"')).toBeLessThan(board.indexOf('className="tdw-rail"'));
+    expect(board.indexOf('className="tdw-rail"')).toBeLessThan(board.indexOf('className="tdw-work"'));
+    expect(board.indexOf('className="tdw-work"')).toBeLessThan(board.indexOf("<TodoDock"));
+    /* still exactly one dock mount and one entrance function */
+    expect(board.match(/<TodoDock/g) ?? []).toHaveLength(1);
+    expect(board.match(/function openDock/g) ?? []).toHaveLength(1);
+  });
+
+  /**
+   * ⚠️ THE PLATE AND THE CHIPS ARE NOT THE SPLIT'S TO REPLACE (owner's ruling, Phase 2).
+   * `PageHeader variant="workspace"` is shell chrome under the alignment contract and the
+   * collapse-on-engagement law; the concept sketch's slim header is a DRAWING of that plate
+   * collapsed, not a page bar to be built. What came out is only the page-local full-width list
+   * container the rail replaces.
+   */
+  it("the split builds no header of its own — the shell's plate and the stat chips both stand", () => {
+    expect(layout).toContain('<PageHeader variant="workspace"');
+    expect(board).toContain('className="tdg-stats"');
+    /* the split sheet paints no plate, no bar, no title */
+    for (const sel of ["ws-plate", "tpl-head", "wpg-plate"]) {
+      expect(splitCss, sel).not.toContain(sel);
     }
   });
 });

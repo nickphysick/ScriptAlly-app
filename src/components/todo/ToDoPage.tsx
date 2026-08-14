@@ -96,6 +96,7 @@ import {
 import { ToastAction, useTodoToast } from "./useTodoToast";
 import "./todo.css";
 import "./todoGroups.css";
+import "./todoSplit.css";
 /* the tag filter’s trigger + menu — the SHARED control, one home (see taskChrome.css) */
 import "./taskChrome.css";
 // The relocated control surfaces' styles + tokens (the chip bench + the Pro sticker) — the
@@ -1181,31 +1182,50 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               Clear search
             </button>
           </div>
-        ) : dock ? (
-          /* ⚠️ THE DOCK TAKES THE BOARD'S PLACE rather than floating over it. A modal would leave
-             the board visible behind, implying you could still reach it — and the whole point of
-             the dock is that this is where the work happens now. Esc and × bring it back, with
-             the scroll position it had. */
-          <TodoDock
-            queue={dock.queue}
-            activeKey={dock.activeKey}
-            onSelect={(key) => setDock((d) => (d ? { ...d, activeKey: key } : d))}
-            onClose={closeDock}
-            timeline={dockTimeline}
-            onPrimary={(c, spec) => void dockPrimary(c, spec)}
-            onSnoozeDays={(c, days, when) => snoozeCard(c, days, when)}
-            tagsSlot={(c) => c.userTaskId ? (
-              <TagPicker
-                compact
-                tags={userTags}
-                selected={c.tags ?? []}
-                onToggle={(tid) => void applyTagToggle(c.userTaskId!, c.tags, tid)}
-                onCreate={(tag) => { void createTagDef(tag); void applyTagToggle(c.userTaskId!, c.tags, tag.id); }}
-              />
-            ) : null}
-            onMore={(c) => openFlowCards([c])}
-          />
-        ) : renderList()}
+        ) : (
+          /**
+           * ⚠️ THE SPLIT (Phase 2). The list is the RAIL and the dock is the WORKSPACE, standing
+           * side by side instead of taking turns.
+           *
+           * ⚠️ THE DOCK MOVED; IT DID NOT MULTIPLY. Its old note said it "takes the board's place
+           * rather than floating over it", and the reasoning behind that sentence — this is where
+           * the work happens now — is the reasoning FOR the pane: a modal was refused because it
+           * would imply the list was still reachable, and here it genuinely is, in its own
+           * column, which is a different arrangement rather than the one that was rejected.
+           * `openDock` is still the single entrance and the dock is still the single recording
+           * surface; nothing in the rail records anything, so the law holds unchanged.
+           */
+          <div className="tdw-split">
+            <div className="tdw-rail">{renderList()}</div>
+            <div className="tdw-work">
+              {dock ? (
+                <TodoDock
+                  queue={dock.queue}
+                  activeKey={dock.activeKey}
+                  onSelect={(key) => setDock((d) => (d ? { ...d, activeKey: key } : d))}
+                  onClose={closeDock}
+                  timeline={dockTimeline}
+                  onPrimary={(c, spec) => void dockPrimary(c, spec)}
+                  onSnoozeDays={(c, days, when) => snoozeCard(c, days, when)}
+                  tagsSlot={(c) => c.userTaskId ? (
+                    <TagPicker
+                      compact
+                      tags={userTags}
+                      selected={c.tags ?? []}
+                      onToggle={(tid) => void applyTagToggle(c.userTaskId!, c.tags, tid)}
+                      onCreate={(tag) => { void createTagDef(tag); void applyTagToggle(c.userTaskId!, c.tags, tag.id); }}
+                    />
+                  ) : null}
+                  onMore={(c) => openFlowCards([c])}
+                />
+              ) : (
+                /* PROVISIONAL — Phase 5 puts the task card and its own empty state here. It says
+                   what the pane is for and nothing about how the writer is doing. */
+                <p className="tdw-hint">Choose a task to work on it here</p>
+              )}
+            </div>
+          </div>
+        )}
 
           {/* ⚠️ THE ASSISTANT BAND IS UNMOUNTED FROM THIS PAGE (fix pack, 10 Aug) — a PLACEMENT
               decision, not a deletion. `AssistantBand` and `AssistantPromo.tsx` are untouched, and

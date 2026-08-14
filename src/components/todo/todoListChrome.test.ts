@@ -32,12 +32,14 @@ const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 
 /** Everything before the body renders — the page's chrome.
- *  ⚠️ The anchor has moved twice: with the view switch (board+dock P1) and again with the board
- *  itself (tasks-consolidation P2, 9 Aug). The slice ends at the body's render call, whatever the
- *  body currently is — that is the whole point of anchoring on it rather than on a view. */
+ *  ⚠️ The anchor has moved three times: with the view switch (board+dock P1), with the board
+ *  itself (tasks-consolidation P2, 9 Aug), and now with the SPLIT (rail + workspace P2), which
+ *  put the list inside a pane so `") : renderList()}"` stopped existing. The slice ends at the
+ *  body's opening element, whatever the body currently is — that is the whole point of anchoring
+ *  on it rather than on a view. */
 const chrome = (() => {
-  const i = page.indexOf(") : renderList()}");
-  expect(i, "the list's render call must exist for this slice to mean anything").toBeGreaterThan(-1);
+  const i = page.indexOf('<div className="tdw-split">');
+  expect(i, "the split — the page's body — must exist for this slice to mean anything").toBeGreaterThan(-1);
   return page.slice(0, i);
 })();
 

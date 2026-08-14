@@ -1,0 +1,97 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * todoSplit — the To-do page's two panes (rail + workspace rebuild, Phase 2; ref
+ * design-refs/todo-workspace-concept-v3.html, `.split`).
+ *
+ * ⚠️ THE PAGE STOPS BEING A LIST AND BECOMES A DIRECTORY BESIDE A WORK SURFACE. The rail holds
+ * everything you might do; the workspace holds the one you are doing. That division is the same
+ * one the dock already asserted — it is where work gets finished, and there is exactly one of it —
+ * except the dock used to REPLACE the list to say so. Standing the two side by side says it
+ * without hiding the thing you were reading a moment ago.
+ *
+ * ⚠️ THE DOCK MOVED, IT DID NOT MULTIPLY. `openDock` is still the one entrance and the dock is
+ * still the one recording surface; it now mounts inside `.tdw-work` instead of in the list's
+ * place. Nothing in the rail records anything — a derived card bounces rather than ticking, and a
+ * writer's own task completes through `quickDone` — so the law the dock's own note protects is
+ * untouched by putting the two on screen together.
+ *
+ * ⚠️ THE PLATE AND THE STAT CHIPS ARE NOT IN HERE, DELIBERATELY. `PageHeader variant="workspace"`
+ * is shell chrome under the alignment contract and the collapse-on-engagement law, and the chips
+ * are the header's own statement; the split sits BENEATH both and replaces only the page-local
+ * full-width list container. A page bar of this file's own would take this page off the shell's
+ * law for the sake of a drawing.
+ */
+
+/* ⚠️ THE RAIL IS A PIXEL WIDTH AND THE WORKSPACE TAKES WHAT IS LEFT — `minmax(0, 1fr)`, never a
+   bare `1fr`, or the workspace refuses to shrink below its content and pushes the rail off its
+   own measure. The row is `minmax(0, 1fr)` for the same reason on the other axis: a grid item's
+   automatic minimum is its content, so without it neither pane can be shorter than what it holds
+   and the frame the viewport lock says never scrolls would grow instead.
+
+   ⚠️ 440px, NOT THE REF'S 408. The live row carries seven lanes where the concept sketch drew
+   four; 408 was measured against the sketch. Widened with the lane structure, not instead of it. */
+.tdw-split {
+  --tdw-rail-w: 440px;
+  /* the divider — the panels' own hairline, so the rail's edge and the sheets inside it agree */
+  --tdw-hair: var(--tdb-panel-hair);
+  display: grid;
+  grid-template-columns: var(--tdw-rail-w) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/**
+ * ⚠️ THE RAIL REPOINTS `--ws-window` AND EVERYTHING INSIDE IT FOLLOWS. The sticky group heading
+ * paints itself with `--tdg-ground`, which IS `var(--ws-window)` — declared that way on purpose,
+ * so the heading's ground is structural rather than a hex kept equal by hand. The rail's ground is
+ * white while the page's is `#fefcfa`; overriding the token here is what makes the heading, the
+ * hem and this background one value instead of three that have to be remembered.
+ *
+ * This is the use-site rule the shell already runs on: a property read inside a `var()` on a
+ * DESCENDANT resolves against that descendant's inherited value, so an override on the ancestor
+ * reaches it. Painting `background: #fff` here and leaving the token alone would give a heading
+ * that looks right at rest and grows a pale slab the moment a row scrolls under it.
+ */
+.tdw-rail {
+  --ws-window-rgb: 255, 255, 255;
+  --ws-window: rgb(var(--ws-window-rgb));
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--ws-window);
+  border-right: 1px solid var(--tdw-hair);
+  padding: 0 14px 0 2px;
+  box-sizing: border-box;
+}
+
+/* ⚠️ THE WORKSPACE KEEPS THE PAGE'S OWN GROUND — `--ws-window` (#fefcfa), the warm near-white the
+   shell already paints behind every Tasks page, NOT a tint invented for this pane. It is the
+   faintest warm step there is against the rail's white, and it is the colour that was already
+   showing here before the split existed, so the pane reads as the page continuing rather than as
+   a third surface. `overflow-y` on the pane itself: it is the second scroller, and it is the
+   pane's own, so the rail and the workspace can be at different heights without either moving
+   the frame. */
+.tdw-work {
+  min-height: 0;
+  min-width: 0;
+  overflow-y: auto;
+  background: var(--ws-window);
+}
+
+/* The provisional occupant — Phase 5 replaces it with the task card and its own empty state.
+   It states what the pane is for and nothing about how you are doing. */
+.tdw-hint {
+  margin: 0;
+  padding: 40px 32px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #a5988c;
+  text-align: center;
+}

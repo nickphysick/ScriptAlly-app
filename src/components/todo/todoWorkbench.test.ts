@@ -904,10 +904,14 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     /* ⚠️ THE PANEL REPLACED THE ONE-LINER (P5, 9 Aug; sheet 4) — it names what you searched for
        and states the size of the set you get back, which is what makes clearing an informed
        choice. The BRANCH ORDER is what this case has always protected and it is unchanged. */
+    /* ⚠️ RE-ANCHORED ON THE SPLIT (rail + workspace P2). The body used to be `renderList()`
+       directly; it is now the two-pane grid, with the list inside the rail. The BRANCH ORDER is
+       what this case has always protected and it is still exactly that — a narrowing that finds
+       nothing must never reach the pane and render as "nothing needs you". */
     const i = page.indexOf('className="tdg-empty"');
-    const j = page.indexOf(") : renderList()}");
+    const j = page.indexOf('<div className="tdw-split">');
     expect(i).toBeGreaterThan(-1);
-    expect(j, "the body's render call must exist").toBeGreaterThan(-1);
+    expect(j, "the body — the split — must exist").toBeGreaterThan(-1);
     expect(i, "the no-match branch must come BEFORE the body").toBeLessThan(j);
     expect(page).toContain("No tasks match");
     expect(page).toContain(">\n              Clear search\n            </button>");

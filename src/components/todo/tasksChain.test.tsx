@@ -101,6 +101,12 @@ const CHAIN = [
   "sa-content-col", // StagePage's optional cap column (no Tasks slot uses it today)
   "t-f12", "spine-root", "tdb-wrap", "today-off", "tdb-col", "tpl",
   "tpl-cols", "tpl-body", "tdb-centre",
+  /* ⚠️ THE TWO THE SPLIT ADDED (rail + workspace, Phase 2), named here because that is the price
+     of adding them. `.tdw-split` is the grid and `.tdw-rail` is its left pane; the zone is now a
+     grandchild of `.tdb-centre` rather than a child. Both declare `min-height: 0` — asserted in
+     tasksViewport.test.tsx, where the rest of the chain is pinned — and this list is what stops a
+     THIRD wrapper arriving unnoticed between them, which is exactly what `.tdb-board` was. */
+  "tdw-split", "tdw-rail",
 ];
 
 describe("⚠️ NOTHING UNNAMED MAY SIT BETWEEN `.tpl-body` AND THE SCROLLER", () => {
