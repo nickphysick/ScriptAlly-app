@@ -55,7 +55,7 @@ import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
 import { getPrimaryAction } from "../lib/queryPrimaryAction";
-import { EdgeFadeScroll } from "./EdgeFadeScroll";
+import { PaneScroll } from "./queries/PaneScroll";
 import { RecordResponseModal } from "./RecordResponseModal";
 import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
@@ -4005,7 +4005,7 @@ export const Queries: React.FC<{
                     meta={statusDisplayLabel(activeQuery)}
                     glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>}
                   >
-                      <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "0 0 18px" }} fade="var(--panel, #fffdfb)">
+                      <PaneScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "0 0 18px" }}>
                         {/**
                           * ⚠️ THE TWO STATS LEAD THE BODY (§2), in the comps page's grammar: icon
                           * plate, Playfair number, mono caption, one hairline between them.
@@ -4086,7 +4086,7 @@ export const Queries: React.FC<{
                             single door now, and the primary above opens it. TimelineComposer
                             itself survives for the dashboard's own flows; only this mount went. */}
                         </div>
-                      </EdgeFadeScroll>
+                      </PaneScroll>
                   </PaneCard>
 
                   {/**
@@ -4110,7 +4110,7 @@ export const Queries: React.FC<{
                     glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>}
                   >
                       {/* spec sheet */}
-                      <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }} fade="var(--panel, #fffdfb)">
+                      <PaneScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }}>
                         {(() => {
                           // Phase 6 — the query's own materialsWanted is the record of what was sent; when
                           // empty we display the agent's expected set (the first edit promotes it onto the
@@ -4270,7 +4270,7 @@ export const Queries: React.FC<{
                             </>
                           );
                         })()}
-                      </EdgeFadeScroll>
+                      </PaneScroll>
                   </PaneCard>
 
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
@@ -4300,7 +4300,7 @@ export const Queries: React.FC<{
                           const send = () => { const t = journalInput.trim(); if (!t) return; addJournalEntry(activeQuery.id, t); setJournalInput(""); };
                           return (
                             <>
-                              <EdgeFadeScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }} fade="var(--panel, #fffdfb)">
+                              <PaneScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }}>
                                 {notes.length === 0 ? (
                                   /* ghost first entry — DOTTED outline, no fill (a placeholder that looks
                                      like one; ref .note); replaced on first save */
@@ -4335,7 +4335,7 @@ export const Queries: React.FC<{
                                     </div>
                                   );
                                 })}
-                              </EdgeFadeScroll>
+                              </PaneScroll>
                               {/* composer — pinned to the column foot */}
                               <div style={{ marginTop: 12, background: "#fffdf9", border: "1px solid #e6dccd", borderRadius: 10, padding: "9px 10px 9px 13px", display: "flex", alignItems: "flex-end", gap: 9, boxShadow: "0 1px 2px rgba(58,28,20,0.04)", flexShrink: 0 }}>
                                 <textarea

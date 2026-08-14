@@ -232,8 +232,28 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             them to the window's rounded corners for free. No wrapper element, no absolute
             positioning, no mask on the scroller — a mask interacts badly with `scrollbar-gutter`,
             which this row depends on. */}
-        <div className={`wpg-hem wpg-hem--top${hem.top ? " on" : ""}`} aria-hidden="true" />
-        <div className={`wpg-hem wpg-hem--bot${hem.bot ? " on" : ""}`} aria-hidden="true" />
+        {/* ⚠️ A FILL PAGE HAS NO HEMS, AND THAT FOLLOWS FROM WHAT `fill` ALREADY MEANS (fix pack 3
+            §1). `fill` declares that the PANES scroll and the page does not — so this scroller
+            cannot reach a state either hem describes, and a fade at the foot of it is claiming
+            something that cannot happen. It is not that the hems are wrong; it is that on this
+            kind of page there is nothing for them to be right about.
+
+            ⚠️ DERIVED, NOT A NEW FLAG. A `hems={false}` prop would have let a page turn them off
+            while still scrolling, which is the one case where they are load-bearing, and would have
+            put two answers to "does this page scroll" in the same component. Today `fill` is Query
+            Centre alone, so this is scoped to it in practice — but any future fill page wants the
+            same thing for the same reason, which a page-scoped `display: none` in a page's own
+            stylesheet would not have given it.
+
+            ⚠️ AND THE STATE STILL COMPUTES. `hem` is left running rather than gated, because it
+            shares its evaluation with the header's condensed state — the reason the hems live here
+            at all. Skipping the work would mean a second answer to "where is this scroller". */}
+        {!fill && (
+          <>
+            <div className={`wpg-hem wpg-hem--top${hem.top ? " on" : ""}`} aria-hidden="true" />
+            <div className={`wpg-hem wpg-hem--bot${hem.bot ? " on" : ""}`} aria-hidden="true" />
+          </>
+        )}
         {/* ⚠️ ROW 4, AFTER THE HEMS — the hems are absolute-ish grid items in row 3, so the dock
             must be its own row or it would share their cell and overlap the scroller's foot. */}
         {dock && <div className="wpg-dock">{dock}</div>}
