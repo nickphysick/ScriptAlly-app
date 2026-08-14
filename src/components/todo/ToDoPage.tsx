@@ -89,6 +89,7 @@ import {
    locked away from this component (tasks-consolidation P2). */
 import { taskGroups, taskStats, tasksEyebrow, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
 import { paneRestLine, showingLine, tasksCsv } from "../../lib/todoHandoff";
+import { rowFigure, daysSince, RowFigure, cardBucket, BUCKET_LABEL, rowDeed } from "../../lib/todoBuckets";
 import { isTerminalStatus } from "../../lib/agentList";
 import { estimateTotal } from "../../lib/todoEstimate";
 import { longDate } from "../../lib/dashboardStats";
@@ -733,6 +734,47 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /** Clearing the narrowing is one act, whichever half of it is set. */
   const clearNarrowing = () => { setSearch(""); setChip("all"); };
+
+  /**
+   * ⚠️ THE FIGURE, RESOLVED WHERE THE DATA IS. The row renders it; the page derives it, because it
+   * needs three things the list has no business holding: the agent's STATED WINDOW
+   * (`responseTimeWeeks`), whose move it is (the CTA engine, never a second answer), and the clock.
+   *
+   * ⚠️ THE BALL-HOLDER COMES FROM `getPrimaryAction` — the same derivation the command bar, the
+   * agent list's turn axis and the To-do flows all read. A local "is the agent waiting" test here
+   * would be a fourth answer to a question with one.
+   */
+  function figureFor(c: BoardCard): RowFigure {
+    const snoozedKeys = new Set(boardCols.snoozed.map((x) => x.key));
+    const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
+    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    const statedWeeks = typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0
+      ? ag.responseTimeWeeks : undefined;
+    const ballHolder = q ? getPrimaryAction(q.status as QueryStatus).ballHolder ?? null : null;
+
+    /* ⚠️ A SLEEPING CARD STATES ITS RETURN DATE AND NOTHING ELSE — an elapsed figure on a card you
+       deliberately put away is a number about a wait you chose. `BoardCard` carries no
+       `snoozedUntil`; the SNOOZED COLUMN is what knows, and `due` is already `backOnLabel`'s
+       output ("BACK 12 AUG"), so the date is read rather than re-derived. */
+    if (snoozedKeys.has(c.key)) {
+      return rowFigure({ card: c, backOn: (c.due || "").replace(/^BACK\s+/i, "") });
+    }
+    /* an offer's reply-by is the one clock that counts DOWN */
+    if (c.taskType === "offer_received" && q?.responseDeadline) {
+      const left = Math.ceil((Date.parse(q.responseDeadline) - now) / 86400000);
+      if (Number.isFinite(left) && left >= 0) {
+        return rowFigure({ card: c, replyWithinDays: left });
+      }
+    }
+    /* everything else counts UP, from the send where there is one and from the card otherwise */
+    const fromMs = q?.dateSent ? Date.parse(q.dateSent) : (c.whenMs ?? now);
+    return rowFigure({
+      card: c,
+      statedWeeks,
+      ballHolder,
+      elapsedDays: daysSince(Number.isFinite(fromMs) ? fromMs : now, now),
+    });
+  }
 
   /** What the rail is showing — the groups it draws, flattened. One derivation, two readers. */
   function railShown(): number {
@@ -2381,6 +2423,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           /* ⚠️ "NO TASKS" AND "WE DO NOT KNOW YET" ARE DIFFERENT SENTENCES (P5). `collectionsReady`
              is the db's own first-snapshot flag — the same one the Dashboard's skeleton reads — so
              the page cannot tell the second as the first and flash an empty desk on boot. */
+          figure={figureFor}
           loading={!collectionsReady}
         />
       </TplZone>

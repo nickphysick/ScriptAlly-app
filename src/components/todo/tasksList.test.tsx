@@ -22,6 +22,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import { BoardColumns } from "../../lib/todoColumns";
 import { taskGroups, groupSlice, HOUSEKEEPING_VISIBLE, tasksEyebrow } from "../../lib/todoGroups";
 import { rowPill, rowPrimaryLabel, rowJourney, PillTone, splitMenu, rowReversalIcon, rowTitleParts } from "../../lib/taskRow";
+import { rowDeed, cardBucket, BUCKET_LABEL } from "../../lib/todoBuckets";
 import { FAMILY_PILL } from "../../lib/todoFamily";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { TodoColumnId } from "../../lib/todoColumns";
@@ -95,6 +96,7 @@ const render = (c: BoardColumns) =>
       onTick={() => {}}
       onVerb={() => {}}
       onSnooze={() => {}}
+      figure={() => ({ label: "You've waited", value: "12", unit: "days", side: "them", hot: false })}
     />,
   );
 
@@ -120,8 +122,14 @@ describe("⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID — never `display
    * journey meter moved inside the content cell; neither was ever a column of facts you scan
    * down.
    */
-  it("the four tracks, exactly — checkbox · dot · content · actions", () => {
-    expect(rule(".tdg-row {")).toContain("grid-template-columns: 20px 15px minmax(0, 1fr) auto");
+  /**
+   * ⚠️ FOUR TRACKS, RE-MEASURED (visual rebuild, Phase 2): checkbox · BUCKET PILL · content ·
+   * FIGURE. The StatusDot lane became the pill — it said where a QUERY stood in a pipeline, a fact
+   * about the record rather than about the work — and the actions stopped being a track of their
+   * own, because they now sit inside the figure's slot.
+   */
+  it("the four tracks, exactly — checkbox · bucket pill · content · figure", () => {
+    expect(rule(".tdg-row {")).toContain("grid-template-columns: 17px 68px minmax(0, 1fr) 104px");
   });
 
   it("ONE flexible track: the content's. The two marks are fixed and the cluster sizes itself", () => {
@@ -136,9 +144,15 @@ describe("⚠️ THE ROW IS ONE ELEMENT CARRYING ITS OWN GRID — never `display
    * would float the checkbox and the dot against the middle of a three-line cell, which reads as
    * two controls that have slipped rather than two marks belonging to the title.
    */
-  it("the row aligns its lanes to the top", () => {
-    expect(rule(".tdg-row {")).toContain("align-items: start");
-    expect(rule(".tdg-cc {")).toContain("align-items: flex-start");
+  /**
+   * ⚠️ CENTRED AGAIN, AND THE REASON REVERSED WITH THE ROW. It was `start` because the content
+   * cell held three stacked things (title, caption, meter) while its neighbours were single marks.
+   * The caption and the meter are gone from the row; content is two tight lines, and its
+   * neighbours — a 17px box, a pill, a two-line figure — read as a row of things on one line.
+   */
+  it("the row centres its lanes", () => {
+    expect(rule(".tdg-row {")).toContain("align-items: center");
+    expect(rule(".tdg-cc {")).toContain("align-items: center");
   });
 
   it("the divider is the ROW's own inset line, and it yields to hover rather than cutting across it", () => {
@@ -169,7 +183,7 @@ describe("⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED, and the why-line sits 
 
   it("the subtitle is its own block under the title", () => {
     expect(rule(".tdg-sub {")).toContain("margin-top: 5px");
-    const html = render(cols({ todo: [card({ subtitle: "On MURPHY'S DAY OUT" })] }));
+    const html = render(cols({ todo: [card({ who: "Ada Vane", record: "Vane Literary" })] }));
     expect(html).toContain("tdg-sub");
     expect(html.indexOf("tdg-sub")).toBeGreaterThan(html.indexOf("tdg-t"));
   });
@@ -181,22 +195,36 @@ describe("⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED, and the why-line sits 
    * title as one sentence and records only the name, so bolding a leading word count would break
    * on the first title that does not start with its verb ("Bethany Carter has made an offer").
    */
-  it("the title is regular with the NAME at 600 — never Playfair, never a burgundy italic", () => {
+  /**
+   * ⚠️ LINE ONE IS THE DEED ALONE (visual rebuild, Phase 2) — "Send your full", never "Send your
+   * full to Ada Vane". The agent moved to line two so line one scans as a column of verbs, which
+   * is what makes a long list readable at a glance.
+   *
+   * ⚠️ SO THE TWO-WEIGHT TITLE IS RETIRED WITH THE NAME IT EMPHASISED. `rowTitleParts` bolded
+   * `who` inside the sentence; there is no sentence now. It survives in `taskRow` unmounted — the
+   * workspace card's band still names the agent — and the row asks `rowDeed` instead.
+   */
+  it("line one is the deed alone, in Inter — never Playfair, never a burgundy italic", () => {
     const t = rule(".tdg-t {");
-    expect(t).toContain("font-weight: 400");
     expect(t).not.toContain("Playfair");
     expect(t).not.toContain("italic");
-    expect(rule(".tdg-t b {")).toContain("font-weight: 600");
-    const html = render(cols({ todo: [card({ title: "Send your full to Ada Vane", who: "Ada Vane" })] }));
-    expect(html).toContain("Send your full to <b>Ada Vane</b>");
+    const html = render(cols({ todo: [card({ title: "Send your full to Ada Vane", who: "Ada Vane", taskType: "full_requested" })] }));
+    expect(html).toContain("Send your full");
+    /* the agent is on line two, and NOT on line one */
+    const deed = html.slice(html.indexOf('class="tdg-t"'), html.indexOf('class="tdg-sub"'));
+    expect(deed).not.toContain("Ada Vane");
+    expect(html).toContain("tdg-sub");
   });
 
-  it("⚠️ AN UNMATCHED OR ABSENT `who` EMPHASISES NOTHING — a fabricated bold is worse than none", () => {
-    expect(rowTitleParts(card({ title: "Water the plants", who: "" })))
-      .toEqual({ before: "Water the plants", name: "", after: "" });
-    expect(rowTitleParts(card({ title: "Water the plants", who: "Ada Vane" })))
-      .toEqual({ before: "Water the plants", name: "", after: "" });
-    expect(render(cols({ todo: [card({ title: "Water the plants", who: "" })] }))).not.toContain("<b>");
+  it("⚠️ THE DEED IS DERIVED, NOT SLICED OUT OF THE TITLE", () => {
+    /* Cutting a composed sentence at " to " would break the first time one was phrased
+       differently, and silently. A writer's own item keeps its own words — it is the one card
+       whose text the writer wrote. */
+    expect(rowDeed(card({ taskType: "full_requested" }))).toBe("Send your full");
+    expect(rowDeed(card({ taskType: "partial_requested" }))).toBe("Send your partial");
+    expect(rowDeed(card({ taskType: "offer_received" }))).toBe("Answer the offer");
+    expect(rowDeed(card({ taskType: "no_response_close" }))).toBe("Log the close");
+    expect(rowDeed(card({ userTaskId: "u1", title: "Water the plants" }))).toBe("Water the plants");
   });
 
   /**
@@ -273,9 +301,15 @@ describe("⚠️ THE SPLIT BUTTON AND ITS FOUR GUARDS ARE EXTINCT", () => {
  * Done and Snoozed keep ONE CONSTANT verb each — undo, return — so nothing varies within a group.
  */
 describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
-  it("a KIND row carries three — clock, dismiss, more", () => {
+  /**
+   * ⚠️ TWO VERBS NOW, IN THE FIGURE'S OWN SLOT (visual rebuild, Phase 2). v9 draws two and the
+   * column is 104px; a four-icon cluster does not fit over a figure it is overlaying. The ⋯ and
+   * the reversal moved to the COMMAND BAR, the page's one action surface — so nothing became
+   * unreachable, it went where the pack put it.
+   */
+  it("a row carries two — snooze and dismiss", () => {
     const html = render(cols({ todo: [card({ key: "n1" })] }));
-    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(3);
+    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(2);
     expect(html).not.toContain('class="tdg-ic prim"');
     expect(rule(".tdg-ic {")).toContain("width: 30px");
     expect(rule(".tdg-ic {")).toContain("height: 30px");
@@ -290,17 +324,18 @@ describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
    * — and Done and Snoozed are whole GROUPS, not rows scattered through one, so no panel ever
    * mixes the two counts.
    */
-  it("a STATE row carries four — the reversal, then the same three", () => {
-    /* ⚠️ DONE ONLY, AND THE REASON IS THE SNOOZED FOLD. Snoozed renders as a slim collapsed fold
-       (`snzOpen` is false at rest — "it is the one group you asked for less of"), so its rows are
-       not in the markup to count. Its glyph is asserted from the derivation in the case below;
-       pretending to render it here would be a case that proves nothing while looking thorough. */
-    const html = render(cols({ done: [card({ key: "s-done", done: true })] }));
-    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(4);
-    expect(html).toContain('class="tdg-ic prim');
-    /* the NAME is always the deed's; a dim one appends its reason, which is the dim-in-place
-       grammar and not a different label */
-    expect(html).toContain('aria-label="Undo');
+  /**
+   * ⚠️ THE REVERSAL ICON LEFT THE ROW WITH THE ⋯ (visual rebuild, Phase 2). Done and Snoozed kept
+   * one constant verb each while the cluster had four slots; at two slots over a 104px figure the
+   * survivors are the two that apply to EVERY row. Undo and Return are on the command bar, which
+   * is where every other verb now lives — the same move, not a loss.
+   */
+  it("a STATE row carries the same two — the reversal is on the command bar now", () => {
+    /* Snoozed and Done both render COLLAPSED, so their rows are not in the markup to count (see
+       the fold cases below). The claim that matters is that no row anywhere draws a `prim` slot. */
+    const html = render(cols({ todo: [card({ key: "k1" })], done: [card({ key: "s-done", done: true })] }));
+    expect(html).not.toContain('class="tdg-ic prim');
+    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(2); // the one live row's two
   });
 
   it("⚠️ NEITHER STATE GLYPH VARIES WITHIN ITS GROUP — that is why these two survived the cut", () => {
@@ -318,7 +353,7 @@ describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
     /* An offer cannot be dismissed. The slot stays, greyed, with the reason in its label — an
        absent slot would shift every icon on that row out of line with the rows above it. */
     const offer = render(cols({ todo: [card({ key: "o1", taskType: "offer_received" })] }));
-    expect((offer.match(/class="tdg-ic/g) ?? [])).toHaveLength(3);
+    expect((offer.match(/class="tdg-ic/g) ?? [])).toHaveLength(2);
     expect(offer).toContain("tdg-ic dz off");
     expect(offer).toContain("Offers cannot be dismissed");
     expect(rule(".tdg-ic.off")).toBeTruthy();
@@ -336,7 +371,7 @@ describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
     const html = render(cols({ todo: [mine] }));
     expect(html).toContain("tdg-tick");                        // the circle, and only the circle
     expect(html).not.toContain('class="tdg-ic prim"');
-    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(3);
+    expect((html.match(/class="tdg-ic/g) ?? [])).toHaveLength(2);
     expect(rowReversalIcon(mine, "todo")).toBeNull();
     /* the WORD survives for the workspace pane's action row (Phase 5) — only the icon went */
     expect(rowPrimaryLabel(mine, "todo")).toBe("Complete");
@@ -395,22 +430,25 @@ describe("⚠️ THE REVERSAL GLYPH IS THE STATE'S, AND THERE ARE ONLY TWO", () 
   });
 });
 
-describe("⚠️ THE GLYPH MAP AND ITS UNION CANNOT DRIFT", () => {
-  it("every key in the derivation has a glyph — a missing one renders `undefined` and throws", () => {
-    /* The map is in the component and the keys are in the lib; nothing type-links them at the
-       point of use, so the census is the link. */
-    for (const k of ["undo", "return"]) {
-      expect(list, `REVERSAL_GLYPH has no ${k}`).toMatch(new RegExp(`\\n  ${k}:`));
-    }
-  });
-
-  it("⚠️ AND THE FIVE KIND GLYPHS ARE GONE FROM THE COMPONENT, not merely unreferenced", () => {
-    /* An unused import is a map somebody re-wires; the icons were removed from the import list
-       too, so reinstating one is a deliberate act rather than a one-word edit. */
+/**
+ * ⚠️ THE GLYPH CENSUS RETIRES WITH THE MAP IT COUNTED (visual rebuild, Phase 2). `REVERSAL_GLYPH`
+ * existed so a key in the derivation could not render `undefined`; the row draws no kind glyph at
+ * all now, and `rowReversalIcon` survives in `taskRow` for the command bar. What is left worth
+ * asserting is that nothing was merely UNREFERENCED — an unused import is a map somebody re-wires.
+ */
+describe("⚠️ NO GLYPH MAP SURVIVES IN THE ROW", () => {
+  it("the map and every icon it read are gone from the component, imports included", () => {
+    expect(list).not.toContain("REVERSAL_GLYPH");
     expect(list).not.toContain("PRIMARY_GLYPH");
-    for (const glyph of ["Send", "Archive", "Award", "ListChecks"]) {
-      expect(list, glyph).not.toMatch(new RegExp(`\\b${glyph}\\b`));
+    /* ⚠️ ON DECLARATIONS — the file's own note names the six buckets ("Send · Decide · Chase …"),
+       and reading prose as code fails a component that is correct. Fifth time this session. */
+    for (const glyph of ["Send", "Archive", "Award", "ListChecks", "Undo2", "RotateCcw", "MoreHorizontal"]) {
+      expect(code(list), glyph).not.toMatch(new RegExp(`\\b${glyph}\\b`));
     }
+    /* the derivations themselves survive for the surfaces that DO draw them */
+    const rowLib = readFileSync(join(here, "..", "..", "lib", "taskRow.ts"), "utf8");
+    expect(rowLib).toContain("export function rowReversalIcon");
+    expect(rowLib).toContain("export function rowPrimaryLabel");
   });
 });
 
@@ -460,8 +498,10 @@ describe("⚠️ EVERY ICON CARRIES A TOOLTIP, ON FOCUS AS WELL AS HOVER", () =>
        to OPEN now, on every group, so advertising it on a button that exists on two groups out of
        five would teach a key that means something else everywhere else. The reversal icon carries
        no hint for exactly that reason. */
-    for (const k of ['hint="S"', 'hint="X"', 'hint="."']) expect(list).toContain(k);
+    /* two keys now — `.` went to the command bar with the ⋯ it opened */
+    for (const k of ['hint="S"', 'hint="X"']) expect(list).toContain(k);
     expect(list).not.toContain('hint="↵"');
+    expect(list).not.toContain('hint="."');
   });
 });
 
@@ -805,14 +845,18 @@ describe("⚠️ THE METER NAMES THE STAGE, and it is a function of the TASK TYP
     expect(rowJourney(card({ taskType: "full_requested" }), "snoozed")).toBeNull();
   });
 
-  it("⚠️ A JOURNEY AND A PILE NEVER APPEAR TOGETHER — a pile has no path", () => {
-    const html = render(cols({ todo: [sweepCard({ key: "s9" })] }));
-    expect(html).toContain("tdg-bar");
-    expect(html).not.toContain("tdg-steps");
-    const wait = render(cols({ todo: [card({ key: "w9", taskType: "full_requested" })] }));
-    expect(wait).toContain("tdg-steps");
-    expect(wait).not.toContain("tdg-bar");
-    expect(wait).toContain("FULL REQUESTED");
+  it("⚠️ THE METER LEFT THE ROW, AND ITS DERIVATION DID NOT (visual rebuild, Phase 2)", () => {
+    /* The row is four tracks now — checkbox, bucket pill, content, figure — and the meter had no
+       lane and no room inside the content cell beside a two-line deed. `rowJourney` is untouched
+       and the WORKSPACE CARD draws it, where a journey is something you read rather than scan. */
+    expect(code(list)).not.toContain("rowJourney");
+    expect(code(list)).not.toContain("tdg-jrny");
+    const rowLib = readFileSync(join(here, "..", "..", "lib", "taskRow.ts"), "utf8");
+    expect(rowLib).toContain("export function rowJourney");
+  });
+
+  it("(retired) a journey and a pile never appeared together", () => {
+    expect(true).toBe(true);
   });
 });
 
@@ -868,12 +912,26 @@ describe("⚠️ ONLY HOUSEKEEPING FOLDS — and the urgent group and Done never
     expect(render(cols({ todo: hk(9) }))).toContain("SHOW 5 MORE");
   });
 
-  it("⚠️ THE DAY'S CLEARED WORK IS NEVER BEHIND A TOGGLE — Done renders its rows open", () => {
-    /* The rule the retired corner panel's spec carried: hiding the only evidence the day went
-       anywhere was a concession to a 250px panel that no longer exists. */
+  /**
+   * ⚠️ SUPERSEDED, AND IT IS A REAL REVERSAL — flagged in the run report rather than slipped in.
+   *
+   * This asserted that Done rendered its rows OPEN, on the grounds that "hiding the only evidence
+   * the day went anywhere was a concession to a 250px panel that no longer exists". The v9 pack
+   * asks for the opposite: completed rows leave their group and gather under a collapsible
+   * `Done today` header at the foot.
+   *
+   * ⚠️ THE OLD LAW'S CONCERN IS HONOURED RATHER THAN OVERRULED. Its worry was that the day's work
+   * would become invisible; the header STATES THE COUNT whether it is open or shut, so the
+   * evidence is still on the page. What changes is that cleared work is stated rather than
+   * displayed — which is the pack's own argument: a ticked row sitting among live ones is a row
+   * you have to re-read to know you have finished it.
+   */
+  it("⚠️ DONE GATHERS AT THE FOOT, COLLAPSED — and still states its count", () => {
     const html = render(cols({ done: [card({ key: "d2", done: true, title: "Reply to Curtis Vane" })] }));
-    expect(html).toContain("Reply to Curtis Vane");
-    expect(html).toContain("tdg-panel");
+    expect(html).toContain("tdg-dnhead");
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).not.toContain("Reply to Curtis Vane");   // stated, not displayed
+    expect(html).toContain('class="n">1<');               // …and the count is the statement
   });
 
   it("SNOOZED is the one group that collapses — you asked for less of it on purpose", () => {
@@ -888,10 +946,13 @@ describe("⚠️ THE RIGHT LANE NEVER MIRRORS ITS NEIGHBOUR — one figure, stat
   /* The board's band grammar carried this law and the list inherited the fault: a sweep nobody
      has started takes `c.due` as its METER label ("16 TO FIX"), and the age lane read the same
      field — so the row printed one figure twice, side by side. Browser-measured, 9 Aug. */
-  it("a sweep's age is an em dash, not a second copy of its meter label", () => {
-    const html = render(cols({ todo: [sweepCard({ key: "s3" })] }));
-    expect(html.match(/16 TO FIX/g) ?? []).toHaveLength(1);
-    expect(html).toContain('<span class="tdg-age">—</span>');
+  it("⚠️ THE AGE LANE'S WHOLE PROBLEM WENT WITH THE LANE (visual rebuild, Phase 2)", () => {
+    /* The fault this guarded: a sweep nobody has started takes `c.due` as its METER label ("16 TO
+       FIX") and the age lane read the same field, so the row printed one figure twice. There is no
+       age lane and no meter on the row now — the FIGURE column derives from the clock and the
+       stated window, never from `due`. The mirror is impossible rather than merely absent. */
+    expect(code(list)).not.toContain("tdg-age");
+    expect(code(list)).not.toContain("c.due");
   });
 
   it("⚠️ THE AGE IS A CAPTION CLAUSE NOW, and its old right-aligned cell is gone with its lane", () => {

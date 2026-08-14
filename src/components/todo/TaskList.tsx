@@ -35,20 +35,26 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   ChevronRight, ChevronDown, Check,
-  Undo2, RotateCcw, Clock, X, MoreHorizontal,
+  Clock, X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
 /* P3 — what the row SAYS about its kind: the pill's tone, the primary's name, the journey.
    (Whether a verb exists at all stays `cardMenu`'s answer — see below.) */
-import { rowPill, rowPrimaryLabel, rowJourney, splitMenu, rowReversalIcon, rowTitleParts, ReversalIcon } from "../../lib/taskRow";
+/* ⚠️ THE ROW'S OWN DERIVATIONS NARROWED WITH IT (visual rebuild, Phase 2). `rowPill`, `rowJourney`,
+   `rowTitleParts` and `rowReversalIcon` all survive in `taskRow` — the workspace card and the
+   command bar read them — but the ROW no longer draws a pill-in-caption, a meter, a two-weight
+   title or a reversal icon. Imports removed rather than left unreferenced: an unused import is a
+   map somebody re-wires. */
+import { rowPrimaryLabel, splitMenu } from "../../lib/taskRow";
+import { cardBucket, BUCKET_LABEL, rowDeed, RowFigure } from "../../lib/todoBuckets";
 import { StatusDot } from "../StatusDot";
 import { RowTip, useTipShow } from "./RowTip";
 import { isTickable, completionVia } from "../../lib/todoActions";
 import { listKey, isTypingTarget, KEY_MAP } from "../../lib/taskShortcuts";
 import { cardMenu, MenuLeaf, MenuEntry, MenuItemId, placeMenu } from "../../lib/todoMenu";
-import { TodoColumnId, isSweepCard } from "../../lib/todoColumns";
+import { TodoColumnId } from "../../lib/todoColumns";
 import { laterHideKey } from "../../lib/todoHousekeeping";
 import { PortalMenu } from "./PortalMenu";
 import { SnoozeDial } from "./SnoozeDial";
@@ -73,6 +79,13 @@ export interface TaskListProps {
   /** ⚠️ THE DIAL'S ONE WRITE — already clamped and re-labelled by `clampSnooze` on its way out,
    *  so the page performs rather than decides, exactly as it does for every ⋯ verb. */
   onSnooze: (card: BoardCard, days: number, when: string) => void;
+  /**
+   * ⚠️ THE FIGURE IS RESOLVED BY THE PAGE, NOT BY THE ROW. It needs the agent's stated window, the
+   * CTA engine's ball-holder and the clock — three things the list has no business holding. The
+   * page passes a resolver, exactly as it does for the pane's hand-off, so the derivation stays
+   * where the data is and the row stays a renderer.
+   */
+  figure: (card: BoardCard) => RowFigure;
   /**
    * ⚠️ WHAT THE WORKSPACE PANE IS SHOWING — and it is the PANE'S key, never a second selection
    * the list keeps for itself (rail + workspace, Phase 3). Two surfaces holding their own idea of
@@ -118,17 +131,6 @@ function offers(groups: ReturnType<typeof cardMenu>, id: MenuItemId): boolean {
 export const RING_MS = 600;
 
 /**
- * ⚠️ THE TITLE'S TWO WEIGHTS, RENDERED AS NODES RATHER THAN MARKUP. `rowTitleParts` finds `who`
- * inside `title` — a field the card already carries for exactly this — and this wraps that span.
- * Nothing is parsed and no HTML is built, so a manuscript called `<b>` is just a title.
- */
-function titleNode(c: BoardCard): React.ReactNode {
-  const { before, name, after } = rowTitleParts(c);
-  if (!name) return before;
-  return <>{before}<b>{name}</b>{after}</>;
-}
-
-/**
  * ⚠️ THE SKELETON IS THE REAL ROW, WEARING PLACEHOLDERS (sheet 3). It reuses `.tdg-row` and its
  * tracks — so nothing shifts by a pixel when the data lands. A bespoke skeleton with its own
  * measurements would be a second layout to keep in step with the first, and the day they drift is
@@ -169,20 +171,6 @@ interface OpenMenu {
   openSub?: "snooze" | "resnooze" | "dismiss";
 }
 
-
-/**
- * ⚠️ TWO GLYPHS, NOT SEVEN — the reversal marks for the two STATE groups, and nothing else. The
- * five kind glyphs went with the varying first icon: on urgent and housekeeping it repeated the
- * row click, on `yours` it repeated the checkbox. `rowReversalIcon` carries the reasoning.
- *
- * ⚠️ NEITHER VARIES WITHIN ITS GROUP. Every Done row shows Undo and every Snoozed row shows
- * Return, so there is nothing to learn — which is precisely why these two survived a cut made in
- * the name of not having to learn a moving glyph.
- */
-const REVERSAL_GLYPH: Record<ReversalIcon, LucideIcon> = {
-  undo: Undo2,
-  return: RotateCcw,   // wake something you put away
-};
 
 /**
  * ⚠️ ONE ICON, ITS TOOLTIP AND ITS DIM STATE, IN ONE PLACE. The alternative was four copies of the
@@ -328,7 +316,7 @@ const SplitMenu: React.FC<{
   );
 };
 
-export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb, onSnooze, selectedKey, loading = false }) => {
+export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggleHk, onOpen, onTick, onVerb, onSnooze, selectedKey, figure: figureFor, loading = false }) => {
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   /* ⚠️ THE DIAL IS THE CLOCK'S SURFACE NOW (P4) — it replaced the ⋯ menu's snooze submenu at THIS
      one call site, which is exactly why the clock was routed through a pre-opened submenu in P2
@@ -341,10 +329,11 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
   /* Snoozed opens in place. Session-only and deliberately so: a band that remembered being open
      would greet you with the things you had put away. */
   const [snzOpen, setSnzOpen] = useState(false);
+  /* the day's cleared work, folded away by default — stated, not displayed */
+  const [dnOpen, setDnOpen] = useState(false);
   /* A sweep's session-high member count — DERIVED VIEW MEMORY, carried over from the board's own
      rail rather than re-derived: with a baseline the meter can say "5 OF 16" as the pile shrinks,
      and a pile you have not started is a pile rather than a 0% failure. */
-  const sweepBase = useRef(new Map<string, number>());
   /* ⚠️ THE FOCUSED ROW IS THE BROWSER'S OWN FOCUS, not a second index kept in state (P6). The rows
      are already `tabIndex={0}`, so j/k simply MOVE focus — which means Tab, a click and a
      shortcut all agree about where you are, and `:focus-visible` paints it for free. A parallel
@@ -408,15 +397,10 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
       : { key: card.key, card, column, anchor, openSub }));
   };
 
-  const sweepFigure = (c: BoardCard): { label: string; pct: number } => {
-    const m = isSweepCard(c) ? c.sweepOf : 0;
-    const base = Math.max(sweepBase.current.get(c.key) ?? 0, m);
-    sweepBase.current.set(c.key, base);
-    const fixed = base - m;
-    return fixed > 0
-      ? { label: `${fixed} OF ${base} DONE`, pct: Math.round((fixed / base) * 100) }
-      : { label: c.due, pct: 0 };
-  };
+  /* (⚠️ `sweepFigure` IS RETIRED WITH THE METER IT FED — visual rebuild, Phase 2. It turned a
+     sweep's remaining count into "5 OF 16 DONE" for the row's bar; the row has no bar. Its
+     session-high `sweepBase` ref went with it. Deleted rather than left unreferenced, so a future
+     meter is a deliberate rebuild rather than a resurrection of a shape nobody chose.) */
 
   /* The rows in the order they are DRAWN — the walker reads the DOM rather than re-deriving the
      order, so j/k can never disagree with what is on screen. */
@@ -567,16 +551,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
      the column rather than being recovered from it. */
   const renderRow = (c: BoardCard, column: TodoColumnId) => {
     const menuModel = cardMenu(c, column);
-    const sweep = isSweepCard(c);
-    const fig = sweep ? sweepFigure(c) : null;
-    const pill = rowPill(c, column);
-    const journey = rowJourney(c, column);
 
     /* ⚠️ THE REVERSAL, ON THE TWO STATE GROUPS ONLY (Phase 3). On the three KIND groups the old
        first icon repeated a control already on the row — the row click, or the checkbox in lane
        one — so it is gone from them; Done and Snoozed keep one constant verb each. */
-    const reversal = rowReversalIcon(c, column);
-
+    const bucket = cardBucket(c);
+    const figure = figureFor(c);
     const tickable = isTickable(c);
 
     return (
@@ -614,80 +594,56 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           )}
         </div>
 
-        {/* ⚠️ LANE 2 — THE REAL StatusDot, NEVER A RECREATION (the app-wide law). 13px is the
-            dense-timeline override, above the component's own 12px floor.
-            ⚠️ A CARD WITHOUT A STATUS GETS THE IDLE RING, NOT A DEFAULT DOT. Housekeeping and the
-            writer's own items carry no `status` — drawing any pipeline dot for them would state a
-            position in a submission that does not exist. The dashed ring says "not on that path",
-            which is the true thing. */}
-        <div className="tdg-cc">
-          {c.status
-            ? <StatusDot status={c.status} overrideSize={13} decorative />
-            : <span className="tdg-idle" aria-hidden />}
-        </div>
+        {/* ⚠️ LANE 2 — THE BUCKET PILL, LEADING THE ROW (visual rebuild, Phase 2). It says what KIND
+            OF ACT this is — Send · Decide · Chase · Close · Fix · Note — which is the question a
+            writer scanning a list actually has. It replaces the StatusDot, which said where a
+            QUERY stood in a pipeline: a fact about the record rather than about the work, and one
+            the card's journey meter and the pane's timeline both still carry.
+            ⚠️ SENTENCE CASE, not caps — at 8.5px with letter-spacing, caps are a texture rather
+            than a word. */}
+        <div className={`tdg-bpill b-${bucket}`}>{BUCKET_LABEL[bucket]}</div>
 
         <div className="tdg-content">
-          <div className="tdg-t">{titleNode(c)}</div>
-          {/* the why-line — the manuscript, or the agency. It sits BETWEEN the title and the
-              caption because it is prose about this row, where the caption is its filing. */}
-          {(c.subtitle || c.record) && <div className="tdg-sub">{c.subtitle || c.record}</div>}
-          {/* ⚠️ ONE CAPTION LINE, ABSORBING THE PILL AND THE AGE (Phase 3). Both had a lane of
-              their own; at 440px there is no room for six tracks, and neither was ever a COLUMN
-              of facts you scan down — they are two clauses about this row. The pill leads because
-              it says what kind of thing this is; the date fact follows because it says when.
-              ⚠️ THE SWEEP'S EM DASH SURVIVES THE MOVE, and so does its reason: an unstarted
-              sweep's meter label IS `c.due` ("16 TO FIX"), so printing the age here too would
-              state one figure twice on one line — closer together than when they were lanes
-              apart, not further. */}
-          <div className="tdg-cap">
-            {pill && <span className={`tdg-pill fam-${pill.tone}`}>{pill.label}</span>}
-            <span className="tdg-age">{sweep ? "—" : c.due}</span>
-          </div>
-          {/* ⚠️ THE METER SITS INSIDE THE CONTENT CELL NOW, UNDER THE CAPTION — it stopped being a
-              lane. It keeps its full 172px measure under a full-width title instead of competing
-              with one for a 440px rail; five lanes of the pack's sizes left the title 33px.
-              ⚠️ THE METER NAMES THE STAGE, NOT A PERCENTAGE — except for a sweep, where the count
-              IS the fact ("5 OF 16 DONE"). The two never appear together: a pile has no journey
-              and a journey has no pile. */}
-          {(sweep || journey) && (
-            <div className="tdg-jrny">
-              {sweep ? (
-                <>
-                  <div className="tdg-bar" aria-hidden><i style={{ width: `${fig!.pct}%` }} /></div>
-                  <div className="tdg-stlab">{fig!.label}</div>
-                </>
-              ) : journey && (
-                <>
-                  <div className="tdg-steps" aria-hidden>
-                    {journey.stages.map((s, i) => <span key={i} className={`tdg-stp ${s}`} />)}
-                  </div>
-                  <div className="tdg-stlab">{journey.label}</div>
-                </>
-              )}
+          {/* ⚠️ LINE ONE IS THE DEED ALONE — "Send your full", never "Send your full to Marcus
+              Reed". The agent moves to line two so line one scans as a column of verbs, which is
+              what makes a long list readable at a glance. The deed is DERIVED from the task rather
+              than sliced out of `title`: cutting a composed sentence at " to " would break the
+              first time one was phrased differently, and silently. */}
+          <div className={c.nature === "note" ? "tdg-notett" : "tdg-t"}>{rowDeed(c)}</div>
+          {/* ⚠️ LINE TWO IS THE AGENT AND THE AGENCY, ONE LINE, ELLIPSISED — AND NO DATE. The time
+              lives in the figure column; a date here would be the same fact twice on one row. A
+              card with no agent shows whatever stands in for one. */}
+          {(c.who || c.record) && (
+            <div className="tdg-sub">
+              {c.who}
+              {c.who && c.record ? <span className="tdg-sep">·</span> : null}
+              {c.record}
             </div>
           )}
         </div>
 
-        {/* ⚠️ THREE ICONS ON A KIND ROW, FOUR ON A STATE ROW, NOTHING AT REST (ref
-            todo-workspace-concept-v3.html; the icon-cluster pack's dim-in-place rule survives
-            intact). An inapplicable icon DIMS IN PLACE and is inert; it is never removed, so the
-            column cannot reflow between one row and the next.
-            ⚠️ AND THE FIRST SLOT IS NOW CONDITIONAL RATHER THAN FIXED, which is the one thing
-            that pack forbade — for a reason that no longer applies. Its fixed slot existed so
-            every primary in a panel started at the same x; the cluster is RIGHT-aligned, so a row
-            with three icons and a row with four still end on the same edge, and Done and Snoozed
-            are whole groups rather than rows scattered through one. */}
-        <div className="tdg-acts" onClick={(e) => e.stopPropagation()}>
-          {reversal && (
-            <RowIcon
-              kind="prim"
-              Glyph={REVERSAL_GLYPH[reversal]}
-              label={rowPrimaryLabel(c, column)}
-              enabled={!!primaryId(c, column)}
-              why="There is nothing to put back."
-              onFire={() => fireReversal(c, column)}
-            />
-          )}
+        {/* ⚠️ THE FIGURE COLUMN — a mono label over a Playfair numeral, and the SAME pairing the
+            workspace card's facts strip uses. That match is what makes the two panes read as one
+            page rather than as two designs.
+            ⚠️ THE WHOLE STACK FADES ON HOVER AND THE VERBS TAKE ITS SLOT, so nothing reflows: the
+            column is one width whether it is showing a figure or two icons. */}
+        <div className={`tdg-fig ${figure.side}`}>
+          <div className="tdg-figstack">
+            <div className="tdg-figlab">{figure.label}</div>
+            <div className="tdg-figval">
+              <span className={`tdg-fignum${figure.hot ? " hot" : ""}`}>{figure.value}</span>
+              {figure.unit && <span className="tdg-figun">{figure.unit}</span>}
+            </div>
+          </div>
+          {/* ⚠️ TWO VERBS, OVER THE FADED STACK (Phase 2). Absolutely positioned in the figure's
+              own slot, so the row cannot reflow between rest and hover. The dim-in-place rule
+              survives intact: an inapplicable verb greys and stays — an offer cannot be dismissed
+              — so the two never trade places.
+              ⚠️ THE ⋯ AND THE REVERSAL LEAVE THE ROW. v9 draws two verbs here and the column is
+              104px; a four-icon cluster does not fit over a figure it is overlaying. Everything
+              the ⋯ reached is on the COMMAND BAR (Phase 4), the page's one action surface — so
+              nothing became unreachable, it moved to where the pack put it. */}
+          <div className="tdg-acts" onClick={(e) => e.stopPropagation()}>
           <RowIcon
             Glyph={Clock}
             label="Snooze"
@@ -707,14 +663,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
               : "There is nothing here to dismiss."}
             onFire={() => fire(c, column, "dismiss-week")}
           />
-          <RowIcon
-            Glyph={MoreHorizontal}
-            label="More"
-            hint="."
-            enabled
-            expanded={split?.card.key === c.key}
-            onFire={(el) => openSplit(el, c, column)}
-          />
+          </div>
         </div>
       </div>
     );
@@ -785,6 +734,37 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
       {groups.map((g) => {
         const column = groupColumn(g.id);
 
+        /**
+         * ⚠️ DONE TODAY GATHERS AT THE FOOT, COLLAPSED (visual rebuild, Phase 2). A ticked row
+         * sitting among live ones is a row you have to re-read to know you have finished it, and
+         * after a busy morning the list is mostly memory. It keeps its own header with a count so
+         * the day's work is still stated — cleared is not the same as gone.
+         *
+         * ⚠️ IT IS THE GROUP'S OWN CARDS, not a second collection. `taskGroups` already partitions
+         * Done; this only changes how that partition is DRAWN.
+         */
+        if (g.id === "done") {
+          return (
+            <React.Fragment key={g.id}>
+              <button
+                type="button"
+                className="tdg-dnhead"
+                aria-expanded={dnOpen}
+                onClick={() => setDnOpen((v) => !v)}
+              >
+                <h3>{g.label}</h3>
+                <span className="n">{g.cards.length}</span>
+                <span className="tdg-dncar" aria-hidden><ChevronRight size={13} /></span>
+              </button>
+              {dnOpen && (
+                <div className="tdg-sect">
+                  <div className="tdg-panel">{g.cards.map((c) => renderRow(c, column))}</div>
+                </div>
+              )}
+            </React.Fragment>
+          );
+        }
+
         /* ⚠️ SNOOZED IS A SLIM FOLD, NOT A PANEL. It is the one group you asked for less of. */
         if (g.id === "snoozed") {
           return (
@@ -820,10 +800,10 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
         return (
           <div key={g.id} className="tdg-sect">
             <div className="tdg-shd">
+              {/* Done and Snoozed both return above, so every group reaching here is a live KIND
+                  and every one of them takes the dot. The chevron branch went with the fold. */}
               <h3>
-                {g.id === "done"
-                  ? <span className="tdg-foldchev" aria-hidden><ChevronDown size={13} /></span>
-                  : <span className="tdg-dot" style={{ background: GROUP_DOT[g.id] }} aria-hidden />}
+                <span className="tdg-dot" style={{ background: GROUP_DOT[g.id] }} aria-hidden />
                 {g.label}
               </h3>
               <span className="tdg-n">{g.cards.length}</span>

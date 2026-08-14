@@ -189,12 +189,12 @@
    dot against the middle of a three-line cell instead of against its first line. */
 .tdg-row {
   display: grid;
-  grid-template-columns: 20px 15px minmax(0, 1fr) auto;
+  grid-template-columns: 17px 68px minmax(0, 1fr) 104px;
   gap: 10px;
-  align-items: start;
-  padding: 11px 10px;
+  align-items: center;
+  padding: 10px 8px 10px 9px;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 11px;
   position: relative;
   transition: background var(--tdg-emph) var(--tdg-ease);
 }
@@ -237,8 +237,7 @@
   background: #7c3a2a;
 }
 
-/* the two mark lanes — pinned to the content's FIRST line rather than to its middle */
-.tdg-cc { display: flex; align-items: flex-start; justify-content: center; }
+.tdg-cc { display: flex; align-items: center; justify-content: center; }
 
 /* the content cell: title, then caption, then the meter — a stack, not a row */
 .tdg-content { min-width: 0; }
@@ -817,3 +816,143 @@
      failure mode is invisible content — so under reduced motion the rows simply arrive. */
   .tdg-panel.grown > .tdg-row:nth-child(n + 5) { animation: none; }
 }
+
+
+/* ══ THE BUCKET PILL, THE DEED AND THE FIGURE (visual rebuild, Phase 2) ═══════════════════════
+   ref design-refs/todo-workspace-v9.html — `.bpill`, `.d-col`, `.stack`. */
+
+/* ⚠️ SENTENCE CASE AT 8.5px. Caps with letter-spacing at this size are a texture rather than a
+   word, and the pill's whole job is to be read in one glance. Tints come from the bucket map. */
+.tdg-bpill {
+  background: var(--bbg);
+  border: 1px solid var(--bbd);
+  color: var(--bfg);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 4px 0;
+  text-align: center;
+}
+
+.b-send { --bbg: #fbeee7; --bbd: #f2dccf; --bfg: #a05a42; }
+.b-decide { --bbg: #f6e3da; --bbd: #e8c8bc; --bfg: #7c3a2a; }
+.b-chase { --bbg: #f4efe4; --bbd: #e9e0cc; --bfg: #8a7440; }
+.b-close { --bbg: #eef1ec; --bbd: #dfe5dc; --bfg: #5a6e58; }
+.b-fix { --bbg: #eceef2; --bbd: #dde1e8; --bfg: #5c6a80; }
+.b-note { --bbg: #faf4e8; --bbd: #efe4cc; --bfg: #a08a58; }
+
+/* the writer's own words keep their own hand */
+.tdg-notett {
+  font-family: "Caveat", cursive;
+  font-size: 18px;
+  line-height: 1.15;
+  color: #4a3a2e;
+}
+
+.tdg-row.done .tdg-notett { color: #b8a898; text-decoration: line-through; }
+
+/* line two: agent · agency, one line, ellipsised. No date — the figure column carries the time. */
+.tdg-sub {
+  font-size: 11.5px;
+  color: #8a7666;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tdg-sep { color: #cbbcae; margin: 0 5px; }
+
+/* ⚠️ THE FIGURE COLUMN IS A FIXED SLOT WITH TWO OCCUPANTS. The stack fades and the verbs appear
+   in the same 104px — absolutely positioned — so the row cannot reflow between rest and hover. */
+.tdg-fig { text-align: right; position: relative; }
+
+.tdg-figstack { transition: opacity var(--tdg-emph) var(--tdg-ease); }
+.tdg-row:hover .tdg-figstack,
+.tdg-row:focus-within .tdg-figstack { opacity: 0.14; }
+
+/* ⚠️ THE LABEL'S COLOUR IS WHOSE MOVE IT IS — one fact in two registers with its wording, never
+   two facts. It may WRAP; it must never truncate, because half a possessive is unreadable. */
+.tdg-figlab {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 7.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wf);
+  line-height: 1.2;
+}
+
+.tdg-fig.you { --wf: #a05a42; }
+.tdg-fig.them { --wf: #5a6e58; }
+.tdg-fig.neither { --wf: #a89684; }
+
+.tdg-figval { margin-top: 1px; line-height: 1; white-space: nowrap; }
+
+/* ⚠️ THE NUMERAL CARRIES THE PAGE'S ONLY COLOUR EMPHASIS, and `.hot` is reachable from exactly
+   two branches of `rowFigure` — past a stated window, or an offer's reply-by running. Nowhere
+   else, which is what keeps it rare. */
+.tdg-fignum {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 21px;
+  font-weight: 500;
+  color: #2b2118;
+}
+
+.tdg-fignum.hot { color: #7c3a2a; }
+
+.tdg-figun {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #b3a496;
+  margin-left: 3px;
+}
+
+/* the two verbs, in the figure's own slot */
+.tdg-acts {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 3px;
+  justify-content: flex-end;
+}
+
+/* ══ DONE TODAY — the collapsible foot (Phase 2) ═══════════════════════════════════════════════
+   ⚠️ COMPLETED ROWS LEAVE THEIR GROUP. A ticked row sitting among live ones is a row you have to
+   re-read to know you have finished it, and after a busy morning the list is mostly memory. */
+.tdg-dnhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 16px 10px 6px;
+  background: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tdg-dnhead h3 {
+  margin: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #b3a496;
+}
+
+.tdg-dnhead .n {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  color: #c8b8a8;
+}
+
+.tdg-dncar { margin-left: auto; color: #c8b8a8; display: flex; transition: transform var(--tdg-emph); }
+.tdg-dnhead[aria-expanded="true"] .tdg-dncar { transform: rotate(90deg); }

@@ -35,7 +35,8 @@ const card = (o: Partial<BoardCard> = {}): BoardCard => ({
 const cols = (o: Partial<BoardColumns> = {}): BoardColumns => ({ todo: [], today: [], snoozed: [], done: [], ...o });
 const render = (c: BoardColumns, loading = false) => renderToStaticMarkup(
   <TaskList groups={taskGroups(c)} hkExpanded={false} loading={loading}
-    onToggleHk={() => {}} onOpen={() => {}} onTick={() => {}} onVerb={() => {}} onSnooze={() => {}} />,
+    onToggleHk={() => {}} onOpen={() => {}} onTick={() => {}} onVerb={() => {}} onSnooze={() => {}}
+    figure={() => ({ label: "You've waited", value: "12", unit: "days", side: "them", hot: false })} />,
 );
 
 /* ── sheet 2: the row's states ──────────────────────────────────────────────────────────────── */
