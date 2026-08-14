@@ -1163,7 +1163,24 @@
  * `.wpg--working` (0-1-0) on the SAME element and be decided by bundle order, which is the fault
  * this repo has recorded twice. Both states are named explicitly at 0-2-0 instead.
  */
-.qc-wpg:not(.wpg--working) { --content-top-gap: 18px; }
+.qc-wpg:not(.wpg--working) { --content-top-gap: 0px; }
+
+/**
+ * ⚠️ ZERO, BECAUSE THE LIST'S GROUND STARTS AT THE MASTHEAD RULE (fix pack 3 §2). The gap was 18px
+ * resting and 9px working — air between the hairline and the top of the split. That air is what
+ * made the list read as a panel PLACED below the masthead rather than as the working area itself
+ * beginning. The split is not content sitting under a header; it is the page.
+ *
+ * ⚠️ IT IS THE GAP THAT GOES, NOT THE AIR. The list's head and the pane's header keep their own
+ * top spacing inside their columns (§4), so nothing lands against the hairline — what changes is
+ * WHICH element pays for it. A container's inset pushes its ground down and leaves a stripe of
+ * page above; a child's margin leaves the ground where it is.
+ *
+ * ⚠️ AND ONLY THE SCROLL ROW READS THIS HERE. `--content-top-gap` also feeds `.wpg-tools`, which
+ * this page deliberately does not render (§1c: search, filter and sort act on the list, so they
+ * live in the list's own head). If a toolbar is ever added back, that row's top padding goes to 0
+ * with it and the gap has to be re-thought rather than inherited.
+ */
 
 /**
  * ══ §1b · THE MASTHEAD IS A BAND, NOT AN ISLAND ═══════════════════════════════════════════════
@@ -1194,7 +1211,7 @@
   border-radius: 0;
   box-shadow: none;
 }
-.qc-wpg.wpg--working { --content-top-gap: 9px; }
+.qc-wpg.wpg--working { --content-top-gap: 0px; }
 
 /**
  * ⚠️ THE INVARIANCE PADDING IS INERT ON THIS PAGE, SO IT IS ZEROED HERE — and the reason matters

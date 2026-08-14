@@ -233,6 +233,54 @@ describe("§2 (fp2) · the list is flush and the seam is the only division", () 
   });
 });
 
+/**
+ * ⚠️ FIX PACK 3 §2 — FLUSH MEANS ALL FOUR EDGES. Fix pack 2 removed the 12px channel to the RIGHT
+ * of the seam and reported the left edge and the radius as already correct, which they were. That
+ * accounted for three edges and left the fourth: the list's ground began 18px (resting) or 9px
+ * (working) BELOW the masthead hairline, because the scroll row carried `--content-top-gap`. A
+ * container's inset pushes its ground down and leaves a stripe of page above it, which is what made
+ * the split read as a panel placed under the masthead rather than as the working area beginning.
+ *
+ * ⚠️ THE AIR IS NOT DELETED, IT MOVES TO THE CHILDREN. The list's head and the pane's header keep
+ * their own top spacing inside their columns, so nothing lands against the hairline. Only the
+ * element paying for it changes.
+ */
+describe("§2 (fp3) · the list's ground meets the masthead rule", () => {
+  it("neither state leaves a gap above the split", () => {
+    for (const sel of [".qc-wpg:not(.wpg--working)", ".qc-wpg.wpg--working"]) {
+      const r = rule(sel);
+      expect(r, `the ${sel} rhythm rule is missing`).not.toBe("");
+      const m = /--content-top-gap:\s*([^;}]+)/.exec(r);
+      expect(m, `${sel} stopped naming --content-top-gap`).not.toBeNull();
+      expect(m![1].trim(), `${sel} put a gap back above the list`).toMatch(/^0(px)?$/);
+    }
+  });
+
+  /**
+   * ⚠️ BOTH STATES, NAMED EXPLICITLY, AT 0-2-0. `:root` resolves `--content-top-gap` from
+   * `--content-top-gap-rest` at :root, so overriding the `-rest`/`-work` pair lower down changes
+   * nothing; and setting `--content-top-gap` on `.qc-wpg` alone (0-1-0) would TIE with
+   * `.wpg--working` on the same element and be decided by bundle order. This case keeps the shape
+   * that avoids both, which is easy to lose while "simplifying" two rules into one.
+   */
+  it("it does not collapse the two states into one bare .qc-wpg rule", () => {
+    expect(cssCode, "the two states were merged into a rule that ties with .wpg--working")
+      .not.toMatch(/\n\.qc-wpg\s*\{[^}]*--content-top-gap/);
+  });
+
+  /* ⚠️ AND THE CONTAINER ITSELF STAYS BARE — no radius, no margin, no horizontal padding. The rows
+     carry their own inset through `.f12-list > *`; putting it back on the container is what would
+     re-inset the ground. */
+  it("the list container declares no radius, margin or horizontal padding", () => {
+    const r = rule(".f12-list");
+    expect(r, "the list rule is missing").not.toBe("");
+    for (const p of ["border-radius", "margin", "padding-inline", "padding-left", "padding-right"]) {
+      expect(r, `the list container took ${p} — it is the working area, not a panel on it`)
+        .not.toContain(p);
+    }
+  });
+});
+
 describe("§1d/e/g · already landed, and still true", () => {
   it("the list's controls are in its own head, and none can go dead", () => {
     const head = code.indexOf('className="f12-lhead"');
