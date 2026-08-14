@@ -338,3 +338,53 @@ describe("Pack C §3 · the letterhead, the caps and the watermark", () => {
     expect(rule(".qc-sheet--record::before"), "record grew its own illustration").toContain("hue-rotate");
   });
 });
+
+/**
+ * ══ FIX PACK 6 §1 · THE PAGE'S CONTENT SITS AT THE SHARED GUTTER ══════════════════════════════
+ *
+ * Measured before: the list panel's left edge was 109px from the working area against the pane's
+ * right edge at 95 — the shell's gutter plus this page's own 14px panel inset plus a rim, on one
+ * side only. Query Centre's content was not at the content gutter at all.
+ *
+ * ⚠️ THE FIX IS THE PANEL'S MARGIN, NOT A GUTTER OVERRIDE — and the override was the obvious move.
+ * `.wpg-plate` reads `calc(var(--content-gutter) + var(--header-inset))`, so a page-scoped
+ * `--content-gutter` would have dragged the MASTHEAD in with the content. Query Centre's masthead
+ * deliberately keeps the shell's 120px inset, like every other page's; making it align with the
+ * content here would fix one inconsistency by inventing another, and it would re-open the
+ * `restHdrL` cross-page abort that took three passes to clear.
+ */
+describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
+  it("⚠️ NO HORIZONTAL INSET ON THE PANEL — its edge IS the content gutter", () => {
+    const list = rule(".f12-list");
+    expect(list, "the anchor this case reads is gone").toContain("margin:");
+    /* ⚠️ THE VALUE IS EXTRACTED AND COMPARED, never a `(?!14px)` lookahead — `\s*` backtracks to
+       zero width and the lookahead runs against the space, which is banned in this repo. */
+    const margin = (/margin:\s*([^;]+);/.exec(list)?.[1] ?? "").trim().split(/\s+/);
+    expect(margin.length, `the panel's margin is no longer the two-value vertical/horizontal form: ${margin.join(" ")}`).toBe(2);
+    expect(margin[1], `the panel took a horizontal inset again — its content would sit inside every other page's gutter: ${margin.join(" ")}`).toBe("0");
+    /* the VERTICAL inset survives — fix pack 5's panel is still held off the rule and the foot */
+    expect(margin[0], "the panel lost its vertical inset — that is fix pack 5's object, not this pack's business")
+      .toBe("var(--f12-panel-inset)");
+  });
+
+  it("⚠️ THE SHARED GUTTER IS UNTOUCHED, here and everywhere", () => {
+    const shell = read("../components/shell/pageHeader.css");
+    expect(shell, "the shell's gutter moved — that is every page, not this one").toContain("--content-gutter: 80px");
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, ""), "a page-scoped gutter override appeared — it would drag the masthead in with the content")
+      .not.toMatch(/--content-gutter\s*:/);
+  });
+
+  it("⚠️ AND ONE OTHER PAGE STILL READS THE SHELL'S GUTTER — the scope is proved, not assumed", () => {
+    const comps = read("../components/manuscripts/comps.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(comps, "Comparable titles gained a gutter override — this exception was supposed to be Query Centre's alone")
+      .not.toMatch(/--content-gutter\s*:/);
+  });
+
+  /* the seam is positioned FROM the panel's right edge, which moved when the inset went */
+  it("⚠️ the seam's offset lost the inset with the panel", () => {
+    const seam = rule(".f12-body::after");
+    expect(seam, "the seam is missing").not.toBe("");
+    expect(seam, "the seam still adds the panel's old inset — the divider would sit 14px inside the pane")
+      .not.toContain("--f12-panel-inset");
+  });
+});

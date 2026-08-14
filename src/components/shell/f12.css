@@ -1330,9 +1330,26 @@
  * `document.body`; if a future control opens inline it will be clipped by this, and the fix is to
  * portal it rather than to remove the clip that gives the panel its rounded corners.
  */
+/**
+ * ⚠️ FIX PACK 6 §1 · THE PANEL SITS AT THE SHARED GUTTER — the horizontal inset is DELETED.
+ *
+ * Measured before: the panel's left edge was 109px from the working area and the pane's right edge
+ * 95px — `--content-gutter` (80) plus this panel's own 14px inset plus its rim, on ONE side only.
+ * The page's content was not at the content gutter at all, and the asymmetry was the bug.
+ *
+ * ⚠️ AND THE LEVER IS THIS MARGIN, NOT `--content-gutter`. A page-scoped gutter override was the
+ * obvious move and the wrong one: it would have moved the masthead too (`.wpg-plate` reads
+ * `calc(var(--content-gutter) + var(--header-inset))`), and Query Centre's masthead deliberately
+ * keeps the shell's 120px inset like every other page's. Dropping the panel's own inset puts both
+ * edges at the shared gutter while overriding nothing.
+ *
+ * ⚠️ THE VERTICAL INSET STAYS — this is the horizontal one only. Fix pack 5 made the panel an
+ * object held off the masthead rule and the foot, and that is untouched; what goes is the extra
+ * step inward that no other page's content takes.
+ */
 .f12-list {
   flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0;
-  margin: var(--f12-panel-inset) 0 var(--f12-panel-inset) var(--f12-panel-inset);
+  margin: var(--f12-panel-inset) 0;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
@@ -1343,9 +1360,12 @@
    pixel back from the column boundary so it is collinear with that rim: over the panel's height the
    rim draws, above and below it this does, and the eye reads one continuous divider. */
 .f12-body { position: relative; }
+/* ⚠️ THE OFFSET LOSES THE PANEL'S INSET WITH THE PANEL (§1). The seam is positioned from the
+   panel's right edge, and that edge moved 14px left when the horizontal inset went — leaving the
+   `+ inset` term would have parked the divider 14px inside the pane. */
 .f12-body::after {
   content: ""; position: absolute; top: 0; bottom: 0;
-  left: calc(var(--f12-panel-inset) + var(--listw) - 1px);
+  left: calc(var(--listw) - 1px);
   width: 1px; background: var(--hairline); pointer-events: none;
 }
 /* ⚠️ THE SCROLLER IS EXEMPT. Head and foot take the panel's inset here; the ROWS take theirs from

@@ -312,15 +312,25 @@ describe("§ (fp5) · the list is an inset panel", () => {
        nothing — the empty-slice failure this repo has an audit about. */
     expect(declValue(r, "border"), "the panel's rim is not the cards' rim")
       .toBe(declValue(rule(".f12-card"), "border"));
+    /**
+     * ⚠️ REPOINTED BY FIX PACK 6 §1 — THE VERTICAL INSET SURVIVES, THE HORIZONTAL ONE IS DELETED.
+     *
+     * This asserted a four-value margin inset on three sides, which put the panel's left edge one
+     * step INSIDE the shared content gutter: measured 109px against the pane's 95, the shell's
+     * gutter plus this page's own 14px plus a rim, on one side only. Query Centre's content is now
+     * at the content gutter like every other page's.
+     *
+     * ⚠️ WHAT FIX PACK 5 WAS ACTUALLY FOR IS UNTOUCHED, which is why this is a repoint and not a
+     * reversal: the panel is still an OBJECT held off the masthead rule and the working area's
+     * foot. Only the sideways step goes, and it was never part of that argument.
+     */
     const m = declValue(r, "margin").split(/\s+/);
-    expect(m.length, `the panel's inset is not a four-value margin: ${m.join(" ")}`).toBe(4);
-    const [top, right, bottom, left] = m;
-    expect(top, "the panel is not held off the masthead rule").toBe("var(--f12-panel-inset)");
-    expect(bottom, "the panel is not held off the working area's foot").toBe("var(--f12-panel-inset)");
-    expect(left, "the panel is not held off the page's left edge").toBe("var(--f12-panel-inset)");
-    /* ⚠️ AND NOT ON THE RIGHT — that edge is where the seam is, and a fourth inset would put a
-       channel of page between the panel and the divider it belongs to. */
-    expect(right, "the panel was inset on the right too, leaving a channel at the seam").toBe("0");
+    expect(m.length, `the panel's inset is not the two-value vertical/horizontal form: ${m.join(" ")}`).toBe(2);
+    const [block, inline] = m;
+    expect(block, "the panel is no longer held off the masthead rule and the foot — that is fix pack 5's object")
+      .toBe("var(--f12-panel-inset)");
+    expect(inline, `the panel took a horizontal inset again — its content sits inside every other page's gutter: ${m.join(" ")}`)
+      .toBe("0");
   });
 
   /**
@@ -334,8 +344,11 @@ describe("§ (fp5) · the list is an inset panel", () => {
     expect(seam, "the full-height seam is missing").not.toBe("");
     expect(seam, "the seam stopped spanning the row").toContain("top: 0");
     expect(seam, "the seam stopped spanning the row").toContain("bottom: 0");
+    /* ⚠️ THE OFFSET LOST THE PANEL'S INSET WITH THE PANEL (fix pack 6 §1). The seam is positioned
+       from the panel's right edge, and that edge moved 14px left when the horizontal inset went;
+       keeping the `+ inset` term would have parked the divider 14px inside the pane. */
     expect(seam, "the seam is no longer collinear with the panel's rim")
-      .toContain("calc(var(--f12-panel-inset) + var(--listw) - 1px)");
+      .toContain("calc(var(--listw) - 1px)");
     expect(rule(".f12-list"), "the panel took its right border back — that doubles the seam")
       .not.toContain("border-right");
   });
