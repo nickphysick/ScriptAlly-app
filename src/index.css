@@ -924,7 +924,10 @@
   --sh-card-h: 0 2px 3px rgba(58, 42, 26, 0.07), 0 12px 26px -8px rgba(58, 42, 26, 0.14);
   --sh-postit: 0 2px 3px rgba(58, 42, 26, 0.10), 0 7px 14px -4px rgba(58, 42, 26, 0.18);
 
-  --listw: 334px; --gut: 12px; --maxw: 1520px;
+  /* ⚠️ 334 → 296 (alignment amendment). It is read by the split's first track AND by the pane's own
+     right column, so the two narrow columns match BY READING ONE TOKEN rather than by two numbers
+     that happen to agree — which is the whole of the amendment's "the same figure" clause. */
+  --listw: 296px; --gut: 12px; --maxw: 1520px;
   /* THE TWO COLUMNS' HEAD BAND. The list head and the pane's toolbar row are different
      components that must close on ONE hairline, and the row beneath each must start on one
      line — so both read these, and neither restates the number. --f12-headgap is also the

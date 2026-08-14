@@ -382,10 +382,14 @@ describe("§ (fp5) · the list is an inset panel", () => {
     const body = rule(".f12-body");
     expect(body, "the split row is missing").not.toBe("");
     expect(declValue(body, "grid-template-columns"), "the first track is not the list token").toBe("var(--listw) minmax(0, 1fr)");
-    expect(declValue(body, "column-gap"), "the channel is not the panel-inset token").toBe("var(--f12-panel-inset)");
-    for (const side of ["padding-top", "padding-bottom"] as const) {
-      expect(declValue(body, side), `the row lost its ${side} — the two columns end on different lines`).toBe("var(--f12-panel-inset)");
-    }
+    /* ⚠️ THE CHANNEL AND THE FOOT ARE STATED VALUES SINCE THE ALIGNMENT AMENDMENT, and they had to
+       stop being `--f12-panel-inset`: that token is the PANEL's own inset, and the amendment gives
+       the work area two numbers of its own — a 16px column gap shared with the card gap inside the
+       pane, and a 32px foot. Borrowing a third meaning from the panel token is how one value
+       silently governs three unrelated distances. */
+    expect(declValue(body, "column-gap"), "the channel is not the amendment's 16").toBe("16px");
+    expect(declValue(body, "row-gap"), "the band-to-column gap is not the amendment's 12").toBe("12px");
+    expect(declValue(body, "padding-bottom"), "the work area's foot is not the page token").toBe("var(--qc-gut)");
   });
 
   /**
@@ -466,8 +470,13 @@ describe("§4 (fp3) · the columns start on the same line", () => {
     expect(head, "the list head's rule is missing").not.toBe("");
     expect(declValue(head, "margin").split(/\s+/)[0], "the head took the column gap back on top of the panel's inset")
       .not.toBe("var(--f12-headgap)");
-    expect(declValue(plate, "margin").split(/\s+/)[0], "the plate stopped reading the shared gap")
-      .toBe("var(--f12-headgap)");
+    /* ⚠️ INVERTED BY THE ALIGNMENT AMENDMENT. The plate's `--f12-headgap` top and its 20px sides
+       were what put the pane's CONTENT on verticals the pane's COLUMN did not have — six verticals
+       across the work area instead of four, with content 20px off the right wall while the list sat
+       hard against the left. It is flush with its column now, and the gap above it is the grid row's
+       to pay. Turned round rather than deleted, so the inset cannot come back quietly. */
+    expect(declValue(plate, "margin"), "the plate took its inset back — the pane's content would leave its column's verticals")
+      .toBe("0");
   });
 
   /* ⚠️ AND ONLY THE PANE IS PADDED SIDEWAYS. The list's inset lives on `.f12-list > *` so the
@@ -762,8 +771,21 @@ describe("§1d/e/g · already landed, and still true", () => {
 
 describe("§2 · the reading pane", () => {
   it("two columns at 1.15fr 0.85fr, with the right one stacked", () => {
-    expect(code, "the pane went back to three equal columns")
-      .toContain('gridTemplateColumns: "1.15fr 0.85fr"');
+    /* ⚠️ THE PROPORTION IS GONE (alignment amendment), AND THE ARGUMENT SURVIVES IT. `1.15fr .85fr`
+       existed because Tracking has a STORY and the other two are inventories — equal thirds
+       flattered the short cards and starved the long one. That is still why the right column is the
+       narrow one. What changed is that a PROPORTION made it a different width at every viewport
+       (measured 245 against the list's 334), so the work area's two narrow columns never matched.
+       It is `--listw` now — the same token the list reads. */
+    expect(code, "the pane's right column stopped reading the list's own token")
+      .toContain('gridTemplateColumns: "minmax(0, 1fr) var(--listw)"');
+    expect(code, "the pane's cards took an inset again — they would leave the column's verticals")
+      .toContain("gap: 16, padding: 0,");
+    /* ⚠️ AND THE GAP ABOVE THEM IS THE PANE COLUMN'S `gap`, not this grid's padding. The two look
+       identical and are not: as padding, the sibling gap measured ZERO with a padding standing in
+       for it, so "one value for every gap" held by coincidence and the next element added to the
+       column would have arrived flush against its neighbour. */
+    expect(code, "the pane stopped paying the card gap itself").toContain('flexDirection: "column", gap: 16 }}>');
     /* §8 made the class conditional — `qp-stack--open` while Notes is expanded — so the anchor is
        the template literal rather than the fixed string. */
     expect(code, "the right column is not a stack").toContain('className={`qp-stack${notesOpen ? " qp-stack--open" : ""}`}');

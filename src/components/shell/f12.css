@@ -1006,6 +1006,18 @@
    so "one button" is enforceable by grep as well as by eye. §1 reads `--btn-h` for the control
    cells' `min-height`, which is what keeps the two heads on one line whatever is in them. */
 .t-f12 { --btn-h: 32px; --btn-r: 8px; --btn-line: #e2d8ca; }
+/* ── ALIGNMENT AMENDMENT · THE WORK AREA'S OWN TWO VALUES ─────────────────────────────────────
+   ⚠️ ONE RADIUS FOR EVERY CARD IN THE WORK AREA, THE AGENT HEADER INCLUDED. It had drifted to three:
+   `--r-lg` (12) on the list panel and the pane's cards, and the header plate reading the same token
+   while the ref drew it a point larger. `--r-lg` itself is NOT retuned — it is `.t-f12`-wide and
+   To-do reads it — so the 13 is scoped to this page and applied through one declaration list.
+   ⚠️ AND THE GUTTER TOKEN IS THE BOTTOM EDGE ONLY. The sides are `--content-gutter`, the shell's,
+   for the reason stated on `.f12-body`. Naming it `--qc-gut` rather than `--qc-gut-bottom` would
+   claim a reach it does not have. */
+.qc-wpg { --qc-gut: 32px; --qc-card-r: 13px; }
+.qc-wpg .f12-list,
+.qc-wpg .f12-card,
+.qc-wpg .f12-heroband { border-radius: var(--qc-card-r); }
 /* ⚠️ ONE TOKEN FOR ALL THREE SIDES AND THE SEAM'S OFFSET. The seam's `left` is computed from it, so
    moving the panel and moving the divider cannot come apart. */
 .t-f12 { --f12-panel-inset: 14px; }
@@ -1149,14 +1161,33 @@
   flex: 1; min-height: 0;
   display: grid;
   grid-template-columns: var(--listw) minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr);
-  column-gap: var(--f12-panel-inset);
-  row-gap: 9px;
-  /* ⚠️ THE BOTTOM INSET IS THE ROW'S, SO BOTH COLUMNS TAKE IT. The list used to buy its own with a
-     margin and the pane bought none, so the two columns ended on different lines — the asymmetry
-     that reads as the pane "hanging". Symmetrically inset, per the pack's gate. */
-  padding-bottom: var(--f12-panel-inset);
-  padding-top: var(--f12-panel-inset);
+  /**
+   * ⚠️ THE CONTROL BAND IS A FIXED 36, NOT `auto` (alignment amendment). `auto` sized the row to
+   * whichever cell was taller, and the two cells hold different things — a Playfair count on one
+   * side, 32px buttons on the other — so the row's height was decided by a font metric. Measured
+   * before: 34px, with the list panel starting above the agent card because the pane's own inset
+   * then added to it. A stated height puts both columns on ONE line and both cells' contents on one
+   * centre line, and it cannot be moved by editing a type size.
+   */
+  grid-template-rows: 36px minmax(0, 1fr);
+  column-gap: 16px;
+  row-gap: 12px;
+  /**
+   * ⚠️ THE BOTTOM GUTTER IS THE ROW'S, SO BOTH COLUMNS TAKE IT, and it is a stated value rather than
+   * the panel-inset token it borrowed. The list used to buy its own with a margin and the pane
+   * bought none, so the two ended on different lines.
+   *
+   * ⚠️ AND THE SIDES ARE THE SHELL'S, DELIBERATELY — this is the amendment's one unmet figure and it
+   * is reported rather than forced. `--content-gutter` is 80px on `.wpg-scroll`, shared by ten
+   * pages, and read by `.wpg-plate` through `calc(var(--content-gutter) + var(--header-inset))` —
+   * so a page-scoped 32 would drag this page's MASTHEAD in with its content and break the
+   * cross-page `restHdrL` check that has aborted two acceptance runs. What the amendment's GATE
+   * asks for is the relationship, and that holds exactly: the work area's children now sit flush
+   * against both walls, so left inset == right inset, one value, nothing between.
+   */
+  padding-bottom: var(--qc-gut);
+  /* the fourth edge is not in the amendment's list; the ref draws it at 20 */
+  padding-top: 20px;
   /**
    * ⚠️ IT IS NOT A CONTAINER ANY MORE — no border, no radius, no padding, no margin. It is the flex
    * row that puts the list beside the pane, and nothing else.
@@ -1185,8 +1216,12 @@
    narrow it. Right cell = what the pane is showing, and the verbs that act on it. The two are the
    same height by `min-height: var(--btn-h)`, so an empty right cell (nothing selected) does not
    collapse the row and shift the panels up — §9's inert verbs stay on the same line as the count. */
-.qc-lhead { grid-column: 1; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0 2px; min-height: var(--btn-h); min-width: 0; }
-.qc-phead { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0 2px; min-height: var(--btn-h); min-width: 0; overflow: hidden; }
+/* ⚠️ NO SIDE PADDING AND NO OWN HEIGHT (alignment amendment). The 2px inset put the count and the
+   verbs on verticals of their own, two pixels inside the columns they head — the "nothing between
+   the four verticals" clause, in miniature. The height is the grid row's 36px, so the two cells are
+   identical by construction rather than by both happening to hold something 34px tall. */
+.qc-lhead { grid-column: 1; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0; min-width: 0; }
+.qc-phead { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0; min-width: 0; overflow: hidden; }
 .qc-sp { flex: 1; }
 /* ⚠️ THE SUB-COUNT IS AN `<i>` INSIDE THE COUNT, not a sibling — the two are one statement about
    one set ("25 queries, 16 of them awaiting"), and a sibling would be free to wrap away from it. */
@@ -1864,7 +1899,12 @@
 .f12-heroband {
   flex: none;
   display: flex; align-items: center; gap: 15px;
-  margin: var(--f12-headgap) 20px 0;
+  /* ⚠️ FLUSH WITH THE PANE COLUMN (alignment amendment). It carried `20px` of side margin and
+     `--f12-headgap` on top, which meant the pane's CONTENT had edges the pane's COLUMN did not —
+     so the work area had six verticals instead of four, and content sat 20px from the right wall
+     while the list sat hard against the left. That asymmetry is the amendment's "gutters were not
+     equal", and it was never a gutter: it was a card inset on one side only. */
+  margin: 0;
   /* ⚠️ 14 → 22 VERTICAL (fix pack 6 §3). The plate was short for what it holds and for the weight
      it now carries beside a 128px masthead. The height comes from the PADDING, deliberately: growing
      the avatar or the type would change what the plate says, and the avatar is also what sets the

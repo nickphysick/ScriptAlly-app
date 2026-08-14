@@ -190,8 +190,12 @@ describe("§1c · the seam runs the full height of both columns", () => {
        column. `minmax(0, 1fr)` on the second row is what lets both scroll internally rather than
        growing the page, which `min-height: 0` did on the flex row. */
     expect(body, "the row stopped being a grid").toContain("display: grid");
+    /* ⚠️ THE FIRST TRACK IS A FIXED 36 SINCE THE ALIGNMENT AMENDMENT — `auto` sized the control band
+       to whichever cell was taller, so the row's height was decided by a font metric. The clause
+       this case is about is the SECOND track: `minmax(0, 1fr)` is what lets both columns scroll
+       internally rather than growing the page. */
     expect(body, "the panel row lost its zero-floor — the columns would grow the page instead of scrolling")
-      .toContain("grid-template-rows: auto minmax(0, 1fr)");
+      .toContain("grid-template-rows: 36px minmax(0, 1fr)");
     expect(body, "the row set a cross-axis alignment — anything but stretch shortens a column")
       .not.toMatch(/align-items\s*:/);
   });

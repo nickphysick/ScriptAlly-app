@@ -3707,7 +3707,13 @@ export const Queries: React.FC<{
                here put a bordered, shadowed card around all of them — a card inside the frame,
                inside the sheet. The SKIN is gone; the layout it provided lives on the inline style
                below (flex column, min-height 0, overflow hidden). */
-            style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            /* ⚠️ THE CARD GAP IS THE COLUMN'S `gap`, NOT THE GRID'S PADDING (alignment amendment).
+               It was `.qp-cols`' own `padding-top: 16`, which LOOKS identical and is not the same
+               thing: measured, the two boxes had a sibling gap of ZERO and a padding standing in
+               for it, so "every gap between siblings is one value" was true by coincidence rather
+               than by construction — and the next element added to this column would have arrived
+               flush against its neighbour. One `gap`, paid by the container, same as the stack's. */
+            style={{ minHeight: 0, overflow: "hidden", display: "flex", flexDirection: "column", gap: 16 }}>
             {/* ── THE TOOLBAR NOW LIVES IN THE PANE (ref query-centre-final.html) — first row of
                 the pane column, flush with the cards beneath it, no longer a page-wide bar
                 straddling the list. Create mode replaces it IN PLACE (its own branch inside the
@@ -4231,7 +4237,20 @@ export const Queries: React.FC<{
                   * now, so it has to come from that stack filling its own column. Browser-measured
                   * at three widths — a stacked card trailing into white is the failure this replaces.
                   */}
-                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 16, padding: "16px 20px 20px", flex: 1, minHeight: 0, alignItems: "stretch" }}>
+                {/* ⚠️ THE RIGHT COLUMN IS `--listw`, THE SAME TOKEN THE LIST READS (alignment
+                    amendment). It was `1.15fr 0.85fr`, which made the pane's narrow column a
+                    PROPORTION of whatever width was left — measured 245px against the list's 334,
+                    so the work area's two narrow columns were two different widths at every
+                    viewport and neither could line up with the other. One token, two consumers, and
+                    the two match at 1180 as exactly as they do at 1680.
+
+                    ⚠️ AND NO SIDE PADDING. It carried `16px 20px 20px`, which inset the cards from
+                    the pane column's own edges — the same fault as the hero's margin, and the
+                    reason content sat 20px from the right wall while the list sat hard against the
+                    left. The top 16 stays: it is the CARD GAP between the header plate and the
+                    cards, the same 16 the grid uses between them. The bottom is the work area's,
+                    paid once by the row. */}
+                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) var(--listw)", gap: 16, padding: 0, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
                   <PaneCard

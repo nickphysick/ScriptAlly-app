@@ -71,15 +71,26 @@ describe("the row beneath each head starts on one line", () => {
      where the masthead's rule ended). Fix pack 2 restored the contained plate, which takes a top
      gap, and the case failed for the one reason that was never its subject. Testing the shorthand
      tested more than the case meant. */
-  it("the hero plate shares the pane's side inset", () => {
+  it("the hero plate is flush with its column, and takes no inset of its own", () => {
     expect(queries, "the hero card came back").not.toContain('className="f12-hero"');
-    const m = /(?:^|;|\{)\s*margin\s*:\s*([^;}]+)/.exec(rule(css, ".f12-heroband"));
+    /**
+     * ⚠️ INVERTED BY THE ALIGNMENT AMENDMENT, AND THE OLD CASE'S SUBJECT IS WHAT INVERTED. It
+     * asserted that the plate SHARES the pane's side inset — right while the pane inset its own
+     * content by 20px. The amendment removes that inset: the pane's column edges ARE its cards'
+     * edges, so there are four verticals across the work area rather than six, and the plate lines
+     * up with the cards beneath it by sharing a COLUMN rather than by sharing a padding.
+     *
+     * ⚠️ THE ALIGNMENT CLAUSE IS THE ONE THAT SURVIVES, and it is asserted against the cards rather
+     * than against a number: whatever the pane's children are inset by, the plate is inset by the
+     * same, and here that is nothing.
+     */
+    /* ⚠️ COMMENTS STRIPPED FIRST — the amendment's note sits immediately before the declaration, so
+       the `(?:^|;|{)` anchor matched the comment's `*​/` instead and reported "declares no margin at
+       all" about a rule whose margin is on the next line. The documented trap, hit again. */
+    const m = /(?:^|;|\{)\s*margin\s*:\s*([^;}]+)/.exec(rule(css, ".f12-heroband").replace(/\/\*[\s\S]*?\*\//g, ""));
     expect(m, "the plate declares no margin at all").not.toBeNull();
-    const parts = m![1].trim().split(/\s+/);
-    /* one value = all round; two/three = the second is the side; four = the fourth is the left */
-    const side = parts.length === 1 ? parts[0] : parts.length === 4 ? parts[3] : parts[1];
-    expect(side, "the plate lost the 20px side inset that lines it up with the cards")
-      .toBe("20px");
+    expect(m![1].trim(), "the plate took a side inset the pane's cards do not have").toBe("0");
+    expect(queries, "the cards took an inset the plate does not have").toContain("gap: 16, padding: 0,");
   });
 
   /* Tops can only agree if the heights do. Centred in the row, a 34px field sat 1px below the

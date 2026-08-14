@@ -386,7 +386,9 @@ describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
     const pad = (/padding-inline:\s*([^;]+);/.exec(body)?.[1] ?? "").trim();
     expect(pad, `the row took a side inset — the scroll row already pays the shared gutter: ${pad}`).toBe("");
     /* and the channel to the pane is still a real one, now as the row's gap */
-    expect((/column-gap:\s*([^;]+);/.exec(body)?.[1] ?? "").trim(), "the channel to the pane went").toBe("var(--f12-panel-inset)");
+    /* the alignment amendment states the channel as its own 16 rather than borrowing the panel's
+       inset token — see the chassis case for why a third meaning on one token is the fault */
+    expect((/column-gap:\s*([^;]+);/.exec(body)?.[1] ?? "").trim(), "the channel to the pane went").toBe("16px");
   });
 
   it("⚠️ THE SHARED GUTTER IS UNTOUCHED, here and everywhere", () => {
