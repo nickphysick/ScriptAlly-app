@@ -252,10 +252,18 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
 export const TimelineRows: React.FC<{
   rows: RowSpec[];
   onMenuOpen?: (entry: TimelineEntryRef, style: React.CSSProperties) => void;
-}> = ({ rows, onMenuOpen }) => (
+  /**
+   * ⚠️ ADDITIVE, AND DEFAULTED SO TO-DO IS UNTOUCHED (fix pack 4 §3). The waiting stage is now an
+   * event BELOW these rows, so the last real row has to grow a connector into it or the timeline
+   * visibly stops and then starts again. To-do renders `<TimelineRows rows={rows} />` with nothing
+   * else and has no projected events beneath, so it keeps the terminal behaviour by default —
+   * which is why this is a flag the caller opts into rather than a change to the row itself.
+   */
+  continues?: boolean;
+}> = ({ rows, onMenuOpen, continues = false }) => (
   <>
     {rows.map((row, i) => {
-      const isLast = i === rows.length - 1;
+      const isLast = i === rows.length - 1 && !continues;
       return (
         <div key={row.key} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: isLast ? 0 : TL_EVENT_GAP }}>
           <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
@@ -307,6 +315,41 @@ export const TimelineRows: React.FC<{
   </>
 );
 
+/**
+ * TlProjection — a timeline event for something that has NOT happened yet (fix pack 4 §3).
+ *
+ * ⚠️ THE SAME GRID AS A REAL ROW, RESTATED IN ONE PLACE RATHER THAN IN TWO EVENTS. `30px 1fr`, the
+ * same gap, the same connector geometry — if a projection drew its own grid the markers would sit a
+ * pixel or two off the real ones and the timeline would bend where the future starts.
+ *
+ * ⚠️ AND THE MARKER IS `ghost`, WHICH ALREADY MEANS THIS. `StatusDot`'s ghost is the same dot
+ * drained to neutral grey with no pulse — the "would-be" treatment. Inventing a second hollow
+ * marker would have given the app two ways to draw "not yet".
+ */
+const TlProjection: React.FC<{
+  status: QueryStatus | string;
+  title: string;
+  date?: string;
+  last?: boolean;
+  children?: React.ReactNode;
+}> = ({ status, title, date, last = false, children }) => (
+  <div style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: last ? 0 : TL_EVENT_GAP }}>
+    <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
+      <StatusDot status={status} overrideSize={28} ghost decorative />
+      {!last && (
+        <div style={{ position: "absolute", top: 29, bottom: -TL_EVENT_GAP, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "var(--hairline, #e8dcd0)" }} />
+      )}
+    </div>
+    <div className="tl-rowbody" style={{ paddingTop: 4 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+        <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "var(--muted, #7d7469)" }}>{title}</span>
+        {date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a", whiteSpace: "nowrap" }}>{date}</span>}
+      </div>
+      {children}
+    </div>
+  </div>
+);
+
 export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
@@ -328,9 +371,13 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
     <div>
       {/* timeline history — oldest at the top, newest at the bottom (rows extracted to
           TimelineRows — the sheet shares them; the ⋯ wiring here is unchanged) */}
+      {/* ⚠️ `continues` ONLY WHEN A PROJECTION ACTUALLY FOLLOWS (fix pack 4 §3). Passing it
+          unconditionally would leave a connector running off the end of a closed query's history
+          into nothing. */}
       <TimelineRows
         rows={rows}
         onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}
+        continues={ballHolder === "agent" && !!waiting}
       />
 
       {/* ── trailing open-state block — calm within window, ESCALATED to needs-you once overdue.
@@ -352,15 +399,6 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
 
         const clockIcon = (
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
-        );
-        // Calm-only readout line (P3 dropped it from the overdue branch — the badge is the single
-        // headline there; two counters off the same send date were pure redundancy).
-        const waitingLine = (
-          <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontWeight: 400, fontSize: 13, color: "#3a1c14" }}>
-            {clockIcon}
-            Waiting to hear back
-            {waiting.sentMs != null && <span style={{ fontFamily: FONT_MONO, fontWeight: 600, fontSize: 12, color: wcol.dim }}>· {elapsedLabel(waiting.nDays)}</span>}
-          </span>
         );
         const bar = dated ? (
           <>
@@ -389,8 +427,36 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
           </>
         ) : null;
 
+        /**
+         * ⚠️ WAITING IS A STAGE ON THE TIMELINE, NOT A BOX AFTER IT (fix pack 4 §3, reversing fix
+         * pack 3's "kept as built"). It used to trail the history as a separate card, which said
+         * the wait was a note ABOUT the query rather than the part of it you are currently in.
+         *
+         * ⚠️ THE BAR MOVED; IT WAS NOT REBUILT. Every state below is the code that was already
+         * here — the derived geometry from `trackingBar`, the overdue hatch and marker, the grace
+         * two-tone against the nudge horizon, the milestone pop-ups. The ref draws a simpler fill
+         * and it is deliberately not adopted: three states carrying real derivations are worth more
+         * than a mockup's single one.
+         *
+         * ⚠️ ONLY THE WITHIN-WINDOW STATE GIVES UP ITS BOX. That box was the thing this section is
+         * removing. Overdue and grace keep theirs because there the frame is an ESCALATION, not a
+         * container — a pink card and a dashed sage card say something the event row cannot.
+         */
+        const nudgeAhead = reminderMs != null && reminderMs > Date.now();
+        /* the agent's stated window, from the agent — falling back to nothing rather than to an
+           invented number when they have not stated one */
+        const statedWeeks = (agent as any)?.responseTimeWeeks;
+        const windowLine = typeof statedWeeks === "number" && statedWeeks > 0
+          ? `${agent?.name?.split(" ")[0] || "They"} states ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}`
+          : waiting.expMs != null ? `Expected by ~${fmtShort(waiting.expMs)}` : null;
+
         return (
-          <div style={{ marginLeft: 4, marginTop: 16 }}>
+          <TlProjection
+            status={query.status}
+            title="Waiting to hear back"
+            date={waiting.sentMs != null ? elapsedLabel(waiting.nDays).toUpperCase() : undefined}
+            last={!nudgeAhead}
+          >
             {!hasExpected ? (
               /* NO EXPECTED DATE (P2/P4) — nothing derivable AND no responseDeadline override. Dashed
                  section + a burgundy "Set an expected date" link (opens the Edit drawer, P4). */
@@ -489,13 +555,30 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
                 );
               })()
             ) : (
-              /* WITHIN-WINDOW (P2) — soft-neutral card + hairline; lead text, mono data (the bar). */
-              <div style={{ background: "var(--paper, #faf7f2)", border: "1px solid var(--hairline, #f0eae1)", borderRadius: 11, padding: "11px 13px" }}>
-                {waitingLine}
+              /* ⚠️ WITHIN-WINDOW — NO BOX. The event's own title carries "Waiting to hear back", so
+                 the old readout line would have stated it twice and has gone with the box; what is
+                 left is the window and the bar, which is exactly what the event is for. */
+              <>
+                {windowLine && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{windowLine}</div>}
                 {bar}
-              </div>
+              </>
             )}
-          </div>
+          </TlProjection>
+        );
+      })()}
+
+      {/* ⚠️ THE SCHEDULED NUDGE IS AN EVENT TOO, AND IT RENDERS ONLY WHEN ONE IS ACTUALLY SCHEDULED.
+          The ref draws it unconditionally; there is no date to put on it unless `nudgeDate` is set
+          and still ahead, and an undated future event would be chrome pretending to be a fact. */}
+      {ballHolder === "agent" && waiting && (() => {
+        const reminderMs = query.nudgeDate ? getTime(query.nudgeDate) : null;
+        if (reminderMs == null || reminderMs <= Date.now()) return null;
+        return (
+          <TlProjection status={QueryStatus.QUERIED} title="Nudge" date={fmtShort(reminderMs).toUpperCase()} last>
+            <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>
+              A task will appear on your to-do list
+            </div>
+          </TlProjection>
         );
       })()}
 
