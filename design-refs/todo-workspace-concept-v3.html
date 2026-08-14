@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — To-do workspace concept v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --parchment:#fdfaf5; --ground:#f2ede7; --burg:#7c3a2a; --burg-deep:#632e22;
+  --ink:#3a1c14; --ink-strong:#241209; --head-ink:#2e3a2c; --muted:#9a8c80; --label:#9c8878;
+  --hair:#e7ddd2; --hair-soft:#efe8de; --field-b:#e0d5c8;
+  --sage-a:#dce0d9; --sage-b:#d0d6cc; --sage-acc:#8a9e88; --sage-txt:#5a6e58;
+  --pink-btn:#f5e2da; --pink-btn-b:#e8c8bc; --pink-btn-h:#efd5ca;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);overflow:hidden;}
+body::before{content:'';position:fixed;inset:0;opacity:0.22;pointer-events:none;z-index:60;
+background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.paper-texture{background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");}
+
+/* ============ APP FRAME — sidebar is a static replica of the LOCKED nav ============ */
+.app{display:grid;grid-template-columns:340px 1fr;height:100vh;}
+.sidebar{background:var(--ground);border-right:1px solid var(--hair);padding:18px 20px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.sb-logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:#1e1108;padding:4px 6px 16px;}
+.sb-logo svg{width:34px;height:34px;}
+.sb-ms{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:11px;margin-bottom:18px;box-shadow:0 1px 3px rgba(58,28,20,0.04);}
+.sb-ms-icon{width:38px;height:38px;border-radius:9px;background:#f6efe6;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.sb-ms b{display:block;font-size:14px;font-weight:600;color:#241209;}
+.sb-ms span{font-size:11.5px;color:var(--muted);}
+.sb-cap{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.16em;color:#a89a8c;padding:16px 8px 6px;}
+.sb-item{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:11px;font-size:14.5px;color:#463527;cursor:default;}
+.sb-item svg{width:19px;height:19px;color:#6b5847;flex-shrink:0;}
+.sb-item.active{background:#fff;border:1px solid var(--hair);color:#241209;font-weight:500;box-shadow:0 1px 3px rgba(58,28,20,0.04);}
+.sb-item .cnt{margin-left:auto;font-size:12.5px;color:var(--burg);display:flex;align-items:center;gap:5px;}
+.sb-item .cnt::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--burg);}
+.sb-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--hair);}
+.sb-user{display:flex;align-items:center;gap:10px;padding:6px 6px 12px;}
+.sb-user .av{width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid rgba(124,58,42,0.25);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;color:var(--burg);}
+.sb-user b{display:block;font-size:13.5px;color:#241209;}
+.sb-user span{font-size:11.5px;color:var(--muted);}
+.sb-upgrade{display:block;text-align:center;background:var(--pink-btn);border:1px solid var(--pink-btn-b);color:var(--burg);border-radius:999px;padding:10px;font-size:13.5px;font-weight:500;}
+
+/* ============ MAIN ============ */
+.main{display:flex;flex-direction:column;min-width:0;height:100vh;}
+.topbar{display:flex;align-items:center;gap:14px;padding:12px 26px;flex-shrink:0;}
+.crumbs{font-size:14px;color:#6b5847;display:flex;gap:8px;align-items:baseline;}
+.crumbs b{color:#241209;font-weight:500;}
+.crumbs .saved{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;color:#b3a496;margin-left:10px;text-transform:uppercase;}
+.topbar .spacer{flex:1;}
+.top-search{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--hair);border-radius:999px;padding:8px 16px;width:250px;color:#b3a496;font-size:13.5px;}
+.top-new{background:#241209;color:#fdfaf5;border:none;border-radius:999px;padding:9px 18px;font-size:13.5px;font-weight:500;}
+
+.sheet{flex:1;min-height:0;background:#fff;border:1px solid var(--hair);border-radius:16px 16px 0 0;margin:4px 22px 0;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(58,28,20,0.04);position:relative;overflow:hidden;}
+.pagebar{display:flex;align-items:center;gap:16px;padding:20px 28px 16px;flex-shrink:0;border-bottom:1px solid var(--hair-soft);}
+.pagebar h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;color:var(--ink-strong);}
+.pagebar .meta{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--label);margin-top:5px;}
+.pagebar .spacer{flex:1;}
+.count-chips{display:flex;gap:8px;}
+.cchip{display:flex;align-items:baseline;gap:7px;background:#fff;border:1px solid var(--hair);border-radius:999px;padding:7px 14px;font-size:12px;color:#8a7666;}
+.cchip b{font-family:'Playfair Display',serif;font-size:14px;color:var(--ink-strong);}
+.btn-pink{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;background:var(--pink-btn);color:var(--burg);border:1px solid var(--pink-btn-b);border-radius:10px;padding:10px 18px;transition:all .18s;}
+.btn-pink:hover{background:var(--pink-btn-h);border-color:#d8a89a;}
+
+.split{display:grid;grid-template-columns:408px minmax(0,1fr);flex:1;min-height:0;}
+
+/* ---- rail ---- */
+.rail{display:flex;flex-direction:column;min-height:0;background:#fff;border-right:1px solid var(--hair-soft);}
+.rail-tools{padding:14px 16px 12px 20px;flex-shrink:0;border-bottom:1px solid var(--hair-soft);}
+.rl-search{display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--field-b);border-radius:10px;padding:9px 13px;transition:all .18s;}
+.rl-search:focus-within{border-color:var(--sage-acc);box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
+.rl-search svg{color:#b3a496;flex-shrink:0;}
+.rl-search input{border:none;outline:none;background:none;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);width:100%;}
+.rl-search input::placeholder{color:#c8b8a8;}
+.rl-search .clr{border:none;background:none;color:#b3a496;cursor:pointer;display:none;padding:0;line-height:0;}
+.rl-search.has .clr{display:block;}
+.filters{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;}
+.fchip{cursor:pointer;font-size:12px;font-weight:500;color:#7a6858;background:#fff;border:1px solid var(--hair);border-radius:999px;padding:6px 12px;display:flex;align-items:center;gap:6px;transition:all .15s;}
+.fchip:hover{border-color:#d8c8b8;color:var(--ink-strong);}
+.fchip .n{font-family:'JetBrains Mono',monospace;font-size:10px;color:#b3a496;}
+.fchip.on{background:var(--ink-strong);border-color:var(--ink-strong);color:#fdfaf5;}
+.fchip.on .n{color:#cbb8a8;}
+
+.rail-scroll{overflow-y:auto;min-height:0;flex:1;padding:4px 10px 18px 12px;scrollbar-gutter:stable;}
+.rail-scroll::-webkit-scrollbar{width:8px;}
+.rail-scroll::-webkit-scrollbar-thumb{background:#e8ddd0;border-radius:999px;border:2px solid #fff;}
+.rg-head{display:flex;align-items:baseline;gap:8px;padding:18px 10px 7px;}
+.rg-head .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;position:relative;top:-1.5px;}
+.rg-head h2{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:#8a7666;}
+.rg-head .n{font-family:'JetBrains Mono',monospace;font-size:10px;color:#c0b0a0;}
+.rg-head .sub{margin-left:auto;font-size:10.5px;color:#c0b0a0;padding-right:6px;}
+
+.trow{display:grid;grid-template-columns:20px 15px minmax(0,1fr) auto;gap:10px;align-items:start;padding:11px 8px 11px 10px;border-radius:12px;cursor:pointer;position:relative;transition:background .14s;border:1px solid transparent;}
+.trow:hover{background:#faf7f2;}
+.trow.sel{background:#faf5ee;border-color:#efe4d5;}
+.trow.sel::before{content:'';position:absolute;left:-6px;top:10px;bottom:10px;width:2.5px;border-radius:3px;background:var(--burg);}
+.trow .cb{width:18px;height:18px;border-radius:6px;border:1.5px solid #d5c8ba;background:#fff;margin-top:1px;flex-shrink:0;transition:all .15s;display:flex;align-items:center;justify-content:center;color:transparent;}
+.trow .cb:hover{border-color:var(--burg);background:#fdf6f2;}
+.trow.done .cb{background:var(--sage-acc);border-color:var(--sage-acc);color:#fdfaf5;}
+.trow .sd{margin-top:3.5px;}
+.trow .tt{font-size:13.5px;font-weight:400;line-height:1.4;color:#43332a;}
+.trow .tt b{font-weight:600;color:var(--ink-strong);}
+.trow .tc{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#b3a496;margin-top:4px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.pill{display:inline-flex;align-items:center;border-radius:999px;padding:2.5px 8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;}
+.pill.act{background:#fbeee7;color:#a05a42;border:1px solid #f2dccf;}
+.pill.hk{background:#eef1ec;color:#5a6e58;border:1px solid #dfe5dc;}
+.pill.note{background:#faf4e8;color:#a08a58;border:1px solid #efe4cc;}
+.pill.snz{background:#f3f0ec;color:#8a7666;border:1px solid #e6ded4;}
+.trow.done .tt,.trow.done .tt b{color:#b8a898;text-decoration:line-through;text-decoration-color:#d5c8ba;}
+.trow.done .tc{opacity:.55;}
+.trow .note-tt{font-family:'Caveat',cursive;font-size:18px;color:#4a3a2e;line-height:1.15;}
+.trow.done .note-tt{color:#b8a898;text-decoration:line-through;text-decoration-color:#d5c8ba;}
+.row-acts{display:flex;gap:4px;opacity:0;transition:opacity .15s;margin-top:1px;}
+.trow:hover .row-acts,.trow.menu-open .row-acts{opacity:1;}
+.ra-btn{width:26px;height:26px;border-radius:8px;border:1px solid var(--hair);background:#fff;color:#b3a496;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+.ra-btn:hover{color:var(--burg);border-color:#e0c8ba;background:#fdf6f2;}
+.ra-btn svg{width:12.5px;height:12.5px;}
+.empty-search{padding:36px 20px;text-align:center;}
+.empty-search p{font-size:13px;color:#a89684;}
+.empty-search .q{font-weight:600;color:var(--ink-strong);}
+
+/* ---- desk ---- */
+.desk{min-height:0;background:#fcfaf7;position:relative;display:flex;flex-direction:column;}
+.desk-scroll{overflow-y:auto;min-height:0;flex:1;padding:20px 34px 44px;}
+.desk-scroll::-webkit-scrollbar{width:8px;}
+.desk-scroll::-webkit-scrollbar-thumb{background:#e2d6c8;border-radius:999px;border:2px solid #fcfaf7;}
+.desk-head{display:flex;align-items:center;gap:12px;max-width:640px;margin:0 auto 14px;}
+.desk-head .pos{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:#a89684;}
+.desk-head .spacer{flex:1;}
+.nav-arrow{width:30px;height:30px;border-radius:9px;border:1px solid var(--field-b);background:#fff;color:var(--burg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+.nav-arrow:hover{background:var(--pink-btn);border-color:#d8a89a;}
+.nav-arrow:disabled{opacity:.35;cursor:default;background:#fff;border-color:var(--field-b);}
+
+.f11{border-radius:14px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 10px 32px rgba(58,28,20,0.09);background:var(--parchment);position:relative;max-width:640px;margin:0 auto;}
+.f11::before{content:'';position:absolute;inset:6px;border:1px solid rgba(124,58,42,0.28);border-radius:10px;pointer-events:none;z-index:3;}
+.f11-band{background:linear-gradient(135deg,var(--sage-a) 0%,var(--sage-b) 100%);padding:18px 24px 16px;position:relative;overflow:hidden;border-radius:8px 8px 0 0;margin:6px 6px 0;min-height:78px;}
+.f11-band::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(90,110,88,0.2);}
+.f11-band.pink{background:linear-gradient(135deg,#f3e0d6 0%,#eed4c8 100%);}
+.f11-band.pink::after{background:rgba(124,58,42,0.14);}
+.motif{position:absolute;right:16px;top:50%;transform:translateY(-50%);pointer-events:none;z-index:1;opacity:.9;}
+.an-c{display:flex;align-items:center;gap:11px;position:relative;z-index:2;}
+.an-c-avatar{width:38px;height:38px;border-radius:50%;background:var(--parchment);border:1px solid rgba(124,58,42,0.25);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:14px;font-weight:500;color:var(--burg);flex-shrink:0;box-shadow:0 1px 2px rgba(58,28,20,0.05);}
+.an-c-pre{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--sage-txt);margin-bottom:1px;}
+.f11-band.pink .an-c-pre{color:#9a6a56;}
+.an-c-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--head-ink);line-height:1.1;}
+.f11-band.pink .an-c-name{color:#4a241a;}
+.an-c-agency{font-size:11px;color:#6a7e68;font-weight:300;margin-top:1px;}
+.f11-band.pink .an-c-agency{color:#9a6a56;}
+.f11-body{padding:20px 24px 24px;position:relative;margin:0 6px 6px;}
+.sect-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--label);font-weight:500;margin:0 0 9px;}
+.sect{padding:16px 2px;}
+.sect + .sect{border-top:1px solid #efe6da;}
+.sect:first-child{padding-top:2px;}
+.report{font-size:13.5px;line-height:1.65;color:#4a3a2e;}
+.report .ag{font-family:'Playfair Display',serif;font-style:italic;color:var(--burg);font-size:14.5px;}
+.report b{font-weight:600;color:var(--ink);}
+
+.journey{display:flex;align-items:center;gap:14px;margin-top:13px;}
+.stripes{display:flex;gap:5px;}
+.stripes i{width:44px;height:5px;border-radius:3px;background:#eadccc;}
+.stripes i.soft{background:#d8b8aa;}
+.stripes i.hard{background:#a86a52;}
+.stripes i.now{background:var(--burg);}
+.journey .jl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#a89684;}
+
+.mats{display:flex;flex-direction:column;gap:7px;}
+.mat{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #ece0d2;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink);}
+.mat .mi{width:26px;height:26px;border-radius:8px;background:#f6efe6;display:flex;align-items:center;justify-content:center;color:var(--burg);flex-shrink:0;}
+.mat .mv{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#a89684;margin-left:auto;letter-spacing:0.06em;text-transform:uppercase;white-space:nowrap;}
+.mat .ok{color:var(--sage-txt);display:flex;align-items:center;gap:5px;}
+
+.handoff{background:#fff;border:1px solid #ece0d2;border-radius:12px;padding:16px 18px;}
+.handoff .hf-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.a-btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:var(--pink-btn);color:var(--burg);border:1px solid var(--pink-btn-b);border-radius:10px;padding:10px 16px;transition:all .18s;}
+.a-btn:hover{background:var(--pink-btn-h);border-color:#d8a89a;}
+.a-btn.quiet{background:#fff;border-color:var(--field-b);color:#6a5a50;}
+.a-btn.quiet:hover{background:#faf4ec;color:var(--burg);}
+.hf-note{font-size:11.5px;color:#a89684;font-style:italic;margin-top:11px;line-height:1.5;}
+.copy-line{display:flex;align-items:center;gap:9px;margin-top:12px;background:#faf6ef;border:1px dashed #dfd2c2;border-radius:9px;padding:8px 12px;}
+.copy-line code{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#5c4a3c;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.copy-line button{border:none;background:none;color:var(--burg);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;padding:2px 4px;}
+.copy-line button:hover{text-decoration:underline;}
+
+.holders{display:flex;flex-direction:column;gap:7px;}
+.holder{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #ece0d2;border-radius:10px;padding:9px 14px;}
+.holder .hn{font-family:'Playfair Display',serif;font-size:14.5px;color:var(--ink);}
+.holder .hs{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:#a89684;margin-left:2px;}
+.holder .hf{margin-left:auto;display:flex;gap:8px;align-items:center;}
+.mini-link{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.06em;text-transform:uppercase;color:var(--burg);text-decoration:none;border:1px solid var(--field-b);background:#fff;border-radius:8px;padding:6px 10px;transition:all .15s;cursor:pointer;}
+.mini-link:hover{background:var(--pink-btn);border-color:#d8a89a;}
+
+.note-area{width:100%;background:#fffdf8;border:1px solid #ece0d2;border-radius:10px;padding:12px 15px;font-family:'Caveat',cursive;font-size:19px;color:#4a3a2e;line-height:1.4;resize:none;outline:none;min-height:64px;}
+.note-area::placeholder{color:#cbbcae;}
+.note-area:focus{border-color:var(--sage-acc);box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
+.big-note{font-family:'Caveat',cursive;font-size:26px;color:#4a3a2e;line-height:1.4;padding:6px 2px 2px;}
+
+.act-row{display:flex;justify-content:center;align-items:center;margin-top:8px;padding-top:20px;position:relative;}
+.split-b{display:inline-flex;position:relative;}
+.split-b .main-b{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;background:var(--pink-btn);color:var(--burg);border:1px solid var(--pink-btn-b);border-radius:10px 0 0 10px;padding:12px 26px;transition:all .18s;}
+.split-b .main-b:hover{background:var(--pink-btn-h);border-color:#d8a89a;}
+.split-b .caret-b{cursor:pointer;background:var(--pink-btn);color:var(--burg);border:1px solid var(--pink-btn-b);border-left:none;border-radius:0 10px 10px 0;padding:0 12px;display:flex;align-items:center;transition:all .18s;}
+.split-b .caret-b:hover{background:var(--pink-btn-h);}
+.split-menu{position:absolute;bottom:calc(100% + 6px);right:0;background:var(--parchment);border:1px solid var(--field-b);border-radius:10px;box-shadow:0 8px 24px rgba(58,28,20,0.16);padding:5px;z-index:30;display:none;width:258px;animation:popIn .15s ease;}
+.split-b.open .split-menu{display:block;}
+@keyframes popIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+.sm-opt{padding:9px 12px;border-radius:7px;font-size:12.5px;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:9px;text-align:left;}
+.sm-opt:hover{background:#fff;color:var(--burg);}
+.sm-opt.na{color:#cbbcae;cursor:default;}
+.sm-opt.na:hover{background:none;color:#cbbcae;}
+.sm-opt svg{width:13px;height:13px;flex-shrink:0;}
+.sm-sep{height:1px;background:#efe6da;margin:5px 4px;}
+
+/* ============ SNOOZE DIAL (single surface) ============ */
+.dial{position:fixed;width:258px;background:var(--parchment);border:1px solid var(--field-b);border-radius:12px;box-shadow:0 10px 30px rgba(58,28,20,0.18);padding:14px 15px 13px;z-index:90;display:none;animation:popIn .14s ease;}
+.dial.open{display:block;}
+.dial-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--label);margin-bottom:10px;}
+.dial-read{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:11px;}
+.dial-read .rl{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink-strong);}
+.dial-read .rr{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);}
+.track-wrap{position:relative;height:26px;margin:0 2px;}
+.track-bg{position:absolute;top:11px;left:0;right:0;height:4px;border-radius:3px;background:#e8dccd;}
+.track-fill{position:absolute;top:11px;left:0;height:4px;border-radius:3px;background:var(--burg);}
+.track-hatch{position:absolute;top:11px;height:4px;border-radius:3px;background-image:repeating-linear-gradient(115deg,#e2d6c6 0 3px,#f2ece2 3px 6px);}
+.dial input[type=range]{position:absolute;top:0;left:0;width:100%;height:26px;margin:0;background:none;-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;}
+.dial input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;background:var(--parchment);border:2px solid var(--burg);box-shadow:0 1px 3px rgba(58,28,20,0.22);cursor:grab;}
+.dial input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(138,158,136,0.25);}
+.dial input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--parchment);border:2px solid var(--burg);box-shadow:0 1px 3px rgba(58,28,20,0.22);cursor:grab;}
+.dial input[type=range]::-moz-range-track{background:transparent;}
+.ticks{position:relative;height:12px;margin:1px 2px 12px;}
+.ticks span{position:absolute;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;color:#bcaa98;}
+.dial-commit{width:100%;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;background:var(--pink-btn);color:var(--burg);border:1px solid var(--pink-btn-b);border-radius:10px;padding:10px 12px;transition:all .18s;}
+.dial-commit:hover{background:var(--pink-btn-h);border-color:#d8a89a;}
+.dial-cap{font-size:10.5px;color:#b3a496;font-style:italic;margin-top:9px;line-height:1.45;text-align:center;}
+
+/* receipt */
+.receipt{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--parchment);border:1px solid var(--field-b);border-radius:12px;box-shadow:0 10px 30px rgba(58,28,20,0.2);padding:12px 18px;display:flex;align-items:center;gap:12px;z-index:95;opacity:0;pointer-events:none;transition:all .25s ease;}
+.receipt.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);}
+.receipt .r-dot{width:22px;height:22px;border-radius:50%;background:var(--sage-acc);color:#fdfaf5;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.receipt .r-txt{font-size:13px;color:var(--ink);}
+.receipt .r-txt b{font-weight:600;color:var(--ink-strong);}
+.receipt button{border:none;background:none;color:var(--burg);cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;padding:4px 6px;}
+.receipt button:hover{text-decoration:underline;}
+
+.allclear{max-width:640px;margin:60px auto;text-align:center;}
+.allclear .q{color:var(--sage-acc);margin-bottom:18px;}
+.allclear h3{font-family:'Playfair Display',serif;font-style:italic;font-weight:500;font-size:24px;color:var(--head-ink);}
+.allclear p{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:var(--label);margin-top:12px;}
+
+.sdot{width:13px;height:13px;border-radius:50%;position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.sdot svg{position:absolute;}
+.sdot.out{border:1.5px solid var(--burg);background:var(--pink-btn);color:var(--burg);}
+.sdot.offer{background:var(--burg);color:var(--parchment);border:1.5px solid var(--burg);}
+.sdot.hk{border:1.5px solid #cfc6bb;background:#fff;color:#a89a8c;}
+.sdot.idle{border:1.5px dashed #d5c8ba;background:#fff;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="sb-logo"><svg viewBox="0 0 24 24" fill="none" stroke="#241209" stroke-width="1.6"><path d="M21 3 3 10.5l6 2.5L11.5 19 21 3Z" stroke-linejoin="round"/><path d="M9 13l12-10" stroke-linecap="round"/></svg>ScriptAlly</div>
+  <div class="sb-ms"><div class="sb-ms-icon">📗</div><div><b>Murphy's Day&nbsp;…</b><span>Thriller · 50,000 words</span></div></div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</div>
+  <div class="sb-cap">QUERIES</div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 3 3 10.5l6 2.5L11.5 19 21 3Z" stroke-linejoin="round"/></svg>Query Centre</div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 17l5-6 4 3 6-8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 21h18" stroke-linecap="round"/></svg>Analytics</div>
+  <div class="sb-cap">AGENTS</div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.7-3 3-4.5 5.5-4.5s4.8 1.5 5.5 4.5" stroke-linecap="round"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.7c2 .2 3.6 1.4 4.3 3.6" stroke-linecap="round"/></svg>Contact list</div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5 5-2Z" stroke-linejoin="round"/></svg>Discover</div>
+  <div class="sb-cap">MATERIALS</div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M5 4h4v16H5zM10.5 4h4v16h-4zM17.5 4.5l3.5 15-3.9.9-3.4-15z" stroke-linejoin="round"/></svg>Manuscripts</div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 19V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2Zm0 0a2 2 0 0 1 2-2h13" stroke-linecap="round"/></svg>Comparable titles</div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 9h16M9 9v11" /></svg>Submission packages</div>
+  <div class="sb-cap">TASKS</div>
+  <div class="sb-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h10M4 12h10M4 18h6" stroke-linecap="round"/><path d="m16 16 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg>To-do list<span class="cnt">16</span></div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4" stroke-linecap="round"/></svg>Calendar</div>
+  <div class="sb-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 3h9l4 4v14H6z" stroke-linejoin="round"/><path d="M15 3v4h4" stroke-linejoin="round"/></svg>Noteboard</div>
+  <div class="sb-cap">ACCOUNT</div>
+  <div class="sb-foot">
+    <div class="sb-user"><div class="av">BC</div><div><b>Bethany Carter</b><span>Free plan</span></div></div>
+    <div class="sb-upgrade">Upgrade</div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="crumbs"><span>ScriptAlly</span> / <span>Tasks</span> / <b>To-do list</b><span class="saved">All changes saved</span></div>
+    <div class="spacer"></div>
+    <div class="top-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>Search</div>
+    <button class="top-new">＋ New</button>
+  </div>
+
+  <div class="sheet">
+    <div class="pagebar">
+      <div>
+        <h1>To-do list</h1>
+        <div class="meta">Thursday 13 August · Week 141 of querying</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="count-chips">
+        <div class="cchip">Outstanding <b id="c-out">12</b></div>
+        <div class="cchip">Done today <b id="c-done">1</b></div>
+        <div class="cchip">Snoozed <b id="c-snz">0</b></div>
+      </div>
+      <button class="btn-pink" onclick="alert('Opens the add task / note form (Form 11).')">＋ Add task or note</button>
+    </div>
+
+    <div class="split">
+      <div class="rail">
+        <div class="rail-tools">
+          <div class="rl-search" id="rl-search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+            <input id="q" type="text" placeholder="Search your list…" oninput="onSearch(this.value)">
+            <button class="clr" onclick="clearSearch()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+          </div>
+          <div class="filters" id="filters"></div>
+        </div>
+        <div class="rail-scroll" id="rail"></div>
+      </div>
+      <div class="desk">
+        <div class="desk-scroll" id="desk"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- SnoozeDial: one surface, opened from the row icon, the split menu, or a snoozed row -->
+<div class="dial" id="dial">
+  <div class="dial-title" id="dial-title">Check back on</div>
+  <div class="dial-read"><span class="rl" id="dial-label">Tomorrow</span><span class="rr" id="dial-date">FRI 14 AUG</span></div>
+  <div class="track-wrap">
+    <div class="track-bg"></div>
+    <div class="track-hatch" id="dial-hatch"></div>
+    <div class="track-fill" id="dial-fill"></div>
+    <input type="range" id="dial-range" min="0" max="11" step="1" value="0">
+  </div>
+  <div class="ticks" id="dial-ticks"></div>
+  <button class="dial-commit" id="dial-commit">Snooze until Friday</button>
+  <div class="dial-cap" id="dial-cap"></div>
+</div>
+
+<div class="receipt" id="receipt">
+  <div class="r-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+  <div class="r-txt" id="receipt-txt"></div>
+  <button onclick="undoLast()">Undo</button>
+</div>
+
+<script>
+/* ---------- icons ---------- */
+const I = {
+  arrowR:'<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>',
+  tick:'<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  broom:'<svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 4 12 10M5 20c1-4 3.5-6.5 7-7l2 2c-.5 3.5-3 6-7 7l-2-2Z" stroke-linejoin="round"/></svg>',
+  mail:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+  ext:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M10 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-4"/></svg>',
+  doc:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>',
+  open:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l6 2.5L11.5 19 21 3Z"/></svg>',
+  ok:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+};
+const motifStack = '<svg class="motif" width="84" height="70" viewBox="0 0 84 70" fill="none"><rect x="16" y="26" width="52" height="36" rx="3" fill="#fdfaf5" stroke="#7c3a2a" stroke-width="1.4"/><rect x="20" y="18" width="52" height="36" rx="3" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.4"/><path d="M28 27h30M28 34h36M28 41h24" stroke="#7c3a2a" stroke-width="1.2" stroke-linecap="round" opacity=".55"/></svg>';
+const motifLaurel = '<svg class="motif" width="78" height="72" viewBox="0 0 78 72" fill="none"><circle cx="39" cy="34" r="19" fill="#fdf3ec" stroke="#7c3a2a" stroke-width="1.4"/><path d="m31 34 6 6 11-12" stroke="#7c3a2a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 40c-3 8 1 16 8 20M62 40c3 8-1 16-8 20" stroke="#8a9e88" stroke-width="1.5" stroke-linecap="round"/><path d="M18 47c-2.5.4-4.6-.4-6-2M20 53c-2.5.6-4.8 0-6.5-1.6M24 58c-2.3 1-4.7.8-6.7-.4M60 47c2.5.4 4.6-.4 6-2M58 53c2.5.6 4.8 0 6.5-1.6M54 58c2.3 1 4.7.8 6.7-.4" stroke="#8a9e88" stroke-width="1.3" stroke-linecap="round"/></svg>';
+const motifBell = '<svg class="motif" width="70" height="66" viewBox="0 0 70 66" fill="none"><path d="M35 10c-9 0-14 7-14 15v9l-5 8h38l-5-8v-9c0-8-5-15-14-15Z" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.4" stroke-linejoin="round"/><path d="M30 46c.6 3 2.4 4.6 5 4.6s4.4-1.6 5-4.6" stroke="#7c3a2a" stroke-width="1.4" stroke-linecap="round"/><path d="M13 14c2-3 4.5-5.2 7.6-6.8M57 14c-2-3-4.5-5.2-7.6-6.8" stroke="#c9a89e" stroke-width="1.4" stroke-linecap="round"/></svg>';
+const motifBroom = '<svg class="motif" width="72" height="68" viewBox="0 0 72 68" fill="none"><path d="M52 8 32 28" stroke="#7c3a2a" stroke-width="1.6" stroke-linecap="round"/><path d="M14 56c2.5-11 9-17.5 18.5-19.5l7 7C37.5 53 31 59.5 20 62l-6-6Z" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.4" stroke-linejoin="round"/><path d="M22 49l6 6M28 43l6 6" stroke="#7c3a2a" stroke-width="1.1" stroke-linecap="round" opacity=".5"/></svg>';
+const motifNote = '<svg class="motif" width="70" height="66" viewBox="0 0 70 66" fill="none"><rect x="12" y="10" width="46" height="46" rx="3" fill="#fdf6ea" stroke="#7c3a2a" stroke-width="1.4"/><path d="M46 56v-10h10" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.4" stroke-linejoin="round"/><path d="M20 22h30M20 30h30M20 38h18" stroke="#c9a89e" stroke-width="1.3" stroke-linecap="round"/></svg>';
+
+/* ---------- data ---------- */
+const MS = "Murphy's Day Out";
+const tasks = [
+ {id:'offer-ellery', group:'urgent', dot:'offer', dotIcon:I.tick, snoozeMax:5,
+  title:`<b>Tom Ellery</b> has made an offer`, cap:`<span class="pill act">Offer</span> On the table since 11 Aug`,
+  ws:{band:'pink', pre:'An offer of representation from', name:'Tom Ellery', agency:'Ellery & Frost Literary', avatar:'TE', motif:motifLaurel,
+    sections:[
+      {lbl:'What the record shows', html:`<div class="report">You logged Tom's offer on <b>11 August</b>, eleven months after the first query and one round of revisions later. The query is now in its <b>Offer</b> state; nothing else on this query needs recording until you decide.</div>
+      <div class="journey"><div class="stripes"><i class="soft"></i><i class="hard"></i><i class="now"></i></div><span class="jl">Queried · Full · Offer — 11 Aug</span></div>`},
+      {lbl:'Three agents are still holding material', html:`<div class="holders">
+        <div class="holder"><span class="hn">Jonathan Marsh</span><span class="hs">Full requested</span><span class="hf"><a class="mini-link" href="mailto:j.marsh@greyhoundlit.co.uk?subject=Offer%20of%20representation%20received%20%E2%80%94%20MURPHY%E2%80%99S%20DAY%20OUT%20%E2%80%94%20Bethany%20Carter">Draft email</a></span></div>
+        <div class="holder"><span class="hn">Daniel O'Rourke</span><span class="hs">Partial requested</span><span class="hf"><a class="mini-link" href="mailto:submissions@orourkeassoc.com?subject=Offer%20of%20representation%20received%20%E2%80%94%20MURPHY%E2%80%99S%20DAY%20OUT%20%E2%80%94%20Bethany%20Carter">Draft email</a></span></div>
+        <div class="holder"><span class="hn">Greg Panetta</span><span class="hs">Partial requested</span><span class="hf"><a class="mini-link" href="mailto:greg@panettaliterary.co.uk?subject=Offer%20of%20representation%20received%20%E2%80%94%20MURPHY%E2%80%99S%20DAY%20OUT%20%E2%80%94%20Bethany%20Carter">Draft email</a></span></div>
+      </div>
+      <div class="hf-note">Each link opens a draft in your own email with the subject line filled in. Letting them know starts their clock; you set whatever deadline you give them.</div>`},
+      {lbl:'Your note', html:`<textarea class="note-area" placeholder="Call notes, deadline you gave the others, questions for Tom…"></textarea>`},
+    ],
+    primary:'Open the query with Tom', primaryKind:'link'}},
+
+ {id:'full-marsh', group:'urgent', dot:'out', dotIcon:I.arrowR,
+  title:`<b>Send your full</b> to <b>Jonathan Marsh</b>`, cap:`<span class="pill act">Agent waiting</span> Full requested 2 Aug`,
+  ws:{pre:'Sending your full to', name:'Jonathan Marsh', agency:'Greyhound Literary', avatar:'JM', motif:motifStack,
+    sections:[
+      {lbl:'The ask', html:`<div class="report"><span class="ag">Jonathan Marsh</span> requested the full manuscript on <b>2 August</b>, after reading your opening fifty pages. His request email asks for a single <b>.docx</b>, double-spaced, sent as a reply.</div>
+      <div class="journey"><div class="stripes"><i class="soft"></i><i class="hard"></i><i class="now"></i></div><span class="jl">Queried · Partial · Full requested — 2 Aug</span></div>`},
+      {lbl:'On file for this send', html:`<div class="mats">
+        <div class="mat"><span class="mi">${I.doc}</span>Full manuscript — ${MS}<span class="mv ok">${I.ok} v4 · 50,000 words</span></div>
+        <div class="mat"><span class="mi">${I.doc}</span>Synopsis<span class="mv ok">${I.ok} 1 page · in his package</span></div>
+      </div>`},
+      {lbl:'Where to send it', html:`<div class="handoff">
+        <div class="hf-row">
+          <a class="a-btn" href="mailto:j.marsh@greyhoundlit.co.uk?subject=Requested%20full%20%E2%80%94%20MURPHY%E2%80%99S%20DAY%20OUT%20%E2%80%94%20Bethany%20Carter">${I.mail} Reply to Jonathan's email</a>
+          <a class="a-btn quiet" href="#" onclick="return false;">${I.ext} His submission page</a>
+        </div>
+        <div class="copy-line"><code>Requested full — MURPHY'S DAY OUT — Bethany Carter</code><button onclick="copyLine(this)">Copy</button></div>
+        <div class="hf-note">ScriptAlly doesn't send anything — the send happens in your own email. Come back and mark it when it's gone.</div>
+      </div>`},
+      {lbl:'Your note', html:`<textarea class="note-area" placeholder="Anything to remember about this send…"></textarea>`},
+    ],
+    primary:'Mark full as sent', logs:`Logged: full sent to <b>Jonathan Marsh</b> · today`}},
+
+ {id:'partial-orourke', group:'urgent', dot:'out', dotIcon:I.arrowR,
+  title:`<b>Send your partial</b> to <b>Daniel O'Rourke</b>`, cap:`<span class="pill act">Agent waiting</span> Partial requested 21 Jul`,
+  ws:{pre:'Sending your partial to', name:"Daniel O'Rourke", agency:"O'Rourke Associates", avatar:'DO', motif:motifStack,
+    sections:[
+      {lbl:'The ask', html:`<div class="report"><span class="ag">Daniel O'Rourke</span> requested a partial on <b>21 July</b> — the first three chapters plus your synopsis, through the agency's submission portal rather than by email.</div>
+      <div class="journey"><div class="stripes"><i class="soft"></i><i class="now"></i><i></i></div><span class="jl">Queried · Partial requested — 21 Jul</span></div>`},
+      {lbl:'On file for this send', html:`<div class="mats">
+        <div class="mat"><span class="mi">${I.doc}</span>Opening sample — first 3 chapters<span class="mv ok">${I.ok} v4 · 9,800 words</span></div>
+        <div class="mat"><span class="mi">${I.doc}</span>Synopsis<span class="mv ok">${I.ok} 1 page · in his package</span></div>
+      </div>`},
+      {lbl:'Where to send it', html:`<div class="handoff">
+        <div class="hf-row">
+          <a class="a-btn" href="#" onclick="return false;">${I.ext} Open the O'Rourke portal</a>
+          <a class="a-btn quiet" href="mailto:submissions@orourkeassoc.com?subject=Requested%20partial%20%E2%80%94%20MURPHY%E2%80%99S%20DAY%20OUT%20%E2%80%94%20Bethany%20Carter">${I.mail} Or reply by email</a>
+        </div>
+        <div class="hf-note">His listing prefers the portal. Come back and mark it when it's gone.</div>
+      </div>`},
+      {lbl:'Your note', html:`<textarea class="note-area" placeholder="Anything to remember about this send…"></textarea>`},
+    ],
+    primary:'Mark partial as sent', logs:`Logged: partial sent to <b>Daniel O'Rourke</b> · today`}},
+
+ {id:'partial-panetta', group:'urgent', dot:'out', dotIcon:I.arrowR,
+  title:`<b>Send your partial</b> to <b>Greg Panetta</b>`, cap:`<span class="pill act">Agent waiting</span> Requested 28 Jun · 46 days`,
+  ws:{pre:'Sending your partial to', name:'Greg Panetta', agency:'Panetta Literary', avatar:'GP', motif:motifStack,
+    sections:[
+      {lbl:'The ask', html:`<div class="report"><span class="ag">Greg Panetta</span> requested a partial on <b>28 June</b> — 46 days ago, the oldest open request on this list. He asked for the first fifty pages as a PDF attachment.</div>
+      <div class="journey"><div class="stripes"><i class="soft"></i><i class="now"></i><i></i></div><span class="jl">Queried · Partial requested — 28 Jun</span></div>`},
+      {lbl:'On file for this send', html:`<div class="mats">
+        <div class="mat"><span class="mi">${I.doc}</span>Opening sample — first 50 pages<span class="mv ok">${I.ok} v4 · PDF export ready</span></div>
+      </div>`},
+      {lbl:'Where to send it', html:`<div class="handoff">
+        <div class="hf-row">
+          <a class="a-btn" href="mailto:greg@panettaliterary.co.uk?subject=Requested%20partial%20%E2%80%94%20MURPHY%E2%80%99S%20DAY%20OUT%20%E2%80%94%20Bethany%20Carter">${I.mail} Reply to Greg's email</a>
+        </div>
+        <div class="copy-line"><code>Requested partial — MURPHY'S DAY OUT — Bethany Carter</code><button onclick="copyLine(this)">Copy</button></div>
+        <div class="hf-note">ScriptAlly doesn't send anything — the send happens in your own email. Come back and mark it when it's gone.</div>
+      </div>`},
+      {lbl:'Your note', html:`<textarea class="note-area" placeholder="Anything to remember about this send…"></textarea>`},
+    ],
+    primary:'Mark partial as sent', logs:`Logged: partial sent to <b>Greg Panetta</b> · today`}},
+
+ {id:'hk-sharma', group:'hk', dot:'hk', dotIcon:I.broom,
+  title:`<b>Chase your query</b> with <b>Priya Sharma</b>`, cap:`<span class="pill hk">Chase</span> 14 wks since queried · window 12`,
+  ws:{pre:'Chasing your query with', name:'Priya Sharma', agency:'Whitfield & Bond', avatar:'PS', motif:motifBell,
+    sections:[
+      {lbl:'What the record shows', html:`<div class="report">You queried <span class="ag">Priya Sharma</span> on <b>6 May</b> — fourteen weeks ago. Her listing states a response window of ten to twelve weeks and welcomes a single follow-up after that.</div>
+      <div class="journey"><div class="stripes"><i class="now"></i><i></i><i></i></div><span class="jl">Queried — 6 May · no reply logged</span></div>`},
+      {lbl:'The follow-up', html:`<div class="handoff">
+        <div class="hf-row"><a class="a-btn" href="mailto:priya@whitfieldbond.co.uk?subject=Query%20follow-up%20%E2%80%94%20MURPHY%E2%80%99S%20DAY%20OUT%20%E2%80%94%20Bethany%20Carter">${I.mail} Draft the chase email</a></div>
+        <div class="copy-line"><code>Query follow-up — MURPHY'S DAY OUT — Bethany Carter</code><button onclick="copyLine(this)">Copy</button></div>
+        <div class="hf-note">Opens in your own email with the subject filled in. Mark it chased once it's sent and the query's record picks it up.</div>
+      </div>`},
+    ],
+    primary:'Mark as chased', logs:`Logged: query chased with <b>Priya Sharma</b> · today`}},
+
+ {id:'hk-kessler', group:'hk', dot:'hk', dotIcon:I.broom,
+  title:`<b>Marina Kessler</b>'s window has passed`, cap:`<span class="pill hk">Close</span> 10 wks · states 8 · no reply means no`,
+  ws:{pre:'Closing your query with', name:'Marina Kessler', agency:'Kessler Literary Management', avatar:'MK', motif:motifBroom,
+    sections:[
+      {lbl:'What the record shows', html:`<div class="report">You queried <span class="ag">Marina Kessler</span> on <b>4 June</b> — ten weeks ago. Her listing states an eight-week window and that no reply after it means a pass. Recording the close keeps your active count accurate; the query stays in your history and can be reopened if she replies.</div>
+      <div class="journey"><div class="stripes"><i class="now"></i><i></i><i></i></div><span class="jl">Queried — 4 Jun · window closed w/c 30 Jul</span></div>`},
+    ],
+    primary:'Record the close', logs:`Logged: query with <b>Marina Kessler</b> closed — window passed`}},
+
+ {id:'hk-grant', group:'hk', dot:'hk', dotIcon:I.broom,
+  title:`Add a reply-by window for <b>Elodie Grant</b>`, cap:`<span class="pill hk">Data gap</span> Queried 30 Jul · no window on record`,
+  ws:{pre:'Tidying the record for', name:'Elodie Grant', agency:'Aster & Vale', avatar:'EG', motif:motifBroom,
+    sections:[
+      {lbl:'What the record shows', html:`<div class="report">Your query to <span class="ag">Elodie Grant</span> was logged on <b>30 July</b> without a reply-by window, so the app can't tell you when a chase becomes appropriate. Her agency page states its current response times.</div>`},
+      {lbl:'Find her stated window', html:`<div class="handoff"><div class="hf-row"><a class="a-btn quiet" href="#" onclick="return false;">${I.ext} Open the Aster &amp; Vale submissions page</a></div><div class="hf-note">Add whatever the page states to her contact card and this row clears itself.</div></div>`},
+    ],
+    primary:'Open her contact card', primaryKind:'link'}},
+
+ {id:'hk-sample', group:'hk', dot:'hk', dotIcon:I.broom,
+  title:`<b>Your opening sample changed</b> — 2 packages hold v3`, cap:`<span class="pill hk">Materials</span> Sample at v4 · built 14 Jul`,
+  ws:{pre:'A materials check for', name:MS, agency:'Submission packages', avatar:'✍', motif:motifBroom,
+    sections:[
+      {lbl:'What the record shows', html:`<div class="report">Your opening sample moved to <b>v4</b> on 9 August. Two submission packages still contain <b>v3</b>: the packages built for <span class="ag">Curtis Brown</span> agents and for <span class="ag">Aster &amp; Vale</span>. Any send from those packages would go out with the older sample.</div>`},
+    ],
+    primary:'Open Submission packages', primaryKind:'link'}},
+
+ {id:'hk-marchetti', group:'hk', dot:'hk', dotIcon:I.broom,
+  title:`Log how the R&amp;R with <b>Sofia Marchetti</b> resolved`, cap:`<span class="pill hk">Stale</span> Last entry 9 Jun`,
+  ws:{pre:'Updating the record for', name:'Sofia Marchetti', agency:'Marchetti Rights Agency', avatar:'SM', motif:motifBroom,
+    sections:[
+      {lbl:'What the record shows', html:`<div class="report">The last entry on <span class="ag">Sofia Marchetti</span>'s query is her revise-and-resubmit note on <b>9 June</b>. Nothing since. If you've resubmitted, replied, or set it aside, recording it keeps the query's state true.</div>
+      <div class="journey"><div class="stripes"><i class="soft"></i><i class="hard"></i><i class="now"></i></div><span class="jl">Queried · Full · R&R — 9 Jun</span></div>`},
+    ],
+    primary:'Open the query', primaryKind:'link'}},
+
+ {id:'hk-mswl', group:'hk', dot:'hk', dotIcon:I.broom,
+  title:`<b>Two agents</b> have no MSWL noted`, cap:`<span class="pill hk">Data gap</span> Contact list`,
+  ws:{pre:'A data check on', name:'Your contact list', agency:'2 of 31 agents affected', avatar:'☰', motif:motifBroom,
+    sections:[
+      {lbl:'What the record shows', html:`<div class="report"><span class="ag">Ffion Reece</span> and <span class="ag">Adam Castell</span> have no manuscript wishlist noted, so Discover can't weigh them against ${MS}. Their MSWL pages are linked from their contact cards.</div>`},
+    ],
+    primary:'Open the contact list', primaryKind:'link'}},
+
+ {id:'note-foyles', group:'yours', note:true, title:`Ask Sam about the Foyles event`, cap:`<span class="pill note">Note</span> Added by you · 9 Aug`,
+  ws:{pre:'A note you added', name:'Your noteboard', agency:'9 August', avatar:'✎', motif:motifNote,
+    sections:[{lbl:'The note', html:`<div class="big-note">Ask Sam about the Foyles event — is the agent panel worth the trip down?</div>`}],
+    primary:'Cross it off', logs:`Crossed off: <b>Ask Sam about the Foyles event</b>`}},
+ {id:'note-ch3', group:'yours', note:true, title:`Re-read ch. 3 before sending any more fulls`, cap:`<span class="pill note">Note</span> Added by you · 11 Aug`,
+  ws:{pre:'A note you added', name:'Your noteboard', agency:'11 August', avatar:'✎', motif:motifNote,
+    sections:[{lbl:'The note', html:`<div class="big-note">Re-read ch. 3 before sending any more fulls — the timeline wobble Tom flagged.</div>`}],
+    primary:'Cross it off', logs:`Crossed off: <b>Re-read ch. 3 before sending any more fulls</b>`}},
+];
+
+const groups = [
+  {id:'urgent', dotColor:'#c9705a', name:'Urgent', sub:'An agent is waiting, or a date is'},
+  {id:'hk', dotColor:'#8a9e88', name:'Housekeeping', sub:'Small tidying the app can see'},
+  {id:'yours', dotColor:'#c8b8a8', name:'Your tasks', sub:'Added by you'},
+];
+const filterDefs = [
+  {id:'all', label:'All'},
+  {id:'urgent', label:'Urgent'},
+  {id:'hk', label:'Housekeeping'},
+  {id:'yours', label:'Your tasks'},
+  {id:'snoozed', label:'Snoozed'},
+];
+
+let selId = 'full-marsh';
+let doneToday = 1;
+let lastAction = null;
+let activeFilter = 'all';
+let query = '';
+
+/* ---------- dates ---------- */
+const TODAY = new Date(2026,7,13); // Thursday 13 August 2026
+const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAYS_S = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MON_S = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+/* twelve stops: 1–6 days, 1–3 weeks, 1–3 months */
+const STOPS = [
+  {label:'Tomorrow', kind:'d', n:1}, {label:'2 days', kind:'d', n:2}, {label:'3 days', kind:'d', n:3},
+  {label:'4 days', kind:'d', n:4}, {label:'5 days', kind:'d', n:5}, {label:'6 days', kind:'d', n:6},
+  {label:'1 week', kind:'w', n:1}, {label:'2 weeks', kind:'w', n:2}, {label:'3 weeks', kind:'w', n:3},
+  {label:'1 month', kind:'m', n:1}, {label:'2 months', kind:'m', n:2}, {label:'3 months', kind:'m', n:3},
+];
+function resolveDate(i){
+  const s = STOPS[i]; const d = new Date(TODAY);
+  if (s.kind==='d') d.setDate(d.getDate()+s.n);
+  if (s.kind==='w') d.setDate(d.getDate()+7*s.n);
+  if (s.kind==='m') d.setMonth(d.getMonth()+s.n);
+  return d;
+}
+const fmtMono = d => `${DAYS_S[d.getDay()]} ${d.getDate()} ${MON_S[d.getMonth()]}`;
+const fmtLong = d => `${d.getDate()} ${MON[d.getMonth()]}`;
+
+/* ---------- helpers ---------- */
+const visible = t => !t.dismissed;
+const inList = t => activeFilter==='snoozed' ? !!t.snoozedUntil : !t.snoozedUntil && (activeFilter==='all'||t.group===activeFilter);
+const matchesSearch = t => {
+  if (!query) return true;
+  const hay = (t.title+' '+t.cap+' '+(t.ws.name||'')+' '+(t.ws.agency||'')).replace(/<[^>]+>/g,'').toLowerCase();
+  return hay.includes(query.toLowerCase());
+};
+const listed = () => tasks.filter(t=>visible(t)&&inList(t)&&matchesSearch(t));
+const openListed = () => listed().filter(t=>!t.done);
+
+/* ---------- filters ---------- */
+function renderFilters(){
+  document.getElementById('filters').innerHTML = filterDefs.map(f=>{
+    let n;
+    if (f.id==='snoozed') n = tasks.filter(t=>visible(t)&&t.snoozedUntil).length;
+    else if (f.id==='all') n = tasks.filter(t=>visible(t)&&!t.done&&!t.snoozedUntil).length;
+    else n = tasks.filter(t=>visible(t)&&!t.done&&!t.snoozedUntil&&t.group===f.id).length;
+    if (f.id==='snoozed' && n===0) return '';
+    return `<div class="fchip ${activeFilter===f.id?'on':''}" onclick="setFilter('${f.id}')">${f.label}<span class="n">${n}</span></div>`;
+  }).join('');
+}
+function setFilter(id){
+  activeFilter = id;
+  const open = openListed();
+  if (open.length && !open.find(t=>t.id===selId)) selId = open[0].id;
+  renderAll();
+}
+function onSearch(v){
+  query = v.trim();
+  document.getElementById('rl-search').classList.toggle('has', !!query);
+  const open = openListed();
+  if (open.length && !open.find(t=>t.id===selId)) selId = open[0].id;
+  renderAll();
+}
+function clearSearch(){ document.getElementById('q').value=''; onSearch(''); }
+
+/* ---------- rail ---------- */
+function renderRail(){
+  const rail = document.getElementById('rail');
+  const rows = listed();
+  if (!rows.length){
+    rail.innerHTML = `<div class="empty-search"><p>${query? `Nothing matches <span class="q">"${query}"</span>` : 'Nothing in this filter'}.</p></div>`;
+    updateCounts(); return;
+  }
+  let html = '';
+  const renderRow = t => {
+    const snz = t.snoozedUntil;
+    const cap = snz
+      ? `<span class="pill snz">Snoozed</span> Back on ${fmtMono(snz).toLowerCase()}`
+      : t.cap;
+    return `<div class="trow ${t.id===selId?'sel':''} ${t.done?'done':''}" onclick="selectTask('${t.id}')">
+      <span class="cb" onclick="event.stopPropagation();toggleDone('${t.id}')">${I.tick.replace('width="8" height="8"','width="10" height="10"')}</span>
+      ${t.note ? '<span class="sdot idle sd"></span>' : `<span class="sdot ${t.dot} sd">${t.dotIcon}</span>`}
+      <span><span class="${t.note?'note-tt':'tt'}">${t.title}</span><div class="tc">${cap}</div></span>
+      <span class="row-acts">
+        <button class="ra-btn" id="sn-${t.id}" title="${snz?'Change the date':'Snooze'}" onclick="event.stopPropagation();openDial('${t.id}', this)">${I.clock}</button>
+        ${snz? `<button class="ra-btn" title="Bring it back now" onclick="event.stopPropagation();unsnooze('${t.id}')">${I.arrowR.replace('width="8" height="8"','')}</button>`
+             : `<button class="ra-btn" title="Dismiss" onclick="event.stopPropagation();dismissTask('${t.id}')">${I.x}</button>`}
+      </span>
+    </div>`;
+  };
+  if (activeFilter==='snoozed'){
+    html += `<div class="rg-head"><span class="dot" style="background:#c0b0a0"></span><h2>Snoozed</h2><span class="n">${rows.length}</span><span class="sub">They come back on their own</span></div>`;
+    html += rows.map(renderRow).join('');
+  } else {
+    for (const g of groups){
+      const gRows = rows.filter(t=>t.group===g.id);
+      if (!gRows.length) continue;
+      html += `<div class="rg-head"><span class="dot" style="background:${g.dotColor}"></span><h2>${g.name}</h2><span class="n">${gRows.filter(t=>!t.done).length}</span><span class="sub">${g.sub}</span></div>`;
+      html += gRows.map(renderRow).join('');
+    }
+  }
+  rail.innerHTML = html;
+  updateCounts();
+}
+function updateCounts(){
+  document.getElementById('c-out').textContent = tasks.filter(t=>visible(t)&&!t.done&&!t.snoozedUntil).length;
+  document.getElementById('c-done').textContent = doneToday;
+  document.getElementById('c-snz').textContent = tasks.filter(t=>visible(t)&&t.snoozedUntil).length;
+}
+
+/* ---------- workspace ---------- */
+function renderDesk(){
+  const desk = document.getElementById('desk');
+  const open = openListed();
+  const t = tasks.find(x=>x.id===selId);
+  const tVisible = t && visible(t) && inList(t) && matchesSearch(t) && !t.done;
+  if (!tVisible && !open.length){
+    const anyOpen = tasks.filter(x=>visible(x)&&!x.done&&!x.snoozedUntil).length;
+    desk.innerHTML = `<div class="allclear">
+      <div class="q"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4c-6 0-11 3-13 9 2-1 4-1.5 6-1.5C11 14 9.5 17 7 20c6-1 11-5 12.5-12 .3-1.5.5-3 .5-4Z"/><path d="M4 20c1-2 2.5-3.5 4.5-4.5"/></svg></div>
+      <h3>${anyOpen? 'Nothing here.' : 'Nothing needs you.'}</h3>
+      <p>${anyOpen? anyOpen+' open elsewhere in the list' : '4 queries are with agents · next window closes w/c 24 Aug'}</p>
+    </div>`;
+    return;
+  }
+  if (!t) return;
+  const w = t.ws;
+  const idx = open.findIndex(x=>x.id===t.id);
+  const pos = t.snoozedUntil ? `Snoozed · back on ${fmtMono(t.snoozedUntil)}`
+    : t.done ? `Done · was in ${groupName(t.group)}`
+    : `Task ${idx+1} of ${open.length} · ${groupName(t.group)}`;
+  const sections = w.sections.map(s=>`<div class="sect"><div class="sect-lbl">${s.lbl}</div>${s.html}</div>`).join('');
+  const primaryAttr = w.primaryKind==='link' ? `onclick="alert('Navigates there in the app.')"` : `onclick="completeTask('${t.id}')"`;
+  const hasQuery = !(t.note || ['hk-grant','hk-sample','hk-mswl'].includes(t.id));
+  const isOffer = t.id==='offer-ellery';
+  desk.innerHTML = `
+    <div class="desk-head">
+      <span class="pos">${pos}</span><span class="spacer"></span>
+      <button class="nav-arrow" ${idx<=0?'disabled':''} onclick="step(-1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button class="nav-arrow" ${idx===open.length-1||idx<0?'disabled':''} onclick="step(1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="f11 paper-texture">
+      <div class="f11-band ${w.band||''}">${w.motif||''}
+        <div class="an-c"><div class="an-c-avatar">${w.avatar}</div>
+          <div><div class="an-c-pre">${w.pre}</div><div class="an-c-name">${w.name}</div><div class="an-c-agency">${w.agency}</div></div>
+        </div>
+      </div>
+      <div class="f11-body">${sections}
+        <div class="act-row">
+          <div class="split-b" id="splitbtn">
+            <button class="main-b" ${primaryAttr}>${w.primary}</button>
+            <button class="caret-b" id="caretb" onclick="document.getElementById('splitbtn').classList.toggle('open');event.stopPropagation();"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>
+            <div class="split-menu">
+              <div class="sm-opt ${hasQuery?'':'na'}" ${hasQuery?`onclick="alert('Opens the query reading pane.')"`:''}>${I.open.replace('<svg','<svg width="13" height="13"')} Open the query</div>
+              <div class="sm-opt" onclick="event.stopPropagation();openDial('${t.id}', document.getElementById('caretb'))">${I.clock.replace('<svg','<svg width="13" height="13"')} ${t.snoozedUntil? 'Change the date…' : 'Snooze…'}</div>
+              <div class="sm-sep"></div>
+              <div class="sm-opt ${isOffer?'na':''}" ${isOffer?'':`onclick="dismissTask('${t.id}')"`}>${I.x.replace('<svg','<svg width="13" height="13"')} Dismiss</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+function groupName(g){return groups.find(x=>x.id===g).name;}
+
+/* ---------- SnoozeDial: one surface, four entry points ---------- */
+let dialTaskId = null, dialIdx = 0, dialCeil = 11;
+const dialEl = document.getElementById('dial');
+const rangeEl = document.getElementById('dial-range');
+
+function openDial(taskId, anchor){
+  const t = tasks.find(x=>x.id===taskId);
+  dialTaskId = taskId;
+  dialCeil = (t.snoozeMax !== undefined) ? t.snoozeMax : 11;   // ceiling read before the drag
+  dialIdx = Math.min(0, dialCeil);                              // opens on tomorrow
+  document.getElementById('dial-title').textContent = t.snoozedUntil ? 'Change the date' : 'Check back on';
+  rangeEl.value = dialIdx;
+  paintDial();
+  document.getElementById('dial-cap').textContent = (t.snoozeMax !== undefined)
+    ? 'An offer is on the table — this one can only wait so long.' : '';
+  dialEl.classList.add('open');
+  // place
+  const r = anchor.getBoundingClientRect();
+  const w = 258, h = dialEl.offsetHeight;
+  let left = Math.min(window.innerWidth-w-12, Math.max(12, r.left + r.width/2 - w/2));
+  let top = r.top - h - 8;
+  if (top < 12) top = r.bottom + 8;
+  dialEl.style.left = left+'px'; dialEl.style.top = top+'px';
+  rangeEl.focus();
+}
+function closeDial(){ dialEl.classList.remove('open'); dialTaskId=null; }
+function paintDial(){
+  const d = resolveDate(dialIdx);
+  document.getElementById('dial-label').textContent = STOPS[dialIdx].label;
+  document.getElementById('dial-date').textContent = fmtMono(d);
+  const pctOf = i => 8 + (i/11)*(258-30-16);        // knob-centre px inside 258px card padding
+  const trackW = 258-30;
+  const pos = (dialIdx/11)*100;
+  document.getElementById('dial-fill').style.width = pos+'%';
+  const hatch = document.getElementById('dial-hatch');
+  if (dialCeil < 11){
+    hatch.style.display='block';
+    hatch.style.left = ((dialCeil/11)*100)+'%';
+    hatch.style.right = '0';
+  } else hatch.style.display='none';
+  document.getElementById('dial-commit').textContent =
+    dialIdx===0 ? `Snooze until ${DAYS[d.getDay()]}` : `Snooze until ${fmtLong(d)}`;
+}
+rangeEl.addEventListener('input', ()=>{
+  let v = parseInt(rangeEl.value,10);
+  if (v > dialCeil){ v = dialCeil; rangeEl.value = v; }   // knob stops at the ceiling
+  dialIdx = v; paintDial();
+});
+rangeEl.addEventListener('keydown', e=>{
+  if (e.key==='Enter'){ e.preventDefault(); commitDial(); return; }
+  if (e.key==='Escape'){ e.preventDefault(); closeDial(); return; }
+  if (e.shiftKey && (e.key==='ArrowRight'||e.key==='ArrowLeft')){
+    e.preventDefault();
+    const unitStart = [0,6,9];                              // day → week → month
+    const dir = e.key==='ArrowRight' ? 1 : -1;
+    const cur = dialIdx < 6 ? 0 : dialIdx < 9 ? 1 : 2;
+    const nextUnit = Math.max(0, Math.min(2, cur+dir));
+    dialIdx = Math.min(dialCeil, unitStart[nextUnit]);
+    rangeEl.value = dialIdx; paintDial();
+  }
+});
+document.getElementById('dial-commit').onclick = commitDial;
+function commitDial(){
+  const t = tasks.find(x=>x.id===dialTaskId);
+  if (!t) return;
+  const d = resolveDate(dialIdx);
+  const wasSnoozed = !!t.snoozedUntil;
+  t.snoozedUntil = d;
+  lastAction = {type:'snooze', id:t.id, wasSnoozed};
+  showReceipt(`${wasSnoozed?'Moved to':'Snoozed until'} <b>${fmtLong(d)}</b>`);
+  closeDial();
+  const open = openListed();
+  if (open.length && selId===t.id) selId = open[0].id;
+  renderAll();
+}
+function unsnooze(id){
+  const t = tasks.find(x=>x.id===id);
+  t.snoozedUntil = null;
+  lastAction = null;
+  showReceipt(`Back on the list: <b>${t.ws.name}</b>`);
+  renderAll();
+}
+
+/* ---------- actions ---------- */
+function renderAll(){renderFilters();renderRail();renderDesk();}
+function selectTask(id){selId=id;renderAll();}
+function step(d){
+  const open = openListed();
+  const i = open.findIndex(t=>t.id===selId);
+  if (open[i+d]) selectTask(open[i+d].id);
+}
+function toggleDone(id){
+  const t = tasks.find(x=>x.id===id);
+  if (t.done){ t.done=false; doneToday=Math.max(0,doneToday-1); renderAll(); return; }
+  completeTask(id);
+}
+function completeTask(id){
+  const t = tasks.find(x=>x.id===id);
+  if (t.done) return;
+  t.done = true; doneToday++;
+  lastAction = {type:'done', id};
+  showReceipt(t.ws.logs || `Done: <b>${t.ws.name}</b>`);
+  renderFilters(); renderRail();
+  const open = openListed();
+  if (open.length && selId===id) setTimeout(()=>selectTask(open[0].id), 450);
+  else renderDesk();
+}
+function dismissTask(id){
+  const t = tasks.find(x=>x.id===id);
+  t.dismissed = true;
+  lastAction = {type:'dismiss', id};
+  showReceipt(`Dismissed: <b>${t.ws.name}</b>`);
+  const open = openListed();
+  if (open.length && selId===id) selId = open[0].id;
+  renderAll();
+}
+function undoLast(){
+  if (!lastAction) return;
+  const t = tasks.find(x=>x.id===lastAction.id);
+  if (lastAction.type==='done'){ t.done=false; doneToday=Math.max(0,doneToday-1); }
+  if (lastAction.type==='snooze'){ t.snoozedUntil=null; }
+  if (lastAction.type==='dismiss'){ t.dismissed=false; }
+  if (activeFilter==='snoozed') activeFilter='all';
+  selId = t.id; lastAction=null;
+  hideReceipt(); renderAll();
+}
+let receiptTimer;
+function showReceipt(html){
+  const r = document.getElementById('receipt');
+  document.getElementById('receipt-txt').innerHTML = html;
+  r.classList.add('show');
+  clearTimeout(receiptTimer);
+  receiptTimer = setTimeout(hideReceipt, 5200);
+}
+function hideReceipt(){document.getElementById('receipt').classList.remove('show');}
+function copyLine(btn){
+  const code = btn.parentElement.querySelector('code').textContent;
+  navigator.clipboard && navigator.clipboard.writeText(code);
+  btn.textContent='Copied'; setTimeout(()=>btn.textContent='Copy',1600);
+}
+document.addEventListener('click', e=>{
+  const s = document.getElementById('splitbtn');
+  if (s && !s.contains(e.target)) s.classList.remove('open');
+  if (dialEl.classList.contains('open') && !dialEl.contains(e.target)) closeDial();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeDial(); });
+
+/* ticks */
+document.getElementById('dial-ticks').innerHTML =
+  [[0,'1D'],[6,'1W'],[9,'1M'],[11,'3M']].map(([i,l])=>`<span style="left:${(i/11)*100}%">${l}</span>`).join('');
+
+renderAll(); paintDial();
+</script>
+</body>
+</html>
