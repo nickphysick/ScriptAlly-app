@@ -879,3 +879,50 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
     expect(index).toContain("--pink: #f5e2da;");
   });
 });
+
+/* ── the two panes read as one page (visual rebuild, Phase 7) ────────────────────────────────── */
+
+/**
+ * ⚠️ BAKED DECISION 5, AND IT IS THE ONE THE REBUILD MADE LOAD-BEARING: the rail's figure column
+ * and the card's facts strip use the SAME mono-label-over-Playfair pairing. That match is what
+ * makes the split read as one page rather than as two designs sharing a screen.
+ *
+ * ⚠️ SO IT IS ASSERTED AS A DERIVATION, NOT AS TWO NUMBERS. The card reads `figureFor(c)` — the
+ * row's own resolver — so the figure you scanned in the list is literally the figure you land on.
+ * Two independently-computed figures would agree today and drift the first time either was tuned,
+ * and the drift would be invisible: both would look correct alone.
+ */
+describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () => {
+  it("the card's strip reads the ROW's resolver rather than recomputing", () => {
+    const at = board.indexOf("handoff={(c) => {");
+    expect(at, "the hand-off resolver is gone — this slice would read nothing").toBeGreaterThan(-1);
+    const fn = board.slice(at, at + 1400);
+    expect(fn).toContain("const f = figureFor(c);");
+    expect(fn).toContain("waitLabel: f.label");
+    expect(fn).toContain("waitValue: f.value");
+  });
+
+  it("both surfaces set the same two registers — mono label, Playfair value", () => {
+    const railLab = rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-figlab {");
+    const railNum = rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-fignum {");
+    const cardLab = rule(readFileSync(join(here, "todoDock.css"), "utf8"), ".tdk-fact .k {");
+    const cardVal = rule(readFileSync(join(here, "todoDock.css"), "utf8"), ".tdk-fact .v {");
+    for (const r of [railLab, cardLab]) {
+      expect(r).toContain('font-family: "JetBrains Mono"');
+      expect(r).toContain("text-transform: uppercase");
+    }
+    for (const r of [railNum, cardVal]) {
+      expect(r).toContain('font-family: "Playfair Display"');
+    }
+  });
+
+  /**
+   * ⚠️ AND BURGUNDY STAYS ON THE RAIL'S NUMERAL ALONE. It is the page's only colour emphasis; a
+   * second hot treatment in the card would double it and halve what it means.
+   */
+  it("the card's facts carry no hot treatment — burgundy is the rail numeral's alone", () => {
+    const dockCss = readFileSync(join(here, "todoDock.css"), "utf8");
+    expect(rule(dockCss, ".tdk-fact .v {")).not.toContain("#7c3a2a");
+    expect(rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-fignum.hot {")).toContain("#7c3a2a");
+  });
+});

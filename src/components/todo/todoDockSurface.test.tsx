@@ -50,7 +50,6 @@ const render = (active = "a", queue = QUEUE) =>
       onClose={() => {}}
       timeline={() => [{ key: "e1", label: "Full requested", when: "12 Jul" }]}
       onPrimary={() => {}}
-      onSnoozeDays={() => {}}
       onMore={() => {}}
     />
   );
@@ -133,7 +132,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(render()).toContain("Full requested");
     const bare = renderToStaticMarkup(
       <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
-        timeline={() => []} onPrimary={() => {}} onSnoozeDays={() => {}} onMore={() => {}} />
+        timeline={() => []} onPrimary={() => {}} onMore={() => {}} />
     );
     expect(bare).not.toContain("tdk-tl");
   });
@@ -348,7 +347,7 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
   it("an empty history says so rather than leaving a frame implying something is missing", () => {
     const html = renderToStaticMarkup(
       <TodoDock queue={QUEUE} activeKey="c" onSelect={() => {}} onClose={() => {}}
-        timeline={() => []} onPrimary={() => {}} onSnoozeDays={() => {}} onMore={() => {}} />,
+        timeline={() => []} onPrimary={() => {}} onMore={() => {}} />,
     );
     expect(html).toContain("Nothing logged yet.");
   });
@@ -429,7 +428,7 @@ describe("⚠️ THE HAND-OFF HANDS OVER, and it never invents what it hands", (
   const withAgent = (active = "a") => renderToStaticMarkup(
     <TodoDock
       queue={QUEUE} activeKey={active} onSelect={() => {}} onClose={() => {}}
-      timeline={() => []} onPrimary={() => {}} onSnoozeDays={() => {}} onMore={() => {}}
+      timeline={() => []} onPrimary={() => {}} onMore={() => {}}
       handoff={() => ({ email: "b@carter.co.uk", website: "carterlit.com", msTitle: "Murphy's Day Out" })}
     />,
   );

@@ -28,7 +28,6 @@ import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
 import { bandFamily } from "../../lib/todoColumns";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
-import { SnoozeDial } from "./SnoozeDial";
 import { handoffFor, panePosition, paneSections, bandFacts, HANDOFF_NOTE } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
@@ -51,10 +50,9 @@ export interface TodoDockProps {
   timeline: (card: BoardCard) => DockTimelineEvent[];
   /** The flow's ink act. `spec` is present only for the send flow. */
   onPrimary: (card: BoardCard, spec: SendSpec | null) => void;
-  /* ⚠️ A DATED VERB (tasks-pages P2, walk fix 2). The old `onSnooze(card)` handed the choice to
-     a page popover that never mounted for the dock — the clock button silently did nothing. The
-     dock owns its own tier menu now (capped for offers) and reports the CHOSEN date. */
-  onSnoozeDays: (card: BoardCard, days: number, when: string) => void;
+  /* ⚠️ RETIRED WITH THE FOOT BAR (visual rebuild, Phase 4). The card no longer offers a snooze at
+     all — the command bar does, opening the ONE dial. The prop is gone rather than left unused:
+     an unused prop is a slot a future surface fills without anyone deciding it should exist. */
   onMore: (card: BoardCard) => void;
   /** The agent's own contact fields and the manuscript's title — the hand-off is built from the
    *  record or is absent; the pane never invents either. */
@@ -71,22 +69,16 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, onPrimary, onSnoozeDays, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, onPrimary, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [confirmSend, setConfirmSend] = useState(false);
-  /* ⚠️ THE DIAL, ANCHORED TO THE CLOCK (Phase 6) — one snooze surface, four doors. The tier menu
-     that stood here is retired; its own note said it existed because "the old `onSnooze(card)`
-     handed the choice to a page popover that never mounted for the dock". The dial mounts here
-     now, so that reason is spent. */
-  const snoozeBtn = useRef<HTMLButtonElement | null>(null);
-  const [snoozeOpen, setSnoozeOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   /* A new item arrives with its own decisions unmade — a confirmation carried over from the last
      one would be the surface agreeing to something on your behalf. */
-  useEffect(() => { setConfirmSend(false); setSnoozeOpen(false); }, [activeKey]);
+  useEffect(() => { setConfirmSend(false); }, [activeKey]);
 
   /* ⚠️ KEYBOARD. Esc closes, ↑↓ walk the queue, Enter is the primary. Bound on the surface rather
      than the document so it cannot reach past an open popover or a field the flow owns. */

@@ -1501,7 +1501,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   onClose={closeDock}
                   timeline={dockTimeline}
                   onPrimary={(c, spec) => void dockPrimary(c, spec)}
-                  onSnoozeDays={(c, days, when) => snoozeCard(c, days, when)}
                   tagsSlot={(c) => c.userTaskId ? (
                     <TagPicker
                       compact
