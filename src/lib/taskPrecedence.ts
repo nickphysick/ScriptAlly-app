@@ -44,24 +44,60 @@ export interface ReplyTaskInput {
 
 const ms = (iso?: string): number => (iso ? new Date(iso).getTime() : NaN);
 
-export function replyTask(inp: ReplyTaskInput): ReplyTask {
-  const { status, noResponseMeansNo, responseTimeWeeks, now } = inp;
-
-  // Only the agent's-court statuses have a reply to chase.
+/**
+ * ══ THE ONE DEADLINE — extracted so nothing computes it twice ═════════════════════════════════
+ *
+ * `NaN` when there is nothing to place in time: a status with no reply owed, an agent with no
+ * stated window, or an undated import with no stored override. Each of those is a genuine absence
+ * and none of them gets a default — a guessed window would put a query in a chase list on the
+ * strength of a number nobody typed.
+ *
+ * ⚠️ IT IS EXPORTED BECAUSE THE LIST'S FIGURE READS IT TOO. Query Centre's rows count down to this
+ * instant and up from it; if that countdown came from the STAGE windows (8/12/12 weeks) while the
+ * OVERDUE group came from here, a row could sit under OVERDUE reading "27 DAYS LEFT" — two clocks,
+ * both defensible, contradicting each other three pixels apart.
+ */
+export function replyDeadlineMs(inp: ReplyTaskInput): number {
+  const { status, responseTimeWeeks } = inp;
   const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT;
-  if (!awaiting) return "none";
-
-  // No reply window recorded → neither fires (data_quality_poor "set a window" does instead).
-  if (!responseTimeWeeks || responseTimeWeeks <= 0) return "none";
-
+  if (!awaiting) return NaN;
+  if (!responseTimeWeeks || responseTimeWeeks <= 0) return NaN;
+  const stored = ms(inp.responseDeadline);
+  if (!Number.isNaN(stored)) return stored;
   const sentMs = ms(inp.dateSent);
-  const storedDeadline = ms(inp.responseDeadline);
-  const deadlineMs = Number.isNaN(storedDeadline)
-    ? Number.isNaN(sentMs) ? NaN : sentMs + responseTimeWeeks * 7 * DAY
-    : storedDeadline;
-  if (Number.isNaN(deadlineMs)) return "none"; // undated import — can't place it in time
+  return Number.isNaN(sentMs) ? NaN : sentMs + responseTimeWeeks * 7 * DAY;
+}
+
+/**
+ * ══ PAST THE AGENT'S STATED WINDOW, WITH NO REPLY ═════════════════════════════════════════════
+ *
+ * Query Centre §5's OVERDUE group. Reads `replyDeadlineMs`, so it cannot disagree with `replyTask`
+ * about WHEN a query lapsed — only about what to do next.
+ *
+ * ⚠️ THIS IS DELIBERATELY WIDER THAN `replyTask !== "none"`, AND THE 14-DAY GRACE IS THE
+ * DIFFERENCE. The grace exists so the APP does not nag on day one; it is not a claim that the query
+ * is still inside its window. A list whose job is "who do I chase" must show a query the moment it
+ * is late, and the row's own figure turns burgundy at the same instant — one boundary, not two.
+ *
+ * ⚠️ AND NUDGE IS NARROWER STILL (`replyTask === "nudge"`). Every nudgeable query is overdue; not
+ * every overdue one may be chased — an agency whose silence IS its answer (`noResponseMeansNo`)
+ * belongs in the group and must never be nudged. Three predicates, one deadline, no second clock.
+ */
+export function replyOverdue(inp: ReplyTaskInput): boolean {
+  const deadline = replyDeadlineMs(inp);
+  return !Number.isNaN(deadline) && inp.now >= deadline;
+}
+
+export function replyTask(inp: ReplyTaskInput): ReplyTask {
+  const { noResponseMeansNo, responseTimeWeeks, now } = inp;
+
+  const deadlineMs = replyDeadlineMs(inp);
+  // Not an awaiting status, no window recorded, or undated — nothing to place in time.
+  if (Number.isNaN(deadlineMs)) return "none";
 
   if (now < deadlineMs + NUDGE_GRACE_DAYS * DAY) return "none"; // still inside window + grace
+
+  const sentMs = ms(inp.dateSent);
 
   if (noResponseMeansNo) return "close"; // stated pass — never nudge
 
@@ -70,30 +106,6 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
   const nudgeIgnored = !Number.isNaN(nudgeMs) && now >= nudgeMs + responseTimeWeeks * 7 * DAY;
   const ceilingHit = !Number.isNaN(sentMs) && now >= sentMs + closeAfterDays(responseTimeWeeks) * DAY;
   return nudgeIgnored || ceilingHit ? "close" : "nudge";
-}
-
-/**
- * ══ IS THIS REPLY OVERDUE? — Query Centre §5's list group and §2's Nudge, from ONE rule ═══════
- *
- * "The agent's stated response window has passed with no reply." That is the same question
- * `replyTask` already answers on its way to deciding WHICH verb applies, so this does not ask it
- * again — it is DEFINED as `replyTask(...) !== "none"` and therefore cannot drift from it. A second
- * predicate spelling out "past the deadline plus grace, with a window recorded, in an agent's-court
- * status" would agree today and disagree the first time either was tuned; this one is incapable of
- * disagreeing at all.
- *
- * ⚠️ WHICH IS WHY THE OVERDUE GROUP AND THE NUDGE BUTTON ARE NOT THE SAME SET, AND MUST NOT BE.
- * Overdue is `replyTask !== "none"`; Nudge is the narrower `replyTask === "nudge"`. An agency whose
- * silence IS its answer (`noResponseMeansNo`) is genuinely overdue and must never be chased — the
- * rule returns "close" there, so the row joins the group and the button stays grey. Collapsing the
- * two would either offer a chase the agency has told you not to make, or hide a lapsed query from
- * the list whose whole job is to show you what has lapsed.
- *
- * ⚠️ NO STATED WINDOW MEANS NOT OVERDUE — not "overdue by an unknown amount". There is nothing for
- * it to be late against, and the data_quality_poor "set a reply window" task is what unblocks it.
- */
-export function replyOverdue(inp: ReplyTaskInput): boolean {
-  return replyTask(inp) !== "none";
 }
 
 /**

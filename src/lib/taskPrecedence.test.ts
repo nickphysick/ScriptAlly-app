@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
-import { replyTask, replyOverdue, closeAfterDays, NUDGE_GRACE_DAYS, ReplyTask, ReplyTaskInput } from "./taskPrecedence";
+import { replyTask, replyOverdue, replyDeadlineMs, closeAfterDays, NUDGE_GRACE_DAYS, ReplyTask, ReplyTaskInput } from "./taskPrecedence";
 
 const NOW = Date.parse("2026-07-09T12:00:00Z");
 const DAY = 86400000;
@@ -86,10 +86,17 @@ describe("replyTask — the state matrix (exactly one fires per row)", () => {
  * `toBe(true)` assertions would go green the day someone changed both in the same wrong direction,
  * which is the failure mode the dashboard/board urgent-count reconciliation was written to catch.
  */
-describe("replyOverdue — the shared overdue predicate", () => {
-  /* ⚠️ ITS OWN MATRIX, because the one above is scoped to that describe. Same shapes, restated
-     here rather than hoisted: hoisting would let a later edit to one suite silently change what the
-     other proves. */
+describe("replyOverdue / replyDeadlineMs — one deadline, three predicates", () => {
+  /**
+   * ⚠️ REVISED BY §5. `replyOverdue` was DEFINED as `replyTask !== "none"`, which made it drift-proof
+   * but put the overdue boundary 14 days after the window closed — and Query Centre's row figure
+   * turns burgundy at the window, not at the grace. Two boundaries three pixels apart is exactly the
+   * contradiction the shared rule exists to prevent, so the shared thing moved DOWN a level: both
+   * predicates now read one `replyDeadlineMs`, and they differ only in what they do about the grace.
+   *
+   * ⚠️ THE GRACE IS THE APP'S MANNERS, NOT A CLAIM ABOUT THE WINDOW. It exists so nothing nags on
+   * day one; it does not mean the query is still inside the agent's stated time.
+   */
   const matrix: Array<[string, ReplyTaskInput]> = [
     ["inside window", base({ dateSent: daysAgo(30) })],
     ["past deadline, inside grace", base({ dateSent: daysAgo(60) })],
@@ -102,28 +109,41 @@ describe("replyOverdue — the shared overdue predicate", () => {
     ["not an awaiting status", base({ status: QueryStatus.REJECTED, dateSent: daysAgo(200) })],
   ];
 
+  /* ⚠️ THE INVARIANT IS ASSERTED AS A RELATIONSHIP, not as a pair of literals per row. Two
+     `toBe(true)`s would go green the day someone changed both sides in the same wrong direction —
+     the failure the dashboard/board urgent-count reconciliation was written to catch. */
   for (const [name, input] of matrix) {
-    it(`agrees with replyTask by construction: ${name}`, () => {
-      expect(replyOverdue(input)).toBe(replyTask(input) !== "none");
+    it(`every verb it suggests is on a query it calls overdue: ${name}`, () => {
+      if (replyTask(input) !== "none") expect(replyOverdue(input)).toBe(true);
     });
   }
 
-  it("⚠️ NUDGE IS THE NARROWER SET — every nudgeable query is overdue, but not every overdue one is nudgeable", () => {
-    const chase = base({ dateSent: daysAgo(80) });
+  it("⚠️ THE GRACE IS THE ONLY DIFFERENCE — overdue at the window, a verb 14 days later", () => {
+    const justPast = base({ dateSent: daysAgo(57) });   // window = 56d
+    expect(replyOverdue(justPast), "a query one day past its window is not overdue").toBe(true);
+    expect(replyTask(justPast), "the app started nagging on day one").toBe("none");
+    const pastGrace = base({ dateSent: daysAgo(80) });
+    expect(replyOverdue(pastGrace)).toBe(true);
+    expect(replyTask(pastGrace)).toBe("nudge");
+  });
+
+  it("⚠️ NUDGE IS NARROWER — a stated pass is overdue and must never be chased", () => {
     const statedPass = base({ noResponseMeansNo: true, dateSent: daysAgo(80) });
-    expect(replyTask(chase), "the chase fixture stopped being nudgeable").toBe("nudge");
-    expect(replyTask(statedPass), "the stated-pass fixture stopped closing").toBe("close");
-    /* both lapsed, so both belong in the group the list draws … */
-    expect(replyOverdue(chase)).toBe(true);
-    expect(replyOverdue(statedPass)).toBe(true);
-    /* … and only one of them may be chased. An agency whose silence IS its answer is genuinely
-       overdue and must never be nudged; collapsing the two sets would either offer a chase the
-       agency has told you not to make, or hide a lapsed query from the list built to show it. */
-    expect(replyTask(statedPass) === "nudge", "Nudge was offered against a stated pass").toBe(false);
+    expect(replyOverdue(statedPass), "a lapsed query was hidden from the list built to show it").toBe(true);
+    expect(replyTask(statedPass), "a chase was offered against a stated pass").toBe("close");
   });
 
   it("nothing is overdue against a window that was never stated", () => {
     expect(replyOverdue(base({ responseTimeWeeks: undefined, dateSent: daysAgo(400) }))).toBe(false);
     expect(replyOverdue(base({ dateSent: undefined, responseDeadline: undefined }))).toBe(false);
+    expect(replyOverdue(base({ status: QueryStatus.REJECTED, dateSent: daysAgo(400) }))).toBe(false);
+  });
+
+  it("the stored override wins over the computed deadline, for both predicates", () => {
+    const future = new Date(NOW + 30 * DAY).toISOString();
+    const inp = base({ dateSent: daysAgo(200), responseDeadline: future });
+    expect(replyDeadlineMs(inp)).toBe(Date.parse(future));
+    expect(replyOverdue(inp), "the override was ignored — a query the writer re-dated read as lapsed").toBe(false);
+    expect(replyTask(inp)).toBe("none");
   });
 });

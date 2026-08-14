@@ -303,6 +303,12 @@ describe("§1g · the row carries status through the real StatusDot", () => {
     const end = code.indexOf('className="f12-lfoot"', body);
     const slice = code.slice(rows, end);
     expect(slice, "the row's status dot is gone").toContain("<StatusDot status={q.status}");
-    expect(slice, "the date left the row").toContain('className="f12-d2"');
+    /* ⚠️ §5 MADE THE FIGURE A POSITION, so the class is conditional — `f12-d2` plus `f12-d2-late`
+       once the row is counting up. The slot itself is what this case is about and it is still one
+       element in the same place; the date fallback survives inside it for a row that cannot be
+       placed in time. */
+    expect(slice, "the date/position slot left the row").toContain("className={`f12-d2");
+    expect(slice, "the position figure is not derived").toContain("figureText(figure)");
+    expect(slice, "an unplaceable row lost its date fallback").toContain("formatListRowDate(q.dateSent)");
   });
 });

@@ -69,6 +69,9 @@ import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
 import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
+/* §5 — the list's four groups and the position figure, both derived, both composing rules that
+   already exist (`queryBucket` for membership, `taskPrecedence` for the clock). */
+import { GROUP_ORDER, GROUP_LABEL, listGroupFor, rowFigure, figureText, foldClosed } from "../lib/queryCentreGroups";
 /* §2/§5 — the ONE reply-overdue rule, two consumers: Nudge's greying and the list's OVERDUE group.
    `replyTaskFor` also owns the input assembly, which is the second place two callers could drift. */
 import { replyTaskFor } from "../lib/taskPrecedence";
@@ -931,6 +934,11 @@ export const Queries: React.FC<{
   // ribbon tile), and the Delete confirmation dialog. (v3: the More ⋯ menu was removed.)
   const [isNudgeOpen, setIsNudgeOpen] = useState(false);
   const [isCloseMenuOpen, setIsCloseMenuOpen] = useState(false);
+  /* §5 — the CLOSED group's fold. Session-only and deliberately not persisted: it is a "let me look
+     at that for a moment" gesture, not a preference, and a fold that survived a reload would leave
+     the writer's own history hidden by a decision they made a week ago. Closed by default, and only
+     offered at all once the group is long enough for folding to earn its place (`foldClosed`). */
+  const [closedOpen, setClosedOpen] = useState(false);
   // ⋯ overflow menu on the command bar (PDF demoted here — a rare action, chrome tidy).
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
@@ -3497,13 +3505,51 @@ export const Queries: React.FC<{
                   the panel now, beside the count they narrow. What is left does ONE job: search. */}
             </div>
             <div ref={listScrollRef} className="f12-rows" role="listbox" aria-label="Queries">
-              {renderList.map((q) => {
-                const agent = agents.find(a => a.id === q.agentId);
-                const ms = manuscripts.find(m => m.id === q.manuscriptId);
-                if (!agent || !ms) return null;
+              {/* ══ §5 · THE LIST GROUPS BY STATE ═══════════════════════════════════════════════
+                  ⚠️ GROUPING PARTITIONS AN ALREADY-SORTED LIST — the agent list's rule, and the
+                  reason it is worth restating: the sort applies WITHIN each group for free, rather
+                  than through a second ordering pass that could disagree with the first.
+
+                  ⚠️ AN EMPTY GROUP DRAWS NOTHING. A rule reading "OVERDUE · 0" is a heading for a
+                  state you are not in; the absence of the rule is the same information, quieter.
+
+                  ⚠️ AND THE COUNT IS THE RENDERED SET'S. These are counts of what is on screen after
+                  the filter and the search — unlike the cell above, which counts the scope. Two
+                  numbers, two facts; the head says how many queries you have and the rules say how
+                  the ones you are looking at are doing. */}
+              {(() => {
+                const nowMs = Date.now();
+                const rows = renderList
+                  .map((q) => ({ q, agent: agents.find((a) => a.id === q.agentId), ms: manuscripts.find((m) => m.id === q.manuscriptId) }))
+                  .filter((r) => !!r.agent && !!r.ms);
+                const grouped = GROUP_ORDER
+                  .map((g) => ({ g, items: rows.filter((r) => listGroupFor(r.q as never, r.agent, nowMs) === g) }))
+                  .filter((s) => s.items.length > 0);
+                return grouped.map(({ g, items }) => {
+                  /* ⚠️ THE FOLD IS THE CLOSED GROUP'S ALONE, and it is only offered once folding
+                     earns its place — see `foldClosed`. A first-time writer with two rejections
+                     behind them sees both. */
+                  const foldable = g === "closed" && foldClosed(items.length);
+                  const shut = foldable && !closedOpen;
+                  return (
+                <React.Fragment key={g}>
+                  <div className={`qc-gh${g === "overdue" ? " qc-gh-od" : ""}${foldable ? " qc-gh-fold" : ""}`}
+                    {...(foldable ? { role: "button", tabIndex: 0, onClick: () => setClosedOpen((o) => !o),
+                      onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setClosedOpen((o) => !o); } },
+                      "aria-expanded": !shut } : {})}>
+                    <span>{GROUP_LABEL[g]} · {items.length}</span>
+                    <i aria-hidden="true" />
+                    {foldable && <em>{shut ? "show" : "hide"}</em>}
+                  </div>
+                  {!shut && items.map(({ q, agent, ms }) => {
                 const isSelected = selectedQueryId === q.id;
-                // Bare quiet date ("14 Mar"; year only when not current); em-dash for undated imports.
-                const queriedDate = formatListRowDate(q.dateSent) ?? "—";
+                /* ⚠️ THE RIGHT-HAND FIGURE IS A POSITION, NOT A DATE (§5) — days left while the
+                   agent's window is open, days late once it has passed, and the date itself for the
+                   two groups where neither is meaningful. The date fallback is the ORIGINAL
+                   behaviour and is what an unplaceable row keeps. */
+                const figure = rowFigure(q as never, agent, nowMs);
+                const figureLabel = figureText(figure) ?? formatListRowDate(q.dateSent) ?? "—";
+                const queriedDate = figureLabel;
                 return (
                   <button
                     key={q.id}
@@ -3515,7 +3561,7 @@ export const Queries: React.FC<{
                     // draft first (silently when untouched, with a confirm when dirty), then
                     // select. pickRow also pushes to detail below md (Mobile Pass 1).
                     onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}
-                    className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${landedId === q.id ? " qc-landed" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
+                    className={`f12-row${isSelected ? " f12-sel" : ""}${g === "overdue" ? " f12-row-od" : ""}${settleId === q.id ? " f12-settle" : ""}${landedId === q.id ? " qc-landed" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
                       // The collapse's own end fires the toast — no timer schedules either.
@@ -3545,11 +3591,15 @@ export const Queries: React.FC<{
                       ) : (
                         <StatusDot status={q.status} overrideSize={15} />
                       )}
-                      <span className="f12-d2">{queriedDate}</span>
+                      <span className={`f12-d2${figure.kind === "late" ? " f12-d2-late" : ""}`}>{queriedDate}</span>
                     </span>
                   </button>
                 );
-              })}
+                  })}
+                </React.Fragment>
+                  );
+                });
+              })()}
               {sortedList.length === 0 && queries.length > 0 && (
                 <div style={{ textAlign: "center", padding: "48px 16px", color: "var(--faint)", fontSize: 12, fontStyle: "italic" }}>
                   No queries match these filters.

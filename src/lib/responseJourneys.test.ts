@@ -184,8 +184,15 @@ describe("the nudge resolves itself, so nothing resolves it", () => {
      quietly resurrecting a task nobody can dismiss. */
   it("and the gate it rests on still reads the agent's-court statuses", () => {
     const prec = read("./taskPrecedence.ts");
+    /* ⚠️ REPOINTED (§5): the gate moved DOWN into `replyDeadlineMs`, which `replyTask` and the list's
+       OVERDUE group now both read — one deadline, one status test, no second clock. The clause is
+       unchanged and is asserted at its new home; `if (!awaiting) return "none"` became
+       `return NaN`, because a deadline that does not exist is not a verb that does not apply. */
     expect(prec).toContain("const awaiting = status === QueryStatus.QUERIED || status === QueryStatus.PARTIAL_SENT || status === QueryStatus.FULL_SENT;");
-    expect(prec).toContain('if (!awaiting) return "none";');
+    expect(prec).toContain("if (!awaiting) return NaN;");
+    expect(prec, "replyTask stopped reading the shared deadline — the gate would be restated")
+      .toContain("const deadlineMs = replyDeadlineMs(inp);");
+    expect(prec, "an unplaceable query stopped returning none").toContain('if (Number.isNaN(deadlineMs)) return "none";');
   });
 
   it("and no resolver was built for a task that deletes itself", () => {

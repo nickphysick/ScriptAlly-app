@@ -1300,6 +1300,27 @@
    into a form. */
 /* The manuscript's name, heading What you sent: what you sent, OF WHAT. One row, then the two facts
    about the book as a single mono line — not the three-line block a previous pack removed. */
+/* ── §5 · GROUP RULES — the list answers "who do I chase" ─────────────────────────────────────
+   A mono label, then a hairline running to the panel's edge. Not a heading: it is a divider that
+   happens to be labelled, which is why the type is 8px and the rule does the work.
+   ⚠️ THE ROWS KEEP THEIR OWN INSET, so the rule reaches further than the row content — that is what
+   makes it read as a division of the column rather than a caption on the first row beneath it. */
+.qc-gh { display: flex; align-items: center; gap: 9px; padding: 12px 8px 6px; }
+.qc-gh span { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.16em; color: var(--faint); white-space: nowrap; }
+.qc-gh i { flex: 1; height: 1px; background: var(--hairline); }
+/* ⚠️ OVERDUE IS THE ONE COLOURED LABEL, and it is the terracotta the danger verb already uses —
+   never `--burg`, which means OUTGOING on every dot in the list beneath it. */
+.qc-gh-od span { color: #a05a45; }
+.qc-gh-fold { cursor: pointer; }
+.qc-gh-fold em { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; color: #b3a79b; }
+.qc-gh-fold:hover em { color: var(--muted); }
+/* ⚠️ A FAINT WARM TINT, NOT A FILL. The overdue rows must still show hover and selection — three
+   steps on a tinted ground, same as on a white one — so the tint is barely a step and the ladder
+   rides on top of it. */
+.f12-row-od { background: #fdf6f3; }
+.f12-row-od:hover { background: #fbeee9; }
+.f12-d2-late { color: #a05a45; font-weight: 500; }
+
 .qp-msrow { padding-bottom: 9px; border-bottom: 1px solid var(--hairline); margin-bottom: 4px; }
 .qp-msname { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--burg); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; border-bottom: 1px solid #e8d3c6; }
 .qp-msname:hover { border-bottom-color: var(--burg); }
