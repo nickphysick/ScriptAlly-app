@@ -764,7 +764,9 @@ describe("§2 · the reading pane", () => {
   it("two columns at 1.15fr 0.85fr, with the right one stacked", () => {
     expect(code, "the pane went back to three equal columns")
       .toContain('gridTemplateColumns: "1.15fr 0.85fr"');
-    expect(code, "the right column is not a stack").toContain('className="qp-stack"');
+    /* §8 made the class conditional — `qp-stack--open` while Notes is expanded — so the anchor is
+       the template literal rather than the fixed string. */
+    expect(code, "the right column is not a stack").toContain('className={`qp-stack${notesOpen ? " qp-stack--open" : ""}`}');
     /* ⚠️ THE EQUALISATION MOVED WITH THE GRID. Three siblings got it free from `align-items:
        stretch`; a stack has to FILL its column and divide that height between its members. */
     expect(rule(".qp-stack"), "the stack does not fill").toContain("min-height: 0");

@@ -939,6 +939,37 @@ export const Queries: React.FC<{
      the writer's own history hidden by a decision they made a week ago. Closed by default, and only
      offered at all once the group is long enough for folding to earn its place (`foldClosed`). */
   const [closedOpen, setClosedOpen] = useState(false);
+  /**
+   * §8 — Notes expands over What you sent.
+   *
+   * ⚠️ THE HEIGHT IS MEASURED, NOT DECLARED. `height: 100%` on the notes card would work only while
+   * the stack's height came from its parent; the stack is a flex column inside a grid cell, so the
+   * moment its first child is hidden the container it is measured against changes and everything
+   * below jumps. The column's height is taken BEFORE the hide and applied as a floor, so the pane is
+   * exactly as tall open as it was closed.
+   *
+   * ⚠️ AND IT CLOSES ON A QUERY CHANGE. The expanded state belongs to the query you were reading;
+   * carrying it across would show a different query's notes at full height without being asked for.
+   */
+  const [notesOpen, setNotesOpen] = useState(false);
+  const notesStackRef = useRef<HTMLDivElement | null>(null);
+  const notesCardRef = useRef<HTMLDivElement | null>(null);
+  const [notesFloor, setNotesFloor] = useState<number | null>(null);
+  useEffect(() => { setNotesOpen(false); setNotesFloor(null); }, [selectedQueryId]);
+  useEffect(() => {
+    if (!notesOpen) return;
+    /* ⚠️ POINTERDOWN, AND ON THE CAPTURE PHASE IS NOT NEEDED HERE. This is a collapse, not a
+       dismissal that must beat another handler — a click that lands on a control inside the card
+       should reach that control, and a click anywhere else should close. */
+    const away = (e: PointerEvent) => {
+      const card = notesCardRef.current;
+      if (card && e.target instanceof Node && card.contains(e.target)) return;
+      setNotesOpen(false);
+      setNotesFloor(null);
+    };
+    document.addEventListener("pointerdown", away);
+    return () => document.removeEventListener("pointerdown", away);
+  }, [notesOpen]);
   // ⋯ overflow menu on the command bar (PDF demoted here — a rare action, chrome tidy).
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
@@ -4297,7 +4328,7 @@ export const Queries: React.FC<{
                     * columns, the second has to FILL its own column and share that height between
                     * its members, or the shorter card trails off into white above the taller one.
                     */}
-                  <div className="qp-stack">
+                  <div className={`qp-stack${notesOpen ? " qp-stack--open" : ""}`} ref={notesStackRef}>
 
                   {/* ── Sub-card 2: What you sent ── */}
                   <PaneCard
@@ -4486,6 +4517,38 @@ export const Queries: React.FC<{
                       return n > 0 ? `${n} note${n === 1 ? "" : "s"}` : undefined;
                     })()}
                     glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v15H6a2 2 0 0 0-2 2z" /><path d="M4 19.5A1.5 1.5 0 0 1 5.5 18H19" /></svg>}
+                    /* ⚠️ ONE CONTROL, BOTH DIRECTIONS (§8). The arrows flip inward while open rather
+                       than a second button appearing to close what the first opened — the writer
+                       presses the same place twice, which is what a toggle is for.
+
+                       ⚠️ AND THE MEASUREMENT HAPPENS ON THE WAY IN, FROM THE STACK. Once the first
+                       card is hidden the stack no longer has the height being asked for, so reading
+                       it afterwards measures the outcome instead of the intent. */
+                    action={(
+                      <button
+                        type="button"
+                        className="qp-cardact qp-cardexp"
+                        aria-expanded={notesOpen}
+                        title={notesOpen ? "Collapse notes" : "Expand notes"}
+                        aria-label={notesOpen ? "Collapse notes" : "Expand notes"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (notesOpen) { setNotesOpen(false); setNotesFloor(null); return; }
+                          const h = notesStackRef.current?.getBoundingClientRect().height ?? null;
+                          setNotesFloor(h && h > 0 ? h : null);
+                          setNotesOpen(true);
+                        }}
+                      >
+                        {notesOpen ? (
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" /></svg>
+                        ) : (
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
+                        )}
+                      </button>
+                    )}
+                    cardRef={notesCardRef as unknown as React.Ref<HTMLElement>}
+                    className={notesOpen ? "qp-notes-open" : undefined}
+                    style={notesOpen && notesFloor ? { minHeight: notesFloor } : undefined}
                   >
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

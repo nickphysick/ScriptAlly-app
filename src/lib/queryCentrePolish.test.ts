@@ -218,3 +218,43 @@ describe("§7 · the reading pane", () => {
     expect(rule(".qp-cardmeta"), "the band's meta slot went").not.toBe("");
   });
 });
+
+describe("§8 · Notes expands", () => {
+  /**
+   * ⚠️ THE MEASUREMENT IS THE SECTION. `height: 100%` would work only while the stack's height came
+   * from its parent; the moment the first card is hidden, the box being measured against is a
+   * different box and everything below jumps by the difference. The column's height is read BEFORE
+   * the hide and applied as a floor.
+   */
+  it("the column is measured on the way in, and the floor is applied to the card", () => {
+    expect(code, "the stack is not measured").toContain("notesStackRef.current?.getBoundingClientRect().height");
+    expect(code, "the measurement happens after the hide — it would read the outcome, not the intent")
+      .toMatch(/setNotesFloor\([\s\S]{0,80}setNotesOpen\(true\)/);
+    expect(code, "the floor is not applied").toContain("style={notesOpen && notesFloor ? { minHeight: notesFloor } : undefined}");
+  });
+
+  /* ⚠️ LIFTED, NOT RELAID — What you sent HIDES and the notes card takes a deeper cast, so the state
+     reads as one card raised over the column rather than as a layout change. */
+  it("What you sent hides beneath it, and the open card is lifted", () => {
+    expect(rule(".qp-stack--open > .f12-card:first-child"), "the first card no longer hides").toContain("display: none");
+    expect(rule(".qp-notes-open"), "the open card lost its deeper cast").toContain("box-shadow:");
+  });
+
+  it("one control, both directions", () => {
+    const at = code.indexOf("qp-cardexp");
+    expect(at, "the expand control is missing").toBeGreaterThan(-1);
+    const block = code.slice(at, at + 900);
+    expect(block, "the control does not state which way it goes").toContain('notesOpen ? "Collapse notes" : "Expand notes"');
+    expect(block, "the icon does not flip").toContain("notesOpen ? (");
+    expect(code, "a second control was built to close what the first opened")
+      .not.toMatch(/Close notes|collapseNotes/);
+  });
+
+  /* ⚠️ THE EXPANDED STATE BELONGS TO THE QUERY YOU WERE READING. Carried across, it would show a
+     different query's notes at full height without being asked. */
+  it("an outside click collapses it, and switching query closes it", () => {
+    expect(code, "the outside-click collapse went").toContain('document.addEventListener("pointerdown", away)');
+    expect(code, "a click inside the card would collapse it").toContain("card.contains(e.target)) return");
+    expect(code, "the expansion survives a query change").toContain("useEffect(() => { setNotesOpen(false); setNotesFloor(null); }, [selectedQueryId]);");
+  });
+});

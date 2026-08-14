@@ -45,9 +45,13 @@ export const PaneCard: React.FC<{
   action?: React.ReactNode;
   /** Extra classes on the card — the stacked column's members take their flex from here. */
   className?: string;
+  /** §8 — the expanded card measures and holds its own floor, so nothing below it reflows. */
+  style?: React.CSSProperties;
+  /** §8 — an outside-click collapse needs to know where "inside" is. */
+  cardRef?: React.Ref<HTMLElement>;
   children: React.ReactNode;
-}> = ({ glyph, title, meta, action, className, children }) => (
-  <section className={`f12-card${className ? " " + className : ""}`} style={{ minWidth: 0, minHeight: 0 }}>
+}> = ({ glyph, title, meta, action, className, style, cardRef, children }) => (
+  <section ref={cardRef} className={`f12-card${className ? " " + className : ""}`} style={{ minWidth: 0, minHeight: 0, ...style }}>
     <div className="f12-chh">
       <span className="qp-cardgl" aria-hidden="true">{glyph}</span>
       <span>{title}</span>

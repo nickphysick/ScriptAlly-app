@@ -1300,6 +1300,21 @@
    into a form. */
 /* The manuscript's name, heading What you sent: what you sent, OF WHAT. One row, then the two facts
    about the book as a single mono line — not the three-line block a previous pack removed. */
+/* ── §8 · NOTES EXPANDS ───────────────────────────────────────────────────────────────────────
+   ⚠️ LIFTED, NOT RELAID. What you sent HIDES rather than shrinking, and the notes card takes a
+   deeper cast — so the state reads as one card raised over the column, which is what it is. A card
+   that merely grew while its neighbour shrank would read as a layout change, and the writer would
+   look for the thing that moved.
+
+   ⚠️ THE FLOOR IS AN INLINE `min-height` MEASURED BEFORE THE HIDE (see Queries.tsx). Declaring
+   `height: 100%` here would work only while the stack's height came from its parent — the moment
+   the first child is hidden, the box being measured against is a different box, and everything
+   below jumps by the difference. */
+.qp-stack--open > .f12-card:first-child { display: none; }
+.qp-notes-open { display: flex; flex-direction: column; box-shadow: 0 2px 6px rgba(58, 42, 26, 0.07), 0 14px 30px rgba(58, 42, 26, 0.09); }
+.qp-cardexp { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; }
+.qp-cardexp svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
 /* ── §7 · THE TODAY MARKER ────────────────────────────────────────────────────────────────────
    ⚠️ THE SAME 30px GUTTER THE TIMELINE ROWS USE, so the dot lands on the line rather than beside
    it. The rows draw their own grid inline; this marker sits in the same padded column, and its dot
