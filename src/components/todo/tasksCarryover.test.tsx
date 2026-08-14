@@ -28,6 +28,10 @@ const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const sidebar = readFileSync(join(here, "..", "shell", "ShellSidebar.tsx"), "utf8");
 const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
 const dock = readFileSync(join(here, "TodoDock.tsx"), "utf8");
+/* ⚠️ ON DECLARATIONS, NOT ON PROSE. These files explain themselves by QUOTING what they replaced —
+   the dock's own note names the two tiers it retired — so a raw substring match reads the comment
+   and fails a file that is correct. It caught me four separate times in one session. */
+const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const colsLib = readFileSync(join(here, "..", "..", "lib", "todoColumns.ts"), "utf8");
 
 const NOW = Date.parse("2026-08-06T12:00:00Z");
@@ -102,15 +106,38 @@ describe("⚠️ an offer's snooze is capped at tomorrow — on EVERY path", () 
     expect(flow).not.toContain("Math.min(p.days, 1)");
   });
 
-  it("the dock's clock is a REAL menu now (it pointed at a popover that never mounted) — offers see only tomorrow", () => {
-    expect(dock).toContain("tdk-snzmenu");
-    expect(dock).toContain("Remind me tomorrow");
-    // the week tier is ABSENT for offers, not disabled — a tier that can never be chosen is not a choice
-    expect(dock).toContain('card.taskType !== "offer_received" && (');
+  /**
+   * ⚠️ COPY FOUR IS GONE, AND THIS IS THE POINT OF THE CASE (rail + workspace, Phase 6). The dock
+   * hand-rolled the offer cap by OMITTING its week row — a fourth statement of one rule, free to
+   * drift like the three above it. The clock opens `SnoozeDial` now, which reads
+   * `snoozeCeilingDays`: an offer's track ends at tomorrow, the unreachable tail is hatched, and
+   * the reason is printed beneath it. The cap is not merely still enforced — it is enforced by
+   * the same function every other path asks.
+   */
+  it("the dock's clock opens THE dial — the cap comes from the ceiling, not from a missing row", () => {
+    expect(dock).toContain("<SnoozeDial");
+    expect(dock).toContain('import { SnoozeDial } from "./SnoozeDial";');
+    /* the hand-rolled cap and the menu it lived in are extinct — read on DECLARATIONS, since the
+       file's own note quotes the tiers it retired */
+    expect(code(dock)).not.toContain("tdk-snzmenu");
+    expect(code(dock)).not.toContain("Remind me tomorrow");
+    expect(code(dock)).not.toContain('card.taskType !== "offer_received" && (');
+    /* the dial still reports a DATED verb up to the page, which routes it through the choke point */
     expect(dock).toContain("onSnoozeDays");
     expect(dock).not.toContain("onSnooze:");
-    // the page routes the dock's choice through the clamped choke point
     expect(listPage).toContain("onSnoozeDays={(c, days, when) => snoozeCard(c, days, when)}");
+  });
+
+  it("⚠️ ONE SNOOZE SURFACE, FOUR DOORS — rail clock, ⋯ menu, `s`, and the pane's clock", () => {
+    const listSrc = readFileSync(join(here, "TaskList.tsx"), "utf8");
+    /* three in the rail… */
+    expect(listSrc).toContain("onFire={(el) => setDial({ card: c, anchor: el })}");            // the icon
+    expect(listSrc).toContain("onOpenDial={() => { setSplit(null); setDial({ card: split.card, anchor: split.anchor }); }}"); // the menu
+    expect(listSrc).toContain('if (action === "snooze")');                                     // the key
+    /* …and the fourth in the pane, on the same component */
+    expect(dock).toContain("<SnoozeDial");
+    /* and there is exactly ONE dial component in the app */
+    expect(readFileSync(join(here, "SnoozeDial.tsx"), "utf8")).toContain("export const SnoozeDial");
   });
 
   it("the board's drag + menu tiers were already capped (board fixes II) — still true", () => {

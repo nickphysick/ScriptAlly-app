@@ -28,6 +28,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
 import { bandFamily } from "../../lib/todoColumns";
 import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, SendSpec } from "../../lib/todoDock";
+import { SnoozeDial } from "./SnoozeDial";
 import "./todoDock.css";
 
 export interface DockTimelineEvent {
@@ -82,6 +83,11 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
   const [confirmSend, setConfirmSend] = useState(false);
+  /* ⚠️ THE DIAL, ANCHORED TO THE CLOCK (Phase 6) — one snooze surface, four doors. The tier menu
+     that stood here is retired; its own note said it existed because "the old `onSnooze(card)`
+     handed the choice to a page popover that never mounted for the dock". The dial mounts here
+     now, so that reason is spent. */
+  const snoozeBtn = useRef<HTMLButtonElement | null>(null);
   const [snoozeOpen, setSnoozeOpen] = useState(false);
   /* ⚠️ ART · DOCK-SEAL (board-optimise P3/P4) — the wax-seal moment: struck the instant a flow
      completes, BEFORE the card animates to Done. It is a flourish over a finished act, so it is
@@ -217,21 +223,35 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           >
             {primaryLabel(card)}
           </button>
-          <span className="tdk-snzwrap">
-            <button type="button" className="tdk-quiet" aria-label="Snooze" title="Snooze" aria-haspopup="menu" aria-expanded={snoozeOpen} onClick={() => setSnoozeOpen((v) => !v)}>
-              <Clock size={14} aria-hidden />
-            </button>
-            {snoozeOpen && (
-              <div className="tdk-snzmenu" role="menu" aria-label="Snooze">
-                <button type="button" role="menuitem" onClick={() => { setSnoozeOpen(false); onSnoozeDays(card, 1, "tomorrow"); }}>Remind me tomorrow</button>
-                {/* ⚠️ AN OFFER'S SNOOZE IS CAPPED AT TOMORROW — the week tier is ABSENT for it,
-                    not disabled: a tier that can never be chosen is not a choice. */}
-                {card.taskType !== "offer_received" && (
-                  <button type="button" role="menuitem" onClick={() => { setSnoozeOpen(false); onSnoozeDays(card, 7, "in a week"); }}>Give it a week</button>
-                )}
-              </div>
-            )}
-          </span>
+          {/* ⚠️ ONE SNOOZE SURFACE, AND THIS IS ITS FOURTH DOOR (Phase 6). The two-tier menu that
+              stood here — "Remind me tomorrow" / "Give it a week" — is RETIRED, not reshaped. It
+              was built because the page's dial "never mounted for the dock", which stopped being
+              true the moment the pane and the rail shared a screen: the rail's clock, the ⋯ menu's
+              `Snooze…`, the `s` key and this button all reach the SAME control now.
+              ⚠️ AND THE CEILING COMES WITH IT. The tier menu hand-rolled the offer cap by omitting
+              its week row; the dial reads `snoozeCeilingDays`, so an offer's track ends at
+              tomorrow with the unreachable tail hatched and the reason stated beneath it. Two
+              surfaces for one act is how they come to disagree about a limit. */}
+          <button
+            ref={snoozeBtn}
+            type="button"
+            className="tdk-quiet"
+            aria-label="Snooze"
+            title="Snooze"
+            aria-haspopup="dialog"
+            aria-expanded={snoozeOpen}
+            onClick={() => setSnoozeOpen((v) => !v)}
+          >
+            <Clock size={14} aria-hidden />
+          </button>
+          {snoozeOpen && snoozeBtn.current && (
+            <SnoozeDial
+              card={card}
+              anchor={snoozeBtn.current}
+              onSnooze={(days, when) => { setSnoozeOpen(false); onSnoozeDays(card, days, when); }}
+              onClose={(returnFocus) => { if (returnFocus) snoozeBtn.current?.focus(); setSnoozeOpen(false); }}
+            />
+          )}
           <button type="button" className="tdk-quiet" aria-label="More" title="More" onClick={() => onMore(card)}>
             <MoreHorizontal size={15} aria-hidden />
           </button>
