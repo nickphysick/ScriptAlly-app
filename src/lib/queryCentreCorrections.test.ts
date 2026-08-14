@@ -72,11 +72,18 @@ describe("§1 · the list finishes becoming furniture", () => {
   });
 
   /* It runs flush from head to foot: the seam is the only drawn line between the two columns. */
-  it("the container has no radius and no border but the seam", () => {
+  /**
+   * ⚠️ INVERTED BY FIX PACK 5. This required the container to carry no radius and no border but the
+   * seam — the flush-wall law. The list is an INSET PANEL now: a rim on all four sides, the standard
+   * card radius, and the seam moved off it onto `.f12-body::after` so that it can run the full
+   * height the panel no longer does. Turned round rather than deleted, so the wall cannot return.
+   */
+  it("the container is a card: rim and radius, and the seam no longer rides on it", () => {
     const list = rule(".f12-list");
-    expect(list, "the column took a radius — it is furniture, not a card").not.toContain("border-radius");
-    expect(list, "the seam went").toContain("border-right: 1px solid var(--hairline)");
-    expect(list, "a second edge appeared").not.toMatch(/border-(top|bottom|left):/);
+    expect(list, "the panel lost its radius — the flush wall is back").toContain("border-radius");
+    expect(list, "the panel lost its rim").toContain("border: 1px solid var(--line)");
+    expect(list, "the seam went back onto the panel, so it stops where the panel stops")
+      .not.toContain("border-right");
   });
 });
 

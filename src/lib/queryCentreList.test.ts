@@ -78,14 +78,20 @@ describe("the list is de-carded", () => {
    *
    * A ground tint is not a card. The distinction is the whole of §1c.
    */
-  it("it is furniture — a ground and one seam, never a card", () => {
+  /**
+   * ⚠️ INVERTED BY FIX PACK 5. "Furniture, never a card" was the flush-wall law; the list is an inset
+   * panel now — rim, standard radius, held off three sides. The GROUND is the one clause that
+   * survives unchanged, and the flex/min-height chain with it, because neither had anything to do
+   * with whether the column was a card.
+   */
+  it("it is a card — the same ground, now with a rim and a radius", () => {
     const list = rule(css, ".f12-list");
     expect(list, "the column lost its ground — it goes back to being loose content")
       .toContain("background: var(--paper)");
-    expect(list, "the seam went").toContain("border-right: 1px solid var(--hairline)");
-    for (const prop of ["border-radius", "box-shadow"]) {
-      expect(list, `.f12-list carries ${prop} — furniture is not a card`).not.toContain(prop);
-    }
+    expect(list, "the panel lost its rim").toContain("border: 1px solid var(--line)");
+    expect(list, "the panel lost its radius").toContain("border-radius");
+    expect(list, "the seam went back onto the panel, so it stops where the panel stops")
+      .not.toContain("border-right");
     expect(list).toContain("display: flex");
     expect(list).toContain("min-height: 0");
   });

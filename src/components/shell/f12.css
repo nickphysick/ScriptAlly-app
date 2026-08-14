@@ -1000,6 +1000,9 @@
  * with the same note). Fold it into index.css's `.t-f12` block when the tree is quiet.
  */
 .t-f12 { --f12-icon-btn: 34px; }
+/* ⚠️ ONE TOKEN FOR ALL THREE SIDES AND THE SEAM'S OFFSET. The seam's `left` is computed from it, so
+   moving the panel and moving the divider cannot come apart. */
+.t-f12 { --f12-panel-inset: 14px; }
 .f12-pill { position: relative; flex: none; display: grid; place-items: center; width: var(--f12-icon-btn); height: var(--f12-icon-btn); border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line); font-family: inherit; color: var(--ink-2); cursor: pointer; transition: border-color 0.15s, background 0.15s; }
 /* The kebab: the same two values, stated rather than left to `.f12-act`'s text padding — an icon
    button whose size comes from its glyph is a size that changes when the glyph does. */
@@ -1311,12 +1314,51 @@
  * tint stops short of the hairline and leaves a stripe of page between them. The column fills to
  * the seam; its CHILDREN carry the inset.
  */
+/**
+ * ══ FIX PACK 5 · THE LIST IS AN INSET PANEL ═══════════════════════════════════════════════════
+ *
+ * ⚠️ THIS REVERSES FIX PACK 2 §2 AND FIX PACK 3 §2, WHICH MADE IT A FLUSH WALL — no radius, no
+ * inset, ground meeting the masthead rule and the working area's foot. That instruction is dead,
+ * not merely superseded: nothing in this file should still be holding the list flush to anything.
+ *
+ * ⚠️ THREE SIDES, NOT FOUR. The panel is held off the masthead rule, the foot and the page's left
+ * edge; its RIGHT edge runs to the column boundary, because that is where the seam is and a fourth
+ * inset would put a channel of page between the panel and the divider it belongs to.
+ *
+ * ⚠️ AND THE SEAM IS NOT THIS RULE'S BORDER ANY MORE. It used to be `border-right`, which was fine
+ * while the panel was the full column; now the panel is inset top and bottom, so a right border
+ * would stop where the panel stops and the divider would have two gaps in it. The seam is drawn by
+ * `.f12-body::after`, full height, and this rule's own right border sits exactly on top of it —
+ * same x, one line, no doubling.
+ *
+ * ⚠️ `overflow: hidden` IS SAFE HERE ONLY BECAUSE THE POPOVERS PORTAL. `F12Popover` renders into
+ * `document.body`; if a future control opens inline it will be clipped by this, and the fix is to
+ * portal it rather than to remove the clip that gives the panel its rounded corners.
+ */
 .f12-list {
   flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0;
+  margin: var(--f12-panel-inset) 0 var(--f12-panel-inset) var(--f12-panel-inset);
   background: var(--paper);
-  border-right: 1px solid var(--hairline);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
 }
+
+/* ⚠️ THE SEAM, FULL HEIGHT OF BOTH COLUMNS, AND UNDERNEATH THE PANEL'S RIGHT RIM. Positioned one
+   pixel back from the column boundary so it is collinear with that rim: over the panel's height the
+   rim draws, above and below it this does, and the eye reads one continuous divider. */
+.f12-body { position: relative; }
+.f12-body::after {
+  content: ""; position: absolute; top: 0; bottom: 0;
+  left: calc(var(--f12-panel-inset) + var(--listw) - 1px);
+  width: 1px; background: var(--hairline); pointer-events: none;
+}
+/* ⚠️ THE SCROLLER IS EXEMPT. Head and foot take the panel's inset here; the ROWS take theirs from
+   `.f12-row`'s own padding, so a row's hover and selection fills reach the panel's edges while its
+   content and its separator stay inset. Padding the scroller as well would inset the fills too and
+   the selected row would float in the middle of the panel. */
 .f12-list > * { padding-inline: var(--gut); }
+.f12-list > .f12-rows { padding-inline: 0; }
 
 /* The head reuses TO-DO'S values verbatim (todo.css .tdb-sec / .tdb-cn / .tdb-secrule) rather
    than approximating them: Playfair 17/700, a mono count, over a 1px #ece5d9 warm hairline.
@@ -1345,7 +1387,13 @@
  * the two heads. The ground reaches the rule, nothing lands against it, and the difference between
  * those two facts is the difference between a working area and a panel placed on a page.
  */
-.f12-lhead { flex: none; display: flex; align-items: center; gap: 6px; margin: var(--f12-headgap) 0 10px; }
+/**
+ * ⚠️ THE HEAD SITS AT THE PANEL'S TOP NOW (fix pack 5). It carried `var(--f12-headgap)` so that its
+ * field lined up with the reading pane's plate while both columns started at the masthead rule —
+ * fix pack 3 §4. The panel's own inset does that job now, and keeping the 20px on top of the 14px
+ * inset would have put the search field 34px down inside a panel that begins 14px down.
+ */
+.f12-lhead { flex: none; display: flex; align-items: center; gap: 6px; margin: 11px 0 10px; }
 /* ⚠️ THE ROW'S CONTROLS ARE ONE HEIGHT, and the height is now the TOKEN rather than a number
    matched by hand. The field used to restate `36px` to meet the pills' 36; both now read
    `--f12-icon-btn`, so the row cannot go out of step the next time the button size moves — which is
@@ -1423,7 +1471,6 @@
   grid-template-columns: 32px minmax(0, 1fr) var(--f12-datew);
   align-items: center; gap: 11px;
   width: 100%; height: 56px; padding: 0 14px;
-  border-bottom: 1px solid var(--hairline);
   cursor: pointer; transition: background 0.1s;
 }
 /**
@@ -1447,6 +1494,21 @@
 /* ⚠️ BURGUNDY, NOT INK (fix pack §2). On a white lifted row an ink spine reads as a third
    structural line beside the row's own hairline and the column's seam; burgundy is this page's mark
    for "this one", and it is the only place colour is spent on a row. */
+/**
+ * ⚠️ THE SEPARATOR IS INSET, WHICH A BORDER CANNOT BE. It was `border-bottom`, which spans the whole
+ * row and therefore ran full-bleed into the seam and the panel's rim — the thing that made the
+ * column read as untidy once the panel gained edges. A pseudo-element takes the same inset as the
+ * row's padding, so the rule starts and stops where the content does.
+ *
+ * ⚠️ AND TWO ROWS DRAW NONE: the last, which would rule off against the foot's own hairline, and
+ * the SELECTED one, where a line cutting across the lifted white row is the specific fault this
+ * section was asked to remove.
+ */
+.f12-row::after {
+  content: ""; position: absolute; left: 14px; right: 14px; bottom: 0;
+  height: 1px; background: var(--hairline); pointer-events: none;
+}
+.f12-row:last-child::after, .f12-row.f12-sel::after { content: none; }
 .f12-row.f12-sel::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--burg); }
 .f12-row .f12-av { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; }
 /* Smaller-tonal monogram (monogram-styles.html) — the QUERY-LIST instance only (via the additive

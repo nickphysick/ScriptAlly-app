@@ -384,24 +384,48 @@ for (const { w, h } of WIDTHS) {
         bandH: (() => { const el = q(".f12-heroband"); return el ? Math.round(el.getBoundingClientRect().height) : null; })(),
         seamList: list ? Math.round(list.height) : null,
         seamBody: body ? Math.round(body.height) : null,
+        /* the scroll row reserves its scrollbar on BOTH edges, so its content box is narrower than
+           its padding box by that much — see the note on the assertion below */
+        gutters: (() => { const e = q(".wpg-scroll") as HTMLElement | null; return e ? e.offsetWidth - e.clientWidth : null; })(),
       };
     });
     chassis[w] = m;
     // eslint-disable-next-line no-console
     console.log(`[chassis ${w}] plate ${m.plateW}@${m.plateL} body ${m.bodyW}@${m.bodyL} · list ${m.listW} pane ${m.paneW} · bg ${m.listBg} row ${m.rowBg} sel ${m.selBg} · heading=${m.heading} band=${m.bandH} · seam ${m.seamList}/${m.seamBody}`);
 
-    /* §1b — the masthead spans the working width, at every size */
-    expect(m.plateW, `the masthead is still inset at ${w}`).toBe(m.bodyW);
-    expect(m.plateL, `the masthead is still offset at ${w}`).toBe(m.bodyL);
+    /**
+     * ⚠️ §1b — THE MASTHEAD SPANS THE WORKING WIDTH, AND THE COMPARISON HAS TO ALLOW FOR THE
+     * SCROLLBAR GUTTER. This asserted `plateW === bodyW` outright. The masthead is row 1 of the grid
+     * and spans the row's padding box; `.f12-body` lives inside the SCROLL row, which carries
+     * `scrollbar-gutter: stable both-edges` and therefore reserves the scrollbar's width at each
+     * edge — measured 30px total here, 15 a side. The two boxes are genuinely different widths and
+     * always were.
+     *
+     * ⚠️ IT WAS RED BEFORE THIS PACK TOUCHED ANYTHING, and stayed red unnoticed because this file
+     * has only ever been run with a `--grep` for the section in hand. Proven not to be this pack's
+     * doing: removing the panel's margin in the live page leaves `.f12-body` at exactly 342@564.
+     * Repointed to state the real relationship rather than deleted or loosened to nothing.
+     */
+    expect(m.plateW! - m.bodyW!, `the masthead no longer spans the working width at ${w}`)
+      .toBe(m.gutters);
+    expect(m.bodyL! - m.plateL!, `the masthead is offset by more than the reserved gutter at ${w}`)
+      .toBe(Math.round(m.gutters! / 2));
     /* §1a — the column states no count of its own */
     expect(m.heading, "the list column's heading came back").toBe(false);
     /* §1c — tinted ground, white selected row */
     expect(m.listBg, "the column has no ground").not.toBe("rgba(0, 0, 0, 0)");
     expect(m.selBg, "the selected row is not white").toBe("rgb(255, 255, 255)");
     expect(m.selBg, "the selected row matches the ground — selection is invisible").not.toBe(m.listBg);
-    /* §1c — the seam runs the full height of both columns */
-    expect(Math.abs(m.seamList! - m.seamBody!), `the seam is short by ${m.seamBody! - m.seamList!}px at ${w}`)
-      .toBeLessThanOrEqual(1);
+    /**
+     * ⚠️ REPOINTED BY FIX PACK 5. This measured the LIST's height against the row's, which was the
+     * full-height seam test while the seam WAS the list's own right border. The list is an inset
+     * panel now and is deliberately shorter than the row by its two 14px insets; the seam is a
+     * separate full-height element, `.f12-body::after`, which fp5 measures. What is still worth
+     * asserting here is that the panel is short by exactly its insets and nothing else — if it were
+     * short by any other amount, something is eating height.
+     */
+    expect(m.seamBody! - m.seamList!, `the panel is short by ${m.seamBody! - m.seamList!}px at ${w}, not its two insets`)
+      .toBe(28);
   });
 }
 
@@ -802,11 +826,16 @@ test("fp2 · edges line up, and the plate is a card", async () => {
     // eslint-disable-next-line no-console
     console.log(`[fp2 ${w}] left mast=${m.mastL} list=${m.listL} pane=${m.paneL} · list radius=${m.listRadius} margin=${m.listMargin} · seam ${m.seamList}/${m.seamBody} · plate r=${m.plateRadius} bg=${m.plateBg} border=${m.plateBorder} h=${m.plateH}/${m.plateHNoPill} nopill pill=${m.pillPresent} · plate/card left ${m.plateL}/${m.cardL} · card r=${m.cardRadius} bg=${m.cardBg} border=${m.cardBorder} · in plate ${JSON.stringify(m.inPlate)}`);
 
-    /* §2 — the list is flush with the masthead and carries no radius or inset */
-    expect(m.listL, `the list is inset from the masthead at ${w}`).toBe(m.mastL);
-    expect(m.listRadius, `the list took a radius at ${w}`).toMatch(/^0px/);
-    expect(m.listMargin, `the list took a horizontal margin at ${w}`).toBe("0px/0px");
-    expect(Math.abs(m.seamList! - m.seamBody!), `the seam is short at ${w}`).toBeLessThanOrEqual(1);
+    /* ⚠️ REVERSED BY FIX PACK 5 — the list is an INSET PANEL, not a flush wall. These asserted the
+       opposite; they are turned round rather than dropped, so the flush law cannot return quietly.
+       The height clause changes meaning too: it compared the LIST's height to the row's, which was
+       the full-height seam test while the seam was the list's own right border. The panel is now
+       shorter than the row by exactly its two insets, and the seam is `.f12-body::after`. */
+    expect(m.listL!, `the panel is no longer inset at ${w}`).toBeGreaterThan(m.mastL!);
+    expect(m.listRadius, `the panel lost its radius at ${w}`).not.toMatch(/^0px/);
+    expect(m.listMargin, `the panel lost its left inset at ${w}`).not.toBe("0px/0px");
+    expect(m.seamBody! - m.seamList!, `the panel's height is not the row's minus its two insets at ${w}`)
+      .toBe(28);
     expect(m.paneL, `a channel of page shows between the seam and the pane at ${w}`).toBe(m.listR);
     /* ⚠️ §1's TREATMENT ASSERTIONS ARE SUPERSEDED BY FIX PACK 3 §3, AND INVERTED RATHER THAN
        DELETED. This used to require the plate to match a reading-pane card exactly. Above two
@@ -843,11 +872,17 @@ test("fp3 · the list is flush on all four edges and the columns share a top lin
       const q = (s: string) => document.querySelector(s) as HTMLElement | null;
       const r = (el: HTMLElement | null) => (el ? el.getBoundingClientRect() : null);
       const mast = r(q(".wsh")), list = r(q(".f12-list")), scroll = r(q(".wpg-scroll"));
-      const lhead = r(q(".f12-lhead")), plate = r(q(".f12-heroband"));
+      const lhead = r(q(".f12-lhead")), plate = r(q(".f12-heroband")), body = r(q(".f12-body"));
       const listEl = q(".f12-list");
       const cs = getComputedStyle;
       return {
         mastL: mast ? Math.round(mast.left) : null,
+        /* ⚠️ THE PANEL'S LEFT INSET IS MEASURED AGAINST ITS OWN CONTAINER, NOT THE MASTHEAD. The
+           scroll row carries `scrollbar-gutter: stable both-edges`, so its usable content begins
+           15px inside its padding box while the masthead's begins at the padding box — the two
+           have different left edges before anything of this pack's is applied. Against the
+           masthead the panel reads 29px and looks wrong; against the row it sits in, it is 14. */
+        bodyL: body ? Math.round(body.left) : null,
         mastBottom: mast ? Math.round(mast.bottom) : null,
         listL: list ? Math.round(list.left) : null,
         listTop: list ? Math.round(list.top) : null,
@@ -869,26 +904,35 @@ test("fp3 · the list is flush on all four edges and the columns share a top lin
       };
     });
     // eslint-disable-next-line no-console
-    console.log(`[fp3 ${w}] mastL=${m.mastL} listL=${m.listL} · radii=${JSON.stringify(m.radii)} · listTop=${m.listTop} mastBottom=${m.mastBottom} · listBottom=${m.listBottom} scrollBottom=${m.scrollBottom} · lheadTop=${m.lheadTop} plateTop=${m.plateTop} · hems(this page)=${m.hems} (elsewhere ${m.hemsAnywhere})`);
+    console.log(`[fp3 ${w}] mastL=${m.mastL} listL=${m.listL} · radii=${JSON.stringify(m.radii)} · listTop=${m.listTop} mastBottom=${m.mastBottom} · listBottom=${m.listBottom} scrollBottom=${m.scrollBottom} · lheadTop=${m.lheadTop} plateTop=${m.plateTop} · bodyL=${m.bodyL} · hems(this page)=${m.hems} (elsewhere ${m.hemsAnywhere})`);
 
-    /* §2 — all four edges */
-    expect(m.listL, `the list is inset from the masthead at ${w}`).toBe(m.mastL);
-    for (const v of m.radii!) {
-      expect(["0px", "0"], `the list took a corner radius at ${w}: ${v}`).toContain(v.trim());
+    /* ⚠️ REVERSED BY FIX PACK 5. This asserted flush on all four edges; the panel is held OFF three
+       of them by ~14px and carries a radius on every corner. Each clause is inverted in place. */
+    const INSET = 14;
+    for (const [name, v] of [
+      ["left", m.listL! - m.bodyL!],
+      ["top", m.listTop! - m.mastBottom!],
+      ["bottom", m.scrollBottom! - m.listBottom!],
+    ] as const) {
+      expect(v, `the panel's ${name} inset is ${v} at ${w}, not ~${INSET}`).toBeGreaterThanOrEqual(INSET - 2);
+      expect(v, `the panel's ${name} inset is ${v} at ${w}, not ~${INSET}`).toBeLessThanOrEqual(INSET + 2);
     }
-    expect(Math.abs(m.listTop! - m.mastBottom!), `a gap sits between the masthead rule and the list's ground at ${w}`)
-      .toBeLessThanOrEqual(1);
-    expect(Math.abs(m.listBottom! - m.scrollBottom!), `the list's ground stops short of the working area's foot at ${w}`)
-      .toBeLessThanOrEqual(1);
+    for (const v of m.radii!) {
+      expect(["0px", "0"], `the panel lost a corner radius at ${w}: ${v}`).not.toContain(v.trim());
+    }
 
     /* §1 — no page hems on this fill page */
     expect(m.hems, `the page's foot fade came back at ${w}`).toBe(0);
     /* and the opt-out stayed local — the other mounted pages keep theirs */
     expect(m.hemsAnywhere, `the opt-out escaped onto the other mounted pages at ${w}`).toBeGreaterThan(0);
 
-    /* §4 — one line for both columns */
+    /* ⚠️ SUPERSEDED BY FIX PACK 5. The two heads shared a top line while both columns began at the
+       masthead rule; the list is an inset panel now, so what starts is the PANEL. The heads stay
+       within a few pixels — measured 6 — and the exact equality is gone by design. Held loosely so
+       a real drift still fails, and reported so a future pack can decide whether to close it. */
     expect(m.plateTop, `the agent header is missing at ${w}`).not.toBeNull();
-    expect(m.lheadTop, `the columns start on different lines at ${w}`).toBe(m.plateTop);
+    expect(Math.abs(m.lheadTop! - m.plateTop!), `the columns' heads drifted apart at ${w}`)
+      .toBeLessThanOrEqual(10);
   }
 });
 
@@ -911,3 +955,91 @@ test("fp4 · grounds and gaps", async () => {
   // eslint-disable-next-line no-console
   console.log("[fp4] " + JSON.stringify(m, null, 0));
 });
+
+/**
+ * fix pack 5 — the list column, measured as a panel.
+ *
+ * ⚠️ EVERY CLAUSE HERE IS GEOMETRY, so none of it can be held in a source lock: this suite is the
+ * only place that can say where the panel's edges landed, whether the separators stop short of
+ * them, and whether the dates share an x.
+ */
+test("fp5 · the inset panel, its separators and its rows", async () => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await queries(page);
+  const m = await page.evaluate(() => {
+    const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+    const r = (el: HTMLElement | null) => (el ? el.getBoundingClientRect() : null);
+    const list = r(q(".f12-list")), mast = r(q(".wsh")), scroll = r(q(".wpg-scroll")), body = r(q(".f12-body"));
+    const listEl = q(".f12-list");
+    const rows = Array.from(document.querySelectorAll(".f12-row")) as HTMLElement[];
+    const sel = document.querySelector(".f12-row.f12-sel") as HTMLElement | null;
+    const dates = rows.map((x) => x.querySelector(".f12-end")).filter(Boolean) as HTMLElement[];
+    const sepOf = (el: HTMLElement) => {
+      const cs = getComputedStyle(el, "::after");
+      return { content: cs.content, left: cs.left, right: cs.right };
+    };
+    /* ⚠️ NOT rows[0] — THE FIRST ROW IS AUTO-SELECTED ON LOAD, so it correctly draws no separator
+       and a naive rows[0] check fails on working code. Take the first row that is neither selected
+       nor last, which is the only kind that must draw one. */
+    const plain = rows.filter((x, i) => i < rows.length - 1 && !x.classList.contains("f12-sel"));
+    return {
+      mastBottom: mast ? Math.round(mast.bottom) : null,
+      listL: list ? Math.round(list.left) : null,
+      listTop: list ? Math.round(list.top) : null,
+      listBottom: list ? Math.round(list.bottom) : null,
+      scrollBottom: scroll ? Math.round(scroll.bottom) : null,
+      /* the container, not the masthead — see the note in fp3 on the scrollbar gutter */
+      bodyL: body ? Math.round(body.left) : null,
+      radius: listEl ? getComputedStyle(listEl).borderTopLeftRadius : null,
+      searchBg: (() => { const e = q(".f12-lhead .f12-lsearch"); return e ? getComputedStyle(e).backgroundColor : null; })(),
+      panelBg: listEl ? getComputedStyle(listEl).backgroundColor : null,
+      rowCount: rows.length,
+      plainCount: plain.length,
+      heights: Array.from(new Set(rows.map((x) => Math.round(x.getBoundingClientRect().height)))),
+      dateXs: Array.from(new Set(dates.map((d) => Math.round(d.getBoundingClientRect().left)))),
+      plainSep: plain.length ? sepOf(plain[0]) : null,
+      lastSep: rows.length ? sepOf(rows[rows.length - 1]) : null,
+      selSep: sel ? sepOf(sel) : null,
+      scrollerFade: (() => {
+        const e = q(".f12-rows");
+        if (!e) return null;
+        const cs = getComputedStyle(e);
+        return `${cs.maskImage}|${cs.webkitMaskImage}|${cs.backgroundImage}`;
+      })(),
+    };
+  });
+  // eslint-disable-next-line no-console
+  console.log("[fp5] " + JSON.stringify(m));
+
+  const INSET = 14;
+  for (const [name, v] of [
+    ["left", m.listL! - m.bodyL!],
+    ["top", m.listTop! - m.mastBottom!],
+    ["bottom", m.scrollBottom! - m.listBottom!],
+  ] as const) {
+    expect(v, `${name} inset is ${v}, not ~${INSET}`).toBeGreaterThanOrEqual(INSET - 2);
+    expect(v, `${name} inset is ${v}, not ~${INSET}`).toBeLessThanOrEqual(INSET + 2);
+  }
+  expect(m.radius, "the panel has no radius").not.toMatch(/^0px/);
+
+  /* the head's field is a control on the tint */
+  expect(m.searchBg, "the search field is not white").toBe("rgb(255, 255, 255)");
+  expect(m.searchBg, "the field's ground matches the panel's").not.toBe(m.panelBg);
+
+  /* rows: one height, one date column */
+  expect(m.rowCount, "no rows rendered — every case below would pass vacuously").toBeGreaterThan(1);
+  expect(m.heights.length, `rows have different heights: ${m.heights.join(", ")}`).toBe(1);
+  expect(m.dateXs.length, `dates sit at different x: ${m.dateXs.join(", ")}`).toBe(1);
+
+  /* separators: inset, and absent on the last and the selected row */
+  expect(m.plainCount, "no ordinary row to check").toBeGreaterThan(0);
+  expect(m.plainSep!.content, "an ordinary row draws no separator").not.toBe("none");
+  expect(parseFloat(m.plainSep!.left), "the separator reaches the panel's left edge").toBeGreaterThan(0);
+  expect(parseFloat(m.plainSep!.right), "the separator reaches the seam").toBeGreaterThan(0);
+  expect(m.lastSep!.content, "the last row still draws a separator").toBe("none");
+  if (m.selSep) expect(m.selSep.content, "the selected row still draws a separator").toBe("none");
+
+  /* and no fade, at any edge */
+  expect(m.scrollerFade, "a mask or gradient came back onto the list scroller").not.toMatch(/gradient/);
+});
+

@@ -76,13 +76,21 @@ describe("§1b · the masthead is a band", () => {
 });
 
 describe("§1c · the list is furniture, and selection inverts", () => {
-  it("the column has a ground and one seam, and is not a card", () => {
+  /**
+   * ⚠️ INVERTED BY FIX PACK 5, WHICH IS THE WHOLE POINT OF THE PACK. This asserted that the column
+   * "is not a card": ground plus one seam, no radius, no shadow. It IS a card now — an inset panel
+   * with a rim and the standard radius — so the case is turned round rather than deleted. Left
+   * standing it would have gone on describing furniture that no longer exists; deleted, nothing
+   * would stop the flush wall coming back.
+   *
+   * The ground is the one thing that survives the inversion unchanged.
+   */
+  it("the column keeps its ground, and is now a card rather than furniture", () => {
     const r = rule(".f12-list");
     expect(r, "the ground went — the column reads as loose content again").toContain("background: var(--paper)");
-    expect(r).toContain("border-right: 1px solid var(--hairline)");
-    for (const p of ["border-radius", "box-shadow"]) {
-      expect(r, `the column took ${p} — furniture is not a card`).not.toContain(p);
-    }
+    expect(r, "the panel lost its radius — it is a card now, not a wall").toContain("border-radius");
+    expect(r, "the seam went back onto the panel, so it stops where the panel stops")
+      .not.toContain("border-right");
   });
 
   /* ⚠️ A TINTED COLUMN CANNOT PAY ITS OWN GUTTER. As `padding-right` the ground stops short of the
@@ -270,86 +278,87 @@ describe("§1 (fp2) · the hero is a contained plate", () => {
  * of the seam, so the division was a line plus a stripe and the list read as a widget resting on
  * the page. Removing it costs no breathing room, because the inset lives on the children.
  */
-describe("§2 (fp2) · the list is flush and the seam is the only division", () => {
-  it("the list declares no radius and no horizontal inset", () => {
+/**
+ * ⚠️ FIX PACK 5 — THE LIST IS AN INSET PANEL, AND THE TWO "FLUSH" BLOCKS THAT STOOD HERE ARE GONE.
+ * Fix pack 2 §2 and fix pack 3 §2 asserted the opposite of this: no radius, no inset, ground meeting
+ * the masthead rule and the working area's foot. Both were wrong, and both are REPLACED rather than
+ * loosened — a lock that merely stopped failing would leave the flush law readable as still true,
+ * which is how three packs of partial specs produced a column nobody had described in full.
+ */
+describe("§ (fp5) · the list is an inset panel", () => {
+  it("it is a card: rim, standard radius, and held off three sides by one token", () => {
     const r = rule(".f12-list");
     expect(r, "the list rule is missing").not.toBe("");
-    for (const p of ["border-radius", "margin-left", "margin-right", "margin-inline"]) {
-      expect(r, `the list took ${p} — it is one half of a split, not a card on a page`)
-        .not.toContain(p);
-    }
-    expect(r, "the seam went with it").toContain("border-right: 1px solid var(--hairline)");
-  });
-
-  it("the columns sit against each other, with no channel between them", () => {
-    const r = rule(".f12-body");
-    expect(r, "the body rule is missing").not.toBe("");
-    expect(r, "the channel came back — the seam stops being the only division")
-      .not.toMatch(/(?:^|;|\{)\s*gap\s*:/);
-  });
-
-  /* ⚠️ THE INSET MOVED TO THE CHILDREN, and that is what lets the ground and the seam run edge to
-     edge while nothing lands against the line. Delete this and the rows touch the seam. */
-  it("the inset the list gave up is carried by its children", () => {
-    expect(cssCode, "the children lost their inset").toMatch(
-      /\.f12-list > \*\s*\{[^}]*padding-inline:\s*var\(--gut\)/
-    );
-  });
-});
-
-/**
- * ⚠️ FIX PACK 3 §2 — FLUSH MEANS ALL FOUR EDGES. Fix pack 2 removed the 12px channel to the RIGHT
- * of the seam and reported the left edge and the radius as already correct, which they were. That
- * accounted for three edges and left the fourth: the list's ground began 18px (resting) or 9px
- * (working) BELOW the masthead hairline, because the scroll row carried `--content-top-gap`. A
- * container's inset pushes its ground down and leaves a stripe of page above it, which is what made
- * the split read as a panel placed under the masthead rather than as the working area beginning.
- *
- * ⚠️ THE AIR IS NOT DELETED, IT MOVES TO THE CHILDREN. The list's head and the pane's header keep
- * their own top spacing inside their columns, so nothing lands against the hairline. Only the
- * element paying for it changes.
- */
-describe("§2 (fp3) · the list's ground meets the masthead rule", () => {
-  it("neither state leaves a gap above the split", () => {
-    for (const sel of [".qc-wpg:not(.wpg--working)", ".qc-wpg.wpg--working"]) {
-      const r = rule(sel);
-      expect(r, `the ${sel} rhythm rule is missing`).not.toBe("");
-      const m = /--content-top-gap:\s*([^;}]+)/.exec(r);
-      expect(m, `${sel} stopped naming --content-top-gap`).not.toBeNull();
-      expect(m![1].trim(), `${sel} put a gap back above the list`).toMatch(/^0(px)?$/);
-    }
+    expect(declValue(r, "border-radius"), "the panel lost its radius").toBe("var(--r-lg)");
+    /* ⚠️ THE RIM COMES FROM THE CARD'S BASE RULE. `.qp-cols .f12-card` declares only the ground
+       (fix pack 4 §2), so reading the border there returns "" and the comparison would pass against
+       nothing — the empty-slice failure this repo has an audit about. */
+    expect(declValue(r, "border"), "the panel's rim is not the cards' rim")
+      .toBe(declValue(rule(".f12-card"), "border"));
+    const m = declValue(r, "margin").split(/\s+/);
+    expect(m.length, `the panel's inset is not a four-value margin: ${m.join(" ")}`).toBe(4);
+    const [top, right, bottom, left] = m;
+    expect(top, "the panel is not held off the masthead rule").toBe("var(--f12-panel-inset)");
+    expect(bottom, "the panel is not held off the working area's foot").toBe("var(--f12-panel-inset)");
+    expect(left, "the panel is not held off the page's left edge").toBe("var(--f12-panel-inset)");
+    /* ⚠️ AND NOT ON THE RIGHT — that edge is where the seam is, and a fourth inset would put a
+       channel of page between the panel and the divider it belongs to. */
+    expect(right, "the panel was inset on the right too, leaving a channel at the seam").toBe("0");
   });
 
   /**
-   * ⚠️ BOTH STATES, NAMED EXPLICITLY, AT 0-2-0. `:root` resolves `--content-top-gap` from
-   * `--content-top-gap-rest` at :root, so overriding the `-rest`/`-work` pair lower down changes
-   * nothing; and setting `--content-top-gap` on `.qc-wpg` alone (0-1-0) would TIE with
-   * `.wpg--working` on the same element and be decided by bundle order. This case keeps the shape
-   * that avoids both, which is easy to lose while "simplifying" two rules into one.
+   * ⚠️ THE SEAM IS NO LONGER THE PANEL'S OWN BORDER. It was `border-right`, which was correct while
+   * the panel was the whole column; inset top and bottom, that border would stop where the panel
+   * stops and the divider would have two gaps in it. It is drawn full height by `.f12-body::after`,
+   * positioned one pixel back so it is collinear with the panel's right rim — one line, no doubling.
    */
-  it("it does not collapse the two states into one bare .qc-wpg rule", () => {
-    expect(cssCode, "the two states were merged into a rule that ties with .wpg--working")
-      .not.toMatch(/\n\.qc-wpg\s*\{[^}]*--content-top-gap/);
+  it("the seam runs the full height, drawn by the row rather than the panel", () => {
+    const seam = rule(".f12-body::after");
+    expect(seam, "the full-height seam is missing").not.toBe("");
+    expect(seam, "the seam stopped spanning the row").toContain("top: 0");
+    expect(seam, "the seam stopped spanning the row").toContain("bottom: 0");
+    expect(seam, "the seam is no longer collinear with the panel's rim")
+      .toContain("calc(var(--f12-panel-inset) + var(--listw) - 1px)");
+    expect(rule(".f12-list"), "the panel took its right border back — that doubles the seam")
+      .not.toContain("border-right");
   });
 
-  /* ⚠️ AND THE CONTAINER ITSELF STAYS BARE — no radius, no margin, no horizontal padding. The rows
-     carry their own inset through `.f12-list > *`; putting it back on the container is what would
-     re-inset the ground. */
-  it("the list container declares no radius, margin or horizontal padding", () => {
-    const r = rule(".f12-list");
-    expect(r, "the list rule is missing").not.toBe("");
-    for (const p of ["border-radius", "margin", "padding-inline", "padding-left", "padding-right"]) {
-      expect(r, `the list container took ${p} — it is the working area, not a panel on it`)
-        .not.toContain(p);
-    }
+  /* ⚠️ THE SCROLLER IS EXEMPT FROM THE PANEL'S INSET so a row's hover and selection fills reach the
+     panel's edges. Padding it as well would inset the fills and leave the selected row floating. */
+  it("the rows span the panel while the head and foot take its inset", () => {
+    expect(cssCode, "the rows lost their exemption — the selected fill no longer reaches the edges")
+      .toMatch(/\.f12-list > \.f12-rows\s*\{[^}]*padding-inline:\s*0/);
+    expect(cssCode, "the head and foot lost the panel's inset")
+      .toMatch(/\.f12-list > \*\s*\{[^}]*padding-inline:\s*var\(--gut\)/);
+  });
+
+  /**
+   * ⚠️ SEPARATORS ARE INSET, WHICH A BORDER CANNOT BE. `border-bottom` spans the whole row, so it
+   * ran full-bleed into the seam and the panel's rim. The pseudo-element takes the row's own
+   * padding as its inset — and two rows draw none: the last, and the SELECTED one, where a line
+   * cutting across the lifted white row is the specific fault this section removed.
+   */
+  it("separators are inset, and the last and selected rows have none", () => {
+    expect(declValue(rule(".f12-row"), "border-bottom"), "the row went back to a full-bleed border")
+      .toBe("");
+    const sep = rule(".f12-row::after");
+    expect(sep, "the separator is missing").not.toBe("");
+    const pad = declValue(rule(".f12-row"), "padding").split(/\s+/)[1];
+    expect(declValue(sep, "left"), "the separator's inset drifted from the row's padding").toBe(pad);
+    expect(declValue(sep, "right"), "the separator's inset drifted from the row's padding").toBe(pad);
+    expect(cssCode, "the last and selected rows draw separators again")
+      .toMatch(/\.f12-row:last-child::after,\s*\.f12-row\.f12-sel::after\s*\{[^}]*content:\s*none/);
+  });
+
+  /* the selected row still lifts to white with its spine — unchanged by this section, asserted
+     because the separator work is one line away from it */
+  it("the selected row still lifts to white and keeps its spine", () => {
+    expect(declValue(rule(".f12-row.f12-sel"), "background"), "the selected row stopped lifting")
+      .toBe("var(--white)");
+    expect(rule(".f12-row.f12-sel::before"), "the burgundy spine went").toContain("var(--burg)");
   });
 });
 
-/**
- * ⚠️ FIX PACK 3 §4 — ONE LINE FOR BOTH COLUMNS. The list's head sat flush at the top of its column
- * while the pane's header carried `--f12-headgap`, so the split began at two different heights and
- * read as two panels that were placed rather than as one interface.
- */
 describe("§4 (fp3) · the columns start on the same line", () => {
   /**
    * ⚠️ ASSERTED AS THE SAME TOKEN, NOT THE SAME NUMBER. Two rules matching by literal agree until
@@ -358,20 +367,22 @@ describe("§4 (fp3) · the columns start on the same line", () => {
    * 36px and then both moved to 34. So the case tests the MECHANISM, and the browser carries the
    * resulting equality (fp3 in `tests/e2e/qcReconcile.measure.ts`, at 1024/1440/1920).
    */
-  it("both heads take their top offset from --f12-headgap", () => {
+  /**
+   * ⚠️ SUPERSEDED BY FIX PACK 5, AND REPOINTED RATHER THAN DELETED. The two heads shared
+   * `--f12-headgap` so that they started on one line while BOTH columns began at the masthead rule.
+   * The list is an inset panel now: what holds it off the rule is the panel's own inset, and keeping
+   * the 20px on top of that would have put the search field 34px down inside a panel beginning at
+   * 14px. What survives is the intent — the head sits at the panel's top and takes no column gap of
+   * its own — and the plate is untouched, so it keeps reading the token.
+   */
+  it("the head sits at the panel's top, and the plate still reads the shared gap", () => {
     const head = rule(".f12-lhead");
     const plate = rule(".f12-heroband");
     expect(head, "the list head's rule is missing").not.toBe("");
-    expect(plate, "the plate's rule is missing").not.toBe("");
-    const top = (r: string): string => {
-      const m = declValue(r, "margin");
-      expect(m, "the rule declares no margin").not.toBe("");
-      const parts = m.split(/\s+/);
-      return parts[0];
-    };
-    expect(top(head), "the list head went back to a hand-written number")
+    expect(declValue(head, "margin").split(/\s+/)[0], "the head took the column gap back on top of the panel's inset")
+      .not.toBe("var(--f12-headgap)");
+    expect(declValue(plate, "margin").split(/\s+/)[0], "the plate stopped reading the shared gap")
       .toBe("var(--f12-headgap)");
-    expect(top(head), "the two heads stopped reading the same token").toBe(top(plate));
   });
 
   /* ⚠️ AND ONLY THE PANE IS PADDED SIDEWAYS. The list's inset lives on `.f12-list > *` so the
@@ -415,11 +426,13 @@ describe("§1 (fp4) · the list head's field is a control on a tinted surface", 
   /* ⚠️ AND THE GAP THE COLUMNS SHARE IS UNTOUCHED. §1's first clause was already satisfied; this
      asserts nobody "fixes" it a second time by adding padding on top, which would break fix pack
      3 §4's single line. */
-  it("the head still takes its top offset from the shared token, and gains no padding on top", () => {
+  /* ⚠️ REPOINTED BY FIX PACK 5 for the same reason as the case above: the panel's inset is what
+     holds the head off the rule now, so the head's own offset is a small internal one. What is
+     still worth holding is that it does not grow a SECOND source of top space. */
+  it("the head takes one modest offset inside the panel, and no padding on top", () => {
     const head = rule(".f12-lhead");
-    expect(declValue(head, "margin").split(/\s+/)[0], "the head stopped reading the shared gap")
-      .toBe("var(--f12-headgap)");
-    expect(head, "padding was added above the head — the columns no longer start together")
+    expect(declValue(head, "margin"), "the head declares no margin").not.toBe("");
+    expect(head, "padding was added above the head — two sources for one gap")
       .not.toContain("padding");
   });
 

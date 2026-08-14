@@ -141,10 +141,23 @@ describe("§1c · the seam runs the full height of both columns", () => {
    * rows inside it come to. Move the line onto `.f12-rows` and it stops at the last row, which is
    * exactly the "short list" case §1c names. The measurement is in the report; this locks the cause.
    */
-  it("the line is the list COLUMN's right edge", () => {
-    const list = rule(".f12-list");
-    expect(list, "the list column rule is missing").not.toBe("");
-    expect(list, "the seam left the column").toContain("border-right: 1px solid var(--hairline)");
+  /**
+   * ⚠️ REPOINTED BY FIX PACK 5. The seam WAS the column's `border-right`, which was right while the
+   * list was the full-height column. It is an inset panel now, so a border on it would stop where
+   * the panel stops and the divider would have a gap at the top and another at the foot — the same
+   * fault this case was written to prevent, arriving by a different route.
+   *
+   * It is drawn by `.f12-body::after` instead: full height of the row, positioned one pixel back
+   * from the column boundary so it is collinear with the panel's own right rim. One line, no
+   * doubling, and no dependence on how tall the panel happens to be.
+   */
+  it("the line spans the row, not the panel that would cut it short", () => {
+    const seam = rule(".f12-body::after");
+    expect(seam, "the full-height seam is missing").not.toBe("");
+    expect(seam, "the seam stopped spanning the row").toMatch(/top:\s*0/);
+    expect(seam, "the seam stopped spanning the row").toMatch(/bottom:\s*0/);
+    expect(rule(".f12-list"), "the seam went back onto the panel, so it stops where the panel stops")
+      .not.toContain("border-right");
     expect(rule(".f12-rows"), "the seam moved onto the scrolling rows — it would stop at the last one")
       .not.toContain("border-right");
   });

@@ -142,9 +142,16 @@ describe("the workspace frame", () => {
    * the row's `gap: var(--gut)` outside it, so neither side states a figure the other must track.
    */
   it("the list and the pane are separated by ONE vertical hairline", () => {
+    /* ⚠️ THE SEAM MOVED OFF THE LIST (fix pack 5). It was the column's `border-right`, which was
+       right while the list WAS the column; as an inset panel a border on it would stop where the
+       panel stops and the divider would have a gap at the top and another at the foot. It is drawn
+       full height by `.f12-body::after`, one pixel back so it is collinear with the panel's rim. */
     const list = rule(f12, ".f12-list");
-    expect(list, "the seam is gone — two independently scrolling regions with no boundary").toContain("border-right");
-    expect(list, "the seam is not on the hairline token").toContain("var(--hairline)");
+    const seam = rule(f12, ".f12-body::after");
+    expect(seam, "the seam is gone — two independently scrolling regions with no boundary").not.toBe("");
+    expect(seam, "the seam is not on the hairline token").toContain("var(--hairline)");
+    expect(list, "the seam went back onto the panel, so it stops where the panel stops")
+      .not.toContain("border-right");
     /* ⚠️ THE AIR MOVED TO THE CHILDREN (§1c), because a TINTED column cannot pay its own gutter as
        `padding-right`: the ground would stop short of the hairline and leave a stripe of page
        between the two. The column fills to the seam; its children carry the inset, so the air is
