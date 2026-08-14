@@ -454,7 +454,9 @@ describe("the portalled popovers carry their theme, and an opaque surface", () =
    */
   it.each([".msv-wordpop", ".msv-genrepop"])("%s can never resolve to transparent", (sel) => {
     const r = rule(sel);
-    expect(r).toMatch(/background:\s*var\(--msv-card,\s*#[0-9a-f]{6}\)/i);
+    /* ⚠️ THE FALLBACK IS WHITE, not a theme's parchment — this sheet's law is that a hex outside the
+       three theme blocks has stopped theming, and white is one of its two sanctioned constants. */
+    expect(r).toContain("background: var(--msv-card, #ffffff)");
     for (const banned of ["opacity", "mix-blend-mode", "backdrop-filter", "filter:"]) {
       expect(r, `${sel} declares ${banned}`).not.toContain(banned);
     }
@@ -475,7 +477,7 @@ describe("the portalled popovers carry their theme, and an opaque surface", () =
     const r = rule(sel);
     expect(r).toContain("background: var(--msv-card,");
     /* A literal 1px hairline, not `--msv-cardbd`, which is `none` in Editorial. */
-    expect(r).toContain("border: 1px solid var(--msv-hair,");
+    expect(r).toContain("border: 1px solid var(--msv-hair)");
     expect(r).toContain("border-radius: 14px");
     expect(r).toContain("box-shadow");
   });

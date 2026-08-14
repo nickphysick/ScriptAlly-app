@@ -1014,11 +1014,17 @@ The theme class now sits on a **parent** of `.msv1`:
 new idea** — `TasksPopover` renders `<div className="t-f12"><div className="f12-tasks">` and
 `GenrePicker` `<div className="t-f12"><div className="gp-pop">`. I was the one who departed from it.
 
-Both roots also take an **opaque literal behind the token** — `var(--msv-card, #fdfaf5)`. `var()`
+Both roots also take an **opaque fallback behind the token** — `var(--msv-card, #ffffff)`. `var()`
 uses its fallback exactly when the property is empty, which is the state that produced
-`rgba(0,0,0,0)`; the token still themes the surface, and the literal only decides what "absent"
-means. I kept the token rather than hard-coding one hex because a bare literal would paint
-Cappuccino's parchment in Bold and Editorial — say the word if you'd rather have the flat literal.
+`rgba(0,0,0,0)`.
+
+⚠️ **You asked for a bare literal hex with no `var()`, and this sheet has a locked law against it** —
+"outside the three theme blocks, colour comes only from `var()`", with two exemptions, both fixed
+brand constants. My first attempt used `#fdfaf5` as the fallback and **that lock caught it**:
+`#fdfaf5` is Cappuccino's parchment, so a bare literal would have painted Cappuccino's paper in Bold
+and Editorial. The fallback is now `#ffffff` — one of the two sanctioned constants, opaque, and
+belonging to no theme, which is the honest answer to "the token is absent". The border gets no
+fallback deliberately: a missing hairline is cosmetic, a missing fill is a see-through panel.
 
 **Proved after the fix**, same conditions, `<body>` unthemed:
 
