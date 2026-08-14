@@ -423,11 +423,43 @@ describe("the portalled popovers carry their theme, and an opaque surface", () =
     expect([...THEME_CLASSES]).toEqual(["t-capp", "t-bold", "t-edn"]);
   });
 
-  it("puts that class on both portal wrappers, with the token class", () => {
+  /**
+   * ⚠️ THE THEME CLASS MUST BE ON A PARENT OF `.msv1`, NEVER ON THE SAME ELEMENT — and this lock is
+   * the one that would have caught the first attempt. `.t-capp .msv1` is a DESCENDANT combinator, so
+   * `class="t-capp msv1"` matches nothing at all: measured `--msv-card` EMPTY and
+   * `background-color: rgba(0, 0, 0, 0)`. A harness carrying `<body class="t-capp">` supplied the
+   * missing ancestor and reported it fixed — against a page the app never serves.
+   */
+  it("nests the theme class ABOVE the token class, never beside it", () => {
     expect(SRC).toContain("themeClassOf(bandRef.current)");
-    expect(SRC).toMatch(/msv1 msv-portal/);
-    /* Both portals use the one wrapper — a second literal would drift from the first. */
-    expect((SRC.match(/className=\{portalClass\}/g) ?? []).length).toBe(2);
+    /* The exact nesting, twice — one per portal. */
+    const nested = SRC.match(/<div className=\{themeClass\}><div className="msv1 msv-portal">/g) ?? [];
+    expect(nested.length, "both portals must nest the theme class above .msv1").toBe(2);
+    /* ⚠️ AND THE TWO CLASSES NEVER SHARE ONE `className`. Checked per attribute rather than with a
+       span-matching regex — the first version used `[^}]*`, which runs straight across the nesting
+       and flagged the correct shape as the broken one. Every className this file writes is read out
+       and inspected on its own. */
+    const attrs = [...SRC.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\})/g)].map((m) => m[1] ?? m[2] ?? "");
+    expect(attrs.length, "no className attributes found — the sweep is reading nothing").toBeGreaterThan(5);
+    for (const a of attrs) {
+      const themed = /\bt-(capp|bold|edn)\b/.test(a);
+      expect(themed && /\bmsv1\b/.test(a), `"${a}" puts a theme class beside msv1 — the descendant selector cannot match`).toBe(false);
+    }
+  });
+
+  /**
+   * ⚠️ THE FILL CANNOT BE TRANSPARENT EVEN IF THE TOKEN STOPS RESOLVING. `var(--x, <literal>)` uses
+   * the literal exactly when `--x` is empty — the state that produced `rgba(0,0,0,0)`. And nothing
+   * on these roots may reintroduce see-through by another route.
+   */
+  it.each([".msv-wordpop", ".msv-genrepop"])("%s can never resolve to transparent", (sel) => {
+    const r = rule(sel);
+    expect(r).toMatch(/background:\s*var\(--msv-card,\s*#[0-9a-f]{6}\)/i);
+    for (const banned of ["opacity", "mix-blend-mode", "backdrop-filter", "filter:"]) {
+      expect(r, `${sel} declares ${banned}`).not.toContain(banned);
+    }
+    /* No alpha anywhere in the fill — rgba/hsla or an 8-digit hex would all reintroduce it. */
+    expect(r).not.toMatch(/background[^;]*(rgba|hsla|#[0-9a-f]{8})/i);
   });
 
   /* ⚠️ THE WRAPPER NEEDS `.msv1` FOR TOKENS AND MUST NOT INHERIT ITS PAGE LAYOUT — measured a
@@ -441,9 +473,9 @@ describe("the portalled popovers carry their theme, and an opaque surface", () =
 
   it.each([".msv-wordpop", ".msv-genrepop"])("%s has an opaque fill, a hairline and the shadow", (sel) => {
     const r = rule(sel);
-    expect(r).toContain("background: var(--msv-card)");
+    expect(r).toContain("background: var(--msv-card,");
     /* A literal 1px hairline, not `--msv-cardbd`, which is `none` in Editorial. */
-    expect(r).toContain("border: 1px solid var(--msv-hair)");
+    expect(r).toContain("border: 1px solid var(--msv-hair,");
     expect(r).toContain("border-radius: 14px");
     expect(r).toContain("box-shadow");
   });

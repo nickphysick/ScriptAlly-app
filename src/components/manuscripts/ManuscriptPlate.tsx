@@ -117,12 +117,11 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
    * the tokens resolve to nothing and the popovers have no fill and no border. Read from the plate
    * itself so it reflects the theme this plate is actually in.
    */
-  const [portalClass, setPortalClass] = useState("msv1 msv-portal");
+  const [themeClass, setThemeClass] = useState("");
   const bandRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
-    const t = themeClassOf(bandRef.current);
-    setPortalClass(`${t ? t + " " : ""}msv1 msv-portal`);
+    setThemeClass(themeClassOf(bandRef.current));
   }, [open]);
   const { triggerRef: wordTrigger, menuStyle: wordMenu } = useFixedMenu<HTMLButtonElement>(open === "words");
 
@@ -314,7 +313,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
           failure this replaces.
         */}
         {open === "genre" && edit && genreDraft && createPortal(
-          <div className={portalClass}>
+          <div className={themeClass}><div className="msv1 msv-portal">
             <div
               ref={genrePopRef}
               className="msv-genrepop"
@@ -364,7 +363,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
                 <button type="button" className="msv-btn sm msv-primary" onClick={saveGenre}>Done</button>
               </div>
             </div>
-          </div>,
+          </div></div>,
           document.body
         )}
 
@@ -401,7 +400,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
       </div>
 
       {open === "words" && edit && createPortal(
-        <div className={portalClass}>
+        <div className={themeClass}><div className="msv1 msv-portal">
           <div className="msv-wordpop" style={{ ...wordMenu }} role="dialog" aria-label="Word count">
             <div className="msv-wordlab">Word count</div>
             {/*
@@ -443,7 +442,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
               <button type="button" className="msv-btn sm msv-primary" onClick={saveWords}>Save</button>
             </div>
           </div>
-        </div>,
+        </div></div>,
         document.body
       )}
     </div>

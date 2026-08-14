@@ -375,6 +375,14 @@
 }
 
 /* ── the portal wrapper ──
+   ⚠️ THE THEME CLASS GOES ON A PARENT OF `.msv1`, NEVER ON THE SAME ELEMENT. `.t-capp .msv1` is a
+   DESCENDANT combinator and an element is not its own descendant, so `class="t-capp msv1"` matches
+   NOTHING and every token resolves to empty — measured `background-color: rgba(0,0,0,0)` with
+   `--msv-card` EMPTY. The first attempt at this fix put both classes on one element and a harness
+   with `<body class="t-capp">` silently supplied the missing ancestor, so it measured opaque against
+   a page the app never serves. `TasksPopover` and `GenrePicker` both already nest; this is the
+   house pattern, not a new idea.
+
    ⚠️ IT NEEDS `.msv1` FOR THE TOKENS AND MUST NOT INHERIT `.msv1`'s PAGE LAYOUT. Every `--msv-*` is
    declared on `.t-{theme} .msv1`, so the wrapper carries both classes or the popovers have no fill;
    but `.msv1` is also the PAGE root — `height: 100%; overflow: hidden; display: flex` — and in
@@ -441,8 +449,9 @@
      from whatever it landed in; `width` here plus `box-sizing` means the grid below is the same
      520px wherever the popover is placed. */
   width: 520px; box-sizing: border-box;
-  background: var(--msv-card);
-  border: 1px solid var(--msv-hair);
+  /* Same opaque literal behind the token — see the word popover's note. */
+  background: var(--msv-card, #fdfaf5);
+  border: 1px solid var(--msv-hair, #e7ddd2);
   border-radius: 14px;
   box-shadow: 0 12px 30px rgba(58, 28, 20, 0.16);
   padding: 13px 0 0;
@@ -520,8 +529,13 @@
      That token is `none` in Editorial (whose CARDS are borderless, by that theme's grammar) — but a
      popover floats over content rather than resting on a desk, so it needs an edge in every theme or
      it has nothing separating it from what it covers. The FILL is the theme's parchment. */
-  background: var(--msv-card);
-  border: 1px solid var(--msv-hair);
+  /* ⚠️ AN OPAQUE LITERAL BEHIND THE TOKEN, so this surface can never be transparent again even if
+     the token stops resolving. `var(--x, <fallback>)` uses the fallback when `--x` is EMPTY, which
+     is exactly the state that produced `rgba(0,0,0,0)` — measured. The token still themes it; the
+     literal only decides what happens when the token is absent, and "absent" must not mean "see
+     through". No alpha, no `opacity`, no blend mode, no backdrop filter on this element. */
+  background: var(--msv-card, #fdfaf5);
+  border: 1px solid var(--msv-hair, #e7ddd2);
   border-radius: 14px;
   box-shadow: 0 12px 30px rgba(58, 28, 20, 0.16);
   width: 270px; padding: 13px 0; z-index: 60;

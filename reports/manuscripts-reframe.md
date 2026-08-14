@@ -973,3 +973,92 @@ three themes. **What remains for Nick to confirm in the browser:** that the popo
 pointer expects them relative to the live plate, that repositioning on scroll feels right rather than
 distracting, and that the 35px bottom gutter reads as even against the side gutters at the viewport
 widths you actually use.
+
+---
+
+## The popovers were still translucent — measured, not guessed
+
+The previous fix was wrong, and **the harness that "verified" it was the reason I believed it**.
+
+### Measured, before changing anything
+
+Reproducing the app's real condition — **no theme class on `<body>`** — with the shipped wrapper
+(`class="t-capp msv1 msv-portal"`, all on one element):
+
+| property, popover root → `<body>` | measured |
+|---|---|
+| `background-color` | **`rgba(0, 0, 0, 0)`** on the popover; transparent on every ancestor |
+| `--msv-card` | **`(EMPTY)`** on the popover and on the wrapper |
+| `opacity` | `1` — on every element in the chain |
+| `mix-blend-mode` | `normal` — on every element in the chain |
+| `backdrop-filter` / `filter` | `none` / `none` — on every element |
+| `animation` | **`none`** — on every element |
+
+**Candidate 1 confirmed. Candidates 2 and 3 ruled out** — there is no entrance animation on any of
+these elements and no blend mode anywhere in the chain.
+
+### The cause
+
+`.t-capp .msv1` is a **descendant combinator**. The wrapper carried *both* classes on **one element**,
+and an element is not its own descendant — so the rule matched nothing and every token stayed empty.
+
+⚠️ **The previous harness had `<body class="t-capp">`.** That silently supplied the missing ancestor,
+so `.msv1` on the portal div *was* a descendant and the fill measured opaque. The harness agreed with
+itself while describing a page the app never serves — the second time in this build, and the
+documented trap almost exactly.
+
+### The fix, at the cause
+
+The theme class now sits on a **parent** of `.msv1`:
+`<div className={themeClass}><div className="msv1 msv-portal">`. **This is the house pattern, not a
+new idea** — `TasksPopover` renders `<div className="t-f12"><div className="f12-tasks">` and
+`GenrePicker` `<div className="t-f12"><div className="gp-pop">`. I was the one who departed from it.
+
+Both roots also take an **opaque literal behind the token** — `var(--msv-card, #fdfaf5)`. `var()`
+uses its fallback exactly when the property is empty, which is the state that produced
+`rgba(0,0,0,0)`; the token still themes the surface, and the literal only decides what "absent"
+means. I kept the token rather than hard-coding one hex because a bare literal would paint
+Cappuccino's parchment in Bold and Editorial — say the word if you'd rather have the flat literal.
+
+**Proved after the fix**, same conditions, `<body>` unthemed:
+
+| theme | word popover | genre popover |
+|---|---|---|
+| Cappuccino | `rgb(253, 250, 245)` | `rgb(253, 250, 245)` |
+| Bold | `rgb(255, 254, 251)` | `rgb(255, 254, 251)` |
+| Editorial | `rgb(255, 255, 255)` | `rgb(255, 255, 255)` |
+
+All `rgb()` with **no alpha channel** (asserted against `^rgb\(\d+, \d+, \d+\)$`, so an `rgba` form
+would fail), `opacity: 1`, `mix-blend-mode: normal`, no filters, no animation.
+
+### Every other portalled surface — swept
+
+| portal | wrapper | exposed? |
+|---|---|---|
+| `TasksPopover` | `t-f12` on a **parent** of `.f12-tasks` | no |
+| `GenrePicker` | `t-f12` on a **parent** of `.gp-pop` | no |
+| `PortalMenu` | `t-f12 tbd-menu2` on one element — but f12 tokens are declared on **`.t-f12` itself**, not via a descendant selector | no |
+| Dashboard toast · `MaterialsField` · `AccountSettings` · `MobileSheet` · `F12Shell` · `SearchPalette` · `ToastProvider` | inline styles, no descendant-scoped token dependency | no |
+
+**The manuscripts popovers were the only ones with this fault.** The hazard exists only where tokens
+are declared `.t-{theme} .x` *and* a portal puts both classes on one element.
+
+### Locks
+
+The nesting is now asserted directly (the exact two-element shape, twice) and **every `className` in
+the file is read out and checked individually** for a theme class beside `msv1` — per attribute,
+because the first version of that check used a `[^}]*` span that ran straight across the nesting and
+flagged the correct shape as the broken one. Verified red by reinstating the original single-element
+wrapper. A second lock forbids `opacity`, `mix-blend-mode`, `backdrop-filter`, `filter` and any
+alpha-bearing fill on either root.
+
+### Also found
+
+⚠️ **`mix-blend-mode: multiply` is still live** at `pageHeader.css:526`
+(`.wsh-mark--xl .os-mark img`), while `manuscriptPlate.css` and `manuscriptMarks.tsx` both state that
+"no `mix-blend-mode` survives anywhere in `src/` today". That claim is stale. It is scoped to the
+header mark's image and is **not** an ancestor of these popovers — it did not cause this — but the
+comments should not be trusted as written.
+
+**Still not seen running: the app is auth-gated and I have not viewed this live.** What is measured is
+the rendered result against the built stylesheet with `<body>` unthemed, in all three themes.
