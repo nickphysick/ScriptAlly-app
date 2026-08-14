@@ -22,6 +22,8 @@ import {
   REJECTED_KEYS,
   isRejectedKey,
   MAX_MANUSCRIPT_GENRES,
+  themeClassOf,
+  THEME_CLASSES,
 } from "./plateEdit";
 import { readFileSync as read } from "node:fs";
 import { commonGenresFor, COMMON_GENRES_BY_AGE, canonicalGenreById } from "../../lib/genres";
@@ -375,5 +377,175 @@ describe("the genre editor floats, and its two columns carry the distinction", (
   it("anchors on the pill group under a name that is not a prefix of the pills'", () => {
     expect(SRC).toContain('className="msv-genreanchor"');
     expect(SRC).not.toContain("msv-gpgroup");
+  });
+});
+
+
+/**
+ * ⚠️ THE POPOVERS WERE TRANSLUCENT, AND THE CAUSE WAS THE PORTAL'S MISSING THEME CLASS.
+ * Every `--msv-*` is declared on a DESCENDANT selector (`.t-capp .msv1` …), so a wrapper rendered
+ * into `document.body` matched none of them: measured on the shipped build, `--msv-card` resolved to
+ * EMPTY, `background-color` computed `rgba(0, 0, 0, 0)` and `border-width` `0px`. Identical in all
+ * three themes — there was no theme for it to be wrong in.
+ *
+ * The apparent overlap of the hint, the footer and the tab bar was the SAME fault: the rows measured
+ * strictly sequential (`overlaps: []`); it was the page printing through an unfilled panel.
+ */
+describe("the portalled popovers carry their theme, and an opaque surface", () => {
+  const SRC = read(resolve(__dirname, "./ManuscriptPlate.tsx"), "utf8");
+  const CSS = read(resolve(__dirname, "./manuscriptPlate.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/@media[^{]*\{/g, "");
+  const rule = (sel: string) => {
+    const bodies = [...CSS.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .filter(([, s]) => s.split(",").some((x) => x.trim() === sel))
+      .map(([, , b]) => b);
+    expect(bodies.length, `${sel} must appear in at least one rule`).toBeGreaterThan(0);
+    return bodies.join("\n");
+  };
+
+  /* ⚠️ NO jsdom IN THIS REPO (`environment: 'node'`), so the walk is exercised against stubs of the
+     two members it actually uses. Reaching for `document.createElement` here threw on the first run. */
+  const node = (classes: string[], parent: unknown = null): any => ({
+    classList: { contains: (c: string) => classes.includes(c) },
+    parentElement: parent,
+  });
+
+  it("finds the theme class by walking up from the element", () => {
+    expect(themeClassOf(node([], node([], node(["t-edn"]))))).toBe("t-edn");
+    expect(themeClassOf(node(["t-bold"]))).toBe("t-bold");
+    /* The NEAREST themed ancestor wins, so a nested theme cannot be overruled from above. */
+    expect(themeClassOf(node([], node(["t-capp"], node(["t-edn"]))))).toBe("t-capp");
+    /* No themed ancestor → an empty string, never a guessed default that would be wrong in two
+       themes out of three. */
+    expect(themeClassOf(node([], node([])))).toBe("");
+    expect(themeClassOf(null)).toBe("");
+    expect([...THEME_CLASSES]).toEqual(["t-capp", "t-bold", "t-edn"]);
+  });
+
+  it("puts that class on both portal wrappers, with the token class", () => {
+    expect(SRC).toContain("themeClassOf(bandRef.current)");
+    expect(SRC).toMatch(/msv1 msv-portal/);
+    /* Both portals use the one wrapper — a second literal would drift from the first. */
+    expect((SRC.match(/className=\{portalClass\}/g) ?? []).length).toBe(2);
+  });
+
+  /* ⚠️ THE WRAPPER NEEDS `.msv1` FOR TOKENS AND MUST NOT INHERIT ITS PAGE LAYOUT — measured a
+     0px-tall clipped flex container in `document.body`. */
+  it("undoes the page-root layout `.msv1` would otherwise impose", () => {
+    const r = rule(".msv1.msv-portal");
+    expect(r).toContain("height: auto");
+    expect(r).toContain("overflow: visible");
+    expect(r).toContain("display: block");
+  });
+
+  it.each([".msv-wordpop", ".msv-genrepop"])("%s has an opaque fill, a hairline and the shadow", (sel) => {
+    const r = rule(sel);
+    expect(r).toContain("background: var(--msv-card)");
+    /* A literal 1px hairline, not `--msv-cardbd`, which is `none` in Editorial. */
+    expect(r).toContain("border: 1px solid var(--msv-hair)");
+    expect(r).toContain("border-radius: 14px");
+    expect(r).toContain("box-shadow");
+  });
+
+  /* ⚠️ EVERY `var()` THESE COMPONENTS READ MUST RESOLVE — the fault was an unresolved token, so the
+     sweep that would have caught it belongs here. */
+  it("reads no token that is defined nowhere", () => {
+    const DEFINED = [
+      CSS,
+      read(resolve(__dirname, "./manuscripts.css"), "utf8"),
+      read(resolve(__dirname, "./manuscriptLibrary.css"), "utf8"),
+      read(resolve(__dirname, "../forms/genrePicker.css"), "utf8"),
+      read(resolve(__dirname, "../shell/pageHeader.css"), "utf8"),
+    ].join("\n");
+    const read_ = new Set([...CSS.matchAll(/var\((--[a-z0-9-]+)/gi)].map((m) => m[1]));
+    expect(read_.size).toBeGreaterThan(10);
+    for (const name of read_) {
+      expect(new RegExp(`${name}\\s*:`).test(DEFINED), `${name} is read and defined nowhere`).toBe(true);
+    }
+  });
+});
+
+/**
+ * ⚠️ THE GENRE POPOVER LANDED IN THE WINDOW'S TOP-LEFT because its anchor had NO BOX.
+ * `display: contents` generates none, so `getBoundingClientRect()` returned zeros and `placeMenu`
+ * resolved them to left 8, top 6 — over the nav and the sidebar.
+ */
+describe("the genre popover is anchored to its trigger", () => {
+  const SRC = read(resolve(__dirname, "./ManuscriptPlate.tsx"), "utf8");
+  const CSS = read(resolve(__dirname, "./manuscriptPlate.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/@media[^{]*\{/g, "");
+  const rule = (sel: string) => {
+    const bodies = [...CSS.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .filter(([, s]) => s.split(",").some((x) => x.trim() === sel))
+      .map(([, , b]) => b);
+    expect(bodies.length, `${sel} must appear in at least one rule`).toBeGreaterThan(0);
+    return bodies.join("\n");
+  };
+
+  it("gives the anchor a real box — `display: contents` has none to measure", () => {
+    const r = rule(".msv-genreanchor");
+    expect(r).toContain("display: inline-flex");
+    expect(r).not.toContain("display: contents");
+  });
+
+  it("places 8px below the trigger, left-aligned, via the shared placeMenu", () => {
+    expect(SRC).toMatch(/placeMenu\(r, \{[^}]*\},\s*\{[^}]*\}, 8, "left"\)/s);
+  });
+
+  /* A zero rect means the anchor lost its box again — placing against it is how this fault looked. */
+  it("refuses to place against a zero rect", () => {
+    expect(SRC).toContain("r.width === 0 && r.height === 0");
+  });
+
+  /* ⚠️ REPOSITION, NOT CLOSE — the popover holds a buffered draft, and closing on scroll would
+     discard an edit nobody asked to abandon. Capture phase: the pane scrolls, not the window. */
+  it("repositions on scroll and resize rather than closing", () => {
+    expect(SRC).toContain('window.addEventListener("scroll", place, true)');
+    expect(SRC).toContain('window.addEventListener("resize", place)');
+    expect(SRC).toContain('window.removeEventListener("scroll", place, true)');
+  });
+
+  /* The columns pulled apart because the panel inherited width from wherever it landed. */
+  it("keeps its own width and its two-column grid wherever it lands", () => {
+    const r = rule(".msv-genrepop");
+    expect(r).toContain("width: 520px");
+    expect(r).toContain("box-sizing: border-box");
+    expect(rule(".msv-gcols")).toContain("grid-template-columns: 186px 1fr");
+  });
+});
+
+/** ⚠️ PLAYFAIR FOR HEADINGS AND FIGURES, MONO FOR LABELS AND HINTS, INTER FOR CONTENT. */
+describe("the popovers follow the app's type grammar", () => {
+  const CSS = read(resolve(__dirname, "./manuscriptPlate.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/@media[^{]*\{/g, "");
+  const rule = (sel: string) => {
+    const bodies = [...CSS.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .filter(([, s]) => s.split(",").some((x) => x.trim() === sel))
+      .map(([, , b]) => b);
+    expect(bodies.length, `${sel} must appear in at least one rule`).toBeGreaterThan(0);
+    return bodies.join("\n");
+  };
+
+  it.each([".msv-wordlab", ".msv-glab"])("%s is a Playfair heading, not a mono label", (sel) => {
+    const r = rule(sel);
+    expect(r).toContain("'Playfair Display'");
+    expect(r).not.toContain("monospace");
+    expect(r).not.toContain("text-transform: uppercase");
+    expect(r).not.toContain("letter-spacing");
+  });
+
+  it("the word-count figure is Playfair, like the stat strip's numerals", () => {
+    const r = rule(".msv-stepinput");
+    expect(r).toContain("'Playfair Display'");
+    expect(r).toContain("font-size: 22px");
+    expect(r).not.toContain("monospace");
+  });
+
+  it("and the unit and the hint stay mono, because they are labels", () => {
+    expect(rule(".msv-stepunit")).toContain("monospace");
+    expect(rule(".msv-wordhint")).toContain("monospace");
   });
 });

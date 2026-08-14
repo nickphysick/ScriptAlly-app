@@ -22,8 +22,21 @@ const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 const here = (f: string) => strip(readFileSync(resolve(__dirname, f), "utf8"));
 
 const LIB = here("./manuscriptLibrary.css");
-/** Where the `--msv-*` set the grid consumes is actually defined. */
-const DEFINED_IN = [LIB, here("./manuscriptPlate.css"), here("./manuscripts.css")].join("\n");
+/**
+ * Where the tokens this sheet consumes are actually defined.
+ *
+ * ⚠️ THE SHELL SHEETS ARE IN THE SET BECAUSE THE DOSSIER READS ACROSS. `--content-top-gap` is the
+ * grid's, and the dossier's bottom gutter reads it deliberately so the vertical inset matches the top
+ * BY CONSTRUCTION. Widening the search keeps the law's teeth — a read still has to resolve to a real
+ * declaration somewhere — while not pretending the page owns a token it borrows.
+ */
+const DEFINED_IN = [
+  LIB,
+  here("./manuscriptPlate.css"),
+  here("./manuscripts.css"),
+  here("../shell/workspacePageGrid.css"),
+  here("../shell/pageHeader.css"),
+].join("\n");
 
 const THEMES = [".t-capp .msv1", ".t-bold .msv1", ".t-edn  .msv1"] as const;
 
@@ -79,16 +92,47 @@ describe("the meter's two roles are declared in every theme", () => {
     expect(token(LIB, sel, "--mlib-segoff")).toBeTruthy();
   });
 
-  /** A token defined in two files is a silent override — which one wins becomes load order. */
+  /**
+   * A token defined in two files is a silent override — which one wins becomes load order.
+   *
+   * ⚠️ TWO NAMED EXCEPTIONS, AND THEY ARE CONTRIBUTIONS RATHER THAN OVERRIDES. `workspacePageGrid.css`
+   * sums `--wpg-foot` and `--wpg-reclaim-pad` into one `padding-bottom` precisely so a page can
+   * contribute to it without replacing anything ("Pages contribute `--wpg-foot`; the working state
+   * contributes `--wpg-reclaim-pad`; both land here and ADD"). Query Centre already contributes the
+   * same reclaim zero from its own page class. Listed BY NAME, not as a `--wpg-*` wildcard, so a
+   * third grid token cannot slip in behind this allowance.
+   */
+  const PAGE_CONTRIBUTIONS = new Set(["--wpg-foot", "--wpg-reclaim-pad"]);
+
   it("and the grid redefines nothing the plate or page sheets already own", () => {
     const mine = new Set(
       [...LIB.matchAll(/(--mlib-[a-z0-9-]+)\s*:/gi)].map((m) => m[1])
     );
     expect(mine.size).toBeGreaterThan(0);
     for (const name of [...LIB.matchAll(/(--[a-z0-9-]+)\s*:/gi)].map((m) => m[1])) {
-      if (mine.has(name)) continue;
+      if (mine.has(name) || PAGE_CONTRIBUTIONS.has(name)) continue;
       expect(name, `${name} is redefined by the library sheet`).toBe("");
     }
+  });
+
+  /**
+   * ⚠️ THE DEAD BAND UNDER THE DOSSIER CARD WAS THE SCROLL ROW'S OWN `padding-bottom`, not a height
+   * lost anywhere in the chain. The working state sets `--wpg-reclaim-pad` to the header's
+   * height-and-gap delta so a SCROLLING page keeps its max scroll when the header condenses; the
+   * dossier does not scroll, so on this page it is dead space exactly the size of what the header
+   * gave back. Condensing the header is what introduced it.
+   */
+  it("zeroes the scroll row's reclaim on the non-scrolling dossier, and gutters it from the top gap", () => {
+    const r = rule(LIB, ".msv-wpg.wpg--fill > .wpg-scroll");
+    expect(r).toContain("--wpg-reclaim-pad: 0px");
+    /* Reading the TOP gap's own token is what makes the inset even without two matched numbers. */
+    expect(r).toContain("--wpg-foot: var(--content-top-gap)");
+  });
+
+  /* ⚠️ NO HEIGHT ARITHMETIC ANYWHERE — the height arrives from the grid row and is passed down. */
+  it("computes the dossier's height from nothing of its own", () => {
+    expect(LIB).not.toMatch(/height:\s*calc/);
+    expect(LIB).not.toContain("dvh");
   });
 });
 

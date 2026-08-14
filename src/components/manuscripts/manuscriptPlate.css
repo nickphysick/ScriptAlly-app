@@ -374,6 +374,14 @@
   border-radius: 18px; padding: 7px 14px; cursor: pointer; white-space: nowrap;
 }
 
+/* ── the portal wrapper ──
+   ⚠️ IT NEEDS `.msv1` FOR THE TOKENS AND MUST NOT INHERIT `.msv1`'s PAGE LAYOUT. Every `--msv-*` is
+   declared on `.t-{theme} .msv1`, so the wrapper carries both classes or the popovers have no fill;
+   but `.msv1` is also the PAGE root — `height: 100%; overflow: hidden; display: flex` — and in
+   `document.body` that measured a 0px-tall clipped flex container. Harmless for a `position: fixed`
+   child and wrong for anything else, so it is undone here rather than worked around. */
+.msv1.msv-portal { height: auto; overflow: visible; display: block; }
+
 /* ── the plate as a form (reframe Phase 4) ──
    ⚠️ HOVER REVEALS THE AFFORDANCE, and the tint is --msv-edithov rather than a translucent white:
    variant D's band IS white, so a white wash on it is invisible. Same reason the stat strip had to
@@ -417,14 +425,25 @@
    ⚠️ AND THE TWO COLUMNS CARRY THE DISTINCTION STRUCTURALLY. Age category and genre are told apart
    by being in different columns under their own labels — never by chip colour, which is the
    specific failure being fixed. */
-/* ⚠️ NOT `msv-gpgroup` — a wrapper class that is a PREFIX of its children's (`msv-gp`) makes every
+/* ⚠️ IT MUST HAVE A BOX, AND `display: contents` GAVE IT NONE. An element with `display: contents`
+   generates no box at all, so `getBoundingClientRect()` returns zeros — and the popover placed
+   against it landed in the window's top-left corner over the nav and the sidebar. `inline-flex` with
+   the meta row's own gap keeps the pills looking exactly as they did AND gives the popover something
+   real to measure.
+
+   ⚠️ NOT `msv-gpgroup` — a wrapper class that is a PREFIX of its children's (`msv-gp`) makes every
    prefix-matching selector and test read the wrapper as a pill. It did exactly that on its first
-   run, failing the "no genres means no pills" lock on a plate rendering no pills. Second time this
-   shape has bitten in this build; the fix is always the name, never the assertion. */
-.msv-genreanchor { display: contents; }
+   run, failing the "no genres means no pills" lock on a plate rendering no pills. */
+.msv-genreanchor { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .msv-genrepop {
-  position: fixed; width: 520px; z-index: 60;
-  background: var(--msv-card); border: var(--msv-cardbd); border-radius: 14px;
+  position: fixed; z-index: 60;
+  /* ⚠️ SELF-CONTAINED WIDTH. The columns pulled apart because the panel was inheriting its width
+     from whatever it landed in; `width` here plus `box-sizing` means the grid below is the same
+     520px wherever the popover is placed. */
+  width: 520px; box-sizing: border-box;
+  background: var(--msv-card);
+  border: 1px solid var(--msv-hair);
+  border-radius: 14px;
   box-shadow: 0 12px 30px rgba(58, 28, 20, 0.16);
   padding: 13px 0 0;
 }
@@ -432,10 +451,10 @@
 .msv-gcolL { border-right: 1px solid var(--msv-hair); padding-bottom: 8px; }
 .msv-gcolR { padding-bottom: 8px; min-width: 0; }
 .msv-glab {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.17em;
-  text-transform: uppercase; color: var(--msv-label); padding: 0 16px 7px;
+  font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600;
+  color: var(--msv-head); padding: 0 16px 7px;
 }
-.msv-glabsub { text-transform: none; letter-spacing: 0; color: var(--msv-muted); }
+.msv-glabsub { font-family: inherit; font-size: 13px; font-weight: 400; color: var(--msv-muted); }
 
 .msv-agerow {
   display: flex; align-items: center; gap: 9px; width: 100%;
@@ -497,13 +516,22 @@
    ⚠️ NO `min-width` HERE — `useFixedMenu` writes an INLINE `minWidth` (the trigger's width) and
    inline always wins, so a declaration in this rule can never apply. It sizes to its content. */
 .msv-wordpop {
-  background: var(--msv-card); border: var(--msv-cardbd); border-radius: 14px;
+  /* ⚠️ AN OPAQUE SURFACE, AND THE BORDER IS A LITERAL 1px HAIRLINE RATHER THAN `--msv-cardbd`.
+     That token is `none` in Editorial (whose CARDS are borderless, by that theme's grammar) — but a
+     popover floats over content rather than resting on a desk, so it needs an edge in every theme or
+     it has nothing separating it from what it covers. The FILL is the theme's parchment. */
+  background: var(--msv-card);
+  border: 1px solid var(--msv-hair);
+  border-radius: 14px;
   box-shadow: 0 12px 30px rgba(58, 28, 20, 0.16);
   width: 270px; padding: 13px 0; z-index: 60;
 }
+/* ⚠️ PLAYFAIR FOR HEADINGS AND FIGURES, MONO FOR LABELS AND HINTS, INTER FOR CONTENT. The popovers
+   were mono end to end, which is not the app's grammar — the stat strip already sets the rule with
+   its Playfair figures over mono keys. */
 .msv-wordlab {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: 0.17em;
-  text-transform: uppercase; color: var(--msv-label); padding: 0 16px 7px;
+  font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600;
+  color: var(--msv-head); padding: 0 16px 7px;
 }
 
 /* ⚠️ ONE BOX, AND THE RING IS ON THE BOX. Three loose controls in a row read as three controls;
@@ -518,8 +546,9 @@
 }
 .msv-stepinput {
   flex: 1; min-width: 0; border: none; outline: none; background: transparent;
-  font-family: 'JetBrains Mono', monospace; font-size: 17px; letter-spacing: 0.03em;
-  color: var(--msv-head); padding: 11px 0 11px 13px;
+  /* The figure, matching the stat strip's Playfair numerals rather than a mono readout. */
+  font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600;
+  color: var(--msv-head); padding: 8px 0 8px 13px;
   /* ⚠️ THE STACKED BUTTONS ARE THE ONLY SPINNER. A native spinner beside them is a second control
      for one job, at a size nobody can hit. */
   -moz-appearance: textfield;

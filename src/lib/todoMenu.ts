@@ -230,13 +230,23 @@ export interface MenuPlace {
  * UP when the menu would cross the viewport's bottom edge; both axes clamp to an 8px inset so the
  * menu is never drawn off-screen. Pure, so the flip is testable without a DOM.
  */
+/**
+ * @param align which of the trigger's edges the menu lines up with. `"right"` (the default, and what
+ *   every ⋯ menu wants) puts the menu's right edge on the trigger's right. `"left"` lines the menu's
+ *   LEFT edge up with the trigger's — which is what a wide form popover under a group of pills needs,
+ *   because right-aligning a 520px panel to a short trigger throws it off the left of the viewport.
+ *   ADDITIVE: absent means `"right"`, so every existing caller is unchanged.
+ */
 export function placeMenu(
   trigger: { left: number; right: number; top: number; bottom: number },
   menu: { w: number; h: number },
   viewport: { w: number; h: number },
   gap = 6,
+  align: "left" | "right" = "right",
 ): MenuPlace {
-  const left = Math.max(8, Math.min(trigger.right - menu.w, viewport.w - menu.w - 8));
+  const wanted = align === "left" ? trigger.left : trigger.right - menu.w;
+  /* Clamped so the menu never crosses either viewport edge — it SHIFTS, never shrinks. */
+  const left = Math.max(8, Math.min(wanted, viewport.w - menu.w - 8));
   const up = trigger.bottom + gap + menu.h > viewport.h - 8;
   const top = up
     ? Math.max(8, trigger.top - gap - menu.h)

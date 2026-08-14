@@ -191,6 +191,30 @@
   scrollbar-gutter: stable both-edges;
 }
 
+/* ⚠️ THE DOSSIER'S BOTTOM GUTTER — and the dead space under the card was the SCROLL ROW's own
+ * padding, not a lost height anywhere in the chain. `fill` is doing its job: the card measures the
+ * full CONTENT box of row 3. But row 3 pays
+ *   `padding-bottom: calc(var(--wpg-foot) + var(--wpg-reclaim-pad))`
+ * and the working state sets `--wpg-reclaim-pad` to the header's height-and-gap delta, so that the
+ * max scroll of a SCROLLING page does not change when the header condenses. The dossier does not
+ * scroll — its pane body does — so on this page the reclaim is a dead band exactly the size of what
+ * the header gave back. Step 2, which condensed the header, is what introduced it.
+ *
+ * ⚠️ ZEROING IT IS THE ESTABLISHED PATTERN, NOT AN OVERRIDE FIGHT. Query Centre — the other `fill`
+ * page whose panes scroll internally — already does exactly this from its own page class:
+ * `.qc-wpg.wpg--working > .wpg-scroll { --wpg-reclaim-pad: 0px }`. Pages contribute these tokens by
+ * design, and zero is the correct contribution for a row that cannot scroll.
+ *
+ * ⚠️ AND THE BOTTOM GAP READS THE TOP GAP'S OWN TOKEN, so the vertical inset is even BY CONSTRUCTION
+ * in both states rather than by two numbers someone matched. No `height`, no `dvh`, no arithmetic
+ * against a bar. (Generalising this to every `.wpg--fill` row belongs in workspacePageGrid.css,
+ * which is not this pass's file — flagged in the report.)
+ */
+.msv-wpg.wpg--fill > .wpg-scroll {
+  --wpg-reclaim-pad: 0px;
+  --wpg-foot: var(--content-top-gap);
+}
+
 /* ⚠️ THE LIBRARY IS NOT IN THE CHAIN. `.wpg--fill` makes the scroll row a flex column, which would
    otherwise stretch the grid to the row's height and strand the cards at the top of a tall box. */
 .mlib-grid { flex: 0 0 auto; }

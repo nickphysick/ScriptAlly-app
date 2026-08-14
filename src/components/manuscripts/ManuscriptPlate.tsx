@@ -40,6 +40,7 @@ import {
   parseWordCount,
   stepWordCount,
   MAX_MANUSCRIPT_GENRES,
+  themeClassOf,
 } from "./plateEdit";
 import manuscriptIcon from "../../assets/shell/manuscript-icon.png";
 import "./manuscriptPlate.css";
@@ -110,6 +111,19 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
    */
   const [genreDraft, setGenreDraft] = useState<{ ageCategory: string; ids: string[] } | null>(null);
   const [genrePos, setGenrePos] = useState<{ left: number; top: number } | null>(null);
+  /**
+   * ⚠️ THE PORTAL'S THEME CLASS. Both popovers render into `document.body`, and every `--msv-*` is
+   * declared on a DESCENDANT selector (`.t-capp .msv1` …) — so without a theme class on the wrapper
+   * the tokens resolve to nothing and the popovers have no fill and no border. Read from the plate
+   * itself so it reflects the theme this plate is actually in.
+   */
+  const [portalClass, setPortalClass] = useState("msv1 msv-portal");
+  const bandRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const t = themeClassOf(bandRef.current);
+    setPortalClass(`${t ? t + " " : ""}msv1 msv-portal`);
+  }, [open]);
   const { triggerRef: wordTrigger, menuStyle: wordMenu } = useFixedMenu<HTMLButtonElement>(open === "words");
 
   /** The receipt is the only thing that says a write happened; it clears itself. */
@@ -149,12 +163,33 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
    * its placement is the part that is genuinely shared, and this is that part.
    */
   useLayoutEffect(() => {
-    const el = genrePopRef.current;
-    const anchor = genreAnchor.current;
-    if (open !== "genre" || !el || !anchor) return;
-    const p = placeMenu(anchor.getBoundingClientRect(), { w: el.offsetWidth, h: el.offsetHeight },
-      { w: window.innerWidth, h: window.innerHeight });
-    setGenrePos({ left: p.left, top: p.top });
+    if (open !== "genre") return;
+    const place = () => {
+      const el = genrePopRef.current;
+      const anchor = genreAnchor.current;
+      if (!el || !anchor) return;
+      const r = anchor.getBoundingClientRect();
+      /* ⚠️ A ZERO RECT MEANS THE ANCHOR HAS NO BOX, and placing against it lands the popover in the
+         window's top-left corner. That is exactly what `display: contents` on the pill group did —
+         it generates no box, so `getBoundingClientRect()` returned all zeros. Bailing out is better
+         than placing something at 0,0 over the nav. */
+      if (r.width === 0 && r.height === 0) return;
+      /* 8px below the trigger, LEFT-ALIGNED to it, flipped above when the bottom would overflow and
+         clamped so it never crosses a viewport edge — all from the shared `placeMenu`. */
+      const p = placeMenu(r, { w: el.offsetWidth, h: el.offsetHeight },
+        { w: window.innerWidth, h: window.innerHeight }, 8, "left");
+      setGenrePos({ left: p.left, top: p.top });
+    };
+    place();
+    /* ⚠️ REPOSITION RATHER THAN CLOSE, deliberately. This popover holds a buffered draft; closing it
+       on a scroll would discard an edit the writer did not ask to abandon. Capture phase because the
+       pane scrolls, not the window, and scroll events do not bubble. */
+    window.addEventListener("scroll", place, true);
+    window.addEventListener("resize", place);
+    return () => {
+      window.removeEventListener("scroll", place, true);
+      window.removeEventListener("resize", place);
+    };
   }, [open, genreDraft]);
 
   const openTitle = () => { if (!edit) return; setTitleDraft(title); setOpen("title"); };
@@ -198,7 +233,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
   const pills = edit ? [edit.genre.ageCategory, ...genreLabels].filter(Boolean) : genres;
 
   return (
-    <div className="msv-plateband">
+    <div className="msv-plateband" ref={bandRef}>
       {/*
         ⚠️ THE PLATE MARK IS THE DASHBOARD'S PNG, IMPORTED — not a traced SVG sibling of the four in
         manuscriptMarks.tsx. `OneScreenAuthor` already renders this exact asset the same way
@@ -279,7 +314,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
           failure this replaces.
         */}
         {open === "genre" && edit && genreDraft && createPortal(
-          <div className="msv1">
+          <div className={portalClass}>
             <div
               ref={genrePopRef}
               className="msv-genrepop"
@@ -366,7 +401,7 @@ export const ManuscriptPlate: React.FC<ManuscriptPlateProps> = ({
       </div>
 
       {open === "words" && edit && createPortal(
-        <div className="msv1">
+        <div className={portalClass}>
           <div className="msv-wordpop" style={{ ...wordMenu }} role="dialog" aria-label="Word count">
             <div className="msv-wordlab">Word count</div>
             {/*

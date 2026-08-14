@@ -96,3 +96,26 @@ export function splitGenres(ids: string[]): { genre: string; subGenres: string[]
  * has not described itself, and the plate has one line to render them on.
  */
 export const MAX_MANUSCRIPT_GENRES = 3;
+
+/** The theme classes the shell puts on its root. */
+export const THEME_CLASSES = ["t-capp", "t-bold", "t-edn"] as const;
+
+/**
+ * The theme class governing `el`, found by walking its ancestors.
+ *
+ * ⚠️ A PORTALLED POPOVER MUST CARRY THIS OR IT HAS NO TOKENS AT ALL. Every `--msv-*` is declared on
+ * a DESCENDANT selector — `.t-capp .msv1`, `.t-bold .msv1`, `.t-edn .msv1` — so a wrapper rendered
+ * into `document.body` matches none of them and each token resolves to NOTHING. Measured on the
+ * shipped build: `--msv-card` empty, `background` computed `rgba(0,0,0,0)`, `border-width` 0. That is
+ * the whole of the translucent-popover fault, and it was identical in all three themes rather than
+ * one — there is no theme to be wrong in.
+ *
+ * Walking up from the trigger is deliberate: it asks which theme THIS plate is in, rather than
+ * assuming the document holds exactly one themed root.
+ */
+export function themeClassOf(el: Element | null): string {
+  for (let n: Element | null = el; n; n = n.parentElement) {
+    for (const t of THEME_CLASSES) if (n.classList.contains(t)) return t;
+  }
+  return "";
+}

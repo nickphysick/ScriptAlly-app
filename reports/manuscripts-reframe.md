@@ -848,3 +848,128 @@ And one lock **did not fail red on its first check**: `toContain("placeMenu(")` 
 
 **The app itself is auth-gated and was not verified live.** No claim is made about behaviour behind
 the gate; the editors are stateful and a static harness verified their geometry only.
+
+---
+
+## Popover rendering and dossier height
+
+Commit: `manuscripts: popover rendering and dossier height`. Ref: `design-refs/manuscript-plate-editors.html`.
+
+Diagnosed before changing anything. **Two of the five hypotheses were wrong, and one fault turned out
+to be a symptom of another** — stated below as what it actually was.
+
+### Fault 1 — translucent popovers · CAUSE CONFIRMED, but not the theme-specific one
+
+Every `--msv-*` is declared on a **descendant** selector — `.t-capp .msv1`, `.t-bold .msv1`,
+`.t-edn .msv1`. Both popovers portal into `document.body` with `className="msv1"` and **no theme
+ancestor**, so not one of those selectors matched. Measured on the shipped build:
+
+| | measured |
+|---|---|
+| `--msv-card` | **(empty)** |
+| `background-color` | `rgba(0, 0, 0, 0)` |
+| `border-width` | `0px` |
+
+⚠️ **It was identical in all three themes, not one.** The brief suggested a token that resolves in
+Cappuccino and not Editorial; there was no theme for it to be wrong in, because the wrapper was
+outside every theme.
+
+**Fixed** by reading the theme class off the plate itself (`themeClassOf`, walking ancestors —
+nearest wins, no guessed default) and putting it on the portal wrapper. Both popovers now take an
+opaque parchment fill, a **literal `1px` hairline** and radius 14. The border is deliberately *not*
+`--msv-cardbd`: that token is `none` in Editorial, whose *cards* are borderless by its grammar — but
+a popover floats over content rather than resting on a desk and needs an edge in every theme.
+
+### Fault 3 — "overlapping" rows · NOT A LAYOUT BUG. It was Fault 1.
+
+The brief expected a fixed height, an absolutely positioned child or a negative margin. **There are
+none.** Measured with the rows' own rects: `133–153, 201–227, 227–248, 256–294` — strictly
+sequential, **zero overlaps**. What the review saw was the page printing *through* an unfilled panel.
+Filling the popover fixed it; nothing about the stack changed. Re-measured after the fix: still zero
+overlaps, in all three themes.
+
+One real thing was found alongside it: the wrapper carried `.msv1`'s **page-root** layout into
+`document.body` — `height: 100%; overflow: hidden; display: flex`, measuring a **0px-tall clipped
+flex container**. Harmless for a `position: fixed` child and wrong for anything else, so
+`.msv1.msv-portal` undoes it rather than working around it.
+
+### Fault 2 — popover in the top-left · CAUSE: the anchor had no box
+
+`.msv-genreanchor { display: contents }` — which generates **no box at all**, so
+`getBoundingClientRect()` returned zeros and `placeMenu` resolved them to `left 8, top 6`: the
+window's corner, over the nav. `display: contents` was my own choice, to keep the pill row's flex
+layout undisturbed.
+
+**Fixed** with `inline-flex` carrying the meta row's own gap — the pills look identical and the
+anchor is measurable. `placeMenu` (the shared one, from `PortalMenu`'s own module) was **extended in
+place** with an optional `align` argument, defaulting to `"right"` so every existing caller is
+unchanged; a 520px panel right-aligned to a short trigger throws it off the left of the viewport.
+The plate also **refuses to place against a zero rect** — better nothing than something at 0,0.
+
+Measured after the fix: anchor **166 × 30** (was 0 × 0), popover left-aligned to the trigger's left
+edge, **exactly 8px** below it, **flips above** when the trigger is low, and **shifts** to stay
+inside the viewport near the right edge (right edge 1272 in a 1280 window) rather than shrinking.
+Grid stays `186px 332px` — self-contained, so the columns cannot pull apart wherever it lands.
+
+**Scroll behaviour: it repositions, it does not close.** These popovers hold a buffered draft, and
+closing on a scroll would discard an edit nobody asked to abandon. Capture phase, because the pane
+scrolls rather than the window.
+
+### Fault 4 — typography
+
+Playfair for headings and figures, mono for labels and hints, Inter for content. Popover titles
+(`Word count`, `Age category`, `Genre`) are Playfair 600 ~15px in ink — not mono, not uppercase, not
+letter-spaced. The word-count value is Playfair 600 22px, matching the stat strip's numerals. `WORDS`,
+`↑ ↓ STEPS 500` and `COMMON IN {age}` stay mono; genre rows, chips, input and results stay Inter.
+
+### Fault 5 — dead space below the card · CAUSE: the scroll row's own padding
+
+**`fill` is doing its job** — the card measures the full *content box* of row 3. But row 3 pays
+`padding-bottom: calc(var(--wpg-foot) + var(--wpg-reclaim-pad))`, and the **working** state sets the
+reclaim to the header's height-and-gap delta so a *scrolling* page keeps its max scroll when the
+header condenses. The dossier does not scroll — its pane body does — so the reclaim is a dead band
+exactly the size of what the header gave back. **Condensing the header (the previous step) is what
+introduced it.**
+
+The height is lost at **the scroll row**, not the window, the wrapper or the card.
+
+**Fixed** by contributing `--wpg-reclaim-pad: 0px` and `--wpg-foot: var(--content-top-gap)` from the
+page's own class. This is the established pattern, not an override fight: **Query Centre — the other
+`fill` page whose panes scroll internally — already does exactly this**
+(`.qc-wpg.wpg--working > .wpg-scroll { --wpg-reclaim-pad: 0px }`), and the grid sums those two tokens
+precisely so a page can contribute without replacing anything. Reading the *top* gap's own token is
+what makes the inset even by construction rather than by two matched numbers. No `height`, no `dvh`,
+no arithmetic anywhere.
+
+Measured, all three themes: **padding-top 35px, padding-bottom 35px, card bottom gap 35px**, pane
+scrolls, row does not.
+
+> **Flagged:** every `.wpg--fill` row has this same dead band. Generalising the fix belongs in
+> `workspacePageGrid.css`, which is not this pass's file.
+
+### Also found
+
+**`--pg-gut` is declared nowhere** — not in any source file, not in the bundle — while three separate
+comments (`pageHeader.css`, `workspaceShell.css`, `manuscripts.css`) describe it as "the one gutter,
+declared once", and a lock forbids pages from declaring it. Any rule reading it resolves to nothing.
+Nothing of mine reads it; reported rather than touched, since all three files are outside this pass.
+
+### Verification
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | green |
+| Vitest | **4,788 passed, 2 skipped, 0 failed** |
+| `npm run build` | green |
+
+⚠️ **The harness read a zero-height viewport on its first run** — `window.innerHeight` is `0` in this
+pane, so a `height: 100%` chain collapsed and reported the card overflowing by 172px. Every number in
+that pass described a page the app never serves. Re-measured with **pinned pixel dimensions** and a
+screenshot first to force layout, which is the documented handling.
+
+**I cannot see any of this in the running app — it is auth-gated, and I make no claim to have.**
+What I measured is the rendered result against the built stylesheet, in the real DOM order, in all
+three themes. **What remains for Nick to confirm in the browser:** that the popovers open where the
+pointer expects them relative to the live plate, that repositioning on scroll feels right rather than
+distracting, and that the 35px bottom gutter reads as even against the side gutters at the viewport
+widths you actually use.
