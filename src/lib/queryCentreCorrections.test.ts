@@ -214,13 +214,23 @@ describe("§5 · tighten, never scroll", () => {
    * ⚠️ THE TOKEN, NOT THE PROPERTY. `.wsh-title` reads `--wsh-title-size`, and the shell derives the
    * plate's height from its own token — so the short-viewport step is set where the shell already
    * looks for it, and copying the ref's absolute would have pinned this page to a number the shared
-   * header does not use. The ref drops 22 to 19 (a factor of 0.86); against the live 33 that is 28.
+   * header does not use. The ref drops 22 to 19 — a FACTOR of 0.86, and the factor is the rule.
+   *
+   * ⚠️ 28 → 33, BECAUSE THE BASE MOVED AND THIS DID NOT. 28 was 0.86 of a 33px resting title; the
+   * resting title is 38 now (header-gap-vs-height, preset B), which silently left this page's
+   * short-viewport step at a factor of 0.74 — twice as steep as the comment claims, on the one page
+   * that also drops its hero band. The derived number is restated whenever the base moves, which is
+   * exactly what this case exists to force.
    */
   it("the masthead steps down through the shell's token", () => {
     const m = rules("max-height: 768px");
     expect(m, "the short-viewport block is missing").not.toBe("");
     expect(css, "the masthead's step sets a raw font-size instead of the token")
-      .toContain("--wsh-title-size: 28px");
+      .toContain("--wsh-title-size: 33px");
+    /* the base it is derived FROM, asserted here so the pair cannot drift apart again unnoticed */
+    const shell = read("../components/shell/pageHeader.css");
+    expect(shell, "the resting title moved without this page's step moving with it — re-derive at 0.86 of the new base")
+      .toContain("--wsh-title-size: 38px");
   });
 
   it("the hero gives up scale first, and the stats keep their figures", () => {

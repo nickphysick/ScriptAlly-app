@@ -106,9 +106,14 @@ const rule = (sel: string) => {
 describe("one ground, one window", () => {
   /* ⚠️ RETARGETED from "the card is white on the radius token, hairline-bordered and softly
      raised". The rule is unchanged; the element is `.ws-window` rather than `.ws-card`. */
-  it("the window is the only white surface: radius, hairline, soft raise", () => {
+  /* ⚠️ AND THE WINDOW IS NO LONGER THE WHITE ONE — the CARDS are. Its ground stepped back to
+     #fefcfa so a card can sit ON it; a literal here would silently break the five surfaces that
+     resolve a gradient or a translucent fill into this one. */
+  it("the window is the ground surface: the token, radius, hairline, soft raise", () => {
     const w = rule(".ws-window");
-    expect(w).toContain("background: #ffffff");
+    expect(w, "the window's ground is a literal again — the hems, the dock and the two internal fades all resolve into it and would each need the same literal")
+      .toContain("background: var(--ws-window)");
+    expect(w).not.toContain("#ffffff");
     expect(w).toContain("border-radius: 16px");
     expect(w).toContain("border: 1px solid var(--ws-edge)");
     expect(w).toContain("box-shadow:");
@@ -143,6 +148,17 @@ describe("one ground, one window", () => {
     const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
     expect(idx).toContain("--ws-ground: #f7f4ee");
     expect(idx).toContain("--ws-edge: #e9e2d7");
+    /* ⚠️ TWO GROUNDS, AND THEY ARE NOT THE SAME SURFACE — `--ws-ground` is what sits OUTSIDE the
+       window, behind the capsules; `--ws-window` is the window's own fill. Both are asserted here
+       so a future pass cannot quietly collapse them into one. */
+    expect(idx).toContain("--ws-window-rgb: 254, 252, 250");
+    /* ⚠️ THE COLOUR IS DERIVED FROM THE CHANNELS, NEVER RESTATED BESIDE THEM. A `--ws-window:
+       #fefcfa` alongside the rgb triple is two numbers for one colour, and the alpha variants
+       (`rgba(var(--ws-window-rgb), 0)` in the hems, `.86` in the dock) would drift off the opaque
+       one the first time either was tuned — silently, since a fade to a near-match reads as a pale
+       stripe rather than as a wrong colour. */
+    expect(idx, "the window colour is stated twice — the channels must be the only source")
+      .toContain("--ws-window: rgb(var(--ws-window-rgb))");
   });
 });
 

@@ -1186,34 +1186,29 @@
  */
 
 /**
- * ══ §1b · THE MASTHEAD IS A BAND, NOT AN ISLAND ═══════════════════════════════════════════════
+ * ══ §1b · THE MASTHEAD IS A CARD AGAIN — THE FULL-WIDTH OPT-OUT IS REVERSED ═══════════════════
  *
- * ⚠️ ONE TOKEN, PAGE-SCOPED — the same shape as the gap above, and for the same reason. The shell's
- * law is `header = content − 2 × --header-inset` with the inset at 120px, which is a REASONED,
- * shell-wide decision documented in pageHeader.css and read by all ten pages. This does not argue
- * with it; it opts this page out. Measured before: the plate was 770px starting at x=447 while the
- * working body was 1010px starting at x=327 — inset 120px a side, with dead space either side of a
- * centred card sitting over a full-width split.
+ * ⚠️ `.qc-wpg { --header-inset: 0px }` IS DELETED, AND SO IS THE BAND TREATMENT THAT DEPENDED ON
+ * IT. The shell's law is `header = content − 2 × --header-inset` with the inset at 120px — a
+ * reasoned, shell-wide decision documented in pageHeader.css and read by all ten pages. This page
+ * opted out, and the cost was that it was the ONE page whose header did not line up with the other
+ * nine: the acceptance matrix's `restHdrL` read 327 here against 447 everywhere else, and that
+ * single divergence aborted the whole run for two passes.
  *
- * ⚠️ AND OVERRIDING THE TOKEN WORKS HERE WHERE IT DID NOT FOR THE GAP. `--content-top-gap` is
- * COMPUTED at `:root` from its `-rest` variant, so overriding the variant lower down changed
- * nothing; `--header-inset` is read directly inside a `calc()` on `.wpg-plate`, and a custom
- * property resolves at its USE site. Different shape, so a different answer — worth stating,
- * because the two look identical from a distance.
+ * ⚠️ THE BAND GOES WITH IT BECAUSE IT WAS AN ARGUMENT ABOUT WIDTH, NOT ABOUT THIS PAGE. It said:
+ * "a card whose left and right edges touch the container's is just a box with two pointless lines
+ * in it" — true, and true only while the plate spanned the working width. Inset by 120px the plate
+ * floats in a gutter again, which is precisely the condition under which that comment said a CARD
+ * is right. Keeping the band would have left a borderless, shadowless strip hanging in a gutter:
+ * the fault the band was introduced to remove, pointing the other way.
+ *
+ * ⚠️ THE TOKEN-SHAPE NOTE IS WORTH KEEPING even though the override is gone, because it is about
+ * the shell rather than this page: `--content-top-gap` is COMPUTED at `:root` from its `-rest`
+ * variant, so overriding the variant lower down changes nothing, while `--header-inset` is read
+ * inside a `calc()` on `.wpg-plate` and resolves at its USE site. That is why the gap override
+ * below works and the inset override above did. Different shape, different answer — and the two
+ * look identical from a distance, which is the whole reason it is written down.
  */
-.qc-wpg { --header-inset: 0px; }
-/**
- * ⚠️ A BAND HAS ONE RULE, NOT FOUR EDGES. The shared plate is a card — border, radius, shadow —
- * which is right when it floats in a gutter and wrong when it spans the working width: a card whose
- * left and right edges touch the container's is just a box with two pointless lines in it. Scoped
- * to this page; the other nine keep the card.
- */
-.qc-wpg .wsh {
-  border: 0;
-  border-bottom: 1px solid var(--ws-edge);
-  border-radius: 0;
-  box-shadow: none;
-}
 .qc-wpg.wpg--working { --content-top-gap: 0px; }
 
 /**
@@ -2446,9 +2441,12 @@
 @media (max-height: 768px) {
   /* ⚠️ THE TOKEN, NOT THE PROPERTY. `.wsh-title` reads `--wsh-title-size` (33px resting), and the
      shell also derives the plate's height from its own token — so the step is set where the shell
-     already looks for it and the two stay in proportion. The ref drops 22 to 19, a factor of 0.86;
-     against a live 33 that lands at 28. */
-  .qc-wpg .wsh { --wsh-title-size: 28px; }
+     already looks for it and the two stay in proportion. The ref drops 22 to 19, a factor of 0.86.
+     ⚠️ 28 → 33, BECAUSE THE BASE MOVED AND THIS DID NOT. 28 was 0.86 of a 33px title; the resting
+     title is 38 now, which left this at a factor of 0.74 — a short-viewport step twice as steep as
+     the one the comment claims, on the one page that also drops its hero band. The factor is the
+     rule and the number is derived from it: 0.86 × 38 ≈ 33. */
+  .qc-wpg .wsh { --wsh-title-size: 33px; }
   /* the hero band gives up its portrait scale first: it is the least information per pixel here */
   /* ⚠️ THE PLATE'S PADDING, NOT A MARGIN (fix pack 2 §1). The band had none to give; a plate does,
      and taking it from the padding is what keeps the container while the row gets shorter. The step

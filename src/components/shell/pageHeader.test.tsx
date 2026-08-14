@@ -342,17 +342,35 @@ describe("the header's two states", () => {
     expect(all(gridCss, ".wpg-plate::after"), "the row's hairline came back — with the band's edge it draws two lines a pixel apart").toBe("");
     expect(all(gridCss, ".wpg-plate--working::after"), "the row's working hairline came back").toBe("");
     const band = all(hdrCss, ".wsh--scrolled");
-    expect(band, "the band has no ground — it is still a card floating on the window's white").toContain("background: var(--wsh-band-bg)");
+    expect(band, "the band has no ground — it is still a card floating on the window").toContain("background: var(--wsh-band-bg)");
     /* ⚠️ THE EXISTING BORDER BOX RE-COLOURED, not a new element: three sides transparent, the
        fourth the band's line. It inherits the `border-color` transition and the 1px comes out of
        the content rather than off the 52px the matrix asserts. */
     expect(band, "the band's bottom edge is missing, or it grew a border on the other three sides")
       .toContain("border-color: transparent transparent var(--wsh-band-edge)");
     expect(band, "the band grew a radius or a shadow — it is a band, not a card").toContain("box-shadow: none");
-    /* the ground is the token, never a literal — and it resolves to the parchment already in use */
+    /**
+     * ⚠️ THE GROUND IS A TOKEN, NEVER A LITERAL, AND IT IS THE SHELL'S CHROME FILL.
+     *
+     * It was `--shell-card` (#fdfaf5), which against a #ffffff window put the band half a step
+     * from the ground — legible only by its hairline. The band should read as THE PAGE SHOWING
+     * THROUGH the window, so it takes `--shell-parch` (#f2ede7), the same surface as a nav pill.
+     *
+     * ⚠️ SEMANTIC MATCH, NOT VALUE MATCH — and this is the whole reason the assertion names the
+     * token rather than the hex. `--shell-panel` holds the same #f2ede7 today, so a value check
+     * would pass either; but its own comment states it is an IN-PAGE GROUPING SURFACE, content
+     * rather than chrome fill, and the band is chrome. Pointing at `--shell-parch` means a future
+     * retone of the shell's chrome fill carries the band with it, which is the behaviour wanted.
+     */
     const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(tokens, "the band ground is a literal — it must resolve to the existing parchment").toContain("--wsh-band-bg: var(--shell-card)");
+    expect(tokens, "the band ground is a literal, or it went back to the card parchment — it must resolve to the shell's chrome fill")
+      .toContain("--wsh-band-bg: var(--shell-parch)");
     expect(tokens, "the band's edge token is missing").toMatch(/--wsh-band-edge:\s*#[0-9a-f]{6}/i);
+    /* ⚠️ AND THE RESTING PLATE STAYS PURE WHITE — the two states are a WHITE CARD collapsing to a
+       PARCHMENT BAND. If the plate ever takes the ground token too, the collapse stops being a
+       change of surface and the band's whole job goes with it. */
+    expect(tokens, "the resting plate left pure white — the card and the band would no longer be two different surfaces")
+      .toContain("--wsh-plate-bg: #ffffff");
   });
 
   it("⚠️ ONE CURVE, ONE PAIR OF DURATIONS — .22s on geometry, .14s on fades", () => {

@@ -54,11 +54,13 @@
   display: block;
 
   /* ⚠️ THE GROUND THE STICKY HEADING PAINTS ITSELF WITH, and it is NOT free-floating: it must
-     equal the shell's content capsule (`.ws-work { background: #ffffff }` in workspaceShell.css),
-     or a heading that looks correct at rest grows a pale slab the moment a row passes under it.
-     CSS cannot read another sheet, so the pair is asserted in `tasksList.test.tsx` — the same
-     treatment the family tones get, for the same reason. */
-  --tdg-ground: #ffffff;
+     equal the shell's content capsule (`.ws-work` in workspaceShell.css), or a heading that looks
+     correct at rest grows a pale slab the moment a row passes under it.
+     ⚠️ IT IS THE TOKEN NOW, NOT A MATCHED LITERAL. Both sides said `#ffffff` and agreed only
+     because someone kept them agreeing; reading `--ws-window` makes the pair structural, so the
+     ground can be retoned without this heading being remembered. The cross-file lock in
+     `tasksList.test.tsx` stays — it now asserts they read one token rather than one hex. */
+  --tdg-ground: var(--ws-window);
 
   /* ⚠️ ONE EASING AND TWO DURATIONS, PAGE-WIDE (P6; sheet 6). 120–160ms for EMPHASIS — a state
      change where nothing moves — and 220–260ms for MOVEMENT. Anything past 300ms is a bug, and
@@ -104,7 +106,9 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: linear-gradient(var(--tdg-ground) 74%, rgba(255, 255, 255, 0));
+  /* the far end is the ground's own channels at zero alpha — a hand-written white here would make
+     the heading fade THROUGH a colour the page does not have, which is the pale-slab fault again */
+  background: linear-gradient(var(--tdg-ground) 74%, rgba(var(--ws-window-rgb), 0));
 }
 
 /* ⚠️ THE HAIRLINE IS THE HEAD'S OWN BOTTOM EDGE (fix pack, 10 Aug), and it rides the head rather

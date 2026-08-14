@@ -45,8 +45,11 @@ describe("StagePage — the ONE wrapper (not scattered per page)", () => {
        ⚠️ RETARGETED (app-shell-v2): the ground is `--ws-ground` on `.ws-app`/`.ws-main` now, and
        the white surface is `.ws-window` — `.ws-card` is retired. The RULE is unchanged and is the
        point of this lock: no page paints its own ground. */
+    /* ⚠️ THE GROUND IS `--ws-window` (#fefcfa) NOW, NOT #ffffff — white moved to the cards, which
+       is what lets them read as objects on the page. The RULE this case protects is unchanged and
+       is the only thing it was ever about: painted ONCE, on the window, never per page. */
     const wsCss = readFileSync(resolve(__dirname, "./workspaceShell.css"), "utf8");
-    expect(wsCss).toMatch(/\.ws-window \{[^}]*background: #ffffff/s);
+    expect(wsCss).toMatch(/\.ws-window \{[^}]*background: var\(--ws-window\)/s);
     expect(shell.includes('background: "var(--shell-canvas)"')).toBe(false);
   });
 

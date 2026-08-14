@@ -132,10 +132,37 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * argument the shell's own foot fade already makes for itself.
    */
   const [hem, setHem] = React.useState({ top: false, bot: false });
-  /* ⚠️ THE UNION, AND IT IS AN `||` RATHER THAN A PRIORITY. Neither half outranks the other: a
-     journey opened part-way down a scrolled page is still working, and closing it while still
-     scrolled must not restore the card. Everything below reads this one value. */
-  const condensed = stuck || condensedByMode;
+  /**
+   * ⚠️ THE THIRD INPUT — ENGAGEMENT (collapse-on-engagement).
+   *
+   * THE RULE: the header collapses when the user starts working. On a scrolling page, scrolling is
+   * the signal. On a fill page, the first click inside the content area is.
+   *
+   * ⚠️ FILL PAGES ONLY, and that is the whole reason it exists. Five pages never collapsed because
+   * they never scroll — their panes do — so the sentinel had nothing to report and the card stayed
+   * forever on the pages with the least room to spare. A scrolling page already has its signal, and
+   * making a click collapse one too would fight the sentinel: the click would strip it at
+   * `scrollTop 0`, where the sentinel says it must be resting.
+   */
+  const [engaged, setEngaged] = React.useState(false);
+  /* ⚠️ AN `||` OF THREE, STILL A PRIORITY OF NONE, and the header still receives ONE boolean and
+     never learns which of them fired. A journey opened part-way down a scrolled page is still
+     working; a click after a journey closes is still working. Everything below reads this value. */
+  const condensed = stuck || condensedByMode || engaged;
+
+  /**
+   * ⚠️ ENTERING A JOURNEY LATCHES ENGAGEMENT, so LEAVING one leaves the header collapsed. You were
+   * working before it and you still are — restoring the card on exit would hand back the browsing
+   * chrome at the moment you have the most to do.
+   *
+   * ⚠️ AND IT IS A LATCH RATHER THAN A READ OF `condensedByMode`. The union already covers the time
+   * the journey is open; what this is for is the moment AFTER it closes, when mode has gone false
+   * again. A journey can also be opened from the shell's own menus without any click landing in the
+   * content area, so the click handler cannot be relied on to have fired.
+   */
+  React.useEffect(() => {
+    if (fill && condensedByMode) setEngaged(true);
+  }, [fill, condensedByMode]);
 
   /**
    * ⚠️ THE STATE IS A PURE FUNCTION OF `scrollTop`, AND THE CLAMP IT USED TO FEAR IS IMPOSSIBLE.
@@ -207,17 +234,83 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     };
   }, []);
 
+  /**
+   * ⚠️ THE TRIGGER IS ON THE CONTENT ROWS, NEVER ON THE DOCUMENT. A document-level listener would
+   * collapse the header when you clicked the sidebar, the breadcrumb or the top bar — none of which
+   * is working on this page — and it would have to guess its way back out with a `closest()` test
+   * against markup it does not own. Handlers on the rows say the same thing structurally: these
+   * elements ARE the work area, so anything reaching them is engagement by definition.
+   *
+   * ⚠️ POINTERDOWN, NOT CLICK. A drag inside the content — reordering a To-do card, dragging a comp
+   * — never produces a `click`, and it is the least ambiguous act of working there is.
+   */
+  const engage = React.useCallback(() => {
+    if (fill) setEngaged(true);
+  }, [fill]);
+
+  /**
+   * ⚠️ THE BAND IS THE WAY BACK, and it carries NO chevron and NO label. The affordance is the
+   * pointer and a hover shift — a control drawn in the strip would be a second thing competing
+   * with the page's own actions for the one row that exists to have almost nothing in it.
+   *
+   * ⚠️ RESTORE IS NOT OFFERED ON A SCROLLING PAGE. There the state is a pure function of
+   * `scrollTop`, so a click that set it false would be overwritten by the next evaluated frame —
+   * an affordance that visibly does nothing is worse than none.
+   */
+  const restorable = fill && condensed;
+  const restore = React.useCallback(() => setEngaged(false), []);
+
+  /**
+   * ⚠️ A PAGE VISIT RESETS IT — the card is the front door, and a fresh arrival gets it.
+   *
+   * ⚠️ AND UNMOUNTING IS NOT THE RESET, because these pages never unmount. The workspace keeps
+   * every page mounted and toggles `display`, so a component that reset its own state on unmount
+   * would reset it exactly never — you would leave Query Centre collapsed and come back to it
+   * collapsed a day later. Measured, not assumed: the matrix's own wheel helper exists because the
+   * first `.wpg-scroll` in the document belongs to a hidden slot whose box is empty.
+   *
+   * So the signal is the grid's box going from zero to non-zero: hidden → shown, which is what a
+   * visit IS under a display-toggling shell. A shell that DOES unmount (a tier crossing) resets by
+   * unmounting, so both arrangements are covered without either knowing about the other.
+   */
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    let shown = el.getBoundingClientRect().height > 0;
+    const ro = new ResizeObserver(() => {
+      const now = el.getBoundingClientRect().height > 0;
+      /* ⚠️ ONLY THE HIDDEN → SHOWN EDGE. Resetting on every observation would clear engagement on
+         any reflow — a window resize, a pane opening — and the header would pop back mid-task. */
+      if (now && !shown) setEngaged(false);
+      shown = now;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
     <PlateCondensedContext.Provider value={condensed}>
-      <div className={`wpg${condensed ? " wpg--working" : ""}${toolbar ? " wpg--tools" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}>
+      <div
+        ref={rootRef}
+        className={`wpg${condensed ? " wpg--working" : ""}${toolbar ? " wpg--tools" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}
+      >
         {/* ⚠️ ROW 1 CARRIES THE STATE CLASS TOO, not just the header inside it. The width change and
             the hairline are the ROW's (the header fills its row in both states), so the row has to
             know. Same boolean, one source — it cannot disagree with the header. */}
-        <div className={`wpg-plate${condensed ? " wpg-plate--working" : ""}`}>{plate}</div>
-        {toolbar && <div className="wpg-tools">{toolbar}</div>}
+        {/* ⚠️ ROW 1 NEVER ENGAGES — clicking the header is not working on the page, and a header that
+            collapsed when you clicked it would be a control that hides itself. */}
+        <div
+          className={`wpg-plate${condensed ? " wpg-plate--working" : ""}${restorable ? " wpg-plate--restorable" : ""}`}
+          onPointerDown={restorable ? restore : undefined}
+        >
+          {plate}
+        </div>
+        {toolbar && <div className="wpg-tools" onPointerDown={engage}>{toolbar}</div>}
         <div
           className="wpg-scroll"
           ref={scrollRef}
+          onPointerDown={engage}
           /* a scrollable region must be reachable by keyboard, and named when it is */
           tabIndex={0}
           role={scrollLabel ? "region" : undefined}
@@ -256,7 +349,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         )}
         {/* ⚠️ ROW 4, AFTER THE HEMS — the hems are absolute-ish grid items in row 3, so the dock
             must be its own row or it would share their cell and overlap the scroller's foot. */}
-        {dock && <div className="wpg-dock">{dock}</div>}
+        {/* the dock is a content row too — acting in it is working on the page */}
+        {dock && <div className="wpg-dock" onPointerDown={engage}>{dock}</div>}
       </div>
     </PlateCondensedContext.Provider>
   );

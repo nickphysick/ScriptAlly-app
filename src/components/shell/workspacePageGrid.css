@@ -79,6 +79,17 @@
   transition: padding .22s cubic-bezier(.4, 0, .2, 1);
 }
 .wpg-plate--working { padding: 0; }
+/**
+ * ⚠️ THE BAND IS THE WAY BACK, AND IT STAYS BARE (collapse-on-engagement). No chevron, no label —
+ * the affordance is the pointer and a hover shift, nothing drawn. A control in the strip would
+ * compete with the page's own actions for the one row that exists to hold almost nothing.
+ *
+ * ⚠️ FILL PAGES ONLY, and the class says so rather than the stylesheet guessing. On a scrolling
+ * page the state is a pure function of `scrollTop`, so a click that cleared it would be overwritten
+ * on the next evaluated frame — a pointer cursor promising something that visibly does not happen.
+ */
+.wpg-plate--restorable { cursor: pointer; }
+.wpg-plate--restorable:hover .wsh { background: var(--shell-inset); }
 /* ⚠️ THE FLOATING HAIRLINE IS DELETED (ref 91). The row drew a 1px rule inset to the content
    gutter, fading in with the working state; the header now draws its OWN bottom edge as a band,
    spanning the container. Keeping both gave two lines a pixel apart that did not even agree on
@@ -193,12 +204,16 @@
  * ⚠️ A HAIRLINE ABOVE AND A TRANSLUCENT GROUND — the content runs up to it, so the boundary has to
  * be stated, and the ground has to admit there is content beneath rather than pretending to be a
  * page edge.
+ *
+ * ⚠️ THE TRANSLUCENT GROUND IS THE WINDOW'S OWN CHANNELS AT .86, not a hand-written white. At
+ * `rgba(255,255,255,.86)` the dock was 86% of a colour the window no longer has, so it read as a
+ * faintly cold panel over a warm ground — the same fault as the hems, wearing an alpha.
  */
 .wpg-dock {
   grid-row: 4;
   grid-column: 1;
   border-top: 1px solid var(--ws-edge);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(var(--ws-window-rgb), 0.86);
   backdrop-filter: blur(6px);
 }
 
@@ -211,10 +226,13 @@
  * `overflow: hidden` clips them to the window's rounded corners without either of them knowing
  * about the radius.
  *
- * ⚠️ WHITE, BECAUSE THE WINDOW IS WHITE. `.ws-window` is `background: #ffffff`; the fade resolves
- * INTO the ground it sits on, so a token that drifts from that ground would show as a wash of the
- * wrong colour rather than as no fade at all — which is how the shell's own foot fade once ended
- * up dissolving to a colour the page no longer had.
+ * ⚠️ THE GROUND TOKEN, NEVER A LITERAL — and this rule's own history is the argument. It read
+ * `#ffffff` "BECAUSE THE WINDOW IS WHITE", which was true and stopped being true the day the
+ * window went to #fefcfa: two hardcoded hems then painted a lighter band across the top and bottom
+ * of every scroller on every page. The fade resolves INTO the ground it sits on, so it reads the
+ * ground's own token, and the far end is that token's channels at zero alpha rather than a second
+ * colour that happens to match — `rgba(255,255,255,0)` beside `var(--ws-window)` would fade
+ * through white and only show against content.
  */
 .wpg-hem {
   grid-row: 3;
@@ -225,8 +243,8 @@
   opacity: 0;
   transition: opacity .18s ease;
 }
-.wpg-hem--top { align-self: start; background: linear-gradient(to bottom, #ffffff 12%, rgba(255, 255, 255, 0)); }
-.wpg-hem--bot { align-self: end; background: linear-gradient(to top, #ffffff 12%, rgba(255, 255, 255, 0)); }
+.wpg-hem--top { align-self: start; background: linear-gradient(to bottom, var(--ws-window) 12%, rgba(var(--ws-window-rgb), 0)); }
+.wpg-hem--bot { align-self: end; background: linear-gradient(to top, var(--ws-window) 12%, rgba(var(--ws-window-rgb), 0)); }
 .wpg-hem.on { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — only the crossfade goes, exactly as the header's collapse does */
@@ -288,7 +306,18 @@
  * changing a height or a gap moves the padding with it. The lock that proves this is not here: it
  * is the matrix's invariance column, measured on the real pages in both states.
  */
-.wpg--working > .wpg-scroll {
+/**
+ * ⚠️ SCROLLING PAGES ONLY — `:not(.wpg--fill)`, and this became load-bearing the moment fill pages
+ * gained a working state (collapse-on-engagement). The padding exists to keep MAX SCROLL identical
+ * across the state change; a fill page has no scroll to clamp, so it has nothing to protect.
+ *
+ * ⚠️ AND ON A FILL PAGE IT IS ACTIVELY WRONG, not merely redundant. `.wpg--fill > .wpg-scroll` is a
+ * flex COLUMN filling the row, so a `padding-bottom` comes out of the content box: the panes would
+ * be shoved up by the whole reclaim the moment the header collapsed, and back down when it
+ * restored. Query Centre was already inside this rule via its journey mode — the only fill page
+ * that could reach the working state before now — so this is a fix as well as a guard.
+ */
+.wpg--working:not(.wpg--fill) > .wpg-scroll {
   --wpg-reclaim-pad: calc(
     var(--wsh-plate-h) + var(--wsh-plate-gap) - var(--wsh-plate-h-scrolled)
     + var(--content-top-gap-rest) - var(--content-top-gap-work)

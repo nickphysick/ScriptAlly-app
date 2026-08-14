@@ -79,6 +79,23 @@
      competes with every card sitting near it. */
   --ws-ground: #f7f4ee;
   --ws-edge: #e9e2d7;
+  /**
+   * ⚠️ THE WINDOW IS NO LONGER PURE WHITE, AND CARDS ARE — that inversion is the point. At
+   * #ffffff the ground and every card on it were the same surface, so a card was legible only by
+   * its border; the ground steps back to #fefcfa and the cards (and the resting header plate,
+   * `--wsh-plate-bg`) keep #ffffff, so they sit ON the page instead of being invisible against it.
+   *
+   * ⚠️ THE CHANNELS ARE THE TOKEN AND THE COLOUR IS DERIVED FROM THEM, never the reverse. Four
+   * places need this colour at a different alpha — two scroll hems, the dock's translucent ground,
+   * the Tasks hem — and `color-mix()` is banned at runtime here. A hex token plus hand-written
+   * `rgba(254, 252, 250, …)` twins is four numbers to keep in step; this is one. The fade's far end
+   * is `rgba(var(--ws-window-rgb), 0)`, which CANNOT drift from the near end.
+   *
+   * ⚠️ AND `--ws-ground` IS A DIFFERENT SURFACE — it is the ground OUTSIDE the window, behind the
+   * capsules. Two neighbouring tokens, two grounds; the window's own fill is this one.
+   */
+  --ws-window-rgb: 254, 252, 250;
+  --ws-window: rgb(var(--ws-window-rgb));
 
   /**
    * THE HEADER PLATE (amendment 7; ref design-refs/header-plate-frosted-v1.html). The band with a
@@ -104,17 +121,28 @@
      left 27px of air above and below a 37px line box, which reads as a title jammed into a
      band rather than set on a plate. The CONDENSED height is deliberately unchanged — 56px is
      sized by the 18px scrolled title, which did not move. */
-  --wsh-plate-h: 96px;
+  /* ⚠️ 96 → 128 (header-gap-vs-height, preset B). The plate grew with the title again: 38px
+     Playfair and an 88px mark need the room, and the rest height is the one number every page's
+     header is measured against. The CONDENSED height is deliberately unchanged — 52px is sized by
+     the 11.5px mono label, which did not move. */
+  --wsh-plate-h: 128px;
   /* ⚠️ 56 → 52 (consolidated spec §2 + ref 84, which states `--strip:52px`). The strip is the
      17px title's line box plus its breathing room; it is not derived from the rest height. */
   --wsh-plate-h-scrolled: 52px;
   --wsh-plate-gap: 18px;
   --wsh-plate-bg: #ffffff;
-  /* ⚠️ THE WORKING STATE IS A BAND, NOT A CARD ON WHITE (ref 91). Its ground is the parchment the
-     shell already uses for card surfaces — `--shell-card`, resolved here rather than restated —
-     and its bottom edge is its own, replacing the free-floating hairline the grid row used to
-     draw. One line, belonging to the thing that draws it. */
-  --wsh-band-bg: var(--shell-card);
+  /* ⚠️ THE WORKING STATE IS A BAND, NOT A CARD ON WHITE (ref 91). Its bottom edge is its own,
+     replacing the free-floating hairline the grid row used to draw. One line, belonging to the
+     thing that draws it.
+     ⚠️ ITS GROUND IS `--shell-parch`, AND IT USED TO BE `--shell-card`. Against a #ffffff window
+     the card parchment (#fdfaf5) was half a step from the ground and the band was legible only by
+     its hairline. The band should read as THE PAGE SHOWING THROUGH the window, so it takes the
+     shell's chrome fill instead — the same surface as a nav pill.
+     ⚠️ SEMANTIC MATCH, NOT VALUE MATCH: `--shell-panel` holds the same #f2ede7 today and was the
+     obvious-looking choice, but its own comment states it is an IN-PAGE GROUPING SURFACE — content,
+     not chrome fill — and the band is chrome. Pointing here means that if the shell's chrome fill
+     is ever retoned the band follows it, which is the behaviour wanted. */
+  --wsh-band-bg: var(--shell-parch);
   --wsh-band-edge: #dfe4dc;
   --wsh-plate-radius: 2px;
   --wsh-plate-sh: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.09);

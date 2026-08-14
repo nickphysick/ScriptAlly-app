@@ -19,7 +19,11 @@
    the surplus becomes calm left-to-right margin — wide screens get space, never wider cards.
    `minmax(0, …)` keeps the min at zero so a long title still wraps instead of forcing overflow. */
 .tbd {
-  --tbd-ground: #ffffff;
+  /* ⚠️ THE BOARD PAINTS NO GROUND OF ITS OWN — this names what SHOWS THROUGH it, which is
+     `.ws-window`. As a literal `#ffffff` it was a copy of the window's colour rather than a
+     reference to it, so the sticky column head and the fold hem below both dissolved to white the
+     moment the window stopped being white. */
+  --tbd-ground: var(--ws-window);
   --tbd-col-w: 290px;
   --tbd-ease: cubic-bezier(.2, .7, .3, 1);
   display: grid;
@@ -41,7 +45,7 @@
   border-bottom: 2px solid #2a1a13;
   padding-bottom: 7px; margin-bottom: 12px;
   position: sticky; top: 0; z-index: 2;
-  background: linear-gradient(var(--tbd-ground) 74%, rgba(255, 255, 255, 0));
+  background: linear-gradient(var(--tbd-ground) 74%, rgba(var(--ws-window-rgb), 0));
 }
 .tbd-fh h3 { font: inherit; margin: 0; }
 .tbd-fh.done { border-bottom-color: #b9c9b4; }
@@ -208,7 +212,7 @@
    the fold says there is more; the button says how much. */
 .tbd-fade {
   height: 30px; margin-top: -30px; position: relative; z-index: 1; pointer-events: none;
-  background: linear-gradient(rgba(255, 255, 255, 0), var(--tbd-ground));
+  background: linear-gradient(rgba(var(--ws-window-rgb), 0), var(--tbd-ground));
 }
 .tbd-morebtn {
   font-family: "JetBrains Mono", ui-monospace, monospace;

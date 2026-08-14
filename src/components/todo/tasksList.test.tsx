@@ -1030,17 +1030,27 @@ describe("⚠️ THE GROUP HEADING STICKS, BOUNDED BY ITS OWN SECTION", () => {
 
   it("⚠️ IT PAINTS ITS OWN GROUND, fading out so rows slide UNDER rather than collide", () => {
     expect(shd()).toContain("background: linear-gradient(var(--tdg-ground) 74%");
-    expect(shd()).toContain("rgba(255, 255, 255, 0)");
+    /* ⚠️ THE FAR END IS THE GROUND'S OWN CHANNELS, not a hand-written white. Both ends of a fade
+       being one colour is the whole definition of a fade; two independently written values agree
+       today and stop agreeing the first time either is tuned, and the heading then dissolves
+       THROUGH a colour the page does not have. */
+    expect(shd()).toContain("rgba(var(--ws-window-rgb), 0)");
+    expect(shd(), "the heading fades through white again").not.toMatch(/\b255,\s*255,\s*255\b/);
   });
 
   it("⚠️ AND THAT GROUND MUST EQUAL THE SHELL'S CONTENT CAPSULE — a cross-file pair", () => {
-    /* CSS cannot read another sheet. If the capsule stops being white, a heading that looks right
-       at rest grows a pale slab the moment a row passes under it — visible only while scrolling,
-       which is the hardest state to notice in a screenshot. */
+    /* CSS cannot read another sheet. If the capsule stops being the ground, a heading that looks
+       right at rest grows a pale slab the moment a row passes under it — visible only while
+       scrolling, which is the hardest state to notice in a screenshot.
+       ⚠️ THE PAIR IS NOW ONE TOKEN, NOT TWO MATCHED LITERALS. They read `--ws-window` each, so the
+       ground can be retoned without either side being remembered — which is what happened: both
+       said `#ffffff` and the capsule moved to #fefcfa. A matched-hex assertion would have caught
+       that, and only after someone had already shipped the mismatch to find out. */
     const shell = readFileSync(join(here, "..", "shell", "workspaceShell.css"), "utf8");
     const ground = rule(".tdg {").match(/--tdg-ground:\s*([^;]+)/)?.[1].trim();
-    expect(ground).toBe("#ffffff");
-    expect(shell).toContain(".ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: #ffffff; }");
+    expect(ground, "the heading's ground is a literal — it will drift from the capsule silently").toBe("var(--ws-window)");
+    expect(shell, "the content capsule stopped reading the ground token")
+      .toContain(".ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: var(--ws-window); }");
   });
 
   it("⚠️ NO LAYOUT CHANGE CAME WITH IT — the resting rhythm is untouched", () => {

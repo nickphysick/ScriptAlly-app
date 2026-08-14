@@ -52,26 +52,43 @@ describe("§1a · the page states its count once", () => {
   });
 });
 
-describe("§1b · the masthead is a band", () => {
-  /**
-   * ⚠️ ONE TOKEN, PAGE-SCOPED — not an argument with the shell's law. `header = content − 2 ×
-   * --header-inset` at 120px is reasoned and shell-wide (pageHeader.css) and all ten pages read it.
-   * This page opts out; the other nine are untouched, which is what the scope proves.
-   */
-  it("the inset is zeroed on this page and nowhere else", () => {
-    expect(rule(".qc-wpg"), "the page-scoped opt-out is missing").toContain("--header-inset: 0px");
+/**
+ * ══ §1b · REVERSED — THE MASTHEAD IS A CARD LIKE EVERY OTHER PAGE'S ═══════════════════════════
+ *
+ * This described a full-width band and its page-scoped `--header-inset: 0px`. Both are gone, and
+ * the case is TURNED ROUND rather than deleted, because a deleted case says nothing about which way
+ * the rule now runs.
+ *
+ * ⚠️ WHAT THE OPT-OUT ACTUALLY COST. `header = content − 2 × --header-inset` at 120px is reasoned
+ * and shell-wide, and nine pages obeyed it; this page's opt-out made it the only one whose header
+ * did not line up. The acceptance matrix's `restHdrL` read 327 here against 447 everywhere else,
+ * and that ONE divergence aborted the entire run — so two passes were verified by reading past the
+ * stop instead of by a clean gate.
+ *
+ * ⚠️ THE BAND TREATMENT WENT WITH IT, AND IT HAD TO. Its own argument was "a card whose left and
+ * right edges touch the container's is just a box with two pointless lines in it" — an argument
+ * about SPANNING THE WIDTH, not about this page. Inset by 120px the plate floats in a gutter, which
+ * is the condition under which that same comment says a card is right. Keeping the band would have
+ * left a borderless, shadowless strip hanging in a gutter.
+ */
+describe("§1b · the masthead is a card, like every other page's", () => {
+  it("⚠️ NO PAGE-SCOPED INSET — this page reads the shell's law like the other nine", () => {
+    expect(rule(".qc-wpg"), "the full-width opt-out came back — this page's header would stop lining up with the other nine, and the matrix aborts on it")
+      .not.toContain("--header-inset");
+    /* ⚠️ COMMENTS STRIPPED FIRST. The reversal note in f12.css names the deleted declaration in
+       prose, and the raw file therefore contains the exact string this case forbids — the assertion
+       failed on its own explanation. Strip, then match. */
+    const css = read("../components/shell/f12.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css, "the opt-out came back under a different selector — the token resolves at its use site, so any ancestor of .wpg-plate will do it")
+      .not.toMatch(/--header-inset:\s*0/);
     const shell = read("../components/shell/pageHeader.css");
     expect(shell, "the shell's own inset was changed — that would move all ten pages")
       .toContain("--header-inset: 120px");
   });
 
-  /* A card whose left and right edges touch its container's is a box with two pointless lines. */
-  it("it is one rule beneath, not four edges", () => {
-    const r = rule(".qc-wpg .wsh");
-    expect(r, "the page-scoped band rule is missing").not.toBe("");
-    expect(r).toContain("border-bottom: 1px solid var(--ws-edge)");
-    expect(r, "the card's radius survived").toContain("border-radius: 0");
-    expect(r, "the card's float survived").toContain("box-shadow: none");
+  it("⚠️ NO PAGE-SCOPED BAND — the plate keeps its border, radius and shadow", () => {
+    expect(rule(".qc-wpg .wsh"), "the band treatment came back — inset in a gutter it is a borderless strip floating in dead space")
+      .toBe("");
   });
 });
 

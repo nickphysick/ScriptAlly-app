@@ -135,9 +135,12 @@
    is pulled back over the content by its own negative margin, so it costs no height and never
    opens a gap under a short list. `pointer-events: none` — it is a signal that content
    continues, never a target. */
+/* ⚠️ IT RESOLVES INTO THE WINDOW, NOT INTO A CARD. Nothing in `.tpl-cols → .tpl-body →
+   .tdb-centre → .tpl-zone` paints a background, so what shows behind this hem is `.ws-window` —
+   which is why it reads the ground token rather than the white it was written against. */
 .tpl-hem {
   position: sticky; bottom: 0; height: 28px; margin-top: -28px; display: block;
-  background: linear-gradient(rgba(255, 255, 255, 0), #ffffff);
+  background: linear-gradient(rgba(var(--ws-window-rgb), 0), var(--ws-window));
   pointer-events: none;
 }
 

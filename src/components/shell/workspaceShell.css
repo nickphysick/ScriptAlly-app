@@ -499,7 +499,15 @@
    inside can take a definite height and scroll internally. `shrink:0` is what stops a TALL page
    being squeezed to fit — with shrink allowed it would compress instead of overflowing, and the
    card would never scroll at all. `basis:auto` keeps content height as the starting point. */
-.ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: #ffffff; }
+/* ⚠️ THIS IS THE GROUND ANYONE ACTUALLY SEES, AND `.ws-window` IS NOT. `.ws-work` fills the window
+   on every page, so the window's own fill is masked almost everywhere — recolouring `.ws-window`
+   alone changes nothing on screen and leaves every fade resolving into a colour no page displays.
+   Browser-measured on all ten pages: the paint chain under the content is `.ws-work #ffffff ←
+   .ws-window`, with nothing else between them.
+   ⚠️ SO THE TWO MOVE TOGETHER, ALWAYS. They are one surface in two elements — the window draws the
+   frame and the radius, this fills it — and a difference between them can only ever show as a seam.
+   `--tdg-ground` in todoGroups.css is a third reader of the same value and is locked against it. */
+.ws-work { flex: 1 0 auto; display: flex; flex-direction: column; background: var(--ws-window); }
 /* ⚠️ FIXED-VIEWPORT OPT-IN (Query Centre) — and `min-height: 0` ALONE DOES NOTHING HERE.
    The blocker on the base rule is `flex-shrink: 0` (the `0` in `flex: 1 0 auto`): the wrapper can
    never shrink below its content, so min-height is never consulted. Measured at a 720px viewport
@@ -742,8 +750,13 @@
   box-shadow: inset 0 0 0 1px var(--ws-edge);
   pointer-events: none;
 }
+/* ⚠️ THE GROUND IS A TOKEN AND IT IS NOT WHITE. Five other places resolve a gradient or a
+   translucent fill INTO this surface (both `.wpg-hem`s, `.wpg-dock`, `.tpl-hem`, `--tbd-ground`),
+   and each of them was a hand-written `#ffffff` matching this one by coincidence. A literal here
+   is the one that makes all five wrong at once — and wrong INVISIBLY, because a fade to a
+   near-match reads as a pale stripe rather than as a colour anyone can name. */
 .ws-window {
-  flex: 1; min-height: 0; background: #ffffff;
+  flex: 1; min-height: 0; background: var(--ws-window);
   border: 1px solid var(--ws-edge); border-radius: 16px;
   box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 8px 26px rgba(58, 28, 20, 0.07);
   overflow: hidden; display: flex; flex-direction: column;

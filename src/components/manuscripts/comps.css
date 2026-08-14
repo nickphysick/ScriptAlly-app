@@ -136,7 +136,13 @@
    retired `--wpg-cap` precisely because a cap in the wrong place ate content under classic
    scrollbars. */
 .ct-wpg { flex: 1; min-height: 0; width: 100%; }
-.ct-pagebody { padding: 22px 0 110px; }
+/* ⚠️ NO TOP PADDING, EVER — the gap under the header belongs to `--content-top-gap` and is paid
+   ONCE, by whichever row is first below the hairline. This carried 22px, so the page rendered a
+   92px gap against a 70px token: not the grid paying twice, but a bare wrapper adding a second
+   helping that nothing distinguishes from the first. The token then stops being the gap, and
+   retuning it moves nine pages and misses this one. Measured before the fix: 92 here, 154 on
+   Discover, 70 on every page that adds nothing. */
+.ct-pagebody { padding: 0 0 110px; }
 
 /* ⚠️ THE TWO COLUMNS COLLAPSE, THEY DO NOT SHRINK. The Scout's column is fixed so its rows keep the
    flush right edge the pack's alignment spec exists to protect; below the breakpoint it stacks. */

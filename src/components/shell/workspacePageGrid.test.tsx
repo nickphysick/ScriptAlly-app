@@ -229,7 +229,7 @@ describe("the three-row grid — chrome outside the scroller", () => {
   });
 
   /* ══ §2 — THE GAP UNDER THE HAIRLINE ═════════════════════════════════════════════════════════ */
-  it("⚠️ the gap is 70px, ONE token, and it is never paid twice", () => {
+  it("⚠️ the gap is 44px, ONE token, and it is never paid twice", () => {
     /* ⚠️ NOTHING ASSERTED THIS TOKEN AT ALL BEFORE NOW — it had gone 20 → 70 with no lock on
        either the value or, more importantly, the once-only rule. The gap sits above whatever comes
        FIRST below the hairline: the toolbar row where a page has one, the scroll row where it does
@@ -239,8 +239,19 @@ describe("the three-row grid — chrome outside the scroller", () => {
        strip is working — the strip is lighter than the card and needs proportionally less
        separation — and the invariance padding below is computed from the DIFFERENCE, so a literal
        in either place is the failure mode this whole section exists to prevent. */
+    /**
+     * ⚠️ 44 IS A VALUE, AND THE DERIVATION WAS OFFERED AND REJECTED. "Half the header's height,
+     * rounded" would give 64 from a 128px plate and would move the gap with the plate for free; 44
+     * is deliberately tighter than half and was chosen over it. Asserted as a literal HERE, in the
+     * one place that also names the header height, so anyone "restoring" the tidier rule has to
+     * delete a case that says in words that it was not picked.
+     */
     const header = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
-    expect(header, "the resting gap changed value without this case changing with it").toContain("--content-top-gap-rest: 70px");
+    expect(header, "the resting gap changed value without this case changing with it").toContain("--content-top-gap-rest: 44px");
+    const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
+    expect(idx, "the resting plate height changed without this case changing with it").toContain("--wsh-plate-h: 128px");
+    expect(header, "the gap became half the header height — that rule was considered and NOT chosen; 44 is deliberately tighter")
+      .not.toMatch(/--content-top-gap-rest:\s*calc/);
     expect(header, "the working gap changed value without this case changing with it").toContain("--content-top-gap-work: 35px");
     expect(header, "the gap everything reads is no longer the resting one").toContain("--content-top-gap: var(--content-top-gap-rest)");
     expect(block(".wpg--working"), "the working state does not halve the gap").toContain("--content-top-gap: var(--content-top-gap-work)");
@@ -249,6 +260,42 @@ describe("the three-row grid — chrome outside the scroller", () => {
     const both = block(".wpg--tools > .wpg-scroll") + block(".wpg--tools .wpg-scroll");
     expect(both, "a page with a toolbar pays the gap twice — the toolbar row and the scroll row both")
       .toMatch(/padding-top:\s*0/);
+  });
+
+  /**
+   * ⚠️ AND A PAGE ADDS NONE OF ITS OWN — the way the gap actually broke, which is NOT the way the
+   * case above guards against.
+   *
+   * The grid pays the gap once on every page; that half was correct and locked. What no one was
+   * watching is a page putting its OWN top padding on the first thing in the scroll row, which is
+   * indistinguishable from the gap and simply adds to it. Measured on the deployed build:
+   * Comparable titles rendered 92px against a 70px token (`.ct-pagebody`, +22) and Discover 154
+   * (`.dv-hero`, +84), while every page that adds nothing measured exactly 70.
+   *
+   * ⚠️ IT IS NOT A TOOLBAR THING, which is what it looked like. Manuscripts has no toolbar and was
+   * clean; To-do has one and was not. The predictor is "does this page pad its own first row", and
+   * nothing else.
+   *
+   * ⚠️ A FRAMED BOX'S PADDING IS ITS OWN, and that distinction is the reason this reads the pixel
+   * rather than the source. `.pkgw-strip` has 11px of top padding and is a bordered, filled strip —
+   * its content starts 11px inside a box whose EDGE is at the gap, so the gap is still 70. Only a
+   * BARE wrapper adds. The measured version of this lives in `gapAudit.measure.ts`; what is
+   * asserted here is that the two known offenders stay at zero.
+   */
+  it("⚠️ NO PAGE ADDS ITS OWN TOP PADDING TO THE FIRST ROW — the gap is the grid's alone", () => {
+    const rule = (css: string, sel: string) => {
+      const i = css.indexOf(`${sel} {`);
+      expect(i, `${sel} has no rule — the anchor this case reads is gone`).toBeGreaterThan(-1);
+      return css.slice(i, css.indexOf("}", i));
+    };
+    const comps = readFileSync(resolve(__dirname, "../manuscripts/comps.css"), "utf8");
+    const discover = readFileSync(resolve(__dirname, "../agents/discover.css"), "utf8");
+    /* ⚠️ THE VALUE IS EXTRACTED AND COMPARED, never tested with a `(?!0)` lookahead — `\s*`
+       backtracks to zero width and the lookahead runs against the space, so `padding: 0` "matches".
+       That shape has bitten this repo twice and is banned. */
+    const padTop = (r: string) => (/padding:\s*([^;]+);/.exec(r)?.[1] ?? "").trim().split(/\s+/)[0];
+    expect(padTop(rule(comps, ".ct-pagebody")), "Comparable titles pads its own body again — its gap renders larger than the token says").toBe("0");
+    expect(padTop(rule(discover, ".dv-hero")), "Discover's hero pads its own top again — it rendered a 154px gap against a 70px token").toBe("0");
   });
 
   /* ══ §3 — THE SCROLL HEMS ═══════════════════════════════════════════════════════════════════ */
@@ -277,6 +324,46 @@ describe("the three-row grid — chrome outside the scroller", () => {
     /* the hems are rendered by the grid, so every page gets them identically or none does */
     expect(srcCode, "the hems are not mounted").toContain("wpg-hem--top");
     expect(srcCode, "the hems are not mounted").toContain("wpg-hem--bot");
+  });
+
+  /**
+   * ⚠️ A HEM RESOLVES INTO THE GROUND, AND IT MUST NAME THE GROUND'S TOKEN TO DO IT.
+   *
+   * Both hems carried a hardcoded `#ffffff` — correct, and silently wrong the moment the window
+   * went to #fefcfa: a fade from white over a warmer ground is a pale stripe across the top and
+   * bottom of every scroller in the app, on every page at once. It shows only against content, so
+   * an empty page looks perfect and nothing anywhere errors.
+   *
+   * ⚠️ THE FAR END IS THE SAME TOKEN'S CHANNELS AT ZERO ALPHA, never `rgba(255,255,255,0)`. That
+   * near end and far end are the same colour is the entire definition of a fade; two independently
+   * written values can agree today and not tomorrow, and gradient interpolation would run the
+   * midpoint through white while both endpoints looked right.
+   *
+   * ⚠️ ASSERTED BY EXTRACTING THE VALUE, NOT BY A `(?!#)` LOOKAHEAD. `background:\s*(?!.*#)` is the
+   * shape this repo has been bitten by twice — `\s*` backtracks to zero width and the lookahead
+   * runs against the space. The declaration is pulled out and checked in code.
+   */
+  it("⚠️ NEITHER HEM PAINTS A LITERAL — both ends read the ground token", () => {
+    for (const sel of [".wpg-hem--top", ".wpg-hem--bot"]) {
+      /* ⚠️ ANCHOR BEFORE SLICING — `block()` returns "" for a selector it cannot find, and every
+         `.not.toMatch` below passes happily on an empty string. */
+      const b = block(sel);
+      expect(b, `${sel} has no rule — the anchor this case reads is gone`).toContain("background:");
+      /* the whole block, not just the declaration: a literal is a fault wherever in the rule it sits */
+      expect(b, `${sel} paints a hex literal — it will drift from the window's ground and show as a pale band over content: ${b.trim()}`)
+        .not.toMatch(/#[0-9a-f]{3,8}\b/i);
+      expect(b, `${sel} paints a bare white — same fault, spelled in rgb`).not.toMatch(/\b255,\s*255,\s*255\b|\bwhite\b/);
+      expect(b, `${sel} does not resolve into the window's ground: ${b.trim()}`).toContain("var(--ws-window)");
+      expect(b, `${sel}'s transparent end is not the ground's own channels — it fades through a different colour: ${b.trim()}`)
+        .toContain("rgba(var(--ws-window-rgb), 0)");
+    }
+    /* ⚠️ AND THE DOCK, which is the same fault wearing an alpha: `rgba(255,255,255,.86)` is 86% of
+       a colour the window no longer has, so it reads as a cold panel over a warm ground. */
+    const dock = block(".wpg-dock");
+    expect(dock, "the dock has no rule — the anchor this case reads is gone").toContain("background:");
+    expect(dock, `the dock's translucent ground is not the window's channels: ${dock.trim()}`).toContain("var(--ws-window-rgb)");
+    expect(dock, "the dock went back to a white alpha — 86% of a colour the window no longer has")
+      .not.toMatch(/\b255,\s*255,\s*255\b/);
   });
 
   it("⚠️ the hems are driven by the SAME evaluation as the header — never a second listener", () => {
@@ -356,9 +443,19 @@ describe("the three-row grid — chrome outside the scroller", () => {
        padding-bottom: 48px }` at the same specificity LATER in the bundle — so they won silently
        and exactly those three measured max scroll falling by 62 while the rest held. Both values
        now land in one `calc` on `.wpg-scroll` and add. */
-    const rule = block(".wpg--working > .wpg-scroll");
+    /**
+     * ⚠️ AND IT IS SCOPED TO SCROLLING PAGES — `:not(.wpg--fill)`, which became load-bearing the
+     * moment fill pages gained a working state of their own. A fill page has no scroll to clamp, so
+     * it has nothing to protect; worse, `.wpg--fill > .wpg-scroll` is a flex COLUMN filling the row,
+     * so a `padding-bottom` comes out of its content box and would shove the panes up by the whole
+     * reclaim on collapse and back down on restore. Query Centre could already reach this rule
+     * through its journey mode, so the guard is a fix as much as a precaution.
+     */
+    const rule = block(".wpg--working:not(.wpg--fill) > .wpg-scroll");
     expect(rule, "the invariance contribution is missing — stripping shrinks max scroll and a barely-scrolling page oscillates")
       .toContain("--wpg-reclaim-pad");
+    expect(block(".wpg--working > .wpg-scroll"), "the reclaim lost its `:not(.wpg--fill)` guard — it now lands on pages that cannot scroll, where it shoves the panes up by its own height")
+      .toBe("");
     /* ⚠️ THE HEADER DELTA *PLUS* THE GAP DELTA, and the second term is the one that goes missing.
        Stripping now gives back the card's extra height AND 35px of the gap under the hairline; a
        padding that only replaces the first drops max scroll by 35 on every page, the browser clamps
@@ -404,6 +501,84 @@ describe("the three-row grid — chrome outside the scroller", () => {
     expect(seen[0], "the mode input does not reach the header — a workspace page would never strip, because nothing scrolls on it").toBe(true);
   });
 
+  /**
+   * ══ COLLAPSE ON ENGAGEMENT ═══════════════════════════════════════════════════════════════════
+   *
+   * THE RULE: the header collapses when the user starts working. On a scrolling page, scrolling is
+   * the signal. On a fill page, the first click inside the content area is.
+   *
+   * ⚠️ IT EXISTS BECAUSE FIVE PAGES COULD NEVER COLLAPSE AT ALL. A fill page's panes scroll and the
+   * row does not, so the sentinel had nothing to report — the card stayed forever on exactly the
+   * pages with the least room to spare. Query Centre was the only one with a way out, and only
+   * because a journey sets the mode.
+   */
+  it("⚠️ ENGAGEMENT IS THE THIRD INPUT, and it is wired to the content rows ONLY", () => {
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    /* ⚠️ NO DOCUMENT LISTENER. One would fire for the sidebar, the breadcrumb and the top bar —
+       none of which is working on this page — and would then need a `closest()` test against markup
+       this component does not own to guess its way back out. */
+    expect(src, "a document-level listener appeared — a click in the sidebar or the top bar would collapse the page's header")
+      .not.toMatch(/document\.addEventListener|window\.addEventListener/);
+    expect(src, "the engage handler is gone — nothing would collapse a fill page").toContain("const engage");
+    /* ⚠️ GATED ON `fill`. On a scrolling page the state is a pure function of `scrollTop`, so a
+       click setting it true would be overwritten by the next evaluated frame — the header would
+       flicker and settle back, which reads as a bug rather than as a rule. */
+    expect(src, "engagement is no longer gated on `fill` — a click would fight the sentinel on every scrolling page")
+      .toMatch(/const engage = [\s\S]{0,120}?if \(fill\)/);
+    /* row 1 must NOT engage — clicking a header is not working, and a header that hid itself on
+       click would be a control that removes itself when used */
+    const plateRow = /className=\{`wpg-plate\$\{[\s\S]*?\}`\}[\s\S]{0,200}?>/.exec(src)?.[0] ?? "";
+    expect(plateRow, "the plate row's markup is not where this case expects it — re-anchor before trusting the assertion below").toContain("wpg-plate");
+    expect(plateRow, "row 1 engages — clicking the header would collapse it").not.toContain("onPointerDown={engage}");
+  });
+
+  it("⚠️ THE BAND RESTORES, AND ONLY ON A FILL PAGE — no chevron, no label", () => {
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(src, "the restorable gate stopped requiring both `fill` and `condensed` — a resting card would take a pointer cursor")
+      .toMatch(/const restorable = fill && condensed;/);
+    /* the affordance is the pointer and a hover shift, and nothing is DRAWN into the strip */
+    const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
+    expect(block(".wpg-plate--restorable"), "the restore affordance lost its pointer").toContain("cursor: pointer");
+    expect(css, "the band's hover shift went — the band would be clickable with nothing to say so")
+      .toMatch(/\.wpg-plate--restorable:hover \.wsh \{[^}]*background:/);
+    expect(css, "a chevron or a label appeared in the band — it stays bare").not.toMatch(/wpg-plate--restorable[^{]*::(before|after)/);
+    /* ⚠️ RENDERED, NOT JUST DECLARED. A `restorable` const that never reaches the markup would pass
+       every assertion above and do nothing at all. */
+    const html = renderToStaticMarkup(<WorkspacePageGrid plate={<span />} fill condensed>{null}</WorkspacePageGrid>);
+    expect(html, "a condensed fill page does not mark its band restorable").toContain("wpg-plate--restorable");
+    const scrolling = renderToStaticMarkup(<WorkspacePageGrid plate={<span />} condensed>{null}</WorkspacePageGrid>);
+    expect(scrolling, "a scrolling page's band offers a restore its sentinel would immediately overwrite").not.toContain("wpg-plate--restorable");
+  });
+
+  /**
+   * ⚠️ A PAGE VISIT RESETS ENGAGEMENT, AND UNMOUNTING IS NOT THE SIGNAL. These pages never unmount —
+   * the workspace keeps them all mounted and toggles `display` — so state cleared on unmount would
+   * be cleared exactly never, and you would return to a page days later still collapsed. The signal
+   * is the grid's own box going from zero to non-zero, which is what a visit IS here.
+   */
+  it("⚠️ A PAGE VISIT RESETS IT — keyed on hidden → shown, not on unmount", () => {
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(src, "the visit reset is gone — a collapsed page would still be collapsed on every future arrival").toMatch(/setEngaged\(false\)/);
+    expect(src, "the reset is not observing the grid root — there is nothing else that reports hidden → shown")
+      .toMatch(/rootRef/);
+    /* ⚠️ THE EDGE, NOT EVERY OBSERVATION. Resetting on each callback would clear engagement on any
+       reflow — a window resize, a pane opening — and the card would pop back mid-task. */
+    expect(src, "the reset fires on every resize rather than on the hidden → shown edge — the header would pop back mid-task")
+      .toMatch(/if \(now && !shown\)/);
+  });
+
+  /**
+   * ⚠️ LEAVING A JOURNEY LEAVES THE HEADER COLLAPSED. You were working before it and you still are;
+   * handing back the browsing chrome at the moment you have most to do is the wrong direction.
+   * The latch is what makes that true after `condensedByMode` has gone false again — and a journey
+   * can be opened from the shell's own menus, so no click need ever have landed in the content.
+   */
+  it("⚠️ ENTERING A JOURNEY LATCHES ENGAGEMENT, so leaving one does not restore the card", () => {
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(src, "the journey latch is gone — closing a journey would hand back the resting card")
+      .toMatch(/if \(fill && condensedByMode\) setEngaged\(true\);/);
+  });
+
   it("without the mode, an unscrolled page is at rest", () => {
     const seen: (boolean | null)[] = [];
     const Probe: React.FC = () => { seen.push(React.useContext(PlateCondensedContext)); return null; };
@@ -415,8 +590,16 @@ describe("the three-row grid — chrome outside the scroller", () => {
     const html = renderToStaticMarkup(<WorkspacePageGrid plate={<span />} condensed>{null}</WorkspacePageGrid>);
     expect(html, "row 1 did not take the working class from the mode — the header would flatten inside a row still holding its inset").toContain("wpg-plate--working");
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    /* ⚠️ THREE INPUTS NOW, STILL ONE UNION AND STILL ONE BOOLEAN OUT (collapse-on-engagement).
+       `engaged` joined `stuck` and the mode; the header receives the same single value and still
+       never learns which of them fired. The count is asserted as well as the shape, because the
+       failure this guards against is a SECOND mechanism appearing beside it rather than a third
+       term joining it. */
     expect(src, "the union is not computed in one place — two derivations of one state is how the row and the header come to disagree")
-      .toMatch(/const condensed = stuck \|\| condensedByMode;/);
+      .toMatch(/const condensed = stuck \|\| condensedByMode \|\| engaged;/);
+    /* the OPENING tag only — `</PlateCondensedContext.Provider>` is the same provider, and counting
+       both made a correct single provider read as two */
+    expect((src.match(/<PlateCondensedContext\.Provider/g) ?? []).length, "a second context appeared — the header would have two answers to one question").toBe(1);
     /* ⚠️ ONE WRITER AGAIN, AND FEWER IS THE POINT. The observer era had two — one to set on the
        sentinel moving, one to clear on resize. The derived version has a single `evaluate()` that
        both the scroll listener and the ResizeObserver call, so there is exactly one place the

@@ -46,9 +46,22 @@
      page gains and loses a toolbar without gaining or losing its top margin.
      ⚠️ IT DOES NOT CHANGE WHEN THE HEADER STRIPS. The gap is the distance from the boundary to
      the content, and the boundary does not move — only what is above it does. */
-  /* ⚠️ 70px (uniformity pass §2) — 20 + the additional 50 the ref calls for. Same token, same
-     single application; it is still paid ONCE, by whichever element sits first below the hairline. */
-  --content-top-gap-rest: 70px;
+  /**
+   * ⚠️ 70 → 44 (header-gap-vs-height, preset B). Same token, same single application; it is still
+   * paid ONCE, by whichever element sits first below the hairline.
+   *
+   * ⚠️ IT IS A VALUE, NOT A DERIVATION, AND THE DERIVATION WAS CONSIDERED AND REJECTED. The obvious
+   * rule is "half the header's height, rounded" — 128 → 64 — and it is tempting because it makes
+   * the gap move with the plate for free. It is NOT what was chosen: 44 is deliberately tighter
+   * than half. Recorded here because a half-height rule is exactly the kind of tidiness someone
+   * later "restores", and doing so would silently add 20px under every header in the app.
+   *
+   * ⚠️ AND THE GAP IS THE GRID'S ALONE — a page that adds its own top padding defeats the token
+   * without contradicting it. Two did: `.ct-pagebody` (+22, rendering 92) and `.dv-hero` (+84,
+   * rendering 154). Both are now 0, and `gapAudit.measure.ts` reports the pixel distance per page
+   * so the next one shows up as a number rather than as a page that just looks roomy.
+   */
+  --content-top-gap-rest: 44px;
   /* ⚠️ HALVED WHEN WORKING (§2). The strip is lighter than the card, so it needs proportionally
      less separation from what follows. Both values are tokens because §3's invariance padding is
      computed from the DIFFERENCE between them, and a literal there is the whole failure mode. */
@@ -325,7 +338,11 @@
 /* ⚠️ .22s ON GEOMETRY, .14s ON FADES (spec §2, ref 84). One curve throughout — a fade that outlasts
    the collapse leaves the mark visible over a row that has already closed. */
 .wsh-mark { flex: 0 0 38px; transition: opacity .14s ease, flex-basis .22s cubic-bezier(.4, 0, .2, 1), width .22s cubic-bezier(.4, 0, .2, 1), height .22s cubic-bezier(.4, 0, .2, 1); }
-.wsh-mark--xl { flex: 0 0 64px; }
+/* ⚠️ 64 → 88 (preset B) — the illustrated mark only. The 38px monoline glyph on its parchment
+   plate is the OTHER mark family and is deliberately untouched: it is a plated icon, not a
+   drawing, and scaling it with the illustration would turn a small badge into a large blank tile.
+   Two legitimate rest sizes, 38 and 88, and the matrix asserts exactly those two. */
+.wsh-mark--xl { flex: 0 0 88px; }
 .wsh-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 0 1 auto; }
 /* ⚠️ 600 IS A TOKEN, NOT A LITERAL, AND IT MUST NOT PROPAGATE (amendment 12). Every other Playfair
    heading in the shell is 500; this plate is the one place that goes heavier, so the weight is
@@ -373,8 +390,10 @@
    and `text-transform` do not interpolate, so the register change is done with keyframes that hold
    the outgoing values while the title is invisible — and a keyframe cannot read "whatever this
    element had before". Restating 33 in two places is exactly how the solo step would drift. */
-.wsh { --wsh-title-size: 33px; }
-.wsh--solo { --wsh-title-size: 35px; }
+/* ⚠️ 33 → 38 (preset B). The solo step stays +2 and is stated as its own value rather than as
+   `calc(--wsh-title-size + 2px)`, because the cross-fade keyframes have to NAME both. */
+.wsh { --wsh-title-size: 38px; }
+.wsh--solo { --wsh-title-size: 40px; }
 .wsh-title {
   font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-plate-title-w);
   color: var(--shell-ink); margin: 0; white-space: nowrap; line-height: 1.12;
@@ -518,7 +537,7 @@
  * are. See the CLAUDE.md entry; do not remove this as redundant.
  */
 .wsh-mark--xl .os-mark {
-  width: 64px; height: 64px; flex: 0 0 64px;
+  width: 88px; height: 88px; flex: 0 0 88px;
   background: none; border: none; box-shadow: none; border-radius: 0;
 }
 .wsh-mark--xl .os-mark img {

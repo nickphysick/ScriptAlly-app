@@ -528,9 +528,17 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
    `padding-inline: var(--content-gutter)` — adding the ref's 40/48px on top would inset the
    content twice and the page would read narrower than every sibling. The VERTICAL rhythm is the
    ref's to the pixel; the sides are the gutter's job. */
+/* ⚠️ AND ITS TOP PADDING GOES FOR THE SAME REASON THE SIDES DID — the note above fixed one axis
+   and missed the other. The ref's `84px` top is measured in a standalone card with NOTHING above
+   it; in the app the grid's scroll row has already paid `--content-top-gap`, so 84 on top of it
+   rendered a 154px gap here against 70 everywhere else. Same translation, same argument: the space
+   above the first thing on a page belongs to the grid, and the page adds none.
+   ⚠️ AND IT IS NOT `calc(84px - var(--content-top-gap))`. Restoring the ref's total that way would
+   encode another element's value in this one — the banned `calc(56px + gap)` shape — and would
+   silently go negative the next time the gap is retuned. */
 .dv-hero {
   text-align: center;
-  padding: 84px 0 26px;
+  padding: 0 0 26px;
 }
 .dv-eyebrow {
   display: inline-block;
@@ -597,7 +605,8 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
 }
 @media (max-width: 980px) {
   .dv-reel { grid-template-columns: 1fr; padding: 40px 0 56px; }
-  .dv-hero { padding: 48px 0 20px; }
+  /* the top stays 0 below 980 too — the grid's gap tightens on its own at that width */
+  .dv-hero { padding: 0 0 20px; }
   .dv-hero h2 { font-size: 38px; }
 }
 

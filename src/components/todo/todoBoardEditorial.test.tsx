@@ -49,6 +49,30 @@ describe("⚠️ the editorial column heads — Playfair over a 2px ink rule, st
     expect(css).toContain(".tbd-fh.done { border-bottom-color: #b9c9b4; }");
   });
 
+  /**
+   * ⚠️ `--tbd-ground` NAMES WHAT SHOWS THROUGH THE BOARD, and the board paints nothing — so it is
+   * the window, and it must be the window's TOKEN. As a literal `#ffffff` it was a copy of the
+   * window's colour rather than a reference to it, and both the sticky head's gradient and the
+   * fold hem dissolved to white the moment the window went to #fefcfa: two pale washes that only
+   * show against cards, on the one page whose columns are nothing but cards.
+   */
+  it("⚠️ THE BOARD'S GROUND IS THE WINDOW'S TOKEN — and both fades resolve into it", () => {
+    const i = css.indexOf(".tbd {");
+    const tbd = css.slice(i, css.indexOf("}", i));
+    expect(tbd, "the anchor this case reads is gone").toContain("--tbd-ground");
+    expect(tbd, `the board's ground is a literal again — it is a copy of the window's colour, not a reference to it: ${tbd.trim()}`)
+      .toContain("--tbd-ground: var(--ws-window)");
+    /* both ends of both gradients, so neither can fade through a colour the window does not have */
+    for (const sel of [".tbd-fh", ".tbd-fade"]) {
+      const j = css.indexOf(`${sel} {`);
+      const r = css.slice(j, css.indexOf("}", j));
+      expect(r, `${sel} has no rule — the anchor is gone`).toContain("background:");
+      expect(r, `${sel} fades through white — its transparent end is not the ground's own channels: ${r.trim()}`)
+        .not.toMatch(/\b255,\s*255,\s*255\b/);
+      expect(r).toContain("rgba(var(--ws-window-rgb), 0)");
+    }
+  });
+
   it("⚠️ the tinted column WELLS are gone — the rule is the column", () => {
     const i = css.indexOf(".tbd-col {");
     const rule = css.slice(i, css.indexOf("}", i));
@@ -117,7 +141,9 @@ describe("the ghost drop slot + the fade hem", () => {
 
   it("⚠️ the hem fades into the ground above '+ N MORE', and the cap arithmetic is pure", () => {
     expect(css).toMatch(/\.tbd-fade\s*\{[^}]*margin-top:\s*-30px/);
-    expect(css).toMatch(/\.tbd-fade\s*\{[^}]*linear-gradient\(rgba\(255,\s*255,\s*255,\s*0\),\s*var\(--tbd-ground\)\)/);
+    /* ⚠️ THE TRANSPARENT END IS THE GROUND'S OWN CHANNELS, not a hand-written white — see the
+       ground case above for why the two are not interchangeable. */
+    expect(css).toMatch(/\.tbd-fade\s*\{[^}]*linear-gradient\(rgba\(var\(--ws-window-rgb\),\s*0\),\s*var\(--tbd-ground\)\)/);
     expect(BOARD_COL_CAP).toBe(8);
     const ten = Array.from({ length: 10 }, (_, i) => card({ key: `c${i}` }));
     expect(columnSlice(ten, false)).toMatchObject({ more: 2 });

@@ -120,6 +120,23 @@ describe("⚠️ the fade hem: sticky, weightless, and only where content contin
     expect(hem).toContain("pointer-events: none");
   });
 
+  /**
+   * ⚠️ IT DISSOLVES INTO THE WINDOW, NOT INTO A CARD — nothing in `.tpl-cols → .tpl-body →
+   * .tdb-centre → .tpl-zone` paints a background, so what shows behind this hem is `.ws-window`.
+   * It was written as a literal `#ffffff` back when the window was white; it now reads the ground
+   * token, so it cannot drift from the surface it is supposed to disappear into.
+   */
+  it("⚠️ IT RESOLVES INTO THE WINDOW'S GROUND — never a literal", () => {
+    const hem = rule(css, ".tpl-hem {");
+    expect(hem, "the anchor this case reads is gone").toContain("background:");
+    expect(hem, `the hem paints a hex literal — it fades to a colour the window no longer has: ${hem.trim()}`)
+      .not.toMatch(/#[0-9a-f]{3,8}\b/i);
+    expect(hem, "the hem fades through white — the near end and the far end are no longer one colour")
+      .not.toMatch(/\b255,\s*255,\s*255\b/);
+    expect(hem).toContain("var(--ws-window)");
+    expect(hem).toContain("rgba(var(--ws-window-rgb), 0)");
+  });
+
   it("⚠️ HEM IFF OVERFLOW — a hem over a list that fits fades to nothing and lies", () => {
     const withHem = renderToStaticMarkup(<TplZone hem>content</TplZone>);
     expect(withHem).toContain("tpl-hem");

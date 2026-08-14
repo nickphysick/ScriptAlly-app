@@ -43,6 +43,10 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
   const hc = hb.top + hb.height / 2;
   return {
     working: row.classList.contains("wpg-plate--working"),
+    /* ⚠️ READ FROM THE DOM, NEVER A LIST OF PAGE NAMES. `fill` is a prop; a hand-kept list of "the
+       fill pages" named Comparable titles, which does not pass it, and omitted Manuscripts, which
+       does. The class is the page saying so itself. */
+    fill: g.classList.contains("wpg--fill"),
     rowH: r(rb.height), headerH: r(hb.height),
     /* ⚠️ THE STRIP'S DISTANCE FROM THE WINDOW'S TOP EDGE — the last place a page could still
        disagree about the header, and it did: five different page insets above the grid put this
@@ -81,6 +85,15 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
         if (!framed && c.paddingLeft !== "0px") bad.push(`padL ${c.paddingLeft}`);
         if (!framed && c.paddingRight !== "0px") bad.push(`padR ${c.paddingRight}`);
         if (bad.length) out.push(`${el.className.toString().slice(0, 22)}: ${bad.join(", ")}`);
+        /* ⚠️ THE WALK STOPS AT THE FIRST FRAMED BOX, and that is this rule finally saying what it
+           already claimed. It exempts a framed element's OWN padding — "a frame you can see is not
+           a bare wrapper" — but then carried on into its children and flagged them, so a card's
+           inner column read as a second gutter. Measured: Query Centre's `.f12-lhead` (12px) and
+           Comparable titles' `.ct-hero-l` (34px), both at depth 2, both inside a bordered and
+           filled parent at depth 1. Past a drawn edge the CONTENT has begun and every inset below
+           is that object's own composition; the fault this guards against is a BARE wrapper paying
+           the gutter twice with nothing drawn to show where the inset came from. */
+        if (framed) break;
         el = el.firstElementChild as HTMLElement | null;
       }
       return out;
@@ -173,6 +186,55 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
       const b2 = h.getBoundingClientRect();
       return `${getComputedStyle(h).opacity === "1" ? "on" : "off"}@${r(sb.bottom - b2.bottom)}`;
     })(),
+    /**
+     * ⚠️ THE WINDOW'S GROUND, AND THE COLOUR EACH HEM ACTUALLY RESOLVES TO — read as COMPUTED
+     * values, because this is the one fault a source lock cannot see. The hems were literals
+     * matching the window by coincidence; a literal that stops matching produces a pale band across
+     * the top and bottom of every scroller, visible only where content passes under it. An empty
+     * page looks perfect and nothing errors.
+     *
+     * ⚠️ THE OPAQUE STOP, EXTRACTED — not the whole `background-image` string, which also carries
+     * the direction and the percentages and would differ between the two hems by construction.
+     * Chromium serialises the stops as `rgb(...)` / `rgba(..., 0)`, so the first stop with a
+     * non-zero alpha IS the colour the fade starts from, and it must equal the window's own fill.
+     */
+    /**
+     * ⚠️ THE GROUND IS READ BY WALKING UP FROM THE CONTENT, NEVER BY NAMING AN ELEMENT — and that
+     * is the finding, not a refinement. Reading `.ws-window` looked obviously right (the source
+     * calls it the white surface, two locks name it, the notes name it) and it is NOT what anyone
+     * sees: `.ws-work` fills the window on every page and paints over it. A run that read
+     * `.ws-window` reported the ground had changed while every page still showed white, and the
+     * hems — correctly matching `.ws-window` — were resolving into a colour no page displayed.
+     *
+     * So: the nearest PAINTED ancestor above the scroll row, whatever it is called. An element name
+     * is a claim about the DOM; this is a reading of the pixel.
+     */
+    windowBg: (() => {
+      for (let n: HTMLElement | null = sc; n; n = n.parentElement) {
+        const bg = getComputedStyle(n).backgroundColor;
+        if (bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") return bg;
+      }
+      return "absent";
+    })(),
+    /* ⚠️ AND THE NAMED SURFACE TOO, so the two can be asserted EQUAL. They are one ground in two
+       elements — the window draws the frame, `.ws-work` fills it — and any difference between them
+       is a seam that shows at the window's edges. */
+    windowEl: (() => {
+      const w = document.querySelector(".ws-window") as HTMLElement | null;
+      return w ? getComputedStyle(w).backgroundColor : "absent";
+    })(),
+    hemInk: (() => {
+      const opaque = (sel: string) => {
+        const h = g.querySelector(sel) as HTMLElement | null;
+        if (!h) return "absent";
+        const img = getComputedStyle(h).backgroundImage;
+        const stops = img.match(/rgba?\([^)]*\)/g) ?? [];
+        /* the far end is the same colour at zero alpha; the near end is the one to compare */
+        const near = stops.find((s) => !/,\s*0\s*\)$/.test(s));
+        return near ?? `noStops:${img.slice(0, 40)}`;
+      };
+      return `${opaque(".wpg-hem--top")} | ${opaque(".wpg-hem--bot")}`;
+    })(),
     /* ⚠️ ONE HEM PER SCROLLER. `.tbd-fade` and `.sv2-fade` predate the grid's; where a legacy fade
        sits on the SAME scroller the two stack and the gradient doubles. They are kept where they
        cover a DIFFERENT scroller — `.sv2-fade` is the shell stage's, `.tbd-fade` rides an internal
@@ -245,7 +307,9 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
         contentL: rest.contentL, chain: rest.chain.join(" · ") || "clean",
         topGap: rest.topGap, workGap: work!.topGap,
         zeroKids: rest.zeroKids.join(" · ") || "none",
+        fill: rest.fill,
         hemRest: `${rest.hemTop} ${rest.hemBot}`, hemWork: `${work!.hemTop} ${work!.hemBot}`,
+        windowBg: rest.windowBg, windowEl: rest.windowEl, hemInk: rest.hemInk,
         stacked: rest.stackedFades.join(",") || "none",
         backToRest: !back!.working,
         offCentre: rest.offCentre.length + work!.offCentre.length,
@@ -280,9 +344,50 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
        split of white against parchment that is the mechanism working, not a page disagreeing.
        Query Centre reads white here for the same reason and is not an exception: its working state
        is mode-driven, so its band is asserted in the journeys gate, as its label already is. */
-    for (const key of ["restBg", "restEdge"] as const) {
+    /* ⚠️ THE WINDOW'S GROUND JOINS THE EQUALITY LIST, and it belongs in the ALL set: every page
+       sits in the same window, so a page that paints its own ground under the header is the exact
+       thing "one ground, painted once" forbids, and it is invisible until two pages are compared. */
+    for (const key of ["restBg", "restEdge", "windowBg", "windowEl"] as const) {
       const vals = [...new Set(all.map((r) => String(r[key])))];
       expect(vals, `${key} differs across pages: ${JSON.stringify(all.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
+    }
+    /* ⚠️ THE TWO HALVES OF THE GROUND AGREE. `.ws-work` fills `.ws-window`, so a difference can only
+       show as a seam at the window's edges — and worse, it lets a change to one of them look like
+       it landed while every page still displays the other. That is exactly what happened. */
+    for (const r of all) {
+      expect(r.windowBg, `${r.page}: the visible ground (${r.windowBg}) is not the window's own fill (${r.windowEl}) — .ws-work is painting over it`)
+        .toBe(String(r.windowEl));
+    }
+    /**
+     * ══ THE HEM RESOLVES INTO THE GROUND, MEASURED ═══════════════════════════════════════════
+     *
+     * ⚠️ THIS IS THE CHECK THAT WOULD HAVE CAUGHT THE LITERAL, and none of the source locks could
+     * have. Both hems read a hardcoded `#ffffff` that was correct while the window was white; the
+     * failure mode is not "the fade is missing" but "the fade is a slightly different white", which
+     * paints a pale stripe across the top and bottom of every scroller and shows ONLY against
+     * content. An empty page renders it perfectly.
+     *
+     * ⚠️ COMPARED AGAINST THE WINDOW'S OWN COMPUTED FILL, never a constant. A literal on both sides
+     * would pass while the pair drifted together — the same reason every other reading here is
+     * cross-page. Both hems are checked, because they are two declarations and only one of them
+     * needs to be missed.
+     */
+    /* ⚠️ SCOPED TO THE PAGES THAT HAVE HEMS, and derived from the reading rather than from a list
+       of page names. A `fill` page mounts none at all — its panes scroll and the row does not, so
+       there is no state either hem describes — and today that is five of the ten. Naming them
+       would go stale the next time a page converts; `absent` is the page saying so itself. */
+    const hemmed = all.filter((r) => !String(r.hemInk).startsWith("absent"));
+    expect(hemmed.length, "no page mounted a hem at all — the reading is broken, not the hems").toBeGreaterThan(0);
+    for (const r of hemmed) {
+      /* the pair is mounted together, so a page reporting one hem has half-rendered them */
+      expect(String(r.hemRest), `${r.page}: it has hem colours but reports no hems — the two readings disagree`).not.toContain("absent");
+      const [top, bot] = String(r.hemInk).split(" | ");
+      for (const [edge, ink] of [["top", top], ["bottom", bot]] as const) {
+        expect(ink, `${r.page}: the ${edge} hem has no opaque stop — its gradient is not a fade into anything (${r.hemInk})`)
+          .not.toMatch(/^(absent|noStops)/);
+        expect(ink, `${r.page}: the ${edge} hem fades from ${ink} over a ${r.windowBg} ground — a pale band across the scroller, visible only against content`)
+          .toBe(String(r.windowBg));
+      }
     }
     for (const key of ["workBg", "workEdge"] as const) {
       const vals = [...new Set(scrollers.map((r) => String(r[key])))];
@@ -293,6 +398,15 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     }
     /* the working band must actually differ from the resting card, or "it becomes a band" is a no-op */
     expect(String(scrollers[0]?.workBg), "the working band did not take the parchment ground").not.toBe(String(scrollers[0]?.restBg));
+    /* ⚠️ AND THE THREE SURFACES ARE THREE SURFACES. The resting plate is the CARD (white), the
+       window is the GROUND, and the band is the page showing through it — so the plate must not
+       match the window either, or the resting header stops reading as an object laid on the page
+       and becomes an invisible rectangle with a border. This is the pair the colour step was for;
+       asserting only band-vs-card would let the ground drift back onto the card and say nothing. */
+    expect(String(all[0]?.restBg), "the resting plate matches the window's ground — the card is invisible against the page and legible only by its border")
+      .not.toBe(String(all[0]?.windowBg));
+    expect(String(scrollers[0]?.workBg), "the band matches the window's ground — it has nothing to distinguish it but its hairline")
+      .not.toBe(String(scrollers[0]?.windowBg));
     expect(String(scrollers[0]?.workEdge), `the band has no bottom edge: ${scrollers[0]?.workEdge}`).toMatch(/^1px rgb/);
 
     for (const key of ["workReg", "workInk"] as const) {
@@ -317,7 +431,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
        edited. What must be identical is the WORKING mark, and `workMark` above asserts all nine
        collapse to the same 30. */
     for (const w of [...new Set(all.map((r) => r.restMark))]) {
-      expect([38, 64], `an unexpected rest mark ${w} — only the 38px glyph and the 64px illustration are legitimate`).toContain(w);
+      expect([38, 88], `an unexpected rest mark ${w} — only the 38px glyph and the 88px illustration are legitimate`).toContain(w);
     }
 
     /* ══ §1 — THE STRIP IS THE SAME OBJECT ON EVERY PAGE ══════════════════════════════════════
@@ -325,7 +439,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
        title-only ones — a page with no description centres its title in the same 96 rather than
        shrinking the card — and 52 working on every page that has a working state. */
     for (const r of all) {
-      expect(r.restCardH, `${r.page}: the resting card is not 96 — its height is following its content`).toBe(96);
+      expect(r.restCardH, `${r.page}: the resting card is not 128 — its height is following its content`).toBe(128);
     }
     for (const r of scrollers) {
       expect(r.workCardH, `${r.page}: the working strip is not 52`).toBe(52);
@@ -388,10 +502,14 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
      * reason it compares across pages. The exception is a literal here so adding a second one is a
      * decision someone has to write down.
      */
-    const GAP_OVERRIDE: Record<string, [number, number]> = { "Query Centre": [18, 9] };
+    /* ⚠️ 18/9 → 0/0. The page moved and the gate did not: fix pack 3 §2 took Query Centre's gap to
+       zero on purpose — "the list's ground starts at the masthead rule... the split is not content
+       sitting under a header; it is the page" — and this entry still described the pack before it.
+       A stale exception is worse than none: it fails on correct behaviour and names the page. */
+    const GAP_OVERRIDE: Record<string, [number, number]> = { "Query Centre": [0, 0] };
     for (const r of all) {
       const [first, second] = String(r.topGap).split("+").map(Number);
-      const [wantRest] = GAP_OVERRIDE[String(r.page)] ?? [70, 35];
+      const [wantRest] = GAP_OVERRIDE[String(r.page)] ?? [44, 35];
       expect(first, `${r.page}: the resting gap under the hairline is ${first}, not ${wantRest}`).toBe(wantRest);
       expect(second, `${r.page}: the gap is paid twice — the toolbar row AND the scroll row`).toBe(0);
     }
@@ -401,7 +519,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
        unasserted working value is also an unasserted invariance. */
     for (const r of scrollers) {
       const [first, second] = String(r.workGap).split("+").map(Number);
-      const [, wantWork] = GAP_OVERRIDE[String(r.page)] ?? [70, 35];
+      const [, wantWork] = GAP_OVERRIDE[String(r.page)] ?? [44, 35];
       expect(first, `${r.page}: the working gap is ${first}, not ${wantWork} — the strip is lighter and takes less separation`).toBe(wantWork);
       expect(second, `${r.page}: the working gap is paid twice`).toBe(0);
     }
@@ -409,7 +527,20 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     /* ══ §3 — THE HEMS ARE PRESENT, PINNED, AND EACH IS A STATE ═════════════════════════════
        ⚠️ THE POSITION IS THE POINT. A hem inside the scrollport scrolls with the content, so it
        would drift by exactly `scrollTop` — `@0` in both states is what proves it did not. */
-    for (const r of all) {
+    /**
+     * ⚠️ THE HEM CONTRACT IS TWO CONTRACTS, AND ASSERTING ONE OVER ALL TEN WAS THE BUG. This
+     * demanded hems on every page; five pages legitimately have none. `fill` declares that the
+     * PANES scroll and the row does not, so that scroller cannot reach a state either hem describes
+     * and a fade at its foot would claim something that cannot happen. The absence is the feature.
+     *
+     * ⚠️ SO BOTH HALVES ARE ASSERTED POSITIVELY rather than one being excused. A fill page must have
+     * NO hems; every other page must have BOTH. An exemption would have let a scrolling page quietly
+     * lose them.
+     */
+    for (const r of all.filter((x) => x.fill)) {
+      expect(r.hemRest, `${r.page}: a fill page drew hems — its row cannot reach a state either hem describes`).toBe("absent absent");
+    }
+    for (const r of all.filter((x) => !x.fill)) {
       expect(r.hemRest, `${r.page}: the hems are missing`).not.toContain("absent");
       for (const reading of [String(r.hemRest), String(r.hemWork)].flatMap((x) => x.split(" "))) {
         expect(reading, `${r.page}: a hem drifted off the row's edge — it is scrolling with the content (${r.hemRest} / ${r.hemWork})`)
@@ -431,8 +562,9 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     for (const r of all) {
       expect(r.stacked, `${r.page}: a legacy fade sits inside the grid's own scroller — two gradients on one edge (${r.stacked})`).toBe("none");
     }
-    /* a page that cannot scroll shows neither — nothing is hidden in either direction */
-    for (const r of all.filter((x) => !x.canScroll)) {
+    /* a page that cannot scroll shows neither — nothing is hidden in either direction. Fill pages
+       are excluded because they have no hems AT ALL, which the case above states directly. */
+    for (const r of all.filter((x) => !x.canScroll && !x.fill)) {
       expect(r.hemRest, `${r.page}: a fade on a page with nothing hidden past either edge`).toBe("off@0 off@0");
     }
 
@@ -445,7 +577,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
       expect(r.workedStrip, `${r.page}: an internal-pane page stripped — it has no scroll of its own to strip on`).toBe(false);
     }
     for (const size of [...new Set(all.map((r) => r.restTitle))]) {
-      expect([33, 35], `an unexpected rest title size ${size} — only the 33px default and the 35px solo step are legitimate`)
+      expect([38, 40], `an unexpected rest title size ${size} — only the 38px default and the 40px solo step are legitimate`)
         .toContain(parseInt(String(size), 10));
     }
     /* ⚠️ `workMark` LEFT THE EQUALITY LIST because the mark is GONE — every page reads 0, which the
