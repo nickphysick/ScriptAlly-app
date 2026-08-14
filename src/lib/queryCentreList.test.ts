@@ -86,11 +86,13 @@ describe("the list is de-carded", () => {
    */
   it("it is a card — the same ground, now with a rim and a radius", () => {
     const list = rule(css, ".f12-list");
-    /* ⚠️ `--paper` → `--panel` (fix pack 6 §2). The receding fill was right while the list was
-       furniture; it is a white OBJECT now, on the same token the reading pane's cards and the agent
-       header plate already read. */
+    /* ⚠️ `--paper` → `--panel` (fix pack 6 §2) → `--white` (§4). The receding fill was right while
+       the list was furniture; `--panel` made it an object — but `--panel` is `#fffdfb` and so is
+       the reading pane beside it, so "an object" was two surfaces one point apart. Pure white with
+       its own cast is the distinction that fill was trying and failing to make. */
     expect(list, "the column lost its ground — it goes back to being loose content")
-      .toContain("background: var(--panel)");
+      .toContain("background: var(--white)");
+    expect(list, "the card lost its cast").toContain("box-shadow: var(--sh-2)");
     expect(list, "the panel lost its rim").toContain("border: 1px solid var(--line)");
     expect(list, "the panel lost its radius").toContain("border-radius");
     expect(list, "the seam went back onto the panel, so it stops where the panel stops")
@@ -110,7 +112,10 @@ describe("the selected row wears a bookmark, not a full-height edge", () => {
        case is actually about.
        ⚠️ AND THE BLUE IS GONE with it: `--blue-t` was a cool #e7eef6 on a warm parchment page, read
        in exactly two places, both here. */
-    expect(sel, "the selected row stopped lifting").toContain("background: var(--white)");
+    /* ⚠️ AND IT INVERTED ONCE MORE WITH §4. On a white column "lifts to white" is not a step at
+       all, so the selected row takes the band and the ladder reads white → paper → oat. The
+       BOOKMARK is what this case is actually about and it is untouched at every step. */
+    expect(sel, "the selected row lost its fill").toContain("background: var(--oat)");
     expect(sel, "the blue came back").not.toContain("--blue-t");
     expect(sel, "the full-height inset edge should be gone").not.toContain("inset 3px 0 0");
     expect(mark, "the bookmark is missing").not.toBe("");

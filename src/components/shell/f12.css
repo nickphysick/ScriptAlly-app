@@ -1530,9 +1530,14 @@
      the margins are the row's `column-gap` / `padding-bottom` for the same reason. */
   grid-column: 1; grid-row: 2;
   display: flex; flex-direction: column; min-height: 0; min-width: 0;
-  background: var(--panel);
+  /* ⚠️ `--white`, NOT `--panel` (§4). The panel token is `#fffdfb`, one point off the reading pane
+     beside it and one off the page ground beneath — measured `rgb(255,253,251)` on both columns,
+     which is a near-match that reads as a mistake rather than as a distinction. The list is a CARD
+     now: pure white, its own rim, a soft cast, sitting ON the ground like every other container. */
+  background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
+  box-shadow: var(--sh-2);
   overflow: hidden;
 }
 
@@ -1620,8 +1625,21 @@
  * ⚠️ SCOPED TO THE HEAD, so `.qc-askfield`'s own override and any other use of the field keep their
  * grounds. The base rule stays `--paper` for surfaces where the field sits on white.
  */
-.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: var(--f12-icon-btn); background: var(--white); }
-.f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid transparent; color: var(--muted); font-size: 12.5px; transition: border-color 0.12s; }
+/* ⚠️ AND THE HEAD'S OVERRIDE GOES BACK TO `--paper` (§4). It was set to `--white` by fix pack 4,
+   whose finding — quoted below — was that the field had no ground of its own against a `--paper`
+   PANEL. §4 turns the panel white, so `--white` is now the invisible one and the same override
+   reproduces the exact fault it was written to fix, pointing the other way. The base rule's fill is
+   right on a white panel, and the rim added there is what makes it a field in both cases. */
+.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: var(--f12-icon-btn); background: var(--paper); }
+/**
+ * ⚠️ THE FIELD HAD NO RIM AT ALL, AND THE FILL WAS DOING ALL THE WORK — measured, not assumed.
+ * `border-color: transparent` at rest, `--paper` fill; against the old `--paper` panel that was
+ * white-on-white with nothing else, and §4's white panel removes even the one point of difference
+ * the fill was buying. So it is the RIM that arrives, not a stronger fill: a field is a field
+ * because it has an edge, and a control that is only a fill disappears the moment the surface
+ * behind it changes — which is exactly what happened, twice, to this one.
+ */
+.f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid var(--hairline); color: var(--muted); font-size: 12.5px; transition: border-color 0.12s; }
 .f12-lsearch:hover, .f12-lsearch:focus-within { border-color: var(--line); }
 .f12-lsearch svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
 .f12-lsearch input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; font: inherit; color: var(--ink); }
@@ -1702,7 +1720,13 @@
 /* Selected: the tint stays; the full-height inset edge becomes a BOOKMARK — 3px of ink inset
    9px from the row's top and bottom, with rounded ends, so it reads as a marker placed on the
    row rather than as the row's own border. */
-.f12-row.f12-sel { background: var(--white); box-shadow: inset 0 0 0 1px var(--hairline), 0 1px 2px rgba(58, 28, 20, 0.04); }
+/* ⚠️ THE LADDER HAD TO INVERT WITH THE GROUND (§4). Selected was WHITE with a ring, which was a
+   real step up from a `--paper` panel and is INVISIBLE on a white one — same rule, same colour, no
+   longer a distinction. Three steps again, the other way up: white ground → `--paper` hover →
+   `--oat` band for the selected row, plus the burgundy spine it already had.
+   ⚠️ AND THE HOVER IS UNCHANGED, which is what makes this a re-levelling rather than a repaint: the
+   middle rung was always `--paper` and is still legible between the two new ends. */
+.f12-row.f12-sel { background: var(--oat); box-shadow: inset 0 0 0 1px var(--oatline); }
 /* ⚠️ BURGUNDY, NOT INK (fix pack §2). On a white lifted row an ink spine reads as a third
    structural line beside the row's own hairline and the column's seam; burgundy is this page's mark
    for "this one", and it is the only place colour is spent on a row. */

@@ -122,9 +122,11 @@ describe("§2 · rows on one grid", () => {
     expect(rule(".f12-row"), "the row's height stopped being fixed").toContain("height: 56px");
   });
 
-  it("hover is a wash; selected lifts to white with a burgundy spine", () => {
+  it("hover is a wash; selected takes the band, with a burgundy spine", () => {
     expect(rule(".f12-row:hover"), "hover collapsed into the panel's ground").toContain("background: var(--paper)");
-    expect(rule(".f12-row.f12-sel")).toContain("background: var(--white)");
+    /* §4: the panel is white, so the selected row is the BAND step rather than a lift to white —
+       three rungs again, the other way up. The spine below is unchanged. */
+    expect(rule(".f12-row.f12-sel")).toContain("background: var(--oat)");
     expect(rule(".f12-row.f12-sel::before"), "the spine went back to ink").toContain("background: var(--burg)");
   });
 });

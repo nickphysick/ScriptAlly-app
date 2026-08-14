@@ -104,11 +104,15 @@ describe("§1c · the list is furniture, and selection inverts", () => {
    */
   it("the column keeps its ground, and is now a card rather than furniture", () => {
     const r = rule(".f12-list");
-    /* ⚠️ `--paper` → `--panel` (fix pack 6 §2). The receding fill was right while the list was
-       furniture; it is a white object now, on the same token the reading pane's cards and the agent
-       header plate already read, so the three cannot drift apart. */
-    expect(r, "the ground went — the column reads as loose content again").toContain("background: var(--panel)");
+    /* ⚠️ `--paper` → `--panel` (fix pack 6 §2) → `--white` (§4). The receding fill was right while
+       the list was furniture; `--panel` made it an object. `--panel` is `#fffdfb` and so is the
+       reading pane beside it — measured identical — so "an object on a ground" was two surfaces a
+       point apart, which reads as a mistake rather than as a distinction. It is a CARD now: pure
+       white, its own rim, its own cast, on the ground like every other container on the page. */
+    expect(r, "the ground went — the column reads as loose content again").toContain("background: var(--white)");
     expect(r, "the panel lost its radius — it is a card now, not a wall").toContain("border-radius");
+    expect(r, "the card lost its cast — a white card on a near-white ground needs one to sit ON it")
+      .toContain("box-shadow: var(--sh-2)");
     expect(r, "the seam went back onto the panel, so it stops where the panel stops")
       .not.toContain("border-right");
   });
@@ -122,20 +126,27 @@ describe("§1c · the list is furniture, and selection inverts", () => {
   });
 
   /**
-   * ⚠️ THREE STEPS FROM THREE EXISTING TOKENS. Ground `--paper`, hover `--panel`, selected `--white`
-   * with a ring — hover and selected differ by the ring and the lift, as the ref has it.
+   * ⚠️ THE LADDER INVERTED WITH THE GROUND (§4), AND THE CLAUSE IS UNCHANGED: three distinguishable
+   * steps. Selected was WHITE with a ring, which was a real step up from a `--paper` panel and is
+   * nothing at all on a white one — the same rule, the same colour, no longer a distinction. It is
+   * white ground → `--paper` hover → `--oat` band now, with the burgundy spine it always had.
    *
-   * ⚠️ AND THE BLUE IS GONE. `--blue-t` (#e7eef6) was a cool selector-blue on a warm parchment page.
-   * It was read in exactly two places, both here, so nothing else decided it.
+   * ⚠️ THE MIDDLE RUNG NEVER MOVED, which is what makes this a re-levelling rather than a repaint.
+   *
+   * ⚠️ AND THE BLUE IS STILL GONE. `--blue-t` (#e7eef6) was a cool selector-blue on a warm
+   * parchment page; it was read in exactly two places, both here.
    */
-  it("the selected row lifts to white with a ring; nothing on this page is blue", () => {
+  it("three distinguishable steps: white ground, paper hover, band selected", () => {
     const sel = rule(".f12-row.f12-sel");
-    expect(sel, "the selected row stopped lifting").toContain("background: var(--white)");
-    expect(sel, "the lift has no edge to seat it on").toContain("inset 0 0 0 1px var(--hairline)");
-    /* ⚠️ THE LADDER SHIFTED ONE PLACE (fix pack 6 §2) — the panel took `--panel`, so hover moved to
-       `--paper`. Still three steps from the same three tokens; the wash now darkens rather than
-       lightens, because the ground it sits on is the lighter of the two. */
+    expect(sel, "the selected row is not the band step").toContain("background: var(--oat)");
+    expect(sel, "the selected fill has no edge to seat it on").toContain("inset 0 0 0 1px var(--oatline)");
     expect(rule(".f12-row:hover"), "hover and the ground are the same colour").toContain("background: var(--paper)");
+    /* ⚠️ AND THE THREE MUST BE THREE. A ladder whose ends match its middle is a ladder with two
+       rungs, which is how §4 broke the old one — asserted rather than eyeballed. */
+    const ground = declValue(rule(".f12-list"), "background");
+    const hover = declValue(rule(".f12-row:hover"), "background");
+    const on = declValue(sel, "background");
+    expect(new Set([ground, hover, on]).size, `two of the three steps are the same colour: ${ground} / ${hover} / ${on}`).toBe(3);
     expect(cssCode, "the selector-blue came back").not.toContain("--blue-t");
   });
 
@@ -411,10 +422,14 @@ describe("§ (fp5) · the list is an inset panel", () => {
 
   /* the selected row still lifts to white with its spine — unchanged by this section, asserted
      because the separator work is one line away from it */
-  it("the selected row still lifts to white and keeps its spine", () => {
-    expect(declValue(rule(".f12-row.f12-sel"), "background"), "the selected row stopped lifting")
-      .toBe("var(--white)");
+  it("the selected row keeps its band fill and its spine", () => {
+    /* §4 re-levelled the fill (see the ladder case above); the SPINE is what this case is really
+       for, and it is untouched — 3px of burgundy on the left edge, at every step of the pack. */
+    expect(declValue(rule(".f12-row.f12-sel"), "background"), "the selected row lost its fill")
+      .toBe("var(--oat)");
     expect(rule(".f12-row.f12-sel::before"), "the burgundy spine went").toContain("var(--burg)");
+    expect(rule(".f12-row.f12-sel::before"), "the spine left the left edge").toContain("left: 0");
+    expect(rule(".f12-row.f12-sel::before"), "the spine is not 3px").toContain("width: 3px");
   });
 });
 
@@ -479,7 +494,17 @@ describe("§1 (fp4) · the list head's field is a control on a tinted surface", 
     expect(fg, "the field declares no ground of its own").not.toBe("");
     expect(fg, "the field went back to the column's tint — it reads as empty space, not a control")
       .not.toBe(lg);
-    expect(fg, "the field's ground is not white").toBe("var(--white)");
+    /* ⚠️ INVERTED BY §4, AND THE CLAUSE IS THE SAME ONE. Fix pack 4's finding was that the field
+       had no ground of its OWN against a `--paper` panel — it was `--paper` on `--paper`, with no
+       edge, so the head read as empty tinted space. §4 turns the panel white, so `--white` here
+       reproduces that exact fault pointing the other way. The distinct-from-the-column assertion
+       above is the durable one; the specific value follows the panel. */
+    expect(fg, "the field's ground stopped being the tint that distinguishes it from a white panel").toBe("var(--paper)");
+    /* ⚠️ AND THE RIM IS WHAT ACTUALLY MAKES IT A FIELD. It was `1px solid transparent` — a reserved
+       border box with no colour in it — so the fill was doing all the work and the control vanished
+       the moment the surface behind it changed. Twice. */
+    expect(declValue(rule(".f12-lsearch"), "border"), "the field's rim went back to transparent")
+      .toBe("1px solid var(--hairline)");
   });
 
   /* ⚠️ AND THE GAP THE COLUMNS SHARE IS UNTOUCHED. §1's first clause was already satisfied; this
