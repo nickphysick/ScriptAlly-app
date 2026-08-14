@@ -375,6 +375,50 @@ describe("§4 (fp3) · the columns start on the same line", () => {
   });
 });
 
+/**
+ * ⚠️ FIX PACK 4 §1 — THE LIST HEAD. Two faults were reported; only one was real, and saying which is
+ * the point of this block.
+ *
+ * The head was NOT flush against the masthead rule: `.f12-lhead` has carried `var(--f12-headgap)`
+ * since fix pack 3 §4, and the field's top measures 203 against the rule's 183 — the plate's own
+ * 203. Adding padding would have pushed the two columns apart to fix something that was not broken.
+ *
+ * What WAS broken: the field's ground and the column's ground were the same token, `--paper`,
+ * measured identical at `rgb(250,246,240)`. The field had no edge and no ground of its own, so the
+ * head read as empty tinted space running up to the rule. That is what "nothing holding it off"
+ * was — not a missing gap, a missing control.
+ */
+describe("§1 (fp4) · the list head's field is a control on a tinted surface", () => {
+  it("the field takes a ground of its own, distinct from the column it sits on", () => {
+    const field = rule(".f12-lhead .f12-lsearch");
+    const list = rule(".f12-list");
+    expect(field, "the in-head field override is missing").not.toBe("");
+    expect(list, "the list rule is missing").not.toBe("");
+    const fg = declValue(field, "background"), lg = declValue(list, "background");
+    expect(fg, "the field declares no ground of its own").not.toBe("");
+    expect(fg, "the field went back to the column's tint — it reads as empty space, not a control")
+      .not.toBe(lg);
+    expect(fg, "the field's ground is not white").toBe("var(--white)");
+  });
+
+  /* ⚠️ AND THE GAP THE COLUMNS SHARE IS UNTOUCHED. §1's first clause was already satisfied; this
+     asserts nobody "fixes" it a second time by adding padding on top, which would break fix pack
+     3 §4's single line. */
+  it("the head still takes its top offset from the shared token, and gains no padding on top", () => {
+    const head = rule(".f12-lhead");
+    expect(declValue(head, "margin").split(/\s+/)[0], "the head stopped reading the shared gap")
+      .toBe("var(--f12-headgap)");
+    expect(head, "padding was added above the head — the columns no longer start together")
+      .not.toContain("padding");
+  });
+
+  /* the base rule keeps the tint for surfaces where the field sits on white */
+  it("the change is scoped to the head, not made global", () => {
+    expect(declValue(rule(".f12-lsearch"), "background"), "the base field ground was changed app-wide")
+      .toBe("var(--paper)");
+  });
+});
+
 describe("§1d/e/g · already landed, and still true", () => {
   it("the list's controls are in its own head, and none can go dead", () => {
     const head = code.indexOf('className="f12-lhead"');

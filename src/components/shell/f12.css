@@ -1351,7 +1351,22 @@
    `--f12-icon-btn`, so the row cannot go out of step the next time the button size moves — which is
    exactly what §1c just moved it. Equal heights align the tops AND the bottoms, which no amount of
    margin arithmetic can do while the heights differ. */
-.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: var(--f12-icon-btn); }
+/**
+ * ⚠️ WHITE, BECAUSE THE FIELD WAS INVISIBLE (fix pack 4 §1). `.f12-lsearch`'s base ground is
+ * `var(--paper)` and so is `.f12-list`'s — measured identical, `rgb(250,246,240)` against
+ * `rgb(250,246,240)`. The field was not merely subtle; it had NO edge and NO ground of its own, so
+ * the head read as empty tinted space running up to the masthead rule. That is what "nothing
+ * holding it off" was: not a missing gap, a missing control.
+ *
+ * ⚠️ THE GAP ITSELF WAS ALREADY RIGHT. `.f12-lhead` takes `var(--f12-headgap)` from fix pack 3 §4,
+ * and the field's top measures 203 against the rule's 183 — exactly the plate's own 203, which is
+ * the "same optical gap" the two columns are supposed to share. Adding padding here would have
+ * pushed the columns apart again to fix something that was never the fault.
+ *
+ * ⚠️ SCOPED TO THE HEAD, so `.qc-askfield`'s own override and any other use of the field keep their
+ * grounds. The base rule stays `--paper` for surfaces where the field sits on white.
+ */
+.f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: var(--f12-icon-btn); background: var(--white); }
 .f12-lsearch { flex: none; display: flex; align-items: center; gap: 8px; margin: 11px 12px; height: 34px; padding: 0 12px; border-radius: 99px; background: var(--paper); border: 1px solid transparent; color: var(--muted); font-size: 12.5px; transition: border-color 0.12s; }
 .f12-lsearch:hover, .f12-lsearch:focus-within { border-color: var(--line); }
 .f12-lsearch svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
