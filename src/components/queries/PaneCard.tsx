@@ -32,15 +32,27 @@ export const PaneCard: React.FC<{
    * where a figure belongs reads as a figure that failed to load.
    */
   meta?: string;
+  /**
+   * A CONTROL in the band, after the meta — Notes' expand, Tracking's task count.
+   *
+   * ⚠️ A SLOT, NOT A SECOND `meta`. The distinction is that this one is interactive: `meta` states a
+   * fact and must never be clickable, because a figure that silently does something when pressed is
+   * the worst kind of hidden control. Anything that acts comes through here and looks like it acts.
+   *
+   * ⚠️ AND IT PUSHES `meta` OFF THE RIGHT EDGE RATHER THAN REPLACING IT. Both can be true at once
+   * (Notes states "1 note" AND expands), so the band has room for the pair.
+   */
+  action?: React.ReactNode;
   /** Extra classes on the card — the stacked column's members take their flex from here. */
   className?: string;
   children: React.ReactNode;
-}> = ({ glyph, title, meta, className, children }) => (
+}> = ({ glyph, title, meta, action, className, children }) => (
   <section className={`f12-card${className ? " " + className : ""}`} style={{ minWidth: 0, minHeight: 0 }}>
     <div className="f12-chh">
       <span className="qp-cardgl" aria-hidden="true">{glyph}</span>
       <span>{title}</span>
       {meta && <span className="qp-cardmeta">{meta}</span>}
+      {action}
     </div>
     {children}
   </section>

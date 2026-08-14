@@ -226,35 +226,52 @@ describe("§1d · the list column's own foot", () => {
   });
 });
 
-describe("§1e / §1f · the kebab has a subject, or it is absent", () => {
-  /* ⚠️ ABSENT, NOT GREYED. A menu with no subject is not a menu that cannot run; it is a menu that
-     has nothing to be about. Greying it would advertise six verbs against a record that does not
-     exist. (The verbs INSIDE it grey individually — that is the to-do row grammar, and a different
-     question: there the subject exists and one verb does not apply to it.) */
-  /* ⚠️ REPOINTED (§1): the verbs left the pane for its control cell, so they render EARLIER in
-     source than the selected-query branch and the old index comparison would fail while the rule
-     held. The rule is unchanged and is asserted at its new home — the cell's own guard, which
-     renders nothing at all when there is no query and no agent. */
-  it("the kebab has a subject or it is not drawn", () => {
+describe("§1e / §1f · the verbs have a subject, or they are not drawn", () => {
+  /**
+   * ⚠️ THE MENU IS DELETED (§2), AND THE CLAUSE IT PROTECTED SURVIVES IT. "Absent, not greyed" was
+   * about a MENU with no subject — a menu that has nothing to be about is not a menu that cannot
+   * run. The same rule now applies to the row that replaced it: the whole cell renders nothing when
+   * there is no query and no agent.
+   *
+   * ⚠️ THE OTHER CLAUSE — "the verbs INSIDE grey individually" — also survives, and §2 sharpens it:
+   * Nudge greys on the rule that fires its to-do task, and greying is a lighter border and a muted
+   * icon at the SAME width, so the row keeps its shape as the selection moves.
+   */
+  it("the verbs have a subject or they are not drawn", () => {
     const cell = code.indexOf('className="qc-phead"');
-    const kebab = code.indexOf('ariaLabel="Actions for this query"');
     expect(cell, "the pane's control cell is missing").toBeGreaterThan(-1);
-    expect(kebab, "the kebab is missing").toBeGreaterThan(cell);
     expect(code.indexOf("{activeQuery && activeAgent ? (() => {", cell), "the cell lost its selection guard")
       .toBeGreaterThan(cell);
     /* and the filtered-to-zero branch still exists — it is the state in which nothing is selected */
     expect(code.indexOf("qc-nomatch"), "the filtered-to-zero branch is missing").toBeGreaterThan(-1);
   });
 
-  it("all six verbs are in the menu and nowhere else on the page", () => {
-    const at = code.indexOf('ariaLabel="Actions for this query"');
-    const items = code.slice(at, code.indexOf("]}", at));
-    expect(items, "the item list was not found — this slice is testing nothing").toContain("label:");
-    for (const verb of ["View tasks", "Nudge", "Agent", "Manuscript", "Download as PDF", "Delete query"]) {
-      expect(items, `${verb} left the kebab`).toContain(verb);
-    }
-    /* Coming-soon verbs are visible and inert, with their label — never hidden. */
-    expect(items, "a coming-soon verb stopped stating that it exists").toContain("disabled: true");
+  /**
+   * ⚠️ INVERTED BY §2. This asserted "all six verbs are in the menu": View tasks, Nudge, Agent,
+   * Manuscript, Download as PDF, Delete query. Four of those six were never query verbs — Agent and
+   * Manuscript were RECORDS and were permanently disabled because a menu is not a place a record
+   * can be opened from; View tasks and the PDF are exports of one kind or another. The row is four
+   * verbs, and each of the six old items is accounted for below rather than assumed.
+   */
+  it("the six old menu items are each accounted for — none was quietly dropped", () => {
+    const cell = code.indexOf('className="qc-phead"');
+    const row = code.slice(cell, code.indexOf("})() : null}", cell));
+    expect(row, "the slice is empty — this case is testing nothing").toContain("qc-btn");
+    /* two are verbs and stay in the row */
+    expect(row, "Nudge left the row").toContain("<span>Nudge</span>");
+    expect(row, "Delete left the row").toContain("<span>Delete</span>");
+    /* the two records moved to their own names */
+    expect(code, "the agent record lost its way in — the ⋯ item was disabled, so the name is now the link")
+      .toContain('className="qp-hlink"');
+    expect(code, "the manuscript lost its way in").toContain("qp-msname");
+    /* View tasks kept its handler and moved to Tracking, where this query's work is named */
+    expect(code, "View tasks lost its opener").toContain("setIsTasksOpen(true)");
+    expect(code, "the task count is not on Tracking's band").toContain('className="qp-cardact"');
+    /* ⚠️ AND THE PDF IS REPORTED, NOT RESOLVED. Its subject IS the query, so by §2's own rule it
+       cannot move — and it is not among the four verbs. It stays as an icon rather than being
+       deleted to make a list of four come out right. */
+    expect(code, "Download as PDF was deleted rather than flagged").toContain("Download this query as PDF");
+    expect(row, "the PDF grew a label — the four LABELLED verbs would read as five").not.toContain("<span>Download");
   });
 
   /* §1f, re-scoped by recon: an auto-select fallback means "nothing selected" is only reachable

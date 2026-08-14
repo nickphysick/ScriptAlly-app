@@ -71,7 +71,11 @@ describe("the command bar is retired, not restyled", () => {
    */
   it("there is no toolbar to return at all", () => {
     expect(queries, "the pane toolbar came back").not.toMatch(/className="f12-ctl[ "]/);
-    expect(queries, "the query's verbs are not in a kebab").toContain('ariaLabel="Actions for this query"');
+    /* ⚠️ REPOINTED (§2): the kebab that replaced the bar is itself deleted. The clause is unchanged
+       — a takeover must not draw browsing verbs over the record it has replaced — and it now holds
+       because the verbs live in a control cell that renders only on a selection. */
+    expect(queries, "the query's verbs left the pane's control cell").toContain('className="qc-phead"');
+    expect(queries, "the ⋯ came back").not.toContain('ariaLabel="Actions for this query"');
   });
 
   for (const dead of [".f12-ctl-create", ".qcb-ctx", ".qcb-req", ".qcb-esc", ".qcb-err", ".qcb-dot"]) {

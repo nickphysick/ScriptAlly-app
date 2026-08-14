@@ -133,6 +133,12 @@ export interface RowSpec {
   note?: string;
   /** Event time for the merged chronological sort. */
   timeMs?: number;
+  /**
+   * §2 — this row's `sub` is a FACT THE WRITER CAN CORRECT IN PLACE (the send method). Set on the
+   * Query-sent rung only, and only that rung: every other `sub` is derived from the log and has no
+   * single field behind it to edit.
+   */
+  subEditable?: boolean;
 }
 
 const isoDay = (ms: number): string => {
@@ -160,6 +166,15 @@ export interface QueryTimelineProps {
   onNudge?: () => void;
   /** TWS P4 — open the "set an expected date" flow (writes responseDeadline) when none is derivable. */
   onSetExpectedDate?: () => void;
+  /**
+   * §2 — the send-method picker, opened FROM THE EVENT THAT STATES IT. Its third home this session
+   * (`sentLine`, then the ⋯, now in place), and the one the three-verb grammar always pointed at:
+   * something happened → Record response; a detail is wrong → change it where it is written.
+   *
+   * ⚠️ ABSENT MEANS THE SUB IS PLAIN TEXT, not a dead control. A caller with no picker to open — the
+   * PDF path, a future read-only view — renders the same line without an affordance on it.
+   */
+  onEditSendMethod?: (anchor: HTMLElement) => void;
 }
 
 /**
@@ -213,6 +228,7 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
       date: fmtShort(getTime(evt.createdAt)),
       sub,
       pills: status === QueryStatus.QUERIED && queryMaterials.length ? queryMaterials : undefined,
+      subEditable: status === QueryStatus.QUERIED,
       activityId: typeof evt.id === "string" ? evt.id : undefined, // synthesised root has no id
       dateISO: isoDay(getTime(evt.createdAt)),
       note: typeof evt.note === "string" ? evt.note : "",
@@ -260,7 +276,8 @@ export const TimelineRows: React.FC<{
    * which is why this is a flag the caller opts into rather than a change to the row itself.
    */
   continues?: boolean;
-}> = ({ rows, onMenuOpen, continues = false }) => (
+  onEditSendMethod?: (anchor: HTMLElement) => void;
+}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod }) => (
   <>
     {rows.map((row, i) => {
       const isLast = i === rows.length - 1 && !continues;
@@ -278,7 +295,19 @@ export const TimelineRows: React.FC<{
           </div>
           <div className="tl-rowbody" style={{ paddingTop: 4 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-              <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "#3a1c14" }}>{row.title}</span>
+              {/* ⚠️ THE EDITABLE FACT SITS ON THE TITLE LINE, NOT UNDER IT (§2). "Query sent" and
+                  "via email" are one statement about one event; on two lines the second read as a
+                  caption, which is why the picker kept being moved somewhere that felt more like a
+                  control. Here it IS the words, with a dashed rule saying so. */}
+              <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "#3a1c14" }}>
+                {row.title}
+                {row.subEditable && row.sub && onEditSendMethod && (
+                  <>
+                    {" · "}
+                    <button type="button" className="qp-inplace" onClick={(e) => onEditSendMethod(e.currentTarget)} title="Change how this query was sent">{row.sub}</button>
+                  </>
+                )}
+              </span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
                 {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a" }}>{row.date}</span>}
                 {row.activityId && onMenuOpen && (
@@ -300,7 +329,10 @@ export const TimelineRows: React.FC<{
                 )}
               </span>
             </div>
-            {row.sub && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
+            {/* ⚠️ NOT TWICE. A promoted sub is drawn on the title line above; drawing it here as well
+                would state the send method twice, three pixels apart. Rows without the flag — and
+                the flagged row when no picker was passed — keep the caption they have always had. */}
+            {row.sub && !(row.subEditable && onEditSendMethod) && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
             {/* ⚠️ A CLASS, SO A SHORT VIEWPORT CAN DROP THESE (fix pack §5). They are the ONE thing on
                 this card repeated verbatim one column over — "What you sent" lists the same
                 materials — so when the card must give something up, this costs the writer nothing.
@@ -350,7 +382,7 @@ const TlProjection: React.FC<{
   </div>
 );
 
-export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
   const rows = buildTimelineRows(events, query, agent);
@@ -376,6 +408,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
           into nothing. */}
       <TimelineRows
         rows={rows}
+        onEditSendMethod={onEditSendMethod}
         onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}
         continues={ballHolder === "agent" && !!waiting}
       />

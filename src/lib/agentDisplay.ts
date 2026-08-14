@@ -60,3 +60,24 @@ export function agentAgencyLine(a: AgentLike, opts: { noAgency?: string; agencyO
 
 /** Whether this agent has no agency yet (and a name to stand on) — the empty-and-valid state. */
 export const isAgencyLess = (a: AgentLike) => !ag(a) && !!nm(a);
+
+/**
+ * The agent's website as a link target, or null when there is nothing to link to.
+ *
+ * ⚠️ A STORED WEBSITE IS WHATEVER THE WRITER TYPED. "greenfieldliterary.co.uk" with no scheme is
+ * the commonest shape, and an `href` without one is resolved as a RELATIVE path — so the pill would
+ * navigate the app to `/queries/greenfieldliterary.co.uk` and land on the dashboard fallback. That
+ * is a link that looks live, does something, and does the wrong thing, which is worse than a dead
+ * one. `https` is assumed rather than `http`: every agency site this would reach serves it.
+ *
+ * ⚠️ AND ONLY http(s). A stored value beginning `javascript:` or `data:` is not a website; it is a
+ * script the writer would run by clicking their own record. Anything with a scheme that is not
+ * http(s) yields null, so the pill greys instead.
+ */
+export function agentWebsiteHref(website?: string | null): string | null {
+  const raw = (website ?? "").trim();
+  if (!raw) return null;
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(raw)?.[1]?.toLowerCase();
+  if (scheme) return scheme === "http" || scheme === "https" ? raw : null;
+  return `https://${raw}`;
+}

@@ -1196,6 +1196,81 @@
    it already names the query. */
 .qc-who { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-right: 8px; white-space: nowrap; }
 
+/* ── §3 · ONE BUTTON, EVERYWHERE ON THIS PAGE ─────────────────────────────────────────────────
+   ⚠️ ONE RULE, NOT A FAMILY. `.f12-btn-pri` / `.f12-btn-sec` / `.f12-act` were three treatments at
+   three heights with three paddings, and which one a control wore depended on which pack added it.
+   `.qc-btn` is the whole vocabulary: one height, one radius, one type size, one rim, one hover — and
+   a single modifier for the one control that is allowed to be filled.
+
+   ⚠️ THE MODIFIER IS PINK WITH BLACK INK, NEVER BURGUNDY. Burgundy means OUTGOING in the StatusDot
+   system; a primary action wearing it would borrow a colour that already says something else on
+   the same screen, and the two meanings would have to be told apart by position. */
+.qc-btn {
+  display: inline-flex; align-items: center; gap: 7px; flex: none;
+  height: var(--btn-h); padding: 0 12px; border-radius: var(--btn-r);
+  border: 1px solid var(--btn-line); background: var(--white);
+  color: var(--ink-2); font-family: inherit; font-size: 12px; font-weight: 500; line-height: 1;
+  white-space: nowrap; cursor: pointer;
+  transition: background-color 0.14s, border-color 0.14s, color 0.14s;
+}
+.qc-btn:hover { background: var(--paper); border-color: #d6c9ba; }
+.qc-btn svg { width: 13px; height: 13px; flex: 0 0 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+/* ⚠️ `--pink-t` / `--pink-b`, NOT A NEW `--pinkb`. The pack names the REF's token; this repo's
+   equivalent pair already exists and is within a point or two of it (#f7e3dd/#eecdc3 against the
+   ref's #f5e2da/#e8c8bc). Adding a fourth pink beside three near-identical ones is exactly how two
+   values that mean the same thing drift apart — the note two rules above says so about radii.
+   ⚠️ AND `--ink`, NOT `--ink-2`: the pack says BLACK text on the fill, and `--ink-2` is the grey the
+   quiet buttons wear. The one filled control is the one that gets the full-strength ink. */
+.qc-btn-pri { background: var(--pink-t); border-color: var(--pink-b); color: var(--ink); font-weight: 600; padding: 0 14px; }
+.qc-btn-pri:hover { background: #f9ebe5; border-color: #e5bfb2; }
+.qc-btn-danger { color: #a05a45; }
+.qc-btn-danger:hover { background: #fdf2ee; border-color: #e8c3b5; }
+/* ⚠️ DISABLED IS A LIGHTER BORDER AND A MUTED ICON — NEVER ABSENCE, and never a change of BOX.
+   The width is identical to the live state, so the row does not reflow as the selection moves
+   between a query that is due a chase and one that is not. */
+.qc-btn:disabled, .qc-btn-off { color: #c4b9ac; border-color: #eee4d6; background: var(--white); cursor: default; }
+.qc-btn:disabled:hover, .qc-btn-off:hover { background: var(--white); border-color: #eee4d6; }
+.qc-btn:disabled svg, .qc-btn-off svg { opacity: 0.55; }
+/* the icon-only form: a square of the same height, so it sits on the row's line without arithmetic */
+.qc-btn-icon { padding: 0; width: var(--btn-h); justify-content: center; }
+.qc-sep { width: 1px; height: 16px; background: #e6ddd0; flex: 0 0 1px; margin: 0 4px; }
+
+/* ── §2 · THE RELOCATIONS — a name that is also the way to the record ─────────────────────────
+   ⚠️ A LINK THAT LOOKS LIKE THE HEADING IT IS. The agent's name is a 27px Playfair heading and a
+   navigation control at the same time; drawn as a link it would put an underline through the
+   pane's largest type, drawn as a heading it would hide the affordance. It inherits everything and
+   earns a rule on hover — the treatment the agent list's own name link already uses. */
+.qp-hlink { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px solid transparent; }
+.qp-hlink:hover { border-bottom-color: #d6c9ba; }
+.qp-hlinks { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+.qp-lnk { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-2); border: 1px solid #eee4d6; background: var(--paper); border-radius: 999px; padding: 3px 10px; cursor: pointer; text-decoration: none; }
+.qp-lnk:hover { border-color: #d6c9ba; color: var(--ink); }
+.qp-lnk svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+/* ⚠️ GREY, NOT ABSENT — an empty slot states nothing; a grey pill states that this record has no
+   email on file, which is a fact and often the one worth acting on. `pointer-events: none` is what
+   makes an `<a>` with no `href` genuinely inert rather than merely unstyled. */
+.qp-lnk-off { color: #c4b9ac; border-color: #f2ece2; background: #fdfbf7; pointer-events: none; }
+
+/* The card band's interactive slot — a control, so it is not mistaken for the mono fact beside it. */
+.qp-cardact { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--sageD); background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 5px; padding: 2px 6px; margin-left: 8px; cursor: pointer; white-space: nowrap; }
+.qp-cardact:hover { background: rgba(255, 255, 255, 0.85); color: var(--ink); }
+/* ⚠️ AND `.qp-cardmeta` KEEPS ITS `margin-left: auto`, so the meta still pushes right and the
+   control sits after it. Two `auto`s would fight; the second element takes a fixed gap instead. */
+
+/* ⚠️ THE SEND METHOD IS EDITED WHERE IT IS WRITTEN (§2) — its third home this session, and the one
+   the three-verb grammar always pointed at: something happened → Record response; a detail is wrong
+   → change it in place. A dashed underline says "this word is editable" without turning a sentence
+   into a form. */
+/* The manuscript's name, heading What you sent: what you sent, OF WHAT. One row, then the two facts
+   about the book as a single mono line — not the three-line block a previous pack removed. */
+.qp-msrow { padding-bottom: 9px; border-bottom: 1px solid var(--hairline); margin-bottom: 4px; }
+.qp-msname { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--burg); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; border-bottom: 1px solid #e8d3c6; }
+.qp-msname:hover { border-bottom-color: var(--burg); }
+.qp-msmeta { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
+
+.qp-inplace { font: inherit; color: inherit; font-weight: 600; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dashed #cbbcab; }
+.qp-inplace:hover { border-bottom-style: solid; border-bottom-color: var(--burg); color: var(--burg); }
+
 .f12-pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-2); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 /* ── THE EDITORIAL LIST (ref query-centre-final.html) — DE-CARDED. It is no longer a .f12-pane:
    inside the workspace frame a bordered card would be a card inside a card, so the list is now

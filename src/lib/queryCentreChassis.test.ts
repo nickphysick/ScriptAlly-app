@@ -593,11 +593,28 @@ describe("§5 (fp4) · what you sent", () => {
       .not.toBe("");
   });
 
-  it("it states no manuscript title, genre or word count", () => {
-    for (const t of ["activeMs.title", "activeMs.genre", "activeMs.wordCount", "genreWords"]) {
-      expect(card, `${t} is still stated here — it is a fact about the book, not about this query`)
-        .not.toContain(t);
-    }
+  /**
+   * ⚠️ REVERSED BY §2, ON FIX PACK 4's OWN TERMS. That pack deleted the manuscript block because
+   * title, genre and word count are facts about the BOOK, not about this send — which is true, and
+   * is still true. What changed is that the ⋯ carried a permanently-disabled `Manuscript` verb, and
+   * §2's rule for everything that is not one of the four verbs is "moves to where its subject is
+   * named". The subject was named NOWHERE on this pane, so the verb had nowhere to move to.
+   *
+   * ⚠️ ONE ROW COMES BACK, NOT THE BLOCK. Title as a link, genre and word count as a single mono
+   * line — asserted here, because "the block is back" and "the name is back" are different things
+   * and only the second is wanted.
+   */
+  it("the manuscript's name heads the card — as ONE row, and as the way to the record", () => {
+    expect(card, "the manuscript's name is not stated").toContain("activeMs.title");
+    expect(card, "the name is not the link to the manuscript").toContain("qp-msname");
+    expect(card, "the meta line is missing").toContain("qp-msmeta");
+    /* ⚠️ AND EACH HALF OMITS ITSELF. A book with no genre must not print a bare interpunct, and one
+       with no word count must not print "0 words" — zero words is a claim; absence is not. */
+    expect(card, "the meta prints regardless of whether it has anything to say")
+      .toContain("(!!activeMs.genre || !!activeMs.wordCount) &&");
+    expect(card, "the word count is printed unconditionally").toContain("activeMs.wordCount ?");
+    /* the three-line block fix pack 4 removed does NOT come back with the row */
+    expect(card, "the old genre/words block returned").not.toContain("genreWords");
   });
 
   it("the heading names the materials rather than the query", () => {
@@ -631,15 +648,33 @@ describe("§5 (fp4) · what you sent", () => {
       .not.toContain("Sent by");
   });
 
-  it("⚠️ THE SEND-METHOD PICKER SURVIVED THE LINE — rehomed, not removed", () => {
+  /**
+   * ⚠️ REPOINTED AGAIN BY §2 — THIRD HOME, AND THE LAST ONE. The clause is unchanged and is the
+   * reason this case exists: the picker is the ONLY control for a query's send method anywhere in
+   * the app, so every rearrangement has to prove it is still reachable. It hung off the "Sent by …"
+   * line; fix pack 6 §4 moved it to the ⋯; §2 deletes the ⋯ and puts it on the WORD IT CHANGES.
+   *
+   * ⚠️ AND THAT IS WHERE THE THREE-VERB GRAMMAR ALWAYS SAID IT BELONGED: something happened →
+   * Record response; a detail is wrong → edit it where it is written. The first two homes were
+   * places a control could live rather than places the fact was stated, which is why it kept moving.
+   */
+  it("⚠️ THE SEND-METHOD PICKER IS EDITED IN PLACE — third home, still reachable", () => {
     for (const kept of ["methodPickOpen", "pickSendMethod", "methodPickMenuStyle"]) {
-      expect(code, `${kept} went with the line — the app would have no way to change a send method`).toContain(kept);
+      expect(code, `${kept} went with the move — the app would have no way to change a send method`).toContain(kept);
     }
-    /* it anchors to the kebab now: one trigger, two menus, via a callback ref that feeds both */
-    expect(code, "the picker lost its trigger — its menu would position against a ref pointing at nothing")
-      .toContain("methodPickTrigRef as React.MutableRefObject<HTMLButtonElement | null>");
-    expect(code, "the ⋯ menu does not offer the verb, so the picker is unreachable")
-      .toMatch(/Sent by \$\{sentViaLabel\(activeQuery\?\.sendMethod\)\} — change/);
+    /* the trigger is the word itself: the timeline hands its own element up as the anchor, so
+       `useFixedMenu` positions the menu against what was clicked rather than a stale ref. */
+    expect(code, "the picker lost its in-place trigger").toContain("onEditSendMethod={(anchor)");
+    expect(code, "the anchor is not fed to the menu's positioner")
+      .toContain("methodPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = anchor");
+    expect(code, "the picker's menu was not re-mounted after the ⋯ was deleted")
+      .toContain('ariaLabel="Change send method"');
+    /* and the retired home is genuinely gone, not merely bypassed */
+    expect(code, "the ⋯ came back").not.toContain('ariaLabel="Actions for this query"');
+    const tl = read("../components/reading-pane/QueryTimeline.tsx");
+    expect(tl, "the timeline does not draw the send method as an editable word").toContain("qp-inplace");
+    expect(tl, "the promoted sub is still drawn a second time as a caption")
+      .toContain("!(row.subEditable && onEditSendMethod)");
   });
 
   /* ⚠️ AND THE ROWS AND THEIR MARKS ARE UNTOUCHED — the section removed a block, not the card. */
@@ -680,12 +715,12 @@ describe("§1d/e/g · already landed, and still true", () => {
      earlier in source than the selected-query branch and an index comparison against that branch
      would fail while the invariant held. The invariant — a verb cannot outlive its subject — is
      asserted where it now lives: the cell's own guard. */
-  it("the kebab cannot outlive its subject", () => {
+  it("the verbs cannot outlive their subject", () => {
     const cell = code.indexOf('className="qc-phead"');
-    const kebab = code.indexOf('ariaLabel="Actions for this query"');
     expect(cell, "the pane's control cell is missing").toBeGreaterThan(-1);
-    expect(kebab, "the kebab is missing").toBeGreaterThan(cell);
     expect(code.indexOf("{activeQuery && activeAgent ? (() => {", cell), "the cell lost its selection guard").toBeGreaterThan(cell);
+    /* §2 deleted the menu the earlier version of this case anchored on */
+    expect(code, "the ⋯ came back").not.toContain("qc-kebab");
   });
 });
 

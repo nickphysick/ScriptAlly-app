@@ -61,7 +61,7 @@ import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
-import { agentLabel, agentAgencyLine, agentPrimary, agentInitials } from "../lib/agentDisplay";
+import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref } from "../lib/agentDisplay";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
 import { formatQueryMaterial, materialLabel, sampleMaterialText } from "../lib/materials";
@@ -69,6 +69,9 @@ import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
 import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
+/* §2/§5 — the ONE reply-overdue rule, two consumers: Nudge's greying and the list's OVERDUE group.
+   `replyTaskFor` also owns the input assembly, which is the second place two callers could drift. */
+import { replyTaskFor } from "../lib/taskPrecedence";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
@@ -3359,104 +3362,96 @@ export const Queries: React.FC<{
             {activeQuery && activeAgent ? (() => {
               const verbAction = getPrimaryAction(activeQuery.status as QueryStatus);
               const verbWaitingOnAgent = verbAction.ballHolder === "agent";
-              const verbTaskCount = queryTaskBadge(tasks, activeQuery.id).count;
               const verbClosed = activeQuery.status === QueryStatus.REJECTED || activeQuery.status === QueryStatus.WITHDRAWN || activeQuery.status === QueryStatus.NO_RESPONSE;
               const verbIsMark = verbAction.kind === "mark-sent" && !verbClosed;
               const verbLabel = verbClosed ? "Reopen"
                 : verbAction.kind === "mark-sent" ? (verbAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
                 : "Record response";
+              /* ⚠️ NUDGE READS THE RULE THAT FIRES ITS TO-DO TASK, NOT A SECOND OPINION (§2).
+                 `replyTaskFor` is `replyTask` with the input assembled once — the same call the
+                 dashboard's urgent panel and the task generator make — so the button greys and
+                 un-greys on exactly the condition that puts "Nudge due" on the to-do list.
+
+                 ⚠️ `=== "nudge"`, NOT `!== "none"`. Past its window with `noResponseMeansNo` set,
+                 the rule returns "close": the query IS overdue and joins §5's group, and chasing it
+                 is the one thing the agency has told you not to do. The two consumers of one rule
+                 are deliberately different SETS — see `replyOverdue`'s note. */
+              const nudgeDue = replyTaskFor(activeQuery as never, activeAgent, Date.now()) === "nudge";
               return (
                 <>
+                  {/* ⚠️ THE ONLY FILLED CONTROL ON THE PAGE (§3). Pink, `--pinkb` rim, and BLACK text
+                      — never burgundy, which means outgoing status in the dot system; the primary
+                      action should not borrow a colour that already says something else. */}
                   <button
                     /* Mobile Pass 1: below md the floating command bar's primary carries the
                        Mark-sent anchor instead (this row is display:none there, and a hidden
                        anchor positions a popover at 0,0). */
                     ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}
                     type="button"
-                    className="f12-btn-pri"
+                    className="qc-btn qc-btn-pri"
                     onClick={() => openRecord(activeQuery)}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
-                    {verbLabel}
+                    <span>{verbLabel}</span>
                   </button>
-                  {/* ⚠️ THE KEBAB CAME UP WITH THE PRIMARY AND IS STILL ONE TRIGGER FOR TWO MENUS
-                      (fix pack 6 §4) — the send-method picker lost its own trigger with the line
-                      that held it and anchors here. `useFixedMenu` positions each menu from
-                      whatever its trigger ref points at, so relocating the button relocates both
-                      menus for free. §2 deletes this menu and rehomes every item in it. */}
-                  <div className="f12-popwrap">
-                    <button
-                      ref={(el) => {
-                        (moreTrigRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
-                        (methodPickTrigRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
-                      }}
-                      type="button"
-                      className="f12-act qc-kebab"
-                      aria-haspopup="menu"
-                      aria-expanded={isMoreOpen}
-                      onClick={() => setIsMoreOpen((o) => !o)}
-                      title="More actions for this query"
-                    >⋯</button>
-                    <F12Menu
-                      open={isMoreOpen}
-                      onClose={() => setIsMoreOpen(false)}
-                      style={moreMenuStyle}
-                      ariaLabel="Actions for this query"
-                      items={[
-                        {
-                          /* ⚠️ REHOMED FROM "What you sent" (fix pack 6 §4) — the only control for a
-                             query's send method anywhere in the app. It states the current value so
-                             the menu answers the question the deleted line answered. */
-                          label: sentViaLabel(activeQuery?.sendMethod) ? `Sent by ${sentViaLabel(activeQuery?.sendMethod)} — change` : "Set send method",
-                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM4 7l8 6 8-6" /></svg>,
-                          onClick: () => { setIsMoreOpen(false); setMethodPickOpen(true); },
-                        },
-                        {
-                          label: verbTaskCount > 0 ? `View tasks (${verbTaskCount})` : "View tasks",
-                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>,
-                          onClick: () => setIsTasksOpen(true),
-                        },
-                        {
-                          /* Nudging is only meaningful while the agent holds the ball — stated,
-                             not hidden, so the verb's existence is not a surprise later. */
-                          label: "Nudge",
-                          disabled: !verbWaitingOnAgent,
-                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>,
-                          onClick: () => setIsNudgeOpen(true),
-                        },
-                        {
-                          label: "Agent",
-                          disabled: true,
-                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5.5 20c.7-3.6 3.3-5.6 6.5-5.6s5.8 2 6.5 5.6" /></svg>,
-                          onClick: () => {},
-                        },
-                        {
-                          label: "Manuscript",
-                          disabled: true,
-                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5z" /></svg>,
-                          onClick: () => {},
-                        },
-                        {
-                          label: isGeneratingPDF ? "Generating…" : "Download as PDF",
-                          disabled: isGeneratingPDF,
-                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>,
-                          onClick: () => handleDownloadPDF(),
-                        },
-                        {
-                          label: "Delete query",
-                          icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>,
-                          onClick: () => askDeleteQuery(),
-                        },
-                      ]}
-                    />
-                    <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method"
-                      items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
-                        label: sentViaLabel(m),
-                        icon: activeQuery?.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
-                        onClick: () => pickSendMethod(m),
-                      }))}
-                    />
-                  </div>
+                  {/* ⚠️ DISABLED IS A LIGHTER BORDER AND A MUTED ICON, NEVER ABSENCE. A verb that
+                      vanished when it did not apply would reflow the row every time the selection
+                      moved between a query that is due a chase and one that is not — so the row
+                      would never be in the same place twice. `title` says WHY, which absence cannot. */}
+                  <button
+                    type="button"
+                    className={`qc-btn qc-btn-shrink${nudgeDue ? "" : " qc-btn-off"}`}
+                    disabled={!nudgeDue}
+                    title={nudgeDue ? "Send a nudge" : verbWaitingOnAgent ? "Not due yet — the agent's stated window has not passed" : "Nothing to chase — the agent is not holding this one"}
+                    onClick={() => setIsNudgeOpen(true)}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
+                    <span>Nudge</span>
+                  </button>
+                  {/* The rule divides what continues the conversation from what ends it. */}
+                  <span className="qc-sep" aria-hidden="true" />
+                  <button
+                    ref={closeTriggerRef}
+                    type="button"
+                    className="qc-btn qc-btn-shrink"
+                    aria-haspopup="menu"
+                    aria-expanded={isCloseMenuOpen}
+                    title="Mark this query closed"
+                    onClick={() => setIsCloseMenuOpen((o) => !o)}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 8-8M21 12a9 9 0 1 1-6.2-8.5" /></svg>
+                    <span>Mark closed</span>
+                  </button>
+                  {/* ⚠️ DELETE SITS OPENLY IN THE ROW BECAUSE §9 GIVES IT AN UNDO. A destructive verb
+                      with no way back needs a dialogue to interrupt the flow; one with five seconds
+                      of undo does not, and the undo is the cheaper interruption. */}
+                  <button
+                    type="button"
+                    className="qc-btn qc-btn-shrink qc-btn-danger"
+                    title="Delete this query"
+                    onClick={() => askDeleteQuery()}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" /></svg>
+                    <span>Delete</span>
+                  </button>
+                  {/* ⚠️ REPORTED, NOT RESOLVED — `Download as PDF` HAS NO SEAT IN THE PACK. §2 names
+                      four verbs and rehomes four other controls "to where its subject is named";
+                      this one's subject IS the query, so by the pack's own test it cannot move, and
+                      it is not among the four. Deleting a live control to make a list of four come
+                      out right is the one thing that would definitely be wrong, so it stays — as an
+                      icon at every width, which keeps the four LABELLED verbs reading as four.
+                      Nick's call whether it belongs here at all. */}
+                  <span className="qc-sep" aria-hidden="true" />
+                  <button
+                    type="button"
+                    className="qc-btn qc-btn-icon"
+                    disabled={isGeneratingPDF}
+                    title={isGeneratingPDF ? "Generating…" : "Download this query as PDF"}
+                    aria-label={isGeneratingPDF ? "Generating PDF" : "Download this query as PDF"}
+                    onClick={() => handleDownloadPDF()}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+                  </button>
                 </>
               );
             })() : null}
@@ -4008,7 +4003,20 @@ export const Queries: React.FC<{
                     <div className="f12-heroband" style={{ flexShrink: 0 }}>
                       <span className="f12-bigav" aria-hidden="true">{initials}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="f12-hn" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nameplate}</div>
+                        {/* ⚠️ THE NAME IS THE LINK TO THE AGENT RECORD (§2). The ⋯ carried an `Agent`
+                            item that was permanently `disabled` — a verb with a subject and no
+                            destination — and the destination it wanted is the agent list, which is
+                            where the record lives. Naming a thing and making the name the way to it
+                            is the whole of §2's relocation rule.
+
+                            ⚠️ PLAIN TEXT WITH NO BRIDGE. `onNavigate` is optional on this page; a
+                            link rendered without one would be a dead link, which this app does not
+                            draw. It degrades to the heading it already was. */}
+                        <div className="f12-hn" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                          {onNavigate ? (
+                            <button type="button" className="qp-hlink" onClick={() => onNavigate("agents")} title="Open the agent list">{nameplate}</button>
+                          ) : nameplate}
+                        </div>
                         {/* ⚠️ ONE META LINE, NOT TWO STACKED. Agency and the queried date are both
                             quiet facts about this record; giving each its own line made a three-line
                             block out of a row. Either half omits itself when absent. */}
@@ -4017,6 +4025,37 @@ export const Queries: React.FC<{
                             <span>{activeAgent.agency}</span>
                           )}
                           {heroQueriedOn && <span>Queried {heroQueriedOn}</span>}
+                        </div>
+                        {/* ⚠️ EMAIL AND WEBSITE ARE PILLS BENEATH THE AGENCY (§2), NOT MENU ITEMS.
+                            Their subject is the AGENT, who is named on the line above them — which
+                            is the rule; in a ⋯ headed "Actions for this query" they were two
+                            contact details filed under the wrong noun.
+
+                            ⚠️ AND THEY GREY RATHER THAN VANISH when the record holds no address or
+                            URL, for the same reason Nudge does: an absent pill states nothing, a
+                            grey one states that this agent has no email on file — which is a fact,
+                            and often the one worth acting on. */}
+                        <div className="qp-hlinks">
+                          <a
+                            className={`qp-lnk${activeAgent.email?.trim() ? "" : " qp-lnk-off"}`}
+                            href={activeAgent.email?.trim() ? `mailto:${activeAgent.email.trim()}` : undefined}
+                            title={activeAgent.email?.trim() || "No email address on this agent's record"}
+                            aria-disabled={activeAgent.email?.trim() ? undefined : true}
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7" /></svg>
+                            Email
+                          </a>
+                          <a
+                            className={`qp-lnk${agentWebsiteHref(activeAgent.website) ? "" : " qp-lnk-off"}`}
+                            href={agentWebsiteHref(activeAgent.website) ?? undefined}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            title={agentWebsiteHref(activeAgent.website) ?? "No website on this agent's record"}
+                            aria-disabled={agentWebsiteHref(activeAgent.website) ? undefined : true}
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></svg>
+                            Website
+                          </a>
                         </div>
                       </div>
                       {/* The status badge draws the real StatusDot — never a recreation. */}
@@ -4054,6 +4093,25 @@ export const Queries: React.FC<{
                        the hero band's badge reads, so the band and the card cannot disagree about
                        what state this query is in. */
                     meta={statusDisplayLabel(activeQuery)}
+                    /* ⚠️ `View tasks` LANDED HERE WHEN THE ⋯ WENT (§2), AND THE PACK DOES NOT NAME IT.
+                       §2's rule for everything that is not one of the four verbs is "moves to where
+                       its subject is named" — and this query's outstanding work is named in
+                       Tracking, which is the card about where the query stands over time. The count
+                       is the existing `queryTaskBadge`, never a fresh tally.
+
+                       ⚠️ ABSENT AT ZERO, not "0 TASKS". A control that opens a drawer onto nothing
+                       is a control that lies about having something to show. */
+                    action={queryTaskBadge(tasks, activeQuery.id).count > 0 ? (
+                      <button
+                        ref={tasksTrigRef}
+                        type="button"
+                        className="qp-cardact"
+                        onClick={() => setIsTasksOpen(true)}
+                        title="View this query's tasks"
+                      >
+                        {queryTaskBadge(tasks, activeQuery.id).count} {queryTaskBadge(tasks, activeQuery.id).count === 1 ? "TASK" : "TASKS"}
+                      </button>
+                    ) : undefined}
                     glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>}
                   >
                       <PaneScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "0 0 18px" }}>
@@ -4128,9 +4186,30 @@ export const Queries: React.FC<{
                               onDeleteEntry={onDeleteEntry}
                               onNudge={() => setIsNudgeOpen(true)}
                               onSetExpectedDate={() => openEditQuery(activeQuery.id)}
+                              /* ⚠️ THE PICKER'S THIRD AND LAST HOME (§2). It anchors off the word it
+                                 changes, so `methodPickTrigRef` is now a callback ref set by the
+                                 in-place button rather than by a kebab that no longer exists — see
+                                 the mount just below, which had to move with it. */
+                              onEditSendMethod={(anchor) => {
+                                (methodPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = anchor;
+                                setMethodPickOpen(true);
+                              }}
                             />
                           );
                         })()}
+                        {/* ⚠️ THE SEND-METHOD PICKER MOUNTS BESIDE THE EVENT IT EDITS (§2). It has now
+                            been moved three times — off the "Sent by …" line, into the ⋯, and here —
+                            and the reason it kept moving is that the first two homes were places a
+                            CONTROL could live rather than places the FACT was stated. Same menu, same
+                            handler, same `useFixedMenu`; only the trigger changed, and the trigger is
+                            now the word itself. */}
+                        <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method"
+                          items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
+                            label: sentViaLabel(m),
+                            icon: activeQuery?.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
+                            onClick: () => pickSendMethod(m),
+                          }))}
+                        />
                         {/* ⚠️ THE "What happened next?" COMPOSER IS GONE (§1). It was the second
                             implementation of the response journey — a primary and an inline
                             composer that behaved differently, in one room. The takeover is the
@@ -4244,25 +4323,45 @@ export const Queries: React.FC<{
 
                           return (
                             <>
-                              {/* ⚠️ THE MANUSCRIPT BLOCK IS GONE (fix pack 4 §5, overriding the ref, which still
-                                  draws it). Title, genre and word count are all stated in the sidebar's
-                                  manuscript card, and none of the three is a fact about THIS query — they
-                                  describe the book, which does not change because you sent it somewhere.
-                                  The card now opens with the two facts that are about this send.
+                              {/* ⚠️ THE MANUSCRIPT'S NAME IS BACK, AND IT IS BACK AS THE HEADING (§2) — this
+                                  REVERSES fix pack 4 §5, which deleted the block, and it reverses it on the
+                                  pack's own terms rather than by preference.
 
-                                  ⚠️ THE CLICK-TO-REASSIGN CONTROL WENT WITH IT, and that is a real loss of a
-                                  shortcut rather than of a capability: the Edit Query drawer carries its own
-                                  manuscript selector, so a query can still be moved. Flagged rather than
-                                  quietly dropped. */}
-                              {/* ⚠️ THE "SENT BY … · 13 AUG" LINE IS GONE TOO (fix pack 6 §4). Both
-                                  facts are already stated by Tracking's `Query sent` event, and a
-                                  card that opens by repeating the event beside it delays the thing
-                                  it exists to show. It now opens directly on Materials sent.
+                                  What that pack argued was that title, genre and word count are facts about
+                                  the BOOK, not about this send — true, and still true. What has changed is
+                                  that the ⋯ carried a permanently-disabled `Manuscript` verb, and §2's rule
+                                  for it is "moves to where its subject is named". The subject was named
+                                  nowhere on this pane, so there was nowhere for it to move TO. Naming it
+                                  here gives the verb its home and the card its subject in one row: what you
+                                  sent, of what.
 
-                                  ⚠️ THE PICKER WAS NOT DROPPED WITH THE LINE. It was the only way to
-                                  change a query's send method anywhere in the app, so removing it to
-                                  tidy a line would have been a feature loss wearing a layout change.
-                                  It moved to the pane's ⋯ menu — see `Change send method` there. */}
+                                  ⚠️ ONE ROW, NOT THE OLD BLOCK. Title as a link, then genre and word count
+                                  as a single mono line — the ref's shape. The three-line block fix pack 4
+                                  removed does not come back with it.
+
+                                  ⚠️ AND IT RESTORES THE REASSIGN SHORTCUT THAT PACK FLAGGED AS A REAL LOSS:
+                                  the name goes to the manuscript, where the record is. */}
+                              <div className="qp-msrow">
+                                {onNavigate ? (
+                                  <button type="button" className="qp-msname" onClick={() => onNavigate("manuscripts")} title="Open your manuscripts">{activeMs.title}</button>
+                                ) : (
+                                  <span className="qp-msname">{activeMs.title}</span>
+                                )}
+                                {/* ⚠️ EACH HALF OMITS ITSELF. A manuscript with no genre recorded must not
+                                    print an interpunct with nothing on one side of it, and one with no word
+                                    count must not print "0 WORDS" — zero words is a claim, absence is not. */}
+                                {(!!activeMs.genre || !!activeMs.wordCount) && (
+                                  <div className="qp-msmeta">
+                                    {[activeMs.genre || null, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString()} words` : null]
+                                      .filter(Boolean).join(" · ")}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* ⚠️ THE "SENT BY … · 13 AUG" LINE STAYS GONE (fix pack 6 §4) — both facts are
+                                  stated by Tracking's `Query sent` event, and a card that opens by repeating
+                                  the event beside it delays the thing it exists to show. §2 moves the PICKER
+                                  onto that event instead: `Query sent · via email`, editable in place. */}
 
                               {/* Materials sent — the document rows (Query letter / Synopsis / Sample materials) */}
                               <div style={eyebrow}>Materials sent</div>
