@@ -1235,6 +1235,43 @@
 .qc-btn-icon { padding: 0; width: var(--btn-h); justify-content: center; }
 .qc-sep { width: 1px; height: 16px; background: #e6ddd0; flex: 0 0 1px; margin: 0 4px; }
 
+/* ── §3 · THE HEADER'S TWO FOLLOW THE SAME RULE, ON THIS PAGE ONLY ────────────────────────────
+   ⚠️ PAGE-SCOPED, BECAUSE `.svh-btn` IS TEN PAGES. Export and Log query are drawn by the shared
+   `PageHeader`, which puts them at 38px / radius 9 / 13px — a different button from everything
+   else in this room. Retuning `.svh-btn` itself would move nine other pages to satisfy one, so the
+   override is under `.qc-wpg` and the shell's own rule is untouched.
+
+   ⚠️ IT READS THE SAME THREE TOKENS the row below it reads, so "one button" survives someone
+   changing the height: there is one number, in one place, and both rows follow it.
+
+   ⚠️ AND THE HEIGHT TRANSITION IS KEPT. `.svh-btn` animates its own height as the header condenses;
+   overriding the height without leaving that transition alone would make the two buttons jump while
+   the plate around them glides. */
+.qc-wpg .svh-btn { height: var(--btn-h); padding: 0 12px; border-radius: var(--btn-r); font-size: 12px; font-weight: 500; gap: 7px; }
+.qc-wpg .svh-btn svg { width: 13px; height: 13px; }
+.qc-wpg .svh-btn-ghost { background: var(--white); border-color: var(--btn-line); color: var(--ink-2); }
+.qc-wpg .svh-btn-ghost:hover { background: var(--paper); border-color: #d6c9ba; }
+/* Log query is the header's primary and wears the row's primary treatment — the SAME exception,
+   not a second one. Two filled controls on one screen, both meaning "this is the action here". */
+.qc-wpg .svh-btn-ink { background: var(--pink-t); border-color: var(--pink-b); color: var(--ink); font-weight: 600; padding: 0 14px; }
+.qc-wpg .svh-btn-ink svg { color: var(--ink); }
+.qc-wpg .svh-btn-ink:hover { background: #f9ebe5; border-color: #e5bfb2; }
+
+/* ⚠️ THE SECONDARIES SHED THEIR LABELS, THE PRIMARY NEVER DOES (§3). Below ~1300 the pane column is
+   too narrow for four labelled verbs beside the THIS QUERY tag; the three that can be recognised by
+   their icons give the width back, and the one that names what you are about to do keeps its words.
+   `title` already carries every label, so nothing becomes unnameable.
+
+   ⚠️ A VIEWPORT QUERY, NOT A CONTAINER ONE, and that is a compromise worth stating: what actually
+   constrains this row is the PANE's width, which also moves with the rail's pinned state. The
+   viewport is the closest thing this stylesheet can ask about without introducing container queries
+   to a page that uses none — so the threshold is verified by measurement at four widths in BOTH
+   rail states rather than trusted. */
+@media (max-width: 1299.98px) {
+  .qc-phead .qc-btn-shrink { padding: 0; width: var(--btn-h); justify-content: center; }
+  .qc-phead .qc-btn-shrink span { display: none; }
+}
+
 /* ── §2 · THE RELOCATIONS — a name that is also the way to the record ─────────────────────────
    ⚠️ A LINK THAT LOOKS LIKE THE HEADING IT IS. The agent's name is a 27px Playfair heading and a
    navigation control at the same time; drawn as a link it would put an underline through the
