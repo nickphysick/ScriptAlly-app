@@ -80,7 +80,12 @@ describe("the To-do PAGE HEADER — it names the page, and carries ONE action", 
     expect(hero).toContain('className="tdb-addb"');  // pink — creation
     // board fixes II P3: the ghost session launcher is retired — the dock's doors replaced it
     expect(hero).not.toContain('className="tdb-ghb"');
-    expect(hero).toContain("tdb-sortb");
+    /* ⚠️ SORT LEFT THIS ROW (visual rebuild, Phase 1) and the max-two law is why it can. This case
+       recorded that two instruments sat beside two buttons and argued the count should not be read
+       against its purpose. The search went to the rail with the split; sort followed it, because
+       both order the LIST and the rail is the list. What is left here acts on the PAGE, and the
+       row is back under the letter of the law as well as its spirit. */
+    expect(hero).not.toContain("tdb-sortb");
     expect(hero).not.toContain("Last week in review"); // one thing, one door
   });
 });

@@ -88,7 +88,7 @@ import {
 /* THE CONSOLIDATED PAGE'S OWN DERIVATIONS — groups, stat chips and the eyebrow, all pure and
    locked away from this component (tasks-consolidation P2). */
 import { taskGroups, taskStats, tasksEyebrow, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
-import { paneRestLine } from "../../lib/todoHandoff";
+import { paneRestLine, showingLine, tasksCsv } from "../../lib/todoHandoff";
 import { isTerminalStatus } from "../../lib/agentList";
 import { estimateTotal } from "../../lib/todoEstimate";
 import { longDate } from "../../lib/dashboardStats";
@@ -734,6 +734,40 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /** Clearing the narrowing is one act, whichever half of it is set. */
   const clearNarrowing = () => { setSearch(""); setChip("all"); };
 
+  /** What the rail is showing — the groups it draws, flattened. One derivation, two readers. */
+  function railShown(): number {
+    return railGroups().reduce((n, g) => n + g.cards.length, 0);
+  }
+
+  /**
+   * ⚠️ THE EXPORT WRITES WHAT THE RAIL SHOWS, which is what the count beside it states. Every
+   * column is a value the row already renders — nothing is re-derived for the file, so a CSV
+   * cannot disagree with the list it came from.
+   */
+  function exportRail() {
+    /* ⚠️ EVERY COLUMN IS A VALUE THE ROW ALREADY RENDERS — nothing is re-derived for the file, so
+       a CSV cannot disagree with the list it came from. (Phase 2 repoints `bucket` and `deed` at
+       the bucket derivations when they exist; the fields it reads today are the ones the row
+       reads today, which is the same rule.) */
+    const rows = railGroups().flatMap((g) => g.cards.map((c) => ({
+      bucket: c.kind ?? "",
+      deed: c.title,
+      agent: c.who ?? "",
+      agency: c.record ?? "",
+      figureLabel: g.label,
+      figure: c.due ?? "",
+    })));
+    const blob = new Blob([tasksCsv(rows)], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute("download", "scriptally-tasks.csv");
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   // the inverses the undo toast already carries, kept by card key so the session's REDO can
   // offer "Undo handled" on a card it stamped (see doneToast — no parallel undo store)
   // v7 — the hero in session: the title crossfade + the fixed sub-slot's single occupant are
@@ -1317,6 +1351,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   </button>
                 </div>
               ) : renderList()}
+              {/* ⚠️ THE FOOTER CLOSES THE CARD, and it states the scope the EXPORT writes. A count
+                  saying "12 of 34" beside a button that wrote 34 would be two statements of one
+                  scope, and the button's is the one nobody checks until the file is open. */}
+              <div className="tdw-foot">
+                <span className="tdw-showing">{showingLine(railShown(), allDockable.length)}</span>
+                <span className="tdw-footgrow" />
+                <button
+                  type="button"
+                  className="tdw-export"
+                  disabled={railShown() === 0}
+                  onClick={exportRail}
+                >
+                  Export CSV
+                </button>
+              </div>
             </div>
             <div className="tdw-work">
               {paneCard ? (
@@ -1538,25 +1587,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 (Flagged in the report: two instruments over one list now sit in two places, which
                 is a tension this pack's own history warns about. The pack put the search in the
                 rail explicitly and the ref draws it there.) */}
-            {/* SORT — it reorders every group at once, which is why it sits with the page's
-                instruments and never inside a panel. */}
-            <span className="tdb-sortwrap">
-              <button type="button" className="tdb-sortb" aria-haspopup="menu" aria-expanded={sortOpen}
-                onClick={() => setSortOpen((v) => !v)}>
-                ⇅ {TODO_SORTS.find((x) => x.id === sort)!.label}
-              </button>
-              {sortOpen && (
-                <div className="tdb-sortmenu" role="menu">
-                  {TODO_SORTS.map((o) => (
-                    <button key={o.id} type="button" role="menuitem" aria-current={o.id === sort}
-                      onClick={() => { setSort(o.id); setSortOpen(false); }}>
-                      {o.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </span>
-
+            {/* ⚠️ SORT MOVED INTO THE RAIL (visual rebuild, Phase 1). Its old note here read
+                "it reorders every group at once, which is why it sits with the page's instruments
+                and never inside a panel" — true of a page that WAS one panel. The rail is the
+                list now, sort orders the list, and leaving it up here kept two instruments over
+                one set in two places. The v9 ref draws it beside the search; that settles the
+                tension flagged when the search moved. */}
             {/* ⚠️ THE TAG NARROWING — THE NOTEBOARD'S OWN CONTROL, NOT A LOOKALIKE (P2 follow-up).
                 Same markup, same `.cal-nav` trigger and `.cal-viewmenu` menu, same single-select
                 `#All ▾` vocabulary; only the set it narrows differs. Rendered ONLY where there is
@@ -2246,6 +2282,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const chips = railChips(boardCols);
     return (
       <div className="tdw-tools">
+        <div className="tdw-toolrow">
         <div className={`tdw-search${search ? " has" : ""}`}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
           <input
@@ -2264,6 +2301,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <X size={13} aria-hidden />
             </button>
           )}
+        </div>
+        {/* sort, beside the field it orders */}
+        <span className="tdw-sortwrap">
+          <button type="button" className="tdw-sort" aria-haspopup="menu" aria-expanded={sortOpen}
+            onClick={() => setSortOpen((v) => !v)}>
+            ⇅ {TODO_SORTS.find((x) => x.id === sort)!.label}
+          </button>
+          {sortOpen && (
+            <div className="tdb-sortmenu" role="menu">
+              {TODO_SORTS.map((o) => (
+                <button key={o.id} type="button" role="menuitem" aria-current={o.id === sort}
+                  onClick={() => { setSort(o.id); setSortOpen(false); }}>
+                  {o.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </span>
         </div>
         {/* ⚠️ EVERY COUNT IS LIVE AND COMES FROM `railChips`, which reads the same `taskGroups` the
             headings do — so a chip and the panel it names can never state different figures. */}

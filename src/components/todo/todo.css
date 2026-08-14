@@ -1370,7 +1370,13 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-ghb { background: var(--shell-card, #fdfaf5); border: 1px solid #e2d8c8; color: #4d4238; }
 .tdb-ghb:hover { background: #f4f2ef; }
 /* pink is CREATION — the Add keeps it, the session launcher does not */
-.tdb-addb { background: var(--pink, #f5e2da); border: 1px solid var(--pink-b, #e8c8bc); color: var(--burg, #7c3a2a); }
+/* ⚠️ BLACK TEXT ON THE PINK FILL (visual rebuild, Phase 1) — ink #241209, not burgundy. Burgundy
+   on blush is two warm tones a shade apart, which reads as low contrast rather than as emphasis;
+   ink states the label and lets the fill do the signalling.
+   ⚠️ SCOPED TO THIS PAGE, DELIBERATELY. `--pink` is an app-wide token (index.css) read by auth,
+   forms, the shell, the toast and the page header — retoning it overnight would restyle six
+   surfaces nobody asked about. The fill still reads the token; only this button's INK is set. */
+.tdb-addb { background: var(--pink, #f5e2da); border: 1px solid var(--pink-b, #e8c8bc); color: #241209; }
 .tdb-addb:hover { background: var(--pink-h, #f7e8e1); }
 
 /* ⚠️ "WORK THE LIST" — the ink verb, back from the retired Today page (tasks-consolidation P2).

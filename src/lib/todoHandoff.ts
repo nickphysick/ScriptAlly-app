@@ -181,3 +181,38 @@ export function paneRestLine(
   if (clauses.length === 0) return "Nothing is out with an agent at the moment.";
   return `${clauses.join(", and ")}.`;
 }
+
+/* ── the list card's footer (visual rebuild, Phase 1) ────────────────────────────────────────── */
+
+/** "Showing 12 of 34" — what you are looking at, out of what there is. */
+export function showingLine(shown: number, total: number): string {
+  return `Showing ${shown} of ${total}`;
+}
+
+/**
+ * ⚠️ THE EXPORT IS THE ROWS YOU CAN SEE, not the whole store. A footer that said "Showing 12 of
+ * 34" beside a button that wrote 34 would be two statements of one scope, and the button's is the
+ * one nobody checks until the file is open.
+ *
+ * ⚠️ FIELDS ARE ESCAPED AND THE FILE CARRIES A BOM, matching the Queries export — an unescaped
+ * comma in an agency name silently shifts every column after it, and without the BOM Excel reads
+ * a manuscript title's curly apostrophe as mojibake.
+ */
+const csvField = (v: string): string =>
+  /[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v;
+
+export interface CsvRow {
+  bucket: string;
+  deed: string;
+  agent: string;
+  agency: string;
+  figureLabel: string;
+  figure: string;
+}
+
+export function tasksCsv(rows: CsvRow[]): string {
+  const head = ["Bucket", "Task", "Agent", "Agency", "Waiting", "Figure"];
+  const body = rows.map((r) =>
+    [r.bucket, r.deed, r.agent, r.agency, r.figureLabel, r.figure].map(csvField).join(","));
+  return `﻿${[head.join(","), ...body].join("\n")}\n`;
+}

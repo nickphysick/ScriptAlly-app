@@ -598,9 +598,14 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(split).toContain("grid-template-columns: var(--tdw-rail-w) minmax(0, 1fr)");
     expect(split).toContain("grid-template-rows: minmax(0, 1fr)");
     /* the value, stated once and read once — the rail is a fixed measure, the workspace is what
-       is left. 440 rather than the ref's 408: the live row carries seven lanes, not the four the
-       concept sketch drew. */
-    expect(split).toContain("--tdw-rail-w: 440px");
+       is left. 520 since the visual rebuild: the row gained a 68px bucket pill and a 104px figure
+       column, and v9 draws the pane at 520. (It was 440, itself widened from the earlier ref's
+       408 when the lane structure grew — the width has always followed the row.) */
+    expect(split).toContain("--tdw-rail-w: 520px");
+    /* the panes are objects on a ground now, not two halves of a sheet — so the split carries the
+       gap and the ground, and the rail no longer carries a divider */
+    expect(split).toContain("background: var(--ws-ground)");
+    expect(split).toContain("gap: 18px");
   });
 
   it("the WORKSPACE is the second scroller, and it is the pane's own", () => {
@@ -613,7 +618,13 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     /* One overflow primitive on this page family — the fault `.tpl-zone` was extracted to fix.
        The rail declares no overflow of its own; it is a flex column and the zone inside it
        scrolls, exactly as `.tpl-body` did before the split. */
-    expect(rule(splitCss, ".tdw-rail {")).not.toContain("overflow");
+    /* ⚠️ THE CARD ITSELF CLIPS, AND THAT IS ITS EDGE RATHER THAN A SCROLL DECISION — a 14px
+       radius with square content spilling past it is not a card. What must not clip is anything
+       BETWEEN the card and the scroller, and there is nothing: `.tpl-zone` is the rail's direct
+       scrolling child. The distinction is the whole of this case, so it is asserted rather than
+       relaxed away. */
+    expect(rule(splitCss, ".tdw-rail {")).toContain("overflow: hidden");
+    expect(rule(splitCss, ".tdw-rail {")).toContain("border-radius: 14px");
     expect(splitCss).not.toContain(".tpl-zone");   // the primitive is not re-declared here
     /* the rail gained its own tools block above the scroller (Phase 4); the ZONE is still the
        one relocated scroller, which is what this case is about */
@@ -634,9 +645,11 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(rail).toContain("--ws-window-rgb: 255, 255, 255");
     expect(rail).toContain("background: var(--ws-window)");
     expect(rail).not.toMatch(/background:\s*#fff/);
-    /* and the workspace keeps the page's own ground — the colour that was already showing there,
-       so the pane reads as the page continuing rather than as a third surface */
-    expect(rule(splitCss, ".tdw-work {")).toContain("background: var(--ws-window)");
+    /* ⚠️ AND THE WORKSPACE PAINTS NOTHING AT ALL NOW (visual rebuild). It used to carry the
+       page's ground; the SPLIT carries it, and the pane is transparent so the task card floats on
+       it directly. A pane with its own fill behind a card that also has one is two surfaces where
+       the design has one object on a desk. */
+    expect(rule(splitCss, ".tdw-work {")).toContain("background: transparent");
     /* the tie this depends on, asserted at its source rather than assumed */
     expect(readFileSync(join(here, "todoGroups.css"), "utf8"))
       .toContain("--tdg-ground: var(--ws-window)");
@@ -779,11 +792,15 @@ describe("⚠️ EACH PANE SCROLLS, AND NEITHER CLIPS — the distinction a page
    */
   it("no box in either chain declares `overflow: hidden`", () => {
     for (const [sheet, sel] of [
-      [css, ".tpl-cols {"], [css, ".tpl-body {"],
-      [splitCss, ".tdw-split {"], [splitCss, ".tdw-rail {"],
+      [css, ".tpl-cols {"], [css, ".tpl-body {"], [splitCss, ".tdw-split {"],
     ] as const) {
       expect(rule(sheet, sel), sel).not.toContain("overflow");
     }
+    /* ⚠️ `.tdw-rail` IS THE EXCEPTION AND IT IS NAMED. It clips because it is a rounded CARD, and
+       its clip is its own edge; the scroller is its direct child, so nothing is swallowed on the
+       way down. Exempting it silently would leave the next reader unable to tell this from the
+       fault the case exists for. */
+    expect(rule(splitCss, ".tdw-rail {")).toContain("overflow: hidden");
     /* `.tdb-wrap` is the ONE deliberate clip — it is the frame, and the frame is a window. Its
        `overflow: hidden` is what makes the panes scroll instead of the page, and it is asserted
        positively above rather than exempted quietly here. */
@@ -797,5 +814,68 @@ describe("⚠️ EACH PANE SCROLLS, AND NEITHER CLIPS — the distinction a page
     expect(rule(splitCss, ".tdw-work {")).toContain("min-height: 0");
     expect(rule(splitCss, ".tdw-rail {")).toContain("min-height: 0");
     expect(rule(splitCss, ".tdw-split {")).toContain("min-height: 0");
+  });
+});
+
+/* ── the panes become cards on a ground (visual rebuild, Phase 1) ────────────────────────────── */
+
+describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () => {
+  /**
+   * ⚠️ THE GROUND IS THE APP'S OWN TOKEN. v9 draws `#f7f3ed`; `--ws-ground` (#f7f4ee) is within a
+   * hair of it — one step of green, one of blue — and is already the warm ground elsewhere in the
+   * shell. Nothing was invented, and the split reads it rather than restating a hex.
+   */
+  it("the split carries the ground, the gap and the padding — and reads a token, not a literal", () => {
+    const split = rule(splitCss, ".tdw-split {");
+    expect(split).toContain("background: var(--ws-ground)");
+    expect(split).not.toMatch(/background:\s*#/);
+    expect(split).toContain("gap: 18px");
+    expect(split).toContain("padding: 0 22px 20px");
+  });
+
+  it("the rail is a CARD — hairline, radius, lift — and the divider went with the sheet", () => {
+    const rail = rule(splitCss, ".tdw-rail {");
+    expect(rail).toContain("border: 1px solid var(--tdw-hair)");
+    expect(rail).toContain("border-radius: 14px");
+    expect(rail).toContain("box-shadow");
+    /* the border-RIGHT that split one sheet in two is gone; the ground separates them now */
+    expect(rail).not.toContain("border-right");
+  });
+
+  it("⚠️ THE WORKSPACE PANE PAINTS NOTHING — the card floats on the ground directly", () => {
+    /* A pane with its own fill behind a card that also has one is two surfaces where the design
+       has one object on a desk. */
+    expect(rule(splitCss, ".tdw-work {")).toContain("background: transparent");
+  });
+
+  /**
+   * ⚠️ THE FOOTER STATES THE SCOPE THE EXPORT WRITES. A count reading "12 of 34" beside a button
+   * that wrote 34 would be two statements of one scope — and the button's is the one nobody
+   * checks until the file is open. Both read `railGroups()`.
+   */
+  it("the footer's count and its export read one derivation", () => {
+    expect(board).toContain("showingLine(railShown(), allDockable.length)");
+    expect(board).toContain("function railShown()");
+    expect(board).toContain("return railGroups().reduce(");
+    const ex = board.indexOf("function exportRail()");
+    expect(ex, "the export is gone — this case would read nothing").toBeGreaterThan(-1);
+    expect(board.slice(ex, ex + 900)).toContain("railGroups().flatMap");
+  });
+
+  /**
+   * ⚠️ BLACK TEXT ON PINK, AND SCOPED TO THIS PAGE. `--pink` is an app-wide token read by auth,
+   * forms, the shell, the toast and the page header; retoning it would restyle six surfaces
+   * nobody asked about. The FILL still reads the token — only the ink is set here.
+   */
+  it("the page's pink buttons take ink, and the app-wide token is untouched", () => {
+    const todoCss = readFileSync(join(here, "todo.css"), "utf8");
+    const dockCss = readFileSync(join(here, "todoDock.css"), "utf8");
+    expect(todoCss).toContain("color: #241209");
+    expect(dockCss).toContain("color: #241209");
+    /* the fill is still the token, so a future retone of the app's pink still reaches this page */
+    expect(todoCss).toContain("background: var(--pink, #f5e2da)");
+    /* and index.css is not touched by this page's decision */
+    const index = readFileSync(join(here, "..", "..", "index.css"), "utf8");
+    expect(index).toContain("--pink: #f5e2da;");
   });
 });

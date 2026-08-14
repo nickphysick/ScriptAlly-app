@@ -145,8 +145,13 @@ describe("settlement P4 — the sweep", () => {
     expect(themes.indexOf("stone ⚠️ SUPERSEDED")).toBeLessThan(themes.indexOf("sage (settled)"));
   });
   it("no blush, greige or stone exploration token remains in the board", () => {
-    expect(css).not.toMatch(/blush|greige/i);
-    expect(page).not.toMatch(/blush|greige/i);
+    /* ⚠️ ON DECLARATIONS, NOT ON PROSE. What this forbids is an exploration TOKEN surviving; the
+       WORDS are legitimate in a comment explaining a colour choice ("burgundy on blush is two warm
+       tones a shade apart"), and reading them as code fails a file that is correct. Stripped —
+       the same fix this repo has had to make to several source-string locks. */
+    const decl = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(decl(css)).not.toMatch(/blush|greige/i);
+    expect(decl(page)).not.toMatch(/blush|greige/i);
     for (const dead of ["#f5f3f0", "#e6e2db", "#3a332c", "#8a8074"]) { // the stone set
       expect(css).not.toContain(dead);
       expect(page).not.toContain(dead);

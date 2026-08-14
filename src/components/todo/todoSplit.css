@@ -32,16 +32,27 @@
 
    ⚠️ 440px, NOT THE REF'S 408. The live row carries seven lanes where the concept sketch drew
    four; 408 was measured against the sketch. Widened with the lane structure, not instead of it. */
+/* ⚠️ TWO CARDS ON A GROUND, NOT ONE SHEET WITH A LINE DOWN IT (visual rebuild, Phase 1). The
+   hairline divider is gone: the panes are objects now, and the ground between them is what
+   separates them. That is the Query Centre's grammar, which is the point — the two pages should
+   read as siblings.
+
+   ⚠️ THE GROUND IS `--ws-ground` (#f7f4ee), THE APP'S OWN. The ref draws #f7f3ed; the existing
+   token is within a hair of it (one step of green, one of blue) and is already the warm ground
+   elsewhere in the shell, so nothing was invented. */
 .tdw-split {
-  --tdw-rail-w: 440px;
-  /* the divider — the panels' own hairline, so the rail's edge and the sheets inside it agree */
+  --tdw-rail-w: 520px;
   --tdw-hair: var(--tdb-panel-hair);
   display: grid;
   grid-template-columns: var(--tdw-rail-w) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
+  gap: 18px;
+  padding: 0 22px 20px;
+  background: var(--ws-ground);
   flex: 1;
   min-height: 0;
   min-width: 0;
+  box-sizing: border-box;
 }
 
 /**
@@ -56,6 +67,12 @@
  * reaches it. Painting `background: #fff` here and leaving the token alone would give a heading
  * that looks right at rest and grows a pale slab the moment a row scrolls under it.
  */
+/* ⚠️ THE RAIL IS A CARD NOW — white, hairline, 14px radius, clipped, with a soft lift. The
+   `border-right` that used to divide two halves of one sheet is gone with the sheet.
+   ⚠️ IT STILL REPOINTS `--ws-window`, and the reason is unchanged and now doubly true: `.tdg`'s
+   sticky group heading paints itself with `--tdg-ground`, which IS `var(--ws-window)`. The card's
+   interior is white while the ground outside it is #f7f4ee, so without the override the heading
+   would fade through the ground's colour INSIDE a white card. */
 .tdw-rail {
   --ws-window-rgb: 255, 255, 255;
   --ws-window: rgb(var(--ws-window-rgb));
@@ -64,8 +81,10 @@
   min-height: 0;
   min-width: 0;
   background: var(--ws-window);
-  border-right: 1px solid var(--tdw-hair);
-  padding: 0 14px 0 2px;
+  border: 1px solid var(--tdw-hair);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.05);
   box-sizing: border-box;
 }
 
@@ -76,20 +95,89 @@
    a third surface. `overflow-y` on the pane itself: it is the second scroller, and it is the
    pane's own, so the rail and the workspace can be at different heights without either moving
    the frame. */
+/* ⚠️ THE WORKSPACE PANE PAINTS NOTHING NOW. It was a surface; it is the ground, and the task card
+   floats on it directly. A pane with its own fill behind a card that also has one is two surfaces
+   where the design has one object on a desk. */
 .tdw-work {
   min-height: 0;
   min-width: 0;
   overflow-y: auto;
-  background: var(--ws-window);
+  background: transparent;
 }
 
-/* ⚠️ THE RAIL'S INSTRUMENTS DO NOT SCROLL WITH THE LIST THEY NARROW (Phase 4). `flex: none` above
-   the scroller: a search that scrolls away is gone exactly when a long list makes you want it. */
+/* ⚠️ THE RAIL'S INSTRUMENTS DO NOT SCROLL WITH THE LIST THEY NARROW. `flex: none` above the
+   scroller: a search that scrolls away is gone exactly when a long list makes you want it.
+   ⚠️ AND SORT JOINS THEM (visual rebuild, Phase 1). It sat in the PAGE tool row while the search
+   sat here — two instruments over one list in two places, which I flagged as a tension when the
+   search moved and which the v9 ref settles by drawing sort beside it. The rail owns the rail's
+   controls; the page row keeps what acts on the page. */
 .tdw-tools {
   flex: none;
-  padding: 14px 16px 12px 12px;
+  padding: 13px 14px 11px;
   border-bottom: 1px solid var(--tdw-hair);
 }
+
+/* search and sort share the first line — the field takes what sort does not */
+.tdw-toolrow { display: flex; align-items: center; gap: 8px; }
+.tdw-toolrow .tdw-search { flex: 1; min-width: 0; }
+
+.tdw-sort {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  background: #fff;
+  border: 1px solid #ddd2c4;
+  border-radius: 10px;
+  padding: 8px 11px;
+  font: inherit;
+  font-size: 12px;
+  color: #7a6858;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tdw-sort:hover { border-color: #d8c8b8; color: #2b2118; }
+.tdw-sortwrap { position: relative; flex: none; }
+
+/* ⚠️ THE FOOTER CLOSES THE CARD, and it is the Query Centre's list-card model rather than a
+   lookalike: a count on the left stating what you are seeing OUT OF what there is, and the export
+   on the right. `flex: none` for the same reason as the tools — it is the card's edge, not part
+   of the list. */
+.tdw-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-top: 1px solid var(--tdw-hair);
+  background: #fdfbf8;
+}
+
+.tdw-showing {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a89684;
+}
+
+.tdw-footgrow { flex: 1; }
+
+.tdw-export {
+  border: 0;
+  background: none;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #8a7666;
+  cursor: pointer;
+  padding: 0;
+}
+
+.tdw-export:hover:not(:disabled) { color: #7c3a2a; }
+.tdw-export:disabled { opacity: 0.4; cursor: default; }
 
 /* ⚠️ THE FOCUS RING IS SAGE, matching the app's field convention — never the burgundy that means
    an action on this page. It rides `:focus-within` so the whole field lights, not just the input

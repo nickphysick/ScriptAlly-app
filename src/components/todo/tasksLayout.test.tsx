@@ -194,7 +194,11 @@ describe("⚠️ the order: header block → hairline → sidebar and body on th
 describe("⚠️ every control sits above the surface it acts on, and nothing floats mid-page", () => {
   it("the PAGE's instruments live in renderTools, and nowhere else", () => {
     const tools = listPage.slice(listPage.indexOf("function renderTools"), listPage.indexOf("function renderHero"));
-    for (const cls of ["tdb-sortb", "tdb-addb"]) {
+    /* ⚠️ SORT LEFT THIS ROW (visual rebuild, Phase 1) — it orders the LIST, the rail is the list,
+       and leaving it here kept two instruments over one set in two places. That tension was
+       flagged when the search moved; v9 settles it by drawing sort beside the search. What is
+       left here acts on the PAGE. */
+    for (const cls of ["tdb-addb"]) {
       expect(tools, cls).toContain(cls);
       const outside = listPage.replace(tools, "");
       expect(outside.includes(`className="${cls}"`), `${cls} outside the tool row`).toBe(false);
@@ -204,9 +208,12 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
 
   it("the RAIL's instruments live in renderRailTools, and nowhere else", () => {
     const railTools = listPage.slice(listPage.indexOf("function renderRailTools"), listPage.indexOf("function renderList"));
-    for (const cls of ["tdw-search", "tdw-chips", "tdw-chip"]) {
+    for (const cls of ["tdw-search", "tdw-chips", "tdw-chip", "tdw-sort"]) {
       expect(railTools, cls).toContain(cls);
     }
+    /* the page row keeps none of it */
+    expect(listPage).not.toContain("tdb-bsearch");
+    expect(listPage).not.toContain('className="tdb-sortb"');
     /* the search left the page tool row entirely — not duplicated into the rail */
     expect(listPage).not.toContain("tdb-bsearch");
     const pageTools = listPage.slice(listPage.indexOf("function renderTools"), listPage.indexOf("function renderHero"));
