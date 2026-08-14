@@ -142,7 +142,7 @@ describe("the copy, at its edges", () => {
   it("⚠️ the header's figures and the rendered groups read the SAME hoisted object", () => {
     expect(page).toContain("taskStats(boardCols,");
     expect(page).not.toContain("boardSubtitleCopy(boardFigures(boardCols))");
-    const fn = page.slice(page.indexOf("function renderList"), page.indexOf("function renderList") + 900);
+    const fn = page.slice(page.indexOf("function railGroups"), page.indexOf("function railGroups") + 900);
     for (const col of ["todo", "today", "snoozed", "done"]) {
       expect(fn, col).toContain(`${col}: narrowCards(boardCols.${col})`);
     }

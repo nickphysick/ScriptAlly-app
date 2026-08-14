@@ -174,15 +174,53 @@ describe("⚠️ the order: header block → hairline → sidebar and body on th
   });
 });
 
-describe("⚠️ the tool row is the ONLY home for page controls", () => {
-  it("the board page's instruments live in renderTools, and nowhere else", () => {
+/**
+ * ⚠️ AMENDED BY THE SPLIT (rail + workspace, Phase 4). The law was "the tool row is the ONLY home
+ * for page controls", and its substance is untouched: nothing floats mid-page, and a control that
+ * changes what you see lives in a fixed block above the thing it changes.
+ *
+ * What the split added is a second THING to be above. The search narrows the RAIL — that is what
+ * a search over a list of tasks does — so with the page in two columns it belongs above the rail,
+ * in the rail's own non-scrolling tools block. Sort stays in the page tool row: it orders every
+ * group at once and has no pane of its own.
+ *
+ * ⚠️ THE TENSION IS REAL AND IS FLAGGED RATHER THAN HIDDEN. Two instruments over one list now sit
+ * in two places, and this page's own history warns about exactly that ("two instrument rows, one
+ * under the other, is how the chip strip and the LISTS rows came to disagree"). The difference
+ * claimed here is that these two are not a stack of rows over one surface — each sits above the
+ * surface it acts on. If that turns out to be a distinction without a difference, the fix is to
+ * move sort into the rail too, and this note is where the argument is recorded.
+ */
+describe("⚠️ every control sits above the surface it acts on, and nothing floats mid-page", () => {
+  it("the PAGE's instruments live in renderTools, and nowhere else", () => {
     const tools = listPage.slice(listPage.indexOf("function renderTools"), listPage.indexOf("function renderHero"));
-    for (const cls of ["tdb-bsearch", "tdb-sortb", "tdb-addb"]) {
+    for (const cls of ["tdb-sortb", "tdb-addb"]) {
       expect(tools, cls).toContain(cls);
       const outside = listPage.replace(tools, "");
       expect(outside.includes(`className="${cls}"`), `${cls} outside the tool row`).toBe(false);
     }
     expect(listPage).toContain("tools={renderTools()}");
+  });
+
+  it("the RAIL's instruments live in renderRailTools, and nowhere else", () => {
+    const railTools = listPage.slice(listPage.indexOf("function renderRailTools"), listPage.indexOf("function renderList"));
+    for (const cls of ["tdw-search", "tdw-chips", "tdw-chip"]) {
+      expect(railTools, cls).toContain(cls);
+    }
+    /* the search left the page tool row entirely — not duplicated into the rail */
+    expect(listPage).not.toContain("tdb-bsearch");
+    const pageTools = listPage.slice(listPage.indexOf("function renderTools"), listPage.indexOf("function renderHero"));
+    expect(pageTools).not.toContain("tdw-search");
+  });
+
+  it("⚠️ NEITHER BLOCK SCROLLS WITH WHAT IT NARROWS", () => {
+    /* A control that scrolls away is gone exactly when a long list makes you want it. The page's
+       row is the grid's toolbar (outside the scroll row by construction); the rail's is `flex:
+       none` above its own scroller. */
+    const splitCss = readFileSync(join(here, "todoSplit.css"), "utf8");
+    const toolsRule = splitCss.slice(splitCss.indexOf(".tdw-tools {"), splitCss.indexOf("}", splitCss.indexOf(".tdw-tools {")));
+    expect(toolsRule).toContain("flex: none");
+    expect(listPage.indexOf("{renderRailTools()}")).toBeLessThan(listPage.indexOf(") : renderList()}"));
   });
 
   /* ⚠️ TODAY'S TITLE-ROW SPEC WENT WITH THE PAGE (tasks-consolidation P1, 9 Aug). It asserted

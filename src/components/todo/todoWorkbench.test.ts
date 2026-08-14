@@ -897,24 +897,19 @@ describe("P4 — search + filters (source locks; the matrix lives in todoFilters
     expect(page).toContain("filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length })");
     expect(page).toContain("togglePill");
   });
-  it("filtered-empty gets the quiet one-liner + clear action, NEVER a celebratory empty", () => {
-    /* The lane-skip half of this case retired with the lanes (board+dock P1); the BRANCH ORDER
-       it was really protecting is unchanged and still asserted: the no-match line beats the
-       board, so a narrowing that finds nothing never renders as "nothing needs you". */
-    /* ⚠️ THE PANEL REPLACED THE ONE-LINER (P5, 9 Aug; sheet 4) — it names what you searched for
-       and states the size of the set you get back, which is what makes clearing an informed
-       choice. The BRANCH ORDER is what this case has always protected and it is unchanged. */
-    /* ⚠️ RE-ANCHORED ON THE SPLIT (rail + workspace P2). The body used to be `renderList()`
-       directly; it is now the two-pane grid, with the list inside the rail. The BRANCH ORDER is
-       what this case has always protected and it is still exactly that — a narrowing that finds
-       nothing must never reach the pane and render as "nothing needs you". */
-    const i = page.indexOf('className="tdg-empty"');
-    const j = page.indexOf('<div className="tdw-split">');
-    expect(i).toBeGreaterThan(-1);
-    expect(j, "the body — the split — must exist").toBeGreaterThan(-1);
-    expect(i, "the no-match branch must come BEFORE the body").toBeLessThan(j);
-    expect(page).toContain("No tasks match");
-    expect(page).toContain(">\n              Clear search\n            </button>");
+  it("filtered-empty is a RAIL state now, and the pane is not part of it", () => {
+    /* ⚠️ THE BRANCH ORDER THIS CASE PROTECTED IS GONE, AND ITS REASON WITH IT (Phase 4). It
+       asserted the no-match panel came BEFORE the body, so a narrowing that found nothing never
+       rendered as "nothing needs you". The panel no longer competes with the body at all: it sits
+       inside the rail, the workspace column renders beside it either way, and the desk states are
+       the only branches left above the split. What replaces the order check is a STRONGER claim —
+       that the empty state cannot reach the pane. */
+    const rail = page.slice(page.indexOf('className="tdw-rail"'), page.indexOf('className="tdw-work"'));
+    expect(rail).toContain("tdw-empty");
+    expect(page).toContain("const railEmpty = railGroups().length === 0;");
+    /* the desk states still replace the whole body — a first run has no list to put in a rail */
+    expect(page).toContain('desk === "new-desk" ? renderNewDesk()');
+    expect(page.indexOf('desk === "new-desk"')).toBeLessThan(page.indexOf('className="tdw-split"'));
   });
   it("search state: ⌘K focuses (visibility-guarded, P1); the input re-lands in the deck (P2)", () => {
     expect(page).toContain("matchesSearch(c, search, sctx)"); // the filter plumbing survives the move

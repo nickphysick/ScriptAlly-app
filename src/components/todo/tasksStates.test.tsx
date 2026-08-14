@@ -140,12 +140,30 @@ describe("⚠️ THE SKELETON IS THE REAL ROW WEARING PLACEHOLDERS", () => {
 /* ── sheet 4: the empty states ──────────────────────────────────────────────────────────────── */
 
 describe("⚠️ A FILTERED-EMPTY RESULT IS A DEAD END TO ESCAPE, NOT A MOMENT TO DECORATE", () => {
-  it("it names what you searched for, states the way back, and carries NO art", () => {
-    expect(page).toContain("No tasks match “{search.trim()}”");
-    expect(page).toContain("or clear it to see all {liveBoardCards(boardCols).length}");
+  /**
+   * ⚠️ IT LIVES IN THE RAIL NOW (Phase 4), and that is the whole point of the state. It used to
+   * replace the entire body, so a search matching nothing took the WORKSPACE with it — the pane
+   * cleared because a search box narrowed, which is the one behaviour this page must not have.
+   * A narrowed-to-nothing rail is a RAIL fact; the pane holds what you were working on.
+   */
+  it("it names what you narrowed by, states the way back, and carries NO art", () => {
+    expect(page).toContain("Nothing matches “${search.trim()}”");
+    /* the chip has its own words — "nothing matches" would be a lie when you typed nothing */
+    expect(page).toContain('"Nothing in this filter"');
+    expect(page).toContain("Clear it to see all {allDockable.length}");
     expect(page).toContain("Clear search");
-    const panel = page.slice(page.indexOf('className="tdg-empty"'), page.indexOf('className="tdg-empty"') + 900);
+    expect(page).toContain('"Show all"');
+    const panel = page.slice(page.indexOf('className="tdg-empty tdw-empty"'), page.indexOf('className="tdg-empty tdw-empty"') + 900);
     expect(panel).not.toContain("ArtSlot");
+  });
+
+  it("⚠️ AND THE PANE IS NOT PART OF IT — the empty state is inside the rail, above the split", () => {
+    /* the marker sits INSIDE `.tdw-rail`, so the workspace column renders regardless */
+    const rail = page.slice(page.indexOf('className="tdw-rail"'), page.indexOf('className="tdw-work"'));
+    expect(rail).toContain("tdw-empty");
+    expect(rail).toContain("renderList()");
+    /* and the pane reads the HELD card, which is what survives a narrowing */
+    expect(page).toContain("const paneCard = docked.card ??");
   });
 
   it("the two states that DO carry art keep it, and they are the two that earn it", () => {

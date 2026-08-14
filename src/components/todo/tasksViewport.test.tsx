@@ -615,7 +615,11 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        scrolls, exactly as `.tpl-body` did before the split. */
     expect(rule(splitCss, ".tdw-rail {")).not.toContain("overflow");
     expect(splitCss).not.toContain(".tpl-zone");   // the primitive is not re-declared here
-    expect(board).toContain('<div className="tdw-rail">{renderList()}</div>');
+    /* the rail gained its own tools block above the scroller (Phase 4); the ZONE is still the
+       one relocated scroller, which is what this case is about */
+    expect(board).toContain('<div className="tdw-rail">');
+    expect(board).toContain("{renderRailTools()}");
+    expect(board).toContain(") : renderList()}");
   });
 
   /**
@@ -670,5 +674,65 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     for (const sel of ["ws-plate", "tpl-head", "wpg-plate"]) {
       expect(splitCss, sel).not.toContain(sel);
     }
+  });
+});
+
+/* ── the rail's narrowing, and what it must NOT reach (Phase 4) ──────────────────────────────── */
+
+describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspace", () => {
+  /**
+   * ⚠️ THE BEHAVIOUR THIS EXISTS TO FORBID: you are working on a card, you type in the search to
+   * find something else, nothing matches, and the pane you were working in goes blank. You
+   * narrowed to LOOK, not to abandon. So an empty rail and a pane still holding your card is the
+   * correct pair, and clearing the search brings the rail back around it.
+   */
+  it("the pane reads a HELD card, so a rail with nothing in it cannot blank it", () => {
+    expect(board).toContain("const paneCard = docked.card ?? (allDockable.length > 0 ? heldCard.current : null);");
+    expect(board).toContain("{paneCard ? (");
+  });
+
+  /**
+   * ⚠️ AND THE ONE DISTINCTION THAT MATTERS: an empty rail because you FILTERED is a view; an
+   * empty rail because you FINISHED is a fact. The pane closes only on the second, which is read
+   * from the UNnarrowed list.
+   */
+  it("the pane closes on `allDockable`, never on the narrowed set", () => {
+    const eff = board.slice(board.indexOf("const lastNarrowSig"), board.indexOf("}, [dockSig, dockKey, narrowSig"));
+    expect(eff, "the effect must exist for this case to mean anything").toContain("setDockKey");
+    expect(eff).toContain("if (allDockable.length === 0) { setDockKey(null); return; }");
+    expect(eff).toContain("if (dockable.length === 0) return;");
+    /* the hold must come AFTER the close, or a narrowed-to-nothing rail would close the pane */
+    expect(eff.indexOf("allDockable.length === 0")).toBeLessThan(eff.indexOf("dockable.length === 0"));
+  });
+
+  /**
+   * ⚠️ TWO CAUSES, TWO ANSWERS. A WRITE removes one card from a set you are still in, so the
+   * position you held is meaningful and `resolveDocked` clamps to it. A FILTER replaces the whole
+   * set, where a position carries no meaning and the first match is the only predictable answer.
+   * Distinguished by the narrowing's own signature rather than guessed at.
+   */
+  it("a narrowing change goes to the FIRST match; a write keeps the position", () => {
+    const eff = board.slice(board.indexOf("const lastNarrowSig"), board.indexOf("}, [dockSig, dockKey, narrowSig"));
+    expect(eff).toContain("const narrowed = lastNarrowSig.current !== narrowSig;");
+    expect(eff).toContain("setDockKey(narrowed ? dockable[0].key : (docked.card?.key ?? dockable[0].key));");
+    /* the signature is the search, the chip and the tag — everything that changes the SET */
+    expect(board).toContain("const narrowSig = `${chip}|${search.trim().toLowerCase()}|${tagSel ?? \"\"}`;");
+  });
+
+  it("⚠️ THE EMPTY MESSAGE IS INSIDE THE RAIL, and the workspace column renders beside it", () => {
+    const rail = board.slice(board.indexOf('className="tdw-rail"'), board.indexOf('className="tdw-work"'));
+    expect(rail).toContain("tdw-empty");
+    expect(rail).toContain("renderList()");
+    /* and it is read from the groups the rail actually draws — not a parallel predicate */
+    expect(board).toContain("const railEmpty = railGroups().length === 0;");
+    /* ⚠️ ON DECLARATIONS, NOT ON PROSE — this file's own helper carries the reason: these rules
+       explain themselves by QUOTING what they replaced, so a raw substring match reads the
+       comment and fails a file that is correct. It caught me on this very line. */
+    expect(board.replace(/\/\*[\s\S]*?\*\//g, "")).not.toContain("anyVisible");
+  });
+
+  it("⚠️ THE PANE'S QUEUE IS THE NARROWED SET, so ↑↓ never walk onto a card the rail is hiding", () => {
+    expect(board).toContain("const dockable = allDockable.filter((c) => chipMatchesCard(chip, c));");
+    expect(board).toContain("queue={dockable}");
   });
 });

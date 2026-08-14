@@ -131,6 +131,80 @@ export function showMoreLabel(more: number): string {
   return `SHOW ${more} MORE`;
 }
 
+/* ── the rail's filter chips (rail + workspace, Phase 4) ───────────────────────────────────── */
+
+/**
+ * ⚠️ THE CHIPS ARE THE GROUPS, PLUS "ALL" — never a second facet vocabulary. The page shipped one
+ * of those already (`todoFilters`' seven types: offers · overToYou · materials · mswl · stale ·
+ * snoozed · notes), written for a sidebar that no longer exists and no longer narrowing anything
+ * the rail draws. A chip strip in a third vocabulary beside the group headings is how a page comes
+ * to file one card under two names, which is the fault Phase 1 spent a commit removing.
+ *
+ * ⚠️ DONE IS NOT A CHIP, DELIBERATELY. The chips answer "what do you want to look at", and
+ * finished work is not something you look FOR — it is where things go. It still renders under All
+ * as its own group, which is where you find it.
+ */
+export type RailChipId = "all" | "urgent" | "housekeeping" | "yours" | "snoozed";
+
+export interface RailChip {
+  id: RailChipId;
+  label: string;
+  /** OPEN cards under this chip — live, and never a stored figure. */
+  count: number;
+}
+
+export const RAIL_CHIP_ORDER: RailChipId[] = ["all", "urgent", "housekeeping", "yours", "snoozed"];
+
+/**
+ * ⚠️ EVERY COUNT COMES FROM `taskGroups`, so a chip and the heading it names cannot disagree.
+ * "All" is the three LIVE kinds — it is what is outstanding, which is the same figure the
+ * "Outstanding" stat chip states, and deliberately not the sum of every group (Done is not
+ * outstanding and Snoozed is asleep).
+ *
+ * ⚠️ THE SNOOZED CHIP IS ABSENT AT ZERO, and only that one. The three kinds are the page's
+ * permanent vocabulary and a `0` beside one of them is information — nothing needs you in that
+ * pile today. Snoozed is a state you may never have used at all, and a chip for it would teach a
+ * feature rather than report a fact.
+ */
+export function railChips(cols: BoardColumns): RailChip[] {
+  const groups = taskGroups(cols);
+  const count = (id: TaskGroupId) => groups.find((g) => g.id === id)?.cards.length ?? 0;
+  const live = count("urgent") + count("housekeeping") + count("yours");
+  const out: RailChip[] = [
+    { id: "all", label: "All", count: live },
+    { id: "urgent", label: TASK_GROUP_META.urgent.label, count: count("urgent") },
+    { id: "housekeeping", label: TASK_GROUP_META.housekeeping.label, count: count("housekeeping") },
+    { id: "yours", label: TASK_GROUP_META.yours.label, count: count("yours") },
+  ];
+  const asleep = count("snoozed");
+  if (asleep > 0) out.push({ id: "snoozed", label: TASK_GROUP_META.snoozed.label, count: asleep });
+  return out;
+}
+
+/**
+ * Which groups a chip shows. `all` shows everything the derivation returned — including Done,
+ * which has no chip of its own precisely because All is where you find it.
+ */
+export function chipGroups(groups: TaskGroup[], chip: RailChipId): TaskGroup[] {
+  if (chip === "all") return groups;
+  return groups.filter((g) => g.id === chip);
+}
+
+/**
+ * ⚠️ THE SAME NARROWING, ASKED OF ONE CARD — this is what the workspace pane's queue reads, so
+ * the pane walks exactly the set the rail is showing.
+ *
+ * ⚠️ A SNOOZED CHIP MATCHES NO LIVE CARD, AND THAT IS CORRECT RATHER THAN A HOLE. The pane's list
+ * is the three live kinds; a sleeping card is not in it. Narrowing the rail to Snoozed therefore
+ * empties the pane's queue — which is the case the pane HOLDS its selection for, rather than
+ * clearing itself because a filter moved.
+ */
+export function chipMatchesCard(chip: RailChipId, c: BoardCard): boolean {
+  if (chip === "all") return true;
+  if (chip === "snoozed") return false;
+  return liveFamily(c) === chip;
+}
+
 /* ── the header block ──────────────────────────────────────────────────────────────────────── */
 
 /**

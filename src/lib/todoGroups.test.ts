@@ -13,6 +13,7 @@ import { describe, it, expect } from "vitest";
 import {
   taskGroups, taskStats, groupSlice, showMoreLabel,
   TASK_GROUP_ORDER, TASK_GROUP_META, HOUSEKEEPING_VISIBLE,
+  railChips, chipGroups, chipMatchesCard,
 } from "./todoGroups";
 import { TODO_LISTS, TodoListId } from "./todoRoutes";
 import { BoardCard } from "./todoBoard";
@@ -177,5 +178,102 @@ describe("⚠️ nothing about a group is stored", () => {
     /* and the law is stated in the file, so the next reader inherits the reasoning rather than
        the habit */
     expect(src).toContain("NO STORED ORDERING OR PLACEMENT");
+  });
+});
+
+/* ── the rail's chips (rail + workspace, Phase 4) ────────────────────────────────────────────── */
+
+describe("⚠️ THE CHIPS ARE THE GROUPS PLUS 'ALL' — never a second facet vocabulary", () => {
+  const live = (over: Partial<BoardColumns> = {}) => cols(over);
+
+  it("the order, and the words, come from the group meta rather than from literals", () => {
+    const cs = railChips(live({ todo: [urgent("a"), house("b"), mine("c")] }));
+    expect(cs.map((c) => c.id)).toEqual(["all", "urgent", "housekeeping", "yours"]);
+    expect(cs.find((c) => c.id === "urgent")!.label).toBe(TASK_GROUP_META.urgent.label);
+    expect(cs.find((c) => c.id === "housekeeping")!.label).toBe(TASK_GROUP_META.housekeeping.label);
+    expect(cs.find((c) => c.id === "yours")!.label).toBe(TASK_GROUP_META.yours.label);
+  });
+
+  /**
+   * ⚠️ EVERY COUNT IS THE GROUP'S OWN, so a chip and the panel it names cannot state different
+   * figures. Asserted against `taskGroups` rather than against numbers — a literal on each side
+   * goes green the day someone changes both in the same wrong direction.
+   */
+  it("each chip's count IS its group's card count", () => {
+    const c = live({
+      todo: [urgent("a"), urgent("b"), house("c")],
+      today: [mine("d")],
+      snoozed: [card({ key: "s" })],
+      done: [card({ key: "z", done: true })],
+    });
+    const gs = taskGroups(c);
+    const n = (id: string) => gs.find((g) => g.id === id)!.cards.length;
+    const chips = railChips(c);
+    for (const id of ["urgent", "housekeeping", "yours", "snoozed"]) {
+      expect(chips.find((x) => x.id === id)!.count, id).toBe(n(id));
+    }
+  });
+
+  it("⚠️ 'ALL' IS WHAT IS OUTSTANDING — the three live kinds, not the sum of every group", () => {
+    /* Snoozed is live work merely asleep and Done is not outstanding at all; adding the panels up
+       would make the headline figure mean something no writer intends. It is the same figure the
+       "Outstanding" stat chip states, which is why they are asserted against each other. */
+    const c = live({
+      todo: [urgent("a"), house("b")], today: [mine("d")],
+      snoozed: [card({ key: "s" })], done: [card({ key: "z", done: true })],
+    });
+    const all = railChips(c).find((x) => x.id === "all")!;
+    expect(all.count).toBe(3);
+    expect(String(all.count)).toBe(taskStats(c, 0).find((s) => s.label === "Outstanding")!.value);
+  });
+
+  /**
+   * ⚠️ THE SNOOZED CHIP IS ABSENT AT ZERO, AND ONLY THAT ONE. The three kinds are the page's
+   * permanent vocabulary and a `0` beside one of them is information — nothing needs you in that
+   * pile today. Snoozed is a state you may never have used, and a chip for it would teach a
+   * feature rather than report a fact.
+   */
+  it("the Snoozed chip renders only when something is asleep; the kinds render at zero", () => {
+    expect(railChips(live({ todo: [urgent("a")] })).map((c) => c.id)).not.toContain("snoozed");
+    const withSnz = railChips(live({ todo: [urgent("a")], snoozed: [card({ key: "s" })] }));
+    expect(withSnz.map((c) => c.id)).toContain("snoozed");
+    /* an empty kind keeps its chip, reading 0 */
+    const bare = railChips(live({ todo: [urgent("a")] }));
+    expect(bare.find((c) => c.id === "yours")).toEqual({ id: "yours", label: "Your tasks", count: 0 });
+  });
+
+  it("⚠️ DONE IS NOT A CHIP — you do not look FOR finished work, and All is where it is", () => {
+    const c = live({ todo: [urgent("a")], done: [card({ key: "z", done: true })] });
+    expect(railChips(c).map((x) => x.id)).not.toContain("done");
+    /* …and it still renders, under All */
+    expect(chipGroups(taskGroups(c), "all").map((g) => g.id)).toContain("done");
+  });
+
+  it("a chip shows its own group and nothing else; All shows everything", () => {
+    const c = live({ todo: [urgent("a"), house("b"), mine("d")], snoozed: [card({ key: "s" })] });
+    const gs = taskGroups(c);
+    expect(chipGroups(gs, "housekeeping").map((g) => g.id)).toEqual(["housekeeping"]);
+    expect(chipGroups(gs, "all")).toEqual(gs);
+  });
+
+  /**
+   * ⚠️ THE CARD PREDICATE IS THE SAME NARROWING, ASKED OF ONE CARD — it is what the workspace
+   * pane's queue reads, so the pane walks exactly the set the rail is showing.
+   */
+  it("the card predicate agrees with the group filter, kind for kind", () => {
+    expect(chipMatchesCard("all", urgent("a"))).toBe(true);
+    expect(chipMatchesCard("urgent", urgent("a"))).toBe(true);
+    expect(chipMatchesCard("urgent", house("b"))).toBe(false);
+    expect(chipMatchesCard("housekeeping", house("b"))).toBe(true);
+    expect(chipMatchesCard("yours", mine("c"))).toBe(true);
+  });
+
+  it("⚠️ A SNOOZED CHIP MATCHES NO LIVE CARD — which is what empties the pane's queue, on purpose", () => {
+    /* The pane's list is the three live kinds; a sleeping card is not in it. Narrowing to Snoozed
+       therefore leaves the pane with nothing to walk — the case it HOLDS its selection for rather
+       than clearing itself because a filter moved. */
+    for (const c of [urgent("a"), house("b"), mine("c")]) {
+      expect(chipMatchesCard("snoozed", c)).toBe(false);
+    }
   });
 });

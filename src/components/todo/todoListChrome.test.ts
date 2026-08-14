@@ -112,9 +112,13 @@ describe("ONE narrowing, applied in ONE place — it cannot reach some of the pa
      — and it still has to reach every source set alike, or the page shows differently-scoped
      views of one list and you have to remember which. `narrowCards` is where it is applied, and
      the list, the dock's queue and the "nothing matches" branch all read THAT. */
+  /* ⚠️ RE-ANCHORED ON `railGroups` (Phase 4). The narrowing moved out of `renderList` into the
+     function BOTH the list and the "is the rail empty" question read — which is the same law
+     tightened, not relaxed: the emptiness check used to run on a parallel set built with a
+     different filter model, free to answer differently from the list beside it. */
   const fn = (() => {
-    const i = page.indexOf("function renderList");
-    expect(i, "renderList must exist for this slice to mean anything").toBeGreaterThan(-1);
+    const i = page.indexOf("function railGroups");
+    expect(i, "railGroups must exist for this slice to mean anything").toBeGreaterThan(-1);
     return page.slice(i, i + 1400);
   })();
 

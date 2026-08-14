@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Funnel, Pin, ChevronRight } from "lucide-react";
+import { Funnel, Pin, ChevronRight, X } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -87,7 +87,7 @@ import {
 } from "../../lib/todoBoardSort";
 /* THE CONSOLIDATED PAGE'S OWN DERIVATIONS — groups, stat chips and the eyebrow, all pure and
    locked away from this component (tasks-consolidation P2). */
-import { taskGroups, taskStats, tasksEyebrow } from "../../lib/todoGroups";
+import { taskGroups, taskStats, tasksEyebrow, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
 import { estimateTotal } from "../../lib/todoEstimate";
 import { longDate } from "../../lib/dashboardStats";
 import {
@@ -370,6 +370,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // Phase 4's wiring. The page stays MOUNTED behind other routes (StagePage display-toggles), so
   // the ⌘K handler must no-op while the board is hidden — offsetParent is null under display:none.
   const [search, setSearch] = useState("");
+  /* ⚠️ THE RAIL'S ONE NARROWING BESIDE THE SEARCH (Phase 4) — a single-select chip, session-only.
+     It is deliberately NOT `todoFilters`' seven-type state: that model was built for a retired
+     sidebar, narrows nothing the rail draws, and a chip strip in a third vocabulary beside the
+     group headings would file one card under two names. */
+  const [chip, setChip] = useState<RailChipId>("all");
   // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
   const [filters, setFilters] = useState<TodoFilterState>(DEFAULT_FILTERS);
   const filtersRef = useRef<TodoFilterState>(DEFAULT_FILTERS);
@@ -549,7 +554,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // ── Phase 4: search + filters compose AND-wise over BOTH views. The review entry card is
   // furniture — it renders only while nothing is filtered/searched (it would dilute matches).
   const sctx = { queries, agents, manuscripts };
-  const active = filtersActive(filters, search);
+  /* (`active` and `anyVisible` are DELETED with the body branch they served — Phase 4. They
+     answered "is a narrowing hiding everything" over four `v*` sets built with a filter model the
+     rail never read; `railEmpty` asks the array the rail actually draws. The `v*` sets themselves
+     survive: the ledger's sorts and `shownX` still read them.) */
   const fc = filterCounts({ doCards: board.do, hkGroups, staleCards, ntCards: board.nt, committedCount: committedCards.length });
   // polish P4 — THE REACTIVE RAIL: while a search runs, every pill re-counts through the SAME
   // shared derivation over the search-narrowed sets (never a parallel tally). Groups narrow
@@ -591,7 +599,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const vGroups = hkGroups.filter((g) => visibleGroup(g, filters) && groupMatchesSearch(g, search));
   const vStale = staleCards.filter((c) => visibleStaleCard(c, filters, today) && matchesSearch(c, search, sctx));
   const vNt = board.nt.filter((c) => visibleNoteCard(c, filters, today) && matchesSearch(c, search, sctx));
-  const anyVisible = vDo.length + vGroups.length + vStale.length + vNt.length > 0;
   // ── the ledger's row model, hoisted (P5): the bulk bar + keyboard walker share the SAME visible
   // top-level order the renderer draws. Children are not in the order — never selectable.
   const lctx = { queries, taskFlags };
@@ -634,6 +641,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      rather than state because it must not itself cause a render: it is written in passing while
      resolving, and read only when the key it accompanied has gone. */
   const dockPos = useRef(0);
+  /* ⚠️ THE LAST CARD THE PANE SHOWED — view memory for the HOLD, never a second list. It is one
+     card, it is only read when a narrowing has emptied the rail, and nothing derives from it. */
+  const heldCard = useRef<BoardCard | null>(null);
   const boardScroll = useRef(0);
 
   /**
@@ -647,28 +657,61 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * is a hoisted `function`, so it is callable here; its CLOSURE is what would have thrown, which
    * is the TDZ trap this file has been bitten by before.)
    */
-  const dockable = dockQueue(dockAllCards());
+  const allDockable = dockQueue(dockAllCards());
+  /* the chip narrows the SAME list the rail draws, so the pane walks exactly what you can see */
+  const dockable = allDockable.filter((c) => chipMatchesCard(chip, c));
   /* ⚠️ THE REF IS WRITTEN DURING RENDER, and that is safe because it is idempotent: the value is
      a pure function of this render's own inputs, so a repeated render writes the same number. */
   const docked = resolveDocked(dockable, dockKey, dockPos.current);
-  if (docked.card) dockPos.current = docked.pos;
+  if (docked.card) { dockPos.current = docked.pos; heldCard.current = docked.card; }
+
+  /**
+   * ⚠️ THE PANE HOLDS WHEN A NARROWING EMPTIES THE RAIL — it does not clear (Phase 4). Emptying
+   * the pane because a search box narrowed is the worst thing this page could do: you filtered to
+   * find something else, not to abandon what you were doing. So a rail with nothing in it and a
+   * pane still showing your card is the CORRECT pair, and clearing the search brings the rail back
+   * around it.
+   *
+   * ⚠️ THE PANE CLOSES ONLY WHEN THERE IS NO WORK AT ALL — `allDockable`, unnarrowed. That is the
+   * one distinction that matters: an empty rail because you filtered is a view, an empty rail
+   * because you finished is a fact, and the two must not look the same.
+   */
+  const paneCard = docked.card ?? (allDockable.length > 0 ? heldCard.current : null);
 
   /**
    * ⚠️ THE KEY FOLLOWS THE RESOLUTION, or the rail would mark nothing while the pane showed
    * something. `resolveDocked` already answers which card is on screen; this writes that answer
-   * back so `selectedKey` and the pane cannot name different cards. When the list empties there
-   * is no card to adopt and the pane closes — which is not the same as being cleared.
+   * back so `selectedKey` and the pane cannot name different cards.
    *
-   * The signature is the dep rather than the array: a fresh array every render would fire this on
-   * every render, and what actually matters is whether the MEMBERSHIP changed.
+   * ⚠️ AND A NARROWING CHANGE GOES TO THE FIRST MATCH, NOT TO THE REMEMBERED POSITION. The two
+   * causes are genuinely different: a WRITE removes one card from a set you are still in, so the
+   * position you held is meaningful and `resolveDocked` clamps to it; a FILTER replaces the whole
+   * set, where a position carries no meaning at all and the first match is the only predictable
+   * answer. Distinguished by the narrowing's own signature rather than guessed at.
+   *
+   * The signatures are the deps rather than the arrays: a fresh array every render would fire this
+   * on every render, and what matters is whether the MEMBERSHIP or the NARROWING changed.
    */
+  /* ⚠️ THE RAIL'S EMPTINESS IS READ FROM THE LIST IT DRAWS, not from a parallel predicate. It
+     used to be `active && !anyVisible`, computed over four `v*` sets built with a DIFFERENT
+     filter model from the one the rail rendered — two derivations of "is there anything here",
+     which could answer differently. This is the same array the rail maps over. */
   const dockSig = dockable.map((c) => c.key).join("|");
+  const narrowSig = `${chip}|${search.trim().toLowerCase()}|${tagSel ?? ""}`;
+  const lastNarrowSig = useRef(narrowSig);
   useEffect(() => {
+    const narrowed = lastNarrowSig.current !== narrowSig;
+    lastNarrowSig.current = narrowSig;
     if (!dockKey) return;
-    if (!docked.card) { setDockKey(null); return; }
-    if (docked.card.key !== dockKey) setDockKey(docked.card.key);
+    if (allDockable.length === 0) { setDockKey(null); return; }  // nothing left anywhere — close
+    if (dockable.length === 0) return;                           // narrowed to nothing — HOLD
+    if (dockable.some((c) => c.key === dockKey)) return;         // still on screen
+    setDockKey(narrowed ? dockable[0].key : (docked.card?.key ?? dockable[0].key));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dockSig, dockKey]);
+  }, [dockSig, dockKey, narrowSig, allDockable.length]);
+
+  /** Clearing the narrowing is one act, whichever half of it is set. */
+  const clearNarrowing = () => { setSearch(""); setChip("all"); };
 
   // the inverses the undo toast already carries, kept by card key so the session's REDO can
   // offer "Undo handled" on a card it stamped (see doneToast — no parallel undo store)
@@ -1118,6 +1161,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // top bar) provides the chrome it drew. The page root keeps the `spine-root` class as the
   // token carrier for the two relocated survivors (the chip bench + the Pro sticker), whose
   // styles live on in the trimmed todoShell.css.
+  /* ⚠️ NARROWED TO NOTHING — a RAIL fact, and the rail alone says it (Phase 4). Read from the
+     groups the rail actually draws, so the message and the list cannot disagree. */
+  const railEmpty = railGroups().length === 0;
+
   return (
     <div className="t-f12 spine-root">
       <div className="tdb-wrap today-off" ref={wrapRef}>
@@ -1217,20 +1264,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             ⚠️ BOTH DESK STATES READ UNFILTERED — `deskState` takes the raw lanes, never the
             searched ones, so a search that happens to match nothing can never fake a clear desk.
             Copy verbatim from todo-empty-states.html. ── */}
-        {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : active && !anyVisible ? (
-          /* ⚠️ A FILTERED-EMPTY RESULT IS A DEAD END TO ESCAPE, NOT A MOMENT TO DECORATE (P5;
-             sheet 4). It is the one empty state the ref gives no art: you are mid-search and want
-             out, not a picture. It names WHAT you searched for — a bare "nothing matches" leaves
-             you wondering whether the page heard you — and it states the size of the set you
-             would get back, which is what makes clearing an informed choice rather than a guess. */
-          <div className="tdg-empty">
-            <h3>No tasks match “{search.trim()}”</h3>
-            <p>Try a shorter search, or clear it to see all {liveBoardCards(boardCols).length}.</p>
-            <button type="button" className="tdg-emptyact" onClick={() => { setFilters(DEFAULT_FILTERS); setSearch(""); }}>
-              Clear search
-            </button>
-          </div>
-        ) : (
+        {desk === "new-desk" ? renderNewDesk() : desk === "desk-cleared" ? renderDeskCleared() : (
           /**
            * ⚠️ THE SPLIT (Phase 2). The list is the RAIL and the dock is the WORKSPACE, standing
            * side by side instead of taking turns.
@@ -1244,12 +1278,30 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
            * surface; nothing in the rail records anything, so the law holds unchanged.
            */
           <div className="tdw-split">
-            <div className="tdw-rail">{renderList()}</div>
+            <div className="tdw-rail">
+              {renderRailTools()}
+              {/* ⚠️ A NARROWED-TO-NOTHING RAIL IS A RAIL FACT, AND IT STAYS IN THE RAIL (Phase 4).
+                  It used to replace the whole body, which meant a search that matched nothing took
+                  the workspace with it — the pane cleared because a search box narrowed, which is
+                  the one behaviour this page must not have. The pane HOLDS; only the rail says so.
+                  ⚠️ It names WHAT you searched for — a bare "nothing matches" leaves you wondering
+                  whether the page heard you — and states the size of the set you get back, which
+                  is what makes clearing an informed choice rather than a guess. */}
+              {railEmpty ? (
+                <div className="tdg-empty tdw-empty">
+                  <h3>{search.trim() ? `Nothing matches “${search.trim()}”` : "Nothing in this filter"}</h3>
+                  <p>Clear it to see all {allDockable.length}.</p>
+                  <button type="button" className="tdg-emptyact" onClick={clearNarrowing}>
+                    {search.trim() ? "Clear search" : "Show all"}
+                  </button>
+                </div>
+              ) : renderList()}
+            </div>
             <div className="tdw-work">
-              {docked.card ? (
+              {paneCard ? (
                 <TodoDock
                   queue={dockable}
-                  activeKey={docked.card.key}
+                  activeKey={paneCard.key}
                   onSelect={(key) => setDockKey(key)}
                   onClose={closeDock}
                   timeline={dockTimeline}
@@ -1437,21 +1489,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function renderTools() {
     return (
       <>
-            <span className="tdb-bsearch">
-              <span className="tdb-bsmag" aria-hidden>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
-              </span>
-              <input
-                ref={searchRef}
-                type="text"
-                placeholder="Search your list…"
-                aria-label="Search your list"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
-              />
-            </span>
-
+            {/* ⚠️ THE SEARCH MOVED TO THE RAIL (Phase 4), and it is the one control that had to.
+                It narrows the RAIL — that is what a search over a list of tasks does — and with
+                the page split in two, a control that acts on one pane belongs above that pane.
+                Sort stays here: it orders every group at once and has no pane of its own.
+                (Flagged in the report: two instruments over one list now sit in two places, which
+                is a tension this pack's own history warns about. The pack put the search in the
+                rail explicitly and the ref draws it there.) */}
             {/* SORT — it reorders every group at once, which is why it sits with the page's
                 instruments and never inside a panel. */}
             <span className="tdb-sortwrap">
@@ -2149,19 +2193,81 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * grouping runs: narrowing one group would leave the page showing differently-scoped views of
    * one set, and you would have to remember which.
    */
-  function renderList() {
+  /**
+   * ⚠️ THE RAIL'S OWN INSTRUMENTS, ABOVE ITS OWN SCROLLER (Phase 4; ref todo-workspace-concept-v3
+   * `.rail-tools`). Search then chips, in a bordered block that does not scroll with the list it
+   * narrows — a control that scrolls away is gone exactly when a long list makes you want it.
+   *
+   * (A hoisted `function`, not a post-return const — the render calls it; the TDZ law.)
+   */
+  function renderRailTools() {
+    const chips = railChips(boardCols);
+    return (
+      <div className="tdw-tools">
+        <div className={`tdw-search${search ? " has" : ""}`}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
+          <input
+            ref={searchRef}
+            type="text"
+            placeholder="Search your list…"
+            aria-label="Search your list"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
+          />
+          {/* ⚠️ THE CLEAR APPEARS ONLY WITH A QUERY — a permanent × on an empty field is a control
+              that does nothing, and it sits where your eye goes to check whether anything is set. */}
+          {search && (
+            <button type="button" className="tdw-clr" aria-label="Clear the search" onClick={() => setSearch("")}>
+              <X size={13} aria-hidden />
+            </button>
+          )}
+        </div>
+        {/* ⚠️ EVERY COUNT IS LIVE AND COMES FROM `railChips`, which reads the same `taskGroups` the
+            headings do — so a chip and the panel it names can never state different figures. */}
+        <div className="tdw-chips" role="group" aria-label="Filter the list">
+          {chips.map((ch) => (
+            <button
+              key={ch.id}
+              type="button"
+              className={`tdw-chip${ch.id === chip ? " on" : ""}`}
+              aria-pressed={ch.id === chip}
+              onClick={() => setChip(ch.id)}
+            >
+              {ch.label}<span className="n">{ch.count}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * ⚠️ THE GROUPS THE RAIL DRAWS — computed ONCE and read by both the list and the "is it empty"
+   * question (Phase 4). That question used to be answered by `active && !anyVisible`, over four
+   * `v*` sets built with a DIFFERENT filter model from the one the rail rendered: two derivations
+   * of "is there anything here", free to answer differently. This is the array the rail maps over.
+   *
+   * (A hoisted `function` for the TDZ law, called from both places rather than a const either
+   * would have had to be declared above.)
+   */
+  function railGroups() {
     const narrowed = {
       todo: narrowCards(boardCols.todo),
       today: narrowCards(boardCols.today),
       snoozed: narrowCards(boardCols.snoozed),
       done: narrowCards(boardCols.done),
     };
+    return chipGroups(taskGroups(narrowed), chip);
+  }
+
+  function renderList() {
     /* ⚠️ THE LIST REGION IS THE SCROLLZONE (tasks-viewport P1). The page never scrolls; the
        header block is fixed and the groups scroll inside this zone. */
     return (
       <TplZone scrollRef={zoneRef} label="Your tasks" hem={false}>
         <TaskList
-          groups={taskGroups(narrowed)}
+          groups={railGroups()}
           hkExpanded={hkExpanded}
           onToggleHk={() => setHkExpanded(true)}
           onOpen={(c) => openDock(c.key)}
