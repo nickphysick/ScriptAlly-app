@@ -114,28 +114,29 @@ describe("⚠️ an offer's snooze is capped at tomorrow — on EVERY path", () 
    * the reason is printed beneath it. The cap is not merely still enforced — it is enforced by
    * the same function every other path asks.
    */
-  it("the dock's clock opens THE dial — the cap comes from the ceiling, not from a missing row", () => {
-    expect(dock).toContain("<SnoozeDial");
-    expect(dock).toContain('import { SnoozeDial } from "./SnoozeDial";');
+  it("the pane's clock opens THE dial — the cap comes from the ceiling, not from a missing row", () => {
+    /* ⚠️ THE CLOCK MOVED TO THE COMMAND BAR (visual rebuild, Phase 4) with the rest of the card's
+       foot. It is still the SAME dial and still the same ceiling; only its anchor changed. */
+    expect(listPage).toContain("<SnoozeDial");
+    expect(listPage).toContain("setCbDial");
     /* the hand-rolled cap and the menu it lived in are extinct — read on DECLARATIONS, since the
        file's own note quotes the tiers it retired */
     expect(code(dock)).not.toContain("tdk-snzmenu");
     expect(code(dock)).not.toContain("Remind me tomorrow");
     expect(code(dock)).not.toContain('card.taskType !== "offer_received" && (');
-    /* the dial still reports a DATED verb up to the page, which routes it through the choke point */
-    expect(dock).toContain("onSnoozeDays");
-    expect(dock).not.toContain("onSnooze:");
-    expect(listPage).toContain("onSnoozeDays={(c, days, when) => snoozeCard(c, days, when)}");
+    /* the bar's dial routes through the SAME choke point every other door uses */
+    expect(listPage).toContain("snoozeCard(paneCard, days, when)");
   });
 
-  it("⚠️ ONE SNOOZE SURFACE, FOUR DOORS — rail clock, ⋯ menu, `s`, and the pane's clock", () => {
+  it("⚠️ ONE SNOOZE SURFACE, THREE DOORS — the rail's clock, the `s` key, and the command bar", () => {
+    /* ⚠️ THE COUNT MOVED WITH THE VERBS AND THE LAW DID NOT (visual rebuild, Phase 4). It was four
+       — the rail's clock, the ⋯ menu's `Snooze…`, `s`, and the pane's own clock. The ⋯ left the
+       row and the card's foot bar was retired into the command bar, so two doors became one; what
+       matters is unchanged and is what this asserts: every door reaches the SAME component. */
     const listSrc = readFileSync(join(here, "TaskList.tsx"), "utf8");
-    /* three in the rail… */
-    expect(listSrc).toContain("onFire={(el) => setDial({ card: c, anchor: el })}");            // the icon
-    expect(listSrc).toContain("onOpenDial={() => { setSplit(null); setDial({ card: split.card, anchor: split.anchor }); }}"); // the menu
-    expect(listSrc).toContain('if (action === "snooze")');                                     // the key
-    /* …and the fourth in the pane, on the same component */
-    expect(dock).toContain("<SnoozeDial");
+    expect(listSrc).toContain("onFire={(el) => setDial({ card: c, anchor: el })}");   // the icon
+    expect(listSrc).toContain('if (action === "snooze")');                            // the key
+    expect(listPage).toContain("<SnoozeDial");                                        // the bar
     /* and there is exactly ONE dial component in the app */
     expect(readFileSync(join(here, "SnoozeDial.tsx"), "utf8")).toContain("export const SnoozeDial");
   });

@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Funnel, Pin, ChevronRight, X } from "lucide-react";
+import { Funnel, Pin, ChevronRight, ChevronLeft, X, Check, Clock, ArrowUpDown, ExternalLink } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -62,12 +62,12 @@ import {
    so a column asking where a card belongs, and a FILTERS facet asking what kind it is, are both
    answered by the groups themselves. Neither component is deleted in this phase (the house rule
    on orphans: flag, then sweep in a commit of its own). */
-import { TaskList } from "./TaskList";
+import { TaskList, groupColumn } from "./TaskList";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
 import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, liveBoardCards } from "../../lib/todoColumns";
-import { MenuLeaf } from "../../lib/todoMenu";
+import { MenuLeaf, cardMenu } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
 import { useTagWrites } from "./useTagWrites";
 import { todoPrefs } from "../../lib/todoPrefs";
@@ -75,7 +75,7 @@ import { todoPrefs } from "../../lib/todoPrefs";
    retirement — only the tag NARROWING went with it); `matchesTags` had no reader left. */
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
-import { dockQueue, dockFlowKind, nextInQueue, resolveDocked, SendSpec } from "../../lib/todoDock";
+import { dockQueue, dockFlowKind, nextInQueue, resolveDocked, sendSpecFor, SendSpec } from "../../lib/todoDock";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
@@ -90,6 +90,8 @@ import {
 import { taskGroups, taskStats, tasksEyebrow, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
 import { paneRestLine, showingLine, tasksCsv } from "../../lib/todoHandoff";
 import { rowFigure, daysSince, RowFigure, cardBucket, BUCKET_LABEL, rowDeed } from "../../lib/todoBuckets";
+import { rowPrimaryLabel } from "../../lib/taskRow";
+import { SnoozeDial } from "./SnoozeDial";
 import { isTerminalStatus } from "../../lib/agentList";
 import { estimateTotal } from "../../lib/todoEstimate";
 import { longDate } from "../../lib/dashboardStats";
@@ -647,6 +649,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /* ⚠️ THE LAST CARD THE PANE SHOWED — view memory for the HOLD, never a second list. It is one
      card, it is only read when a narrowing has emptied the rail, and nothing derives from it. */
   const heldCard = useRef<BoardCard | null>(null);
+  /* the command bar's own snooze door — the fifth onto the ONE dial */
+  const cbSnooze = useRef<HTMLButtonElement | null>(null);
+  const [cbDial, setCbDial] = useState(false);
   const boardScroll = useRef(0);
 
   /**
@@ -1374,6 +1379,84 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
            * `openDock` is still the single entrance and the dock is still the single recording
            * surface; nothing in the rail records anything, so the law holds unchanged.
            */
+          <>
+          {/**
+            * ⚠️ ONE ACTION SURFACE, SPANNING BOTH PANES (visual rebuild, Phase 4). The card's own
+            * foot bar is retired in the same commit — two places to act on one task is how they
+            * come to offer different verbs, and this one can state the list's count as well,
+            * which a bar inside the pane never could.
+            *
+            * ⚠️ EVERY VERB HERE FIRES AN EXISTING PRIMITIVE, and an inapplicable one renders
+            * DISABLED rather than absent: a bar whose buttons come and go makes you re-read it
+            * every time the selection changes.
+            */}
+          <div className="tdw-cbar">
+            <span className="tdw-cbcount">
+              <span className="big">{allDockable.length} {allDockable.length === 1 ? "task" : "tasks"}</span>
+              <span className="sm">{railShown()} outstanding</span>
+            </span>
+            <span className="tdw-cbdiv" />
+            <button type="button" className="tdw-cbic" title="Filter" aria-label="Filter"
+              onClick={() => searchRef.current?.focus()}>
+              <Funnel size={15} aria-hidden />
+            </button>
+            <button type="button" className="tdw-cbic" title="Sort" aria-label="Sort"
+              aria-expanded={sortOpen} onClick={() => setSortOpen((v) => !v)}>
+              <ArrowUpDown size={15} aria-hidden />
+            </button>
+            <span className="tdw-cbsp" />
+            {paneCard && (() => {
+              const col = groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent");
+              const menu = cardMenu(paneCard, col);
+              const offersLeaf = (id: string) => menu.some((g) => g.entries.some((e) =>
+                e.kind === "leaf" ? e.id === id && !e.disabled : e.sub.some((x) => x.id === id && !x.disabled)));
+              const i = dockable.findIndex((c) => c.key === paneCard.key);
+              return (
+                <>
+                  <span className="tdw-cblab">This task</span>
+                  {/* the named verb — `rowPrimaryLabel`, the derivation the pane's own act reads */}
+                  <button type="button" className="tdw-cbprim"
+                    onClick={() => void dockPrimary(paneCard, sendSpecFor(paneCard))}>
+                    <Check size={14} aria-hidden /> {rowPrimaryLabel(paneCard, col)}
+                  </button>
+                  <button type="button" className="tdw-cbbtn" disabled={!offersLeaf("snooze-1")}
+                    ref={cbSnooze}
+                    onClick={() => setCbDial((v) => !v)}>
+                    <Clock size={14} aria-hidden /> Snooze
+                  </button>
+                  <span className="tdw-cbdiv" />
+                  <button type="button" className="tdw-cbbtn" disabled={!paneCard.relatedRecordId}
+                    onClick={() => paneCard.relatedRecordId && onNavigate("queries", paneCard.relatedRecordId)}>
+                    <ExternalLink size={14} aria-hidden /> Open query
+                  </button>
+                  {/* an offer cannot be dismissed — the reply-by date is not yours to move */}
+                  <button type="button" className="tdw-cbbtn" disabled={!offersLeaf("dismiss-week")}
+                    onClick={() => forkStale(paneCard, "notNow")}>
+                    <X size={14} aria-hidden /> Dismiss
+                  </button>
+                  <span className="tdw-cbdiv" />
+                  <button type="button" className="tdw-cbic" title="Previous task" aria-label="Previous task"
+                    disabled={i <= 0}
+                    onClick={() => { const to = dockable[i - 1]; if (to) setDockKey(to.key); }}>
+                    <ChevronLeft size={15} aria-hidden />
+                  </button>
+                  <button type="button" className="tdw-cbic" title="Next task" aria-label="Next task"
+                    disabled={i < 0 || i >= dockable.length - 1}
+                    onClick={() => { const to = dockable[i + 1]; if (to) setDockKey(to.key); }}>
+                    <ChevronRight size={15} aria-hidden />
+                  </button>
+                </>
+              );
+            })()}
+          </div>
+          {cbDial && paneCard && cbSnooze.current && (
+            <SnoozeDial
+              card={paneCard}
+              anchor={cbSnooze.current}
+              onSnooze={(days, when) => { setCbDial(false); snoozeCard(paneCard, days, when); }}
+              onClose={(rf) => { if (rf) cbSnooze.current?.focus(); setCbDial(false); }}
+            />
+          )}
           <div className="tdw-split">
             <div className="tdw-rail">
               {renderRailTools()}
@@ -1458,6 +1541,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               )}
             </div>
           </div>
+          </>
         )}
 
           {/* ⚠️ THE ASSISTANT BAND IS UNMOUNTED FROM THIS PAGE (fix pack, 10 Aug) — a PLACEMENT

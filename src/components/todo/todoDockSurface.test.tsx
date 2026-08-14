@@ -20,6 +20,9 @@ import { TodoBoard } from "./TodoBoard";
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const dockSrc = readFileSync(join(here, "TodoDock.tsx"), "utf8");
+/* ⚠️ ON DECLARATIONS — the card's own notes QUOTE the foot bar they retired, and reading prose as
+   code fails a file that is correct. */
+const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const dockCssRule = (sel: string): string => {
   const css = readFileSync(join(here, "todoDock.css"), "utf8");
   const i = css.indexOf(sel);
@@ -90,10 +93,11 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(html).toContain("Send your full to Jonathan Marsh");
     /* the card AFTER next is nowhere: with the stack gone there is no list in this surface */
     expect(html).not.toContain("Redraft the opening");
-    /* ⚠️ THE IMMEDIATE NEXT ONE IS NAMED, AND THAT IS THE FORWARD LOOK, NOT A LIST. It survives
-       deliberately — it is one of the two array-driven survivors — so this case asserts it is
-       present as PROSE rather than mistaking it for a leftover rail. */
-    expect(html).toContain("NEXT: Eleanor Whitfield silent");
+    /* ⚠️ AND THE FORWARD LOOK MOVED TOO (visual rebuild, Phase 4). "NEXT: …" was the card foot's
+       last survivor; the command bar's previous/next pair says the same thing as a POSITION rather
+       than as a name, and the head row's "Task 2 of 4" states the set. Nothing in this surface
+       names another card now. */
+    expect(html).not.toContain("Eleanor Whitfield silent");
     expect(html).not.toContain("tdk-rail");
   });
 
@@ -108,11 +112,14 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(dockSrc).toContain("onSelect(to.key)");
   });
 
-  it("the NEXT line still names what is coming, from the same array", () => {
-    expect(dockSrc).toContain("nextInQueue(queue, card.key)");
-    expect(render("a")).toContain("NEXT: Eleanor Whitfield silent");
-    /* …and says so plainly at the end rather than going blank */
-    expect(render("c")).toContain("LAST IN THE QUEUE");
+  it("⚠️ THE FORWARD LOOK IS THE BAR'S PREV/NEXT PAIR NOW — a position, not a name", () => {
+    /* `nextInQueue` survives in `lib/todoDock` (advanceDock reads it) but the CARD names no other
+       card. The bar's arrows and the head row's "Task 2 of 4" carry where you are and where you
+       can go, which is the same fact stated once rather than twice. */
+    expect(code(dockSrc)).not.toContain("nextLabel");
+    expect(dockSrc).not.toContain("LAST IN THE QUEUE");
+    expect(page).toContain('aria-label="Next task"');
+    expect(page).toContain('aria-label="Previous task"');
   });
 
   it("the work surface carries the family band, the title and the record line", () => {
@@ -136,37 +143,52 @@ describe("the flow mounted is the card's own kind", () => {
   it("agent-waiting offers the send, and its ink act NAMES what it records", () => {
     const html = render("a");
     expect(html).toContain("What goes");
-    expect(html).toContain("Record the full as sent");
-    expect(html).not.toContain(">Done<");
+    /* ⚠️ THE ACT'S NAME IS THE BAR'S NOW (Phase 4) — the card states what the record shows and
+       what goes; the command bar names the deed. Both read `rowPrimaryLabel`, one derivation. */
+    expect(page).toContain("rowPrimaryLabel(paneCard, col)");
   });
 
-  it("⚠️ the send's primary is DISABLED until the writer confirms what goes", () => {
-    expect(render("a")).toContain("disabled=\"\"");
+  it("⚠️ the send's confirmation is still the card's — the tick before the act", () => {
+    /* the checkbox stays here: it is a statement about WHAT GOES, which is the card's business.
+       The act it gates is the bar's. */
+    expect(render("a")).toContain("tdk-check");
   });
 
   it("stale offers the close, and says what closing means for the response rate", () => {
     const html = render("b");
-    expect(html).toContain("Close this query");
     expect(html).toContain("not a rejection");
   });
 
   it("a user task offers the tick — the only kind that finishes by ticking", () => {
     const html = render("c");
-    expect(html).toContain("Mark it done");
     expect(html).toContain("ticking it is what finishes it");
   });
 });
 
-describe("the foot: one ink act, two quiet verbs, and where you are going", () => {
-  it("names the next item, and says so plainly at the end of the queue", () => {
-    expect(render("a")).toContain("NEXT: Eleanor Whitfield silent");
-    expect(render("c")).toContain("LAST IN THE QUEUE");
+/**
+ * ⚠️ THE FOOT BAR IS RETIRED INTO THE COMMAND BAR (visual rebuild, Phase 4), and this describe
+ * inverts rather than going. Two places to act on one task is how they come to offer different
+ * verbs; a bar inside the card could only ever act on the card, while the page's bar states the
+ * list's count as well.
+ *
+ * WHERE EACH PIECE WENT: the named primary → the bar's pink button (same `rowPrimaryLabel`);
+ * Snooze → the bar's clock, another door onto the one dial; ⋯ → the bar's `Open query` and
+ * `Dismiss`, which is what it actually reached; `NEXT: …` → the bar's previous/next pair, which
+ * says the same thing as a position rather than as a name.
+ */
+describe("⚠️ THE CARD HAS NO ACTION BAR — there is one action surface and it is not here", () => {
+  it("nothing in the card acts, names an act, or names another card", () => {
+    const html = render();
+    for (const gone of ["tdk-foot", "tdk-prime", "tdk-next", 'aria-label="More"', 'aria-label="Snooze"']) {
+      expect(html, gone).not.toContain(gone);
+    }
   });
 
-  it("carries Snooze and More as quiet controls beside the primary", () => {
-    const html = render();
-    expect(html).toContain('aria-label="Snooze"');
-    expect(html).toContain('aria-label="More"');
+  it("…and the bar carries every one of them", () => {
+    for (const verb of ["Snooze", "Open query", "Dismiss", "Next task", "Previous task"]) {
+      expect(page, verb).toContain(verb);
+    }
+    expect(page).toContain("rowPrimaryLabel(paneCard, col)");
   });
 });
 
@@ -331,42 +353,34 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     expect(html).toContain("Nothing logged yet.");
   });
 
-  it("the footer keeps its contract — the ink act, snooze, ⋯ and the NEXT line", () => {
-    const html = render();
-    const foot = html.slice(html.indexOf("tdk-foot"));
-    expect(foot).toContain("tdk-prime");
-    expect(foot).toContain('aria-label="Snooze"');
-    expect(foot).toContain('aria-label="More"');
-    expect(foot).toContain("tdk-next");
+  it("⚠️ THE FOOTER'S CONTRACT MOVED WHOLE — asserted on the bar, not deleted", () => {
+    /* The four things it guaranteed are guaranteed by the command bar now; see the describe above.
+       This case survives so the CONTRACT is still named somewhere the next reader will look. */
+    expect(render()).not.toContain("tdk-foot");
+    expect(page).toContain('className="tdw-cbar"');
   });
 });
 
-describe("⚠️ the DOCK-SEAL fires on completion, and never under reduced motion", () => {
-  it("the primary strikes the seal and performs the act — the flourish rides over, never delays", () => {
-    expect(dockSrc).toContain("setSealing(true)");
-    expect(dockSrc).toContain("onPrimary(card, spec);");
-    expect(dockSrc.indexOf("setSealing(true)")).toBeLessThan(dockSrc.indexOf("onPrimary(card, spec);"));
+/**
+ * ⚠️ THE DOCK-SEAL IS UNMOUNTED, AND ITS ART IS NOT DELETED (visual rebuild, Phase 4). The seal was
+ * struck by the CARD'S ink primary as a flourish over a finished act; the act is the command bar's
+ * now, so there is nothing here to strike it. `ArtSlot name="dock-seal"`, its 600ms keyframe and
+ * the reduced-motion stop are all untouched in `artSlot.css` — the flourish returns the day a
+ * completion has a home in this surface again.
+ *
+ * Inverted rather than deleted so the ASSET is not quietly orphaned: if someone removes the art
+ * believing it dead, this is where the reason it survives is written down.
+ */
+describe("⚠️ THE SEAL IS UNMOUNTED, ITS ART SURVIVES", () => {
+  it("nothing in the card strikes it, and no seal state remains", () => {
+    expect(code(dockSrc)).not.toContain("setSealing");
+    expect(code(dockSrc)).not.toContain("SEAL_MS");
+    expect(code(dockSrc)).not.toContain("reducedMotion");
   });
 
-  it("the mount is GATED on reduced motion — the CSS stop is the belt to this brace", () => {
-    expect(dockSrc).toContain("if (!reducedMotion()) {");
-    expect(dockSrc).toContain('window.matchMedia?.("(prefers-reduced-motion: reduce)")');
-  });
-
-  it("the timer and the keyframe agree at 600ms", () => {
-    expect(dockSrc).toContain("const SEAL_MS = 600;");
-    const artCss = readFileSync(join(here, "artSlot.css"), "utf8");
-    expect(artCss).toContain("animation: artSeal 600ms");
-  });
-
-  it("it is absent at rest, and the sheet is its containing block", () => {
-    expect(render()).not.toContain("dock-seal");
-    const w = dockCssRule(".tdk-w {");
-    expect(w).toContain("position: relative");
-  });
-
-  it("a new docked item clears any seal in flight", () => {
-    expect(dockSrc).toContain("setSealing(false); }, [activeKey]);");
+  it("⚠️ AND THE ART IS STILL REGISTERED — an orphaned asset is not a deleted one", () => {
+    const slots = readFileSync(join(here, "ArtSlot.tsx"), "utf8");
+    expect(slots).toContain("dock-seal");
   });
 });
 

@@ -27,7 +27,7 @@ import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy 
 import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
 import { bandFamily } from "../../lib/todoColumns";
-import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, SendSpec } from "../../lib/todoDock";
+import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
 import { SnoozeDial } from "./SnoozeDial";
 import { handoffFor, panePosition, paneSections, HANDOFF_NOTE } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
@@ -64,24 +64,7 @@ export interface TodoDockProps {
   tagsSlot?: (card: BoardCard) => React.ReactNode;
 }
 
-/** The seal's own duration — the ref's 600ms, restated here because the mount owns the timer
- *  and the stylesheet owns the keyframe; artSlots.test.ts holds them equal. */
-const SEAL_MS = 600;
-const reducedMotion = () =>
-  typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-/** The ink primary's words per flow — the act, never a bare "Done". */
-function primaryLabel(card: BoardCard): string {
-  const spec = sendSpecFor(card);
-  if (spec) return spec.actLabel;
-  switch (dockFlowKind(card)) {
-    case "offer": return "Answer the offer";
-    case "stale": return "Close this query";
-    case "user-task": return "Mark it done";
-    case "agent-waiting": return "Log the nudge";
-    default: return "Fill in the gap";
-  }
-}
 
 export const TodoDock: React.FC<TodoDockProps> = ({
   queue, activeKey, onSelect, onClose, timeline, onPrimary, onSnoozeDays, onMore, tagsSlot, handoff,
@@ -96,14 +79,10 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const snoozeBtn = useRef<HTMLButtonElement | null>(null);
   const [snoozeOpen, setSnoozeOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  /* ⚠️ ART · DOCK-SEAL (board-optimise P3/P4) — the wax-seal moment: struck the instant a flow
-     completes, BEFORE the card animates to Done. It is a flourish over a finished act, so it is
-     never mounted under reduced motion at all — the CSS stop is the belt to this brace. */
-  const [sealing, setSealing] = useState(false);
 
   /* A new item arrives with its own decisions unmade — a confirmation carried over from the last
      one would be the surface agreeing to something on your behalf. */
-  useEffect(() => { setConfirmSend(false); setSnoozeOpen(false); setSealing(false); }, [activeKey]);
+  useEffect(() => { setConfirmSend(false); setSnoozeOpen(false); }, [activeKey]);
 
   /* ⚠️ KEYBOARD. Esc closes, ↑↓ walk the queue, Enter is the primary. Bound on the surface rather
      than the document so it cannot reach past an open popover or a field the flow owns. */
@@ -120,7 +99,6 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
   useEffect(() => { surfaceRef.current?.focus(); }, []);
 
-  const next = useMemo(() => (card ? nextInQueue(queue, card.key) : null), [queue, card]);
   if (!card) return null;
 
   const spec = sendSpecFor(card);
@@ -166,7 +144,9 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
       {/* ── THE WORK SURFACE ─────────────────────────────────────────────── */}
       <section className="tdk-w">
-        {sealing && <ArtSlot name="dock-seal" />}
+        {/* ⚠️ THE DOCK-SEAL IS UNMOUNTED WITH THE PRIMARY IT RODE OVER (Phase 4) — the act is the
+            command bar's now. `ArtSlot name="dock-seal"` and its 600ms are untouched in the sheet;
+            the flourish returns the day a completion has a home in this surface again. */}
         <div className={`tdk-band fam-${bandFamily(card)}`}>
           <i>{[card.kind, card.due].filter(Boolean).join(" · ")}</i>
           <button type="button" className="tdk-x" aria-label="Back to the board" onClick={onClose}>
@@ -313,57 +293,19 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
         )}
 
-        <footer className="tdk-foot">
-          <button
-            type="button"
-            className="tdk-prime"
-            disabled={flow === "agent-waiting" && !!spec && !confirmSend}
-            onClick={() => {
-              /* The seal is struck first and the act follows immediately — the flourish rides
-                 over the completion rather than delaying it. */
-              if (!reducedMotion()) {
-                setSealing(true);
-                window.setTimeout(() => setSealing(false), SEAL_MS);
-              }
-              onPrimary(card, spec);
-            }}
-          >
-            {primaryLabel(card)}
-          </button>
-          {/* ⚠️ ONE SNOOZE SURFACE, AND THIS IS ITS FOURTH DOOR (Phase 6). The two-tier menu that
-              stood here — "Remind me tomorrow" / "Give it a week" — is RETIRED, not reshaped. It
-              was built because the page's dial "never mounted for the dock", which stopped being
-              true the moment the pane and the rail shared a screen: the rail's clock, the ⋯ menu's
-              `Snooze…`, the `s` key and this button all reach the SAME control now.
-              ⚠️ AND THE CEILING COMES WITH IT. The tier menu hand-rolled the offer cap by omitting
-              its week row; the dial reads `snoozeCeilingDays`, so an offer's track ends at
-              tomorrow with the unreachable tail hatched and the reason stated beneath it. Two
-              surfaces for one act is how they come to disagree about a limit. */}
-          <button
-            ref={snoozeBtn}
-            type="button"
-            className="tdk-quiet"
-            aria-label="Snooze"
-            title="Snooze"
-            aria-haspopup="dialog"
-            aria-expanded={snoozeOpen}
-            onClick={() => setSnoozeOpen((v) => !v)}
-          >
-            <Clock size={14} aria-hidden />
-          </button>
-          {snoozeOpen && snoozeBtn.current && (
-            <SnoozeDial
-              card={card}
-              anchor={snoozeBtn.current}
-              onSnooze={(days, when) => { setSnoozeOpen(false); onSnoozeDays(card, days, when); }}
-              onClose={(returnFocus) => { if (returnFocus) snoozeBtn.current?.focus(); setSnoozeOpen(false); }}
-            />
-          )}
-          <button type="button" className="tdk-quiet" aria-label="More" title="More" onClick={() => onMore(card)}>
-            <MoreHorizontal size={15} aria-hidden />
-          </button>
-          <span className="tdk-next">{nextLabel(next) ?? "LAST IN THE QUEUE"}</span>
-        </footer>
+        {/**
+          * ⚠️ THE CARD'S FOOT BAR IS RETIRED (visual rebuild, Phase 4). It carried the ink primary,
+          * the clock, the ⋯ and the NEXT line. Every one of those is on the COMMAND BAR now, which
+          * spans both panes — and that is the point: two places to act on one task is how they
+          * come to offer different verbs, and a bar inside the card could only ever act on the
+          * card, while the page's bar states the list's count as well.
+          *
+          * ⚠️ WHAT WENT WITH IT, AND WHERE IT WENT: the named primary → the bar's pink button
+          * (same `rowPrimaryLabel`); Snooze → the bar's clock, the FIFTH door onto the one dial;
+          * ⋯ → the bar's `Open query` and `Dismiss`, which is what it actually reached; the
+          * `NEXT:` forward look → the bar's previous/next pair, which says the same thing as a
+          * position rather than as a name. Nothing became unreachable.
+          */}
       </section>
     </div>
   );
