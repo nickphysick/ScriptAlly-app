@@ -3915,7 +3915,14 @@ export const Queries: React.FC<{
                         */}
                       <div className="f12-popwrap" style={{ flexShrink: 0 }}>
                         <button
-                          ref={moreTrigRef}
+                          /* ⚠️ TWO MENUS, ONE TRIGGER (fix pack 6 §4). The send-method picker lost
+                             its own trigger with the line that held it, so it anchors to the kebab
+                             instead. A callback ref assigns both — `useFixedMenu` positions each
+                             menu from whatever its trigger ref points at, and both now point here. */
+                          ref={(el) => {
+                            (moreTrigRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+                            (methodPickTrigRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
+                          }}
                           type="button"
                           className="f12-act qc-kebab"
                           aria-haspopup="menu"
@@ -3929,6 +3936,14 @@ export const Queries: React.FC<{
                           style={moreMenuStyle}
                           ariaLabel="Actions for this query"
                           items={[
+                            {
+                              /* ⚠️ REHOMED FROM "What you sent" (fix pack 6 §4) — the only control
+                                 for a query's send method anywhere in the app. It states the current
+                                 value so the menu answers the question the deleted line answered. */
+                              label: sentViaLabel(activeQuery?.sendMethod) ? `Sent by ${sentViaLabel(activeQuery?.sendMethod)} — change` : "Set send method",
+                              icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM4 7l8 6 8-6" /></svg>,
+                              onClick: () => { setIsMoreOpen(false); setMethodPickOpen(true); },
+                            },
                             {
                               label: heroTaskCount > 0 ? `View tasks (${heroTaskCount})` : "View tasks",
                               icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10" /></svg>,
@@ -3966,6 +3981,18 @@ export const Queries: React.FC<{
                               onClick: () => askDeleteQuery(),
                             },
                           ]}
+                        />
+                        {/* ⚠️ THE SEND-METHOD PICKER, REHOMED (fix pack 6 §4). It hung off the
+                            "Sent by …" line in What you sent; that line is deleted, but it was the
+                            ONLY control for a query's send method anywhere in the app, so it moved
+                            rather than went. Same menu, same handler, same `useFixedMenu` — only its
+                            trigger changed, and the kebab's callback ref feeds both. */}
+                        <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method"
+                          items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
+                            label: sentViaLabel(m),
+                            icon: activeQuery?.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
+                            onClick: () => pickSendMethod(m),
+                          }))}
                         />
                       </div>
                     </div>
@@ -4180,25 +4207,6 @@ export const Queries: React.FC<{
                               )}
                             </div>
                           );
-                          const sentLine = (
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: ".07em", textTransform: "uppercase" as const, color: "#8f877b", marginTop: 12 }}>
-                              {/* 5d — method click-to-pick */}
-                              Sent by
-                              <span className="f12-popwrap" style={{ display: "inline-flex" }}>
-                                <button ref={methodPickTrigRef} type="button" className="qce-pick" aria-haspopup="menu" aria-expanded={methodPickOpen} title="Change how this query was sent" onClick={() => setMethodPickOpen(o => !o)} style={{ font: "inherit", letterSpacing: "inherit", textTransform: "inherit", color: method ? "var(--hub-item, #1a1512)" : "#8f877b", background: "none", border: "none", padding: 0, cursor: "pointer" }}>
-                                  {method || "set method"}
-                                </button>
-                                <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method"
-                                  items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
-                                    label: sentViaLabel(m),
-                                    icon: activeQuery.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
-                                    onClick: () => pickSendMethod(m),
-                                  }))}
-                                />
-                              </span>
-                              {sentDate && <>&nbsp;·&nbsp;<span style={{ color: "var(--hub-item, #1a1512)" }}>{sentDate}</span></>}
-                            </div>
-                          );
 
                           return (
                             <>
@@ -4212,7 +4220,15 @@ export const Queries: React.FC<{
                                   shortcut rather than of a capability: the Edit Query drawer carries its own
                                   manuscript selector, so a query can still be moved. Flagged rather than
                                   quietly dropped. */}
-                              {sentLine}
+                              {/* ⚠️ THE "SENT BY … · 13 AUG" LINE IS GONE TOO (fix pack 6 §4). Both
+                                  facts are already stated by Tracking's `Query sent` event, and a
+                                  card that opens by repeating the event beside it delays the thing
+                                  it exists to show. It now opens directly on Materials sent.
+
+                                  ⚠️ THE PICKER WAS NOT DROPPED WITH THE LINE. It was the only way to
+                                  change a query's send method anywhere in the app, so removing it to
+                                  tidy a line would have been a feature loss wearing a layout change.
+                                  It moved to the pane's ⋯ menu — see `Change send method` there. */}
 
                               {/* Materials sent — the document rows (Query letter / Synopsis / Sample materials) */}
                               <div style={eyebrow}>Materials sent</div>

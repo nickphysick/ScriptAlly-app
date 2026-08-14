@@ -582,9 +582,41 @@ describe("§5 (fp4) · what you sent", () => {
     expect(card, "the old heading survived").not.toContain("Sent with this query");
   });
 
-  /* ⚠️ THE TWO FACTS THAT ARE ABOUT THIS SEND STAY, and they now open the card. */
-  it("it opens with how and when it was sent", () => {
-    expect(card, "the send line left the card").toContain("{sentLine}");
+  /**
+   * ⚠️ INVERTED BY FIX PACK 6 §4 — THE SEND LINE IS GONE, AND THE CARD OPENS ON ITS MATERIALS.
+   *
+   * This asserted the opposite: that "how and when it was sent" opened the card. Both facts are
+   * already stated by Tracking's `Query sent` event, sitting beside it on the same screen, so the
+   * card opened by repeating its neighbour and delayed the thing it exists to show. Turned round
+   * rather than deleted, so nothing quietly reinstates the line.
+   *
+   * ⚠️ THE PICKER WAS NOT DROPPED WITH IT, and that distinction is the point of the second case.
+   * It was the ONLY control for a query's send method anywhere in the app; removing it to tidy a
+   * line would have been a feature loss wearing a layout change. It moved to the pane's ⋯ menu.
+   */
+  it("⚠️ NO SEND METHOD AND NO SEND DATE — the card opens on Materials sent", () => {
+    expect(card, "the send line came back — Tracking already states both facts").not.toContain("{sentLine}");
+    expect(code, "the sentLine block survives as dead render code").not.toContain("const sentLine =");
+    /* the FIRST thing under the header is the materials heading — asserted by position, because a
+       `toContain` would pass with the line reinstated above it */
+    const heading = card.indexOf("Materials sent");
+    expect(heading, "the materials heading is gone from the card").toBeGreaterThan(-1);
+    /* ⚠️ "Sent by" ONLY — `sentDate` legitimately survives ABOVE this point, in the card's header
+       meta, which §4 leaves at its three items. Forbidding the identifier outright failed on the
+       meta and would have read as the line surviving; what the section removed is the LINE. */
+    expect(card.slice(0, heading), "the send-method line still renders above the materials heading")
+      .not.toContain("Sent by");
+  });
+
+  it("⚠️ THE SEND-METHOD PICKER SURVIVED THE LINE — rehomed, not removed", () => {
+    for (const kept of ["methodPickOpen", "pickSendMethod", "methodPickMenuStyle"]) {
+      expect(code, `${kept} went with the line — the app would have no way to change a send method`).toContain(kept);
+    }
+    /* it anchors to the kebab now: one trigger, two menus, via a callback ref that feeds both */
+    expect(code, "the picker lost its trigger — its menu would position against a ref pointing at nothing")
+      .toContain("methodPickTrigRef as React.MutableRefObject<HTMLButtonElement | null>");
+    expect(code, "the ⋯ menu does not offer the verb, so the picker is unreachable")
+      .toMatch(/Sent by \$\{sentViaLabel\(activeQuery\?\.sendMethod\)\} — change/);
   });
 
   /* ⚠️ AND THE ROWS AND THEIR MARKS ARE UNTOUCHED — the section removed a block, not the card. */
