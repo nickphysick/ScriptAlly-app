@@ -151,12 +151,11 @@ describe("§1c · the seam runs the full height of both columns", () => {
    * from the column boundary so it is collinear with the panel's own right rim. One line, no
    * doubling, and no dependence on how tall the panel happens to be.
    */
-  it("the line spans the row, not the panel that would cut it short", () => {
-    const seam = rule(".f12-body::after");
-    expect(seam, "the full-height seam is missing").not.toBe("");
-    expect(seam, "the seam stopped spanning the row").toMatch(/top:\s*0/);
-    expect(seam, "the seam stopped spanning the row").toMatch(/bottom:\s*0/);
-    expect(rule(".f12-list"), "the seam went back onto the panel, so it stops where the panel stops")
+  /* ⚠️ INVERTED BY FIX PACK 6 §2 — the seam is deleted and the panel's rim is the division. The
+     full-height argument was about a line that had to outlast an inset panel; there is no line. */
+  it("⚠️ NO SEAM — the panel's rim divides the columns", () => {
+    expect(rule(".f12-body::after"), "the seam came back — a second division beside the panel's rim").toBe("");
+    expect(rule(".f12-list"), "the panel took a right border of its own — that is the seam by another name")
       .not.toContain("border-right");
     expect(rule(".f12-rows"), "the seam moved onto the scrolling rows — it would stop at the last one")
       .not.toContain("border-right");

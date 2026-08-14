@@ -123,7 +123,7 @@ describe("§2 · rows on one grid", () => {
   });
 
   it("hover is a wash; selected lifts to white with a burgundy spine", () => {
-    expect(rule(".f12-row:hover")).toContain("background: var(--panel)");
+    expect(rule(".f12-row:hover"), "hover collapsed into the panel's ground").toContain("background: var(--paper)");
     expect(rule(".f12-row.f12-sel")).toContain("background: var(--white)");
     expect(rule(".f12-row.f12-sel::before"), "the spine went back to ink").toContain("background: var(--burg)");
   });
@@ -359,12 +359,17 @@ describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
     expect(list, "the anchor this case reads is gone").toContain("margin:");
     /* ⚠️ THE VALUE IS EXTRACTED AND COMPARED, never a `(?!14px)` lookahead — `\s*` backtracks to
        zero width and the lookahead runs against the space, which is banned in this repo. */
+    /* ⚠️ FOUR VALUES AGAIN AFTER §2, AND ONLY THE LEFT IS ZERO. §2 gave the panel its fourth inset
+       when the seam went; the LEFT is the one that must stay at the shared gutter, because that is
+       what puts this page's content where every other page's is. */
     const margin = (/margin:\s*([^;]+);/.exec(list)?.[1] ?? "").trim().split(/\s+/);
-    expect(margin.length, `the panel's margin is no longer the two-value vertical/horizontal form: ${margin.join(" ")}`).toBe(2);
-    expect(margin[1], `the panel took a horizontal inset again — its content would sit inside every other page's gutter: ${margin.join(" ")}`).toBe("0");
-    /* the VERTICAL inset survives — fix pack 5's panel is still held off the rule and the foot */
-    expect(margin[0], "the panel lost its vertical inset — that is fix pack 5's object, not this pack's business")
-      .toBe("var(--f12-panel-inset)");
+    expect(margin.length, `the panel's margin is not the four-value form: ${margin.join(" ")}`).toBe(4);
+    const [mTop, mRight, mBottom, mLeft] = margin;
+    expect(mLeft, `the panel took a LEFT inset again — its content would sit inside every other page's gutter: ${margin.join(" ")}`).toBe("0");
+    /* the other three survive — fix pack 5's object, plus §2's channel to the pane */
+    for (const [side, v] of [["top", mTop], ["right", mRight], ["bottom", mBottom]] as const) {
+      expect(v, `the panel lost its ${side} inset`).toBe("var(--f12-panel-inset)");
+    }
   });
 
   it("⚠️ THE SHARED GUTTER IS UNTOUCHED, here and everywhere", () => {
@@ -380,11 +385,11 @@ describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
       .not.toMatch(/--content-gutter\s*:/);
   });
 
-  /* the seam is positioned FROM the panel's right edge, which moved when the inset went */
-  it("⚠️ the seam's offset lost the inset with the panel", () => {
-    const seam = rule(".f12-body::after");
-    expect(seam, "the seam is missing").not.toBe("");
-    expect(seam, "the seam still adds the panel's old inset — the divider would sit 14px inside the pane")
-      .not.toContain("--f12-panel-inset");
+  /* ⚠️ INVERTED BY §2 — THE SEAM IS DELETED. It was positioned from the panel's right edge, so it
+     was one more thing to keep in step with a margin every time that edge moved, which it did twice
+     in this pack alone. The panel's own rim is the division now. */
+  it("⚠️ THE SEAM IS GONE — the panel's rim is the only division", () => {
+    expect(rule(".f12-body::after"), "the seam came back — with a rimmed white panel it is a second division doing the same job")
+      .toBe("");
   });
 });

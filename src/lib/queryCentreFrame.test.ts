@@ -141,16 +141,18 @@ describe("the workspace frame", () => {
    * ⚠️ SYMMETRIC BY CONSTRUCTION, not by matched numbers: `--gut` of padding inside the line and
    * the row's `gap: var(--gut)` outside it, so neither side states a figure the other must track.
    */
-  it("the list and the pane are separated by ONE vertical hairline", () => {
-    /* ⚠️ THE SEAM MOVED OFF THE LIST (fix pack 5). It was the column's `border-right`, which was
-       right while the list WAS the column; as an inset panel a border on it would stop where the
-       panel stops and the divider would have a gap at the top and another at the foot. It is drawn
-       full height by `.f12-body::after`, one pixel back so it is collinear with the panel's rim. */
+  /**
+   * ⚠️ INVERTED BY FIX PACK 6 §2 — THERE IS NO SEAM, AND THAT IS THE DIVISION WORKING. The line was
+   * drawn when the list was a flush wall on a receding ground: two independently scrolling regions
+   * with nothing between them but air. The list is a WHITE PANEL now, with its own rim, its own
+   * radius and an inset on all four sides, so the seam became a second division doing the job the
+   * rim already does. Turned round rather than deleted, so nothing quietly draws it again.
+   */
+  it("⚠️ ONE DIVISION, AND IT IS THE PANEL'S RIM — no seam", () => {
     const list = rule(f12, ".f12-list");
-    const seam = rule(f12, ".f12-body::after");
-    expect(seam, "the seam is gone — two independently scrolling regions with no boundary").not.toBe("");
-    expect(seam, "the seam is not on the hairline token").toContain("var(--hairline)");
-    expect(list, "the seam went back onto the panel, so it stops where the panel stops")
+    expect(rule(f12, ".f12-body::after"), "the seam came back — beside a rimmed panel it is a second line doing one job").toBe("");
+    expect(list, "the panel lost the rim that IS the division now").toContain("border: 1px solid var(--line)");
+    expect(list, "the panel took a right border of its own — that is the seam by another name")
       .not.toContain("border-right");
     /* ⚠️ THE AIR MOVED TO THE CHILDREN (§1c), because a TINTED column cannot pay its own gutter as
        `padding-right`: the ground would stop short of the hairline and leave a stripe of page

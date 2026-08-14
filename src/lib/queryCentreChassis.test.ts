@@ -104,7 +104,10 @@ describe("§1c · the list is furniture, and selection inverts", () => {
    */
   it("the column keeps its ground, and is now a card rather than furniture", () => {
     const r = rule(".f12-list");
-    expect(r, "the ground went — the column reads as loose content again").toContain("background: var(--paper)");
+    /* ⚠️ `--paper` → `--panel` (fix pack 6 §2). The receding fill was right while the list was
+       furniture; it is a white object now, on the same token the reading pane's cards and the agent
+       header plate already read, so the three cannot drift apart. */
+    expect(r, "the ground went — the column reads as loose content again").toContain("background: var(--panel)");
     expect(r, "the panel lost its radius — it is a card now, not a wall").toContain("border-radius");
     expect(r, "the seam went back onto the panel, so it stops where the panel stops")
       .not.toContain("border-right");
@@ -129,7 +132,10 @@ describe("§1c · the list is furniture, and selection inverts", () => {
     const sel = rule(".f12-row.f12-sel");
     expect(sel, "the selected row stopped lifting").toContain("background: var(--white)");
     expect(sel, "the lift has no edge to seat it on").toContain("inset 0 0 0 1px var(--hairline)");
-    expect(rule(".f12-row:hover"), "hover and the ground are the same colour").toContain("background: var(--panel)");
+    /* ⚠️ THE LADDER SHIFTED ONE PLACE (fix pack 6 §2) — the panel took `--panel`, so hover moved to
+       `--paper`. Still three steps from the same three tokens; the wash now darkens rather than
+       lightens, because the ground it sits on is the lighter of the two. */
+    expect(rule(".f12-row:hover"), "hover and the ground are the same colour").toContain("background: var(--paper)");
     expect(cssCode, "the selector-blue came back").not.toContain("--blue-t");
   });
 
@@ -324,13 +330,17 @@ describe("§ (fp5) · the list is an inset panel", () => {
      * reversal: the panel is still an OBJECT held off the masthead rule and the working area's
      * foot. Only the sideways step goes, and it was never part of that argument.
      */
+    /* ⚠️ FOUR SIDES NOW, AND EXACTLY ONE OF THEM ZERO. §1 put the LEFT edge on the shared content
+       gutter; §2 gave the RIGHT its inset when the seam went, because a rim touching the pane is
+       worse than the channel fix pack 5 was avoiding — and with no seam there is nothing for that
+       channel to sit against. */
     const m = declValue(r, "margin").split(/\s+/);
-    expect(m.length, `the panel's inset is not the two-value vertical/horizontal form: ${m.join(" ")}`).toBe(2);
-    const [block, inline] = m;
-    expect(block, "the panel is no longer held off the masthead rule and the foot — that is fix pack 5's object")
-      .toBe("var(--f12-panel-inset)");
-    expect(inline, `the panel took a horizontal inset again — its content sits inside every other page's gutter: ${m.join(" ")}`)
-      .toBe("0");
+    expect(m.length, `the panel's inset is not the four-value form: ${m.join(" ")}`).toBe(4);
+    const [top, right, bottom, left] = m;
+    expect(left, `the panel took a left inset again — its content sits inside every other page's gutter: ${m.join(" ")}`).toBe("0");
+    for (const [side, v] of [["top", top], ["right", right], ["bottom", bottom]] as const) {
+      expect(v, `the panel lost its ${side} inset`).toBe("var(--f12-panel-inset)");
+    }
   });
 
   /**
@@ -339,17 +349,13 @@ describe("§ (fp5) · the list is an inset panel", () => {
    * stops and the divider would have two gaps in it. It is drawn full height by `.f12-body::after`,
    * positioned one pixel back so it is collinear with the panel's right rim — one line, no doubling.
    */
-  it("the seam runs the full height, drawn by the row rather than the panel", () => {
+  it("⚠️ INVERTED BY §2 — THE SEAM IS DELETED, and the panel's rim is the division", () => {
+    /* It was drawn for a flush list on a receding ground: two independently scrolling regions with
+       nothing between them but air. The list is a white panel with its own rim, radius and an inset
+       on all four sides now, so the seam is a SECOND division doing the job the rim already does. */
     const seam = rule(".f12-body::after");
-    expect(seam, "the full-height seam is missing").not.toBe("");
-    expect(seam, "the seam stopped spanning the row").toContain("top: 0");
-    expect(seam, "the seam stopped spanning the row").toContain("bottom: 0");
-    /* ⚠️ THE OFFSET LOST THE PANEL'S INSET WITH THE PANEL (fix pack 6 §1). The seam is positioned
-       from the panel's right edge, and that edge moved 14px left when the horizontal inset went;
-       keeping the `+ inset` term would have parked the divider 14px inside the pane. */
-    expect(seam, "the seam is no longer collinear with the panel's rim")
-      .toContain("calc(var(--listw) - 1px)");
-    expect(rule(".f12-list"), "the panel took its right border back — that doubles the seam")
+    expect(seam, "the seam came back — with a rimmed white panel it is a second division doing the same job").toBe("");
+    expect(rule(".f12-list"), "the panel took a right border of its own — its rim is already the division")
       .not.toContain("border-right");
   });
 

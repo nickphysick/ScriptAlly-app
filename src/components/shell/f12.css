@@ -1347,10 +1347,27 @@
  * object held off the masthead rule and the foot, and that is untouched; what goes is the extra
  * step inward that no other page's content takes.
  */
+/**
+ * ⚠️ FIX PACK 6 §2 · THE PANEL IS WHITE, AND IT GAINS ITS FOURTH INSET.
+ *
+ * The ground is `--panel` — the same white the reading pane's cards and the agent header plate
+ * already use, read from the token rather than restated, so the three cannot drift apart. `--paper`
+ * was a receding fill, correct while the list was furniture and wrong now that it is an object.
+ *
+ * ⚠️ THE FOURTH INSET ARRIVES BECAUSE THE SEAM LEAVES. Fix pack 5 held the panel off three sides
+ * and deliberately not the right: that edge was where the seam was, and a channel there would have
+ * put a stripe of page between the panel and the divider it belonged to. With the seam deleted
+ * there is nothing for the channel to sit against, and a rim touching the pane is worse than the
+ * channel that argument was avoiding.
+ *
+ * ⚠️ THE LEFT STAYS AT 0 — that is §1, and it is not the fourth inset. The panel's left edge IS the
+ * shared content gutter; insetting it again would put this page's content back inside every other
+ * page's. Four values, and only one of them is zero.
+ */
 .f12-list {
   flex: none; width: var(--listw); display: flex; flex-direction: column; min-height: 0;
-  margin: var(--f12-panel-inset) 0;
-  background: var(--paper);
+  margin: var(--f12-panel-inset) var(--f12-panel-inset) var(--f12-panel-inset) 0;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   overflow: hidden;
@@ -1360,14 +1377,19 @@
    pixel back from the column boundary so it is collinear with that rim: over the panel's height the
    rim draws, above and below it this does, and the eye reads one continuous divider. */
 .f12-body { position: relative; }
-/* ⚠️ THE OFFSET LOSES THE PANEL'S INSET WITH THE PANEL (§1). The seam is positioned from the
-   panel's right edge, and that edge moved 14px left when the horizontal inset went — leaving the
-   `+ inset` term would have parked the divider 14px inside the pane. */
-.f12-body::after {
-  content: ""; position: absolute; top: 0; bottom: 0;
-  left: calc(var(--listw) - 1px);
-  width: 1px; background: var(--hairline); pointer-events: none;
-}
+/**
+ * ⚠️ THE VERTICAL SEAM IS DELETED (fix pack 6 §2), AND `.f12-body::after` GOES WITH IT.
+ *
+ * It was added when the list was a flush wall on a receding ground: two independently scrolling
+ * regions with nothing between them but air needed a boundary, and the seam was that boundary. The
+ * list is not that any more. It is a white panel with its own rim, its own radius and an inset on
+ * all four sides — a distinct object — so the seam is a SECOND division doing the job the rim
+ * already does, drawn for a list that no longer exists.
+ *
+ * ⚠️ DELETED, NOT HIDDEN. The rule is gone rather than zeroed, and its offset arithmetic with it:
+ * the seam was positioned from the panel's right edge, so it was one more thing that had to be kept
+ * in step with a margin every time that edge moved — which it did twice in this pack alone.
+ */
 /* ⚠️ THE SCROLLER IS EXEMPT. Head and foot take the panel's inset here; the ROWS take theirs from
    `.f12-row`'s own padding, so a row's hover and selection fills reach the panel's edges while its
    content and its separator stay inset. Padding the scroller as well would inset the fills too and
@@ -1501,7 +1523,13 @@
  * Three steps from three existing tokens: ground `--paper`, hover `--panel`, selected `--white`
  * with a ring. Hover and selected differ by the ring and the lift, exactly as the ref has it.
  */
-.f12-row:hover { background: var(--panel); }
+/* ⚠️ HOVER IS `--paper` NOW, AND IT HAD TO MOVE (fix pack 6 §2). The ladder was ground `--paper`
+   → hover `--panel` → selected `--white`; §2 gave the PANEL the `--panel` white, which put the
+   ground and the hover on the same colour and made hover invisible. The three steps are the same
+   three tokens, shifted one place: ground `--panel`, hover `--paper`, selected `--white`. Hover is
+   still a wash and selected still lifts — the direction of the wash inverts, because the ground it
+   washes is now lighter than the tint rather than darker. */
+.f12-row:hover { background: var(--paper); }
 /* Selected: the tint stays; the full-height inset edge becomes a BOOKMARK — 3px of ink inset
    9px from the row's top and bottom, with rounded ends, so it reads as a marker placed on the
    row rather than as the row's own border. */

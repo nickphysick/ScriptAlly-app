@@ -86,8 +86,11 @@ describe("the list is de-carded", () => {
    */
   it("it is a card — the same ground, now with a rim and a radius", () => {
     const list = rule(css, ".f12-list");
+    /* ⚠️ `--paper` → `--panel` (fix pack 6 §2). The receding fill was right while the list was
+       furniture; it is a white OBJECT now, on the same token the reading pane's cards and the agent
+       header plate already read. */
     expect(list, "the column lost its ground — it goes back to being loose content")
-      .toContain("background: var(--paper)");
+      .toContain("background: var(--panel)");
     expect(list, "the panel lost its rim").toContain("border: 1px solid var(--line)");
     expect(list, "the panel lost its radius").toContain("border-radius");
     expect(list, "the seam went back onto the panel, so it stops where the panel stops")
