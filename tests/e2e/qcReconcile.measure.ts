@@ -814,7 +814,11 @@ test("fp2 · edges line up, and the plate is a card", async () => {
        brighter and one step firmer, and must NEVER be identical again. The radius still agrees:
        that belongs to the page's shape language, not to the hierarchy. */
     expect(m.plateRadius, `the plate's radius drifted from a card's at ${w}`).toBe(m.cardRadius);
-    expect(m.plateBg, `the plate's ground fell back to the cards' at ${w}`).not.toBe(m.cardBg);
+    /* ⚠️ FLIPPED BACK BY FIX PACK 4 §2, and not out of indecision: §3 separated the plate from
+       cards that were DARKER than the white page behind them. §2 fixed that inversion by whitening
+       the cards and warming the pane, so plate and cards now share `--white` deliberately and the
+       plate out-ranks them by rim and elevation instead. */
+    expect(m.plateBg, `the plate and the pane's cards stopped sharing a ground at ${w}`).toBe(m.cardBg);
     expect(m.plateBorder, `the plate's rim fell back to the cards' at ${w}`).not.toBe(m.cardBorder);
     expect(m.inPlate, "the plate is missing").not.toBeNull();
     expect(m.plateHNoPill, `the plate shrinks when the status pill is absent at ${w}`).toBe(m.plateH);
@@ -886,4 +890,24 @@ test("fp3 · the list is flush on all four edges and the columns share a top lin
     expect(m.plateTop, `the agent header is missing at ${w}`).not.toBeNull();
     expect(m.lheadTop, `the columns start on different lines at ${w}`).toBe(m.plateTop);
   }
+});
+
+test("fp4 · grounds and gaps", async () => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await queries(page);
+  const m = await page.evaluate(() => {
+    const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+    const bg = (s: string) => { const e = q(s); return e ? getComputedStyle(e).backgroundColor : null; };
+    const rect = (s: string) => { const e = q(s); return e ? Math.round(e.getBoundingClientRect().top) : null; };
+    return {
+      list: bg(".f12-list"), search: bg(".f12-lhead .f12-lsearch"), iconctl: bg(".f12-lhead .f12-iconctl"),
+      card: bg(".qp-cols .f12-card"), plate: bg(".f12-heroband"),
+      pane: bg(".qp-pane"), cols: bg(".qp-cols"), scroll: bg(".wpg-scroll"), win: bg(".ws-window"),
+      note: bg(".f12-note"),
+      mastBottom: (() => { const e = q(".wsh"); return e ? Math.round(e.getBoundingClientRect().bottom) : null; })(),
+      searchTop: rect(".f12-lhead .f12-lsearch"), plateTop: rect(".f12-heroband"),
+    };
+  });
+  // eslint-disable-next-line no-console
+  console.log("[fp4] " + JSON.stringify(m, null, 0));
 });

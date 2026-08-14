@@ -1572,6 +1572,32 @@
 .f12-hero .f12-hs { display: inline-block; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.14em; color: var(--pink-i); background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 3px 10px; margin-top: 11px; }
 /* content cards — pale sage gradient header bands, dark-sage 19px icons */
 .f12-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+/**
+ * ══ FIX PACK 4 §2 · THE CARDS ARE THE BRIGHTEST THING, ON A GROUND THAT IS NOT ═══════════════
+ *
+ * ⚠️ THE PAGE BEHIND THE CARDS WAS WHITE, NOT WARM PAPER — and that inverts the fault. Measured:
+ * `.qp-pane`, `.qp-cols` and `.wpg-scroll` are all transparent, so what shows through is
+ * `.ws-window` at `rgb(255,255,255)`, with the cards at `rgb(255,253,251)` ON it. The cards were
+ * two points DARKER than their own ground. Whitening them alone would have made card and page
+ * identical and removed the edge completely — the opposite of the intent.
+ *
+ * ⚠️ SO THE GROUND MOVES TOO, WHICH THE REF ALREADY DOES. There `.card` is `#fff` on an `--paper`
+ * of `#fffdfa` — the card is BRIGHTER than what it sits on, by about three points. That direction
+ * is the whole device, and it is unreproducible while the ground is the brightest value available.
+ * `--panel` (#fffdfb) is within a point of the ref's ground, so the pair translates onto existing
+ * tokens exactly: pane `--panel`, cards `--white`.
+ *
+ * ⚠️ AND THIS IS WIDER THAN §2's WORDING, DELIBERATELY. The instruction named only the cards; doing
+ * only that would have satisfied the sentence and broken the page. Flagged in the report rather
+ * than done quietly.
+ */
+.qp-pane { background: var(--panel); }
+
+/* ⚠️ SCOPED TO THE READING PANE. `.f12-card` is also the journey sheet's column chrome, where the
+   ground behind it is the sheet's, not this one — so the base rule is left alone and only the
+   pane's three cards are whitened. */
+.qp-cols .f12-card { background: var(--white); }
+
 .f12-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--sh-1); }
 .f12-card .f12-chh { flex: none; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 13px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); font-family: var(--f12-serif); font-size: 15.5px; font-weight: 600; color: #2f3a30; }
 .f12-card .f12-chh svg { width: 19px; height: 19px; stroke: #5a6e58; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }

@@ -159,12 +159,23 @@ describe("§1 (fp2) · the hero is a contained plate", () => {
     expect(plate, "rule() found the short-viewport override, not the base rule").toContain("background");
 
     const g = declValue;
-    for (const prop of ["background", "border", "box-shadow"]) {
+    /* ⚠️ BACKGROUND LEFT THIS LIST AT FIX PACK 4 §2, AND THE REASON IS NOT A CLIMBDOWN. §3 gave the
+       plate `--white` to out-rank cards that were `--panel`. §2 then found the page BEHIND those
+       cards was white, so the cards were darker than their own ground; whitening the cards and
+       warming the pane fixed that, and the plate and the pane's cards now share `--white` by
+       design. The plate still out-ranks them by RIM and ELEVATION, which is where the hierarchy
+       actually lives — a card lifted off a warm ground reads as higher whatever its fill. Asserted
+       below rather than deleted, so "make the plate a different colour again" cannot happen by
+       accident. */
+    for (const prop of ["border", "box-shadow"]) {
       const a = g(plate, prop), b = g(card, prop);
       expect(a, `the plate declares no ${prop}`).not.toBe("");
       expect(a, `the plate's ${prop} fell back to the cards' — it is the subject, not a peer`)
         .not.toBe(b);
     }
+    /* and the ground is now shared ON PURPOSE — with the pane's cards, which is what §2 asks for */
+    expect(g(rule(".qp-cols .f12-card"), "background"), "the pane's cards left the plate's ground")
+      .toBe(g(plate, "background"));
     /* the radius is the ONE thing that must still agree: it belongs to the page's shape language,
        not to the hierarchy this section is about */
     expect(g(plate, "border-radius"), "the plate's radius drifted from the cards'")
@@ -416,6 +427,42 @@ describe("§1 (fp4) · the list head's field is a control on a tinted surface", 
   it("the change is scoped to the head, not made global", () => {
     expect(declValue(rule(".f12-lsearch"), "background"), "the base field ground was changed app-wide")
       .toBe("var(--paper)");
+  });
+});
+
+/**
+ * ⚠️ FIX PACK 4 §2 — THE CARDS ARE THE BRIGHTEST THING, AND THE GROUND BEHIND THEM IS NOT.
+ * The instruction named only the cards. Measured, the page behind them was `rgb(255,255,255)`
+ * (`.ws-window`, showing through three transparent ancestors) with the cards at `rgb(255,253,251)`
+ * ON it — so the cards were DARKER than their own ground, and whitening them alone would have made
+ * the two identical and removed the edge entirely. The ref has `.card` at `#fff` on a ground of
+ * `#fffdfa`: the card brighter than what it sits on. That direction is the device, so the ground
+ * moved with the cards.
+ */
+describe("§2 (fp4) · the reading pane's cards", () => {
+  it("the cards are white and the pane they sit on is not", () => {
+    const card = declValue(rule(".qp-cols .f12-card"), "background");
+    const pane = declValue(rule(".qp-pane"), "background");
+    expect(card, "the pane's cards declare no ground").toBe("var(--white)");
+    expect(pane, "the pane went back to showing the shell's white window through it")
+      .toBe("var(--panel)");
+    expect(card, "the cards and their ground collapsed to one value — there is no edge left")
+      .not.toBe(pane);
+  });
+
+  /* ⚠️ AND THE BASE RULE IS UNTOUCHED. `.f12-card` is also the journey sheet's column chrome, where
+     the ground behind it is the sheet's rather than this pane's. Whitening it globally would have
+     reached a surface this section never looked at. */
+  it("the change is scoped to the pane, not made global", () => {
+    expect(declValue(rule(".f12-card"), "background"), "the card ground was changed app-wide")
+      .toBe("var(--panel)");
+  });
+
+  /* the rim and the header band are explicitly unchanged by this section */
+  it("the rim and the sage cap are untouched", () => {
+    expect(declValue(rule(".f12-card"), "border"), "the cards' rim changed")
+      .toBe("1px solid var(--line)");
+    expect(rule(".f12-card .f12-chh"), "the sage cap changed").toContain("var(--sage-band)");
   });
 });
 
