@@ -780,7 +780,6 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
                   {g.label}
                 </h3>
                 <span className="tdg-n">{g.cards.length}</span>
-                <span className="tdg-desc">{g.description}</span>
               </button>
               {snzOpen && (
                 <div className="tdg-sect">
@@ -798,7 +797,7 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
         const { visible, more } = groupSlice(g, hkExpanded);
 
         return (
-          <div key={g.id} className="tdg-sect">
+          <div key={g.id} className={`tdg-sect g-${g.id}`}>
             <div className="tdg-shd">
               {/* Done and Snoozed both return above, so every group reaching here is a live KIND
                   and every one of them takes the dot. The chevron branch went with the fold. */}
@@ -807,7 +806,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
                 {g.label}
               </h3>
               <span className="tdg-n">{g.cards.length}</span>
-              <span className="tdg-desc">{g.description}</span>
+              {/* ⚠️ THE SUBTITLE IS GONE (visual rebuild, Phase 3). "An agent is waiting, or a date
+                  is" explained what a section was back when a section was a line of text; the band
+                  and the count say it now. `TaskGroup.description` survives in the derivation —
+                  the Noteboard and the chips' own copy read the same module — but the rail does
+                  not render it. A tinted band you can see does not need a sentence telling you it
+                  is a section. */}
             </div>
             {/* `grown` is what the stagger keys off — the fold's revealed rows, and only after a
                 real expansion, so nothing animates on first paint (sheet 6: one entrance, then

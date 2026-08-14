@@ -98,32 +98,33 @@
    gradient fades out over the bottom quarter so a row slides UNDER the heading rather than
    colliding with a hard edge — the treatment the retired board's column heads used, kept because
    it was right there and not because it was there. */
+/* ⚠️ THE HEADING IS A TINTED BAND NOW (visual rebuild, Phase 3) — full-width inside the list card,
+   filled and bordered in the group's own colour. It stopped being a line of text over a panel and
+   became the panel's lid, which is what lets the subtitle go: a band you can see is a section, and
+   a section you can see does not need a sentence explaining that it is one.
+   ⚠️ IT IS STILL STICKY, AND STILL BOUNDED BY ITS OWN SECTION — that mechanism is untouched, and
+   the band paints its own ground for the same reason the gradient did: rows must not read through
+   the words as they pass. A solid fill does that job better than a fade, so the fade goes. */
 .tdg-shd {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 0 4px 13px;
+  gap: 8px;
+  padding: 7px 12px;
+  margin: 16px 2px 7px;
+  border-radius: 9px;
+  background: var(--gband);
+  border: 1px solid var(--gbd);
   position: sticky;
   top: 0;
   z-index: 2;
-  /* the far end is the ground's own channels at zero alpha — a hand-written white here would make
-     the heading fade THROUGH a colour the page does not have, which is the pale-slab fault again */
-  background: linear-gradient(var(--tdg-ground) 74%, rgba(var(--ws-window-rgb), 0));
 }
 
 /* ⚠️ THE HAIRLINE IS THE HEAD'S OWN BOTTOM EDGE (fix pack, 10 Aug), and it rides the head rather
    than the panel: a rule on the panel would scroll away with it, leaving a pinned heading with
    nothing closing it. It sits at the opaque band's foot — not at the box's — so the fade below it
    still does its job and the line never floats over a row sliding under. */
-.tdg-shd::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  bottom: 10px;
-  height: 1px;
-  background: #ece4d6;
-}
+/* (the head's hairline is retired — the band has a border of its own, and a rule inside a filled
+   box is a second edge saying the same thing.) */
 
 /* ⚠️ THE GROUP HEADING IS MONO CAPS, NOT PLAYFAIR (rail + workspace, Phase 1). The stationery
    register belongs to the workspace card; the rail is a directory, and an 18px serif name over
@@ -136,12 +137,23 @@
   gap: 10px;
   margin: 0;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 9.5px;
+  font-weight: 500;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: #8a7d6e;
+  /* the label takes the group's own foreground — the band, its border and its words are one
+     colour decision rather than three */
+  color: var(--gfg);
 }
+
+/* ⚠️ THE COUNT IS THE LABEL AT 60%, not a second colour. It is the same fact at lower volume. */
+.tdg-shd .tdg-n { color: var(--gfg); opacity: 0.6; }
+
+/* the group colours — band, border, foreground. One triple per group, read by the head only. */
+.tdg-sect.g-urgent { --gband: #fbeee7; --gbd: #f2dccf; --gfg: #a05a42; }
+.tdg-sect.g-housekeeping { --gband: #eef1ec; --gbd: #dfe5dc; --gfg: #5a6e58; }
+.tdg-sect.g-yours { --gband: #faf4e8; --gbd: #efe4cc; --gfg: #a08a58; }
+.tdg-sect.g-snoozed { --gband: #f5f1ec; --gbd: #e8e0d6; --gfg: #8a7666; }
 
 .tdg-dot {
   width: 8px;

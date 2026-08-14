@@ -713,22 +713,53 @@ describe("the panels: white sheets separated by SPACE, with the heading outside 
    * left-hand column shouting its own filing system. Both headings demote — `.tdg-fold` is
    * Snoozed's, and one grammar for four panels plus a fold is the point.
    */
-  it("both group headings are mono caps at 10px / .15em, muted — never Playfair", () => {
-    for (const sel of [".tdg-shd h3 {", ".tdg-fold h3 {"]) {
-      const r = rule(sel);
-      expect(r, sel).toContain('font-family: "JetBrains Mono"');
-      expect(r, sel).toContain("font-size: 10px");
-      expect(r, sel).toContain("letter-spacing: 0.15em");
-      expect(r, sel).toContain("text-transform: uppercase");
-      expect(r, sel).not.toContain("Playfair");
+  /**
+   * ⚠️ THE HEADING IS A TINTED BAND NOW (visual rebuild, Phase 3) — filled and bordered in the
+   * group's own colour, with the label in that colour and the count at 60% of it. It stopped
+   * being a line of text over a panel and became the panel's lid, which is what lets the subtitle
+   * go: a band you can see is a section, and a section you can see does not need a sentence.
+   */
+  it("the heading is a band — fill, border and label all from one group triple", () => {
+    const r = rule(".tdg-shd {");
+    expect(r).toContain("background: var(--gband)");
+    expect(r).toContain("border: 1px solid var(--gbd)");
+    expect(r).toContain("padding: 7px 12px");
+    expect(r).toContain("border-radius: 9px");
+    expect(r).toContain("margin: 16px 2px 7px");
+    const h = rule(".tdg-shd h3 {");
+    expect(h).toContain('font-family: "JetBrains Mono"');
+    expect(h).toContain("text-transform: uppercase");
+    expect(h).toContain("color: var(--gfg)");
+    expect(h).not.toContain("Playfair");
+    /* the count is the label at lower volume, never a second colour */
+    expect(rule(".tdg-shd .tdg-n {")).toContain("opacity: 0.6");
+  });
+
+  it("every live group carries its triple, and the class is on the SECTION", () => {
+    for (const g of ["urgent", "housekeeping", "yours", "snoozed"]) {
+      expect(cssDecls, g).toContain(`.tdg-sect.g-${g} {`);
     }
+    expect(render(cols({ todo: [card()] }))).toContain('class="tdg-sect g-urgent"');
+  });
+
+  /**
+   * ⚠️ THE SUBTITLES COME OUT, AND THE DERIVATION KEEPS THEM. `TaskGroup.description` is untouched
+   * in `todoGroups` — other copy reads that module — but the rail does not render it. The band
+   * and the count say what the sentence said.
+   */
+  it("⚠️ NO SUBTITLE REACHES A ROW GROUP", () => {
+    const html = render(cols({ todo: [card()] }));
+    expect(html).not.toContain("An agent is waiting");
+    expect(html).not.toContain("tdg-desc");
+    expect(code(list)).not.toContain("g.description");
   });
 
   it("rendered: the heading precedes its panel and is not inside it", () => {
     const html = render(cols({ todo: [card()] }));
     expect(html.indexOf("tdg-shd")).toBeLessThan(html.indexOf("tdg-panel"));
     expect(html).toContain("Urgent");
-    expect(html).toContain("An agent is waiting, or a date is."); // the group's own description
+    /* the description is NOT rendered any more — the band and the count say it (Phase 3) */
+    expect(html).not.toContain("An agent is waiting, or a date is.");
   });
 
   it("an EMPTY group renders nothing at all — not a panel with a heading over it", () => {
@@ -1237,7 +1268,9 @@ describe("⚠️ THE GROUP HEADING STICKS, BOUNDED BY ITS OWN SECTION", () => {
        its own rows run out — which is exactly "release when the next group's heading arrives".
        The heading must therefore be a CHILD of the section, not a sibling of it. */
     const html = render(cols({ todo: [card()] }));
-    const sect = html.slice(html.indexOf('class="tdg-sect"'));
+    const at = html.indexOf('class="tdg-sect g-');
+    expect(at, "the section marker is gone — this slice would read the whole document").toBeGreaterThan(-1);
+    const sect = html.slice(at);
     expect(sect.indexOf("tdg-shd")).toBeLessThan(sect.indexOf("tdg-panel"));
     expect(decls(list)).not.toContain("IntersectionObserver");
     expect(decls(list)).not.toContain("scrollTop");
@@ -1254,14 +1287,25 @@ describe("⚠️ THE GROUP HEADING STICKS, BOUNDED BY ITS OWN SECTION", () => {
     }
   });
 
-  it("⚠️ IT PAINTS ITS OWN GROUND, fading out so rows slide UNDER rather than collide", () => {
-    expect(shd()).toContain("background: linear-gradient(var(--tdg-ground) 74%");
-    /* ⚠️ THE FAR END IS THE GROUND'S OWN CHANNELS, not a hand-written white. Both ends of a fade
-       being one colour is the whole definition of a fade; two independently written values agree
-       today and stop agreeing the first time either is tuned, and the heading then dissolves
-       THROUGH a colour the page does not have. */
-    expect(shd()).toContain("rgba(var(--ws-window-rgb), 0)");
-    expect(shd(), "the heading fades through white again").not.toMatch(/\b255,\s*255,\s*255\b/);
+  /**
+   * ⚠️ THE FADE IS RETIRED AND ITS JOB IS NOT (visual rebuild, Phase 3). The heading painted a
+   * gradient of the page ground so rows slid UNDER it rather than reading through the words. It is
+   * a filled, bordered BAND now — a solid fill does that job better than a fade, and it does it
+   * without having to keep two ends of a gradient agreeing about a colour.
+   *
+   * The requirement that survives is the one that mattered: the heading must be OPAQUE where the
+   * words are. A transparent band would put a row's text through a group label at every scroll.
+   */
+  it("⚠️ IT PAINTS ITS OWN GROUND — a solid band, so rows cannot read through the words", () => {
+    const r = shd();
+    expect(r).toContain("background: var(--gband)");
+    expect(r).not.toContain("linear-gradient");
+    /* every group's fill is opaque — no alpha channel anywhere in the triples */
+    for (const g of ["urgent", "housekeeping", "yours", "snoozed"]) {
+      const t = rule(`.tdg-sect.g-${g} {`);
+      expect(t, g).toMatch(/--gband:\s*#[0-9a-f]{6}/i);
+      expect(t, g).not.toContain("rgba");
+    }
   });
 
   it("⚠️ AND THAT GROUND MUST EQUAL THE SHELL'S CONTENT CAPSULE — a cross-file pair", () => {
@@ -1283,7 +1327,11 @@ describe("⚠️ THE GROUP HEADING STICKS, BOUNDED BY ITS OWN SECTION", () => {
     /* A sticky box stays in flow, so the resting page is what it was. The temptation is to add top
        padding for the stuck state; that would move every heading down in the state you spend most
        of your time in. The ref's own rhythm stands. */
-    expect(shd()).toContain("padding: 0 4px 13px");
+    /* ⚠️ THE BAND'S OWN RHYTHM (Phase 3): 7px 12px inside it, 16/2/7 around it. Still no top
+       padding added FOR the stuck state — that would move every heading down in the state you
+       spend most of your time in, which is the rule this case has always carried. */
+    expect(shd()).toContain("padding: 7px 12px");
+    expect(shd()).toContain("margin: 16px 2px 7px");
     expect(rule(".tdg-sect {")).toContain("margin-bottom: 26px");
   });
 
