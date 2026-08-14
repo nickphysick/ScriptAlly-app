@@ -42,9 +42,13 @@ export const TOUR_STOPS: TourStop[] = [
     cta: "Next →",
   },
   {
-    sel: ".tdb-bsearch",  // todo rebuild P1: the search sits on the control line
-    h: "Search from the bar.",
-    p: "One field for both views — start typing and the desk narrows as you go. ⌘K from anywhere.",
+    /* ⚠️ RETARGETED AND RE-WORDED (rail + workspace P4): the search MOVED into the rail's own
+       tools block, so `.tdb-bsearch` matched nothing — and a stop whose selector misses is
+       FILTERED OUT silently, which means this step would simply have stopped existing with
+       nobody told. Its copy said "from the bar", which was the other half of the same staleness. */
+    sel: ".tdw-search",
+    h: "Search your list.",
+    p: "It narrows the list beside it as you type — the card you are working on stays put. ⌘K from anywhere.",
     cta: "Next →",
   },
   {
@@ -52,9 +56,13 @@ export const TOUR_STOPS: TourStop[] = [
     /* ⚠️ RETARGETED (board+dock P1): `.tdb-ctrl` was the standalone control bar, which is gone —
        its search, the sort, the session launcher and the Add are the header's tool row now. A
        tour stop whose selector matches nothing SKIPS SILENTLY, so it moves with the feature. */
-    sel: ".tdb-tools",
-    h: "Narrow the desk.",
-    p: "Quiet filters with live counts: click one to see only that kind of work. All brings everything back.",
+    /* ⚠️ RETARGETED AGAIN (P4): the chips are the RAIL's now, beneath its search, and they are
+       the groups rather than the old seven facets. `.tdb-tools` still exists — it is the page's
+       sort and Add — so this one would NOT have skipped: it would have pointed confidently at the
+       wrong controls and described them correctly. The worse failure of the two. */
+    sel: ".tdw-chips",
+    h: "Narrow the list.",
+    p: "Chips with live counts: click one to see only that kind of work. All brings everything back.",
     cta: "Next →",
   },
   {

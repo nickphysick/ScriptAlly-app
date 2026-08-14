@@ -6,6 +6,8 @@
  * Today. Copy snapshot-locked; the auto-run gate unchanged.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { TOUR_STOPS, shouldAutoRunTour } from "./todoTour";
 
 describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), Done on the last", () => {
@@ -14,8 +16,12 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       ".spine-rail",
       ".tdb-herobegin",
       ".svh-btn-primary", // notes-and-tasks P4: the hero's "Add task or note"
-      ".tdb-bsearch",
-      ".tdb-tools", // board+dock P1: the control bar became the header tool row
+      // ⚠️ BOTH MOVED TO THE RAIL (P4). The search's old selector matched nothing and the step
+      // would have vanished silently; the chips' old one still MATCHES — it would have pointed
+      // confidently at the page's sort and Add while describing filters. The second is why this
+      // census exists: a stop can go wrong without going missing.
+      ".tdw-search",
+      ".tdw-chips",
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       // workspace P3: Today's stop left the retired corner for the sidebar group that reaches it.
@@ -29,8 +35,8 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       "Your whole workspace, spined.",
       "Say go, any time.",
       "A note, or a task.",
-      "Search from the bar.",
-      "Narrow the desk.",
+      "Search your list.",
+      "Narrow the list.",
       "Your week, reviewed.",
       "Every card works the same.",
       "Today has its own page.",
@@ -55,5 +61,78 @@ describe("shouldAutoRunTour — the once gate (unchanged by the rewire)", () => 
   it("never on a new desk; never once stamped", () => {
     expect(shouldAutoRunTour(undefined, "new-desk" as never)).toBe(false);
     expect(shouldAutoRunTour("2026-07-16T09:00:00Z", "normal" as never)).toBe(false);
+  });
+});
+
+/**
+ * ⚠️ A TOUR STOP CAN GO WRONG WITHOUT GOING MISSING, AND BOTH WAYS ARE SILENT.
+ *
+ * `TodoTour` locates targets at open and FILTERS OUT stops whose selector matches nothing. That
+ * is the right behaviour — a replay on a page missing a feature should not break — but it makes a
+ * stale selector invisible: the step simply stops existing and nobody is told.
+ *
+ * The rail rebuild produced one of each failure in a single commit. `.tdb-bsearch` matched nothing
+ * once the search moved, so that stop would have vanished. `.tdb-tools` still MATCHED — it is the
+ * page's sort and Add now — so that stop would have pointed confidently at the wrong controls
+ * while describing filters correctly. The second is the worse one, and neither is loud.
+ *
+ * This census cannot prove a stop points at the RIGHT thing. It can prove every stop points at
+ * something that still exists in the source, which is the half that was failing.
+ */
+describe("⚠️ EVERY TOUR TARGET STILL EXISTS — a stop that misses is dropped in silence", () => {
+  const root = join(__dirname, "..");
+  const sources = (dir: string): string[] =>
+    readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) return sources(full);
+      return /\.(tsx|css)$/.test(e.name) && !/\.test\./.test(e.name) ? [full] : [];
+    });
+  const corpus = sources(root).map((f) => readFileSync(f, "utf8")).join("\n");
+
+  /**
+   * ⚠️ ONE KNOWN-STALE STOP, NAMED RATHER THAN TOLERATED — AND THIS CENSUS IS HOW IT WAS FOUND.
+   *
+   * `.spine-rail` was the hardback spine's category rail. That shell was replaced (the claude-il
+   * merge brought app-shell-v2 chrome), and the selector appears NOWHERE in `src/` any more —
+   * only here and in the stop itself. So the first stop of the tour has been silently dropping
+   * for some time and the tour has been showing seven steps, not the eight this file asserts.
+   *
+   * It is not retargeted here because that is a product decision, not a mechanical one: either it
+   * points at the new shell's nav or the step goes. Left standing, named, and reported.
+   *
+   * ⚠️ THIS LIST MAY ONLY EVER SHRINK. An exemption that grows is a census that has stopped
+   * counting.
+   */
+  const KNOWN_STALE = [
+    /* the hardback spine's category rail — that shell was replaced by app-shell-v2 chrome and the
+       class appears nowhere in `src/` any more. Stop 1 has been dropping in silence. */
+    ".spine-rail",
+    /* ⚠️ THIS ONE IS WORSE THAN A DEAD SELECTOR, AND THE CENSUS ONLY FOUND HALF OF IT. The class
+       half (`.ws-navrow`) is dead; the attribute half may still match the sidebar's accordion, so
+       the stop can still SHOW — carrying copy that says "Today has its own page" about a page
+       RETIRED on 9 August (tasks-consolidation P1). A stop that fails to appear teaches nothing;
+       this one teaches something untrue. Reported for a decision, not patched here. */
+    '[aria-expanded][class*="asec"], .ws-navrow',
+  ];
+
+  it("each stop names at least one class the app still renders or styles", () => {
+    for (const stop of TOUR_STOPS) {
+      if (KNOWN_STALE.includes(stop.sel)) continue;
+      /* a stop may list ALTERNATIVES (".tdb-tile, .tdb-gcard, .tdb-lrow") — one surviving target
+         is a live stop, so the assertion is over the set rather than every member */
+      const classes = [...stop.sel.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]);
+      if (classes.length === 0) continue; // attribute-only selectors are not this case's business
+      const alive = classes.some((c) => corpus.includes(c));
+      expect(alive, `no source mentions any of ${classes.join(", ")} — stop "${stop.h}" is dead`).toBe(true);
+    }
+  });
+
+  it("⚠️ AND THE TWO THE REBUILD MOVED POINT AT THE RAIL, not at the page's tool row", () => {
+    const sels = TOUR_STOPS.map((s) => s.sel);
+    expect(sels).toContain(".tdw-search");
+    expect(sels).toContain(".tdw-chips");
+    /* `.tdb-bsearch` is extinct; `.tdb-tools` still exists but is no longer what this stop meant */
+    expect(sels).not.toContain(".tdb-bsearch");
+    expect(sels).not.toContain(".tdb-tools");
   });
 });
