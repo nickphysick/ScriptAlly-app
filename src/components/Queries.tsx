@@ -3595,7 +3595,19 @@ export const Queries: React.FC<{
                      earns its place — see `foldClosed`. A first-time writer with two rejections
                      behind them sees both. */
                   const foldable = g === "closed" && foldClosed(items.length);
-                  const shut = foldable && !closedOpen;
+                  /* ⚠️ AND A FOLD NEVER HIDES THE ROW THE PANE IS READING. Measured on dev: the
+                     auto-select picks `sortedList[0]`, which is first in SORT order and has nothing
+                     to do with group order — so the opening selection was a closed query, and the
+                     list folded away the only row that was marked. A reading pane whose subject
+                     cannot be found in the list beside it is the shell's own
+                     "the selector never marks a row that is not rendered" fault, one page over.
+
+                     ⚠️ DERIVED, NOT AN EFFECT THAT OPENS THE FOLD. Setting state on selection would
+                     leave the group open after the writer moved away, so the fold would drift open
+                     over a session and the writer would never have asked for it. This reads the
+                     selection every render: open while you are in there, shut the moment you leave. */
+                  const holdsSelection = foldable && items.some((r) => r.q.id === selectedQueryId);
+                  const shut = foldable && !closedOpen && !holdsSelection;
                   return (
                 <React.Fragment key={g}>
                   <div className={`qc-gh${g === "overdue" ? " qc-gh-od" : ""}${foldable ? " qc-gh-fold" : ""}`}

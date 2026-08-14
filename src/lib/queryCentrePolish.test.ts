@@ -162,6 +162,13 @@ describe("§5 · the list's groups, as rendered", () => {
       .toContain('const foldable = g === "closed" && foldClosed(items.length)');
     expect(code, "the fold is not reachable by keyboard").toContain('e.key === "Enter" || e.key === " "');
     expect(code, "the fold does not state which way it goes").toContain('{shut ? "show" : "hide"}');
+    /* ⚠️ AND IT NEVER HIDES THE ROW THE PANE IS READING — measured on dev, where the auto-select
+       (first in SORT order, not group order) opened on a closed query and the list folded away the
+       only marked row. Derived per render rather than an effect, so the group shuts again the
+       moment the writer leaves it. */
+    expect(code, "a fold can hide the selected row — the pane would have a subject the list does not show")
+      .toContain("const holdsSelection = foldable && items.some((r) => r.q.id === selectedQueryId);");
+    expect(code, "the fold does not read the selection").toContain("const shut = foldable && !closedOpen && !holdsSelection;");
   });
 
   /* ⚠️ THE OVERDUE TINT IS NOT `--burg`. Burgundy means OUTGOING on every dot in the list beneath. */
