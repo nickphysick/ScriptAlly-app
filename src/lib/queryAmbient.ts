@@ -114,11 +114,27 @@ export interface AmbientStatus {
 }
 
 /** Derive the open-state numbers for a query, given the CTA engine's ball-holder + markKind. */
+/**
+ * ⚠️ `windowWeeks` IS ADDITIVE AND OPT-IN, AND IT EXISTS BECAUSE THIS PAGE HAD TWO CLOCKS.
+ *
+ * `STAGE_RESPONSE_WINDOWS` (8/12/12 weeks) is a house assumption for when nobody has stated
+ * anything. The AGENT's own `responseTimeWeeks` is a fact, and it is what `taskPrecedence` — and so
+ * the to-do task, the Nudge button and Query Centre's OVERDUE group — has always read. With the
+ * list stating a position derived from the agent's window and this pane stating "reply expected by"
+ * derived from the house one, the two halves of one screen disagreed about the same query: an agent
+ * stating four weeks produced a list row counting to week 4 and a pane counting to week 8.
+ *
+ * Passing it makes the caller read the stated fact and fall back to the house assumption only when
+ * there is none. Omitting it is byte-identical to the previous behaviour, which is why the to-do
+ * surfaces are untouched by this — their divergence from the agent's window is REPORTED, not
+ * silently changed underneath them.
+ */
 export function queryAmbientStatus(
   query: Query,
   ballHolder: BallHolder,
   markKind: MarkKind,
   now: number = Date.now(),
+  windowWeeks?: number,
 ): AmbientStatus {
   const base: AmbientStatus = {
     mode: "closed", nDays: 0, sentMs: null, expMs: null, widthPct: 0, overdue: false, daysOverdue: 0,
@@ -129,7 +145,7 @@ export function queryAmbientStatus(
     const st = query.status as QueryStatus;
     const stage: SendStage = st === QueryStatus.QUERIED ? "query" : st === QueryStatus.PARTIAL_SENT ? "partial" : "full";
     const sendIso = st === QueryStatus.QUERIED ? query.dateSent : st === QueryStatus.PARTIAL_SENT ? query.partialSentDate : query.fullSentDate;
-    const mDays = STAGE_RESPONSE_WINDOWS[stage] * 7;
+    const mDays = (windowWeeks && windowWeeks > 0 ? windowWeeks : STAGE_RESPONSE_WINDOWS[stage]) * 7;
     const sentMs = sendIso ? getTime(sendIso) : NaN;
     if (!Number.isNaN(sentMs)) {
       const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));

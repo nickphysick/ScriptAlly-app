@@ -4205,7 +4205,9 @@ export const Queries: React.FC<{
                           */}
                         {(() => {
                           const ta0 = getPrimaryAction(activeQuery.status as QueryStatus);
-                          const amb = queryAmbientStatus(activeQuery, ta0.ballHolder, ta0.kind === "mark-sent" ? ta0.markKind : undefined);
+                          /* §7 — the agent's stated window wins over the house one, so this pane's two figures and the
+                             list's position figure count to the same instant. See queryAmbient's note. */
+                          const amb = queryAmbientStatus(activeQuery, ta0.ballHolder, ta0.kind === "mark-sent" ? ta0.markKind : undefined, Date.now(), activeAgent.responseTimeWeeks);
                           const cells: { key: string; glyph: React.ReactNode; value: string; unit?: string; caption: string }[] = [];
                           if (amb.mode === "waiting" && amb.sentMs != null) {
                             cells.push({

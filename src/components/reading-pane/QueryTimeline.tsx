@@ -390,7 +390,11 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
   // ── trailing open-state block — one shared derivation (lib/queryAmbient), the same numbers the
   // command bar shows, so the two can't disagree. Ball-holder still comes from getPrimaryAction. ──
   const ballHolder = primaryAction?.ballHolder ?? null;
-  const ambient = queryAmbientStatus(query, ballHolder, primaryAction?.markKind);
+  /* ⚠️ THE AGENT'S STATED WINDOW WINS OVER THE HOUSE ONE (§7). Without it this pane counted to the
+     8/12/12-week house assumption while the list beside it counted to what the agency actually
+     says — one screen, one query, two deadlines. Falls back to the house window when the record
+     states none, which is the only case the assumption was ever for. */
+  const ambient = queryAmbientStatus(query, ballHolder, primaryAction?.markKind, Date.now(), agent?.responseTimeWeeks);
   const waiting = ambient.mode === "waiting" ? ambient : null;
   const sendWhat = ambient.sendWhat;
 
@@ -412,6 +416,34 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}
         continues={ballHolder === "agent" && !!waiting}
       />
+
+      {/* ══ §7 · THE TODAY MARKER — where you are between what happened and what is expected ═════
+          ⚠️ A SOLID BURGUNDY DOT AMONG HOLLOW ONES, and that contrast IS the marker. The projections
+          below it are ghosts because they have not happened; this one has, continuously, and is the
+          only point on the line that is true right now.
+
+          ⚠️ IT STATES A POSITION, NOT A JUDGEMENT. "Day 5 of ~28" is a fact; "Day 5 — still early"
+          would be the app having an opinion about someone else's post. The `~` is honest too: the
+          window is the agency's stated intention, not a promise.
+
+          ⚠️ AND IT COUNTS AGAINST THE SAME WINDOW EVERYTHING ELSE ON THIS SCREEN COUNTS AGAINST —
+          `waiting.sentMs`/`expMs`, which now prefer the agent's stated weeks. A marker reading
+          "of ~56" beside a list row reading "27 DAYS LEFT" would be the two-clock fault the whole
+          section is about.
+
+          ⚠️ WAITING AND DATED ONLY. An undated import has no day to be on; a writer's-turn or closed
+          query has no window running. In both cases the marker omits itself rather than printing a
+          zero or a guess. */}
+      {ballHolder === "agent" && waiting && waiting.sentMs != null && waiting.expMs != null && (() => {
+        const day = Math.max(1, waiting.nDays + 1);
+        const span = Math.max(1, Math.round((waiting.expMs - waiting.sentMs) / 86400000));
+        return (
+          <div className="tl-today">
+            <span className="tl-todaywhen">TODAY</span>
+            <b>Day {day} of ~{span}</b>
+          </div>
+        );
+      })()}
 
       {/* ── trailing open-state block — calm within window, ESCALATED to needs-you once overdue.
           The escalation is the pane's ONLY needs-you signal (the fork below stays neutral). ── */}

@@ -1300,6 +1300,17 @@
    into a form. */
 /* The manuscript's name, heading What you sent: what you sent, OF WHAT. One row, then the two facts
    about the book as a single mono line — not the three-line block a previous pack removed. */
+/* ── §7 · THE TODAY MARKER ────────────────────────────────────────────────────────────────────
+   ⚠️ THE SAME 30px GUTTER THE TIMELINE ROWS USE, so the dot lands on the line rather than beside
+   it. The rows draw their own grid inline; this marker sits in the same padded column, and its dot
+   is positioned to the same centre — one number, `left: 15px`, which is half of that gutter.
+   ⚠️ SOLID, WHERE THE PROJECTIONS ARE HOLLOW. The contrast is the marker: everything below it has
+   not happened, and this is the only point on the line that is true right now. */
+.tl-today { position: relative; padding-left: 41px; margin: 2px 0 13px; }
+.tl-today::before { content: ""; position: absolute; left: 11px; top: 3px; width: 9px; height: 9px; border-radius: 50%; background: var(--burg); box-shadow: 0 0 0 3px #f8e7dc; }
+.tl-today b { font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600; color: var(--burg); }
+.tl-todaywhen { float: right; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; color: #b07a63; }
+
 /* ── §5 · GROUP RULES — the list answers "who do I chase" ─────────────────────────────────────
    A mono label, then a hairline running to the panel's edge. Not a heading: it is a divider that
    happens to be labelled, which is why the type is 8px and the rule does the work.

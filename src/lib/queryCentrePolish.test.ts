@@ -168,3 +168,53 @@ describe("§5 · the list's groups, as rendered", () => {
     expect(rule(".f12-row-od:hover"), "an overdue row stopped answering the pointer").not.toBe("");
   });
 });
+
+describe("§7 · the reading pane", () => {
+  const tl = read("../components/reading-pane/QueryTimeline.tsx");
+
+  /**
+   * ⚠️ THE FINDING OF THIS SECTION: THE PAGE HAD TWO CLOCKS, AND §5 MADE IT VISIBLE. The pane's
+   * figures came from `STAGE_RESPONSE_WINDOWS` — a house assumption of 8/12/12 weeks — while the
+   * list's new position figure comes from the agent's OWN stated window, which is what
+   * `taskPrecedence` has always read. An agency stating four weeks produced a list row counting to
+   * week 4 and a pane counting to week 8, about one query, on one screen.
+   *
+   * ⚠️ THE SEAM IS ADDITIVE AND OPT-IN, so nothing else moved underneath. The to-do surfaces still
+   * read the house window and that divergence is REPORTED rather than silently changed.
+   */
+  it("the pane counts against the agent's stated window, falling back to the house one", () => {
+    const amb = read("./queryAmbient.ts");
+    expect(amb, "the opt-in window seam is missing").toContain("windowWeeks?: number,");
+    expect(amb, "the stated window does not win over the house assumption")
+      .toContain("(windowWeeks && windowWeeks > 0 ? windowWeeks : STAGE_RESPONSE_WINDOWS[stage]) * 7");
+    expect(tl, "the timeline did not pass the agent's window").toContain("agent?.responseTimeWeeks");
+    expect(code, "the Tracking stats did not pass the agent's window").toContain("activeAgent.responseTimeWeeks)");
+  });
+
+  /* ⚠️ SOLID AMONG HOLLOW — the contrast IS the marker. Everything below it is a projection. */
+  it("the today marker is a solid burgundy dot stating a position, not a judgement", () => {
+    expect(tl, "the today marker is missing").toContain('className="tl-today"');
+    expect(tl, "the marker stopped stating the position").toContain("Day {day} of ~{span}");
+    expect(declValue(rule(".tl-today::before"), "background"), "the marker's dot is not solid burgundy").toBe("var(--burg)");
+    /* the projections are hollow through `StatusDot`'s own `ghost` — the locked component's
+       drained treatment, never a second hollow dot drawn beside it */
+    expect(tl, "the projections stopped being ghosts").toContain("<StatusDot status={status} overrideSize={28} ghost decorative />");
+    /* ⚠️ AND IT OMITS ITSELF RATHER THAN GUESSING. An undated import has no day to be on. */
+    expect(tl, "the marker renders without a window to count against")
+      .toContain("waiting.sentMs != null && waiting.expMs != null");
+    /* no adjective — the app reports, it does not appraise */
+    expect(tl.slice(tl.indexOf('className="tl-today"'), tl.indexOf('className="tl-today"') + 240))
+      .not.toMatch(/still|only|already|good|slow|plenty/i);
+  });
+
+  it("materials are chips on the Query sent entry, not a second list", () => {
+    expect(tl, "the materials chips went").toContain("tl-pills");
+    expect(tl, "the chips left the Query sent rung")
+      .toContain("pills: status === QueryStatus.QUERIED && queryMaterials.length ? queryMaterials : undefined");
+  });
+
+  it("the card heads carry a mono count on the right", () => {
+    expect(code, "What you sent lost its count").toMatch(/\$\{n\} item\$\{n === 1 \? "" : "s"\}/);
+    expect(rule(".qp-cardmeta"), "the band's meta slot went").not.toBe("");
+  });
+});
