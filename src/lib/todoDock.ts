@@ -100,3 +100,37 @@ export function nextLabel(next: BoardCard | null): string | null {
 export function dockQueue(cards: BoardCard[]): BoardCard[] {
   return cards.filter((c) => c.nature !== "note" && !c.done);
 }
+
+/**
+ * ⚠️ WHICH CARD THE PANE IS SHOWING — DERIVED, because the queue is (rail + workspace, Phase 5).
+ *
+ * The dock used to hold its own SNAPSHOT of the queue, taken when it opened. That was harmless
+ * while the dock REPLACED the list: one list on screen, nothing to disagree with. The moment the
+ * rail stood beside it, the two could visibly diverge — snooze a card from the rail and it left
+ * the rail while the pane's stack kept showing it and kept counting it. Two lists that can
+ * disagree about what is outstanding is the same failure as two writers of query status, and it
+ * gets the same answer: there is ONE list, and the pane holds a selection INTO it.
+ *
+ * ⚠️ THE KEY IS THE SOURCE OF TRUTH; THE POSITION IS ONLY A RECOVERY HINT. While the key is in
+ * the list, that is the answer and its index is remembered in passing. When the key is GONE —
+ * you snoozed the docked card from the rail — the hint says where it was, and the pane advances
+ * to whatever now occupies that position.
+ *
+ * ⚠️ IT CLAMPS TO THE END, NEVER BACK TO THE START. Past the end means the docked card was last,
+ * so the card before it is what remains; jumping to the top of the list because a row vanished
+ * under you is the worse failure, and it is the one a naive `?? queue[0]` produces.
+ *
+ * An empty queue is the one case that yields nothing: there is no card to show because there is
+ * no work left, which is the pane closing rather than the pane being cleared.
+ */
+export function resolveDocked(
+  queue: BoardCard[],
+  key: string | null,
+  lastPos: number,
+): { card: BoardCard | null; pos: number } {
+  if (!key || queue.length === 0) return { card: null, pos: lastPos };
+  const i = queue.findIndex((c) => c.key === key);
+  if (i !== -1) return { card: queue[i], pos: i };
+  const at = Math.min(Math.max(lastPos, 0), queue.length - 1);
+  return { card: queue[at], pos: at };
+}

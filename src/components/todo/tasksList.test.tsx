@@ -927,7 +927,7 @@ describe("the page wires the list to its EXISTING primitives, and to nothing new
 
   it("the tick is the page's ONE completion path, and the row's door is the dock", () => {
     expect(page).toContain("onTick={(c) => void quickDone(c)}");
-    expect(page).toContain("onOpen={(c) => openDock(dockAllCards(), c.key)}");
+    expect(page).toContain("onOpen={(c) => openDock(c.key)}");
   });
 
   it("the group → column map exists because the MENU speaks states, not columns", () => {

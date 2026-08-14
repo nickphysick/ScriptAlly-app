@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, dockQueue } from "./todoDock";
+import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, dockQueue, resolveDocked } from "./todoDock";
 
 const card = (over: Partial<BoardCard>): BoardCard => ({
   key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,
@@ -92,5 +92,59 @@ describe("the queue", () => {
   it("⚠️ notes and finished work never enter the queue", () => {
     const mixed = [card({ key: "n", nature: "note" }), card({ key: "d", done: true }), card({ key: "w" })];
     expect(dockQueue(mixed).map((c) => c.key)).toEqual(["w"]);
+  });
+});
+
+/**
+ * ⚠️ THE SNAPSHOT IS RETIRED, AND THIS IS THE BUG IT WOULD HAVE CAUGHT (rail + workspace, P5).
+ *
+ * The pane used to hold its own copy of the queue, taken when it opened. Harmless while the dock
+ * REPLACED the list; a live divergence the moment the rail stood beside it — snooze the docked
+ * card from the rail and it left the rail while the pane kept showing it and kept counting it in
+ * "30 to work through". One list, one selection into it, and the selection resolves at read time.
+ */
+describe("⚠️ THE DOCKED CARD IS RESOLVED FROM THE LIVE LIST, never from a stored copy", () => {
+  const q = [card({ key: "a" }), card({ key: "b" }), card({ key: "c" })];
+
+  it("while the key is present it IS the answer, and its position is remembered in passing", () => {
+    expect(resolveDocked(q, "b", 0)).toEqual({ card: q[1], pos: 1 });
+    expect(resolveDocked(q, "a", 2)).toEqual({ card: q[0], pos: 0 });
+  });
+
+  /**
+   * ⚠️ THE CASE THE SNAPSHOT HID. You are working on `b` and you snooze it from the rail. It
+   * leaves the list; the pane must advance to whatever now occupies its position — `c`, which has
+   * shuffled up — rather than showing a card that is no longer outstanding.
+   */
+  it("⚠️ THE DOCKED CARD SNOOZED FROM THE RAIL: the pane takes what now occupies its position", () => {
+    const after = [card({ key: "a" }), card({ key: "c" })];   // `b` is gone
+    const { card: shown } = resolveDocked(after, "b", 1);
+    expect(shown?.key).toBe("c");
+  });
+
+  it("⚠️ PAST THE END CLAMPS TO THE LAST CARD — never back to the first", () => {
+    /* You were on the LAST card and it left. The one before it is what remains; jumping to the
+       top of the list because a row vanished under you is the worse failure, and it is exactly
+       what a naive `?? queue[0]` produces. */
+    const after = [card({ key: "a" }), card({ key: "b" })];   // `c` was last and is gone
+    expect(resolveDocked(after, "c", 2).card?.key).toBe("b");
+    /* and the same when the list has shrunk by more than one */
+    expect(resolveDocked([card({ key: "a" })], "c", 2).card?.key).toBe("a");
+  });
+
+  it("⚠️ AN EMPTY LIST YIELDS NOTHING — the pane closes, which is not the pane being cleared", () => {
+    expect(resolveDocked([], "b", 1).card).toBeNull();
+    expect(resolveDocked(q, null, 0).card).toBeNull();
+  });
+
+  it("a nonsense position cannot escape the list", () => {
+    expect(resolveDocked(q, "gone", -5).card?.key).toBe("a");
+    expect(resolveDocked(q, "gone", 99).card?.key).toBe("c");
+  });
+
+  it("⚠️ IT NEVER INVENTS A POSITION when it has no card to report one for", () => {
+    /* The hint must survive an empty read unchanged, or a list that briefly empties would reset
+       the reader to the top when it refilled. */
+    expect(resolveDocked([], "b", 7).pos).toBe(7);
   });
 });

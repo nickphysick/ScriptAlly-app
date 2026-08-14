@@ -3,59 +3,19 @@
  * Families reuse the board's map, so a card looks like itself when it docks.
  */
 
+/* ⚠️ ONE COLUMN (rail + workspace, Phase 5). It was `grid-template-columns: 30% 70%` — a queue
+   stack down the left and the work surface on the right — because this surface had REPLACED the
+   list and that stack was the only way to see where you were going next. The rail is the stack
+   now, permanently on screen, so the column was a second copy of it: a copy drawn from a snapshot
+   while the rail was live, which is how the two came to disagree about what was outstanding. */
 .tdk {
-  display: grid;
-  grid-template-columns: 30% 70%;
-  gap: 14px;
-  align-items: start;
+  display: block;
   margin-top: 20px;
   outline: none;
 }
 
-/* ── the queue ───────────────────────────────────────────────────────── */
-.tdk-q {
-  background: #fbf8f3;
-  border: 1px solid var(--bd, #e7ddd2);
-  border-radius: 12px;
-  padding: 10px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-.tdk-qcap {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: #9a8e80; padding: 2px 6px 6px;
-}
-
-/* A rail is the card, slimmed — same family colour, so it is recognisable at a glance. */
-.tdk-rail {
-  display: block; width: 100%; text-align: left; font: inherit; cursor: pointer;
-  background: #fffefb; border: 1px solid #efe8dc; border-left-width: 3px;
-  border-radius: 8px; padding: 7px 9px;
-}
-.tdk-rail.fam-urgent { border-left-color: #e8c8bc; }
-.tdk-rail.fam-housekeeping { border-left-color: #ddd0bc; }
-.tdk-rail.fam-yours { border-left-color: #b9c9b4; }
-.tdk-rail.fam-done { border-left-color: #cfd8cc; }
-.tdk-rail:hover { background: #f7f3ec; }
-
-/* ⚠️ THE DOCKED RAIL IS RINGED IN INK — the others stay legible rather than dimmed, because
-   they are where you are going next, not clutter. */
-.tdk-rail.on { border-color: #2a1a13; border-left-color: #2a1a13; background: #fffefb; }
-
-.tdk-railk {
-  display: block;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 7.5px; letter-spacing: 0.13em; text-transform: uppercase; color: #8a7a6d;
-}
-.tdk-railt {
-  display: block; font-size: 12.5px; color: #2a1a13; margin-top: 2px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
+/* (the queue's own rules — `.tdk-q`, `.tdk-qcap` and the six `.tdk-rail*` — are retired with the
+   stack they painted. The rail draws the cards now, in `todoGroups.css`.) */
 
 /* ── the work surface ────────────────────────────────────────────────── */
 /* `position:relative` so the dock-seal's absolute flourish centres on the SHEET (board-optimise
@@ -160,10 +120,8 @@
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40%;
 }
 
-@media (max-width: 900px) {
-  .tdk { grid-template-columns: 1fr; }
-  .tdk-q { max-height: 170px; }
-}
+/* (the narrow-viewport rule went with the two-column grid — a single column needs no collapse,
+   and its only other line capped the retired queue's height.) */
 
 /* ── the dock's snooze tier menu (tasks-pages P2, walk fix 2). The old clock pointed at a page
    popover that never mounted here — a silently dead control. It opens UPWARD (the button sits in

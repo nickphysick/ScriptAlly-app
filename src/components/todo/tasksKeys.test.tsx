@@ -219,7 +219,10 @@ describe("⚠️ SELECTION IS STILL NOT BUILT — and `x` is no longer free for 
     expect(groupsCss).toContain(".tdg-row.sel");
     expect(listSrc).toContain('c.key === selectedKey ? " sel" : ""');
     /* the producer is the PANE'S key, not a second selection the list keeps for itself */
-    expect(pageSrc).toContain("selectedKey={dock?.activeKey}");
+    /* ⚠️ RE-ANCHORED (P5): the pane no longer stores a queue, so there is no `dock` object to
+       read a key off. The mark is the RESOLVED card's key — the same value the pane is showing,
+       resolved from the live list — which is a stronger tie than before, not a weaker one. */
+    expect(pageSrc).toContain("selectedKey={docked.card?.key}");
   });
 });
 

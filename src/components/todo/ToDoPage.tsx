@@ -75,7 +75,7 @@ import { todoPrefs } from "../../lib/todoPrefs";
    retirement — only the tag NARROWING went with it); `matchesTags` had no reader left. */
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
-import { dockQueue, dockFlowKind, nextInQueue, SendSpec } from "../../lib/todoDock";
+import { dockQueue, dockFlowKind, nextInQueue, resolveDocked, SendSpec } from "../../lib/todoDock";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
@@ -616,12 +616,60 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [assistantOpen, setAssistantOpen] = useState(false);
   // the focused session (the session pack): the queue = the ENGINE's own boardCards order,
   // captured at launch; the cinematic container drives it.
-  /* ⚠️ THE DOCK (board+dock P4) — the one work surface. `queue` is the board's own column order,
-     handed over rather than recomputed, so what you walk is what you were looking at. The board's
-     scroll position is remembered here because closing the dock must put you back where you were,
-     not at the top of a board you had scrolled halfway down. */
-  const [dock, setDock] = useState<{ queue: BoardCard[]; activeKey: string } | null>(null);
+  /**
+   * ⚠️ THE PANE HOLDS A SELECTION, NOT A LIST (rail + workspace, Phase 5). It used to store its
+   * own `queue` snapshot taken at open time — harmless while the dock REPLACED the list, and a
+   * live divergence the moment the rail stood beside it: snooze from the rail and the card left
+   * the rail while the pane's stack kept showing it and kept counting it.
+   *
+   * Two lists that can disagree about what is outstanding is the same failure as two writers of
+   * query status, and it takes the same answer. The queue is DERIVED at render from
+   * `dockAllCards()`; the state is one key.
+   *
+   * The board's scroll position is remembered because closing must put you back where you were,
+   * not at the top of a list you had scrolled halfway down.
+   */
+  const [dockKey, setDockKey] = useState<string | null>(null);
+  /* ⚠️ A RECOVERY HINT, NEVER THE SOURCE OF TRUTH — `resolveDocked` carries the reasoning. A ref
+     rather than state because it must not itself cause a render: it is written in passing while
+     resolving, and read only when the key it accompanied has gone. */
+  const dockPos = useRef(0);
   const boardScroll = useRef(0);
+
+  /**
+   * ⚠️ THE ONE LIST, DERIVED — read by the rail, the pane, the arrows and the forward look alike.
+   * `dockAllCards()` is the narrowing already applied to the list, so what you work through is
+   * exactly what you were looking at; `dockQueue` drops notes and finished work, which are not
+   * things to work through.
+   *
+   * (Placed here rather than beside its consumers on purpose: every value it closes over —
+   * `board`, `search`, `sctx`, `tagSel`, `sort` — is initialised above this line. `dockAllCards`
+   * is a hoisted `function`, so it is callable here; its CLOSURE is what would have thrown, which
+   * is the TDZ trap this file has been bitten by before.)
+   */
+  const dockable = dockQueue(dockAllCards());
+  /* ⚠️ THE REF IS WRITTEN DURING RENDER, and that is safe because it is idempotent: the value is
+     a pure function of this render's own inputs, so a repeated render writes the same number. */
+  const docked = resolveDocked(dockable, dockKey, dockPos.current);
+  if (docked.card) dockPos.current = docked.pos;
+
+  /**
+   * ⚠️ THE KEY FOLLOWS THE RESOLUTION, or the rail would mark nothing while the pane showed
+   * something. `resolveDocked` already answers which card is on screen; this writes that answer
+   * back so `selectedKey` and the pane cannot name different cards. When the list empties there
+   * is no card to adopt and the pane closes — which is not the same as being cleared.
+   *
+   * The signature is the dep rather than the array: a fresh array every render would fire this on
+   * every render, and what actually matters is whether the MEMBERSHIP changed.
+   */
+  const dockSig = dockable.map((c) => c.key).join("|");
+  useEffect(() => {
+    if (!dockKey) return;
+    if (!docked.card) { setDockKey(null); return; }
+    if (docked.card.key !== dockKey) setDockKey(docked.card.key);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dockSig, dockKey]);
+
   // the inverses the undo toast already carries, kept by card key so the session's REDO can
   // offer "Undo handled" on a card it stamped (see doneToast — no parallel undo store)
   // v7 — the hero in session: the title crossfade + the fixed sub-slot's single occupant are
@@ -729,7 +777,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        ranked list — `dockAllCards`, the narrowing respected. The listener survives as the
        cross-surface contract and the tool row's button is what calls it, so there is exactly one
        definition of what gets walked. */
-    const onWork = () => openDock(dockAllCards());
+    const onWork = () => openDock();
     const onAdd = (e: Event) => {
       const key = (e as CustomEvent<{ key?: string }>).detail?.key;
       const card = [...board.do, ...board.hk, ...board.nt].find((c) => c.key === key);
@@ -1198,11 +1246,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           <div className="tdw-split">
             <div className="tdw-rail">{renderList()}</div>
             <div className="tdw-work">
-              {dock ? (
+              {docked.card ? (
                 <TodoDock
-                  queue={dock.queue}
-                  activeKey={dock.activeKey}
-                  onSelect={(key) => setDock((d) => (d ? { ...d, activeKey: key } : d))}
+                  queue={dockable}
+                  activeKey={docked.card.key}
+                  onSelect={(key) => setDockKey(key)}
                   onClose={closeDock}
                   timeline={dockTimeline}
                   onPrimary={(c, spec) => void dockPrimary(c, spec)}
@@ -1513,7 +1561,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             It unmounts for the session (the opening owns the departure). */}
         {heroSession.slot?.kind !== "session" && (
           <div className={`tdb-heroright${heroSession.clearing ? " insession" : ""}`}>
-            <button type="button" className="tdb-btnp tdb-herobegin" disabled={boardCards.length === 0} onClick={() => openDock(boardCards)}>
+            <button type="button" className="tdb-btnp tdb-herobegin" disabled={dockable.length === 0} onClick={() => openDock()}>
               <svg width="10" height="11" viewBox="0 0 11 12" aria-hidden><path d="M1.5 1.5 L9.5 6 L1.5 10.5 Z" fill="#f3e7da" /></svg>
               Begin focused session
             </button>
@@ -1902,7 +1950,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           label: "Open",
           /* ⚠️ THE BOUNCE'S WAY THROUGH — it docks the item, which is where the act it named
              actually happens. Bouncing without a route would be a rule with no door. */
-          fn: async () => { openDock(dockAllCards(), card.key); },
+          fn: async () => { openDock(card.key); },
         });
         break;
       case "none": if (plan.why) flash(plan.why); break;  // the offer guard states its reason
@@ -1910,7 +1958,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   /* (The session launcher's one-line opener is DELETED — board fixes II P3. It was
-     openDock(dockAllCards()), and its only caller was the retired tool-row button. The dock's
+     openDock() over the whole list, and its only caller was the retired tool-row button. The dock's
      entrances are now the cards themselves, the menu's Action now, the bounce toast's Open, and
      Today's "Work the list".) */
 
@@ -1951,7 +1999,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     switch (item.id) {
       case "action":
         if (group) { setFlow({ items: [{ kind: "group", group }] }); break; } // Start the sweep — the batch sheet
-        openDock(dockAllCards(), card.key);                                   // ⚠️ the dock — the one work surface
+        openDock(card.key);                                                   // ⚠️ the dock — the one work surface
         break;
       case "today": performBoardPlan(card, dropPlan(card, column, column === "today" ? "todo" : "today")); break;
       /* The date tiers write through the EXISTING snooze primitives — never a menu-local date. */
@@ -2006,15 +2054,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /** ⚠️ THE ONE ENTRANCE FUNCTION — Action now, the bounce toast's Open, "Focused session" and
    *  Today's "Work the list" all arrive here. Two work surfaces would have to agree about what
    *  "done" means; there is one. */
-  function openDock(queue: BoardCard[], activeKey?: string) {
-    const q = dockQueue(queue);
-    if (q.length === 0) { flash("Nothing to work through"); return; }
+  function openDock(activeKey?: string) {
+    /* ⚠️ THE QUEUE IS NOT AN ARGUMENT ANY MORE — it is derived, so there is nothing to hand over.
+       Callers used to pass `dockAllCards()` (and one passed the UNnarrowed `boardCards`, which
+       quietly contradicted `narrowCards`' own law that what you work through is what you were
+       looking at). Naming only the card removes the chance to pass the wrong list. */
+    if (dockable.length === 0) { flash("Nothing to work through"); return; }
     boardScroll.current = document.getElementById(STAGE_SCROLL_ID)?.scrollTop ?? 0;
-    setDock({ queue: q, activeKey: activeKey && q.some((c) => c.key === activeKey) ? activeKey : q[0].key });
+    const start = activeKey && dockable.some((c) => c.key === activeKey) ? activeKey : dockable[0].key;
+    dockPos.current = dockable.findIndex((c) => c.key === start);
+    setDockKey(start);
   }
 
   function closeDock() {
-    setDock(null);
+    setDockKey(null);
     // restore where the board was — after the board has painted again
     requestAnimationFrame(() => {
       const el = document.getElementById(STAGE_SCROLL_ID);
@@ -2074,13 +2127,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /** ⚠️ ADVANCE OFFERS THE NEXT ITEM — it never runs it. A surface that started the next act on
    *  your behalf would be deciding at exactly the moment you had stopped paying attention. */
   function advanceDock(done: BoardCard) {
-    setDock((d) => {
-      if (!d) return d;
-      const next = nextInQueue(d.queue, done.key);
-      const queue = d.queue.filter((c) => c.key !== done.key);
-      if (queue.length === 0) return null;      // the queue is finished — back to the board
-      return { queue, activeKey: (next ?? queue[0]).key };
-    });
+    /* ⚠️ ITS FILTER IS GONE WITH THE SNAPSHOT. That line reconciled a stored queue against a
+       reality it could not see; the queue is derived now, so the finished card leaves the list on
+       its own the moment the write lands. All that is left is to point at the successor.
+       ⚠️ AND NOTHING IS CLEARED WHEN THERE IS NONE. Pointing at the card that is about to vanish
+       is correct: `resolveDocked` then finds the key gone, takes the position it held and clamps
+       to the end — so finishing the LAST item lands on the one before it rather than at the top. */
+    const next = nextInQueue(dockable, done.key);
+    if (next) setDockKey(next.key);
   }
 
   /**
@@ -2110,11 +2164,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           groups={taskGroups(narrowed)}
           hkExpanded={hkExpanded}
           onToggleHk={() => setHkExpanded(true)}
-          onOpen={(c) => openDock(dockAllCards(), c.key)}
+          onOpen={(c) => openDock(c.key)}
           /* ⚠️ THE MARK IS THE PANE'S OWN KEY, NOT A SECOND SELECTION. The rail marks what the
              workspace is showing, so the two cannot disagree about which one is current — and
              when nothing is docked, nothing is marked. */
-          selectedKey={dock?.activeKey}
+          selectedKey={docked.card?.key}
           onTick={(c) => void quickDone(c)}
           onVerb={(c, v, column) => performCardVerb(c, v, column)}
           /* ⚠️ THE DIAL DECIDES NOTHING — it hands over an ALREADY-CLAMPED value and the page

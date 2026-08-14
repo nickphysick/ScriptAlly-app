@@ -212,6 +212,11 @@ describe("⚠️ DOCK ENTRY IS ONE FILTER, and it was already a seam", () => {
   });
 
   it("the page's dock entrance goes through it", () => {
-    expect(page).toContain("const q = dockQueue(queue)");
+    /* ⚠️ RE-ANCHORED (rail + workspace P5). `openDock` took the queue as an argument and filtered
+       it on the way in; the queue is DERIVED now, so the filter moved to the one place the list
+       is built. Same filter, same single seam — it is simply upstream of the entrance rather than
+       inside it. */
+    expect(page).toContain("const dockable = dockQueue(dockAllCards());");
+    expect(page).not.toContain("function openDock(queue:");
   });
 });

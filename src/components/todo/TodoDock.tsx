@@ -10,9 +10,13 @@
  * the reason a derived card cannot be ticked on the board — ticking would clear the reminder and
  * leave the work undone, so the board bounces it here.
  *
- * ⚠️ ONE ENGINE, TWO ENTRANCES. "Focused session" in the tool row and "Work the list" on Today
- * both open this. Two work surfaces would have to agree about what "done" means, and the first
- * time they disagreed one of them would be silently wrong.
+ * ⚠️ THE QUEUE MOVED TO THE RAIL; THE PANE KEEPS THE SELECTION (rail + workspace, Phase 5).
+ * This surface used to draw its own card stack down a 30% left column, because it had REPLACED
+ * the list and that stack was the only way to see where you were going next. The rail is that
+ * stack now, permanently on screen, so the column was a second copy of it — and a copy that
+ * could disagree, since it was drawn from a snapshot while the rail was live. One column now.
+ * `queue` is still a prop and still drives ↑↓ and the NEXT line; it is simply derived by the
+ * page rather than stored, so nothing here can hold a stale list.
  *
  * ⚠️ IT PERFORMS NOTHING ITSELF. Every act is handed up to the page, which runs the EXISTING
  * primitive — `recordMaterialsSent`, `quickDone`, the offer flow, the close dialogue. The dock
@@ -112,26 +116,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
   return (
     <div className="tdk" role="dialog" aria-label="Work surface" onKeyDown={onKeyDown} tabIndex={-1} ref={surfaceRef}>
-      {/* ── LEFT · THE QUEUE ──────────────────────────────────────────────
-          Slim rails in the board's own order. The docked one is ringed in ink; the others stay
-          legible rather than dimmed, because they are where you are going next. */}
-      <aside className="tdk-q" aria-label="Queue">
-        <div className="tdk-qcap">{queue.length} to work through</div>
-        {queue.map((c) => (
-          <button
-            key={c.key}
-            type="button"
-            className={`tdk-rail fam-${bandFamily(c)}${c.key === card.key ? " on" : ""}`}
-            aria-current={c.key === card.key ? "true" : undefined}
-            onClick={() => onSelect(c.key)}
-          >
-            <span className="tdk-railk">{c.kind}</span>
-            <span className="tdk-railt">{c.title}</span>
-          </button>
-        ))}
-      </aside>
-
-      {/* ── RIGHT · THE WORK SURFACE ─────────────────────────────────────── */}
+      {/* ── THE WORK SURFACE ─────────────────────────────────────────────── */}
       <section className="tdk-w">
         {sealing && <ArtSlot name="dock-seal" />}
         <div className={`tdk-band fam-${bandFamily(card)}`}>
@@ -144,8 +129,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
         {/* ⚠️ THE WORK SURFACE IS A TWO-COLUMN SHEET (board-optimise P4; ref board-optimised.html
             §2). The story ran ABOVE the work before, so the flow began below the fold on a long
             history and the two things you need at once — what happened, and what to do — could
-            not be read together. The 30/70 outer split STANDS: a slide-over would hide the
-            queue, and the queue is half the point. */}
+            not be read together. This inner split stands; the OUTER 30/70 one does not — see the
+            head note. */}
         <div className="tdk-body">
           <aside className="tdk-story" aria-label="The story so far">
             <div className="tdk-storyk">THE STORY SO FAR</div>

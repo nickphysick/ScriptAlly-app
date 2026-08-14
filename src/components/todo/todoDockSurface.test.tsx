@@ -52,28 +52,67 @@ const render = (active = "a", queue = QUEUE) =>
     />
   );
 
-describe("the dock renders, 30/70, queue left and work surface right", () => {
+/**
+ * ⚠️ THE PANE DRAWS NO QUEUE OF ITS OWN (rail + workspace, Phase 5).
+ *
+ * It used to: a 30% left column of slim rails, defended in its own file with "a slide-over would
+ * hide the queue, and the queue is half the point". That was TRUE of a surface which had REPLACED
+ * the list — the stack was the only way to see where you were going next. The rail is that stack
+ * now, permanently on screen, so the column became a second copy of it. A copy drawn from a
+ * SNAPSHOT while the rail was live, which is how the two came to disagree about what was
+ * outstanding.
+ *
+ * These cases are inverted rather than deleted, and the survivors — ↑↓ and the NEXT line — are
+ * locked AS survivors: their visible invoker is gone, so nothing else would notice if they broke.
+ */
+describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
   it("renders without throwing", () => {
     expect(() => render()).not.toThrow();
   });
 
-  it("is a 30/70 split, in the stylesheet rather than in the markup", () => {
-    const css = readFileSync(join(here, "todoDock.css"), "utf8");
-    expect(css).toContain("grid-template-columns: 30% 70%");
+  it("one column, and no rail markup anywhere in it", () => {
+    const tdk = dockCssRule(".tdk {");
+    expect(tdk).toContain("display: block");
+    expect(tdk).not.toContain("grid-template-columns");
+    /* ⚠️ ANCHORED, NOT PREFIXED — a bare `tdk-q` matches `tdk-quiet`, which is the footer's own
+       live class. The house rule on this exists because the failure is silent in the other
+       direction: a prefix test passes on a file that still draws the thing. */
+    for (const cls of ["tdk-q", "tdk-qcap", "tdk-rail"]) {
+      expect(dockSrc, cls).not.toMatch(new RegExp(`["\`\\s]${cls}[\`"\\s]`));
+    }
+    /* the count line went with it — "30 to work through" beside a rail showing a different
+       number was the divergence made visible */
+    expect(dockSrc).not.toContain("to work through");
   });
 
-  it("the queue lists every item, in the order it was given", () => {
-    const html = render();
-    for (const c of QUEUE) expect(html).toContain(c.title);
+  it("⚠️ THE OTHER CARDS ARE NOT DRAWN HERE — only the docked one, and the NEXT line's name", () => {
+    const html = render("a");
+    expect(html).toContain("Send your full to Jonathan Marsh");
+    /* the card AFTER next is nowhere: with the stack gone there is no list in this surface */
+    expect(html).not.toContain("Redraft the opening");
+    /* ⚠️ THE IMMEDIATE NEXT ONE IS NAMED, AND THAT IS THE FORWARD LOOK, NOT A LIST. It survives
+       deliberately — it is one of the two array-driven survivors — so this case asserts it is
+       present as PROSE rather than mistaking it for a leftover rail. */
+    expect(html).toContain("NEXT: Eleanor Whitfield silent");
+    expect(html).not.toContain("tdk-rail");
   });
 
-  it("⚠️ the DOCKED rail is ringed in ink; the others are not dimmed — they are where you go next", () => {
-    const html = render("b");
-    expect(html).toContain('aria-current="true"');
-    expect((html.match(/aria-current="true"/g) ?? []).length).toBe(1);
-    const css = readFileSync(join(here, "todoDock.css"), "utf8");
-    expect(css).toContain(".tdk-rail.on { border-color: #2a1a13;");
-    expect(css).not.toMatch(/\.tdk-rail(?!\.on)[^{]*\{[^}]*opacity/);
+  /**
+   * ⚠️ THE SURVIVORS, LOCKED AS SURVIVORS. ↑↓ and the forward look were always array-driven —
+   * they read the `queue` PROP, never the stack — which is why cutting the stack stranded
+   * nothing. With their visible neighbour gone, nothing else would notice if they broke.
+   */
+  it("↑↓ still walk the queue, through `stepQueue` on the prop", () => {
+    expect(dockSrc).toContain('if (e.key === "ArrowDown" || e.key === "ArrowUp")');
+    expect(dockSrc).toContain('stepQueue(queue, card?.key ?? "", e.key === "ArrowDown" ? 1 : -1)');
+    expect(dockSrc).toContain("onSelect(to.key)");
+  });
+
+  it("the NEXT line still names what is coming, from the same array", () => {
+    expect(dockSrc).toContain("nextInQueue(queue, card.key)");
+    expect(render("a")).toContain("NEXT: Eleanor Whitfield silent");
+    /* …and says so plainly at the end rather than going blank */
+    expect(render("c")).toContain("LAST IN THE QUEUE");
   });
 
   it("the work surface carries the family band, the title and the record line", () => {
@@ -170,11 +209,11 @@ describe("⚠️ ONE SURFACE, EVERY ENTRANCE", () => {
        P3 then retired the tool-row launcher: openFocusedSession is DELETED (its one line lives
        on as the card doors' own call), so the entrances are cards · menu · bounce · Today. */
     expect(page).toContain('case "action":');
-    expect(page).toContain("openDock(dockAllCards(), card.key);");
+    expect(page).toContain("openDock(card.key);");
     expect(page).toContain("fn: async () => { openDock(");                   // the bounce
     expect(page).not.toContain("openFocusedSession");                        // the identifier is extinct
     expect(page).not.toContain("tdb-ghb");                                   // and so is its button
-    expect(page).toContain("onOpen={(c) => openDock(dockAllCards(), c.key)}"); // the doors
+    expect(page).toContain("onOpen={(c) => openDock(c.key)}"); // the doors
     expect(page).toContain("const onWork = () => openDock(");                // Today
   });
 
@@ -215,7 +254,7 @@ describe("⚠️ the card is the door — click, Enter, and the menu's Action no
   const css = readFileSync(join(here, "todoBoard.css"), "utf8");
 
   it("the page's onOpen docks the clicked card (not the whole page's default)", () => {
-    expect(page).toContain("onOpen={(c) => openDock(dockAllCards(), c.key)}");
+    expect(page).toContain("onOpen={(c) => openDock(c.key)}");
   });
 
   it("click and Enter both call onOpen; the ⋯ trigger stops propagation so the seat never docks", () => {
@@ -251,9 +290,15 @@ describe("⚠️ the card is the door — click, Enter, and the menu's Action no
 describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the work, not above it", () => {
   const dockCss = readFileSync(join(here, "todoDock.css"), "utf8");
 
-  it("the 30/70 outer split STANDS — a slide-over would hide the queue", () => {
-    expect(dockCss).toMatch(/\.tdk\s*\{[^}]*grid-template-columns:\s*30%/);
-    expect(dockSrc).toContain('aria-label="Queue"');
+  /**
+   * ⚠️ THE INNER SPLIT STANDS; THE OUTER ONE DOES NOT (Phase 5). This case used to assert the
+   * 30/70 outer grid on the grounds that "a slide-over would hide the queue, and the queue is
+   * half the point" — true of a surface that had replaced the list. The rail holds the queue now,
+   * so the outer column is gone and the story-beside-work sheet is the only split left.
+   */
+  it("the outer 30/70 split is RETIRED — one column, and no Queue landmark", () => {
+    expect(dockCss).not.toMatch(/\.tdk\s*\{[^}]*grid-template-columns/);
+    expect(dockSrc).not.toContain('aria-label="Queue"');
   });
 
   it("the sheet is a flex row: the story at ~230px, the work taking the rest", () => {
