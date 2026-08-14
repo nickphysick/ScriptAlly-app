@@ -1603,6 +1603,21 @@
 .f12-card .f12-chh svg { width: 19px; height: 19px; stroke: #5a6e58; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .f12-card .f12-cbb { flex: 1; padding: 18px; display: flex; flex-direction: column; min-height: 0; }
 /* journal empty state — dotted outline, NO fill (a placeholder that looks like one) */
+/**
+ * ⚠️ NOTES SIT ON PARCHMENT (fix pack 4 §4). Each note carried an inline `#ffffff` — which was
+ * merely subtle while the card was `--panel`, and became invisible the moment §2 made the card
+ * white. A note flat on its card is not a note; it is a paragraph.
+ *
+ * ⚠️ THE GROUND AND THE RIM COME OFF THE STYLESHEET NOW, because an inline background cannot be
+ * overridden by a rule and the next person to retheme this would have had no way in. The radius and
+ * the spacing stay inline where they were — only the two colours moved.
+ *
+ * ⚠️ `--paper` IS THE REF'S CREAM. It draws notes on `--cream: #fbf7f1` with an inset hairline;
+ * `--paper` is #faf6f0, within a point, and `--line` is the same hairline the cards read. No new
+ * token, no literal.
+ */
+.qp-note { background: var(--paper); border: 1px solid var(--line); }
+
 .f12-note { border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 13px 15px; }
 .f12-note .f12-nd { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.13em; color: var(--faint); margin-bottom: 6px; }
 .f12-note .f12-nt { font-size: 13px; line-height: 1.55; color: var(--muted); }

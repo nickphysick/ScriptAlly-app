@@ -466,6 +466,44 @@ describe("§2 (fp4) · the reading pane's cards", () => {
   });
 });
 
+/**
+ * ⚠️ FIX PACK 4 §4 — NOTES SIT ON PARCHMENT. Each note carried an inline `#ffffff`, which was merely
+ * subtle while the card was `--panel` and became invisible the moment §2 made the card white. A
+ * note flat on its card is not a note; it is a paragraph.
+ */
+describe("§4 (fp4) · the notes", () => {
+  it("a note's ground differs from the card it sits on", () => {
+    const note = declValue(rule(".qp-note"), "background");
+    const card = declValue(rule(".qp-cols .f12-card"), "background");
+    expect(note, "the note declares no ground").not.toBe("");
+    expect(note, "the note's ground collapsed into the card's — it reads as a paragraph")
+      .not.toBe(card);
+    expect(note, "the note lost its hairline").toBeTruthy();
+    expect(rule(".qp-note"), "the note lost its rim").toContain("border: 1px solid var(--line)");
+  });
+
+  /**
+   * ⚠️ AND THE COLOURS LIVE IN THE STYLESHEET NOW. They were inline, where no rule can reach them —
+   * which is why the note stayed white through a change to the surface underneath it. An inline
+   * background is not a style, it is a fact nobody can argue with.
+   */
+  it("the note's ground is not written inline, where no rule can reach it", () => {
+    const at = code.indexOf('className="qp-note"');
+    expect(at, "the note markup is missing").toBeGreaterThan(-1);
+    const tag = code.slice(at, code.indexOf(">", at));
+    expect(tag, "the note's ground went back inline").not.toContain("background:");
+    expect(tag, "the note's rim went back inline").not.toContain("border:");
+  });
+
+  /* ⚠️ THE COMPOSER STAYS PINNED. `flexShrink: 0` is what stops a long note list squeezing it out
+     of the card — the one thing in this section that is about behaviour rather than colour. */
+  it("the composer cannot be squeezed out by a long list", () => {
+    const at = code.indexOf('className="qp-note"');
+    const after = code.slice(at);
+    expect(after, "the composer lost its pin").toContain("flexShrink: 0");
+  });
+});
+
 describe("§1d/e/g · already landed, and still true", () => {
   it("the list's controls are in its own head, and none can go dead", () => {
     const head = code.indexOf('className="f12-lhead"');

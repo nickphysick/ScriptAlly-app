@@ -4311,7 +4311,7 @@ export const Queries: React.FC<{
                                 ) : notes.map((entry) => {
                                   const isEditing = editingJournalId === entry.id;
                                   return (
-                                    <div key={entry.id} className="qp-note" style={{ background: "#ffffff", border: "1px solid var(--bd)", borderRadius: 12, padding: "11px 13px", marginBottom: 9 }}>
+                                    <div key={entry.id} className="qp-note" style={{ borderRadius: 12, padding: "11px 13px", marginBottom: 9 }}>
                                       {isEditing ? (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                                           <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} autoFocus rows={2} style={{ width: "100%", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#3a1c14", border: "1px solid #e6dccd", borderRadius: 7, padding: "6px 8px", outline: "none", resize: "vertical", background: "#fff" }} />
