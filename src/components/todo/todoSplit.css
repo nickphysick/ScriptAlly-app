@@ -228,41 +228,14 @@
 
 .tdw-clr:hover { color: #7c3a2a; }
 
-.tdw-chips {
-  display: flex;
-  gap: 6px;
-  margin-top: 10px;
-  flex-wrap: wrap;
-}
 
-/* ⚠️ THE ACTIVE CHIP IS SOLID INK WITH PARCHMENT TEXT — never burgundy-filled. Burgundy is this
-   page's ACTION colour; a burgundy fill on a view control says "this did something" about a chip
-   that only changed what you are looking at. */
-.tdw-chip {
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  color: #7a6858;
-  background: #fff;
-  border: 1px solid #ece4d6;
-  border-radius: 999px;
-  padding: 6px 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background var(--tdg-emph, 120ms), border-color var(--tdg-emph, 120ms), color var(--tdg-emph, 120ms);
-}
 
-.tdw-chip:hover { border-color: #d8c8b8; color: #2b2118; }
 
-.tdw-chip .n {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 10px;
-  color: #b3a496;
-}
 
-.tdw-chip.on { background: #2b2118; border-color: #2b2118; color: #fdfaf5; }
+
+
+
+
 .tdw-chip.on .n { color: #cbb8a8; }
 
 /* the narrowed-to-nothing message sits INSIDE the rail — it is a rail fact, not a page one */

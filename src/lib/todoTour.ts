@@ -60,9 +60,13 @@ export const TOUR_STOPS: TourStop[] = [
        the groups rather than the old seven facets. `.tdb-tools` still exists — it is the page's
        sort and Add — so this one would NOT have skipped: it would have pointed confidently at the
        wrong controls and described them correctly. The worse failure of the two. */
-    sel: ".tdw-chips",
+    /* ⚠️ RETARGETED AGAIN (corrections, Phase 5): the chip strip folded into the filter MENU, so
+       `.tdw-chips` stopped existing. Found by grepping the built bundle before a deploy — the
+       census below passed it because an orphaned CSS rule still matched, which is a hole this
+       commit also closes. */
+    sel: ".tdw-menuwrap",
     h: "Narrow the list.",
-    p: "Chips with live counts: click one to see only that kind of work. All brings everything back.",
+    p: "Filter and sort sit beside the search. The filter fills with ink while a narrowing is on, so a short list is never a mystery.",
     cta: "Next →",
   },
   {

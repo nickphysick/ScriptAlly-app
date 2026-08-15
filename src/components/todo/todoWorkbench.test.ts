@@ -323,7 +323,10 @@ describe("hero-pair P5 — sweep", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('sel: ".tdb-herobegin"');
     expect(tour).not.toContain("tdb-fsb2");
-    expect(tour).toContain("All brings everything back"); // todo rebuild P1: the chip is "All"
+    /* ⚠️ THE CHIP STRIP IS A MENU NOW (corrections, Phase 5) — "All brings everything back" was
+       true of a chip you could see. The stop teaches the button's ink fill instead, which is the
+       only thing left on the page saying a short list is short on purpose. */
+    expect(tour).toContain("fills with ink");
     expect(tour).not.toContain("RESET");
   });
 });

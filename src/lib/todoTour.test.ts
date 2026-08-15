@@ -21,7 +21,7 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       // confidently at the page's sort and Add while describing filters. The second is why this
       // census exists: a stop can go wrong without going missing.
       ".tdw-search",
-      ".tdw-chips",
+      ".tdw-menuwrap",
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       // workspace P3: Today's stop left the retired corner for the sidebar group that reaches it.
@@ -45,7 +45,11 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
     expect(TOUR_STOPS[1].p).toContain("focused session");
     expect(TOUR_STOPS[2].p).toContain("nothing chases you"); // notes-and-tasks: the two natures
     expect(TOUR_STOPS[3].p).toContain("⌘K");
-    expect(TOUR_STOPS[4].p).toContain("All brings everything back"); // todo rebuild P1: the reset chip is "All"
+    /* ⚠️ THE CHIP STRIP IS A MENU NOW (corrections, Phase 5), so "All brings everything back" —
+       true of a chip you could see — describes a row you have to open a menu to find. What the
+       stop must teach instead is that the button FILLS while a narrowing is on, because that is
+       the only thing left on the page saying a short list is short on purpose. */
+    expect(TOUR_STOPS[4].p).toContain("fills with ink");
     expect(TOUR_STOPS[5].p).toContain("turns the dial in your favour");
     expect(TOUR_STOPS[6].p).toContain("Hover for the actions");
     expect(TOUR_STOPS[6].p).toContain("Batches expand in place");
@@ -81,11 +85,17 @@ describe("shouldAutoRunTour — the once gate (unchanged by the rewire)", () => 
  */
 describe("⚠️ EVERY TOUR TARGET STILL EXISTS — a stop that misses is dropped in silence", () => {
   const root = join(__dirname, "..");
+  /**
+   * ⚠️ MARKUP ONLY — A CSS RULE IS NOT A RENDERED TARGET, and this is the hole that let a dead
+   * stop through. The census used to read `.tsx` AND `.css`, so `.tdw-chips` stayed "live" on the
+   * strength of an ORPHANED stylesheet rule for weeks after the markup went. A tour locates its
+   * targets in the DOM; only something that renders can be one.
+   */
   const sources = (dir: string): string[] =>
     readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
       const full = join(dir, e.name);
       if (e.isDirectory()) return sources(full);
-      return /\.(tsx|css)$/.test(e.name) && !/\.test\./.test(e.name) ? [full] : [];
+      return /\.tsx$/.test(e.name) && !/\.test\./.test(e.name) ? [full] : [];
     });
   const corpus = sources(root).map((f) => readFileSync(f, "utf8")).join("\n");
 
@@ -130,7 +140,7 @@ describe("⚠️ EVERY TOUR TARGET STILL EXISTS — a stop that misses is droppe
   it("⚠️ AND THE TWO THE REBUILD MOVED POINT AT THE RAIL, not at the page's tool row", () => {
     const sels = TOUR_STOPS.map((s) => s.sel);
     expect(sels).toContain(".tdw-search");
-    expect(sels).toContain(".tdw-chips");
+    expect(sels).toContain(".tdw-menuwrap");
     /* `.tdb-bsearch` is extinct; `.tdb-tools` still exists but is no longer what this stop meant */
     expect(sels).not.toContain(".tdb-bsearch");
     expect(sels).not.toContain(".tdb-tools");

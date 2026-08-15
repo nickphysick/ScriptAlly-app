@@ -100,7 +100,11 @@ describe("⚠️ THE FOCUSED ROW IS THE BROWSER'S OWN FOCUS", () => {
 
   it("the `?` map is built FROM `KEY_MAP`, so the sheet cannot advertise a key that does nothing", () => {
     expect(list).toContain("KEY_MAP.map((k) => (");
-    for (const k of ["J / K", "Space", "Enter", "S", "X", ".", "O", "E", "/", "W", "Esc", "?"]) {
+    /* ⚠️ `W` IS OFF THE MAP (corrections, Phase 4) — it opened the dock over the whole queue, and
+       the dock IS the right-hand pane now, so the key entered a mode you were already in. Leaving
+       it on the sheet would be the exact fault this case exists for: an overlay advertising a key
+       that does nothing. `.` went with the ⋯ in the same pass. */
+    for (const k of ["J / K", "Space", "Enter", "S", "X", "O", "E", "/", "Esc", "?"]) {
       expect(KEY_MAP.some((m) => m.key === k), k).toBe(true);
     }
     /* and every key the map advertises is one the handlers actually answer */

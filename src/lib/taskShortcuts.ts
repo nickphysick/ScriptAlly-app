@@ -115,6 +115,15 @@ export function listKey(e: ShortcutKey, typing: boolean): ListAction | null {
  * on the whole list rather than on whatever happens to be focused, so it belongs with `/` on the
  * window listener rather than with the row keys inside the list.
  */
+/**
+ * ⚠️ RETIRED WITH THE BUTTON (corrections, Phase 4). `W` opened the dock over the whole queue; the
+ * dock IS the right-hand pane now and never leaves the screen, so the key entered a mode you were
+ * already in. It is OFF `KEY_MAP` — the overlay must not advertise a key that does nothing, which
+ * is the fault the map is built FROM `KEY_MAP` to prevent.
+ *
+ * The predicate survives unreferenced by the page so the key stays claimed rather than silently
+ * falling through to the browser; deleting it is a follow-up once nothing reads it at all.
+ */
 export function worksTheList(e: ShortcutKey, typing: boolean): boolean {
   return !typing && !e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "w" || e.key === "W");
 }
@@ -157,7 +166,6 @@ export const KEY_MAP: { key: string; does: string }[] = [
   { key: "O", does: "Open the query behind the row" },
   { key: "E", does: "Edit — your tasks and notes only" },
   { key: "/", does: "Jump to search" },
-  { key: "W", does: "Work the list — opens the dock at the top of the order" },
   { key: "Esc", does: "Close the dial, then the menu" },
   { key: "?", does: "This map" },
 ];
