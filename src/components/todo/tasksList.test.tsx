@@ -314,7 +314,30 @@ describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
     expect(rule(".tdg-ic {")).toContain("width: 30px");
     expect(rule(".tdg-ic {")).toContain("height: 30px");
     expect(rule(".tdg-ic {")).toContain("border-radius: 8px");
-    expect(rule(".tdg-acts {")).toContain("gap: 5px");
+    /* ⚠️ 3px, NOT 5px — and the 5 was never what rendered. `.tdg-acts` was declared TWICE; this
+       sliced the FIRST block, which set `gap: 5px` and was overridden by the real rule's 3px forty
+       lines below. The duplicate is folded into one rule now, so this asserts what the browser
+       uses. The FIRST-MATCH SLICE is the hazard: the value was wrong for as long as the duplicate
+       existed and the lock stayed green throughout. */
+    expect(rule(".tdg-acts {")).toContain("gap: 3px");
+  });
+
+  /**
+   * ⚠️ THE VERBS ARE HIDDEN AT REST — the swap was only ever half built. The figure stack faded to
+   * 0.14 on hover as designed, but nothing hid the verbs, so at REST the clock and dismiss icons
+   * were drawn at full opacity ON TOP of a full-opacity figure: both visible, neither readable.
+   */
+  it("⚠️ the verbs and the figure never share legible pixels", () => {
+    const acts = rule(".tdg-acts {");
+    expect(acts).toContain("opacity: 0");
+    /* ⚠️ `visibility` TOO — an `opacity: 0` control still takes the pointer, and this one sits
+       directly over the figure it replaces. */
+    expect(acts).toContain("visibility: hidden");
+    expect(acts).toContain("position: absolute");          // the same slot, so no reflow
+    const css = readFileSync(join(here, "todoGroups.css"), "utf8");
+    expect(css).toContain(".tdg-row:focus-within .tdg-acts { opacity: 1; visibility: visible; }");
+    /* and the figure still fades, so the two are a swap rather than a stack */
+    expect(css).toContain(".tdg-row:focus-within .tdg-figstack { opacity: 0.14; }");
   });
 
   /**

@@ -440,7 +440,6 @@
    arm-before-press pair of `:hover`s, its 34px caret minimum and its filled/outlined weights were
    four guards around ONE problem — a compound control repeated sixteen times down a list. Four
    separate targets have no seam to defend, so the guards are deleted rather than carried over. */
-.tdg-acts { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
 
 /* ⚠️ NOTHING AT REST. The cluster is the row's actions, not its furniture: a list of sixteen rows
    each wearing four icons is a wall of glyphs, and at rest the row should read as a sentence. */
@@ -830,6 +829,10 @@
      opacity change OR NOTHING"). An opacity swap here would reintroduce the very fade whose
      failure mode is invisible content — so under reduced motion the rows simply arrive. */
   .tdg-panel.grown > .tdg-row:nth-child(n + 5) { animation: none; }
+  /* ⚠️ FOLDED IN RATHER THAN GIVEN ITS OWN BLOCK. A second `@media (prefers-reduced-motion)` above
+     this one silently repoints every lock that finds this block by first match — the slicing
+     hazard the house rules name, and it caught this edit immediately. */
+  .tdg-acts, .tdg-figstack { transition: none; }
 }
 
 
@@ -930,16 +933,34 @@
   margin-left: 3px;
 }
 
-/* the two verbs, in the figure's own slot */
+/**
+ * ⚠️ THE VERBS ARE HIDDEN AT REST, AND THAT WAS THE WHOLE BUG. The figure stack faded to 0.14 on
+ * hover as designed, but nothing ever hid the verbs — so at REST the clock and the dismiss icons
+ * were drawn at full opacity ON TOP of a full-opacity figure, both legible, neither readable. The
+ * fade was only ever half a swap.
+ *
+ * ⚠️ `visibility` AS WELL AS `opacity`, so the hidden half cannot be clicked. An `opacity: 0`
+ * control still takes the pointer, and this one sits directly over the figure it replaces.
+ *
+ * ⚠️ AND THIS RULE ABSORBED A SECOND `.tdg-acts` BLOCK forty lines above it, which set `display`,
+ * `align-items` and `gap` and was silently half-overridden here. One selector, one owner — the
+ * grouped/duplicate-rule hazard the house rules name.
+ */
 .tdg-acts {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
+  align-items: center;
   gap: 3px;
   justify-content: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--tdg-emph) var(--tdg-ease);
 }
+.tdg-row:hover .tdg-acts,
+.tdg-row:focus-within .tdg-acts { opacity: 1; visibility: visible; }
 
 /* ══ DONE TODAY — the collapsible foot (Phase 2) ═══════════════════════════════════════════════
    ⚠️ COMPLETED ROWS LEAVE THEIR GROUP. A ticked row sitting among live ones is a row you have to
