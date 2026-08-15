@@ -26,7 +26,8 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
-import { bandFamily } from "../../lib/todoColumns";
+import { bandVariant, bandMotif } from "../../lib/todoHandoff";
+import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
 import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
@@ -189,7 +190,11 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           * cannot wrap, so the block grows and shoves the facts off their own edge — which is what
           * "the facts float across the title" actually was.
           */}
-        <div className={`tdk-band fam-${bandFamily(card)}`}>
+        {/* ⚠️ THE VARIANT COMES FROM `bandVariant`, NOT FROM THE FAMILY. This read
+            `fam-${bandFamily(card)}`, and family answers "how urgent is this" — `urgent` covers
+            every send, every R&R and the offer alike, so nine cards of ten rendered pink. */}
+        <div className={`tdk-band v-${bandVariant(card)}`}>
+          <DockMotif motif={bandMotif(card)} />
           <div className="tdk-id">
             <span className="tdk-av" aria-hidden>{card.initials}</span>
             <span className="tdk-idtx">

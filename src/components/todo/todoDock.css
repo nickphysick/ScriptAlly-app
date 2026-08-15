@@ -126,12 +126,16 @@
 .tdk-agency { display: block; font-size: 11px; color: #6a7e68; font-weight: 300; margin-top: 1px; }
 
 /* the pink band is the offer's — its inks take the burgundy family rather than the sage */
-.tdk-band.fam-urgent .tdk-pre, .tdk-band.fam-urgent .tdk-agency { color: #9a6a56; }
-.tdk-band.fam-urgent .tdk-name { color: #4a241a; }
-.tdk-band.fam-urgent { background: linear-gradient(180deg, #f8e2d9, #f4d5c9); border-bottom-color: #e8c8bc; }
-.tdk-band.fam-housekeeping { background: linear-gradient(180deg, #f5efe6, #efe7d9); border-bottom-color: #ddd0bc; }
-.tdk-band.fam-yours { background: linear-gradient(180deg, #dee4dc, #d5dbd3); border-bottom-color: #b9c9b4; }
-.tdk-band.fam-done { background: #e7ebe5; border-bottom-color: #cfd8cc; }
+/* ⚠️ SAGE IS THE DEFAULT AND PINK IS THE OFFER — two variants, not four families. The `.fam-*`
+   set is gone from this band: it keyed on urgency, so every send and every R&R came out pink. */
+.tdk-band.v-default { background: linear-gradient(135deg, #dee4dc 0%, #d5dbd3 100%); border-bottom-color: rgba(90, 110, 88, 0.2); }
+.tdk-band.v-offer { background: linear-gradient(135deg, #f3e0d6 0%, #eed4c8 100%); border-bottom-color: rgba(124, 58, 42, 0.14); }
+.tdk-band.v-offer .tdk-pre, .tdk-band.v-offer .tdk-agency { color: #9a6a56; }
+.tdk-band.v-offer .tdk-name { color: #4a241a; }
+
+/* ⚠️ BEHIND THE TEXT AND CLIPPED BY THE BAND — `z-index: 1` under the content's 2, and the band's
+   own `overflow: hidden` is what makes it a corner motif rather than a floating illustration. */
+.tdk-motif { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1; opacity: .85; display: block; }
 
 .tdk-band i {
   font-family: "JetBrains Mono", ui-monospace, monospace;
@@ -348,7 +352,10 @@
    the point: the figure you scanned in the list is the figure you land on here. */
 /* ⚠️ FIXED BESIDE A BLOCK THAT WRAPS — never the other way round. The right padding clears the
    corner motif so the two never overlap. */
-.tdk-facts { display: flex; gap: 26px; position: relative; z-index: 2; flex: none; padding-right: 8px; }
+/* ⚠️ THE RIGHT PADDING CLEARS THE MOTIF. The facts strip and the illustration share the band's
+   right edge; at the old 8px the figures sat on top of it. One declaration, not two — a second
+   `padding-right` later in the same rule is what silently wins. */
+.tdk-facts { display: flex; gap: 26px; position: relative; z-index: 2; flex: none; padding-right: 96px; }
 .tdk-fact { text-align: right; display: block; }
 
 .tdk-fact .k {
@@ -370,7 +377,7 @@
 }
 
 /* the pink band is the offer's — its labels take the burgundy family rather than the sage */
-.tdk-band.fam-urgent .tdk-fact .k { color: #9a6a56; }
+.tdk-band.v-offer .tdk-fact .k { color: #9a6a56; }
 
 /* ══ TRACKING (journeys pack, Phase 2; ref todo-workspace-v14.html `.tstats` / `.chips` / `.prog`)
    ⚠️ THE SHAPE IS THE QUERY CENTRE'S `.qp-stats` — icon tile, Playfair figure, mono caption, one

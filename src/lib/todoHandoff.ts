@@ -351,3 +351,44 @@ export function trackingStats(facts: BandFact[]): TrackingStat[] {
     };
   });
 }
+
+/* ── the band's variant (v14 close-the-gap, Phase 2) ─────────────────────────────────────────── */
+
+/**
+ * ⚠️ PINK IS THE OFFER, AND NOTHING ELSE. The dock's band was classed `fam-${bandFamily(card)}`,
+ * and `bandFamily` answers a DIFFERENT question — how urgent is this — where `urgent` covers every
+ * send, every R&R and the offer alike. `.fam-urgent` is the pink gradient, so nine of the ten cards
+ * the ref draws in sage were rendering pink; measured on the deployed page, every single card came
+ * back `fam-urgent`.
+ *
+ * ⚠️ SO THE FIX IS A DERIVATION, NOT A TERNARY AT THE CALL SITE. The band variant is a fact about
+ * WHAT KIND OF ACT this is, which is exactly what `cardBucket` answers, and the mockup paints one
+ * card of ten pink — the offer. Everything else is the sage default. Family keeps its own job
+ * (the lanes, the swatches, the board); this is not it.
+ */
+export type BandVariant = "offer" | "default";
+
+export function bandVariant(c: BoardCard): BandVariant {
+  /* ⚠️ THE OFFER, NOT THE BUCKET. An R&R shares the `decide` bucket and the ref draws it sage —
+     the celebration belongs to the offer alone, which is the one card that changes everything. */
+  return c.taskType === "offer_received" ? "offer" : "default";
+}
+
+/**
+ * The corner motif, per bucket. ⚠️ IT IS KEYED ON THE BUCKET, so a new task type inherits a motif
+ * from the act it performs rather than needing its own; and the two that share one share it because
+ * they ARE one act — a Close and a Fix are both tidying the record.
+ */
+export type MotifKey = "stack" | "laurel" | "bell" | "broom" | "note";
+
+export function bandMotif(c: BoardCard): MotifKey {
+  switch (cardBucket(c)) {
+    case "send": return "stack";
+    /* an R&R is a resubmission — the same manuscript stack goes back */
+    case "decide": return c.taskType === "offer_received" ? "laurel" : "stack";
+    case "chase": return "bell";
+    case "close": return "broom";
+    case "fix": return "broom";
+    case "note": return "note";
+  }
+}

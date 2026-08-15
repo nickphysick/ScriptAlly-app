@@ -137,11 +137,50 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
    */
   it("the band carries the identity — avatar, pre-line, name, agency", () => {
     const html = render();
-    expect(html).toContain("tdk-band fam-urgent");
+    /* ⚠️ `fam-urgent` IS GONE. The band was classed by FAMILY, which answers "how urgent is this" —
+       and `urgent` covers every send, every R&R and the offer alike, so nine cards of ten rendered
+       in the pink offer treatment. A send is the sage default. */
+    expect(html).toContain("tdk-band v-default");
+    expect(html).not.toContain("tdk-band fam-");
     expect(html).toContain("tdk-id");
     expect(html).toContain("Sending your full to");
     expect(html).toContain("Jonathan Marsh");
     expect(html).toContain("The Marsh Agency");
+  });
+
+  /**
+   * ⚠️ PINK IS THE OFFER AND NOTHING ELSE — one card of ten in the ref. Measured on the deployed
+   * page before the fix: EVERY card came back `fam-urgent`, because the variant was reading the
+   * family. The derivation (`bandVariant`) is asserted here against the rendered output, and the
+   * two variants are checked against each other so neither can drift into the other's job.
+   */
+  it("⚠️ the band variant is sage by default and pink ONLY for an offer", () => {
+    expect(render("a")).toContain("tdk-band v-default");            // a send
+    expect(render("b")).toContain("tdk-band v-default");            // a stale close
+    expect(render("c")).toContain("tdk-band v-default");            // the writer's own note
+    const offer = renderToStaticMarkup(
+      <TodoDock queue={[card({ key: "o", title: "An offer", who: "Tom Ellery", taskType: "offer_received" })]}
+        activeKey="o" onSelect={() => {}} onClose={() => {}} timeline={() => []}
+        onPrimary={() => {}} onMore={() => {}} />,
+    );
+    expect(offer).toContain("tdk-band v-offer");
+    expect(offer).not.toContain("v-default");
+  });
+
+  it("⚠️ each bucket carries its own motif, behind the text and clipped by the band", () => {
+    /* keyed on the BUCKET, so a new task type inherits the mark of the act it performs */
+    expect(render("a")).toContain("tdk-motif");                     // send → the manuscript stack
+    expect(render("c")).toContain("tdk-motif");                     // note → the torn note
+    const m = dockCssRule(".tdk-motif {");
+    expect(m).toContain("position: absolute");
+    expect(m).toContain("z-index: 1");                              // BEHIND the content's 2
+    expect(m).toContain("pointer-events: none");
+    expect(dockCssRule(".tdk-band {")).toContain("overflow: hidden"); // what clips it
+    /* ⚠️ THE FACTS STRIP CLEARS IT, in ONE declaration — a second `padding-right` later in the
+       same rule is what silently wins, and that is exactly how this was first written. */
+    const facts = dockCssRule(".tdk-facts {");
+    expect((facts.match(/padding-right:/g) ?? [])).toHaveLength(1);
+    expect(facts).toContain("padding-right: 96px");
   });
 
   it("⚠️ AND THE BODY REPEATS NEITHER THE NAME NOR THE TITLE", () => {
