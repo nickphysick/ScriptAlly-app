@@ -912,6 +912,10 @@
   color: #2b2118;
 }
 
+/* ⚠️ WORD FIGURES DROP TO 15px — "Today" at 21px shouts down a column of two-digit numerals.
+   Same family, same weight, same colour; only the size moves, so the column still aligns. */
+.tdg-fignum.word { font-size: 15px; }
+
 .tdg-fignum.hot { color: #7c3a2a; }
 
 .tdg-figun {

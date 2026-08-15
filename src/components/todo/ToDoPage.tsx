@@ -89,7 +89,7 @@ import {
    locked away from this component (tasks-consolidation P2). */
 import { taskGroups, taskStats, tasksEyebrow, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
 import { paneRestLine, showingLine, tasksCsv } from "../../lib/todoHandoff";
-import { rowFigure, daysSince, RowFigure, cardBucket, BUCKET_LABEL, rowDeed } from "../../lib/todoBuckets";
+import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket, BUCKET_LABEL, rowDeed } from "../../lib/todoBuckets";
 import { rowPrimaryLabel } from "../../lib/taskRow";
 import { SnoozeDial } from "./SnoozeDial";
 import { isTerminalStatus } from "../../lib/agentList";
@@ -749,35 +749,58 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * agent list's turn axis and the To-do flows all read. A local "is the agent waiting" test here
    * would be a fourth answer to a question with one.
    */
+  /** ⚠️ `responseReceivedAt` and `lastStatusChange` are `Timestamp | string` — the derived pair
+   *  carry whichever the write left. One coercion, at the only place that reads them here. */
+  const isoOf = (v: unknown): string | undefined => {
+    if (typeof v === "string") return v;
+    const d = (v as { toDate?: () => Date } | undefined)?.toDate?.();
+    return d ? d.toISOString() : undefined;
+  };
+
   function figureFor(c: BoardCard): RowFigure {
     const snoozedKeys = new Set(boardCols.snoozed.map((x) => x.key));
     const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    const ut = c.userTaskId ? userTasks.find((t) => t.id === c.userTaskId) : undefined;
     const statedWeeks = typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0
       ? ag.responseTimeWeeks : undefined;
     const ballHolder = q ? getPrimaryAction(q.status as QueryStatus).ballHolder ?? null : null;
 
-    /* ⚠️ A SLEEPING CARD STATES ITS RETURN DATE AND NOTHING ELSE — an elapsed figure on a card you
-       deliberately put away is a number about a wait you chose. `BoardCard` carries no
-       `snoozedUntil`; the SNOOZED COLUMN is what knows, and `due` is already `backOnLabel`'s
-       output ("BACK 12 AUG"), so the date is read rather than re-derived. */
+    /* a sleeping card states its return date and nothing else */
     if (snoozedKeys.has(c.key)) {
       return rowFigure({ card: c, backOn: (c.due || "").replace(/^BACK\s+/i, "") });
     }
-    /* an offer's reply-by is the one clock that counts DOWN */
+
+    /* ⚠️ AN OFFER'S REPLY-BY IS THE ONE CLOCK THAT COUNTS DOWN, and it can run out — a negative
+       remainder is "Reply was due / 3 days ago" rather than a figure quietly clamped to zero. */
     if (c.taskType === "offer_received" && q?.responseDeadline) {
       const left = Math.ceil((Date.parse(q.responseDeadline) - now) / 86400000);
-      if (Number.isFinite(left) && left >= 0) {
-        return rowFigure({ card: c, replyWithinDays: left });
-      }
+      if (Number.isFinite(left)) return rowFigure({ card: c, replyWithinDays: left });
     }
-    /* everything else counts UP, from the send where there is one and from the card otherwise */
-    const fromMs = q?.dateSent ? Date.parse(q.dateSent) : (c.whenMs ?? now);
+
+    /**
+     * ⚠️ THE ANCHOR IS PER BUCKET AND IT CAN BE ABSENT. `waitAnchorMs` returns NaN where the record
+     * cannot say; `elapsedDays` is then left UNDEFINED and the figure reads "No date on record".
+     * There is no `?? now` here any more — that fallback is what printed "Today" on cards that had
+     * waited 47 days.
+     */
+    const anchor = waitAnchorMs(cardBucket(c), c.taskType, {
+      dateSent: q?.dateSent,
+      partialRequestedDate: q?.partialRequestedDate,
+      fullRequestedDate: q?.fullRequestedDate,
+      partialSentDate: q?.partialSentDate,
+      fullSentDate: q?.fullSentDate,
+      lastNudgeSentDate: q?.lastNudgeSentDate,
+      lastReplyAt: isoOf(q?.responseReceivedAt),
+      statusMovedAt: isoOf(q?.lastStatusChange),
+      createdAt: ut?.createdAt,
+    });
+
     return rowFigure({
       card: c,
       statedWeeks,
       ballHolder,
-      elapsedDays: daysSince(Number.isFinite(fromMs) ? fromMs : now, now),
+      elapsedDays: Number.isFinite(anchor) ? daysSince(anchor, now) : undefined,
     });
   }
 

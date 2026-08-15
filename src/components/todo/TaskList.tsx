@@ -629,7 +629,12 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           <div className="tdg-figstack">
             <div className="tdg-figlab">{figure.label}</div>
             <div className="tdg-figval">
-              <span className={`tdg-fignum${figure.hot ? " hot" : ""}`}>{figure.value}</span>
+              {/* ⚠️ A WORD IS NOT A NUMERAL (corrections, Phase 3c). "Today" at the numeral's 21px
+                  shouts down a column of two-digit figures. Same family, same weight, same colour
+                  — 15px — so the column still aligns without one word dominating the rail. The
+                  test is `unit`: a figure with no unit is a word, which is the same fact the
+                  derivation already decided rather than a second guess at it. */}
+              <span className={`tdg-fignum${figure.unit ? "" : " word"}${figure.hot ? " hot" : ""}`}>{figure.value}</span>
               {figure.unit && <span className="tdg-figun">{figure.unit}</span>}
             </div>
           </div>

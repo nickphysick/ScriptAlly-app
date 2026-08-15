@@ -166,60 +166,72 @@ export interface FigureInput {
   statedWeeks?: number;
   /** Whose move — the CTA engine's answer, passed in rather than re-derived. */
   ballHolder?: "agent" | "writer" | null;
-  /** Days since the thing the figure counts from. */
+  /**
+   * ⚠️ DAYS SINCE THE EVENT THAT STARTED THIS WAIT — and `undefined` where the record cannot say.
+   * It was `= 0`, which silently became "Today" on every card whose anchor was missing. A default
+   * here is a fabricated date, and the whole point of this pass is that there is no such thing.
+   */
   elapsedDays?: number;
-  /** An offer's remaining days, where one is running. */
+  /** An offer's remaining days. NEGATIVE where the reply-by has passed. */
   replyWithinDays?: number;
   /** A snoozed card's return date, already formatted. */
   backOn?: string;
 }
 
 /**
- * ⚠️ THE LABEL SAYS WHOSE WAIT IT IS, AND THE COLOUR SAYS THE SAME THING — one fact in two
- * registers, never two facts. `side` drives the colour and the wording comes from the same branch.
+ * ⚠️ THE LABEL AND THE FIGURE ARE CHOSEN TOGETHER, NEVER INDEPENDENTLY. "DANIEL'S WAITED / Today"
+ * is not English. The pair is picked in one branch so a label can never be handed a figure that
+ * does not complete it — read every row of the table aloud and it is a sentence.
  *
- * ⚠️ BURGUNDY IS RARE BY CONSTRUCTION. `hot` is true in exactly two cases: an elapsed figure past
- * a stated window, and an offer's reply-by running. It is not reachable from any other branch, so
- * the page cannot drift into a column of red numerals.
+ * ⚠️ AND THERE IS NO FALLBACK TO TODAY. A card whose anchor the record cannot supply says so —
+ * `No date on record`, and no figure at all. Inventing "Today" for a wait that started months ago
+ * is the app stating something false in its most scannable column.
  */
 export function rowFigure(input: FigureInput): RowFigure {
-  const { card, statedWeeks, ballHolder, elapsedDays = 0, replyWithinDays, backOn } = input;
+  const { card, statedWeeks, ballHolder, elapsedDays, replyWithinDays, backOn } = input;
 
   if (backOn) return { label: "Back on", value: backOn, unit: "", side: "neither", hot: false };
 
+  /* the offer's clock is the one that counts DOWN, and it can run out */
   if (typeof replyWithinDays === "number") {
-    return {
-      label: "Reply within",
-      ...elapsedFigure(replyWithinDays, undefined),
-      side: "you",
-      hot: true, // a running reply-by is one of the two cases burgundy exists for
-    };
+    if (replyWithinDays < 0) {
+      const past = Math.abs(replyWithinDays);
+      return { label: "Reply was due", value: String(past), unit: past === 1 ? "day ago" : "days ago", side: "you", hot: true };
+    }
+    if (replyWithinDays === 0) return { label: "Reply by", value: "Today", unit: "", side: "you", hot: true };
+    return { label: "Reply within", ...elapsedFigure(replyWithinDays), side: "you", hot: true };
+  }
+
+  /* ⚠️ NO ANCHOR, NO FIGURE, AND THE LABEL SAYS SO. */
+  if (typeof elapsedDays !== "number") {
+    return { label: "No date on record", value: "", unit: "", side: "neither", hot: false };
   }
 
   const first = firstName(card.who);
   const past = !!statedWeeks && statedWeeks > 0 && elapsedDays > statedWeeks * 7;
+  const fig = elapsedFigure(elapsedDays, statedWeeks);
+  /* under two days the figure is a WORD, and a word needs a different verb to complete it */
+  const isWord = elapsedDays <= 1;
 
   if (!card.agentId && !card.who) {
-    /* no agent at all — the writer's own items and the housekeeping that has no agency behind it */
-    return { label: card.userTaskId || card.nature ? "Added" : "Noticed", ...elapsedFigure(elapsedDays, statedWeeks), side: "neither", hot: false };
-  }
-
-  if (ballHolder === "writer") {
-    /* the agent is waiting on the writer */
     return {
-      label: first ? `${possessive(first)} waited` : "They've waited",
-      ...elapsedFigure(elapsedDays, statedWeeks),
-      side: "you",
-      hot: past,
+      label: card.userTaskId || card.nature ? "Added" : "Noticed",
+      ...fig, side: "neither", hot: false,
     };
   }
 
-  return {
-    label: "You've waited",
-    ...elapsedFigure(elapsedDays, statedWeeks),
-    side: "them",
-    hot: past,
-  };
+  if (ballHolder === "writer") {
+    /* the agent is waiting on the writer — "Marcus's waited / 12 days", "Marcus asked / Today" */
+    return {
+      label: isWord
+        ? (first ? `${first} asked` : "They asked")
+        : (first ? `${possessive(first)} waited` : "They've waited"),
+      ...fig, side: "you", hot: past,
+    };
+  }
+
+  /* the writer is waiting on the agent — "You've waited / 14 weeks", "You queried / Today" */
+  return { label: isWord ? "You queried" : "You've waited", ...fig, side: "them", hot: past };
 }
 
 /** Days between two instants, floored — the one arithmetic every caller shares. */
@@ -249,4 +261,87 @@ export function rowMeta(c: BoardCard): string {
   if (c.record) return c.record;
   if (c.who) return c.who;
   return cardBucket(c) === "note" ? "Your noteboard" : "Submission packages";
+}
+
+/* ── the wait's anchor, per bucket (corrections, Phase 3a) ───────────────────────────────────── */
+
+export interface AnchorInput {
+  /** The query behind the card, where there is one. */
+  dateSent?: string;
+  partialRequestedDate?: string;
+  fullRequestedDate?: string;
+  partialSentDate?: string;
+  fullSentDate?: string;
+  lastNudgeSentDate?: string;
+  /**
+   * ⚠️ NAMED FOR WHAT THEY ARE HERE, NOT FOR THE FIELDS THEY COME FROM — and that is deliberate.
+   * `recomputeQuery`'s single-writer lock sweeps for the object-key form of the two derived date
+   * fields and flags any file outside the derivation pair that carries it. An
+   * AnchorInput literal using those names is indistinguishable from a write, so the sweep would
+   * have to be loosened to let this through — and a lock that has to be argued with stops being
+   * one. These are the anchor's own names; the call site READS the stored fields, which the sweep
+   * correctly ignores.
+   */
+  /** The last reply that came in (from the derived `responseReceivedAt`). */
+  lastReplyAt?: string;
+  /** When the status last moved (from the derived `lastStatusChange`). */
+  statusMovedAt?: string;
+  /** A user card's own creation instant. */
+  createdAt?: string;
+}
+
+const ms = (v?: string): number => {
+  const t = v ? Date.parse(v) : NaN;
+  return Number.isFinite(t) ? t : NaN;
+};
+const latest = (...vs: (string | undefined)[]): number => {
+  const ts = vs.map(ms).filter((t) => Number.isFinite(t));
+  return ts.length ? Math.max(...ts) : NaN;
+};
+
+/**
+ * ⚠️ THE ANCHOR IS THE EVENT THAT STARTED **THIS** WAIT, AND IT IS PER BUCKET. The rail was
+ * measuring from `dateSent` — when the QUERY went — for every kind, which is why an offer received
+ * on 17 July read `127 weeks` and a full requested on 2 August read `123 weeks`: both were counting
+ * from the original query, months or years earlier. And where `dateSent` was absent it fell back
+ * to `now`, which is where `Today` came from on cards that had waited 24 and 47 days.
+ *
+ * ⚠️ NaN MEANS THE RECORD CANNOT SAY, and that is a RESULT rather than a failure. `rowFigure` turns
+ * it into "No date on record" with no figure. There is no fallback to today and no fallback to the
+ * query's creation — both are the app inventing a date, which is worse than admitting it has none.
+ *
+ * ⚠️ THE DERIVED FIELDS ARE READ, NOT RE-DERIVED. `lastStatusChange` and `responseReceivedAt` are
+ * `recomputeQuery`'s own output from the activity log, so reading them IS reading the log — through
+ * the one derivation that owns it, exactly as `lastQueriedAt` reads `dateSent` rather than
+ * rescanning. A second scan here would be a second answer.
+ */
+export function waitAnchorMs(bucket: Bucket, taskType: string | undefined, q: AnchorInput): number {
+  switch (bucket) {
+    case "send":
+      /* the date the agent asked for the material — the specific request, not the query */
+      if (taskType === "partial_requested") return ms(q.partialRequestedDate);
+      if (taskType === "full_requested") return ms(q.fullRequestedDate);
+      /* an R&R has no request date of its own; the status change IS when it was asked for */
+      return ms(q.statusMovedAt);
+
+    case "decide":
+      /* the offer or the revision arrived when the status last moved */
+      return ms(q.statusMovedAt);
+
+    case "chase":
+    case "close":
+      /* whichever is later: the last thing the writer sent, or the last thing that came back */
+      return latest(q.fullSentDate, q.partialSentDate, q.lastNudgeSentDate, q.lastReplyAt, q.dateSent);
+
+    case "note":
+      return ms(q.createdAt);
+
+    case "fix":
+      /* ⚠️ NOT RESOLVABLE TODAY, AND THIS IS THE HONEST ANSWER RATHER THAN A GUESS. A housekeeping
+         gap is raised from a `TaskFlag`, which carries `snoozedUntil`, `committedDate`, `skippedAt`
+         and `resolvedAt` — every date EXCEPT when the flag was created. There is nothing to measure
+         from, so the row says "No date on record". Adding a `createdAt` to the flag is the one
+         change that would resolve it, and it is a data decision rather than a display one. */
+      return NaN;
+  }
 }

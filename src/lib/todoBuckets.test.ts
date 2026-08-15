@@ -13,7 +13,7 @@ import { BoardCard } from "./todoBoard";
 import { liveFamily } from "./todoFamily";
 import {
   cardBucket, bucketFamily, bucketAgreesWithFamily, BUCKET_ORDER, BUCKET_LABEL,
-  rowDeed, rowMeta, rowFigure, elapsedFigure, possessive, firstName, daysSince,
+  rowDeed, rowMeta, rowFigure, elapsedFigure, possessive, firstName, daysSince, waitAnchorMs,
 } from "./todoBuckets";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -207,5 +207,119 @@ describe("⚠️ THE META LINE IS COMPOSED ONCE", () => {
       const line = rowMeta(c);
       expect(line.split(c.who).length - 1, line).toBe(1);
     }
+  });
+});
+
+/**
+ * ⚠️ THE ANCHOR IS THE EVENT THAT STARTED **THIS** WAIT. The rail measured every kind from
+ * `dateSent` — when the QUERY went — so an offer received on 17 July read `127 weeks` and a full
+ * requested on 2 August read `123 weeks`: both counting from the original query. And where
+ * `dateSent` was absent it fell back to `now`, which is where `Today` came from on cards that had
+ * waited 24 and 47 days.
+ */
+describe("⚠️ THE WAIT'S ANCHOR IS PER BUCKET, AND IT CAN BE ABSENT", () => {
+  const JUL = "2026-07-17T09:00:00Z";
+  const AUG = "2026-08-02T09:00:00Z";
+  const OLD = "2024-01-05T09:00:00Z"; // the original query — never the anchor for a later wait
+
+  it("a Send counts from the REQUEST, not from the query", () => {
+    expect(waitAnchorMs("send", "full_requested", { dateSent: OLD, fullRequestedDate: AUG }))
+      .toBe(Date.parse(AUG));
+    expect(waitAnchorMs("send", "partial_requested", { dateSent: OLD, partialRequestedDate: JUL }))
+      .toBe(Date.parse(JUL));
+  });
+
+  it("a Decide counts from the status change that brought the offer in", () => {
+    expect(waitAnchorMs("decide", "offer_received", { dateSent: OLD, statusMovedAt: JUL }))
+      .toBe(Date.parse(JUL));
+  });
+
+  it("a Chase counts from the LATER of the last send and the last reply", () => {
+    const anchor = waitAnchorMs("chase", "nudge_overdue", {
+      dateSent: OLD, fullSentDate: JUL, lastReplyAt: AUG,
+    });
+    expect(anchor).toBe(Date.parse(AUG));
+  });
+
+  it("a Note counts from when it was added", () => {
+    expect(waitAnchorMs("note", undefined, { createdAt: AUG })).toBe(Date.parse(AUG));
+  });
+
+  /**
+   * ⚠️ A FIX HAS NO ANCHOR THE RECORD CAN SUPPLY, and NaN is the honest answer. `TaskFlag` carries
+   * `snoozedUntil`, `committedDate`, `skippedAt` and `resolvedAt` — every date except when the
+   * flag was raised. Adding a `createdAt` to the flag is the one change that would resolve it.
+   */
+  it("⚠️ A FIX IS NOT RESOLVABLE — and it says so rather than guessing", () => {
+    expect(Number.isNaN(waitAnchorMs("fix", "data_quality_poor", { dateSent: OLD }))).toBe(true);
+  });
+
+  it("⚠️ NO FALLBACK TO TODAY AND NONE TO THE QUERY'S CREATION — a missing anchor is NaN", () => {
+    expect(Number.isNaN(waitAnchorMs("send", "full_requested", { dateSent: OLD }))).toBe(true);
+    expect(Number.isNaN(waitAnchorMs("decide", "offer_received", { dateSent: OLD }))).toBe(true);
+  });
+});
+
+/**
+ * ⚠️ READ EVERY PAIR ALOUD. `DANIEL'S WAITED / Today` is not English — the label and the figure are
+ * chosen in ONE branch so a label can never be handed a figure that does not complete it.
+ */
+describe("⚠️ THE LABEL AND THE FIGURE ALWAYS FORM A SENTENCE", () => {
+  const c = (over: Partial<BoardCard> = {}) => card({ who: "Daniel Okafor", ...over });
+  const say = (f: { label: string; value: string; unit: string }) =>
+    `${f.label} ${f.value}${f.unit ? ` ${f.unit}` : ""}`.trim();
+
+  it("agent waiting: 2+ days possessive, today and yesterday take `asked`", () => {
+    expect(say(rowFigure({ card: c(), ballHolder: "writer", elapsedDays: 12 }))).toBe("Daniel's waited 12 days");
+    expect(say(rowFigure({ card: c(), ballHolder: "writer", elapsedDays: 0 }))).toBe("Daniel asked Today");
+    expect(say(rowFigure({ card: c(), ballHolder: "writer", elapsedDays: 1 }))).toBe("Daniel asked Yesterday");
+  });
+
+  it("writer waiting: `You've waited` at 2+, `You queried` at today and yesterday", () => {
+    expect(say(rowFigure({ card: c(), ballHolder: "agent", elapsedDays: 98, statedWeeks: 12 }))).toBe("You've waited 14 weeks");
+    expect(say(rowFigure({ card: c(), ballHolder: "agent", elapsedDays: 0 }))).toBe("You queried Today");
+    expect(say(rowFigure({ card: c(), ballHolder: "agent", elapsedDays: 1 }))).toBe("You queried Yesterday");
+  });
+
+  it("the offer's three states each read as a sentence", () => {
+    expect(say(rowFigure({ card: c(), replyWithinDays: 24 }))).toBe("Reply within 24 days");
+    expect(say(rowFigure({ card: c(), replyWithinDays: 0 }))).toBe("Reply by Today");
+    expect(say(rowFigure({ card: c(), replyWithinDays: -3 }))).toBe("Reply was due 3 days ago");
+  });
+
+  it("⚠️ NO ANCHOR: the label says so and there is NO figure at all", () => {
+    const f = rowFigure({ card: c(), ballHolder: "agent" });
+    expect(f.label).toBe("No date on record");
+    expect(f.value).toBe("");
+    expect(f.unit).toBe("");
+    expect(f.hot).toBe(false);
+  });
+
+  it("a snoozed card, and a card with no agent", () => {
+    expect(say(rowFigure({ card: c(), backOn: "15 Aug" }))).toBe("Back on 15 Aug");
+    const mine = card({ who: "", agentId: undefined, userTaskId: "u1" });
+    expect(say(rowFigure({ card: mine, elapsedDays: 5 }))).toBe("Added 5 days");
+    expect(say(rowFigure({ card: mine, elapsedDays: 0 }))).toBe("Added Today");
+  });
+
+  it("⚠️ EVERY PAIR IS A SENTENCE — no label is ever left with a figure that does not finish it", () => {
+    const pairs = [
+      rowFigure({ card: c(), ballHolder: "writer", elapsedDays: 0 }),
+      rowFigure({ card: c(), ballHolder: "writer", elapsedDays: 1 }),
+      rowFigure({ card: c(), ballHolder: "agent", elapsedDays: 0 }),
+      rowFigure({ card: c(), ballHolder: "agent", elapsedDays: 2 }),
+      rowFigure({ card: c(), replyWithinDays: 0 }),
+      rowFigure({ card: c(), replyWithinDays: -1 }),
+    ];
+    for (const f of pairs) {
+      /* a possessive "…'s waited" can never sit over a word figure — that is the bug this table
+         exists to make impossible */
+      if (!f.unit && f.value) expect(f.label, say(f)).not.toMatch(/waited|within$/);
+    }
+  });
+
+  it("⚠️ A WORD FIGURE CARRIES NO UNIT — which is how the row knows to set it at 15px", () => {
+    expect(rowFigure({ card: c(), ballHolder: "agent", elapsedDays: 0 }).unit).toBe("");
+    expect(rowFigure({ card: c(), ballHolder: "agent", elapsedDays: 2 }).unit).toBe("days");
   });
 });
