@@ -45,6 +45,7 @@ import { journeyMaterials, synopsisStateFor, journeySummary } from "../../lib/jo
 import { RecordingCalendar } from "./RecordingCalendar";
 import { shortDate } from "../../lib/recordingCalendar";
 import { cardBucket } from "../../lib/todoBuckets";
+import { cardJourney, isSendTask, CloseReason, CLOSE_REASONS } from "../../lib/todoJourneys";
 import { isSlotFilled } from "../../lib/packageMetrics";
 import { agentDataQualityNeeds, AgentDataNeed } from "../../lib/agentDataQuality";
 import { BoardCard } from "../../lib/todoBoard";
@@ -89,20 +90,6 @@ const itemKey = (it: FocusItem): string => (it.kind === "card" ? it.card.key : `
  * writer sees everything they are about to record at once, which is the only way the summary
  * strip beneath can be true of the whole thing.
  */
-/**
- * ⚠️ THREE WAYS A QUERY CLOSES, AND THEY ARE NOT THE SAME EVENT. A silence, a pass you saw but
- * never logged, and a withdrawal are three different facts about what happened, and folding them
- * into one "closed" would make the response rate a number that means nothing — a pass IS a
- * response, a silence is not, and a withdrawal is neither. Each carries its own `QueryStatus`, so
- * `recomputeQuery` stays the single writer of everything derived from it.
- */
-export type CloseReason = "no_reply" | "off_record" | "withdrawn";
-export const CLOSE_REASONS: { key: CloseReason; label: string; gloss: string; status: QueryStatus }[] = [
-  { key: "no_reply", label: "No reply within their window", gloss: "Silence past a stated window", status: QueryStatus.NO_RESPONSE },
-  { key: "off_record", label: "A pass arrived off the record", gloss: "You saw it but never logged it", status: QueryStatus.REJECTED },
-  { key: "withdrawn", label: "You withdrew the query", gloss: "You pulled it yourself", status: QueryStatus.WITHDRAWN },
-];
-
 export interface JourneyStep {
   id: string;
   /** The Playfair heading — "What went", "How it went", "When". */
@@ -131,19 +118,6 @@ export interface JourneySpec {
   lede?: React.ReactNode;
   /** A secondary footer action, beside Cancel. Only the note journey uses it — see `noteSheet`. */
   extraFoot?: React.ReactNode;
-}
-type CardJourney = "offer" | "send" | "resubmit" | "nudge" | "stale" | "dq" | "note";
-function cardJourney(c: BoardCard): CardJourney {
-  if (c.userTaskId) return "note";
-  if (c.taskType === "offer_received") return "offer";
-  /* ⚠️ AN R&R IS ITS OWN JOURNEY, not a send with a different label. It is the one stage where a
-     SECOND row is pre-ticked by default, and the reference panel shows the agent's notes rather
-     than their ask — two differences a shared journey would have to branch on internally. */
-  if (c.taskType === "revise_resubmit") return "resubmit";
-  if (c.taskType === "nudge_overdue") return "nudge";
-  if (c.taskType === "no_response_close") return "stale";
-  if (c.taskType === "data_quality_poor") return "dq";
-  return "send";
 }
 /** What the agent asked for, in prose, for the nudge draft. */
 function requestedProse(status?: QueryStatus): string | undefined {
@@ -1927,7 +1901,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
        (`exclusive_expiring` is declared in this codebase and would have hit it). The bucket says
        which hand-off: a judgement goes to the offer flow, a gap in the record to where the data
        lives. Only the two send task types reach `sendSheet` now, and they say so. */
-    if (it.card.taskType === "partial_requested" || it.card.taskType === "full_requested") return sendSheet(it.card);
+    if (isSendTask(it.card.taskType)) return sendSheet(it.card);
     const bucket = cardBucket(it.card);
     return handoffSheet(it.card, bucket === "decide" ? "decide" : "fix");
     // eslint-disable-next-line react-hooks/exhaustive-deps
