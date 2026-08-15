@@ -299,6 +299,13 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                 {events.map((e) => (
                   <li key={e.key} className={e.ring ? `r-${e.ring}` : undefined}>
                     <span className="tdk-tlw">{e.when}</span>
+                    {/* ⚠️ §3.5 — THE RING IS ITS OWN TRACK, AND THE CONNECTOR IS THE TRACK'S, NOT
+                        THE LIST'S. A single `border-left` down the whole `<ol>` — which is what
+                        this was — draws a rule THROUGH every mark rather than between them, so
+                        the marks read as beads threaded on a wire instead of as rungs joined by
+                        one. The rule is `.tdk-tlm::after`, suppressed on the last entry because
+                        there is nothing below it to reach. */}
+                    <span className="tdk-tlm" aria-hidden><i /></span>
                     <span className="tdk-tle">
                       {/* the event in 600, the channel appended in regular — one line, two weights */}
                       <b>{e.label}</b>{e.via && <span className="via"> · {e.via}</span>}

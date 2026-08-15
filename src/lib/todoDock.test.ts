@@ -6,7 +6,8 @@
  */
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, dockQueue, resolveDocked } from "./todoDock";
+import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, dockQueue, resolveDocked, timelineRing } from "./todoDock";
+import { QueryStatus } from "../types";
 
 const card = (over: Partial<BoardCard>): BoardCard => ({
   key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,
@@ -146,5 +147,45 @@ describe("⚠️ THE DOCKED CARD IS RESOLVED FROM THE LIVE LIST, never from a st
     /* The hint must survive an empty read unchanged, or a list that briefly empties would reset
        the reader to the top when it refilled. */
     expect(resolveDocked([], "b", 7).pos).toBe(7);
+  });
+});
+
+/* ── §3.5 — THE RING ──────────────────────────────────────────────────────────────────────────
+   ⚠️ THE STATUSES ARE THE `QueryStatus` ENUM'S OWN MEMBERS, never hand-typed strings. `recordResponse`
+   writes `resultingStatus` from that enum, so an argument spelled by hand here would be testing a
+   value the system cannot produce — and would go green the day a member was renamed. */
+describe("timelineRing — the direction the record pointed, from StatusDot's own classifier", () => {
+  it("outgoing is something of yours leaving", () => {
+    for (const s of [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.OFFER]) {
+      expect(timelineRing(s, false), String(s)).toBe("out");
+    }
+  });
+
+  it("incoming is the agency asking for something", () => {
+    for (const s of [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]) {
+      expect(timelineRing(s, false), String(s)).toBe("in");
+    }
+  });
+
+  it("⚠️ THE LAST RUNG IS `now` WHATEVER DIRECTION IT POINTED — it is where the record stands", () => {
+    expect(timelineRing(QueryStatus.FULL_SENT, true)).toBe("now");
+    expect(timelineRing(QueryStatus.FULL_REQUESTED, true)).toBe("now");
+    expect(timelineRing(QueryStatus.REJECTED, true)).toBe("now");
+    /* and an entry with no status at all still marks the rung it is */
+    expect(timelineRing(undefined, true)).toBe("now");
+  });
+
+  it("⚠️ A CLOSED DIRECTION MID-HISTORY TAKES THE NEUTRAL RING, not one of the other two", () => {
+    /* §3.5 names three treatments. A rejection is neither outgoing nor incoming, and borrowing
+       either colour would state a direction the event did not have. */
+    for (const s of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]) {
+      expect(timelineRing(s, false), String(s)).toBeUndefined();
+    }
+  });
+
+  it("a row the record left silent carries no ring rather than a guessed one", () => {
+    expect(timelineRing(undefined, false)).toBeUndefined();
+    expect(timelineRing("", false)).toBeUndefined();
+    expect(timelineRing(null, false)).toBeUndefined();
   });
 });

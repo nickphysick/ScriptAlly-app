@@ -219,11 +219,56 @@
 .tdk-rec { font-size: 12.5px; color: #8a7a6d; margin-top: 5px; }
 
 /* the timeline — quiet, and only when there is history to show */
-.tdk-tl { list-style: none; margin: 0; padding: 0 0 0 12px; border-left: 2px solid #efe8dc; }
-.tdk-tl li { display: flex; gap: 10px; font-size: 12.5px; color: #4d4238; padding: 4px 0; }
+/* ⚠️ §3.5 — THREE TRACKS: DATE · RING · EVENT (ref v14 `.tl-row`). It was a flex row with a single
+   `border-left: 2px` down the whole `<ol>`, which draws one continuous rule THROUGH the entries.
+   That reads as a margin rule beside a list, not as a record with rungs — and it is why §3.5
+   called the rings the largest remaining gap: there was nothing on the line at all.
+   ⚠️ A GRID, so the event text wraps against its own track rather than against the date's. */
+.tdk-tl { list-style: none; margin: 0; padding: 0; border: 0; --tdk-ring: 22px; }
+.tdk-tl li {
+  display: grid;
+  grid-template-columns: 62px var(--tdk-ring) minmax(0, 1fr);
+  gap: 0 12px; align-items: start;
+  font-size: 12.5px; color: #4d4238; padding: 0 0 16px;
+}
+.tdk-tl li:last-child { padding-bottom: 0; }
 .tdk-tlw {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px; letter-spacing: .08em; color: #a5988c; white-space: nowrap; min-width: 62px;
+  font-size: 9px; letter-spacing: .08em; color: #a5988c; white-space: nowrap;
+  text-align: right; padding-top: 6px;
+}
+
+/* ⚠️ §3.5 — THE RING IS 22px, AND THAT IS THE SPECIFICATION'S NUMBER, NOT v14's.
+   The mockup draws an 11px DOT (`.tl-mark .n`); the specification asks for a RING, and a ring at
+   11px with a 1.5px border has almost no interior left to carry the fill that distinguishes
+   outgoing from incoming. The size is what makes the three treatments legible as three; the
+   COLOURS below are v14's tokens unchanged. Recorded because the two artefacts disagree and the
+   divergence is deliberate.
+   ⚠️ `box-sizing: border-box` DECLARED HERE rather than inherited — the connector's `top` is
+   arithmetic off this box, and a rule whose maths depends on the box model states its own.
+   (`--tdk-ring` is declared on `.tdk-tl` above, in its ONE rule — a second `.tdk-tl {` block would
+   make every lock that slices on first match read the wrong half.) */
+.tdk-tlm { position: relative; display: flex; justify-content: center; }
+.tdk-tlm i {
+  box-sizing: border-box;
+  display: block; width: var(--tdk-ring); height: var(--tdk-ring); border-radius: 50%;
+  background: #fdfaf5; border: 1.5px solid #d8c4b6;
+  position: relative; z-index: 2;
+}
+/* outgoing — burgundy on pink; something of yours left the building */
+.tdk-tl li.r-out .tdk-tlm i { background: #f5e2da; border-color: #7c3a2a; }
+/* incoming — sage; the agency asked for something */
+.tdk-tl li.r-in .tdk-tlm i { background: #e7ece5; border-color: #8a9e88; }
+/* the rung the record stands on — solid burgundy, filled rather than outlined */
+.tdk-tl li.r-now .tdk-tlm i { background: #7c3a2a; border-color: #7c3a2a; }
+
+/* ⚠️ THE CONNECTOR RUNS BETWEEN RINGS, NEVER THROUGH THEM — it starts at this ring's bottom edge
+   and stops at the next one's top. `bottom: -16px` is the row's own `padding-bottom`, so the two
+   move together; the last entry has nothing below it and draws none. */
+.tdk-tl li:not(:last-child) .tdk-tlm::after {
+  content: "";
+  position: absolute; left: 50%; transform: translateX(-50%);
+  top: var(--tdk-ring); bottom: -16px; width: 1.5px; background: #eadfd2; z-index: 1;
 }
 
 .tdk-flow { margin-top: 18px; }

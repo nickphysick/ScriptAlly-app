@@ -16,6 +16,30 @@
  */
 
 import { BoardCard } from "./todoBoard";
+import { statusDirection } from "../components/StatusDot";
+
+/**
+ * ⚠️ §3.5 — THE RING'S STATE COMES FROM `statusDirection`, THE SAME CLASSIFIER `StatusDot` DRAWS.
+ *
+ * Three states and no fourth: `out` is something of yours leaving (queried, partial sent, full
+ * sent, offer accepted), `in` is the agency asking for something (partial/full requested, R&R),
+ * and `now` is the rung the record currently stands on. Deriving them here rather than in the
+ * page is what stops the card and the dot disagreeing about which way an event pointed.
+ *
+ * ⚠️ AND A `closed` DIRECTION TAKES THE NEUTRAL RING, NOT A COLOUR OF ITS OWN. §3.5 names three
+ * treatments; a rejection mid-history is neither outgoing nor incoming, so it renders the base
+ * ring rather than borrowing one of the two that mean something else. Where a closure IS the last
+ * rung — which is every `close` card — `now` wins, because that is what the record stands on.
+ */
+export type TimelineRing = "out" | "in" | "now";
+
+export function timelineRing(resultingStatus: unknown, isLast: boolean): TimelineRing | undefined {
+  /* the newest rung is where the record stands, whatever direction it pointed on the way in */
+  if (isLast) return "now";
+  if (typeof resultingStatus !== "string" || !resultingStatus) return undefined;
+  const dir = statusDirection(resultingStatus);
+  return dir === "closed" ? undefined : dir;
+}
 
 /** Which inline flow the work surface mounts. Derived from the card, never stored. */
 export type DockFlowKind = "agent-waiting" | "offer" | "stale" | "user-task" | "housekeeping";

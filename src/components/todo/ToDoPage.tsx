@@ -80,7 +80,7 @@ import { todoPrefs } from "../../lib/todoPrefs";
    retirement — only the tag NARROWING went with it); `matchesTags` had no reader left. */
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
-import { dockQueue, resolveDocked } from "../../lib/todoDock";
+import { dockQueue, resolveDocked, timelineRing } from "../../lib/todoDock";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
@@ -2290,10 +2290,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (!card.relatedRecordId) return [];
     const q = queries.find((x) => x.id === card.relatedRecordId);
     const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
-    return dockRows
+    const kept = dockRows
       .map((r, i) => ({ r, i, label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }) }))
-      .filter((x) => x.label !== null)
-      .map((x) => {
+      .filter((x) => x.label !== null);
+    return kept
+      .map((x, n) => {
         /* ⚠️ `createdAt` IS A FIRESTORE TIMESTAMP ON THESE ROWS, not the ISO string the global feed
            carries — reading it as a string yields "Invalid Date" rather than an error. */
         const raw: any = x.r.createdAt ?? x.r.date;
@@ -2305,6 +2306,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           /* absent where the record is silent — never inferred */
           ...(x.r.via ? { via: String(x.r.via) } : q?.sendMethod ? { via: `via ${String(q.sendMethod).toLowerCase()}` } : {}),
           ...(x.r.note ? { note: String(x.r.note) } : {}),
+          /* ⚠️ §3.5 — THE RING, FROM THE SAME CLASSIFIER `StatusDot` DRAWS. `isLast` is computed
+             against the KEPT rows, not the raw ones: an unlabelled row is not on the timeline, so
+             it cannot be the rung the record stands on. */
+          ...((r) => (r ? { ring: r } : {}))(timelineRing(x.r.resultingStatus, n === kept.length - 1)),
         } as DockTimelineEvent;
       })
       /* newest last, as the Centre reads it — the bar against the agent's window belongs to the
