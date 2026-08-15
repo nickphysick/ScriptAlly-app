@@ -36,8 +36,19 @@
  */
 .tdk-w {
   position: relative;
-  max-width: 640px;
-  margin: 0 auto;
+  /**
+   * ⚠️ THE CARD FILLS THE PANE — and the 640px cap I kept here is what inverted Phase 3's columns.
+   * Measured at 1920: the body resolved to `162px 400px`, the RECORD on 162 and the doing on 400,
+   * which is precisely the fault Phase 3 was meant to fix. The arithmetic: a 640 card leaves 592
+   * of content, minus the 30px gap is 562 — and the doing column's `minmax(330px, 400px)` takes
+   * 400 of that, so the fr track can only ever have 162. The track numbers are the ref's and they
+   * are right; the cap was mine and it was wrong. Two columns need 330 + 30 + 330 = 690 of content
+   * before the record gets an equal share, which a 640 card can never provide.
+   *
+   * ⚠️ AND THE REF SAYS SO IN ITS OWN COMMENT: "the card fills the pane; the frame is the
+   * workspace edge". `.f11` has `flex: 1` and no max-width. The pane is already bounded by the
+   * split, so the pane is the measure — a second cap inside it was one constraint too many.
+   */
   background: var(--paper);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
   border-radius: 14px;
@@ -45,11 +56,11 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  /* ⚠️ THE CARD REACHES THE BOTTOM OF THE PANE — it does not become full-bleed. `max-width: 640px`
-     and the auto margins stay: the reading measure is the two-column body's, and widening it would
-     set the record column's prose at a line length nobody reads comfortably. Only the VERTICAL
-     changes. This replaced a `min-height: 340px` content floor, which left a stub card floating in
-     a tall pane; `.tdw-work` still scrolls when the record outgrows the pane.
+  /* ⚠️ THE CARD REACHES THE BOTTOM OF THE PANE. This replaced a `min-height: 340px` content floor,
+     which left a stub card floating in a tall pane; `.tdw-work` still scrolls when the record
+     outgrows it. The READING MEASURE is the doing column's own `minmax(330px, 400px)` now — the
+     bounded track is what stops prose running long, which is a better place for it than a cap on
+     the whole card that also decided the record's width.
      ⚠️ `box-sizing` IS DECLARED rather than inherited, because the maths depends on it. */
   box-sizing: border-box;
   min-height: 100%;
@@ -141,7 +152,15 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 7.5px; letter-spacing: 0.14em; font-style: normal; text-transform: uppercase; color: #3a1c14;
 }
-.tdk-x { margin-left: auto; background: transparent; border: 0; color: #8a6a58; cursor: pointer; line-height: 0; padding: 3px; border-radius: 5px; }
+/* ⚠️ THE CLOSE CONTROL IS POSITIONED AND STACKED, and it was neither — that is why the motif drew
+   over it. `.tdk-motif` is `position: absolute; z-index: 1`; a STATIC element takes no z-index at
+   all, so the close button sat outside the stacking order and a positioned sibling painted on top
+   of it regardless of DOM order. Measured on the deployed page at 1920: the motif's box
+   (t432–508) crossed the ×'s (t444–463). It did not happen at 1440 only because the identity
+   block wraps there and the taller band pushes the vertically-centred motif clear — a fault that
+   comes and goes with the viewport is still a fault.
+   ⚠️ z-index 3, ABOVE the content's 2, because a control must sit above the text as well. */
+.tdk-x { position: relative; z-index: 3; margin-left: auto; background: transparent; border: 0; color: #8a6a58; cursor: pointer; line-height: 0; padding: 3px; border-radius: 5px; }
 .tdk-x:hover { background: rgba(0,0,0,.06); color: #2a1a13; }
 
 /* ⚠️ THE TWO-COLUMN SHEET (board-optimise P4; ref board-optimised.html §2): the story at ~230px
@@ -249,7 +268,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  max-width: 640px;
+  
   margin: 0 auto 14px;
 }
 
@@ -394,9 +413,13 @@
    ⚠️ THE SHAPE IS THE QUERY CENTRE'S `.qp-stats` — icon tile, Playfair figure, mono caption, one
    hairline between the pair. Borrowed deliberately: the two panes are looking at the same record
    from two places, and a second grammar for one fact would make them read as two apps. */
+/* ⚠️ THE BLOCK SIZES TO ITS CONTENTS. It was a fixed `1fr 1fr`, so a card with ONE stat — which is
+   every note — drew one tile and an empty half with a divider beside nothing. `auto-fit` gives one
+   stat the whole block and two an equal share, and the divider comes from `+` so it only exists
+   when there is something to divide. */
 .tdk-tstats {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   border: 1px solid #ece0d2;
   border-radius: 11px;
   overflow: hidden;
@@ -453,6 +476,16 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #b8a898;
 }
+
+/* ⚠️ THE TAG ROW SITS INSIDE THE CARD (pane faults, Phase 5). It had `padding: 10px 0 2px` and is a
+   direct child of `.tdk-w`, which has no horizontal padding of its own — so the chip and the
+   "Find or create…" field ran to the card's edges, across the 6px inset frame and out over the
+   rounded corner. It takes the BODY's own horizontal padding, so the two align down the card, and
+   enough bottom padding to clear the frame's bottom rule rather than sit on it. */
+.tdk-tags { padding: 10px 24px 18px; border-top: 1px solid var(--hairline); margin-top: 12px; }
+
+/* the note, as the record column's lead — the hint beneath it is a caption, not a column */
+.tdk-notehint { font-size: 11.5px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
 
 /* ── the materials record (v14 close-the-gap, Phase 6) ───────────────────────────────────────── */
 /* ⚠️ WHITE GROUND ON THE PARCHMENT CARD — the row is a filed item, and the card is the file. */

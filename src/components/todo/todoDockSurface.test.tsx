@@ -167,6 +167,49 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(offer).not.toContain("v-default");
   });
 
+  /**
+   * ⚠️ THE MOTIF NEVER TOUCHES A CONTROL — and `z-index: 1` on the motif was not enough on its own.
+   * `.tdk-x` was `position: static`, and a static element takes no z-index at all, so a positioned
+   * sibling paints over it whatever the DOM order says. Measured on the deployed page at 1920 the
+   * motif's box crossed the ×'s; at 1440 it did not, because the identity block wraps there and
+   * the taller band pushes the vertically-centred motif clear. A fault that comes and goes with
+   * the viewport is still a fault, and stacking is the thing to assert rather than the geometry.
+   */
+  /**
+   * ⚠️ THE BLOCK SIZES TO ITS CONTENTS. It was a fixed `1fr 1fr`, so a card with ONE stat — which
+   * is every note — drew one tile and an empty half, with a divider beside nothing.
+   */
+  it("one stat spans the block; two share it, and only then is there a divider", () => {
+    const stats = dockCssRule(".tdk-tstats {");
+    expect(stats).toContain("repeat(auto-fit, minmax(0, 1fr))");
+    expect(stats).not.toContain("1fr 1fr");
+    /* the divider is a sibling rule, so it cannot exist without something to divide */
+    const css = readFileSync(join(here, "todoDock.css"), "utf8");
+    expect(css).toContain(".tdk-tstat + .tdk-tstat { border-left:");
+  });
+
+  /**
+   * ⚠️ THE TAG ROW SITS INSIDE THE CARD. It had `padding: 10px 0 2px` and is a direct child of
+   * `.tdk-w`, which has no horizontal padding of its own — so the chip and the field ran to the
+   * card's edges, across the inset frame and out over the rounded corner.
+   */
+  it("the tag row respects the card's own inset", () => {
+    const tags = dockCssRule(".tdk-tags {");
+    expect(tags).toContain("padding: 10px 24px 18px");
+    /* ⚠️ ONE OWNER — the old rule in `todo.css` is retired rather than left as a second one */
+    const shared = readFileSync(join(here, "todo.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(shared).not.toContain(".tdk-tags {");
+  });
+
+  it("⚠️ the close control outranks the motif — positioned AND stacked", () => {
+    const x = dockCssRule(".tdk-x {");
+    expect(x).toContain("position: relative");
+    expect(x).toContain("z-index: 3");
+    /* the three layers, in order, asserted together so no one of them can drift alone */
+    expect(dockCssRule(".tdk-motif {")).toContain("z-index: 1");
+    expect(dockCssRule(".tdk-id {")).toContain("z-index: 2");
+  });
+
   it("⚠️ each bucket carries its own motif, behind the text and clipped by the band", () => {
     /* keyed on the BUCKET, so a new task type inherits the mark of the act it performs */
     expect(render("a")).toContain("tdk-motif");                     // send → the manuscript stack
@@ -534,21 +577,46 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     const html = render("c");
     const at = html.indexOf('class="tdk-work"');
     expect(at, "the work column marker is gone").toBeGreaterThan(-1);
+    /* ⚠️ THE BAND SLICE ENDS AT THE BODY, NOT AT THE WORK COLUMN. The note moved INTO the record
+       column, which sits between the two — so slicing to `.tdk-work` now includes the note and the
+       assertion would be reading the body while claiming to read the band. */
+    const bodyAt = html.indexOf('class="tdk-body"');
+    expect(bodyAt, "the body marker is gone").toBeGreaterThan(-1);
     /* the band names the surface, not the note — which is precisely why the body must carry it */
-    expect(html.slice(0, at)).toContain("Your noteboard");
-    expect(html.slice(0, at)).not.toContain("Redraft the opening");
-    /* the note itself, first in the body, in the writer's own hand at reading size */
-    const work = html.slice(at);
-    expect(work, "the note's own text renders nowhere on its own pane").toContain("Redraft the opening");
+    expect(html.slice(0, bodyAt)).toContain("Your noteboard");
+    expect(html.slice(0, bodyAt)).not.toContain("Redraft the opening");
+    /* ⚠️ THE NOTE IS IN THE RECORD COLUMN NOW, NOT THE DOING ONE (pane faults, Phase 2) — it is
+       the content of a note card, so it leads, in the WIDE column. It was in the bounded column
+       beside a hint sentence while the wide one held a stat tile and an empty Tracking section. */
+    const story = html.indexOf('class="tdk-story"');
+    expect(story, "the record column is gone").toBeGreaterThan(-1);
+    expect(story).toBeLessThan(at);
+    const rec = html.slice(story, at);
+    expect(rec, "the note's own text renders nowhere on its own pane").toContain("Redraft the opening");
+    const work = rec;
     expect(work).toContain("tdk-bignote");
     expect(dockCssRule(".tdk-bignote")).toContain("Caveat");
     expect(dockCssRule(".tdk-bignote")).toContain("font-size: 28px");
   });
 
 
+  /**
+   * ⚠️ AND A NOTE SHOWS NO TRACKING SECTION AT ALL. A note has no query and no history, so
+   * "Nothing logged yet." against one is an empty section pretending to be a populated one — the
+   * heading is suppressed rather than filled with an empty state.
+   */
+  it("a note suppresses Tracking entirely — heading and empty state both", () => {
+    const html = render("c");
+    expect(html).not.toContain("TRACKING");
+    expect(html).not.toContain("Nothing logged yet.");
+  });
+
+  /* ⚠️ ON AN AGENT CARD — a note has no history to be empty OF, and suppresses the section whole
+     (see above). The fixture is the send, not the note, which is what this asserted before the
+     note's own column existed to confuse it. */
   it("an empty history says so rather than leaving a frame implying something is missing", () => {
     const html = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="c" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}} />,
     );
     expect(html).toContain("Nothing logged yet.");
@@ -614,10 +682,25 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
     expect((dockSrc.match(/stepQueue\(queue, card\??\.?key/g) ?? []).length).toBeGreaterThanOrEqual(3);
   });
 
-  it("the card takes a reading measure, and the head row shares it", () => {
-    expect(dockCssRule(".tdk-w {")).toContain("max-width: 640px");
-    expect(dockCssRule(".tdk-w {")).toContain("margin: 0 auto");
-    expect(dockCssRule(".tdk-head {")).toContain("max-width: 640px");
+  /**
+   * ⚠️ THE CARD FILLS THE PANE, AND THE 640px CAP IS WHAT INVERTED THE COLUMNS. Measured on the
+   * deployed page at 1920 the body resolved to `162px 400px` — the RECORD on 162 — which is
+   * exactly the fault the column swap was meant to fix. The arithmetic: 640 card → 592 content →
+   * minus the 30px gap → 562, and the doing's `minmax(330px, 400px)` takes 400 of it, leaving the
+   * fr track 162. Two columns need 690 of content before the record gets an equal share. The track
+   * numbers are the ref's and are right; the cap was mine and was wrong — and the ref says so in
+   * its own comment: "the card fills the pane; the frame is the workspace edge".
+   *
+   * ⚠️ THE READING MEASURE MOVED TO THE BOUNDED TRACK, which is a better home for it: the doing
+   * column's own `minmax(330px, 400px)` is what stops prose running long, without also deciding
+   * the record's width.
+   */
+  it("the card fills the pane — no cap competing with the column tracks", () => {
+    const w = dockCssRule(".tdk-w {");
+    expect(w).not.toContain("max-width");
+    expect(dockCssRule(".tdk-head {")).not.toContain("max-width");
+    /* the measure now lives where it only constrains the doing */
+    expect(dockCssRule(".tdk-body {")).toContain("minmax(330px, 400px)");
   });
 
   /**
@@ -663,11 +746,9 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
     /* ⚠️ THE MATHS DEPENDS ON THE BOX MODEL, SO THE RULE DECLARES IT rather than inheriting
        preflight — the harness trap the house rules name. */
     expect(rule).toContain("box-sizing: border-box");
-    /* horizontal: UNCHANGED. The reading measure belongs to the two-column body in this same
-       file (`.tdk-story` 230px beside `.tdk-work`), and widening it would set that column's
-       prose at a line length nobody reads comfortably. */
-    expect(rule).toContain("max-width: 640px");
-    expect(rule).toContain("margin: 0 auto");
+    /* ⚠️ HORIZONTAL: THE CAP IS GONE — see "the card fills the pane". It competed with the column
+       tracks and the record lost. The measure is the doing column's bounded track now. */
+    expect(rule).not.toContain("max-width");
     /* and the pane still scrolls when the record outgrows it */
     const split = readFileSync(join(here, "todoSplit.css"), "utf8");
     const pane = split.slice(split.indexOf(".tdw-work {"), split.indexOf("}", split.indexOf(".tdw-work {")));

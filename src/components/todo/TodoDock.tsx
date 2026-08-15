@@ -136,6 +136,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const spec = sendSpecFor(card);
   const flow = dockFlowKind(card);
   const events = timeline(card);
+  /* a note has no query, so it has no record column to fill — see the story column below */
+  const isNote = flow === "user-task";
   /* ⚠️ THE SECTIONS ARE DECLARED, NOT BRANCHED. `paneSections` owns which kinds carry what; this
      component asks whether a section is present and renders it. A card that branched inline on
      `taskType` would grow a private opinion about each kind. */
@@ -234,7 +236,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             not be read together. This inner split stands; the OUTER 30/70 one does not — see the
             head note. */}
         <div className="tdk-body">
-          <aside className="tdk-story" aria-label="Tracking">
+          <aside className="tdk-story" aria-label={isNote ? "Your note" : "Tracking"}>
             {/**
               * ⚠️ THE STAT PAIR IS THE BAND'S TWO FACTS, IN THE QUERY CENTRE'S GRAMMAR (Phase 2).
               * Icon tile, Playfair figure with the unit in Inter beside it, mono caption beneath —
@@ -254,7 +256,25 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                 ))}
               </div>
             )}
-            <div className="tdk-storyk">TRACKING</div>
+            {/**
+              * ⚠️ A NOTE LEADS WITH THE NOTE, AND SHOWS NO TRACKING. The note's words were in the
+              * BOUNDED column beside a hint sentence while the wide column held a stat tile and an
+              * empty Tracking section — the content of a note card pushed aside for a section that
+              * had nothing to put in it. A note has no query and no history, so
+              * "Nothing logged yet." here is an empty section pretending to be a populated one:
+              * it is SUPPRESSED rather than filled with an empty state.
+              */}
+            {isNote ? (
+              <>
+                <p className="tdk-bignote">{card.title}</p>
+                {card.detail && <p className="tdk-detail">{card.detail}</p>}
+                {/* the hint is a CAPTION beneath the note, not a column beside it */}
+                <div className="tdk-notehint">Your own task — ticking it is what finishes it.</div>
+                {card.record && <div className="tdk-ffsmall">Attached to <b>{card.record.replace(/^On /, "")}</b>.</div>}
+              </>
+            ) : (
+              <>
+                <div className="tdk-storyk">TRACKING</div>
             {/* Derived from the activity log, never stored. Absent when the record has no history
                 yet, rather than an empty frame implying something is missing. */}
             {events.length > 0 ? (
@@ -283,6 +303,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               </ol>
             ) : (
               <div className="tdk-storynone">Nothing logged yet.</div>
+            )}
+              </>
             )}
           </aside>
 
@@ -360,9 +382,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                   * the subject of the screen rather than a field on it — `card.detail` is the
                   * SECONDARY line and stays beneath it, which is the order it was always in.
                   */}
-                <p className="tdk-bignote">{card.title}</p>
-                {card.detail && <p className="tdk-detail">{card.detail}</p>}
-                <div className="tdk-note">Your own task — ticking it is what finishes it.</div>
+                {/* ⚠️ THE NOTE MOVED TO THE WIDE COLUMN (pane faults, Phase 2) — it is the content
+                    of a note card, so it leads. Nothing is repeated here. */}
               </>
             )}
 

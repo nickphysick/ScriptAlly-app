@@ -1414,7 +1414,10 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tsettagdel { background: transparent; border: 0; font: inherit; font-size: 11px; color: #8a7a6c; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .tdb-tsettagdel.armed { color: #7c3a2a; font-weight: 700; }
 .tdb-nc-tags { display: block; width: 100%; margin-top: 8px; }
-.tdk-tags { padding: 10px 0 2px; border-top: 1px solid #f0e9dd; margin-top: 12px; }
+/* ⚠️ SUPERSEDED BY `todoDock.css` (pane faults, Phase 5) — this had no horizontal padding, and the
+   card has none either, so the tag row ran across the inset frame and out over the rounded corner.
+   The live rule lives with the rest of the dock's chrome; leaving a second one here would be two
+   owners for one selector, which is how the earlier `.tdb-lact` duplicate went wrong. */
 
 /* ART slots on the board page (board-optimise P3): the first-run desk's hero and the weekly
    briefing's slim banner. Both sit INSIDE their own temporary card — never in the page header. */
