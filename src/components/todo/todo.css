@@ -1567,6 +1567,9 @@ button.tdb-ldot { cursor: pointer; }
 /* the lede — a journey's own material above step 01, unnumbered because it is not a decision */
 .tdb-jnlede { padding-bottom: 18px; margin-bottom: 4px; border-bottom: 1px dashed var(--line); }
 
+/* the writer's own note, at reading size — it is the subject of the screen, not a field on it */
+.tdb-jnbignote { min-height: 104px; font-size: 22px; }
+
 /* the hand-off paragraph — the one step on a journey that records nothing */
 .tdb-jnreport { font-size: 13px; line-height: 1.65; color: var(--ink-2); }
 

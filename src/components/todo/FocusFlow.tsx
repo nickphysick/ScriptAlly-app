@@ -127,6 +127,8 @@ export interface JourneySpec {
    * chase's copyable note; this is that slot, and nothing else uses it.
    */
   lede?: React.ReactNode;
+  /** A secondary footer action, beside Cancel. Only the note journey uses it — see `noteSheet`. */
+  extraFoot?: React.ReactNode;
 }
 type CardJourney = "offer" | "send" | "resubmit" | "nudge" | "stale" | "dq" | "note";
 function cardJourney(c: BoardCard): CardJourney {
@@ -1210,22 +1212,60 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     );
   }
 
+  /**
+   * ⚠️ THE WRITER'S OWN NOTE, AND NOTHING IS LOGGED AGAINST A QUERY. It is the one journey whose
+   * commit is the completion itself — there is no event to record, because the note was never an
+   * exchange with an agent. Which is exactly why the reference panel says so: this surface looks
+   * like the five that DO write, and the only thing distinguishing it is that it says it doesn't.
+   */
   function noteSheet(c: BoardCard) {
     const text = noteText ?? c.title;
     const dirty = text.trim() !== c.title && text.trim().length > 0;
-    return sheet(
-      <>
-        <div className="tdb-ffrow"><div className="tdb-fff"><label>Your note</label><textarea value={text} onChange={(e) => setNoteText(e.target.value)} /></div></div>
-        {c.record && <div className="tdb-ffsmall">Attached to <b>{c.record.replace(/^On /, "")}</b>.</div>}
-      </>,
-      <>
-        <button type="button" className="tdb-ffback" disabled={qi === 0} onClick={backOne}>← Back</button>
-        <span className="tdb-sp" />
-        <button type="button" className="tdb-ffskip" onClick={() => { if (dirty && c.userTaskId) updateUserTask(c.userTaskId, { text: text.trim() }); advance(); }}>Keep it</button>
-        <button type="button" className="tdb-ffpri pink" onClick={() => { if (c.userTaskId) { updateUserTask(c.userTaskId, { done: true, completedAt: new Date().toISOString(), ...(dirty ? { text: text.trim() } : {}) }); onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } }); } advance(); }}>✓ Mark it done</button>
-      </>,
-      band("paper", c.due || "Note to self", "A note, in your own hand.", undefined, { art: "note", kickCls: "nt" }),
-    );
+    const saveText = dirty && c.userTaskId ? { text: text.trim() } : {};
+    return journeySheet({
+      steps: [{
+        id: "note",
+        name: "Your note",
+        body: (
+          <>
+            {/* the Caveat hand — a note the writer wrote to themselves stays in their handwriting */}
+            <div className="tdb-ffalso">
+              <textarea className="tdb-fffree tdb-jnbignote" value={text} aria-label="Your note"
+                onChange={(e) => setNoteText(e.target.value)} />
+            </div>
+            {c.record && <div className="tdb-ffsmall">Attached to <b>{c.record.replace(/^On /, "")}</b>.</div>}
+          </>
+        ),
+      }],
+      reference: {
+        heading: "Your own task",
+        body: <>Ticking it is what finishes it. <b>Nothing is logged against a query.</b></>,
+        meta: c.due || undefined,
+      },
+      /* the summary reads the live field, like every other journey — an emptied note says so */
+      summary: text.trim() ? `Crossing off: ${text.trim()}` : "Nothing selected yet.",
+      commit: {
+        label: "Cross it off",
+        hint: "Nothing is logged against a query.",
+        disabled: !text.trim(),
+        onCommit: () => {
+          if (c.userTaskId) {
+            updateUserTask(c.userTaskId, { done: true, completedAt: new Date().toISOString(), ...saveText });
+            onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await updateUserTask(c.userTaskId!, { done: false }); onToast("Restored"); } });
+          }
+          advance();
+        },
+      },
+      /* ⚠️ "Keep it" SURVIVES AS A SECOND FOOTER ACTION, deliberately beyond the ref's three. The
+         note is EDITABLE here, so without it an edit could only be saved by also completing the
+         task — and Cancel must write nothing, which is the rule that would otherwise eat the edit. */
+      extraFoot: (
+        <button type="button" className="tdb-ffskip"
+          onClick={() => { if (dirty && c.userTaskId) updateUserTask(c.userTaskId, { text: text.trim() }); advance(); }}>
+          Keep it
+        </button>
+      ),
+    }, journeyBand("paper", "Crossing it off", cardAgent(c, cardQuery(c)), c.initials, "note"));
   }
 
   // ── sweep mode — the speed grammar (Phase D). Writes are IMMEDIATE (the Phase-C defaults through
@@ -1681,6 +1721,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         {step > 0 && <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>}
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={() => requestExit()}>Cancel</button>
+        {spec.extraFoot}
         <button type="button" className="tdb-ffpri" disabled={spec.commit.disabled} onClick={spec.commit.onCommit}>{spec.commit.label}</button>
         {spec.commit.hint && <span className="tdb-jnhint">{spec.commit.hint}</span>}
       </>,

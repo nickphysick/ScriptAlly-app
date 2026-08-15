@@ -120,8 +120,19 @@ describe("C2 — families across every mode; ceremony D; the manifest; mobile", 
     expect(flow).toContain('band("cof", "Stale query"');
     expect(flow).toContain('band("cof", "Housekeeping"');
     expect(flow).toContain('band("cof", <>Housekeeping · {meta.label.toLowerCase()}</>');
-    expect(flow).toContain('band("paper", c.due || "Note to self"');
     expect(flow).toContain('band("sage", "Ready to save"');
+    /* ⚠️ THE JOURNEY TAKEOVER OBEYS THE SAME FAMILY LAW (journeys pack, Phase 2). `journeyBand`
+       goes through the same `fam()` and the same `.tdb-fband` shell, so the six journeys are
+       covered here rather than in a second table that could disagree with this one: pink for the
+       three that send or chase, coffee for the two housekeeping ones, paper for the writer's own
+       note. The note's band moved from `band("paper", c.due || "Note to self", …)` when it became
+       a journey — same family, new builder. */
+    expect(flow).toContain('journeyBand("pink", "Recording what you sent"');
+    expect(flow).toContain('journeyBand("pink", "Recording your resubmission"');
+    expect(flow).toContain('journeyBand("pink", "Recording your follow-up"');
+    expect(flow).toContain('journeyBand("cof", "Closing the record"');
+    expect(flow).toContain('journeyBand("paper", "Crossing it off"');
+    expect(flow).toContain('journeyBand(decide ? "pink" : "cof", decide ? "Answering the offer" : "Tidying the record"');
     const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
     expect(settings).toContain('<div className="tdb-fband paper">');
     // no step composes its own kicker outside a band any more (uniform reach — halt (f) clear)
