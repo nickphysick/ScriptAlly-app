@@ -149,9 +149,15 @@
    pushed the flow below the fold — and what happened and what to do are the two things you need
    in the same glance. `min-width:0` on the work column is what lets a long title wrap instead of
    forcing the sheet wider. */
-.tdk-body { padding: 18px 20px 6px; flex: 1; display: flex; gap: 22px; align-items: flex-start; min-height: 0; }
-.tdk-story { flex: 0 0 230px; min-width: 0; }
-.tdk-work { flex: 1; min-width: 0; }
+/* ⚠️ THE RECORD TAKES THE WIDTH, THE DOING IS BOUNDED (v14 `.jn-body`). These were inverted:
+   `.tdk-story` was pinned at 230px while `.tdk-work` flexed — so the TIMELINE, which is the
+   richest thing on the card and the only part whose content varies, was squeezed into the
+   narrowest column while a checkbox and two buttons took the rest.
+   ⚠️ A GRID, NOT A FLEX ROW, so the hairline between them is the gap rather than a border on one
+   child — a border would belong to whichever column drew it and would vanish with that column. */
+.tdk-body { padding: 18px 24px 6px; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, 400px); gap: 0 30px; align-content: start; min-height: 0; }
+.tdk-story { min-width: 0; }
+.tdk-work { min-width: 0; border-left: 1px solid var(--hairline); padding-left: 30px; }
 .tdk-storyk {
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 7px; letter-spacing: 0.18em; color: #b3a394; padding-bottom: 8px;
@@ -163,10 +169,15 @@
 
 .tdk-storynone { font-size: 11.5px; color: #a5988c; }
 
-/* the sheet stacks below the dock's own narrow step — the story reads first, as it always did */
-@media (max-width: 900px) {
-  .tdk-body { flex-direction: column; gap: 14px; }
-  .tdk-story { flex: none; width: 100%; }
+/* ⚠️ THE STACK IS A CONTAINER QUERY, NOT A MEDIA QUERY. This card sits in a pane whose width the
+   viewport does not describe — the split's rail takes its share first — so a viewport breakpoint
+   stacked it on a wide screen and left it two-up in a narrow pane. The card is the container.
+   The story still reads FIRST when stacked, as it always did, and the hairline becomes a rule
+   ABOVE the doing rather than beside it. */
+.tdk-w { container-type: inline-size; }
+@container (max-width: 620px) {
+  .tdk-body { grid-template-columns: minmax(0, 1fr); gap: 16px 0; }
+  .tdk-work { border-left: 0; padding-left: 0; border-top: 1px solid var(--hairline); padding-top: 16px; }
 }
 
 .tdk-t {

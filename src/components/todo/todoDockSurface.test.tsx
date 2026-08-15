@@ -421,11 +421,44 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     expect(dockSrc).not.toContain('aria-label="Queue"');
   });
 
-  it("the sheet is a flex row: the story at ~230px, the work taking the rest", () => {
-    const body = dockCss.slice(dockCss.indexOf(".tdk-body {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-body {")));
-    expect(body).toContain("display: flex");
-    expect(dockCss).toContain(".tdk-story { flex: 0 0 230px;");
-    expect(dockCss).toContain(".tdk-work { flex: 1; min-width: 0; }");
+  /**
+   * ⚠️ THE RECORD TAKES THE WIDTH, THE DOING IS BOUNDED — and these were INVERTED. `.tdk-story`
+   * was pinned at 230px while `.tdk-work` flexed, so the timeline (the richest thing on the card,
+   * and the only part whose content varies) was squeezed into the narrowest column while a
+   * checkbox and two buttons took the rest.
+   */
+  it("the record column is the flexible one; the doing column is bounded", () => {
+    const body = dockCssRule(".tdk-body {");
+    expect(body).toContain("display: grid");
+    expect(body).toContain("grid-template-columns: minmax(0, 1fr) minmax(330px, 400px)");
+    /* ⚠️ THE RECORD IS FIRST — the wide track is the story's, not the work's */
+    const html = render();
+    const story = html.indexOf('class="tdk-story"');
+    const work = html.indexOf('class="tdk-work"');
+    expect(story, "the story column is gone").toBeGreaterThan(-1);
+    expect(work, "the work column is gone").toBeGreaterThan(-1);
+    expect(story).toBeLessThan(work);
+    /* neither column carries a fixed width any more */
+    expect(dockCssRule(".tdk-story {")).not.toContain("230px");
+  });
+
+  /**
+   * ⚠️ THE STACK IS A CONTAINER QUERY. The card sits in a pane whose width the viewport does not
+   * describe — the split's rail takes its share first — so the old `@media (max-width: 900px)`
+   * stacked it on a wide screen and left it two-up in a narrow pane.
+   */
+  it("it stacks on the CARD's width, not the viewport's", () => {
+    const css = readFileSync(join(here, "todoDock.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css).toMatch(/\.tdk-w \{[^}]*container-type: inline-size/);
+    const at = css.indexOf("@container");
+    expect(at, "the card has no container query").toBeGreaterThan(-1);
+    const block = css.slice(at, css.indexOf("\n}", at));
+    const cols = /\.tdk-body \{[^}]*grid-template-columns:([^;}]+)/.exec(block);
+    expect(cols, "the container query does not restate the body's columns").toBeTruthy();
+    const tracks = cols![1].trim().replace(/minmax\([^)]*\)/g, "T").split(/\s+/).filter(Boolean);
+    expect(tracks).toHaveLength(1);
+    /* and no viewport query is doing the container's job for this card */
+    expect(css).not.toContain("@media (max-width: 900px)");
   });
 
   /**
