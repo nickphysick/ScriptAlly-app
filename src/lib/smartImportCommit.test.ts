@@ -17,7 +17,7 @@ vi.mock('firebase/firestore', () => ({
 vi.mock('./firebase', () => ({ db: {} }));
 vi.mock('./recomputeQuery', () => ({ recomputeQuery: vi.fn(async () => {}) }));
 
-import { setDoc, updateDoc } from 'firebase/firestore';
+import { setDoc, updateDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import { impliedRungs, assignTimes, commitSmartImport } from './smartImportCommit';
 import { parseModel, modelToResult, seedUnidentifiedSetAside, buildClusters } from './smartImportReviewModel';
 import { ParsedAgent, ParsedQuery, SmartImportResult, TimelineEvent } from '../types/smartImport';
@@ -25,6 +25,8 @@ import { QueryStatus } from '../types';
 
 const mockSetDoc = vi.mocked(setDoc);
 const mockUpdateDoc = vi.mocked(updateDoc);
+const mockGetDocs = vi.mocked(getDocs);
+const mockDeleteDoc = vi.mocked(deleteDoc);
 
 const q = (over: Partial<ParsedQuery> = {}): ParsedQuery => ({
   agentRef: 'a1', status: QueryStatus.QUERIED, sentDate: null, ...over,
@@ -385,5 +387,68 @@ describe('agency-less agents — data-integrity guard (downstream of extraction)
     expect(written.some((a: any) => !a.name && !a.agency)).toBe(false); // follow-up never written
     expect(out.agentsCreated).toBe(3);                                // Clara + Priya + agency-only
     expect(out.queriesImported).toBe(3);                              // follow-up's query skipped, not the rest
+  });
+});
+
+/* ── 7a · THE IMPORT'S DELETE ────────────────────────────────────────────────────────────────── */
+
+describe("⚠️ an import may only delete activities the import wrote", () => {
+  const agent = (over: Partial<ParsedAgent> = {}): ParsedAgent => ({ ref: 'a1', name: 'Jane Doe', agency: 'Acme', ...over });
+  const deps = () => ({
+    userId: 'u1',
+    existingAgents: [] as any[],
+    manuscriptTitle: 'My Novel',
+    addAgent: vi.fn(async () => ({ success: true, id: 'ag-1' })),
+    addQuery: vi.fn(async () => ({ success: true, id: 'q-1' })),
+  });
+
+  /**
+   * ⚠️ THE FIXTURE IS THE SHAPE THE SYSTEM REALLY PRODUCES. The two survivors are ids in the form
+   * `recordResponse` and `logNudge` mint; the two casualties carry the `imp-` prefix this file's
+   * own `setDoc` writes, taken from there rather than typed by hand. A fixture of invented ids
+   * would be testing a predicate against documents nothing creates.
+   */
+  const rows = [
+    { id: 'imp-abc123def', ref: { id: 'imp-abc123def' }, data: () => ({}) },
+    { id: 'resp-9f21', ref: { id: 'resp-9f21' }, data: () => ({}) },
+    { id: 'imp-zz9900aaa', ref: { id: 'imp-zz9900aaa' }, data: () => ({}) },
+    { id: 'nudge-4410', ref: { id: 'nudge-4410' }, data: () => ({}) },
+  ];
+
+  beforeEach(() => {
+    mockDeleteDoc.mockClear();
+    mockGetDocs.mockReset();
+    mockGetDocs.mockImplementation(async () => ({ docs: rows }) as any);
+  });
+
+  it('deletes ONLY the rungs carrying the import\'s own id prefix', async () => {
+    await commitSmartImport(deps() as any, { agents: [agent()], queries: [q({ status: QueryStatus.QUERIED })] } as SmartImportResult, 'ms1');
+    const deleted = mockDeleteDoc.mock.calls.map((c) => (c[0] as any).id);
+    /* ⚠️ ASSERTED BOTH WAYS. That the writer's rungs survived is the point of the fix; that the
+       import's own were still cleared is what stops a re-import duplicating its whole history. A
+       test that only checked the survivors would pass on a delete that had been removed entirely. */
+    expect(deleted).not.toContain('resp-9f21');
+    expect(deleted).not.toContain('nudge-4410');
+    expect(deleted).toContain('imp-abc123def');
+    expect(deleted).toContain('imp-zz9900aaa');
+  });
+
+  it('⚠️ leaves a recorded history INTACT when the import writes none of its own', async () => {
+    /* the re-import-over-a-year-of-responses case, stated as its own test because it is the one
+       that cost the data — every document in the subcollection is the writer's */
+    const onlyWriters = rows.filter((r) => !r.id.startsWith('imp-'));
+    mockGetDocs.mockImplementation(async () => ({ docs: onlyWriters }) as any);
+    await commitSmartImport(deps() as any, { agents: [agent()], queries: [q({ status: QueryStatus.QUERIED })] } as SmartImportResult, 'ms1');
+    expect(mockDeleteDoc.mock.calls.map((c) => (c[0] as any).id)).toEqual([]);
+  });
+
+  it('⚠️ `dateProvisional` is NOT the discriminator — a DATED import rung is still deletable', async () => {
+    /* Scoping to `dateProvisional` is the obvious candidate and it is wrong: it is set only on the
+       undated subset, so an import rung with a real date would become undeletable and would
+       duplicate on every re-import. This fixture is exactly that rung. */
+    const datedImportRung = [{ id: 'imp-dated0001', ref: { id: 'imp-dated0001' }, data: () => ({ /* no dateProvisional */ }) }];
+    mockGetDocs.mockImplementation(async () => ({ docs: datedImportRung }) as any);
+    await commitSmartImport(deps() as any, { agents: [agent()], queries: [q({ status: QueryStatus.QUERIED })] } as SmartImportResult, 'ms1');
+    expect(mockDeleteDoc.mock.calls.map((c) => (c[0] as any).id)).toContain('imp-dated0001');
   });
 });
