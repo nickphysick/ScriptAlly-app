@@ -1442,3 +1442,59 @@ button.tdb-ldot { cursor: pointer; }
   margin-left: auto; font-size: 11.5px; font-weight: 600; color: var(--burg, #7c3a2a);
   white-space: nowrap;
 }
+
+/* ══ THE JOURNEY'S MATERIALS STEP (journeys pack, Phase 3; ref todo-workspace-v14.html) ════════
+   ⚠️ THE CONDITIONAL ROW'S REASON RIDES ON THE ROW, not in a tooltip — an explanation you have to
+   hover for is an explanation most readers never get, and this one exists to justify a row that
+   would otherwise look like a mistake. */
+.tdb-ffnote {
+  font-size: 11.5px;
+  color: #a89684;
+  font-style: italic;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+
+/* ⚠️ THE FIELD IS A CAVEAT TEXTAREA, NOT AN INPUT. It is the one part of the record the writer
+   composes, and it should look like it — the same hand the noteboard uses, resizable, on its own
+   warm ground rather than the sheet's. */
+.tdb-ffalso { margin-top: 14px; padding-top: 14px; border-top: 1px dashed #ece0d2; }
+
+.tdb-ffalso label {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: #a89684; margin-bottom: 8px;
+}
+
+.tdb-fffree {
+  width: 100%;
+  min-height: 76px;
+  background: #fffdf8;
+  border: 1px solid #ece0d2;
+  border-radius: 10px;
+  padding: 12px 15px;
+  font-family: "Caveat", cursive;
+  font-size: 19px;
+  line-height: 1.45;
+  color: #4a3a2e;
+  resize: vertical;
+  outline: none;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* the placeholder is in the same hand — a serif prompt in a handwritten field reads as chrome */
+.tdb-fffree::placeholder { color: #cbbcae; font-family: "Caveat", cursive; font-size: 18px; }
+.tdb-fffree:focus { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12); }
+
+/* ⚠️ THE SUMMARY IS MANDATORY, NOT A FLOURISH — the commit button must never be the first time
+   the writer sees what is about to be written. It assembles from the LIVE form state. */
+.tdb-ffsum {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #f0e7db;
+  font-size: 12.5px;
+  color: #5c4a3c;
+  line-height: 1.55;
+}

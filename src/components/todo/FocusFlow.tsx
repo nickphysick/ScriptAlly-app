@@ -41,6 +41,9 @@ import { clampSnoozeDays } from "../../lib/todoActions";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { nudgeDraft } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
+import { journeyMaterials, synopsisStateFor, journeySummary } from "../../lib/journeyMaterials";
+import { cardBucket } from "../../lib/todoBuckets";
+import { isSlotFilled } from "../../lib/packageMetrics";
 import { agentDataQualityNeeds, AgentDataNeed } from "../../lib/agentDataQuality";
 import { BoardCard } from "../../lib/todoBoard";
 import { HkGroup, HkRule, HK_RULES, HK_PAYOFF, mutedMembersForRule } from "../../lib/todoHousekeeping";
@@ -101,13 +104,17 @@ export interface FocusFlowProps {
 
 export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate, onToast, prefill, mode = "journey", ritual = false }) => {
   const {
-    queries, agents, manuscripts, activities, taskFlags, userTasks, currentUser,
+    queries, agents, manuscripts, activities, taskFlags, userTasks, packages, currentUser,
     recordMaterialsSent, logNudge, recordOfferDecision, dismissTask, upsertTaskFlag, updateUserProfile, updateAgent, updateUserTask, addUserTask, updateQueryStatus, undoQueryStatus, resolveTaskFlag, deleteActivity,
   } = useScriptAllyDb();
 
   const [qi, setQi] = useState(0);
   const [step, setStep] = useState(0);
   const [staged, setStaged] = useState<StagedPayload[]>([]);
+  /* ⚠️ ONE FREE-TEXT FIELD, DELIBERATELY UNSTRUCTURED (journeys pack, Phase 3) — it is the part of
+     the record the writer composes, and a checkbox list of guesses would invite them to confirm
+     things the record never said. */
+  const [alsoText, setAlsoText] = useState("");
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
   const [leaving, setLeaving] = useState(false);
   // the offer journey (P3; notify rebuilt by the popup-notify-scrim pass P2): which door is open,
@@ -304,7 +311,25 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
     const who = c.who || "the agent";
     const assumed = assumedSendItem(c.taskType, ag?.materialsWanted as string[] | undefined, who);
-    const extrasOn = assumed.extras.filter((m) => mats[m]);
+    /**
+     * ⚠️ THE CONDITION IS STRUCTURAL, NEVER PARSED. `SubmissionPackage.synopsisVersionId` holds
+     * `UNFILLED_SLOT` when no synopsis went; scanning an activity's free-text `details` for the
+     * word would be deriving state by reading a display string. NO PACKAGE MEANS UNKNOWN rather
+     * than "none" — a query logged before packages existed has not told us a synopsis was absent,
+     * only that nothing linked it, and treating silence as absence would put a claim about the
+     * agency's submission route on most historical queries.
+     */
+    const synState = synopsisStateFor(
+      q?.packageId,
+      (id) => packages.find((pk) => pk.id === id),
+      isSlotFilled,
+    );
+    const { rows: matRows, note: matNote } = journeyMaterials(
+      cardBucket(c), c.taskType, synState, who, ag?.materialsWanted as string[] | undefined,
+    );
+    /* the first row IS the assumed item, already rendered above — the rest are the conditional */
+    const extraRows = matRows.slice(1);
+    const extrasOn = extraRows.filter((m) => mats[m.label]).map((m) => m.label);
     return sheet(
       <>
         <div className="tdb-ffqsub">{who} asked for {assumed.label === "Full manuscript" ? "the full" : assumed.label === "Revised manuscript" ? "revisions" : assumed.label.toLowerCase()} — so that’s what we’ll log.</div>
@@ -312,14 +337,43 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
           <span className="tdb-ffatick" aria-hidden>✓</span>
           <span><b>{assumed.label}</b><span className="tdb-ffasub">{ms?.title ? `${ms.title} · ` : ""}{assumed.sub}</span></span>
         </div>
-        <button type="button" className="tdb-ffelse" aria-expanded={extrasOpen} onClick={() => setExtrasOpen((v) => !v)}>+ I sent something else too</button>
-        {extrasOpen && (
-          <div className="tdb-ffchoices tight">{assumed.extras.map((m) => (
-            <button key={m} type="button" className={`tdb-ffchoice${mats[m] ? " on" : ""}`} onClick={() => setMats((p) => ({ ...p, [m]: !p[m] }))}>
-              <span className="tdb-ffck" /><span className="tdb-ffct">{m}</span>
-            </button>
-          ))}</div>
-        )}
+        {/**
+          * ⚠️ THE SYNOPSIS ROW APPEARS ONLY ON A KNOWN ABSENCE, AND STATES WHY (journeys pack,
+          * Phase 3). This offered `["First pages", "Synopsis", "Covering email"]` on EVERY send —
+          * so the writer was invited to re-send a synopsis the agent has held since the original
+          * submission. Offering to send what someone already has is not a neutral default: it is
+          * the app suggesting work that should not happen, on the surface whose job is recording
+          * what did.
+          *
+          * ⚠️ AND IT IS NOT PRE-TICKED. The record can say the agent has never seen one; it cannot
+          * say the writer means to send one now.
+          */}
+        {extraRows.map((m) => (
+          <button key={m.id} type="button" className={`tdb-ffchoice${mats[m.label] ? " on" : ""}`}
+            onClick={() => setMats((p) => ({ ...p, [m.label]: !p[m.label] }))}>
+            <span className="tdb-ffck" />
+            <span className="tdb-ffct">{m.label}{m.sub && <span className="tdb-ffasub">{m.sub}</span>}</span>
+          </button>
+        ))}
+        {/* ⚠️ THE OMISSION IS ACCOUNTED FOR ONCE, QUIETLY — a step that silently leaves out the
+            query letter and synopsis looks like a step that forgot them. */}
+        {matNote && <div className="tdb-ffnote">{matNote}</div>}
+        {/* ⚠️ ANYTHING ELSE IS ONE FREE-TEXT FIELD, DELIBERATELY UNSTRUCTURED. A checkbox list of
+            guesses is the same fault as the synopsis row, spread thinner: it invites the writer to
+            confirm things the record never said. */}
+        <div className="tdb-ffalso">
+          <label htmlFor="ff-also">Anything else?</label>
+          <textarea id="ff-also" className="tdb-fffree" value={alsoText}
+            placeholder="A covering note, a change of address, anything worth remembering…"
+            onChange={(e) => setAlsoText(e.target.value)} />
+        </div>
+        {/* ⚠️ THE SUMMARY READS LIVE FORM STATE, never the string it is about to compose — and the
+            commit button must never be the first time the writer sees what will be written. */}
+        <div className="tdb-ffsum">{journeySummary({
+          materials: [assumed.label, ...extraRows.filter((m) => mats[m.label]).map((m) => m.label)],
+          when: backdated ? fmtShort(sentDate) : "today",
+          also: alsoText,
+        })}</div>
         <div className="tdb-ffwhen">
           {backdated ? (
             <>Logging it as <input type="date" value={sentDate} max={todayISO()} onChange={(e) => setSentDate(e.target.value)} /> <span className="tdb-ffsmall">— we’ll log it at midday.</span></>
