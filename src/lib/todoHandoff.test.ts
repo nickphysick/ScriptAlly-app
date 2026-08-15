@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, anchorNoun, bandForward, materialRows, bandAnchor, trackingStats, HANDOFF_NOTE,
+  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, holderRows, anchorNoun, bandForward, materialRows, bandAnchor, trackingStats, HANDOFF_NOTE,
 } from "./todoHandoff";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -386,5 +386,38 @@ describe("⚠️ §5.1 — THE BAND CARRIES THE FORWARD-LOOKING FACT ALONE", () 
     const pair = trackingStats(bandFacts("Offer received", "17 June", "You've waited", "8 weeks"));
     expect(pair.map((p) => p.k)).not.toContain(fwd.k);
     expect(pair.map((p) => p.v)).not.toContain(fwd.v);
+  });
+});
+
+/* ── §4.4 · who else holds material ──────────────────────────────────────────────────────────── */
+
+describe("⚠️ §4.4 — WHO ELSE HOLDS MATERIAL, from the set `notifyGroups` already computes", () => {
+  const pages = [
+    { queryId: "q1", agentId: "a1", name: "Jonathan Marsh", statusLine: "FULL SENT" },
+    { queryId: "q2", agentId: "a2", name: "Daniel O'Rourke", statusLine: "PARTIAL SENT", caution: "“no reply means no” agency" },
+  ];
+  const email = (id: string | undefined) => (id === "a1" ? "jm@marsh.co.uk" : undefined);
+
+  it("a row per agent — the name, WHAT THEY HOLD, and a composed draft link", () => {
+    const [a, b] = holderRows(pages, email, "The Smoke Test — an update");
+    expect(a).toMatchObject({ name: "Jonathan Marsh", holds: "FULL SENT" });
+    expect(a.mail.href).toBe("mailto:jm@marsh.co.uk?subject=" + encodeURIComponent("The Smoke Test — an update"));
+    expect(b.holds).toBe("PARTIAL SENT");
+    expect(b.caution).toMatch(/no reply means no/);
+  });
+
+  /**
+   * ⚠️ AN AFFORDANCE WITH NOTHING BEHIND IT GREYS AND SAYS WHY — never hidden, never fabricated.
+   * The same law the hand-off already follows: a vanishing control leaves you wondering what the
+   * app knows; a greyed one with its reason tells you what to go and fix.
+   */
+  it("no email on file greys the link and states the reason", () => {
+    const [, b] = holderRows(pages, email, "s");
+    expect(b.mail.href).toBeNull();
+    expect(b.mail.why).toBe("No email address on file for this agent.");
+  });
+
+  it("nobody holding anything yields no rows — the section does not render", () => {
+    expect(holderRows([], email, "s")).toEqual([]);
   });
 });

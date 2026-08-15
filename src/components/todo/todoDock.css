@@ -515,3 +515,15 @@
 /* ⚠️ THE TICK IS A MARK, NOT AN INPUT — it states that this is what would go, and nothing on the
    reading card can toggle it. Sage, because it is the app's one "done" colour. */
 .tdk-mattick { flex: none; color: var(--sageD); font-size: 13px; }
+
+/* ── §4.4 · who else holds material ──────────────────────────────────────────────────────────── */
+.tdk-holds { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
+.tdk-hold { display: flex; align-items: center; gap: 10px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+.tdk-holdtx { flex: 1; min-width: 0; font-size: 13px; color: var(--ink); }
+.tdk-holdtx b { display: block; font-weight: 500; }
+.tdk-holdtx span { display: block; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); margin-top: 3px; }
+.tdk-holdmail { flex: none; font-size: 11.5px; font-weight: 500; color: var(--burg); border: 1px solid var(--line); border-radius: 8px; padding: 5px 10px; background: var(--paper); text-decoration: none; }
+.tdk-holdmail:hover { border-color: var(--burg); }
+/* ⚠️ GREYED AND EXPLAINED, NEVER HIDDEN — a vanishing control leaves you wondering what the app
+   knows; a greyed one with its reason tells you what to go and fix. */
+.tdk-holdmail.off { opacity: 0.45; cursor: default; }

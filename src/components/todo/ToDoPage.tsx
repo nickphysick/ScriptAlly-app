@@ -64,7 +64,8 @@ import {
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList, groupColumn } from "./TaskList";
 import { useDockActivity } from "./useDockActivity";
-import { materialRows, anchorNoun, bandForward } from "../../lib/todoHandoff";
+import { materialRows, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
+import { notifyGroups } from "../../lib/offerNotify";
 import { sendSpecFor } from "../../lib/todoDock";
 import { isSlotFilled } from "../../lib/packageMetrics";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
@@ -1544,6 +1545,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   /* ⚠️ THE PAGE DERIVES THE MATERIALS because the package and its versions live
                      here; the card states what it is handed. */
                   materials={dockMaterials}
+                  /* §4.4 — the page derives it because `notifyGroups` needs the whole query set */
+                  holders={dockHolders}
                   onPrimary={(c) => dockPrimary(c)}
                   tagsSlot={(c) => c.userTaskId ? (
                     <TagPicker
@@ -2243,6 +2246,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * material word count does not exist either: `wordCount` belongs to the MANUSCRIPT, and printing
    * it beside a query letter would state the novel's length as the letter's.
    */
+  /**
+   * ⚠️ §4.4 — WHO ELSE HOLDS MATERIAL, and it REUSES `notifyGroups`. The offer flow's notify door
+   * has derived exactly this set for months; only the presentation was missing. Nothing here
+   * re-derives who holds what — a second derivation of that is precisely the fault this codebase
+   * keeps writing down.
+   */
+  function dockHolders(card: BoardCard) {
+    if (card.taskType !== "offer_received" || !card.relatedRecordId) return [];
+    const q = queries.find((x) => x.id === card.relatedRecordId);
+    if (!q) return [];
+    const ms = manuscripts.find((m) => m.id === q.manuscriptId);
+    return holderRows(
+      notifyGroups(q, queries, agents, userTasks).pages,
+      (agentId) => (agentId ? agents.find((a) => a.id === agentId)?.email : undefined),
+      ms?.title ? `${ms.title} — an update` : "An update on my submission",
+    );
+  }
+
   function dockMaterials(card: BoardCard) {
     const spec = sendSpecFor(card);
     if (!spec) return [];

@@ -29,7 +29,7 @@ import { ArtSlot } from "./ArtSlot";
 import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
-import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact } from "../../lib/todoHandoff";
+import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
@@ -75,6 +75,11 @@ export interface TodoDockProps {
   activeKey: string;
   onSelect: (key: string) => void;
   onClose: () => void;
+  /**
+   * ⚠️ §4.4 — WHO ELSE HOLDS MATERIAL. `decide` only, and derived by the page because
+   * `notifyGroups` needs the whole query set. Empty array = the section does not render.
+   */
+  holders?: (card: BoardCard) => HolderRow[];
   /** ⚠️ THE MATERIALS ON FILE — a RECORD, not a choice. The page derives them because the package
    *  and its versions live there; the card states what it is handed. */
   materials?: (card: BoardCard) => MaterialRow[];
@@ -111,7 +116,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, materials, onPrimary, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -368,9 +373,39 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               <div className="tdk-note">A nudge is a message, not a send — logging it records the chase.</div>
             )}
 
-            {flow === "offer" && (
-              <div className="tdk-note">An offer has a reply-by date. Answering it opens the offer flow, where the decision and the other agents are handled together.</div>
-            )}
+            {flow === "offer" && (() => {
+              /**
+                * ⚠️ THE SECTION DOES NOT RENDER WHEN NOBODY IS HOLDING ANYTHING — it is not an
+                * empty state. "No other agent holds your pages" is a sentence about a situation
+                * that needs no action, and a heading over nothing is a section pretending to be
+                * populated. The offer flow's own notify door still handles query-only agents.
+                */
+              const hold = holders?.(card) ?? [];
+              if (!hold.length) {
+                return <div className="tdk-note">An offer has a reply-by date. Answering it opens the offer flow, where the decision is recorded.</div>;
+              }
+              return (
+                <>
+                  <div className="tdk-fk">Who else holds material</div>
+                  <div className="tdk-holds">
+                    {hold.map((h) => (
+                      <div className="tdk-hold" key={h.queryId}>
+                        <span className="tdk-holdtx">
+                          <b>{h.name}</b>
+                          <span>{h.holds}{h.caution ? ` · ${h.caution}` : ""}</span>
+                        </span>
+                        {/* ⚠️ AN AFFORDANCE WITH NOTHING BEHIND IT GREYS AND SAYS WHY — it never
+                            disappears and is never fabricated, the same law the hand-off follows. */}
+                        {h.mail.href
+                          ? <a className="tdk-holdmail" href={h.mail.href}>Draft a note</a>
+                          : <span className="tdk-holdmail off" title={h.mail.why}>Draft a note</span>}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="tdk-note">{HANDOFF_NOTE}</div>
+                </>
+              );
+            })()}
 
             {flow === "stale" && (
               <div className="tdk-note">Closing records no response — not a rejection, so your response rate stays honest.</div>

@@ -500,3 +500,51 @@ export function bandForward(
   }
   return null;
 }
+
+/* ── §4.4 · who else holds material ──────────────────────────────────────────────────────────── */
+
+export interface HolderRow {
+  queryId: string;
+  /** The agent's display name. */
+  name: string;
+  /** WHAT THEY HOLD — the status line, e.g. `FULL SENT`, `PARTIAL SENT`, `R&R IN PROGRESS`. */
+  holds: string;
+  /** A composed draft link, or `null` with the reason — never hidden, never fabricated. */
+  mail: { href: string | null; why: string };
+  /** The agency's own standing, where it changes what telling them means. */
+  caution?: string;
+}
+
+/**
+ * ⚠️ THE MOST USEFUL THING ON AN OFFER CARD, AND IT HAS NEVER BEEN BUILT. It has been in every
+ * mockup since v1: when an offer arrives, the agents still holding your pages are the people you
+ * have to contact, and the writer should not have to reconstruct that list from the query hub
+ * under time pressure.
+ *
+ * ⚠️ IT REUSES `notifyGroups`, WHICH ALREADY COMPUTES THE SET — the offer flow's notify door has
+ * been deriving exactly this for months. Only the presentation was missing, so nothing here
+ * re-derives who holds what; it takes `pages` and dresses it. A second derivation of "who is still
+ * holding material" is precisely the fault this codebase keeps writing down.
+ *
+ * ⚠️ `pages` ONLY — an agent who has your query letter and nothing else is not holding material
+ * in the sense that matters here; `queryOnly` is a different, gentler conversation and the offer
+ * flow's own door still covers it.
+ */
+export function holderRows(
+  pages: { queryId: string; agentId?: string; name: string; statusLine: string; caution?: string }[],
+  emailFor: (agentId: string | undefined) => string | undefined,
+  subject: string,
+): HolderRow[] {
+  return pages.map((p) => {
+    const to = emailFor(p.agentId)?.trim();
+    return {
+      queryId: p.queryId,
+      name: p.name,
+      holds: p.statusLine,
+      mail: to
+        ? { href: `mailto:${to}${subject ? `?subject=${encodeURIComponent(subject)}` : ""}`, why: "" }
+        : { href: null, why: "No email address on file for this agent." },
+      ...(p.caution ? { caution: p.caution } : {}),
+    };
+  });
+}
