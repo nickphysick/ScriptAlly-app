@@ -26,7 +26,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
-import { bandVariant, bandMotif } from "../../lib/todoHandoff";
+import { bandVariant, bandMotif, bandAnchor } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
 import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE } from "../../lib/todoHandoff";
@@ -206,9 +206,11 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           </div>
           {/* ⚠️ TOP-ALIGNED TO THE IDENTITY BLOCK AND `flex-shrink: 0` — it is a fixed pair of
               facts beside a block that wraps, never the other way round. */}
-          {facts.length > 0 && (
+          {/* ⚠️ THE BAND SHOWS THE ANCHOR ALONE. It showed both, and the stat pair three inches
+              below showed the same two — one figure twice, in one glance. */}
+          {bandAnchor(facts).length > 0 && (
             <span className="tdk-facts">
-              {facts.map((f) => (
+              {bandAnchor(facts).map((f) => (
                 <span className="tdk-fact" key={f.k}>
                   <span className="k">{f.k}</span>
                   <span className="v">{f.v}</span>

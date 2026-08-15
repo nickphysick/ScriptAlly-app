@@ -258,6 +258,17 @@ export interface BandFact {
  * arithmetic on it. Neither is a judgement, and a fact with no value behind it is OMITTED rather
  * than shown as a dash — the strip is short by design and an empty column in it reads as a fault.
  */
+/**
+ * ⚠️ THE BAND CARRIES ONE FACT, THE PAIR CARRIES BOTH — and this is the deliberate exception to
+ * "a figure appears once per card". The band states the ANCHOR (when they asked), because that is
+ * the fact the identity line is about; the stat pair states the anchor AND the elapsed, because
+ * the pair's whole job is the relationship between them. Two presentations of one derivation, on
+ * purpose — never the same figure twice by accident, which is what the band showing both was.
+ */
+export function bandAnchor(facts: BandFact[]): BandFact[] {
+  return facts.filter((f) => f.kind !== "wait");
+}
+
 export function bandFacts(
   sentLabel: string | null,
   sentValue: string | null,
@@ -339,8 +350,15 @@ export interface TrackingStat {
  * figure, Inter for the unit — and a single string cannot carry two faces. The split is on the
  * LAST space, so "6 weeks" divides and "28 Jun" does not (a date's parts belong together).
  */
+/**
+ * ⚠️ THE PAIR READS ELAPSED FIRST, ANCHOR SECOND — "Jonathan has waited / 13 days" beside "He
+ * asked on / 2 Aug". `bandFacts` builds them anchor-first because that is the order the BAND wants
+ * (see `bandAnchor`); the pair is a different presentation of the same two facts and reads the
+ * other way, because the elapsed figure is the one the writer is looking for.
+ */
 export function trackingStats(facts: BandFact[]): TrackingStat[] {
-  return facts.map((f) => {
+  const ordered = [...facts].sort((a, b) => (a.kind === "wait" ? -1 : 0) - (b.kind === "wait" ? -1 : 0));
+  return ordered.map((f) => {
     /* only a WAIT splits, and only when it actually has a unit — "Today" has none */
     const m = f.kind === "wait" ? /^(\S+)\s+(.+)$/.exec(f.v) : null;
     return {

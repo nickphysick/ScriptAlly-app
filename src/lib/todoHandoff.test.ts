@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, trackingStats, HANDOFF_NOTE,
+  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, bandAnchor, trackingStats, HANDOFF_NOTE,
 } from "./todoHandoff";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -241,9 +241,30 @@ describe("⚠️ THE BAND'S FACTS STRIP IS THE RAIL'S PAIRING, IN THE CARD", () 
 });
 
 describe("⚠️ TRACKING'S STAT PAIR IS THE BAND'S FACTS, RE-PRESENTED — never a second derivation", () => {
-  it("it takes `bandFacts`' own output, so three surfaces state one number", () => {
+  /**
+   * ⚠️ THE PAIR READS ELAPSED FIRST — "Greg has waited / 6 weeks" beside "He asked on / 28 Jun".
+   * `bandFacts` builds anchor-first because that is the order the BAND wants; the pair is a
+   * different presentation of the same two facts and reads the other way, because the elapsed
+   * figure is the one the writer is looking for. Same derivation, two orders, on purpose.
+   */
+  it("it takes `bandFacts`' own output, elapsed first, so two surfaces state one number", () => {
     const facts = bandFacts("He asked on", "28 Jun", "Greg has waited", "6 weeks");
-    expect(trackingStats(facts).map((s) => s.k)).toEqual(["He asked on", "Greg has waited"]);
+    expect(trackingStats(facts).map((s) => s.k)).toEqual(["Greg has waited", "He asked on"]);
+  });
+
+  /**
+   * ⚠️ THE BAND CARRIES THE ANCHOR ALONE, AND THIS IS THE DELIBERATE EXCEPTION to "a figure
+   * appears once per card". The band showed BOTH facts and the stat pair three inches below showed
+   * the same two — one figure twice, in one glance, which is the accident the rule exists to stop.
+   * The band states when they asked; the pair states that AND how long it has been, because the
+   * pair's whole job is the relationship between them.
+   */
+  it("the band shows the anchor alone; the pair shows both", () => {
+    const facts = bandFacts("He asked on", "28 Jun", "Greg has waited", "6 weeks");
+    expect(bandAnchor(facts).map((f) => f.k)).toEqual(["He asked on"]);
+    expect(trackingStats(facts)).toHaveLength(2);
+    /* an anchor-less card shows no band fact rather than falling back to the wait */
+    expect(bandAnchor(bandFacts(null, null, "Greg has waited", "6 weeks"))).toEqual([]);
   });
 
   /**
@@ -255,13 +276,13 @@ describe("⚠️ TRACKING'S STAT PAIR IS THE BAND'S FACTS, RE-PRESENTED — neve
      first attempt guessed from the LABEL and split "He asked on / 28 Jun" into "28" and "Jun"
      because the word "asked" matched. Caught by this case. */
   it("a wait splits into figure and unit; a date does not", () => {
-    const [date, wait] = trackingStats(bandFacts("He asked on", "28 Jun", "Greg has waited", "6 weeks"));
+    const [wait, date] = trackingStats(bandFacts("He asked on", "28 Jun", "Greg has waited", "6 weeks"));
     expect(wait).toMatchObject({ v: "6", u: "weeks" });
     expect(date).toMatchObject({ v: "28 Jun", u: "" });
   });
 
   it("a word figure carries no unit to split", () => {
-    const [, wait] = trackingStats(bandFacts("He asked on", "28 Jun", "Greg has waited", "Today"));
+    const [wait] = trackingStats(bandFacts("He asked on", "28 Jun", "Greg has waited", "Today"));
     expect(wait).toMatchObject({ v: "Today", u: "" });
   });
 
