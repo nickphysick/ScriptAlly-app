@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, bandAnchor, trackingStats, HANDOFF_NOTE,
+  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, materialRows, bandAnchor, trackingStats, HANDOFF_NOTE,
 } from "./todoHandoff";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -289,5 +289,37 @@ describe("⚠️ TRACKING'S STAT PAIR IS THE BAND'S FACTS, RE-PRESENTED — neve
   it("an absent fact yields no stat — the pair is short rather than padded", () => {
     expect(trackingStats(bandFacts(null, null, "Greg has waited", "6 weeks"))).toHaveLength(1);
     expect(trackingStats(bandFacts(null, null, null, null))).toEqual([]);
+  });
+});
+
+/* ── the materials sub-line (pane faults; Nick's ruling) ─────────────────────────────────────── */
+
+describe("⚠️ THE SUB-LINE VARIES BY WHAT THE MATERIAL IS — and is ABSENT where nothing is true", () => {
+  it("a full manuscript takes the manuscript's own word count — the one place that figure belongs", () => {
+    expect(materialRows("The manuscript", { isFull: true, wordCount: 92000 })[0].sub).toBe("92,000 words");
+  });
+
+  it("a sample, synopsis or letter takes the package slot's version", () => {
+    expect(materialRows("The partial", { versionName: "QL v2" })[0].sub).toBe("QL v2");
+  });
+
+  /**
+   * ⚠️ NO SUB-LINE BEATS AN ABSENT-VALUE SUB-LINE. "Version not recorded" on every row is noise,
+   * and the absence is already visible from the row having no second line.
+   */
+  it("no version and no word count means NO second line at all", () => {
+    expect(materialRows("The partial", {})[0].sub).toBeUndefined();
+    expect(materialRows("The manuscript", { isFull: true })[0].sub).toBeUndefined();
+    expect(materialRows("The partial", { versionName: null })[0].sub).toBeUndefined();
+  });
+
+  /* ⚠️ A WORD COUNT NEVER LANDS ON A NON-FULL — beside a query letter it would state the novel's
+     length as the letter's. */
+  it("a word count cannot leak onto a sample", () => {
+    expect(materialRows("The partial", { wordCount: 92000 })[0].sub).toBeUndefined();
+  });
+
+  it("no material, no row", () => {
+    expect(materialRows(null, { isFull: true, wordCount: 92000 })).toEqual([]);
   });
 });

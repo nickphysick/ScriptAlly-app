@@ -417,16 +417,11 @@ export interface MaterialRow {
   /** The material's own name — "Opening sample", never "Sample pages" (the ComponentType law). */
   label: string;
   /**
-   * ⚠️ WHAT THE RECORD CAN ACTUALLY SAY, WHICH IS LESS THAN THE MOCKUP DRAWS. The ref's sub-line
-   * is `v4 · 50,000 words · .docx`. Of those three, ONE is derivable: the version name, and only
-   * where the query has a linked package whose slot is filled. There is no file at all —
-   * `ManuscriptVersion.fileName` is written nowhere in `src/` outside a dev lab fixture, and
-   * `contentType: "file"` is a disabled "coming soon" with no Storage behind it — so a format
-   * stamp would be invented, every time, on every row. A per-material word count does not exist
-   * either; `wordCount` is a MANUSCRIPT field, and printing it beside a query letter would be
-   * stating the novel's length as the letter's.
+   * ⚠️ ABSENT WHERE THERE IS NOTHING TRUE TO SAY — Nick's ruling, and the reason it is optional
+   * rather than a "Version not recorded" string. A line on every row announcing that a thing is
+   * missing is noise, and the absence is already visible from the row having no second line.
    */
-  sub: string;
+  sub?: string;
 }
 
 /**
@@ -434,17 +429,27 @@ export interface MaterialRow {
  * JOURNEY, where the writer is choosing what went. On the reading card the same material is a
  * statement of what is on file, so it carries a tick that is a MARK rather than an input.
  *
- * ⚠️ AND AN UNKNOWN VERSION SAYS SO. "Version not recorded" is a fact about the record; a bare
- * "v1" would be the app guessing, and on a query with no linked package it would be guessing
- * every time.
+ * ⚠️ THE SUB-LINE VARIES BY WHAT THE MATERIAL IS, because only one fact is legitimate for each:
+ *
+ *   · a FULL MANUSCRIPT takes the manuscript's own word count — the one place that figure is
+ *     about the thing being sent. Beside a query letter it would state the novel's length as the
+ *     letter's, which is why it appears nowhere else;
+ *   · an OPENING SAMPLE, SYNOPSIS or QUERY LETTER takes the package slot's version, where one is
+ *     recorded — the artefact genuinely has a version and the package names it;
+ *   · anything with neither takes NO SUB-LINE. Not "Version not recorded": a line on every row
+ *     saying a thing is absent is noise.
+ *
+ * ⚠️ AND NEVER A FORMAT, until there is a file to name. `ManuscriptVersion.fileName` is written
+ * nowhere in `src/` outside a dev lab fixture and `contentType: "file"` is a disabled coming-soon
+ * with no Storage behind it, so a format stamp would be invented on every row, every time.
  */
 export function materialRows(
   materialLabel: string | null,
-  versionName: string | null,
+  opts: { isFull?: boolean; wordCount?: number; versionName?: string | null },
 ): MaterialRow[] {
   if (!materialLabel) return [];
-  return [{
-    label: materialLabel,
-    sub: versionName ? versionName : "Version not recorded",
-  }];
+  const sub = opts.isFull
+    ? (opts.wordCount ? `${opts.wordCount.toLocaleString("en-GB")} words` : undefined)
+    : (opts.versionName || undefined);
+  return [{ label: materialLabel, ...(sub ? { sub } : {}) }];
 }

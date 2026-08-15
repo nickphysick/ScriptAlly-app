@@ -343,7 +343,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                   {(materials?.(card) ?? []).map((m) => (
                     <div className="tdk-mat" key={m.label}>
                       <span className="tdk-matic" aria-hidden>▤</span>
-                      <span className="tdk-mattx"><b>{m.label}</b><span>{m.sub}</span></span>
+                      {/* ⚠️ NO SECOND LINE WHERE THERE IS NOTHING TRUE TO SAY — the element is absent, not empty. */}
+                      <span className="tdk-mattx"><b>{m.label}</b>{m.sub && <span>{m.sub}</span>}</span>
                       <span className="tdk-mattick" aria-hidden>✓</span>
                     </div>
                   ))}

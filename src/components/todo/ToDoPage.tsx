@@ -2208,9 +2208,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        `SubmissionPackage` — there is no "full manuscript" slot, and that is the standing law
        (PACKAGE_MATERIALS): a full manuscript is what you send when asked, not part of a package.
        So a full has no version to quote, and says so rather than quoting the sample's. */
-    const slot = spec.targetStatus === "Partial Sent" ? pkg?.samplePagesVersionId : undefined;
-    const version = slot && isSlotFilled(slot) ? versions.find((v) => v.id === slot)?.versionName ?? null : null;
-    return materialRows(spec.material, version);
+    /* ⚠️ THE SLOT FOLLOWS THE MATERIAL, and a FULL has none. `SubmissionPackage` carries no
+       full-manuscript slot — the standing PACKAGE_MATERIALS law: a full is what you send when
+       asked, not part of a package. So a full takes the MANUSCRIPT's word count instead, which is
+       the one place that figure is about the thing being sent. */
+    const isFull = spec.targetStatus !== "Partial Sent";
+    const slot = isFull ? undefined : pkg?.samplePagesVersionId;
+    const versionName = slot && isSlotFilled(slot) ? versions.find((v) => v.id === slot)?.versionName ?? null : null;
+    const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
+    return materialRows(spec.material, { isFull, wordCount: ms?.wordCount, versionName });
   }
 
   function dockTimeline(card: BoardCard): DockTimelineEvent[] {
