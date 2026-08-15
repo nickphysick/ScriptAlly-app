@@ -304,6 +304,21 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(bare).not.toMatch(/["\s`]tdk-tl["\s`]/);
   });
 
+  /**
+   * ⚠️ THE THREE VALUES THE SPECIFICATION AND v14 BOTH NAME, AND THE APP HAD DRIFTED FROM ALL
+   * THREE. None of the three had a reason recorded anywhere against it — they were not decisions
+   * that beat the artefacts, they were numbers that had wandered. Locked together because a
+   * wandering value is exactly what a lock is for, and because a single test naming all three
+   * makes the next drift one red rather than three separate silences.
+   */
+  it("⚠️ §2.1 / §2.3 / §3.8 — the disc, the subject and the date track are the named figures", () => {
+    expect(dockCssRule(".tdk-av {")).toContain("width: 40px; height: 40px");   // §2.1
+    const name = dockCssRule(".tdk-name {");
+    expect(name).toContain("font-size: 20px");                                  // §2.3
+    expect(name).toContain("line-height: 1.15");
+    expect(dockCssRule(".tdk-tl li {")).toContain("grid-template-columns: 66px"); // §3.8
+  });
+
   /* ── §3.5 — THE RINGS ────────────────────────────────────────────────────────────────────── */
 
   it("⚠️ §3.5 — every entry carries a ring, and the ring's class is the direction", () => {
