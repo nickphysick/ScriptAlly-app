@@ -48,7 +48,10 @@
   grid-template-rows: minmax(0, 1fr);
   gap: 18px;
   padding: 0 22px 20px;
-  background: var(--ws-ground);
+  /* ⚠️ THE WARM GROUND IS GONE (corrections, Phase 4). The bar and the split are white, the same
+     as the sheet they sit on, and the LIST CARD'S HAIRLINE is now the only thing delineating it.
+     A tinted ground under a white card was two surfaces doing one job; the border does it alone. */
+  background: #fff;
   flex: 1;
   min-height: 0;
   min-width: 0;
@@ -303,7 +306,7 @@
   align-items: center;
   gap: 14px;
   padding: 14px 22px 13px;
-  background: var(--ws-ground);
+  background: #fff;
 }
 
 .tdw-cbcount { display: flex; align-items: baseline; gap: 9px; }

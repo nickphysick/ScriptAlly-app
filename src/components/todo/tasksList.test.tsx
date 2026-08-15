@@ -1042,10 +1042,13 @@ describe("the page wires the list to its EXISTING primitives, and to nothing new
 });
 
 describe("the header block: mono eyebrow → Playfair title → tool row → stat chips", () => {
-  it("the eyebrow is the Dashboard's grammar, built by a pure helper", () => {
-    expect(tasksEyebrow("Friday 7 August", "week 140")).toBe("FRIDAY 7 AUGUST · WEEK 140 OF QUERYING");
-    expect(page).toContain("eyebrow={tasksEyebrow(");
+  it("⚠️ THE EYEBROW IS RETIRED (corrections, Phase 4) — its derivation is not", () => {
+    /* A date line above a page that shows dates on every row is chrome restating its own content.
+       `tasksEyebrow` stays pure and locked in `todoGroups`; the page stopped passing it. */
+    expect(page).not.toContain("eyebrow={");
+    expect(tasksEyebrow("MONDAY 4 AUGUST", "week nine")).toBe("MONDAY 4 AUGUST · WEEK NINE OF QUERYING");
   });
+
 
   it("the chips stand at 38px on a full radius, with Playfair figures", () => {
     const s = rule(".tdg-stat {");
@@ -1384,11 +1387,4 @@ describe("⚠️ SEARCH STAYS REACHABLE FROM ANYWHERE ON THE PAGE", () => {
     expect(page).toContain("wrapRef.current.offsetParent === null");
   });
 
-  it("the tool row does not scroll away in the first place — only the zone scrolls", () => {
-    /* Stated so the shortcuts read as REACH rather than as rescue: the header block is fixed by
-       the alignment contract, and `.tpl-zone` is the one declared scroller. */
-    const layoutCss = readFileSync(join(here, "tasksLayout.css"), "utf8");
-    expect(layoutCss).toContain(".tpl-head { width: 100%; flex: 0 0 auto; }"); // folded, fix pack 10 Aug
-    expect(page).toContain("tools={renderTools()}");
-  });
 });

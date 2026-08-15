@@ -192,18 +192,24 @@ describe("⚠️ the order: header block → hairline → sidebar and body on th
  * move sort into the rail too, and this note is where the argument is recorded.
  */
 describe("⚠️ every control sits above the surface it acts on, and nothing floats mid-page", () => {
-  it("the PAGE's instruments live in renderTools, and nowhere else", () => {
-    const tools = listPage.slice(listPage.indexOf("function renderTools"), listPage.indexOf("function renderHero"));
-    /* ⚠️ SORT LEFT THIS ROW (visual rebuild, Phase 1) — it orders the LIST, the rail is the list,
-       and leaving it here kept two instruments over one set in two places. That tension was
-       flagged when the search moved; v9 settles it by drawing sort beside the search. What is
-       left here acts on the PAGE. */
-    for (const cls of ["tdb-addb"]) {
-      expect(tools, cls).toContain(cls);
-      const outside = listPage.replace(tools, "");
-      expect(outside.includes(`className="${cls}"`), `${cls} outside the tool row`).toBe(false);
-    }
-    expect(listPage).toContain("tools={renderTools()}");
+  /**
+   * ⚠️ THE PAGE HAS NO TOOL ROW AT ALL NOW (corrections, Phase 4). Everything between the header
+   * plate and the control bar came out — the eyebrow, the tag dropdown, the count pills and
+   * `Work the list`. Search and sort had already gone to the list card; `Add task or note` is the
+   * control bar's. `TasksPageLayout` renders no row and no hairline when neither `tools` nor
+   * `eyebrow` is passed, so the strip costs nothing rather than leaving a bare rule.
+   *
+   * The LAW is unchanged and asserted the other way round: every control sits above the surface
+   * it acts on, and this page's surfaces are the list card and the bar.
+   */
+  it("the page passes no tool row, and nothing floats where one used to be", () => {
+    expect(listPage).not.toContain("tools={renderTools()}");
+    expect(listPage).not.toContain("function renderTools");
+    expect(listPage).not.toContain("eyebrow={");
+    expect(listPage).not.toContain('className="tdb-workb"');
+    /* the two surfaces that DO carry controls still do */
+    expect(listPage).toContain('className="tdw-tools"');
+    expect(listPage).toContain('className="tdw-cbar"');
   });
 
   it("the RAIL's instruments live in renderRailTools, and nowhere else", () => {

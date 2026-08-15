@@ -35,7 +35,9 @@ describe("tightening P1 — the hero on one line + the recessed control strip", 
        derivation is the fault the counting law exists to prevent, so the header keeps one. */
     expect(hero).toContain('title="To-do list"');
     expect(hero).not.toContain("subtitle={boardSubtitle()}");
-    expect(hero).toContain("eyebrow={tasksEyebrow(");
+    /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4) — the page passes neither `tools` nor
+       `eyebrow`, so the layout renders no row and no hairline. The Add is the control bar's. */
+    expect(hero).not.toContain("eyebrow={");
     expect(page).toContain("taskStats(boardCols,");
   });
 

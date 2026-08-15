@@ -604,7 +604,6 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(split).toContain("--tdw-rail-w: 520px");
     /* the panes are objects on a ground now, not two halves of a sheet — so the split carries the
        gap and the ground, and the rail no longer carries a divider */
-    expect(split).toContain("background: var(--ws-ground)");
     expect(split).toContain("gap: 18px");
   });
 
@@ -821,16 +820,21 @@ describe("⚠️ EACH PANE SCROLLS, AND NEITHER CLIPS — the distinction a page
 
 describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () => {
   /**
-   * ⚠️ THE GROUND IS THE APP'S OWN TOKEN. v9 draws `#f7f3ed`; `--ws-ground` (#f7f4ee) is within a
-   * hair of it — one step of green, one of blue — and is already the warm ground elsewhere in the
-   * shell. Nothing was invented, and the split reads it rather than restating a hex.
+   * ⚠️ THE WARM GROUND IS RETIRED (corrections, Phase 4). It was `--ws-ground` — the app's own
+   * token, within a hair of v9's `#f7f3ed`. v10 makes the bar and the split WHITE, the same as the
+   * sheet, and the LIST CARD'S HAIRLINE is the only delineation. A tinted ground under a white
+   * card was two surfaces doing one job.
    */
-  it("the split carries the ground, the gap and the padding — and reads a token, not a literal", () => {
+  it("the split is white, and the card's border is what delineates it", () => {
     const split = rule(splitCss, ".tdw-split {");
-    expect(split).toContain("background: var(--ws-ground)");
-    expect(split).not.toMatch(/background:\s*#/);
+    expect(split).toContain("background: #fff");
+    expect(split).not.toContain("--ws-ground");
     expect(split).toContain("gap: 18px");
     expect(split).toContain("padding: 0 22px 20px");
+    /* the bar shares it — one surface from the plate down to the cards */
+    expect(rule(splitCss, ".tdw-cbar {")).toContain("background: #fff");
+    /* and the border is still there to do the delineating alone */
+    expect(rule(splitCss, ".tdw-rail {")).toContain("border: 1px solid var(--tdw-hair)");
   });
 
   it("the rail is a CARD — hairline, radius, lift — and the divider went with the sheet", () => {

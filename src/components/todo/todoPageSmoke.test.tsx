@@ -63,15 +63,22 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
   it("…and produces its own chrome, so it is not an empty shell that merely did not crash", () => {
     const html = render(<ToDoPage onNavigate={() => {}} />);
     expect(html).toContain("To-do list");        // the page header
-    expect(html).toContain("tdb-tools");          // the tool row
+    /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4) — the eyebrow, the tag dropdown, the
+       count pills and `Work the list` all came out; search and sort are the list card's and
+       `Add task or note` is the control bar's. */
+    expect(html).toContain("tdb-centre");          // the page's own content column
     /* ⚠️ THE SIDE CONTAINER'S "Filters" WENT WITH THE SIDEBAR (tasks-consolidation P2, 9 Aug).
        The point of this smoke is that the page is not an empty shell that merely did not crash,
        so it anchors on chrome the CONSOLIDATED page produces in EVERY state — the mono eyebrow
        and the tool row's returned ink verb. (The stat chips and the groups are the populated
        state's, and they are smoked below: with no data at all this page renders its first-run
        panel, and smoking only that leaves every derivation unexecuted.) */
-    expect(html).toContain("tpl-eyebrow");
-    expect(html).toContain("Work the list");
+    /* ⚠️ THE EYEBROW IS RETIRED (corrections, Phase 4). With no data this render is the FIRST-RUN
+       desk, which replaces the whole body — so the split is legitimately absent here and the
+       page's own chrome is its header and content column. */
+    /* ⚠️ `Work the list` IS RETIRED (Phase 4) — it opened the dock over the whole queue, and the
+       dock IS the right-hand pane now, so the button entered a mode you were already in. */
+    expect(html).not.toContain("Work the list");
   });
 
   /* ⚠️ TODAY'S TWO SMOKES WENT WITH THE PAGE (tasks-consolidation P1, 9 Aug), AND THIS IS THE

@@ -55,7 +55,6 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
        exists to prevent, so the header keeps ONE. The mono eyebrow arrives in its place — the
        Dashboard's grammar, both halves imported from the Dashboard's own derivations. */
     expect(chrome).not.toContain("subtitle={boardSubtitle()}");
-    expect(chrome).toContain("eyebrow={tasksEyebrow(longDate(new Date(now)), weekOfQuerying(queries, new Date(now)))}");
     /* Scoped to the LIVE chrome: `renderHero` is the dormant bespoke hero, kept whole behind its
        red gate, and it legitimately still carries the old wording. Asserting over the whole file
        would fail on a thing that is deliberately preserved. */
@@ -89,15 +88,13 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(page).toContain("<TaskList");
   });
 
-  it("the Add is PINK (creation); the session launcher is RETIRED (board fixes II P3)", () => {
-    // tasks-pages P1: the controls live in renderTools (the layout's tool row) now
-    const hero = page.slice(page.indexOf("function renderTools"), page.indexOf("function renderHero"));
-    expect(hero).toContain('className="tdb-addb"');   // pink
-    /* ⚠️ SUPERSEDED: "tdb-ghb ▶ Focused session" is gone — the dock's doors (every card, the
-       menu's Action now) made a separate launcher a second name for a thing already under your
-       pointer. The ENGINE survives whole; only the button went. */
-    expect(hero).not.toContain('className="tdb-ghb"');
-    expect(hero).not.toContain("Focused session");
+  it("⚠️ THE ADD IS THE CONTROL BAR'S NOW, and still the only creation action", () => {
+    /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4). The Add moved into the control bar as the
+       one list-level action there; the session launcher stays extinct. */
+    expect(page).toContain("Add task or note");
+    expect(page).toContain('onClick={() => openComposer("task")}');
+    expect(page).not.toContain("tdb-ghb");
+    expect(page).not.toContain("function renderTools");
   });
 
   it("the briefing seat still renders above the groups — it is what the pill pointed at", () => {

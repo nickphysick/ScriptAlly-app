@@ -257,7 +257,7 @@ describe("⚠️ ONE ACT, THREE RECORDS — and only two of them are writes", ()
 });
 
 describe("⚠️ ONE SURFACE, EVERY ENTRANCE", () => {
-  it("Action now, the bounce toast's Open, the card doors and Work the list all call openDock", () => {
+  it("Action now, the bounce toast's Open and the card doors all call openDock", () => {
     /* board fixes II P1 reshaped the action case: a SWEEP routes to its batch sheet first, and
        every other card docks — the assert follows the call, not the old one-line layout.
        P3 then retired the tool-row launcher: openFocusedSession is DELETED (its one line lives
@@ -268,7 +268,11 @@ describe("⚠️ ONE SURFACE, EVERY ENTRANCE", () => {
     expect(page).not.toContain("openFocusedSession");                        // the identifier is extinct
     expect(page).not.toContain("tdb-ghb");                                   // and so is its button
     expect(page).toContain("onOpen={(c) => openDock(c.key)}"); // the doors
-    expect(page).toContain("const onWork = () => openDock(");                // Today
+    /* ⚠️ "Work the list" IS RETIRED (corrections, Phase 4) — it opened the dock over the whole
+       queue, and the dock IS the right-hand pane now, so the button entered a mode you were
+       already in. Its listener went with it; nothing else in `src/` dispatches the event. */
+    expect(code(page)).not.toContain("const onWork");
+    expect(code(page)).not.toContain("TODO_WORK_THE_LIST,");
   });
 
   it("and the separate focused-session surface is GONE", () => {

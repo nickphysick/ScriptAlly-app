@@ -122,10 +122,13 @@ describe("the tool row: search · #All ▾ · the toggle · the pink Pin", () =>
     expect(page).toContain("(n.tags ?? []).includes(tagSel)");
   });
 
-  it("the pink creation action sits in the right slot", () => {
-    const tools = page.slice(page.indexOf("tools={"), page.indexOf("/* ⚠️ NO sidebar prop"));
-    expect(tools.indexOf("tdb-addb")).toBeGreaterThan(tools.indexOf("<TplGrow />"));
-    expect(tools).toContain("Pin a note");
+  it("⚠️ THE TO-DO PAGE'S TOOL ROW IS RETIRED — the Noteboard keeps its own", () => {
+    /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4) — the page passes neither `tools` nor
+       `eyebrow`, so the layout renders no row and no hairline. The Add is the control bar's. */
+    const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    expect(listPage).not.toContain("function renderTools");
+    /* the Noteboard is unaffected — its row is its own and still carries the pink right */
+    expect(page).toContain("<TplGrow />");
   });
 
   it("the empty state TEACHES rather than apologises", () => {

@@ -67,7 +67,6 @@ describe("the To-do PAGE HEADER — it names the page, and carries ONE action", 
     /* ⚠️ THE ONE LINE IS THE STAT CHIPS NOW (tasks-consolidation P2, 9 Aug) — same facts, same
        `boardCols`, one statement rather than two. The eyebrow above the title is the Dashboard's
        grammar arriving with the consolidation. */
-    expect(hero).toContain("eyebrow={tasksEyebrow(");
     expect(page).toContain("taskStats(boardCols,");
   });
 
@@ -76,8 +75,6 @@ describe("the To-do PAGE HEADER — it names the page, and carries ONE action", 
        dropdown) beside two buttons. The max-two law is about actions competing for attention;
        collapsing instruments into "actions" to satisfy a count would read its letter against
        its purpose. */
-    expect(hero).toContain("tools={renderTools()}"); // the layout's tool row is the one instrument home
-    expect(hero).toContain('className="tdb-addb"');  // pink — creation
     // board fixes II P3: the ghost session launcher is retired — the dock's doors replaced it
     expect(hero).not.toContain('className="tdb-ghb"');
     /* ⚠️ SORT LEFT THIS ROW (visual rebuild, Phase 1) and the max-two law is why it can. This case

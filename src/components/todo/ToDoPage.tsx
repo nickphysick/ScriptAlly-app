@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Funnel, Pin, ChevronRight, ChevronLeft, X, Check, Clock, ArrowUpDown, ExternalLink } from "lucide-react";
+import { Funnel, Pin, ChevronRight, ChevronLeft, X, Check, Clock, ArrowUpDown, ExternalLink, Plus } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -55,7 +55,7 @@ import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import {
-  TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_WORK_THE_LIST, TODO_ADD_TO_TODAY,
+  TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_ADD_TO_TODAY,
 } from "../../lib/todoRoutes";
 /* ⚠️ THE FOUR-COLUMN BOARD IS RETIRED AS THIS PAGE'S BODY (tasks-consolidation P2). `TodoBoard`
    and `TodoSideContainer` are no longer mounted here — the ranked order of ONE list is the plan,
@@ -940,21 +940,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      unmount), so a sibling Tasks route has this page alive beside it. That is a real dependency,
      so it is stated here rather than left to be discovered. */
   useEffect(() => {
-    /* ⚠️ "Work the list" opens THE SAME DOCK, AND NOW ON THE SAME QUEUE (tasks-consolidation P2).
-       It used to walk Today's committed subset; Today is retired, so "the list" means the one
-       ranked list — `dockAllCards`, the narrowing respected. The listener survives as the
-       cross-surface contract and the tool row's button is what calls it, so there is exactly one
-       definition of what gets walked. */
-    const onWork = () => openDock();
+    /* ⚠️ "Work the list" AND ITS LISTENER ARE RETIRED (corrections, Phase 4). It opened the dock
+       over the whole queue; the dock IS the right-hand pane now and never leaves the screen, so
+       the button entered a mode you were already in. Recon confirmed nothing else in `src/`
+       dispatches `TODO_WORK_THE_LIST` — the event name survives in `todoRoutes` unfired rather
+       than being deleted out from under a caller that might exist off this page. */
     const onAdd = (e: Event) => {
       const key = (e as CustomEvent<{ key?: string }>).detail?.key;
       const card = [...board.do, ...board.hk, ...board.nt].find((c) => c.key === key);
       if (card) toggleToday(card); // the cap + the flash come with it, exactly as on this page
     };
-    window.addEventListener(TODO_WORK_THE_LIST, onWork);
     window.addEventListener(TODO_ADD_TO_TODAY, onAdd);
     return () => {
-      window.removeEventListener(TODO_WORK_THE_LIST, onWork);
       window.removeEventListener(TODO_ADD_TO_TODAY, onAdd);
     };
   });
@@ -1314,8 +1311,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <TasksPageLayout
           title="To-do list"
           mark="todo"
-          eyebrow={tasksEyebrow(longDate(new Date(now)), weekOfQuerying(queries, new Date(now)))}
-          tools={renderTools()}
         >
           <div className="tdb-centre">
           {/* THE BRIEFING SLOT (briefing-slot pack — ref design-refs/briefing-slot.html option 1;
@@ -1419,13 +1414,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               <span className="sm">{railShown()} outstanding</span>
             </span>
             <span className="tdw-cbdiv" />
-            <button type="button" className="tdw-cbic" title="Filter" aria-label="Filter"
-              onClick={() => searchRef.current?.focus()}>
-              <Funnel size={15} aria-hidden />
-            </button>
-            <button type="button" className="tdw-cbic" title="Sort" aria-label="Sort"
-              aria-expanded={sortOpen} onClick={() => setSortOpen((v) => !v)}>
-              <ArrowUpDown size={15} aria-hidden />
+            {/* ⚠️ THE ONE LIST-LEVEL ACTION HERE (corrections, Phase 4). Filter and sort left for
+                the list card — they narrow and order the LIST, and the list card is where the list
+                is. What is left in this bar is the one thing that makes a new item, then the
+                verbs for the task in hand. */}
+            <button type="button" className="tdw-cbbtn" onClick={() => openComposer("task")}>
+              <Plus size={14} aria-hidden /> Add task or note
             </button>
             <span className="tdw-cbsp" />
             {paneCard && (() => {
@@ -1734,74 +1728,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      statements of one derivation, which is the exact fault the counting law exists to prevent.
      `boardFigures` and `boardSubtitleCopy` stay in `todoColumns`, pure and locked, unmounted. */
 
-  /* ⚠️ THE TOOL ROW IS THE PAGE'S SINGLE INSTRUMENT (board+dock P1; re-homed by tasks-pages P1
-     into TasksPageLayout's tool row). Search, sort, the Add and — since Today's retirement —
-     "Work the list" all live here: one place to look for anything that changes what the list
-     shows or walks it, with the pink creation action pinned to the RIGHT SLOT per the contract.
-     (A hoisted `function`, not a post-return const — the render calls it; the TDZ law.) */
-  function renderTools() {
-    return (
-      <>
-            {/* ⚠️ THE SEARCH MOVED TO THE RAIL (Phase 4), and it is the one control that had to.
-                It narrows the RAIL — that is what a search over a list of tasks does — and with
-                the page split in two, a control that acts on one pane belongs above that pane.
-                Sort stays here: it orders every group at once and has no pane of its own.
-                (Flagged in the report: two instruments over one list now sit in two places, which
-                is a tension this pack's own history warns about. The pack put the search in the
-                rail explicitly and the ref draws it there.) */}
-            {/* ⚠️ SORT MOVED INTO THE RAIL (visual rebuild, Phase 1). Its old note here read
-                "it reorders every group at once, which is why it sits with the page's instruments
-                and never inside a panel" — true of a page that WAS one panel. The rail is the
-                list now, sort orders the list, and leaving it up here kept two instruments over
-                one set in two places. The v9 ref draws it beside the search; that settles the
-                tension flagged when the search moved. */}
-            {/* ⚠️ THE TAG NARROWING — THE NOTEBOARD'S OWN CONTROL, NOT A LOOKALIKE (P2 follow-up).
-                Same markup, same `.cal-nav` trigger and `.cal-viewmenu` menu, same single-select
-                `#All ▾` vocabulary; only the set it narrows differs. Rendered ONLY where there is
-                something to pick — a filter over an empty vocabulary is a control over nothing,
-                which is the fault this same pass retired `goodDay` for. */}
-            {userTags.length > 0 && (
-              <span className="nb-tagwrap">
-                <button type="button" className={`cal-nav${tagSel ? " on" : ""}`} aria-haspopup="menu" aria-expanded={tagOpen}
-                  onClick={() => setTagOpen((v) => !v)}>
-                  #{tagSel ? (userTags.find((t) => t.id === tagSel)?.label ?? tagSel) : "All"} ▾
-                </button>
-                {tagOpen && (
-                  <div className="cal-viewmenu" role="menu">
-                    <button type="button" role="menuitem" aria-current={tagSel === null}
-                      onClick={() => { setTagSel(null); setTagOpen(false); }}>#All</button>
-                    {userTags.map((t) => (
-                      <button key={t.id} type="button" role="menuitem" aria-current={tagSel === t.id}
-                        onClick={() => { setTagSel(t.id); setTagOpen(false); }}>
-                        #{t.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </span>
-            )}
-
-            {/* The Add was orphaned mid-page; it belongs with the page's other instruments. */}
-            <TplGrow />
-            <button type="button" className="tdb-addb" onClick={() => openComposer("task")}>
-              ＋ Add task or note
-            </button>
-            {/* ⚠️ "WORK THE LIST" COMES BACK HERE (tasks-consolidation P2) — it was Today's ink
-                button, and Today is retired. It DISPATCHES rather than calling openDock, so the
-                page's own listener stays the single definition of what gets walked (one queue,
-                one entrance). DISABLED AT ZERO in the house grammar: an enabled button with
-                nothing to walk offers to walk an empty list. */}
-            <button
-              type="button"
-              className="tdb-workb"
-              disabled={boardCols.todo.length + boardCols.today.length === 0}
-              onClick={() => window.dispatchEvent(new CustomEvent(TODO_WORK_THE_LIST))}
-            >
-              ▶ Work the list
-            </button>
-      </>
-    );
-  }
+  /**
+   * ⚠️ THE TOOL ROW IS GONE, NOT EMPTIED (corrections, Phase 4). Everything between the header
+   * plate and the control bar comes out: the date / week-of-querying eyebrow, the `#All` tag
+   * dropdown, the four count pills and `Work the list`. Search and sort had already moved into
+   * the list card; `Add task or note` moves into the CONTROL BAR as the one list-level action
+   * there. `TasksPageLayout` renders no row and no hairline when neither `tools` nor `eyebrow` is
+   * passed, so the strip costs nothing rather than leaving a bare rule.
+   *
+   * ⚠️ `Work the list` IS RETIRED BECAUSE THE MODE IT ENTERED IS ALWAYS ON. It opened the dock
+   * over the whole queue; the dock IS the right-hand pane now and never leaves the screen, so the
+   * button entered a mode you were already in. Its listener went with it — nothing else in `src/`
+   * dispatches `TODO_WORK_THE_LIST`, and the event name survives in `todoRoutes` unfired rather
+   * than being deleted out from under a caller that might exist off this page.
+   */
   /** DORMANT (todo rebuild P4): the bespoke hero — the focused session's title crossfade,
    *  ritual lines and progress slot. Kept whole rather than deleted; see the red gate above. */
   function renderHero() {

@@ -121,15 +121,17 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
   it("⚠️ THE LIST'S TAG CONTROL IS THE NOTEBOARD'S OWN, not a lookalike", () => {
     /* Same trigger class, same menu class, same `#All ▾` wording and the same single-select
        shape. Two tag filters that looked different would be two things to learn about one idea. */
-    const listPage2 = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    /* ⚠️ THE LIST'S COPY WENT WITH THE TOOL ROW (corrections, Phase 4) — its narrowing has a home
+       in the list card's filter menu now. The NOTEBOARD keeps the control, and what this case was
+       really about survives: the grammar is one thing rather than two lookalikes, which is now
+       asserted on the surface that still draws it. */
     const nb = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
     for (const token of ['className="nb-tagwrap"', 'className="cal-viewmenu"', '#All']) {
-      expect(listPage2, `list: ${token}`).toContain(token);
       expect(nb, `noteboard: ${token}`).toContain(token);
     }
     /* and it renders only where there is something to pick — a filter over an empty vocabulary
        is a control over nothing, the same fault this pass retired `goodDay` for */
-    expect(listPage2).toContain("{userTags.length > 0 && (");
+    expect(nb).toContain("nb-tagwrap");
   });
 
   it("the sidebar's TAGS section is REAL: rows with counts, multi-select, a clear control", () => {

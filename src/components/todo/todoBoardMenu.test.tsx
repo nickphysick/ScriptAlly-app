@@ -351,11 +351,12 @@ describe("⚠️ ＋ Add task or note reaches a MOUNTED composer (P3)", () => {
     expect(page.match(/renderComposer\(\)/g)?.length).toBe(2);
   });
 
-  it("the tool-row Add opens task mode; the session launcher beside it is gone", () => {
-    // tasks-pages P1: the tools live in renderTools (TasksPageLayout's tool row)
-    const hero = page.slice(page.indexOf("function renderTools"), page.indexOf("function renderHero"));
-    expect(hero).toContain('onClick={() => openComposer("task")}');
-    expect(hero).not.toContain("tdb-ghb");
+  it("the control bar's Add opens task mode; the session launcher is gone", () => {
+    /* ⚠️ THE ADD MOVED TO THE CONTROL BAR (corrections, Phase 4) — the tool row is retired, and
+       the bar is the one place a list-level action lives now. */
+    expect(page).toContain('onClick={() => openComposer("task")}');
+    expect(page).toContain("Add task or note");
+    expect(page).not.toContain("tdb-ghb");
   });
 
   it("a fresh task lands in To do — and a surfaced one in Today — without any reload logic", () => {
