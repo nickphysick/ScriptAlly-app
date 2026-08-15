@@ -25,32 +25,54 @@
    at a time; letting it run the full width of a workspace on a wide screen would set its prose at
    a line length nobody reads comfortably, and the pane's ground either side is what makes it read
    as a card ON a desk rather than as the desk. The head row shares the measure. */
+/**
+ * ⚠️ THE CARD IS A DOCUMENT, NOT A PANEL (v14 `.f11`). It was a white box with a hairline: the
+ * sections were right and the object was not. Three layers, and each does a different job —
+ *   · the parchment GROUND (`--paper`), which is what makes it paper rather than UI;
+ *   · the two-part SHADOW — a 1px contact shadow that seats it, and a soft 32px lift that floats
+ *     it. ⚠️ NO BORDER: the shadow is what separates the card from the ground, and a hairline as
+ *     well would draw the edge twice;
+ *   · the GRAIN, at the app's own 0.03 slope — the same turbulence the manuscript plate uses.
+ */
 .tdk-w {
   position: relative;
   max-width: 640px;
   margin: 0 auto;
-  background: #fffefb;
-  border: 1px solid var(--bd, #e7ddd2);
-  border-radius: 12px;
+  background: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 10px 32px rgba(58, 28, 20, 0.08);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   /* ⚠️ THE CARD REACHES THE BOTTOM OF THE PANE — it does not become full-bleed. `max-width: 640px`
      and the auto margins stay: the reading measure is the two-column body's, and widening it would
-     set the Tracking column's prose at a line length nobody reads comfortably. Only the VERTICAL
-     changes.
-
-     ⚠️ AND THIS REPLACES `min-height: 340px`, WHICH WAS A CONTENT FLOOR PRETENDING TO BE A HEIGHT.
-     A short record gave a stub card floating in a tall pane with the desk showing beneath it, and
-     `.tdw-work` is `overflow-y: auto` — so the card grows past the pane and scrolls when the
-     record is long, exactly as before. The floor is not kept alongside: at any pane shorter than
-     340px the two would fight, and the pane's height is the honest answer in both directions.
-
-     ⚠️ `box-sizing` IS DECLARED RATHER THAN INHERITED, because this rule's maths now depends on
-     it — `100%` against a 1px border is a scrollbar either way round if preflight is ever absent
-     (the harness trap the house rules name). */
+     set the record column's prose at a line length nobody reads comfortably. Only the VERTICAL
+     changes. This replaced a `min-height: 340px` content floor, which left a stub card floating in
+     a tall pane; `.tdw-work` still scrolls when the record outgrows the pane.
+     ⚠️ `box-sizing` IS DECLARED rather than inherited, because the maths depends on it. */
   box-sizing: border-box;
   min-height: 100%;
+}
+
+/**
+ * ⚠️ THE INSET FRAME IS DRAWN ON THE CARD, NEVER ON A CHILD — this is the `.qhbar::after` spill
+ * bug the MountCard fix exists to prevent. A frame on a child is an overlay border that the
+ * child's own fills paint over and its siblings escape; on the card it is one rule, above
+ * everything (`z-index: 5`), inert to the pointer, and nothing can cross it.
+ *
+ * ⚠️ THE BAND STAYS INSIDE IT BY ITS OWN MARGIN (`6px 6px 0`), not by the frame clipping it.
+ * That is why the band's margin and this inset are the same 6px: two numbers that must agree, and
+ * they agree because they describe one gap.
+ */
+.tdk-w::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid rgba(124, 58, 42, 0.28);
+  border-radius: 10px;
+  pointer-events: none;
+  z-index: 5;
 }
 
 /* the family band — the same map as the board's card */
@@ -61,10 +83,16 @@
   display: flex;
   align-items: flex-start;
   gap: 16px;
-  padding: 18px 24px 16px;
+  padding: 16px 26px 14px;
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid #e8c8bc;
+  /* ⚠️ THE MARGIN IS WHAT KEEPS THE BAND INSIDE THE FRAME, and it is the frame's own 6px inset.
+     The card clips at 14px and the frame sits at 6px, so a band drawn flush to the card would put
+     its fill across the rule at the top corners. */
+  margin: 6px 6px 0;
+  border-radius: 8px 8px 0 0;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(90, 110, 88, 0.2);
 }
 
 /* ⚠️ `min-width: 0` IS THE WHOLE FIX. Without it a long agency cannot wrap, so the block grows and

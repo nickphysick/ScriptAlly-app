@@ -529,6 +529,40 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
     expect(dockCssRule(".tdk-head {")).toContain("max-width: 640px");
   });
 
+  /**
+   * ⚠️ THE CARD IS A DOCUMENT, NOT A PANEL (v14 `.f11`). It was a white box with a hairline — the
+   * sections right, the object wrong. Three layers, each doing a different job, and the frame is
+   * the one with a history: drawn on a CHILD it is an overlay border that fills paint over and
+   * siblings escape, which is the `.qhbar::after` spill the MountCard fix exists to prevent.
+   */
+  it("⚠️ the card is parchment with grain and a two-part shadow — and NO border", () => {
+    const rule = dockCssRule(".tdk-w {");
+    expect(rule).toContain("background: var(--paper)");
+    expect(rule).toContain("feTurbulence");
+    expect(rule).toContain("slope='0.03'");            // the app's own grain, not a new opacity
+    expect(rule).toContain("border-radius: 14px");
+    /* the contact shadow AND the lift — one without the other is a card that floats or sits, not both */
+    expect(rule).toContain("0 1px 2px rgba(58, 28, 20, 0.05), 0 10px 32px rgba(58, 28, 20, 0.08)");
+    /* ⚠️ NO HAIRLINE: the shadow separates the card from the ground, and a border would draw the
+       edge twice. Matched as a declaration so `border-radius` / `box-sizing` cannot satisfy it. */
+    expect(rule).not.toMatch(/(^|;)\s*border:/);
+  });
+
+  it("⚠️ the inset frame is on the CARD, above everything, inert — never on a child", () => {
+    const frame = dockCssRule(".tdk-w::before {");
+    expect(frame).toContain("inset: 6px");
+    expect(frame).toContain("border: 1px solid rgba(124, 58, 42, 0.28)");
+    expect(frame).toContain("border-radius: 10px");
+    expect(frame).toContain("pointer-events: none");
+    expect(frame).toContain("z-index: 5");
+    /* ⚠️ THE BAND STAYS INSIDE IT BY ITS OWN MARGIN — and that margin IS the frame's inset. Two
+       numbers that must agree, agreeing because they describe one gap. Asserted together so a
+       change to either fails rather than silently putting the band's fill across the rule. */
+    const band = dockCssRule(".tdk-band {");
+    expect(band).toContain("margin: 6px 6px 0");
+    expect(band).toContain("overflow: hidden");
+  });
+
   it("⚠️ the card REACHES THE BOTTOM of the pane, and does not become full-bleed", () => {
     const rule = dockCssRule(".tdk-w {");
     /* vertical: it fills. `min-height: 340px` was a CONTENT floor pretending to be a height — a
