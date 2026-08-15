@@ -29,7 +29,7 @@ import { ArtSlot } from "./ArtSlot";
 import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
-import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow } from "../../lib/todoHandoff";
+import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow, recordNote } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
@@ -286,7 +286,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                 <p className="tdk-bignote">{card.title}</p>
                 {card.detail && <p className="tdk-detail">{card.detail}</p>}
                 {/* the hint is a CAPTION beneath the note, not a column beside it */}
-                <div className="tdk-notehint">Your own task — ticking it is what finishes it.</div>
+                <div className="tdk-notehint">{recordNote(card)}</div>
                 {card.record && <div className="tdk-ffsmall">Attached to <b>{card.record.replace(/^On /, "")}</b>.</div>}
               </>
             ) : (
@@ -321,6 +321,10 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             ) : (
               <div className="tdk-storynone">Nothing logged yet.</div>
             )}
+                {/* ⚠️ §3.11 — WHAT THE RECORD SHOWS, beneath Tracking. These strings lived in the
+                    DOING column keyed on `dockFlowKind`, which folds send and chase into one; they
+                    are re-keyed on the BUCKET and moved here, not rewritten. */}
+                <div className="tdk-recnote">{recordNote(card)}</div>
               </>
             )}
           </aside>
@@ -370,7 +374,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             )}
 
             {flow === "agent-waiting" && !spec && (
-              <div className="tdk-note">A nudge is a message, not a send — logging it records the chase.</div>
+              <div className="tdk-note">{HANDOFF_NOTE}</div>
             )}
 
             {flow === "offer" && (() => {
@@ -417,7 +421,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             })()}
 
             {flow === "stale" && (
-              <div className="tdk-note">Closing records no response — not a rejection, so your response rate stays honest.</div>
+              <></>
             )}
 
             {flow === "user-task" && (
@@ -445,7 +449,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             )}
 
             {flow === "housekeeping" && (
-              <div className="tdk-note">A gap on the agent's record. Filling it opens their profile at the field.</div>
+              <></>
             )}
           </div>
 

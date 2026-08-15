@@ -239,7 +239,11 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     /* the STORY column legitimately names the agent inside timeline entries; what must not repeat
        is the card's own title and record line, which is what collided with the facts */
     expect(body).not.toContain("Send your full to Jonathan Marsh");
-    expect(html).not.toContain("tdk-rec");
+    /* ⚠️ THE EXACT CLASS, NOT THE SUBSTRING. This read `not.toContain("tdk-rec")`, which is
+       satisfied by any class merely STARTING with it — §3.11's `tdk-recnote` tripped it, and the
+       looseness runs the other way too: a real `tdk-record` would have passed. The retired class
+       is `tdk-rec` exactly. */
+    expect(html).not.toContain('class="tdk-rec"');
     expect(html).not.toContain('class="tdk-t"');
   });
 

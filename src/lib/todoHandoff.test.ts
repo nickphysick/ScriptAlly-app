@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, holderRows, anchorNoun, bandForward, materialRows, bandAnchor, trackingStats, HANDOFF_NOTE,
+  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, recordNote, holderRows, anchorNoun, bandForward, materialRows, bandAnchor, trackingStats, HANDOFF_NOTE,
 } from "./todoHandoff";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -419,5 +419,42 @@ describe("⚠️ §4.4 — WHO ELSE HOLDS MATERIAL, from the set `notifyGroups` 
 
   it("nobody holding anything yields no rows — the section does not render", () => {
     expect(holderRows([], email, "s")).toEqual([]);
+  });
+});
+
+/* ── §3.11 · what the record shows ───────────────────────────────────────────────────────────── */
+
+describe("⚠️ §3.11 — ONE PARAGRAPH PER BUCKET, and it reports rather than advises", () => {
+  const B = ["offer_received", "revise_resubmit", "full_requested", "nudge_overdue", "no_response_close", "data_quality_poor"];
+
+  it("every bucket has one, and no two share a paragraph", () => {
+    const notes = B.map((t) => recordNote(bcard({ taskType: t })));
+    notes.push(recordNote(bcard({ userTaskId: "u1" })));
+    expect(notes.every((n) => n.length > 30)).toBe(true);
+    expect(new Set(notes).size).toBe(notes.length);
+  });
+
+  /**
+   * ⚠️ IT REPORTS AND NEVER ADVISES. The same lock the manuscript plate carries: one adverb turns
+   * a fact into a verdict, and one imperative turns a record into an instruction.
+   */
+  it("no advice, no urging, no appraisal", () => {
+    const all = [...B.map((t) => recordNote(bcard({ taskType: t }))), recordNote(bcard({ userTaskId: "u1" }))].join(" ");
+    expect(all).not.toMatch(/\b(should|must|don't forget|remember to|make sure|try to|need to)\b/i);
+    expect(all).not.toMatch(/\b(only|already|still|good|great|slow|overdue|finally)\b/i);
+    expect(all).not.toContain("!");
+  });
+
+  /* ⚠️ THE FOUR THAT EXISTED ARE MOVED VERBATIM, not rewritten — the doing column had them keyed
+     on `dockFlowKind`, which folds send and chase into one and so had no paragraph for a send. */
+  it("the four that already existed carry their original words", () => {
+    expect(recordNote(bcard({ taskType: "nudge_overdue" })))
+      .toBe("A nudge is a message, not a send — logging it records the chase.");
+    expect(recordNote(bcard({ taskType: "no_response_close" })))
+      .toBe("Closing records no response — not a rejection, so your response rate stays honest.");
+    expect(recordNote(bcard({ taskType: "data_quality_poor" })))
+      .toBe("A gap on the agent's record. Filling it opens their profile at the field.");
+    expect(recordNote(bcard({ userTaskId: "u1" })))
+      .toBe("Your own task — ticking it is what finishes it.");
   });
 });

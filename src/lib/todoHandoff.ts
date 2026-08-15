@@ -548,3 +548,36 @@ export function holderRows(
     };
   });
 }
+
+/* ── §3.11 · what the record shows ───────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ THESE STRINGS MOSTLY ALREADY EXISTED — they were rendered in the DOING column, keyed on
+ * `dockFlowKind` rather than on the bucket. Four are moved here VERBATIM (chase, close, fix, note);
+ * two are new because `dockFlowKind` is coarser than the buckets and had no paragraph for them: it
+ * folds send and chase into one `agent-waiting`, and an R&R into the same. Writing a second set
+ * would have been the fault — this is the same set, re-keyed and relocated.
+ *
+ * ⚠️ IT REPORTS AND NEVER ADVISES. Each says what the record shows and what the deed does. No
+ * "don't forget", no "you should", no adjective about how long anything has taken — the app states
+ * what is true and leaves the feeling to the writer.
+ */
+export function recordNote(c: BoardCard): string {
+  switch (cardBucket(c)) {
+    case "send":
+      return "The record shows a request and nothing sent against it. Logging the send moves the query on and starts their reply window.";
+    case "decide":
+      return c.taskType === "offer_received"
+        /* verbatim from the doing column, minus the clause about a flow that is now on this card */
+        ? "An offer has a reply-by date, and it touches every open query on this manuscript at once."
+        : "The record shows revisions requested. Logging the resubmission starts their clock again from today.";
+    case "chase":
+      return "A nudge is a message, not a send — logging it records the chase.";
+    case "close":
+      return "Closing records no response — not a rejection, so your response rate stays honest.";
+    case "fix":
+      return "A gap on the agent's record. Filling it opens their profile at the field.";
+    case "note":
+      return "Your own task — ticking it is what finishes it.";
+  }
+}
