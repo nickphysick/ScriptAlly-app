@@ -603,13 +603,24 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
    * paragraph and hands off. The commit verb NAVIGATES, and the hint says `Nothing is recorded
    * here.` — a surface that looks like every other recording surface must say when it is not one.
    *
-   * ⚠️ IT IS THE FALL-THROUGH, NOT THE ROUTE FOR OFFERS AND HOUSEKEEPING. Every task type this app
-   * actually generates already has a purpose-built journey — `offerSheet` IS the offer flow, and
-   * `dqSheet` fills the reply window, materials list and wish list in place, none of which
-   * Submission packages can touch. Putting the hand-off in front of either would add a click that
-   * teaches nothing, or send a writer who clicked "3 agents have no reply window" to a page about
-   * manuscript packages. What this DOES catch is the unrecognised task type, which fell through to
-   * the SEND journey and was offered "Mark sent" for something that is not a send.
+   * ⚠️ IT SITS BEHIND `offerSheet` AND `dqSheet`, NEVER IN FRONT OF THEM — AND THAT IS A RULING,
+   * NOT AN OVERSIGHT. THE PACK THAT COMMISSIONED THIS ASKED FOR THE OPPOSITE, AND WAS WRONG ON ITS
+   * OWN TERMS; the ruling was reviewed and accepted. Do not "restore" it to match the pack or the
+   * mockup. The reasoning, so it does not have to be rediscovered:
+   *
+   *   · The ref draws Decide handing off to "the offer flow" because THAT MOCKUP HAD NO OFFER FLOW
+   *     TO OPEN. This app does: `offerSheet` is it, in this same surface. An interstitial reading
+   *     "this has its own flow →" in front of it is a screen whose only content is a second click.
+   *   · The ref draws Fix handing off to Submission packages because ITS example task was package
+   *     version drift. This app has no such task. Its Fix bucket is `data_quality_poor` — a missing
+   *     reply window, materials list or wish list, all of which live on the AGENT and all of which
+   *     `dqSheet` fills in place. Submission packages is a manuscripts page and cannot touch one of
+   *     them, so the hand-off would answer a writer who clicked "3 agents have no reply window"
+   *     by navigating them somewhere with no reply window on it. That is worse than the mockup.
+   *
+   * ⚠️ WHAT IT DOES CATCH IS REAL: `cardJourney`'s final `return "send"` means any unrecognised
+   * task type used to land in the SEND journey and be offered "Mark sent" for something that is not
+   * a send. `isSendTask` now gates that by name and everything else arrives here instead.
    */
   function handoffSheet(c: BoardCard, kind: "decide" | "fix") {
     const q = cardQuery(c);

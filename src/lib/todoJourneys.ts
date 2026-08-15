@@ -42,6 +42,14 @@ export function cardJourney(c: BoardCard): CardJourney {
  * ⚠️ THE TWO TASK TYPES THAT ARE GENUINELY SENDS, NAMED. Everything else that falls past
  * `cardJourney`'s branches used to land in the send sheet and be offered "Mark sent" for something
  * that is not a send; naming them here is what lets the fall-through hand off instead.
+ *
+ * ⚠️ THE HAND-OFF IS THE FALL-THROUGH ONLY — it never fronts `offerSheet` or `dqSheet`. Ruled and
+ * accepted; the full reasoning sits on `handoffSheet` in `FocusFlow.tsx`. In one line: the mockup's
+ * hand-offs existed because it had neither flow, and this app has both.
+ *
+ * ⚠️ `exclusive_expiring` IS THE ONE DECLARED TYPE WITH NO PRODUCER, and if it is ever built it
+ * wants its OWN journey and its own row in `todoBuckets`, not this generic hand-off — an exclusive
+ * running out is a deadline with a decision attached, which is nothing like a housekeeping gap.
  */
 export const SEND_TASK_TYPES = ["partial_requested", "full_requested"] as const;
 export const isSendTask = (taskType?: string): boolean =>
