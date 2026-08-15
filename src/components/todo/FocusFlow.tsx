@@ -128,10 +128,14 @@ export interface JourneySpec {
    */
   lede?: React.ReactNode;
 }
-type CardJourney = "offer" | "send" | "nudge" | "stale" | "dq" | "note";
+type CardJourney = "offer" | "send" | "resubmit" | "nudge" | "stale" | "dq" | "note";
 function cardJourney(c: BoardCard): CardJourney {
   if (c.userTaskId) return "note";
   if (c.taskType === "offer_received") return "offer";
+  /* ⚠️ AN R&R IS ITS OWN JOURNEY, not a send with a different label. It is the one stage where a
+     SECOND row is pre-ticked by default, and the reference panel shows the agent's notes rather
+     than their ask — two differences a shared journey would have to branch on internally. */
+  if (c.taskType === "revise_resubmit") return "resubmit";
   if (c.taskType === "nudge_overdue") return "nudge";
   if (c.taskType === "no_response_close") return "stale";
   if (c.taskType === "data_quality_poor") return "dq";
@@ -477,6 +481,120 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       }),
       commit: { label: "Record it as sent", hint: "Nothing is sent from here — this records what you sent.", onCommit: () => { void commitSend(); } },
     }, journeyBand("pink", "Recording what you sent", ag, c.initials, "send"));
+  }
+
+  /**
+   * The R&R. ⚠️ THE SECOND ROW IS PRE-TICKED AND SAYS WHY — this is the one stage where a second
+   * default is conventional, because an agent who asked for revisions expects an account of how
+   * you answered their notes, and a resubmission arriving without one is the single shape they
+   * asked not to receive. Everywhere else a pre-tick would be the app deciding for the writer.
+   */
+  function resubmitSheet(c: BoardCard) {
+    const q = cardQuery(c);
+    const ag = cardAgent(c, q);
+    const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
+    const who = c.who || "the agent";
+    if (step === 0) return sheet(
+      <>
+        {whoRow(ag, c.initials)}
+        {sheetTimeline(q, ag)}
+        {openQueryLink(q)}
+      </>,
+      <>
+        <button type="button" className="tdb-ffback" disabled={qi === 0} onClick={backOne}>← Back</button>
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffskip" onClick={advance}>Leave it</button>
+        <button type="button" className="tdb-ffskip" onClick={() => c.taskType && c.relatedRecordId && stageAndAdvance({ kind: "snooze", cardKey: c.key, label: c.title, taskType: c.taskType, relatedRecordId: c.relatedRecordId, days: 7 })}>Snooze</button>
+        <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>Record your resubmission →</button>
+      </>,
+      band("pink", sendKicker(c, { queries, taskFlags }, Date.now()), emTitle(c), c.subtitle || undefined, { art: "send", kickCls: c.warn ? "warn" : "" }),
+    );
+    const synState = synopsisStateFor(q?.packageId, (id) => packages.find((pk) => pk.id === id), isSlotFilled);
+    /* the SAME table every other journey reads — `cardBucket(c)` is `decide` here, and the table
+       answers on the task type, which is the fix that made these two rows reachable at all */
+    const { rows: rrRows, note: rrNote } = journeyMaterials(
+      cardBucket(c), c.taskType, synState, who, ag?.materialsWanted as string[] | undefined,
+    );
+    /* pre-ticked rows start ON: `mats` is empty until touched, so absence means "as the table left it" */
+    const isOn = (label: string, dflt: boolean) => (label in mats ? mats[label] : dflt);
+    const chosen = rrRows.filter((r) => isOn(r.label, r.on)).map((r) => r.label);
+    const rrWhen = [whenSent(), whenYesterday(), WHEN_OTHER];
+    return journeySheet({
+      steps: [{
+        id: "what",
+        name: "What went",
+        body: (
+          <>
+            <div className="tdb-jnopts">
+              {rrRows.map((r) => (
+                <button key={r.id} type="button" className={`tdb-jnrow${isOn(r.label, r.on) ? " on" : ""}`}
+                  aria-pressed={isOn(r.label, r.on)}
+                  onClick={() => setMats((p) => ({ ...p, [r.label]: !isOn(r.label, r.on) }))}>
+                  <span className="tdb-jnbx">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  </span>
+                  <span>{r.label}{r.sub && <span className="tdb-jnsub">{r.sub}</span>}</span>
+                </button>
+              ))}
+            </div>
+            {rrNote && <div className="tdb-ffnote">{rrNote}</div>}
+            <div className="tdb-ffalso">
+              <label htmlFor="ff-also-rr">Anything else?</label>
+              <textarea id="ff-also-rr" className="tdb-fffree" value={alsoText}
+                placeholder="A revised synopsis, a chapter map…"
+                onChange={(e) => setAlsoText(e.target.value)} />
+            </div>
+          </>
+        ),
+      }, {
+        id: "how",
+        name: "How it went",
+        body: (
+          <div className="tdb-jnseg">
+            {METHODS.slice(0, 2).map((m) => (
+              <button key={m} type="button" className={method === m ? "on" : ""} onClick={() => setMethod(m)}>
+                {m === "QueryManager" ? "Agency portal" : m}
+              </button>
+            ))}
+          </div>
+        ),
+      }, whenStep(rrWhen)],
+      reference: {
+        heading: "Their notes",
+        /* `rrNotes` is what RecordResponseModal kept when the R&R was logged — the agent's own
+           guidance, which is exactly what the writer needs beside them while recording the reply */
+        body: q?.rrNotes
+          ? <>{q.rrNotes}</>
+          : <>Nothing was kept on record when the revisions were requested. What goes back is yours to judge.</>,
+        meta: [q?.revisionRound ? `Revision round ${q.revisionRound}` : null, ms?.title, c.subtitle]
+          .filter(Boolean).join(" · ") || undefined,
+      },
+      summary: journeySummary({
+        materials: chosen,
+        channel: method === "QueryManager" ? "Agency portal" : method,
+        when: whenText(rrWhen),
+        also: alsoText,
+      }),
+      commit: {
+        label: "Record the resubmission",
+        hint: "Starts their clock again from today.",
+        /* ⚠️ NO DUPLICATE-SEND GUARD HERE, and that is the standing rule rather than an omission:
+           an R&R is expected to arrive after an earlier send of the same materials, so the guard
+           that protects an ordinary send would fire on every legitimate resubmission. */
+        onCommit: () => {
+          if (!q) { advance(); return; }
+          const action = getPrimaryAction(q.status as QueryStatus);
+          if (action.kind !== "mark-sent") { advance(); return; }
+          stageAndAdvance({
+            kind: "mark-sent", cardKey: c.key, label: c.title, queryId: q.id,
+            targetStatus: action.target as QueryStatus,
+            sentDate: journeyEventISO(sentDate, new Date().toISOString()),
+            isResubmit: action.markKind === "resubmit", method,
+            materials: chosen,
+          });
+        },
+      },
+    }, journeyBand("pink", "Recording your resubmission", ag, c.initials, "send"));
   }
 
   function nudgeSheet(c: BoardCard) {
@@ -1680,6 +1798,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (it.kind === "group") return groupSheet(it.group);
     const j = cardJourney(it.card);
     if (j === "offer") return offerSheet(it.card);
+    if (j === "resubmit") return resubmitSheet(it.card);
     if (j === "nudge") return nudgeSheet(it.card);
     if (j === "stale") return staleSheet(it.card);
     if (j === "dq") return dqSheet(it.card);

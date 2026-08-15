@@ -11,6 +11,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { journeyMaterials, synopsisStateFor, journeySummary } from "./journeyMaterials";
+import { cardBucket } from "./todoBuckets";
 
 const rows = (b: Parameters<typeof journeyMaterials>[0], t?: string, syn: "held" | "none" | "unknown" = "held") =>
   journeyMaterials(b, t, syn, "Greg");
@@ -40,8 +41,19 @@ describe("⚠️ A PARTIAL OR A FULL IS PAGES AND NOTHING ELSE", () => {
     expect(journeyMaterials("send", "partial_requested", "held", "Greg").rows[0].label).not.toMatch(/\d/);
   });
 
-  it("an R&R goes back with the work AND an account of what changed, both pre-ticked", () => {
-    const m = rows("send", "revise_resubmit");
+  /**
+   * ⚠️ THIS ASSERTION USED TO PASS `"send"`, AND AN R&R CARD CANNOT PRODUCE THAT BUCKET. The
+   * journey's real call site passes `cardBucket(card)`, which for `revise_resubmit` is `decide` —
+   * and `decide` sat in the no-materials guard, so both rows returned `[]` on screen while this
+   * test went green against an argument no caller could supply. A unit test that hands a function
+   * an input its callers cannot is testing a function nobody runs.
+   *
+   * ⚠️ SO THE BUCKET IS DERIVED HERE, NOT NAMED. Writing `"decide"` as a literal would go green the
+   * day `cardBucket` moved R&R somewhere else, which is the same fault one step along.
+   */
+  it("an R&R goes back with the work AND an account of what changed, both pre-ticked — AT ITS REAL BUCKET", () => {
+    const bucket = cardBucket({ taskType: "revise_resubmit" } as unknown as Parameters<typeof cardBucket>[0]);
+    const m = journeyMaterials(bucket, "revise_resubmit", "held", "Greg");
     expect(m.rows.map((r) => r.label)).toEqual(["The revised manuscript", "A note on what changed"]);
     expect(m.rows.every((r) => r.on)).toBe(true);
   });

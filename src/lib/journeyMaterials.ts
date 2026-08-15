@@ -74,17 +74,29 @@ export function journeyMaterials(
   who: string,
   agentMaterials?: string[],
 ): JourneyMaterials {
-  /* a chase and a close carry no materials at all — nothing is being sent */
-  if (bucket === "chase" || bucket === "close" || bucket === "fix" || bucket === "note" || bucket === "decide") {
-    return { rows: [], note: null };
-  }
-
   const rows: JourneyRow[] = [];
+  /**
+   * ⚠️ THE TASK TYPE IS TESTED BEFORE THE BUCKET, AND THAT ORDER IS THE WHOLE FIX. An R&R's bucket
+   * is `decide` (`todoBuckets.cardBucket` — the ACT is a judgement), and `decide` was in the
+   * no-materials guard below, so this branch was UNREACHABLE from the only call site that renders
+   * it: the journey passed `cardBucket(c)` and got `{ rows: [] }` every time. Both pre-ticked rows
+   * existed, were tested, and had never once appeared on screen.
+   *
+   * ⚠️ AND THE TEST THAT COVERED THEM PASSED, because it called this with `"send"` — a bucket no
+   * R&R card can produce. A unit test that supplies an argument its caller cannot is testing a
+   * function nobody runs.
+   *
+   * An R&R is a judgement about whether to do the work AND a send once you have; the bucket answers
+   * the first question and this table answers the second, so it must not be gated on the first.
+   */
   if (taskType === "revise_resubmit") {
     /* both pre-ticked: an R&R goes back with the work AND an account of what changed, and a
        resubmission with no note is the one shape an agent asked not to receive */
     rows.push({ id: "revised", label: "The revised manuscript", sub: `what ${who} asked to see again`, on: true });
     rows.push({ id: "changes", label: "A note on what changed", sub: "what you did with their notes", on: true });
+  } else if (bucket === "chase" || bucket === "close" || bucket === "fix" || bucket === "note" || bucket === "decide") {
+    /* a chase, a close and a housekeeping fix carry no materials at all — nothing is being sent */
+    return { rows: [], note: null };
   } else if (taskType === "partial_requested") {
     rows.push({ id: "pages", label: sampleLabel(agentMaterials), sub: `what ${who} asked for`, on: true });
   } else {
