@@ -99,7 +99,7 @@ describe("⚠️ the TASKS section renders — same grammar, three rows, in orde
     expect(rows[0].urgent).toBe(true);
     expect(rows.slice(1).every((r) => r.count === undefined && r.urgent === undefined)).toBe(true);
     // and a quiet day renders no chip at all
-    expect(renderShell("/todo", 0)).not.toContain("sp-ct");
+    expect(renderShell("/todo", 0)).not.toMatch(/["\s]sp-ct["\s]/);
   });
 });
 

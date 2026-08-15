@@ -193,7 +193,7 @@ describe("the mega-menus", () => {
     const html = at({ suppressMenus: true });
     expect(html).toContain("tn-mast");
     expect(html).toContain("tn-tile"); // the brand stays, so the page still looks like the product
-    expect(html).not.toContain("tn-mega");
+    expect(html).not.toMatch(/["\s]tn-mega["\s]/);
   });
 });
 

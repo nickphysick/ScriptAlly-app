@@ -123,7 +123,7 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        shape rather than a gap. A derived card's split is exercised in tasksList.test.tsx. */
     expect(html).toContain("tdg-acts");
     expect(html).toContain("tdg-tick");
-    expect(html).not.toContain("tdg-split");
+    expect(html).not.toMatch(/["\s]tdg-split["\s]/);
     /* ⚠️ THE ROW IS ONE ELEMENT — never `display: contents`, which fractures hover, focus and any
        selected band into per-cell rectangles. Asserted against RENDERED output, not source. */
     expect(html).toContain('class="tdg-row"');

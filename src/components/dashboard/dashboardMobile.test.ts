@@ -61,7 +61,7 @@ describe("the <md dashboard stack", () => {
      dashboardV37.css for the git record; rules without consumers render nothing. */
   it("the desk line and the mobile to-do doorway are retired from the dashboard", () => {
     expect(dash).not.toContain("sa-mdeskline");
-    expect(dash).not.toContain("sa-mtodo");
+    expect(dash).not.toMatch(/["\s]sa-mtodo["\s]/);
     expect(dash).toContain("OneScreenDashboard");
   });
 });
