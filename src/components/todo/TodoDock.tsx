@@ -381,12 +381,21 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                 * populated. The offer flow's own notify door still handles query-only agents.
                 */
               const hold = holders?.(card) ?? [];
-              if (!hold.length) {
-                return <div className="tdk-note">An offer has a reply-by date. Answering it opens the offer flow, where the decision is recorded.</div>;
-              }
+              /**
+                * ⚠️ THE SECTION STATES ITS OWN EMPTINESS RATHER THAN VANISHING. A correctly-empty
+                * section and an unbuilt one look identical on screen — neither the writer nor a
+                * reviewer can tell which they are looking at, and §7 could not assert the
+                * difference either.
+                *
+                * ⚠️ AND "NOBODY ELSE IS HOLDING ANYTHING" IS A FACT WORTH TELLING AT OFFER STAGE.
+                * It means there is no one to notify, which is a real and reassuring answer rather
+                * than an absence — the opposite of the empty-state-as-filler this codebase
+                * otherwise refuses.
+                */
               return (
                 <>
                   <div className="tdk-fk">Who else holds material</div>
+                  {!hold.length && <div className="tdk-holdnone">No other agent is holding material.</div>}
                   <div className="tdk-holds">
                     {hold.map((h) => (
                       <div className="tdk-hold" key={h.queryId}>
@@ -402,7 +411,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                       </div>
                     ))}
                   </div>
-                  <div className="tdk-note">{HANDOFF_NOTE}</div>
+                  {hold.length > 0 && <div className="tdk-note">{HANDOFF_NOTE}</div>}
                 </>
               );
             })()}

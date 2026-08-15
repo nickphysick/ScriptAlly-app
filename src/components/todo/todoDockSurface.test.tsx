@@ -378,6 +378,41 @@ describe("⚠️ THE ACTION BUTTON NEVER COMPLETES DIRECTLY — it opens the jou
   });
 });
 
+describe("⚠️ §4.4 — WHO ELSE HOLDS MATERIAL, and it states its own emptiness", () => {
+  const offer = (holders: () => { queryId: string; name: string; holds: string; mail: { href: string | null; why: string } }[]) =>
+    renderToStaticMarkup(
+      <TodoDock queue={[card({ key: "o", title: "An offer", who: "Tom Ellery", taskType: "offer_received" })]}
+        activeKey="o" onSelect={() => {}} onClose={() => {}} timeline={() => []}
+        holders={holders} onPrimary={() => {}} onMore={() => {}} />,
+    );
+
+  it("a row per agent — name, what they hold, a draft link", () => {
+    const html = offer(() => [{ queryId: "q1", name: "Jonathan Marsh", holds: "FULL SENT", mail: { href: "mailto:jm@x.co", why: "" } }]);
+    expect(html).toContain("Who else holds material");
+    expect(html).toContain("Jonathan Marsh");
+    expect(html).toContain("FULL SENT");
+    expect(html).toContain('href="mailto:jm@x.co"');
+  });
+
+  /**
+   * ⚠️ A CORRECTLY-EMPTY SECTION AND AN UNBUILT ONE LOOK IDENTICAL, which is why this states the
+   * answer rather than vanishing: neither the writer nor a reviewer could tell which they were
+   * looking at, and the acceptance pass could not assert the difference either. "Nobody else is
+   * holding anything" is also a real answer at offer stage — there is no one to notify.
+   */
+  it("⚠️ nobody holding anything SAYS SO — the heading stands and the answer is stated", () => {
+    const html = offer(() => []);
+    expect(html).toContain("Who else holds material");
+    expect(html).toContain("No other agent is holding material.");
+  });
+
+  it("a greyed draft link keeps its reason on the control", () => {
+    const html = offer(() => [{ queryId: "q1", name: "Ana", holds: "PARTIAL SENT", mail: { href: null, why: "No email address on file for this agent." } }]);
+    expect(html).toContain("No email address on file for this agent.");
+    expect(html).not.toContain('href="mailto:null');
+  });
+});
+
 describe("⚠️ AN UNDOCKABLE KEY IS REFUSED, NEVER SUBSTITUTED", () => {
   /**
    * ⚠️ MEASURED ON THE DEPLOYED PAGE: clicking the grouped "12 wish lists" row opened Noah
