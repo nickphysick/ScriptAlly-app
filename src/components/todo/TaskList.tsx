@@ -48,7 +48,7 @@ import { TaskGroup, groupSlice, showMoreLabel } from "../../lib/todoGroups";
    title or a reversal icon. Imports removed rather than left unreferenced: an unused import is a
    map somebody re-wires. */
 import { rowPrimaryLabel, splitMenu } from "../../lib/taskRow";
-import { cardBucket, BUCKET_LABEL, rowDeed, RowFigure } from "../../lib/todoBuckets";
+import { cardBucket, BUCKET_LABEL, rowDeed, rowMeta, RowFigure } from "../../lib/todoBuckets";
 import { StatusDot } from "../StatusDot";
 import { RowTip, useTipShow } from "./RowTip";
 import { isTickable, completionVia } from "../../lib/todoActions";
@@ -613,13 +613,11 @@ export const TaskList: React.FC<TaskListProps> = ({ groups, hkExpanded, onToggle
           {/* ⚠️ LINE TWO IS THE AGENT AND THE AGENCY, ONE LINE, ELLIPSISED — AND NO DATE. The time
               lives in the figure column; a date here would be the same fact twice on one row. A
               card with no agent shows whatever stands in for one. */}
-          {(c.who || c.record) && (
-            <div className="tdg-sub">
-              {c.who}
-              {c.who && c.record ? <span className="tdg-sep">·</span> : null}
-              {c.record}
-            </div>
-          )}
+          {/* ⚠️ ONE DERIVATION, AND THE ROW COMPOSES NOTHING (corrections, Phase 2). This read
+              `{who} · {record}` — and `record` is ALREADY "name · agency", so the line printed
+              "Tom Ellery · Tom Ellery · Curtis Vane". The composition upstream was never wrong; a
+              second one was layered over it. */}
+          <div className="tdg-sub">{rowMeta(c)}</div>
         </div>
 
         {/* ⚠️ THE FIGURE COLUMN — a mono label over a Playfair numeral, and the SAME pairing the

@@ -13,7 +13,7 @@ import { BoardCard } from "./todoBoard";
 import { liveFamily } from "./todoFamily";
 import {
   cardBucket, bucketFamily, bucketAgreesWithFamily, BUCKET_ORDER, BUCKET_LABEL,
-  rowDeed, rowFigure, elapsedFigure, possessive, firstName, daysSince,
+  rowDeed, rowMeta, rowFigure, elapsedFigure, possessive, firstName, daysSince,
 } from "./todoBuckets";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -170,5 +170,42 @@ describe("⚠️ THE FIGURE'S LABEL, ITS UNIT, AND THE RARITY OF BURGUNDY", () =
     const d = 86400000;
     expect(daysSince(0, d * 3)).toBe(3);
     expect(daysSince(d * 3, 0)).toBe(0);
+  });
+});
+
+/**
+ * ⚠️ THE AGENT WAS PRINTED TWICE — rows read `Tom Ellery · Tom Ellery · Curtis Vane`. `record` is
+ * already the composed meta line, and the row prefixed `who` to it again. These lock the three
+ * shapes so a second composition cannot be layered back on.
+ */
+describe("⚠️ THE META LINE IS COMPOSED ONCE", () => {
+  it("agent with agency: the name and the agency, once each", () => {
+    expect(rowMeta(card({ who: "Tom Ellery", record: "Tom Ellery · Curtis Vane" })))
+      .toBe("Tom Ellery · Curtis Vane");
+  });
+
+  it("⚠️ agent WITHOUT agency: the name alone — never the name twice, never a dangling separator", () => {
+    /* the upstream `filter(Boolean).join(" · ")` already drops the empty half; asserted rather
+       than trusted, because that is exactly the join this bug came out of */
+    const line = rowMeta(card({ who: "Greg Panetta", record: "Greg Panetta" }));
+    expect(line).toBe("Greg Panetta");
+    expect(line).not.toMatch(/·/);
+    expect(line.match(/Greg Panetta/g)).toHaveLength(1);
+  });
+
+  it("no agent at all: the standing subject, never an empty line", () => {
+    expect(rowMeta(card({ who: "", record: "", userTaskId: "u1" }))).toBe("Your noteboard");
+    expect(rowMeta(card({ who: "", record: "", taskType: "data_quality_poor" }))).toBe("Submission packages");
+  });
+
+  it("⚠️ NO NAME APPEARS TWICE IN ANY SHAPE", () => {
+    for (const c of [
+      card({ who: "Tom Ellery", record: "Tom Ellery · Curtis Vane" }),
+      card({ who: "Greg Panetta", record: "Greg Panetta" }),
+      card({ who: "Ada Vane", record: "Ada Vane · Vane Literary · On MURPHY'S DAY OUT" }),
+    ]) {
+      const line = rowMeta(c);
+      expect(line.split(c.who).length - 1, line).toBe(1);
+    }
   });
 });

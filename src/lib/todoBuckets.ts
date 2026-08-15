@@ -226,3 +226,27 @@ export function rowFigure(input: FigureInput): RowFigure {
 export function daysSince(fromMs: number, nowMs: number): number {
   return Math.max(0, Math.floor((nowMs - fromMs) / DAY));
 }
+
+/* ── line two: the meta line (corrections, Phase 2) ──────────────────────────────────────────── */
+
+/**
+ * ⚠️ THE AGENT WAS PRINTED TWICE, and this is the one derivation that composes the line.
+ *
+ * `BoardCard.record` is ALREADY the composed meta — `todoBoard` builds it as
+ * `[agentPrimary(ag), ag.agency].filter(Boolean).join(" · ")` — so the row rendering
+ * `{who} · {record}` produced "Tom Ellery · Tom Ellery · Curtis Vane". The composition was never
+ * wrong; a second one was layered over it.
+ *
+ * ⚠️ SO THE ROW COMPOSES NOTHING. It asks this, and this reads the field that already holds the
+ * answer. A card with an agent and no agency yields the name alone (the `filter(Boolean)` upstream
+ * already drops the empty half, so there is no dangling separator to guard against here — and the
+ * lock asserts that rather than trusting it).
+ *
+ * ⚠️ AND A CARD WITH NO AGENT NAMES ITS STANDING SUBJECT rather than rendering an empty line. A
+ * note belongs to the writer's own board; everything else without an agent is about the list.
+ */
+export function rowMeta(c: BoardCard): string {
+  if (c.record) return c.record;
+  if (c.who) return c.who;
+  return cardBucket(c) === "note" ? "Your noteboard" : "Submission packages";
+}
