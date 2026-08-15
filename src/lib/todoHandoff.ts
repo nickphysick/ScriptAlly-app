@@ -261,3 +261,48 @@ export function bandFacts(
   if (waitLabel && waitValue) out.push({ k: waitLabel, v: waitValue });
   return out;
 }
+
+
+/* ── the band's identity block (corrections, Phase 1) ────────────────────────────────────────── */
+
+/**
+ * ⚠️ THE PRE-LINE NAMES THE ACT so the band reads as a sentence into the name: "Sending your full
+ * to / Bethany Carter". It is per BUCKET rather than per task type, because the sentence is about
+ * what you are doing rather than about which flag raised it.
+ */
+export function bandPreline(c: BoardCard): string {
+  switch (cardBucket(c)) {
+    case "send": {
+      const spec = sendSpecFor(c);
+      return spec ? `Sending your ${spec.material}${spec.isResubmit ? " again" : ""} to` : "Sending to";
+    }
+    case "decide":
+      return c.taskType === "offer_received" ? "An offer of representation from" : "A revision requested by";
+    case "chase": return "Chasing";
+    case "close": return "Closing your query to";
+    case "fix": return "A gap on the record for";
+    case "note": return "Your note";
+  }
+}
+
+/**
+ * ⚠️ THE SUBJECT IS NOT ALWAYS A PERSON, and the band must not pretend otherwise. A Fix card's
+ * subject can be a manuscript and a Note's is the writer's own board — so where there is no agent
+ * the standing subject is named rather than a blank disc with an empty line beside it.
+ */
+export function bandSubject(c: BoardCard): string {
+  if (c.who) return c.who;
+  if (cardBucket(c) === "note") return "Your noteboard";
+  return c.msTitle || c.title || "Your list";
+}
+
+/**
+ * The line beneath the name — the agency, and only where it is a DIFFERENT fact from the name.
+ * `record` is already "name · agency", so the agency is what follows the separator; where there is
+ * none, the line is absent rather than an echo of the name above it.
+ */
+export function bandUnder(c: BoardCard): string {
+  if (!c.who || !c.record) return "";
+  const rest = c.record.startsWith(c.who) ? c.record.slice(c.who.length) : c.record;
+  return rest.replace(/^\s*·\s*/, "").trim();
+}

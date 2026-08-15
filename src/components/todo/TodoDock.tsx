@@ -28,7 +28,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
 import { bandFamily } from "../../lib/todoColumns";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
-import { handoffFor, panePosition, paneSections, bandFacts, HANDOFF_NOTE } from "../../lib/todoHandoff";
+import { handoffFor, panePosition, paneSections, bandFacts, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
@@ -144,13 +144,31 @@ export const TodoDock: React.FC<TodoDockProps> = ({
         {/* ⚠️ THE DOCK-SEAL IS UNMOUNTED WITH THE PRIMARY IT RODE OVER (Phase 4) — the act is the
             command bar's now. `ArtSlot name="dock-seal"` and its 600ms are untouched in the sheet;
             the flourish returns the day a completion has a home in this surface again. */}
+        {/**
+          * ⚠️ THE BAND CARRIES THE IDENTITY, AND THE BODY NEVER REPEATS IT (corrections, Phase 1).
+          * It held only a kind pill and the facts, so the agent's name rendered as a body element
+          * in the RIGHT column while the facts floated across the title with nothing to align to.
+          * That was the collision — not a spacing fault.
+          *
+          * One row, three parts: the identity block left, the facts right and top-aligned to it,
+          * the motif behind both and clipped by the frame.
+          *
+          * ⚠️ `min-width: 0` ON THE IDENTITY BLOCK IS THE WHOLE FIX. Without it a long agency name
+          * cannot wrap, so the block grows and shoves the facts off their own edge — which is what
+          * "the facts float across the title" actually was.
+          */}
         <div className={`tdk-band fam-${bandFamily(card)}`}>
-          <i>{[card.kind, card.due].filter(Boolean).join(" · ")}</i>
-          {/* ⚠️ THE FACTS STRIP USES THE RAIL'S OWN PAIRING — mono label over a Playfair value —
-              and that match is not decoration. It is what makes the two panes read as one page:
-              the figure you scanned in the list is the figure you land on in the card, in the same
-              two registers. A fact with no value behind it is OMITTED rather than dashed; the
-              strip is short by design and an empty column in it reads as a fault. */}
+          <div className="tdk-id">
+            <span className="tdk-av" aria-hidden>{card.initials}</span>
+            <span className="tdk-idtx">
+              {/* the pre-line names the ACT, so the band reads as a sentence into the name */}
+              <span className="tdk-pre">{bandPreline(card)}</span>
+              <span className="tdk-name">{bandSubject(card)}</span>
+              {bandUnder(card) && <span className="tdk-agency">{bandUnder(card)}</span>}
+            </span>
+          </div>
+          {/* ⚠️ TOP-ALIGNED TO THE IDENTITY BLOCK AND `flex-shrink: 0` — it is a fixed pair of
+              facts beside a block that wraps, never the other way round. */}
           {facts.length > 0 && (
             <span className="tdk-facts">
               {facts.map((f) => (
@@ -188,8 +206,9 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           </aside>
 
           <div className="tdk-work">
-          <h2 className="tdk-t">{card.title}</h2>
-          {card.record && <div className="tdk-rec">{card.record}</div>}
+          {/* ⚠️ NO TITLE AND NO AGENT HERE (corrections, Phase 1). The band says who this is and
+              what the act is; repeating either in the body was what put a name in the right-hand
+              column with the facts floating over it. The body is the DOING. */}
 
           {/* ── THE REAL FLOW, INLINE ────────────────────────────────────── */}
           <div className="tdk-flow">

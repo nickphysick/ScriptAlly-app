@@ -36,7 +36,9 @@ const card = (over: Partial<BoardCard>): BoardCard => ({
 });
 
 const QUEUE = [
-  card({ key: "a", title: "Send your full to Jonathan Marsh", taskType: "full_requested", kind: "AGENT WAITING", due: "12 JUL", record: "Jonathan Marsh · The Marsh Agency" }),
+  /* ⚠️ `who` IS SET, as a real card's is — the band reads it, and a fixture without it would test
+     the no-agent fallback while claiming to test an agent. */
+  card({ key: "a", title: "Send your full to Jonathan Marsh", who: "Jonathan Marsh", taskType: "full_requested", kind: "AGENT WAITING", due: "12 JUL", record: "Jonathan Marsh · The Marsh Agency" }),
   card({ key: "b", title: "Eleanor Whitfield silent", taskType: "no_response_close", kind: "STALE", hk: true }),
   card({ key: "c", title: "Redraft the opening", userTaskId: "u1", nature: "task", kind: "YOUR TASK" }),
 ];
@@ -89,7 +91,8 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
 
   it("⚠️ THE OTHER CARDS ARE NOT DRAWN HERE — only the docked one, and the NEXT line's name", () => {
     const html = render("a");
-    expect(html).toContain("Send your full to Jonathan Marsh");
+    /* the docked card's IDENTITY is on screen — the band names it now, not a body title */
+    expect(html).toContain("Jonathan Marsh");
     /* the card AFTER next is nowhere: with the stack gone there is no list in this surface */
     expect(html).not.toContain("Redraft the opening");
     /* ⚠️ AND THE FORWARD LOOK MOVED TOO (visual rebuild, Phase 4). "NEXT: …" was the card foot's
@@ -121,11 +124,41 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(page).toContain('aria-label="Previous task"');
   });
 
-  it("the work surface carries the family band, the title and the record line", () => {
+  /**
+   * ⚠️ THE BAND CARRIES THE IDENTITY AND THE BODY NEVER REPEATS IT (corrections, Phase 1). This
+   * asserted the title and the record line in the body — which is exactly what put the agent's
+   * name in the right-hand column with the facts floating across it. The band holds the avatar,
+   * the pre-line, the Playfair name and the agency; the body holds the doing.
+   */
+  it("the band carries the identity — avatar, pre-line, name, agency", () => {
     const html = render();
     expect(html).toContain("tdk-band fam-urgent");
-    expect(html).toContain("Send your full to Jonathan Marsh");
-    expect(html).toContain("Jonathan Marsh · The Marsh Agency");
+    expect(html).toContain("tdk-id");
+    expect(html).toContain("Sending your full to");
+    expect(html).toContain("Jonathan Marsh");
+    expect(html).toContain("The Marsh Agency");
+  });
+
+  it("⚠️ AND THE BODY REPEATS NEITHER THE NAME NOR THE TITLE", () => {
+    const html = render();
+    const at = html.indexOf('class="tdk-body"');
+    expect(at, "the body marker is gone — this slice would read the whole card").toBeGreaterThan(-1);
+    const body = html.slice(at);
+    /* the STORY column legitimately names the agent inside timeline entries; what must not repeat
+       is the card's own title and record line, which is what collided with the facts */
+    expect(body).not.toContain("Send your full to Jonathan Marsh");
+    expect(html).not.toContain("tdk-rec");
+    expect(html).not.toContain('class="tdk-t"');
+  });
+
+  it("⚠️ THE SUBJECT IS NOT ALWAYS A PERSON — a note's band names the standing subject", () => {
+    /* a Fix card's subject can be a manuscript and a Note's is the writer's own board; a blank
+       disc with an empty line beside it is the collision in a quieter form */
+    const note = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="c" onSelect={() => {}} onClose={() => {}}
+        timeline={() => []} onPrimary={() => {}} onMore={() => {}} />,
+    );
+    expect(note).toContain("Your noteboard");
   });
 
   it("the timeline renders when there is history, and is absent when there is none", () => {
@@ -337,12 +370,16 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     expect(story).not.toContain("tdk-t\"");   // …and the title does NOT
   });
 
-  it("the title, the record line and the flow sit in the WORK column, in that order", () => {
+  it("⚠️ THE WORK COLUMN IS THE DOING ALONE — no title, no record line (corrections, Phase 1)", () => {
     const html = render();
-    const work = html.slice(html.indexOf("tdk-work"));
-    expect(work.indexOf("tdk-t")).toBeLessThan(work.indexOf("tdk-rec"));
-    expect(work.indexOf("tdk-rec")).toBeLessThan(work.indexOf("tdk-flow"));
+    const at = html.indexOf('class="tdk-work"');
+    expect(at, "the work column marker is gone").toBeGreaterThan(-1);
+    const work = html.slice(at);
+    expect(work).not.toContain("tdk-t\"");
+    expect(work).not.toContain("tdk-rec");
+    expect(work).toContain("tdk-flow");
   });
+
 
   it("an empty history says so rather than leaving a frame implying something is missing", () => {
     const html = renderToStaticMarkup(

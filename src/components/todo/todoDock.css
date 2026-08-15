@@ -39,10 +39,52 @@
 }
 
 /* the family band — the same map as the board's card */
+/* ⚠️ THE BAND IS THE IDENTITY ROW (corrections, Phase 1) — it was a 30px strip holding a kind pill
+   and the facts, which left the agent's name to render in the BODY with the facts floating over it.
+   One row, three parts: identity left, facts right and top-aligned, motif behind. */
 .tdk-band {
-  height: 30px; display: flex; align-items: center; padding: 0 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 24px 16px;
+  position: relative;
+  overflow: hidden;
   border-bottom: 1px solid #e8c8bc;
 }
+
+/* ⚠️ `min-width: 0` IS THE WHOLE FIX. Without it a long agency cannot wrap, so the block grows and
+   shoves the facts off their own edge — which is what "the facts float across the title" was. */
+.tdk-id { display: flex; align-items: center; gap: 11px; min-width: 0; flex: 1; position: relative; z-index: 2; }
+
+.tdk-av {
+  width: 38px; height: 38px; border-radius: 50%; flex: none;
+  background: #fdfaf5; border: 1px solid rgba(124, 58, 42, 0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Playfair Display", Georgia, serif; font-size: 14px; font-weight: 500;
+  color: #7c3a2a;
+}
+
+.tdk-idtx { min-width: 0; }
+
+.tdk-pre {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #5a6e58; margin-bottom: 1px;
+}
+
+.tdk-name {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px; font-weight: 500; color: #2b2118; line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.tdk-agency { display: block; font-size: 11px; color: #6a7e68; font-weight: 300; margin-top: 1px; }
+
+/* the pink band is the offer's — its inks take the burgundy family rather than the sage */
+.tdk-band.fam-urgent .tdk-pre, .tdk-band.fam-urgent .tdk-agency { color: #9a6a56; }
+.tdk-band.fam-urgent .tdk-name { color: #4a241a; }
 .tdk-band.fam-urgent { background: linear-gradient(180deg, #f8e2d9, #f4d5c9); border-bottom-color: #e8c8bc; }
 .tdk-band.fam-housekeeping { background: linear-gradient(180deg, #f5efe6, #efe7d9); border-bottom-color: #ddd0bc; }
 .tdk-band.fam-yours { background: linear-gradient(180deg, #dee4dc, #d5dbd3); border-bottom-color: #b9c9b4; }
@@ -256,7 +298,9 @@
 /* ⚠️ THE BAND'S FACTS STRIP — the rail's figure pairing, in the card (visual rebuild, Phase 5).
    Mono label over a Playfair value, right-aligned inside the band. The match with `.tdg-fig` is
    the point: the figure you scanned in the list is the figure you land on here. */
-.tdk-facts { margin-left: auto; display: flex; gap: 26px; position: relative; z-index: 2; }
+/* ⚠️ FIXED BESIDE A BLOCK THAT WRAPS — never the other way round. The right padding clears the
+   corner motif so the two never overlap. */
+.tdk-facts { display: flex; gap: 26px; position: relative; z-index: 2; flex: none; padding-right: 8px; }
 .tdk-fact { text-align: right; display: block; }
 
 .tdk-fact .k {
