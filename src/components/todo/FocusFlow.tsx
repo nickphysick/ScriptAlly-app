@@ -42,6 +42,8 @@ import { agentPrimary } from "../../lib/agentDisplay";
 import { nudgeDraft } from "../../lib/nudgeDraft";
 import { flagKeyForTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import { journeyMaterials, synopsisStateFor, journeySummary } from "../../lib/journeyMaterials";
+import { RecordingCalendar } from "./RecordingCalendar";
+import { shortDate } from "../../lib/recordingCalendar";
 import { cardBucket } from "../../lib/todoBuckets";
 import { isSlotFilled } from "../../lib/packageMetrics";
 import { agentDataQualityNeeds, AgentDataNeed } from "../../lib/agentDataQuality";
@@ -217,6 +219,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
      Building a second date control for the chase would be the exact fault the shared step
      vocabulary exists to prevent — two versions of one question, drifting apart. */
   const [whenMode, setWhenMode] = useState<string>("today");
+  /* the open calendar's anchor element — `null` = closed. Held as the ELEMENT because that is what
+     placement and focus-return both need, and holding a boolean would mean re-finding it. */
+  const [calAnchor, setCalAnchor] = useState<HTMLElement | null>(null);
   /* the chase's check-back window in days; `null` = "Don't remind me" (see `chaseSheet`) */
   const [checkBack, setCheckBack] = useState<number | null>(DEFAULT_CHECKBACK_DAYS);
   /* the close journey's outcome — a radio, because these are three different things that happened */
@@ -261,7 +266,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     /* ⚠️ `alsoText` WAS MISSING FROM THIS RESET, and it is the field every journey composes in — so
        a note typed against item one of a walk arrived pre-filled on item two, ready to be committed
        against a different agent. It is the quietest kind of wrong: the form looked filled in. */
-    setAlsoText(""); setWhenMode("today"); setCheckBack(DEFAULT_CHECKBACK_DAYS);
+    setAlsoText(""); setWhenMode("today"); setCheckBack(DEFAULT_CHECKBACK_DAYS); setCalAnchor(null); setCloseReason("no_reply");
     setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setShowMuted(false); setNoteText(null);
     setDeepDive(false); setSweepReceipt(null); setSweepFork(false);
     setOfferDoor(""); setOfferChoice(null); setRemindDate(""); setNotifyStep("pick"); setNotifySel({});
@@ -1594,8 +1599,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
    * the control does not, because two versions of one question are two things to keep in step.
    * `sentDate` stays the single Y-M-D the write reads; `whenMode` only lights a segment.
    *
-   * ⚠️ "Another date…" IS A NATIVE PICKER UNTIL PHASE 3 REPLACES IT with `RecordingCalendar`. It is
-   * named here so the count of these instances is the count the calendar has to reach.
+   * ⚠️ "Another date…" OPENS `RecordingCalendar`, ONE COMPONENT FOR ALL FOUR JOURNEYS. It is
+   * declared once here, so the number of journeys that can pick a day is the number of entries in
+   * the option lists — never a count of hand-written pickers that have to be kept in step.
    */
   interface WhenOption { mode: string; label: string; ymd?: string }
   const WHEN_OTHER: WhenOption = { mode: "other", label: "Another date…" };
@@ -1613,22 +1619,38 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       body: (
         <>
           <div className="tdb-jnseg">
-            {options.map((o) => (
-              <button key={o.mode} type="button" className={whenMode === o.mode ? "on" : ""}
-                onClick={() => { setWhenMode(o.mode); if (o.ymd) setSentDate(o.ymd); }}>
-                {/* ⚠️ THE ANCHOR RELABELS ITSELF once a day is chosen — a button still reading
-                    "Another date…" beside a filled picker states that nothing has been picked. */}
-                {o.mode === "other" && whenMode === "other" ? fmtShort(sentDate) : o.label}
-              </button>
-            ))}
+            {options.map((o) => {
+              const isOther = o.mode === "other";
+              const chosenHere = isOther && whenMode === "other";
+              return (
+                <button key={o.mode} type="button"
+                  className={`${whenMode === o.mode ? "on" : ""}${chosenHere ? " hasdate" : ""}`}
+                  aria-haspopup={isOther ? "dialog" : undefined}
+                  onClick={(e) => {
+                    if (isOther) { setCalAnchor(e.currentTarget); return; }
+                    setWhenMode(o.mode);
+                    if (o.ymd) setSentDate(o.ymd);
+                  }}>
+                  {/* ⚠️ THE ANCHOR RELABELS ITSELF once a day is chosen — a button still reading
+                      "Another date…" beside a chosen date states that nothing has been picked. */}
+                  {chosenHere ? shortDate(sentDate) : o.label}
+                </button>
+              );
+            })}
           </div>
-          {whenMode === "other" && (
-            <div className="tdb-jnpick">
-              <input type="date" value={sentDate} max={todayISO()} onChange={(e) => setSentDate(e.target.value)} />
-              <span className="tdb-ffsmall">Logged at midday on the day you pick.</span>
-            </div>
-          )}
           {note && <div className="tdb-jnsub">{note}</div>}
+          {calAnchor && (
+            <RecordingCalendar
+              anchor={calAnchor}
+              value={whenMode === "other" ? sentDate : undefined}
+              /* ⚠️ THE JOURNEY SUPPLIES `max`, THE COMPONENT ASSUMES NOTHING. You cannot have sent
+                 something tomorrow — but that is this caller's fact about recording, not the
+                 calendar's about dates. */
+              max={todayISO()}
+              onPick={(day) => { setSentDate(day); setWhenMode("other"); }}
+              onClose={() => setCalAnchor(null)}
+            />
+          )}
         </>
       ),
     };
@@ -1909,7 +1931,11 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     const bucket = cardBucket(it.card);
     return handoffSheet(it.card, bucket === "decide" ? "decide" : "fix");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerDoor, offerChoice, remindDate, notifyStep, notifySel, review, rvStep, rvQuiet, rvSeed, rvSummary, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
+    /* ⚠️ THE JOURNEY STATE BELONGS IN THESE DEPS OR THE SHEET DOES NOT REDRAW. `content` is memoised
+       over every piece of scratch it reads, so a new one — `whenMode`, `checkBack`, `closeReason`,
+       `calAnchor`, `alsoText` — that is left out renders as a control that visibly does nothing. */
+  }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo,
+    whenMode, checkBack, closeReason, calAnchor, alsoText, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerDoor, offerChoice, remindDate, notifyStep, notifySel, review, rvStep, rvQuiet, rvSeed, rvSummary, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
 
 
   const remaining = items.length - qi - 1;
