@@ -1488,13 +1488,83 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-fffree::placeholder { color: #cbbcae; font-family: "Caveat", cursive; font-size: 18px; }
 .tdb-fffree:focus { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12); }
 
-/* ⚠️ THE SUMMARY IS MANDATORY, NOT A FLOURISH — the commit button must never be the first time
-   the writer sees what is about to be written. It assembles from the LIVE form state. */
-.tdb-ffsum {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid #f0e7db;
-  font-size: 12.5px;
-  color: #5c4a3c;
-  line-height: 1.55;
+/* ══ THE JOURNEY TAKEOVER (journeys pack, Phase 1; ref design-refs/todo-workspace-v14.html) ══════
+ *
+ * ⚠️ THIS BLOCK REPLACES A SECOND `.tdb-ffsum` DECLARATION. The Phase-3 summary strip was given the
+ * same class as the review screen's staged rows (todo.css :1315), and being later in the file it
+ * won on every property the two shared — so the review screen's rows were quietly being restyled by
+ * a rule written for something else: recoloured top border, shifted margin, overridden padding.
+ * Nothing errored, and the cascade was working exactly as specified. The strip is `.tdb-jnsum` now,
+ * so each selector has ONE owner and a source lock over either is unambiguous.
+ */
+
+/* the band's journey layout — avatar · the journey title as the pre-line · name · agency, held on
+   screen for the whole journey so the writer never loses track of who they are recording against */
+.tdb-jnwho { flex: 1; min-width: 0; display: flex; align-items: center; gap: 13px; }
+.tdb-fband.journey .tdb-ffbigav { width: 46px; height: 46px; font-size: 16px; }
+.tdb-jnpre { font-family: var(--f12-serif); font-style: italic; font-size: 15px; color: var(--ink-2); }
+.tdb-jnname { font-family: var(--f12-serif); font-size: 26px; font-weight: 600; line-height: 1.15; color: var(--ink); margin-top: 3px; }
+.tdb-jnagency { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); margin-top: 5px; }
+
+/* ⚠️ THE WIDTH SIGNAL IS THE CONTAINER, NEVER THE VIEWPORT. The Calendar's item sheet mounts the
+   journey with no width constraint of its own, so the layout must answer to the box it is in — a
+   media query would lay a two-column journey out inside a narrow sheet on a wide screen and be
+   right about nothing.
+   ⚠️ AND THE THRESHOLD IS TAKEN FROM THE COLUMNS THEMSELVES, not from the ref's 1480px, which is a
+   VIEWPORT number measured on a full-page mockup: applied to this container it would collapse the
+   grid permanently and the reference panel would never once appear beside the steps. 640 = the
+   reference column's own 300px minimum + the 30px gap + ~310px before the steps column is too
+   narrow for a segmented control. */
+.tdb-jnbody { container-type: inline-size; }
+.tdb-jngrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 0 30px; align-content: start; }
+@container (max-width: 640px) {
+  .tdb-jngrid { grid-template-columns: minmax(0, 1fr); }
+  /* single column puts the panel below the steps, where sticking to the top pins it mid-scroll
+     over nothing — the panel is reference, and reference that follows you is furniture */
+  .tdb-jnref { position: static; margin-top: 18px; }
 }
+
+.tdb-jnsteps { min-width: 0; }
+.tdb-jnstep { padding-bottom: 20px; }
+.tdb-jnstep + .tdb-jnstep { border-top: 1px solid var(--hairline); padding-top: 18px; }
+.tdb-jnn { display: flex; align-items: baseline; gap: 9px; margin-bottom: 11px; }
+.tdb-jni { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--burg); }
+.tdb-jnn h4 { font-family: var(--f12-serif); font-size: 17px; font-weight: 500; color: var(--ink); }
+.tdb-jnopt { font-size: 11px; font-style: italic; color: var(--faint); margin-left: auto; }
+
+.tdb-jnrefwrap { min-width: 0; }
+.tdb-jnref { position: sticky; top: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 15px; }
+.tdb-jnref h5 { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--muted); margin-bottom: 9px; }
+.tdb-jnrefq { font-size: 13px; line-height: 1.6; color: var(--ink-2); }
+.tdb-jnrefq b { font-weight: 600; color: var(--ink); }
+.tdb-jnrefm { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--hairline); }
+
+/* ⚠️ THE SUMMARY IS MANDATORY, NOT A FLOURISH — the commit button must never be the first time the
+   writer sees what is about to be written. It assembles from the LIVE form state, and it sits
+   OUTSIDE the scroller so it cannot scroll away from the button it accounts for. */
+.tdb-jnsum { flex: none; display: flex; align-items: flex-start; gap: 10px; padding: 12px 40px 13px; border-top: 1px solid var(--hairline); }
+.tdb-jnsumic { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--sage); color: var(--sageD); display: flex; align-items: center; justify-content: center; flex: none; margin-top: 1px; }
+.tdb-jnsumic svg { width: 11px; height: 11px; }
+.tdb-jnsumtx { font-size: 12.5px; line-height: 1.55; color: var(--ink-2); }
+.tdb-jnsumtx b { font-weight: 600; color: var(--ink); }
+
+/* the consequence hint — what pressing the verb will do, in the writer's own terms */
+.tdb-jnhint { font-size: 11.5px; font-style: italic; color: var(--faint); text-align: right; max-width: 44%; margin-left: 6px; }
+
+/* ── the step vocabulary: segments and option rows. Shared by every journey, which is the point —
+      a chase's "How you chased" and a send's "When" are the same control asking different
+      questions, and building them twice is how two of them end up looking different. ── */
+.tdb-jnseg { display: flex; gap: 6px; flex-wrap: wrap; }
+.tdb-jnseg button { flex: 1 1 96px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 10px 8px; font-size: 12.5px; color: var(--ink-2); transition: all 0.14s; }
+.tdb-jnseg button:hover { border-color: var(--oatline); }
+.tdb-jnseg button.on { background: var(--pink-btn); border-color: var(--pink-b); color: var(--ink); font-weight: 500; }
+
+.tdb-jnopts { display: flex; flex-direction: column; gap: 7px; }
+.tdb-jnrow { width: 100%; display: flex; align-items: center; gap: 11px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 11px 13px; font-size: 13px; color: var(--ink-2); transition: all 0.14s; }
+.tdb-jnrow:hover { border-color: var(--oatline); }
+.tdb-jnrow.on { border-color: var(--sage); background: var(--sageC); box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.1); }
+.tdb-jnbx { width: 17px; height: 17px; flex: none; border-radius: 5px; border: 1.5px solid var(--oatline); background: var(--white, #fff); display: flex; align-items: center; justify-content: center; color: transparent; }
+.tdb-jnbx.rad { border-radius: 50%; }
+.tdb-jnrow.on .tdb-jnbx { background: var(--sage); border-color: var(--sage); color: #fff; }
+.tdb-jnbx svg { width: 10px; height: 10px; }
+.tdb-jnsub { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }

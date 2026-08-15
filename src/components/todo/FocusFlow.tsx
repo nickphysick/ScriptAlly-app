@@ -69,6 +69,46 @@ const WEEK_CHIPS = [4, 6, 8, 12];
 const MATERIAL_VOCAB = ["Query Letter", "Synopsis", "Sample Pages", "Full Manuscript"];
 
 const itemKey = (it: FocusItem): string => (it.kind === "card" ? it.card.key : `group-${it.group.rule}`);
+
+/* ── THE JOURNEY TAKEOVER (journeys pack, Phase 1; ref design-refs/todo-workspace-v14.html) ─────
+ *
+ * ⚠️ ONE CHROME, SIX JOURNEYS, AND THE STEPS ARE A DECLARED TABLE. Every journey hands
+ * `journeySheet` a spec and renders nothing of its own frame. The alternative — the shape this
+ * replaces — was a per-journey `if (step === 0) return sheet(…)` with the numbering, the footer
+ * and the consequence hint restated inside each one; six copies of a layout is six chances for
+ * two of them to disagree about what the writer is looking at.
+ *
+ * ⚠️ A JOURNEY IS ONE SCREEN, NOT A WIZARD. The numbers are reading order, not pagination — the
+ * writer sees everything they are about to record at once, which is the only way the summary
+ * strip beneath can be true of the whole thing.
+ */
+export interface JourneyStep {
+  id: string;
+  /** The Playfair heading — "What went", "How it went", "When". */
+  name: string;
+  /** Renders the italic `optional` marker, right-aligned on the heading row. */
+  optional?: boolean;
+  body: React.ReactNode;
+}
+
+export interface JourneySpec {
+  steps: JourneyStep[];
+  /**
+   * ⚠️ THE REFERENCE PANEL HOLDS WHAT THE RECORD ALREADY SAYS, never a control. It is what the
+   * agent asked for, or what the listing states, or what closing does — the thing the writer would
+   * otherwise leave the surface to go and check.
+   */
+  reference: { heading: string; body: React.ReactNode; meta?: string };
+  /** ⚠️ MANDATORY. The commit button must never be the first time the writer sees what will be
+   *  written — `journeySummary` off the LIVE form state, never off the string it composes. */
+  summary: string;
+  commit: { label: string; hint?: string; onCommit: () => void; disabled?: boolean };
+  /**
+   * Rendered above step 01. The ref is a mockup with no draft feature and so had no slot for the
+   * chase's copyable note; this is that slot, and nothing else uses it.
+   */
+  lede?: React.ReactNode;
+}
 type CardJourney = "offer" | "send" | "nudge" | "stale" | "dq" | "note";
 function cardJourney(c: BoardCard): CardJourney {
   if (c.userTaskId) return "note";
@@ -330,7 +370,27 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     /* the first row IS the assumed item, already rendered above — the rest are the conditional */
     const extraRows = matRows.slice(1);
     const extrasOn = extraRows.filter((m) => mats[m.label]).map((m) => m.label);
-    return sheet(
+    const commitSend = async () => {
+      if (!q) { advance(); return; }
+      const action = getPrimaryAction(q.status as QueryStatus);
+      if (action.kind !== "mark-sent") { advance(); return; }
+      // B3 — the soft duplicate-send guard: read the log at write time; decline stages
+      // NOTHING and stays on the step (staged work intact). R&R is never guarded.
+      const prior = priorSameTypeSend(activities, q.id, action.target as QueryStatus, action.markKind === "resubmit");
+      if (prior && !(await confirmAsk(duplicateSendPrompt(action.target as QueryStatus, c.who, prior), { confirmLabel: "Send again", cancelLabel: "Cancel" }))) return;
+      stageAndAdvance({
+        kind: "mark-sent", cardKey: c.key, label: c.title, queryId: q.id,
+        targetStatus: action.target as QueryStatus,
+        sentDate: journeyEventISO(backdated ? sentDate : undefined, new Date().toISOString()),
+        isResubmit: action.markKind === "resubmit", method: q.sendMethod || "Email",
+        materials: [assumed.label, ...extrasOn],
+      });
+    };
+    return journeySheet({
+      steps: [{
+        id: "what",
+        name: "What went",
+        body: (
       <>
         <div className="tdb-ffqsub">{who} asked for {assumed.label === "Full manuscript" ? "the full" : assumed.label === "Revised manuscript" ? "revisions" : assumed.label.toLowerCase()} — so that’s what we’ll log.</div>
         <div className="tdb-ffassume">
@@ -367,13 +427,12 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
             placeholder="A covering note, a change of address, anything worth remembering…"
             onChange={(e) => setAlsoText(e.target.value)} />
         </div>
-        {/* ⚠️ THE SUMMARY READS LIVE FORM STATE, never the string it is about to compose — and the
-            commit button must never be the first time the writer sees what will be written. */}
-        <div className="tdb-ffsum">{journeySummary({
-          materials: [assumed.label, ...extraRows.filter((m) => mats[m.label]).map((m) => m.label)],
-          when: backdated ? fmtShort(sentDate) : "today",
-          also: alsoText,
-        })}</div>
+      </>
+        ),
+      }, {
+        id: "when",
+        name: "When",
+        body: (
         <div className="tdb-ffwhen">
           {backdated ? (
             <>Logging it as <input type="date" value={sentDate} max={todayISO()} onChange={(e) => setSentDate(e.target.value)} /> <span className="tdb-ffsmall">— we’ll log it at midday.</span></>
@@ -381,29 +440,20 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
             <>Logged just now, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · <button type="button" className="tdb-fflink" onClick={() => setBackdated(true)}>I sent it earlier</button></>
           )}
         </div>
-      </>,
-      <>
-        <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>
-        <span className="tdb-sp" />
-        <button type="button" className="tdb-ffpri" onClick={async () => {
-          if (!q) { advance(); return; }
-          const action = getPrimaryAction(q.status as QueryStatus);
-          if (action.kind !== "mark-sent") { advance(); return; }
-          // B3 — the soft duplicate-send guard: read the log at write time; decline stages
-          // NOTHING and stays on the step (staged work intact). R&R is never guarded.
-          const prior = priorSameTypeSend(activities, q.id, action.target as QueryStatus, action.markKind === "resubmit");
-          if (prior && !(await confirmAsk(duplicateSendPrompt(action.target as QueryStatus, c.who, prior), { confirmLabel: "Send again", cancelLabel: "Cancel" }))) return;
-          stageAndAdvance({
-            kind: "mark-sent", cardKey: c.key, label: c.title, queryId: q.id,
-            targetStatus: action.target as QueryStatus,
-            sentDate: journeyEventISO(backdated ? sentDate : undefined, new Date().toISOString()),
-            isResubmit: action.markKind === "resubmit", method: q.sendMethod || "Email",
-            materials: [assumed.label, ...extrasOn],
-          });
-        }}>Mark sent</button>
-      </>,
-      band("pink", <>{c.who || "Logging"} · logging the send</>, "Off it goes", `${c.title}${ms?.title ? ` — ${ms.title}` : ""}`, { art: "send" }),
-    );
+        ),
+      }],
+      reference: {
+        heading: `What ${who} asked for`,
+        body: <><b>{assumed.label}</b>{assumed.sub ? <> — {assumed.sub}</> : null}</>,
+        meta: [ms?.title, c.subtitle].filter(Boolean).join(" · ") || undefined,
+      },
+      summary: journeySummary({
+        materials: [assumed.label, ...extraRows.filter((m) => mats[m.label]).map((m) => m.label)],
+        when: backdated ? fmtShort(sentDate) : "today",
+        also: alsoText,
+      }),
+      commit: { label: "Record it as sent", hint: "Nothing is sent from here — this records what you sent.", onCommit: () => { void commitSend(); } },
+    }, journeyBand("pink", "Recording what you sent", ag, c.initials, "send"));
   }
 
   function nudgeSheet(c: BoardCard) {
@@ -1124,11 +1174,15 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   }
 
   // ── frame ─────────────────────────────────────────────────────────────────
-  function sheet(body: React.ReactNode, foot: React.ReactNode, bandNode?: React.ReactNode) {
+  /* ⚠️ `summaryNode` SITS OUTSIDE THE SCROLLER, deliberately. It is the account of what the commit
+     button is about to write, so it must be on screen at the moment that button is pressed — a
+     summary that scrolls away is a summary the writer can commit without having read. */
+  function sheet(body: React.ReactNode, foot: React.ReactNode, bandNode?: React.ReactNode, summaryNode?: React.ReactNode) {
     return (
       <>
         {bandNode}
         <div className="tdb-ffbody">{body}</div>
+        {summaryNode}
         <div className="tdb-fffoot">
           {/* C1 — progress relocated from the retired chrome row (dots + count, multi-item modes) */}
           {review ? (
@@ -1175,6 +1229,92 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       </div>
     );
   }
+  /**
+   * The journey's band. ⚠️ IT KEEPS THE AVATAR, THE NAME AND THE AGENCY ON SCREEN FOR THE WHOLE
+   * JOURNEY — the writer must never lose track of who they are recording against, and a form that
+   * only names its subject on the screen before it is a form you can fill in for the wrong agent.
+   *
+   * ⚠️ `.tdb-ffq` RIDES THE PRE-LINE, NOT THE NAME. The dialog is labelled by its first `.tdb-ffq`,
+   * and "Recording what you sent" is what this surface is; the agent is its subject. Labelling the
+   * dialog with a person's name would announce the wrong thing.
+   *
+   * Family colour goes through `fam()` like every other band, so the ritual law and the mixed-walk
+   * crossfade key hold here too rather than being re-implemented.
+   */
+  function journeyBand(famKey: BandFam, title: React.ReactNode, ag?: Agent, initials?: string, art?: JourneyArtKey) {
+    const f = fam(famKey);
+    const src = art ? JOURNEY_ART[art] : null;
+    return (
+      <div key={f} className={`tdb-fband ${f} journey`}>
+        <div className="tdb-jnwho">
+          <span className="tdb-ffbigav">{initials || "•"}</span>
+          <div className="tdb-fbtx">
+            <div className="tdb-ffq tdb-jnpre">{title}</div>
+            {ag && <div className="tdb-jnname">{agentPrimary(ag)}</div>}
+            {ag?.agency && <div className="tdb-jnagency">{ag.agency}</div>}
+          </div>
+        </div>
+        {src && <div className="tdb-fbart"><img src={src} alt="" /></div>}
+      </div>
+    );
+  }
+
+  /**
+   * The journey body: numbered steps left, sticky reference panel right, summary strip above a
+   * pinned footer of Cancel · the named commit verb · the consequence hint.
+   *
+   * ⚠️ SINGLE-COLUMN BELOW THE THRESHOLD IS A CONTAINER QUERY, NOT A MEDIA QUERY. The Calendar's
+   * item sheet mounts this with no width constraint of its own, so the journey must answer to the
+   * box it is in rather than to the viewport — a viewport query would lay a two-column journey out
+   * inside a narrow sheet on a wide screen and be right about nothing.
+   *
+   * ⚠️ CANCEL AND ESCAPE BOTH GO THROUGH `requestExit`, which writes nothing. `← Back` appears only
+   * where there is a step behind this one; it is an addition to the ref's three-item footer,
+   * because dropping it would strand a multi-item walk with no way back to the item before.
+   */
+  function journeySheet(spec: JourneySpec, bandNode: React.ReactNode) {
+    return sheet(
+      <div className="tdb-jnbody">
+        <div className="tdb-jngrid">
+          <div className="tdb-jnsteps">
+            {spec.lede}
+            {spec.steps.map((st, i) => (
+              <div key={st.id} className="tdb-jnstep">
+                <div className="tdb-jnn">
+                  <span className="tdb-jni">{String(i + 1).padStart(2, "0")}</span>
+                  <h4>{st.name}</h4>
+                  {st.optional && <span className="tdb-jnopt">optional</span>}
+                </div>
+                {st.body}
+              </div>
+            ))}
+          </div>
+          <div className="tdb-jnrefwrap">
+            <div className="tdb-jnref">
+              <h5>{spec.reference.heading}</h5>
+              <div className="tdb-jnrefq">{spec.reference.body}</div>
+              {spec.reference.meta && <div className="tdb-jnrefm">{spec.reference.meta}</div>}
+            </div>
+          </div>
+        </div>
+      </div>,
+      <>
+        {step > 0 && <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>}
+        <span className="tdb-sp" />
+        <button type="button" className="tdb-ffskip" onClick={() => requestExit()}>Cancel</button>
+        <button type="button" className="tdb-ffpri" disabled={spec.commit.disabled} onClick={spec.commit.onCommit}>{spec.commit.label}</button>
+        {spec.commit.hint && <span className="tdb-jnhint">{spec.commit.hint}</span>}
+      </>,
+      bandNode,
+      <div className="tdb-jnsum">
+        <span className="tdb-jnsumic" aria-hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+        </span>
+        <span className="tdb-jnsumtx">{spec.summary}</span>
+      </div>,
+    );
+  }
+
   // The dialog is labelled by the CURRENT sheet's question heading — one renders at a time, so the
   // first .tdb-ffq is it (stamped after each step render; jsdom-safe).
   useEffect(() => {

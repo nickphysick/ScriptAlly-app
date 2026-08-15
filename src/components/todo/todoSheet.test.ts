@@ -44,7 +44,11 @@ describe("B2 — the sheet renders the HUB'S timeline (reuse, not imitation)", (
 describe("B3 — the duplicate-send guard wires all three write moments (source locks)", () => {
   const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
   it("the journey's Mark sent: guard BEFORE stageAndAdvance; decline stages nothing (staged work intact)", () => {
-    const site = flow.slice(flow.indexOf('if (action.kind !== "mark-sent") { advance(); return; }\n          // B3'));
+    /* ⚠️ ANCHOR BEFORE THE SLICE (house rule). A missing marker makes `slice` return the tail of
+       the file, and whether the assertions below notice depends on what happens to sit there. */
+    const anchor = 'if (action.kind !== "mark-sent") { advance(); return; }\n      // B3';
+    expect(flow.indexOf(anchor), "the send journey's commit no longer opens with the mark-sent guard").toBeGreaterThan(-1);
+    const site = flow.slice(flow.indexOf(anchor));
     expect(site.indexOf("priorSameTypeSend(activities, q.id")).toBeGreaterThan(-1);
     const guardAt = site.indexOf("await confirmAsk(duplicateSendPrompt(");
     expect(guardAt).toBeGreaterThan(-1); // hero-pair P4: the styled ask replaced window.confirm
@@ -90,7 +94,11 @@ describe("C1 — anatomy + exit (ref todo-sheet-restyle-v1.html; both sheets)", 
   });
   it("the zoned E band proves on the send journey: pink family, kicker→headline→sub left, the plane right", () => {
     expect(flow).toContain('band("pink", sendKicker(c, { queries, taskFlags }, Date.now()), emTitle(c), c.subtitle || undefined, { art: "send"');
-    expect(flow).toContain('band("pink", <>{c.who || "Logging"} · logging the send</>, "Off it goes"');
+    /* ⚠️ THE SEND JOURNEY'S SECOND SCREEN IS THE TAKEOVER NOW (journeys pack, Phase 1) — the band
+       is `journeyBand`, which keeps the same pink family and the same plane, and swaps the
+       headline/sub pair for avatar · pre-line · name · agency. Same band shell, same family law. */
+    expect(flow).toContain('journeyBand("pink", "Recording what you sent", ag, c.initials, "send")');
+    expect(flow).toContain('<div key={f} className={`tdb-fband ${f} journey`}>');
     expect(css).toContain(".tdb-fband.pink { background: linear-gradient(180deg, var(--pink-t), var(--pink-btn)); border-color: var(--pink-b); }");
     expect(css).toContain(".tdb-fbart { width: 165px; height: 120px;");
     expect(css).toContain("drop-shadow(0 3px 6px rgba(58, 28, 20, 0.14))"); // assets ship shadowless
