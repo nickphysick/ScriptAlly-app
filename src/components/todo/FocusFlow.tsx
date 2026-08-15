@@ -196,8 +196,19 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   /* the open calendar's anchor element — `null` = closed. Held as the ELEMENT because that is what
      placement and focus-return both need, and holding a boolean would mean re-finding it. */
   const [calAnchor, setCalAnchor] = useState<HTMLElement | null>(null);
-  /* the chase's check-back window in days; `null` = "Don't remind me" (see `chaseSheet`) */
-  const [checkBack, setCheckBack] = useState<number | null>(DEFAULT_CHECKBACK_DAYS);
+  /**
+   * The chase's check-back window in days.
+   *
+   * ⚠️ THERE IS NO "Don't remind me", AND ITS ABSENCE IS THE DECISION. It shipped briefly as a
+   * third option that staged a mute alongside the nudge — but `logNudge`'s `checkBackDate` is
+   * required by the write path, so the activity still stored the line "Follow-up reminder set for
+   * {date}": the app stating something untrue about its own record, on the surface whose whole
+   * premise is that the record reports facts. Suppressing that line is not a display fix — it is
+   * COMPOSED AT WRITE TIME in `buildNudgeWrites` and persisted — so it needs the event-date change
+   * tracked in `reports/activity-event-date.md`. Two options that tell the truth beat three where
+   * one lies. It comes back with that change, not before.
+   */
+  const [checkBack, setCheckBack] = useState<number>(DEFAULT_CHECKBACK_DAYS);
   /* the close journey's outcome — a radio, because these are three different things that happened */
   const [closeReason, setCloseReason] = useState<CloseReason>("no_reply");
   const [rows, setRows] = useState<Record<string, string>>({}); // batch/dq drafts keyed by agentId (+need for dq)
@@ -241,7 +252,14 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
        a note typed against item one of a walk arrived pre-filled on item two, ready to be committed
        against a different agent. It is the quietest kind of wrong: the form looked filled in. */
     setAlsoText(""); setWhenMode("today"); setCheckBack(DEFAULT_CHECKBACK_DAYS); setCalAnchor(null); setCloseReason("no_reply");
-    setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setShowMuted(false); setNoteText(null);
+    /* ⚠️ `setAssisting(false)` COMPLETES THE TRIO — `assistAt` and `assistMsg` were cleared here and
+       its in-flight flag was not, so advancing mid-fetch left the next group's button reading
+       "Searching…" and disabled. Milder than the `alsoText` gap by a long way (it self-heals when
+       the promise resolves, and it feeds no write), but the same shape. What is NOT fixed here is
+       the stale RESPONSE: a resolving fetch still calls `setFound` against whichever item is on
+       screen. That needs a generation guard, and half-fixing it would be worse than leaving it
+       named — see `reports/activity-event-date.md`'s closing note. */
+    setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setAssisting(false); setShowMuted(false); setNoteText(null);
     setDeepDive(false); setSweepReceipt(null); setSweepFork(false);
     setOfferDoor(""); setOfferChoice(null); setRemindDate(""); setNotifyStep("pick"); setNotifySel({});
   };
@@ -697,16 +715,16 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         body: (
           <>
             <div className="tdb-jnseg">
-              {([[14, "2 weeks"], [28, "4 weeks"], [null, "Don’t remind me"]] as [number | null, string][]).map(([d, label]) => (
+              {([[14, "2 weeks"], [28, "4 weeks"]] as [number, string][]).map(([d, label]) => (
                 <button key={label} type="button" className={checkBack === d ? "on" : ""} onClick={() => setCheckBack(d)}>{label}</button>
               ))}
             </div>
             {/* ⚠️ SETTING THE NEXT REMINDER IS PART OF RECORDING THE CHASE, not a separate errand —
-                a follow-up you have to remember to schedule is a follow-up you will forget. */}
+                a follow-up you have to remember to schedule is a follow-up you will forget.
+                ⚠️ AND THERE IS NO THIRD "Don't remind me" OPTION — see `checkBack`'s declaration.
+                It would have stored a reminder line the writer asked not to receive. */}
             <div className="tdb-jnsub">
-              {checkBack === null
-                ? "Recorded, and this query stops asking. It stays live and nothing is deleted."
-                : `We’ll put it back in front of you in ${checkBack === 14 ? "two weeks" : "four weeks"}.`}
+              We’ll put it back in front of you in {checkBack === 14 ? "two weeks" : "four weeks"}.
             </div>
           </>
         ),
@@ -727,28 +745,15 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       }),
       commit: {
         label: "Record the chase",
-        hint: checkBack === null ? "Logs a follow-up and stops the reminders." : "Logs a follow-up on the query and sets your next reminder.",
-        onCommit: () => {
-          if (!q) { advance(); return; }
-          /**
-           * ⚠️ "Don't remind me" STAGES A MUTE ALONGSIDE THE NUDGE, because `logNudge`'s
-           * `checkBackDate` is REQUIRED by the write path — it becomes the query's `nudgeDate`, the
-           * activity's `reminderDate`, and the "Follow-up reminder set for …" line. Making it
-           * optional would ripple into `db.tsx`, which this pack does not touch. So the chase is
-           * logged with the default window and the task is muted, which is what the writer asked
-           * for. THE COST, STATED: the activity's display line still names a date they asked not to
-           * be reminded on. The fix is an optional `checkBackDate` through `logNudge` + `db.tsx`.
-           */
-          const days = checkBack ?? DEFAULT_CHECKBACK_DAYS;
-          setStaged((s) => [...s, {
-            kind: "nudge" as const, cardKey: c.key, label: c.title, queryId: q.id,
-            checkBackDate: plusDaysISO(days), nudgeDate: sentDate, method,
-            ...(alsoText.trim() ? { note: alsoText.trim() } : {}),
-          }, ...(checkBack === null && c.taskType && c.relatedRecordId
-            ? [{ kind: "mute-item" as const, cardKey: c.key, label: c.title, taskType: c.taskType, relatedRecordId: c.relatedRecordId }]
-            : [])]);
-          advance();
-        },
+        hint: "Logs a follow-up on the query and sets your next reminder.",
+        /* ⚠️ ONE STAGED NUDGE, through the same `nudgeWriteArgs` → `logNudge` the quick path uses.
+           Every window this step offers genuinely sets a reminder, so nothing here has to be
+           reconciled against what the activity will say. */
+        onCommit: () => q && stageAndAdvance({
+          kind: "nudge", cardKey: c.key, label: c.title, queryId: q.id,
+          checkBackDate: plusDaysISO(checkBack), nudgeDate: sentDate, method,
+          ...(alsoText.trim() ? { note: alsoText.trim() } : {}),
+        }),
       },
     }, journeyBand("pink", "Recording your follow-up", ag, c.initials, "nudge"));
   }

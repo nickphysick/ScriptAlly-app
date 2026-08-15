@@ -412,8 +412,28 @@ describe("⚠️ COMMITTING WRITES ONCE, THROUGH THE PRIMITIVE THAT ALREADY EXIS
 
   it("a chase stages ONE nudge, through the same logNudge write args", () => {
     const body = slice("function nudgeSheet(c: BoardCard) {", "function offerSheet(c: BoardCard)");
-    expect((body.match(/kind: "nudge" as const/g) ?? [])).toHaveLength(1);
+    expect((body.match(/kind: "nudge"/g) ?? [])).toHaveLength(1);
     expect(flow).toContain("logNudge(...nudgeWriteArgs(p, new Date().toISOString()))");
+  });
+
+  /**
+   * ⚠️ EVERY CHECK-BACK OPTION MUST GENUINELY SET A REMINDER. "Don't remind me" shipped briefly and
+   * was removed: `logNudge`'s `checkBackDate` is required by the write path, so the activity still
+   * STORED "Follow-up reminder set for {date}" — the app stating something untrue about its own
+   * record. That line is composed in `buildNudgeWrites` and persisted, so suppressing it is a
+   * write-path change, not a display one. Two options that tell the truth beat three where one lies.
+   *
+   * This asserts the ABSENCE, on comment-stripped source, because the prose above names the very
+   * string it forbids — which is the whole reason `decls` exists.
+   */
+  it("the chase offers no option that logs a reminder the writer declined", () => {
+    const body = slice("function nudgeSheet(c: BoardCard) {", "function offerSheet(c: BoardCard)");
+    expect(body).not.toContain("remind me");
+    /* no mute is staged beside the nudge — that was the shape that papered over the stored line */
+    expect(body).not.toContain("mute-item");
+    /* and the windows that remain are real day counts, not a sentinel */
+    expect(body).toContain("plusDaysISO(checkBack)");
+    expect(flow).toContain("const [checkBack, setCheckBack] = useState<number>(DEFAULT_CHECKBACK_DAYS);");
   });
 
   it("a close writes ONE status change and undoes by DELETING it, never by compensating", () => {
