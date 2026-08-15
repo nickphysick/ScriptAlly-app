@@ -60,6 +60,11 @@ export type FocusItem = { kind: "card"; card: BoardCard } | { kind: "group"; gro
 
 const todayISO = (): string => new Date().toISOString().slice(0, 10);
 const plusDaysISO = (n: number): string => new Date(Date.now() + n * 86400000).toISOString();
+/* ⚠️ LOCAL Y-M-D, because `journeyEventISO` compares the picked day against the LOCAL date. A
+   UTC-derived "yesterday" is a day out for part of every evening in a positive-offset zone, and
+   the symptom would be a chase logged on the wrong day rather than an error. */
+const ymdLocal = (d: Date): string => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const ymdDaysAgo = (n: number): string => { const d = new Date(); d.setDate(d.getDate() - n); return ymdLocal(d); };
 const fmtShort = (iso: string): string => {
   const ms = new Date(iso).getTime();
   return Number.isNaN(ms) ? "" : new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
@@ -187,6 +192,13 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [copied, setCopied] = useState(false);
   const [extrasOpen, setExtrasOpen] = useState(false); // "+ I sent something else too"
   const [backdated, setBackdated] = useState(false); // the quiet "I sent it earlier" day picker
+  /* ⚠️ ONE `When` CONTROL FOR EVERY JOURNEY (journeys pack, Phase 2a). `sentDate` stays the single
+     Y-M-D the write reads; `whenMode` only says which segment is lit and whether the picker shows.
+     Building a second date control for the chase would be the exact fault the shared step
+     vocabulary exists to prevent — two versions of one question, drifting apart. */
+  const [whenMode, setWhenMode] = useState<string>("today");
+  /* the chase's check-back window in days; `null` = "Don't remind me" (see `chaseSheet`) */
+  const [checkBack, setCheckBack] = useState<number | null>(DEFAULT_CHECKBACK_DAYS);
   const [rows, setRows] = useState<Record<string, string>>({}); // batch/dq drafts keyed by agentId (+need for dq)
   const [noMeansNo, setNoMeansNo] = useState<Record<string, boolean>>({});
   const [found, setFound] = useState<Record<string, AssistFound>>({});
@@ -224,6 +236,10 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
 
   const resetScratch = () => {
     setMats({}); setSentDate(todayISO()); setMethod("Email"); setCopied(false); setExtrasOpen(false); setBackdated(false);
+    /* ⚠️ `alsoText` WAS MISSING FROM THIS RESET, and it is the field every journey composes in — so
+       a note typed against item one of a walk arrived pre-filled on item two, ready to be committed
+       against a different agent. It is the quietest kind of wrong: the form looked filled in. */
+    setAlsoText(""); setWhenMode("today"); setCheckBack(DEFAULT_CHECKBACK_DAYS);
     setRows({}); setNoMeansNo({}); setFound({}); setNotFound(new Set()); setAssistAt(null); setAssistMsg(null); setShowMuted(false); setNoteText(null);
     setDeepDive(false); setSweepReceipt(null); setSweepFork(false);
     setOfferDoor(""); setOfferChoice(null); setRemindDate(""); setNotifyStep("pick"); setNotifySel({});
@@ -370,6 +386,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     /* the first row IS the assumed item, already rendered above — the rest are the conditional */
     const extraRows = matRows.slice(1);
     const extrasOn = extraRows.filter((m) => mats[m.label]).map((m) => m.label);
+    const sendWhen = [whenSent(), whenYesterday(), WHEN_OTHER];
     const commitSend = async () => {
       if (!q) { advance(); return; }
       const action = getPrimaryAction(q.status as QueryStatus);
@@ -381,7 +398,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       stageAndAdvance({
         kind: "mark-sent", cardKey: c.key, label: c.title, queryId: q.id,
         targetStatus: action.target as QueryStatus,
-        sentDate: journeyEventISO(backdated ? sentDate : undefined, new Date().toISOString()),
+        /* `journeyEventISO` collapses today's date back to the true moment of the write, so the
+           shared control can always pass its Y-M-D and the "was it back-dated" flag disappears. */
+        sentDate: journeyEventISO(sentDate, new Date().toISOString()),
         isResubmit: action.markKind === "resubmit", method: q.sendMethod || "Email",
         materials: [assumed.label, ...extrasOn],
       });
@@ -429,19 +448,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         </div>
       </>
         ),
-      }, {
-        id: "when",
-        name: "When",
-        body: (
-        <div className="tdb-ffwhen">
-          {backdated ? (
-            <>Logging it as <input type="date" value={sentDate} max={todayISO()} onChange={(e) => setSentDate(e.target.value)} /> <span className="tdb-ffsmall">— we’ll log it at midday.</span></>
-          ) : (
-            <>Logged just now, {new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · <button type="button" className="tdb-fflink" onClick={() => setBackdated(true)}>I sent it earlier</button></>
-          )}
-        </div>
-        ),
-      }],
+      }, whenStep(sendWhen)],
       reference: {
         heading: `What ${who} asked for`,
         body: <><b>{assumed.label}</b>{assumed.sub ? <> — {assumed.sub}</> : null}</>,
@@ -449,7 +456,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       },
       summary: journeySummary({
         materials: [assumed.label, ...extraRows.filter((m) => mats[m.label]).map((m) => m.label)],
-        when: backdated ? fmtShort(sentDate) : "today",
+        when: whenText(sendWhen),
         also: alsoText,
       }),
       commit: { label: "Record it as sent", hint: "Nothing is sent from here — this records what you sent.", onCommit: () => { void commitSend(); } },
@@ -483,28 +490,96 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       msTitle: ms?.title,
       requested: requestedProse(q?.status as QueryStatus | undefined),
     });
-    return sheet(
-      <>
-        <div className="tdb-ffdraft">{draft}</div>
-        <button type="button" className="tdb-ffcopy" onClick={() => { navigator.clipboard?.writeText(draft); setCopied(true); window.setTimeout(() => setCopied(false), 1400); }}>
-          {copied ? "✓ Copied" : "⧉  Copy the draft"}
-        </button>
-        <div className="tdb-ffsmall">ScriptAlly never sends anything for you. Copy it, send it from your own email, then stage the log below.</div>
-        <div className="tdb-ffrow">
-          <div className="tdb-fff"><label>Date nudged</label><input type="date" value={sentDate} onChange={(e) => setSentDate(e.target.value)} /></div>
-          <div className="tdb-fff"><label>How</label><select value={method} onChange={(e) => setMethod(e.target.value)}>{METHODS.slice(0, 2).map((m) => <option key={m}>{m}</option>)}</select></div>
+    const chaseWhen = [whenSent(), whenYesterday(), WHEN_OTHER];
+    const weeksWaited = q?.dateSent ? Math.floor((Date.now() - new Date(q.dateSent).getTime()) / (7 * 86400000)) : null;
+    return journeySheet({
+      /* ⚠️ THE DRAFT IS A LEDE, NOT A STEP. The ref is a mockup with no draft feature, so it had no
+         slot for one; deleting a working "here is a note you could send" to match a drawing would
+         be losing a feature to a picture. It is not numbered because it is not a decision. */
+      lede: (
+        <div className="tdb-jnlede">
+          <div className="tdb-ffdraft">{draft}</div>
+          <button type="button" className="tdb-ffcopy" onClick={() => { navigator.clipboard?.writeText(draft); setCopied(true); window.setTimeout(() => setCopied(false), 1400); }}>
+            {copied ? "✓ Copied" : "⧉  Copy the draft"}
+          </button>
+          <div className="tdb-ffsmall">ScriptAlly never sends anything for you. Copy it, send it from your own email, then record it below.</div>
         </div>
-      </>,
-      <>
-        <button type="button" className="tdb-ffback" onClick={backOne}>← Back</button>
-        <span className="tdb-sp" />
-        <button type="button" className="tdb-ffpri" onClick={() => q && stageAndAdvance({
-          kind: "nudge", cardKey: c.key, label: c.title, queryId: q.id,
-          checkBackDate: plusDaysISO(DEFAULT_CHECKBACK_DAYS), nudgeDate: sentDate, method,
-        })}>Stage it →</button>
-      </>,
-      band("pink", <>Nudging {c.who || "them"}</>, "Here’s a note you could send.", ms?.title ? `${c.title} — ${ms.title}` : undefined, { art: "nudge" }),
-    );
+      ),
+      steps: [{
+        id: "how",
+        name: "How you chased",
+        body: (
+          <div className="tdb-jnseg">
+            {METHODS.slice(0, 2).map((m) => (
+              <button key={m} type="button" className={method === m ? "on" : ""} onClick={() => setMethod(m)}>
+                {m === "QueryManager" ? "Agency portal" : m}
+              </button>
+            ))}
+          </div>
+        ),
+      },
+        whenStep(chaseWhen),
+        freeTextStep("asked", "What you asked", "A line about what you said, so the next one reads differently…"),
+      {
+        id: "checkback",
+        name: "Check back",
+        body: (
+          <>
+            <div className="tdb-jnseg">
+              {([[14, "2 weeks"], [28, "4 weeks"], [null, "Don’t remind me"]] as [number | null, string][]).map(([d, label]) => (
+                <button key={label} type="button" className={checkBack === d ? "on" : ""} onClick={() => setCheckBack(d)}>{label}</button>
+              ))}
+            </div>
+            {/* ⚠️ SETTING THE NEXT REMINDER IS PART OF RECORDING THE CHASE, not a separate errand —
+                a follow-up you have to remember to schedule is a follow-up you will forget. */}
+            <div className="tdb-jnsub">
+              {checkBack === null
+                ? "Recorded, and this query stops asking. It stays live and nothing is deleted."
+                : `We’ll put it back in front of you in ${checkBack === 14 ? "two weeks" : "four weeks"}.`}
+            </div>
+          </>
+        ),
+      }],
+      reference: {
+        heading: ag?.agency ? "What the listing states" : "What you know of their window",
+        body: ag?.responseTimeWeeks
+          ? <>They state <b>{ag.responseTimeWeeks} weeks</b>{ag.noResponseMeansNo ? <>, and that <b>no reply means no</b></> : null}.</>
+          : <>No reply window is recorded for {c.who || "this agent"}. A polite follow-up is fair once their stated window has passed.</>,
+        meta: [q?.dateSent ? `Queried ${fmtShort(q.dateSent)}` : null, weeksWaited != null ? `you have waited ${weeksWaited} week${weeksWaited === 1 ? "" : "s"}` : null]
+          .filter(Boolean).join(" · ") || undefined,
+      },
+      summary: journeySummary({
+        materials: [],
+        channel: method === "QueryManager" ? "Agency portal" : method,
+        when: whenText(chaseWhen),
+        also: alsoText,
+      }),
+      commit: {
+        label: "Record the chase",
+        hint: checkBack === null ? "Logs a follow-up and stops the reminders." : "Logs a follow-up on the query and sets your next reminder.",
+        onCommit: () => {
+          if (!q) { advance(); return; }
+          /**
+           * ⚠️ "Don't remind me" STAGES A MUTE ALONGSIDE THE NUDGE, because `logNudge`'s
+           * `checkBackDate` is REQUIRED by the write path — it becomes the query's `nudgeDate`, the
+           * activity's `reminderDate`, and the "Follow-up reminder set for …" line. Making it
+           * optional would ripple into `db.tsx`, which this pack does not touch. So the chase is
+           * logged with the default window and the task is muted, which is what the writer asked
+           * for. THE COST, STATED: the activity's display line still names a date they asked not to
+           * be reminded on. The fix is an optional `checkBackDate` through `logNudge` + `db.tsx`.
+           */
+          const days = checkBack ?? DEFAULT_CHECKBACK_DAYS;
+          setStaged((s) => [...s, {
+            kind: "nudge" as const, cardKey: c.key, label: c.title, queryId: q.id,
+            checkBackDate: plusDaysISO(days), nudgeDate: sentDate, method,
+            ...(alsoText.trim() ? { note: alsoText.trim() } : {}),
+          }, ...(checkBack === null && c.taskType && c.relatedRecordId
+            ? [{ kind: "mute-item" as const, cardKey: c.key, label: c.title, taskType: c.taskType, relatedRecordId: c.relatedRecordId }]
+            : [])]);
+          advance();
+        },
+      },
+    }, journeyBand("pink", "Recording your follow-up", ag, c.initials, "nudge"));
   }
 
   function offerSheet(c: BoardCard) {
@@ -1229,6 +1304,66 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
       </div>
     );
   }
+  /* ── the shared step vocabulary ─────────────────────────────────────────────────────────────
+   *
+   * ⚠️ EVERY JOURNEY THAT RECORDS AN EVENT ASKS `When` THE SAME WAY, so it is built once. The
+   * options differ — a close offers "When their window closed" where a send offers "Today" — but
+   * the control does not, because two versions of one question are two things to keep in step.
+   * `sentDate` stays the single Y-M-D the write reads; `whenMode` only lights a segment.
+   *
+   * ⚠️ "Another date…" IS A NATIVE PICKER UNTIL PHASE 3 REPLACES IT with `RecordingCalendar`. It is
+   * named here so the count of these instances is the count the calendar has to reach.
+   */
+  interface WhenOption { mode: string; label: string; ymd?: string }
+  const WHEN_OTHER: WhenOption = { mode: "other", label: "Another date…" };
+  const whenSent = (): WhenOption => ({ mode: "today", label: "Today", ymd: todayISO() });
+  const whenYesterday = (): WhenOption => ({ mode: "yesterday", label: "Yesterday", ymd: ymdDaysAgo(1) });
+
+  /** The summary's phrasing of the chosen day — a picked date keeps its case, a named day does not. */
+  const whenText = (options: WhenOption[]): string =>
+    whenMode === "other" ? fmtShort(sentDate) : (options.find((o) => o.mode === whenMode)?.label.toLowerCase() ?? "today");
+
+  function whenStep(options: WhenOption[], name = "When"): JourneyStep {
+    return {
+      id: "when",
+      name,
+      body: (
+        <>
+          <div className="tdb-jnseg">
+            {options.map((o) => (
+              <button key={o.mode} type="button" className={whenMode === o.mode ? "on" : ""}
+                onClick={() => { setWhenMode(o.mode); if (o.ymd) setSentDate(o.ymd); }}>
+                {/* ⚠️ THE ANCHOR RELABELS ITSELF once a day is chosen — a button still reading
+                    "Another date…" beside a filled picker states that nothing has been picked. */}
+                {o.mode === "other" && whenMode === "other" ? fmtShort(sentDate) : o.label}
+              </button>
+            ))}
+          </div>
+          {whenMode === "other" && (
+            <div className="tdb-jnpick">
+              <input type="date" value={sentDate} max={todayISO()} onChange={(e) => setSentDate(e.target.value)} />
+              <span className="tdb-ffsmall">Logged at midday on the day you pick.</span>
+            </div>
+          )}
+        </>
+      ),
+    };
+  }
+
+  /** The one-free-text step. ⚠️ ONE FIELD, UNSTRUCTURED — a checkbox list of guesses invites the
+   *  writer to confirm things the record never said. */
+  function freeTextStep(id: string, name: string, placeholder: string, optional = true): JourneyStep {
+    return {
+      id, name, optional,
+      body: (
+        <div className="tdb-ffalso">
+          <textarea id={`ff-${id}`} className="tdb-fffree" value={alsoText} placeholder={placeholder}
+            aria-label={name} onChange={(e) => setAlsoText(e.target.value)} />
+        </div>
+      ),
+    };
+  }
+
   /**
    * The journey's band. ⚠️ IT KEEPS THE AVATAR, THE NAME AND THE AGENCY ON SCREEN FOR THE WHOLE
    * JOURNEY — the writer must never lose track of who they are recording against, and a form that

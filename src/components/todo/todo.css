@@ -1559,6 +1559,14 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-jnseg button:hover { border-color: var(--oatline); }
 .tdb-jnseg button.on { background: var(--pink-btn); border-color: var(--pink-b); color: var(--ink); font-weight: 500; }
 
+/* the day picker "Another date…" opens in place — replaced by RecordingCalendar in Phase 3 */
+.tdb-jnpick { display: flex; align-items: center; gap: 10px; margin-top: 9px; flex-wrap: wrap; }
+.tdb-jnpick input { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); padding: 8px 10px; font-size: 12.5px; color: var(--ink); }
+.tdb-jnpick .tdb-ffsmall { margin-top: 0; }
+
+/* the lede — a journey's own material above step 01, unnumbered because it is not a decision */
+.tdb-jnlede { padding-bottom: 18px; margin-bottom: 4px; border-bottom: 1px dashed var(--line); }
+
 .tdb-jnopts { display: flex; flex-direction: column; gap: 7px; }
 .tdb-jnrow { width: 100%; display: flex; align-items: center; gap: 11px; text-align: left; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 11px 13px; font-size: 13px; color: var(--ink-2); transition: all 0.14s; }
 .tdb-jnrow:hover { border-color: var(--oatline); }
