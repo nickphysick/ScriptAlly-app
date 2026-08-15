@@ -887,9 +887,14 @@
    in the same 104px — absolutely positioned — so the row cannot reflow between rest and hover. */
 .tdg-fig { text-align: right; position: relative; }
 
+/* ⚠️ §6.1 — IT FADES TO ZERO, NOT TO 14%. At 0.14 the figures are still legible enough to be read
+   as something, so the verbs that replace them in the same 104px arrive on top of a ghost of the
+   wait — clutter behind the icons rather than a swap. Nothing is lost by going to 0: the stack is
+   still in flow (the slot is fixed and the verbs are absolutely positioned over it), so the row
+   cannot reflow between rest and hover either way; only the residue goes. */
 .tdg-figstack { transition: opacity var(--tdg-emph) var(--tdg-ease); }
 .tdg-row:hover .tdg-figstack,
-.tdg-row:focus-within .tdg-figstack { opacity: 0.14; }
+.tdg-row:focus-within .tdg-figstack { opacity: 0; }
 
 /* ⚠️ THE LABEL'S COLOUR IS WHOSE MOVE IT IS — one fact in two registers with its wording, never
    two facts. It may WRAP; it must never truncate, because half a possessive is unreadable. */

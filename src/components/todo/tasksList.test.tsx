@@ -336,8 +336,13 @@ describe("⚠️ THE ROW'S ACTIONS ARE A CLUSTER, AND IT NEVER REFLOWS", () => {
     expect(acts).toContain("position: absolute");          // the same slot, so no reflow
     const css = readFileSync(join(here, "todoGroups.css"), "utf8");
     expect(css).toContain(".tdg-row:focus-within .tdg-acts { opacity: 1; visibility: visible; }");
-    /* and the figure still fades, so the two are a swap rather than a stack */
-    expect(css).toContain(".tdg-row:focus-within .tdg-figstack { opacity: 0.14; }");
+    /* ⚠️ §6.1 — AND THE FIGURE FADES TO ZERO, so the two are a swap rather than a stack. This
+       asserted `0.14`, which was the designed value and was still legible enough to be read as
+       something: the verbs arrived on top of a ghost of the wait. Nothing is lost at 0 — the slot
+       is fixed and the verbs are absolutely positioned over it, so the row cannot reflow either
+       way; only the residue goes. */
+    expect(css).toContain(".tdg-row:focus-within .tdg-figstack { opacity: 0; }");
+    expect(css).not.toContain(".tdg-figstack { opacity: 0.14; }");
   });
 
   /**
