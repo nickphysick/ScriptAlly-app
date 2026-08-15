@@ -2162,8 +2162,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        quietly contradicted `narrowCards`' own law that what you work through is what you were
        looking at). Naming only the card removes the chance to pass the wrong list. */
     if (dockable.length === 0) { flash("Nothing to work through"); return; }
+    /**
+     * ⚠️ AN UNDOCKABLE KEY IS REFUSED, NEVER SUBSTITUTED. This read
+     * `activeKey && dockable.some(…) ? activeKey : dockable[0].key`, so naming a card the queue
+     * does not hold silently docked the FIRST card instead — measured on the deployed page:
+     * clicking the grouped "12 wish lists" row opened Noah Bright's offer. That is worse than a
+     * stale selection, because it is always the same card and therefore looks deliberate: the
+     * writer clicks one row and is shown another, with nothing saying so.
+     *
+     * ⚠️ THE `dockable[0]` FALLBACK IS STILL RIGHT WITH NO KEY — that is the "work through the
+     * list" entrance, which legitimately means "start at the top". The fault was only ever the
+     * case where a key WAS named and could not be honoured.
+     *
+     * A grouped housekeeping row keeps its real deed, which is expanding its members; it simply no
+     * longer pretends to dock.
+     */
+    if (activeKey && !dockable.some((c) => c.key === activeKey)) return;
     boardScroll.current = document.getElementById(STAGE_SCROLL_ID)?.scrollTop ?? 0;
-    const start = activeKey && dockable.some((c) => c.key === activeKey) ? activeKey : dockable[0].key;
+    const start = activeKey ?? dockable[0].key;
     dockPos.current = dockable.findIndex((c) => c.key === start);
     setDockKey(start);
   }

@@ -378,6 +378,26 @@ describe("⚠️ THE ACTION BUTTON NEVER COMPLETES DIRECTLY — it opens the jou
   });
 });
 
+describe("⚠️ AN UNDOCKABLE KEY IS REFUSED, NEVER SUBSTITUTED", () => {
+  /**
+   * ⚠️ MEASURED ON THE DEPLOYED PAGE: clicking the grouped "12 wish lists" row opened Noah
+   * Bright's offer. `openDock` read `activeKey && dockable.some(…) ? activeKey : dockable[0].key`,
+   * so a key the queue does not hold silently docked the FIRST card. Worse than a stale selection,
+   * because it is always the same card and so looks deliberate — the writer clicks one row and is
+   * shown another, with nothing saying so.
+   */
+  it("a named key that is not in the queue docks nothing", () => {
+    expect(code(page)).toContain("if (activeKey && !dockable.some((c) => c.key === activeKey)) return;");
+    /* ⚠️ AND THE SUBSTITUTION IS GONE, not merely guarded ahead of */
+    expect(code(page)).not.toContain("? activeKey : dockable[0].key");
+  });
+
+  it("⚠️ but NO key still starts at the top — that is the work-through entrance, not a fallback", () => {
+    expect(code(page)).toContain("const start = activeKey ?? dockable[0].key;");
+    expect(code(page)).toContain('onClick={() => openDock()}');
+  });
+});
+
 describe("⚠️ ONE SURFACE, EVERY ENTRANCE", () => {
   it("Action now, the bounce toast's Open and the card doors all call openDock", () => {
     /* board fixes II P1 reshaped the action case: a SWEEP routes to its batch sheet first, and
