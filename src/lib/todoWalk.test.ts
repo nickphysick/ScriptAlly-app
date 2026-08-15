@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import { choosePicks, rolledOverCards, todayProgress, walkStepKind, isStageable, applyStaged, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, assumedSendItem, quickSendPayload, quickNudgePayload, receiptLine, journeyEventISO, DEFAULT_CHECKBACK_DAYS, StagedPayload, StagedHandlers, sendKicker, priorSameTypeSend, duplicateSendPrompt , todayGhosts } from "./todoWalk";
+import { defaultSentMaterials } from "./journeyMaterials";
 import { Activity, ActivityType, QueryStatus } from "../types";
 
 const card = (key: string, over: Partial<BoardCard> = {}): BoardCard =>
@@ -167,17 +168,30 @@ describe("materialOptsForTask — the request's tick-list", () => {
 describe("quick-✓ — one write path, stated defaults", () => {
   const NOW = "2026-07-16T09:00:00.000Z";
 
-  it("quick send = today · the query's method (else Email) · everything they asked for", () => {
+  /**
+   * ⚠️ THE QUICK PATH WROTE A SYNOPSIS THAT WAS NEVER SENT (journeys pack, Phase 3). It set
+   * `materials: materialOptsForTask(taskType)` — `["Full manuscript", "Synopsis", "Covering
+   * email"]` — so every one-tap send RECORDED a claim that a synopsis went. Not a display fault:
+   * a write. The journey's UI fix did not reach it, because the quick path skips the journey.
+   *
+   * A one-tap confirm records what the agent asked for and nothing else; anything conditional
+   * needs the journey, because it needs a decision the tap never offered.
+   */
+  it("quick send = today · the query's method (else Email) · what the agent asked for, ONLY", () => {
     const p = quickSendPayload({ cardKey: "k", taskType: "full_requested", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: false, method: null, nowIso: NOW });
     expect(p.sentDate).toBe(NOW);
     expect(p.method).toBe("Email");
-    expect(p.materials).toEqual(materialOptsForTask("full_requested"));
+    expect(p.materials).toEqual(["The manuscript"]);
+    expect(p.materials).not.toContain("Synopsis");
+    /* an R&R still records both halves — the work and the account of what changed */
+    expect(quickSendPayload({ cardKey: "k", taskType: "revise_resubmit", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: true, method: null, nowIso: NOW }).materials)
+      .toEqual(["The revised manuscript", "A note on what changed"]);
     expect(quickSendPayload({ cardKey: "k", taskType: "full_requested", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: false, method: "QueryManager", nowIso: NOW }).method).toBe("QueryManager");
   });
 
   it("quick-✓ writes BYTE-IDENTICAL args to the journey with the same inputs", () => {
     const quick = quickSendPayload({ cardKey: "k", taskType: "full_requested", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: false, method: "Email", nowIso: NOW });
-    const journey: StagedPayload = { kind: "mark-sent", cardKey: "k", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, sentDate: NOW, isResubmit: false, method: "Email", materials: ["Full manuscript", "Synopsis", "Covering email"] };
+    const journey: StagedPayload = { kind: "mark-sent", cardKey: "k", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, sentDate: NOW, isResubmit: false, method: "Email", materials: ["The manuscript"] };
     expect(markSentWriteArgs(quick)).toEqual(markSentWriteArgs(journey as Extract<StagedPayload, { kind: "mark-sent" }>));
   });
 
@@ -196,11 +210,13 @@ describe("receiptLine — the receipt derives from the actual payload", () => {
   const send = quickSendPayload({ cardKey: "k", taskType: "full_requested", queryId: "q1", targetStatus: QueryStatus.FULL_SENT, isResubmit: false, method: "Email", nowIso: "2026-07-16T09:00:00.000Z" });
 
   it("full set → 'everything they asked for'; today reads as today", () => {
-    expect(receiptLine(send, TODAY, materialOptsForTask("full_requested"))).toBe("Logged: today (16 Jul) · via email · everything they asked for.");
+    /* the comparison set is what a send RECORDS, not the retired option list */
+    expect(receiptLine({ ...send, materials: ["The manuscript"] }, TODAY, defaultSentMaterials("full_requested")))
+      .toBe("Logged: today (16 Jul) · via email · everything they asked for.");
   });
   it("a subset lists what was actually logged", () => {
     const partial = { ...send, materials: ["Synopsis"] };
-    expect(receiptLine(partial, TODAY, materialOptsForTask("full_requested"))).toBe("Logged: today (16 Jul) · via email · Synopsis.");
+    expect(receiptLine(partial, TODAY, defaultSentMaterials("full_requested"))).toBe("Logged: today (16 Jul) · via email · Synopsis.");
   });
   it("a changed method changes the line (never a hardcoded claim)", () => {
     const qm = { ...send, method: "QueryManager" };

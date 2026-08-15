@@ -171,3 +171,22 @@ function listWords(xs: string[]): string {
 }
 
 const lowerFirst = (s: string): string => (s ? s[0].toLowerCase() + s.slice(1) : s);
+
+
+/**
+ * ⚠️ WHAT A QUICK SEND ACTUALLY RECORDS — and this is a WRITE, not a display.
+ *
+ * `quickSendPayload` set `materials: materialOptsForTask(taskType)`, so the one-tap path wrote
+ * `["Full manuscript", "Synopsis", "Covering email"]` into the record: a claim that a synopsis was
+ * sent, on every quick send, when none was. The journey's UI fix did not reach it, because the
+ * quick path skips the journey entirely.
+ *
+ * ⚠️ IT IS THE PRE-TICKED ROWS AND NOTHING ELSE. A one-tap confirm records what the agent asked
+ * for — that is the whole promise of the tap. Anything conditional (the synopsis) or composed (the
+ * writer's note) requires the journey, because it requires a decision the tap never offered.
+ */
+export function defaultSentMaterials(taskType: string | undefined, who = "the agent", agentMaterials?: string[]): string[] {
+  return journeyMaterials("send", taskType, "held", who, agentMaterials)
+    .rows.filter((r) => r.on)
+    .map((r) => r.label);
+}

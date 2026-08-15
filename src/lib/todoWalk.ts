@@ -12,6 +12,7 @@
 import { BoardCard } from "./todoBoard";
 import { ledgerDetail } from "./todoLedger";
 import { Activity, ActivityType, Query, QueryStatus, TaskFlag } from "../types";
+import { defaultSentMaterials } from "./journeyMaterials";
 
 export const MAX_TODAY = 5;
 const MAX_DO = 4;
@@ -115,6 +116,14 @@ export function walkStepKind(card: BoardCard): WalkStepKind {
 export const isStageable = (card: BoardCard): boolean => walkStepKind(card) !== "open";
 
 /** The focus flow's material tick-list per request type (was TaskCaptureForm's inline map). */
+/**
+ * ⚠️ THE OLD OPTION LIST, KEPT ONLY FOR `assumedSendItem`'s "something else" EXTRAS — which the
+ * journey no longer renders (journeys pack, Phase 3). It offered a synopsis on every send, so
+ * nothing that WRITES or DISPLAYS may read it: `defaultSentMaterials` is what a send records and
+ * `journeyMaterials` is what a step offers. Left in place rather than deleted because
+ * `assumedSendItem` still computes `extras` for callers this pack did not audit; it goes the day
+ * that function is retired.
+ */
 export function materialOptsForTask(taskType?: string): string[] {
   if (taskType === "partial_requested") return ["First pages", "Synopsis", "Covering email"];
   if (taskType === "revise_resubmit") return ["Revised manuscript", "Revision letter"];
@@ -211,7 +220,11 @@ export function quickSendPayload(a: { cardKey: string; label?: string; taskType?
   return {
     kind: "mark-sent", cardKey: a.cardKey, ...(a.label ? { label: a.label } : {}),
     queryId: a.queryId, targetStatus: a.targetStatus, sentDate: journeyEventISO(undefined, a.nowIso), isResubmit: a.isResubmit,
-    method: a.method || "Email", materials: materialOptsForTask(a.taskType),
+    /* ⚠️ THE PRE-TICKED ROWS, NOT THE OLD OPTION LIST. This wrote `["Full manuscript", "Synopsis",
+       "Covering email"]` — a claim that a synopsis was sent, on every quick send, when none was.
+       A one-tap confirm records what the agent asked for; anything conditional needs the journey,
+       because it needs a decision the tap never offered. */
+    method: a.method || "Email", materials: defaultSentMaterials(a.taskType),
   };
 }
 
