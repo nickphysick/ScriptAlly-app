@@ -173,8 +173,18 @@
    richest thing on the card and the only part whose content varies, was squeezed into the
    narrowest column while a checkbox and two buttons took the rest.
    ⚠️ A GRID, NOT A FLEX ROW, so the hairline between them is the gap rather than a border on one
-   child — a border would belong to whichever column drew it and would vanish with that column. */
-.tdk-body { padding: 18px 24px 6px; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, 400px); gap: 0 30px; align-content: start; min-height: 0; }
+   child — a border would belong to whichever column drew it and would vanish with that column.
+
+   ⚠️ THE DOING TRACK IS 300–360, NOT THE REF'S 330–400 — AND THE ARITHMETIC IS WHY. `minmax` takes
+   its MAX whenever there is room, so a 400px doing column leaves the fr track everything above
+   400 + 30 of gap: the record is only the wider of the two on a card past ~878px. Measured on the
+   deployed page at 1920, with the cap already removed and the card filling its 830px pane, the
+   body still resolved to `352px 400px` — the record narrower, which is the fault this was for.
+   The pane cannot get wider, so the ref's numbers cannot produce the ref's intent here: the ref's
+   card lives in a wider pane than ours has. THE LAW WINS OVER THE NUMBERS — "the record column is
+   the wide one" — so the doing is bounded lower and the record is wider at every width where two
+   columns show. */
+.tdk-body { padding: 18px 24px 6px; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 0 30px; align-content: start; min-height: 0; }
 .tdk-story { min-width: 0; }
 .tdk-work { min-width: 0; border-left: 1px solid var(--hairline); padding-left: 30px; }
 .tdk-storyk {
@@ -194,7 +204,10 @@
    The story still reads FIRST when stacked, as it always did, and the hairline becomes a rule
    ABOVE the doing rather than beside it. */
 .tdk-w { container-type: inline-size; }
-@container (max-width: 620px) {
+/* ⚠️ THE THRESHOLD IS WHERE THE RECORD CAN ACTUALLY BE THE WIDER COLUMN, not an arbitrary narrow
+   step. Below ~800px of card the doing's 360 max would leave the fr track less than itself, which
+   is a two-column layout that breaks the law it exists to serve — so it stacks instead. */
+@container (max-width: 800px) {
   .tdk-body { grid-template-columns: minmax(0, 1fr); gap: 16px 0; }
   .tdk-work { border-left: 0; padding-left: 0; border-top: 1px solid var(--hairline); padding-top: 16px; }
 }

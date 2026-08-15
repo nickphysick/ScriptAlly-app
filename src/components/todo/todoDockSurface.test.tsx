@@ -492,7 +492,12 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
   it("the record column is the flexible one; the doing column is bounded", () => {
     const body = dockCssRule(".tdk-body {");
     expect(body).toContain("display: grid");
-    expect(body).toContain("grid-template-columns: minmax(0, 1fr) minmax(330px, 400px)");
+    /* ⚠️ 300–360, NOT THE REF'S 330–400. `minmax` takes its MAX whenever there is room, so a 400px
+       doing column leaves the fr track everything above 400 + 30 of gap — the record is only the
+       wider of the two on a card past ~878px. Measured on the deployed page at 1920, card filling
+       its 830px pane, the body still resolved to `352px 400px`. The pane cannot get wider, so the
+       ref's numbers cannot produce the ref's intent here. THE LAW WINS OVER THE NUMBERS. */
+    expect(body).toContain("grid-template-columns: minmax(0, 1fr) minmax(300px, 360px)");
     /* ⚠️ THE RECORD IS FIRST — the wide track is the story's, not the work's */
     const html = render();
     const story = html.indexOf('class="tdk-story"');
@@ -700,7 +705,7 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
     expect(w).not.toContain("max-width");
     expect(dockCssRule(".tdk-head {")).not.toContain("max-width");
     /* the measure now lives where it only constrains the doing */
-    expect(dockCssRule(".tdk-body {")).toContain("minmax(330px, 400px)");
+    expect(dockCssRule(".tdk-body {")).toContain("minmax(300px, 360px)");
   });
 
   /**
