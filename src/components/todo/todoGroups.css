@@ -227,7 +227,10 @@
 
 /* ⚠️ HOVER IS A LIGHTER TINT ONLY — no border, no edge rule, nothing that could be mistaken for
    the selected state a pointer is about to produce. */
-.tdg-row:hover { background: #faf7f2; }
+/* ⚠️ ROW HOVER IS A TRANSLUCENT WHITE, not a warm tint (journeys pack, Phase 1). With the card's
+   own fill gone, an opaque hover would be the only solid surface in the list and would read as a
+   selection; a wash lifts the row off the sheet without claiming it. */
+.tdg-row:hover { background: rgba(255, 255, 255, 0.72); }
 .tdg-row:hover::after { background: transparent; }
 
 /* ⚠️ SELECTED IS THE PARCHMENT TINT, A HAIRLINE, AND A BURGUNDY EDGE RULE THAT BLEEDS INTO THE

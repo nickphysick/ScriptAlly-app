@@ -639,10 +639,17 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * token and the heading follows; painting a bare `background: #fff` here would give a heading
    * that looks correct at rest and grows a pale slab the moment a row scrolls under it.
    */
-  it("the rail repoints --ws-window rather than painting a literal white", () => {
+  /**
+   * ⚠️ THE CARD PAINTS NOTHING NOW (journeys pack, Phase 1) — but it still REPOINTS the token, and
+   * that is the half that matters. `.tdg`'s sticky heading resolves its ground from `--ws-window`;
+   * with the card transparent the band must fade into the SHEET, which is what the override now
+   * names. Painting nothing and leaving the token alone would put a heading's ground a shade off
+   * the surface actually behind it.
+   */
+  it("the rail repoints --ws-window even though it paints nothing itself", () => {
     const rail = rule(splitCss, ".tdw-rail {");
-    expect(rail).toContain("--ws-window-rgb: 255, 255, 255");
-    expect(rail).toContain("background: var(--ws-window)");
+    expect(rail).toContain("--ws-window-rgb");
+    expect(rail).toContain("background: transparent");
     expect(rail).not.toMatch(/background:\s*#fff/);
     /* ⚠️ AND THE WORKSPACE PAINTS NOTHING AT ALL NOW (visual rebuild). It used to carry the
        page's ground; the SPLIT carries it, and the pane is transparent so the task card floats on
@@ -825,23 +832,31 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
    * sheet, and the LIST CARD'S HAIRLINE is the only delineation. A tinted ground under a white
    * card was two surfaces doing one job.
    */
-  it("the split is white, and the card's border is what delineates it", () => {
+  /**
+   * ⚠️ NO CONTAINER ON THIS PAGE CARRIES A FILL (journeys pack, Phase 1). The split, the bar, the
+   * list card and the desk pane all sit on the SHEET's ground; hairlines and the section bands do
+   * every piece of delineating. A fill under a card that also has one was two surfaces doing one
+   * job — this takes the second away rather than matching it to the first.
+   */
+  it("every container is transparent, and the hairlines do the delineating", () => {
     const split = rule(splitCss, ".tdw-split {");
-    expect(split).toContain("background: #fff");
+    expect(split).toContain("background: transparent");
     expect(split).not.toContain("--ws-ground");
+    for (const sel of [".tdw-cbar {", ".tdw-rail {", ".tdw-work {", ".tdw-tools {", ".tdw-foot {"]) {
+      expect(rule(splitCss, sel), sel).toContain("background: transparent");
+    }
+    /* …and the card is its border: no fill, no lift */
+    expect(rule(splitCss, ".tdw-rail {")).not.toContain("box-shadow");
     expect(split).toContain("gap: 18px");
     expect(split).toContain("padding: 0 22px 20px");
-    /* the bar shares it — one surface from the plate down to the cards */
-    expect(rule(splitCss, ".tdw-cbar {")).toContain("background: #fff");
     /* and the border is still there to do the delineating alone */
     expect(rule(splitCss, ".tdw-rail {")).toContain("border: 1px solid var(--tdw-hair)");
   });
 
-  it("the rail is a CARD — hairline, radius, lift — and the divider went with the sheet", () => {
+  it("the rail is a CARD — hairline and radius, and the divider went with the sheet", () => {
     const rail = rule(splitCss, ".tdw-rail {");
     expect(rail).toContain("border: 1px solid var(--tdw-hair)");
     expect(rail).toContain("border-radius: 14px");
-    expect(rail).toContain("box-shadow");
     /* the border-RIGHT that split one sheet in two is gone; the ground separates them now */
     expect(rail).not.toContain("border-right");
   });
@@ -849,7 +864,6 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
   it("⚠️ THE WORKSPACE PANE PAINTS NOTHING — the card floats on the ground directly", () => {
     /* A pane with its own fill behind a card that also has one is two surfaces where the design
        has one object on a desk. */
-    expect(rule(splitCss, ".tdw-work {")).toContain("background: transparent");
   });
 
   /**
