@@ -121,7 +121,7 @@ describe("the rendered states", () => {
       const collapsed = renderShell(7);
       expect(collapsed).toContain("sb-collapsed");
       expect(collapsed.match(/class="sp-ct"/g)?.length).toBe(1);
-      expect(renderShell(0)).not.toMatch(/["\s]sp-ct["\s]/);
+      expect(renderShell(0)).not.toMatch(/["\s`]sp-ct["\s`]/);
     } finally {
       localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
     }

@@ -136,7 +136,7 @@ describe("⚠️ tag filters combine ADDITIVELY with FILTERS (Urgent AND #synops
 
   it("the sidebar's TAGS section is REAL: rows with counts, multi-select, a clear control", () => {
     // the retirement comment may QUOTE the old box; the RENDERED class is what must be extinct
-    expect(side).not.toMatch(/["\s]tds-soon["\s]/);
+    expect(side).not.toMatch(/["\s`]tds-soon["\s`]/);
     expect(side).toContain("tagCounts?.get(t.id) ?? 0");
     expect(side).toContain("onToggleTag");
     expect(side).toContain("Clear");

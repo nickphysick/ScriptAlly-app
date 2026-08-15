@@ -471,7 +471,7 @@ describe("⚠️ AN ILLUSTRATOR'S BRIEF IS NEVER USER-FACING COPY", () => {
     expect(html).toContain("<img");
     expect(html).toContain("art-real");
     expect(html).not.toContain("art-box");
-    expect(html).not.toMatch(/["\s]art-ph["\s]/);
+    expect(html).not.toMatch(/["\s`]art-ph["\s`]/);
   });
 });
 

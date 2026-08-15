@@ -69,7 +69,7 @@ describe("the draft is LOCAL until Save", () => {
   it("create mode owns the reading pane, and nothing is left in the list", () => {
     expect(queries).toContain("createDraft ? (");
     expect(queries).toContain("<QueryCreatePane");
-    expect(queries, "the draft row outlived the list it pinned to").not.toMatch(/["\s]f12-draft["\s]/);
+    expect(queries, "the draft row outlived the list it pinned to").not.toMatch(/["\s`]f12-draft["\s`]/);
   });
 
   /* ⚠️ RETIRED WITH THE ROW (v3). It asserted the draft was emitted BEFORE the filtered map, so

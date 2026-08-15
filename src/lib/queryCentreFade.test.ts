@@ -77,7 +77,7 @@ describe("§1 · mechanism 2 — the page's own foot does not fade", () => {
     const normal = renderToStaticMarkup(
       React.createElement(WorkspacePageGrid, { plate: null, children: "body" }),
     );
-    expect(fill, "the fill page's foot fade came back").not.toMatch(/["\s]wpg-hem["\s]/);
+    expect(fill, "the fill page's foot fade came back").not.toMatch(/["\s`]wpg-hem["\s`]/);
     expect(normal, "the opt-out escaped onto every page in the shell").toContain("wpg-hem");
   });
 });

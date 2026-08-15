@@ -239,7 +239,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     /* the STORY column legitimately names the agent inside timeline entries; what must not repeat
        is the card's own title and record line, which is what collided with the facts */
     expect(body).not.toContain("Send your full to Jonathan Marsh");
-    /* ⚠️ THE EXACT CLASS, NOT THE SUBSTRING. This read `not.toMatch(/["\s]tdk-rec["\s]/)`, which is
+    /* ⚠️ THE EXACT CLASS, NOT THE SUBSTRING. This read `not.toMatch(/["\s`]tdk-rec["\s`]/)`, which is
        satisfied by any class merely STARTING with it — §3.11's `tdk-recnote` tripped it, and the
        looseness runs the other way too: a real `tdk-record` would have passed. The retired class
        is `tdk-rec` exactly. */
@@ -263,7 +263,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
       <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}} />
     );
-    expect(bare).not.toMatch(/["\s]tdk-tl["\s]/);
+    expect(bare).not.toMatch(/["\s`]tdk-tl["\s`]/);
   });
 });
 
@@ -636,7 +636,7 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     expect(at, "the work column marker is gone").toBeGreaterThan(-1);
     const work = html.slice(at);
     expect(work).not.toContain("tdk-t\"");
-    expect(work).not.toMatch(/["\s]tdk-rec["\s]/);
+    expect(work).not.toMatch(/["\s`]tdk-rec["\s`]/);
     expect(work).toContain("tdk-flow");
     /* and the band IS carrying the name, which is what earns the omission */
     expect(html.slice(0, at)).toContain("Jonathan Marsh");

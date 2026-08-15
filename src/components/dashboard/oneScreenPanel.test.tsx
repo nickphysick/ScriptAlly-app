@@ -38,8 +38,8 @@ describe("OneScreenPanel — the shell the four containers had", () => {
 
   it("renders the skeleton ONLY while loading, and only when bars are given", () => {
     expect(html(<OneScreenPanel variant="os-tasks" loading skel={["h", ""]} />)).toContain("os-skel");
-    expect(html(<OneScreenPanel variant="os-tasks" skel={["h", ""]} />)).not.toMatch(/["\s]os-skel["\s]/);
-    expect(html(<OneScreenPanel variant="os-tasks" loading />)).not.toMatch(/["\s]os-skel["\s]/);
+    expect(html(<OneScreenPanel variant="os-tasks" skel={["h", ""]} />)).not.toMatch(/["\s`]os-skel["\s`]/);
+    expect(html(<OneScreenPanel variant="os-tasks" loading />)).not.toMatch(/["\s`]os-skel["\s`]/);
   });
 
   it("⚠️ the head precedes the body — it is the card's first child after the skeleton", () => {

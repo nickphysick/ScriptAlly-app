@@ -215,7 +215,7 @@ describe("frame P4 — sweep", () => {
     const tour = readFileSync(join(here, "..", "..", "lib", "todoTour.ts"), "utf8");
     expect(tour).toContain('".tdb-revlink"'); // the workspace shell: the review link in the hero
     expect(tour).not.toContain("tdb-rvbox");
-    expect(tour).not.toMatch(/["\s]tdb-rvrow["\s]/);
+    expect(tour).not.toMatch(/["\s`]tdb-rvrow["\s`]/);
     expect(tour).toContain("beneath Begin");
     expect(page).not.toContain("tdb-cta");
     expect(css).not.toContain("tdb-cta");

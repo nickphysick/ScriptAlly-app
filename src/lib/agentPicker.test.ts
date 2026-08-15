@@ -118,7 +118,7 @@ describe("the folded all-queried block", () => {
     expect(picker).toContain('className="qc-fold"');
     expect(picker, "closed by default").toContain("const [showPlates, setShowPlates] = useState(false);");
     const cold = picker.slice(picker.indexOf('state === "cold"'), picker.indexOf("const field ="));
-    expect(cold).not.toMatch(/["\s]qc-fold["\s]/);
+    expect(cold).not.toMatch(/["\s`]qc-fold["\s`]/);
   });
 
   /* A resubmission is just a query to someone already queried — one door, not two. */

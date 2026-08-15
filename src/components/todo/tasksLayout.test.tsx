@@ -128,7 +128,7 @@ describe("⚠️ one gutter, one cap — equal LEFT offsets by construction", ()
       // the mount sits directly inside the page wrap — never inside a max-width/pad wrapper
       const before = src.slice(src.indexOf("return ("), src.indexOf("<TasksPageLayout"));
       expect(before, name).not.toContain("maxWidth");
-      expect(before, name).not.toMatch(/["\s]sa-content-col["\s]/);
+      expect(before, name).not.toMatch(/["\s`]sa-content-col["\s`]/);
     }
   });
 });
