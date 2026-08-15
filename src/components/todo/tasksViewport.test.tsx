@@ -917,10 +917,18 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
   it("the card's strip reads the ROW's resolver rather than recomputing", () => {
     const at = board.indexOf("handoff={(c) => {");
     expect(at, "the hand-off resolver is gone — this slice would read nothing").toBeGreaterThan(-1);
-    const fn = board.slice(at, at + 1400);
+    const fn = board.slice(at, at + 3200);
+    /* ⚠️ THE WAIT HALF WAS ALWAYS TRUE — `figureFor` IS the row's resolver. The ANCHOR half was
+       not: it read `q.dateSent` under a hardcoded "Requested", which is a DIFFERENT fact from the
+       rail's `waitAnchorMs` and mislabelled on every bucket. Measured on the deployed page: the
+       R&R row said "No date on record" while its card showed "13 June". Both halves now come from
+       the row's own derivations, so the comment at that site is finally true of the code. */
     expect(fn).toContain("const f = figureFor(c);");
     expect(fn).toContain("waitLabel: f.label");
     expect(fn).toContain("waitValue: f.value");
+    expect(fn).toContain("waitAnchorMs(cardBucket(c), c.taskType");
+    expect(fn).toContain("anchorLabel: Number.isFinite(anchorMs) ? anchorNoun(c) : undefined");
+    expect(fn).not.toContain('"Requested"');
   });
 
   it("both surfaces set the same two registers — mono label, Playfair value", () => {

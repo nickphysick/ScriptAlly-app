@@ -26,10 +26,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
-import { bandVariant, bandMotif, bandAnchor, MaterialRow } from "../../lib/todoHandoff";
+import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
-import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE } from "../../lib/todoHandoff";
+import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
@@ -91,9 +91,17 @@ export interface TodoDockProps {
   /** The agent's own contact fields and the manuscript's title — the hand-off is built from the
    *  record or is absent; the pane never invents either. */
   handoff?: (card: BoardCard) => {
+    /** §5.3 — the anchor's own noun, derived per bucket; absent where the record has no anchor. */
+    anchorLabel?: string;
+    anchorValue?: string;
+    /** §5.1 — the band's forward-looking fact, or null where there is none. */
+    forward?: BandFact | null;
     email?: string; website?: string; msTitle?: string;
     /** The band's facts strip — derived by the page, which holds the query and the clock. */
-    sentLabel?: string; sentValue?: string; waitLabel?: string; waitValue?: string;
+    /* ⚠️ `sentLabel`/`sentValue` ARE RETIRED — they carried `q.dateSent` under a hardcoded
+       "Requested" noun, which is the §5 fault: a different fact from the rail's anchor, mislabelled
+       on every bucket. `anchorLabel`/`anchorValue` above replace them. */
+    waitLabel?: string; waitValue?: string;
   };
   /** tasks-pages P5 — MOUNT 2 of 3: the item sheet's tag surface. The page supplies the ONE
    *  TagPicker for user-task cards; derived work cannot be tagged, so the slot stays empty. */
@@ -143,7 +151,11 @@ export const TodoDock: React.FC<TodoDockProps> = ({
      `taskType` would grow a private opinion about each kind. */
   const sections = paneSections(card);
   const src = handoff?.(card) ?? {};
-  const facts = bandFacts(src.sentLabel ?? null, src.sentValue ?? null, src.waitLabel ?? null, src.waitValue ?? null);
+  /* ⚠️ THE PAIR TAKES THE ANCHOR AND THE ELAPSED; THE BAND TAKES THE FORWARD FACT. Two different
+     moments, so neither repeats the other — §5's whole point. The band used to carry the anchor,
+     which the pair also carries: the same figure twice on one card. */
+  const facts = bandFacts(src.anchorLabel ?? null, src.anchorValue ?? null, src.waitLabel ?? null, src.waitValue ?? null);
+  const forward: BandFact | null = src.forward ?? null;
   /* the stat pair reads the SAME two facts the band does — one derivation, two presentations */
   const stats = trackingStats(facts);
   const hoff = handoffFor(card, src.email, src.website, src.msTitle);
@@ -215,9 +227,9 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               facts beside a block that wraps, never the other way round. */}
           {/* ⚠️ THE BAND SHOWS THE ANCHOR ALONE. It showed both, and the stat pair three inches
               below showed the same two — one figure twice, in one glance. */}
-          {bandAnchor(facts).length > 0 && (
+          {forward && (
             <span className="tdk-facts">
-              {bandAnchor(facts).map((f) => (
+              {[forward].map((f) => (
                 <span className="tdk-fact" key={f.k}>
                   <span className="k">{f.k}</span>
                   <span className="v">{f.v}</span>

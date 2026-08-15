@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, materialRows, bandAnchor, trackingStats, HANDOFF_NOTE,
+  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, anchorNoun, bandForward, materialRows, bandAnchor, trackingStats, HANDOFF_NOTE,
 } from "./todoHandoff";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -321,5 +321,70 @@ describe("⚠️ THE SUB-LINE VARIES BY WHAT THE MATERIAL IS — and is ABSENT w
 
   it("no material, no row", () => {
     expect(materialRows(null, { isFull: true, wordCount: 92000 })).toEqual([]);
+  });
+});
+
+/* ── §5 · the anti-duplication law ───────────────────────────────────────────────────────────── */
+
+const bcard = (over: Record<string, unknown>) => ({ key: "k", title: "t", ...over }) as unknown as BoardCard;
+
+describe("⚠️ §5.3 — THE ANCHOR'S NOUN NAMES WHAT ACTUALLY HAPPENED", () => {
+  /**
+   * ⚠️ EVERY CARD ON THE DEPLOYED PAGE PRINTED `REQUESTED` — the offer, five chases, both closes —
+   * because the label was a hardcoded string at the call site rather than a derivation. Nothing is
+   * requested on an offer; the agent offered.
+   */
+  it("each bucket gets the noun of its own act", () => {
+    expect(anchorNoun(bcard({ taskType: "offer_received" }))).toBe("Offer received");
+    expect(anchorNoun(bcard({ taskType: "revise_resubmit" }))).toBe("Revision requested");
+    expect(anchorNoun(bcard({ taskType: "full_requested" }))).toBe("Requested");
+    expect(anchorNoun(bcard({ taskType: "nudge_overdue" }))).toBe("Queried");
+    expect(anchorNoun(bcard({ taskType: "no_response_close" }))).toBe("Last entry");
+    expect(anchorNoun(bcard({ userTaskId: "u1" }))).toBe("Added");
+    expect(anchorNoun(bcard({ taskType: "data_quality_poor" }))).toBe("Noticed");
+  });
+
+  /* ⚠️ NO TWO BUCKETS SHARE A NOUN BY ACCIDENT — asserted as a set, so a future bucket cannot
+     quietly inherit another's word. */
+  it("the nouns are distinct across the buckets that have their own act", () => {
+    const nouns = ["offer_received", "revise_resubmit", "full_requested", "nudge_overdue", "no_response_close"]
+      .map((t) => anchorNoun(bcard({ taskType: t })));
+    expect(new Set(nouns).size).toBe(nouns.length);
+  });
+});
+
+describe("⚠️ §5.1 — THE BAND CARRIES THE FORWARD-LOOKING FACT ALONE", () => {
+  const fmt = (iso: string) => `fmt:${iso}`;
+
+  it("an offer's band counts DOWN to the reply-by", () => {
+    expect(bandForward(bcard({ taskType: "offer_received" }), "2026-09-07", null, fmt))
+      .toMatchObject({ k: "Reply by", v: "fmt:2026-09-07" });
+  });
+
+  it("a send or a chase carries the agent's stated window", () => {
+    expect(bandForward(bcard({ taskType: "full_requested" }), null, 8, fmt))
+      .toMatchObject({ k: "Their window", v: "8 weeks" });
+    expect(bandForward(bcard({ taskType: "nudge_overdue" }), null, 10, fmt))
+      .toMatchObject({ k: "Their window", v: "10 weeks" });
+  });
+
+  /**
+   * ⚠️ ABSENT RATHER THAN PADDED. A band that always has something to say will eventually say
+   * something untrue — and the fault this replaces was the band carrying the ANCHOR, which the
+   * stat pair carries too: the same figure twice on one card.
+   */
+  it("no forward-looking fact means the band carries NOTHING", () => {
+    expect(bandForward(bcard({ taskType: "offer_received" }), null, 8, fmt)).toBeNull();
+    expect(bandForward(bcard({ taskType: "full_requested" }), "2026-09-07", null, fmt)).toBeNull();
+    expect(bandForward(bcard({ taskType: "no_response_close" }), "2026-09-07", 8, fmt)).toBeNull();
+    expect(bandForward(bcard({ userTaskId: "u1" }), null, null, fmt)).toBeNull();
+  });
+
+  /* ⚠️ THE LAW ITSELF: the band's fact and the pair's facts are never the same string. */
+  it("the band's fact is never one of the pair's", () => {
+    const fwd = bandForward(bcard({ taskType: "offer_received" }), "2026-09-07", null, fmt)!;
+    const pair = trackingStats(bandFacts("Offer received", "17 June", "You've waited", "8 weeks"));
+    expect(pair.map((p) => p.k)).not.toContain(fwd.k);
+    expect(pair.map((p) => p.v)).not.toContain(fwd.v);
   });
 });

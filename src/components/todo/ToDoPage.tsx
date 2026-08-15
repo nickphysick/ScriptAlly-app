@@ -64,7 +64,7 @@ import {
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList, groupColumn } from "./TaskList";
 import { useDockActivity } from "./useDockActivity";
-import { materialRows } from "../../lib/todoHandoff";
+import { materialRows, anchorNoun, bandForward } from "../../lib/todoHandoff";
 import { sendSpecFor } from "../../lib/todoDock";
 import { isSlotFilled } from "../../lib/packageMetrics";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
@@ -1563,18 +1563,46 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
                     const f = figureFor(c);
                     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+                    /**
+                     * ⚠️ THE ANCHOR IS THE RAIL'S OWN `waitAnchorMs`, AND UNTIL NOW THE COMMENT
+                     * HERE CLAIMED THAT AND WAS FALSE. It read "the strip reads the row's own
+                     * figure — literally the same derivation", while the code read `q.dateSent`
+                     * directly and labelled it `Requested`. Two consequences, both visible on the
+                     * deployed page: the R&R row said `No date on record` in the rail while its
+                     * card showed `13 June`, because the two were deriving different facts; and
+                     * EVERY card printed `REQUESTED`, offer and chase and close alike, because the
+                     * noun was a hardcoded string. The wait half was true — `figureFor` is the
+                     * row's own — so only the anchor moved.
+                     *
+                     * ⚠️ AND THE NOUN IS DERIVED PER BUCKET (`anchorNoun`) — nothing is requested
+                     * on an offer.
+                     */
+                    const anchorMs = waitAnchorMs(cardBucket(c), c.taskType, {
+                      dateSent: q?.dateSent,
+                      partialRequestedDate: q?.partialRequestedDate,
+                      fullRequestedDate: q?.fullRequestedDate,
+                      partialSentDate: q?.partialSentDate,
+                      fullSentDate: q?.fullSentDate,
+                      lastNudgeSentDate: q?.lastNudgeSentDate,
+                      lastReplyAt: isoOf(q?.responseReceivedAt),
+                      statusMovedAt: isoOf(q?.lastStatusChange),
+                      createdAt: c.userTaskId ? userTasks.find((t) => t.id === c.userTaskId)?.createdAt : undefined,
+                    });
+                    const longDay = (ms: number) =>
+                      new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
                     return {
                       email: ag?.email, website: ag?.website, msTitle: c.msTitle,
-                      /* ⚠️ THE STRIP READS THE ROW'S OWN FIGURE — literally the same derivation, so
-                         the number you scanned in the rail is the number you land on in the card.
-                         That is baked decision 5, and reading it rather than recomputing it is
-                         what makes the match structural instead of maintained. */
-                      sentLabel: q?.dateSent ? "Requested" : undefined,
-                      sentValue: q?.dateSent
-                        ? new Date(q.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "long" })
-                        : undefined,
+                      anchorLabel: Number.isFinite(anchorMs) ? anchorNoun(c) : undefined,
+                      anchorValue: Number.isFinite(anchorMs) ? longDay(anchorMs) : undefined,
                       waitLabel: f.label,
                       waitValue: f.value ? `${f.value}${f.unit ? ` ${f.unit}` : ""}` : undefined,
+                      /* §5.1 — the band's own fact, forward-looking, absent where there is none */
+                      forward: bandForward(
+                        c,
+                        isoOf(q?.responseDeadline) ?? null,
+                        ag?.responseTimeWeeks ?? null,
+                        (iso) => longDay(new Date(iso).getTime()),
+                      ),
                     };
                   }}
                 />

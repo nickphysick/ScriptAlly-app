@@ -564,7 +564,7 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
       <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => [{ key: "e1", label: "Full requested", when: "12 Jul" }]}
         onPrimary={() => {}} onMore={() => {}}
-        handoff={() => ({ waitLabel: "Greg has waited", waitValue: "6 weeks", sentLabel: "He asked on", sentValue: "28 Jun" })} />,
+        handoff={() => ({ waitLabel: "Greg has waited", waitValue: "6 weeks", anchorLabel: "Requested", anchorValue: "28 Jun" })} />,
     );
     expect(html).toContain("TRACKING");
     expect(html).toContain("tdk-tstats");

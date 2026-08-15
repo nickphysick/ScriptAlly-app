@@ -453,3 +453,50 @@ export function materialRows(
     : (opts.versionName || undefined);
   return [{ label: materialLabel, ...(sub ? { sub } : {}) }];
 }
+
+/* ── §5 · facts and figures — the anti-duplication law ───────────────────────────────────────── */
+
+/**
+ * ⚠️ THE ANCHOR'S NOUN NAMES WHAT ACTUALLY HAPPENED. Every card on the deployed page printed
+ * `REQUESTED` — the offer, five chases, both closes — because the label was a hardcoded string at
+ * the call site rather than a derivation. Nothing was requested on an offer; the agent offered.
+ *
+ * ⚠️ AND IT IS KEYED ON THE BUCKET, so a new task type inherits the noun of the act it performs
+ * rather than needing one chosen for it.
+ */
+export function anchorNoun(c: BoardCard): string {
+  switch (cardBucket(c)) {
+    case "decide": return c.taskType === "offer_received" ? "Offer received" : "Revision requested";
+    case "send": return "Requested";
+    case "chase": return "Queried";
+    case "close": return "Last entry";
+    case "note": return "Added";
+    /* a housekeeping gap is NOTICED, not requested — and `rowFigure` already says so on the rail */
+    case "fix": return "Noticed";
+  }
+}
+
+/**
+ * ⚠️ THE BAND CARRIES THE FORWARD-LOOKING FACT ALONE, AND NOTHING WHERE THERE IS NONE (§5.1). It
+ * carried the anchor, which the stat pair also carries — the same figure twice on one card, which
+ * is the law this section exists to state. Forward and elapsed are different facts about different
+ * moments, so the band and the pair can both speak without repeating.
+ *
+ * ⚠️ ABSENT RATHER THAN PADDED: no reply-by on an offer and no stated window on a send means the
+ * band shows no fact at all. A band that always has something to say will eventually say something
+ * untrue.
+ */
+export function bandForward(
+  c: BoardCard,
+  replyBy: string | null,
+  statedWeeks: number | null,
+  fmt: (iso: string) => string,
+): BandFact | null {
+  const bucket = cardBucket(c);
+  /* an offer's clock counts DOWN and is the most consequential figure on the page */
+  if (bucket === "decide" && replyBy) return { k: "Reply by", v: fmt(replyBy), kind: "date" };
+  if ((bucket === "send" || bucket === "chase") && statedWeeks && statedWeeks > 0) {
+    return { k: "Their window", v: `${statedWeeks} weeks`, kind: "wait" };
+  }
+  return null;
+}
