@@ -109,6 +109,11 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 7px; letter-spacing: 0.18em; color: #b3a394; padding-bottom: 8px;
 }
+/* ⚠️ THE WRITER'S OWN NOTE, AT READING SIZE AND IN THEIR OWN HAND (ref v14 `.big-note`, 28px
+   Caveat). It is the SUBJECT of this pane, not a field on it — the band above carries only the
+   standing label "Your noteboard", so if this does not render the note, nothing does. */
+.tdk-bignote { font-family: "Caveat", cursive; font-size: 28px; line-height: 1.4; color: #4a3a2e; padding: 4px 2px; margin-bottom: 10px; }
+
 .tdk-storynone { font-size: 11.5px; color: #a5988c; }
 
 /* the sheet stacks below the dock's own narrow step — the story reads first, as it always did */

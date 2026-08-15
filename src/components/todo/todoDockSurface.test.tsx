@@ -414,7 +414,15 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     expect(bare).not.toContain('class="via"');
   });
 
-  it("⚠️ THE WORK COLUMN IS THE DOING ALONE — no title, no record line (corrections, Phase 1)", () => {
+  /**
+   * ⚠️ THE RULE IS "THE BODY OMITS WHATEVER THE BAND IS SHOWING", not "the body never shows the
+   * title" — and the difference is a whole feature. The original was written for an AGENT card,
+   * where `bandSubject` returns the name, and generalised to every kind. On a user task
+   * `card.who` is `""`, so the band falls through to the standing label "Your noteboard"; with
+   * the title also withheld, the note's own words rendered NOWHERE. Both halves are asserted
+   * together now, so neither can be "simplified" back into the rule that broke one of them.
+   */
+  it("an AGENT card omits the title and the record — the band is already showing them", () => {
     const html = render();
     const at = html.indexOf('class="tdk-work"');
     expect(at, "the work column marker is gone").toBeGreaterThan(-1);
@@ -422,6 +430,23 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     expect(work).not.toContain("tdk-t\"");
     expect(work).not.toContain("tdk-rec");
     expect(work).toContain("tdk-flow");
+    /* and the band IS carrying the name, which is what earns the omission */
+    expect(html.slice(0, at)).toContain("Jonathan Marsh");
+  });
+
+  it("⚠️ a NOTE shows its own words — the band is only showing a standing label", () => {
+    const html = render("c");
+    const at = html.indexOf('class="tdk-work"');
+    expect(at, "the work column marker is gone").toBeGreaterThan(-1);
+    /* the band names the surface, not the note — which is precisely why the body must carry it */
+    expect(html.slice(0, at)).toContain("Your noteboard");
+    expect(html.slice(0, at)).not.toContain("Redraft the opening");
+    /* the note itself, first in the body, in the writer's own hand at reading size */
+    const work = html.slice(at);
+    expect(work, "the note's own text renders nowhere on its own pane").toContain("Redraft the opening");
+    expect(work).toContain("tdk-bignote");
+    expect(dockCssRule(".tdk-bignote")).toContain("Caveat");
+    expect(dockCssRule(".tdk-bignote")).toContain("font-size: 28px");
   });
 
 

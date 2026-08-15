@@ -275,9 +275,24 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           </aside>
 
           <div className="tdk-work">
-          {/* ⚠️ NO TITLE AND NO AGENT HERE (corrections, Phase 1). The band says who this is and
-              what the act is; repeating either in the body was what put a name in the right-hand
-              column with the facts floating over it. The body is the DOING. */}
+          {/**
+            * ⚠️ THE BODY OMITS WHATEVER THE BAND IS SHOWING. (Amended — the rule here read "no
+            * title and no agent here", which was true of the card it was written for and false of
+            * the rest.)
+            *
+            * The original: the band says who this is and what the act is, so repeating either in
+            * the body was what put a name in the right-hand column with the facts floating over
+            * it. That reasoning is sound and unchanged FOR AN AGENT CARD, where `bandSubject`
+            * returns the agent's name.
+            *
+            * ⚠️ WHAT IT ASSUMED, AND WHERE THAT FAILED: that the band always carries the subject.
+            * On a user task `card.who` is `""`, so the band falls through to the standing label
+            * "Your noteboard" — and a body that also withheld the title left the writer's own
+            * words rendering nowhere on the page. The band was showing a LABEL, so the body had
+            * nothing to omit.
+            *
+            * State the rule as the omission it is, and each card kind answers it for itself.
+            */}
 
           {/* ── THE REAL FLOW, INLINE ────────────────────────────────────── */}
           <div className="tdk-flow">
@@ -307,6 +322,24 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
             {flow === "user-task" && (
               <>
+                {/**
+                  * ⚠️ THE BODY OMITS WHATEVER THE BAND IS SHOWING — which is NOT the same rule as
+                  * "the body never shows the title", and the difference is why the note's own words
+                  * vanished from this page.
+                  *
+                  * The original rule was written for an AGENT card, where `bandSubject` returns the
+                  * agent's name and repeating it in the body was the collision being fixed. For a
+                  * user task `card.who` is always `""`, so `bandSubject` falls through to the
+                  * STANDING LABEL "Your noteboard" — the band names the surface, not the note. With
+                  * the title also withheld from the body, a note-taking feature rendered a pane that
+                  * never showed you your note: every one read "Your note / Your noteboard" and
+                  * nothing else, whatever it said.
+                  *
+                  * ⚠️ SO THE NOTE IS THE FIRST THING IN THE BODY, in the writer's own hand. It is
+                  * the subject of the screen rather than a field on it — `card.detail` is the
+                  * SECONDARY line and stays beneath it, which is the order it was always in.
+                  */}
+                <p className="tdk-bignote">{card.title}</p>
                 {card.detail && <p className="tdk-detail">{card.detail}</p>}
                 <div className="tdk-note">Your own task — ticking it is what finishes it.</div>
               </>
