@@ -181,8 +181,13 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
    */
   it("one stat spans the block; two share it, and only then is there a divider", () => {
     const stats = dockCssRule(".tdk-tstats {");
-    expect(stats).toContain("repeat(auto-fit, minmax(0, 1fr))");
+    /* ⚠️ AUTO-FLOW COLUMNS, NOT `auto-fit`. Auto-fit with a ZERO minimum has no reason to stop —
+       measured on the deployed page it generated a hundred-odd phantom `0px` tracks after the two
+       real ones, and rendered correctly only by luck. */
+    expect(stats).toContain("grid-auto-flow: column");
+    expect(stats).toContain("grid-auto-columns: 1fr");
     expect(stats).not.toContain("1fr 1fr");
+    expect(stats).not.toContain("auto-fit");
     /* the divider is a sibling rule, so it cannot exist without something to divide */
     const css = readFileSync(join(here, "todoDock.css"), "utf8");
     expect(css).toContain(".tdk-tstat + .tdk-tstat { border-left:");

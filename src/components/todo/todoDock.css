@@ -427,12 +427,16 @@
    hairline between the pair. Borrowed deliberately: the two panes are looking at the same record
    from two places, and a second grammar for one fact would make them read as two apps. */
 /* ⚠️ THE BLOCK SIZES TO ITS CONTENTS. It was a fixed `1fr 1fr`, so a card with ONE stat — which is
-   every note — drew one tile and an empty half with a divider beside nothing. `auto-fit` gives one
-   stat the whole block and two an equal share, and the divider comes from `+` so it only exists
-   when there is something to divide. */
+   every note — drew one tile and an empty half with a divider beside nothing.
+   ⚠️ `grid-auto-flow: column`, NOT `repeat(auto-fit, minmax(0, 1fr))`. My first fix used auto-fit,
+   and auto-fit with a ZERO minimum has no reason to stop: measured on the deployed page it
+   generated a hundred-odd phantom `0px` tracks after the two real ones. It rendered correctly by
+   luck, which is the worst kind of correct. Auto-flow columns size to the items that exist and
+   generate nothing for the ones that do not. */
 .tdk-tstats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   border: 1px solid #ece0d2;
   border-radius: 11px;
   overflow: hidden;
