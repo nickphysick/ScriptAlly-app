@@ -2293,13 +2293,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       case "tags": setTagsFor(card); break;                     // tasks-pages P5 — the tag sheet
       /* board-optimise P7 — the ladder writes minutes (or clears with null) through the ONE
          existing updateUserTask path; no new primitive, no new failure mode. */
-      case "est-5": case "est-10": case "est-25": case "est-45": case "est-60": case "est-none":
-        if (card.userTaskId) {
-          const mins = item.id === "est-none" ? null : Number(item.id.slice(4));
-          void updateUserTask(card.userTaskId, { estimateMin: mins })
-            .catch(() => flash("Couldn’t set that — try again?"));
-        }
-        break;
+      /* ⚠️ THE ESTIMATE HANDLER IS REMOVED WITH ITS MENU ITEMS (15 Aug). It wrote
+         `UserTask.estimateMin` through `updateUserTask`, and nothing now displays that field:
+         `.tdg-stats`' total was retired as a duplicate and `estimateChip` lives in the unmounted
+         `TodoBoard.tsx`. ⚠️ SO `UserTask.estimateMin` IS NOW WRITTEN BY NOTHING AND READ BY
+         NOTHING — its presence in the type, the rules allowlist and any existing document is NOT
+         evidence that the feature exists. The derivation (`ESTIMATE_LADDER`, `estimateTotal`,
+         `estimateHeadLabel`, `estimateChip`) is deliberately left standing in
+         `lib/todoEstimate.ts` so the day a "what can I get done today" view wants it, this is one
+         line to restore rather than a rebuild. */
       case "delete-task": void deleteUserNote(card); break;     // the styled confirm + undo ride along
     }
   }

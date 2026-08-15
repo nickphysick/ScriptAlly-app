@@ -39,8 +39,9 @@ export type MenuItemId =
   | "edit-task"
   | "delete-task"
   | "give-date"    // the Noteboard's conversion door (tasks-pages P4)
-  | "tags"        // the tag sheet (tasks-pages P5 — arrives WITH its picker)
-  | "est-5" | "est-10" | "est-25" | "est-45" | "est-60" | "est-none"; // the ladder (P7)
+  /* ⚠️ THE `est-*` IDS ARE REMOVED WITH THE LADDER (15 Aug) — see `cardMenu`. Keeping them in the
+     union would leave a handler-shaped hole nothing can reach, reading as a live capability. */
+  | "tags";       // the tag sheet (tasks-pages P5 — arrives WITH its picker)
 
 export interface MenuLeaf {
   kind: "leaf";
@@ -58,7 +59,7 @@ export interface MenuLeaf {
 
 export interface MenuParent {
   kind: "sub";
-  id: "snooze" | "resnooze" | "dismiss" | "estimate";
+  id: "snooze" | "resnooze" | "dismiss";
   label: string;
   sub: MenuLeaf[];
 }
@@ -163,19 +164,19 @@ export function cardMenu(card: BoardCard, column: TodoColumnId): MenuGroup[] {
     { head: "PUT IT OFF", entries: putOff },
   ];
   if (elsewhere.length) groups.push({ head: "GO ELSEWHERE", entries: elsewhere });
-  /* ⚠️ THE ESTIMATE LADDER IS A TODAY-COLUMN AFFORDANCE (board-optimise P7). Planning is Today's
-     job: an estimate on a card you have not committed to is a plan for a day you have not
-     decided to have — so the rungs simply are not offered anywhere else. Fixed values only,
-     never free text (a typed "about an hour?" cannot be summed). */
-  if (column === "today") {
-    doIt.push({
-      kind: "sub", id: "estimate", label: "How long…",
-      sub: [
-        leaf("est-5", "5m"), leaf("est-10", "10m"), leaf("est-25", "25m"),
-        leaf("est-45", "45m"), leaf("est-60", "1h+"), leaf("est-none", "No estimate"),
-      ],
-    });
-  }
+  /* ⚠️ THE ESTIMATE LADDER IS NOT OFFERED — and its absence is the decision (15 Aug). It wrote
+     `UserTask.estimateMin`, and the only two surfaces that ever DISPLAYED that field are both
+     gone: `.tdg-stats`' "Estimated {n} min" was retired as a duplicate, and `estimateChip` lives
+     in `TodoBoard.tsx`, which is mounted nowhere. A menu that writes a figure the writer can never
+     read back is neither "shown somewhere" nor "not offered", which are the only two honest
+     states — so it is now the second.
+
+     ⚠️ THIS IS NOT A PERMANENT NO, AND THE DERIVATION IS DELIBERATELY LEFT STANDING.
+     `ESTIMATE_LADDER`, `estimateTotal`, `estimateHeadLabel` and `estimateChip` all survive in
+     `lib/todoEstimate.ts`, pure and locked, so the day something displays a total this is one
+     line to restore rather than a rebuild. Estimates belong with a "what can I get done today"
+     view; the app does not have one and may never need one. Until then it was a field pretending
+     to be a feature. */
 
   if (isUserTask) {
     groups.push({

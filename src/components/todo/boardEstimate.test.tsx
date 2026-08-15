@@ -43,23 +43,38 @@ describe("⚠️ time estimates live ONLY on Today, from a FIXED ladder", () => 
     expect(isLadderValue(undefined)).toBe(false);
   });
 
-  it("⚠️ NEVER FREE TEXT — the menu offers rungs, and no input reaches the field", () => {
-    expect(menu).toContain('leaf("est-25", "25m")');
+  it("⚠️ NEVER FREE TEXT — the derivation takes rungs, and no input reaches the field", () => {
     expect(est).not.toContain("<input");
     expect(est).not.toContain("parseFloat");
   });
 
-  it("⚠️ the ladder is offered on TODAY only — planning is Today's job", () => {
-    expect(menu).toContain('if (column === "today") {');
-    const todayMenu = cardMenu(card({ userTaskId: "u1" }), "today").flatMap((g) => g.entries);
-    expect(todayMenu.some((e) => e.id === "estimate")).toBe(true);
-    for (const col of ["todo", "snoozed", "done"] as const) {
-      const m = cardMenu(card({ userTaskId: "u1" }), col).flatMap((g) => g.entries);
-      expect(m.some((e) => e.id === "estimate"), col).toBe(false);
+  /**
+   * ⚠️ THE LADDER IS NOT OFFERED ANYWHERE, AND THAT IS THE ASSERTION NOW (15 Aug). It used to be
+   * "offered on TODAY only". It wrote `UserTask.estimateMin`, and the only two surfaces that ever
+   * DISPLAYED that field are both gone — `.tdg-stats`' total was retired as a duplicate, and
+   * `estimateChip` lives in `TodoBoard.tsx`, which is mounted nowhere. A menu that writes a figure
+   * the writer can never read back is neither "shown somewhere" nor "not offered"; it is now the
+   * second. Not a permanent no: estimates belong with a "what can I get done today" view, which
+   * this app does not have.
+   */
+  it("⚠️ the ladder is offered NOWHERE — a field nothing displays is not offered", () => {
+    const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(decls(menu)).not.toContain("est-");
+    expect(decls(menu)).not.toContain('"estimate"');
+    /* ⚠️ COMPARED AS STRINGS ON PURPOSE. `MenuItemId` no longer contains "estimate", so a typed
+       `e.id === "estimate"` is a compile error rather than a runtime check — and a lock that
+       cannot be written is a lock that stops running. This asserts the RENDERED model, which is
+       what a user meets, and keeps failing loudly if the id ever comes back. */
+    for (const col of ["today", "todo", "snoozed", "done"] as const) {
+      const ids = cardMenu(card({ userTaskId: "u1" }), col).flatMap((g) => g.entries).map((e) => String(e.id));
+      expect(ids.some((id) => id === "estimate" || id.startsWith("est-")), col).toBe(false);
     }
   });
 
-  it("the chip renders on a Today card and NOWHERE else", () => {
+  /* ⚠️ `TodoBoard` IS MOUNTED NOWHERE — this exercises a real function of an unmounted component,
+     which is why the chip could not be the estimate's "somewhere it is displayed". Left standing
+     because retiring that component is its own pass; noted so the green is not read as reach. */
+  it("the chip renders on a Today card and NOWHERE else (in the unmounted board)", () => {
     const withEst = card({ key: "e", userTaskId: "u1", estimateMin: 25, title: "Redraft" });
     const onToday = renderToStaticMarkup(
       <TodoBoard columns={cols({ today: [withEst] })} onPlan={() => {}} onOpen={() => {}} onVerb={() => {}} />,
@@ -89,10 +104,19 @@ describe("⚠️ time estimates live ONLY on Today, from a FIXED ladder", () => 
     expect(lib).not.toContain("count > goodDay");
   });
 
-  it("the write rides the ONE existing path, and 'none' clears the field", () => {
+  /**
+   * ⚠️ `UserTask.estimateMin` IS NOW WRITTEN BY NOTHING AND READ BY NOTHING. Its presence in the
+   * type, in the rules allowlist and in any existing document is NOT evidence that the feature
+   * exists — which is exactly what a future reader would otherwise conclude. The `db.tsx` path and
+   * the rules clause are deliberately left intact: they are the cheap half, and re-adding a
+   * bounded field to deployed rules is the expensive half.
+   */
+  it("⚠️ nothing writes the field — the handler went with the menu items", () => {
     const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-    expect(page).toContain('const mins = item.id === "est-none" ? null : Number(item.id.slice(4));');
-    expect(page).toContain("updateUserTask(card.userTaskId, { estimateMin: mins })");
+    const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(decls(page)).not.toContain("est-none");
+    expect(decls(page)).not.toContain("estimateMin: mins");
+    /* the write PATH survives, unused — reinstating is one line, not a rules deploy */
     const db = readFileSync(join(here, "..", "..", "lib", "db.tsx"), "utf8");
     expect(db).toContain("patch.estimateMin = estimateMin === null ? deleteField() : estimateMin");
   });
