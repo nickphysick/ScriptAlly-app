@@ -24,7 +24,12 @@ const dockSrc = readFileSync(join(here, "TodoDock.tsx"), "utf8");
    code fails a file that is correct. */
 const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const dockCssRule = (sel: string): string => {
-  const css = readFileSync(join(here, "todoDock.css"), "utf8");
+  /* ⚠️ COMMENTS OUT BEFORE THE SLICE, NOT AFTER — and both halves matter. A rule's own prose
+     explains the value it replaced, so an unstripped slice fails `not.toContain` on the note
+     saying the thing was removed; and a `}` inside a comment would truncate the rule early,
+     which is the quiet direction — assertions passing against half a rule. */
+  const css = readFileSync(join(here, "todoDock.css"), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
   const i = css.indexOf(sel);
   expect(i, `${sel} has no rule`).toBeGreaterThan(-1);
   return css.slice(i, css.indexOf("}", i));
@@ -522,6 +527,27 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
     expect(dockCssRule(".tdk-w {")).toContain("max-width: 640px");
     expect(dockCssRule(".tdk-w {")).toContain("margin: 0 auto");
     expect(dockCssRule(".tdk-head {")).toContain("max-width: 640px");
+  });
+
+  it("⚠️ the card REACHES THE BOTTOM of the pane, and does not become full-bleed", () => {
+    const rule = dockCssRule(".tdk-w {");
+    /* vertical: it fills. `min-height: 340px` was a CONTENT floor pretending to be a height — a
+       short record left a stub card floating in a tall pane with the desk showing beneath it. */
+    expect(rule).toContain("min-height: 100%");
+    expect(rule).not.toContain("min-height: 340px");
+    /* ⚠️ THE MATHS DEPENDS ON THE BOX MODEL, SO THE RULE DECLARES IT rather than inheriting
+       preflight — the harness trap the house rules name. */
+    expect(rule).toContain("box-sizing: border-box");
+    /* horizontal: UNCHANGED. The reading measure belongs to the two-column body in this same
+       file (`.tdk-story` 230px beside `.tdk-work`), and widening it would set that column's
+       prose at a line length nobody reads comfortably. */
+    expect(rule).toContain("max-width: 640px");
+    expect(rule).toContain("margin: 0 auto");
+    /* and the pane still scrolls when the record outgrows it */
+    const split = readFileSync(join(here, "todoSplit.css"), "utf8");
+    const pane = split.slice(split.indexOf(".tdw-work {"), split.indexOf("}", split.indexOf(".tdw-work {")));
+    expect(pane.length, "the .tdw-work slice came out empty").toBeGreaterThan(20);
+    expect(pane).toContain("overflow-y: auto");
   });
 });
 

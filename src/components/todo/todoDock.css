@@ -35,7 +35,22 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  min-height: 340px;
+  /* ⚠️ THE CARD REACHES THE BOTTOM OF THE PANE — it does not become full-bleed. `max-width: 640px`
+     and the auto margins stay: the reading measure is the two-column body's, and widening it would
+     set the Tracking column's prose at a line length nobody reads comfortably. Only the VERTICAL
+     changes.
+
+     ⚠️ AND THIS REPLACES `min-height: 340px`, WHICH WAS A CONTENT FLOOR PRETENDING TO BE A HEIGHT.
+     A short record gave a stub card floating in a tall pane with the desk showing beneath it, and
+     `.tdw-work` is `overflow-y: auto` — so the card grows past the pane and scrolls when the
+     record is long, exactly as before. The floor is not kept alongside: at any pane shorter than
+     340px the two would fight, and the pane's height is the honest answer in both directions.
+
+     ⚠️ `box-sizing` IS DECLARED RATHER THAN INHERITED, because this rule's maths now depends on
+     it — `100%` against a 1px border is a scrollbar either way round if preflight is ever absent
+     (the harness trap the house rules name). */
+  box-sizing: border-box;
+  min-height: 100%;
 }
 
 /* the family band — the same map as the board's card */
