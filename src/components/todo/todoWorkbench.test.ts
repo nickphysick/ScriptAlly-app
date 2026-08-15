@@ -167,7 +167,9 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect((page.match(/tdb-btnp/g) ?? []).length).toBe(1); // the shrinking ink census (Begin only)
     // the tightening P2: the ledger's action lane carries an INK primary (ref .prime) — revealed
     // on hover/focus-within inside the reserved lane, so the census admits the lane primaries.
-    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    /* one-primary pass: the CARD lane's ink primary reads `rowPrimaryLabel`; the batch lane's
+       reads the cohort constant. The ink census is unchanged — both are still `.tdb-lprime`. */
+    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>');
     expect(page).toContain('className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>');
     expect(page).toContain('onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>');
     /* workspace P3: "Help me pick" lived in the corner panel's ＋ flow and went with it. The
@@ -866,12 +868,16 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).not.toContain("const [view, setView]");
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
-  it("toolbelt P2 — the divergence is RETIRED: cards + ledger read ONE shared VERB_LABELS constant", () => {
+  it("one-primary: the card foot reads rowPrimaryLabel; VERB_LABELS holds the cohort verb alone", () => {
     // the tightening P3: cardVerbs died with the hover stack — the card FOOT is the ledger's
     // own lane (rowActionLane's classes + the same constant), so the two views cannot diverge.
     expect(page).not.toContain("function cardVerbs");
     const foot = page.slice(page.indexOf('<div className="tdb-cfoot"'), page.indexOf("function renderGroupCard"));
-    expect(foot).toContain("{VERB_LABELS.action}");
+    /* ⚠️ INVERTED BY THE ONE-PRIMARY PASS. "Cards and the ledger read one constant" was true and
+       was the WRONG unification: it put a flat "Action now" on a card while the command bar named
+       the deed. The card foot now reads `rowPrimaryLabel`, which is the derivation the live
+       primary already used, and the constant keeps only the batch cohort's verb. */
+    expect(foot).toContain('{rowPrimaryLabel(c, "todo")}');
     expect(foot).toContain("aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
     expect(foot).toContain("laterMenu(c, true)");
     // the literals live ONCE, in the constant — nowhere inline

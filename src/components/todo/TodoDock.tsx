@@ -77,7 +77,9 @@ export interface TodoDockProps {
   /** The timeline, derived by the page from the activity log. */
   timeline: (card: BoardCard) => DockTimelineEvent[];
   /** The flow's ink act. `spec` is present only for the send flow. */
-  onPrimary: (card: BoardCard, spec: SendSpec | null) => void;
+  /** ⚠️ NO `spec` — the primary OPENS THE JOURNEY and the journey commits, so the dock has
+   *  nothing to pre-resolve. It used to hand a `SendSpec` straight to an inline write. */
+  onPrimary: (card: BoardCard) => void;
   /* ⚠️ RETIRED WITH THE FOOT BAR (visual rebuild, Phase 4). The card no longer offers a snooze at
      all — the command bar does, opening the ONE dial. The prop is gone rather than left unused:
      an unused prop is a slot a future surface fills without anyone deciding it should exist. */
@@ -118,7 +120,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
       const to = stepQueue(queue, card?.key ?? "", e.key === "ArrowDown" ? 1 : -1);
       if (to) { e.preventDefault(); onSelect(to.key); }
     }
-    if (e.key === "Enter" && card) { e.preventDefault(); onPrimary(card, sendSpecFor(card)); }
+    if (e.key === "Enter" && card) { e.preventDefault(); onPrimary(card); }
   };
 
   useEffect(() => { surfaceRef.current?.focus(); }, []);

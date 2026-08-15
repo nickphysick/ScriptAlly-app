@@ -188,7 +188,9 @@ describe("tightening P3 — the card, on the same system (the row stood upright)
     const foot = rule(".tdb-cfoot");
     expect(foot).toContain("grid-template-columns: auto auto auto 1fr");
     expect(rule(".tdb-cfoot .tdb-crest")).toContain("justify-self: end");
-    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    /* one-primary pass: same lane, same ink primary — only the LABEL source moved to
+       `rowPrimaryLabel`, which names the deed rather than saying "Action now" for all six. */
+    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>');
   });
 
   it("FOUR columns at the standard tier; the wider tier takes five; the sticker treatment is UNTOUCHED", () => {

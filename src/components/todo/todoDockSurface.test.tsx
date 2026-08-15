@@ -224,35 +224,46 @@ describe("⚠️ THE CARD HAS NO ACTION BAR — there is one action surface and 
   });
 });
 
-describe("⚠️ ONE ACT, THREE RECORDS — and only two of them are writes", () => {
-  const fn = page.slice(page.indexOf("async function dockPrimary"), page.indexOf("function advanceDock"));
+describe("⚠️ THE ACTION BUTTON NEVER COMPLETES DIRECTLY — it opens the journey, and the journey commits", () => {
+  /**
+   * ⚠️ THIS SUITE USED TO ASSERT THE OPPOSITE, and the inversion is the point rather than a
+   * deletion. It pinned `dockPrimary`'s inline `recordMaterialsSent` and `quickDone` — so the two
+   * COMMONEST card kinds wrote straight from the command bar and the journey never opened, while
+   * offer / stale / housekeeping / agent-waiting went the long way. One button, two behaviours,
+   * and nothing on screen distinguishing them. Baked decision 4 now holds without exception.
+   *
+   * ⚠️ THE WRITES DID NOT DISAPPEAR, THEY MOVED TO THE ONE SURFACE THAT CAN STATE THEM. A send
+   * still runs `recordMaterialsSent` through `markSentWriteArgs`, a note still runs
+   * `updateUserTask` — asserted in `journeyTakeover.test.ts` under "COMMITTING WRITES ONCE,
+   * THROUGH THE PRIMITIVE THAT ALREADY EXISTED", which is where they now live.
+   */
+  const fn = page.slice(page.indexOf("function dockPrimary"), page.indexOf("⚠️ `advanceDock` IS RETIRED"));
 
-  it("the send calls the EXISTING primitive, which writes the activity AND moves the status", () => {
-    expect(fn).toContain("await recordMaterialsSent({");
-    expect(fn).toContain("targetStatus:");
-    expect(fn).toContain("sentDate:");
+  it("its whole body is the journey — no write path is reachable from the bar", () => {
+    expect(page.indexOf("function dockPrimary"), "dockPrimary is gone or renamed").toBeGreaterThan(-1);
+    expect(fn.length, "the dockPrimary slice came out empty").toBeGreaterThan(40);
+    expect(fn).toContain("openFlowCards([card])");
+    for (const w of ["recordMaterialsSent", "quickDone", "updateQueryStatus", "updateUserTask",
+      "upsertTaskFlag", "resolveTaskFlag", "logNudge", "dismissTask"]) {
+      expect(fn, `dockPrimary reached for ${w}`).not.toContain(w);
+    }
   });
 
-  it("⚠️ the THIRD record — the task going away — is DERIVED, never written", () => {
+  it("and it carves out no card kind — there is no spec, so there is nothing to fast-path", () => {
+    /* the `SendSpec` argument existed ONLY to feed the inline write; taking it away is what makes
+       a carve-out impossible to reintroduce by accident rather than merely discouraged */
+    expect(fn).not.toContain("spec");
+    expect(page).toContain("onPrimary={(c) => dockPrimary(c)}");
+    expect(dockSrc).toContain("onPrimary: (card: BoardCard) => void;");
+    expect(dockSrc).toContain("onPrimary(card);");
+  });
+
+  it("⚠️ the task going away is still DERIVED, never written — that law is unchanged", () => {
     /* The engine generates a partial_requested task BECAUSE the query sits at PARTIAL_REQUESTED.
-       Moving the status retires the task by construction. A write there would be a second record
+       Moving the status retires the task by construction; a write there would be a second record
        of a fact the first already carries, and the two would eventually disagree. */
-    expect(fn).not.toContain("resolveTaskFlag(");
     expect(fn).not.toContain("done: true");
-    expect(page).toContain("DERIVED, not written");
-  });
-
-  it("the resubmit flag rides through, because the primitive's revision bump depends on it", () => {
-    expect(fn).toContain("isResubmit");
-  });
-
-  it("and the act is undoable — a completion you cannot reverse is not recoverable", () => {
-    expect(fn).toContain('label: "Undo"');
-    expect(fn).toContain("undoQueryStatus(");
-  });
-
-  it("a user task completes through quickDone — the same primitive the board's tick uses", () => {
-    expect(fn).toContain("await quickDone(card)");
+    expect(page).toContain("remains DERIVED");
   });
 });
 
@@ -285,11 +296,18 @@ describe("⚠️ ONE SURFACE, EVERY ENTRANCE", () => {
     expect(page).toContain("el.scrollTop = boardScroll.current;");
   });
 
-  it("⚠️ advancing OFFERS the next item — it never runs it", () => {
-    const adv = page.slice(page.indexOf("function advanceDock"), page.indexOf("function renderBoard"));
-    expect(adv).toContain("nextInQueue(");
-    expect(adv).not.toContain("dockPrimary(");   // never performs the next act
-    expect(page).toContain("it never runs it");
+  it("⚠️ advancing is RETIRED with the inline write — the journey owns its own queue", () => {
+    /* `advanceDock` pointed the pane at the next card once the BAR had recorded this one. The bar
+       records nothing now, so there is no moment here to advance from — and reinstating it would
+       mean the pane moving on for a completion that happened in another surface.
+       ⚠️ `nextInQueue` GOES WITH IT — `advanceDock` was its only caller on this page. The dock's
+       own left/right step walks `dockable[i ± 1]` by index and never used it. */
+    expect(code(page)).not.toContain("function advanceDock");
+    expect(code(page)).not.toContain("advanceDock(");
+    expect(code(page)).not.toContain("nextInQueue");
+    expect(page).toContain("dockable[i - 1]");
+    expect(page).toContain("dockable[i + 1]");
+    expect(page).toContain("owns its own queue and its own advance");
   });
 });
 

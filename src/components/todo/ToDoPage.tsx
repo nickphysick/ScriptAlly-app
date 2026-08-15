@@ -75,7 +75,7 @@ import { todoPrefs } from "../../lib/todoPrefs";
    retirement — only the tag NARROWING went with it); `matchesTags` had no reader left. */
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
-import { dockQueue, dockFlowKind, nextInQueue, resolveDocked, sendSpecFor, SendSpec } from "../../lib/todoDock";
+import { dockQueue, resolveDocked } from "../../lib/todoDock";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
@@ -127,6 +127,15 @@ const shortHeaderDate = (ms: number): string =>
 // these strings; a future rename touches this object only. (detail P3: the moon + chevron
 // left the snooze label — the clock glyph carries the deferral signal.)
 const VERB_LABELS = {
+  /**
+   * ⚠️ `action` IS THE GROUP COHORT'S VERB ONLY — a CARD's verb is `rowPrimaryLabel`, and the two
+   * must never both name one card. It read "Action now" on cards while the command bar read
+   * "Action" from `rowPrimaryLabel`: one label for a thing that opened the journey, another for a
+   * thing that wrote immediately, with nothing on screen distinguishing them. `rowPrimaryLabel`
+   * survives because it NAMES THE DEED — Close, Complete, Return, Undo, Start — where this is one
+   * flat word; a writer's own item is completed, not "actioned". A batch is a cohort of agents
+   * rather than one card, so it keeps a verb of its own and says so here.
+   */
   action: "Action now",
   todayAdd: "＋ Today’s list",
   todayRemove: "− Today’s list",
@@ -1454,7 +1463,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   <span className="tdw-cblab">This task</span>
                   {/* the named verb — `rowPrimaryLabel`, the derivation the pane's own act reads */}
                   <button type="button" className="tdw-cbprim"
-                    onClick={() => void dockPrimary(paneCard, sendSpecFor(paneCard))}>
+                    onClick={() => dockPrimary(paneCard)}>
                     <Check size={14} aria-hidden /> {rowPrimaryLabel(paneCard, col)}
                   </button>
                   <button type="button" className="tdw-cbbtn" disabled={!offersLeaf("snooze-1")}
@@ -1538,7 +1547,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   onSelect={(key) => setDockKey(key)}
                   onClose={closeDock}
                   timeline={dockTimeline}
-                  onPrimary={(c, spec) => void dockPrimary(c, spec)}
+                  onPrimary={(c) => dockPrimary(c)}
                   tagsSlot={(c) => c.userTaskId ? (
                     <TagPicker
                       compact
@@ -2020,7 +2029,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       <div className="tdb-lact" onClick={(e) => e.stopPropagation()}>
         <span className="tdb-lrest" aria-hidden>▸</span>
         <div className="tdb-lacts">
-          <button type="button" className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>
+          <button type="button" className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>
           <button type="button" className="tdb-lib" aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} title={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>
           {laterMenu(c, true)}
         </div>
@@ -2335,52 +2344,41 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   /**
-   * ⚠️ THE FLOW'S ONE INK ACT — and for a send, ONE ACT, THREE RECORDS.
+   * ⚠️ THE ACTION BUTTON NEVER COMPLETES DIRECTLY. IT OPENS THE JOURNEY, AND THE JOURNEY COMMITS.
+   * No exceptions, no card kind carved out — this function's whole body is now one call, and that
+   * is the point rather than an accident of refactoring.
    *
-   * `recordMaterialsSent` is the existing primitive and it does two of them: it appends the
-   * MATERIALS_SENT activity and moves the query's status. The third — the task going away — is
-   * DERIVED, not written: the engine generates a partial_requested task because the query sits at
-   * PARTIAL_REQUESTED, so moving the status retires the task by construction. Nothing ticks it,
-   * and nothing needs to; a write there would be a second record of a fact the first already
-   * carries, and the two would eventually disagree.
+   * ⚠️ WHAT THIS REPLACED, SO IT IS NOT REINSTATED AS A "FAST PATH". It called
+   * `recordMaterialsSent` inline for any card with a send spec, and `quickDone` for a user task —
+   * so the two COMMONEST kinds wrote straight from the bar and the journey never opened, while
+   * offer / stale / housekeeping / agent-waiting went the long way. One button, two behaviours,
+   * and the split invisible from the label. The materials derivation, the conditional synopsis row,
+   * the free-text field and the summary strip were all reachable only on the cards that happened
+   * to fall the other way; a send recorded from here logged `sentDate: new Date()` and whatever
+   * the spec assumed, with the writer never shown what was about to be written.
+   *
+   * ⚠️ AND THE INLINE WRITE COULD NOT STATE WHAT IT WROTE. That is the deeper reason it goes
+   * rather than being kept behind a preference: a one-press record has nowhere to put the day, the
+   * channel, the conditional synopsis or the note, so its speed came from asserting defaults it
+   * never showed you. The journey is the only surface that can say what it is about to record.
+   *
+   * The completion mechanics are unchanged and stay where they always were: the journey's commit
+   * runs `recordMaterialsSent` / `updateUserTask` through the same primitives, and the task going
+   * away remains DERIVED — the engine stops generating it once the status moves, so nothing ticks
+   * it and nothing needs to.
    */
-  async function dockPrimary(card: BoardCard, spec: SendSpec | null) {
-    const flow = dockFlowKind(card);
-    if (spec && card.relatedRecordId) {
-      try {
-        await recordMaterialsSent({
-          queryId: card.relatedRecordId,
-          targetStatus: spec.targetStatus === "Partial Sent" ? QueryStatus.PARTIAL_SENT : QueryStatus.FULL_SENT,
-          sentDate: new Date().toISOString(),
-          ...(spec.isResubmit ? { isResubmit: true } : {}),
-        });
-        flash(`Recorded — the ${spec.material} is away`, { label: "Undo", fn: async () => {
-          if (card.relatedRecordId) await undoQueryStatus(card.relatedRecordId, card.status as QueryStatus, spec.targetStatus === "Partial Sent" ? QueryStatus.PARTIAL_SENT : QueryStatus.FULL_SENT);
-        } });
-      } catch { flash("Couldn’t record that — try again?"); return; }
-      advanceDock(card);
-      return;
-    }
-    /* Every other flow hands off to the surface that already owns it, rather than the dock
-       growing a second implementation of a dialogue that exists. */
-    if (flow === "user-task") { await quickDone(card); advanceDock(card); return; }
-    if (flow === "offer" || flow === "stale" || flow === "housekeeping" || flow === "agent-waiting") {
-      openFlowCards([card]);
-    }
+  function dockPrimary(card: BoardCard) {
+    openFlowCards([card]);
   }
 
-  /** ⚠️ ADVANCE OFFERS THE NEXT ITEM — it never runs it. A surface that started the next act on
-   *  your behalf would be deciding at exactly the moment you had stopped paying attention. */
-  function advanceDock(done: BoardCard) {
-    /* ⚠️ ITS FILTER IS GONE WITH THE SNAPSHOT. That line reconciled a stored queue against a
-       reality it could not see; the queue is derived now, so the finished card leaves the list on
-       its own the moment the write lands. All that is left is to point at the successor.
-       ⚠️ AND NOTHING IS CLEARED WHEN THERE IS NONE. Pointing at the card that is about to vanish
-       is correct: `resolveDocked` then finds the key gone, takes the position it held and clamps
-       to the end — so finishing the LAST item lands on the one before it rather than at the top. */
-    const next = nextInQueue(dockable, done.key);
-    if (next) setDockKey(next.key);
-  }
+  /* ⚠️ `advanceDock` IS RETIRED WITH THE INLINE WRITE (one-primary pass). It pointed the pane at
+     the next card once the bar had recorded this one — and the bar no longer records anything, so
+     there is no moment here to advance FROM. The journey owns its own queue and its own advance,
+     which is where "offer the next item, never run it" now lives. Reinstating it would mean the
+     pane moving on for a completion that happened in another surface.
+     ⚠️ AND `nextInQueue` GOES WITH IT, because `advanceDock` was its only caller here — the dock's
+     own ← → step walks `dockable[i ± 1]` by index and never touched it. The pure function survives
+     in `lib/todoDock.ts` for any future caller; what is removed is this page's dead import. */
 
   /**
    * ⚠️ THE FOUR COLUMNS ARE RETIRED; THIS IS THE GROUPED LIST (tasks-consolidation P2).
@@ -2712,7 +2710,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             {c.subtitle && <div className="tdb-tsub">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
           </div>
           <div className="tdb-cfoot" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>
+            <button type="button" className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>
             <button type="button" className="tdb-lib" aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} title={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>
             {laterMenu(c, true)}
             <span className="tdb-crest" aria-hidden>▸</span>

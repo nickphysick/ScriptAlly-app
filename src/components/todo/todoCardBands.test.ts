@@ -100,13 +100,18 @@ describe("The card contract — structure law (todo-deck-v2.html THE LAWS)", () 
     expect(css).toContain(".tdb-tile:focus-visible, .tdb-gcard:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }");
     expect(css).toContain(".tdb-tile.hov, .tdb-gcard.hov { transform: none; }");
   });
-  it("toolbelt P2 — ONE grammar with the ledger: the foot lane reads the SAME VERB_LABELS + lane classes", () => {
+  it("one-primary: the card foot reads rowPrimaryLabel; VERB_LABELS keeps only the cohort verb", () => {
+    /* ⚠️ THE CARD'S VERB AND THE COHORT'S VERB ARE NOW DIFFERENT SOURCES, DELIBERATELY. A card had
+       "Action now" from this constant while the command bar had "Action" from `rowPrimaryLabel` —
+       one label on a control that opened the journey, another on a control that wrote immediately.
+       `rowPrimaryLabel` won because it NAMES THE DEED (Close · Complete · Return · Undo · Start);
+       a batch is a cohort of agents rather than one card, so it keeps a verb of its own. */
     expect(page).toContain('action: "Action now",');
     expect(page).toContain('todayAdd: "＋ Today’s list",');
     expect(page).toContain('todayRemove: "− Today’s list",');
     expect(page).toContain('later: "Snooze or dismiss",');
     // the card foot IS the ledger's lane: .tdb-lprime + .tdb-lib, one constant for the labels
-    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{VERB_LABELS.action}</button>');
+    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>');
     expect(page).toContain("aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
     // the short verbs are extinct — the doc-pass divergence is formally retired
     expect(page).not.toContain("✓ DONE");
