@@ -87,6 +87,20 @@ const itemKey = (it: FocusItem): string => (it.kind === "card" ? it.card.key : `
  * writer sees everything they are about to record at once, which is the only way the summary
  * strip beneath can be true of the whole thing.
  */
+/**
+ * ⚠️ THREE WAYS A QUERY CLOSES, AND THEY ARE NOT THE SAME EVENT. A silence, a pass you saw but
+ * never logged, and a withdrawal are three different facts about what happened, and folding them
+ * into one "closed" would make the response rate a number that means nothing — a pass IS a
+ * response, a silence is not, and a withdrawal is neither. Each carries its own `QueryStatus`, so
+ * `recomputeQuery` stays the single writer of everything derived from it.
+ */
+export type CloseReason = "no_reply" | "off_record" | "withdrawn";
+export const CLOSE_REASONS: { key: CloseReason; label: string; gloss: string; status: QueryStatus }[] = [
+  { key: "no_reply", label: "No reply within their window", gloss: "Silence past a stated window", status: QueryStatus.NO_RESPONSE },
+  { key: "off_record", label: "A pass arrived off the record", gloss: "You saw it but never logged it", status: QueryStatus.REJECTED },
+  { key: "withdrawn", label: "You withdrew the query", gloss: "You pulled it yourself", status: QueryStatus.WITHDRAWN },
+];
+
 export interface JourneyStep {
   id: string;
   /** The Playfair heading — "What went", "How it went", "When". */
@@ -199,6 +213,8 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [whenMode, setWhenMode] = useState<string>("today");
   /* the chase's check-back window in days; `null` = "Don't remind me" (see `chaseSheet`) */
   const [checkBack, setCheckBack] = useState<number | null>(DEFAULT_CHECKBACK_DAYS);
+  /* the close journey's outcome — a radio, because these are three different things that happened */
+  const [closeReason, setCloseReason] = useState<CloseReason>("no_reply");
   const [rows, setRows] = useState<Record<string, string>>({}); // batch/dq drafts keyed by agentId (+need for dq)
   const [noMeansNo, setNoMeansNo] = useState<Record<string, boolean>>({});
   const [found, setFound] = useState<Record<string, AssistFound>>({});
@@ -762,24 +778,14 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   function staleSheet(c: BoardCard) {
     const q = cardQuery(c);
     const ag = cardAgent(c, q);
-    return sheet(
+    /* step 0 keeps the two STANCES — still waiting, stop asking — which are not closes and must not
+       be lost behind a journey whose every outcome ends the query. */
+    if (step === 0) return sheet(
       <>
-        <div className="tdb-ffqsub">Closing keeps your response rate honest — logged as <b>no response</b>, not a rejection.</div>
+        <div className="tdb-ffqsub">Closing keeps your response rate honest. Nothing is deleted, and it reopens if a reply is ever logged.</div>
         {whoRow(ag, c.initials)}
         {openQueryLink(q)}
         <div className="tdb-ffchoices">
-          <button type="button" className="tdb-ffchoice" onClick={async () => {
-            if (q) {
-              const prev = q.status as QueryStatus;
-              await updateQueryStatus(q.id, QueryStatus.NO_RESPONSE, "Marked as no response from the focus flow");
-              // Undo = delete the created activity record (the existing undo path), never a compensating entry.
-              onToast(`Done — “${c.title}”`, { label: "Undo", fn: async () => { await undoQueryStatus(q.id, prev, QueryStatus.NO_RESPONSE); onToast("Restored"); } });
-            }
-            advance();
-          }}>
-            <span className="tdb-ffck" /><span><span className="tdb-ffct">Close as no response</span>
-            <span className="tdb-ffcs">Writes now — a decision, not a stance.</span></span>
-          </button>
           <button type="button" className="tdb-ffchoice" onClick={() => c.taskType && c.relatedRecordId && stageAndAdvance({ kind: "snooze", cardKey: c.key, label: c.title, taskType: c.taskType, relatedRecordId: c.relatedRecordId, days: 7 })}>
             <span className="tdb-ffck" /><span><span className="tdb-ffct">Still waiting — ask me in a week</span></span>
           </button>
@@ -793,9 +799,72 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         <button type="button" className="tdb-ffback" disabled={qi === 0} onClick={backOne}>← Back</button>
         <span className="tdb-sp" />
         <button type="button" className="tdb-ffskip" onClick={advance}>Leave it</button>
+        <button type="button" className="tdb-ffpri" onClick={() => setStep(1)}>Close the record →</button>
       </>,
       band("cof", "Stale query", emTitle(c), c.subtitle || undefined, { art: "stale", kickCls: "hk" }),
     );
+    const chosen = CLOSE_REASONS.find((r) => r.key === closeReason) ?? CLOSE_REASONS[0];
+    const windowClosed = q?.responseDeadline ? ymdLocal(new Date(q.responseDeadline)) : undefined;
+    /* the first option is the window's own date where the record has one — a close usually happened
+       when their window ran out, not on the day the writer got round to recording it */
+    const closeWhen: WhenOption[] = [
+      ...(windowClosed ? [{ mode: "closed", label: "When their window closed", ymd: windowClosed }] : []),
+      whenSent(),
+      WHEN_OTHER,
+    ];
+    const lastEntry = activities.filter((a) => a.queryId === q?.id).map((a) => a.date).sort().slice(-1)[0];
+    return journeySheet({
+      steps: [{
+        id: "what",
+        name: "What happened",
+        body: (
+          <div className="tdb-jnopts">
+            {CLOSE_REASONS.map((r) => (
+              <button key={r.key} type="button" className={`tdb-jnrow${closeReason === r.key ? " on" : ""}`}
+                aria-pressed={closeReason === r.key} onClick={() => setCloseReason(r.key)}>
+                <span className="tdb-jnbx rad">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                </span>
+                <span>{r.label}<span className="tdb-jnsub">{r.gloss}</span></span>
+              </button>
+            ))}
+          </div>
+        ),
+      },
+        whenStep(closeWhen, "When", "The entry is made now; the day you pick is kept on it."),
+        freeTextStep("remember", "Anything to remember", "Worth noting for next time you query this agent…"),
+      ],
+      reference: {
+        heading: "What closing does",
+        body: <>The query leaves your active count and joins your history. <b>Nothing is deleted</b>, and it reopens if a reply is ever logged.</>,
+        meta: lastEntry ? `Last entry ${fmtShort(lastEntry)}` : undefined,
+      },
+      summary: journeySummary({ materials: [chosen.label], when: whenText(closeWhen), also: alsoText }),
+      commit: {
+        label: "Record the close",
+        hint: "Reopens by itself if they reply.",
+        onCommit: () => {
+          void (async () => {
+            if (!q) { advance(); return; }
+            const prev = q.status as QueryStatus;
+            /**
+             * ⚠️ THE CHOSEN DAY RIDES IN THE NOTE, NOT THE TIMESTAMP. `updateQueryStatus` stamps
+             * `new Date()` and takes no event date, so a back-dated close cannot move the entry
+             * without a change in `db.tsx` — which this pack does not touch. The note carries what
+             * the writer said happened; the step says so on screen rather than letting the picker
+             * imply a backdate it cannot perform.
+             */
+            const day = whenText(closeWhen);
+            const note = [`${chosen.label} — recorded from the To-do journey`, day ? `dated ${day}` : null, alsoText.trim() || null]
+              .filter(Boolean).join(" · ");
+            await updateQueryStatus(q.id, chosen.status, note);
+            // Undo = delete the created activity record (the existing undo path), never a compensating entry.
+            onToast(`Closed — “${c.title}”`, { label: "Undo", fn: async () => { await undoQueryStatus(q.id, prev, chosen.status); onToast("Restored"); } });
+            advance();
+          })();
+        },
+      },
+    }, journeyBand("cof", "Closing the record", ag, c.initials, "stale"));
   }
 
   function dqSheet(c: BoardCard) {
@@ -1323,7 +1392,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const whenText = (options: WhenOption[]): string =>
     whenMode === "other" ? fmtShort(sentDate) : (options.find((o) => o.mode === whenMode)?.label.toLowerCase() ?? "today");
 
-  function whenStep(options: WhenOption[], name = "When"): JourneyStep {
+  function whenStep(options: WhenOption[], name = "When", note?: string): JourneyStep {
     return {
       id: "when",
       name,
@@ -1345,6 +1414,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
               <span className="tdb-ffsmall">Logged at midday on the day you pick.</span>
             </div>
           )}
+          {note && <div className="tdb-jnsub">{note}</div>}
         </>
       ),
     };
