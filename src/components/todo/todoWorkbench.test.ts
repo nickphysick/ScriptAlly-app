@@ -157,32 +157,6 @@ describe("frame P2 — THE BUTTON LAW (ink primary + hairline secondaries; the p
     expect(em).toContain("border-color: var(--ink)");
     expect(em).toContain("font-weight: 700");
   });
-  it("assignment audit: ink ONLY for the singular page-level actions; rows/cards never ink-solid", () => {
-    expect(page).toContain('className="tdb-btnp tdb-herobegin"'); // Begin (the hero pair)
-    /* workspace P3: the census shrinks again — Today's own .tdb-pbtn went with the corner. Its
-       "Work the list" is now the Today PAGE's header primary, which is PageHeader's button, not
-       one of this page's. */
-    expect((page.match(/className="tdb-pbtn"/g) ?? []).length).toBe(0);
-    // todo rebuild P3: the review banner's ink pill became the featured card's soft-pink View.
-    expect((page.match(/tdb-btnp/g) ?? []).length).toBe(1); // the shrinking ink census (Begin only)
-    // the tightening P2: the ledger's action lane carries an INK primary (ref .prime) — revealed
-    // on hover/focus-within inside the reserved lane, so the census admits the lane primaries.
-    /* one-primary pass: the CARD lane's ink primary reads `rowPrimaryLabel`; the batch lane's
-       reads the cohort constant. The ink census is unchanged — both are still `.tdb-lprime`. */
-    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>');
-    expect(page).toContain('className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>');
-    expect(page).toContain('onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>');
-    /* workspace P3: "Help me pick" lived in the corner panel's ＋ flow and went with it. The
-       function survives — it is a real selection gesture — and its next home is the Today page's
-       own add flow, which is the pack that builds it. Flagged rather than silently dropped. */
-    expect(page).toContain("async function helpMePick()");
-    expect(page).not.toContain("setAddOpen(false)");
-    // the card verbs adopt the TONES at their own compact geometry — the ink-solid face is dead
-    // toolbelt P2/P3: the compact verb family is gone — the card stack rides the law's own
-    // hairline primitives at 30px (no ink-solid anywhere in the expansion)
-    expect(rule(".tdb-lprime")).toContain("height: 28px"); // the tightening P3: the lane's one geometry (the vstack died with the hover reveal)
-    expect(css).not.toContain(".tdb-verb");
-  });
   it("fixed heights + centring hold: the Today foot is ONE primary + the ＋ roundel; the toggle's active chip = white + ink ring, shadowless", () => {
     // save-and-today P2: the level PAIR is retired — one primary grows, the roundel holds its size.
     expect(rule(".tdb-pbtn")).toContain("flex: 1");
@@ -281,21 +255,6 @@ describe("detail P3 — ledger Notes parity + the clock snooze", () => {
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
-  });
-  it("the clock snooze: the plain outline clock leads the label in BOTH views from the ONE constant; moon + chevron dead", () => {
-    // the clock follows TypeGlyph's grammar as a page-scoped sibling — TypeGlyph itself is
-    // LOCKED to the three material ComponentTypes (the recon resolution, reported)
-    expect(page).toContain('const ClockGlyph: React.FC<{ size?: number }> = ({ size = 13 }) => (');
-    expect(page).toContain('<circle cx="12" cy="12" r="9" />');
-    expect(page).toContain('<path d="M12 7v5l3.5 2" />');
-    expect(page).toContain('stroke="currentColor"');
-    // the tightening P2: the ledger's clock triggers are ICON-ONLY in the reserved lane (the
-    // label survives as aria-label/title from the SAME constant); the labelled form remains on cards.
-    expect((page.match(/<ClockGlyph \/>\{VERB_LABELS\.later\}/g) ?? []).length).toBe(1); // laterMenu's labelled branch (the journey sheets)
-    expect((page.match(/aria-label=\{VERB_LABELS\.later\}/g) ?? []).length).toBe(3); // laterMenu icon mode + the batch row + the batch card
-    expect(page).toContain('later: "Snooze or dismiss",');
-    expect(page).not.toContain("☾");
-    expect(page).not.toContain("Snooze or dismiss ▾");
   });
 });
 
@@ -712,12 +671,6 @@ describe("P2 — card view: the grid replaces the reels; renames land", () => {
     expect(rule(".tdb-tile")).toContain("min-height: var(--card-minh)"); // the tightening P3: the shared height, feet pinned
     expect(rule(".tdb-body")).toContain("padding: 10px 12px 12px");
   });
-  it("VI P3 → todo rebuild P1: the lane PLAY BUTTON is retired with the header bar; the batch lead stands", () => {
-    expect(page).not.toContain("tdb-playb"); // a heading is a heading — no actions on it
-    expect(page).toContain('className="tdb-lprime" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>'); // the batch card's lead, in the lane
-    expect(page).not.toContain("Fix together");
-    expect(page).not.toContain(">▶ Focus on"); // the pill text is extinct in both views
-  });
 });
 
 describe("doc pass P6 — sweep", () => {
@@ -755,32 +708,12 @@ describe("grouping P4 — sweep", () => {
   });
 });
 
-describe("grouping P3 — persistence + interplay", () => {
-  it("expansion persists per-batch (sa.todoGroupsOpen) and is ONE state consumed by BOTH views", () => {
-    expect(page).toContain('JSON.parse(localStorage.getItem("sa.todoGroupsOpen") || "{}")');
-    expect(page).toContain('localStorage.setItem("sa.todoGroupsOpen", JSON.stringify(next))');
-    expect(page).toContain("if (openGroups[g.rule]) return renderGroupExpanded(g);"); // cards
-    expect(page).toContain("const expanded = !!openGroups[g.rule];"); // ledger
-    expect((page.match(/toggleGroup\(g\.rule\)/g) ?? []).length).toBeGreaterThanOrEqual(4); // xp · gbar Collapse · row · row key
-  });
-  it("search narrows MEMBERS via the one matchesSearch; the bar stands with SHOWING {matched} OF {n} (both views)", () => {
-    expect(page).toContain("const groupMembers = (g: HkGroup) => (searchActive ? g.members.filter((m) => matchesSearch(m.card, search, sctx)) : g.members);");
-    expect(page).toContain("const groupShowing = (g: HkGroup, matched: number) => (matched === g.members.length ? `SHOWING ALL ${g.members.length}` : `SHOWING ${matched} OF ${g.members.length}`);");
-    expect((page.match(/const members = groupMembers\(g\);/g) ?? []).length).toBe(2); // gx + the ledger row
-    // the tightening P2: the SHOWING note rides the batch row's subtitle line (the grid has no
-    // floating span between lanes)
-    expect(page).toContain('groupShowing(g, members.length)');
-  });
-  it("member actions re-derive the counts (the bar reads g.members.length live — no cached tally); zero members prune the flag", () => {
-    expect(page).toContain("{g.members.length}{copy.rest(g.members.length)}"); // the gbar title reads the LIVE derivation
-    expect(page).toContain("const live = Object.entries(g).filter(([r]) => hkGroups.some((x) => x.rule === r));");
-    expect(page).toContain("}, [hkGroups]);"); // the prune keys off the UNFILTERED derivation — a filtered-out group survives
-  });
-  it("n = 1: a group of one renders as its UNIT in both views (no batch card, no Expand, no chevron)", () => {
-    expect(page).toContain("if (g.members.length === 1) return renderCard(g.members[0].card);");
-    expect(page).toContain("if (g.members.length === 1) return runRow(g.members[0].card);");
-  });
-});
+/* ⚠️ "grouping P3 — persistence + interplay" IS DELETED ENTIRELY (15 Aug) — every case in it
+   asserted the batch ROW and the batch CARD (`runBatchRow` / `renderGroupCard`), both removed with
+   the unreachable row/reel cluster. The suite emptied rather than shrank, which is itself the
+   finding: the whole describe was about two views of a thing that had no callers. Group expansion
+   state (`sa.todoGroupsOpen`) still exists and is still consumed by `TaskList`; if it needs a lock
+   it wants one written against that file. */
 
 describe("grouping P2 — the ledger nest", () => {
   it("the chevron rotates 90° open; the row's non-action click TOGGLES (Action now keeps its opener) — RETIRED SURFACE (board+dock P1)", () => {
@@ -790,18 +723,6 @@ describe("grouping P2 — the ledger nest", () => {
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
-  });
-  it("member rows join the SAME grid (the tightening P2): inset title, tinted row, the standard lane", () => {
-    // the standalone inset card (margin 40 + 3px spine) is superseded — a member IS a grid row
-    expect(rule(".tdb-lrow.lsub")).toContain("background: #fbf8f2");
-    expect(css).toContain(".tdb-lrow.lsub .tdb-ltask { padding-left: 14px; }");
-    expect(css).toContain(".tdb-lrow.lsub .tdb-lbt.sm { font-size: 12.5px; }");
-    const mr = page.slice(page.indexOf("function runMemberRow"), page.indexOf("function runBatchRow"));
-    expect(mr).toContain("onClick={() => openFlowCards([c])}");
-    expect(mr).toContain("rowActionLane(c, committed)"); // the identical reserved lane
-    expect(page).toContain("{paged.map((m) => runMemberRow(m.card))}");
-    expect(page).toContain('className="tdb-lpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>');
-    expect(rule(".tdb-lpage")).toContain("border: 1.5px dashed var(--lat-bd)");
   });
   it("the parent row persists while open (progress + meta intact) as the collapse control — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
@@ -854,12 +775,6 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).not.toContain("const [view, setView]");
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
-  it("the dropdown keeps the Later items under the renamed trigger", () => {
-    expect(page).toContain('><ClockGlyph />{VERB_LABELS.later}</button>'); // ONE trigger form everywhere — the clock leads it (detail P3)
-    expect((page.match(/>Remind me tomorrow<\/button>/g) ?? []).length).toBe(3); // the card menu + the ledger batch row + the batch CARD
-    expect((page.match(/>Give it a week<\/button>/g) ?? []).length).toBe(3);
-    expect((page.match(/>Don’t show these again<\/button>/g) ?? []).length).toBe(3);
-  });
   it("the leading-checkbox quick-complete is SUPERSEDED (the tightening P2, system A): the dot is a family marker — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
        Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
@@ -867,27 +782,6 @@ describe("doc pass P4 — LEDGER v2 (washed sections · Action now · the head c
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
-  });
-  it("one-primary: the card foot reads rowPrimaryLabel; VERB_LABELS holds the cohort verb alone", () => {
-    // the tightening P3: cardVerbs died with the hover stack — the card FOOT is the ledger's
-    // own lane (rowActionLane's classes + the same constant), so the two views cannot diverge.
-    expect(page).not.toContain("function cardVerbs");
-    const foot = page.slice(page.indexOf('<div className="tdb-cfoot"'), page.indexOf("function renderGroupCard"));
-    /* ⚠️ INVERTED BY THE ONE-PRIMARY PASS. "Cards and the ledger read one constant" was true and
-       was the WRONG unification: it put a flat "Action now" on a card while the command bar named
-       the deed. The card foot now reads `rowPrimaryLabel`, which is the derivation the live
-       primary already used, and the constant keeps only the batch cohort's verb. */
-    expect(foot).toContain('{rowPrimaryLabel(c, "todo")}');
-    expect(foot).toContain("aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd}");
-    expect(foot).toContain("laterMenu(c, true)");
-    // the literals live ONCE, in the constant — nowhere inline
-    expect((page.match(/: "Action now"/g) ?? []).length).toBe(1); // the constant's assignment alone
-    expect((page.match(/: "Snooze or dismiss"/g) ?? []).length).toBe(1);
-    expect(page).not.toContain("✓ DONE");
-    expect(page).not.toContain("⚡ FIX");
-    expect(page).not.toContain("LATER ▾");
-    const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runBatchRow"));
-    expect(rr).toContain("onClick={() => openFlowCards([c])}");
   });
   it("the step family is extinct; the 9-col ledger stays extinct", () => {
     for (const stale of ["tdb-step", "runHeading", "tdb-lgrid", "tdb-lcols", "tdb-ltd", "truncateRows"]) {
@@ -952,12 +846,9 @@ describe("A1 → Final Shape — the hero band (supersedes the strip)", () => {
     expect(css).not.toContain(".tdb-fside, .tdb-railr"); // the floating flanks retired for the shell + corner
   });
 });
-describe("A2 → Final Shape — the batch copy + roundels live on the run-sheet row", () => {
-  it("the batch row reads G3_COPY (one source) and the display roundels overlap −5px", () => {
-    expect(page).toContain("const copy = G3_COPY[g.rule]");
-    expect(css).toContain(".tdb-avs span:first-child { margin-left: 0; }");
-  });
-});
+/* ⚠️ "A2 → Final Shape — the batch copy + roundels live on the run-sheet row" IS DELETED ENTIRELY
+   (15 Aug) — same reason: it asserted `runBatchRow`'s copy and roundels, and that function had no
+   callers. `G3_COPY` survives as the one source of the batch wording. */
 describe("II·B P1 — the 24-grid + the ref masthead (todo-workbench-rail-v1.html, Option B)", () => {
   it("the grid ships as named tokens with the vocabulary comment — no magic numbers at the seams", () => {
     expect(css).toContain("WIDTH v4 — THE CENTRED ASSEMBLY"); // the Final Shape law absorbed the vocabulary
@@ -993,12 +884,6 @@ describe("III P3 — the pinned pair (supersedes the II·B controls-only drawer)
    across two files is how a retirement quietly half-comes-back. */
 
 describe("II·B P4 — one tag grammar + card polish", () => {
-  it("the grouped card wears the standard typed tag pill; the kicker grammar is retired page-wide", () => {
-    expect(page).toContain('<span className="tdb-ktag">{g.meta.label.toUpperCase()}</span>'); // the tightening P3: the squared kind chip
-    expect(page).not.toContain("tdb-kick");
-    expect(page).not.toContain("tdb-kd");
-    expect(css).not.toContain("tdb-kick");
-  });
   it("BOTH views share ONE heading builder (todo rebuild P1) — the divergence is over — RETIRED SURFACE (board+dock P1)", () => {
     /* ⚠️ RETIRED SURFACE (board+dock P1). This page is the BOARD now — cards only. The
        Lane/ledger grammar, the standalone control bar and the view toggle went with it; the
@@ -1006,11 +891,6 @@ describe("II·B P4 — one tag grammar + card polish", () => {
     expect(page).not.toContain("function renderLedger");
     expect(page).not.toContain("const [view, setView]");
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
-  });
-  it("the batch card's Never + footer CTA are extinct (the contract); the hide lives in ☾ LATER", () => {
-    expect(page).not.toContain("tdb-gnever");
-    expect(page).not.toContain(">Batch fix →</button>");
-    expect(page).toContain("muteRuleFromCard(g); }}>Don’t show these again</button>");
   });
 });
 
@@ -1103,16 +983,6 @@ describe("Deck v2 P5 — retirement sweep · breakpoints · a11y", () => {
     expect(page).not.toContain('window.matchMedia("(max-width: 1239.98px)")');
     expect(tshCss).not.toContain("@media (max-width: 1099.98px)");
     expect(page).not.toContain("tdb-fdrawer"); // the old collapsed drawer is extinct
-  });
-  it("A11Y: post-its/pills pressed; cards real buttons (Enter/Space, aria-expanded = the verb reveal)", () => {
-    expect((page.match(/role="button"/g) ?? []).length).toBeGreaterThanOrEqual(4); // cards + run rows
-    expect((page.match(/e\.key === "Enter" \|\| e\.key === " "/g) ?? []).length).toBeGreaterThanOrEqual(4);
-  });
-  it("A11Y: the Later menu is arrow-navigable; focus reveals the verbs as hover does", () => {
-    expect(page).toContain("function latMenuKeys(");
-    expect(page).toContain('if (e.key === "ArrowDown")');
-    expect((page.match(/onKeyDown=\{latMenuKeys\}/g) ?? []).length).toBeGreaterThanOrEqual(2); // cards + run-sheet batch
-    expect((page.match(/onFocus=\{\(\) => armVerbs\(/g) ?? []).length).toBe(2);
   });
 });
 

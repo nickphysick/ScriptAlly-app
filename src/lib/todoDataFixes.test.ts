@@ -128,13 +128,6 @@ describe("no render path can draw an empty pill", () => {
 
   /* ⚠️ `kind` is "" for a user task (todoBoard's default branch). The LIST row was guarded and the
      BOARD card was not — chrome with nothing in it, which reads as a load failure. */
-  it("every tdb-ktag that interpolates `kind` is guarded", () => {
-    const uses = page.match(/[^\n]*tdb-ktag[^\n]*c\.kind[^\n]*/g) ?? [];
-    expect(uses.length, "the kind pills must exist for this to mean anything").toBeGreaterThan(0);
-    for (const line of uses) {
-      expect(line, `unguarded kind pill: ${line.trim()}`).toMatch(/c\.kind &&/);
-    }
-  });
 
   it("renders no literal 'undefined' anywhere in the page's markup", () => {
     expect(page).not.toMatch(/>\s*\{[^}]*\bundefined\b[^}]*\}\s*</);

@@ -26,32 +26,14 @@ const SRC = readFileSync(
   "utf8"
 );
 
-describe("Phase 0B — the KIND pill never renders empty", () => {
-  it("the source really is the To-do page (anchor)", () => {
-    expect(SRC).toContain("tdb-ktag");
-    expect(SRC.length).toBeGreaterThan(1000);
-  });
+/* ⚠️ "Phase 0B — the KIND pill never renders empty" IS DELETED, NOT ADJUSTED (15 Aug). Its three
+   `tdb-ktag`/`c.kind` sites were the card band, the ledger row and the member row — every one of
+   them inside the unreachable row/reel cluster that was removed with `runBatchRow` and
+   `renderGroupCard`. A test that survives the removal of the thing it tested is a test asserting
+   nothing; the guard it pinned has no render site left to guard. The empty-pill LAW itself is not
+   lost — the live list is `TaskList.tsx`, and if a kind pill is ever drawn there it needs its own
+   lock written against that file. */
 
-  it("EVERY tdb-ktag carrying a card's kind is guarded on that kind", () => {
-    // The three sites that render `c.kind` — the card band, the ledger row, the member row.
-    // Each must be preceded by the `c.kind &&` guard on the same line.
-    const kindLines = SRC.split("\n").filter((l) => l.includes("tdb-ktag") && l.includes("c.kind"));
-    expect(kindLines.length).toBeGreaterThanOrEqual(3); // anchor: the sites exist
-    for (const line of kindLines) {
-      expect(line, `unguarded kind pill: ${line.trim()}`).toContain("c.kind &&");
-    }
-  });
-
-  it("the offer star can no longer interpolate an absent kind", () => {
-    // `★ ${c.kind}` is fine ONLY behind the guard; the guard is asserted above, so what this
-    // pins is that no OTHER form of the interpolation crept back in unguarded.
-    const starLines = SRC.split("\n").filter((l) => l.includes("★ ${c.kind}"));
-    expect(starLines.length).toBeGreaterThanOrEqual(1); // anchor
-    for (const line of starLines) {
-      expect(line).toContain("c.kind &&");
-    }
-  });
-});
 
 describe("Phase 0B — the task engine names records through the display helper", () => {
   const DB = readFileSync(

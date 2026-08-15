@@ -142,62 +142,12 @@ describe("tightening P2 — the ledger as a REAL column grid (system A)", () => 
     expect(rule(".tdb-lib")).toContain("width: 28px");
   });
 
-  it("rows: 56px fixed, centred, hairline-separated, whole-row hover tint, still clickable to open", () => {
-    const row = rule(".tdb-lrow");
-    expect(row).toContain("height: var(--lg-row-h)");
-    expect(row).toContain("align-items: center");
-    expect(row).toContain("border-bottom: 1px solid #f4efe6");
-    expect(rule(".tdb-lrow:hover")).toContain("background: #fdfaf5");
-    const rr = page.slice(page.indexOf("function runRow"), page.indexOf("function runMemberRow"));
-    expect(rr).toContain("onClick={() => openFlowCards([c])}");
-  });
 
-  it("batch rows put the PROGRESS in the status lane (bar + count), on the same tracks", () => {
-    const br = page.slice(page.indexOf("function runBatchRow"), page.indexOf("function ledgerHeading"));
-    expect(br).toContain('<div className="tdb-lstat">');
-    expect(br).toContain('<div className="tdb-minibar"><i style={{ width: `${prog.pct}%` }} /></div>');
-    expect(br).toContain("tdb-lstatn");
-    expect(rule(".tdb-lstat .tdb-minibar")).toContain("max-width: 76px");
-  });
 });
 
 describe("tightening P3 — the card, on the same system (the row stood upright)", () => {
-  it("BAND: kind tag left, the date/age right in TABULAR mono — the ledger's own figures, upright", () => {
-    const card = page.slice(page.indexOf('<div className={`tdb-band ${c.stream}`}>'), page.indexOf('<div className="tdb-body">'));
-    expect(card).toContain('<span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>');
-    expect(card).toContain('<span className="tdb-when">{c.due}</span>'); // the SAME c.due the ledger status lane renders
-    const band = rule(".tdb-band");
-    expect(band).toContain("grid-template-columns: minmax(0, 1fr) auto"); // two tracks, never an auto margin
-    expect(rule(".tdb-when")).toContain("font-variant-numeric: tabular-nums");
-  });
 
-  it("BODY + THE FIXED PROGRESS SLOT: present on batch cards, absent on units — the foot never moves either way", () => {
-    expect(page).toContain('<div className="tdb-cprog">');
-    expect(rule(".tdb-cprog")).toContain("margin-top: 10px");
-    // the slot cannot reposition the foot because the foot is PINNED (margin-top:auto), not stacked
-    expect(rule(".tdb-cfoot")).toContain("margin-top: auto");
-  });
 
-  it("FOOT: the identical action lane, pinned inside the SHARED min-height so feet align across a row", () => {
-    expect(rule(".tdb-wrap")).toContain("--card-minh: 150px");
-    for (const sel of [".tdb-tile", ".tdb-gcard", ".tdb-ntc"]) {
-      expect(rule(sel)).toContain("min-height: var(--card-minh)"); // EVERY card family shares it
-    }
-    // EQUAL FOOT OFFSETS, by construction: each card is a flex column at the shared min-height and
-    // its foot carries margin-top:auto — so in any row, every foot sits at the card's base
-    // regardless of title length (a two-line title beside a one-line title changes nothing).
-    expect(rule(".tdb-tile")).toContain("flex-direction: column");
-    expect(rule(".tdb-gcard")).toContain("flex-direction: column");
-    expect(rule(".tdb-ntc")).toContain("flex-direction: column");
-    expect(rule(".tdb-ntc-ft")).toContain("margin-top: auto"); // the user cards' foot pins too
-    // the lane's contents mirror the ledger: ink primary + icon buttons + the chevron on the 1fr track
-    const foot = rule(".tdb-cfoot");
-    expect(foot).toContain("grid-template-columns: auto auto auto 1fr");
-    expect(rule(".tdb-cfoot .tdb-crest")).toContain("justify-self: end");
-    /* one-primary pass: same lane, same ink primary — only the LABEL source moved to
-       `rowPrimaryLabel`, which names the deed rather than saying "Action now" for all six. */
-    expect(page).toContain('className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>');
-  });
 
   it("FOUR columns at the standard tier; the wider tier takes five; the sticker treatment is UNTOUCHED", () => {
     expect(rule(".tdb-grid")).toContain("grid-template-columns: repeat(4, 1fr)");

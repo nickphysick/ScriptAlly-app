@@ -35,7 +35,7 @@ import {
 } from "../../lib/todoWalk";
 import { weekOfQuerying } from "../../lib/dashboardStats";
 import { WriteErrorCode, classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
-import { groupHousekeeping, hkGapCount, hkGroupProgress, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
+import { groupHousekeeping, hkGapCount, HkGroup, HkRule, HK_RULES, laterHideKey } from "../../lib/todoHousekeeping";
 import { deskState, liveQueryCount, liveQueriesLine, clearedListCap } from "../../lib/todoEmpty";
 import { sortLedgerDo, sortLedgerHk } from "../../lib/todoLedger";
 // VI P2 — the review cup (original ScriptAlly artwork; currentColor → inlined so it inherits ink)
@@ -95,7 +95,7 @@ import { SnoozeDial } from "./SnoozeDial";
 import { isTerminalStatus } from "../../lib/agentList";
 import { longDate } from "../../lib/dashboardStats";
 import {
-  TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
+  TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, isSnoozed,
 } from "../../lib/todoListPage";
 import { ToastAction, useTodoToast } from "./useTodoToast";
 import "./todo.css";
@@ -121,25 +121,11 @@ const shortHeaderDate = (ms: number): string =>
 // (hoisted function declarations), where a component-body `const` is dead code — never
 // initialised — and a hoisted reader hits the TDZ at first render (the crash class that took
 // the whole app down twice: openSundayReview `4d4fbed`, GHOST_BARS this fix). The regression
-// lock in todoWorkbench.test.ts bans component-level const/let after the return.
-// toolbelt P2 — ONE source for the action labels: the ledger rows AND the card stacks read
-// these strings; a future rename touches this object only. (detail P3: the moon + chevron
-// left the snooze label — the clock glyph carries the deferral signal.)
-const VERB_LABELS = {
-  /**
-   * ⚠️ `action` IS THE GROUP COHORT'S VERB ONLY — a CARD's verb is `rowPrimaryLabel`, and the two
-   * must never both name one card. It read "Action now" on cards while the command bar read
-   * "Action" from `rowPrimaryLabel`: one label for a thing that opened the journey, another for a
-   * thing that wrote immediately, with nothing on screen distinguishing them. `rowPrimaryLabel`
-   * survives because it NAMES THE DEED — Close, Complete, Return, Undo, Start — where this is one
-   * flat word; a writer's own item is completed, not "actioned". A batch is a cohort of agents
-   * rather than one card, so it keeps a verb of its own and says so here.
-   */
-  action: "Action now",
-  todayAdd: "＋ Today’s list",
-  todayRemove: "− Today’s list",
-  later: "Snooze or dismiss",
-} as const;
+/* ⚠️ `VERB_LABELS` IS RETIRED WITH THE ROW/REEL CLUSTER (15 Aug). All four members —
+   action · todayAdd · todayRemove · later — were consumed only by `rowActionLane`, `renderCard`,
+   `runBatchRow`, `renderGroupCard` and `laterMenu`, every one of which was unreachable. The CARD
+   verb is `rowPrimaryLabel` (`lib/taskRow.ts`), which is the one the live command bar reads and
+   the one that names the deed. */
 
 // detail P3 — the snooze CLOCK (todo-detail-b.html §1, the recommended plain clock). It
 // follows TypeGlyph's exact grammar (currentColor stroke SVG, viewBox 24, aria-hidden, size
@@ -339,7 +325,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [openGroups, setOpenGroups] = useState<Record<string, true>>(() => {
     try { return JSON.parse(localStorage.getItem("sa.todoGroupsOpen") || "{}"); } catch { return {}; }
   });
-  const [pagedGroups, setPagedGroups] = useState<Record<string, true>>({});
+  /* ⚠️ `pagedGroups` IS RETIRED WITH THE CLUSTER (15 Aug) — both halves were referenced only by
+     `renderGroupExpanded`'s "+ N more…" pager, which had no callers. Four sibling states
+     (`pulsing`, `recentG`, `verbKey`, `openGroups`) are now WRITE-ONLY: their setters are still
+     called from live code but nothing reads the value, since the readers were all in the cluster.
+     Left standing because removing them means unpicking live call sites; recorded so the next
+     reader knows they are inert rather than load-bearing. */
   const [recentG, setRecentG] = useState<string | null>(null);
   const toggleGroup = (rule: string) => {
     setOpenGroups((g) => {
@@ -552,11 +543,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), ruleKey])) });
     const undo = () => updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== ruleKey) });
     flash(`Hidden — ${c.due}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
-  }
-  function muteRuleFromCard(g: HkGroup) {
-    updateUserProfile({ mutedTaskRules: Array.from(new Set([...(currentUser?.mutedTaskRules ?? []), g.rule])) });
-    const undo = () => updateUserProfile({ mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== g.rule) });
-    flash(`Hidden — ${g.meta.label}`, { label: "Undo", fn: async () => { await undo(); flash("Restored"); } });
   }
 
   // Today: committed band (committedDate === today, the 5-cap set) + done band (the cleared
@@ -1997,157 +1983,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      MARKUP had to go: two implementations of one list is how the corner and the page would have
      started disagreeing. */
 
-  // ── doc pass P4: LEDGER v2 (todo-doc-pass-a.html §3 + todo-doc-pass-b.html §2) — each
-  // lane's rows live in a family-washed section (whisper pink / whisper latte / a DERIVED
-  // notes whisper — the pack specified two; the wash is territory, not decoration); rows are
-  // white cards inside it. DONE lives at the row's HEAD: the 24px family roundel becomes a
-  // tick on row hover/focus and completes immediately (offers + batches keep the plain dot —
-  // an offer needs its moment, a batch has no single completion). The acting controls sit at
-  // the tail, vertically centred: the emphasised lead (OPENS the acting surface, same as
-  // row-click — it never marks complete) · ghost "＋ Today's list" · the clock "Snooze or
-  // dismiss ▾" (the SAME Later menu, renamed trigger). The cards view keeps its short verbs —
-  // a deliberate, baked divergence. Headings stick within the page scroll on a wash-coloured
-  // backing; clicking the heading (not its play button) folds the section, persisted per-lane
-  // (sa.todoLedgerFold). ──
-  /** THE ROW (todo rebuild P2 — ref .row): a hairline card carrying a 42px tinted family tile,
-   *  a Playfair title over an italic Playfair subtitle, the mono tag pill right, then a
-   *  chevron; the border lifts and a soft shadow arrives on hover.
-   *
-   *  RECONCILE (reported): the mockup's tile is decorative, but the leading slot on the live
-   *  row is the COMPLETION control (the dot that becomes a tick on hover). Rather than lose
-   *  that, the dot is SEATED INSIDE the tile — the tile brings the mockup's tint and size, the
-   *  dot keeps its behaviour. The action cluster likewise stays: the mockup draws no row
-   *  actions, but Action-now / Today / Later are the row's working surface. */
-  // ── the tightening P2 — THE ROW IS A GRID (design-refs/ledger-grid.html · system A). Every row
-  // shares the same fixed tracks — dot · task · kind · status · action — so tags, figures and
-  // buttons form straight vertical lines down the page. THE LAYOUT LAW: no cell positions itself
-  // with margin-left:auto or from a sibling's content width. The action lane is RESERVED: a
-  // chevron at rest, the buttons revealed on hover/focus-within WITHIN the same fixed lane. ──
-  function rowActionLane(c: BoardCard, committed: boolean) {
-    return (
-      <div className="tdb-lact" onClick={(e) => e.stopPropagation()}>
-        <span className="tdb-lrest" aria-hidden>▸</span>
-        <div className="tdb-lacts">
-          <button type="button" className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>
-          <button type="button" className="tdb-lib" aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} title={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>
-          {laterMenu(c, true)}
-        </div>
-      </div>
-    );
-  }
-  function runRow(c: BoardCard, fam: "do" | "hk" | "nt" = "do") {
-    const committed = onList(c);
-    const isOffer = c.taskType === "offer_received";
-    const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
-    /* Phase 2 — THE RETURNED-FROM-SNOOZE CHIP, for today only. A row that reappears with no
-       explanation reads as a bug in a list you thought you had cleared; this says why it is back.
-       Clock-driven, never stored: it is derived from the flag's own expiry against today. */
-    const backFlag = taskFlags.find((f) =>
-      (c.relatedRecordId && flagMatchesTask(f, c.taskType ?? "", c.relatedRecordId))
-      || (c.userTaskId && flagMatchesTask(f, USER_TASK_FLAG_TYPE, c.userTaskId)));
-    const cameBack = returnedToday(backFlag, now);
-    return (
-      <div key={c.key} data-tdbkey={c.key} className="tdb-lrow" role="button" tabIndex={0}
-        onClick={() => openFlowCards([c])}
-        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
-        <span className={`tdb-ldot ${fam}`} aria-hidden />
-        <div className="tdb-ltask">
-          <h3 className="tdb-lbt">{c.title}</h3>
-          {c.subtitle && <div className="tdb-lbms">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
-          {cameBack && backFlag?.snoozedUntil && (
-            <div className="tdb-lbms"><span className="tdg-back">{returnedChipLabel(backFlag.snoozedUntil)}</span></div>
-          )}
-        </div>
-        <div className="tdb-lkind">
-          {c.kind && <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>}
-          {(c.snoozes > 0 || committed) && (
-            <span className="tdb-kmeta">
-              {c.snoozes > 0 && <span className="tdb-ktag snz">×{c.snoozes}</span>}
-              {committed && <span className="tdb-ktag on">✓ TODAY</span>}
-            </span>
-          )}
-        </div>
-        <div className="tdb-lstat">{c.due}</div>
-        {rowActionLane(c, committed)}
-      </div>
-    );
-  }
-  // ── grouping P2 — the nested MEMBER ROW (todo-grouping.html §2): inset beneath the
-  // parent with the family-tinted spine, smaller title, the STANDARD trio of row actions;
-  // no head checkbox (the ref draws none — a dq member completes through its journey). ──
-  function runMemberRow(c: BoardCard) {
-    const committed = onList(c);
-    return (
-      <div key={c.key} data-tdbkey={c.key} className="tdb-lrow lsub" role="button" tabIndex={0}
-        onClick={() => openFlowCards([c])}
-        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
-        <span className="tdb-ldot sub" aria-hidden />
-        <div className="tdb-ltask">
-          <h3 className="tdb-lbt sm">{c.title}</h3>
-          {c.subtitle && <div className="tdb-lbms">{c.subtitle}</div>}
-        </div>
-        <div className="tdb-lkind">{c.kind && <span className="tdb-ktag">{c.kind}</span>}</div>
-        <div className="tdb-lstat">{c.due}</div>
-        {rowActionLane(c, committed)}
-      </div>
-    );
-  }
-  function runBatchRow(g: HkGroup) {
-    // grouping P3 — a group of one renders as its UNIT row
-    if (g.members.length === 1) return runRow(g.members[0].card);
-    const key = `group-${g.rule}`;
-    const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
-    const prog = hkGroupProgress(agents.length, g.members.length);
-    const open = () => setFlow({ items: [{ kind: "group", group: g }] });
-    // grouping P2 — the row's non-action click TOGGLES the nest (Action now keeps open —
-    // a scoped supersede of the doc-pass "same as row-click" clause for BATCH rows only)
-    const expanded = !!openGroups[g.rule];
-    const members = groupMembers(g);
-    const paged = pagedGroups[g.rule] ? members : members.slice(0, GROUP_PAGE);
-    const remaining = members.length - paged.length;
-    return (
-      <React.Fragment key={key}>
-      <div className={`tdb-lrow batch${expanded ? " open" : ""}`} role="button" tabIndex={0} aria-expanded={expanded}
-        onClick={() => toggleGroup(g.rule)}
-        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); toggleGroup(g.rule); } }}>
-        <span className="tdb-lchev" aria-hidden>▶</span>
-        <div className="tdb-ltask">
-          <h3 className="tdb-lbt batch"><b>{g.members.length}</b>{copy.rest(g.members.length)}</h3>
-          <div className="tdb-lbms">{copy.sub}{expanded && members.length !== g.members.length ? ` · ${groupShowing(g, members.length)}` : ""}</div>
-        </div>
-        <div className="tdb-lkind"><span className="tdb-ktag">{g.meta.label.toUpperCase()}</span></div>
-        <div className="tdb-lstat">
-          <div className="tdb-minibar"><i style={{ width: `${prog.pct}%` }} /></div>
-          <span className="tdb-lstatn">{prog.pct}% · {g.members.length}</span>
-        </div>
-        <div className="tdb-lact" onClick={(e) => e.stopPropagation()}>
-          <span className="tdb-lrest" aria-hidden>▸</span>
-          <div className="tdb-lacts">
-          <button type="button" className="tdb-lprime" onClick={open}>{VERB_LABELS.action}</button>
-          <span className="tdb-latwrap">
-            <button type="button" className="tdb-lib" aria-label={VERB_LABELS.later} title={VERB_LABELS.later} aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}><ClockGlyph /></button>
-            {laterKey === key && (
-              <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
-                <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
-                <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 7, "in a week"); }}>Give it a week</button>
-                <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); muteRuleFromCard(g); }}>Don’t show these again</button>
-              </div>
-            )}
-          </span>
-          </div>
-        </div>
-      </div>
-      {expanded && (
-        <>
-          {paged.map((m) => runMemberRow(m.card))}
-          {remaining > 0 && (
-            <button type="button" className="tdb-lpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>
-          )}
-        </>
-      )}
-      </React.Fragment>
-    );
-  }
   /** Both views now sit under the SAME typographic heading (todo rebuild P1) — the ledger's own
    *  header bar went with the cards': its fold control (▸/▾), play button and ＋ were part of
    *  that bar. `ledgerFold`/`toggleFold` are left in place, dormant, rather than chased down. */
@@ -2583,234 +2418,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       });
   }
 
-  function renderFork(key: string, single: boolean, acts: { notNow: () => void; neverThis: () => void; neverRule?: () => void }) {
-    return (
-      <div className="tdb-neverfork" onClick={(e) => e.stopPropagation()}>
-        <div className="tdb-nt2">Stop asking — for how long?</div>
-        <button type="button" className="tdb-nb" onClick={acts.notNow}><b>Not now</b>&nbsp;— back in a week</button>
-        <button type="button" className="tdb-nb" onClick={acts.neverThis}><b>Never</b>&nbsp;— just {single ? "this query" : "these agents"}</button>
-        {acts.neverRule && <button type="button" className="tdb-nb" onClick={acts.neverRule}><b>Never</b>&nbsp;— any agent missing this</button>}
-        <button type="button" className="tdb-ncancel" onClick={() => clearOverlay(key)}>Cancel</button>
-        <button type="button" className="tdb-nsettings" onClick={() => { clearOverlay(key); setSettingsOpen(true); }}>Change what appears here → Task settings</button>
-      </div>
-    );
-  }
 
-  // ── THE CARD CONTRACT (Deck v2 laws; labels realigned by toolbelt P2) — band = identity +
-  // status only (tag, the sage ✓ TODAY chip); body = content only; CLICK ANYWHERE opens (unit →
-  // the journey sheet); hover (~150ms intent, 180ms ease) grows the STACK downward as an
-  // overlay — the reel never reflows: Action now · ＋/− Today's list · the clock Snooze menu
-  // (tomorrow / a week / don't-show-these — the per-type hide, restorable in Task settings;
-  // offers keep no hide — the locked row). One grammar with the ledger, via VERB_LABELS. ──
-  // arrow navigation inside the Later menu (P5 a11y): ↓/↑ cycle the menuitems; Esc closes
-  function latMenuKeys(e: React.KeyboardEvent<HTMLDivElement>) {
-    const items = Array.from((e.currentTarget as HTMLElement).querySelectorAll<HTMLButtonElement>("[role=menuitem]"));
-    const i = items.indexOf(document.activeElement as HTMLButtonElement);
-    if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length]?.focus(); }
-    else if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus(); }
-    else if (e.key === "Escape") { e.stopPropagation(); setLaterKey(null); }
-  }
-  function laterMenu(c: BoardCard, icon = false) {
-    const hideKey = laterHideKey(c.taskType);
-    return (
-      <span className="tdb-latwrap">
-        {icon ? (
-          <button type="button" className="tdb-lib" aria-label={VERB_LABELS.later} title={VERB_LABELS.later} aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}><ClockGlyph /></button>
-        ) : (
-          <button type="button" className="tdb-btnh" aria-haspopup="menu" aria-expanded={laterKey === c.key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === c.key ? null : c.key)); }}><ClockGlyph />{VERB_LABELS.later}</button>
-        )}
-        {laterKey === c.key && (
-          <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
-            <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 1, "tomorrow"); }}>Remind me tomorrow</button>
-            <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeCard(c, 7, "in a week"); }}>Give it a week</button>
-            {hideKey && (
-              <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); hideType(c, hideKey); }}>Don’t show these again</button>
-            )}
-          </div>
-        )}
-      </span>
-    );
-  }
-  // ── notes-and-tasks P3 — THE TWO NATURES ON THE BOARD (design-refs/notes-and-tasks.html · frame
-  // 3): a NOTE is butter with an ✎ NOTE band, Caveat, a PINNED footer and NO completion circle; a
-  // TASK is sage (the user-created family) with a ✓ YOUR TASK band, typeset, a date chip and a
-  // completion tick (the existing quickDone + undo toast). A task PROMOTES on its due day — pink
-  // offset + band, a DUE TODAY tag — while its lane (Urgent) and Today's-list membership are
-  // derived upstream. Blue is reserved for Pro and NEVER appears here. ──
-  function renderUserCard(c: BoardCard) {
-    const isTask = c.nature === "task";
-    const promoted = c.dueState === "today" || c.dueState === "overdue";
-    const surfLead = c.surfaceOffset && c.surfaceOffset !== "on-day" ? c.surfaceOffset : null;
-    return (
-      <div key={c.key} data-tdbkey={c.key} className={`tdb-ntc ${c.nature}${promoted ? " due" : ""}`}>
-        <div className="tdb-ntc-b">
-          <i className="tdb-ntc-tag">{isTask ? "✓ YOUR TASK" : "✎ NOTE"}</i>
-          {promoted && <i className="tdb-ntc-tag hot">{c.dueState === "overdue" ? "OVERDUE" : "DUE TODAY"}</i>}
-          {/* removal is a note's completion (it is never ticked); the task can be ticked OR removed */}
-          <button type="button" className="tdb-ntc-del" onClick={() => deleteUserNote(c)} aria-label={`Delete “${c.title}”`} title="Delete">✕</button>
-        </div>
-        <div className="tdb-ntc-in">
-          <h4 className="tdb-ntc-ttl">{c.title}</h4>
-          {c.detail && <div className="tdb-ntc-d">{c.detail}</div>}
-          <div className="tdb-ntc-ft">
-            {isTask ? (
-              <>
-                <span className={`tdb-ntc-dchip${promoted ? " due" : ""}`}>{c.due}</span>
-                {surfLead && <span className="tdb-ntc-surf">{surfLead === "week-before" ? "SHOWS A WEEK EARLY" : "SHOWS A DAY EARLY"}</span>}
-                <button type="button" className="tdb-ntc-tick" onClick={() => quickDone(c)} aria-label={`Mark “${c.title}” done`} />
-              </>
-            ) : (
-              <span className="tdb-ntc-pin">{c.due}</span>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-  // ── full-detail lane card (the contract): band tag (+ ✓ TODAY chip) over title + manuscript. ──
-  function renderCard(c: BoardCard, gin = false) {
-    if (c.nature) return renderUserCard(c); // notes-and-tasks: user notes/tasks wear their own grammar
-    const committed = onList(c);
-    const ov = overlays[c.key];
-    const isOffer = c.taskType === "offer_received";
-    const subIsMs = !!c.subtitle && manuscripts.some((m) => m.title === c.subtitle);
-    if (ov?.kind === "fork") {
-      return (
-        <div key={c.key} className={`tdb-tile ${c.stream}`}>
-          <div className="tdb-frame">{renderFork(c.key, true, { notNow: () => forkStale(c, "notNow"), neverThis: () => forkStale(c, "neverThis") })}</div>
-        </div>
-      );
-    }
-    const hov = verbKey === c.key;
-    // the tightening P3 — THE ROW STOOD UPRIGHT (design-refs/card-grid.html): the same three
-    // lanes as the ledger. Band = kind tag left + the SAME tabular figures right; body = title +
-    // manuscript line; foot = the identical action lane, PINNED with margin-top:auto inside the
-    // shared min-height, so feet align across a row whatever the title length. The hover-verb
-    // expansion machinery is superseded — the foot is always present.
-    return (
-      <div key={c.key} data-tdbkey={c.key} className={`tdb-cell${gin ? " gin" : ""}`}>
-        <div className={`tdb-tile ${c.stream}${hov ? " hov" : ""}${c.quiet ? " quiet" : ""}${pulsing === c.key ? " pulse" : ""}`}
-          onClick={() => openFlowCards([c])}
-          onMouseEnter={() => armVerbs(c.key)} onMouseLeave={disarmVerbs}
-          onFocus={() => armVerbs(c.key)} onBlur={disarmVerbs}
-          role="button" tabIndex={0}
-          onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); openFlowCards([c]); } }}>
-          <div className={`tdb-band ${c.stream}`}>
-            <span className="tdb-bandl">
-              {/* ⚠️ GUARDED, like the list row at the top of this file. `kind` is "" for a user
-                  task (todoBoard's default branch), so an unguarded render drew an EMPTY PILL —
-                  chrome with nothing in it, which reads as a load failure rather than an absence. */}
-              {c.kind && <span className="tdb-ktag">{isOffer ? `★ ${c.kind}` : c.kind}</span>}
-              {c.snoozes > 0 && <span className="tdb-ktag snz">×{c.snoozes}</span>}
-              {committed && <span className="tdb-ktag on">✓ TODAY</span>}
-            </span>
-            <span className="tdb-when">{c.due}</span>
-          </div>
-          <div className="tdb-body">
-            <div className="tdb-tt">{c.title}</div>
-            {c.subtitle && <div className="tdb-tsub">{subIsMs ? <span className="tdb-ms">{c.subtitle}</span> : c.subtitle}</div>}
-          </div>
-          <div className="tdb-cfoot" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="tdb-lprime" onClick={() => openFlowCards([c])}>{rowPrimaryLabel(c, "todo")}</button>
-            <button type="button" className="tdb-lib" aria-label={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} title={committed ? VERB_LABELS.todayRemove : VERB_LABELS.todayAdd} onClick={() => toggleToday(c)}>{committed ? "−" : "＋"}</button>
-            {laterMenu(c, true)}
-            <span className="tdb-crest" aria-hidden>▸</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
-  // ── the BATCH card (the contract): flat, hairline, count headline + roundels; click anywhere
-  // opens the Batch-fix sheet; the hover stack = Action now · the clock Snooze menu (Today's
-  // list omitted: groups are not committable — the existing Today primitive is per-card). ──
-  // ── grouping P1 — THE GROUP BAR (todo-grouping.html §1): expanding replaces the batch
-  // card with a slim full-span bar that OWNS the Collapse control; the members flow beneath
-  // as standard unit cards rendered from the batch's OWN member derivation (g.members[].card
-  // — never a second query path). The first GROUP_PAGE render; a dashed cell pages in the
-  // rest. The fragment sits at the batch's map position, so following cards flow after. ──
-  function renderGroupExpanded(g: HkGroup) {
-    const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
-    const members = groupMembers(g);
-    const paged = pagedGroups[g.rule] ? members : members.slice(0, GROUP_PAGE);
-    const remaining = members.length - paged.length;
-    return (
-      <React.Fragment key={g.rule}>
-        <div className="tdb-gbar">
-          <span className="tdb-gbart">{g.members.length}{copy.rest(g.members.length)}</span>
-          <span className="tdb-gbarn">{groupShowing(g, members.length)}</span>
-          <button type="button" className="tdb-btnh em tdb-gcol" onClick={() => toggleGroup(g.rule)}>Collapse ▴</button>
-        </div>
-        {paged.map((m) => renderCard(m.card, true))}
-        {remaining > 0 && (
-          <button type="button" className="tdb-gpage" onClick={() => setPagedGroups((p) => ({ ...p, [g.rule]: true }))}>+ {remaining} more…</button>
-        )}
-      </React.Fragment>
-    );
-  }
-  function renderGroupCard(g: HkGroup) {
-    // grouping P3 — a group of one renders as its UNIT (no batch card, no Expand affordance)
-    if (g.members.length === 1) return renderCard(g.members[0].card);
-    const key = `group-${g.rule}`;
-    const ov = overlays[key];
-    if (ov?.kind === "fork") {
-      return (
-        <div key={g.rule} className="tdb-gcard">
-          <div className="tdb-frame">{renderFork(key, false, { notNow: () => forkNotNowGroup(g), neverThis: () => forkNeverThese(g), neverRule: () => forkNeverRule(g) })}</div>
-        </div>
-      );
-    }
-    if (openGroups[g.rule]) return renderGroupExpanded(g);
-    const faces = g.members.slice(0, 4);
-    const copy = G3_COPY[g.rule] ?? { rest: () => ` ${g.meta.label.toLowerCase()}`, sub: "" };
-    const prog = hkGroupProgress(agents.length, g.members.length);
-    const hov = verbKey === key;
-    return (
-      <div key={g.rule} className={`tdb-cell b${recentG === g.rule ? " gin" : ""}`}>
-        <div className={`tdb-gcard${hov ? " hov" : ""}`}
-          onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}
-          onMouseEnter={() => armVerbs(key)} onMouseLeave={disarmVerbs}
-          onFocus={() => armVerbs(key)} onBlur={disarmVerbs}
-          role="button" aria-expanded={hov} tabIndex={0}
-          onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); setFlow({ items: [{ kind: "group", group: g }] }); } }}>
-          <div className="tdb-band hk">
-            <span className="tdb-bandl"><span className="tdb-ktag">{g.meta.label.toUpperCase()}</span></span>
-            <span className="tdb-when">{g.members.length}</span>
-          </div>
-          {/* the tightening P3 — the batch body carries its PROGRESS in the fixed slot (present on
-              batch cards, absent on unit cards — the pinned foot never moves either way); the
-              hover expansion that used to hold it is superseded. */}
-          <div className="tdb-body">
-            <div className="tdb-gtt"><span className="tdb-gn">{g.members.length}</span>{copy.rest(g.members.length)}</div>
-            <div className="tdb-avs">
-              {faces.map((m) => <span key={m.card.key} title={m.agentName}>{m.card.initials}</span>)}
-              {g.members.length > faces.length && <i>+{g.members.length - faces.length}</i>}
-            </div>
-            <div className="tdb-cprog">
-              <div className="tdb-minibar"><i style={{ width: `${prog.pct}%` }} /></div>
-              <div className="tdb-pcap"><span>{prog.caption}</span><span>{prog.pct}%</span></div>
-            </div>
-            {/* grouping P1 — the one rest affordance (it replaces neither the foot nor Action now) */}
-            <button type="button" className="tdb-gxp" onClick={(e) => { e.stopPropagation(); toggleGroup(g.rule); }}>Expand {g.members.length} ▾</button>
-          </div>
-          <div className="tdb-cfoot" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="tdb-lprime" onClick={() => setFlow({ items: [{ kind: "group", group: g }] })}>{VERB_LABELS.action}</button>
-            <span className="tdb-latwrap">
-              <button type="button" className="tdb-lib" aria-label={VERB_LABELS.later} title={VERB_LABELS.later} aria-haspopup="menu" aria-expanded={laterKey === key} onClick={(e) => { e.stopPropagation(); setLaterKey((k) => (k === key ? null : key)); }}><ClockGlyph /></button>
-              {laterKey === key && (
-                <div className="tdb-latmenu" role="menu" aria-label="Later" onKeyDown={latMenuKeys}>
-                  <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 1, "tomorrow"); }}>Remind me tomorrow</button>
-                  <button type="button" role="menuitem" onClick={(e) => { e.stopPropagation(); setLaterKey(null); snoozeGroup(g, 7, "in a week"); }}>Give it a week</button>
-                  <button type="button" role="menuitem" className="warn" onClick={(e) => { e.stopPropagation(); setLaterKey(null); muteRuleFromCard(g); }}>Don’t show these again</button>
-                </div>
-              )}
-            </span>
-            <span className="tdb-crest" aria-hidden>▸</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
 };
 
 export default ToDoPage;

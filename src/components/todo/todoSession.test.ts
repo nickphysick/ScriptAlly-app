@@ -82,13 +82,6 @@ describe("v7 P1 — the hero: title crossfade · the fixed sub-slot · the ritua
 });
 
 describe("v7 P3 — the gather + morph (the deck retired; the pile fully fades)", () => {
-  it("the gather flies every other item onto the ENGINE's first task, staggered, z beneath it", () => {
-    expect(ss).toContain("const firstKey = queue[0]?.key ?? \"\";".replace(/\\/g, ""));
-    expect(page).toContain("data-tdbkey={c.key}");
-    expect(ss).toContain("const s = staggerFor(flyers.length + 1);");
-    expect(ss).toContain("el.style.opacity = String(GATHER.gatherOpacity);"); // ~85% behind
-    expect(ss).toContain('firstEl.style.zIndex = "30";'); // the first never covered
-  });
   it("the morph grows the pile to the computed rest (min 20, resize) and the pile FULLY FADES — no residual stack", () => {
     expect(ss).toContain("const gRestY = restTop(g.regionH, g.cardH);");
     expect(ss).toContain("big.style.transition = `transform ${GATHER.morphMs}ms cubic-bezier(.25,.8,.3,1.05)`;");

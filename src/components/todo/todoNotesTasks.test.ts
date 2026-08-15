@@ -221,32 +221,8 @@ describe("notes-and-tasks P3 — the two natures on the board", () => {
     expect(uc).not.toContain("reminderDue(");
   });
 
-  it("the note card: butter, ✎ NOTE, a PINNED footer, and NO completion circle", () => {
-    expect(page).toContain("if (c.nature) return renderUserCard(c);"); // renderCard delegates
-    expect(rc).toContain('{isTask ? "✓ YOUR TASK" : "✎ NOTE"}');
-    expect(rc).toContain('<span className="tdb-ntc-pin">{c.due}</span>'); // the PINNED footer (notes)
-    // the tick lives ONLY inside the isTask branch — a note never renders one
-    const noteBranch = rc.slice(rc.indexOf(") : ("), rc.length);
-    expect(noteBranch).not.toContain("tdb-ntc-tick");
-    expect(rule(".tdb-ntc.note")).toContain("--nt-ntc-blk: var(--nt-block-note)"); // butter offset
-  });
 
-  it("the task card: sage family, the completion tick → the existing quickDone + undo", () => {
-    expect(rc).toContain('onClick={() => quickDone(c)}'); // the existing completion primitive
-    expect(rc).toContain('className="tdb-ntc-tick"');
-    expect(rule(".tdb-ntc.task")).toContain("--nt-ntc-blk: var(--nt-block-task)"); // sage offset
-    expect(rule(".tdb-wrap")).toContain("--nt-block-task: #d5dbd3"); // sage
-  });
 
-  it("due-day promotion is PINK with a DUE TODAY tag; overdue keeps the state with the overdue chip", () => {
-    expect(rc).toContain('className={`tdb-ntc ${c.nature}${promoted ? " due" : ""}`}');
-    expect(rc).toContain('{c.dueState === "overdue" ? "OVERDUE" : "DUE TODAY"}');
-    expect(rc).toContain('className={`tdb-ntc-dchip${promoted ? " due" : ""}`}');
-    expect(rule(".tdb-ntc.task.due")).toContain("--nt-ntc-blk: var(--nt-block-due)"); // pink offset
-    expect(rule(".tdb-wrap")).toContain("--nt-block-due: #f2cec1"); // pink
-    // the overdue form is derived in the chip label
-    expect(board).toContain('state === "overdue" ? `OVERDUE · ${d}` : d');
-  });
 
   it("SAGE is the user-created family — no blue anywhere on a note or task card", () => {
     // the whole notes-and-tasks card + composer surface never uses the Pro blue
@@ -292,14 +268,6 @@ describe("notes gaps — adding another, and removing one (found in live use)", 
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
 
-  it("a note can be DELETED — removal is its completion (it is never ticked)", () => {
-    const rc = page.slice(page.indexOf("function renderUserCard"), page.indexOf("function renderCard"));
-    expect(rc).toContain('className="tdb-ntc-del"');
-    expect(rc).toContain("onClick={() => deleteUserNote(c)}");
-    expect(rc).toContain("aria-label={`Delete “${c.title}”`}");
-    // it sits on BOTH natures (the band, above the nature branch) — a task can be ticked OR removed
-    expect(rc.indexOf("tdb-ntc-del")).toBeLessThan(rc.indexOf("isTask ? ("));
-  });
 
   it("delete goes through the existing store, undoes by re-creating the SAME id, and fails visibly", () => {
     const del = page.slice(page.indexOf("async function deleteUserNote"), page.indexOf("const composerCanSave"));

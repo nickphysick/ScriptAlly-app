@@ -36,25 +36,6 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
     expect(page).toContain("mutedTaskRules: (currentUser?.mutedTaskRules ?? []).filter((r) => r !== g.rule)");
   });
 
-  it("toast grammar (doc pass P5): Done — “{title}” · Snoozed until {when} · Hidden — {type}; the ad-hoc copies stay gone", () => {
-    // scoped to the toast calls — receipt-overlay card copy legitimately keeps its own prose
-    const toastCalls = [...(page.match(/flash\([^;]*\)/g) ?? []), ...(flow.match(/onToast\([^;]*\)/g) ?? [])].join("\n");
-    for (const gone of ["logged with defaults", "Snoozed for 7 days", 'flash("Note done"', 'onToast("Note done"', '"Closed as no response"', "— done`", "— snoozed`", "— dismissed`", "(restore in Task settings)"]) {
-      expect(toastCalls).not.toContain(gone);
-    }
-    expect(page).toContain("flash(`Done — “${c.title}”`,");
-    /* ⚠️ THE RECEIPT NAMES THE DATE, NOT THE TIER (Fix 4 revision). It read
-       `days === 1 ? "tomorrow" : "next week"` — a BINARY label over a five-stop scale, so a
-       month's snooze announced "next week". The fixed 7-day path had its own hardcoded copy of
-       the same sentence. Both go through one formatter now, so what the button says, what the
-       receipt says and what was written cannot name three different days. */
-    expect(page).toContain("flash(`Snoozed until ${snoozeDateLabel(days)}`,");
-    expect(page).toContain("flash(`Snoozed until ${snoozeDateLabel(7)}`,"); // the fixed 7-day path
-    expect(page).not.toContain('days === 1 ? "tomorrow" : "next week"');
-    expect(page).toContain("flash(`Hidden — ${g.meta.label}`,");
-    expect(page).toContain("flash(`Hidden — ${HK_RULES[g.rule].label}`,");
-    expect(page).toContain("flash(`Hidden — “${c.title}”`,"); // item-level mutes name the item
-  });
 
   it("undo confirms with Restored; the toast is a status region on the 6s action window", () => {
     const hook = readFileSync(join(here, "useTodoToast.ts"), "utf8");
