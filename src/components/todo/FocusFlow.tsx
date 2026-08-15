@@ -597,6 +597,62 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     }, journeyBand("pink", "Recording your resubmission", ag, c.initials, "send"));
   }
 
+  /**
+   * ⚠️ THE TWO JOURNEYS THAT RECORD NOTHING. A Decide and a Fix are not recorded here because
+   * neither is a single event on a single query: an offer touches every open query at once, and a
+   * gap in the record is corrected where the data lives. So this journey states why in one
+   * paragraph and hands off. The commit verb NAVIGATES, and the hint says `Nothing is recorded
+   * here.` — a surface that looks like every other recording surface must say when it is not one.
+   *
+   * ⚠️ IT IS THE FALL-THROUGH, NOT THE ROUTE FOR OFFERS AND HOUSEKEEPING. Every task type this app
+   * actually generates already has a purpose-built journey — `offerSheet` IS the offer flow, and
+   * `dqSheet` fills the reply window, materials list and wish list in place, none of which
+   * Submission packages can touch. Putting the hand-off in front of either would add a click that
+   * teaches nothing, or send a writer who clicked "3 agents have no reply window" to a page about
+   * manuscript packages. What this DOES catch is the unrecognised task type, which fell through to
+   * the SEND journey and was offered "Mark sent" for something that is not a send.
+   */
+  function handoffSheet(c: BoardCard, kind: "decide" | "fix") {
+    const q = cardQuery(c);
+    const ag = cardAgent(c, q);
+    const decide = kind === "decide";
+    const others = q ? queries.filter((x) => x.manuscriptId === q.manuscriptId && x.id !== q.id) : [];
+    return journeySheet({
+      steps: [{
+        id: "why",
+        name: decide ? "This one has its own flow" : "What to do",
+        body: (
+          <div className="tdb-jnreport">
+            {decide
+              ? "An offer touches every open query at once — the agents still holding material, the deadline you give them, and the decision itself. That is handled together in the offer flow rather than recorded here."
+              : "This one is fixed where the data lives, not here. Recording it against a query would put a note on the record instead of correcting it."}
+          </div>
+        ),
+      }],
+      reference: decide
+        ? {
+          heading: "Still holding material",
+          body: others.length
+            ? <>{others.slice(0, 5).map((x) => agents.find((a) => a.id === x.agentId)).filter(Boolean).map((a, i) => <span key={i}><b>{agentPrimary(a!)}</b><br /></span>)}</>
+            : <>No other agent is holding this manuscript.</>,
+          meta: others.length ? "Each will need telling" : undefined,
+        }
+        : {
+          heading: "Why it appeared",
+          body: <>{c.subtitle || "Something in the record is incomplete."}</>,
+          meta: c.due || undefined,
+        },
+      /* ⚠️ THE SUMMARY STRIP IS MANDATORY EVERYWHERE, and on a journey that records nothing the
+         honest thing for it to say is that nothing is going on the record. */
+      summary: "Nothing goes on the record here.",
+      commit: {
+        label: decide ? "Open the offer flow" : "Open submission packages",
+        hint: "Nothing is recorded here.",
+        onCommit: () => requestExit(() => (decide && q ? onNavigate("queries", q.id) : onNavigate("manuscripts", "Submission packages"))),
+      },
+    }, journeyBand(decide ? "pink" : "cof", decide ? "Answering the offer" : "Tidying the record", ag, c.initials, decide ? "offerCelebration" : "details"));
+  }
+
   function nudgeSheet(c: BoardCard) {
     const q = cardQuery(c);
     const ag = cardAgent(c, q);
@@ -1803,7 +1859,14 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     if (j === "stale") return staleSheet(it.card);
     if (j === "dq") return dqSheet(it.card);
     if (j === "note") return noteSheet(it.card);
-    return sendSheet(it.card);
+    /* ⚠️ THE FALL-THROUGH IS A HAND-OFF, NOT A SEND. Anything not named above used to land in
+       `sendSheet` and be offered "Mark sent" for a task that is not a send — a live latent fault
+       (`exclusive_expiring` is declared in this codebase and would have hit it). The bucket says
+       which hand-off: a judgement goes to the offer flow, a gap in the record to where the data
+       lives. Only the two send task types reach `sendSheet` now, and they say so. */
+    if (it.card.taskType === "partial_requested" || it.card.taskType === "full_requested") return sendSheet(it.card);
+    const bucket = cardBucket(it.card);
+    return handoffSheet(it.card, bucket === "decide" ? "decide" : "fix");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [atReview, qi, step, items, mats, sentDate, method, copied, extrasOpen, backdated, rows, noMeansNo, found, notFound, assistAt, assisting, assistMsg, showMuted, noteText, staged, savedN, saving, offerDoor, offerChoice, remindDate, notifyStep, notifySel, review, rvStep, rvQuiet, rvSeed, rvSummary, sweep, deepDive, sweepReceipt, sweepFork, queries, agents, manuscripts, activities, taskFlags, currentUser]);
 
