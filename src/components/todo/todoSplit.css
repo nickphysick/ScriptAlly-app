@@ -396,3 +396,28 @@
 
 .tdw-cbic:hover:not(:disabled) { border-color: #d8c8b8; color: #7c3a2a; background: #fdfbf8; }
 .tdw-cbic:disabled { opacity: 0.35; cursor: default; background: #fff; border-color: #ece4d6; }
+
+/* ── the list card's two menus (corrections, Phase 5) ────────────────────────────────────────── */
+
+.tdw-menuwrap { position: relative; flex: none; }
+
+/* ⚠️ THE FILTER BUTTON READS AS ACTIVE WHENEVER THE FILTER IS NOT `All`. The chip strip used to
+   say a list was narrowed by standing on the page; with the chips folded into a menu this fill is
+   the only thing that can, so it is not optional. */
+.tdw-cbic.on { background: #2b2118; border-color: #2b2118; color: #fdfaf5; }
+.tdw-cbic.on:hover:not(:disabled) { background: #2b2118; border-color: #2b2118; color: #fdfaf5; }
+
+/* the count beside a menu row — the same figure the band above the group states */
+.tdw-mn { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 10px; color: #b3a496; }
+
+/* a one-line statement beneath the row, for when the list IS narrowed — the button's fill says
+   THAT it is, this says to what */
+.tdw-narrowed {
+  display: block;
+  margin-top: 9px;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a89684;
+}

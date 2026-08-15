@@ -652,6 +652,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /* the command bar's own snooze door — the fifth onto the ONE dial */
   const cbSnooze = useRef<HTMLButtonElement | null>(null);
   const [cbDial, setCbDial] = useState(false);
+  /* the list card's two menus — mutually exclusive, both dismissed the same three ways */
+  const [filterOpen, setFilterOpen] = useState(false);
   const boardScroll = useRef(0);
 
   /**
@@ -736,6 +738,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setDockKey(narrowed ? dockable[0].key : (docked.card?.key ?? dockable[0].key));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dockSig, dockKey, narrowSig, allDockable.length]);
+
+  /**
+   * ⚠️ BOTH MENUS CLOSE ON OUTSIDE PRESS AND ON ESCAPE, AND NEITHER TRAPS FOCUS (Phase 5). They
+   * are narrowing controls on permanent chrome, not dialogues — trapping focus in one would make
+   * a filter something you have to escape from. Escape is NOT captured or stopped for the same
+   * reason the New popover's is not: this page has its own Escape business (an open card's draft
+   * discard), and swallowing the key at this level would reach past these menus.
+   */
+  useEffect(() => {
+    if (!filterOpen && !sortOpen) return;
+    const close = () => { setFilterOpen(false); setSortOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
+    document.addEventListener("pointerdown", close);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [filterOpen, sortOpen]);
 
   /** Clearing the narrowing is one act, whichever half of it is set. */
   const clearNarrowing = () => { setSearch(""); setChip("all"); };
@@ -2382,61 +2403,81 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    */
   function renderRailTools() {
     const chips = railChips(boardCols);
+    const active = chips.find((ch) => ch.id === chip);
     return (
       <div className="tdw-tools">
         <div className="tdw-toolrow">
-        <div className={`tdw-search${search ? " has" : ""}`}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
-          <input
-            ref={searchRef}
-            type="text"
-            placeholder="Search your list…"
-            aria-label="Search your list"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
-          />
-          {/* ⚠️ THE CLEAR APPEARS ONLY WITH A QUERY — a permanent × on an empty field is a control
-              that does nothing, and it sits where your eye goes to check whether anything is set. */}
-          {search && (
-            <button type="button" className="tdw-clr" aria-label="Clear the search" onClick={() => setSearch("")}>
-              <X size={13} aria-hidden />
-            </button>
-          )}
-        </div>
-        {/* sort, beside the field it orders */}
-        <span className="tdw-sortwrap">
-          <button type="button" className="tdw-sort" aria-haspopup="menu" aria-expanded={sortOpen}
-            onClick={() => setSortOpen((v) => !v)}>
-            ⇅ {TODO_SORTS.find((x) => x.id === sort)!.label}
-          </button>
-          {sortOpen && (
-            <div className="tdb-sortmenu" role="menu">
-              {TODO_SORTS.map((o) => (
-                <button key={o.id} type="button" role="menuitem" aria-current={o.id === sort}
-                  onClick={() => { setSort(o.id); setSortOpen(false); }}>
-                  {o.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </span>
-        </div>
-        {/* ⚠️ EVERY COUNT IS LIVE AND COMES FROM `railChips`, which reads the same `taskGroups` the
-            headings do — so a chip and the panel it names can never state different figures. */}
-        <div className="tdw-chips" role="group" aria-label="Filter the list">
-          {chips.map((ch) => (
+          {/* ⚠️ THE FILTER READS AS ACTIVE WHENEVER IT IS NOT `All` (corrections, Phase 5) — solid
+              ink, the same treatment the active chip carried. A narrowed list must never be
+              silently narrowed: the chips used to say so by standing there, and with them folded
+              into a menu the button is the only thing left that can. */}
+          <span className="tdw-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
             <button
-              key={ch.id}
               type="button"
-              className={`tdw-chip${ch.id === chip ? " on" : ""}`}
-              aria-pressed={ch.id === chip}
-              onClick={() => setChip(ch.id)}
+              className={`tdw-cbic${chip === "all" ? "" : " on"}`}
+              title="Filter" aria-label="Filter" aria-haspopup="menu" aria-expanded={filterOpen}
+              onClick={() => { setSortOpen(false); setFilterOpen((v) => !v); }}
             >
-              {ch.label}<span className="n">{ch.count}</span>
+              <Funnel size={15} aria-hidden />
             </button>
-          ))}
+            {filterOpen && (
+              <div className="tdb-sortmenu" role="menu">
+                {/* ⚠️ THE COUNTS ARE `railChips`', the SAME derivation the section bands read — a
+                    chip and the band it names cannot disagree. Snoozed still appears only when
+                    non-zero, which is the chip strip's own rule carried over intact. */}
+                {chips.map((ch) => (
+                  <button key={ch.id} type="button" role="menuitem" aria-current={ch.id === chip}
+                    onClick={() => { setChip(ch.id); setFilterOpen(false); }}>
+                    {ch.label} <span className="tdw-mn">{ch.count}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </span>
+          <span className="tdw-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="tdw-cbic"
+              title="Sort" aria-label="Sort" aria-haspopup="menu" aria-expanded={sortOpen}
+              onClick={() => { setFilterOpen(false); setSortOpen((v) => !v); }}
+            >
+              <ArrowUpDown size={15} aria-hidden />
+            </button>
+            {sortOpen && (
+              <div className="tdb-sortmenu" role="menu">
+                {TODO_SORTS.map((o) => (
+                  <button key={o.id} type="button" role="menuitem" aria-current={o.id === sort}
+                    onClick={() => { setSort(o.id); setSortOpen(false); }}>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </span>
+          <div className={`tdw-search${search ? " has" : ""}`}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
+            <input
+              ref={searchRef}
+              type="text"
+              placeholder="Search your list…"
+              aria-label="Search your list"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
+            />
+            {search && (
+              <button type="button" className="tdw-clr" aria-label="Clear the search" onClick={() => setSearch("")}>
+                <X size={13} aria-hidden />
+              </button>
+            )}
+          </div>
         </div>
+        {/* ⚠️ THE CHIP STRIP IS GONE (Phase 5) — its contents ARE the filter menu, and the active
+            one is marked there. What it said by standing on the page, the button's ink fill says
+            now, which is why that fill is not optional. */}
+        {active && chip !== "all" && (
+          <span className="tdw-narrowed">Showing {active.label} only</span>
+        )}
       </div>
     );
   }

@@ -214,9 +214,16 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
 
   it("the RAIL's instruments live in renderRailTools, and nowhere else", () => {
     const railTools = listPage.slice(listPage.indexOf("function renderRailTools"), listPage.indexOf("function renderList"));
-    for (const cls of ["tdw-search", "tdw-chips", "tdw-chip", "tdw-sort"]) {
+    /* ⚠️ THE CHIP STRIP FOLDED INTO THE FILTER MENU (corrections, Phase 5), and the standalone
+       sort button became an icon beside it. Both are 38px icon buttons to the LEFT of the search,
+       which fills the rest of the row. */
+    for (const cls of ["tdw-search", "tdw-menuwrap", "tdw-cbic"]) {
       expect(railTools, cls).toContain(cls);
     }
+    expect(railTools).not.toContain("tdw-chips");
+    expect(railTools).not.toContain('className="tdw-sort"');
+    /* the icons come BEFORE the field in the row */
+    expect(railTools.indexOf("tdw-menuwrap")).toBeLessThan(railTools.indexOf("tdw-search"));
     /* the page row keeps none of it */
     expect(listPage).not.toContain("tdb-bsearch");
     expect(listPage).not.toContain('className="tdb-sortb"');

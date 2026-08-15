@@ -930,3 +930,57 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
     expect(rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-fignum.hot {")).toContain("#7c3a2a");
   });
 });
+
+/* ── filter and sort in the list card (corrections, Phase 5) ─────────────────────────────────── */
+
+describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
+  /**
+   * ⚠️ THE CHIP STRIP SAID IT BY STANDING ON THE PAGE. With the chips folded into a menu, the
+   * button's ink fill is the ONLY thing left that can say a filter is on — so that fill is not
+   * decoration and not optional.
+   */
+  it("the filter button takes the active fill whenever the chip is not `all`", () => {
+    expect(board).toContain('className={`tdw-cbic${chip === "all" ? "" : " on"}`}');
+    const on = rule(splitCss, ".tdw-cbic.on {");
+    expect(on).toContain("background: #2b2118");
+    expect(on).toContain("color: #fdfaf5");
+  });
+
+  it("…and it states WHAT it is narrowed to, beneath the row", () => {
+    expect(board).toContain('className="tdw-narrowed"');
+    expect(board).toContain("Showing {active.label} only");
+  });
+
+  /**
+   * ⚠️ THE MENU'S COUNTS ARE THE BANDS' COUNTS. `railChips` is the one derivation both read, so a
+   * menu row and the section band it names cannot state different figures — which is the whole
+   * reason the chips could be folded away at all.
+   */
+  it("the filter menu reads `railChips`, the same derivation the bands read", () => {
+    const at = board.indexOf("function renderRailTools");
+    expect(at, "the rail tools are gone — this slice would read nothing").toBeGreaterThan(-1);
+    const fn = board.slice(at, at + 3200);
+    expect(fn).toContain("const chips = railChips(boardCols);");
+    expect(fn).toContain("{ch.label} <span className=\"tdw-mn\">{ch.count}</span>");
+  });
+
+  /**
+   * ⚠️ BOTH CLOSE ON OUTSIDE PRESS AND ESCAPE, AND NEITHER TRAPS FOCUS. They are narrowing
+   * controls on permanent chrome, not dialogues — trapping focus in a filter would make it
+   * something you have to escape from. Escape is deliberately NOT captured or stopped: this page
+   * has its own Escape business, and swallowing the key here would reach past these menus.
+   */
+  it("the two menus dismiss the same three ways, and neither traps focus", () => {
+    const at = board.indexOf("if (!filterOpen && !sortOpen) return;");
+    expect(at, "the dismissal effect is gone").toBeGreaterThan(-1);
+    const eff = board.slice(at, at + 700);
+    expect(eff).toContain('document.addEventListener("pointerdown", close)');
+    expect(eff).toContain('if (e.key === "Escape") close();');
+    /* not captured, not stopped — the page's own Escape still reaches past them */
+    expect(eff).not.toContain("true)");
+    expect(eff).not.toContain("stopPropagation");
+    /* mutually exclusive: opening one shuts the other */
+    expect(board).toContain("onClick={() => { setSortOpen(false); setFilterOpen((v) => !v); }}");
+    expect(board).toContain("onClick={() => { setFilterOpen(false); setSortOpen((v) => !v); }}");
+  });
+});
