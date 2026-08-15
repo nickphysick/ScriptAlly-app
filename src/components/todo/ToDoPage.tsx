@@ -64,6 +64,9 @@ import {
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList, groupColumn } from "./TaskList";
 import { useDockActivity } from "./useDockActivity";
+import { materialRows } from "../../lib/todoHandoff";
+import { sendSpecFor } from "../../lib/todoDock";
+import { isSlotFilled } from "../../lib/packageMetrics";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
@@ -242,7 +245,7 @@ export interface ToDoPageProps {
 
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const {
-    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser, collectionsReady,
+    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, versions, currentUser, collectionsReady,
     addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile,
     recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
@@ -1538,6 +1541,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   onSelect={(key) => setDockKey(key)}
                   onClose={closeDock}
                   timeline={dockTimeline}
+                  /* ⚠️ THE PAGE DERIVES THE MATERIALS because the package and its versions live
+                     here; the card states what it is handed. */
+                  materials={dockMaterials}
                   onPrimary={(c) => dockPrimary(c)}
                   tagsSlot={(c) => c.userTaskId ? (
                     <TagPicker
@@ -2184,6 +2190,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * ⚠️ A SECOND SOURCE, NOT A SECOND DERIVATION. `activityEventLabel` is still the one label
    * derivation and is untouched; only the store it is handed changed.
    */
+  /**
+   * ⚠️ WHAT THE RECORD CAN ACTUALLY SAY, WHICH IS LESS THAN THE MOCKUP DRAWS. The ref's sub-line is
+   * `v4 · 50,000 words · .docx`; of the three, only the VERSION is derivable, and only where the
+   * query has a linked package whose slot is filled. `ManuscriptVersion.fileName` is written
+   * nowhere in `src/` outside a dev lab fixture and `contentType: "file"` is a disabled
+   * "coming soon" with no Storage — so a format stamp would be invented on every row. A per-
+   * material word count does not exist either: `wordCount` belongs to the MANUSCRIPT, and printing
+   * it beside a query letter would state the novel's length as the letter's.
+   */
+  function dockMaterials(card: BoardCard) {
+    const spec = sendSpecFor(card);
+    if (!spec) return [];
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    const pkg = q?.packageId ? packages.find((p) => p.id === q.packageId) : undefined;
+    /* ⚠️ THE SLOT FOLLOWS THE MATERIAL. A partial and a full are both the OPENING SAMPLE slot in
+       `SubmissionPackage` — there is no "full manuscript" slot, and that is the standing law
+       (PACKAGE_MATERIALS): a full manuscript is what you send when asked, not part of a package.
+       So a full has no version to quote, and says so rather than quoting the sample's. */
+    const slot = spec.targetStatus === "Partial Sent" ? pkg?.samplePagesVersionId : undefined;
+    const version = slot && isSlotFilled(slot) ? versions.find((v) => v.id === slot)?.versionName ?? null : null;
+    return materialRows(spec.material, version);
+  }
+
   function dockTimeline(card: BoardCard): DockTimelineEvent[] {
     if (!card.relatedRecordId) return [];
     const q = queries.find((x) => x.id === card.relatedRecordId);

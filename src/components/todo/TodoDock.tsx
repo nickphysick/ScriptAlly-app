@@ -26,7 +26,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
-import { bandVariant, bandMotif, bandAnchor } from "../../lib/todoHandoff";
+import { bandVariant, bandMotif, bandAnchor, MaterialRow } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
 import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE } from "../../lib/todoHandoff";
@@ -75,6 +75,9 @@ export interface TodoDockProps {
   activeKey: string;
   onSelect: (key: string) => void;
   onClose: () => void;
+  /** ⚠️ THE MATERIALS ON FILE — a RECORD, not a choice. The page derives them because the package
+   *  and its versions live there; the card states what it is handed. */
+  materials?: (card: BoardCard) => MaterialRow[];
   /** The timeline, derived by the page from the activity log. */
   timeline: (card: BoardCard) => DockTimelineEvent[];
   /** The flow's ink act. `spec` is present only for the send flow. */
@@ -100,16 +103,18 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, onPrimary, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, materials, onPrimary, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
-  const [confirmSend, setConfirmSend] = useState(false);
+  /* ⚠️ `confirmSend` IS RETIRED WITH THE CHECKBOX (Phase 6). It was the card's own copy of a
+     decision the journey owns — and the card never read it back to anything, so it was a control
+     whose only effect was to look like one. */
   const [copied, setCopied] = useState(false);
 
-  /* A new item arrives with its own decisions unmade — a confirmation carried over from the last
-     one would be the surface agreeing to something on your behalf. */
-  useEffect(() => { setConfirmSend(false); }, [activeKey]);
+  /* ⚠️ THE PER-ITEM RESET WENT WITH `confirmSend` (Phase 6). It existed so a confirmation could
+     not carry from one card to the next; the card confirms nothing now — it records — so there is
+     no per-item decision left here to clear. */
 
   /* ⚠️ KEYBOARD. Esc closes, ↑↓ walk the queue, Enter is the primary. Bound on the surface rather
      than the document so it cannot reach past an open popover or a field the flow owns. */
@@ -306,12 +311,21 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             {flow === "agent-waiting" && spec && (
               <>
                 <div className="tdk-fk">What goes</div>
-                {/* The writer CONFIRMS rather than chooses from scratch: the task already knows
-                    what was asked for, and offering a free choice would invite the wrong one. */}
-                <label className="tdk-check">
-                  <input type="checkbox" checked={confirmSend} onChange={(e) => setConfirmSend(e.target.checked)} />
-                  The {spec.material}{spec.isResubmit ? ", resubmitted" : ""} — as {card.who || "they"} asked
-                </label>
+                {/**
+                  * ⚠️ A RECORD, NOT A CHOICE. This was a CHECKBOX — and a checkbox belongs to the
+                  * JOURNEY, where the writer is choosing what went. On the reading card the same
+                  * material is a statement of what is on file, so the tick is a MARK: it says
+                  * "this is what would go", and it is not an input the card can be wrong about.
+                  */}
+                <div className="tdk-mats">
+                  {(materials?.(card) ?? []).map((m) => (
+                    <div className="tdk-mat" key={m.label}>
+                      <span className="tdk-matic" aria-hidden>▤</span>
+                      <span className="tdk-mattx"><b>{m.label}</b><span>{m.sub}</span></span>
+                      <span className="tdk-mattick" aria-hidden>✓</span>
+                    </div>
+                  ))}
+                </div>
               </>
             )}
 

@@ -453,3 +453,15 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #b8a898;
 }
+
+/* ── the materials record (v14 close-the-gap, Phase 6) ───────────────────────────────────────── */
+/* ⚠️ WHITE GROUND ON THE PARCHMENT CARD — the row is a filed item, and the card is the file. */
+.tdk-mats { display: flex; flex-direction: column; gap: 8px; }
+.tdk-mat { display: flex; align-items: center; gap: 11px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.tdk-matic { width: 28px; height: 28px; flex: none; border-radius: 8px; background: #f6efe6; color: var(--burg); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.tdk-mattx { flex: 1; min-width: 0; font-size: 13px; color: var(--ink); }
+.tdk-mattx b { display: block; font-weight: 500; }
+.tdk-mattx span { display: block; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-top: 3px; }
+/* ⚠️ THE TICK IS A MARK, NOT AN INPUT — it states that this is what would go, and nothing on the
+   reading card can toggle it. Sage, because it is the app's one "done" colour. */
+.tdk-mattick { flex: none; color: var(--sageD); font-size: 13px; }

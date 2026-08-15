@@ -224,10 +224,29 @@ describe("the flow mounted is the card's own kind", () => {
     expect(page).toContain("rowPrimaryLabel(paneCard, col)");
   });
 
-  it("⚠️ the send's confirmation is still the card's — the tick before the act", () => {
-    /* the checkbox stays here: it is a statement about WHAT GOES, which is the card's business.
-       The act it gates is the bar's. */
-    expect(render("a")).toContain("tdk-check");
+  /**
+   * ⚠️ THE CARD RECORDS, IT DOES NOT ASK — and this case asserted the opposite. It pinned a
+   * CHECKBOX on the reading card, and a checkbox is the journey's control: it is where the writer
+   * CHOOSES what went. On the card the same material is a statement of what is on file, so the
+   * tick is a MARK. The old `confirmSend` state went with it — the card never read it back to
+   * anything, so it was a control whose only effect was to look like one.
+   */
+  it("⚠️ the materials are a RECORD — a marked row, never an input", () => {
+    const html = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => []} materials={() => [{ label: "The partial", sub: "QL v2" }]}
+        onPrimary={() => {}} onMore={() => {}} />,
+    );
+    expect(html).toContain("tdk-mat");
+    expect(html).toContain("The partial");
+    expect(html).toContain("QL v2");
+    /* ⚠️ NO INPUT ANYWHERE IN THE WORK COLUMN — the tick is a glyph, not a control */
+    const at = html.indexOf('class="tdk-work"');
+    expect(at, "the work column marker is gone").toBeGreaterThan(-1);
+    expect(html.slice(at)).not.toContain("<input");
+    /* ⚠️ COMMENT-STRIPPED — the retirement note in `TodoDock.tsx` names the very identifier this
+       forbids, which is the false red the house rule exists for. */
+    expect(code(dockSrc)).not.toContain("confirmSend");
   });
 
   it("stale offers the close, and says what closing means for the response rate", () => {

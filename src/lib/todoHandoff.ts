@@ -410,3 +410,41 @@ export function bandMotif(c: BoardCard): MotifKey {
     case "note": return "note";
   }
 }
+
+/* ── the card's materials, as a RECORD (v14 close-the-gap, Phase 6) ──────────────────────────── */
+
+export interface MaterialRow {
+  /** The material's own name — "Opening sample", never "Sample pages" (the ComponentType law). */
+  label: string;
+  /**
+   * ⚠️ WHAT THE RECORD CAN ACTUALLY SAY, WHICH IS LESS THAN THE MOCKUP DRAWS. The ref's sub-line
+   * is `v4 · 50,000 words · .docx`. Of those three, ONE is derivable: the version name, and only
+   * where the query has a linked package whose slot is filled. There is no file at all —
+   * `ManuscriptVersion.fileName` is written nowhere in `src/` outside a dev lab fixture, and
+   * `contentType: "file"` is a disabled "coming soon" with no Storage behind it — so a format
+   * stamp would be invented, every time, on every row. A per-material word count does not exist
+   * either; `wordCount` is a MANUSCRIPT field, and printing it beside a query letter would be
+   * stating the novel's length as the letter's.
+   */
+  sub: string;
+}
+
+/**
+ * ⚠️ THE CARD RECORDS, IT DOES NOT ASK. This replaced a checkbox — a control that belongs to the
+ * JOURNEY, where the writer is choosing what went. On the reading card the same material is a
+ * statement of what is on file, so it carries a tick that is a MARK rather than an input.
+ *
+ * ⚠️ AND AN UNKNOWN VERSION SAYS SO. "Version not recorded" is a fact about the record; a bare
+ * "v1" would be the app guessing, and on a query with no linked package it would be guessing
+ * every time.
+ */
+export function materialRows(
+  materialLabel: string | null,
+  versionName: string | null,
+): MaterialRow[] {
+  if (!materialLabel) return [];
+  return [{
+    label: materialLabel,
+    sub: versionName ? versionName : "Version not recorded",
+  }];
+}
