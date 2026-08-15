@@ -41,3 +41,32 @@ is marked `[FIXED-IN-RUN]` with the reason it could not wait.
 7. **`.tdk-tlw` keeps `white-space: nowrap` inside a now-fixed 66px grid track.** Harmless for
    `5 Jun`; a longer date string (`4 May 2024`, which the close cards' data can produce) would
    overflow its track rather than wrap. Not seen on dev; the data that would show it exists.
+
+---
+
+## ⚠️ THE ONE THAT MATTERS — found in Phase 6, NOT fixed
+
+8. **ALL FIVE TO-DO JOURNEYS RENDER CORRECTLY AND CANNOT BE OPERATED.** Every control inside the
+   takeover is unreachable by pointer and by keyboard on the deployed dev site.
+
+   **Measured, not inferred.** `document.elementsFromPoint()` at the exact centre of the send
+   journey's advance button — a visible, enabled, `pointer-events: auto`, opacity-1, untransformed
+   `<button>` whose rect is `(820, 661, 169×45)` in a 1920×1000 viewport — returns
+   `["body", "html"]`. Playwright retried the click 440 times and gave up. The app's own handler is
+   fine: dispatching `el.click()` directly advances the journey to the `When` step.
+
+   **Cause, exactly.** `<div id="root">` carries `inert`. It is the only inert node on the page, and
+   it is set by `sealBackground()` in `src/components/shell/useOverlay.ts:55` — on a premise the
+   file states in its own words: *"Overlays here portal to `document.body`, so the thing to seal off
+   is `#root`."* `FocusFlow` does **not** portal. `ToDoPage.tsx:1705` mounts it inline, inside
+   `#root`. So the takeover seals itself along with the page behind it.
+
+   **Two candidate fixes, and choosing between them is a decision, not a typo.** Portal `FocusFlow`
+   to `document.body` so it satisfies the contract `useOverlay` already documents; or have
+   `sealBackground()` seal something other than the shared root. `useOverlay` is also used by the
+   Query Centre sheet and `TaskSettingsSheet`, so the wrong choice breaks two working overlays —
+   which is why this was reported rather than patched at 1am under a no-new-investigations rule.
+
+   Not caught by anything: the journey locks read source, and the takeover's markup is correct. Only
+   asking the browser what owns the pixel finds it. `tests/e2e/calendarWidth.measure.ts` now reports
+   the sealed-root check on every run so it cannot quietly stop being true.
