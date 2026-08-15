@@ -370,13 +370,10 @@
 /* anything the agent said, in their own words */
 .tdk-tlq { display: block; font-size: 11.5px; color: #8a7666; margin-top: 4px; font-style: italic; }
 
-/* what went with the entry */
-.tdk-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
-
-.tdk-chip {
-  border: 1px solid #e6d9c9; background: #fdfaf5; border-radius: 999px;
-  padding: 4px 10px; font-size: 11px; color: #6a5a50;
-}
+/* (⚠️ THE MATERIAL CHIPS ARE CUT — `Activity` carries no package or version reference, so
+   structured chips are possible on ZERO entries, and faking them from the free-text `details`
+   would be parsing a display string. `details` renders verbatim as the sub-line instead. The
+   rules return the day an activity can name what went with it.) */
 
 /* ⚠️ BOTH ENDS ARE LABELLED — a bar with no scale is a shape rather than a fact. Sage inside the
    agent's stated window, burgundy once past it, which is the rule the rail's numeral follows so

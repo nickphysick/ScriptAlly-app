@@ -46,8 +46,21 @@ export interface DockTimelineEvent {
   via?: string;
   /** Anything the agent said: the request quote, the R&R notes. */
   note?: string;
-  /** What went with this entry — `Query letter`, `First 50 pages v3`. */
-  chips?: string[];
+  /**
+   * ⚠️ MATERIAL CHIPS ARE CUT, NOT DEFERRED, AND THE REASON IS THAT NOTHING CAN FEED THEM.
+   * `Activity` carries no package or version reference — only a free-text `details`. The package's
+   * filled slots describe the QUERY'S CURRENT package, not what went with a specific entry, so
+   * there is no join from an activity to what accompanied it. Structured chips are therefore
+   * possible on ZERO historical entries.
+   *
+   * ⚠️ AND `details` IS DISPLAYED, NEVER PARSED. Splitting "QL v2 + Syn v4" on "+" to fake chips
+   * would be deriving state by reading a display string, which is the fault the whole record is
+   * built to avoid. The string renders VERBATIM as the sub-line instead: it is what a human wrote
+   * for a human to read, and that is all it is.
+   *
+   * The field returns the day an activity can name what went with it — a data decision, not a
+   * display one.
+   */
   /** The wait against the agent's STATED window. Absent where they state none. */
   progress?: { pct: number; over: boolean; from: string; to: string };
   /** The ring's state, from the same StatusDot logic the rest of the app draws. */
@@ -240,12 +253,6 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                       <b>{e.label}</b>{e.via && <span className="via"> · {e.via}</span>}
                       {/* anything the agent said, in their own words */}
                       {e.note && <span className="tdk-tlq">{e.note}</span>}
-                      {/* what went with this entry */}
-                      {e.chips && e.chips.length > 0 && (
-                        <span className="tdk-chips">
-                          {e.chips.map((c) => <span className="tdk-chip" key={c}>{c}</span>)}
-                        </span>
-                      )}
                       {/* ⚠️ THE BAR IS AGAINST THE AGENT'S STATED WINDOW, and both ends are
                           labelled — a bar with no scale is a shape, not a fact. Sage inside the
                           window, burgundy once past it, which is the same rule the rail's numeral

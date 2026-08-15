@@ -29,6 +29,12 @@
   --ink: #241c15;     /* near-black — glyph strokes on tinted bands, headings */
   --muted: #9a8c80;   /* muted mono captions */
   --pink: #f5e2da;    /* soft-pink CTA fill */
+  /* ⚠️ THE TWO HAIRLINES, NAMED WHILE THEY HAVE TWO CALLERS RATHER THAN NINE. `--hair` is a
+     container's OWN edge (a card, a control); `--hair-soft` is a divider INSIDE one (a tools row,
+     a footer strip). Two weights because a box's edge and its internal rules should not read as
+     the same line — which is the distinction the To-do list card is built on. */
+  --hair: #e7ddd2;    /* a container's own edge */
+  --hair-soft: #efe8de; /* a divider inside one */
   --pink-b: #e8c8bc;  /* soft-pink CTA border */
   --pink-h: #efd5ca;  /* soft-pink CTA hover */
   --tl: #f6ddd3;      /* query-letter type tint */

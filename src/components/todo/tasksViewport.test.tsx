@@ -998,3 +998,50 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
     expect(board).toContain("onClick={() => { setFilterOpen(false); setSortOpen((v) => !v); }}");
   });
 });
+
+/**
+ * ⚠️ `details` IS DISPLAYED, NEVER PARSED (journeys pack, (B)). It is a free-text field a human
+ * wrote for a human to read; deriving anything by reading it back — chips, counts, status — is the
+ * fault the whole record is built to avoid, and it is the same shape as a discriminator that
+ * infers from label text.
+ */
+describe("⚠️ NOTHING DERIVES STATE BY READING A DISPLAY STRING", () => {
+  it("the timeline renders `details` verbatim and splits it on nothing", () => {
+    const dock = readFileSync(join(here, "TodoDock.tsx"), "utf8");
+    const decl = dock.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    /* no chip strip, and no split of any kind over an entry's text */
+    expect(decl).not.toContain("tdk-chips");
+    expect(decl).not.toMatch(/\.split\(["'`]\s*\+/);
+    expect(decl).not.toMatch(/details\s*\.\s*split/);
+  });
+
+  /**
+   * ⚠️ AND THE CHIPS ARE CUT BECAUSE NOTHING COULD FEED THEM. `Activity` carries no package or
+   * version reference, so structured chips are possible on ZERO entries. The type asserts that
+   * absence, so a future reader adding chips has to add the DATA first.
+   */
+  it("an Activity cannot name what went with it — which is why there are no chips", () => {
+    const types = readFileSync(join(here, "..", "..", "types.ts"), "utf8");
+    const i = types.indexOf("export interface Activity {");
+    expect(i, "the Activity interface is gone").toBeGreaterThan(-1);
+    /* ⚠️ ON DECLARATIONS — the interface's own note says "materials sent", describing the WRITES
+       that stamp `resultingStatus`, and reading prose as a field is the same mistake this whole
+       describe is about. */
+    const iface = types.slice(i, types.indexOf("}", i)).replace(/\/\/[^\n]*/g, "");
+    for (const field of ["packageId", "versionId", "materials"]) {
+      expect(iface, field).not.toContain(field);
+    }
+  });
+});
+
+describe("⚠️ THE TWO HAIRLINES ARE TOKENS, named while they had two callers", () => {
+  it("both are declared once and read by name", () => {
+    const index = readFileSync(join(here, "..", "..", "index.css"), "utf8");
+    expect(index).toContain("--hair: #e7ddd2;");
+    expect(index).toContain("--hair-soft: #efe8de;");
+    /* the page reads them rather than restating the hexes */
+    expect(splitCss).toContain("var(--hair-soft)");
+    expect(splitCss).toContain("var(--hair)");
+    expect(splitCss).not.toContain("#efe8de");
+  });
+});
