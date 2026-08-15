@@ -28,7 +28,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import { ArtSlot } from "./ArtSlot";
 import { bandFamily } from "../../lib/todoColumns";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
-import { handoffFor, panePosition, paneSections, bandFacts, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE } from "../../lib/todoHandoff";
+import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
@@ -37,6 +37,21 @@ export interface DockTimelineEvent {
   key: string;
   label: string;
   when: string;
+  /**
+   * ⚠️ EVERYTHING BELOW IS OPTIONAL AND ABSENT WHERE THE RECORD IS SILENT (journeys pack, Phase 2).
+   * A row with no channel shows no channel; a row with no materials shows no chips. None of it is
+   * inferred — an entry that says "Partial sent" and nothing else renders exactly that.
+   */
+  /** "via email" — appended in REGULAR weight beside the event's 600. */
+  via?: string;
+  /** Anything the agent said: the request quote, the R&R notes. */
+  note?: string;
+  /** What went with this entry — `Query letter`, `First 50 pages v3`. */
+  chips?: string[];
+  /** The wait against the agent's STATED window. Absent where they state none. */
+  progress?: { pct: number; over: boolean; from: string; to: string };
+  /** The ring's state, from the same StatusDot logic the rest of the app draws. */
+  ring?: "out" | "in" | "now";
 }
 
 export interface TodoDockProps {
@@ -106,6 +121,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const sections = paneSections(card);
   const src = handoff?.(card) ?? {};
   const facts = bandFacts(src.sentLabel ?? null, src.sentValue ?? null, src.waitLabel ?? null, src.waitValue ?? null);
+  /* the stat pair reads the SAME two facts the band does — one derivation, two presentations */
+  const stats = trackingStats(facts);
   const hoff = handoffFor(card, src.email, src.website, src.msTitle);
   const who = card.who || "them";
 
@@ -190,14 +207,57 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             not be read together. This inner split stands; the OUTER 30/70 one does not — see the
             head note. */}
         <div className="tdk-body">
-          <aside className="tdk-story" aria-label="The story so far">
-            <div className="tdk-storyk">THE STORY SO FAR</div>
+          <aside className="tdk-story" aria-label="Tracking">
+            {/**
+              * ⚠️ THE STAT PAIR IS THE BAND'S TWO FACTS, IN THE QUERY CENTRE'S GRAMMAR (Phase 2).
+              * Icon tile, Playfair figure with the unit in Inter beside it, mono caption beneath —
+              * the shape `.qp-stats` uses over there. The FIGURES are the same `figureFor` the rail
+              * and the band already read, so a third statement of the wait is impossible.
+              */}
+            {stats.length > 0 && (
+              <div className="tdk-tstats">
+                {stats.map((st) => (
+                  <div className="tdk-tstat" key={st.k}>
+                    <span className="ico" aria-hidden>{st.icon}</span>
+                    <span>
+                      <span className="big">{st.v}{st.u && <span className="u">{st.u}</span>}</span>
+                      <span className="k">{st.k}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="tdk-storyk">TRACKING</div>
             {/* Derived from the activity log, never stored. Absent when the record has no history
                 yet, rather than an empty frame implying something is missing. */}
             {events.length > 0 ? (
               <ol className="tdk-tl">
                 {events.map((e) => (
-                  <li key={e.key}><span className="tdk-tlw">{e.when}</span><span>{e.label}</span></li>
+                  <li key={e.key} className={e.ring ? `r-${e.ring}` : undefined}>
+                    <span className="tdk-tlw">{e.when}</span>
+                    <span className="tdk-tle">
+                      {/* the event in 600, the channel appended in regular — one line, two weights */}
+                      <b>{e.label}</b>{e.via && <span className="via"> · {e.via}</span>}
+                      {/* anything the agent said, in their own words */}
+                      {e.note && <span className="tdk-tlq">{e.note}</span>}
+                      {/* what went with this entry */}
+                      {e.chips && e.chips.length > 0 && (
+                        <span className="tdk-chips">
+                          {e.chips.map((c) => <span className="tdk-chip" key={c}>{c}</span>)}
+                        </span>
+                      )}
+                      {/* ⚠️ THE BAR IS AGAINST THE AGENT'S STATED WINDOW, and both ends are
+                          labelled — a bar with no scale is a shape, not a fact. Sage inside the
+                          window, burgundy once past it, which is the same rule the rail's numeral
+                          follows so the two surfaces cannot disagree about "late". */}
+                      {e.progress && (
+                        <span className="tdk-prog">
+                          <span className="bar"><i className={e.progress.over ? "fill over" : "fill"} style={{ width: `${e.progress.pct}%` }} /></span>
+                          <span className="ends"><span>{e.progress.from}</span><span>{e.progress.to}</span></span>
+                        </span>
+                      )}
+                    </span>
+                  </li>
                 ))}
               </ol>
             ) : (

@@ -12,7 +12,7 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, HANDOFF_NOTE,
+  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, trackingStats, HANDOFF_NOTE,
 } from "./todoHandoff";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -225,7 +225,7 @@ describe("⚠️ THE SECTION SET IS DECLARED PER BUCKET — one table, not a fif
 describe("⚠️ THE BAND'S FACTS STRIP IS THE RAIL'S PAIRING, IN THE CARD", () => {
   it("both facts render when both exist", () => {
     expect(bandFacts("Requested", "2 August", "Waiting", "12 days"))
-      .toEqual([{ k: "Requested", v: "2 August" }, { k: "Waiting", v: "12 days" }]);
+      .toEqual([{ k: "Requested", v: "2 August", kind: "date" }, { k: "Waiting", v: "12 days", kind: "wait" }]);
   });
 
   /**
@@ -235,7 +235,38 @@ describe("⚠️ THE BAND'S FACTS STRIP IS THE RAIL'S PAIRING, IN THE CARD", () 
    * empty IS the information; here, the strip is a summary and a summary of nothing is noise.
    */
   it("a fact with no value is omitted, and an empty strip is empty", () => {
-    expect(bandFacts("Requested", null, "Waiting", "12 days")).toEqual([{ k: "Waiting", v: "12 days" }]);
+    expect(bandFacts("Requested", null, "Waiting", "12 days")).toEqual([{ k: "Waiting", v: "12 days", kind: "wait" }]);
     expect(bandFacts(null, null, null, null)).toEqual([]);
+  });
+});
+
+describe("⚠️ TRACKING'S STAT PAIR IS THE BAND'S FACTS, RE-PRESENTED — never a second derivation", () => {
+  it("it takes `bandFacts`' own output, so three surfaces state one number", () => {
+    const facts = bandFacts("He asked on", "28 Jun", "Greg has waited", "6 weeks");
+    expect(trackingStats(facts).map((s) => s.k)).toEqual(["He asked on", "Greg has waited"]);
+  });
+
+  /**
+   * ⚠️ THE UNIT SPLITS OFF THE FIGURE because the two are set in different faces — Playfair for
+   * the number, Inter for the unit — and one string cannot carry two faces. The split is on the
+   * FIRST space of a WAIT only, so "6 weeks" divides and a date's parts stay together.
+   */
+  /* ⚠️ AND THE DISCRIMINATOR IS THE TAG, NOT THE TEXT. Both values start with a number, so a
+     first attempt guessed from the LABEL and split "He asked on / 28 Jun" into "28" and "Jun"
+     because the word "asked" matched. Caught by this case. */
+  it("a wait splits into figure and unit; a date does not", () => {
+    const [date, wait] = trackingStats(bandFacts("He asked on", "28 Jun", "Greg has waited", "6 weeks"));
+    expect(wait).toMatchObject({ v: "6", u: "weeks" });
+    expect(date).toMatchObject({ v: "28 Jun", u: "" });
+  });
+
+  it("a word figure carries no unit to split", () => {
+    const [, wait] = trackingStats(bandFacts("He asked on", "28 Jun", "Greg has waited", "Today"));
+    expect(wait).toMatchObject({ v: "Today", u: "" });
+  });
+
+  it("an absent fact yields no stat — the pair is short rather than padded", () => {
+    expect(trackingStats(bandFacts(null, null, "Greg has waited", "6 weeks"))).toHaveLength(1);
+    expect(trackingStats(bandFacts(null, null, null, null))).toEqual([]);
   });
 });

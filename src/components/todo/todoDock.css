@@ -323,3 +323,70 @@
 
 /* the pink band is the offer's — its labels take the burgundy family rather than the sage */
 .tdk-band.fam-urgent .tdk-fact .k { color: #9a6a56; }
+
+/* ══ TRACKING (journeys pack, Phase 2; ref todo-workspace-v14.html `.tstats` / `.chips` / `.prog`)
+   ⚠️ THE SHAPE IS THE QUERY CENTRE'S `.qp-stats` — icon tile, Playfair figure, mono caption, one
+   hairline between the pair. Borrowed deliberately: the two panes are looking at the same record
+   from two places, and a second grammar for one fact would make them read as two apps. */
+.tdk-tstats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #ece0d2;
+  border-radius: 11px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.tdk-tstat { padding: 12px 14px; display: flex; align-items: center; gap: 11px; min-width: 0; }
+.tdk-tstat + .tdk-tstat { border-left: 1px solid #ece0d2; }
+
+.tdk-tstat .ico {
+  width: 30px; height: 30px; border-radius: 9px; flex: none;
+  background: #f6efe6; color: #7c3a2a;
+  display: flex; align-items: center; justify-content: center; font-size: 15px;
+}
+
+.tdk-tstat .big {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 19px; color: #2b2118; line-height: 1;
+}
+
+/* ⚠️ THE UNIT IS INTER BESIDE A PLAYFAIR FIGURE — two faces, which is why the derivation splits
+   the value rather than handing the row one string. */
+.tdk-tstat .big .u { font-family: inherit; font-size: 12px; color: #8a7666; margin-left: 3px; }
+
+.tdk-tstat .k {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #b3a496; margin-top: 4px;
+}
+
+/* the entry: the event in 600, the channel appended in regular */
+.tdk-tle { display: block; min-width: 0; }
+.tdk-tle b { font-weight: 600; }
+.tdk-tle .via { font-weight: 400; color: #8a7666; }
+
+/* anything the agent said, in their own words */
+.tdk-tlq { display: block; font-size: 11.5px; color: #8a7666; margin-top: 4px; font-style: italic; }
+
+/* what went with the entry */
+.tdk-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+
+.tdk-chip {
+  border: 1px solid #e6d9c9; background: #fdfaf5; border-radius: 999px;
+  padding: 4px 10px; font-size: 11px; color: #6a5a50;
+}
+
+/* ⚠️ BOTH ENDS ARE LABELLED — a bar with no scale is a shape rather than a fact. Sage inside the
+   agent's stated window, burgundy once past it, which is the rule the rail's numeral follows so
+   the two surfaces cannot disagree about "late". */
+.tdk-prog { display: block; margin-top: 8px; }
+.tdk-prog .bar { display: block; height: 4px; border-radius: 3px; background: #f0e8dd; position: relative; overflow: hidden; }
+.tdk-prog .fill { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: #8a9e88; }
+.tdk-prog .fill.over { background: #7c3a2a; }
+.tdk-prog .ends { display: flex; justify-content: space-between; margin-top: 5px; }
+.tdk-prog .ends span {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #b8a898;
+}

@@ -239,6 +239,14 @@ export interface BandFact {
   k: string;
   /** The Playfair value beneath it. */
   v: string;
+  /**
+   * ⚠️ WHICH FACT THIS IS, TAGGED AT CONSTRUCTION RATHER THAN INFERRED. Tracking's stat pair sets
+   * the figure in Playfair and its unit in Inter, so it has to split "6 weeks" and NOT split
+   * "28 Jun" — and both start with a number, so the value cannot tell them apart. A first attempt
+   * guessed from the LABEL and split "He asked on / 28 Jun" into "28" and "Jun", because the word
+   * "asked" matched. The caller knows; it says.
+   */
+  kind: "date" | "wait";
 }
 
 /**
@@ -257,8 +265,8 @@ export function bandFacts(
   waitValue: string | null,
 ): BandFact[] {
   const out: BandFact[] = [];
-  if (sentLabel && sentValue) out.push({ k: sentLabel, v: sentValue });
-  if (waitLabel && waitValue) out.push({ k: waitLabel, v: waitValue });
+  if (sentLabel && sentValue) out.push({ k: sentLabel, v: sentValue, kind: "date" });
+  if (waitLabel && waitValue) out.push({ k: waitLabel, v: waitValue, kind: "wait" });
   return out;
 }
 
@@ -305,4 +313,41 @@ export function bandUnder(c: BoardCard): string {
   if (!c.who || !c.record) return "";
   const rest = c.record.startsWith(c.who) ? c.record.slice(c.who.length) : c.record;
   return rest.replace(/^\s*·\s*/, "").trim();
+}
+
+
+/* ── Tracking's stat pair (journeys pack, Phase 2) ───────────────────────────────────────────── */
+
+export interface TrackingStat {
+  /** The mono caption beneath. */
+  k: string;
+  /** The Playfair figure. */
+  v: string;
+  /** The unit, in Inter beside it. Empty where the figure is a word or a date. */
+  u: string;
+  /** The icon tile's glyph — a clock for a wait, a calendar for a date. */
+  icon: string;
+}
+
+/**
+ * ⚠️ THE STAT PAIR IS THE BAND'S TWO FACTS IN A SECOND PRESENTATION, NEVER A SECOND DERIVATION.
+ * It takes `bandFacts`' own output and re-presents it, so the card cannot state the wait twice and
+ * differently — which is the same reason the band reads the rail's `figureFor` rather than
+ * recomputing. Three surfaces, one number.
+ *
+ * ⚠️ THE UNIT SPLITS OFF THE VALUE because the two are set in different faces — Playfair for the
+ * figure, Inter for the unit — and a single string cannot carry two faces. The split is on the
+ * LAST space, so "6 weeks" divides and "28 Jun" does not (a date's parts belong together).
+ */
+export function trackingStats(facts: BandFact[]): TrackingStat[] {
+  return facts.map((f) => {
+    /* only a WAIT splits, and only when it actually has a unit — "Today" has none */
+    const m = f.kind === "wait" ? /^(\S+)\s+(.+)$/.exec(f.v) : null;
+    return {
+      k: f.k,
+      v: m ? m[1] : f.v,
+      u: m ? m[2] : "",
+      icon: f.kind === "wait" ? "◷" : "▤",
+    };
+  });
 }

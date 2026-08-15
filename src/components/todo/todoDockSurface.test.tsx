@@ -366,12 +366,34 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     expect(dockCss).toContain(".tdk-work { flex: 1; min-width: 0; }");
   });
 
-  it('the story column is headed "THE STORY SO FAR" and holds the timeline', () => {
-    const html = render();
-    expect(html).toContain("THE STORY SO FAR");
-    const story = html.slice(html.indexOf("tdk-story"), html.indexOf("tdk-work"));
-    expect(story).toContain("tdk-tl");        // the timeline lives inside it
-    expect(story).not.toContain("tdk-t\"");   // …and the title does NOT
+  /**
+   * ⚠️ THE COLUMN IS **TRACKING** NOW (journeys pack, Phase 2), borrowing the Query Centre's own
+   * section rather than growing a second story panel. Its stat pair re-presents the band's two
+   * facts — one derivation, three presentations — and its rows read `activityEventLabel`, which
+   * `dockTimeline` already called.
+   */
+  it("the column is headed TRACKING and opens with the stat pair", () => {
+    const html = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => [{ key: "e1", label: "Full requested", when: "12 Jul" }]}
+        onPrimary={() => {}} onMore={() => {}}
+        handoff={() => ({ waitLabel: "Greg has waited", waitValue: "6 weeks", sentLabel: "He asked on", sentValue: "28 Jun" })} />,
+    );
+    expect(html).toContain("TRACKING");
+    expect(html).toContain("tdk-tstats");
+    expect(html).toContain("6");            // the Playfair figure
+    expect(html).toContain("weeks");        // …with the unit split off for Inter
+    expect(html).toContain("28 Jun");
+    expect(html).toContain("Full requested");
+  });
+
+  it("⚠️ EVERY ENRICHMENT IS ABSENT WHERE THE RECORD IS SILENT", () => {
+    /* a row that says "Full requested" and nothing else renders exactly that — no empty chip
+       strip, no bar with no scale, no channel invented */
+    const bare = render();
+    expect(bare).not.toContain("tdk-chips");
+    expect(bare).not.toContain("tdk-prog");
+    expect(bare).not.toContain('class="via"');
   });
 
   it("⚠️ THE WORK COLUMN IS THE DOING ALONE — no title, no record line (corrections, Phase 1)", () => {
