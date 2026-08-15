@@ -17,6 +17,9 @@ const here = __dirname;
 const shellCss = readFileSync(join(here, "..", "shell", "todoShell.css"), "utf8");
 const pageCss = readFileSync(join(here, "todo.css"), "utf8");
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+/* ⚠️ COMMENTS OUT BEFORE ANY ABSENCE ASSERTION — the prose here names the very identifiers it
+   forbids, which is exactly the false-red the house rule exists for. */
+const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const promo = readFileSync(join(here, "AssistantPromo.tsx"), "utf8");
 
 /** Read a single CSS rule body by exact selector (first match). */
@@ -67,7 +70,10 @@ describe("the To-do PAGE HEADER — it names the page, and carries ONE action", 
     /* ⚠️ THE ONE LINE IS THE STAT CHIPS NOW (tasks-consolidation P2, 9 Aug) — same facts, same
        `boardCols`, one statement rather than two. The eyebrow above the title is the Dashboard's
        grammar arriving with the consolidation. */
-    expect(page).toContain("taskStats(boardCols,");
+    /* ⚠️ THE STAT CHIPS ARE RETIRED (one-primary pass follow-up) — they restated the control
+       bar's own `{n} outstanding` and the group headings' own counts, three inches apart. The
+       header states NO figures now; the figure lives beside the thing it counts. */
+    expect(code(page)).not.toContain("taskStats(");
   });
 
   it("its actions are a TOOL ROW now (board+dock P1) — pink Add, ghost session launcher", () => {

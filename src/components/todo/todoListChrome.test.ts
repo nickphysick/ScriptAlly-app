@@ -30,6 +30,9 @@ import { join } from "node:path";
 
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+/* ⚠️ COMMENTS OUT BEFORE ANY ABSENCE ASSERTION — the prose here names the very identifiers it
+   forbids, which is exactly the false-red the house rule exists for. */
+const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
 /** Everything before the body renders — the page's chrome.
  *  ⚠️ The anchor has moved three times: with the view switch (board+dock P1), with the board
@@ -143,8 +146,12 @@ describe("ONE narrowing, applied in ONE place — it cannot reach some of the pa
   it("the header's figures come from the cards the page RENDERS, never a second tally", () => {
     /* ⚠️ SUPERSEDED FEED, TWICE. P5 moved it off the raw lanes (which held every sweep member
        loose and could not see the flags-built Snoozed — "Everything 27" beside fourteen); P2
-       moves it off the FILTERS rows onto the stat chips. Same object both times: `boardCols`. */
-    expect(page).toContain("taskStats(boardCols,");
+       moved it off the FILTERS rows onto the stat chips. Same object each time: `boardCols`.
+       ⚠️ SUPERSEDED A THIRD TIME, and this one ends the sequence: the chips are retired and the
+       control bar's figure is `railShown()`, which SUMS THE RENDERED GROUPS rather than deriving
+       a parallel total. There is no longer a second tally to keep in step with the first. */
+    expect(page).toContain("return railGroups().reduce((n, g) => n + g.cards.length, 0);");
+    expect(code(page)).not.toContain("taskStats(");
     expect(page).not.toContain("facetCounts(");
   });
 });

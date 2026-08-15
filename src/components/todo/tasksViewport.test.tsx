@@ -686,9 +686,12 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * collapsed, not a page bar to be built. What came out is only the page-local full-width list
    * container the rail replaces.
    */
-  it("the split builds no header of its own — the shell's plate and the stat chips both stand", () => {
+  it("the split builds no header of its own — the shell's plate stands, the chips are retired", () => {
     expect(layout).toContain('<PageHeader variant="workspace"');
-    expect(board).toContain('className="tdg-stats"');
+    /* ⚠️ THE STAT CHIPS ARE RETIRED (one-primary pass follow-up) — they restated the control
+       bar's own `{n} outstanding` and the group headings' own counts, three inches apart. The
+       header states NO figures now; the figure lives beside the thing it counts. */
+    expect(board).not.toContain('className="tdg-stats"');
     /* the split sheet paints no plate, no bar, no title */
     for (const sel of ["ws-plate", "tpl-head", "wpg-plate"]) {
       expect(splitCss, sel).not.toContain(sel);

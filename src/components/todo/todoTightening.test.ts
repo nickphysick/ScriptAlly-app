@@ -15,6 +15,9 @@ import { join } from "node:path";
 
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+/* ⚠️ COMMENTS OUT BEFORE ANY ABSENCE ASSERTION — the prose here names the very identifiers it
+   forbids, which is exactly the false-red the house rule exists for. */
+const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const css = readFileSync(join(here, "todo.css"), "utf8");
 const rule = (sel: string): string => {
   const m = css.match(new RegExp("(?:^|\\n)" + sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\{([^}]*)\\}"));
@@ -38,7 +41,10 @@ describe("tightening P1 — the hero on one line + the recessed control strip", 
     /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4) — the page passes neither `tools` nor
        `eyebrow`, so the layout renders no row and no hairline. The Add is the control bar's. */
     expect(hero).not.toContain("eyebrow={");
-    expect(page).toContain("taskStats(boardCols,");
+    /* ⚠️ THE STAT CHIPS ARE RETIRED (one-primary pass follow-up) — they restated the control
+       bar's own `{n} outstanding` and the group headings' own counts, three inches apart. The
+       header states NO figures now; the figure lives beside the thing it counts. */
+    expect(code(page)).not.toContain("taskStats(");
   });
 
   it("THE STRIP: chips + search + toggle live inside ONE recessed bar directly beneath the hero — RETIRED SURFACE, see corrections fix 3 — RETIRED SURFACE (board+dock P1)", () => {

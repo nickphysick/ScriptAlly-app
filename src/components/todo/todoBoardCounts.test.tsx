@@ -27,6 +27,9 @@ import { TodoBoard } from "./TodoBoard";
 
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+/* ⚠️ COMMENTS OUT BEFORE ANY ABSENCE ASSERTION — the prose here names the very identifiers it
+   forbids, which is exactly the false-red the house rule exists for. */
+const code = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
 const card = (over: Partial<BoardCard>): BoardCard => ({
   key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,
@@ -139,8 +142,16 @@ describe("the copy, at its edges", () => {
    * above still cover them — and what this case now pins is that the chips and the rendered
    * groups read the SAME object, which is the whole content of the law.
    */
-  it("⚠️ the header's figures and the rendered groups read the SAME hoisted object", () => {
-    expect(page).toContain("taskStats(boardCols,");
+  it("⚠️ the page's figures ARE the rendered groups — the count cannot be a second tally", () => {
+    /* ⚠️ STRONGER THAN THE RULE IT REPLACES. This asserted that the header's stat chips and the
+       groups both read `taskStats(boardCols, …)` — two derivations over one object, which could
+       still drift if either changed. The chips are retired (they restated the bar and the group
+       headings), and what states the figure now SUMS THE RENDERED GROUPS themselves:
+       `railShown()` reduces `railGroups()`, and every heading prints its own `g.cards.length`.
+       A disagreement is not merely unlikely, it is structurally unavailable. */
+    expect(page).toContain("return railGroups().reduce((n, g) => n + g.cards.length, 0);");
+    expect(page).toContain("{railShown()} outstanding");
+    expect(code(page)).not.toContain("taskStats(");
     expect(page).not.toContain("boardSubtitleCopy(boardFigures(boardCols))");
     const fn = page.slice(page.indexOf("function railGroups"), page.indexOf("function railGroups") + 900);
     for (const col of ["todo", "today", "snoozed", "done"]) {

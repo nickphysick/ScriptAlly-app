@@ -87,13 +87,12 @@ import {
 } from "../../lib/todoBoardSort";
 /* THE CONSOLIDATED PAGE'S OWN DERIVATIONS — groups, stat chips and the eyebrow, all pure and
    locked away from this component (tasks-consolidation P2). */
-import { taskGroups, taskStats, tasksEyebrow, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
+import { taskGroups, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
 import { paneRestLine, showingLine, tasksCsv } from "../../lib/todoHandoff";
 import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket, BUCKET_LABEL, rowDeed } from "../../lib/todoBuckets";
 import { rowPrimaryLabel } from "../../lib/taskRow";
 import { SnoozeDial } from "./SnoozeDial";
 import { isTerminalStatus } from "../../lib/agentList";
-import { estimateTotal } from "../../lib/todoEstimate";
 import { longDate } from "../../lib/dashboardStats";
 import {
   TODO_GROUPS, HOUSEKEEPING_FOLD, foldRows, snoozedCount, returnedToday, returnedChipLabel, isSnoozed,
@@ -1383,20 +1382,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               instrument — one place to look for anything that changes what the list shows. Two
               instrument rows, one under the other, is how the chip strip and the LISTS rows came
               to disagree; this is the same mistake in a different arrangement. */}
-          {/* ⚠️ THE STAT CHIPS ARE THE HEADER'S STATEMENT (P2) — four figures from the ONE
-              derivation, each counting CARDS, which is the unit the groups and the sidebar badge
-              both speak. They REPORT and never appraise: no "good day" verdict, no bar, and the
-              estimate chip is simply absent when nothing carries an estimate rather than reading
-              "0 min". "Outstanding" is deliberately not the sum of the panels below it — Snoozed
-              is live work merely asleep, and Done is not outstanding at all. */}
-          {!desk && (
-            <div className="tdg-stats">
-              {taskStats(boardCols, estimateTotal([...boardCols.todo, ...boardCols.today].map((c) => c.estimateMin)))
-                .map((s) => (
-                  <span key={s.label} className="tdg-stat">{s.label} <b>{s.value}</b></span>
-                ))}
-            </div>
-          )}
+          {/* ⚠️ THE STAT CHIPS ARE RETIRED — THEY STATED WHAT THE PAGE ALREADY SAID, TWICE OVER.
+              "Outstanding" is the control bar's own `{n} outstanding`, three inches above; Urgent,
+              Done and Snoozed are each printed on the group heading of the very cards they count.
+              The chips were the header's statement back when the header was the only thing that
+              could make one — the grouped list makes it now, beside the thing being counted, which
+              is where a count is worth reading.
+
+              ⚠️ ONE FIGURE WAS NOT A DUPLICATE, AND ITS LOSS IS FLAGGED RATHER THAN QUIET:
+              `Estimated {n} min` had no other home. `estimateChip` in `TodoBoard.tsx` is the only
+              other display and that component is mounted NOWHERE, so the ⋯ menu's est-5…est-60
+              items now write a `UserTask.estimateMin` the writer can never see. `estimateTotal`
+              and `taskStats` both survive in `lib/`, pure and locked, so reinstating the one line
+              is trivial — but the honest states are "shown somewhere" or "not offered", and the
+              menu still offers it. Nick's call: reinstate the figure, or retire the est-* items. */}
           {/* ⚠️ `.tdb-board` IS DELETED, DIV AND RULE (scroll fix, 9 Aug) — and it was HALF THE BUG.
               It contributed `width: 100%; box-sizing: border-box` and nothing else, but it was a
               BLOCK sitting between `.tpl-body` and `.tpl-zone`. `.tpl-zone`'s `flex: 1;

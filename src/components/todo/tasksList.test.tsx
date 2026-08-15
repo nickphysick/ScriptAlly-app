@@ -1057,8 +1057,14 @@ describe("the header block: mono eyebrow → Playfair title → tool row → sta
     expect(rule(".tdg-stat b {")).toContain('font-family: "Playfair Display"');
   });
 
-  it("⚠️ THE CHIPS ARE ABSENT IN THE DESK STATES — a first-run panel states no figures", () => {
-    expect(page).toContain("{!desk && (");
+  it("⚠️ THE HEADER STATES NO FIGURES AT ALL — so a first-run panel cannot state any", () => {
+    /* ⚠️ THE STAT CHIPS ARE RETIRED (one-primary pass follow-up) — they restated the control
+       bar's own `{n} outstanding` and the group headings' own counts, three inches apart. The
+       header states NO figures now; the figure lives beside the thing it counts. */
+    expect(code(page)).not.toContain("tdg-stats");
+    expect(code(page)).not.toContain("taskStats(");
+    /* the desk states remain the page's own branch, unchanged */
+    expect(page).toContain('desk === "new-desk" ? renderNewDesk()');
   });
 });
 

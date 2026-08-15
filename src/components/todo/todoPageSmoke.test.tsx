@@ -85,7 +85,7 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
      POPULATED CASE THAT ABSORBED THEIR JOB (P2). The app-smoke law: a page that only smokes its
      first-run panel leaves every derivation unexecuted — and on this page the grouping, the stat
      chips, the family pills and the four-slot verb grid are ALL in that unexecuted half. */
-  it("…and with real work on it, the GROUPS, the chips and a row all render (the populated smoke)", () => {
+  it("…and with real work on it, the GROUPS and a row all render (the populated smoke)", () => {
     /* ⚠️ THE TASK IS DATED ON PURPOSE. Under the two-natures law a DATELESS user card is a NOTE,
        and `boardEligible` keeps notes off this page entirely (they live on the Noteboard) — so a
        dateless seed renders an empty list and proves nothing. */
@@ -94,8 +94,13 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     seed.agents = [{ id: "a1", userId: "u1", name: "Tom Ellery", agency: "Ellery & Frost" }];
     seed.userTasks = [{ id: "t1", userId: "u1", text: "Redraft the opening chapter", done: false, dueDate: ymd, createdAt: "2026-08-01T09:00:00Z", updatedAt: "" }];
     const html = render(<ToDoPage onNavigate={() => {}} />);
-    expect(html).toContain("tdg-stats");                 // the header's stat chips
-    expect(html).toContain("Outstanding");               // …stating a figure from the one derivation
+    expect(html).not.toContain("tdg-stats");             // the header's stat chips are retired
+    /* ⚠️ THE FIGURE IS THE CONTROL BAR'S, AND IT AGREES WITH THE GROUP HEADING — asserted on the
+       RENDERED page, which is the one check a source lock cannot make. One seeded task: the bar
+       says "1 outstanding" and the heading beside the card says "1". The chips used to state the
+       same number a third time. */
+    expect(html).toContain("1 outstanding");
+    expect(html).toContain('<span class="tdg-n">1</span>');
     expect(html).toContain("Your tasks");                // the group heading, outside its panel
     expect(html).toContain("tdg-panel");                 // the white panel
     expect(html).toContain("Redraft the opening chapter");
