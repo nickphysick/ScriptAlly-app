@@ -373,11 +373,31 @@ describe("⚠️ §5.1 — THE BAND CARRIES THE FORWARD-LOOKING FACT ALONE", () 
    * something untrue — and the fault this replaces was the band carrying the ANCHOR, which the
    * stat pair carries too: the same figure twice on one card.
    */
-  it("no forward-looking fact means the band carries NOTHING", () => {
-    expect(bandForward(bcard({ taskType: "offer_received" }), null, 8, fmt)).toBeNull();
-    expect(bandForward(bcard({ taskType: "full_requested" }), "2026-09-07", null, fmt)).toBeNull();
-    expect(bandForward(bcard({ taskType: "no_response_close" }), "2026-09-07", 8, fmt)).toBeNull();
-    expect(bandForward(bcard({ userTaskId: "u1" }), null, null, fmt)).toBeNull();
+  /**
+   * ⚠️ "Not stated" IS A FACT ABOUT THE AGENT, NOT AN APOLOGY FOR MISSING DATA. Plenty of agencies
+   * publish no response time, and knowing that this one does not is worth as much as the number —
+   * it is why the wait has no yardstick. It also makes the row assertable: a band with nothing and
+   * a band whose fact was never built are otherwise the same picture.
+   */
+  it("a send or chase with no stated window SAYS SO, where we hold an agent record", () => {
+    expect(bandForward(bcard({ taskType: "full_requested" }), null, null, fmt, true))
+      .toMatchObject({ k: "Their window", v: "Not stated" });
+    expect(bandForward(bcard({ taskType: "nudge_overdue" }), null, 0, fmt, true))
+      .toMatchObject({ k: "Their window", v: "Not stated" });
+  });
+
+  /**
+   * ⚠️ TWO DIFFERENT SILENCES, AND ONLY ONE IS THE AGENT'S. With no agent on file there is nobody
+   * to have stated anything, so the band says nothing rather than reporting a silence from someone
+   * we have never met. And close / fix / note have no forward-looking CONCEPT at all — a close is
+   * the end of a wait, not the middle of one.
+   */
+  it("no agent record, or a bucket with no such concept, carries NOTHING", () => {
+    expect(bandForward(bcard({ taskType: "full_requested" }), null, null, fmt, false)).toBeNull();
+    expect(bandForward(bcard({ taskType: "offer_received" }), null, 8, fmt, true)).toBeNull();
+    expect(bandForward(bcard({ taskType: "no_response_close" }), "2026-09-07", 8, fmt, true)).toBeNull();
+    expect(bandForward(bcard({ taskType: "data_quality_poor" }), null, 8, fmt, true)).toBeNull();
+    expect(bandForward(bcard({ userTaskId: "u1" }), null, null, fmt, true)).toBeNull();
   });
 
   /* ⚠️ THE LAW ITSELF: the band's fact and the pair's facts are never the same string. */

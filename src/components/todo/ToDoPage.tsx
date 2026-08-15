@@ -1605,6 +1605,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                         isoOf(q?.responseDeadline) ?? null,
                         ag?.responseTimeWeeks ?? null,
                         (iso) => longDay(new Date(iso).getTime()),
+                        /* an agent on file is what makes "Not stated" a fact rather than a guess */
+                        !!ag,
                       ),
                     };
                   }}

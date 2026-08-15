@@ -491,13 +491,32 @@ export function bandForward(
   replyBy: string | null,
   statedWeeks: number | null,
   fmt: (iso: string) => string,
+  /** Whether we hold an agent record at all. No record → no claim either way. */
+  hasAgent = true,
 ): BandFact | null {
   const bucket = cardBucket(c);
   /* an offer's clock counts DOWN and is the most consequential figure on the page */
   if (bucket === "decide" && replyBy) return { k: "Reply by", v: fmt(replyBy), kind: "date" };
-  if ((bucket === "send" || bucket === "chase") && statedWeeks && statedWeeks > 0) {
-    return { k: "Their window", v: `${statedWeeks} weeks`, kind: "wait" };
+  if (bucket === "send" || bucket === "chase") {
+    if (statedWeeks && statedWeeks > 0) return { k: "Their window", v: `${statedWeeks} weeks`, kind: "wait" };
+    /**
+     * ⚠️ "Not stated" IS A FACT ABOUT THE AGENT, NOT AN APOLOGY FOR MISSING DATA. Plenty of
+     * agencies publish no response time, and knowing that this one does not is worth as much to a
+     * writer as knowing the number — it is why the wait has no yardstick. It also makes the row
+     * assertable: a band with nothing and a band whose fact was never built are the same picture.
+     *
+     * ⚠️ ONLY WHERE WE HOLD A RECORD THAT COULD CARRY THE FIELD. With no agent on file there is
+     * nothing to have stated it, so the band says nothing rather than reporting a silence from
+     * someone we have never met.
+     */
+    if (hasAgent) return { k: "Their window", v: "Not stated", kind: "date" };
   }
+  /**
+   * ⚠️ THE OTHER BUCKETS CARRY NOTHING, AND THAT IS THE CONCEPT'S ABSENCE RATHER THAN THE DATA'S.
+   * A note has no agent and no window; a close is the end of a wait, not the middle of one; a fix
+   * is a gap in a record rather than a thing anyone is waiting on. There is no forward-looking
+   * fact to state, so no line claims there is.
+   */
   return null;
 }
 
