@@ -31,6 +31,20 @@ import { UserPlan } from "../../types";
    still renders the first-run state and executes none of the grouping. One agent is the smallest
    thing that gets the page past its own door. */
 const seed: { userTasks: unknown[]; agents: unknown[] } = { userTasks: [], agents: [] };
+/* ⚠️ THE FIRESTORE LAYER IS MOCKED TOO (v14 Phase 4). The dock now subscribes to the docked
+   query's own activity subcollection — the AUTHORITATIVE store the Query Centre reads — so
+   `ToDoPage` reaches `lib/firebase`, whose `getAuth` throws `auth/invalid-api-key` under
+   `environment: 'node'`. Mocking the module keeps this a RENDER smoke rather than turning it into
+   an integration test; the listener returning nothing is the correct default for a render check. */
+vi.mock("../../lib/firebase", () => ({
+  db: {},
+  auth: {},
+  OperationType: { GET: "GET", WRITE: "WRITE", DELETE: "DELETE" },
+  handleFirestoreError: () => {},
+}));
+vi.mock("firebase/firestore", () => ({
+  collection: () => ({}), onSnapshot: () => () => {}, orderBy: () => ({}), query: () => ({}),
+}));
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
     /* ⚠️ THE READINESS FLAG IS PART OF THE CONTRACT NOW (P5): the page renders its loading

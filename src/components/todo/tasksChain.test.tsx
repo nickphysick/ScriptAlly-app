@@ -47,6 +47,20 @@ const here = __dirname;
    nothing. One agent gets the page past its own front door; one dated task fills the list. */
 const today = new Date();
 const ymd = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+/* ⚠️ THE FIRESTORE LAYER IS MOCKED TOO (v14 Phase 4). The dock now subscribes to the docked
+   query's own activity subcollection — the AUTHORITATIVE store the Query Centre reads — so
+   `ToDoPage` reaches `lib/firebase`, whose `getAuth` throws `auth/invalid-api-key` under
+   `environment: 'node'`. Mocking the module keeps this a RENDER smoke rather than turning it into
+   an integration test; the listener returning nothing is the correct default for a render check. */
+vi.mock("../../lib/firebase", () => ({
+  db: {},
+  auth: {},
+  OperationType: { GET: "GET", WRITE: "WRITE", DELETE: "DELETE" },
+  handleFirestoreError: () => {},
+}));
+vi.mock("firebase/firestore", () => ({
+  collection: () => ({}), onSnapshot: () => () => {}, orderBy: () => ({}), query: () => ({}),
+}));
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
     /* ⚠️ THE READINESS FLAG IS PART OF THE CONTRACT NOW (P5): the page renders its loading

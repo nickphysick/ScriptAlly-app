@@ -63,6 +63,7 @@ import {
    answered by the groups themselves. Neither component is deleted in this phase (the house rule
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList, groupColumn } from "./TaskList";
+import { useDockActivity } from "./useDockActivity";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
 import { TodoDock, DockTimelineEvent } from "./TodoDock";
@@ -681,6 +682,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * because you finished is a fact, and the two must not look the same.
    */
   const paneCard = docked.card ?? (allDockable.length > 0 ? heldCard.current : null);
+  /* ⚠️ THE DOCKED QUERY'S OWN ACTIVITY ROWS — the AUTHORITATIVE subcollection, which is what the
+     Query Centre reads. The global `activities` feed the dock used before is a best-effort
+     projection twin, and where the twin was never written Tracking rendered "Nothing logged yet."
+     on a query with history. One card is docked at a time, so this is one listener. */
+  const dockRows = useDockActivity(currentUser?.id, paneCard?.relatedRecordId);
 
   /**
    * ⚠️ THE KEY FOLLOWS THE RESOLUTION, or the rail would mark nothing while the pane showed
@@ -2166,17 +2172,42 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }
 
   /** The docked item's timeline — derived from the activity log, never stored. */
+  /**
+   * ⚠️ IT READS THE QUERY'S OWN ACTIVITY SUBCOLLECTION, NOT THE GLOBAL FEED — and that one word is
+   * why Tracking said "Nothing logged yet." on every card. This filtered `users/{uid}/activities`
+   * by `queryId`; that collection is a best-effort PROJECTION twin (`recordResponse`: "SECONDARY
+   * write — best-effort … failures here must never block undo"), and for this data the twins were
+   * never written. The AUTHORITATIVE rows are the per-query subcollection, which is what the Query
+   * Centre subscribes to — proven on the deployed site: the Centre rendered "Full requested — 5
+   * JUN" for `seed-query-9` while the dock rendered nothing for the same query.
+   *
+   * ⚠️ A SECOND SOURCE, NOT A SECOND DERIVATION. `activityEventLabel` is still the one label
+   * derivation and is untouched; only the store it is handed changed.
+   */
   function dockTimeline(card: BoardCard): DockTimelineEvent[] {
     if (!card.relatedRecordId) return [];
-    return activities
-      .filter((a) => a.queryId === card.relatedRecordId)
-      .map((a, i) => ({ a, i, label: activityEventLabel(a) }))
+    const q = queries.find((x) => x.id === card.relatedRecordId);
+    const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
+    return dockRows
+      .map((r, i) => ({ r, i, label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }) }))
       .filter((x) => x.label !== null)
-      .map((x) => ({
-        key: x.a.id ?? `ev-${x.i}`,
-        label: x.label as string,
-        when: new Date(x.a.date).toLocaleDateString("en-GB", { day: "numeric", month: "short" }),
-      }));
+      .map((x) => {
+        /* ⚠️ `createdAt` IS A FIRESTORE TIMESTAMP ON THESE ROWS, not the ISO string the global feed
+           carries — reading it as a string yields "Invalid Date" rather than an error. */
+        const raw: any = x.r.createdAt ?? x.r.date;
+        const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
+        return {
+          key: x.r.id ?? `ev-${x.i}`,
+          label: x.label as string,
+          when: Number.isFinite(ms) ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "",
+          /* absent where the record is silent — never inferred */
+          ...(x.r.via ? { via: String(x.r.via) } : q?.sendMethod ? { via: `via ${String(q.sendMethod).toLowerCase()}` } : {}),
+          ...(x.r.note ? { note: String(x.r.note) } : {}),
+        } as DockTimelineEvent;
+      })
+      /* newest last, as the Centre reads it — the bar against the agent's window belongs to the
+         most recent rung, and `trackingStats` already derives that pair from `bandFacts`. */
+      .slice(-6);
   }
 
   /**
