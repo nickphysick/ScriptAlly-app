@@ -10,6 +10,7 @@ import {
   deriveRevisionRound,
   derivePipelineDates,
   deriveQueryFields,
+  dropSupersededProvisional,
   AGENT_RESPONSE_STATUSES,
   DerivableActivity,
 } from './queryDerivation';
@@ -253,5 +254,59 @@ describe('deriveQueryFields — bundle + idempotence', () => {
     expect(a.revisionRound).toBe(1);
     // The earliest incoming rung (the partial request, day 1) — not the later full request.
     expect(a.responseReceivedAt).toBe(new Date(t0 + 1 * 86400000).toISOString());
+  });
+});
+
+/* ── §7b · THE SUPERSEDED PROVISIONAL RUNG ───────────────────────────────────────────────────── */
+
+describe("dropSupersededProvisional — one predicate, three surfaces", () => {
+  /**
+   * ⚠️ THE ROWS ARE THE SHAPE THE SYSTEM REALLY WRITES. `smartImportCommit` writes
+   * `{ resultingStatus, dateProvisional: true }`; `recordResponse` writes `resultingStatus` with no
+   * such flag. The statuses are `QueryStatus` members, never hand-typed strings — a literal would
+   * go green the day a member was renamed.
+   */
+  const read = (r: { resultingStatus?: unknown; dateProvisional?: boolean }) =>
+    ({ status: r.resultingStatus, provisional: r.dateProvisional === true });
+  const imported = (s: QueryStatus) => ({ id: `imp-${s}`, resultingStatus: s, dateProvisional: true });
+  const recorded = (s: QueryStatus) => ({ id: `resp-${s}`, resultingStatus: s });
+
+  it("drops the import's rung when the writer has recorded the same status", () => {
+    const rows = [imported(QueryStatus.OFFER), recorded(QueryStatus.OFFER)];
+    expect(dropSupersededProvisional(rows, read).map((r) => r.id)).toEqual([`resp-${QueryStatus.OFFER}`]);
+  });
+
+  it("⚠️ SUPERSESSION IS PER STATUS — a real OFFER does not silence a provisional QUERIED", () => {
+    /* the commonest real log: an import seeded the whole history, the writer later recorded the
+       offer. Only the offer rung is superseded; the seeded query-sent rung is still the only
+       record that the query was ever sent. */
+    const rows = [imported(QueryStatus.QUERIED), imported(QueryStatus.OFFER), recorded(QueryStatus.OFFER)];
+    expect(dropSupersededProvisional(rows, read).map((r) => r.id))
+      .toEqual([`imp-${QueryStatus.QUERIED}`, `resp-${QueryStatus.OFFER}`]);
+  });
+
+  it("⚠️ AN ALL-PROVISIONAL LOG IS UNTOUCHED — an import nobody has answered yet keeps its history", () => {
+    const rows = [imported(QueryStatus.QUERIED), imported(QueryStatus.FULL_REQUESTED)];
+    expect(dropSupersededProvisional(rows, read)).toHaveLength(2);
+  });
+
+  it("a log with no provisional rung at all passes through unchanged", () => {
+    const rows = [recorded(QueryStatus.QUERIED), recorded(QueryStatus.REJECTED)];
+    expect(dropSupersededProvisional(rows, read)).toHaveLength(2);
+  });
+
+  it("a rung whose status is not a QueryStatus member cannot supersede anything", () => {
+    /* `normalizeResultingStatus` is exact-enum; a junk value is not status-bearing, so it neither
+       joins the real set nor gets dropped by it. */
+    const rows = [{ id: "junk", resultingStatus: "Offer!!" }, imported(QueryStatus.OFFER)];
+    expect(dropSupersededProvisional(rows, read).map((r) => r.id)).toEqual(["junk", `imp-${QueryStatus.OFFER}`]);
+  });
+
+  it("⚠️ THE ORDER OF THE SURVIVORS IS THE INPUT'S — it filters, it never re-sorts", () => {
+    /* every caller sorts afterwards on its own terms (earliest-first in the Query Centre, newest-
+       last in the dock); a filter that also reordered would silently change both. */
+    const rows = [recorded(QueryStatus.QUERIED), imported(QueryStatus.OFFER), recorded(QueryStatus.OFFER), recorded(QueryStatus.REJECTED)];
+    expect(dropSupersededProvisional(rows, read).map((r) => r.id))
+      .toEqual([`resp-${QueryStatus.QUERIED}`, `resp-${QueryStatus.OFFER}`, `resp-${QueryStatus.REJECTED}`]);
   });
 });

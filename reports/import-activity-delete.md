@@ -82,3 +82,44 @@ later clean-up. **1 alone** is the only one that makes the record true.
 Pre-launch with no users, both cost nothing today. Both cost everything the week after launch, when
 the first writer re-imports a corrected spreadsheet over a year of recorded responses. This is
 exactly the class of fault that gets forgotten because it has never hurt anyone yet.
+
+---
+
+## What landed, 16 Aug — and what is still owed
+
+**Status: A BUILT; B built as 2 + 3 only.** Commits `dede681` (A) and the one following (B).
+
+### A · the delete — done
+Scoped to `d.id.startsWith("imp-")` in `smartImportCommit.ts`, with both caveats written at the
+site: an id prefix is a weaker contract than a stored field (unvalidated by the rules, mintable by
+any future writer, carrying no reason), and `dateProvisional` is not a sufficient discriminator
+because it is set only on the undated subset. **Still owed: the stored `source: "import"` field**,
+after which the prefix check retires.
+
+### B · the duplicate — mechanisms 2 and 3, NOT 1
+One pure predicate, `dropSupersededProvisional` in `queryDerivation.ts`, with three callers: the
+derivation (`computeRecomputedFields`, ahead of BOTH `deriveQueryFields` and the `stageProvisional`
+scan), the Query Centre timeline (`buildTimelineRows`), and the dock's (`dockTimeline`). One
+function rather than three filters that agree today.
+
+⚠️ **This is a remedy, not the fix, and the note must not be allowed to read as though it were.**
+**Supersede-on-write (mechanism 1) remains the true fix.** After this change both documents are
+still in Firestore: the record still contains the duplicate, and every future consumer meets it
+again. What is fixed is what is derived from the record and what is drawn from it — not the record.
+The reason 1 was not done is unchanged and is written in mechanism 1 above: the existing undo
+deletes what the write created and has no way to restore a provisional rung the write also removed,
+so undo must carry the deleted document rather than its id. That is a write-path change with a
+data-loss failure mode of its own, and it wants a session of its own.
+
+**One thing the recon above did not know.** `buildTimelineRows` dedupes by status keeping the
+EARLIEST rung — so the Query Centre never drew a duplicate at all. It drew ONE row and drew the
+WRONG one: the import's provisional rung, labelled "(imported — date needed)", over a date the
+record actually held. Two surfaces, two different symptoms, one cause. The collapse runs before that
+dedupe, which is what puts the real rung back.
+
+**And a second, quieter one in the derivation.** `stageProvisional` takes the last rung at the
+highest time, and `assignTimes` stamps import rungs at the moment of the import — so a RE-import
+over an already-recorded response writes its provisional rung LATER than the real one, and the stage
+date was then nulled against a date the writer had recorded. Nothing on screen showed it; the field
+was simply absent. That case is the one the derivation-level lock pins, and the first fixture written
+for it passed without the fix because the rungs were in the convenient order rather than the real one.

@@ -81,6 +81,7 @@ import { todoPrefs } from "../../lib/todoPrefs";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
 import { dockQueue, resolveDocked, timelineRing } from "../../lib/todoDock";
+import { dropSupersededProvisional } from "../../lib/queryDerivation";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
@@ -2290,7 +2291,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (!card.relatedRecordId) return [];
     const q = queries.find((x) => x.id === card.relatedRecordId);
     const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
-    const kept = dockRows
+    /* ⚠️ §7b — THE SUPERSEDED PROVISIONAL RUNG IS DROPPED BEFORE ANYTHING ELSE. This surface is
+       where the duplicate was SEEN: it does not dedupe by status, so an import's `OFFER` rung and
+       the writer's later real one both drew, one above the other, the first reading
+       "(imported — date needed)". Same predicate as the derivation and the Query Centre —
+       `dropSupersededProvisional` — so the three cannot come to differ about which rung is real. */
+    const live = dropSupersededProvisional(dockRows, (r) => ({
+      status: r.resultingStatus ?? r.type,
+      provisional: r.dateProvisional === true,
+    }));
+    const kept = live
       .map((r, i) => ({ r, i, label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }) }))
       .filter((x) => x.label !== null);
     return kept

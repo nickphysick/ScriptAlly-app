@@ -20,7 +20,7 @@
 import { collection, doc, getDocs, updateDoc, deleteField } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "./firebase";
 import { QueryStatus } from "../types";
-import { deriveQueryFields, getActivityTime, normalizeResultingStatus, DerivableActivity } from "./queryDerivation";
+import { deriveQueryFields, getActivityTime, normalizeResultingStatus, dropSupersededProvisional, DerivableActivity } from "./queryDerivation";
 
 /**
  * Adapt a per-query subcollection doc to the derivation shape. These docs have carried their
@@ -80,7 +80,16 @@ export interface RecomputedFields {
  * Firestore. `null` === the field is cleared. No I/O, no side effects — so a caller can preview
  * a recompute (the sweep's dry run) without duplicating a line of derivation.
  */
-export function computeRecomputedFields(docs: RawActivityDoc[]): RecomputedFields {
+export function computeRecomputedFields(raw: RawActivityDoc[]): RecomputedFields {
+  /* ⚠️ §7b — SUPERSEDED PROVISIONAL RUNGS ARE DROPPED ONCE, HERE, so `deriveQueryFields` AND the
+     `stageProvisional` scan below both see the same log. Filtering only the former would leave a
+     stage reporting "date needed" against a date the writer had already recorded — `stageProvisional`
+     takes the LAST rung at the highest time, and an import's ordering key can tie or beat a real
+     one. One filter, both consumers, no chance of them disagreeing. */
+  const docs = dropSupersededProvisional(raw, (d) => ({
+    status: d.data.resultingStatus ?? d.data.type,
+    provisional: d.data.dateProvisional === true,
+  }));
   const fields = deriveQueryFields(docs.map((d) => subcollectionDocToDerivable(d.id, d.data)));
 
   // A pipeline-stage date whose latest rung is PROVISIONAL (an imported, date-unknown rung) must

@@ -187,6 +187,57 @@ export interface DerivedQueryFields extends DerivedPipelineDates {
 }
 
 /** One call for everything recomputeQuery writes. */
+/**
+ * ⚠️ §7b — A PROVISIONAL RUNG IS SUPERSEDED BY A REAL ONE OF THE SAME STATUS, and this is the ONE
+ * place that is decided.
+ *
+ * The shape it answers: an import writes an `OFFER` rung (provisional, its `createdAt` only an
+ * ordering key, labelled "(imported — date needed)"); the writer later records the real offer; and
+ * `recordResponse` APPENDS a second `OFFER` beside it rather than superseding it. Both documents
+ * exist. The dock's timeline drew both; the Query Centre's `buildTimelineRows` dedupes by status
+ * keeping the EARLIEST, which is the provisional one — so it drew a single row and drew the wrong
+ * one. Two different symptoms, one cause.
+ *
+ * ⚠️ THIS IS A REMEDY, NOT THE FIX, AND THE DISTINCTION MATTERS. The true fix is
+ * supersede-on-write: `recordResponse` reading the subcollection before appending and replacing the
+ * provisional rung in place. That leaves the RECORD true, which nothing here does — after this,
+ * both documents are still in Firestore and every future consumer meets the pair again. What
+ * stopped supersede-on-write being done tonight is its undo: the existing undo deletes what the
+ * write created, and it has no way to restore a provisional rung the write also removed, so undo
+ * would have to carry the deleted document rather than its id. That is a write-path change with a
+ * data-loss failure mode of its own.
+ *
+ * ⚠️ SO IT IS DELIBERATELY ONE FUNCTION WITH THREE CALLERS, not three filters that agree today. The
+ * derivation and both display surfaces ask the same question, so they cannot come to differ about
+ * which rung is the real one — and when supersede-on-write lands, this becomes inert in one place
+ * rather than needing to be found in three.
+ *
+ * The accessor is the seam: the three callers hold their rows in three shapes (a subcollection doc
+ * with a `data` bag, a loose display event, a `DerivableActivity`), and each states how ITS rows
+ * expose the two fields rather than being converted into a fourth shape first.
+ */
+export function dropSupersededProvisional<T>(
+  rows: readonly T[],
+  read: (row: T) => { status: unknown; provisional: boolean },
+): T[] {
+  const real = new Set<QueryStatus>();
+  for (const row of rows) {
+    const { status, provisional } = read(row);
+    if (provisional) continue;
+    const s = normalizeResultingStatus(status);
+    if (s) real.add(s);
+  }
+  /* ⚠️ NOTHING REAL MEANS NOTHING TO SUPERSEDE — an all-provisional log is an import nobody has
+     touched yet, and dropping its rungs would empty the timeline of the only history there is. */
+  if (real.size === 0) return [...rows];
+  return rows.filter((row) => {
+    const { status, provisional } = read(row);
+    if (!provisional) return true;
+    const s = normalizeResultingStatus(status);
+    return !(s !== null && real.has(s));
+  });
+}
+
 export function deriveQueryFields(activities: DerivableActivity[]): DerivedQueryFields {
   return {
     status: deriveStatus(activities),

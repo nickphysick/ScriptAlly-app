@@ -38,6 +38,8 @@ export interface DockActivityDoc {
   date?: string;
   note?: string;
   via?: string;
+  /** Import flag: the `createdAt` is an ordering key, not a real date. Read by §7b's collapse. */
+  dateProvisional?: boolean;
 }
 
 export function useDockActivity(userId: string | undefined, queryId: string | undefined): DockActivityDoc[] {

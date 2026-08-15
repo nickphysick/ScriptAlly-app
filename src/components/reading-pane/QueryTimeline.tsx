@@ -17,6 +17,7 @@ import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
 import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel } from "../../lib/queryAmbient";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
+import { dropSupersededProvisional } from "../../lib/queryDerivation";
 
 /** TWS-revised — natural-language date for the grace header ("15th July"), the header's own font. */
 const fmtNatural = (ms: number): string => {
@@ -193,8 +194,20 @@ export interface QueryTimelineProps {
 export function buildTimelineRows(events: any[], query: Query, agent: Agent | null): RowSpec[] {
   const validEnumValues = Object.values(QueryStatus);
 
+  /* ⚠️ §7b — SUPERSEDED PROVISIONAL RUNGS GO FIRST, AND THE ORDER IS THE WHOLE POINT HERE. The
+     dedupe below keeps the EARLIEST rung of each status, and an import's provisional rung carries
+     an ordering-key `createdAt` that is earlier than the real one the writer recorded later — so
+     this surface did not draw a duplicate, it drew ONE row and drew the wrong one, labelled
+     "(imported — date needed)" over a date the record actually held. Dropping the superseded rung
+     before the dedupe leaves the real one as the only candidate.
+     ⚠️ ONE PREDICATE, SHARED WITH THE DERIVATION — `dropSupersededProvisional`. A second copy here
+     is how a timeline and the fields beneath it come to disagree about which rung is real. */
+  const kept = dropSupersededProvisional(events || [], (evt: any) => ({
+    status: evt?.resultingStatus ?? evt?.type,
+    provisional: evt?.dateProvisional === true,
+  }));
   // Dedupe the activity log by status (keep the earliest of each), then order chronologically.
-  const raw = (events || []).filter((evt) => validEnumValues.includes(evt.type as QueryStatus));
+  const raw = kept.filter((evt) => validEnumValues.includes(evt.type as QueryStatus));
   const byType: Record<string, any> = {};
   raw.forEach((evt) => {
     const t = evt.type as string;

@@ -194,6 +194,39 @@ describe('computeRecomputedFields — the pure derivation behind the live write'
     expect(pure.hasAgentResponded).toBe(true); // responded — date unknown
   });
 
+  /**
+   * ⚠️ §7b — THE SUPERSEDED PROVISIONAL RUNG IS DROPPED BEFORE `stageProvisional` SEES IT, and this
+   * is the case that made it worth doing in the derivation rather than only on screen.
+   *
+   * `stageProvisional` takes the LAST rung at the highest time, and an import's `createdAt` is an
+   * ordering key — it can tie or beat a real one. When it does, the stage reports "date needed"
+   * against a date the writer had already recorded, and `recomputeQuery` writes null over it.
+   * Nothing on screen shows that; the field is simply absent.
+   */
+  it('⚠️ a REAL rung supersedes the import\'s, so its date is written rather than nulled', () => {
+    /* ⚠️ THE ORDER IS THE REAL ONE, NOT A CONVENIENT ONE. `assignTimes` stamps import rungs at
+       `importBaseMs` — the moment of the import — so a RE-import over an already-recorded response
+       writes its provisional rung LATER than the real one. That is the case `stageProvisional`
+       gets wrong, because it takes the last rung at the highest time. A fixture with the import
+       first passes without the fix at all: I wrote that one first and it stayed green. */
+    const pure = computeRecomputedFields([
+      { id: 'resp-p1', data: { resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-02-09T10:00:00Z') } },
+      { id: 'imp-p1', data: { resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-03-20T09:00:00Z'), dateProvisional: true } },
+    ]);
+    expect(pure.status).toBe(QueryStatus.PARTIAL_REQUESTED);
+    expect(pure.partialRequestedDate).toBe(iso('2026-02-09T10:00:00Z'));
+  });
+
+  it('⚠️ AND THE PROVISIONAL GUARD STILL BITES where nothing has superseded it', () => {
+    /* asserted beside the case above, because a collapse written too broadly would fabricate a date
+       from an ordering key — which is the fault the provisional flag exists to prevent. */
+    const pure = computeRecomputedFields([
+      { id: 'imp-p1', data: { resultingStatus: QueryStatus.PARTIAL_REQUESTED, createdAt: iso('2026-02-09T10:00:00Z'), dateProvisional: true } },
+      { id: 'resp-o1', data: { resultingStatus: QueryStatus.OFFER, createdAt: iso('2026-03-01T10:00:00Z') } },
+    ]);
+    expect(pure.partialRequestedDate).toBeNull();
+  });
+
   it('an empty log previews the clean-slate state (everything datey cleared)', () => {
     const pure = computeRecomputedFields([]);
     expect(pure.status).toBe(QueryStatus.QUERIED);
