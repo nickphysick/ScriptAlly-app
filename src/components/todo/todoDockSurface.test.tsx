@@ -228,7 +228,45 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
        same rule is what silently wins, and that is exactly how this was first written. */
     const facts = dockCssRule(".tdk-facts {");
     expect((facts.match(/padding-right:/g) ?? [])).toHaveLength(1);
-    expect(facts).toContain("padding-right: 96px");
+    /* ⚠️ §2.5 — COMPUTED FROM THE MOTIF'S LANE, NEVER RESTATED. This asserted a flat `96px` beside
+       a motif at `right: 22px` with a 92px box — two authored numbers that could drift apart, and
+       had: 96 < 22 + 92, so the figures already overlapped the illustration while the rule's own
+       prose said they cleared it. A lock on the literal could not see that; a lock on the
+       RELATIONSHIP can only be satisfied by keeping it. */
+    expect(facts).toContain("calc(var(--tdk-motif-right) + var(--tdk-motif-w) - var(--tdk-facts-inset))");
+    expect(facts).not.toMatch(/padding-right:\s*\d/);
+  });
+
+  it("⚠️ §2.5 — the motif's lane is derived from the close control's, and clears it", () => {
+    const band = dockCssRule(".tdk-band {");
+    /* the three authored measurements, and nothing else authored downstream of them */
+    expect(band).toContain("--tdk-band-px: 26px");
+    expect(band).toContain("--tdk-x-w: 19px");
+    expect(band).toContain("--tdk-motif-w: 92px");
+    /* ⚠️ THE LANE IS A SUM OF THINGS THAT EXIST, not a chosen offset — so moving the band's
+       padding or the control's size moves the motif with them. */
+    expect(band).toContain("--tdk-motif-right: calc(var(--tdk-band-px) + var(--tdk-x-w) + 8px)");
+    /* the band reads its own tokens rather than restating their values */
+    expect(band).toContain("padding: 16px var(--tdk-band-px) 14px");
+    expect(band).toContain("gap: var(--tdk-band-gap)");
+    /* ⚠️ AND THE REF'S 22px IS GONE FROM THE MOTIF. v14 drew that offset into a band with NO close
+       button; taking it literally is what put the illustration behind the control. */
+    const motif = dockCssRule(".tdk-motif {");
+    expect(motif).toContain("right: var(--tdk-motif-right)");
+    expect(motif).not.toContain("right: 22px");
+    /* ⚠️ THE SUBTRAHEND IS BUILT FROM THE SAME THREE NUMBERS — otherwise the facts' `calc()` would
+       subtract a stale inset and the padding would drift silently in whichever direction the band
+       moved. */
+    expect(band).toContain("--tdk-facts-inset: calc(var(--tdk-band-px) + var(--tdk-x-w) + var(--tdk-band-gap))");
+    /* ⚠️ AND THE SUM IS EVALUATED, because `calc()` has no opinion about signs: a facts padding
+       that came out NEGATIVE would push the figures right, back over the illustration and under
+       the ×, and the stylesheet would parse without complaint. Read the authored values and do the
+       arithmetic here rather than trusting the shape of the expression. */
+    const px = (k: string) => Number(/(\d+)px/.exec(new RegExp(`${k}:([^;]+)`).exec(band)![1])![1]);
+    const motifLeftEdge = px("--tdk-band-px") + px("--tdk-x-w") + 8 + px("--tdk-motif-w");
+    const factsInset = px("--tdk-band-px") + px("--tdk-x-w") + px("--tdk-band-gap");
+    expect(motifLeftEdge - factsInset, "the facts' computed padding is negative — the figures land back on the motif")
+      .toBeGreaterThan(0);
   });
 
   it("⚠️ AND THE BODY REPEATS NEITHER THE NAME NOR THE TITLE", () => {

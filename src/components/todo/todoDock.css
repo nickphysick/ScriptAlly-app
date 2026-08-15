@@ -90,11 +90,37 @@
 /* ⚠️ THE BAND IS THE IDENTITY ROW (corrections, Phase 1) — it was a 30px strip holding a kind pill
    and the facts, which left the agent's name to render in the BODY with the facts floating over it.
    One row, three parts: identity left, facts right and top-aligned, motif behind. */
+/* ⚠️ §2.5 — THE MOTIF'S LANE IS DERIVED FROM THE CLOSE CONTROL'S, AND THE FACTS' FROM THE MOTIF'S.
+   ONE value is authored per fact; everything downstream is `calc()`. The three numbers below are
+   the only ones stated, and each is a measurement of something that exists rather than a chosen
+   offset:
+     `--tdk-band-px`  the band's own side padding, read by `padding` below and by both lanes
+     `--tdk-x-w`      the close control's box — its 13px glyph plus `.tdk-x`'s 3px either side
+     `--tdk-motif-w`  the WIDEST motif box in `DockMotif` (the manuscript stack, 92px)
+
+   ⚠️ WHY THE CONFLICT EXISTS AT ALL: the ref's band HAS NO CLOSE BUTTON. `todo-workspace-v14.html`
+   draws `.motif { right: 22px }` into a band whose right edge is empty, so 22px is a perfectly
+   good number there and cannot be one here — the × occupies exactly the space the mockup gave the
+   illustration. Taking the ref's offset literally is what put the motif behind the control.
+
+   ⚠️ AND STACKING IS NOT CLEARANCE. `.tdk-x` already outranks the motif at `z-index: 3`, so the
+   control was never painted over — it was still visibly INTERSECTED, which is what §2.5 refuses.
+   The z-order fix and this one are answers to different faults; neither replaces the other. */
 .tdk-band {
+  --tdk-band-px: 26px;
+  --tdk-band-gap: 16px;
+  --tdk-x-w: 19px;
+  --tdk-motif-w: 92px;
+  /* the motif's right edge stops 8px short of the close control's left edge */
+  --tdk-motif-right: calc(var(--tdk-band-px) + var(--tdk-x-w) + 8px);
+  /* how far the facts strip's OWN right edge already sits in from the band's — the band padding,
+     the control it sits beside, and the flex gap between them. Without subtracting this the
+     padding would clear the motif twice over. */
+  --tdk-facts-inset: calc(var(--tdk-band-px) + var(--tdk-x-w) + var(--tdk-band-gap));
   display: flex;
   align-items: flex-start;
-  gap: 16px;
-  padding: 16px 26px 14px;
+  gap: var(--tdk-band-gap);
+  padding: 16px var(--tdk-band-px) 14px;
   position: relative;
   overflow: hidden;
   /* ⚠️ THE MARGIN IS WHAT KEEPS THE BAND INSIDE THE FRAME, and it is the frame's own 6px inset.
@@ -146,7 +172,9 @@
 
 /* ⚠️ BEHIND THE TEXT AND CLIPPED BY THE BAND — `z-index: 1` under the content's 2, and the band's
    own `overflow: hidden` is what makes it a corner motif rather than a floating illustration. */
-.tdk-motif { position: absolute; right: 22px; top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1; opacity: .85; display: block; }
+/* ⚠️ §2.5 — `right` IS THE DERIVED LANE, NOT THE REF'S 22px. See the note on `.tdk-band` for why
+   the mockup's number cannot survive the close control this band carries. */
+.tdk-motif { position: absolute; right: var(--tdk-motif-right); top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1; opacity: .85; display: block; }
 
 .tdk-band i {
   font-family: "JetBrains Mono", ui-monospace, monospace;
@@ -440,10 +468,17 @@
    the point: the figure you scanned in the list is the figure you land on here. */
 /* ⚠️ FIXED BESIDE A BLOCK THAT WRAPS — never the other way round. The right padding clears the
    corner motif so the two never overlap. */
-/* ⚠️ THE RIGHT PADDING CLEARS THE MOTIF. The facts strip and the illustration share the band's
-   right edge; at the old 8px the figures sat on top of it. One declaration, not two — a second
-   `padding-right` later in the same rule is what silently wins. */
-.tdk-facts { display: flex; gap: 26px; position: relative; z-index: 2; flex: none; padding-right: 96px; }
+/* ⚠️ THE RIGHT PADDING CLEARS THE MOTIF — COMPUTED FROM IT, NEVER RESTATED (§2.5). It was a flat
+   `96px` beside a motif at `right: 22px` with a 92px box: two independently-authored numbers that
+   happened to be close, and 96 < 22 + 92, so the figures were ALREADY sitting on the illustration's
+   near edge while the rule above claimed they cleared it. Now: the motif's own left edge, less how
+   far this strip's right edge already sits in from the band's.
+   ⚠️ ONE DECLARATION, NOT TWO — a second `padding-right` later in the same rule is what silently
+   wins, and that is exactly how this was first written. */
+.tdk-facts {
+  display: flex; gap: 26px; position: relative; z-index: 2; flex: none;
+  padding-right: calc(var(--tdk-motif-right) + var(--tdk-motif-w) - var(--tdk-facts-inset));
+}
 .tdk-fact { text-align: right; display: block; }
 
 .tdk-fact .k {
