@@ -1529,6 +1529,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   saying "12 of 34" beside a button that wrote 34 would be two statements of one
                   scope, and the button's is the one nobody checks until the file is open. */}
               <div className="tdw-foot">
+                {/* ⚠️ ONE LINE, ONE PLACE. The bar said "30 tasks · 16 outstanding" while the
+                    footer said "Showing 16 of 30" — two statements of overlapping facts, in two
+                    surfaces, either of which could be read as the whole truth. Both figures read
+                    `railShown()` and `allDockable`, the SAME derivation the section bands read, so
+                    a count and the band it names cannot disagree. */}
                 <span className="tdw-showing">{showingLine(railShown(), allDockable.length)}</span>
                 <span className="tdw-footgrow" />
                 <button
@@ -2769,6 +2774,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               </button>
             )}
           </div>
+          {/* ⚠️ IT ACTS ON THE LIST, SO IT LIVES ON THE LIST. `Add task or note` was in the command
+              bar, which acted on nothing in particular — the bar was simply the only permanent
+              surface, so everything homeless ended up there. Same handler (`openComposer("task")`),
+              new home, beside the two other controls that narrow and order this list.
+              ⚠️ PINK, NOT INK. Black is reserved for "this advances" — a commit. Adding opens a
+              composer, which is the start of something rather than the end of it. */}
+          <button type="button" className="tdw-cbic tdw-add" title="Add task or note"
+            aria-label="Add task or note" onClick={() => openComposer("task")}>
+            <Plus size={15} aria-hidden />
+          </button>
         </div>
         {/* ⚠️ THE CHIP STRIP IS GONE (Phase 5) — its contents ARE the filter menu, and the active
             one is marked there. What it said by standing on the page, the button's ink fill says

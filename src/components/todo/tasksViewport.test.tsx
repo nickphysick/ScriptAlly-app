@@ -617,6 +617,28 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * record produced a card TALLER than the pane whose band scrolled away with it and whose bottom
    * edge was never on screen.
    */
+  it("⚠️ ADD ACTS ON THE LIST, SO IT LIVES ON THE LIST — and it is pink, not ink", () => {
+    const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    /* same handler as the bar's copy — a rehoming, not a new entrance */
+    expect(page).toContain('title="Add task or note"');
+    expect(page).toContain('onClick={() => openComposer("task")}');
+    /* ⚠️ BLACK IS RESERVED FOR "THIS ADVANCES". Adding opens a composer — the start of something,
+       not the end of it — so it wears the page's other colour. */
+    const add = rule(splitCss, ".tdw-add {");
+    expect(add).toContain("var(--pink-btn");
+    expect(add).not.toContain("--ink-strong");
+  });
+
+  it("⚠️ THE COUNTS ARE ONE LINE IN ONE PLACE, off the derivation the bands read", () => {
+    const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+    /* the WORDING is `showingLine`'s, which absorbed the bar's "30 tasks · 16 outstanding" — one
+       sentence, one place. Both figures come from `railShown()` / `allDockable`, the same source
+       `railChips` reads for the section bands, so a count and the band it names cannot disagree. */
+    expect(page).toContain("showingLine(railShown(), allDockable.length)");
+    const handoff = readFileSync(join(here, "../../lib/todoHandoff.ts"), "utf8");
+    expect(handoff).toContain("outstanding · showing");
+  });
+
   it("the WORKSPACE's second scroller is the card's body, and the pane holds it", () => {
     const work = rule(splitCss, ".tdw-work {");
     expect(work).toContain("min-height: 0");

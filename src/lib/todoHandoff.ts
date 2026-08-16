@@ -199,9 +199,18 @@ export function paneRestLine(
 
 /* ── the list card's footer (visual rebuild, Phase 1) ────────────────────────────────────────── */
 
-/** "Showing 12 of 34" — what you are looking at, out of what there is. */
+/**
+ * "16 outstanding · showing 16 of 30" — the list's ONE count line.
+ *
+ * ⚠️ IT ABSORBED THE COMMAND BAR'S "30 tasks · 16 outstanding". The two said overlapping things in
+ * two surfaces, either of which could be read as the whole truth — and when a filter narrowed the
+ * list they disagreed by construction, because one counted the view and the other the set.
+ *
+ * ⚠️ BOTH FIGURES COME FROM THE CALLER'S ONE DERIVATION (`railShown()` / `allDockable`), which is
+ * what `railChips` reads for the section bands. A count and the band it names cannot disagree.
+ */
 export function showingLine(shown: number, total: number): string {
-  return `Showing ${shown} of ${total}`;
+  return `${shown} outstanding · showing ${shown} of ${total}`;
 }
 
 /**
