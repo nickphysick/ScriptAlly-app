@@ -39,6 +39,7 @@ import { MarketingShell } from "./marketing/MarketingShell";
 import { Landing } from "./marketing/Landing";
 import { PricingPage } from "./marketing/PricingPage";
 import { AboutPage } from "./marketing/AboutPage";
+import { ContactPage } from "./marketing/ContactPage";
 import { LegalPage } from "./marketing/LegalPage";
 import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
@@ -344,6 +345,7 @@ function pathFor(tab: string, subPageName?: string): string {
     case "privacy": return "/privacy";
     // Company pages — public, marketing tier, reachable from the shared footer on every page.
     case "about": return "/about";
+    case "contact": return "/contact";
     case "import": return "/import";
     case "help": return "/help";
     case "account": return "/account";
@@ -530,6 +532,7 @@ function AppContent() {
       <MarketingShell user={currentUser} onNavigate={handleNavigate} path={path}>
         {path === "/pricing" ? <PricingPage onNavigate={handleNavigate} />
           : path === "/about" ? <AboutPage onNavigate={handleNavigate} />
+          : path === "/contact" ? <ContactPage onNavigate={handleNavigate} />
           : path === "/terms" ? <LegalPage doc="terms" onNavigate={handleNavigate} />
           : path === "/privacy" ? <LegalPage doc="privacy" onNavigate={handleNavigate} />
           : <Landing onNavigate={handleNavigate} />}

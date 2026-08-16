@@ -36,6 +36,7 @@ describe("tierForPath", () => {
    */
   it("puts the company pages in the marketing tier, public to everyone", () => {
     expect(tierForPath("/about")).toBe("marketing");
+    expect(tierForPath("/contact")).toBe("marketing");
   });
 
   it("the focus tier is retired — account, plans and help are workspace routes (capsule fixes P5)", () => {

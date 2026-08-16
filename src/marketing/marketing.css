@@ -905,3 +905,88 @@
   .mk-commitgrid { grid-template-columns: 1fr; }
   .mk-founder { padding: 38px 26px 16px; }
 }
+
+/* ══════════════ Contact — ways in, and a form card ══════════════ */
+.mk-contactsplit {
+  max-width: 1180px; margin: 0 auto; padding: 54px 56px 20px;
+  display: grid; grid-template-columns: 1fr 440px; gap: 54px; align-items: start;
+}
+.mk-cleft h1 {
+  font-family: "Playfair Display", Georgia, serif; font-size: 42px; font-weight: 500;
+  line-height: 1.12; color: var(--mk-head); margin-top: 10px;
+}
+.mk-clede { font-size: 15px; font-weight: 300; line-height: 1.72; color: #5a4a40; margin-top: 14px; max-width: 480px; }
+.mk-cmail {
+  display: inline-block; margin-top: 18px;
+  font-family: "JetBrains Mono", monospace; font-size: 13px; letter-spacing: .02em;
+  color: var(--mk-burg); text-decoration: none; border-bottom: 1px solid var(--mk-bd); padding-bottom: 2px;
+}
+.mk-cmail:hover { color: var(--mk-head); border-bottom-color: var(--mk-burg); }
+
+.mk-ways { margin-top: 30px; }
+.mk-way { display: flex; gap: 14px; padding: 18px 0; border-top: 1px solid var(--mk-hair); }
+.mk-way strong {
+  display: block; font-family: "Playfair Display", Georgia, serif; font-size: 16px;
+  font-weight: 500; color: var(--mk-head);
+}
+.mk-way span { display: block; margin-top: 6px; font-size: 13.5px; font-weight: 300; line-height: 1.65; color: var(--mk-muted); }
+.mk-wayplate {
+  flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--mk-centre); border: 1px solid var(--mk-bd);
+}
+.mk-wayplate svg { width: 17px; height: 17px; fill: none; stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+
+/* The form card — the one lifted surface on the page. */
+.mk-formcard {
+  background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 16px; padding: 26px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 12px 34px rgba(58, 28, 20, 0.09);
+}
+.mk-formcard h2 {
+  font-family: "Playfair Display", Georgia, serif; font-size: 24px; font-weight: 500;
+  color: var(--mk-head); margin-top: 6px;
+}
+.mk-csub { font-size: 13px; font-weight: 300; color: var(--mk-muted); margin-top: 6px; }
+.mk-field { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; }
+.mk-field label {
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mk-label);
+}
+.mk-field input, .mk-field select, .mk-field textarea {
+  font-family: inherit; font-size: 14px; color: var(--mk-ink);
+  background: #ffffff; border: 1px solid var(--mk-bd); border-radius: 10px; padding: 10px 12px;
+  width: 100%; box-sizing: border-box;
+}
+.mk-field textarea { min-height: 118px; resize: vertical; line-height: 1.6; }
+.mk-field input:focus, .mk-field select:focus, .mk-field textarea:focus {
+  outline: none; border-color: var(--mk-burg); box-shadow: 0 0 0 3px var(--mk-centre);
+}
+.mk-field input::placeholder, .mk-field textarea::placeholder { color: var(--mk-label); }
+.mk-fielderr { font-size: 12px; color: var(--mk-burg); }
+
+/* Off-screen rather than display:none — see the honeypot note in ContactPage.tsx. */
+.mk-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+/* Dark ink primary — the one filled button in the tier, and only on this page's own action. */
+.mk-cbtn {
+  margin-top: 20px; width: 100%; font-family: inherit; font-size: 13.5px; font-weight: 500;
+  padding: 12px 22px; border-radius: 11px; cursor: pointer;
+  background: var(--mk-ink); border: 1px solid var(--mk-ink); color: #ffffff;
+}
+.mk-cbtn:hover { background: var(--mk-head); border-color: var(--mk-head); }
+.mk-cbtn:disabled { opacity: .55; cursor: default; }
+.mk-cstate { margin-top: 12px; font-size: 13px; font-weight: 300; line-height: 1.6; color: var(--mk-muted); }
+.mk-cstate--bad { color: var(--mk-burg); }
+.mk-cfine { margin-top: 14px; font-size: 12px; font-weight: 300; line-height: 1.6; color: var(--mk-label); }
+.mk-cfine .mk-doclink { font-size: inherit; }
+
+.mk-svcline {
+  max-width: 1180px; margin: 0 auto; padding: 24px 56px 10px; border-top: 1px solid var(--mk-hair);
+}
+.mk-svcline p { font-size: 12.5px; font-weight: 300; line-height: 1.65; color: var(--mk-muted); }
+.mk-svcline strong { color: var(--mk-ink); font-weight: 500; }
+
+@media (max-width: 900px) {
+  .mk-contactsplit { grid-template-columns: 1fr; gap: 30px; padding: 40px 26px 16px; }
+  .mk-cleft h1 { font-size: 32px; }
+  .mk-svcline { padding: 20px 26px 8px; }
+}

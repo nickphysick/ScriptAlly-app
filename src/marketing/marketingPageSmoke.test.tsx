@@ -28,12 +28,14 @@ import { MarketingShell } from "./MarketingShell";
 import { PricingPage } from "./PricingPage";
 import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
+import { ContactPage } from "./ContactPage";
 
 /** The public marketing routes and a string each must actually render. */
 const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain: string][] = [
   ["/", () => <Landing onNavigate={noNavigate} />, "Take control of your querying journey"],
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Start free"],
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "Querying shouldn&#x27;t be the hard part"],
+  ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
   ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of use"],
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy policy"],
 ];

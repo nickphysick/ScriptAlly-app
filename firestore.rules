@@ -733,5 +733,15 @@ service cloud.firestore {
     // denies are belt-and-braces over the default-deny catch-all, per the allowlist principle.
     match /waitlist/{id}  { allow read, write: if false; }
     match /counters/{id}  { allow read, write: if false; }
+
+    // ROUTE: Contact form (/contact) — NO client writes, admin-only reads.
+    // The form posts to the `sendContactMessage` callable, which writes via the Admin SDK and
+    // bypasses these rules. A client write path is deliberately absent: the form is PUBLIC, so an
+    // open create rule would be an unauthenticated write endpoint with no honeypot and no rate
+    // limit in front of it. `contactSenders` holds nothing but a hashed address and a timestamp —
+    // it is the throttle's memory, and it is denied outright rather than made admin-readable,
+    // because nobody needs to read it and a hashed mailing list is still a mailing list.
+    match /contactMessages/{id} { allow read: if isAdmin(); allow write: if false; }
+    match /contactSenders/{id}  { allow read, write: if false; }
   }
 }

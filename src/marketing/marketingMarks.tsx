@@ -110,6 +110,28 @@ export const AboutIllustration: React.FC<{ slot: AboutIlloKey }> = ({ slot }) =>
   );
 };
 
+/** The small tinted plates beside each "way in" on the contact page. From the ref. */
+export const ContactWayPlate: React.FC<{ way: "questions" | "broken" | "privacy" }> = ({ way }) => (
+  <span className="mk-wayplate" aria-hidden="true">
+    {way === "questions" ? (
+      <svg viewBox="0 0 24 24">
+        <path d="M21 11.5a8.5 8.5 0 1 1-4-7.2" />
+        <path d="M8.5 12h7M8.5 8.8h4.5" />
+      </svg>
+    ) : way === "broken" ? (
+      <svg viewBox="0 0 24 24">
+        <path d="M12 9v4M12 16.5v.5" />
+        <path d="M10.3 4.2 3.3 17a2 2 0 0 0 1.7 3h14a2 2 0 0 0 1.7-3l-7-12.8a2 2 0 0 0-3.4 0z" />
+      </svg>
+    ) : (
+      <svg viewBox="0 0 24 24">
+        <path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7z" />
+        <path d="M9.2 12.2l2 2 3.6-4" />
+      </svg>
+    )}
+  </span>
+);
+
 /** The tick inside a commitment card. */
 export const CommitmentTick: React.FC = () => (
   <span className="mk-ctick" aria-hidden="true">
