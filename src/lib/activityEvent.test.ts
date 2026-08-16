@@ -48,3 +48,40 @@ describe('activityEventLabel — typed fields only', () => {
     expect(activityEventLabel({ activityType: ActivityType.STATUS_CHANGED, resultingStatus: 'partialRequested' })).toBeNull();
   });
 });
+
+/* ── Item 2 · the dock has no hero row ───────────────────────────────────────────────────────── */
+
+describe("⚠️ includeSend — the suppression is a fact about ONE surface, not about the event", () => {
+  /**
+   * Measured before it was written: the Query Centre renders "Query sent · via Email" from a
+   * subcollection whose card in the To-do dock showed a single later rung. Same store, two
+   * surfaces, one of them a rung short — because the dock inherited a suppression that exists so
+   * the Centre does not repeat its own HERO ROW.
+   */
+  it("the Centre's default is unchanged — the send is its hero row's, not an entry", () => {
+    expect(activityEventLabel({ activityType: ActivityType.QUERY_SENT })).toBeNull();
+    expect(activityEventLabel({ resultingStatus: QueryStatus.QUERIED })).toBeNull();
+  });
+
+  it("a caller with no hero row gets the send as an entry, under both signals", () => {
+    /* the rung can arrive typed either way — `activityType` on the feed's row, `resultingStatus`
+       on the per-query subcollection's — and the card must not depend on which */
+    expect(activityEventLabel({ activityType: ActivityType.QUERY_SENT }, { includeSend: true })).toBe("Query sent");
+    expect(activityEventLabel({ resultingStatus: QueryStatus.QUERIED }, { includeSend: true })).toBe("Query sent");
+  });
+
+  it("⚠️ IT CHANGES NOTHING ELSE — every other rung reads the same with the flag on or off", () => {
+    /* a flag that quietly altered other labels would be a second vocabulary wearing one function's
+       name, which is the thing this option exists to avoid. */
+    const rungs = [
+      QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_REQUESTED,
+      QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER,
+      QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE,
+    ];
+    for (const rs of rungs) {
+      expect(activityEventLabel({ resultingStatus: rs }, { includeSend: true }), String(rs))
+        .toBe(activityEventLabel({ resultingStatus: rs }));
+    }
+    expect(activityEventLabel({ activityType: ActivityType.NUDGE_SENT }, { includeSend: true })).toBe("Nudge sent");
+  });
+});

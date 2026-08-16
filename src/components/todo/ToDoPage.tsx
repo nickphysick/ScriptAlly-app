@@ -2324,7 +2324,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       provisional: r.dateProvisional === true,
     }));
     const kept = once
-      .map((r, i) => ({ r, i, label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }) }))
+      /* ⚠️ `includeSend` — THIS SURFACE HAS NO HERO ROW. The Centre suppresses the send because it
+         draws one above its timeline; the card does not, so without this the query going out was
+         dropped and a full-requested card showed a single rung with no beginning. */
+      .map((r, i) => ({ r, i, label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }, { includeSend: true }) }))
       .filter((x) => x.label !== null);
     return kept
       .map((x) => {
@@ -2348,9 +2351,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           ...((st) => (st ? { status: String(st) } : {}))(x.r.resultingStatus ?? x.r.type),
         } as DockTimelineEvent;
       })
-      /* newest last, as the Centre reads it — the bar against the agent's window belongs to the
-         most recent rung, and `trackingStats` already derives that pair from `bandFacts`. */
-      .slice(-6);
+      /* ⚠️ EVERY ENTRY, OLDEST FIRST — the cap is gone. It was `.slice(-6)`, which silently dropped
+         the OLDEST rungs, so a long history lost its beginning: precisely the end a reader is
+         looking for when they open the record. The body scrolls and the footer is pinned below it,
+         so length costs nothing now. Ascending, as `useDockActivity` orders it and as v14 draws it. */
+      ;
   }
 
   /**
