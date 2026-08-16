@@ -118,6 +118,12 @@ export interface TodoDockProps {
   onCommitSend?: (card: BoardCard, values: JourneySendValues) => Promise<void> | void;
   /** Which journey this card's bucket runs — declared by the page, never guessed here. */
   journeyKind?: (card: BoardCard) => JourneyKind | undefined;
+  /**
+   * ⚠️ `fix` ONLY — the gaps the card was raised for. The dock does not derive them: the page owns
+   * the agent list, and `agentDataQualityNeeds` is already what raised the card, so re-deriving it
+   * here would give one fact two sources.
+   */
+  journeyGaps?: (card: BoardCard) => readonly ("responseTime" | "materials" | "mswl")[];
   /** The offer's notify branch — the same set §4.4 shows on the card, split by what they hold. */
   journeyHolders?: (card: BoardCard) => { holding: HolderRow[]; queried: HolderRow[] } | undefined;
   /** The reply-by day, where the record has one — the `time` branch caps its reminder there. */
@@ -167,7 +173,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, journeyGaps, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -356,6 +362,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           {draft ? (
             <PaneJourney
               kind={journeyKind?.(card) ?? "send"}
+              gaps={journeyGaps?.(card)}
               holders={journeyHolders?.(card)}
               replyBy={replyBy?.(card)}
               wrote={{ title: card.title, ...(card.detail ? { detail: card.detail } : {}) }}

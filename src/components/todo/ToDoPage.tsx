@@ -50,7 +50,8 @@ import { shouldAutoRunTour } from "../../lib/todoTour";
    untouched for whoever re-places the band (units first — see reports/STATE.md). */
 import { AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { TodoTour } from "./TodoTour";
-import { ActivityType, QueryStatus, SurfaceOffset } from "../../types";
+import { Agent, ActivityType, QueryStatus, SurfaceOffset } from "../../types";
+import { AgentDataNeed, agentDataQualityNeeds } from "../../lib/agentDataQuality";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
@@ -1524,6 +1525,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                      before the next, rather than six half-wired at once. */
                   onCommitSend={paneJourneyKind(paneCard) ? commitFromPane : undefined}
                   journeyKind={paneJourneyKind}
+                  journeyGaps={cardGaps}
                   /* ⚠️ THE SAME HANDLERS AND THE SAME GATING THE BAR USED — `offersLeaf` off
                      `cardMenu`, so the footer's greying and the ⋯ menu's cannot disagree about what
                      applies to a card. A rehoming, not a rebuild. */
@@ -2369,9 +2371,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       case "send": return "send";
       case "chase": return "chase";
       case "close": return "close";
-      /* fix and note still open the takeover */
+      /* ⚠️ `fix` EARNS THE PANE ONLY IF THERE IS SOMETHING TO ASK. Its stack is its gaps, so a card
+         whose agent has since been filled in — or one with no agent to resolve — would render a
+         journey of zero steps and a footer offering to save nothing. It falls back to the takeover,
+         which is where grouped housekeeping still lives. */
+      case "fix": return cardGaps(card).length > 0 ? "fix" : undefined;
+      /* note still opens the takeover for a grouped card */
       default: return undefined;
     }
+  }
+
+  /**
+   * ⚠️ THE GAPS ARE THE CARD'S, NOT THE JOURNEY'S — read from the agent the card points at, through
+   * the SAME `agentDataQualityNeeds` that raised it. A second derivation here is how the journey
+   * would come to ask about a field the card was not raised for.
+   */
+  function cardGaps(card: BoardCard): AgentDataNeed[] {
+    const ag = card.relatedRecordId ? agents.find((a) => a.id === card.relatedRecordId) : undefined;
+    return ag ? agentDataQualityNeeds(ag) : [];
   }
 
   /** The one entrance — it routes to the bucket's own write, each of which is the EXISTING one. */
@@ -2386,6 +2403,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        caught it, and it was right to — an inline completion is how the undo was bypassed once
        already. One primitive, four entrances. */
     if (kind === "note") return quickDone(card);
+    if (kind === "fix") return commitFixFromPane(card, v);
     return commitSendFromPane(card, v);
   }
 
@@ -2486,6 +2504,45 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     const undo = () => undoQueryStatus(q.id, prev, target.status);
     doneToast(card, async () => { await undo(); flash("Restored"); });
+  }
+
+  /**
+   * ⚠️ THE HOUSEKEEPING SHEET'S OWN WRITE, RE-HOMED — one `updateAgent` carrying only the fields the
+   * writer actually answered, then the flag the card was raised by. Nothing here is new: the same
+   * three fields, the same `resolveTaskFlag`, the same toast. What changed is where it is asked.
+   *
+   * ⚠️ AND AN UNANSWERED GAP IS OMITTED, never written empty. `agentDataQualityNeeds` reads
+   * `responseTimeWeeks === 0` as the stub and an ABSENT field as "Unknown, and that is an answer" —
+   * so writing `0` or `""` for a question they skipped would not clear the gap, it would restate it
+   * as a fact. Absence is a first-class state on this record and the write respects it.
+   */
+  async function commitFixFromPane(card: BoardCard, v: JourneySendValues) {
+    const ag = card.relatedRecordId ? agents.find((a) => a.id === card.relatedRecordId) : undefined;
+    if (!ag) return;
+    const fields: Partial<Agent> = {};
+    if (v.fixResponseWeeks.trim()) {
+      fields.responseTimeWeeks = Number(v.fixResponseWeeks);
+      fields.noResponseMeansNo = v.fixNoMeansNo;
+    }
+    if (v.fixMaterials.length) fields.materialsWanted = v.fixMaterials;
+    if (v.fixMswl.trim()) fields.mswlNotes = v.fixMswl.trim();
+    if (!Object.keys(fields).length) return;
+    try {
+      await updateAgent(ag.id, fields);
+    } catch {
+      flash("Couldn’t save that — try again?", { label: "Try again", fn: () => commitFixFromPane(card, v) });
+      return;
+    }
+    /* ⚠️ THE FLAG IS RESOLVED ONLY AFTER THE WRITE LANDS. Resolving first would clear the card on a
+       failed save, which is the one outcome worse than the card staying. */
+    resolveTaskFlag(flagKeyForTask("data_quality_poor", ag.id));
+    /* ⚠️ NO UNDO ARM. The other four journeys undo by restoring a query's PREVIOUS status, which
+       `recomputeQuery` derives and this write does not touch. Here the previous state is an ABSENT
+       field, and "undo" would mean writing `deleteField()` back over three fields the writer may
+       have edited elsewhere in between. The agent's own editor is the honest way back.
+       So the receipt says what happened and offers nothing it cannot deliver — `doneToast` takes an
+       undo arm as a REQUIRED argument, which is the signature doing its job. */
+    flash("Saved to the profile.");
   }
 
   async function commitSendFromPane(card: BoardCard, v: JourneySendValues) {

@@ -17,6 +17,7 @@ import { join } from "node:path";
 import { BoardCard } from "../../lib/todoBoard";
 import { TodoDock } from "./TodoDock";
 import { TodoBoard } from "./TodoBoard";
+import { parseAgentMaterials } from "../../lib/agentMaterials";
 
 const here = __dirname;
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
@@ -1276,5 +1277,76 @@ describe("⚠️ THE PANE IS NEVER PROVISIONALLY EMPTY, and never congratulates"
     expect(at, "the empty pane's marker is gone — this slice would read the whole file").toBeGreaterThan(-1);
     const panel = page.slice(at, at + 700);
     expect(panel).not.toMatch(/\b(great|well done|congrat|nice work)\b/i);
+  });
+});
+
+/* ── the fix journey ─────────────────────────────────────────────────────────────────────────── */
+
+describe("⚠️ THE FIX JOURNEY WRITES THROUGH `updateAgent`, and omits what was not answered", () => {
+  /* ⚠️ STRIPPED BEFORE ASSERTING, and this suite proved why twice while it was being written: the
+     commit's own note explains that `doneToast` is deliberately NOT used, and the dock's prop doc
+     names `agentDataQualityNeeds` to say the dock must not call it. Both `not.toContain`s failed on
+     the prose describing the very absence they were checking for. */
+  const commit = code(sliceBetween(page, "async function commitFixFromPane", "async function commitSendFromPane", "commitFixFromPane"));
+
+  it("one write, and it is the existing one — no second agent-update path", () => {
+    expect(commit).toContain("await updateAgent(ag.id, fields)");
+    expect(commit).not.toContain("updateDoc");
+    expect(commit).not.toContain("setDoc");
+  });
+
+  it("⚠️ EACH FIELD IS GATED ON AN ANSWER — a skipped question writes nothing at all", () => {
+    /* Zeroing a skipped reply window would not clear the gap: `agentDataQualityNeeds` reads `0` as
+       the stub that RAISED the card. So the guard is correctness, not tidiness. */
+    for (const f of ["responseTimeWeeks", "materialsWanted", "mswlNotes"]) {
+      expect(commit, `${f} is written unconditionally`).toContain(f);
+    }
+    expect(commit).toContain("if (v.fixResponseWeeks.trim())");
+    expect(commit).toContain("if (v.fixMaterials.length)");
+    expect(commit).toContain("if (v.fixMswl.trim())");
+    expect(commit).toContain("if (!Object.keys(fields).length) return;");
+  });
+
+  it("⚠️ THE FLAG RESOLVES AFTER THE WRITE, never before", () => {
+    const write = commit.indexOf("await updateAgent");
+    const flag = commit.indexOf("resolveTaskFlag");
+    expect(write).toBeGreaterThan(-1);
+    expect(flag).toBeGreaterThan(write);
+    /* and a failed write returns before either */
+    expect(commit.indexOf("return;")).toBeLessThan(flag);
+  });
+
+  it("⚠️ NO UNDO IS OFFERED, because none can be delivered", () => {
+    /* The other four undo by restoring a query's previous status. Here the previous state is an
+       ABSENT field, and `deleteField()` over three fields the writer may have edited elsewhere is
+       not an undo. `doneToast` requires an undo arm, so its absence is the signature enforcing it. */
+    expect(commit).not.toContain("doneToast");
+    expect(commit).not.toContain("rememberUndo");
+    expect(commit).toContain('flash("Saved to the profile.")');
+  });
+
+  it("⚠️ THE PANE IS WITHHELD WHEN THERE IS NOTHING TO ASK", () => {
+    const kindFn = sliceBetween(page, "function paneJourneyKind", "\n  }", "paneJourneyKind");
+    expect(kindFn).toContain('case "fix": return cardGaps(card).length > 0 ? "fix" : undefined;');
+  });
+
+  it("⚠️ THE GAPS COME FROM THE DERIVATION THAT RAISED THE CARD — one source, not two", () => {
+    const gapsFn = sliceBetween(page, "function cardGaps", "\n  }", "cardGaps");
+    expect(gapsFn).toContain("agentDataQualityNeeds(ag)");
+    /* the dock is a conduit: it must not derive them a second time */
+    expect(code(dockSrc)).not.toContain("agentDataQualityNeeds");
+  });
+
+  it("⚠️ THE MATERIALS EDITOR WRITES WHAT `parseAgentMaterials` CAN READ BACK", () => {
+    /* "Opening sample" is the LABEL — `MAT_OPTS` stores `Sample pages`, and the parser classifies
+       by whole-string match, so writing the label would file it as Other. And Full manuscript /
+       Author bio are excluded from this surface by the standing law. */
+    const opts = sliceBetween(readFileSync(join(here, "PaneJourney.tsx"), "utf8"), "const FIX_MATERIALS", "];", "FIX_MATERIALS");
+    expect(opts).toContain('{ label: "Opening sample", stored: "Sample pages" }');
+    expect(opts).not.toMatch(/Full manuscript/i);
+    expect(opts).not.toMatch(/Author bio/i);
+    for (const stored of ["Query letter", "Synopsis", "Sample pages"]) {
+      expect(parseAgentMaterials([stored]).selected, `${stored} does not round-trip`).toContain(stored);
+    }
   });
 });

@@ -30,7 +30,7 @@ import { MaterialRow } from "../../lib/todoHandoff";
 import {
   CLOSE_REASON_COPY, CloseReason, JOURNEY_HINT, JOURNEY_STEPS, JourneyKind, JourneySendValues,
   OFFER_ACT, OFFER_BRANCHES, OFFER_HINT, OfferBranch, SEND_METHODS, SendMethod,
-  StepId, canCommit, checkBackLabel, journeySummary, shortDay, whenMode, ymdLocal,
+  StepId, canCommit, checkBackLabel, fixSteps, journeySummary, shortDay, whenMode, ymdLocal,
 } from "../../lib/paneJourney";
 import { HolderRow } from "../../lib/todoHandoff";
 import { RecordingCalendar } from "./RecordingCalendar";
@@ -45,7 +45,27 @@ const STEP_TITLE: Record<StepId, string> = {
   why: "How it ended",
   remember: "Anything to remember",
   wrote: "What you wrote",
+  "gap-responseTime": "How long they take",
+  "gap-materials": "What they ask for",
+  "gap-mswl": "What they are looking for",
 };
+
+/**
+ * ⚠️ THE THREE THE LAW ALLOWS, AND THE STORED VALUE IS NOT THE LABEL. `agentMaterials`' four rows
+ * are Query letter · Synopsis · Opening sample · Other; Other is free text and has no home in a
+ * three-chip editor, and Full manuscript / Author bio are excluded from this surface by the
+ * standing law. "Opening sample" is what the writer reads — `Sample pages` is what is written,
+ * because `parseAgentMaterials` classifies by whole-string match and would file anything else as
+ * Other.
+ */
+const FIX_MATERIALS: { label: string; stored: string }[] = [
+  { label: "Query letter", stored: "Query letter" },
+  { label: "Synopsis", stored: "Synopsis" },
+  { label: "Opening sample", stored: "Sample pages" },
+];
+
+/** The reply windows the housekeeping sheet offers, unchanged — one vocabulary, two surfaces. */
+const FIX_WEEKS = [4, 6, 8, 12];
 
 export interface PaneJourneyProps {
   /** The rows the card states as on file — pre-ticked, because this confirms rather than asks. */
@@ -68,6 +88,12 @@ export interface PaneJourneyProps {
   /** Which journey — the step stack is declared per kind in `JOURNEY_STEPS`. */
   kind: JourneyKind;
   /**
+   * ⚠️ `fix` ONLY — the gaps the card was raised for, from `agentDataQualityNeeds`. This is the one
+   * journey whose stack is DERIVED rather than declared, because its questions are whichever fields
+   * are actually missing. Passing it for any other kind does nothing.
+   */
+  gaps?: readonly ("responseTime" | "materials" | "mswl")[];
+  /**
    * ⚠️ THE OFFER'S NOTIFY BRANCH — THE AGENTS STILL HOLDING MATERIAL, AND HERE THEY ARE THE WORK.
    * §4.4 shows this same set on the CARD as reference; in the journey it is the thing being acted
    * on. One derivation, two presentations: `holderRows` is a presenter over
@@ -88,8 +114,10 @@ export interface PaneJourneyProps {
   onCancel: () => void;
 }
 
-export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, holders, replyBy, wrote, value, onChange, onCancel }) => {
+export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, gaps, holders, replyBy, wrote, value, onChange, onCancel }) => {
   const now = useMemo(() => new Date(), []);
+  /* declared for five kinds, derived from the card's own gaps for `fix` — see the note at the map */
+  const steps = useMemo(() => (kind === "fix" ? fixSteps(gaps ?? []) : JOURNEY_STEPS[kind]), [kind, gaps]);
   const [calAnchor, setCalAnchor] = useState<HTMLElement | null>(null);
   const dateBtn = useRef<HTMLButtonElement | null>(null);
 
@@ -333,6 +361,56 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
             {wrote?.detail && <p className="pj-wrotesub">{wrote.detail}</p>}
           </>
         );
+      case "gap-responseTime":
+        /* ⚠️ NO REPLY MEANS NO RIDES HERE, not in a step of its own. It is a clause of the same
+           policy — how long they take, and whether silence is the answer — and splitting it would
+           make a card raised for one gap ask two questions. */
+        return (
+          <>
+            <div className="pj-seg">
+              {FIX_WEEKS.map((w) => (
+                <button type="button" key={w} className={value.fixResponseWeeks === String(w) ? "on" : undefined}
+                  aria-pressed={value.fixResponseWeeks === String(w)} onClick={() => set({ fixResponseWeeks: String(w) })}>
+                  {w} weeks
+                </button>
+              ))}
+            </div>
+            <div className="pj-also bare">
+              <input type="number" min={1} className="pj-num" placeholder="or a number of weeks"
+                value={FIX_WEEKS.includes(Number(value.fixResponseWeeks)) ? "" : value.fixResponseWeeks}
+                onChange={(e) => set({ fixResponseWeeks: e.target.value })} />
+            </div>
+            <button type="button" className={`pj-orow${value.fixNoMeansNo ? " on" : ""}`}
+              aria-pressed={value.fixNoMeansNo} onClick={() => set({ fixNoMeansNo: !value.fixNoMeansNo })}>
+              <span className="pj-bx" aria-hidden>{value.fixNoMeansNo ? <Check size={10} /> : null}</span>
+              <span className="pj-otx">No reply means no<span className="sub">We will stop waiting once the window is up.</span></span>
+            </button>
+          </>
+        );
+      case "gap-materials":
+        return (
+          <div className="pj-opts">
+            {FIX_MATERIALS.map((m) => {
+              const on = value.fixMaterials.includes(m.stored);
+              return (
+                <button type="button" key={m.stored} className={`pj-orow${on ? " on" : ""}`} aria-pressed={on}
+                  onClick={() => set({ fixMaterials: on
+                    ? value.fixMaterials.filter((x) => x !== m.stored)
+                    : [...value.fixMaterials, m.stored] })}>
+                  <span className="pj-bx" aria-hidden>{on ? <Check size={10} /> : null}</span>
+                  <span className="pj-otx">{m.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      case "gap-mswl":
+        return (
+          <div className="pj-also bare">
+            <textarea value={value.fixMswl} placeholder="What are they looking for?"
+              onChange={(e) => set({ fixMswl: e.target.value })} />
+          </div>
+        );
       case "remember":
         return (
           <div className="pj-also bare">
@@ -389,8 +467,12 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
       <>
       {/* ⚠️ THE STACK IS DECLARED, NOT BRANCHED — `JOURNEY_STEPS[kind]`. A send asks four things; a
           chase asks two; a close asks one. Numbering follows the stack, so a shorter journey LOOKS
-          shorter rather than showing "03 of 04" with a step that does nothing. */}
-      {JOURNEY_STEPS[kind].map((id, i) => (
+          shorter rather than showing "03 of 04" with a step that does nothing.
+          ⚠️ WITH ONE EXCEPTION, AND IT IS DERIVED RATHER THAN DECLARED: `fix` asks one question per
+          MISSING FIELD, from the same `agentDataQualityNeeds` that raised the card. Its stack is
+          therefore data, not a table — and it is never padded to a fixed length, because a card
+          raised for one gap that asked three questions would be inventing work. */}
+      {steps.map((id, i) => (
         <div className="pj-step" key={id}>
           <div className="pj-n">
             <span className="i">{String(i + 1).padStart(2, "0")}</span>

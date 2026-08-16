@@ -46,3 +46,4 @@ One line each, unfixed. Not swept for siblings, not turned into work. Candidates
   mounted-but-hidden on /todo, so an unscoped `.cal-d` selector resolves to a cell nobody can click —
   it cost a measurement run. No visual bug today because the popover's own rules are more specific,
   but two components sharing a prefix is one stylesheet edit away from being one.
+- `FocusFlow.tsx:77` `MATERIAL_VOCAB` offers **Full Manuscript** as an agent material. The standing law excludes Full manuscript and Author bio from Agent Materials and `agentMaterials.ts` STRIPS them on every Materials commit — so the housekeeping sheet offers a chip whose value the next Materials save deletes. The in-pane `fix` journey offers the three the law allows. (Not fixed — FocusFlow is out of scope this pass.)

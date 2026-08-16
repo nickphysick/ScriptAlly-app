@@ -37,7 +37,7 @@
  *
  * Declared as a table rather than branched in the component — the same law `paneSections` follows.
  */
-export type JourneyKind = "send" | "chase" | "close" | "offer" | "note";
+export type JourneyKind = "send" | "chase" | "close" | "offer" | "note" | "fix";
 
 /**
  * ⚠️ THE OFFER IS A BRANCH, NOT A STACK, AND FLATTENING IT WOULD BE A LIE ABOUT THE DECISION.
@@ -56,7 +56,9 @@ export const OFFER_BRANCHES: { key: OfferBranch; title: string; gloss: string }[
   { key: "time", title: "I need time to decide", gloss: "The card stays on your board, quieter, until the day you choose" },
 ];
 
-export type StepId = "what-went" | "how" | "when" | "check-back" | "why" | "remember" | "wrote";
+export type StepId = "what-went" | "how" | "when" | "check-back" | "why" | "remember" | "wrote"
+  /* the fix journey's three, one per gap `agentDataQualityNeeds` can report */
+  | "gap-responseTime" | "gap-materials" | "gap-mswl";
 
 /* ⚠️ `Exclude<…, "offer">` IS THE TYPE SAYING WHAT THE DESIGN SAYS: the offer has no step stack,
    because it branches. A `Record<JourneyKind, …>` would have forced a placeholder entry here, and a
@@ -75,7 +77,24 @@ export const JOURNEY_STEPS: Record<Exclude<JourneyKind, "offer">, readonly StepI
    * finished it. There is no field for "what happened when I did this", so nothing pretends there is.
    */
   note: ["wrote"],
+  /**
+   * ⚠️ THE FIX JOURNEY'S STACK IS EMPTY HERE BECAUSE IT IS DERIVED FROM THE CARD, NOT DECLARED.
+   * Its steps are whichever agent fields are actually missing — `agentDataQualityNeeds` already
+   * answers that, and it is the same derivation the card was RAISED by. A card raised for one gap
+   * asks one question; a card raised for three asks three. `fixSteps()` below builds it.
+   *
+   * ⚠️ AND IT IS NOT PADDED TO MATCH THE SEND. A journey that asked about a wish list on a card
+   * raised for a missing reply window would be inventing work — and worse, it would invite the
+   * writer to fill in a field nothing had flagged, which is how a housekeeping prompt turns into a
+   * form.
+   */
+  fix: [],
 };
+
+/** The `fix` journey's steps — one per gap, in the order `agentDataQualityNeeds` reports them. */
+export function fixSteps(needs: readonly ("responseTime" | "materials" | "mswl")[]): StepId[] {
+  return needs.map((n) => `gap-${n}` as StepId);
+}
 
 /**
  * ⚠️ THE BAND'S PRE-LINE IS PER JOURNEY, and the walk is what found this: a close card in the
@@ -90,6 +109,8 @@ export const JOURNEY_PRELINE: Record<JourneyKind, string> = {
   /* ⚠️ THE OFFER'S PRE-LINE IS THE ONE THING IT SHARES ACROSS BRANCHES — whichever you pick, you
      are answering an offer, and the band should not change under you when you choose. */
   offer: "Answering the offer from",
+  /* a fix is about the RECORD, and the band's subject is the agent whose record it is */
+  fix: "Filling in the record for",
   /* a note has no agent — the band already falls through to the standing subject */
   note: "Ticking off",
 };
@@ -105,6 +126,7 @@ export const JOURNEY_ACT: Record<Exclude<JourneyKind, "send" | "offer">, string>
   chase: "Log the nudge",
   close: "Close the record",
   note: "Mark it done",
+  fix: "Save to the record",
 };
 
 /**
@@ -117,6 +139,7 @@ export const JOURNEY_HINT: Record<Exclude<JourneyKind, "offer">, string> = {
   chase: "Nothing is sent from here — this records the nudge you sent.",
   close: "This closes the record. It does not tell the agent anything.",
   note: "Struck through on Today — undo is on the toast.",
+  fix: "This updates the agent's record. It tells them nothing.",
 };
 
 /** The three ways a query ends — the close journey's one real question. */
@@ -138,6 +161,15 @@ export interface JourneySendValues {
   checkBackDays: number;
   /** close only — which of the three ways it ended. `null` until the writer says. */
   reason: CloseReason | null;
+  /* ── fix: one field per gap `agentDataQualityNeeds` can report, all empty until answered ── */
+  /** Weeks, as typed. A string because the editor is chips + a free field. */
+  fixResponseWeeks: string;
+  /** Rides with the reply window — "no reply means no" is a fact about the same policy. */
+  fixNoMeansNo: boolean;
+  /** Material labels, the shape `buildAgentMaterials` encodes. */
+  fixMaterials: string[];
+  /** Their wish list, verbatim. */
+  fixMswl: string;
   /** offer only — `null` while the writer is on the branch selector. */
   branch: OfferBranch | null;
   /** offer · decide — accepted or declined. `null` until said. */
@@ -199,6 +231,10 @@ export function openSend(
     /* ⚠️ `null` — THE OFFER OPENS ON ITS SELECTOR. There is no default branch, because the three
        are not degrees of one act; choosing for the writer would decide which of three different
        things they came here to do. */
+    fixResponseWeeks: "",
+    fixNoMeansNo: false,
+    fixMaterials: [],
+    fixMswl: "",
     branch: null,
     decision: null,
     remindDate: "",
@@ -266,6 +302,21 @@ export function canCommitSend(v: JourneySendValues): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(v.sentDate);
 }
 
+/**
+ * ⚠️ THE FIX'S SUMMARY NAMES WHAT WILL BE WRITTEN, and nothing that will not. A writer who answered
+ * one of three gaps sees one clause — the other two are still missing, and saying so here would be
+ * the app reporting its own emptiness back at them.
+ */
+export function fixSummary(v: JourneySendValues): string {
+  const parts: string[] = [];
+  if (v.fixResponseWeeks.trim()) {
+    parts.push(`a ${v.fixResponseWeeks.trim()}-week reply window${v.fixNoMeansNo ? " (no reply means no)" : ""}`);
+  }
+  if (v.fixMaterials.length) parts.push(`${v.fixMaterials.length} material${v.fixMaterials.length === 1 ? "" : "s"}`);
+  if (v.fixMswl.trim()) parts.push("their wish list");
+  return parts.length ? `Saving ${parts.join(", ")} to the record.` : "Fill in whatever you know.";
+}
+
 /** The sentence about to be committed, per branch — and nothing at all on the selector. */
 export function offerSummary(v: JourneySendValues): string {
   if (v.branch === "notify") {
@@ -302,6 +353,10 @@ export function canCommit(kind: JourneyKind, v: JourneySendValues): boolean {
   if (kind === "note") return true;
   if (kind === "close") return v.reason !== null;
   if (kind === "offer") return canCommitOffer(v);
+  /* ⚠️ ANY ONE GAP ANSWERED IS WORTH SAVING. A journey that demanded all three would refuse a
+     writer who knows the reply window but not the wish list — and the card was raised BY the gaps,
+     so closing one of them is real progress rather than a partial answer. */
+  if (kind === "fix") return !!v.fixResponseWeeks.trim() || v.fixMaterials.length > 0 || !!v.fixMswl.trim();
   return canCommitSend(v);
 }
 
@@ -357,6 +412,7 @@ export function journeySummary(kind: JourneyKind, v: JourneySendValues, now: Dat
   /* ⚠️ A NOTE'S SUMMARY IS NOT THE NOTE. The step above already shows the words; repeating them
      here would say the same thing twice on one screen. It states the DEED. */
   if (kind === "note") return "Marking this done.";
+  if (kind === "fix") return fixSummary(v);
   const mode = whenMode(v.sentDate, now);
   const when = mode === "today" ? "today" : mode === "yesterday" ? "yesterday" : `on ${shortDay(v.sentDate)}`;
   if (kind === "chase") return `Logging a nudge sent ${when}, coming back ${checkBackLabel(v.checkBackDays)}.`;

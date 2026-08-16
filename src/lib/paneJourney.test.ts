@@ -5,7 +5,8 @@
  * The in-pane journey's pure model (Item 9, Phase 2).
  */
 import { describe, it, expect } from "vitest";
-import { openSend, sendSummary, canCommitSend, canCommit, whenMode, ymdLocal, shortDay, SEND_METHODS, JOURNEY_STEPS, JOURNEY_PRELINE, JOURNEY_ACT, JOURNEY_HINT, journeySummary, checkBackLabel, CLOSE_REASON_COPY, OFFER_BRANCHES, OFFER_ACT, OFFER_HINT, canCommitOffer, offerSummary, seedNotify } from "./paneJourney";
+import { openSend, sendSummary, canCommitSend, canCommit, whenMode, ymdLocal, shortDay, SEND_METHODS, JOURNEY_STEPS, JOURNEY_PRELINE, JOURNEY_ACT, JOURNEY_HINT, journeySummary, checkBackLabel, CLOSE_REASON_COPY, OFFER_BRANCHES, OFFER_ACT, OFFER_HINT, canCommitOffer, offerSummary, seedNotify, fixSteps, fixSummary } from "./paneJourney";
+import { agentDataQualityNeeds } from "./agentDataQuality";
 import { CLOSE_REASONS } from "./todoJourneys";
 
 /* ⚠️ A FIXED CLOCK, PASSED IN. Every function here takes `now` rather than reading it, so the tests
@@ -213,7 +214,11 @@ describe("⚠️ THE OFFER IS A BRANCH, NOT A STACK", () => {
   it("it has no step stack at all — the type says so, and so does the table", () => {
     /* `JOURNEY_STEPS` is keyed `Exclude<JourneyKind, "offer">`. A placeholder entry is how a branch
        quietly becomes a stack later, so there is none to find. */
-    expect(Object.keys(JOURNEY_STEPS).sort()).toEqual(["chase", "close", "note", "send"]);
+    expect(Object.keys(JOURNEY_STEPS).sort()).toEqual(["chase", "close", "fix", "note", "send"]);
+    /* ⚠️ AND `fix`'s ENTRY IS EMPTY FOR THE OPPOSITE REASON — it is a stack, but a DERIVED one, so
+       the table holds no steps to be read instead of the card's gaps. A non-empty entry here would
+       silently become the thing `fixSteps` is meant to replace. */
+    expect(JOURNEY_STEPS.fix).toEqual([]);
   });
 
   it("⚠️ IT OPENS ON THE SELECTOR WITH NO BRANCH CHOSEN", () => {
@@ -301,5 +306,74 @@ describe("⚠️ THE TWO NOTIFY GROUPS OPEN DIFFERENTLY, because the courtesy di
 
   it("seedNotify with no groups is an empty selection, not a crash", () => {
     expect(seedNotify()).toEqual({ notifySel: {}, notifyHolding: [] });
+  });
+});
+
+/* ── the fix journey · the stack is the card's gaps ──────────────────────────────────────────── */
+
+describe("⚠️ THE FIX ASKS ONE QUESTION PER MISSING FIELD — derived, never padded", () => {
+  /**
+   * ⚠️ THE INPUT COMES FROM THE FUNCTION THAT RAISES THE CARD, not from a hand-written list of
+   * gap names. `agentDataQualityNeeds` is what decides a fix card exists at all; typing
+   * `["mswl"]` here would test a stack the board cannot produce, which is the exact fault the
+   * house rule about hand-written arguments names.
+   */
+  const stackFor = (a: Parameters<typeof agentDataQualityNeeds>[0]) => fixSteps(agentDataQualityNeeds(a));
+
+  it("one gap, one step", () => {
+    expect(stackFor({ responseTimeWeeks: 6, materialsWanted: ["Query letter"] })).toEqual(["gap-mswl"]);
+    expect(stackFor({ responseTimeWeeks: 0, materialsWanted: ["Query letter"], mswlNotes: "x" }))
+      .toEqual(["gap-responseTime"]);
+  });
+
+  it("three gaps, three steps — and the order is the derivation's, not a display preference", () => {
+    /* ⚠️ `{}` IS NOT THE THREE-GAP AGENT, and assuming it was is how this expectation was first
+       written wrong. An ABSENT `responseTimeWeeks` reads as "Unknown", which is a valid answer and
+       clears that gap; the stub `0` is what the quick-add writes and what raises it. The three-gap
+       agent is therefore the one carrying the stub, not the empty one — and that distinction is the
+       whole reason the write omits an unanswered field rather than zeroing it. */
+    expect(stackFor({})).toEqual(["gap-materials", "gap-mswl"]);
+    expect(stackFor({ responseTimeWeeks: 0 })).toEqual(["gap-responseTime", "gap-materials", "gap-mswl"]);
+  });
+
+  it("⚠️ NOTHING PADS IT TO FOUR. A one-gap card that asked the send's four questions would be", () => {
+    /* inventing work, and worse, inviting the writer to fill a field nothing had flagged. */
+    for (const a of [{}, { mswlNotes: "x" }, { responseTimeWeeks: 4 }]) {
+      expect(stackFor(a).length).toBe(agentDataQualityNeeds(a).length);
+      expect(stackFor(a).length).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("a filled-in agent yields NO steps — which is what the page reads to withhold the journey", () => {
+    expect(stackFor({ responseTimeWeeks: 8, materialsWanted: ["Query letter"], mswlNotes: "Upmarket" }))
+      .toEqual([]);
+  });
+
+  it("⚠️ ANY ONE ANSWER COMMITS. Demanding all three would refuse a writer who knows one of them", () => {
+    const v = { ...openSend([], undefined, NOW) };
+    expect(canCommit("fix", v)).toBe(false);
+    expect(canCommit("fix", { ...v, fixMswl: "Upmarket crime" })).toBe(true);
+    expect(canCommit("fix", { ...v, fixMaterials: ["Synopsis"] })).toBe(true);
+    expect(canCommit("fix", { ...v, fixResponseWeeks: "6" })).toBe(true);
+    /* whitespace is not an answer */
+    expect(canCommit("fix", { ...v, fixMswl: "   " })).toBe(false);
+  });
+
+  it("the summary names what will be written, and nothing that will not", () => {
+    const v = openSend([], undefined, NOW);
+    expect(fixSummary({ ...v, fixMswl: "Upmarket crime" })).toBe("Saving their wish list to the record.");
+    expect(fixSummary({ ...v, fixResponseWeeks: "6", fixNoMeansNo: true }))
+      .toBe("Saving a 6-week reply window (no reply means no) to the record.");
+    expect(fixSummary({ ...v, fixMaterials: ["Query letter", "Synopsis"] }))
+      .toBe("Saving 2 materials to the record.");
+    /* ⚠️ AND IT NEVER REPORTS THE GAPS STILL OPEN. A writer who answered one of three would
+       otherwise read the app listing its own emptiness back at them. */
+    expect(fixSummary({ ...v, fixMswl: "x" })).not.toMatch(/still|missing|remaining|other/i);
+  });
+
+  it("⚠️ THE JOURNEY IS ABOUT THE RECORD, and its hint says the agent is told nothing", () => {
+    expect(JOURNEY_ACT.fix).toBe("Save to the record");
+    expect(JOURNEY_HINT.fix).toContain("tells them nothing");
+    expect(JOURNEY_PRELINE.fix).not.toMatch(/send|chase|reply/i);
   });
 });
