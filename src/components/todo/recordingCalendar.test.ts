@@ -78,23 +78,46 @@ describe("the calendar's settled values — locked so a rebuild cannot lose them
     expect([...WEEKDAY_INITIALS]).toEqual(["M", "T", "W", "T", "F", "S", "S"]);
   });
 
-  it("days are 8px radii, pink on hover, burgundy when chosen", () => {
+  it("⚠️ NO BURGUNDY FILL — the chosen day is INK, and hover is the parchment step", () => {
+    /* the standing rule: no burgundy button fills anywhere. The chosen day wears the same grammar
+       as the black primary, so "this is selected" and "this commits" read as one family. */
     expect(rule(todoCss, ".cal-d {")).toContain("border-radius: 8px");
-    expect(rule(todoCss, ".cal-d:hover:not(:disabled) {")).toContain("background: var(--pink-btn)");
-    expect(rule(todoCss, ".cal-d.on {")).toContain("background: var(--burg)");
+    expect(rule(todoCss, ".cal-d.on {")).toContain("background: var(--ink-strong");
+    expect(rule(todoCss, ".cal-d.on {")).not.toContain("--burg");
+    expect(rule(todoCss, ".cal-d:hover:not(:disabled) {")).toContain("background: #f2ede7");
+  });
+
+  it("⚠️ EVERY TOKEN THE PORTALLED CARD READS HAS A LITERAL FALLBACK", () => {
+    /* `RecordingCalendar` portals to `document.body`; the theme's properties are declared on a class
+       inside `#root`. Outside that subtree `var(--paper)` resolves to nothing, and `var()` on an
+       undefined property makes the whole declaration INVALID — which CSS drops in silence. Measured
+       on the deployed page before the fix: computed background `rgba(0,0,0,0)`, border black,
+       radius 0. The page read straight through the calendar. */
+    const shell = rule(todoCss, ".cal {");
+    expect(shell).toContain("background: var(--paper, #");
+    expect(shell).toContain("border: 1px solid var(--line, #");
+    expect(shell).toContain("border-radius: var(--r-lg, ");
+    /* ⚠️ AND NO `var()` IN THIS COMPONENT'S RULES MAY BE FALLBACK-LESS — one bare token is enough to
+       drop a declaration, and the failure is invisible. Scans every `.cal*` rule, not just the
+       shell's. */
+    const from = todoCss.indexOf(".cal {");
+    const block = todoCss.slice(from, todoCss.indexOf(".cal-f button:disabled", from));
+    const bare = [...block.matchAll(/var\((--[a-z0-9-]+)\)/gi)].map((m) => m[1]);
+    expect(bare, `these read a token with no fallback: ${bare.join(", ")}`).toEqual([]);
   });
 
   it("⚠️ TODAY CARRIES A RING, NOT A FILL — a fill would read as chosen when nothing is", () => {
     const today = rule(todoCss, ".cal-d.today {");
-    expect(today).toContain("box-shadow: inset 0 0 0 1px var(--sage)");
+    expect(today).toContain("box-shadow: inset 0 0 0 1px var(--sage,");
     expect(today).not.toContain("background:");
   });
 
   it("parchment card, Playfair month, burgundy nav, mono initials", () => {
-    expect(rule(todoCss, ".cal {")).toContain("background: var(--paper)");
-    expect(rule(todoCss, ".cal-h .m {")).toContain("font-family: var(--f12-serif)");
-    expect(rule(todoCss, ".cal-nav {")).toContain("color: var(--burg)");
-    expect(rule(todoCss, ".cal-dow span {")).toContain("font-family: var(--f12-mono)");
+    /* the tokens carry fallbacks now (see the portal case) — the VALUES are unchanged */
+    expect(rule(todoCss, ".cal {")).toContain("background: var(--paper,");
+    expect(rule(todoCss, ".cal-h .m {")).toContain("font-family: var(--f12-serif,");
+    expect(rule(todoCss, ".cal-nav {")).toContain("color: var(--burg,");
+    expect(rule(todoCss, ".cal-dow span {")).toContain("font-family: var(--f12-mono,");
   });
 
   it("⚠️ IT IS A GENERAL min/max COMPONENT — the CALLER makes it past-only, not the component", () => {

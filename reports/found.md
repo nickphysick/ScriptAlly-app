@@ -33,3 +33,17 @@ One line each, unfixed. Not swept for siblings, not turned into work. Candidates
   Any function added in that range inherits the assertion. It caught a real fault this time (an
   inline completion that should have called `quickDone`), so it fired for the right reason by luck
   rather than by aim. Narrowing it to the function body is a one-line change; not done here.
+- **`.tdw-cbic` is now a misnomer.** It survives because it still renders — the list tools row's icon
+  buttons (filter, sort, add) — but "cb" named the command bar, which no longer exists. Renaming
+  touches locks in three files, so it is recorded rather than done.
+- **`.tdb-nc-save` carries a burgundy BUTTON fill** (`src/components/todo/todo.css:463`) — the note
+  composer's save. That is the rule Item 6 enforced on the calendar, still live one file over.
+- **`.sa-dp-day.sel` carries a burgundy fill too** (`src/components/forms/forms.css:338`) — it is
+  `BrandDatePicker`'s selected day, i.e. the EXACT fault fixed in `RecordingCalendar` this pass,
+  in the sibling date surface. Whether BrandDatePicker is replaced by RecordingCalendar is the
+  question that component's header already defers; this is one more argument for asking it.
+- **`.cal-*` is shared by two unrelated surfaces.** `RecordingCalendar`'s popover and the To-do
+  CALENDAR PAGE (`todoCalendar.css`) both use `.cal-grid` / `.cal-dow` / `.cal-d`. The page's grid is
+  mounted-but-hidden on /todo, so an unscoped `.cal-d` selector resolves to a cell nobody can click —
+  it cost a measurement run. No visual bug today because the popover's own rules are more specific,
+  but two components sharing a prefix is one stylesheet edit away from being one.

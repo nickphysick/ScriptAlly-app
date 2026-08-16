@@ -308,7 +308,11 @@ describe("⚠️ RecordingCalendar NAMES A DATE INSIDE A RANGE, AND ASSUMES NOTH
     const today = css.slice(css.indexOf(".cal-d.today {"), css.indexOf("}", css.indexOf(".cal-d.today {")));
     expect(today.length, "the .cal-d.today slice came out empty").toBeGreaterThan(20);
     expect(today).not.toMatch(/background:/);
-    expect(css).toMatch(/\.cal-d\.on \{[^}]*background: var\(--burg\)/);
+    /* ⚠️ THE CHOSEN DAY IS INK NOW, NOT BURGUNDY — the standing "no burgundy button fills" rule.
+       This case's own point is unchanged and is the half above: today is a RING and a fill is what
+       CHOSEN means. What chosen looks like moved to the black-primary grammar. */
+    expect(css).toMatch(/\.cal-d\.on \{[^}]*background: var\(--ink-strong/);
+    expect(css).not.toMatch(/\.cal-d\.on \{[^}]*--burg/);
   });
 
   it("the anchor relabels itself to the chosen date and stays selected", () => {
