@@ -50,10 +50,18 @@ const QUEUE = [
   card({ key: "c", title: "Redraft the opening", userTaskId: "u1", nature: "task", kind: "YOUR TASK" }),
 ];
 
+/* one offer card, shared by the two specs that mount one — the queue and the `card` prop must name
+   the SAME object, so declaring it once is the only way they cannot drift */
+const OFFER_CARD = card({ key: "o", title: "An offer", who: "Tom Ellery", taskType: "offer_received" });
+
 const render = (active = "a", queue = QUEUE) =>
   renderToStaticMarkup(
     <TodoDock
       queue={queue}
+      /* ⚠️ THE SPEC RESOLVES IT THE WAY THE PAGE DOES, and this is the one place a literal would be
+         wrong: passing a card the queue does not contain would make every spec below test a mount
+         the app cannot produce. */
+      card={queue.find((c) => c.key === active) ?? queue[0]}
       activeKey={active}
       onSelect={() => {}}
       onClose={() => {}}
@@ -169,7 +177,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(render("b")).toContain("tdk-band v-default");            // a stale close
     expect(render("c")).toContain("tdk-band v-default");            // the writer's own note
     const offer = renderToStaticMarkup(
-      <TodoDock queue={[card({ key: "o", title: "An offer", who: "Tom Ellery", taskType: "offer_received" })]}
+      <TodoDock queue={[OFFER_CARD]} card={OFFER_CARD}
         activeKey="o" onSelect={() => {}} onClose={() => {}} timeline={() => []}
         onPrimary={() => {}} onMore={() => {}} />,
     );
@@ -299,7 +307,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     /* a Fix card's subject can be a manuscript and a Note's is the writer's own board; a blank
        disc with an empty line beside it is the collision in a quieter form */
     const note = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="c" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE.find((c) => c.key === "c") ?? QUEUE[0]} activeKey="c" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}} />,
     );
     expect(note).toContain("Your noteboard");
@@ -308,7 +316,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
   it("the timeline renders when there is history, and is absent when there is none", () => {
     expect(render()).toContain("Full requested");
     const bare = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}} />
     );
     expect(bare).not.toMatch(/["\s`]tdk-tl["\s`]/);
@@ -337,7 +345,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
 
   const withJourney = (over: Partial<React.ComponentProps<typeof TodoDock>> = {}) =>
     renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}}
         materials={() => [{ label: "The partial — as Greg asked", sub: "v4" }]}
         primaryLabel={() => "Record the partial as sent"}
@@ -425,7 +433,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
 
   it("⚠️ THE FOOTER CARRIES THIS TASK'S VERBS — hint, three quiet buttons, divider, black Action", () => {
     const html = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}}
         primaryLabel={() => "Action"}
         verbs={() => ({
@@ -451,7 +459,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     /* an offer cannot be dismissed; a control that disappears leaves the writer wondering whether
        the app knows something they do not */
     const html = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}}
         verbs={() => ({
           snooze: { disabled: true, onPress: () => {} },
@@ -479,7 +487,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
   it("the card renders no verbs at all when the page hands it none", () => {
     /* the prop is the seam — a card without it is the surface as it was */
     const bare = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}} />,
     );
     expect(bare).not.toContain("tdk-vbsep");
@@ -492,14 +500,14 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     /* the page's own derivation is what suppresses it, so this asserts the SHAPE the card is handed
        and that the card renders a note when there genuinely is one */
     const withNote = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => [{ key: "e1", label: "Full requested", when: "2 Apr", status: "Full Requested", note: "First fifty pages as a PDF" }]}
         onPrimary={() => {}} onMore={() => {}} />,
     );
     expect(withNote).toContain("First fifty pages as a PDF");
     /* and none at all when the page withholds it */
     const bare = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => [{ key: "e1", label: "Full requested", when: "2 Apr", status: "Full Requested" }]}
         onPrimary={() => {}} onMore={() => {}} />,
     );
@@ -518,7 +526,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
 
   it("⚠️ the timeline renders the REAL StatusDot — never a ring drawn here", () => {
     const html = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => [
           { key: "e1", label: "Query sent", when: "2 Jun", status: "Queried" },
           { key: "e2", label: "Partial requested", when: "28 Jun", status: "Partial Requested" },
@@ -543,7 +551,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
 
   it("⚠️ A NUDGE CARRIES NO STATUS AND SO TAKES NO DOT — it is not a status change", () => {
     const html = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => [{ key: "n1", label: "Nudge sent", when: "3 Jul" }]}
         onPrimary={() => {}} onMore={() => {}} />,
     );
@@ -585,7 +593,7 @@ describe("the flow mounted is the card's own kind", () => {
    */
   it("⚠️ the materials are a RECORD — a marked row, never an input", () => {
     const html = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} materials={() => [{ label: "The partial", sub: "QL v2" }]}
         onPrimary={() => {}} onMore={() => {}} />,
     );
@@ -716,7 +724,7 @@ describe("⚠️ THE ACTION BUTTON NEVER COMPLETES DIRECTLY — it opens the jou
 describe("⚠️ §4.4 — WHO ELSE HOLDS MATERIAL, and it states its own emptiness", () => {
   const offer = (holders: () => { queryId: string; name: string; holds: string; mail: { href: string | null; why: string } }[]) =>
     renderToStaticMarkup(
-      <TodoDock queue={[card({ key: "o", title: "An offer", who: "Tom Ellery", taskType: "offer_received" })]}
+      <TodoDock queue={[OFFER_CARD]} card={OFFER_CARD}
         activeKey="o" onSelect={() => {}} onClose={() => {}} timeline={() => []}
         holders={holders} onPrimary={() => {}} onMore={() => {}} />,
     );
@@ -934,7 +942,7 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
    */
   it("the column is headed TRACKING and opens with the stat pair", () => {
     const html = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => [{ key: "e1", label: "Full requested", when: "12 Jul" }]}
         onPrimary={() => {}} onMore={() => {}}
         handoff={() => ({ waitLabel: "Greg has waited", waitValue: "6 weeks", anchorLabel: "Requested", anchorValue: "28 Jun" })} />,
@@ -1019,7 +1027,7 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
      note's own column existed to confuse it. */
   it("an empty history says so rather than leaving a frame implying something is missing", () => {
     const html = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+      <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}} />,
     );
     expect(html).toContain("Nothing logged yet.");
@@ -1220,7 +1228,8 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
 describe("⚠️ THE HAND-OFF HANDS OVER, and it never invents what it hands", () => {
   const withAgent = (active = "a") => renderToStaticMarkup(
     <TodoDock
-      queue={QUEUE} activeKey={active} onSelect={() => {}} onClose={() => {}}
+      queue={QUEUE} card={QUEUE.find((c) => c.key === active) ?? QUEUE[0]} activeKey={active}
+      onSelect={() => {}} onClose={() => {}}
       timeline={() => []} onPrimary={() => {}} onMore={() => {}}
       handoff={() => ({ email: "b@carter.co.uk", website: "carterlit.com", msTitle: "Murphy's Day Out" })}
     />,
@@ -1348,5 +1357,49 @@ describe("⚠️ THE FIX JOURNEY WRITES THROUGH `updateAgent`, and omits what wa
     for (const stored of ["Query letter", "Synopsis", "Sample pages"]) {
       expect(parseAgentMaterials([stored]).selected, `${stored} does not round-trip`).toContain(stored);
     }
+  });
+});
+
+/* ── item 6 · the dock's identity ────────────────────────────────────────────────────────────── */
+
+describe("⚠️ THE DOCK RENDERS THE CARD IT IS GIVEN — a held card outlives its place in the queue", () => {
+  /**
+   * ⚠️ THE FIXTURE IS THE FAULT: a card that is NOT in the queue. That is the state a commit
+   * creates (the card leaves `dockable`) and the state a search narrowing creates, and the old
+   * `queue.find(activeKey) ?? queue[0]` resolved it to the FIRST REMAINING TASK — silently, with
+   * the page still holding the original and the activity listener still keyed on its query.
+   *
+   * Measured on the deployed page before the fix, without a write: dock Joan Whitfield, search for
+   * "Ana Duarte", and the pane swapped to Ana Duarte with no action taken on the pane.
+   */
+  const HELD = card({
+    key: "gone", title: "Chase your query", who: "Joan Whitfield",
+    record: "Joan Whitfield · Whitfield Agency", taskType: "nudge_overdue", kind: "AGENT WAITING",
+  });
+  const REMAINING = [card({ key: "x", title: "Send your full", who: "Ana Duarte", record: "Ana Duarte · Duarte Words", taskType: "full_requested" })];
+
+  const held = renderToStaticMarkup(
+    <TodoDock queue={REMAINING} card={HELD} activeKey={HELD.key}
+      onSelect={() => {}} onClose={() => {}} timeline={() => []}
+      onPrimary={() => {}} onMore={() => {}} />,
+  );
+
+  it("it draws the held card, not the queue's first", () => {
+    expect(held).toContain("Joan Whitfield");
+    expect(held, "the dock fell back to the queue's first card").not.toContain("Ana Duarte");
+  });
+
+  it("⚠️ AND THE FALLBACK IS GONE FROM THE SOURCE, not merely unreached", () => {
+    /* stripped first — the prop's own doc quotes the expression it retired, and reading prose as
+       code fails a file that is correct. */
+    expect(code(dockSrc)).not.toContain("queue.find");
+    expect(code(dockSrc)).not.toContain("?? queue[0]");
+  });
+
+  it("the queue survives for the WALK, which is a different question from identity", () => {
+    /* prev/next genuinely step through the live list; what the dock must never do again is decide
+       which card this IS. Both facts, so a future simplification cannot drop the queue entirely. */
+    expect(dockSrc).toContain("queue");
+    expect(held).toContain("tdk-pos");
   });
 });

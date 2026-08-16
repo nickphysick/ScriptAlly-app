@@ -677,7 +677,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const dockable = allDockable.filter((c) => chipMatchesCard(chip, c));
   /* ⚠️ THE REF IS WRITTEN DURING RENDER, and that is safe because it is idempotent: the value is
      a pure function of this render's own inputs, so a repeated render writes the same number. */
-  const docked = resolveDocked(dockable, dockKey, dockPos.current);
+  /* ⚠️ THE UNNARROWED SET GOES IN — see `resolveDocked`. Without it a search narrowing and a
+     snooze are indistinguishable here, and the pane advances off a card you are still working on. */
+  const docked = resolveDocked(dockable, dockKey, dockPos.current, allDockable);
   if (docked.card) { dockPos.current = docked.pos; heldCard.current = docked.card; }
 
   /**
@@ -1506,6 +1508,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               {paneCard ? (
                 <TodoDock
                   queue={dockable}
+                  /* ⚠️ THE PAGE HANDS THE CARD OVER — see `TodoDockProps.card`. `paneCard` already
+                     resolves the hold (`docked.card ?? heldCard.current`); the dock used to redo
+                     that resolution against a list the held card may have left, and win. */
+                  card={paneCard}
                   activeKey={paneCard.key}
                   onSelect={(key) => setDockKey(key)}
                   onClose={closeDock}

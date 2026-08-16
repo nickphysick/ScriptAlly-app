@@ -193,15 +193,37 @@ export function dockQueue(cards: BoardCard[]): BoardCard[] {
  *
  * An empty queue is the one case that yields nothing: there is no card to show because there is
  * no work left, which is the pane closing rather than the pane being cleared.
+ *
+ * ⚠️ AND "GONE FROM THE VIEW" IS NOT "GONE FROM THE WORK" — the distinction this function was
+ * missing, and the advance above is only ever right for the second.
+ *
+ * Snoozing the docked card from the rail removes it from the WORK, and advancing to what now
+ * occupies its place is what you want. Typing a search removes it from the VIEW only: the card is
+ * still outstanding, you were still working on it, and you narrowed the list to look something up.
+ * The page states this rule in its own words — "a rail with nothing in it and a pane still showing
+ * your card is the CORRECT pair" — and this function was quietly overruling it, because both cases
+ * arrive here as the same fact: the key is not in `queue`.
+ *
+ * ⚠️ MEASURED, NOT REASONED. On the deployed page: dock Joan Whitfield, search "Ana Duarte", and
+ * the pane swaps to Ana Duarte with no action taken on the pane. No write required to reproduce
+ * it — which matters, because the same swap happens after a COMMIT and proving THAT needs one.
+ *
+ * ⚠️ THE UNNARROWED SET IS THE DISCRIMINATOR, and it is optional so every existing caller keeps
+ * its exact behaviour. Absent, this is byte-for-byte the old function.
  */
 export function resolveDocked(
   queue: BoardCard[],
   key: string | null,
   lastPos: number,
+  /** The work BEFORE any narrowing. A key missing from `queue` but present here left the view. */
+  allWork?: BoardCard[],
 ): { card: BoardCard | null; pos: number } {
   if (!key || queue.length === 0) return { card: null, pos: lastPos };
   const i = queue.findIndex((c) => c.key === key);
   if (i !== -1) return { card: queue[i], pos: i };
+  /* still outstanding, merely filtered out of sight — hold it, and keep the position for later */
+  const held = allWork?.find((c) => c.key === key);
+  if (held) return { card: held, pos: lastPos };
   const at = Math.min(Math.max(lastPos, 0), queue.length - 1);
   return { card: queue[at], pos: at };
 }

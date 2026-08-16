@@ -123,6 +123,34 @@ describe("⚠️ THE DOCKED CARD IS RESOLVED FROM THE LIVE LIST, never from a st
     expect(shown?.key).toBe("c");
   });
 
+  /**
+   * ⚠️ AND THE CASE THE ADVANCE HID, which is the same shape pointing the other way. The two are
+   * asserted TOGETHER and against the same fixture on purpose: the only thing separating them is
+   * whether the card is still in the unnarrowed work, and a suite that tested one without the
+   * other would go green on a function that had collapsed them back into one.
+   */
+  it("⚠️ NARROWED OUT OF THE VIEW IS NOT GONE FROM THE WORK — the pane HOLDS", () => {
+    const all = [card({ key: "a" }), card({ key: "b" }), card({ key: "c" })];
+    const filtered = [card({ key: "a" })];             // a search matched only `a`
+    const { card: shown, pos } = resolveDocked(filtered, "b", 1, all);
+    expect(shown?.key, "the pane advanced off a card that is still outstanding").toBe("b");
+    /* the position is kept rather than recomputed — clearing the search must put you back */
+    expect(pos).toBe(1);
+  });
+
+  it("⚠️ THE SNOOZE STILL ADVANCES, because the card really has left the work", () => {
+    const all = [card({ key: "a" }), card({ key: "c" })];   // `b` snoozed — gone from BOTH
+    const { card: shown } = resolveDocked(all, "b", 1, all);
+    expect(shown?.key).toBe("c");
+  });
+
+  it("without the unnarrowed set it is byte-for-byte the old function", () => {
+    /* every existing caller keeps its exact behaviour — the discriminator is opt-in */
+    const after = [card({ key: "a" }), card({ key: "c" })];
+    expect(resolveDocked(after, "b", 1)).toEqual(resolveDocked(after, "b", 1, undefined));
+    expect(resolveDocked(after, "b", 1).card?.key).toBe("c");
+  });
+
   it("⚠️ PAST THE END CLAMPS TO THE LAST CARD — never back to the first", () => {
     /* You were on the LAST card and it left. The one before it is what remains; jumping to the
        top of the list because a row vanished under you is the worse failure, and it is exactly

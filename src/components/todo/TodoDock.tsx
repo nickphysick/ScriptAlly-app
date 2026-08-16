@@ -85,7 +85,26 @@ export interface DockTimelineEvent {
 export interface TodoDockProps {
   /** The queue — the board's current column order, filtered view already respected. */
   queue: BoardCard[];
-  /** The docked card's key. */
+  /**
+   * ⚠️ THE CARD ITSELF, AND THE DOCK NO LONGER LOOKS IT UP. It resolved
+   * `queue.find((c) => c.key === activeKey) ?? queue[0]`, and the fallback is the whole fault: the
+   * moment the held card leaves `dockable` — a commit removes it, a search narrowing hides it — the
+   * find misses and the dock SILENTLY SWAPS TO THE FIRST REMAINING TASK. Meanwhile the page is
+   * still holding the original (`heldCard.current`, its documented hold rule) and the activity
+   * listener is still keyed on the original's query. Header, materials and verbs from one card;
+   * timeline from another, with nothing on screen saying so.
+   *
+   * ⚠️ MEASURED WITHOUT A WRITE, because it does not need one: dock a card, type a search that
+   * matches a different one, and the pane swaps under you. Joan Whitfield → Ana Duarte, no action
+   * taken on the pane. The page's own comment says a narrowed rail beside a held card is the
+   * CORRECT pair — the dock was overruling it.
+   *
+   * ⚠️ SO THE PAGE OWNS THE IDENTITY AND THE DOCK RENDERS WHAT IT IS GIVEN. `queue` stays, because
+   * prev/next genuinely walk the live list; what it must never do again is decide WHICH card this
+   * is. One owner, and a held card that outlives its place in the queue.
+   */
+  card: BoardCard;
+  /** The docked card's key — for the queue walk and the position line, never for resolution. */
   activeKey: string;
   onSelect: (key: string) => void;
   onClose: () => void;
@@ -173,9 +192,8 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, journeyGaps, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, card, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, journeyGaps, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
-  const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
   /* ⚠️ `confirmSend` IS RETIRED WITH THE CHECKBOX (Phase 6). It was the card's own copy of a
      decision the journey owns — and the card never read it back to anything, so it was a control
