@@ -123,6 +123,15 @@ describe("⚠️ THE STACKS ARE DIFFERENT LENGTHS ON PURPOSE — no padding for 
   it("⚠️ AND A CLOSE ASKS ONE THING — the only thing the app does not already know", () => {
     expect(JOURNEY_STEPS.close.filter((s) => s !== "remember")).toEqual(["why"]);
   });
+
+  it("⚠️ AND A NOTE ASKS NOTHING AT ALL — one step, and it is confirmation", () => {
+    /* every field a journey could add here would be one the app invented so the stack looked
+       longer. `UserTask.detail` is the writer's OWN line; writing over it at completion would edit
+       what they wrote in order to record that they had finished it. */
+    expect(JOURNEY_STEPS.note).toEqual(["wrote"]);
+    expect(canCommit("note", openSend([], undefined, NOW))).toBe(true);
+    expect(journeySummary("note", openSend([], undefined, NOW), NOW)).toBe("Marking this done.");
+  });
 });
 
 describe("the close's one question", () => {
@@ -204,7 +213,7 @@ describe("⚠️ THE OFFER IS A BRANCH, NOT A STACK", () => {
   it("it has no step stack at all — the type says so, and so does the table", () => {
     /* `JOURNEY_STEPS` is keyed `Exclude<JourneyKind, "offer">`. A placeholder entry is how a branch
        quietly becomes a stack later, so there is none to find. */
-    expect(Object.keys(JOURNEY_STEPS).sort()).toEqual(["chase", "close", "send"]);
+    expect(Object.keys(JOURNEY_STEPS).sort()).toEqual(["chase", "close", "note", "send"]);
   });
 
   it("⚠️ IT OPENS ON THE SELECTOR WITH NO BRANCH CHOSEN", () => {

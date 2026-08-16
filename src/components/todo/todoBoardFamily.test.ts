@@ -163,14 +163,35 @@ describe("⚠️ the ⋯ menu speaks VERBS, never 'Move to X'", () => {
 describe("⚠️ completion goes through the PRIMITIVE, from either path (the undo repair)", () => {
   const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 
+  /**
+   * ⚠️ THIS SLICE HAD LOST ITS END ANCHOR AND WAS READING THE REST OF THE FILE. It ran
+   * `indexOf("function performBoardPlan")` → `indexOf("function renderBoard")`, and `renderBoard`
+   * no longer exists — so the end index was `-1`, which `slice` reads as "one character from the
+   * end". Every function below `performBoardPlan` was inside the assertion, and it passed only
+   * because nothing down there happened to contain the string. The house rule names this exactly:
+   * ANCHOR BEFORE YOU SLICE, one `expect` per slice.
+   *
+   * ⚠️ AND IT READS DECLARATIONS, NOT PROSE. The forbidden string is one this codebase writes in
+   * comments while explaining why a path must NOT use it — which is what a `not.toContain` over raw
+   * source is guaranteed to meet eventually.
+   */
+  const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  const boardPlan = (): string => {
+    const from = page.indexOf("function performBoardPlan");
+    expect(from, "performBoardPlan is gone — this case is reading nothing").toBeGreaterThan(-1);
+    /* the function's own body: to the next top-level `function ` declaration after it */
+    const rest = page.slice(from + 10);
+    const to = rest.indexOf("\n  function ");
+    expect(to, "no following declaration — the slice would run to the end of the file").toBeGreaterThan(-1);
+    return strip(page.slice(from, from + 10 + to));
+  };
+
   it("the drag's complete branch calls quickDone — the same call the tick makes", () => {
-    const fn = page.slice(page.indexOf("function performBoardPlan"), page.indexOf("function renderBoard"));
-    expect(fn).toContain('case "complete": void quickDone(card);');
+    expect(boardPlan()).toContain('case "complete": void quickDone(card);');
   });
 
   it("no board path writes `done: true` directly, which is how the undo was bypassed", () => {
-    const fn = page.slice(page.indexOf("function performBoardPlan"), page.indexOf("function renderBoard"));
-    expect(fn).not.toContain("done: true");
+    expect(boardPlan()).not.toContain("done: true");
   });
 
   it("and quickDone still raises the undo toast it always did", () => {

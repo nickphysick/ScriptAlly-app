@@ -44,6 +44,7 @@ const STEP_TITLE: Record<StepId, string> = {
   "check-back": "Come back to it",
   why: "How it ended",
   remember: "Anything to remember",
+  wrote: "What you wrote",
 };
 
 export interface PaneJourneyProps {
@@ -79,13 +80,15 @@ export interface PaneJourneyProps {
   holders?: { holding: HolderRow[]; queried: HolderRow[] };
   /** The reply-by day, where the record has one — the `time` branch caps its reminder there. */
   replyBy?: string;
+  /** note only — the writer's own words, shown so they can see what they are ticking off. */
+  wrote?: { title: string; detail?: string };
   value: JourneySendValues;
   onChange: (v: JourneySendValues) => void;
   /** `Back to the task` — the way out at the TOP of the body. Writes nothing. */
   onCancel: () => void;
 }
 
-export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, holders, replyBy, value, onChange, onCancel }) => {
+export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, holders, replyBy, wrote, value, onChange, onCancel }) => {
   const now = useMemo(() => new Date(), []);
   const [calAnchor, setCalAnchor] = useState<HTMLElement | null>(null);
   const dateBtn = useRef<HTMLButtonElement | null>(null);
@@ -319,6 +322,16 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
               );
             })}
           </div>
+        );
+      case "wrote":
+        /* ⚠️ THE NOTE'S OWN WORDS, IN THE NOTE'S OWN HAND — the same Caveat the card gives them. It
+           is confirmation, not a field: there is nothing here to change, because the thing being
+           recorded is that it is finished. */
+        return (
+          <>
+            <p className="pj-wrote">{wrote?.title ?? ""}</p>
+            {wrote?.detail && <p className="pj-wrotesub">{wrote.detail}</p>}
+          </>
         );
       case "remember":
         return (

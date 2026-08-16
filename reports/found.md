@@ -27,3 +27,9 @@ One line each, unfixed. Not swept for siblings, not turned into work. Candidates
   worth surfacing: those rungs carry an ordering key rather than a date, and the writer is the only
   one who can supply the real one. It is not a timeline sub-line; it wants an affordance (a prompt
   on the rung, or a gap in the Fix bucket). Suppressed, not answered.
+- **A completion lock slices too wide.** `todoBoardFamily.test.ts`'s "no board path writes
+  `done: true` directly" slices `ToDoPage.tsx` from `function performBoardPlan` to
+  `function renderBoard` — everything between those two markers, not `performBoardPlan`'s own body.
+  Any function added in that range inherits the assertion. It caught a real fault this time (an
+  inline completion that should have called `quickDone`), so it fired for the right reason by luck
+  rather than by aim. Narrowing it to the function body is a one-line change; not done here.

@@ -37,7 +37,7 @@
  *
  * Declared as a table rather than branched in the component — the same law `paneSections` follows.
  */
-export type JourneyKind = "send" | "chase" | "close" | "offer";
+export type JourneyKind = "send" | "chase" | "close" | "offer" | "note";
 
 /**
  * ⚠️ THE OFFER IS A BRANCH, NOT A STACK, AND FLATTENING IT WOULD BE A LIE ABOUT THE DECISION.
@@ -56,7 +56,7 @@ export const OFFER_BRANCHES: { key: OfferBranch; title: string; gloss: string }[
   { key: "time", title: "I need time to decide", gloss: "The card stays on your board, quieter, until the day you choose" },
 ];
 
-export type StepId = "what-went" | "how" | "when" | "check-back" | "why" | "remember";
+export type StepId = "what-went" | "how" | "when" | "check-back" | "why" | "remember" | "wrote";
 
 /* ⚠️ `Exclude<…, "offer">` IS THE TYPE SAYING WHAT THE DESIGN SAYS: the offer has no step stack,
    because it branches. A `Record<JourneyKind, …>` would have forced a placeholder entry here, and a
@@ -65,6 +65,16 @@ export const JOURNEY_STEPS: Record<Exclude<JourneyKind, "offer">, readonly StepI
   send: ["what-went", "how", "when", "remember"],
   chase: ["when", "check-back", "remember"],
   close: ["why", "remember"],
+  /**
+   * ⚠️ A NOTE HAS NOTHING TO ASK, SO IT ASKS NOTHING. One step — the words you wrote — and a
+   * commit that ticks it off. The step is confirmation rather than a question, and that is honest:
+   * every field a journey could add here would be one the app invented so the stack looked longer.
+   *
+   * ⚠️ I CONSIDERED AND REJECTED A CLOSING NOTE. `UserTask` has `detail`, which is the writer's OWN
+   * line; writing over it at completion would edit what they wrote in order to record that they had
+   * finished it. There is no field for "what happened when I did this", so nothing pretends there is.
+   */
+  note: ["wrote"],
 };
 
 /**
@@ -80,6 +90,8 @@ export const JOURNEY_PRELINE: Record<JourneyKind, string> = {
   /* ⚠️ THE OFFER'S PRE-LINE IS THE ONE THING IT SHARES ACROSS BRANCHES — whichever you pick, you
      are answering an offer, and the band should not change under you when you choose. */
   offer: "Answering the offer from",
+  /* a note has no agent — the band already falls through to the standing subject */
+  note: "Ticking off",
 };
 
 /**
@@ -92,6 +104,7 @@ export const JOURNEY_PRELINE: Record<JourneyKind, string> = {
 export const JOURNEY_ACT: Record<Exclude<JourneyKind, "send" | "offer">, string> = {
   chase: "Log the nudge",
   close: "Close the record",
+  note: "Mark it done",
 };
 
 /**
@@ -103,6 +116,7 @@ export const JOURNEY_HINT: Record<Exclude<JourneyKind, "offer">, string> = {
   send: "Nothing is sent from here — this records what you sent.",
   chase: "Nothing is sent from here — this records the nudge you sent.",
   close: "This closes the record. It does not tell the agent anything.",
+  note: "Struck through on Today — undo is on the toast.",
 };
 
 /** The three ways a query ends — the close journey's one real question. */
@@ -284,6 +298,8 @@ export function offerSummary(v: JourneySendValues): string {
  *           is safe to assume, so nothing is assumed.
  */
 export function canCommit(kind: JourneyKind, v: JourneySendValues): boolean {
+  /* ⚠️ A NOTE IS NEVER BLOCKED — there is nothing to answer, so there is nothing to withhold. */
+  if (kind === "note") return true;
   if (kind === "close") return v.reason !== null;
   if (kind === "offer") return canCommitOffer(v);
   return canCommitSend(v);
@@ -338,6 +354,9 @@ export const CLOSE_REASON_COPY: { key: CloseReason; label: string; gloss: string
 export function journeySummary(kind: JourneyKind, v: JourneySendValues, now: Date): string {
   if (kind === "send") return sendSummary(v, now);
   if (kind === "offer") return offerSummary(v);
+  /* ⚠️ A NOTE'S SUMMARY IS NOT THE NOTE. The step above already shows the words; repeating them
+     here would say the same thing twice on one screen. It states the DEED. */
+  if (kind === "note") return "Marking this done.";
   const mode = whenMode(v.sentDate, now);
   const when = mode === "today" ? "today" : mode === "yesterday" ? "yesterday" : `on ${shortDay(v.sentDate)}`;
   if (kind === "chase") return `Logging a nudge sent ${when}, coming back ${checkBackLabel(v.checkBackDays)}.`;

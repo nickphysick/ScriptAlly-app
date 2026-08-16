@@ -2383,6 +2383,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        `sendSpecFor` returns a spec for it, `recordMaterialsSent` performs it, and the only thing
        distinguishing it is a second pre-ticked row. One bucket, two journeys, because the bucket
        answers "how urgent" and the task type answers "what is this". */
+    if (card.userTaskId) return "note";
     if (card.taskType === "offer_received") return "offer";
     if (card.taskType === "revise_resubmit") return "send";
     switch (cardBucket(card)) {
@@ -2400,6 +2401,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (kind === "chase") return commitChaseFromPane(card, v);
     if (kind === "close") return commitCloseFromPane(card, v);
     if (kind === "offer") return commitOfferFromPane(card, v);
+    /* ⚠️ THE NOTE'S COMMIT IS `quickDone` ITSELF — completion goes through the PRIMITIVE, from
+       every path. My first version wrote `updateUserTask({ done: true })` inline, which is a COPY
+       of `quickDone`'s user-task arm: the same write, its own receipt, its own undo. The board lock
+       caught it, and it was right to — an inline completion is how the undo was bypassed once
+       already. One primitive, four entrances. */
+    if (kind === "note") return quickDone(card);
     return commitSendFromPane(card, v);
   }
 

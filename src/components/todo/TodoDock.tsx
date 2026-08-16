@@ -341,6 +341,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               kind={journeyKind?.(card) ?? "send"}
               holders={journeyHolders?.(card)}
               replyBy={replyBy?.(card)}
+              wrote={{ title: card.title, ...(card.detail ? { detail: card.detail } : {}) }}
               materials={materials?.(card) ?? []}
               ask={ask?.(card)}
               value={draft}

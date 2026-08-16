@@ -160,3 +160,8 @@
   background: none; border: 0; padding: 2px 4px; border-radius: 6px;
 }
 .pj-grouptog:hover { background: #f5e2da; }
+
+/* the note's own words, at reading size and in the writer's hand — the card's `.tdk-bignote`
+   treatment, because it is the same words being shown for the same reason */
+.pj-wrote { font-family: "Caveat", cursive; font-size: 26px; line-height: 1.4; color: #4a3a2e; margin: 0; }
+.pj-wrotesub { font-size: 13px; color: #6b6055; line-height: 1.5; margin: 10px 0 0; }
