@@ -138,7 +138,7 @@ describe("the requirement pips", () => {
     const pre = rule(".qch-rq.qch-prefilled .qch-c");
     expect(pre, "pre-filled must not be a filled mark").toContain("background: transparent");
     expect(pre, "sage is reserved for confirmed").not.toContain("#7e9178");
-    expect(rule(".qch-rq.qch-answered .qch-c")).toContain("background: #7e9178");
+    expect(rule(".qch-rq.qch-answered .qch-c")).toContain("background: var(--ink-2)");
     expect(rule(".qch-c"), "the unmet pip must read as empty").toContain("border: 1.5px solid #cfc3b1");
     expect(rule(".qch-rq.qch-on .qch-c"), "the old one-tick rule must be gone").toBe("");
   });

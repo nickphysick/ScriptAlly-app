@@ -189,7 +189,7 @@ describe("the panel reads as quieter than the form", () => {
      Asserted as the TOKENS the reading pane's card heads already read, not as literals. */
   it("a sage gradient ground with a soft disc bleeding off the corner", () => {
     const cap = rule(".qc-glance");
-    expect(cap).toContain("linear-gradient(180deg, var(--sage-band), var(--sage-band-2))");
+    expect(cap).toContain("background: var(--oat)");
     expect(cap, "the cap went back to a literal — it must read the shared band tokens")
       .not.toContain("#f4efe6");
     const disc = rule(".qc-glance::after");
@@ -332,7 +332,7 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
 
   /* The pill is a STATE signal, not part of the surface treatment. */
   it("and the sage status pill is left alone", () => {
-    expect(rule(".qc-ctxpill")).toContain("#e9ede6");
+    expect(rule(".qc-ctxpill")).toContain("background: var(--oat)");
     expect(rule(".t-capp .qc-ctxpill"), "the treatment must not reach it").toBe("");
   });
 });
@@ -401,7 +401,7 @@ describe("the stat cells carry a glyph apiece", () => {
     expect(panel).toContain("{STAT_GLYPH[c.key] && <span className=\"qc-ctxsi\"");
     expect(panel, "a positional lookup would mislabel a one-cell strip").not.toContain("STAT_GLYPH[0]");
     const si = rule(".qc-ctxsi");
-    expect(si).toContain("var(--pink-t)");
+    expect(si).toContain("var(--oat)");
     expect(si).toContain("var(--pink-i)");
     expect(si).toContain("border-radius: 7px");
   });

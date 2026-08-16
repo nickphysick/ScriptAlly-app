@@ -304,17 +304,32 @@ describe("Pack C §3 · the letterhead, the caps and the watermark", () => {
     }
   });
 
+  /**
+   * ⚠️ THE REGISTER SURVIVES §3; THE TWO COLOURS CARRYING IT DO NOT. The band still distinguishes
+   * create from record and still names the current segment in burgundy — but it did that in PINK
+   * and SAGE, and those two are the StatusDot system's alone now. A colour cannot carry a signal
+   * while it is also the wallpaper. The tokens are unchanged and the SHEET repoints them, so the
+   * rules still read the role they always read.
+   */
   it("the band carries the register", () => {
     expect(rule(".qc-crumb"), "the create band lost its ground").toContain("background: var(--pink-t)");
-    expect(rule(".qc-sheet--record .qc-crumb"), "record's band is not sage").toContain("var(--sageC)");
+    expect(rule(".qc-sheet--record .qc-crumb"), "record's band lost its own ground").toContain("var(--paper)");
     expect(rule(".qc-crumbcur"), "the current segment lost its colour").toContain("var(--burg)");
+    /* and the sheet is what makes those two neutral, in one place rather than per selector */
+    const sheet = rule(".t-f12.qc-sheet-layer");
+    expect(sheet, "the sheet's §3 block is missing").not.toBe("");
+    expect(sheet, "pink still paints a sheet surface").toContain("--pink-t: var(--oat)");
   });
 
-  /* §3b — the open step wears the same gradient every card on the reading pane already has. */
-  it("the open step is sage-capped, and no second band sits inside it", () => {
+  /* §3b — the open step wore the same cap every card on the reading pane had. Both are neutral now:
+     the cards' went parchment in fix pack 7 §1, and this one follows in §3 for the same reason —
+     sage is a status colour and cannot also be a header. The CLAUSE is that the open step is capped
+     and that the cap cannot reach a nested header; neither depended on the colour. */
+  it("the open step is capped, and no second band sits inside it", () => {
     const cap = rule(".qc-sec.qc-active > .qc-shead");
     expect(cap, "the cap rule is missing").not.toBe("");
-    expect(cap).toContain("linear-gradient(180deg, var(--sage-band), var(--sage-band-2))");
+    expect(cap, "the open step lost its cap").toContain("background: var(--oat)");
+    expect(cap, "the sage cap came back").not.toContain("--sage-band");
     /* the direct-child selector is what stops a nested header taking the cap too */
     expect(cap, "the cap would reach a nested header — that is the striped-box risk ref 96 names")
       .toContain("> .qc-shead");

@@ -166,7 +166,7 @@ describe("the three treatments", () => {
   });
 
   it("done shows a sage tick, the value at the right edge, and an EDIT", () => {
-    expect(rule(".qc-sec.qc-done .qc-tick")).toContain("#7e9178");
+    expect(rule(".qc-sec.qc-done .qc-tick")).toContain("var(--ink-2)");
     /* ⚠️ RESPELLED: the summary is the step descriptor's own value now, so one row cannot show a
        different step's answer. */
     expect(pane).toContain('<span className="qc-sval">{s.summary}</span>');

@@ -11,9 +11,11 @@
  * source — only a laid-out page shows them. So this walks the rendered page and records every
  * colour every element actually paints.
  *
- * ⚠️ IT RECORDS, IT DOES NOT INTERPRET. §1 must diff to nothing. §2 and §3 are SUPPOSED to differ,
- * and the same fingerprint is what shows exactly where and by how much, rather than "the page looks
- * different now".
+ * ⚠️ IT RECORDS, IT DOES NOT INTERPRET. §1 had to diff to NOTHING against a baseline taken before
+ * the refactor, and did — 461 elements, 0 differences, after it caught two "near enough" token
+ * substitutions on the first run. §2 and §3 were SUPPOSED to differ, so the baseline has been
+ * retaken against the palette as shipped: from here it guards the neutral scale rather than the
+ * refactor, and the next change to this page has to say which of 461 values it means to move.
  *
  * Usage:  SA_BASELINE=1 npx playwright test tests/e2e/qcPalette.measure.ts   → write the baseline
  *         npx playwright test tests/e2e/qcPalette.measure.ts                 → diff against it

@@ -96,8 +96,8 @@
 .f12-divv2 { display: block; width: 1px; height: 20px; background: var(--oatline); margin: 0 10px; align-self: center; }
 
 /* the left zone's pair — the ONLY filled button in the chrome (pink CTA) + the white import */
-.f12-btn-pri { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 600; padding: 8px 15px; border-radius: var(--r-md); background: var(--pink-btn); border: none; color: var(--ink); box-shadow: var(--sh-btn); transition: background 0.12s, transform 0.06s; }
-.f12-btn-pri:hover { background: var(--pink-btn-h); }
+.f12-btn-pri { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 600; padding: 8px 15px; border-radius: var(--r-md); background: var(--oat); border: none; color: var(--ink); box-shadow: var(--sh-btn); transition: background 0.12s, transform 0.06s; }
+.f12-btn-pri:hover { background: var(--line); }
 .f12-btn-pri:active { transform: translateY(0.5px); }
 .f12-btn-pri svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; }
 .f12-btn-sec { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 500; padding: 8px 14px; border-radius: var(--r-md); background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); box-shadow: var(--sh-btn); transition: border-color 0.12s, color 0.12s; }
@@ -195,7 +195,7 @@
 .qch-rq.qch-prefilled .qch-c { background: transparent; border-color: #cfc3b1; color: var(--muted); font-size: 10px; }
 /* answered — the solid tick, reserved for what the writer actively did */
 .qch-rq.qch-answered { color: var(--ink); }
-.qch-rq.qch-answered .qch-c { background: #7e9178; border-color: #7e9178; color: #fff; }
+.qch-rq.qch-answered .qch-c { background: var(--ink-2); border-color: var(--ink-2); color: #fff; }
 
 /* ══ STAGE 1 — ONE QUESTION, TWO COLUMNS (ref qc-stage1.html option 2) ══════════════════════
    ⚠️ THE SAME GEOMETRY AS STAGE 2, deliberately. Choosing an agent REPLACES the right column's
@@ -262,7 +262,7 @@
 .qc-drop { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 30; max-height: 300px; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 11px; box-shadow: 0 10px 30px rgba(60, 45, 30, 0.14); padding: 5px; }
 .qc-drow { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; background: none; border: 0; border-radius: 8px; padding: 7px 8px; font: inherit; font-size: 12.5px; cursor: pointer; }
 .qc-drow.on, .qc-drow:hover { background: var(--paper); }
-.qc-dmg { width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 8px; }
+.qc-dmg { width: 26px; height: 26px; flex: none; border-radius: 50%; background: var(--oat); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 8px; }
 .qc-dwho { min-width: 0; display: flex; flex-direction: column; }
 .qc-dwho b { font-family: var(--f12-serif); font-weight: 700; font-size: 13px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc-dwho i { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -283,13 +283,13 @@
    two ways of using this grid would look like two different controls */
 .qc-acard.on, .qc-acard:focus-visible { background: var(--panel); border-color: var(--pink-b); box-shadow: 0 0 0 2px rgba(124, 58, 42, 0.12); }
 .qc-actop { display: flex; align-items: center; gap: 9px; min-width: 0; }
-.qc-acav { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 8.5px; }
+.qc-acav { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--oat); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 8.5px; }
 .qc-acwho { min-width: 0; display: flex; flex-direction: column; }
 .qc-acwho b { font-family: var(--f12-serif); font-weight: 700; font-size: 13.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc-acwho i { font-style: normal; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc-acmeta { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
-.qc-actag { display: inline-flex; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 2px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; }
-.qc-actag.shut { background: #f6ece7; border-color: #e0bda9; color: #9a4a30; }
+.qc-actag { display: inline-flex; background: var(--oat); border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px; padding: 2px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; }
+.qc-actag.shut { background: var(--paper); border-color: #e0bda9; color: #9a4a30; }
 /* ══ THE FOLDED ALL-QUERIED BLOCK (ref 77) ═════════════════════════════════════════════════
    ⚠️ 18px CLEAR OF THE PANEL ABOVE. They are two separate statements — the panel says what this
    state IS, the block says who is in it — and stacked flush they read as one box with a rule
@@ -316,7 +316,7 @@
 /* ⚠️ NEITHER STATE IS EMPHASISED. Same type, same size, same colour — they differ by DOT and by
    nothing else, because they have all been queried and none is being put forward. */
 .qc-platedot { width: 7px; height: 7px; flex: none; border-radius: 50%; }
-.qc-plate-active .qc-platedot, i.qc-plate-active { background: #8a9e88; }
+.qc-plate-active .qc-platedot, i.qc-plate-active { background: var(--burg); }
 .qc-plate-previous .qc-platedot, i.qc-plate-previous { background: #cfc7bb; }
 /* the state is named ONCE, beneath the set — not sixteen times, on every plate */
 .qc-platekey { display: flex; gap: 14px; margin: 9px 0 0; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
@@ -367,7 +367,7 @@
    until it is ticked; only Sample and Other have more to say, and they say it in place. */
 .qc-chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .qc-chip2 { display: inline-flex; align-items: center; gap: 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel); padding: 0 4px 0 0; transition: border-color 0.15s, background 0.15s; }
-.qc-chip2.on { border-color: var(--pink-b); background: var(--pink-t); }
+.qc-chip2.on { border-color: var(--pink-b); background: var(--oat); }
 /* an expanded chip stops being a pill — it is holding a control now, not a word */
 .qc-chip2.open { border-radius: 12px; padding-right: 9px; }
 .qc-chiptick { display: inline-flex; align-items: center; gap: 7px; background: none; border: 0; padding: 8px 13px; font: inherit; font-size: 12.5px; color: var(--ink); cursor: pointer; border-radius: inherit; }
@@ -386,7 +386,7 @@
    and no warning when the writer sends something different; this record says what you sent. */
 .qc-matsub { font-size: 11.5px; color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qc-matreq { margin-left: auto; flex: none; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); border: 1px solid var(--hairline); border-radius: 999px; padding: 2px 7px; }
-.qc-matreq.on { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); }
+.qc-matreq.on { background: var(--oat); border-color: var(--pink-b); color: var(--pink-i); }
 /* ⚠️ AN UNTICKED ROW GREYS ITS CONTROLS BUT KEEPS ITS CHECKBOX LIVE — the row is how you tick it,
    so disabling the whole thing would make the state unreachable. */
 .qc-mat:not(.on) .qc-matsub, .qc-mat:not(.on) .qc-qty { opacity: 0.45; }
@@ -486,7 +486,7 @@
    is what it was before the pulse existed. The DOM focus below is the real "you are here". */
 @media (prefers-reduced-motion: reduce) { .qc-sec.qc-active.qc-pulse { animation: none; } }
 .qc-shead { display: flex; align-items: center; gap: 9px; padding: 13px 16px 0; }
-.qc-n { width: 20px; height: 20px; border-radius: 50%; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 9px; flex: none; }
+.qc-n { width: 20px; height: 20px; border-radius: 50%; background: var(--oat); border: 1px solid var(--pink-b); color: var(--pink-i); display: grid; place-items: center; font-family: var(--f12-mono); font-size: 9px; flex: none; }
 .qc-shead h3 { font-family: var(--f12-serif); font-weight: 700; font-size: 16px; color: var(--ink); margin: 0; }
 .qc-opt { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.05em; font-weight: 400; color: var(--muted); }
 /* ⚠️ THE STEP'S PRIMARY IS THE SOFTER OF THE TWO ON SCREEN. It finishes the STACK; the header's
@@ -513,8 +513,8 @@
    underline of the last field; running it through says "content above, actions below", which is
    what it is for. */
 .qc-sfoot { display: flex; align-items: center; gap: 10px; margin: 20px 0 0; padding: 15px 16px; border-top: 1px solid var(--hairline); }
-.qc-next { margin-left: auto; flex: none; white-space: nowrap; font-family: var(--f12-mono); font-size: 10.5px; letter-spacing: 0.07em; background: var(--pink-t); border: 1px solid var(--pink-b); color: var(--burg); border-radius: 9px; padding: 10px 18px; cursor: pointer; transition: background 0.15s; }
-.qc-next:hover:not(:disabled) { background: var(--pink-b); }
+.qc-next { margin-left: auto; flex: none; white-space: nowrap; font-family: var(--f12-mono); font-size: 10.5px; letter-spacing: 0.07em; background: var(--oat); border: 1px solid var(--pink-b); color: var(--burg); border-radius: 9px; padding: 10px 18px; cursor: pointer; transition: background 0.15s; }
+.qc-next:hover:not(:disabled) { background: var(--line); }
 .qc-next:disabled { opacity: 0.45; cursor: default; }
 .qc-back { flex: none; white-space: nowrap; font-family: var(--f12-mono); font-size: 10.5px; letter-spacing: 0.07em; background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); border-radius: 9px; padding: 9px 16px; cursor: pointer; transition: border-color 0.15s; }
 .qc-back:hover { border-color: var(--muted); }
@@ -526,7 +526,7 @@
 
 /* done — the summary IS the receipt, so it states values, not that values exist */
 .qc-sum { width: 100%; text-align: left; background: none; border: none; font-family: inherit; cursor: pointer; }
-.qc-sec.qc-done .qc-tick { background: #7e9178; color: #fff; }
+.qc-sec.qc-done .qc-tick { background: var(--ink-2); color: #fff; }
 
 /* ⚠️ THE HINT AND THE VALUE ARE THE SAME SLOT, ONE AT A TIME. Before the step is answered the row
    says what it is FOR; after, it says what was RECORDED — and both at once would put a category
@@ -660,7 +660,7 @@
    nothing else in the app, so the glance panel was the one card on this surface without the
    grammar every other card has. Tokens, not the ref's literals: `--sage-band`/`--sage-band-2` are
    what `.f12-card .f12-chh` already reads. */
-.qc-glance { flex: none; position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; padding: 13px 15px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); }
+.qc-glance { flex: none; position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; padding: 13px 15px; background: var(--oat); border-bottom: 1px solid var(--line); }
 .qc-glance::after { content: ""; position: absolute; right: -18px; top: -18px; width: 76px; height: 76px; border-radius: 50%; background: rgba(90, 110, 88, 0.06); }
 /* ⚠️ THE GLYPH CHIP FOLLOWS THE CAP. A pink-bordered chip on a sage band reads as a control that
    wandered in from somewhere else; the reading pane's own card heads put a translucent paper chip
@@ -671,8 +671,8 @@
 .qc-glanceh { font-family: var(--f12-serif); font-weight: 700; font-size: 15px; line-height: 1.1; color: var(--ink); }
 .qc-glancew { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* the pill must sit ABOVE the disc, or the wash tints it a different green from every other pill */
-.qc-ctxpill { margin-left: auto; flex: none; position: relative; z-index: 1; display: inline-flex; align-items: center; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; border-radius: 999px; padding: 3px 9px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; }
-.qc-ctxpill-shut { background: #f6ece7; border-color: #e0bda9; color: #9a4a30; }
+.qc-ctxpill { margin-left: auto; flex: none; position: relative; z-index: 1; display: inline-flex; align-items: center; background: var(--oat); border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px; padding: 3px 9px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; }
+.qc-ctxpill-shut { background: var(--paper); border-color: #e0bda9; color: #9a4a30; }
 
 /* stat strip — cells omit themselves; the strip omits when none survive */
 .qc-ctxstats { flex: none; display: flex; border-bottom: 1px solid var(--hairline); }
@@ -682,7 +682,7 @@
 .qc-ctxstat:last-child { border-right: none; }
 /* the glyph — a pink-tinted rounded square, so the two facts read as two KINDS of fact before
    they are read as values. Never a bare icon: at 12px an unbacked glyph is a smudge. */
-.qc-ctxsi { width: 24px; height: 24px; flex: none; border-radius: 7px; background: var(--pink-t); color: var(--pink-i); display: grid; place-items: center; }
+.qc-ctxsi { width: 24px; height: 24px; flex: none; border-radius: 7px; background: var(--oat); color: var(--pink-i); display: grid; place-items: center; }
 .qc-ctxsi svg { width: 12px; height: 12px; }
 .qc-ctxstatt { min-width: 0; }
 .qc-ctxv { font-family: inherit; font-weight: 600; font-size: 14px; line-height: 1.2; color: var(--ink-2); }
@@ -701,7 +701,7 @@
 .qc-ctxg { border: 1px solid var(--line); background: #fdfbf8; border-radius: 999px; padding: 4px 10px; font-size: 11px; color: var(--ink-2); }
 .qc-ctxask { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: 12.5px; color: var(--ink-2); border-bottom: 1px solid var(--hairline); }
 .qc-ctxask:last-child { border-bottom: none; }
-.qc-ctxtk { width: 16px; height: 16px; flex: none; border-radius: 4px; background: #e9ede6; border: 1px solid #b9c6b4; color: #5a6e58; display: grid; place-items: center; font-size: 9px; }
+.qc-ctxtk { width: 16px; height: 16px; flex: none; border-radius: 4px; background: var(--oat); border: 1px solid var(--line); color: var(--ink-2); display: grid; place-items: center; font-size: 9px; }
 .qc-ctxq { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; color: var(--muted); }
 /* history — a bordered line, present even at zero */
 .qc-ctxhist { display: flex; align-items: center; gap: 9px; background: #fdfbf8; border: 1px solid var(--hairline); border-radius: 10px; padding: 9px 11px; font-size: 12px; color: var(--ink-2); }
@@ -812,7 +812,7 @@
 }
 .qc-agav {
   width: 36px; height: 36px; flex: 0 0 36px; border-radius: 50%;
-  background: var(--pink-av); color: var(--ink);
+  background: var(--oat); color: var(--ink);
   font-family: var(--f12-serif); font-size: 13px; font-weight: 600;
   display: grid; place-items: center;
 }
@@ -918,7 +918,7 @@
 /* reminder chips */
 .qc-chip { border: 1px solid var(--line); border-radius: 999px; padding: 8px 13px; font-family: inherit; font-size: 12px; background: var(--panel); color: var(--muted); cursor: pointer; transition: background 0.12s, border-color 0.12s; }
 .qc-chip:hover { border-color: var(--muted); }
-.qc-chip.on { background: var(--pink-t); border-color: var(--pink-b); color: var(--pink-i); font-weight: 600; }
+.qc-chip.on { background: var(--oat); border-color: var(--pink-b); color: var(--pink-i); font-weight: 600; }
 
 /* the materials checklist */
 .qc-mat { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 2px; border: none; border-bottom: 1px solid var(--hairline); background: none; font-family: inherit; font-size: 13.5px; color: var(--muted); cursor: pointer; }
@@ -957,7 +957,7 @@
 .qc-ghost-line { height: 12px; width: 150px; border-radius: 5px; background: var(--oat); }
 .qc-ghost-cols { display: flex; gap: 12px; height: calc(100% - 100px); }
 .qc-ghost-col { flex: 1; border: 1px solid var(--line); border-radius: 13px; overflow: hidden; }
-.qc-ghost-band { height: 36px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); }
+.qc-ghost-band { height: 36px; background: var(--oat); border-bottom: 1px solid var(--line); }
 .qc-ghost-ln { height: 9px; margin: 12px 14px; border-radius: 4px; background: var(--oat); }
 
 /* the welcome card that sits over it — one primary, then the quiet alternative routes */
@@ -1058,7 +1058,7 @@
      caught both substitutions on the journal's send button; a near-enough token is still a value
      change, and §1's whole claim is that there are none. Same near-miss as the `--pinkb` question
      two packs ago, arrived at from the other side. */
-  --qc-rim-pink: #e8c8bc;
+  --qc-rim-pink: var(--line);           /* §3 — was #e8c8bc */
 
   /* text — NINE quiet greys today, which is the finding rather than the fault */
   --qc-tx-quiet: #8f877b;
@@ -1077,14 +1077,14 @@
 
   /* accents — NAMED so §3 can find them; NOT repointed by §2 */
   --qc-acc-late: #a05a45;             /* overdue, and the destructive verb */
-  --qc-acc-late-t: #fdf2ee;
+  --qc-acc-late-t: var(--paper);        /* §3 — was #fdf2ee, a pink FILL; the ink stays terracotta */
   --qc-acc-late-b: #e8c3b5;
   --qc-acc-today: #b07a63;
-  --qc-acc-pink-save: #f5e2da;        /* §3 target — a pink SURFACE */
-  --qc-acc-pink-h: #f9ebe5;           /* §3 target */
-  --qc-acc-pink-h-b: #e5bfb2;         /* §3 target */
-  --qc-acc-sage-tick: #eef3eb;        /* §3 target — a sage SURFACE */
-  --qc-acc-sage-tick-i: #4a5d45;
+  --qc-acc-pink-save: var(--oat);     /* §3 — was #f5e2da; a pink SURFACE, now the warm neutral */
+  --qc-acc-pink-h: var(--oat);        /* §3 — was #f9ebe5 */
+  --qc-acc-pink-h-b: var(--line);     /* §3 — was #e5bfb2 */
+  --qc-acc-sage-tick: var(--oat);     /* §3 — was #eef3eb; a sage SURFACE, now the warm neutral */
+  --qc-acc-sage-tick-i: var(--ink-2);   /* §3 — was #4a5d45 */
 }
 
 /* ── ALIGNMENT AMENDMENT · THE WORK AREA'S OWN TWO VALUES ─────────────────────────────────────
@@ -1312,6 +1312,31 @@
    it already names the query. */
 .qc-who { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-right: 8px; white-space: nowrap; }
 
+
+
+/* ══ §3 · PINK AND SAGE ARE SIGNALS, IN THE JOURNEYS TOO ══════════════════════════════════════
+ *
+ * ⚠️ THE RULE STATED ONCE, NOT CHASED SELECTOR BY SELECTOR. The sheets are portalled outside the
+ * page, so `.qc-neutral` never reaches them and they keep the warm set — deliberately, because Pack
+ * C rebuilds these surfaces. What §3 forbids is narrower than a palette: pink and sage as a
+ * BACKGROUND. So the surface tokens that carry them are repointed here, onto warm neutrals the
+ * sheet already has, and the rules that read them keep reading the ROLE they always read — the
+ * letterhead band still asks for "the create register" and gets a neutral. A handful of journey
+ * rules held sage as a literal gradient rather than a token and were edited in place; those are the
+ * ones a block like this cannot reach, which is why both appear in the same section.
+ *
+ * ⚠️ THE DOTS ARE UNTOUCHED BY CONSTRUCTION. `--sd-hue` and `--sd-centre` are the StatusDot pair and
+ * are not in this list — which is the whole point of §3: those two colours cannot do their job while
+ * they are also painting the furniture.
+ */
+.t-f12.qc-sheet-layer {
+  --pink-t: var(--oat);
+  --pink-av: var(--oat);
+  --pink-btn: var(--oat);
+  --pink-btn-h: var(--line);
+  --pink-b: var(--line);
+  --sageC: var(--paper);
+}
 
 /* ══ QUERY CENTRE · THE NEUTRAL SCALE (§2) — page-scoped, and reversible by deleting this block ══
  *
@@ -3172,7 +3197,7 @@
 .qc-crumbsep { opacity: 0.5; }
 /* only the current segment takes colour — the rest are the band's own muted ink */
 .qc-crumbcur { color: var(--burg); font-weight: 500; }
-.qc-sheet--record .qc-crumb { background: var(--sageC); box-shadow: inset 0 -1px 0 rgba(90, 110, 88, 0.2); color: var(--sageD); }
+.qc-sheet--record .qc-crumb { background: var(--paper); box-shadow: inset 0 -1px 0 rgba(90, 110, 88, 0.2); color: var(--sageD); }
 .qc-sheet--record .qc-crumbcur { color: var(--sageD); }
 
 /**
@@ -3184,12 +3209,13 @@
  * a striped box of a form, which is the risk 96 names against this treatment.
  */
 .qc-sec.qc-active > .qc-shead {
-  background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2));
-  box-shadow: inset 0 -1px 0 var(--sage-edge);
+  /* §3 — was the sage gradient; sage is a STATUS colour now and cannot also paint the open step */
+  background: var(--oat);
+  box-shadow: inset 0 -1px 0 var(--line);
   padding: 12px 16px;
   margin-bottom: 12px;
 }
-.qc-sec.qc-active > .qc-shead .qc-n { background: rgba(253, 250, 245, 0.8); color: var(--sageD); }
+.qc-sec.qc-active > .qc-shead .qc-n { background: rgba(253, 250, 245, 0.8); color: var(--ink-2); }
 
 /**
  * ══ §3c · THE WATERMARK ═══════════════════════════════════════════════════════════════════════
