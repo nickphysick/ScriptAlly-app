@@ -1006,6 +1006,87 @@
    so "one button" is enforceable by grep as well as by eye. §1 reads `--btn-h` for the control
    cells' `min-height`, which is what keeps the two heads on one line whatever is in them. */
 .t-f12 { --btn-h: 32px; --btn-r: 8px; --btn-line: #e2d8ca; --btn-rim: 1px; }
+
+/* ══ QUERY CENTRE · THE PAGE'S SURFACE TOKENS (§1 — a refactor, not a repaint) ═══════════════════
+ *
+ * ⚠️ EVERY VALUE HERE IS THE LITERAL IT REPLACED, UNCHANGED. §1's whole job is to move ~63 hard-coded
+ * colours off the rules and onto names, so that §2's palette is a pure value swap that can be
+ * reverted by deleting one block rather than by unpicking a refactor. If any value here differs from
+ * what the page painted before, §1 has failed — which is why it is verified by diffing 461 elements'
+ * computed colours against a baseline taken from the deployed build, not by reading the diff.
+ *
+ * ⚠️ THREE FAMILIES, BECAUSE §2 REPOINTS FAMILIES RATHER THAN COLOURS. The page currently paints
+ * NINE different quiet greys at text level and five different hairlines — none of them wrong, none
+ * of them related. Grouping them by role is what lets a scale replace them; grouping them by value
+ * would just rename the problem.
+ *
+ * ⚠️ AND THE ACCENTS ARE NAMED BUT NOT TOUCHED. `--qc-acc-*` exists so §3 can find every pink and
+ * sage SURFACE on this page without grepping for hexes. §2 leaves them alone: burgundy stays the
+ * only accent, and it is not changing.
+ *
+ * ⚠️ DECLARED IN `.t-f12`, WHICH THE CONTACT LIST AND TO-DO ALSO CARRY. That is safe and deliberate:
+ * §1 changes no value, so those pages are pixel-identical, and §2's overrides sit on the palette
+ * CLASS — two applications, both removable — so nothing outside Query Centre and its journeys moves.
+ */
+.t-f12 {
+  /* surfaces */
+  --qc-surf-row-od: #fdf6f3;          /* overdue row */
+  --qc-surf-row-od-h: #fbeee9;
+  --qc-surf-shut-av: #eceae6;         /* a closed agency's monogram */
+  --qc-surf-act-h: rgba(255, 253, 251, 0.95);
+  --qc-surf-glyph: rgba(253, 250, 245, 0.75);   /* the card band's glyph plate */
+  --qc-surf-headact: rgba(255, 255, 255, 0.5);  /* a control ON the card band */
+  --qc-surf-headact-h: rgba(255, 255, 255, 0.85);
+  --qc-surf-pill-off: #fdfbf7;        /* a contact pill with nothing to link to */
+  --qc-surf-composer: #fffdf9;        /* the note composer */
+  --qc-surf-noteact-h: #f3ebe0;
+  --qc-surf-send-off: #f1f1f0;        /* the journal's send, with nothing to send */
+  --qc-surf-menu-h: rgba(30, 26, 22, 0.07);
+
+  /* rims, hairlines and strokes */
+  --qc-rim-h: #d6c9ba;                /* every control's hover rim, and the empty-state mark */
+  --qc-rim-off: #eee4d6;              /* a disabled control's rim */
+  --qc-rim-off-2: #f2ece2;
+  --qc-rim-headact: rgba(255, 255, 255, 0.7);
+  --qc-rim-glyph: rgba(124, 58, 42, 0.13);
+  --qc-rim-sep: #e6ddd0;              /* the verb row's divider */
+  --qc-rim-dash: #cbbcab;             /* an editable word */
+  --qc-rim-ms: #e8d3c6;               /* the manuscript's name */
+  --qc-rim-title: #ece5d9;
+  --qc-rim-composer: #e6dccd;
+  /* ⚠️ #e8c8bc IS NOT `--pink-b` (#eecdc3), AND REACHING FOR IT COST A REGRESSION. The fingerprint
+     caught both substitutions on the journal's send button; a near-enough token is still a value
+     change, and §1's whole claim is that there are none. Same near-miss as the `--pinkb` question
+     two packs ago, arrived at from the other side. */
+  --qc-rim-pink: #e8c8bc;
+
+  /* text — NINE quiet greys today, which is the finding rather than the fault */
+  --qc-tx-quiet: #8f877b;
+  --qc-tx-note: #4a3c30;
+  --qc-tx-stamp: #b3a596;
+  --qc-tx-cancel: #a89a8a;
+  --qc-tx-input: #3a1c14;
+  --qc-tx-shut: #a49a8d;
+  --qc-tx-shut-2: #c3b9ac;
+  --qc-tx-shut-3: #cfc6ba;
+  --qc-tx-nq: #bdb3a6;
+  --qc-tx-fold: #b3a79b;
+  --qc-tx-off: #c4b9ac;               /* a disabled control's label */
+  --qc-tx-send-off: #c5b9b0;
+  --qc-tx-noteact: #bcae9e;
+
+  /* accents — NAMED so §3 can find them; NOT repointed by §2 */
+  --qc-acc-late: #a05a45;             /* overdue, and the destructive verb */
+  --qc-acc-late-t: #fdf2ee;
+  --qc-acc-late-b: #e8c3b5;
+  --qc-acc-today: #b07a63;
+  --qc-acc-pink-save: #f5e2da;        /* §3 target — a pink SURFACE */
+  --qc-acc-pink-h: #f9ebe5;           /* §3 target */
+  --qc-acc-pink-h-b: #e5bfb2;         /* §3 target */
+  --qc-acc-sage-tick: #eef3eb;        /* §3 target — a sage SURFACE */
+  --qc-acc-sage-tick-i: #4a5d45;
+}
+
 /* ── ALIGNMENT AMENDMENT · THE WORK AREA'S OWN TWO VALUES ─────────────────────────────────────
    ⚠️ ONE RADIUS FOR EVERY CARD IN THE WORK AREA, THE AGENT HEADER INCLUDED. It had drifted to three:
    `--r-lg` (12) on the list panel and the pane's cards, and the header plate reading the same token
@@ -1054,7 +1135,7 @@
 /* timeline correction ⋯ (5b) — hover-revealed on the entry row */
 .tl-rowbody .tl-more { opacity: 0; width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; line-height: 1; color: var(--muted, #7d7469); background: none; border: none; cursor: pointer; transition: opacity 0.12s, background 0.12s; }
 .tl-rowbody:hover .tl-more, .tl-more:focus-visible { opacity: 1; }
-.tl-more:hover { background: rgba(30, 26, 22, 0.07); }
+.tl-more:hover { background: var(--qc-surf-menu-h); }
 
 /* F12Menu — the ⋯ overflow / correction action menu (portalled inside .t-f12) */
 .f12-menu { min-width: 180px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-md); box-shadow: var(--sh-3); padding: 5px; display: flex; flex-direction: column; gap: 1px; }
@@ -1073,7 +1154,7 @@
 
 /* quiet action buttons (the right zone — no filled button in this bar) */
 .f12-act { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font-size: 14px; font-weight: 450; color: var(--ink-2); padding: 8px 11px; border-radius: var(--r-md); transition: background 0.12s, color 0.12s; }
-.f12-act:hover { background: rgba(255, 253, 251, 0.95); color: var(--ink); box-shadow: var(--sh-1); }
+.f12-act:hover { background: var(--qc-surf-act-h); color: var(--ink); box-shadow: var(--sh-1); }
 .f12-act svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 /* View-tasks count — white badge (chrome revision: NOT a pink tint) */
 .f12-act .f12-cnt { font-family: var(--f12-mono); font-size: 9px; font-weight: 700; background: #ffffff; color: var(--ink); border: 1px solid var(--line); border-radius: 99px; padding: 1.5px 7px; box-shadow: var(--sh-btn); }
@@ -1248,7 +1329,7 @@
   white-space: nowrap; cursor: pointer;
   transition: background-color 0.14s, border-color 0.14s, color 0.14s;
 }
-.qc-btn:hover { background: var(--paper); border-color: #d6c9ba; }
+.qc-btn:hover { background: var(--paper); border-color: var(--qc-rim-h); }
 .qc-btn svg { width: 13px; height: 13px; flex: 0 0 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 /**
  * ══ §5 · THE PRIMARY JOINS THE FAMILY ════════════════════════════════════════════════════════
@@ -1278,17 +1359,17 @@
  * One colour, one job, the same rule §1 applies to sage.
  */
 .qc-btn-pri { border-width: calc(var(--btn-rim) * 2); }
-.qc-btn-danger { color: #a05a45; }
-.qc-btn-danger:hover { background: #fdf2ee; border-color: #e8c3b5; }
+.qc-btn-danger { color: var(--qc-acc-late); }
+.qc-btn-danger:hover { background: var(--qc-acc-late-t); border-color: var(--qc-acc-late-b); }
 /* ⚠️ DISABLED IS A LIGHTER BORDER AND A MUTED ICON — NEVER ABSENCE, and never a change of BOX.
    The width is identical to the live state, so the row does not reflow as the selection moves
    between a query that is due a chase and one that is not. */
-.qc-btn:disabled, .qc-btn-off { color: #c4b9ac; border-color: #eee4d6; background: var(--white); cursor: default; }
-.qc-btn:disabled:hover, .qc-btn-off:hover { background: var(--white); border-color: #eee4d6; }
+.qc-btn:disabled, .qc-btn-off { color: var(--qc-tx-off); border-color: var(--qc-rim-off); background: var(--white); cursor: default; }
+.qc-btn:disabled:hover, .qc-btn-off:hover { background: var(--white); border-color: var(--qc-rim-off); }
 .qc-btn:disabled svg, .qc-btn-off svg { opacity: 0.55; }
 /* the icon-only form: a square of the same height, so it sits on the row's line without arithmetic */
 .qc-btn-icon { padding: 0; width: var(--btn-h); justify-content: center; }
-.qc-sep { width: 1px; height: 16px; background: #e6ddd0; flex: 0 0 1px; margin: 0 4px; }
+.qc-sep { width: 1px; height: 16px; background: var(--qc-rim-sep); flex: 0 0 1px; margin: 0 4px; }
 
 /* ── §3 · THE HEADER'S TWO FOLLOW THE SAME RULE, ON THIS PAGE ONLY ────────────────────────────
    ⚠️ PAGE-SCOPED, BECAUSE `.svh-btn` IS TEN PAGES. Export and Log query are drawn by the shared
@@ -1305,12 +1386,12 @@
 .qc-wpg .svh-btn { height: var(--btn-h); padding: 0 12px; border-radius: var(--btn-r); font-size: 12px; font-weight: 500; gap: 7px; }
 .qc-wpg .svh-btn svg { width: 13px; height: 13px; }
 .qc-wpg .svh-btn-ghost { background: var(--white); border-color: var(--btn-line); color: var(--ink-2); }
-.qc-wpg .svh-btn-ghost:hover { background: var(--paper); border-color: #d6c9ba; }
+.qc-wpg .svh-btn-ghost:hover { background: var(--paper); border-color: var(--qc-rim-h); }
 /* Log query is the header's primary and wears the row's primary treatment — the SAME exception,
    not a second one. Two filled controls on one screen, both meaning "this is the action here". */
 .qc-wpg .svh-btn-ink { background: var(--pink-t); border-color: var(--pink-b); color: var(--ink); font-weight: 600; padding: 0 14px; }
 .qc-wpg .svh-btn-ink svg { color: var(--ink); }
-.qc-wpg .svh-btn-ink:hover { background: #f9ebe5; border-color: #e5bfb2; }
+.qc-wpg .svh-btn-ink:hover { background: var(--qc-acc-pink-h); border-color: var(--qc-acc-pink-h-b); }
 
 /* ⚠️ THE SECONDARIES SHED THEIR LABELS, THE PRIMARY NEVER DOES (§3). Below ~1300 the pane column is
    too narrow for four labelled verbs beside the THIS QUERY tag; the three that can be recognised by
@@ -1333,19 +1414,19 @@
    pane's largest type, drawn as a heading it would hide the affordance. It inherits everything and
    earns a rule on hover — the treatment the agent list's own name link already uses. */
 .qp-hlink { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px solid transparent; }
-.qp-hlink:hover { border-bottom-color: #d6c9ba; }
+.qp-hlink:hover { border-bottom-color: var(--qc-rim-h); }
 .qp-hlinks { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
-.qp-lnk { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-2); border: 1px solid #eee4d6; background: var(--paper); border-radius: 999px; padding: 3px 10px; cursor: pointer; text-decoration: none; }
-.qp-lnk:hover { border-color: #d6c9ba; color: var(--ink); }
+.qp-lnk { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-2); border: 1px solid var(--qc-rim-off); background: var(--paper); border-radius: 999px; padding: 3px 10px; cursor: pointer; text-decoration: none; }
+.qp-lnk:hover { border-color: var(--qc-rim-h); color: var(--ink); }
 .qp-lnk svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 /* ⚠️ GREY, NOT ABSENT — an empty slot states nothing; a grey pill states that this record has no
    email on file, which is a fact and often the one worth acting on. `pointer-events: none` is what
    makes an `<a>` with no `href` genuinely inert rather than merely unstyled. */
-.qp-lnk-off { color: #c4b9ac; border-color: #f2ece2; background: #fdfbf7; pointer-events: none; }
+.qp-lnk-off { color: var(--qc-tx-off); border-color: var(--qc-rim-off-2); background: var(--qc-surf-pill-off); pointer-events: none; }
 
 /* The card band's interactive slot — a control, so it is not mistaken for the mono fact beside it. */
-.qp-cardact { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--sageD); background: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 5px; padding: 2px 6px; margin-left: 8px; cursor: pointer; white-space: nowrap; }
-.qp-cardact:hover { background: rgba(255, 255, 255, 0.85); color: var(--ink); }
+.qp-cardact { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--sageD); background: var(--qc-surf-headact); border: 1px solid var(--qc-rim-headact); border-radius: 5px; padding: 2px 6px; margin-left: 8px; cursor: pointer; white-space: nowrap; }
+.qp-cardact:hover { background: var(--qc-surf-headact-h); color: var(--ink); }
 /* ⚠️ AND `.qp-cardmeta` KEEPS ITS `margin-left: auto`, so the meta still pushes right and the
    control sits after it. Two `auto`s would fight; the second element takes a fixed gap instead. */
 
@@ -1363,7 +1444,7 @@
 .qc-verbs-inert { display: inline-flex; align-items: center; gap: 6px; opacity: 0.35; pointer-events: none; }
 .qc-blank { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 40px 20px; }
 .qc-blankmark { width: 70px; height: 70px; display: grid; place-items: center; margin-bottom: 4px; }
-.qc-blankmark svg { width: 50px; height: 50px; stroke: #d6c9ba; fill: none; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.qc-blankmark svg { width: 50px; height: 50px; stroke: var(--qc-rim-h); fill: none; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
 .qc-blank h4 { font-family: var(--f12-serif); font-size: 22px; font-weight: 500; color: var(--muted); margin: 0; }
 .qc-blank p { font-size: 12.5px; color: var(--faint); max-width: 330px; line-height: 1.6; margin: 0; }
 
@@ -1391,7 +1472,7 @@
 .tl-today { position: relative; padding-left: 41px; margin: 2px 0 13px; }
 .tl-today::before { content: ""; position: absolute; left: 11px; top: 3px; width: 9px; height: 9px; border-radius: 50%; background: var(--burg); box-shadow: 0 0 0 3px #f8e7dc; }
 .tl-today b { font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600; color: var(--burg); }
-.tl-todaywhen { float: right; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; color: #b07a63; }
+.tl-todaywhen { float: right; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; color: var(--qc-acc-today); }
 
 /* ── §5 · GROUP RULES — the list answers "who do I chase" ─────────────────────────────────────
    A mono label, then a hairline running to the panel's edge. Not a heading: it is a divider that
@@ -1403,23 +1484,23 @@
 .qc-gh i { flex: 1; height: 1px; background: var(--hairline); }
 /* ⚠️ OVERDUE IS THE ONE COLOURED LABEL, and it is the terracotta the danger verb already uses —
    never `--burg`, which means OUTGOING on every dot in the list beneath it. */
-.qc-gh-od span { color: #a05a45; }
+.qc-gh-od span { color: var(--qc-acc-late); }
 .qc-gh-fold { cursor: pointer; }
-.qc-gh-fold em { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; color: #b3a79b; }
+.qc-gh-fold em { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; color: var(--qc-tx-fold); }
 .qc-gh-fold:hover em { color: var(--muted); }
 /* ⚠️ A FAINT WARM TINT, NOT A FILL. The overdue rows must still show hover and selection — three
    steps on a tinted ground, same as on a white one — so the tint is barely a step and the ladder
    rides on top of it. */
-.f12-row-od { background: #fdf6f3; }
-.f12-row-od:hover { background: #fbeee9; }
-.f12-d2-late { color: #a05a45; font-weight: 500; }
+.f12-row-od { background: var(--qc-surf-row-od); }
+.f12-row-od:hover { background: var(--qc-surf-row-od-h); }
+.f12-d2-late { color: var(--qc-acc-late); font-weight: 500; }
 
 .qp-msrow { padding-bottom: 9px; border-bottom: 1px solid var(--hairline); margin-bottom: 4px; }
-.qp-msname { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--burg); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; border-bottom: 1px solid #e8d3c6; }
+.qp-msname { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--burg); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; border-bottom: 1px solid var(--qc-rim-ms); }
 .qp-msname:hover { border-bottom-color: var(--burg); }
 .qp-msmeta { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
 
-.qp-inplace { font: inherit; color: inherit; font-weight: 600; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dashed #cbbcab; }
+.qp-inplace { font: inherit; color: inherit; font-weight: 600; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dashed var(--qc-rim-dash); }
 .qp-inplace:hover { border-bottom-style: solid; border-bottom-color: var(--burg); color: var(--burg); }
 
 .f12-pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-2); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
@@ -1693,7 +1774,7 @@
    The head used to be content-height + 8px of padding, so its rule sat wherever the type
    happened to land (~31px) while the toolbar's sat at 47px: two rules, one frame, 16px apart.
    Both now take --f12-headh, so the rule lands at the same y whatever the label says. */
-.f12-lhtitle { flex: none; display: flex; align-items: center; height: var(--f12-headh); border-bottom: 1px solid #ece5d9; margin-bottom: var(--f12-headgap); }
+.f12-lhtitle { flex: none; display: flex; align-items: center; height: var(--f12-headh); border-bottom: 1px solid var(--qc-rim-title); margin-bottom: var(--f12-headgap); }
 .f12-lhtitle h2 { font-family: var(--f12-serif); font-size: 17px; font-weight: 700; color: var(--ink); margin: 0; }
 /* list head — search takes the remaining width; Filter/Sort(/Group) triggers sit to its right */
 /**
@@ -2163,12 +2244,12 @@
    recede (~45% grey) but stay fully clickable; the SELECTED row returns to full contrast. ── */
 .f12-qdots { display: flex; align-items: center; gap: 4px; }
 .f12-qdots .f12-qmore { font-family: var(--f12-mono); font-size: 8.5px; color: var(--faint); margin-left: 1px; }
-.f12-nq { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: #bdb3a6; white-space: nowrap; }
-.f12-row.f12-shut .f12-av { background: #eceae6; color: #a49a8d; }
-.f12-row.f12-shut .f12-nm { color: #a49a8d; font-weight: 450; }
-.f12-row.f12-shut .f12-ag { color: #c3b9ac; }
+.f12-nq { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--qc-tx-nq); white-space: nowrap; }
+.f12-row.f12-shut .f12-av { background: var(--qc-surf-shut-av); color: var(--qc-tx-shut); }
+.f12-row.f12-shut .f12-nm { color: var(--qc-tx-shut); font-weight: 450; }
+.f12-row.f12-shut .f12-ag { color: var(--qc-tx-shut-2); }
 .f12-row.f12-shut .f12-qdots { opacity: 0.45; }
-.f12-row.f12-shut .f12-nq { color: #cfc6ba; }
+.f12-row.f12-shut .f12-nq { color: var(--qc-tx-shut-3); }
 .f12-row.f12-shut.f12-sel .f12-av { background: var(--pink-av); color: var(--ink); }
 .f12-row.f12-shut.f12-sel .f12-nm { color: var(--ink); font-weight: 500; }
 .f12-row.f12-shut.f12-sel .f12-ag { color: var(--faint); }
@@ -2872,7 +2953,7 @@
 
 /* The band's glyph and its right-aligned meta — the header's two additions, shared by all three
    cards because the header is shared. */
-.qp-cardgl { width: 19px; height: 19px; flex: 0 0 19px; border-radius: 6px; background: rgba(253, 250, 245, 0.75); box-shadow: inset 0 0 0 1px rgba(124, 58, 42, 0.13); display: grid; place-items: center; }
+.qp-cardgl { width: 19px; height: 19px; flex: 0 0 19px; border-radius: 6px; background: var(--qc-surf-glyph); box-shadow: inset 0 0 0 1px var(--qc-rim-glyph); display: grid; place-items: center; }
 .qp-cardgl svg { width: 11px; height: 11px; stroke: var(--burg); fill: none; stroke-width: 1.6; }
 /* ⚠️ `margin-left: auto` IS WHAT RIGHT-ALIGNS IT, so the title keeps its natural width and a long
    one pushes the meta rather than being truncated by it. */

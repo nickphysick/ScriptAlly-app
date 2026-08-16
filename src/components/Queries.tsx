@@ -4109,8 +4109,8 @@ export const Queries: React.FC<{
                 <style>{`
                   .qp-noteacts{ opacity:0; transition:opacity .14s; }
                   .qp-note:hover .qp-noteacts{ opacity:1; }
-                  .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:#bcae9e; display:flex; align-items:center; justify-content:center; cursor:pointer; }
-                  .qp-noteact:hover{ background:#f3ebe0; color:#7c3a2a; }
+                  .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:var(--qc-tx-noteact); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+                  .qp-noteact:hover{ background:var(--qc-surf-noteact-h); color:var(--burg); }
                 `}</style>
                 {/* ── Agent header (F12, ref .hero) — SAGE LEFT SPINE (::before in f12.css, clipped
                     by the card radius via overflow:hidden; there is NO top accent rule), pink avatar
@@ -4433,8 +4433,8 @@ export const Queries: React.FC<{
                           const sentDate = activeQuery.dateSent ? new Date(activeQuery.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
 
                           const proChip = (auto?: boolean) => (<span style={{ ...(auto ? { marginLeft: "auto" } : { marginLeft: 6 }), fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", borderRadius: 6, padding: "3px 7px", whiteSpace: "nowrap" as const }}>PRO</span>);
-                          const addlinkStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#8f877b", marginTop: 14, cursor: "pointer" };
-                          const eyebrow: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "#8f877b", margin: "18px 0 2px" };
+                          const addlinkStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, color: "var(--qc-tx-quiet)", marginTop: 14, cursor: "pointer" };
+                          const eyebrow: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--qc-tx-quiet)", margin: "18px 0 2px" };
 
                           // A material a query either did or didn't send — the whole row toggles it (writes
                           // materialsWanted). Un-marking is a CORRECTION to a factual record: a plain field
@@ -4442,7 +4442,7 @@ export const Queries: React.FC<{
                           const sentPip = (sent: boolean) => (
                             <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: sent ? "#4a5d45" : burgundy }}>
                               {sent ? "Sent" : "Mark sent"}
-                              <span style={{ width: 16, height: 16, borderRadius: "50%", display: "grid", placeItems: "center", fontSize: 9, flexShrink: 0, ...(sent ? { background: "#eef3eb", color: "#4a5d45" } : { border: "1.5px dashed #cfc3b1", color: "transparent" }) }}>✓</span>
+                              <span style={{ width: 16, height: 16, borderRadius: "50%", display: "grid", placeItems: "center", fontSize: 9, flexShrink: 0, ...(sent ? { background: "var(--qc-acc-sage-tick)", color: "var(--qc-acc-sage-tick-i)" } : { border: "1.5px dashed #cfc3b1", color: "transparent" }) }}>✓</span>
                             </span>
                           );
                           const docRow = (kind: "query" | "synopsis", label: string, sent: boolean, gtype: ComponentType) => (
@@ -4463,11 +4463,11 @@ export const Queries: React.FC<{
                             <div style={{ padding: "11px 0", borderBottom: "1px solid var(--bd)", fontFamily: "'Inter',sans-serif", fontSize: 13.5 }}>
                               <div style={{ display: "flex", alignItems: "center", gap: 11, color: sampleItem ? "var(--hub-item, #1a1512)" : "#8f877b" }}>
                                 <TypeGlyph type={ComponentType.SAMPLE_PAGES} size={16} style={{ flexShrink: 0, color: sampleItem ? "#6f4e37" : "#b3a596" }} />
-                                <span style={{ flex: 1, minWidth: 0 }}>Sample materials<span style={{ color: "#8f877b" }}> — {sampleItem ? sampleMaterialText(sampleItem) : "Not included"}</span></span>
+                                <span style={{ flex: 1, minWidth: 0 }}>Sample materials<span style={{ color: "var(--qc-tx-quiet)" }}> — {sampleItem ? sampleMaterialText(sampleItem) : "Not included"}</span></span>
                                 {sampleItem ? (
                                   <span style={{ display: "inline-flex", gap: 13 }}>
                                     <button type="button" onClick={openSampleEditor} title="Change the sample you sent" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: burgundy, background: "none", border: "none", cursor: "pointer", padding: 0 }}>Change</button>
-                                    <button type="button" onClick={() => removeSampleMaterial(activeQuery, activeAgent)} title="Clear the sample materials" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "#8f877b", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Remove</button>
+                                    <button type="button" onClick={() => removeSampleMaterial(activeQuery, activeAgent)} title="Clear the sample materials" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "var(--qc-tx-quiet)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Remove</button>
                                   </span>
                                 ) : (
                                   <button type="button" onClick={openSampleEditor} title="Set the sample you sent" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: burgundy, background: "none", border: "none", cursor: "pointer", padding: 0 }}>＋ Add</button>
@@ -4486,8 +4486,8 @@ export const Queries: React.FC<{
                                   <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                                     <input type="text" inputMode="numeric" value={sampleQty} onChange={(e) => setSampleQty(e.target.value)} aria-label="Quantity"
                                       style={{ flex: 1, minWidth: 0, padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 13, border: "1px solid var(--bd)", borderRadius: 8, background: "var(--panel, #fffdfb)", color: "var(--hub-item, #1a1512)" }} />
-                                    <button type="button" onClick={() => saveSampleMaterial(activeQuery, activeAgent)} disabled={!sampleQty.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "#f5e2da", border: "1px solid #e8c8bc", borderRadius: 8, cursor: sampleQty.trim() ? "pointer" : "default", opacity: sampleQty.trim() ? 1 : 0.5 }}>Save</button>
-                                    <button type="button" onClick={() => setSampleEditorOpen(false)} style={{ padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "#8f877b", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
+                                    <button type="button" onClick={() => saveSampleMaterial(activeQuery, activeAgent)} disabled={!sampleQty.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: sampleQty.trim() ? "pointer" : "default", opacity: sampleQty.trim() ? 1 : 0.5 }}>Save</button>
+                                    <button type="button" onClick={() => setSampleEditorOpen(false)} style={{ padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "var(--qc-tx-quiet)", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
                                   </div>
                                 </div>
                               )}
@@ -4643,17 +4643,17 @@ export const Queries: React.FC<{
                                     <div key={entry.id} className="qp-note" style={{ borderRadius: 12, padding: "11px 13px", marginBottom: 9 }}>
                                       {isEditing ? (
                                         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                          <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} autoFocus rows={2} style={{ width: "100%", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#3a1c14", border: "1px solid #e6dccd", borderRadius: 7, padding: "6px 8px", outline: "none", resize: "vertical", background: "#fff" }} />
+                                          <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} autoFocus rows={2} style={{ width: "100%", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "var(--qc-tx-input)", border: "1px solid var(--qc-rim-composer)", borderRadius: 7, padding: "6px 8px", outline: "none", resize: "vertical", background: "#fff" }} />
                                           <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
-                                            <button type="button" onClick={() => setEditingJournalId(null)} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: "transparent", border: "none", color: "#a89a8a", cursor: "pointer" }}>Cancel</button>
+                                            <button type="button" onClick={() => setEditingJournalId(null)} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: "transparent", border: "none", color: "var(--qc-tx-cancel)", cursor: "pointer" }}>Cancel</button>
                                             <button type="button" onClick={async () => { if (!editingJournalText.trim()) return; await updateJournalEntry(entry.id, editingJournalText.trim()); setEditingJournalId(null); }} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: burgundy, color: "#fff", border: "none", borderRadius: 6, padding: "5px 11px", cursor: "pointer" }}>Save</button>
                                           </div>
                                         </div>
                                       ) : (
                                         <>
-                                          <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#4a3c30", lineHeight: 1.48, whiteSpace: "pre-wrap" }}>{entry.entryText}</div>
+                                          <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "var(--qc-tx-note)", lineHeight: 1.48, whiteSpace: "pre-wrap" }}>{entry.entryText}</div>
                                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 9 }}>
-                                            <span style={{ fontFamily: FONT_MONO, fontSize: 8, color: "#b3a596", letterSpacing: ".08em", textTransform: "uppercase" as const }}>{formatWhatsAppDate(entry.createdAt)}</span>
+                                            <span style={{ fontFamily: FONT_MONO, fontSize: 8, color: "var(--qc-tx-stamp)", letterSpacing: ".08em", textTransform: "uppercase" as const }}>{formatWhatsAppDate(entry.createdAt)}</span>
                                             <div className="qp-noteacts" style={{ display: "flex", gap: 4 }}>
                                               <button type="button" title="Edit" onClick={() => { setEditingJournalId(entry.id); setEditingJournalText(entry.entryText); }} className="qp-noteact"><Pencil style={{ width: 12, height: 12 }} /></button>
                                               <button type="button" title="Delete" onClick={() => showConfirm({ title: "Delete this note?", danger: true, confirmLabel: "Delete", cancelLabel: "Keep it", body: <p style={{ margin: 0 }}>This note will be removed from the query's record.</p>, onConfirm: () => deleteJournalEntry(entry.id) })} className="qp-noteact"><Trash2 style={{ width: 12, height: 12 }} /></button>
@@ -4666,14 +4666,14 @@ export const Queries: React.FC<{
                                 })}
                               </PaneScroll>
                               {/* composer — pinned to the column foot */}
-                              <div style={{ marginTop: 12, background: "#fffdf9", border: "1px solid #e6dccd", borderRadius: 10, padding: "9px 10px 9px 13px", display: "flex", alignItems: "flex-end", gap: 9, boxShadow: "0 1px 2px rgba(58,28,20,0.04)", flexShrink: 0 }}>
+                              <div style={{ marginTop: 12, background: "var(--qc-surf-composer)", border: "1px solid var(--qc-rim-composer)", borderRadius: 10, padding: "9px 10px 9px 13px", display: "flex", alignItems: "flex-end", gap: 9, boxShadow: "0 1px 2px rgba(58,28,20,0.04)", flexShrink: 0 }}>
                                 <textarea
                                   value={journalInput} rows={1} placeholder="Write a note…"
                                   onChange={(e) => { setJournalInput(e.target.value); e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; }}
                                   onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); (e.target as HTMLTextAreaElement).style.height = "auto"; } }}
-                                  style={{ flex: 1, border: "none", outline: "none", background: "transparent", resize: "none", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "#3a1c14", lineHeight: 1.4, minHeight: 20, maxHeight: 120, padding: "4px 0", overflowY: "auto" }}
+                                  style={{ flex: 1, border: "none", outline: "none", background: "transparent", resize: "none", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "var(--qc-tx-input)", lineHeight: 1.4, minHeight: 20, maxHeight: 120, padding: "4px 0", overflowY: "auto" }}
                                 />
-                                <button type="button" onClick={send} disabled={!journalInput.trim()} style={{ flexShrink: 0, width: 32, height: 32, border: "1px solid #e8c8bc", background: journalInput.trim() ? "#f5e2da" : "#f1f1f0", borderRadius: 8, color: journalInput.trim() ? burgundy : "#c5b9b0", display: "flex", alignItems: "center", justifyContent: "center", cursor: journalInput.trim() ? "pointer" : "not-allowed" }}>
+                                <button type="button" onClick={send} disabled={!journalInput.trim()} style={{ flexShrink: 0, width: 32, height: 32, border: "1px solid var(--qc-rim-pink)", background: journalInput.trim() ? "var(--qc-acc-pink-save)" : "var(--qc-surf-send-off)", borderRadius: 8, color: journalInput.trim() ? burgundy : "var(--qc-tx-send-off)", display: "flex", alignItems: "center", justifyContent: "center", cursor: journalInput.trim() ? "pointer" : "not-allowed" }}>
                                   <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
                                 </button>
                               </div>

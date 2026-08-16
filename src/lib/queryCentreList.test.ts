@@ -34,8 +34,13 @@ describe("the head reuses To-do's values, it does not approximate them", () => {
   });
 
   it("the rule is To-do's 1px warm hairline, NOT the agent list's 2px ink rule", () => {
+    /* ⚠️ TOKENISED BY §1, AND THE COUPLING HAD TO BE RESTATED ON THE TOKEN'S VALUE. The clause is
+       that this hairline TRACKS To-do's; once the rule reads a name, comparing the rule's text to
+       To-do's literal compares two different kinds of thing and would pass while the token drifted.
+       The value is asserted where it is now declared. */
     const head = rule(css, ".f12-lhtitle");
-    expect(head).toContain("border-bottom: 1px solid #ece5d9");
+    expect(head).toContain("border-bottom: 1px solid var(--qc-rim-title)");
+    expect(css, "the hairline token changed value — it no longer tracks To-do's").toContain("--qc-rim-title: #ece5d9;");
     expect(todoCss, "To-do's hairline moved — reuse means these track each other").toContain("#ece5d9");
     expect(head, "the ref's 2px ink rule must not arrive here").not.toContain("2px solid var(--ink)");
   });
