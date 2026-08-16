@@ -1,0 +1,170 @@
+/**
+ * Beta chrome — the strip above the workspace and the feedback dock.
+ *
+ * ⚠️ THE STRIP IS `flex: none` IN THE SHELL'S COLUMN. `.sv2-app` is a viewport-height flex column;
+ * a strip that could grow or shrink would take its height out of the workspace unpredictably, and
+ * every fixed-viewport page below it does its own height arithmetic against what is left.
+ *
+ * Colours come from the shell's own tokens. The blush pair is the app's existing "something needs
+ * reading" wash — the same one the notification desk line uses — never a new alarm colour.
+ */
+
+.sa-betastrip {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 16px;
+  background: #faf0ea;
+  border-bottom: 1px solid #e8c8bc;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #5a4a40;
+}
+
+.sa-betapill {
+  flex: none;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #7c3a2a;
+  border: 1px solid rgba(124, 58, 42, 0.3);
+  border-radius: 999px;
+  padding: 4px 9px;
+}
+
+.sa-betastrip p { margin: 0; flex: 1; min-width: 0; }
+
+.sa-betastrip p button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: #7c3a2a;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.sa-betastrip p button:hover { color: #5d4037; }
+
+.sa-betax {
+  flex: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+  color: #9c8878;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+.sa-betax:hover { color: #5d4037; background: rgba(124, 58, 42, 0.07); }
+
+/* ── The feedback dock ───────────────────────────────────────────────────────
+   ⚠️ FIXED FURNITURE MEASURES FROM THE BROWSER EDGE, WHICH IS FURTHER OUT THAN ANY CAPSULE. That
+   is the left-correct/right-short signature the timeline pull tab and the help FAB were both fixed
+   for, so this takes the same correction: the capsule gap plus 6px. (The floating help FAB is
+   retired — help is a bar button now — so this corner is the dock's alone.) */
+.sa-fbdock {
+  position: fixed;
+  right: calc(var(--shell-cap-gap, 14px) + 6px);
+  bottom: 84px;
+  z-index: 46;
+}
+
+.sa-fbfab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  background: #fffefb;
+  border: 1px solid #ded3c2;
+  color: #5d4037;
+  box-shadow: 0 2px 6px rgba(58, 28, 20, 0.1), 0 10px 26px rgba(58, 28, 20, 0.1);
+}
+.sa-fbfab:hover { background: #f4f2ef; }
+
+.sa-fbpanel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  width: 330px;
+  max-width: calc(100vw - 28px);
+  background: #fffefb;
+  border: 1px solid #e7ddd2;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(58, 28, 20, 0.08), 0 18px 44px rgba(58, 28, 20, 0.16);
+}
+
+.sa-fbhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 15px;
+  background: #fdfaf5;
+  border-bottom: 1px solid #e7ddd2;
+}
+.sa-fbhead strong {
+  flex: 1;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 15.5px;
+  font-weight: 500;
+  color: #5d4037;
+}
+.sa-fbhead button {
+  background: none; border: none; cursor: pointer; font-size: 17px; line-height: 1;
+  color: #9c8878; padding: 2px 5px; border-radius: 6px;
+}
+.sa-fbhead button:hover { color: #5d4037; background: rgba(124, 58, 42, 0.07); }
+
+.sa-fbbody { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+
+.sa-fbfield { display: flex; flex-direction: column; gap: 6px; }
+.sa-fbfield label {
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: #9c8878;
+}
+.sa-fbfield select,
+.sa-fbfield textarea {
+  font-family: inherit; font-size: 13.5px; color: #3a1c14; width: 100%; box-sizing: border-box;
+  background: #ffffff; border: 1px solid #ded3c2; border-radius: 9px; padding: 9px 11px;
+}
+.sa-fbfield textarea { min-height: 92px; resize: vertical; line-height: 1.55; }
+.sa-fbfield select:focus,
+.sa-fbfield textarea:focus { outline: none; border-color: #7c3a2a; box-shadow: 0 0 0 3px #f6e4da; }
+
+/* The context block is READ-ONLY and shown in full — a writer must be able to see exactly what
+   travels with their report. */
+.sa-fbctx {
+  font-family: "JetBrains Mono", monospace; font-size: 9px; line-height: 1.8; letter-spacing: 0.04em;
+  color: #8a7a6c; background: #fdfaf5; border: 1px solid #e7ddd2; border-radius: 9px; padding: 10px 12px;
+}
+.sa-fbnote { font-size: 11.5px; line-height: 1.5; color: #9c8878; margin: 0; }
+
+.sa-fbsend {
+  width: 100%; font-family: inherit; font-size: 13px; font-weight: 500; padding: 11px 18px;
+  border-radius: 10px; cursor: pointer; background: #3a1c14; border: 1px solid #3a1c14; color: #ffffff;
+}
+.sa-fbsend:hover { background: #5d4037; border-color: #5d4037; }
+.sa-fbsend:disabled { opacity: .55; cursor: default; }
+
+.sa-fbsent { padding: 26px 20px; text-align: center; display: flex; flex-direction: column; gap: 7px; }
+.sa-fbsent strong {
+  font-family: "Playfair Display", Georgia, serif; font-size: 17px; font-weight: 500; color: #5d4037;
+}
+.sa-fbsent span { font-size: 13px; line-height: 1.55; color: #8a7a6c; }
+.sa-fberr { font-size: 12.5px; line-height: 1.5; color: #7c3a2a; margin: 0; }
+
+@media (max-width: 767px) {
+  /* Below md the mobile tab capsule owns the bottom of the screen — the dock clears it. */
+  .sa-fbdock { bottom: 138px; }
+  .sa-betastrip { padding: 8px 12px; gap: 9px; font-size: 12px; }
+}

@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
+import { BetaStrip } from "./BetaStrip";
+import { FeedbackDock } from "./FeedbackDock";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
@@ -207,6 +209,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // VI P3 — the help FAB's /todo two-item menu returns (the workbench-era route hide is
   // reversed; the board's sidebar no longer carries help).
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   // (NavDrawer retired — shell follow-up P3. The slim mobile Nav is retired too (Mobile Pass 1):
   // the v2 top bar now carries the <md variant itself — one bar, two breakpoint states — and the
   // rebuilt BottomTabBar is the floating tab capsule.)
@@ -301,6 +304,12 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       // mobile pass can swap 100vh → 100dvh below md.
       style={{ backgroundColor: "var(--shell-chrome)" }}
     >
+      {/* ⚠️ THE BETA STRIP IS A SIBLING OF THE WORKSPACE, NEVER A ROW INSIDE IT. The page grid
+          computes the header's collapse and its scroll-invariance padding within `.wpg`; a strip
+          up here is outside that box entirely, so `--wpg-reclaim-pad` and the collapse trigger
+          cannot see it. That separation is the condition this was allowed under. */}
+      <BetaStrip onReport={() => setFeedbackOpen(true)} />
+
       {/* THE DOUBLE-DECKER (shell-rebuild pack, Phase 3) — it replaces ShellColumn and the
           desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so
           a nav change never means editing the shell. */}
@@ -487,6 +496,18 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {/* DEV-only page-colour lab (local + scriptally-dev builds; statically false → tree-shaken
           from prod). Overrides ride an injected <style>; the root's data-sa-ground is its hook. */}
       {import.meta.env.DEV && <BackgroundLab theme={theme} />}
+
+      {/* ⚠️ THE RECEIPT IS THE PANEL'S OWN "Got it" STATE. `useTodoToast` is the app's toast, and
+          it is PAGE-scoped: the hook returns a toast object its caller renders, so using it here
+          would mean mounting a second toast surface app-wide beside the one every To-do page
+          already draws. The seam is kept so a shell-level toast can take it the day one exists. */}
+      <FeedbackDock
+        uid={currentUser?.id}
+        open={feedbackOpen}
+        onOpenChange={setFeedbackOpen}
+        onReceipt={() => {}}
+      />
+
     </div>
   );
 };
