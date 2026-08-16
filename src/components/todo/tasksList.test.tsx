@@ -754,7 +754,14 @@ describe("the panels: white sheets separated by SPACE, with the heading outside 
     expect(r).toContain("border: 1px solid var(--gbd)");
     expect(r).toContain("padding: 7px 12px");
     expect(r).toContain("border-radius: 9px");
-    expect(r).toContain("margin: 16px 2px 7px");
+    /* ⚠️ THE BOTTOM MARGIN IS ITS OWN DECLARATION NOW, and that is the point rather than tidiness:
+       the shorthand's `7px` did nothing once the band stuck, because a margin separates FLOW
+       SIBLINGS and a row scrolling underneath is not one. Split out, it is a token the stuck state
+       can repaint — see the `box-shadow` below, which reads the SAME token, so the gap the resting
+       state shows and the gap the stuck state keeps cannot drift apart. */
+    expect(r).toContain("margin: 16px 2px");
+    expect(r).toContain("margin-bottom: var(--tdg-band-gap)");
+    expect(r).toContain("box-shadow: 0 var(--tdg-band-gap) 0 var(--tdg-ground)");
     const h = rule(".tdg-shd h3 {");
     expect(h).toContain('font-family: "JetBrains Mono"');
     expect(h).toContain("text-transform: uppercase");
@@ -1369,8 +1376,23 @@ describe("⚠️ THE GROUP HEADING STICKS, BOUNDED BY ITS OWN SECTION", () => {
        padding added FOR the stuck state — that would move every heading down in the state you
        spend most of your time in, which is the rule this case has always carried. */
     expect(shd()).toContain("padding: 7px 12px");
-    expect(shd()).toContain("margin: 16px 2px 7px");
+    expect(shd()).toContain("margin: 16px 2px");
+    expect(shd()).toContain("margin-bottom: var(--tdg-band-gap)");
     expect(rule(".tdg-sect {")).toContain("margin-bottom: 26px");
+
+    /* ⚠️ AND THE SCROLLER RESERVES THE BAND, so a `scrollIntoView` cannot land a row underneath it.
+       It was `auto` — measured on the deployed page — which aimed every scrolled-to row at the one
+       strip the band permanently covers.
+       ⚠️ BOTH TOKENS ARE DECLARED ON THE SCROLLER, NOT ON `.tdg`. A custom property inherits
+       downward only, so declared below they would be invisible here — and `var()` on an undefined
+       property invalidates the whole declaration silently, which is how this would have shipped
+       reading `auto` again with nothing to point at. */
+    const zone = rule(".tpl-zone:has(.tdg) {");
+    expect(zone).toContain("--tdg-band-h: 31px");
+    expect(zone).toContain("--tdg-band-gap: 7px");
+    expect(zone).toContain("scroll-padding-top: calc(var(--tdg-band-h) + var(--tdg-band-gap))");
+    /* scoped, because `.tpl-zone` is every Tasks page's scroller and only this page has a band */
+    expect(css).not.toMatch(/\n\.tpl-zone \{[^}]*scroll-padding-top/);
   });
 
   /* ⚠️ SNOOZED IS DELIBERATELY NOT STICKY. Its fold row is not a heading over rows — it IS the

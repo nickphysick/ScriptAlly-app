@@ -71,6 +71,31 @@
   --tdg-move: 240ms;
 }
 
+/* ⚠️ TWO — A ROW SCROLLED TO LANDED UNDERNEATH THE BAND, because the scroller declared no
+   `scroll-padding-top` at all (measured: `auto`). Every `scrollIntoView` on this page — keyboard
+   walking, the pane's prev/next, a deep link — aimed at the scrollport's true top edge, which is
+   the one place the band is permanently covering. The row arrived and was invisible.
+
+   ⚠️ IT IS SCOPED WITH `:has(.tdg)` BECAUSE `.tpl-zone` IS EVERY TASKS PAGE'S SCROLLER. Calendar and
+   Noteboard have no sticky band, and reserving a band's height on a page with no band would push
+   every scrolled-to target down by 46px for no reason.
+
+   ⚠️ AND IT IS DERIVED FROM THE BAND, NOT GUESSED. `--tdg-band-h` is the band's own min-height, so
+   the reserve and the thing being cleared are one number. A hand-matched pair is the shape this
+   file's own ground token was rewritten to avoid. */
+/* ⚠️ THE TWO TOKENS ARE DECLARED HERE, ON THE SCROLLER, AND NOT ON `.tdg` — because a custom
+   property inherits DOWNWARD only. Declared on `.tdg` they would be invisible to this rule, and
+   `var(--tdg-band-h)` on an undefined property makes the whole declaration invalid and DROPPED,
+   silently: the scroller would have gone back to `auto` with nothing to point at. Writing a
+   fallback instead (`var(--x, 7px)`) is the same fault wearing a disguise — it is a read that
+   resolves to nothing, which is precisely what `--shell-ease` did. Declared at the top of the
+   chain, both readers see one number. */
+.tpl-zone:has(.tdg) {
+  --tdg-band-h: 31px;
+  --tdg-band-gap: 7px;
+  scroll-padding-top: calc(var(--tdg-band-h) + var(--tdg-band-gap));
+}
+
 .tdg-sect {
   margin-bottom: 26px;
 }
@@ -109,14 +134,29 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: var(--tdg-band-h);
   padding: 7px 12px;
-  margin: 16px 2px 7px;
+  margin: 16px 2px;
   border-radius: 9px;
   background: var(--gband);
   border: 1px solid var(--gbd);
   position: sticky;
   top: 0;
   z-index: 2;
+
+  /* ⚠️ THE FILL WAS NEVER THE FAULT — measured on the deployed page, `rgb(238, 241, 236)` at
+     `opacity: 1`, and `elementsFromPoint` at the band's centre returns `.tdg-shd` first. Rows pass
+     UNDER it, exactly as intended. Two other things were wrong, and neither is a colour.
+
+     ⚠️ ONE — THE 7px BOTTOM MARGIN STOPS RESERVING ANYTHING THE MOMENT THE BAND STICKS. A margin
+     separates FLOW SIBLINGS; a row scrolling beneath a stuck band is not a sibling of anything, so
+     it slides up until it touches the band's border and sits there sliced through the middle of its
+     chip. Measured: a row's own subtitle painting 2px below the band's bottom edge. The solid
+     `box-shadow` repaints exactly that margin in the panel's ground, so the gap the resting state
+     shows is the gap the stuck state keeps — no new element, and it cannot drift from the margin
+     because both read the same token. */
+  margin-bottom: var(--tdg-band-gap);
+  box-shadow: 0 var(--tdg-band-gap) 0 var(--tdg-ground);
 }
 
 /* ⚠️ THE HAIRLINE IS THE HEAD'S OWN BOTTOM EDGE (fix pack, 10 Aug), and it rides the head rather
