@@ -28,6 +28,16 @@ describe("tierForPath", () => {
     expect(tierForPath("/privacy")).toBe("marketing");
   });
 
+  /**
+   * ⚠️ THE COMPANY PAGES ARE PUBLIC, AND THAT IS THE WHOLE POINT OF THEM. A privacy request has to
+   * be makeable by someone who cannot sign in — including someone whose account is the thing they
+   * are asking about. Putting Contact behind the auth gate would close the only door that has to
+   * stay open.
+   */
+  it("puts the company pages in the marketing tier, public to everyone", () => {
+    expect(tierForPath("/about")).toBe("marketing");
+  });
+
   it("the focus tier is retired — account, plans and help are workspace routes (capsule fixes P5)", () => {
     expect(tierForPath("/account")).toBe("workspace");
     expect(tierForPath("/plans")).toBe("workspace");

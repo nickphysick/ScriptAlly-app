@@ -815,3 +815,93 @@
   .mk-docmeta { margin-left: 0; width: 100%; text-align: left; }
   .mk-docbody { padding: 24px 22px 30px; }
 }
+
+/* ══════════════ About — full-width alternating bands ══════════════
+   Deliberately NOT the document card: this is a page read once, not a reference consulted. Colour
+   comes from the tier's tokens only. */
+.mk-band {
+  max-width: 1180px; margin: 0 auto; padding: 54px 56px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 46px; align-items: center;
+}
+.mk-band + .mk-band { border-top: 1px solid var(--mk-hair); }
+/* Every vision band renders illustration-first, so the plate sits left by default and the
+   alternating band pulls the copy across. Both sides are declared: giving only the copy an order
+   leaves the illustration on `order: 0` and it jumps in front. */
+.mk-band--copyfirst .mk-bandcopy { order: 1; }
+.mk-band--copyfirst .mk-illo { order: 2; }
+.mk-bandcopy h1 {
+  font-family: "Playfair Display", Georgia, serif; font-size: 42px; font-weight: 500;
+  line-height: 1.12; color: var(--mk-head);
+}
+.mk-bandcopy h2 {
+  font-family: "Playfair Display", Georgia, serif; font-size: 28px; font-weight: 500;
+  line-height: 1.2; color: var(--mk-head); margin-top: 8px;
+}
+.mk-bandcopy p {
+  font-size: 15px; font-weight: 300; line-height: 1.72; color: #5a4a40; margin-top: 16px;
+}
+.mk-bandcopy strong { color: var(--mk-ink); font-weight: 500; }
+
+/* The illustration slot: a dashed rim reserving the artwork's box, the monoline stand-in inside
+   it, and the subject in mono beneath. The rim is what says "not finished" without a label. */
+.mk-illo {
+  position: relative; border-radius: 16px; border: 1px dashed var(--mk-bd);
+  min-height: 260px; display: grid; place-items: center; padding: 26px;
+}
+.mk-illo--blush { background: var(--mk-centre); }
+.mk-illo--sage { background: var(--mk-sage); }
+.mk-illo--plate { background: var(--mk-parch); }
+.mk-illo svg {
+  width: 190px; max-width: 100%; height: auto; fill: none;
+  stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: .55;
+}
+.mk-illotag {
+  position: absolute; left: 14px; bottom: 12px;
+  font-family: "JetBrains Mono", monospace; font-size: 7.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mk-label);
+}
+
+/* Commitments — three cards on a tinted band. */
+.mk-commitstrip { background: var(--mk-band-a); border-top: 1px solid var(--mk-hair); border-bottom: 1px solid var(--mk-hair); }
+.mk-commitinner { max-width: 1180px; margin: 0 auto; padding: 46px 56px; }
+.mk-commitgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px; }
+.mk-commit {
+  background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 16px; padding: 22px;
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
+}
+.mk-commit strong {
+  font-family: "Playfair Display", Georgia, serif; font-size: 17px; font-weight: 500;
+  color: var(--mk-head);
+}
+.mk-commit span { font-size: 13.5px; font-weight: 300; line-height: 1.65; color: var(--mk-muted); }
+.mk-ctick {
+  width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--mk-sage); border: 1px solid var(--mk-sage-t);
+}
+.mk-ctick svg { width: 11px; height: 11px; fill: none; stroke: var(--mk-sage-t); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Founder sign-off. The rule is its own element — never a border on either label. */
+.mk-founder { max-width: 720px; margin: 0 auto; padding: 52px 56px 20px; text-align: center; }
+.mk-founder p { font-size: 15px; font-weight: 300; line-height: 1.72; color: #5a4a40; }
+.mk-founder a, .mk-founder .mk-doclink { color: var(--mk-burg); }
+.mk-signoff { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 20px; }
+.mk-signname { font-family: "Playfair Display", Georgia, serif; font-size: 18px; font-weight: 500; color: var(--mk-ink); }
+.mk-signrule { flex: 0 0 auto; width: 1px; height: 15px; background: var(--mk-bd); }
+.mk-signrole {
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mk-label);
+}
+
+@media (max-width: 900px) {
+  .mk-band { grid-template-columns: 1fr; gap: 28px; padding: 40px 26px; }
+  /* Stacked, the words come first on EVERY band — a reader meeting the plate before the sentence
+     is reading a caption with nothing to caption. Applied to the band, not to the alternating
+     modifier, so the two vision layouts converge rather than staying mirrored. */
+  .mk-band .mk-bandcopy { order: 1; }
+  .mk-band .mk-illo { order: 2; }
+  .mk-bandcopy h1 { font-size: 32px; }
+  .mk-commitinner { padding: 34px 26px; }
+  .mk-commitgrid { grid-template-columns: 1fr; }
+  .mk-founder { padding: 38px 26px 16px; }
+}

@@ -16,7 +16,7 @@
  * `**` to `/index.html`, so a static legal page at those paths would be served the SPA instead.
  * The sign-up screen linked to them for a long time while they could not exist.
  */
-export const MARKETING_PATHS = new Set(["/", "/pricing", "/terms", "/privacy"]);
+export const MARKETING_PATHS = new Set(["/", "/pricing", "/about", "/terms", "/privacy"]);
 
 /** The workspace route set — the capsule-shell tier (every authenticated route). */
 export const WORKSPACE_PATHS = new Set([
