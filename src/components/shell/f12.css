@@ -2024,7 +2024,35 @@
    pane's three cards are whitened. */
 .qp-cols .f12-card { background: var(--white); }
 
-.f12-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--sh-1); }
+/**
+ * ══ §2 · THE RIM SURROUNDS THE WHOLE CARD ════════════════════════════════════════════════════
+ *
+ * ⚠️ AN OVERLAY RING, NOT AN INSET SHADOW ON THE CARD. An inset shadow paints BENEATH the card's
+ * children, so a filled header covers the rim along its own edges and the rim appears to start
+ * where the header ends — the spill this app has hit before, and the exact fault §1's parchment
+ * header would have made obvious. A `border` has the same problem in reverse: it is outside the
+ * padding box, so the header's fill runs to the border's inner edge and the two hairlines double up
+ * at the corners once the radius rounds them.
+ *
+ * ⚠️ THREE LAYERS, AND EACH ONE HAS A JOB THE OTHERS CANNOT DO:
+ *   1. `.f12-card`  — positions the ring and carries the radius. No border, NO `overflow: hidden`:
+ *      clipping here would clip the ring's own outer edge.
+ *   2. `.f12-cfr`   — the clipping context. It is what makes the header's fill stop at the radius,
+ *      and it is a separate element precisely so the card can stay unclipped.
+ *   3. `::after`    — the ring, `pointer-events: none`, painted above every child because it is the
+ *      last thing in the card's stacking order. Its `inset 0 0 0 1px` is a shadow inset relative to
+ *      the RING, which is not the same thing as an inset shadow on the card.
+ *
+ * ⚠️ THE RADIUS IS `inherit` IN BOTH PLACES. The alignment amendment sets it on `.qc-wpg .f12-card`;
+ * restating it on the frame and the ring would be two more numbers to keep in step with a token
+ * that has already moved twice this month. Inherited, the three cannot come apart.
+ *
+ * ⚠️ AND THE HEADER TAKES NO RADIUS OF ITS OWN — the frame's clipping is what rounds it. A
+ * radius-matching hack on the header is the thing that looks right until the card's radius moves.
+ */
+.f12-card { position: relative; background: var(--panel); border-radius: var(--r-lg); display: flex; flex-direction: column; box-shadow: var(--sh-1); }
+.f12-card > .f12-cfr { border-radius: inherit; overflow: hidden; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.f12-card::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 1px var(--line); }
 /**
  * ══ §1 · THE CARD HEADERS ARE PARCHMENT ══════════════════════════════════════════════════════
  *

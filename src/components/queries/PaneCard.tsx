@@ -52,12 +52,20 @@ export const PaneCard: React.FC<{
   children: React.ReactNode;
 }> = ({ glyph, title, meta, action, className, style, cardRef, children }) => (
   <section ref={cardRef} className={`f12-card${className ? " " + className : ""}`} style={{ minWidth: 0, minHeight: 0, ...style }}>
-    <div className="f12-chh">
-      <span className="qp-cardgl" aria-hidden="true">{glyph}</span>
-      <span>{title}</span>
-      {meta && <span className="qp-cardmeta">{meta}</span>}
-      {action}
+    {/**
+      * ⚠️ THE FRAME EXISTS SO THE RIM CAN SURROUND THE HEADER (§2), and it is a real element rather
+      * than a class on the section because the two jobs are incompatible: the card must NOT clip,
+      * or it would clip its own ring; the header's fill must BE clipped, or it would square off the
+      * card's rounded corners. One element cannot do both, so there are two.
+      */}
+    <div className="f12-cfr">
+      <div className="f12-chh">
+        <span className="qp-cardgl" aria-hidden="true">{glyph}</span>
+        <span>{title}</span>
+        {meta && <span className="qp-cardmeta">{meta}</span>}
+        {action}
+      </div>
+      {children}
     </div>
-    {children}
   </section>
 );
