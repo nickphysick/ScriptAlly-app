@@ -229,6 +229,19 @@ export interface SelectRowProps {
   desc: string;
   selected: boolean;
   onClick: () => void;
+  /**
+   * Small facts beneath the description — what the choice costs, and what kind of input it suits.
+   * ⚠️ A TAG STATES A FACT, NEVER A RECOMMENDATION: "Best for a messy list" describes the sheet,
+   * not the writer holding it.
+   */
+  tags?: { label: string; kind: "cost" | "fit" }[];
+  /**
+   * ⚠️ RADIOGROUP SEMANTICS ARE OPT-IN, because the two shapes are genuinely different. A lone row
+   * is a toggle and `aria-pressed` is right for it; a row inside a set of mutually exclusive
+   * choices is a radio, and a screen reader given `aria-pressed` there is told three independent
+   * switches happen to be on and off rather than one choice out of three.
+   */
+  radio?: boolean;
 }
 
 /**
@@ -238,11 +251,13 @@ export interface SelectRowProps {
  * border — the treatment the app reserves for a surface asking something of you, which is the
  * opposite of what a chosen option means.
  */
-export const SelectRow: React.FC<SelectRowProps> = ({ icon, title, desc, selected, onClick }) => (
+export const SelectRow: React.FC<SelectRowProps> = ({ icon, title, desc, selected, onClick, tags, radio }) => (
   <button
     type="button"
     onClick={onClick}
-    aria-pressed={selected}
+    role={radio ? "radio" : undefined}
+    aria-checked={radio ? selected : undefined}
+    aria-pressed={radio ? undefined : selected}
     style={{
       display: "flex", gap: 13, alignItems: "flex-start", width: "100%", textAlign: "left",
       background: selected ? onbOptionSelectedFill : onbOptionRest,
@@ -270,6 +285,23 @@ export const SelectRow: React.FC<SelectRowProps> = ({ icon, title, desc, selecte
     <span style={{ minWidth: 0 }}>
       <span style={{ fontWeight: 600, display: "block", lineHeight: 1.3, fontSize: 14.5, color: onbHeadingInk }}>{title}</span>
       <span style={{ color: onbMuted, fontSize: 13.5, display: "block", marginTop: 1, lineHeight: 1.4 }}>{desc}</span>
+      {tags && tags.length > 0 && (
+        <span style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+          {tags.map((tag) => (
+            <span
+              key={tag.label}
+              style={{
+                fontFamily: FONT_MONO, fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase",
+                borderRadius: 999, padding: "4px 9px", border: `1px solid ${tag.kind === "cost" ? sageText : onbOptionEdge}`,
+                color: tag.kind === "cost" ? sageText : onbMuted,
+                background: tag.kind === "cost" ? onbOptionSelectedFill : "transparent",
+              }}
+            >
+              {tag.label}
+            </span>
+          ))}
+        </span>
+      )}
     </span>
     <span style={{ flex: 1 }} />
     <span aria-hidden="true" style={{ flexShrink: 0, marginTop: 1, color: sageText, opacity: 0.85 }}>{icon}</span>

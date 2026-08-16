@@ -26,6 +26,9 @@ import { ScatterSettleLoader, LoaderCard } from "./ScatterSettleLoader";
 import { fmtDate } from "../../lib/smartImportReviewModel";
 import { confirmFileLead } from "../../lib/smartImportConfirm";
 import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "./ManuscriptFields";
+import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
+import { CaptureOption, CAPTURE_HEADING, CAPTURE_SUB, capturePrimaryLabel } from "../../lib/captureFork";
+import { CaptureFork } from "./CaptureFork";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
  *  errors — Promise.all rejects as soon as the commit does). */
@@ -43,8 +46,8 @@ export interface BranchBProps {
   /** Create-or-reuse the manuscript from the held details, returning its id (null if it couldn't be
    *  created). Idempotent — call it at the commit ending; every imported query attaches to this id. */
   onEnsureManuscript: () => Promise<string | null>;
-  /** Pre-selected import option: deep/interest → "smart", early → "byhand". */
-  defaultImport: "smart" | "byhand";
+  /** Pre-selected capture option: deep/interest → "smart", early → "byhand". */
+  defaultImport: CaptureOption;
   /** "Add them by hand" — drops into the existing add-agents flow. */
   onAddByHand: () => void;
   /** Escape hatch — finish onboarding into the Import desk (ImportCsv). */
@@ -127,7 +130,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const [importOption, setImportOption] = useState<"smart" | "byhand">(defaultImport);
+  const [importOption, setImportOption] = useState<CaptureOption>(defaultImport);
   const [fileName, setFileName] = useState("");
   const [validated, setValidated] = useState<ValidatedImport | null>(null);
   // Scatter-settle loader (extraction wait): the writer's raw cells sampled client-side (display only),
@@ -142,6 +145,9 @@ export const BranchB: React.FC<BranchBProps> = ({
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [blocked, setBlocked] = useState<Blocked | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const templateInputRef = useRef<HTMLInputElement>(null);
+  /** Cells the template parser could not read. The review screen shows them; nothing is guessed. */
+  const [templateFlags, setTemplateFlags] = useState<TemplateFlag[]>([]);
 
   const shownError = error || fieldError;
 
@@ -162,6 +168,32 @@ export const BranchB: React.FC<BranchBProps> = ({
        screen whose whole job is naming the file about to spend a one-shot entitlement. */
     setFileName(file.name);
     setScreen("confirm");
+  };
+
+  /**
+   * The template path — parsed HERE, in the browser, with no call to anything.
+   *
+   * ⚠️ IT DOES NOT TOUCH THE ENTITLEMENT, AND THAT IS THE PROMISE THE FORK MAKES IN WORDS. No
+   * gate check, no confirm beat, no spend: the columns are set, so reading them needs no model.
+   * The confirm screen exists to name the file about to spend a one-shot entitlement, and there is
+   * nothing here to spend.
+   *
+   * ⚠️ IT REJOINS THE SMART IMPORT PIPELINE AT THE REVIEW. The parse produces a SmartImportResult,
+   * so duplicate reconciliation, validation, the review screen and commitSmartImport are the same
+   * code for both paths — the adaptation is at this boundary and nowhere else.
+   */
+  const pickTemplateFile = async (file: File) => {
+    setRawSample([]); setExtractComplete(false); setValidated(null); setTemplateFlags([]);
+    setFileName(file.name);
+    try {
+      const parsed = await readTemplateFile(file);
+      setTemplateFlags(parsed.flags);
+      setValidated(validateSmartImport(parsed.result));
+      setScreen("overview");
+    } catch (e) {
+      console.error("Template parse failed:", e);
+      setScreen("fallback"); // graceful fallback — never dead-end onboarding
+    }
   };
 
   const runMapping = async (file: File) => {
@@ -257,19 +289,22 @@ export const BranchB: React.FC<BranchBProps> = ({
     );
   }
 
-  // ── B3 · bring it across — Smart Import is the hero ──────────────────────
+  // ── B3 · the capture fork — three ways to bring an existing list across ──
+  //    The fork itself is CaptureFork.tsx: extracted so it can be rendered and asserted on its own,
+  //    rather than only after driving this component through the manuscript screen first.
   if (screen === "pipeline") {
     return (
       <OnboardingCard
         onSkip={onSkip}
-        pre="Your pipeline"
-        name="Bring it across"
-        sub="Drop in whatever you use — we'll read it for you"
+        pre="Your list"
+        name={CAPTURE_HEADING}
+        sub={CAPTURE_SUB}
         motif={<InboxMotif />}
         onBack={() => setScreen("book")}
-        primaryLabel={importOption === "smart" ? "Choose a file →" : "Add them by hand →"}
+        primaryLabel={capturePrimaryLabel(importOption)}
         onPrimary={() => {
           if (importOption === "smart") fileInputRef.current?.click();
+          else if (importOption === "template") templateInputRef.current?.click();
           else onAddByHand();
         }}
       >
@@ -280,51 +315,21 @@ export const BranchB: React.FC<BranchBProps> = ({
           style={{ display: "none" }}
           onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); e.target.value = ""; }}
         />
-
-        {/* The hero: a large, inviting upload affordance — clicking it opens the picker directly. */}
-        <div
-          onClick={() => { setImportOption("smart"); fileInputRef.current?.click(); }}
-          style={{
-            /* ⚠️ SELECTED IS SAGE HERE TOO. The hero used a burgundy dash on a pink wash, which
-               was the Form 11 primary treatment applied to a chooser — it read louder than the
-               actual primary in the footer. It now matches SelectRow's sage selection exactly. */
-            border: `1.5px dashed ${importOption === "smart" ? sageText : onbOptionEdge}`,
-            background: importOption === "smart" ? onbOptionSelectedFill : onbOptionRest,
-            borderRadius: 12, padding: "22px 18px", textAlign: "center", cursor: "pointer",
-            marginBottom: 12, transition: "all 0.15s",
-          }}
-        >
-          <div style={{ width: 44, height: 44, borderRadius: 11, background: onbPlate, border: `1px solid ${onbHairline}`, display: "flex", alignItems: "center", justifyContent: "center", color: sageText, margin: "0 auto 10px" }}>
-            {UploadIcon}
-          </div>
-          <div style={{ fontFamily: FONT_SANS, fontSize: 14.5, fontWeight: 500, color: "#3a1c14", marginBottom: 5 }}>
-            Already tracking your queries somewhere?
-          </div>
-          <p style={{ fontFamily: FONT_SANS, fontSize: 12, color: "#9c8878", lineHeight: 1.55, margin: "0 0 12px", maxWidth: 320, marginLeft: "auto", marginRight: "auto" }}>
-            Drop in whatever you use — a spreadsheet, an export, any layout — and we'll read it into ScriptAlly for you.
-          </p>
-          {/* A cue inside the hero, not a second primary — the footer owns the primary. */}
-          <span style={{ fontFamily: FONT_MONO, fontSize: 10.5, fontWeight: 500, letterSpacing: "0.09em", textTransform: "uppercase", background: "transparent", color: sageText, border: `1px solid ${sageText}`, borderRadius: 9, padding: "9px 18px", display: "inline-block" }}>
-            Choose a file →
-          </span>
-        </div>
-
-        {/* Template, demoted to a quiet secondary line. */}
-        <p style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: "#a8968a", textAlign: "center", margin: "0 0 14px" }}>
-          Prefer to start from a clean template?{" "}
-          <a href="/ScriptAlly-pipeline-import-template.xlsx" download style={{ color: onbMuted, textDecoration: "underline", textUnderlineOffset: 3 }}>
-            Download one.
-          </a>
-        </p>
-
-        <SelectRow
-          icon={HandIcon}
-          title="Add them by hand"
-          desc="Only a few out there? Add your agents one at a time."
-          selected={importOption === "byhand"}
-          onClick={() => setImportOption("byhand")}
+        <input
+          ref={templateInputRef}
+          type="file"
+          accept=".csv,.xlsx,.xls"
+          style={{ display: "none" }}
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickTemplateFile(f); e.target.value = ""; }}
         />
-        <EscapeHatch onOpen={onOpenImportDesk} />
+        <CaptureFork
+          selected={importOption}
+          onSelect={setImportOption}
+          onChooseFile={() => fileInputRef.current?.click()}
+          onUploadTemplate={() => templateInputRef.current?.click()}
+          onNothingYet={onSkip}
+          onOpenImportDesk={onOpenImportDesk}
+        />
       </OnboardingCard>
     );
   }

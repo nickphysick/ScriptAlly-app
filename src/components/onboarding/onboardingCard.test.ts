@@ -137,7 +137,16 @@ describe("option rows select in sage", () => {
     expect(TOKENS).toContain('export const onbOptionSelectedFill = "#fbfdfa"');
   });
 
-  it("and the row reports its state to assistive tech", () => {
-    expect(CHROME).toContain('aria-pressed={selected}');
+  /**
+   * ⚠️ TWO SHAPES, BOTH ANNOUNCED. A lone row is a toggle and takes `aria-pressed`; a row inside a
+   * set of mutually exclusive choices opts into `radio`, because a screen reader given
+   * `aria-pressed` there is told three independent switches happen to be on and off rather than one
+   * choice out of three. The `radio` flag is what picks between them, and BOTH must survive — this
+   * used to assert `aria-pressed` alone, and went red the day the capture fork needed the other.
+   */
+  it("and the row reports its state to assistive tech, in whichever shape it is in", () => {
+    expect(CHROME).toContain('aria-pressed={radio ? undefined : selected}');
+    expect(CHROME).toContain('aria-checked={radio ? selected : undefined}');
+    expect(CHROME).toContain('role={radio ? "radio" : undefined}');
   });
 });
