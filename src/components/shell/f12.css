@@ -2025,8 +2025,24 @@
 .qp-cols .f12-card { background: var(--white); }
 
 .f12-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--sh-1); }
-.f12-card .f12-chh { flex: none; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 13px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); font-family: var(--f12-serif); font-size: 15.5px; font-weight: 600; color: #2f3a30; }
-.f12-card .f12-chh svg { width: 19px; height: 19px; stroke: #5a6e58; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+/**
+ * ══ §1 · THE CARD HEADERS ARE PARCHMENT ══════════════════════════════════════════════════════
+ *
+ * ⚠️ THE COLLISION, NOT THE COLOUR, IS WHY. The collapsed page band is sage now, and a sage header
+ * a short distance below a sage band reads as one stripe interrupted by a card. Each colour gets
+ * one job: sage identifies the PAGE, parchment labels a SURFACE, white is where the work happens.
+ *
+ * ⚠️ `--shell-rail` IS THE SIDEBAR'S OWN GROUND, NOT A NEW TINT — the token the left column capsule
+ * is painted with, so "the card headers are the same material as the sidebar" is true by reading
+ * one value rather than by two hexes that were matched once.
+ *
+ * ⚠️ AND THE GLYPH LOSES ITS SAGE WITH THE GRADIENT. Its stroke was `#5a6e58`; removing the ground
+ * and leaving a sage icon standing on parchment would be half the section, and would leave the
+ * exact collision the section exists to remove — one sage element, on the surface sage just left.
+ * It takes the header's own ink at the muted step, so the glyph reads as part of the label.
+ */
+.f12-card .f12-chh { flex: none; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 13px; background: var(--shell-rail); border-bottom: 1px solid var(--line); font-family: var(--f12-serif); font-size: 18px; font-weight: 600; color: var(--ink); }
+.f12-card .f12-chh svg { width: 19px; height: 19px; stroke: var(--muted); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .f12-card .f12-cbb { flex: 1; padding: 18px; display: flex; flex-direction: column; min-height: 0; }
 /* journal empty state — dotted outline, NO fill (a placeholder that looks like one) */
 /**
@@ -2780,7 +2796,12 @@
 .qp-cardgl svg { width: 11px; height: 11px; stroke: var(--burg); fill: none; stroke-width: 1.6; }
 /* ⚠️ `margin-left: auto` IS WHAT RIGHT-ALIGNS IT, so the title keeps its natural width and a long
    one pushes the meta rather than being truncated by it. */
-.qp-cardmeta { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sageD); white-space: nowrap; }
+/* ⚠️ THE META IS UNCHANGED IN EVERYTHING THE PACK NAMES — same slot, same size, same tracking, same
+   `margin-left: auto`. Its INK moves off `--sageD`, and that is the one place this section reads the
+   ref over the word "unchanged": the ref draws this exact state and recolours the meta to muted for
+   it, and a sage figure standing on parchment is the same leftover the glyph was. One token, one
+   line to put back if that reading is wrong. */
+.qp-cardmeta { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 
 /**
  * ⚠️ THE TWO STATS LEAD TRACKING'S BODY, in the comps page's grammar — icon plate, Playfair number,
