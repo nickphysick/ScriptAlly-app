@@ -25,6 +25,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
+import { StatusDot } from "../StatusDot";
+import { QueryStatus } from "../../types";
 import { ArtSlot } from "./ArtSlot";
 import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
@@ -64,8 +66,17 @@ export interface DockTimelineEvent {
    */
   /** The wait against the agent's STATED window. Absent where they state none. */
   progress?: { pct: number; over: boolean; from: string; to: string };
-  /** The ring's state, from the same StatusDot logic the rest of the app draws. */
-  ring?: "out" | "in" | "now";
+  /**
+   * ⚠️ THE ENTRY'S OWN STATUS, HANDED STRAIGHT TO `StatusDot`. Not a ring state, not a direction,
+   * not a colour — the exact `QueryStatus` the rung produced. `StatusDot` is the app's ONE drawing
+   * of a query status and it is never recreated locally; anything less than the status itself
+   * throws away what the glyph is for.
+   *
+   * ⚠️ ABSENT ON A NUDGE, and correctly so. `NUDGE_SENT` carries no `resultingStatus` — it is not
+   * a status change — so it takes no dot, and the mark track is simply empty on that row while the
+   * connector runs past it.
+   */
+  status?: QueryStatus | string;
 }
 
 export interface TodoDockProps {
@@ -297,15 +308,28 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             {events.length > 0 ? (
               <ol className="tdk-tl">
                 {events.map((e) => (
-                  <li key={e.key} className={e.ring ? `r-${e.ring}` : undefined}>
+                  <li key={e.key}>
                     <span className="tdk-tlw">{e.when}</span>
-                    {/* ⚠️ §3.5 — THE RING IS ITS OWN TRACK, AND THE CONNECTOR IS THE TRACK'S, NOT
-                        THE LIST'S. A single `border-left` down the whole `<ol>` — which is what
-                        this was — draws a rule THROUGH every mark rather than between them, so
-                        the marks read as beads threaded on a wire instead of as rungs joined by
-                        one. The rule is `.tdk-tlm::after`, suppressed on the last entry because
-                        there is nothing below it to reach. */}
-                    <span className="tdk-tlm" aria-hidden><i /></span>
+                    {/**
+                      * ⚠️ THE REAL `StatusDot`, IMPORTED — NEVER A RING DRAWN HERE. The previous
+                      * pass built local rings from `statusDirection`, on my own earlier wording
+                      * ("direction-coloured from the existing StatusDot logic"), and that wording
+                      * was wrong: `StatusDot` is locked app-wide, never recreated locally, and
+                      * even legends render the real component.
+                      *
+                      * ⚠️ WHAT THE LOCAL RINGS THREW AWAY, which is the reason it is a lock and not
+                      * a preference. Outgoing is a burgundy ring with a pink centre and an arrow
+                      * RIGHT; incoming a sage ring with a sage centre and an arrow LEFT; an offer a
+                      * solid burgundy disc with a parchment tick; a closure a grey ring with an ×.
+                      * A hollow circle beside a filled circle says none of that — it distinguishes
+                      * two rungs without telling you what either one is.
+                      *
+                      * ⚠️ THE CONNECTOR IS STILL THE TRACK'S, not the list's: one rule between two
+                      * marks, never a `border-left` drawn THROUGH them.
+                      */}
+                    <span className="tdk-tlm">
+                      {e.status && <StatusDot status={e.status} overrideSize={20} decorative />}
+                    </span>
                     <span className="tdk-tle">
                       {/* the event in 600, the channel appended in regular — one line, two weights */}
                       <b>{e.label}</b>{e.via && <span className="via"> · {e.via}</span>}

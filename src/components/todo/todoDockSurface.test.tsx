@@ -316,58 +316,61 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     const name = dockCssRule(".tdk-name {");
     expect(name).toContain("font-size: 20px");                                  // §2.3
     expect(name).toContain("line-height: 1.15");
-    expect(dockCssRule(".tdk-tl li {")).toContain("grid-template-columns: 66px"); // §3.8
+    /* ⚠️ §3.8's 66px DATE TRACK IS SUPERSEDED, and this lock caught the change rather than being
+       quietly edited around it. `todo-journey-in-pane.html` is the newer of the two authoritative
+       refs and describes the pane this timeline is in; its `.tl-row` is 60 · 20 · rest, and the
+       20 is sized for a real `StatusDot` rather than for the local ring 66 was drawn around. */
+    expect(dockCssRule(".tdk-tl li {")).toContain("grid-template-columns: 60px 20px");
   });
 
   /* ── §3.5 — THE RINGS ────────────────────────────────────────────────────────────────────── */
 
-  it("⚠️ §3.5 — every entry carries a ring, and the ring's class is the direction", () => {
+  it("⚠️ the timeline renders the REAL StatusDot — never a ring drawn here", () => {
     const html = renderToStaticMarkup(
       <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => [
-          { key: "e1", label: "Query sent", when: "6 May", ring: "out" as const },
-          { key: "e2", label: "Full requested", when: "12 Jul", ring: "in" as const },
-          { key: "e3", label: "Full sent", when: "14 Jul", ring: "now" as const },
+          { key: "e1", label: "Query sent", when: "2 Jun", status: "Queried" },
+          { key: "e2", label: "Partial requested", when: "28 Jun", status: "Partial Requested" },
+          { key: "e3", label: "Offer received", when: "1 Aug", status: "Offer" },
         ]}
         onPrimary={() => {}} onMore={() => {}} />,
     );
-    /* one mark per entry — asserted by COUNT, so a ring that renders only on the last rung fails */
-    expect((html.match(/class="tdk-tlm"/g) ?? [])).toHaveLength(3);
-    for (const r of ["r-out", "r-in", "r-now"]) expect(html).toContain(`class="${r}"`);
-    /* an entry with no direction takes the neutral ring rather than no ring at all */
-    const plain = renderToStaticMarkup(
-      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
-        timeline={() => [{ key: "e1", label: "Something logged", when: "1 Jan" }]}
-        onPrimary={() => {}} onMore={() => {}} />,
-    );
-    expect(plain).toContain('class="tdk-tlm"');
+    /* ⚠️ ASSERTED AGAINST THE COMPONENT'S OWN ROOT, not against a class this file chose and not
+       against one BRANCH of its output. Two markers were tried and both were true of only some
+       statuses: `<svg>` (several statuses are a tinted disc with no glyph) and `var(--sd-centre)`
+       (Offer and the closed set keep their own palette rather than the theme tokens — the
+       StatusDot lock says so). The root span's own signature is true of every status. */
+    const ROOT = "width:20px;height:20px;flex-shrink:0;display:inline-flex";
+    const marks = html.split('class="tdk-tlm"').slice(1);
+    expect(marks).toHaveLength(3);
+    for (const m of marks) expect(m.slice(0, 600)).toContain(ROOT);
+    /* ⚠️ AND THE THREE DIFFER — one glyph per status. A dot that rendered the same mark for every
+       rung would satisfy "it renders StatusDot" and still say nothing. */
+    const glyphs = marks.map((m) => m.slice(0, 900));
+    expect(new Set(glyphs).size, "every rung drew the same mark").toBe(3);
   });
 
-  it("⚠️ §3.5 — the ring is 22px, the three treatments differ, and the connector is BETWEEN them", () => {
-    const list = dockCssRule(".tdk-tl {");
-    expect(list).toContain("--tdk-ring: 22px");
-    /* ⚠️ THE OLD CONTINUOUS RULE IS GONE — a `border-left` down the whole list draws THROUGH the
-       marks, which is the fault §3.5 names. Asserted as its absence, not merely as the new rule's
-       presence: both can be true at once and the result is two lines. */
-    expect(list).not.toContain("border-left");
+  it("⚠️ A NUDGE CARRIES NO STATUS AND SO TAKES NO DOT — it is not a status change", () => {
+    const html = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => [{ key: "n1", label: "Nudge sent", when: "3 Jul" }]}
+        onPrimary={() => {}} onMore={() => {}} />,
+    );
+    /* the track still renders — the connector runs past it — but nothing is drawn in it */
+    expect(html).toContain('class="tdk-tlm"');
+    expect(html.split('class="tdk-tlm"')[1].slice(0, 200))
+      .not.toContain("width:20px;height:20px;flex-shrink:0;display:inline-flex");
+  });
+
+  it("⚠️ THE LOCAL RING IS GONE FROM THE STYLESHEET, not merely unused in the markup", () => {
     const css = readFileSync(join(here, "todoDock.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    /* the connector hangs off the MARK and skips the last entry */
+    /* ⚠️ COMMENTS STRIPPED FIRST — this file's own prose names every one of these while explaining
+       that they were removed, and an unstripped read fails a file that is correct. */
+    for (const dead of [".tdk-tlm i", "--tdk-ring", "r-out", "r-in", "r-now"]) {
+      expect(css, `${dead} survives in the stylesheet`).not.toContain(dead);
+    }
+    /* the connector is the track's, and it is still there */
     expect(css).toContain(".tdk-tl li:not(:last-child) .tdk-tlm::after");
-    const ring = dockCssRule(".tdk-tlm i {");
-    expect(ring).toContain("width: var(--tdk-ring)");
-    expect(ring).toContain("height: var(--tdk-ring)");
-    /* ⚠️ THE BOX MODEL IS DECLARED, NOT INHERITED — the connector's `top` is arithmetic off it */
-    expect(ring).toContain("box-sizing: border-box");
-    /* three treatments, three different fills — compared to EACH OTHER, so a copy-paste that gave
-       two directions the same colour fails here rather than looking plausible */
-    const fill = (sel: string) => /background: (#[0-9a-f]{6})/i.exec(dockCssRule(sel))?.[1]?.toLowerCase();
-    const out = fill(".tdk-tl li.r-out .tdk-tlm i {");
-    const inn = fill(".tdk-tl li.r-in .tdk-tlm i {");
-    const now = fill(".tdk-tl li.r-now .tdk-tlm i {");
-    expect(new Set([out, inn, now]).size, "two ring states share a fill").toBe(3);
-    /* the current rung is SOLID burgundy — fill and border the same ink */
-    expect(now).toBe("#7c3a2a");
-    expect(dockCssRule(".tdk-tl li.r-now .tdk-tlm i {")).toContain("border-color: #7c3a2a");
   });
 });
 

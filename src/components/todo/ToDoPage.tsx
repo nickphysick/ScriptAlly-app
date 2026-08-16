@@ -80,7 +80,7 @@ import { todoPrefs } from "../../lib/todoPrefs";
    retirement — only the tag NARROWING went with it); `matchesTags` had no reader left. */
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
-import { dockQueue, resolveDocked, timelineRing } from "../../lib/todoDock";
+import { dockQueue, resolveDocked } from "../../lib/todoDock";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
@@ -2304,7 +2304,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       .map((r, i) => ({ r, i, label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }) }))
       .filter((x) => x.label !== null);
     return kept
-      .map((x, n) => {
+      .map((x) => {
         /* ⚠️ `createdAt` IS A FIRESTORE TIMESTAMP ON THESE ROWS, not the ISO string the global feed
            carries — reading it as a string yields "Invalid Date" rather than an error. */
         const raw: any = x.r.createdAt ?? x.r.date;
@@ -2316,10 +2316,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           /* absent where the record is silent — never inferred */
           ...(x.r.via ? { via: String(x.r.via) } : q?.sendMethod ? { via: `via ${String(q.sendMethod).toLowerCase()}` } : {}),
           ...(x.r.note ? { note: String(x.r.note) } : {}),
-          /* ⚠️ §3.5 — THE RING, FROM THE SAME CLASSIFIER `StatusDot` DRAWS. `isLast` is computed
-             against the KEPT rows, not the raw ones: an unlabelled row is not on the timeline, so
-             it cannot be the rung the record stands on. */
-          ...((r) => (r ? { ring: r } : {}))(timelineRing(x.r.resultingStatus, n === kept.length - 1)),
+          /* ⚠️ THE STATUS ITSELF, HANDED TO THE REAL `StatusDot`. It used to be a three-state ring
+             derived here and painted by the card's own CSS; `StatusDot` is the app's one drawing of
+             a query status and is never recreated locally. `resultingStatus ?? type` is the same
+             pair `subcollectionDocToDerivable` reads, so the dot and the derivation agree about
+             which field carries the status.
+             ⚠️ A NUDGE HAS NO STATUS AND TAKES NO DOT — `NUDGE_SENT` is not a status change. */
+          ...((st) => (st ? { status: String(st) } : {}))(x.r.resultingStatus ?? x.r.type),
         } as DockTimelineEvent;
       })
       /* newest last, as the Centre reads it — the bar against the agent's window belongs to the
