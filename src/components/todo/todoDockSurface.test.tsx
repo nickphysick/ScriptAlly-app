@@ -976,7 +976,16 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
     const pane = split.slice(split.indexOf(".tdw-work {"), split.indexOf("}", split.indexOf(".tdw-work {")));
     expect(pane.length, "the .tdw-work slice came out empty").toBeGreaterThan(20);
     expect(pane).toContain("display: flex");
-    expect(dockCssRule(".tdk-body {")).toContain("overflow-y: auto");
+    /* ⚠️ ASSERTED ON THE RENDERED CARD, not on the stylesheet. `EdgeFadeScroll` sets the scroller's
+       overflow INLINE, so a CSS lock reads a rule that no longer carries it and fails a page that
+       works — the mirror image of a CSS lock passing while the cascade does something else. */
+    const html = render();
+    expect(html).toContain("overflow-y:auto");
+    expect(html).toContain('class="tdk-body"');
+    /* ⚠️ AND THE FADES ARE THE SHARED COMPONENT'S — never a second mechanism drawn here. The two
+       overlays are what make the overflow EVIDENT; the scrolling was never the missing half. */
+    expect(html).toContain("linear-gradient(to bottom, var(--paper");
+    expect(html).toContain("linear-gradient(to top, var(--paper");
   });
 });
 

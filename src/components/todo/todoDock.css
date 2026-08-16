@@ -232,7 +232,11 @@
    card lives in a wider pane than ours has. THE LAW WINS OVER THE NUMBERS — "the record column is
    the wide one" — so the doing is bounded lower and the record is wider at every width where two
    columns show. */
-.tdk-body { padding: 18px 24px 6px; flex: 1; overflow-y: auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 0 30px; align-content: start; min-height: 0; }
+/* ⚠️ THE OUTER FRAME TAKES THE HEIGHT; THE INNER DIV SCROLLS. `EdgeFadeScroll` hangs its two
+   gradient overlays off `.tdk-scroll` and sets the scroller's own `flex`/`min-height`/`overflow`
+   inline, so the height chain terminates here rather than on `.tdk-body`. */
+.tdk-scroll { flex: 1; min-height: 0; }
+.tdk-body { padding: 18px 24px 6px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 0 30px; align-content: start; min-height: 0; }
 .tdk-story { min-width: 0; }
 .tdk-work { min-width: 0; border-left: 1px solid var(--hairline); padding-left: 30px; }
 .tdk-storyk {

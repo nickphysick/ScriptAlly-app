@@ -26,6 +26,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy, Check } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
+import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { QueryStatus } from "../../types";
 import { ArtSlot } from "./ArtSlot";
 import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
@@ -269,7 +270,31 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             history and the two things you need at once — what happened, and what to do — could
             not be read together. This inner split stands; the OUTER 30/70 one does not — see the
             head note. */}
-        <div className="tdk-body">
+        {/**
+          * ⚠️ THE OVERFLOW IS NOW EVIDENT, NOT MERELY REACHABLE — and the distinction is the whole
+          * of this fix. The body DID scroll: measured on the deployed page, a wheel over it moved
+          * it the full 111px and 251px of its overflow at two viewport heights. What it had was no
+          * SIGNAL. This browser (and Nick's) draws overlay scrollbars, so a scroller at rest shows
+          * nothing at all, and the last section simply looked cut off by the card's edge.
+          *
+          * ⚠️ IT RIDES THE SHARED `EdgeFadeScroll`, NEVER A FADE OF ITS OWN — the house rule, and
+          * this component already answers the trap that would otherwise bite here: its recompute
+          * runs on EVERY COMMIT, not only on a ResizeObserver, so a timeline that arrives from a
+          * Firestore snapshot AFTER mount turns the fade on. A `ResizeObserver` alone says nothing
+          * when a scroller's CONTENT grows inside it, which is exactly this surface's shape.
+          *
+          * `fade` is the card's own ground token, so the mist is the paper rather than a hex that
+          * has to be kept in step with it.
+          */}
+        <EdgeFadeScroll
+          fade="var(--paper, #fdfaf5)"
+          outerClassName="tdk-scroll"
+          scrollClassName="tdk-body"
+          /* ⚠️ `display` IS PASSED, because the wrapper sets it INLINE and inline beats the class.
+             Without this the two-column grid silently becomes a block and the doing column drops
+             below the record on every card. */
+          scrollStyle={{ display: "grid" }}
+        >
           <aside className="tdk-story" aria-label={isNote ? "Your note" : "Tracking"}>
             {/**
               * ⚠️ THE STAT PAIR IS THE BAND'S TWO FACTS, IN THE QUERY CENTRE'S GRAMMAR (Phase 2).
@@ -555,7 +580,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             </div>
           )}
           </div>{/* .tdk-work */}
-        </div>
+        </EdgeFadeScroll>
 
         {/* ── THE FOOT ─────────────────────────────────────────────────────
             The flow's ink primary, the two quiet verbs, and where you are going next. */}
