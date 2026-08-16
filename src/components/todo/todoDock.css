@@ -20,7 +20,11 @@
   flex-direction: column;
   flex: 1;
   min-height: 0;
-  padding: 14px 24px;
+  /* ⚠️ THE SPLIT'S 22px ALREADY PROVIDES THE TOP AND THE SIDES, so this contributed a SECOND inset
+     on both. Zero top: the position row sits directly under the split's own padding. 10 at the foot
+     because 10 + the split's 22 is 32, which is the Query Centre's measured gap between its lowest
+     panel and the sheet — matched to that number rather than chosen. */
+  padding: 0 24px 10px;
   outline: none;
 }
 
@@ -401,7 +405,9 @@
   align-items: center;
   gap: 10px;
   
-  margin: 0 auto 14px;
+  /* 10, not 14 — the last of the ~25px flagged last pass. The row still reads as chrome ABOUT the
+     card rather than part of it; below about 8 it stops doing that. */
+  margin: 0 auto 10px;
   /* the position line keeps its own height — the card takes the remainder */
   flex: none;
 }
