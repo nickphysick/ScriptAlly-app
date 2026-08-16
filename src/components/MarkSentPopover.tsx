@@ -8,6 +8,17 @@
  *
  * Fast path is just a date — "What you sent" and the reminder are optional and never block
  * save. On save it calls recordMaterialsSent (db.tsx), which performs the single status write.
+ *
+ * ⚠️ ITS COLOURS ARE THE NEUTRAL SCALE NOW, AND THAT REACHES BEYOND QUERY CENTRE. Every other
+ * surface in this pack is page-scoped through `.qc-neutral`; this popover is rendered inline by its
+ * caller rather than through a portal host, and one of those callers is the dashboard's
+ * TimelineComposer. Tailwind arbitrary values cannot be page-scoped, so it reads `--n*` — which are
+ * declared at `:root` and therefore resolve the same everywhere. The popover is consistent, and it
+ * is neutral on the dashboard too. Reported rather than hidden: it is the one place this experiment
+ * is not confined to one page.
+ *
+ * ⚠️ BURGUNDY IS UNTOUCHED. `#7c3a2a` and its hover stay — the accent is the accent. The one pink
+ * that was here (`#e8c8bc`, a button rim) is not an accent, it was furniture.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
@@ -132,21 +143,21 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.14 }}
       style={{ ...style, width: 300, zIndex: 1000 }}
-      className="bg-[#fdfaf5] border border-[#e0d5c8] rounded-xl shadow-[0_8px_24px_rgba(58,28,20,0.16)] p-3.5 select-none"
+      className="bg-[var(--n1)] border border-[var(--n5)] rounded-xl shadow-[0_8px_24px_rgba(58,28,20,0.16)] p-3.5 select-none"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-2.5">
         <div className="flex items-center gap-1.5">
           <Send className="w-3.5 h-3.5 text-[#7c3a2a]" />
-          <span className="text-[12.5px] font-bold text-[#3a1c14]">{TITLES[kind]}</span>
+          <span className="text-[12.5px] font-bold text-[var(--n8)]">{TITLES[kind]}</span>
         </div>
-        <button onClick={onClose} aria-label="Close" className="text-[#c9a89e] hover:text-[#7c3a2a] transition-colors">
+        <button onClick={onClose} aria-label="Close" className="text-[var(--n6)] hover:text-[#7c3a2a] transition-colors">
           <X className="w-3.5 h-3.5" />
         </button>
       </div>
 
       {/* Date sent — required, defaults today */}
-      <label className="block text-[10px] uppercase font-bold text-[#a08070] tracking-wider mb-1">Date sent</label>
+      <label className="block text-[10px] uppercase font-bold text-[var(--n6)] tracking-wider mb-1">Date sent</label>
       <div className="mb-2.5">
         <BrandDatePicker value={sentDate} onChange={setSentDate} placeholder="When you sent it" />
       </div>
@@ -154,15 +165,15 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
       {/* What you sent — optional confirmation chip */}
       {requestedMaterial && (
         <>
-          <label className="block text-[10px] uppercase font-bold text-[#a08070] tracking-wider mb-1">What you sent</label>
+          <label className="block text-[10px] uppercase font-bold text-[var(--n6)] tracking-wider mb-1">What you sent</label>
           <button
             type="button"
             onClick={() => setMaterialConfirmed(v => !v)}
             aria-pressed={materialConfirmed}
             className={`mb-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${
               materialConfirmed
-                ? "bg-[rgba(124,58,42,0.10)] text-[#7c3a2a] border-[#e8c8bc]"
-                : "bg-white text-[#9a8579] border-[#e8e0d8]"
+                ? "bg-[rgba(124,58,42,0.10)] text-[#7c3a2a] border-[var(--n5)]"
+                : "bg-white text-[var(--n6)] border-[var(--n4)]"
             }`}
           >
             {requestedMaterial}
@@ -175,19 +186,19 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
         <button
           type="button"
           onClick={() => setWantReminder(true)}
-          className="flex items-center gap-1.5 text-[11px] text-[#9a8579] hover:text-[#7c3a2a] transition-colors mb-1"
+          className="flex items-center gap-1.5 text-[11px] text-[var(--n6)] hover:text-[#7c3a2a] transition-colors mb-1"
         >
           <Bell className="w-3 h-3" />
           Set a reminder
         </button>
       ) : (
-        <div className="mb-1 p-2 bg-[#fbf6f0] border border-[#ece0d4] rounded-lg">
+        <div className="mb-1 p-2 bg-[var(--n1)] border border-[var(--n4)] rounded-lg">
           <div className="flex items-center justify-between mb-1">
-            <label className="text-[10px] uppercase font-bold text-[#a08070] tracking-wider">Expected reply by</label>
+            <label className="text-[10px] uppercase font-bold text-[var(--n6)] tracking-wider">Expected reply by</label>
             <button
               type="button"
               onClick={() => { setWantReminder(false); expectedEdited.current = false; }}
-              className="text-[10px] text-[#c9a89e] hover:text-[#7c3a2a]"
+              className="text-[10px] text-[var(--n6)] hover:text-[#7c3a2a]"
             >
               Remove
             </button>
@@ -197,7 +208,7 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
             onChange={(v) => { expectedEdited.current = true; setExpectedDate(v); }}
             placeholder="Auto-filled from response time"
           />
-          <p className="text-[10px] text-[#a08070] leading-snug mt-0.5">
+          <p className="text-[10px] text-[var(--n6)] leading-snug mt-0.5">
             We'll remind you to nudge {agentPrimary(agent).split(" ")[0]} if you haven't heard back by then.
           </p>
         </div>
@@ -208,7 +219,7 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
         <button
           type="button"
           onClick={onClose}
-          className="px-3 py-1.5 rounded-full text-[11px] font-medium text-[#9a8579] hover:bg-stone-100 transition-colors"
+          className="px-3 py-1.5 rounded-full text-[11px] font-medium text-[var(--n6)] hover:bg-stone-100 transition-colors"
         >
           Cancel
         </button>
@@ -216,7 +227,7 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
           type="button"
           onClick={handleSave}
           disabled={!sentDate || saving}
-          className="px-4 py-1.5 rounded-full text-[11px] font-bold text-[#fffffd] bg-[#7c3a2a] hover:bg-[#6c3224] disabled:opacity-55 disabled:cursor-not-allowed transition-colors"
+          className="px-4 py-1.5 rounded-full text-[11px] font-bold text-[var(--n0)] bg-[#7c3a2a] hover:bg-[#6c3224] disabled:opacity-55 disabled:cursor-not-allowed transition-colors"
         >
           {saving ? "Saving…" : "Confirm sent"}
         </button>
@@ -226,7 +237,7 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
       <button
         type="button"
         onClick={onRecordResponseInstead}
-        className="mt-2 block w-full text-center text-[10.5px] text-[#9a8579] hover:text-[#7c3a2a] transition-colors"
+        className="mt-2 block w-full text-center text-[10.5px] text-[var(--n6)] hover:text-[#7c3a2a] transition-colors"
       >
         Agent responded instead? Record a response →
       </button>

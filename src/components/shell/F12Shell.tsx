@@ -146,7 +146,7 @@ export const F12Popover: React.FC<{
   }, []);
 
   return createPortal(
-    <div className="t-f12">
+    <div className="t-f12 qc-neutral">
       <div
         ref={ref}
         className="f12-pop"
@@ -199,7 +199,7 @@ export const F12Menu: React.FC<{
   }, [open, onClose]);
   if (!open) return null;
   return createPortal(
-    <div className="t-f12">
+    <div className="t-f12 qc-neutral">
       <div ref={ref} className="f12-menu" style={{ zIndex: 60, ...style }} role="menu" aria-label={ariaLabel}>
         {items.map((it, i) =>
           it === "divider" ? (

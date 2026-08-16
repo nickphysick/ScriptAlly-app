@@ -4762,7 +4762,7 @@ export const Queries: React.FC<{
                 <button type="button" className="qh-mq" aria-label="More actions" aria-haspopup="dialog" onClick={() => setMobileMoreOpen(true)}>⋯</button>
               </div>
               <MobileSheet open={mobileMoreOpen} onClose={() => setMobileMoreOpen(false)} ariaLabel="More query actions">
-                <div className="t-f12 qh-msheet">
+                <div className="t-f12 qc-neutral qh-msheet">
                   {waiting && (
                     <button type="button" className="qh-msrow" onClick={() => { setMobileMoreOpen(false); setIsNudgeOpen(true); }}>
                       Nudge the agent

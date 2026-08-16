@@ -15,6 +15,7 @@
  */
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useLocation } from "react-router-dom";
 import "./toast.css";
 
 export interface ToastOptions {
@@ -135,11 +136,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Clear any pending timers on unmount.
   useEffect(() => () => { timers.current.forEach((h) => window.clearTimeout(h)); }, []);
 
+  /* Query Centre's neutral palette is page-scoped; the toasts it raises should wear it, and no
+     other page's should. `useLocation` re-renders on navigation, so a toast raised while leaving
+     the page cannot keep the palette after it. */
+  const qcPalette = useLocation().pathname.startsWith("/queries");
+
   return (
     <NotifyContext.Provider value={{ showToast, showConfirm }}>
       {children}
       {createPortal(
-        <div className="t-f12">
+        /* ⚠️ THE TOAST HOST IS APP-WIDE, SO THE PALETTE HAS TO BE ROUTE-AWARE. Every other portal in
+           this pack belongs to Query Centre and can take the class unconditionally; this one renders
+           To-do's toasts and the dashboard's too, and painting those with a page-scoped experiment
+           would put the test somewhere nobody asked for it. The pathname is the only thing that
+           distinguishes them, and this provider sits inside the Router. */
+        <div className={`t-f12${qcPalette ? " qc-neutral" : ""}`}>
           <div className="sa-toasts" role="status" aria-live="polite">
             {toasts.map((t) => (
               <div key={t.id} className="sa-toast">

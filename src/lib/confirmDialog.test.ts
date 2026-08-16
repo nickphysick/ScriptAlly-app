@@ -77,9 +77,18 @@ describe("portalled surfaces get the house focus ring by construction", () => {
     expect(f12).not.toContain(".f12-root button:focus-visible {");
   });
 
-  it("...and the portals really do mount into a bare .t-f12 wrapper", () => {
-    // If this ever changes, the ring silently stops applying to portalled UI again.
-    expect(provider).toContain('createPortal(\n        <div className="t-f12">');
+  /**
+   * ⚠️ THE WRAPPER IS NO LONGER BARE, AND THE CLAUSE IS UNCHANGED. The focus ring is scoped to
+   * `.t-f12`, so what this case protects is that the portal still mounts into one — not that the
+   * className is exactly two words. Query Centre's neutral palette adds `qc-neutral` to it on that
+   * route only, which is additive: a `t-f12 qc-neutral` host still matches `.t-f12 button`.
+   *
+   * ⚠️ ASSERTED ON THE CLASS RATHER THAN THE STRING for that reason — the old exact-match would fail
+   * on any future addition while the ring kept working perfectly, which is a lock that cries wolf.
+   */
+  it("...and the portals really do mount into a .t-f12 wrapper", () => {
+    expect(provider, "the portal host lost its theme class — the focus ring stops applying")
+      .toMatch(/createPortal\(\s*(?:\/\*[\s\S]*?\*\/\s*)?<div className=\{?`?t-f12/);
   });
 });
 

@@ -71,7 +71,11 @@ export const TasksPopover: React.FC<{
   };
 
   return createPortal(
-    <div className="t-f12">
+    /* ⚠️ THE PALETTE FOLLOWS THE PORTAL. This host mounts at body level, outside the page, so it
+       inherits nothing — and every component rendering through it belongs to Query Centre alone.
+       The class is applied here rather than matched by a selector on the body, which would
+       hard-code where React chooses to mount. */
+    <div className="t-f12 qc-neutral">
       <div ref={ref} className="f12-tasks" style={{ zIndex: 60, ...style }} role="dialog" aria-label="Tasks">
         <div className="f12-tasks-h">Tasks</div>
         <div className="f12-tasks-body">
