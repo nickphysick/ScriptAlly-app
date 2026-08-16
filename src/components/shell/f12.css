@@ -1256,21 +1256,28 @@
  * It was a filled pink button. It is now the same button as its neighbours — same ground, same
  * rim tone, same label weight, same padding — differing in ONE property.
  *
- * ⚠️ THE DIFFERENCE IS A STATED RELATIONSHIP, NOT A SECOND NUMBER. `calc(var(--btn-rim) * 1.5)`
- * says "half again as heavy as the standard rim" and follows it if the standard ever moves; a
- * literal `1.5px` beside a literal `1px` is two values that agree until one is edited. It is also
- * the whole of the difference — no fill, no colour, no shadow, and the hover is the family's,
- * which is why this rule sets a width and nothing else.
+ * ⚠️ THE DIFFERENCE IS A STATED RELATIONSHIP, NOT A SECOND NUMBER. `calc(var(--btn-rim) * 2)` says
+ * "twice the standard rim" and follows it if the standard ever moves; a literal beside a literal is
+ * two values that agree until one is edited. It is also the whole of the difference — no fill, no
+ * colour, no shadow, and the hover is the family's, which is why this rule sets a width and nothing
+ * else.
  *
- * ⚠️ THE BOX DOES NOT GROW. Preflight puts every element on `border-box`, so the extra half-pixel
- * comes out of the padding rather than off the row's 32px line — the height the alignment gate
- * measures across every control in this row and the header.
+ * ⚠️ IT WAS `* 1.5`, AND THE BROWSER THREW THE HALF AWAY — measured on the deployed build, not
+ * reasoned about. Chrome floors a used border-width to whole DEVICE pixels, so at DPR 1
+ * `calc(1px * 1.5)` computes to `1px` and the primary rendered byte-identical to its neighbours: a
+ * hierarchy signal that existed in the stylesheet and not on the screen. Worse, it would have
+ * SURVIVED on a 2× display and vanished on a 1× one, so whether the page had a primary at all
+ * depended on the monitor. A rim distinction has to be a whole pixel to be a distinction.
+ *
+ * ⚠️ THE BOX DOES NOT GROW. Preflight puts every element on `border-box`, so the extra pixel comes
+ * out of the padding rather than off the row's 32px line — the height the alignment gate measures
+ * across every control in this row and the header.
  *
  * ⚠️ THE PINK PAIR IS NOT DELETED — `--pink-t` is now the LIST's selection fill (§4), which is the
  * trade this pack makes: pink stops meaning "press this" and starts meaning "you are reading this".
  * One colour, one job, the same rule §1 applies to sage.
  */
-.qc-btn-pri { border-width: calc(var(--btn-rim) * 1.5); }
+.qc-btn-pri { border-width: calc(var(--btn-rim) * 2); }
 .qc-btn-danger { color: #a05a45; }
 .qc-btn-danger:hover { background: #fdf2ee; border-color: #e8c3b5; }
 /* ⚠️ DISABLED IS A LIGHTER BORDER AND A MUTED ICON — NEVER ABSENCE, and never a change of BOX.

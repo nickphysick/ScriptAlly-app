@@ -77,8 +77,13 @@ describe("§3 · one button rule, app-wide on this page", () => {
   it("Record response is the family's button, heavier by a stated relationship", () => {
     const r = rule(".qc-btn-pri");
     expect(r, "the primary rule is missing").not.toBe("");
+    /* ⚠️ `* 2`, NOT `* 1.5`, AND THE BROWSER IS WHY. Chrome floors a used border-width to whole
+       DEVICE pixels: at DPR 1 `calc(1px * 1.5)` computed to `1px` on the deployed build and the
+       primary rendered identical to its neighbours — and it would have shown on a 2× display, so
+       whether the page had a primary depended on the monitor. A rim distinction must be a whole
+       pixel. Measured, not reasoned about. */
     expect(declValue(r, "border-width"), "the extra weight is not a relationship to the standard rim")
-      .toBe("calc(var(--btn-rim) * 1.5)");
+      .toBe("calc(var(--btn-rim) * 2)");
     /* the extra weight is in the rim ONLY — no fill, no colour, no shadow, no bolder label */
     for (const prop of ["background", "color", "box-shadow", "font-weight", "padding"]) {
       expect(declValue(r, prop), `the primary took a ${prop} of its own — the weight is the rim alone`).toBe("");
