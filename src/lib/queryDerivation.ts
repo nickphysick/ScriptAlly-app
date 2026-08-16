@@ -17,6 +17,7 @@
  * db.tsx's offline twin). No other code may set `status`.
  */
 import { QueryStatus } from "../types";
+import { STATUS_ORDER } from "./statusOrder";
 
 /**
  * The minimal shape derivation needs. Both stores adapt to it:
@@ -32,12 +33,40 @@ export interface DerivableActivity {
   dateProvisional?: boolean;
 }
 
-/** Statuses that mean the agent acted — receiving any of these is "a response" (max one per query). */
+/**
+ * INCOMING rungs — the agent's own acts. This is the set a response DATE may be taken from, and it
+ * deliberately excludes the writer's outgoing sends: the day you posted a partial is not the day
+ * the agent replied to you.
+ */
 export const AGENT_RESPONSE_STATUSES: ReadonlySet<QueryStatus> = new Set([
   QueryStatus.PARTIAL_REQUESTED,
   QueryStatus.FULL_REQUESTED,
   QueryStatus.REVISE_RESUBMIT,
   QueryStatus.OFFER,
+  QueryStatus.REJECTED,
+]);
+
+/**
+ * Statuses that mean the agent HAS responded, by position in the journey — Partial Requested
+ * onward. Wider than the incoming set on purpose, and this is the fix for a real undercount.
+ *
+ * ⚠️ "PARTIAL SENT" MEANS THE AGENT ASKED. You cannot have sent a partial unless one was requested,
+ * so a query sitting at Partial Sent or Full Sent is a query the agent has replied to — but neither
+ * status was in the incoming set, so `hasAgentResponded` derived FALSE for every one of them. An
+ * imported history is mostly made of exactly those rows, because an import records where a query
+ * got to rather than every step it took, and "Responses received" undercounted the writer's own
+ * history from their first day in the app.
+ *
+ * ⚠️ IT IS DERIVED FROM `STATUS_ORDER`, NOT LISTED. Listing it would be a fourth hand-written copy
+ * of the pipeline (`packageMetrics.REQUEST_OR_BEYOND` and `dashboardStats.LEGACY_RESPONSE_STATUSES`
+ * are the other two), and the whole fault here was two sets that disagreed about the same question.
+ *
+ * ⚠️ SILENCE AND WITHDRAWAL ARE NOT REPLIES. `NO_RESPONSE` is absent because closing a query
+ * yourself after months of quiet is the opposite of hearing back, and `WITHDRAWN` is the writer's
+ * act, not the agent's. Both are terminal and neither belongs to the agent.
+ */
+export const AGENT_HAS_RESPONDED_STATUSES: ReadonlySet<QueryStatus> = new Set<QueryStatus>([
+  ...STATUS_ORDER.slice(STATUS_ORDER.indexOf(QueryStatus.PARTIAL_REQUESTED)),
   QueryStatus.REJECTED,
 ]);
 
@@ -89,10 +118,17 @@ export function deriveStatus(activities: DerivableActivity[]): QueryStatus {
   return ordered.length > 0 ? ordered[ordered.length - 1].status : QueryStatus.QUERIED;
 }
 
-/** Has the agent ever acted on this query? Boolean — structurally capped at one response per query. */
+/**
+ * Has the agent ever acted on this query? Boolean — structurally capped at one response per query.
+ *
+ * ⚠️ IT READS THE WIDER SET, AND THE DATE DERIVATION BELOW READS THE NARROWER ONE. The two questions
+ * are different: "did they reply" is answered by where the query GOT TO, while "when did they
+ * reply" can only be answered by a rung the agent actually sent. Using one set for both is what
+ * either undercounts the boolean or mints a response date out of the writer's own postmark.
+ */
 export function deriveResponseFlags(activities: DerivableActivity[]): { hasAgentResponded: boolean } {
   return {
-    hasAgentResponded: orderedStatusBearing(activities).some((a) => AGENT_RESPONSE_STATUSES.has(a.status)),
+    hasAgentResponded: orderedStatusBearing(activities).some((a) => AGENT_HAS_RESPONDED_STATUSES.has(a.status)),
   };
 }
 

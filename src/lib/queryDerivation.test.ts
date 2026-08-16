@@ -95,10 +95,22 @@ describe('deriveResponseFlags — "one response per query"', () => {
       expect(deriveResponseFlags([at(QueryStatus.QUERIED, 0), at(s, 1)]).hasAgentResponded).toBe(true);
     }
   });
-  it('writer-only actions and closes are NOT a response', () => {
+  /**
+   * ⚠️ AMENDED: "PARTIAL SENT" AND "FULL SENT" NOW COUNT, AND THE OLD ASSERTION WAS THE BUG.
+   * They were listed here as "writer-only actions", which is true of who performed them and false
+   * about what they imply: you cannot have sent a partial unless one was requested. An import
+   * records where a query GOT TO rather than every step it took, so a real imported history is
+   * mostly rows sitting at exactly these two — and every one of them derived "no response",
+   * undercounting the writer's own history from their first day in the app. `packageMetrics` had
+   * already widened around it locally and called it "a separate, known standing fix".
+   */
+  it('a sent partial or full means the agent had already asked — both count', () => {
+    expect(deriveResponseFlags([at(QueryStatus.PARTIAL_SENT, 1)]).hasAgentResponded).toBe(true);
+    expect(deriveResponseFlags([at(QueryStatus.FULL_SENT, 1)]).hasAgentResponded).toBe(true);
+  });
+  it('an unanswered query and the writer-side closes are NOT a response', () => {
     expect(deriveResponseFlags([at(QueryStatus.QUERIED, 0)]).hasAgentResponded).toBe(false);
-    expect(deriveResponseFlags([at(QueryStatus.PARTIAL_SENT, 1)]).hasAgentResponded).toBe(false);
-    expect(deriveResponseFlags([at(QueryStatus.FULL_SENT, 1)]).hasAgentResponded).toBe(false);
+    // Silence is not a reply, and withdrawing is the writer's act rather than the agent's.
     expect(deriveResponseFlags([at(QueryStatus.NO_RESPONSE, 1)]).hasAgentResponded).toBe(false);
     expect(deriveResponseFlags([at(QueryStatus.WITHDRAWN, 1)]).hasAgentResponded).toBe(false);
   });
