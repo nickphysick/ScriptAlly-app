@@ -411,9 +411,11 @@ describe("the flow mounted is the card's own kind", () => {
   it("agent-waiting offers the send, and its ink act NAMES what it records", () => {
     const html = render("a");
     expect(html).toContain("What goes");
-    /* ⚠️ THE ACT'S NAME IS THE BAR'S NOW (Phase 4) — the card states what the record shows and
-       what goes; the command bar names the deed. Both read `rowPrimaryLabel`, one derivation. */
-    expect(page).toContain("rowPrimaryLabel(paneCard, col)");
+    /* ⚠️ THE ACT'S NAME IS THE CARD FOOTER'S AGAIN, and the bar's copy of it is retired. It was
+       moved to the bar on the "one action surface" rule, which was right — and the bar was the
+       wrong surface: the deed belongs on the object it acts on. One derivation still, read once. */
+    expect(page).toContain("primaryLabel={(c) => rowPrimaryLabel(c,");
+    expect(code(page)).not.toContain("rowPrimaryLabel(paneCard, col)");
   });
 
   /**
@@ -485,18 +487,22 @@ describe("⚠️ THE CARD HAS NO ACTION BAR — there is one action surface and 
     }
   });
 
-  it("⚠️ AND THE TWO MOUNTS CANNOT NAME THE DEED DIFFERENTLY — one derivation, read twice", () => {
-    expect(page).toContain("rowPrimaryLabel(paneCard, col)");                 // the bar
+  it("⚠️ THE DEED HAS ONE MOUNT AGAIN — the card's footer, and the bar's copy is gone", () => {
+    /* This case existed to make TWO mounts safe by pinning them to one derivation. The second
+       mount is retired, so it now asserts the simpler and stronger thing: there is one. */
     expect(page).toContain("primaryLabel={(c) => rowPrimaryLabel(c,");        // the card
-    /* the card holds no vocabulary of its own — the label arrives as a prop */
+    expect(code(page)).not.toContain("tdw-cbprim");                           // the bar's is gone
+    /* the card still holds no vocabulary of its own — the label arrives as a prop */
     expect(code(dockSrc)).not.toContain("rowPrimaryLabel");
   });
 
-  it("…and the bar carries every one of them", () => {
+  it("…and the bar carries the SURROUNDING verbs, which is a different job", () => {
+    /* Snooze, Open query, Dismiss and the previous/next pair act on the task's PLACE in the list;
+       the deed acts on the record. The bar keeps the first kind and has given up the second. */
     for (const verb of ["Snooze", "Open query", "Dismiss", "Next task", "Previous task"]) {
       expect(page, verb).toContain(verb);
     }
-    expect(page).toContain("rowPrimaryLabel(paneCard, col)");
+    expect(code(page)).not.toContain("tdw-cbprim");
   });
 });
 

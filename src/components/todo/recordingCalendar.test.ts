@@ -22,6 +22,7 @@ const here = __dirname;
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const todoCss = strip(readFileSync(join(here, "todo.css"), "utf8"));
 const splitCss = strip(readFileSync(join(here, "todoSplit.css"), "utf8"));
+const dockCss = strip(readFileSync(join(here, "todoDock.css"), "utf8"));
 const calSrc = readFileSync(join(here, "RecordingCalendar.tsx"), "utf8");
 
 const rule = (css: string, sel: string): string => {
@@ -38,13 +39,18 @@ describe("⚠️ A BLACK BUTTON ALWAYS MEANS 'THIS ADVANCES' — one grammar, bo
    * a state.
    */
   it("the card's Action is ink-filled with parchment text", () => {
-    const prim = rule(splitCss, ".tdw-cbprim {");
+    /* ⚠️ IT IS `.tdk-prime` NOW — the card FOOTER's primary. This read `.tdw-cbprim`, the command
+       bar's copy, which is retired with the button: the deed belongs on the object it acts on. The
+       grammar this case protects moved with it rather than being dropped. */
+    const prim = rule(dockCss, ".tdk-prime {");
     expect(prim).toContain("background: var(--ink-strong");
     expect(prim).toContain("color: var(--paper");
     /* ⚠️ THE FILL AND THE TEXT MOVE TOGETHER OR NOT AT ALL. The first pass changed only the fill and
        left `color: #241209` — ink on ink, an invisible label, and a rule that still parsed. */
     expect(prim).not.toContain("color: #241209");
     expect(prim).not.toContain("background: var(--pink");
+    /* and the bar's copy is gone from the stylesheet, not merely unrendered */
+    expect(splitCss).not.toContain(".tdw-cbprim");
   });
 
   it("the calendar's confirm is the same button", () => {

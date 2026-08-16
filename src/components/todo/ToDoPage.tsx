@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Funnel, Pin, ChevronRight, ChevronLeft, X, Check, Clock, ArrowUpDown, ExternalLink, Plus } from "lucide-react";
+import { Funnel, Pin, ChevronRight, ChevronLeft, X, Clock, ArrowUpDown, ExternalLink, Plus } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
 import { getPrimaryAction } from "../../lib/queryPrimaryAction";
@@ -1456,11 +1456,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               return (
                 <>
                   <span className="tdw-cblab">This task</span>
-                  {/* the named verb — `rowPrimaryLabel`, the derivation the pane's own act reads */}
-                  <button type="button" className="tdw-cbprim"
-                    onClick={() => dockPrimary(paneCard)}>
-                    <Check size={14} aria-hidden /> {rowPrimaryLabel(paneCard, col)}
-                  </button>
+                  {/**
+                    * ⚠️ THE DEED IS THE CARD FOOTER'S; THE BAR KEEPS THE SURROUNDING VERBS.
+                    * The bar's `Action` was a SECOND mount of one act — the card's footer carries
+                    * the same `rowPrimaryLabel` through the same `dockPrimary`, so this button
+                    * offered nothing the card did not, three inches above the thing it acted on.
+                    *
+                    * ⚠️ NOTHING IS STRANDED, checked rather than assumed. The journey keeps four
+                    * other entrances: the card's footer, the card's own Enter key (`TodoDock` binds
+                    * it to `onPrimary`), the group sweep, and `TodoCalendarPage`, which mounts its
+                    * flow directly rather than through this bar.
+                    *
+                    * Snooze, Open query, Dismiss and the previous/next pair stay — they act on the
+                    * task's PLACE in the list rather than on the record, which is the bar's job.
+                    */}
                   <button type="button" className="tdw-cbbtn" disabled={!offersLeaf("snooze-1")}
                     ref={cbSnooze}
                     onClick={() => setCbDial((v) => !v)}>

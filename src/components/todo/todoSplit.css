@@ -330,30 +330,11 @@
 
 /* ⚠️ INTER 13px WITH A LEADING ICON — not mono all-caps. These are sentences you press, and the
    mono-caps register belongs to labels that state a fact rather than offer an act. */
-/* ⚠️ BLACK MEANS "THIS ADVANCES", AND IT IS THE PAGE'S ONE PRIMARY GRAMMAR. This was pink — the
-   same pink as a chosen segment, a hover and the band of an offer — so the control that OPENS the
-   recording read as one more selected thing. `--ink-strong` fill with parchment text, bottom-right
-   of the footer; the quiet verbs stay on the left with the consequence hint between them. */
-.tdw-cbprim {
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 500;
-  background: var(--ink-strong, #241209);
-  /* ⚠️ PARCHMENT ON INK. This read `color: #241209` — ink text, correct while the fill was pink and
-     invisible the moment it went black. The two move together or not at all. */
-  color: var(--paper, #fdfaf5);
-  border: 1px solid var(--ink-strong, #241209);
-  border-radius: 10px;
-  padding: 9px 17px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tdw-cbprim:hover:not(:disabled) { background: #3a1c14; border-color: #3a1c14; }
-.tdw-cbprim:disabled { opacity: 0.4; cursor: default; }
+/* ⚠️ `.tdw-cbprim` IS DELETED WITH THE BUTTON IT PAINTED. The bar's `Action` was a second mount of
+   the card footer's deed; the black-primary grammar it carried lives on `.tdk-prime` in
+   `todoDock.css`, which is where the act now is. Deleted rather than left as an orphan rule: a
+   styled class with no renderer is one a future surface adopts without anyone deciding it should.
+   Recoverable at 4271f30. */
 
 .tdw-cbbtn {
   cursor: pointer;
