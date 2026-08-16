@@ -10,6 +10,7 @@
  * and that NONE of it reaches the twenty Form 11 call sites that didn't ask for it.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";

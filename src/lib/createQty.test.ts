@@ -5,6 +5,7 @@
  * CREATE-MODE SAMPLE BOUNDS — the fork, and the one rule that makes it safe.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { CREATE_QTY, askPhrase, asksSentence, canStep, effectiveMax, formatQty, parseQty, serialJoin, stepLabel, stepQty } from "./createQty";
 import { MAT_QTY, snapToUnit } from "./agentMaterials";
 import { materialRowsForDraft } from "./queryDraft";
@@ -212,7 +213,7 @@ describe("the stepper survived the move into the chip", () => {
      and then pressing an arrow toggles the chip back off — the control the writer aimed at is
      nested inside the control they did not. */
   it("controls inside an expanded chip do not toggle the chip", () => {
-    const body = pane.slice(pane.indexOf('className="qc-chipbody"'), pane.indexOf("{isOther && on"));
+    const body = sliceBetween(pane, 'className="qc-chipbody"', "{isOther && on");
     expect(body).toContain("onClick={(e) => e.stopPropagation()}");
     expect(body, "the arrows must not bubble").toContain("e.stopPropagation(); setRow(\"sample\"");
     expect(body, "nor the unit menu").toContain("e.stopPropagation(); setUnitMenuOpen");

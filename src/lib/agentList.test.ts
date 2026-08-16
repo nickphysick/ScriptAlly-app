@@ -7,6 +7,7 @@
  * chip counts over the whole list, search reach, and the absence-aware meta line.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -173,7 +174,7 @@ describe("agentList · the door (UNKNOWN is retired — reads OPEN)", () => {
       // what survives the hush: identity + the meta line, which sit ABOVE the body
       expect(card.indexOf('className="agl-meta"')).toBeLessThan(card.indexOf('{!hushed && <div className="agl-body">'));
       // …and what does not: history, wishlist, materials all live inside the body
-      const body = card.slice(card.indexOf('{!hushed && <div className="agl-body">'), card.indexOf('className="agl-stamp"'));
+      const body = sliceBetween(card, '{!hushed && <div className="agl-body">', 'className="agl-stamp"');
       for (const gone of ["Your history", "Wishlist", "Materials wanted"]) expect(body).toContain(gone);
       const css = readFileSync(join(__dirname, "..", "components", "agents", "agentList.css"), "utf8");
       expect(css).toMatch(/\.s-hush \.agl-facef \.agl-acard \{ min-height: 210px; \}/); // never a stub

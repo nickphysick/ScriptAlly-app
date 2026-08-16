@@ -14,6 +14,7 @@
  * quietly stops matching the TypeScript map it was copied from.
  */
 import React from "react";
+import { sliceBetween } from "../../test/sliceBetween";
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
@@ -211,7 +212,7 @@ describe("⚠️ THE TITLE WRAPS AND IS NEVER ELLIPSISED, and the why-line sits 
     const html = render(cols({ todo: [card({ title: "Send your full to Ada Vane", who: "Ada Vane", taskType: "full_requested" })] }));
     expect(html).toContain("Send your full");
     /* the agent is on line two, and NOT on line one */
-    const deed = html.slice(html.indexOf('class="tdg-t"'), html.indexOf('class="tdg-sub"'));
+    const deed = sliceBetween(html, 'class="tdg-t"', 'class="tdg-sub"');
     expect(deed).not.toContain("Ada Vane");
     expect(html).toContain("tdg-sub");
   });
@@ -679,7 +680,7 @@ describe("⚠️ ONE SNOOZE SURFACE, AND FOUR WAYS IN", () => {
     /* the extraction itself stays: the popover is a wrapper around the body, and the body owns
        no popover machinery of its own */
     expect(dialSrc).toContain("export const SnoozeDialBody");
-    const body = dialSrc.slice(dialSrc.indexOf("export const SnoozeDialBody"), dialSrc.indexOf("export const SnoozeDial:"));
+    const body = sliceBetween(dialSrc, "export const SnoozeDialBody", "export const SnoozeDial:");
     expect(body).not.toContain("createPortal");
     expect(body).not.toContain("addEventListener");
   });

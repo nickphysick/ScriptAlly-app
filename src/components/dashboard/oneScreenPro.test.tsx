@@ -5,6 +5,7 @@
  * Locks for the Pro banner (v16 §5).
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -54,7 +55,7 @@ describe("§5 · it appears only where it fits", () => {
   });
 
   it("~132px tall, and pastille-blue only — no burgundy, no sage", () => {
-    const banner = cssRules.slice(cssRules.indexOf(".os-probanner {"), cssRules.indexOf(".os-pimg2 {"));
+    const banner = sliceBetween(cssRules, ".os-probanner {", ".os-pimg2 {");
     expect(banner).toContain("min-height: 132px");
     expect(banner).toContain("border-top: 2px solid #c2cfda");
     expect(banner).not.toContain("#7c3a2a");

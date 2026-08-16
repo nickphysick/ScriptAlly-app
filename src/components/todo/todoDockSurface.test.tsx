@@ -9,6 +9,7 @@
  * WHICH primitive is called, and calling it for real would need the whole db.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
@@ -413,7 +414,7 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(page).toContain("await recordMaterialsSent(markSentWriteArgs(p));");
     expect(page).toContain("const undo = () => undoQueryStatus(q.id, prev, p.targetStatus);");
     /* and it does NOT advance — the writer watches the record change and moves on separately */
-    const commit = page.slice(page.indexOf("async function commitSendFromPane"), page.indexOf("function dockTimeline"));
+    const commit = sliceBetween(page, "async function commitSendFromPane", "function dockTimeline");
     expect(commit).not.toContain("stepQueue");
     expect(commit).not.toContain("setDockKey");
     expect(commit).not.toContain("openFlowCards");
@@ -681,7 +682,7 @@ describe("⚠️ THE ACTION BUTTON NEVER COMPLETES DIRECTLY — it opens the jou
    * `updateUserTask` — asserted in `journeyTakeover.test.ts` under "COMMITTING WRITES ONCE,
    * THROUGH THE PRIMITIVE THAT ALREADY EXISTED", which is where they now live.
    */
-  const fn = page.slice(page.indexOf("function dockPrimary"), page.indexOf("⚠️ `advanceDock` IS RETIRED"));
+  const fn = sliceBetween(page, "function dockPrimary", "⚠️ `advanceDock` IS RETIRED");
 
   it("its whole body is the journey — no write path is reachable from the bar", () => {
     expect(page.indexOf("function dockPrimary"), "dockPrimary is gone or renamed").toBeGreaterThan(-1);
@@ -836,7 +837,7 @@ describe("⚠️ the card is the door — click, Enter, and the menu's Action no
   });
 
   it("click and Enter both call onOpen; the ⋯ trigger stops propagation so the seat never docks", () => {
-    const article = board.slice(board.indexOf("<article"), board.indexOf("</article>"));
+    const article = sliceBetween(board, "<article", "</article>");
     expect(article).toContain("if (!clickIsDrag(e)) onOpen(c)");
     expect(article).toContain('e.key === "Enter" || e.key === " "');
     const seat = article.slice(article.indexOf('className="tbd-more"'));

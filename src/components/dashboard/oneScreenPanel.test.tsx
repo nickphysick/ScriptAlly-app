@@ -10,6 +10,7 @@
  * character, including the order of `os-card os-lift {variant}`.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { readFileSync } from "node:fs";

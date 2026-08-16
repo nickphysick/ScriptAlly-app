@@ -5,6 +5,7 @@
  * ⚠️ THE MANUSCRIPT ARROWS (polish P6) — a shortcut through the list, never the only route.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { stepManuscript } from "./shellSidebar";

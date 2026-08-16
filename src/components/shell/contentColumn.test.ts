@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 

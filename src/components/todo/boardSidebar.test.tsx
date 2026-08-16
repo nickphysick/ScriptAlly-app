@@ -6,6 +6,7 @@
  * §1 — the `.pside` panel).
  */
 import React from "react";
+import { sliceBetween } from "../../test/sliceBetween";
 import { describe, it, expect, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
@@ -84,7 +85,7 @@ describe("⚠️ CLEAR sits beside FILTERS, appears only when something narrows,
     const html = render({ active: "urgent" });
     expect(html).toContain("tds-tagclear");
     // …and it sits in the FILTERS cap, not the TAGS one
-    const filtersCap = html.slice(html.indexOf("Filters"), html.indexOf("Tags"));
+    const filtersCap = sliceBetween(html, "Filters", "Tags");
     expect(filtersCap).toContain("tds-tagclear");
   });
 

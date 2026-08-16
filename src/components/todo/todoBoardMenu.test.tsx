@@ -13,6 +13,7 @@
  * produce — which is exactly the point: the menu is never part of a card's subtree).
  */
 import React from "react";
+import { sliceBetween } from "../../test/sliceBetween";
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
@@ -142,12 +143,12 @@ describe("⚠️ the seat (ref option A) — one ⋯, reserved lane, nothing hov
     expect(css).not.toContain(".tbd-foot {");
     expect(css).toContain(".tbd-foot-note"); // the Done column's midnight note survives
     // exactly one action control inside the card's JSX: the seat
-    const article = board.slice(board.indexOf("<article"), board.indexOf("</article>"));
+    const article = sliceBetween(board, "<article", "</article>");
     expect(article.match(/className="tbd-more"/g)?.length).toBe(1);
   });
 
   it("the trigger stops propagation — opening the menu never opens the card", () => {
-    const article = board.slice(board.indexOf("<article"), board.indexOf("</article>"));
+    const article = sliceBetween(board, "<article", "</article>");
     const seat = article.slice(article.indexOf('className="tbd-more"'));
     expect(seat).toContain("e.stopPropagation()");
   });
@@ -253,7 +254,7 @@ describe("⚠️ per column — Today, Snoozed, Done", () => {
 /* ── the wiring — every leaf routes to an EXISTING primitive ───────────────────────────────── */
 
 describe("⚠️ performCardVerb routes each leaf to the verb that already owns it", () => {
-  const fn = page.slice(page.indexOf("function performCardVerb"), page.indexOf("/** ⚠️ THE ONE ENTRANCE FUNCTION"));
+  const fn = sliceBetween(page, "function performCardVerb", "/** ⚠️ THE ONE ENTRANCE FUNCTION");
 
   it("anchors exist", () => {
     expect(page).toContain("function performCardVerb");

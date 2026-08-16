@@ -12,6 +12,7 @@
  * the contacts on the page fixes both, because there is no longer a state where results are hidden.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 import {
   PICKER_LIMIT, pickerState, pickerCards, queriedCount, replyLine, moveInGrid, matchesQuery,
@@ -117,7 +118,7 @@ describe("the folded all-queried block", () => {
     expect(nameplates([agent("a1"), agent("a2")], [q("a1")]).length, "un-queried contacts are not plates").toBe(1);
     expect(picker).toContain('className="qc-fold"');
     expect(picker, "closed by default").toContain("const [showPlates, setShowPlates] = useState(false);");
-    const cold = picker.slice(picker.indexOf('state === "cold"'), picker.indexOf("const field ="));
+    const cold = sliceBetween(picker, 'state === "cold"', "const field =");
     expect(cold).not.toMatch(/["\s`]qc-fold["\s`]/);
   });
 
@@ -527,7 +528,7 @@ describe("art belongs to the cold start and nowhere else", () => {
   it("exactly one ArtSlot, in the cold branch", () => {
     expect(picker.match(/<ArtSlot/g)?.length ?? 0, "art in a populated state decorates a void")
       .toBe(1);
-    const cold = picker.slice(picker.indexOf('state === "cold"'), picker.indexOf("const field ="));
+    const cold = sliceBetween(picker, 'state === "cold"', "const field =");
     expect(cold).toContain("<ArtSlot");
     expect(cold).toContain("Add your first agent");
   });

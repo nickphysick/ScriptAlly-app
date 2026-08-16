@@ -6,6 +6,7 @@
  * tests that should have caught "OFFER · OFFER" and the ink border on every card.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { QueryStatus, Agent, Query, Manuscript, Task } from "../../types";

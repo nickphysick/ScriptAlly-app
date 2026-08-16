@@ -14,6 +14,7 @@
  * 4. Done cards carry a populated band: ✓ DONE | {completion time}.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Query, Agent, UserTask, TaskFlag, QueryStatus } from "../../types";
@@ -88,7 +89,7 @@ describe("⚠️ an offer's snooze is capped at tomorrow — on EVERY path", () 
        a choke point inside the file about to be rebuilt is a coincidence, not a guarantee. It
        is `clampSnooze` in lib/todoActions now, unit-tested away from any component, and this
        asserts the page reaches it. */
-    const fn = listPage.slice(listPage.indexOf("function snoozeCard"), listPage.indexOf("function snoozeGroup"));
+    const fn = sliceBetween(listPage, "function snoozeCard", "function snoozeGroup");
     expect(fn).toContain("({ days, when } = clampSnooze(c, days, when))");
     expect(fn).not.toContain('c.taskType === "offer_received" && days > 1');
   });

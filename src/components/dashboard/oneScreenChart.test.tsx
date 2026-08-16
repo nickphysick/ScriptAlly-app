@@ -6,6 +6,7 @@
  * behaviour (draw-in, crosshair motion, ResizeObserver) is a browser check, listed in the report.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -127,10 +128,10 @@ describe("the chart's stylesheet", () => {
   });
 
   it("the Form 11 frame: parchment rim 5px/13, burgundy 1px frame radius 9, REAL overflow clip", () => {
-    const tip = cssRules.slice(cssRules.indexOf(".os-tip {"), cssRules.indexOf(".os-tip.show"));
+    const tip = sliceBetween(cssRules, ".os-tip {", ".os-tip.show");
     expect(tip).toContain("border-radius: 13px");
     expect(tip).toContain("padding: 5px");
-    const frame = cssRules.slice(cssRules.indexOf(".os-tip .frame {"), cssRules.indexOf(".os-tip .frame.pinframe"));
+    const frame = sliceBetween(cssRules, ".os-tip .frame {", ".os-tip .frame.pinframe");
     expect(frame).toContain("border: 1px solid #7c3a2a");
     expect(frame).toContain("border-radius: 9px");
     expect(frame).toContain("overflow: hidden");

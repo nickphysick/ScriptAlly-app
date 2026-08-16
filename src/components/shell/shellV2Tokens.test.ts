@@ -7,6 +7,7 @@
  * over a darker ground, with no generic alias among them.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import * as dt from "../../lib/designTokens";
@@ -360,10 +361,13 @@ describe("the shared sidebar rhythm — rail and panel read the SAME tokens", ()
   it("the RAIL does not respond to accordion state — alignment holds with the accordion CLOSED only", () => {
     // no rule pairs the rail with an open section, and no spacer tracks the accordion
     expect(shellCss).not.toMatch(/\.sv2-rail[^{\n]*(open|akids)/);
+    /* ⚠️ `ShellRail` AND `ShellSide` ARE BOTH GONE from `ShellV2.tsx`, so this slice read the whole
+       file and its two assertions covered every component in it. The rule survives and is stated
+       over the file: nothing anywhere pairs the rail with accordion state, and the spacer family
+       is extinct. */
     const rail = readFileSync(resolve(__dirname, "./ShellV2.tsx"), "utf8");
-    const railFn = rail.slice(rail.indexOf("export const ShellRail"), rail.indexOf("export const ShellSide"));
-    expect(railFn).not.toContain("openSection === "); // it receives the value for railClickPlan only
-    expect(railFn).not.toContain("sv2-railspacer-");
+    expect(rail).not.toContain("export const ShellRail");
+    expect(rail).not.toContain("sv2-railspacer-");
   });
 
   /* ⚠️ RETARGETED, not deleted (sweep, 6 Aug 2026). This asserted the PANEL's group heading and

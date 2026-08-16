@@ -8,6 +8,7 @@
  * Nick's in-browser list.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "fs";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
@@ -74,8 +75,11 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
        in lib/todoRoutes, because the name was typed in two files and a re-typed event name is a
        listener that silently never fires. The contract is unchanged; the assertion follows it. */
     expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
-    const filterFn2 = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
-    expect(filterFn2).not.toContain("tdb-setrow");
+    /* ⚠️ `renderFilterSection` IS RETIRED — this slice had been reading the whole file, so the
+       assertion was vacuous. Stated over the whole page instead, which is stronger than the
+       bounded version ever was. */
+    expect(page).not.toContain("function renderFilterSection");
+    expect(page).not.toContain("tdb-setrow");
     // the square-era classes stay extinct — bounded so the polish-P3 colleague's distinct
     // names (tdb-prok2 / tdb-progoP) don't false-trip the ban
     for (const stale of [/tdb-prosq/, /tdb-prok(?!2)/, /tdb-progo(?!P)/]) {
@@ -369,8 +373,9 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
     const hr = rule(".tdb-heroright");
     expect(hr).toContain("flex-direction: column");
     expect(hr).toContain("align-items: center");
-    const right = page.slice(page.indexOf('className={`tdb-heroright'), page.indexOf("// the CTA pair"));
-    const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
+    /* (an unused `right` slice stood here, anchored on a comment that no longer exists — it was
+       assigned and never read, so it asserted nothing even before its anchor died) */
+    const heroFn = sliceBetween(page, "function renderHero", "function renderComposer");
     expect(heroFn).toContain('className="tdb-btnp tdb-herobegin"');
     expect(heroFn).toContain("className={`tdb-revlink${reviewSeen ? \" seen\" : \"\"}`}".replace(/\\/g, ""));
   });
@@ -619,7 +624,7 @@ describe("Final Shape P1 — the hero + the floating search", () => {
   it("THE WORKSPACE SHELL: the hero is title + subtitle left, the CTA pair right (the search moved to the bar)", () => {
     expect(page).toContain('>What’s on your desk?</h1>'); // v7: the crossfade pair (t1/t2)
     expect(rule(".tdb-ask")).toContain("font-size: 33px"); // the workspace shell: the plain-page hero title
-    const hero = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
+    const hero = sliceBetween(page, "function renderHero", "function renderComposer");
     expect(hero).toContain("tdb-herohead"); // the plain-page hero row
     expect(hero).toContain("Begin focused session"); // the CTA pair lives here now
     expect(hero).toContain("Here’s everything on your to-do list."); // the subtitle

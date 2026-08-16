@@ -11,6 +11,7 @@
  * as the only control home. Today's squash was exactly this structure missing from that page.
  */
 import React from "react";
+import { sliceBetween } from "../../test/sliceBetween";
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
@@ -217,7 +218,7 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
   });
 
   it("the RAIL's instruments live in renderRailTools, and nowhere else", () => {
-    const railTools = listPage.slice(listPage.indexOf("function renderRailTools"), listPage.indexOf("function renderList"));
+    const railTools = sliceBetween(listPage, "function renderRailTools", "function renderList");
     /* ⚠️ THE CHIP STRIP FOLDED INTO THE FILTER MENU (corrections, Phase 5), and the standalone
        sort button became an icon beside it. Both are 38px icon buttons to the LEFT of the search,
        which fills the rest of the row. */
@@ -233,8 +234,12 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
     expect(listPage).not.toContain('className="tdb-sortb"');
     /* the search left the page tool row entirely — not duplicated into the rail */
     expect(listPage).not.toContain("tdb-bsearch");
-    const pageTools = listPage.slice(listPage.indexOf("function renderTools"), listPage.indexOf("function renderHero"));
-    expect(pageTools).not.toContain("tdw-search");
+    /* ⚠️ `renderTools` IS RETIRED — the page passes no tool row at all, which the case above
+       already asserts. Slicing it read the whole file, so this had been checking that the string
+       `tdw-search` appeared nowhere on the page — which is false and only passed because the slice
+       was empty, not because it was wrong. Asserted as what is actually true: there is no page
+       tool row to put a search in. */
+    expect(listPage).not.toContain("function renderTools");
   });
 
   it("⚠️ NEITHER BLOCK SCROLLS WITH WHAT IT NARROWS", () => {

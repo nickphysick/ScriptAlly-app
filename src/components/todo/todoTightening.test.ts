@@ -10,6 +10,7 @@
  * Nick's in-browser checklist.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -28,7 +29,7 @@ const rule = (sel: string): string => {
 describe("tightening P1 — the hero on one line + the recessed control strip", () => {
   it("THE HEADER NAMES THE PAGE and carries its one line (amended, corrections fix 3)", () => {
     // tasks-pages P1: the header block is TasksPageLayout's — title + subtitle ride its props
-    const hero = page.slice(page.indexOf("<TasksPageLayout"), page.indexOf("function renderHero"));
+    const hero = sliceBetween(page, "<TasksPageLayout", "function renderHero");
     /* The no-subtitle rule was written for a hero that named nothing. The page is titled for its
        crumb now, and a bare title with no line under it leaves the page unexplained.
 
@@ -59,7 +60,7 @@ describe("tightening P1 — the hero on one line + the recessed control strip", 
   });
 
   it("SECTION ANATOMY: label · mono count · a hairline rule filling the remaining width — one line", () => {
-    const head = page.slice(page.indexOf("export const SectionHead"), page.indexOf("const Lane:"));
+    const head = sliceBetween(page, "export const SectionHead", "const Lane:");
     expect(head).toContain("<h2>{label}</h2>");
     expect(head).toContain('<span className="tdb-cn">{count}</span>');
     expect(head).toContain('<span className="tdb-secrule" aria-hidden />'); // INSIDE the line

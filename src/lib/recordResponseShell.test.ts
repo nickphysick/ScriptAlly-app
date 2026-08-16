@@ -11,6 +11,7 @@
  * focused the composer.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 import { QueryStatus } from "../types";
 import {
@@ -223,19 +224,19 @@ describe("it wears the shared motion, not a second copy", () => {
      cleared. Every arming site branches instead. */
   it("and reduced motion cuts to the final frame at every arming site", () => {
     expect(queries).toContain("setRespEntering(!prefersReducedMotion());");
-    const save = queries.slice(queries.indexOf("const saveResponse = async"), queries.indexOf("/** The picker's inline quick-add"));
+    const save = sliceBetween(queries, "const saveResponse = async", "/** The picker's inline quick-add");
     expect(save).not.toBe("");
     /* ⚠️ AMENDED (§5): the branch now also shows the seal at its final frame before completing
        directly. The reason it must not WAIT is unchanged — `animation: none` fires no
        `animationend`, so a seal-armed exit would strand the sheet open forever. */
     expect(save).toContain("if (prefersReducedMotion()) { setSeal({ kind, thenExit: false }); shutRecord(); recordTriggerRef.current?.focus(); }");
-    const close = queries.slice(queries.indexOf("const closeRecord = ()"), queries.indexOf("const saveResponse = async"));
+    const close = sliceBetween(queries, "const closeRecord = ()", "const saveResponse = async");
     expect(close).toContain("if (prefersReducedMotion()) { shutRecord(); recordTriggerRef.current?.focus(); return; }");
   });
 
   /* Animate on success, never on click: a failed write must not have already shown an exit. */
   it("a failed write leaves the takeover open with its error", () => {
-    const save = queries.slice(queries.indexOf("const saveResponse = async"), queries.indexOf("/** The picker's inline quick-add"));
+    const save = sliceBetween(queries, "const saveResponse = async", "/** The picker's inline quick-add");
     const fail = save.slice(save.indexOf("} catch {"));
     expect(fail).toContain("setRespError(");
     expect(fail, "a failed save must not animate").not.toContain("setRespExiting");
@@ -299,7 +300,7 @@ describe("the write goes through the one path", () => {
   /* ⚠️ `recomputeQuery` REMAINS THE SINGLE WRITER of status, response count, revision round and the
      pipeline dates. This journey appends an activity and derives nothing itself. */
   it("recordQueryResponse, and nothing sets a status here", () => {
-    const save = queries.slice(queries.indexOf("const saveResponse = async"), queries.indexOf("/** The picker's inline quick-add"));
+    const save = sliceBetween(queries, "const saveResponse = async", "/** The picker's inline quick-add");
     expect(save).toContain("await recordQueryResponse(");
     expect(save, "status is derived, never written").not.toContain("status:");
     expect(save, "and the toolbar's old direct writer is not reachable from here")

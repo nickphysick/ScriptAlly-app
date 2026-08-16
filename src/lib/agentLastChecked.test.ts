@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -20,7 +21,7 @@ describe('lastCheckedDate = last verified, not last edited', () => {
     expect(src).toContain(anchor); // anchor before slicing
     const end = 'const saveAgentEdits = (';
     expect(src).toContain(end); // the next provider function — closes the slice
-    const slice = src.slice(src.indexOf(anchor), src.indexOf(end));
+    const slice = sliceBetween(src, anchor, end);
     expect(slice).not.toContain('lastCheckedDate');
   });
 
@@ -30,7 +31,7 @@ describe('lastCheckedDate = last verified, not last edited', () => {
     expect(src).toContain(anchor); // anchor before slicing
     const end = 'const updateAgent = async (';
     expect(src).toContain(end);
-    const slice = src.slice(src.indexOf(anchor), src.indexOf(end));
+    const slice = sliceBetween(src, anchor, end);
     expect(slice).toContain('lastCheckedDate: new Date().toISOString()');
   });
 

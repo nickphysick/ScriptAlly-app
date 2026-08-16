@@ -10,6 +10,7 @@
  * appends instead of restoring, and copy that starts appraising again.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -132,7 +133,7 @@ describe("Phase 3 — validation is presence-only, and there is no red", () => {
   it("says what is needed rather than what went wrong", () => {
     const anchor = "{problem && (";
     expect(src, "the validation note moved — this lock is reading nothing").toContain(anchor);
-    const note = src.slice(src.indexOf(anchor), src.indexOf('<div className="ct-fbot">'));
+    const note = sliceBetween(src, anchor, '<div className="ct-fbot">');
     expect(note).toContain("A title is needed to save this comp.");
     expect(note).not.toMatch(/\b(invalid|required|you must|please|error|failed|cannot)\b/i);
   });

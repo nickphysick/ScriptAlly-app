@@ -7,6 +7,7 @@
  * would rot silently. The motion itself is on the browser-check list.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import {
   ARRIVE_MS,
   BUMP_MS,
@@ -201,7 +202,7 @@ describe("id adoption happens ONLY on a confirmed create", () => {
   });
 
   it("a FAILED create adopts nothing and leaves the draft a draft", () => {
-    const failBlock = list.slice(list.indexOf("if (!created?.success)"), list.indexOf("ID ADOPTION"));
+    const failBlock = sliceBetween(list, "if (!created?.success)", "ID ADOPTION");
     expect(
       failBlock,
       "the failure path now adopts an id — a node would claim an id that does not exist in the database",

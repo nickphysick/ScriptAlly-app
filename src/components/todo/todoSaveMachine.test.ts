@@ -8,6 +8,7 @@
  * locks (the page is auth-gated; jsdom mounts nothing).
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { classifyWriteError, saveErrorCopy, TodoWriteError } from "../../lib/todoWrite";
@@ -42,7 +43,7 @@ describe("save machine P1 — the error classifier (permission vs network, by CO
 
 describe("save machine P1 — the write paths throw a typed, coded error", () => {
   it("addUserTask throws a TodoWriteError classified by code (not handleFirestoreError's message-only throw)", () => {
-    const add = db.slice(db.indexOf("const addUserTask ="), db.indexOf("const updateUserTask ="));
+    const add = sliceBetween(db, "const addUserTask =", "const updateUserTask =");
     expect(add).toContain("throw new TodoWriteError(classifyWriteError(e)");
     expect(add).not.toContain("handleFirestoreError(e, OperationType.WRITE"); // the code-discarding path is gone from create
     // the caller can supply the id so the composer knows it BEFORE the optimistic insert
@@ -51,7 +52,7 @@ describe("save machine P1 — the write paths throw a typed, coded error", () =>
 });
 
 describe("save machine P1 — idle → pending → (saved | failed)", () => {
-  const save = page.slice(page.indexOf("async function saveComposer"), page.indexOf("function renderComposer"));
+  const save = sliceBetween(page, "async function saveComposer", "function renderComposer");
 
   it("PENDING: sets pending, hides the in-flight id, disables the button, locks fields, suppresses Esc", () => {
     expect(save).toContain('setSaveState("pending")');
@@ -80,7 +81,7 @@ describe("save machine P1 — idle → pending → (saved | failed)", () => {
     expect(create).toContain("setPendingSaveId(null); // the settled item may now render");
     // the edit branch honours the same order: its close follows ITS awaited write
     expect(save).toContain("if (composerEdit) {"); // the branch anchor
-    const edit = save.slice(save.indexOf("if (composerEdit) {"), save.indexOf('const id = "task-"'));
+    const edit = sliceBetween(save, "if (composerEdit) {", 'const id = "task-"');
     expect(edit.indexOf("closeComposer();")).toBeGreaterThan(edit.indexOf("await updateUserTask("));
   });
 
@@ -89,7 +90,7 @@ describe("save machine P1 — idle → pending → (saved | failed)", () => {
     expect(save).toContain('setSaveState("failed")');
     // NEITHER branch's failure closes the composer or clears the draft
     for (const branch of [
-      save.slice(save.indexOf("if (composerEdit) {"), save.indexOf('const id = "task-"')),
+      sliceBetween(save, "if (composerEdit) {", 'const id = "task-"'),
       save.slice(save.indexOf('const id = "task-"')),
     ]) {
       expect(branch).toContain("} catch (e) {");
@@ -117,7 +118,7 @@ describe("save machine P1 — idle → pending → (saved | failed)", () => {
 
 describe("save machine P1 — the tick is a write too (no silent no-op)", () => {
   it("ticking a user task complete surfaces a Try-again toast on failure instead of throwing silently", () => {
-    const qd = page.slice(page.indexOf("async function quickDone"), page.indexOf("function forkNotNowGroup"));
+    const qd = sliceBetween(page, "async function quickDone", "function forkNotNowGroup");
     expect(qd).toContain("try {\n        await updateUserTask(c.userTaskId, { done: true, completedAt: nowIso });");
     expect(qd).toContain('flash("Couldn’t mark that done — try again?", { label: "Try again", fn: () => quickDone(c) })');
   });

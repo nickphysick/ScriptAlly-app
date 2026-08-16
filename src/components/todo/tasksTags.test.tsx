@@ -7,6 +7,7 @@
  * tags surviving the note→task conversion.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { TagDef } from "../../types";
@@ -171,7 +172,7 @@ describe("⚠️ The tags sheet: rename, recolour, delete — with usage counts"
 describe("⚠️ tags survive note→task conversion — the date is the door, the tags are the luggage", () => {
   it("the conversion writes ONLY dueDate; the tags field is untouched by construction", () => {
     expect(noteboard).toContain("await updateUserTask(note.id, { dueDate: dateDraft })");
-    const give = noteboard.slice(noteboard.indexOf("const giveDate"), noteboard.indexOf("const deleteNote"));
+    const give = sliceBetween(noteboard, "const giveDate", "const deleteNote");
     expect(give).not.toContain("tags");
   });
 

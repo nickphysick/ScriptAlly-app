@@ -6,6 +6,7 @@
  * design-refs/tasks-states.html, sheets 5 and 7).
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { listKey, worksTheList, focusesSearch, KEY_MAP, ShortcutKey } from "../../lib/taskShortcuts";
@@ -245,7 +246,7 @@ describe("⚠️ ONE TOAST, ONE POSITION, ONE UNDO", () => {
   it("⚠️ PINK IS FOR A REFUSAL AND ONLY FOR A REFUSAL, and it carries no Undo", () => {
     expect(css).toContain(".tdb-toast.warn");
     expect(hook).toContain('setToast({ msg, tone: "warn" });');
-    const warn = hook.slice(hook.indexOf("const warn = useCallback"), hook.indexOf("const dismiss = useCallback"));
+    const warn = sliceBetween(hook, "const warn = useCallback", "const dismiss = useCallback");
     expect(warn, "a refusal has nothing to reverse").not.toContain("action");
     expect(page).toContain('role={toast.tone === "warn" ? "alert" : "status"}');
   });

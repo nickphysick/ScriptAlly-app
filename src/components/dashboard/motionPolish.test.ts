@@ -10,6 +10,7 @@
  * is the property list and the ordering rule that makes the reduced-motion block effective.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 

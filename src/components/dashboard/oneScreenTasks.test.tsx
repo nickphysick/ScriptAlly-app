@@ -5,6 +5,7 @@
  * Locks for the tasks card (spec §5; P4).
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -184,15 +185,15 @@ describe("§5 · the stylesheet", () => {
   });
 
   it("⚠️ the crossfade is ABSOLUTE-in-one-cell — no reflow on hover", () => {
-    const stp = cssRules.slice(cssRules.indexOf(".os-stp {"), cssRules.indexOf(".os-stp.u"));
+    const stp = sliceBetween(cssRules, ".os-stp {", ".os-stp.u");
     expect(stp).toContain("position: absolute");
-    const act = cssRules.slice(cssRules.indexOf(".os-act {"), cssRules.indexOf(".os-trow:hover .os-stp"));
+    const act = sliceBetween(cssRules, ".os-act {", ".os-trow:hover .os-stp");
     expect(act).toContain("position: absolute");
     expect(cssRules).toContain(".os-trow:hover .os-stp, .os-trow:focus-within .os-stp { opacity: 0; }");
   });
 
   it("kind pills are a fixed 20px with centred text", () => {
-    const knd = cssRules.slice(cssRules.indexOf(".os-knd {"), cssRules.indexOf(".os-knd.sg"));
+    const knd = sliceBetween(cssRules, ".os-knd {", ".os-knd.sg");
     expect(knd).toContain("height: 20px");
     expect(knd).toContain("justify-content: center");
   });

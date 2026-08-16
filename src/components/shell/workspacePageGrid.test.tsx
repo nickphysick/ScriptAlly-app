@@ -11,6 +11,7 @@
  * the last one is off it, so any stop between commits leaves a working app.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { readFileSync } from "node:fs";
@@ -373,7 +374,7 @@ describe("the three-row grid — chrome outside the scroller", () => {
       "a second scroll listener appeared — the hems and the header would disagree mid-scroll").toBe(1);
     expect((srcCode.match(/requestAnimationFrame/g) ?? []).length,
       "a second animation frame loop appeared").toBe(1);
-    const evaluate = srcCode.slice(srcCode.indexOf("const evaluate ="), srcCode.indexOf("const onScroll"));
+    const evaluate = sliceBetween(srcCode, "const evaluate =", "const onScroll");
     expect(evaluate, "the evaluate block was not found — the slice below is testing nothing").toContain("setStuck");
     expect(evaluate, "the hems are not written from the same evaluation as the header").toContain("setHem");
     /* ⚠️ EACH HEM IS A STATE. A top fade on an unscrolled page or a bottom fade at the end of the

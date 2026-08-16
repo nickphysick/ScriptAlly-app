@@ -8,6 +8,7 @@
  * this suite guards CONTAINER STRUCTURE and the hero's furniture only.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -119,10 +120,13 @@ describe("settlement P2/P3 — SUPERSEDED by the workspace shell (todo-fix48)", 
     expect(page).toContain("function renderList"); // ⚠️ RETIRED AGAIN: the board → the grouped list (P2)
   });
   it("the CTA pair is in the hero; there is NO CTA in the sidebar", () => {
-    const heroFn = page.slice(page.indexOf("function renderHero"), page.indexOf("function renderFilterSection"));
+    const heroFn = sliceBetween(page, "function renderHero", "function renderComposer");
     expect(heroFn).toContain("tdb-herobegin");
-    const filterFn = page.slice(page.indexOf("function renderFilterSection"), page.indexOf("function renderComposer"));
-    expect(filterFn).not.toContain("tdb-herobegin");
+    /* ⚠️ `renderFilterSection` IS RETIRED, so slicing it read the whole file and this assertion had
+       been vacuous. What it meant — Begin is the hero's and nothing else has a copy — is asserted
+       directly and more strongly: exactly one occurrence, anywhere on the page. */
+    expect(page).not.toContain("function renderFilterSection");
+    expect((page.match(/tdb-herobegin/g) ?? []), "Begin has more than one mount").toHaveLength(1);
     expect(page).not.toContain("tdb-sbpair"); // the sidebar-seated pair retired
   });
   it("the sage header tokens survive; the height is 46px since P2 gave the header its progress pair", () => {

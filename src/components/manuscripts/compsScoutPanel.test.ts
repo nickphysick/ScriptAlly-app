@@ -11,6 +11,7 @@
  * report says so rather than implying it was done.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -111,7 +112,7 @@ describe("the free state shows the shape, never invented books", () => {
    * anyone could mistake for a book.
    */
   it("renders skeleton bars, and no title text, behind the veil", () => {
-    const ghost = src.slice(src.indexOf('className="ghost"'), src.indexOf("lockwrap"));
+    const ghost = sliceBetween(src, 'className="ghost"', "lockwrap");
     expect(ghost).toContain('className="bar');
     /* nothing quoted in the ghost may be prose — only class names and the index numerals */
     expect(ghost).not.toMatch(/\bs\.title\b|\bs\.author\b|suggestions/);
@@ -124,7 +125,7 @@ describe("the free state shows the shape, never invented books", () => {
 
   /** ⚠️ A FREE USER NEVER DISPATCHES — the panel returns before any send control exists. */
   it("gives a free user no send control at all", () => {
-    const free = src.slice(src.indexOf("if (!isPro) {"), src.indexOf("const sent = run"));
+    const free = sliceBetween(src, "if (!isPro) {", "const sent = run");
     expect(free).not.toContain("Send the Scout out");
     expect(free).not.toContain("fetchCompRun");
   });
@@ -141,7 +142,7 @@ describe("the footer claim, and what stands behind it", () => {
    * two different claims.
    */
   it("the row's verified chip is the shared one, naming its catalogue", () => {
-    const row = src.slice(src.indexOf("const ScoutRow"), src.indexOf("type ScoutPhase"));
+    const row = sliceBetween(src, "const ScoutRow", "type ScoutPhase");
     expect(row).toContain('className="ct-chip verified"');
     expect(row).toContain("s.verification.catalogue");
   });

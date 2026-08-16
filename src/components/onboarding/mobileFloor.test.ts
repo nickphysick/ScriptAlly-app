@@ -6,6 +6,7 @@
  * nothing in the funnel BREAKS below 900px. They do not claim any of it is designed for a phone.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";

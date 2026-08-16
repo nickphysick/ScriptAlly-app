@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -33,7 +34,7 @@ describe('status writes: the create seed and the derivation engine only', () => 
     expect(src).toContain(anchor); // anchor before slicing
     const end = 'const updateQueryStatus = async';
     expect(src).toContain(end);
-    const slice = src.slice(src.indexOf(anchor), src.indexOf(end));
+    const slice = sliceBetween(src, anchor, end);
     expect(slice).toMatch(/status:\s*q\.status \|\| QueryStatus\.QUERIED/);
   });
 
@@ -43,7 +44,7 @@ describe('status writes: the create seed and the derivation engine only', () => 
     expect(src).toContain(anchor); // anchor before slicing
     const end = 'const recordMaterialsSent = async';
     expect(src).toContain(end);
-    const slice = src.slice(src.indexOf(anchor), src.indexOf(end));
+    const slice = sliceBetween(src, anchor, end);
     expect(slice).not.toMatch(WRITE_KEY);
   });
 

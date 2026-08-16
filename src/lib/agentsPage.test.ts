@@ -8,6 +8,7 @@
  * stripped Agent.pinned field — Tier 3+4 · Phase 9.)
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 import {
   filterAgents,

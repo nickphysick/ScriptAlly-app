@@ -10,6 +10,7 @@
  *   P1 — the empty Notes section
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { taskDueState, taskSurfaced, SURFACE_LEAD_DAYS } from "../../lib/todoBoard";
@@ -29,7 +30,7 @@ const rule = (sel: string): string => {
 };
 
 describe("notes-and-tasks P1 — the empty Notes section", () => {
-  const emptyFn = page.slice(page.indexOf("function renderNotesEmpty"), page.indexOf("function renderFilterChips"));
+  const emptyFn = sliceBetween(page, "function renderNotesEmpty", "function renderRailTools");
 
   it("the Notes section renders the dashed butter card (frame 1) when it is empty", () => {
     expect(page).toContain("function renderNotesEmpty()");
@@ -87,7 +88,7 @@ describe("notes-and-tasks P1 — the empty Notes section", () => {
 });
 
 describe("notes-and-tasks P2 — the composer + the schema", () => {
-  const comp = page.slice(page.indexOf("function renderComposer"), page.indexOf("function renderNotesEmpty"));
+  const comp = sliceBetween(page, "function renderComposer", "function renderNotesEmpty");
 
   it("the SCHEMA: UserTask gains detail + surfaceOffset; surfaceOffset is an in-app lead, NOT a notification", () => {
     expect(types).toContain('export type SurfaceOffset = "on-day" | "day-before" | "week-before"');
@@ -178,7 +179,7 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
   });
 
   it("save writes the nature: a note = title (+detail); a task = + dueDate + surfaceOffset", () => {
-    const save = page.slice(page.indexOf("async function saveComposer"), page.indexOf("function renderComposer"));
+    const save = sliceBetween(page, "async function saveComposer", "function renderComposer");
     expect(save).toContain("text: composerDraft.trim()");
     expect(save).toContain("detail: composerDetail.trim() || undefined");
     expect(save).toContain("dueDate: isTask ? composerDate : undefined");
@@ -187,8 +188,10 @@ describe("notes-and-tasks P2 — the composer + the schema", () => {
 });
 
 describe("notes-and-tasks P3 — the two natures on the board", () => {
-  const uc = board.slice(board.indexOf("function userCard"), board.indexOf("function orderDoNext"));
-  const rc = page.slice(page.indexOf("function renderUserCard"), page.indexOf("function renderCard"));
+  const uc = sliceBetween(board, "function userCard", "function orderDoNext");
+  /* (a `rc` slice stood here on `function renderUserCard`, which is retired — assigned, never read,
+     and so asserting nothing even before its anchor died. The two natures on the board are covered
+     by `uc` above and by the pure `taskDueState` / `taskSurfaced` cases.) */
 
   it("THE PROMOTION IS DERIVED BY THE CLOCK, not a stored flag — taskDueState is pure over (dueDate, today)", () => {
     // the SAME task promotes as the day arrives — proof the state is a function of `today`, never written
@@ -270,7 +273,7 @@ describe("notes gaps — adding another, and removing one (found in live use)", 
 
 
   it("delete goes through the existing store, undoes by re-creating the SAME id, and fails visibly", () => {
-    const del = page.slice(page.indexOf("async function deleteUserNote"), page.indexOf("const composerCanSave"));
+    const del = sliceBetween(page, "async function deleteUserNote", "const composerCanSave");
     expect(del).toContain("await deleteUserTask(c.userTaskId)"); // the existing write path, no fork
     // P1's no-silent-no-op rule covers delete too
     expect(del).toContain('flash("Couldn’t delete that — try again?", { label: "Try again"');
@@ -340,7 +343,7 @@ describe("notes — the composer fits, and deleting asks first (live-use fixes)"
   });
 
   it("DELETE ASKS FIRST — the ✕ is on the card, so consent is required; the task warns harder", () => {
-    const del = page.slice(page.indexOf("async function deleteUserNote"), page.indexOf("const composerCanSave"));
+    const del = sliceBetween(page, "async function deleteUserNote", "const composerCanSave");
     // the confirm gates the write: nothing is deleted until it resolves true
     expect(del).toContain("const ok = await confirmAsk(");
     expect(del).toContain("if (!ok) return;");

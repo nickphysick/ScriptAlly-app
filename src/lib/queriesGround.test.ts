@@ -12,6 +12,7 @@
  * 1.7/255 — indistinguishable at any size.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");

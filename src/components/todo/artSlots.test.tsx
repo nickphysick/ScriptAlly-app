@@ -10,6 +10,7 @@
  * cheerfully violate in six months.
  */
 import React from "react";
+import { sliceBetween } from "../../test/sliceBetween";
 import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
@@ -116,15 +117,18 @@ describe("⚠️ WHERE ART DOES NOT GO — the two rejections, enforced", () => 
   it("NO ART IN A PAGE HEADER: the shared layout's header block cannot render one", () => {
     /* Every Tasks page's title/subtitle/tool row comes from TasksPageLayout — so a single
        assertion on that component covers all four pages at once. */
+    /* ⚠️ THE LAYOUT HAS NO `<header>` ELEMENT AT ALL — the header block is the shell's
+       `PageHeader`, passed as the grid's `plate`. Slicing for one read the whole file, so the
+       "no art in the header" assertion was really "no art in the component", which the line above
+       already states. Both halves asserted for what they are. */
     expect(layout).not.toContain("ArtSlot");
-    const header = layout.slice(layout.indexOf("<header"), layout.indexOf("</header>"));
-    expect(header).not.toContain("art");
+    expect(layout).not.toContain("<header");
   });
 
   it("NO ART PER CARD: no slot renders inside a board card, a note card or a calendar pip", () => {
-    const article = board.slice(board.indexOf("<article"), board.indexOf("</article>"));
+    const article = sliceBetween(board, "<article", "</article>");
     expect(article).not.toContain("ArtSlot");
-    const noteCard = noteboard.slice(noteboard.indexOf("<article"), noteboard.indexOf("</article>"));
+    const noteCard = sliceBetween(noteboard, "<article", "</article>");
     expect(noteCard).not.toContain("ArtSlot");
     const calendar = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
     expect(calendar).not.toContain("ArtSlot"); // no pip, no cell, nowhere

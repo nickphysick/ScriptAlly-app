@@ -18,6 +18,7 @@
  * crash — it proves code was written, not that it ran. Reserve it for what only source can show.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -109,7 +110,7 @@ describe("⚠️ DECIDE AND FIX RECORD NOTHING, AND SAY SO", () => {
   const anchor = 'function handoffSheet(c: BoardCard, kind: "decide" | "fix") {';
   it("the hand-off journey calls no write path at all", () => {
     expect(flow.indexOf(anchor), "handoffSheet is gone or renamed").toBeGreaterThan(-1);
-    const body = flow.slice(flow.indexOf(anchor), flow.indexOf("function nudgeSheet(c: BoardCard)"));
+    const body = sliceBetween(flow, anchor, "function nudgeSheet(c: BoardCard)");
     expect(body.length, "the handoffSheet slice came out empty").toBeGreaterThan(200);
     /* every write this component can perform, named once */
     for (const w of ["recordMaterialsSent", "logNudge", "updateQueryStatus", "updateUserTask",
@@ -119,7 +120,7 @@ describe("⚠️ DECIDE AND FIX RECORD NOTHING, AND SAY SO", () => {
   });
 
   it("its commit verb navigates, and its hint says nothing is recorded", () => {
-    const body = flow.slice(flow.indexOf(anchor), flow.indexOf("function nudgeSheet(c: BoardCard)"));
+    const body = sliceBetween(flow, anchor, "function nudgeSheet(c: BoardCard)");
     expect(body).toContain('hint: "Nothing is recorded here."');
     expect(body).toContain("onCommit: () => requestExit(");
     expect(body).toContain("onNavigate(");
@@ -394,7 +395,7 @@ describe("⚠️ COMMITTING WRITES ONCE, THROUGH THE PRIMITIVE THAT ALREADY EXIS
   const slice = (from: string, to: string) => {
     expect(flow.indexOf(from), `anchor missing: ${from}`).toBeGreaterThan(-1);
     expect(flow.indexOf(to), `anchor missing: ${to}`).toBeGreaterThan(-1);
-    const body = flow.slice(flow.indexOf(from), flow.indexOf(to));
+    const body = sliceBetween(flow, from, to);
     expect(body.length, `the slice ${from} → ${to} came out empty`).toBeGreaterThan(200);
     return body;
   };

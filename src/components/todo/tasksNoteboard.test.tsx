@@ -7,6 +7,7 @@
  * the tag filter and the column-reading toggle. Render smokes live in todoPageSmoke.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { UserTask } from "../../types";
@@ -116,7 +117,7 @@ describe("⚠️ delete asks first and holds the LONG way back", () => {
 
 describe("the tool row: search · #All ▾ · the toggle · the pink Pin", () => {
   it("the tag filter lives in the TOOL ROW (the page's only filter dimension) and reads the user's tags", () => {
-    const tools = page.slice(page.indexOf("tools={"), page.indexOf("/* ⚠️ NO sidebar prop"));
+    const tools = sliceBetween(page, "tools={", "/* ⚠️ NO sidebar prop");
     expect(tools).toContain('#{tagSel ? tagLabel(tagSel) : "All"}');
     expect(page).toContain("currentUser?.tags ?? []");
     expect(page).toContain("(n.tags ?? []).includes(tagSel)");

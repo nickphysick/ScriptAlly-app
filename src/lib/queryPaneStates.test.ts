@@ -10,6 +10,7 @@
  * it gets a quiet note and a way back. Confusing the two is the classic empty-state mistake.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 
 const queries = readFileSync(new URL("../components/Queries.tsx", import.meta.url), "utf8");

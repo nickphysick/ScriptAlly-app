@@ -6,6 +6,7 @@
  * lockable here is the feed derivation, the structure, and the CSS mechanics the motion rests on.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -200,7 +201,7 @@ describe("§6 · the collapse mechanics in CSS", () => {
   });
 
   it("⚠️ the activity panel's own height is NEVER animated — flex does the work", () => {
-    const actv = cssRules.slice(cssRules.indexOf(".os-actv {"), cssRules.indexOf(".os-ahead {"));
+    const actv = sliceBetween(cssRules, ".os-actv {", ".os-ahead {");
     expect(actv).toContain("flex: 1");
     expect(actv).not.toContain("transition: height");
     expect(actv).not.toContain("max-height");

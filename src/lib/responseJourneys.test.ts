@@ -10,6 +10,7 @@
  * takes the writer's work without telling them.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 import { QueryStatus } from "../types";
 import {
@@ -197,7 +198,7 @@ describe("the nudge resolves itself, so nothing resolves it", () => {
 
   it("and no resolver was built for a task that deletes itself", () => {
     const queries = read("../components/Queries.tsx");
-    const save = queries.slice(queries.indexOf("const saveResponse = async"), queries.indexOf("/** The picker's inline quick-add"));
+    const save = sliceBetween(queries, "const saveResponse = async", "/** The picker's inline quick-add");
     expect(save).not.toBe("");
     for (const w of ["dismissTask", "resolveTaskFlag", "nudge_overdue"]) {
       expect(save, `${w} here would be machinery pretending to do work`).not.toContain(w);

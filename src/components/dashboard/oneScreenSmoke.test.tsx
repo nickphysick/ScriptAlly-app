@@ -6,6 +6,7 @@
  * Whole-string assertions; CSS asserted against RULES with comments stripped (the tombstone trap).
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -305,7 +306,7 @@ describe("§9 · first-run states", () => {
     const html = render({ queries: [], manuscripts: [], agents: [], activeManuscript: null });
     expect(html).toContain(">Day one<");
     // the pill row holds ONLY Day one — no tenure, no achievement
-    expect(html.slice(html.indexOf("os-pills"), html.indexOf("os-counters"))).not.toContain("Querying since");
+    expect(sliceBetween(html, "os-pills", "os-counters")).not.toContain("Querying since");
     expect(html).toContain("Every query you send and every reply that comes back will be charted here.");
     expect(html).toContain("Send your first query");
     /* ⚠️ the header's day-one line folded into the shared empty state (v16 §4) — the "yet" it

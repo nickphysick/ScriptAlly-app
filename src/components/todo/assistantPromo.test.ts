@@ -8,6 +8,7 @@
  * honesty guarantees (no writes, no price), the docked TODO for the real free-run mechanic.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -22,7 +23,7 @@ const rule = (sel: string): string => {
 };
 
 describe("briefing-slot P2 — THE ASSISTANT BAND (supersedes the Pro strip)", () => {
-  const band = promo.slice(promo.indexOf("export const AssistantBand"), promo.indexOf("export const AssistantModal"));
+  const band = sliceBetween(promo, "export const AssistantBand", "export const AssistantModal");
   it("the component IS the band: slate PRO pill, Playfair title, one derived line, slate button", () => {
     expect(band).toContain('<div className="tdb-asst">');
     expect(band).toContain('<span className="tdb-asstpill">');

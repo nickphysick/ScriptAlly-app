@@ -7,6 +7,7 @@
  * mechanism and the wiring — asserted at source where a portal cannot render in node.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { TOUR_BREAKPOINT, TOUR_STEPS } from "./OneScreenTour";
@@ -35,7 +36,7 @@ describe("§12 · the six steps, copy verbatim from the ref", () => {
 describe("§12 · the spotlight mechanism", () => {
   it("⚠️ the scrim IS the hole's 9999px box-shadow — never a separate overlay div", () => {
     expect(cssRules).toContain("box-shadow: 0 0 0 9999px rgba(43, 33, 24, 0.46)");
-    const hole = cssRules.slice(cssRules.indexOf(".os-tourhole {"), cssRules.indexOf(".os-tourcard {"));
+    const hole = sliceBetween(cssRules, ".os-tourhole {", ".os-tourcard {");
     expect(hole).toContain("pointer-events: none");
     expect(hole).toContain("border-radius: 16px");
     expect(hole).toContain("transition: all 0.45s");

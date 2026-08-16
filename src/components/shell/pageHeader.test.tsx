@@ -6,6 +6,7 @@
  * jsdom limits noted in the pack).
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import React from "react";

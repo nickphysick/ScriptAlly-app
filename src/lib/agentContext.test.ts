@@ -12,6 +12,7 @@
  * shadow, Inter values, and a caption bar saying what the column is for.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 import {
   panelHeader, statCells, noReplyPolicy, agentHistory, historyLine, seekingChips, agentAsks,
@@ -227,7 +228,7 @@ describe("the reference panel reads as marginalia, not as a second card", () => 
   /* Tokens in the THEME scope, never the base sheet — that is what keeps Bold and Editorial out
      of it without a single override of their own. */
   it("the tokens live under .t-capp, and the base sheet holds none of them", () => {
-    const capp = index.slice(index.indexOf(".t-capp {"), index.indexOf("--bd: #d8cebf"));
+    const capp = sliceBetween(index, ".t-capp {", "--bd: #d8cebf");
     expect(capp).toContain("--qc-ref-rim: 1px dashed rgba(124, 58, 42, 0.28)");
     expect(capp).toContain("--qc-ref-rule:");
     expect(capp).toContain("--qc-ref-plate:");

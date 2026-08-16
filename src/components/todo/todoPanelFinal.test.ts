@@ -10,6 +10,7 @@
  * nothing); pixels are Nick's in-browser checklist.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -42,7 +43,7 @@ describe("the ASSISTANT BAND — the page's closing note (briefing-slot P2)", ()
        taking height from a scroll zone that was already too short — and because its counts are in
        the wrong unit (see assistantPromo.test.ts). */
     expect(page).not.toContain("<AssistantBand");
-    const band = promo.slice(promo.indexOf("export const AssistantBand"), promo.indexOf("export const AssistantModal"));
+    const band = sliceBetween(promo, "export const AssistantBand", "export const AssistantModal");
     expect(band).toContain("{hkCount} of your {totalCount} tasks could run in the background whilst you write.");
     expect(band).toContain("onClick={onPreview}>Meet the assistant");
   });
@@ -60,7 +61,7 @@ describe("the ASSISTANT BAND — the page's closing note (briefing-slot P2)", ()
 describe("the To-do PAGE HEADER — it names the page, and carries ONE action", () => {
   /* tasks-pages P1: the header block is TasksPageLayout's; the page's tools live in renderTools.
      The slice spans the layout mount through the tools so title + controls stay covered. */
-  const hero = page.slice(page.indexOf("<TasksPageLayout"), page.indexOf("function renderHero"));
+  const hero = sliceBetween(page, "<TasksPageLayout", "function renderHero");
 
   it("titles itself 'To-do list' — the same words as the breadcrumb", () => {
     /* "What's on your desk?" named nothing and disagreed with the crumb, which reads "To-do
