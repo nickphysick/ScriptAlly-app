@@ -691,3 +691,127 @@
   .mk-legal { padding: 36px 26px 6px; }
   .mk-legal h1 { font-size: 30px; }
 }
+
+/* ══════════════ Shared footer (every public page) ══════════════
+   Supersedes the single-row `.mk-foot` layout that Landing, Pricing and the legal pages each drew
+   their own copy of. `.mk-foot` keeps its name and its outer padding; what changed is what sits
+   inside it. Every value below is a var() or a neutral already used in this file. */
+.mk-foot { display: block; }
+.mk-footgrid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 30px; align-items: start;
+  padding-bottom: 26px; border-bottom: 1px solid var(--mk-hair);
+}
+.mk-footbrand .mk-brand { margin-right: 0; }
+.mk-foottag {
+  font-size: 12.5px; font-weight: 300; line-height: 1.65; color: var(--mk-muted);
+  margin-top: 10px; max-width: 300px;
+}
+.mk-footcol h4 {
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mk-label); font-weight: 500; margin-bottom: 11px;
+}
+.mk-footcol button {
+  display: block; background: none; border: none; padding: 0 0 8px; cursor: pointer;
+  font-family: inherit; font-size: 13px; color: var(--mk-ink); text-align: left;
+}
+.mk-footcol button:hover { color: var(--mk-burg); }
+.mk-footbase {
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 18px;
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--mk-label);
+}
+
+/* ══════════════ Document shell (privacy, terms) ══════════════ */
+.mk-docplane { max-width: 860px; margin: 0 auto; padding: 44px 56px 10px; width: 100%; }
+
+/* The ribbon reads as a notice, not as body copy — the reader must not mistake a working draft for
+   finished policy. Same reasoning as the `.mk-legalnotice` it replaces. */
+.mk-draftribbon {
+  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px;
+  padding: 14px 18px; border-radius: 12px;
+  background: var(--mk-parch); border: 1px solid var(--mk-bd);
+}
+.mk-drtag {
+  flex: none; font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--mk-burg); font-weight: 500;
+  border: 1px solid rgba(124, 58, 42, 0.28); border-radius: 999px; padding: 5px 10px;
+}
+.mk-draftribbon p { font-size: 12.5px; font-weight: 300; line-height: 1.6; color: var(--mk-muted); }
+
+.mk-doccard {
+  background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
+}
+.mk-docband {
+  display: flex; align-items: center; gap: 16px;
+  padding: 26px 34px; background: var(--mk-parch); border-bottom: 1px solid var(--mk-hair);
+}
+.mk-docplate {
+  flex: none; width: 44px; height: 44px; border-radius: 12px;
+  display: grid; place-items: center;
+  background: var(--mk-centre); border: 1px solid var(--mk-bd);
+}
+.mk-docplate svg { width: 22px; height: 22px; fill: none; stroke: var(--mk-burg); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mk-doceyebrow {
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--mk-label);
+}
+.mk-doctitle {
+  font-family: "Playfair Display", Georgia, serif; font-size: 30px; font-weight: 500;
+  line-height: 1.15; color: var(--mk-head); margin-top: 6px;
+}
+.mk-docmeta {
+  margin-left: auto; align-self: flex-start; text-align: right;
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--mk-label);
+}
+
+.mk-docbody { padding: 30px 34px 36px; }
+.mk-doclede {
+  font-family: "Playfair Display", Georgia, serif; font-size: 17px; font-style: italic;
+  font-weight: 400; line-height: 1.6; color: var(--mk-head);
+  padding-bottom: 22px; border-bottom: 1px solid var(--mk-hair);
+}
+.mk-docsection { margin-top: 28px; }
+.mk-seclabel {
+  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
+  color: var(--mk-label);
+}
+.mk-sectitle {
+  font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 500;
+  color: var(--mk-head); margin-top: 4px;
+}
+.mk-docsection p { font-size: 14px; font-weight: 300; line-height: 1.75; color: #5a4a40; margin-top: 10px; }
+.mk-docsection ul { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.mk-docsection li {
+  position: relative; padding-left: 20px; font-size: 14px; font-weight: 300; line-height: 1.7; color: #5a4a40;
+}
+.mk-docsection li::before {
+  content: ""; position: absolute; left: 2px; top: 10px; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--mk-sage); border: 1px solid var(--mk-sage-t);
+}
+.mk-docsection strong { color: var(--mk-ink); font-weight: 500; }
+.mk-doclink {
+  background: none; border: none; padding: 0; cursor: pointer; font: inherit;
+  color: var(--mk-burg); text-decoration: underline; text-underline-offset: 2px;
+}
+.mk-doclink:hover { color: var(--mk-head); }
+.mk-docsection a { color: var(--mk-burg); text-decoration: underline; text-underline-offset: 2px; }
+
+/* A pulled-out clause — the sentence a reader should not be able to skim past. */
+.mk-callout {
+  display: flex; gap: 14px; margin-top: 16px; padding: 15px 18px;
+  background: var(--mk-parch); border: 1px solid var(--mk-bd); border-radius: 12px;
+}
+.mk-corule { flex: none; width: 3px; border-radius: 2px; background: var(--mk-burg); opacity: .55; }
+.mk-callout p { margin-top: 0; font-size: 13.5px; }
+
+@media (max-width: 760px) {
+  .mk-footgrid { grid-template-columns: 1fr 1fr; gap: 24px; }
+  .mk-docplane { padding: 30px 22px 6px; }
+  .mk-docband { padding: 20px 22px; flex-wrap: wrap; }
+  .mk-doctitle { font-size: 25px; }
+  .mk-docmeta { margin-left: 0; width: 100%; text-align: left; }
+  .mk-docbody { padding: 24px 22px 30px; }
+}

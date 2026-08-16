@@ -18,6 +18,7 @@
 
 import React, { useEffect } from "react";
 import { PRICING_DOCUMENT_TITLE, PRICING_H1, PRICING_SUB, PRICING_TIERS, PRICING_FOOTNOTE } from "./landingCopy";
+import { MarketingFooter } from "./MarketingFooter";
 
 export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
   useEffect(() => {
@@ -70,17 +71,7 @@ export const PricingPage: React.FC<{ onNavigate: (tab: string, subPageName?: str
 
       <p className="mk-pricefoot">{PRICING_FOOTNOTE}</p>
 
-      <footer className="mk-foot">
-        <div className="mk-brand">
-          <span className="mk-monogram">S</span>
-          <span className="mk-wordmark">ScriptAlly</span>
-        </div>
-        <div className="mk-footlinks">
-          <button type="button" onClick={() => onNavigate("landing")}>Home</button>
-          <button type="button" onClick={() => onNavigate("privacy")}>Privacy</button>
-          <button type="button" onClick={() => onNavigate("terms")}>Terms</button>
-        </div>
-      </footer>
+      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };

@@ -18,6 +18,7 @@ import React, { useEffect } from "react";
 import { Hero } from "./Hero";
 import { FeatureRows } from "./FeatureRows";
 import { CtaBand } from "./CtaBand";
+import { MarketingFooter } from "./MarketingFooter";
 import { DOCUMENT_TITLE, FeatureRow } from "./landingCopy";
 
 const openSignup = () => { window.location.hash = "#/signup"; };
@@ -47,20 +48,11 @@ export const Landing: React.FC<{ onNavigate: (tab: string, subPageName?: string)
       <Hero onStart={openSignup} onPricing={() => onNavigate("pricing")} />
       <FeatureRows onStart={openSignup} onRowLink={onRowLink} />
       <CtaBand onStart={openSignup} />
-      <footer className="mk-foot">
-        <div className="mk-brand">
-          <span className="mk-monogram">S</span>
-          <span className="mk-wordmark">ScriptAlly</span>
-        </div>
-        <div className="mk-footlinks">
-          <button type="button" onClick={() => onNavigate("pricing")}>Pricing</button>
-          {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist —
-              which is a worse answer than an unfinished page, because a reader cannot tell the
-              difference between "no policy yet" and "the link is broken". */}
-          <button type="button" onClick={() => onNavigate("privacy")}>Privacy</button>
-          <button type="button" onClick={() => onNavigate("terms")}>Terms</button>
-        </div>
-      </footer>
+      {/* ⚠️ LINKS, NOT SPANS. These were inert text for as long as the pages did not exist — which
+          is a worse answer than an unfinished page, because a reader cannot tell the difference
+          between "no policy yet" and "the link is broken". The footer is now shared, so a page
+          added to the site is reachable from every other page by construction. */}
+      <MarketingFooter onNavigate={onNavigate} />
     </div>
   );
 };
