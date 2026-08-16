@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ScriptAlly — no command bar</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fdfaf5;--page:#fdfbf8;--burg:#7c3a2a;--ink:#3a1c14;--ink-strong:#241209;
+  --label:#9c8878;--hair:#e9e0d5;--hair-soft:#f0e8dd;--field-b:#e0d5c8;
+  --sage-a:#dce0d9;--sage-b:#d0d6cc;--sage:#8a9e88;--sage-txt:#5a6e58;
+  --pink:#f5e2da;--pink-b:#e8c8bc;--pink-h:#efd5ca;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;background:#f2ede7;color:var(--ink);overflow:hidden;}
+.main{height:100vh;padding:14px 16px 0;display:flex;flex-direction:column;}
+.sheet{flex:1;min-height:0;background:var(--page);border:1px solid var(--hair);border-radius:16px 16px 0 0;
+  display:flex;flex-direction:column;overflow:hidden;}
+.plate{padding:13px 24px;flex-shrink:0;background:#f4efe8;border-bottom:1px solid var(--hair);}
+.plate span{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#6a5a50;}
+
+/* the whole page is now list + pane. no command bar. */
+.split{display:grid;grid-template-columns:500px minmax(0,1fr);gap:16px;flex:1;min-height:0;padding:14px 20px 12px;}
+
+/* ---- list ---- */
+.rail{display:flex;flex-direction:column;min-height:0;border:1px solid var(--hair);border-radius:14px;}
+.tools{padding:11px 12px;flex-shrink:0;border-bottom:1px solid var(--hair-soft);display:flex;gap:7px;}
+.ic{width:36px;height:36px;flex-shrink:0;border-radius:10px;border:1px solid var(--field-b);background:transparent;
+  color:#8a7666;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.ic:hover{border-color:#d8c8b8;color:var(--burg);background:rgba(255,255,255,.6);}
+.ic svg{width:15px;height:15px;}
+.ic.add{color:var(--burg);border-color:var(--pink-b);background:var(--pink);}
+.ic.add:hover{background:var(--pink-h);}
+.search{flex:1;display:flex;align-items:center;gap:9px;border:1px solid var(--field-b);border-radius:10px;padding:8px 12px;}
+.search svg{color:#b3a496;flex-shrink:0;width:14px;height:14px;}
+.search input{border:none;outline:none;background:none;font-size:13px;color:var(--ink);width:100%;}
+.search input::placeholder{color:#c8b8a8;}
+.scroll{overflow-y:auto;min-height:0;flex:1;padding:2px 10px 12px 12px;}
+.scroll::-webkit-scrollbar{width:8px;}
+.scroll::-webkit-scrollbar-thumb{background:#e8ddd0;border-radius:999px;border:2px solid var(--page);}
+.foot{flex-shrink:0;border-top:1px solid var(--hair-soft);padding:9px 14px;display:flex;justify-content:space-between;align-items:baseline;}
+.foot .l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#b3a496;}
+.foot .l b{color:#6a5a50;font-weight:500;}
+.foot .r{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--burg);cursor:pointer;}
+
+.gband{display:flex;align-items:center;gap:9px;padding:6px 11px;border-radius:9px;margin:12px 2px 5px;border:1px solid var(--gbd);background:var(--gbg);}
+.gband i{width:6px;height:6px;border-radius:50%;background:var(--gfg);opacity:.65;}
+.gband h2{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--gfg);}
+.gband span{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--gfg);opacity:.6;}
+.g-u{--gbg:#fbeee7;--gbd:#f2dccf;--gfg:#a05a42;}
+.g-h{--gbg:#eef1ec;--gbd:#dfe5dc;--gfg:#5a6e58;}
+
+.row{display:grid;grid-template-columns:17px 62px minmax(0,1fr) 96px;gap:10px;align-items:center;
+  padding:9px 8px;border-radius:11px;cursor:pointer;border:1px solid transparent;}
+.row:hover{background:rgba(255,255,255,.7);}
+.row.on{background:#faf5ee;border-color:#efe4d5;}
+.cb{width:17px;height:17px;border-radius:5px;border:1.5px solid #d5c8ba;background:var(--page);}
+.pill{border:1px solid var(--bd);background:var(--bg);color:var(--fg);font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;border-radius:6px;padding:4px 0;text-align:center;}
+.p-send{--bg:#fbeee7;--bd:#f2dccf;--fg:#a05a42;}
+.p-decide{--bg:#f6e3da;--bd:#e8c8bc;--fg:#7c3a2a;}
+.p-close{--bg:#eef1ec;--bd:#dfe5dc;--fg:#5a6e58;}
+.deed{font-size:13.5px;font-weight:600;color:var(--ink-strong);line-height:1.3;}
+.who{font-size:11.5px;color:#8a7666;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fig{text-align:right;}
+.fig .k{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--kf);}
+.fig .v{margin-top:1px;line-height:1;white-space:nowrap;}
+.fig .v b{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;color:var(--ink-strong);}
+.fig .v b.hot{color:var(--burg);}
+.fig .v i{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#b3a496;font-style:normal;margin-left:3px;}
+.k-you{--kf:#a05a42;}.k-them{--kf:#5a6e58;}.k-none{--kf:#b3a496;}
+
+/* ---- pane ---- */
+.pane{display:flex;flex-direction:column;min-height:0;}
+.phead{display:flex;align-items:center;gap:9px;padding:0 2px 9px;flex-shrink:0;}
+.phead .pos{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#a89684;}
+.phead .sp{flex:1;}
+.nav{width:28px;height:28px;border-radius:9px;border:1px solid var(--field-b);background:transparent;color:var(--burg);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.nav:hover{background:var(--pink);border-color:#d8a89a;}
+.nav svg{width:12px;height:12px;}
+
+.card{flex:1;min-height:0;background:var(--paper);border-radius:14px;position:relative;display:flex;flex-direction:column;
+  box-shadow:0 1px 2px rgba(58,28,20,.05),0 10px 30px rgba(58,28,20,.07);}
+.card::before{content:'';position:absolute;inset:6px;border:1px solid rgba(124,58,42,.28);border-radius:10px;pointer-events:none;z-index:5;}
+.band{background:linear-gradient(135deg,var(--sage-a),var(--sage-b));margin:6px 6px 0;border-radius:8px 8px 0 0;
+  padding:13px 20px 12px;display:flex;align-items:flex-start;gap:11px;position:relative;overflow:hidden;flex-shrink:0;}
+.band::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:rgba(90,110,88,.2);}
+.motif{position:absolute;right:62px;top:50%;transform:translateY(-50%);opacity:.85;z-index:1;pointer-events:none;}
+.av{width:37px;height:37px;border-radius:50%;background:var(--paper);border:1px solid rgba(124,58,42,.25);
+  display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13.5px;color:var(--burg);flex-shrink:0;z-index:2;}
+.idb{min-width:0;z-index:2;}
+.pre{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--sage-txt);}
+.nm{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:#2e3a2c;line-height:1.15;}
+.agy{font-size:11px;color:#6a7e68;margin-top:1px;}
+.bf{margin-left:auto;text-align:right;padding-right:96px;z-index:2;flex-shrink:0;}
+.bf .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--sage-txt);opacity:.85;}
+.bf .v{font-family:'Playfair Display',serif;font-size:15.5px;color:#2e3a2c;margin-top:2px;}
+.x{position:absolute;right:14px;top:12px;width:20px;height:20px;border:none;background:none;color:var(--sage-txt);cursor:pointer;z-index:4;opacity:.7;}
+.x svg{width:13px;height:13px;}
+
+.body{flex:1;min-height:0;overflow-y:auto;margin:0 6px;padding:14px 20px 8px;}
+.body::-webkit-scrollbar{width:8px;}
+.body::-webkit-scrollbar-thumb{background:#e2d6c8;border-radius:999px;border:2px solid var(--paper);}
+.slab{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--label);margin:0 0 9px;}
+.sect{padding-bottom:15px;}
+.sect+.sect{border-top:1px solid #f0e7db;padding-top:14px;}
+.rep{font-size:13.5px;line-height:1.65;color:#4a3a2e;}
+.stats{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ece0d2;border-radius:11px;overflow:hidden;background:#fff;margin-bottom:13px;}
+.stat{padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.stat+.stat{border-left:1px solid #ece0d2;}
+.stat .i{width:27px;height:27px;border-radius:8px;background:#f6efe6;display:flex;align-items:center;justify-content:center;color:var(--burg);flex-shrink:0;}
+.stat .i svg{width:14px;height:14px;}
+.stat .big{font-family:'Playfair Display',serif;font-size:18px;color:var(--ink-strong);line-height:1;}
+.stat .big u{font-family:'Inter',sans-serif;font-size:11.5px;color:#8a7666;margin-left:3px;text-decoration:none;}
+.stat .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#b3a496;margin-top:4px;}
+.tlr{display:grid;grid-template-columns:56px 20px minmax(0,1fr);gap:10px;padding-bottom:13px;position:relative;}
+.tlr:last-child{padding-bottom:0;}
+.tld{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#b8a898;padding-top:4px;text-align:right;}
+.tlm{position:relative;display:flex;justify-content:center;padding-top:2px;}
+.tlr:not(:last-child) .tlm::after{content:'';position:absolute;top:22px;bottom:-13px;width:1.5px;background:#eee2d4;}
+.tlt{font-size:13.5px;font-weight:600;color:var(--ink-strong);line-height:1.35;}
+.tlt span{font-weight:400;color:#8a7666;}
+.sd{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--paper);z-index:2;}
+.sd svg{width:9px;height:9px;}
+.sd.out{border:2px solid var(--burg);background:#f8e7dc;color:var(--burg);}
+.sd.in{border:2px solid var(--sage);background:#e9ede6;color:#5a6e58;}
+.mat{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid #ece0d2;border-radius:10px;padding:10px 13px;font-size:13px;}
+.mat .mi{width:27px;height:27px;border-radius:8px;background:#f6efe6;display:flex;align-items:center;justify-content:center;color:var(--burg);flex-shrink:0;}
+.mat .mi svg{width:14px;height:14px;}
+.mat u{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#a89684;margin-top:3px;text-decoration:none;}
+.mat .ok{margin-left:auto;color:var(--sage-txt);}
+.hand{background:#fff;border:1px solid #ece0d2;border-radius:12px;padding:13px 14px;}
+.hrow{display:flex;gap:9px;flex-wrap:wrap;}
+.ab{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;font-weight:500;background:var(--pink);
+  color:var(--ink-strong);border:1px solid var(--pink-b);border-radius:10px;padding:9px 14px;}
+.ab svg{width:14px;height:14px;color:var(--burg);}
+.ab.q{background:#fff;border-color:var(--field-b);color:#6a5a50;}
+.ab.q svg{color:#a89684;}
+.hnote{font-size:11.5px;color:#a89684;font-style:italic;margin-top:9px;line-height:1.5;}
+
+/* ---- the footer that replaces the command bar ---- */
+.cfoot{flex-shrink:0;margin:0 6px 6px;padding:10px 14px 10px 20px;border-top:1px solid #eee4d7;background:#fbf6ee;
+  border-radius:0 0 8px 8px;display:flex;align-items:center;gap:8px;}
+.cfoot .hint{font-size:11.5px;color:#a89684;font-style:italic;margin-right:auto;padding-right:12px;}
+.vb{display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:#6a5a50;background:#fff;
+  border:1px solid var(--field-b);border-radius:9px;padding:9px 13px;white-space:nowrap;}
+.vb:hover{border-color:#d8c8b8;color:var(--ink-strong);}
+.vb svg{width:14px;height:14px;color:#a89684;}
+.vb.na{opacity:.4;cursor:default;}
+.sep{width:1px;height:22px;background:#e8ddd0;margin:0 3px;}
+.prime{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;
+  background:var(--ink-strong);color:#fdfaf5;border:1px solid var(--ink-strong);border-radius:10px;padding:10px 20px;white-space:nowrap;}
+.prime:hover{background:#3a1c14;}
+.prime svg{width:14px;height:14px;}
+.gain{position:fixed;right:18px;bottom:14px;background:var(--ink-strong);color:#f2ede7;border-radius:10px;
+  padding:8px 13px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;z-index:30;}
+</style>
+</head>
+<body>
+<div class="main"><div class="sheet">
+  <div class="plate"><span>To-do list</span></div>
+  <div class="split">
+
+    <div class="rail">
+      <div class="tools">
+        <button class="ic" title="Filter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></svg></button>
+        <button class="ic" title="Sort"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 4v13M7 17l-3-3M7 17l3-3M17 20V7M17 7l-3 3M17 7l3 3"/></svg></button>
+        <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg><input placeholder="Search your list…"></div>
+        <button class="ic add" title="Add task or note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+      <div class="scroll" id="list"></div>
+      <div class="foot"><span class="l"><b>16</b> outstanding · showing 16 of 30</span><span class="r">Export CSV</span></div>
+    </div>
+
+    <div class="pane">
+      <div class="phead">
+        <span class="pos">Task 3 of 30 · Urgent</span><span class="sp"></span>
+        <button class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+      <div class="card" id="card"></div>
+    </div>
+
+  </div>
+</div></div>
+<div class="gain" id="gain"></div>
+
+<script>
+var I={
+ tick:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+ arrR:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>',
+ arrL:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H6M11 6l-6 6 6 6"/></svg>',
+ x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>',
+ clock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+ cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+ ext:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M10 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-4"/></svg>',
+ mail:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>',
+ web:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>',
+ doc:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h6M9 16h6"/></svg>'
+};
+var motif='<svg class="motif" width="84" height="70" viewBox="0 0 84 70" fill="none"><rect x="16" y="26" width="52" height="36" rx="3" fill="#fdfaf5" stroke="#7c3a2a" stroke-width="1.4"/><rect x="20" y="18" width="52" height="36" rx="3" fill="#f5e2da" stroke="#7c3a2a" stroke-width="1.4"/><path d="M28 27h30M28 34h36M28 41h24" stroke="#7c3a2a" stroke-width="1.2" stroke-linecap="round" opacity=".55"/></svg>';
+
+var rows=[
+ {p:'Decide',c:'p-decide',d:'Answer the offer',w:'Tom Ellery · Curtis Vane',k:"You've waited",v:'4',u:'weeks',kc:'k-you'},
+ {p:'Send',c:'p-send',d:'Send your full',w:'Jonathan Marsh · The Marsh Agency',k:'No date on record',v:'',u:'',kc:'k-none'},
+ {p:'Send',c:'p-send',d:'Send your partial',w:"Daniel O'Rourke · Inkwell & Stone",k:"Daniel's waited",v:'8',u:'weeks',kc:'k-you',on:true},
+ {p:'Send',c:'p-send',d:'Send your partial',w:'Greg Panetta',k:"Greg's waited",v:'6',u:'weeks',kc:'k-you',hot:true},
+ {g:'Housekeeping'},
+ {p:'Close',c:'p-close',d:'Log the close',w:'Jonathan Marsh · The Marsh Agency',k:"You've waited",v:'122',u:'weeks',kc:'k-them'}
+];
+document.getElementById('list').innerHTML =
+ '<div class="gband g-u"><i></i><h2>Urgent</h2><span>4</span></div>'+
+ rows.map(function(r){
+   if(r.g)return '<div class="gband g-h"><i></i><h2>Housekeeping</h2><span>10</span></div>';
+   return '<div class="row '+(r.on?'on':'')+'"><span class="cb"></span><span class="pill '+r.c+'">'+r.p+'</span>'+
+    '<span><span class="deed">'+r.d+'</span><div class="who">'+r.w+'</div></span>'+
+    '<span class="fig '+r.kc+'"><div class="k">'+r.k+'</div>'+
+      (r.v?'<div class="v"><b class="'+(r.hot?'hot':'')+'">'+r.v+'</b><i>'+r.u+'</i></div>':'')+'</span></div>';
+ }).join('');
+
+document.getElementById('card').innerHTML =
+ '<div class="band">'+motif+'<button class="x">'+I.x+'</button>'+
+   '<span class="av">DO</span><span class="idb"><div class="pre">Sending your partial to</div>'+
+   '<div class="nm">Daniel O&rsquo;Rourke</div><div class="agy">Inkwell &amp; Stone</div></span>'+
+   '<span class="bf"><div class="k">Their window</div><div class="v">6 weeks</div></span></div>'+
+ '<div class="body">'+
+   '<div class="sect"><div class="slab">Tracking</div>'+
+     '<div class="stats">'+
+       '<div class="stat"><span class="i">'+I.clock+'</span><span><span class="big">8<u>weeks</u></span><div class="k">Daniel has waited</div></span></div>'+
+       '<div class="stat"><span class="i">'+I.cal+'</span><span><span class="big">25<u>June</u></span><div class="k">Requested</div></span></div>'+
+     '</div>'+
+     '<div class="tlr"><span class="tld">25 Jun</span><span class="tlm"><span class="sd out">'+I.arrR+'</span></span>'+
+       '<span class="tlt">Query sent <span>· via email</span></span></div>'+
+     '<div class="tlr"><span class="tld">25 Jun</span><span class="tlm"><span class="sd in">'+I.arrL+'</span></span>'+
+       '<span class="tlt">Partial requested <span>· via email</span></span></div>'+
+   '</div>'+
+   '<div class="sect"><div class="slab">What the record shows</div><div class="rep">The record shows a request and nothing sent against it. Logging the send moves the query on and starts their reply window.</div></div>'+
+   '<div class="sect"><div class="slab">What goes</div>'+
+     '<div class="mat"><span class="mi">'+I.doc+'</span><span>The partial — as Daniel asked<u>v4 · first three chapters</u></span><span class="ok">'+I.tick.replace('<svg','<svg width="15" height="15"')+'</span></div>'+
+   '</div>'+
+   '<div class="sect"><div class="slab">Where to send it</div><div class="hand">'+
+     '<div class="hrow"><a class="ab">'+I.mail+' Open in email</a><a class="ab q">'+I.web+' Their website</a></div>'+
+     '<div class="hnote">The send happens in your own email — come back and record it, and the query moves with it.</div>'+
+   '</div></div>'+
+ '</div>'+
+ '<div class="cfoot">'+
+   '<span class="hint">Nothing is sent from here — this records what happened.</span>'+
+   '<button class="vb">'+I.clock+' Snooze</button>'+
+   '<button class="vb">'+I.ext+' Open query</button>'+
+   '<button class="vb">'+I.x+' Dismiss</button>'+
+   '<span class="sep"></span>'+
+   '<button class="prime">'+I.tick+' Action</button>'+
+ '</div>';
+
+function gain(){
+  var c=document.getElementById('card').getBoundingClientRect();
+  document.getElementById('gain').textContent='Card height '+Math.round(c.height)+'px · was ~475px';
+}
+gain(); window.addEventListener('resize',gain);
+</script>
+</body>
+</html>
