@@ -5,7 +5,7 @@
  * The in-pane journey's pure model (Item 9, Phase 2).
  */
 import { describe, it, expect } from "vitest";
-import { openSend, sendSummary, canCommitSend, canCommit, whenMode, ymdLocal, shortDay, SEND_METHODS, JOURNEY_STEPS, JOURNEY_PRELINE, JOURNEY_ACT, journeySummary, checkBackLabel, CLOSE_REASON_COPY } from "./paneJourney";
+import { openSend, sendSummary, canCommitSend, canCommit, whenMode, ymdLocal, shortDay, SEND_METHODS, JOURNEY_STEPS, JOURNEY_PRELINE, JOURNEY_ACT, JOURNEY_HINT, journeySummary, checkBackLabel, CLOSE_REASON_COPY } from "./paneJourney";
 import { CLOSE_REASONS } from "./todoJourneys";
 
 /* ⚠️ A FIXED CLOCK, PASSED IN. Every function here takes `now` rather than reading it, so the tests
@@ -181,6 +181,12 @@ describe("⚠️ THE BAND AND THE COMMIT SPEAK FOR THE JOURNEY THEY ARE IN", () 
     expect(JOURNEY_PRELINE.close).toBe("Closing your query to");
     /* all three end in the preposition the name follows — the band reads as one sentence */
     for (const k of ["send", "chase", "close"] as const) expect(JOURNEY_PRELINE[k].endsWith(" to")).toBe(true);
+  });
+
+  it("⚠️ AND THE HINT IS TRUE OF ITS OWN JOURNEY — a close does not 'record what you sent'", () => {
+    expect(JOURNEY_HINT.close).not.toContain("sent");
+    expect(JOURNEY_HINT.send).toContain("what you sent");
+    expect(JOURNEY_HINT.chase).toContain("nudge");
   });
 
   it("⚠️ AND THE COMMIT NAMES ITS DEED — never the row's `Action` shorthand", () => {

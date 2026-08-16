@@ -28,7 +28,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { ArrowLeft, Check } from "lucide-react";
 import { MaterialRow } from "../../lib/todoHandoff";
 import {
-  CLOSE_REASON_COPY, CloseReason, JOURNEY_STEPS, JourneyKind, JourneySendValues, SEND_METHODS, SendMethod,
+  CLOSE_REASON_COPY, CloseReason, JOURNEY_HINT, JOURNEY_STEPS, JourneyKind, JourneySendValues, SEND_METHODS, SendMethod,
   StepId, canCommit, checkBackLabel, journeySummary, shortDay, whenMode, ymdLocal,
 } from "../../lib/paneJourney";
 import { RecordingCalendar } from "./RecordingCalendar";
@@ -201,7 +201,11 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
           one framed a derived string as something the agent phrased; this one states where the line
           came from and claims nothing about who wrote it. Omitted entirely where the record holds
           nothing: a "no request recorded" panel is a heading over an absence. */}
-      {(ask?.fact || ask?.meta) && (
+      {/* ⚠️ THE FACT IS WHAT EARNS THE BLOCK. `meta` alone is the agent and their agency — which the
+          BAND states two inches above, in larger type — so a block holding only that is a heading
+          over a duplicate. Measured on a close card, which has no incoming rung to quote: it drew a
+          bordered box containing "ON THE RECORD" and the name already on screen. */}
+      {ask?.fact && (
         <div className="pj-ref">
           <h5>On the record</h5>
           {ask.fact && <div className="pj-reff">{ask.fact}</div>}
@@ -259,7 +263,7 @@ export const PaneJourneyFoot: React.FC<PaneJourneyFootProps> = ({ kind, actLabel
       </div>
       <div className="pj-foot">
         <button type="button" className="pj-btn" onClick={onCancel}>Cancel</button>
-        <span className="pj-hint">Nothing is sent from here — this records what you sent.</span>
+        <span className="pj-hint">{JOURNEY_HINT[kind]}</span>
         <span className="pj-grow" />
         <button type="button" className="pj-prime" disabled={!canCommit(kind, value) || saving} onClick={onCommit}>
           <Check size={14} aria-hidden /> {saving ? "Recording…" : actLabel}

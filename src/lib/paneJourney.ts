@@ -70,6 +70,17 @@ export const JOURNEY_ACT: Record<Exclude<JourneyKind, "send">, string> = {
   close: "Close the record",
 };
 
+/**
+ * ⚠️ THE FOOT'S HINT IS PER JOURNEY TOO — same family as the pre-line, found the same way. A close
+ * card read "Nothing is sent from here — this records what you sent", which is a sentence about a
+ * send sitting under a form that ends a query.
+ */
+export const JOURNEY_HINT: Record<JourneyKind, string> = {
+  send: "Nothing is sent from here — this records what you sent.",
+  chase: "Nothing is sent from here — this records the nudge you sent.",
+  close: "This closes the record. It does not tell the agent anything.",
+};
+
 /** The three ways a query ends — the close journey's one real question. */
 export type CloseReason = "no_reply" | "off_record" | "withdrawn";
 
