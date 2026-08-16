@@ -749,5 +749,13 @@ service cloud.firestore {
     // callable, which writes via the Admin SDK and bypasses these rules. A report names a fault in
     // the writer's own work in progress, so it is between them and the desk.
     match /betaFeedback/{id} { allow read: if isAdmin(); allow write: if false; }
+
+    // ROUTE: Beta invite codes — NO client access whatsoever.
+    // The signup gate posts to the `redeemInviteCode` callable, which validates and marks a code
+    // used inside a transaction via the Admin SDK. A client READ would be the whole gate given
+    // away: the collection IS the list of valid codes, so being able to read it is being able to
+    // sign up. Not even the admin reads them here — seeding and auditing go through the console or
+    // the Admin SDK, neither of which these rules govern.
+    match /inviteCodes/{code} { allow read, write: if false; }
   }
 }

@@ -6,6 +6,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
+import { BETA_MODE } from "../lib/beta";
+import {
+  INVITE_LABEL, INVITE_PLACEHOLDER, INVITE_MISSING, INVITE_REJECTED,
+  looksLikeInviteCode, normaliseInviteCode,
+} from "../lib/inviteCode";
 import { signInWithGoogle, sendReset, isValidEmail } from "../lib/authActions";
 import { LoginDashboardPreview } from "./auth/LoginDashboardPreview";
 import "./auth/auth.css";
@@ -53,6 +58,13 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
   const [password, setPassword] = useState("");
   const [resetEmail, setResetEmail] = useState("");
 
+  /* ⚠️ THE INVITE GATE IS PRESENTATION; THE GATE IS THE CALLABLE. `redeemInviteCode` validates and
+     marks a code used inside a transaction, server-side — a browser check gates nothing, because
+     the account is created by the Auth SDK and anyone can call that from a console. This state only
+     decides whether the door is drawn and refuses to submit until the server has said yes. */
+  const [inviteCode, setInviteCode] = useState("");
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
   const [showPw, setShowPw] = useState(false);
   const [errs, setErrs] = useState<{ name?: string; email?: string; pw?: string; reset?: string }>({});
   const [banner, setBanner] = useState<Banner>(null);
@@ -80,14 +92,43 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
     if (!password) next.pw = "Please enter your password.";
     else if (mode === "signup" && password.length < 8) next.pw = "Use at least 8 characters for your password.";
     setErrs(next);
-    if (Object.keys(next).length) return;
+
+    /* An empty or implausible code never reaches the server — not as a security measure (the
+       server refuses it too, identically) but so a writer who simply has not pasted it yet is told
+       so rather than being handed the rejection message meant for a bad code. */
+    const needsInvite = BETA_MODE && mode === "signup";
+    const inviteMissing = needsInvite && !looksLikeInviteCode(inviteCode);
+    setInviteError(inviteMissing ? INVITE_MISSING : null);
+
+    if (Object.keys(next).length || inviteMissing) return;
 
     setSubmitting(true);
     try {
       // Existing db.tsx exports — unchanged. On success, the onAuthStateChanged listener takes over
       // and App swaps this screen for the app, so there is nothing to do here on the happy path.
-      if (isSignin) await login(email.trim(), password);
-      else await signup(name.trim(), email.trim(), password);
+      if (isSignin) {
+        await login(email.trim(), password);
+      } else {
+        /* ⚠️ REDEEMED BEFORE THE ACCOUNT IS CREATED, and the order matters: creating first and
+           checking after would leave an account behind every rejected code. A caller can burn a
+           code without finishing signup — self-limiting, since they had the code — which is the
+           honest trade for a gate that cannot be bypassed. */
+        if (BETA_MODE) {
+          const { getFunctions, httpsCallable } = await import("firebase/functions");
+          const redeem = httpsCallable(getFunctions(undefined, "europe-west2"), "redeemInviteCode");
+          try {
+            await redeem({ code: normaliseInviteCode(inviteCode), email: email.trim() });
+          } catch {
+            /* ⚠️ ONE MESSAGE FOR EVERY FAILURE. Wrong code, spent code and a server that could not
+               answer all read the same — telling them apart turns the form into an oracle you can
+               feed codes to. */
+            setInviteError(INVITE_REJECTED);
+            setSubmitting(false);
+            return;
+          }
+        }
+        await signup(name.trim(), email.trim(), password);
+      }
     } catch (err: any) {
       setBanner({ type: "error", message: err?.message || "Something went wrong. Please try again.", offerReset: isSignin });
       setSubmitting(false);
@@ -98,6 +139,22 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
   const handleGoogle = async () => {
     setBanner(null);
     setErrs({});
+    /* ⚠️ THE GOOGLE PATH NEEDS THE SAME CODE, and this only covers the Create-account tab.
+       Google sign-in CREATES an account when none exists, so a determined visitor on the Sign-in
+       tab still gets in — closing that needs a `beforeUserCreated` blocking Auth trigger, which is
+       flagged in the run report and NOT built here. This is a real gate on the honest route, not a
+       complete one. */
+    if (BETA_MODE && !isSignin) {
+      if (!looksLikeInviteCode(inviteCode)) { setInviteError(INVITE_MISSING); return; }
+      try {
+        const { getFunctions, httpsCallable } = await import("firebase/functions");
+        const redeem = httpsCallable(getFunctions(undefined, "europe-west2"), "redeemInviteCode");
+        await redeem({ code: normaliseInviteCode(inviteCode), email: email.trim() });
+      } catch {
+        setInviteError(INVITE_REJECTED);
+        return;
+      }
+    }
     setGoogleBusy(true);
     try {
       await signInWithGoogle(); // success unmounts this screen via the auth listener; cancel is silent
@@ -197,6 +254,26 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
                   <div className="divider"><span>or with email</span></div>
 
                   <form onSubmit={handleSubmit} noValidate>
+                    {/* ⚠️ THE INVITE FIELD LEADS, because it is the thing that decides whether any
+                        of the rest matters. It renders only while BETA_MODE is on; with the flag
+                        off, signup is exactly as it was. */}
+                    {BETA_MODE && !isSignin && (
+                      <div className="field">
+                        <label htmlFor="au-invite">{INVITE_LABEL}</label>
+                        <div className={`inp${inviteError ? " bad" : ""}`}>
+                          <input
+                            id="au-invite"
+                            type="text"
+                            autoComplete="off"
+                            placeholder={INVITE_PLACEHOLDER}
+                            value={inviteCode}
+                            onChange={(e) => { setInviteCode(e.target.value); if (inviteError) setInviteError(null); }}
+                            style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em" }}
+                          />
+                        </div>
+                        {inviteError && <div className="err">{inviteError}</div>}
+                      </div>
+                    )}
                     {!isSignin && (
                       <div className="field">
                         <label htmlFor="au-name">Your name</label>
