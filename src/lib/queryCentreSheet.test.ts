@@ -148,7 +148,7 @@ describe("§2 · the desk stays mounted behind it", () => {
     expect(sheet, "the portal target moved off the body").toContain("document.body");
     /* the wrapper re-establishes the token scope the portal escaped */
     expect(sheet, "the portal escaped .t-f12 — every token below it would fail to resolve")
-      .toContain("t-f12 qc-sheet-layer");
+      .toContain("t-f12 qc-neutral qc-sheet-layer");
   });
 
   it("the scrim is the sheet's sibling, never its parent", () => {
@@ -159,7 +159,7 @@ describe("§2 · the desk stays mounted behind it", () => {
        as the backdrop — so a bare `indexOf` would measure whichever is written first and keep
        passing until the two moved apart. Caught by `testAnchors`, this repo's meta-lock for exactly
        this shape, on this file's first run. */
-    const layer = sheet.indexOf("className={`t-f12 qc-sheet-layer");
+    const layer = sheet.indexOf("className={`t-f12 qc-neutral qc-sheet-layer");
     expect(layer, "the layer's className is missing").toBeGreaterThan(-1);
     const scrim = sheet.indexOf("qc-sheet-scrim", layer);
     const box = sheet.indexOf("className={`qc-sheet$", layer);

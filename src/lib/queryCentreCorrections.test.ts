@@ -315,10 +315,14 @@ describe("Pack C §3 · the letterhead, the caps and the watermark", () => {
     expect(rule(".qc-crumb"), "the create band lost its ground").toContain("background: var(--pink-t)");
     expect(rule(".qc-sheet--record .qc-crumb"), "record's band lost its own ground").toContain("var(--paper)");
     expect(rule(".qc-crumbcur"), "the current segment lost its colour").toContain("var(--burg)");
-    /* and the sheet is what makes those two neutral, in one place rather than per selector */
-    const sheet = rule(".t-f12.qc-sheet-layer");
-    expect(sheet, "the sheet's §3 block is missing").not.toBe("");
-    expect(sheet, "pink still paints a sheet surface").toContain("--pink-t: var(--oat)");
+    /* ⚠️ REPOINTED AGAIN: the sheet's own token block is GONE, because the sheets now carry the
+       whole palette rather than a pink-and-sage patch of it. `.qc-neutral` maps `--pink-t` for the
+       page and the journeys alike, from one place, so the letterhead reads its role and gets a
+       neutral wherever it renders. */
+    const palette = rule(".t-f12.qc-neutral");
+    expect(palette, "the palette block is missing").not.toBe("");
+    expect(palette, "pink still paints a surface").toContain("--pink-t: var(--n3)");
+    expect(css, "the superseded sheet-only block came back").not.toContain(".t-f12.qc-sheet-layer {");
   });
 
   /* §3b — the open step wore the same cap every card on the reading pane had. Both are neutral now:

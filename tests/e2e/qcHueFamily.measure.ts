@@ -94,3 +94,45 @@ test("§3 — no pink or sage background outside the status components", async (
   for (const s of offending) console.log(`  ${s.c}  H ${s.H}  C ${s.C}  ×${s.n}  ${s.sample}`);
   expect(offending.map((s) => `${s.c} (${s.sample})`), "a pink or sage surface survives outside the status components").toEqual([]);
 });
+
+test("§2 — the journey sheets belong to the same family as the page", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.getByRole("button", { name: /log query/i }).first().click();
+  await page.waitForSelector(".qc-sheet-layer", { timeout: 15_000 });
+  await page.waitForTimeout(600);
+  const surfaces = await page.evaluate(() => {
+    const oklch = (rgb: string) => {
+      const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/.exec(rgb);
+      if (!m || (m[4] !== undefined && parseFloat(m[4]) < 0.5)) return null;
+      const f = (v: number) => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+      const [r, g, b] = [f(+m[1]), f(+m[2]), f(+m[3])];
+      const l = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+      const mm = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+      const ss = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+      const A = 1.9779984951 * l - 2.4285922050 * mm + 0.4505937099 * ss;
+      const B = 0.0259040371 * l + 0.7827717662 * mm - 0.8086757660 * ss;
+      return { C: Math.hypot(A, B), H: ((Math.atan2(B, A) * 180) / Math.PI + 360) % 360 };
+    };
+    const root = document.querySelector(".qc-sheet-layer") as HTMLElement;
+    const seen = new Map<string, string>();
+    for (const e of Array.from(root.querySelectorAll("*")) as HTMLElement[]) {
+      const r = e.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) continue;
+      const st = getComputedStyle(e);
+      /* the dot's locked geometry — a circle in the status size band — and the wax seal, which is
+         burgundy by design and is the sanctioned accent */
+      if (st.borderRadius.startsWith("50%") && Math.abs(r.width - r.height) < 1 && r.width <= 30) continue;
+      if ((e.className || "").toString().includes("qc-seal")) continue;
+      const v = oklch(st.backgroundColor);
+      if (v && v.C > 0.004) seen.set(st.backgroundColor, `${v.H.toFixed(1)}° C${v.C.toFixed(4)} ${(e.className || e.tagName).toString().slice(0, 36)}`);
+    }
+    return [...seen.entries()];
+  });
+  console.log("\nJOURNEY surfaces");
+  for (const [c, d] of surfaces) console.log(`  ${c.padEnd(24)} ${d}`);
+  const hues = surfaces.map(([, d]) => parseFloat(d));
+  expect(surfaces.length, "no coloured surfaces in the sheet — measuring nothing").toBeGreaterThan(0);
+  const spread = Math.max(...hues) - Math.min(...hues);
+  console.log(`hue spread in the sheet: ${spread.toFixed(1)}°`);
+  expect(spread, `the sheet paints surfaces spanning ${spread.toFixed(1)}° — not one family`).toBeLessThanOrEqual(12);
+});

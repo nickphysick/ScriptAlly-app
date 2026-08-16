@@ -101,14 +101,14 @@ describe("the panel reads as quieter than the form", () => {
   it("flat ground, no shadow — a shadow would imply floating", () => {
     const r = rule(".qc-ctx");
     expect(r, "the panel rule is missing").not.toBe("");
-    expect(r).toContain("background: #fbf9f5");
+    expect(r).toContain("background: var(--qcj-surf-ctx)");
     expect(r, "a shadow makes it float; this sits back").not.toContain("box-shadow");
   });
 
   /* ══ A CARD LAID ON THE DESK (ref qc-tilt.html, b2 + t1) ══════════════════════════════════ */
   it("a dotted edge and six-tenths of a degree — not a hairline UI box", () => {
     const r = rule(".qc-ctx");
-    expect(r).toContain("border: 1.5px dotted #cdbfa9");
+    expect(r).toContain("border: 1.5px dotted var(--qcj-rim-ctx)");
     expect(r).toContain("transform: rotate(-0.6deg)");
   });
 

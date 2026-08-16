@@ -185,7 +185,7 @@
    ⚠️ The sage is the BAND sage #7e9178. index.css locks --sage / --sageC / --sageD to
    StatusDots, and a requirement mark is not a query status. */
 .qch-rq { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
-.qch-c { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #cfc3b1; display: grid; place-items: center; font-size: 8px; line-height: 1; color: #fff; flex: none; }
+.qch-c { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid var(--qcj-rim-tick); display: grid; place-items: center; font-size: 8px; line-height: 1; color: #fff; flex: none; }
 /* (`.qch-v` retired with the value previews — the values live in the collapsed step rows.) */
 /* ⚠️ PRE-FILLED IS A DASH, NOT AN OUTLINED TICK. Whatever the intent, a tick reads as DONE — and
    being outlined is not enough of a difference to carry "you have not looked at this yet". A dash
@@ -228,7 +228,7 @@
 .qc-pickhead { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .qc-pickfield { flex: 1 1 auto; max-width: 400px; min-width: 0; border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px; background: var(--panel); font-family: inherit; font-size: 13.5px; color: var(--ink); outline: none; box-shadow: 0 2px 8px rgba(60, 45, 30, 0.06); }
 .qc-pickfield::placeholder { color: var(--muted); }
-.qc-pickfield:focus { border-color: #d8c4b2; box-shadow: 0 0 0 3px rgba(216, 196, 178, 0.28); }
+.qc-pickfield:focus { border-color: var(--qcj-rim-focus); box-shadow: 0 0 0 3px rgba(216, 196, 178, 0.28); }
 .qc-pickadd { font-size: 12px; color: var(--ink-2); }
 .qc-pickadd button { background: none; border: 0; padding: 0; font: inherit; color: var(--burg); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 
@@ -245,11 +245,11 @@
 .qc-qahead { font-family: var(--f12-serif); font-weight: 700; font-size: 14px; color: var(--ink); margin-bottom: 2px; }
 .qc-qain { width: 100%; border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; background: var(--paper); font-family: inherit; font-size: 13px; color: var(--ink); outline: none; }
 .qc-qain::placeholder { color: var(--muted); }
-.qc-qain:focus { border-color: #d8c4b2; box-shadow: 0 0 0 3px rgba(216, 196, 178, 0.28); }
+.qc-qain:focus { border-color: var(--qcj-rim-focus); box-shadow: 0 0 0 3px rgba(216, 196, 178, 0.28); }
 .qc-qarow { display: flex; gap: 8px; align-items: center; }
 .qc-qastars { display: inline-flex; gap: 2px; flex: none; }
-.qc-qastar { background: none; border: 0; padding: 0 1px; font-size: 15px; line-height: 1; color: #d8ccbc; cursor: pointer; }
-.qc-qastar.on { color: #c99a4e; }
+.qc-qastar { background: none; border: 0; padding: 0 1px; font-size: 15px; line-height: 1; color: var(--qcj-tx-star); cursor: pointer; }
+.qc-qastar.on { color: var(--qcj-acc-star); }
 .qc-qaerr { font-size: 12px; color: var(--burg); }
 .qc-qaacts { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
 
@@ -289,7 +289,7 @@
 .qc-acwho i { font-style: normal; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qc-acmeta { display: flex; align-items: center; gap: 8px; margin-top: 9px; }
 .qc-actag { display: inline-flex; background: var(--oat); border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px; padding: 2px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.09em; text-transform: uppercase; }
-.qc-actag.shut { background: var(--paper); border-color: #e0bda9; color: #9a4a30; }
+.qc-actag.shut { background: var(--paper); border-color: var(--qcj-acc-shut-b); color: var(--qcj-acc-shut-i); }
 /* ══ THE FOLDED ALL-QUERIED BLOCK (ref 77) ═════════════════════════════════════════════════
    ⚠️ 18px CLEAR OF THE PANEL ABOVE. They are two separate statements — the panel says what this
    state IS, the block says who is in it — and stacked flush they read as one box with a rule
@@ -317,7 +317,7 @@
    nothing else, because they have all been queried and none is being put forward. */
 .qc-platedot { width: 7px; height: 7px; flex: none; border-radius: 50%; }
 .qc-plate-active .qc-platedot, i.qc-plate-active { background: var(--burg); }
-.qc-plate-previous .qc-platedot, i.qc-plate-previous { background: #cfc7bb; }
+.qc-plate-previous .qc-platedot, i.qc-plate-previous { background: var(--qcj-surf-step-prev); }
 /* the state is named ONCE, beneath the set — not sixteen times, on every plate */
 .qc-platekey { display: flex; gap: 14px; margin: 9px 0 0; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .qc-platekey span { display: inline-flex; align-items: center; gap: 5px; }
@@ -409,7 +409,7 @@
 .qc-note { display: block; width: 100%; min-height: 104px; padding: 12px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); font-family: inherit; font-size: 12.5px; line-height: 1.6; color: var(--ink); resize: vertical; outline: none; transition: border-color 0.14s, box-shadow 0.14s; }
 .qc-note::placeholder { color: var(--muted); }
 /* The house focus ring — the same pair the active step wears, so focus reads as one language. */
-.qc-note:focus { border-color: #d8c4b2; box-shadow: 0 0 0 3px rgba(216, 196, 178, 0.28); }
+.qc-note:focus { border-color: var(--qcj-rim-focus); box-shadow: 0 0 0 3px rgba(216, 196, 178, 0.28); }
 .qc-notecap { margin: 8px 0 0; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); }
 
 /* The stack — one column of sections. On stage 1 all three are ghosts.
@@ -465,11 +465,11 @@
 .qc-tick { width: 19px; height: 19px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 9px; line-height: 1; }
 /* upcoming: the shape of an answer, not an answer — hollow tick, no Change, dimmed whole. */
 .qc-sec.qc-up { opacity: 0.45; }
-.qc-sec.qc-up .qc-tick { background: transparent; border: 1.5px solid #cfc3b1; color: transparent; }
+.qc-sec.qc-up .qc-tick { background: transparent; border: 1.5px solid var(--qcj-rim-tick); color: transparent; }
 
 /* ── STAGE 2: the three treatments (ref qc-create-steps.html) ────────────────────────────── */
 /* active — lifted, warm border, numbered head with the Enter hint */
-.qc-sec.qc-active { border-color: #d8c4b2; box-shadow: 0 10px 30px rgba(60, 45, 30, 0.09); }
+.qc-sec.qc-active { border-color: var(--qcj-rim-focus); box-shadow: 0 10px 30px rgba(60, 45, 30, 0.09); }
 
 /* ⚠️ THE PULSE IS AN INVITATION, NOT A STATUS — cue D (qc-focus.html). A burgundy halo breathing
    on the active step tells the eye where to act; the moment the writer engages with that step it
@@ -538,7 +538,7 @@
    label. EDIT says what opening it is FOR, which is only worth saying once you are reaching. */
 .qc-sedit { margin-left: 12px; flex: none; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; color: var(--burg); opacity: 0; transition: opacity 0.15s; }
 .qc-sum:hover .qc-sedit, .qc-sum:focus-visible .qc-sedit { opacity: 1; }
-.qc-schev { margin-left: 10px; flex: none; color: #c8b8a8; font-size: 14px; line-height: 1; }
+.qc-schev { margin-left: 10px; flex: none; color: var(--qcj-tx-chev); font-size: 14px; line-height: 1; }
 /* an unanswered row has no value, so the hint must take the slack or the chevron slides left */
 .qc-sec:not(.qc-done) .qc-stxt { margin-right: auto; }
 @media (prefers-reduced-motion: reduce) { .qc-sedit { transition: none; } }
@@ -598,7 +598,7 @@
    ⚠️ AND IT IS NOT GATED ON `prefers-reduced-motion`. This is a static transform, not motion:
    nothing animates, nothing moves, and there is no vestibular effect to spare anyone. Gating it
    would leave those users with a different design, not a calmer one. */
-.qc-ctx { flex: 0 0 322px; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; margin: 10px; display: flex; flex-direction: column; border: 1.5px dotted #cdbfa9; border-radius: 16px; overflow: hidden; background: #fbf9f5; transform: rotate(-0.6deg); }
+.qc-ctx { flex: 0 0 322px; min-width: 0; align-self: flex-start; height: auto; max-height: 100%; min-height: 200px; margin: 10px; display: flex; flex-direction: column; border: 1.5px dotted var(--qcj-rim-ctx); border-radius: 16px; overflow: hidden; background: var(--qcj-surf-ctx); transform: rotate(-0.6deg); }
 
 /* ══ THE MARGINALIA TREATMENT — CAPPUCCINO ONLY (ref 69, treatment C) ══════════════════════
    ⚠️ THE PANEL RECEDES BY LOSING ITS AFFORDANCE SIGNALS, NOT BY CHANGING COLOUR. Fills say
@@ -672,7 +672,7 @@
 .qc-glancew { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* the pill must sit ABOVE the disc, or the wash tints it a different green from every other pill */
 .qc-ctxpill { margin-left: auto; flex: none; position: relative; z-index: 1; display: inline-flex; align-items: center; background: var(--oat); border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px; padding: 3px 9px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.09em; text-transform: uppercase; }
-.qc-ctxpill-shut { background: var(--paper); border-color: #e0bda9; color: #9a4a30; }
+.qc-ctxpill-shut { background: var(--paper); border-color: var(--qcj-acc-shut-b); color: var(--qcj-acc-shut-i); }
 
 /* stat strip — cells omit themselves; the strip omits when none survive */
 .qc-ctxstats { flex: none; display: flex; border-bottom: 1px solid var(--hairline); }
@@ -695,17 +695,17 @@
 .qc-ctxpolicy { flex: none; margin: 0; padding: 11px 15px 0; font-size: 12px; line-height: 1.5; color: var(--ink-2); }
 .qc-ctxsec { margin-bottom: 15px; }
 .qc-ctxsech { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
-.qc-ctxcap { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: #a2947f; flex: none; }
+.qc-ctxcap { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--qcj-tx-cap); flex: none; }
 .qc-ctxrule { flex: 1; height: 1px; background: var(--hairline); }
 .qc-ctxchips { display: flex; gap: 5px; flex-wrap: wrap; }
-.qc-ctxg { border: 1px solid var(--line); background: #fdfbf8; border-radius: 999px; padding: 4px 10px; font-size: 11px; color: var(--ink-2); }
+.qc-ctxg { border: 1px solid var(--line); background: var(--qcj-surf-ghost); border-radius: 999px; padding: 4px 10px; font-size: 11px; color: var(--ink-2); }
 .qc-ctxask { display: flex; align-items: center; gap: 9px; padding: 6px 0; font-size: 12.5px; color: var(--ink-2); border-bottom: 1px solid var(--hairline); }
 .qc-ctxask:last-child { border-bottom: none; }
 .qc-ctxtk { width: 16px; height: 16px; flex: none; border-radius: 4px; background: var(--oat); border: 1px solid var(--line); color: var(--ink-2); display: grid; place-items: center; font-size: 9px; }
 .qc-ctxq { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; color: var(--muted); }
 /* history — a bordered line, present even at zero */
-.qc-ctxhist { display: flex; align-items: center; gap: 9px; background: #fdfbf8; border: 1px solid var(--hairline); border-radius: 10px; padding: 9px 11px; font-size: 12px; color: var(--ink-2); }
-.qc-ctxhd { width: 9px; height: 9px; flex: none; border-radius: 50%; border: 1.5px solid var(--burg); background: #fbeae1; }
+.qc-ctxhist { display: flex; align-items: center; gap: 9px; background: var(--qcj-surf-ghost); border: 1px solid var(--hairline); border-radius: 10px; padding: 9px 11px; font-size: 12px; color: var(--ink-2); }
+.qc-ctxhd { width: 9px; height: 9px; flex: none; border-radius: 50%; border: 1.5px solid var(--burg); background: var(--qcj-surf-dot); }
 .qc-ctxopen { margin-left: auto; background: none; border: none; padding: 0; font: inherit; font-size: 11px; font-weight: 600; color: var(--burg); text-decoration: underline; cursor: pointer; }
 /* the wish list — a pull-quote, clamped */
 .qc-ctxquote { background: var(--paper); border: 1px solid var(--line); border-left: 2.5px solid var(--pink-b); border-radius: 0 11px 11px 0; padding: 12px 13px 12px 14px; }
@@ -1186,10 +1186,10 @@
 .f12-prow.f12-on { color: var(--ink); font-weight: 500; background: var(--paper); }
 .f12-prow .f12-sub { display: block; font-size: 10.5px; color: var(--faint); font-weight: 400; margin-top: 1px; }
 .f12-prow .f12-txt { flex: 1; min-width: 0; }
-.f12-rad { flex: none; width: 15px; height: 15px; border: 1.5px solid #d9cfc0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.12s; }
+.f12-rad { flex: none; width: 15px; height: 15px; border: 1.5px solid var(--qcj-rim-box); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.12s; }
 .f12-prow.f12-on .f12-rad { border-color: var(--ink); }
 .f12-prow.f12-on .f12-rad::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ink); }
-.f12-box { flex: none; width: 15px; height: 15px; border: 1.5px solid #d9cfc0; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; color: var(--panel); transition: background 0.12s, border-color 0.12s; }
+.f12-box { flex: none; width: 15px; height: 15px; border: 1.5px solid var(--qcj-rim-box); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; color: var(--panel); transition: background 0.12s, border-color 0.12s; }
 .f12-prow.f12-on .f12-box { background: var(--ink); border-color: var(--ink); }
 .f12-prow.f12-on .f12-box::after { content: "✓"; }
 .f12-quick { display: flex; gap: 5px; padding: 0 11px 8px; }
@@ -1314,29 +1314,42 @@
 
 
 
-/* ══ §3 · PINK AND SAGE ARE SIGNALS, IN THE JOURNEYS TOO ══════════════════════════════════════
+/* ══ THE JOURNEY SHEETS' SURFACE TOKENS (finishing §2 — a refactor, not a repaint) ═══════════════
  *
- * ⚠️ THE RULE STATED ONCE, NOT CHASED SELECTOR BY SELECTOR. The sheets are portalled outside the
- * page, so `.qc-neutral` never reaches them and they keep the warm set — deliberately, because Pack
- * C rebuilds these surfaces. What §3 forbids is narrower than a palette: pink and sage as a
- * BACKGROUND. So the surface tokens that carry them are repointed here, onto warm neutrals the
- * sheet already has, and the rules that read them keep reading the ROLE they always read — the
- * letterhead band still asks for "the create register" and gets a neutral. A handful of journey
- * rules held sage as a literal gradient rather than a token and were edited in place; those are the
- * ones a block like this cannot reach, which is why both appear in the same section.
+ * ⚠️ EVERY VALUE IS THE LITERAL IT REPLACED. The sheets were held out of the page's tokenising pass
+ * on the grounds that Pack C rebuilds them; that exemption is withdrawn, so they get the same
+ * treatment and the same proof — a computed-style fingerprint of the OPEN sheet, taken before and
+ * after, which must diff to nothing. The page's own run caught two near-miss mappings, and the
+ * sheets are portalled so its fingerprint never saw them.
  *
- * ⚠️ THE DOTS ARE UNTOUCHED BY CONSTRUCTION. `--sd-hue` and `--sd-centre` are the StatusDot pair and
- * are not in this list — which is the whole point of §3: those two colours cannot do their job while
- * they are also painting the furniture.
+ * ⚠️ SIXTEEN VALUES, NONE OF WHICH MATCHED AN EXISTING TOKEN. That is the finding: not one of the
+ * journeys' colours was a value the rest of the app already names. They were a private palette.
  */
-.t-f12.qc-sheet-layer {
-  --pink-t: var(--oat);
-  --pink-av: var(--oat);
-  --pink-btn: var(--oat);
-  --pink-btn-h: var(--line);
-  --pink-b: var(--line);
-  --sageC: var(--paper);
+.t-f12 {
+  --qcj-surf-ctx: #fbf9f5;      /* the agent context panel */
+  --qcj-surf-ghost: #fdfbf8;    /* its quiet rows */
+  --qcj-surf-dot: #fbeae1;      /* the history dot's centre */
+  --qcj-surf-step-prev: #cfc7bb;/* a step already passed */
+  --qcj-rim-ctx: #cdbfa9;       /* the context panel's dotted edge */
+  --qcj-rim-focus: #d8c4b2;     /* the focused field */
+  --qcj-rim-tick: #cfc3b1;      /* an unearned requirement chip */
+  --qcj-rim-dash: #d2c8ba;      /* a note, a wish row */
+  --qcj-rim-add: #ded4c6;       /* the add-material affordance */
+  --qcj-rim-box: #d9cfc0;       /* the boxed radio group */
+  --qcj-tx-cap: #a2947f;        /* the context panel's caption */
+  --qcj-tx-chev: #c8b8a8;       /* a chevron */
+  --qcj-tx-star: #d8ccbc;       /* an unlit star */
+  --qcj-acc-star: #c99a4e;      /* a lit star — a rating, which is meant */
+  --qcj-acc-shut-b: #e0bda9;    /* an agency that is closed */
+  --qcj-acc-shut-i: #9a4a30;
 }
+
+/* ⚠️ THE `.qc-sheet-layer` TOKEN BLOCK IS SUPERSEDED AND DELETED. It repointed pink and sage on the
+   sheets while they kept the warm set; the sheets take the whole palette now, and `.qc-neutral`
+   maps the same tokens to the same neutrals. Two blocks at equal specificity, decided by file
+   order, is precisely the arrangement this file's comments warn about — so the redundant one goes
+   rather than being left as a tie nobody has to think about. `--sageC` moved into the palette with
+   the others; it was the one token the scale did not already cover. */
 
 /* ══ QUERY CENTRE · THE NEUTRAL SCALE (§2) — page-scoped, and reversible by deleting this block ══
  *
@@ -1416,6 +1429,33 @@
   --qc-tx-off: var(--n6);
   --qc-tx-send-off: var(--n6);
   --qc-tx-noteact: var(--n6);
+
+
+  /* ── the journeys' own surfaces (finishing §2) ────────────────────────────────────────────
+     ⚠️ SIXTEEN VALUES, AND NOT ONE OF THEM MATCHED A TOKEN THE APP ALREADY HAD. The sheets were a
+     private palette — which is why they read as a different product the moment the page changed,
+     and why the fix is a mapping rather than a repaint. */
+  --sageC: var(--n1);            /* record's letterhead — the last sage the scale did not cover */
+  --qcj-surf-ctx: var(--n1);
+  --qcj-surf-ghost: var(--n1);
+  --qcj-surf-dot: var(--n2);
+  --qcj-surf-step-prev: var(--n4);
+  --qcj-rim-ctx: var(--n5);
+  --qcj-rim-focus: var(--n6);
+  --qcj-rim-tick: var(--n5);
+  --qcj-rim-dash: var(--n5);
+  --qcj-rim-add: var(--n5);
+  --qcj-rim-box: var(--n5);
+  --qcj-tx-cap: var(--n6);
+  --qcj-tx-chev: var(--n6);
+  --qcj-tx-star: var(--n5);
+  /* ⚠️ THE LIT STAR GOES BURGUNDY, AND THAT IS THE ONE JUDGEMENT IN THIS MAPPING. #c99a4e was the
+     page's only gold — a second accent, on a rating, which IS "something meant". Burgundy is the
+     sanctioned accent, so the star takes it and the gold leaves rather than surviving as an
+     exception nobody decided on. */
+  --qcj-acc-star: var(--burg);
+  /* the closed-agency pair stays: terracotta is the burgundy family at higher lightness, which is
+     the same thing the overdue state reads, not a second accent */
 
   /* ⚠️ THE OVERDUE ROW LOSES ITS TINT AND KEEPS ITS SIGNAL. It was a faint warm pink, which §3
      forbids as a surface; the state is carried by the terracotta figure and label already on the
@@ -2347,11 +2387,11 @@
  */
 .qp-note { background: var(--paper); border: 1px solid var(--line); }
 
-.f12-note { border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 13px 15px; }
+.f12-note { border: 1.5px dotted var(--qcj-rim-dash); background: transparent; border-radius: var(--r-md); padding: 13px 15px; }
 .f12-note .f12-nd { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.13em; color: var(--faint); margin-bottom: 6px; }
 .f12-note .f12-nt { font-size: 13px; line-height: 1.55; color: var(--muted); }
 /* dashed add-affordances */
-.f12-addmat { border: 1.5px dashed #ded4c6; border-radius: var(--r-md); padding: 11px; text-align: center; font-size: 12.5px; color: var(--muted); transition: border-color 0.12s, color 0.12s, background 0.12s; width: 100%; }
+.f12-addmat { border: 1.5px dashed var(--qcj-rim-add); border-radius: var(--r-md); padding: 11px; text-align: center; font-size: 12.5px; color: var(--muted); transition: border-color 0.12s, color 0.12s, background 0.12s; width: 100%; }
 .f12-addmat:hover { border-color: var(--ink-2); color: var(--ink); background: var(--paper); }
 .f12-pro { font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.1em; background: var(--pro); color: #ffffff; padding: 2px 7px; border-radius: 99px; }
 
@@ -2382,7 +2422,7 @@
 .f12-row.f12-shut.f12-sel .f12-qdots { opacity: 1; }
 /* Wish-list EMPTY state — a single-row strip: dotted outline, no fill, icon + label + copy on
    one line, the add pill on the right (~a third of the old block's height). */
-.f12-wishrow { display: flex; align-items: center; gap: 10px; width: 100%; border: 1.5px dotted #d2c8ba; background: transparent; border-radius: var(--r-md); padding: 10px 14px; color: var(--muted); font-size: 13px; text-align: left; }
+.f12-wishrow { display: flex; align-items: center; gap: 10px; width: 100%; border: 1.5px dotted var(--qcj-rim-dash); background: transparent; border-radius: var(--r-md); padding: 10px 14px; color: var(--muted); font-size: 13px; text-align: left; }
 .f12-wishrow svg { width: 15px; height: 15px; stroke: var(--faint); fill: none; stroke-width: 1.5; flex-shrink: 0; }
 .f12-wishrow .f12-wl { font-weight: 600; color: var(--ink-2); white-space: nowrap; }
 .f12-wishrow .f12-wc { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

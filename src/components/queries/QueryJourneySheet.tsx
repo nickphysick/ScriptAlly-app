@@ -148,7 +148,7 @@ const SheetInner: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
-      className={`t-f12 qc-sheet-layer qc-sheet--${register}`}
+      className={`t-f12 qc-neutral qc-sheet-layer qc-sheet--${register}`}
       onKeyDown={trapTab}
       onClick={scrimClick}
     >
