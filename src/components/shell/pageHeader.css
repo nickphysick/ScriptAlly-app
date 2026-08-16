@@ -557,6 +557,31 @@
   color: var(--wsh-band-bg);
 }
 .wsh--scrolled .svh-btn-ink svg { color: var(--wsh-band-bg); }
+/**
+ * ⚠️ AND THE SECONDARY OUTLINES, SO THE PAIR STAYS FILLED-VERSUS-OUTLINED. Measured on the first
+ * build of this band: Export and Log query were BOTH pure white at 11.1:1 against the ground —
+ * identical brightness, with the ranking carried only by a label colour. That is not a hierarchy.
+ *
+ * ⚠️ IT IS THE SAME RELATIONSHIP THE LIGHT BAND ALREADY EXPRESSED, inverted. There it was a dark
+ * pill against a white chip: filled primary, outlined secondary. On a dark ground the fill becomes
+ * white and the outline becomes white — same grammar, opposite polarity — rather than a new
+ * hierarchy invented for this surface.
+ *
+ * ⚠️ AND IT RETIRES A SEPARATE PROBLEM. The ghost's glyph is `--shell-muted` (#9c8878), which on a
+ * white chip measured ~3.1:1 — weak, and one more thing tuned for parchment sitting on this band.
+ * On `--wsh-band-ink` it is 11.1:1 and stops being anything to revisit.
+ */
+.wsh--scrolled .svh-btn-ghost {
+  background: transparent;
+  border-color: var(--wsh-band-ink);
+  color: var(--wsh-band-ink);
+}
+.wsh--scrolled .svh-btn-ghost svg { color: var(--wsh-band-ink); }
+/* the hover fills faintly rather than brightening a border — the only move available on this ground */
+.wsh--scrolled .svh-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--wsh-band-ink);
+}
 /* the hover steps DOWN in brightness, because on this ground brighter is no longer available */
 .wsh--scrolled .svh-btn-ink:hover { background: #e7e9ee; border-color: #e7e9ee; }
 /* ⚠️ THE FOCUS RING IS THE BAND'S FOREGROUND TOO. `--shell-focus` is a burgundy at 45% alpha,

@@ -373,6 +373,35 @@ describe("the header's two states", () => {
   });
 
   /**
+   * ⚠️ FILLED PRIMARY, OUTLINED SECONDARY — AND THE FIRST BUILD OF THIS BAND HAD NEITHER.
+   *
+   * Measured: Export and Log query were BOTH pure white at 11.1:1 against the ground. Identical
+   * brightness, with the ranking carried only by a label colour — which is not a hierarchy, it is
+   * two primaries. The light band already expressed the right relationship as a dark pill against a
+   * white chip; on a dark ground that inverts to filled-white against outlined-white. Same grammar,
+   * opposite polarity, rather than a hierarchy invented for this one surface.
+   *
+   * ⚠️ AND IT RETIRES A SECOND ITEM. The ghost's glyph is `--shell-muted` (#9c8878), ~3.1:1 on a
+   * white chip — one more thing tuned for parchment. On the band's foreground it is 11.1:1.
+   */
+  it("⚠️ THE SECONDARY OUTLINES ON THE BAND — or the pair reads as two primaries", () => {
+    const ghost = all(hdrCss, ".wsh--scrolled .svh-btn-ghost");
+    expect(ghost, "the secondary keeps its white chip — identical in weight to the primary beside it").not.toBe("");
+    expect(ghost, "the secondary is still filled — filled-versus-filled is not a hierarchy").toContain("background: transparent");
+    expect(ghost, "the secondary's rim is not the band's foreground").toContain("border-color: var(--wsh-band-ink)");
+    expect(ghost, "the secondary's label is not the band's foreground").toContain("color: var(--wsh-band-ink)");
+    expect(all(hdrCss, ".wsh--scrolled .svh-btn-ghost svg"), "the secondary's glyph kept a parchment-tuned muted ink")
+      .toContain("color: var(--wsh-band-ink)");
+    /* ⚠️ THE PAIR IS THE POINT, so the primary's opposite is asserted here too: if both ever became
+       outlined, or both filled, each rule above would still pass on its own. */
+    expect(all(hdrCss, ".wsh--scrolled .svh-btn-ink"), "the primary stopped being the filled one")
+      .toContain("background: var(--wsh-band-ink)");
+    /* and the app-wide ghost is untouched — this is `.wsh--scrolled` scoped, like the primary */
+    expect(all(hdrCss, ".svh-btn-ghost"), "the app-wide ghost was changed — this pack recolours ONE band")
+      .toContain("background: var(--shell-card)");
+  });
+
+  /**
    * ⚠️ THE FOCUS RING HAD TO MOVE TOO, and it is the quietest of the four things on this band.
    * `--shell-focus` is a burgundy at 45% alpha tuned to sit on parchment; on `#333c4d` it is a dark
    * ring on a dark ground and effectively absent — a keyboard user loses the strip entirely.
