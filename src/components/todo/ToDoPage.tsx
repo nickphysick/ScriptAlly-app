@@ -80,7 +80,7 @@ import { todoPrefs } from "../../lib/todoPrefs";
    retirement — only the tag NARROWING went with it); `matchesTags` had no reader left. */
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
-import { dockQueue, resolveDocked } from "../../lib/todoDock";
+import { dockQueue, resolveDocked, collapseTimelineDuplicates } from "../../lib/todoDock";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
@@ -2288,6 +2288,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return materialRows(materialName(spec.material, card.who), { isFull, wordCount: ms?.wordCount, versionName });
   }
 
+  /* ⚠️ THE DAY, NOT THE INSTANT. Two rungs of one status seconds apart are the duplicate; two on
+     different days are a re-request. `createdAt` is a Firestore Timestamp on these rows, not the
+     ISO string the global feed carries — reading it as a string yields "Invalid Date" rather than
+     an error, the same trap the `when` line below already documents. */
+  function dayKeyOf(raw: any): string {
+    const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
+    return Number.isFinite(ms) ? new Date(ms).toISOString().slice(0, 10) : "";
+  }
+
   function dockTimeline(card: BoardCard): DockTimelineEvent[] {
     if (!card.relatedRecordId) return [];
     const q = queries.find((x) => x.id === card.relatedRecordId);
@@ -2301,7 +2310,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       status: r.resultingStatus ?? r.type,
       provisional: r.dateProvisional === true,
     }));
-    const kept = live
+    /* ⚠️ ITEM 6 — AND THEN THE SAME-DAY PAIR. `dropSupersededProvisional` above handles an import
+       rung superseded by a RECORDED one; it leaves a pair that is both provisional (or both real)
+       exactly as it found it, which is the `Partial requested · via email` twice on one date.
+       Keyed on (status, DAY), so a re-request on a different day survives — that is a real thing an
+       agency does. Display only: both documents are still in Firestore. */
+    const once = collapseTimelineDuplicates(live, (r) => ({
+      status: r.resultingStatus ?? r.type,
+      day: dayKeyOf(r.createdAt ?? r.date),
+      provisional: r.dateProvisional === true,
+    }));
+    const kept = once
       .map((r, i) => ({ r, i, label: activityEventLabel(r as { activityType?: unknown; resultingStatus?: unknown }) }))
       .filter((x) => x.label !== null);
     return kept

@@ -6,7 +6,8 @@
  */
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
-import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, dockQueue, resolveDocked } from "./todoDock";
+import { dockFlowKind, sendSpecFor, nextInQueue, stepQueue, nextLabel, dockQueue, resolveDocked, collapseTimelineDuplicates } from "./todoDock";
+import { QueryStatus } from "../types";
 
 const card = (over: Partial<BoardCard>): BoardCard => ({
   key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,
@@ -146,5 +147,71 @@ describe("⚠️ THE DOCKED CARD IS RESOLVED FROM THE LIVE LIST, never from a st
     /* The hint must survive an empty read unchanged, or a list that briefly empties would reset
        the reader to the top when it refilled. */
     expect(resolveDocked([], "b", 7).pos).toBe(7);
+  });
+});
+
+/* ── Item 6 · the same-day duplicate, collapsed at display ───────────────────────────────────── */
+
+describe("collapseTimelineDuplicates — two rungs of one status on one day are one event", () => {
+  /* ⚠️ THE STATUSES COME FROM THE ENUM `recordResponse` WRITES, never hand-typed strings. */
+  interface Rung { id: string; status?: QueryStatus; day: string; provisional: boolean }
+  const row = (id: string, status: QueryStatus, day: string, provisional = false): Rung =>
+    ({ id, status, day, provisional });
+  const read = (r: Rung) => ({ status: r.status, day: r.day, provisional: r.provisional });
+  const ids = (rows: Rung[]) => rows.map((r) => r.id);
+
+  it("the observed shape: the same status twice on one day collapses to one", () => {
+    const out = collapseTimelineDuplicates([
+      row("a", QueryStatus.PARTIAL_REQUESTED, "2026-06-28"),
+      row("b", QueryStatus.PARTIAL_REQUESTED, "2026-06-28"),
+    ], read);
+    expect(ids(out)).toEqual(["a"]);
+  });
+
+  it("⚠️ A RE-REQUEST ON A DIFFERENT DAY SURVIVES — that is a real thing an agency does", () => {
+    /* keying on status ALONE would delete it from the record's face. The Query Centre's own
+       timeline does exactly that, which is an older decision and not a precedent to copy. */
+    const out = collapseTimelineDuplicates([
+      row("a", QueryStatus.PARTIAL_REQUESTED, "2026-06-28"),
+      row("b", QueryStatus.PARTIAL_REQUESTED, "2026-07-15"),
+    ], read);
+    expect(ids(out)).toEqual(["a", "b"]);
+  });
+
+  it("⚠️ THE RECORDED ROW WINS OVER THE IMPORTED ONE, whichever came first", () => {
+    /* the recorded row carries the writer's own date and channel; keeping the first would keep
+       whichever happened to sort earlier, which is the import. */
+    const out = collapseTimelineDuplicates([
+      row("imported", QueryStatus.OFFER, "2026-06-28", true),
+      row("recorded", QueryStatus.OFFER, "2026-06-28", false),
+    ], read);
+    expect(ids(out)).toEqual(["recorded"]);
+  });
+
+  it("⚠️ AND IT EMITS AT THE FIRST OCCURRENCE'S POSITION — a collapse never reorders the history", () => {
+    const out = collapseTimelineDuplicates([
+      row("queried", QueryStatus.QUERIED, "2026-06-01"),
+      row("imported", QueryStatus.OFFER, "2026-06-28", true),
+      row("rejected", QueryStatus.REJECTED, "2026-07-02"),
+      row("recorded", QueryStatus.OFFER, "2026-06-28", false),
+    ], read);
+    expect(ids(out)).toEqual(["queried", "recorded", "rejected"]);
+  });
+
+  it("a row with no status is not an event this can judge, and always survives", () => {
+    /* a nudge carries no `resultingStatus`; two nudges on one day are two nudges. */
+    const out = collapseTimelineDuplicates([
+      { id: "n1", day: "2026-06-28", provisional: false } as Rung,
+      { id: "n2", day: "2026-06-28", provisional: false } as Rung,
+    ], read);
+    expect(ids(out)).toEqual(["n1", "n2"]);
+  });
+
+  it("distinct statuses on one day are distinct events", () => {
+    const out = collapseTimelineDuplicates([
+      row("a", QueryStatus.PARTIAL_REQUESTED, "2026-06-28"),
+      row("b", QueryStatus.PARTIAL_SENT, "2026-06-28"),
+    ], read);
+    expect(ids(out)).toEqual(["a", "b"]);
   });
 });

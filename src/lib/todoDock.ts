@@ -25,6 +25,69 @@ import { BoardCard } from "./todoBoard";
    and it draws itself. Deleted rather than left unused, because an unused derivation is one a
    future surface adopts without anyone deciding it should exist. Recoverable at 2e48f14. */
 
+/**
+ * ⚠️ ITEM 6 — TWO RUNGS OF ONE STATUS ON ONE DAY ARE ONE EVENT, COLLAPSED AT DISPLAY.
+ *
+ * The observed shape: `Partial requested · via email` twice, both on 28 Jun. A query has one
+ * partial request; two identical rungs on one day is a record holding the same event twice, not a
+ * history worth showing twice.
+ *
+ * ⚠️ THIS IS A DISPLAY REMEDY OVER A RECORD THAT STILL HOLDS BOTH ENTRIES, and saying so is the
+ * point of this note. SUPERSEDE-ON-WRITE REMAINS THE TRUE FIX — `recordResponse` reading the
+ * subcollection before appending and replacing the provisional rung in place, which is the only
+ * thing that makes the RECORD true. Nothing here touches Firestore: both documents survive, every
+ * future consumer meets the pair again, and the day someone exports the log or writes a new surface
+ * they will find it. What stops supersede-on-write being done is its undo — the existing undo
+ * deletes what the write created and cannot restore a rung the write also removed, so undo would
+ * have to carry the deleted document rather than its id. That is a write-path change with a
+ * data-loss failure mode of its own.
+ *
+ * ⚠️ IT IS NOT `dropSupersededProvisional`, AND THE DIFFERENCE IS WHY BOTH EXIST. That one drops a
+ * PROVISIONAL rung when a REAL one of the same status exists — an import seeding a history the
+ * writer later recorded properly. It leaves two rungs that are BOTH provisional, or both real,
+ * exactly as it found them, which is the pair described here.
+ *
+ * ⚠️ THE KEY IS (status, DAY), NEVER STATUS ALONE. Two `Partial requested` rungs on DIFFERENT days
+ * are a re-request, which is a real thing an agency does and a real thing to show. Collapsing on
+ * status alone would silently delete it from the record's face — the Query Centre's own timeline
+ * does exactly that, which is a separate and older decision, not a precedent to copy.
+ *
+ * ⚠️ AND A NON-PROVISIONAL ROW WINS THE COLLAPSE. Where the pair is one imported and one recorded,
+ * the recorded one carries the writer's own date and channel; keeping the first would keep whichever
+ * happened to sort earlier, which is the import.
+ */
+export function collapseTimelineDuplicates<T>(
+  rows: readonly T[],
+  read: (row: T) => { status: unknown; day: string; provisional: boolean },
+): T[] {
+  const keyOf = (status: unknown, day: string): string | null =>
+    typeof status === "string" && status.trim() ? `${status.trim()}\u0000${day}` : null;
+
+  /* pass one — which row of each pair is the one worth keeping */
+  const best = new Map<string, T>();
+  for (const row of rows) {
+    const { status, day, provisional } = read(row);
+    const k = keyOf(status, day);
+    if (!k) continue;                       // no status: not an event this can judge
+    const held = best.get(k);
+    if (!held || (!provisional && read(held).provisional)) best.set(k, row);
+  }
+
+  /* pass two — emit at the FIRST occurrence's position, whichever row won. Emitting at the
+     winner's index instead would REORDER the history in order to fix a duplicate. */
+  const seen = new Set<string>();
+  const out: T[] = [];
+  for (const row of rows) {
+    const { status, day } = read(row);
+    const k = keyOf(status, day);
+    if (!k) { out.push(row); continue; }    // a statusless row (a nudge) always survives
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(best.get(k) ?? row);
+  }
+  return out;
+}
+
 /** Which inline flow the work surface mounts. Derived from the card, never stored. */
 export type DockFlowKind = "agent-waiting" | "offer" | "stale" | "user-task" | "housekeeping";
 
