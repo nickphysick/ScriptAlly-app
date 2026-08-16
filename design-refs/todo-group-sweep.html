@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ScriptAlly — the group sweep</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --white:#fff;--page:#fdfbf8;--burg:#7c3a2a;--ink:#3a1c14;--ink-strong:#241209;
+  --label:#9c8878;--hair:#e9e0d5;--hair-soft:#f0e8dd;--field-b:#e0d5c8;
+  --sage-a:#dce0d9;--sage-b:#d0d6cc;--sage:#8a9e88;--sage-txt:#5a6e58;
+  --pink:#f5e2da;--pink-b:#e8c8bc;--slate:#eceef2;--slate-b:#dde1e8;--slate-f:#5c6a80;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:#f2ede7;color:var(--ink);padding:20px;}
+.wrap{max-width:920px;margin:0 auto;}
+.hd h1{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;color:var(--ink-strong);}
+.hd p{font-size:13px;color:#6a5a50;margin-top:6px;line-height:1.6;}
+.hd b{color:var(--ink-strong);font-weight:600;}
+.pane{width:860px;height:700px;margin-top:16px;display:flex;flex-direction:column;}
+.pos{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#a89684;padding:0 2px 9px;}
+.card{flex:1;min-height:0;background:var(--white);border:1px solid var(--hair);border-radius:14px;
+  display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(58,28,20,.05);overflow:hidden;}
+.band{background:linear-gradient(135deg,var(--sage-a),var(--sage-b));padding:14px 22px 13px;
+  display:flex;align-items:center;gap:12px;position:relative;flex-shrink:0;}
+.band .ic{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.55);border:1px solid rgba(124,58,42,.18);
+  display:flex;align-items:center;justify-content:center;color:var(--burg);flex-shrink:0;}
+.band .ic svg{width:18px;height:18px;}
+.pre{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--sage-txt);}
+.nm{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:#2e3a2c;line-height:1.15;}
+.prog{margin-left:auto;text-align:right;}
+.prog .k{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--sage-txt);opacity:.85;}
+.prog .v{font-family:'Playfair Display',serif;font-size:16px;color:#2e3a2c;margin-top:2px;}
+.prog .bar{width:120px;height:3px;border-radius:2px;background:rgba(255,255,255,.5);margin-top:6px;overflow:hidden;}
+.prog .bar i{display:block;height:100%;background:var(--sage-txt);border-radius:2px;transition:width .3s;}
+
+.body{flex:1;min-height:0;overflow-y:auto;padding:14px 20px 8px;}
+.body::-webkit-scrollbar{width:8px;}
+.body::-webkit-scrollbar-thumb{background:#e8ddd0;border-radius:999px;border:2px solid var(--white);}
+.lead{font-size:13px;line-height:1.6;color:#4a3a2e;padding-bottom:13px;border-bottom:1px solid var(--hair-soft);margin-bottom:12px;}
+
+.arow{border:1px solid var(--hair);border-radius:11px;padding:11px 13px;margin-bottom:8px;transition:all .15s;}
+.arow.done{border-color:#dfe5dc;background:#f7faf6;}
+.arow.skipped{opacity:.5;}
+.atop{display:flex;align-items:center;gap:10px;}
+.aname{font-size:13.5px;font-weight:600;color:var(--ink-strong);}
+.aagy{font-size:11.5px;color:#8a7666;}
+.asp{flex:1;}
+.astate{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-txt);display:flex;align-items:center;gap:5px;}
+.astate svg{width:11px;height:11px;}
+.skip{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#b3a496;cursor:pointer;background:none;border:none;padding:4px 6px;}
+.skip:hover{color:var(--burg);}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;}
+.chip{cursor:pointer;font-size:12px;color:#6a5a50;background:#fff;border:1px solid var(--field-b);border-radius:999px;padding:6px 12px;transition:all .14s;}
+.chip:hover{border-color:#d8c8b8;}
+.chip.on{background:var(--ink-strong);border-color:var(--ink-strong);color:#fdfaf5;font-weight:500;}
+.chip.other{border-style:dashed;}
+.alink{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--burg);text-decoration:none;cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-top:9px;}
+.alink svg{width:11px;height:11px;}
+.alink:hover{text-decoration:underline;}
+
+.foot{flex-shrink:0;border-top:1px solid var(--hair-soft);background:#fbf8f3;padding:11px 20px;display:flex;align-items:center;gap:9px;}
+.foot .hint{font-size:11.5px;color:#a89684;font-style:italic;margin-right:auto;}
+.vb{cursor:pointer;font-size:12.5px;color:#6a5a50;background:#fff;border:1px solid var(--field-b);border-radius:9px;padding:9px 13px;}
+.vb:hover{border-color:#d8c8b8;color:var(--ink-strong);}
+.prime{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:500;
+  background:var(--ink-strong);color:#fdfaf5;border:1px solid var(--ink-strong);border-radius:10px;padding:10px 20px;}
+.prime:disabled{opacity:.35;cursor:default;}
+.prime svg{width:14px;height:14px;}
+.note{margin-top:16px;font-size:12.5px;color:#6a5a50;line-height:1.6;background:#fff;border:1px solid var(--hair);border-radius:12px;padding:14px 16px;}
+.note b{color:var(--ink-strong);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <h1>Working a housekeeping cohort</h1>
+    <p>A group row — <b>16 materials wanted</b> — opens a sweep in the pane rather than docking nothing.
+    One row per agent, the answer inline, and a progress bar that fills as you go. Skip anything that needs their website open.</p>
+  </div>
+
+  <div class="pane">
+    <div class="pos">Housekeeping · 16 agents</div>
+    <div class="card">
+      <div class="band">
+        <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M52 8"/><path d="M18 4 11 11"/><path d="M5 19c1.5-6 5-9.5 10-10.5l2.5 2.5C16.5 16 13 19.5 7 21l-2-2Z"/></svg></span>
+        <span><span class="pre">A materials list is missing for</span><span class="nm" id="hn">16 agents</span></span>
+        <span class="prog"><div class="k">Answered</div><div class="v" id="pv">0 of 16</div><div class="bar"><i id="pb" style="width:0%"></i></div></span>
+      </div>
+      <div class="body">
+        <div class="lead">Each of these agents has no materials list on record, so Discover can't weigh them and a query package can't be built for them. The common answers are one press; anything unusual opens their listing.</div>
+        <div id="rows"></div>
+      </div>
+      <div class="foot">
+        <span class="hint" id="hint">Nothing recorded yet.</span>
+        <button class="vb" onclick="skipAll()">Skip the rest for now</button>
+        <button class="prime" id="save" disabled onclick="save()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> <span id="savelab">Record</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Why a list rather than one-at-a-time.</b> A sweep of sixteen where each answer needs the agent's own listing would be sixteen page-loads.
+    Most of these are the same three answers, so the list lets a writer clear the obvious ones in a minute and skip the rest —
+    and a skipped agent stays on the list rather than disappearing.
+  </div>
+</div>
+
+<script>
+var AGENTS=[
+ {n:'Ffion Reece',a:'Reece & Hall'},{n:'Adam Castell',a:'Castell Literary'},
+ {n:'Nina Boateng',a:'Boateng & Fox'},{n:'Rory Vance',a:'The Vance Agency'},
+ {n:'Sadie Kerr',a:'Kerr Literary'},{n:'Tomas Lindqvist',a:'Lindqvist & Co'}
+];
+var OPTS=['Query + synopsis + 3 chapters','Query + first 50 pages','Query letter only','Query + synopsis'];
+var state=AGENTS.map(function(){return {pick:null,skipped:false};});
+
+function render(){
+  document.getElementById('rows').innerHTML=AGENTS.map(function(ag,i){
+    var s=state[i];
+    return '<div class="arow '+(s.pick?'done':'')+' '+(s.skipped?'skipped':'')+'">'+
+      '<div class="atop"><span><span class="aname">'+ag.n+'</span> <span class="aagy">· '+ag.a+'</span></span><span class="asp"></span>'+
+      (s.pick?'<span class="astate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Answered</span>'
+             :'<button class="skip" onclick="skip('+i+')">'+(s.skipped?'Bring back':'Skip')+'</button>')+
+      '</div>'+
+      (s.skipped?'':'<div class="chips">'+OPTS.map(function(o,j){
+        return '<button class="chip '+(s.pick===j?'on':'')+'" onclick="pick('+i+','+j+')">'+o+'</button>';
+      }).join('')+'<button class="chip other" onclick="pick('+i+',99)">Something else…</button></div>'+
+      '<a class="alink"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M10 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-4"/></svg> Open their submissions page</a>')+
+    '</div>';
+  }).join('');
+  var done=state.filter(function(s){return s.pick!==null;}).length;
+  document.getElementById('pv').textContent=done+' of 16';
+  document.getElementById('pb').style.width=(done/16*100)+'%';
+  document.getElementById('save').disabled=done===0;
+  document.getElementById('savelab').textContent=done?('Record '+done+(done===1?' answer':' answers')):'Record';
+  document.getElementById('hint').textContent=done
+    ? done+' answered · the rest stay on your list'
+    : 'Nothing recorded yet.';
+}
+function pick(i,j){state[i].pick=state[i].pick===j?null:j;state[i].skipped=false;render();}
+function skip(i){state[i].skipped=!state[i].skipped;state[i].pick=null;render();}
+function skipAll(){state=state.map(function(s){return s.pick!==null?s:{pick:null,skipped:true};});render();}
+function save(){
+  var done=state.filter(function(s){return s.pick!==null;}).length;
+  document.getElementById('hint').textContent='Recorded '+done+' · '+(16-done)+' still without a materials list';
+}
+render();
+</script>
+</body>
+</html>
