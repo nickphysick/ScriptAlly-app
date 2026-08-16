@@ -339,9 +339,27 @@
   background: #fbf6ee;
   border-radius: 0 0 8px 8px;
 }
+/* ⚠️ THE HINT TAKES THE SPACE AND GIVES IT UP FIRST. `margin-right: auto` puts the buttons hard
+   right; `min-width: 0` + the ellipsis lets it truncate; `flex-shrink` on the buttons is 0 so they
+   never wrap. A verb on its own line reads as a different control from the three above it. */
 .tdk-footgrow { flex: 1; }
+.tdk-vb {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer; flex: none;
+  font: inherit; font-size: 12.5px; color: #6a5a50;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 9px; padding: 9px 13px; white-space: nowrap;
+}
+.tdk-vb:hover:not(:disabled) { border-color: #d8c8b8; color: #241209; }
+.tdk-vb svg { color: #a89684; }
+/* the house disabled grammar — paper, hairline, faint, not-allowed; never opacity alone */
+.tdk-vb:disabled { background: var(--shell-card, #fdfaf5); border-color: #e8dfd1; color: #b3a394; cursor: not-allowed; }
+.tdk-vb:disabled svg { color: #cbbcae; }
+.tdk-vbsep { width: 1px; height: 22px; background: #e8ddd0; margin: 0 3px; flex: none; }
 /* the consequence, quiet and italic — it states, it does not instruct */
-.tdk-foothint { font-size: 11.5px; color: #a89684; font-style: italic; min-width: 0; }
+.tdk-foothint {
+  font-size: 11.5px; color: #a89684; font-style: italic;
+  min-width: 0; margin-right: auto; padding-right: 12px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 
 /* ⚠️ BLACK MEANS "THIS ADVANCES" — the same grammar as the calendar's confirm and the bar's Action,
    reading the token rather than restating a near-black hex. */

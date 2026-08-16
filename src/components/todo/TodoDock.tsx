@@ -23,7 +23,7 @@
  * decides what to OFFER; it never decides what happens.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy, Check } from "lucide-react";
+import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy, Check, ExternalLink } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
@@ -122,6 +122,20 @@ export interface TodoDockProps {
   journeyHolders?: (card: BoardCard) => { holding: HolderRow[]; queried: HolderRow[] } | undefined;
   /** The reply-by day, where the record has one — the `time` branch caps its reminder there. */
   replyBy?: (card: BoardCard) => string | undefined;
+  /**
+   * ⚠️ THIS TASK'S VERBS — REHOMED FROM THE COMMAND BAR, not rebuilt. Every handler behind these
+   * already existed and every one is reachable elsewhere (`forkStale` from the ⋯ menu, the dial
+   * from the rail's row menu), so nothing here is a new behaviour or a new entrance.
+   *
+   * ⚠️ THE SNOOZE HANDS BACK ITS OWN ELEMENT, because the dial is a POPOVER the page owns and it
+   * needs something to hang off. The card does not mount the dial — it says which button was
+   * pressed, exactly as it hands every other act upward.
+   */
+  verbs?: (card: BoardCard) => {
+    snooze: { disabled: boolean; onPress: (anchor: HTMLElement) => void };
+    openQuery: { disabled: boolean; onPress: () => void };
+    dismiss: { disabled: boolean; onPress: () => void };
+  } | undefined;
   /** What the agent asked for, in their words — for the journey's reference block. */
   ask?: (card: BoardCard) => { quote?: string; meta?: string } | undefined;
   /** The query's recorded send method, so the journey opens on it rather than on a default. */
@@ -153,7 +167,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, journeyHolders, replyBy, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -695,9 +709,36 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             outer one would offer to re-open a journey that is already open. */}
         {!draft && (
           <div className="tdk-foot">
-            {/* the consequence, stated before the act rather than discovered after it */}
+            {/* the consequence, stated before the act rather than discovered after it.
+                ⚠️ IT TAKES THE REMAINING SPACE AND GIVES IT UP FIRST — `margin-right: auto` plus a
+                min-width of 0, so on a narrow pane the hint truncates and then drops before any
+                button wraps. Buttons never wrap to a second row: a verb on its own line reads as a
+                different control from the three above it. */}
             <span className="tdk-foothint">Nothing is sent from here — this records what happened.</span>
-            <span className="tdk-footgrow" />
+            {(() => {
+              const v = verbs?.(card);
+              if (!v) return null;
+              /* ⚠️ INAPPLICABLE VERBS GREY IN PLACE AND NEVER VANISH — an offer cannot be
+                 dismissed, and a control that disappears leaves the writer wondering whether the
+                 app knows something. The house disabled grammar, not opacity alone. */
+              return (
+                <>
+                  <button type="button" className="tdk-vb" disabled={v.snooze.disabled}
+                    onClick={(e) => v.snooze.onPress(e.currentTarget)}>
+                    <Clock size={14} aria-hidden /> Snooze
+                  </button>
+                  <button type="button" className="tdk-vb" disabled={v.openQuery.disabled}
+                    onClick={() => v.openQuery.onPress()}>
+                    <ExternalLink size={14} aria-hidden /> Open query
+                  </button>
+                  <button type="button" className="tdk-vb" disabled={v.dismiss.disabled}
+                    onClick={() => v.dismiss.onPress()}>
+                    <X size={14} aria-hidden /> Dismiss
+                  </button>
+                  <span className="tdk-vbsep" aria-hidden />
+                </>
+              );
+            })()}
             <button
               type="button"
               className="tdk-prime"

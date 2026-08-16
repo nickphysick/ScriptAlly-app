@@ -416,6 +416,71 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(commit).not.toContain("openFlowCards");
   });
 
+  /* ── the footer's task verbs ────────────────────────────────────────────────────────────────── */
+
+  it("⚠️ THE FOOTER CARRIES THIS TASK'S VERBS — hint, three quiet buttons, divider, black Action", () => {
+    const html = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => []} onPrimary={() => {}} onMore={() => {}}
+        primaryLabel={() => "Action"}
+        verbs={() => ({
+          snooze: { disabled: false, onPress: () => {} },
+          openQuery: { disabled: false, onPress: () => {} },
+          dismiss: { disabled: false, onPress: () => {} },
+        })} />,
+    );
+    const foot = html.slice(html.indexOf('class="tdk-foot"'));
+    expect(html.indexOf('class="tdk-foot"'), "the footer marker is gone — this slice reads nothing").toBeGreaterThan(-1);
+    for (const v of ["Snooze", "Open query", "Dismiss", "Action"]) expect(foot, v).toContain(v);
+    expect(foot).toContain("tdk-vbsep");
+    /* the order the ref draws: hint, three verbs, divider, primary */
+    const at = (t: string) => foot.indexOf(t);
+    expect(at("tdk-foothint")).toBeLessThan(at("Snooze"));
+    expect(at("Snooze")).toBeLessThan(at("Open query"));
+    expect(at("Open query")).toBeLessThan(at("Dismiss"));
+    expect(at("Dismiss")).toBeLessThan(at("tdk-vbsep"));
+    expect(at("tdk-vbsep")).toBeLessThan(at("tdk-prime"));
+  });
+
+  it("⚠️ AN INAPPLICABLE VERB GREYS IN PLACE AND NEVER VANISHES", () => {
+    /* an offer cannot be dismissed; a control that disappears leaves the writer wondering whether
+       the app knows something they do not */
+    const html = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => []} onPrimary={() => {}} onMore={() => {}}
+        verbs={() => ({
+          snooze: { disabled: true, onPress: () => {} },
+          openQuery: { disabled: true, onPress: () => {} },
+          dismiss: { disabled: true, onPress: () => {} },
+        })} />,
+    );
+    expect(html).toContain("Dismiss");
+    expect((html.match(/class="tdk-vb" disabled/g) ?? [])).toHaveLength(3);
+    /* the house disabled grammar — paper, hairline, faint, not-allowed; never opacity alone */
+    const rule = dockCssRule(".tdk-vb:disabled {");
+    expect(rule).toContain("cursor: not-allowed");
+    expect(rule).not.toContain("opacity");
+  });
+
+  it("⚠️ THE HINT GIVES UP THE SPACE FIRST — buttons never wrap to a second row", () => {
+    /* a verb on its own line reads as a different control from the three above it */
+    const hint = dockCssRule(".tdk-foothint {");
+    expect(hint).toContain("margin-right: auto");
+    expect(hint).toContain("min-width: 0");
+    expect(hint).toContain("text-overflow: ellipsis");
+    expect(dockCssRule(".tdk-vb {")).toContain("flex: none");
+  });
+
+  it("the card renders no verbs at all when the page hands it none", () => {
+    /* the prop is the seam — a card without it is the surface as it was */
+    const bare = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => []} onPrimary={() => {}} onMore={() => {}} />,
+    );
+    expect(bare).not.toContain("tdk-vbsep");
+    expect(bare).not.toContain("Open query");
+  });
+
   /* ── Item 5 · the import's bookkeeping ─────────────────────────────────────────────────────── */
 
   it("⚠️ A PROVISIONAL RUNG SHOWS THE EVENT AND NOTHING ELSE", () => {

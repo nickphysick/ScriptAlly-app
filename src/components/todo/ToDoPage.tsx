@@ -652,7 +652,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      card, it is only read when a narrowing has emptied the rail, and nothing derives from it. */
   const heldCard = useRef<BoardCard | null>(null);
   /* the command bar's own snooze door — the fifth onto the ONE dial */
-  const cbSnooze = useRef<HTMLButtonElement | null>(null);
+  /* the dial's anchor — whichever control opened it. `HTMLElement`, not `HTMLButtonElement`: the
+     card's footer hands back its own element and the dial only needs a box to hang off. */
+  const cbSnooze = useRef<HTMLElement | null>(null);
   const [cbDial, setCbDial] = useState(false);
   /* the list card's two menus — mutually exclusive, both dismissed the same three ways */
   const [filterOpen, setFilterOpen] = useState(false);
@@ -1473,7 +1475,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     * task's PLACE in the list rather than on the record, which is the bar's job.
                     */}
                   <button type="button" className="tdw-cbbtn" disabled={!offersLeaf("snooze-1")}
-                    ref={cbSnooze}
+                    ref={(el) => { cbSnooze.current = el; }}
                     onClick={() => setCbDial((v) => !v)}>
                     <Clock size={14} aria-hidden /> Snooze
                   </button>
@@ -1568,6 +1570,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                      before the next, rather than six half-wired at once. */
                   onCommitSend={paneJourneyKind(paneCard) ? commitFromPane : undefined}
                   journeyKind={paneJourneyKind}
+                  /* ⚠️ THE SAME HANDLERS AND THE SAME GATING THE BAR USED — `offersLeaf` off
+                     `cardMenu`, so the footer's greying and the ⋯ menu's cannot disagree about what
+                     applies to a card. A rehoming, not a rebuild. */
+                  verbs={(c) => {
+                    const col = groupColumn(cardBucket(c) === "note" ? "yours" : "urgent");
+                    const menu = cardMenu(c, col);
+                    const offers = (id: string) => menu.some((g) => g.entries.some((e) =>
+                      e.kind === "leaf" ? e.id === id && !e.disabled : e.sub.some((x) => x.id === id && !x.disabled)));
+                    return {
+                      snooze: {
+                        disabled: !offers("snooze-1"),
+                        onPress: (anchor: HTMLElement) => { cbSnooze.current = anchor; setCbDial(true); },
+                      },
+                      openQuery: {
+                        disabled: !c.relatedRecordId,
+                        onPress: () => c.relatedRecordId && onNavigate("queries", c.relatedRecordId),
+                      },
+                      dismiss: {
+                        disabled: !offers("dismiss-week"),
+                        onPress: () => forkStale(c, "notNow"),
+                      },
+                    };
+                  }}
                   /* ⚠️ ONE DERIVATION, TWO PRESENTATIONS — `dockHolders` already feeds §4.4's card
                      section from `notifyGroups(...).pages`; the journey reads the SAME builder and
                      adds the query-only group, because courtesy at offer stage reaches both. */
