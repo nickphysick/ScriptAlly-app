@@ -53,6 +53,34 @@ test("item 3 — the fix journey's stack is derived", async ({ page }) => {
     return;
   }
 
+  /**
+   * ⚠️ A GROUPED FIX ROW OPENS THE SWEEP, NOT THE JOURNEY — and that is the right answer, not a
+   * miss. The journey asks one agent's questions; a row standing for twelve agents is a cohort, and
+   * Item 4 built the surface for it. So the `fix` JOURNEY is still unwalked on this account, but the
+   * reason has changed: before, the row docked nothing at all; now it docks the correct thing.
+   *
+   * ⚠️ AN INDIVIDUAL `fix` CARD IS WHAT THE JOURNEY NEEDS, and this account has none — every
+   * data-quality gap here belongs to a group. The report says so rather than implying a walk.
+   */
+  const surface = await page.evaluate(() => {
+    const vis = (e: Element) => e.getBoundingClientRect().height > 0;
+    const g = (s: string) => [...document.querySelectorAll(s)].find(vis) as HTMLElement | undefined;
+    return {
+      sweep: !!g(".psw-foot"),
+      journeyPrimary: !!g(".tdk-prime"),
+      steps: [...document.querySelectorAll(".pj-step")].filter(vis).length,
+    };
+  });
+  console.log("WHAT THE GROUPED FIX ROW OPENS:", JSON.stringify(surface));
+  await page.screenshot({ path: shot });
+
+  if (surface.sweep) {
+    console.log("THE SWEEP — correct for a cohort. The per-agent `fix` journey is UNWALKED on this");
+    console.log("account: every data-quality gap here is grouped, so no individual fix card exists.");
+    expect(surface.steps, "a cohort rendered a per-agent step stack").toBe(0);
+    return;
+  }
+
   await page.locator(".tdk-prime").click({ timeout: 10_000 });
   await page.waitForTimeout(600);
 
