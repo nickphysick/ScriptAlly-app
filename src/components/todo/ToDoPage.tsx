@@ -2315,6 +2315,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      different days are a re-request. `createdAt` is a Firestore Timestamp on these rows, not the
      ISO string the global feed carries — reading it as a string yields "Invalid Date" rather than
      an error, the same trap the `when` line below already documents. */
+  /** "2 Apr" — the rung's day, for a line that states a fact rather than quotes a person. */
+  function dayLabel(raw: any): string {
+    const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
+    return Number.isFinite(ms) ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
+  }
+
   function dayKeyOf(raw: any): string {
     const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
     return Number.isFinite(ms) ? new Date(ms).toISOString().slice(0, 10) : "";
@@ -2326,7 +2332,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * card already derives. Absent where the record is silent: a "no request recorded" panel is a
    * heading over an absence.
    */
-  function dockAsk(card: BoardCard): { quote?: string; meta?: string } | undefined {
+  function dockAsk(card: BoardCard): { fact?: string; meta?: string } | undefined {
     if (!card.relatedRecordId) return undefined;
     const rows = dockRows.filter((r) => {
       const st = normalizeResultingStatus(r.resultingStatus);
@@ -2335,9 +2341,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const last = rows[rows.length - 1];
     /* ⚠️ AND A PROVISIONAL RUNG'S NOTE IS THE IMPORT'S BOOKKEEPING, not the agency's words — the
        same rule Item 5 applied to the timeline's sub-line, for the same reason. */
-    const quote = last && last.dateProvisional !== true && last.note ? String(last.note) : undefined;
+    const note = last && last.dateProvisional !== true && last.note ? String(last.note) : undefined;
+    /* ⚠️ THE DATE JOINS THE LINE, which is what makes it read as a fact rather than a sentence
+       somebody uttered. The rung's own `createdAt`, through the same reader the timeline uses —
+       a Firestore Timestamp on these rows, not the ISO string the global feed carries. */
+    const when = last ? dayLabel(last.createdAt ?? last.date) : "";
+    const fact = note ? (when ? `${note} · ${when}` : note) : undefined;
     const meta = card.record || undefined;
-    return quote || meta ? { ...(quote ? { quote } : {}), ...(meta ? { meta } : {}) } : undefined;
+    return fact || meta ? { ...(fact ? { fact } : {}), ...(meta ? { meta } : {}) } : undefined;
   }
 
   /**

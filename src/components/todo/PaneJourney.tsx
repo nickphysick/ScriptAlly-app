@@ -36,8 +36,21 @@ import "./paneJourney.css";
 export interface PaneJourneyProps {
   /** The rows the card states as on file — pre-ticked, because this confirms rather than asks. */
   materials: MaterialRow[];
-  /** What the agent asked for, in their own words. Absent where the record is silent. */
-  ask?: { quote?: string; meta?: string };
+  /**
+   * ⚠️ THE REQUEST, IN THE ONE REGISTER THE DATA CAN SUPPORT — a plain fact line, never a quote.
+   *
+   * The ref draws this slot carrying the agent's actual words ("First fifty pages as a PDF
+   * attachment"), which is why it reads as something they said. NOTHING IN THIS APP STORES THAT.
+   * Every `note` on a per-query activity rung is written by `buildActivityNote` /
+   * `statusChangeDescription` — pure functions of the status and four typed fields, with no writer
+   * text and no agent text folded in anywhere. So the quoted register would not be occasionally
+   * wrong; it would be wrong every time.
+   *
+   * Two registers chosen by source is the right design and it needs a source. What would have to
+   * exist: a writer-supplied field on the rung, captured when a response is recorded. `details`
+   * exists on the LEGACY GLOBAL feed doc and is also derived (`respondBy()`), so it is not it.
+   */
+  ask?: { fact?: string; meta?: string };
   value: JourneySendValues;
   onChange: (v: JourneySendValues) => void;
   /** `Back to the task` — the way out at the TOP of the body. Writes nothing. */
@@ -67,12 +80,14 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, value,
         </button>
       </div>
 
-      {/* ⚠️ WHAT THEY ASKED FOR, WHERE THE RECORD HOLDS IT — omitted entirely where it does not.
-          A "no request recorded" panel is a heading over an absence. */}
-      {(ask?.quote || ask?.meta) && (
+      {/* ⚠️ "ON THE RECORD", NOT "WHAT THEY ASKED FOR" — the heading is half the register. The old
+          one framed a derived string as something the agent phrased; this one states where the line
+          came from and claims nothing about who wrote it. Omitted entirely where the record holds
+          nothing: a "no request recorded" panel is a heading over an absence. */}
+      {(ask?.fact || ask?.meta) && (
         <div className="pj-ref">
-          <h5>What they asked for</h5>
-          {ask.quote && <div className="pj-refq">{ask.quote}</div>}
+          <h5>On the record</h5>
+          {ask.fact && <div className="pj-reff">{ask.fact}</div>}
           {ask.meta && <div className="pj-refm">{ask.meta}</div>}
         </div>
       )}

@@ -26,7 +26,10 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; color: #9c8878; margin-bottom: 8px;
 }
-.pj-refq { font-size: 13px; line-height: 1.6; color: #4a3a2e; }
+/* ⚠️ A PLAIN FACT LINE — not italic, not quoted, no speech marks. The ref's slot carries the
+   agent's own words and earns a quotation's register; this one carries a string the app composed,
+   and dressing it as speech attributes it to someone who never said it. */
+.pj-reff { font-size: 13px; line-height: 1.6; color: #4a3a2e; font-style: normal; }
 .pj-refm {
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #b3a496;
