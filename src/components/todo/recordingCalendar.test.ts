@@ -87,6 +87,17 @@ describe("the calendar's settled values — locked so a rebuild cannot lose them
     expect(rule(todoCss, ".cal-d:hover:not(:disabled) {")).toContain("background: #f2ede7");
   });
 
+  it("⚠️ NO BURGUNDY BUTTON FILL SURVIVES IN THE TWO SIBLING SURFACES EITHER", () => {
+    /* the rule is app-wide, and `found.md` had recorded both of these as still breaking it: the
+       note composer's save, and `BrandDatePicker`'s selected day — the exact fault fixed here, in
+       the other date surface. */
+    expect(rule(todoCss, ".tdb-nc-save {")).toContain("background: var(--ink-strong");
+    const forms = strip(readFileSync(join(here, "../forms/forms.css"), "utf8"));
+    expect(rule(forms, ".sa-dp-day.sel {")).toContain("background: var(--ink-strong");
+    expect(rule(forms, ".sa-dp-day.sel {")).not.toContain("#7c3a2a");
+    expect(rule(forms, ".sa-dp-day:hover {")).toContain("#f2ede7");
+  });
+
   it("⚠️ EVERY TOKEN THE PORTALLED CARD READS HAS A LITERAL FALLBACK", () => {
     /* `RecordingCalendar` portals to `document.body`; the theme's properties are declared on a class
        inside `#root`. Outside that subtree `var(--paper)` resolves to nothing, and `var()` on an

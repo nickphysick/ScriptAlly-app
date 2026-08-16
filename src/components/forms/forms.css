@@ -331,12 +331,16 @@
   cursor: pointer;
   transition: all 0.13s;
 }
-.sa-dp-day:hover { background: #f5e2da; color: #7c3a2a; }
+/* ⚠️ THE SETTLED DATE TREATMENT, brought across from `RecordingCalendar`: a parchment highlight for
+   hover, the ink fill for a selection. This picker had the burgundy fill that was fixed there — the
+   same fault in the sibling surface, which is one more argument for the replace-BrandDatePicker
+   question its header already defers. */
+.sa-dp-day:hover { background: #f2ede7; color: #2b2118; }
 .sa-dp-day.muted { color: #cbbcae; cursor: default; }
 .sa-dp-day.muted:hover { background: transparent; color: #cbbcae; }
 .sa-dp-day.today { font-weight: 600; color: #5a6e58; box-shadow: inset 0 0 0 1px #b8c8b0; }
-.sa-dp-day.sel { background: #7c3a2a; color: #f5ede8; font-weight: 500; }
-.sa-dp-day.sel:hover { background: #5a2a1e; color: #f5ede8; }
+.sa-dp-day.sel { background: var(--ink-strong, #241209); color: var(--paper, #fdfaf5); font-weight: 500; }
+.sa-dp-day.sel:hover { background: #3a1c14; color: var(--paper, #fdfaf5); }
 /* outside min/max — inert, and it must READ inert, or a click that does nothing looks broken */
 .sa-dp-day.off { color: #d5cabc; cursor: default; pointer-events: none; }
 .sa-dp-day.off:hover { background: transparent; }

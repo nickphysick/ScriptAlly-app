@@ -460,8 +460,11 @@
 .tdb-nc-cancel { flex: 0 0 auto; background: none; border: 0; padding: 0 6px; font: inherit; font-size: 12px; color: var(--nt-dtl, #5d5245); cursor: pointer; }
 .tdb-nc-cancel:hover { color: var(--ink, #2a1a13); text-decoration: underline; }
 
-.tdb-nc-save { flex: 0 0 auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 32px; padding: 0 15px; border-radius: 99px; background: var(--burg, #7c3a2a); border: 1px solid var(--burg, #7c3a2a); color: var(--paper, #f6efe6); font-size: 12px; font-weight: 600; cursor: pointer; }
-.tdb-nc-save:hover:not(:disabled) { background: #6b3023; }
+/* ⚠️ INK, NOT BURGUNDY — the standing rule: no burgundy button fills anywhere. Saving a note is a
+   commit, so it wears the commit's grammar (`--ink-strong` with parchment text), the same as the
+   card's primary, the journey's and the calendar's confirm. */
+.tdb-nc-save { flex: 0 0 auto; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 32px; padding: 0 15px; border-radius: 99px; background: var(--ink-strong, #241209); border: 1px solid var(--ink-strong, #241209); color: var(--paper, #f6efe6); font-size: 12px; font-weight: 600; cursor: pointer; }
+.tdb-nc-save:hover:not(:disabled) { background: #3a1c14; border-color: #3a1c14; }
 
 /* ⚠️ THE HOUSE INERT GRAMMAR, NOT OPACITY (fix pack, 10 Aug). It was `opacity: .45`, which dims the
    burgundy to a washed-out burgundy — a colour that still reads as the primary, only faded, so the
