@@ -1,0 +1,130 @@
+/**
+ * PaneJourney — the journey INSIDE the card (Item 9, Phase 2; ref todo-journey-in-pane.html).
+ *
+ * ⚠️ THE SUMMARY AND THE FOOTER ARE PINNED; THE STEPS SCROLL. Both are siblings of the scroller
+ * rather than children of it, so the sentence you are about to commit and the button that commits
+ * it are on screen together whatever the step stack's length. The ref draws exactly this — `.sum`
+ * and `.foot` both `flex-shrink: 0` outside `.body`.
+ *
+ * ⚠️ CLASSES ARE `pj-`, NOT `tdb-jn*`. FocusFlow's takeover carries a near-identical vocabulary and
+ * borrowing it would tie this surface's appearance to a component it is replacing — the day the
+ * takeover is deleted its stylesheet goes with it.
+ */
+
+.pj-head { display: flex; align-items: center; gap: 10px; padding: 0 0 14px; }
+.pj-back {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  font: inherit; font-size: 12.5px; color: #6a5a50;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 9px; padding: 7px 12px;
+}
+.pj-back:hover { border-color: #d8c8b8; color: #241209; }
+.pj-back svg { color: #a89684; }
+
+/* what they asked for — above the first step, never a column beside it */
+.pj-ref { background: #fff; border: 1px solid #ece0d2; border-radius: 11px; padding: 13px 15px; margin-bottom: 16px; }
+.pj-ref h5 {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; color: #9c8878; margin-bottom: 8px;
+}
+.pj-refq { font-size: 13px; line-height: 1.6; color: #4a3a2e; }
+.pj-refm {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #b3a496;
+  margin-top: 8px; padding-top: 8px; border-top: 1px solid #f2e9dd;
+}
+
+.pj-step { padding-bottom: 18px; }
+.pj-step + .pj-step { border-top: 1px solid #f0e7db; padding-top: 16px; }
+.pj-n { display: flex; align-items: baseline; gap: 9px; margin-bottom: 10px; }
+.pj-n .i {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.1em; color: #7c3a2a;
+}
+.pj-n h4 { font-family: "Playfair Display", Georgia, serif; font-size: 16.5px; font-weight: 500; color: #241209; margin: 0; }
+.pj-n .opt { font-size: 11px; color: #b3a496; font-style: italic; margin-left: auto; }
+
+.pj-opts { display: flex; flex-direction: column; gap: 7px; }
+/* ⚠️ A `<button>`, NOT A DIV WITH AN onClick. The row toggles, so it is a control: it takes the
+   keyboard, it announces `aria-pressed`, and it needs no role bolted on. */
+.pj-orow {
+  display: flex; align-items: center; gap: 11px; width: 100%; text-align: left;
+  font: inherit; font-size: 13px; color: #4d4238;
+  background: #fff; border: 1px solid #ece0d2; border-radius: 10px; padding: 11px 13px; cursor: pointer;
+}
+.pj-orow:hover { border-color: #dcc8b8; }
+.pj-orow.on { border-color: #8a9e88; background: #f6faf5; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.1); }
+.pj-bx {
+  width: 17px; height: 17px; border-radius: 5px; border: 1.5px solid #d5c8ba; background: #fff;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: transparent;
+}
+.pj-orow.on .pj-bx { background: #8a9e88; border-color: #8a9e88; color: #fff; }
+.pj-otx { min-width: 0; }
+.pj-otx .sub { display: block; font-size: 11px; color: #a89684; margin-top: 2px; }
+.pj-none { font-size: 12.5px; color: #a5988c; }
+
+.pj-seg { display: flex; gap: 6px; }
+.pj-seg button {
+  flex: 1; cursor: pointer; font: inherit; font-size: 12.5px; color: #6a5a50;
+  background: #fff; border: 1px solid #ece0d2; border-radius: 10px; padding: 10px 8px;
+}
+.pj-seg button:hover { border-color: #dcc8b8; }
+.pj-seg button.on { background: #f5e2da; border-color: #e8c8bc; color: #241209; font-weight: 500; }
+
+.pj-also { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #ece0d2; }
+.pj-also.bare { margin: 0; padding: 0; border-top: 0; }
+.pj-also label {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase; color: #9c8878; margin-bottom: 8px;
+}
+/* ⚠️ CAVEAT — the writer's own words are in the writer's own hand, the same treatment the note
+   card gives them. A recording form is still a thing a person writes. */
+.pj-also textarea {
+  width: 100%; min-height: 74px; box-sizing: border-box;
+  background: #fffdf8; border: 1px solid #ece0d2; border-radius: 10px; padding: 11px 14px;
+  font-family: "Caveat", cursive; font-size: 19px; line-height: 1.45; color: #4a3a2e;
+  resize: vertical; outline: none;
+}
+.pj-also textarea::placeholder { color: #cbbcae; }
+.pj-also textarea:focus { border-color: #8a9e88; box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12); }
+
+/* ── pinned beneath the scroller ─────────────────────────────────────────────────────────────── */
+
+/* ⚠️ `flex: none` AND OUTSIDE THE BODY — the summary is the sentence about to be committed, so it
+   must be on screen with the button that commits it rather than scrolling away above it. */
+.pj-sum {
+  flex: none; margin: 0 6px; padding: 10px 22px 11px;
+  border-top: 1px solid #f0e7db; display: flex; gap: 9px; align-items: flex-start;
+}
+.pj-sum .i {
+  width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #8a9e88; color: #5a6e58;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.pj-sum .t { font-size: 12.5px; color: #5c4a3c; line-height: 1.55; }
+
+/* the journey's own foot band — the card footer's geometry, so the two read as one object */
+.pj-foot {
+  flex: none; display: flex; align-items: center; gap: 12px;
+  margin: 0 6px 6px; padding: 11px 22px;
+  border-top: 1px solid #eee4d7; background: #fbf6ee; border-radius: 0 0 8px 8px;
+}
+.pj-grow { flex: 1; }
+.pj-hint { font-size: 11.5px; color: #a89684; font-style: italic; min-width: 0; }
+.pj-btn {
+  cursor: pointer; font: inherit; font-size: 12.5px; color: #6a5a50;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 9px; padding: 9px 14px; flex: none;
+}
+.pj-btn:hover { border-color: #d8c8b8; color: #241209; }
+/* ⚠️ BLACK MEANS "THIS ADVANCES" — the same grammar as the card's footer and the calendar's
+   confirm, reading the token rather than restating a near-black hex. */
+.pj-prime {
+  cursor: pointer; font: inherit; font-size: 13px; font-weight: 500;
+  background: var(--ink-strong, #241209); border: 1px solid var(--ink-strong, #241209);
+  color: var(--paper, #fdfaf5); border-radius: 9px; padding: 10px 20px;
+  display: inline-flex; align-items: center; gap: 7px; flex: none; white-space: nowrap;
+}
+.pj-prime:hover:not(:disabled) { background: #3a1c14; border-color: #3a1c14; }
+/* the house disabled grammar — paper, hairline, faint, not-allowed; never opacity alone */
+.pj-prime:disabled {
+  background: var(--shell-card, #fdfaf5); border-color: #e8dfd1; color: #b3a394; cursor: not-allowed;
+}

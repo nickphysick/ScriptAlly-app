@@ -31,7 +31,7 @@ import {
 import { flagKeyForTask, flagMatchesTask, MUTED_UNTIL } from "../../lib/taskFlags";
 import {
   choosePicks, rolledOverCards, todayGhosts, MAX_TODAY,
-  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, priorSameTypeSend, duplicateSendPrompt,
+  quickSendPayload, quickNudgePayload, receiptLine, markSentWriteArgs, nudgeWriteArgs, materialOptsForTask, priorSameTypeSend, duplicateSendPrompt, journeyEventISO,
 } from "../../lib/todoWalk";
 import { weekOfQuerying } from "../../lib/dashboardStats";
 import { WriteErrorCode, classifyWriteError, saveErrorCopy } from "../../lib/todoWrite";
@@ -81,7 +81,8 @@ import { todoPrefs } from "../../lib/todoPrefs";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
 import { dockQueue, resolveDocked, collapseTimelineDuplicates } from "../../lib/todoDock";
-import { dropSupersededProvisional } from "../../lib/queryDerivation";
+import { dropSupersededProvisional, normalizeResultingStatus } from "../../lib/queryDerivation";
+import { JourneySendValues } from "../../lib/paneJourney";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
@@ -1560,6 +1561,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   /* ⚠️ ONE DERIVATION FOR BOTH MOUNTS — the bar's Action and the card's footer read
                      the SAME `rowPrimaryLabel`, so they cannot come to name the deed differently. */
                   primaryLabel={(c) => rowPrimaryLabel(c, groupColumn(cardBucket(c) === "note" ? "yours" : "urgent"))}
+                  /* ⚠️ ITEM 9, PHASE 2 — THE `send` BUCKET ONLY. Handing this prop is what moves a
+                     bucket's journey into the pane; every other bucket has no `onCommitSend` and
+                     still opens the takeover through `onPrimary`. One bucket at a time, walked
+                     before the next, rather than six half-wired at once. */
+                  onCommitSend={cardBucket(paneCard) === "send" ? commitSendFromPane : undefined}
+                  ask={dockAsk}
+                  queryMethod={(c) => {
+                    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+                    return q?.sendMethod ? String(q.sendMethod) : undefined;
+                  }}
                   tagsSlot={(c) => c.userTaskId ? (
                     <TagPicker
                       compact
@@ -2307,6 +2318,67 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function dayKeyOf(raw: any): string {
     const ms = raw?.toMillis ? raw.toMillis() : raw?.seconds ? raw.seconds * 1000 : Date.parse(String(raw ?? ""));
     return Number.isFinite(ms) ? new Date(ms).toISOString().slice(0, 10) : "";
+  }
+
+  /**
+   * ⚠️ WHAT THE AGENT ASKED FOR, IN THEIR OWN WORDS — the journey's reference block. It is the
+   * newest incoming rung's own note, displayed verbatim and never parsed, with the anchor line the
+   * card already derives. Absent where the record is silent: a "no request recorded" panel is a
+   * heading over an absence.
+   */
+  function dockAsk(card: BoardCard): { quote?: string; meta?: string } | undefined {
+    if (!card.relatedRecordId) return undefined;
+    const rows = dockRows.filter((r) => {
+      const st = normalizeResultingStatus(r.resultingStatus);
+      return st === QueryStatus.PARTIAL_REQUESTED || st === QueryStatus.FULL_REQUESTED || st === QueryStatus.REVISE_RESUBMIT;
+    });
+    const last = rows[rows.length - 1];
+    /* ⚠️ AND A PROVISIONAL RUNG'S NOTE IS THE IMPORT'S BOOKKEEPING, not the agency's words — the
+       same rule Item 5 applied to the timeline's sub-line, for the same reason. */
+    const quote = last && last.dateProvisional !== true && last.note ? String(last.note) : undefined;
+    const meta = card.record || undefined;
+    return quote || meta ? { ...(quote ? { quote } : {}), ...(meta ? { meta } : {}) } : undefined;
+  }
+
+  /**
+   * ⚠️ THE JOURNEY'S COMMIT RUNS THE EXISTING WRITE, UNCHANGED. `quickSendPayload` builds the same
+   * `StagedPayload` the quick ✓ builds and `markSentWriteArgs` → `recordMaterialsSent` performs it —
+   * so the two surfaces cannot come to record different things. What the journey adds is the
+   * writer's OWN answers in place of the quick path's stated defaults.
+   *
+   * ⚠️ IT DOES NOT ADVANCE TO THE NEXT TASK, deliberately and against what the takeover did. The
+   * writer stays on the card and watches the record change — the new rung in the timeline, the stat
+   * pair flipping, `What goes` and `Where to send it` dropping away because there is nothing left
+   * to send. Moving on is a separate press.
+   */
+  async function commitSendFromPane(card: BoardCard, v: JourneySendValues) {
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    if (!q) return;
+    const action = getPrimaryAction(q.status as QueryStatus);
+    if (action.kind !== "mark-sent") return;
+    const nowIso = new Date().toISOString();
+    const base = quickSendPayload({
+      cardKey: card.key, label: card.title, taskType: card.taskType, queryId: q.id,
+      targetStatus: action.target as QueryStatus, isResubmit: action.markKind === "resubmit",
+      method: v.method, nowIso,
+    });
+    /* the writer's answers replace the defaults; the SHAPE is the quick path's, so the write is */
+    const p = {
+      ...base,
+      sentDate: journeyEventISO(v.sentDate, nowIso),
+      method: v.method,
+      materials: [...v.materials, ...(v.also.trim() ? [v.also.trim()] : [])],
+      ...(v.note.trim() ? { note: v.note.trim() } : {}),
+    };
+    const prev = q.status as QueryStatus;
+    try {
+      await recordMaterialsSent(markSentWriteArgs(p));
+    } catch {
+      flash("Couldn’t record that — try again?", { label: "Try again", fn: () => commitSendFromPane(card, v) });
+      return;
+    }
+    const undo = () => undoQueryStatus(q.id, prev, p.targetStatus);
+    doneToast(card, async () => { await undo(); flash("Restored"); });
   }
 
   function dockTimeline(card: BoardCard): DockTimelineEvent[] {

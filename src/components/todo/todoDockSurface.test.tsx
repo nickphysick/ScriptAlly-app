@@ -328,6 +328,88 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(dockCssRule(".tdk-tl li {")).toContain("grid-template-columns: 60px 20px");
   });
 
+  /* ── Item 9 · the journey renders in the pane ──────────────────────────────────────────────── */
+
+  const withJourney = (over: Partial<React.ComponentProps<typeof TodoDock>> = {}) =>
+    renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => []} onPrimary={() => {}} onMore={() => {}}
+        materials={() => [{ label: "The partial — as Greg asked", sub: "v4" }]}
+        primaryLabel={() => "Record the partial as sent"}
+        onCommitSend={() => {}} {...over} />,
+    );
+
+  it("⚠️ THE CARD OPENS ON THE CARD — the journey is not the default view", () => {
+    /* a surface that opened mid-form would show a writer a set of questions before they had asked
+       to answer any */
+    const html = withJourney();
+    expect(html).toContain("Sending your full to");     // the band's own pre-line
+    expect(html).not.toContain("Back to the task");
+    expect(html).toContain("tdk-foot");                  // the card's footer, with the deed
+  });
+
+  it("⚠️ THE JOURNEY IS NOT AN OVERLAY — no portal, no scrim, no `useOverlay`", () => {
+    /* THE POINT OF THE MOVE. `useOverlay`'s `sealBackground()` puts `inert` on `#root` on the
+       premise that overlays portal to `document.body`; FocusFlow does not portal, so its takeover
+       sealed ITSELF and every control inside was unreachable. A journey that is the card's body
+       cannot have that fault — asserted at source so it cannot quietly become one. */
+    const src = readFileSync(join(here, "PaneJourney.tsx"), "utf8");
+    const code_ = code(src);
+    expect(code_).not.toContain("useOverlay");
+    expect(code_).not.toContain("createPortal");
+    expect(code_).not.toContain("inert");
+    /* the card mounts it inline, as a child of the scroller it already had */
+    expect(code(dockSrc)).toContain("<PaneJourney");
+  });
+
+  it("⚠️ ALL THREE WAYS OUT WRITE NOTHING, and Escape cascades to the journey first", () => {
+    const src = code(dockSrc);
+    /* the journey's own two are `onCancel`, which only clears the draft */
+    expect(code(readFileSync(join(here, "PaneJourney.tsx"), "utf8"))).toContain("onClick={onCancel}");
+    /* and Escape leaves the journey before it closes the pane — a single handler that always
+       closed the dock would throw away a half-filled form to do it */
+    expect(src).toContain('if (e.key === "Escape" && draft) { e.preventDefault(); setDraft(null); return; }');
+    const esc = src.indexOf('e.key === "Escape" && draft');
+    const close = src.indexOf('if (e.key === "Escape") { e.preventDefault(); onClose(); return; }');
+    expect(esc, "the cascade is the wrong way round — the pane closes before the journey").toBeLessThan(close);
+  });
+
+  it("⚠️ THE QUEUE'S KEYS STAND DOWN while a form is open", () => {
+    /* ↑↓ would step the pane out from under a form in progress; Enter would re-fire the deed that
+       opened it */
+    expect(code(dockSrc)).toContain("if (draft) return;");
+  });
+
+  it("⚠️ ONE FOOTER AT A TIME — the card's stands down and the journey brings its own", () => {
+    /* two footers would put two primaries on one card, and the outer one would offer to re-open a
+       journey that is already open */
+    expect(code(dockSrc)).toContain("{!draft && (");
+    const pj = code(readFileSync(join(here, "PaneJourney.tsx"), "utf8"));
+    expect(pj).toContain("pj-foot");
+    expect(pj).toContain("pj-prime");
+  });
+
+  it("⚠️ THE BUCKETS MOVE ONE AT A TIME — no `onCommitSend`, and the card still opens the takeover", () => {
+    /* this is what makes a stop survivable: a bucket without the prop is untouched, so five
+       half-wired journeys is not a state this can reach */
+    const src = code(dockSrc);
+    expect(src).toContain("if (onCommitSend) {");
+    expect(src).toContain("onPrimary(card);");
+    expect(page).toContain('onCommitSend={cardBucket(paneCard) === "send" ? commitSendFromPane : undefined}');
+  });
+
+  it("⚠️ THE COMMIT RUNS THE EXISTING WRITE — never a second path", () => {
+    /* `quickSendPayload` → `markSentWriteArgs` → `recordMaterialsSent` is the quick ✓'s path too,
+       so the two surfaces cannot come to record different things. */
+    expect(page).toContain("await recordMaterialsSent(markSentWriteArgs(p));");
+    expect(page).toContain("const undo = () => undoQueryStatus(q.id, prev, p.targetStatus);");
+    /* and it does NOT advance — the writer watches the record change and moves on separately */
+    const commit = page.slice(page.indexOf("async function commitSendFromPane"), page.indexOf("function dockTimeline"));
+    expect(commit).not.toContain("stepQueue");
+    expect(commit).not.toContain("setDockKey");
+    expect(commit).not.toContain("openFlowCards");
+  });
+
   /* ── Item 5 · the import's bookkeeping ─────────────────────────────────────────────────────── */
 
   it("⚠️ A PROVISIONAL RUNG SHOWS THE EVENT AND NOTHING ELSE", () => {

@@ -27,6 +27,8 @@ import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy,
 import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
+import { PaneJourney, PaneJourneyFoot } from "./PaneJourney";
+import { JourneySendValues, openSend } from "../../lib/paneJourney";
 import { QueryStatus } from "../../types";
 import { ArtSlot } from "./ArtSlot";
 import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
@@ -107,6 +109,17 @@ export interface TodoDockProps {
    * can never come to offer differently-worded versions of one act.
    */
   primaryLabel?: (card: BoardCard) => string;
+  /**
+   * ⚠️ ITEM 9 — THE JOURNEY RENDERS HERE, and the page performs the write. Present = this card's
+   * bucket has an in-pane journey; absent = the card falls back to `onPrimary`, which still opens
+   * the takeover. That is what lets the six buckets move ONE AT A TIME rather than all at once on
+   * a surface nobody has walked yet.
+   */
+  onCommitSend?: (card: BoardCard, values: JourneySendValues) => Promise<void> | void;
+  /** What the agent asked for, in their words — for the journey's reference block. */
+  ask?: (card: BoardCard) => { quote?: string; meta?: string } | undefined;
+  /** The query's recorded send method, so the journey opens on it rather than on a default. */
+  queryMethod?: (card: BoardCard) => string | undefined;
   /* ⚠️ RETIRED WITH THE FOOT BAR (visual rebuild, Phase 4). The card no longer offers a snooze at
      all — the command bar does, opening the ONE dial. The prop is gone rather than left unused:
      an unused prop is a slot a future surface fills without anyone deciding it should exist. */
@@ -134,7 +147,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -142,6 +155,11 @@ export const TodoDock: React.FC<TodoDockProps> = ({
      decision the journey owns — and the card never read it back to anything, so it was a control
      whose only effect was to look like one. */
   const [copied, setCopied] = useState(false);
+  /* ⚠️ THE VIEW IS THE CARD'S OWN STATE, and it is cleared whenever the docked card changes —
+     otherwise stepping to the next task with ↑↓ would land you inside a half-filled form for a
+     record you are no longer looking at. */
+  const [draft, setDraft] = useState<JourneySendValues | null>(null);
+  const [saving, setSaving] = useState(false);
 
   /* ⚠️ THE PER-ITEM RESET WENT WITH `confirmSend` (Phase 6). It existed so a confirmation could
      not carry from one card to the next; the card confirms nothing now — it records — so there is
@@ -150,9 +168,18 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   /* ⚠️ KEYBOARD. Esc closes, ↑↓ walk the queue, Enter is the primary. Bound on the surface rather
      than the document so it cannot reach past an open popover or a field the flow owns. */
   const onKeyDown = (e: React.KeyboardEvent) => {
+    /* ⚠️ ESCAPE CASCADES: the journey first, then the pane. A single handler that always closed the
+       dock would throw away a half-filled form to do it — and leaving the journey writes nothing,
+       so there is nothing to confirm. (The calendar consumes Escape on the CAPTURE phase before
+       either of these sees it, which is its own existing rule.) */
+    if (e.key === "Escape" && draft) { e.preventDefault(); setDraft(null); return; }
     if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
     const editing = (e.target as HTMLElement)?.closest("input, textarea, select");
     if (editing) return; // never steal keys from something being typed into
+    /* ⚠️ ↑↓ AND Enter ARE THE QUEUE'S, AND THE QUEUE IS NOT WHAT YOU ARE DOING. While the journey
+       is open they would step the pane out from under a form in progress, or re-fire the deed that
+       opened it. */
+    if (draft) return;
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       const to = stepQueue(queue, card?.key ?? "", e.key === "ArrowDown" ? 1 : -1);
       if (to) { e.preventDefault(); onSelect(to.key); }
@@ -161,6 +188,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   };
 
   useEffect(() => { surfaceRef.current?.focus(); }, []);
+  /* the journey belongs to the card that opened it — see the note on `draft` */
+  useEffect(() => { setDraft(null); setSaving(false); }, [activeKey]);
 
   if (!card) return null;
 
@@ -241,7 +270,10 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             <span className="tdk-av" aria-hidden>{card.initials}</span>
             <span className="tdk-idtx">
               {/* the pre-line names the ACT, so the band reads as a sentence into the name */}
-              <span className="tdk-pre">{bandPreline(card)}</span>
+              {/* ⚠️ THE BAND STAYS AND ONLY THE PRE-LINE CHANGES. "Sending your partial to" becomes
+                  "Recording what you sent to" — the same disc, name and agency throughout, so the
+                  writer never loses who they are recording against half way through recording it. */}
+              <span className="tdk-pre">{draft ? "Recording what you sent to" : bandPreline(card)}</span>
               <span className="tdk-name">{bandSubject(card)}</span>
               {bandUnder(card) && <span className="tdk-agency">{bandUnder(card)}</span>}
             </span>
@@ -286,15 +318,28 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           * `fade` is the card's own ground token, so the mist is the paper rather than a hex that
           * has to be kept in step with it.
           */}
+        {/* ⚠️ THE CARD'S BODY BECOMES THE FORM — one scroller, two contents. Nothing overlays and
+            nothing has to be dismissed, which is the whole of Item 9 and is also what removes the
+            `inert` seal: a journey that is not an overlay never calls `useOverlay`. */}
         <EdgeFadeScroll
           fade="var(--paper, #fdfaf5)"
           outerClassName="tdk-scroll"
-          scrollClassName="tdk-body"
+          scrollClassName={draft ? "tdk-body tdk-body--journey" : "tdk-body"}
           /* ⚠️ `display` IS PASSED, because the wrapper sets it INLINE and inline beats the class.
              Without this the two-column grid silently becomes a block and the doing column drops
              below the record on every card. */
-          scrollStyle={{ display: "grid" }}
+          scrollStyle={{ display: draft ? "block" : "grid" }}
         >
+          {draft ? (
+            <PaneJourney
+              materials={materials?.(card) ?? []}
+              ask={ask?.(card)}
+              value={draft}
+              onChange={setDraft}
+              onCancel={() => setDraft(null)}
+            />
+          ) : (
+          <>
           <aside className="tdk-story" aria-label={isNote ? "Your note" : "Tracking"}>
             {/**
               * ⚠️ THE STAT PAIR IS THE BAND'S TWO FACTS, IN THE QUERY CENTRE'S GRAMMAR (Phase 2).
@@ -580,6 +625,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             </div>
           )}
           </div>{/* .tdk-work */}
+          </>
+          )}
         </EdgeFadeScroll>
 
         {/* ── THE FOOT ─────────────────────────────────────────────────────
@@ -607,15 +654,54 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           * scrolls under it and the deed is on screen whatever the record's length. That is also
           * what gives the body a bottom edge to scroll AGAINST — see the note on `.tdk-foot`.
           */}
-        <div className="tdk-foot">
-          {/* the consequence, stated before the act rather than discovered after it */}
-          <span className="tdk-foothint">Nothing is sent from here — this records what happened.</span>
-          <span className="tdk-footgrow" />
-          <button type="button" className="tdk-prime" onClick={() => onPrimary(card)}>
-            <Check size={14} aria-hidden />
-            {primaryLabel?.(card) ?? "Action"}
-          </button>
-        </div>
+        {/* ⚠️ PINNED, AS A SIBLING OF THE SCROLLER — see `PaneJourneyFoot`'s note for what building
+            it inside the scroller actually did (the commit at y 1271 in a 1000px viewport). */}
+        {draft && (
+          <PaneJourneyFoot
+            /* ⚠️ THE JOURNEY'S COMMIT NAMES THE DEED; THE CARD'S FOOTER SAYS "Action". That is the
+               ref's own split and it is right: on the card the button OPENS something, so "Action"
+               is honest; at the end of the form it PERFORMS something, and a button that performs
+               must say what. `SendSpec.actLabel` exists for exactly this — its own comment calls it
+               "the ink primary's words" — rather than a fourth phrasing invented here.
+               `rowPrimaryLabel` is the ROW's shorthand and correctly returns "Action". */
+            actLabel={spec?.actLabel ?? primaryLabel?.(card) ?? "Record it as sent"}
+            value={draft}
+            onCancel={() => setDraft(null)}
+            onCommit={async () => {
+              if (!onCommitSend) return;
+              setSaving(true);
+              try { await onCommitSend(card, draft); } finally { setSaving(false); }
+            }}
+            saving={saving}
+          />
+        )}
+
+        {/* ⚠️ THE CARD'S FOOTER STANDS DOWN WHILE THE JOURNEY IS OPEN — the journey carries its own,
+            with Cancel and the commit. Two footers would put two primaries on one card, and the
+            outer one would offer to re-open a journey that is already open. */}
+        {!draft && (
+          <div className="tdk-foot">
+            {/* the consequence, stated before the act rather than discovered after it */}
+            <span className="tdk-foothint">Nothing is sent from here — this records what happened.</span>
+            <span className="tdk-footgrow" />
+            <button
+              type="button"
+              className="tdk-prime"
+              onClick={() => {
+                /* ⚠️ THE JOURNEY OPENS IN THE PANE WHERE ONE EXISTS FOR THIS BUCKET; everything else
+                   still opens the takeover. That is what lets the buckets move one at a time. */
+                if (onCommitSend) {
+                  setDraft(openSend((materials?.(card) ?? []).map((m) => m.label), queryMethod?.(card), new Date()));
+                  return;
+                }
+                onPrimary(card);
+              }}
+            >
+              <Check size={14} aria-hidden />
+              {primaryLabel?.(card) ?? "Action"}
+            </button>
+          </div>
+        )}
 
         {/**
           * ⚠️ THE CARD'S FOOT BAR IS RETIRED (visual rebuild, Phase 4). It carried the ink primary,

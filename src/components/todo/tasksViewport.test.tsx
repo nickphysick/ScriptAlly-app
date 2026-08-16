@@ -633,7 +633,9 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(outer).toContain("min-height: 0");
     const dockSrc = readFileSync(join(here, "TodoDock.tsx"), "utf8");
     expect(dockSrc).toContain("<EdgeFadeScroll");
-    expect(dockSrc).toContain('scrollClassName="tdk-body"');
+    /* the class is conditional now — the journey renders in the SAME scroller, so it carries a
+       modifier rather than a second scrolling element */
+    expect(dockSrc).toContain('scrollClassName={draft ? "tdk-body tdk-body--journey" : "tdk-body"}');
     /* ⚠️ AND THE CHAIN ABOVE IT IS REAL. `flex: 1; min-height: 0` under a BLOCK parent applies to
        nothing and the page keeps working, sized by content — the failure this codebase has been
        caught by twice. Each link asserted, not just the leaf. */
