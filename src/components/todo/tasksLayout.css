@@ -11,7 +11,30 @@
  */
 
 /* ── the header block: title → subtitle → tool row, full content width ──
-   ⚠️ ONE RULE, FOLDED (fix pack, 10 Aug). `.tpl-head` was declared TWICE in this file — here for
+   ⚠️ ONE RULE, FOLDED (fix pack, 10 Aug). `/**
+ * ⚠️ THE RESTING PLATE IS SIZED FOR A MARK THIS PAGE DOES NOT RENDER — 128px against 45px of
+ * content, and that is the ~100px empty band above the control bar.
+ *
+ * The shell's `--wsh-plate-h: 128px` carries its own reason in `index.css`: "38px Playfair and an
+ * 88px mark need the room". The Tasks pages render `wsh-mark--md`, which is 38px — measured on the
+ * deployed page, along with a 44.8px title block. So the premise of the 128 does not hold here, and
+ * roughly 83px of the plate is empty by construction.
+ *
+ * ⚠️ THE 44px GAP BELOW THE HEADER IS NOT TOUCHED, DELIBERATELY. It is a locked value with a
+ * recorded rejection — "half the header's height, rounded" would give 64 and was refused in favour
+ * of 44 — and it is exactly the tidiness a later pass "restores". The band shrinks because the
+ * plate fits its contents, not because the rhythm under it was traded away.
+ *
+ * ⚠️ AND IT IS SCOPED TO THIS LAYOUT, NOT CHANGED IN `index.css`. Nine pages read that token and
+ * most of them render the larger mark; a global edit would shrink headers that are correctly sized.
+ * The lock on `--wsh-plate-h: 128px` in `workspacePageGrid.test.tsx` therefore still holds, which is
+ * the check that a scoped override is the honest shape here rather than a way round a rule.
+ */
+.tpl-wpg {
+  --wsh-plate-h: 84px;
+}
+
+.tpl-head` was declared TWICE in this file — here for
    its width and again ~80 lines down for `flex: 0 0 auto` — both single-class, so any property
    they came to share would have resolved on source order alone. They never overlapped, which is
    exactly how such a pair survives until the day it does. */
