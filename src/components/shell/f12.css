@@ -1820,7 +1820,28 @@
    `--oat` band for the selected row, plus the burgundy spine it already had.
    ⚠️ AND THE HOVER IS UNCHANGED, which is what makes this a re-levelling rather than a repaint: the
    middle rung was always `--paper` and is still legible between the two new ends. */
-.f12-row.f12-sel { background: var(--oat); box-shadow: inset 0 0 0 1px var(--oatline); }
+/**
+ * ══ §4 · SELECTION IS A FLAT PINK FILL ═══════════════════════════════════════════════════════
+ *
+ * ⚠️ FILL ONLY — no ring, no glow, no shadow. The row has now worn three treatments in three packs
+ * (white-with-a-ring on a paper panel, band-with-a-ring on a white one, and this), and each time
+ * the ring was doing work the fill could not: on `--oat` against white the step was small enough to
+ * need an edge. `--pink-t` is a different KIND of difference — a hue nothing else in the column
+ * carries — so an edge on top of it is a second signal for one state.
+ *
+ * ⚠️ AND `box-shadow: none` IS STATED, not merely absent. The base row and the settle animation both
+ * set shadows; leaving this to inheritance is how a ring comes back without anyone choosing it.
+ */
+.f12-row.f12-sel { background: var(--pink-t); box-shadow: none; }
+/* the name is ink-dark on the fill — the base row's ink, stated here so it cannot drift muted */
+.f12-row.f12-sel .f12-nm { color: var(--ink); }
+/**
+ * ⚠️ THE DISC INVERTS, BECAUSE A PINK DISC ON A PINK GROUND IS NOT A DISC. It is the same reasoning
+ * the ref gives for the header plate's avatar: the monogram needs a ground it can sit ON, and pink
+ * on pink muddies rather than contrasts. White with near-black initials, and the same 1px contact
+ * shadow every other small raised thing on this page uses.
+ */
+.f12-row.f12-sel .f12-av { background: var(--white); color: var(--ink); box-shadow: var(--sh-btn); }
 /* ⚠️ BURGUNDY, NOT INK (fix pack §2). On a white lifted row an ink spine reads as a third
    structural line beside the row's own hairline and the column's seam; burgundy is this page's mark
    for "this one", and it is the only place colour is spent on a row. */
@@ -1839,15 +1860,26 @@
   height: 1px; background: var(--hairline); pointer-events: none;
 }
 .f12-row:last-child::after, .f12-row.f12-sel::after { content: none; }
-.f12-row.f12-sel::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px; border-radius: 0 3px 3px 0; background: var(--burg); }
+/* ⚠️ THE BURGUNDY SPINE IS DELETED (§4), NOT HIDDEN. It was the selection's marker back when the
+   fill was a near-neutral step and something had to say which row was live; the fill says it now,
+   and burgundy means OUTGOING on the StatusDots two columns to the right of it. No burgundy
+   anywhere in this list — the rule is the section, and a zeroed rule would read as still true. */
 .f12-row .f12-av { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; }
-/* Smaller-tonal monogram (monogram-styles.html) — the QUERY-LIST instance only (via the additive
-   --sm modifier on that span; the Contact List keeps the shared .f12-av). Warm-grey tonal fill so
-   colour stays reserved for the semantic StatusDots. --mono-tonal is defined here rather than in
-   index.css (a parallel stream holds an uncommitted theme retoken there); fold it into index.css's
-   .t-f12 token block once that lands. Placed AFTER the base rule so it wins at equal specificity. */
-.t-f12 { --mono-tonal: #ece5db; }
-.f12-row .f12-av--sm { width: 32px; height: 32px; background: var(--mono-tonal, #ece5db); color: var(--ink); border: none; font-size: 10.5px; }
+/**
+ * ⚠️ THE BEIGE AVATARS, AND THEIR CAUSE (§4). Nothing was resolving a token differently: `.f12-av`
+ * reads `--pink-av` and always has. This `--sm` modifier — the query list's instance only, added
+ * from monogram-styles.html — OVERRODE it with a warm-grey `--mono-tonal`, on the stated reasoning
+ * that "colour stays reserved for the semantic StatusDots". That reasoning is superseded rather
+ * than wrong: §4 makes pink the selection's own colour in this column, so the discs are pink for
+ * the same reason the selected one is white — they are a family, and the odd one out is the row
+ * you are reading.
+ *
+ * ⚠️ THE TOKEN IS DELETED WITH ITS ONLY READER. `--mono-tonal` existed for this one declaration; a
+ * token left defined and unread is an invitation for the override to come back without its
+ * argument. The size modifier survives — 32px against the shared 30 — because that part was never
+ * about colour.
+ */
+.f12-row .f12-av--sm { width: 32px; height: 32px; color: var(--ink); border: none; font-size: 10.5px; }
 .f12-row .f12-mid { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .f12-row .f12-nm { font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
 .f12-row .f12-ag { font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.09em; color: var(--faint); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

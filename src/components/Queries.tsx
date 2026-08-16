@@ -3660,10 +3660,15 @@ export const Queries: React.FC<{
                     </span>
                     <span className="f12-end">
                       {undoingQueryIds.has(q.id) ? (
+                        /* ⚠️ NO BURGUNDY IN THE LIST (§4) — and this is the only place it was left.
+                           These three dots mark a row whose undo is in flight; burgundy means
+                           OUTGOING on the StatusDot in the same row, so a transient indicator was
+                           borrowing a colour that means something else two columns over. Muted ink
+                           says "working" without claiming a state. */
                         <span className="animate-pulse" style={{ display: "inline-flex", gap: 3 }} aria-hidden="true">
-                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--burg)" }} />
-                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--burg)" }} />
-                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--burg)" }} />
+                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
+                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
+                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
                         </span>
                       ) : (
                         <StatusDot status={q.status} overrideSize={15} />
