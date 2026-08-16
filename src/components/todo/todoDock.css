@@ -320,16 +320,34 @@
 .tdk-detail { font-size: 13.5px; color: #2a1a13; line-height: 1.5; margin: 0 0 10px; }
 
 /* ── the foot ────────────────────────────────────────────────────────── */
+/* ⚠️ THE FOOT BAND SITS INSIDE THE 6px INSET, like the band above it — `margin: 0 6px 6px` and the
+   mirror of the band's radius, so the card's frame runs unbroken round both. A footer drawn flush
+   would put its fill across the inset rule at the bottom corners, which is the same fault the band's
+   own margin exists to avoid.
+   ⚠️ `flex: none`, SO IT DOES NOT SCROLL. It is outside `.tdk-body`; the body scrolls under it and
+   the deed stays on screen whatever the record's length. */
 .tdk-foot {
-  display: flex; align-items: center; gap: 8px;
-  padding: 12px 16px; border-top: 1px solid #f0e9e0; background: #fdfcfa;
+  flex: none;
+  display: flex; align-items: center; gap: 12px;
+  margin: 0 6px 6px;
+  padding: 11px 22px;
+  border-top: 1px solid #eee4d7;
+  background: #fbf6ee;
+  border-radius: 0 0 8px 8px;
 }
+.tdk-footgrow { flex: 1; }
+/* the consequence, quiet and italic — it states, it does not instruct */
+.tdk-foothint { font-size: 11.5px; color: #a89684; font-style: italic; min-width: 0; }
 
+/* ⚠️ BLACK MEANS "THIS ADVANCES" — the same grammar as the calendar's confirm and the bar's Action,
+   reading the token rather than restating a near-black hex. */
 .tdk-prime {
-  font: inherit; font-size: 13px; height: 36px; padding: 0 15px; border-radius: 9px;
-  background: #2a1a13; border: 1px solid #2a1a13; color: #fdfaf5; cursor: pointer;
+  font: inherit; font-size: 13px; font-weight: 500; height: 38px; padding: 0 20px; border-radius: 9px;
+  background: var(--ink-strong, #241209); border: 1px solid var(--ink-strong, #241209);
+  color: var(--paper, #fdfaf5); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px; flex: none; white-space: nowrap;
 }
-.tdk-prime:hover:not(:disabled) { background: #3a2a20; }
+.tdk-prime:hover:not(:disabled) { background: #3a1c14; border-color: #3a1c14; }
 /* the house disabled grammar — paper, hairline, faint, not-allowed; never opacity */
 .tdk-prime:disabled {
   background: var(--shell-card, #fdfaf5); border-color: #e8dfd1; color: #b3a394; cursor: not-allowed;

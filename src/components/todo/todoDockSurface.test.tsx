@@ -436,11 +436,32 @@ describe("the flow mounted is the card's own kind", () => {
  * says the same thing as a position rather than as a name.
  */
 describe("⚠️ THE CARD HAS NO ACTION BAR — there is one action surface and it is not here", () => {
-  it("nothing in the card acts, names an act, or names another card", () => {
+  /**
+   * ⚠️ THE CARD HAS A FOOTER AGAIN, AND THE DEED IS IN IT. This asserted the opposite, and the
+   * reasoning behind that — "two places to act on one task is how they come to offer different
+   * verbs" — was right about the DANGER and wrong about the remedy. What the page actually shipped
+   * was a card that simply stopped, its last section cut by the pane's edge, with the only act
+   * floating in a bar three inches above the thing it acted on.
+   *
+   * ⚠️ THE DANGER IS ANSWERED BY ONE DERIVATION, NOT BY ONE MOUNT. Both controls read the page's
+   * own `rowPrimaryLabel`, so they cannot come to name the deed differently — which is asserted
+   * below and is what makes two mounts safe where two vocabularies would not be.
+   */
+  it("the card's footer carries the deed; the quiet verbs stay on the bar", () => {
     const html = render();
-    for (const gone of ["tdk-foot", "tdk-prime", "tdk-next", 'aria-label="More"', 'aria-label="Snooze"']) {
+    expect(html).toContain("tdk-foot");
+    expect(html).toContain("tdk-prime");
+    /* the verbs that belong to the surrounding chrome are still NOT in the card */
+    for (const gone of ["tdk-next", 'aria-label="More"', 'aria-label="Snooze"']) {
       expect(html, gone).not.toContain(gone);
     }
+  });
+
+  it("⚠️ AND THE TWO MOUNTS CANNOT NAME THE DEED DIFFERENTLY — one derivation, read twice", () => {
+    expect(page).toContain("rowPrimaryLabel(paneCard, col)");                 // the bar
+    expect(page).toContain("primaryLabel={(c) => rowPrimaryLabel(c,");        // the card
+    /* the card holds no vocabulary of its own — the label arrives as a prop */
+    expect(code(dockSrc)).not.toContain("rowPrimaryLabel");
   });
 
   it("…and the bar carries every one of them", () => {
@@ -803,11 +824,22 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     expect(html).toContain("Nothing logged yet.");
   });
 
-  it("⚠️ THE FOOTER'S CONTRACT MOVED WHOLE — asserted on the bar, not deleted", () => {
-    /* The four things it guaranteed are guaranteed by the command bar now; see the describe above.
-       This case survives so the CONTRACT is still named somewhere the next reader will look. */
-    expect(render()).not.toContain("tdk-foot");
+  it("⚠️ THE FOOTER IS PINNED AND DOES NOT SCROLL — it is the body's bottom edge", () => {
+    /* This asserted the footer's ABSENCE, on the reading that its contract had moved wholly to the
+       command bar. Half of that is still true and still asserted — the quiet verbs are the bar's —
+       but the deed came back, and with it the thing the card had been missing: a bottom edge for
+       the body to scroll against. */
+    expect(render()).toContain("tdk-foot");
     expect(page).toContain('className="tdw-cbar"');
+    const foot = dockCssRule(".tdk-foot {");
+    expect(foot).toContain("flex: none");                 // outside the scroller
+    /* inside the 6px inset, like the band above it — a flush footer would lay its fill across the
+       frame at the bottom corners, which is why the band carries the same margin */
+    expect(foot).toContain("margin: 0 6px 6px");
+    expect(foot).toContain("border-radius: 0 0 8px 8px");
+    /* and it is a SIBLING of the body, never inside it */
+    const src = code(dockSrc);
+    expect(src.indexOf('className="tdk-foot"')).toBeGreaterThan(src.indexOf('className="tdk-body"'));
   });
 });
 

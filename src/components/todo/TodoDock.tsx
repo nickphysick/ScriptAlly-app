@@ -23,7 +23,7 @@
  * decides what to OFFER; it never decides what happens.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy } from "lucide-react";
+import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy, Check } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
@@ -100,6 +100,12 @@ export interface TodoDockProps {
   /** ⚠️ NO `spec` — the primary OPENS THE JOURNEY and the journey commits, so the dock has
    *  nothing to pre-resolve. It used to hand a `SendSpec` straight to an inline write. */
   onPrimary: (card: BoardCard) => void;
+  /**
+   * ⚠️ THE DEED'S NAME, FROM THE PAGE'S OWN `rowPrimaryLabel` — never a second vocabulary here.
+   * The command bar already reads it; the card's footer reads the same one, so the two controls
+   * can never come to offer differently-worded versions of one act.
+   */
+  primaryLabel?: (card: BoardCard) => string;
   /* ⚠️ RETIRED WITH THE FOOT BAR (visual rebuild, Phase 4). The card no longer offers a snooze at
      all — the command bar does, opening the ONE dial. The prop is gone rather than left unused:
      an unused prop is a slot a future surface fills without anyone deciding it should exist. */
@@ -127,7 +133,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -559,6 +565,32 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           <div className="tdk-tags">{tagsSlot(card)}</div>
 
         )}
+
+        {/**
+          * ⚠️ THE CARD HAS A FOOTER AGAIN, AND THE DEED LIVES IN IT (ref `todo-journey-in-pane.html`
+          * `.foot`). It was retired with the old foot bar on the reasoning that "two places to act
+          * on one task is how they come to offer different verbs" — which was right about the
+          * DANGER and wrong about the remedy: what the page ended up with was a card that simply
+          * stops, its last section cut by the pane's edge, and the only act floating in a bar three
+          * inches above the thing it acts on.
+          *
+          * ⚠️ THE VERB CANNOT DIVERGE, because there is one derivation. `primaryLabel` is the page's
+          * own `rowPrimaryLabel` — the same function the command bar reads. That is what makes two
+          * mounts safe where two vocabularies would not be.
+          *
+          * ⚠️ IT IS PINNED AND DOES NOT SCROLL. `flex: none` outside `.tdk-body`, so the body
+          * scrolls under it and the deed is on screen whatever the record's length. That is also
+          * what gives the body a bottom edge to scroll AGAINST — see the note on `.tdk-foot`.
+          */}
+        <div className="tdk-foot">
+          {/* the consequence, stated before the act rather than discovered after it */}
+          <span className="tdk-foothint">Nothing is sent from here — this records what happened.</span>
+          <span className="tdk-footgrow" />
+          <button type="button" className="tdk-prime" onClick={() => onPrimary(card)}>
+            <Check size={14} aria-hidden />
+            {primaryLabel?.(card) ?? "Action"}
+          </button>
+        </div>
 
         {/**
           * ⚠️ THE CARD'S FOOT BAR IS RETIRED (visual rebuild, Phase 4). It carried the ink primary,

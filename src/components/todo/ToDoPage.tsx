@@ -1548,6 +1548,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   /* §4.4 — the page derives it because `notifyGroups` needs the whole query set */
                   holders={dockHolders}
                   onPrimary={(c) => dockPrimary(c)}
+                  /* ⚠️ ONE DERIVATION FOR BOTH MOUNTS — the bar's Action and the card's footer read
+                     the SAME `rowPrimaryLabel`, so they cannot come to name the deed differently. */
+                  primaryLabel={(c) => rowPrimaryLabel(c, groupColumn(cardBucket(c) === "note" ? "yours" : "urgent"))}
                   tagsSlot={(c) => c.userTaskId ? (
                     <TagPicker
                       compact
