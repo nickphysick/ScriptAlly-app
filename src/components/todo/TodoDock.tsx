@@ -342,7 +342,10 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             nothing has to be dismissed, which is the whole of Item 9 and is also what removes the
             `inert` seal: a journey that is not an overlay never calls `useOverlay`. */}
         <EdgeFadeScroll
-          fade="var(--paper, #fdfaf5)"
+          /* ⚠️ THE FADE IS THE CARD'S GROUND, AND THE CARD IS WHITE NOW. It read `--paper`, which was
+              correct while the body was parchment and would have drawn a cream mist over a white
+              panel. */
+          fade="var(--white, #ffffff)"
           outerClassName="tdk-scroll"
           scrollClassName={draft ? "tdk-body tdk-body--journey" : "tdk-body"}
           /* ⚠️ `display` IS PASSED, because the wrapper sets it INLINE and inline beats the class.

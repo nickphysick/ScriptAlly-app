@@ -58,10 +58,17 @@
    * workspace edge". `.f11` has `flex: 1` and no max-width. The pane is already bounded by the
    * split, so the pane is the measure — a second cap inside it was one constraint too many.
    */
-  background: var(--paper);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.03'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E");
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05), 0 10px 32px rgba(58, 28, 20, 0.08);
+  /* ⚠️ THE QUERY CENTRE'S OWN VALUES — AND THE WHITE WAS READ OFF THE RENDERED PANEL, NOT OFF
+     `.f12-card`'s DECLARATION. That distinction is the whole of this note. `.f12-card` declares
+     `background: var(--panel)` (#fffdfb), but the Tracking panel sits inside `.qp-cols`, and
+     the rule `.qp-cols .f12-card` sets `background: var(--white)` and is more specific. Measured on the
+     deployed page: `rgb(255, 255, 255)`. Reading the base rule would have produced a near-match
+     that was wrong by exactly the amount nobody can see and everybody can feel.
+     The other three ARE the base rule's, and are unshadowed: `--line`, `--r-lg`, `--sh-1`. */
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -80,25 +87,14 @@
   min-height: 0;
 }
 
-/**
- * ⚠️ THE INSET FRAME IS DRAWN ON THE CARD, NEVER ON A CHILD — this is the `.qhbar::after` spill
- * bug the MountCard fix exists to prevent. A frame on a child is an overlay border that the
- * child's own fills paint over and its siblings escape; on the card it is one rule, above
- * everything (`z-index: 5`), inert to the pointer, and nothing can cross it.
- *
- * ⚠️ THE BAND STAYS INSIDE IT BY ITS OWN MARGIN (`6px 6px 0`), not by the frame clipping it.
- * That is why the band's margin and this inset are the same 6px: two numbers that must agree, and
- * they agree because they describe one gap.
- */
-.tdk-w::before {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  border: 1px solid rgba(124, 58, 42, 0.28);
-  border-radius: 10px;
-  pointer-events: none;
-  z-index: 5;
-}
+/* ⚠️ THE BURGUNDY INSET FRAME IS GONE. It was the parchment-document idiom — a rule drawn inside
+   the card's edge to make it read as a sheet of paper — and it has no equivalent anywhere else in
+   the app. On a white panel it read as a second border inside the first.
+   ⚠️ AND ITS 6px INSET WAS LOAD-BEARING FOR THREE OTHER RULES. The band, the card footer and the
+   journey's foot each carried `margin: … 6px …` for the sole purpose of staying inside it; with the
+   frame gone those margins became a white gutter around a sage band. They are flush now, clipped by
+   the card's own `overflow: hidden` — which is exactly how `.f12-card` seats its header.
+   Recoverable at acdf126. */
 
 /* the family band — the same map as the board's card */
 /* ⚠️ THE BAND IS THE IDENTITY ROW (corrections, Phase 1) — it was a 30px strip holding a kind pill
@@ -137,11 +133,10 @@
   padding: 16px var(--tdk-band-px) 14px;
   position: relative;
   overflow: hidden;
-  /* ⚠️ THE MARGIN IS WHAT KEEPS THE BAND INSIDE THE FRAME, and it is the frame's own 6px inset.
-     The card clips at 14px and the frame sits at 6px, so a band drawn flush to the card would put
-     its fill across the rule at the top corners. */
-  margin: 6px 6px 0;
-  border-radius: 8px 8px 0 0;
+  /* ⚠️ FLUSH, NOW THE FRAME IS GONE. This carried `margin: 6px 6px 0` to stay inside the inset
+     rule; with no rule to stay inside, the margin was a white gutter around the band. The card's
+     `overflow: hidden` clips it to the radius, which is how `.f12-card` seats its own header. */
+  margin: 0;
   flex-shrink: 0;
   border-bottom: 1px solid rgba(90, 110, 88, 0.2);
 }
@@ -643,7 +638,7 @@
 /* ── the materials record (v14 close-the-gap, Phase 6) ───────────────────────────────────────── */
 /* ⚠️ WHITE GROUND ON THE PARCHMENT CARD — the row is a filed item, and the card is the file. */
 .tdk-mats { display: flex; flex-direction: column; gap: 8px; }
-.tdk-mat { display: flex; align-items: center; gap: 11px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.tdk-mat { display: flex; align-items: center; gap: 11px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
 .tdk-matic { width: 28px; height: 28px; flex: none; border-radius: 8px; background: #f6efe6; color: var(--burg); display: flex; align-items: center; justify-content: center; font-size: 13px; }
 .tdk-mattx { flex: 1; min-width: 0; font-size: 13px; color: var(--ink); }
 .tdk-mattx b { display: block; font-weight: 500; }
@@ -654,7 +649,7 @@
 
 /* ── §4.4 · who else holds material ──────────────────────────────────────────────────────────── */
 .tdk-holds { display: flex; flex-direction: column; gap: 7px; margin-bottom: 12px; }
-.tdk-hold { display: flex; align-items: center; gap: 10px; background: var(--white, #fff); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+.tdk-hold { display: flex; align-items: center; gap: 10px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
 .tdk-holdtx { flex: 1; min-width: 0; font-size: 13px; color: var(--ink); }
 .tdk-holdtx b { display: block; font-weight: 500; }
 .tdk-holdtx span { display: block; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); margin-top: 3px; }
