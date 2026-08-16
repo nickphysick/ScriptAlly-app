@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About — ScriptAlly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#f7f4ee;
+    --surface:#fefcfa;
+    --plate:#ffffff;
+    --ink:#241711;
+    --primary:#1c130f;
+    --body-ink:#4a3d33;
+    --muted:#8a7a6c;
+    --label:#9c8878;
+    --hairline:#e7ddcf;
+    --hairline-soft:#efe7da;
+    --sage-1:#d7ded4;
+    --sage-2:#dadfd7;
+    --sage-tint:#eef1ec;
+    --sage-text:#5a6e58;
+    --sage-accent:#8a9e88;
+    --blush-tint:#f6ebe4;
+    --burgundy:#773c2d;
+    --sh-card:0 1px 2px rgba(36,23,17,0.04), 0 6px 18px rgba(36,23,17,0.05);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--ground);color:var(--body-ink);font-family:'Inter',sans-serif;font-size:14px;line-height:1.65;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;}
+  a{color:var(--burgundy);text-decoration:none;}
+  a:hover{text-decoration:underline;text-underline-offset:3px;}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--sage-accent);outline-offset:2px;border-radius:4px;}
+
+  /* ── Marketing header ─────────────────────────────── */
+  .mk-head{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20px,4vw,44px);border-bottom:1px solid var(--hairline);background:var(--ground);}
+  .mk-brand{display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .mk-brand:hover{text-decoration:none;}
+  .mk-mark{width:26px;height:26px;flex:none;}
+  .mk-wordmark{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;letter-spacing:0.01em;color:var(--ink);}
+  .mk-nav{display:flex;align-items:center;gap:26px;}
+  .mk-nav a.mk-link{font-size:13px;font-weight:400;color:var(--body-ink);}
+  .mk-nav a.mk-link:hover{color:var(--ink);text-decoration:none;}
+  .mk-nav a.mk-link[aria-current="page"]{color:var(--ink);font-weight:500;}
+  .mk-actions{display:flex;align-items:center;gap:12px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:9px;font-size:13px;font-weight:500;padding:9px 18px;cursor:pointer;border:1px solid transparent;transition:background 140ms ease, border-color 140ms ease;}
+  .btn-ghost{background:var(--plate);border-color:var(--hairline);color:var(--body-ink);}
+  .btn-ghost:hover{border-color:#d7cbba;text-decoration:none;color:var(--ink);}
+  .btn-primary{background:var(--primary);color:#fdfaf5;}
+  .btn-primary:hover{background:#31221a;text-decoration:none;}
+
+  /* ── Alternating bands ────────────────────────────── */
+  main{flex:1;}
+  .band{
+    max-width:1080px;margin:0 auto;
+    padding:clamp(44px,8vw,96px) clamp(20px,4vw,44px);
+    display:grid;grid-template-columns:1fr 1fr;
+    gap:clamp(32px,6vw,84px);
+    align-items:center;
+  }
+  .band + .band{padding-top:0;}
+  .band-copy .eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:var(--label);margin-bottom:14px;}
+  .band-copy h1{font-family:'Playfair Display',serif;font-size:clamp(32px,4.6vw,48px);font-weight:600;color:var(--ink);line-height:1.12;margin-bottom:20px;}
+  .band-copy h2{font-family:'Playfair Display',serif;font-size:clamp(26px,3.6vw,38px);font-weight:600;color:var(--ink);line-height:1.15;margin-bottom:16px;}
+  .band-copy p{font-size:14.5px;max-width:44ch;}
+  .band-copy p + p{margin-top:12px;}
+  .band-copy p strong{color:var(--ink);font-weight:600;}
+
+  /* Illustration placeholder plate — drop final artwork into .illo, keep the frame */
+  .illo{
+    aspect-ratio:5/4;width:100%;
+    border-radius:16px;
+    border:1.5px dashed rgba(154,138,120,0.5);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  }
+  .illo.on-sage{background:var(--sage-tint);}
+  .illo.on-blush{background:var(--blush-tint);}
+  .illo.on-plate{background:var(--plate);}
+  .illo svg{width:clamp(90px,12vw,140px);height:auto;stroke:var(--burgundy);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;opacity:0.75;}
+  .illo .illo-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.17em;text-transform:uppercase;color:var(--label);}
+
+  .band.flip .band-copy{order:2;}
+  .band.flip .illo{order:1;}
+
+  /* ── Commitments strip ────────────────────────────── */
+  .commit-strip{border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline);background:var(--surface);}
+  .commit-inner{max-width:1080px;margin:0 auto;padding:clamp(36px,6vw,64px) clamp(20px,4vw,44px);}
+  .commit-inner .eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:var(--label);margin-bottom:22px;text-align:center;}
+  .commit-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  .commit{background:var(--plate);border:1px solid var(--hairline-soft);border-radius:12px;padding:22px;}
+  .commit .c-tick{width:24px;height:24px;border:1px solid var(--sage-accent);background:var(--sage-tint);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
+  .commit .c-tick svg{width:11px;height:11px;stroke:var(--sage-text);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .commit strong{display:block;font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  .commit span{font-size:13px;color:var(--body-ink);}
+
+  /* ── Founder sign-off ─────────────────────────────── */
+  .founder{max-width:1080px;margin:0 auto;padding:clamp(40px,7vw,72px) clamp(20px,4vw,44px);text-align:center;}
+  .founder p{max-width:52ch;margin:0 auto 22px;font-size:14.5px;}
+  .signoff{display:inline-flex;align-items:center;gap:14px;}
+  .signoff-rule{width:1px;height:15px;background:#dbcfc0;}
+  .signoff-name{font-family:'Playfair Display',serif;font-size:15px;color:var(--ink);}
+  .signoff-role{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--label);}
+
+  /* ── Footer ───────────────────────────────────────── */
+  .mk-foot{border-top:1px solid var(--hairline);padding:36px clamp(20px,4vw,44px) 30px;}
+  .foot-grid{max-width:960px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px;}
+  .foot-brand .mk-wordmark{font-size:17px;}
+  .foot-tag{font-size:12px;color:var(--muted);margin-top:8px;max-width:220px;line-height:1.55;}
+  .foot-col h4{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:var(--label);margin-bottom:12px;}
+  .foot-col a{display:block;font-size:13px;color:var(--body-ink);margin-bottom:8px;}
+  .foot-col a:hover{color:var(--ink);text-decoration:none;}
+  .foot-base{max-width:960px;margin:30px auto 0;padding-top:18px;border-top:1px solid var(--hairline-soft);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .foot-base span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--label);}
+
+  @media (max-width:820px){
+    .mk-nav .mk-link{display:none;}
+    .band{grid-template-columns:1fr;gap:26px;}
+    .band.flip .band-copy{order:1;}
+    .band.flip .illo{order:2;}
+    .commit-grid{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="mk-head">
+  <a class="mk-brand" href="#/">
+    <svg class="mk-mark" viewBox="0 0 26 26" aria-hidden="true"><path d="M2 13 L24 4 L15 23 L12 15 Z" fill="none" stroke="#773c2d" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15 L24 4" fill="none" stroke="#773c2d" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    <span class="mk-wordmark">ScriptAlly</span>
+  </a>
+  <nav class="mk-nav" aria-label="Site">
+    <a class="mk-link" href="#/about" aria-current="page">About</a>
+    <a class="mk-link" href="#/pricing">Pricing</a>
+    <a class="mk-link" href="#/contact">Contact</a>
+    <div class="mk-actions">
+      <a class="btn btn-ghost" href="#/signin">Sign in</a>
+      <a class="btn btn-primary" href="#/signup">Open ScriptAlly</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HERO BAND -->
+  <section class="band">
+    <div class="band-copy">
+      <h1>Querying shouldn't be the hard part</h1>
+      <p><strong>Hello, we're ScriptAlly.</strong> Finding an agent had turned into a second job of spreadsheets, guesswork and lost threads — so we built the tool the search deserves. One place for your agents, your manuscripts, and every exchange between you and representation.</p>
+    </div>
+    <!-- ILLUSTRATION SLOT: hero — desk scene, paper plane over stacked query letters -->
+    <div class="illo on-blush" role="img" aria-label="Illustration placeholder: paper plane over stacked letters">
+      <svg viewBox="0 0 120 96"><path d="M8 38 L74 16 L48 62 L40 44 Z"/><path d="M40 44 L74 16"/><rect x="52" y="66" width="52" height="12" rx="2"/><rect x="58" y="80" width="46" height="12" rx="2"/><path d="M60 72h30M66 86h26"/></svg>
+      <span class="illo-tag">Illustration · Hero</span>
+    </div>
+  </section>
+
+  <!-- VISION 01 -->
+  <section class="band flip">
+    <!-- ILLUSTRATION SLOT: vision 01 — tangled thread resolving into a straight line / tidy index card -->
+    <div class="illo on-sage" role="img" aria-label="Illustration placeholder: tangle resolving into a straight line">
+      <svg viewBox="0 0 120 96"><path d="M8 60 C 20 20, 34 84, 46 48 S 66 22, 72 48"/><path d="M72 48 H 112"/><circle cx="112" cy="48" r="3"/></svg>
+      <span class="illo-tag">Illustration · The tangle, untangled</span>
+    </div>
+    <div class="band-copy">
+      <div class="eyebrow">The vision · 01</div>
+      <h2>Simplify the querying process.</h2>
+      <p>Who you've queried, what you sent, when a nudge is due, which version went where — the search generates a hundred small facts, and losing one costs you. ScriptAlly keeps every fact in its place, so the state of your search is one glance away instead of one spreadsheet archaeology dig.</p>
+    </div>
+  </section>
+
+  <!-- VISION 02 -->
+  <section class="band">
+    <div class="band-copy">
+      <div class="eyebrow">The vision · 02</div>
+      <h2>Reduce story waste.</h2>
+      <p>Good stories go unrepresented every year — not because they weren't good, but because the process defeated the writer. Queries fizzle out half-sent, nudges never happen, promising fulls sit forgotten. We think of that as <strong>story waste</strong>, and it's the thing ScriptAlly exists to reduce: a search that stays organised is a search that gets finished.</p>
+    </div>
+    <!-- ILLUSTRATION SLOT: vision 02 — manuscript in a bottle / book reaching a lit desk lamp -->
+    <div class="illo on-plate" role="img" aria-label="Illustration placeholder: a manuscript finding its reader">
+      <svg viewBox="0 0 120 96"><path d="M22 78 V 30 a2 2 0 0 1 2-2 h 28 v 50 z"/><path d="M82 78 V 30 a2 2 0 0 0-2-2 h-28 v 50"/><path d="M28 38h18M28 46h18M60 38h16M60 46h16"/><path d="M92 24 l6-10 6 10"/><circle cx="98" cy="30" r="4"/><path d="M98 34 v 44"/></svg>
+      <span class="illo-tag">Illustration · Stories found</span>
+    </div>
+  </section>
+
+  <!-- VISION 03 -->
+  <section class="band flip">
+    <!-- ILLUSTRATION SLOT: vision 03 — closed tracker, open notebook and pen -->
+    <div class="illo on-blush" role="img" aria-label="Illustration placeholder: an open notebook and pen">
+      <svg viewBox="0 0 120 96"><path d="M14 74 V 26 a3 3 0 0 1 3-3 h 38 v 54 z"/><path d="M102 74 V 26 a3 3 0 0 0-3-3 h-38 v 54"/><path d="M22 36h22M22 44h22M22 52h14"/><path d="M84 12 l 10 10 -34 34 -13 3 3-13 z"/></svg>
+      <span class="illo-tag">Illustration · Back to the page</span>
+    </div>
+    <div class="band-copy">
+      <div class="eyebrow">The vision · 03</div>
+      <h2>Give writers more time to write.</h2>
+      <p>Every hour spent maintaining a tracking spreadsheet is an hour not spent on the next book. ScriptAlly takes the admin — the dates, the counts, the who-has-what — so the only thing left on your desk is the writing.</p>
+    </div>
+  </section>
+
+  <!-- COMMITMENTS -->
+  <section class="commit-strip">
+    <div class="commit-inner">
+      <div class="eyebrow">How ScriptAlly behaves</div>
+      <div class="commit-grid">
+        <div class="commit">
+          <div class="c-tick" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2 6.5 L4.8 9 L10 3"/></svg></div>
+          <strong>It reports; it never appraises.</strong>
+          <span>ScriptAlly states facts about your search — dates, counts, waits. It never grades your manuscript or scores your chances. That's between you and your work.</span>
+        </div>
+        <div class="commit">
+          <div class="c-tick" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2 6.5 L4.8 9 L10 3"/></svg></div>
+          <strong>Your work stays yours.</strong>
+          <span>Manuscripts, pitches, and querying records belong to you. No data sales, no advertising, and nothing you write trains anything.</span>
+        </div>
+        <div class="commit">
+          <div class="c-tick" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2 6.5 L4.8 9 L10 3"/></svg></div>
+          <strong>Free means useful.</strong>
+          <span>The free tier is a complete tracker, not a teaser. Pro adds more on top; it never takes the basics away.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDER -->
+  <section class="founder">
+    <p>ScriptAlly is designed, built, and run by one person, from the UK, around a manuscript of his own. If you write in, it's him who answers — <a href="#/contact">say hello</a>.</p>
+    <div class="signoff">
+      <span class="signoff-name">Nick Physick</span>
+      <span class="signoff-rule" aria-hidden="true"></span>
+      <span class="signoff-role">Founder</span>
+    </div>
+  </section>
+
+</main>
+
+<footer class="mk-foot">
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <span class="mk-wordmark">ScriptAlly</span>
+      <p class="foot-tag">Query with confidence. A tracker for fiction writers seeking literary agents.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Product</h4>
+      <a href="#/pricing">Pricing</a>
+      <a href="#/signup">Open ScriptAlly</a>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <a href="#/about">About</a>
+      <a href="#/contact">Contact</a>
+    </div>
+    <div class="foot-col">
+      <h4>Legal</h4>
+      <a href="#/privacy">Privacy</a>
+      <a href="#/terms">Terms</a>
+    </div>
+  </div>
+  <div class="foot-base">
+    <span>© 2026 ScriptAlly · Made in the UK</span>
+    <span>scriptally.ink</span>
+  </div>
+</footer>
+
+</body>
+</html>

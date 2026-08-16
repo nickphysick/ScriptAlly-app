@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — ScriptAlly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#f7f4ee;
+    --surface:#fefcfa;
+    --plate:#ffffff;
+    --ink:#241711;
+    --primary:#1c130f;
+    --body-ink:#4a3d33;
+    --muted:#8a7a6c;
+    --label:#9c8878;
+    --hairline:#e7ddcf;
+    --hairline-soft:#efe7da;
+    --sage-1:#d7ded4;
+    --sage-2:#dadfd7;
+    --sage-text:#5a6e58;
+    --sage-accent:#8a9e88;
+    --burgundy:#773c2d;
+    --blush-1:#f3e0d6;
+    --blush-2:#eed6c9;
+    --sh-card:0 1px 2px rgba(36,23,17,0.04), 0 6px 18px rgba(36,23,17,0.05);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--ground);color:var(--body-ink);font-family:'Inter',sans-serif;font-size:14px;line-height:1.68;-webkit-font-smoothing:antialiased;min-height:100vh;display:flex;flex-direction:column;}
+  a{color:var(--burgundy);text-decoration:none;}
+  a:hover{text-decoration:underline;text-underline-offset:3px;}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--sage-accent);outline-offset:2px;border-radius:4px;}
+
+  .mk-head{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(20px,4vw,44px);border-bottom:1px solid var(--hairline);background:var(--ground);}
+  .mk-brand{display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .mk-brand:hover{text-decoration:none;}
+  .mk-mark{width:26px;height:26px;flex:none;}
+  .mk-wordmark{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;letter-spacing:0.01em;color:var(--ink);}
+  .mk-nav{display:flex;align-items:center;gap:26px;}
+  .mk-nav a.mk-link{font-size:13px;font-weight:400;color:var(--body-ink);}
+  .mk-nav a.mk-link:hover{color:var(--ink);text-decoration:none;}
+  .mk-actions{display:flex;align-items:center;gap:12px;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:9px;font-size:13px;font-weight:500;padding:9px 18px;cursor:pointer;border:1px solid transparent;transition:background 140ms ease, border-color 140ms ease;}
+  .btn-ghost{background:var(--plate);border-color:var(--hairline);color:var(--body-ink);}
+  .btn-ghost:hover{border-color:#d7cbba;text-decoration:none;color:var(--ink);}
+  .btn-primary{background:var(--primary);color:#fdfaf5;}
+  .btn-primary:hover{background:#31221a;text-decoration:none;}
+
+  .doc-plane{flex:1;display:flex;flex-direction:column;align-items:center;padding:clamp(28px,5vw,56px) 20px 72px;}
+
+  .draft-ribbon{width:100%;max-width:760px;background:linear-gradient(135deg,var(--blush-1),var(--blush-2));border:1px solid rgba(119,60,45,0.22);border-radius:11px;padding:12px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;}
+  .draft-ribbon .dr-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:var(--burgundy);white-space:nowrap;}
+  .draft-ribbon p{font-size:12.5px;color:#5a3324;margin:0;}
+
+  .doc-card{width:100%;max-width:760px;background:var(--surface);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--sh-card);overflow:hidden;}
+  .doc-band{background:linear-gradient(135deg,var(--sage-1),var(--sage-2));border-bottom:1px solid rgba(90,110,88,0.18);padding:26px clamp(24px,5vw,44px) 24px;display:flex;align-items:center;gap:18px;}
+  .doc-plate{width:46px;height:46px;flex:none;background:var(--plate);border:1px solid rgba(90,110,88,0.28);border-radius:11px;display:flex;align-items:center;justify-content:center;}
+  .doc-plate svg{width:24px;height:24px;stroke:var(--burgundy);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+  .doc-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:var(--sage-text);margin-bottom:5px;}
+  .doc-title{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,30px);font-weight:600;color:var(--ink);line-height:1.15;}
+  .doc-meta{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--sage-text);white-space:nowrap;align-self:flex-start;padding-top:8px;}
+
+  .doc-body{padding:clamp(28px,5vw,44px);}
+  .doc-lede{font-family:'Playfair Display',serif;font-size:17px;font-weight:400;font-style:italic;color:var(--ink);line-height:1.55;padding-bottom:24px;margin-bottom:28px;border-bottom:1px solid var(--hairline-soft);}
+
+  .doc-section{margin-bottom:32px;}
+  .doc-section:last-child{margin-bottom:0;}
+  .sec-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:var(--label);margin-bottom:8px;}
+  .sec-title{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink);margin-bottom:10px;}
+  .doc-section p{margin-bottom:12px;}
+  .doc-section p:last-child{margin-bottom:0;}
+  .doc-section ul{margin:0 0 12px 0;padding-left:0;list-style:none;}
+  .doc-section li{position:relative;padding-left:20px;margin-bottom:8px;font-size:13.5px;}
+  .doc-section li::before{content:"";position:absolute;left:2px;top:9px;width:6px;height:6px;border-radius:50%;border:1.5px solid var(--sage-accent);}
+  .doc-section li strong{color:var(--ink);font-weight:600;}
+
+  .callout{display:flex;gap:12px;align-items:flex-start;background:var(--plate);border:1px solid var(--hairline-soft);border-radius:11px;padding:16px 18px;margin:14px 0 0;}
+  .callout .co-rule{width:3px;align-self:stretch;border-radius:3px;background:var(--sage-accent);flex:none;}
+  .callout p{font-size:13px;margin:0;}
+
+  .mk-foot{border-top:1px solid var(--hairline);padding:36px clamp(20px,4vw,44px) 30px;}
+  .foot-grid{max-width:960px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:28px;}
+  .foot-brand .mk-wordmark{font-size:17px;}
+  .foot-tag{font-size:12px;color:var(--muted);margin-top:8px;max-width:220px;line-height:1.55;}
+  .foot-col h4{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:0.17em;text-transform:uppercase;color:var(--label);margin-bottom:12px;}
+  .foot-col a{display:block;font-size:13px;color:var(--body-ink);margin-bottom:8px;}
+  .foot-col a:hover{color:var(--ink);text-decoration:none;}
+  .foot-base{max-width:960px;margin:30px auto 0;padding-top:18px;border-top:1px solid var(--hairline-soft);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .foot-base span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--label);}
+
+  @media (max-width:760px){
+    .mk-nav .mk-link{display:none;}
+    .doc-band{flex-wrap:wrap;}
+    .doc-meta{margin-left:0;width:100%;padding-top:2px;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none !important;}}
+</style>
+</head>
+<body>
+
+<header class="mk-head">
+  <a class="mk-brand" href="#/">
+    <svg class="mk-mark" viewBox="0 0 26 26" aria-hidden="true"><path d="M2 13 L24 4 L15 23 L12 15 Z" fill="none" stroke="#773c2d" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15 L24 4" fill="none" stroke="#773c2d" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    <span class="mk-wordmark">ScriptAlly</span>
+  </a>
+  <nav class="mk-nav" aria-label="Site">
+    <a class="mk-link" href="#/about">About</a>
+    <a class="mk-link" href="#/pricing">Pricing</a>
+    <a class="mk-link" href="#/contact">Contact</a>
+    <div class="mk-actions">
+      <a class="btn btn-ghost" href="#/signin">Sign in</a>
+      <a class="btn btn-primary" href="#/signup">Open ScriptAlly</a>
+    </div>
+  </nav>
+</header>
+
+<main class="doc-plane">
+
+  <!-- DRAFT RIBBON — strip this block after legal review -->
+  <div class="draft-ribbon" role="note">
+    <span class="dr-tag">Working draft</span>
+    <p>These terms are a working draft and have not yet been legally reviewed. Bracketed items are pending confirmation.</p>
+  </div>
+
+  <article class="doc-card">
+    <div class="doc-band">
+      <div class="doc-plate" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M6 3.5h9l4 4v13H6z"/><path d="M15 3.5V8h4"/><path d="M9 12h7M9 15.5h7"/></svg>
+      </div>
+      <div>
+        <div class="doc-eyebrow">Legal · Terms</div>
+        <h1 class="doc-title">Terms of Service</h1>
+      </div>
+      <div class="doc-meta">Last updated 15 Aug 2026</div>
+    </div>
+
+    <div class="doc-body">
+      <p class="doc-lede">The plain-English promise underneath the legal text: you own everything you put into ScriptAlly, we'll be straight with you about what the service does, and neither of us should need a lawyer to understand this page.</p>
+
+      <section class="doc-section">
+        <div class="sec-label">01</div>
+        <h2 class="sec-title">Who we are and what you're agreeing to</h2>
+        <p>These terms are an agreement between you and <strong>[LEGAL ENTITY NAME]</strong> of <strong>[REGISTERED / TRADING ADDRESS]</strong>, United Kingdom. By creating an account or using ScriptAlly, you accept them. How we handle your personal data is set out separately in the <a href="#/privacy">privacy policy</a>.</p>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">02</div>
+        <h2 class="sec-title">The service</h2>
+        <p>ScriptAlly is a tool for tracking your literary agent querying process: your agents, queries, manuscripts, submission packages, and the history of each exchange. It's a record-keeper, not an adviser — it reports what you've recorded, and it doesn't guarantee any outcome with any agent or publisher.</p>
+        <div class="callout">
+          <span class="co-rule" aria-hidden="true"></span>
+          <p><strong>Early-access notice.</strong> ScriptAlly is newly launched and actively developed. Features may change, and occasional rough edges are part of the deal at this stage. We'll flag significant changes rather than spring them on you.</p>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">03</div>
+        <h2 class="sec-title">Your account</h2>
+        <p>You need to be 16 or over, give us accurate account details, and keep your sign-in credentials to yourself. You're responsible for what happens under your account; tell us straight away if you think it's been compromised.</p>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">04</div>
+        <h2 class="sec-title">Your content</h2>
+        <p>Everything you put into ScriptAlly — manuscripts, pitches, notes, querying records — remains yours. You grant us only the limited licence needed to store, process, and display it back to you, which is what running the service means. We claim no other rights in your writing, and we do not use your content to train AI models.</p>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">05</div>
+        <h2 class="sec-title">Acceptable use</h2>
+        <ul>
+          <li>Don't use ScriptAlly to store or transmit anything unlawful, or content you don't have the right to hold.</li>
+          <li>Don't attempt to breach, probe, or overload the service, or access another user's data.</li>
+          <li>Don't resell or scrape the service.</li>
+        </ul>
+        <p>Breaching these lets us suspend or close the account involved.</p>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">06</div>
+        <h2 class="sec-title">AI-assisted features</h2>
+        <p>Some features, such as Smart Import, use third-party AI models to process content you explicitly submit to them — the details are in section 4 of the <a href="#/privacy">privacy policy</a>. AI-extracted output can contain mistakes; each of these features gives you a review step, and you're responsible for checking the results before relying on them.</p>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">07</div>
+        <h2 class="sec-title">Fees</h2>
+        <p>ScriptAlly is currently free to use. A paid Pro tier is planned; when it arrives, its price and what it includes will be stated clearly before you're asked to pay anything, and the free tier will remain genuinely useful. These terms will be updated before any payment is taken.</p>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">08</div>
+        <h2 class="sec-title">Availability, and things going wrong</h2>
+        <p>We work to keep ScriptAlly available and your data safe, but as a small, early-stage service it's provided "as is" — we can't promise uninterrupted availability. Nothing in these terms excludes liability that can't legally be excluded (such as for death or personal injury caused by negligence, or fraud). Beyond that, our total liability to you is limited to the greater of £100 or the amount you've paid us in the twelve months before the claim. You should keep your own copies of any manuscript files: ScriptAlly tracks your querying, it is not your manuscript's only home.</p>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">09</div>
+        <h2 class="sec-title">Ending things</h2>
+        <p>You can close your account at any time, and your data will be deleted as described in the privacy policy. We can suspend or close accounts that breach these terms, and we'll give reasonable notice if we ever discontinue the service — with a way to export your records first.</p>
+      </section>
+
+      <section class="doc-section">
+        <div class="sec-label">10</div>
+        <h2 class="sec-title">Changes and governing law</h2>
+        <p>If we change these terms in a way that matters, we'll tell you in the app or by email before the change takes effect. These terms are governed by the laws of England and Wales, and any disputes belong to the courts of England and Wales — though if you use the service as a consumer elsewhere in the UK, you keep the protections of your home nation's law.</p>
+        <p>Questions about any of this: <a href="mailto:hello@scriptally.ink">hello@scriptally.ink</a>.</p>
+      </section>
+    </div>
+  </article>
+</main>
+
+<footer class="mk-foot">
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <span class="mk-wordmark">ScriptAlly</span>
+      <p class="foot-tag">Query with confidence. A tracker for fiction writers seeking literary agents.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Product</h4>
+      <a href="#/pricing">Pricing</a>
+      <a href="#/signup">Open ScriptAlly</a>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <a href="#/about">About</a>
+      <a href="#/contact">Contact</a>
+    </div>
+    <div class="foot-col">
+      <h4>Legal</h4>
+      <a href="#/privacy">Privacy</a>
+      <a href="#/terms">Terms</a>
+    </div>
+  </div>
+  <div class="foot-base">
+    <span>© 2026 ScriptAlly · Made in the UK</span>
+    <span>scriptally.ink</span>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — beta readiness pack</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#f7f4ee; --surface:#fefcfa; --plate:#ffffff;
+    --ink:#241711; --primary:#1c130f; --body-ink:#4a3d33;
+    --muted:#8a7a6c; --label:#9c8878;
+    --hairline:#e7ddcf; --hairline-soft:#efe7da;
+    --sage-1:#d7ded4; --sage-2:#dadfd7; --sage-tint:#eef1ec;
+    --sage-text:#5a6e58; --sage-accent:#8a9e88;
+    --blush-tint:#f6ebe4; --blush-band:#f3e0d6; --burgundy:#773c2d;
+    --sh-card:0 1px 2px rgba(36,23,17,.04), 0 8px 24px rgba(36,23,17,.06);
+    --sh-lift:0 2px 4px rgba(36,23,17,.05), 0 14px 34px rgba(36,23,17,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--ground);color:var(--body-ink);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 22px 90px;}
+  .page-head{margin-bottom:34px;}
+  .page-head .eyebrow,.eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.17em;text-transform:uppercase;color:var(--label);}
+  .page-head h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;color:var(--ink);line-height:1.15;margin:8px 0 6px;}
+  .page-head p{max-width:68ch;}
+
+  .exhibit{margin-bottom:42px;}
+  .ex-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px;}
+  .ex-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.17em;color:var(--label);}
+  .ex-name{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink);}
+  .ex-rule{flex:1;height:1px;background:var(--hairline-soft);}
+  .ex-why{font-size:12.5px;color:var(--muted);margin-bottom:16px;max-width:70ch;}
+  .flag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;padding:3px 8px;border-radius:5px;background:var(--blush-band);color:var(--burgundy);margin-left:2px;}
+  .flag.new{background:var(--sage-tint);color:var(--sage-text);}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;font-size:13px;font-weight:500;font-family:inherit;padding:10px 18px;cursor:pointer;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,color 140ms ease;}
+  .btn-primary{background:var(--primary);color:#fdfaf5;}
+  .btn-primary:hover{background:#31221a;}
+  .btn-primary:disabled{background:#ddd4c7;color:#fff;cursor:not-allowed;}
+  .btn-ghost{background:var(--plate);border-color:var(--hairline);color:var(--body-ink);}
+  .btn-ghost:hover{border-color:#cfc2b0;color:var(--ink);}
+  .btn-danger{background:var(--plate);border-color:#d9b3a6;color:var(--burgundy);}
+  .btn-danger:hover{background:#fbf1ec;}
+  .btn-danger:disabled{border-color:var(--hairline);color:#c0b3a4;cursor:not-allowed;background:var(--plate);}
+  .btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+  .btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--sage-accent);outline-offset:2px;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.17em;text-transform:uppercase;color:var(--label);margin-bottom:7px;}
+  .field input,.field select,.field textarea{width:100%;background:var(--surface);border:1px solid var(--hairline);border-radius:9px;padding:11px 13px;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--ink);transition:border-color 140ms,box-shadow 140ms;}
+  .field input::placeholder,.field textarea::placeholder{color:#b3a795;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--sage-accent);box-shadow:0 0 0 3px rgba(138,158,136,.14);}
+  .field textarea{min-height:104px;resize:vertical;}
+  .field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239c8878' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;cursor:pointer;}
+  .mono-in{font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;}
+
+  .card{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--sh-card);overflow:hidden;}
+  .card-band{background:linear-gradient(135deg,var(--sage-1),var(--sage-2));border-bottom:1px solid rgba(90,110,88,.18);padding:18px 24px;display:flex;align-items:center;gap:14px;}
+  .card-mark{width:42px;height:42px;flex:none;background:var(--plate);border:1px solid rgba(90,110,88,.28);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+  .card-mark svg{width:21px;height:21px;stroke:var(--burgundy);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+  .card-band h3{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink);}
+  .card-body{padding:24px;}
+  .note{display:flex;gap:11px;align-items:flex-start;background:var(--plate);border:1px solid var(--hairline-soft);border-radius:10px;padding:14px 16px;}
+  .note .rule{width:3px;align-self:stretch;border-radius:3px;background:var(--sage-accent);flex:none;}
+  .note.warn .rule{background:#d9a08c;}
+  .note p{font-size:12.5px;margin:0;}
+
+  /* 1 — invite gate */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
+  .state-tag{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);margin-bottom:8px;display:block;}
+
+  /* 2 — beta strip */
+  .app-frame{border:1px solid var(--hairline);border-radius:14px;overflow:hidden;background:var(--plate);}
+  .beta-strip{background:var(--blush-band);border-bottom:1px solid rgba(119,60,45,.18);padding:9px 18px;display:flex;align-items:center;gap:12px;}
+  .beta-strip .pill{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;background:var(--plate);border:1px solid rgba(119,60,45,.25);color:var(--burgundy);padding:3px 8px;border-radius:5px;flex:none;}
+  .beta-strip p{font-size:12.5px;color:#5a3324;flex:1;}
+  .beta-strip a{color:var(--burgundy);}
+  .beta-strip button{background:none;border:none;cursor:pointer;color:#8a5b49;font-size:15px;line-height:1;padding:4px;font-family:inherit;}
+  .fake-page{padding:26px 20px;background:var(--surface);display:flex;gap:12px;}
+  .fake-block{height:56px;border-radius:9px;background:var(--plate);border:1px solid var(--hairline-soft);flex:1;}
+
+  /* 3 — feedback dock */
+  .dock-stage{position:relative;min-height:400px;border:1px solid var(--hairline);border-radius:14px;background:var(--surface);overflow:hidden;}
+  .dock-bg{padding:26px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .dock-bg div{height:78px;border-radius:9px;background:var(--plate);border:1px solid var(--hairline-soft);}
+  .fab{position:absolute;right:20px;bottom:20px;display:inline-flex;align-items:center;gap:8px;background:var(--primary);color:#fdfaf5;border:none;border-radius:99px;padding:11px 17px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;box-shadow:var(--sh-lift);}
+  .fab svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+  .fb-panel{position:absolute;right:20px;bottom:20px;width:340px;max-width:calc(100% - 40px);background:var(--plate);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--sh-lift);display:none;overflow:hidden;}
+  .fb-panel.open{display:block;}
+  .fb-head{background:linear-gradient(135deg,var(--sage-1),var(--sage-2));padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(90,110,88,.18);}
+  .fb-head strong{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);}
+  .fb-head button{background:none;border:none;cursor:pointer;color:var(--sage-text);font-size:16px;line-height:1;font-family:inherit;}
+  .fb-body{padding:16px;}
+  .ctx{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--label);background:var(--surface);border:1px solid var(--hairline-soft);border-radius:8px;padding:9px 11px;margin-bottom:14px;line-height:1.7;}
+  .fb-sent{padding:30px 20px;text-align:center;display:none;}
+  .fb-sent.on{display:block;}
+  .fb-sent .tick{width:40px;height:40px;margin:0 auto 12px;border-radius:50%;background:var(--sage-tint);border:1px solid var(--sage-accent);display:flex;align-items:center;justify-content:center;}
+  .fb-sent .tick svg{width:18px;height:18px;stroke:var(--sage-text);stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+  .fb-sent strong{display:block;font-family:'Playfair Display',serif;font-size:17px;color:var(--ink);margin-bottom:4px;}
+  .fb-sent span{font-size:12.5px;color:var(--muted);}
+
+  /* 4 — data controls */
+  .row-ctl{display:flex;gap:16px;align-items:center;padding:18px 0;border-bottom:1px solid var(--hairline-soft);}
+  .row-ctl:last-of-type{border-bottom:none;}
+  .row-ctl .rc-main{flex:1;min-width:0;}
+  .row-ctl strong{display:block;font-family:'Playfair Display',serif;font-size:16px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+  .row-ctl span{font-size:12.5px;color:var(--body-ink);}
+  .danger-zone{margin-top:18px;background:#fdf6f2;border:1px solid #e8cec1;border-radius:12px;padding:18px 20px;}
+  .danger-zone .eyebrow{color:var(--burgundy);margin-bottom:8px;display:block;}
+  .confirm{display:none;margin-top:14px;padding-top:14px;border-top:1px solid #e8cec1;}
+  .confirm.open{display:block;}
+
+  /* 5 — reset */
+  .auth-card{max-width:400px;background:var(--surface);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--sh-card);padding:28px;}
+  .auth-card h3{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:6px;}
+  .auth-card .sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
+  .auth-foot{margin-top:14px;font-size:12.5px;text-align:center;color:var(--muted);}
+  .auth-foot a{color:var(--burgundy);}
+
+  @media (max-width:760px){.split{grid-template-columns:1fr;}.dock-bg{grid-template-columns:1fr;}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="page-head">
+    <div class="eyebrow">ScriptAlly · Beta readiness</div>
+    <h1>What beta users need that doesn't exist yet</h1>
+    <p>Five surfaces. Two of them aren't really features — they're the launch blockers from the audit wearing a UI, and the privacy policy already promises both. The other three are what makes a beta a beta rather than an early launch.</p>
+  </div>
+
+  <!-- 1 -->
+  <section class="exhibit">
+    <div class="ex-head"><span class="ex-num">01</span><span class="ex-name">Invite gate</span><span class="flag new">New build</span><span class="ex-rule"></span></div>
+    <p class="ex-why">A beta you can't close isn't a beta. The waitlist on the holding page already collects addresses — this turns one into an invite code that gates account creation, so you control the intake rate and know who everyone is.</p>
+    <div class="split">
+      <div class="card">
+        <div class="card-body">
+          <span class="state-tag">State · code required</span>
+          <div class="field">
+            <label for="ic">Your invite code</label>
+            <input id="ic" class="mono-in" type="text" placeholder="SA-XXXX-XXXX" value="SA-7F2K-QM19">
+          </div>
+          <button class="btn btn-primary" style="width:100%" type="button">Continue to sign up</button>
+          <p style="font-size:12.5px;color:var(--muted);text-align:center;margin-top:12px">No code yet? <a href="#" style="color:var(--burgundy)">Join the waiting list</a> — we're letting people in a handful at a time.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <span class="state-tag">State · code not recognised</span>
+          <div class="field">
+            <label for="ic2">Your invite code</label>
+            <input id="ic2" class="mono-in" type="text" value="SA-0000-0000" style="border-color:#d9a08c">
+          </div>
+          <div class="note warn"><span class="rule"></span><p>That code isn't one of ours, or it's already been used. Check the email we sent, or <a href="#" style="color:var(--burgundy)">ask us to look it up</a>.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="exhibit">
+    <div class="ex-head"><span class="ex-num">02</span><span class="ex-name">Beta strip</span><span class="flag new">New build</span><span class="ex-rule"></span></div>
+    <p class="ex-why">Sets expectations once, honestly, without an anxious modal. Sits above the workspace, dismissible per session, and gives the known-issues list somewhere to live so people stop reporting the same three things.</p>
+    <div class="app-frame">
+      <div class="beta-strip" id="strip">
+        <span class="pill">Beta</span>
+        <p>You're using ScriptAlly before it's finished. Your data is real and kept safely — but expect the odd rough edge, and <a href="#">tell us when you find one</a>. <a href="#">What we already know about</a>.</p>
+        <button type="button" aria-label="Dismiss" onclick="document.getElementById('strip').style.display='none'">×</button>
+      </div>
+      <div class="fake-page"><div class="fake-block"></div><div class="fake-block"></div><div class="fake-block"></div></div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="exhibit">
+    <div class="ex-head"><span class="ex-num">03</span><span class="ex-name">Feedback dock</span><span class="flag new">New build</span><span class="ex-rule"></span></div>
+    <p class="ex-why">The single highest-value thing on this page. A beta without a one-click report route produces silence, and silence reads as "it's fine" right up until people stop signing in. It captures the page, the browser and the account automatically, so you don't have to ask.</p>
+    <div class="dock-stage">
+      <div class="dock-bg"><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      <button class="fab" id="fab" type="button">
+        <svg viewBox="0 0 24 24"><path d="M20 15a2 2 0 0 1-2 2H8l-4 3V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg>
+        Give feedback
+      </button>
+      <div class="fb-panel" id="fbp">
+        <div class="fb-head">
+          <strong>Tell us what you found</strong>
+          <button type="button" id="fbx" aria-label="Close">×</button>
+        </div>
+        <div class="fb-body" id="fbform">
+          <div class="field">
+            <label for="fbt">What kind of thing is it?</label>
+            <select id="fbt">
+              <option>Something's broken</option>
+              <option>Something's confusing</option>
+              <option>An idea</option>
+              <option>Something I liked</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fbm">What happened?</label>
+            <textarea id="fbm" placeholder="What were you doing, what did you expect, what happened instead?"></textarea>
+          </div>
+          <div class="ctx">
+            PAGE · Query Centre<br>
+            BROWSER · Chrome 141 · macOS<br>
+            ACCOUNT · attached automatically
+          </div>
+          <button class="btn btn-primary" style="width:100%" type="button" id="fbsend">Send it</button>
+        </div>
+        <div class="fb-sent" id="fbsent">
+          <div class="tick"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></div>
+          <strong>Got it</strong>
+          <span>We read every one of these. If it needs a reply, you'll get one.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="exhibit">
+    <div class="ex-head"><span class="ex-num">04</span><span class="ex-name">Your data — export and deletion</span><span class="flag">Blocker · policy promises this</span><span class="ex-rule"></span></div>
+    <p class="ex-why">Sits in Account &amp; settings. The privacy policy commits to access, export and deletion; this is the mechanism that makes the commitment true. Deletion asks for the account email typed out — not a checkbox — because it can't be undone.</p>
+    <div class="card">
+      <div class="card-band">
+        <div class="card-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7z"/><path d="M9.2 12.2l2 2 3.6-4"/></svg></div>
+        <h3>Your data</h3>
+      </div>
+      <div class="card-body">
+        <div class="row-ctl">
+          <div class="rc-main">
+            <strong>Download everything</strong>
+            <span>One file with your agents, queries, manuscripts, packages and full activity history. Yours to keep, wherever you go next.</span>
+          </div>
+          <button class="btn btn-ghost" type="button"><svg viewBox="0 0 24 24"><path d="M12 4v12"/><path d="M7.5 11.5 12 16l4.5-4.5"/><path d="M4 19h16"/></svg>Download</button>
+        </div>
+        <div class="row-ctl">
+          <div class="rc-main">
+            <strong>Correct something we hold</strong>
+            <span>Most things you can edit yourself. For anything you can't, write to us and we'll put it right.</span>
+          </div>
+          <button class="btn btn-ghost" type="button">Get in touch</button>
+        </div>
+
+        <div class="danger-zone">
+          <span class="eyebrow">Closing your account</span>
+          <div class="row-ctl" style="padding-top:0;border:none">
+            <div class="rc-main">
+              <strong>Delete my account</strong>
+              <span>Removes your account and everything in it within 30 days. This can't be undone — download your data first if you want to keep it.</span>
+            </div>
+            <button class="btn btn-danger" type="button" id="delopen">Delete account</button>
+          </div>
+          <div class="confirm" id="delconf">
+            <div class="field" style="margin-bottom:12px">
+              <label for="delin">Type your account email to confirm</label>
+              <input id="delin" type="text" placeholder="bethany@example.com">
+            </div>
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-danger" type="button" id="delgo" disabled>Delete my account permanently</button>
+              <button class="btn btn-ghost" type="button" id="delcancel">Keep my account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="exhibit">
+    <div class="ex-head"><span class="ex-num">05</span><span class="ex-name">Forgotten password</span><span class="flag">Blocker · confirm before building</span><span class="ex-rule"></span></div>
+    <p class="ex-why">Firebase Auth does the work; the question is whether a UI path exists. Without one a locked-out beta user has no way in and no way to reach you from inside the app. Two states, both plain.</p>
+    <div class="split">
+      <div class="auth-card">
+        <span class="state-tag">State · request</span>
+        <h3>Forgotten your password?</h3>
+        <p class="sub">Give us the email you signed up with and we'll send a link to set a new one.</p>
+        <div class="field">
+          <label for="rem">Email</label>
+          <input id="rem" type="email" placeholder="you@example.com">
+        </div>
+        <button class="btn btn-primary" style="width:100%" type="button">Send the link</button>
+        <p class="auth-foot"><a href="#">Back to sign in</a></p>
+      </div>
+      <div class="auth-card">
+        <span class="state-tag">State · sent</span>
+        <h3>Check your email</h3>
+        <p class="sub">If an account exists for that address, a reset link is on its way. The link works once and expires after an hour.</p>
+        <div class="note"><span class="rule"></span><p>Nothing arrived? Look in spam, then <a href="#" style="color:var(--burgundy)">try again</a> or <a href="#" style="color:var(--burgundy)">write to us</a> — during beta we can sort it by hand.</p></div>
+        <p class="auth-foot" style="margin-top:16px"><a href="#">Back to sign in</a></p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var fab=document.getElementById('fab'),p=document.getElementById('fbp'),x=document.getElementById('fbx'),
+      send=document.getElementById('fbsend'),form=document.getElementById('fbform'),sent=document.getElementById('fbsent');
+  fab.onclick=function(){p.classList.add('open');fab.style.display='none';};
+  x.onclick=function(){p.classList.remove('open');fab.style.display='';form.style.display='';sent.classList.remove('on');};
+  send.onclick=function(){form.style.display='none';sent.classList.add('on');};
+
+  var o=document.getElementById('delopen'),c=document.getElementById('delconf'),
+      i=document.getElementById('delin'),g=document.getElementById('delgo'),k=document.getElementById('delcancel');
+  o.onclick=function(){c.classList.add('open');i.focus();};
+  k.onclick=function(){c.classList.remove('open');i.value='';g.disabled=true;};
+  i.oninput=function(){g.disabled=i.value.trim().toLowerCase()!=='bethany@example.com';};
+})();
+</script>
+</body>
+</html>
