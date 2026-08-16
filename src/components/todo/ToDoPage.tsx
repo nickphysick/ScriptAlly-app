@@ -2341,7 +2341,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           when: Number.isFinite(ms) ? new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "",
           /* absent where the record is silent — never inferred */
           ...(x.r.via ? { via: String(x.r.via) } : q?.sendMethod ? { via: `via ${String(q.sendMethod).toLowerCase()}` } : {}),
-          ...(x.r.note ? { note: String(x.r.note) } : {}),
+          /* ⚠️ ITEM 5 — A PROVISIONAL RUNG SHOWS THE EVENT AND NOTHING ELSE. The import writes its
+             own bookkeeping into `note` — "Full Requested (imported — date needed)" — and the card
+             rendered it as the agent's words. It is a message from the importer to itself.
+             ⚠️ KEYED ON THE STORED FLAG, NEVER ON THE STRING. Matching "(imported" would be
+             deriving state by reading a display string, which is the fault the whole record is
+             built to avoid; `dateProvisional` is a real field and says exactly this.
+             ⚠️ AND IT SUPPRESSES THE WHOLE SUB-LINE ON A PROVISIONAL RUNG, not just the
+             parenthetical — a provisional rung's note is import-written by construction, and
+             trimming the brackets off would leave "Full Requested" restating the label above it. */
+          ...(x.r.note && x.r.dateProvisional !== true ? { note: String(x.r.note) } : {}),
           /* ⚠️ THE STATUS ITSELF, HANDED TO THE REAL `StatusDot`. It used to be a three-state ring
              derived here and painted by the card's own CSS; `StatusDot` is the app's one drawing of
              a query status and is never recreated locally. `resultingStatus ?? type` is the same

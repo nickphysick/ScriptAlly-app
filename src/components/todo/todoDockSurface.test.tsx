@@ -328,6 +328,34 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(dockCssRule(".tdk-tl li {")).toContain("grid-template-columns: 60px 20px");
   });
 
+  /* ── Item 5 · the import's bookkeeping ─────────────────────────────────────────────────────── */
+
+  it("⚠️ A PROVISIONAL RUNG SHOWS THE EVENT AND NOTHING ELSE", () => {
+    /* the page's own derivation is what suppresses it, so this asserts the SHAPE the card is handed
+       and that the card renders a note when there genuinely is one */
+    const withNote = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => [{ key: "e1", label: "Full requested", when: "2 Apr", status: "Full Requested", note: "First fifty pages as a PDF" }]}
+        onPrimary={() => {}} onMore={() => {}} />,
+    );
+    expect(withNote).toContain("First fifty pages as a PDF");
+    /* and none at all when the page withholds it */
+    const bare = renderToStaticMarkup(
+      <TodoDock queue={QUEUE} activeKey="a" onSelect={() => {}} onClose={() => {}}
+        timeline={() => [{ key: "e1", label: "Full requested", when: "2 Apr", status: "Full Requested" }]}
+        onPrimary={() => {}} onMore={() => {}} />,
+    );
+    expect(bare).not.toContain("tdk-tlq");
+  });
+
+  it("⚠️ AND THE PAGE WITHHOLDS IT ON THE STORED FLAG, NEVER BY MATCHING THE STRING", () => {
+    /* matching "(imported" would be deriving state by reading a display string — the fault the
+       record is built to avoid. `dateProvisional` is a real field and says exactly this. */
+    expect(page).toContain("x.r.dateProvisional !== true ? { note: String(x.r.note) }");
+    expect(code(page)).not.toContain("imported — date needed");
+    expect(code(page)).not.toContain("(imported");
+  });
+
   /* ── §3.5 — THE RINGS ────────────────────────────────────────────────────────────────────── */
 
   it("⚠️ the timeline renders the REAL StatusDot — never a ring drawn here", () => {

@@ -22,3 +22,8 @@ One line each, unfixed. Not swept for siblings, not turned into work. Candidates
   the stated premise that overlays portal to `document.body`, and FocusFlow does not portal. Full
   write-up as item 8 of `reports/found-overnight.md`. Moving the journey INTO the pane removes the
   overlay entirely, which is why it is worth doing rather than patching.
+- **"date needed" is a real need with no home.** The import writes `(imported — date needed)` into a
+  provisional rung's `note`, and Item 5 stops it rendering — but the underlying fact is true and
+  worth surfacing: those rungs carry an ordering key rather than a date, and the writer is the only
+  one who can supply the real one. It is not a timeline sub-line; it wants an affordance (a prompt
+  on the rung, or a gap in the Fix bucket). Suppressed, not answered.
