@@ -104,10 +104,21 @@
 /* ⚠️ THE WORKSPACE PANE PAINTS NOTHING NOW. It was a surface; it is the ground, and the task card
    floats on it directly. A pane with its own fill behind a card that also has one is two surfaces
    where the design has one object on a desk. */
+/* ⚠️ THE SCROLLER MOVED INWARD — THE PANE HOLDS, THE CARD'S BODY SCROLLS (ref
+   `todo-journey-in-pane.html`: `.pane { overflow: hidden }` over `.body { overflow-y: auto }`).
+   This was `overflow-y: auto` with the card sized by its content, and the result was a card
+   TALLER than the pane with the record paragraph cut mid-sentence — the pane scrolled, so the
+   text was technically reachable, but the card had no bottom and the band scrolled away with it.
+   ⚠️ `display: flex` IS WHAT MAKES THE CARD'S `flex: 1` MEAN ANYTHING. The house rule: a
+   `flex: 1; min-height: 0` chain needs a flex parent, and a block parent silently drops both
+   declarations — the page then still works, sized by content, which is exactly the failure that
+   is hardest to see. */
 .tdw-work {
   min-height: 0;
   min-width: 0;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: transparent;
 }
 

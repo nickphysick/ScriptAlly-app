@@ -607,10 +607,32 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(split).toContain("gap: 18px");
   });
 
-  it("the WORKSPACE is the second scroller, and it is the pane's own", () => {
+  /**
+   * ⚠️ THE SECOND SCROLLER MOVED INWARD — it is the CARD'S BODY, not the pane (ref
+   * `todo-journey-in-pane.html`: `.pane { overflow: hidden }` over `.body { overflow-y: auto }`).
+   *
+   * The rule this case protects is unchanged: there are two scrollers, the rail's and the
+   * workspace's, and nothing between the frame and either of them may clip. What changed is WHICH
+   * element in the workspace owns it. With the pane scrolling and the card sized by content, a long
+   * record produced a card TALLER than the pane whose band scrolled away with it and whose bottom
+   * edge was never on screen.
+   */
+  it("the WORKSPACE's second scroller is the card's body, and the pane holds it", () => {
     const work = rule(splitCss, ".tdw-work {");
-    expect(work).toContain("overflow-y: auto");
     expect(work).toContain("min-height: 0");
+    /* the pane no longer scrolls — it gives the card a definite height instead */
+    expect(work).toContain("display: flex");
+    expect(work).toContain("flex-direction: column");
+    const dock = readFileSync(join(here, "todoDock.css"), "utf8");
+    const body = rule(dock, ".tdk-body {");
+    expect(body).toContain("overflow-y: auto");
+    expect(body).toContain("flex: 1");
+    expect(body).toContain("min-height: 0");
+    /* ⚠️ AND THE CHAIN ABOVE IT IS REAL. `flex: 1; min-height: 0` under a BLOCK parent applies to
+       nothing and the page keeps working, sized by content — the failure this codebase has been
+       caught by twice. Each link asserted, not just the leaf. */
+    expect(rule(dock, ".tdk {")).toContain("display: flex");
+    expect(rule(dock, ".tdk-w {")).toContain("flex: 1");
   });
 
   it("⚠️ THE RAIL SCROLLER IS THE EXISTING ZONE RELOCATED, never a second one", () => {
@@ -788,10 +810,14 @@ describe("⚠️ EACH PANE SCROLLS, AND NEITHER CLIPS — the distinction a page
     expect(zone).not.toContain("overflow: hidden");
   });
 
-  it("the workspace's own scroller is `overflow-y: auto`, never hidden", () => {
-    const work = rule(splitCss, ".tdw-work {");
-    expect(work).toContain("overflow-y: auto");
-    expect(work).not.toContain("hidden");
+  it("the workspace's own scroller is `overflow-y: auto`, never hidden — and it is the card's body", () => {
+    /* retargeted with the scroller: the pane clips deliberately so the card can be given a height,
+       and the thing that scrolls is one level in. A `hidden` on the SCROLLER would still be the
+       fault this case exists for, so that is where the assertion points. */
+    const dock = readFileSync(join(here, "todoDock.css"), "utf8");
+    const body = rule(dock, ".tdk-body {");
+    expect(body).toContain("overflow-y: auto");
+    expect(body).not.toContain("overflow-y: hidden");
   });
 
   /**

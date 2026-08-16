@@ -81,7 +81,12 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
 
   it("one column, and no rail markup anywhere in it", () => {
     const tdk = dockCssRule(".tdk {");
-    expect(tdk).toContain("display: block");
+    /* ⚠️ `display: flex` NOW, AND IT IS STILL ONE COLUMN. This asserted `display: block`, which was
+       the shape when the pane scrolled and the card was sized by its content. The wrapper is a flex
+       COLUMN so the position line keeps its height and the card takes the rest; what this case
+       actually protects — that there is no second track holding a queue — is the grid assertion
+       below, and that is unchanged. */
+    expect(tdk).toContain("flex-direction: column");
     expect(tdk).not.toContain("grid-template-columns");
     /* ⚠️ ANCHORED, NOT PREFIXED — a bare `tdk-q` matches `tdk-quiet`, which is the footer's own
        live class. The house rule on this exists because the failure is silent in the other
@@ -917,19 +922,29 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
     const rule = dockCssRule(".tdk-w {");
     /* vertical: it fills. `min-height: 340px` was a CONTENT floor pretending to be a height — a
        short record left a stub card floating in a tall pane with the desk showing beneath it. */
-    expect(rule).toContain("min-height: 100%");
+    /* ⚠️ IT FILLS RATHER THAN MERELY REACHING. `min-height: 100%` made the card AT LEAST the pane's
+       height and let it grow past it — which is how a long record produced a card whose bottom edge
+       was never on screen and whose band scrolled away. `flex: 1; min-height: 0` makes it exactly
+       the remaining height, so the body is what scrolls. `min-height: 340px`, the content floor
+       that started all this, stays gone. */
+    expect(rule).toContain("flex: 1");
+    expect(rule).toContain("min-height: 0");
     expect(rule).not.toContain("min-height: 340px");
+    expect(rule).not.toContain("min-height: 100%");
     /* ⚠️ THE MATHS DEPENDS ON THE BOX MODEL, SO THE RULE DECLARES IT rather than inheriting
        preflight — the harness trap the house rules name. */
     expect(rule).toContain("box-sizing: border-box");
     /* ⚠️ HORIZONTAL: THE CAP IS GONE — see "the card fills the pane". It competed with the column
        tracks and the record lost. The measure is the doing column's bounded track now. */
     expect(rule).not.toContain("max-width");
-    /* and the pane still scrolls when the record outgrows it */
+    /* ⚠️ AND THE CARD'S BODY SCROLLS WHEN THE RECORD OUTGROWS IT — not the pane. The pane holds a
+       definite height so the card can fill it; a scrolling pane over a content-sized card is what
+       cut the record paragraph mid-sentence with the card's bottom edge off screen. */
     const split = readFileSync(join(here, "todoSplit.css"), "utf8");
     const pane = split.slice(split.indexOf(".tdw-work {"), split.indexOf("}", split.indexOf(".tdw-work {")));
     expect(pane.length, "the .tdw-work slice came out empty").toBeGreaterThan(20);
-    expect(pane).toContain("overflow-y: auto");
+    expect(pane).toContain("display: flex");
+    expect(dockCssRule(".tdk-body {")).toContain("overflow-y: auto");
   });
 });
 
