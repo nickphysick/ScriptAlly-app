@@ -330,15 +330,20 @@
 
 /* ⚠️ INTER 13px WITH A LEADING ICON — not mono all-caps. These are sentences you press, and the
    mono-caps register belongs to labels that state a fact rather than offer an act. */
+/* ⚠️ BLACK MEANS "THIS ADVANCES", AND IT IS THE PAGE'S ONE PRIMARY GRAMMAR. This was pink — the
+   same pink as a chosen segment, a hover and the band of an offer — so the control that OPENS the
+   recording read as one more selected thing. `--ink-strong` fill with parchment text, bottom-right
+   of the footer; the quiet verbs stay on the left with the consequence hint between them. */
 .tdw-cbprim {
   cursor: pointer;
   font: inherit;
   font-size: 13px;
   font-weight: 500;
-  background: var(--pink, #f5e2da);
-  /* ink, not burgundy — the page-scoped decision from Phase 1; the FILL still reads the token */
-  color: #241209;
-  border: 1px solid var(--pink-b, #e8c8bc);
+  background: var(--ink-strong, #241209);
+  /* ⚠️ PARCHMENT ON INK. This read `color: #241209` — ink text, correct while the fill was pink and
+     invisible the moment it went black. The two move together or not at all. */
+  color: var(--paper, #fdfaf5);
+  border: 1px solid var(--ink-strong, #241209);
   border-radius: 10px;
   padding: 9px 17px;
   white-space: nowrap;
@@ -347,7 +352,7 @@
   gap: 8px;
 }
 
-.tdw-cbprim:hover:not(:disabled) { background: #f2d5ca; border-color: #d8a89a; }
+.tdw-cbprim:hover:not(:disabled) { background: #3a1c14; border-color: #3a1c14; }
 .tdw-cbprim:disabled { opacity: 0.4; cursor: default; }
 
 .tdw-cbbtn {

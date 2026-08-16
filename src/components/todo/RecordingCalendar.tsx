@@ -127,7 +127,10 @@ export const RecordingCalendar: React.FC<RecordingCalendarProps> = ({ anchor, va
       <div className="cal-f">
         {/* the standing note states what cannot be picked, until a day is picked and states itself */}
         <span className="note">{picked ? fullDate(picked) : standing}</span>
-        <button type="button" disabled={!picked} onClick={() => { if (picked) { onPick(picked); onClose(); anchor.focus?.(); } }}>Done</button>
+        {/* ⚠️ IT NAMES WHAT IT DOES. "Done" is what you say when a dialogue has nothing left to ask;
+            this one is choosing a value, and the button is what applies it. Disabled until a day is
+            picked, so it can never apply nothing. */}
+        <button type="button" disabled={!picked} onClick={() => { if (picked) { onPick(picked); onClose(); anchor.focus?.(); } }}>Use this date</button>
       </div>
     </div>,
     document.body,

@@ -1591,8 +1591,11 @@ button.tdb-ldot { cursor: pointer; }
 .cal-d.blank { visibility: hidden; }
 .cal-f { display: flex; align-items: center; gap: 8px; margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--hairline); }
 .cal-f .note { flex: 1; min-width: 0; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
-.cal-f button { cursor: pointer; font-size: 12px; font-weight: 500; background: var(--pink-btn); color: var(--ink); border: 1px solid var(--pink-b); border-radius: 9px; padding: 8px 14px; }
-.cal-f button:hover:not(:disabled) { background: var(--pink-btn-h); }
+/* ⚠️ BLACK MEANS "THIS ADVANCES" — one grammar, everywhere. The confirm was PINK, which on this
+   page is the colour of a chosen segment and a hover; a control that looks like a selected option
+   is not obviously the thing that commits. `--ink-strong` fill, parchment text. */
+.cal-f button { cursor: pointer; font-size: 12px; font-weight: 500; background: var(--ink-strong, #241209); color: var(--paper, #fdfaf5); border: 1px solid var(--ink-strong, #241209); border-radius: 9px; padding: 8px 14px; }
+.cal-f button:hover:not(:disabled) { background: #3a1c14; border-color: #3a1c14; }
 .cal-f button:disabled { opacity: 0.45; cursor: default; }
 @media (prefers-reduced-motion: reduce) { .cal-d { transition: none; } }
 
