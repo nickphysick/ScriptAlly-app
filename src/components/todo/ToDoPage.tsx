@@ -64,7 +64,7 @@ import {
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList, groupColumn } from "./TaskList";
 import { useDockActivity } from "./useDockActivity";
-import { materialRows, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
+import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
 import { notifyGroups } from "../../lib/offerNotify";
 import { sendSpecFor } from "../../lib/todoDock";
 import { isSlotFilled } from "../../lib/packageMetrics";
@@ -2283,7 +2283,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const slot = isFull ? undefined : pkg?.samplePagesVersionId;
     const versionName = slot && isSlotFilled(slot) ? versions.find((v) => v.id === slot)?.versionName ?? null : null;
     const ms = q ? manuscripts.find((m) => m.id === q.manuscriptId) : undefined;
-    return materialRows(spec.material, { isFull, wordCount: ms?.wordCount, versionName });
+    /* ⚠️ THE NAME, NOT THE SPEC'S DISCRIMINATOR. `spec.material` is `"partial" | "full"` — what the
+       WRITE path branches on — and it was going straight to the row's label. */
+    return materialRows(materialName(spec.material, card.who), { isFull, wordCount: ms?.wordCount, versionName });
   }
 
   function dockTimeline(card: BoardCard): DockTimelineEvent[] {

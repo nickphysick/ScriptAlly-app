@@ -443,6 +443,28 @@ export interface MaterialRow {
  * nowhere in `src/` outside a dev lab fixture and `contentType: "file"` is a disabled coming-soon
  * with no Storage behind it, so a format stamp would be invented on every row, every time.
  */
+/**
+ * ⚠️ THE ROW NAMES THE MATERIAL; IT DOES NOT PRINT THE SPEC'S SLUG.
+ *
+ * `What goes` read `partial`. That string is `SendSpec.material` — a two-value discriminator
+ * (`"partial" | "full"`) whose job is to tell the WRITE path which primitive to run and which
+ * status follows. It was never a label, and rendering it made the card say the name of an internal
+ * field to the writer.
+ *
+ * ⚠️ AND THE ASK IS ATTRIBUTED, because that is what makes the row a statement rather than an
+ * instruction: "The partial — as Greg asked" says the material is on file AND whose request it
+ * answers. `bandPreline` already names the act; this names the thing.
+ *
+ * ⚠️ THE CLAUSE OMITS ITSELF WHERE THERE IS NO ONE TO ATTRIBUTE IT TO. A card with no agent —
+ * `card.who` is `""` — reads "The partial" and stops. "as asked" with nobody's name in it is a
+ * sentence about a person the record does not have.
+ */
+export function materialName(material: "partial" | "full", who: string): string {
+  const thing = material === "partial" ? "The partial" : "The full";
+  const name = who.trim().split(/\s+/)[0];
+  return name ? `${thing} — as ${name} asked` : thing;
+}
+
 export function materialRows(
   materialLabel: string | null,
   opts: { isFull?: boolean; wordCount?: number; versionName?: string | null },

@@ -12,8 +12,9 @@
 import { describe, it, expect } from "vitest";
 import { BoardCard } from "./todoBoard";
 import {
-  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, recordNote, holderRows, anchorNoun, bandForward, materialRows, bandAnchor, trackingStats, HANDOFF_NOTE,
+  handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, recordNote, holderRows, anchorNoun, bandForward, materialRows, materialName, bandAnchor, trackingStats, HANDOFF_NOTE,
 } from "./todoHandoff";
+import { sendSpecFor } from "./todoDock";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
   key: "k", stream: "do", title: "Send your full to Bethany Carter", who: "Bethany Carter",
@@ -476,5 +477,49 @@ describe("⚠️ §3.11 — ONE PARAGRAPH PER BUCKET, and it reports rather than
       .toBe("A gap on the agent's record. Filling it opens their profile at the field.");
     expect(recordNote(bcard({ userTaskId: "u1" })))
       .toBe("Your own task — ticking it is what finishes it.");
+  });
+});
+
+/* ── Item 4 · the material row's NAME ────────────────────────────────────────────────────────── */
+
+describe("materialName — the row names the material, never the spec's slug", () => {
+  /**
+   * ⚠️ THE ARGUMENT IS DERIVED, NOT TYPED. `sendSpecFor` is what computes the material in
+   * production, so the fixtures call it rather than hand-writing "partial" — a literal here is the
+   * same fault one step along, going green the day that mapping moves.
+   */
+  const forTask = (taskType: string, who: string) => {
+    const spec = sendSpecFor(card({ taskType, who }));
+    return spec ? materialName(spec.material, who) : null;
+  };
+
+  it("a partial request reads as a named material, attributed to whoever asked", () => {
+    expect(forTask("partial_requested", "Greg Panetta")).toBe("The partial — as Greg asked");
+  });
+
+  it("a full takes the same shape", () => {
+    expect(forTask("full_requested", "Greg Panetta")).toBe("The full — as Greg asked");
+  });
+
+  it("an R&R is still a full, and the 'again' is the band's job rather than this row's", () => {
+    /* `bandPreline` already reads "Sending your full again to"; saying it twice in one card would
+       be the duplication law's fault in prose. */
+    expect(forTask("revise_resubmit", "Iris Kwan")).toBe("The full — as Iris asked");
+  });
+
+  it("⚠️ THE ATTRIBUTION OMITS ITSELF WHERE THERE IS NO ONE TO ATTRIBUTE IT TO", () => {
+    /* `card.who` is `""` on every card with no agent. "as asked" with nobody's name in it is a
+       sentence about a person the record does not have. */
+    expect(forTask("partial_requested", "")).toBe("The partial");
+    expect(forTask("full_requested", "   ")).toBe("The full");
+  });
+
+  it("⚠️ AND THE SPEC'S DISCRIMINATOR NEVER REACHES THE ROW", () => {
+    /* the fault as it shipped: `What goes` printed `partial`, which is `SendSpec.material` — the
+       two-value field the WRITE path branches on, rendered to the writer as a label. */
+    for (const t of ["partial_requested", "full_requested", "revise_resubmit"]) {
+      expect(forTask(t, "Greg Panetta"), t).not.toBe("partial");
+      expect(forTask(t, "Greg Panetta"), t).not.toBe("full");
+    }
   });
 });
