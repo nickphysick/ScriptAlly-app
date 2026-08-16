@@ -29,6 +29,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
+import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, deletionConfirmed } from "../lib/dataExport";
 import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountCard } from "./MountCard";
@@ -402,9 +403,19 @@ const Rail: React.FC<{ active: SectionId; onSelect: (id: SectionId) => void }> =
 /* ── Delete-account modal: a typed-confirmation pattern. The confirm step is present and
  *    functional, but the final action is DISABLED ("coming soon") — no deletion endpoint
  *    exists and irreversible deletion is never wired unsupervised. ───────────────────── */
-const DeleteAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+/**
+ * ⚠️ THE CONFIRMATION IS THE ACCOUNT EMAIL, NOT THE WORD "DELETE" — and not a checkbox.
+ * "DELETE" is a word anyone can type without reading; your own address is a sentence you have to
+ * mean, and it is the one string that is different for every account. `deletionConfirmed` also
+ * refuses an empty account email, so a half-loaded user document cannot arm the button.
+ *
+ * ⚠️ AND THE BUTTON STAYS DISABLED WHATEVER IS TYPED. `ACCOUNT_DELETION_ENABLED` is the outer gate:
+ * nothing in this repo deletes a user's records, and the flag exists so the mechanism gets reviewed
+ * before it is switched on. The confirm proves intent; the flag proves the code has been read.
+ */
+const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string; onContact: () => void }> = ({ onClose, accountEmail, onContact }) => {
   const [confirm, setConfirm] = useState("");
-  const matched = confirm.trim().toUpperCase() === "DELETE";
+  const matched = deletionConfirmed(confirm, accountEmail);
   const inputRef = useRef<HTMLInputElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -467,7 +478,7 @@ const DeleteAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               This <strong>cannot be undone</strong>.
             </p>
             <label htmlFor="del-confirm" style={labelStyle}>
-              Type DELETE to confirm
+              Type your account email to confirm
             </label>
             <input
               id="del-confirm"
@@ -476,6 +487,7 @@ const DeleteAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               autoComplete="off"
+              placeholder={accountEmail ?? "you@example.com"}
               className="acct-input"
               style={inputStyle}
               aria-describedby="del-note"
@@ -506,8 +518,18 @@ const DeleteAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account
               </button>
             </div>
-            <p id="del-note" style={{ ...helpText, marginTop: 12, fontStyle: "italic" }}>
-              Account deletion isn't available yet — it's coming soon. Nothing has been deleted.
+            {/* ⚠️ SAID PLAINLY, AND WITH A ROUTE THAT WORKS. A writer who wants out needs one; a
+                disabled button and "coming soon" leaves them with nowhere to go. */}
+            <p id="del-note" style={{ ...helpText, marginTop: 12 }}>
+              Self-service deletion isn't switched on yet.{" "}
+              <button
+                type="button"
+                onClick={onContact}
+                style={{ background: "none", border: "none", padding: 0, font: "inherit", color: DANGER_INK, textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}
+              >
+                Write to us
+              </button>{" "}
+              and we'll close your account by hand. Nothing has been deleted.
             </p>
           </div>
         </CardShell>
@@ -518,7 +540,10 @@ const DeleteAccountModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 };
 
 export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
-  const { currentUser, updateUserProfile, resetPassword, agents, queries, manuscripts } = useScriptAllyDb();
+  const {
+    currentUser, updateUserProfile, resetPassword,
+    agents, queries, manuscripts, versions, packages, activities, notes, userTasks,
+  } = useScriptAllyDb();
 
   const [active, setActive] = useState<SectionId>("profile");
   const [name, setName] = useState(currentUser?.name ?? "");
@@ -575,30 +600,36 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
     }
   };
 
-  /** Self-contained client-side export of the already-loaded data — no backend, no writes. */
+  /**
+   * Self-contained client-side export of the already-loaded data — no backend, no writes.
+   *
+   * ⚠️ IT USED TO EXPORT THREE COLLECTIONS AND THE POLICY PROMISED SIX. Manuscripts, agents and
+   * queries went out; submission packages, notes, activity history, manuscript versions and tasks
+   * did not — while section 2 of the privacy policy names the querying records "including
+   * submission packages, notes and activity history", and section 8 offers export as a right. The
+   * shape now lives in `lib/dataExport.ts` with the collection list asserted against it, so a
+   * record type added to the app cannot quietly fall out of the file a writer is told is
+   * everything.
+   */
   const exportData = useCallback(() => {
-    const payload = {
-      exportedAt: new Date().toISOString(),
-      account: { name: currentUser.name, email: currentUser.email, plan: currentUser.plan },
-      manuscripts,
-      agents,
-      queries,
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `scriptally-export-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    const now = new Date();
+    const bundle = buildExport(
+      {
+        // The account record as the writer's own document, not a hand-picked three fields: an
+        // export is a copy of what is held, and choosing which parts to include is the thing that
+        // made the old one incomplete.
+        user: currentUser,
+        manuscripts, versions, packages, agents, queries, activities, notes, userTasks,
+      },
+      now,
+    );
+    downloadExport(bundle, exportFilename(now));
     setExportMsg(
       `Downloaded ${manuscripts.length} manuscript${manuscripts.length === 1 ? "" : "s"}, ${agents.length} agent${
         agents.length === 1 ? "" : "s"
-      } and ${queries.length} quer${queries.length === 1 ? "y" : "ies"} as JSON.`,
+      }, ${queries.length} quer${queries.length === 1 ? "y" : "ies"} and your full activity history as JSON.`,
     );
-  }, [currentUser, manuscripts, agents, queries]);
+  }, [currentUser, manuscripts, versions, packages, agents, queries, activities, notes, userTasks]);
 
   const initial = (currentUser.name || currentUser.email || "?").trim().charAt(0).toUpperCase();
   const fmtDate = (iso?: string) => {
@@ -888,6 +919,17 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
         </div>
         {exportMsg && <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN, marginTop: -4, marginBottom: 16 }}>{exportMsg}</p>}
 
+        {/* ⚠️ THE THIRD DATA RIGHT, AND IT HAD NO ROUTE. The privacy policy offers access, export,
+            CORRECTION and deletion; export and deletion had surfaces here and correction had none,
+            so the one right a writer is most likely to need was the one with nowhere to click. */}
+        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Correct something we hold</p>
+            <p style={helpText}>Most things you can edit yourself. For anything you can't, write to us and we'll put it right.</p>
+          </div>
+          <button onClick={() => onNavigate("contact")} style={ghostBtn}>Get in touch</button>
+        </div>
+
         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Import agents &amp; queries</p>
@@ -989,7 +1031,7 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
         </div>
       </div>
 
-      {showDelete && <DeleteAccountModal onClose={() => setShowDelete(false)} />}
+      {showDelete && <DeleteAccountModal onClose={() => setShowDelete(false)} accountEmail={currentUser.email} onContact={() => onNavigate("contact")} />}
     </div>
   );
 };
