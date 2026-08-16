@@ -11,6 +11,8 @@ import { join } from "node:path";
 import { QueryStatus, UserTask, Manuscript, TaskFlag, Activity, ActivityType, Agent, Query } from "../types";
 import { assembleBoard, todaySplit, BoardCard, BoardInput } from "./todoBoard";
 import { todoCounts } from "./todoCount";
+import { HK_RULES } from "./todoHousekeeping";
+import { rowMeta } from "./todoBuckets";
 import {
   boardColumns, dropPlan, offerGuard, boardEligible, TODO_COLUMNS, snoozedCards, sweepCardFor,
   columnWeight, cardWeight, isSweepCard,
@@ -243,6 +245,45 @@ describe("NO STORED PLACEMENT — the schema gains nothing", () => {
     const src = readFileSync(join(process.cwd(), "src", "lib", "todoColumns.ts"), "utf8");
     for (const write of ["updateDoc", "setDoc", "addDoc", "deleteDoc", "firebase"]) {
       expect(src, `todoColumns must not write (${write})`).not.toContain(write);
+    }
+  });
+});
+
+/* ── item 3 · a group row names its subject ──────────────────────────────────────────────────── */
+
+describe("⚠️ A GROUP ROW NAMES ITS SUBJECT, never the band it already sits under", () => {
+  /**
+   * ⚠️ THE SENTENCE IS BUILT BY THE RULE THAT OWNS IT, not typed here. `HK_RULES` declares one
+   * `title(n)` per rule; a literal in this test would pass on the day the rule's wording moved and
+   * the row started saying something else — the hand-written-argument fault.
+   */
+  it("the second line is the rule's own sentence, and it names the count and the subject", () => {
+    const meta = HK_RULES.dq_materials;
+    const { card } = sweepCardFor("dq_materials", meta.label, 16, [], meta.title(16));
+    expect(card.record).toBe(meta.title(16));
+    expect(rowMeta(card)).toBe(meta.title(16));
+    /* count and subject, both present — asserted as facts about the string, not as the string */
+    expect(rowMeta(card)).toContain("16");
+    expect(rowMeta(card)).toMatch(/agents?/i);
+    /* and it is no longer the band's own word */
+    expect(rowMeta(card)).not.toBe("Housekeeping");
+  });
+
+  it("⚠️ NO SENTENCE, NO LINE — never a borrowed standing subject", () => {
+    /* `rowMeta`'s fallbacks name a PLACE (the noteboard, the packages page), which is honest for a
+       card that has one. A sweep stands for n agents, not for a place, so an absent subject renders
+       nothing rather than sending the reader somewhere unrelated. */
+    const { card } = sweepCardFor("dq_mswl", "Wish lists", 15, []);
+    expect(card.record).toBe("");
+    expect(rowMeta(card)).toBe("");
+    expect(rowMeta(card)).not.toBe("Submission packages");
+  });
+
+  it("every live rule can describe itself, so no group row is silent by accident", () => {
+    for (const r of Object.values(HK_RULES)) {
+      expect(typeof r.title, r.rule).toBe("function");
+      expect(r.title(3).length, r.rule).toBeGreaterThan(10);
+      expect(r.title(3), r.rule).toContain("3");
     }
   });
 });

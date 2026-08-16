@@ -19,6 +19,7 @@
  * agent moves to line two, so line one scans as a column of verbs. That is the whole reason the
  * card's own `title` is not reused here: it is a sentence, and a sentence is not a deed.
  */
+import { isSweepCard } from "./todoColumns";
 import { BoardCard } from "./todoBoard";
 import { BandFamily, liveFamily } from "./todoFamily";
 
@@ -269,6 +270,12 @@ export function daysSince(fromMs: number, nowMs: number): number {
 export function rowMeta(c: BoardCard): string {
   if (c.record) return c.record;
   if (c.who) return c.who;
+  /* ⚠️ A GROUP ROW WITH NOTHING TO SAY SAYS NOTHING. The fallbacks below name a STANDING SUBJECT —
+     the writer's board, the packages page — which is honest for a card that has one and no agent.
+     A sweep has neither: it stands for n agents rather than for a place, so borrowing either
+     fallback would put a destination in the slot where the row's subject belongs. Empty renders no
+     line at all, which is the true answer. */
+  if (isSweepCard(c)) return "";
   return cardBucket(c) === "note" ? "Your noteboard" : "Submission packages";
 }
 

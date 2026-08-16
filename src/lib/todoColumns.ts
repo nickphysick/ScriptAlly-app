@@ -219,11 +219,26 @@ export function columnWeight(cards: BoardCard[]): number {
 }
 
 /** Build the one card that stands for a whole rule group. */
+/**
+ * ⚠️ THE SECOND LINE NAMES THE SUBJECT, NOT THE PILE. It read `"Housekeeping"` — the word already
+ * printed on the band the row sits under, in the slot where every other row puts the agent, so a
+ * group row spent its one descriptive line repeating its own address.
+ *
+ * ⚠️ AND THE SENTENCE IS THE RULE'S OWN, NOT A SECOND VOCABULARY. `HK_RULES[rule].title(n)` already
+ * says "16 agents are missing a materials list" — declared once per rule, beside the rule, which is
+ * exactly where the journeys keep their per-kind copy. Writing a terser parallel phrase here would
+ * give one fact two wordings that drift the first time a rule is renamed.
+ *
+ * ⚠️ ABSENT RATHER THAN FILLED: a rule with no sentence renders no second line. `rowMeta`'s
+ * standing-subject fallbacks are for cards that HAVE a subject and no agent; a group that cannot
+ * describe itself should say nothing rather than borrow a description meant for something else.
+ */
 export function sweepCardFor(
   rule: string,
   label: string,
   memberCount: number,
-  memberKeys: string[]
+  memberKeys: string[],
+  subject?: string,
 ): { card: SweepCard; memberKeys: string[] } {
   return {
     memberKeys,
@@ -239,7 +254,7 @@ export function sweepCardFor(
       snoozes: 0,
       hk: true,
       initials: "•",
-      record: "Housekeeping",
+      record: subject ?? "",
       committed: false,
       done: false,
       taskType: "data_quality_poor",
@@ -339,7 +354,11 @@ export function assembleBoardColumns(input: AssembleColumnsInput): {
     : input.userTasks;
   const board = assembleBoard({ ...input, userTasks });
   const hkGroups = groupHousekeeping(board.hk, input.agents, input.mutedTaskRules, input.queries);
-  const sweeps = hkGroups.map((g) => sweepCardFor(g.rule, g.meta.label, g.members.length, g.members.map((m) => m.card.key)));
+  const sweeps = hkGroups.map((g) => sweepCardFor(
+    g.rule, g.meta.label, g.members.length, g.members.map((m) => m.card.key),
+    /* the rule's own sentence — one vocabulary, declared beside the rule */
+    g.meta.title?.(g.members.length),
+  ));
   const cols = boardColumns({
     board, flags: input.taskFlags, queries: input.queries, agents: input.agents,
     manuscripts: input.manuscripts, userTasks: input.userTasks, sweeps,
