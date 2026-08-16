@@ -40,6 +40,8 @@ Declared in `:root` (`src/index.css`) and consumed by every theme. Type families
 | `--font-mono` | `"JetBrains Mono", monospace` | Eyebrows, meta, counts |
 | `--content-max` | `1440px` | Shared content gutter cap |
 | `--burg` | `#7c3a2a` | Primary brand ink (= `--color-burgundy`) |
+| `--wsh-band-bg` | `#333c4d` | **The collapsed header band's ground.** Theme-independent — one value under Cappuccino, Bold Pastille and Editorial alike |
+| `--wsh-band-ink` | `#ffffff` | Everything sitting **on** that band: the mono label, glyphs, focus rings, and the primary's inverted fill |
 | `--burg-d` | `#632e22` | Deep burgundy |
 | `--ink` | `#241c15` | Near-black glyph strokes / headings on tinted bands |
 | `--muted` | `#9a8c80` | Muted mono captions |
@@ -565,6 +567,25 @@ These flourishes matter as much as the hexes — they are the difference between
 
 ### Theme-independent behaviour
 - Theme swap fades over ≤150ms (`transition: background-color .15s ease` on all three roots).
+### ⚠️ The collapsed header band — the app's first cool colour
+
+`--wsh-band-bg: #333c4d` is a **new family, not a variant**: nothing else in the palette is within
+reach of it, and the last blue on Query Centre (the selected row's `#e7eef6`) was removed as
+off-palette days earlier. It is named for the band rather than for the colour, so a retheme does not
+have to fight the name.
+
+- **One value everywhere.** Not per-theme. A per-theme split is a later decision and was deliberately
+  not taken; if it reads badly under Editorial or Bold that is reported, not fixed here.
+- **No rule beneath.** `--wsh-band-edge` (`#dfe4dc`, a warm parchment hairline) is **deleted**, not
+  zeroed — on dark slate it reads as a scratch, and a saturated band announces its own edge.
+- **The primary inverts on this band only.** `.svh-btn-ink` is `#2a1a13`, which is 1.4:1 on
+  `#333c4d` — invisible, not merely low-contrast. On the band it takes `--wsh-band-ink` as its fill
+  and `--wsh-band-bg` as its label, so the primary stays the highest-contrast element in the
+  composition, which is what the dark pill was always for. **The app-wide dark pill is unchanged.**
+- **The band's foreground is one token** because label, glyphs, focus ring and the inverted pill all
+  sit on one ground. `--shell-focus` (burgundy at 45%) and `--shell-ink-soft` (`#6a615a`) were both
+  tuned for a near-white band and neither survives here.
+
 - The grand-masthead title steps `54px → 40px` at `max-height ≤ 819px` (`--hub-mast-title`/`--hub-mast-pad`, `:root`), theme-independent; only the title *ink* is per-theme (`--hub-head`).
 - StatusDot is never restyled by theme CSS — only its `--sd-hue`/`--sd-centre` component tokens change.
 

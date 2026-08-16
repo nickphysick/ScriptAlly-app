@@ -291,7 +291,12 @@ describe("the header's two states", () => {
     expect(t, "the label is not uppercase").toContain("text-transform: uppercase");
     /* ⚠️ A TOKEN, NOT A LITERAL — and specifically not the tertiary muted, which is the
        counts-and-captions tier: the page's own identity must not be fainter than a tally. */
-    expect(t, "the label colour is a literal, or dropped to the counts tier").toContain("color: var(--shell-ink-soft)");
+    /* ⚠️ `--shell-ink-soft` → `--wsh-band-ink`. Both `--shell-ink-soft` (#6a615a) and the tertiary
+       `--shell-muted` are WARM inks tuned for a near-white band; on #333c4d the first is under 2:1.
+       The band's own foreground token takes over. What the old assertion protected — that the
+       label is not demoted to the counts tier — still holds, since nothing in the strip is brighter
+       than it. */
+    expect(t, "the label colour is a literal, or it went back to an ink tuned for a near-white band").toContain("color: var(--wsh-band-ink)");
     const sub = all(hdrCss, ".wsh--scrolled .wsh-sub");
     expect(sub, "the description faded but kept its box, holding the title off-centre in a 52px strip").toContain("max-height: 0");
   });
@@ -339,34 +344,76 @@ describe("the header's two states", () => {
    * The line belongs to the thing that draws it. Asserted as ABSENT here, because a leftover
    * `::after` would be invisible at rest and a double rule the moment anyone scrolled.
    */
+  /**
+   * ══ THE PRIMARY INVERTS ON THE BAND, AND ONLY ON THE BAND ═══════════════════════════════════
+   *
+   * ⚠️ THIS IS THE HALF OF THE RECOLOUR THAT IS NOT PAINT. `.svh-btn-ink` is `#2a1a13` on
+   * `#333c4d` — 1.4:1, a near-black pill on dark slate. That is not low contrast, it is INVISIBLE,
+   * so recolouring the band without this would ship a page whose principal action cannot be seen.
+   *
+   * ⚠️ IT INVERTS RATHER THAN GOING PINK, for the reason the dark pill existed: the primary is the
+   * highest-contrast element in the composition. On a light band the darkest thing present was the
+   * pill; on a dark band the darkest thing is the band, so the pill becomes the lightest and the
+   * RANKING is preserved rather than restated. Pink is the house primary elsewhere and would have
+   * worked, but it says "creation" — a register the ink primary was deliberately chosen over.
+   *
+   * ⚠️ BOTH VALUES ARE THE BAND'S OWN TWO TOKENS, never a third pair invented for the button, so
+   * the pill cannot drift into a combination against a ground nobody checked.
+   */
+  it("⚠️ THE PRIMARY INVERTS ON THE BAND — and the app-wide pill is untouched", () => {
+    const inverted = all(hdrCss, ".wsh--scrolled .svh-btn-ink");
+    expect(inverted, "the primary keeps its near-black fill on the band — 1.4:1, invisible").not.toBe("");
+    expect(inverted, "the inverted fill is not the band's foreground token").toContain("background: var(--wsh-band-ink)");
+    expect(inverted, "the inverted label is not the band's ground token").toContain("color: var(--wsh-band-bg)");
+    /* ⚠️ SCOPED, NOT GLOBAL. The resting header and every other surface keep #2a1a13; a change to
+       the base rule would have retoned the primary app-wide, which this pack explicitly forbids. */
+    const base = all(hdrCss, ".svh-btn-ink");
+    expect(base, "the app-wide dark pill was changed — this pack recolours ONE band, not the primary")
+      .toContain("background: #2a1a13");
+  });
+
+  /**
+   * ⚠️ THE FOCUS RING HAD TO MOVE TOO, and it is the quietest of the four things on this band.
+   * `--shell-focus` is a burgundy at 45% alpha tuned to sit on parchment; on `#333c4d` it is a dark
+   * ring on a dark ground and effectively absent — a keyboard user loses the strip entirely.
+   */
+  it("⚠️ THE FOCUS RING READS THE BAND'S FOREGROUND — a parchment ring is invisible here", () => {
+    const ring = all(hdrCss, ".wsh--scrolled .svh-btn:focus-visible,\n.wsh--scrolled button:focus-visible");
+    expect(ring, "nothing gives the strip a focus ring against its dark ground").not.toBe("");
+    expect(ring, "the ring is not on the band's foreground token").toContain("var(--wsh-band-ink)");
+  });
+
   it("⚠️ THE BAND DRAWS ITS OWN EDGE — the row's floating hairline is GONE", () => {
     expect(all(gridCss, ".wpg-plate::after"), "the row's hairline came back — with the band's edge it draws two lines a pixel apart").toBe("");
     expect(all(gridCss, ".wpg-plate--working::after"), "the row's working hairline came back").toBe("");
     const band = all(hdrCss, ".wsh--scrolled");
     expect(band, "the band has no ground — it is still a card floating on the window").toContain("background: var(--wsh-band-bg)");
-    /* ⚠️ THE EXISTING BORDER BOX RE-COLOURED, not a new element: three sides transparent, the
-       fourth the band's line. It inherits the `border-color` transition and the 1px comes out of
-       the content rather than off the 52px the matrix asserts. */
-    expect(band, "the band's bottom edge is missing, or it grew a border on the other three sides")
-      .toContain("border-color: transparent transparent var(--wsh-band-edge)");
+    /* ⚠️ INVERTED — THE RULE BENEATH IS GONE. A warm parchment hairline on dark slate reads as a
+       scratch, and a saturated band states its own boundary. All four sides transparent; the border
+       BOX stays, because the strip's 52px is `box-sizing: border-box` and dropping the border would
+       hand the content a pixel back — which is the height the matrix asserts. */
+    expect(band, "the band's rule came back — on dark slate a warm hairline reads as a scratch")
+      .toContain("border-color: transparent;");
+    expect(band, "the band still names the retired edge token").not.toContain("--wsh-band-edge");
     expect(band, "the band grew a radius or a shadow — it is a band, not a card").toContain("box-shadow: none");
     /**
-     * ⚠️ THE GROUND IS A TOKEN, NEVER A LITERAL, AND IT IS THE SHELL'S CHROME FILL.
+     * ⚠️ THE GROUND IS ITS OWN DECLARED VALUE NOW, AND THE OLD ARGUMENT IS WITHDRAWN. It read
+     * `var(--shell-parch)` under a "semantic match, not value match" rule — the band is chrome, so
+     * it took the shell's chrome fill and would follow it through any retone. That held only while
+     * the band belonged to the warm parchment family. It does not, so the coupling goes with it.
      *
-     * It was `--shell-card` (#fdfaf5), which against a #ffffff window put the band half a step
-     * from the ground — legible only by its hairline. The band should read as THE PAGE SHOWING
-     * THROUGH the window, so it takes `--shell-parch` (#f2ede7), the same surface as a nav pill.
-     *
-     * ⚠️ SEMANTIC MATCH, NOT VALUE MATCH — and this is the whole reason the assertion names the
-     * token rather than the hex. `--shell-panel` holds the same #f2ede7 today, so a value check
-     * would pass either; but its own comment states it is an IN-PAGE GROUPING SURFACE, content
-     * rather than chrome fill, and the band is chrome. Pointing at `--shell-parch` means a future
-     * retone of the shell's chrome fill carries the band with it, which is the behaviour wanted.
+     * ⚠️ THE APP'S FIRST COOL COLOUR, and a NEW FAMILY rather than a variant — nothing else in the
+     * palette is near it. Asserted as the literal precisely because there is no token to point at:
+     * a `var()` here would mean it had been folded into a family it does not belong to.
      */
     const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(tokens, "the band ground is a literal, or it went back to the card parchment — it must resolve to the shell's chrome fill")
-      .toContain("--wsh-band-bg: var(--shell-parch)");
-    expect(tokens, "the band's edge token is missing").toMatch(/--wsh-band-edge:\s*#[0-9a-f]{6}/i);
+    expect(tokens, "the band ground stopped being its own value — it must not be folded back into the warm chrome family")
+      .toContain("--wsh-band-bg: #333c4d");
+    expect(tokens, "the band's foreground token is missing — the label, glyphs, focus ring and the inverted primary all read it")
+      .toContain("--wsh-band-ink: #ffffff");
+    /* ⚠️ THE RETIRED TOKEN IS ASSERTED ABSENT, not merely unused. A token no rule reads is the next
+       thing someone wires back up. */
+    expect(tokens, "the retired edge token came back").not.toContain("--wsh-band-edge:");
     /* ⚠️ AND THE RESTING PLATE STAYS PURE WHITE — the two states are a WHITE CARD collapsing to a
        PARCHMENT BAND. If the plate ever takes the ground token too, the collapse stops being a
        change of surface and the band's whole job goes with it. */

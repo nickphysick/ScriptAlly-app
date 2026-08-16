@@ -309,12 +309,30 @@
  * Keeping both drew two lines a pixel apart — and the row's version was inset to the content
  * gutter while this one spans the container, so they would not even have agreed on their length.
  */
+/**
+ * ⚠️ THE BAND IS DARK SLATE NOW, AND THE RULE BENEATH IS GONE. The note above describes the state
+ * this replaces — a parchment ground closed by its own bottom edge — and both halves of it change
+ * together: a warm hairline on `#333c4d` reads as a scratch, and a saturated band states its own
+ * boundary without one. All four sides go transparent; the border BOX stays, because the strip's
+ * 52px is `box-sizing: border-box` and removing the border would give the content a pixel back.
+ *
+ * ⚠️ EVERYTHING ON IT READS `--wsh-band-ink` — one ground, one foreground. The label below takes
+ * it, and so does the primary's inverted fill, so a later adjustment is one token rather than a
+ * hunt through rules that happen to agree.
+ */
 .wsh--scrolled {
   height: var(--wsh-plate-h-scrolled);
   background: var(--wsh-band-bg);
-  border-color: transparent transparent var(--wsh-band-edge);
+  border-color: transparent;
   border-radius: 0;
   box-shadow: none;
+  /* ⚠️ THE INHERITED INK MOVES WITH THE GROUND, and this line is the token doing its stated job
+     rather than four rules that happen to agree. Measured on the deployed band: `.wsh-row`,
+     `.wsh-txt` and `.wsh-acts` all inherit `#1e1a16` — near-black, 1.4:1 here — so the strip reads
+     correctly today only because its ONE text node sets its own colour. Anything added to the row
+     later would be invisible, with nothing to point at. Nothing is unreadable now; this stops the
+     next thing being so. */
+  color: var(--wsh-band-ink);
 }
 /* ⚠️ 30px AT REST, THE CONTENT GUTTER WHEN WORKING (spec §2), AND IT LIVES HERE. Layout is on the
    inner row, never on `.wsh` — `.wsh` carries the state class, and a single-class layout rule
@@ -423,9 +441,12 @@
  * same voice, quieter, which is what makes it look like a mistake. Mono uppercase at 11.5px is a
  * different voice altogether: the page's name as a LABEL, in the mono the shell already speaks.
  *
- * ⚠️ THE COLOUR IS `--shell-ink-soft`, AND NOT THE TERTIARY MUTED. The ref draws #5d4d44, which
- * falls between this repo's two tokens; `--shell-muted` (#9c8878) is the counts-and-captions tier,
- * and using it would make the page's own identity fainter than a tally sitting beside it.
+ * ⚠️ THE COLOUR IS `--wsh-band-ink`, AND THE ARGUMENT IT REPLACES IS RECORDED because it was a
+ * good one for the ground it was written against. It read `--shell-ink-soft`, deliberately not the
+ * tertiary `--shell-muted`, so the page's own identity was never fainter than a tally beside it.
+ * Both are warm inks tuned for a near-white band and neither survives dark slate — a #6a615a label
+ * on #333c4d is under 2:1. The band's own foreground token takes over; the RANKING the old note
+ * protected still holds, because nothing else in the strip is brighter than the label.
  */
 .wsh--scrolled .wsh-title {
   font-family: var(--font-mono);
@@ -433,7 +454,7 @@
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--shell-ink-soft);
+  color: var(--wsh-band-ink);
 }
 /* ⚠️ THE MARK STAYS, AT 30px, AND THIS REVERSES THE SPEC (strip-fixes ref 87). §2 said the mark
    was removed on collapse; it is not. At 30px in full colour it is what still IDENTIFIES the page
@@ -508,6 +529,45 @@
    show; on an empty account Packages had none, so the one element that differed was absent from
    every measurement and all six headers "matched". */
 .wsh--scrolled .svh-btn { height: 30px; padding: 0 13px; font-size: 12px; }
+/**
+ * ══ THE PRIMARY INVERTS ON THE BAND, AND ONLY ON THE BAND ═════════════════════════════════════
+ *
+ * ⚠️ THE DARK PILL DOES NOT SURVIVE A DARK GROUND. `.svh-btn-ink` is #2a1a13 on #333c4d — 1.4:1,
+ * a near-black pill on dark slate, which is not "low contrast" but INVISIBLE. Recolouring the band
+ * without this is not a paint change with a defect; it is shipping a page whose principal action
+ * cannot be seen.
+ *
+ * ⚠️ IT INVERTS RATHER THAN GOING PINK, and the reason is what the dark pill was always FOR: the
+ * primary is the highest-contrast element in the composition. On a light band the darkest thing
+ * present was the pill; on a dark band the darkest thing present is the band, so the pill becomes
+ * the lightest and the ranking is preserved rather than restated. Pink is the house primary
+ * elsewhere and would have worked, but it says "creation" — a register the ink primary was chosen
+ * over deliberately, for a principal action on things that already exist.
+ *
+ * ⚠️ BOTH VALUES ARE THE BAND'S OWN TWO TOKENS, not a third pair invented here. Fill is the band's
+ * foreground, label is the band's ground — so an adjustment to either moves the pill with the band
+ * it sits on, and the pair cannot drift into a combination nobody checked.
+ *
+ * ⚠️ AND THE APP-WIDE PILL IS UNTOUCHED. This is `.wsh--scrolled` scoped: every resting header and
+ * every other surface keeps #2a1a13.
+ */
+.wsh--scrolled .svh-btn-ink {
+  background: var(--wsh-band-ink);
+  border-color: var(--wsh-band-ink);
+  color: var(--wsh-band-bg);
+}
+.wsh--scrolled .svh-btn-ink svg { color: var(--wsh-band-bg); }
+/* the hover steps DOWN in brightness, because on this ground brighter is no longer available */
+.wsh--scrolled .svh-btn-ink:hover { background: #e7e9ee; border-color: #e7e9ee; }
+/* ⚠️ THE FOCUS RING IS THE BAND'S FOREGROUND TOO. `--shell-focus` is a burgundy at 45% alpha,
+   tuned to sit on parchment; on #333c4d it is a dark ring on a dark ground and effectively absent.
+   Anything focusable in the strip gets a visible ring from the one token everything else here
+   reads. */
+.wsh--scrolled .svh-btn:focus-visible,
+.wsh--scrolled button:focus-visible {
+  outline: 2px solid var(--wsh-band-ink);
+  outline-offset: 2px;
+}
 .wsh-grow { flex: 1 1 auto; min-width: 10px; }
 .wsh-acts { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 

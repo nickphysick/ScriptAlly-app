@@ -137,19 +137,33 @@
   --wsh-plate-h-scrolled: 52px;
   --wsh-plate-gap: 18px;
   --wsh-plate-bg: #ffffff;
-  /* ⚠️ THE WORKING STATE IS A BAND, NOT A CARD ON WHITE (ref 91). Its bottom edge is its own,
-     replacing the free-floating hairline the grid row used to draw. One line, belonging to the
-     thing that draws it.
-     ⚠️ ITS GROUND IS `--shell-parch`, AND IT USED TO BE `--shell-card`. Against a #ffffff window
-     the card parchment (#fdfaf5) was half a step from the ground and the band was legible only by
-     its hairline. The band should read as THE PAGE SHOWING THROUGH the window, so it takes the
-     shell's chrome fill instead — the same surface as a nav pill.
-     ⚠️ SEMANTIC MATCH, NOT VALUE MATCH: `--shell-panel` holds the same #f2ede7 today and was the
-     obvious-looking choice, but its own comment states it is an IN-PAGE GROUPING SURFACE — content,
-     not chrome fill — and the band is chrome. Pointing here means that if the shell's chrome fill
-     is ever retoned the band follows it, which is the behaviour wanted. */
-  --wsh-band-bg: var(--shell-parch);
-  --wsh-band-edge: #dfe4dc;
+  /**
+   * ══ THE COLLAPSED HEADER BAND — A DARK SLATE GROUND ═══════════════════════════════════════
+   *
+   * ⚠️ ITS OWN DECLARED VALUE, AND THE ARGUMENT THAT STOOD HERE IS WITHDRAWN RATHER THAN LEFT.
+   * This read `var(--shell-parch)` under a "semantic match, not value match" rule: the band is
+   * chrome, so it took the shell's chrome fill and would follow it through any retone. That
+   * reasoning depended on the band belonging to the warm parchment family. It no longer does, and
+   * a comment arguing for a coupling the code has dropped is worse than no comment.
+   *
+   * ⚠️ THIS IS THE APP'S FIRST COOL COLOUR, and it is a NEW FAMILY rather than a variant — nothing
+   * else in the palette is within reach of it, and the last blue on Query Centre (the selected
+   * row's #e7eef6) was removed as off-palette days ago. Named for the band, never for the colour,
+   * so a retheme does not have to fight the name.
+   *
+   * ⚠️ ONE VALUE EVERYWHERE — not per-theme. Cappuccino, Bold Pastille and Editorial all get this
+   * slate; a per-theme split is a later decision and deliberately not taken here.
+   *
+   * ⚠️ AND THE RULE BENEATH IS GONE. `--wsh-band-edge` was a warm parchment hairline (#dfe4dc)
+   * sized against a near-white band; on dark slate it reads as a scratch, and a dark band already
+   * announces its own edge. Deleted rather than zeroed — a token no rule reads is the next thing
+   * someone wires back up.
+   */
+  --wsh-band-bg: #333c4d;
+  /* ⚠️ ONE FOREGROUND FOR EVERYTHING ON THE BAND — label, glyphs, focus rings, button text. They
+     all sit on one ground, so they take one token: a later adjustment is one edit rather than a
+     hunt through four rules that happen to agree today. ~10.6:1 against the ground. */
+  --wsh-band-ink: #ffffff;
   --wsh-plate-radius: 2px;
   --wsh-plate-sh: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.09);
 

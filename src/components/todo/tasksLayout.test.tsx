@@ -161,11 +161,12 @@ describe("⚠️ the order: header block → hairline → sidebar and body on th
        every other page. What this file still owns is the row's CONTENT. */
     expect(layoutCss, "the Tasks tool row drew its own hairline again — that is a second line under the header's")
       .not.toMatch(/\.tpl-tools\s*\{[^}]*border-bottom/s);
-    /* ⚠️ AND THE SHARED ROW'S HAIRLINE IS GONE TOO (ref 91) — the boundary is drawn by the HEADER
-       now, as the bottom edge of a parchment band, rather than by the row as a floating rule. What
-       this case protects is unchanged: Tasks must not draw a second line of its own. */
+    /* ⚠️ THE BOUNDARY IS THE BAND'S GROUND NOW, NOT A LINE. It was the header's own bottom edge, a
+       parchment hairline; the band is dark slate, which announces its boundary by contrast and needs
+       no rule — a warm hairline on it would read as a scratch. What this case protects is unchanged
+       either way: Tasks must not draw a second line of its own, which is the assertion above. */
     const hdr = readFileSync(join(here, "..", "shell", "pageHeader.css"), "utf8");
-    expect(hdr, "nothing draws the chrome/content boundary — the band lost its edge").toContain("var(--wsh-band-edge)");
+    expect(hdr, "the band lost the ground that IS the chrome/content boundary now").toContain("background: var(--wsh-band-bg)");
   });
 
   it("the sidebar is OPTIONAL — absent means no aside at all, never an empty gutter", () => {
