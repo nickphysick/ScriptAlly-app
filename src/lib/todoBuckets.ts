@@ -22,6 +22,15 @@
 import { BoardCard } from "./todoBoard";
 import { BandFamily, liveFamily } from "./todoFamily";
 
+/**
+ * ⚠️ ONE STRING, TWO PRODUCERS, ONE FILTER. "Added" is emitted here (a card with no agent, whose
+ * only date is its own creation) and by `anchorNoun`'s note case — and `trackingStats` drops it
+ * from any card that HAS an agent. Three literals would let a rename silently switch the filter
+ * off, which is the failure this whole file's derivation-over-literal habit exists to prevent.
+ */
+export const ADDED_LABEL = "Added";
+
+
 export type Bucket = "send" | "decide" | "chase" | "close" | "fix" | "note";
 
 export const BUCKET_ORDER: Bucket[] = ["send", "decide", "chase", "close", "fix", "note"];
@@ -215,7 +224,7 @@ export function rowFigure(input: FigureInput): RowFigure {
 
   if (!card.agentId && !card.who) {
     return {
-      label: card.userTaskId || card.nature ? "Added" : "Noticed",
+      label: card.userTaskId || card.nature ? ADDED_LABEL : "Noticed",
       ...fig, side: "neither", hot: false,
     };
   }

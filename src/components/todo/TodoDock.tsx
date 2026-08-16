@@ -235,7 +235,10 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const facts = bandFacts(src.anchorLabel ?? null, src.anchorValue ?? null, src.waitLabel ?? null, src.waitValue ?? null);
   const forward: BandFact | null = src.forward ?? null;
   /* the stat pair reads the SAME two facts the band does — one derivation, two presentations */
-  const stats = trackingStats(facts);
+  /* ⚠️ AGENT-NESS, NOT BUCKET — see `trackingStats`. A card that names an agent has no business
+     showing the day its TASK was created; a note about nobody keeps that date because it is the
+     only one it has. `card.who` counts: an imported card can name an agent it holds no id for. */
+  const stats = trackingStats(facts, !!(card.agentId || card.who));
   const hoff = handoffFor(card, src.email, src.website, src.msTitle);
   const who = card.who || "them";
 

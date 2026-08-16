@@ -15,6 +15,7 @@ import {
   handoffSubject, handoffFor, panePosition, paneSections, paneRestLine, bandFacts, recordNote, holderRows, anchorNoun, bandForward, materialRows, materialName, bandAnchor, trackingStats, HANDOFF_NOTE,
 } from "./todoHandoff";
 import { sendSpecFor } from "./todoDock";
+import { rowFigure } from "./todoBuckets";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
   key: "k", stream: "do", title: "Send your full to Bethany Carter", who: "Bethany Carter",
@@ -260,6 +261,33 @@ describe("⚠️ TRACKING'S STAT PAIR IS THE BAND'S FACTS, RE-PRESENTED — neve
    * The band states when they asked; the pair states that AND how long it has been, because the
    * pair's whole job is the relationship between them.
    */
+  /**
+   * ⚠️ THE INPUT COMES FROM `anchorNoun`, NOT FROM THE STRING "Added". Typing the literal would
+   * test a fact no producer emits the day either producer renames it — the hand-written-argument
+   * fault. The note bucket is what produces this noun, so the note bucket is what builds it.
+   */
+  it("⚠️ AN AGENT CARD DROPS THE `Added` TILE — the pair is elapsed and anchor, never a trio", () => {
+    const note = card({ userTaskId: "u1", taskType: undefined as never, who: "" });
+    const noun = anchorNoun(note);
+    /* the producer really does emit it — if this fails the filter below is testing nothing */
+    expect(noun, "the note bucket no longer produces this noun").toBe("Added");
+
+    const facts = bandFacts(noun, "17 July", "You've waited", "9 days");
+    /* on a card that names an agent: gone, and the two real facts survive in their own order */
+    expect(trackingStats(facts, true).map((s) => s.k)).toEqual(["You've waited"]);
+    /* on a note about nobody: kept, because the day you wrote it is the only date there is */
+    expect(trackingStats(facts, false).map((s) => s.k)).toEqual(["You've waited", noun]);
+  });
+
+  it("⚠️ THE OTHER PRODUCER ALREADY GUARDED, and the two now share one constant", () => {
+    /* `rowFigure` only labels "Added" when there is no agent AND no name — so the tile filter and
+       the figure's own guard agree by construction rather than by being kept in step. */
+    const withAgent = rowFigure({ card: card({ agentId: "a1", userTaskId: "u1" }), elapsedDays: 9 });
+    expect(withAgent.label).not.toBe("Added");
+    const bare = rowFigure({ card: card({ userTaskId: "u1", who: "", agentId: undefined }), elapsedDays: 9 });
+    expect(bare.label).toBe("Added");
+  });
+
   it("the band shows the anchor alone; the pair shows both", () => {
     const facts = bandFacts("He asked on", "28 Jun", "Greg has waited", "6 weeks");
     expect(bandAnchor(facts).map((f) => f.k)).toEqual(["He asked on"]);

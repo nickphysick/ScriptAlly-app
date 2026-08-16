@@ -16,7 +16,7 @@
  */
 import { BoardCard } from "./todoBoard";
 import { sendSpecFor } from "./todoDock";
-import { cardBucket, Bucket } from "./todoBuckets";
+import { ADDED_LABEL, cardBucket, Bucket } from "./todoBuckets";
 
 export interface HandoffLink {
   /** The href, or null where the record has nothing to build one from. */
@@ -365,8 +365,22 @@ export interface TrackingStat {
  * (see `bandAnchor`); the pair is a different presentation of the same two facts and reads the
  * other way, because the elapsed figure is the one the writer is looking for.
  */
-export function trackingStats(facts: BandFact[]): TrackingStat[] {
-  const ordered = [...facts].sort((a, b) => (a.kind === "wait" ? -1 : 0) - (b.kind === "wait" ? -1 : 0));
+/**
+ * ⚠️ AN AGENT CARD NEVER SHOWS AN `Added` TILE — and the filter lives HERE, in the one builder of
+ * the tiles, rather than at either producer. Two things can emit it: `rowFigure`, which already
+ * guards on `!card.agentId && !card.who`, and `anchorNoun`'s note case, which did not — so a note
+ * carrying an agent showed the day the TASK was created as though it were a fact about the agent.
+ *
+ * ⚠️ IT IS THE WIDTH, NOT JUST THE UNTRUTH. The pair is elapsed and anchor; a third tile takes each
+ * of the two real facts down to a third of the row, so the wrong one costs the right ones their
+ * legibility as well as their meaning.
+ *
+ * ⚠️ AND IT STAYS ON A NOTE, where the day you wrote it is the only date there is. The test is
+ * whether the card has an agent, not which bucket it is in: a note about nobody keeps its date.
+ */
+export function trackingStats(facts: BandFact[], hasAgent = false): TrackingStat[] {
+  const kept = hasAgent ? facts.filter((f) => f.k !== ADDED_LABEL) : facts;
+  const ordered = [...kept].sort((a, b) => (a.kind === "wait" ? -1 : 0) - (b.kind === "wait" ? -1 : 0));
   return ordered.map((f) => {
     /* only a WAIT splits, and only when it actually has a unit — "Today" has none */
     const m = f.kind === "wait" ? /^(\S+)\s+(.+)$/.exec(f.v) : null;
@@ -501,7 +515,7 @@ export function anchorNoun(c: BoardCard): string {
     case "send": return "Requested";
     case "chase": return "Queried";
     case "close": return "Last entry";
-    case "note": return "Added";
+    case "note": return ADDED_LABEL;
     /* a housekeeping gap is NOTICED, not requested — and `rowFigure` already says so on the rail */
     case "fix": return "Noticed";
   }
