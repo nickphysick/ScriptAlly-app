@@ -150,7 +150,9 @@ describe("the copy, at its edges", () => {
        `railShown()` reduces `railGroups()`, and every heading prints its own `g.cards.length`.
        A disagreement is not merely unlikely, it is structurally unavailable. */
     expect(page).toContain("return railGroups().reduce((n, g) => n + g.cards.length, 0);");
-    expect(page).toContain("{railShown()} outstanding");
+    /* the sentence moved into `showingLine` when the bar's half of it was absorbed — the figure is
+       still `railShown()`, which is what this case is about */
+    expect(page).toContain("showingLine(railShown(), allDockable.length)");
     expect(code(page)).not.toContain("taskStats(");
     expect(page).not.toContain("boardSubtitleCopy(boardFigures(boardCols))");
     const fn = page.slice(page.indexOf("function railGroups"), page.indexOf("function railGroups") + 900);

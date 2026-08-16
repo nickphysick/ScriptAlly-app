@@ -902,13 +902,19 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
     const split = rule(splitCss, ".tdw-split {");
     expect(split).toContain("background: transparent");
     expect(split).not.toContain("--ws-ground");
-    for (const sel of [".tdw-cbar {", ".tdw-rail {", ".tdw-work {", ".tdw-tools {", ".tdw-foot {"]) {
+    /* `.tdw-cbar` is deleted with the command bar — the rule it held is asserted on the four
+       containers that remain */
+    expect(splitCss).not.toContain(".tdw-cbar {");
+    for (const sel of [".tdw-rail {", ".tdw-work {", ".tdw-tools {", ".tdw-foot {"]) {
       expect(rule(splitCss, sel), sel).toContain("background: transparent");
     }
     /* …and the card is its border: no fill, no lift */
     expect(rule(splitCss, ".tdw-rail {")).not.toContain("box-shadow");
     expect(split).toContain("gap: 18px");
-    expect(split).toContain("padding: 0 22px 20px");
+    /* ⚠️ ONE RHYTHM ON ALL FOUR SIDES NOW THE BAR IS NOT ABOVE IT. This was `0 22px 20px` — no top at
+       all, because the bar's own `margin-bottom` stood in for it. With the bar gone that top would
+       have collapsed to nothing and the split would sit hard against the header. */
+    expect(split).toContain("padding: 22px");
     /* and the border is still there to do the delineating alone */
     expect(rule(splitCss, ".tdw-rail {")).toContain("border: 1px solid var(--tdw-hair)");
   });

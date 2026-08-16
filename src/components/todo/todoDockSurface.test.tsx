@@ -1025,11 +1025,12 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
 
   it("⚠️ THE FOOTER IS PINNED AND DOES NOT SCROLL — it is the body's bottom edge", () => {
     /* This asserted the footer's ABSENCE, on the reading that its contract had moved wholly to the
-       command bar. Half of that is still true and still asserted — the quiet verbs are the bar's —
-       but the deed came back, and with it the thing the card had been missing: a bottom edge for
-       the body to scroll against. */
+       command bar. The whole of that is now reversed: the deed came back, then the verbs, and the
+       bar itself is gone — so the card's footer carries the contract it was said to have given up,
+       and with it the thing the card had been missing, a bottom edge for the body to scroll
+       against. */
     expect(render()).toContain("tdk-foot");
-    expect(page).toContain('className="tdw-cbar"');
+    expect(code(page)).not.toContain("tdw-cbar");
     const foot = dockCssRule(".tdk-foot {");
     expect(foot).toContain("flex: none");                 // outside the scroller
     /* inside the 6px inset, like the band above it — a flush footer would lay its fill across the

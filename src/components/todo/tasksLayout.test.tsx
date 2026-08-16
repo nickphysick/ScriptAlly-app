@@ -207,9 +207,13 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
     expect(listPage).not.toContain("function renderTools");
     expect(listPage).not.toContain("eyebrow={");
     expect(listPage).not.toContain('className="tdb-workb"');
-    /* the two surfaces that DO carry controls still do */
-    expect(listPage).toContain('className="tdw-tools"');
-    expect(listPage).toContain('className="tdw-cbar"');
+    /* ⚠️ THE SURFACES THAT CARRY CONTROLS ARE THE LIST AND THE CARD NOW — the bar is gone, and its
+       contents went to the things they act on. The rule this case holds is unchanged and is in fact
+       better served: every control sits above the surface it acts on, and the bar was the one that
+       sat above nothing in particular. */
+    expect(listPage).toContain('className="tdw-tools"');   // the list's own instruments
+    expect(listPage).toContain('className="tdw-foot"');    // the list's own counts + export
+    expect(listPage).not.toContain('className="tdw-cbar"');
   });
 
   it("the RAIL's instruments live in renderRailTools, and nowhere else", () => {

@@ -47,7 +47,11 @@
   grid-template-columns: var(--tdw-rail-w) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   gap: 18px;
-  padding: 0 22px 20px;
+  /* ⚠️ ONE RHYTHM ON ALL FOUR SIDES, NOW THE BAR IS NOT ABOVE IT. This was `0 22px 20px` — no top
+     at all, because the command bar's own `margin-bottom` was standing in for it, and 20 at the
+     foot. With the bar gone the top would have collapsed to nothing and the page would sit hard
+     against the header. 22 on every side is the horizontal rhythm the split already had. */
+  padding: 22px;
   /* ⚠️ THE CONTAINERS CARRY NO FILLS AT ALL NOW (journeys pack, Phase 1). The split, the bar, the
      list card and the desk pane all sit on the SHEET's own ground; hairlines and the section bands
      do every piece of delineating. A fill under a card that also has one was two surfaces doing
@@ -283,78 +287,13 @@
   color: #8a7d6e;
 }
 
-/* ══ THE COMMAND BAR (visual rebuild, Phase 4; ref todo-workspace-v9.html `.cbar`) ═════════════
-   ⚠️ ONE ACTION SURFACE, SPANNING BOTH PANES. The card's own foot bar is retired: two places to
-   act on one task is how they come to offer different verbs, and the foot bar could only ever
-   act on the pane while this one states the list's count as well. It sits ON the ground, above
-   the cards, which is what makes it read as the page's instrument rather than the card's. */
-.tdw-cbar {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 22px 14px;
-  background: transparent;
-  border-bottom: 1px solid var(--hair-soft);
-  margin-bottom: 16px;
-}
 
-.tdw-cbcount { display: flex; align-items: baseline; gap: 9px; }
 
-.tdw-cbcount .big {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 20px;
-  font-weight: 500;
-  color: #2b2118;
-}
 
-.tdw-cbcount .sm {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  color: #b3a496;
-}
 
-.tdw-cbdiv { width: 1px; height: 24px; background: #e4dbcf; flex: none; }
-.tdw-cbsp { flex: 1; }
 
-.tdw-cblab {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #b3a496;
-  white-space: nowrap;
-}
 
-/* ⚠️ INTER 13px WITH A LEADING ICON — not mono all-caps. These are sentences you press, and the
-   mono-caps register belongs to labels that state a fact rather than offer an act. */
-/* ⚠️ `.tdw-cbprim` IS DELETED WITH THE BUTTON IT PAINTED. The bar's `Action` was a second mount of
-   the card footer's deed; the black-primary grammar it carried lives on `.tdk-prime` in
-   `todoDock.css`, which is where the act now is. Deleted rather than left as an orphan rule: a
-   styled class with no renderer is one a future surface adopts without anyone deciding it should.
-   Recoverable at 4271f30. */
 
-.tdw-cbbtn {
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  color: #6a5a50;
-  background: transparent;
-  border: 1px solid var(--hair);
-  border-radius: 10px;
-  padding: 9px 14px;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tdw-cbbtn:hover:not(:disabled) { border-color: #d8c8b8; color: #2b2118; background: #fdfbf8; }
-/* ⚠️ AN INAPPLICABLE VERB RENDERS DISABLED, NEVER ABSENT — a bar whose buttons come and go makes
-   you re-read it every time the selection changes. */
-.tdw-cbbtn:disabled { opacity: 0.4; cursor: default; background: transparent; border-color: #e7ddd2; }
 
 .tdw-cbic {
   width: 38px;
@@ -407,3 +346,11 @@
   color: var(--burg, #7c3a2a);
 }
 .tdw-add:hover:not(:disabled) { background: var(--pink-btn-h, #efd5ca); border-color: #d8a89a; }
+
+/* ⚠️ THE COMMAND BAR'S STYLES ARE DELETED WITH THE ROW — `.tdw-cbar`, `.tdw-cbcount`, `.tdw-cbbtn`,
+   `.tdw-cbdiv`, `.tdw-cbsp` and `.tdw-cblab`. A styled class with no renderer is one a future
+   surface adopts without anyone deciding it should exist, which is how the bar collected its
+   contents in the first place. `.tdw-cbic` SURVIVES because it still renders: it is the tools
+   row's icon button (filter, sort, add). Its name is now a misnomer — recorded in reports/found.md
+   rather than renamed here, since the rename touches locks in three files.
+   Recoverable at 23d9310. */

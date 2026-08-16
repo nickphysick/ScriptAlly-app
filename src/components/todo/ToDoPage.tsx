@@ -1437,67 +1437,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             * DISABLED rather than absent: a bar whose buttons come and go makes you re-read it
             * every time the selection changes.
             */}
-          <div className="tdw-cbar">
-            <span className="tdw-cbcount">
-              <span className="big">{allDockable.length} {allDockable.length === 1 ? "task" : "tasks"}</span>
-              <span className="sm">{railShown()} outstanding</span>
-            </span>
-            <span className="tdw-cbdiv" />
-            {/* ⚠️ THE ONE LIST-LEVEL ACTION HERE (corrections, Phase 4). Filter and sort left for
-                the list card — they narrow and order the LIST, and the list card is where the list
-                is. What is left in this bar is the one thing that makes a new item, then the
-                verbs for the task in hand. */}
-            <button type="button" className="tdw-cbbtn" onClick={() => openComposer("task")}>
-              <Plus size={14} aria-hidden /> Add task or note
-            </button>
-            <span className="tdw-cbsp" />
-            {paneCard && (() => {
-              const col = groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent");
-              const menu = cardMenu(paneCard, col);
-              const offersLeaf = (id: string) => menu.some((g) => g.entries.some((e) =>
-                e.kind === "leaf" ? e.id === id && !e.disabled : e.sub.some((x) => x.id === id && !x.disabled)));
-              const i = dockable.findIndex((c) => c.key === paneCard.key);
-              return (
-                <>
-                  <span className="tdw-cblab">This task</span>
-                  {/**
-                    * ⚠️ THE DEED IS THE CARD FOOTER'S; THE BAR KEEPS THE SURROUNDING VERBS.
-                    * The bar's `Action` was a SECOND mount of one act — the card's footer carries
-                    * the same `rowPrimaryLabel` through the same `dockPrimary`, so this button
-                    * offered nothing the card did not, three inches above the thing it acted on.
-                    *
-                    * ⚠️ NOTHING IS STRANDED, checked rather than assumed. The journey keeps four
-                    * other entrances: the card's footer, the card's own Enter key (`TodoDock` binds
-                    * it to `onPrimary`), the group sweep, and `TodoCalendarPage`, which mounts its
-                    * flow directly rather than through this bar.
-                    *
-                    * Snooze, Open query, Dismiss and the previous/next pair stay — they act on the
-                    * task's PLACE in the list rather than on the record, which is the bar's job.
-                    */}
-                  <button type="button" className="tdw-cbbtn" disabled={!offersLeaf("snooze-1")}
-                    ref={(el) => { cbSnooze.current = el; }}
-                    onClick={() => setCbDial((v) => !v)}>
-                    <Clock size={14} aria-hidden /> Snooze
-                  </button>
-                  <span className="tdw-cbdiv" />
-                  <button type="button" className="tdw-cbbtn" disabled={!paneCard.relatedRecordId}
-                    onClick={() => paneCard.relatedRecordId && onNavigate("queries", paneCard.relatedRecordId)}>
-                    <ExternalLink size={14} aria-hidden /> Open query
-                  </button>
-                  {/* an offer cannot be dismissed — the reply-by date is not yours to move */}
-                  <button type="button" className="tdw-cbbtn" disabled={!offersLeaf("dismiss-week")}
-                    onClick={() => forkStale(paneCard, "notNow")}>
-                    <X size={14} aria-hidden /> Dismiss
-                  </button>
-                  {/* ⚠️ THE PREVIOUS/NEXT PAIR IS THE PANE HEADER'S — see `.tdk-head`. They are
-                      NAVIGATION, not deeds: they change which task you are looking at rather than
-                      doing anything to one, so they belong beside "Task 3 of 30 · Urgent" and not
-                      among the verbs. The bar's copy is retired here rather than with the bar, so
-                      the page never carries two pairs that could disable differently. */}
-                </>
-              );
-            })()}
-          </div>
+          {/**
+            * ⚠️ THE COMMAND BAR IS GONE, AND EVERY ONE OF ITS CONTENTS IS SOMEWHERE THAT ACTS.
+            *   the counts        → the list's own footer (`showingLine`)
+            *   Add task or note  → the list's tools row, beside filter and sort
+            *   Snooze · Open query · Dismiss → the card's footer, with the deed
+            *   previous / next   → the pane header, beside "Task 3 of 30"
+            * The "This task" label and the dividers went with the row: they existed to explain
+            * which of two scopes a button belonged to, and that ambiguity was the bar's own.
+            *
+            * ⚠️ IT WAS NEVER A SURFACE — it was where homeless controls collected, because it was
+            * the only permanent row on the page. That is a fact about the layout, not about any of
+            * the verbs, which is why every one of them had a better home to go to.
+            *
+            * The snooze DIAL survives below: it is a popover, and it now hangs off whichever
+            * control opened it (`cbSnooze` holds that element) rather than off the bar's button.
+            */}
           {cbDial && paneCard && cbSnooze.current && (
             <SnoozeDial
               card={paneCard}
