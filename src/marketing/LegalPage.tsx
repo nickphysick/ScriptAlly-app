@@ -13,22 +13,43 @@
  * copy to the shared `DocumentShell`; replacing the wording after legal review is an edit to that
  * one file with no component work at all.
  *
- * ⚠️ THE PRIVACY POLICY MUST COVER SMART IMPORT. Uploading a spreadsheet sends its CONTENTS to
- * Anthropic's API for mapping (functions/src/smartImport.ts), as does the email drop
- * (functions/src/emailImport.ts) and the comps suggester. That is third-party processing of the
- * writer's own agent list and correspondence.
+ * ⚠️ THE PRIVACY POLICY'S §4 COVERS SMART IMPORT AND MUST KEEP DOING SO. Uploading a spreadsheet
+ * sends its CONTENTS to Anthropic's API (functions/src/smartImport.ts), as does the email drop and
+ * the comps suggester. The section is not trimmable.
  */
 
 import React from "react";
-import { LEGAL_DOCUMENTS, LegalDocumentKey } from "./legalCopy";
+import { LEGAL_DOCUMENTS, LEGAL_COPY_REVIEWED, DRAFT_TAG, LegalDocumentKey, LegalBlock } from "./legalCopy";
 import { DocumentShell } from "./DocumentShell";
 import { MarketingFooter } from "./MarketingFooter";
 import { LegalPlate } from "./marketingMarks";
+import { Runs } from "./CopyRuns";
 
-export const LegalPage: React.FC<{
-  doc: LegalDocumentKey;
-  onNavigate: (tab: string, subPageName?: string) => void;
-}> = ({ doc, onNavigate }) => {
+type Nav = (tab: string, subPageName?: string) => void;
+
+/** One block of a section — a paragraph, a list, or the pulled-out clause a reader must not skim. */
+const Block: React.FC<{ block: LegalBlock; onNavigate: Nav }> = ({ block, onNavigate }) => {
+  if (block.kind === "list") {
+    return (
+      <ul>
+        {block.items.map((item, i) => (
+          <li key={i}><Runs runs={item} onNavigate={onNavigate} /></li>
+        ))}
+      </ul>
+    );
+  }
+  if (block.kind === "callout") {
+    return (
+      <div className="mk-callout">
+        <span className="mk-corule" aria-hidden="true" />
+        <p><Runs runs={block.runs} onNavigate={onNavigate} /></p>
+      </div>
+    );
+  }
+  return <p><Runs runs={block.runs} onNavigate={onNavigate} /></p>;
+};
+
+export const LegalPage: React.FC<{ doc: LegalDocumentKey; onNavigate: Nav }> = ({ doc, onNavigate }) => {
   const document_ = LEGAL_DOCUMENTS[doc];
 
   return (
@@ -37,17 +58,23 @@ export const LegalPage: React.FC<{
         documentTitle={document_.documentTitle}
         eyebrow={document_.eyebrow}
         title={document_.title}
-        /* ⚠️ THE PLACEHOLDER SAYS SO, IN THE PAGE, WHERE A READER SEES IT — not only in a comment
-           where only we do. A legal page that looks finished and is not is worse than an obviously
-           unfinished one, because nobody chases it. */
-        draft={{ tag: "Working draft", body: `${document_.noticeHeading} ${document_.noticeBody}` }}
+        meta={`Last updated ${document_.lastUpdated}`}
+        /* ⚠️ ONE FLAG, ONE EFFECT. Setting LEGAL_COPY_REVIEWED true removes the ribbon and changes
+           nothing else on the page — no copy, no geometry, no route. A document that looks
+           finished and is not is worse than an obviously unfinished one, because nobody chases it. */
+        draft={LEGAL_COPY_REVIEWED ? undefined : { tag: DRAFT_TAG, body: document_.draftBody }}
         plate={<LegalPlate doc={doc} />}
       >
+        <p className="mk-doclede">{document_.lede}</p>
+
         {document_.sections.map((section, i) => (
           <section className="mk-docsection" key={section.heading}>
+            {/* The number is derived from position, so inserting a section renumbers the rest —
+                a hand-written label would leave two sections called 07 and a cross-reference
+                pointing at the wrong one. */}
             <div className="mk-seclabel">{String(i + 1).padStart(2, "0")}</div>
             <h2 className="mk-sectitle">{section.heading}</h2>
-            {section.paragraphs.map((paragraph, j) => <p key={j}>{paragraph}</p>)}
+            {section.blocks.map((block, j) => <Block key={j} block={block} onNavigate={onNavigate} />)}
           </section>
         ))}
       </DocumentShell>

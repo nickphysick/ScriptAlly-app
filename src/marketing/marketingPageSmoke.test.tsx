@@ -29,6 +29,8 @@ import { PricingPage } from "./PricingPage";
 import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
+import { LEGAL_COPY_REVIEWED } from "./legalCopy";
+import { SUPPORT_EMAIL } from "./companyInfo";
 
 /** The public marketing routes and a string each must actually render. */
 const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain: string][] = [
@@ -36,8 +38,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/pricing", () => <PricingPage onNavigate={noNavigate} />, "Start free"],
   ["/about", () => <AboutPage onNavigate={noNavigate} />, "Querying shouldn&#x27;t be the hard part"],
   ["/contact", () => <ContactPage onNavigate={noNavigate} />, "Get in touch"],
-  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of use"],
-  ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy policy"],
+  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
+  ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "Privacy Policy"],
 ];
 
 describe("every public marketing route renders for a LOGGED-OUT visitor", () => {
@@ -106,17 +108,56 @@ describe("the public pricing page sells nothing and writes nothing", () => {
  */
 describe("the legal pages are honest about being drafts", () => {
   for (const doc of ["terms", "privacy"] as const) {
-    it(`/${doc} carries a visible placeholder notice`, () => {
+    it(`/${doc} carries the working-draft ribbon while the copy is unreviewed`, () => {
       const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
-      expect(html).toContain("placeholder");
+      // The ribbon is a function of the flag, so assert the flag's state alongside its effect —
+      // a green here with the flag already true would be proving nothing.
+      expect(LEGAL_COPY_REVIEWED).toBe(false);
+      expect(html).toContain("Working draft");
+      // Not "has not yet" — the terms say "have", because the subject is plural. The shared
+      // fragment is what both documents actually promise.
+      expect(html).toContain("not yet been legally reviewed");
+    });
+
+    /**
+     * ⚠️ THE PLACEHOLDERS RENDER AS PLACEHOLDERS. An invented entity name or address would make
+     * the page look finished, and a legal page that looks finished and is not is the one nobody
+     * chases. Both documents name the operating entity in their first section.
+     */
+    it(`/${doc} still shows its unfilled entity placeholders`, () => {
+      const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
+      expect(html).toContain("[LEGAL ENTITY NAME]");
+      expect(html).toContain("[REGISTERED / TRADING ADDRESS]");
     });
   }
 
-  /** The gap that must not be forgotten when the real policy is written. */
-  it("the privacy draft names the third-party processing Smart Import performs", () => {
+  /**
+   * ⚠️ THE SECTION THAT MUST NOT BE TRIMMED. Three features send content the writer supplies to
+   * Anthropic's API; without this section the product does something no surface discloses.
+   */
+  it("the privacy policy names the third-party processing Smart Import performs", () => {
     const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
     expect(html).toContain("Anthropic");
     expect(html).toMatch(/Smart Import/);
+  });
+
+  /**
+   * ⚠️ THE POLICY SAYS THERE IS NO COOKIE BANNER. That sentence is only true while the app sets
+   * nothing but auth tokens and interface preferences — so if a banner or an analytics tag ever
+   * arrives, this assertion is the thing that should stop it arriving silently.
+   */
+  it("the privacy policy covers cookies and local storage, and claims no banner", () => {
+    const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
+    expect(html).toContain("Cookies and local storage");
+    expect(html).toContain("cookie banner");
+  });
+
+  /** The rights section is the one a data subject arrives looking for; it must name a route out. */
+  it("the privacy policy tells a reader how to exercise their rights", () => {
+    const html = renderPage(<LegalPage doc="privacy" onNavigate={noNavigate} />, "/privacy");
+    expect(html).toContain("Your rights");
+    expect(html).toContain("ico.org.uk");
+    expect(html).toContain(SUPPORT_EMAIL);
   });
 });
 
