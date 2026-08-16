@@ -18,6 +18,7 @@ import {
   ExternalLink
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { supportMailto } from "../lib/companyInfo";
 
 interface FAQItem {
   id: string;
@@ -368,8 +369,12 @@ export function HelpCentre() {
             <p className="text-[11px] text-[#dbbdb5] font-light leading-relaxed mb-4">
               Can't find documentation for your exact workflow or looking to suggest an agent database expansion? Pitch our design team.
             </p>
-            <a 
-              href="mailto:support@scriptally.com"
+            {/* ⚠️ ONE ADDRESS, FROM ONE CONSTANT. This was a hardcoded support@scriptally.com — a
+                second published mailbox, on a domain the product does not otherwise use, while the
+                privacy policy names hello@scriptally.ink as the route for a UK GDPR request. Two
+                addresses is the fault; the one the policy publishes is the one that has to work. */}
+            <a
+              href={supportMailto()}
               className="inline-flex items-center gap-1.5 bg-white text-[#7c3a2a] hover:bg-[#FAF1EF] text-[10px] font-bold px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
             >
               Contact Support

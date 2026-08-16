@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import { FOOTER_TAGLINE, SITE_HOST } from "./companyInfo";
+import { FOOTER_TAGLINE, SITE_HOST } from "../lib/companyInfo";
 
 export const MarketingFooter: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;

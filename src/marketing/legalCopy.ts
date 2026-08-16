@@ -33,7 +33,7 @@ import { CopyRun } from "./CopyRuns";
 import {
   DATA_REGION, DELETION_WINDOW_DAYS, ICO_REGISTRATION_NOTE, LEGAL_ENTITY_NAME,
   LEGAL_LAST_UPDATED, REGISTERED_ADDRESS, SUPPORT_EMAIL, supportMailto,
-} from "./companyInfo";
+} from "../lib/companyInfo";
 
 /**
  * ⚠️ ONE FLAG, ONE EFFECT. False = both documents carry the working-draft ribbon. Setting it true

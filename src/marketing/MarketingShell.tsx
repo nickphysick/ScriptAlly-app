@@ -47,9 +47,15 @@ export const MarketingShell: React.FC<{
             <span className="mk-monogram">S</span>
             <span className="mk-wordmark">ScriptAlly</span>
           </button>
+          {/* ⚠️ THE NAV AND THE FOOTER MUST NOT DISAGREE ABOUT WHAT THE SITE CONTAINS. About and
+              Contact are real public routes; leaving them footer-only would put the two company
+              pages one scroll below the fold on every page that has one. Features stays because it
+              is a live in-page anchor on the landing, and the refs' nav simply predates it. */}
           <div className="mk-links">
             <button type="button" onClick={toFeatures}>Features</button>
+            <button type="button" onClick={() => onNavigate("about")}>About</button>
             <button type="button" onClick={() => onNavigate("pricing")}>Pricing</button>
+            <button type="button" onClick={() => onNavigate("contact")}>Contact</button>
           </div>
           <div className="mk-navright">
             {nav.showLogIn && (

@@ -314,7 +314,13 @@ const useHash = () => {
  * the navigate bridge — existing onNavigate call sites keep their old vocabulary; the read side
  * (path → props) lives in AppContent. Focus-form interceptions never reach this function.
  */
-function pathFor(tab: string, subPageName?: string): string {
+/**
+ * ⚠️ EXPORTED SO IT CAN BE LOCKED. An unregistered tab falls through to `/dashboard`, which
+ * is silent: the link works, it simply goes home. `/queries/analytics` was a live dead link
+ * for exactly that reason, agreed to exist by four surfaces and denied by the one the router
+ * asks. `marketingLinks.test.ts` now asserts every destination the public chrome offers.
+ */
+export function pathFor(tab: string, subPageName?: string): string {
   switch (tab) {
     case "landing": return "/"; // marketing front door (wordmarks navigate here from any tier)
     case "dashboard": return "/dashboard";

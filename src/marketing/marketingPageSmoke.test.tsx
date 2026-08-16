@@ -30,7 +30,7 @@ import { LegalPage } from "./LegalPage";
 import { AboutPage } from "./AboutPage";
 import { ContactPage } from "./ContactPage";
 import { LEGAL_COPY_REVIEWED } from "./legalCopy";
-import { SUPPORT_EMAIL } from "./companyInfo";
+import { SUPPORT_EMAIL } from "../lib/companyInfo";
 
 /** The public marketing routes and a string each must actually render. */
 const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain: string][] = [

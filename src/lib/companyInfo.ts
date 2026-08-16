@@ -10,10 +10,17 @@
  * looks finished. Filling them in is an edit to this file and nothing else — the same reasoning
  * `legalCopy.ts` already applies to the wording.
  *
- * ⚠️ THE SUPPORT ADDRESS IS DEFINED ONCE, HERE. `HelpCentre.tsx` carries a DIFFERENT address
- * (`support@scriptally.com`, on a domain the product does not otherwise use) which predates this
- * file; the two disagree, and which one is real is Nick's call — flagged in the run report rather
- * than silently reconciled, because guessing an inbox that may not exist sends mail nowhere.
+ * ⚠️ THE SUPPORT ADDRESS IS DEFINED ONCE, HERE, AND IT CHANGED WHEN IT WAS UNIFIED.
+ * `HelpCentre.tsx` carried `support@scriptally.com` — a different mailbox on a domain the product
+ * does not otherwise use — while the legal copy names `hello@scriptally.ink` as the controller's
+ * contact. Two published addresses is the fault; which one is real is Nick's call, flagged in the
+ * run report. The `.ink` address wins here because it is the one the privacy policy now publishes
+ * as the route for a UK GDPR request, and that is the address that has to work.
+ *
+ * ⚠️ IT LIVES IN `lib/`, NOT IN `marketing/`. These are facts about the company, and the workspace
+ * needs them too — the Help centre offers the same address the legal pages name. Keeping the
+ * constant in the marketing tier would have meant a workspace page importing from it, which is
+ * the boundary that tier states it does not cross.
  */
 
 /** The address every peripheral surface offers, and the one the legal copy names. */

@@ -27,7 +27,7 @@ import {
 import { Runs } from "./CopyRuns";
 import { MarketingFooter } from "./MarketingFooter";
 import { ContactWayPlate } from "./marketingMarks";
-import { LEGAL_ENTITY_NAME, REGISTERED_ADDRESS, SUPPORT_EMAIL } from "./companyInfo";
+import { LEGAL_ENTITY_NAME, REGISTERED_ADDRESS, SUPPORT_EMAIL } from "../lib/companyInfo";
 import {
   CONTACT_TRANSPORT, CONTACT_HONEYPOT_FIELD, CONTACT_LAST_SENT_KEY, CONTACT_MAX,
   ContactDraft, ContactField, contactMailto, isRateLimited, looksAutomated, validateContact,
