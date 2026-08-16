@@ -96,7 +96,7 @@ describe("Queries Hub chrome — artefact locks (F12 shell, overnight run)", () 
     expect(queries.includes("<F12Page")).toBe(false);
     // v4 P4 appends the route-entry class, so the root is a template literal now — match the
     // SCOPE itself (both classes, in order), which is what this lock is actually about.
-    expect(queries).toMatch(/className=\{`t-f12 f12-root\$\{/);
+    expect(queries).toMatch(/className=\{`t-f12 qc-neutral f12-root\$\{/);
     // Amendment 1 (H2): renamed Queries Hub → Query Centre, so nav, crumb and page agree.
     expect(queries).toContain('title="Query Centre"'); // the PageHeader carries the name
     /* ⚠️  NOW — Query Centre is on the grid, the last of the ten pages to

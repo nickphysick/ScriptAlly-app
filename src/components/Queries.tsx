@@ -2594,7 +2594,7 @@ export const Queries: React.FC<{
        there is nothing for either class to key. Deleted rather than left applied-and-unmatched: a
        className that computes on every render and matches no rule is the shape someone later
        "restores" on the assumption it once did something. */
-    <div className={`t-f12 f12-root${entering ? " qh-enter" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
+    <div className={`t-f12 qc-neutral f12-root${entering ? " qh-enter" : ""}${mobileDetailOn ? " qh-mv-detail" : " qh-mv-list"}`}>
     <div
       className="w-full flex flex-col overflow-hidden font-sans relative queries-container-theme"
       style={{ flex: 1, minHeight: 0 }}

@@ -1312,6 +1312,111 @@
    it already names the query. */
 .qc-who { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-right: 8px; white-space: nowrap; }
 
+
+/* ══ QUERY CENTRE · THE NEUTRAL SCALE (§2) — page-scoped, and reversible by deleting this block ══
+ *
+ * ⚠️ ONE HUE, MEASURED FROM THIS APP'S OWN PARCHMENT RATHER THAN CHOSEN. `--shell-rail`, `--paper`
+ * and `--line` all sit at OKLCH hue 78.2° — the warm-paper hue the product already has — so the
+ * scale is that hue at nine lightnesses rather than a new colour introduced beside it. That is what
+ * makes it read as one material: every non-white surface on the page is the SAME hue, and the only
+ * thing that varies is how much light it reflects.
+ *
+ * ⚠️ CHROMA FALLS AS LIGHTNESS FALLS — 0.013 at the ground to 0.003 at the ink. The page's existing
+ * set does the opposite at the top (--paper 0.009 rising to --oatline 0.028), which is why its
+ * mid-tones read as tan rather than as shadow. Falling chroma is what lets the dark end be genuinely
+ * dark instead of brown.
+ *
+ * ⚠️ IT IS A CLASS, NOT A SELECTOR LIST. `.qc-neutral` is on `.f12-root` and nowhere else today; the
+ * journeys keep the warm set, deliberately, because Pack C rebuilds those surfaces wholesale.
+ * Extending the test to them is one more className, not a second block.
+ *
+ * ⚠️ AND IT SITS AT 0-2-0 SO IT BEATS `.t-f12`, WHICH IS ON THE SAME ELEMENT. Equal specificity
+ * would leave this to stylesheet order, and index.css versus f12.css is not this block's business.
+ *
+ * Measured: L* 6.3 to 100 across the scale; surfaces L* 84.4 to 100 (was 88.3 to 100).
+ */
+.t-f12.qc-neutral {
+  --n0: #ffffff;   /* panels, cards, the agent plate — unchanged, and the only pure white */
+  --n1: #fef8f0;   /* the page ground, one step below white          L* 97.8 */
+  --n2: #f5f0e8;   /* the card header, one step below the ground     L* 95.0 */
+  --n3: #e9e4dd;   /* the selected row and the monograms             L* 90.8 */
+  --n4: #e1dcd6;   /* the soft internal separator                    L* 88.0 */
+  --n5: #d6d2cc;   /* hairlines, two steps below the selected row    L* 84.4 */
+  --n6: #a19e9a;   /* text · quiet                                   L* 65.3 */
+  --n7: #5c5a58;   /* text · mid                                     L* 38.4 */
+  --n8: #141412;   /* text · dark — darker than the old --ink (9.6)  L*  6.3 */
+
+  /* ── the page's surface roles, repointed ─────────────────────────────────────────────────── */
+  --white: var(--n0);
+  --panel: var(--n0);
+  --paper: var(--n1);
+  --oat: var(--n3);
+  --shell-rail: var(--n2);
+  --pink-t: var(--n3);
+  --pink-av: var(--n3);
+
+  /* ── rims: two steps from the same scale, split by ROLE. `--line` divides one OBJECT from
+     another and takes the hairline step; `--hairline` separates rows INSIDE one object and takes
+     the step above it. Collapsing both to n5 would put a structural weight on every internal
+     separator in the reading pane. */
+  --line: var(--n5);
+  --oatline: var(--n5);
+  --btn-line: var(--n5);
+  --hairline: var(--n4);
+  --qc-rim-h: var(--n6);
+  --qc-rim-off: var(--n4);
+  --qc-rim-off-2: var(--n4);
+  --qc-rim-sep: var(--n5);
+  --qc-rim-dash: var(--n6);
+  --qc-rim-ms: var(--n5);
+  --qc-rim-title: var(--n4);
+  --qc-rim-composer: var(--n5);
+  --qc-rim-glyph: var(--n5);
+  --qc-rim-headact: var(--n5);
+  --qc-rim-pink: var(--n5);
+
+  /* ── text: THREE levels, four tokens onto them. `--ink-2` and `--muted` both land on the mid
+     step; that collapse is the point rather than a casualty — 9 L* apart and used for the same
+     kind of thing, and the brief asks for three levels, not today's four rendered in neutral. */
+  --ink: var(--n8);
+  --ink-2: var(--n7);
+  --muted: var(--n7);
+  --faint: var(--n6);
+  --qc-tx-quiet: var(--n7);
+  --qc-tx-note: var(--n7);
+  --qc-tx-stamp: var(--n6);
+  --qc-tx-cancel: var(--n6);
+  --qc-tx-input: var(--n8);
+  --qc-tx-shut: var(--n6);
+  --qc-tx-shut-2: var(--n6);
+  --qc-tx-shut-3: var(--n6);
+  --qc-tx-nq: var(--n6);
+  --qc-tx-fold: var(--n6);
+  --qc-tx-off: var(--n6);
+  --qc-tx-send-off: var(--n6);
+  --qc-tx-noteact: var(--n6);
+
+  /* ⚠️ THE OVERDUE ROW LOSES ITS TINT AND KEEPS ITS SIGNAL. It was a faint warm pink, which §3
+     forbids as a surface; the state is carried by the terracotta figure and label already on the
+     row. A late query says so in words and in ink, not by being a different colour of paper. */
+  --qc-surf-row-od: var(--n2);
+  --qc-surf-row-od-h: var(--n3);
+  --qc-surf-shut-av: var(--n4);
+  --qc-surf-composer: var(--n1);
+  --qc-surf-pill-off: var(--n1);
+  --qc-surf-noteact-h: var(--n2);
+  --qc-surf-send-off: var(--n2);
+  --qc-surf-glyph: var(--n1);
+  --qc-surf-act-h: var(--n1);
+}
+
+/* ⚠️ THE GROUND IS PAINTED HERE, AND IT HAS TO BE. `--ws-window` is computed at `:root` from
+   `--ws-window-rgb`, and the element that paints it — `.ws-work` — is an ANCESTOR of this page, so
+   neither the token nor the paint is reachable from a block scoped inside it. `.f12-root` paints
+   nothing today and fills the page area, and nothing between the two paints either. One
+   declaration, page-scoped, removable with the class. */
+.qc-neutral.f12-root { background: var(--n1); }
+
 /* ── §3 · ONE BUTTON, EVERYWHERE ON THIS PAGE ─────────────────────────────────────────────────
    ⚠️ ONE RULE, NOT A FAMILY. `.f12-btn-pri` / `.f12-btn-sec` / `.f12-act` were three treatments at
    three heights with three paddings, and which one a control wore depended on which pack added it.
