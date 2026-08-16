@@ -28,7 +28,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { PaneJourney, PaneJourneyFoot } from "./PaneJourney";
-import { JourneySendValues, openSend } from "../../lib/paneJourney";
+import { JOURNEY_ACT, JOURNEY_PRELINE, JourneyKind, JourneySendValues, openSend } from "../../lib/paneJourney";
 import { QueryStatus } from "../../types";
 import { ArtSlot } from "./ArtSlot";
 import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
@@ -116,6 +116,8 @@ export interface TodoDockProps {
    * a surface nobody has walked yet.
    */
   onCommitSend?: (card: BoardCard, values: JourneySendValues) => Promise<void> | void;
+  /** Which journey this card's bucket runs — declared by the page, never guessed here. */
+  journeyKind?: (card: BoardCard) => JourneyKind | undefined;
   /** What the agent asked for, in their words — for the journey's reference block. */
   ask?: (card: BoardCard) => { quote?: string; meta?: string } | undefined;
   /** The query's recorded send method, so the journey opens on it rather than on a default. */
@@ -147,7 +149,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -273,7 +275,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               {/* ⚠️ THE BAND STAYS AND ONLY THE PRE-LINE CHANGES. "Sending your partial to" becomes
                   "Recording what you sent to" — the same disc, name and agency throughout, so the
                   writer never loses who they are recording against half way through recording it. */}
-              <span className="tdk-pre">{draft ? "Recording what you sent to" : bandPreline(card)}</span>
+              <span className="tdk-pre">{draft ? JOURNEY_PRELINE[journeyKind?.(card) ?? "send"] : bandPreline(card)}</span>
               <span className="tdk-name">{bandSubject(card)}</span>
               {bandUnder(card) && <span className="tdk-agency">{bandUnder(card)}</span>}
             </span>
@@ -332,6 +334,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
         >
           {draft ? (
             <PaneJourney
+              kind={journeyKind?.(card) ?? "send"}
               materials={materials?.(card) ?? []}
               ask={ask?.(card)}
               value={draft}
@@ -658,13 +661,17 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             it inside the scroller actually did (the commit at y 1271 in a 1000px viewport). */}
         {draft && (
           <PaneJourneyFoot
+            kind={journeyKind?.(card) ?? "send"}
             /* ⚠️ THE JOURNEY'S COMMIT NAMES THE DEED; THE CARD'S FOOTER SAYS "Action". That is the
                ref's own split and it is right: on the card the button OPENS something, so "Action"
                is honest; at the end of the form it PERFORMS something, and a button that performs
                must say what. `SendSpec.actLabel` exists for exactly this — its own comment calls it
                "the ink primary's words" — rather than a fourth phrasing invented here.
                `rowPrimaryLabel` is the ROW's shorthand and correctly returns "Action". */
-            actLabel={spec?.actLabel ?? primaryLabel?.(card) ?? "Record it as sent"}
+            actLabel={(() => {
+              const k = journeyKind?.(card) ?? "send";
+              return k === "send" ? (spec?.actLabel ?? "Record it as sent") : JOURNEY_ACT[k];
+            })()}
             value={draft}
             onCancel={() => setDraft(null)}
             onCommit={async () => {

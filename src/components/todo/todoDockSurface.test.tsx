@@ -395,7 +395,13 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     const src = code(dockSrc);
     expect(src).toContain("if (onCommitSend) {");
     expect(src).toContain("onPrimary(card);");
-    expect(page).toContain('onCommitSend={cardBucket(paneCard) === "send" ? commitSendFromPane : undefined}');
+    /* the declaration is a TABLE now — `paneJourneyKind` names the buckets that have one, and the
+       three that do not fall through to `undefined` and keep the takeover */
+    expect(page).toContain("onCommitSend={paneJourneyKind(paneCard) ? commitFromPane : undefined}");
+    expect(page).toContain('case "send": return "send";');
+    expect(page).toContain('case "chase": return "chase";');
+    expect(page).toContain('case "close": return "close";');
+    expect(page).toContain("default: return undefined;");
   });
 
   it("⚠️ THE COMMIT RUNS THE EXISTING WRITE — never a second path", () => {

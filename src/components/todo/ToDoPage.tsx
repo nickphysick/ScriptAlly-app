@@ -82,7 +82,8 @@ import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import { TagDef } from "../../types";
 import { dockQueue, resolveDocked, collapseTimelineDuplicates } from "../../lib/todoDock";
 import { dropSupersededProvisional, normalizeResultingStatus } from "../../lib/queryDerivation";
-import { JourneySendValues } from "../../lib/paneJourney";
+import { JourneyKind, JourneySendValues } from "../../lib/paneJourney";
+import { CLOSE_REASONS } from "../../lib/todoJourneys";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
 import { clampSnooze, cardLane, snoozeVia, completionVia, snoozeDateLabel } from "../../lib/todoActions";
@@ -1565,7 +1566,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                      bucket's journey into the pane; every other bucket has no `onCommitSend` and
                      still opens the takeover through `onPrimary`. One bucket at a time, walked
                      before the next, rather than six half-wired at once. */
-                  onCommitSend={cardBucket(paneCard) === "send" ? commitSendFromPane : undefined}
+                  onCommitSend={paneJourneyKind(paneCard) ? commitFromPane : undefined}
+                  journeyKind={paneJourneyKind}
                   ask={dockAsk}
                   queryMethod={(c) => {
                     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
@@ -2362,6 +2364,78 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * pair flipping, `What goes` and `Where to send it` dropping away because there is nothing left
    * to send. Moving on is a separate press.
    */
+  /**
+   * ⚠️ WHICH BUCKETS HAVE AN IN-PANE JOURNEY — declared here, one line each, and `undefined` for the
+   * rest. A bucket without an entry keeps the takeover through `onPrimary`, which is what lets them
+   * move one at a time rather than all at once on a surface nobody has walked.
+   */
+  function paneJourneyKind(card: BoardCard): JourneyKind | undefined {
+    switch (cardBucket(card)) {
+      case "send": return "send";
+      case "chase": return "chase";
+      case "close": return "close";
+      /* decide (offer + R&R), fix and note still open the takeover */
+      default: return undefined;
+    }
+  }
+
+  /** The one entrance — it routes to the bucket's own write, each of which is the EXISTING one. */
+  async function commitFromPane(card: BoardCard, v: JourneySendValues) {
+    const kind = paneJourneyKind(card);
+    if (kind === "chase") return commitChaseFromPane(card, v);
+    if (kind === "close") return commitCloseFromPane(card, v);
+    return commitSendFromPane(card, v);
+  }
+
+  /**
+   * ⚠️ THE CHASE RUNS `logNudge` THROUGH `nudgeWriteArgs` — the quick rail's own path, unchanged.
+   * What the journey adds is the writer's day and their chosen check-back in place of the quick
+   * path's stated defaults. Undo deletes the NUDGE_SENT activity, which fully unwinds it (twins,
+   * `nudgeDate` fields and the flag) — the same inverse the quick rail already uses.
+   */
+  async function commitChaseFromPane(card: BoardCard, v: JourneySendValues) {
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    if (!q) return;
+    const nowIso = new Date().toISOString();
+    const base = quickNudgePayload({ cardKey: card.key, label: card.title, queryId: q.id, method: q.sendMethod, nowIso });
+    const p = {
+      ...base,
+      nudgeDate: v.sentDate,
+      checkBackDate: new Date(new Date(`${v.sentDate}T12:00:00`).getTime() + v.checkBackDays * 86400000).toISOString(),
+      ...(v.note.trim() ? { note: v.note.trim() } : {}),
+    };
+    const r = await logNudge(...nudgeWriteArgs(p, nowIso));
+    if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return; }
+    const undo = async () => {
+      const acts = activitiesRef.current
+        .filter((a) => a.queryId === q.id && a.activityType === ActivityType.NUDGE_SENT)
+        .sort((x, y) => new Date(y.date).getTime() - new Date(x.date).getTime());
+      if (acts[0]?.id) await deleteActivity(acts[0].id);
+    };
+    doneToast(card, async () => { await undo(); flash("Restored"); });
+  }
+
+  /**
+   * ⚠️ THE CLOSE'S ONE QUESTION WRITES THREE DIFFERENT STATUSES, which is why it has no default and
+   * why the reason is the thing that gates the commit. `CLOSE_REASONS` in `lib/todoJourneys.ts` owns
+   * the mapping — read, never restated, so the journey and every other close surface agree.
+   */
+  async function commitCloseFromPane(card: BoardCard, v: JourneySendValues) {
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    if (!q || !v.reason) return;
+    const target = CLOSE_REASONS.find((r) => r.key === v.reason);
+    if (!target) return;
+    const prev = q.status as QueryStatus;
+    try {
+      await updateQueryStatus(q.id, target.status, v.note.trim() || `Closed — ${target.label.toLowerCase()}`);
+    } catch {
+      flash("Couldn’t close that — try again?", { label: "Try again", fn: () => commitCloseFromPane(card, v) });
+      return;
+    }
+    const undo = () => undoQueryStatus(q.id, prev, target.status);
+    doneToast(card, async () => { await undo(); flash("Restored"); });
+  }
+
   async function commitSendFromPane(card: BoardCard, v: JourneySendValues) {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
     if (!q) return;

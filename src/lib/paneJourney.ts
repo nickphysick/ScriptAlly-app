@@ -22,6 +22,57 @@
  * to record different things.
  */
 
+/**
+ * ⚠️ THE STEPS ARE DECLARED PER JOURNEY, AND THE STACKS ARE DELIBERATELY DIFFERENT LENGTHS.
+ *
+ * A send asks four things because a send HAS four: what went, how, when, and anything to remember.
+ * A chase asks two — when you nudged and when to ask again — because that is the whole of a nudge;
+ * `logNudge` takes `checkBackDate`, `eventDate` and an optional note, and has no home for a method
+ * at all, so a "how it went" step would collect an answer that goes nowhere. A close asks ONE: which
+ * of the three ways it ended, because that is the only thing the app does not already know.
+ *
+ * ⚠️ PADDING THEM TO FOUR FOR SYMMETRY WOULD BE THE WORSE PAGE. A two-step journey that asks only
+ * what it needs is faster to finish and tells the truth about how much of a decision this is; a
+ * filler step in the middle teaches the writer that some questions here do not matter.
+ *
+ * Declared as a table rather than branched in the component — the same law `paneSections` follows.
+ */
+export type JourneyKind = "send" | "chase" | "close";
+
+export type StepId = "what-went" | "how" | "when" | "check-back" | "why" | "remember";
+
+export const JOURNEY_STEPS: Record<JourneyKind, readonly StepId[]> = {
+  send: ["what-went", "how", "when", "remember"],
+  chase: ["when", "check-back", "remember"],
+  close: ["why", "remember"],
+};
+
+/**
+ * ⚠️ THE BAND'S PRE-LINE IS PER JOURNEY, and the walk is what found this: a close card in the
+ * journey read "Recording what you sent to / Elinor Hale", which describes a send. The pre-line is
+ * the one line telling the writer what they are in the middle of, so it has to be true of the thing
+ * they are doing.
+ */
+export const JOURNEY_PRELINE: Record<JourneyKind, string> = {
+  send: "Recording what you sent to",
+  chase: "Recording the nudge you sent to",
+  close: "Closing your query to",
+};
+
+/**
+ * ⚠️ THE COMMIT NAMES ITS OWN DEED. A send reads `SendSpec.actLabel` ("Record the full as sent"),
+ * which already exists for exactly this; the other two have no send spec, so they name themselves
+ * here rather than falling through to `rowPrimaryLabel`'s row shorthand — which put "Action" on a
+ * chase's commit button, measured on the deployed page.
+ */
+export const JOURNEY_ACT: Record<Exclude<JourneyKind, "send">, string> = {
+  chase: "Log the nudge",
+  close: "Close the record",
+};
+
+/** The three ways a query ends — the close journey's one real question. */
+export type CloseReason = "no_reply" | "off_record" | "withdrawn";
+
 /** What the writer has said, once the four steps are answered. */
 export interface JourneySendValues {
   /** The material rows they left ticked — labels, in the order the card states them. */
@@ -34,6 +85,10 @@ export interface JourneySendValues {
   sentDate: string;
   /** "Anything to remember" — optional, and optional means optional. */
   note: string;
+  /** chase only — days until the reminder returns. */
+  checkBackDays: number;
+  /** close only — which of the three ways it ended. `null` until the writer says. */
+  reason: CloseReason | null;
 }
 
 export type SendMethod = "Email" | "Agency portal" | "Post";
@@ -61,7 +116,16 @@ export function ymdLocal(d: Date): string {
  */
 export function openSend(materials: string[], queryMethod: string | undefined, now: Date): JourneySendValues {
   const m = SEND_METHODS.find((x) => x.toLowerCase() === String(queryMethod ?? "").toLowerCase());
-  return { materials: [...materials], also: "", method: m ?? "Email", sentDate: ymdLocal(now), note: "" };
+  return {
+    materials: [...materials], also: "", method: m ?? "Email", sentDate: ymdLocal(now), note: "",
+    /* ⚠️ THE DEFAULT IS THE ONE THE QUICK PATH ALREADY STATES — `DEFAULT_CHECKBACK_DAYS`'s 14. A
+       second default here would be a second answer to "when does a nudge come back". */
+    checkBackDays: 14,
+    /* ⚠️ `null`, NOT A FIRST REASON. A close is the one journey whose single question has no safe
+       default: pre-selecting "no reply" would write a NO_RESPONSE for a query the writer withdrew,
+       on a form they never touched. The commit is blocked until they say. */
+    reason: null,
+  };
 }
 
 /** Which of the three "when" segments a date corresponds to — `other` for anything else. */
@@ -104,4 +168,45 @@ export function sendSummary(v: JourneySendValues, now: Date): string {
  */
 export function canCommitSend(v: JourneySendValues): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(v.sentDate);
+}
+
+/**
+ * ⚠️ EACH JOURNEY IS BLOCKED BY ITS OWN ONE THING, and never by more than that.
+ *   send  — a date, because an event with no day happened on no day.
+ *   chase — the same.
+ *   close — the REASON, because the three write three different statuses. There is no default that
+ *           is safe to assume, so nothing is assumed.
+ */
+export function canCommit(kind: JourneyKind, v: JourneySendValues): boolean {
+  if (kind === "close") return v.reason !== null;
+  return canCommitSend(v);
+}
+
+/** "in 2 weeks" / "in 5 days" — the check-back stated as the interval the writer chose. */
+export function checkBackLabel(days: number): string {
+  if (days % 7 === 0 && days >= 7) {
+    const w = days / 7;
+    return `in ${w === 1 ? "a week" : `${w} weeks`}`;
+  }
+  return `in ${days} ${days === 1 ? "day" : "days"}`;
+}
+
+export const CLOSE_REASON_COPY: { key: CloseReason; label: string; gloss: string }[] = [
+  { key: "no_reply", label: "No reply within their window", gloss: "Silence past a stated window" },
+  { key: "off_record", label: "A pass arrived off the record", gloss: "You saw it but never logged it" },
+  { key: "withdrawn", label: "You withdrew the query", gloss: "You pulled it yourself" },
+];
+
+/**
+ * ⚠️ ONE SUMMARY PER JOURNEY, in the same grammar — the sentence about to be committed, assembled
+ * from answers the writer actually gave.
+ */
+export function journeySummary(kind: JourneyKind, v: JourneySendValues, now: Date): string {
+  if (kind === "send") return sendSummary(v, now);
+  const mode = whenMode(v.sentDate, now);
+  const when = mode === "today" ? "today" : mode === "yesterday" ? "yesterday" : `on ${shortDay(v.sentDate)}`;
+  if (kind === "chase") return `Logging a nudge sent ${when}, coming back ${checkBackLabel(v.checkBackDays)}.`;
+  const r = CLOSE_REASON_COPY.find((x) => x.key === v.reason);
+  /* ⚠️ IT SAYS WHAT IS MISSING RATHER THAN GUESSING — the one journey that can be unanswerable */
+  return r ? `Closing the query: ${r.label.toLowerCase()}.` : "Choose how this one ended.";
 }
