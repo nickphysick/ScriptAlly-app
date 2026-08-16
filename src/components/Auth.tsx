@@ -6,7 +6,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
-import { BETA_MODE } from "../lib/beta";
+import { BETA_MODE, INVITE_GATE_ENABLED } from "../lib/beta";
 import {
   INVITE_LABEL, INVITE_PLACEHOLDER, INVITE_MISSING, INVITE_REJECTED,
   looksLikeInviteCode, normaliseInviteCode,
@@ -96,7 +96,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
     /* An empty or implausible code never reaches the server — not as a security measure (the
        server refuses it too, identically) but so a writer who simply has not pasted it yet is told
        so rather than being handed the rejection message meant for a bad code. */
-    const needsInvite = BETA_MODE && mode === "signup";
+    const needsInvite = BETA_MODE && INVITE_GATE_ENABLED && mode === "signup";
     const inviteMissing = needsInvite && !looksLikeInviteCode(inviteCode);
     setInviteError(inviteMissing ? INVITE_MISSING : null);
 
@@ -113,7 +113,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
            checking after would leave an account behind every rejected code. A caller can burn a
            code without finishing signup — self-limiting, since they had the code — which is the
            honest trade for a gate that cannot be bypassed. */
-        if (BETA_MODE) {
+        if (BETA_MODE && INVITE_GATE_ENABLED) {
           const { getFunctions, httpsCallable } = await import("firebase/functions");
           const redeem = httpsCallable(getFunctions(undefined, "europe-west2"), "redeemInviteCode");
           try {
@@ -144,7 +144,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
        tab still gets in — closing that needs a `beforeUserCreated` blocking Auth trigger, which is
        flagged in the run report and NOT built here. This is a real gate on the honest route, not a
        complete one. */
-    if (BETA_MODE && !isSignin) {
+    if (BETA_MODE && INVITE_GATE_ENABLED && !isSignin) {
       if (!looksLikeInviteCode(inviteCode)) { setInviteError(INVITE_MISSING); return; }
       try {
         const { getFunctions, httpsCallable } = await import("firebase/functions");
@@ -257,7 +257,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
                     {/* ⚠️ THE INVITE FIELD LEADS, because it is the thing that decides whether any
                         of the rest matters. It renders only while BETA_MODE is on; with the flag
                         off, signup is exactly as it was. */}
-                    {BETA_MODE && !isSignin && (
+                    {BETA_MODE && INVITE_GATE_ENABLED && !isSignin && (
                       <div className="field">
                         <label htmlFor="au-invite">{INVITE_LABEL}</label>
                         <div className={`inp${inviteError ? " bad" : ""}`}>

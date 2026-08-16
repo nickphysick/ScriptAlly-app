@@ -18,6 +18,23 @@
 export const BETA_MODE = true;
 
 /**
+ * ⚠️ THE INVITE GATE IS BUILT AND NOT ARMED, AND IT IS A SEPARATE FLAG FOR A REASON.
+ *
+ * `BETA_MODE` is safe to ship true: it draws the strip and the feedback dock, and the worst a
+ * writer meets if the feedback function is undeployed is a send that reports its own failure. The
+ * invite gate is NOT safe to ship true, because `redeemInviteCode` is undeployed and no codes are
+ * seeded — so turning it on before the deploy does not gate signup, it CLOSES it, for everyone,
+ * silently, with a message about a code being wrong.
+ *
+ * Folding it into BETA_MODE would have made one flag mean "show the beta furniture" and "lock the
+ * door" at once, and the safe half is the reason to leave the flag on.
+ *
+ * Nick: deploy `functions:redeemInviteCode` and `firestore:rules`, seed at least one
+ * `inviteCodes/{CODE}` document, redeem a code end to end, THEN set this true.
+ */
+export const INVITE_GATE_ENABLED = false;
+
+/**
  * Where the strip's dismissal is remembered.
  *
  * ⚠️ SESSION, NOT LOCAL, AND DELIBERATELY. A beta notice a writer dismissed in March should be back

@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 import { INVITE_REJECTED, looksLikeInviteCode, normaliseInviteCode } from "./inviteCode";
+import { INVITE_GATE_ENABLED } from "./beta";
 
 describe("normalising a typed code", () => {
   it("upper-cases and strips spaces", () => {
@@ -59,6 +60,17 @@ describe("⚠️ one message for every failure", () => {
   it("the server returns the same sentence", () => {
     const fn = readFileSync(resolve(__dirname, "../../functions/src/inviteCode.ts"), "utf8");
     expect(fn).toContain("isn't one of ours, or it's already been used");
+  });
+});
+
+describe("⚠️ built, not armed", () => {
+  /**
+   * `redeemInviteCode` is undeployed and no codes are seeded, so turning this on today would not
+   * gate signup — it would CLOSE it, for everyone, with a message about a code being wrong. It is
+   * a separate flag from BETA_MODE precisely so the safe half of the beta can ship.
+   */
+  it("the invite gate ships off", () => {
+    expect(INVITE_GATE_ENABLED).toBe(false);
   });
 });
 
