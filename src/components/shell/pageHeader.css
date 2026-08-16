@@ -567,8 +567,11 @@
   border-color: rgba(36, 28, 21, 0.14);
   box-shadow: none;
 }
-.wsh--scrolled .svh-btn-ink:hover { background: #f7f8f6; }
-.wsh--scrolled .svh-btn-ghost:hover { background: #f7f8f6; border-color: rgba(36, 28, 21, 0.22); }
+/* ⚠️ THE HOVER STEPS DOWN FROM WHITE, ONTO THE SCALE'S OWN LIGHTEST STEP. Brighter is not available
+   — the resting button is already white — so the hover is `--n1`, which keeps it in the band's
+   family instead of the cool #f7f8f6 it inherited from the sage pass. */
+.wsh--scrolled .svh-btn-ink:hover { background: var(--n1); border-color: var(--n1); }
+.wsh--scrolled .svh-btn-ghost:hover { background: var(--n1); border-color: rgba(36, 28, 21, 0.22); }
 /* ⚠️ THE FOCUS RING IS THE BAND'S FOREGROUND, and this survives the retone unchanged because it
    was written against the token rather than against slate. `--shell-focus` is a burgundy at 45%
    alpha tuned for parchment and was invisible on the last ground; on this one the band's own ink
@@ -578,17 +581,11 @@
   outline: 2px solid var(--wsh-band-ink);
   outline-offset: 2px;
 }
-/* the hover steps DOWN in brightness, because on this ground brighter is no longer available */
-.wsh--scrolled .svh-btn-ink:hover { background: #e7e9ee; border-color: #e7e9ee; }
-/* ⚠️ THE FOCUS RING IS THE BAND'S FOREGROUND TOO. `--shell-focus` is a burgundy at 45% alpha,
-   tuned to sit on parchment; on #333c4d it is a dark ring on a dark ground and effectively absent.
-   Anything focusable in the strip gets a visible ring from the one token everything else here
-   reads. */
-.wsh--scrolled .svh-btn:focus-visible,
-.wsh--scrolled button:focus-visible {
-  outline: 2px solid var(--wsh-band-ink);
-  outline-offset: 2px;
-}
+/* ⚠️ A SLATE-ERA HOVER (#e7e9ee) AND A DUPLICATE FOCUS BLOCK STOOD HERE, AND THE HOVER WAS LIVE.
+   Being later in the file it OVERRODE the one above, so through the whole sage pass the band's
+   primary hovered to a cool blue-grey on a green ground — a colour from two grounds ago, surviving
+   two retones because nothing measured a hover. Deleted rather than corrected: the rule above it
+   already says what the hover is. */
 .wsh-grow { flex: 1 1 auto; min-width: 10px; }
 .wsh-acts { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
 

@@ -137,44 +137,73 @@
   --wsh-plate-h-scrolled: 52px;
   --wsh-plate-gap: 18px;
   --wsh-plate-bg: #ffffff;
+
   /**
-   * ══ THE COLLAPSED HEADER BAND — A SAGE GROUND ═════════════════════════════════════════════
+   * ══ THE WARM NEUTRAL SCALE ═══════════════════════════════════════════════════════════════════
    *
-   * ⚠️ THIS VALUE REPLACES A DARK SLATE (#333c4d), AND THE PROSE THAT ARGUED FOR IT IS GONE WITH
-   * IT rather than left describing a colour the app no longer has. That comment made the case for
-   * the app's first COOL colour and a new family; sage is neither. It is already the app's own
-   * incoming-status hue and sits in the warm-neutral family every other surface belongs to, so the
-   * band stops being an exception and becomes a tint of what is already here.
+   * Nine steps at ONE hue — OKLCH 78.2°, which is not a chosen colour but a MEASURED one: it is
+   * where `--shell-rail`, `--paper` and `--line` already sit. The scale is the app's own warm-paper
+   * hue at nine lightnesses, so it reads as one material rather than as a new family beside the old.
    *
-   * ⚠️ AND IT IS WHY THE PRIMARY STOPPED INVERTING. On slate a white button became the brightest
-   * thing on screen and outranked the primary, which is the whole reason the inversion existed.
-   * Sage is light enough that a white button reads as RAISED rather than as the loudest element, so
-   * both buttons can be white and weight alone separates them. Removing the inversion is a
-   * consequence of the ground changing, not a reversal for its own sake.
+   * ⚠️ CHROMA FALLS AS LIGHTNESS FALLS — 0.013 at the ground to 0.003 at the ink. The warm set this
+   * replaces does the opposite at the top (`--paper` 0.009 rising to `--oatline` 0.028), which is
+   * why its mid-tones read as tan rather than as shadow. Falling chroma is what lets the dark end be
+   * genuinely dark instead of brown.
    *
-   * ⚠️ ONE VALUE EVERYWHERE — still not per-theme, unchanged from the slate pass.
+   * ⚠️ IT IS AT `:root` BECAUSE THE HEADER BAND READS IT, and the band is shell-wide. Declared on a
+   * page it would be unreachable from the shell; declared twice it would drift. Query Centre's
+   * `.qc-neutral` maps this page's surfaces onto these steps and declares none of them.
+   */
+  --n0: #ffffff;   /* panels, cards, plates — the only pure white     L* 100.0 */
+  --n1: #fef8f0;   /* a page ground, one step below white             L*  97.8 */
+  --n2: #f5f0e8;   /* a card header                                   L*  95.0 */
+  --n3: #e9e4dd;   /* a selected row, a monogram, THE COLLAPSED BAND  L*  90.8 */
+  --n4: #e1dcd6;   /* an internal separator                           L*  88.0 */
+  --n5: #d6d2cc;   /* a hairline                                      L*  84.4 */
+  --n6: #a19e9a;   /* text · quiet                                    L*  65.3 */
+  --n7: #5c5a58;   /* text · mid                                      L*  38.4 */
+  --n8: #141412;   /* text · dark                                     L*   6.3 */
+
+  /**
+   * ══ THE COLLAPSED HEADER BAND — THE NEUTRAL SCALE'S n3 ════════════════════════════════════
+   *
+   * ⚠️ THIRD GROUND, AND THE PROSE FOR EACH PREVIOUS ONE IS GONE WITH IT rather than left
+   * describing a colour the app does not have. Slate (#333c4d) argued for the app's first COOL
+   * family; sage (#c9d2c7) argued that the band should stop being an exception and become a tint of
+   * the warm family. The second argument was right and is why this is the third value: the page
+   * beneath it is now unified at OKLCH 78.2°, and sage sits at 133° — so the band became the ONLY
+   * thing on the screen outside the family, and read as chrome imported from another product.
+   * `--n3` is that same argument, finally satisfiable: it is the warm family, at a step chosen to
+   * separate from the page ground rather than to be a colour.
+   *
+   * ⚠️ DISTINCT FROM THE GROUND BENEATH IT BY 7 L*, and that is the whole specification — n1 is a
+   * page ground at 97.8, n3 is 90.8. Taking n2 would have made the band and every card header the
+   * same surface, which is a different mistake from the one this fixes.
+   *
+   * ⚠️ AND THE WHITE-BUTTON ARGUMENT SURVIVES THE MOVE. On slate a white button became the
+   * brightest thing on screen and outranked the primary; that was a fact about DARK grounds. n3 is
+   * light, so both buttons stay white and weight alone separates them — the same conclusion sage
+   * reached, for the same reason, on a ground that now belongs to the page.
+   *
+   * ⚠️ ONE VALUE EVERYWHERE — still not per-theme.
    *
    * ⚠️ AND THE RULE BENEATH STAYS DELETED. `--wsh-band-edge` was a warm parchment hairline sized
    * against a near-white band; a tinted band states its own boundary. The token remains absent and
    * asserted absent — one no rule reads is the next thing someone wires back up.
    */
-  --wsh-band-bg: #c9d2c7;
+  --wsh-band-bg: var(--n3);
   /**
    * ⚠️ ONE FOREGROUND FOR EVERYTHING ON THE BAND — label, glyphs, focus ring, button text and the
    * strip's inherited `color`. That plumbing came in with the slate pass and is the part of it
    * worth keeping: a ground change is one token, not a hunt through four rules that agree.
    *
-   * ⚠️ THE VALUE IS `:root`'s `--ink`, TAKEN AS A LITERAL RATHER THAN READ. `--ink: #241c15` is the
-   * exact match — its own comment states its job as "glyph strokes on tinted bands, headings", and
-   * a sage band is a tinted band. It is NOT written as `var(--ink)` because `.t-f12` overrides
-   * `--ink` to #1e1a16 and wraps Query Centre's whole grid, header included: a `var()` here would
-   * resolve per-PAGE and quietly break the one-value rule the band is built on.
-   *
-   * ⚠️ AND NOT `--hub-ink`/`--rail-ink` (#3a1c14), which look like the closer match by value. Both
-   * are declared per theme — #3a1c14 Cappuccino, #1d1712 Bold, #1a1a1a Editorial — so either would
-   * make the band's ink theme-dependent, which is the same rule broken a different way. 11.3:1.
+   * ⚠️ IT IS `--n8`, AND THE OLD WARNING ABOUT `var()` IS ANSWERED RATHER THAN REPEATED. The value
+   * used to be written as the literal #241c15 precisely BECAUSE `var(--ink)` would have resolved
+   * per-page: `.t-f12` overrides `--ink` and wraps Query Centre's header. `--n8` cannot do that —
+   * it is declared once, at `:root`, and nothing overrides it — so the one-value rule the band is
+   * built on now holds by construction instead of by avoiding a token. 17.9:1 on n3.
    */
-  --wsh-band-ink: #241c15;
+  --wsh-band-ink: var(--n8);
   --wsh-plate-radius: 2px;
   --wsh-plate-sh: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.09);
 

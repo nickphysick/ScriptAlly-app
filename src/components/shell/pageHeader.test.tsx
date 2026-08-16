@@ -405,17 +405,22 @@ describe("the header's two states", () => {
     expect(band, "the band still names the retired edge token").not.toContain("--wsh-band-edge");
     expect(band, "the band grew a radius or a shadow — it is a band, not a card").toContain("box-shadow: none");
     /**
-     * ⚠️ THE GROUND IS ITS OWN DECLARED VALUE NOW, AND THE OLD ARGUMENT IS WITHDRAWN. It read
-     * `var(--shell-parch)` under a "semantic match, not value match" rule — the band is chrome, so
-     * it took the shell's chrome fill and would follow it through any retone. That held only while
-     * the band belonged to the warm parchment family. It does not, so the coupling goes with it.
+     * ⚠️ THE GROUND IS A TOKEN AGAIN, AND THE ARGUMENT AGAINST ONE IS ANSWERED RATHER THAN
+     * REVERSED. It was asserted as a LITERAL because there was no family to point at: slate was the
+     * app's first cool colour, and a `var()` would have implied it belonged to one. Sage did belong
+     * to the warm family but sat at OKLCH 133° against a page that has since unified at 78° — so
+     * the band became the only thing on the screen outside the family it claimed.
      *
-     * ⚠️ THE APP'S FIRST COOL COLOUR, and a NEW FAMILY rather than a variant — nothing else in the
-     * palette is near it. Asserted as the literal precisely because there is no token to point at:
-     * a `var()` here would mean it had been folded into a family it does not belong to.
+     * `--n3` is the family, and it is a real one: nine steps at the app's own measured parchment
+     * hue, declared once at `:root` so the band's one-value rule holds by construction rather than
+     * by avoiding a token. The clause is unchanged — the band has ONE ground, everywhere.
      */
     const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(tokens, "the band ground moved without this case moving with it").toContain("--wsh-band-bg: #c9d2c7");
+    expect(tokens, "the band ground moved without this case moving with it").toContain("--wsh-band-bg: var(--n3);");
+    expect(tokens, "the scale step the band reads is gone").toContain("--n3: #e9e4dd;");
+    /* ⚠️ AND IT IS DECLARED ONCE. A second `--n3` anywhere would make the band's ground depend on
+       which subtree it rendered in, which is the exact fault the literal was guarding against. */
+    expect((tokens.match(/--n3:/g) ?? []).length, "the scale is declared more than once — the band's ground would vary by subtree").toBe(1);
     /* ⚠️ THE INK IS `:root`'s `--ink` VALUE, TAKEN AS A LITERAL AND NOT READ. `--ink: #241c15` is
        the exact match — its comment states its job as "glyph strokes on tinted bands" — but
        `.t-f12` overrides `--ink` and wraps Query Centre's whole grid, header included, so a
@@ -423,7 +428,13 @@ describe("the header's two states", () => {
        `--rail-ink` (#3a1c14) look closer by value and are declared per THEME, which is the same
        rule broken a different way. */
     expect(tokens, "the band's foreground token is missing — label, glyphs, focus ring and both buttons read it")
-      .toContain("--wsh-band-ink: #241c15");
+      .toContain("--wsh-band-ink: var(--n8);");
+    /* ⚠️ `--n8` NOW, AND THE REASON THE LITERAL EXISTED IS ANSWERED. It was a hex precisely because
+       `var(--ink)` resolves per-PAGE — `.t-f12` overrides `--ink` and wraps Query Centre's header.
+       `--n8` is declared once, at `:root`, and overridden nowhere, so the band's one-value rule
+       holds by construction rather than by refusing to use a token. */
+    expect(tokens, "the ink step is gone").toContain("--n8: #141412;");
+    expect((tokens.match(/--n8:/g) ?? []).length, "the ink step is declared more than once — the band's foreground would vary by subtree").toBe(1);
     const inkRoot = /--ink:\s*#241c15/.test(tokens);
     expect(inkRoot, "`:root --ink` moved — the band's literal was taken from it and the two have drifted apart").toBe(true);
     /* ⚠️ THE RETIRED TOKEN IS ASSERTED ABSENT, not merely unused. A token no rule reads is the next

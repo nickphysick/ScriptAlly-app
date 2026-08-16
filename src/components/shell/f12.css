@@ -1361,15 +1361,11 @@
  * Measured: L* 6.3 to 100 across the scale; surfaces L* 84.4 to 100 (was 88.3 to 100).
  */
 .t-f12.qc-neutral {
-  --n0: #ffffff;   /* panels, cards, the agent plate — unchanged, and the only pure white */
-  --n1: #fef8f0;   /* the page ground, one step below white          L* 97.8 */
-  --n2: #f5f0e8;   /* the card header, one step below the ground     L* 95.0 */
-  --n3: #e9e4dd;   /* the selected row and the monograms             L* 90.8 */
-  --n4: #e1dcd6;   /* the soft internal separator                    L* 88.0 */
-  --n5: #d6d2cc;   /* hairlines, two steps below the selected row    L* 84.4 */
-  --n6: #a19e9a;   /* text · quiet                                   L* 65.3 */
-  --n7: #5c5a58;   /* text · mid                                     L* 38.4 */
-  --n8: #141412;   /* text · dark — darker than the old --ink (9.6)  L*  6.3 */
+  /* ⚠️ THE SCALE ITSELF NOW LIVES AT `:root` (index.css), NOT HERE. The collapsed header band is
+     shell-wide and renders OUTSIDE this page, so it cannot read a page-scoped token — and two
+     declarations of one scale is exactly the drift this file spends its comments warning about.
+     What stays here is the ROLE MAPPING: which of the nine steps each of this page's surfaces
+     takes. That is the page-scoped decision, and it is still the block that comes out. */
 
   /* ── the page's surface roles, repointed ─────────────────────────────────────────────────── */
   --white: var(--n0);
