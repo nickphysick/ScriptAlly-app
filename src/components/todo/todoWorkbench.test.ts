@@ -569,10 +569,15 @@ describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebui
 describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
-    const box = page.indexOf('className="tdb-brief"'); // briefing-slot P1
     const zone = page.indexOf("<TplZone scrollRef={zoneRef}");
     expect(centre).toBeGreaterThan(0);
-    expect(box).toBeGreaterThan(centre);
+    /* ⚠️ THE BRIEFING SIBLING IS UNMOUNTED, so the order this case protects is now centre → body.
+       Its SLOT is still the first thing inside `.tdb-centre` — the unmount comment sits exactly
+       where the card did — so restoring the card restores the three-sibling order without moving
+       anything else. Asserted against the comment rather than deleted, because "the briefing comes
+       first inside the centre" is the fact worth keeping. */
+    const slot = page.indexOf("THE WEEKLY REVIEW BANNER IS UNMOUNTED");
+    expect(slot).toBeGreaterThan(centre);
     /* ⚠️ THE THIRD SIBLING IS THE ZONE ITSELF NOW — `.tdb-board` wrapped it and is extinct (scroll
        fix, 9 Aug). The ORDER is what this case protects and it is unchanged: centre → briefing →
        the body. (The zone renders from `renderList`, below the return, so its position in the
@@ -602,7 +607,10 @@ describe("polish P3 — the centre stack: three sibling containers", () => {
     expect(css).not.toContain("tdb-rvhead");
     expect(page).not.toContain("tdb-rvbox");
     expect(page).not.toContain("tdb-feat"); // the featured card is superseded
-    expect((page.match(/className="tdb-brief"/g) ?? []).length).toBe(1);
+    /* ⚠️ ZERO, NOT ONE — the briefing card is unmounted from this page (it returns deliberately).
+       The point of this case survives the change: there is ONE review surface repo-wide and the
+       retired banner/card/strip classes stay extinct. What it counted was the surviving one. */
+    expect((page.match(/className="tdb-brief"/g) ?? []).length).toBe(0);
     expect(page).not.toContain(">Open it ›</button>");
   });
 });

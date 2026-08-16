@@ -1348,32 +1348,31 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               hero. That is why the whole block sits inside this one condition and why the slot
               owns no wrapper of its own. Dismissal is already per-review-period
               (sa.todoReviewDismissed keyed on reviewWin.key), so a new review brings it back. */}
-          {reviewWin && !reviewSeen && !reviewDismissed && (
-            <div className="tdb-brief">
-              {/* ⚠️ ART · REVIEW-MASTHEAD (board-optimise P3) — the ONE place a header
-                  illustration earns its keep, and the ref says why: the card is TEMPORARY and
-                  celebratory. It is inside the briefing card, never the page header, and it
-                  leaves with the card when the week is read or dismissed. */}
-              <ArtSlot name="review-masthead" className="tdb-briefart" />
-              <div className="tdb-brieftxt">
-                <div className="tdb-briefk">↺ LAST WEEK IN REVIEW</div>
-                <div className="tdb-brieft">{briefingHeadline(briefCleared, briefReplies)}</div>
-                {briefNarrative && <div className="tdb-briefd">{briefNarrative}</div>}
-              </div>
-              {briefFigures.length > 0 && (
-                <div className="tdb-briefstats">
-                  {briefFigures.map((f) => (
-                    <div key={f.key}>
-                      <b>{f.value}</b>
-                      <span>{f.label}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <button type="button" className="tdb-briefbtn" onClick={openReview}>Read the review</button>
-              <button type="button" className="tdb-briefx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}>✕</button>
-            </div>
-          )}
+          {/**
+            * ⚠️ THE WEEKLY REVIEW BANNER IS UNMOUNTED, NOT DELETED — it comes back deliberately.
+            *
+            * The `.tdb-brief` card rendered here: the review masthead art, `↺ LAST WEEK IN REVIEW`,
+            * the headline, the narrative, the figures, `Read the review` and the ✕. Every one of
+            * its inputs is still computed a few hundred lines up and still correct — `reviewWin`,
+            * `reviewSeen`, `reviewDismissed`, `briefCleared`, `briefReplies`, `briefNarrative`,
+            * `briefFigures`, `markReviewSeen`, `dismissReviewWeek`, `openReview` — and
+            * `openSundayReview` still opens the review with the live Urgent cards as its seed.
+            *
+            * ⚠️ SO NOTHING HERE IS ORPHANED BY THIS COMMIT, and that is deliberate rather than
+            * untidy: a derivation deleted now is one that has to be rebuilt from the git history
+            * when the banner returns, and the reasoning that produced `briefingHeadline`'s copy is
+            * not recoverable from its call site. Restoring the card is putting this block back.
+            *
+            * ⚠️ WHAT THIS CHANGES BESIDES THE BANNER, stated because it is not obvious: the tool
+            * row's `.tdb-revlink` renders only when `reviewSeen || reviewDismissed`, and the ONLY
+            * thing that set `reviewSeen` was this card being opened or dismissed. With the card
+            * gone, a fresh account never sets either — so the link does not appear, and the weekly
+            * review has no entry point on this page at all. An account whose localStorage already
+            * carries `sa.todoReviewSeen` for the current week WILL still see the link. That is a
+            * consequence of unmounting, not a second decision, and it is reported rather than
+            * worked around.
+            */}
+
           {/* ⚠️ THE STANDALONE CONTROL BAR IS GONE (board+dock P1). Its search and the retired
               view toggle fold into the header's tool row, which is now the page's single
               instrument — one place to look for anything that changes what the list shows. Two

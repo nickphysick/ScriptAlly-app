@@ -13,6 +13,13 @@ import { dirname, join } from "path";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+/* ⚠️ COMMENTS STRIPPED BEFORE ANY `not.toContain`, per the house rule — and this file proved it
+   again the moment the review banner was unmounted. The unmount note NAMES the card it replaced
+   ("↺ LAST WEEK IN REVIEW", `dismissReviewWeek`), which is exactly the prose this codebase writes
+   when it retires something, so a raw read fails a file that is correct. Positive assertions still
+   use `page`: those are looking for real declarations, and a comment cannot satisfy them by
+   accident in the direction that matters. */
+const pageCode = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
 const db = readFileSync(join(here, "../../lib/db.tsx"), "utf8");
 
@@ -59,6 +66,13 @@ describe("P2 — undo everywhere (write-then-reverse)", () => {
    below is unchanged — only the file it is asserted against moved. */
 describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)", () => {
   const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+/* ⚠️ COMMENTS STRIPPED BEFORE ANY `not.toContain`, per the house rule — and this file proved it
+   again the moment the review banner was unmounted. The unmount note NAMES the card it replaced
+   ("↺ LAST WEEK IN REVIEW", `dismissReviewWeek`), which is exactly the prose this codebase writes
+   when it retires something, so a raw read fails a file that is correct. Positive assertions still
+   use `page`: those are looking for real declarations, and a comment cannot satisfy them by
+   accident in the direction that matters. */
+const pageCode = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   const hook = readFileSync(join(here, "useTodoToast.ts"), "utf8");
   const css = readFileSync(join(here, "todo.css"), "utf8");
 
@@ -116,6 +130,13 @@ describe("doc pass P5 — the undo-toast SYSTEM (mechanics, both views + Today)"
 
 describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)", () => {
   const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
+/* ⚠️ COMMENTS STRIPPED BEFORE ANY `not.toContain`, per the house rule — and this file proved it
+   again the moment the review banner was unmounted. The unmount note NAMES the card it replaced
+   ("↺ LAST WEEK IN REVIEW", `dismissReviewWeek`), which is exactly the prose this codebase writes
+   when it retires something, so a raw read fails a file that is correct. Positive assertions still
+   use `page`: those are looking for real declarations, and a comment cannot satisfy them by
+   accident in the direction that matters. */
+const pageCode = page.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   const css = readFileSync(join(here, "todo.css"), "utf8");
   const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
   const cup = readFileSync(join(here, "..", "..", "assets", "todo", "review-cup.svg"), "utf8");
@@ -128,20 +149,23 @@ describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)"
     expect(page).toContain("const reviewWin = queries.length > 0 ? reviewWeek(queries, now) : null;");
     expect(page).toContain("f.snoozedUntil === reviewCompletionSnooze(reviewWin)");
     expect(page).toContain("const reviewSeen = !reviewWin || reviewSeenWk === reviewWin.key || reviewOpened;");
-    // frame P3: the banner shows only while UNSEEN and UNDISMISSED; its button is always the
-    // ink "Open it ›" (an opened week never re-shows the banner, so the View-again flip died)
-    expect(page).toContain("{reviewWin && !reviewSeen && !reviewDismissed && (");
-    // todo rebuild P3: the banner became the FEATURED CARD — its primary is the soft-pink
-    // "View" (no ink pill anywhere on this page now).
-    expect(page).toContain('className="tdb-briefbtn" onClick={openReview}'); // briefing-slot: Read the review
-    expect(page).not.toContain("View again");
+    /* ⚠️ THE DERIVATIONS OUTLIVE THE BANNER, and that is what this case is for. The card is
+       UNMOUNTED from the To-do page and comes back deliberately; every boolean above is still
+       computed and still correct, which is the thing that makes restoring it a matter of putting
+       the JSX back rather than rebuilding the reasoning. The two assertions that read the card's
+       own MARKUP move to the unmount marker. */
+    expect(page).toContain("THE WEEKLY REVIEW BANNER IS UNMOUNTED");
+    expect(pageCode).not.toContain("{reviewWin && !reviewSeen && !reviewDismissed && (");
+    expect(pageCode).not.toContain("View again");
   });
   it("frame P3 — the ✕ persists PER-WEEK (sa. prefs, no data writes); a new week resets both flags", () => {
     expect(page).toContain('localStorage.getItem("sa.todoReviewSeen")');
     expect(page).toContain('localStorage.setItem("sa.todoReviewSeen", reviewWin.key)');
     expect(page).toContain('localStorage.setItem("sa.todoReviewDismissed", reviewWin.key)');
     expect(page).toContain("const reviewDismissed = !reviewWin || reviewDismissedWk === reviewWin.key;"); // key mismatch on a new week = reset
-    expect(page).toContain('className="tdb-briefx" aria-label="Dismiss for this week" onClick={dismissReviewWeek}');
+    /* the ✕ is unmounted with the card; `dismissReviewWeek` and its key are not */
+    expect(pageCode).toContain("const dismissReviewWeek = () => {");
+    expect(pageCode).not.toContain('className="tdb-briefx"');
     expect(page).not.toContain("reviewHidden"); // the session-only hide is superseded
     expect(page).not.toContain("reviewSurface");
     for (const stale of ["tdb-rvbanner", "tdb-rvbar", "tdb-rvcard", "tdb-rvx2", "tdb-rvgo2", "renderReviewAfterlife"]) {
@@ -150,9 +174,24 @@ describe("polish P3 — THE REVIEW CARD (its own container at the stack's head)"
     }
   });
   it("THE BRIEFING anatomy (briefing-slot P1): warm panel, mono kicker, Playfair headline, figures, ink CTA", () => {
-    expect(page).toContain("↺ LAST WEEK IN REVIEW");
-    expect(page).toContain("briefingHeadline(briefCleared, briefReplies)");
-    expect(page).toContain(">Read the review</button>");
+    /* ⚠️ THE ANATOMY IS ASSERTED IN THE STYLESHEET, WHICH IS UNTOUCHED — the card is unmounted
+       from the page, not deleted, so every rule below is still the card's and still correct. The
+       three assertions that read the MARKUP invert; `briefingHeadline` is still called, because
+       the figures are still derived for the day the card returns. */
+    expect(pageCode).not.toContain("↺ LAST WEEK IN REVIEW");
+    expect(pageCode).not.toContain(">Read the review</button>");
+    /* ⚠️ THE FOUR DERIVATIONS STILL COMPUTE — they are what makes the restore a JSX change rather
+       than a rebuild. `briefingHeadline` is the ONE that lost its call site with the markup (it was
+       only ever called inline in the headline node); it stays IMPORTED so the card's return does
+       not have to rediscover it, and it is asserted here so a tidy-up of "unused imports" fails
+       rather than silently making the restore harder. */
+    for (const d of [
+      "const briefCleared = reviewWin ? briefingCleared(userTasks, reviewWin) : 0;",
+      "const briefFigures = briefingFigures(briefCleared, briefReplies);",
+      "const briefNarrative = briefStats ? briefingNarrative(briefStats) : null;",
+    ]) expect(pageCode, d).toContain(d);
+    expect(pageCode).toContain("briefingHeadline");            // imported, awaiting the card
+    expect(pageCode).not.toContain("briefingHeadline(brief");  // …and not called while it is gone
     const box = css.match(/\.tdb-brief \{([^}]*)\}/)?.[1] ?? "";
     expect(box).toContain("linear-gradient(180deg, #f7f2ea, #f3ece1)");
     expect(box).toContain("border: 1px solid #e2d8c6");

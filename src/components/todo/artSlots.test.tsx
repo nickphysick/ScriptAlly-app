@@ -170,10 +170,19 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
     expect(ART_SLOTS["first-run-board"].caption).not.toBe(ART_SLOTS["desk-clear"].caption);
   });
 
-  it("review-masthead rides INSIDE the briefing card, which is temporary and dismissible", () => {
-    expect(listPage).toContain('<ArtSlot name="review-masthead"');
-    const brief = listPage.slice(listPage.indexOf("{reviewWin && !reviewSeen"), listPage.indexOf("{reviewWin && !reviewSeen") + 700);
-    expect(brief).toContain("review-masthead");
+  /**
+   * ⚠️ THE BRIEFING CARD IS UNMOUNTED FROM THE TO-DO PAGE, so its art slot goes with it — and the
+   * rule this case protects is unchanged rather than relaxed. `review-masthead` is the ONE place a
+   * header illustration earns its keep BECAUSE the card is temporary and celebratory; a slot that
+   * outlived its card would be a permanent page illustration, which is exactly what the trigger
+   * list forbids. So the assertion inverts: no card, no slot.
+   *
+   * The slot's own definition is untouched and the card returns with it.
+   */
+  it("review-masthead does not render while the briefing card is unmounted", () => {
+    expect(listPage).not.toContain('<ArtSlot name="review-masthead"');
+    /* and the reason is stated at the unmount site, so restoring one restores both */
+    expect(listPage).toContain("THE WEEKLY REVIEW BANNER IS UNMOUNTED");
   });
 });
 
