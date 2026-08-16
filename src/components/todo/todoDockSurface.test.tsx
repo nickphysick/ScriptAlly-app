@@ -125,13 +125,16 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
   });
 
   it("⚠️ THE FORWARD LOOK IS THE BAR'S PREV/NEXT PAIR NOW — a position, not a name", () => {
-    /* `nextInQueue` survives in `lib/todoDock` (advanceDock reads it) but the CARD names no other
-       card. The bar's arrows and the head row's "Task 2 of 4" carry where you are and where you
-       can go, which is the same fact stated once rather than twice. */
+    /* `nextInQueue` survives in `lib/todoDock` but the CARD names no other card. The PANE HEADER's
+       arrows and its "Task 2 of 4" carry where you are and where you can go — one fact, stated
+       once. (They were the bar's; the bar's copy is retired, so this now reads the header's own,
+       which is in `TodoDock` rather than in the page.) */
     expect(code(dockSrc)).not.toContain("nextLabel");
     expect(dockSrc).not.toContain("LAST IN THE QUEUE");
-    expect(page).toContain('aria-label="Next task"');
-    expect(page).toContain('aria-label="Previous task"');
+    expect(dockSrc).toContain('aria-label="Next task"');
+    expect(dockSrc).toContain('aria-label="Previous task"');
+    /* and the page no longer carries a second pair that could disable differently */
+    expect(code(page)).not.toContain('aria-label="Next task"');
   });
 
   /**
@@ -649,11 +652,17 @@ describe("⚠️ THE CARD HAS NO ACTION BAR — there is one action surface and 
     expect(code(dockSrc)).not.toContain("rowPrimaryLabel");
   });
 
-  it("…and the bar carries the SURROUNDING verbs, which is a different job", () => {
-    /* Snooze, Open query, Dismiss and the previous/next pair act on the task's PLACE in the list;
-       the deed acts on the record. The bar keeps the first kind and has given up the second. */
-    for (const verb of ["Snooze", "Open query", "Dismiss", "Next task", "Previous task"]) {
-      expect(page, verb).toContain(verb);
+  it("…and the verbs live where they act", () => {
+    /* ⚠️ THE SPLIT CHANGED, AND THIS CASE HOLDS THE NEW ONE. Snooze, Open query and Dismiss act on
+       the TASK, so they are the card footer's; previous/next act on which task you are LOOKING at,
+       so they are the pane header's. Neither is the bar's any more — the bar had them because it
+       was the only permanent surface, which was a fact about the layout rather than about the
+       verbs. */
+    for (const verb of ["Snooze", "Open query", "Dismiss"]) {
+      expect(dockSrc, verb).toContain(verb);
+    }
+    for (const nav of ["Next task", "Previous task"]) {
+      expect(dockSrc, nav).toContain(nav);
     }
     expect(code(page)).not.toContain("tdw-cbprim");
   });
@@ -795,8 +804,11 @@ describe("⚠️ ONE SURFACE, EVERY ENTRANCE", () => {
     expect(code(page)).not.toContain("function advanceDock");
     expect(code(page)).not.toContain("advanceDock(");
     expect(code(page)).not.toContain("nextInQueue");
-    expect(page).toContain("dockable[i - 1]");
-    expect(page).toContain("dockable[i + 1]");
+    /* the step is `stepQueue` on the pane header now — the same clamped walk the ↑↓ keys take,
+       which is the point: one derivation, so the pointer path and the keyboard path cannot come to
+       mean different things. The page's `dockable[i ± 1]` pair went with the bar's arrows. */
+    expect(dockSrc).toContain("stepQueue(queue, card.key, -1)");
+    expect(dockSrc).toContain("stepQueue(queue, card.key, 1)");
     expect(page).toContain("owns its own queue and its own advance");
   });
 });

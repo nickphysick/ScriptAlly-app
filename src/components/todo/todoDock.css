@@ -423,9 +423,12 @@
 
 /* ⚠️ DISABLED, NOT HIDDEN, AT THE ENDS. A control that vanishes at the edge of a list makes the
    edge feel like a fault; a dim one says "this is the end" and stays where your hand expects it. */
+/* ⚠️ 28px, THE REF'S OWN (`.nav`). They are the pane header's navigation and they sit beside the
+   position line, right-aligned — disabled at the ends rather than wrapping, because "last in the
+   queue" is a fact worth arriving at. */
 .tdk-nav {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 9px;
   border: 1px solid #ddd2c4;
   background: #fff;

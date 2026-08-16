@@ -1489,17 +1489,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     onClick={() => forkStale(paneCard, "notNow")}>
                     <X size={14} aria-hidden /> Dismiss
                   </button>
-                  <span className="tdw-cbdiv" />
-                  <button type="button" className="tdw-cbic" title="Previous task" aria-label="Previous task"
-                    disabled={i <= 0}
-                    onClick={() => { const to = dockable[i - 1]; if (to) setDockKey(to.key); }}>
-                    <ChevronLeft size={15} aria-hidden />
-                  </button>
-                  <button type="button" className="tdw-cbic" title="Next task" aria-label="Next task"
-                    disabled={i < 0 || i >= dockable.length - 1}
-                    onClick={() => { const to = dockable[i + 1]; if (to) setDockKey(to.key); }}>
-                    <ChevronRight size={15} aria-hidden />
-                  </button>
+                  {/* ⚠️ THE PREVIOUS/NEXT PAIR IS THE PANE HEADER'S — see `.tdk-head`. They are
+                      NAVIGATION, not deeds: they change which task you are looking at rather than
+                      doing anything to one, so they belong beside "Task 3 of 30 · Urgent" and not
+                      among the verbs. The bar's copy is retired here rather than with the bar, so
+                      the page never carries two pairs that could disable differently. */}
                 </>
               );
             })()}
