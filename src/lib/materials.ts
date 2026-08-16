@@ -68,6 +68,28 @@ function formatLegacyMaterial(mat: string): string {
 }
 
 /**
+ * ⚠️ IS THERE A QUANTITY WORTH STATING — ONE PREDICATE, because three places asked it and all three
+ * asked it wrong.
+ *
+ * The fault: `Partial manuscript requested — 0 pages`. The guards were truthiness tests, and the
+ * quantity reaches them as a STRING — `recordResponse` writes
+ * `String(data.materialsQuantity ?? "").trim()` — so the number `0` was filtered and the string
+ * `"0"` sailed through. A placeholder rendering as a fact, and the sentence should simply have
+ * ended after `requested`.
+ *
+ * ⚠️ NON-NUMERIC TEXT IS A STATED QUANTITY, whatever it says. An `other` item carries the writer's
+ * own words ("the first three chapters"), and `Number()` of that is `NaN` — which must not be read
+ * as "nothing stated". Only a value that parses as a number is judged as one.
+ */
+export function statedQuantity(quantity: unknown): boolean {
+  if (quantity === undefined || quantity === null) return false;
+  const s = String(quantity).trim();
+  if (s === "") return false;
+  const n = Number(s);
+  return Number.isFinite(n) ? n > 0 : true;
+}
+
+/**
  * THE place a material becomes display text. Handles legacy strings (via the parser above)
  * and structured items. A structured item with no type/quantity renders as its bare label;
  * an "other" item renders its free-text quantity verbatim; a numeric item is rendered through
@@ -78,7 +100,7 @@ export function formatQueryMaterial(item: string | QueryMaterial): string {
   if (typeof item === "string") return formatLegacyMaterial(item);
 
   const { material, type, quantity } = item;
-  const hasQty = quantity !== undefined && quantity !== null && String(quantity).trim() !== "";
+  const hasQty = statedQuantity(quantity);
 
   if (!type || !hasQty) return formatLegacyMaterial(material); // unquantified → just the label
   if (type === "other") return String(quantity); // free text, verbatim
@@ -98,7 +120,7 @@ export function formatQueryMaterial(item: string | QueryMaterial): string {
 export function sampleMaterialText(item: string | QueryMaterial): string {
   if (typeof item === "string") return formatLegacyMaterial(item); // legacy string keeps its display
   const { type, quantity } = item;
-  const hasQty = quantity !== undefined && quantity !== null && String(quantity).trim() !== "";
+  const hasQty = statedQuantity(quantity);
   if (!type || !hasQty) return "Included"; // unit/quantity unspecified — historic data preserved
   if (type === "other") return String(quantity);
   const n = typeof quantity === "number" ? quantity : parseInt(String(quantity).replace(/[^0-9]/g, ""), 10);

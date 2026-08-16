@@ -27,6 +27,7 @@ import {
   deleteField,
   Timestamp,
 } from "firebase/firestore";
+import { statedQuantity } from "./materials";
 import { db, handleFirestoreError, OperationType } from "./firebase";
 import { QueryStatus, ActivityType } from "../types";
 import { recomputeQuery, monotonicEventTime } from "./recomputeQuery";
@@ -467,13 +468,17 @@ function buildActivityNote(
     case QueryStatus.QUERIED:
       return `Query sent via ${ctx.sendMethod || "Email"}`;
     case QueryStatus.PARTIAL_REQUESTED:
-      return ctx.materialsRequestedQuantity
+      /* ⚠️ `statedQuantity`, NOT TRUTHINESS. The quantity arrives as a STRING (see the write above:
+         `String(data.materialsQuantity ?? "").trim()`), so `"0"` is truthy and this rendered
+         `Partial manuscript requested — 0 pages` — a placeholder stating itself as a fact. Where
+         there is no count the clause does not render and the sentence ends. */
+      return statedQuantity(ctx.materialsRequestedQuantity)
         ? `Partial manuscript requested — ${ctx.materialsRequestedQuantity} ${ctx.materialsRequestedType || "pages"}`
         : "Partial manuscript requested";
     case QueryStatus.PARTIAL_SENT:
       return "Partial manuscript sent";
     case QueryStatus.FULL_REQUESTED:
-      return ctx.materialsRequestedQuantity
+      return statedQuantity(ctx.materialsRequestedQuantity)
         ? `Full manuscript requested — ${ctx.materialsRequestedQuantity} ${ctx.materialsRequestedType || "pages"}`
         : "Full manuscript requested";
     case QueryStatus.FULL_SENT:
