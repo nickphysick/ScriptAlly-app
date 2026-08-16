@@ -397,3 +397,13 @@
   text-transform: uppercase;
   color: #a89684;
 }
+
+/* ⚠️ THE ADD CONTROL IS PINK, AND THE DISTINCTION IS THE PAGE'S ONE BUTTON GRAMMAR. Black means
+   "this advances" — a commit at the end of a form. Adding OPENS a composer, which is the start of
+   something; wearing the commit's colour would make the two read as the same kind of act. */
+.tdw-add {
+  background: var(--pink-btn, #f5e2da);
+  border-color: var(--pink-b, #e8c8bc);
+  color: var(--burg, #7c3a2a);
+}
+.tdw-add:hover:not(:disabled) { background: var(--pink-btn-h, #efd5ca); border-color: #d8a89a; }
