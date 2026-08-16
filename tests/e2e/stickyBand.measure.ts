@@ -40,6 +40,11 @@ test("item 1 — what is actually wrong with the sticky band", async ({ page }) 
         bg: cs.backgroundColor,
         opacity: cs.opacity,
         zIndex: cs.zIndex,
+        /* ⚠️ THE SHADOW IS CHECKED AS A COMPUTED VALUE, NOT WITH `elementsFromPoint`. That probe
+           HIT-TESTS, and a box-shadow is paint with no hit area — so it reports the row underneath
+           whether the shadow covers it or not. Asking it would produce a confident wrong answer. */
+        boxShadow: cs.boxShadow,
+        marginBottom: cs.marginBottom,
         position: cs.position,
         rect: { top: Math.round(r.top), h: Math.round(r.height), left: Math.round(r.left), w: Math.round(r.width) },
         onScreen,
