@@ -37,11 +37,31 @@
  *
  * Declared as a table rather than branched in the component — the same law `paneSections` follows.
  */
-export type JourneyKind = "send" | "chase" | "close";
+export type JourneyKind = "send" | "chase" | "close" | "offer";
+
+/**
+ * ⚠️ THE OFFER IS A BRANCH, NOT A STACK, AND FLATTENING IT WOULD BE A LIE ABOUT THE DECISION.
+ * The other three journeys ask a sequence of questions about ONE act. An offer asks which of three
+ * different acts you are here to do — tell the others, record what you decided, or buy time — and
+ * they share nothing: different screens, different writes, different meanings of "done". A step
+ * stack would put two of them in front of a writer who wants the third.
+ *
+ * So: the branch selection IS the first screen, and the chosen branch is the second.
+ */
+export type OfferBranch = "notify" | "decide" | "time";
+
+export const OFFER_BRANCHES: { key: OfferBranch; title: string; gloss: string }[] = [
+  { key: "notify", title: "Let your other agents know", gloss: "Courtesy says the ones holding your pages hear it from you" },
+  { key: "decide", title: "Record your decision", gloss: "Accepted or declined — this is what completes the task" },
+  { key: "time", title: "I need time to decide", gloss: "The card stays on your board, quieter, until the day you choose" },
+];
 
 export type StepId = "what-went" | "how" | "when" | "check-back" | "why" | "remember";
 
-export const JOURNEY_STEPS: Record<JourneyKind, readonly StepId[]> = {
+/* ⚠️ `Exclude<…, "offer">` IS THE TYPE SAYING WHAT THE DESIGN SAYS: the offer has no step stack,
+   because it branches. A `Record<JourneyKind, …>` would have forced a placeholder entry here, and a
+   placeholder is how a branch quietly becomes a stack six months later. */
+export const JOURNEY_STEPS: Record<Exclude<JourneyKind, "offer">, readonly StepId[]> = {
   send: ["what-went", "how", "when", "remember"],
   chase: ["when", "check-back", "remember"],
   close: ["why", "remember"],
@@ -57,6 +77,9 @@ export const JOURNEY_PRELINE: Record<JourneyKind, string> = {
   send: "Recording what you sent to",
   chase: "Recording the nudge you sent to",
   close: "Closing your query to",
+  /* ⚠️ THE OFFER'S PRE-LINE IS THE ONE THING IT SHARES ACROSS BRANCHES — whichever you pick, you
+     are answering an offer, and the band should not change under you when you choose. */
+  offer: "Answering the offer from",
 };
 
 /**
@@ -65,7 +88,8 @@ export const JOURNEY_PRELINE: Record<JourneyKind, string> = {
  * here rather than falling through to `rowPrimaryLabel`'s row shorthand — which put "Action" on a
  * chase's commit button, measured on the deployed page.
  */
-export const JOURNEY_ACT: Record<Exclude<JourneyKind, "send">, string> = {
+/* the offer names its deed per BRANCH — `OFFER_ACT` — so it is absent here for the same reason */
+export const JOURNEY_ACT: Record<Exclude<JourneyKind, "send" | "offer">, string> = {
   chase: "Log the nudge",
   close: "Close the record",
 };
@@ -75,7 +99,7 @@ export const JOURNEY_ACT: Record<Exclude<JourneyKind, "send">, string> = {
  * card read "Nothing is sent from here — this records what you sent", which is a sentence about a
  * send sitting under a form that ends a query.
  */
-export const JOURNEY_HINT: Record<JourneyKind, string> = {
+export const JOURNEY_HINT: Record<Exclude<JourneyKind, "offer">, string> = {
   send: "Nothing is sent from here — this records what you sent.",
   chase: "Nothing is sent from here — this records the nudge you sent.",
   close: "This closes the record. It does not tell the agent anything.",
@@ -100,6 +124,14 @@ export interface JourneySendValues {
   checkBackDays: number;
   /** close only — which of the three ways it ended. `null` until the writer says. */
   reason: CloseReason | null;
+  /** offer only — `null` while the writer is on the branch selector. */
+  branch: OfferBranch | null;
+  /** offer · decide — accepted or declined. `null` until said. */
+  decision: "accepted" | "declined" | null;
+  /** offer · time — the day the card wakes, `YYYY-MM-DD`. */
+  remindDate: string;
+  /** offer · notify — which agents to write a reminder for, by query id. */
+  notifySel: Record<string, boolean>;
 }
 
 export type SendMethod = "Email" | "Agency portal" | "Post";
@@ -136,6 +168,13 @@ export function openSend(materials: string[], queryMethod: string | undefined, n
        default: pre-selecting "no reply" would write a NO_RESPONSE for a query the writer withdrew,
        on a form they never touched. The commit is blocked until they say. */
     reason: null,
+    /* ⚠️ `null` — THE OFFER OPENS ON ITS SELECTOR. There is no default branch, because the three
+       are not degrees of one act; choosing for the writer would decide which of three different
+       things they came here to do. */
+    branch: null,
+    decision: null,
+    remindDate: "",
+    notifySel: {},
   };
 }
 
@@ -181,6 +220,23 @@ export function canCommitSend(v: JourneySendValues): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(v.sentDate);
 }
 
+/** The sentence about to be committed, per branch — and nothing at all on the selector. */
+export function offerSummary(v: JourneySendValues): string {
+  if (v.branch === "notify") {
+    const n = Object.values(v.notifySel).filter(Boolean).length;
+    return n ? `Writing ${n} reminder${n === 1 ? "" : "s"} to tell the others.` : "Choose who to tell.";
+  }
+  if (v.branch === "decide") {
+    if (v.decision === "accepted") return "Recording that you accepted. Your other queries stay open.";
+    if (v.decision === "declined") return "Recording that you declined. The querying continues.";
+    return "Accepted or declined?";
+  }
+  if (v.branch === "time") {
+    return v.remindDate ? `Bringing this back on ${shortDay(v.remindDate)}.` : "Choose a day to come back to it.";
+  }
+  return "";
+}
+
 /**
  * ⚠️ EACH JOURNEY IS BLOCKED BY ITS OWN ONE THING, and never by more than that.
  *   send  — a date, because an event with no day happened on no day.
@@ -190,8 +246,36 @@ export function canCommitSend(v: JourneySendValues): boolean {
  */
 export function canCommit(kind: JourneyKind, v: JourneySendValues): boolean {
   if (kind === "close") return v.reason !== null;
+  if (kind === "offer") return canCommitOffer(v);
   return canCommitSend(v);
 }
+
+/**
+ * ⚠️ EACH BRANCH IS BLOCKED BY ITS OWN ONE THING, and the SELECTOR commits nothing at all — there
+ * is no deed until a branch is chosen, so the footer offers none.
+ */
+export function canCommitOffer(v: JourneySendValues): boolean {
+  if (v.branch === "decide") return v.decision !== null;
+  if (v.branch === "time") return /^\d{4}-\d{2}-\d{2}$/.test(v.remindDate);
+  if (v.branch === "notify") return Object.values(v.notifySel).some(Boolean);
+  return false;
+}
+
+/**
+ * ⚠️ THE COMMIT'S WORDS ARE THE BRANCH'S OWN. "Record the decision" on the notify screen would name
+ * a deed that screen does not perform.
+ */
+export const OFFER_ACT: Record<OfferBranch, string> = {
+  notify: "Set the reminders",
+  decide: "Record the decision",
+  time: "Set the reminder",
+};
+
+export const OFFER_HINT: Record<OfferBranch, string> = {
+  notify: "This writes reminders for you — it does not email anyone.",
+  decide: "Your other queries stay open and untouched.",
+  time: "The reply-by date still counts down.",
+};
 
 /** "in 2 weeks" / "in 5 days" — the check-back stated as the interval the writer chose. */
 export function checkBackLabel(days: number): string {
@@ -214,6 +298,7 @@ export const CLOSE_REASON_COPY: { key: CloseReason; label: string; gloss: string
  */
 export function journeySummary(kind: JourneyKind, v: JourneySendValues, now: Date): string {
   if (kind === "send") return sendSummary(v, now);
+  if (kind === "offer") return offerSummary(v);
   const mode = whenMode(v.sentDate, now);
   const when = mode === "today" ? "today" : mode === "yesterday" ? "yesterday" : `on ${shortDay(v.sentDate)}`;
   if (kind === "chase") return `Logging a nudge sent ${when}, coming back ${checkBackLabel(v.checkBackDays)}.`;

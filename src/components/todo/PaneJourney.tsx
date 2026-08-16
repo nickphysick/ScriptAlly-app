@@ -25,12 +25,14 @@
  * asked for reads better BEFORE the questions than alongside them.
  */
 import React, { useMemo, useRef, useState } from "react";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight } from "lucide-react";
 import { MaterialRow } from "../../lib/todoHandoff";
 import {
-  CLOSE_REASON_COPY, CloseReason, JOURNEY_HINT, JOURNEY_STEPS, JourneyKind, JourneySendValues, SEND_METHODS, SendMethod,
+  CLOSE_REASON_COPY, CloseReason, JOURNEY_HINT, JOURNEY_STEPS, JourneyKind, JourneySendValues,
+  OFFER_ACT, OFFER_BRANCHES, OFFER_HINT, OfferBranch, SEND_METHODS, SendMethod,
   StepId, canCommit, checkBackLabel, journeySummary, shortDay, whenMode, ymdLocal,
 } from "../../lib/paneJourney";
+import { HolderRow } from "../../lib/todoHandoff";
 import { RecordingCalendar } from "./RecordingCalendar";
 import "./paneJourney.css";
 
@@ -64,19 +66,144 @@ export interface PaneJourneyProps {
   ask?: { fact?: string; meta?: string };
   /** Which journey — the step stack is declared per kind in `JOURNEY_STEPS`. */
   kind: JourneyKind;
+  /**
+   * ⚠️ THE OFFER'S NOTIFY BRANCH — THE AGENTS STILL HOLDING MATERIAL, AND HERE THEY ARE THE WORK.
+   * §4.4 shows this same set on the CARD as reference; in the journey it is the thing being acted
+   * on. One derivation, two presentations: `holderRows` is a presenter over
+   * `notifyGroups(...).pages`, which is what the write already reads.
+   *
+   * ⚠️ AND IT CARRIES THE QUERY-ONLY AGENTS TOO. Courtesy says everyone still considering the
+   * manuscript hears about an offer, not only the ones holding pages — the existing notify write
+   * covers both, and narrowing it to §4.4's `pages` here would silently stop telling people.
+   */
+  holders?: { holding: HolderRow[]; queried: HolderRow[] };
+  /** The reply-by day, where the record has one — the `time` branch caps its reminder there. */
+  replyBy?: string;
   value: JourneySendValues;
   onChange: (v: JourneySendValues) => void;
   /** `Back to the task` — the way out at the TOP of the body. Writes nothing. */
   onCancel: () => void;
 }
 
-export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, value, onChange, onCancel }) => {
+export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, holders, replyBy, value, onChange, onCancel }) => {
   const now = useMemo(() => new Date(), []);
   const [calAnchor, setCalAnchor] = useState<HTMLElement | null>(null);
   const dateBtn = useRef<HTMLButtonElement | null>(null);
 
   const set = (patch: Partial<JourneySendValues>) => onChange({ ...value, ...patch });
+  /** One level down inside the offer — the back control goes up one, never all the way out. */
+  const inBranch = kind === "offer" && !!value.branch;
   const yesterday = () => ymdLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+
+  const toggleNotify = (queryId: string) =>
+    set({ notifySel: { ...value.notifySel, [queryId]: !value.notifySel[queryId] } });
+
+  const holderPick = (h: HolderRow) => {
+    const on = !!value.notifySel[h.queryId];
+    return (
+      <button type="button" key={h.queryId} className={`pj-orow${on ? " on" : ""}`}
+        aria-pressed={on} onClick={() => toggleNotify(h.queryId)}>
+        <span className="pj-bx" aria-hidden>{on ? <Check size={10} /> : null}</span>
+        <span className="pj-otx">{h.name}<span className="sub">{h.holds}{h.caution ? ` · ${h.caution}` : ""}</span></span>
+      </button>
+    );
+  };
+
+  const renderOffer = (): React.ReactNode => {
+    /* ── screen one: which of the three ─────────────────────────────────────────────────────── */
+    if (!value.branch) {
+      return (
+        <div className="pj-branches">
+          {OFFER_BRANCHES.map((b) => (
+            <button type="button" key={b.key} className="pj-branch"
+              onClick={() => set({ branch: b.key as OfferBranch })}>
+              <span className="pj-branchtx"><b>{b.title}</b><span>{b.gloss}</span></span>
+              <ChevronRight size={15} aria-hidden />
+            </button>
+          ))}
+        </div>
+      );
+    }
+    /* ── screen two: the branch ─────────────────────────────────────────────────────────────── */
+    if (value.branch === "notify") {
+      const holding = holders?.holding ?? [];
+      const queried = holders?.queried ?? [];
+      return (
+        <>
+          {/* ⚠️ THE ONES HOLDING YOUR PAGES COME FIRST AND ARE NAMED AS SUCH. It is the difference
+              between "someone is reading your manuscript" and "someone has your query in a pile",
+              and it is the whole reason this branch is the most consequential of the three. */}
+          {holding.length > 0 && (
+            <div className="pj-step">
+              <div className="pj-n"><span className="i">01</span><h4>Still holding your pages</h4></div>
+              <div className="pj-opts">{holding.map(holderPick)}</div>
+            </div>
+          )}
+          {queried.length > 0 && (
+            <div className="pj-step">
+              <div className="pj-n">
+                <span className="i">{holding.length ? "02" : "01"}</span><h4>Still considering your query</h4>
+              </div>
+              <div className="pj-opts">{queried.map(holderPick)}</div>
+            </div>
+          )}
+          {/* ⚠️ NOBODY ELSE IS A FACT WORTH TELLING at offer stage — it means there is no one to
+              notify, which is a real and reassuring answer rather than an absence. */}
+          {holding.length === 0 && queried.length === 0 && (
+            <div className="pj-step"><div className="pj-none">No other agent is still considering this manuscript.</div></div>
+          )}
+        </>
+      );
+    }
+    if (value.branch === "decide") {
+      return (
+        <>
+          <div className="pj-step">
+            <div className="pj-n"><span className="i">01</span><h4>What did you tell them?</h4></div>
+            <div className="pj-opts">
+              {([["accepted", "I accepted", "They represent this manuscript now"],
+                 ["declined", "I declined", "The querying continues"]] as const).map(([k, label, gloss]) => {
+                const on = value.decision === k;
+                return (
+                  <button type="button" key={k} className={`pj-orow${on ? " on" : ""}`}
+                    aria-pressed={on} onClick={() => set({ decision: k })}>
+                    <span className="pj-bx" aria-hidden>{on ? <Check size={10} /> : null}</span>
+                    <span className="pj-otx">{label}<span className="sub">{gloss}</span></span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      );
+    }
+    return (
+      <>
+        <div className="pj-step">
+          <div className="pj-n"><span className="i">01</span><h4>When should this come back?</h4></div>
+          <div className="pj-seg">
+            {[3, 7, 14].map((d) => {
+              const day = ymdLocal(new Date(now.getFullYear(), now.getMonth(), now.getDate() + d));
+              /* ⚠️ CAPPED AT THE REPLY-BY, because a reminder after the deadline is a reminder about
+                 something already decided for you. */
+              const capped = replyBy && day > replyBy.slice(0, 10) ? replyBy.slice(0, 10) : day;
+              return (
+                <button type="button" key={d} className={value.remindDate === capped ? "on" : undefined}
+                  aria-pressed={value.remindDate === capped} onClick={() => set({ remindDate: capped })}>
+                  {checkBackLabel(d)}
+                </button>
+              );
+            })}
+          </div>
+          {replyBy && (
+            <div className="pj-refm" style={{ borderTop: 0, paddingTop: 10 }}>
+              Reply-by is {shortDay(replyBy.slice(0, 10))} — a later day is capped there.
+            </div>
+          )}
+        </div>
+      </>
+    );
+  };
 
   const renderStep = (id: StepId): React.ReactNode => {
     switch (id) {
@@ -190,10 +317,16 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
     <>
       {/* ⚠️ THE WAY BACK IS THE FIRST THING IN THE BODY, above the reference and the steps. A
           journey whose exit is only in the footer asks the writer to read to the end to find out
-          they can leave. */}
+          they can leave.
+          ⚠️ ONE CONTROL, DESTINATION BY DEPTH — and the walk is what forced this. The offer's branch
+          screens first rendered a SECOND back button beneath this one, so the card carried "Back to
+          the task" and "Back to the three" stacked, and the top one silently threw away the branch
+          you had chosen. A single control goes up exactly one level: out of a branch to the three,
+          and out of the three to the card. */}
       <div className="pj-head">
-        <button type="button" className="pj-back" onClick={onCancel}>
-          <ArrowLeft size={13} aria-hidden /> Back to the task
+        <button type="button" className="pj-back"
+          onClick={() => (inBranch ? onChange({ ...value, branch: null }) : onCancel())}>
+          <ArrowLeft size={13} aria-hidden /> {inBranch ? "Back to the three" : "Back to the task"}
         </button>
       </div>
 
@@ -213,6 +346,12 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
         </div>
       )}
 
+      {/* ⚠️ THE OFFER RENDERS ITS BRANCHES, NOT A STACK — see `OfferBranch`'s note. The selector is
+          screen one; the chosen branch is screen two, reached by a choice and left by `Back`. */}
+      {kind === "offer" ? renderOffer() : null}
+
+      {kind !== "offer" && (
+      <>
       {/* ⚠️ THE STACK IS DECLARED, NOT BRANCHED — `JOURNEY_STEPS[kind]`. A send asks four things; a
           chase asks two; a close asks one. Numbering follows the stack, so a shorter journey LOOKS
           shorter rather than showing "03 of 04" with a step that does nothing. */}
@@ -226,6 +365,8 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
           {renderStep(id)}
         </div>
       ))}
+      </>
+      )}
 
     </>
   );
@@ -255,19 +396,36 @@ export interface PaneJourneyFootProps {
 
 export const PaneJourneyFoot: React.FC<PaneJourneyFootProps> = ({ kind, actLabel, value, onCancel, onCommit, saving = false }) => {
   const now = useMemo(() => new Date(), []);
+  /**
+   * ⚠️ THE SELECTOR HAS NO DEED, SO IT OFFERS NO BUTTON. An offer with no branch chosen is a writer
+   * deciding which of three things they came to do; a primary there would have to be labelled
+   * something, and every honest label for it ("Continue", "Next") describes navigation rather than
+   * a deed — which is exactly the register the black button is reserved against.
+   */
+  const onSelector = kind === "offer" && !value.branch;
+  const summary = journeySummary(kind, value, now);
+  const hint = kind === "offer"
+    ? (value.branch ? OFFER_HINT[value.branch] : "Three ways to answer this — pick the one you are here for.")
+    : JOURNEY_HINT[kind];
+  const label = kind === "offer" && value.branch ? OFFER_ACT[value.branch] : actLabel;
   return (
     <>
-      <div className="pj-sum" role="status">
-        <span className="i" aria-hidden><Check size={10} /></span>
-        <span className="t">{journeySummary(kind, value, now)}</span>
-      </div>
+      {/* the summary is absent on the selector too — there is nothing yet to summarise */}
+      {summary && (
+        <div className="pj-sum" role="status">
+          <span className="i" aria-hidden><Check size={10} /></span>
+          <span className="t">{summary}</span>
+        </div>
+      )}
       <div className="pj-foot">
         <button type="button" className="pj-btn" onClick={onCancel}>Cancel</button>
-        <span className="pj-hint">{JOURNEY_HINT[kind]}</span>
+        <span className="pj-hint">{hint}</span>
         <span className="pj-grow" />
-        <button type="button" className="pj-prime" disabled={!canCommit(kind, value) || saving} onClick={onCommit}>
-          <Check size={14} aria-hidden /> {saving ? "Recording…" : actLabel}
-        </button>
+        {!onSelector && (
+          <button type="button" className="pj-prime" disabled={!canCommit(kind, value) || saving} onClick={onCommit}>
+            <Check size={14} aria-hidden /> {saving ? "Recording…" : label}
+          </button>
+        )}
       </div>
     </>
   );

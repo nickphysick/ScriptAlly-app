@@ -5,7 +5,7 @@
  * The in-pane journey's pure model (Item 9, Phase 2).
  */
 import { describe, it, expect } from "vitest";
-import { openSend, sendSummary, canCommitSend, canCommit, whenMode, ymdLocal, shortDay, SEND_METHODS, JOURNEY_STEPS, JOURNEY_PRELINE, JOURNEY_ACT, JOURNEY_HINT, journeySummary, checkBackLabel, CLOSE_REASON_COPY } from "./paneJourney";
+import { openSend, sendSummary, canCommitSend, canCommit, whenMode, ymdLocal, shortDay, SEND_METHODS, JOURNEY_STEPS, JOURNEY_PRELINE, JOURNEY_ACT, JOURNEY_HINT, journeySummary, checkBackLabel, CLOSE_REASON_COPY, OFFER_BRANCHES, OFFER_ACT, OFFER_HINT, canCommitOffer, offerSummary } from "./paneJourney";
 import { CLOSE_REASONS } from "./todoJourneys";
 
 /* ⚠️ A FIXED CLOCK, PASSED IN. Every function here takes `now` rather than reading it, so the tests
@@ -193,5 +193,64 @@ describe("⚠️ THE BAND AND THE COMMIT SPEAK FOR THE JOURNEY THEY ARE IN", () 
     expect(JOURNEY_ACT.chase).toBe("Log the nudge");
     expect(JOURNEY_ACT.close).toBe("Close the record");
     for (const v of Object.values(JOURNEY_ACT)) expect(v).not.toBe("Action");
+  });
+});
+
+/* ── Phase 3 · the offer branches ────────────────────────────────────────────────────────────── */
+
+describe("⚠️ THE OFFER IS A BRANCH, NOT A STACK", () => {
+  const open = () => openSend([], undefined, NOW);
+
+  it("it has no step stack at all — the type says so, and so does the table", () => {
+    /* `JOURNEY_STEPS` is keyed `Exclude<JourneyKind, "offer">`. A placeholder entry is how a branch
+       quietly becomes a stack later, so there is none to find. */
+    expect(Object.keys(JOURNEY_STEPS).sort()).toEqual(["chase", "close", "send"]);
+  });
+
+  it("⚠️ IT OPENS ON THE SELECTOR WITH NO BRANCH CHOSEN", () => {
+    /* the three are not degrees of one act — choosing for the writer would decide which of three
+       different things they came here to do */
+    expect(open().branch).toBeNull();
+    expect(canCommitOffer(open())).toBe(false);
+    expect(offerSummary(open())).toBe("");
+  });
+
+  it("the three branches are the three, each with its own words", () => {
+    expect(OFFER_BRANCHES.map((b) => b.key)).toEqual(["notify", "decide", "time"]);
+    for (const b of OFFER_BRANCHES) {
+      expect(OFFER_ACT[b.key], b.key).toBeTruthy();
+      expect(OFFER_HINT[b.key], b.key).toBeTruthy();
+      /* ⚠️ EACH ACT NAMES ITS OWN DEED — "Record the decision" on the notify screen would name a
+         deed that screen does not perform. */
+      expect(new Set(Object.values(OFFER_ACT)).size).toBe(3);
+    }
+  });
+
+  it("each branch is blocked by its own one thing", () => {
+    expect(canCommitOffer({ ...open(), branch: "decide" })).toBe(false);
+    expect(canCommitOffer({ ...open(), branch: "decide", decision: "accepted" })).toBe(true);
+    expect(canCommitOffer({ ...open(), branch: "time" })).toBe(false);
+    expect(canCommitOffer({ ...open(), branch: "time", remindDate: "2026-08-20" })).toBe(true);
+    expect(canCommitOffer({ ...open(), branch: "notify" })).toBe(false);
+    expect(canCommitOffer({ ...open(), branch: "notify", notifySel: { q1: true } })).toBe(true);
+    /* ⚠️ AND AN UNTICKED SELECTION IS NOT A SELECTION — `{q1: false}` is what unticking leaves */
+    expect(canCommitOffer({ ...open(), branch: "notify", notifySel: { q1: false } })).toBe(false);
+  });
+
+  it("each branch's summary states its own act, and says what is missing", () => {
+    expect(offerSummary({ ...open(), branch: "decide" })).toBe("Accepted or declined?");
+    expect(offerSummary({ ...open(), branch: "decide", decision: "declined" }))
+      .toBe("Recording that you declined. The querying continues.");
+    expect(offerSummary({ ...open(), branch: "notify" })).toBe("Choose who to tell.");
+    expect(offerSummary({ ...open(), branch: "notify", notifySel: { a: true, b: true } }))
+      .toBe("Writing 2 reminders to tell the others.");
+    expect(offerSummary({ ...open(), branch: "notify", notifySel: { a: true } }))
+      .toBe("Writing 1 reminder to tell the others.");
+    expect(offerSummary({ ...open(), branch: "time" })).toBe("Choose a day to come back to it.");
+  });
+
+  it("⚠️ AND THE BAND DOES NOT CHANGE UNDER THE WRITER WHEN THEY PICK A BRANCH", () => {
+    /* one pre-line for the whole journey: whichever branch you take, you are answering an offer */
+    expect(JOURNEY_PRELINE.offer).toBe("Answering the offer from");
   });
 });

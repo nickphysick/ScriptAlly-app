@@ -131,3 +131,20 @@
 .pj-prime:disabled {
   background: var(--shell-card, #fdfaf5); border-color: #e8dfd1; color: #b3a394; cursor: not-allowed;
 }
+
+/* ── the offer's branch selector (Item 9, Phase 3) ───────────────────────────────────────────── */
+
+/* ⚠️ THREE CHOICES, NOT THREE STEPS. They are laid out as equals because they ARE equals — three
+   different acts, not degrees of one — and the chevron says each leads somewhere rather than
+   toggling something on this screen. */
+.pj-branches { display: flex; flex-direction: column; gap: 9px; }
+.pj-branch {
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer;
+  font: inherit; color: #4d4238;
+  background: #fff; border: 1px solid #ece0d2; border-radius: 11px; padding: 14px 15px;
+}
+.pj-branch:hover { border-color: #dcc8b8; background: #fffdf9; }
+.pj-branch svg { color: #b3a496; flex: none; margin-left: auto; }
+.pj-branchtx { min-width: 0; }
+.pj-branchtx b { display: block; font-size: 13.5px; font-weight: 600; color: #241209; }
+.pj-branchtx span { display: block; font-size: 11.5px; color: #a89684; margin-top: 3px; line-height: 1.5; }

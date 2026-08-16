@@ -65,7 +65,7 @@ import {
 import { TaskList, groupColumn } from "./TaskList";
 import { useDockActivity } from "./useDockActivity";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
-import { notifyGroups } from "../../lib/offerNotify";
+import { notifyGroups, reminderFields } from "../../lib/offerNotify";
 import { sendSpecFor } from "../../lib/todoDock";
 import { isSlotFilled } from "../../lib/packageMetrics";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
@@ -250,7 +250,7 @@ export interface ToDoPageProps {
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, versions, currentUser, collectionsReady,
-    addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile,
+    addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile, recordOfferDecision,
     recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
   const { toast, flash, dismiss: dismissToast, pause: pauseToast, resume: resumeToast, remember: rememberUndo, recall: recallUndo } = useTodoToast();
@@ -1568,6 +1568,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                      before the next, rather than six half-wired at once. */
                   onCommitSend={paneJourneyKind(paneCard) ? commitFromPane : undefined}
                   journeyKind={paneJourneyKind}
+                  /* ⚠️ ONE DERIVATION, TWO PRESENTATIONS — `dockHolders` already feeds §4.4's card
+                     section from `notifyGroups(...).pages`; the journey reads the SAME builder and
+                     adds the query-only group, because courtesy at offer stage reaches both. */
+                  journeyHolders={dockJourneyHolders}
+                  replyBy={(c) => {
+                    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+                    return q?.responseDeadline;
+                  }}
                   ask={dockAsk}
                   queryMethod={(c) => {
                     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
@@ -2370,11 +2378,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * move one at a time rather than all at once on a surface nobody has walked.
    */
   function paneJourneyKind(card: BoardCard): JourneyKind | undefined {
+    /* ⚠️ THE `decide` BUCKET SPLITS BY TASK TYPE, and forcing one shape on both would be wrong in
+       whichever direction it went. An OFFER is a branch — three different acts. An R&R is a SEND:
+       `sendSpecFor` returns a spec for it, `recordMaterialsSent` performs it, and the only thing
+       distinguishing it is a second pre-ticked row. One bucket, two journeys, because the bucket
+       answers "how urgent" and the task type answers "what is this". */
+    if (card.taskType === "offer_received") return "offer";
+    if (card.taskType === "revise_resubmit") return "send";
     switch (cardBucket(card)) {
       case "send": return "send";
       case "chase": return "chase";
       case "close": return "close";
-      /* decide (offer + R&R), fix and note still open the takeover */
+      /* fix and note still open the takeover */
       default: return undefined;
     }
   }
@@ -2384,7 +2399,58 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const kind = paneJourneyKind(card);
     if (kind === "chase") return commitChaseFromPane(card, v);
     if (kind === "close") return commitCloseFromPane(card, v);
+    if (kind === "offer") return commitOfferFromPane(card, v);
     return commitSendFromPane(card, v);
+  }
+
+  /**
+   * ⚠️ THREE BRANCHES, THREE EXISTING WRITES — none of them new, and none of them shared.
+   *   notify  → `addUserTask` per selected agent, through `reminderFields`. Writes NO activities:
+   *             telling someone is something the WRITER does, in their own email; what the app can
+   *             honestly do is remember that it needs doing.
+   *   decide  → `recordOfferDecision`, which is the task's death condition. Accepted keeps the
+   *             OFFER status historically true, so status alone can never clear the card.
+   *   time    → `upsertTaskFlag`'s snooze, capped at the reply-by.
+   */
+  async function commitOfferFromPane(card: BoardCard, v: JourneySendValues) {
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    if (!q || !v.branch) return;
+
+    if (v.branch === "decide") {
+      if (!v.decision) return;
+      const r = await recordOfferDecision(q.id, v.decision);
+      if (!r.success) { flash(r.error || "Couldn’t record the decision — try again."); return; }
+      flash(v.decision === "accepted" ? "Recorded — congratulations." : "Recorded — the querying continues.");
+      return;
+    }
+
+    if (v.branch === "time") {
+      if (!v.remindDate) return;
+      await upsertTaskFlag(flagKeyForTask("offer_received", q.id), {
+        snoozedUntil: journeyEventISO(v.remindDate, new Date().toISOString()),
+      });
+      flash("Quieter until then — the reply-by date still counts down.");
+      return;
+    }
+
+    /* notify — one task per selected agent, through the existing builder */
+    const groups = notifyGroups(q, queries, agents, userTasks);
+    const rows = [...groups.pages, ...groups.queryOnly].filter((r) => v.notifySel[r.queryId]);
+    if (!rows.length) return;
+    /* ⚠️ `reminderFields` TAKES THE WHOLE SELECTION — one builder, one shape, and the reply-by
+       becomes the tasks' due date (omitted where there is none, rather than invented). */
+    const fields = reminderFields(rows, q.id, q.responseDeadline);
+    let made = 0;
+    for (const f of fields) {
+      try { await addUserTask(f); made += 1; }
+      catch { /* one refusal must not lose the others — the count states what landed */ }
+    }
+    /* ⚠️ THE TOAST STATES WHAT ACTUALLY LANDED, not what was asked for. A partial failure that
+       reported the full number would be the app telling the writer people had been remembered who
+       had not. */
+    flash(made === rows.length
+      ? `${made} reminder${made === 1 ? "" : "s"} added to your list.`
+      : `${made} of ${rows.length} reminders added — try the rest again?`);
   }
 
   /**
@@ -2464,6 +2530,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     const undo = () => undoQueryStatus(q.id, prev, p.targetStatus);
     doneToast(card, async () => { await undo(); flash("Restored"); });
+  }
+
+  /**
+   * ⚠️ THE NOTIFY BRANCH'S TWO GROUPS, THROUGH THE SAME PRESENTER §4.4 USES. `holderRows` turns
+   * `NotifyRow`s into display rows with a draft-note link; the card shows only `pages`, and the
+   * journey shows both because everyone still considering the manuscript should hear about an
+   * offer. Narrowing the journey to `pages` would silently stop telling the query-only agents,
+   * which is a behaviour change the existing notify flow never made.
+   */
+  function dockJourneyHolders(card: BoardCard) {
+    if (card.taskType !== "offer_received" || !card.relatedRecordId) return undefined;
+    const q = queries.find((x) => x.id === card.relatedRecordId);
+    if (!q) return undefined;
+    const ms = manuscripts.find((m) => m.id === q.manuscriptId);
+    const subject = ms?.title ? `${ms.title} — an update` : "An update on my submission";
+    const email = (agentId: string | undefined) => (agentId ? agents.find((a) => a.id === agentId)?.email : undefined);
+    const g = notifyGroups(q, queries, agents, userTasks);
+    return { holding: holderRows(g.pages, email, subject), queried: holderRows(g.queryOnly, email, subject) };
   }
 
   function dockTimeline(card: BoardCard): DockTimelineEvent[] {

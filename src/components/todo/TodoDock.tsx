@@ -118,6 +118,10 @@ export interface TodoDockProps {
   onCommitSend?: (card: BoardCard, values: JourneySendValues) => Promise<void> | void;
   /** Which journey this card's bucket runs — declared by the page, never guessed here. */
   journeyKind?: (card: BoardCard) => JourneyKind | undefined;
+  /** The offer's notify branch — the same set §4.4 shows on the card, split by what they hold. */
+  journeyHolders?: (card: BoardCard) => { holding: HolderRow[]; queried: HolderRow[] } | undefined;
+  /** The reply-by day, where the record has one — the `time` branch caps its reminder there. */
+  replyBy?: (card: BoardCard) => string | undefined;
   /** What the agent asked for, in their words — for the journey's reference block. */
   ask?: (card: BoardCard) => { quote?: string; meta?: string } | undefined;
   /** The query's recorded send method, so the journey opens on it rather than on a default. */
@@ -149,7 +153,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, journeyHolders, replyBy, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const card = queue.find((c) => c.key === activeKey) ?? queue[0];
   const surfaceRef = useRef<HTMLDivElement>(null);
@@ -335,6 +339,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           {draft ? (
             <PaneJourney
               kind={journeyKind?.(card) ?? "send"}
+              holders={journeyHolders?.(card)}
+              replyBy={replyBy?.(card)}
               materials={materials?.(card) ?? []}
               ask={ask?.(card)}
               value={draft}
