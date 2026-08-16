@@ -125,10 +125,11 @@ describe("§2 · rows on one grid", () => {
 
   it("hover is a wash; selected takes the band, with a burgundy spine", () => {
     expect(rule(".f12-row:hover"), "hover collapsed into the panel's ground").toContain("background: var(--paper)");
-    /* §4: the panel is white, so the selected row is the BAND step rather than a lift to white —
-       three rungs again, the other way up. The spine below is unchanged. */
-    expect(rule(".f12-row.f12-sel")).toContain("background: var(--oat)");
-    expect(rule(".f12-row.f12-sel::before"), "the spine went back to ink").toContain("background: var(--burg)");
+    /* ⚠️ AND FIX PACK 7 §4 TOOK THE LAST STEP: the fill is pink and the spine is gone. Three rungs
+       still — white ground, `--paper` hover, pink selected — but the top rung is now a HUE rather
+       than a tonal step, which is why it needs neither an edge nor a spine to be found. */
+    expect(rule(".f12-row.f12-sel")).toContain("background: var(--pink-t)");
+    expect(rule(".f12-row.f12-sel::before"), "the burgundy spine came back").toBe("");
   });
 });
 

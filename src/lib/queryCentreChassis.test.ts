@@ -138,8 +138,11 @@ describe("§1c · the list is furniture, and selection inverts", () => {
    */
   it("three distinguishable steps: white ground, paper hover, band selected", () => {
     const sel = rule(".f12-row.f12-sel");
-    expect(sel, "the selected row is not the band step").toContain("background: var(--oat)");
-    expect(sel, "the selected fill has no edge to seat it on").toContain("inset 0 0 0 1px var(--oatline)");
+/* ⚠️ FIX PACK 7 §4: the fill is `--pink-t` and the ring is GONE. `--oat` needed an edge because it
+   is a small step from white; pink is a different KIND of difference — a hue nothing else in the
+   column carries — so an edge on top of it is a second signal for one state. */
+    expect(sel, "the selected row is not the pink fill").toContain("background: var(--pink-t)");
+    expect(sel, "a ring came back on top of the fill").toContain("box-shadow: none");
     expect(rule(".f12-row:hover"), "hover and the ground are the same colour").toContain("background: var(--paper)");
     /* ⚠️ AND THE THREE MUST BE THREE. A ladder whose ends match its middle is a ladder with two
        rungs, which is how §4 broke the old one — asserted rather than eyeballed. */
@@ -347,11 +350,17 @@ describe("§ (fp5) · the list is an inset panel", () => {
     const r = rule(".f12-list");
     expect(r, "the list rule is missing").not.toBe("");
     expect(declValue(r, "border-radius"), "the panel lost its radius").toBe("var(--r-lg)");
-    /* ⚠️ THE RIM COMES FROM THE CARD'S BASE RULE. `.qp-cols .f12-card` declares only the ground
-       (fix pack 4 §2), so reading the border there returns "" and the comparison would pass against
-       nothing — the empty-slice failure this repo has an audit about. */
+    /* ⚠️ THE COMPARISON SURVIVES FIX PACK 7 §2, ON THE OTHER PROPERTY. The cards' rim is a RING now,
+       so comparing borders would compare the panel's real value against an empty string — the
+       empty-slice failure this repo has an audit about, arrived at from the other direction. What
+       must not drift is the rim's WEIGHT AND TONE, so that is what is compared: the panel draws it
+       as a border because it has no filled header to surround, and the two still cannot come apart. */
+    const ring = rule(".f12-card::after");
+    expect(ring, "the cards' ring is missing — this comparison would test nothing").not.toBe("");
+    const ringRim = /inset 0 0 0 (\S+) (var\(--[a-z-]+\))/.exec(ring);
+    expect(ringRim, `the ring's rim could not be read: ${ring}`).not.toBeNull();
     expect(declValue(r, "border"), "the panel's rim is not the cards' rim")
-      .toBe(declValue(rule(".f12-card"), "border"));
+      .toBe(`${ringRim![1]} solid ${ringRim![2]}`);
     /**
      * ⚠️ REPOINTED BY FIX PACK 6 §1 — THE VERTICAL INSET SURVIVES, THE HORIZONTAL ONE IS DELETED.
      *
@@ -441,10 +450,14 @@ describe("§ (fp5) · the list is an inset panel", () => {
     /* §4 re-levelled the fill (see the ladder case above); the SPINE is what this case is really
        for, and it is untouched — 3px of burgundy on the left edge, at every step of the pack. */
     expect(declValue(rule(".f12-row.f12-sel"), "background"), "the selected row lost its fill")
-      .toBe("var(--oat)");
-    expect(rule(".f12-row.f12-sel::before"), "the burgundy spine went").toContain("var(--burg)");
-    expect(rule(".f12-row.f12-sel::before"), "the spine left the left edge").toContain("left: 0");
-    expect(rule(".f12-row.f12-sel::before"), "the spine is not 3px").toContain("width: 3px");
+      .toBe("var(--pink-t)");
+    /* ⚠️ INVERTED BY FIX PACK 7 §4 — THE SPINE IS DELETED, and this case was its lock. Burgundy
+       means OUTGOING on the StatusDot two columns to the right of it, and the fill now says which
+       row is live on its own. Turned round rather than removed: a deleted case would let the spine
+       come back, and the section's rule is that NO burgundy appears in the list at all. */
+    expect(rule(".f12-row.f12-sel::before"), "the burgundy spine came back").toBe("");
+    expect(css.slice(css.indexOf("\n.f12-row {"), css.indexOf("\n.f12-lfoot")), "burgundy reappeared in the list")
+      .not.toContain("var(--burg)");
   });
 });
 
@@ -576,10 +589,19 @@ describe("§2 (fp4) · the reading pane's cards", () => {
   });
 
   /* the rim and the header band are explicitly unchanged by this section */
-  it("the rim and the sage cap are untouched", () => {
-    expect(declValue(rule(".f12-card"), "border"), "the cards' rim changed")
-      .toBe("1px solid var(--line)");
-    expect(rule(".f12-card .f12-chh"), "the sage cap changed").toContain("var(--sage-band)");
+  /* ⚠️ BOTH HALVES SUPERSEDED BY FIX PACK 7, and each for its own reason. §2 made the rim a RING —
+     same 1px, same token, drawn as an overlay so it can surround a filled header rather than
+     stopping where the fill begins. §1 replaced the sage cap with parchment, because the collapsed
+     page band went sage and a sage header below a sage band reads as one stripe. Both turned round
+     rather than deleted: the values they guarded still matter, just on different properties. */
+  it("the rim survives as a ring, and the cap is parchment", () => {
+    expect(declValue(rule(".f12-card"), "border"), "the card took a border back — it would double with the ring")
+      .toBe("");
+    expect(rule(".f12-card::after"), "the card lost its rim").toContain("inset 0 0 0 1px var(--line)");
+    const cap = rule(".f12-card .f12-chh");
+    expect(cap, "the sage cap came back").not.toContain("var(--sage-band)");
+    expect(declValue(cap, "background"), "the cap is not the sidebar's own ground").toBe("var(--shell-rail)");
+    expect(declValue(cap, "font-size"), "the title is not 18px").toBe("18px");
   });
 });
 

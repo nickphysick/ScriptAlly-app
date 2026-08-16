@@ -1152,8 +1152,26 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
     expect(panel.length, "the .f12-card slice came out empty").toBeGreaterThan(40);
     /* ⚠️ ASSERTED AGAINST THE OTHER COMPONENT, so the day the Query Centre's panel is retoned this
        fails rather than the two silently drifting apart again. */
-    for (const decl of ["border: 1px solid var(--line)", "border-radius: var(--r-lg)",
-                        "box-shadow: var(--sh-1)"]) {
+    /**
+     * ⚠️ THE RIM IS COMPARED AS WEIGHT-AND-TONE, NOT AS A DECLARATION (Query Centre fix pack 7 §2).
+     * `.f12-card` draws its rim as an `::after` overlay ring now, so that it can surround a FILLED
+     * header rather than stopping where the fill begins — a border cannot do that, and an inset
+     * shadow paints beneath its own children. The task card has no filled header and keeps a plain
+     * border.
+     *
+     * ⚠️ WHICH IS EXACTLY THE COUPLING THIS CASE EXISTS FOR, working. It caught a change to a shared
+     * class the moment it happened. What must not drift is what the two cards LOOK like — 1px of
+     * `--line` — so that is what is asserted; the property that draws it is free to differ, because
+     * the two cards have different problems to solve.
+     */
+    const ring = sliceBetween(f12, "\n.f12-card::after {", "}", ".f12-card ring");
+    const rim = /inset 0 0 0 (\S+) (var\(--[a-z-]+\))/.exec(ring);
+    expect(rim, `the panel's ring could not be read: ${ring}`).not.toBeNull();
+    expect(rule, `the task card's rim is not the panel's ${rim![1]} ${rim![2]}`)
+      .toContain(`border: ${rim![1]} solid ${rim![2]}`);
+    expect(panel, ".f12-card took a border back — it would double with its own ring")
+      .not.toMatch(/(?:^|;|\{)\s*border\s*:/);
+    for (const decl of ["border-radius: var(--r-lg)", "box-shadow: var(--sh-1)"]) {
       expect(panel, `.f12-card no longer declares ${decl}`).toContain(decl);
       expect(rule, `the task card no longer declares ${decl}`).toContain(decl);
     }

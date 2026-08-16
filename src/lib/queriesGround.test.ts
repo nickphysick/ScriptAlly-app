@@ -35,7 +35,13 @@ describe("the cards still read as raised against the lighter ground", () => {
      If this ever needs strengthening the answer is the border or the shadow — never tinting the
      ground back to cream, which is the change this pass exists to undo. */
   it("every card keeps its hairline", () => {
-    for (const sel of ["\n.f12-pane {", "\n.f12-card {", "\n.f12-hero {"]) {
+    /* ⚠️ `.f12-card`'s HAIRLINE IS A RING SINCE FIX PACK 7 §2 — same weight, same token, drawn as an
+       `::after` overlay so it can surround a filled header instead of stopping where the fill
+       begins. The clause here is "the edge does the work"; which property draws it is not the
+       subject, and asserting the property would have failed on a card that still has its edge. */
+    const ring = css.slice(css.indexOf("\n.f12-card::after {"), css.indexOf("}", css.indexOf("\n.f12-card::after {")));
+    expect(ring, ".f12-card lost its hairline").toContain("inset 0 0 0 1px var(--line)");
+    for (const sel of ["\n.f12-pane {", "\n.f12-hero {"]) {
       const rule = css.slice(css.indexOf(sel), css.indexOf("}", css.indexOf(sel)));
       expect(rule, `${sel.trim()} lost its border`).toContain("border: 1px solid var(--line)");
     }

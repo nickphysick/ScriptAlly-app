@@ -29,7 +29,14 @@ describe("no double container", () => {
   });
 
   it("...but the hero and the columns keep their card skin", () => {
-    for (const sel of [".f12-hero", ".f12-card"]) {
+    /* ⚠️ THE CARD'S RIM IS A RING SINCE FIX PACK 7 §2 — same 1px, same `--line`, drawn by an
+       `::after` overlay instead of a border so it can surround the header's fill. The clause is the
+       rim, not the property that draws it, so the card is asserted against its ring. */
+    expect(rule(".f12-card::after"), ".f12-card lost its rim")
+      .toContain("box-shadow: inset 0 0 0 1px var(--line)");
+    expect(rule(".f12-card"), "the card took a border back — it would double with the ring")
+      .not.toMatch(/(?:^|;|\{)\s*border\s*:/);
+    for (const sel of [".f12-hero"]) {
       expect(rule(sel), `${sel} lost its border`).toContain("border: 1px solid var(--line)");
     }
   });

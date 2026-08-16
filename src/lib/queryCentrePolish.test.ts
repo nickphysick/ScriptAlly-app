@@ -63,14 +63,30 @@ describe("§3 · one button rule, app-wide on this page", () => {
    * is on this very page, on every waiting row's dot — so a primary wearing it would borrow a
    * colour that already says something else, and the two meanings would be told apart by position.
    */
-  it("Record response is the only filled control, in pink with black ink", () => {
+  /**
+   * ⚠️ INVERTED BY FIX PACK 7 §5, AND THE INVERSION IS THE POINT. This asserted the primary was the
+   * ONLY FILLED control — pink ground, black ink. It is now the same button as its neighbours and
+   * differs in one property: a rim half again as heavy. Pink did not leave the page, it changed
+   * job — §4 makes it the LIST's selection fill, so it says "you are reading this" rather than
+   * "press this". One colour, one job, the rule §1 applies to sage.
+   *
+   * ⚠️ AND THE DIFFERENCE IS A RELATIONSHIP, NOT A SECOND NUMBER. `calc(--btn-rim * 1.5)` follows
+   * the standard rim if it ever moves; `1.5px` beside `1px` is two values that agree until one is
+   * edited. Asserted as the expression, because the expression is the decision.
+   */
+  it("Record response is the family's button, heavier by a stated relationship", () => {
     const r = rule(".qc-btn-pri");
     expect(r, "the primary rule is missing").not.toBe("");
-    expect(declValue(r, "background"), "the primary is not on the page's pink").toBe("var(--pink-t)");
-    expect(declValue(r, "border-color"), "the primary's rim is not the pink's own darker step").toBe("var(--pink-b)");
-    expect(declValue(r, "color"), "the primary's ink is not full-strength — the pack says black").toBe("var(--ink)");
-    expect(declValue(r, "background"), "the primary went burgundy").not.toContain("--burg");
-    /* and nothing else on the page is filled: the quiet buttons are white with a rim */
+    expect(declValue(r, "border-width"), "the extra weight is not a relationship to the standard rim")
+      .toBe("calc(var(--btn-rim) * 1.5)");
+    /* the extra weight is in the rim ONLY — no fill, no colour, no shadow, no bolder label */
+    for (const prop of ["background", "color", "box-shadow", "font-weight", "padding"]) {
+      expect(declValue(r, prop), `the primary took a ${prop} of its own — the weight is the rim alone`).toBe("");
+    }
+    /* and the standard rim it multiplies is a token, declared once */
+    expect(css, "the standard rim stopped being a token").toContain("--btn-rim: 1px;");
+    expect(declValue(rule(".qc-btn"), "border"), "the base button's rim is not the token")
+      .toBe("var(--btn-rim) solid var(--btn-line)");
     expect(declValue(rule(".qc-btn"), "background"), "the base button grew a fill").toBe("var(--white)");
   });
 
@@ -325,5 +341,88 @@ describe("§9 · nothing selected", () => {
       .toContain('title: "Delete this query?"');
     expect(code, "a toast promises an undo the write path cannot perform")
       .not.toMatch(/undoLabel:\s*"Undo"/);
+  });
+});
+
+/**
+ * ══ FIX PACK 7 — the clauses the repointed locks above do not already carry ═══════════════════
+ *
+ * ⚠️ WHAT IS NOT HERE IS AS DELIBERATE AS WHAT IS. §2's and §4's own "Test:" lines describe a
+ * LAID-OUT page — all four edges showing the rim across the header's vertical range, at rest and on
+ * hover — and this repo's vitest reads source. Those are browser questions, the pack forbids a
+ * deploy, and the measured harness only reaches the deployed build. What is asserted here is the
+ * structure that makes those things true; the pixels are stated as unverified in the report rather
+ * than implied by a green suite.
+ */
+describe("fix pack 7 §2 · the ring's three layers", () => {
+  it("the card positions and does not clip; the frame clips; the ring overlays", () => {
+    const card = rule(".f12-card");
+    expect(card, "the card rule is missing").not.toBe("");
+    expect(declValue(card, "position"), "the ring has nothing to position against").toBe("relative");
+    /* ⚠️ CLIPPING HERE WOULD CLIP THE RING'S OWN OUTER EDGE — the reason the frame is a second
+       element rather than a class on the section. */
+    expect(declValue(card, "overflow"), "the card clips again — it would clip its own ring").toBe("");
+    const frame = rule(".f12-card > .f12-cfr");
+    expect(frame, "the clipping frame is missing").not.toBe("");
+    expect(declValue(frame, "overflow"), "the frame stopped clipping — the header would square the corners").toBe("hidden");
+    const ring = rule(".f12-card::after");
+    expect(declValue(ring, "pointer-events"), "the ring intercepts clicks").toBe("none");
+    expect(declValue(ring, "inset"), "the ring does not cover the card").toBe("0");
+  });
+
+  /* ⚠️ ONE RADIUS, INHERITED IN BOTH PLACES. The alignment amendment sets it on `.qc-wpg .f12-card`
+     and it has moved twice; restating it on the frame and the ring would be two more numbers to
+     keep in step. */
+  it("the frame and the ring inherit the card's radius rather than restating it", () => {
+    for (const sel of [".f12-card > .f12-cfr", ".f12-card::after"]) {
+      expect(declValue(rule(sel), "border-radius"), `${sel} restates the radius instead of inheriting it`).toBe("inherit");
+    }
+  });
+
+  /* the frame is a real element in the markup, and the header sits INSIDE it */
+  it("PaneCard renders the frame, with the header inside it", () => {
+    const pc = read("../components/queries/PaneCard.tsx");
+    expect(pc, "the frame is not rendered").toContain('<div className="f12-cfr">');
+    expect(pc.indexOf('className="f12-cfr"'), "the frame is missing").toBeGreaterThan(-1);
+    expect(pc.indexOf('className="f12-chh"'), "the header escaped the frame — its fill would square the corners")
+      .toBeGreaterThan(pc.indexOf('className="f12-cfr"'));
+    /* ⚠️ AND NO RADIUS-MATCHING HACK ON THE HEADER, which is what the frame exists to make unnecessary */
+    expect(declValue(rule(".f12-card .f12-chh"), "border-radius"), "the header grew a radius of its own").toBe("");
+  });
+});
+
+describe("fix pack 7 §3 · the agent header stays white", () => {
+  /**
+   * ⚠️ THIS SECTION IS A LOCK AND NOTHING ELSE — §3 changes no code. The plate was made a contained,
+   * raised object because it must read as THE SUBJECT the cards describe; give it the card headers'
+   * parchment and it becomes a peer of them, four parchment surfaces in a column with only the lift
+   * saying which is the parent. The ref explores that and recommends it; the pack rejects it. A
+   * section whose whole content is "do not sweep this into §1" is precisely the kind that needs an
+   * assertion rather than a note, because the next parchment pass will look exactly like §1 did.
+   */
+  it("the plate is white, lifted, and not the headers' parchment", () => {
+    const plate = rule(".f12-heroband");
+    expect(plate, "the plate rule is missing").not.toBe("");
+    expect(declValue(plate, "background"), "the plate took the card headers' ground — it would become their peer")
+      .toBe("var(--white)");
+    expect(declValue(plate, "background"), "the plate went parchment").not.toContain("--shell-rail");
+    expect(declValue(plate, "box-shadow"), "the plate lost the lift that says it is the parent").toBe("var(--sh-2)");
+  });
+});
+
+describe("fix pack 7 §4 · the discs", () => {
+  /* ⚠️ A PINK DISC ON A PINK GROUND IS NOT A DISC. The selected row's monogram needs a ground it can
+     sit ON — the same reasoning the ref gives for the header plate's avatar. */
+  it("the selected disc inverts, and the unselected ones are the pink token", () => {
+    const on = rule(".f12-row.f12-sel .f12-av");
+    expect(on, "the selected disc has no treatment of its own").not.toBe("");
+    expect(declValue(on, "background"), "the selected disc did not invert").toBe("var(--white)");
+    expect(declValue(on, "color"), "the selected disc's initials are not near-black").toBe("var(--ink)");
+    /* the base disc is the soft pink token, and the list's `--sm` modifier no longer overrides it */
+    expect(declValue(rule(".f12-row .f12-av"), "background"), "the base disc left the pink token").toBe("var(--pink-av)");
+    expect(declValue(rule(".f12-row .f12-av--sm"), "background"), "the warm-neutral override came back").toBe("");
+    /* ⚠️ AND THE TOKEN IT READ IS GONE WITH ITS ONLY READER — a token left defined and unread is an
+       invitation for the override to return without its argument. */
+    expect(css, "--mono-tonal came back").not.toContain("--mono-tonal:");
   });
 });

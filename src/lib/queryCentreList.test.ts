@@ -102,26 +102,23 @@ describe("the list is de-carded", () => {
   });
 });
 
-describe("the selected row wears a bookmark, not a full-height edge", () => {
-  it("3px of ink, inset from top and bottom, with rounded ends", () => {
+describe("the selected row is a flat fill, and the bookmark is retired", () => {
+  /**
+   * ⚠️ INVERTED BY FIX PACK 7 §4, AND THIS CASE IS TURNED ROUND RATHER THAN DELETED. It asserted a
+   * 3px burgundy bookmark, inset top and bottom, with rounded ends — the marker the selected row
+   * needed while its fill was a small tonal step from the column's ground. The fill is `--pink-t`
+   * now: a HUE nothing else in the column carries, which needs neither an edge nor a mark to be
+   * found. And burgundy means OUTGOING on the StatusDot two columns to the right of it, so the
+   * section's rule is that no burgundy appears in the list at all.
+   *
+   * A deleted case would let the bookmark come back; this one says why it must not.
+   */
+  it("3px of ink no longer marks it — the fill does", () => {
     const sel = rule(css, ".f12-row.f12-sel");
-    const mark = rule(css, ".f12-row.f12-sel::before");
-    /* ⚠️ THE FILL INVERTED WITH THE COLUMN (§1c). On a white column the selected row was the tinted
-       one; on a tinted column it LIFTS to white and takes a ring — the ref's `.qi.on`, and the more
-       literal reading of a card picked up off a desk. The bookmark is unchanged and is what this
-       case is actually about.
-       ⚠️ AND THE BLUE IS GONE with it: `--blue-t` was a cool #e7eef6 on a warm parchment page, read
-       in exactly two places, both here. */
-    /* ⚠️ AND IT INVERTED ONCE MORE WITH §4. On a white column "lifts to white" is not a step at
-       all, so the selected row takes the band and the ladder reads white → paper → oat. The
-       BOOKMARK is what this case is actually about and it is untouched at every step. */
-    expect(sel, "the selected row lost its fill").toContain("background: var(--oat)");
+    expect(sel, "the selected row lost its fill").toContain("background: var(--pink-t)");
+    expect(sel, "a ring came back on top of the fill").toContain("box-shadow: none");
     expect(sel, "the blue came back").not.toContain("--blue-t");
     expect(sel, "the full-height inset edge should be gone").not.toContain("inset 3px 0 0");
-    expect(mark, "the bookmark is missing").not.toBe("");
-    expect(mark).toContain("width: 3px");
-    expect(mark).toContain("top: 9px");
-    expect(mark).toContain("bottom: 9px");
-    expect(mark).toContain("border-radius: 0 3px 3px 0");
+    expect(rule(css, ".f12-row.f12-sel::before"), "the bookmark came back").toBe("");
   });
 });
