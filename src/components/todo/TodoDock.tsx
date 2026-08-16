@@ -704,7 +704,16 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                 /* ⚠️ THE JOURNEY OPENS IN THE PANE WHERE ONE EXISTS FOR THIS BUCKET; everything else
                    still opens the takeover. That is what lets the buckets move one at a time. */
                 if (onCommitSend) {
-                  setDraft(openSend((materials?.(card) ?? []).map((m) => m.label), queryMethod?.(card), new Date()));
+                  /* ⚠️ THE OFFER'S NOTIFY GROUPS SEED THE DRAFT — the two open differently, so the
+                     opener needs the split rather than a flat list (see `seedNotify`). */
+                  const h = journeyHolders?.(card);
+                  setDraft(openSend(
+                    (materials?.(card) ?? []).map((m) => m.label),
+                    queryMethod?.(card),
+                    new Date(),
+                    (h?.holding ?? []).map((r) => r.queryId),
+                    (h?.queried ?? []).map((r) => r.queryId),
+                  ));
                   return;
                 }
                 onPrimary(card);

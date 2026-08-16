@@ -132,6 +132,13 @@ export interface JourneySendValues {
   remindDate: string;
   /** offer · notify — which agents to write a reminder for, by query id. */
   notifySel: Record<string, boolean>;
+  /**
+   * ⚠️ WHICH OF THOSE ARE HOLDING PAGES — carried in the draft so the SUMMARY can state both
+   * numbers without re-deriving the split. The alternative was threading the holder groups down to
+   * the footer, which would have given two components two chances to disagree about who is in
+   * which group.
+   */
+  notifyHolding: string[];
 }
 
 export type SendMethod = "Email" | "Agency portal" | "Post";
@@ -157,7 +164,14 @@ export function ymdLocal(d: Date): string {
  * ⚠️ AND THE METHOD OPENS ON THE QUERY'S OWN, where the record holds one. Defaulting to Email when
  * the record says Post would be the app quietly overwriting a fact it already had.
  */
-export function openSend(materials: string[], queryMethod: string | undefined, now: Date): JourneySendValues {
+export function openSend(
+  materials: string[],
+  queryMethod: string | undefined,
+  now: Date,
+  /** offer only — the two notify groups, so the seed can differ by group (see `seedNotify`). */
+  holdingQueryIds: string[] = [],
+  queriedQueryIds: string[] = [],
+): JourneySendValues {
   const m = SEND_METHODS.find((x) => x.toLowerCase() === String(queryMethod ?? "").toLowerCase());
   return {
     materials: [...materials], also: "", method: m ?? "Email", sentDate: ymdLocal(now), note: "",
@@ -174,8 +188,26 @@ export function openSend(materials: string[], queryMethod: string | undefined, n
     branch: null,
     decision: null,
     remindDate: "",
-    notifySel: {},
+    ...seedNotify(holdingQueryIds, queriedQueryIds),
   };
+}
+
+/**
+ * ⚠️ THE TWO GROUPS OPEN DIFFERENTLY, BECAUSE THE COURTESY DIFFERS. An agent reading your
+ * manuscript right now needs telling; an agent holding a query letter is a courtesy the writer may
+ * or may not extend today.
+ *
+ * ⚠️ AND BOTH WRONG DEFAULTS ARE WRONG IN THEIR OWN WAY. Pre-ticking all twelve makes the second
+ * decision for the writer — it would write nine reminders they never chose. Pre-ticking none makes
+ * them do work the app already knows the answer to: of course the three holding your pages should
+ * hear. So: holding pre-ticked, queried not.
+ */
+export function seedNotify(holdingQueryIds: string[] = [], queriedQueryIds: string[] = []):
+  { notifySel: Record<string, boolean>; notifyHolding: string[] } {
+  const notifySel: Record<string, boolean> = {};
+  for (const id of holdingQueryIds) notifySel[id] = true;
+  for (const id of queriedQueryIds) notifySel[id] = false;
+  return { notifySel, notifyHolding: [...holdingQueryIds] };
 }
 
 /** Which of the three "when" segments a date corresponds to — `other` for anything else. */
@@ -223,8 +255,15 @@ export function canCommitSend(v: JourneySendValues): boolean {
 /** The sentence about to be committed, per branch — and nothing at all on the selector. */
 export function offerSummary(v: JourneySendValues): string {
   if (v.branch === "notify") {
-    const n = Object.values(v.notifySel).filter(Boolean).length;
-    return n ? `Writing ${n} reminder${n === 1 ? "" : "s"} to tell the others.` : "Choose who to tell.";
+    /* ⚠️ BOTH NUMBERS, SO TWELVE ROWS NEVER HAVE TO BE READ TO KNOW WHAT WILL HAPPEN. A single
+       total would hide the thing that matters — whether the three holding your pages are in it. */
+    const holding = v.notifyHolding.filter((id) => v.notifySel[id]).length;
+    const queried = Object.entries(v.notifySel).filter(([id, on]) => on && !v.notifyHolding.includes(id)).length;
+    if (!holding && !queried) return "Choose who to tell.";
+    const parts: string[] = [];
+    if (holding) parts.push(`${holding} holding pages`);
+    if (queried) parts.push(`${queried} queried`);
+    return `Telling ${parts.join(" and ")}.`;
   }
   if (v.branch === "decide") {
     if (v.decision === "accepted") return "Recording that you accepted. Your other queries stay open.";

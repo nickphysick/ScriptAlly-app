@@ -98,6 +98,22 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
   const toggleNotify = (queryId: string) =>
     set({ notifySel: { ...value.notifySel, [queryId]: !value.notifySel[queryId] } });
 
+  /**
+   * ⚠️ ONE TOGGLE PER GROUP, AND IT SAYS WHAT IT WILL DO. All ticked → "None"; anything else →
+   * "Select all". That is why the two groups open showing different words without either being
+   * hard-coded: holding opens fully ticked, queried opens empty.
+   */
+  const groupToggle = (rows: HolderRow[]) => {
+    const all = rows.length > 0 && rows.every((r) => value.notifySel[r.queryId]);
+    return (
+      <button type="button" className="pj-grouptog" onClick={() => {
+        const next = { ...value.notifySel };
+        for (const r of rows) next[r.queryId] = !all;
+        set({ notifySel: next });
+      }}>{all ? "None" : "Select all"}</button>
+    );
+  };
+
   const holderPick = (h: HolderRow) => {
     const on = !!value.notifySel[h.queryId];
     return (
@@ -135,7 +151,11 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
               and it is the whole reason this branch is the most consequential of the three. */}
           {holding.length > 0 && (
             <div className="pj-step">
-              <div className="pj-n"><span className="i">01</span><h4>Still holding your pages</h4></div>
+              <div className="pj-n">
+                <span className="i">01</span><h4>Still holding your pages</h4>
+                <span className="pj-count">{holding.length}</span>
+                {groupToggle(holding)}
+              </div>
               <div className="pj-opts">{holding.map(holderPick)}</div>
             </div>
           )}
@@ -143,6 +163,8 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
             <div className="pj-step">
               <div className="pj-n">
                 <span className="i">{holding.length ? "02" : "01"}</span><h4>Still considering your query</h4>
+                <span className="pj-count">{queried.length}</span>
+                {groupToggle(queried)}
               </div>
               <div className="pj-opts">{queried.map(holderPick)}</div>
             </div>

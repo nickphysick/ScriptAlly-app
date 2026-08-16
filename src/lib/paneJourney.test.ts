@@ -5,7 +5,7 @@
  * The in-pane journey's pure model (Item 9, Phase 2).
  */
 import { describe, it, expect } from "vitest";
-import { openSend, sendSummary, canCommitSend, canCommit, whenMode, ymdLocal, shortDay, SEND_METHODS, JOURNEY_STEPS, JOURNEY_PRELINE, JOURNEY_ACT, JOURNEY_HINT, journeySummary, checkBackLabel, CLOSE_REASON_COPY, OFFER_BRANCHES, OFFER_ACT, OFFER_HINT, canCommitOffer, offerSummary } from "./paneJourney";
+import { openSend, sendSummary, canCommitSend, canCommit, whenMode, ymdLocal, shortDay, SEND_METHODS, JOURNEY_STEPS, JOURNEY_PRELINE, JOURNEY_ACT, JOURNEY_HINT, journeySummary, checkBackLabel, CLOSE_REASON_COPY, OFFER_BRANCHES, OFFER_ACT, OFFER_HINT, canCommitOffer, offerSummary, seedNotify } from "./paneJourney";
 import { CLOSE_REASONS } from "./todoJourneys";
 
 /* ⚠️ A FIXED CLOCK, PASSED IN. Every function here takes `now` rather than reading it, so the tests
@@ -242,15 +242,55 @@ describe("⚠️ THE OFFER IS A BRANCH, NOT A STACK", () => {
     expect(offerSummary({ ...open(), branch: "decide", decision: "declined" }))
       .toBe("Recording that you declined. The querying continues.");
     expect(offerSummary({ ...open(), branch: "notify" })).toBe("Choose who to tell.");
-    expect(offerSummary({ ...open(), branch: "notify", notifySel: { a: true, b: true } }))
-      .toBe("Writing 2 reminders to tell the others.");
-    expect(offerSummary({ ...open(), branch: "notify", notifySel: { a: true } }))
-      .toBe("Writing 1 reminder to tell the others.");
+    /* the two-number form is asserted in its own describe below — this case only pins that the
+       branch summarises at all and says what is missing when nothing is chosen */
     expect(offerSummary({ ...open(), branch: "time" })).toBe("Choose a day to come back to it.");
   });
 
   it("⚠️ AND THE BAND DOES NOT CHANGE UNDER THE WRITER WHEN THEY PICK A BRANCH", () => {
     /* one pre-line for the whole journey: whichever branch you take, you are answering an offer */
     expect(JOURNEY_PRELINE.offer).toBe("Answering the offer from");
+  });
+});
+
+describe("⚠️ THE TWO NOTIFY GROUPS OPEN DIFFERENTLY, because the courtesy differs", () => {
+  const HOLD = ["q-full", "q-rr", "q-partial"];
+  const QUERIED = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9"];
+  const open = () => openSend([], undefined, NOW, HOLD, QUERIED);
+
+  it("holding opens TICKED and queried opens UNTICKED", () => {
+    /* pre-ticking all twelve writes nine reminders the writer never chose; pre-ticking none makes
+       them do work the app already knows the answer to */
+    const v = open();
+    for (const id of HOLD) expect(v.notifySel[id], id).toBe(true);
+    for (const id of QUERIED) expect(v.notifySel[id], id).toBe(false);
+  });
+
+  it("⚠️ EVERY ROW IS PRESENT IN THE SELECTION MAP, ticked or not", () => {
+    /* an absent key and a `false` key look the same to `canCommit`, but only the present one lets a
+       group toggle know the row exists — a "Select all" that skipped unseeded rows would tick some
+       of a group and report all of it */
+    expect(Object.keys(open().notifySel).sort()).toEqual([...HOLD, ...QUERIED].sort());
+  });
+
+  it("the draft remembers which are holding, so the summary can state both numbers", () => {
+    expect(open().notifyHolding).toEqual(HOLD);
+  });
+
+  it("⚠️ THE SUMMARY STATES BOTH NUMBERS — twelve rows never have to be read", () => {
+    const v = { ...open(), branch: "offer-notify" as never };
+    const notify = { ...open(), branch: "notify" as const };
+    expect(offerSummary(notify)).toBe("Telling 3 holding pages.");
+    const all = { ...notify, notifySel: Object.fromEntries([...HOLD, ...QUERIED].map((id) => [id, true])) };
+    expect(offerSummary(all)).toBe("Telling 3 holding pages and 9 queried.");
+    const onlyQueried = { ...notify, notifySel: Object.fromEntries([...HOLD.map((id) => [id, false]), ...QUERIED.map((id) => [id, true])]) };
+    expect(offerSummary(onlyQueried)).toBe("Telling 9 queried.");
+    const none = { ...notify, notifySel: Object.fromEntries([...HOLD, ...QUERIED].map((id) => [id, false])) };
+    expect(offerSummary(none)).toBe("Choose who to tell.");
+    void v;
+  });
+
+  it("seedNotify with no groups is an empty selection, not a crash", () => {
+    expect(seedNotify()).toEqual({ notifySel: {}, notifyHolding: [] });
   });
 });
