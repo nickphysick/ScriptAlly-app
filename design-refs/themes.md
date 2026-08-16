@@ -40,8 +40,8 @@ Declared in `:root` (`src/index.css`) and consumed by every theme. Type families
 | `--font-mono` | `"JetBrains Mono", monospace` | Eyebrows, meta, counts |
 | `--content-max` | `1440px` | Shared content gutter cap |
 | `--burg` | `#7c3a2a` | Primary brand ink (= `--color-burgundy`) |
-| `--wsh-band-bg` | `#333c4d` | **The collapsed header band's ground.** Theme-independent — one value under Cappuccino, Bold Pastille and Editorial alike |
-| `--wsh-band-ink` | `#ffffff` | Everything sitting **on** that band: the mono label, glyphs, focus rings, and the primary's inverted fill |
+| `--wsh-band-bg` | `#c9d2c7` | **The collapsed header band's ground** (sage). Theme-independent — one value under Cappuccino, Bold Pastille and Editorial alike |
+| `--wsh-band-ink` | `#241c15` | Everything sitting **on** that band: the mono label, glyphs, focus rings, and both buttons' label + glyph. Value taken from `:root --ink` (see below) |
 | `--burg-d` | `#632e22` | Deep burgundy |
 | `--ink` | `#241c15` | Near-black glyph strokes / headings on tinted bands |
 | `--muted` | `#9a8c80` | Muted mono captions |
@@ -567,24 +567,29 @@ These flourishes matter as much as the hexes — they are the difference between
 
 ### Theme-independent behaviour
 - Theme swap fades over ≤150ms (`transition: background-color .15s ease` on all three roots).
-### ⚠️ The collapsed header band — the app's first cool colour
+### ⚠️ The collapsed header band — sage, theme-independent
 
-`--wsh-band-bg: #333c4d` is a **new family, not a variant**: nothing else in the palette is within
-reach of it, and the last blue on Query Centre (the selected row's `#e7eef6`) was removed as
-off-palette days earlier. It is named for the band rather than for the colour, so a retheme does not
-have to fight the name.
+`--wsh-band-bg: #c9d2c7`. **This supersedes a dark slate (`#333c4d`)**, and that value is recorded
+here only so the reversal is legible: the slate was the app's first cool colour and a family of its
+own; sage is already the app's incoming-status hue and belongs to the warm-neutral family every
+other surface is in.
 
-- **One value everywhere.** Not per-theme. A per-theme split is a later decision and was deliberately
-  not taken; if it reads badly under Editorial or Bold that is reported, not fixed here.
-- **No rule beneath.** `--wsh-band-edge` (`#dfe4dc`, a warm parchment hairline) is **deleted**, not
-  zeroed — on dark slate it reads as a scratch, and a saturated band announces its own edge.
-- **The primary inverts on this band only.** `.svh-btn-ink` is `#2a1a13`, which is 1.4:1 on
-  `#333c4d` — invisible, not merely low-contrast. On the band it takes `--wsh-band-ink` as its fill
-  and `--wsh-band-bg` as its label, so the primary stays the highest-contrast element in the
-  composition, which is what the dark pill was always for. **The app-wide dark pill is unchanged.**
-- **The band's foreground is one token** because label, glyphs, focus ring and the inverted pill all
-  sit on one ground. `--shell-focus` (burgundy at 45%) and `--shell-ink-soft` (`#6a615a`) were both
-  tuned for a near-white band and neither survives here.
+- **One value everywhere.** Not per-theme, unchanged from the slate pass.
+- **No rule beneath.** `--wsh-band-edge` (`#dfe4dc`) stays **deleted** and is asserted absent — a
+  token no rule reads is the next thing someone wires back up.
+- **Both buttons are white**, separated by weight rather than fill: the primary carries a shadow and
+  no rim, the secondary a faint rim and no shadow. **The slate-era inversion is removed, not
+  adapted** — it existed because `#2a1a13` on `#333c4d` was 1.4:1 and because a white chip there
+  became the brightest element on screen, and neither is true of sage.
+- **`--wsh-band-ink: #241c15` is `:root`'s `--ink` value, taken as a LITERAL rather than read.**
+  `--ink` is the exact semantic match — its own comment gives its job as "glyph strokes on tinted
+  bands, headings" — but `.t-f12` overrides `--ink` to `#1e1a16` and wraps Query Centre's entire
+  grid, header included, so `var(--ink)` would resolve per-PAGE. `--hub-ink`/`--rail-ink` (`#3a1c14`)
+  look like the closer match by value and are declared per THEME (`#3a1c14` Capp / `#1d1712` Bold /
+  `#1a1a1a` Editorial) — the same one-value rule broken a different way. 11.3:1 on the band.
+- The foreground token feeds label, glyphs, focus ring, both buttons and the strip's inherited
+  `color`. That plumbing arrived with the slate pass and is the part of it worth keeping: a ground
+  change is one token, not a hunt through rules that happen to agree.
 
 - The grand-masthead title steps `54px → 40px` at `max-height ≤ 819px` (`--hub-mast-title`/`--hub-mast-pad`, `:root`), theme-independent; only the title *ink* is per-theme (`--hub-head`).
 - StatusDot is never restyled by theme CSS — only its `--sd-hue`/`--sd-centre` component tokens change.

@@ -138,32 +138,43 @@
   --wsh-plate-gap: 18px;
   --wsh-plate-bg: #ffffff;
   /**
-   * ══ THE COLLAPSED HEADER BAND — A DARK SLATE GROUND ═══════════════════════════════════════
+   * ══ THE COLLAPSED HEADER BAND — A SAGE GROUND ═════════════════════════════════════════════
    *
-   * ⚠️ ITS OWN DECLARED VALUE, AND THE ARGUMENT THAT STOOD HERE IS WITHDRAWN RATHER THAN LEFT.
-   * This read `var(--shell-parch)` under a "semantic match, not value match" rule: the band is
-   * chrome, so it took the shell's chrome fill and would follow it through any retone. That
-   * reasoning depended on the band belonging to the warm parchment family. It no longer does, and
-   * a comment arguing for a coupling the code has dropped is worse than no comment.
+   * ⚠️ THIS VALUE REPLACES A DARK SLATE (#333c4d), AND THE PROSE THAT ARGUED FOR IT IS GONE WITH
+   * IT rather than left describing a colour the app no longer has. That comment made the case for
+   * the app's first COOL colour and a new family; sage is neither. It is already the app's own
+   * incoming-status hue and sits in the warm-neutral family every other surface belongs to, so the
+   * band stops being an exception and becomes a tint of what is already here.
    *
-   * ⚠️ THIS IS THE APP'S FIRST COOL COLOUR, and it is a NEW FAMILY rather than a variant — nothing
-   * else in the palette is within reach of it, and the last blue on Query Centre (the selected
-   * row's #e7eef6) was removed as off-palette days ago. Named for the band, never for the colour,
-   * so a retheme does not have to fight the name.
+   * ⚠️ AND IT IS WHY THE PRIMARY STOPPED INVERTING. On slate a white button became the brightest
+   * thing on screen and outranked the primary, which is the whole reason the inversion existed.
+   * Sage is light enough that a white button reads as RAISED rather than as the loudest element, so
+   * both buttons can be white and weight alone separates them. Removing the inversion is a
+   * consequence of the ground changing, not a reversal for its own sake.
    *
-   * ⚠️ ONE VALUE EVERYWHERE — not per-theme. Cappuccino, Bold Pastille and Editorial all get this
-   * slate; a per-theme split is a later decision and deliberately not taken here.
+   * ⚠️ ONE VALUE EVERYWHERE — still not per-theme, unchanged from the slate pass.
    *
-   * ⚠️ AND THE RULE BENEATH IS GONE. `--wsh-band-edge` was a warm parchment hairline (#dfe4dc)
-   * sized against a near-white band; on dark slate it reads as a scratch, and a dark band already
-   * announces its own edge. Deleted rather than zeroed — a token no rule reads is the next thing
-   * someone wires back up.
+   * ⚠️ AND THE RULE BENEATH STAYS DELETED. `--wsh-band-edge` was a warm parchment hairline sized
+   * against a near-white band; a tinted band states its own boundary. The token remains absent and
+   * asserted absent — one no rule reads is the next thing someone wires back up.
    */
-  --wsh-band-bg: #333c4d;
-  /* ⚠️ ONE FOREGROUND FOR EVERYTHING ON THE BAND — label, glyphs, focus rings, button text. They
-     all sit on one ground, so they take one token: a later adjustment is one edit rather than a
-     hunt through four rules that happen to agree today. ~10.6:1 against the ground. */
-  --wsh-band-ink: #ffffff;
+  --wsh-band-bg: #c9d2c7;
+  /**
+   * ⚠️ ONE FOREGROUND FOR EVERYTHING ON THE BAND — label, glyphs, focus ring, button text and the
+   * strip's inherited `color`. That plumbing came in with the slate pass and is the part of it
+   * worth keeping: a ground change is one token, not a hunt through four rules that agree.
+   *
+   * ⚠️ THE VALUE IS `:root`'s `--ink`, TAKEN AS A LITERAL RATHER THAN READ. `--ink: #241c15` is the
+   * exact match — its own comment states its job as "glyph strokes on tinted bands, headings", and
+   * a sage band is a tinted band. It is NOT written as `var(--ink)` because `.t-f12` overrides
+   * `--ink` to #1e1a16 and wraps Query Centre's whole grid, header included: a `var()` here would
+   * resolve per-PAGE and quietly break the one-value rule the band is built on.
+   *
+   * ⚠️ AND NOT `--hub-ink`/`--rail-ink` (#3a1c14), which look like the closer match by value. Both
+   * are declared per theme — #3a1c14 Cappuccino, #1d1712 Bold, #1a1a1a Editorial — so either would
+   * make the band's ink theme-dependent, which is the same rule broken a different way. 11.3:1.
+   */
+  --wsh-band-ink: #241c15;
   --wsh-plate-radius: 2px;
   --wsh-plate-sh: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.09);
 

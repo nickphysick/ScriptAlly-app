@@ -345,60 +345,39 @@ describe("the header's two states", () => {
    * `::after` would be invisible at rest and a double rule the moment anyone scrolled.
    */
   /**
-   * ══ THE PRIMARY INVERTS ON THE BAND, AND ONLY ON THE BAND ═══════════════════════════════════
+   * ══ BOTH BUTTONS ARE WHITE, AND THE INVERSION IS GONE ═══════════════════════════════════════
    *
-   * ⚠️ THIS IS THE HALF OF THE RECOLOUR THAT IS NOT PAINT. `.svh-btn-ink` is `#2a1a13` on
-   * `#333c4d` — 1.4:1, a near-black pill on dark slate. That is not low contrast, it is INVISIBLE,
-   * so recolouring the band without this would ship a page whose principal action cannot be seen.
+   * ⚠️ THIS REPLACES TWO CASES — "the primary inverts" and "the secondary outlines" — and both are
+   * DELETED rather than loosened, because each described a fact about SLATE. The primary inverted
+   * because #2a1a13 on #333c4d was 1.4:1; the secondary outlined because a white chip there became
+   * the brightest thing on screen and tied the primary. On #c9d2c7 neither holds: the band is light
+   * enough that white reads as raised rather than loudest.
    *
-   * ⚠️ IT INVERTS RATHER THAN GOING PINK, for the reason the dark pill existed: the primary is the
-   * highest-contrast element in the composition. On a light band the darkest thing present was the
-   * pill; on a dark band the darkest thing is the band, so the pill becomes the lightest and the
-   * RANKING is preserved rather than restated. Pink is the house primary elsewhere and would have
-   * worked, but it says "creation" — a register the ink primary was deliberately chosen over.
-   *
-   * ⚠️ BOTH VALUES ARE THE BAND'S OWN TWO TOKENS, never a third pair invented for the button, so
-   * the pill cannot drift into a combination against a ground nobody checked.
+   * ⚠️ SO THE PAIR IS SEPARATED BY WEIGHT, NOT BY FILL — shadow versus rim, which is the same
+   * distinction the original light band drew. Asserted as a PAIR: each half passes on its own if
+   * both ever became shadowed or both rimmed, which is precisely the state that would stop reading
+   * as a hierarchy.
    */
-  it("⚠️ THE PRIMARY INVERTS ON THE BAND — and the app-wide pill is untouched", () => {
-    const inverted = all(hdrCss, ".wsh--scrolled .svh-btn-ink");
-    expect(inverted, "the primary keeps its near-black fill on the band — 1.4:1, invisible").not.toBe("");
-    expect(inverted, "the inverted fill is not the band's foreground token").toContain("background: var(--wsh-band-ink)");
-    expect(inverted, "the inverted label is not the band's ground token").toContain("color: var(--wsh-band-bg)");
-    /* ⚠️ SCOPED, NOT GLOBAL. The resting header and every other surface keep #2a1a13; a change to
-       the base rule would have retoned the primary app-wide, which this pack explicitly forbids. */
-    const base = all(hdrCss, ".svh-btn-ink");
-    expect(base, "the app-wide dark pill was changed — this pack recolours ONE band, not the primary")
-      .toContain("background: #2a1a13");
-  });
-
-  /**
-   * ⚠️ FILLED PRIMARY, OUTLINED SECONDARY — AND THE FIRST BUILD OF THIS BAND HAD NEITHER.
-   *
-   * Measured: Export and Log query were BOTH pure white at 11.1:1 against the ground. Identical
-   * brightness, with the ranking carried only by a label colour — which is not a hierarchy, it is
-   * two primaries. The light band already expressed the right relationship as a dark pill against a
-   * white chip; on a dark ground that inverts to filled-white against outlined-white. Same grammar,
-   * opposite polarity, rather than a hierarchy invented for this one surface.
-   *
-   * ⚠️ AND IT RETIRES A SECOND ITEM. The ghost's glyph is `--shell-muted` (#9c8878), ~3.1:1 on a
-   * white chip — one more thing tuned for parchment. On the band's foreground it is 11.1:1.
-   */
-  it("⚠️ THE SECONDARY OUTLINES ON THE BAND — or the pair reads as two primaries", () => {
+  it("⚠️ BOTH BUTTONS ARE WHITE ON THE BAND — separated by weight, not by fill", () => {
+    const pair = all(hdrCss, ".wsh--scrolled .svh-btn-ink,\n.wsh--scrolled .svh-btn-ghost");
+    expect(pair, "the shared white ground is gone — the inversion or the outline has come back").not.toBe("");
+    expect(pair, "the buttons stopped sharing a white ground").toContain("background: #ffffff");
+    expect(pair, "the buttons' label is not the band's ink").toContain("color: var(--wsh-band-ink)");
+    /* the primary carries the shadow and NO rim; the secondary the rim and NO shadow */
+    const primary = all(hdrCss, ".wsh--scrolled .svh-btn-ink");
     const ghost = all(hdrCss, ".wsh--scrolled .svh-btn-ghost");
-    expect(ghost, "the secondary keeps its white chip — identical in weight to the primary beside it").not.toBe("");
-    expect(ghost, "the secondary is still filled — filled-versus-filled is not a hierarchy").toContain("background: transparent");
-    expect(ghost, "the secondary's rim is not the band's foreground").toContain("border-color: var(--wsh-band-ink)");
-    expect(ghost, "the secondary's label is not the band's foreground").toContain("color: var(--wsh-band-ink)");
-    expect(all(hdrCss, ".wsh--scrolled .svh-btn-ghost svg"), "the secondary's glyph kept a parchment-tuned muted ink")
-      .toContain("color: var(--wsh-band-ink)");
-    /* ⚠️ THE PAIR IS THE POINT, so the primary's opposite is asserted here too: if both ever became
-       outlined, or both filled, each rule above would still pass on its own. */
-    expect(all(hdrCss, ".wsh--scrolled .svh-btn-ink"), "the primary stopped being the filled one")
-      .toContain("background: var(--wsh-band-ink)");
-    /* and the app-wide ghost is untouched — this is `.wsh--scrolled` scoped, like the primary */
-    expect(all(hdrCss, ".svh-btn-ghost"), "the app-wide ghost was changed — this pack recolours ONE band")
-      .toContain("background: var(--shell-card)");
+    expect(primary, "the primary lost the shadow that sits it above the band").toContain("box-shadow:");
+    expect(primary, "the primary stopped being the heavier of the two").toContain("font-weight: 600");
+    expect(ghost, "the secondary lost its rim").toContain("border-color: rgba(36, 28, 21, 0.14)");
+    expect(ghost, "the secondary grew a shadow — it would read as a second primary").toContain("box-shadow: none");
+    /* ⚠️ THE SLATE-ERA INVERSION MUST NOT SURVIVE ANYWHERE. Its shape was `background:
+       var(--wsh-band-ink)` on the primary, which now resolves to near-black — a black pill on sage.
+       Asserted at the sheet level, because a leftover copy under another selector would render. */
+    expect(hdrCss, "the slate inversion survives — on sage its fill resolves to near-black")
+      .not.toContain("background: var(--wsh-band-ink)");
+    /* and the app-wide pair is untouched — this is `.wsh--scrolled` scoped */
+    expect(all(hdrCss, ".svh-btn-ink"), "the app-wide dark pill was changed").toContain("background: #2a1a13");
+    expect(all(hdrCss, ".svh-btn-ghost"), "the app-wide ghost was changed").toContain("background: var(--shell-card)");
   });
 
   /**
@@ -436,10 +415,17 @@ describe("the header's two states", () => {
      * a `var()` here would mean it had been folded into a family it does not belong to.
      */
     const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(tokens, "the band ground stopped being its own value — it must not be folded back into the warm chrome family")
-      .toContain("--wsh-band-bg: #333c4d");
-    expect(tokens, "the band's foreground token is missing — the label, glyphs, focus ring and the inverted primary all read it")
-      .toContain("--wsh-band-ink: #ffffff");
+    expect(tokens, "the band ground moved without this case moving with it").toContain("--wsh-band-bg: #c9d2c7");
+    /* ⚠️ THE INK IS `:root`'s `--ink` VALUE, TAKEN AS A LITERAL AND NOT READ. `--ink: #241c15` is
+       the exact match — its comment states its job as "glyph strokes on tinted bands" — but
+       `.t-f12` overrides `--ink` and wraps Query Centre's whole grid, header included, so a
+       `var(--ink)` here would resolve per-PAGE and break the one-value rule. `--hub-ink`/
+       `--rail-ink` (#3a1c14) look closer by value and are declared per THEME, which is the same
+       rule broken a different way. */
+    expect(tokens, "the band's foreground token is missing — label, glyphs, focus ring and both buttons read it")
+      .toContain("--wsh-band-ink: #241c15");
+    const inkRoot = /--ink:\s*#241c15/.test(tokens);
+    expect(inkRoot, "`:root --ink` moved — the band's literal was taken from it and the two have drifted apart").toBe(true);
     /* ⚠️ THE RETIRED TOKEN IS ASSERTED ABSENT, not merely unused. A token no rule reads is the next
        thing someone wires back up. */
     expect(tokens, "the retired edge token came back").not.toContain("--wsh-band-edge:");

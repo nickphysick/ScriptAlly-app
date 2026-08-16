@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — slate as the action colour</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--paper:#fffdfa;--side:#f7f3ec;--ink:#3a1c14;--ink-soft:#6a5a50;--burg:#7c3a2a;--muted:#9c8878;
+--hair:#e9dfd2;--hair2:#e0d5c8;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage:#8a9e88;--sage-tx:#5a6e58;
+--pink:#f5e2da;--pink-br:#e8c8bc;--cream:#fbf7f1;--slate:#333c4d;--slate-2:#4a5468;--bandC:#333c4d;--bandOn:#ffffff;--sage-band:#c9d2c7;
+/* switched by the toggles */
+--btn:#2f1c15;--btnTx:#f6ece5;--navTx:#6a5a50;--navStrong:#3a1c14;--navMuted:#9c8878;}
+body[data-btn="slate"]{--btn:var(--slate);--btnTx:#fff;}
+body[data-k="sage"]{--bandC:var(--sage-band);--bandOn:#3a1c14;}
+body[data-nav="slate"]{--navTx:#4a5468;--navStrong:#333c4d;--navMuted:#8a92a0;}
+body{font-family:'Inter',sans-serif;background:#e7e1d8;color:var(--ink);padding:20px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:11px;margin-bottom:14px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#8d7d6e;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--hair2);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 11px;border:0;background:transparent;color:var(--ink-soft);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--pink);color:var(--burg);font-weight:500;}
+.note{font-size:11px;color:#a08f7e;font-style:italic;}
+
+.app{display:grid;grid-template-columns:216px minmax(0,1fr);background:var(--paper);border-radius:12px;overflow:hidden;height:720px;box-shadow:0 12px 34px rgba(58,28,20,.14);max-width:1460px;}
+.side{background:var(--side);box-shadow:inset -1px 0 0 var(--hair);padding:14px 12px;display:flex;flex-direction:column;font-size:12.5px;}
+.brand{display:flex;align-items:center;gap:8px;font-family:'Playfair Display',serif;font-size:17px;font-weight:500;margin:2px 4px 12px;color:var(--navStrong);}
+.brand i{width:22px;height:22px;border-radius:6px;background:var(--navStrong);display:block;
+  -webkit-mask:linear-gradient(#000,#000);mask:linear-gradient(#000,#000);}
+.ms{background:#fff;border-radius:10px;padding:8px 10px;box-shadow:inset 0 0 0 1px var(--hair);margin-bottom:8px;}
+.ms b{font-size:12px;font-weight:500;display:block;color:var(--navStrong);}
+.ms span{font-size:10px;color:var(--navMuted);}
+.nsec{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--navMuted);margin:11px 6px 4px;}
+.nav{display:flex;align-items:center;gap:9px;padding:6px 9px;border-radius:8px;color:var(--navTx);}
+.nav.on{background:#fff;box-shadow:inset 0 0 0 1px var(--hair);color:var(--navStrong);font-weight:500;}
+.nav i{width:13px;height:13px;border-radius:4px;background:currentColor;opacity:.32;flex:0 0 13px;}
+.nav em{margin-left:auto;font-style:normal;font-size:10px;color:var(--burg);}
+.up{margin-top:auto;}
+.upb{width:100%;border:0;border-radius:22px;padding:10px;font-size:12.5px;cursor:pointer;background:var(--btn);color:var(--btnTx);}
+.acct{display:flex;align-items:center;gap:8px;padding:9px 5px;box-shadow:inset 0 1px 0 var(--hair);margin-bottom:9px;}
+.acct .av{width:26px;height:26px;border-radius:50%;background:#e9ddd0;font-family:'JetBrains Mono',monospace;font-size:8.5px;display:flex;align-items:center;justify-content:center;color:var(--navTx);}
+.acct b{font-size:11.5px;font-weight:500;display:block;color:var(--navStrong);}
+.acct span{font-size:9.5px;color:var(--navMuted);}
+
+.main{display:flex;flex-direction:column;min-height:0;}
+.bar{display:flex;align-items:center;gap:12px;padding:10px 18px;box-shadow:inset 0 -1px 0 var(--hair);}
+.crumb{font-family:'Playfair Display',serif;font-size:13.5px;color:var(--navTx);}
+.crumb b{color:var(--navStrong);font-weight:500;}
+.saved{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--navMuted);}
+.tsearch{margin-left:auto;display:flex;align-items:center;gap:8px;background:#fff;border-radius:9px;padding:7px 12px;box-shadow:inset 0 0 0 1px var(--hair2);color:var(--navMuted);font-size:12px;width:190px;}
+.newb{background:var(--btn);color:var(--btnTx);border:0;border-radius:20px;padding:7px 15px;font-size:12px;cursor:pointer;}
+
+.band{position:relative;display:flex;align-items:center;gap:12px;padding:12px 24px;background:var(--bandC);}
+.band .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--bandOn);}
+/* white band with a slate accent along its top edge */
+body[data-d="rule"] .band,body[data-d="thick"] .band{background:#fff;box-shadow:inset 0 -1px 0 var(--hair);}
+body[data-d="rule"] .band::before,body[data-d="thick"] .band::before{content:'';position:absolute;left:0;right:0;top:0;background:var(--bandC);}
+body[data-d="rule"] .band::before{height:2px;}
+body[data-d="thick"] .band::before{height:5px;}
+body[data-d="rule"] .band .lbl,body[data-d="thick"] .band .lbl{color:var(--navStrong);}
+body[data-d="rule"] .bghost,body[data-d="thick"] .bghost{box-shadow:inset 0 0 0 1px var(--hair2);color:var(--ink-soft);}
+body[data-d="rule"] .bprim,body[data-d="thick"] .bprim{background:var(--btn);color:var(--btnTx);}
+.band .r{margin-left:auto;display:flex;gap:9px;}
+/* both white — the ask */
+.bghost{background:#fff;border:0;box-shadow:inset 0 0 0 1px rgba(58,28,20,.10);color:#1e1a16;border-radius:9px;padding:8px 13px;font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;}
+body[data-bb="split"] .bghost{background:transparent;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--bandOn) 45%,transparent);color:var(--bandOn);}
+.bprim{background:#fff;border:0;color:#1e1a16;border-radius:9px;padding:8px 13px;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;cursor:pointer;box-shadow:0 1px 2px rgba(58,28,20,.10);}
+
+.work{flex:1;min-height:0;display:flex;flex-direction:column;padding:14px 20px 20px;}
+.tools{display:flex;align-items:center;gap:11px;margin-bottom:12px;}
+.cnt{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--navStrong);}
+.cnt em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-left:7px;}
+.ico{width:32px;height:32px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--hair2);display:flex;align-items:center;justify-content:center;color:var(--ink-soft);font-size:11px;}
+.tsep{width:1px;height:20px;background:var(--hair);margin:0 3px;}
+.tv{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);padding:6px 9px;border-radius:8px;}
+.tv.pk{background:var(--pink);box-shadow:inset 0 0 0 1px var(--pink-br);color:var(--burg);font-weight:500;}
+.tv.mut{color:#c2b2a2;}
+
+.cols{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;flex:1;min-height:0;}
+.panel{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--hair);padding:11px;display:flex;flex-direction:column;min-height:0;}
+.lsearch{background:#fff;border-radius:9px;box-shadow:inset 0 0 0 1px var(--hair2);padding:8px 11px;color:#b8a898;font-size:12px;margin-bottom:9px;}
+.qi{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:8px 6px;position:relative;}
+.qi::after{content:'';position:absolute;left:6px;right:6px;bottom:0;height:1px;background:var(--hair);}
+.qi.on{background:#fffdfa;border-radius:9px;box-shadow:inset 3px 0 0 var(--burg);}
+.qi.on::after{display:none;}
+.av{width:30px;height:30px;border-radius:50%;background:#f3ded6;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.qi b{font-size:12.5px;font-weight:500;display:block;color:var(--navStrong);}
+.qi i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
+.qi em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);}
+.hero{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--hair2),0 1px 2px rgba(58,28,20,.05),0 8px 18px -10px rgba(58,28,20,.22);padding:16px 18px;display:flex;align-items:center;gap:15px;margin-bottom:13px;}
+.hero .big{width:56px;height:56px;border-radius:50%;background:#f3ded6;color:var(--burg);font-family:'Playfair Display',serif;font-size:18px;display:flex;align-items:center;justify-content:center;}
+.hero h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;color:var(--navStrong);}
+.hero .sub{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+.hero .r{margin-left:auto;text-align:right;}
+.hero .st{font-family:'Playfair Display',serif;font-size:20px;color:var(--burg);}
+.cards{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;flex:1;min-height:0;}
+.card{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--hair);overflow:hidden;display:flex;flex-direction:column;}
+.ch{padding:10px 14px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--ink);
+  display:flex;align-items:center;gap:9px;}
+.ch .meta{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);font-weight:400;}
+body[data-c="slate"] .ch{background:var(--slate);color:#fff;}
+body[data-c="slate"] .ch .meta{color:rgba(255,255,255,.72);}
+body[data-c="mixed"] .card:first-child .ch{background:var(--slate);color:#fff;}
+body[data-c="mixed"] .card:first-child .ch .meta{color:rgba(255,255,255,.72);}
+.cb{padding:13px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+.cb b{font-family:'Playfair Display',serif;font-size:20px;color:var(--navStrong);}
+.legend{max-width:1460px;margin-top:18px;padding:15px 20px;background:#fdfaf5;border-radius:11px;box-shadow:inset 0 0 0 1px var(--hair);font-size:12.5px;line-height:1.7;color:var(--ink-soft);}
+.legend b{color:var(--burg);} .legend ul{margin:5px 0 0 18px;}
+</style></head>
+<body data-btn="dark" data-nav="warm" data-c="sage" data-d="solid" data-k="sage" data-bb="white">
+
+<div class="ctl">
+  <b>Primary buttons</b>
+  <div class="seg" id="B"><button data-b="dark" class="on">Current — near-black</button><button data-b="slate">Slate</button></div>
+  <b>Nav &amp; breadcrumb text</b>
+  <div class="seg" id="N"><button data-n="warm" class="on">Current — warm ink</button><button data-n="slate">Slate</button></div>
+  <b>Band colour</b>
+  <div class="seg" id="K">
+    <button data-k="slate">Slate</button>
+    <button data-k="sage" class="on">Sage</button>
+  </div>
+  <b>Band buttons</b>
+  <div class="seg" id="P">
+    <button data-p="white" class="on">Both white</button>
+    <button data-p="split">White primary, outlined ghost</button>
+  </div>
+  <b>Band</b>
+  <div class="seg" id="D">
+    <button data-d="solid" class="on">Solid slate</button>
+    <button data-d="rule">White + slate rule</button>
+    <button data-d="thick">White + thick accent</button>
+  </div>
+  <b>Card headers</b>
+  <div class="seg" id="C">
+    <button data-c="sage" class="on">Current — sage</button>
+    <button data-c="slate">Slate</button>
+    <button data-c="mixed">Slate on tracking only</button>
+  </div>
+  <span class="note">The band is slate in both. Burgundy stays burgundy throughout — status, avatars, the selected spine, Record response.</span>
+</div>
+
+<div class="app">
+  <div class="side">
+    <div class="brand"><i></i>ScriptAlly</div>
+    <div class="ms"><b>Murphy's Day Out</b><span>Thriller · 50,000 words</span></div>
+    <div class="nav"><i></i>Dashboard</div>
+    <div class="nsec">Queries</div>
+    <div class="nav on"><i></i>Query Centre</div>
+    <div class="nav"><i></i>Analytics</div>
+    <div class="nsec">Agents</div>
+    <div class="nav"><i></i>Contact list</div>
+    <div class="nav"><i></i>Discover</div>
+    <div class="nsec">Materials</div>
+    <div class="nav"><i></i>Manuscripts</div>
+    <div class="nav"><i></i>Submission packages</div>
+    <div class="nsec">Tasks</div>
+    <div class="nav"><i></i>To-do list<em>16</em></div>
+    <div class="up">
+      <div class="acct"><span class="av">BC</span><span><b>Bethany Carter</b><span>Free plan</span></span></div>
+      <button class="upb">Upgrade</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="bar">
+      <span class="crumb">ScriptAlly / Queries / <b>Query Centre</b></span>
+      <span class="saved">All changes saved</span>
+      <span class="tsearch">⌕ Search</span>
+      <button class="newb">+ New</button>
+    </div>
+
+    <div class="band">
+      <span class="lbl">Query Centre</span>
+      <div class="r"><button class="bghost">↓ Export</button><button class="bprim">+ Log query</button></div>
+    </div>
+
+    <div class="work">
+      <div class="tools">
+        <span class="cnt">25 queries<em>17 awaiting</em></span>
+        <span class="ico">⚟</span><span class="ico">⇅</span>
+        <span class="tsep"></span>
+        <span class="tv pk">✈ Record response</span>
+        <span class="tv mut">Nudge</span>
+        <span class="tv">Mark closed</span>
+        <span class="tv">Delete</span>
+      </div>
+      <div class="cols">
+        <div class="panel">
+          <div class="lsearch">⌕ Search</div>
+          <div class="qi on"><span class="av">WT</span><span><b>William Tan</b><i>Foxglove Literary</i></span><em>+735 D</em></div>
+          <div class="qi"><span class="av">MR</span><span><b>Marcus Reed</b><i>Bloomsbury Quill</i></span><em>+754 D</em></div>
+          <div class="qi"><span class="av">PR</span><span><b>Priya Raman</b><i>No agency</i></span><em>+795 D</em></div>
+          <div class="qi"><span class="av">JM</span><span><b>Jonathan Marsh</b><i>The Marsh Agency</i></span><em>+817 D</em></div>
+          <div class="qi"><span class="av">AK</span><span><b>Aisha Kapoor</b><i>The Lantern Agency</i></span><em>+823 D</em></div>
+          <div class="qi"><span class="av">EW</span><span><b>Eleanor Whitfield</b><i>Greenfield Literary</i></span><em>+857 D</em></div>
+        </div>
+        <div style="display:flex;flex-direction:column;min-height:0">
+          <div class="hero"><span class="big">WT</span>
+            <div><h2>William Tan</h2><div class="sub">Foxglove Literary</div></div>
+            <div class="r"><div class="st">Queried</div><div class="sub">30 June 2024</div></div>
+          </div>
+          <div class="cards">
+            <div class="card"><div class="ch">Tracking<span class="meta">Overdue</span></div><div class="cb"><b>777</b> days waiting<br><br>Reply expected by 11 Aug<br>Response overdue by 105 weeks</div></div>
+            <div class="card"><div class="ch">What you sent<span class="meta">2 items</span></div><div class="cb">Materials sent<br><br>Query letter<br>Synopsis</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>What the two toggles actually decide</b>
+  <ul>
+    <li><b>Primary buttons in slate.</b> +New, Upgrade and Log query stop being near-black and take the band's colour. This is the stronger of the two ideas: it makes the band read as <i>the app's chrome colour</i> rather than one page's decoration, and near-black was never a brand colour — it was the absence of one. Watch the sidebar's Upgrade button, which is the largest area of it.</li>
+    <li><b>Nav and breadcrumb text in slate.</b> The whole left rail and the top bar go cool while the working surface stays warm. It reads as a deliberate two-material system — cool chrome, warm paper — and it is the more consequential change, because it moves the app's overall temperature rather than three buttons.</li>
+    <li><b>Burgundy is untouched in both.</b> Status dots, avatars, the selected row's spine, Record response, the To-do count, the overdue state. That matters: if slate takes the chrome and burgundy keeps the <i>content</i>, each colour has one job. If slate also crept into content, the app would have two competing accent colours and no hierarchy.</li>
+    <li><b>The thing to judge is the sidebar.</b> With both toggles on, the rail is cool text on warm parchment, which can read as elegant or as slightly off-register depending on how much warmth the parchment carries. Toggle nav alone first, then both.</li>
+  </ul>
+    <li><b>Both buttons white with black text</b> — the default now. On sage this works, and it works for a reason: the band is light enough that white still reads as raised rather than as a hole. Note what it costs: <b>the two buttons become the same object</b>, distinguished only by the primary's slight shadow and its weight. That is a real hierarchy but a quiet one, and Export is the button you want people to press less often.</li>
+    <li><b>The split option keeps them white-and-outlined</b> — filled white primary, transparent ghost with a rim in the band's own ink. It is the same relationship the page uses everywhere else: filled means primary, outlined means secondary. Toggle between them with your eye on which button you reach for first.</li>
+    <li><b>Band colour is now separate from band treatment</b>, so all six combinations are reachable. Sage solid is the `#c9d2c7` you picked earlier, with ink-dark labels; sage accent is the same colour as a 2px or 5px line. The accent versions read their primary from whatever the button toggle is set to, so a sage accent with slate buttons is a legitimate pairing to look at.</li>
+    <li><b>Sage solid against sage card headers</b> is the one to check carefully — it is the stripe risk I flagged earlier. With the cards' sage sitting a few pixels below a sage band, the pane can read as banded rather than composed. Slate does not have that problem, which is a real argument for it that has nothing to do with which colour is nicer.</li>
+    <li><b>The band as a white ground with a slate accent</b> — the first toggle set. <i>White + slate rule</i> puts a 2px slate line along the band's top edge; <i>thick</i> makes it 5px. Both keep the label and buttons on white, so the primary returns to a filled slate pill and the ghost returns to its normal rim — no inversion needed, which removes the one genuinely awkward part of the solid version.</li>
+    <li><b>What you gain and lose.</b> The accent version is quieter and keeps the page warm from top to bottom; it also stops the band from being the heaviest thing on screen, which matters on a page whose content is meant to be the subject. What it loses is the clear division between chrome and work — the solid band tells you unmistakably where the app ends and the page begins, and a 2px line says the same thing far more faintly. Try both against the sidebar: solid reads as a continuation of the app frame, accent reads as a page element.</li>
+    <li><b>Card headers in slate</b> — the third toggle. Try <i>Slate</i> and then <i>Slate on tracking only</i>. Two things happen: the pane gains a lot of visual weight, because those bands are large and now dark; and the sage disappears from the product almost entirely, since the card headers are where most of it lives. The glance panel, the journey steps and the status system all use sage — removing it here leaves it stranded in places the writer sees less often.</li>
+    <li><b>The mixed option exists to test a real idea</b>: that dark is a state, not a style. If Tracking goes dark only when a query is overdue, the colour carries meaning. If every header is dark all the time, it is decoration and the page loses the calm it currently has. Judge it on the overdue query shown here, then imagine it on a query sent yesterday.</li>
+  <br>
+  <b>My read:</b> take the buttons, hold the nav text for a day, and <b>leave the card headers sage</b>. On the band, sage solid with white buttons is a good answer — light enough that white buttons sit on it rather than in it, and warm enough that the page stays one temperature. <b>I would use the split treatment rather than two white buttons</b>, so the band keeps the same filled-means-primary grammar as everything else, but both are defensible and the difference is small. Slate is the chrome colour — the band, the buttons, the frame around the work. The card headers are inside the work, and making them the same colour as the chrome collapses the distinction the band was introduced to create. Sage headers on white cards against slate chrome is a three-part system where each part has a job; slate headers make it two parts and a lot of dark.
+</div>
+
+<script>
+function seg(id,attr){document.getElementById(id).addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ document.body.dataset[attr]=b.dataset[id.toLowerCase()];[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});}
+seg('B','btn');seg('N','nav');seg('C','c');seg('D','d');seg('K','k');seg('P','bb');
+</script>
+</body></html>
