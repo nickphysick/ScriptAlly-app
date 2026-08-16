@@ -4,3 +4,4 @@ export { suggestComps } from "./suggestComps";
 export { assistAgentData } from "./assistAgentData";
 export { waitlist } from "./waitlist";
 export { sendContactMessage } from "./contactMessage";
+export { sendBetaFeedback } from "./betaFeedback";

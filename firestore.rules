@@ -743,5 +743,11 @@ service cloud.firestore {
     // because nobody needs to read it and a hashed mailing list is still a mailing list.
     match /contactMessages/{id} { allow read: if isAdmin(); allow write: if false; }
     match /contactSenders/{id}  { allow read, write: if false; }
+
+    // ROUTE: Beta feedback dock — NO client writes, admin-only reads.
+    // Same shape and same reasoning as contactMessages: the dock posts to the `sendBetaFeedback`
+    // callable, which writes via the Admin SDK and bypasses these rules. A report names a fault in
+    // the writer's own work in progress, so it is between them and the desk.
+    match /betaFeedback/{id} { allow read: if isAdmin(); allow write: if false; }
   }
 }
