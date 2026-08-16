@@ -1,0 +1,141 @@
+/**
+ * PaneSweep — the group sweep inside the card (Item 4; ref design-refs/todo-group-sweep.html).
+ *
+ * ⚠️ THE ROWS SCROLL AND THE FOOTER DOES NOT. Same structure as the journey and for the same
+ * measured reason: the card's scroller is a grid row, and a footer rendered inside it scrolls away
+ * with the content — a commit control at y 1271 in a 1000px viewport.
+ *
+ * ⚠️ AND THE FOOTER'S TREATMENT IS THE JOURNEY'S, RESTATED RATHER THAN IMPORTED. `.pj-foot` and
+ * `.psw-foot` are two surfaces that happen to look alike today; sharing one class would mean the
+ * sweep's footer changes whenever the journey's does, which is a coupling neither asked for. The
+ * VALUES are the same because the grammar is — black means "this advances", paper-and-hairline
+ * means disabled — and both read the same tokens for it.
+ */
+
+/* ⚠️ TILES ON THE CARD BODY ARE PARCHMENT, NOT WHITE — the Query Centre's own precedent, recorded
+   in `f12.css`: a white note on a white card "is not a note; it is a paragraph". */
+
+.psw-lead {
+  font-size: 13px; line-height: 1.6; color: #4a3a2e;
+  padding-bottom: 13px; margin-bottom: 12px; border-bottom: 1px solid #f0e8dd;
+}
+
+.psw-row {
+  border: 1px solid #e9e0d5; border-radius: 11px; padding: 11px 13px; margin-bottom: 8px;
+  background: var(--paper, #fdfaf5);
+  transition: border-color 150ms var(--tdg-ease, cubic-bezier(0.2, 0.7, 0.3, 1)),
+              background 150ms var(--tdg-ease, cubic-bezier(0.2, 0.7, 0.3, 1));
+}
+/* ⚠️ ANSWERED IS A SAGE HAIRLINE, NOT A FILL. The card's own family colours mean something on this
+   page; a filled row here would read as a status the sweep does not have. */
+.psw-row.done { border-color: #dfe5dc; background: #f7faf6; }
+/* ⚠️ SKIPPED IS QUIET, NOT GONE. The agent is still on the list — that is what separates skipping
+   from dismissing — so the row stays legible enough to bring back. */
+.psw-row.skipped { opacity: 0.55; }
+
+.psw-top { display: flex; align-items: center; gap: 10px; }
+.psw-sp { flex: 1; }
+.psw-name { font-size: 13.5px; font-weight: 600; color: var(--ink-strong, #241209); }
+.psw-agy { font-size: 11.5px; color: #8a7666; }
+
+.psw-state {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #5a6e58;
+  display: inline-flex; align-items: center; gap: 5px; flex: none;
+}
+.psw-skip {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #b3a496;
+  cursor: pointer; background: none; border: none; padding: 4px 6px; flex: none;
+}
+.psw-skip:hover { color: #7c3a2a; }
+
+.psw-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.psw-chip {
+  cursor: pointer; font: inherit; font-size: 12px; color: #6a5a50;
+  background: #fff; border: 1px solid #e0d5c8; border-radius: 999px; padding: 6px 12px;
+  transition: border-color 140ms var(--tdg-ease, cubic-bezier(0.2, 0.7, 0.3, 1));
+}
+.psw-chip:hover { border-color: #d8c8b8; }
+/* the chosen answer is ink — the same "this is the one" grammar the journeys' options use */
+.psw-chip.on {
+  background: var(--ink-strong, #241209); border-color: var(--ink-strong, #241209);
+  color: var(--paper, #fdfaf5); font-weight: 500;
+}
+
+.psw-text { margin-top: 10px; }
+.psw-text input {
+  width: 100%; font: inherit; font-size: 13px; color: #3a2c22;
+  background: #fff; border: 1px solid #e0d5c8; border-radius: 9px; padding: 9px 12px;
+}
+.psw-text input:focus { outline: none; border-color: #c9b8a6; }
+
+.psw-link {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #7c3a2a;
+  text-decoration: none; display: inline-flex; align-items: center; gap: 5px; margin-top: 9px;
+}
+.psw-link:hover { text-decoration: underline; }
+
+.psw-foot {
+  flex: none; display: flex; align-items: center; gap: 9px;
+  margin: 0; padding: 11px 22px;
+  border-top: 1px solid #eee4d7; background: #fbf6ee;
+}
+.psw-hint { font-size: 11.5px; color: #a89684; font-style: italic; margin-right: auto; min-width: 0; }
+.psw-ghost {
+  cursor: pointer; font: inherit; font-size: 12.5px; color: #6a5a50;
+  background: #fff; border: 1px solid #e2d8c8; border-radius: 9px; padding: 9px 13px; flex: none;
+}
+.psw-ghost:hover { border-color: #d8c8b8; color: #241209; }
+.psw-prime {
+  cursor: pointer; font: inherit; font-size: 13px; font-weight: 500;
+  background: var(--ink-strong, #241209); border: 1px solid var(--ink-strong, #241209);
+  color: var(--paper, #fdfaf5); border-radius: 9px; padding: 10px 20px;
+  display: inline-flex; align-items: center; gap: 7px; flex: none; white-space: nowrap;
+}
+.psw-prime:hover:not(:disabled) { background: #3a1c14; border-color: #3a1c14; }
+/* the house disabled grammar — paper, hairline, faint, not-allowed; never opacity alone */
+.psw-prime:disabled {
+  background: var(--shell-card, #fdfaf5); border-color: #e8dfd1; color: #b3a394; cursor: not-allowed;
+}
+
+/* ── the band's progress block ───────────────────────────────────────────────────────────────── */
+
+/* ⚠️ THE BAR IS THE ONLY PLACE THE COHORT'S SIZE IS DRAWN RATHER THAN STATED. It reports what has
+   been answered SO FAR IN THIS PASS — not how complete the record is — so it starts at zero every
+   time the sweep is opened, which is honest: the previous pass's answers are already saved and are
+   not part of what this one is doing. */
+/* ⚠️ THESE ARE `<span>`s, SO THEY MUST BE TOLD TO BE BLOCKS. An inline element ignores `width` and
+   `height` entirely — the bar measured `7x0` on the deployed page while its inline width said
+   `8.33333%`, so the fill was there, correct, and invisible. The TEXT above it rendered fine, which
+   is what made it survive a source reading: only measuring the box found it. */
+/* ⚠️ IT CLEARS THE MOTIF THE WAY THE FACTS STRIP DOES — same stacking, same reserved box, same
+   tokens. Measured on the deployed page before this: the illustration drew straight across
+   "Answered / 1 of 12" and hid the figure. A static element takes no z-index, so raising it needs
+   `position: relative` as well; and stacking alone is not clearance, which is why the padding
+   reserves the motif's own width rather than trusting the order things paint in. */
+.psw-prog {
+  display: block; margin-left: auto; text-align: right; flex: none;
+  position: relative; z-index: 2;
+  padding-right: calc(var(--tdk-motif-right) + var(--tdk-motif-w) - var(--tdk-facts-inset));
+}
+.psw-progk {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: #5a6e58; opacity: 0.85;
+}
+.psw-progv { display: block; font-family: "Playfair Display", Georgia, serif; font-size: 16px; color: #2e3a2c; margin-top: 2px; }
+.psw-bar {
+  display: block; margin-left: auto;
+  width: 120px; height: 3px; border-radius: 2px;
+  background: rgba(255, 255, 255, 0.5); margin-top: 6px; overflow: hidden;
+}
+.psw-bar i {
+  display: block; height: 100%; background: #5a6e58; border-radius: 2px;
+  transition: width 240ms var(--tdg-ease, cubic-bezier(0.2, 0.7, 0.3, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .psw-row, .psw-chip, .psw-bar i { transition: none; }
+}

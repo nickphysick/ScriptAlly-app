@@ -657,7 +657,12 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     expect(dockSrc).toContain("<EdgeFadeScroll");
     /* the class is conditional now — the journey renders in the SAME scroller, so it carries a
        modifier rather than a second scrolling element */
-    expect(dockSrc).toContain('scrollClassName={draft ? "tdk-body tdk-body--journey" : "tdk-body"}');
+    /* ⚠️ THREE CONTENTS, ONE SCROLLER — the journey and the group sweep both render in the SAME
+       element the tracking columns do, carrying a modifier rather than adding a scrolling box. The
+       assertion states that rule rather than the current ternary, so adding a fourth content
+       cannot quietly introduce a second scroller. */
+    expect(dockSrc).toContain('scrollClassName={draft || cohort ? "tdk-body tdk-body--journey" : "tdk-body"}');
+    expect((dockSrc.match(/<EdgeFadeScroll/g) ?? []), "the card grew a second scroller").toHaveLength(1);
     /* ⚠️ AND THE CHAIN ABOVE IT IS REAL. `flex: 1; min-height: 0` under a BLOCK parent applies to
        nothing and the page keeps working, sized by content — the failure this codebase has been
        caught by twice. Each link asserted, not just the leaf. */

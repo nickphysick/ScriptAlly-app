@@ -52,6 +52,8 @@ import { AssistantModal, AssistantTaskRow } from "./AssistantPromo";
 import { TodoTour } from "./TodoTour";
 import { Agent, ActivityType, QueryStatus, SurfaceOffset } from "../../types";
 import { AgentDataNeed, agentDataQualityNeeds } from "../../lib/agentDataQuality";
+import { SweepMember } from "./PaneSweep";
+import { SweepRow, SweepRule, emptySweepRow, isSweepRule, sweepFields, sweepOutcome } from "../../lib/paneSweep";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
 import { TaskSettingsSheet } from "./TaskSettingsSheet";
@@ -1532,6 +1534,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   onCommitSend={paneJourneyKind(paneCard) ? commitFromPane : undefined}
                   journeyKind={paneJourneyKind}
                   journeyGaps={cardGaps}
+                  /* ⚠️ THE PAGE OWNS THE COHORT because it owns the agent list; the dock renders it
+                     and hands the answers back. The members are the GROUP's own, in the group's own
+                     order — not re-derived here, which would be a second answer to "who is in it". */
+                  sweep={dockSweep}
+                  onCommitSweep={commitSweep}
                   /* ⚠️ THE SAME HANDLERS AND THE SAME GATING THE BAR USED — `offersLeaf` off
                      `cardMenu`, so the footer's greying and the ⋯ menu's cannot disagree about what
                      applies to a card. A rehoming, not a rebuild. */
@@ -2135,7 +2142,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /** The queue the dock walks — the list's own order, narrowing respected. */
   function dockAllCards(): BoardCard[] {
-    return narrowCards([...board.do, ...board.hk, ...board.nt]);
+    /**
+     * ⚠️ THE SWEEP CARDS JOIN THE QUEUE, WHICH IS WHY A GROUP ROW CAN NOW BE OPENED AT ALL. They
+     * were drawn in the rail (which reads `boardCols`) and absent from here (which reads `board`),
+     * so clicking one asked `openDock` for a key the queue did not hold — and `openDock` correctly
+     * REFUSES an unknown key rather than substituting one, so thirty housekeeping items were
+     * unreachable.
+     *
+     * ⚠️ TAKEN FROM `boardCols`, NEVER REBUILT. `boardColumns` already constructs them; building a
+     * second set here would be one fact with two sources, and the two would drift the first time
+     * the card's shape changed.
+     *
+     * ⚠️ THE GROUPED MEMBERS STAY OUT. `board.hk` still holds every individual gap card, and
+     * `boardColumns` removes exactly those the sweeps stand for — so adding the sweeps without
+     * removing their members would put both the cohort and its sixteen parts in one queue.
+     */
+    const sweeps = boardCols.todo.filter(isSweepCard);
+    const swept = new Set(hkGroups.flatMap((g) => g.members.map((m) => m.card.key)));
+    return narrowCards([...board.do, ...sweeps, ...board.hk.filter((c) => !swept.has(c.key)), ...board.nt]);
   }
 
   /* tasks-pages P5 — the tag writes; board-optimise P2 moved the pair into useTagWrites so the
@@ -2395,6 +2419,65 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function cardGaps(card: BoardCard): AgentDataNeed[] {
     const ag = card.relatedRecordId ? agents.find((a) => a.id === card.relatedRecordId) : undefined;
     return ag ? agentDataQualityNeeds(ag) : [];
+  }
+
+  /**
+   * ⚠️ THE COHORT BEHIND A SWEEP CARD, or nothing. `hkGroups` is the one place a group is built —
+   * the rail's row, the ⋯ verbs and the batch sheet all read it — so the pane reads it too rather
+   * than grouping the cards a second time.
+   */
+  function dockSweep(card: BoardCard): { rule: SweepRule; members: SweepMember[] } | undefined {
+    if (!isSweepCard(card) || !isSweepRule(card.sweepRule)) return undefined;
+    const group = hkGroups.find((g) => g.rule === card.sweepRule);
+    if (!group) return undefined;
+    return {
+      rule: card.sweepRule,
+      members: group.members
+        .filter((m) => !!m.agentId)
+        .map((m) => {
+          const ag = agents.find((a) => a.id === m.agentId);
+          return {
+            agentId: m.agentId!,
+            name: m.agentName,
+            ...(m.agency ? { agency: m.agency } : {}),
+            /* ⚠️ OMITTED WHERE THERE IS NO SITE ON FILE — the row exists because the record is
+               incomplete, so a link to nowhere is the same fault one field along. */
+            ...(ag?.website ? { website: ag.website } : {}),
+          };
+        }),
+    };
+  }
+
+  /**
+   * ⚠️ ONE `updateAgent` PER ANSWERED AGENT — the same primitive the `fix` journey uses, and never
+   * a batch. There is no apply-to-all above it and none here: sixteen wrong records written by one
+   * press is worse than the gap those sixteen have today.
+   *
+   * ⚠️ AND A PARTIAL RESULT IS REPORTED AS ONE. Some writes can fail while others land, so the
+   * receipt counts what ACTUALLY succeeded rather than what was attempted — a toast saying
+   * "Recorded 16" over eleven successful writes is the kind of lie that is only found months later.
+   */
+  async function commitSweep(card: BoardCard, rows: SweepRow[]) {
+    const cohort = dockSweep(card);
+    if (!cohort) return;
+    let done = 0;
+    for (let i = 0; i < cohort.members.length; i++) {
+      const fields = sweepFields(cohort.rule, rows[i] ?? emptySweepRow());
+      if (!fields) continue;
+      const id = cohort.members[i].agentId;
+      try {
+        await updateAgent(id, fields);
+        /* the flag resolves only after its own write lands — the `fix` journey's rule, per agent */
+        resolveTaskFlag(flagKeyForTask("data_quality_poor", id));
+        done++;
+      } catch {
+        /* keep going: the remaining agents are independent records, and stopping at the first
+           failure would discard answers the writer has already given for all of them */
+      }
+    }
+    const total = cohort.members.length;
+    if (done === 0) { flash("Couldn’t save those — try again?"); return; }
+    flash(sweepOutcome(done, total, cohort.rule));
   }
 
   /** The one entrance — it routes to the bucket's own write, each of which is the EXISTING one. */

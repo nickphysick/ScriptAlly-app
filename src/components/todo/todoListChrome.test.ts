@@ -25,6 +25,7 @@
  * have failed on the walk's first look.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../../test/sliceBetween";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -139,8 +140,17 @@ describe("ONE narrowing, applied in ONE place — it cannot reach some of the pa
   });
 
   it("the DOCK walks exactly what you were looking at — the same helper, never a second order", () => {
-    const dock = page.slice(page.indexOf("function dockAllCards"), page.indexOf("function dockAllCards") + 300);
-    expect(dock).toContain("narrowCards([...board.do, ...board.hk, ...board.nt])");
+    /* ⚠️ THE RULE, NOT THE EXPRESSION. This pinned the exact array literal, so it went red the day
+       the sweep cards joined the queue — a correct change failing a lock that meant something else.
+       What it protects is that the dock's list goes through `narrowCards`, the ONE narrowing, and
+       is not assembled a second way. */
+    const dock = sliceBetween(page, "function dockAllCards", "\n  }", "dockAllCards");
+    expect(dock).toContain("narrowCards([");
+    expect((dock.match(/narrowCards\(/g) ?? []), "the dock narrows more than once").toHaveLength(1);
+    /* ⚠️ AND A COHORT AND ITS MEMBERS ARE NEVER BOTH IN IT. The sweeps stand FOR their members, so
+       a queue holding both would count the same work twice and walk it twice. */
+    expect(dock).toContain("boardCols.todo.filter(isSweepCard)");
+    expect(dock).toContain("board.hk.filter((c) => !swept.has(c.key))");
   });
 
   it("the header's figures come from the cards the page RENDERS, never a second tally", () => {

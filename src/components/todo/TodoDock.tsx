@@ -28,6 +28,8 @@ import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { PaneJourney, PaneJourneyFoot } from "./PaneJourney";
+import { PaneSweep, PaneSweepFoot, SweepMember } from "./PaneSweep";
+import { SWEEP_PRELINE, SweepRow, SweepRule, emptySweepRow, skipTheRest, sweepAnswered } from "../../lib/paneSweep";
 import { JOURNEY_ACT, JOURNEY_PRELINE, JourneyKind, JourneySendValues, openSend } from "../../lib/paneJourney";
 import { QueryStatus } from "../../types";
 import { ArtSlot } from "./ArtSlot";
@@ -143,6 +145,13 @@ export interface TodoDockProps {
    * here would give one fact two sources.
    */
   journeyGaps?: (card: BoardCard) => readonly ("responseTime" | "materials" | "mswl")[];
+  /**
+   * ⚠️ THE GROUP SWEEP — a card that stands for a cohort rather than for one agent. The page
+   * supplies the rule and the members because it owns the agent list; the dock only renders and
+   * hands the answers back. Absent → the card is an ordinary one and nothing changes.
+   */
+  sweep?: (card: BoardCard) => { rule: SweepRule; members: SweepMember[] } | undefined;
+  onCommitSweep?: (card: BoardCard, rows: SweepRow[]) => Promise<void> | void;
   /** The offer's notify branch — the same set §4.4 shows on the card, split by what they hold. */
   journeyHolders?: (card: BoardCard) => { holding: HolderRow[]; queried: HolderRow[] } | undefined;
   /** The reply-by day, where the record has one — the `time` branch caps its reminder there. */
@@ -192,7 +201,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, card, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, journeyKind, journeyGaps, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, card, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const surfaceRef = useRef<HTMLDivElement>(null);
   /* ⚠️ `confirmSend` IS RETIRED WITH THE CHECKBOX (Phase 6). It was the card's own copy of a
@@ -203,6 +212,14 @@ export const TodoDock: React.FC<TodoDockProps> = ({
      otherwise stepping to the next task with ↑↓ would land you inside a half-filled form for a
      record you are no longer looking at. */
   const [draft, setDraft] = useState<JourneySendValues | null>(null);
+  /**
+   * ⚠️ THE SWEEP'S ANSWERS, ONE PER MEMBER, AND THEY RESET WITH THE CARD. A cohort you half-answered
+   * and then walked away from must not reappear pre-ticked on the next card — the same reason
+   * `draft` clears on `activeKey`. Nothing is pre-selected at any point, which is the one rule this
+   * surface cannot bend: guessing an agent's requirements and having a writer accept it by not
+   * looking is how bad data gets in.
+   */
+  const [sweepRows, setSweepRows] = useState<SweepRow[]>([]);
   const [saving, setSaving] = useState(false);
 
   /* ⚠️ THE PER-ITEM RESET WENT WITH `confirmSend` (Phase 6). It existed so a confirmation could
@@ -233,7 +250,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
   useEffect(() => { surfaceRef.current?.focus(); }, []);
   /* the journey belongs to the card that opened it — see the note on `draft` */
-  useEffect(() => { setDraft(null); setSaving(false); }, [activeKey]);
+  useEffect(() => { setDraft(null); setSaving(false); setSweepRows([]); }, [activeKey]);
 
   if (!card) return null;
 
@@ -257,6 +274,13 @@ export const TodoDock: React.FC<TodoDockProps> = ({
      showing the day its TASK was created; a note about nobody keeps that date because it is the
      only one it has. `card.who` counts: an imported card can name an agent it holds no id for. */
   const stats = trackingStats(facts, !!(card.agentId || card.who));
+  /* ⚠️ RESOLVED ONCE — the body, the band's progress and the footer must all be answering about the
+     same cohort, and three calls could disagree the moment the page's memo identity changes. */
+  const cohort = sweep?.(card);
+  const rows = cohort
+    ? (sweepRows.length === cohort.members.length ? sweepRows : cohort.members.map(() => emptySweepRow()))
+    : [];
+  const swept = cohort ? sweepAnswered(rows, cohort.rule) : 0;
   const hoff = handoffFor(card, src.email, src.website, src.msTitle);
   const who = card.who || "them";
 
@@ -320,11 +344,34 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               {/* ⚠️ THE BAND STAYS AND ONLY THE PRE-LINE CHANGES. "Sending your partial to" becomes
                   "Recording what you sent to" — the same disc, name and agency throughout, so the
                   writer never loses who they are recording against half way through recording it. */}
-              <span className="tdk-pre">{draft ? JOURNEY_PRELINE[journeyKind?.(card) ?? "send"] : bandPreline(card)}</span>
-              <span className="tdk-name">{bandSubject(card)}</span>
-              {bandUnder(card) && <span className="tdk-agency">{bandUnder(card)}</span>}
+              {/* ⚠️ A COHORT'S SUBJECT IS THE COUNT, NOT A NAME — "A materials list is missing for
+                  / 16 agents". `bandSubject` would fall back to the card's title here, which is
+                  already the row's own words ("16 materials wanted"), so the band would repeat the
+                  rail. The sweep's own pre-line and count say the two halves of one sentence. */}
+              <span className="tdk-pre">
+                {cohort ? SWEEP_PRELINE[cohort.rule]
+                  : draft ? JOURNEY_PRELINE[journeyKind?.(card) ?? "send"]
+                  : bandPreline(card)}
+              </span>
+              <span className="tdk-name">
+                {cohort ? `${cohort.members.length} ${cohort.members.length === 1 ? "agent" : "agents"}` : bandSubject(card)}
+              </span>
+              {!cohort && bandUnder(card) && <span className="tdk-agency">{bandUnder(card)}</span>}
             </span>
           </div>
+          {/* ⚠️ THE PROGRESS BLOCK REPORTS THIS PASS, NOT THE RECORD'S COMPLETENESS. It starts at
+              zero every time the sweep is opened, which is honest: answers from a previous pass are
+              already saved and are not part of what this one is doing. A bar that resumed would be
+              claiming the cohort was partly done when in fact it was partly SMALLER. */}
+          {cohort && (
+            <span className="psw-prog">
+              <span className="psw-progk">Answered</span>
+              <span className="psw-progv">{swept} of {cohort.members.length}</span>
+              <span className="psw-bar" aria-hidden>
+                <i style={{ width: `${cohort.members.length ? (swept / cohort.members.length) * 100 : 0}%` }} />
+              </span>
+            </span>
+          )}
           {/* ⚠️ TOP-ALIGNED TO THE IDENTITY BLOCK AND `flex-shrink: 0` — it is a fixed pair of
               facts beside a block that wraps, never the other way round. */}
           {/* ⚠️ THE BAND SHOWS THE ANCHOR ALONE. It showed both, and the stat pair three inches
@@ -374,13 +421,15 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               panel. */
           fade="var(--white, #ffffff)"
           outerClassName="tdk-scroll"
-          scrollClassName={draft ? "tdk-body tdk-body--journey" : "tdk-body"}
+          scrollClassName={draft || cohort ? "tdk-body tdk-body--journey" : "tdk-body"}
           /* ⚠️ `display` IS PASSED, because the wrapper sets it INLINE and inline beats the class.
              Without this the two-column grid silently becomes a block and the doing column drops
              below the record on every card. */
-          scrollStyle={{ display: draft ? "block" : "grid" }}
+          scrollStyle={{ display: draft || cohort ? "block" : "grid" }}
         >
-          {draft ? (
+          {cohort ? (
+            <PaneSweep rule={cohort.rule} members={cohort.members} rows={rows} onChange={setSweepRows} />
+          ) : draft ? (
             <PaneJourney
               kind={journeyKind?.(card) ?? "send"}
               gaps={journeyGaps?.(card)}
@@ -711,7 +760,21 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           */}
         {/* ⚠️ PINNED, AS A SIBLING OF THE SCROLLER — see `PaneJourneyFoot`'s note for what building
             it inside the scroller actually did (the commit at y 1271 in a 1000px viewport). */}
-        {draft && (
+        {cohort && (
+          <PaneSweepFoot
+            rule={cohort.rule}
+            rows={rows}
+            onSkipRest={() => setSweepRows(skipTheRest(rows, cohort.rule))}
+            onCommit={async () => {
+              if (!onCommitSweep) return;
+              setSaving(true);
+              try { await onCommitSweep(card, rows); } finally { setSaving(false); }
+            }}
+            saving={saving}
+          />
+        )}
+
+        {!cohort && draft && (
           <PaneJourneyFoot
             kind={journeyKind?.(card) ?? "send"}
             /* ⚠️ THE JOURNEY'S COMMIT NAMES THE DEED; THE CARD'S FOOTER SAYS "Action". That is the
@@ -738,7 +801,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
         {/* ⚠️ THE CARD'S FOOTER STANDS DOWN WHILE THE JOURNEY IS OPEN — the journey carries its own,
             with Cancel and the commit. Two footers would put two primaries on one card, and the
             outer one would offer to re-open a journey that is already open. */}
-        {!draft && (
+        {!draft && !cohort && (
           <div className="tdk-foot">
             {/* the consequence, stated before the act rather than discovered after it.
                 ⚠️ IT TAKES THE REMAINING SPACE AND GIVES IT UP FIRST — `margin-right: auto` plus a

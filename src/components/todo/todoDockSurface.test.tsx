@@ -396,7 +396,10 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
   it("⚠️ ONE FOOTER AT A TIME — the card's stands down and the journey brings its own", () => {
     /* two footers would put two primaries on one card, and the outer one would offer to re-open a
        journey that is already open */
-    expect(code(dockSrc)).toContain("{!draft && (");
+    /* ⚠️ AND THE SWEEP JOINS THE RULE RATHER THAN BYPASSING IT. Three footers exist in this file;
+       the card's own stands down for either of the other two, and the two never render together. */
+    expect(code(dockSrc)).toContain("{!draft && !cohort && (");
+    expect(code(dockSrc)).toContain("{!cohort && draft && (");
     const pj = code(readFileSync(join(here, "PaneJourney.tsx"), "utf8"));
     expect(pj).toContain("pj-foot");
     expect(pj).toContain("pj-prime");
@@ -1401,5 +1404,77 @@ describe("⚠️ THE DOCK RENDERS THE CARD IT IS GIVEN — a held card outlives 
        which card this IS. Both facts, so a future simplification cannot drop the queue entirely. */
     expect(dockSrc).toContain("queue");
     expect(held).toContain("tdk-pos");
+  });
+});
+
+/* ── item 4 · the group sweep ────────────────────────────────────────────────────────────────── */
+
+describe("⚠️ THE GROUP SWEEP RENDERS IN THE CARD, and nothing in it is pre-selected", () => {
+  const SWEEP = card({
+    key: "sweep-dq_materials", title: "16 materials wanted", who: "", record: "16 agents are missing a materials list",
+    taskType: "data_quality_poor", kind: "MATERIALS", hk: true, initials: "•",
+  });
+  const MEMBERS = [
+    { agentId: "a1", name: "Ffion Reece", agency: "Reece & Hall", website: "reecehall.co.uk" },
+    { agentId: "a2", name: "Adam Castell", agency: "Castell Literary" },
+  ];
+  const html = renderToStaticMarkup(
+    <TodoDock queue={[SWEEP]} card={SWEEP} activeKey={SWEEP.key}
+      onSelect={() => {}} onClose={() => {}} timeline={() => []}
+      onPrimary={() => {}} onMore={() => {}}
+      sweep={() => ({ rule: "dq_materials", members: MEMBERS })}
+      onCommitSweep={() => {}} />,
+  );
+
+  it("one row per member, each naming its agent and agency", () => {
+    expect(html).toContain("Ffion Reece");
+    expect(html).toContain("Reece &amp; Hall");
+    expect(html).toContain("Adam Castell");
+    expect((html.match(/psw-row/g) ?? [])).toHaveLength(MEMBERS.length);
+  });
+
+  it("⚠️ NOTHING IS PRE-SELECTED — no chip renders as chosen", () => {
+    /* Guessing an agent's requirements and having a writer accept it by not looking is how bad data
+       gets in. Asserted against the rendered attribute, bounded, so `psw-chip on` cannot hide in a
+       longer class name and a substring cannot fake a pass. */
+    expect(html).toContain('class="psw-chip"');
+    expect(html).not.toMatch(/["\s`]psw-chip on["\s`]/);
+    expect(html).not.toContain('aria-pressed="true"');
+  });
+
+  it("⚠️ THE COMMIT IS CLOSED AT ZERO, and its words name the number", () => {
+    expect(html).toContain('class="psw-prime"');
+    expect(html).toContain("disabled");
+    expect(html).toContain("Nothing recorded yet.");
+    /* it says "Record", not "Record 0 answers" — a zero the writer never asked for */
+    expect(html).not.toContain("Record 0");
+  });
+
+  it("⚠️ THERE IS NO APPLY-TO-ALL ANYWHERE ON THE SURFACE", () => {
+    const src = code(readFileSync(join(here, "PaneSweep.tsx"), "utf8"));
+    expect(src).not.toMatch(/apply.?to.?all|applyAll|selectAll|tickAll/i);
+    expect(html).not.toMatch(/apply to all/i);
+    /* the only bulk control is the one that writes nothing */
+    expect(html).toContain("Skip the rest for now");
+  });
+
+  it("a member with no website gets NO link rather than a dead one", () => {
+    const links = html.match(/psw-link/g) ?? [];
+    expect(links).toHaveLength(1);            // Ffion has a site, Adam does not
+    expect(html).toContain("reecehall.co.uk");
+  });
+
+  it("the band states the cohort, and does not repeat the rail's own words", () => {
+    expect(html).toContain("A materials list is missing for");
+    expect(html).toContain("2 agents");
+    /* the row's title is the rail's line; the band must not echo it */
+    expect(html).not.toContain("16 materials wanted");
+    /* and the progress block reports this pass */
+    expect(html).toContain("0 of 2");
+  });
+
+  it("⚠️ THE CARD'S OWN FOOTER STANDS DOWN — one primary on the card, never two", () => {
+    expect(html).toContain("psw-prime");
+    expect(html).not.toContain("tdk-prime");
   });
 });
