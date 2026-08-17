@@ -252,8 +252,11 @@ describe("§1 · the query header is a mail header", () => {
   it("the rows are a two-track grid, and every sub-row sits in the label rail", () => {
     const rows = rule(".qc-mailrows");
     expect(rows, "the rows grid is missing").not.toBe("");
-    expect(rows, "the labels are not a track of their own").toContain("grid-template-columns: max-content minmax(0, 1fr)");
-    expect(rule(".qc-mlab"), "the labels left column 1").toContain("grid-column: 1");
+    /* ⚠️ THE TRACK IS A STATED WIDTH SINCE §1, NOT `max-content`. It held the words `AGENT`/`SENT`
+       and resolved to 30.41px; the leaders that replaced them take 30, so the rail is the same
+       within half a pixel and no longer depends on the length of a label that is gone. */
+    expect(rows, "the label track stopped being a track of its own").toContain("grid-template-columns: 30px minmax(0, 1fr)");
+    expect(rule(".qc-mlead"), "the leaders left column 1").toContain("grid-column: 1");
     expect(rule(".qc-mval"), "the values left column 2").toContain("grid-column: 2");
     expect(rule(".qc-msub"), "a sub-row is not on the rail — it would indent by hand").toContain("grid-column: 2");
     /* ⚠️ AND THE OUTER GRID'S FIRST TRACK IS `minmax(0, …)`. A bare `1fr` has a min-content floor,
@@ -311,6 +314,30 @@ describe("§1 · the query header is a mail header", () => {
     expect(card, "the website chip shows the word rather than the domain").not.toMatch(/>Website</);
     expect(card, "the email chip has no full value in `title`").toContain("title={email ||");
     expect(card, "the site chip has no full value in `title`").toContain("title={site ??");
+  });
+
+  /**
+   * ⚠️ THE WORDS CARRIED NOTHING (§1) — you already know which line is the person and which is the
+   * book — so the glyphs say *which kind of thing* in a third of the width, and the size difference
+   * (§2) says which is the subject. Asserted absent because a mono label above a row is the tidiest
+   * thing in the world to add back.
+   */
+  it("the rows are led by bare glyphs, not by words", () => {
+    const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
+    expect(card, "a mono row label came back").not.toMatch(/["\s`]qc-mlab["\s`]/);
+    expect(card, "the AGENT label came back").not.toContain(">Agent<");
+    expect(card, "the SENT label came back").not.toContain(">Sent<");
+    expect((card.match(/className="qc-mlead"/g) ?? []).length, "the two rows are not both led by a glyph").toBe(2);
+    /* ⚠️ BARE, AND THE STATUS MARK STAYS THE ONLY CIRCLE. A plate or a ring here would give the
+       card a second round element and the eye a second place to start. */
+    const lead = rule(".qc-mlead");
+    expect(lead, "the leader took a ground").not.toMatch(/background|border|box-shadow|border-radius/);
+    /* one size and one stroke on both — a single rule, so they cannot drift */
+    expect(rule(".qc-mlead svg"), "the leaders lost their shared size").toContain("width: 20px");
+    expect(rule(".qc-mlead svg"), "the leaders lost their shared stroke").toContain("stroke-width: 1.5");
+    /* ⚠️ AND IT IS NOT BASELINED. An inline SVG has no baseline, so a baselined wrapper aligns its
+       BOTTOM MARGIN EDGE to the text and the glyph drops below the line. */
+    expect(lead, "the leader is baselined — the glyph would sit below the line").toContain("align-self: center");
   });
 
   it("the removals hold: no initials, no sage cap, no materials heading, no separate queried date", () => {
@@ -738,7 +765,7 @@ describe("§5 (fp4) · what you sent — now the mail header's SENT row", () => 
 
   it("the row is there to test", () => {
     expect(card, "the header card is missing — every case below would pass vacuously").not.toBe("");
-    expect(card, "the SENT label went").toContain(">Sent<");
+    expect(card, "the SENT row's leader went").toContain('<path d="M5 4.5h11.5');
     /* ⚠️ AND THE CARD IT CAME FROM IS STILL GONE. A second surface listing the same materials is
        the duplication the first merge removed. */
     expect(code, "the What you sent card came back").not.toContain('title="What you sent"');
@@ -799,8 +826,8 @@ describe("§5 (fp4) · what you sent — now the mail header's SENT row", () => 
    * query. Under it they start on the rail, which is one column for the whole card.
    */
   it("the AGENT row carries identity only, with its contacts on the rail beneath", () => {
-    expect(card, "the AGENT label went").toContain(">Agent<");
-    const agentAt = card.indexOf(">Agent<"), sentAt = card.indexOf(">Sent<");
+    expect(card, "the AGENT row's leader went").toContain('<circle cx="12" cy="8" r="3.6"');
+    const agentAt = card.indexOf('<circle cx="12" cy="8"'), sentAt = card.indexOf('<path d="M5 4.5h11.5');
     const agentBlock = card.slice(agentAt, sentAt);
     expect(agentBlock, "the contacts left the agent's sub-row").toContain("qc-mchip-con");
     expect(agentBlock, "the agency is not stated").toContain("activeAgent.agency");

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — materials interaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage:#8a9e88;--sage-tx:#4e6050;--sage-br:#b9c6b7;--sage-fr:#dfe6dd;--pinkc:#f8e7dc;--pro:#6A89A7;
+--sh-2:0 1px 2px rgba(40,35,30,.05),0 8px 18px -12px rgba(40,35,30,.28);
+--sh-pop:0 2px 6px rgba(40,35,30,.10),0 16px 34px -14px rgba(40,35,30,.42);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--oat);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:0;background:transparent;color:var(--ink2);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--ink);color:#fff;}
+.hd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;margin:20px 0 8px;}
+.frame{max-width:1060px;background:var(--ground);border-radius:12px;padding:20px;box-shadow:0 10px 26px rgba(40,35,30,.13);}
+
+.obj{position:relative;background:#fff;border-radius:12px;box-shadow:var(--sh-2);padding:20px 26px;}
+.obj::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;box-shadow:inset 0 0 0 2px var(--sage-br);}
+.obj::before{content:'';position:absolute;inset:7px;border-radius:7px;pointer-events:none;box-shadow:inset 0 0 0 1px var(--sage-fr);}
+.r{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;align-items:start;}
+.lead{width:34px;height:34px;display:flex;align-items:center;justify-content:center;}
+.lead svg{width:20px;height:20px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke:var(--faint);}
+.line1{display:flex;align-items:baseline;gap:11px;}
+.nm{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;}
+.meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+.subs{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;align-items:center;}
+
+/* chips */
+.att{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);
+  background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:7px;padding:6px 10px;cursor:default;}
+.att .clip{width:12px;height:12px;stroke:var(--faint);fill:none;stroke-width:1.6;}
+.att .tick{font-style:normal;color:var(--sage-tx);font-size:10px;}
+.att .qty{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);
+  background:#fff;box-shadow:inset 0 0 0 1px var(--line);border-radius:4px;padding:1px 5px;}
+.att .x{width:15px;height:15px;border-radius:4px;display:none;align-items:center;justify-content:center;
+  font-size:10px;color:var(--faint);background:#fff;box-shadow:inset 0 0 0 1px var(--line);cursor:pointer;}
+.att:hover .x{display:flex;}
+.att:hover{box-shadow:inset 0 0 0 1px var(--oat);}
+.att.pending{background:#fff;border-style:dashed;box-shadow:none;outline:1px dashed var(--oat);outline-offset:-1px;color:var(--faint);}
+.att.pending .tick{color:#c6c1b9;}
+.addbtn{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--burg);background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);border-radius:7px;padding:6px 11px;cursor:pointer;border:0;font-family:inherit;}
+.addbtn:hover{box-shadow:inset 0 0 0 1px var(--burg);}
+.pro{display:inline-flex;align-items:center;gap:7px;font-size:11px;color:var(--pro);background:#fff;
+  box-shadow:inset 0 0 0 1px #d5dfe7;border-radius:7px;padding:5px 10px;}
+.pro b{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.12em;background:var(--pro);color:#fff;border-radius:10px;padding:2px 6px;}
+
+/* popover */
+.pop{position:absolute;z-index:20;min-width:266px;background:#fff;border-radius:11px;box-shadow:var(--sh-pop);padding:7px;display:none;}
+.pop.open{display:block;}
+.pop h5{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:7px 9px 5px;font-weight:400;}
+.pi{display:flex;align-items:center;gap:10px;padding:9px;border-radius:8px;font-size:12.5px;cursor:pointer;}
+.pi:hover{background:var(--n1);}
+.pi svg{width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.6;}
+.pi .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;color:#c0bbb3;}
+.pi.done{color:var(--faint);} .pi.done .k{color:var(--sage-tx);}
+.pop .sep{height:1px;background:var(--line);margin:5px 9px;}
+.stepper{display:flex;align-items:center;gap:0;margin-left:auto;}
+.stepper button{width:24px;height:24px;border:0;background:#fff;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink2);cursor:pointer;font-size:13px;line-height:1;}
+.stepper button:first-child{border-radius:6px 0 0 6px;} .stepper button:last-child{border-radius:0 6px 6px 0;}
+.stepper span{font-family:'JetBrains Mono',monospace;font-size:11px;min-width:58px;text-align:center;
+  box-shadow:inset 0 -1px 0 var(--line),inset 0 1px 0 var(--line);height:24px;display:flex;align-items:center;justify-content:center;}
+.unit{display:flex;gap:4px;padding:4px 9px 9px;}
+.unit span{font-size:11px;padding:4px 9px;border-radius:14px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink2);cursor:pointer;}
+.unit span.on{background:var(--pinkc);box-shadow:inset 0 0 0 1px #e8c8bc;color:var(--burg);}
+.wrap{position:relative;display:inline-block;}
+
+/* B: table row style */
+.mtable{margin-top:10px;width:100%;}
+.mrow{display:grid;grid-template-columns:20px minmax(0,1fr) auto auto;gap:11px;align-items:center;padding:7px 2px;font-size:12.5px;}
+.mrow+.mrow{box-shadow:inset 0 1px 0 var(--line);}
+.mrow svg{width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.6;}
+.mrow .st{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--sage-tx);}
+.mrow .st.no{color:var(--faint);}
+.mrow .act{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--burg);cursor:pointer;}
+.mrow.off{color:var(--faint);}
+.legend{max-width:1060px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.7;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<div class="hd">A · Attachment chips — hover to remove, one button to add</div>
+<div class="frame"><div class="obj">
+  <div class="r">
+    <span class="lead"><svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z"/><path d="M5 17.5h13.5"/><path d="M9 9h7M9 12.5h5"/></svg></span>
+    <div>
+      <div class="line1"><span class="nm">Murphy's Day Out</span><span class="meta">Thriller · 50,000 words</span></div>
+      <div class="subs">
+        <span class="att"><svg class="clip" viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter <i class="tick">✓</i><span class="x">×</span></span>
+        <span class="att"><svg class="clip" viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Synopsis <i class="tick">✓</i><span class="x">×</span></span>
+        <span class="att"><svg class="clip" viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Opening sample <span class="qty">3 chapters</span> <i class="tick">✓</i><span class="x">×</span></span>
+        <span class="wrap">
+          <button class="addbtn" id="addA">+ Attach</button>
+          <div class="pop" id="popA" style="left:0;top:34px">
+            <h5>Add to this query</h5>
+            <div class="pi done">📄 Query letter<span class="k">Added</span></div>
+            <div class="pi done">📑 Synopsis<span class="k">Added</span></div>
+            <div class="pi done">📕 Opening sample<span class="k">Added</span></div>
+            <div class="pi">✎ Other…<span class="k">Free text</span></div>
+            <div class="sep"></div>
+            <div class="pi" style="color:var(--pro)">✦ Attach a submission package<span class="k">Pro</span></div>
+          </div>
+        </span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="hd">A2 · The same, mid-edit — opening sample quantity</div>
+<div class="frame"><div class="obj">
+  <div class="r">
+    <span class="lead"><svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z"/><path d="M5 17.5h13.5"/><path d="M9 9h7M9 12.5h5"/></svg></span>
+    <div>
+      <div class="line1"><span class="nm">Murphy's Day Out</span><span class="meta">Thriller · 50,000 words</span></div>
+      <div class="subs">
+        <span class="att"><svg class="clip" viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter <i class="tick">✓</i></span>
+        <span class="wrap">
+          <span class="att" style="box-shadow:inset 0 0 0 1px var(--burg)"><svg class="clip" viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Opening sample <span class="qty">3 chapters</span></span>
+          <div class="pop open" style="left:0;top:36px">
+            <h5>Opening sample</h5>
+            <div class="pi" style="cursor:default"><span>Quantity</span>
+              <span class="stepper"><button>−</button><span>3</span><button>+</button></span></div>
+            <div class="unit"><span class="on">chapters</span><span>pages</span><span>words</span></div>
+            <div class="sep"></div>
+            <div class="pi">✓ Mark as sent<span class="k">Not yet</span></div>
+            <div class="pi" style="color:var(--burg)">× Remove from query</div>
+          </div>
+        </span>
+        <span class="att pending"><svg class="clip" viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Synopsis <i class="tick">○</i></span>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div class="hd">B · A four-row list — every material always visible, present or not</div>
+<div class="frame"><div class="obj">
+  <div class="r">
+    <span class="lead"><svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z"/><path d="M5 17.5h13.5"/><path d="M9 9h7M9 12.5h5"/></svg></span>
+    <div>
+      <div class="line1"><span class="nm">Murphy's Day Out</span><span class="meta">Thriller · 50,000 words</span></div>
+      <div class="mtable">
+        <div class="mrow"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/></svg>Query letter<span class="st">Sent ✓</span><span class="act">Remove</span></div>
+        <div class="mrow"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Synopsis<span class="st no">Not sent</span><span class="act">Mark sent</span></div>
+        <div class="mrow"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6"/></svg>Opening sample <span class="qty">3 chapters</span><span class="st">Sent ✓</span><span class="act">Edit</span></div>
+        <div class="mrow off"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Other<span class="st no">Not included</span><span class="act">Add</span></div>
+      </div>
+      <div class="subs" style="margin-top:11px"><span class="pro"><b>Pro</b>Attach a submission package instead</span></div>
+    </div>
+  </div>
+</div></div>
+
+<div class="legend">
+  <b>What is wrong with it now</b><br>
+  The row currently mixes three different things on one line — chips that are records, a bare <i>REMOVE</i> that acts on the last chip without saying so, and an upgrade pitch. Nothing indicates what is clickable, and the destructive action is the most prominent word in the row.<br><br>
+  <b>A · Attachment chips.</b> Each material is a chip; hovering reveals a small × on that chip, so remove belongs to the thing it removes rather than floating at the end of the row. One <i>+ Attach</i> button opens a menu of the four material types, with already-added ones shown as done rather than hidden — so the menu is a complete statement of what a query can carry. The Pro option sits below a rule as one more thing you could attach, which is a far softer pitch than a line of upgrade copy.<br><br>
+  <b>A2 shows the edit case.</b> Clicking a chip opens its own popover: quantity stepper and unit for the opening sample, a <i>Mark as sent</i> action, and remove at the bottom in burgundy. The unit chips make the quantity self-describing — <i>3 chapters</i> reads on the chip afterwards, so you never need to open it to know. The dashed chip is a material added but not yet sent, which the current design cannot express at all.<br><br>
+  <b>B · A four-row list.</b> All four material types always visible, each with its state and one action. Nothing is hidden behind a menu, and the empty ones invite completion — <i>Other · Not included · Add</i>. It costs about 70px more height than A and turns the header into a form, but it is the only version where you can see at a glance what you have <i>not</i> sent.<br><br>
+  <b>My read:</b> A, with A2's popover. The chips keep the card a header rather than a form, the state each material is in is legible without opening anything, and adding is one button rather than four rows of affordances. B would be right on a dedicated materials screen; here it competes with Tracking for the eye.
+</div>
+
+<script>
+document.getElementById('addA').addEventListener('click',function(e){
+  e.stopPropagation();document.getElementById('popA').classList.toggle('open');});
+document.addEventListener('click',function(){document.getElementById('popA').classList.remove('open');});
+</script>
+</body></html>

@@ -2319,11 +2319,26 @@
 .qc-mailgrid { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 26px; padding: 22px 26px; }
 /* ⚠️ THE LABEL TRACK IS THE RAIL. `max-content` on it means the widest label sets the column and
    both sub-rows inherit it; a fixed px would need re-deriving the day a third label appears. */
-.qc-mailrows { display: grid; grid-template-columns: max-content minmax(0, 1fr); column-gap: 18px; row-gap: 5px; align-items: baseline; min-width: 0; }
+.qc-mailrows { display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 18px; row-gap: 5px; align-items: baseline; min-width: 0; }
 /* every sub-row starts in column 2 — the rail, stated once */
 .qc-msub { grid-column: 2; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 1px 0 9px; }
 .qc-mailrows > .qc-msub:last-child { margin-bottom: 0; }
-.qc-mlab { grid-column: 1; font-family: var(--f12-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); white-space: nowrap; }
+/**
+ * ⚠️ THE LEADER IS 30px BECAUSE THAT IS WHAT THE WORDS MEASURED (§1). The label track was
+ * `max-content` of `AGENT`/`SENT` and resolved to 30.41px at 1440 — browser-read before the change
+ * — so the icon takes 30 and the rail moves by 0.41px rather than staying literally identical. The
+ * pack asks for the sub-rows' indent to be unchanged; 0.41px is sub-pixel, and a 30.41px design
+ * value would be the measurement of a deleted thing masquerading as a decision. Both stated.
+ *
+ * ⚠️ AND IT IS NOT BASELINE-ALIGNED, which the row otherwise is. An inline SVG has no baseline of
+ * its own, so a baselined `<span>` wrapping one aligns its BOTTOM MARGIN EDGE to the text's
+ * baseline and the glyph drops below the line — the documented trap in this repo, one page over.
+ * `align-self: center` puts it on the value's own centre instead.
+ *
+ * ⚠️ BARE — no plate, no ring, no ground. The status mark stays the card's only circular element.
+ */
+.qc-mlead { grid-column: 1; align-self: center; width: 30px; height: 20px; display: flex; align-items: center; justify-content: center; }
+.qc-mlead svg { width: 20px; height: 20px; fill: none; stroke: var(--faint); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .qc-mval { grid-column: 2; display: flex; align-items: baseline; gap: 11px; min-width: 0; }
 /* ⚠️ ONE TYPE STEP FOR BOTH NAMES — the card's claim is that the agent and the manuscript are
    peers, and a larger face on either would make the card about that one. 20px is a step above the

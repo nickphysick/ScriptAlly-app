@@ -4304,7 +4304,15 @@ export const Queries: React.FC<{
 
                           <div className="qc-mailrows">
                             {/* ── AGENT ── */}
-                            <span className="qc-mlab">Agent</span>
+                            {/* ⚠️ A BARE GLYPH WHERE THE WORD WAS (§1). `AGENT` and `SENT` carried
+                                nothing — you already know which line is the person and which is the
+                                book — and spent a third of the card's label column saying it.
+                                ⚠️ BARE: no plate, no ring, no ground. The status mark stays the only
+                                circular element on the card, which is what keeps the eye going name,
+                                then status. */}
+                            <span className="qc-mlead" aria-hidden="true">
+                              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>
+                            </span>
                             <div className="qc-mval">
                               {onNavigate ? (
                                 <button type="button" className="qc-mname" onClick={() => onNavigate("agents")} title="Open the agent list">{nameplate}</button>
@@ -4339,7 +4347,9 @@ export const Queries: React.FC<{
                             </div>
 
                             {/* ── SENT ── */}
-                            <span className="qc-mlab">Sent</span>
+                            <span className="qc-mlead" aria-hidden="true">
+                              <svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z" /><path d="M5 17.5h13.5" /><path d="M9 9h7M9 12.5h5" /></svg>
+                            </span>
                             <div className="qc-mval">
                               {/* ⚠️ THE TITLE IS THE AGENT'S PEER — same face, same size, same ink.
                                   It was burgundy inside "What you sent" and burgundy is the outgoing

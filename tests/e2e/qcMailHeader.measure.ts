@@ -19,7 +19,7 @@ const read = (page: Page) => page.evaluate(() => {
   const rows = q(".qc-mailrows")!;
   const st = q(".qc-mstatus")!;
   const dot = st.querySelector("svg, .sa-statusdot, span") as HTMLElement | null;
-  const labs = [...document.querySelectorAll(".qc-mlab")] as HTMLElement[];
+  const labs = [...document.querySelectorAll(".qc-mlead")] as HTMLElement[];
   const vals = [...document.querySelectorAll(".qc-mval")] as HTMLElement[];
   const subs = [...document.querySelectorAll(".qc-msub")] as HTMLElement[];
   const names = [...document.querySelectorAll(".qc-mname")] as HTMLElement[];
@@ -36,7 +36,10 @@ const read = (page: Page) => page.evaluate(() => {
     /* ⚠️ ONE RAIL: every value and every sub-row starts at the same x */
     rail: [...vals, ...subs].map((e) => r(box(e)!.left)),
     labelX: labs.map((e) => r(box(e)!.left)),
-    labels: labs.map((e) => e.textContent?.trim() ?? ""),
+    /* ⚠️ THE LEADERS' SIZE AND STROKE, not their text — §1 replaced the words with glyphs. */
+    leaders: labs.map((e) => { const g = e.querySelector("svg")!; const c = getComputedStyle(g as unknown as Element); const b = g.getBoundingClientRect(); return `${r(b.width)}x${r(b.height)}|${c.strokeWidth}|${c.stroke}`; }),
+    leaderBox: labs.map((e) => r(e.getBoundingClientRect().width)),
+    leaderPaint: labs.map((e) => { const c = getComputedStyle(e); return `${c.backgroundColor}|${c.borderTopWidth}|${c.borderRadius}`; }),
     /* the two names are peers — same face, size and ink */
     nameStyles: names.map((e) => { const c = getComputedStyle(e); return `${c.fontFamily.split(",")[0].replace(/"/g, "")}|${c.fontSize}|${c.color}`; }),
     contacts: chip(".qc-mchip-con"),
@@ -78,7 +81,7 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
 
     if (!checkedOne) {
       checkedOne = true;
-      console.log(`labels=${JSON.stringify(m.labels)} rail=${JSON.stringify([...new Set(m.rail)])} labelX=${JSON.stringify([...new Set(m.labelX)])}`);
+      console.log(`leaders=${JSON.stringify(m.leaders)} box=${JSON.stringify(m.leaderBox)} rail=${JSON.stringify([...new Set(m.rail)])} labelX=${JSON.stringify([...new Set(m.labelX)])}`);
       console.log(`names=${JSON.stringify(m.nameStyles)}`);
       console.log(`contacts=${JSON.stringify(m.contacts)}`);
       console.log(`attachments=${JSON.stringify(m.attachments)}`);
@@ -87,7 +90,15 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
       /* §1 — one rail for every value and every sub-row */
       expect([...new Set(m.rail)], `values and sub-rows start at different x: ${[...new Set(m.rail)].join(", ")}`).toHaveLength(1);
       expect([...new Set(m.labelX)], "the labels are not in one column").toHaveLength(1);
-      expect(m.labels.map((l) => l.toUpperCase())).toEqual(["AGENT", "SENT"]);
+      /* ⚠️ ONE SIZE AND ONE STROKE ON BOTH — read from the rendered glyphs, not from the rule */
+      expect([...new Set(m.leaders)], `the leaders differ: ${m.leaders.join(" ⁄ ")}`).toHaveLength(1);
+      expect(m.leaders[0], "the leaders are not 20px").toContain("20x20");
+      /* ⚠️ BARE — no ground, no rim, no radius. The status mark is the card's only circle. */
+      for (const p of m.leaderPaint) expect(p, `a leader took a plate: ${p}`).toMatch(/^rgba\(0, 0, 0, 0\)\|0px\|0px$/);
+      /* ⚠️ AND THE RAIL DID NOT MOVE. Browser-read before §1: the label track was 30.41px and the
+         rail sat at 773.41. The leaders take 30, so the sub-rows keep their indent within half a
+         pixel — the pack's clause, checked against the recorded figure rather than against itself. */
+      expect(Math.abs(m.rail[0] - 773.41), `the sub-rows' indent moved: ${m.rail[0]} against 773.41`).toBeLessThan(1);
 
       /* the two names are peers */
       expect([...new Set(m.nameStyles)], `the two names differ: ${m.nameStyles.join(" ⁄ ")}`).toHaveLength(1);
