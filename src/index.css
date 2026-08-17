@@ -167,6 +167,8 @@
    * markers unsized and its connector unplaced with nothing to point at.
    */
   --tl-mark: 27px;
+  /* §2 — a minor event's marker: part of the record, not a round. */
+  --tl-mark-sm: 9px;
   --tl-gap: 22px;
   --n0: #ffffff;   /* panels, cards, plates — the only pure white     L* 100.0 */
   --n1: #fef8f0;   /* a page ground, one step below white             L*  97.8 */

@@ -301,8 +301,8 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
  * never a recreation — and they differ only in its props (`ghost` for a projection). Taking the
  * dot as a child keeps that difference at the call site where it is legible.
  */
-const TlEvent: React.FC<{ last?: boolean; mark: React.ReactNode; children: React.ReactNode }> = ({ last = false, mark, children }) => (
-  <div className={`tl-ev${last ? " tl-ev--last" : ""}`}>
+const TlEvent: React.FC<{ last?: boolean; minor?: boolean; mark: React.ReactNode; children: React.ReactNode }> = ({ last = false, minor = false, mark, children }) => (
+  <div className={`tl-ev${last ? " tl-ev--last" : ""}${minor ? " tl-ev--minor" : ""}`}>
     <div className="tl-evmark">{mark}</div>
     {/* the connector, drawn by the CONTAINER behind the locked StatusDot — never by editing it.
         It runs marker-bottom to next-marker-top, and `.tl-ev--last` hides it, so a single-event
@@ -345,8 +345,49 @@ export const TimelineRows: React.FC<{
      cannot apply a different figure. */
   const book = chaptered ? chapterise(rows) : null;
   const render = (row: RowSpec, isLast: boolean) => {
+      /**
+       * ⚠️ §2 · A MINOR EVENT IS EVERY ROW THAT IS NOT A STATUS — which is what `kind` already
+       * means, so the test is the presence of the field rather than a list of its values. A note
+       * kind arriving later is minor without this line changing.
+       *
+       * ⚠️ AND ITS MARKER IS NOT A `StatusDot`. A nudge borrowed the outgoing QUERIED glyph
+       * "decoratively" at the full 27px — which is exactly the fault this section names: at equal
+       * weight a follow-up competes with a request, and it did so wearing the mark of a status it
+       * does not have. A 9px hollow ring says "part of the record, not a round".
+       */
+      if (row.kind) {
+        return (
+          <TlEvent key={row.key} last={isLast} minor mark={<span className="tl-minormark" aria-hidden="true" />}>
+            <div className="tl-rowbody">
+              <div className="tl-minor">
+                <span className="tl-minortx">{row.title}</span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", marginLeft: "auto" }}>
+                  {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a" }}>{row.date}</span>}
+                  {row.activityId && onMenuOpen && (
+                    <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                      <button
+                        type="button"
+                        className="tl-more"
+                        aria-label="Correct this entry"
+                        title="Correct this entry"
+                        onClick={(e) => {
+                          const r = e.currentTarget.getBoundingClientRect();
+                          onMenuOpen(
+                            { activityId: row.activityId!, status: row.status, label: row.title, dateISO: row.dateISO || "", note: row.note || "" },
+                            { position: "fixed", top: r.bottom + 4, left: Math.max(8, r.right - 184) },
+                          );
+                        }}
+                      >⋯</button>
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+          </TlEvent>
+        );
+      }
       return (
-        <TlEvent key={row.key} last={isLast} mark={<StatusDot status={row.status} overrideSize={TL_MARK} decorative={row.kind === "nudge"} />}>
+        <TlEvent key={row.key} last={isLast} mark={<StatusDot status={row.status} overrideSize={TL_MARK} />}>
           <div className="tl-rowbody">
             <div className="tl-evtitle"><div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
               {/* ⚠️ THE EDITABLE FACT SITS ON THE TITLE LINE, NOT UNDER IT (§2). "Query sent" and

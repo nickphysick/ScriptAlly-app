@@ -1189,6 +1189,30 @@
 .tl-evtitle { min-height: var(--tl-mark); display: flex; align-items: center; }
 .tl-evtitle > * { flex: 1 1 auto; min-width: 0; }
 
+/* ══ §2 · MINOR EVENTS ARE MINOR — SAME RHYTHM, LESS WEIGHT ══════════════════════════════════
+ *
+ * ⚠️ THE GAP DOES NOT CHANGE, AND THAT IS THE SECTION'S FIRST SENTENCE. The ref's treatment A
+ * tightens a minor event to 14px; every event here pays `--tl-gap` whatever it carries, so what
+ * makes a nudge minor is the MARK and the absence of a title, never a second spacing. One rhythm
+ * survives a mixed history; two rhythms are how the column came to look ragged in the first place.
+ *
+ * ⚠️ THE SMALL MARK IS CENTRED INSIDE THE BIG ONE'S BOX, structurally. Both offsets and the
+ * connector's start are `calc()` off the two sizes, so the rail stays one straight line if either
+ * figure moves — the arithmetic that used to be done by hand at `top: 29px`.
+ */
+.tl-ev--minor .tl-evmark {
+  width: var(--tl-mark-sm); height: var(--tl-mark-sm);
+  left: calc((var(--tl-mark) - var(--tl-mark-sm)) / 2);
+  top: calc((var(--tl-mark) - var(--tl-mark-sm)) / 2);
+}
+.tl-ev--minor .tl-evline { top: calc((var(--tl-mark) + var(--tl-mark-sm)) / 2); }
+/* ⚠️ THE TITLE ROW'S RESERVED 27px GOES WITH THE TITLE. Keeping it would hold a minor event at the
+   height of a status one, which is the weight this section is taking away. */
+.tl-ev--minor .tl-evtitle { min-height: 0; }
+.tl-minormark { width: 100%; height: 100%; border-radius: 50%; background: var(--paper, #f4f1ed); border: 1.5px solid var(--oatline, #dcd8d1); }
+.tl-minor { display: flex; align-items: baseline; gap: 10px; min-height: var(--tl-mark-sm); }
+.tl-minortx { font-family: "Inter", sans-serif; font-size: 12px; color: var(--muted, #7d7469); line-height: 1.5; }
+
 /* ══ §1 · CHAPTERS — A LONG QUERY IS FOUR ROUNDS, NOT ELEVEN EVENTS ══════════════════════════
  *
  * ⚠️ THE SEPARATION IS THE ONE THING THAT BREAKS THE RHYTHM, DELIBERATELY. §2's law is that every
