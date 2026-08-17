@@ -41,7 +41,10 @@ const read = (page: Page) => page.evaluate(() => {
     leaderBox: labs.map((e) => r(e.getBoundingClientRect().width)),
     leaderPaint: labs.map((e) => { const c = getComputedStyle(e); return `${c.backgroundColor}|${c.borderTopWidth}|${c.borderRadius}`; }),
     /* the two names are peers — same face, size and ink */
-    nameStyles: names.map((e) => { const c = getComputedStyle(e); return `${c.fontFamily.split(",")[0].replace(/"/g, "")}|${c.fontSize}|${c.color}`; }),
+    /* ⚠️ FACE AND INK ONLY — §2 made the SIZE the difference between them, so comparing all three
+       would fail on the hierarchy it deliberately introduced. */
+    nameFaces: names.map((e) => { const c = getComputedStyle(e); return `${c.fontFamily.split(",")[0].replace(/"/g, "")}|${c.color}|${c.fontStyle}`; }),
+    nameSizes: names.map((e) => getComputedStyle(e).fontSize),
     contacts: chip(".qc-mchip-con"),
     attachments: chip(".qc-mchip-att"),
     /* §2 — the mark */
@@ -82,7 +85,7 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
     if (!checkedOne) {
       checkedOne = true;
       console.log(`leaders=${JSON.stringify(m.leaders)} box=${JSON.stringify(m.leaderBox)} rail=${JSON.stringify([...new Set(m.rail)])} labelX=${JSON.stringify([...new Set(m.labelX)])}`);
-      console.log(`names=${JSON.stringify(m.nameStyles)}`);
+      console.log(`names=${JSON.stringify(m.nameFaces)} sizes=${JSON.stringify(m.nameSizes)}`);
       console.log(`contacts=${JSON.stringify(m.contacts)}`);
       console.log(`attachments=${JSON.stringify(m.attachments)}`);
       console.log(`status=${JSON.stringify(m.status)}`);
@@ -100,9 +103,12 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
          pixel — the pack's clause, checked against the recorded figure rather than against itself. */
       expect(Math.abs(m.rail[0] - 773.41), `the sub-rows' indent moved: ${m.rail[0]} against 773.41`).toBeLessThan(1);
 
-      /* the two names are peers */
-      expect([...new Set(m.nameStyles)], `the two names differ: ${m.nameStyles.join(" ⁄ ")}`).toHaveLength(1);
-      expect(m.nameStyles[0], "the names are not Playfair").toContain("Playfair");
+      /* ⚠️ ONE FACE, ONE INK, AND THE SIZE IS THE HIERARCHY (§2). The agent is what the card
+         confirms first — the list row you clicked was an agent — so it takes the larger step;
+         everything else about the two is identical, and neither is italic or burgundy. */
+      expect([...new Set(m.nameFaces)], `the two names differ in more than size: ${m.nameFaces.join(" ⁄ ")}`).toHaveLength(1);
+      expect(m.nameFaces[0], "the names are not Playfair in the ink, upright").toBe("Playfair Display|rgb(20, 20, 18)|normal");
+      expect(parseFloat(m.nameSizes[0]), "the agent is not the larger of the two").toBeGreaterThan(parseFloat(m.nameSizes[1]));
 
       /* the two chip families: same size and radius, different ground */
       expect(m.contacts.length, "no contact chips").toBeGreaterThan(0);

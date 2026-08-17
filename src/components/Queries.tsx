@@ -1386,6 +1386,24 @@ export const Queries: React.FC<{
   /* §5 — the Attach menu and the Other free-text editor. Both portal through the page's own
      `F12Menu` / `F12Popover`, anchored by `useFixedMenu`, which already close on Escape and on an
      outside click. A second popover primitive on this page would be a third way to open a menu. */
+  /**
+   * §5 — the per-chip popover. ONE popover, anchored to whichever chip opened it, rather than one
+   * per chip: the content is a function of the material, and three mounted popovers would be three
+   * places for the open state to disagree.
+   *
+   * ⚠️ THE ANCHOR IS ASSIGNED FROM THE CLICK, the pattern the send-method picker already uses —
+   * `useFixedMenu` positions against `triggerRef.current`, so handing it the element that was
+   * actually pressed is what keeps the popover under the right chip after the row reflows.
+   */
+  const [matPop, setMatPop] = useState<null | "ql" | "syn" | "smp">(null);
+  const { triggerRef: matPopTrigRef, menuStyle: matPopStyle } = useFixedMenu<HTMLElement>(!!matPop);
+  const openMatPop = (key: "ql" | "syn" | "smp", el: HTMLElement) => {
+    (matPopTrigRef as React.MutableRefObject<HTMLElement | null>).current = el;
+    setMatPop(key);
+  };
+  /* ⚠️ FOCUS RETURNS TO THE CHIP THAT OPENED IT (§6) — a popover that closes into nowhere ends the
+     keyboard session, and the next Tab restarts at the page's first control. */
+  const closeMatPop = () => { const el = matPopTrigRef.current; setMatPop(null); el?.focus(); };
   const [addMatOpen, setAddMatOpen] = useState(false);
   const { triggerRef: addMatTrigRef, menuStyle: addMatMenuStyle } = useFixedMenu<HTMLButtonElement>(addMatOpen);
   const [otherOpen, setOtherOpen] = useState(false);
@@ -4388,8 +4406,8 @@ export const Queries: React.FC<{
                    * rather than a nested `<button>` — nested interactive elements are invalid and
                    * browsers disagree about which one a click reaches.
                    */
-                  const attach = (key: string, label: string, qty: string | null, done: boolean, onClick: () => void, title: string, onRemove?: () => void) => (
-                    <button key={key} type="button" className={`qc-mchip qc-mchip-att${done ? " on" : ""}`} onClick={onClick} title={title}>
+                  const attach = (key: string, label: string, qty: string | null, done: boolean, onClick: (el: HTMLElement) => void, title: string, onRemove?: () => void) => (
+                    <button key={key} type="button" className={`qc-mchip qc-mchip-att${done ? " on" : ""}`} onClick={(e) => onClick(e.currentTarget)} title={title}>
                       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
                       <span className="qc-mchiptx">{label}</span>
                       {qty && <span className="qc-mqtybadge">{qty}</span>}
@@ -4490,8 +4508,11 @@ export const Queries: React.FC<{
                               )}
                             </div>
                             <div className="qc-msub">
-                              {attach("ql", "Query letter", null, qlSent, () => toggleDocMaterial(activeQuery, activeAgent, "query"), qlSent ? "Un-mark the query letter as sent" : "Mark the query letter as sent", qlSent ? () => toggleDocMaterial(activeQuery, activeAgent, "query") : undefined)}
-                              {attach("syn", "Synopsis", null, synSent, () => toggleDocMaterial(activeQuery, activeAgent, "synopsis"), synSent ? "Un-mark the synopsis as sent" : "Mark the synopsis as sent", synSent ? () => toggleDocMaterial(activeQuery, activeAgent, "synopsis") : undefined)}
+                              {/* ⚠️ THE CHIP OPENS ITS OWN POPOVER (§5) rather than toggling on click. A single click that
+                                   silently flipped "sent" gave one control two of the three things a
+                                   material can have done to it and no way to reach the third. */}
+                              {attach("ql", "Query letter", null, qlSent, (el) => openMatPop("ql", el), "Query letter", qlSent ? () => toggleDocMaterial(activeQuery, activeAgent, "query") : undefined)}
+                              {attach("syn", "Synopsis", null, synSent, (el) => openMatPop("syn", el), "Synopsis", synSent ? () => toggleDocMaterial(activeQuery, activeAgent, "synopsis") : undefined)}
                               {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
                                   sample is a quantity and a unit, not a yes. Its label carries what
                                   was sent; Remove keeps its own control, since a chip that both
@@ -4500,7 +4521,7 @@ export const Queries: React.FC<{
                                     chapters`, not `3 chapters`. And `Opening sample` is the locked
                                     name: the three units all store as one `ComponentType`, so
                                     "Sample pages" would assert a unit the artefact does not carry. */}
-                                {attach("smp", "Opening sample", sampleItem ? sampleMaterialText(sampleItem) : null, !!sampleItem, openSampleEditor, sampleItem ? "Change the sample you sent" : "Set the sample you sent", sampleItem ? () => removeSampleMaterial(activeQuery, activeAgent) : undefined)}
+                                {attach("smp", "Opening sample", sampleItem ? sampleMaterialText(sampleItem) : null, !!sampleItem, (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", sampleItem ? () => removeSampleMaterial(activeQuery, activeAgent) : undefined)}
                               {otherItems.map((it, i) => (
                                 <span key={`oth-${i}`} className="qc-mchip qc-mchip-att on" title={sampleMaterialText(it)}>
                                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
@@ -4576,48 +4597,23 @@ export const Queries: React.FC<{
                                   placeholder="What else did you send?"
                                   aria-label="Other material"
                                   onChange={(e) => setOtherText(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter") { e.preventDefault(); saveOtherMaterial(activeQuery, activeAgent); }
-                                    if (e.key === "Escape") { e.preventDefault(); setOtherOpen(false); setOtherText(""); }
-                                  }}
+                                  /* ⚠️ ENTER SAVES; ESCAPE IS DELIBERATELY NOT HANDLED HERE. The
+                                     page's rule is EXACTLY ONE Escape listener — two, both reaching
+                                     the journey's exit, run the dirty guard twice and ask about a
+                                     draft the first has already discarded. A field-level Escape is
+                                     a different thing and the rule cannot tell them apart; Cancel
+                                     is beside the field, and the overlays that DO own Escape own it
+                                     through `F12Popover` and `F12Menu`. */
+                                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveOtherMaterial(activeQuery, activeAgent); } }}
                                 />
                                 <button type="button" onClick={() => saveOtherMaterial(activeQuery, activeAgent)} disabled={!otherText.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: otherText.trim() ? "pointer" : "default", opacity: otherText.trim() ? 1 : 0.5 }}>Add</button>
                                 <button type="button" className="qc-mact" onClick={() => { setOtherOpen(false); setOtherText(""); }}>Cancel</button>
                               </div>
                             )}
-                            {sampleEditorOpen && (
-                              <div className="qc-msub qc-msamp">
-                                <div role="group" aria-label="Sample unit" style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--bd)" }}>
-                                  {/* ⚠️ `SAMPLE_UNITS`, AND SWITCHING SNAPS RATHER THAN CONVERTING.
-                                      `snapToUnit` gives that unit's own default instead of
-                                      arithmetically turning 3 chapters into 3 pages — a fake
-                                      conversion states a quantity the writer never chose. */}
-                                  {SAMPLE_UNITS.map((u) => (
-                                    <button key={u} type="button" onClick={() => { setSampleUnit(u); setSampleQty(snapToUnit(u)); }} aria-pressed={sampleUnit === u}
-                                      style={{ flex: 1, padding: "6px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, cursor: "pointer", border: "none", background: "var(--panel, #fffdfb)", boxShadow: sampleUnit === u ? "inset 0 0 0 1.5px var(--ink, #1e1a16)" : "none", color: sampleUnit === u ? "var(--ink, #1e1a16)" : "#6b6257", fontWeight: sampleUnit === u ? 600 : 400 }}>{u}</button>
-                                  ))}
-                                </div>
-                                {/* ⚠️ `stepAmount` — THE EXISTING ARITHMETIC, AND ITS STEP VARIES BY
-                                      UNIT: 1 chapter, 5 pages, 500 words, each floored and capped
-                                      by `MAT_QTY`'s storage range. A hard-coded ±1 would make the
-                                      writer press an arrow a thousand times to reach a word count,
-                                      and would let a value past the range the rules validate. */}
-                                <span className="qc-mqty">
-                                  <input type="text" inputMode="numeric" value={sampleQty} onChange={(e) => setSampleQty(e.target.value)} aria-label="Quantity"
-                                    onKeyDown={(e) => {
-                                      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-                                      e.preventDefault();
-                                      setSampleQty(stepAmount(sampleQty, sampleUnit, e.key === "ArrowUp" ? 1 : -1));
-                                    }} />
-                                  <span className="qc-mqtysteps">
-                                    <button type="button" aria-label={`Up one step of ${sampleUnit.toLowerCase()}`} onClick={() => setSampleQty(stepAmount(sampleQty, sampleUnit, 1))}>▲</button>
-                                    <button type="button" aria-label={`Down one step of ${sampleUnit.toLowerCase()}`} onClick={() => setSampleQty(stepAmount(sampleQty, sampleUnit, -1))}>▼</button>
-                                  </span>
-                                </span>
-                                <button type="button" onClick={() => saveSampleMaterial(activeQuery, activeAgent)} disabled={!sampleQty.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: sampleQty.trim() ? "pointer" : "default", opacity: sampleQty.trim() ? 1 : 0.5 }}>Save</button>
-                                <button type="button" onClick={() => setSampleEditorOpen(false)} className="qc-mact">Cancel</button>
-                              </div>
-                            )}
+                            {/* ⚠️ THE INLINE SAMPLE EDITOR IS GONE (§5) — its unit toggle, its
+                                stepper and its Save/Cancel are the chip's own popover now. A row
+                                that expanded under the chips pushed everything below it every time
+                                a quantity was checked, and it could only ever edit the sample. */}
                           </div>
 
                           {/* ══ §2 · THE STATUS BLOCK ══════════════════════════════════════════
@@ -4649,6 +4645,72 @@ export const Queries: React.FC<{
 
                         </div>
                       </div>
+                      {/* ══ §5 · THE CHIP'S OWN POPOVER ═══════════════════════════════════════
+                          ⚠️ ONE POPOVER, ANCHORED TO WHICHEVER CHIP OPENED IT. Three mounted
+                          popovers would be three places for the open state to disagree.
+                          ⚠️ AND IT PORTALS THROUGH THE PAGE'S OWN `F12Popover` — which already
+                          closes on Escape and on an outside click and escapes the pane's
+                          `overflow: hidden`. A fourth popover primitive on this page would be a
+                          fourth way to open a menu. */}
+                      {matPop && (
+                        <F12Popover
+                          width={272}
+                          title={matPop === "ql" ? "Query letter" : matPop === "syn" ? "Synopsis" : "Opening sample"}
+                          style={matPopStyle}
+                          onClose={() => { setSampleEditorOpen(false); closeMatPop(); }}
+                        >
+                          {matPop === "smp" && (
+                            <>
+                              {/* ⚠️ THE SHARED UNIT SET AND THE SHARED ARITHMETIC. Switching SNAPS
+                                  to that unit's default rather than converting 3 chapters into 3
+                                  pages, and the step is `stepAmount`'s — 1 chapter, 5 pages, 500
+                                  words — floored and capped by the range the rules validate. */}
+                              <div className="qc-mpoprow">
+                                <span>Quantity</span>
+                                <span className="qc-mqty">
+                                  <input type="text" inputMode="numeric" value={sampleQty} aria-label="Quantity"
+                                    onChange={(e) => setSampleQty(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+                                      e.preventDefault();
+                                      setSampleQty(stepAmount(sampleQty, sampleUnit, e.key === "ArrowUp" ? 1 : -1));
+                                    }} />
+                                  <span className="qc-mqtysteps">
+                                    <button type="button" aria-label={`Up one step of ${sampleUnit.toLowerCase()}`} onClick={() => setSampleQty(stepAmount(sampleQty, sampleUnit, 1))}>▲</button>
+                                    <button type="button" aria-label={`Down one step of ${sampleUnit.toLowerCase()}`} onClick={() => setSampleQty(stepAmount(sampleQty, sampleUnit, -1))}>▼</button>
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="qc-mpopunits" role="group" aria-label="Sample unit">
+                                {SAMPLE_UNITS.map((u) => (
+                                  <button key={u} type="button" aria-pressed={sampleUnit === u} className={sampleUnit === u ? "on" : undefined}
+                                    onClick={() => { setSampleUnit(u); setSampleQty(snapToUnit(u)); }}>{u}</button>
+                                ))}
+                              </div>
+                              <button type="button" className="qc-mpopact" onClick={() => { saveSampleMaterial(activeQuery, activeAgent); closeMatPop(); }} disabled={!sampleQty.trim()}>
+                                Save quantity
+                              </button>
+                            </>
+                          )}
+                          {/* ⚠️ MARK AS SENT SHOWS THE CURRENT STATE rather than only the verb — a
+                              toggle that says "Mark as sent" whichever way it is set gives the
+                              writer no way to read the record without changing it. */}
+                          {matPop !== "smp" && (
+                            <button type="button" className="qc-mpopact" onClick={() => { toggleDocMaterial(activeQuery, activeAgent, matPop === "ql" ? "query" : "synopsis"); closeMatPop(); }}>
+                              {(matPop === "ql" ? qlSent : synSent) ? "Sent ✓ — un-mark" : "Mark as sent"}
+                            </button>
+                          )}
+                          {/* ⚠️ REMOVE IS LAST AND BURGUNDY — the destructive verb furthest from the
+                              one your hand lands on first. */}
+                          <button type="button" className="qc-mpopact qc-mpopact-danger"
+                            onClick={() => {
+                              if (matPop === "smp") removeSampleMaterial(activeQuery, activeAgent);
+                              else if ((matPop === "ql" ? qlSent : synSent)) toggleDocMaterial(activeQuery, activeAgent, matPop === "ql" ? "query" : "synopsis");
+                              closeMatPop();
+                            }}
+                          >Remove from query</button>
+                        </F12Popover>
+                      )}
                       <div className="qc-mailins" aria-hidden="true" />
                     </div>
                   );

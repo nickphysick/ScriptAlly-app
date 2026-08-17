@@ -276,8 +276,11 @@ describe("§1 · the query header is a mail header", () => {
     const con = rule(".qc-mchip-con");
     const att = rule(".qc-mchip-att");
     expect(base, "the shared chip base is missing — the two families would size separately").not.toBe("");
-    expect(base, "the chips lost their shared height").toContain("height: 24px");
-    expect(base, "the chips lost their shared radius").toContain("border-radius: 999px");
+    /* ⚠️ 24 → 26 AND THE PILL → A ROUNDED RECTANGLE (§4). Both refs draw the chip at radius 7–8;
+       the two families are held EQUAL at 7 rather than a pixel apart, because the law is that they
+       differ in GROUND and nothing else. The height moved with the type, which went to 11.5px. */
+    expect(base, "the chips lost their shared height").toContain("height: 26px");
+    expect(base, "the chips lost their shared radius").toContain("border-radius: 7px");
     expect(con, "a contact is no longer white with a rim").toContain("background: var(--white)");
     expect(con, "a contact lost its rim").toMatch(/border:\s*1px solid var\(--qc-rim-off\)/);
     expect(att, "an attachment is no longer a filled neutral").toContain("background: var(--n2)");

@@ -2405,6 +2405,17 @@ button.qc-mname:hover { color: var(--burg); }
    row keeps one rhythm; different treatment, so it is not mistaken for a material. */
 .qc-mchip-add { background: var(--white); border: 1px solid var(--qc-rim-off); color: var(--burg); font-weight: 500; }
 .qc-mchip-add:hover { border-color: var(--burg); }
+/* ── §5 · the chip popover's rows ──────────────────────────────────────────────────────────── */
+.qc-mpoprow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 2px 10px; font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--ink-2); }
+.qc-mpopunits { display: flex; gap: 5px; padding-bottom: 12px; }
+.qc-mpopunits button { flex: 1; padding: 5px 0; border: 1px solid var(--qc-rim-off); border-radius: 6px; background: var(--white); font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); cursor: pointer; }
+/* ⚠️ THE SELECTED UNIT TAKES THE PAGE'S PINK, which here means "chosen" rather than "outgoing" —
+   it is the same treatment the list's selected row wears, and this popover draws no status. */
+.qc-mpopunits button.on { background: var(--pink-t); border-color: var(--qc-rim-pink); color: var(--burg); font-weight: 600; }
+.qc-mpopact { display: block; width: 100%; text-align: left; padding: 9px 10px; border: 0; border-radius: 8px; background: none; font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--ink-2); cursor: pointer; }
+.qc-mpopact:hover { background: var(--n1); }
+.qc-mpopact:disabled { color: var(--qc-tx-off); cursor: default; background: none; }
+.qc-mpopact-danger { color: var(--burg); }
 .qc-mfree { flex: 1; min-width: 180px; max-width: 320px; height: 32px; padding: 0 10px; border: 1px solid var(--bd); border-radius: 8px; background: var(--panel, #fffdfb); font-family: "Inter", sans-serif; font-size: 13px; color: var(--hub-item, #1a1512); }
 /* ⚠️ ONE BORDERED BOX HOLDING THE FIELD AND ITS ARROWS — the manuscripts plate's shape, which is
    the shape this app already uses for a stepped number. The arrows sit INSIDE the border behind a
