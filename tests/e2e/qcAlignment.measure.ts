@@ -100,7 +100,20 @@ const geometry = (page: import("@playwright/test").Page) => page.evaluate(() => 
       }
       return { left, right };
     })(),
-    /* the two narrow columns, which the amendment says are one figure */
+    /**
+     * ⚠️ THE AMENDMENT'S "TWO NARROW COLUMNS ARE ONE FIGURE" IS SUPERSEDED BY §3, and this reads the
+     * rule that replaced it. Pinning the pane's right column to `--listw` fixed a real fault — a
+     * proportion of the LEFTOVER measured 245 against the list's 334 — by making the two the same
+     * width. The ratio is stated directly now: the stack is 40% of the PANE rather than the list's
+     * twin, so the durable claim is the SPLIT, measured at every width.
+     */
+    split: (() => {
+      const cols = q(".qp-cols");
+      const kids = cols ? (Array.from(cols.children) as HTMLElement[]).filter((k) => k.offsetHeight > 0) : [];
+      if (kids.length < 2) return null;
+      const t = kids[0].getBoundingClientRect().width, s2 = kids[1].getBoundingClientRect().width;
+      return { track: t, stack: s2, pct: (t / (t + s2)) * 100 };
+    })(),
     narrow: (() => {
       const stack = q(".qp-stack");
       return { list: r(list)!.width, paneRight: stack ? r(stack)!.width : null };
@@ -136,6 +149,7 @@ for (const width of WIDTHS) {
       `  gutters  left ${Math.round(g!.gutters.left)}  right ${Math.round(g!.gutters.right)}  bottom ${Math.round(g!.gutters.bottom)}\n` +
       `  gaps     band→cols ${Math.round(g!.bandGap)}  channel ${Math.round(g!.channel)}  pane cards ${JSON.stringify(g!.paneGaps)}  stack ${g!.cardGap}  pane cols ${g!.colGap}\n` +
       `  pane     content left ${Math.round(g!.paneEdges.left)}  right ${Math.round(g!.paneEdges.right)}\n` +
+      `  split    ${g!.split ? g!.split.pct.toFixed(1) + "/" + (100 - g!.split.pct).toFixed(1) : "n/a"}  (track ${g!.split ? Math.round(g!.split.track) : 0} · stack ${g!.split ? Math.round(g!.split.stack) : 0})\n` +
       `  narrow   list ${Math.round(g!.narrow.list)}  pane-right ${g!.narrow.paneRight != null ? Math.round(g!.narrow.paneRight) : "n/a"}\n` +
       `  radii    ${g!.radii.join(" ")}`);
 
@@ -167,9 +181,11 @@ for (const width of WIDTHS) {
     const gaps = [g!.channel, ...g!.paneGaps, g!.cardGap, g!.colGap].filter((n): n is number => n != null);
     expect(new Set(gaps.map((n) => Math.round(n))).size, `the gaps are not one value: ${gaps.map((n) => Math.round(n)).join(", ")}`).toBe(1);
 
-    /* 4b — the two narrow columns are one figure, because they read one token */
-    if (g!.narrow.paneRight != null) {
-      expect(near(g!.narrow.list, g!.narrow.paneRight), `the two narrow columns differ: ${g!.narrow.list} vs ${g!.narrow.paneRight}`).toBe(true);
+    /* 4b — the pane splits 60/40 (§3), at every width. Asserted as the RATIO rather than as two
+       widths, because the ratio is the specification and the widths are what it produces. */
+    if (g!.split) {
+      expect(Math.abs(g!.split.pct - 60), `the pane splits ${g!.split.pct.toFixed(1)}/${(100 - g!.split.pct).toFixed(1)}, not 60/40`)
+        .toBeLessThanOrEqual(0.5);
     }
   });
 }
