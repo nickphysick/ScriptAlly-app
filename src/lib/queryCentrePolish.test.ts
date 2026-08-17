@@ -45,7 +45,10 @@ describe("§3 · one button rule, app-wide on this page", () => {
     /* ⚠️ TOKENS RATHER THAN THREE MATCHED NUMBERS. §1's control cells read `--btn-h` for their
        min-height, so the heads stay on one line whatever the height becomes; a literal here would
        agree today and drift the first time anyone tuned the button. */
-    expect(css, "the button tokens are gone").toContain("--btn-h: 32px; --btn-r: 8px; --btn-line: #e2d8ca;");
+    /* ⚠️ 32 → 40 AND 8 → 10 (§3) — the verbs were lighter than the things they act on. The clause is
+       unchanged and is the reason this case exists: the values are TOKENS, declared once, so "one
+       button" stays enforceable by grep as well as by eye. */
+    expect(css, "the button tokens are gone").toContain("--btn-h: 40px; --btn-r: 10px; --btn-line: #e2d8ca;");
   });
 
   it("the base button reads them, and states one rim and one hover", () => {
@@ -53,11 +56,11 @@ describe("§3 · one button rule, app-wide on this page", () => {
     expect(r, "the button rule is missing").not.toBe("");
     expect(declValue(r, "height"), "the height stopped being the token").toBe("var(--btn-h)");
     expect(declValue(r, "border-radius"), "the radius stopped being the token").toBe("var(--btn-r)");
-    expect(declValue(r, "font-size"), "the type size moved off 12px").toBe("12px");
+    expect(declValue(r, "font-size"), "the type size moved off 13px").toBe("13px");
     expect(declValue(r, "font-weight"), "the weight moved off 500").toBe("500");
     expect(declValue(r, "gap"), "the icon gap moved off 7px").toBe("7px");
     expect(declValue(r, "border"), "the rim is not the single border colour").toContain("var(--btn-line)");
-    expect(declValue(rule(".qc-btn svg"), "width"), "the icon moved off 13px").toBe("13px");
+    expect(declValue(rule(".qc-btn svg"), "width"), "the icon moved off 13px").toBe("16px");
   });
 
   /**

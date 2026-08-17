@@ -156,7 +156,9 @@ describe("Queries hub · the list card's Filter / Sort are LABELLED pills", () =
        this token and `--mono-tonal` — so a first-match slice reads whichever happens to come first
        and would silently start testing the other one the day they swap order. The repo has been
        caught by that shape twice already; a declaration this exact needs no slice at all. */
-    expect(f12, "the size token is not declared").toContain("--f12-icon-btn: 34px");
+    /* ⚠️ 34 → 40 (§3). The token is the point: the pills and the search FIELD both read it, so the
+       three share a baseline because they share one value rather than because three were matched. */
+    expect(f12, "the size token is not declared").toContain("--f12-icon-btn: 40px");
     expect(pill, "the circle came back — it is what made the two controls read as two components").not.toContain("border-radius: 999px");
     expect(shellComp, "the v4 chevron is retired with the label").not.toContain("f12-cv");
   });

@@ -143,7 +143,9 @@ describe("§1c · one button vocabulary", () => {
       expect(r, `${sel} has no rule — it would take its size from its contents`).not.toBe("");
       expect(r, `${sel} restated a number instead of reading the token`).toContain("height: var(--f12-icon-btn)");
     }
-    expect(css, "the size token is not declared").toContain("--f12-icon-btn: 34px");
+    /* ⚠️ 34 → 40 (§3). The token is the point: the pills and the search FIELD both read it, so the
+       three share a baseline because they share one value rather than because three were matched. */
+    expect(css, "the size token is not declared").toContain("--f12-icon-btn: 40px");
   });
 
   it("the pill and the kebab share the radius the rest of the page's buttons use", () => {

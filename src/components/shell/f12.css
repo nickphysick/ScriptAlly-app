@@ -999,13 +999,21 @@
  * index.css open, and this file already carries that exact precedent (`--mono-tonal`, further down,
  * with the same note). Fold it into index.css's `.t-f12` block when the tree is quiet.
  */
-.t-f12 { --f12-icon-btn: 34px; }
+/* ⚠️ 34 → 40 (§3). The list's filter and sort read this and so does the search FIELD, which is the
+   pairing that made 34 the number in the first place — the three share a baseline because they
+   share a token, not because three values were matched. They rise together or not at all. */
+.t-f12 { --f12-icon-btn: 40px; }
 /* ── §3 · THE ONE BUTTON RULE, AS THREE TOKENS ────────────────────────────────────────────────
    Height, radius and the single border colour every control on this page reads — the header's
    Export and Log query included. Declared with the other page tokens rather than at each use site
    so "one button" is enforceable by grep as well as by eye. §1 reads `--btn-h` for the control
    cells' `min-height`, which is what keeps the two heads on one line whatever is in them. */
-.t-f12 { --btn-h: 32px; --btn-r: 8px; --btn-line: #e2d8ca; --btn-rim: 1px; }
+/* ⚠️ 32 → 40, 8 → 10 (§3). The query verbs were lighter than the things they act on: a 32px
+   control above a 195px card and beside a 40px search field. The height comes from the PADDING and
+   the type — 13px labels, 16px glyphs — rather than from a fixed box, so the button grows with
+   what it says. `Log new query` reads the same two tokens, which is what puts the two columns'
+   controls on one line. */
+.t-f12 { --btn-h: 40px; --btn-r: 10px; --btn-line: #e2d8ca; --btn-rim: 1px; }
 
 /* ══ QUERY CENTRE · THE PAGE'S SURFACE TOKENS (§1 — a refactor, not a repaint) ═══════════════════
  *
@@ -1415,6 +1423,16 @@
 .qc-sp { flex: 1; }
 /* ⚠️ THE SUB-COUNT IS AN `<i>` INSIDE THE COUNT, not a sibling — the two are one statement about
    one set ("25 queries, 16 of them awaiting"), and a sibling would be free to wrap away from it. */
+/* ══ §2 · LOG NEW QUERY ═════════════════════════════════════════════════════════════════════
+ * ⚠️ NEAR-BLACK ON PINK, NOT BURGUNDY ON PINK. Burgundy is the outgoing-status colour in the dot
+ * system; a primary action wearing it would borrow a word that already means something else. The
+ * plus takes the same ink as the label so the two read as one control.
+ * ⚠️ AND IT IS THE SAME BOX AS THE TOOLBAR'S BUTTONS — `--btn-h`, `--btn-r` — so the two columns'
+ * controls sit on one line. Only the GROUND differs, which is the whole of the emphasis. */
+.qc-logq { display: inline-flex; align-items: center; gap: 8px; flex: none; height: var(--btn-h); padding: 0 17px; border-radius: var(--btn-r); border: var(--btn-rim) solid var(--qc-rim-pink); background: var(--pink); font-family: "Inter", sans-serif; font-size: 13px; font-weight: 500; color: var(--ink); cursor: pointer; }
+.qc-logq svg { width: 15px; height: 15px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; }
+.qc-logq:hover { border-color: var(--pink-i); }
+.qc-logq:disabled { opacity: 0.5; cursor: default; }
 .qc-count { font-family: var(--f12-serif); font-size: 18px; font-weight: 500; line-height: 1; color: var(--ink); white-space: nowrap; }
 .qc-count i { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; color: var(--faint); margin-left: 9px; }
 /* The pane cell's label: whose verbs these are. Mono, quiet, and never a heading — the pane below
@@ -1601,14 +1619,14 @@
    the same screen, and the two meanings would have to be told apart by position. */
 .qc-btn {
   display: inline-flex; align-items: center; gap: 7px; flex: none;
-  height: var(--btn-h); padding: 0 12px; border-radius: var(--btn-r);
+  height: var(--btn-h); padding: 0 17px; border-radius: var(--btn-r);
   border: var(--btn-rim) solid var(--btn-line); background: var(--white);
-  color: var(--ink-2); font-family: inherit; font-size: 12px; font-weight: 500; line-height: 1;
+  color: var(--ink-2); font-family: inherit; font-size: 13px; font-weight: 500; line-height: 1;
   white-space: nowrap; cursor: pointer;
   transition: background-color 0.14s, border-color 0.14s, color 0.14s;
 }
 .qc-btn:hover { background: var(--paper); border-color: var(--qc-rim-h); }
-.qc-btn svg { width: 13px; height: 13px; flex: 0 0 13px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.qc-btn svg { width: 16px; height: 16px; flex: 0 0 16px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 /**
  * ══ §5 · THE PRIMARY JOINS THE FAMILY ════════════════════════════════════════════════════════
  *
@@ -1646,6 +1664,9 @@
 .qc-btn:disabled:hover, .qc-btn-off:hover { background: var(--white); border-color: var(--qc-rim-off); }
 .qc-btn:disabled svg, .qc-btn-off svg { opacity: 0.55; }
 /* the icon-only form: a square of the same height, so it sits on the row's line without arithmetic */
+/* ⚠️ SQUARE AT THE NEW HEIGHT — the icon-only Export is the one button with no label to set its
+   width, so it takes the height as its width and stays square rather than growing with the
+   padding the labelled ones use. */
 .qc-btn-icon { padding: 0; width: var(--btn-h); justify-content: center; }
 /* ⚠️ THE RULE BETWEEN THE VERB GROUPS IS RETIRED (§3c) — the gap carries the division. Kept as a
    rule with no reader would be an invitation; `--qc-rim-sep` still has other readers on the page.
