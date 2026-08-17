@@ -141,6 +141,48 @@ describe("⚠️ one implementation — logout() itself", () => {
   });
 });
 
+describe("the second door — Account & settings", () => {
+  const SETTINGS = read("../AccountSettings.tsx");
+
+  it("offers a sign-out row", () => {
+    expect(SETTINGS).toContain('title="Signing out"');
+    expect(SETTINGS).toContain("Sign out");
+    expect(SETTINGS).toContain("acct-h-signout");
+  });
+
+  /**
+   * ⚠️ ABOVE THE DANGER ZONE, NOT BELOW IT. Someone scrolling to close their account should not
+   * pass the way out on the journey to deletion — and someone looking for the way out should not
+   * have to scroll past a delete button to find it. Two exits; the reversible one comes first.
+   */
+  it("sits above the closing-your-account block", () => {
+    const signOut = SETTINGS.indexOf('title="Signing out"');
+    const danger = SETTINGS.indexOf('title="Danger zone"');
+    expect(signOut).toBeGreaterThan(-1);
+    expect(danger).toBeGreaterThan(-1);
+    expect(signOut).toBeLessThan(danger);
+  });
+
+  /** ⚠️ THE SAME HANDLER, never a local signOut of its own. */
+  it("calls the shared logout", () => {
+    expect(SETTINGS).toContain("logout,");
+    expect(SETTINGS).toContain("void logout()");
+    expect(SETTINGS).not.toContain("signOut(auth)");
+  });
+
+  /**
+   * ⚠️ AND IT DOES NOT TOUCH THE DELETION PATH. The two controls sit next to each other, which is
+   * exactly why the boundary is worth asserting: sign-out must never reach the flag or the confirm.
+   */
+  it("is independent of the deletion path", () => {
+    const at = SETTINGS.indexOf('title="Signing out"');
+    const card = SETTINGS.slice(at, SETTINGS.indexOf('title="Danger zone"'));
+    expect(card).not.toContain("ACCOUNT_DELETION_ENABLED");
+    expect(card).not.toContain("setShowDelete");
+    expect(card).not.toContain("deletionConfirmed");
+  });
+});
+
 describe("no second implementation crept in", () => {
   /**
    * ⚠️ EVERY DOOR CALLS `logout`. Two sign-outs would eventually disagree about where they land —

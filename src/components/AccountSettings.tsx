@@ -64,6 +64,7 @@ import {
   ListChecks,
   Database,
   Trash2,
+  LogOut,
   Check,
   ChevronRight,
   Download,
@@ -543,6 +544,7 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
   const {
     currentUser, updateUserProfile, resetPassword,
     agents, queries, manuscripts, versions, packages, activities, notes, userTasks,
+    logout,
   } = useScriptAllyDb();
 
   const [active, setActive] = useState<SectionId>("profile");
@@ -937,6 +939,26 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
           </div>
           <button onClick={() => onNavigate("import")} style={ghostBtn}>
             <Upload style={{ width: 14, height: 14 }} aria-hidden="true" /> Open import
+          </button>
+        </div>
+      </SectionCard>
+
+      {/* ⚠️ SIGN OUT SITS ABOVE THE DANGER ZONE, NOT BELOW IT. Someone scrolling to close their
+          account should not pass the way out on the journey to deletion — and someone looking for
+          the way out should not have to scroll past a delete button to find it. Two exits, and the
+          reversible one comes first.
+
+          ⚠️ ONE IMPLEMENTATION, TWO DOORS. This is the same `logout` the account menu calls, so
+          where sign-out leaves you cannot differ by the door you used. */}
+      <SectionCard title="Signing out" Icon={LogOut} headingId="acct-h-signout">
+        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Sign out</p>
+            <p style={helpText}>Ends this session and takes you back to the ScriptAlly home page. Your work stays where it is.</p>
+          </div>
+          {/* No confirm: leaving is not destructive, and signing back in costs a password. */}
+          <button onClick={() => { void logout(); }} style={ghostBtn}>
+            <LogOut style={{ width: 14, height: 14 }} aria-hidden="true" /> Sign out
           </button>
         </div>
       </SectionCard>
