@@ -1647,7 +1647,12 @@
 .qc-btn:disabled svg, .qc-btn-off svg { opacity: 0.55; }
 /* the icon-only form: a square of the same height, so it sits on the row's line without arithmetic */
 .qc-btn-icon { padding: 0; width: var(--btn-h); justify-content: center; }
-.qc-sep { width: 1px; height: 16px; background: var(--qc-rim-sep); flex: 0 0 1px; margin: 0 4px; }
+/* ⚠️ THE RULE BETWEEN THE VERB GROUPS IS RETIRED (§3c) — the gap carries the division. Kept as a
+   rule with no reader would be an invitation; `--qc-rim-sep` still has other readers on the page.
+   ⚠️ AND THE GAP IS `flex: 1`, NOT A FIGURE. The closing group is pinned to the pane's RIGHT edge
+   and the opening group to its left, so the space between them is whatever the column has left —
+   which is what makes Delete "furthest from the primary" true at every width rather than at one. */
+.qc-gap { flex: 1; min-width: 12px; }
 
 /* ── §3 · THE HEADER'S TWO FOLLOW THE SAME RULE, ON THIS PAGE ONLY ────────────────────────────
    ⚠️ PAGE-SCOPED, BECAUSE `.svh-btn` IS TEN PAGES. Export and Log query are drawn by the shared

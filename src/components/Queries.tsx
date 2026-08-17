@@ -3332,35 +3332,6 @@ export const Queries: React.FC<{
               {mastheadScopedQueries.length} {mastheadScopedQueries.length === 1 ? "query" : "queries"}
               <i>{mastheadScopedQueries.filter((q) => queryBucket(q.status as QueryStatus) === "waiting").length} AWAITING</i>
             </div>
-            <span className="qc-sp" />
-            {/* ⚠️ FILTER AND SORT LEFT THE SEARCH ROW (§1). They narrow the list, so they stay over
-                the list — but the search does ONE job in the panel below and these two are controls
-                on the set, not on the field. Wiring untouched: same handlers, same popovers, same
-                refs, so every lock that reads them still reads them. */}
-            <div className="f12-popwrap">
-              <PillTrig
-                ref={filterTrigRef}
-                label="Filter"
-                open={filterPopOpen}
-                active={activeFilterCount > 0}
-                count={activeFilterCount}
-                onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
-                icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
-              />
-              {filterPopOpen && renderFilterPopover()}
-            </div>
-            <div className="f12-popwrap">
-              <PillTrig
-                ref={sortTrigRef}
-                label="Sort"
-                open={sortPopOpen}
-                active={sortKey !== "last_activity"}
-                value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
-                onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
-                icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
-              />
-              {sortPopOpen && renderSortPopover()}
-            </div>
           </div>
 
           {/* ⚠️ THE PANE'S VERBS CAME UP OUT OF THE HERO BAND (§1). They acted on the selected query
@@ -3368,7 +3339,12 @@ export const Queries: React.FC<{
               verbs belong to the column, above the thing they change, on the same line as the list's.
               §2 settles WHICH verbs — this row is their seat. */}
           <div className="qc-phead">
-            <span className="qc-who">THIS QUERY</span>
+            {/* ⚠️ `THIS QUERY` IS RETIRED (§3c), AND ITS OWN SENTENCE IS WHY. §3a says the label
+                "was being contradicted" by Filter and Sort sitting in this row; with them gone it
+                is true — and now redundant, because the column IS the query's and the pairing card
+                sits directly beneath it. It also occupied the one position §3c needs: the primary
+                has to start at the pane's left edge for the two columns to read as one grid, and a
+                label there pushes it off by its own width. */}
             {/* ⚠️ AN IIFE IN THE RENDER, NOT A `const` ABOVE IT. Every handler these verbs call is a
                 `const` arrow declared further down the component; a `paneVerbs` const defined up
                 beside `activeQuery` would read them from their temporal dead zone and throw on the
@@ -3424,8 +3400,11 @@ export const Queries: React.FC<{
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
                     <span>Nudge</span>
                   </button>
-                  {/* The rule divides what continues the conversation from what ends it. */}
-                  <span className="qc-sep" aria-hidden="true" />
+                  {/* ⚠️ THE GAP CARRIES THE DIVISION, NOT A RULE (§3c). Two groups: what moves the
+                      query forward, then what ends it or takes it out of the app. A 1px rule between
+                      them was a second device saying what the space already says, and it read as
+                      chrome inside a row that is otherwise all verbs. */}
+                  <span className="qc-gap" />
                   <button
                     ref={closeTriggerRef}
                     type="button"
@@ -3437,6 +3416,22 @@ export const Queries: React.FC<{
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 8-8M21 12a9 9 0 1 1-6.2-8.5" /></svg>
                     <span>Mark closed</span>
+                  </button>
+                  {/* ⚠️ `Download as PDF` IS THE PACK'S "EXPORT", AND IT FINALLY HAS A SEAT (§3c).
+                      §2 could place four verbs and left this one trailing behind a rule, flagged as
+                      unresolved: its subject IS the query, so it could not be rehomed, and it was
+                      not among the four. §3c names five and puts it second in the closing group —
+                      between Mark closed and Delete. It stays an ICON at every width, which keeps
+                      the four LABELLED verbs reading as four. */}
+                  <button
+                    type="button"
+                    className="qc-btn qc-btn-icon"
+                    disabled={isGeneratingPDF}
+                    title={isGeneratingPDF ? "Generating…" : "Download this query as PDF"}
+                    aria-label={isGeneratingPDF ? "Generating PDF" : "Download this query as PDF"}
+                    onClick={() => handleDownloadPDF()}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
                   </button>
                   {/* ⚠️ DELETE SITS OPENLY IN THE ROW BECAUSE §9 GIVES IT AN UNDO. A destructive verb
                       with no way back needs a dialogue to interrupt the flow; one with five seconds
@@ -3450,24 +3445,7 @@ export const Queries: React.FC<{
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" /></svg>
                     <span>Delete</span>
                   </button>
-                  {/* ⚠️ REPORTED, NOT RESOLVED — `Download as PDF` HAS NO SEAT IN THE PACK. §2 names
-                      four verbs and rehomes four other controls "to where its subject is named";
-                      this one's subject IS the query, so by the pack's own test it cannot move, and
-                      it is not among the four. Deleting a live control to make a list of four come
-                      out right is the one thing that would definitely be wrong, so it stays — as an
-                      icon at every width, which keeps the four LABELLED verbs reading as four.
-                      Nick's call whether it belongs here at all. */}
-                  <span className="qc-sep" aria-hidden="true" />
-                  <button
-                    type="button"
-                    className="qc-btn qc-btn-icon"
-                    disabled={isGeneratingPDF}
-                    title={isGeneratingPDF ? "Generating…" : "Download this query as PDF"}
-                    aria-label={isGeneratingPDF ? "Generating PDF" : "Download this query as PDF"}
-                    onClick={() => handleDownloadPDF()}
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
-                  </button>
+
                 </>
               );
             })() : (
@@ -3490,18 +3468,21 @@ export const Queries: React.FC<{
                   <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
                   <span>Nudge</span>
                 </button>
-                <span className="qc-sep" />
+                {/* ⚠️ THE GHOST MIRRORS THE LIVE ROW EXACTLY — same order, same grouping, same gap
+                    (§3c). It is what the row looks like with nothing selected, so any divergence
+                    would make the row move when a query is clicked, which is the fault the ghost
+                    exists to prevent. */}
+                <span className="qc-gap" />
                 <button type="button" className="qc-btn qc-btn-shrink" disabled tabIndex={-1}>
                   <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12a9 9 0 1 1-6.2-8.5" /></svg>
                   <span>Mark closed</span>
                 </button>
+                <button type="button" className="qc-btn qc-btn-icon" disabled tabIndex={-1}>
+                  <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+                </button>
                 <button type="button" className="qc-btn qc-btn-shrink qc-btn-danger" disabled tabIndex={-1}>
                   <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6" /></svg>
                   <span>Delete</span>
-                </button>
-                <span className="qc-sep" />
-                <button type="button" className="qc-btn qc-btn-icon" disabled tabIndex={-1}>
-                  <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
                 </button>
               </span>
             )}
@@ -3543,8 +3524,42 @@ export const Queries: React.FC<{
                   aria-label="Search queries"
                 />
               </div>
-              {/* ⚠️ FILTER AND SORT ARE GONE FROM THIS ROW (§1) — they are in the control cell above
-                  the panel now, beside the count they narrow. What is left does ONE job: search. */}
+              {/* ⚠️ FILTER AND SORT ARE BACK IN THIS ROW (§3a), REVERSING §1's MOVE ON ITS OWN
+                  TERMS. §1 argued they "narrow the list, so they stay over the list" and put them
+                  beside the count — which is over the list, and is also the row the pack labelled
+                  THIS QUERY. Two controls acting on the whole set sat inside a row named for one
+                  record. They act on the LIST, so they belong in the list's own row, beside the
+                  field they act with.
+
+                  ⚠️ NOTHING IS LOST IN THE MOVE, and that is worth stating because it looks like it
+                  should be: `PillTrig` has been a 36px icon button since v5 P1 — the word lives in
+                  the title, the aria-label and the popover's own header — so the sort's chosen value
+                  was never on its face. The field shortens by two buttons and a gap; the wiring,
+                  handlers, popovers and refs are untouched. */}
+              <div className="f12-popwrap">
+                <PillTrig
+                  ref={filterTrigRef}
+                  label="Filter"
+                  open={filterPopOpen}
+                  active={activeFilterCount > 0}
+                  count={activeFilterCount}
+                  onClick={() => { setSortPopOpen(false); setFilterPopOpen(o => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8v6l-4-2v-4L3 5z" /></svg>}
+                />
+                {filterPopOpen && renderFilterPopover()}
+              </div>
+              <div className="f12-popwrap">
+                <PillTrig
+                  ref={sortTrigRef}
+                  label="Sort"
+                  open={sortPopOpen}
+                  active={sortKey !== "last_activity"}
+                  value={sortKey !== "last_activity" ? (F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || undefined) : undefined}
+                  onClick={() => { setFilterPopOpen(false); setSortPopOpen(o => !o); }}
+                  icon={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v14M7 18l-3-3M7 18l3-3M17 20V6M17 6l-3 3M17 6l3 3" /></svg>}
+                />
+                {sortPopOpen && renderSortPopover()}
+              </div>
             </div>
             <div ref={listScrollRef} className="f12-rows" role="listbox" aria-label="Queries">
               {/* ══ §5 · THE LIST GROUPS BY STATE ═══════════════════════════════════════════════

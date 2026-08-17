@@ -59,32 +59,47 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
   });
 
   /**
-   * ⚠️ SPLIT IN TWO BY §1, AND THE SCOPE ARGUMENT IS WHY. All three controls narrow the LIST, which
-   * is what put them in the list COLUMN — that is unchanged. What §1 separates is their two jobs:
-   * the search acts on the rows and stays pinned inside the panel with them; Filter and Sort act on
-   * the SET, so they sit in the control cell over the panel, beside the count of that set.
+   * ⚠️ REJOINED BY §3a, REVERSING §1's SPLIT ON ITS OWN ARGUMENT. §1 read the three controls as two
+   * jobs — the search acts on the ROWS, Filter and Sort on the SET — and put the latter pair in the
+   * control cell beside the count of that set. The scope reasoning was sound and the seat was not:
+   * that cell is the toolbar row, which the pack labels THIS QUERY, so two controls acting on the
+   * whole list sat inside a row named for one record.
+   *
+   * ⚠️ AND NOTHING IS LOST BY THE MOVE, which is the case worth asserting because it looks as
+   * though something should be: `PillTrig` has been a 36px icon button since v5 P1, so neither the
+   * word nor the sort's chosen value was ever on its face — they live in the title, the aria-label
+   * and the popover's header. The field simply shortens.
    */
-  it("the search stays inside the panel, with the rows it searches", () => {
+  it("the search row holds all three controls, at one height", () => {
     const body = populated();
     const head = code.indexOf('className="f12-lhead"', body);
     expect(head, "the panel's search row is missing").toBeGreaterThan(-1);
     const slice = code.slice(head, code.indexOf('className="f12-rows"', body));
     expect(slice, "the slice is empty — this case is testing nothing").toContain("f12-lsearch");
     expect(slice, "the search field left the panel").toContain('aria-label="Search queries"');
-    /* ⚠️ AND ONE JOB ONLY. Filter and Sort in this row is the state §1 corrected. */
-    expect(slice, "Filter came back to the search row").not.toContain('label="Filter"');
-    expect(slice, "Sort came back to the search row").not.toContain('label="Sort"');
+    expect(slice, "Filter is not in the search row").toContain('label="Filter"');
+    expect(slice, "Sort is not in the search row").toContain('label="Sort"');
+    /* ⚠️ ONE HEIGHT, FROM ONE TOKEN — the field and the two buttons all read `--f12-icon-btn`, so
+       the three share a baseline without any of them restating a number. */
+    expect(css, "the field stopped reading the shared control height")
+      .toContain(".f12-lhead .f12-lsearch { flex: 1; min-width: 0; margin: 0; height: var(--f12-icon-btn);");
+    expect(css, "the pills stopped reading the shared control height")
+      .toMatch(/\.f12-pill \{[^}]*height: var\(--f12-icon-btn\)/);
   });
 
-  it("Filter and Sort sit in the list's control cell, over the count they narrow", () => {
+  it("the toolbar cell holds the count alone — the row is the query's", () => {
     const cell = code.indexOf('className="qc-lhead"');
     expect(cell, "the list's control cell is missing").toBeGreaterThan(-1);
     const slice = code.slice(cell, code.indexOf('className="qc-phead"'));
     expect(slice, "the slice is empty — this case is testing nothing").toContain("qc-count");
-    expect(slice, "Filter left the cell").toContain('label="Filter"');
-    expect(slice, "Sort left the cell").toContain('label="Sort"');
+    expect(slice, "Filter came back to the toolbar").not.toContain('label="Filter"');
+    expect(slice, "Sort came back to the toolbar").not.toContain('label="Sort"');
     /* the count is the SCOPE's, from the same bucket function the pills read — never a fresh tally */
     expect(slice, "the sub-count stopped reading the shared bucket").toContain('queryBucket(q.status as QueryStatus) === "waiting"');
+    /* ⚠️ AND `THIS QUERY` IS RETIRED WITH THEM (§3c) — true once they left, and redundant: the
+       column is the query's and the pairing card sits directly beneath it. It also held the one
+       position the primary needs if the two columns are to read as one grid. */
+    expect(code, "the label came back into the position the primary needs").not.toContain("THIS QUERY");
   });
 
   /* ⚠️ THE POINT OF THE WHOLE SPLIT. Six selected-query verbs used to sit above the list, all six
