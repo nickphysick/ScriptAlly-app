@@ -1,0 +1,209 @@
+/**
+ * §1/§2 — the query header as a mail header, measured on the running page.
+ *
+ * ⚠️ THE LONGEST LABEL IS THE CASE, AND IT IS DRIVEN RATHER THAN ASSUMED. `Revise & resubmit` is
+ * the label that breaks this layout, and whether the account holds such a query is not something a
+ * source lock can know — so the run sweeps the list, reports which statuses it actually saw, and
+ * says so when the case went unexercised instead of passing on the ones that fit easily.
+ *
+ *   SA_E2E_BASE_URL=http://localhost:3000 npx playwright test --project=measure qcMailHeader
+ */
+import { test, expect, Page } from "@playwright/test";
+import { openRoute } from "./measure";
+
+const read = (page: Page) => page.evaluate(() => {
+  const r = (n: number) => Math.round(n * 10) / 10;
+  const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+  const box = (e: Element | null) => e ? e.getBoundingClientRect() : null;
+  const card = q(".qc-mail")!;
+  const rows = q(".qc-mailrows")!;
+  const st = q(".qc-mstatus")!;
+  const dot = st.querySelector("svg, .sa-statusdot, span") as HTMLElement | null;
+  const labs = [...document.querySelectorAll(".qc-mlab")] as HTMLElement[];
+  const vals = [...document.querySelectorAll(".qc-mval")] as HTMLElement[];
+  const subs = [...document.querySelectorAll(".qc-msub")] as HTMLElement[];
+  const names = [...document.querySelectorAll(".qc-mname")] as HTMLElement[];
+  const chip = (sel: string) => [...document.querySelectorAll(sel)].map((c) => {
+    const cs = getComputedStyle(c as HTMLElement); const b = c.getBoundingClientRect();
+    const tx = c.querySelector(".qc-mchiptx") as HTMLElement | null;
+    return { bg: cs.backgroundColor, bd: cs.borderTopWidth + " " + cs.borderTopColor, rad: cs.borderTopLeftRadius,
+             h: r(b.height), w: r(b.width), text: (tx?.textContent ?? "").trim(),
+             clipped: tx ? tx.scrollWidth > tx.clientWidth + 0.5 : false, title: c.getAttribute("title") ?? "",
+             wrapped: b.height > 30 };
+  });
+  return {
+    cardH: r(box(card)!.height),
+    /* ⚠️ ONE RAIL: every value and every sub-row starts at the same x */
+    rail: [...vals, ...subs].map((e) => r(box(e)!.left)),
+    labelX: labs.map((e) => r(box(e)!.left)),
+    labels: labs.map((e) => e.textContent?.trim() ?? ""),
+    /* the two names are peers — same face, size and ink */
+    nameStyles: names.map((e) => { const c = getComputedStyle(e); return `${c.fontFamily.split(",")[0].replace(/"/g, "")}|${c.fontSize}|${c.color}`; }),
+    contacts: chip(".qc-mchip-con"),
+    attachments: chip(".qc-mchip-att"),
+    /* §2 — the mark */
+    status: {
+      label: (q(".qc-mswd")?.textContent ?? "").trim(),
+      dotW: dot ? r(box(dot)!.width) : null,
+      dotH: dot ? r(box(dot)!.height) : null,
+      transform: dot ? getComputedStyle(dot).transform : "—",
+      blockTop: r(box(st)!.top), blockH: r(box(st)!.height),
+      rowsTop: r(box(rows)!.top), rowsH: r(box(rows)!.height),
+      rowsRight: r(box(rows)!.right), stLeft: r(box(st)!.left),
+      /* a hairline between the two would show up as a border on either box */
+      rowsBorder: getComputedStyle(rows).borderRightWidth, stBorder: getComputedStyle(st).borderLeftWidth,
+      textLines: Math.round((box(q(".qc-mswd"))!.height) / parseFloat(getComputedStyle(q(".qc-mswd")!).lineHeight || "1")),
+    },
+    /* what must NOT be here */
+    hasAvatar: !!document.querySelector(".qc-mail .f12-bigav"),
+    sageHead: !!document.querySelector(".qc-mail .f12-chh"),
+    cardText: (card.textContent ?? "").trim(),
+  };
+});
+
+test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  const rows = page.locator(".f12-row");
+  const n = Math.min(await rows.count(), 14);
+
+  const seen: { label: string; cardH: number; dot: number | null; lines: number; rowsH: number; blockH: number; right: number; chips: number }[] = [];
+  let checkedOne = false;
+
+  for (let i = 0; i < n; i++) {
+    await rows.nth(i).scrollIntoViewIfNeeded({ timeout: 2000 }).catch(() => {});
+    await rows.nth(i).click({ timeout: 2500 }).catch(() => {});
+    await page.waitForTimeout(140);
+    const m = await read(page);
+    seen.push({ label: m.status.label, cardH: m.cardH, dot: m.status.dotW, lines: m.status.textLines, rowsH: m.status.rowsH, blockH: m.status.blockH, right: m.status.rowsRight, chips: m.attachments.length + m.contacts.length });
+
+    if (!checkedOne) {
+      checkedOne = true;
+      console.log(`labels=${JSON.stringify(m.labels)} rail=${JSON.stringify([...new Set(m.rail)])} labelX=${JSON.stringify([...new Set(m.labelX)])}`);
+      console.log(`names=${JSON.stringify(m.nameStyles)}`);
+      console.log(`contacts=${JSON.stringify(m.contacts)}`);
+      console.log(`attachments=${JSON.stringify(m.attachments)}`);
+      console.log(`status=${JSON.stringify(m.status)}`);
+
+      /* §1 — one rail for every value and every sub-row */
+      expect([...new Set(m.rail)], `values and sub-rows start at different x: ${[...new Set(m.rail)].join(", ")}`).toHaveLength(1);
+      expect([...new Set(m.labelX)], "the labels are not in one column").toHaveLength(1);
+      expect(m.labels.map((l) => l.toUpperCase())).toEqual(["AGENT", "SENT"]);
+
+      /* the two names are peers */
+      expect([...new Set(m.nameStyles)], `the two names differ: ${m.nameStyles.join(" ⁄ ")}`).toHaveLength(1);
+      expect(m.nameStyles[0], "the names are not Playfair").toContain("Playfair");
+
+      /* the two chip families: same size and radius, different ground */
+      expect(m.contacts.length, "no contact chips").toBeGreaterThan(0);
+      expect(m.attachments.length, "no attachment chips").toBeGreaterThan(0);
+      const heights = new Set([...m.contacts, ...m.attachments].map((c) => c.h));
+      const radii = new Set([...m.contacts, ...m.attachments].map((c) => c.rad));
+      expect([...heights], `the two chip families differ in height: ${[...heights].join(", ")}`).toHaveLength(1);
+      expect([...radii], "the two chip families differ in radius").toHaveLength(1);
+      const conBg = new Set(m.contacts.filter((c) => !c.text.startsWith("No ")).map((c) => c.bg));
+      const attBg = new Set(m.attachments.map((c) => c.bg));
+      expect([...conBg].some((b) => attBg.has(b)), `the two families share a ground: ${[...conBg]} vs ${[...attBg]}`).toBe(false);
+      expect([...conBg][0], "a contact chip is not white").toBe("rgb(255, 255, 255)");
+      /* ⚠️ THE RIM IS TRANSPARENT, NOT ABSENT — and that is what makes "same size" true. `border: 0`
+         on the attachments would make them 2px shorter than the contacts, so the two families would
+         differ in the one dimension the pack says they must share. What must not happen is a rim
+         with a COLOUR, which is what a shared `.on` modifier gave them before the rename. */
+      for (const c of m.attachments) {
+        expect(c.bd, `an attachment chip grew a visible rim: ${c.bd}`).toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
+        expect(parseFloat(c.bd), "the attachment chips lost the width that keeps both families one size").toBe(1);
+      }
+
+      /* contacts show their value, never wrap, and carry the whole thing in `title` */
+      for (const c of m.contacts) {
+        expect(c.text, `a contact chip reads "${c.text}" — the word, not the value`).not.toMatch(/^(Email|Website)$/);
+        expect(c.wrapped, `a contact chip wrapped: "${c.text}"`).toBe(false);
+        expect(c.w, `a contact chip ran past the 270px cap: ${c.w}`).toBeLessThanOrEqual(270.5);
+        expect(c.title, "a contact chip has no full value in `title`").toBeTruthy();
+        if (c.clipped) expect(c.title.length, "a truncated chip's title is no longer than what it shows").toBeGreaterThan(c.text.length - 2);
+      }
+      /* ⚠️ WHETHER THE TRUNCATION RAN AT ALL DEPENDS ON THIS ACCOUNT'S ADDRESSES. Reported rather
+         than assumed: a green on chips that all fit says nothing about the ellipsis. */
+      if (!m.contacts.some((c) => c.clipped)) {
+        console.log(`⚠️ NO CONTACT LONG ENOUGH TO TRUNCATE on this query (widths ${m.contacts.map((c) => c.w).join(", ")} against a 270 cap) — the ellipsis is unexercised here`);
+      }
+
+      /* §2 — the locked component, larger and otherwise untouched */
+      expect(m.status.dotW, "the mark is not ~56px").toBeGreaterThan(50);
+      expect(m.status.dotW, "the mark is not ~56px").toBeLessThan(62);
+      expect(m.status.transform, "a transform is applied to the mark").toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
+      /* no hairline between the rows and the block */
+      expect(parseFloat(m.status.rowsBorder), "the rows drew a rule beside the status").toBe(0);
+      expect(parseFloat(m.status.stBorder), "the status block drew a rule beside the rows").toBe(0);
+
+      /* the removals */
+      expect(m.hasAvatar, "the initials avatar came back").toBe(false);
+      expect(m.sageHead, "the sage card header came back").toBe(false);
+      expect(m.cardText, "the Materials sent heading came back").not.toContain("Materials sent");
+    }
+  }
+
+  console.log(seen.map((s) => `  ${s.label}: card ${s.cardH} · rows ${s.rowsH} · block ${s.blockH} · rowsRight ${s.right} · chips ${s.chips} · mark ${s.dot} · lines ${s.lines}`).join("\n"));
+
+  /* ⚠️ THE LONGEST LABEL. Reported when absent rather than passed over. */
+  const longest = seen.filter((s) => /revise/i.test(s.label));
+  if (!longest.length) {
+    console.log("⚠️ NO `Revise & resubmit` QUERY IN THIS ACCOUNT — the longest-label case is unexercised on the page");
+  } else {
+    console.log(`Revise & resubmit: card ${longest[0].cardH} · mark ${longest[0].dot} · label lines ${longest[0].lines}`);
+    expect(longest[0].dot, "the longest label shrank the mark").toBeGreaterThan(50);
+  }
+  /* ⚠️ THE ROWS ARE NOT PUSHED — the pack's clause, and the one that failed. The status column is a
+     constant reserve, so the rows end at the same x whatever the label says; a `max-width` block
+     moved that edge by 77px between `Queried` and `Revise & Resubmit`. */
+  expect([...new Set(seen.map((s) => s.right))], `the status label moved the rows' right edge: ${[...new Set(seen.map((s) => s.right))].join(", ")}`).toHaveLength(1);
+  expect([...new Set(seen.map((s) => s.rowsH))], `the rows changed height with the status label: ${[...new Set(seen.map((s) => s.rowsH))].join(", ")}`).toHaveLength(1);
+  /* whatever labels the account holds, the card is one height and the mark one size */
+  expect([...new Set(seen.map((s) => s.dot))], `the mark changed size with the status: ${[...new Set(seen.map((s) => s.dot))].join(", ")}`).toHaveLength(1);
+});
+
+/**
+ * ⚠️ THE ELLIPSIS, EXERCISED DIRECTLY BECAUSE THE DATA CANNOT REACH IT. Every address on this
+ * account measures ~129px against a 270px cap, so the truncation branch renders green by never
+ * running — the failure this repo has a rule about. Here the rendered chip is given a long value
+ * and re-measured, then put back. That is a probe of the REAL rule on the REAL page, not a harness
+ * reconstruction: what it proves is that the CSS truncates rather than wraps, which is the clause.
+ * What it cannot prove is that any agent in this account has such an address, and it does not claim to.
+ */
+test("§1 — a long contact truncates and never wraps", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.locator(".f12-row").first().click({ timeout: 4000 }).catch(() => {});
+  await page.waitForTimeout(250);
+
+  const m = await page.evaluate(() => {
+    const r = (n: number) => Math.round(n * 10) / 10;
+    const chip = document.querySelector(".qc-mchip-con:not(.off)") as HTMLElement;
+    const tx = chip.querySelector(".qc-mchiptx") as HTMLElement;
+    const rowH = (document.querySelector(".qc-msub") as HTMLElement).getBoundingClientRect().height;
+    const was = tx.textContent ?? "";
+    const before = { w: r(chip.getBoundingClientRect().width), h: r(chip.getBoundingClientRect().height), rowH: r(rowH) };
+    tx.textContent = "a.very.long.editorial.assistant.address@an-exceedingly-long-agency-domain-name.co.uk";
+    const after = {
+      w: r(chip.getBoundingClientRect().width), h: r(chip.getBoundingClientRect().height),
+      rowH: r((document.querySelector(".qc-msub") as HTMLElement).getBoundingClientRect().height),
+      clipped: tx.scrollWidth > tx.clientWidth + 0.5,
+      overflow: getComputedStyle(tx).textOverflow, wrap: getComputedStyle(tx).whiteSpace,
+    };
+    tx.textContent = was;
+    return { before, after };
+  });
+  console.log(JSON.stringify(m));
+
+  expect(m.after.w, `a long address ran past the 270px cap: ${m.after.w}`).toBeLessThanOrEqual(270.5);
+  expect(m.after.h, "a long address made the chip taller — the TEXT wrapped").toBe(m.before.h);
+  /* ⚠️ THE SUB-ROW MAY REFLOW, AND THAT IS NOT THE CLAUSE. "Never wrap" is about the address: a
+     wrapped address turns a chip into a paragraph and moves everything under it. A second chip
+     dropping to its own line is the sub-row's `flex-wrap` doing the job it exists for — the
+     attachments row already uses it for four or five chips. Measured here: at the 270px cap the
+     row went 24 → 54 in a ~388px column, which is two chips on two lines, not a wrapped address.
+     I asserted the row's height first and it failed for this reason; the assertion was wrong, not
+     the rule. */
+  expect(m.after.rowH, "the sub-row collapsed rather than reflowing").toBeGreaterThanOrEqual(m.before.rowH);
+  expect(m.after.clipped, "the long address was not clipped at all").toBe(true);
+  expect(m.after.overflow, "the clipped text has no ellipsis").toBe("ellipsis");
+  expect(m.after.wrap, "the chip's text may wrap").toBe("nowrap");
+});

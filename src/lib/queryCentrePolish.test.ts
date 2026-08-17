@@ -134,7 +134,7 @@ describe("§3 · one button rule, app-wide on this page", () => {
  * because "the header lost its portrait and its status" is exactly the regression that reads as a
  * bug to anyone who did not follow the merge.
  */
-describe("§6 · the agent header — now the pairing card's agent half", () => {
+describe("§6 · the agent header — now the mail header's AGENT row", () => {
   /**
    * ⚠️ THE PORTRAIT IS GONE AND THE NAME GREW. A monogram was decoration once the position holds
    * the query's real StatusDot; the name went 27 → 26px, which is not a reduction but an
@@ -144,8 +144,11 @@ describe("§6 · the agent header — now the pairing card's agent half", () => 
   it("no portrait, and the name is the same step as the manuscript's", () => {
     expect(rule(".f12-heroband .f12-bigav"), "the monogram came back").toBe("");
     expect(code, "the initials are computed again with nothing to render them").not.toContain("agentInitials(activeAgent)");
-    const n = rule(".qc-pairnm");
-    expect(declValue(n, "font-size"), "the two names are no longer one type step").toBe("26px");
+    /* ⚠️ 26 → 20 (subrows §1). Not a reduction but a re-scaling: the pairing card gave each name a
+       half of the card, and a row gives it a line. 20 is a step above the reading cards' 18px
+       headers, which is the hierarchy this card already had. Both names still read one element. */
+    const n = rule(".qc-mname");
+    expect(declValue(n, "font-size"), "the two names are no longer one type step").toBe("20px");
     expect(declValue(n, "font-family"), "the name lost its serif").toBe("var(--f12-serif)");
   });
 
@@ -170,17 +173,25 @@ describe("§6 · the agent header — now the pairing card's agent half", () => 
    * label any more: at 66px it IS the statement, which is why the word could go.
    */
   it("the dot is the real StatusDot, and it is the card's left mark", () => {
-    expect(code, "the mark is not the locked component at the shared size")
-      .toContain("<StatusDot status={activeQuery.status} overrideSize={66} />");
-    const card = code.slice(code.indexOf('<div className="qc-pairid">'), code.indexOf('<div className="qc-pairms">'));
-    expect(card.indexOf("<StatusDot"), "the mark fell behind the name it leads")
-      .toBeLessThan(card.indexOf("qc-pairnm"));
-    expect(card, "a second dot was drawn beside it").not.toMatch(/overrideSize=\{(?!66)/);
+    expect(code, "the mark is not the locked component at the stated size")
+      .toContain("<StatusDot status={activeQuery.status} overrideSize={56} />");
+    /* ⚠️ THE MARK IS THE STATUS BLOCK'S NOW, NOT THE AGENT ROW'S — one mark on the card, in the
+       right-hand column, which is what let the second one go. "It leads its name" was true of a
+       two-subject card and has no subject here. */
+    const block = code.slice(code.indexOf('<div className="qc-mstatus">'), code.indexOf('<div className="qp-cols"'));
+    expect(block, "the status block does not hold the mark").toContain("<StatusDot");
+    expect(block.indexOf("<StatusDot"), "the mark fell behind its own label")
+      .toBeLessThan(block.indexOf("qc-mswd"));
+    const card = code.slice(code.indexOf('<div className="qc-mail">'), code.indexOf('<div className="qp-cols"'));
+    expect((card.match(/<StatusDot/g) ?? []).length, "a second mark was drawn on the card").toBe(1);
   });
 
   it("the contact pills sit on their own line, and grey rather than vanish", () => {
-    expect(rule(".qc-pairlinks"), "the pills' row is missing").not.toBe("");
-    expect(declValue(rule(".qp-lnk-off"), "pointer-events"), "a pill with no target is still clickable").toBe("none");
+    /* ⚠️ THEY ARE CHIPS ON THE RAIL NOW, AND THEY SHOW THEIR VALUE. Under the name rather than
+       beside it, because beside it the longest agency decided where every address began. */
+    expect(rule(".qc-msub"), "the sub-row that holds them is missing").not.toBe("");
+    expect(rule(".qc-mchip-con"), "the contact chips have no rule").not.toBe("");
+    expect(declValue(rule(".qc-mchip-con.off"), "pointer-events"), "a chip with no target is still clickable").toBe("none");
     expect(code, "the email pill stopped stating its absence")
       .toContain("No email address on this agent's record");
   });
@@ -480,13 +491,13 @@ describe("fix pack 7 §3 · the agent header stays white", () => {
    * section whose whole content is "do not sweep this into §1" is precisely the kind that needs an
    * assertion rather than a note, because the next parchment pass will look exactly like §1 did.
    */
-  it("the pairing card is white, lifted, and not the headers' parchment", () => {
+  it("the header card is white, lifted, and not the headers' parchment", () => {
     /* ⚠️ THE ELEMENT CHANGED, THE RULING DID NOT (§1). The plate is the pairing card now, and the
        argument transfers intact: give the object above the cards their parchment and it becomes a
        peer of the things it describes. It has a second defence now — a 2px frame nothing else on
        the page carries — but the ground is still the first one. */
-    const plate = rule(".qc-pair");
-    expect(plate, "the pairing card's rule is missing").not.toBe("");
+    const plate = rule(".qc-mail");
+    expect(plate, "the header card's rule is missing").not.toBe("");
     expect(declValue(plate, "background"), "the plate took the card headers' ground — it would become their peer")
       .toBe("var(--white)");
     expect(declValue(plate, "background"), "the plate went parchment").not.toContain("--shell-rail");

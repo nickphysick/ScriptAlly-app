@@ -90,7 +90,7 @@ describe("the order the page settles in", () => {
        ⚠️ THE THIRD CARD'S DELAY SURVIVES WITH TWO CARDS, deliberately: `:nth-child(3)` simply
        matches nothing, and asserting the ladder over all three keeps the sequence intact if a card
        ever returns. Read as "the ladder is unbroken", not as "three cards render". */
-    const hero = delayOf(".qh-enter .f12-detail .qc-pair");
+    const hero = delayOf(".qh-enter .f12-detail .qc-mail");
     const c1 = delayOf(".qh-enter .f12-detail .f12-card:nth-child(1)");
     const c2 = delayOf(".qh-enter .f12-detail .f12-card:nth-child(2)");
     const c3 = delayOf(".qh-enter .f12-detail .f12-card:nth-child(3)");
@@ -116,7 +116,7 @@ describe("what must NOT animate", () => {
   it("reduced motion turns every one of them off", () => {
     const rm = css.slice(css.indexOf("@media (prefers-reduced-motion: reduce) {\n  .qh-enter"));
     expect(rm).toContain("animation: none !important");
-    for (const sel of [".f12-hd2", ".f12-ctl", ".f12-list", ".qc-pair", ".f12-card", ".f12-row"]) {
+    for (const sel of [".f12-hd2", ".f12-ctl", ".f12-list", ".qc-mail", ".f12-card", ".f12-row"]) {
       expect(rm.slice(0, rm.indexOf("}")), `${sel} still animates under reduced motion`).toContain(sel);
     }
   });

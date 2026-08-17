@@ -100,7 +100,11 @@ describe("the query's verbs live in one kebab, not a bar", () => {
        clause asserts is the DESTINATION, which the disabled ⋯ item never had. */
     expect(code, "the agent's name is not the link to the record").toContain('onNavigate("agents")');
     /* email + website — pills under the agency, not menu items */
-    expect(code, "the contact pills are missing").toContain('className="qc-pairlinks"');
+    /* ⚠️ THE CONTACTS ARE CHIPS ON THE AGENT ROW'S RAIL NOW (subrows §1), and they show the VALUE
+       rather than the word — which is the clause that matters here: the ⋯ carried "Email" and
+       "Website" as menu items filed under the wrong noun, and a stale address is unspottable on a
+       button that says "Email". */
+    expect(code, "the contact chips are missing").toContain("qc-mchip-con");
     expect(code, "the website pill stopped going through the scheme guard").toContain("agentWebsiteHref(activeAgent.website)");
     /* ⚠️ THE MANUSCRIPT'S NAME IS THE PAIRING CARD'S RIGHT-HAND SUBJECT NOW (§1), not a link inside
        "What you sent" — the clause is unchanged (the disabled ⋯ item's destination is the name

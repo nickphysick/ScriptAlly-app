@@ -49,8 +49,8 @@ describe("the cards still read as raised against the lighter ground", () => {
     /* ⚠️ THE PAIRING CARD DRAWS ITS EDGE AS A RING TOO, and at 2px in its own sage — so the clause
        is "it has an edge", not "it has that border". Asserting the property here would have failed
        on a surface whose edge is more emphatic than the one being asked for. */
-    const pring = css.slice(css.indexOf("\n.qc-pair::after {"), css.indexOf("}", css.indexOf("\n.qc-pair::after {")));
-    expect(pring, ".qc-pair lost its edge").toContain("inset 0 0 0 2px var(--qc-card-border)");
+    const pring = css.slice(css.indexOf("\n.qc-mail::after {"), css.indexOf("}", css.indexOf("\n.qc-mail::after {")));
+    expect(pring, ".qc-mail lost its edge").toContain("inset 0 0 0 2px var(--qc-card-border)");
   });
 
   it("and the panes keep their shadow", () => {

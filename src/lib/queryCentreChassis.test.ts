@@ -172,65 +172,60 @@ describe("§1c · the list is furniture, and selection inverts", () => {
 });
 
 /**
- * ⚠️ REWRITTEN BY §1 — THE PLATE IS HALF OF THE PAIRING CARD NOW, and every case below is an
- * inversion of one that described it alone. The old section's law was "the plate must be DISTINCT
- * from the cards and must out-rank them", enforced through a brighter ground, a firmer rim and a
- * higher shadow. That law is not contradicted; it is satisfied by a different means. The object
- * above the cards is no longer a header for them — it is the card that names the query's two
- * subjects, and it out-ranks the row of cards beneath by carrying a 2px frame and an inset frame
- * that nothing else on the page has.
+ * ⚠️ REWRITTEN AGAIN — THE PAIRING CARD IS A MAIL HEADER (subrows pack §1/§2), and every case here
+ * has now described three objects: a plate, a two-subject card, and a set of labelled rows. Each
+ * rewrite kept the clause and changed the subject, which is why the section is still recognisable.
  *
- * ⚠️ TWO CLAUSES DIE OUTRIGHT AND ARE ASSERTED DEAD RATHER THAN DELETED: the initials disc and the
- * status word with its date. Both were removals with reasons — a monogram is decoration once the
- * position holds the query's real StatusDot, and the status and the queried date are Tracking's
- * header meta and Tracking's first event, twelve pixels away.
+ * ⚠️ WHAT THE PAIRING CARD GOT WRONG, ON ITS OWN TERMS. It gave the agent and the manuscript a HALF
+ * each and a 66px mark apiece — equal weight, one axis — and it was the equality that failed: two
+ * marks of the same size read as two statuses, which the card then had to spend a tonal rule
+ * defending. Three facts stated as three LINES need no such defence: a labelled subject, then what
+ * belongs to it, on a shared rail.
+ *
+ * ⚠️ AND THE RAIL IS THE CASE THAT MATTERS. It is structural — one grid track for the labels, and
+ * every value and sub-row in column 2 — so nothing can be a pixel out. That is asserted against the
+ * rendered page in `qcMailHeader.measure.ts`; what is asserted here is that it is a grid and not a
+ * set of matched paddings.
  */
-describe("§1 · the pairing card", () => {
+describe("§1 · the query header is a mail header", () => {
   const val = declValue;
 
-  it("it out-ranks the cards beneath, and no longer by matching their treatment", () => {
-    const pair = rule(".qc-pair");
-    const card = rule(".f12-card");
-    expect(pair, "the pairing card's rule is missing").not.toBe("");
-    expect(pair, "the card's ground is no longer the brightest on the page").toContain("var(--white)");
-    expect(pair, "the card lost its lift").toContain("var(--sh-2)");
-    expect(pair, "the card dropped to the reading cards' elevation").not.toContain("var(--sh-1)");
-    /* ⚠️ AND IT IS STILL NOT A READING-PANE CARD. The old case forbade an identical treatment; the
-       frame is what makes them different now rather than the rim token, so the test moves with it. */
-    expect(val(card, "box-shadow"), "the cards climbed to the plate's elevation").toContain("--sh-1");
+  it("it out-ranks the cards beneath, and by its frame rather than their treatment", () => {
+    const card = rule(".qc-mail");
+    const reading = rule(".f12-card");
+    expect(card, "the header card's rule is missing").not.toBe("");
+    expect(card, "the card's ground is no longer the brightest on the page").toContain("var(--white)");
+    expect(card, "the card lost its lift").toContain("var(--sh-2)");
+    expect(card, "the card dropped to the reading cards' elevation").not.toContain("var(--sh-1)");
+    expect(val(reading, "box-shadow"), "the cards climbed to the header's elevation").toContain("--sh-1");
   });
 
   /**
-   * ⚠️ NO BORDER AND NO RESTATED RADIUS ANYWHERE IN THE STACK — the three-layer rule. An inset
-   * shadow paints BENEATH children, which is why the frame is its own element; a `border` would
-   * change the box; a restated radius is two numbers that agree until one is edited.
+   * ⚠️ THE FRAME IS KEPT ACROSS THE REPLACEMENT, and that is a judgement rather than an instruction
+   * — recorded here because a judgement nobody wrote down is a judgement the next pass reverses by
+   * accident. The pack supersedes the two-subject layout, the two marks and the right-aligned
+   * column BY NAME and says nothing about the border. The 2px deepened sage and its 1px inset are
+   * what make this card out-rank the reading cards, a law that predates the pairing pack, and both
+   * tokens are derived against the live sage scale and locked below.
    */
   it("three layers: a ring, a clipping frame, and the inset frame as its own overlay", () => {
-    const pair = rule(".qc-pair");
-    const ring = rule(".qc-pair::after");
-    const fr = rule(".qc-pair > .qc-pairfr");
-    const ins = rule(".qc-pairins");
+    const card = rule(".qc-mail");
+    const ring = rule(".qc-mail::after");
+    const fr = rule(".qc-mail > .qc-mailfr");
+    const ins = rule(".qc-mailins");
     for (const [n, r] of [["ring", ring], ["frame", fr], ["inset", ins]] as const) {
       expect(r, `the ${n} layer is missing`).not.toBe("");
     }
     expect(ring, "the ring is not a 2px inset").toContain("inset 0 0 0 2px var(--qc-card-border)");
     expect(ring, "the ring restated a radius instead of inheriting").toContain("border-radius: inherit");
     expect(fr, "the clipping context stopped clipping").toContain("overflow: hidden");
-    expect(fr, "the clipping context restated a radius").toContain("border-radius: inherit");
     expect(ins, "the inset frame is not a 1px line at 7px").toMatch(/inset:\s*7px/);
     expect(ins, "the inset frame lost its line").toContain("inset 0 0 0 1px var(--qc-card-inset)");
-    for (const [n, r] of [["pair", pair], ["ring", ring], ["inset", ins]] as const) {
+    for (const [n, r] of [["card", card], ["ring", ring], ["inset", ins]] as const) {
       expect(r, `the ${n} layer took a border — the ring is a shadow`).not.toMatch(/(^|[;{\s])border:\s/);
     }
   });
 
-  /**
-   * ⚠️ NAMED FOR THEIR ROLE, AND DERIVED AGAINST THE LIVE SAGE SCALE. The border must be darker
-   * than the header gradient it sits near — otherwise a 2px line at a gradient stop's value reads
-   * as a thickened header rather than a frame — and the inset paler than the same gradient's top.
-   * Asserted as an ORDER rather than as two hexes, so a retune of the sage family moves them
-   * together or fails here.
-   */
   it("its two sage values are role-named tokens, ordered against the header's gradient", () => {
     const hex = (n: string) => (new RegExp(`${n}:\\s*(#[0-9a-f]{6})`, "i").exec(cssCode + indexCss) ?? [])[1];
     const lum = (h: string) => {
@@ -244,75 +239,154 @@ describe("§1 · the pairing card", () => {
       expect(v, `${n} is not a literal hex where this case can read it`).toBeTruthy();
     }
     expect(lum(border), "the border is not darker than the header's darkest stop").toBeLessThan(lum(bandBot));
-    expect(lum(border), "the border is not darker than the header's own bottom rule — at 2px it would read as a thickened header")
-      .toBeLessThan(lum(edge));
+    expect(lum(border), "the border is not darker than the header's own bottom rule").toBeLessThan(lum(edge));
     expect(lum(inset), "the inset frame is not paler than the header's lightest stop").toBeGreaterThan(lum(bandTop));
-    /* the colour names must not be in the token names: role, not hue */
     expect(cssCode, "a sage-named token replaced the role-named one").not.toContain("--qc-card-sage");
   });
 
   /**
-   * ⚠️ NEITHER HALF MAY SET THE HEIGHT, and this is the clause the old "its height comes from the
-   * avatar" case becomes. The left grows with links, the right with materials — so the row is
-   * centred and each half centres its own contents, which is what puts the two marks on ONE axis
-   * without either being measured against the other. Browser-measured at 1440: halves 79.6 and
-   * 172.9 tall, both centred on 343.5, both marks 66px centred on 343.5.
+   * ⚠️ ONE RAIL, AND IT IS A GRID TRACK RATHER THAN A SET OF MATCHED INDENTS. The labels are column
+   * 1; every value and every sub-row is column 2. A sub-row cannot drift from the line above it,
+   * because it is in the same column — which is the whole reason the contacts moved down there.
    */
-  it("both halves are centred, so either may be the taller one", () => {
-    const grid = rule(".qc-pairgrid");
-    expect(grid, "the pairing grid is missing").not.toBe("");
-    expect(grid, "the halves stopped being centred against each other").toContain("align-items: center");
-    expect(grid, "the halves are no longer equal columns").toContain("grid-template-columns: 1fr 1fr");
-    for (const s of [".qc-pairid", ".qc-pairms"]) {
-      expect(rule(s), `${s} stopped centring its own contents — its mark would leave the axis`)
-        .toContain("align-items: center");
-      expect(rule(s), `${s} took a height, which is the one way a half can set the row`)
-        .not.toMatch(/(^|[;{\s])height:/);
+  it("the rows are a two-track grid, and every sub-row sits in the label rail", () => {
+    const rows = rule(".qc-mailrows");
+    expect(rows, "the rows grid is missing").not.toBe("");
+    expect(rows, "the labels are not a track of their own").toContain("grid-template-columns: max-content minmax(0, 1fr)");
+    expect(rule(".qc-mlab"), "the labels left column 1").toContain("grid-column: 1");
+    expect(rule(".qc-mval"), "the values left column 2").toContain("grid-column: 2");
+    expect(rule(".qc-msub"), "a sub-row is not on the rail — it would indent by hand").toContain("grid-column: 2");
+    /* ⚠️ AND THE OUTER GRID'S FIRST TRACK IS `minmax(0, …)`. A bare `1fr` has a min-content floor,
+       so a long address would refuse to shrink and push the status block off the card instead of
+       ellipsising — the fault the truncation rule exists to prevent, one level up. */
+    expect(rule(".qc-mailgrid"), "the rows column can refuse to shrink")
+      .toContain("grid-template-columns: minmax(0, 1fr) auto");
+  });
+
+  /**
+   * ⚠️ TWO CHIP FAMILIES, ONE SIZE, TWO GROUNDS — and they must not be unified. A contact is a
+   * place to go and reads as a control; an attachment is a record of something done and reads as a
+   * fact. The shared half is a BASE class so the sizes cannot drift apart.
+   */
+  it("contacts and attachments share a size and differ in ground", () => {
+    const base = rule(".qc-mchip");
+    const con = rule(".qc-mchip-con");
+    const att = rule(".qc-mchip-att");
+    expect(base, "the shared chip base is missing — the two families would size separately").not.toBe("");
+    expect(base, "the chips lost their shared height").toContain("height: 24px");
+    expect(base, "the chips lost their shared radius").toContain("border-radius: 999px");
+    expect(con, "a contact is no longer white with a rim").toContain("background: var(--white)");
+    expect(con, "a contact lost its rim").toMatch(/border:\s*1px solid var\(--qc-rim-off\)/);
+    expect(att, "an attachment is no longer a filled neutral").toContain("background: var(--n2)");
+    /* ⚠️ THE ATTACHMENT'S RIM IS TRANSPARENT, NOT ABSENT — `border: 0` would make it 2px shorter
+       than a contact, so the two families would differ in the one dimension they must share. */
+    expect(att, "the attachment lost the width that keeps both families one size").toContain("border: 1px solid transparent");
+    /* neither may declare a size of its own */
+    for (const [n, r] of [["contact", con], ["attachment", att]] as const) {
+      expect(r, `the ${n} family declared its own height`).not.toMatch(/(^|[;{\s])height:/);
+      expect(r, `the ${n} family declared its own radius`).not.toMatch(/border-radius:/);
     }
   });
 
   /**
-   * ⚠️ THE TONAL DIFFERENCE BETWEEN THE MARKS IS LOAD-BEARING. Same size, so they read as a pair;
-   * different ring, so the right-hand one is not taken for a second status. A burgundy or sage ring
-   * on the manuscript mark is the specific failure this forbids.
+   * ⚠️ `qc-mchip`, NOT `qc-chip`, AND THE RENAME WAS FORCED BY A MEASUREMENT. `.qc-chip` already
+   * exists in this sheet for the create journey's reminder chips, and its `.on` modifier sets a
+   * pink rim and an oat ground — which the attachments silently took. The browser reported a 1px
+   * `rgb(238,205,195)` border on a chip whose own rule says `transparent`, and two grounds inside
+   * one family. The second class-name collision this page has had.
    */
-  it("two marks, one size, and only one of them is a status", () => {
-    const mk = rule(".qc-pairmk");
-    expect(mk, "the manuscript mark is missing").not.toBe("");
-    expect(code, "the status mark is not the locked component at the shared size")
-      .toContain("<StatusDot status={activeQuery.status} overrideSize={66} />");
-    expect(val(mk, "width"), "the marks are no longer the same size").toBe("66px");
-    expect(mk, "the manuscript mark took a status ring").not.toMatch(/--burg|--sage(?![a-z-])|--sage-band|--sageD/);
-    expect(mk, "the manuscript mark's ring is not a neutral").toContain("inset 0 0 0 2.5px var(--n5)");
+  it("the header's chips do not collide with the create journey's", () => {
+    expect(cssCode, "the create journey's chip rule went").toContain(".qc-chip.on {");
+    expect(code, "the header renders the colliding class").not.toMatch(/["\s`]qc-chip["\s`]/);
   });
 
-  /**
-   * ⚠️ THREE THINGS ARE ASSERTED ABSENT, and each was removed for a stated reason rather than for
-   * room: the initials disc (decoration, once the position holds a real mark), the status word and
-   * its date (Tracking's header meta and Tracking's first event). Asserted dead because "the plate
-   * lost its avatar" is exactly the regression a future reader would repair.
-   */
-  it("no initials, no status word, no queried date", () => {
-    const at = code.indexOf('<div className="qc-pair">');
-    expect(at, "the pairing card is missing — every case here would pass vacuously").toBeGreaterThan(-1);
-    const card = sliceBetween(code, '<div className="qc-pair">', '<div className="qp-cols"');
+  /* the truncation clause: the value, capped, never wrapped, with the whole thing in `title` */
+  it("a contact shows its value, capped and unwrapped", () => {
+    const base = rule(".qc-mchip");
+    expect(base, "the chip lost its cap").toContain("max-width: 270px");
+    expect(rule(".qc-mchiptx"), "the chip's text may wrap").toContain("white-space: nowrap");
+    expect(rule(".qc-mchiptx"), "the clipped text has no ellipsis").toContain("text-overflow: ellipsis");
+    const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
+    expect(card, "a contact chip shows the word rather than the value").not.toMatch(/>Email</);
+    expect(card, "the website chip shows the word rather than the domain").not.toMatch(/>Website</);
+    expect(card, "the email chip has no full value in `title`").toContain("title={email ||");
+    expect(card, "the site chip has no full value in `title`").toContain("title={site ??");
+  });
+
+  it("the removals hold: no initials, no sage cap, no materials heading, no separate queried date", () => {
+    const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
     expect(card, "the initials disc came back").not.toMatch(/agentInitials|f12-bigav/);
-    expect(card, "the status word came back — Tracking's header states it").not.toContain("statusDisplayLabel");
-    expect(card, "the queried date came back — Tracking's first event states it").not.toMatch(/heroQueriedOn|f12-hsd/);
-    /* and the verbs are still not here */
-    expect(card, "the primary came back to the card").not.toContain('className="f12-btn-pri"');
-    expect(card, "the kebab came back to the card").not.toContain("qc-kebab");
+    expect(card, "the sage card header came back").not.toContain("f12-chh");
+    expect(card, "the Materials sent heading came back").not.toContain("Materials sent");
+    /* ⚠️ THE DATE SURVIVES ONLY BENEATH THE STATUS. It is no longer a field of its own; §2 gives it
+       the one place where "when did this last move" belongs. */
+    expect(card, "the queried date came back as a field").not.toContain("heroQueriedOn");
+    expect(card, "the date left the status block").toContain("qc-msdate");
   });
 
-  it("both subjects are named, and each is the way to its record", () => {
-    const card = sliceBetween(code, '<div className="qc-pair">', '<div className="qp-cols"');
+  it("both subjects are named, in one type step, and each is the way to its record", () => {
+    const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
     expect(card, "the agent is not named").toContain("{nameplate}");
     expect(card, "the manuscript is not named").toContain("{activeMs.title}");
     expect(card, "the agent's name stopped being the way to the agent list").toContain('onNavigate("agents")');
     expect(card, "the manuscript's name stopped being the way to the manuscripts").toContain('onNavigate("manuscripts")');
-    /* ⚠️ ONE TYPE STEP FOR BOTH — the card's claim is that they are peers, and a larger face on
-       either would make the card about that one. */
-    expect((card.match(/className="qc-pairnm"/g) ?? []).length, "the two names are not the same element").toBe(4);
+    /* ⚠️ ONE ELEMENT FOR BOTH, so "same face, size and ink" is structural. The manuscript was
+       burgundy inside "What you sent"; burgundy is the outgoing status colour, and on a card whose
+       only colour is the status mark a second burgundy reads as a second status. */
+    expect((card.match(/className="qc-mname"/g) ?? []).length, "the two names are not the same element").toBe(4);
+    expect(rule(".qc-mname"), "the names took a colour of their own").toContain("color: var(--ink)");
+  });
+});
+
+/**
+ * ══ §2 · THE STATUS BLOCK ═══════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE COMPONENT IS IMPORTED AND RESIZED, AND NOTHING ELSE IS DONE TO IT. `overrideSize` is the
+ * only thing this card says about the mark: the ring, the centre fill and the direction colouring
+ * are the system's, here and on every other surface. The postmark treatment the ref's ancestors
+ * explored — a rotation, an inner ring, the status text baked into the glyph — is forbidden by
+ * name, because each of them makes this one surface's dot a different dot.
+ */
+describe("§2 · the status block", () => {
+  it("it renders the locked StatusDot, larger and otherwise untouched", () => {
+    expect(code, "the mark is not the locked component at the stated size")
+      .toContain("<StatusDot status={activeQuery.status} overrideSize={56} />");
+    expect(code, "StatusDot is reimplemented rather than imported")
+      .toMatch(/import \{[^}]*StatusDot[^}]*\} from "\.\/StatusDot"/);
+    const block = sliceBetween(code, '<div className="qc-mstatus">', '<div className="qp-cols"');
+    /* ⚠️ THE CLOSING TAG IS THE TEST, NOT A REGEX OVER THE OPENING ONE. A first attempt used
+       `/<StatusDot[^>]*>[^<]/` and matched the self-closing tag itself — `[^>]*` runs to the `/`,
+       and the newline after `>` satisfies `[^<]`. Text baked into the component means CHILDREN,
+       and children mean a closing tag. */
+    expect(block, "the status text was baked into the mark").not.toContain("</StatusDot>");
+    for (const forbidden of ["rotate", "transform", "postmark"]) {
+      expect(block, `the mark was given a ${forbidden}`).not.toContain(forbidden);
+    }
+    expect(rule(".qc-mstatus"), "the block transforms its contents").not.toContain("transform");
+  });
+
+  /**
+   * ⚠️ A CONSTANT RESERVE, AND THE MAXIMUM FAILED. With `max-width` the block was as wide as its
+   * label needed, so the grid's `auto` track grew with the status: browser-read at 1440, the rows
+   * ended at 1174 under `Queried` and 1097 under `Revise & Resubmit` — a 77px push — and the
+   * narrower rows then wrapped a chip and made the card 13px taller. A fixed width is what makes
+   * the pack's "must not push the rows" true for every label rather than for the short ones.
+   */
+  it("the block is a fixed reserve, and the row never wraps", () => {
+    expect(rule(".qc-mstx"), "the status text is a maximum again — a long label would push the rows")
+      .toContain("width: 132px");
+    expect(rule(".qc-mstx"), "the reserve is a maximum, not a width").not.toContain("max-width");
+    const st = rule(".qc-mstatus");
+    expect(st, "the block may wrap — the mark would drop below its own label").toContain("flex-wrap: nowrap");
+    expect(st, "the block may be squeezed by the rows").toContain("flex: none");
+  });
+
+  /* ⚠️ NO HAIRLINE. The status is a mark applied to the paper, not a field ruled off from the rows. */
+  it("nothing separates the block from the rows", () => {
+    for (const sel of [".qc-mstatus", ".qc-mailrows"]) {
+      expect(rule(sel), `${sel} drew a rule beside its neighbour`).not.toMatch(/border(-left|-right)?:/);
+    }
+    expect(rule(".qc-mailgrid"), "a divider was drawn between the columns").not.toContain("border");
   });
 });
 
@@ -651,149 +725,90 @@ describe("§4 (fp4) · the notes", () => {
  * because you sent it somewhere.
  */
 /**
- * ⚠️ RENAMED AND REPOINTED BY §1 — "WHAT YOU SENT" IS THE PAIRING CARD'S RIGHT HALF NOW. The card
- * is gone; everything it held moved up whole, so these cases follow it rather than being deleted.
- * The section keeps its job, which is to prove that a rearrangement did not quietly drop a control.
+ * ⚠️ REPOINTED AGAIN — "WHAT YOU SENT" IS THE MAIL HEADER'S `SENT` ROW. It was a card, then a
+ * card's right half, and it is now a labelled line with its materials on the rail beneath it. The
+ * section keeps its job through all three: proving that a rearrangement did not quietly drop a
+ * control.
  */
-describe("§5 (fp4) · what you sent — now the pairing card's manuscript half", () => {
+describe("§5 (fp4) · what you sent — now the mail header's SENT row", () => {
   const card = (() => {
-    const at = code.indexOf('<div className="qc-pairms">');
+    const at = code.indexOf('<div className="qc-mail">');
     return at < 0 ? "" : code.slice(at, code.indexOf('<div className="qp-cols"', at));
   })();
 
-  it("the half is there to test", () => {
-    expect(card, "the manuscript half is missing — every case below would pass vacuously")
-      .not.toBe("");
-    /* ⚠️ AND THE CARD IT CAME FROM IS ASSERTED GONE, not merely unreferenced. A second surface
-       listing the same materials is the exact duplication §1 merged away. */
-    expect(code, "the What you sent card came back beside the pairing card")
-      .not.toContain('title="What you sent"');
+  it("the row is there to test", () => {
+    expect(card, "the header card is missing — every case below would pass vacuously").not.toBe("");
+    expect(card, "the SENT label went").toContain(">Sent<");
+    /* ⚠️ AND THE CARD IT CAME FROM IS STILL GONE. A second surface listing the same materials is
+       the duplication the first merge removed. */
+    expect(code, "the What you sent card came back").not.toContain('title="What you sent"');
   });
 
-  /**
-   * ⚠️ REVERSED BY §2, ON FIX PACK 4's OWN TERMS. That pack deleted the manuscript block because
-   * title, genre and word count are facts about the BOOK, not about this send — which is true, and
-   * is still true. What changed is that the ⋯ carried a permanently-disabled `Manuscript` verb, and
-   * §2's rule for everything that is not one of the four verbs is "moves to where its subject is
-   * named". The subject was named NOWHERE on this pane, so the verb had nowhere to move to.
-   *
-   * ⚠️ ONE ROW COMES BACK, NOT THE BLOCK. Title as a link, genre and word count as a single mono
-   * line — asserted here, because "the block is back" and "the name is back" are different things
-   * and only the second is wanted.
-   */
-  it("the manuscript's name heads the card — as ONE row, and as the way to the record", () => {
+  it("the manuscript is the row's subject, and the way to its record", () => {
     expect(card, "the manuscript's name is not stated").toContain("activeMs.title");
-    /* ⚠️ THE NAME CHANGED WEIGHT WITH THE MERGE. It was a 13.5px burgundy link inside a card
-       (`qp-msname`); it is the card's right-hand SUBJECT now, in the same element and the same
-       26px Playfair as the agent opposite — which is the merge's whole claim about them. */
-    expect(card, "the name is not the link to the manuscript").toContain("qc-pairnm");
-    expect(card, "the manuscript is no longer the agent's peer").not.toContain("qp-msname");
-    expect(card, "the meta line is missing").toContain("qc-pairsub");
-    /* ⚠️ AND EACH HALF OMITS ITSELF. A book with no genre must not print a bare interpunct, and one
-       with no word count must not print "0 words" — zero words is a claim; absence is not. */
+    expect(card, "the name is not the agent's peer").toContain("qc-mname");
+    expect(card, "the manuscript kept the burgundy link treatment").not.toContain("qp-msname");
+    expect(card, "the meta line is missing").toContain("qc-msec");
+    /* each half omits itself — no stray interpunct, and never "0 words" */
     expect(card, "the meta prints regardless of whether it has anything to say")
       .toContain("(!!activeMs.genre || !!activeMs.wordCount) &&");
     expect(card, "the word count is printed unconditionally").toContain("activeMs.wordCount ?");
-    /* the three-line block fix pack 4 removed does NOT come back with the row */
-    expect(card, "the old genre/words block returned").not.toContain("genreWords");
   });
 
   /**
-   * ⚠️ INVERTED BY §1 — THERE IS NO HEADING AT ALL, and that is what the merge bought. "Materials
-   * sent" existed to name a subject the card could not otherwise show; the rows now sit directly
-   * under the manuscript they belong to, in Playfair, at the top of the same column. A heading here
-   * would name the thing named twenty pixels above it.
+   * ⚠️ NO HEADING, AND NOW NO ROW LABEL EITHER — the mono `SENT` in column 1 IS the heading, and it
+   * names the line rather than the list. "Materials sent" existed to name a subject a card could
+   * not otherwise show; the subject is on the line above, on the same rail.
    */
-  it("the materials need no heading — they sit under the manuscript they belong to", () => {
+  it("the materials need no heading — the label names the line", () => {
     expect(card, "the eyebrow came back over rows that already have a subject").not.toContain("Materials sent");
     expect(card, "the old heading survived").not.toContain("Sent with this query");
-    const title = card.indexOf("activeMs.title"), mats = card.indexOf("qc-pairmats");
-    expect(title, "the manuscript is not named in this half").toBeGreaterThan(-1);
-    expect(mats, "the materials rows are not in this half").toBeGreaterThan(-1);
-    expect(title, "the rows no longer follow the manuscript that gives them their subject").toBeLessThan(mats);
+    const title = card.indexOf("activeMs.title"), mats = card.indexOf('attach("ql"');
+    expect(title, "the manuscript is not named").toBeGreaterThan(-1);
+    expect(mats, "the material chips are not here").toBeGreaterThan(-1);
+    expect(title, "the chips no longer follow the manuscript that gives them their subject").toBeLessThan(mats);
   });
 
-  /**
-   * ⚠️ INVERTED BY FIX PACK 6 §4 — THE SEND LINE IS GONE, AND THE CARD OPENS ON ITS MATERIALS.
-   *
-   * This asserted the opposite: that "how and when it was sent" opened the card. Both facts are
-   * already stated by Tracking's `Query sent` event, sitting beside it on the same screen, so the
-   * card opened by repeating its neighbour and delayed the thing it exists to show. Turned round
-   * rather than deleted, so nothing quietly reinstates the line.
-   *
-   * ⚠️ THE PICKER WAS NOT DROPPED WITH IT, and that distinction is the point of the second case.
-   * It was the ONLY control for a query's send method anywhere in the app; removing it to tidy a
-   * line would have been a feature loss wearing a layout change. It moved to the pane's ⋯ menu.
-   */
-  it("⚠️ NO SEND METHOD AND NO SEND DATE — the half opens on its materials", () => {
+  it("⚠️ NO SEND METHOD AND NO SEND DATE — the row opens on its materials", () => {
     expect(card, "the send line came back — Tracking already states both facts").not.toContain("{sentLine}");
     expect(code, "the sentLine block survives as dead render code").not.toContain("const sentLine =");
-    /* the first thing under the manuscript is the rows — asserted by position, because a
-       `toContain` would pass with the line reinstated above them */
-    const heading = card.indexOf("qc-pairmats");
-    expect(heading, "the materials rows are gone from the half").toBeGreaterThan(-1);
-    /* ⚠️ "Sent by" ONLY — `sentDate` legitimately survives ABOVE this point, in the card's header
-       meta, which §4 leaves at its three items. Forbidding the identifier outright failed on the
-       meta and would have read as the line surviving; what the section removed is the LINE. */
-    expect(card.slice(0, heading), "the send-method line still renders above the materials heading")
-      .not.toContain("Sent by");
   });
 
   /**
-   * ⚠️ REPOINTED AGAIN BY §2 — THIRD HOME, AND THE LAST ONE. The clause is unchanged and is the
-   * reason this case exists: the picker is the ONLY control for a query's send method anywhere in
-   * the app, so every rearrangement has to prove it is still reachable. It hung off the "Sent by …"
-   * line; fix pack 6 §4 moved it to the ⋯; §2 deletes the ⋯ and puts it on the WORD IT CHANGES.
-   *
-   * ⚠️ AND THAT IS WHERE THE THREE-VERB GRAMMAR ALWAYS SAID IT BELONGED: something happened →
-   * Record response; a detail is wrong → edit it where it is written. The first two homes were
-   * places a control could live rather than places the fact was stated, which is why it kept moving.
+   * ⚠️ THE ROWS SURVIVE AS CHIPS, AND EVERY WRITE PATH WITH THEM. Three shapes in three packs —
+   * a left-aligned row with a pushed-right mark, a right-aligned row with a leading mark, and now
+   * a filled chip with a tick — and one builder each time, because two builders is how two
+   * surfaces drift.
    */
-  it("⚠️ THE SEND-METHOD PICKER IS EDITED IN PLACE — third home, still reachable", () => {
-    for (const kept of ["methodPickOpen", "pickSendMethod", "methodPickMenuStyle"]) {
-      expect(code, `${kept} went with the move — the app would have no way to change a send method`).toContain(kept);
+  it("the materials survive as attachment chips, with every write still reachable", () => {
+    expect(card, "the chips are no longer built by one helper").toContain("attach(");
+    for (const t of ["matRow(", "qp-msrow", "sentPip(", "docRow("]) {
+      expect(card, `${t} survived — two builders is how the families drift apart`).not.toContain(t);
     }
-    /* the trigger is the word itself: the timeline hands its own element up as the anchor, so
-       `useFixedMenu` positions the menu against what was clicked rather than a stale ref. */
-    expect(code, "the picker lost its in-place trigger").toContain("onEditSendMethod={(anchor)");
-    expect(code, "the anchor is not fed to the menu's positioner")
-      .toContain("methodPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = anchor");
-    expect(code, "the picker's menu was not re-mounted after the ⋯ was deleted")
-      .toContain('ariaLabel="Change send method"');
-    /* and the retired home is genuinely gone, not merely bypassed */
-    expect(code, "the ⋯ came back").not.toContain('ariaLabel="Actions for this query"');
-    const tl = read("../components/reading-pane/QueryTimeline.tsx");
-    expect(tl, "the timeline does not draw the send method as an editable word").toContain("qp-inplace");
-    expect(tl, "the promoted sub is still drawn a second time as a caption")
-      .toContain("!(row.subEditable && onEditSendMethod)");
-  });
-
-  /**
-   * ⚠️ THE ROWS SURVIVE THE MERGE AND CHANGED SHAPE WITH IT. `docRow`/`sampleRow`/`sentPip` built a
-   * left-aligned row with its mark pushed right; the half is right-aligned prose, so one `matRow`
-   * writes the mark FIRST and the label last — which is what gives the column a hard right edge.
-   * Three rows, three subjects, and every write path they carried is still here.
-   */
-  it("the material rows survive, with the mark leading and the label closing", () => {
-    expect(card, "the rows are no longer built by one helper").toContain("matRow(");
-    for (const t of ["qp-msrow", "sentPip(", "docRow("]) {
-      expect(card, `${t} survived the merge — two row builders is how the two halves drift apart`)
-        .not.toContain(t);
-    }
-    /* every write the card owned is still reachable */
-    for (const t of ["toggleDocMaterial(activeQuery, activeAgent, \"query\")", "toggleDocMaterial(activeQuery, activeAgent, \"synopsis\")", "openSampleEditor", "removeSampleMaterial(activeQuery, activeAgent)", "saveSampleMaterial(activeQuery, activeAgent)"]) {
+    for (const t of ['toggleDocMaterial(activeQuery, activeAgent, "query")', 'toggleDocMaterial(activeQuery, activeAgent, "synopsis")', "openSampleEditor", "removeSampleMaterial(activeQuery, activeAgent)", "saveSampleMaterial(activeQuery, activeAgent)"]) {
       expect(card, `${t} was dropped in the move`).toContain(t);
     }
-    /* ⚠️ AND THE PACKAGE ROW CAME WITH THEM. §1's removals are named and it is not among them. */
+    /* ⚠️ AND THE PACKAGE CAME WITH THEM, as a chip: it is not among the pack's named removals, and
+       a Pro attachment is a record of what was sent — which is what this sub-row lists. */
     expect(card, "the submission package was dropped in the move").toContain("linkedPackage");
   });
 
   /**
-   * ⚠️ THE REASSIGN MACHINERY WENT WITH THE BLOCK IT LIVED IN, rather than being left behind as
-   * state nothing reads. The capability survives in the Edit Query drawer's own manuscript
-   * selector — what was lost is the shortcut, which is worth knowing and was not worth keeping as
-   * dead code.
+   * ⚠️ THE CONTACTS MOVED FOR A LAYOUT REASON, AND THE REASON IS THE CASE. Beside the name, the
+   * longest agency decided where every address began, so they started somewhere different on every
+   * query. Under it they start on the rail, which is one column for the whole card.
    */
+  it("the AGENT row carries identity only, with its contacts on the rail beneath", () => {
+    expect(card, "the AGENT label went").toContain(">Agent<");
+    const agentAt = card.indexOf(">Agent<"), sentAt = card.indexOf(">Sent<");
+    const agentBlock = card.slice(agentAt, sentAt);
+    expect(agentBlock, "the contacts left the agent's sub-row").toContain("qc-mchip-con");
+    expect(agentBlock, "the agency is not stated").toContain("activeAgent.agency");
+    /* ⚠️ AND AN AGENCY-LESS AGENT SAYS SO. A blank is indistinguishable from a field nobody has
+       looked at; "No agency" is a fact, and this app has agency-less agents by design. */
+    expect(agentBlock, "an agent with no agency shows a blank").toContain('"No agency"');
+  });
+
   it("the block's now-unreachable machinery was swept, not orphaned", () => {
     for (const t of ["msPickOpen", "msPickTrigRef", "msPickMenuStyle", "pickManuscript"]) {
       expect(code, `${t} is still declared with nothing rendering it`).not.toContain(t);

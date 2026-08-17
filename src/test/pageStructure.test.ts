@@ -157,7 +157,14 @@ export function postReturnConstsReadByRender(src: string): string[] {
    people learn to ignore, and this one exists to catch a crash that ships silently. */
 describe("⚠️ no page reads a post-return const from its render (the crash's shape)", () => {
   for (const rel of PAGE_SOURCES) {
-    it(`${rel} declares nothing below its return that the JSX above it touches`, { timeout: 30_000 }, () => {
+    /* ⚠️ 30s → 120s, AND THE BUDGET WAS THE PROBLEM RATHER THAN THE PAGE. Measured: `Queries.tsx`
+       takes ~16s when this file runs alone and over 30s under the full suite's parallel load, so a
+       30s budget put the largest page permanently on the edge — green in isolation, red in CI, for
+       no reason a reader could act on. It failed twice running with the page 13 lines longer than
+       the last green run, which is not a cause.
+       ⚠️ THE REAL ANSWER IS THAT THE WALK IS SLOW, and that is a separate job. A guard that flakes
+       is a guard people learn to ignore, which is worse than a slow one. */
+    it(`${rel} declares nothing below its return that the JSX above it touches`, { timeout: 120_000 }, () => {
       const src = read(rel);
       expect(src.length, `${rel} must be readable`).toBeGreaterThan(0);
       expect(

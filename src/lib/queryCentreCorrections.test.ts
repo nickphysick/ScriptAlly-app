@@ -160,8 +160,11 @@ describe("§3 · the hero's initials — REMOVED with the plate", () => {
 
   /* ⚠️ THE POSITION IS NOT EMPTY — it holds the locked component, which is what earned the removal */
   it("the position holds the query's real mark instead", () => {
-    expect(code, "the mark is not the locked component at the shared size")
-      .toContain("<StatusDot status={activeQuery.status} overrideSize={66} />");
+    /* ⚠️ ONE MARK NOW, AT 56 (subrows §2). The pairing card had two of the same size and had to
+       defend the tonal difference between them; the mail header has one, so the mark IS the status
+       and needs no defending. Still the locked component, still resized and nothing else. */
+    expect(code, "the mark is not the locked component at the stated size")
+      .toContain("<StatusDot status={activeQuery.status} overrideSize={56} />");
   });
 });
 
@@ -242,10 +245,15 @@ describe("§5 · tighten, never scroll", () => {
   it("the card gives up air and type first, and keeps both marks at full size", () => {
     const short = /@media \(max-height: 768px\)[\s\S]*?\n\}/.exec(css)?.[0] ?? "";
     expect(short, "the short-viewport block is missing").not.toBe("");
-    expect(short, "the card stopped reclaiming from its padding").toContain(".qc-pairgrid { padding:");
-    expect(short, "the names stopped stepping down with it").toContain(".qc-pairnm { font-size:");
-    expect(short, "a mark was shrunk — that changes what the card says, not its size")
-      .not.toContain(".qc-pairmk");
+    expect(short, "the card stopped reclaiming from its padding").toContain(".qc-mailgrid { padding:");
+    expect(short, "the names stopped stepping down with it").toContain(".qc-mname { font-size:");
+    /* ⚠️ ONE MARK NOW, AND IT KEEPS ITS SIZE FOR THE SAME REASON THE TWO DID. It is the query's
+       state; shrinking it changes what the card SAYS rather than how much room it takes.
+       ⚠️ COMMENTS STRIPPED — the rule's own note explains that the mark is NOT shrunk here, and
+       therefore names it, so the raw block contains the exact string this case forbids. Fifth time
+       in this repo. A rule about code is asserted against code. */
+    expect(short.replace(/\/\*[\s\S]*?\*\//g, ""), "the mark was shrunk — that changes what the card says, not its size")
+      .not.toMatch(/StatusDot|qc-mstatus/);
     expect(css, "the stats lost a figure rather than their air").toContain(".qp-statn { font-size: 20px; }");
   });
 
@@ -452,48 +460,45 @@ describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
  * which is exactly why it is the safe lever.
  */
 /**
- * ⚠️ REPOINTED ONTO THE PAIRING CARD (§1). Fix pack 6 §3's subject was "the plate is short for what
- * it holds", and its three clauses were about HOW the height is bought: from the padding, uniformly,
- * with a short-viewport step that keeps its proportion. The card holds twice as much now and every
- * clause still applies — what changed is that the padding also has to clear an inset frame, which
- * gives the vertical figure a floor it did not have before.
+ * ⚠️ REPOINTED ONTO THE MAIL HEADER (subrows §1). Fix pack 6 §3's subject was "the plate is short
+ * for what it holds", and its three clauses were about HOW the height is bought: from the padding,
+ * uniformly, with a short-viewport step that keeps its proportion. Every clause still applies —
+ * what changed is the element, twice.
  */
-describe("fix pack 6 §3 · the pairing card's height comes from its padding", () => {
+describe("fix pack 6 §3 · the header's height comes from its padding", () => {
   const padOf = (r: string) => (/padding:\s*([^;]+);/.exec(r.replace(/\/\*[\s\S]*?\*\//g, ""))?.[1] ?? "").trim().split(/\s+/);
 
   it("⚠️ THE PADDING CLEARS THE INSET FRAME — on both axes", () => {
-    const grid = rule(".qc-pairgrid");
-    expect(grid, "the pairing grid is missing").not.toBe("");
+    const grid = rule(".qc-mailgrid");
+    expect(grid, "the header grid is missing").not.toBe("");
     const [block, inline] = padOf(grid);
     /* extracted and compared, never a `(?!7px)` lookahead — the backtracking trap this repo bans */
-    const inset = parseFloat((/\.qc-pairins[\s\S]*?inset:\s*([\d.]+)px/.exec(css) ?? [])[1] ?? "NaN");
+    const inset = parseFloat((/\.qc-mailins[\s\S]*?inset:\s*([\d.]+)px/.exec(css) ?? [])[1] ?? "NaN");
     expect(inset, "the inset frame's offset is not readable").toBeGreaterThan(0);
-    expect(parseFloat(block), `the card's vertical padding no longer clears the frame: ${block} vs ${inset}px`).toBeGreaterThan(inset * 2);
-    expect(parseFloat(inline), `the card's horizontal padding no longer clears the frame: ${inline} vs ${inset}px`).toBeGreaterThan(inset * 2);
+    expect(parseFloat(block), `the vertical padding no longer clears the frame: ${block} vs ${inset}px`).toBeGreaterThan(inset * 2);
+    expect(parseFloat(inline), `the horizontal padding no longer clears the frame: ${inline} vs ${inset}px`).toBeGreaterThan(inset * 2);
   });
 
   it("⚠️ THE UNIFORMITY CLAUSE IS INTACT — a centred row, two-value padding", () => {
-    const grid = rule(".qc-pairgrid");
-    expect(grid, "the halves stopped being centred — the shorter one could pull the taller down").toContain("align-items: center");
+    const grid = rule(".qc-mailgrid");
+    expect(grid, "the columns stopped being centred against each other").toContain("align-items: center");
     /* one value for both vertical sides: an asymmetric pair would put the row's centre and the
-       card's centre on two different lines, and the two marks would stop sharing an axis cleanly */
+       card's centre on two different lines */
     expect(padOf(grid).length, "the padding is no longer the two-value form — top and bottom could differ").toBe(2);
   });
 
   it("⚠️ THE SHORT-VIEWPORT STEP TRACKS THE BASE, or it reclaims more than it used to", () => {
-    /* ⚠️ READ FROM THE RAW SHEET, ANCHORED ON THE MEDIA QUERY. `rules()` rebuilds each block from a
-       split on `}`, which does not survive being nested inside an `@media`. */
-    const short = /@media \(max-height: 768px\)[\s\S]*?\.qc-pairgrid \{[^}]*\}/.exec(css)?.[0] ?? "";
+    /* read from the raw sheet, anchored on the media query — `rules()` cannot survive nesting */
+    const short = /@media \(max-height: 768px\)[\s\S]*?\.qc-mailgrid \{[^}]*\}/.exec(css)?.[0] ?? "";
     expect(short, "the short-viewport step is missing").not.toBe("");
     const m = /padding:\s*([^;]+);/.exec(short);
     expect(m, "the short-viewport step lost its padding").toBeTruthy();
     const stepBlock = parseFloat(m![1].trim().split(/\s+/)[0]);
-    const restBlock = parseFloat(padOf(rule(".qc-pairgrid"))[0]);
+    const restBlock = parseFloat(padOf(rule(".qc-mailgrid"))[0]);
     expect(stepBlock, "the step stopped reclaiming anything").toBeLessThan(restBlock);
     expect(stepBlock / restBlock, `the short-viewport step drifted from its proportion: ${stepBlock}/${restBlock}`)
       .toBeGreaterThan(0.6);
-    /* ⚠️ AND IT STILL CLEARS THE FRAME, which the resting value's floor does not guarantee for it */
-    const inset = parseFloat((/\.qc-pairins[\s\S]*?inset:\s*([\d.]+)px/.exec(css) ?? [])[1] ?? "NaN");
+    const inset = parseFloat((/\.qc-mailins[\s\S]*?inset:\s*([\d.]+)px/.exec(css) ?? [])[1] ?? "NaN");
     expect(stepBlock, "the short-viewport padding cuts into the inset frame").toBeGreaterThan(inset * 2);
   });
 });

@@ -38,9 +38,9 @@ describe("no double container", () => {
       .not.toMatch(/(?:^|;|\{)\s*border\s*:/);
     /* ⚠️ `.f12-hero` RETIRED WITH THE PLATE (pairing pack §1); the pairing card is the object this
        clause is about now — it keeps a card skin while the page keeps one container. */
-    expect(rule(".qc-pair::after"), ".qc-pair lost its rim")
+    expect(rule(".qc-mail::after"), ".qc-mail lost its rim")
       .toContain("box-shadow: inset 0 0 0 2px var(--qc-card-border)");
-    expect(rule(".qc-pair"), "the pairing card took a border back — it would double with the ring")
+    expect(rule(".qc-mail"), "the header card took a border back — it would double with the ring")
       .not.toMatch(/(?:^|;|\{)\s*border\s*:/);
   });
 
