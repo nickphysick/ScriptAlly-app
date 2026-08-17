@@ -1030,8 +1030,6 @@
  */
 .t-f12 {
   /* surfaces */
-  --qc-surf-row-od: #fdf6f3;          /* overdue row */
-  --qc-surf-row-od-h: #fbeee9;
   --qc-surf-shut-av: #eceae6;         /* a closed agency's monogram */
   --qc-surf-act-h: rgba(255, 253, 251, 0.95);
   --qc-surf-glyph: rgba(253, 250, 245, 0.75);   /* the card band's glyph plate */
@@ -1460,8 +1458,6 @@
   /* ⚠️ THE OVERDUE ROW LOSES ITS TINT AND KEEPS ITS SIGNAL. It was a faint warm pink, which §3
      forbids as a surface; the state is carried by the terracotta figure and label already on the
      row. A late query says so in words and in ink, not by being a different colour of paper. */
-  --qc-surf-row-od: var(--n2);
-  --qc-surf-row-od-h: var(--n3);
   --qc-surf-shut-av: var(--n4);
   --qc-surf-composer: var(--n1);
   --qc-surf-pill-off: var(--n1);
@@ -1662,8 +1658,12 @@
 /* ⚠️ A FAINT WARM TINT, NOT A FILL. The overdue rows must still show hover and selection — three
    steps on a tinted ground, same as on a white one — so the tint is barely a step and the ladder
    rides on top of it. */
-.f12-row-od { background: var(--qc-surf-row-od); }
-.f12-row-od:hover { background: var(--qc-surf-row-od-h); }
+/* ⚠️ THE OVERDUE TINT IS DELETED, AND SO IS ITS CLASS. An overdue row sits on the same ground as
+   every other row and hovers the same way: the state is already carried by the `+N DAYS` figure in
+   terracotta and by the status dot, and a third statement of it was the row saying in COLOUR what it
+   already says in words and in a mark. Deleted rather than zeroed — a rule that paints nothing is
+   the next thing someone puts a value back into, and the tint has now been through three of them
+   (a warm pink, then n2, then this). */
 .f12-d2-late { color: var(--qc-acc-late); font-weight: 500; }
 
 .qp-msrow { padding-bottom: 9px; border-bottom: 1px solid var(--hairline); margin-bottom: 4px; }

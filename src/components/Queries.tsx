@@ -3638,7 +3638,7 @@ export const Queries: React.FC<{
                     // draft first (silently when untouched, with a confirm when dirty), then
                     // select. pickRow also pushes to detail below md (Mobile Pass 1).
                     onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}
-                    className={`f12-row${isSelected ? " f12-sel" : ""}${g === "overdue" ? " f12-row-od" : ""}${settleId === q.id ? " f12-settle" : ""}${landedId === q.id ? " qc-landed" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
+                    className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${landedId === q.id ? " qc-landed" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
                       // The collapse's own end fires the toast — no timer schedules either.

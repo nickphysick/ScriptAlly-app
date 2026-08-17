@@ -192,18 +192,27 @@ describe("§5 · the list's groups, as rendered", () => {
     expect(code, "the fold does not read the selection").toContain("const shut = foldable && !closedOpen && !holdsSelection;");
   });
 
-  /* ⚠️ THE OVERDUE TINT IS NOT `--burg`. Burgundy means OUTGOING on every dot in the list beneath. */
-  it("overdue is terracotta, and the row ladder still rides on its tint", () => {
-    /* ⚠️ TOKENISED BY §1, VALUES UNCHANGED — the accent is `--qc-acc-late` and the tint
-       `--qc-surf-row-od`, both declared as the literals they replaced. The clause is that overdue is
-       TERRACOTTA and not `--burg` (which means outgoing on every dot in the list beneath), so it is
-       asserted against the token's declared value rather than against the rule's text. */
+  /**
+   * ⚠️ THE TINT IS GONE, AND WHAT THE CASE WAS FOR SURVIVES IT. It asserted two things: that the
+   * overdue ACCENT is terracotta and not `--burg` (which means OUTGOING on every dot in the list
+   * beneath it), and that the row carried a tint. The first is the durable one and is unchanged.
+   *
+   * ⚠️ THE SECOND IS INVERTED RATHER THAN DELETED, BECAUSE THE TINT HAD THREE LIVES — a warm pink,
+   * then the scale's n2, now nothing — and a deleted case would let a fourth arrive unremarked. An
+   * overdue row sits on the same ground as every other row: the state is already stated by the
+   * `+N DAYS` figure and by the dot, and a tint was the row saying in colour what it says twice
+   * already in words and in a mark.
+   */
+  it("overdue is terracotta, and the row carries no tint at all", () => {
     expect(declValue(rule(".qc-gh-od span"), "color"), "the overdue label stopped reading its token").toBe("var(--qc-acc-late)");
     expect(css, "the overdue accent is not terracotta").toContain("--qc-acc-late: #a05a45;");
     expect(css, "the overdue accent went burgundy").not.toContain("--qc-acc-late: var(--burg)");
-    expect(rule(".f12-row-od"), "the overdue tint went").toContain("background: var(--qc-surf-row-od)");
-    expect(css, "the overdue tint changed value").toContain("--qc-surf-row-od: #fdf6f3;");
-    expect(rule(".f12-row-od:hover"), "an overdue row stopped answering the pointer").not.toBe("");
+    /* the rules, the tokens and the class are all gone — a rule that paints nothing is the next
+       thing someone puts a value back into */
+    expect(rule(".f12-row-od"), "the overdue tint came back").toBe("");
+    expect(rule(".f12-row-od:hover"), "the overdue hover came back").toBe("");
+    expect(css, "the tint's token came back").not.toContain("--qc-surf-row-od");
+    expect(code, "the row still carries the class the tint hung off").not.toContain("f12-row-od");
   });
 });
 
