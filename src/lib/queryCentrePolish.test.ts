@@ -206,9 +206,15 @@ describe("§5 · the list's groups, as rendered", () => {
        (first in SORT order, not group order) opened on a closed query and the list folded away the
        only marked row. Derived per render rather than an effect, so the group shuts again the
        moment the writer leaves it. */
+    /* ⚠️ THE FOLD MOVED INTO THE SHARED DERIVATION (§4c) — the arrows need to know which rows are
+       showing, and computing that twice is how Down comes to skip a row that is plainly on screen.
+       Both clauses are unchanged; what changed is that they are now computed once, above the
+       render, and read by the keyboard model as well. */
     expect(code, "a fold can hide the selected row — the pane would have a subject the list does not show")
       .toContain("const holdsSelection = foldable && items.some((r) => r.q.id === selectedQueryId);");
-    expect(code, "the fold does not read the selection").toContain("const shut = foldable && !closedOpen && !holdsSelection;");
+    expect(code, "the fold does not read the selection").toContain("shut: foldable && !closedOpen && !holdsSelection");
+    expect(code, "a folded group still contributes rows to the arrows' order")
+      .toContain("visibleIds = listGroups.flatMap(({ items, shut }) => (shut ? [] : items.map((r) => r.q.id)))");
   });
 
   /**

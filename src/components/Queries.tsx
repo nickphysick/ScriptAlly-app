@@ -72,6 +72,7 @@ import { queryTaskBadge } from "../lib/queryTaskBadge";
 /* §5 — the list's four groups and the position figure, both derived, both composing rules that
    already exist (`queryBucket` for membership, `taskPrecedence` for the clock). */
 import { GROUP_ORDER, GROUP_LABEL, listGroupFor, rowFigure, figureText, foldClosed } from "../lib/queryCentreGroups";
+import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, isTypeAheadKey, TYPEAHEAD_MS } from "../lib/listKeyboard";
 /* §2/§5 — the ONE reply-overdue rule, two consumers: Nudge's greying and the list's OVERDUE group.
    `replyTaskFor` also owns the input assembly, which is the second place two callers could drift. */
 import { replyTaskFor } from "../lib/taskPrecedence";
@@ -1620,27 +1621,24 @@ export const Queries: React.FC<{
     }
   }, [journalEntries, selectedQueryId]);
 
-  // Arrow-key navigation through the query list — registers once, reads state via stable refs
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
-      const el = document.activeElement as HTMLElement | null;
-      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable)) return;
-      e.preventDefault();
-      const list = sortedListRef.current;
-      const currentId = selectedQueryIdRef.current;
-      const idx = list.findIndex((q: any) => q.id === currentId);
-      if (idx === -1) return;
-      const nextIdx = e.key === "ArrowDown"
-        ? Math.min(idx + 1, list.length - 1)
-        : Math.max(idx - 1, 0);
-      if (nextIdx === idx) return;
-      setSelectedQueryId(list[nextIdx].id);
-      document.getElementById(`query-row-${list[nextIdx].id}`)?.scrollIntoView({ block: "nearest" });
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  /**
+   * ⚠️ THE WINDOW-LEVEL ARROW HANDLER IS DELETED (§4b), AND IT WAS THE FAULT ITSELF. It walked
+   * `sortedListRef` — the SORT order — while the list has been drawn in GROUPS since §5 of the
+   * polish pass. So Down did not "fail to cross a group boundary"; it never knew there were
+   * groups, and moved through a sequence that has not matched the rendered one for two packs.
+   * Measured while replacing it: the selection stepped 20 → 7 → 6 → 5 while the eye was on the
+   * first group.
+   *
+   * ⚠️ AND IT WAS ON `window`, WHICH IS THE OTHER HALF. It called `preventDefault()` on every arrow
+   * key anywhere on the page that was not in a field — including in the reading pane — so the list
+   * owned a key it was often not the subject of. The replacement is on the listbox: it fires when
+   * the list has focus and at no other time, which is what a composite widget is.
+   *
+   * ⚠️ IT ALSO MOVED THE SELECTION WITHOUT MOVING FOCUS, so the ring and the marked row could point
+   * at different rows — the divergence that made "selection follows focus" untestable.
+   *
+   * See `onListKeyDown` and `lib/listKeyboard.ts`.
+   */
 
   const triggerNotesEdit = () => {
     if (activeAgent) {
@@ -2512,6 +2510,150 @@ export const Queries: React.FC<{
   const renderList = graceQuery && !sortedList.some((q) => q.id === graceQuery.id)
     ? [...sortedList, graceQuery].sort(compareQueries)
     : sortedList;
+
+
+  /* ══ §4 · THE LIST'S ONE VISUAL ORDER ════════════════════════════════════════════════════════
+   *
+   * ⚠️ DERIVED ONCE, READ BY THE ARROWS AND BY THE RENDER. The grouping used to be computed inside
+   * an IIFE in the JSX; a keyboard model computing it a second time is two answers to "which rows
+   * are showing", and they come apart at exactly the states that are hard to notice — a folded
+   * group, a grace row mid-collapse. Down skipping a row that is plainly on screen is what that
+   * looks like from the outside.
+   *
+   * ⚠️ AND `shut` IS PART OF THE DERIVATION, not of the render. A folded group contributes no rows
+   * to the order, which is why "Down crosses a group boundary" needs no special case anywhere: the
+   * headings and the hidden rows are simply not in the array.
+   *
+   * ⚠️ PLAIN CONSTS, DECLARED HERE. `useMemo` would need `Date.now()` in its dependencies to keep
+   * the overdue split honest across a day boundary; the grouping was computed per render before
+   * this and still is. What moved is WHERE, not how often.
+   */
+  const listGroups = (() => {
+    const nowMs = Date.now();
+    const rows = renderList
+      .map((q) => ({ q, agent: agents.find((a) => a.id === q.agentId), ms: manuscripts.find((m) => m.id === q.manuscriptId) }))
+      .filter((r) => !!r.agent && !!r.ms);
+    return GROUP_ORDER
+      .map((g) => ({ g, items: rows.filter((r) => listGroupFor(r.q as never, r.agent, nowMs) === g) }))
+      .filter((s) => s.items.length > 0)
+      .map(({ g, items }) => {
+        /* the fold is the closed group's alone, and only once folding earns its place */
+        const foldable = g === "closed" && foldClosed(items.length);
+        /* a fold never hides the row the pane is reading — derived, never an effect that opens it */
+        const holdsSelection = foldable && items.some((r) => r.q.id === selectedQueryId);
+        return { g, items, foldable, shut: foldable && !closedOpen && !holdsSelection };
+      });
+  })();
+  const visibleIds = listGroups.flatMap(({ items, shut }) => (shut ? [] : items.map((r) => r.q.id)));
+
+  /* ══ §4c · THE LIST IS ONE COMPOSITE WIDGET ═════════════════════════════════════════════════
+   *
+   * ⚠️ ONE TAB STOP, ROVING. Forty rows, each a `<button>`, was forty tab stops between the search
+   * field and the reading pane — Tab as a way THROUGH the list rather than PAST it. The row holding
+   * `rovingId` carries `tabIndex={0}` and every other carries `-1`, so Tab enters the list at where
+   * the writer was and the next Tab leaves it.
+   *
+   * ⚠️ IT DEFAULTS TO THE SELECTION, not to the top. The pane is already reading a query; entering
+   * the list anywhere else would move the reading on the first arrow press.
+   */
+  const [rovingId, setRovingId] = useState<string | null>(null);
+  const rovingResolved = rovingId && visibleIds.includes(rovingId) ? rovingId
+    : (selectedQueryId && visibleIds.includes(selectedQueryId) ? selectedQueryId : visibleIds[0] ?? null);
+  /* type-ahead's buffer — refs, because a keystroke must read the run it is extending rather than
+     the run as it was when the handler was last rendered */
+  const typeBufRef = useRef("");
+  const typeAtRef = useRef(0);
+  /**
+   * ⚠️ FOCUS AND SCROLL ARE AN EFFECT OF THE STATE, NOT OF THE KEYSTROKE. Calling `.focus()` inside
+   * the handler focuses the row as it was BEFORE the re-render, which on a list that reorders under
+   * a sort is the wrong element. This runs after the row with `tabIndex={0}` exists.
+   *
+   * ⚠️ AND IT ONLY TAKES FOCUS IF THE LIST ALREADY HAD IT. Otherwise selecting a row by clicking
+   * the pane, or a `?q=` deep link, would yank focus into the list from wherever the writer was.
+   */
+  const kbdMoveRef = useRef(false);
+  useEffect(() => {
+    if (!kbdMoveRef.current || !rovingResolved) return;
+    kbdMoveRef.current = false;
+    const el = document.getElementById(`query-row-${rovingResolved}`);
+    if (!el) return;
+    el.focus();
+    /* ⚠️ `nearest`, so a row already on screen does not scroll the list at all. `center` would
+       jog the whole list on every arrow press. */
+    el.scrollIntoView({ block: "nearest" });
+  }, [rovingResolved]);
+
+  /**
+   * ⚠️ WHEN THE LIST CHANGES UNDER FOCUS, THE NEAREST SURVIVOR TAKES IT — never the top, never
+   * `<body>`. Both are the same fault: the widget forgetting where the writer was because its
+   * contents moved. The previous order is a ref rather than state, because reading it is the whole
+   * point and re-rendering on it would be a loop.
+   */
+  const prevVisibleRef = useRef<string[]>([]);
+  useEffect(() => {
+    const prev = prevVisibleRef.current;
+    prevVisibleRef.current = visibleIds;
+    if (!prev.length || prev.join("\u0000") === visibleIds.join("\u0000")) return;
+    if (!rovingId || visibleIds.includes(rovingId)) return;
+    const landing = nearestSurvivor(prev, visibleIds, rovingId);
+    /* ⚠️ AND IT TAKES FOCUS, NOT JUST THE ROVING — "not the top, not `<body>`" is the clause, and
+       a removed row leaves focus on `<body>`, where the next Tab restarts at the page's first
+       control. Preserving the roving alone would keep the WIDGET's memory and lose the writer's.
+
+       ⚠️ ONLY FROM THE LIST OR FROM NOWHERE. If the change came from typing in the search field or
+       from a control in the filter popover, focus belongs to that control and stealing it would
+       move the cursor out of the field the writer is still using. `<body>` is included because that
+       is where focus falls when the element holding it is removed. */
+    const a = document.activeElement;
+    if (a === document.body || (a instanceof Node && listScrollRef.current?.contains(a))) kbdMoveRef.current = true;
+    setRovingId(landing);
+    /* ⚠️ THE SELECTION FOLLOWS IT HERE TOO. Leaving the pane on a query the list no longer shows is
+       the shell's own "the selector never marks a row that is not rendered" fault, one page over. */
+    if (landing && landing !== selectedQueryId) setSelectedQueryId(landing);
+  }, [visibleIds.join("\u0000")]);   // eslint-disable-line react-hooks/exhaustive-deps
+
+  /**
+   * ⚠️ ONE HANDLER, ON THE LISTBOX. Per-row handlers would be forty closures over a list that
+   * changes, and the container is where a composite widget's keys belong.
+   *
+   * ⚠️ SELECTION FOLLOWS FOCUS — this is a master–detail list over local data, so moving to a row
+   * reads it, exactly as a mail client does. That is what makes Enter and Space no-ops rather than
+   * a second mechanism: a `<button>` activates on both, which would fire `pickRow` again for the
+   * row that is already selected.
+   */
+  const onListKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); return; }
+    if (!visibleIds.length) return;
+    const at = rovingResolved ? visibleIds.indexOf(rovingResolved) : -1;
+    let to: number | null = null;
+
+    if (isListNavKey(e.key)) {
+      const scroller = listScrollRef.current;
+      const row = rovingResolved ? document.getElementById(`query-row-${rovingResolved}`) : null;
+      to = nextIndex(e.key, at, visibleIds.length, pageSizeFor(scroller?.clientHeight ?? 0, row?.offsetHeight ?? 0));
+    } else if (isTypeAheadKey(e.key, { alt: e.altKey, ctrl: e.ctrlKey, meta: e.metaKey })) {
+      const now = Date.now();
+      typeBufRef.current = now - typeAtRef.current > TYPEAHEAD_MS ? e.key : typeBufRef.current + e.key;
+      typeAtRef.current = now;
+      /* ⚠️ THE LABELS ARE THE AGENT NAMES THE ROWS DRAW, in the order they are drawn — taken from
+         the same derivation, so a search can never match a row the writer cannot see. */
+      const labels = visibleIds.map((id) => {
+        const q = renderList.find((x) => x.id === id);
+        const a = q ? agents.find((ag) => ag.id === q.agentId) : undefined;
+        return a ? agentPrimary(a) : "";
+      });
+      to = typeAheadIndex(labels, typeBufRef.current, at);
+    } else {
+      return;
+    }
+
+    if (to == null) return;
+    e.preventDefault();
+    const id = visibleIds[to];
+    kbdMoveRef.current = true;
+    setRovingId(id);
+    if (id !== selectedQueryId) { if (creating) closeCreate(() => pickRow(id)); else pickRow(id); }
+  };
 
   selectedQueryIdRef.current = selectedQueryId;
 
@@ -3561,7 +3703,7 @@ export const Queries: React.FC<{
                 {sortPopOpen && renderSortPopover()}
               </div>
             </div>
-            <div ref={listScrollRef} className="f12-rows" role="listbox" aria-label="Queries">
+            <div ref={listScrollRef} className="f12-rows" role="listbox" aria-label="Queries" onKeyDown={onListKeyDown}>
               {/* ══ §5 · THE LIST GROUPS BY STATE ═══════════════════════════════════════════════
                   ⚠️ GROUPING PARTITIONS AN ALREADY-SORTED LIST — the agent list's rule, and the
                   reason it is worth restating: the sort applies WITHIN each group for free, rather
@@ -3575,37 +3717,27 @@ export const Queries: React.FC<{
                   numbers, two facts; the head says how many queries you have and the rules say how
                   the ones you are looking at are doing. */}
               {(() => {
-                const nowMs = Date.now();
-                const rows = renderList
-                  .map((q) => ({ q, agent: agents.find((a) => a.id === q.agentId), ms: manuscripts.find((m) => m.id === q.manuscriptId) }))
-                  .filter((r) => !!r.agent && !!r.ms);
-                const grouped = GROUP_ORDER
-                  .map((g) => ({ g, items: rows.filter((r) => listGroupFor(r.q as never, r.agent, nowMs) === g) }))
-                  .filter((s) => s.items.length > 0);
-                return grouped.map(({ g, items }) => {
-                  /* ⚠️ THE FOLD IS THE CLOSED GROUP'S ALONE, and it is only offered once folding
-                     earns its place — see `foldClosed`. A first-time writer with two rejections
-                     behind them sees both. */
-                  const foldable = g === "closed" && foldClosed(items.length);
-                  /* ⚠️ AND A FOLD NEVER HIDES THE ROW THE PANE IS READING. Measured on dev: the
-                     auto-select picks `sortedList[0]`, which is first in SORT order and has nothing
-                     to do with group order — so the opening selection was a closed query, and the
-                     list folded away the only row that was marked. A reading pane whose subject
-                     cannot be found in the list beside it is the shell's own
-                     "the selector never marks a row that is not rendered" fault, one page over.
-
-                     ⚠️ DERIVED, NOT AN EFFECT THAT OPENS THE FOLD. Setting state on selection would
-                     leave the group open after the writer moved away, so the fold would drift open
-                     over a session and the writer would never have asked for it. This reads the
-                     selection every render: open while you are in there, shut the moment you leave. */
-                  const holdsSelection = foldable && items.some((r) => r.q.id === selectedQueryId);
-                  const shut = foldable && !closedOpen && !holdsSelection;
+                /* ⚠️ THE GROUPING IS DERIVED ABOVE (§4) AND READ HERE. It used to be computed in
+                   this IIFE; the arrows need the same order, and two derivations of "which rows are
+                   showing" come apart at exactly the states that are hard to notice — a folded
+                   group, a grace row mid-collapse. */
+                return listGroups.map(({ g, items, foldable, shut }) => {
                   return (
-                <React.Fragment key={g}>
+                /* ⚠️ A REAL `role="group"` WITH A NAME (§4c). The heading is a divider, not a stop:
+                   it is `aria-hidden` on every group whose name the wrapper already carries, so a
+                   screen reader announces "Overdue, 4" once rather than reading a decorative rule.
+                   The comma is deliberate — "·" is announced as a character.
+
+                   ⚠️ THE CLOSED GROUP'S HEADING IS THE ONE EXCEPTION, and it is flagged rather than
+                   hidden: it is a real control (show/hide) and must stay reachable, so it keeps its
+                   button role and its tab stop. That makes it a non-option child of a listbox, which
+                   is an ARIA compromise; hiding it would trade a compromise for an unreachable
+                   control, which is worse. */
+                <div className="qc-grp" role="group" aria-label={`${GROUP_LABEL[g]}, ${items.length}`} key={g}>
                   <div className={`qc-gh${g === "overdue" ? " qc-gh-od" : ""}${foldable ? " qc-gh-fold" : ""}`}
                     {...(foldable ? { role: "button", tabIndex: 0, onClick: () => setClosedOpen((o) => !o),
-                      onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setClosedOpen((o) => !o); } },
-                      "aria-expanded": !shut } : {})}>
+                      onKeyDown: (e: React.KeyboardEvent) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); setClosedOpen((o) => !o); } },
+                      "aria-expanded": !shut } : { "aria-hidden": true })}>
                     <span>{GROUP_LABEL[g]} · {items.length}</span>
                     <i aria-hidden="true" />
                     {foldable && <em>{shut ? "show" : "hide"}</em>}
@@ -3626,10 +3758,26 @@ export const Queries: React.FC<{
                     id={`query-row-${q.id}`}
                     role="option"
                     aria-selected={isSelected}
+                    /* ⚠️ ONE TAB STOP (§4c). Forty rows, each a `<button>`, was forty stops between
+                       the search field and the reading pane — Tab as a way THROUGH the list rather
+                       than past it. Only the roving row is reachable; the arrows move the roving. */
+                    tabIndex={q.id === rovingResolved ? 0 : -1}
     // v4 P2 — clicking another row while drafting is a click-away: resolve the
                     // draft first (silently when untouched, with a confirm when dirty), then
                     // select. pickRow also pushes to detail below md (Mobile Pass 1).
                     onClick={() => (creating ? closeCreate(() => pickRow(q.id)) : pickRow(q.id))}
+                    /* ⚠️ SELECTION FOLLOWS FOCUS, LITERALLY (§4c) — and that fixes a fault this
+                       section did not set out to fix. Measured: the FIRST click on a row after a
+                       page visit focuses it and does not select it, because the header collapses on
+                       engagement between `pointerdown` and `pointerup` and the shifted `pointerup`
+                       never completes a `click`. Focus had already moved, so the row looked chosen
+                       and the pane did not follow. Selecting on FOCUS is what the clause says and
+                       it is immune to the click never arriving.
+
+                       ⚠️ THE DRAFT GUARD KEEPS THE CLICK PATH. Clicking away from an open create
+                       journey has to resolve the draft first; a bare focus must not, so this is
+                       gated on `!creating` and the click handler above is unchanged. */
+                    onFocus={() => { if (!creating && q.id !== selectedQueryId) pickRow(q.id); }}
                     className={`f12-row${isSelected ? " f12-sel" : ""}${settleId === q.id ? " f12-settle" : ""}${landedId === q.id ? " qc-landed" : ""}${graceRow?.id === q.id && graceRow.leaving ? " f12-row-leaving" : ""}`}
                     onAnimationEnd={(e) => {
                       if (e.animationName === "f12-settle") setSettleId((cur) => (cur === q.id ? null : cur));
@@ -3670,7 +3818,7 @@ export const Queries: React.FC<{
                   </button>
                 );
                   })}
-                </React.Fragment>
+                </div>
                   );
                 });
               })()}
