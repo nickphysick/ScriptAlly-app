@@ -2364,7 +2364,11 @@ button.qc-mname:hover { color: var(--burg); }
    ground. The attachments took both: the browser reported a 1px `rgb(238,205,195)` border on a
    chip whose own rule says `transparent`, and two different grounds within one family. The second
    class-name collision this page has had; the tell is a state class as common as `.on`. */
-.qc-mchip { display: inline-flex; align-items: center; gap: 6px; max-width: 270px; height: 24px; padding: 0 10px; border-radius: 999px; font-family: "Inter", sans-serif; font-size: 11px; line-height: 1; text-decoration: none; cursor: pointer; }
+/* ⚠️ A ROUNDED RECTANGLE, NOT A PILL (§4). Both refs draw it: contacts at 8px and attachments at
+   7px. They are held EQUAL at 7 here rather than a pixel apart, because the locked law is that the
+   two families differ in GROUND and in nothing else — and a 1px radius difference is invisible
+   while a broken law is not. The pill shape is superseded by both refs. */
+.qc-mchip { position: relative; display: inline-flex; align-items: center; gap: 6px; max-width: 270px; height: 26px; padding: 0 10px; border-radius: 7px; font-family: "Inter", sans-serif; font-size: 11.5px; line-height: 1; text-decoration: none; cursor: pointer; }
 .qc-mchip svg { width: 11px; height: 11px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 /* ⚠️ TRUNCATE, NEVER WRAP, AND ALWAYS WITH THE FULL VALUE IN `title`. A wrapped address turns a
    one-line sub-row into three and moves everything under it; an ellipsis keeps the row's shape and
@@ -2382,11 +2386,26 @@ button.qc-mname:hover { color: var(--burg); }
 .qc-mchip-att:hover { background: var(--n3); color: var(--ink); }
 .qc-mchip-att i { font-style: normal; font-size: 9px; flex: none; color: var(--qc-tx-off); }
 .qc-mchip-att.on i { color: var(--sageD); }
+/* ⚠️ THE QUANTITY IS A BADGE ON THE CHIP, so the chip answers "how much" without being opened.
+   `Opening sample · 3 chapters` is the whole point of the popover being optional. */
+.qc-mqtybadge { flex: none; font-family: var(--f12-mono); font-size: 9px; color: var(--faint); background: var(--white); border: 1px solid var(--qc-rim-off); border-radius: 4px; padding: 1px 5px; }
+/* ⚠️ REMOVE BELONGS TO THE THING IT REMOVES. It was a floating `REMOVE` at the end of the row —
+   a verb with no visible subject, which acted on whichever material happened to be the sample.
+   Revealed on hover and on focus-within, so it is reachable without a pointer. */
+.qc-mchipx { flex: none; display: none; width: 16px; height: 16px; margin-right: -4px; border: 1px solid var(--qc-rim-off); border-radius: 4px; background: var(--white); color: var(--faint); font-size: 10px; line-height: 1; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
+.qc-mchip:hover .qc-mchipx, .qc-mchip:focus-within .qc-mchipx { display: inline-flex; }
+.qc-mchipx:hover { border-color: var(--burg); color: var(--burg); }
 /* a bare text action in a sub-row — Remove, ＋ Package, the upgrade line */
 .qc-mact { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-quiet); background: none; border: 0; padding: 0 4px; cursor: pointer; }
 .qc-mact:hover { color: var(--burg); }
 .qc-mact-pro { color: #6A89A7; }
 .qc-msamp { gap: 8px; }
+/* ⚠️ + ATTACH IS A CHIP-SIZED CONTROL, and it reads as a control rather than a record: burgundy
+   ink on white with a rim, where an attachment is neutral ink on a filled ground. Same box, so the
+   row keeps one rhythm; different treatment, so it is not mistaken for a material. */
+.qc-mchip-add { background: var(--white); border: 1px solid var(--qc-rim-off); color: var(--burg); font-weight: 500; }
+.qc-mchip-add:hover { border-color: var(--burg); }
+.qc-mfree { flex: 1; min-width: 180px; max-width: 320px; height: 32px; padding: 0 10px; border: 1px solid var(--bd); border-radius: 8px; background: var(--panel, #fffdfb); font-family: "Inter", sans-serif; font-size: 13px; color: var(--hub-item, #1a1512); }
 /* ⚠️ ONE BORDERED BOX HOLDING THE FIELD AND ITS ARROWS — the manuscripts plate's shape, which is
    the shape this app already uses for a stepped number. The arrows sit INSIDE the border behind a
    divider rather than beside it, so the control reads as a field with a stepper and not as a field
