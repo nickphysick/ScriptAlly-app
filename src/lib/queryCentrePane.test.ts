@@ -11,6 +11,7 @@
  * stacking context, so the new workspace frame traps nothing.
  */
 import { describe, it, expect } from "vitest";
+import { sliceBetween } from "../test/sliceBetween";
 import { readFileSync } from "fs";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -69,15 +70,33 @@ describe("the query's verbs live in one kebab, not a bar", () => {
     expect(row, "the primary is not the one filled control").toContain('className="qc-btn qc-btn-pri"');
   });
 
-  it("⚠️ Nudge greys, never vanishes — and on the rule that fires its to-do task", () => {
+  /**
+   * ⚠️ SUPERSEDED BY §4 OF THE NUDGE PACK, AND THE OLD CLAUSE IS RESTATED HERE BECAUSE IT WAS
+   * WRONG RATHER THAN MERELY OUTGROWN. It required Nudge to read `replyTaskFor(...) === "nudge"` —
+   * the rule that fires the to-do TASK, which needs a stated window AND a send date AND fourteen
+   * days past the deadline. Most agencies state no response time, so the condition was never true
+   * and the control was permanently grey on the page while this lock stayed green.
+   *
+   * ⚠️ THE `disabled` CLAUSE WAS THE SAME MISTAKE ONE LAYER DOWN: a `disabled` button dispatches no
+   * mouse events, so the `title` this test insisted on could never be shown to anybody.
+   *
+   * What survives is the part that was right — it greys rather than vanishing, and it says why.
+   */
+  it("⚠️ Nudge greys, never vanishes — and now on whose turn it is", () => {
     const cell = code.indexOf('className="qc-phead"');
     const row = code.slice(cell, code.indexOf("})() : null}", cell));
     expect(row, "the slice is empty").toContain("Nudge");
-    /* ⚠️ THE SAME PREDICATE THE TASK GENERATOR READS, through the shared input assembler — never a
-       second opinion about whether a chase is due. */
-    expect(row, "Nudge stopped reading the shared reply rule").toContain('replyTaskFor(activeQuery as never, activeAgent, Date.now()) === "nudge"');
-    expect(row, "Nudge vanishes instead of greying — the row would reflow between selections").toContain("disabled={!nudgeDue}");
-    expect(row, "the disabled state stopped saying why").toContain("Not due yet");
+    expect(row, "Nudge stopped reading the CTA engine's standing").toContain("nudgeStanding(activeQuery.status as QueryStatus)");
+    expect(row, "the to-do rule is back on the control").not.toContain("replyTaskFor(");
+    expect(row, "Nudge vanishes instead of greying — the row would reflow between selections").toContain('qc-btn-off');
+    /* ⚠️ THE BUTTON, NOT THE ROW — the row also holds the PDF control, which is legitimately
+       `disabled`, and an unbounded search would have found it and called it this bug. */
+    const btn = sliceBetween(row, "ref={nudgeTriggerRef}", "</button>", "the Nudge button");
+    /* ⚠️ AND THE TOKEN IS BOUNDED: `aria-disabled` CONTAINS `disabled`, so an unanchored match
+       flags the correct shape as the fault. The character before it is the whole test. */
+    expect(btn, "a hard-disabled button cannot show its reason — it dispatches no mouse events").not.toMatch(/\sdisabled=\{/);
+    expect(btn, "the control is not marked disabled at all").toContain("aria-disabled=");
+    expect(btn, "the disabled state stopped saying why").toContain("nudgeWhy");
   });
 
   it("the verbs cannot outlive their subject — the cell is guarded on the selection", () => {

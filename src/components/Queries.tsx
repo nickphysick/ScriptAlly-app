@@ -68,16 +68,21 @@ import { classifyQueryMaterial, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount
 import { formatQueryMaterial, materialLabel, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
+import { createPortal } from "react-dom";
 import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
 /* §5 — the list's four groups and the position figure, both derived, both composing rules that
    already exist (`queryBucket` for membership, `taskPrecedence` for the clock). */
 import { GROUP_ORDER, GROUP_LABEL, listGroupFor, rowFigure, figureText, foldClosed, elapsedSenseFor } from "../lib/queryCentreGroups";
-import { ELAPSED_LABEL, exactDate } from "../lib/elapsed";
+import { ELAPSED_LABEL, exactDate, elapsedPhrase } from "../lib/elapsed";
 import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, isTypeAheadKey, TYPEAHEAD_MS } from "../lib/listKeyboard";
-/* §2/§5 — the ONE reply-overdue rule, two consumers: Nudge's greying and the list's OVERDUE group.
-   `replyTaskFor` also owns the input assembly, which is the second place two callers could drift. */
-import { replyTaskFor } from "../lib/taskPrecedence";
+/* ⚠️ §4 — NUDGE NO LONGER READS `replyTaskFor`, AND THE RULE ITSELF IS UNTOUCHED. It is the
+   to-do list's rule — "should the app raise this?" — which needs a stated window, a send date and
+   fourteen days of grace before it can be true. The button answers a different question ("may I
+   chase?"), and gating one on the other is what made Nudge permanently grey. The list's OVERDUE
+   group still composes it, through `queryCentreGroups`. */
+import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, closureOffer } from "../lib/nudgeState";
+import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
@@ -994,8 +999,12 @@ export const Queries: React.FC<{
     });
   };
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
+  /* §4c — the confirm hangs off the Nudge button itself; the control row sits at the top of the
+     pane, so it opens downward like every other menu in that row. */
+  const [nudgeAsk, setNudgeAsk] = useState<{ title: string; body: string } | null>(null);
+  const { triggerRef: nudgeTriggerRef, menuStyle: nudgeAskStyle } = useFixedMenu<HTMLButtonElement>(!!nudgeAsk);
   // Close every ribbon popover/modal whenever the reader moves to a different query.
-  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); }, [selectedQueryId]);
+  useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); setNudgeAsk(null); }, [selectedQueryId]);
   // 5e — the delete is now WIRED to db.deleteQuery (cascades the per-query activity log + the
   // global-feed twins; models deleteAgent). No undo — a cascade restore isn't offered; the counted
   // confirm below is the safety. Clear the selection so the pane doesn't dangle on a deleted id.
@@ -3632,16 +3641,25 @@ export const Queries: React.FC<{
               const verbLabel = verbClosed ? "Reopen"
                 : verbAction.kind === "mark-sent" ? (verbAction.markKind === "resubmit" ? "Record resubmission" : "Mark sent")
                 : "Record response";
-              /* ⚠️ NUDGE READS THE RULE THAT FIRES ITS TO-DO TASK, NOT A SECOND OPINION (§2).
-                 `replyTaskFor` is `replyTask` with the input assembled once — the same call the
-                 dashboard's urgent panel and the task generator make — so the button greys and
-                 un-greys on exactly the condition that puts "Nudge due" on the to-do list.
+              /* ⚠️ §4a · NUDGE FOLLOWS WHOSE TURN IT IS, NOT WHETHER A DATE HAS PASSED. It read
+                 `replyTaskFor(...) === "nudge"` — the rule that fires the to-do TASK, which needs a
+                 stated window AND a send date AND fourteen days past the deadline. Most agencies
+                 state no response time, so that condition was simply never true and the control was
+                 permanently grey. Nothing was broken; it was answering the app's question ("should
+                 I raise this?") where the writer was asking their own ("may I chase?").
 
-                 ⚠️ `=== "nudge"`, NOT `!== "none"`. Past its window with `noResponseMeansNo` set,
-                 the rule returns "close": the query IS overdue and joins §5's group, and chasing it
-                 is the one thing the agency has told you not to do. The two consumers of one rule
-                 are deliberately different SETS — see `replyOverdue`'s note. */
-              const nudgeDue = replyTaskFor(activeQuery as never, activeAgent, Date.now()) === "nudge";
+                 ⚠️ AND THE DERIVATION IS THE CTA ENGINE'S, the one the command bar's primary, the
+                 agent list's whose-turn axis and this pane's waiting state already share. */
+              const nudgeAt = nudgeStanding(activeQuery.status as QueryStatus);
+              const nudgeWhy = nudgeReason(activeQuery.status as QueryStatus, activeAgent);
+              /* §4d — how long ago the last nudge on THIS round went. The round begins at the last
+                 status change, so a nudge that worked stops being current when the reply lands. */
+              const nudgeRoundMs = activeQuery.lastStatusChange ? toMs(activeQuery.lastStatusChange) : null;
+              const nudgeAgoDays = nudgedAgo(
+                nudgeTimes(trackingEvents, NUDGE_NESTED_TYPE, (v) => toMs(v)),
+                Number.isNaN(nudgeRoundMs as number) ? null : nudgeRoundMs,
+                Date.now(),
+              );
               return (
                 <>
                   {/* ⚠️ THE ONLY FILLED CONTROL ON THE PAGE (§3). Pink, `--pinkb` rim, and BLACK text
@@ -3663,16 +3681,43 @@ export const Queries: React.FC<{
                       vanished when it did not apply would reflow the row every time the selection
                       moved between a query that is due a chase and one that is not — so the row
                       would never be in the same place twice. `title` says WHY, which absence cannot. */}
+                  {/* ⚠️ §4b · `aria-disabled`, NOT `disabled` — and that is a correctness fix, not a
+                      preference. A `disabled` button dispatches no mouse events, so its `title`
+                      never appears: the old control carried a reason nobody could ever read. It
+                      stays focusable, announces itself as disabled, and no-ops on click. */}
+                  <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                   <button
+                    ref={nudgeTriggerRef}
                     type="button"
-                    className={`qc-btn qc-btn-shrink${nudgeDue ? "" : " qc-btn-off"}`}
-                    disabled={!nudgeDue}
-                    title={nudgeDue ? "Send a nudge" : verbWaitingOnAgent ? "Not due yet — the agent's stated window has not passed" : "Nothing to chase — the agent is not holding this one"}
-                    onClick={() => setIsNudgeOpen(true)}
+                    className={`qc-btn qc-btn-shrink${nudgeAt === "available" ? "" : " qc-btn-off"}${nudgeAgoDays != null ? " qc-btn-quiet" : ""}`}
+                    aria-disabled={nudgeAt !== "available"}
+                    title={nudgeAt === "available" ? (nudgeAgoDays != null ? `Nudged ${elapsedPhrase(nudgeAgoDays)} ago — nudge again` : "Send a nudge") : nudgeWhy}
+                    onClick={() => {
+                      if (nudgeAt !== "available") return;
+                      /* §4c — inside the agency's own stated window, state the facts and ask. Past
+                         it, or with no window stated at all, there is nothing left to say. */
+                      const ask = nudgeConfirm({
+                        agent: activeAgent,
+                        /* ⚠️ THE SEND ANCHOR COMES FROM THE SHARED DERIVATION, never re-mapped
+                           here. `queryAmbientStatus` already knows which date the current stage
+                           was sent on; a second status→date map is how the confirm and the
+                           tracking bar would come to name two different days. */
+                        sentMs: queryAmbientStatus(activeQuery, verbAction.ballHolder, verbAction.kind === "mark-sent" ? verbAction.markKind : undefined, Date.now(), activeAgent?.responseTimeWeeks).sentMs,
+                        now: Date.now(),
+                        formatDate: exactDate,
+                      });
+                      if (ask) setNudgeAsk({ title: ask.title, body: ask.body });
+                      else setIsNudgeOpen(true);
+                    }}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" /></svg>
-                    <span>Nudge</span>
+                    {/* ⚠️ §4d · THE STATE IS THE LABEL. "Nudged · 3 days ago" is what stops a writer
+                        sending a second follow-up they have already sent, and it uses §4's one
+                        duration formatter rather than a count of days. */}
+                    <span>{nudgeAgoDays != null ? "Nudged" : "Nudge"}</span>
+                    {nudgeAgoDays != null && <span className="qc-btn-sub">· {elapsedPhrase(nudgeAgoDays)} ago</span>}
                   </button>
+                  </span>
                   {/* ⚠️ THE GAP CARRIES THE DIVISION, NOT A RULE (§3c). Two groups: what moves the
                       query forward, then what ends it or takes it out of the app. A 1px rule between
                       them was a second device saying what the space already says, and it read as
@@ -5242,6 +5287,36 @@ export const Queries: React.FC<{
           triggerToast({ queryId: activeQuery.id, agentName: agentPrimary(activeAgent), manuscriptTitle: activeMs?.title || "", responseStyle: null });
         }}
       />
+    )}
+
+    {/**
+      * §4c — THE CONFIRM. It states what the agency said, when that window closes and how far off
+      * that is, then offers the two answers.
+      *
+      * ⚠️ NO VERDICT, WHICH IS WHY THERE IS NO "ARE YOU SURE". The copy is built by `nudgeConfirm`
+      * and locked against advice; this mount contributes only the two buttons.
+      *
+      * ⚠️ IT IS PORTALLED WITH ITS OWN CHROME RATHER THAN THROUGH `F12Popover`, which is a titled
+      * filter dialog with a DONE foot — a shape that would put a third answer on a two-answer
+      * question.
+      *
+      * ⚠️ THE REF'S LITTLE WINDOW BAR IS NOT BUILT, deliberately and reversibly. It can only ever
+      * draw one of its two states here (the confirm exists only while the window is OPEN), and in
+      * the no-window case it would draw a bar for a window that does not exist. The pack's prose
+      * lists the facts and the actions and no bar. Nick's call if he wants it back.
+      */}
+    {nudgeAsk && createPortal(
+      <div className="t-f12 qc-neutral">
+        <div className="qc-nask" style={{ ...nudgeAskStyle, zIndex: 60 }} role="dialog" aria-label={nudgeAsk.title}>
+          <div className="qc-nask-h">{nudgeAsk.title}</div>
+          <div className="qc-nask-b">{nudgeAsk.body}</div>
+          <div className="qc-nask-f">
+            <button type="button" className="qc-nask-x" onClick={() => setNudgeAsk(null)}>Cancel</button>
+            <button type="button" className="qc-nask-go" onClick={() => { setNudgeAsk(null); setIsNudgeOpen(true); }}>Nudge anyway</button>
+          </div>
+        </div>
+      </div>,
+      document.body,
     )}
 
     {/* Nudge — the ribbon's Nudge tile (writer waiting on the agent). Mirrors the dashboard mount:

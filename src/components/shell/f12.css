@@ -1210,6 +1210,30 @@
 .tl-evtitle { min-height: var(--tl-mark); display: flex; align-items: center; }
 .tl-evtitle > * { flex: 1 1 auto; min-width: 0; }
 
+/* ══ §4 · NUDGE — THE STATE ON THE CONTROL, AND THE CONFIRM ══════════════════════════════════
+ *
+ * ⚠️ THE NUDGED STATE IS A SUB-LABEL, NOT A SECOND BUTTON. "Nudged · 3 days ago" is one control
+ * reporting what it did; splitting the elapsed figure onto its own chip would make the row's width
+ * jump every time a query with a nudge was selected.
+ */
+.qc-btn-sub { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); font-weight: 400; margin-left: 5px; white-space: nowrap; }
+
+/* ⚠️ THE REF'S SQUARE-WITH-A-SAGE-TOP TREATMENT, which is the page's own card grammar (the query
+   header wears the same 5px edge). The ref itself asks whether that is heavy for a two-line
+   dialogue and offers a plain rounded popover as the alternative — a decision left with Nick
+   rather than taken quietly here. */
+.qc-nask { width: 340px; background: var(--white); box-shadow: var(--sh-3); border-radius: 0; position: relative; }
+.qc-nask::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--qc-card-border); }
+.qc-nask-h { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; color: var(--ink); padding: 16px 18px 0; }
+.qc-nask-b { font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); padding: 9px 18px 14px; }
+.qc-nask-f { display: flex; gap: 8px; justify-content: flex-end; padding: 0 18px 16px; }
+.qc-nask-x, .qc-nask-go { font-family: "Inter", sans-serif; font-size: 12.5px; height: 36px; padding: 0 15px; border-radius: 9px; cursor: pointer; border: 1px solid transparent; background: transparent; color: var(--ink-2); }
+.qc-nask-x:hover { background: var(--paper); border-color: var(--btn-line); }
+/* ⚠️ PINK, AND IT CANNOT COLLIDE: the page's only other pink is `Log new query`, which lives in the
+   list column and is never on screen at the same moment as this dialogue's focus. */
+.qc-nask-go { background: var(--pink); border-color: var(--qc-rim-pink); color: var(--ink); font-weight: 600; }
+.qc-nask-go:hover { filter: brightness(0.98); }
+
 /* ══ §2 · MINOR EVENTS ARE MINOR — SAME RHYTHM, LESS WEIGHT ══════════════════════════════════
  *
  * ⚠️ THE GAP DOES NOT CHANGE, AND THAT IS THE SECTION'S FIRST SENTENCE. The ref's treatment A
@@ -1767,11 +1791,16 @@
 /* ⚠️ THE OLD ALWAYS-TERRACOTTA RULE IS GONE (§3) — it sat LATER in the file than its replacement
    and silently won, so Delete kept its colour while the sheet said otherwise. One rule per
    selector, which is this file's own invariant. */
-/* ⚠️ DISABLED IS A LIGHTER BORDER AND A MUTED ICON — NEVER ABSENCE, and never a change of BOX.
-   The width is identical to the live state, so the row does not reflow as the selection moves
-   between a query that is due a chase and one that is not. */
-.qc-btn:disabled, .qc-btn-off { color: var(--qc-tx-off); border-color: var(--qc-rim-off); background: var(--white); cursor: default; }
-.qc-btn:disabled:hover, .qc-btn-off:hover { background: var(--white); border-color: var(--qc-rim-off); }
+/* ⚠️ DISABLED IS QUIETER, NEVER ABSENT, and never a change of BOX. The width is identical to the
+   live state, so the row does not reflow as the selection moves between a query that may be
+   chased and one that may not.
+   ⚠️ AND IT IS NOW TRANSPARENT (§4). It carried `background: var(--white)` and a rim from before
+   the bar went borderless, so an UNAVAILABLE Nudge drew a framed white pill between neighbours
+   that draw nothing — the one control the writer cannot use was the most prominent thing in the
+   row. Quiet text, no fill, no frame; the hover suppression stays, because a control that lights
+   up under the pointer is claiming to be available. */
+.qc-btn:disabled, .qc-btn-off { color: var(--qc-tx-off); border-color: transparent; background: transparent; cursor: default; }
+.qc-btn:disabled:hover, .qc-btn-off:hover { background: transparent; border-color: transparent; }
 .qc-btn:disabled svg, .qc-btn-off svg { opacity: 0.55; }
 /* the icon-only form: a square of the same height, so it sits on the row's line without arithmetic */
 /* ⚠️ SQUARE AT THE NEW HEIGHT — the icon-only Export is the one button with no label to set its
