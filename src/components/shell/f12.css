@@ -2387,6 +2387,16 @@ button.qc-mname:hover { color: var(--burg); }
 .qc-mact:hover { color: var(--burg); }
 .qc-mact-pro { color: #6A89A7; }
 .qc-msamp { gap: 8px; }
+/* ⚠️ ONE BORDERED BOX HOLDING THE FIELD AND ITS ARROWS — the manuscripts plate's shape, which is
+   the shape this app already uses for a stepped number. The arrows sit INSIDE the border behind a
+   divider rather than beside it, so the control reads as a field with a stepper and not as a field
+   next to two buttons. The arithmetic is `stepAmount`'s, not this rule's. */
+.qc-mqty { display: inline-flex; align-items: stretch; height: 32px; border: 1px solid var(--bd); border-radius: 8px; overflow: hidden; background: var(--panel, #fffdfb); }
+.qc-mqty input { width: 68px; border: 0; background: none; padding: 0 10px; font-family: var(--f12-mono); font-size: 13px; color: var(--hub-item, #1a1512); outline: none; }
+.qc-mqtysteps { display: flex; flex-direction: column; width: 22px; flex: none; border-left: 1px solid var(--bd); }
+.qc-mqtysteps button { flex: 1; border: 0; background: none; padding: 0; font-size: 7px; line-height: 1; color: var(--qc-tx-quiet); cursor: pointer; }
+.qc-mqtysteps button + button { border-top: 1px solid var(--bd); }
+.qc-mqtysteps button:hover { background: var(--n2); color: var(--ink); }
 
 /* ── §2 · the status block ───────────────────────────────────────────────────────────────────
    ⚠️ `nowrap` IS THE CLAUSE. `Revise & resubmit` is the longest label on this page, and the fault

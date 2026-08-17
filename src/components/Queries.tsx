@@ -64,6 +64,7 @@ import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref } from "../lib/agentDisplay";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
+import { classifyQueryMaterial, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
 import { formatQueryMaterial, materialLabel, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
@@ -1382,7 +1383,11 @@ export const Queries: React.FC<{
   // Phase 6 — the What-you-sent sample-materials inline editor (unit toggle + quantity). Wired to the
   // existing QueryMaterial.type/quantity via updateQuery — no new fields.
   const [sampleEditorOpen, setSampleEditorOpen] = useState(false);
-  const [sampleUnit, setSampleUnit] = useState<"pages" | "chapters" | "words">("pages");
+  /* ⚠️ THE SHARED `SampleUnit`, NOT A LOCAL TRIPLE. This page had its own
+     `["pages","chapters","words"]` — the same concept the agent list's Materials editor already
+     owned, spelled differently and with no physics behind it. Two implementations of one idea is
+     the pattern this repo keeps paying for. */
+  const [sampleUnit, setSampleUnit] = useState<SampleUnit>("Pages");
   const [sampleQty, setSampleQty] = useState("");
   /* F12 sort — grouped Activity / Dates / Pipeline (ref sort popover). Default: last activity. */
   const [sortKey, setSortKey] = useState<string>("last_activity");
@@ -1559,14 +1564,36 @@ export const Queries: React.FC<{
   // Phase 6 — What-you-sent material writes. The query's own materialsWanted is the record of what was
   // sent; when it's empty we DISPLAY the agent's expected set, and the first edit promotes that set onto
   // the query. Writes patch materialsWanted (allowlisted) with an undo restoring the prior stored value.
-  const isQueryLetterMat = (it: string | QueryMaterial) => materialLabel(it).toLowerCase().includes("query");
-  const isSynopsisMat = (it: string | QueryMaterial) => materialLabel(it).toLowerCase().includes("synopsis");
-  const isSampleMat = (it: string | QueryMaterial) => !isQueryLetterMat(it) && !isSynopsisMat(it);
+  /**
+   * ⚠️ THE CANONICAL CLASSIFIER, NOT THREE GUESSES. These were `includes("query")`,
+   * `includes("synopsis")`, and — the live bug — a CATCH-ALL: `!queryLetter && !synopsis` meant
+   * "sample". So any free text a writer had entered was reported back to them as an opening
+   * sample. That is the app misstating a fact about their own submission, not merely failing to
+   * model one, and it is why this is a fix rather than a tidy-up.
+   *
+   * ⚠️ ONE SET OF PATTERNS, IN `agentMaterials.ts`, where they have always lived. A fourth copy
+   * here — even a correct one — is the shape this repo keeps paying for.
+   */
+  const matKind = (it: string | QueryMaterial) => classifyQueryMaterial(it);
+  const isQueryLetterMat = (it: string | QueryMaterial) => matKind(it) === "queryLetter";
+  const isSynopsisMat = (it: string | QueryMaterial) => matKind(it) === "synopsis";
+  const isSampleMat = (it: string | QueryMaterial) => matKind(it) === "sample";
+  const isOtherMat = (it: string | QueryMaterial) => matKind(it) === "other";
   const baseMaterialsFor = (q: Query, ag: Agent | null | undefined): (string | QueryMaterial)[] => {
     const own = (q as any).materialsWanted;
     if (Array.isArray(own) && own.length) return own;
     return ag && Array.isArray(ag.materialsWanted) ? ag.materialsWanted : [];
   };
+  /**
+   * ⚠️ THE ONE WRITER FOR EVERY MATERIALS CHANGE — add, edit, mark sent, remove. A second path
+   * would be a second answer to what the query holds.
+   *
+   * ⚠️ AND IT LOGS NO ACTIVITY, DELIBERATELY. Editing what you sent is a CORRECTION to a factual
+   * record, not an event that happened — the same rule the timeline's ⋯ corrections follow. An
+   * entry reading "materials changed" would put a thing you did to the RECORD into the story of
+   * what the agent and the writer did to each other. The undo restores the prior stored value,
+   * which is what a correction needs instead. Do not "fix" this by adding a log entry.
+   */
   const writeMaterials = (q: Query, next: (string | QueryMaterial)[], msg: string) => {
     const prev = (q as any).materialsWanted;
     const restore = Array.isArray(prev) ? { materialsWanted: prev } : { materialsWanted: deleteField() as unknown as QueryMaterial[] };
@@ -1585,7 +1612,8 @@ export const Queries: React.FC<{
     const qty = sampleQty.trim();
     if (!qty) return;
     const numeric = /^[\d,]+$/.test(qty) ? Number(qty.replace(/,/g, "")) : qty;
-    const item: QueryMaterial = { material: "Sample Pages", type: sampleUnit, quantity: numeric };
+    /* the stored `type` is the lowercase unit the schema uses; `SampleUnit` is the shared editor's */
+    const item: QueryMaterial = { material: "Sample Pages", type: sampleUnit.toLowerCase() as QueryMaterial["type"], quantity: numeric };
     const next = [...baseMaterialsFor(q, ag).filter((it) => !isSampleMat(it)), item];
     writeMaterials(q, next, "Sample materials updated");
     setSampleEditorOpen(false);
@@ -4269,15 +4297,32 @@ export const Queries: React.FC<{
                   const qlSent = base.some(isQueryLetterMat);
                   const synSent = base.some(isSynopsisMat);
                   const sampleItem = base.find(isSampleMat) ?? null;
+                  /* ⚠️ THE OTHER ITEMS MUST RENDER, AND THAT IS A CONSEQUENCE OF THE CLASSIFIER
+                     RATHER THAN A NEW FEATURE. While `isSampleMat` was a catch-all, free text
+                     appeared on the card wearing the sample chip's label — wrong, but VISIBLE.
+                     Correctly classified and unrendered, the same material would vanish from the
+                     card altogether, which is worse than misreporting it: the app would be hiding
+                     a fact about the writer's own submission rather than mislabelling one.
+                     ⚠️ THE CHIP'S LABEL IS THE WRITER'S OWN WORDS, verbatim. `sampleMaterialText`
+                     returns the free text for an `other` item and the legacy string for a plain
+                     one, so no vocabulary of ours is imposed on what they typed. */
+                  const otherItems = base.filter(isOtherMat);
                   const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
                   const pkgComponents = linkedPackage
                     ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
                     : [];
                   const isPro = currentUser?.plan === UserPlan.PRO;
                   const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
+                  /* ⚠️ THE STORED UNIT IS LOWERCASE AND THE EDITOR'S IS CAPITALISED, so the two
+                     meet in one place rather than at every call site. `unitFromStored` is the whole
+                     of the mapping; an empty quantity opens on the unit's own DEFAULT rather than
+                     blank, which is what `snapToUnit` is for. */
                   const openSampleEditor = () => {
-                    if (sampleItem && typeof sampleItem !== "string" && sampleItem.type && sampleItem.type !== "other") { setSampleUnit(sampleItem.type); setSampleQty(sampleItem.quantity != null ? String(sampleItem.quantity) : ""); }
-                    else { setSampleUnit("pages"); setSampleQty(""); }
+                    const stored = sampleItem && typeof sampleItem !== "string" ? sampleItem.type : undefined;
+                    const unit: SampleUnit = stored === "chapters" ? "Chapters" : stored === "words" ? "Words" : "Pages";
+                    setSampleUnit(unit);
+                    const qty = sampleItem && typeof sampleItem !== "string" && sampleItem.quantity != null ? String(sampleItem.quantity) : "";
+                    setSampleQty(qty || snapToUnit(unit));
                     setSampleEditorOpen(true);
                   };
                   /* ⚠️ TWO CHIP FAMILIES, AND THEY MUST NOT BE UNIFIED. A contact is a place to go
@@ -4382,6 +4427,13 @@ export const Queries: React.FC<{
                                   was sent; Remove keeps its own control, since a chip that both
                                   edits and clears on one click could not do either. */}
                               {attach("smp", sampleItem ? sampleMaterialText(sampleItem) : "Sample materials", !!sampleItem, openSampleEditor, sampleItem ? "Change the sample you sent" : "Set the sample you sent")}
+                              {otherItems.map((it, i) => (
+                                <span key={`oth-${i}`} className="qc-mchip qc-mchip-att on" title={sampleMaterialText(it)}>
+                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
+                                  <span className="qc-mchiptx">{sampleMaterialText(it)}</span>
+                                  <i aria-hidden="true">✓</i>
+                                </span>
+                              ))}
                               {sampleItem && !sampleEditorOpen && (
                                 <button type="button" className="qc-mact" onClick={() => removeSampleMaterial(activeQuery, activeAgent)} title="Clear the sample materials">Remove</button>
                               )}
@@ -4403,13 +4455,32 @@ export const Queries: React.FC<{
                             {sampleEditorOpen && (
                               <div className="qc-msub qc-msamp">
                                 <div role="group" aria-label="Sample unit" style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--bd)" }}>
-                                  {(["pages", "chapters", "words"] as const).map((u) => (
-                                    <button key={u} type="button" onClick={() => setSampleUnit(u)} aria-pressed={sampleUnit === u}
-                                      style={{ flex: 1, padding: "6px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, textTransform: "capitalize" as const, cursor: "pointer", border: "none", background: "var(--panel, #fffdfb)", boxShadow: sampleUnit === u ? "inset 0 0 0 1.5px var(--ink, #1e1a16)" : "none", color: sampleUnit === u ? "var(--ink, #1e1a16)" : "#6b6257", fontWeight: sampleUnit === u ? 600 : 400 }}>{u}</button>
+                                  {/* ⚠️ `SAMPLE_UNITS`, AND SWITCHING SNAPS RATHER THAN CONVERTING.
+                                      `snapToUnit` gives that unit's own default instead of
+                                      arithmetically turning 3 chapters into 3 pages — a fake
+                                      conversion states a quantity the writer never chose. */}
+                                  {SAMPLE_UNITS.map((u) => (
+                                    <button key={u} type="button" onClick={() => { setSampleUnit(u); setSampleQty(snapToUnit(u)); }} aria-pressed={sampleUnit === u}
+                                      style={{ flex: 1, padding: "6px 12px", fontFamily: "'Inter',sans-serif", fontSize: 12, cursor: "pointer", border: "none", background: "var(--panel, #fffdfb)", boxShadow: sampleUnit === u ? "inset 0 0 0 1.5px var(--ink, #1e1a16)" : "none", color: sampleUnit === u ? "var(--ink, #1e1a16)" : "#6b6257", fontWeight: sampleUnit === u ? 600 : 400 }}>{u}</button>
                                   ))}
                                 </div>
-                                <input type="text" inputMode="numeric" value={sampleQty} onChange={(e) => setSampleQty(e.target.value)} aria-label="Quantity"
-                                  style={{ width: 84, padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 13, border: "1px solid var(--bd)", borderRadius: 8, background: "var(--panel, #fffdfb)", color: "var(--hub-item, #1a1512)" }} />
+                                {/* ⚠️ `stepAmount` — THE EXISTING ARITHMETIC, AND ITS STEP VARIES BY
+                                      UNIT: 1 chapter, 5 pages, 500 words, each floored and capped
+                                      by `MAT_QTY`'s storage range. A hard-coded ±1 would make the
+                                      writer press an arrow a thousand times to reach a word count,
+                                      and would let a value past the range the rules validate. */}
+                                <span className="qc-mqty">
+                                  <input type="text" inputMode="numeric" value={sampleQty} onChange={(e) => setSampleQty(e.target.value)} aria-label="Quantity"
+                                    onKeyDown={(e) => {
+                                      if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+                                      e.preventDefault();
+                                      setSampleQty(stepAmount(sampleQty, sampleUnit, e.key === "ArrowUp" ? 1 : -1));
+                                    }} />
+                                  <span className="qc-mqtysteps">
+                                    <button type="button" aria-label={`Up one step of ${sampleUnit.toLowerCase()}`} onClick={() => setSampleQty(stepAmount(sampleQty, sampleUnit, 1))}>▲</button>
+                                    <button type="button" aria-label={`Down one step of ${sampleUnit.toLowerCase()}`} onClick={() => setSampleQty(stepAmount(sampleQty, sampleUnit, -1))}>▼</button>
+                                  </span>
+                                </span>
                                 <button type="button" onClick={() => saveSampleMaterial(activeQuery, activeAgent)} disabled={!sampleQty.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: sampleQty.trim() ? "pointer" : "default", opacity: sampleQty.trim() ? 1 : 0.5 }}>Save</button>
                                 <button type="button" onClick={() => setSampleEditorOpen(false)} className="qc-mact">Cancel</button>
                               </div>

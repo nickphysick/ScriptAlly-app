@@ -132,27 +132,102 @@ export function parseAgentMaterials(stored: readonly string[] | undefined): Agen
   for (const raw of stored ?? []) {
     const v = (raw ?? "").trim();
     if (v === "") continue;
-    const lower = v.toLowerCase();
-
-    if (lower === "query letter") { select("Query letter"); continue; }
-    if (lower === "author bio") { select("Author bio"); continue; }
-    if (lower === "full manuscript") { select("Full manuscript"); continue; }
-
-    let m: RegExpMatchArray | null;
-    if ((m = v.match(/^synopsis\s*\(\s*(\d+)\s*pages?\s*\)$/i))) { select("Synopsis"); state.counts["Synopsis"] = m[1]; continue; }
-    if (lower === "synopsis") { select("Synopsis"); continue; }
-    if ((m = v.match(/^first\s+(\d+)\s+pages$/i))) { select("Sample pages"); state.counts["Sample pages"] = m[1]; continue; }
-    if (lower === "sample pages") { select("Sample pages"); continue; }
-    if ((m = v.match(/^first\s+(\d+)\s+chapters$/i))) { select("Sample chapters"); state.counts["Sample chapters"] = m[1]; continue; }
-    if (lower === "sample chapters" || lower === "chapters") { select("Sample chapters"); continue; }
-    if ((m = v.match(/^([\d,]+)\s+words$/i))) { select("Sample words"); state.counts["Sample words"] = m[1].replace(/,/g, ""); continue; }
-    if (lower === "sample words" || lower === "word count") { select("Sample words"); continue; }
-
-    others.push(v); // unrecognised → Other
+    const c = classifyMaterial(v);
+    if (c.pill === null) { others.push(v); continue; } // unrecognised → Other
+    select(c.pill);
+    if (c.count) state.counts[c.pill] = c.count;
   }
 
   if (others.length) { select("Other"); state.otherText = others.join(OTHER_JOIN); }
   return state;
+}
+
+/**
+ * ══ THE ONE CLASSIFIER ═══════════════════════════════════════════════════════════════════════
+ *
+ * What a single stored material IS. Extracted from `parseAgentMaterials`, which is where these
+ * patterns have always lived — so this is one set of rules with two callers rather than a third
+ * copy. The array parser above reads it per item; the Query Centre reads it through
+ * `classifyQueryMaterial` below.
+ *
+ * ⚠️ IT EXISTS BECAUSE THE QUERY CENTRE WAS GUESSING. That page classified with three ad-hoc
+ * predicates, the last of which was a CATCH-ALL — `!queryLetter && !synopsis` meant "sample". So
+ * any free text a writer had entered was reported back to them as an opening sample: the app
+ * misstating a fact about their own submission, not merely failing to model it.
+ *
+ * ⚠️ `pill: null` MEANS OTHER, and it is a decision rather than a failure. Nick's ★1: a stored
+ * string matching none of the structured patterns IS Other by definition, so nothing is ever
+ * dropped or corrupted — it round-trips back out as editable free text.
+ *
+ * ⚠️ AUTHOR BIO AND FULL MANUSCRIPT ARE STILL RECOGNISED, and that is what lets them be shed. They
+ * are retired from the UI, not from the parser: a legacy agent has to be able to SAY it holds one
+ * before `materialsWantedFromRows` can decline to re-emit it.
+ */
+export interface MaterialClass {
+  /** The `MAT_OPTS` pill this material is, or null for free text ("Other"). */
+  pill: MatOpt | null;
+  /** The sample unit, where the pill is a quantified sample. */
+  unit?: SampleUnit;
+  /** The digits, where the pattern stated a count. */
+  count?: string;
+}
+
+export function classifyMaterial(raw: string): MaterialClass {
+  const v = (raw ?? "").trim();
+  if (v === "") return { pill: null };
+  const lower = v.toLowerCase();
+
+  if (lower === "query letter") return { pill: "Query letter" };
+  if (lower === "author bio") return { pill: "Author bio" };
+  if (lower === "full manuscript") return { pill: "Full manuscript" };
+
+  let m: RegExpMatchArray | null;
+  if ((m = v.match(/^synopsis\s*\(\s*(\d+)\s*pages?\s*\)$/i))) return { pill: "Synopsis", count: m[1] };
+  if (lower === "synopsis") return { pill: "Synopsis" };
+  if ((m = v.match(/^first\s+(\d+)\s+pages$/i))) return { pill: "Sample pages", unit: "Pages", count: m[1] };
+  if (lower === "sample pages") return { pill: "Sample pages", unit: "Pages" };
+  if ((m = v.match(/^first\s+(\d+)\s+chapters$/i))) return { pill: "Sample chapters", unit: "Chapters", count: m[1] };
+  if (lower === "sample chapters" || lower === "chapters") return { pill: "Sample chapters", unit: "Chapters" };
+  if ((m = v.match(/^([\d,]+)\s+words$/i))) return { pill: "Sample words", unit: "Words", count: m[1].replace(/,/g, "") };
+  if (lower === "sample words" || lower === "word count") return { pill: "Sample words", unit: "Words" };
+
+  return { pill: null }; // free text — Other by definition
+}
+
+/**
+ * The four KINDS a query's material can be — the locked list, and the vocabulary the Query Centre
+ * speaks. Author bio and Full manuscript have no kind here: they are recognised by the classifier
+ * so legacy data can shed them, and they are not offerable.
+ */
+export type MaterialKind = "queryLetter" | "synopsis" | "sample" | "other";
+
+const PILL_KIND: Partial<Record<MatOpt, MaterialKind>> = {
+  "Query letter": "queryLetter",
+  "Synopsis": "synopsis",
+  "Sample pages": "sample",
+  "Sample chapters": "sample",
+  "Sample words": "sample",
+};
+
+/**
+ * What a QUERY's stored material is. A query holds `(string | QueryMaterial)[]`: legacy plain
+ * strings go through the classifier above, and a structured item is already self-describing.
+ *
+ * ⚠️ `type === "other"` IS THE STRUCTURED FREE TEXT, and it is checked FIRST. `QueryMaterial`
+ * already carries the unit, so Other needs no schema change to have an identity — only a reader
+ * that looks at it.
+ *
+ * ⚠️ AND A RETIRED PILL READS AS `other` RATHER THAN VANISHING. A query that genuinely holds an
+ * author bio should say so in the writer's own words; silently dropping it from the card would be
+ * the app deciding a fact about their submission did not happen.
+ */
+export function classifyQueryMaterial(item: string | { material?: string; type?: string; quantity?: unknown }): MaterialKind {
+  if (typeof item !== "string") {
+    if (item.type === "other") return "other";
+    if (item.type === "pages" || item.type === "chapters" || item.type === "words") return "sample";
+    return PILL_KIND[classifyMaterial(item.material ?? "").pill as MatOpt] ?? "other";
+  }
+  return PILL_KIND[classifyMaterial(item).pill as MatOpt] ?? "other";
 }
 
 /**
