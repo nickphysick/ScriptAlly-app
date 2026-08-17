@@ -141,10 +141,13 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
          everything else about the two is identical, and neither is italic or burgundy. */
       expect([...new Set(m.nameFaces)], `the two names differ in more than size: ${m.nameFaces.join(" ⁄ ")}`).toHaveLength(1);
       expect(m.nameFaces[0], "the names are not Playfair in the ink, upright").toBe("Playfair Display|rgb(20, 20, 18)|normal");
-      /* ⚠️ INVERTED BY §4 — THE NAMES MATCH AND THE CARD DIFFERENTIATES. The earlier pack's
-         argument for a larger agent was sound and its MECHANISM was not: type carrying the
-         hierarchy survives neither a long title, a short one, nor a later change to the scale. */
-      expect(m.nameSizes[0], `the two names differ in size: ${m.nameSizes.join(" ⁄ ")}`).toBe(m.nameSizes[1]);
+      /* ⚠️ THE STEP RETURNS ON THE MANUSCRIPT, and this is the third position the pair has held.
+         The structural pack removed it because type carrying the hierarchy ALONE survives neither
+         a long title nor a later change to the scale — which was right. It is not alone now: the
+         icon discs say which KIND each row is, so the size is free to say which is the SUBJECT.
+         Two devices, two jobs. Face and ink stay identical, which is asserted above. */
+      expect(parseFloat(m.nameSizes[0]), `the manuscript is not the smaller of the two: ${m.nameSizes.join(" ⁄ ")}`)
+        .toBeGreaterThan(parseFloat(m.nameSizes[1]));
       /* §4a — a rule between the rows, spanning BOTH tracks so it divides the card rather than
          underlining one row's text */
       expect(m.rule, "the rule between the rows is missing").toBeTruthy();
