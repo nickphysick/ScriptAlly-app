@@ -72,7 +72,8 @@ export const ShellTopBar: React.FC<{
   onTuck?: () => void;
   /** The account block opens the SHARED AccountMenu (one component, both shells). */
   accountMenu?: React.ReactNode;
-  onOpenAccount?: () => void;
+  /** Opens the account menu, handing it the element to anchor against (it is portalled). */
+  onOpenAccount?: (anchor: HTMLElement) => void;
   mobileDetail?: MobileDetailSpec | null;
   onOpenYou?: () => void;
 }> = ({ onNavigate, scope, onOpenSearch, searchOpenerRef, onTuck, accountMenu, onOpenAccount, mobileDetail, onOpenYou }) => {
@@ -114,7 +115,7 @@ export const ShellTopBar: React.FC<{
         </div>
         {currentUser && (
           <span className="sv2-acctwrap">
-            <button type="button" className="sv2-tbuser" onClick={onOpenAccount} title="Account" aria-haspopup="menu">
+            <button type="button" className="sv2-tbuser" onClick={(e) => onOpenAccount?.(e.currentTarget)} title="Account" aria-haspopup="menu">
               <span className="sv2-tbav" aria-hidden="true">{initials}</span>
               <span className="sv2-tbname">{currentUser.name}</span>
               <ChevronDown className="sv2-tbuchev" aria-hidden="true" />

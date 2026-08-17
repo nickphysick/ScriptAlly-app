@@ -221,6 +221,14 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   const [youOpen, setYouOpen] = useState(false);
   // The SHARED account menu's open state — Phase 4's top-nav shell will drive the same component.
   const [accountOpen, setAccountOpen] = useState(false);
+  /* ⚠️ THE MENU IS PORTALLED, SO IT NEEDS THE ELEMENT THAT OPENED IT. Two shells offer a trigger —
+     the rail's user row and the mobile bar's chip — and one menu serves both, so the anchor
+     travels with the request rather than being a ref this component guesses at. */
+  const [accountAnchor, setAccountAnchor] = useState<HTMLElement | null>(null);
+  const toggleAccount = useCallback((el: HTMLElement) => {
+    setAccountAnchor(el);
+    setAccountOpen((v) => !v);
+  }, []);
 
   const [mobileDetailMap, setMobileDetailMap] = useState<Record<string, MobileDetailSpec | null>>({});
   const setMobileDetail = useCallback((route: string, spec: MobileDetailSpec | null) => {
@@ -371,7 +379,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         onOpenSearch={openPalette}
         searchAnchorRef={desktopSearchRef}
         onOpenHelp={() => goPath("/help")}
-        onOpenAccount={() => setAccountOpen((v) => !v)}
+        onOpenAccount={toggleAccount}
         onUpgrade={() => goPath("/plans")}
         onNavigate={onNavigate}
         scrollId={STAGE_SCROLL_ID}
@@ -396,6 +404,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             plan={currentUser?.plan}
             onNavigatePath={goPath}
             onSignOut={logout}
+            anchor={accountAnchor}
           />
         }
       >
@@ -413,7 +422,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
                nothing on any viewport. The bar's own tuck button was therefore already inert in
                effect; without the prop it is inert in fact, byte-identical on screen. The button
                itself belongs to the LOCKED mobile bar and is left for a mobile pass to remove. */
-            onOpenAccount={() => setAccountOpen((v) => !v)}
+            onOpenAccount={toggleAccount}
             mobileDetail={activeMobileDetail}
             onOpenYou={() => setYouOpen(true)}
           />

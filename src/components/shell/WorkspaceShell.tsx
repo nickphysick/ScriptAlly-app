@@ -63,7 +63,8 @@ export interface WorkspaceShellProps {
   /** Attached to the desktop SearchPill so the palette can anchor to it. */
   searchAnchorRef?: React.Ref<HTMLButtonElement>;
   onOpenHelp: () => void;
-  onOpenAccount?: () => void;
+  /** Opens the account menu, and hands it the element to anchor against (it is portalled). */
+  onOpenAccount?: (anchor: HTMLElement) => void;
   onUpgrade?: () => void;
   /** The legacy navigate bridge — the + New menu's capture contracts run through it. */
   onNavigate?: (tab: string, subPageName?: string) => void;
@@ -502,8 +503,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               role="button"
               tabIndex={0}
               aria-haspopup="menu"
-              onClick={() => onOpenAccount?.()}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpenAccount?.(); } }}
+              onClick={(e) => onOpenAccount?.(e.currentTarget)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpenAccount?.(e.currentTarget); } }}
               /* ⚠️ THE TOOLTIP CARRIES THE FULL NAME, NEVER THE FORMATTED ONE — it is the only
                  place the whole name is guaranteed to appear, and it now shows in BOTH states:
                  expanded (where the name may be shortened to "Bethany C." or ellipsised) and

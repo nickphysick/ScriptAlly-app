@@ -36,14 +36,17 @@ describe("the chain from the rail row to signOut", () => {
    */
   it("WorkspaceShell actually calls onOpenAccount, not merely accepts it", () => {
     expect(WORKSPACE).toContain("onOpenAccount");
-    expect(WORKSPACE).toMatch(/onOpenAccount\?\.\(\)/);
+    expect(WORKSPACE).toMatch(/onOpenAccount\?\.\(e\.currentTarget\)/);
   });
 
   it("the rail's user row is the opener", () => {
     const at = WORKSPACE.indexOf('className="ws-uacct"');
     expect(at).toBeGreaterThan(-1);
     const row = WORKSPACE.slice(at, WORKSPACE.indexOf("</div>", at));
-    expect(row).toMatch(/onClick=\{\(\) => onOpenAccount\?\.\(\)\}/);
+    /* ⚠️ IT HANDS OVER ITS OWN ELEMENT. The menu is portalled to document.body, so the trigger is
+       the only thing that can say where it belongs — passing nothing is how it ended up placed
+       against the initial containing block, eight pixels below the fold. */
+    expect(row).toMatch(/onClick=\{\(e\) => onOpenAccount\?\.\(e\.currentTarget\)\}/);
   });
 
   /**
@@ -62,13 +65,24 @@ describe("the chain from the rail row to signOut", () => {
     const row = WORKSPACE.slice(at, WORKSPACE.indexOf("</div>", at));
     expect(row).toContain("onKeyDown");
     expect(row).toMatch(/Enter/);
-    expect(row).toMatch(/onOpenAccount\?\.\(\)/);
+    expect(row).toMatch(/onOpenAccount\?\.\(e\.currentTarget\)/);
   });
 
-  it("AppShell wires the opener to the menu's own open state", () => {
-    expect(APPSHELL).toContain("onOpenAccount={() => setAccountOpen((v) => !v)}");
+  it("AppShell wires the opener to the menu's own open state, and to an anchor", () => {
+    expect(APPSHELL).toContain("onOpenAccount={toggleAccount}");
+    expect(APPSHELL).toContain("setAccountAnchor(el)");
     expect(APPSHELL).toContain("open={accountOpen}");
+    expect(APPSHELL).toContain("anchor={accountAnchor}");
     expect(APPSHELL).toContain("onSignOut={logout}");
+  });
+
+  /**
+   * ⚠️ BOTH SHELLS HAND OVER AN ANCHOR. The mobile bar's chip is the opener that always worked; if
+   * it stopped passing its element the menu would still open and would place itself against
+   * nothing, which is the fault this pass exists to fix arriving from the other direction.
+   */
+  it("the mobile bar's chip passes its element too", () => {
+    expect(read("ShellV2.tsx")).toMatch(/onClick=\{\(e\) => onOpenAccount\?\.\(e\.currentTarget\)\}/);
   });
 });
 

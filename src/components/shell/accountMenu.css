@@ -3,10 +3,15 @@
    (the palette is 80/81, so this sits just under it — a palette opened over the menu should
    cover it, not the other way round). ── */
 
+/* ⚠️ `fixed`, AND ITS COORDINATES COME FROM THE TRIGGER — never from an ancestor.
+   It was `position: absolute; top: calc(100% + 8px); right: 0`, which works only where the menu is
+   a child of the control that opens it (the ShellV2 bar, `.sv2-acctwrap`). At the WorkspaceShell
+   mount there is no positioned ancestor at all, so it resolved against the initial containing block
+   and opened eight pixels below the bottom of the viewport. The menu is portalled to `document.body`
+   now and placed by `placeMenu`, which flips it upward at the rail foot. No `top`/`right` here:
+   both are set inline, per opening, from the trigger's rect. */
 .am-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  position: fixed;
   min-width: 236px;
   background: var(--shell-canvas);
   border: 1px solid var(--shell-line);
