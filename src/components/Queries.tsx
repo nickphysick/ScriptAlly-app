@@ -4486,21 +4486,20 @@ export const Queries: React.FC<{
                                 ⚠️ BARE: no plate, no ring, no ground. The status mark stays the only
                                 circular element on the card, which is what keeps the eye going name,
                                 then status. */}
-                            <span className="qc-mlead" aria-hidden="true">
+                            <span className="qc-mlead qc-mlead--ag" aria-hidden="true">
                               <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>
                             </span>
                             <div className="qc-mval">
-                              {/* ⚠️ THE AGENT IS THE LARGER OF THE TWO (§2), and the reason is what
-                                  you clicked: the list row was an AGENT, so the agent is what the
-                                  card confirms first. The manuscript is the constant — it is the
-                                  same book on every query in this view — so it keeps its size.
-                                  ⚠️ SIZE ALONE. Italic and burgundy were both tried on the title
-                                  and rejected; burgundy is the outgoing status colour, and on a
-                                  card whose only colour is the status mark a second one would read
-                                  as a second status. */}
+                              {/* ⚠️ THE SIZE DIFFERENCE IS REMOVED (§4), REVERSING THE EARLIER
+                                  PACK'S §2. Its argument was sound — the list row you clicked was
+                                  an agent, so the agent is what the card confirms first — and the
+                                  MECHANISM was the problem: type carrying the hierarchy survives
+                                  neither a long title, a short one, nor any later change to the
+                                  scale. The CARD differentiates now, through a rule and a disc,
+                                  and both of those hold whatever the words are. */}
                               {onNavigate ? (
-                                <button type="button" className="qc-mname qc-mname--lg" onClick={() => onNavigate("agents")} title="Open the agent list">{nameplate}</button>
-                              ) : <span className="qc-mname qc-mname--lg">{nameplate}</span>}
+                                <button type="button" className="qc-mname" onClick={() => onNavigate("agents")} title="Open the agent list">{nameplate}</button>
+                              ) : <span className="qc-mname">{nameplate}</span>}
                               {/* ⚠️ THE AGENCY IS THE SECONDARY, and it states its own absence. An
                                   agent with no agency on file is a real record in this app; "No
                                   agency" is a fact, and a blank there is indistinguishable from a
@@ -4531,7 +4530,14 @@ export const Queries: React.FC<{
                             </div>
 
                             {/* ── SENT ── */}
-                            <span className="qc-mlead" aria-hidden="true">
+                            {/* ⚠️ 4a · THE RULE BETWEEN THE ROWS — the card reads as two statements
+                                rather than a list, and it is a grid child spanning both tracks so
+                                it divides the CARD rather than underlining one row's text. */}
+                            <span className="qc-mrule" aria-hidden="true" />
+                            {/* ⚠️ 4b · THE MANUSCRIPT'S GLYPH STAYS BARE while the agent's takes a
+                                disc. The leaders are the one place the two rows can differ without
+                                the TYPE doing it — same glyph size, same stroke, different ground. */}
+                            <span className="qc-mlead qc-mlead--ms" aria-hidden="true">
                               <svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z" /><path d="M5 17.5h13.5" /><path d="M9 9h7M9 12.5h5" /></svg>
                             </span>
                             <div className="qc-mval">

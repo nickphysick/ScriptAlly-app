@@ -334,11 +334,21 @@ describe("§1 · the query header is a mail header", () => {
     expect(card, "a mono row label came back").not.toMatch(/["\s`]qc-mlab["\s`]/);
     expect(card, "the AGENT label came back").not.toContain(">Agent<");
     expect(card, "the SENT label came back").not.toContain(">Sent<");
-    expect((card.match(/className="qc-mlead"/g) ?? []).length, "the two rows are not both led by a glyph").toBe(2);
+    expect((card.match(/className="qc-mlead /g) ?? []).length, "the two rows are not both led by a glyph").toBe(2);
+    /* ⚠️ §4b — THE LEADERS DIFFER IN GROUND AND IN NOTHING ELSE, which is what lets the two NAMES
+       be identical. The agent's takes a disc; the manuscript's stays bare. */
+    expect(card, "the agent's leader lost its modifier").toContain("qc-mlead--ag");
+    expect(card, "the manuscript's leader lost its modifier").toContain("qc-mlead--ms");
     /* ⚠️ BARE, AND THE STATUS MARK STAYS THE ONLY CIRCLE. A plate or a ring here would give the
        card a second round element and the eye a second place to start. */
+    /* ⚠️ INVERTED IN HALF BY §4b. §1's clause was that BOTH leaders are bare, so the status mark
+       stayed the card's only circle; §4b gives the agent's a disc to carry the differentiation the
+       type used to. The base rule is still bare — the disc is a modifier — and the manuscript's
+       leader wears nothing, which is what makes the pair a difference rather than two icons. */
     const lead = rule(".qc-mlead");
-    expect(lead, "the leader took a ground").not.toMatch(/background|border|box-shadow|border-radius/);
+    expect(lead, "the shared leader rule took a ground").not.toMatch(/background|border|box-shadow|border-radius/);
+    expect(rule(".qc-mlead--ag"), "the agent's disc is missing").toContain("background: var(--pink)");
+    expect(cssCode, "the manuscript's leader took a ground").not.toMatch(/\.qc-mlead--ms[^{]*\{[^}]*background/);
     /* one size and one stroke on both — a single rule, so they cannot drift */
     expect(rule(".qc-mlead svg"), "the leaders lost their shared size").toContain("width: 20px");
     expect(rule(".qc-mlead svg"), "the leaders lost their shared stroke").toContain("stroke-width: 1.5");
@@ -372,14 +382,14 @@ describe("§1 · the query header is a mail header", () => {
        burgundy is the outgoing status colour, and on a card whose only colour is the status mark a
        second one reads as a second status. Size alone carries the hierarchy. */
     expect((card.match(/className="qc-mname/g) ?? []).length, "the two names are not the same element").toBe(4);
-    expect((card.match(/qc-mname--lg/g) ?? []).length, "the larger step is not the agent's alone").toBe(2);
+    /* ⚠️ `--lg` IS RETIRED BY §4 — the names match and the CARD differentiates, through a rule
+       between the rows and a disc on one leader. Both of those hold whatever the words are, which
+       is what type carrying the hierarchy could not do. */
+    expect(card, "the agent's larger step came back — the card should carry the difference").not.toContain("qc-mname--lg");
+    expect(cssCode, "the modifier survives with nothing wearing it").not.toContain(".qc-mname--lg");
     expect(rule(".qc-mname"), "the names took a colour of their own").toContain("color: var(--ink)");
     expect(rule(".qc-mname"), "the base rule went italic").not.toContain("font-style");
-    const lg = rule(".qc-mname--lg");
-    expect(lg, "the agent's step is missing").not.toBe("");
-    expect(lg, "the agent name is not 24px").toContain("font-size: 24px");
-    expect(lg.replace(/[.\s{}]|qc-mname--lg/g, "").split(";").filter(Boolean).length,
-      "the modifier changed more than the size — the two names would stop sharing a face").toBe(1);
+    expect(rule(".qc-mname"), "the shared name step moved off 23px").toContain("font-size: 23px");
   });
 });
 

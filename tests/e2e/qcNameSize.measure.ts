@@ -45,8 +45,19 @@ test("§2 — the agent name is larger, and the longest one does not crowd the s
   for (const s of seen) console.log(`  ${s.name} / ${s.agency}: name ${s.nameW} + agency in ${s.valW} → free ${s.free} · ${s.fs}/${s.msFs} · card ${s.cardH}`);
 
   const first = seen[0];
-  expect(parseFloat(first.fs), "the agent name is not larger than the manuscript title").toBeGreaterThan(parseFloat(first.msFs));
-  expect(first.fs, "the agent name is not 24px").toBe("24px");
+  /* ⚠️ INVERTED BY §4 — THE TWO NAMES MATCH, AND THE CARD DIFFERENTIATES INSTEAD. The earlier
+     pack's argument for a larger agent was sound and the MECHANISM was not: type carrying the
+     hierarchy survives neither a long title, a short one, nor any later change to the scale. A rule
+     between the rows and a disc on one leader hold whatever the words are. */
+  expect(first.fs, "the two names differ in size again — the card should carry the difference").toBe(first.msFs);
+  expect(first.fs, "the names are not at the shared step").toBe("23px");
+  /* ⚠️ THE NAME MUST NOT BE THE ONE THAT TRUNCATES. §4's equal 23px pushed the manuscript row past
+     its width and clipped the TITLE — "The Smoke T…" beside "92,000 WOR…". The name is its row's
+     subject; the qualifier beside it is what gives way. */
+  const clipped = await page.evaluate(() => [...document.querySelectorAll(".qc-mname")]
+    .map((e) => ({ t: (e.textContent ?? "").trim(), clipped: e.scrollWidth > e.clientWidth + 0.5 })));
+  console.log(`name clipping: ${clipped.map((c) => `${c.t}=${c.clipped}`).join(" | ")}`);
+  for (const c of clipped) expect(c.clipped, `"${c.t}" is truncated — the meta beside it should give way first`).toBe(false);
   expect(first.italic, "the agent name is italic").toBe("normal");
   /* ⚠️ AND NOT BURGUNDY — the outgoing status colour, which on this card would read as a second status */
   expect(first.colour, "a name took the status colour").toBe("rgb(20, 20, 18)");
@@ -79,7 +90,9 @@ test("§2 — the pack's longest name, measured on the rendered card", async ({ 
 
   const m = await page.evaluate(() => {
     const r = (x: number) => Math.round(x * 10) / 10;
-    const name = document.querySelector(".qc-mname--lg") as HTMLElement;
+    /* ⚠️ `--lg` IS RETIRED (§4) — the two names match and the CARD differentiates. The agent's is
+       simply the first `.qc-mname` on the card now. */
+    const name = document.querySelector(".qc-mname") as HTMLElement;
     const val = name.closest(".qc-mval") as HTMLElement;
     const sec = val.querySelector(".qc-msec") as HTMLElement;
     const card = document.querySelector(".qc-mail") as HTMLElement;

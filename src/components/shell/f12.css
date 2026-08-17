@@ -2341,6 +2341,15 @@
 /* ⚠️ THE LABEL TRACK IS THE RAIL. `max-content` on it means the widest label sets the column and
    both sub-rows inherit it; a fixed px would need re-deriving the day a third label appears. */
 .qc-mailrows { display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 18px; row-gap: 5px; align-items: baseline; min-width: 0; }
+/**
+ * ══ §4a · A RULE BETWEEN THE ROWS ═══════════════════════════════════════════════════════════
+ * ⚠️ IT SPANS BOTH TRACKS, so it reads as a division of the CARD rather than a line under the
+ * manuscript's text — `grid-column: 1 / -1`, which is also why it cannot come apart from the rail
+ * if the label track ever moves.
+ * ⚠️ AND THE SPACE IS PART OF IT. A hairline alone reads as a table; a hairline with room above and
+ * below reads as two statements, which is what the card is.
+ */
+.qc-mailrows > .qc-mrule { grid-column: 1 / -1; height: 1px; background: var(--hairline); margin: 11px 0 12px; }
 /* every sub-row starts in column 2 — the rail, stated once */
 .qc-msub { grid-column: 2; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 1px 0 9px; }
 .qc-mailrows > .qc-msub:last-child { margin-bottom: 0; }
@@ -2358,8 +2367,21 @@
  *
  * ⚠️ BARE — no plate, no ring, no ground. The status mark stays the card's only circular element.
  */
-.qc-mlead { grid-column: 1; align-self: center; width: 30px; height: 20px; display: flex; align-items: center; justify-content: center; }
+.qc-mlead { grid-column: 1; align-self: center; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
 .qc-mlead svg { width: 20px; height: 20px; fill: none; stroke: var(--faint); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+/**
+ * ══ §4b · THE LEADERS DIFFER, AND THE TYPE DOES NOT ═════════════════════════════════════════
+ * ⚠️ SAME GLYPH SIZE, SAME STROKE, DIFFERENT GROUND. The disc is the whole of the difference, so a
+ * reader can tell the rows apart without either name being bigger than the other.
+ * ⚠️ AND THIS IS THE SECOND PINK SURFACE ON THE PAGE, alongside `Log new query`. That is the stated
+ * limit: no third. The status mark's own centre fill is not pink and is not touched by this — it is
+ * the StatusDot's, which the whole app shares.
+ */
+.qc-mlead--ag { border-radius: 50%; background: var(--pink); }
+/* ⚠️ THE GLYPH KEEPS ITS SIZE — the pack is explicit that only the GROUND differs, and the ref's
+   18px is a concession to its own 34px disc. Ours is the label rail's 30px, so 20 stays 20 and the
+   two leaders remain the same drawing at the same weight. */
+.qc-mlead--ag svg { stroke: var(--burg); }
 .qc-mval { grid-column: 2; display: flex; align-items: baseline; gap: 11px; min-width: 0; }
 /* ⚠️ ONE TYPE STEP FOR BOTH NAMES — the card's claim is that the agent and the manuscript are
    peers, and a larger face on either would make the card about that one. 20px is a step above the
@@ -2367,10 +2389,17 @@
 /* ⚠️ ONE RULE, ONE MODIFIER — the two names share face, weight, ink and every truncation property,
    and differ in exactly one declaration. A second full rule for the agent is how "same face and
    ink" quietly stops being true. */
-.qc-mname { font-family: var(--f12-serif); font-size: 20px; font-weight: 500; line-height: 1.15; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 0 1 auto; }
-/* ⚠️ 24 ON THE AGENT ONLY. The size difference is doing what the mono labels did badly: saying
-   which line is the subject without spending a word on it. */
-.qc-mname--lg { font-size: 24px; }
+/* ⚠️ THE META GIVES WAY BEFORE THE NAME. Both were `flex: 0 1 auto`, so they shrank together and
+   §4's equal 23px pushed the manuscript row past its width — browser-read: "The Smoke T…" beside
+   "92,000 WOR…", a truncated TITLE next to a truncated qualifier. The name is the subject of its
+   row, so it holds its width and the meta ellipsises first; `max-width: 100%` is what stops a very
+   long name overflowing the row instead of clipping inside it. */
+.qc-mname { font-family: var(--f12-serif); font-size: 23px; font-weight: 500; line-height: 1.15; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 100%; flex: 0 0 auto; }
+/* ⚠️ `--lg` IS RETIRED (§4), REVERSING THE EARLIER PACK'S §2. The argument for it was sound and the
+   MECHANISM was not: type carrying the hierarchy survives neither a long title nor a short one nor
+   any later change to the scale, and it made the two names differ in the one property the card had
+   just been built to say they shared. The card differentiates instead — a rule between the rows and
+   a disc on one leader — and both hold whatever the words are. */
 button.qc-mname { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
 button.qc-mname:hover { color: var(--burg); }
 .qc-msec { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }

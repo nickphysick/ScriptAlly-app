@@ -150,8 +150,12 @@ describe("§6 · the agent header — now the mail header's AGENT row", () => {
     /* ⚠️ 26 → 20 (subrows §1). Not a reduction but a re-scaling: the pairing card gave each name a
        half of the card, and a row gives it a line. 20 is a step above the reading cards' 18px
        headers, which is the hierarchy this card already had. Both names still read one element. */
+    /* ⚠️ 20 → 24 → 23 ACROSS THREE PACKS, and it is one shared step again. The middle one gave the
+       agent a larger face to say which line was the subject; §4 takes the hierarchy off the TYPE
+       and puts it on the CARD, because type carrying it survives neither a long title nor a later
+       change to the scale. */
     const n = rule(".qc-mname");
-    expect(declValue(n, "font-size"), "the two names are no longer one type step").toBe("20px");
+    expect(declValue(n, "font-size"), "the two names are no longer one type step").toBe("23px");
     expect(declValue(n, "font-family"), "the name lost its serif").toBe("var(--f12-serif)");
   });
 

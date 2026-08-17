@@ -62,6 +62,29 @@ const read = (page: Page) => page.evaluate(() => {
     },
     /* what must NOT be here */
     hasAvatar: !!document.querySelector(".qc-mail .f12-bigav"),
+    /* §4a — the rule between the rows, spanning both tracks */
+    rule: (() => {
+      const e = document.querySelector(".qc-mrule") as HTMLElement | null;
+      if (!e) return null;
+      const b = e.getBoundingClientRect();
+      return { h: r(b.height), left: r(b.left), bg: getComputedStyle(e).backgroundColor };
+    })(),
+    /**
+     * ⚠️ THE PINK BUDGET IS TWO, AND `StatusDot`'s OWN PARTS ARE EXEMPT BY NAME — the pack says so:
+     * "the status mark's centre fill is not affected". Its internals are unclassed spans with
+     * inline styles, one per list row plus the card's, and counting those would be measuring the
+     * app's shared status component rather than this page's surfaces.
+     * ⚠️ SO THE RULE IS "A SURFACE HAS A NAME": anything painting a warm tint under a class is this
+     * page's own decision; an unclassed span is the dot's.
+     */
+    pinkSurfaces: [...document.querySelectorAll(".qc-wpg [class]")].filter((e) => {
+      const cls = (e as HTMLElement).className;
+      if (typeof cls !== "string" || !cls.trim()) return false;
+      const mm = /rgba?\((\d+), (\d+), (\d+)/.exec(getComputedStyle(e as HTMLElement).backgroundColor);
+      if (!mm) return false;
+      const [rr, gg, bb] = [1, 2, 3].map((i) => Number(mm[i]));
+      return rr > 230 && rr - bb > 12 && rr - gg > 6;
+    }).map((e) => `${e.tagName.toLowerCase()}.${((e as HTMLElement).className as string).split(" ")[0]}`),
     sageHead: !!document.querySelector(".qc-mail .f12-chh"),
     cardText: (card.textContent ?? "").trim(),
   };
@@ -93,11 +116,21 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
       /* §1 — one rail for every value and every sub-row */
       expect([...new Set(m.rail)], `values and sub-rows start at different x: ${[...new Set(m.rail)].join(", ")}`).toHaveLength(1);
       expect([...new Set(m.labelX)], "the labels are not in one column").toHaveLength(1);
-      /* ⚠️ ONE SIZE AND ONE STROKE ON BOTH — read from the rendered glyphs, not from the rule */
-      expect([...new Set(m.leaders)], `the leaders differ: ${m.leaders.join(" ⁄ ")}`).toHaveLength(1);
+      /* ⚠️ ONE SIZE AND ONE STROKE ON BOTH — read from the rendered glyphs, not from the rule.
+         §4b gives the agent's a pink disc and burgundy ink, so the COLOUR differs by design now;
+         the drawing and its weight must not, which is what makes the pair a differentiator rather
+         than two different icons. */
+      expect([...new Set(m.leaders.map((l) => l.split("|").slice(0, 2).join("|")))],
+        `the leaders differ in size or stroke: ${m.leaders.join(" ⁄ ")}`).toHaveLength(1);
       expect(m.leaders[0], "the leaders are not 20px").toContain("20x20");
-      /* ⚠️ BARE — no ground, no rim, no radius. The status mark is the card's only circle. */
-      for (const p of m.leaderPaint) expect(p, `a leader took a plate: ${p}`).toMatch(/^rgba\(0, 0, 0, 0\)\|0px\|0px$/);
+      /* ⚠️ INVERTED BY §4b — THE AGENT'S LEADER TAKES A DISC, so the card has two circles now.
+         §1's clause was "the status mark is the card's only circular element", which kept the eye
+         going name → status; §4 gives the disc a job that clause did not anticipate, and the
+         hierarchy survives on SIZE — a 30px disc beside a 56px mark. The manuscript's stays bare,
+         which is what makes the difference structural rather than decorative. */
+      expect(m.leaderPaint[0], "the agent's leader has no disc").not.toMatch(/^rgba\(0, 0, 0, 0\)/);
+      expect(m.leaderPaint[0], "the agent's disc is not round").toContain("50%");
+      expect(m.leaderPaint[1], `the manuscript's leader took a plate: ${m.leaderPaint[1]}`).toMatch(/^rgba\(0, 0, 0, 0\)\|0px\|0px$/);
       /* ⚠️ AND THE RAIL DID NOT MOVE. Browser-read before §1: the label track was 30.41px and the
          rail sat at 773.41. The leaders take 30, so the sub-rows keep their indent within half a
          pixel — the pack's clause, checked against the recorded figure rather than against itself. */
@@ -108,7 +141,18 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
          everything else about the two is identical, and neither is italic or burgundy. */
       expect([...new Set(m.nameFaces)], `the two names differ in more than size: ${m.nameFaces.join(" ⁄ ")}`).toHaveLength(1);
       expect(m.nameFaces[0], "the names are not Playfair in the ink, upright").toBe("Playfair Display|rgb(20, 20, 18)|normal");
-      expect(parseFloat(m.nameSizes[0]), "the agent is not the larger of the two").toBeGreaterThan(parseFloat(m.nameSizes[1]));
+      /* ⚠️ INVERTED BY §4 — THE NAMES MATCH AND THE CARD DIFFERENTIATES. The earlier pack's
+         argument for a larger agent was sound and its MECHANISM was not: type carrying the
+         hierarchy survives neither a long title, a short one, nor a later change to the scale. */
+      expect(m.nameSizes[0], `the two names differ in size: ${m.nameSizes.join(" ⁄ ")}`).toBe(m.nameSizes[1]);
+      /* §4a — a rule between the rows, spanning BOTH tracks so it divides the card rather than
+         underlining one row's text */
+      expect(m.rule, "the rule between the rows is missing").toBeTruthy();
+      expect(m.rule!.h, "the rule is not a hairline").toBe(1);
+      expect(m.rule!.left, "the rule starts at the rail — it should span both tracks").toBeLessThan(m.rail[0]);
+      /* ⚠️ TWO PINK SURFACES, AND THAT IS THE STATED LIMIT */
+      console.log(`pink surfaces: ${m.pinkSurfaces.join(", ")}`);
+      expect(m.pinkSurfaces.length, `more than two pink surfaces: ${m.pinkSurfaces.join(", ")}`).toBeLessThanOrEqual(2);
 
       /* the two chip families: same size and radius, different ground */
       expect(m.contacts.length, "no contact chips").toBeGreaterThan(0);
