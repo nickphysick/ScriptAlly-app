@@ -125,45 +125,59 @@ describe("§3 · one button rule, app-wide on this page", () => {
   });
 });
 
-describe("§6 · the agent header", () => {
-  it("the portrait is 58 and the name is Playfair 27", () => {
-    expect(rule(".f12-heroband .f12-bigav"), "the portrait is not 58px").toContain("width: 58px");
-    const n = rule(".f12-heroband .f12-hn");
-    expect(declValue(n, "font-size"), "the name is not 27px").toBe("27px");
+/**
+ * ⚠️ §6 DESCRIBED A PLATE THAT IS NOW HALF OF THE PAIRING CARD. Three of its four cases inverted
+ * outright — the portrait, the status word and the dot beside it were all REMOVED by §1, each for
+ * a stated reason — and the fourth (the contact pills) survives unchanged. Kept as inversions,
+ * because "the header lost its portrait and its status" is exactly the regression that reads as a
+ * bug to anyone who did not follow the merge.
+ */
+describe("§6 · the agent header — now the pairing card's agent half", () => {
+  /**
+   * ⚠️ THE PORTRAIT IS GONE AND THE NAME GREW. A monogram was decoration once the position holds
+   * the query's real StatusDot; the name went 27 → 26px, which is not a reduction but an
+   * ALIGNMENT — the manuscript opposite reads at the same size, because the card's claim is that
+   * the two are peers.
+   */
+  it("no portrait, and the name is the same step as the manuscript's", () => {
+    expect(rule(".f12-heroband .f12-bigav"), "the monogram came back").toBe("");
+    expect(code, "the initials are computed again with nothing to render them").not.toContain("agentInitials(activeAgent)");
+    const n = rule(".qc-pairnm");
+    expect(declValue(n, "font-size"), "the two names are no longer one type step").toBe("26px");
     expect(declValue(n, "font-family"), "the name lost its serif").toBe("var(--f12-serif)");
   });
 
   /**
-   * ⚠️ NO TILE, NO FILL — and the reason is sharper than "the ref draws it plain". The state was a
-   * bordered pink capsule, which made a FACT look like a control; §2 then put two REAL pills in the
-   * same band (Email, Website), so the one thing that could not be pressed looked exactly like the
-   * two that could.
+   * ⚠️ INVERTED: THE STATE IS NOT DRAWN HERE AT ALL. §6's law was "no tile, no fill — a FACT must
+   * not look like a control", and it was right; §1 goes further on the same reasoning. Tracking's
+   * header meta states the status and Tracking's first event states the date, both within a
+   * hundred pixels, so the plate's copy was a second statement rather than a badly-dressed one.
    */
-  it("the state is plain — no pill, no fill, no border", () => {
-    const r = rule(".f12-hs");
-    expect(r, "the state rule is missing").not.toBe("");
-    expect(declValue(r, "background"), "the state took a fill again").toBe("none");
-    expect(declValue(r, "border"), "the state took a rim again").toBe("0");
-    expect(declValue(r, "border-radius"), "the state went back to a capsule").toBe("0");
-    expect(declValue(rule(".f12-hs .f12-hsw"), "font-family"), "the status word is not Playfair").toBe("var(--f12-serif)");
+  it("the state is not restated — Tracking's header and first event carry it", () => {
+    expect(rule(".f12-hs"), "the state block came back").toBe("");
+    const card = code.slice(code.indexOf('<div className="qc-pair">'), code.indexOf('<div className="qp-cols"'));
+    expect(card, "the status word came back to the card").not.toContain("statusDisplayLabel");
+    expect(card, "the state's date came back to the card").not.toMatch(/lastStatusChange|heroQueriedOn/);
+    /* and Tracking still states both, which is what makes the removal a de-duplication */
+    expect(code, "Tracking stopped stating the status").toContain("meta={statusDisplayLabel(activeQuery)}");
   });
 
-  /* ⚠️ THE DOT IS THE LOCKED COMPONENT AND IT SITS OUTBOARD OF THE WORD — never a recreation, and
-     never tucked inside a label where it reads as decoration. */
-  it("the dot is the real StatusDot, outboard of the word", () => {
-    const at = code.indexOf('className="f12-hs"');
-    expect(at, "the state block is missing").toBeGreaterThan(-1);
-    const block = code.slice(at, code.indexOf("</span>", code.indexOf("<StatusDot", at)));
-    expect(block, "the status dot went").toContain("<StatusDot status={activeQuery.status}");
-    /* ⚠️ THE MARK LEADS THE LABEL NOW (§5) — it is declared FIRST, so it renders to the label's
-       left. "Outboard" is unchanged as the clause; which side is outboard changed, because at 44px
-       the mark anchors the group rather than trailing it. */
-    expect(block.indexOf("<StatusDot"), "the mark fell behind the label").toBeLessThan(block.indexOf("f12-hsw"));
-    expect(block, "the mark is not the locked component at a larger size").toContain("overrideSize={44}");
+  /**
+   * ⚠️ THE DOT SURVIVES AND BECAME THE MARK. It is still the locked component, never a recreation,
+   * still outboard, and still declared before what it sits beside — what changed is that it has no
+   * label any more: at 66px it IS the statement, which is why the word could go.
+   */
+  it("the dot is the real StatusDot, and it is the card's left mark", () => {
+    expect(code, "the mark is not the locked component at the shared size")
+      .toContain("<StatusDot status={activeQuery.status} overrideSize={66} />");
+    const card = code.slice(code.indexOf('<div className="qc-pairid">'), code.indexOf('<div className="qc-pairms">'));
+    expect(card.indexOf("<StatusDot"), "the mark fell behind the name it leads")
+      .toBeLessThan(card.indexOf("qc-pairnm"));
+    expect(card, "a second dot was drawn beside it").not.toMatch(/overrideSize=\{(?!66)/);
   });
 
   it("the contact pills sit on their own line, and grey rather than vanish", () => {
-    expect(rule(".qp-hlinks"), "the pills' row is missing").not.toBe("");
+    expect(rule(".qc-pairlinks"), "the pills' row is missing").not.toBe("");
     expect(declValue(rule(".qp-lnk-off"), "pointer-events"), "a pill with no target is still clickable").toBe("none");
     expect(code, "the email pill stopped stating its absence")
       .toContain("No email address on this agent's record");
@@ -267,48 +281,46 @@ describe("§7 · the reading pane", () => {
   });
 
   it("the card heads carry a mono count on the right", () => {
-    expect(code, "What you sent lost its count").toMatch(/\$\{n\} item\$\{n === 1 \? "" : "s"\}/);
+    /* ⚠️ THE MATERIALS COUNT WENT WITH ITS CARD (§1). Three rows are their own inventory; a band
+       counting what the reader can already see was a header convention rather than a fact worth
+       stating. Notes keeps its count because its list scrolls and the band is the only place a
+       total fits — which is the distinction, not a carve-out. */
+    expect(code, "a materials count came back over rows the reader can see")
+      .not.toMatch(/\$\{n\} item\$\{n === 1 \? "" : "s"\}/);
     expect(rule(".qp-cardmeta"), "the band's meta slot went").not.toBe("");
   });
 });
 
-describe("§8 · Notes expands", () => {
-  /**
-   * ⚠️ THE MEASUREMENT IS THE SECTION. `height: 100%` would work only while the stack's height came
-   * from its parent; the moment the first card is hidden, the box being measured against is a
-   * different box and everything below jumps by the difference. The column's height is read BEFORE
-   * the hide and applied as a floor.
-   */
-  it("the column is measured on the way in, and the floor is applied to the card", () => {
-    expect(code, "the stack is not measured").toContain("notesStackRef.current?.getBoundingClientRect().height");
-    expect(code, "the measurement happens after the hide — it would read the outcome, not the intent")
-      .toMatch(/setNotesFloor\([\s\S]{0,80}setNotesOpen\(true\)/);
-    expect(code, "the floor is not applied").toContain("style={notesOpen && notesFloor ? { minHeight: notesFloor } : undefined}");
+/**
+ * ⚠️ §8 IS RETIRED BY §1 OF THE PAIRING PACK, AND THE WHOLE DESCRIBE INVERTS. Its four cases held
+ * a careful mechanism — measure the stack, hide "What you sent", pin the column at the height it
+ * had, collapse on an outside click, reset per query — and every one of them existed because Notes
+ * SHARED the right column and got whatever height was left. The merge removed the sharing rather
+ * than the symptom: Notes has the column outright.
+ *
+ * ⚠️ ASSERTED DEAD RATHER THAN DELETED, because "Notes lost its expand button" is exactly the
+ * regression a future reader would repair — and repairing it would rebuild a toggle whose only
+ * effect was `display: none` on an element that is no longer rendered.
+ */
+describe("§8 · Notes expands — RETIRED with the column it shared", () => {
+  it("the expansion state, its floor and its listener are gone from the page", () => {
+    for (const t of ["notesOpen", "notesFloor", "notesStackRef", "notesCardRef", "setNotesOpen"]) {
+      expect(code, `${t} survives with nothing rendering it`).not.toContain(t);
+    }
   });
 
-  /* ⚠️ LIFTED, NOT RELAID — What you sent HIDES and the notes card takes a deeper cast, so the state
-     reads as one card raised over the column rather than as a layout change. */
-  it("What you sent hides beneath it, and the open card is lifted", () => {
-    expect(rule(".qp-stack--open > .f12-card:first-child"), "the first card no longer hides").toContain("display: none");
-    expect(rule(".qp-notes-open"), "the open card lost its deeper cast").toContain("box-shadow:");
+  it("its three rules are gone from the stylesheet", () => {
+    for (const sel of [".qp-stack--open > .f12-card:first-child", ".qp-notes-open", ".qp-cardexp"]) {
+      expect(rule(sel), `${sel} survives with nothing wearing it`).toBe("");
+    }
   });
 
-  it("one control, both directions", () => {
-    const at = code.indexOf("qp-cardexp");
-    expect(at, "the expand control is missing").toBeGreaterThan(-1);
-    const block = code.slice(at, at + 900);
-    expect(block, "the control does not state which way it goes").toContain('notesOpen ? "Collapse notes" : "Expand notes"');
-    expect(block, "the icon does not flip").toContain("notesOpen ? (");
-    expect(code, "a second control was built to close what the first opened")
-      .not.toMatch(/Close notes|collapseNotes/);
-  });
-
-  /* ⚠️ THE EXPANDED STATE BELONGS TO THE QUERY YOU WERE READING. Carried across, it would show a
-     different query's notes at full height without being asked. */
-  it("an outside click collapses it, and switching query closes it", () => {
-    expect(code, "the outside-click collapse went").toContain('document.addEventListener("pointerdown", away)');
-    expect(code, "a click inside the card would collapse it").toContain("card.contains(e.target)) return");
-    expect(code, "the expansion survives a query change").toContain("useEffect(() => { setNotesOpen(false); setNotesFloor(null); }, [selectedQueryId]);");
+  /* ⚠️ AND THE THING IT WAS FOR IS TRUE WITHOUT IT: the stack holds ONE card, which fills. */
+  it("Notes has the column outright, which is what the toggle was reaching for", () => {
+    expect(code, "the stack is conditional again").toContain('className="qp-stack"');
+    expect(rule(".qp-stack > .f12-card"), "the card no longer takes the column's height")
+      .toContain("flex: 1 1 0");
+    expect((code.match(/<PaneCard/g) ?? []).length, "a second card returned to the stack").toBe(2);
   });
 });
 
@@ -427,9 +439,13 @@ describe("fix pack 7 §3 · the agent header stays white", () => {
    * section whose whole content is "do not sweep this into §1" is precisely the kind that needs an
    * assertion rather than a note, because the next parchment pass will look exactly like §1 did.
    */
-  it("the plate is white, lifted, and not the headers' parchment", () => {
-    const plate = rule(".f12-heroband");
-    expect(plate, "the plate rule is missing").not.toBe("");
+  it("the pairing card is white, lifted, and not the headers' parchment", () => {
+    /* ⚠️ THE ELEMENT CHANGED, THE RULING DID NOT (§1). The plate is the pairing card now, and the
+       argument transfers intact: give the object above the cards their parchment and it becomes a
+       peer of the things it describes. It has a second defence now — a 2px frame nothing else on
+       the page carries — but the ground is still the first one. */
+    const plate = rule(".qc-pair");
+    expect(plate, "the pairing card's rule is missing").not.toBe("");
     expect(declValue(plate, "background"), "the plate took the card headers' ground — it would become their peer")
       .toBe("var(--white)");
     expect(declValue(plate, "background"), "the plate went parchment").not.toContain("--shell-rail");

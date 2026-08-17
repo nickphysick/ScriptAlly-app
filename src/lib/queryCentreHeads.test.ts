@@ -87,9 +87,13 @@ describe("the row beneath each head starts on one line", () => {
     /* ⚠️ COMMENTS STRIPPED FIRST — the amendment's note sits immediately before the declaration, so
        the `(?:^|;|{)` anchor matched the comment's `*​/` instead and reported "declares no margin at
        all" about a rule whose margin is on the next line. The documented trap, hit again. */
-    const m = /(?:^|;|\{)\s*margin\s*:\s*([^;}]+)/.exec(rule(css, ".f12-heroband").replace(/\/\*[\s\S]*?\*\//g, ""));
-    expect(m, "the plate declares no margin at all").not.toBeNull();
-    expect(m![1].trim(), "the plate took a side inset the pane's cards do not have").toBe("0");
+    /* ⚠️ THE PLATE IS THE PAIRING CARD (§1), AND IT NEVER HAD A MARGIN TO DECLARE AWAY. The plate
+       said `margin: 0` because it had carried one; a new element stating zero would be rebutting a
+       claim nobody made, so the clause is "declares no margin" and the absence is the pass. */
+    const m = /(?:^|;|\{)\s*margin\s*:\s*([^;}]+)/.exec(rule(css, ".qc-pair").replace(/\/\*[\s\S]*?\*\//g, ""));
+    expect(m ? m[1].trim() : "0", "the pairing card took a side inset the pane's cards do not have").toBe("0");
+    expect(rule(css, ".qc-pairgrid").replace(/\/\*[\s\S]*?\*\//g, ""), "the inset came back on the grid instead")
+      .not.toMatch(/(?:^|;|\{)\s*margin\s*:/);
     expect(queries, "the cards took an inset the plate does not have").toContain("gap: 16, padding: 0,");
   });
 

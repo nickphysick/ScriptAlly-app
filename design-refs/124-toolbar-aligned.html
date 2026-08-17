@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — six fixes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+ --ground:#fefcfa;--white:#fff;--n1:#f4f1ed;--n2:#eceae6;--n3:#e4e1db;--line:#e6e3dd;--oat:#dcd8d1;
+ --ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;--burg:#7c3a2a;
+ --sage-a:#d7ddd5;--sage-br:#b9c6b7;--sage-fr:#dfe6dd;--sage-b:#d5dbd3;--sage-tx:#4e6050;--pink:#f5e2da;
+ --sh-1:0 1px 2px rgba(40,35,30,.05);--sh-2:0 1px 2px rgba(40,35,30,.05),0 8px 18px -12px rgba(40,35,30,.28);
+}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--oat);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:0;background:transparent;color:var(--ink2);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--ink);color:#fff;}
+.note2{font-size:11px;color:var(--faint);font-style:italic;}
+.hd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;margin-bottom:11px;}
+.app{background:var(--ground);border-radius:12px;overflow:hidden;box-shadow:0 12px 34px rgba(40,35,30,.16);max-width:1460px;}
+
+/* ① band: white, hairline beneath */
+.band{display:flex;align-items:center;gap:12px;padding:13px 24px;background:#fff;box-shadow:inset 0 -1px 0 var(--line);}
+.band .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);}
+.band .r{margin-left:auto;display:flex;gap:9px;}
+.bb{background:#fff;border:0;box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);border-radius:9px;padding:8px 13px;font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;}
+.bb.p{box-shadow:inset 0 0 0 1.5px var(--ink2);color:var(--ink);font-weight:500;}
+
+.work{padding:14px 22px 20px;}
+.tools{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;align-items:center;margin-bottom:12px;}
+.tleft{display:flex;align-items:center;gap:10px;min-width:0;}
+.tright{display:flex;align-items:center;gap:9px;min-width:0;}
+.tspacer{flex:1;}
+.cnt{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.cnt em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-left:7px;}
+.ico{width:32px;height:32px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:11px;}
+.thisq{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-left:6px;}
+.tb{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);padding:8px 13px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);}
+.tb.mut{color:#bdb8b0;}
+.tb.sq{padding:8px 11px;}
+.tsep{width:1px;height:22px;background:var(--line);margin:0 3px;}
+.tb.pri{box-shadow:inset 0 0 0 1.5px var(--ink2);color:var(--ink);font-weight:500;}
+.cols{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;}
+
+.panel{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:11px;}
+.srow{display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+.lsearch{flex:1;min-width:0;background:#fff;border-radius:9px;box-shadow:inset 0 0 0 1px var(--oat);padding:9px 12px;color:#b5b0a8;font-size:12px;}
+.ico{width:36px;height:36px;flex:0 0 36px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:12px;}
+.grp{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:4px 6px 6px;}
+.grp:after{content:'';flex:1;height:1px;background:var(--line);}
+.qi{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:9px 7px;border-radius:9px;position:relative;}
+.qi::after{content:'';position:absolute;left:7px;right:7px;bottom:0;height:1px;background:var(--line);}
+.qi.on{background:var(--n2);}.qi.on::after{display:none;}
+.qi:last-child::after{display:none;}
+.av{width:30px;height:30px;border-radius:50%;background:var(--n2);color:var(--ink2);font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.qi.on .av{background:#fff;color:var(--ink);box-shadow:var(--sh-1);}
+.qi b{font-size:12.5px;font-weight:500;display:block;}
+.qi i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
+.qi em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--faint);}
+.qfoot{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:#b5b0a8;padding:11px 7px 3px;box-shadow:inset 0 1px 0 var(--line);margin-top:6px;}
+
+/* the merged object */
+.obj{position:relative;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:30px;
+  background:#fff;border-radius:12px;margin-bottom:14px;padding:20px 24px;}
+.obj::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;}
+body[data-b="oat"] .obj{box-shadow:var(--sh-2);}
+body[data-b="oat"] .obj::after{box-shadow:inset 0 0 0 1px var(--oat);}
+body[data-b="sage"] .obj{box-shadow:var(--sh-2);--divc:#dfe6dd;}
+body[data-b="sage"] .obj::after{box-shadow:inset 0 0 0 2px var(--sage-br);}
+body[data-b="sagein"] .obj{box-shadow:var(--sh-2);padding:26px 30px;--divc:#dfe6dd;}
+body[data-b="sagein"] .obj::after{box-shadow:inset 0 0 0 2px var(--sage-br);}
+body[data-b="sagein"] .obj::before{content:'';position:absolute;inset:7px;border-radius:7px;pointer-events:none;
+  box-shadow:inset 0 0 0 1px var(--sage-fr);}
+body[data-d="hair"] .obj{gap:0;padding:0;}
+body[data-d="hair"] .obj{align-items:stretch;}
+body[data-d="hair"] .zid{padding:20px 24px;}
+body[data-d="hair"] .zmat{padding:20px 24px;box-shadow:inset 1px 0 0 var(--divc,var(--line));display:flex;align-items:center;justify-content:flex-end;}
+body[data-d="hair"] .mswrap{width:100%;}
+
+.zid{display:flex;align-items:center;gap:18px;min-width:0;}
+.mswrap{display:flex;align-items:center;gap:18px;justify-content:flex-end;}
+.mk{width:66px;height:66px;flex:0 0 66px;border-radius:50%;box-shadow:inset 0 0 0 2.5px var(--burg);
+  display:flex;align-items:center;justify-content:center;}
+.mk svg{width:30px;height:30px;stroke:var(--burg);fill:none;stroke-width:1.6;}
+.mk.ms{box-shadow:inset 0 0 0 2.5px var(--oat);}
+.mk.ms svg{stroke:var(--ink2);}
+
+.who{min-width:0;}
+.who h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:500;line-height:1.08;}
+.who .sub{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);margin-top:5px;}
+.who.r{text-align:right;}
+.lks{margin-top:11px;}
+.lk{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:8px;padding:5px 10px;margin-right:6px;}
+
+.zmat{min-width:0;}
+.mats{margin-top:12px;}
+.mat{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:6px 0;font-size:12px;color:var(--ink2);}
+.mat+.mat{box-shadow:inset 0 1px 0 var(--line);}
+.mat em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-tx);order:-1;}
+/* ⑥ sage headers, ② bare glyphs */
+.cards{display:grid;grid-template-columns:60% 40%;gap:14px;align-items:start;}
+.cards>.stack{display:flex;flex-direction:column;gap:14px;}
+.card{position:relative;background:#fff;border-radius:12px;}
+.card::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);}
+.card .fr{border-radius:12px;overflow:hidden;}
+.ch{display:flex;align-items:center;gap:10px;padding:11px 15px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));
+  font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--ink);}
+.ch svg{width:17px;height:17px;stroke:var(--sage-tx);fill:none;stroke-width:1.5;flex:0 0 17px;}
+.ch .meta{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);font-weight:400;}
+.ch .task{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.6);border-radius:20px;padding:3px 8px;color:var(--sage-tx);font-weight:400;}
+.cb{padding:16px 18px;font-size:11.5px;color:var(--ink2);line-height:1.6;}
+
+/* ④ timeline rhythm */
+.tl{display:flex;flex-direction:column;}
+.ev{position:relative;padding-left:40px;padding-bottom:22px;}
+.ev:last-child{padding-bottom:0;}
+.ev::before{content:'';position:absolute;left:13px;top:28px;bottom:-2px;width:1px;background:var(--line);}
+.ev:last-child::before{display:none;}
+.ev .m{position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:#fff;
+  box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.ev .m.q{box-shadow:inset 0 0 0 1.5px var(--oat);color:#b5b0a8;}
+.ev .t{display:flex;align-items:baseline;gap:10px;min-height:27px;}
+.ev .t b{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);}
+.ev .t u{text-decoration:none;color:var(--ink2);font-size:13px;}
+.ev .t em{font-style:normal;margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--faint);}
+.ev p{margin-top:3px;color:var(--ink2);}
+.chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;}
+.chip{font-size:11px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:16px;padding:5px 11px;color:var(--ink2);}
+.wbox{margin-top:11px;padding:13px 15px;background:var(--n1);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);}
+.wbox .h{display:flex;align-items:center;gap:8px;color:var(--ink2);}
+.wbox .cta{display:inline-block;margin-top:9px;font-weight:500;color:var(--burg);font-size:12px;}
+.bar{height:5px;border-radius:3px;background:var(--n3);margin:11px 0 7px;overflow:hidden;}
+.bar i{display:block;height:100%;width:22%;background:#9db09b;border-radius:3px;}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+
+.mat{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:12px;}
+.mat+.mat{box-shadow:inset 0 1px 0 var(--line);}
+.mat svg{width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.5;}
+.mat em{margin-left:auto;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-tx);}
+.msname{font-family:'Playfair Display',serif;font-size:16px;color:var(--burg);display:block;}
+.msmeta{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.mshead{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin:14px 0 3px;}
+.nt{background:var(--n1);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);padding:11px 13px;font-size:11.5px;line-height:1.5;}
+.nt .d{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;color:#b5b0a8;margin-bottom:5px;}
+.compose{display:flex;gap:8px;margin-top:11px;}
+.compose span{flex:1;background:#fff;border-radius:9px;box-shadow:inset 0 0 0 1px var(--oat);padding:9px 12px;font-size:11.5px;color:#b5b0a8;}
+.compose .s{width:34px;flex:0 0 34px;border-radius:9px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);}
+.legend{max-width:1460px;margin-top:18px;padding:16px 20px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.75;color:var(--ink2);}
+.legend b{color:var(--burg);} .legend ol{margin:5px 0 0 18px;}
+</style></head>
+<body data-d="none" data-b="sagein">
+
+<div class="ctl">
+  <b>Card border</b>
+  <div class="seg" id="B">
+    <button data-b="oat">Neutral 1px</button>
+    <button data-b="sage">Sage 2px</button>
+    <button data-b="sagein" class="on">Sage 2px + inset frame</button>
+  </div>
+  <b>Divider</b>
+  <div class="seg" id="D">
+    <button data-d="none" class="on">None</button>
+    <button data-d="hair">Hairline</button>
+  </div>
+  <span class="note2">Status mark and manuscript mark are the same size, on one line.</span>
+</div>
+
+<div class="app">
+  <div class="band"><span class="lbl">Query Centre</span>
+    <div class="r"><button class="bb">↓ Export</button><button class="bb p">+ Log query</button></div></div>
+
+  <div class="work">
+    <div class="tools">
+      <div class="tleft">
+        <span class="cnt">25 queries<em>17 awaiting</em></span>
+      </div>
+      <div class="tright">
+        <span class="tb pri">✈ Record response</span>
+        <span class="tb mut">🔔 Nudge</span>
+        <span class="tspacer"></span>
+        <span class="tb">✓ Mark closed</span>
+        <span class="tb sq">↓</span>
+        <span class="tb">🗑 Delete</span>
+      </div>
+    </div>
+
+    <div class="cols">
+      <div class="panel">
+        <div class="srow">
+          <span class="lsearch">⌕ Search</span>
+          <span class="ico">⚟</span>
+          <span class="ico">⇅</span>
+        </div>
+        <div class="grp">Overdue · 10</div>
+        <div class="qi"><span class="av">SD</span><span><b>Sophie Dunn</b><i>Curtis Vane</i></span><em>+903 D</em></div>
+        <div class="qi"><span class="av">WT</span><span><b>William Tan</b><i>Foxglove Literary</i></span><em>+736 D</em></div>
+        <div class="qi"><span class="av">MR</span><span><b>Marcus Reed</b><i>Bloomsbury Quill</i></span><em>+755 D</em></div>
+        <div class="qi"><span class="av">PR</span><span><b>Priya Raman</b><i>No agency</i></span><em>+796 D</em></div>
+        <div class="qi on"><span class="av">JM</span><span><b>Jonathan Marsh</b><i>The Marsh Agency</i></span><em>+818 D</em></div>
+        <div class="qi"><span class="av">AK</span><span><b>Aisha Kapoor</b><i>The Lantern Agency</i></span><em>+824 D</em></div>
+        <div class="qi"><span class="av">PL</span><span><b>Penhallow Literary</b><i>Agent not specified</i></span><em>+844 D</em></div>
+        <div class="qfoot"><span>Showing 25 of 25</span><span>Export CSV</span></div>
+      </div>
+
+      <div>
+        <div class="obj">
+          <div class="zid">
+            <span class="mk"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h9M9 7l5 5-5 5M15 6v12"/></svg></span>
+            <div class="who">
+              <h2>Jonathan Marsh</h2>
+              <div class="sub">The Marsh Agency</div>
+              <div class="lks"><span class="lk">✉ Email</span><span class="lk">⌾ Website</span></div>
+            </div>
+          </div>
+
+          <div class="zmat">
+            <div class="mswrap">
+              <div class="who r">
+                <h2>Murphy's Day Out</h2>
+                <div class="sub">Thriller · 50,000 words</div>
+                <div class="mats">
+                  <div class="mat"><em>Sent ✓</em>Query letter</div>
+                  <div class="mat"><em>Sent ✓</em>Synopsis</div>
+                  <div class="mat"><em>Sent ✓</em>First 3 chapters</div>
+                </div>
+              </div>
+              <span class="mk ms"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z"/><path d="M5 17.5h13.5"/><path d="M9 9h7M9 12.5h5"/></svg></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="card"><div class="fr">
+            <div class="ch">
+              <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>
+              Tracking<span class="meta">Full sent</span><span class="task">1 task</span>
+            </div>
+            <div class="cb"><div class="tl">
+              <div class="ev"><span class="m">✈</span>
+                <div class="t"><b>Query sent</b><u>· via Email</u><em>9 APR</em></div>
+                <div class="chips"><span class="chip">Query letter</span><span class="chip">Synopsis</span><span class="chip">First 3 chapters</span></div>
+              </div>
+              <div class="ev"><span class="m">«</span>
+                <div class="t"><b>Full requested</b><em>9 APR</em></div>
+                <p>Jonathan asked for the full</p>
+              </div>
+              <div class="ev"><span class="m">»</span>
+                <div class="t"><b>Full sent</b><em>9 APR</em></div>
+              </div>
+              <div class="ev"><span class="m q">⌛</span>
+                <div class="t"><b>Waiting to hear back</b><em>818 DAYS</em></div>
+                <div class="wbox">
+                  <div class="h">No expected date set for this agent</div>
+                  <span class="cta">Set an expected date →</span>
+                </div>
+              </div>
+            </div></div>
+          </div></div>
+
+          <div class="stack">
+            <div class="card"><div class="fr">
+              <div class="ch">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>
+                Notes<span class="meta">1 note</span>
+              </div>
+              <div class="cb">
+                <div class="nt"><div class="d">Today</div>Your notes on this query appear here — first impressions, things they said, anything worth remembering.</div>
+                <div class="nt" style="margin-top:9px"><div class="d">30 Jun, 16:25</div>Agency moved to Submittable in June; the old form bounces.</div>
+                <div class="compose"><span>Write a note…</span><span class="s">➤</span></div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>The toolbar now shares the page grid</b>
+  <ul>
+    <li><b>The query verbs start where the reading pane starts.</b> The bar uses the same two-column grid as the content beneath it — 320px, then the remainder — so <i>Record response</i> aligns with the pairing card's left edge and <i>Delete</i> with its right. Previously the verbs began wherever the count and the icons happened to end, which is why the bar looked unrelated to the pane it controls.</li>
+    <li><b>Split by consequence, not by frequency.</b> Left: <i>Record response</i> and <i>Nudge</i> — the two things that move the query forward. Right: <i>Mark closed</i>, <i>Export</i> and <i>Delete</i> — the things that end it or take it out of the app. The gap between them is the meaningful boundary, so it does not need a divider to say so.</li>
+    <li><b>Delete sits at the far right</b>, furthest from the primary, which is the cheapest safety measure available: the destructive verb is the one your hand travels furthest to reach.</li>
+    <li><b>The count stays in the left column</b>, above the list it counts — so each column's header describes the column beneath it.</li>
+  </ul>
+  <p>⚠️ <b>The grid must be the same one</b>, not a matching pair of numbers. If the columns are ever retuned — a wider list, a different ratio — a duplicated <code>320px</code> in the toolbar will silently drift out of alignment with the content.</p>
+</div>
+</body></html>

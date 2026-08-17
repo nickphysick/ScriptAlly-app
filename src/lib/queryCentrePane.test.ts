@@ -95,12 +95,17 @@ describe("the query's verbs live in one kebab, not a bar", () => {
    */
   it("every non-verb moved to where its subject is named", () => {
     /* the agent record — the ⋯ carried a permanently-disabled `Agent`; the name is the way there */
-    expect(code, "the agent's name is not the link to the record").toContain('className="qp-hlink"');
+    /* ⚠️ `qp-hlink` RETIRED WITH THE PLATE (§1) — the agent's name is the pairing card's left-hand
+       subject now, in the same element and at the same size as the manuscript opposite. What this
+       clause asserts is the DESTINATION, which the disabled ⋯ item never had. */
+    expect(code, "the agent's name is not the link to the record").toContain('onNavigate("agents")');
     /* email + website — pills under the agency, not menu items */
-    expect(code, "the contact pills are missing").toContain('className="qp-hlinks"');
+    expect(code, "the contact pills are missing").toContain('className="qc-pairlinks"');
     expect(code, "the website pill stopped going through the scheme guard").toContain("agentWebsiteHref(activeAgent.website)");
-    /* the manuscript — its name heads What you sent */
-    expect(code, "the manuscript's name is not heading What you sent").toContain('className="qp-msname"');
+    /* ⚠️ THE MANUSCRIPT'S NAME IS THE PAIRING CARD'S RIGHT-HAND SUBJECT NOW (§1), not a link inside
+       "What you sent" — the clause is unchanged (the disabled ⋯ item's destination is the name
+       itself), and the name simply became the more prominent of the card's two. */
+    expect(code, "the manuscript's name is not the way to its record").toContain('onNavigate("manuscripts")');
     /* the send method — edited in place on the event that states it */
     expect(code, "the send-method picker lost its in-place trigger").toContain("onEditSendMethod={(anchor)");
     expect(code, "the picker menu was not re-mounted beside the event").toContain('ariaLabel="Change send method"');

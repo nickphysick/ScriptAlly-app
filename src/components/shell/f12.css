@@ -136,7 +136,7 @@
 .qh-enter .f12-ctl,
 .qh-enter .f12-chips { animation: rise 0.22s ease-out 0.05s backwards; }
 .qh-enter .f12-list { animation: rise 0.24s ease-out 0.08s backwards; }
-.qh-enter .f12-detail .f12-hero { animation: rise 0.24s ease-out 0.13s backwards; }
+.qh-enter .f12-detail .qc-pair { animation: rise 0.24s ease-out 0.13s backwards; }
 .qh-enter .f12-detail .f12-card:nth-child(1) { animation: rise 0.24s ease-out 0.17s backwards; }
 .qh-enter .f12-detail .f12-card:nth-child(2) { animation: rise 0.24s ease-out 0.2s backwards; }
 .qh-enter .f12-detail .f12-card:nth-child(3) { animation: rise 0.24s ease-out 0.23s backwards; }
@@ -156,7 +156,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .qh-enter .f12-hd2, .qh-enter .f12-ctl, .qh-enter .f12-chips, .qh-enter .f12-list,
-  .qh-enter .f12-detail .f12-hero, .qh-enter .f12-detail .f12-card,
+  .qh-enter .f12-detail .qc-pair, .qh-enter .f12-detail .f12-card,
   .qh-enter .f12-rows .f12-row { animation: none !important; }
 }
 
@@ -1096,7 +1096,7 @@
 .qc-wpg { --qc-gut: 32px; --qc-card-r: 13px; }
 .qc-wpg .f12-list,
 .qc-wpg .f12-card,
-.qc-wpg .f12-heroband { border-radius: var(--qc-card-r); }
+.qc-wpg .qc-pair { border-radius: var(--qc-card-r); }
 /* ⚠️ ONE TOKEN FOR ALL THREE SIDES AND THE SEAM'S OFFSET. The seam's `left` is computed from it, so
    moving the panel and moving the divider cannot come apart. */
 .t-f12 { --f12-panel-inset: 14px; }
@@ -1358,10 +1358,25 @@
    unconditionally — a `calc()` on an undefined custom property yields NaN and the whole declaration
    is dropped in silence, which is the fault this repo has an audit about. */
 .t-f12 { --qc-reclaim: 0px; }
-/* ⚠️ §4 — THE PLATE'S MONOGRAM IS THE PAGE'S ONE PINK SURFACE, and it is its own token precisely so
-   the neutral palette cannot reach it. `--pink-av` is remapped to the scale for the LIST's discs,
-   which stay neutral; this is the current subject, and the subject is the one thing worth tinting. */
-.t-f12 { --qc-plate-av: #f6d7cf; }
+/**
+ * ⚠️ `--qc-plate-av` IS GONE, AND THAT REVERSES THE PREVIOUS PACK'S §4 ON ITS OWN TERMS. It made
+ * the plate's monogram the page's one pink surface, because "the current subject is the one thing
+ * worth tinting". The subject is still worth marking — what changed is that the initials disc is
+ * not the thing marking it. §1 puts the query's real StatusDot in that position, so the monogram
+ * has no element left to tint and a token with no reader is the next thing someone wires up.
+ *
+ * ── §1 · THE PAIRING CARD'S TWO SAGE VALUES, NAMED FOR THEIR ROLE ───────────────────────────
+ * ⚠️ DERIVED AGAINST THE LIVE SAGE SCALE, NOT COPIED FROM THE REF. The ref sets its border 8.2 L*
+ * below its own darkest gradient stop and its inset frame 3.1 L* above its lightest; those two
+ * steps, in Lab, applied to `--sage-band-2` (L* 84.9) and `--sage-band` (L* 88.7) give the values
+ * below — L* 76.7 and 91.8. Copying #b9c6b7 would have put a border from another sheet's scale
+ * against this one's header and left nobody able to say whether it was right.
+ *
+ * ⚠️ THE BORDER IS DARKER THAN `--sage-edge` (L* 82.6) BY DESIGN, not incidentally: the header's
+ * own bottom rule is the darkest sage the card already draws, and a 2px line at that value reads
+ * as a thickened version of it rather than as a frame.
+ */
+.t-f12 { --qc-card-border: #b4c1b0; --qc-card-inset: #e4e9e1; }
 /* the panel is `--shell-panelw` open and 72px collapsed; each of the three columns takes a third */
 .sb-shut .f12-body { --qc-reclaim: calc((var(--shell-panelw) - 72px) / 3); }
 
@@ -1676,9 +1691,8 @@
    navigation control at the same time; drawn as a link it would put an underline through the
    pane's largest type, drawn as a heading it would hide the affordance. It inherits everything and
    earns a rule on hover — the treatment the agent list's own name link already uses. */
-.qp-hlink { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px solid transparent; }
-.qp-hlink:hover { border-bottom-color: var(--qc-rim-h); }
-.qp-hlinks { display: flex; align-items: center; gap: 7px; margin-top: 9px; }
+/* ⚠️ `.qp-hlink` WENT WITH THE PLATE (§1) — the agent's name is the pairing card's subject now and
+   wears `.qc-pairnm`, which carries its own hover. */
 .qp-lnk { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-2); border: 1px solid var(--qc-rim-off); background: var(--paper); border-radius: 999px; padding: 3px 10px; cursor: pointer; text-decoration: none; }
 .qp-lnk:hover { border-color: var(--qc-rim-h); color: var(--ink); }
 .qp-lnk svg { width: 11px; height: 11px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
@@ -1721,10 +1735,9 @@
    `height: 100%` here would work only while the stack's height came from its parent — the moment
    the first child is hidden, the box being measured against is a different box, and everything
    below jumps by the difference. */
-.qp-stack--open > .f12-card:first-child { display: none; }
-.qp-notes-open { display: flex; flex-direction: column; box-shadow: 0 2px 6px rgba(58, 42, 26, 0.07), 0 14px 30px rgba(58, 42, 26, 0.09); }
-.qp-cardexp { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; }
-.qp-cardexp svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* ⚠️ §8's EXPANSION RULES ARE GONE WITH THEIR SUBJECT (§1). `--open` hid the stack's first card,
+   `.qp-notes-open` raised what was left and `.qp-cardexp` was the toggle — all three describe a
+   stack of two, and the merge left one. */
 
 /* ── §7 · THE TODAY MARKER ────────────────────────────────────────────────────────────────────
    ⚠️ THE SAME 30px GUTTER THE TIMELINE ROWS USE, so the dot lands on the line rather than beside
@@ -1770,10 +1783,9 @@
    (a warm pink, then n2, then this). */
 .f12-d2-late { color: var(--qc-acc-late); font-weight: 500; }
 
-.qp-msrow { padding-bottom: 9px; border-bottom: 1px solid var(--hairline); margin-bottom: 4px; }
-.qp-msname { font: inherit; font-size: 13.5px; font-weight: 600; color: var(--burg); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; border-bottom: 1px solid var(--qc-rim-ms); }
-.qp-msname:hover { border-bottom-color: var(--burg); }
-.qp-msmeta { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); margin-top: 4px; }
+/* ⚠️ THE MANUSCRIPT ROW MOVED UP AND CHANGED WEIGHT (§1). It was a 13.5px burgundy link inside a
+   card; it is the pairing card's right-hand SUBJECT now, in the same 26px Playfair as the agent
+   opposite — because the merge's whole claim is that the two are peers. */
 
 .qp-inplace { font: inherit; color: inherit; font-weight: 600; background: none; border: 0; padding: 0; cursor: pointer; border-bottom: 1px dashed var(--qc-rim-dash); }
 .qp-inplace:hover { border-bottom-style: solid; border-bottom-color: var(--burg); color: var(--burg); }
@@ -2277,138 +2289,107 @@
    pair, so one rule serves both without a second selector. */
 .f12-detail { flex: 1; min-width: 0; grid-column: 2; grid-row: 2; }
 .f12-dscroll { flex: 1; overflow-y: auto; min-height: 0; background: var(--paper); padding: 20px; }
-/* agent header — sage LEFT SPINE (::before clipped by the card radius; no top rule) */
 /**
- * ══ §1h · THE HERO IS A BAND ══════════════════════════════════════════════════════════════════
+ * ══ §1 · THE PAIRING CARD — TWO SUBJECTS, ONE OBJECT ═════════════════════════════════════════
  *
- * ⚠️ IT WAS A BOX INSIDE A PANE OF BOXES. A bordered, shadowed, sage-spined card sitting above
- * three more framed cards — four objects of equal weight, so the pane had no hierarchy at all. One
- * row now, closed by a single rule, exactly as the masthead above it is.
+ * ⚠️ THE PLATE AND "WHAT YOU SENT" WERE ONE STATEMENT SPLIT ACROSS TWO SURFACES. Who you queried
+ * sat in a band; what you sent them sat in a card two columns away, under its own sage header, and
+ * the manuscript they are both about was named in the second one. Merged, the card says the whole
+ * sentence — this agent, this book, these materials — and the right-hand column is freed for Notes
+ * alone, which is the practical point: its list could previously show one entry.
  *
- * ⚠️ THE OLD `.f12-hero` RULES ARE LEFT WHERE THEY ARE. The class still dresses the CREATE journey's
- * chassis children (`.f12-bigav`, `.f12-hn`, `.f12-hs`), which this band reuses — so the skin is
- * replaced by not applying it, rather than by deleting rules the reused children still read.
+ * ⚠️ EITHER SIDE CAN BE THE TALLER ONE, so neither may set the height. The left grows with links,
+ * the right with materials — `align-items: center` on the grid centres each half in a row the
+ * taller one defines, and `align-items: center` inside each half puts its mark on that half's own
+ * centre. Both marks therefore land on ONE axis by construction. A rule that centred one half
+ * against the other, or gave either a fixed height, would be two numbers agreeing until they did
+ * not.
+ *
+ * ⚠️ THREE LAYERS, because an inset shadow paints BENEATH children and a border changes the box.
+ * `.qc-pair` carries the ground and the 2px ring; `.qc-pairfr` is the clipping context; the inset
+ * frame is its own overlay element, so it draws over the frame's contents rather than under them.
+ * No `border` anywhere in the stack and no radius restated — every layer inherits.
  */
+.qc-pair { position: relative; background: var(--white); box-shadow: var(--sh-2); flex: none; }
+.qc-pair > .qc-pairfr { border-radius: inherit; overflow: hidden; }
+/* the 2px card border. ⚠️ DEEPENED SAGE, NOT THE HEADER'S — at 2px a gradient stop reads as a
+   smudge rather than a line, which is the whole reason the token exists separately. */
+.qc-pair::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 2px var(--qc-card-border); }
+/* the inset frame — an ELEMENT, so it paints above `.qc-pairfr` rather than under it */
+.qc-pairins { position: absolute; inset: 7px; border-radius: calc(var(--qc-card-r) - 6px); pointer-events: none; box-shadow: inset 0 0 0 1px var(--qc-card-inset); }
+/* ⚠️ THE PADDING CLEARS THE INSET FRAME. At the plate's old `22px 17px` the frame would have cut
+   through the monogram and the links; 7px of inset plus its own line needs room on both axes. */
+.qc-pairgrid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 30px; padding: 26px 30px; }
+.qc-pairid { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.qc-pairms { display: flex; align-items: center; gap: 18px; justify-content: flex-end; min-width: 0; }
+.qc-pairwho { min-width: 0; }
+/* ⚠️ RIGHT-ALIGNED ALL THE WAY DOWN, INCLUDING THE ROWS. The manuscript half reads inward from a
+   hard right edge; a right-aligned title over left-aligned rows would leave the column with two
+   edges and neither of them the card's. */
+.qc-pairwho--r { text-align: right; }
+/* the two names are ONE type step — the agent and the manuscript are peers here, and giving either
+   the larger face would make the card about that one */
+.qc-pairnm { font-family: var(--f12-serif); font-size: 26px; font-weight: 500; line-height: 1.08; color: var(--ink); display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+button.qc-pairnm { background: none; border: 0; padding: 0; cursor: pointer; text-align: inherit; }
+button.qc-pairnm:hover { color: var(--burg); }
+.qc-pairsub { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /**
- * ⚠️ A CONTAINED PLATE, AND THIS REVERSES PACK B §1h (ref 102, which supersedes 101 for the hero).
- * "The hero becomes a band" was right in isolation and wrong in context: flattening a header works
- * when its neighbours are flat, and everything around this one is contained — two sage-capped cards
- * below, the list panel beside it, the masthead plate above. One uncontained element among them
- * reads as unfinished rather than as deliberate.
- *
- * ⚠️ AND IT HAS A CLUSTER TO HOLD. Avatar, name, agency, queried date, status pill, primary and
- * kebab — with no container the button group floats free of the name it belongs to, which is the
- * practical half of the same argument.
- *
- * ⚠️ THE SAME TREATMENT AS A READING-PANE CARD, so it belongs to their family rather than
- * approximating it: `.f12-card`'s ground, rim and radius, stated through the same tokens. A plate
- * that merely LOOKED like the cards would drift from them the first time the card was retuned.
+ * ⚠️ THE TWO MARKS ARE THE SAME SIZE AND DIFFERENT IN TONE, AND THE TONE IS LOAD-BEARING. The left
+ * one is the locked `StatusDot` at 66px — its burgundy ring is the query's state. The right one is
+ * a neutral ring around a book. Give the manuscript mark a burgundy or sage ring and the card
+ * appears to state two statuses, one of which is not a status at all.
  */
-.f12-heroband {
-  flex: none;
-  display: flex; align-items: center; gap: 15px;
-  /* ⚠️ FLUSH WITH THE PANE COLUMN (alignment amendment). It carried `20px` of side margin and
-     `--f12-headgap` on top, which meant the pane's CONTENT had edges the pane's COLUMN did not —
-     so the work area had six verticals instead of four, and content sat 20px from the right wall
-     while the list sat hard against the left. That asymmetry is the amendment's "gutters were not
-     equal", and it was never a gutter: it was a card inset on one side only. */
-  margin: 0;
-  /* ⚠️ 14 → 22 VERTICAL (fix pack 6 §3). The plate was short for what it holds and for the weight
-     it now carries beside a 128px masthead. The height comes from the PADDING, deliberately: growing
-     the avatar or the type would change what the plate says, and the avatar is also what sets the
-     row's height — so the padding is the one lever that adds room without touching either.
-     ⚠️ THE HORIZONTAL IS UNTOUCHED. This is a height change; widening the inset as well would move
-     the identity away from the edge the rest of the pane aligns to. */
-  padding: 22px 17px;
-  /* ⚠️ FIX PACK 3 §3 — THE PLATE IS RAISED, AND IT NO LONGER MATCHES THE CARDS. Fix pack 2 gave it
-     a reading-pane card's exact treatment, which fixed the drifting-caption problem and created the
-     next one: sitting above two sage-capped cards, an identical fourth surface read as the WEAKEST
-     thing on the page rather than its subject. This supersedes that lock deliberately — the plate is
-     now one step brighter, one step firmer and one step higher than the cards.
+.qc-pairmk { width: 66px; height: 66px; flex: 0 0 66px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 2.5px var(--n5); }
+.qc-pairmk svg { width: 30px; height: 30px; stroke: var(--ink-2); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.qc-pairlinks { display: flex; align-items: center; gap: 7px; margin-top: 11px; }
+/* ── the materials rows, right-aligned: sent mark, then label ────────────────────────────────
+   ⚠️ THE MARK COMES FIRST AND THE LABEL LAST, which is what keeps the right edge hard. Reversed,
+   the labels would ragged-left against a column of marks. `order` is not used — the mark is simply
+   written first, because the reading order and the visual order are the same here. */
+.qc-pairmats { margin-top: 12px; }
+.qc-pairmat { display: flex; align-items: center; justify-content: flex-end; gap: 10px; width: 100%; padding: 7px 0; background: none; border: 0; border-radius: 0; cursor: pointer; font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--qc-tx-off); text-align: right; }
+.qc-pairmat + .qc-pairmat { border-top: 1px solid var(--hairline); }
+.qc-pairmat.on { color: var(--ink-2); }
+.qc-pairmat:hover .qc-pairmatlb { color: var(--burg); }
+.qc-pairmatst { display: inline-flex; align-items: center; gap: 6px; flex: none; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--burg); }
+.qc-pairmat.on .qc-pairmatst { color: var(--sageD); }
+.qc-pairmatck { width: 14px; height: 14px; border-radius: 50%; display: grid; place-items: center; font-size: 8px; flex: none; border: 1.5px dashed var(--qc-rim-off-2); color: transparent; }
+.qc-pairmat.on .qc-pairmatck { background: var(--qc-acc-sage-tick); color: var(--qc-acc-sage-tick-i); border: 0; }
+/* ⚠️ THE LABEL WRAPS RATHER THAN TRUNCATES. Measured at 1440 the manuscript half gives the text
+   about 205px, and "Sample materials — not included" ellipsised to "Sample materials — n…", which
+   states less than nothing. Wrapping is free here because the column is right-aligned prose: a
+   second line keeps the same hard edge. */
+.qc-pairmatlb { min-width: 0; overflow-wrap: anywhere; }
+.qc-pairmatlb small { color: var(--qc-tx-quiet); font-size: inherit; }
+.qc-pairsub-act { display: block; margin-left: auto; margin-top: 7px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-quiet); background: none; border: 0; padding: 0; cursor: pointer; }
+.qc-pairsub-act:hover { color: var(--burg); }
+/* ⚠️ THE SAMPLE EDITOR STAYS LEFT-TO-RIGHT INSIDE A RIGHT-ALIGNED COLUMN, deliberately. A unit
+   toggle and a number field are controls, not prose; mirroring them would put the cursor's start
+   on the wrong side of the field for no gain. */
+.qc-paired { text-align: left; margin-top: 10px; }
+/* ⚠️ THE PACKAGE ROW IS A FOOTNOTE TO THE MATERIALS, NOT A CARD OF ITS OWN. It was a slate-filled
+   box inside "What you sent"; on a card whose whole right column is right-aligned prose, a box
+   would have been the one element with its own edges. Same right edge, quieter ink. */
+.qc-pairpkg { margin-top: 12px; }
+.qc-pairpkgn { display: block; font-family: "Inter", sans-serif; font-size: 12px; font-weight: 600; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qc-pairpkgc { display: block; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-quiet); margin-top: 3px; }
 
-     ⚠️ ELEVATION, NOT COLOUR, AND NEVER A SAGE CAP. A sage band here would make it a fourth card —
-     a peer of the things it contains. Lifting it says these cards belong to this thing, which is
-     what is actually true. Do not add a cap to this element, now or later.
-
-     ⚠️ EVERY VALUE RE-DERIVED AGAINST THE EXISTING SCALE, none copied from the mockup's rgba
-     literals. The ref pairs a plain hairline on the cards with a firmer one on the hero; this token
-     set has the same pair, so the plate takes `--oatline` (#e0d3c1) where the cards take `--line`
-     (#e6dccd). And the ref's lift is a contact shadow plus a soft ambient — which is exactly what
-     `--sh-2` already is, one step above the cards' `--sh-1`, with a contact term identical to the
-     ref's. Reading the scale gets the mockup's shape for free and keeps it theme-safe.
-
-     ⚠️ THE RIM STAYS A BORDER RATHER THAN BECOMING AN INSET RING. The ref draws it as an inset
-     shadow, which would take 2px out of the plate's height — and the height is asserted stable
-     against the status pill's presence. Same line, same weight, no height change. */
-  background: var(--white);
-  border: 1px solid var(--oatline);
-  border-radius: var(--r-lg);
-  box-shadow: var(--sh-2);
+@media (max-width: 1100px) {
+  /* ⚠️ ONE COLUMN, AND THE MANUSCRIPT HALF STOPS BEING RIGHT-ALIGNED WITH IT. Stacked, "right" is
+     no longer an outer edge — it is the middle of the card, which reads as an accident. */
+  .qc-pairgrid { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 22px 24px; }
+  .qc-pairms { justify-content: flex-start; flex-direction: row-reverse; }
+  .qc-pairwho--r { text-align: left; }
+  .qc-pairmat { justify-content: flex-start; text-align: left; }
+  .qc-pairsub-act { margin-left: 0; }
 }
-/**
- * ⚠️ THE AVATAR'S WHOLE SKIN WAS SCOPED TO `.f12-hero`, AND THE BAND IS NOT THAT. `.f12-hero
- * .f12-bigav` carries the disc — radius, fill, ink, centring, serif — and §1h renamed the container
- * without bringing it across, so the band overrode only width, height and font-size and the avatar
- * degraded to two bare letters. It severed the one visual tie between the hero and the row that was
- * clicked, which is exactly what the avatar is for.
- *
- * ⚠️ THE SAME DECLARATIONS, NOT A SECOND TREATMENT. The list row's `.f12-av` and this share the
- * disc's shape and its monogram fill; what differs is scale, which is the only thing a band should
- * be changing. Written as one rule listing both selectors so a future edit to the disc cannot reach
- * one and miss the other — the failure this section exists to undo.
- */
-.f12-hero .f12-bigav,
-.f12-heroband .f12-bigav {
-  flex: none; border-radius: 50%;
-  background: var(--pink-av); color: var(--ink);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--f12-serif); font-weight: 600;
-}
-.f12-hero .f12-bigav { width: 76px; height: 76px; font-size: 25px; }
-/* ⚠️ 46 → 58, AND THE OLD NOTE ("a band's height is its row, not its portrait") IS SUPERSEDED, not
-   contradicted. It was written when the band held the primary and the kebab: the row's height came
-   from a 32px control, so a portrait bigger than the row would have set the height instead. §1 took
-   the controls out. The band is now identity ALONE — a portrait, a name, an agency, two pills and a
-   state — and the portrait is entitled to set the height of a row it is the subject of. */
-.f12-heroband .f12-bigav { width: 58px; height: 58px; font-size: 21px; background: var(--qc-plate-av); color: var(--ink); }
-.f12-heroband .f12-hn { font-family: var(--f12-serif); font-size: 27px; font-weight: 500; line-height: 1.05; }
-/* ⚠️ ONE META LINE. Agency and the queried date are both quiet facts about this record; two stacked
-   lines made a three-line block out of a row. The interpunct is drawn by the rule, so either half
-   can omit itself without leaving a stray separator. */
-.f12-hmeta { display: flex; align-items: center; gap: 8px; margin-top: 2px; font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--faint); min-width: 0; }
-.f12-hmeta > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.f12-hmeta > span + span::before { content: "·"; margin-right: 8px; color: var(--line); }
-/**
- * ⚠️ §6 — THE STATE IS PLAIN: NO TILE, NO FILL, NO PILL. It was a bordered pink capsule, which made
- * a fact about the query look like a control you could press — and it was the only pill in a band
- * that now also carries two real pills (Email, Website), so the one thing that could NOT be clicked
- * looked exactly like the two that could.
- *
- * ⚠️ THE DOT IS OUTBOARD OF THE WORD, on the far right, and it is the real `StatusDot` — burgundy
- * outgoing, sage incoming, grey closed, from the locked component, never a recreation. Outboard
- * because the dot is the thing the eye finds when scanning a column of these; a dot tucked inside a
- * pill is decoration on a label.
- */
-/* ⚠️ THE MARK IS OUTBOARD ON THE LEFT NOW (§5). It led the word before and still does — what
-   changed is which side "leading" is on, because at 44px the mark is heavy enough to anchor the
-   group rather than trail it. `text-align: left` follows: a right-aligned label under a
-   left-aligned mark leaves a ragged edge between two things that are one statement. */
-.f12-hs { display: flex; align-items: center; gap: 13px; text-align: left; margin-left: auto; flex: none; background: none; border: 0; padding: 0; border-radius: 0; }
-.f12-hs .f12-hstx { min-width: 0; }
-.f12-hs .f12-hsw { font-family: var(--f12-serif); font-size: 21px; font-weight: 600; color: var(--ink-2); line-height: 1; }
-/* ⚠️ AND BENEATH IT, ONLY THE DATE OF THE MOST RECENT DEVELOPMENT — not the send date. The send date
-   is where the story STARTS and Tracking's first rung already carries it; what belongs beside a
-   state is when the query last entered it. */
-.f12-hs .f12-hsd { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); margin-top: 6px; white-space: nowrap; }
-.f12-heroband .f12-hs { margin-top: 0; }
 
-.f12-hero { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px 26px 24px 32px; display: flex; align-items: center; gap: 22px; box-shadow: var(--sh-1); overflow: hidden; }
-.f12-hero::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 5px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); }
-/* ⚠️ THE DISC MOVED UP TO THE SHARED RULE (fix pack §3) — one declaration list for both scales, so
-   an edit to the disc cannot reach the card and miss the band. Only the size stays per-container. */
-.f12-hero .f12-hn { font-family: var(--f12-serif); font-size: 30px; font-weight: 600; line-height: 1.08; color: var(--ink); }
-.f12-hero .f12-ha { font-family: var(--f12-serif); font-size: 16px; font-weight: 500; color: var(--muted); margin-top: 3px; }
-.f12-hero .f12-hs { display: inline-block; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.14em; color: var(--pink-i); background: var(--pink-t); border: 1px solid var(--pink-b); border-radius: 99px; padding: 3px 10px; margin-top: 11px; }
+/* ⚠️ `.f12-hero` AND ITS CHILDREN ARE DELETED, and the reason is reachability rather than tidiness.
+   The rules survived §1h on the stated grounds that "the class still dresses the CREATE journey's
+   chassis children" — that was true when it was written and is not now: nothing in `src/` renders
+   `f12-hero`, `f12-bigav`, `f12-hn`, `f12-ha` or `f12-hs`, and the only mention left is a sentence
+   in `QueryCreatePane.tsx`'s header comment describing where its model came from. Traced to a
+   rendered root in both directions before removing. */
 /* content cards — pale sage gradient header bands, dark-sage 19px icons */
 .f12-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
 /**
@@ -2634,9 +2615,8 @@
   .f12-root .qc-cols { display: block !important; padding: 14px 14px calc(96px + env(safe-area-inset-bottom)) !important; }
   .f12-root .qp-cols > .f12-card,
   .f12-root .qc-cols > .f12-card { margin-bottom: 12px; min-height: 0; }
-  .f12-root .f12-hero { margin: 14px 14px 0 !important; }
-  /* the command bar takes the hero's primary (the create hero keeps its own controls) */
-  .f12-root .f12-hero:not(.qc-hero) > .f12-btn-pri { display: none; }
+  /* ⚠️ THE `.f12-hero` OVERRIDES WENT WITH THE ELEMENT (§1) — including the one hiding a
+     primary button on a card that had already lost its buttons two packs ago. */
 
   /* touch rule: the note actions are hover-revealed on desktop and unreachable by tap — always
      visible below md (out-specifies the pane's inline <style> rule) */
@@ -3298,18 +3278,14 @@
      the one the comment claims, on the one page that also drops its hero band. The factor is the
      rule and the number is derived from it: 0.86 × 38 ≈ 33. */
   .qc-wpg .wsh { --wsh-title-size: 33px; }
-  /* the hero band gives up its portrait scale first: it is the least information per pixel here */
-  /* ⚠️ THE PLATE'S PADDING, NOT A MARGIN (fix pack 2 §1). The band had none to give; a plate does,
-     and taking it from the padding is what keeps the container while the row gets shorter. The step
-     is the same 0.86 the masthead takes — 14/17 resting lands at 10/14. */
-  /* ⚠️ 10 → 16 VERTICAL, tracking §3's base. The short-viewport step is a RECLAIM, so it keeps the
-     same proportion of the resting padding it always did (14 → 10); against a 22px base that lands
-     at 16. Left at 10 it would have taken 12px off a plate that had just gained 8, which is a
-     steeper drop on the one viewport with least room to absorb it. The horizontal step is
-     unchanged, because §3 did not change the horizontal. */
-  .f12-heroband { padding: 16px 14px; }
-  .f12-heroband .f12-bigav { width: 40px; height: 40px; font-size: 15px; }
-  .f12-heroband .f12-hn { font-size: 19px; }  /* 21 resting, the same 0.86 step */
+  /* ⚠️ THE PAIRING CARD GIVES UP AIR AND TYPE, BUT NOT ITS MARKS. Reclaiming from the padding is
+     what keeps the container while the row gets shorter — the same 0.86 step the masthead takes,
+     26/30 landing at 22/26. The marks hold their 66px: they are the two subjects, and shrinking
+     them is the one change that would alter what the card says rather than how much room it takes.
+     ⚠️ AND THE INSET FRAME'S 7px IS NOT REDUCED WITH IT, so the padding must stay clear of it —
+     which is the floor this step is measured against, not a free choice. */
+  .qc-pairgrid { padding: 22px 26px; gap: 24px; }
+  .qc-pairnm { font-size: 22px; }  /* 26 resting, the same 0.86 step */
   /* the stats keep their figures and lose their air */
   .qp-stat { padding: 10px 15px; }
   .qp-statn { font-size: 20px; }

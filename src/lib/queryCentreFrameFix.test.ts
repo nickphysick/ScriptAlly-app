@@ -36,9 +36,12 @@ describe("no double container", () => {
       .toContain("box-shadow: inset 0 0 0 1px var(--line)");
     expect(rule(".f12-card"), "the card took a border back — it would double with the ring")
       .not.toMatch(/(?:^|;|\{)\s*border\s*:/);
-    for (const sel of [".f12-hero"]) {
-      expect(rule(sel), `${sel} lost its border`).toContain("border: 1px solid var(--line)");
-    }
+    /* ⚠️ `.f12-hero` RETIRED WITH THE PLATE (pairing pack §1); the pairing card is the object this
+       clause is about now — it keeps a card skin while the page keeps one container. */
+    expect(rule(".qc-pair::after"), ".qc-pair lost its rim")
+      .toContain("box-shadow: inset 0 0 0 2px var(--qc-card-border)");
+    expect(rule(".qc-pair"), "the pairing card took a border back — it would double with the ring")
+      .not.toMatch(/(?:^|;|\{)\s*border\s*:/);
   });
 
   /* ⚠️ REVERSED — the frame is gone entirely (flatten §1). "Hairline-only" was the right rule for
@@ -74,8 +77,11 @@ describe("quiet scrollbars — the To-do pattern, reused", () => {
   /* Create mode's two scrolling column bodies went with the grid (v3): the stack shows one
      section at a time and the pane scrolls as a whole, so there is nothing left inside it that
      scrolls on its own. The READING pane's three columns are untouched and still the point. */
-  it("applied to the list rows and the reading pane's three columns", () => {
-    expect(queries.match(/scrollClassName="f12-quiet-scroll"/g)?.length ?? 0).toBe(3);
+  /* ⚠️ TWO SCROLLERS NOW, NOT THREE (pairing pack §1). "What you sent" had one; its rows moved into
+     the pairing card, which does not scroll — it sizes to its contents, and a scroller there would
+     be a card that hides half its own subject. Tracking and Notes keep theirs. */
+  it("applied to the list rows and the reading pane's two card bodies", () => {
+    expect(queries.match(/scrollClassName="f12-quiet-scroll"/g)?.length ?? 0).toBe(2);
     expect(pane, "a create-mode inner scroller came back").not.toContain('className="f12-quiet-scroll"');
   });
 

@@ -266,8 +266,10 @@ describe("§1e / §1f · the verbs have a subject, or they are not drawn", () =>
     expect(row, "Delete left the row").toContain("<span>Delete</span>");
     /* the two records moved to their own names */
     expect(code, "the agent record lost its way in — the ⋯ item was disabled, so the name is now the link")
-      .toContain('className="qp-hlink"');
-    expect(code, "the manuscript lost its way in").toContain("qp-msname");
+      .toContain('onNavigate("agents")');
+    /* ⚠️ `qp-msname` RETIRED WITH THE MERGE (§1) — the manuscript is the pairing card's right-hand
+       subject now, in the same element as the agent. The clause is the destination, not the class. */
+    expect(code, "the manuscript lost its way in").toContain('onNavigate("manuscripts")');
     /* View tasks kept its handler and moved to Tracking, where this query's work is named */
     expect(code, "View tasks lost its opener").toContain("setIsTasksOpen(true)");
     expect(code, "the task count is not on Tracking's band").toContain('className="qp-cardact"');

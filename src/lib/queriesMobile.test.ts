@@ -67,7 +67,10 @@ describe("the espresso command bar (concept frame 03)", () => {
     expect(hub).toContain("ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}");
     // and the popover opens UPWARD from the foot-pinned bar
     expect(hub).toContain('isMobile ? { placement: "up" } : undefined');
-    expect(css).toContain(".f12-root .f12-hero:not(.qc-hero) > .f12-btn-pri { display: none; }");
+    /* ⚠️ THE RULE HIDING THE HERO'S PRIMARY IS GONE, and it was already hiding a button that had
+       left two packs earlier. `.f12-hero` itself went with the pairing merge (§1) — the mobile
+       command bar's own primary is what this case is really about, asserted below. */
+    expect(css, "a rule survives for an element nothing renders").not.toContain(".f12-root .f12-hero");
   });
 
   it("the ⋯ sheet re-homes the bar's actions with the same handlers", () => {

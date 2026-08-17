@@ -940,36 +940,13 @@ export const Queries: React.FC<{
      offered at all once the group is long enough for folding to earn its place (`foldClosed`). */
   const [closedOpen, setClosedOpen] = useState(false);
   /**
-   * §8 — Notes expands over What you sent.
-   *
-   * ⚠️ THE HEIGHT IS MEASURED, NOT DECLARED. `height: 100%` on the notes card would work only while
-   * the stack's height came from its parent; the stack is a flex column inside a grid cell, so the
-   * moment its first child is hidden the container it is measured against changes and everything
-   * below jumps. The column's height is taken BEFORE the hide and applied as a floor, so the pane is
-   * exactly as tall open as it was closed.
-   *
-   * ⚠️ AND IT CLOSES ON A QUERY CHANGE. The expanded state belongs to the query you were reading;
-   * carrying it across would show a different query's notes at full height without being asked for.
+   * ⚠️ §8's NOTES EXPANSION IS RETIRED WITH ITS SUBJECT (§1). It measured the stack's height, hid
+   * "What you sent" and held the column at the height it had been — careful machinery for a real
+   * problem, which was that Notes shared a column and got what was left of it. The merge removed
+   * the problem rather than the symptom: there is no sibling to expand over, so `notesOpen`, the
+   * measured floor, the pointerdown-away listener and the per-query reset all had nothing left to
+   * do. Deleted rather than left inert, because state nobody sets is state someone re-wires.
    */
-  const [notesOpen, setNotesOpen] = useState(false);
-  const notesStackRef = useRef<HTMLDivElement | null>(null);
-  const notesCardRef = useRef<HTMLDivElement | null>(null);
-  const [notesFloor, setNotesFloor] = useState<number | null>(null);
-  useEffect(() => { setNotesOpen(false); setNotesFloor(null); }, [selectedQueryId]);
-  useEffect(() => {
-    if (!notesOpen) return;
-    /* ⚠️ POINTERDOWN, AND ON THE CAPTURE PHASE IS NOT NEEDED HERE. This is a collapse, not a
-       dismissal that must beat another handler — a click that lands on a control inside the card
-       should reach that control, and a click anywhere else should close. */
-    const away = (e: PointerEvent) => {
-      const card = notesCardRef.current;
-      if (card && e.target instanceof Node && card.contains(e.target)) return;
-      setNotesOpen(false);
-      setNotesFloor(null);
-    };
-    document.addEventListener("pointerdown", away);
-    return () => document.removeEventListener("pointerdown", away);
-  }, [notesOpen]);
   // ⋯ overflow menu on the command bar (PDF demoted here — a rare action, chrome tidy).
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const { triggerRef: moreTrigRef, menuStyle: moreMenuStyle } = useFixedMenu<HTMLButtonElement>(isMoreOpen);
@@ -4112,125 +4089,169 @@ export const Queries: React.FC<{
                   .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:var(--qc-tx-noteact); display:flex; align-items:center; justify-content:center; cursor:pointer; }
                   .qp-noteact:hover{ background:var(--qc-surf-noteact-h); color:var(--burg); }
                 `}</style>
-                {/* ── Agent header (F12, ref .hero) — SAGE LEFT SPINE (::before in f12.css, clipped
-                    by the card radius via overflow:hidden; there is NO top accent rule), pink avatar
-                    with black initials, Playfair name, agency, pink status pill, plane ornament. ── */}
+                {/* ══ §1 · THE PAIRING CARD — the agent and the manuscript, one object ══════════
+                    ⚠️ IT ABSORBS "WHAT YOU SENT" WHOLE. The plate named the agent; the card named
+                    the manuscript, listed the materials, and sat two columns away under its own
+                    sage header. Three facts about one send, on two surfaces, with the middle one
+                    (which book) findable only in the second. Together they are a sentence.
+
+                    ⚠️ AND THE POINT OF THE MERGE IS THE COLUMN IT FREES. Notes shared the right
+                    column with this card and got whatever height was left — enough for one entry.
+                    It takes the column now. */}
                 {(() => {
                   const nameplate = agentPrimary(activeAgent);
-                  const initials = agentInitials(activeAgent);
-                  /* ⚠️ THE CTA DERIVATIONS WENT WITH THE BUTTONS (§1). `heroAction`, `heroIsMark`,
-                     `heroLabel`, `heroTaskCount` and `heroWaitingOnAgent` all existed to feed the
-                     primary and the kebab; both now compute in the control cell that renders them,
-                     from the SAME `getPrimaryAction` call. Leaving the derivations here would have
-                     been a second reading of whose turn it is, in a band that no longer acts. */
-                  /* ⚠️ THROUGH `refDate`, WHICH OMITS RATHER THAN PRINTING "Invalid Date". Undated
-                     imports exist, and `new Date(junk).toLocaleDateString()` is a literal string
-                     this app has shown a writer before. */
-                  const heroQueriedOn = refDate((activeQuery as { dateSent?: unknown }).dateSent);
+                  /* ⚠️ `agentInitials` AND `heroQueriedOn` ARE GONE FROM HERE, and both were
+                     removals rather than relocations. The monogram is replaced by the query's own
+                     StatusDot — initials were decoration in a card that now has a real mark to put
+                     in that position. The queried date is on Tracking's `Query sent` event and the
+                     status label is Tracking's header meta, so both were second statements of
+                     things stated twelve pixels away. */
+                  const base = baseMaterialsFor(activeQuery, activeAgent);
+                  const qlSent = base.some(isQueryLetterMat);
+                  const synSent = base.some(isSynopsisMat);
+                  const sampleItem = base.find(isSampleMat) ?? null;
+                  const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
+                  const pkgComponents = linkedPackage
+                    ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
+                    : [];
+                  const isPro = currentUser?.plan === UserPlan.PRO;
+                  const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
+                  const openSampleEditor = () => {
+                    if (sampleItem && typeof sampleItem !== "string" && sampleItem.type && sampleItem.type !== "other") { setSampleUnit(sampleItem.type); setSampleQty(sampleItem.quantity != null ? String(sampleItem.quantity) : ""); }
+                    else { setSampleUnit("pages"); setSampleQty(""); }
+                    setSampleEditorOpen(true);
+                  };
+                  /* ⚠️ THE MARK LEADS AND THE LABEL CLOSES THE ROW — the order that gives the
+                     column a hard right edge. The row is the control, as it was: the whole line
+                     toggles sent, which is a CORRECTION to a factual record and so a plain field
+                     patch, never a timeline entry. */
+                  const matRow = (key: string, label: React.ReactNode, sent: boolean, onClick: () => void, title: string) => (
+                    <button key={key} type="button" className={`qc-pairmat${sent ? " on" : ""}`} onClick={onClick} title={title}>
+                      <span className="qc-pairmatst">{sent ? "Sent" : "Mark sent"}<span className="qc-pairmatck">✓</span></span>
+                      <span className="qc-pairmatlb">{label}</span>
+                    </button>
+                  );
                   return (
-                    /* ⚠️ A BAND, NOT A BOX INSIDE A PANE OF BOXES (§1h). This was a bordered,
-                       shadowed, sage-spined card sitting above three more cards — four framed
-                       objects stacked, so nothing in the pane was more important than anything
-                       else. It is one row beneath the masthead now, closed by a single rule.
+                    <div className="qc-pair">
+                      <div className="qc-pairfr">
+                        <div className="qc-pairgrid">
 
-                       ⚠️ IT TAKES THE QUERIED DATE AND LEAVES THE LIVE PAIR TO TRACKING. The date is
-                       STATIC and belongs to identity — when this went out. "Days waiting" and
-                       "expected by" move, and they are the two numbers Tracking's progress bar reads
-                       against, so they stay where the bar is. Splitting them this way is what stops
-                       either surface restating the other. */
-                    <div className="f12-heroband" style={{ flexShrink: 0 }}>
-                      <span className="f12-bigav" aria-hidden="true">{initials}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        {/* ⚠️ THE NAME IS THE LINK TO THE AGENT RECORD (§2). The ⋯ carried an `Agent`
-                            item that was permanently `disabled` — a verb with a subject and no
-                            destination — and the destination it wanted is the agent list, which is
-                            where the record lives. Naming a thing and making the name the way to it
-                            is the whole of §2's relocation rule.
+                          {/* ── left: the agent ── */}
+                          <div className="qc-pairid">
+                            {/* ⚠️ THE LOCKED COMPONENT AT 66px, NEVER A RECREATION — so the ring,
+                                the fill and the per-status glyph are exactly the ones every other
+                                surface draws. It is the card's left mark AND the query's state,
+                                which is why the status word could leave. */}
+                            <StatusDot status={activeQuery.status} overrideSize={66} />
+                            <div className="qc-pairwho">
+                              {onNavigate ? (
+                                <button type="button" className="qc-pairnm" onClick={() => onNavigate("agents")} title="Open the agent list">{nameplate}</button>
+                              ) : <span className="qc-pairnm">{nameplate}</span>}
+                              {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
+                                <div className="qc-pairsub">{activeAgent.agency}</div>
+                              )}
+                              {/* ⚠️ THEY GREY RATHER THAN VANISH. An absent pill states nothing; a
+                                  grey one states that this agent has no email on file, which is a
+                                  fact and often the one worth acting on. */}
+                              <div className="qc-pairlinks">
+                                <a
+                                  className={`qp-lnk${activeAgent.email?.trim() ? "" : " qp-lnk-off"}`}
+                                  href={activeAgent.email?.trim() ? `mailto:${activeAgent.email.trim()}` : undefined}
+                                  title={activeAgent.email?.trim() || "No email address on this agent's record"}
+                                  aria-disabled={activeAgent.email?.trim() ? undefined : true}
+                                >
+                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7" /></svg>
+                                  Email
+                                </a>
+                                <a
+                                  className={`qp-lnk${agentWebsiteHref(activeAgent.website) ? "" : " qp-lnk-off"}`}
+                                  href={agentWebsiteHref(activeAgent.website) ?? undefined}
+                                  target="_blank"
+                                  rel="noreferrer noopener"
+                                  title={agentWebsiteHref(activeAgent.website) ?? "No website on this agent's record"}
+                                  aria-disabled={agentWebsiteHref(activeAgent.website) ? undefined : true}
+                                >
+                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></svg>
+                                  Website
+                                </a>
+                              </div>
+                            </div>
+                          </div>
 
-                            ⚠️ PLAIN TEXT WITH NO BRIDGE. `onNavigate` is optional on this page; a
-                            link rendered without one would be a dead link, which this app does not
-                            draw. It degrades to the heading it already was. */}
-                        <div className="f12-hn" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                          {onNavigate ? (
-                            <button type="button" className="qp-hlink" onClick={() => onNavigate("agents")} title="Open the agent list">{nameplate}</button>
-                          ) : nameplate}
-                        </div>
-                        {/* ⚠️ ONE META LINE, NOT TWO STACKED. Agency and the queried date are both
-                            quiet facts about this record; giving each its own line made a three-line
-                            block out of a row. Either half omits itself when absent. */}
-                        {/* ⚠️ THE AGENCY ALONE (§6). The queried date left this line for the state's
-                            own caption on the right, where "when did it last move" belongs beside
-                            "where does it stand". The interpunct rule survives for the case where a
-                            second fact is ever added back — it draws only between siblings. */}
-                        <div className="f12-hmeta">
-                          {!!activeAgent.name?.trim() && !!activeAgent.agency?.trim() && (
-                            <span>{activeAgent.agency}</span>
-                          )}
-                        </div>
-                        {/* ⚠️ EMAIL AND WEBSITE ARE PILLS BENEATH THE AGENCY (§2), NOT MENU ITEMS.
-                            Their subject is the AGENT, who is named on the line above them — which
-                            is the rule; in a ⋯ headed "Actions for this query" they were two
-                            contact details filed under the wrong noun.
+                          {/* ── right: the manuscript ── */}
+                          <div className="qc-pairms">
+                            <div className="qc-pairwho qc-pairwho--r">
+                              {onNavigate ? (
+                                <button type="button" className="qc-pairnm" onClick={() => onNavigate("manuscripts")} title="Open your manuscripts">{activeMs.title}</button>
+                              ) : <span className="qc-pairnm">{activeMs.title}</span>}
+                              {/* ⚠️ EACH HALF OMITS ITSELF. No genre must not print a stray
+                                  interpunct, and no word count must not print "0 words" — zero
+                                  words is a claim, absence is not. */}
+                              {(!!activeMs.genre || !!activeMs.wordCount) && (
+                                <div className="qc-pairsub">
+                                  {[activeMs.genre || null, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString()} words` : null].filter(Boolean).join(" · ")}
+                                </div>
+                              )}
+                              {/* ⚠️ NO "MATERIALS SENT" HEADING. The rows sit under the manuscript
+                                  they belong to, which is what the merge buys: the heading existed
+                                  to name a subject the card could not otherwise show. */}
+                              <div className="qc-pairmats">
+                                {matRow("ql", "Query letter", qlSent, () => toggleDocMaterial(activeQuery, activeAgent, "query"), qlSent ? "Un-mark the query letter as sent" : "Mark the query letter as sent")}
+                                {matRow("syn", "Synopsis", synSent, () => toggleDocMaterial(activeQuery, activeAgent, "synopsis"), synSent ? "Un-mark the synopsis as sent" : "Mark the synopsis as sent")}
+                                {/* ⚠️ THE SAMPLE ROW OPENS ITS EDITOR RATHER THAN TOGGLING, because
+                                    a sample is a quantity and a unit, not a yes. Its label carries
+                                    what was sent; Remove keeps its own control beneath, since a row
+                                    that both edits and clears on one click could not do either. */}
+                                {/* ⚠️ NO "— NOT INCLUDED" SUFFIX. The row's own mark already reads "Mark sent" when nothing
+                                    was, so the suffix restated the mark beside it and was the one label long
+                                    enough to need truncating. */}
+                                {matRow("smp", sampleItem ? sampleMaterialText(sampleItem) : "Sample materials", !!sampleItem, openSampleEditor, sampleItem ? "Change the sample you sent" : "Set the sample you sent")}
+                                {sampleItem && !sampleEditorOpen && (
+                                  <button type="button" className="qc-pairsub-act" onClick={() => removeSampleMaterial(activeQuery, activeAgent)} title="Clear the sample materials">Remove sample</button>
+                                )}
+                                {sampleEditorOpen && (
+                                  <div className="qc-paired">
+                                    <div role="group" aria-label="Sample unit" style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--bd)" }}>
+                                      {(["pages", "chapters", "words"] as const).map((u) => (
+                                        <button key={u} type="button" onClick={() => setSampleUnit(u)} aria-pressed={sampleUnit === u}
+                                          style={{ flex: 1, padding: "6px 0", fontFamily: "'Inter',sans-serif", fontSize: 12, textTransform: "capitalize" as const, cursor: "pointer", border: "none", background: "var(--panel, #fffdfb)", boxShadow: sampleUnit === u ? "inset 0 0 0 1.5px var(--ink, #1e1a16)" : "none", color: sampleUnit === u ? "var(--ink, #1e1a16)" : "#6b6257", fontWeight: sampleUnit === u ? 600 : 400 }}>{u}</button>
+                                      ))}
+                                    </div>
+                                    <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                                      <input type="text" inputMode="numeric" value={sampleQty} onChange={(e) => setSampleQty(e.target.value)} aria-label="Quantity"
+                                        style={{ flex: 1, minWidth: 0, padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 13, border: "1px solid var(--bd)", borderRadius: 8, background: "var(--panel, #fffdfb)", color: "var(--hub-item, #1a1512)" }} />
+                                      <button type="button" onClick={() => saveSampleMaterial(activeQuery, activeAgent)} disabled={!sampleQty.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: sampleQty.trim() ? "pointer" : "default", opacity: sampleQty.trim() ? 1 : 0.5 }}>Save</button>
+                                      <button type="button" onClick={() => setSampleEditorOpen(false)} style={{ padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "var(--qc-tx-quiet)", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              {/* ⚠️ THE PACKAGE ROW SURVIVES THE MERGE. §1's removals are named and
+                                  it is not among them; a Pro attachment is a fact about what was
+                                  sent, which is precisely this column's subject. */}
+                              {linkedPackage ? (
+                                <div className="qc-pairpkg">
+                                  <span className="qc-pairpkgn">{linkedPackage.packageName}</span>
+                                  {pkgComponents.length > 0 && <span className="qc-pairpkgc">{pkgComponents.join(" · ")}</span>}
+                                  <button type="button" className="qc-pairsub-act" onClick={openPackages}>Edit package</button>
+                                </div>
+                              ) : isPro ? (
+                                <button type="button" className="qc-pairsub-act" onClick={openPackages}>＋ Attach a submission package</button>
+                              ) : (
+                                <button type="button" className="qc-pairsub-act" onClick={() => onNavigate?.("plans")} style={{ color: "#6A89A7" }}>Upgrade to attach a package</button>
+                              )}
+                            </div>
+                            {/* ⚠️ A NEUTRAL RING, AND THE TONE IS THE POINT. Same 66px as the
+                                StatusDot opposite so the two share one axis; a burgundy or sage
+                                ring here would make the card appear to state two statuses. */}
+                            <span className="qc-pairmk" aria-hidden="true">
+                              <svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z" /><path d="M5 17.5h13.5" /><path d="M9 9h7M9 12.5h5" /></svg>
+                            </span>
+                          </div>
 
-                            ⚠️ AND THEY GREY RATHER THAN VANISH when the record holds no address or
-                            URL, for the same reason Nudge does: an absent pill states nothing, a
-                            grey one states that this agent has no email on file — which is a fact,
-                            and often the one worth acting on. */}
-                        <div className="qp-hlinks">
-                          <a
-                            className={`qp-lnk${activeAgent.email?.trim() ? "" : " qp-lnk-off"}`}
-                            href={activeAgent.email?.trim() ? `mailto:${activeAgent.email.trim()}` : undefined}
-                            title={activeAgent.email?.trim() || "No email address on this agent's record"}
-                            aria-disabled={activeAgent.email?.trim() ? undefined : true}
-                          >
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7" /></svg>
-                            Email
-                          </a>
-                          <a
-                            className={`qp-lnk${agentWebsiteHref(activeAgent.website) ? "" : " qp-lnk-off"}`}
-                            href={agentWebsiteHref(activeAgent.website) ?? undefined}
-                            target="_blank"
-                            rel="noreferrer noopener"
-                            title={agentWebsiteHref(activeAgent.website) ?? "No website on this agent's record"}
-                            aria-disabled={agentWebsiteHref(activeAgent.website) ? undefined : true}
-                          >
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></svg>
-                            Website
-                          </a>
                         </div>
                       </div>
-                      {/* ⚠️ THE STATE, PLAIN (§6) — Playfair word, dot OUTBOARD of it, and beneath
-                          the word only the date of the most recent development. The dot is the real
-                          `StatusDot`: burgundy outgoing, sage incoming, grey closed, from the locked
-                          component, never a recreation.
-
-                          ⚠️ AND THE DATE IS `lastStatusChange`, NOT `dateSent`. The send date is
-                          where the story starts and Tracking's first rung already carries it; what
-                          belongs beside a STATE is when the query last entered one. It falls back to
-                          the send date only when nothing has happened since — which is true rather
-                          than a substitution, because on a query with no developments the send IS
-                          the most recent one. Both go through `refDate`, which omits an unparseable
-                          value rather than printing "Invalid Date". */}
-                      {/* ⚠️ THE MARK LEADS THE LABEL NOW (§5), AND IT IS THE SAME COMPONENT AT A
-                          LARGER SIZE — `overrideSize`, never a recreation, so the ring/fill grammar
-                          and the per-status glyph are exactly the locked ones. At 44 it stops being
-                          a dot beside a word and becomes the plate's second subject, which is what
-                          doubling it is for; the label and its date stack to its right. */}
-                      <span className="f12-hs">
-                        <StatusDot status={activeQuery.status} overrideSize={44} />
-                        <span className="f12-hstx">
-                          <span className="f12-hsw">{statusDisplayLabel(activeQuery)}</span>
-                          {(() => {
-                            const moved = refDate((activeQuery as { lastStatusChange?: unknown }).lastStatusChange) || heroQueriedOn;
-                            return moved ? <div className="f12-hsd">{moved}</div> : null;
-                          })()}
-                        </span>
-                      </span>
-                      {/* ⚠️ THE PRIMARY AND THE KEBAB LEFT THIS BAND (§1). They act on the query, not
-                          on the identity card that names it, and they now sit in the pane's control
-                          cell above — on the same line as the list's count, which is what makes the
-                          two columns read as one interface rather than two panels with their own
-                          chrome. The band keeps IDENTITY: who, where, what state, when. */}
+                      <div className="qc-pairins" aria-hidden="true" />
                     </div>
                   );
                 })()}
@@ -4414,178 +4435,22 @@ export const Queries: React.FC<{
                     * columns, the second has to FILL its own column and share that height between
                     * its members, or the shorter card trails off into white above the taller one.
                     */}
-                  <div className={`qp-stack${notesOpen ? " qp-stack--open" : ""}`} ref={notesStackRef}>
+                  {/* ⚠️ NO `--open` MODIFIER AND NO MEASURED FLOOR (§1). Both existed to hide the
+                      first card in this stack and hold the column's height while it was hidden;
+                      with one card there is no sibling to hide and no height to preserve — it
+                      already fills the column. A toggle whose only effect was `display: none` on an
+                      element that is no longer here is a control that does nothing. */}
+                  <div className="qp-stack">
 
-                  {/* ── Sub-card 2: What you sent ── */}
-                  <PaneCard
-                    title="What you sent"
-                    /* ⚠️ COUNTED FROM THE LIST THE BODY RENDERS, never a second read of the query.
-                       `baseMaterialsFor` is what this card's own spec sheet walks, so the band's
-                       figure and the rows beneath it cannot come apart. */
-                    meta={(() => {
-                      const n = baseMaterialsFor(activeQuery, activeAgent).length;
-                      return n > 0 ? `${n} item${n === 1 ? "" : "s"}` : undefined;
-                    })()}
-                    glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>}
-                  >
-                      {/* spec sheet */}
-                      <PaneScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "16px 16px 18px" }}>
-                        {(() => {
-                          // Phase 6 — the query's own materialsWanted is the record of what was sent; when
-                          // empty we display the agent's expected set (the first edit promotes it onto the
-                          // query). Each material is Query letter / Synopsis / a Sample item (type+quantity).
-                          const base = baseMaterialsFor(activeQuery, activeAgent);
-                          const qlSent = base.some(isQueryLetterMat);
-                          const synSent = base.some(isSynopsisMat);
-                          const sampleItem = base.find(isSampleMat) ?? null;
-                          const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
-                          const pkgComponents = linkedPackage
-                            ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
-                            : [];
-                          const isPro = currentUser?.plan === UserPlan.PRO;
-                          const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
-                          const method = sentViaLabel(activeQuery.sendMethod || activeAgent.submissionMethod);
-                          // dateSent is optional (undated imports) — render the date only when present, never invent one.
-                          const sentDate = activeQuery.dateSent ? new Date(activeQuery.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "";
+                  {/* ⚠️ "WHAT YOU SENT" IS GONE FROM HERE, MERGED INTO THE PAIRING CARD (§1) —
+                      manuscript, materials and package all moved up whole. Nothing was dropped in
+                      the move except the card's own sage header and its "Materials sent" eyebrow,
+                      both of which existed to name a subject the card could not otherwise show and
+                      which the pairing card names in Playfair at the top of the same column.
 
-                          const proChip = (auto?: boolean) => (<span style={{ ...(auto ? { marginLeft: "auto" } : { marginLeft: 6 }), fontFamily: FONT_MONO, fontSize: 7.5, letterSpacing: ".1em", textTransform: "uppercase" as const, color: "#fff", background: "#6A89A7", borderRadius: 6, padding: "3px 7px", whiteSpace: "nowrap" as const }}>PRO</span>);
-                          const addlinkStyle: React.CSSProperties = { display: "inline-flex", alignItems: "center", gap: 7, fontFamily: "'Inter',sans-serif", fontSize: 12, color: "var(--qc-tx-quiet)", marginTop: 14, cursor: "pointer" };
-                          const eyebrow: React.CSSProperties = { fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".12em", textTransform: "uppercase" as const, color: "var(--qc-tx-quiet)", margin: "18px 0 2px" };
-
-                          // A material a query either did or didn't send — the whole row toggles it (writes
-                          // materialsWanted). Un-marking is a CORRECTION to a factual record: a plain field
-                          // patch, never a timeline-log entry (consistent with the corrections model).
-                          const sentPip = (sent: boolean) => (
-                            <span style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: sent ? "#4a5d45" : burgundy }}>
-                              {sent ? "Sent" : "Mark sent"}
-                              <span style={{ width: 16, height: 16, borderRadius: "50%", display: "grid", placeItems: "center", fontSize: 9, flexShrink: 0, ...(sent ? { background: "var(--qc-acc-sage-tick)", color: "var(--qc-acc-sage-tick-i)" } : { border: "1.5px dashed #cfc3b1", color: "transparent" }) }}>✓</span>
-                            </span>
-                          );
-                          const docRow = (kind: "query" | "synopsis", label: string, sent: boolean, gtype: ComponentType) => (
-                            <button type="button" onClick={() => toggleDocMaterial(activeQuery, activeAgent, kind)} title={sent ? `Un-mark ${label.toLowerCase()} as sent` : `Mark ${label.toLowerCase()} as sent`}
-                              style={{ display: "flex", alignItems: "center", gap: 11, width: "100%", textAlign: "left", padding: "11px 0", background: "none", border: "none", borderBottom: "1px solid var(--bd)", cursor: "pointer", fontFamily: "'Inter',sans-serif", fontSize: 13.5, color: sent ? "var(--hub-item, #1a1512)" : "#8f877b" }}>
-                              <TypeGlyph type={gtype} size={16} style={{ flexShrink: 0, color: sent ? "#6f4e37" : "#b3a596" }} />
-                              <span style={{ flex: 1, minWidth: 0 }}>{label}</span>
-                              {sentPip(sent)}
-                            </button>
-                          );
-
-                          const openSampleEditor = () => {
-                            if (sampleItem && typeof sampleItem !== "string" && sampleItem.type && sampleItem.type !== "other") { setSampleUnit(sampleItem.type); setSampleQty(sampleItem.quantity != null ? String(sampleItem.quantity) : ""); }
-                            else { setSampleUnit("pages"); setSampleQty(""); }
-                            setSampleEditorOpen(true);
-                          };
-                          const sampleRow = (
-                            <div style={{ padding: "11px 0", borderBottom: "1px solid var(--bd)", fontFamily: "'Inter',sans-serif", fontSize: 13.5 }}>
-                              <div style={{ display: "flex", alignItems: "center", gap: 11, color: sampleItem ? "var(--hub-item, #1a1512)" : "#8f877b" }}>
-                                <TypeGlyph type={ComponentType.SAMPLE_PAGES} size={16} style={{ flexShrink: 0, color: sampleItem ? "#6f4e37" : "#b3a596" }} />
-                                <span style={{ flex: 1, minWidth: 0 }}>Sample materials<span style={{ color: "var(--qc-tx-quiet)" }}> — {sampleItem ? sampleMaterialText(sampleItem) : "Not included"}</span></span>
-                                {sampleItem ? (
-                                  <span style={{ display: "inline-flex", gap: 13 }}>
-                                    <button type="button" onClick={openSampleEditor} title="Change the sample you sent" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: burgundy, background: "none", border: "none", cursor: "pointer", padding: 0 }}>Change</button>
-                                    <button type="button" onClick={() => removeSampleMaterial(activeQuery, activeAgent)} title="Clear the sample materials" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: "var(--qc-tx-quiet)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>Remove</button>
-                                  </span>
-                                ) : (
-                                  <button type="button" onClick={openSampleEditor} title="Set the sample you sent" style={{ fontFamily: FONT_MONO, fontSize: 8.5, letterSpacing: ".06em", textTransform: "uppercase" as const, color: burgundy, background: "none", border: "none", cursor: "pointer", padding: 0 }}>＋ Add</button>
-                                )}
-                              </div>
-                              {sampleEditorOpen && (
-                                <div style={{ marginTop: 11 }}>
-                                  {/* unit toggle — Pages / Chapters / Words (→ QueryMaterial.type). Selected =
-                                      inset ink ring, no fill; unselected stay plain/muted. */}
-                                  <div role="group" aria-label="Sample unit" style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid var(--bd)" }}>
-                                    {(["pages", "chapters", "words"] as const).map((u) => (
-                                      <button key={u} type="button" onClick={() => setSampleUnit(u)} aria-pressed={sampleUnit === u}
-                                        style={{ flex: 1, padding: "6px 0", fontFamily: "'Inter',sans-serif", fontSize: 12, textTransform: "capitalize" as const, cursor: "pointer", border: "none", background: "var(--panel, #fffdfb)", boxShadow: sampleUnit === u ? "inset 0 0 0 1.5px var(--ink, #1e1a16)" : "none", color: sampleUnit === u ? "var(--ink, #1e1a16)" : "#6b6257", fontWeight: sampleUnit === u ? 600 : 400 }}>{u}</button>
-                                    ))}
-                                  </div>
-                                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                                    <input type="text" inputMode="numeric" value={sampleQty} onChange={(e) => setSampleQty(e.target.value)} aria-label="Quantity"
-                                      style={{ flex: 1, minWidth: 0, padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 13, border: "1px solid var(--bd)", borderRadius: 8, background: "var(--panel, #fffdfb)", color: "var(--hub-item, #1a1512)" }} />
-                                    <button type="button" onClick={() => saveSampleMaterial(activeQuery, activeAgent)} disabled={!sampleQty.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: sampleQty.trim() ? "pointer" : "default", opacity: sampleQty.trim() ? 1 : 0.5 }}>Save</button>
-                                    <button type="button" onClick={() => setSampleEditorOpen(false)} style={{ padding: "7px 10px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, color: "var(--qc-tx-quiet)", background: "none", border: "none", cursor: "pointer" }}>Cancel</button>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-
-                          return (
-                            <>
-                              {/* ⚠️ THE MANUSCRIPT'S NAME IS BACK, AND IT IS BACK AS THE HEADING (§2) — this
-                                  REVERSES fix pack 4 §5, which deleted the block, and it reverses it on the
-                                  pack's own terms rather than by preference.
-
-                                  What that pack argued was that title, genre and word count are facts about
-                                  the BOOK, not about this send — true, and still true. What has changed is
-                                  that the ⋯ carried a permanently-disabled `Manuscript` verb, and §2's rule
-                                  for it is "moves to where its subject is named". The subject was named
-                                  nowhere on this pane, so there was nowhere for it to move TO. Naming it
-                                  here gives the verb its home and the card its subject in one row: what you
-                                  sent, of what.
-
-                                  ⚠️ ONE ROW, NOT THE OLD BLOCK. Title as a link, then genre and word count
-                                  as a single mono line — the ref's shape. The three-line block fix pack 4
-                                  removed does not come back with it.
-
-                                  ⚠️ AND IT RESTORES THE REASSIGN SHORTCUT THAT PACK FLAGGED AS A REAL LOSS:
-                                  the name goes to the manuscript, where the record is. */}
-                              <div className="qp-msrow">
-                                {onNavigate ? (
-                                  <button type="button" className="qp-msname" onClick={() => onNavigate("manuscripts")} title="Open your manuscripts">{activeMs.title}</button>
-                                ) : (
-                                  <span className="qp-msname">{activeMs.title}</span>
-                                )}
-                                {/* ⚠️ EACH HALF OMITS ITSELF. A manuscript with no genre recorded must not
-                                    print an interpunct with nothing on one side of it, and one with no word
-                                    count must not print "0 WORDS" — zero words is a claim, absence is not. */}
-                                {(!!activeMs.genre || !!activeMs.wordCount) && (
-                                  <div className="qp-msmeta">
-                                    {[activeMs.genre || null, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString()} words` : null]
-                                      .filter(Boolean).join(" · ")}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* ⚠️ THE "SENT BY … · 13 AUG" LINE STAYS GONE (fix pack 6 §4) — both facts are
-                                  stated by Tracking's `Query sent` event, and a card that opens by repeating
-                                  the event beside it delays the thing it exists to show. §2 moves the PICKER
-                                  onto that event instead: `Query sent · via email`, editable in place. */}
-
-                              {/* Materials sent — the document rows (Query letter / Synopsis / Sample materials) */}
-                              <div style={eyebrow}>Materials sent</div>
-                              <div>
-                                {docRow("query", "Query letter", qlSent, ComponentType.QUERY_LETTER)}
-                                {docRow("synopsis", "Synopsis", synSent, ComponentType.SYNOPSIS)}
-                                {sampleRow}
-                              </div>
-
-                              {/* Submission package (PRO) — the foot row */}
-                              {linkedPackage ? (
-                                <div style={{ marginTop: 14 }}>
-                                  <div style={{ border: "1px solid #cfd9e2", background: "#f4f7fa", borderRadius: 11, padding: "12px 14px" }}>
-                                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontFamily: "'Inter',sans-serif", fontWeight: 600, fontSize: 13.5, color: "#2e4257" }}>
-                                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2e4257" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>
-                                      <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{linkedPackage.packageName}</span>
-                                      {proChip(true)}
-                                    </div>
-                                    {pkgComponents.length > 0 && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 11.5, color: "#5a6e80", marginTop: 5 }}>{pkgComponents.join(" · ")}</div>}
-                                  </div>
-                                  <div role="button" tabIndex={0} onClick={openPackages} style={addlinkStyle}>✎ Edit package</div>
-                                </div>
-                              ) : isPro ? (
-                                <div role="button" tabIndex={0} onClick={openPackages} style={addlinkStyle}>＋ Attach a submission package</div>
-                              ) : (
-                                /* Free — attaching stays Pro-gated; the action reads Upgrade (slate) and routes
-                                   to the plans/upgrade flow, the same plan check the rest of the app uses. */
-                                <div role="button" tabIndex={0} onClick={() => onNavigate?.("plans")} style={{ ...addlinkStyle, color: "#6A89A7" }}>Upgrade to attach a submission package{proChip()}</div>
-                              )}
-                            </>
-                          );
-                        })()}
-                      </PaneScroll>
-                  </PaneCard>
-
+                      ⚠️ SO THIS STACK HOLDS ONE CARD, and that is the merge's purpose rather than a
+                      leftover: Notes takes the whole right column and its list can show more than
+                      one entry. */}
                   {/* ── Sub-card 3: Notes — journal pins to bottom via flex-1 on messages area ── */}
                   <PaneCard
                     title="Notes"
@@ -4610,31 +4475,6 @@ export const Queries: React.FC<{
                        ⚠️ AND THE MEASUREMENT HAPPENS ON THE WAY IN, FROM THE STACK. Once the first
                        card is hidden the stack no longer has the height being asked for, so reading
                        it afterwards measures the outcome instead of the intent. */
-                    action={(
-                      <button
-                        type="button"
-                        className="qp-cardact qp-cardexp"
-                        aria-expanded={notesOpen}
-                        title={notesOpen ? "Collapse notes" : "Expand notes"}
-                        aria-label={notesOpen ? "Collapse notes" : "Expand notes"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (notesOpen) { setNotesOpen(false); setNotesFloor(null); return; }
-                          const h = notesStackRef.current?.getBoundingClientRect().height ?? null;
-                          setNotesFloor(h && h > 0 ? h : null);
-                          setNotesOpen(true);
-                        }}
-                      >
-                        {notesOpen ? (
-                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7" /></svg>
-                        ) : (
-                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" /></svg>
-                        )}
-                      </button>
-                    )}
-                    cardRef={notesCardRef as unknown as React.Ref<HTMLElement>}
-                    className={notesOpen ? "qp-notes-open" : undefined}
-                    style={notesOpen && notesFloor ? { minHeight: notesFloor } : undefined}
                   >
                       {/* notes body — list (scrolls) + bottom-pinned composer */}
                       <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>

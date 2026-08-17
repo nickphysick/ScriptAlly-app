@@ -41,10 +41,16 @@ describe("the cards still read as raised against the lighter ground", () => {
        subject, and asserting the property would have failed on a card that still has its edge. */
     const ring = css.slice(css.indexOf("\n.f12-card::after {"), css.indexOf("}", css.indexOf("\n.f12-card::after {")));
     expect(ring, ".f12-card lost its hairline").toContain("inset 0 0 0 1px var(--line)");
-    for (const sel of ["\n.f12-pane {", "\n.f12-hero {"]) {
-      const rule = css.slice(css.indexOf(sel), css.indexOf("}", css.indexOf(sel)));
-      expect(rule, `${sel.trim()} lost its border`).toContain("border: 1px solid var(--line)");
-    }
+    /* ⚠️ `.f12-hero` IS GONE (pairing pack §1) — traced to a rendered root in both directions and
+       deleted, so the pairing card takes its place in this sweep. The clause is unchanged: every
+       card-like surface keeps a hairline against the lighter ground. */
+    const pane = css.slice(css.indexOf("\n.f12-pane {"), css.indexOf("}", css.indexOf("\n.f12-pane {")));
+    expect(pane, ".f12-pane lost its border").toContain("border: 1px solid var(--line)");
+    /* ⚠️ THE PAIRING CARD DRAWS ITS EDGE AS A RING TOO, and at 2px in its own sage — so the clause
+       is "it has an edge", not "it has that border". Asserting the property here would have failed
+       on a surface whose edge is more emphatic than the one being asked for. */
+    const pring = css.slice(css.indexOf("\n.qc-pair::after {"), css.indexOf("}", css.indexOf("\n.qc-pair::after {")));
+    expect(pring, ".qc-pair lost its edge").toContain("inset 0 0 0 2px var(--qc-card-border)");
   });
 
   it("and the panes keep their shadow", () => {

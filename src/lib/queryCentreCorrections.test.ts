@@ -133,45 +133,35 @@ describe("§2 · rows on one grid", () => {
   });
 });
 
-describe("§3 · the hero keeps its initials", () => {
-  /**
-   * ⚠️ A REGRESSION FROM PACK B §1h, AND ITS SHAPE IS THE LESSON. The avatar's whole skin — radius,
-   * fill, ink, centring, serif — was scoped to `.f12-hero`; renaming the container to
-   * `.f12-heroband` brought across only width, height and font-size, so the disc degraded to two
-   * bare letters. Nothing errored: the element rendered, its text was right, and only the treatment
-   * that tied it to the clicked row was gone.
-   *
-   * ⚠️ ONE DECLARATION LIST FOR BOTH SCALES is the fix, not a copy. A second treatment beside the
-   * first is how the two drift apart the next time the disc is edited — which is exactly how this
-   * happened.
-   */
-  it("the disc is declared once, for both containers", () => {
-    const all = rules(".f12-heroband .f12-bigav");
-    expect(all, "the band's avatar has no rule at all — it would render bare text").not.toBe("");
-    /* the disc reaches the band through a selector list that also names the card */
-    expect(all, "the band no longer shares the card's disc").toContain(".f12-hero .f12-bigav");
-    expect(all).toContain("border-radius: 50%");
-    expect(all).toContain("background: var(--pink-av)");
-    expect(all, "the monogram lost its serif").toContain("font-family: var(--f12-serif)");
+/**
+ * ⚠️ §3 IS INVERTED BY THE PAIRING PACK'S §1 — THE DISC IS GONE, AND THIS SECTION IS THE REASON IT
+ * must be asserted gone. §3 existed because a rename had silently degraded the monogram to two bare
+ * letters: nothing errored, the element rendered, only the treatment tying it to the clicked row
+ * disappeared. That is precisely the failure mode a removal invites in reverse — someone reading
+ * "the hero keeps its initials" and restoring a disc the card no longer has a position for.
+ *
+ * ⚠️ AND THE REMOVAL IS NOT A TIDY-UP. The card's left position now holds the query's real
+ * StatusDot at 66px. A monogram there would be decoration in the one spot on the page where a mark
+ * carries the query's state.
+ */
+describe("§3 · the hero's initials — REMOVED with the plate", () => {
+  it("the disc has no rule, no token and no renderer", () => {
+    expect(rules(".f12-bigav"), "the monogram's rules came back").toBe("");
+    /* ⚠️ SCOPED TO THE CARD, NOT THE FILE. `agentInitials` is the LIST rows' helper and always was
+       — forbidding it outright would have failed on `.f12-av`, which is a different disc doing a
+       different job and is not what §1 removed. */
+    const card = code.slice(code.indexOf('<div className="qc-pair">'), code.indexOf('<div className="qp-cols"'));
+    expect(card, "the initials are still computed for the card").not.toContain("agentInitials(");
+    expect(code, "something still renders the big disc").not.toContain('className="f12-bigav"');
+    /* ⚠️ AND ITS PINK SURVIVES ONLY WHERE IT ALWAYS BELONGED — the list's discs read `--pink-av`;
+       the plate's own `--qc-plate-av` had exactly one reader and went with it. */
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, ""), "the plate's private pink survives with nothing reading it").not.toContain("--qc-plate-av");
   });
 
-  /* Only the SIZE is per-container. ⚠️ THE BAND'S IS 58 SINCE §6: the old note said "a band's height
-     is its row, not its portrait", which was true while the band held a 32px primary and a kebab —
-     the row's height came from a control, so a larger portrait would have set it instead. §1 took
-     the controls out; the band is identity alone now, and the portrait may set the height of a row
-     it is the subject of. */
-  it("the two differ by scale and nothing else", () => {
-    expect(rules(".f12-hero .f12-bigav"), "the card's scale went").toContain("width: 76px");
-    expect(rules(".f12-heroband .f12-bigav"), "the band's scale went").toContain("width: 58px");
-    /* exactly one radius declaration across everything that dresses either avatar */
-    const discs = (rules(".f12-bigav").match(/border-radius/g) ?? []).length;
-    expect(discs, "the disc is declared more than once — the two can drift apart again").toBe(1);
-  });
-
-  /* the initials come from the shared helper the row uses, so the two cannot disagree */
-  it("the hero and the row read the same initials", () => {
-    expect(code, "the hero stopped using the shared display helper").toContain("agentInitials(");
-    expect(code).toContain('className="f12-bigav"');
+  /* ⚠️ THE POSITION IS NOT EMPTY — it holds the locked component, which is what earned the removal */
+  it("the position holds the query's real mark instead", () => {
+    expect(code, "the mark is not the locked component at the shared size")
+      .toContain("<StatusDot status={activeQuery.status} overrideSize={66} />");
   });
 });
 
@@ -241,8 +231,21 @@ describe("§5 · tighten, never scroll", () => {
       .toContain("--wsh-title-size: 38px");
   });
 
-  it("the hero gives up scale first, and the stats keep their figures", () => {
-    expect(css).toContain(".f12-heroband .f12-bigav { width: 40px");
+  /**
+   * ⚠️ INVERTED BY §1 — THE CARD GIVES UP AIR AND TYPE, AND KEEPS ITS MARKS. The old clause was
+   * "the hero gives up scale first: it is the least information per pixel here", and it was true of
+   * a 58px monogram carrying two letters. The two 66px marks are not that: one is the query's
+   * state and the other says which object the right-hand column is about, so shrinking either
+   * changes what the card SAYS rather than how much room it takes. The reclaim comes from the
+   * padding and the type instead — which is the same principle applied to a different element.
+   */
+  it("the card gives up air and type first, and keeps both marks at full size", () => {
+    const short = /@media \(max-height: 768px\)[\s\S]*?\n\}/.exec(css)?.[0] ?? "";
+    expect(short, "the short-viewport block is missing").not.toBe("");
+    expect(short, "the card stopped reclaiming from its padding").toContain(".qc-pairgrid { padding:");
+    expect(short, "the names stopped stepping down with it").toContain(".qc-pairnm { font-size:");
+    expect(short, "a mark was shrunk — that changes what the card says, not its size")
+      .not.toContain(".qc-pairmk");
     expect(css, "the stats lost a figure rather than their air").toContain(".qp-statn { font-size: 20px; }");
   });
 
@@ -448,41 +451,49 @@ describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
  * child still cannot pull the height down with it. A padding change is uniform by construction,
  * which is exactly why it is the safe lever.
  */
-describe("fix pack 6 §3 · the plate is taller, through padding alone", () => {
+/**
+ * ⚠️ REPOINTED ONTO THE PAIRING CARD (§1). Fix pack 6 §3's subject was "the plate is short for what
+ * it holds", and its three clauses were about HOW the height is bought: from the padding, uniformly,
+ * with a short-viewport step that keeps its proportion. The card holds twice as much now and every
+ * clause still applies — what changed is that the padding also has to clear an inset frame, which
+ * gives the vertical figure a floor it did not have before.
+ */
+describe("fix pack 6 §3 · the pairing card's height comes from its padding", () => {
   const padOf = (r: string) => (/padding:\s*([^;]+);/.exec(r.replace(/\/\*[\s\S]*?\*\//g, ""))?.[1] ?? "").trim().split(/\s+/);
 
-  it("⚠️ THE VERTICAL PADDING GREW — and the horizontal did not", () => {
-    const plate = rule(".f12-heroband");
-    expect(plate, "the plate rule is missing").not.toBe("");
-    const [block, inline] = padOf(plate);
-    /* extracted and compared, never a `(?!14px)` lookahead — the backtracking trap this repo bans */
-    expect(parseFloat(block), `the plate's vertical padding went back down: ${block}`).toBeGreaterThan(14);
-    expect(inline, "the plate's horizontal inset moved — §3 is a height change, and widening it would pull the identity off the edge the pane aligns to").toBe("17px");
+  it("⚠️ THE PADDING CLEARS THE INSET FRAME — on both axes", () => {
+    const grid = rule(".qc-pairgrid");
+    expect(grid, "the pairing grid is missing").not.toBe("");
+    const [block, inline] = padOf(grid);
+    /* extracted and compared, never a `(?!7px)` lookahead — the backtracking trap this repo bans */
+    const inset = parseFloat((/\.qc-pairins[\s\S]*?inset:\s*([\d.]+)px/.exec(css) ?? [])[1] ?? "NaN");
+    expect(inset, "the inset frame's offset is not readable").toBeGreaterThan(0);
+    expect(parseFloat(block), `the card's vertical padding no longer clears the frame: ${block} vs ${inset}px`).toBeGreaterThan(inset * 2);
+    expect(parseFloat(inline), `the card's horizontal padding no longer clears the frame: ${inline} vs ${inset}px`).toBeGreaterThan(inset * 2);
   });
 
-  it("⚠️ THE PILL-INDEPENDENCE CAUSE IS INTACT — a centred row, uniform padding", () => {
-    const plate = rule(".f12-heroband");
-    expect(plate, "the plate stopped centring its children — a shorter child could pull the height down").toContain("align-items: center");
-    expect(plate, "the plate stopped being a flex row").toContain("display: flex");
-    /* one value for both vertical sides: an asymmetric pair would make the row's centre and the
-       plate's centre two different lines, and the avatar would stop setting the height cleanly */
-    expect(padOf(plate).length, "the plate's padding is no longer the two-value form — top and bottom could differ").toBe(2);
+  it("⚠️ THE UNIFORMITY CLAUSE IS INTACT — a centred row, two-value padding", () => {
+    const grid = rule(".qc-pairgrid");
+    expect(grid, "the halves stopped being centred — the shorter one could pull the taller down").toContain("align-items: center");
+    /* one value for both vertical sides: an asymmetric pair would put the row's centre and the
+       card's centre on two different lines, and the two marks would stop sharing an axis cleanly */
+    expect(padOf(grid).length, "the padding is no longer the two-value form — top and bottom could differ").toBe(2);
   });
 
   it("⚠️ THE SHORT-VIEWPORT STEP TRACKS THE BASE, or it reclaims more than it used to", () => {
     /* ⚠️ READ FROM THE RAW SHEET, ANCHORED ON THE MEDIA QUERY. `rules()` rebuilds each block from a
-       split on `}`, which does not survive being nested inside an `@media` — the helper returned the
-       block and the padding was not in it, so the case failed while the rule was plainly correct. */
-    const short = /@media \(max-height: 768px\)[\s\S]*?\.f12-heroband \{[^}]*\}/.exec(css)?.[0] ?? "";
-    expect(short, "the short-viewport plate step is missing").not.toBe("");
+       split on `}`, which does not survive being nested inside an `@media`. */
+    const short = /@media \(max-height: 768px\)[\s\S]*?\.qc-pairgrid \{[^}]*\}/.exec(css)?.[0] ?? "";
+    expect(short, "the short-viewport step is missing").not.toBe("");
     const m = /padding:\s*([^;]+);/.exec(short);
-    expect(m, "the short-viewport plate step is gone").toBeTruthy();
+    expect(m, "the short-viewport step lost its padding").toBeTruthy();
     const stepBlock = parseFloat(m![1].trim().split(/\s+/)[0]);
-    const restBlock = parseFloat(padOf(rule(".f12-heroband"))[0]);
+    const restBlock = parseFloat(padOf(rule(".qc-pairgrid"))[0]);
     expect(stepBlock, "the step stopped reclaiming anything").toBeLessThan(restBlock);
-    /* it kept its proportion rather than its absolute: left at the old 10px against a taller base it
-       would take 12px off a plate that had just gained 8, on the viewport with least room to spare */
     expect(stepBlock / restBlock, `the short-viewport step drifted from its proportion: ${stepBlock}/${restBlock}`)
       .toBeGreaterThan(0.6);
+    /* ⚠️ AND IT STILL CLEARS THE FRAME, which the resting value's floor does not guarantee for it */
+    const inset = parseFloat((/\.qc-pairins[\s\S]*?inset:\s*([\d.]+)px/.exec(css) ?? [])[1] ?? "NaN");
+    expect(stepBlock, "the short-viewport padding cuts into the inset frame").toBeGreaterThan(inset * 2);
   });
 });
