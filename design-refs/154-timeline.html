@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — busy timeline, four treatments</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--rad:12px;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+em,.meta,.et time,.barf,.dcol{font-variant-numeric:tabular-nums;}
+.ctl{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--oat);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:0;background:transparent;color:var(--ink2);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--ink);color:#fff;}
+.wrap{max-width:820px;background:var(--ground);border-radius:var(--rad);padding:20px;box-shadow:0 10px 26px rgba(40,35,30,.13);}
+.card{position:relative;background:#fff;border-radius:var(--rad);}
+.card::after{content:'';position:absolute;inset:0;border-radius:var(--rad);pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);}
+.clip{border-radius:var(--rad);overflow:hidden;}
+.ch{display:flex;align-items:center;gap:10px;padding:13px 17px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.ch .m2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);font-weight:400;}
+.cb{padding:16px 18px;}
+
+/* ---------- shared atoms ---------- */
+.m{width:27px;height:27px;flex:none;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--burg);
+  color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.m.in{box-shadow:inset 0 0 0 1.5px #9db09b;color:var(--sage-tx);}
+.m.q{box-shadow:inset 0 0 0 1.5px var(--oat);color:#bdb8b0;}
+.m.sm{width:9px;height:9px;box-shadow:inset 0 0 0 1.5px var(--oat);background:var(--n1);}
+.ttl{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;line-height:1.3;}
+.dt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);white-space:nowrap;}
+.body{font-size:12.5px;color:var(--ink2);line-height:1.55;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.att{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);background:var(--n1);
+  box-shadow:inset 0 0 0 1px var(--line);border-radius:7px;padding:5px 10px;}
+.addb{display:inline-flex;font-size:11.5px;color:var(--burg);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:7px;padding:5px 11px;}
+.mslink{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;line-height:1.35;padding-bottom:1px;}
+.msmeta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+.minor{font-size:12px;color:var(--faint);}
+.bar2{position:relative;height:5px;border-radius:3px;background:var(--n2);margin:11px 0 6px;overflow:hidden;}
+.bar2 i{display:block;height:100%;width:100%;background:var(--oat);}
+.bar2::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(124,58,42,.15) 5px 10px);}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.offer{margin-top:10px;background:var(--n1);border-radius:9px;box-shadow:inset 0 0 0 1px var(--line);padding:10px 12px;font-size:12px;color:var(--ink2);}
+.ilink{color:var(--burg);text-decoration:underline;text-underline-offset:3px;}
+
+/* ---------- A · rail (one rhythm) ---------- */
+.ev{position:relative;padding-left:40px;padding-bottom:20px;}
+.ev::before{content:'';position:absolute;left:13px;top:31px;bottom:0;width:1px;background:var(--line);}
+.ev:last-child{padding-bottom:0;} .ev:last-child::before{display:none;}
+.ev>.m{position:absolute;left:0;top:0;}
+.ev>.m.sm{left:9px;top:5px;}
+.head{display:flex;align-items:baseline;gap:10px;min-height:27px;}
+.head .dt{margin-left:auto;}
+.sub{margin-top:5px;}
+.sub>*+*{margin-top:8px;}
+body[data-v="rail"] .ev.minor-ev{padding-bottom:14px;}
+
+/* ---------- B · chaptered (grouped by exchange) ---------- */
+body[data-v="chap"] .ev{padding-bottom:16px;}
+body[data-v="chap"] .chap{position:relative;margin-bottom:18px;}
+body[data-v="chap"] .chap+.chap{padding-top:18px;box-shadow:inset 0 1px 0 var(--line);}
+body[data-v="chap"] .chaplab{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:7.5px;
+  letter-spacing:.15em;text-transform:uppercase;color:#b0aba3;margin-bottom:12px;}
+body[data-v="chap"] .chaplab:after{content:'';flex:1;height:1px;background:var(--line);}
+body[data-v="rail"] .chaplab,body[data-v="dcol"] .chaplab,body[data-v="cards"] .chaplab{display:none;}
+body[data-v="rail"] .chap+.chap,body[data-v="dcol"] .chap+.chap,body[data-v="cards"] .chap+.chap{box-shadow:none;padding-top:0;}
+
+/* ---------- C · date column ---------- */
+body[data-v="dcol"] .ev{display:grid;grid-template-columns:74px 27px minmax(0,1fr);gap:12px;padding-left:0;padding-bottom:18px;align-items:start;}
+body[data-v="dcol"] .ev::before{left:97px;}
+body[data-v="dcol"] .ev>.m{position:static;grid-column:2;}
+body[data-v="dcol"] .ev>.m.sm{margin:9px 0 0 9px;}
+body[data-v="dcol"] .head .dt{display:none;}
+body[data-v="dcol"] .dcol{display:block;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.06em;
+  color:var(--ink2);text-align:right;padding-top:6px;line-height:1.4;}
+body[data-v="dcol"] .dcol s{text-decoration:none;display:block;font-size:7px;color:#b8b3ab;letter-spacing:.11em;text-transform:uppercase;}
+.dcol{display:none;}
+
+/* ---------- D · cards ---------- */
+body[data-v="cards"] .ev{padding-left:40px;padding-bottom:10px;}
+body[data-v="cards"] .ev::before{top:34px;}
+body[data-v="cards"] .inner{background:var(--n1);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);padding:12px 14px;}
+body[data-v="cards"] .ev>.m{top:3px;}
+body[data-v="cards"] .ev.minor-ev .inner{background:transparent;box-shadow:none;padding:4px 0 4px 2px;}
+body[data-v="cards"] .att{background:#fff;}
+
+.legend{max-width:820px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body data-v="rail">
+
+<div class="ctl">
+  <b>Treatment</b>
+  <div class="seg" id="V">
+    <button data-v="rail" class="on">A · One rhythm</button>
+    <button data-v="chap">B · Chaptered</button>
+    <button data-v="dcol">C · Date column</button>
+    <button data-v="cards">D · Event cards</button>
+  </div>
+</div>
+
+<div class="wrap"><div class="card"><div class="clip">
+  <div class="ch">Tracking<span class="m2">Full sent · 1 task</span></div>
+  <div class="cb">
+
+    <div class="chap">
+      <div class="chaplab">The query</div>
+
+      <div class="ev">
+        <span class="m">✈</span>
+        <span class="dcol">9 Apr 24<s>Tue</s></span>
+        <div class="inner"><div class="head"><span class="ttl">Query sent</span><span class="minor">· via Email</span><span class="dt">9 APR 2024</span></div>
+        <div class="sub">
+          <div><a class="mslink">Murphy&rsquo;s Day Out</a> <span class="msmeta">Thriller · 50,000 words</span></div>
+          <div class="chips"><span class="att">📎 Query letter</span><span class="att">📎 Synopsis</span><span class="att">📎 First 3 chapters</span><span class="addb">+ Attach</span></div>
+        </div>
+        </div>
+      </div>
+
+      <div class="ev minor-ev">
+        <span class="m sm"></span>
+        <span class="dcol">7 Jun 24<s>Fri</s></span>
+        <div class="inner"><div class="head"><span class="body">Nudged &mdash; no reply</span><span class="dt">7 JUN 2024</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chap">
+      <div class="chaplab">The partial</div>
+
+      <div class="ev">
+        <span class="m in">«</span>
+        <span class="dcol">18 Jun 24<s>Tue</s></span>
+        <div class="inner"><div class="head"><span class="ttl">Partial requested</span><span class="dt">18 JUN 2024</span></div>
+        <div class="sub"><div class="body">Jonathan asked for the first fifty pages</div></div>
+        </div>
+      </div>
+
+      <div class="ev">
+        <span class="m">»</span>
+        <span class="dcol">20 Jun 24<s>Thu</s></span>
+        <div class="inner"><div class="head"><span class="ttl">Partial sent</span><span class="dt">20 JUN 2024</span></div>
+        <div class="sub"><div class="chips"><span class="att">📎 First 50 pages</span><span class="att">📎 Revised synopsis</span><span class="addb">+ Attach</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chap">
+      <div class="chaplab">Revise and resubmit</div>
+
+      <div class="ev">
+        <span class="m in">✎</span>
+        <span class="dcol">3 Sep 24<s>Tue</s></span>
+        <div class="inner"><div class="head"><span class="ttl">Revise &amp; resubmit</span><span class="dt">3 SEP 2024</span></div>
+        <div class="sub"><div class="body">Wants the opening restructured and Aunt Vi&rsquo;s subplot cut. Six months to resubmit.</div></div>
+        </div>
+      </div>
+
+      <div class="ev minor-ev">
+        <span class="m sm"></span>
+        <span class="dcol">14 Nov 24<s>Thu</s></span>
+        <div class="inner"><div class="head"><span class="body">Note added &mdash; <i>restructure done, sending Friday</i></span><span class="dt">14 NOV 2024</span></div>
+        </div>
+      </div>
+
+      <div class="ev">
+        <span class="m">»</span>
+        <span class="dcol">22 Nov 24<s>Fri</s></span>
+        <div class="inner"><div class="head"><span class="ttl">Resubmitted</span><span class="dt">22 NOV 2024</span></div>
+        <div class="sub"><div class="chips"><span class="att">📎 Full manuscript</span><span class="att">📎 Revision letter</span><span class="addb">+ Attach</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chap">
+      <div class="chaplab">The full</div>
+
+      <div class="ev">
+        <span class="m in">«</span>
+        <span class="dcol">6 Jan 25<s>Mon</s></span>
+        <div class="inner"><div class="head"><span class="ttl">Full requested</span><span class="dt">6 JAN 2025</span></div>
+        </div>
+      </div>
+
+      <div class="ev">
+        <span class="m">»</span>
+        <span class="dcol">8 Jan 25<s>Wed</s></span>
+        <div class="inner"><div class="head"><span class="ttl">Full sent</span><span class="dt">8 JAN 2025</span></div>
+        <div class="sub"><div class="chips"><span class="att">📎 Full manuscript</span><span class="addb">+ Attach</span></div></div>
+        </div>
+      </div>
+
+      <div class="ev minor-ev">
+        <span class="m sm"></span>
+        <span class="dcol">19 Mar 25<s>Wed</s></span>
+        <div class="inner"><div class="head"><span class="body">Nudged &mdash; no reply</span><span class="dt">19 MAR 2025</span></div>
+        </div>
+      </div>
+
+      <div class="ev">
+        <span class="m q">⌛</span>
+        <span class="dcol">Today<s>ongoing</s></span>
+        <div class="inner"><div class="head"><span class="ttl">No reply</span><span class="dt">1 YEAR 7 MONTHS</span></div>
+        <div class="sub">
+          <div class="body">The Marsh Agency state eight weeks. That window closed in March 2025.<br>Many agencies treat silence as a pass.</div>
+          <div><div class="bar2"><i></i></div>
+            <div class="barf"><span>Full sent 8 Jan 2025</span><span>Window closed 5 Mar 2025</span></div></div>
+          <div class="offer">You can <a class="ilink">mark this closed</a> if you&rsquo;d rather stop tracking it.</div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div></div></div>
+
+<div class="legend">
+  <b>A busy query — two years, ten events, a nudge, an R&amp;R and a resubmission</b>
+  <ul style="margin:6px 0 0 18px">
+    <li><b>A · One rhythm.</b> Every event on the same rail with the same gap, and minor events (nudges, notes) reduced to a small hollow marker and one line of body text. Simplest, and the small marker is what stops a nudge claiming the same weight as a request.</li>
+    <li><b>B · Chaptered.</b> The same rail, grouped into exchanges — <i>The query</i>, <i>The partial</i>, <i>Revise and resubmit</i>, <i>The full</i> — with a rule between. This is how a writer actually remembers a query: not as ten events but as four rounds. Best on a long history; on a two-event query the labels would be noise, so it needs a rule about when they appear.</li>
+    <li><b>C · Date column.</b> Dates move to a left column with the weekday beneath, so the eye can scan chronology without reading titles. Most log-like and the most precise; it costs ~86px of width, which matters when the pane is 60% of the page.</li>
+    <li><b>D · Event cards.</b> Each substantive event sits on a tinted panel; minor events stay bare. The chips gain a surface to sit on, which is the clearest of the four for materials — but ten panels in a column starts to look like a feed.</li>
+  </ul>
+  <br>
+  <b>What all four fix.</b> One rhythm regardless of what an event carries; the connector running marker to marker rather than floating; a distinct treatment for minor events so nudges and notes stop competing with requests; and chips grouped under the send they belong to.<br><br>
+  <b>My pick: B, with A's minor-event treatment.</b> Chaptering is the only option that adds meaning rather than arranging it — and on a query this busy it turns a wall into four short stories. ⚠️ It needs a threshold: chapter labels only once a query has more than one exchange, otherwise a fresh query gets a heading saying <i>The query</i> above a single line.
+</div>
+
+<script>
+document.getElementById('V').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ document.body.setAttribute('data-v',b.getAttribute('data-v'));
+ [].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});
+</script>
+</body></html>

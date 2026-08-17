@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — nudges on the timeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;--rad:12px;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+em,.dt,.barf,.hist{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:1400px;align-items:start;}
+.card{position:relative;background:#fff;border-radius:var(--rad);}
+.card::after{content:'';position:absolute;inset:0;border-radius:var(--rad);pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);}
+.clip{border-radius:var(--rad);overflow:hidden;}
+.ch{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));font-family:'Playfair Display',serif;font-size:17px;font-weight:500;}
+.ch .m2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);font-weight:400;}
+.cb{padding:15px 16px;}
+.chaplab{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.15em;
+  text-transform:uppercase;color:#b0aba3;margin-bottom:11px;}
+.chaplab:after{content:'';flex:1;height:1px;background:var(--line);}
+.ev{position:relative;padding-left:36px;padding-bottom:17px;}
+.ev::before{content:'';position:absolute;left:12px;top:29px;bottom:0;width:1px;background:var(--line);}
+.ev:last-child{padding-bottom:0;} .ev:last-child::before{display:none;}
+.m{position:absolute;left:0;top:0;width:25px;height:25px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--burg);
+  color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:10px;}
+.m.in{box-shadow:inset 0 0 0 1.5px #9db09b;color:var(--sage-tx);}
+.m.q{box-shadow:inset 0 0 0 1.5px var(--oat);color:#bdb8b0;}
+.m.sm{left:8px;top:4px;width:9px;height:9px;box-shadow:inset 0 0 0 1.5px var(--oat);background:var(--n1);}
+.ev.minor{padding-bottom:13px;}
+.ev.minor::before{top:15px;}
+.head{display:flex;align-items:baseline;gap:9px;min-height:25px;}
+.ttl{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;line-height:1.3;}
+.dt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);white-space:nowrap;}
+.body{font-size:12px;color:var(--ink2);line-height:1.55;margin-top:4px;}
+.minor .body{margin-top:0;font-size:12px;}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;}
+.att{display:inline-flex;font-size:11px;color:var(--ink2);background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:7px;padding:4px 9px;}
+.bar2{position:relative;height:5px;border-radius:3px;background:var(--n2);margin:10px 0 6px;overflow:hidden;}
+.bar2 i{display:block;height:100%;width:100%;background:var(--oat);}
+.bar2::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(124,58,42,.15) 5px 10px);}
+.bar2.open i{width:58%;background:#9db09b;}
+.bar2.open::after{display:none;}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.hist{margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#a9a49c;}
+.offer{margin-top:10px;background:var(--n1);border-radius:9px;box-shadow:inset 0 0 0 1px var(--line);padding:10px 11px;font-size:11.5px;color:var(--ink2);line-height:1.55;}
+.offer.warm{background:#faf1ea;box-shadow:inset 0 0 0 1px #eed9cc;}
+.ilink{color:var(--burg);text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+.acts{display:flex;gap:7px;margin-top:9px;}
+.mini{font-family:inherit;font-size:11.5px;height:32px;padding:0 12px;border:0;border-radius:8px;background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);cursor:pointer;}
+.mini.go{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.legend{max-width:1400px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>Three points on the same query <s>— what the timeline says as nudges go unanswered</s></h4>
+<div class="grid">
+
+  <!-- 1 · nudged once, still inside a reasonable stretch -->
+  <div class="card"><div class="clip">
+    <div class="ch">Tracking<span class="m2">Full sent</span></div>
+    <div class="cb">
+      <div class="chaplab">The full</div>
+      <div class="ev"><span class="m">»</span>
+        <div class="head"><span class="ttl">Full sent</span><span class="dt">8 JAN</span></div>
+        <div class="chips"><span class="att">📎 Full manuscript</span></div></div>
+      <div class="ev minor"><span class="m sm"></span>
+        <div class="head"><span class="body">Nudged — no reply yet</span><span class="dt">19 MAR</span></div></div>
+      <div class="ev"><span class="m q">⌛</span>
+        <div class="head"><span class="ttl">No reply</span><span class="dt">4 MONTHS</span></div>
+        <div class="body">The Marsh Agency state eight weeks. That window closed in March.</div>
+        <div class="bar2"><i></i></div>
+        <div class="barf"><span>Sent 8 Jan</span><span>Closed 5 Mar</span></div>
+        <div class="hist">Nudged once · 19 Mar</div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- 2 · nudged twice, long silence — closure offered -->
+  <div class="card"><div class="clip">
+    <div class="ch">Tracking<span class="m2">Full sent</span></div>
+    <div class="cb">
+      <div class="chaplab">The full</div>
+      <div class="ev"><span class="m">»</span>
+        <div class="head"><span class="ttl">Full sent</span><span class="dt">8 JAN 25</span></div>
+        <div class="chips"><span class="att">📎 Full manuscript</span></div></div>
+      <div class="ev minor"><span class="m sm"></span>
+        <div class="head"><span class="body">Nudged — no reply</span><span class="dt">19 MAR 25</span></div></div>
+      <div class="ev minor"><span class="m sm"></span>
+        <div class="head"><span class="body">Nudged — no reply</span><span class="dt">2 JUN 25</span></div></div>
+      <div class="ev"><span class="m q">⌛</span>
+        <div class="head"><span class="ttl">No reply</span><span class="dt">1 YEAR 7 MONTHS</span></div>
+        <div class="body">The Marsh Agency state eight weeks. That window closed in March 2025.<br>Many agencies treat silence as a pass.</div>
+        <div class="bar2"><i></i></div>
+        <div class="barf"><span>Sent 8 Jan 25</span><span>Closed 5 Mar 25</span></div>
+        <div class="hist">Nudged twice · 19 Mar 25, 2 Jun 25</div>
+        <div class="offer warm">Two nudges, no reply, and fourteen months since the window closed.
+          <div class="acts"><button class="mini go">Mark closed</button><button class="mini">Keep tracking</button></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- 3 · nudge worked -->
+  <div class="card"><div class="clip">
+    <div class="ch">Tracking<span class="m2">Full sent</span></div>
+    <div class="cb">
+      <div class="chaplab">The full</div>
+      <div class="ev"><span class="m">»</span>
+        <div class="head"><span class="ttl">Full sent</span><span class="dt">8 JAN</span></div>
+        <div class="chips"><span class="att">📎 Full manuscript</span></div></div>
+      <div class="ev minor"><span class="m sm"></span>
+        <div class="head"><span class="body">Nudged</span><span class="dt">19 MAR</span></div></div>
+      <div class="ev"><span class="m in">«</span>
+        <div class="head"><span class="ttl">Reply received</span><span class="dt">22 MAR</span></div>
+        <div class="body">Jonathan apologised for the delay and asked for two more weeks.</div></div>
+      <div class="ev"><span class="m q">⌛</span>
+        <div class="head"><span class="ttl">Waiting</span><span class="dt">9 DAYS</span></div>
+        <div class="body">Jonathan said two weeks on 22 March.</div>
+        <div class="bar2 open"><i></i></div>
+        <div class="barf"><span>Replied 22 Mar</span><span>Expected ~5 Apr</span></div>
+      </div>
+    </div>
+  </div></div>
+
+</div>
+
+<div class="legend">
+  <b>The nudge record, and how closure gets offered without nagging</b>
+  <ul style="margin:6px 0 0 18px">
+    <li><b>Each nudge is a minor event</b> — small hollow marker, one line, no title — so a follow-up never claims the weight of a request. Its wording states the outcome, not the act: <i>Nudged — no reply</i>, and once something comes back, simply <i>Nudged</i>, because the reply below it says the rest.</li>
+    <li><b>The waiting event carries a nudge history line</b>: <i>Nudged twice · 19 Mar 25, 2 Jun 25</i>. This is the single most useful fact in a long silence and it currently exists nowhere — without it a writer scrolls the timeline to work out whether they already followed up.</li>
+    <li><b>Closure is offered once, and only when the facts justify it.</b> In the first card there is no offer at all — one nudge and four months is an ordinary state of affairs. In the second, three facts have accumulated — two nudges, no reply, fourteen months past the window — so the offer appears, states exactly those three facts, and gives both answers equal standing: <b>Mark closed</b> and <b>Keep tracking</b>.</li>
+    <li><b>It never repeats.</b> Choosing <i>Keep tracking</i> dismisses it for that query; it does not return next month with the same suggestion in stronger words. A prompt that reappears is nagging, and this product's whole premise is that it reports and the writer decides.</li>
+    <li><b>The threshold should be facts, not time.</b> My proposal: the offer appears once <b>at least one nudge has gone unanswered and the window closed more than six months ago</b> — so it is triggered by the writer having already tried, not merely by the clock. A query never nudged never gets the offer, because the obvious next step is a nudge, not closure.</li>
+    <li><b>The third card is the case worth designing for</b> — the nudge worked. The reply becomes an incoming event, the waiting state restarts from what the agent actually said, and the bar goes back to open and green. Nothing about the earlier silence lingers; the record keeps it, the state moves on.</li>
+  </ul>
+</div>
+</body></html>

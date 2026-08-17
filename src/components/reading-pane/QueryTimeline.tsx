@@ -19,6 +19,7 @@ import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount } from ".
 import { elapsedPhrase } from "../../lib/elapsed";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
+import { chapterise } from "../../lib/timelineChapters";
 
 /** TWS-revised — natural-language date for the grace header ("15th July"), the header's own font. */
 const fmtNatural = (ms: number): string => {
@@ -330,10 +331,20 @@ export const TimelineRows: React.FC<{
    * nothing, so it keeps the rung it has always had.
    */
   sentExtra?: React.ReactNode;
-}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra }) => (
-  <>
-    {rows.map((row, i) => {
-      const isLast = i === rows.length - 1 && !continues;
+  /**
+   * §1 — group the rows into rounds and head each with its own label.
+   *
+   * ⚠️ ADDITIVE AND OFF BY DEFAULT, SO TO-DO IS UNTOUCHED. Its focus sheet renders a condensed
+   * copy of these rows in a panel a few hundred pixels tall; chapter rules and headings there
+   * would be structure for a surface that has no room to read it.
+   */
+  chaptered?: boolean;
+}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, chaptered = false }) => {
+  /* ⚠️ THE GROUPING IS THE PURE `chapterise`, INCLUDING ITS THRESHOLD. Nothing here decides when a
+     heading is worth drawing — `labelled` is the derivation's own answer, so a second surface
+     cannot apply a different figure. */
+  const book = chaptered ? chapterise(rows) : null;
+  const render = (row: RowSpec, isLast: boolean) => {
       return (
         <TlEvent key={row.key} last={isLast} mark={<StatusDot status={row.status} overrideSize={TL_MARK} decorative={row.kind === "nudge"} />}>
           <div className="tl-rowbody">
@@ -388,9 +399,33 @@ export const TimelineRows: React.FC<{
           </div>
         </TlEvent>
       );
-    })}
-  </>
-);
+  };
+
+  if (!book) return <>{rows.map((row, i) => render(row, i === rows.length - 1 && !continues))}</>;
+
+  return (
+    <>
+      {book.chapters.map((chapter, ci) => {
+        const lastChapter = ci === book.chapters.length - 1;
+        return (
+          <div className="tl-chap" key={ci}>
+            {/* ⚠️ NO HEADING ON A ONE-ROUND QUERY, and no blank one on a chapter that has no subject:
+                a leading run of rows with no send before it is real (an import, a correction) and
+                gets the grouping without a name it cannot honestly carry. */}
+            {book.labelled && chapter.label && <div className="tl-chaplab">{chapter.label}</div>}
+            {chapter.rows.map((row, ri) => {
+              /* ⚠️ THE CONNECTOR ENDS WITH ITS ROUND, not only with the timeline. A line running out
+                 of the last event of a chapter would cross the rule that separates the rounds and
+                 arrive at the next round's heading, which is the one place it means nothing. */
+              const endsChapter = ri === chapter.rows.length - 1;
+              return render(row, endsChapter && !(lastChapter && continues));
+            })}
+          </div>
+        );
+      })}
+    </>
+  );
+};
 
 /**
  * TlProjection — a timeline event for something that has NOT happened yet (fix pack 4 §3).
@@ -452,6 +487,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
           into nothing. */}
       <TimelineRows
         rows={rows}
+        chaptered
         onEditSendMethod={onEditSendMethod}
         onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}
         continues={ballHolder === "agent" && !!waiting}

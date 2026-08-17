@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — Nudge, every state</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;--btn-h:42px;
+--lift:0 1px 2px rgba(40,35,30,.05),0 4px 10px -4px rgba(40,35,30,.14),0 18px 34px -18px rgba(40,35,30,.38);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+em,.dt,.sub2,.stx span{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+.sheet{max-width:1080px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.row{display:grid;grid-template-columns:190px minmax(0,1fr);gap:20px;align-items:center;padding:14px 0;}
+.row+.row{box-shadow:inset 0 1px 0 var(--line);}
+.tag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;line-height:1.6;}
+.tag s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:9.5px;}
+.barrow{display:flex;align-items:center;gap:9px;}
+
+.b{font-family:inherit;font-size:13px;height:var(--btn-h);padding:0 16px;border:0;border-radius:10px;background:transparent;
+  color:var(--ink2);display:inline-flex;align-items:center;gap:8px;cursor:pointer;position:relative;}
+.b svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;}
+.b:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--oat);}
+.b.act{color:var(--ink);font-weight:500;}
+.b.off{color:#c9c4bc;cursor:not-allowed;}
+.b.off:hover{background:transparent;box-shadow:none;}
+.b .sub2{font-family:'JetBrains Mono',monospace;font-size:9px;color:#b8b3ab;font-weight:400;}
+.tip{position:absolute;left:0;top:calc(100% + 7px);z-index:5;background:#22201d;color:#f2ede8;font-size:11.5px;line-height:1.5;
+  border-radius:8px;padding:8px 11px;width:250px;box-shadow:0 8px 20px -8px rgba(40,35,30,.6);display:none;}
+.b.off:hover .tip{display:block;}
+.tip::before{content:'';position:absolute;top:-4px;left:16px;width:8px;height:8px;background:#22201d;transform:rotate(45deg);}
+
+/* confirm popover */
+.pop{position:relative;width:340px;background:#fff;border-radius:0;box-shadow:var(--lift);}
+.pop::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:var(--sage-br);}
+.ph{padding:16px 18px 0;}
+.ph b{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;display:block;}
+.pb{padding:9px 18px 14px;font-size:12.5px;color:var(--ink2);line-height:1.6;}
+.pf{display:flex;gap:8px;justify-content:flex-end;padding:0 18px 16px;}
+.pf .b{height:36px;font-size:12.5px;}
+.pf .b.go{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.win{display:flex;align-items:center;gap:10px;margin-top:11px;padding:10px 12px;background:var(--n1);border-radius:9px;
+  box-shadow:inset 0 0 0 1px var(--line);}
+.win .track{flex:1;height:5px;border-radius:3px;background:var(--n2);overflow:hidden;position:relative;}
+.win .track i{display:block;height:100%;width:62%;background:#9db09b;border-radius:3px;}
+.win .track.past i{width:100%;background:var(--oat);}
+.win .track.past::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(124,58,42,.15) 5px 10px);}
+.win span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);white-space:nowrap;}
+
+/* timeline result */
+.tl{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:14px 16px;max-width:520px;}
+.ev{position:relative;padding-left:38px;}
+.ev .m{position:absolute;left:9px;top:4px;width:9px;height:9px;border-radius:50%;background:var(--n1);box-shadow:inset 0 0 0 1.5px var(--oat);}
+.ev .l{display:flex;align-items:baseline;gap:10px;font-size:12.5px;color:var(--ink2);}
+.ev .dt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--faint);}
+.legend{max-width:1080px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>The control, in every state</h4>
+<div class="sheet">
+  <div class="row"><span class="tag">With the agent<s>Full sent · window closed</s></span>
+    <div class="barrow">
+      <button class="b act"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudge</button>
+    </div></div>
+
+  <div class="row"><span class="tag">With the agent<s>Full sent · still inside the window</s></span>
+    <div class="barrow">
+      <button class="b act"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudge</button>
+      <span class="tag" style="color:#c2bdb5;text-transform:none;letter-spacing:0;font-size:11px">— opens the confirm below</span>
+    </div></div>
+
+  <div class="row"><span class="tag">Already nudged<s>Full sent · nudged recently</s></span>
+    <div class="barrow">
+      <button class="b act"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudged <span class="sub2">· 3 days ago</span></button>
+    </div></div>
+
+  <div class="row"><span class="tag">With the writer<s>Partial requested</s></span>
+    <div class="barrow">
+      <button class="b off"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudge
+        <span class="tip">Jonathan is waiting on you — he asked for the first fifty pages on 18 June.</span></button>
+      <span class="tag" style="color:#c2bdb5;text-transform:none;letter-spacing:0;font-size:11px">— hover it</span>
+    </div></div>
+
+  <div class="row"><span class="tag">Finished<s>Closed · no reply</s></span>
+    <div class="barrow">
+      <button class="b off"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudge
+        <span class="tip">This query is closed. Reopen it if you want to follow up.</span></button>
+    </div></div>
+</div>
+
+<h4>The confirm — only when the window has not yet closed</h4>
+<div class="sheet" style="display:flex;gap:20px;flex-wrap:wrap">
+  <div class="pop">
+    <div class="ph"><b>Nudge before their window closes?</b></div>
+    <div class="pb">The Marsh Agency state eight weeks. That window closes on <b>4 June</b> — three weeks from now.
+      <div class="win"><span>Sent 9 Apr</span><span class="track"><i></i></span><span>Closes 4 Jun</span></div>
+    </div>
+    <div class="pf"><button class="b">Cancel</button><button class="b go">Nudge anyway</button></div>
+  </div>
+
+  <div class="pop">
+    <div class="ph"><b>Nudge?</b></div>
+    <div class="pb">The Marsh Agency do not state a response time. You sent this <b>5 weeks ago</b>.
+      <div class="win"><span>Sent 9 Apr</span><span class="track"><i style="width:100%;background:var(--oat)"></i></span><span>No window stated</span></div>
+    </div>
+    <div class="pf"><button class="b">Cancel</button><button class="b go">Nudge anyway</button></div>
+  </div>
+</div>
+
+<h4>What a nudge leaves behind</h4>
+<div class="sheet">
+  <div class="tl">
+    <div class="ev"><span class="m"></span><div class="l">Nudged — no reply<span class="dt">19 MAR 2025</span></div></div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>Availability follows whose turn it is, not whether a date has passed.</b> That is almost certainly the bug: if the current condition is gated on the expected-reply date, most queries have no expected date at all, so it never becomes true and the button is permanently grey.<br><br>
+  <b>Disabled states explain themselves.</b> A greyed control that never says why is the weakest thing in a toolbar — worse than no control, because the writer cannot tell whether it is broken or waiting. Both disabled cases name the reason and, where there is one, the thing outstanding: <i>he asked for the first fifty pages on 18 June</i>. The closed case offers the way out instead.<br><br>
+  <b>The confirm states facts and stops.</b> What the agency said, when the window closes, how long that is — then <i>Nudge anyway</i> and <i>Cancel</i>. No <i>are you sure</i>, no <i>this may annoy them</i>, no recommendation. The little window bar is the same spent-hatch device as the timeline, filled while the window is open and hatched once it has passed, so the two places that talk about a window look the same.<br><br>
+  <b>Two decisions for you.</b> The confirm's primary is pink — the only other pink on the page is <i>Log new query</i>, and the two never appear together, so it is available. And the confirm takes the header's square-with-sage-top treatment; if that feels heavy for a two-line dialog, the alternative is a plain rounded popover.<br><br>
+  <b>A nudge is a minor timeline event</b> — small hollow marker, one line, no title — so it sits in the record without competing with a request. That is treatment A's minor-event rule from the timeline pack.
+</div>
+</body></html>
