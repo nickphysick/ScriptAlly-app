@@ -28,9 +28,17 @@ const fmtNatural = (ms: number): string => {
   return `${day}${ord} ${d.toLocaleDateString("en-GB", { month: "long" })}`;
 };
 
-/** P5 — inter-event vertical spacing (px). One constant so reuse of the timeline stays consistent;
- *  the connector hairline's length is derived from it, never a per-instance number. */
-const TL_EVENT_GAP = 24;
+/**
+ * The marker's diameter, in px — the ONE size every event's dot is drawn at.
+ *
+ * ⚠️ THE GAP IS NO LONGER A CONSTANT HERE, AND THAT IS §6's WHOLE POINT. `TL_EVENT_GAP = 24` was a
+ * number this file spent on `paddingBottom` and then spent AGAIN, negated, on the connector's
+ * `bottom` — so the rhythm lived in JavaScript while the thing it had to line up with (the next
+ * marker) lived in layout. It is `--tl-gap` at `:root` now, and the connector reaches the next
+ * marker structurally rather than by arithmetic. This constant stays because `StatusDot` takes a
+ * pixel number, not a token; it is kept in step with `--tl-mark` by a measure, not by a comment.
+ */
+const TL_MARK = 27;
 import { F12Menu } from "../shell/F12Shell";
 
 /** A correctable timeline entry (5b) — passed to the ⋯ Edit / Delete handlers. */
@@ -278,6 +286,30 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
  * rows.map block verbatim; QueryTimeline consumes it with its behaviour (incl. the ⋯ correction
  * trigger) byte-identical, and the sheet renders it condensed with no menu wiring.
  */
+/**
+ * TlEvent — the ONE geometry every event on this timeline uses (six fixes §6).
+ *
+ * ⚠️ IT EXISTS BECAUSE THE GRID WAS WRITTEN TWICE. A real row and a projection each declared
+ * `30px 1fr`, `gap: 11`, their own `paddingBottom`, and their own connector at `top: 29 /
+ * bottom: -TL_EVENT_GAP` — four numbers restated in two places, which is how the timeline came to
+ * bend where the future starts. The geometry is now a class (`.tl-ev` in f12.css) and this is its
+ * only renderer; a third kind of event gets it for free rather than by copying it.
+ *
+ * ⚠️ THE MARKER IS A SLOT, NOT A COMPONENT. Both callers pass a `StatusDot` — the locked glyph,
+ * never a recreation — and they differ only in its props (`ghost` for a projection). Taking the
+ * dot as a child keeps that difference at the call site where it is legible.
+ */
+const TlEvent: React.FC<{ last?: boolean; mark: React.ReactNode; children: React.ReactNode }> = ({ last = false, mark, children }) => (
+  <div className={`tl-ev${last ? " tl-ev--last" : ""}`}>
+    <div className="tl-evmark">{mark}</div>
+    {/* the connector, drawn by the CONTAINER behind the locked StatusDot — never by editing it.
+        It runs marker-bottom to next-marker-top, and `.tl-ev--last` hides it, so a single-event
+        query gets no orphan line. */}
+    <div className="tl-evline" aria-hidden="true" />
+    {children}
+  </div>
+);
+
 export const TimelineRows: React.FC<{
   rows: RowSpec[];
   onMenuOpen?: (entry: TimelineEntryRef, style: React.CSSProperties) => void;
@@ -295,19 +327,9 @@ export const TimelineRows: React.FC<{
     {rows.map((row, i) => {
       const isLast = i === rows.length - 1 && !continues;
       return (
-        <div key={row.key} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: isLast ? 0 : TL_EVENT_GAP }}>
-          <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-            <StatusDot status={row.status} overrideSize={28} decorative={row.kind === "nudge"} />
-            {/* P5 — the connector hairline: drawn by the CONTAINER behind the locked StatusDot (never
-                by editing it), on event nodes only, joining consecutive events and stopping at the
-                last (so it draws only with 2+ events; a single-event query gets no orphan line).
-                Colour = the theme --hairline token; length derived from TL_EVENT_GAP. */}
-            {!isLast && (
-              <div style={{ position: "absolute", top: 29, bottom: -TL_EVENT_GAP, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "var(--hairline, #e8dcd0)" }} />
-            )}
-          </div>
-          <div className="tl-rowbody" style={{ paddingTop: 4 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+        <TlEvent key={row.key} last={isLast} mark={<StatusDot status={row.status} overrideSize={TL_MARK} decorative={row.kind === "nudge"} />}>
+          <div className="tl-rowbody">
+            <div className="tl-evtitle"><div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
               {/* ⚠️ THE EDITABLE FACT SITS ON THE TITLE LINE, NOT UNDER IT (§2). "Query sent" and
                   "via email" are one statement about one event; on two lines the second read as a
                   caption, which is why the picker kept being moved somewhere that felt more like a
@@ -341,7 +363,7 @@ export const TimelineRows: React.FC<{
                   </span>
                 )}
               </span>
-            </div>
+            </div></div>
             {/* ⚠️ NOT TWICE. A promoted sub is drawn on the title line above; drawing it here as well
                 would state the send method twice, three pixels apart. Rows without the flag — and
                 the flagged row when no picker was passed — keep the caption they have always had. */}
@@ -354,7 +376,7 @@ export const TimelineRows: React.FC<{
               <div className="tl-pills" style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
             )}
           </div>
-        </div>
+        </TlEvent>
       );
     })}
   </>
@@ -363,9 +385,10 @@ export const TimelineRows: React.FC<{
 /**
  * TlProjection — a timeline event for something that has NOT happened yet (fix pack 4 §3).
  *
- * ⚠️ THE SAME GRID AS A REAL ROW, RESTATED IN ONE PLACE RATHER THAN IN TWO EVENTS. `30px 1fr`, the
- * same gap, the same connector geometry — if a projection drew its own grid the markers would sit a
- * pixel or two off the real ones and the timeline would bend where the future starts.
+ * ⚠️ THE SAME GEOMETRY AS A REAL ROW, AND NOW BY SHARING IT RATHER THAN BY MATCHING IT (§6). This
+ * note used to say the grid was "restated in one place" — it was restated in two, here and in
+ * `TimelineRows`, which is exactly the arrangement where the markers drift a pixel or two apart and
+ * the timeline bends where the future starts. Both render `TlEvent`; there is nothing left to match.
  *
  * ⚠️ AND THE MARKER IS `ghost`, WHICH ALREADY MEANS THIS. `StatusDot`'s ghost is the same dot
  * drained to neutral grey with no pulse — the "would-be" treatment. Inventing a second hollow
@@ -378,21 +401,15 @@ const TlProjection: React.FC<{
   last?: boolean;
   children?: React.ReactNode;
 }> = ({ status, title, date, last = false, children }) => (
-  <div style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 11, position: "relative", paddingBottom: last ? 0 : TL_EVENT_GAP }}>
-    <div style={{ position: "relative", display: "flex", justifyContent: "center" }}>
-      <StatusDot status={status} overrideSize={28} ghost decorative />
-      {!last && (
-        <div style={{ position: "absolute", top: 29, bottom: -TL_EVENT_GAP, left: "50%", transform: "translateX(-50%)", width: 1.6, background: "var(--hairline, #e8dcd0)" }} />
-      )}
-    </div>
-    <div className="tl-rowbody" style={{ paddingTop: 4 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+  <TlEvent last={last} mark={<StatusDot status={status} overrideSize={TL_MARK} ghost decorative />}>
+    <div className="tl-rowbody">
+      <div className="tl-evtitle"><div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
         <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "var(--muted, #7d7469)" }}>{title}</span>
         {date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a", whiteSpace: "nowrap" }}>{date}</span>}
-      </div>
+      </div></div>
       {children}
     </div>
-  </div>
+  </TlEvent>
 );
 
 export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod }) => {
@@ -663,7 +680,11 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
       {ballHolder === "writer" && (
         /* YOUR MOVE (P2) — soft-pink fill + ink border, no divider beneath; Playfair title + burgundy
            sub. The ACTION lives in the fork/command bar (one home for actions). */
-        <div style={{ marginLeft: 4, marginTop: 16 }}>
+        /* ⚠️ THE EVENTS' GAP, NOT A NUMBER OF ITS OWN (§6). This block follows the last history
+           row, so its `marginTop: 16` was a fifth spacing sitting where the eye had just learned
+           to expect 22 (browser-measured). It is not an event — no marker, no connector — but the distance
+           between it and what precedes it is the same distance as everywhere else. */
+        <div style={{ marginLeft: 4, marginTop: "var(--tl-gap)" }}>
           <div style={{ background: "var(--pink, #f5e2da)", border: "1px solid var(--ink, #1e1a16)", borderRadius: 11, padding: "12px 14px" }}>
             <span style={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 15, color: "var(--ink, #1e1a16)" }}>Your move — send the {sendWhat}</span>
             {ambient.writerDaysAgo != null && (

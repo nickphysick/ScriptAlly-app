@@ -248,7 +248,10 @@ describe("§7 · the reading pane", () => {
     expect(declValue(rule(".tl-today::before"), "background"), "the marker's dot is not solid burgundy").toBe("var(--burg)");
     /* the projections are hollow through `StatusDot`'s own `ghost` — the locked component's
        drained treatment, never a second hollow dot drawn beside it */
-    expect(tl, "the projections stopped being ghosts").toContain("<StatusDot status={status} overrideSize={28} ghost decorative />");
+    /* ⚠️ `TL_MARK`, NOT 28 (§6). The size is a named constant now because the CSS reads a token
+       for the same number and `StatusDot` takes a pixel figure rather than a `var()` — two places
+       that must agree, kept in step by `qcTimeline.measure.ts` measuring the rendered marker. */
+    expect(tl, "the projections stopped being ghosts").toContain("<StatusDot status={status} overrideSize={TL_MARK} ghost decorative />");
     /* ⚠️ AND IT OMITS ITSELF RATHER THAN GUESSING. An undated import has no day to be on. */
     expect(tl, "the marker renders without a window to count against")
       .toContain("waiting.sentMs != null && waiting.expMs != null");

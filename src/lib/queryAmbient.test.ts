@@ -242,12 +242,24 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
     expect(tl.includes("nudges > 0 ?")).toBe(true); // omitted entirely when never nudged
   });
 
-  it("P5 connector — container-drawn hairline, gated on !isLast (2+ events), spacing via a constant", () => {
-    expect(tl.includes("const TL_EVENT_GAP")).toBe(true);
-    expect(tl.includes("var(--hairline")).toBe(true);      // theme token, not a scattered hex
-    expect(tl.includes("bottom: -TL_EVENT_GAP")).toBe(true);
-    // The connector is inside the `{!isLast && (` guard — no orphan line on a single-event query.
-    expect(/\{!isLast && \(\s*[\s\S]{0,220}var\(--hairline/.test(tl)).toBe(true);
+  /**
+   * ⚠️ REPOINTED BY SIX FIXES §6, AND THE THREE THINGS IT ASSERTED ARE NOW ASSERTED ELSEWHERE OR
+   * NOT TRUE. It required `const TL_EVENT_GAP`, `bottom: -TL_EVENT_GAP` and a `{!isLast && (`
+   * guard — the JS geometry §6 retired. The gap left JavaScript because it had to line up with the
+   * NEXT MARKER, which lives in layout: it was spent once on `paddingBottom` and again, negated,
+   * on the connector's `bottom`, so both ends were re-derived by hand every time either moved.
+   *
+   * What survives here is the part that is genuinely this file's business — the connector is drawn
+   * by the CONTAINER, never by editing the locked StatusDot, and it stops at the last event. The
+   * geometry itself is asserted where it can be seen: `qcTimeline.measure.ts` reads the rendered
+   * page and requires ONE gap across every event kind, which is the claim a source lock could
+   * never make (the retired code held a single correct `24` and produced 24, 26 and 13).
+   */
+  it("P5 connector — container-drawn, and it stops at the last event", () => {
+    expect(tl.includes("var(--hairline")).toBe(false); // moved to the stylesheet with the geometry
+    expect(tl.includes('<div className="tl-evline" aria-hidden="true" />')).toBe(true);
+    // the "no orphan line" gate is a class now, read by `.tl-ev--last .tl-evline { display: none }`
+    expect(tl.includes('`tl-ev${last ? " tl-ev--last" : ""}`')).toBe(true);
     // Drawn by the row container, never by editing the locked StatusDot.
     expect(tl.includes("<StatusDot") && !tl.includes("StatusDot connector")).toBe(true);
   });

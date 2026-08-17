@@ -37,7 +37,10 @@ describe("B2 — the sheet renders the HUB'S timeline (reuse, not imitation)", (
     expect(hub).toContain("export const TimelineRows");
     expect(hub).toContain("onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}");
     expect(hub).toContain("row.activityId && onMenuOpen"); // the ⋯ condition, equivalence preserved
-    expect(hub).toContain('StatusDot status={row.status} overrideSize={28} decorative={row.kind === "nudge"}');
+    /* ⚠️ `TL_MARK` SINCE §6 — and this lock is the reason the token behind it sits at `:root`.
+       To-do renders these rows inside `.tdb-ffhubtl`, nowhere near `.t-f12`, so a page-scoped
+       `--tl-mark` would have left THIS host's markers unsized with nothing to point at. */
+    expect(hub).toContain('StatusDot status={row.status} overrideSize={TL_MARK} decorative={row.kind === "nudge"}');
   });
 });
 

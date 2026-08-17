@@ -1131,6 +1131,48 @@
 .f12-tasks-add input:focus { outline: none; border-color: var(--ink); background: var(--panel); }
 
 /* timeline correction ⋯ (5b) — hover-revealed on the entry row */
+/* ══ §6 · TIMELINE RHYTHM — ONE GEOMETRY, FOUR SPACINGS RETIRED ═══════════════════════════════
+ *
+ * ⚠️ THE FOUR SPACINGS CAME FROM ONE CORRECT NUMBER. Browser-measured before this change: 24px
+ * between events, 26px into the today marker, 13px out of it, 16px into the writer's-turn block —
+ * from a single `TL_EVENT_GAP = 24` that every event honoured. The two blocks that sit BETWEEN
+ * events simply carried margins of their own (`margin: 2px 0 13px`, `marginTop: 16`), and each was
+ * a reasonable local decision. Nothing in the source reads as a mistake, which is why it survived.
+ *
+ * ⚠️ SO THE GAP BECOMES A PROPERTY OF THE LINE, NOT OF EACH THING ON IT. Every node — event,
+ * projection, today marker — pays `padding-bottom: var(--tl-gap)` and states no margin, so the
+ * distance from the last thing in one node to the top of the next node's mark is one figure by
+ * construction rather than by four places agreeing.
+ *
+ * ⚠️ AND THE MARKER LEAVES THE FLOW, which is a separate fix with a separate reason. In the grid
+ * it was a row item, so the row's height was `max(marker, body)` and `.tl-rowbody` STRETCHED to
+ * fill it — harmless while every body was short, and the thing that would have made the gap drift
+ * the moment a body needed its own alignment. Absolutely positioned it contributes no height at
+ * all, and `padding-bottom` is then the entire distance, whatever the body does.
+ *
+ * ⚠️ AND THE CONNECTOR NOW ENDS WHERE THE NEXT MARKER BEGINS. It ran `top: 29px` to
+ * `bottom: -24px` — a hard-coded 1px below a 28px marker, and a negative inset restating the gap,
+ * so both ends had to be re-derived by hand every time either number moved. `top: var(--tl-mark)`
+ * to `bottom: 0` says the same thing structurally: the element's bottom border edge IS the next
+ * event's top, because they are adjacent blocks with no margins between them.
+ *
+ * ⚠️ UNSCOPED, DELIBERATELY. `TimelineRows` has two hosts — the Query Centre and To-do's focus
+ * sheet — and a `.t-f12` prefix here would have left To-do's copy with an absolutely-positioned
+ * marker and no rule to place it. The tokens are at `:root` for the same reason.
+ */
+.tl-ev { position: relative; padding-left: 40px; padding-bottom: var(--tl-gap); }
+.tl-ev--last { padding-bottom: 0; }
+.tl-evmark { position: absolute; left: 0; top: 0; width: var(--tl-mark); height: var(--tl-mark); display: grid; place-items: center; z-index: 1; }
+.tl-evline { position: absolute; left: calc(var(--tl-mark) / 2); top: var(--tl-mark); bottom: 0; width: 1.6px; transform: translateX(-50%); background: var(--hairline, #e8dcd0); }
+.tl-ev--last .tl-evline { display: none; }
+/* ⚠️ THE TITLE ROW TAKES THE MARKER'S HEIGHT, which is what puts the title and its mark on one
+   line. It replaces a `padding-top: 4px` on the body — a magic number that centred a 14px title
+   against a 28px marker by arithmetic nobody had written down, and that would have gone quietly
+   wrong the moment either size changed. Centring is stated now; the title and its date keep their
+   own shared baseline inside. */
+.tl-evtitle { min-height: var(--tl-mark); display: flex; align-items: center; }
+.tl-evtitle > * { flex: 1 1 auto; min-width: 0; }
+
 .tl-rowbody .tl-more { opacity: 0; width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; line-height: 1; color: var(--muted, #7d7469); background: none; border: none; cursor: pointer; transition: opacity 0.12s, background 0.12s; }
 .tl-rowbody:hover .tl-more, .tl-more:focus-visible { opacity: 1; }
 .tl-more:hover { background: var(--qc-surf-menu-h); }
@@ -1690,8 +1732,16 @@
    is positioned to the same centre — one number, `left: 15px`, which is half of that gutter.
    ⚠️ SOLID, WHERE THE PROJECTIONS ARE HOLLOW. The contrast is the marker: everything below it has
    not happened, and this is the only point on the line that is true right now. */
-.tl-today { position: relative; padding-left: 41px; margin: 2px 0 13px; }
-.tl-today::before { content: ""; position: absolute; left: 11px; top: 3px; width: 9px; height: 9px; border-radius: 50%; background: var(--burg); box-shadow: 0 0 0 3px #f8e7dc; }
+/* ⚠️ ON THE EVENTS' OWN INSET AND THE EVENTS' OWN GAP (§6). It used to state `padding-left: 41px`
+   and `margin: 2px 0 13px` — a third inset and a fourth gap, and it sits BETWEEN the history and
+   the projections, so its two odd margins were the visible break in the middle of the rhythm. It
+   reads `.tl-ev`'s numbers now; the dot's `left` is derived from the marker rather than from the
+   retired 30px gutter, so it stays on the line if the marker ever resizes. */
+.tl-today { position: relative; padding-left: 40px; padding-bottom: var(--tl-gap); margin: 0; }
+.tl-today::before { content: ""; position: absolute; left: calc(var(--tl-mark) / 2 - 4.5px); top: 3px; width: 9px; height: 9px; border-radius: 50%; background: var(--burg); box-shadow: 0 0 0 3px #f8e7dc; z-index: 1; }
+/* the connector passes BEHIND the dot — its 3px ring masks the hairline, which is what puts the
+   marker "on" the line rather than beside a line that stops and restarts around it */
+.tl-today::after { content: ""; position: absolute; left: calc(var(--tl-mark) / 2); top: 0; bottom: 0; width: 1.6px; transform: translateX(-50%); background: var(--hairline, #e8dcd0); }
 .tl-today b { font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600; color: var(--burg); }
 .tl-todaywhen { float: right; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; color: var(--qc-acc-today); }
 

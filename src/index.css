@@ -157,6 +157,17 @@
   /* ⚠️ THE WORKING AREA'S CAP, READ BY THE DASHBOARD AND BY QUERY CENTRE. It was a literal in
      oneScreen.css; two pages agreeing by hand is two pages that agree until one is edited. */
   --work-max: 1660px;
+  /**
+   * THE TIMELINE'S RHYTHM (six fixes §6) — the marker's size and the ONE gap between events.
+   *
+   * ⚠️ AT `:root`, AND THE REASON IS A RENDERER RATHER THAN A THEME. `TimelineRows` is shared: the
+   * Query Centre draws it inside `.t-f12`, and To-do's focus sheet draws it inside `.tdb-ffhubtl`,
+   * which is nowhere near that class. A `calc()` reading an UNDEFINED custom property yields NaN
+   * and the declaration is dropped in silence, so a page-scoped token here would have left To-do's
+   * markers unsized and its connector unplaced with nothing to point at.
+   */
+  --tl-mark: 27px;
+  --tl-gap: 22px;
   --n0: #ffffff;   /* panels, cards, plates — the only pure white     L* 100.0 */
   --n1: #fef8f0;   /* a page ground, one step below white             L*  97.8 */
   --n2: #f5f0e8;   /* a card header                                   L*  95.0 */
