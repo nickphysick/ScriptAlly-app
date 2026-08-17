@@ -61,26 +61,76 @@ test("§3b — the cursor follows the click, with the keyboard used first", asyn
   expect(second.focus, `Down from row 5 landed on row ${second.focus}`).toBe(6);
 });
 
-test("§3a — a click leaves no ring; the keyboard shows the page's own", async ({ page }) => {
+/**
+ * ⚠️ THE ROW, NEVER `document.activeElement` — the vacuous shape this file has to avoid. If a click
+ * ever stopped focusing the row, `activeElement` would be `body`, and "no outline, no ring" would
+ * pass about the wrong element entirely.
+ */
+const ringOf = (page: Page, n: number) => page.locator(".f12-row").nth(n).evaluate((el) => {
+  const c = getComputedStyle(el);
+  return {
+    fv: (() => { try { return el.matches(":focus-visible"); } catch { return null; } })(),
+    focused: document.activeElement === el,
+    outline: `${c.outlineStyle} ${c.outlineWidth} ${c.outlineColor}`,
+    shadow: c.boxShadow,
+    border: `${c.borderTopStyle} ${c.borderTopWidth} ${c.borderTopColor}`,
+  };
+});
+
+/** The page's one focus ring, read from the token rather than restated as a hex. */
+const ringColour = (page: Page) => page.evaluate(() => {
+  const root = document.querySelector(".f12-root") ?? document.documentElement;
+  const raw = getComputedStyle(root).getPropertyValue("--qc-ring").trim();
+  const probe = document.createElement("span");
+  probe.style.color = raw; document.body.appendChild(probe);
+  const rgb = getComputedStyle(probe).color; probe.remove();
+  return { raw, rgb };
+});
+
+test("§3 — the ring is keyboard-only, and it is the page's sage", async ({ page }) => {
   await openRoute(page, "/queries", { width: 1440, height: 900 });
+
+  const token = await ringColour(page);
+  console.log(`--qc-ring = ${token.raw || "(undefined)"} → ${token.rgb}`);
+  /* ⚠️ AN UNDEFINED CUSTOM PROPERTY RESOLVES TO NOTHING AND EVERY COMPARISON BELOW WOULD BE AGAINST
+     "rgb(0, 0, 0)". Assert the token exists before asserting anything is painted in it. */
+  expect(token.raw, "the page has no --qc-ring token").not.toBe("");
+
   await page.locator(".f12-row").nth(3).click({ timeout: 4000 });
   await page.waitForTimeout(300);
-  const clicked = await at(page);
-  console.log(`clicked: fv=${clicked.fv} outline="${clicked.outline}" shadow="${clicked.shadow}"`);
+  const clicked = await ringOf(page, 3);
+  console.log(`clicked:  focused=${clicked.focused} fv=${clicked.fv} outline="${clicked.outline}" shadow="${clicked.shadow}" border="${clicked.border}"`);
+  expect(clicked.focused, "the click did not focus the row — the reading below would be about nothing").toBe(true);
   expect(clicked.fv, "a clicked row matches :focus-visible").toBe(false);
   expect(clicked.outline, "a clicked row draws an outline").toContain("none");
   expect(clicked.shadow, "a clicked row draws a ring").toBe("none");
+  expect(clicked.border, "a clicked row draws a border").toContain("0px");
 
   await page.keyboard.press("ArrowDown");
   await page.waitForTimeout(250);
-  const kbd = await at(page);
-  console.log(`keyboard: fv=${kbd.fv} outline="${kbd.outline}" shadow="${kbd.shadow}"`);
+  const kbd = await ringOf(page, 4);
+  console.log(`keyboard: focused=${kbd.focused} fv=${kbd.fv} outline="${kbd.outline}" shadow="${kbd.shadow}"`);
   expect(kbd.fv, "a keyboard-focused row draws no ring").toBe(true);
-  /* ⚠️ THE PAGE'S OWN TREATMENT, NOT THE SHARED BLACK OUTLINE. `.t-f12 button:focus-visible` is a
-     2px `--ink` outline — right for a small control, a hard dark rectangle around a 60px row. */
-  expect(kbd.outline, "the row still wears the shared black outline").toContain("none");
+  /* ⚠️ NOT AN OUTLINE, AND NOT A DARK ONE. `.t-f12 button:focus-visible` was a 2px `--ink` outline —
+     right for a small control, a hard dark rectangle around a 60px row. */
+  expect(kbd.outline, "the row wears an outline rather than a ring").toContain("none");
   expect(kbd.shadow, "the row has no ring of its own").not.toBe("none");
-  expect(kbd.shadow, "the ring is not the page's burgundy halo").toContain("124, 58, 42");
+  /* ⚠️ THE COLOUR IS THE ASSERTION THAT WAS MISSING. The previous fix moved the ring off the black
+     outline and onto `--qc-rim-h`, which the live palette repoints to `--n6` — the QUIET TEXT step,
+     measured rgb(161, 158, 154). A 2px hard rectangle in a text grey is what still reads as a
+     border. This compares against the token, so it cannot go stale if the sage moves. */
+  expect(kbd.shadow, `the ring is ${kbd.shadow}, not the page's sage ${token.rgb}`).toContain(token.rgb);
+
+  /* ⚠️ AND THE ORDER A WRITER ACTUALLY PRODUCES: keyboard first, then a click. Chrome grants
+     `:focus-visible` to a PROGRAMMATICALLY focused element when the one it replaced had it — so a
+     click that re-focuses through an effect can inherit a ring the click itself never earned. */
+  for (const n of [6, 2]) {
+    await page.locator(".f12-row").nth(n).click({ timeout: 4000 });
+    await page.waitForTimeout(300);
+    const after = await ringOf(page, n);
+    console.log(`keyboard-then-click row ${n}: fv=${after.fv} shadow="${after.shadow}"`);
+    expect(after.shadow, `row ${n} kept a ring after being clicked`).toBe("none");
+  }
 });
 
 test("§3 — Up/Down cross groups, and a filter leaves the cursor on a survivor", async ({ page }) => {

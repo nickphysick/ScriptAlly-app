@@ -50,7 +50,10 @@
    the black outline stayed — silently, with the row rule sitting right there looking applied.
    Stacking a more specific selector would have made one contribution replace the other; saying
    which buttons this rule is FOR leaves the row's rule unopposed. */
-.t-f12 button:not(.f12-row):focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
+/* ⚠️ AND IT IS SAGE, NOT `--ink` (§3b). "The page's single focus-ring treatment" has to be single
+   to be worth naming: the row's ring and every control's outline are now one token, so the page
+   cannot come to have two answers to "what does focus look like here". */
+.t-f12 button:not(.f12-row):focus-visible { outline: 2px solid var(--qc-ring); outline-offset: 1px; border-radius: var(--r-sm); }
 .f12-root svg { display: block; }
 .f12-kbd { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; background: var(--panel); }
 
@@ -1055,6 +1058,24 @@
   --qc-surf-noteact-h: #f3ebe0;
   --qc-surf-send-off: #f1f1f0;        /* the journal's send, with nothing to send */
   --qc-surf-menu-h: rgba(30, 26, 22, 0.07);
+
+  /**
+   * ⚠️ §3 · THE PAGE'S ONE FOCUS RING, AND IT IS AN ACCENT RATHER THAN A RIM. Every earlier attempt
+   * borrowed a token that meant something else — first `--ink` (a black outline), then `--qc-rim-h`,
+   * "every control's hover rim", which the neutral palette repoints to `--n6`, the QUIET TEXT step.
+   * Measured on the deployed build: `rgb(161, 158, 154)` at 2px, which is why a ring that was
+   * already correctly gated on `:focus-visible` still read as a thick dark border.
+   *
+   * ⚠️ SAGE, WHICH THIS PAGE ALREADY OWNS — the header card's top edge is `--qc-card-border`, the
+   * same family. It is the BAND sage, never the StatusDot trio (`--sage`/`--sageC`/`--sageD`), which
+   * index.css locks to statuses; a focus ring is not a query status.
+   *
+   * ⚠️ AND IT IS DECLARED HERE, NOT IN `.t-f12.qc-neutral`. That block maps SURFACES onto the grey
+   * scale and leaves accents alone by its own rule — a ring repointed to a neutral would be exactly
+   * the fault above, one palette later.
+   */
+  --qc-ring: #7e9178;
+  --qc-ring-soft: rgba(126, 145, 120, 0.22);
 
   /* rims, hairlines and strokes */
   --qc-rim-h: #d6c9ba;                /* every control's hover rim, and the empty-state mark */
@@ -2352,13 +2373,18 @@
  * had been used, which is what it is for. What made it read as a bug was 3b putting it on the
  * WRONG ROW, and its weight.
  *
- * ⚠️ AND THE SHARED RULE IS NOT TOUCHED. Every other button on the page is small enough for a 2px
- * ink outline to be right, and re-toning it app-wide to suit one list would trade this fault for a
- * quieter one everywhere else. The row takes the page's own selectable-card treatment instead —
- * the burgundy halo `.qc-acard:focus-visible` already wears — which is a ring rather than a border
- * and belongs to this page's vocabulary.
+ * ⚠️ AND THE FAULT THAT SURVIVED ALL OF THAT WAS THE COLOUR. The rule moved off the black outline
+ * and onto `--qc-rim-h` — described in its own note as "the page's burgundy halo", which it is not:
+ * the live palette repoints that token to `--n6`, the quiet TEXT step, and the ring measured
+ * `rgb(161, 158, 154)` at 2px. A hard rectangle in a text grey around a 60px row is a border by any
+ * other name, so the trigger was right and the paint was wrong — which is why "already fixed" and
+ * "still there" were both true.
+ *
+ * ⚠️ SO IT TAKES THE PAGE'S ONE RING TOKEN, and so does every other button (see `--qc-ring`). Sage
+ * is not in use for any state on this page, which is what a focus ring needs: a colour that means
+ * nothing else. Burgundy means OUTGOING two columns to the right of it.
  */
-.f12-rows .f12-row:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--qc-rim-h), 0 0 0 5px rgba(124, 58, 42, 0.12); }
+.f12-rows .f12-row:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--qc-ring), 0 0 0 5px var(--qc-ring-soft); }
 /* ⚠️ AFTER `.f12-row.f12-sel`, AND THAT PLACEMENT IS THE FIX. Both selectors are (0,2,0), and the
    selected-row rule sets `box-shadow: none` — so while this sat above it, the ring was cancelled
    by the very state it always accompanies: selection follows focus here, so the focused row is
