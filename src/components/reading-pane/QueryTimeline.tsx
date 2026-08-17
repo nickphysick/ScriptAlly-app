@@ -365,6 +365,8 @@ export const TimelineRows: React.FC<{
      cannot apply a different figure. */
   const book = chaptered ? chapterise(rows) : null;
   const render = (row: RowSpec, isLast: boolean) => {
+      /* the caller's materials list for this row, if it has one — see the note at its render */
+      const showsExtra = !!sentExtra && row.status === QueryStatus.QUERIED && !row.kind;
       /**
        * ⚠️ §2 · A MINOR EVENT IS EVERY ROW THAT IS NOT A STATUS — which is what `kind` already
        * means, so the test is the presence of the field rather than a list of its values. A note
@@ -448,15 +450,32 @@ export const TimelineRows: React.FC<{
                 would state the send method twice, three pixels apart. Rows without the flag — and
                 the flagged row when no picker was passed — keep the caption they have always had. */}
             {row.sub && !(row.subEditable && onEditSendMethod) && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
-            {/* ⚠️ A CLASS, SO A SHORT VIEWPORT CAN DROP THESE (fix pack §5). They are the ONE thing on
-                this card repeated verbatim one column over — "What you sent" lists the same
-                materials — so when the card must give something up, this costs the writer nothing.
-                See the `max-height` rule in f12.css for why these rather than the nudge event. */}
-            {row.pills && row.pills.length > 0 && (
+            {/**
+              * ⚠️ ONE MATERIALS LIST PER EVENT, AND THE RICHER ONE WINS.
+              *
+              * Two things read `query.materialsWanted` and both drew it here. These pills are the
+              * OLDER of the two: `buildTimelineRows` maps the array through `formatQueryMaterial`
+              * onto `row.pills`, and they are plain labels — no sent state, no way to attach. The
+              * caller's `sentExtra` is the newer one, and it carries the manuscript name, each
+              * material's ticked/unticked state and the `+ Attach` control. So the event stated its
+              * materials twice, three lines apart, the first time without any of the information
+              * the second one adds.
+              *
+              * ⚠️ THE PILLS ARE NOT DELETED, BECAUSE THEY ARE STILL RENDERED ELSEWHERE. To-do's
+              * focus sheet (`FocusFlow.sheetTimeline`) mounts `<TimelineRows rows={rows} />` with no
+              * `sentExtra` — a condensed, read-only view with no attach control and no manuscript
+              * name — so `row.pills` is its only materials list. Removing them from the row spec
+              * would have taken the materials off that surface to fix a duplicate on this one.
+              * Traced to a rendered root before touching it, in both directions.
+              *
+              * ⚠️ SO IT IS "SUPERSEDED WHERE BOTH EXIST", not "removed": the caller that supplies
+              * the richer list is the caller that suppresses the plain one.
+              */}
+            {row.pills && row.pills.length > 0 && !showsExtra && (
               <div className="tl-pills" style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
             )}
             {/* the send's own materials — rendered by the caller, on the send rung only */}
-            {sentExtra && row.status === QueryStatus.QUERIED && sentExtra}
+            {showsExtra && sentExtra}
           </div>
         </TlEvent>
       );

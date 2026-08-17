@@ -822,8 +822,13 @@ describe("§5 (fp4) · what you sent — now the send event's own block", () => 
     /* ⚠️ AND THE SEAM IS ADDITIVE, so To-do's copy of these rows is untouched */
     const tl = read("../components/reading-pane/QueryTimeline.tsx");
     expect(tl, "the send-extra seam is not optional").toContain("sentExtra?: React.ReactNode;");
+    /* ⚠️ THE SCOPING MOVED INTO `showsExtra` (overnight §1) — one predicate, because the same test
+       now decides TWO things: that the caller's list renders here, and that the row's own plain
+       pills do not. Two copies of it are how the event came to state its materials twice. */
     expect(tl, "the extra is not scoped to the send rung")
-      .toContain("sentExtra && row.status === QueryStatus.QUERIED && sentExtra");
+      .toContain("!!sentExtra && row.status === QueryStatus.QUERIED");
+    expect(tl, "the plain pills are not suppressed where the caller supplies the richer list")
+      .toContain("row.pills.length > 0 && !showsExtra");
   });
 
   it("the manuscript is the send's subject, and the way to its record", () => {

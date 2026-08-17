@@ -12,7 +12,9 @@ import { describe, it, expect, vi } from "vitest";
 // tests). Mock the shell shallowly; the row-builder under test is pure and doesn't touch it.
 vi.mock("../shell/F12Shell", () => ({ F12Menu: () => null }));
 
-import { buildTimelineRows } from "./QueryTimeline";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { buildTimelineRows, TimelineRows } from "./QueryTimeline";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { QueryStatus, type Query } from "../../types";
 
@@ -63,5 +65,34 @@ describe("buildTimelineRows — the nudge node (P2)", () => {
     );
     expect(rows.filter((r) => r.status === QueryStatus.QUERIED && !r.kind)).toHaveLength(1);
     expect(rows).toHaveLength(1); // the unknown type never renders
+  });
+});
+
+/**
+ * ⚠️ ONE MATERIALS LIST PER SEND EVENT (overnight §1) — asserted against the RENDERED output,
+ * because the fault was two components each behaving correctly on its own. `row.pills` is the older
+ * plain list; the Query Centre passes a richer `sentExtra` carrying sent state and `+ Attach`, and
+ * both drew, three lines apart.
+ */
+describe("§1 · materials render once", () => {
+  /* ⚠️ MATERIALS ON THE FIXTURE, because the pills only exist when the query has some — a fixture
+     without them makes every case below pass by rendering nothing. The guard beneath says so. */
+  const rows = buildTimelineRows([queried], q({ materialsWanted: ["Query letter", "Synopsis"] }), null);
+
+  it("the fixture has pills to duplicate — otherwise every case below is vacuous", () => {
+    expect(rows.find((r) => r.status === QueryStatus.QUERIED)!.pills?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it("with a caller's list, the row's own pills do not render", () => {
+    const html = renderToStaticMarkup(<TimelineRows rows={rows} sentExtra={<div className="caller-materials" />} />);
+    expect(html, "the caller's list is missing").toContain("caller-materials");
+    expect(html, "the send event drew two materials lists").not.toContain("tl-pills");
+  });
+
+  /* ⚠️ AND WITHOUT ONE THEY STILL DO — To-do's focus sheet has no `sentExtra`, so these pills are
+     its ONLY materials list. This is the half that stops the duplicate being "fixed" by deletion. */
+  it("with no caller's list, the row's pills are the materials", () => {
+    const html = renderToStaticMarkup(<TimelineRows rows={rows} />);
+    expect(html, "To-do's copy lost its materials").toContain("tl-pills");
   });
 });
