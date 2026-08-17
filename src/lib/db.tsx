@@ -1033,11 +1033,31 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * ⚠️ SIGNING OUT LANDS ON THE LANDING PAGE, NOT THE SIGN-IN FORM. Clearing the session alone left
+   * the writer on `<Auth/>` — the app's answer to "who are you", offered to someone who had just
+   * said they were leaving. `/` is a real page now (About, Pricing, Contact, the features), so the
+   * way out ends somewhere you can read rather than at a form you just declined.
+   *
+   * ⚠️ IT IS A HARD NAVIGATION BECAUSE THE ROUTER IS NOT AVAILABLE HERE, and that is structural
+   * rather than a preference: `DbProvider` is mounted ABOVE `BrowserRouter` in App.tsx, so this
+   * function has no router context to navigate with. The reload is a fair price — it guarantees no
+   * in-memory state outlives the account it belonged to, which is exactly the guarantee wanted at
+   * this moment. `localStorage` survives it, so interface preferences (`sa.*`) are kept; the auth
+   * listener has already dropped `scriptally_was_authed` and torn down every collection listener.
+   *
+   * ⚠️ ONE IMPLEMENTATION, EVERY ENTRY POINT. The account menu, the settings row and the mobile
+   * "you" menu all call this — so where sign-out leaves you cannot differ by the door you used.
+   */
   const logout = async () => {
     try {
       await signOut(auth);
     } catch (e) {
       console.error("Sign out process error:", e);
+    } finally {
+      // `finally`, not the try: a failed signOut still means the writer asked to leave, and
+      // stranding them on a page for an account they believe they have left is the worse outcome.
+      window.location.assign("/");
     }
   };
 

@@ -483,14 +483,27 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             <div className="ws-pdiv" />
             {/* ⚠️ POLISH §6 — ONE INTERACTIVE ROW, not two text lines. The name gets the full row
                 width on line 1 so a realistic name never truncates at 186px; the plan and the
-                Upgrade pill share line 2. Clicking the row opens Settings for now.
-                TODO(account-menu): this is the opener for an account menu when one exists. */}
+                Upgrade pill share line 2.
+
+                ⚠️ IT OPENS THE ACCOUNT MENU. The TODO that stood here said this row was "the
+                opener for an account menu when one exists" — and the menu had existed since
+                `AccountMenu` was built, mounted a few lines below at `{accountMenu}`, carrying
+                Settings, Task settings, Help centre and Sign out. Nothing opened it: this row
+                navigated straight to /account, and `onOpenAccount` arrived as a prop and was never
+                called. The one live opener was `.sv2-tbuser` inside `.ws-mobilebar`, which is
+                `display:none` at ≥768px — so a DESKTOP user had no way to sign out at all.
+
+                ⚠️ SETTINGS IS NOT LOST BY THIS. It is the FIRST row of the menu, so the journey
+                gains a step rather than a dead end; nothing else in the app relied on this row
+                being a direct link (checked — the other `ws-uacct` references are its stylesheet
+                rules and three tests about position, tooltip gating and initials). */}
             <div
               className="ws-uacct"
               role="button"
               tabIndex={0}
-              onClick={() => go("/account")}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go("/account"); } }}
+              aria-haspopup="menu"
+              onClick={() => onOpenAccount?.()}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpenAccount?.(); } }}
               /* ⚠️ THE TOOLTIP CARRIES THE FULL NAME, NEVER THE FORMATTED ONE — it is the only
                  place the whole name is guaranteed to appear, and it now shows in BOTH states:
                  expanded (where the name may be shortened to "Bethany C." or ellipsised) and

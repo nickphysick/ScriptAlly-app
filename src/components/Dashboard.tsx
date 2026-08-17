@@ -482,7 +482,6 @@ export const Dashboard: React.FC<{
     tasks,
     taskFlags,
     notes,
-    logout,
     dismissTask,
     logNudge,
     updateQueryStatus,
