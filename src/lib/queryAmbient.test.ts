@@ -238,8 +238,13 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
   it("TR P3 re-escalation copy — the overdue badge appends 'nudged N×' when chased, omits it when never", () => {
     expect(tl.includes("· nudged ")).toBe(true);   // the append fragment
     expect(tl.includes('"once"')).toBe(true);      // a single chase reads 'once'
-    expect(tl.includes("${nudges}×")).toBe(true);  // repeats read 'N×'
-    expect(tl.includes("nudges > 0 ?")).toBe(true); // omitted entirely when never nudged
+    /* ⚠️ THE COUNT IS `nudgeN` NOW — §5 gave the pane ONE nudge derivation (`nudgeTimes`), and the
+       count comes off its length rather than from a second filter over the same events. Two passes
+       answering the same question is how this headline and §5b's history line would have come to
+       state different numbers on one card. */
+    expect(tl.includes("${nudgeN}×")).toBe(true);  // repeats read 'N×'
+    expect(tl.includes("nudgeN > 0 ?")).toBe(true); // omitted entirely when never nudged
+    expect(tl, "the pane counts nudges twice").not.toContain("nudgeCount(");
   });
 
   /**
@@ -258,8 +263,11 @@ describe("P6 artefacts — one escalation signal per pane (readout escalates, fo
   it("P5 connector — container-drawn, and it stops at the last event", () => {
     expect(tl.includes("var(--hairline")).toBe(false); // moved to the stylesheet with the geometry
     expect(tl.includes('<div className="tl-evline" aria-hidden="true" />')).toBe(true);
-    // the "no orphan line" gate is a class now, read by `.tl-ev--last .tl-evline { display: none }`
-    expect(tl.includes('`tl-ev${last ? " tl-ev--last" : ""}`')).toBe(true);
+    /* the "no orphan line" gate is a class, read by `.tl-ev--last .tl-evline { display: none }`
+       ⚠️ AND A SECOND MODIFIER JOINED IT (§2): a minor event takes `--minor`, which is why this
+       matches the class EXPRESSION rather than the whole template it used to. */
+    expect(tl.includes('`tl-ev${last ? " tl-ev--last" : ""}')).toBe(true);
+    expect(tl.includes('minor ? " tl-ev--minor" : ""')).toBe(true);
     // Drawn by the row container, never by editing the locked StatusDot.
     expect(tl.includes("<StatusDot") && !tl.includes("StatusDot connector")).toBe(true);
   });

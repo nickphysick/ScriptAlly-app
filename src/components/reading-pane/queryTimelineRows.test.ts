@@ -23,11 +23,21 @@ const queried = { id: "e1", type: QueryStatus.QUERIED, createdAt: "2026-05-01T00
 const nudge = (id: string, iso: string) => ({ id, type: NUDGE_NESTED_TYPE, createdAt: iso, note: "Follow-up reminder set for 29 Jul 2026" });
 
 describe("buildTimelineRows — the nudge node (P2)", () => {
-  it("a nudge activity renders as an outgoing 'Nudged' row, chronologically after the send", () => {
+  /**
+   * ⚠️ §5a — THE TITLE NOW STATES THE OUTCOME, and the two cases are asserted together because the
+   * whole point is that nothing stores which one applies: an incoming event after the nudge IS the
+   * answer. "Nudged — no reply" while the log holds nothing after it; plain "Nudged" once it does.
+   */
+  it("a nudge activity renders as an outgoing row stating its outcome, chronologically after the send", () => {
     const rows = buildTimelineRows([queried, nudge("n1", "2026-06-20T00:00:00.000Z")], q(), null);
     const nrow = rows.find((r) => r.kind === "nudge");
     expect(nrow).toBeDefined();
-    expect(nrow!.title).toBe("Nudged");
+    expect(nrow!.title).toBe("Nudged — no reply");
+    const answered = buildTimelineRows(
+      [queried, nudge("n1", "2026-06-20T00:00:00.000Z"), { id: "a1", type: QueryStatus.FULL_REQUESTED, createdAt: "2026-06-25T00:00:00.000Z" }],
+      q(), null,
+    );
+    expect(answered.find((r) => r.kind === "nudge")!.title, "a nudge that was answered still claims no reply").toBe("Nudged");
     expect(nrow!.sub).toBe("via Email");
     expect(nrow!.status).toBe(QueryStatus.QUERIED); // the OUTGOING glyph, decorative
     expect(rows.indexOf(nrow!)).toBeGreaterThan(rows.findIndex((r) => r.status === QueryStatus.QUERIED && !r.kind));

@@ -15,11 +15,12 @@ import React, { useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
-import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount } from "../../lib/queryAmbient";
+import { queryAmbientStatus, deriveEscalation, trackingBar } from "../../lib/queryAmbient";
 import { elapsedPhrase } from "../../lib/elapsed";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
+import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer } from "../../lib/nudgeState";
 
 /** TWS-revised — natural-language date for the grace header ("15th July"), the header's own font. */
 const fmtNatural = (ms: number): string => {
@@ -130,8 +131,15 @@ const MatPill: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export interface RowSpec {
   key: string;
-  /** "nudge" = a non-status outgoing touch (P2): the dot reuses the outgoing QUERIED glyph
-   *  decoratively, and the row never carries an activityId (corrections are for status entries). */
+  /**
+   * A row that is NOT a status. Today that is only a nudge; §2 renders every `kind` as a MINOR
+   * event — 9px hollow mark, one line, no title — so a note kind arriving later needs no branch.
+   *
+   * ⚠️ THE OLD NOTE HERE IS SUPERSEDED: a nudge no longer borrows the outgoing QUERIED `StatusDot`
+   * "decoratively", which was the thing that let a follow-up claim a request's weight while wearing
+   * the mark of a status it does not have. It DOES carry an `activityId` (a mis-logged nudge is
+   * deletable), which the old note also denied.
+   */
   kind?: "nudge";
   status: QueryStatus;
   title: string;
@@ -279,7 +287,19 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
       timeMs: getTime(evt.createdAt),
     }));
 
-  return [...statusRows, ...nudgeRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
+  const merged = [...statusRows, ...nudgeRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
+
+  /**
+   * §5a — a nudge states its OUTCOME, not the act: "Nudged — no reply" while nothing has come back,
+   * and plain "Nudged" once something has, because the event below it says the rest.
+   *
+   * ⚠️ DERIVED FROM THE ROWS THAT FOLLOW IT, never stored. The presence of an incoming event after
+   * a nudge IS whether it worked; a `worked: true` flag would be a second copy of a fact the log
+   * already holds, and one that goes stale the moment an entry is corrected.
+   */
+  return merged.map((row) => (row.kind === "nudge"
+    ? { ...row, title: nudgeOutcomeLabel(row.timeMs ?? 0, merged) }
+    : row));
 }
 
 /**
@@ -498,7 +518,12 @@ const TlProjection: React.FC<{
   </TlEvent>
 );
 
-export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.ReactNode; onMarkClosed?: () => void }> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, sentExtra, onMarkClosed }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps & {
+  sentExtra?: React.ReactNode;
+  onMarkClosed?: () => void;
+  /** §5d — "Keep tracking". Absent ⇒ the offer renders no dismissal, never a dead button. */
+  onKeepTracking?: () => void;
+}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, sentExtra, onMarkClosed, onKeepTracking }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
   const rows = buildTimelineRows(events, query, agent);
@@ -513,6 +538,20 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
   const ambient = queryAmbientStatus(query, ballHolder, primaryAction?.markKind, Date.now(), agent?.responseTimeWeeks);
   const waiting = ambient.mode === "waiting" ? ambient : null;
   const sendWhat = ambient.sendWhat;
+
+  /**
+   * §5b/§5c — every nudge on this query, once, read by the history line and the closure offer.
+   *
+   * ⚠️ THE WINDOW'S CLOSE IS `waiting.expMs`, THE SAME FIGURE THE BAR DRAWS. The offer's "since the
+   * window closed" and the bar's expected marker cannot name two different days.
+   */
+  const nudges = nudgeTimes(events, NUDGE_NESTED_TYPE, (v) => getTime(v));
+  const offer = closureOffer({
+    times: nudges,
+    windowClosedMs: waiting?.expMs ?? null,
+    now: Date.now(),
+    dismissed: (query as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
+  });
 
   const sage = waiting ? !waiting.overdue : true; // sage within window, calm grey once past it
   const wcol = sage
@@ -561,7 +600,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
         const reminderMs = query.nudgeDate ? getTime(query.nudgeDate) : null;
         const lastNudgeMs = query.lastNudgeSentDate ? getTime(query.lastNudgeSentDate) : null;
         const escal = deriveEscalation(waiting, { reminderMs, lastNudgeMs, now: Date.now() });
-        const nudges = nudgeCount(events, NUDGE_NESTED_TYPE); // P3 — re-escalation "nudged N×" copy
+        /* ⚠️ THE COUNT COMES FROM THE TIMES, not from a second pass. `nudgeCount` and `nudgeTimes`
+           would answer the same question through two filters, which is how the headline and the
+           history line below it come to disagree about how many nudges there have been. */
+        const nudgeN = nudges.length;
         const dated = waiting.sentMs != null && waiting.expMs != null; // both present → a progress bar
         const hasExpected = waiting.expMs != null;                     // P4 — derived OR overridden
         // P4 — derived bar geometry (no magic percentages): within ends at expected (no marker);
@@ -718,17 +760,33 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
                   <div className="tl-noreply">
                     <div className="tl-noreply-h">
                       {clockIcon}
-                      <span>No reply{nudges > 0 ? ` · nudged ${nudges === 1 ? "once" : `${nudges}×`}` : ""}</span>
+                      <span>No reply{nudgeN > 0 ? ` · nudged ${nudgeN === 1 ? "once" : `${nudgeN}×`}` : ""}</span>
                     </div>
                     <div className="tl-noreply-f">
                       {statedWeeks ? `${agent?.agency?.trim() || agent?.name?.split(" ")[0] || "They"} state ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}. ` : ""}
                       {waiting.expMs != null ? `That window closed in ${new Date(waiting.expMs).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}.` : ""}
                     </div>
                     <div className="tl-noreply-c">Many agencies treat silence as a pass.</div>
-                    {onMarkClosed && (
-                      <button type="button" className="tl-noreply-a" onClick={onMarkClosed}>
-                        You can mark this closed if you&rsquo;d rather stop tracking it
-                      </button>
+                    {/**
+                      * ⚠️ §5c · THE QUIET LINK IS SUPERSEDED, AND ITS FAULT WAS WHEN IT APPEARED.
+                      * "You can mark this closed…" rendered on EVERY overdue query, including one
+                      * the writer has never nudged — where the obvious next step is a nudge, not
+                      * closure. The offer is now gated on facts: at least one unanswered nudge, and
+                      * a window that closed more than six months ago.
+                      *
+                      * ⚠️ AND IT OFFERS BOTH ANSWERS WITH EQUAL STANDING. `Keep tracking` is not a
+                      * dismissal beside a primary — it is the other answer, and choosing it ends the
+                      * offer for this query permanently. A prompt that returns next month in
+                      * stronger words is nagging.
+                      */}
+                    {offer.show && (
+                      <div className="tl-offer">
+                        <div className="tl-offer-f">{offer.facts}</div>
+                        <div className="tl-offer-a">
+                          {onMarkClosed && <button type="button" className="tl-offer-go" onClick={onMarkClosed}>Mark closed</button>}
+                          {onKeepTracking && <button type="button" className="tl-offer-keep" onClick={onKeepTracking}>Keep tracking</button>}
+                        </div>
+                      </div>
                     )}
                     {dated && (
                       <>
@@ -759,6 +817,17 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
                 {bar}
               </>
             )}
+            {/**
+              * ⚠️ §5b · THE NUDGE HISTORY, BENEATH WHATEVER STATE THE WAIT IS IN. It is the single
+              * most useful fact during a long silence and it existed nowhere: without it a writer
+              * scrolls the whole timeline to work out whether they already followed up.
+              *
+              * ⚠️ OUTSIDE THE STATE BOXES, DELIBERATELY. Within-window, overdue and grace each draw
+              * their own frame; putting the line inside all three would be the same sentence
+              * written three times, and inside one of them it would appear and vanish as a query
+              * crossed a threshold that has nothing to do with whether it has been nudged.
+              */}
+            {nudges.length > 0 && <div className="tl-nhist">{nudgeHistoryLine(nudges, (ms) => fmtShort(ms).toUpperCase())}</div>}
           </TlProjection>
         );
       })()}

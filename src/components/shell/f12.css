@@ -1210,6 +1210,24 @@
 .tl-evtitle { min-height: var(--tl-mark); display: flex; align-items: center; }
 .tl-evtitle > * { flex: 1 1 auto; min-width: 0; }
 
+/* ══ §5 · WHAT A NUDGE LEAVES BEHIND ═════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE HISTORY LINE IS A CAPTION ON THE WAIT, not a row of its own — mono, quiet, under whatever
+ * state the wait is in. It answers "have I already chased this" without the writer scrolling.
+ */
+.tl-nhist { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-top: 9px; font-variant-numeric: tabular-nums; }
+
+/* ⚠️ TWO ANSWERS OF EQUAL STANDING, WHICH IS WHY NEITHER IS A LINK AND NEITHER IS THE PAGE'S PINK
+   PRIMARY. `Mark closed` carries a light fill only because it is the one that changes something;
+   `Keep tracking` is a real button beside it, not a dismissal set in small text. */
+.tl-offer { margin-top: 10px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; padding: 10px 11px; }
+.tl-offer-f { font-family: "Inter", sans-serif; font-size: 11.5px; line-height: 1.55; color: var(--ink-2); }
+.tl-offer-a { display: flex; gap: 7px; margin-top: 9px; }
+.tl-offer-go, .tl-offer-keep { font-family: "Inter", sans-serif; font-size: 11.5px; height: 32px; padding: 0 12px; border-radius: 8px; cursor: pointer; border: 1px solid var(--btn-line); background: var(--white); color: var(--ink-2); }
+.tl-offer-go { background: var(--pink); border-color: var(--qc-rim-pink); color: var(--ink); font-weight: 600; }
+.tl-offer-go:hover { filter: brightness(0.98); }
+.tl-offer-keep:hover { background: var(--paper); }
+
 /* ══ §4 · NUDGE — THE STATE ON THE CONTROL, AND THE CONFIRM ══════════════════════════════════
  *
  * ⚠️ THE NUDGED STATE IS A SUB-LABEL, NOT A SECOND BUTTON. "Nudged · 3 days ago" is one control

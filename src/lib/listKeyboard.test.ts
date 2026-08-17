@@ -204,7 +204,11 @@ describe("§4a · the ring belongs to the keyboard", () => {
    */
   it("the row has its own ring, and the shared one no longer reaches it", () => {
     expect(css, "the shared ring still reaches list rows")
-      .toContain("button:not(.f12-row):focus-visible { outline: 2px solid var(--ink)");
+      .toContain("button:not(.f12-row):focus-visible { outline: 2px solid var(--qc-ring)");
+    /* ⚠️ AND `--ink` IS GONE FROM IT (§3b). The exclusion was right and the COLOUR was the fault
+       that survived it: a page cannot claim "one focus-ring treatment" while its controls outline
+       in near-black and its rows ring in something else. */
+    expect(css, "a focus ring is still drawn in ink").not.toMatch(/focus-visible[^}]*outline:[^;}]*var\(--ink\)/);
     expect(css, "the row has no ring of its own").toContain(".f12-rows .f12-row:focus-visible");
     /* ⚠️ SCOPED, NOT SHOUTED — (0,3,0) against the shell's (0,2,1), which is enough to win. */
     expect(css, "the row's ring resorted to !important").not.toMatch(/\.f12-row:focus-visible[^}]*!important/);

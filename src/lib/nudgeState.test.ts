@@ -10,7 +10,7 @@ import { QueryStatus } from "../types";
 import { getPrimaryAction } from "./queryPrimaryAction";
 import {
   chasedBy, nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo,
-  nudgeOutcomeLabel, nudgeHistoryLine, closureOffer, CLOSURE_OFFER_MONTHS,
+  nudgeOutcomeLabel, nudgeHistoryLine, closureOffer, CLOSURE_OFFER_MONTHS, nudgedAgoLabel,
 } from "./nudgeState";
 
 const DAY = 86400000;
@@ -156,6 +156,14 @@ describe("§4d + §5 · what a nudge leaves behind", () => {
     expect(nudgeOutcomeLabel(400, [])).toBe("Nudged — no reply");
     /* ⚠️ AN OUTGOING EVENT IS NOT A REPLY — the writer sending the full does not answer their nudge */
     expect(nudgeOutcomeLabel(400, [{ status: QueryStatus.FULL_SENT, timeMs: 500 }])).toBe("Nudged — no reply");
+  });
+
+  /* ⚠️ "0 days ago" is a correct duration and the wrong sentence — measured on the page. */
+  it("a nudge sent today says today", () => {
+    expect(nudgedAgoLabel(0)).toBe("today");
+    expect(nudgedAgoLabel(1)).toBe("1 day ago");
+    expect(nudgedAgoLabel(21)).toBe("3 weeks ago");
+    expect(nudgedAgoLabel(0), "the control counted a duration where it should name a day").not.toContain("0");
   });
 
   it("§5b — the history line counts in words and lists the dates", () => {

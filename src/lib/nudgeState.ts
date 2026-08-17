@@ -163,6 +163,15 @@ export function nudgedAgo(times: number[], roundStartMs: number | null, now: num
 }
 
 /**
+ * §4d — how the control reports that it has been used.
+ *
+ * ⚠️ ZERO DAYS IS "TODAY", NOT "0 days ago". `elapsedPhrase` is a DURATION formatter and "0 days" is
+ * the correct duration; as a sentence about when something happened it is the wrong words. Measured
+ * on the deployed build immediately after a nudge: "Nudged · 0 days ago".
+ */
+export const nudgedAgoLabel = (days: number): string => (days === 0 ? "today" : `${elapsedPhrase(days)} ago`);
+
+/**
  * §5a — what a nudge event says.
  *
  * ⚠️ THE OUTCOME, NOT THE ACT, AND IT IS DERIVED. "Nudged — no reply" while nothing has come back;

@@ -81,7 +81,7 @@ import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, 
    fourteen days of grace before it can be true. The button answers a different question ("may I
    chase?"), and gating one on the other is what made Nudge permanently grey. The list's OVERDUE
    group still composes it, through `queryCentreGroups`. */
-import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, closureOffer } from "../lib/nudgeState";
+import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, nudgedAgoLabel } from "../lib/nudgeState";
 import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -3691,7 +3691,7 @@ export const Queries: React.FC<{
                     type="button"
                     className={`qc-btn qc-btn-shrink${nudgeAt === "available" ? "" : " qc-btn-off"}${nudgeAgoDays != null ? " qc-btn-quiet" : ""}`}
                     aria-disabled={nudgeAt !== "available"}
-                    title={nudgeAt === "available" ? (nudgeAgoDays != null ? `Nudged ${elapsedPhrase(nudgeAgoDays)} ago — nudge again` : "Send a nudge") : nudgeWhy}
+                    title={nudgeAt === "available" ? (nudgeAgoDays != null ? `Nudged ${nudgedAgoLabel(nudgeAgoDays)} — nudge again` : "Send a nudge") : nudgeWhy}
                     onClick={() => {
                       if (nudgeAt !== "available") return;
                       /* §4c — inside the agency's own stated window, state the facts and ask. Past
@@ -3715,7 +3715,7 @@ export const Queries: React.FC<{
                         sending a second follow-up they have already sent, and it uses §4's one
                         duration formatter rather than a count of days. */}
                     <span>{nudgeAgoDays != null ? "Nudged" : "Nudge"}</span>
-                    {nudgeAgoDays != null && <span className="qc-btn-sub">· {elapsedPhrase(nudgeAgoDays)} ago</span>}
+                    {nudgeAgoDays != null && <span className="qc-btn-sub">· {nudgedAgoLabel(nudgeAgoDays)}</span>}
                   </button>
                   </span>
                   {/* ⚠️ THE GAP CARRIES THE DIVISION, NOT A RULE (§3c). Two groups: what moves the
@@ -4964,9 +4964,23 @@ export const Queries: React.FC<{
                               })()}
                               onDeleteEntry={onDeleteEntry}
                               onNudge={() => setIsNudgeOpen(true)}
-                              /* §4c — the quiet offer beneath a no-reply event opens the same
-                                 close flow the bar's `Mark closed` does. One home for the act. */
+                              /* §4c — the offer beneath a no-reply event opens the same close flow
+                                 the bar's `Mark closed` does. One home for the act. */
                               onMarkClosed={() => setIsCloseMenuOpen(true)}
+                              /**
+                               * §5d — "Keep tracking" is a DECISION, so it is the one thing in §5
+                               * that is stored: `closureOfferDismissed` on the query, in the update
+                               * allowlist beside the rest.
+                               *
+                               * ⚠️ IT MUST NEVER COME BACK. Everything else the offer reads is
+                               * derived and will keep being true — more months pass, the nudge stays
+                               * unanswered — so without a stored answer the offer would return next
+                               * month having learned nothing, which is the nagging this forbids.
+                               */
+                              onKeepTracking={async () => {
+                                await updateQuery(activeQuery.id, { closureOfferDismissed: true } as never);
+                                showToast({ message: "Still tracking this query" });
+                              }}
                               onSetExpectedDate={() => openEditQuery(activeQuery.id)}
                               /* ⚠️ THE PICKER'S THIRD AND LAST HOME (§2). It anchors off the word it
                                  changes, so `methodPickTrigRef` is now a callback ref set by the
