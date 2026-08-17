@@ -435,7 +435,20 @@ service cloud.firestore {
           data.resultingStatus == 'Rejected' ||
           data.resultingStatus == 'Withdrawn' ||
           data.resultingStatus == 'No Response'
-        )));
+        )))
+        // ── the send's own materials (Query Centre §2) ──────────────────────────────────────
+        // ⚠️ OPTIONAL, because every activity written before this deploy has none and must stay
+        // valid — a required key here would reject every correction to an existing event.
+        //
+        // ⚠️ THE SAME SHAPE AND CAP AS THE QUERY'S OWN FIELD: a list of strings (legacy) or maps
+        // (structured QueryMaterial), 20 at most. The two are deliberately identical so a
+        // first-write migration can move a value across without it changing validity on the way.
+        //
+        // ⚠️ IT IS NAMED FOR THE EVENT IT SITS ON. On an activity, `materials` means what went with
+        // THIS send — a query-level `materialsWanted` had to carry both "what the agent asks for"
+        // and "what you sent", which is the ambiguity that stopped a sent-flag being added.
+        && (data.get('materials', null) == null
+            || ((data.materials is list || data.materials is map) && data.materials.size() <= 20));
     }
 
     function isValidJournalEntry(data, userId) {
@@ -610,7 +623,11 @@ service cloud.firestore {
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidId(activityId) && isValidActivity(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(activityId) && isValidActivity(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus'])
+          // ⚠️ `materials` MUST BE HERE OR EVERY MATERIALS WRITE IS SILENTLY DENIED. A field absent
+          // from this allowlist fails with a permission error the UI shows as nothing happening —
+          // the `affectedKeys` trap this repo has a note about. Added with the shape check above,
+          // in the same deploy, because either alone is broken.
+          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials'])
         );
       }
 
