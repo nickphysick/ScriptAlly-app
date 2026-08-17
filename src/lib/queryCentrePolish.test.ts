@@ -335,7 +335,9 @@ describe("§7 · the reading pane", () => {
     expect(rule(".tl-todaywhen"), "its label's rule survives").toBe("");
     /* ⚠️ AND THE FIGURE IT STATED IS STILL ON THE PAGE, which is what makes this a de-duplication
        rather than a loss: the waiting event carries the elapsed label as its own date. */
-    expect(tl, "the elapsed figure went with the marker").toContain("elapsedLabel(waiting.nDays)");
+    /* ⚠️ `elapsedLabel` → `elapsedPhrase` (§4a): one formatter, and the unit scales. The old one
+       stopped at weeks, so a two-year-old query read "121 weeks". */
+    expect(tl, "the elapsed figure went with the marker").toContain("elapsedPhrase(waiting.nDays)");
   });
 
   it("materials are chips on the Query sent entry, not a second list", () => {

@@ -18,6 +18,7 @@
  * `taskPrecedence` — the same module the to-do generator and the Nudge button read. This file
  * decides only how those two answers are ARRANGED.
  */
+import { ElapsedSense, elapsedPhrase } from "./elapsed";
 import { Query, Agent, QueryStatus } from "../types";
 import { queryBucket } from "./queryAmbient";
 import { replyOverdue, replyDeadlineMs } from "./taskPrecedence";
@@ -41,8 +42,14 @@ export const GROUP_ORDER: readonly ListGroup[] = ["overdue", "waiting", "move", 
  *
  * A mockup wins on what it shows; it does not win a factual claim about whose turn it is.
  */
+/**
+ * ⚠️ "OVERDUE" LEAVES THE PRODUCT (§4c). It asserts the agent failed an obligation they never made:
+ * a response window is a stated intention, not a contract, and a query past it is a query that has
+ * not been answered — which is what the app can honestly say. The derivation is untouched; only the
+ * word is.
+ */
 export const GROUP_LABEL: Record<ListGroup, string> = {
-  overdue: "OVERDUE",
+  overdue: "NO REPLY YET",
   waiting: "WAITING",
   move: "YOUR MOVE",
   closed: "CLOSED",
@@ -106,10 +113,18 @@ export function rowFigure(query: QueryLike, agent: AgentLike, now: number = Date
  * ⚠️ AND `+0 DAYS` IS `DUE TODAY`. The day the window closes is neither "left" nor "late" by any
  * useful reading, and a zero on a row is the least informative thing it could say.
  */
+/**
+ * ⚠️ THE FIGURE SCALES ITS UNIT (§4a), THROUGH THE ONE FORMATTER. `+847 DAYS` made the reader
+ * divide before the number meant anything; `2¼ years` is the same fact in the unit a person would
+ * have used. The exact date rides in a `title` on the figure — approximate display, precise truth.
+ *
+ * ⚠️ AND THE "+" IS GONE WITH "OVERDUE" (§4c). A plus sign on a wait is an overrun against a
+ * deadline the agency never agreed to; the duration alone states the same fact without the verdict.
+ */
 export function figureText(f: RowFigure): string | null {
   if (f.kind === "date") return null;
-  if (f.kind === "left") return `${f.days} ${f.days === 1 ? "DAY" : "DAYS"} LEFT`;
-  return f.days === 0 ? "DUE TODAY" : `+${f.days} ${f.days === 1 ? "DAY" : "DAYS"}`;
+  if (f.kind === "left") return `${elapsedPhrase(f.days)} left`;
+  return f.days === 0 ? "today" : elapsedPhrase(f.days);
 }
 
 /**
@@ -121,4 +136,18 @@ export function figureText(f: RowFigure): string | null {
 export const CLOSED_FOLD_MIN = 5;
 export function foldClosed(n: number): boolean {
   return n >= CLOSED_FOLD_MIN;
+}
+
+/**
+ * ⚠️ WHICH SENTENCE A ROW'S DURATION IS IN (§4a). "With agent for 2¼ years" is true only while the
+ * query is actually with an agent; on a rejected one it is a false statement about someone's own
+ * submission, which is worse than a vague one.
+ *
+ * ⚠️ IT READS THE GROUP, NOT THE STATUS, so the words and the row's position cannot disagree — the
+ * group is already the answer to "where does this stand", derived from `getPrimaryAction`.
+ */
+export function elapsedSenseFor(group: ListGroup): ElapsedSense {
+  if (group === "closed") return "closed";
+  if (group === "move") return "your-move";
+  return "with-agent";
 }

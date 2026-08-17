@@ -11,6 +11,7 @@
 import { Query, QueryStatus } from "../types";
 /* the CTA engine — the consequence line promises what the ROW will offer, so it must ask the same
    function the row asks rather than restating the map */
+import { elapsedPhrase } from "./elapsed";
 import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
@@ -474,6 +475,13 @@ export interface TrackingStatCell {
   absent: boolean;
 }
 
+/* ⚠️ THE STRIP SHOWS THE SCALED PHRASE (§4a), SPLIT INTO ITS FIGURE AND ITS UNIT — the cell draws
+   the number large and the unit small, so the formatter's one string is divided at the space rather
+   than composed a second way. `85 days` became `12 weeks`; a two-year query read `847 days`. */
+const splitPhrase = (p: string): { value: string; unit?: string } => {
+  const i = p.indexOf(" ");
+  return i < 0 ? { value: p } : { value: p.slice(0, i), unit: p.slice(i + 1) };
+};
 const STAT_DAY = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric" });
 const STAT_MON = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { month: "short" });
 
@@ -488,10 +496,42 @@ export function trackingStatCells(a: AmbientStatus): TrackingStatCell[] {
        "Waiting so far · Not set" says nothing; "Date sent · Not set" says what is wrong with the
        record. The SHAPE is what is fixed here — two cells, one geometry — not the words. */
     a.sentMs != null
-      ? { key: "waiting", value: String(a.nDays), unit: a.nDays === 1 ? "day" : "days", caption: "Waiting so far", absent: false }
+      ? { key: "waiting", ...splitPhrase(elapsedPhrase(a.nDays)), caption: "Waiting so far", absent: false }
       : { key: "waiting", value: "Not set", caption: "Date sent", absent: true },
     a.expMs != null
       ? { key: "expected", value: STAT_DAY(a.expMs), unit: STAT_MON(a.expMs), caption: "Reply expected by", absent: false }
       : { key: "expected", value: "Not set", caption: "Reply expected by", absent: true },
   ];
 }
+
+/**
+ * ══ §4b · THE COUNT STATES BOTH HALVES ═══════════════════════════════════════════════════════
+ *
+ * ⚠️ "17 AWAITING" LEFT THE OTHER HALF UNSAID, so the reader had to subtract to learn the thing
+ * they actually wanted: how many have come back. `8 answered · 17 not` states both, and the two
+ * are the whole set by construction rather than by two counts agreeing.
+ *
+ * ⚠️ THEY SUM TO THE TOTAL, INCLUDING CLOSED AND WITHDRAWN — which is why `notAnswered` is derived
+ * by SUBTRACTION rather than counted. Two independent tallies is how a page comes to state a pair
+ * that does not add up, and a closed query is one nobody is waiting on but which still happened.
+ *
+ * ⚠️ ANSWERED MEANS THE AGENT REPLIED, from the canonical set the rest of the app reads — not
+ * "not waiting", which would count a query you withdrew as one they answered.
+ */
+export interface AnsweredSplit { answered: number; notAnswered: number; total: number }
+
+export function answeredSplit(queries: Pick<Query, "status">[]): AnsweredSplit {
+  const total = queries.length;
+  const answered = queries.filter((q) => AGENT_ANSWERED.has(q.status as QueryStatus)).length;
+  return { answered, notAnswered: total - answered, total };
+}
+
+/**
+ * ⚠️ THE AGENT SAID SOMETHING. A request, an offer or a rejection is an answer; withdrawn is the
+ * writer's own act and no-response is the absence of one, so neither counts.
+ */
+const AGENT_ANSWERED = new Set<QueryStatus>([
+  QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT,
+  QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT,
+  QueryStatus.REVISE_RESUBMIT, QueryStatus.OFFER, QueryStatus.REJECTED,
+]);

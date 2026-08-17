@@ -104,8 +104,11 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
        columns are to read as one grid. */
     expect(code, "the label came back into the position the primary needs").not.toContain("THIS QUERY");
     /* the cap counts through the shared bucket, which is where the clause about agreement lives */
-    expect(code, "the cap counts waiting queries some other way")
-      .toContain('queryBucket(q.status as QueryStatus) === "waiting"');
+    /* ⚠️ §4b — THE CAP STATES BOTH HALVES NOW, from ONE derivation whose second figure is taken by
+       SUBTRACTION, so the pair sums to the total by construction rather than by two tallies
+       agreeing. `queryBucket` was the right source for a single "awaiting" figure and the wrong one
+       for a pair: it does not account for closed and withdrawn. */
+    expect(code, "the cap counts some other way").toContain("answeredSplit(mastheadScopedQueries)");
   });
 
   /* ⚠️ THE POINT OF THE WHOLE SPLIT. Six selected-query verbs used to sit above the list, all six
@@ -242,8 +245,11 @@ describe("§1b · the count caps the list it counts", () => {
     expect(code, "the masthead grew a count of its own").not.toMatch(/description=\{`\$\{\w+\.length\}/);
     /* ⚠️ AND THE CAP READS THE SAME BUCKET FUNCTION, so the two figures cannot disagree with the
        filter pills or with `getPrimaryAction` about whose turn anything is. */
-    expect(code, "the cap counts waiting queries some other way")
-      .toContain('queryBucket(q.status as QueryStatus) === "waiting"');
+    /* ⚠️ §4b — THE CAP STATES BOTH HALVES NOW, from ONE derivation whose second figure is taken by
+       SUBTRACTION, so the pair sums to the total by construction rather than by two tallies
+       agreeing. `queryBucket` was the right source for a single "awaiting" figure and the wrong one
+       for a pair: it does not account for closed and withdrawn. */
+    expect(code, "the cap counts some other way").toContain("answeredSplit(mastheadScopedQueries)");
   });
 
   /**

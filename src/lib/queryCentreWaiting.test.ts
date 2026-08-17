@@ -63,10 +63,16 @@ describe("§3 · waiting and the nudge are timeline events", () => {
     );
   });
 
-  /* ⚠️ ONLY THE WITHIN-WINDOW STATE GIVES UP ITS BOX — that box is what this section removes.
-     Overdue and grace keep theirs because there the frame is an ESCALATION rather than a container. */
-  it("the escalation treatments keep their frames", () => {
-    expect(tl, "the overdue card lost its pink frame").toContain('background: "var(--pink-t)"');
+  /**
+   * ⚠️ THE FRAME SURVIVES, THE ALARM DOES NOT (§4c). The clause was that the escalated states keep
+   * a frame because there it is an ESCALATION rather than a container — and that is unchanged. What
+   * changed is the tone: a pink card and a red fill said the agency had failed an obligation they
+   * never made, and the app reports rather than appraises. The no-reply card is the palette's own
+   * neutral step and the bar is a spent hatch.
+   */
+  it("the escalation treatments keep their frames, in the palette's own tones", () => {
+    expect(tl, "the no-reply card lost its frame").toContain('className="tl-noreply"');
+    expect(tl, "the no-reply card kept an alarm colour").not.toContain('background: "var(--pink-t)"');
     expect(tl, "the grace card lost its dashed sage frame").toContain('border: "1px dashed var(--sage');
   });
 });

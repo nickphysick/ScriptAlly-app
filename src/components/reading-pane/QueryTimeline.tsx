@@ -15,7 +15,8 @@ import React, { useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
-import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel } from "../../lib/queryAmbient";
+import { queryAmbientStatus, deriveEscalation, trackingBar, nudgeCount } from "../../lib/queryAmbient";
+import { elapsedPhrase } from "../../lib/elapsed";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 
@@ -421,7 +422,7 @@ const TlProjection: React.FC<{
   </TlEvent>
 );
 
-export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.ReactNode }> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, sentExtra }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.ReactNode; onMarkClosed?: () => void }> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, sentExtra, onMarkClosed }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
   const rows = buildTimelineRows(events, query, agent);
@@ -540,7 +541,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
         const nudgeAhead = reminderMs != null && reminderMs > Date.now();
         /* the agent's stated window, from the agent — falling back to nothing rather than to an
            invented number when they have not stated one */
-        const statedWeeks = (agent as any)?.responseTimeWeeks;
+        const statedWeeks = (agent as any)?.responseTimeWeeks as number | undefined;
         const windowLine = typeof statedWeeks === "number" && statedWeeks > 0
           ? `${agent?.name?.split(" ")[0] || "They"} states ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}`
           : waiting.expMs != null ? `Expected by ~${fmtShort(waiting.expMs)}` : null;
@@ -549,7 +550,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
           <TlProjection
             status={query.status}
             title="Waiting to hear back"
-            date={waiting.sentMs != null ? elapsedLabel(waiting.nDays).toUpperCase() : undefined}
+            date={waiting.sentMs != null ? elapsedPhrase(waiting.nDays).toUpperCase() : undefined}
             last={!nudgeAhead}
           >
             {!hasExpected ? (
@@ -581,7 +582,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
                 return (
                   <div style={{ border: "1px dashed var(--sage, #8a9e88)", borderRadius: 11, padding: "11px 13px" }}>
                     <div style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink, #1e1a16)" }}>
-                      Response {elapsedLabel(waiting.daysOverdue)} overdue — nudge sent {lastNudgeMs != null ? fmtNatural(lastNudgeMs) : "recently"}
+                      No reply after {elapsedPhrase(waiting.daysOverdue)} past the window — nudge sent {lastNudgeMs != null ? fmtNatural(lastNudgeMs) : "recently"}
                     </div>
                     <div style={{ fontSize: 12, color: "var(--muted, #7d7469)", marginTop: 4 }}>
                       Scheduled follow-up set for {reminderMs != null ? fmtNatural(reminderMs) : "—"}
@@ -624,19 +625,42 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
                 const now = Date.now();
                 const expectedPct = dated ? Math.max(0, Math.min(100, ((waiting.expMs! - waiting.sentMs!) / Math.max(1, now - waiting.sentMs!)) * 100)) : 0;
                 return (
-                  <div style={{ background: "var(--pink-t)", border: "1px solid var(--pink-b)", borderRadius: 11, padding: "11px 13px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap", color: "var(--ink, #1e1a16)" }}>
+                  /**
+                   * ⚠️ §4c · THE FACTS, THEN THE CONVENTION, THEN AN OFFER — and no verdict anywhere.
+                   * "Response overdue by 4 weeks" said the agency had failed an obligation; a stated
+                   * window is an intention, not a contract. What the app can honestly say is what
+                   * the agency stated, when that window closed, and what silence usually means.
+                   *
+                   * ⚠️ AND THE OFFER IS QUIET AND OPTIONAL. "You can mark this closed if you'd
+                   * rather stop tracking it" leaves the decision where it belongs; "close this" or
+                   * "give up on this" would be the app deciding for them.
+                   *
+                   * ⚠️ NO RED FILL. The card is the palette's own tones and the bar is a spent
+                   * hatch — a colour that means alarm is a verdict by another route.
+                   */
+                  <div className="tl-noreply">
+                    <div className="tl-noreply-h">
                       {clockIcon}
-                      <span style={{ fontFamily: FONT_SERIF, fontSize: 14, fontWeight: 600, color: "var(--ink, #1e1a16)" }}>
-                        Response overdue by {elapsedLabel(waiting.daysOverdue)}{nudges > 0 ? ` · nudged ${nudges === 1 ? "once" : `${nudges}×`}` : ""}
-                      </span>
+                      <span>No reply{nudges > 0 ? ` · nudged ${nudges === 1 ? "once" : `${nudges}×`}` : ""}</span>
                     </div>
+                    <div className="tl-noreply-f">
+                      {statedWeeks ? `${agent?.agency?.trim() || agent?.name?.split(" ")[0] || "They"} state ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}. ` : ""}
+                      {waiting.expMs != null ? `That window closed in ${new Date(waiting.expMs).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}.` : ""}
+                    </div>
+                    <div className="tl-noreply-c">Many agencies treat silence as a pass.</div>
+                    {onMarkClosed && (
+                      <button type="button" className="tl-noreply-a" onClick={onMarkClosed}>
+                        You can mark this closed if you&rsquo;d rather stop tracking it
+                      </button>
+                    )}
                     {dated && (
                       <>
                         {/* the fill runs to the full end of the track — no warning glyph (redundant with
                             the headline), so no gap where it sat */}
                         <div style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, background: "var(--pink-b)" }}>
-                          <div style={{ position: "absolute", inset: 0, borderRadius: 6, background: "linear-gradient(90deg, #e6a99b, var(--pink-i))" }} />
+                          {/* ⚠️ A SPENT HATCH, NOT A RED FILL (§4c) — the window is used up, which
+                              is a fact about time rather than a warning about a person. */}
+                          <div className="tl-spent" style={{ position: "absolute", inset: 0, borderRadius: 6 }} />
                           {/* response-expected milestone — bare hollow circle; its date shows on hover/tap */}
                           <BarMilestone pct={expectedPct} label={`RESPONSE EXPECTED ${fmtShort(waiting.expMs!)}`} />
                         </div>
@@ -689,7 +713,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.Re
             <span style={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 15, color: "var(--ink, #1e1a16)" }}>Your move — send the {sendWhat}</span>
             {ambient.writerDaysAgo != null && (
               <small style={{ display: "block", fontWeight: 500, fontSize: 11.5, color: "var(--burg, #7c3a2a)", marginTop: 3 }}>
-                {agent?.name?.split(" ")[0] || "The agent"} asked for it {elapsedLabel(ambient.writerDaysAgo)} ago
+                {agent?.name?.split(" ")[0] || "The agent"} asked for it {elapsedPhrase(ambient.writerDaysAgo)} ago
               </small>
             )}
           </div>

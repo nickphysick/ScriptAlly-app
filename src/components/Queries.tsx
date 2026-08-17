@@ -50,7 +50,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, answeredSplit, DAY } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -72,7 +72,8 @@ import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
 /* §5 — the list's four groups and the position figure, both derived, both composing rules that
    already exist (`queryBucket` for membership, `taskPrecedence` for the clock). */
-import { GROUP_ORDER, GROUP_LABEL, listGroupFor, rowFigure, figureText, foldClosed } from "../lib/queryCentreGroups";
+import { GROUP_ORDER, GROUP_LABEL, listGroupFor, rowFigure, figureText, foldClosed, elapsedSenseFor } from "../lib/queryCentreGroups";
+import { ELAPSED_LABEL, exactDate } from "../lib/elapsed";
 import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, isTypeAheadKey, TYPEAHEAD_MS } from "../lib/listKeyboard";
 /* §2/§5 — the ONE reply-overdue rule, two consumers: Nudge's greying and the list's OVERDUE group.
    `replyTaskFor` also owns the input assembly, which is the second place two callers could drift. */
@@ -3778,9 +3779,14 @@ export const Queries: React.FC<{
                 Two different jobs, and the cap is the one that introduces the column. */}
             <div className="f12-chh">
               <span>{mastheadScopedQueries.length} {mastheadScopedQueries.length === 1 ? "query" : "queries"}</span>
-              <span className="qp-cardmeta">
-                {mastheadScopedQueries.filter((q) => queryBucket(q.status as QueryStatus) === "waiting").length} awaiting
-              </span>
+              {/* ⚠️ §4b · BOTH HALVES, AND THEY SUM. "17 awaiting" left the other half unsaid, so the
+                  reader had to subtract to learn how many have come back. The two figures come from
+                  ONE derivation with `notAnswered` taken by subtraction, which is why they add up to
+                  the total by construction rather than by two tallies agreeing. */}
+              {(() => {
+                const sp = answeredSplit(mastheadScopedQueries);
+                return <span className="qp-cardmeta">{sp.answered} answered · {sp.notAnswered} not</span>;
+              })()}
             </div>
             {/* ⚠️ THE COLUMN'S OWN HEADING IS GONE (§1a). It read "20 queries" — the same figure
                 the masthead states directly above it, on one screen, twice. Panes do not introduce
@@ -3899,6 +3905,14 @@ export const Queries: React.FC<{
                 const figure = rowFigure(q as never, agent, nowMs);
                 const figureLabel = figureText(figure) ?? formatListRowDate(q.dateSent) ?? "—";
                 const queriedDate = figureLabel;
+                /* ⚠️ §4a · THE LABEL SITS ABOVE THE FIGURE, and it is the group's sense rather than
+                   the status's — so the words and the row's position cannot disagree. "With agent
+                   for" is TRUE only while the query is with an agent; on a closed row it would be a
+                   false sentence about the writer's own submission, which is worse than a vague
+                   one. Absent on a date fallback, where there is no duration to qualify. */
+                const senseLabel = figure.kind === "date" ? null : ELAPSED_LABEL[elapsedSenseFor(listGroupFor(q as never, agent, nowMs))];
+                /* approximate display, precise truth — the exact date rides in the title */
+                const exact = q.dateSent ? exactDate(new Date(q.dateSent).getTime()) : "";
                 return (
                   <button
                     key={q.id}
@@ -3961,7 +3975,10 @@ export const Queries: React.FC<{
                       ) : (
                         <StatusDot status={q.status} overrideSize={15} />
                       )}
-                      <span className={`f12-d2${figure.kind === "late" ? " f12-d2-late" : ""}`}>{queriedDate}</span>
+                      <span className={`f12-d2${figure.kind === "late" ? " f12-d2-late" : ""}`} title={exact ? `Sent ${exact}` : undefined}>
+                        {senseLabel && <i className="f12-d2lab">{senseLabel}</i>}
+                        {queriedDate}
+                      </span>
                     </span>
                   </button>
                 );
@@ -4902,6 +4919,9 @@ export const Queries: React.FC<{
                               })()}
                               onDeleteEntry={onDeleteEntry}
                               onNudge={() => setIsNudgeOpen(true)}
+                              /* §4c — the quiet offer beneath a no-reply event opens the same
+                                 close flow the bar's `Mark closed` does. One home for the act. */
+                              onMarkClosed={() => setIsCloseMenuOpen(true)}
                               onSetExpectedDate={() => openEditQuery(activeQuery.id)}
                               /* ⚠️ THE PICKER'S THIRD AND LAST HOME (§2). It anchors off the word it
                                  changes, so `methodPickTrigRef` is now a callback ref set by the

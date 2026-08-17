@@ -2425,6 +2425,26 @@
 .qc-mail::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--qc-card-border); pointer-events: none; }
 /* the send's own materials, under the `Query sent` rung */
 .qc-sentmat { margin-top: 10px; }
+/* ══ §4c · THE NO-REPLY EVENT — facts, convention, offer, and no verdict ════════════════════
+ * ⚠️ THE PALETTE'S OWN TONES, NOT A RED CARD. A colour that means alarm is a verdict by another
+ * route, and the app reports rather than appraises. The card is the neutral step the page already
+ * uses for a quiet surface. */
+.tl-noreply { background: var(--n1); border: 1px solid var(--hairline); border-radius: 11px; padding: 11px 13px; }
+.tl-noreply-h { display: flex; align-items: center; gap: 9px; font-family: var(--f12-serif); font-size: 14px; font-weight: 600; color: var(--ink); }
+.tl-noreply-f { font-family: "Inter", sans-serif; font-size: 12px; color: var(--ink-2); margin-top: 6px; line-height: 1.5; }
+/* the convention is quieter than the facts — it is context, not a finding about this query */
+.tl-noreply-c { font-family: "Inter", sans-serif; font-size: 12px; color: var(--faint); margin-top: 3px; }
+/* ⚠️ THE OFFER IS A PLAIN LINK, and quiet. "You can" leaves the decision where it belongs. */
+.tl-noreply-a { display: block; margin-top: 9px; padding: 0; border: 0; background: none; font-family: "Inter", sans-serif; font-size: 12px; color: var(--burg); text-align: left; cursor: pointer; }
+.tl-noreply-a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* ⚠️ A SPENT HATCH, NOT A FILL — the window is used up, which is a fact about time rather than a
+   warning about a person. */
+/* ⚠️ §4a · THE LABEL ABOVE THE FIGURE, which is what lets it be a sentence rather than a caption:
+   the eye reads "with agent for" and then the number it qualifies. Tabular numerals so a column of
+   durations lines up. */
+.f12-d2lab { display: block; font-style: normal; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-bottom: 3px; font-weight: 400; }
+.f12-d2 { font-variant-numeric: tabular-nums; }
+.tl-spent { background: repeating-linear-gradient(-45deg, var(--n4) 0 4px, var(--n2) 4px 9px); }
 .qc-sentms { display: flex; align-items: baseline; gap: 11px; min-width: 0; margin-bottom: 8px; }
 /* ⚠️ THE ROWS TAKE THE FREE WIDTH AND THE STATUS TAKES WHAT IT NEEDS — `minmax(0, 1fr) auto`. The
    `minmax(0, …)` is load-bearing: a `1fr` track's default minimum is min-content, so a long email

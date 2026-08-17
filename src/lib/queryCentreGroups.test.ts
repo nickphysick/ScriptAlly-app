@@ -73,9 +73,15 @@ describe("§5 · the four groups", () => {
 });
 
 describe("§5 · the figure is a position, and it agrees with the group", () => {
+  /**
+   * ⚠️ THE FIGURE SCALES ITS UNIT AND LOSES ITS SHOUT (§4a/§4c). `+46 DAYS LEFT` became `7 weeks
+   * left`: mono uppercase belonged to a label, and a `+` on a wait is an overrun against a deadline
+   * the agency never agreed to. The DERIVATION is untouched — same days, same groups, same
+   * direction — which is why only the strings in these cases moved.
+   */
   it("waiting counts down, overdue counts up, everything else keeps its date", () => {
-    expect(figureText(rowFigure(q({ dateSent: daysAgo(10) }), agent(), NOW))).toBe("46 DAYS LEFT");
-    expect(figureText(rowFigure(q({ dateSent: daysAgo(75) }), agent(), NOW))).toBe("+19 DAYS");
+    expect(figureText(rowFigure(q({ dateSent: daysAgo(10) }), agent(), NOW))).toBe("7 weeks left");
+    expect(figureText(rowFigure(q({ dateSent: daysAgo(75) }), agent(), NOW))).toBe("3 weeks");
     expect(rowFigure(q({ status: QueryStatus.PARTIAL_REQUESTED }), agent(), NOW).kind).toBe("date");
     expect(rowFigure(q({ status: QueryStatus.REJECTED }), agent(), NOW).kind).toBe("date");
     expect(figureText({ kind: "date" })).toBeNull();
@@ -110,9 +116,9 @@ describe("§5 · the figure is a position, and it agrees with the group", () => 
   });
 
   it("singulars agree, and the day the window closes says so", () => {
-    expect(figureText(rowFigure(q({ dateSent: daysAgo(55) }), agent(), NOW))).toBe("1 DAY LEFT");
-    expect(figureText(rowFigure(q({ dateSent: daysAgo(56) }), agent(), NOW))).toBe("DUE TODAY");
-    expect(figureText(rowFigure(q({ dateSent: daysAgo(57) }), agent(), NOW))).toBe("+1 DAY");
+    expect(figureText(rowFigure(q({ dateSent: daysAgo(55) }), agent(), NOW))).toBe("1 day left");
+    expect(figureText(rowFigure(q({ dateSent: daysAgo(56) }), agent(), NOW))).toBe("today");
+    expect(figureText(rowFigure(q({ dateSent: daysAgo(57) }), agent(), NOW))).toBe("1 day");
   });
 
   it("an unplaceable query keeps its date rather than inventing a position", () => {
