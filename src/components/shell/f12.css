@@ -1745,18 +1745,9 @@
    is positioned to the same centre — one number, `left: 15px`, which is half of that gutter.
    ⚠️ SOLID, WHERE THE PROJECTIONS ARE HOLLOW. The contrast is the marker: everything below it has
    not happened, and this is the only point on the line that is true right now. */
-/* ⚠️ ON THE EVENTS' OWN INSET AND THE EVENTS' OWN GAP (§6). It used to state `padding-left: 41px`
-   and `margin: 2px 0 13px` — a third inset and a fourth gap, and it sits BETWEEN the history and
-   the projections, so its two odd margins were the visible break in the middle of the rhythm. It
-   reads `.tl-ev`'s numbers now; the dot's `left` is derived from the marker rather than from the
-   retired 30px gutter, so it stays on the line if the marker ever resizes. */
-.tl-today { position: relative; padding-left: 40px; padding-bottom: var(--tl-gap); margin: 0; }
-.tl-today::before { content: ""; position: absolute; left: calc(var(--tl-mark) / 2 - 4.5px); top: 3px; width: 9px; height: 9px; border-radius: 50%; background: var(--burg); box-shadow: 0 0 0 3px #f8e7dc; z-index: 1; }
-/* the connector passes BEHIND the dot — its 3px ring masks the hairline, which is what puts the
-   marker "on" the line rather than beside a line that stops and restarts around it */
-.tl-today::after { content: ""; position: absolute; left: calc(var(--tl-mark) / 2); top: 0; bottom: 0; width: 1.6px; transform: translateX(-50%); background: var(--hairline, #e8dcd0); }
-.tl-today b { font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600; color: var(--burg); }
-.tl-todaywhen { float: right; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; color: var(--qc-acc-today); }
+/* ⚠️ THE TODAY MARKER'S RULES ARE DELETED WITH IT (§2). The previous pack had just brought this
+   element onto the events' inset and gap — which is why removing it costs the rhythm nothing: the
+   numbers it read belonged to `.tl-ev`, not to itself. See QueryTimeline for why it went. */
 
 /* ── §5 · GROUP RULES — the list answers "who do I chase" ─────────────────────────────────────
    A mono label, then a hairline running to the panel's edge. Not a heading: it is a divider that
@@ -3253,6 +3244,9 @@ button.qc-pairnm:hover { color: var(--burg); }
 .qp-statgl svg { width: 17px; height: 17px; stroke: var(--burg); fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
 .qp-statn { font-family: var(--f12-serif); font-size: 25px; line-height: 1; color: var(--ink); }
 .qp-statn small { font-size: 13px; color: var(--ink-2); }
+/* ⚠️ THE UNRECORDED FIGURE, AT THE CAPTION'S OWN WEIGHT (§2) — present enough to hold the cell's
+   shape, quiet enough not to out-rank the figure beside it that is real. */
+.qp-statn--off { font-family: "Inter", sans-serif; font-size: 14px; color: var(--qc-tx-off); }
 .qp-statk { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 5px; }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════

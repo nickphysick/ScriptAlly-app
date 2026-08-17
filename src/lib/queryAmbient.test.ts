@@ -8,7 +8,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { queryAmbientStatus, commandBarStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel, suggestedAction, isHugelyOverdue, HUGELY_OVERDUE_WINDOW_MULT, HUGELY_OVERDUE_FLOOR_WEEKS } from "./queryAmbient";
+import { queryAmbientStatus, commandBarStatus, deriveEscalation, trackingBar, nudgeCount, elapsedLabel, suggestedAction, trackingStatCells, isHugelyOverdue, HUGELY_OVERDUE_WINDOW_MULT, HUGELY_OVERDUE_FLOOR_WEEKS } from "./queryAmbient";
 import { QueryStatus } from "../types";
 
 const NOW = new Date("2026-07-06T00:00:00Z").getTime();
@@ -510,5 +510,61 @@ describe("Fork pulse — the composer applies tc-suggested to exactly one chip; 
   it("no fork chip carries a pink fill any more (the 'primary' fill is gone)", () => {
     expect(css.includes("--pink-btn")).toBe(false);
     expect(/\.tc-chip\.tc-primary\s*\{[^}]*background/.test(css)).toBe(false);
+  });
+});
+
+/**
+ * ══ §2 · TRACKING'S FIXED SKELETON ═══════════════════════════════════════════════════════════
+ *
+ * ⚠️ EVERY INPUT IS `queryAmbientStatus`'s OWN OUTPUT, never a hand-written object. A test that
+ * types `{ mode: "waiting", expMs: null }` is testing a shape the system might not produce — the
+ * trap this repo has a rule about, and it bites hardest here, because the whole point of these
+ * cases is the branch the running app could not exercise.
+ */
+describe("trackingStatCells — the strip keeps its shape whatever the record holds", () => {
+  const cells = (over: Record<string, any>, ball: "agent" | "writer" | null, mark?: any) =>
+    trackingStatCells(queryAmbientStatus(q(over), ball, mark, NOW));
+
+  it("sent + a stated window → two figures, neither absent", () => {
+    const c = cells({ status: QueryStatus.QUERIED, dateSent: "2026-06-01T00:00:00.000Z" }, "agent");
+    expect(c).toHaveLength(2);
+    expect(c.map((x) => x.absent)).toEqual([false, false]);
+    expect(c[0].caption).toBe("Waiting so far");
+    expect(c[1].caption).toBe("Reply expected by");
+  });
+
+  /* ⚠️ THE BRANCH THE PAGE COULD NOT REACH. Every query on dev has an expected date, so the
+     browser measure proved the shape and never ran this. An undated import produces it. */
+  it("no send date and no override → still two cells, both stating the missing field", () => {
+    const c = cells({ status: QueryStatus.QUERIED, dateSent: undefined }, "agent");
+    expect(c, "the strip shortened — two queries would render two card shapes").toHaveLength(2);
+    expect(c.map((x) => x.value)).toEqual(["Not set", "Not set"]);
+    /* ⚠️ AND THE ABSENT CELL NAMES THE FIELD RATHER THAN KEEPING A FALSE CAPTION. "Waiting so far ·
+       Not set" says nothing about the record; "Date sent · Not set" says exactly what is missing. */
+    expect(c[0].caption).toBe("Date sent");
+    expect(c[1].caption).toBe("Reply expected by");
+    expect(c.map((x) => x.absent)).toEqual([true, true]);
+  });
+
+  it("an override deadline with no send date → the expected cell fills, the other states its gap", () => {
+    const c = cells({ status: QueryStatus.QUERIED, dateSent: undefined, responseDeadline: "2026-09-01T00:00:00.000Z" }, "agent");
+    expect(c).toHaveLength(2);
+    expect(c[0].absent, "a send date appeared from nowhere").toBe(true);
+    expect(c[1].absent, "the override did not fill the expected cell").toBe(false);
+  });
+
+  /* ⚠️ AND IT OMITS WHERE ITS FIGURES DO NOT APPLY. Both describe waiting on an agent; on a
+     writer's-turn or closed query a skeleton would be two "Not set" cells about a wait that is not
+     happening. Asserted so "always renders" is not read as "renders everywhere". */
+  it("a writer's-turn or closed query renders no strip at all", () => {
+    expect(cells({ status: QueryStatus.PARTIAL_REQUESTED, partialRequestedDate: "2026-06-01T00:00:00.000Z" }, "writer", "partial")).toHaveLength(0);
+    expect(cells({ status: QueryStatus.REJECTED }, null)).toHaveLength(0);
+  });
+
+  /* singular agrees with its verb at one day — the house rule for every count on this page */
+  it("one day reads 'day', not 'days'", () => {
+    const c = cells({ status: QueryStatus.QUERIED, dateSent: new Date(NOW - 26 * 60 * 60 * 1000).toISOString() }, "agent");
+    expect(c[0].value).toBe("1");
+    expect(c[0].unit).toBe("day");
   });
 });

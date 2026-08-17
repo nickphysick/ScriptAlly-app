@@ -12,10 +12,12 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
+import { sliceBetween } from "../test/sliceBetween";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
 const css = read("../components/shell/f12.css");
 const queries = read("../components/Queries.tsx");
+const ambient = read("./queryAmbient.ts");
 const code = queries.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
 
 /** The FULL rule for a selector — every block, joined. A first-match slice reads whichever block
@@ -255,23 +257,56 @@ describe("§7 · the reading pane", () => {
     expect(code, "the Tracking stats did not pass the agent's window").toContain("activeAgent.responseTimeWeeks)");
   });
 
-  /* ⚠️ SOLID AMONG HOLLOW — the contrast IS the marker. Everything below it is a projection. */
-  it("the today marker is a solid burgundy dot stating a position, not a judgement", () => {
-    expect(tl, "the today marker is missing").toContain('className="tl-today"');
-    expect(tl, "the marker stopped stating the position").toContain("Day {day} of ~{span}");
-    expect(declValue(rule(".tl-today::before"), "background"), "the marker's dot is not solid burgundy").toBe("var(--burg)");
-    /* the projections are hollow through `StatusDot`'s own `ghost` — the locked component's
-       drained treatment, never a second hollow dot drawn beside it */
-    /* ⚠️ `TL_MARK`, NOT 28 (§6). The size is a named constant now because the CSS reads a token
-       for the same number and `StatusDot` takes a pixel figure rather than a `var()` — two places
-       that must agree, kept in step by `qcTimeline.measure.ts` measuring the rendered marker. */
-    expect(tl, "the projections stopped being ghosts").toContain("<StatusDot status={status} overrideSize={TL_MARK} ghost decorative />");
-    /* ⚠️ AND IT OMITS ITSELF RATHER THAN GUESSING. An undated import has no day to be on. */
-    expect(tl, "the marker renders without a window to count against")
-      .toContain("waiting.sentMs != null && waiting.expMs != null");
-    /* no adjective — the app reports, it does not appraise */
-    expect(tl.slice(tl.indexOf('className="tl-today"'), tl.indexOf('className="tl-today"') + 240))
-      .not.toMatch(/still|only|already|good|slow|plenty/i);
+  /**
+   * ⚠️ INVERTED BY THE PAIRING PACK'S §2 — THE TODAY MARKER IS REMOVED, and §7's own two arguments
+   * are what removed it. It was built as "the only point on the line that is true right now" and it
+   * "states a position, not a judgement" — both defensible, and both undone by what sits around it:
+   * `Waiting to hear back` already carries the elapsed figure as its date, and the stats strip above
+   * counts the same days against the same expected date, so the position was stated three times.
+   *
+   * ⚠️ AND IT WAS A MARK WITH NO EVENT BEHIND IT — the one node on the timeline recording that
+   * nothing had happened — drawn only on waiting-and-dated queries, which is most of what made two
+   * Tracking cards look differently spaced. Asserted dead in both files, because a burgundy dot
+   * among hollow ones is a good idea that will be had again.
+   */
+  /**
+   * ⚠️ §2 · THE STRIP IS A FIXED SKELETON, AND THIS REVERSES ITS OWN BLOCK'S RULE. The render
+   * carried "a dash against a caption states nothing while taking a line to do it" — true of a
+   * DASH, and still true. `Not set` is not a dash: it states that nobody has recorded an expected
+   * reply, which is a fact about the record and the one the timeline below offers to fix. Omitting
+   * the cell made two queries differing by one absent field into two different card SHAPES.
+   *
+   * ⚠️ ASSERTED AS A CONSTRUCTION, NOT AS A COUNT. The old code pushed conditionally into an array,
+   * so "two cells" was an outcome; the array is a literal of two now, and no `if` can shorten it.
+   * That is the difference between a skeleton and a coincidence.
+   */
+  it("the stats strip renders both cells whether or not an expected date exists", () => {
+    /* ⚠️ THE DERIVATION MOVED OUT OF THE CARD, and that is the case. It was built inline, so the
+       "Not set" branch could only be exercised by a record the dev account does not hold — every
+       query there has an expected date, and the browser measure proved the SHAPE while never
+       running the branch. `trackingStatCells` is pure and exhaustively covered in
+       `queryAmbient.test.ts`, from inputs the real derivation produced. */
+    expect(code, "the cells are built in the card again — the absent branch becomes untestable")
+      .toContain("const cells = trackingStatCells(amb);");
+    expect(code, "the cells are pushed conditionally again — a shape that depends on the data")
+      .not.toContain("cells.push(");
+    /* ⚠️ AND THE GLYPH STAYED BEHIND, which is why the move was possible: a lib returning JSX is a
+       lib a node-environment test cannot call. */
+    expect(code, "the glyphs followed the derivation into the lib").toContain("STAT_GLYPH[c.key]");
+    expect(ambient, "the derivation lost its absent state").toContain('caption: "Reply expected by", absent: true');
+    expect(ambient, "the waiting cell lost its absent state").toContain('caption: "Date sent", absent: true');
+    expect(ambient, "the strip stopped being scoped to the state its figures describe")
+      .toContain('if (a.mode !== "waiting") return [];');
+  });
+
+  it("the today marker is REMOVED — its position is stated by the events themselves", () => {
+    expect(tl, "the today marker came back").not.toMatch(/["\s`]tl-today["\s`]/);
+    expect(tl, "its copy came back under another class").not.toContain("Day {day} of ~{span}");
+    expect(rule(".tl-today"), "its rules survive with nothing wearing them").toBe("");
+    expect(rule(".tl-todaywhen"), "its label's rule survives").toBe("");
+    /* ⚠️ AND THE FIGURE IT STATED IS STILL ON THE PAGE, which is what makes this a de-duplication
+       rather than a loss: the waiting event carries the elapsed label as its own date. */
+    expect(tl, "the elapsed figure went with the marker").toContain("elapsedLabel(waiting.nDays)");
   });
 
   it("materials are chips on the Query sent entry, not a second list", () => {

@@ -30,15 +30,15 @@ interface Read { n: number; evs: Ev[]; titleRow: { h: number; markH: number } | 
 const read = (page: Page): Promise<Read> => page.evaluate(() => {
   const r = (n: number) => Math.round(n * 10) / 10;
   /**
-   * ⚠️ THE LINE IS A SEQUENCE OF NODES, AND `.tl-ev` IS NOT ALL OF THEM. The first run of this
+   * ⚠️ THE LINE IS A SEQUENCE OF NODES, AND `.tl-ev` WAS NOT ALL OF THEM. The first run of this
    * measure walked only the events and reported a 62.8px gap on eight queries — a real reading of
-   * the wrong thing: the TODAY marker sits between the history and the projections, so what the
-   * measure called a gap was a gap, a node and another gap added together. Reading it as a
-   * violation would have had me "fix" a rhythm that was already correct.
+   * the wrong thing: the TODAY marker sat between the history and the projections, so what the
+   * measure called a gap was a gap, a node and another gap added together.
    *
-   * ⚠️ AND INCLUDING IT IS NOT A CONCESSION — it is the stronger case. The today marker used to
-   * carry `margin: 2px 0 13px`, a third inset and a fourth gap sitting exactly where the eye had
-   * settled into the rhythm. Walking it here is what asserts it has joined.
+   * ⚠️ THAT MARKER IS GONE (pairing pack §2) and the selector KEEPS it, deliberately. If one is
+   * ever drawn again this walks it and holds it to the events' rhythm, which is exactly the state
+   * it had been brought to before it was removed. A selector matching nothing costs nothing; a
+   * measure that silently stops seeing a node costs a session.
    */
   const nodes = [...document.querySelectorAll(".tl-ev, .tl-today")] as HTMLElement[];
   const evs = nodes;

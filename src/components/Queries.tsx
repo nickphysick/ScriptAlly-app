@@ -50,7 +50,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, DAY } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -4346,31 +4346,35 @@ export const Queries: React.FC<{
                           /* §7 — the agent's stated window wins over the house one, so this pane's two figures and the
                              list's position figure count to the same instant. See queryAmbient's note. */
                           const amb = queryAmbientStatus(activeQuery, ta0.ballHolder, ta0.kind === "mark-sent" ? ta0.markKind : undefined, Date.now(), activeAgent.responseTimeWeeks);
-                          const cells: { key: string; glyph: React.ReactNode; value: string; unit?: string; caption: string }[] = [];
-                          if (amb.mode === "waiting" && amb.sentMs != null) {
-                            cells.push({
-                              key: "waiting",
-                              glyph: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>,
-                              value: String(amb.nDays), unit: amb.nDays === 1 ? "day" : "days", caption: "Waiting so far",
-                            });
-                          }
-                          if (amb.expMs != null) {
-                            cells.push({
-                              key: "expected",
-                              glyph: <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" /><path d="M3.5 10h17M8 3.5v3M16 3.5v3" /></svg>,
-                              value: new Date(amb.expMs).toLocaleDateString("en-GB", { day: "numeric" }),
-                              unit: new Date(amb.expMs).toLocaleDateString("en-GB", { month: "short" }),
-                              caption: "Reply expected by",
-                            });
-                          }
+                          /**
+                           * ⚠️ THE CELLS ARE A PURE DERIVATION (§2) — `trackingStatCells`, beside
+                           * the ambient status it reads. They were built inline here, which made
+                           * the "Not set" branch untestable: the browser measure that proves the
+                           * strip's SHAPE can only exercise the records the account holds, and every
+                           * query on dev has an expected date, so that branch measured green by
+                           * never running.
+                           *
+                           * ⚠️ THE GLYPH STAYS HERE, deliberately. A lib returning JSX is a lib a
+                           * node-environment test cannot call — which is the whole reason the
+                           * derivation moved.
+                           */
+                          const STAT_GLYPH: Record<string, React.ReactNode> = {
+                            waiting: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></svg>,
+                            expected: <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" /><path d="M3.5 10h17M8 3.5v3M16 3.5v3" /></svg>,
+                          };
+                          const cells = trackingStatCells(amb);
                           if (!cells.length) return null;
                           return (
                             <div className="qp-stats">
                               {cells.map((c) => (
                                 <div className="qp-stat" key={c.key}>
-                                  <span className="qp-statgl" aria-hidden="true">{c.glyph}</span>
+                                  <span className="qp-statgl" aria-hidden="true">{STAT_GLYPH[c.key]}</span>
                                   <div>
-                                    <div className="qp-statn">{c.value}{c.unit && <small> {c.unit}</small>}</div>
+                                    {/* ⚠️ THE ABSENT FIGURE IS QUIETER THAN A REAL ONE (§2). "Not
+                                        set" at 25px Playfair would give an unrecorded field more
+                                        weight than a recorded one — the skeleton is there so the
+                                        card keeps its shape, not so that absence shouts. */}
+                                    <div className={`qp-statn${c.absent ? " qp-statn--off" : ""}`}>{c.value}{c.unit && <small> {c.unit}</small>}</div>
                                     <div className="qp-statk">{c.caption}</div>
                                   </div>
                                 </div>

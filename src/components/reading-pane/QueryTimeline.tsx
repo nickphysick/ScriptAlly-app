@@ -447,34 +447,24 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         continues={ballHolder === "agent" && !!waiting}
       />
 
-      {/* ══ §7 · THE TODAY MARKER — where you are between what happened and what is expected ═════
-          ⚠️ A SOLID BURGUNDY DOT AMONG HOLLOW ONES, and that contrast IS the marker. The projections
-          below it are ghosts because they have not happened; this one has, continuously, and is the
-          only point on the line that is true right now.
-
-          ⚠️ IT STATES A POSITION, NOT A JUDGEMENT. "Day 5 of ~28" is a fact; "Day 5 — still early"
-          would be the app having an opinion about someone else's post. The `~` is honest too: the
-          window is the agency's stated intention, not a promise.
-
-          ⚠️ AND IT COUNTS AGAINST THE SAME WINDOW EVERYTHING ELSE ON THIS SCREEN COUNTS AGAINST —
-          `waiting.sentMs`/`expMs`, which now prefer the agent's stated weeks. A marker reading
-          "of ~56" beside a list row reading "27 DAYS LEFT" would be the two-clock fault the whole
-          section is about.
-
-          ⚠️ WAITING AND DATED ONLY. An undated import has no day to be on; a writer's-turn or closed
-          query has no window running. In both cases the marker omits itself rather than printing a
-          zero or a guess. */}
-      {ballHolder === "agent" && waiting && waiting.sentMs != null && waiting.expMs != null && (() => {
-        const day = Math.max(1, waiting.nDays + 1);
-        const span = Math.max(1, Math.round((waiting.expMs - waiting.sentMs) / 86400000));
-        return (
-          <div className="tl-today">
-            <span className="tl-todaywhen">TODAY</span>
-            <b>Day {day} of ~{span}</b>
-          </div>
-        );
-      })()}
-
+      {/**
+        * ⚠️ THE TODAY MARKER IS REMOVED (§2), AND ITS OWN ARGUMENT IS WHAT REMOVES IT. §7 built it
+        * as "a solid burgundy dot among hollow ones — the only point on the line that is true right
+        * now", and gave it a position: "Day 5 of ~28". Both halves turned out to be the problem.
+        *
+        * The position is stated twice: `Waiting to hear back` carries the elapsed figure as its own
+        * date, and the stats strip above states the same count against its expected date. So the
+        * marker's words were a third reading of one number.
+        *
+        * And it is a MARK WITH NO EVENT BEHIND IT — the one node on the timeline that records
+        * nothing having happened. It appeared only on waiting-and-dated queries, which is most of
+        * what made two Tracking cards look differently spaced: a line of events interrupted by a
+        * smaller dot on some queries and not others.
+        *
+        * ⚠️ ITS RHYTHM WORK IS NOT LOST WITH IT. The previous pack brought this element onto the
+        * events' own inset and gap; those numbers were the events', not its own, so the rhythm is
+        * unchanged by its going. Deleted rather than hidden, and its CSS with it.
+        */}
       {/* ── trailing open-state block — calm within window, ESCALATED to needs-you once overdue.
           The escalation is the pane's ONLY needs-you signal (the fork below stays neutral). ── */}
       {ballHolder === "agent" && waiting && (() => {

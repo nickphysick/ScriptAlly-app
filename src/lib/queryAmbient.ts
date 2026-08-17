@@ -449,3 +449,49 @@ export function consequenceLine(next: QueryStatus | null): string {
     : "closed";
   return `Saves as ${next} · ${turn} — the row will offer ${action.label}`;
 }
+
+/**
+ * ══ §2 · TRACKING'S STAT CELLS — a FIXED skeleton, derived ═══════════════════════════════════
+ *
+ * One cell per figure, always both, or none at all. Data only: the component maps `key` to a glyph,
+ * because a lib that returns JSX is a lib nobody can call from a test.
+ *
+ * ⚠️ IT IS PURE AND IT LIVES HERE BECAUSE THE ABSENT CASE HAS NO DATA ON DEV. The strip was built
+ * inline in the card, and the browser measure that proves its SHAPE could only ever exercise the
+ * records the account happens to hold — every query on dev has an expected date, so the "Not set"
+ * branch measured green by never running. A pure function can be handed the state directly.
+ *
+ * ⚠️ AND THE INPUT IS THE REAL DERIVATION'S OUTPUT, never a literal. Callers pass what
+ * `queryAmbientStatus` returned; a test that hand-writes `{ mode: "waiting", expMs: null }` is
+ * testing a shape the system might not produce (the trap this repo has a rule about).
+ */
+export interface TrackingStatCell {
+  key: "waiting" | "expected";
+  value: string;
+  unit?: string;
+  caption: string;
+  /** true when the record holds no figure — the cell states the missing FIELD, quietly. */
+  absent: boolean;
+}
+
+const STAT_DAY = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric" });
+const STAT_MON = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { month: "short" });
+
+export function trackingStatCells(a: AmbientStatus): TrackingStatCell[] {
+  /* ⚠️ SCOPED TO THE STATE THE FIGURES DESCRIBE. Both are about waiting on an agent, and every
+     non-waiting mode returns `expMs: null` — so a skeleton on a closed or writer's-turn query
+     would be two cells reading "Not set" about a wait that is not happening. A fixed shape across
+     the states this strip is ABOUT is the fix; a fixed shape everywhere would be furniture. */
+  if (a.mode !== "waiting") return [];
+  return [
+    /* ⚠️ THE ABSENT CELL NAMES THE MISSING FIELD RATHER THAN KEEPING A CAPTION THAT WOULD BE FALSE.
+       "Waiting so far · Not set" says nothing; "Date sent · Not set" says what is wrong with the
+       record. The SHAPE is what is fixed here — two cells, one geometry — not the words. */
+    a.sentMs != null
+      ? { key: "waiting", value: String(a.nDays), unit: a.nDays === 1 ? "day" : "days", caption: "Waiting so far", absent: false }
+      : { key: "waiting", value: "Not set", caption: "Date sent", absent: true },
+    a.expMs != null
+      ? { key: "expected", value: STAT_DAY(a.expMs), unit: STAT_MON(a.expMs), caption: "Reply expected by", absent: false }
+      : { key: "expected", value: "Not set", caption: "Reply expected by", absent: true },
+  ];
+}
