@@ -4211,15 +4211,20 @@ export const Queries: React.FC<{
                           than a substitution, because on a query with no developments the send IS
                           the most recent one. Both go through `refDate`, which omits an unparseable
                           value rather than printing "Invalid Date". */}
+                      {/* ⚠️ THE MARK LEADS THE LABEL NOW (§5), AND IT IS THE SAME COMPONENT AT A
+                          LARGER SIZE — `overrideSize`, never a recreation, so the ring/fill grammar
+                          and the per-status glyph are exactly the locked ones. At 44 it stops being
+                          a dot beside a word and becomes the plate's second subject, which is what
+                          doubling it is for; the label and its date stack to its right. */}
                       <span className="f12-hs">
-                        <span>
+                        <StatusDot status={activeQuery.status} overrideSize={44} />
+                        <span className="f12-hstx">
                           <span className="f12-hsw">{statusDisplayLabel(activeQuery)}</span>
                           {(() => {
                             const moved = refDate((activeQuery as { lastStatusChange?: unknown }).lastStatusChange) || heroQueriedOn;
                             return moved ? <div className="f12-hsd">{moved}</div> : null;
                           })()}
                         </span>
-                        <StatusDot status={activeQuery.status} overrideSize={26} />
                       </span>
                       {/* ⚠️ THE PRIMARY AND THE KEBAB LEFT THIS BAND (§1). They act on the query, not
                           on the identity card that names it, and they now sit in the pane's control

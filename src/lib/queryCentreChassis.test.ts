@@ -602,10 +602,16 @@ describe("§2 (fp4) · the reading pane's cards", () => {
     expect(declValue(rule(".f12-card"), "border"), "the card took a border back — it would double with the ring")
       .toBe("");
     expect(rule(".f12-card::after"), "the card lost its rim").toContain("inset 0 0 0 1px var(--line)");
+    /* ⚠️ SAGE IS BACK (§7), AND THE FIX-PACK-7 ARGUMENT IS WHAT BRINGS IT BACK RATHER THAN WHAT IT
+       overturns. The gradient went because the collapsed band had just gone sage and two sage
+       surfaces a short distance apart read as one interrupted stripe. The band is WHITE now and the
+       page beneath is one neutral family, so sage competes with nothing and does the job it was
+       always for: marking these three cards as one family. The 18px title from that pack stays. */
     const cap = rule(".f12-card .f12-chh");
-    expect(cap, "the sage cap came back").not.toContain("var(--sage-band)");
-    expect(declValue(cap, "background"), "the cap is not the sidebar's own ground").toBe("var(--shell-rail)");
+    expect(cap, "the sage cap went").toContain("var(--sage-band)");
     expect(declValue(cap, "font-size"), "the title is not 18px").toBe("18px");
+    /* and the glyph's plate is gone with it (§3) — a mark on a plate on a coloured band */
+    expect(declValue(rule(".qp-cardgl"), "background"), "the glyph's plate came back").toBe("");
   });
 });
 

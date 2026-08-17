@@ -155,8 +155,11 @@ describe("§6 · the agent header", () => {
     expect(at, "the state block is missing").toBeGreaterThan(-1);
     const block = code.slice(at, code.indexOf("</span>", code.indexOf("<StatusDot", at)));
     expect(block, "the status dot went").toContain("<StatusDot status={activeQuery.status}");
-    /* the word is declared BEFORE the dot in source, so the dot renders to its right */
-    expect(block.indexOf("f12-hsw"), "the dot came inboard of the word").toBeLessThan(block.indexOf("<StatusDot"));
+    /* ⚠️ THE MARK LEADS THE LABEL NOW (§5) — it is declared FIRST, so it renders to the label's
+       left. "Outboard" is unchanged as the clause; which side is outboard changed, because at 44px
+       the mark anchors the group rather than trailing it. */
+    expect(block.indexOf("<StatusDot"), "the mark fell behind the label").toBeLessThan(block.indexOf("f12-hsw"));
+    expect(block, "the mark is not the locked component at a larger size").toContain("overrideSize={44}");
   });
 
   it("the contact pills sit on their own line, and grey rather than vanish", () => {
