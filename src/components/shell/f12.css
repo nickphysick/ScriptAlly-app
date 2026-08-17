@@ -2343,7 +2343,13 @@
 /* ⚠️ ONE TYPE STEP FOR BOTH NAMES — the card's claim is that the agent and the manuscript are
    peers, and a larger face on either would make the card about that one. 20px is a step above the
    reading cards' 18px headers, which is the hierarchy this card already had. */
+/* ⚠️ ONE RULE, ONE MODIFIER — the two names share face, weight, ink and every truncation property,
+   and differ in exactly one declaration. A second full rule for the agent is how "same face and
+   ink" quietly stops being true. */
 .qc-mname { font-family: var(--f12-serif); font-size: 20px; font-weight: 500; line-height: 1.15; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 0 1 auto; }
+/* ⚠️ 24 ON THE AGENT ONLY. The size difference is doing what the mono labels did badly: saying
+   which line is the subject without spending a word on it. */
+.qc-mname--lg { font-size: 24px; }
 button.qc-mname { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
 button.qc-mname:hover { color: var(--burg); }
 .qc-msec { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }

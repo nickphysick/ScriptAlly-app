@@ -351,17 +351,28 @@ describe("§1 · the query header is a mail header", () => {
     expect(card, "the date left the status block").toContain("qc-msdate");
   });
 
-  it("both subjects are named, in one type step, and each is the way to its record", () => {
+  it("both subjects are named, in one face and ink, and each is the way to its record", () => {
     const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
     expect(card, "the agent is not named").toContain("{nameplate}");
     expect(card, "the manuscript is not named").toContain("{activeMs.title}");
     expect(card, "the agent's name stopped being the way to the agent list").toContain('onNavigate("agents")');
     expect(card, "the manuscript's name stopped being the way to the manuscripts").toContain('onNavigate("manuscripts")');
-    /* ⚠️ ONE ELEMENT FOR BOTH, so "same face, size and ink" is structural. The manuscript was
-       burgundy inside "What you sent"; burgundy is the outgoing status colour, and on a card whose
-       only colour is the status mark a second burgundy reads as a second status. */
-    expect((card.match(/className="qc-mname"/g) ?? []).length, "the two names are not the same element").toBe(4);
+    /* ⚠️ ONE RULE AND ONE MODIFIER SINCE §2 — the names differ in SIZE and in nothing else. The
+       base carries face, weight, ink and every truncation property; `--lg` carries a single
+       declaration. A second full rule for the agent is how "same face and ink" quietly stops being
+       true, so the modifier is asserted to be exactly that.
+       ⚠️ AND NEITHER IS BURGUNDY OR ITALIC. Both were tried on the manuscript title and rejected:
+       burgundy is the outgoing status colour, and on a card whose only colour is the status mark a
+       second one reads as a second status. Size alone carries the hierarchy. */
+    expect((card.match(/className="qc-mname/g) ?? []).length, "the two names are not the same element").toBe(4);
+    expect((card.match(/qc-mname--lg/g) ?? []).length, "the larger step is not the agent's alone").toBe(2);
     expect(rule(".qc-mname"), "the names took a colour of their own").toContain("color: var(--ink)");
+    expect(rule(".qc-mname"), "the base rule went italic").not.toContain("font-style");
+    const lg = rule(".qc-mname--lg");
+    expect(lg, "the agent's step is missing").not.toBe("");
+    expect(lg, "the agent name is not 24px").toContain("font-size: 24px");
+    expect(lg.replace(/[.\s{}]|qc-mname--lg/g, "").split(";").filter(Boolean).length,
+      "the modifier changed more than the size — the two names would stop sharing a face").toBe(1);
   });
 });
 

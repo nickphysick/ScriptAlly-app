@@ -4314,9 +4314,17 @@ export const Queries: React.FC<{
                               <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>
                             </span>
                             <div className="qc-mval">
+                              {/* ⚠️ THE AGENT IS THE LARGER OF THE TWO (§2), and the reason is what
+                                  you clicked: the list row was an AGENT, so the agent is what the
+                                  card confirms first. The manuscript is the constant — it is the
+                                  same book on every query in this view — so it keeps its size.
+                                  ⚠️ SIZE ALONE. Italic and burgundy were both tried on the title
+                                  and rejected; burgundy is the outgoing status colour, and on a
+                                  card whose only colour is the status mark a second one would read
+                                  as a second status. */}
                               {onNavigate ? (
-                                <button type="button" className="qc-mname" onClick={() => onNavigate("agents")} title="Open the agent list">{nameplate}</button>
-                              ) : <span className="qc-mname">{nameplate}</span>}
+                                <button type="button" className="qc-mname qc-mname--lg" onClick={() => onNavigate("agents")} title="Open the agent list">{nameplate}</button>
+                              ) : <span className="qc-mname qc-mname--lg">{nameplate}</span>}
                               {/* ⚠️ THE AGENCY IS THE SECONDARY, and it states its own absence. An
                                   agent with no agency on file is a real record in this app; "No
                                   agency" is a fact, and a blank there is indistinguishable from a
