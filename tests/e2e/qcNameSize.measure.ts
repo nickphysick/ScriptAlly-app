@@ -49,8 +49,13 @@ test("§2 — the agent name is larger, and the longest one does not crowd the s
      pack's argument for a larger agent was sound and the MECHANISM was not: type carrying the
      hierarchy survives neither a long title, a short one, nor any later change to the scale. A rule
      between the rows and a disc on one leader hold whatever the words are. */
-  expect(first.fs, "the two names differ in size again — the card should carry the difference").toBe(first.msFs);
-  expect(first.fs, "the names are not at the shared step").toBe("23px");
+  /* ⚠️ THE STEP RETURNS ON THE MANUSCRIPT (2b), REVERSING THE STRUCTURAL PACK'S §4. That pack was
+     right that type carrying the hierarchy ALONE does not survive a long title; it is not alone
+     now — the icon discs say which KIND each row is, so the size is free to say which is the
+     SUBJECT. Two devices, two jobs. */
+  expect(first.fs, "the agent name moved off its step").toBe("23px");
+  expect(first.msFs, "the manuscript did not step down").toBe("19px");
+  expect(parseFloat(first.fs), "the manuscript is not the smaller of the two").toBeGreaterThan(parseFloat(first.msFs));
   /* ⚠️ THE NAME MUST NOT BE THE ONE THAT TRUNCATES. §4's equal 23px pushed the manuscript row past
      its width and clipped the TITLE — "The Smoke T…" beside "92,000 WOR…". The name is its row's
      subject; the qualifier beside it is what gives way. */
@@ -58,6 +63,43 @@ test("§2 — the agent name is larger, and the longest one does not crowd the s
     .map((e) => ({ t: (e.textContent ?? "").trim(), clipped: e.scrollWidth > e.clientWidth + 0.5 })));
   console.log(`name clipping: ${clipped.map((c) => `${c.t}=${c.clipped}`).join(" | ")}`);
   for (const c of clipped) expect(c.clipped, `"${c.t}" is truncated — the meta beside it should give way first`).toBe(false);
+
+  /**
+   * ⚠️ 2a · THE DESCENDERS. Playfair's `y` and `p` need more room than a 1.15 line-height gives
+   * them, and the row is `align-items: baseline` inside a card that CLIPS — so what overflowed was
+   * cut rather than merely overlapping. Measured as the line box against the face: a 23px Playfair
+   * needs more than 26.4px, which is what 1.15 was giving it.
+   * ⚠️ ASSERTED ON BOTH NAMES. The agent's is the same face at a larger size and was clipping
+   * without it being obvious — the pack says to check it, so it is checked rather than assumed.
+   */
+  const desc = await page.evaluate(() => [...document.querySelectorAll(".qc-mname")].map((e) => {
+    const c = getComputedStyle(e as HTMLElement);
+    const fs = parseFloat(c.fontSize), lh = parseFloat(c.lineHeight);
+    return { t: (e.textContent ?? "").trim().slice(0, 16), fs, lh, ratio: Math.round((lh / fs) * 100) / 100,
+             pb: c.paddingBottom, box: Math.round(e.getBoundingClientRect().height * 10) / 10 };
+  }));
+  console.log(`descenders: ${desc.map((d) => `${d.t} ${d.fs}px lh${d.lh}(${d.ratio}) pb${d.pb} box${d.box}`).join(" | ")}`);
+  for (const d of desc) {
+    expect(d.ratio, `"${d.t}" has a ${d.ratio} line-height — Playfair's descenders need more`).toBeGreaterThanOrEqual(1.3);
+    /* the line box must clear the face with room to spare, which is what the ratio buys */
+    expect(d.box, `"${d.t}" box ${d.box} against a ${d.fs}px face`).toBeGreaterThanOrEqual(d.fs * 1.3);
+  }
+
+  /* ⚠️ 2c · A REAL CONTROL, IN TAB ORDER, WITH THE APP'S OWN RING — and no underline at rest. */
+  const link = await page.evaluate(() => {
+    const e = document.querySelector(".qc-mname--ms") as HTMLElement;
+    return { tag: e.tagName, tabIndex: e.tabIndex, rest: getComputedStyle(e).textDecorationLine, colour: getComputedStyle(e).color };
+  });
+  console.log(JSON.stringify(link));
+  expect(link.tag, "the title is not a real control").toBe("BUTTON");
+  expect(link.tabIndex, "the title is not in tab order").toBeGreaterThanOrEqual(0);
+  expect(link.rest, "the title is underlined at rest").toBe("none");
+  expect(link.colour, "the title took a colour of its own — not burgundy, not italic").toBe("rgb(20, 20, 18)");
+  await page.locator(".qc-mname--ms").hover();
+  await page.waitForTimeout(150);
+  const hov = await page.evaluate(() => getComputedStyle(document.querySelector(".qc-mname--ms") as HTMLElement).textDecorationLine);
+  console.log(`underline on hover: ${hov}`);
+  expect(hov, "hovering the title shows no underline").toBe("underline");
   expect(first.italic, "the agent name is italic").toBe("normal");
   /* ⚠️ AND NOT BURGUNDY — the outgoing status colour, which on this card would read as a second status */
   expect(first.colour, "a name took the status colour").toBe("rgb(20, 20, 18)");
