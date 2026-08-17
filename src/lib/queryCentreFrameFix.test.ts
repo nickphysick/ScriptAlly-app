@@ -38,10 +38,12 @@ describe("no double container", () => {
       .not.toMatch(/(?:^|;|\{)\s*border\s*:/);
     /* ⚠️ `.f12-hero` RETIRED WITH THE PLATE (pairing pack §1); the pairing card is the object this
        clause is about now — it keeps a card skin while the page keeps one container. */
-    expect(rule(".qc-mail::after"), ".qc-mail lost its rim")
-      .toContain("box-shadow: inset 0 0 0 2px var(--qc-card-border)");
-    expect(rule(".qc-mail"), "the header card took a border back — it would double with the ring")
-      .not.toMatch(/(?:^|;|\{)\s*border\s*:/);
+    /* ⚠️ INVERTED BY §1 — the header is square, rimless and lifted, which is the whole of how it
+       out-ranks the three panels beneath it. A rim would be a second device saying what the shape
+       already says. */
+    expect(rule(".qc-mail::after"), "the header's rim came back").toBe("");
+    expect(rule(".qc-mail"), "the header card took a border").not.toMatch(/(?:^|;|\{)\s*border\s*:/);
+    expect(rule(".qc-mail"), "the header lost the lift that is now its only separation").toContain("var(--sh-2)");
   });
 
   /* ⚠️ REVERSED — the frame is gone entirely (flatten §1). "Hairline-only" was the right rule for

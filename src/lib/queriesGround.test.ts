@@ -46,11 +46,13 @@ describe("the cards still read as raised against the lighter ground", () => {
        card-like surface keeps a hairline against the lighter ground. */
     const pane = css.slice(css.indexOf("\n.f12-pane {"), css.indexOf("}", css.indexOf("\n.f12-pane {")));
     expect(pane, ".f12-pane lost its border").toContain("border: 1px solid var(--line)");
-    /* ⚠️ THE PAIRING CARD DRAWS ITS EDGE AS A RING TOO, and at 2px in its own sage — so the clause
-       is "it has an edge", not "it has that border". Asserting the property here would have failed
-       on a surface whose edge is more emphatic than the one being asked for. */
-    const pring = css.slice(css.indexOf("\n.qc-mail::after {"), css.indexOf("}", css.indexOf("\n.qc-mail::after {")));
-    expect(pring, ".qc-mail lost its edge").toContain("inset 0 0 0 2px var(--qc-card-border)");
+    /* ⚠️ INVERTED BY §1 — THE HEADER HAS NO EDGE, AND THAT IS ITS DISTINCTION. It separates by
+       DEPTH and a 5px sage top rather than by a line, which is what makes it the page's subject
+       rather than a fourth card. The clause was "every card keeps its hairline"; the header stopped
+       being a card. */
+    const top = css.slice(css.indexOf("\n.qc-mail::before {"), css.indexOf("}", css.indexOf("\n.qc-mail::before {")));
+    expect(top, "the header's sage top edge went").toContain("height: 5px");
+    expect(css, "the header took a rim back").not.toContain(".qc-mail::after {");
   });
 
   it("and the panes keep their shadow", () => {

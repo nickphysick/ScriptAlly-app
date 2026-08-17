@@ -1109,9 +1109,10 @@
    for the reason stated on `.f12-body`. Naming it `--qc-gut` rather than `--qc-gut-bottom` would
    claim a reach it does not have. */
 .qc-wpg { --qc-gut: 32px; --qc-card-r: 13px; }
+/* ⚠️ THE HEADER LEFT THIS LIST (§1). It is square now; the three panels that remain rounded are
+   what it is distinguished FROM, so sharing their radius token would be the distinction undone. */
 .qc-wpg .f12-list,
-.qc-wpg .f12-card,
-.qc-wpg .qc-mail { border-radius: var(--qc-card-r); }
+.qc-wpg .f12-card { border-radius: var(--qc-card-r); }
 /* ⚠️ ONE TOKEN FOR ALL THREE SIDES AND THE SEAM'S OFFSET. The seam's `left` is computed from it, so
    moving the panel and moving the divider cannot come apart. */
 .t-f12 { --f12-panel-inset: 14px; }
@@ -2375,10 +2376,22 @@
  * tokens are derived against the live sage scale and locked. Removing them silently would discard
  * a reasoned decision on the strength of a metaphor.
  */
-.qc-mail { position: relative; background: var(--white); box-shadow: var(--sh-2); flex: none; }
+/**
+ * ⚠️ §1 · THE HEADER IS THE ONLY OBJECT BUILT THIS WAY, and that is what makes it the subject
+ * rather than a fourth card. Square, no rim, no frame — it separates by DEPTH and by a 5px sage
+ * top edge, while Tracking, Notes and the list panel keep their radius and their hairline.
+ *
+ * ⚠️ THE 2px FRAME AND THE 1px INSET ARE GONE. They were how the card out-ranked its neighbours
+ * when it shared their shape; it no longer shares it, so a rim would be a second device saying what
+ * the shape already says. `--qc-card-border` survives as the top edge's tone — the same deepened
+ * sage, doing one job instead of outlining.
+ */
+.qc-mail { position: relative; background: var(--white); box-shadow: var(--sh-2); flex: none; border-radius: 0; }
 .qc-mail > .qc-mailfr { border-radius: inherit; overflow: hidden; }
-.qc-mail::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; box-shadow: inset 0 0 0 2px var(--qc-card-border); }
-.qc-mailins { position: absolute; inset: 7px; border-radius: calc(var(--qc-card-r) - 6px); pointer-events: none; box-shadow: inset 0 0 0 1px var(--qc-card-inset); }
+.qc-mail::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--qc-card-border); pointer-events: none; }
+/* the send's own materials, under the `Query sent` rung */
+.qc-sentmat { margin-top: 10px; }
+.qc-sentms { display: flex; align-items: baseline; gap: 11px; min-width: 0; margin-bottom: 8px; }
 /* ⚠️ THE ROWS TAKE THE FREE WIDTH AND THE STATUS TAKES WHAT IT NEEDS — `minmax(0, 1fr) auto`. The
    `minmax(0, …)` is load-bearing: a `1fr` track's default minimum is min-content, so a long email
    address would refuse to shrink and push the status block off the card instead of ellipsising. */
@@ -2386,15 +2399,8 @@
 /* ⚠️ THE LABEL TRACK IS THE RAIL. `max-content` on it means the widest label sets the column and
    both sub-rows inherit it; a fixed px would need re-deriving the day a third label appears. */
 .qc-mailrows { display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 18px; row-gap: 5px; align-items: baseline; min-width: 0; }
-/**
- * ══ §4a · A RULE BETWEEN THE ROWS ═══════════════════════════════════════════════════════════
- * ⚠️ IT SPANS BOTH TRACKS, so it reads as a division of the CARD rather than a line under the
- * manuscript's text — `grid-column: 1 / -1`, which is also why it cannot come apart from the rail
- * if the label track ever moves.
- * ⚠️ AND THE SPACE IS PART OF IT. A hairline alone reads as a table; a hairline with room above and
- * below reads as two statements, which is what the card is.
- */
-.qc-mailrows > .qc-mrule { grid-column: 1 / -1; height: 1px; background: var(--hairline); margin: 11px 0 12px; }
+/* ⚠️ §4a's RULE IS RETIRED (§1) — it divided the card's two statements, and the manuscript's row
+   left for the send event that carries it. A hairline through a one-row card divides nothing. */
 /* every sub-row starts in column 2 — the rail, stated once */
 .qc-msub { grid-column: 2; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 1px 0 9px; }
 .qc-mailrows > .qc-msub:last-child { margin-bottom: 0; }
@@ -2415,18 +2421,12 @@
 .qc-mlead { grid-column: 1; align-self: center; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
 .qc-mlead svg { width: 20px; height: 20px; fill: none; stroke: var(--faint); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 /**
- * ══ §4b · THE LEADERS DIFFER, AND THE TYPE DOES NOT ═════════════════════════════════════════
- * ⚠️ SAME GLYPH SIZE, SAME STROKE, DIFFERENT GROUND. The disc is the whole of the difference, so a
- * reader can tell the rows apart without either name being bigger than the other.
- * ⚠️ AND THIS IS THE SECOND PINK SURFACE ON THE PAGE, alongside `Log new query`. That is the stated
- * limit: no third. The status mark's own centre fill is not pink and is not touched by this — it is
- * the StatusDot's, which the whole app shares.
+ * ⚠️ THE PINK DISC IS RETIRED (§1), AND ITS OWN REASON RETIRES IT. §4b gave the agent's leader a
+ * disc so the card's TWO rows could be told apart without the type doing it. There is one row: the
+ * manuscript left for the send event that carries it, so the disc had nothing left to distinguish
+ * and was simply a second circle competing with the 56px status mark.
+ * ⚠️ AND THE PAGE IS BACK TO ONE PINK SURFACE — `Log new query`, the one verb that adds.
  */
-.qc-mlead--ag { border-radius: 50%; background: var(--pink); }
-/* ⚠️ THE GLYPH KEEPS ITS SIZE — the pack is explicit that only the GROUND differs, and the ref's
-   18px is a concession to its own 34px disc. Ours is the label rail's 30px, so 20 stays 20 and the
-   two leaders remain the same drawing at the same weight. */
-.qc-mlead--ag svg { stroke: var(--burg); }
 .qc-mval { grid-column: 2; display: flex; align-items: baseline; gap: 11px; min-width: 0; }
 /* ⚠️ ONE TYPE STEP FOR BOTH NAMES — the card's claim is that the agent and the manuscript are
    peers, and a larger face on either would make the card about that one. 20px is a step above the

@@ -468,15 +468,18 @@ describe("fix pack 6 §1 · the list panel joins the shared gutter", () => {
 describe("fix pack 6 §3 · the header's height comes from its padding", () => {
   const padOf = (r: string) => (/padding:\s*([^;]+);/.exec(r.replace(/\/\*[\s\S]*?\*\//g, ""))?.[1] ?? "").trim().split(/\s+/);
 
-  it("⚠️ THE PADDING CLEARS THE INSET FRAME — on both axes", () => {
+  /**
+   * ⚠️ INVERTED BY §1 — THERE IS NO INSET FRAME TO CLEAR. The padding's floor was the frame's 7px
+   * inset; the frame is gone with the rim, so the clause becomes the one underneath it: the card's
+   * height comes from its PADDING, which is what it has always been about.
+   */
+  it("⚠️ THE HEIGHT COMES FROM THE PADDING, and the frame it used to clear is gone", () => {
     const grid = rule(".qc-mailgrid");
     expect(grid, "the header grid is missing").not.toBe("");
     const [block, inline] = padOf(grid);
-    /* extracted and compared, never a `(?!7px)` lookahead — the backtracking trap this repo bans */
-    const inset = parseFloat((/\.qc-mailins[\s\S]*?inset:\s*([\d.]+)px/.exec(css) ?? [])[1] ?? "NaN");
-    expect(inset, "the inset frame's offset is not readable").toBeGreaterThan(0);
-    expect(parseFloat(block), `the vertical padding no longer clears the frame: ${block} vs ${inset}px`).toBeGreaterThan(inset * 2);
-    expect(parseFloat(inline), `the horizontal padding no longer clears the frame: ${inline} vs ${inset}px`).toBeGreaterThan(inset * 2);
+    expect(parseFloat(block), `the card has no vertical padding: ${block}`).toBeGreaterThan(12);
+    expect(parseFloat(inline), `the card has no horizontal padding: ${inline}`).toBeGreaterThan(12);
+    expect(css, "the inset frame came back").not.toContain(".qc-mailins");
   });
 
   it("⚠️ THE UNIFORMITY CLAUSE IS INTACT — a centred row, two-value padding", () => {
@@ -498,7 +501,8 @@ describe("fix pack 6 §3 · the header's height comes from its padding", () => {
     expect(stepBlock, "the step stopped reclaiming anything").toBeLessThan(restBlock);
     expect(stepBlock / restBlock, `the short-viewport step drifted from its proportion: ${stepBlock}/${restBlock}`)
       .toBeGreaterThan(0.6);
-    const inset = parseFloat((/\.qc-mailins[\s\S]*?inset:\s*([\d.]+)px/.exec(css) ?? [])[1] ?? "NaN");
-    expect(stepBlock, "the short-viewport padding cuts into the inset frame").toBeGreaterThan(inset * 2);
+    /* ⚠️ THE "CLEARS THE INSET FRAME" CLAUSE WENT WITH THE FRAME (§1). What survives is the one it
+       was protecting: the step still leaves the card real padding rather than reclaiming all of it. */
+    expect(stepBlock, "the short-viewport step left the card without padding").toBeGreaterThan(12);
   });
 });

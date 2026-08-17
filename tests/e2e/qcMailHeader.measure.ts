@@ -20,8 +20,11 @@ const read = (page: Page) => page.evaluate(() => {
   const st = q(".qc-mstatus")!;
   const dot = st.querySelector("svg, .sa-statusdot, span") as HTMLElement | null;
   const labs = [...document.querySelectorAll(".qc-mlead")] as HTMLElement[];
-  const vals = [...document.querySelectorAll(".qc-mval")] as HTMLElement[];
-  const subs = [...document.querySelectorAll(".qc-msub")] as HTMLElement[];
+  /* ⚠️ SCOPED TO THE CARD (§1). The send event's materials row reuses `.qc-msub` for its chip
+     layout, and a document-wide query put an element from the TIMELINE into the header's rail
+     reading — 755 against 773, reported as a broken rail on a card whose rail is fine. */
+  const vals = [...card.querySelectorAll(".qc-mval")] as HTMLElement[];
+  const subs = [...card.querySelectorAll(".qc-msub")] as HTMLElement[];
   const names = [...document.querySelectorAll(".qc-mname")] as HTMLElement[];
   const chip = (sel: string) => [...document.querySelectorAll(sel)].map((c) => {
     const cs = getComputedStyle(c as HTMLElement); const b = c.getBoundingClientRect();
@@ -123,14 +126,12 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
       expect([...new Set(m.leaders.map((l) => l.split("|").slice(0, 2).join("|")))],
         `the leaders differ in size or stroke: ${m.leaders.join(" ⁄ ")}`).toHaveLength(1);
       expect(m.leaders[0], "the leaders are not 20px").toContain("20x20");
-      /* ⚠️ INVERTED BY §4b — THE AGENT'S LEADER TAKES A DISC, so the card has two circles now.
-         §1's clause was "the status mark is the card's only circular element", which kept the eye
-         going name → status; §4 gives the disc a job that clause did not anticipate, and the
-         hierarchy survives on SIZE — a 30px disc beside a 56px mark. The manuscript's stays bare,
-         which is what makes the difference structural rather than decorative. */
-      expect(m.leaderPaint[0], "the agent's leader has no disc").not.toMatch(/^rgba\(0, 0, 0, 0\)/);
-      expect(m.leaderPaint[0], "the agent's disc is not round").toContain("50%");
-      expect(m.leaderPaint[1], `the manuscript's leader took a plate: ${m.leaderPaint[1]}`).toMatch(/^rgba\(0, 0, 0, 0\)\|0px\|0px$/);
+      /* ⚠️ BACK TO BARE, AND §4b's REASON IS WHAT TAKES IT AWAY. The disc existed so the card's TWO
+         rows could be told apart without the type doing it; §1 leaves one row, so it had nothing to
+         distinguish and was a second circle competing with the 56px mark. The status mark is the
+         card's only circular element again. */
+      expect(m.leaderPaint, "the card has more than one leader").toHaveLength(1);
+      expect(m.leaderPaint[0], `the leader took a plate: ${m.leaderPaint[0]}`).toMatch(/^rgba\(0, 0, 0, 0\)\|0px\|0px$/);
       /* ⚠️ AND THE RAIL DID NOT MOVE. Browser-read before §1: the label track was 30.41px and the
          rail sat at 773.41. The leaders take 30, so the sub-rows keep their indent within half a
          pixel — the pack's clause, checked against the recorded figure rather than against itself. */
@@ -141,6 +142,8 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
          everything else about the two is identical, and neither is italic or burgundy. */
       expect([...new Set(m.nameFaces)], `the two names differ in more than size: ${m.nameFaces.join(" ⁄ ")}`).toHaveLength(1);
       expect(m.nameFaces[0], "the names are not Playfair in the ink, upright").toBe("Playfair Display|rgb(20, 20, 18)|normal");
+      /* the agent's is the card's only name now — the manuscript's is on the send rung */
+      expect(m.nameFaces, "the card still names more than the agent").toHaveLength(2);
       /* ⚠️ THE STEP RETURNS ON THE MANUSCRIPT, and this is the third position the pair has held.
          The structural pack removed it because type carrying the hierarchy ALONE survives neither
          a long title nor a later change to the scale — which was right. It is not alone now: the
@@ -148,11 +151,13 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
          Two devices, two jobs. Face and ink stay identical, which is asserted above. */
       expect(parseFloat(m.nameSizes[0]), `the manuscript is not the smaller of the two: ${m.nameSizes.join(" ⁄ ")}`)
         .toBeGreaterThan(parseFloat(m.nameSizes[1]));
-      /* §4a — a rule between the rows, spanning BOTH tracks so it divides the card rather than
-         underlining one row's text */
-      expect(m.rule, "the rule between the rows is missing").toBeTruthy();
-      expect(m.rule!.h, "the rule is not a hairline").toBe(1);
-      expect(m.rule!.left, "the rule starts at the rail — it should span both tracks").toBeLessThan(m.rail[0]);
+      /* ⚠️ AND THEY ARE ON DIFFERENT SURFACES NOW — the agent's in the header, the manuscript's on
+         the send rung — which is why `names` is read document-wide while the rail is read from the
+         card. Two scopes, deliberately, and each says which it is. */
+      /* ⚠️ §4a's RULE IS GONE WITH THE SECOND ROW (§1) — it divided two statements, and there is
+         one. Asserted absent, because a hairline through a single-row card would be a divider
+         dividing nothing. */
+      expect(m.rule, "the rule between the rows survives with one row to divide").toBeNull();
       /* ⚠️ TWO PINK SURFACES, AND THAT IS THE STATED LIMIT */
       console.log(`pink surfaces: ${m.pinkSurfaces.join(", ")}`);
       expect(m.pinkSurfaces.length, `more than two pink surfaces: ${m.pinkSurfaces.join(", ")}`).toBeLessThanOrEqual(2);

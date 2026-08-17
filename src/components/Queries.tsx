@@ -4410,76 +4410,6 @@ export const Queries: React.FC<{
                     on the label rail, which is one column for the whole card. */}
                 {(() => {
                   const nameplate = agentPrimary(activeAgent);
-                  const base = baseMaterialsFor(activeQuery, activeAgent);
-                  const qlSent = base.some(isQueryLetterMat);
-                  const synSent = base.some(isSynopsisMat);
-                  const sampleItem = base.find(isSampleMat) ?? null;
-                  /* ⚠️ THE OTHER ITEMS MUST RENDER, AND THAT IS A CONSEQUENCE OF THE CLASSIFIER
-                     RATHER THAN A NEW FEATURE. While `isSampleMat` was a catch-all, free text
-                     appeared on the card wearing the sample chip's label — wrong, but VISIBLE.
-                     Correctly classified and unrendered, the same material would vanish from the
-                     card altogether, which is worse than misreporting it: the app would be hiding
-                     a fact about the writer's own submission rather than mislabelling one.
-                     ⚠️ THE CHIP'S LABEL IS THE WRITER'S OWN WORDS, verbatim. `sampleMaterialText`
-                     returns the free text for an `other` item and the legacy string for a plain
-                     one, so no vocabulary of ours is imposed on what they typed. */
-                  const otherItems = base.filter(isOtherMat);
-                  const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
-                  const pkgComponents = linkedPackage
-                    ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
-                    : [];
-                  const isPro = currentUser?.plan === UserPlan.PRO;
-                  const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
-                  /* ⚠️ THE STORED UNIT IS LOWERCASE AND THE EDITOR'S IS CAPITALISED, so the two
-                     meet in one place rather than at every call site. `unitFromStored` is the whole
-                     of the mapping; an empty quantity opens on the unit's own DEFAULT rather than
-                     blank, which is what `snapToUnit` is for. */
-                  const openSampleEditor = () => {
-                    const stored = sampleItem && typeof sampleItem !== "string" ? sampleItem.type : undefined;
-                    const unit: SampleUnit = stored === "chapters" ? "Chapters" : stored === "words" ? "Words" : "Pages";
-                    setSampleUnit(unit);
-                    const qty = sampleItem && typeof sampleItem !== "string" && sampleItem.quantity != null ? String(sampleItem.quantity) : "";
-                    setSampleQty(qty || snapToUnit(unit));
-                    setSampleEditorOpen(true);
-                  };
-                  /* ⚠️ TWO CHIP FAMILIES, AND THEY MUST NOT BE UNIFIED. A contact is a place to go
-                     and reads as a control — white, with a rim. An attachment is a record of
-                     something done and reads as a fact — filled neutral, no rim. Same size, same
-                     radius, different ground; merging them would make a record look pressable and
-                     a link look inert. */
-                  /**
-                   * ⚠️ THE CHIP IS THE MATERIAL, AND ITS × IS ITS OWN (§4). Remove was a floating
-                   * `REMOVE` at the end of the row — a verb with no visible subject, which acted on
-                   * whichever material happened to be the sample. On the chip, what it removes is
-                   * the thing it sits on.
-                   *
-                   * ⚠️ AND THE QUANTITY IS A BADGE RATHER THAN A LABEL. `Opening sample · 3
-                   * chapters` on the face is what makes opening the popover optional; a chip that
-                   * read only `3 chapters` said the amount and not the thing.
-                   *
-                   * ⚠️ THE × IS A BUTTON INSIDE A BUTTON'S BOX, so it is a `<span role="button">`
-                   * rather than a nested `<button>` — nested interactive elements are invalid and
-                   * browsers disagree about which one a click reaches.
-                   */
-                  const attach = (key: string, label: string, qty: string | null, done: boolean, onClick: (el: HTMLElement) => void, title: string, onRemove?: () => void) => (
-                    <button key={key} type="button" className={`qc-mchip qc-mchip-att${done ? " on" : ""}`} onClick={(e) => onClick(e.currentTarget)} title={title}>
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
-                      <span className="qc-mchiptx">{label}</span>
-                      {qty && <span className="qc-mqtybadge">{qty}</span>}
-                      <i aria-hidden="true">{done ? "✓" : "○"}</i>
-                      {onRemove && (
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          className="qc-mchipx"
-                          aria-label={`Remove ${label} from this query`}
-                          title={`Remove ${label}`}
-                          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onRemove(); } }}
-                        >×</span>
-                      )}
-                    </button>
-                  );
                   /* the email address and the DOMAIN — see the note on `.qc-mchip-con` for why the
                      value rather than the word, and why it truncates rather than wraps */
                   const email = activeAgent.email?.trim() || "";
@@ -4498,7 +4428,7 @@ export const Queries: React.FC<{
                                 ⚠️ BARE: no plate, no ring, no ground. The status mark stays the only
                                 circular element on the card, which is what keeps the eye going name,
                                 then status. */}
-                            <span className="qc-mlead qc-mlead--ag" aria-hidden="true">
+                            <span className="qc-mlead" aria-hidden="true">
                               <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>
                             </span>
                             <div className="qc-mval">
@@ -4542,145 +4472,6 @@ export const Queries: React.FC<{
                             </div>
 
                             {/* ── SENT ── */}
-                            {/* ⚠️ 4a · THE RULE BETWEEN THE ROWS — the card reads as two statements
-                                rather than a list, and it is a grid child spanning both tracks so
-                                it divides the CARD rather than underlining one row's text. */}
-                            <span className="qc-mrule" aria-hidden="true" />
-                            {/* ⚠️ 4b · THE MANUSCRIPT'S GLYPH STAYS BARE while the agent's takes a
-                                disc. The leaders are the one place the two rows can differ without
-                                the TYPE doing it — same glyph size, same stroke, different ground. */}
-                            <span className="qc-mlead qc-mlead--ms" aria-hidden="true">
-                              <svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z" /><path d="M5 17.5h13.5" /><path d="M9 9h7M9 12.5h5" /></svg>
-                            </span>
-                            <div className="qc-mval">
-                              {/* ⚠️ THE TITLE IS THE AGENT'S PEER — same face, same size, same ink.
-                                  It was burgundy inside "What you sent" and burgundy is the outgoing
-                                  status colour; on a card whose only colour is the status mark, a
-                                  second burgundy would read as a second status. */}
-                              {/* ⚠️ 2b/2c · SMALLER, AND THE CARD'S ONE NAVIGATION. The size step
-                                  returns because the icon discs now say which KIND each row is, so
-                                  the type is free to say which is the SUBJECT — two devices, two
-                                  jobs. It stays a real <button>, so it is in tab order and takes
-                                  the app's focus ring; the underline appears on hover and on focus
-                                  and never at rest. */}
-                              {onNavigate ? (
-                                <button type="button" className="qc-mname qc-mname--ms" onClick={() => onNavigate("manuscripts")} title="Open your manuscripts">{activeMs.title}</button>
-                              ) : <span className="qc-mname qc-mname--ms">{activeMs.title}</span>}
-                              {/* each half omits itself: no genre must not print a stray interpunct,
-                                  and no word count must not print "0 words" — zero words is a claim */}
-                              {(!!activeMs.genre || !!activeMs.wordCount) && (
-                                <span className="qc-msec">
-                                  {[activeMs.genre || null, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString()} words` : null].filter(Boolean).join(" · ")}
-                                </span>
-                              )}
-                            </div>
-                            <div className="qc-msub">
-                              {/* ⚠️ THE CHIP OPENS ITS OWN POPOVER (§5) rather than toggling on click. A single click that
-                                   silently flipped "sent" gave one control two of the three things a
-                                   material can have done to it and no way to reach the third. */}
-                              {attach("ql", "Query letter", null, qlSent, (el) => openMatPop("ql", el), "Query letter", qlSent ? () => toggleDocMaterial(activeQuery, activeAgent, "query") : undefined)}
-                              {attach("syn", "Synopsis", null, synSent, (el) => openMatPop("syn", el), "Synopsis", synSent ? () => toggleDocMaterial(activeQuery, activeAgent, "synopsis") : undefined)}
-                              {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
-                                  sample is a quantity and a unit, not a yes. Its label carries what
-                                  was sent; Remove keeps its own control, since a chip that both
-                                  edits and clears on one click could not do either. */}
-                              {/* ⚠️ THE LABEL IS THE MATERIAL AND THE BADGE IS THE AMOUNT — `Opening sample · 3
-                                    chapters`, not `3 chapters`. And `Opening sample` is the locked
-                                    name: the three units all store as one `ComponentType`, so
-                                    "Sample pages" would assert a unit the artefact does not carry. */}
-                                {attach("smp", "Opening sample", sampleItem ? sampleMaterialText(sampleItem) : null, !!sampleItem, (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", sampleItem ? () => removeSampleMaterial(activeQuery, activeAgent) : undefined)}
-                              {otherItems.map((it, i) => (
-                                <span key={`oth-${i}`} className="qc-mchip qc-mchip-att on" title={sampleMaterialText(it)}>
-                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
-                                  <span className="qc-mchiptx">{sampleMaterialText(it)}</span>
-                                  <i aria-hidden="true">✓</i>
-                                  <span role="button" tabIndex={0} className="qc-mchipx"
-                                    aria-label="Remove this material from the query" title="Remove"
-                                    onClick={(e) => { e.stopPropagation(); removeOtherMaterial(activeQuery, activeAgent, it); }}
-                                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); removeOtherMaterial(activeQuery, activeAgent, it); } }}
-                                  >×</span>
-                                </span>
-                              ))}
-                              {/* ⚠️ THE FLOATING `REMOVE` IS GONE (§4) — it now lives on the chip
-                                  it removes. A verb parked at the end of a row of chips has no
-                                  visible subject; this one silently meant "the sample". */}
-                              {/* ⚠️ THE PACKAGE SURVIVES AS A CHIP. It is not among §1's named
-                                  removals, and a Pro attachment is a record of what was sent —
-                                  which is exactly what this sub-row lists. */}
-                              {linkedPackage ? (
-                                <button type="button" className="qc-mchip qc-mchip-att on" onClick={openPackages} title={pkgComponents.length ? `${linkedPackage.packageName} — ${pkgComponents.join(" · ")}` : linkedPackage.packageName}>
-                                  <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>
-                                  <span className="qc-mchiptx">{linkedPackage.packageName}</span>
-                                </button>
-                              ) : null}
-                              {/* ══ §5 · + ATTACH ═══════════════════════════════════════════════
-                                  ⚠️ ALREADY-ADDED TYPES STAY IN THE MENU, MARKED `Added`. The menu
-                                  is a complete statement of what a query CAN carry; hiding what is
-                                  already on it would make the list shorter every time you used it,
-                                  and leave you unable to see that a type exists at all.
-                                  ⚠️ AND THE PACKAGE MOVES IN HERE, BELOW A RULE. The row's
-                                  `UPGRADE TO ATTACH A PACKAGE` was a pitch parked among facts; as
-                                  the last item of "what you could attach" it is one more thing you
-                                  could attach, which is what it actually is. */}
-                              <span className="f12-popwrap">
-                                <button
-                                  ref={addMatTrigRef}
-                                  type="button"
-                                  className="qc-mchip qc-mchip-add"
-                                  aria-haspopup="menu"
-                                  aria-expanded={addMatOpen}
-                                  onClick={() => setAddMatOpen((o) => !o)}
-                                >＋ Attach</button>
-                                <F12Menu
-                                  open={addMatOpen}
-                                  onClose={() => { setAddMatOpen(false); addMatTrigRef.current?.focus(); }}
-                                  style={addMatMenuStyle}
-                                  ariaLabel="Add to this query"
-                                  items={[
-                                    ...MATERIAL_MENU.map((m) => ({
-                                      label: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0) ? `${m.label} · Added` : m.label,
-                                      disabled: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0),
-                                      onClick: () => { setAddMatOpen(false); m.add(); },
-                                    })),
-                                    "divider" as const,
-                                    {
-                                      label: isPro ? "Attach a submission package" : "Attach a submission package · Pro",
-                                      onClick: () => { setAddMatOpen(false); if (isPro) openPackages(); else onNavigate?.("plans"); },
-                                    },
-                                  ]}
-                                />
-                              </span>
-                            </div>
-
-                            {/* ⚠️ OTHER TAKES A FIELD, NOT A STEPPER — a quantity of what? Its chip
-                                reads whatever the writer types, verbatim. */}
-                            {otherOpen && (
-                              <div className="qc-msub qc-msamp">
-                                <input
-                                  type="text"
-                                  className="qc-mfree"
-                                  autoFocus
-                                  value={otherText}
-                                  placeholder="What else did you send?"
-                                  aria-label="Other material"
-                                  onChange={(e) => setOtherText(e.target.value)}
-                                  /* ⚠️ ENTER SAVES; ESCAPE IS DELIBERATELY NOT HANDLED HERE. The
-                                     page's rule is EXACTLY ONE Escape listener — two, both reaching
-                                     the journey's exit, run the dirty guard twice and ask about a
-                                     draft the first has already discarded. A field-level Escape is
-                                     a different thing and the rule cannot tell them apart; Cancel
-                                     is beside the field, and the overlays that DO own Escape own it
-                                     through `F12Popover` and `F12Menu`. */
-                                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveOtherMaterial(activeQuery, activeAgent); } }}
-                                />
-                                <button type="button" onClick={() => saveOtherMaterial(activeQuery, activeAgent)} disabled={!otherText.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: otherText.trim() ? "pointer" : "default", opacity: otherText.trim() ? 1 : 0.5 }}>Add</button>
-                                <button type="button" className="qc-mact" onClick={() => { setOtherOpen(false); setOtherText(""); }}>Cancel</button>
-                              </div>
-                            )}
-                            {/* ⚠️ THE INLINE SAMPLE EDITOR IS GONE (§5) — its unit toggle, its
-                                stepper and its Save/Cancel are the chip's own popover now. A row
-                                that expanded under the chips pushed everything below it every time
-                                a quantity was checked, and it could only ever edit the sample. */}
                           </div>
 
                           {/* ══ §2 · THE STATUS BLOCK ══════════════════════════════════════════
@@ -4719,7 +4510,16 @@ export const Queries: React.FC<{
                           closes on Escape and on an outside click and escapes the pane's
                           `overflow: hidden`. A fourth popover primitive on this page would be a
                           fourth way to open a menu. */}
-                      {matPop && (
+                      {matPop && (() => {
+                        /* ⚠️ THE FLAGS ARE DERIVED HERE, FROM THE SAME SOURCE THE CHIPS READ. The
+                           chips moved onto the send rung and took their locals with them; the
+                           popover is portalled, so its place in the tree never mattered — what it
+                           needed was the values. Re-derived from `baseMaterialsFor` rather than
+                           threaded down, because a second copy of "is it sent" is a second answer. */
+                        const pbase = baseMaterialsFor(activeQuery, activeAgent);
+                        const qlSent = pbase.some(isQueryLetterMat);
+                        const synSent = pbase.some(isSynopsisMat);
+                        return (
                         <F12Popover
                           width={272}
                           title={matPop === "ql" ? "Query letter" : matPop === "syn" ? "Synopsis" : "Opening sample"}
@@ -4777,8 +4577,8 @@ export const Queries: React.FC<{
                             }}
                           >Remove from query</button>
                         </F12Popover>
-                      )}
-                      <div className="qc-mailins" aria-hidden="true" />
+                        );
+                      })()}
                     </div>
                   );
                 })()}
@@ -4924,6 +4724,179 @@ export const Queries: React.FC<{
                                   lived inside the inline composer this section removed, so there is
                                   nothing to hand an entry to. Omitted rather than wired to a ref
                                   that is always null — the menu item now hides itself. */
+                              /**
+                               * ⚠️ THE SEND'S MATERIALS HANG OFF THE SEND (§1/§2 layout half). They
+                               * were on the header card, which describes the QUERY — so a
+                               * resubmission had nowhere to say what went with it, and the card
+                               * claimed one set of materials for a record that may have several
+                               * sends. Under the `Query sent` rung they belong to the event that
+                               * carries them.
+                               *
+                               * ⚠️ THE DATA IS UNCHANGED AND STILL THE QUERY'S. §2's migration —
+                               * moving `materialsWanted` onto the activities — is gated on Nick's
+                               * confirmation and is NOT done here; this reads exactly what it read
+                               * before, from `baseMaterialsFor`. Moving the UI without the data
+                               * keeps every write working while the model question is open, and it
+                               * is what stops §1 stranding the editors with nothing to open them.
+                               */
+                              sentExtra={(() => {
+                                const base = baseMaterialsFor(activeQuery, activeAgent);
+                                const qlSent = base.some(isQueryLetterMat);
+                                const synSent = base.some(isSynopsisMat);
+                                const sampleItem = base.find(isSampleMat) ?? null;
+                                const otherItems = base.filter(isOtherMat);
+                                const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
+                                const pkgComponents = linkedPackage
+                                  ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
+                                  : [];
+                                const isPro = currentUser?.plan === UserPlan.PRO;
+                                const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
+                                const openSampleEditor = () => {
+                                  const stored = sampleItem && typeof sampleItem !== "string" ? sampleItem.type : undefined;
+                                  const unit: SampleUnit = stored === "chapters" ? "Chapters" : stored === "words" ? "Words" : "Pages";
+                                  setSampleUnit(unit);
+                                  const qty = sampleItem && typeof sampleItem !== "string" && sampleItem.quantity != null ? String(sampleItem.quantity) : "";
+                                  setSampleQty(qty || snapToUnit(unit));
+                                  setSampleEditorOpen(true);
+                                };
+                                const attach = (key: string, label: string, qty: string | null, done: boolean, onClick: (el: HTMLElement) => void, title: string, onRemove?: () => void) => (
+                                  <button key={key} type="button" className={`qc-mchip qc-mchip-att${done ? " on" : ""}`} onClick={(e) => onClick(e.currentTarget)} title={title}>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
+                                    <span className="qc-mchiptx">{label}</span>
+                                    {qty && <span className="qc-mqtybadge">{qty}</span>}
+                                    <i aria-hidden="true">{done ? "✓" : "○"}</i>
+                                    {onRemove && (
+                                      <span role="button" tabIndex={0} className="qc-mchipx"
+                                        aria-label={`Remove ${label} from this query`} title={`Remove ${label}`}
+                                        onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onRemove(); } }}
+                                      >×</span>
+                                    )}
+                                  </button>
+                                );
+                                return (
+                                  <div className="qc-sentmat">
+                                    {/* ⚠️ THE MANUSCRIPT IS THE SEND'S SUBJECT, and a link — the one
+                                        thing here that navigates. Ink coloured, no underline at rest,
+                                        underlined on hover and focus; 1.35 line-height with a pixel
+                                        of bottom padding, because Playfair's descenders clip at
+                                        tighter values and an underline makes it worse. */}
+                                    <div className="qc-sentms">
+                                      {onNavigate ? (
+                                        <button type="button" className="qc-mname qc-mname--ms" onClick={() => onNavigate("manuscripts")} title="Open your manuscripts">{activeMs.title}</button>
+                                      ) : <span className="qc-mname qc-mname--ms">{activeMs.title}</span>}
+                                      {(!!activeMs.genre || !!activeMs.wordCount) && (
+                                        <span className="qc-msec">
+                                          {[activeMs.genre || null, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString()} words` : null].filter(Boolean).join(" · ")}
+                                        </span>
+                                      )}
+                                    </div>
+  <div className="qc-msub">
+                                {/* ⚠️ THE CHIP OPENS ITS OWN POPOVER (§5) rather than toggling on click. A single click that
+                                     silently flipped "sent" gave one control two of the three things a
+                                     material can have done to it and no way to reach the third. */}
+                                {attach("ql", "Query letter", null, qlSent, (el) => openMatPop("ql", el), "Query letter", qlSent ? () => toggleDocMaterial(activeQuery, activeAgent, "query") : undefined)}
+                                {attach("syn", "Synopsis", null, synSent, (el) => openMatPop("syn", el), "Synopsis", synSent ? () => toggleDocMaterial(activeQuery, activeAgent, "synopsis") : undefined)}
+                                {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
+                                    sample is a quantity and a unit, not a yes. Its label carries what
+                                    was sent; Remove keeps its own control, since a chip that both
+                                    edits and clears on one click could not do either. */}
+                                {/* ⚠️ THE LABEL IS THE MATERIAL AND THE BADGE IS THE AMOUNT — `Opening sample · 3
+                                      chapters`, not `3 chapters`. And `Opening sample` is the locked
+                                      name: the three units all store as one `ComponentType`, so
+                                      "Sample pages" would assert a unit the artefact does not carry. */}
+                                  {attach("smp", "Opening sample", sampleItem ? sampleMaterialText(sampleItem) : null, !!sampleItem, (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", sampleItem ? () => removeSampleMaterial(activeQuery, activeAgent) : undefined)}
+                                {otherItems.map((it, i) => (
+                                  <span key={`oth-${i}`} className="qc-mchip qc-mchip-att on" title={sampleMaterialText(it)}>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
+                                    <span className="qc-mchiptx">{sampleMaterialText(it)}</span>
+                                    <i aria-hidden="true">✓</i>
+                                    <span role="button" tabIndex={0} className="qc-mchipx"
+                                      aria-label="Remove this material from the query" title="Remove"
+                                      onClick={(e) => { e.stopPropagation(); removeOtherMaterial(activeQuery, activeAgent, it); }}
+                                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); removeOtherMaterial(activeQuery, activeAgent, it); } }}
+                                    >×</span>
+                                  </span>
+                                ))}
+                                {/* ⚠️ THE FLOATING `REMOVE` IS GONE (§4) — it now lives on the chip
+                                    it removes. A verb parked at the end of a row of chips has no
+                                    visible subject; this one silently meant "the sample". */}
+                                {/* ⚠️ THE PACKAGE SURVIVES AS A CHIP. It is not among §1's named
+                                    removals, and a Pro attachment is a record of what was sent —
+                                    which is exactly what this sub-row lists. */}
+                                {linkedPackage ? (
+                                  <button type="button" className="qc-mchip qc-mchip-att on" onClick={openPackages} title={pkgComponents.length ? `${linkedPackage.packageName} — ${pkgComponents.join(" · ")}` : linkedPackage.packageName}>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>
+                                    <span className="qc-mchiptx">{linkedPackage.packageName}</span>
+                                  </button>
+                                ) : null}
+                                {/* ══ §5 · + ATTACH ═══════════════════════════════════════════════
+                                    ⚠️ ALREADY-ADDED TYPES STAY IN THE MENU, MARKED `Added`. The menu
+                                    is a complete statement of what a query CAN carry; hiding what is
+                                    already on it would make the list shorter every time you used it,
+                                    and leave you unable to see that a type exists at all.
+                                    ⚠️ AND THE PACKAGE MOVES IN HERE, BELOW A RULE. The row's
+                                    `UPGRADE TO ATTACH A PACKAGE` was a pitch parked among facts; as
+                                    the last item of "what you could attach" it is one more thing you
+                                    could attach, which is what it actually is. */}
+                                <span className="f12-popwrap">
+                                  <button
+                                    ref={addMatTrigRef}
+                                    type="button"
+                                    className="qc-mchip qc-mchip-add"
+                                    aria-haspopup="menu"
+                                    aria-expanded={addMatOpen}
+                                    onClick={() => setAddMatOpen((o) => !o)}
+                                  >＋ Attach</button>
+                                  <F12Menu
+                                    open={addMatOpen}
+                                    onClose={() => { setAddMatOpen(false); addMatTrigRef.current?.focus(); }}
+                                    style={addMatMenuStyle}
+                                    ariaLabel="Add to this query"
+                                    items={[
+                                      ...MATERIAL_MENU.map((m) => ({
+                                        label: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0) ? `${m.label} · Added` : m.label,
+                                        disabled: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0),
+                                        onClick: () => { setAddMatOpen(false); m.add(); },
+                                      })),
+                                      "divider" as const,
+                                      {
+                                        label: isPro ? "Attach a submission package" : "Attach a submission package · Pro",
+                                        onClick: () => { setAddMatOpen(false); if (isPro) openPackages(); else onNavigate?.("plans"); },
+                                      },
+                                    ]}
+                                  />
+                                </span>
+                              </div>
+
+                              {/* ⚠️ OTHER TAKES A FIELD, NOT A STEPPER — a quantity of what? Its chip
+                                  reads whatever the writer types, verbatim. */}
+                              {otherOpen && (
+                                <div className="qc-msub qc-msamp">
+                                  <input
+                                    type="text"
+                                    className="qc-mfree"
+                                    autoFocus
+                                    value={otherText}
+                                    placeholder="What else did you send?"
+                                    aria-label="Other material"
+                                    onChange={(e) => setOtherText(e.target.value)}
+                                    /* ⚠️ ENTER SAVES; ESCAPE IS DELIBERATELY NOT HANDLED HERE. The
+                                       page's rule is EXACTLY ONE Escape listener — two, both reaching
+                                       the journey's exit, run the dirty guard twice and ask about a
+                                       draft the first has already discarded. A field-level Escape is
+                                       a different thing and the rule cannot tell them apart; Cancel
+                                       is beside the field, and the overlays that DO own Escape own it
+                                       through `F12Popover` and `F12Menu`. */
+                                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveOtherMaterial(activeQuery, activeAgent); } }}
+                                  />
+                                  <button type="button" onClick={() => saveOtherMaterial(activeQuery, activeAgent)} disabled={!otherText.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: otherText.trim() ? "pointer" : "default", opacity: otherText.trim() ? 1 : 0.5 }}>Add</button>
+                                  <button type="button" className="qc-mact" onClick={() => { setOtherOpen(false); setOtherText(""); }}>Cancel</button>
+                                </div>
+                              )}
+                                  </div>
+                                );
+                              })()}
                               onDeleteEntry={onDeleteEntry}
                               onNudge={() => setIsNudgeOpen(true)}
                               onSetExpectedDate={() => openEditQuery(activeQuery.id)}

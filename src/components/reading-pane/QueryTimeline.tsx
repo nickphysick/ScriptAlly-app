@@ -322,7 +322,14 @@ export const TimelineRows: React.FC<{
    */
   continues?: boolean;
   onEditSendMethod?: (anchor: HTMLElement) => void;
-}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod }) => (
+  /**
+   * ⚠️ ADDITIVE, AND DEFAULTED SO TO-DO IS UNTOUCHED. The Query Centre hangs the send's materials
+   * under its `Query sent` rung — each send carries what went with it, which is the only way a
+   * resubmission can be described at all. To-do renders `<TimelineRows rows={rows} />` and passes
+   * nothing, so it keeps the rung it has always had.
+   */
+  sentExtra?: React.ReactNode;
+}> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra }) => (
   <>
     {rows.map((row, i) => {
       const isLast = i === rows.length - 1 && !continues;
@@ -375,6 +382,8 @@ export const TimelineRows: React.FC<{
             {row.pills && row.pills.length > 0 && (
               <div className="tl-pills" style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
             )}
+            {/* the send's own materials — rendered by the caller, on the send rung only */}
+            {sentExtra && row.status === QueryStatus.QUERIED && sentExtra}
           </div>
         </TlEvent>
       );
@@ -412,7 +421,7 @@ const TlProjection: React.FC<{
   </TlEvent>
 );
 
-export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod }) => {
+export const QueryTimeline: React.FC<QueryTimelineProps & { sentExtra?: React.ReactNode }> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, sentExtra }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
   const rows = buildTimelineRows(events, query, agent);
@@ -445,6 +454,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps> = ({ query, agent, even
         onEditSendMethod={onEditSendMethod}
         onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}
         continues={ballHolder === "agent" && !!waiting}
+        sentExtra={sentExtra}
       />
 
       {/**

@@ -205,30 +205,33 @@ describe("§1 · the query header is a mail header", () => {
   });
 
   /**
-   * ⚠️ THE FRAME IS KEPT ACROSS THE REPLACEMENT, and that is a judgement rather than an instruction
-   * — recorded here because a judgement nobody wrote down is a judgement the next pass reverses by
-   * accident. The pack supersedes the two-subject layout, the two marks and the right-aligned
-   * column BY NAME and says nothing about the border. The 2px deepened sage and its 1px inset are
-   * what make this card out-rank the reading cards, a law that predates the pairing pack, and both
-   * tokens are derived against the live sage scale and locked below.
+   * ⚠️ THE FRAME IS GONE (§1), AND THE JUDGEMENT THAT KEPT IT IS WHAT RETIRES IT. It was kept
+   * across the mail-header rewrite because the 2px sage rim and its 1px inset were how this card
+   * out-ranked the three beneath it WHILE IT SHARED THEIR SHAPE. It no longer shares it: square,
+   * unrimmed, lifted, with a 5px sage top edge, against three rounded and hairlined panels. A rim
+   * now would be a second device saying what the shape already says.
+   *
+   * ⚠️ AND THE DIFFERENCE IS THE POINT, so it is asserted as a difference rather than as values:
+   * the header is square and the other three are not.
    */
-  it("three layers: a ring, a clipping frame, and the inset frame as its own overlay", () => {
+  it("the header is square, rimless and lifted — and the other three panels are not", () => {
     const card = rule(".qc-mail");
-    const ring = rule(".qc-mail::after");
-    const fr = rule(".qc-mail > .qc-mailfr");
-    const ins = rule(".qc-mailins");
-    for (const [n, r] of [["ring", ring], ["frame", fr], ["inset", ins]] as const) {
-      expect(r, `the ${n} layer is missing`).not.toBe("");
-    }
-    expect(ring, "the ring is not a 2px inset").toContain("inset 0 0 0 2px var(--qc-card-border)");
-    expect(ring, "the ring restated a radius instead of inheriting").toContain("border-radius: inherit");
-    expect(fr, "the clipping context stopped clipping").toContain("overflow: hidden");
-    expect(ins, "the inset frame is not a 1px line at 7px").toMatch(/inset:\s*7px/);
-    expect(ins, "the inset frame lost its line").toContain("inset 0 0 0 1px var(--qc-card-inset)");
-    for (const [n, r] of [["card", card], ["ring", ring], ["inset", ins]] as const) {
-      expect(r, `the ${n} layer took a border — the ring is a shadow`).not.toMatch(/(^|[;{\s])border:\s/);
-    }
+    expect(card, "the header card's rule is missing").not.toBe("");
+    expect(card, "the header took a radius — it is what distinguishes it").toContain("border-radius: 0");
+    expect(card, "the header lost its lift, which is now its only separation").toContain("var(--sh-2)");
+    expect(card, "the header took a border back").not.toMatch(/(^|[;{\s])border:\s/);
+    expect(rule(".qc-mail::after"), "the 2px frame came back").toBe("");
+    expect(rule(".qc-mailins"), "the inset frame came back").toBe("");
+    expect(cssCode, "the inset frame survives with nothing rendering it").not.toContain("qc-mailins");
+    /* the 5px sage top edge is the whole of the card's chrome */
+    expect(rule(".qc-mail::before"), "the sage top edge is missing").toContain("height: 5px");
+    expect(rule(".qc-mail::before"), "the top edge is not the deepened sage").toContain("var(--qc-card-border)");
+    /* ⚠️ AND THE THREE OTHERS KEEP THEIR RADIUS — asserted here because the header's squareness
+       means nothing on its own. */
+    expect(cssCode, "the header rejoined the rounded family")
+      .toContain(".qc-wpg .f12-list,\n.qc-wpg .f12-card { border-radius: var(--qc-card-r); }");
   });
+
 
   it("its two sage values are role-named tokens, ordered against the header's gradient", () => {
     const hex = (n: string) => (new RegExp(`${n}:\\s*(#[0-9a-f]{6})`, "i").exec(cssCode + indexCss) ?? [])[1];
@@ -334,11 +337,16 @@ describe("§1 · the query header is a mail header", () => {
     expect(card, "a mono row label came back").not.toMatch(/["\s`]qc-mlab["\s`]/);
     expect(card, "the AGENT label came back").not.toContain(">Agent<");
     expect(card, "the SENT label came back").not.toContain(">Sent<");
-    expect((card.match(/className="qc-mlead /g) ?? []).length, "the two rows are not both led by a glyph").toBe(2);
-    /* ⚠️ §4b — THE LEADERS DIFFER IN GROUND AND IN NOTHING ELSE, which is what lets the two NAMES
-       be identical. The agent's takes a disc; the manuscript's stays bare. */
-    expect(card, "the agent's leader lost its modifier").toContain("qc-mlead--ag");
-    expect(card, "the manuscript's leader lost its modifier").toContain("qc-mlead--ms");
+    /* ⚠️ ONE ROW, ONE LEADER (§1). The manuscript's row left the card for the send event that
+       carries it, so the agent's glyph is the only one — and it is BARE again: the pink disc
+       existed to tell two rows apart, and there is one. */
+    /* ⚠️ ONE ROW, ONE LEADER, AND IT IS BARE AGAIN (§1). The manuscript's row left for the send
+       event that carries it, so the pink disc §4b gave the agent's glyph had nothing left to
+       distinguish — it was a second circle competing with the 56px status mark. */
+    expect((card.match(/className="qc-mlead"/g) ?? []).length, "the card is not one row").toBe(1);
+    expect(card, "the manuscript's row is still in the header").not.toContain("qc-mlead--ms");
+    expect(card, "the leader took its disc back").not.toContain("qc-mlead--ag");
+    expect(cssCode, "the disc's rule survives with nothing wearing it").not.toContain("qc-mlead--ag");
     /* ⚠️ BARE, AND THE STATUS MARK STAYS THE ONLY CIRCLE. A plate or a ring here would give the
        card a second round element and the eye a second place to start. */
     /* ⚠️ INVERTED IN HALF BY §4b. §1's clause was that BOTH leaders are bare, so the status mark
@@ -347,8 +355,7 @@ describe("§1 · the query header is a mail header", () => {
        leader wears nothing, which is what makes the pair a difference rather than two icons. */
     const lead = rule(".qc-mlead");
     expect(lead, "the shared leader rule took a ground").not.toMatch(/background|border|box-shadow|border-radius/);
-    expect(rule(".qc-mlead--ag"), "the agent's disc is missing").toContain("background: var(--pink)");
-    expect(cssCode, "the manuscript's leader took a ground").not.toMatch(/\.qc-mlead--ms[^{]*\{[^}]*background/);
+
     /* one size and one stroke on both — a single rule, so they cannot drift */
     expect(rule(".qc-mlead svg"), "the leaders lost their shared size").toContain("width: 20px");
     expect(rule(".qc-mlead svg"), "the leaders lost their shared stroke").toContain("stroke-width: 1.5");
@@ -368,12 +375,21 @@ describe("§1 · the query header is a mail header", () => {
     expect(card, "the date left the status block").toContain("qc-msdate");
   });
 
-  it("both subjects are named, in one face and ink, and each is the way to its record", () => {
+  /**
+   * ⚠️ ONE SUBJECT IN THE HEADER NOW (§1) — the agent and the query's state, and nothing else. The
+   * manuscript is the SEND's subject and lives on the send rung, which is what lets a resubmission
+   * describe itself at all; a card that names one manuscript cannot speak for a record with several
+   * sends.
+   */
+  it("the header names the agent, and the manuscript has left it", () => {
     const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
     expect(card, "the agent is not named").toContain("{nameplate}");
-    expect(card, "the manuscript is not named").toContain("{activeMs.title}");
     expect(card, "the agent's name stopped being the way to the agent list").toContain('onNavigate("agents")');
-    expect(card, "the manuscript's name stopped being the way to the manuscripts").toContain('onNavigate("manuscripts")');
+    expect(card, "the manuscript is still in the header").not.toContain("{activeMs.title}");
+    expect(card, "a materials chip is still in the header").not.toContain("qc-mchip-att");
+    /* and it went somewhere — the send rung, through the timeline's own seam */
+    expect(code, "the manuscript did not move to the send event").toContain("sentExtra={(() => {");
+    expect(code, "the send's block does not name the manuscript").toContain('className="qc-sentms"');
     /* ⚠️ ONE RULE AND ONE MODIFIER SINCE §2 — the names differ in SIZE and in nothing else. The
        base carries face, weight, ink and every truncation property; `--lg` carries a single
        declaration. A second full rule for the agent is how "same face and ink" quietly stops being
@@ -381,12 +397,13 @@ describe("§1 · the query header is a mail header", () => {
        ⚠️ AND NEITHER IS BURGUNDY OR ITALIC. Both were tried on the manuscript title and rejected:
        burgundy is the outgoing status colour, and on a card whose only colour is the status mark a
        second one reads as a second status. Size alone carries the hierarchy. */
-    expect((card.match(/className="qc-mname/g) ?? []).length, "the two names are not the same element").toBe(4);
     /* ⚠️ `--lg` IS RETIRED BY §4 — the names match and the CARD differentiates, through a rule
        between the rows and a disc on one leader. Both of those hold whatever the words are, which
        is what type carrying the hierarchy could not do. */
     expect(card, "the agent's larger step came back — the card should carry the difference").not.toContain("qc-mname--lg");
     expect(cssCode, "the modifier survives with nothing wearing it").not.toContain(".qc-mname--lg");
+    /* both names still share one rule — the header's and the send's — so "same face and ink" holds
+       across the two surfaces they now live on */
     expect(rule(".qc-mname"), "the names took a colour of their own").toContain("color: var(--ink)");
     expect(rule(".qc-mname"), "the base rule went italic").not.toContain("font-style");
     expect(rule(".qc-mname"), "the shared name step moved off 23px").toContain("font-size: 23px");
@@ -780,88 +797,74 @@ describe("§4 (fp4) · the notes", () => {
  * because you sent it somewhere.
  */
 /**
- * ⚠️ REPOINTED AGAIN — "WHAT YOU SENT" IS THE MAIL HEADER'S `SENT` ROW. It was a card, then a
- * card's right half, and it is now a labelled line with its materials on the rail beneath it. The
- * section keeps its job through all three: proving that a rearrangement did not quietly drop a
- * control.
+ * ⚠️ REPOINTED A THIRD TIME — "WHAT YOU SENT" IS THE SEND EVENT'S OWN BLOCK. It was a card, then a
+ * card's half, then a labelled row in the header, and it is now hung off the `Query sent` rung.
+ * Each move had one reason and this one is the strongest: a header describes the QUERY, so a card
+ * carrying materials claimed one set for a record that may have several sends — and a resubmission
+ * had nowhere to say what went with it.
+ *
+ * ⚠️ THE DATA IS UNCHANGED AND STILL THE QUERY'S. §2's migration is gated on Nick's confirmation;
+ * this block reads exactly what it read before, from `baseMaterialsFor`.
  */
-describe("§5 (fp4) · what you sent — now the mail header's SENT row", () => {
+describe("§5 (fp4) · what you sent — now the send event's own block", () => {
   const card = (() => {
-    const at = code.indexOf('<div className="qc-mail">');
-    return at < 0 ? "" : code.slice(at, code.indexOf('<div className="qp-cols"', at));
+    const at = code.indexOf("sentExtra={(() => {");
+    return at < 0 ? "" : code.slice(at, code.indexOf("onDeleteEntry={onDeleteEntry}", at));
   })();
 
-  it("the row is there to test", () => {
-    expect(card, "the header card is missing — every case below would pass vacuously").not.toBe("");
-    expect(card, "the SENT row's leader went").toContain('<path d="M5 4.5h11.5');
-    /* ⚠️ AND THE CARD IT CAME FROM IS STILL GONE. A second surface listing the same materials is
-       the duplication the first merge removed. */
+  it("the block is there to test", () => {
+    expect(card, "the send's materials block is missing — every case below would pass vacuously")
+      .not.toBe("");
     expect(code, "the What you sent card came back").not.toContain('title="What you sent"');
+    /* ⚠️ AND THE SEAM IS ADDITIVE, so To-do's copy of these rows is untouched */
+    const tl = read("../components/reading-pane/QueryTimeline.tsx");
+    expect(tl, "the send-extra seam is not optional").toContain("sentExtra?: React.ReactNode;");
+    expect(tl, "the extra is not scoped to the send rung")
+      .toContain("sentExtra && row.status === QueryStatus.QUERIED && sentExtra");
   });
 
-  it("the manuscript is the row's subject, and the way to its record", () => {
+  it("the manuscript is the send's subject, and the way to its record", () => {
     expect(card, "the manuscript's name is not stated").toContain("activeMs.title");
-    expect(card, "the name is not the agent's peer").toContain("qc-mname");
+    expect(card, "the name is not the shared type").toContain("qc-mname");
     expect(card, "the manuscript kept the burgundy link treatment").not.toContain("qp-msname");
     expect(card, "the meta line is missing").toContain("qc-msec");
-    /* each half omits itself — no stray interpunct, and never "0 words" */
     expect(card, "the meta prints regardless of whether it has anything to say")
       .toContain("(!!activeMs.genre || !!activeMs.wordCount) &&");
     expect(card, "the word count is printed unconditionally").toContain("activeMs.wordCount ?");
   });
 
-  /**
-   * ⚠️ NO HEADING, AND NOW NO ROW LABEL EITHER — the mono `SENT` in column 1 IS the heading, and it
-   * names the line rather than the list. "Materials sent" existed to name a subject a card could
-   * not otherwise show; the subject is on the line above, on the same rail.
-   */
-  it("the materials need no heading — the label names the line", () => {
+  it("the materials sit under the send that carried them", () => {
     expect(card, "the eyebrow came back over rows that already have a subject").not.toContain("Materials sent");
-    expect(card, "the old heading survived").not.toContain("Sent with this query");
     const title = card.indexOf("activeMs.title"), mats = card.indexOf('attach("ql"');
     expect(title, "the manuscript is not named").toBeGreaterThan(-1);
     expect(mats, "the material chips are not here").toBeGreaterThan(-1);
     expect(title, "the chips no longer follow the manuscript that gives them their subject").toBeLessThan(mats);
   });
 
-  it("⚠️ NO SEND METHOD AND NO SEND DATE — the row opens on its materials", () => {
-    expect(card, "the send line came back — Tracking already states both facts").not.toContain("{sentLine}");
-    expect(code, "the sentLine block survives as dead render code").not.toContain("const sentLine =");
-  });
-
-  /**
-   * ⚠️ THE ROWS SURVIVE AS CHIPS, AND EVERY WRITE PATH WITH THEM. Three shapes in three packs —
-   * a left-aligned row with a pushed-right mark, a right-aligned row with a leading mark, and now
-   * a filled chip with a tick — and one builder each time, because two builders is how two
-   * surfaces drift.
-   */
-  it("the materials survive as attachment chips, with every write still reachable", () => {
+  it("the materials survive as chips, with every write still reachable", () => {
     expect(card, "the chips are no longer built by one helper").toContain("attach(");
     for (const t of ["matRow(", "qp-msrow", "sentPip(", "docRow("]) {
       expect(card, `${t} survived — two builders is how the families drift apart`).not.toContain(t);
     }
-    for (const t of ['toggleDocMaterial(activeQuery, activeAgent, "query")', 'toggleDocMaterial(activeQuery, activeAgent, "synopsis")', "openSampleEditor", "removeSampleMaterial(activeQuery, activeAgent)", "saveSampleMaterial(activeQuery, activeAgent)"]) {
+    for (const t of ['toggleDocMaterial(activeQuery, activeAgent, "query")', 'toggleDocMaterial(activeQuery, activeAgent, "synopsis")', "openSampleEditor", "removeSampleMaterial(activeQuery, activeAgent)"]) {
       expect(card, `${t} was dropped in the move`).toContain(t);
     }
-    /* ⚠️ AND THE PACKAGE CAME WITH THEM, as a chip: it is not among the pack's named removals, and
-       a Pro attachment is a record of what was sent — which is what this sub-row lists. */
+    /* ⚠️ `saveSampleMaterial` IS THE POPOVER'S, AND THE POPOVER IS PORTALLED — its place in the
+       tree never mattered, so it did not move with the chips and is asserted against the file
+       rather than the block. Its own flags are re-derived at its site from `baseMaterialsFor`,
+       which is the same source the chips read: one answer to "is it sent", not two. */
+    expect(code, "the sample editor's save went with the move")
+      .toContain("saveSampleMaterial(activeQuery, activeAgent)");
+    expect(code, "the popover threads the flags down instead of deriving them")
+      .toContain("const pbase = baseMaterialsFor(activeQuery, activeAgent);");
     expect(card, "the submission package was dropped in the move").toContain("linkedPackage");
   });
 
-  /**
-   * ⚠️ THE CONTACTS MOVED FOR A LAYOUT REASON, AND THE REASON IS THE CASE. Beside the name, the
-   * longest agency decided where every address began, so they started somewhere different on every
-   * query. Under it they start on the rail, which is one column for the whole card.
-   */
   it("the AGENT row carries identity only, with its contacts on the rail beneath", () => {
-    expect(card, "the AGENT row's leader went").toContain('<circle cx="12" cy="8" r="3.6"');
-    const agentAt = card.indexOf('<circle cx="12" cy="8"'), sentAt = card.indexOf('<path d="M5 4.5h11.5');
-    const agentBlock = card.slice(agentAt, sentAt);
-    expect(agentBlock, "the contacts left the agent's sub-row").toContain("qc-mchip-con");
-    expect(agentBlock, "the agency is not stated").toContain("activeAgent.agency");
-    /* ⚠️ AND AN AGENCY-LESS AGENT SAYS SO. A blank is indistinguishable from a field nobody has
-       looked at; "No agency" is a fact, and this app has agency-less agents by design. */
-    expect(agentBlock, "an agent with no agency shows a blank").toContain('"No agency"');
+    const hdr = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
+    expect(hdr, "the contacts left the agent's sub-row").toContain("qc-mchip-con");
+    expect(hdr, "the agency is not stated").toContain("activeAgent.agency");
+    expect(hdr, "an agent with no agency shows a blank").toContain('"No agency"');
   });
 
   it("the block's now-unreachable machinery was swept, not orphaned", () => {

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — Query Centre, final</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;
+  --ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;--burg:#7c3a2a;
+  --sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;
+  --pinkc:#f8e7dc;--pinkb:#ebcfc2;
+  --col-list:330px;--gap:16px;--btn-h:42px;--rad:12px;
+  --lift:0 1px 2px rgba(40,35,30,.05),0 4px 10px -4px rgba(40,35,30,.14),0 18px 34px -18px rgba(40,35,30,.38);
+}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:20px;-webkit-font-smoothing:antialiased;}
+em,.meta,.qi time,.stx span,.et em,.barf,.stat b,.lh span{font-variant-numeric:tabular-nums;}
+:focus-visible{outline:2px solid var(--sage-br);outline-offset:2px;}
+@media (prefers-reduced-motion:no-preference){.qi,.b,.att,.lk,.mslink{transition:background-color .12s ease,box-shadow .12s ease;}}
+
+.shell{max-width:1400px;margin:0 auto;}
+.band{display:flex;align-items:center;background:#fff;border-radius:var(--rad) var(--rad) 0 0;
+  padding:14px 24px;border-bottom-width:2px;border-bottom-style:solid;border-bottom-color:#1a1917;}
+.band .pn{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;}
+.page{background:var(--ground);border-radius:0 0 var(--rad) var(--rad);padding:30px 24px 26px;box-shadow:0 12px 30px rgba(40,35,30,.14);}
+
+/* ---- buttons: one base, borderless, one height ---- */
+.b{font-family:inherit;font-size:13px;height:var(--btn-h);padding:0 16px;border:0;border-radius:10px;
+  background:transparent;box-shadow:none;color:var(--ink2);display:inline-flex;align-items:center;gap:8px;cursor:pointer;}
+.b svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;}
+.b:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--oat);}
+.b.act{color:var(--ink);font-weight:500;}
+.b.pink{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.b.pink:hover{background:#f6e0d3;box-shadow:inset 0 0 0 1px var(--pinkb);}
+.b.sq{padding:0 12px;}
+.b .sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:#b8b3ab;}
+
+/* ---- the two aligned rows share one grid ---- */
+.grid{display:grid;grid-template-columns:var(--col-list) minmax(0,1fr);gap:var(--gap);}
+.bar{align-items:center;padding-bottom:14px;margin-bottom:16px;box-shadow:inset 0 -1px 0 var(--line);}
+.bar .left{display:flex;}
+.bar .right{display:flex;align-items:center;gap:8px;}
+.bar .sp{flex:1;}
+.body{align-items:start;}
+
+/* ---- list ---- */
+.panel{position:relative;background:#fff;border-radius:var(--rad);}
+.panel::after{content:'';position:absolute;inset:0;border-radius:var(--rad);pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);}
+.panel .clip{border-radius:var(--rad);overflow:hidden;}
+.lh{display:flex;align-items:baseline;gap:10px;padding:13px 16px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));}
+.lh b{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.lh span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);}
+.lbody{padding:12px;}
+.srow{display:flex;gap:8px;margin-bottom:10px;}
+.lsearch{flex:1;min-width:0;display:flex;align-items:center;height:var(--btn-h);padding:0 12px;border-radius:10px;
+  background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:#b5b0a8;font-size:12px;}
+.lsearch kbd{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:#c4bfb7;background:var(--n1);border-radius:4px;padding:1px 6px;box-shadow:inset 0 0 0 1px var(--line);}
+.ico{width:var(--btn-h);height:var(--btn-h);flex:none;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);
+  display:flex;align-items:center;justify-content:center;color:var(--ink2);cursor:pointer;}
+.ico svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;}
+.grp{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin:6px 4px 4px;}
+.grp:after{content:'';flex:1;height:1px;background:var(--line);}
+.qi{position:relative;display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;
+  padding:10px 6px;border-radius:9px;cursor:pointer;}
+.qi::after{content:'';position:absolute;left:6px;right:6px;bottom:0;height:1px;background:var(--line);}
+.qi:last-of-type::after{display:none;}
+.qi:hover{background:var(--n1);}
+.qi.on{background:var(--n2);} .qi.on::after{display:none;}
+.av{width:30px;height:30px;border-radius:50%;background:var(--n2);color:var(--ink2);font-family:'JetBrains Mono',monospace;font-size:9px;
+  display:flex;align-items:center;justify-content:center;}
+.qi.on .av{background:#fff;}
+.qn{min-width:0;}
+.qn b{display:block;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.qn i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
+.qi time{display:flex;flex-direction:column;align-items:flex-end;text-align:right;font-family:'JetBrains Mono',monospace;line-height:1.3;}
+.qi time s{text-decoration:none;font-size:7px;letter-spacing:.11em;text-transform:uppercase;color:#b8b3ab;margin-bottom:1px;}
+.qi time u{text-decoration:none;font-size:9.5px;color:var(--ink2);}
+.lfoot{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;box-shadow:inset 0 1px 0 var(--line);
+  font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+
+/* ---- right column ---- */
+.right-col{display:flex;flex-direction:column;gap:14px;min-width:0;}
+
+/* header card: white, square, lifted, 5px sage top */
+.hdr{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;
+  background:#fff;border-radius:0;box-shadow:var(--lift);padding:24px 26px 22px;}
+.hdr::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:var(--sage-br);}
+.who{display:flex;align-items:center;gap:14px;min-width:0;}
+.lead{width:34px;height:34px;flex:none;display:flex;align-items:center;justify-content:center;}
+.lead svg{width:21px;height:21px;stroke:var(--faint);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+.l1{display:flex;align-items:baseline;gap:11px;min-width:0;}
+.nm{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;line-height:1.35;}
+.meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+.pills{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.lk{display:inline-flex;align-items:center;gap:6px;max-width:280px;font-size:11.5px;color:var(--ink2);
+  background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;}
+.lk svg{width:12px;height:12px;flex:none;stroke:var(--faint);fill:none;stroke-width:1.6;}
+.lk s{text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lk:hover{box-shadow:inset 0 0 0 1px var(--sage-br);}
+.st{display:flex;align-items:center;gap:14px;flex:none;}
+.sd{width:56px;height:56px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--pinkc);box-shadow:inset 0 0 0 2.5px var(--burg);}
+.sd svg{width:24px;height:24px;stroke:var(--burg);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.stx b{display:block;font-family:'Playfair Display',serif;font-size:21px;font-weight:500;line-height:1.3;}
+.stx span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+
+.lower{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;align-items:start;}
+.card{position:relative;background:#fff;border-radius:var(--rad);}
+.card::after{content:'';position:absolute;inset:0;border-radius:var(--rad);pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);}
+.card .clip{border-radius:var(--rad);overflow:hidden;}
+.ch{display:flex;align-items:center;gap:10px;padding:13px 17px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));
+  font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.ch svg{width:17px;height:17px;stroke:var(--sage-tx);fill:none;stroke-width:1.5;}
+.ch .m2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);font-weight:400;}
+.stats{display:grid;grid-template-columns:1fr 1fr;box-shadow:inset 0 -1px 0 var(--line);}
+.stat{display:flex;align-items:center;gap:12px;padding:15px 17px;}
+.stat+.stat{box-shadow:inset 1px 0 0 var(--line);}
+.si{width:34px;height:34px;flex:none;border-radius:10px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);
+  display:flex;align-items:center;justify-content:center;}
+.si svg{width:16px;height:16px;stroke:var(--burg);fill:none;stroke-width:1.6;}
+.stat b{display:block;font-family:'Playfair Display',serif;font-size:22px;font-weight:400;line-height:1.1;}
+.stat b i{font-style:normal;font-size:12px;color:var(--ink2);}
+.stat u{display:block;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--faint);margin-top:5px;}
+.cb{padding:16px 18px;}
+.ev{position:relative;padding:0 0 20px 40px;}
+.ev::before{content:'';position:absolute;left:13px;top:31px;bottom:0;width:1px;background:var(--line);}
+.ev:last-child{padding-bottom:0;} .ev:last-child::before{display:none;}
+.ev .m{position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:#fff;
+  box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.ev .m.in{box-shadow:inset 0 0 0 1.5px #9db09b;color:var(--sage-tx);}
+.ev .m.q{box-shadow:inset 0 0 0 1.5px var(--oat);color:#bdb8b0;}
+.et{display:flex;align-items:baseline;gap:10px;min-height:27px;}
+.et b{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;}
+.et em{font-style:normal;margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--faint);}
+.ep{margin-top:4px;font-size:12.5px;color:var(--ink2);line-height:1.55;}
+.msline{display:flex;align-items:baseline;gap:10px;margin-top:6px;}
+.mslink{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink);line-height:1.35;
+  text-decoration:none;cursor:pointer;padding-bottom:1px;}
+.mslink:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--oat);}
+.chips{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;align-items:center;}
+.att{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);background:var(--n1);
+  box-shadow:inset 0 0 0 1px var(--line);border-radius:7px;padding:5px 10px;cursor:pointer;}
+.att svg{width:12px;height:12px;stroke:var(--faint);fill:none;stroke-width:1.6;}
+.att:hover{box-shadow:inset 0 0 0 1px var(--oat);}
+.addb{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--burg);background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);border-radius:7px;padding:5px 11px;cursor:pointer;}
+.addb:hover{box-shadow:inset 0 0 0 1px var(--burg);}
+.bar2{position:relative;height:5px;border-radius:3px;background:var(--n2);margin:12px 0 7px;overflow:hidden;}
+.bar2 i{display:block;height:100%;width:100%;background:var(--oat);}
+.bar2::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(124,58,42,.15) 5px 10px);}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);}
+.offer{margin-top:11px;background:var(--n1);border-radius:9px;box-shadow:inset 0 0 0 1px var(--line);padding:10px 12px;font-size:12px;color:var(--ink2);}
+.ilink{color:var(--burg);text-decoration:underline;text-underline-offset:3px;text-decoration-color:#dfc0b4;cursor:pointer;}
+.note{background:var(--n1);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);padding:12px 13px;font-size:12px;line-height:1.55;color:var(--ink2);}
+.note .d{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);margin-bottom:5px;}
+.compose{display:flex;align-items:center;margin-top:10px;height:var(--btn-h);padding:0 13px;border-radius:10px;
+  background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:#b5b0a8;font-size:12px;}
+/* shortcut sheet */
+.ovl{position:relative;max-width:1400px;margin:16px auto 0;background:rgba(40,35,30,.10);border-radius:12px;padding:26px;}
+.sheet{max-width:640px;margin:0 auto;background:#fff;border-radius:0;box-shadow:var(--lift);position:relative;}
+.sheet::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:var(--sage-br);}
+.sh{display:flex;align-items:center;padding:15px 20px 13px;box-shadow:inset 0 -1px 0 var(--line);}
+.sh b{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;}
+.sh span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);background:var(--n1);
+  border-radius:4px;padding:2px 7px;box-shadow:inset 0 0 0 1px var(--line);}
+.sb{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:18px 20px;}
+.kg u{display:block;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--faint);margin-bottom:8px;}
+.kr{display:flex;align-items:center;gap:6px;padding:5px 0;font-size:12px;color:var(--ink2);}
+.kr span{flex:1;}
+.kr kbd{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink2);background:var(--n1);
+  border-radius:4px;padding:2px 6px;box-shadow:inset 0 0 0 1px var(--line);}
+/* specimens */
+.spec{max-width:1400px;margin:16px auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.sp1{background:var(--ground);border-radius:12px;padding:16px;box-shadow:0 8px 20px rgba(40,35,30,.1);}
+.sl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:#a9a49c;margin-bottom:11px;}
+.toast{display:flex;align-items:center;gap:9px;background:#22201d;color:#f4f0eb;border-radius:10px;padding:11px 13px;font-size:12.5px;
+  box-shadow:0 6px 18px -6px rgba(40,35,30,.5);}
+.toast b{font-weight:500;color:#fff;}
+.tk{width:17px;height:17px;border-radius:50%;background:#4e6050;color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;}
+.undo{margin-left:auto;color:#f0d6c8;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+.tclose{color:#8d8880;cursor:pointer;}
+.empty{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:22px 18px;text-align:center;}
+.empty svg{width:60px;height:44px;stroke:var(--oat);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+.empty b{display:block;font-family:'Playfair Display',serif;font-size:17px;font-weight:500;margin:10px 0 5px;}
+.empty p{font-size:12px;color:var(--ink2);line-height:1.55;margin-bottom:13px;}
+.skel{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:8px 12px;}
+.sk{display:grid;grid-template-columns:30px 1fr 62px;gap:10px;align-items:center;padding:11px 0;}
+.sk+.sk{box-shadow:inset 0 1px 0 var(--line);}
+.sk .c{width:30px;height:30px;border-radius:50%;}
+.sk .l1s{height:9px;border-radius:4px;width:70%;}
+.sk .l1s.w2{width:52%;} .sk .l1s.w3{width:62%;}
+.sk .l2s{height:8px;border-radius:4px;width:100%;}
+.sk span{background:linear-gradient(90deg,var(--n1) 25%,var(--n2) 37%,var(--n1) 63%);background-size:400% 100%;}
+@media (prefers-reduced-motion:no-preference){.sk span{animation:shim 1.5s ease infinite;}}
+@keyframes shim{0%{background-position:100% 0;}100%{background-position:0 0;}}
+.legend{max-width:1400px;margin:16px auto 0;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+<div class="shell">
+  <div class="band">
+    <span class="pn">Query Centre</span>
+    <button class="b" style="margin-left:auto"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg>Export</button>
+  </div>
+
+  <div class="page">
+    <div class="grid bar">
+      <div class="left">
+        <button class="b pink"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log new query</button>
+      </div>
+      <div class="right">
+        <button class="b act"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+        <button class="b act"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudge</button>
+        <span class="sp"></span>
+        <button class="b"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>Mark closed</button>
+        <button class="b sq" title="Export this query"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button>
+        <button class="b"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 13h6l1-13"/></svg>Delete</button>
+      </div>
+    </div>
+
+    <div class="grid body">
+      <div class="panel"><div class="clip">
+        <div class="lh"><b>25 queries</b><span>8 answered · 17 not</span></div>
+        <div class="lbody">
+          <div class="srow">
+            <span class="lsearch">⌕&nbsp; Search<kbd>/</kbd></span>
+            <span class="ico" title="Filter"><svg viewBox="0 0 24 24"><path d="M4 6h16l-6 7v5l-4 2v-7Z"/></svg></span>
+            <span class="ico" title="Sort"><svg viewBox="0 0 24 24"><path d="M8 4v16M8 4L5 8M8 4l3 4M16 20V4M16 20l-3-4M16 20l3-4"/></svg></span>
+          </div>
+          <div class="grp">No reply yet · 10</div>
+          <div class="qi"><span class="av">SD</span><span class="qn"><b>Sophie Dunn</b><i>Curtis Vane</i></span>
+            <time title="Sent 15 January 2024"><s>with agent for</s><u>2½ years</u></time></div>
+          <div class="qi"><span class="av">WT</span><span class="qn"><b>William Tan</b><i>Foxglove Literary</i></span>
+            <time title="Sent 3 August 2024"><s>with agent for</s><u>2 years</u></time></div>
+          <div class="qi"><span class="av">MR</span><span class="qn"><b>Marcus Reed</b><i>Bloomsbury Quill</i></span>
+            <time title="Sent 11 June 2024"><s>with agent for</s><u>2 years</u></time></div>
+          <div class="qi on"><span class="av">JM</span><span class="qn"><b>Jonathan Marsh</b><i>The Marsh Agency</i></span>
+            <time title="Sent 9 April 2024"><s>with agent for</s><u>2¼ years</u></time></div>
+          <div class="qi"><span class="av">AK</span><span class="qn"><b>Aisha Kapoor</b><i>The Lantern Agency</i></span>
+            <time title="Sent 14 March 2024"><s>with agent for</s><u>2¼ years</u></time></div>
+          <div class="qi"><span class="av">PL</span><span class="qn"><b>Penhallow Literary</b><i>Agent not specified</i></span>
+            <time title="Sent 26 January 2024"><s>with agent for</s><u>2⅓ years</u></time></div>
+        </div>
+        <div class="lfoot"><span>Showing 25 of 25</span><span>Export CSV</span></div>
+      </div></div>
+
+      <div class="right-col">
+        <div class="hdr">
+          <div class="who">
+            <span class="lead"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+            <div style="min-width:0">
+              <div class="l1"><span class="nm">Jonathan Marsh</span><span class="meta">The Marsh Agency</span></div>
+              <div class="pills">
+                <span class="lk" title="Click to copy"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="M3 7l9 6 9-6"/></svg><s>submissions@themarshagency.com</s></span>
+                <span class="lk" title="themarshagency.com"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg><s>themarshagency.com</s></span>
+              </div>
+            </div>
+          </div>
+          <div class="st">
+            <span class="sd"><svg viewBox="0 0 24 24"><path d="M4 12h9M9 7l5 5-5 5M15 6v12"/></svg></span>
+            <span class="stx"><b>Full sent</b><span>9 April 2024</span></span>
+          </div>
+        </div>
+
+        <div class="lower">
+          <div class="card"><div class="clip">
+            <div class="ch"><svg viewBox="0 0 24 24" stroke-linecap="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>Tracking<span class="m2">Full sent · 1 task</span></div>
+            <div class="stats">
+              <div class="stat"><span class="si"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>
+                <div><b>2¼ <i>years</i></b><u>With agent for</u></div></div>
+              <div class="stat"><span class="si"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 9h16M9 3v4M15 3v4"/></svg></span>
+                <div><b>4 <i>Jun 2024</i></b><u>Window closed</u></div></div>
+            </div>
+            <div class="cb">
+              <div class="ev"><span class="m">✈</span>
+                <div class="et"><b>Query sent · via Email</b><em>9 APR 2024</em></div>
+                <div class="msline"><a class="mslink">Murphy&rsquo;s Day Out</a><span class="meta">Thriller · 50,000 words</span></div>
+                <div class="chips">
+                  <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+                  <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Synopsis</span>
+                  <span class="addb">+ Attach</span>
+                </div>
+              </div>
+              <div class="ev"><span class="m in">«</span>
+                <div class="et"><b>Full requested</b><em>18 APR 2024</em></div>
+                <div class="ep">Jonathan asked for the full manuscript</div>
+              </div>
+              <div class="ev"><span class="m">»</span>
+                <div class="et"><b>Full sent</b><em>20 APR 2024</em></div>
+                <div class="chips">
+                  <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Full manuscript</span>
+                  <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Revised synopsis</span>
+                  <span class="addb">+ Attach</span>
+                </div>
+              </div>
+              <div class="ev"><span class="m q">⌛</span>
+                <div class="et"><b>No reply</b><em>2¼ YEARS</em></div>
+                <div class="ep">The Marsh Agency state eight weeks. That window closed in June 2024.<br>Many agencies treat silence as a pass.</div>
+                <div class="bar2"><i></i></div>
+                <div class="barf"><span>Sent 9 Apr 2024</span><span>Window closed 4 Jun 2024</span></div>
+                <div class="offer">You can <a class="ilink">mark this closed</a> if you'd rather stop tracking it.</div>
+              </div>
+            </div>
+          </div></div>
+
+          <div class="card"><div class="clip">
+            <div class="ch"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>Notes<span class="m2">1 note</span></div>
+            <div class="cb">
+              <div class="note"><div class="d">30 Jun 2024, 16:25</div>Agency moved to Submittable in June; the old form bounces. Worth checking before any follow-up.</div>
+              <div class="compose">Write a note…</div>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ovl">
+  <div class="sheet">
+    <div class="sh"><b>Keyboard</b><span>?</span></div>
+    <div class="sb">
+      <div class="kg"><u>The list</u>
+        <div class="kr"><span>Move between queries</span><kbd>↑</kbd><kbd>↓</kbd></div>
+        <div class="kr"><span>First / last</span><kbd>Home</kbd><kbd>End</kbd></div>
+        <div class="kr"><span>Jump to a name</span><kbd>type</kbd></div>
+        <div class="kr"><span>Search</span><kbd>/</kbd></div>
+      </div>
+      <div class="kg"><u>This query</u>
+        <div class="kr"><span>Record response</span><kbd>R</kbd></div>
+        <div class="kr"><span>Nudge</span><kbd>N</kbd></div>
+        <div class="kr"><span>Attach material</span><kbd>A</kbd></div>
+        <div class="kr"><span>Mark closed</span><kbd>C</kbd></div>
+      </div>
+      <div class="kg"><u>Anywhere</u>
+        <div class="kr"><span>Log new query</span><kbd>L</kbd></div>
+        <div class="kr"><span>Undo last change</span><kbd>⌘</kbd><kbd>Z</kbd></div>
+        <div class="kr"><span>Close / cancel</span><kbd>Esc</kbd></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spec">
+  <div class="sp1">
+    <div class="sl">Undo toast — every write is reversible</div>
+    <div class="toast" role="status"><span class="tk">✓</span>Response recorded · <b>Full requested</b><a class="undo">Undo</a><span class="tclose">×</span></div>
+  </div>
+  <div class="sp1">
+    <div class="sl">Empty state — teaches rather than apologises</div>
+    <div class="empty">
+      <svg viewBox="0 0 60 44"><rect x="6" y="10" width="34" height="24" rx="2"/><path d="M6 13l17 12 17-12"/><circle cx="48" cy="16" r="8" stroke-dasharray="3 4"/></svg>
+      <b>No queries yet</b>
+      <p>Log the first one and ScriptAlly starts tracking the wait, the window, and what you sent.</p>
+      <span class="b pink" style="height:38px">+ Log new query</span>
+    </div>
+  </div>
+  <div class="sp1">
+    <div class="sl">Loading — skeleton matches the real row</div>
+    <div class="skel">
+      <div class="sk"><span class="c"></span><span class="l1s"></span><span class="l2s"></span></div>
+      <div class="sk"><span class="c"></span><span class="l1s w2"></span><span class="l2s"></span></div>
+      <div class="sk"><span class="c"></span><span class="l1s w3"></span><span class="l2s"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>Below the page: the polish, as specimens.</b> A keyboard sheet on <code>?</code> — the list keys already specced, plus single-key verbs for this query and <code>⌘Z</code> for undo; it borrows the header's square-and-sage-top treatment so it reads as the same family. An undo toast, because every write here should be reversible and <code>writeMaterials</code> already works that way — the other verbs should match, and it needs <code>aria-live="polite"</code> so the announcement reaches screen readers. An empty state that teaches rather than apologises, carrying the one action it wants. And skeleton rows whose geometry matches the real row exactly, so nothing jumps when data lands.<br><br>
+  <b>The masthead band closes with a 2px black rule</b> — the only near-black line on the page. It gives the page a definite top edge and separates the chrome from the working area outright, rather than with the same hairline used inside the cards. It also re-establishes a hierarchy of lines: 2px black for the page's own boundary, 5px sage for the subject card's head, 1px oat everywhere else.<br><br>
+  <b>The bar now has one filled control.</b> <i>Record response</i> and <i>Nudge</i> are plain — no ground, ink text, outline on hover like everything else — with only the slightly heavier text weight separating the two query verbs from the three closing ones. <i>Log new query</i> keeps the pink, so the page has exactly one filled button and it is the one that creates something. That also resolves the two-pink collision: the eye now lands on the left, which is where a new query starts.<br><br>
+  ⚠️ <b>Worth watching in the browser:</b> with nothing filled on the right, <i>Record response</i> relies on weight alone to read as more likely than <i>Delete</i>. If it disappears into the row, the smallest correction is ink-black text on it and muted ink on the rest — not a ground returning.<br><br>
+  <b>Everything locked, one grid.</b> The control bar and the content share a single <code>.grid</code> rule, so <i>Log new query</i> starts where the list starts and <i>Delete</i> ends where the pane ends — one declaration, not two matching numbers. A hairline under the bar anchors it.<br><br>
+  <b>The header</b> is white, square, lifted, with a 5px sage top edge: agent, real contact values, status. The manuscript lives on <i>Query sent</i> as a hover-underlined link, with each send carrying its own materials — which is what lets the resubmission read correctly here.<br><br>
+  <b>Language</b> throughout: <i>with agent for 2¼ years</i>, <i>8 answered · 17 not</i>, <i>No reply yet</i>, and the past-window state stating facts with a spent hatch instead of a red alarm.<br><br>
+  <b>Polish already in:</b> tabular numerals everywhere; scaled durations carrying their exact date in a tooltip; <code>/</code> hint in search; a single sage focus ring; transitions gated behind <code>prefers-reduced-motion</code>; the icon-only export button given a title.
+</div>
+</body></html>
