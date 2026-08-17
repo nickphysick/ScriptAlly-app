@@ -3388,16 +3388,16 @@ export const Queries: React.FC<{
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5" /><path d="M4 19h16" /></svg>,
                     onClick: () => { if (sortedList.length > 0) handleExportFilteredCSV(); },
                   },
-                  {
-                    label: "Log query",
-                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
-                    onClick: () => onNavigate?.("queries", "Log a query"),
-                    primary: true,
-                    // Already drafting? The CTA says so rather than looking live and doing nothing.
-                    disabled: creating,
-                  },
+                  /* ⚠️ `Log query` LEFT THE BAND (§2) — it is the toolbar's left column now, over
+                     the list it adds to. The action must not exist twice on one page, and of the
+                     two seats this is the one that reads as a band of chrome beside the destructive
+                     verbs. Export stays: it acts on the page, not on the column. */
                 ]
               : [
+                  /* ⚠️ THE EMPTY BRANCH KEEPS ITS OWN, and that is not a second copy: `.f12-body-empty`
+                     opts out of the grid, so the toolbar's left column — and §2's button with it —
+                     is not rendered at all when there is nothing to list. One control in each
+                     state, never two in either. */
                   {
                     label: "Log query",
                     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
@@ -3573,8 +3573,22 @@ export const Queries: React.FC<{
               plate's description is not drawn once the header condenses, which is the state the ref
               draws and the state this page spends its life in. Flagged, not silently reconciled. */}
           <div className="qc-lhead">
-            {/* ⚠️ THE COUNT LEFT THIS CELL (§1) — it is the list panel's cap now. §2 fills the
-                space with the page's one creative action, over the column it adds to. */}
+            {/* ══ §2 · THE PAGE'S ONE CREATIVE ACTION, OVER THE COLUMN IT ADDS TO ═══════════
+                ⚠️ IT WAS IN THE MASTHEAD BAND, beside Export and above both columns — a creative
+                verb filed with the page's chrome. Here it sits over the list it lengthens, which is
+                where the thing it makes will appear.
+                ⚠️ AND IT IS THE PAGE'S ONLY PINK SURFACE apart from §4's agent disc. Pink means
+                "you can make something" here, which is why the toolbar's other buttons stay white:
+                one emphasis, spent on the one verb that adds rather than ends. */}
+            <button
+              type="button"
+              className="qc-logq"
+              disabled={creating}
+              onClick={() => onNavigate?.("queries", "Log a query")}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+              <span>Log new query</span>
+            </button>
           </div>
 
           {/* ⚠️ THE PANE'S VERBS CAME UP OUT OF THE HERO BAND (§1). They acted on the selected query

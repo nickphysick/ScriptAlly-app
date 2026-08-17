@@ -54,7 +54,14 @@ describe("re-entry is a no-op, from every entry point", () => {
   });
 
   it("the masthead CTA greys out while drafting — both header variants", () => {
-    expect(queries.match(/disabled: creating,/g)?.length ?? 0).toBe(2);
+    /* ⚠️ ONE MASTHEAD CTA LEFT (§2). `Log query` was in both header variants and is now the
+       TOOLBAR's button, over the column it adds to — so the populated variant has no CTA to grey,
+       and only the empty branch's survives. The clause is unchanged: a re-entry point that is
+       already drafting says so rather than looking live and doing nothing, which is now asserted
+       on the toolbar's button as well. */
+    expect(queries.match(/disabled: creating,/g)?.length ?? 0).toBe(1);
+    expect(queries, "the toolbar's Log button stays live while a draft is open")
+      .toMatch(/className="qc-logq"[\s\S]{0,40}disabled=\{creating\}/);
   });
 });
 
