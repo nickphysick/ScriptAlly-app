@@ -128,7 +128,10 @@ describe("§2 · rows on one grid", () => {
     /* ⚠️ AND FIX PACK 7 §4 TOOK THE LAST STEP: the fill is pink and the spine is gone. Three rungs
        still — white ground, `--paper` hover, pink selected — but the top rung is now a HUE rather
        than a tonal step, which is why it needs neither an edge nor a spine to be found. */
-    expect(rule(".f12-row.f12-sel")).toContain("background: var(--pink-t)");
+    /* ⚠️ `--qc-row-sel`, NOT `--pink-t` (overnight §2): with the keyboard ring removed the fill is the
+       list's ONLY cursor, so it deepened from `--n3` to `--n5`. It took its own token because
+       `--pink-t` is also a monogram and the collapsed band, and neither of those moved. */
+    expect(rule(".f12-row.f12-sel")).toContain("background: var(--qc-row-sel)");
     expect(rule(".f12-row.f12-sel::before"), "the burgundy spine came back").toBe("");
   });
 });

@@ -150,7 +150,7 @@ describe("§1c · the list is furniture, and selection inverts", () => {
 /* ⚠️ FIX PACK 7 §4: the fill is `--pink-t` and the ring is GONE. `--oat` needed an edge because it
    is a small step from white; pink is a different KIND of difference — a hue nothing else in the
    column carries — so an edge on top of it is a second signal for one state. */
-    expect(sel, "the selected row is not the pink fill").toContain("background: var(--pink-t)");
+    expect(sel, "the selected row is not the band fill").toContain("background: var(--qc-row-sel)");
     expect(sel, "a ring came back on top of the fill").toContain("box-shadow: none");
     expect(rule(".f12-row:hover"), "hover and the ground are the same colour").toContain("background: var(--paper)");
     /* ⚠️ AND THE THREE MUST BE THREE. A ladder whose ends match its middle is a ladder with two
@@ -589,8 +589,11 @@ describe("§ (fp5) · the list is an inset panel", () => {
   it("the selected row keeps its band fill and its spine", () => {
     /* §4 re-levelled the fill (see the ladder case above); the SPINE is what this case is really
        for, and it is untouched — 3px of burgundy on the left edge, at every step of the pack. */
+    /* ⚠️ `--qc-row-sel` SINCE THE OVERNIGHT §2: the keyboard ring is gone, so the fill is the list's
+       only cursor and it deepened from `--n3` to `--n5`. Its own token, because `--pink-t` is also
+       a monogram and the collapsed band, and neither of those moved. */
     expect(declValue(rule(".f12-row.f12-sel"), "background"), "the selected row lost its fill")
-      .toBe("var(--pink-t)");
+      .toBe("var(--qc-row-sel)");
     /* ⚠️ INVERTED BY FIX PACK 7 §4 — THE SPINE IS DELETED, and this case was its lock. Burgundy
        means OUTGOING on the StatusDot two columns to the right of it, and the fill now says which
        row is live on its own. Turned round rather than removed: a deleted case would let the spine

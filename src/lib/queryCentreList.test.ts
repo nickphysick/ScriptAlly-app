@@ -120,7 +120,10 @@ describe("the selected row is a flat fill, and the bookmark is retired", () => {
    */
   it("3px of ink no longer marks it — the fill does", () => {
     const sel = rule(css, ".f12-row.f12-sel");
-    expect(sel, "the selected row lost its fill").toContain("background: var(--pink-t)");
+    /* ⚠️ `--qc-row-sel`, NOT `--pink-t` (overnight §2): with the keyboard ring removed the fill is the
+       list's ONLY cursor, so it deepened from `--n3` to `--n5`. It took its own token because
+       `--pink-t` is also a monogram and the collapsed band, and neither of those moved. */
+    expect(sel, "the selected row lost its fill").toContain("background: var(--qc-row-sel)");
     expect(sel, "a ring came back on top of the fill").toContain("box-shadow: none");
     expect(sel, "the blue came back").not.toContain("--blue-t");
     expect(sel, "the full-height inset edge should be gone").not.toContain("inset 3px 0 0");

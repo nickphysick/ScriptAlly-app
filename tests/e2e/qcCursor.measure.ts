@@ -87,50 +87,128 @@ const ringColour = (page: Page) => page.evaluate(() => {
   return { raw, rgb };
 });
 
-test("§3 — the ring is keyboard-only, and it is the page's sage", async ({ page }) => {
+/**
+ * ⚠️ THE ROW DRAWS NO RING AT ALL — the third and final answer. Selection follows focus, so the
+ * focused row is always the selected row and the fill already says where the cursor is. What this
+ * has to prove is that the ring is GONE rather than quieter, that the SHELL's ring did not take
+ * its place, that buttons still have one, and that the fill is visible enough to carry the job on
+ * its own.
+ */
+test("§2 — a keyboard row and a clicked row are identical, and neither wears a ring", async ({ page }) => {
   await openRoute(page, "/queries", { width: 1440, height: 900 });
-
-  const token = await ringColour(page);
-  console.log(`--qc-ring = ${token.raw || "(undefined)"} → ${token.rgb}`);
-  /* ⚠️ AN UNDEFINED CUSTOM PROPERTY RESOLVES TO NOTHING AND EVERY COMPARISON BELOW WOULD BE AGAINST
-     "rgb(0, 0, 0)". Assert the token exists before asserting anything is painted in it. */
-  expect(token.raw, "the page has no --qc-ring token").not.toBe("");
 
   await page.locator(".f12-row").nth(3).click({ timeout: 4000 });
   await page.waitForTimeout(300);
   const clicked = await ringOf(page, 3);
-  console.log(`clicked:  focused=${clicked.focused} fv=${clicked.fv} outline="${clicked.outline}" shadow="${clicked.shadow}" border="${clicked.border}"`);
-  expect(clicked.focused, "the click did not focus the row — the reading below would be about nothing").toBe(true);
-  expect(clicked.fv, "a clicked row matches :focus-visible").toBe(false);
-  expect(clicked.outline, "a clicked row draws an outline").toContain("none");
-  expect(clicked.shadow, "a clicked row draws a ring").toBe("none");
-  expect(clicked.border, "a clicked row draws a border").toContain("0px");
-
   await page.keyboard.press("ArrowDown");
-  await page.waitForTimeout(250);
+  await page.waitForTimeout(300);
   const kbd = await ringOf(page, 4);
-  console.log(`keyboard: focused=${kbd.focused} fv=${kbd.fv} outline="${kbd.outline}" shadow="${kbd.shadow}"`);
-  expect(kbd.fv, "a keyboard-focused row draws no ring").toBe(true);
-  /* ⚠️ NOT AN OUTLINE, AND NOT A DARK ONE. `.t-f12 button:focus-visible` was a 2px `--ink` outline —
-     right for a small control, a hard dark rectangle around a 60px row. */
-  expect(kbd.outline, "the row wears an outline rather than a ring").toContain("none");
-  expect(kbd.shadow, "the row has no ring of its own").not.toBe("none");
-  /* ⚠️ THE COLOUR IS THE ASSERTION THAT WAS MISSING. The previous fix moved the ring off the black
-     outline and onto `--qc-rim-h`, which the live palette repoints to `--n6` — the QUIET TEXT step,
-     measured rgb(161, 158, 154). A 2px hard rectangle in a text grey is what still reads as a
-     border. This compares against the token, so it cannot go stale if the sage moves. */
-  expect(kbd.shadow, `the ring is ${kbd.shadow}, not the page's sage ${token.rgb}`).toContain(token.rgb);
+  console.log(`clicked:  fv=${clicked.fv} outline="${clicked.outline}" shadow="${clicked.shadow}" border="${clicked.border}"`);
+  console.log(`keyboard: fv=${kbd.fv} outline="${kbd.outline}" shadow="${kbd.shadow}" border="${kbd.border}"`);
 
-  /* ⚠️ AND THE ORDER A WRITER ACTUALLY PRODUCES: keyboard first, then a click. Chrome grants
-     `:focus-visible` to a PROGRAMMATICALLY focused element when the one it replaced had it — so a
-     click that re-focuses through an effect can inherit a ring the click itself never earned. */
-  for (const n of [6, 2]) {
-    await page.locator(".f12-row").nth(n).click({ timeout: 4000 });
-    await page.waitForTimeout(300);
-    const after = await ringOf(page, n);
-    console.log(`keyboard-then-click row ${n}: fv=${after.fv} shadow="${after.shadow}"`);
-    expect(after.shadow, `row ${n} kept a ring after being clicked`).toBe("none");
+  expect(clicked.focused, "the click did not focus the row — the reading would be about nothing").toBe(true);
+  expect(kbd.fv, "the keyboard row does not match :focus-visible, so this proves nothing").toBe(true);
+  for (const [what, r] of [["clicked", clicked], ["keyboard", kbd]] as const) {
+    expect(r.outline, `the ${what} row draws an outline: ${r.outline}`).toContain("none");
+    expect(r.shadow, `the ${what} row draws a ring: ${r.shadow}`).toBe("none");
+    expect(r.border, `the ${what} row draws a border: ${r.border}`).toContain("0px");
   }
+  /* ⚠️ IDENTICAL, NOT MERELY BOTH RINGLESS — the section's actual claim. */
+  expect(kbd.outline).toBe(clicked.outline);
+  expect(kbd.shadow).toBe(clicked.shadow);
+
+  /* ── the highlight is now the only cursor, so it has to be seen ── */
+  const contrast = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll<HTMLElement>(".f12-row")];
+    const sel = rows.find((r) => r.classList.contains("f12-sel"));
+    const other = rows.find((r) => !r.classList.contains("f12-sel"));
+    if (!sel || !other) return null;
+    /* the painted ground, walking up past any transparent ancestor */
+    const ground = (el: HTMLElement | null): string => {
+      while (el) {
+        const b = getComputedStyle(el).backgroundColor;
+        if (b && b !== "rgba(0, 0, 0, 0)" && b !== "transparent") return b;
+        el = el.parentElement;
+      }
+      return "rgb(255, 255, 255)";
+    };
+    const lum = (c: string) => {
+      const [r, g, b] = c.match(/\d+(\.\d+)?/g)!.slice(0, 3).map(Number).map((v) => {
+        const s = v / 255;
+        return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const a = ground(sel), b = ground(other);
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+    return { selected: a, unselected: b, ratio: Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100 };
+  });
+  console.log(`selection fill ${contrast?.selected} against ${contrast?.unselected} → ${contrast?.ratio}:1`);
+  expect(contrast, "no selected row to measure").not.toBeNull();
+  /**
+   * ⚠️ THE 3:1 NON-TEXT BAR (WCAG 1.4.11) IS NOT MET, AND THAT IS STATED RATHER THAN ASSERTED AWAY.
+   * Reaching it from white needs roughly #949494 — a mid grey behind every selected row, which is a
+   * different page from the one this is. What is asserted instead is what the design commits to:
+   * the fill was DEEPENED and must stay deepened (1.26:1 → 1.51:1, `--n3` → `--n5`), and the state
+   * carries more than one signal, so the fill is not doing this alone.
+   *
+   * ⚠️ A FLOOR SET TO WHATEVER WAS JUST MEASURED WOULD ASSERT NOTHING. 1.4 is the previous value
+   * rounded UP — it fails if anyone puts the old `--n3` step back, which is the regression this
+   * guards, and it is honest about not being the accessibility bar.
+   */
+  expect(contrast!.ratio, `the selection fill fell back to the old faint step: ${contrast!.ratio}:1`).toBeGreaterThan(1.4);
+  expect(contrast!.selected, "the selected row has no fill at all").not.toBe(contrast!.unselected);
+
+  const signals = await page.evaluate(() => {
+    const rows = [...document.querySelectorAll<HTMLElement>(".f12-row")];
+    const sel = rows.find((r) => r.classList.contains("f12-sel"))!;
+    const other = rows.find((r) => !r.classList.contains("f12-sel"))!;
+    const read = (r: HTMLElement) => ({
+      name: getComputedStyle(r.querySelector(".f12-nm") as HTMLElement).color,
+      avatar: getComputedStyle(r.querySelector(".f12-av") as HTMLElement).backgroundColor,
+    });
+    return { sel: read(sel), other: read(other) };
+  });
+  console.log(`  name ${signals.other.name} → ${signals.sel.name} · avatar ${signals.other.avatar} → ${signals.sel.avatar}`);
+  /**
+   * ⚠️ THE FILL IS NOT THE ONLY SIGNAL — the argument for accepting 1.51:1, asserted rather than
+   * asserted-about: the monogram inverts from the tinted step to white.
+   *
+   * ⚠️ AND THE NAME IS NOT A SECOND SIGNAL, WHICH THIS RUN CORRECTED. `.f12-sel .f12-nm { color:
+   * var(--ink) }` restates the colour the base row already has — measured rgb(20,20,18) in BOTH
+   * states — so it is a guard against drifting muted, not a change. Claiming it as a distinguishing
+   * signal would have been a false sentence in a report about accessibility.
+   */
+  expect(signals.sel.avatar, "the selected row's monogram no longer inverts — the fill is alone").not.toBe(signals.other.avatar);
+  expect(signals.sel.name, "the name became a selection signal — the reasoning above needs revisiting").toBe(signals.other.name);
+});
+
+test("§2 — buttons keep the page's focus ring", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.locator(".f12-row").first().click({ timeout: 4000 });
+  await page.waitForTimeout(300);
+
+  /* ⚠️ REACHED BY TAB, NOT BY `.focus()`. Chromium grants `:focus-visible` on a programmatic focus
+     only when the last interaction was a keyboard one — after a click it does not, so a `.focus()`
+     here measured a button that had been given focus and no ring, and reported the ring missing. */
+  let found: any = null;
+  for (let i = 0; i < 14 && !found; i++) {
+    await page.keyboard.press("Tab");
+    await page.waitForTimeout(90);
+    found = await page.evaluate(() => {
+      const a = document.activeElement as HTMLElement | null;
+      if (!a || a.tagName !== "BUTTON" || !a.closest(".qc-wpg")) return null;
+      const c = getComputedStyle(a);
+      let fv: boolean | null = null;
+      try { fv = a.matches(":focus-visible"); } catch { fv = null; }
+      return { label: (a.textContent || "").trim().slice(0, 24), cls: String(a.className).slice(0, 40), fv, outline: `${c.outlineStyle} ${c.outlineWidth} ${c.outlineColor}` };
+    });
+  }
+  console.log(`tabbed to "${found?.label}" (${found?.cls}): fv=${found?.fv} outline="${found?.outline}"`);
+  expect(found, "Tab never reached a button on the page").not.toBeNull();
+  expect(found.fv, "the button is not focus-visible, so its ring was never asked for").toBe(true);
+  expect(found.outline, "the page's controls lost their focus ring with the row's").not.toContain("none");
+  expect(found.outline, "the button's ring is not the page's sage").toContain("126, 145, 120");
 });
 
 test("§3 — Up/Down cross groups, and a filter leaves the cursor on a survivor", async ({ page }) => {

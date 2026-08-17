@@ -1060,7 +1060,11 @@
   --qc-surf-menu-h: rgba(30, 26, 22, 0.07);
 
   /**
-   * ⚠️ §3 · THE PAGE'S ONE FOCUS RING, AND IT IS AN ACCENT RATHER THAN A RIM. Every earlier attempt
+   * ⚠️ §3 · THE PAGE'S ONE FOCUS RING FOR BUTTONS, LINKS AND FIELDS — AND NOT FOR LIST ROWS, which
+   * draw no ring at all (see `.f12-rows .f12-row:focus-visible`). Its halo companion went with the
+   * row's ring: it had no other reader, and a token nothing reads is the next false lead.
+   *
+   * ⚠️ IT IS AN ACCENT RATHER THAN A RIM. Every earlier attempt
    * borrowed a token that meant something else — first `--ink` (a black outline), then `--qc-rim-h`,
    * "every control's hover rim", which the neutral palette repoints to `--n6`, the QUIET TEXT step.
    * Measured on the deployed build: `rgb(161, 158, 154)` at 2px, which is why a ring that was
@@ -1075,7 +1079,8 @@
    * the fault above, one palette later.
    */
   --qc-ring: #7e9178;
-  --qc-ring-soft: rgba(126, 145, 120, 0.22);
+  /* the selected row's fill — see `.f12-row.f12-sel`; the warm palette keeps what it had */
+  --qc-row-sel: var(--pink-t);
 
   /* rims, hairlines and strokes */
   --qc-rim-h: #d6c9ba;                /* every control's hover rim, and the empty-state mark */
@@ -1644,6 +1649,8 @@
   --btn-line: var(--n5);
   --hairline: var(--n4);
   --qc-rim-h: var(--n6);
+  /* ⚠️ DEEPER THAN THE OTHER SURFACES BY DESIGN — it is the list's cursor, not a tint. */
+  --qc-row-sel: var(--n5);
   --qc-rim-off: var(--n4);
   --qc-rim-off-2: var(--n4);
   --qc-rim-sep: var(--n5);
@@ -2395,7 +2402,23 @@
  * ⚠️ AND `box-shadow: none` IS STATED, not merely absent. The base row and the settle animation both
  * set shadows; leaving this to inheritance is how a ring comes back without anyone choosing it.
  */
-.f12-row.f12-sel { background: var(--pink-t); box-shadow: none; }
+/**
+ * ⚠️ THE FILL IS THE CURSOR NOW, SO IT WAS DEEPENED (overnight §2). With the keyboard ring removed
+ * this is the ONLY thing saying where the cursor is, and it measured 1.26:1 against an unselected
+ * row — `--n3`, a 9-point L* step. It takes `--n5` instead, the deepest surface step before the
+ * scale turns into text greys: 1.51:1, a 15.6-point step.
+ *
+ * ⚠️ IT IS ITS OWN TOKEN RATHER THAN A REPOINTED `--pink-t`, which a monogram and the collapsed
+ * band also read; and the warm palette keeps exactly what it had, because only the neutral one is
+ * on the page this reasoning was measured on.
+ *
+ * ⚠️ AND IT STILL DOES NOT REACH 3:1 — the WCAG non-text bar for a state indicator. Reaching it
+ * from white needs about #949494, a mid grey behind every selected row, which is a different page.
+ * Stated here rather than quietly rounded to whatever was built: the fill is not the only signal
+ * (the name goes ink-dark and the avatar inverts to white), and the conventional way to clear 3:1
+ * for a keyboard cursor is a focus indicator, which this section deliberately removes.
+ */
+.f12-row.f12-sel { background: var(--qc-row-sel); box-shadow: none; }
 /**
  * ══ §3a · THE KEYBOARD RING IS THE PAGE'S OWN, NOT A BLACK BORDER ═══════════════════════════
  *
@@ -2420,18 +2443,23 @@
  * had been used, which is what it is for. What made it read as a bug was 3b putting it on the
  * WRONG ROW, and its weight.
  *
- * ⚠️ AND THE FAULT THAT SURVIVED ALL OF THAT WAS THE COLOUR. The rule moved off the black outline
- * and onto `--qc-rim-h` — described in its own note as "the page's burgundy halo", which it is not:
- * the live palette repoints that token to `--n6`, the quiet TEXT step, and the ring measured
- * `rgb(161, 158, 154)` at 2px. A hard rectangle in a text grey around a 60px row is a border by any
- * other name, so the trigger was right and the paint was wrong — which is why "already fixed" and
- * "still there" were both true.
+ * ⚠️ AND THE RING IS GONE ENTIRELY — the third and last answer to this. The colour was the fault
+ * that survived the trigger being fixed (`--qc-rim-h` resolves to `--n6`, the quiet TEXT step, so
+ * the ring measured rgb(161,158,154) at 2px); recolouring it sage fixed the colour and left the
+ * shape, and a hard rectangle around a 60px row reads as a border however it is painted.
  *
- * ⚠️ SO IT TAKES THE PAGE'S ONE RING TOKEN, and so does every other button (see `--qc-ring`). Sage
- * is not in use for any state on this page, which is what a focus ring needs: a colour that means
- * nothing else. Burgundy means OUTGOING two columns to the right of it.
+ * ⚠️ THE REASON IS THAT THERE WAS NEVER ANYTHING FOR IT TO SAY. Selection follows focus here, so
+ * the focused row is ALWAYS the selected row — the fill already states where the cursor is, and
+ * the ring was a second indicator drawn on top of a complete one.
+ *
+ * ⚠️ SO THE RULE STAYS AND PAINTS NOTHING, WHICH IS NOT THE SAME AS DELETING IT. Underneath sits a
+ * SHELL-WIDE ring — `.ws-main a:focus-visible, .ws-main button:focus-visible`, a terracotta 2px
+ * outline on every button in the workspace — and a row is a button. Removing this rule outright
+ * would not remove the ring; it would hand the row back to the shell's. (0,3,0) against the
+ * shell's (0,2,1), which is enough to win without `!important`, and it is scoped to the listbox so
+ * every other control on the page keeps the page's own ring.
  */
-.f12-rows .f12-row:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--qc-ring), 0 0 0 5px var(--qc-ring-soft); }
+.f12-rows .f12-row:focus-visible { outline: none; box-shadow: none; }
 /* ⚠️ AFTER `.f12-row.f12-sel`, AND THAT PLACEMENT IS THE FIX. Both selectors are (0,2,0), and the
    selected-row rule sets `box-shadow: none` — so while this sat above it, the ring was cancelled
    by the very state it always accompanies: selection follows focus here, so the focused row is
