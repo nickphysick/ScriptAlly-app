@@ -1328,9 +1328,14 @@
    * then added to it. A stated height puts both columns on ONE line and both cells' contents on one
    * centre line, and it cannot be moved by editing a type size.
    */
-  grid-template-rows: 36px minmax(0, 1fr);
+  /* ⚠️ THE BAR'S ROW IS `auto`, NOT A FIGURE (§3). It was 36px while the buttons were 32; they are
+     40 now, so a stated row height is a second number that has to be kept in step with `--btn-h`
+     — and was already 4px out. The row is what its tallest control is. */
+  grid-template-rows: auto minmax(0, 1fr);
   column-gap: 16px;
-  row-gap: 12px;
+  /* ⚠️ THE ROW GAP CARRIES THE HAIRLINE'S BREATHING ROOM. The rule sits at the bar row's foot, so
+     the space beneath it is this gap and the space above it is the cell's own padding. */
+  row-gap: 18px;
   /**
    * ⚠️ THE BOTTOM GUTTER IS THE ROW'S, SO BOTH COLUMNS TAKE IT, and it is a stated value rather than
    * the panel-inset token it borrowed. The list used to buy its own with a margin and the pane
@@ -1426,8 +1431,16 @@
    verbs on verticals of their own, two pixels inside the columns they head — the "nothing between
    the four verticals" clause, in miniature. The height is the grid row's 36px, so the two cells are
    identical by construction rather than by both happening to hold something 34px tall. */
-.qc-lhead { grid-column: 1; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0; min-width: 0; }
-.qc-phead { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0; min-width: 0; overflow: hidden; }
+.qc-lhead { grid-column: 1; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0 0 14px; min-width: 0; }
+.qc-phead { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 6px; padding: 0 0 14px; min-width: 0; overflow: hidden; }
+/**
+ * ⚠️ §3 · THE HAIRLINE IS A GRID CHILD SPANNING BOTH COLUMNS, so it crosses the channel between
+ * them and runs the full working width. A `border-bottom` on the two cells would break at the
+ * 16px column gap and read as two rules rather than one.
+ * ⚠️ AND IT IS PLACED IN ROW 1 AT ITS FOOT — `align-self: end` — so it moves with the bar rather
+ * than with a margin that would have to be kept in step with the row's height.
+ */
+.qc-barrule { grid-column: 1 / -1; grid-row: 1; align-self: end; height: 1px; background: var(--hairline); }
 .qc-sp { flex: 1; }
 /* ⚠️ THE SUB-COUNT IS AN `<i>` INSIDE THE COUNT, not a sibling — the two are one statement about
    one set ("25 queries, 16 of them awaiting"), and a sibling would be free to wrap away from it. */
@@ -1617,13 +1630,16 @@
    the same screen, and the two meanings would have to be told apart by position. */
 .qc-btn {
   display: inline-flex; align-items: center; gap: 7px; flex: none;
-  height: var(--btn-h); padding: 0 17px; border-radius: var(--btn-r);
-  border: var(--btn-rim) solid var(--btn-line); background: var(--white);
+  height: var(--btn-h); padding: 0 16px; border-radius: var(--btn-r);
+  /* ⚠️ BORDERLESS AT REST (§3) — no ground and no rim, so the bar reads as a row of verbs rather
+     than a row of objects. The rim is kept as a TRANSPARENT border rather than removed, because a
+     `border: 0` state and a `border: 1px` hover would move every label by a pixel on hover. */
+  border: var(--btn-rim) solid transparent; background: transparent;
   color: var(--ink-2); font-family: inherit; font-size: 13px; font-weight: 500; line-height: 1;
   white-space: nowrap; cursor: pointer;
   transition: background-color 0.14s, border-color 0.14s, color 0.14s;
 }
-.qc-btn:hover { background: var(--paper); border-color: var(--qc-rim-h); }
+.qc-btn:hover { background: var(--white); border-color: var(--btn-line); }
 .qc-btn svg { width: 16px; height: 16px; flex: 0 0 16px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 /**
  * ══ §5 · THE PRIMARY JOINS THE FAMILY ════════════════════════════════════════════════════════
@@ -1652,7 +1668,24 @@
  * trade this pack makes: pink stops meaning "press this" and starts meaning "you are reading this".
  * One colour, one job, the same rule §1 applies to sage.
  */
-.qc-btn-pri { border-width: calc(var(--btn-rim) * 2); }
+/* ⚠️ THE PRIMARY IS TEXT WEIGHT NOW, NOT A HEAVIER RIM (§3). With no rim at rest there is nothing
+   to thicken, and the pack's rule is that weight alone separates the two verbs that move the query
+   forward from the three that end it. If Record response ever fails to read as the likely action,
+   the correction is full ink on it and muted on the rest — never a ground returning, which would
+   put a second filled button one column from `Log new query`. */
+.qc-btn-pri { color: var(--ink); font-weight: 600; }
+/**
+ * ⚠️ MUTED IS ITS OWN CLASS, NOT `.qc-btn-shrink`. Keying on the shrink modifier muted NUDGE too —
+ * measured `rgb(161,158,154)` on a verb the pack puts with `Record response` — because that class
+ * means "may lose its label when narrow", which three of the five happen to share. Two facts, two
+ * classes: what a button DOES and how it behaves under pressure are unrelated.
+ */
+.qc-btn-quiet { color: var(--faint); }
+/* ⚠️ AND DELETE IS MUTED AT REST, TERRACOTTA ON HOVER. The pack puts it with the closing verbs, and
+   a permanently coloured destructive verb is a warning nobody is reading yet; on hover — the moment
+   before it is pressed — the signal is exactly where it is useful. */
+.qc-btn-danger { color: var(--faint); }
+.qc-btn-danger:hover { color: var(--qc-acc-late); background: var(--qc-acc-late-t); border-color: var(--qc-acc-late-b); }
 /* ══ §2 · LOG NEW QUERY — A MODIFIER, PLACED AFTER THE BASE IT MODIFIES ═════════════════════
  * ⚠️ SOURCE ORDER IS THE MECHANISM, and getting it wrong was silent: the modifier sat 200 lines
  * ABOVE `.qc-btn`, so at equal specificity the base's `background: var(--white)` won and the pink
@@ -1665,8 +1698,9 @@
 .qc-logq { border-color: var(--qc-rim-pink); background: var(--pink); color: var(--ink); }
 .qc-logq:hover { background: var(--pink); border-color: var(--pink-i); }
 .qc-logq svg { stroke-width: 1.9; }
-.qc-btn-danger { color: var(--qc-acc-late); }
-.qc-btn-danger:hover { background: var(--qc-acc-late-t); border-color: var(--qc-acc-late-b); }
+/* ⚠️ THE OLD ALWAYS-TERRACOTTA RULE IS GONE (§3) — it sat LATER in the file than its replacement
+   and silently won, so Delete kept its colour while the sheet said otherwise. One rule per
+   selector, which is this file's own invariant. */
 /* ⚠️ DISABLED IS A LIGHTER BORDER AND A MUTED ICON — NEVER ABSENCE, and never a change of BOX.
    The width is identical to the live state, so the row does not reflow as the selection moves
    between a query that is due a chase and one that is not. */

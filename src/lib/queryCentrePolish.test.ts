@@ -59,7 +59,11 @@ describe("§3 · one button rule, app-wide on this page", () => {
     expect(declValue(r, "font-size"), "the type size moved off 13px").toBe("13px");
     expect(declValue(r, "font-weight"), "the weight moved off 500").toBe("500");
     expect(declValue(r, "gap"), "the icon gap moved off 7px").toBe("7px");
-    expect(declValue(r, "border"), "the rim is not the single border colour").toContain("var(--btn-line)");
+    /* ⚠️ TRANSPARENT AT REST (§3), AND THE RIM IS KEPT RATHER THAN REMOVED — a `border: 0` state
+       and a `border: 1px` hover would move every label by a pixel on hover. The single border
+       COLOUR is now the hover's, which is where a rim is drawn at all. */
+    expect(declValue(r, "border"), "the rim stopped being a transparent placeholder").toContain("transparent");
+    expect(rule(".qc-btn:hover"), "the hover rim is not the single border colour").toContain("var(--btn-line)");
     expect(declValue(rule(".qc-btn svg"), "width"), "the icon moved off 13px").toBe("16px");
   });
 
@@ -79,25 +83,26 @@ describe("§3 · one button rule, app-wide on this page", () => {
    * the standard rim if it ever moves; `1.5px` beside `1px` is two values that agree until one is
    * edited. Asserted as the expression, because the expression is the decision.
    */
-  it("Record response is the family's button, heavier by a stated relationship", () => {
+  /**
+   * ⚠️ INVERTED BY §3 — THE PRIMARY IS TEXT WEIGHT NOW, NOT A HEAVIER RIM. With no rim at rest
+   * there is nothing to thicken, and the pack's rule is that weight alone separates the two verbs
+   * that move the query forward from the three that end it.
+   *
+   * ⚠️ THE OLD CASE'S FINDING IS WORTH KEEPING EVEN THOUGH ITS SUBJECT IS GONE: `calc(1px * 1.5)`
+   * computed to `1px` at DPR 1 and 1.5px at 2×, so whether the page had a visible primary depended
+   * on the monitor. A rim distinction has to be a whole device pixel. Recorded here because the
+   * next person reaching for a fractional rim will not have measured it.
+   */
+  it("Record response is the family's button, heavier by weight rather than by rim", () => {
     const r = rule(".qc-btn-pri");
     expect(r, "the primary rule is missing").not.toBe("");
-    /* ⚠️ `* 2`, NOT `* 1.5`, AND THE BROWSER IS WHY. Chrome floors a used border-width to whole
-       DEVICE pixels: at DPR 1 `calc(1px * 1.5)` computed to `1px` on the deployed build and the
-       primary rendered identical to its neighbours — and it would have shown on a 2× display, so
-       whether the page had a primary depended on the monitor. A rim distinction must be a whole
-       pixel. Measured, not reasoned about. */
-    expect(declValue(r, "border-width"), "the extra weight is not a relationship to the standard rim")
-      .toBe("calc(var(--btn-rim) * 2)");
-    /* the extra weight is in the rim ONLY — no fill, no colour, no shadow, no bolder label */
-    for (const prop of ["background", "color", "box-shadow", "font-weight", "padding"]) {
-      expect(declValue(r, prop), `the primary took a ${prop} of its own — the weight is the rim alone`).toBe("");
-    }
-    /* and the standard rim it multiplies is a token, declared once */
-    expect(css, "the standard rim stopped being a token").toContain("--btn-rim: 1px;");
-    expect(declValue(rule(".qc-btn"), "border"), "the base button's rim is not the token")
-      .toBe("var(--btn-rim) solid var(--btn-line)");
-    expect(declValue(rule(".qc-btn"), "background"), "the base button grew a fill").toBe("var(--white)");
+    expect(declValue(r, "border-width"), "the primary took a rim back").toBe("");
+    expect(parseInt(declValue(r, "font-weight"), 10), "the primary is not heavier than the base")
+      .toBeGreaterThan(parseInt(declValue(rule(".qc-btn"), "font-weight"), 10));
+    /* ⚠️ AND NO GROUND, EVER. A second filled button one column from `Log new query` is the
+       collision the pack names by hand: if the primary fails to read, the correction is full ink
+       on it and muted on the rest. */
+    expect(declValue(r, "background"), "the primary took a ground").toBe("");
   });
 
   it("the header's Export and Log query follow it, and only on this page", () => {

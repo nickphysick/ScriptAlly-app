@@ -218,7 +218,11 @@ describe("§1c · the seam runs the full height of both columns", () => {
        this case is about is the SECOND track: `minmax(0, 1fr)` is what lets both columns scroll
        internally rather than growing the page. */
     expect(body, "the panel row lost its zero-floor — the columns would grow the page instead of scrolling")
-      .toContain("grid-template-rows: 36px minmax(0, 1fr)");
+      /* ⚠️ `auto`, NOT 36px (§3). The bar's row was a stated figure while its buttons were 32; they
+         are 40 now, so the number was a second value to keep in step with `--btn-h` — and was
+         already 4px out. The clause is the SECOND track's zero-floor, which is what stops the
+         columns growing the page instead of scrolling. */
+      .toContain("grid-template-rows: auto minmax(0, 1fr)");
     expect(body, "the row set a cross-axis alignment — anything but stretch shortens a column")
       .not.toMatch(/align-items\s*:/);
   });

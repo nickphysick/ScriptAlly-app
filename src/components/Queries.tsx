@@ -3567,6 +3567,9 @@ export const Queries: React.FC<{
             state and 70 in the other. The page states ONE offset now, 18px, and states it on the
             row where every other page's lives. */}
         <div className="f12-body">
+          {/* ⚠️ §3 · ONE HAIRLINE UNDER THE WHOLE BAR. A grid child spanning both columns, so it
+              crosses the channel and reads as one rule rather than two borders with a gap in it. */}
+          <span className="qc-barrule" aria-hidden="true" />
 
           {/* ══ §1 · THE CONTROL LAYER, SPLIT BY COLUMN ══════════════════════════════════════════
               ⚠️ TWO CELLS OF THE SPLIT'S OWN GRID, NOT TWO ROWS ABOVE IT. Alignment is structural:
@@ -3677,7 +3680,7 @@ export const Queries: React.FC<{
                   <button
                     ref={closeTriggerRef}
                     type="button"
-                    className="qc-btn qc-btn-shrink"
+                    className="qc-btn qc-btn-shrink qc-btn-quiet"
                     aria-haspopup="menu"
                     aria-expanded={isCloseMenuOpen}
                     title="Mark this query closed"
@@ -3694,7 +3697,7 @@ export const Queries: React.FC<{
                       the four LABELLED verbs reading as four. */}
                   <button
                     type="button"
-                    className="qc-btn qc-btn-icon"
+                    className="qc-btn qc-btn-icon qc-btn-quiet"
                     disabled={isGeneratingPDF}
                     title={isGeneratingPDF ? "Generating…" : "Download this query as PDF"}
                     aria-label={isGeneratingPDF ? "Generating PDF" : "Download this query as PDF"}
@@ -3742,11 +3745,11 @@ export const Queries: React.FC<{
                     would make the row move when a query is clicked, which is the fault the ghost
                     exists to prevent. */}
                 <span className="qc-gap" />
-                <button type="button" className="qc-btn qc-btn-shrink" disabled tabIndex={-1}>
+                <button type="button" className="qc-btn qc-btn-shrink qc-btn-quiet" disabled tabIndex={-1}>
                   <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12a9 9 0 1 1-6.2-8.5" /></svg>
                   <span>Mark closed</span>
                 </button>
-                <button type="button" className="qc-btn qc-btn-icon" disabled tabIndex={-1}>
+                <button type="button" className="qc-btn qc-btn-icon qc-btn-quiet" disabled tabIndex={-1}>
                   <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
                 </button>
                 <button type="button" className="qc-btn qc-btn-shrink qc-btn-danger" disabled tabIndex={-1}>

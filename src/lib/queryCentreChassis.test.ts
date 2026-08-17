@@ -534,7 +534,10 @@ describe("§ (fp5) · the list is an inset panel", () => {
        pane, and a 32px foot. Borrowing a third meaning from the panel token is how one value
        silently governs three unrelated distances. */
     expect(declValue(body, "column-gap"), "the channel is not the amendment's 16").toBe("16px");
-    expect(declValue(body, "row-gap"), "the band-to-column gap is not the amendment's 12").toBe("12px");
+    /* ⚠️ 12 → 18 (§3). The gap now carries the bar's hairline — the rule sits at the bar row's foot,
+       so this is the space BENEATH it rather than between two bare rows. The amendment's clause was
+       that ONE value states the gap, which is unchanged. */
+    expect(declValue(body, "row-gap"), "the band-to-column gap is not one stated value").toBe("18px");
     expect(declValue(body, "padding-bottom"), "the work area's foot is not the page token").toBe("var(--qc-gut)");
   });
 

@@ -69,13 +69,16 @@ test("§2/§3 — the controls share a height and only one of them is pink", asy
   const icon = m.verbs.find((v) => v.label === "icon" || /pdf/i.test(v.label));
   if (icon) expect(icon.w, `the icon button is ${icon.w}×${icon.h}, not square`).toBe(icon.h);
 
-  /* ⚠️ ONE PINK SURFACE IN THIS ROW. Every verb white; the primary is a thicker rim and no colour. */
+  /* ⚠️ BORDERLESS AT REST (§3) — every verb transparent, so the bar reads as a row of verbs rather
+     than of objects, and `Log new query` is the page's only filled control. */
   const grounds = new Set(m.verbs.map((v) => v.bg));
   expect([...grounds], `a toolbar verb has a ground of its own: ${[...grounds].join(", ")}`).toHaveLength(1);
-  expect([...grounds][0], "the verbs are not white").toBe("rgb(255, 255, 255)");
-  expect(m.log!.bg, "the Log button is not pink").not.toBe("rgb(255, 255, 255)");
+  expect([...grounds][0], "the verbs are not borderless at rest").toBe("rgba(0, 0, 0, 0)");
+  expect(m.log!.bg, "the Log button is not the one filled control").not.toBe("rgba(0, 0, 0, 0)");
+  /* ⚠️ TEXT WEIGHT SEPARATES THE TWO FORWARD VERBS FROM THE THREE CLOSING ONES — not a rim, and
+     never a second ground, which would put a filled button one column from the pink one. */
   const bws = m.verbs.map((v) => parseFloat(v.bw));
-  expect(Math.max(...bws), "the primary lost its heavier outline").toBeGreaterThan(Math.min(...bws));
+  expect([...new Set(bws)], `the verbs differ in rim weight: ${bws.join(", ")}`).toHaveLength(1);
   expect([...new Set(m.verbs.map((v) => v.fs))], "the verbs differ in type size").toHaveLength(1);
   expect(parseFloat(m.verbs[0].fs), "the labels did not grow").toBeGreaterThanOrEqual(13);
 });
