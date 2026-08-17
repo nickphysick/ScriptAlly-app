@@ -43,7 +43,14 @@
    confirm dialog) is wrapped in a bare `.t-f12` div, and under the old selector those buttons fell
    through to the browser's default focus ring. That's why the discard dialog focused blue. Any
    future portalled surface now gets the house ring by construction. */
-.t-f12 button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
+/* ⚠️ EVERY BUTTON EXCEPT A LIST ROW (§3a). The shared ring is a 2px `--ink` outline — right for a
+   small control and a hard dark rectangle around a 60px row, which is what the row was wearing.
+   ⚠️ EXCLUDED RATHER THAN OVERRIDDEN, and that is the point: `.t-f12 button:focus-visible` is
+   (0,2,1) and `.f12-row:focus-visible` is (0,2,0), so the row's own rule LOST on specificity and
+   the black outline stayed — silently, with the row rule sitting right there looking applied.
+   Stacking a more specific selector would have made one contribution replace the other; saying
+   which buttons this rule is FOR leaves the row's rule unopposed. */
+.t-f12 button:not(.f12-row):focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; border-radius: var(--r-sm); }
 .f12-root svg { display: block; }
 .f12-kbd { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; background: var(--panel); }
 
@@ -2190,6 +2197,7 @@
  * it.
  */
 .t-f12 { --f12-datew: 56px; }
+
 .f12-row {
   position: relative;
   display: grid;
@@ -2240,6 +2248,41 @@
  * set shadows; leaving this to inheritance is how a ring comes back without anyone choosing it.
  */
 .f12-row.f12-sel { background: var(--pink-t); box-shadow: none; }
+/**
+ * ══ §3a · THE KEYBOARD RING IS THE PAGE'S OWN, NOT A BLACK BORDER ═══════════════════════════
+ *
+ * ⚠️ IT WAS THE PAGE'S SHARED BUTTON RING — not a browser default and not a `:focus` rule.
+ * `.t-f12 button:focus-visible { outline: 2px solid var(--ink) }`, measured as `solid 2px
+ * rgb(20,20,18)` on the focused row: `--ink` is the scale's near-black, so a rule written for
+ * small controls drew a hard dark rectangle around a 60px row.
+ *
+ * ⚠️ AND UNDERNEATH IT IS A SHELL-WIDE RING, which is the part worth carrying away. Excluding rows
+ * from the page's rule revealed `.ws-panel a:focus-visible, .ws-panel button:focus-visible,
+ * .ws-main a:focus-visible, .ws-main button:focus-visible` — a terracotta `rgb(185,138,118)` 2px
+ * outline on EVERY button in the workspace. So any other roving-tabindex list in this app rings
+ * its rows the same way; this page is simply the one where it was noticed. Left alone here: it is
+ * the shell's, and re-toning it for one list would trade this fault for a quieter one everywhere.
+ *
+ * ⚠️ SO THE ROW'S RULE IS SCOPED TO ITS OWN LISTBOX rather than shouting louder. `.f12-rows
+ * .f12-row:focus-visible` is (0,3,0) against the shell's (0,2,1) — three classes beat two — which
+ * is enough to win without `!important` and says WHERE the exception applies.
+ *
+ * ⚠️ SO THE FAULT IS SCOPE, NOT PHASE. `:focus-visible` was already correct — a clicked row
+ * measured `fv=false` with no outline at every step, and the ring appeared only once the keyboard
+ * had been used, which is what it is for. What made it read as a bug was 3b putting it on the
+ * WRONG ROW, and its weight.
+ *
+ * ⚠️ AND THE SHARED RULE IS NOT TOUCHED. Every other button on the page is small enough for a 2px
+ * ink outline to be right, and re-toning it app-wide to suit one list would trade this fault for a
+ * quieter one everywhere else. The row takes the page's own selectable-card treatment instead —
+ * the burgundy halo `.qc-acard:focus-visible` already wears — which is a ring rather than a border
+ * and belongs to this page's vocabulary.
+ */
+.f12-rows .f12-row:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--qc-rim-h), 0 0 0 5px rgba(124, 58, 42, 0.12); }
+/* ⚠️ AFTER `.f12-row.f12-sel`, AND THAT PLACEMENT IS THE FIX. Both selectors are (0,2,0), and the
+   selected-row rule sets `box-shadow: none` — so while this sat above it, the ring was cancelled
+   by the very state it always accompanies: selection follows focus here, so the focused row is
+   ALWAYS the selected one. The rule looked applied and painted nothing. */
 /* the name is ink-dark on the fill — the base row's ink, stated here so it cannot drift muted */
 .f12-row.f12-sel .f12-nm { color: var(--ink); }
 /**

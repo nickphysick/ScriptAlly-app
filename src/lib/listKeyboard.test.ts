@@ -191,8 +191,23 @@ describe("§4a · the ring belongs to the keyboard", () => {
     expect(drawing, `a non-field draws a ring on :focus: ${drawing.join(" ⁄ ")}`).toHaveLength(0);
   });
 
-  it("the row's ring is the shared `:focus-visible` rule, unchanged", () => {
-    expect(css, "the keyboard ring went").toContain("button:focus-visible { outline: 2px solid var(--ink)");
+  /**
+   * ⚠️ INVERTED BY §3a — THE ROW HAS ITS OWN RING NOW, and the diagnosis is why. The shared rule
+   * WAS the black border: `.t-f12 button:focus-visible { outline: 2px solid var(--ink) }`, measured
+   * `solid 2px rgb(20,20,18)` on a focused row. Right for a small control; a hard dark rectangle
+   * around a 60px row.
+   *
+   * ⚠️ AND EXCLUDING ROWS FROM IT REVEALED A SHELL-WIDE RING UNDERNEATH — `.ws-main
+   * button:focus-visible`, a terracotta 2px outline on every button in the workspace. That one is
+   * left alone: it is the shell's, and re-toning it for one list would trade this fault for a
+   * quieter one everywhere else. The row's rule is scoped to its own listbox to out-specify it.
+   */
+  it("the row has its own ring, and the shared one no longer reaches it", () => {
+    expect(css, "the shared ring still reaches list rows")
+      .toContain("button:not(.f12-row):focus-visible { outline: 2px solid var(--ink)");
+    expect(css, "the row has no ring of its own").toContain(".f12-rows .f12-row:focus-visible");
+    /* ⚠️ SCOPED, NOT SHOUTED — (0,3,0) against the shell's (0,2,1), which is enough to win. */
+    expect(css, "the row's ring resorted to !important").not.toMatch(/\.f12-row:focus-visible[^}]*!important/);
   });
 });
 
@@ -211,13 +226,20 @@ describe("§4c · the list is one composite widget", () => {
   });
 
   it("one tab stop: the rows rove", () => {
-    /* ⚠️ IT READS THE *RESOLVED* ROVING, NOT THE RAW STATE. `rovingId` is null until the first
-       keystroke, so a row comparing against it would leave NO row with `tabIndex={0}` and the list
-       unreachable by Tab — a roving tabindex that has roved off the widget entirely. */
+    /**
+     * ⚠️ THE CURSOR IS DERIVED, NOT STORED (§3b) — and the stored one was a real defect in this
+     * very section. `rovingId` was written only by the keyboard handler while clicks wrote the
+     * selection, so the two disagreed the moment a writer used one after the other. Measured on the
+     * deployed build: keyboard to row 7, click row 2, press Down, and focus landed on row EIGHT.
+     * ⚠️ ASSERTED AS AN ABSENCE AS WELL AS A DERIVATION, because "add a second writer so clicks
+     * update it too" is the tempting fix and the wrong one: it leaves two values that can disagree
+     * and relies on every future call site remembering both.
+     */
     expect(src, "the rows do not rove — every row would be a tab stop")
-      .toContain("tabIndex={q.id === rovingResolved ? 0 : -1}");
-    expect(src, "the roving falls back to nothing — Tab could not enter the list")
-      .toContain("const rovingResolved = rovingId && visibleIds.includes(rovingId) ? rovingId");
+      .toContain("tabIndex={q.id === cursorId ? 0 : -1}");
+    expect(src, "the cursor is not derived from the selection")
+      .toContain("const cursorId = selectedQueryId && visibleIds.includes(selectedQueryId) ? selectedQueryId : visibleIds[0] ?? null;");
+    expect(src, "a stored cursor came back").not.toMatch(/["\s`(]rovingId["\s`,)]|setRovingId/);
   });
 
   /* ⚠️ SELECTION FOLLOWS FOCUS, so Enter and Space have nothing left to do — and a `<button>`

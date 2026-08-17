@@ -2640,15 +2640,29 @@ export const Queries: React.FC<{
    *
    * ⚠️ ONE TAB STOP, ROVING. Forty rows, each a `<button>`, was forty tab stops between the search
    * field and the reading pane — Tab as a way THROUGH the list rather than PAST it. The row holding
-   * `rovingId` carries `tabIndex={0}` and every other carries `-1`, so Tab enters the list at where
+   * the cursor carries `tabIndex={0}` and every other carries `-1`, so Tab enters the list at where
    * the writer was and the next Tab leaves it.
    *
    * ⚠️ IT DEFAULTS TO THE SELECTION, not to the top. The pane is already reading a query; entering
    * the list anywhere else would move the reading on the first arrow press.
    */
-  const [rovingId, setRovingId] = useState<string | null>(null);
-  const rovingResolved = rovingId && visibleIds.includes(rovingId) ? rovingId
-    : (selectedQueryId && visibleIds.includes(selectedQueryId) ? selectedQueryId : visibleIds[0] ?? null);
+  /**
+   * ⚠️ THE CURSOR IS DERIVED FROM THE SELECTION, NOT STORED — a FIX, not a preference. It was a
+   * `rovingId` state that only the keyboard handler wrote while clicks wrote the selection, so the
+   * two disagreed the moment a writer used one after the other. Measured on the deployed build:
+   * keyboard to row 7, click row 2, press Down, and focus landed on row EIGHT — the stale stored
+   * cursor was still 7 and the click had never touched it.
+   *
+   * ⚠️ THE SELECTED QUERY ALREADY IS THE CURSOR. Selection follows focus here, so every navigation
+   * key moves the selection anyway; a second position alongside it was recording what could be
+   * read. Derived, the disagreement is structurally impossible rather than fixed — there is no
+   * second value for a future call site to forget to write.
+   *
+   * ⚠️ AND THE INDEX IS TAKEN AT THE POINT OF USE, from `visibleIds` — the one visual order, with
+   * group headings and folded rows simply not in it. That is why position IS derivable from the
+   * selected id alone, which is the condition the pack sets for not storing one.
+   */
+  const cursorId = selectedQueryId && visibleIds.includes(selectedQueryId) ? selectedQueryId : visibleIds[0] ?? null;
   /* type-ahead's buffer — refs, because a keystroke must read the run it is extending rather than
      the run as it was when the handler was last rendered */
   const typeBufRef = useRef("");
@@ -2663,15 +2677,15 @@ export const Queries: React.FC<{
    */
   const kbdMoveRef = useRef(false);
   useEffect(() => {
-    if (!kbdMoveRef.current || !rovingResolved) return;
+    if (!kbdMoveRef.current || !cursorId) return;
     kbdMoveRef.current = false;
-    const el = document.getElementById(`query-row-${rovingResolved}`);
+    const el = document.getElementById(`query-row-${cursorId}`);
     if (!el) return;
     el.focus();
     /* ⚠️ `nearest`, so a row already on screen does not scroll the list at all. `center` would
        jog the whole list on every arrow press. */
     el.scrollIntoView({ block: "nearest" });
-  }, [rovingResolved]);
+  }, [cursorId]);
 
   /**
    * ⚠️ WHEN THE LIST CHANGES UNDER FOCUS, THE NEAREST SURVIVOR TAKES IT — never the top, never
@@ -2684,8 +2698,8 @@ export const Queries: React.FC<{
     const prev = prevVisibleRef.current;
     prevVisibleRef.current = visibleIds;
     if (!prev.length || prev.join("\u0000") === visibleIds.join("\u0000")) return;
-    if (!rovingId || visibleIds.includes(rovingId)) return;
-    const landing = nearestSurvivor(prev, visibleIds, rovingId);
+    if (!selectedQueryId || visibleIds.includes(selectedQueryId)) return;
+    const landing = nearestSurvivor(prev, visibleIds, selectedQueryId);
     /* ⚠️ AND IT TAKES FOCUS, NOT JUST THE ROVING — "not the top, not `<body>`" is the clause, and
        a removed row leaves focus on `<body>`, where the next Tab restarts at the page's first
        control. Preserving the roving alone would keep the WIDGET's memory and lose the writer's.
@@ -2696,10 +2710,9 @@ export const Queries: React.FC<{
        is where focus falls when the element holding it is removed. */
     const a = document.activeElement;
     if (a === document.body || (a instanceof Node && listScrollRef.current?.contains(a))) kbdMoveRef.current = true;
-    setRovingId(landing);
-    /* ⚠️ THE SELECTION FOLLOWS IT HERE TOO. Leaving the pane on a query the list no longer shows is
-       the shell's own "the selector never marks a row that is not rendered" fault, one page over. */
-    if (landing && landing !== selectedQueryId) setSelectedQueryId(landing);
+    /* ⚠️ IT MOVES THE SELECTION, WHICH IS THE CURSOR. With the cursor derived there is nothing else
+       to update — the fault this section fixes was a second thing to remember. */
+    if (landing) setSelectedQueryId(landing);
   }, [visibleIds.join("\u0000")]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
@@ -2714,12 +2727,12 @@ export const Queries: React.FC<{
   const onListKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); return; }
     if (!visibleIds.length) return;
-    const at = rovingResolved ? visibleIds.indexOf(rovingResolved) : -1;
+    const at = cursorId ? visibleIds.indexOf(cursorId) : -1;
     let to: number | null = null;
 
     if (isListNavKey(e.key)) {
       const scroller = listScrollRef.current;
-      const row = rovingResolved ? document.getElementById(`query-row-${rovingResolved}`) : null;
+      const row = cursorId ? document.getElementById(`query-row-${cursorId}`) : null;
       to = nextIndex(e.key, at, visibleIds.length, pageSizeFor(scroller?.clientHeight ?? 0, row?.offsetHeight ?? 0));
     } else if (isTypeAheadKey(e.key, { alt: e.altKey, ctrl: e.ctrlKey, meta: e.metaKey })) {
       const now = Date.now();
@@ -2741,7 +2754,6 @@ export const Queries: React.FC<{
     e.preventDefault();
     const id = visibleIds[to];
     kbdMoveRef.current = true;
-    setRovingId(id);
     if (id !== selectedQueryId) { if (creating) closeCreate(() => pickRow(id)); else pickRow(id); }
   };
 
@@ -3894,7 +3906,7 @@ export const Queries: React.FC<{
                     /* ⚠️ ONE TAB STOP (§4c). Forty rows, each a `<button>`, was forty stops between
                        the search field and the reading pane — Tab as a way THROUGH the list rather
                        than past it. Only the roving row is reachable; the arrows move the roving. */
-                    tabIndex={q.id === rovingResolved ? 0 : -1}
+                    tabIndex={q.id === cursorId ? 0 : -1}
     // v4 P2 — clicking another row while drafting is a click-away: resolve the
                     // draft first (silently when untouched, with a confirm when dirty), then
                     // select. pickRow also pushes to detail below md (Mobile Pass 1).
