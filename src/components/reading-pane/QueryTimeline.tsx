@@ -489,10 +489,12 @@ export const TimelineRows: React.FC<{
         const lastChapter = ci === book.chapters.length - 1;
         return (
           <div className="tl-chap" key={ci}>
-            {/* ⚠️ NO HEADING ON A ONE-ROUND QUERY, and no blank one on a chapter that has no subject:
-                a leading run of rows with no send before it is real (an import, a correction) and
-                gets the grouping without a name it cannot honestly carry. */}
-            {book.labelled && chapter.label && <div className="tl-chaplab">{chapter.label}</div>}
+            {/* ⚠️ NO HEADING ON A ONE-ROUND QUERY — and when there ARE headings, EVERY chapter has
+                one, including the first (§3b). The `&& chapter.label` guard that used to sit here
+                was the fault: an imported query with no `Queried` root opened an unnamed leading
+                chapter, so the first heading was simply missing while the later ones rendered.
+                `chapterise` now names every round it opens, so there is nothing left to guard. */}
+            {book.labelled && <div className="tl-chaplab">{chapter.label}</div>}
             {chapter.rows.map((row, ri) => {
               /* ⚠️ THE CONNECTOR ENDS WITH ITS ROUND, not only with the timeline. A line running out
                  of the last event of a chapter would cross the rule that separates the rounds and

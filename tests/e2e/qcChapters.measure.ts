@@ -29,111 +29,128 @@ async function pick(page: Page, want: (chapters: number) => boolean): Promise<nu
 }
 const findChaptered = (page: Page) => pick(page, (c) => c > 1);
 
-test("§1 — a long query reads as rounds, a fresh one carries no heading", async ({ page }) => {
+test("§3 — how many queries render rounds, and where the headings fall", async ({ page }) => {
   await openRoute(page, "/queries", { width: 1440, height: 900 });
 
-  const rows = await page.locator(".f12-row").count();
-  expect(rows, "no queries on the page — nothing to read").toBeGreaterThan(2);
+  /* ⚠️ THE WHOLE LIST, COUNTED — "if it is still zero, the rule is wrong again". A single sampled
+     query cannot answer that, and a run that found none would look identical to a run that found
+     none because it stopped early. */
+  const seen: { row: number; chapters: number; labels: string[]; order: string[] }[] = [];
+  for (let i = 0; i < 24; i++) {
+    const row = page.locator(".f12-row").nth(i);
+    if (!(await row.count())) break;
+    await row.scrollIntoViewIfNeeded();
+    await row.click({ timeout: 5000 });
+    await page.waitForTimeout(280);
+    seen.push(await page.evaluate((n) => ({
+      row: n,
+      chapters: document.querySelectorAll(".tl-chap").length,
+      labels: [...document.querySelectorAll(".tl-chaplab")].map((l) => (l.textContent || "").trim()),
+      /* the reading order of the whole column: headings and event titles interleaved */
+      order: [...document.querySelectorAll<HTMLElement>(".tl-chaplab, .tl-ev .tl-evtitle span:first-child, .tl-minortx")]
+        .map((e) => (e.textContent || "").trim()).filter(Boolean),
+    }), i));
+  }
+  for (const s of seen) console.log(`  row ${String(s.row).padStart(2)} · ${s.chapters} chapter${s.chapters === 1 ? " " : "s"} · ${JSON.stringify(s.labels)}`);
 
-  const idx = await findChaptered(page);
-  console.log(`\nfirst multi-round query: row ${idx} of ${rows}`);
+  const chaptered = seen.filter((s) => s.chapters > 1);
+  console.log(`\n${chaptered.length} of ${seen.length} queries render rounds`);
+  expect(seen.length, "no queries to read").toBeGreaterThan(2);
+  /* ⚠️ THE PACK'S OWN CHECK: zero means the rule is wrong again. */
+  expect(chaptered.length, "no query renders rounds — the rule is wrong again").toBeGreaterThan(0);
 
-  if (idx >= 0) {
-    const chapters = await page.locator(".tl-chap").count();
-    const labels = await page.locator(".tl-chaplab").allInnerTexts();
-    console.log(`  ${chapters} chapters · labels ${JSON.stringify(labels)}`);
-    expect(chapters, "more than one round and no chapter boxes").toBeGreaterThan(1);
-    expect(labels.length, "a multi-round query drew no headings").toBe(chapters);
-    /* ⚠️ NO TWO ROUNDS SHARE A HEADING — the ordinal rule, on the page rather than in a fixture. */
-    expect(new Set(labels).size, `two rounds share a heading: ${labels.join(" / ")}`).toBe(labels.length);
-    for (const l of labels) expect(l.trim().length, "a blank heading was drawn").toBeGreaterThan(0);
+  for (const s of chaptered) {
+    /* §3b — every chapter labelled, including the first */
+    expect(s.labels.length, `row ${s.row}: ${s.chapters} chapters but ${s.labels.length} headings`).toBe(s.chapters);
+    for (const l of s.labels) expect(l.length, `row ${s.row} drew a blank heading`).toBeGreaterThan(0);
+    expect(new Set(s.labels).size, `row ${s.row}: two rounds share a heading — ${s.labels.join(" / ")}`).toBe(s.labels.length);
 
-    /* the rule that separates rounds, and the label's own trailing rule */
-    const sep = await page.locator(".tl-chap").nth(1).evaluate((el) => {
-      const c = getComputedStyle(el);
-      return { shadow: c.boxShadow, padTop: c.paddingTop, marginTop: c.marginTop };
-    });
-    console.log(`  boundary: margin ${sep.marginTop} + padding ${sep.padTop}, rule ${sep.shadow}`);
-    expect(sep.shadow, "no rule between rounds").not.toBe("none");
-  } else {
-    console.log("  (no multi-round query in this account — the threshold half is still asserted below)");
+    /* §3a — the request opens the round it belongs to, so no heading falls BETWEEN a request and
+       the send answering it */
+    const req = s.order.findIndex((t) => /requested|Revise/i.test(t));
+    const sent = s.order.findIndex((t) => /^(Partial sent|Full sent)/i.test(t));
+    if (req >= 0 && sent > req) {
+      const between = s.order.slice(req + 1, sent).filter((t) => s.labels.includes(t));
+      console.log(`  row ${s.row} order: ${s.order.join(" → ")}`);
+      expect(between, `row ${s.row}: a heading fell between the request and its send — ${between.join(", ")}`).toEqual([]);
+    }
+    /* the request must sit UNDER its own round's heading, not at the end of the one before */
+    if (req >= 0) {
+      const headingBefore = [...s.order.slice(0, req)].reverse().find((t) => s.labels.includes(t));
+      console.log(`  row ${s.row}: "${s.order[req]}" sits under "${headingBefore}"`);
+      expect(headingBefore, `row ${s.row}: the request has no heading above it`).toBeTruthy();
+      expect(headingBefore, `row ${s.row}: the request sits under "The query" — it should open its own round`).not.toBe("The query");
+    }
   }
 
-  /* ⚠️ THE THRESHOLD, ON THE PAGE. A query with one round must show no heading at all — the case
-     the derivation calls `labelled: false`, which is worthless if the renderer draws one anyway. */
-  const single = await pick(page, (c) => c === 1);
-  const checked = single >= 0 ? 1 : 0;
-  if (single >= 0) {
-    const labels = await page.locator(".tl-chaplab").count();
-    console.log(`\nsingle-round query at row ${single}: 1 chapter · ${labels} headings`);
-    expect(labels, "a one-round query was given a heading").toBe(0);
-  }
-  expect(checked, "no single-round query to check the threshold against").toBe(1);
+  /* the threshold still holds: a one-round query shows nothing */
+  const single = seen.find((s) => s.chapters === 1);
+  expect(single, "no single-round query to check the threshold against").toBeTruthy();
+  expect(single!.labels.length, "a one-round query was given a heading").toBe(0);
 });
 
-test("§2 — one gap for every event, a small mark for the minor ones, no line after the last", async ({ page }) => {
+/**
+ * ⚠️ MEASURED ACROSS EVERY QUERY, NOT ON ONE. A chapter with a single event has no gap to compare —
+ * which is what the first version of this hit once chapters started opening at the request — so the
+ * rhythm is read from every event on every query that has a next event to be spaced from.
+ */
+test("§2 — one gap for every event, and no line after the last", async ({ page }) => {
   await openRoute(page, "/queries", { width: 1440, height: 900 });
-  const idx = await findChaptered(page);
-  if (idx < 0) test.skip(true, "no multi-round query in this account");
 
-  const geo = await page.evaluate(() => {
-    const chaps = [...document.querySelectorAll<HTMLElement>(".tl-chap")];
-    const out: any = { chapters: [], minor: [], lastLine: null, marks: [] };
-    for (const chap of chaps) {
-      const evs = [...chap.querySelectorAll<HTMLElement>(":scope > .tl-ev")];
-      const gaps: number[] = [];
-      for (let i = 1; i < evs.length; i++) {
-        const a = evs[i - 1].getBoundingClientRect();
-        const b = evs[i].getBoundingClientRect();
-        gaps.push(Math.round((b.top - a.bottom) * 10) / 10);
-      }
-      /* the distance the eye reads is mark-top to mark-top minus the previous event's own content */
-      const pads = evs.map((e) => getComputedStyle(e).paddingBottom);
-      out.chapters.push({ events: evs.length, gaps, pads });
-    }
-    for (const m of [...document.querySelectorAll<HTMLElement>(".tl-ev--minor")]) {
-      const mark = m.querySelector<HTMLElement>(".tl-evmark")!.getBoundingClientRect();
-      out.minor.push({
-        markW: Math.round(mark.width), markH: Math.round(mark.height),
-        centreX: Math.round(mark.left + mark.width / 2 - m.getBoundingClientRect().left),
-        titles: m.querySelectorAll(".tl-evtitle").length,
-        text: (m.textContent || "").trim().slice(0, 44),
+  const pads = new Set<string>();
+  const centres = new Set<number>();
+  let events = 0, samples = 0, lastLines: string[] = [];
+  for (let i = 0; i < 24; i++) {
+    const row = page.locator(".f12-row").nth(i);
+    if (!(await row.count())) break;
+    await row.scrollIntoViewIfNeeded();
+    await row.click({ timeout: 5000 });
+    await page.waitForTimeout(260);
+    const read = await page.evaluate(() => {
+      const evs = [...document.querySelectorAll<HTMLElement>(".tl-ev")];
+      /**
+       * ⚠️ "FOLLOWED BY ANOTHER EVENT" IS DOCUMENT ORDER, NOT SIBLINGHOOD. Each chapter WRAPS its
+       * events, and the waiting projection sits outside every chapter — so `nextElementSibling`
+       * found nothing on any query and reported zero samples rather than a wrong figure. It is the
+       * vacuous shape: an assertion about a set the probe never built.
+       *
+       * ⚠️ AND A CHAPTER BOUNDARY IS THE DELIBERATE EXCEPTION — the last event of a round pays no
+       * gap because its connector ends there. So the rhythm is every event whose successor is in
+       * the SAME round (or is the projection, which continues the last one).
+       */
+      const chapOf = (e: HTMLElement) => e.closest(".tl-chap");
+      const spaced = evs.filter((e, i) => {
+        const next = evs[i + 1];
+        if (!next) return false;
+        const a = chapOf(e), b = chapOf(next);
+        return a === b || b === null;
       });
-    }
-    const bigMarks = [...document.querySelectorAll<HTMLElement>(".tl-ev:not(.tl-ev--minor) .tl-evmark")];
-    out.marks = bigMarks.slice(0, 3).map((k) => {
-      const r = k.getBoundingClientRect();
-      return { w: Math.round(r.width), centreX: Math.round(r.left + r.width / 2 - (k.closest(".tl-ev") as HTMLElement).getBoundingClientRect().left) };
+      const line = evs[evs.length - 1]?.querySelector<HTMLElement>(".tl-evline");
+      return {
+        events: evs.length,
+        pads: spaced.map((e) => getComputedStyle(e).paddingBottom),
+        centres: evs.map((e) => {
+          const m = e.querySelector<HTMLElement>(".tl-evmark")!.getBoundingClientRect();
+          return Math.round(m.left + m.width / 2 - e.getBoundingClientRect().left);
+        }),
+        lastLine: line ? getComputedStyle(line).display : "(no line element)",
+      };
     });
-    const all = [...document.querySelectorAll<HTMLElement>(".tl-ev")];
-    const last = all[all.length - 1];
-    const line = last?.querySelector<HTMLElement>(".tl-evline");
-    out.lastLine = line ? getComputedStyle(line).display : "(no line element)";
-    return out;
-  });
-
-  console.log(`\nper chapter: ${JSON.stringify(geo.chapters)}`);
-  console.log(`minor events: ${JSON.stringify(geo.minor)}`);
-  console.log(`substantive marks: ${JSON.stringify(geo.marks)}`);
-  console.log(`connector on the final event: ${geo.lastLine}`);
-
-  /* ⚠️ ONE GAP. Every event's own `padding-bottom` is the rhythm — measured as the computed value
-     rather than as a rect difference, because a rect gap is 0 for adjacent blocks whose spacing is
-     padding rather than margin, and 0 === 0 would pass while saying nothing. */
-  const pads = geo.chapters.flatMap((c: any) => c.pads.slice(0, -1));
-  expect(pads.length, "not enough events to compare a rhythm").toBeGreaterThan(1);
-  expect(new Set(pads).size, `the gap is not one figure: ${[...new Set(pads)].join(", ")}`).toBe(1);
-
-  /* the minor treatment */
-  expect(geo.minor.length, "no minor events on this query to check").toBeGreaterThan(0);
-  for (const m of geo.minor) {
-    expect(m.markW, `a minor mark is ${m.markW}px, not the small one`).toBeLessThanOrEqual(12);
-    expect(m.titles, `a minor event drew a title row: "${m.text}"`).toBe(0);
+    events += read.events;
+    samples += read.pads.length;
+    read.pads.forEach((p) => pads.add(p));
+    read.centres.forEach((c) => centres.add(c));
+    lastLines.push(read.lastLine);
   }
-  /* ⚠️ THE RAIL STAYS STRAIGHT — the small mark's centre must sit on the big one's centre, which is
-     the thing a hand-written offset gets wrong and nothing else notices. */
-  const centres = [...geo.minor.map((m: any) => m.centreX), ...geo.marks.map((m: any) => m.centreX)];
-  expect(new Set(centres).size, `the rail bends: mark centres ${centres.join(", ")}`).toBe(1);
 
-  expect(geo.lastLine, "a connector runs off the end of the timeline").toBe("none");
+  console.log(`\n${events} events across the list · ${samples} of them spaced from a next event`);
+  console.log(`  gaps: ${[...pads].join(" / ")}`);
+  console.log(`  mark centres: ${[...centres].join(", ")}`);
+  console.log(`  connector on each query's final event: ${[...new Set(lastLines)].join(", ")}`);
+
+  expect(samples, "no event anywhere has a next event to be spaced from").toBeGreaterThan(1);
+  expect(pads.size, `the gap is not one figure: ${[...pads].join(", ")}`).toBe(1);
+  /* ⚠️ THE RAIL IS ONE STRAIGHT LINE across every event on every query, whatever its mark's size. */
+  expect(centres.size, `the rail bends: mark centres ${[...centres].join(", ")}`).toBe(1);
+  expect(new Set(lastLines), "a connector runs off the end of a timeline").toEqual(new Set(["none"]));
 });

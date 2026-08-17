@@ -9,13 +9,14 @@
  * nothing migrates when the rule changes, and a corrected activity re-chapters the timeline the
  * moment it lands. Pure so the rule can be locked without a browser.
  *
- * ⚠️ A CHAPTER OPENS ON AN OUTBOUND SEND, WHICH IS NOT WHAT THE REF DRAWS — a deliberate deviation
- * with a reason. 154-timeline.html groups a request WITH the send that answers it, so its second
- * chapter reads "Partial requested · Partial sent". That is legible until the writer has not sent
- * yet: the request opens a chapter named after a send that has not happened, and a query sitting in
- * the writer's court grows a heading for work it is still waiting on. Opening on the SEND means a
- * chapter only ever begins with something the writer actually did, and the request that caused it
- * closes the round before. The pack states this rule in prose; the ref draws the other one.
+ * ⚠️ A CHAPTER OPENS AT THE REQUEST THAT STARTS THE ROUND, NOT AT THE SEND THAT ANSWERS IT — the
+ * ref's grouping, reinstated. An earlier pass opened chapters on the outbound send, reasoning that a
+ * chapter should never be named after work the writer had not done; the cost was worse in both
+ * directions. It put "Partial requested" at the END of the previous round, so the heading "The
+ * partial" fell BETWEEN the request and the send that answered it — the two events a reader most
+ * needs to see together. And because it took two sends to make two chapters, a query in the writer's
+ * court showed no rounds at all, which is exactly when the reader most wants to see where they are.
+ * A round is the exchange; the request is what opens it.
  *
  * ⚠️ AND NEITHER THE SEND SET NOR THE LABEL IS A HAND-WRITTEN LIST OF STATUSES. Both come out of the
  * CTA engine: a status is a SEND when some other status's mark-sent action TARGETS it, and a round's
@@ -35,11 +36,15 @@ const SEND_TARGETS: QueryStatus[] = Object.values(QueryStatus)
   .flatMap((a) => (a.kind === "mark-sent" ? [a.target] : []));
 
 /**
- * Does this status OPEN a round?
+ * Does this status OPEN a round? A REQUEST does — it is the event the round is about.
  *
- * ⚠️ `QUERIED` IS IN THE SET BY ITS OWN CLAUSE, not by accident: it is the one send no request
- * precedes, so nothing targets it and the derivation above cannot find it.
+ * ⚠️ DERIVED FROM THE CTA ENGINE, never a list of statuses: a request is exactly a status whose
+ * primary action is "mark something as sent", which is the same fact the command bar's button and
+ * the agent list's whose-turn axis read. A new request status joins without an edit here.
  */
+export const isRequestStatus = (status: QueryStatus): boolean => getPrimaryAction(status).kind === "mark-sent";
+
+/** A send is anything a request can target, plus the first query, which no request precedes. */
 export const isSendStatus = (status: QueryStatus): boolean =>
   status === QueryStatus.QUERIED || SEND_TARGETS.includes(status);
 
@@ -51,21 +56,23 @@ const producersOf = (target: QueryStatus): QueryStatus[] =>
   });
 
 /**
- * What a send is a send OF.
+ * What the round this row opens is ABOUT.
  *
- * ⚠️ THE REQUEST BEFORE IT IS THE AUTHORITY, and the fallback is still derived. Two statuses target
- * `Full sent` — `Full requested` and `Revise & Resubmit` — so the status alone cannot say which
- * round this is; the nearest preceding request can. With no request in the log at all (an import, a
- * query recorded after the fact), the first producer in enum order is the answer, which is the
- * ordinary reading rather than the revision one.
+ * ⚠️ THE REQUEST NAMES ITS OWN ROUND — its `markKind` IS the subject, which is why one status can
+ * head two differently-named rounds: a `Full sent` after `Full requested` belongs to "The full",
+ * the same status after an R&R belongs to "Revise and resubmit". A per-status lookup could not
+ * express that, and here it does not have to: the opener is the request, and the request knows.
+ *
+ * ⚠️ AND A SEND CAN STILL OPEN THE FIRST CHAPTER, because something has to. `Queried` is the
+ * ordinary case; a log that begins at `Partial sent` with no request recorded (an import, a
+ * correction) is named from the request that WOULD have produced it, in enum order — still derived,
+ * and still better than an unnamed round.
  */
-export function chapterSubject(sendStatus: QueryStatus, precedingRequest: QueryStatus | null): ChapterSubject {
-  if (sendStatus === QueryStatus.QUERIED) return "query";
-  if (precedingRequest) {
-    const a = getPrimaryAction(precedingRequest);
-    if (a.kind === "mark-sent" && a.target === sendStatus) return a.markKind;
-  }
-  const first = producersOf(sendStatus)[0];
+export function openerSubject(status: QueryStatus): ChapterSubject {
+  if (status === QueryStatus.QUERIED) return "query";
+  const own = getPrimaryAction(status);
+  if (own.kind === "mark-sent") return own.markKind;
+  const first = producersOf(status)[0];
   if (first) {
     const a = getPrimaryAction(first);
     if (a.kind === "mark-sent") return a.markKind;
@@ -98,9 +105,8 @@ export function qualifyChapterLabel(label: string, nth: number): string {
 }
 
 export interface Chapter<T> {
-  /** "" for rows that precede the first send — rendered without a heading, never as a blank one. */
   label: string;
-  subject: ChapterSubject | null;
+  subject: ChapterSubject;
   rows: T[];
 }
 
@@ -124,27 +130,24 @@ export interface ChapterableRow {
 
 export function chapterise<T extends ChapterableRow>(rows: T[]): ChapteredTimeline<T> {
   const chapters: Chapter<T>[] = [];
-  let seenRequest: QueryStatus | null = null;
 
   for (const row of rows) {
     const status = row.status as QueryStatus;
-    const opensChapter = !row.kind && isSendStatus(status);
-    if (opensChapter) {
-      const subject = chapterSubject(status, seenRequest);
+    /* ⚠️ THE FIRST ROW ALWAYS OPENS A CHAPTER, which is what makes §3b unconditional: there is no
+       such thing as an unnamed round, so "when chapters are labelled, every chapter is labelled"
+       needs no exception for a log that begins mid-story. */
+    const opens = !chapters.length || (!row.kind && isRequestStatus(status));
+    if (opens) {
+      const subject = openerSubject(status);
       chapters.push({ label: chapterLabel(subject), subject, rows: [row] });
-      seenRequest = null;
       continue;
     }
-    /* a request is what NAMES the next round, so remember the most recent one */
-    if (!row.kind && getPrimaryAction(status).kind === "mark-sent") seenRequest = status;
-    if (!chapters.length) chapters.push({ label: "", subject: null, rows: [] });
     chapters[chapters.length - 1].rows.push(row);
   }
 
   /* repeats get an ordinal — counted over labels, so two partials differ and a partial and a full do not */
   const seen = new Map<string, number>();
   for (const c of chapters) {
-    if (!c.label) continue;
     const n = (seen.get(c.label) ?? 0) + 1;
     seen.set(c.label, n);
     c.label = qualifyChapterLabel(c.label, n);

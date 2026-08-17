@@ -6,27 +6,41 @@
  */
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
-import { chapterise, chapterLabel, chapterSubject, isSendStatus, qualifyChapterLabel } from "./timelineChapters";
+import { getPrimaryAction } from "./queryPrimaryAction";
+import { chapterise, chapterLabel, openerSubject, isRequestStatus, isSendStatus, qualifyChapterLabel } from "./timelineChapters";
 
 const row = (status: QueryStatus, kind?: string) => ({ status, ...(kind ? { kind } : {}) });
 const labels = (rows: ReturnType<typeof row>[]) => chapterise(rows).chapters.map((c) => c.label);
 
 describe("what opens a round", () => {
-  /* ⚠️ DERIVED FROM THE CTA ENGINE, so this asserts the SET rather than restating a list — if a new
-     request status arrives with a mark-sent target, the send it targets joins without an edit. */
-  it("the three sends open one, and nothing else does", () => {
-    expect(isSendStatus(QueryStatus.QUERIED)).toBe(true);
-    expect(isSendStatus(QueryStatus.PARTIAL_SENT)).toBe(true);
-    expect(isSendStatus(QueryStatus.FULL_SENT)).toBe(true);
-    for (const s of [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT,
+  /**
+   * ⚠️ THE REQUEST OPENS IT, NOT THE SEND — reversed by the overnight §3, and the reason is what
+   * the old rule did to the page: "Partial requested" sat at the END of the previous round, so the
+   * heading "The partial" fell BETWEEN the request and the send answering it, and a query still in
+   * the writer's court showed no rounds at all.
+   *
+   * ⚠️ ASSERTED AS THE SET the CTA engine defines, so a new request status joins without an edit.
+   */
+  it("every request opens one, and nothing else does", () => {
+    for (const s of Object.values(QueryStatus)) {
+      expect(isRequestStatus(s), `${s} disagrees with the CTA engine about being a request`)
+        .toBe(getPrimaryAction(s).kind === "mark-sent");
+    }
+    for (const s of [QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]) {
+      expect(isRequestStatus(s), `${s} does not open a round`).toBe(true);
+    }
+    for (const s of [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT,
       QueryStatus.OFFER, QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]) {
-      expect(isSendStatus(s), `${s} opened a round`).toBe(false);
+      expect(isRequestStatus(s), `${s} opened a round`).toBe(false);
     }
   });
 
-  /* ⚠️ AN OFFER IS "OUT" TO `statusDirection` AND IS NOT A SEND. That is precisely why this reads
-     the mark-sent targets rather than the dot's direction: the writer never sends an offer. */
-  it("an offer is not a send, whatever the dot's direction says", () => {
+  /* the sends are still known — the first chapter opens on one, because something has to */
+  it("the three sends are still the sends", () => {
+    expect(isSendStatus(QueryStatus.QUERIED)).toBe(true);
+    expect(isSendStatus(QueryStatus.PARTIAL_SENT)).toBe(true);
+    expect(isSendStatus(QueryStatus.FULL_SENT)).toBe(true);
+    /* ⚠️ AN OFFER IS "OUT" TO `statusDirection` AND IS NOT A SEND — the writer never sends one. */
     expect(isSendStatus(QueryStatus.OFFER)).toBe(false);
   });
 });
@@ -40,19 +54,23 @@ describe("what a round is called", () => {
   });
 
   /**
-   * ⚠️ ONE STATUS, TWO LABELS — the whole reason the subject is derived from the round rather than
-   * looked up per status. `Full sent` after a full request is "The full"; the same status after an
-   * R&R is the resubmission.
+   * ⚠️ THE REQUEST NAMES ITS OWN ROUND, which is why one status can head two differently-named
+   * ones: `Full requested` opens "The full" and `Revise & Resubmit` opens "Revise and resubmit",
+   * and BOTH rounds end in a `Full sent`.
    */
-  it("Full sent is named by the request that asked for it", () => {
-    expect(chapterSubject(QueryStatus.FULL_SENT, QueryStatus.FULL_REQUESTED)).toBe("full");
-    expect(chapterSubject(QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT)).toBe("resubmit");
+  it("a request is named by what it asked for", () => {
+    expect(openerSubject(QueryStatus.PARTIAL_REQUESTED)).toBe("partial");
+    expect(openerSubject(QueryStatus.FULL_REQUESTED)).toBe("full");
+    expect(openerSubject(QueryStatus.REVISE_RESUBMIT)).toBe("resubmit");
+    expect(openerSubject(QueryStatus.QUERIED)).toBe("query");
   });
 
-  it("with no request in the log it reads as the ordinary round, not the revision", () => {
-    expect(chapterSubject(QueryStatus.FULL_SENT, null)).toBe("full");
-    expect(chapterSubject(QueryStatus.PARTIAL_SENT, null)).toBe("partial");
-    expect(chapterSubject(QueryStatus.QUERIED, QueryStatus.REVISE_RESUBMIT)).toBe("query");
+  /* a log that starts mid-story still names its first round, from the request that would have
+     produced that send — never an unnamed chapter, which is what §3b forbids */
+  it("a send opening the first chapter is named from the request that would have caused it", () => {
+    expect(openerSubject(QueryStatus.PARTIAL_SENT)).toBe("partial");
+    expect(openerSubject(QueryStatus.FULL_SENT)).toBe("full");
+    expect(openerSubject(QueryStatus.REJECTED)).toBe("query");
   });
 
   it("a repeat takes an ordinal where English wants it", () => {
@@ -78,13 +96,25 @@ describe("chapterise", () => {
     expect(t.chapters[0].rows).toHaveLength(2);
   });
 
-  it("a request-and-send round makes exactly two chapters, and both are labelled", () => {
+  /**
+   * ⚠️ THE PRIYA FIXTURE — the case the overnight §3 exists for. The request and the send that
+   * answers it belong to ONE round; the old rule put the heading between them.
+   */
+  it("a request and the send answering it sit under one heading", () => {
     const t = chapterise([row(QueryStatus.QUERIED), row(QueryStatus.PARTIAL_REQUESTED), row(QueryStatus.PARTIAL_SENT)]);
     expect(t.labelled).toBe(true);
     expect(t.chapters.map((c) => c.label)).toEqual(["The query", "The partial"]);
-    /* ⚠️ THE REQUEST CLOSES THE ROUND BEFORE IT — see the module note on the ref's other grouping. */
-    expect(t.chapters[0].rows.map((r) => r.status)).toEqual([QueryStatus.QUERIED, QueryStatus.PARTIAL_REQUESTED]);
-    expect(t.chapters[1].rows.map((r) => r.status)).toEqual([QueryStatus.PARTIAL_SENT]);
+    expect(t.chapters[0].rows.map((r) => r.status)).toEqual([QueryStatus.QUERIED]);
+    expect(t.chapters[1].rows.map((r) => r.status), "the request was left in the previous round")
+      .toEqual([QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT]);
+  });
+
+  /* ⚠️ AND A REQUEST NOT YET ANSWERED STILL GETS ITS ROUND — the invisibility the old rule caused:
+     it took two SENDS to make two chapters, so a query in the writer's court showed none. */
+  it("a request with no send yet is still a round of its own", () => {
+    const t = chapterise([row(QueryStatus.QUERIED), row(QueryStatus.PARTIAL_REQUESTED)]);
+    expect(t.chapters.map((c) => c.label)).toEqual(["The query", "The partial"]);
+    expect(t.labelled, "a query in the writer's court showed no rounds").toBe(true);
   });
 
   /* the ref's own fixture: two years, a nudge, an R&R and a resubmission */
@@ -113,7 +143,7 @@ describe("chapterise", () => {
   it("a rejection joins the last round rather than starting one", () => {
     const t = chapterise([row(QueryStatus.QUERIED), row(QueryStatus.FULL_REQUESTED), row(QueryStatus.FULL_SENT), row(QueryStatus.REJECTED)]);
     expect(t.chapters).toHaveLength(2);
-    expect(t.chapters[1].rows.map((r) => r.status)).toEqual([QueryStatus.FULL_SENT, QueryStatus.REJECTED]);
+    expect(t.chapters[1].rows.map((r) => r.status)).toEqual([QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REJECTED]);
   });
 
   /* ⚠️ NOTHING IS DROPPED. Whatever the rule does, every row it was handed comes out the other side —
@@ -124,10 +154,22 @@ describe("chapterise", () => {
     expect(t.chapters.flatMap((c) => c.rows)).toEqual(rows);
   });
 
-  it("rows before the first send sit in an unlabelled chapter rather than a blank heading", () => {
-    const t = chapterise([row(QueryStatus.PARTIAL_REQUESTED), row(QueryStatus.PARTIAL_SENT)]);
-    expect(t.chapters[0].label).toBe("");
-    expect(t.chapters[0].subject).toBeNull();
+  /**
+   * §3b — ⚠️ WHEN CHAPTERS ARE LABELLED, EVERY CHAPTER IS LABELLED. There is no unnamed round, so
+   * this holds without an exception for a log that begins mid-story — which is exactly the shape
+   * that produced the reported fault: an imported query with no `Queried` root opened an unnamed
+   * first chapter, and the first heading was simply missing.
+   */
+  it("no chapter is ever unnamed, wherever the log begins", () => {
+    for (const rows of [
+      [row(QueryStatus.PARTIAL_REQUESTED), row(QueryStatus.PARTIAL_SENT)],
+      [row(QueryStatus.PARTIAL_SENT), row(QueryStatus.FULL_REQUESTED), row(QueryStatus.FULL_SENT)],
+      [row(QueryStatus.QUERIED, "nudge"), row(QueryStatus.FULL_REQUESTED)],
+      [row(QueryStatus.REJECTED)],
+    ]) {
+      const t = chapterise(rows);
+      for (const c of t.chapters) expect(c.label.length, `an unnamed chapter from ${rows.map((r) => r.status).join(" → ")}`).toBeGreaterThan(0);
+    }
   });
 
   it("no rows, no chapters", () => {
