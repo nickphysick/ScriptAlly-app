@@ -1471,12 +1471,17 @@
   --qc-surf-act-h: var(--n1);
 }
 
-/* ⚠️ THE GROUND IS PAINTED HERE, AND IT HAS TO BE. `--ws-window` is computed at `:root` from
-   `--ws-window-rgb`, and the element that paints it — `.ws-work` — is an ANCESTOR of this page, so
-   neither the token nor the paint is reachable from a block scoped inside it. `.f12-root` paints
-   nothing today and fills the page area, and nothing between the two paints either. One
-   declaration, page-scoped, removable with the class. */
-.qc-neutral.f12-root { background: var(--n1); }
+/* ⚠️ THE PAINT SITE IS DELETED, NOT REPOINTED — the ground goes back to the shell's warm cream.
+   The neutral palette painted here because `--ws-window` is computed at `:root` and the element that
+   paints it, `.ws-work`, is an ANCESTOR of this page: neither the token nor the paint was reachable
+   from inside. That reasoning was right and is exactly why removing the rule is the correct revert
+   rather than pointing it at `var(--ws-window)` — with nothing declared here the ancestor's ground
+   simply shows through, which is what every other page does and what keeps ONE value in ONE place.
+   Painting `var(--ws-window)` would have been a second consumer of a token that already had a
+   painter, and the two would agree until one moved.
+
+   ⚠️ THE REST OF THE SCALE STAYS. Cards, headers, rows, text and hairlines are as the palette test
+   left them; only the ground reverts. */
 
 /* ── §3 · ONE BUTTON, EVERYWHERE ON THIS PAGE ─────────────────────────────────────────────────
    ⚠️ ONE RULE, NOT A FAMILY. `.f12-btn-pri` / `.f12-btn-sec` / `.f12-act` were three treatments at
