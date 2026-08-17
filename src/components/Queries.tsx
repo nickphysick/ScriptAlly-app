@@ -1001,7 +1001,7 @@ export const Queries: React.FC<{
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   /* §4c — the confirm hangs off the Nudge button itself; the control row sits at the top of the
      pane, so it opens downward like every other menu in that row. */
-  const [nudgeAsk, setNudgeAsk] = useState<{ title: string; body: string } | null>(null);
+  const [nudgeAsk, setNudgeAsk] = useState<{ title: string; body: string; bar?: { pct: number; sentLabel: string; closesLabel: string } } | null>(null);
   const { triggerRef: nudgeTriggerRef, menuStyle: nudgeAskStyle } = useFixedMenu<HTMLButtonElement>(!!nudgeAsk);
   // Close every ribbon popover/modal whenever the reader moves to a different query.
   useEffect(() => { setIsMarkSentOpen(false); setIsNudgeOpen(false); setIsCloseMenuOpen(false); setIsTasksOpen(false); setIsMoreOpen(false); setNudgeAsk(null); }, [selectedQueryId]);
@@ -3706,7 +3706,7 @@ export const Queries: React.FC<{
                         now: Date.now(),
                         formatDate: exactDate,
                       });
-                      if (ask) setNudgeAsk({ title: ask.title, body: ask.body });
+                      if (ask) setNudgeAsk({ title: ask.title, body: ask.body, bar: ask.bar });
                       else setIsNudgeOpen(true);
                     }}
                   >
@@ -5323,7 +5323,18 @@ export const Queries: React.FC<{
       <div className="t-f12 qc-neutral">
         <div className="qc-nask" style={{ ...nudgeAskStyle, zIndex: 60 }} role="dialog" aria-label={nudgeAsk.title}>
           <div className="qc-nask-h">{nudgeAsk.title}</div>
-          <div className="qc-nask-b">{nudgeAsk.body}</div>
+          <div className="qc-nask-b">
+            {nudgeAsk.body}
+            {/* ⚠️ §4 · THE BAR ONLY WHERE THERE IS A WINDOW. `nudgeConfirm` omits it when the agency
+                states no response time — drawing an empty track there would invent the very fact
+                the sentence above is admitting does not exist. Same rule as the waiting state. */}
+            {nudgeAsk.bar && (
+              <div className="qc-naskw">
+                <div className="qc-naskw-t"><i style={{ width: `${nudgeAsk.bar.pct}%` }} /></div>
+                <div className="qc-naskw-f"><span>{nudgeAsk.bar.sentLabel}</span><span>{nudgeAsk.bar.closesLabel}</span></div>
+              </div>
+            )}
+          </div>
           <div className="qc-nask-f">
             <button type="button" className="qc-nask-x" onClick={() => setNudgeAsk(null)}>Cancel</button>
             <button type="button" className="qc-nask-go" onClick={() => { setNudgeAsk(null); setIsNudgeOpen(true); }}>Nudge anyway</button>

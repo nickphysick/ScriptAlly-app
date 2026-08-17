@@ -112,6 +112,17 @@ export interface AmbientStatus {
   eventLabel: string;
   /** Writer: days since that request (null when undated). */
   writerDaysAgo: number | null;
+  /**
+   * Is `expMs` a WINDOW SOMEONE STATED, or the house assumption?
+   *
+   * ⚠️ `expMs` IS ALMOST NEVER NULL, WHICH IS WHY THIS EXISTS. When nobody has stated a response
+   * time this derivation still produces an expected date from `STAGE_RESPONSE_WINDOWS` (8/12/12
+   * weeks) so the numbers have an anchor — and every surface that drew a bar or printed "expected
+   * by ~" off it was presenting the house guess as something the agency said. True when the AGENT
+   * states a window, or when the writer set an expected date themselves (`responseDeadline`); false
+   * when the figure is the assumption.
+   */
+  windowStated: boolean;
 }
 
 /** Derive the open-state numbers for a query, given the CTA engine's ball-holder + markKind. */
@@ -139,7 +150,7 @@ export function queryAmbientStatus(
 ): AmbientStatus {
   const base: AmbientStatus = {
     mode: "closed", nDays: 0, sentMs: null, expMs: null, widthPct: 0, overdue: false, daysOverdue: 0,
-    sendWhat: "resubmission", eventLabel: "", writerDaysAgo: null,
+    sendWhat: "resubmission", eventLabel: "", writerDaysAgo: null, windowStated: false,
   };
 
   if (ballHolder === "agent") {
@@ -150,14 +161,16 @@ export function queryAmbientStatus(
     const sentMs = sendIso ? getTime(sendIso) : NaN;
     if (!Number.isNaN(sentMs)) {
       const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
-      return { ...base, mode: "waiting", nDays, sentMs, expMs: sentMs + mDays * DAY, widthPct: Math.max(0, Math.min(1, nDays / mDays)) * 100, overdue: nDays > mDays, daysOverdue: Math.max(0, nDays - mDays) };
+      return { ...base, mode: "waiting", nDays, sentMs, expMs: sentMs + mDays * DAY, widthPct: Math.max(0, Math.min(1, nDays / mDays)) * 100, overdue: nDays > mDays, daysOverdue: Math.max(0, nDays - mDays), windowStated: !!(windowWeeks && windowWeeks > 0) };
     }
     // P4 — no stage send date to derive from: fall back to the stored responseDeadline OVERRIDE (a
     // legitimate user input — "Set an expected date"). Drives the readout's overdue/expected; without
     // a send anchor there is still no progress bar (sentMs null).
     const overrideMs = query.responseDeadline ? getTime(query.responseDeadline) : NaN;
     if (!Number.isNaN(overrideMs)) {
-      return { ...base, mode: "waiting", sentMs: null, expMs: overrideMs, overdue: now > overrideMs, daysOverdue: Math.max(0, Math.floor((now - overrideMs) / DAY)) };
+      /* ⚠️ AN OVERRIDE IS A STATED WINDOW — the writer typed the date themselves through "Set an
+         expected date". It is not the house assumption, so it earns a bar. */
+      return { ...base, mode: "waiting", sentMs: null, expMs: overrideMs, overdue: now > overrideMs, daysOverdue: Math.max(0, Math.floor((now - overrideMs) / DAY)), windowStated: true };
     }
     // Undated import, no override — the pill reads "waiting" but there is no bar/date.
     return { ...base, mode: "waiting", sentMs: null, expMs: null };

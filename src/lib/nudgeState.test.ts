@@ -89,6 +89,11 @@ describe("§4c · the confirm states facts and stops", () => {
     expect(c.kind).toBe("inside-window");
     expect(c.title).toBe("Nudge before their window closes?");
     expect(c.body).toBe("The Marsh Agency state 8 weeks. That window closes on 6 July — 5 weeks from now.");
+    /* §4 — the bar exists because there is a window to measure against, filled to the elapsed part */
+    expect(c.bar, "a stated window drew no bar").toBeTruthy();
+    expect(Math.round(c.bar!.pct), "21 of 56 days is 37.5%").toBe(38);
+    expect(c.bar!.sentLabel).toBe("Sent 11 May");
+    expect(c.bar!.closesLabel).toBe("Closes 6 July");
   });
 
   /* ⚠️ NULL MEANS PROCEED — a confirm with nothing left to state is friction, not information. */
@@ -104,11 +109,15 @@ describe("§4c · the confirm states facts and stops", () => {
     expect(c.kind).toBe("no-window");
     expect(c.title).toBe("Nudge?");
     expect(c.body).toBe("The Marsh Agency do not state a response time. You sent this 5 weeks ago.");
+    /* ⚠️ NO BAR — a track for a window that does not exist would invent the fact the sentence
+       beside it is admitting the record does not hold. */
+    expect(c.bar, "a bar was drawn for an agency that states no window").toBeUndefined();
   });
 
   it("with neither a window nor a send date it states only what it has", () => {
     const c = nudgeConfirm({ agent: {}, sentMs: null, now: NOW, formatDate: day })!;
     expect(c.body).toBe("The agency do not state a response time.");
+    expect(c.bar).toBeUndefined();
     expect(c.body, "it invented a duration from nothing").not.toMatch(/\d/);
   });
 
@@ -117,6 +126,8 @@ describe("§4c · the confirm states facts and stops", () => {
     const c = nudgeConfirm({ agent: MARSH, sentMs: null, now: NOW, formatDate: day })!;
     expect(c.kind).toBe("inside-window");
     expect(c.body).toContain("no send date recorded");
+    /* a proportion needs both ends: a window with no send has nothing to fill from */
+    expect(c.bar, "a bar was drawn with no send date to measure from").toBeUndefined();
   });
 
   it("no confirm anywhere carries a verdict", () => {

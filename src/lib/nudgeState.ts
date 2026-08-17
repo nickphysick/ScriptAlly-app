@@ -83,6 +83,16 @@ export interface NudgeConfirm {
   kind: "inside-window" | "no-window";
   title: string;
   body: string;
+  /**
+   * §4 — the window drawn, and ONLY where there is a window to draw.
+   *
+   * ⚠️ ABSENT IS THE ANSWER, NOT AN EMPTY BAR. A track rendered for an agency that states no
+   * response time would be inventing the fact the sentence beside it is admitting does not exist —
+   * and it is the same rule the timeline's waiting state now obeys: a bar exists only where there
+   * is something to measure against. It is also absent when a window is stated but no send date is
+   * recorded, because a proportion needs both ends.
+   */
+  bar?: { pct: number; sentLabel: string; closesLabel: string };
 }
 
 export interface ConfirmInput {
@@ -121,6 +131,11 @@ export function nudgeConfirm({ agent, sentMs, now, formatDate }: ConfirmInput): 
       title: "Nudge before their window closes?",
       body: `${who.name} ${agree(who, "state", "states")} ${weeks} week${weeks === 1 ? "" : "s"}. `
         + `That window closes on ${formatDate(closesMs)} — ${elapsedPhrase(daysBetween(now, closesMs))} from now.`,
+      bar: {
+        pct: Math.max(0, Math.min(100, ((now - sentMs) / (closesMs - sentMs)) * 100)),
+        sentLabel: `Sent ${formatDate(sentMs)}`,
+        closesLabel: `Closes ${formatDate(closesMs)}`,
+      },
     };
   }
 

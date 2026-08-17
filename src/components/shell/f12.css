@@ -1249,6 +1249,12 @@
 .qc-nask::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--qc-card-border); }
 .qc-nask-h { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; color: var(--ink); padding: 16px 18px 0; }
 .qc-nask-b { font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); padding: 9px 18px 14px; }
+/* ⚠️ THE SAME SAGE FILL AND THE SAME 5px TRACK AS THE TIMELINE'S WAITING BAR — the two places that
+   talk about a window look like each other, which is the ref's argument for drawing it at all. */
+.qc-naskw { margin-top: 11px; }
+.qc-naskw-t { height: 5px; border-radius: 3px; background: var(--n2); overflow: hidden; }
+.qc-naskw-t i { display: block; height: 100%; background: var(--qc-ring); border-radius: 3px; }
+.qc-naskw-f { display: flex; justify-content: space-between; margin-top: 6px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-variant-numeric: tabular-nums; }
 .qc-nask-f { display: flex; gap: 8px; justify-content: flex-end; padding: 0 18px 16px; }
 .qc-nask-x, .qc-nask-go { font-family: "Inter", sans-serif; font-size: 12.5px; height: 36px; padding: 0 15px; border-radius: 9px; cursor: pointer; border: 1px solid transparent; background: transparent; color: var(--ink-2); }
 .qc-nask-x:hover { background: var(--paper); border-color: var(--btn-line); }

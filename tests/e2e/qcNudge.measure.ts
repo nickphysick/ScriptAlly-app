@@ -83,6 +83,30 @@ test("§4c — a nudge inside the window asks first, and states facts", async ({
       continue;
     }
     const text = (await ask.innerText()).replace(/\s+/g, " ").trim();
+    /* §4 — the bar, and whether it is drawn at all */
+    const bar = await ask.evaluate((el) => {
+      const t = el.querySelector<HTMLElement>(".qc-naskw-t i");
+      const f = el.querySelector<HTMLElement>(".qc-naskw-f");
+      if (!t) return null;
+      const track = t.parentElement!.getBoundingClientRect();
+      return {
+        pct: Math.round((t.getBoundingClientRect().width / track.width) * 100),
+        fill: getComputedStyle(t).backgroundColor,
+        labels: (f?.textContent || "").trim(),
+      };
+    });
+    console.log(`  bar: ${bar ? `${bar.pct}% ${bar.fill} · ${bar.labels}` : "(none)"}`);
+    /* ⚠️ THE SENTENCE DECIDES WHETHER A BAR IS HONEST — a window stated means a window to draw, and
+       "do not state a response time" means there is nothing to measure against. */
+    const statesWindow = /state[s]? \d+ week/.test(text);
+    if (statesWindow) {
+      expect(bar, "a stated window drew no bar").not.toBeNull();
+      expect(bar!.pct, "the bar is empty or overfull").toBeGreaterThan(0);
+      expect(bar!.pct).toBeLessThanOrEqual(100);
+      expect(bar!.labels, "the bar states neither end").toMatch(/Sent .*Closes /i);
+    } else {
+      expect(bar, "a bar was drawn for an agency that states no window").toBeNull();
+    }
     const geo = await ask.evaluate((el) => {
       const r = el.getBoundingClientRect();
       const edge = getComputedStyle(el, "::before");

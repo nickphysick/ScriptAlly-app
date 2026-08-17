@@ -625,7 +625,15 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
            would answer the same question through two filters, which is how the headline and the
            history line below it come to disagree about how many nudges there have been. */
         const nudgeN = nudges.length;
-        const dated = waiting.sentMs != null && waiting.expMs != null; // both present → a progress bar
+        /**
+         * ⚠️ §4 · NO BAR WITHOUT A WINDOW TO MEASURE AGAINST. `expMs` is almost never null: when
+         * nobody has stated a response time, `queryAmbientStatus` still derives one from the house
+         * 8/12/12-week assumption so the numbers have an anchor. Every bar drawn off that was
+         * presenting the app's guess as something the agency had said — including "EXPECTED BY ~"
+         * beneath it, in a date nobody gave. `windowStated` is true only when the AGENT states a
+         * window or the writer set an expected date themselves.
+         */
+        const dated = waiting.sentMs != null && waiting.expMs != null && waiting.windowStated;
         const hasExpected = waiting.expMs != null;                     // P4 — derived OR overridden
         // P4 — derived bar geometry (no magic percentages): within ends at expected (no marker);
         // overdue spans sent→now with the expected marker + hatch; grace spans sent→reminder with a
@@ -682,9 +690,12 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         /* the agent's stated window, from the agent — falling back to nothing rather than to an
            invented number when they have not stated one */
         const statedWeeks = (agent as any)?.responseTimeWeeks as number | undefined;
+        /* ⚠️ AND SO DOES THE WINDOW LINE. Its fallback printed "Expected by ~{date}" off `expMs`,
+           which is the house assumption whenever nobody has stated anything — a date presented as
+           an expectation that no one set. */
         const windowLine = typeof statedWeeks === "number" && statedWeeks > 0
           ? `${agent?.name?.split(" ")[0] || "They"} states ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}`
-          : waiting.expMs != null ? `Expected by ~${fmtShort(waiting.expMs)}` : null;
+          : waiting.windowStated && waiting.expMs != null ? `Expected by ~${fmtShort(waiting.expMs)}` : null;
 
         return (
           <TlProjection
@@ -783,10 +794,16 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                       {clockIcon}
                       <span>No reply{nudgeN > 0 ? ` · nudged ${nudgeN === 1 ? "once" : `${nudgeN}×`}` : ""}</span>
                     </div>
-                    <div className="tl-noreply-f">
-                      {statedWeeks ? `${agent?.agency?.trim() || agent?.name?.split(" ")[0] || "They"} state ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}. ` : ""}
-                      {waiting.expMs != null ? `That window closed in ${new Date(waiting.expMs).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}.` : ""}
-                    </div>
+                    {/* ⚠️ AND THE SENTENCE OBEYS THE SAME RULE AS THE BAR. "That window closed in
+                        March" was gated on `expMs`, which the house assumption supplies — so a card
+                        could name the month an agency's window closed when the agency had never
+                        stated one. Both clauses now hang on the window actually existing. */}
+                    {waiting.windowStated && (
+                      <div className="tl-noreply-f">
+                        {statedWeeks ? `${agent?.agency?.trim() || agent?.name?.split(" ")[0] || "They"} state ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}. ` : ""}
+                        {waiting.expMs != null ? `That window closed in ${new Date(waiting.expMs).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}.` : ""}
+                      </div>
+                    )}
                     <div className="tl-noreply-c">Many agencies treat silence as a pass.</div>
                     {/**
                       * ⚠️ §5c · THE QUIET LINK IS SUPERSEDED, AND ITS FAULT WAS WHEN IT APPEARED.
