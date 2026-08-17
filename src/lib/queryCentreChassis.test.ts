@@ -799,8 +799,16 @@ describe("§2 · the reading pane", () => {
        narrow one. What changed is that a PROPORTION made it a different width at every viewport
        (measured 245 against the list's 334), so the work area's two narrow columns never matched.
        It is `--listw` now — the same token the list reads. */
-    expect(code, "the pane's right column stopped reading the list's own token")
-      .toContain('gridTemplateColumns: "minmax(0, 1fr) var(--listw)"');
+    /**
+     * ⚠️ 60/40 (§3), AND IT SUPERSEDES BOTH EARLIER EXPRESSIONS OF THE SAME IDEA. `1.15fr .85fr`
+     * said "Tracking has a story, the other two are inventories" as a tuning nobody could read;
+     * `--listw` said it by making the stack the list's twin, which fixed a real fault (a proportion
+     * of the leftover measured 245 against the list's 334) at the cost of tying two unrelated
+     * columns together. The ratio is stated directly now — the same argument, finally as a number
+     * that says what it means.
+     */
+    expect(code, "the pane's split is not the stated 60/40")
+      .toContain('gridTemplateColumns: "60fr 40fr"');
     expect(code, "the pane's cards took an inset again — they would leave the column's verticals")
       .toContain("gap: 16, padding: 0,");
     /* ⚠️ AND THE GAP ABOVE THEM IS THE PANE COLUMN'S `gap`, not this grid's padding. The two look

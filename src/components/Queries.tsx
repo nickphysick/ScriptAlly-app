@@ -4242,12 +4242,14 @@ export const Queries: React.FC<{
                   * now, so it has to come from that stack filling its own column. Browser-measured
                   * at three widths — a stacked card trailing into white is the failure this replaces.
                   */}
-                {/* ⚠️ THE RIGHT COLUMN IS `--listw`, THE SAME TOKEN THE LIST READS (alignment
-                    amendment). It was `1.15fr 0.85fr`, which made the pane's narrow column a
-                    PROPORTION of whatever width was left — measured 245px against the list's 334,
-                    so the work area's two narrow columns were two different widths at every
-                    viewport and neither could line up with the other. One token, two consumers, and
-                    the two match at 1180 as exactly as they do at 1680.
+                {/* ⚠️ 60/40 (§3), REPLACING `--listw` ON THE RIGHT COLUMN — and that supersedes the
+                    alignment amendment's "the two narrow columns are one figure". That rule was
+                    real and its reason was good: `1.15fr .85fr` made the pane's narrow column a
+                    proportion of whatever was left, so it measured 245 against the list's 334 and
+                    the two never lined up. Pinning it to `--listw` fixed that by making them the
+                    same width. The ratio is now specified directly instead, so the stack is 40% of
+                    the pane rather than the list's twin — a stated proportion, at every viewport,
+                    which is what the amendment was reaching for by another route.
 
                     ⚠️ AND NO SIDE PADDING. It carried `16px 20px 20px`, which inset the cards from
                     the pane column's own edges — the same fault as the hero's margin, and the
@@ -4255,7 +4257,7 @@ export const Queries: React.FC<{
                     left. The top 16 stays: it is the CARD GAP between the header plate and the
                     cards, the same 16 the grid uses between them. The bottom is the work area's,
                     paid once by the row. */}
-                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) var(--listw)", gap: 16, padding: 0, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "60fr 40fr", gap: 16, padding: 0, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
                   <PaneCard
