@@ -61,7 +61,7 @@ describe("re-entry is a no-op, from every entry point", () => {
        on the toolbar's button as well. */
     expect(queries.match(/disabled: creating,/g)?.length ?? 0).toBe(1);
     expect(queries, "the toolbar's Log button stays live while a draft is open")
-      .toMatch(/className="qc-logq"[\s\S]{0,40}disabled=\{creating\}/);
+      .toMatch(/className="qc-btn qc-logq"[\s\S]{0,40}disabled=\{creating\}/);
   });
 });
 

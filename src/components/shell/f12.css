@@ -1423,16 +1423,6 @@
 .qc-sp { flex: 1; }
 /* ⚠️ THE SUB-COUNT IS AN `<i>` INSIDE THE COUNT, not a sibling — the two are one statement about
    one set ("25 queries, 16 of them awaiting"), and a sibling would be free to wrap away from it. */
-/* ══ §2 · LOG NEW QUERY ═════════════════════════════════════════════════════════════════════
- * ⚠️ NEAR-BLACK ON PINK, NOT BURGUNDY ON PINK. Burgundy is the outgoing-status colour in the dot
- * system; a primary action wearing it would borrow a word that already means something else. The
- * plus takes the same ink as the label so the two read as one control.
- * ⚠️ AND IT IS THE SAME BOX AS THE TOOLBAR'S BUTTONS — `--btn-h`, `--btn-r` — so the two columns'
- * controls sit on one line. Only the GROUND differs, which is the whole of the emphasis. */
-.qc-logq { display: inline-flex; align-items: center; gap: 8px; flex: none; height: var(--btn-h); padding: 0 17px; border-radius: var(--btn-r); border: var(--btn-rim) solid var(--qc-rim-pink); background: var(--pink); font-family: "Inter", sans-serif; font-size: 13px; font-weight: 500; color: var(--ink); cursor: pointer; }
-.qc-logq svg { width: 15px; height: 15px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; }
-.qc-logq:hover { border-color: var(--pink-i); }
-.qc-logq:disabled { opacity: 0.5; cursor: default; }
 .qc-count { font-family: var(--f12-serif); font-size: 18px; font-weight: 500; line-height: 1; color: var(--ink); white-space: nowrap; }
 .qc-count i { font-style: normal; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.12em; color: var(--faint); margin-left: 9px; }
 /* The pane cell's label: whose verbs these are. Mono, quiet, and never a heading — the pane below
@@ -1655,6 +1645,18 @@
  * One colour, one job, the same rule §1 applies to sage.
  */
 .qc-btn-pri { border-width: calc(var(--btn-rim) * 2); }
+/* ══ §2 · LOG NEW QUERY — A MODIFIER, PLACED AFTER THE BASE IT MODIFIES ═════════════════════
+ * ⚠️ SOURCE ORDER IS THE MECHANISM, and getting it wrong was silent: the modifier sat 200 lines
+ * ABOVE `.qc-btn`, so at equal specificity the base's `background: var(--white)` won and the pink
+ * button rendered white. Nothing errored — the browser reported the button as
+ * `rgb(255,255,255)`, which is the fault this repo's "the page's sheet is later in the bundle"
+ * note describes, one file in.
+ * ⚠️ RAISING SPECIFICITY WOULD HAVE BEEN THE WRONG FIX: it makes one contribution REPLACE the
+ * other rather than follow it, which is the same bug pointing the other way.
+ */
+.qc-logq { border-color: var(--qc-rim-pink); background: var(--pink); color: var(--ink); }
+.qc-logq:hover { background: var(--pink); border-color: var(--pink-i); }
+.qc-logq svg { stroke-width: 1.9; }
 .qc-btn-danger { color: var(--qc-acc-late); }
 .qc-btn-danger:hover { background: var(--qc-acc-late-t); border-color: var(--qc-acc-late-b); }
 /* ⚠️ DISABLED IS A LIGHTER BORDER AND A MUTED ICON — NEVER ABSENCE, and never a change of BOX.
@@ -2394,14 +2396,49 @@
    "92,000 WOR…", a truncated TITLE next to a truncated qualifier. The name is the subject of its
    row, so it holds its width and the meta ellipsises first; `max-width: 100%` is what stops a very
    long name overflowing the row instead of clipping inside it. */
-.qc-mname { font-family: var(--f12-serif); font-size: 23px; font-weight: 500; line-height: 1.15; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 100%; flex: 0 0 auto; }
-/* ⚠️ `--lg` IS RETIRED (§4), REVERSING THE EARLIER PACK'S §2. The argument for it was sound and the
-   MECHANISM was not: type carrying the hierarchy survives neither a long title nor a short one nor
-   any later change to the scale, and it made the two names differ in the one property the card had
-   just been built to say they shared. The card differentiates instead — a rule between the rows and
-   a disc on one leader — and both hold whatever the words are. */
-button.qc-mname { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
-button.qc-mname:hover { color: var(--burg); }
+/**
+ * ⚠️ 2a · 1.15 → 1.35 AND A PIXEL OF BOTTOM PADDING — A LINE-HEIGHT BUG, NOT A DESIGN PROBLEM.
+ * Playfair's descenders need more room than 1.15 gives them at this size: measured, the name's box
+ * was 26.4px for a 23px face, and the `y` and `p` in a title like "Murphy's" fell outside it. The
+ * row is `align-items: baseline` and the card has a clipping layer, so what overflowed was cut
+ * rather than merely overlapping.
+ * ⚠️ AND IT IS FIXED BEFORE THE LINK TREATMENT (2c) ON PURPOSE. An underline sits BELOW the
+ * baseline, so applying it first would have made the clipping worse and looked like a new bug
+ * introduced by the link rather than an old one exposed by it.
+ * ⚠️ `overflow: hidden` STAYS — it is what makes the ellipsis work — so the room has to come from
+ * the line box rather than from letting the text escape.
+ */
+.qc-mname { font-family: var(--f12-serif); font-size: 23px; font-weight: 500; line-height: 1.35; padding-bottom: 1px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 100%; flex: 0 0 auto; }
+/**
+ * ⚠️ 2b · THE SIZE STEP COMES BACK, ON THE MANUSCRIPT — 19 against the agent's 23 — and this
+ * REVERSES the structural pack's §4, which removed it. That pack's reasoning was that type carrying
+ * the hierarchy survives neither a long title nor a later change to the scale, and it was right
+ * about type carrying it ALONE. It is not alone now: the icon discs say which KIND of thing each
+ * row is, so the size is free to say which is the SUBJECT. Two devices, two jobs — which is what
+ * makes this a restoration rather than a return to the fault.
+ * ⚠️ AND IT IS THE MANUSCRIPT THAT STEPS DOWN, not the agent that steps up. The row you clicked in
+ * the list was an agent; the book is the constant across every query in this view.
+ * ⚠️ ONE DECLARATION, so "same face, same weight, same ink" stays structural. If this modifier ever
+ * carries a second property the two names have stopped being the same type.
+ */
+.qc-mname--ms { font-size: 19px; }
+button.qc-mname { background: none; border: 0; padding: 0 0 1px; cursor: pointer; text-align: left; }
+/**
+ * ⚠️ 2c · THE TITLE IS THE CARD'S ONE NAVIGATION, and it says so only when reached for. No
+ * underline at rest — a permanent one would make the card look like a form of links — and one on
+ * hover AND on focus, so a keyboard reaches the same affordance a pointer does.
+ * ⚠️ THE INK DOES NOT CHANGE. Burgundy and italic were both tried and rejected: burgundy is the
+ * outgoing-status colour, and on a card whose only colour is the status mark a second one reads as
+ * a second status. The underline is the whole of the signal.
+ * ⚠️ AND IT SITS BELOW THE BASELINE IN THE RIM TONE, which is why 2a had to land first: an
+ * underline on a clipped descender is two faults wearing one appearance.
+ */
+button.qc-mname:hover, button.qc-mname:focus-visible {
+  text-decoration: underline;
+  text-decoration-color: var(--qc-rim-h);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
 .qc-msec { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
 
 /* ── the two chip families ───────────────────────────────────────────────────────────────────

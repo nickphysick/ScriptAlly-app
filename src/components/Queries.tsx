@@ -3582,7 +3582,7 @@ export const Queries: React.FC<{
                 one emphasis, spent on the one verb that adds rather than ends. */}
             <button
               type="button"
-              className="qc-logq"
+              className="qc-btn qc-logq"
               disabled={creating}
               onClick={() => onNavigate?.("queries", "Log a query")}
             >
@@ -4545,9 +4545,15 @@ export const Queries: React.FC<{
                                   It was burgundy inside "What you sent" and burgundy is the outgoing
                                   status colour; on a card whose only colour is the status mark, a
                                   second burgundy would read as a second status. */}
+                              {/* ⚠️ 2b/2c · SMALLER, AND THE CARD'S ONE NAVIGATION. The size step
+                                  returns because the icon discs now say which KIND each row is, so
+                                  the type is free to say which is the SUBJECT — two devices, two
+                                  jobs. It stays a real <button>, so it is in tab order and takes
+                                  the app's focus ring; the underline appears on hover and on focus
+                                  and never at rest. */}
                               {onNavigate ? (
-                                <button type="button" className="qc-mname" onClick={() => onNavigate("manuscripts")} title="Open your manuscripts">{activeMs.title}</button>
-                              ) : <span className="qc-mname">{activeMs.title}</span>}
+                                <button type="button" className="qc-mname qc-mname--ms" onClick={() => onNavigate("manuscripts")} title="Open your manuscripts">{activeMs.title}</button>
+                              ) : <span className="qc-mname qc-mname--ms">{activeMs.title}</span>}
                               {/* each half omits itself: no genre must not print a stray interpunct,
                                   and no word count must not print "0 words" — zero words is a claim */}
                               {(!!activeMs.genre || !!activeMs.wordCount) && (

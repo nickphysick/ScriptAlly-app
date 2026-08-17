@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — button sets & manuscript name</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--sage-fr:#dfe6dd;--pinkc:#f8e7dc;--pinkb:#ebcfc2;
+--sh-1:0 1px 2px rgba(40,35,30,.06);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+.sheet{max-width:1420px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.set{display:flex;align-items:center;gap:10px;padding:13px 0;flex-wrap:wrap;}
+.set+.set{box-shadow:inset 0 1px 0 var(--line);}
+.tag{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;width:120px;flex:none;}
+.sp{flex:1;min-width:14px;}
+button{font-family:inherit;cursor:pointer;border:0;display:inline-flex;align-items:center;gap:8px;}
+button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;}
+
+/* ---- shared sizing: every set is the same height ---- */
+.b{font-size:13px;padding:0 16px;height:42px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);}
+.b.sq{padding:0 12px;}
+.b.mut{color:#c0bbb3;}
+
+/* 1 · rim-weight primary (current) */
+.s1 .pri{box-shadow:inset 0 0 0 1.6px var(--ink2);color:var(--ink);font-weight:500;}
+/* 2 · pink primary */
+.s2 .pri{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+/* 3 · ink primary */
+.s3 .pri{background:#22201d;box-shadow:none;color:#faf7f3;font-weight:500;}
+/* 4 · sage primary */
+.s4 .pri{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));box-shadow:inset 0 0 0 1px var(--sage-br);color:#20261f;font-weight:500;}
+/* 5 · borderless, hover fills */
+.s5 .b{background:transparent;box-shadow:none;}
+.s5 .b:hover{background:#fff;box-shadow:inset 0 0 0 1px var(--oat);}
+.s5 .pri{background:#fff;box-shadow:inset 0 0 0 1.6px var(--ink2);color:var(--ink);font-weight:500;}
+/* 6 · segmented closers */
+.s6 .grp{display:inline-flex;background:#fff;border-radius:10px;box-shadow:inset 0 0 0 1px var(--oat);overflow:hidden;}
+.s6 .grp .b{border-radius:0;box-shadow:none;}
+.s6 .grp .b+.b{box-shadow:inset 1px 0 0 var(--line);}
+.s6 .pri{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+/* 7 · pill radius */
+.s7 .b{border-radius:21px;}
+.s7 .pri{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+/* 8 · lifted */
+.s8 .b{box-shadow:inset 0 0 0 1px var(--line),var(--sh-1);}
+.s8 .pri{background:#fff;box-shadow:inset 0 0 0 1.6px var(--ink2),var(--sh-1);color:var(--ink);font-weight:500;}
+/* 9 · icon-only destructive */
+.s9 .pri{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.s9 .del{padding:0 12px;color:var(--burg);}
+/* 10 · sage-rimmed, matching the card */
+.s10 .b{box-shadow:inset 0 0 0 1px var(--sage-fr);}
+.s10 .pri{box-shadow:inset 0 0 0 1.6px var(--sage-br);color:var(--ink);font-weight:500;}
+
+/* ---- manuscript-name treatments ---- */
+.card{position:relative;background:#fff;border-radius:12px;padding:18px 22px;margin-bottom:11px;}
+.card::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;box-shadow:inset 0 0 0 1px var(--sage-br);}
+.row{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;align-items:start;}
+.lead{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.lead.ag{background:var(--pinkc);}
+.lead svg{width:18px;height:18px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke:var(--burg);}
+.lead.ms svg{stroke:var(--faint);}
+.l1{display:flex;align-items:baseline;gap:11px;}
+/* the fix: room for descenders */
+.nm{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;line-height:1.35;padding-bottom:1px;}
+.meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+.ms .row+.row{margin-top:12px;padding-top:12px;box-shadow:inset 0 1px 0 var(--line);}
+.opt{display:flex;align-items:baseline;gap:12px;padding:9px 0;}
+.opt .tag{width:150px;}
+.n2{font-family:'Playfair Display',serif;font-size:23px;font-weight:500;line-height:1.35;color:var(--ink);cursor:pointer;}
+.u1{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px;text-decoration-color:var(--oat);}
+.u2{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:5px;text-decoration-color:#c9c3ba;}
+.u3{box-shadow:inset 0 -1px 0 var(--sage-br);}
+.u4{text-decoration:none;} .u4:hover{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--oat);}
+.u5{color:var(--burg);text-decoration:underline;text-underline-offset:4px;text-decoration-color:#dfc0b4;}
+.u6::after{content:' ↗';font-size:14px;color:var(--faint);font-family:'Inter',sans-serif;}
+.u7{background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:8px;padding:2px 10px;}
+.legend{max-width:1420px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.7;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>Button sets — every set at one height (42px), same label size, same icon size</h4>
+<div class="sheet">
+  <div class="set s1"><span class="tag">1 · Rim weight</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></div>
+
+  <div class="set s2"><span class="tag">2 · Pink primary</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></div>
+
+  <div class="set s3"><span class="tag">3 · Ink primary</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></div>
+
+  <div class="set s4"><span class="tag">4 · Sage primary</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></div>
+
+  <div class="set s5"><span class="tag">5 · Borderless</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></div>
+
+  <div class="set s6"><span class="tag">6 · Segmented closers</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <span class="grp"><button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></span></div>
+
+  <div class="set s7"><span class="tag">7 · Pill radius</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></div>
+
+  <div class="set s8"><span class="tag">8 · Lifted</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></div>
+
+  <div class="set s9"><span class="tag">9 · Icon-only delete</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button>
+    <button class="b del sq" title="Delete"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 13h6l1-13"/></svg></button></div>
+
+  <div class="set s10"><span class="tag">10 · Sage rims</span>
+    <button class="b pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b mut">Nudge</button><span class="sp"></span>
+    <button class="b">Mark closed</button><button class="b sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button><button class="b">Delete</button></div>
+</div>
+
+<h4>The clipping fix, in place</h4>
+<div class="sheet">
+  <div class="card ms">
+    <div class="row"><span class="lead ag"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+      <div><div class="l1"><span class="nm">Eleanor Whitfield</span><span class="meta">Greenfield Literary</span></div></div></div>
+    <div class="row"><span class="lead ms"><svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z"/><path d="M5 17.5h13.5"/><path d="M9 9h7"/></svg></span>
+      <div><div class="l1"><span class="nm u1">Murphy's Day Out</span><span class="meta">Thriller · 50,000 words</span></div></div></div>
+  </div>
+</div>
+
+<h4>Manuscript name — link treatments</h4>
+<div class="sheet">
+  <div class="opt"><span class="tag">A · Solid underline</span><span class="n2 u1">Murphy's Day Out</span></div>
+  <div class="opt"><span class="tag">B · Dotted underline</span><span class="n2 u2">Murphy's Day Out</span></div>
+  <div class="opt"><span class="tag">C · Sage rule beneath</span><span class="n2 u3">Murphy's Day Out</span></div>
+  <div class="opt"><span class="tag">D · Underline on hover</span><span class="n2 u4">Murphy's Day Out</span></div>
+  <div class="opt"><span class="tag">E · Burgundy + underline</span><span class="n2 u5">Murphy's Day Out</span></div>
+  <div class="opt"><span class="tag">F · Arrow suffix</span><span class="n2 u6">Murphy's Day Out</span></div>
+  <div class="opt"><span class="tag">G · Chip</span><span class="n2 u7">Murphy's Day Out</span></div>
+</div>
+
+<div class="legend">
+  <b>The clipping was a line-height bug, not a design problem.</b> Playfair's descenders — the <i>y</i> and <i>p</i> in <i>Murphy's</i> — need more room than a 1.14 line-height gives them, and the row's <code>align-items: baseline</code> plus the card's clipping layer cut what overflowed. Fixed here at <b>1.35 with 1px of bottom padding</b>. Any underline makes this worse, so it has to be fixed before a link treatment goes on.<br><br>
+  <b>Button alignment.</b> Every set above is one height (42px), one label size, one glyph size — including <i>Log new query</i>, which is the thing currently out of step. <b>The rule to hold: one height for every button in the bar, set by the tallest thing in it, and the pink button is not an exception.</b><br><br>
+  <b>On the sets.</b> 1 is what is deployed. 2 puts pink on <i>Record response</i>, which now conflicts with <i>Log new query</i> — two pink primaries on one page is one too many. 3 reads strong but reintroduces the near-black pill we removed from the band. 4 ties the primary to the card headers. 6 groups the three closing verbs into one segmented control, which is the only set that shows the left/right split structurally rather than by gap. 9 reduces <i>Delete</i> to an icon, the cheapest way to stop the destructive verb being the widest thing on the right. <b>My picks: 6 for the structure, or 9 if you want the destructive verb quieter — and 1's rim-weight primary in either case.</b><br><br>
+  <b>On the manuscript name.</b> A hyperlink is right — it goes somewhere, and nothing else in the card does. <b>D is my pick:</b> underline on hover keeps the two names identical at rest, which is the whole point of the icon-disc treatment, and reveals the affordance exactly when it is relevant. A is the honest always-visible version if you would rather it be discoverable without hovering. E is out — burgundy on the title was already tried and rejected. G stops it being a name at all.
+</div>
+</body></html>
