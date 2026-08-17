@@ -107,8 +107,13 @@ describe("Queries hub · the header block sits in the SHARED content column", ()
     const code = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
     const body = code(block(".f12-body"));
     expect(body, "the frame went back to its own wider cap").not.toContain("var(--maxw)");
-    expect(body, "a cap turns the margin back into a share of the surplus")
-      .not.toContain("max-width:");
+    /* ⚠️ INVERTED BY §4. The old clause — "a cap turns the margin into a share of the surplus" —
+       was an argument against capping while the shell owned the width; the cap is now the stated
+       behaviour, and its margin being a share of the surplus is exactly what centring is. What
+       survives is that the figure is the SHARED token the Dashboard reads, not one invented here:
+       measured at 2560, both pages stop at 1660 with equal margins. */
+    expect(body, "the cap is not the shared token").toContain("max-width: var(--work-max)");
+    expect(body, "the frame invented a cap of its own").not.toMatch(/max-width:\s*\d/);
     expect(body, "the frame re-declared a side inset — the scroll row already pays the gutter")
       .not.toContain("--sa-col-gut");
     expect(body, "the frame stopped filling the row").toContain("width: 100%");

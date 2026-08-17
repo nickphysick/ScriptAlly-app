@@ -154,6 +154,9 @@
    * page it would be unreachable from the shell; declared twice it would drift. Query Centre's
    * `.qc-neutral` maps this page's surfaces onto these steps and declares none of them.
    */
+  /* ⚠️ THE WORKING AREA'S CAP, READ BY THE DASHBOARD AND BY QUERY CENTRE. It was a literal in
+     oneScreen.css; two pages agreeing by hand is two pages that agree until one is edited. */
+  --work-max: 1660px;
   --n0: #ffffff;   /* panels, cards, plates — the only pure white     L* 100.0 */
   --n1: #fef8f0;   /* a page ground, one step below white             L*  97.8 */
   --n2: #f5f0e8;   /* a card header                                   L*  95.0 */

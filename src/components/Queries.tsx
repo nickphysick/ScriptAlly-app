@@ -4242,7 +4242,16 @@ export const Queries: React.FC<{
                   * now, so it has to come from that stack filling its own column. Browser-measured
                   * at three widths — a stacked card trailing into white is the failure this replaces.
                   */}
-                {/* ⚠️ 60/40 (§3), REPLACING `--listw` ON THE RIGHT COLUMN — and that supersedes the
+                {/* ⚠️ THE TWO TERMS AFTER `60%` ARE BOTH DERIVED, AND NEITHER IS A NUDGE (§3 + §4).
+                    `- 9.6px` is the column gap's share: 60% of the PANE overshoots 60% of the space
+                    the two columns actually divide by 0.6 × 16px, so the ratio is exact rather than
+                    approximately right. `- reclaim × 0.2` is what makes the expansion EQUAL: the
+                    pane receives two thirds of the reclaim, and 60% of two thirds is 1.2 shares —
+                    so a fifth of one share comes back off to leave each column with exactly one.
+                    Take either term away and the split still looks fine; it is simply no longer the
+                    thing it claims to be.
+
+                    ⚠️ 60/40 (§3), REPLACING `--listw` ON THE RIGHT COLUMN — and that supersedes the
                     alignment amendment's "the two narrow columns are one figure". That rule was
                     real and its reason was good: `1.15fr .85fr` made the pane's narrow column a
                     proportion of whatever was left, so it measured 245 against the list's 334 and
@@ -4257,7 +4266,7 @@ export const Queries: React.FC<{
                     left. The top 16 stays: it is the CARD GAP between the header plate and the
                     cards, the same 16 the grid uses between them. The bottom is the work area's,
                     paid once by the row. */}
-                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "60fr 40fr", gap: 16, padding: 0, flex: 1, minHeight: 0, alignItems: "stretch" }}>
+                <div className="qp-cols" style={{ display: "grid", gridTemplateColumns: "calc(60% - 9.6px - var(--qc-reclaim) * 0.2) minmax(0, 1fr)", gap: 16, padding: 0, flex: 1, minHeight: 0, alignItems: "stretch" }}>
 
                   {/* ── Sub-card 1: Tracking ── */}
                   <PaneCard

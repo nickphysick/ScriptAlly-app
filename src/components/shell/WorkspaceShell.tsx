@@ -289,7 +289,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const name = currentUser?.name ?? "";
 
   return (
-    <div className="ws-app">
+    /* ⚠️ THE COLLAPSED STATE IS ANNOUNCED ON THE APP, NOT ONLY ON THE PANEL. `sb-collapsed` lives on
+       `.ws-panel`, which is a SIBLING of the workspace — so no page can see it from a descendant
+       selector, and a page that wants to redistribute the width the panel gave back has nothing to
+       key on. Same boolean, second mount, on the common ancestor. */
+    <div className={`ws-app${sidebar.collapsed ? " sb-shut" : ""}`}>
 
       {/* ⚠️ `sb-ready` GATES THE WIDTH TRANSITION (sidebar-collapse pack, Phase 1). The collapsed
           state is read synchronously, so the first render is already narrow — but a transition

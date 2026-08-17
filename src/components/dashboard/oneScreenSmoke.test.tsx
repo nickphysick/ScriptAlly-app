@@ -116,7 +116,11 @@ describe("§1 · the lock", () => {
   it("the grid is v16's: minmax(0,1fr) 287px, capped 1660 and centred", () => {
     const c = rule(".os-content");
     expect(c).toContain("grid-template-columns: minmax(0, 1fr) 287px");
-    expect(c).toContain("max-width: 1660px");
+    expect(c).toContain("max-width: var(--work-max)");
+    /* ⚠️ THE FIGURE MOVED TO A TOKEN SO QUERY CENTRE CAN READ THE SAME ONE. Two pages agreeing by
+       literal agree until one is edited; the value is asserted where it is now declared. */
+    expect(readFileSync(resolve(__dirname, "../../index.css"), "utf8"), "the shared cap changed value")
+      .toContain("--work-max: 1660px;");
     expect(c).toContain("margin: 0 auto");
   });
 

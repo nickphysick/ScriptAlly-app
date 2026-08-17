@@ -110,7 +110,9 @@
   column-gap: 16px;
   row-gap: 0;
   padding: 16px 26px 24px;
-  max-width: 1660px;
+  /* ⚠️ THE CAP IS A TOKEN NOW — Query Centre reads the same one, so the two pages agree by
+     reading one value rather than by two literals that match today. */
+  max-width: var(--work-max);
   margin: 0 auto;
   width: 100%;
 }

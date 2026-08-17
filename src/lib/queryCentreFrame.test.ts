@@ -111,7 +111,13 @@ describe("the workspace frame", () => {
     const code = (t: string) => t.replace(/\/\*[\s\S]*?\*\//g, "");
     const body = code(rule(f12, ".f12-body"));
     expect(body, "the frame is back on its own width system").not.toContain("var(--maxw)");
-    expect(body, "a cap makes the margin grow with the window").not.toContain("max-width:");
+    /* ⚠️ INVERTED BY §4 — THE CAP IS THE POINT NOW. This forbade `max-width` because the frame had no
+       business capping its own width while the shell owned the gutters, and an auto margin was "the
+       seat a cap comes back into". It has come back deliberately: the working area stops stretching
+       at `--work-max` and centres, the same token and the same mechanism the Dashboard uses, so the
+       two pages agree by reading one value. What the case still protects is that the cap is the
+       SHARED one rather than a figure invented here. */
+    expect(body, "the cap is not the shared token").toContain("max-width: var(--work-max)");
     expect(body, "the frame re-declared a side inset — the scroll row already pays the gutter")
       .not.toContain("--sa-col-gut");
     expect(body, "the frame stopped filling the row").toContain("width: 100%");
@@ -120,8 +126,13 @@ describe("the workspace frame", () => {
        `grid-template-rows: auto minmax(0, 1fr)` contains the same four letters and means something
        entirely unrelated, so the broad match would have failed on a correct row. The property is
        named now rather than the substring, which is what the case was always asserting. */
-    expect(body, "an auto margin returned — dead at 100% width, and the seat a cap comes back into")
-      .not.toMatch(/margin[a-z-]*:[^;]*auto/);
+    /* ⚠️ AND THE AUTO MARGIN IS NOW REQUIRED, WHICH IS THE OTHER HALF OF THE SAME INVERSION. It was
+       forbidden as "the seat a cap comes back into" — dead at `width: 100%`, and therefore an
+       invitation. The cap has arrived on purpose, and the margin is what centres what it leaves
+       over. Asserted PRESENT so a later tidy-up cannot delete it and leave the working area capped
+       and left-aligned, which looks like a bug and reads as one. */
+    expect(body, "the cap has nothing to centre it — the working area would sit hard left at 2560")
+      .toMatch(/margin-inline:\s*auto/);
   });
 
   /* ⚠️ THE INSET WENT WITH THE FRAME. Its padding was interior space for a border that no longer

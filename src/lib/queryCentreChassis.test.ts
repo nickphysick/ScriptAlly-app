@@ -390,7 +390,11 @@ describe("§ (fp5) · the list is an inset panel", () => {
     expect(declValue(r, "width"), "the panel restated --listw; the grid's first track already is it").toBe("");
     const body = rule(".f12-body");
     expect(body, "the split row is missing").not.toBe("");
-    expect(declValue(body, "grid-template-columns"), "the first track is not the list token").toBe("var(--listw) minmax(0, 1fr)");
+    /* ⚠️ §4 ADDED THE RECLAIM TERM. The first track is still `--listw` — the resting width is
+       unchanged at every viewport — plus a share of the width the panel gives back when it
+       collapses. Zero unless it has. */
+    expect(declValue(body, "grid-template-columns"), "the first track is not the list token plus its reclaim share")
+      .toBe("calc(var(--listw) + var(--qc-reclaim)) minmax(0, 1fr)");
     /* ⚠️ THE CHANNEL AND THE FOOT ARE STATED VALUES SINCE THE ALIGNMENT AMENDMENT, and they had to
        stop being `--f12-panel-inset`: that token is the PANEL's own inset, and the amendment gives
        the work area two numbers of its own — a 16px column gap shared with the card gap inside the
@@ -807,8 +811,13 @@ describe("§2 · the reading pane", () => {
      * columns together. The ratio is stated directly now — the same argument, finally as a number
      * that says what it means.
      */
-    expect(code, "the pane's split is not the stated 60/40")
-      .toContain('gridTemplateColumns: "60fr 40fr"');
+    /* ⚠️ 60/40 IS STILL THE RATIO; §4 ADDED THE TWO DERIVED TERMS THAT MAKE IT TRUE AND EQUAL.
+       `- 9.6px` is 60% of the 16px gap, without which "60% of the pane" overshoots 60% of the space
+       the columns actually divide. `- reclaim × 0.2` is what turns proportional expansion into equal
+       expansion: the pane receives two thirds of the reclaim and 60% of that is 1.2 shares, so a
+       fifth of a share comes back off. Measured: all three columns gain 50.7px of the panel's 152. */
+    expect(code, "the pane's split is not the stated 60/40 with its two derived terms")
+      .toContain('gridTemplateColumns: "calc(60% - 9.6px - var(--qc-reclaim) * 0.2) minmax(0, 1fr)"');
     expect(code, "the pane's cards took an inset again — they would leave the column's verticals")
       .toContain("gap: 16, padding: 0,");
     /* ⚠️ AND THE GAP ABOVE THEM IS THE PANE COLUMN'S `gap`, not this grid's padding. The two look

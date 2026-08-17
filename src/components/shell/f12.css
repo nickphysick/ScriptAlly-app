@@ -1239,7 +1239,29 @@
    */
   flex: 1; min-height: 0;
   display: grid;
-  grid-template-columns: var(--listw) minmax(0, 1fr);
+  grid-template-columns: calc(var(--listw) + var(--qc-reclaim)) minmax(0, 1fr);
+  /**
+   * ══ §4 · EQUAL EXPANSION, AND THE CAP ════════════════════════════════════════════════════════
+   *
+   * ⚠️ THE MECHANISM IS A FIXED INCREMENT PER COLUMN, NOT A GRID RATIO — and that is the finding
+   * rather than a preference. Grid's `fr` distributes free space to make tracks EQUAL IN SIZE, not
+   * to give each an equal SHARE of what arrived; there is no `fr` arrangement that does the latter.
+   * The two candidates that come closest both fail on measurement:
+   *   · `1fr 2fr` outer with `60fr 40fr` inner — the panel's 152px reclaim lands as 50.7 / 60.8 /
+   *     40.5. Proportional, which is what the section rules out in as many words.
+   *   · `calc(33.333% + bias)` tracks — genuinely equal gains, and equal for EVERY width change,
+   *     not just this one. At the 1660 cap the query list computes to 523px. A list of avatars and
+   *     dates does not want to be 523px wide, and 60/40 would hold at exactly one viewport.
+   * So the reclaim is named, divided by three, and added to each column. It fires only when the
+   * panel actually gives width back, and the resting proportions — `--listw` and 60/40 — hold at
+   * every width, which is what §3 asked for.
+   *
+   * ⚠️ THE FIGURE IS DERIVED FROM THE PANEL'S OWN TOKENS, never typed. 224px open, 72px collapsed;
+   * `--shell-panelw` is the first of those, so two thirds of the arithmetic tracks the shell for
+   * free and only the collapsed width is stated here.
+   */
+  max-width: var(--work-max);
+  margin-inline: auto;
   /**
    * ⚠️ THE CONTROL BAND IS A FIXED 36, NOT `auto` (alignment amendment). `auto` sized the row to
    * whichever cell was taller, and the two cells hold different things — a Playfair count on one
@@ -1289,6 +1311,13 @@
    */
   width: 100%;
 }
+
+/* ⚠️ ZERO UNLESS THE PANEL HAS GIVEN WIDTH BACK. Declared on the page so the columns can read it
+   unconditionally — a `calc()` on an undefined custom property yields NaN and the whole declaration
+   is dropped in silence, which is the fault this repo has an audit about. */
+.t-f12 { --qc-reclaim: 0px; }
+/* the panel is `--shell-panelw` open and 72px collapsed; each of the three columns takes a third */
+.sb-shut .f12-body { --qc-reclaim: calc((var(--shell-panelw) - 72px) / 3); }
 
 /* ── §1 · THE TWO CONTROL CELLS ───────────────────────────────────────────────────────────────
    Row 1 of the split. Left cell = what the list IS (count, sub-count) and the two controls that
