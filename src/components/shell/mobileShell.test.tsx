@@ -118,9 +118,27 @@ describe("the shell at <md — one bar, one capsule, derived clearance", () => {
     expect(beforeMedia).not.toContain(".sv2-stagepad");
   });
 
-  it("the viewport law: 100vh base moves to the class, dvh overrides below md", () => {
-    expect(shellCss).toContain(".sv2-app { display: flex; height: 100vh; overflow: hidden; }");
+  /**
+   * ⚠️ THE VIEWPORT MEASUREMENT MOVED UP TO THE FRAME, AND THE LAW IS UNCHANGED. `.sv2-app` is a
+   * ROW — the rail and the workspace are its columns — so anything that must sit above the whole
+   * shell cannot be its child. `.sa-shellframe` is the column that holds the strip and the row, and
+   * it therefore takes the height: a `100vh` row inside a column that also holds a 42px strip
+   * overflows by exactly the strip.
+   *
+   * ⚠️ AND `flex-direction: row` IS STATED NOW RATHER THAN DEFAULTED. It was the default, and two
+   * comments elsewhere in the app described this element as a COLUMN — a third thing was mounted
+   * into it on that basis and took 840px of the app's width. A default that two authors guessed
+   * wrong is worth one word.
+   */
+  it("the viewport law: the frame takes 100vh, the row is a row, dvh overrides below md", () => {
+    expect(shellCss).toContain(".sv2-app { display: flex; flex-direction: row; height: 100vh; overflow: hidden; }");
+    expect(shellCss, "the frame is missing — the strip would be a column of the row again")
+      .toContain(".sa-shellframe { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }");
+    expect(shellCss, "the row kept its own viewport height inside the frame — it would overflow by the strip")
+      .toContain(".sa-shellframe > .sv2-app { height: auto; flex: 1 1 auto; min-height: 0; }");
     const mobileBlock = css.split("@media (max-width: 767.98px)")[1] ?? "";
+    expect(mobileBlock, "the dynamic-viewport swap did not follow the height up to the frame")
+      .toContain(".sa-shellframe { height: 100vh; height: 100dvh; }");
     expect(mobileBlock).toContain(".sv2-app { height: 100vh; height: 100dvh; }");
     // the locked desktop capsule rule is untouched, byte for byte
     expect(shellCss).toContain(".sv2-app { padding: var(--shell-cap-gap); gap: var(--shell-cap-gap); }");

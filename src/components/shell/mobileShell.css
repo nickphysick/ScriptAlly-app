@@ -138,6 +138,9 @@
 @media (max-width: 767.98px) {
   /* ── screen arrangement ── */
   /* dvh with the vh fallback (viewport law) — the shell root is the one hard viewport clamp */
+  /* the frame owns the viewport measurement now, so the dynamic-viewport swap moves with it;
+     the row inside it keeps `flex: 1` and needs no height of its own */
+  .sa-shellframe { height: 100vh; height: 100dvh; }
   .sv2-app { height: 100vh; height: 100dvh; }
   /* the plane stops being the capsule: the ground shows through, the bar sits on it */
   .sv2-plane { background: transparent; overflow: visible; }

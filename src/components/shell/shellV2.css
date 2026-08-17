@@ -12,7 +12,28 @@
 /* The root's LAYOUT lives on the class (it was inline) so the mobile pass can override the
    viewport unit below md — mobileShell.css swaps 100vh → 100dvh there (viewport law). The
    ground colour + paper grain stay inline in AppShell (the data-URI defeats the CSS parser). */
-.sv2-app { display: flex; height: 100vh; overflow: hidden; }
+/**
+ * ⚠️ IT IS A ROW, AND IT ALWAYS WAS — the rail and the workspace are its columns. Two comments
+ * elsewhere in the app described it as a COLUMN and a third thing was mounted into it on that
+ * basis; measured at 1440, the beta strip took 840px as a third column and squeezed the whole app
+ * into 1008. `flex-direction` is stated explicitly now rather than left to the default, because the
+ * default is what both of those comments were guessing at.
+ */
+.sv2-app { display: flex; flex-direction: row; height: 100vh; overflow: hidden; }
+
+/**
+ * ══ THE SHELL FRAME — the column the strip belongs in ════════════════════════════════════════
+ *
+ * It owns the viewport height, the theme class and the page ground; `.sv2-app` is its second child
+ * and keeps every rule ever written against it. Anything that must sit ABOVE the whole shell —
+ * a beta strip, an outage banner, an impersonation bar — is a child of this and never of the row.
+ *
+ * ⚠️ THE HEIGHT MOVES UP WITH IT. `.sv2-app` is `100vh`; inside a column that also holds a strip,
+ * that overflows by the strip's height. The frame takes the viewport measurement and the row takes
+ * what is left, which is the whole reason a frame is better than making the row a column.
+ */
+.sa-shellframe { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.sa-shellframe > .sv2-app { height: auto; flex: 1 1 auto; min-height: 0; }
 @media (min-width: 768px) {
   .sv2-app { padding: var(--shell-cap-gap); gap: var(--shell-cap-gap); }
   .sv2-cap { border-radius: var(--shell-cap-radius); box-shadow: var(--shell-cap-shadow); border: var(--shell-cap-border); }

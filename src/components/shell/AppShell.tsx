@@ -293,8 +293,25 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   );
 
   return (
+    /**
+     * ⚠️ THE FRAME EXISTS BECAUSE `.sv2-app` IS A ROW, AND THE STRIP HAS TO BE ABOVE IT.
+     *
+     * `.sv2-app { display: flex }` with no direction is a ROW — the rail and the workspace are its
+     * columns. The strip was a third column: measured at 1440 it took 840px and squeezed the whole
+     * app into 1008, starting at x=840, with Query Centre's Tracking card collapsed to ZERO. Every
+     * page was affected; the Dashboard showed the same shift.
+     *
+     * ⚠️ BOTH SIDES OF THE CODE ASSERTED THE OPPOSITE, CONFIDENTLY AND IN PROSE. `betaChrome.css`
+     * says "`.sv2-app` is a viewport-height flex COLUMN"; the comment below says the strip is
+     * "A SIBLING OF THE WORKSPACE, NEVER A ROW INSIDE IT". Both were wrong in the same direction,
+     * and neither could be checked by reading — only a measurement told the intent from the fact.
+     *
+     * So the frame is the column the strip always believed it was in: it owns the viewport height,
+     * the theme class and the page ground, and `.sv2-app` becomes its second child at `flex: 1`.
+     * The row stays a row and keeps every rule written against it.
+     */
     <div
-      className={`${THEME_CLASS[theme]} sv2-app ws-host`}
+      className={`${THEME_CLASS[theme]} sa-shellframe`}
       data-sa-ground=""
       // ⚠️ THE DESK IS GONE (Amendment 1, A1). This was the sage-grey field the capsules floated
       // on; the workspace is full-screen now, so --shell-chrome IS the page ground and the
@@ -309,6 +326,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           up here is outside that box entirely, so `--wpg-reclaim-pad` and the collapse trigger
           cannot see it. That separation is the condition this was allowed under. */}
       <BetaStrip onReport={() => setFeedbackOpen(true)} />
+
+      <div className="sv2-app ws-host">
 
       {/* THE DOUBLE-DECKER (shell-rebuild pack, Phase 3) — it replaces ShellColumn and the
           desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so
@@ -508,6 +527,10 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         onReceipt={() => {}}
       />
 
+      </div>{/* closes .sv2-app.ws-host — EVERYTHING except the strip stays inside it, deliberately:
+                 the floating chrome below (tab bar, sheets, dock, the dev lab) has always been a
+                 descendant of `.sv2-app`, and moving it up to the frame would silently change what
+                 every `.sv2-app …` selector reaches. The strip is the only child that moves. */}
     </div>
   );
 };
