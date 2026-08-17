@@ -40,8 +40,8 @@ Declared in `:root` (`src/index.css`) and consumed by every theme. Type families
 | `--font-mono` | `"JetBrains Mono", monospace` | Eyebrows, meta, counts |
 | `--content-max` | `1440px` | Shared content gutter cap |
 | `--burg` | `#7c3a2a` | Primary brand ink (= `--color-burgundy`) |
-| `--wsh-band-bg` | `#c9d2c7` | **The collapsed header band's ground** (sage). Theme-independent — one value under Cappuccino, Bold Pastille and Editorial alike |
-| `--wsh-band-ink` | `#241c15` | Everything sitting **on** that band: the mono label, glyphs, focus rings, and both buttons' label + glyph. Value taken from `:root --ink` (see below) |
+| `--wsh-band-bg` | `var(--n0)` → `#ffffff` | **The collapsed header band's ground** — WHITE. Theme-independent, one value under all three themes, and identical at rest, on hover and during scroll |
+| `--wsh-band-ink` | `var(--n8)` → `#141412` | Everything sitting **on** that band: the mono label, glyphs, focus rings, and both buttons' label + glyph. 18.4:1 on white |
 | `--burg-d` | `#632e22` | Deep burgundy |
 | `--ink` | `#241c15` | Near-black glyph strokes / headings on tinted bands |
 | `--muted` | `#9a8c80` | Muted mono captions |
@@ -77,6 +77,28 @@ Warm mocha + foam. Square chrome (`--chromerad: 0`), 1px taupe borders, flat but
 | `--card` | `#fffefb` | Card / container surface |
 | `--chromerad` | `0px` | Chrome corners — **square** |
 | `--listbg` | `#ffffff` | Query-list panel bg |
+
+### The warm neutral scale (`:root`) — theme-independent
+
+Nine steps at **one hue, OKLCH 78.2°** — measured from `--shell-rail` / `--paper` / `--line` rather than chosen, so the scale is the app's own warm-paper hue at nine lightnesses. **Chroma falls as lightness falls** (0.013 → 0.003), which is what lets the dark end be genuinely dark rather than brown; the older warm set does the opposite at the top (`--paper` 0.009 rising to `--oatline` 0.028) and its mid-tones read as tan.
+
+Declared **once**, at `:root`, and overridden nowhere — the collapsed header band reads it, so a page-scoped declaration would be unreachable from the shell and a second one would drift.
+
+| Token | Value | L\* | Role |
+|---|---|---|---|
+| `--n0` | `#ffffff` | 100.0 | Panels, cards, plates — and the collapsed band |
+| `--n1` | `#fef8f0` | 97.8 | A page ground; the band's button hover |
+| `--n2` | `#f5f0e8` | 95.0 | A card header |
+| `--n3` | `#e9e4dd` | 90.8 | A selected row, a monogram |
+| `--n4` | `#e1dcd6` | 88.0 | An internal separator |
+| `--n5` | `#d6d2cc` | 84.4 | A hairline |
+| `--n6` | `#a19e9a` | 65.3 | Text · quiet |
+| `--n7` | `#5c5a58` | 38.4 | Text · mid |
+| `--n8` | `#141412` | 6.3 | Text · dark; the band's foreground |
+
+⚠️ **The band has had four grounds.** Slate `#333c4d` (the app's first cool colour), sage `#c9d2c7` (a tint of the warm family), `--n3` (the same argument once the page unified at 78°), and now white. Each was right about its predecessor and wrong about itself, because each answered *which tint* when the question was whether the band should be a tint at all. White has nowhere to drift to.
+
+| `--work-max` | `1660px` | The working area's cap — read by the Dashboard (`.os-content`) **and** Query Centre (`.f12-body`), so the two agree by reading one value |
 
 ### Header & bands
 | Token | Value | Controls |

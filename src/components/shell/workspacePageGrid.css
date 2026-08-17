@@ -89,7 +89,12 @@
  * on the next evaluated frame — a pointer cursor promising something that visibly does not happen.
  */
 .wpg-plate--restorable { cursor: pointer; }
-.wpg-plate--restorable:hover .wsh { background: var(--shell-inset); }
+/* ⚠️ THE HOVER SHIFT IS DELETED (§5), AND THE POINTER IS THE WHOLE AFFORDANCE NOW. It repainted the
+   band's ground on hover — the one thing this element must not do, because the band is a fixed
+   surface the eye uses to locate the page, and a surface that changes colour when the mouse passes
+   over it reads as a control that has been pressed. The comment above still holds: "nothing drawn"
+   was always the intent, and a background swap IS drawing something. The band renders identically
+   at rest, on hover and during scroll. */
 /* ⚠️ THE FLOATING HAIRLINE IS DELETED (ref 91). The row drew a 1px rule inset to the content
    gutter, fading in with the working state; the header now draws its OWN bottom edge as a band,
    spanning the container. Keeping both gave two lines a pixel apart that did not even agree on

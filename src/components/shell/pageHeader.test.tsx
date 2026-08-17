@@ -416,11 +416,16 @@ describe("the header's two states", () => {
      * by avoiding a token. The clause is unchanged — the band has ONE ground, everywhere.
      */
     const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(tokens, "the band ground moved without this case moving with it").toContain("--wsh-band-bg: var(--n3);");
-    expect(tokens, "the scale step the band reads is gone").toContain("--n3: #e9e4dd;");
-    /* ⚠️ AND IT IS DECLARED ONCE. A second `--n3` anywhere would make the band's ground depend on
+    /* ⚠️ FOURTH GROUND, AND WHITE IS THE END OF THE SEQUENCE RATHER THAN A FIFTH TINT. Slate, sage
+       and `--n3` each answered "which tint" when the question was whether the band should be a tint
+       at all — three retones in a month is the evidence. White has nowhere to drift to. It is `--n0`
+       rather than `#ffffff` so the band belongs to the same nine steps as the surfaces it sits
+       above, and so the one-value rule holds by construction. */
+    expect(tokens, "the band ground moved without this case moving with it").toContain("--wsh-band-bg: var(--n0);");
+    expect(tokens, "the scale step the band reads is gone").toContain("--n0: #ffffff;");
+    /* ⚠️ AND IT IS DECLARED ONCE. A second `--n0` anywhere would make the band's ground depend on
        which subtree it rendered in, which is the exact fault the literal was guarding against. */
-    expect((tokens.match(/--n3:/g) ?? []).length, "the scale is declared more than once — the band's ground would vary by subtree").toBe(1);
+    expect((tokens.match(/--n0:/g) ?? []).length, "the scale is declared more than once — the band's ground would vary by subtree").toBe(1);
     /* ⚠️ THE INK IS `:root`'s `--ink` VALUE, TAKEN AS A LITERAL AND NOT READ. `--ink: #241c15` is
        the exact match — its comment states its job as "glyph strokes on tinted bands" — but
        `.t-f12` overrides `--ink` and wraps Query Centre's whole grid, header included, so a

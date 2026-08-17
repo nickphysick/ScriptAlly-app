@@ -168,33 +168,34 @@
   --n8: #141412;   /* text · dark                                     L*   6.3 */
 
   /**
-   * ══ THE COLLAPSED HEADER BAND — THE NEUTRAL SCALE'S n3 ════════════════════════════════════
+   * ══ THE COLLAPSED HEADER BAND — WHITE ═════════════════════════════════════════════════════
    *
-   * ⚠️ THIRD GROUND, AND THE PROSE FOR EACH PREVIOUS ONE IS GONE WITH IT rather than left
-   * describing a colour the app does not have. Slate (#333c4d) argued for the app's first COOL
-   * family; sage (#c9d2c7) argued that the band should stop being an exception and become a tint of
-   * the warm family. The second argument was right and is why this is the third value: the page
-   * beneath it is now unified at OKLCH 78.2°, and sage sits at 133° — so the band became the ONLY
-   * thing on the screen outside the family, and read as chrome imported from another product.
-   * `--n3` is that same argument, finally satisfiable: it is the warm family, at a step chosen to
-   * separate from the page ground rather than to be a colour.
+   * ⚠️ FOURTH GROUND, AND EACH PREDECESSOR'S PROSE LEFT WITH IT rather than staying to describe a
+   * colour the app does not have. Slate argued for the app's first COOL family. Sage argued the
+   * band should stop being an exception and become a tint of the warm one. `--n3` was that same
+   * argument once the page beneath had unified at OKLCH 78.2°, since sage sat at 133° and read as
+   * chrome imported from another product. Each was right about the previous one and wrong about
+   * itself, because each answered "which tint" when the question was whether the band should be a
+   * tint at all.
    *
-   * ⚠️ DISTINCT FROM THE GROUND BENEATH IT BY 7 L*, and that is the whole specification — n1 is a
-   * page ground at 97.8, n3 is 90.8. Taking n2 would have made the band and every card header the
-   * same surface, which is a different mistake from the one this fixes.
+   * ⚠️ WHITE IS NOT A FIFTH TINT — IT IS THE END OF THE SEQUENCE. A band that carries a colour is a
+   * band that has to be re-argued every time the page moves under it; three retones in a month is
+   * the evidence. White has nowhere to drift to, and it lets the chrome recede behind the work
+   * instead of competing with it.
    *
-   * ⚠️ AND THE WHITE-BUTTON ARGUMENT SURVIVES THE MOVE. On slate a white button became the
-   * brightest thing on screen and outranked the primary; that was a fact about DARK grounds. n3 is
-   * light, so both buttons stay white and weight alone separates them — the same conclusion sage
-   * reached, for the same reason, on a ground that now belongs to the page.
+   * ⚠️ AND IT IS `--n0`, NOT `#ffffff`. The scale's own white, so the band belongs to the same nine
+   * steps as every surface it sits above, and so the one-value rule holds by construction: `--n0` is
+   * declared once at `:root` and overridden nowhere.
    *
-   * ⚠️ ONE VALUE EVERYWHERE — still not per-theme.
+   * ⚠️ THE BAND NEVER CHANGES, IN ANY STATE. A hover rule in workspacePageGrid.css repainted it on
+   * pointer-over as the restore affordance; it is deleted, and the pointer cursor carries that job
+   * alone. Rest, hover and scroll are one appearance.
    *
    * ⚠️ AND THE RULE BENEATH STAYS DELETED. `--wsh-band-edge` was a warm parchment hairline sized
-   * against a near-white band; a tinted band states its own boundary. The token remains absent and
-   * asserted absent — one no rule reads is the next thing someone wires back up.
+   * against a near-white band, and this band is near-white again — but the boundary it drew is now
+   * the plate's own shadow and the content's edge. The token remains absent and asserted absent.
    */
-  --wsh-band-bg: var(--n3);
+  --wsh-band-bg: var(--n0);
   /**
    * ⚠️ ONE FOREGROUND FOR EVERYTHING ON THE BAND — label, glyphs, focus ring, button text and the
    * strip's inherited `color`. That plumbing came in with the slate pass and is the part of it

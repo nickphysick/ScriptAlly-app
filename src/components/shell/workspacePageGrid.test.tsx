@@ -537,11 +537,21 @@ describe("the three-row grid — chrome outside the scroller", () => {
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(src, "the restorable gate stopped requiring both `fill` and `condensed` — a resting card would take a pointer cursor")
       .toMatch(/const restorable = fill && condensed;/);
-    /* the affordance is the pointer and a hover shift, and nothing is DRAWN into the strip */
+    /**
+     * ⚠️ THE HOVER SHIFT IS DELETED, AND THE POINTER IS THE WHOLE AFFORDANCE. This asserted the
+     * shift EXISTED, on the reasoning that "the band would be clickable with nothing to say so" —
+     * fair while the band carried a tint, and wrong about the one thing the band must not do. It is
+     * a fixed surface the eye uses to locate the page; repainting its ground under the pointer
+     * reads as a control that has been pressed. The rule's own comment always said "nothing drawn",
+     * and a background swap IS drawing something.
+     *
+     * ⚠️ INVERTED RATHER THAN DELETED, because this ground has now moved four times and a case that
+     * merely stopped failing would let the shift come back with the fifth.
+     */
     const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
     expect(block(".wpg-plate--restorable"), "the restore affordance lost its pointer").toContain("cursor: pointer");
-    expect(css, "the band's hover shift went — the band would be clickable with nothing to say so")
-      .toMatch(/\.wpg-plate--restorable:hover \.wsh \{[^}]*background:/);
+    expect(css.replace(/\/\*[\s\S]*?\*\//g, ""), "the band repaints on hover again — it must render identically at rest, on hover and during scroll")
+      .not.toMatch(/\.wpg-plate--restorable:hover/);
     expect(css, "a chevron or a label appeared in the band — it stays bare").not.toMatch(/wpg-plate--restorable[^{]*::(before|after)/);
     /* ⚠️ RENDERED, NOT JUST DECLARED. A `restorable` const that never reaches the markup would pass
        every assertion above and do nothing at all. */
