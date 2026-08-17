@@ -52,7 +52,11 @@ describe("§1a · the page states its count once", () => {
      foot counts what the FILTER left. They diverge the moment anything is narrowed — which is
      exactly when a second number earns its place. */
   it("the masthead counts the scope; the foot counts the filtered view", () => {
-    expect(code).toContain("description={queriesMastheadCounts(mastheadScopedQueries)}");
+    /* ⚠️ THE MASTHEAD'S COUNT IS RETIRED (§1) — the figure describes the LIST, and the list now
+       carries it in its own sage cap, in every state. The earlier pack flagged this duplication and
+       accepted it because the count had no permanent home; it has one now. Measured with both
+       present: "20 queries" twice on one screen. */
+    expect(code, "the masthead states the count again — the cap already does").not.toContain("description={queriesMastheadCounts");
     expect(code).toContain("SHOWING <b>{sortedList.length}</b> OF {queries.length}");
   });
 });
@@ -713,7 +717,7 @@ describe("§2 (fp4) · the reading pane's cards", () => {
        surfaces a short distance apart read as one interrupted stripe. The band is WHITE now and the
        page beneath is one neutral family, so sage competes with nothing and does the job it was
        always for: marking these three cards as one family. The 18px title from that pack stays. */
-    const cap = rule(".f12-card .f12-chh");
+    const cap = rule(".f12-chh");
     expect(cap, "the sage cap went").toContain("var(--sage-band)");
     expect(declValue(cap, "font-size"), "the title is not 18px").toBe("18px");
     /* and the glyph's plate is gone with it (§3) — a mark on a plate on a coloured band */

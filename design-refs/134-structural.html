@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — name pairing, sage list header, larger controls</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--sage-fr:#dfe6dd;--pinkc:#f8e7dc;
+--sh-2:0 1px 2px rgba(40,35,30,.05),0 8px 18px -12px rgba(40,35,30,.28);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.ctl{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.ctl b{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;}
+.seg{display:flex;background:#fff;border-radius:9px;padding:3px;gap:2px;box-shadow:inset 0 0 0 1px var(--oat);}
+.seg button{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:0;background:transparent;color:var(--ink2);border-radius:6px;cursor:pointer;}
+.seg button.on{background:var(--ink);color:#fff;}
+.page{max-width:1400px;background:var(--ground);border-radius:12px;padding:18px 22px 22px;box-shadow:0 10px 26px rgba(40,35,30,.13);}
+
+/* toolbar — larger buttons */
+.tools{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:center;margin-bottom:13px;}
+.tright{display:flex;align-items:center;gap:10px;}
+.tleft{display:flex;}
+.logq{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:#1a1917;
+  background:var(--pinkc);box-shadow:inset 0 0 0 1px #ebcfc2;border-radius:10px;padding:11px 17px;cursor:pointer;}
+.logq svg{width:15px;height:15px;stroke:#1a1917;fill:none;stroke-width:1.9;}
+.logq:hover{box-shadow:inset 0 0 0 1px #dcb7a7;}
+.tb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2);padding:11px 17px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);}
+.tb svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;}
+.tb.pri{box-shadow:inset 0 0 0 1.6px var(--ink2);color:var(--ink);font-weight:500;}
+.tb.mut{color:#bdb8b0;}
+.tb.sq{padding:11px 13px;}
+.tspacer{flex:1;}
+
+.cols{display:grid;grid-template-columns:330px minmax(0,1fr);gap:16px;align-items:start;}
+
+/* list with a sage header */
+.panel{background:#fff;border-radius:12px;position:relative;}
+.panel::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);}
+.panel .fr{border-radius:12px;overflow:hidden;}
+.lh{display:flex;align-items:baseline;gap:10px;padding:12px 15px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));}
+.lh b{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.lh span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);}
+.lbody{padding:11px;}
+.srow{display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+.lsearch{flex:1;background:#fff;border-radius:9px;box-shadow:inset 0 0 0 1px var(--oat);padding:10px 12px;color:#b5b0a8;font-size:12px;}
+.ico{width:40px;height:40px;flex:0 0 40px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:13px;}
+.grp{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:3px 5px 5px;}
+.grp:after{content:'';flex:1;height:1px;background:var(--line);}
+.qi{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:9px 6px;border-radius:9px;position:relative;}
+.qi::after{content:'';position:absolute;left:6px;right:6px;bottom:0;height:1px;background:var(--line);}
+.qi:last-child::after{display:none;}
+.av{width:30px;height:30px;border-radius:50%;background:var(--n2);color:var(--ink2);font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.qi b{font-size:12.5px;font-weight:500;display:block;}
+.qi i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
+.qi em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--faint);}
+
+/* the card */
+.obj{position:relative;background:#fff;border-radius:12px;box-shadow:var(--sh-2);
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;padding:20px 26px;}
+.obj::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;box-shadow:inset 0 0 0 2px var(--sage-br);}
+.obj::before{content:'';position:absolute;inset:7px;border-radius:7px;pointer-events:none;box-shadow:inset 0 0 0 1px var(--sage-fr);}
+.r{display:grid;grid-template-columns:34px minmax(0,1fr);gap:14px;align-items:start;padding:3px 0;}
+.r+.r{margin-top:8px;}
+.lead{width:34px;height:34px;display:flex;align-items:center;justify-content:center;}
+.lead svg{width:20px;height:20px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;stroke:var(--faint);}
+.line1{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;}
+.nm{font-family:'Playfair Display',serif;font-weight:500;line-height:1.14;color:var(--ink);}
+.meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+.subs{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center;}
+.lk{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--faint);background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:8px;padding:5px 10px;}
+.att{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:7px;padding:6px 10px;}
+.att i{font-style:normal;color:var(--sage-tx);font-size:10px;}
+.att.pend{background:#fff;color:var(--faint);}
+.addb{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--burg);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:7px;padding:6px 11px;}
+.st{display:flex;align-items:center;gap:13px;padding-left:20px;}
+.sd{width:56px;height:56px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--pinkc);box-shadow:inset 0 0 0 2.5px var(--burg);}
+.sd svg{width:24px;height:24px;stroke:var(--burg);fill:none;stroke-width:1.7;}
+.stx b{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;display:block;line-height:1.12;}
+.stx span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+
+/* names are identical throughout — the card differentiates, not the type */
+.ag .nm,.ms .nm{font-size:23px;font-weight:500;}
+.eyeb{display:none;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:#b3aea6;margin-bottom:3px;}
+
+/* A · hairline between the rows */
+body[data-p="hair"] .r.ms{padding-top:13px;box-shadow:inset 0 1px 0 var(--line);}
+body[data-p="hair"] .r+.r{margin-top:11px;}
+
+/* B · enclosure — the manuscript half recessed, like an attachment area */
+body[data-p="encl"] .r.ms{background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:10px;padding:13px 14px 13px 12px;margin-top:12px;}
+
+/* C · nested rail — the book sits under the agent, as an enclosure does */
+body[data-p="nest"] .r.ms{margin-left:26px;padding-left:16px;box-shadow:inset 2px 0 0 var(--sage-fr);margin-top:12px;}
+
+/* D · eyebrows — the labels return, but tiny and above the names */
+body[data-p="eyebrow"] .eyeb{display:block;}
+body[data-p="eyebrow"] .r+.r{margin-top:13px;}
+
+/* E · icon discs — agent in a filled disc, manuscript bare */
+body[data-p="disc"] .ag .lead{border-radius:50%;background:var(--pinkc);}
+body[data-p="disc"] .ag .lead svg{stroke:var(--burg);width:18px;height:18px;}
+body[data-p="disc"] .ms .lead svg{stroke:var(--faint);}
+
+/* F · two-tone split — the card itself divides */
+body[data-p="split"] .obj{padding:0;overflow:hidden;}
+body[data-p="split"] .rows{display:block;}
+body[data-p="split"] .r{padding:16px 26px;margin:0;}
+body[data-p="split"] .r.ms{background:var(--n1);box-shadow:inset 0 1px 0 var(--line);}
+body[data-p="split"] .st{padding:16px 26px 16px 0;}
+
+.legend{max-width:1400px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.7;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body data-p="hair">
+
+<div class="ctl">
+  <b>Differentiation</b>
+  <div class="seg" id="P">
+    <button data-p="hair" class="on">A · Hairline</button>
+    <button data-p="encl">B · Enclosure tint</button>
+    <button data-p="nest">C · Nested rail</button>
+    <button data-p="eyebrow">D · Eyebrows</button>
+    <button data-p="disc">E · Icon discs</button>
+    <button data-p="split">F · Two-tone split</button>
+  </div>
+</div>
+
+<div class="page">
+  <div class="tools">
+    <div class="tleft"><span class="logq"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log new query</span></div>
+    <div class="tright">
+      <span class="tb pri"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</span>
+      <span class="tb mut"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudge</span>
+      <span class="tspacer"></span>
+      <span class="tb"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>Mark closed</span>
+      <span class="tb sq"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5 4.5-4.5M5 20h14"/></svg></span>
+      <span class="tb"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 13h6l1-13"/></svg>Delete</span>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="panel"><div class="fr">
+      <div class="lh"><b>25 queries</b><span>17 awaiting</span></div>
+      <div class="lbody">
+        <div class="srow"><span class="lsearch">⌕ Search</span><span class="ico">⚟</span><span class="ico">⇅</span></div>
+        <div class="grp">Overdue · 10</div>
+        <div class="qi"><span class="av">SD</span><span><b>Sophie Dunn</b><i>Curtis Vane</i></span><em>+903 D</em></div>
+        <div class="qi"><span class="av">WT</span><span><b>William Tan</b><i>Foxglove Literary</i></span><em>+736 D</em></div>
+        <div class="qi"><span class="av">MR</span><span><b>Marcus Reed</b><i>Bloomsbury Quill</i></span><em>+755 D</em></div>
+        <div class="qi"><span class="av">PR</span><span><b>Priya Raman</b><i>No agency</i></span><em>+796 D</em></div>
+        <div class="qi"><span class="av">JM</span><span><b>Jonathan Marsh</b><i>The Marsh Agency</i></span><em>+818 D</em></div>
+      </div>
+    </div></div>
+
+    <div class="obj">
+      <div class="rows">
+        <div class="r ag">
+          <span class="lead"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg></span>
+          <div>
+            <div class="eyeb">Agent</div><div class="line1"><span class="nm">Eleanor Whitfield</span><span class="meta">Greenfield Literary</span></div>
+            <div class="subs"><span class="lk">✉ No email</span><span class="lk">⌾ No website</span></div>
+          </div>
+        </div>
+        <div class="r ms">
+          <span class="lead"><svg viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2Z"/><path d="M5 17.5h13.5"/><path d="M9 9h7M9 12.5h5"/></svg></span>
+          <div>
+            <div class="eyeb">Sent</div><div class="line1"><span class="nm">Murphy's Day Out</span><span class="meta">Thriller · 50,000 words</span></div>
+            <div class="subs">
+              <span class="att">📎 Query letter <i>✓</i></span>
+              <span class="att">📎 Synopsis <i>✓</i></span>
+              <span class="att pend">📎 Opening sample <i>○</i></span>
+              <span class="addb">+ Attach</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="st">
+        <span class="sd"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg></span>
+        <span class="stx"><b>Queried</b><span>13 August 2026</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>Six structural ways to separate the two rows</b><br>
+  The names are now <b>identical in all six</b> — same face, size, weight and ink. The card does the differentiating instead of the type, which is the more durable approach: it survives a long title, a short one, and any future change to the type scale.<br><br>
+  <b>A · Hairline</b> — a rule between the rows. Plainest, and it says only <i>these are two things</i>. Safe, and slightly administrative.<br>
+  <b>B · Enclosure tint</b> — the manuscript half sits in a recessed panel. It borrows the mail metaphor properly: this is the attachment area, and the chips inside it now sit on a surface that explains them. <b>My pick.</b><br>
+  <b>C · Nested rail</b> — the book indents under the agent with a soft sage rail, the way an enclosure belongs to a letter. Most expressive of the relationship, but it costs horizontal room and reads slightly like a reply thread.<br>
+  <b>D · Eyebrows</b> — the words come back, but as 7px marks above each name rather than a label column. Explicit, and it recovers the naming without the width the old labels took.<br>
+  <b>E · Icon discs</b> — only the leaders differ: the agent's glyph sits in a soft pink disc, the manuscript's stays bare. The lightest touch of the six; whether it is enough depends on how much work you want the icons doing.<br>
+  <b>F · Two-tone split</b> — the card divides edge to edge, agent on white, manuscript on tint. Strongest and most graphic; it also makes the card look like two stacked cards rather than one, which is the risk.<br><br>
+  <b>Also here:</b> <i>Log new query</i> in soft pink with black text, left-aligned above the list — so the page's one creative action sits over the column it adds to, rather than in the band with the destructive verbs. It is the only pink surface on the page, which is exactly the emphasis it deserves.
+</div>
+<script>
+document.getElementById('P').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+ document.body.dataset.p=b.dataset.p;[].forEach.call(this.children,function(x){x.classList.toggle('on',x===b);});});
+</script>
+</body></html>

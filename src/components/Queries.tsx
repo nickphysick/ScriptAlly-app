@@ -50,7 +50,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, queriesMastheadCounts, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -3355,7 +3355,20 @@ export const Queries: React.FC<{
                disagree with the list beneath it about whose turn anything is.
                ⚠️ MANUSCRIPT-SCOPED, NOT VIEW-SCOPED, matching `queriesPulse`'s existing rule: the
                status filter and the search narrow the LIST, not the page's own totals. */
-            description={queriesMastheadCounts(mastheadScopedQueries)}
+            /* ⚠️ THE MASTHEAD'S COUNT IS RETIRED (§1), AND THE EARLIER PACK PREDICTED THIS. It
+               flagged the duplication rather than resolving it — "the plate's description is not
+               drawn once the header condenses, which is the state the page spends its life in" —
+               and accepted it because the count then had no permanent home. It has one now: the
+               sage cap on the column it counts, in every state. Measured with both present: "20
+               queries" twice on one screen.
+               ⚠️ AND THE CAP IS THE ONE THAT SURVIVES, not the masthead. The figure describes the
+               LIST, and the cap sits on the list; the masthead describes the page.
+               ⚠️ `queriesMastheadCounts` IS THEREFORE ORPHANED — I first wrote that it "keeps its
+               other readers" and then checked, which it does not: nothing in `src/` renders it now,
+               only its own tests. Reported rather than deleted, and deliberately: it is a pure
+               function with a live suite covering a real rule (the zero clause is omitted, never
+               printed), and removing one in a visual pass is a separate decision. The cap derives
+               the same two figures from the same `queryBucket`, so they cannot disagree. */
             /* ⚠️ A JOURNEY LEAVES THE ACTIONS EMPTY, AND THE `Close` THAT WAS HERE IS GONE. The
                reason the strip carries no actions during a journey is unchanged: `Log query` would
                start a SECOND journey on top of the open one, and disabling it leaves a dead control
@@ -3560,10 +3573,8 @@ export const Queries: React.FC<{
               plate's description is not drawn once the header condenses, which is the state the ref
               draws and the state this page spends its life in. Flagged, not silently reconciled. */}
           <div className="qc-lhead">
-            <div className="qc-count">
-              {mastheadScopedQueries.length} {mastheadScopedQueries.length === 1 ? "query" : "queries"}
-              <i>{mastheadScopedQueries.filter((q) => queryBucket(q.status as QueryStatus) === "waiting").length} AWAITING</i>
-            </div>
+            {/* ⚠️ THE COUNT LEFT THIS CELL (§1) — it is the list panel's cap now. §2 fills the
+                space with the page's one creative action, over the column it adds to. */}
           </div>
 
           {/* ⚠️ THE PANE'S VERBS CAME UP OUT OF THE HERO BAND (§1). They acted on the selected query
@@ -3724,6 +3735,24 @@ export const Queries: React.FC<{
               56px rows, slim footer (SHOWING n OF m · EXPORT CSV · key hints). No "your move"
               pills, no manuscript spine — the row is avatar · name/agency · StatusDot + date. ── */}
           <div className="f12-list">
+            {/* ══ §1 · THE COUNT CAPS THE COLUMN ═══════════════════════════════════════════════
+                ⚠️ IT WAS AN ORPHANED LINE FLOATING ABOVE A PANEL. In the header it caps the list
+                the way Tracking and Notes are capped, so the three columns read as one family
+                instead of two capped cards beside an uncapped one.
+
+                ⚠️ THE SAME RULE, NOT THE SAME LOOK — `.f12-chh` is `PaneCard`'s own class,
+                unscoped from `.f12-card` for this. A third sage band would be a third place for the
+                gradient to drift.
+
+                ⚠️ AND IT SITS ABOVE THE SEARCH ROW, which does not move: search, filter and sort
+                narrow the list and belong with the rows, while the count states what the list IS.
+                Two different jobs, and the cap is the one that introduces the column. */}
+            <div className="f12-chh">
+              <span>{mastheadScopedQueries.length} {mastheadScopedQueries.length === 1 ? "query" : "queries"}</span>
+              <span className="qp-cardmeta">
+                {mastheadScopedQueries.filter((q) => queryBucket(q.status as QueryStatus) === "waiting").length} awaiting
+              </span>
+            </div>
             {/* ⚠️ THE COLUMN'S OWN HEADING IS GONE (§1a). It read "20 queries" — the same figure
                 the masthead states directly above it, on one screen, twice. Panes do not introduce
                 themselves: the page is titled once, and the count belongs to the title.

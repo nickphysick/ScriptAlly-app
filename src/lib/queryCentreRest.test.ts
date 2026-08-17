@@ -87,19 +87,25 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
       .toMatch(/\.f12-pill \{[^}]*height: var\(--f12-icon-btn\)/);
   });
 
-  it("the toolbar cell holds the count alone — the row is the query's", () => {
+  /**
+   * ⚠️ INVERTED AGAIN BY §1 — THE CELL IS EMPTY OF THE COUNT NOW, and §2 fills it with the page's
+   * one creative action. The clause has moved twice for the same reason each time: a control
+   * belongs over the column it acts on. Filter and Sort went down into the list's own row; the
+   * count went into the list's cap; what is left over the list is the verb that ADDS to it.
+   */
+  it("the toolbar cell holds no count and no list controls", () => {
     const cell = code.indexOf('className="qc-lhead"');
     expect(cell, "the list's control cell is missing").toBeGreaterThan(-1);
     const slice = code.slice(cell, code.indexOf('className="qc-phead"'));
-    expect(slice, "the slice is empty — this case is testing nothing").toContain("qc-count");
+    expect(slice, "the count came back to the toolbar — the cap already states it").not.toContain("qc-count");
     expect(slice, "Filter came back to the toolbar").not.toContain('label="Filter"');
     expect(slice, "Sort came back to the toolbar").not.toContain('label="Sort"');
-    /* the count is the SCOPE's, from the same bucket function the pills read — never a fresh tally */
-    expect(slice, "the sub-count stopped reading the shared bucket").toContain('queryBucket(q.status as QueryStatus) === "waiting"');
-    /* ⚠️ AND `THIS QUERY` IS RETIRED WITH THEM (§3c) — true once they left, and redundant: the
-       column is the query's and the pairing card sits directly beneath it. It also held the one
-       position the primary needs if the two columns are to read as one grid. */
+    /* ⚠️ AND `THIS QUERY` IS STILL RETIRED — it held the position the primary needs if the two
+       columns are to read as one grid. */
     expect(code, "the label came back into the position the primary needs").not.toContain("THIS QUERY");
+    /* the cap counts through the shared bucket, which is where the clause about agreement lives */
+    expect(code, "the cap counts waiting queries some other way")
+      .toContain('queryBucket(q.status as QueryStatus) === "waiting"');
   });
 
   /* ⚠️ THE POINT OF THE WHOLE SPLIT. Six selected-query verbs used to sit above the list, all six
@@ -216,15 +222,31 @@ describe("§1c · the seam runs the full height of both columns", () => {
   });
 });
 
-describe("§1b · the masthead states counts, from the shared derivation", () => {
-  it("the page reads the selector rather than counting for itself", () => {
-    expect(code, "the masthead stopped reading the shared derivation")
-      .toContain("description={queriesMastheadCounts(mastheadScopedQueries)}");
+/**
+ * ⚠️ INVERTED BY §1 — THE COUNT LEFT THE MASTHEAD FOR THE LIST'S OWN CAP. §1b's clause was "the
+ * page reads the selector rather than counting for itself", and the selector is still the answer;
+ * what changed is WHERE the figure is stated. It describes the LIST, so it caps the list, in every
+ * state — where the masthead's copy was drawn only at rest, which is why the earlier pack flagged
+ * the duplication and accepted it. Measured with both present: "20 queries" twice on one screen.
+ */
+describe("§1b · the count caps the list it counts", () => {
+  it("the masthead no longer states it, and does not count for itself either", () => {
+    expect(code, "the masthead states the count again — the cap already does")
+      .not.toContain("description={queriesMastheadCounts");
     expect(code, "the masthead grew a count of its own").not.toMatch(/description=\{`\$\{\w+\.length\}/);
+    /* ⚠️ AND THE CAP READS THE SAME BUCKET FUNCTION, so the two figures cannot disagree with the
+       filter pills or with `getPrimaryAction` about whose turn anything is. */
+    expect(code, "the cap counts waiting queries some other way")
+      .toContain('queryBucket(q.status as QueryStatus) === "waiting"');
   });
 
-  /* Composed from `queryBucket` — the same function the filter pills and `getPrimaryAction` read —
-     so the masthead cannot disagree with the list beneath it about whose turn anything is. */
+  /**
+   * ⚠️ `queriesMastheadCounts` IS ORPHANED BY §1 AND ITS TESTS ARE KEPT, deliberately. Nothing in
+   * `src/` renders it now — traced, not assumed; I first wrote that it kept other readers and was
+   * wrong. It stays because it is a pure function covering a real rule (the zero clause is omitted,
+   * never printed) and deleting one in a visual pass is a separate decision. Reported here so the
+   * next reader knows it is unreferenced rather than discovering it.
+   */
   it("the counts are the buckets, and the awaiting clause omits itself at zero", () => {
     const q = (status: QueryStatus) => ({ status });
     expect(queriesMastheadCounts([q(QueryStatus.QUERIED), q(QueryStatus.REJECTED)]))

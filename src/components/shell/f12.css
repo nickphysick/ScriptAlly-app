@@ -2547,8 +2547,21 @@ button.qc-mname:hover { color: var(--burg); }
  * band: three surfaces for one word. It takes the band's own dark sage now, which is the colour the
  * meta beside it already reads.
  */
-.f12-card .f12-chh { flex: none; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 13px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); font-family: var(--f12-serif); font-size: 18px; font-weight: 600; color: var(--ink); }
-.f12-card .f12-chh svg { width: 19px; height: 19px; stroke: var(--sageD); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+/**
+ * ⚠️ UNSCOPED FROM `.f12-card` (§1), SO THE LIST PANEL WEARS THE SAME RULE RATHER THAN A COPY. The
+ * pack's instruction is "do not write a third sage band", and there were two ways to obey it: group
+ * a second selector onto this rule, or drop the ancestor. Grouping would have broken every lock
+ * that finds this block by `indexOf(".f12-card .f12-chh {")` — the first-match trap this repo has
+ * hit twice — and the file's own invariant is one rule per selector. `.f12-chh` was only ever worn
+ * by `PaneCard`, so unscoping costs nothing and leaves ONE declaration list with two hosts.
+ */
+.f12-chh { flex: none; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 13px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); font-family: var(--f12-serif); font-size: 18px; font-weight: 600; color: var(--ink); }
+.f12-chh svg { width: 19px; height: 19px; stroke: var(--sageD); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+/* ⚠️ THE LIST'S CAP READS LEFT, WHERE THE READING CARDS' READ CENTRED — the ref draws it that way,
+   and the reason holds: a card header names one thing, while this one states a figure and then
+   qualifies it, which is a sentence and wants a left edge. A modifier, so the shared treatment is
+   still literally shared. */
+.f12-list > .f12-chh { justify-content: flex-start; align-items: baseline; gap: 10px; padding: 12px var(--gut); }
 .f12-card .f12-cbb { flex: 1; padding: 18px; display: flex; flex-direction: column; min-height: 0; }
 /* journal empty state — dotted outline, NO fill (a placeholder that looks like one) */
 /**

@@ -478,7 +478,9 @@ describe("fix pack 7 §2 · the ring's three layers", () => {
     expect(pc.indexOf('className="f12-chh"'), "the header escaped the frame — its fill would square the corners")
       .toBeGreaterThan(pc.indexOf('className="f12-cfr"'));
     /* ⚠️ AND NO RADIUS-MATCHING HACK ON THE HEADER, which is what the frame exists to make unnecessary */
-    expect(declValue(rule(".f12-card .f12-chh"), "border-radius"), "the header grew a radius of its own").toBe("");
+    /* ⚠️ THE RULE IS `.f12-chh`, UNSCOPED SINCE §1, so the list panel wears the same declarations
+       rather than a copy. The clause is unchanged: no radius of its own, because the frame clips. */
+    expect(declValue(rule(".f12-chh"), "border-radius"), "the header grew a radius of its own").toBe("");
   });
 });
 
