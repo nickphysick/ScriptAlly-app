@@ -991,7 +991,11 @@
   /* ⚠️ 334 → 296 (alignment amendment). It is read by the split's first track AND by the pane's own
      right column, so the two narrow columns match BY READING ONE TOKEN rather than by two numbers
      that happen to agree — which is the whole of the amendment's "the same figure" clause. */
-  --listw: 296px; --gut: 12px; --maxw: 1520px;
+  /* ⚠️ 296 → 386 (§1). The gutters came in by 45 a side and the 90px goes ENTIRELY to the list,
+     which was the cramped column — the reading pane keeps the width it had. Read by the split's
+     first track and by the empty state's list; the pane's own columns are a ratio and take none of
+     it. */
+  --listw: 386px; --gut: 12px; --maxw: 1520px;
   /* THE TWO COLUMNS' HEAD BAND. The list head and the pane's toolbar row are different
      components that must close on ONE hairline, and the row beneath each must start on one
      line — so both read these, and neither restates the number. --f12-headgap is also the

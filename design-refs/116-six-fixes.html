@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — six fixes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+ --ground:#fefcfa;--white:#fff;--n1:#f4f1ed;--n2:#eceae6;--n3:#e4e1db;--line:#e6e3dd;--oat:#dcd8d1;
+ --ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;--burg:#7c3a2a;
+ --sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--pink:#f5e2da;
+ --sh-1:0 1px 2px rgba(40,35,30,.05);--sh-2:0 1px 2px rgba(40,35,30,.05),0 8px 18px -12px rgba(40,35,30,.28);
+}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.hd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;margin-bottom:11px;}
+.app{background:var(--ground);border-radius:12px;overflow:hidden;box-shadow:0 12px 34px rgba(40,35,30,.16);max-width:1460px;}
+
+/* ① band: white, hairline beneath */
+.band{display:flex;align-items:center;gap:12px;padding:13px 24px;background:#fff;box-shadow:inset 0 -1px 0 var(--line);}
+.band .lbl{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink);}
+.band .r{margin-left:auto;display:flex;gap:9px;}
+.bb{background:#fff;border:0;box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);border-radius:9px;padding:8px 13px;font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;}
+.bb.p{box-shadow:inset 0 0 0 1.5px var(--ink2);color:var(--ink);font-weight:500;}
+
+.work{padding:14px 22px 20px;}
+.tools{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.cnt{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.cnt em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-left:7px;}
+.ico{width:32px;height:32px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:11px;}
+.tb{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);padding:7px 11px;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);}
+.tb.pri{box-shadow:inset 0 0 0 1.5px var(--ink2);color:var(--ink);font-weight:500;}
+.cols{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;}
+
+.panel{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:11px;}
+.lsearch{background:#fff;border-radius:9px;box-shadow:inset 0 0 0 1px var(--oat);padding:9px 12px;color:#b5b0a8;font-size:12px;margin-bottom:10px;}
+.grp{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:4px 6px 6px;}
+.grp:after{content:'';flex:1;height:1px;background:var(--line);}
+.qi{display:grid;grid-template-columns:30px 1fr auto;gap:10px;align-items:center;padding:9px 7px;border-radius:9px;position:relative;}
+.qi::after{content:'';position:absolute;left:7px;right:7px;bottom:0;height:1px;background:var(--line);}
+.qi.on{background:var(--n2);}.qi.on::after{display:none;}
+.qi:last-child::after{display:none;}
+.av{width:30px;height:30px;border-radius:50%;background:var(--n2);color:var(--ink2);font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.qi.on .av{background:#fff;color:var(--ink);box-shadow:var(--sh-1);}
+.qi b{font-size:12.5px;font-weight:500;display:block;}
+.qi i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
+.qi em{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--faint);}
+.qfoot{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:#b5b0a8;padding:11px 7px 3px;box-shadow:inset 0 1px 0 var(--line);margin-top:6px;}
+
+/* ③⑤ agent plate */
+.hero{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--oat),var(--sh-2);padding:16px 20px;display:flex;align-items:center;gap:16px;margin-bottom:14px;}
+.hero .big{width:58px;height:58px;flex:0 0 58px;border-radius:50%;background:var(--pink);color:#1a1917;font-family:'Playfair Display',serif;font-size:19px;display:flex;align-items:center;justify-content:center;}
+.hero h2{font-family:'Playfair Display',serif;font-size:25px;font-weight:500;line-height:1.05;}
+.hero .sub{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);margin-top:4px;}
+.hero .lk{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:8px;padding:5px 10px;margin:9px 6px 0 0;}
+.hero .r{margin-left:auto;display:flex;align-items:center;gap:13px;}
+.hero .sdot{width:44px;height:44px;flex:0 0 44px;border-radius:50%;box-shadow:inset 0 0 0 2px var(--burg);color:var(--burg);
+  display:flex;align-items:center;justify-content:center;font-size:17px;}
+.hero .stx{text-align:right;}
+.hero .stx b{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;display:block;line-height:1.1;}
+.hero .stx span{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);}
+
+/* ⑥ sage headers, ② bare glyphs */
+.cards{display:grid;grid-template-columns:60% 40%;gap:14px;align-items:start;}
+.cards>.stack{display:flex;flex-direction:column;gap:14px;}
+.card{position:relative;background:#fff;border-radius:12px;}
+.card::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);}
+.card .fr{border-radius:12px;overflow:hidden;}
+.ch{display:flex;align-items:center;gap:10px;padding:11px 15px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));
+  font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--ink);}
+.ch svg{width:17px;height:17px;stroke:var(--sage-tx);fill:none;stroke-width:1.5;flex:0 0 17px;}
+.ch .meta{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);font-weight:400;}
+.ch .task{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.6);border-radius:20px;padding:3px 8px;color:var(--sage-tx);font-weight:400;}
+.cb{padding:16px 18px;font-size:11.5px;color:var(--ink2);line-height:1.6;}
+
+/* ④ timeline rhythm */
+.tl{display:flex;flex-direction:column;}
+.ev{position:relative;padding-left:40px;padding-bottom:22px;}
+.ev:last-child{padding-bottom:0;}
+.ev::before{content:'';position:absolute;left:13px;top:28px;bottom:-2px;width:1px;background:var(--line);}
+.ev:last-child::before{display:none;}
+.ev .m{position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:#fff;
+  box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.ev .m.q{box-shadow:inset 0 0 0 1.5px var(--oat);color:#b5b0a8;}
+.ev .t{display:flex;align-items:baseline;gap:10px;min-height:27px;}
+.ev .t b{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);}
+.ev .t u{text-decoration:none;color:var(--ink2);font-size:13px;}
+.ev .t em{font-style:normal;margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--faint);}
+.ev p{margin-top:3px;color:var(--ink2);}
+.chips{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap;}
+.chip{font-size:11px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:16px;padding:5px 11px;color:var(--ink2);}
+.wbox{margin-top:11px;padding:13px 15px;background:var(--n1);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);}
+.wbox .h{display:flex;align-items:center;gap:8px;color:var(--ink2);}
+.wbox .cta{display:inline-block;margin-top:9px;font-weight:500;color:var(--burg);font-size:12px;}
+.bar{height:5px;border-radius:3px;background:var(--n3);margin:11px 0 7px;overflow:hidden;}
+.bar i{display:block;height:100%;width:22%;background:#9db09b;border-radius:3px;}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+
+.mat{display:flex;align-items:center;gap:11px;padding:9px 0;font-size:12px;}
+.mat+.mat{box-shadow:inset 0 1px 0 var(--line);}
+.mat svg{width:15px;height:15px;stroke:var(--faint);fill:none;stroke-width:1.5;}
+.mat em{margin-left:auto;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-tx);}
+.msname{font-family:'Playfair Display',serif;font-size:16px;color:var(--burg);display:block;}
+.msmeta{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.mshead{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin:14px 0 3px;}
+.nt{background:var(--n1);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);padding:11px 13px;font-size:11.5px;line-height:1.5;}
+.nt .d{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;color:#b5b0a8;margin-bottom:5px;}
+.compose{display:flex;gap:8px;margin-top:11px;}
+.compose span{flex:1;background:#fff;border-radius:9px;box-shadow:inset 0 0 0 1px var(--oat);padding:9px 12px;font-size:11.5px;color:#b5b0a8;}
+.compose .s{width:34px;flex:0 0 34px;border-radius:9px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink2);}
+.legend{max-width:1460px;margin-top:18px;padding:16px 20px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.75;color:var(--ink2);}
+.legend b{color:var(--burg);} .legend ol{margin:5px 0 0 18px;}
+</style></head>
+<body>
+
+<div class="hd">Six fixes</div>
+
+<div class="app">
+  <div class="band"><span class="lbl">Query Centre</span>
+    <div class="r"><button class="bb">↓ Export</button><button class="bb p">+ Log query</button></div></div>
+
+  <div class="work">
+    <div class="tools">
+      <span class="cnt">25 queries<em>17 awaiting</em></span>
+      <span class="ico">⚟</span><span class="ico">⇅</span>
+      <span class="tb pri">✈ Record response</span><span class="tb">Mark closed</span><span class="tb">Delete</span>
+    </div>
+
+    <div class="cols">
+      <div class="panel">
+        <div class="lsearch">⌕ Search</div>
+        <div class="grp">Overdue · 10</div>
+        <div class="qi"><span class="av">SD</span><span><b>Sophie Dunn</b><i>Curtis Vane</i></span><em>+903 D</em></div>
+        <div class="qi"><span class="av">WT</span><span><b>William Tan</b><i>Foxglove Literary</i></span><em>+736 D</em></div>
+        <div class="qi"><span class="av">MR</span><span><b>Marcus Reed</b><i>Bloomsbury Quill</i></span><em>+755 D</em></div>
+        <div class="qi"><span class="av">PR</span><span><b>Priya Raman</b><i>No agency</i></span><em>+796 D</em></div>
+        <div class="qi on"><span class="av">JM</span><span><b>Jonathan Marsh</b><i>The Marsh Agency</i></span><em>+818 D</em></div>
+        <div class="qi"><span class="av">AK</span><span><b>Aisha Kapoor</b><i>The Lantern Agency</i></span><em>+824 D</em></div>
+        <div class="qi"><span class="av">PL</span><span><b>Penhallow Literary</b><i>Agent not specified</i></span><em>+844 D</em></div>
+        <div class="qfoot"><span>Showing 25 of 25</span><span>Export CSV</span></div>
+      </div>
+
+      <div>
+        <div class="hero">
+          <span class="big">JM</span>
+          <div>
+            <h2>Jonathan Marsh</h2>
+            <div class="sub">The Marsh Agency</div>
+            <span class="lk">✉ Email</span><span class="lk">⌾ Website</span>
+          </div>
+          <div class="r">
+            <span class="sdot">»</span>
+            <span class="stx"><b>Full Sent</b><span>9 April 2024</span></span>
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="card"><div class="fr">
+            <div class="ch">
+              <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>
+              Tracking<span class="meta">Full sent</span><span class="task">1 task</span>
+            </div>
+            <div class="cb"><div class="tl">
+              <div class="ev"><span class="m">✈</span>
+                <div class="t"><b>Query sent</b><u>· via Email</u><em>9 APR</em></div>
+                <div class="chips"><span class="chip">Query letter</span><span class="chip">Synopsis</span><span class="chip">First 3 chapters</span></div>
+              </div>
+              <div class="ev"><span class="m">«</span>
+                <div class="t"><b>Full requested</b><em>9 APR</em></div>
+                <p>Jonathan asked for the full</p>
+              </div>
+              <div class="ev"><span class="m">»</span>
+                <div class="t"><b>Full sent</b><em>9 APR</em></div>
+              </div>
+              <div class="ev"><span class="m q">⌛</span>
+                <div class="t"><b>Waiting to hear back</b><em>818 DAYS</em></div>
+                <div class="wbox">
+                  <div class="h">No expected date set for this agent</div>
+                  <span class="cta">Set an expected date →</span>
+                </div>
+              </div>
+            </div></div>
+          </div></div>
+
+          <div class="stack">
+            <div class="card"><div class="fr">
+              <div class="ch">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>
+                What you sent<span class="meta">3 items</span>
+              </div>
+              <div class="cb">
+                <span class="msname">Murphy's Day Out</span>
+                <span class="msmeta">Thriller · 50,000 words</span>
+                <div class="mshead">Materials sent</div>
+                <div class="mat"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M16 4v3h3"/></svg>Query letter<em>Sent ✓</em></div>
+                <div class="mat"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg>Synopsis<em>Sent ✓</em></div>
+                <div class="mat"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 9h6M9 13h6"/></svg>First 3 chapters<em>Sent ✓</em></div>
+              </div>
+            </div></div>
+
+            <div class="card"><div class="fr">
+              <div class="ch">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>
+                Notes<span class="meta">1 note</span>
+              </div>
+              <div class="cb">
+                <div class="nt"><div class="d">Today</div>Your notes on this query appear here — first impressions, things they said, anything worth remembering.</div>
+                <div class="compose"><span>Write a note…</span><span class="s">➤</span></div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>The six</b>
+  <ol>
+    <li><b>Hairline under the band.</b> White on warm cream is too small a step to divide anything on its own — the band was floating. One hairline and it becomes an edge.</li>
+    <li><b>Card header glyphs lose their plates.</b> A glyph on a tinted plate on a coloured band is three surfaces to say one word. The bare mark in the header's own darker sage reads better and stops the header looking like a toolbar.</li>
+    <li><b>The agent's initials go soft pink with black text.</b> It is now the only pink surface on the page, which is what makes it work — the current subject is the one thing worth tinting.</li>
+    <li><b>Timeline rhythm.</b> Markers up to 27px, one consistent 22px gap between events, the connector running from marker to marker rather than floating, and the title row given the marker's height so text and mark sit on one line. The old version had events at four different spacings depending on whether they carried a body.</li>
+    <li><b>Status mark doubled and moved left</b> — 44px, ahead of the words, so the eye meets the symbol and then reads the label. Date sits under the label.</li>
+    <li><b>Sage headers return.</b> With the page now unified in neutrals, sage is doing what it should — marking the three cards as one family against a quiet ground. It stopped working before because it was competing with four other tints; it is the only hue on the page now.</li>
+  </ol>
+</div>
+</body></html>

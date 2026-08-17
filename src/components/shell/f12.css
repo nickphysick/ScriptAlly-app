@@ -1319,6 +1319,27 @@
 /* the panel is `--shell-panelw` open and 72px collapsed; each of the three columns takes a third */
 .sb-shut .f12-body { --qc-reclaim: calc((var(--shell-panelw) - 72px) / 3); }
 
+/* ══ §1 · THE GUTTERS COME IN ═════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THREE THINGS WERE STACKING, and only one of them was the page's. Measured at 1440, from the
+ * content window's inner edge to the working area:
+ *     80px  `--content-gutter` on `.wpg-scroll`  — the shell's, shared by ten pages
+ *     15px  `scrollbar-gutter: stable both-edges` on the same element — reserved, and invisible on
+ *           a machine with overlay scrollbars, which is why nobody counted it
+ *      1px  `.ws-window`'s border
+ *   = 96px, against the ~50 this page wants.
+ *
+ * ⚠️ THE TOKEN IS NOT TOUCHED, AND THAT IS THE WHOLE CARE HERE. `--content-gutter` is read by
+ * `.wpg-plate` through `calc(var(--content-gutter) + var(--header-inset))`, so scoping the TOKEN to
+ * this page would drag the masthead in with the content and re-open the cross-page `restHdrL`
+ * divergence that aborted two acceptance runs. Overriding the ROW'S OWN PADDING changes what this
+ * page's content is inset by and leaves every reader of the token exactly where it was.
+ *
+ * ⚠️ AND IT IS 35, NOT 50, BECAUSE THE SCROLLBAR GUTTER IS ALREADY PAYING 15. Writing 50 here would
+ * land the content at 65 and look like an arithmetic slip six months from now.
+ */
+.qc-wpg .wpg-scroll { padding-inline: 35px; }
+
 /* ── §1 · THE TWO CONTROL CELLS ───────────────────────────────────────────────────────────────
    Row 1 of the split. Left cell = what the list IS (count, sub-count) and the two controls that
    narrow it. Right cell = what the pane is showing, and the verbs that act on it. The two are the
