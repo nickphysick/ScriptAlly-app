@@ -239,7 +239,13 @@ describe("the header's two states", () => {
     const strip = all(hdrCss, ".wsh--scrolled");
     expect(strip, "the strip kept its border").toContain("border-color: transparent");
     expect(strip, "the strip kept its radius").toContain("border-radius: 0");
-    expect(strip, "the strip kept its shadow").toContain("box-shadow: none");
+    /* ⚠️ THE SHADOW IS GONE AND A HAIRLINE HAS TAKEN ITS PLACE (§2). The clause is that every
+       OBJECT property drops at once — the card's border, radius and cast — and it still does: what
+       the band draws now is a 1px inset rule at its foot, which is a boundary rather than an
+       elevation. A white band on warm cream is about a point of lightness apart, and a point of
+       lightness does not divide anything. */
+    expect(strip, "the strip kept the card's cast").not.toMatch(/box-shadow:[^;]*rgba/);
+    expect(strip, "the band lost the hairline that divides it from the page").toContain("box-shadow: inset 0 -1px 0 var(--n5)");
     expect(strip, "the strip is not taking the strip height").toContain("height: var(--wsh-plate-h-scrolled)");
     expect(all(gridCss, ".wpg-plate--working"), "the row kept its inset — the strip would not reach the container's edges")
       .toContain("padding: 0");
@@ -400,10 +406,24 @@ describe("the header's two states", () => {
        scratch, and a saturated band states its own boundary. All four sides transparent; the border
        BOX stays, because the strip's 52px is `box-sizing: border-box` and dropping the border would
        hand the content a pixel back — which is the height the matrix asserts. */
-    expect(band, "the band's rule came back — on dark slate a warm hairline reads as a scratch")
+    /* ⚠️ REVERSED BY §2, AND THE REASON IT WAS RIGHT IS THE REASON IT IS NOT. "A saturated band
+       states its own boundary" held for slate, sage and n3; the band is WHITE now, so it states
+       nothing against the cream beneath it. The BORDER is still transparent on all four sides —
+       that clause was about the border box's 52px height and survives untouched — and the boundary
+       is an inset shadow, which costs no height. */
+    expect(band, "the band's border came back — the strip's 52px is border-box and would lose a pixel")
       .toContain("border-color: transparent;");
-    expect(band, "the band still names the retired edge token").not.toContain("--wsh-band-edge");
-    expect(band, "the band grew a radius or a shadow — it is a band, not a card").toContain("box-shadow: none");
+    expect(band, "the band stopped drawing its foot").toContain("inset 0 -1px 0 var(--n5)");
+    /* ⚠️ COMMENT-STRIPPED, FOURTH TIME IN THIS REPO. §2's own note explains why the hairline is a
+       rule rather than the retired TOKEN, and therefore names `--wsh-band-edge` — so the raw rule
+       contains the exact string this case forbids, and it failed on its own explanation. A rule
+       about code is asserted against code. */
+    const bare = band.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(bare, "the retired edge token was wired back up").not.toContain("--wsh-band-edge");
+    /* ⚠️ AND "not a card" IS NOW ABOUT THE CAST, NOT THE ABSENCE OF ANY SHADOW. §2 draws the band's
+       foot as an INSET shadow, which costs no height and is a boundary rather than an elevation;
+       what must never come back is the plate's outer cast. */
+    expect(bare, "the band grew an outer cast — it is a band, not a card").not.toMatch(/box-shadow:\s*(?!inset)[^;]*rgba/);
     /**
      * ⚠️ THE GROUND IS A TOKEN AGAIN, AND THE ARGUMENT AGAINST ONE IS ANSWERED RATHER THAN
      * REVERSED. It was asserted as a LITERAL because there was no family to point at: slate was the

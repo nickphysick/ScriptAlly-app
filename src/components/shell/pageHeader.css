@@ -325,7 +325,14 @@
   background: var(--wsh-band-bg);
   border-color: transparent;
   border-radius: 0;
-  box-shadow: none;
+  /* ⚠️ THE HAIRLINE IS BACK (§2), AND WHITE IS WHY. `--wsh-band-edge` was deleted on the reasoning
+     that "a tinted band states its own boundary" — true of slate, of sage and of n3, and false the
+     moment the band went white: white against the warm cream beneath it is about a point of
+     lightness, which is not a division. Drawn as an INSET SHADOW rather than a border so the band's
+     height is untouched, and reading `--n5`, the scale's own rim tone, so it is the same hairline
+     every card on the page draws. The TOKEN stays absent — one no rule reads is the next thing
+     someone wires back up; this is a rule, and it has a reader. */
+  box-shadow: inset 0 -1px 0 var(--n5);
   /* ⚠️ THE INHERITED INK MOVES WITH THE GROUND, and this line is the token doing its stated job
      rather than four rules that happen to agree. Measured on the deployed band: `.wsh-row`,
      `.wsh-txt` and `.wsh-acts` all inherit `#1e1a16` — near-black, 1.4:1 here — so the strip reads
