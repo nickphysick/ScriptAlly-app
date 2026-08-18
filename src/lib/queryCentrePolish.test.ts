@@ -59,11 +59,19 @@ describe("§3 · one button rule, app-wide on this page", () => {
     expect(declValue(r, "font-size"), "the type size moved off 13px").toBe("13px");
     expect(declValue(r, "font-weight"), "the weight moved off 500").toBe("500");
     expect(declValue(r, "gap"), "the icon gap moved off 7px").toBe("7px");
-    /* ⚠️ TRANSPARENT AT REST (§3), AND THE RIM IS KEPT RATHER THAN REMOVED — a `border: 0` state
-       and a `border: 1px` hover would move every label by a pixel on hover. The single border
-       COLOUR is now the hover's, which is where a rim is drawn at all. */
-    expect(declValue(r, "border"), "the rim stopped being a transparent placeholder").toContain("transparent");
-    expect(rule(".qc-btn:hover"), "the hover rim is not the single border colour").toContain("var(--btn-line)");
+    /**
+     * ⚠️ INVERTED BY §1 — THE RIM IS DRAWN AT REST. "Transparent at rest" wanted the bar to read as
+     * a row of verbs rather than objects; what it produced was seven controls that read as TEXT
+     * until the pointer found them. The transparent placeholder was always there so a rim could
+     * become a colour without moving a label by a pixel, and that is what it did.
+     *
+     * ⚠️ AND THE HOVER DARKENS THE OUTLINE RATHER THAN ADDING A GROUND — a ground on hover would
+     * make seven buttons that fill under the pointer beside the one that is filled all the time.
+     */
+    expect(declValue(r, "border"), "the rim went back to transparent at rest").toContain("var(--btn-line)");
+    expect(declValue(r, "border"), "the rim is not the shared width").toContain("var(--btn-rim)");
+    expect(rule(".qc-btn:hover"), "the hover does not darken the outline").toContain("border-color: var(--ink-2)");
+    expect(declValue(rule(".qc-btn:hover"), "background"), "the hover added a ground of its own").toBe("var(--white)");
     expect(declValue(rule(".qc-btn svg"), "width"), "the icon moved off 13px").toBe("16px");
   });
 
@@ -93,16 +101,21 @@ describe("§3 · one button rule, app-wide on this page", () => {
    * on the monitor. A rim distinction has to be a whole device pixel. Recorded here because the
    * next person reaching for a fractional rim will not have measured it.
    */
-  it("Record response is the family's button, heavier by weight rather than by rim", () => {
-    const r = rule(".qc-btn-pri");
-    expect(r, "the primary rule is missing").not.toBe("");
-    expect(declValue(r, "border-width"), "the primary took a rim back").toBe("");
-    expect(parseInt(declValue(r, "font-weight"), 10), "the primary is not heavier than the base")
+  /* ⚠️ `-fwd` SINCE §1 OF THE OUTLINED-BAR PACK, AND THE CLASS IS NOW A GROUP OF THREE. It carried
+     only `Record response` while it meant "the primary"; the outlined bar separates the three verbs
+     that move a query forward from the three that end it by ink and weight, and those two
+     declarations are exactly what this rule already held. The clause below is unchanged in what it
+     asserts — no rim, no ground, heavier than the base — because that is still the whole rule. */
+  it("the forward verbs are the family's buttons, heavier by weight rather than by rim", () => {
+    const r = rule(".qc-btn-fwd");
+    expect(r, "the forward rule is missing").not.toBe("");
+    expect(declValue(r, "border-width"), "the forward group took a rim of its own").toBe("");
+    expect(parseInt(declValue(r, "font-weight"), 10), "the forward group is not heavier than the base")
       .toBeGreaterThan(parseInt(declValue(rule(".qc-btn"), "font-weight"), 10));
     /* ⚠️ AND NO GROUND, EVER. A second filled button one column from `Log new query` is the
        collision the pack names by hand: if the primary fails to read, the correction is full ink
        on it and muted on the rest. */
-    expect(declValue(r, "background"), "the primary took a ground").toBe("");
+    expect(declValue(r, "background"), "the forward group took a ground").toBe("");
   });
 
   it("the header's Export and Log query follow it, and only on this page", () => {
@@ -127,9 +140,20 @@ describe("§3 · one button rule, app-wide on this page", () => {
     const cell = code.indexOf('className="qc-phead"');
     const row = code.slice(cell, code.indexOf("})() : (", cell));
     expect(row, "the slice is empty — this case is testing nothing").toContain("qc-btn");
-    /* the primary does not carry the shrinking modifier … */
-    expect(row, "the primary was given the shrinking modifier — it would lose its label at 1280")
-      .not.toMatch(/qc-btn qc-btn-pri[^"]*qc-btn-shrink/);
+    /* the primary does not carry the shrinking modifier …
+       ⚠️ ANCHORED ON THE BUTTON'S OWN LABEL SINCE §1. This read `qc-btn qc-btn-pri…qc-btn-shrink`,
+       which identified `Record response` only while it was the sole wearer of that class; two of
+       its three fellows in the forward group DO shrink, so the class no longer names one button and
+       the pattern would have been satisfiable by the wrong one. The label is what the clause is
+       actually about — the control that must keep its words at 1280. Its label is a variable
+       (`verbLabel` — the verb changes with the query), so the anchor is the handler that makes this
+       button the record-response button and nothing else. */
+    const open = row.indexOf("openRecord(activeQuery)");
+    expect(open, "the record-response button is not in the live row").toBeGreaterThan(-1);
+    const rec = row.lastIndexOf("qc-btn", open);
+    expect(rec, "the record-response button carries no class list").toBeGreaterThan(-1);
+    expect(row.slice(rec, row.indexOf('"', rec)), "Record response was given the shrinking modifier — it would lose its label at 1280")
+      .not.toContain("qc-btn-shrink");
     /* … and exactly three controls do */
     /* ⚠️ FOUR SINCE §5 — `View related tasks` joined the bar and sheds its label at the same width
        as the other secondaries. What this clause is for is that the PRIMARY is not among them. */
@@ -430,7 +454,7 @@ describe("§9 · nothing selected", () => {
     const cell = code.indexOf('className="qc-phead"');
     const live = code.slice(cell, code.indexOf("})() : (", cell));
     const ghost = code.slice(code.indexOf('className="qc-verbs-inert"'), code.indexOf("</span>\n            )}", cell));
-    expect(ghost, "the inert row is missing").toContain("qc-btn-pri");
+    expect(ghost, "the inert row is missing").toContain("qc-btn-fwd");
     for (const verb of ["Nudge", "Mark closed", "Delete"]) {
       expect(ghost, `${verb} is missing from the inert row — the row would reflow on selection`).toContain(`<span>${verb}</span>`);
     }

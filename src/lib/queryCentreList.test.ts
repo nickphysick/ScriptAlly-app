@@ -182,8 +182,13 @@ describe("§2 · the closing verbs are never faded", () => {
   it("Delete is ink at rest and keeps its hover", () => {
     const danger = rule(css, ".qc-btn-danger");
     expect(danger, "Delete's rest colour is back").not.toContain("color: var(--faint)");
-    expect(rule(css, ".qc-btn-danger:hover"), "Delete lost the terracotta it earns on hover")
-      .toContain("var(--qc-acc-late)");
+    /* ⚠️ BURGUNDY SINCE §1, NOT TERRACOTTA — and it is an OUTLINE now rather than a fill, because
+       every button has an outline to darken. The clause is that the signal arrives on hover and
+       never sits at rest; the tone follows the bar's own family rather than the late-task palette,
+       which is a different system on a different page. */
+    expect(rule(css, ".qc-btn-danger:hover"), "Delete lost the colour it earns on hover")
+      .toContain("var(--burg)");
+    expect(rule(css, ".qc-btn-danger:hover"), "Delete's hover took a ground").toContain("background: var(--white)");
   });
 
   /* ⚠️ AND THE CLASS SURVIVES FOR ONE STATE — Nudge once used, where quiet is a FACT rather than a

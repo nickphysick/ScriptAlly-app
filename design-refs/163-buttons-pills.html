@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — outlined bar, pink materials</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;--pinksel:#fbeee6;--btn-h:42px;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+.sheet{max-width:1240px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:10px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.row{display:flex;align-items:center;gap:8px;padding-bottom:16px;margin-bottom:20px;box-shadow:inset 0 -1px 0 var(--line);flex-wrap:wrap;}
+.row:last-child{box-shadow:none;margin-bottom:0;}
+.sp{flex:1;}
+.b{font-family:inherit;font-size:13px;height:var(--btn-h);padding:0 15px;border:0;border-radius:10px;background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);display:inline-flex;align-items:center;gap:8px;cursor:pointer;}
+.b svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;}
+.b:hover{box-shadow:inset 0 0 0 1px var(--ink2);}
+.b.act{color:var(--ink);font-weight:500;}
+.b.pink{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.b.burg{background:#fff;box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);font-weight:500;}
+.b .ct{font-family:'JetBrains Mono',monospace;font-size:9px;color:#b8b3ab;font-weight:400;}
+.b.dgr{color:var(--ink2);}
+.b.dgr:hover{box-shadow:inset 0 0 0 1px var(--burg);color:var(--burg);}
+
+/* materials */
+.stage{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:16px;}
+.ttl{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;}
+.mrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:11px;}
+.att{display:inline-flex;align-items:center;gap:7px;font-size:12px;border-radius:8px;padding:7px 12px;cursor:pointer;}
+.att svg{width:12px;height:12px;fill:none;stroke-width:1.7;}
+.att.neutral{color:var(--ink2);background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);}
+.att.neutral svg{stroke:var(--faint);}
+.att.pink{color:var(--ink);background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);font-weight:500;}
+.att.pink svg{stroke:var(--burg);}
+.att.outline{color:var(--burg);background:#fff;box-shadow:inset 0 0 0 1.5px var(--pinkb);font-weight:500;}
+.att.outline svg{stroke:var(--burg);}
+.addb{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--burg);background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);border-radius:8px;padding:7px 12px;cursor:pointer;}
+
+/* composer */
+.ncard{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:13px;max-width:400px;}
+.compose{display:flex;align-items:flex-end;gap:9px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--oat);padding:9px 10px;}
+.compose.focus{box-shadow:inset 0 0 0 1.5px var(--sage-br);}
+.compose textarea{flex:1;border:0;resize:none;font-family:inherit;font-size:12.5px;line-height:20px;color:var(--ink);
+  outline:none;background:transparent;height:20px;padding:0;display:block;overflow:hidden;}
+.compose textarea::placeholder{color:#b5b0a8;}
+.send{flex:none;font-family:inherit;font-size:11.5px;font-weight:500;height:28px;padding:0 13px;border:0;border-radius:8px;
+  background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);cursor:pointer;}
+.send.off{background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);color:#c4bfb7;cursor:default;}
+.legend{max-width:1240px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>The command bar — every control a real button</h4>
+<div class="sheet">
+  <div class="lab">A · Pink primary, everything else outlined<s>The filled pink still leads; the outline gives the rest an edge without a ground</s></div>
+  <div class="row">
+    <button class="b pink"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log new query</button>
+    <span style="width:22px"></span>
+    <button class="b act"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b act"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudge</button>
+    <button class="b act"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>View related tasks <span class="ct">(1)</span></button>
+    <span class="sp"></span>
+    <button class="b"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>Mark closed</button>
+    <button class="b" style="padding:0 12px"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button>
+    <button class="b dgr"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 13h6l1-13"/></svg>Delete</button>
+  </div>
+
+  <div class="lab">B · Burgundy outline on the two query verbs<s>If Record response and Nudge should carry more weight than the closing three</s></div>
+  <div class="row">
+    <button class="b pink"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Log new query</button>
+    <span style="width:22px"></span>
+    <button class="b burg"><svg viewBox="0 0 24 24"><path d="M21 3 3 10.5l7 3 3 7L21 3Z"/></svg>Record response</button>
+    <button class="b burg"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6Z"/><path d="M10 20h4"/></svg>Nudge</button>
+    <button class="b act"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></svg>View related tasks <span class="ct">(1)</span></button>
+    <span class="sp"></span>
+    <button class="b"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>Mark closed</button>
+    <button class="b" style="padding:0 12px"><svg viewBox="0 0 24 24"><path d="M12 4v11M7.5 11l4.5 4.5L16.5 11M5 20h14"/></svg></button>
+    <button class="b dgr"><svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M8 7l1 13h6l1-13"/></svg>Delete</button>
+  </div>
+</div>
+
+<h4>Materials — prominence, and the sample naming itself</h4>
+<div class="sheet" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+  <div><div class="lab">Pink pills<s>Attached materials as filled pink · sample reads its own size</s></div>
+    <div class="stage">
+      <div class="ttl">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att pink"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+        <span class="att pink"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Synopsis</span>
+        <span class="att pink"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 5,500 words</span>
+        <span class="addb">+ Attach</span>
+      </div>
+      <div class="mrow" style="margin-top:14px">
+        <span class="att pink"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 3 chapters</span>
+        <span class="att pink"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 50 pages</span>
+        <span class="att pink"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Marketing plan</span>
+      </div>
+    </div></div>
+
+  <div><div class="lab">Pink outline<s>Same prominence, less mass — pink stays a ground reserved for actions</s></div>
+    <div class="stage">
+      <div class="ttl">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att outline"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+        <span class="att outline"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Synopsis</span>
+        <span class="att outline"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>First 5,500 words</span>
+        <span class="addb">+ Attach</span>
+      </div>
+    </div></div>
+</div>
+
+<h4>The notes composer — one row until the text needs two</h4>
+<div class="sheet" style="display:flex;gap:16px;flex-wrap:wrap">
+  <div><div class="lab">Empty<s>Save present, faded, inert</s></div>
+    <div class="ncard"><div class="compose">
+      <textarea placeholder="Write a note…" rows="1"></textarea>
+      <button class="send off">Save</button>
+    </div></div></div>
+  <div><div class="lab">One line of text<s>Still exactly one row — Save lit</s></div>
+    <div class="ncard"><div class="compose focus">
+      <textarea rows="1">Nudged today</textarea>
+      <button class="send">Save</button>
+    </div></div></div>
+  <div><div class="lab">Genuinely two lines<s>Grows only when the text wraps</s></div>
+    <div class="ncard"><div class="compose focus">
+      <textarea rows="2" style="height:40px">Priya mentioned she's clearing a backlog — said six weeks but sounded looser</textarea>
+      <button class="send">Save</button>
+    </div></div></div>
+</div>
+
+<div class="legend">
+  <b>The bar.</b> Every control becomes a real button with a hairline outline; hover darkens the outline rather than adding a ground. <b>A</b> keeps the pink filled primary as the only ground on the page, which preserves the rule that has held all along — one filled control, and it is the one that creates something. <b>B</b> gives Record response and Nudge a burgundy outline if the two query verbs should outrank the three closing ones by more than text weight. ⚠️ <b>A is my pick</b>: with every button now outlined, weight and position already separate the groups, and burgundy on two of seven starts the bar competing with the header's status mark.<br><br>
+  <b>Materials.</b> The sample names itself once saved — <i>First 5,500 words</i>, <i>First 3 chapters</i>, <i>First 50 pages</i> — which is both shorter and more informative than <i>Opening sample · 3 ch</i>, and removes the need for a separate size chip. ⚠️ <b>The label is derived from unit and quantity, never stored</b>, or it will drift the first time someone edits the number. <i>Other</i> shows its own free text, which is the same principle.<br>
+  On the colour: <b>pink fill</b> reads strongest and is what you asked for; the <b>pink outline</b> gets most of the prominence while keeping filled pink reserved for actions. ⚠️ Worth knowing that with the bar's primary, the selected row, and now the materials, pink would be doing three jobs on one screen — the outline keeps the materials legible as objects rather than buttons, since a filled pink pill reads as clickable in a bar that also uses filled pink for its primary action.<br><br>
+  <b>The composer.</b> The jump to two rows is a measuring fault: the auto-grow reads <code>scrollHeight</code> while padding is still in the box, so the first keystroke computes a height one line taller than the content. Setting height to <code>auto</code> before measuring, with an explicit line-height and border-box, holds it at one row until the text genuinely wraps. <b>Save is always present</b>, faded and inert with nothing to send, lit as soon as there is.
+</div>
+</body></html>

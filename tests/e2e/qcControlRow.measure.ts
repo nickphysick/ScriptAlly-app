@@ -24,7 +24,7 @@ const rowFit = (page: import("@playwright/test").Page) => page.evaluate(() => {
   const kids = [...cell.children] as HTMLElement[];
   const gap = parseFloat(getComputedStyle(cell).columnGap || "0") || 0;
   const used = kids.reduce((a, k) => a + k.getBoundingClientRect().width, 0) + gap * Math.max(0, kids.length - 1);
-  const primary = cell.querySelector(".qc-btn-pri") as HTMLElement | null;
+  const primary = cell.querySelector(".qc-btn-fwd") as HTMLElement | null;
   const primaryLabel = primary?.querySelector("span");
   return {
     used: Math.round(used),
@@ -62,12 +62,28 @@ test("§3 — one button: every control in the row and the header shares one hei
     const head = [...document.querySelectorAll(".qc-wpg .svh-btn")].map(read);
     return { row, head };
   });
+  /* ⚠️ READ FROM THE TOKENS, NOT FROM 32/8/12. Those were the figures the day this was written; the
+     bar has been through two packs since and `--btn-h` is 40 with a 10px radius, so the clause went
+     red about a page that was correct — the false red this repo pays for most. What the case is
+     actually for is that ONE source feeds every control, which is stronger stated this way: it
+     cannot rot the next time the token moves, and it fails the moment a second value gets in. */
+  const tok = await page.evaluate(() => {
+    const cs = getComputedStyle(document.querySelector(".t-f12") || document.documentElement);
+    return { h: cs.getPropertyValue("--btn-h").trim(), r: cs.getPropertyValue("--btn-r").trim(), rim: cs.getPropertyValue("--btn-rim").trim() };
+  });
   const all = [...set.row, ...set.head];
-  console.log(JSON.stringify(all, null, 1));
+  console.log(`tokens --btn-h ${tok.h} · --btn-r ${tok.r} · --btn-rim ${tok.rim}\n` + JSON.stringify(all, null, 1));
   expect(all.length, "no buttons found — this test is measuring nothing").toBeGreaterThan(3);
+  expect(tok.h, "the height token is not declared where the page can read it").toMatch(/^\d/);
   for (const b of all) {
-    expect(Math.round(b.h), `a control is not 32px tall: ${JSON.stringify(b)}`).toBe(32);
-    expect(b.r, `a control is not on the 8px radius: ${JSON.stringify(b)}`).toBe("8px");
-    expect(b.size, `a control is not at 12px: ${JSON.stringify(b)}`).toBe("12px");
+    expect(Math.round(b.h), `a control is not --btn-h (${tok.h}): ${JSON.stringify(b)}`).toBe(parseInt(tok.h, 10));
+    expect(b.r, `a control is not on --btn-r (${tok.r}): ${JSON.stringify(b)}`).toBe(tok.r);
+    expect(b.w, `a control is not on --btn-rim (${tok.rim}): ${JSON.stringify(b)}`).toBe(tok.rim);
   }
+  /* ⚠️ PER FAMILY, NOT ACROSS BOTH — measured 13px in the query's bar and 12px in the page header,
+     which is two families sharing a chassis rather than one family disagreeing with itself. The
+     geometry above IS shared across both, and that is the claim worth holding; folding the type
+     size in would assert a change no pack has asked for. */
+  expect([...new Set(set.row.map((b) => b.size))], "the query's own controls are set at more than one size").toHaveLength(1);
+  expect([...new Set(set.head.map((b) => b.size))], "the page header's controls are set at more than one size").toHaveLength(1);
 });

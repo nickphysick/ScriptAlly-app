@@ -3801,7 +3801,7 @@ export const Queries: React.FC<{
                        anchor positions a popover at 0,0). */
                     ref={verbIsMark && !isMobile ? markSentTriggerRef : undefined}
                     type="button"
-                    className="qc-btn qc-btn-pri"
+                    className="qc-btn qc-btn-fwd"
                     onClick={() => openRecord(activeQuery)}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
@@ -3819,7 +3819,7 @@ export const Queries: React.FC<{
                   <button
                     ref={nudgeTriggerRef}
                     type="button"
-                    className={`qc-btn qc-btn-shrink${nudgeAt === "available" ? "" : " qc-btn-off"}${nudgeAgoDays != null ? " qc-btn-quiet" : ""}`}
+                    className={`qc-btn qc-btn-shrink qc-btn-fwd${nudgeAt === "available" ? "" : " qc-btn-off"}${nudgeAgoDays != null ? " qc-btn-quiet" : ""}`}
                     aria-disabled={nudgeAt !== "available"}
                     title={nudgeAt === "available" ? (nudgeAgoDays != null ? `Nudged ${agoLabel(nudgeAgoDays)} — nudge again` : "Send a nudge") : nudgeWhy}
                     onClick={() => {
@@ -3869,7 +3869,7 @@ export const Queries: React.FC<{
                       <button
                         ref={tasksTrigRef}
                         type="button"
-                        className="qc-btn qc-btn-shrink"
+                        className="qc-btn qc-btn-shrink qc-btn-fwd"
                         aria-haspopup="dialog"
                         aria-expanded={isTasksOpen}
                         title="Tasks on this query"
@@ -3941,7 +3941,7 @@ export const Queries: React.FC<{
                  fired against a query that is not there. `aria-hidden` for the same reason: it is a
                  shape, and a screen reader should meet the four verbs when they mean something. */
               <span className="qc-verbs-inert" aria-hidden="true">
-                <button type="button" className="qc-btn qc-btn-pri" disabled tabIndex={-1}>
+                <button type="button" className="qc-btn qc-btn-fwd" disabled tabIndex={-1}>
                   <svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z" /></svg>
                   <span>Record response</span>
                 </button>

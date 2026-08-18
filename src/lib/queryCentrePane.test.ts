@@ -67,7 +67,7 @@ describe("the query's verbs live in one kebab, not a bar", () => {
     /* the primary's label is CONTEXTUAL — the CTA engine's, shared with the mobile bar and the
        to-do flows — so it is asserted by its derivation rather than by one of its four words. */
     expect(row, "the primary stopped reading the CTA engine").toContain("getPrimaryAction(activeQuery.status as QueryStatus)");
-    expect(row, "the primary is not the one filled control").toContain('className="qc-btn qc-btn-pri"');
+    expect(row, "the primary is not the one filled control").toContain('className="qc-btn qc-btn-fwd"');
   });
 
   /**
@@ -104,7 +104,7 @@ describe("the query's verbs live in one kebab, not a bar", () => {
     expect(cell, "the pane's control cell is missing").toBeGreaterThan(-1);
     const guard = code.indexOf("{activeQuery && activeAgent ? (() => {", cell);
     expect(guard, "the selection guard is missing from the control cell").toBeGreaterThan(cell);
-    expect(guard, "the guard fell below the verbs it wraps").toBeLessThan(code.indexOf("qc-btn-pri", cell));
+    expect(guard, "the guard fell below the verbs it wraps").toBeLessThan(code.indexOf("qc-btn-fwd", cell));
   });
 
   /**

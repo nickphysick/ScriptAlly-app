@@ -1810,15 +1810,27 @@
 .qc-btn {
   display: inline-flex; align-items: center; gap: 7px; flex: none;
   height: var(--btn-h); padding: 0 16px; border-radius: var(--btn-r);
-  /* ⚠️ BORDERLESS AT REST (§3) — no ground and no rim, so the bar reads as a row of verbs rather
-     than a row of objects. The rim is kept as a TRANSPARENT border rather than removed, because a
-     `border: 0` state and a `border: 1px` hover would move every label by a pixel on hover. */
-  border: var(--btn-rim) solid transparent; background: transparent;
+  /**
+   * ⚠️ OUTLINED AT REST (§1), REVERSING "BORDERLESS AT REST". That rule wanted the bar to read as a
+   * row of verbs rather than a row of objects; what it produced was seven controls that read as
+   * TEXT until the pointer found them — a row where nothing looks pressable is not quieter, it is
+   * unlabelled.
+   *
+   * ⚠️ ONE HEIGHT AND ONE OUTLINE, FROM THE TOKENS THIS FILE ALREADY DECLARES — `--btn-h`,
+   * `--btn-r`, `--btn-rim` and `--btn-line`, all four set once in `.t-f12`. Seven near-identical
+   * buttons is exactly where a second hardcoded value gets in, and the rim was already a
+   * transparent placeholder for precisely this reason: it becomes a colour without moving a label
+   * by a pixel.
+   *
+   * ⚠️ AND THE HOVER DARKENS THE OUTLINE RATHER THAN ADDING A GROUND. A ground on hover would make
+   * seven buttons that fill under the pointer beside the one button that is filled all the time.
+   */
+  border: var(--btn-rim) solid var(--btn-line); background: var(--white);
   color: var(--ink-2); font-family: inherit; font-size: 13px; font-weight: 500; line-height: 1;
   white-space: nowrap; cursor: pointer;
   transition: background-color 0.14s, border-color 0.14s, color 0.14s;
 }
-.qc-btn:hover { background: var(--white); border-color: var(--btn-line); }
+.qc-btn:hover { background: var(--white); border-color: var(--ink-2); }
 .qc-btn svg { width: 16px; height: 16px; flex: 0 0 16px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 /**
  * ══ §5 · THE PRIMARY JOINS THE FAMILY ════════════════════════════════════════════════════════
@@ -1852,7 +1864,18 @@
    forward from the three that end it. If Record response ever fails to read as the likely action,
    the correction is full ink on it and muted on the rest — never a ground returning, which would
    put a second filled button one column from `Log new query`. */
-.qc-btn-pri { color: var(--ink); font-weight: 600; }
+/**
+ * ⚠️ `-fwd`, NOT `-pri` (§1) — THE CLASS IS THE GROUP, NOT ONE BUTTON. It held only `Record
+ * response` while it meant "the primary"; the pack's rule is that the three verbs which move a
+ * query FORWARD carry the heavier ink and weight, and the three that END it stay lighter. Three
+ * buttons wearing a class called "primary" would have been a name that lies, and a second rule with
+ * the same two declarations would be the drift this file spends its comments on.
+ *
+ * ⚠️ WEIGHT AND INK, AND NO GROUND. With every button outlined, weight alone separates the groups —
+ * which is why a second fill is forbidden here: `Log new query` is the page's one filled control
+ * and the bar's only ground.
+ */
+.qc-btn-fwd { color: var(--ink); font-weight: 600; }
 /**
  * ⚠️ MUTED NOW MEANS "ALREADY DONE", NOT "LESS IMPORTANT" — and that reversal is the whole of §2.
  * This class was a RANK: Mark closed, Export and Delete were quieter than the two verbs that move a
@@ -1874,7 +1897,10 @@
    hierarchy argument, which put the app's unavailable treatment on a verb that is always
    available. The hover is untouched: colour arrives at the moment before it is pressed, which is
    where the signal is useful and where it cannot be mistaken for a disabled state. */
-.qc-btn-danger:hover { color: var(--qc-acc-late); background: var(--qc-acc-late-t); border-color: var(--qc-acc-late-b); }
+/* ⚠️ THE HOVER IS BURGUNDY AND THE REST IS THE FAMILY'S (§1) — no red, no permanent warning colour.
+   The signal arrives at the moment before it is pressed, which is where it is useful and where it
+   cannot be mistaken for a state. */
+.qc-btn-danger:hover { color: var(--burg); background: var(--white); border-color: var(--burg); }
 /* ══ §2 · LOG NEW QUERY — A MODIFIER, PLACED AFTER THE BASE IT MODIFIES ═════════════════════
  * ⚠️ SOURCE ORDER IS THE MECHANISM, and getting it wrong was silent: the modifier sat 200 lines
  * ABOVE `.qc-btn`, so at equal specificity the base's `background: var(--white)` won and the pink
@@ -1898,8 +1924,11 @@
    that draw nothing — the one control the writer cannot use was the most prominent thing in the
    row. Quiet text, no fill, no frame; the hover suppression stays, because a control that lights
    up under the pointer is claiming to be available. */
-.qc-btn:disabled, .qc-btn-off { color: var(--qc-tx-off); border-color: transparent; background: transparent; cursor: default; }
-.qc-btn:disabled:hover, .qc-btn-off:hover { background: transparent; border-color: transparent; }
+/* ⚠️ AN UNAVAILABLE CONTROL KEEPS ITS BOX AND LOSES ITS INK (§1). It used to lose the outline too,
+   which was right while nothing had one and wrong the moment every button does: a button with no
+   edge in a row of edges reads as a gap rather than as a control that cannot be used. */
+.qc-btn:disabled, .qc-btn-off { color: var(--qc-tx-off); border-color: var(--qc-rim-off); background: var(--white); cursor: default; }
+.qc-btn:disabled:hover, .qc-btn-off:hover { background: var(--white); border-color: var(--qc-rim-off); }
 .qc-btn:disabled svg, .qc-btn-off svg { opacity: 0.55; }
 /* the icon-only form: a square of the same height, so it sits on the row's line without arithmetic */
 /* ⚠️ SQUARE AT THE NEW HEIGHT — the icon-only Export is the one button with no label to set its

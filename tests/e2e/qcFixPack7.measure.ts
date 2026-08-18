@@ -117,8 +117,8 @@ test("§1/§3/§5 — parchment headers, a white plate, and one button family", 
     /* ⚠️ AN ENABLED NEIGHBOUR. The first standard button in this row is Nudge, which is disabled
        whenever no chase is due and wears the disabled rim tone — so an unqualified selector compared
        the primary against a GREYED control and reported a tone difference §5 never made. */
-    const std = q(".qc-phead .qc-btn:not(.qc-btn-pri):not(.qc-btn-off):not(:disabled)");
-    const pri = q(".qc-phead .qc-btn-pri");
+    const std = q(".qc-phead .qc-btn:not(.qc-btn-fwd):not(.qc-btn-off):not(:disabled)");
+    const pri = q(".qc-phead .qc-btn-fwd");
     return {
       headBg: head?.backgroundColor, headSize: head?.fontSize, headRule: head?.borderBottomColor,
       plateBg: plate?.backgroundColor, plateShadow: plate?.boxShadow !== "none",
