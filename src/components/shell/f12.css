@@ -4001,3 +4001,16 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .t-f12 { --qc-track-clear: 12px; }
 .qc-trackscroll { padding-top: var(--qc-track-clear) !important; }
 .qc-trackscroll .tl-ev { scroll-margin-top: var(--qc-track-clear); }
+
+/* ══ §6 · TRACKING'S TWO DATES ARE CLICK-TO-EDIT ══════════════════════════════════════════════
+ *
+ * ⚠️ THE WHOLE CELL IS THE CONTROL, not a pencil beside it — the thing being offered is "change
+ * this date", and the figure is what you are changing. A real `<button>`, so it is in the tab
+ * order and answers Enter and Space without a handler of ours.
+ *
+ * ⚠️ AND `Not set` STOPS BEING A LABEL. It read as the field's name because nothing happened when
+ * you pressed it; it is the empty state now, with a way out of it.
+ */
+.qp-stat--edit { width: 100%; text-align: left; background: transparent; border: 0; font: inherit; color: inherit; cursor: pointer; border-radius: 9px; transition: background-color 0.12s; }
+.qp-stat--edit:hover { background: var(--paper); }
+.qp-stat--edit:focus-visible { outline: 2px solid var(--qc-ring); outline-offset: 1px; }

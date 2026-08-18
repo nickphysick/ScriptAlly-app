@@ -20,6 +20,8 @@ import {
   limit
 } from "firebase/firestore";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
+/* §6 — the same atomic path the Edit drawer saves its dates through; recompute derives the rest. */
+import { commitQueryEdits } from "../lib/saveQueryEdits";
 import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, SubmissionStatus, ActivityType, QueryMaterial, UserPlan, ComponentType } from "../types";
 import { TypeGlyph } from "./packages/TypeGlyph";
 import { StatusPill, getStatusLabel } from "./StatusPill";
@@ -102,6 +104,13 @@ import {
   qdbCardLine,
   qdbBoldInk, qdbBoldInk2, qdbBoldMuted,
 } from "../lib/designTokens";
+
+/** An ISO date to the `<input type="date">` value the browser wants, or "" when there is none. */
+const toDateInputValue = (iso?: string | null): string => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
 
 const normalizeStatus = (status: string | QueryStatus): QueryStatus => {
   if (!status) return QueryStatus.QUERIED;
@@ -1001,6 +1010,13 @@ export const Queries: React.FC<{
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   /* §4c — the confirm hangs off the Nudge button itself; the control row sits at the top of the
      pane, so it opens downward like every other menu in that row. */
+  /**
+   * §6 — which of Tracking's two dates is being edited. `sent` writes the SEND date through the
+   * activity log's own commit; `expected` writes the stored `responseDeadline` override.
+   */
+  const [dateEdit, setDateEdit] = useState<null | "sent" | "expected">(null);
+  const [dateDraft, setDateDraft] = useState("");
+  const { triggerRef: dateTrigRef, menuStyle: dateMenuStyle } = useFixedMenu<HTMLElement>(!!dateEdit);
   const [nudgeAsk, setNudgeAsk] = useState<{ title: string; body: string; bar?: { pct: number; sentLabel: string; closesLabel: string } } | null>(null);
   const { triggerRef: nudgeTriggerRef, menuStyle: nudgeAskStyle } = useFixedMenu<HTMLButtonElement>(!!nudgeAsk);
   // Close every ribbon popover/modal whenever the reader moves to a different query.
@@ -4830,7 +4846,29 @@ export const Queries: React.FC<{
                           return (
                             <div className="qp-stats">
                               {cells.map((c) => (
-                                <div className="qp-stat" key={c.key}>
+                                /**
+                                 * ⚠️ §6 · THE CELL IS THE CONTROL. Both figures read `Not set` and did
+                                 * nothing — an empty state offered as a label, with the only way to
+                                 * fill it three clicks away in a drawer. `Not set` is what the field
+                                 * says when it is empty, not what the field is called.
+                                 *
+                                 * ⚠️ A REAL BUTTON, so it is in the tab order and answers Enter and
+                                 * Space without a keydown handler of ours. The hover affordance is
+                                 * the cell's own (`.qp-stat` gains one), because the thing being
+                                 * offered is the whole cell rather than a pencil beside it.
+                                 */
+                                <button
+                                  type="button"
+                                  className="qp-stat qp-stat--edit"
+                                  key={c.key}
+                                  title={c.key === "waiting" ? "Change the date this was sent" : "Change when a reply is expected"}
+                                  onClick={(e) => {
+                                    const which = c.key === "waiting" ? "sent" : "expected";
+                                    (dateTrigRef as React.MutableRefObject<HTMLElement | null>).current = e.currentTarget;
+                                    setDateDraft(toDateInputValue(which === "sent" ? activeQuery.dateSent : activeQuery.responseDeadline));
+                                    setDateEdit(which);
+                                  }}
+                                >
                                   <span className="qp-statgl" aria-hidden="true">{STAT_GLYPH[c.key]}</span>
                                   <div>
                                     {/* ⚠️ THE ABSENT FIGURE IS QUIETER THAN A REAL ONE (§2). "Not
@@ -4840,7 +4878,7 @@ export const Queries: React.FC<{
                                     <div className={`qp-statn${c.absent ? " qp-statn--off" : ""}`}>{c.value}{c.unit && <small> {c.unit}</small>}</div>
                                     <div className="qp-statk">{c.caption}</div>
                                   </div>
-                                </div>
+                                </button>
                               ))}
                             </div>
                           );
@@ -5356,6 +5394,55 @@ export const Queries: React.FC<{
           triggerToast({ queryId: activeQuery.id, agentName: agentPrimary(activeAgent), manuscriptTitle: activeMs?.title || "", responseStyle: null });
         }}
       />
+    )}
+
+    {/**
+      * §6 — THE DATE EDITOR THE TWO TRACKING CELLS OPEN.
+      *
+      * ⚠️ IT WRITES THROUGH `commitQueryEdits`, THE PATH THE EDIT DRAWER ALREADY USES — `dateSentMs`
+      * for the send (which the drawer also passes, because the send date lives in the ACTIVITY LOG
+      * and `recomputeQuery` derives `dateSent` from it) and `queryFields.responseDeadline` for the
+      * expected date, which is a stored override rather than a derived field. `recomputeQuery`
+      * remains the single writer for everything derived from either; nothing here writes a derived
+      * field directly.
+      *
+      * ⚠️ AND A CLEARED FIELD IS `""`, NOT A DELETE — the same value the drawer sends, which is what
+      * the rules' allowlist accepts.
+      */}
+    {dateEdit && activeQuery && (
+      <F12Popover
+        width={244}
+        title={dateEdit === "sent" ? "Date sent" : "Reply expected by"}
+        style={dateMenuStyle}
+        onClose={() => setDateEdit(null)}
+      >
+        <input
+          type="date"
+          className="qc-pickfield"
+          autoFocus
+          value={dateDraft}
+          max={dateEdit === "sent" ? toDateInputValue(new Date().toISOString()) : undefined}
+          aria-label={dateEdit === "sent" ? "Date sent" : "Reply expected by"}
+          onChange={(e) => setDateDraft(e.target.value)}
+        />
+        <button
+          type="button"
+          className="qc-mpopact"
+          disabled={!dateDraft}
+          onClick={async () => {
+            if (!currentUser || !dateDraft) return;
+            const ms = new Date(`${dateDraft}T12:00:00`).getTime();
+            const ops = dateEdit === "sent"
+              ? { dateSentMs: ms }
+              : { queryFields: { responseDeadline: new Date(ms).toISOString() } };
+            await commitQueryEdits(db, currentUser.id, activeQuery.id, ops as never, {
+              agentName: agentPrimary(activeAgent), manuscriptId: activeQuery.manuscriptId, manuscriptTitle: activeMs?.title || "",
+            });
+            setDateEdit(null);
+            showToast({ message: dateEdit === "sent" ? "Date sent updated" : "Expected date updated" });
+          }}
+        >Save</button>
+      </F12Popover>
     )}
 
     {/**
