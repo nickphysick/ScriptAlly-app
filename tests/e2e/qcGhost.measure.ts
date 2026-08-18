@@ -116,5 +116,82 @@ test("§2 — the ghost is an event, with the events' gap and its own marker", a
   expect(ghostGap, "the ghost is fused to the event above it").toBeGreaterThan(8);
 
   expect(g.ghost!.text, "the rung still reads as a fragment").toContain("Nudge reminder set");
-  expect(g.ghost!.text, "the rung does not say when").toContain("Scheduled for");
+  /* ⚠️ THE PREFIX IS GONE WITH THE SENTENCE (§3 of the event-grammar pack). "Scheduled for" was a
+     word explaining a slot that needs no explaining; the panel states what is set and when. */
+  expect(g.ghost!.text, "the retired prefix is back").not.toContain("Scheduled for");
+});
+
+/**
+ * §3 (event-grammar pack) — the reminder is a dashed pending PANEL, and the only one.
+ *
+ * ⚠️ THE "ONLY ONE" HALF IS THE HALF WORTH MEASURING. That a dashed panel renders is visible in a
+ * screenshot; that nothing ELSE on the timeline has taken the shape is not, and it is what stops
+ * "not yet" becoming a decoration. So this counts dashed borders across the whole card.
+ */
+test("§3 — the ghost is a dashed panel, and the only dashed object", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  const rows = page.locator(".f12-row");
+  await rows.first().click({ timeout: 8000 });
+  await page.waitForTimeout(400);
+
+  let found = -1;
+  const n = Math.min(await rows.count(), 10);
+  for (let i = 0; i < n; i++) {
+    if (i >= await rows.count()) break;
+    await rows.nth(i).click({ timeout: 6000 });
+    await page.waitForTimeout(350);
+    if (await page.locator(".tl-ghostpanel").count()) { found = i; break; }
+  }
+  expect(found, "no query on this account carries a scheduled reminder").toBeGreaterThan(-1);
+
+  const g = await page.evaluate(() => {
+    const p = document.querySelector<HTMLElement>(".tl-ghostpanel")!;
+    const cs = getComputedStyle(p);
+    /* every dashed border inside the timeline card, whatever draws it */
+    const card = p.closest(".qc-trackscroll") || p.closest(".tl-ev")!.parentElement!;
+    /* ⚠️ AN OUTLINE IS A BOX ON ALL FOUR SIDES, and that distinction is the whole of this probe.
+       A first pass counted any dashed edge and flagged two things that are not outlines: the
+       editable qualifier's dashed UNDERLINE — a rule under a word, the app's "you can change this"
+       affordance — and the ghost's own dashed ring, which belongs to the object being asserted.
+       Neither is a pending panel, and banning them would be banning a device the card needs. */
+    const dashed = [...card.querySelectorAll<HTMLElement>("*")]
+      .filter((e) => {
+        const c = getComputedStyle(e);
+        return ["borderTopStyle", "borderRightStyle", "borderBottomStyle", "borderLeftStyle"]
+          .every((k) => (c as unknown as Record<string, string>)[k] === "dashed");
+      })
+      .filter((e) => !e.closest(".tl-ev--ghost"))
+      .map((e) => e.className || e.tagName.toLowerCase());
+    return {
+      tag: p.tagName,
+      text: (p.textContent || "").replace(/\s+/g, " ").trim(),
+      border: `${cs.borderTopStyle} ${cs.borderTopWidth}`,
+      fill: cs.backgroundColor,
+      shadow: cs.boxShadow,
+      who: (p.querySelector(".tl-ghostwho")?.textContent || "").trim(),
+      when: (p.querySelector(".tl-ghostwhen")?.textContent || "").trim(),
+      whenRight: (() => {
+        const w = p.querySelector<HTMLElement>(".tl-ghostwhen");
+        return w ? Math.round(p.getBoundingClientRect().right - w.getBoundingClientRect().right) : null;
+      })(),
+      mark: !!document.querySelector(".tl-ghostmark"),
+      dashed,
+    };
+  });
+  console.log(`  panel <${g.tag}> "${g.text}" · border ${g.border} · fill ${g.fill} · shadow ${g.shadow}`);
+  console.log(`  who "${g.who}" · when "${g.when}" (${g.whenRight}px from the right edge) · dashed objects: ${g.dashed.join(", ")}`);
+
+  /* ⚠️ THE PANEL IS THE LINK, which is what removed the link from the middle of the sentence. */
+  expect(g.tag, "the panel is not the link target").toBe("BUTTON");
+  expect(g.border, "the panel is not a dashed outline").toMatch(/^dashed 1px$/);
+  expect(g.fill, "the panel took a fill — solid is what happened").toBe("rgba(0, 0, 0, 0)");
+  expect(g.shadow, "the panel took a shadow").toBe("none");
+  expect(g.who, "the panel does not say what is set").toBe("Nudge reminder set");
+  expect(g.when, "the panel does not say when").toMatch(/^(MON|TUE|WED|THU|FRI|SAT|SUN)/i);
+  expect(g.when, "the date carries a prefix word").not.toMatch(/SCHEDULED|DUE|ON /i);
+  expect(g.whenRight, "the date is not against the panel's right edge").toBeLessThan(16);
+  expect(g.mark, "the panel lost its dashed marker on the rail").toBe(true);
+
+  /* ⚠️ AND NOTHING ELSE IS DASHED. */
+  expect(g.dashed, `something else on the timeline is a dashed outline: ${g.dashed.join(", ")}`).toEqual([]);
 });

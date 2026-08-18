@@ -845,18 +845,37 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
       {ballHolder === "agent" && waiting && reminder && (
         <div className="tl-ev tl-ev--ghost tl-ev--last">
           <div className="tl-evmark"><span className="tl-ghostmark" aria-hidden="true">🔔</span></div>
+          {/**
+            * ⚠️ §3 · A PENDING OBJECT, NOT AN EVENT — option C. §1 gave every event two rows, and
+            * this one kept failing to fit them because it is not an event: nothing happened. So it
+            * stops being written in the event grammar and becomes a dashed panel hanging off the
+            * rail below the record.
+            *
+            * ⚠️ THE PANEL IS THE LINK, which is what removes the fragment. The sentence used to
+            * carry a link in its middle — "Nudge reminder set · from your to-do list · SCHEDULED
+            * FOR MON 1 SEP" — three things competing on one line, one of them a prefix explaining a
+            * slot. The whole panel is the target now, so the words are just the two facts: what is
+            * set, and when.
+            *
+            * ⚠️ SOLID IS WHAT HAPPENED; DASHED IS WHAT HAS NOT. No fill, no shadow, faint ink
+            * throughout, on the page ground rather than a surface of its own.
+            *
+            * ⚠️ AND IT IS THE ONLY OBJECT ON THIS TIMELINE ALLOWED OUTSIDE THE TWO-ROW GRAMMAR,
+            * precisely because it is not an event. Nothing else may take this shape — a second
+            * dashed panel would make "not yet" a decoration rather than a statement.
+            */}
           <div className="tl-rowbody">
-            {/**
-              * ⚠️ §2 · A SENTENCE, NOT A FRAGMENT. It read "Nudge reminder", which is a label — a
-              * noun phrase the reader has to finish for themselves. `Nudge reminder set` states
-              * what is true, and the meta slot says when: `SCHEDULED FOR MON 1 SEP`, weekday first,
-              * because a future date is read as a day of the week before it is read as a number.
-              */}
-            <div className="tl-ghostline">
-              <span>Nudge reminder set</span>
-              {onOpenReminder && <button type="button" className="tl-ghostlink" onClick={onOpenReminder}>from your to-do list</button>}
-              <span className="tl-ghostdate">{reminder.dueDate ? `Scheduled for ${fmtDay(new Date(`${reminder.dueDate}T12:00:00`).getTime())}` : ""}</span>
-            </div>
+            {onOpenReminder ? (
+              <button type="button" className="tl-ghostpanel" onClick={onOpenReminder} title="Open this reminder on your to-do list">
+                <span className="tl-ghostwho">Nudge reminder set</span>
+                <span className="tl-ghostwhen">{reminder.dueDate ? fmtDay(new Date(`${reminder.dueDate}T12:00:00`).getTime()) : ""}</span>
+              </button>
+            ) : (
+              <div className="tl-ghostpanel">
+                <span className="tl-ghostwho">Nudge reminder set</span>
+                <span className="tl-ghostwhen">{reminder.dueDate ? fmtDay(new Date(`${reminder.dueDate}T12:00:00`).getTime()) : ""}</span>
+              </div>
+            )}
           </div>
         </div>
       )}

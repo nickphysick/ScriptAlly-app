@@ -357,10 +357,16 @@ describe("§2 · the ghost rung asks the same source as the row above it", () =>
     expect(tl, "the rung is not rendered off the reminder").toContain("reminder && (");
   });
 
-  /* ⚠️ A SENTENCE, NOT A LABEL — and the date says when rather than sitting there as a bare day. */
+  /**
+   * ⚠️ THE PREFIX IS RETIRED (§3, event-grammar pack) AND THE CLAUSE IS INVERTED. "Scheduled for"
+   * was the right fix while the rung was a sentence in the event grammar; the rung is now a dashed
+   * panel that is not an event at all, and the prefix was a word explaining a slot that needs no
+   * explaining. The other half of the case stands unchanged: it states what is set.
+   */
   it("the rung states what is true and when", () => {
     expect(tl, "the rung reads as a fragment again").toContain("Nudge reminder set");
-    expect(tl, "the rung does not say when").toContain("Scheduled for ${");
+    expect(tl, "the retired prefix is back in the panel").not.toContain("Scheduled for ${");
+    expect(tl, "the panel does not state a date").toContain("fmtDay(");
   });
 });
 
