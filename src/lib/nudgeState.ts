@@ -357,6 +357,51 @@ export function silencePolicyLine(inp: SilencePolicyInput): string | null {
   return `${who.name} ${agree(who, "treat", "treats")} silence as a pass — their window expired ${formatDate(windowExpiredMs)}.`;
 }
 
+/**
+ * ══ WHOSE WINDOW IS IT — the attribution that rides beside the event's title ═══════════════════
+ *
+ * ⚠️ THE CHIP IS RETIRED AND THIS REPLACES IT. `Priya says 6 weeks` had its own surface so that a
+ * claim could not be read as one of the app's own sentences — the right instinct, and the wrong
+ * device: it cost a whole body part to say four words, and it could only ever carry the AGENCY's
+ * version. Attribution in the title line does the same job for the agency, does it for the writer
+ * too, and costs no space.
+ *
+ * ⚠️ THREE SOURCES, THREE VOICES, AND THE THIRD IS SILENCE. An agency's stated weeks are their
+ * claim and are named as such; a date the writer set is their estimate and says so; the house
+ * 8/12/12-week default belongs to nobody and gets no sentence at all. A `null` here is the point of
+ * the whole section, not a missing case.
+ *
+ * ⚠️ TENSE FOLLOWS THE WINDOW, NOT THE STATEMENT. Past the window the agency `advised` — they have
+ * not withdrawn the claim, but the period it described is over, and the present tense beside an
+ * expired bar reads as though the app had not noticed.
+ */
+export interface WindowAttributionInput {
+  source: "agent" | "writer" | null;
+  who: Chased;
+  /** The agency's stated weeks — required for the agent voice, ignored otherwise. */
+  weeks?: number | null;
+  /** The resolved expected date — required for the writer voice. */
+  expMs?: number | null;
+  past: boolean;
+  /** Long-form date, injected so this module stays free of formatting. */
+  formatDate: (ms: number) => string;
+}
+
+/** `lead` is plain, `strong` is the part that carries the fact — the ref emphasises the claim. */
+export function windowAttribution(inp: WindowAttributionInput): { lead: string; strong: string } | null {
+  const { source, who, weeks, expMs, past, formatDate } = inp;
+  if (source === "agent") {
+    if (!weeks || weeks <= 0) return null;
+    const verb = past ? "advised" : agree(who, "advise", "advises");
+    return { lead: `${who.name} `, strong: `${verb} ${weeks} week${weeks === 1 ? "" : "s"}` };
+  }
+  if (source === "writer") {
+    if (expMs == null) return null;
+    return { lead: "", strong: `you expect${past ? "ed" : ""} a reply by ${formatDate(expMs)}` };
+  }
+  return null;
+}
+
 /** A task that is a scheduled reminder on this query: undone, scoped to it, and dated ahead. */
 export interface ReminderTask { id: string; text: string; done: boolean; queryId?: string; dueDate?: string }
 

@@ -121,8 +121,28 @@ export interface AmbientStatus {
    * by ~" off it was presenting the house guess as something the agency said. True when the AGENT
    * states a window, or when the writer set an expected date themselves (`responseDeadline`); false
    * when the figure is the assumption.
+   *
+   * ⚠️ IT IS NOW DERIVED FROM `windowSource` rather than set beside it, so the two cannot disagree.
    */
   windowStated: boolean;
+  /**
+   * ══ WHOSE WINDOW IS IT ═══════════════════════════════════════════════════════════════════════
+   *
+   * ⚠️ `windowStated` COLLAPSED TWO DIFFERENT FACTS INTO ONE BOOLEAN, and that is the whole fault.
+   * A window reaches this card from three places and they belong to three different people:
+   *
+   *   `"agent"`  the agency's own `responseTimeWeeks` — THEIR claim, and nameable as such
+   *   `"writer"` a date the writer set themselves (`responseDeadline`) — YOUR estimate
+   *   `null`     the house 8/12/12-week default — nobody's, and it may say nothing at all
+   *
+   * With one flag for the first two, a date the WRITER typed rendered as though the agency had
+   * stated it — beside a body line correctly reporting that they had not. Both sentences were
+   * true; the attribution was invented, and nothing in the data said which was which.
+   *
+   * ⚠️ THE PREVIOUS PACK REMOVED THE HOUSE ASSUMPTION FROM EVERY READER. This is a level above
+   * that: the assumption was already excluded, and the remaining two were still one thing.
+   */
+  windowSource: "agent" | "writer" | null;
 }
 
 /** Derive the open-state numbers for a query, given the CTA engine's ball-holder + markKind. */
@@ -150,7 +170,7 @@ export function queryAmbientStatus(
 ): AmbientStatus {
   const base: AmbientStatus = {
     mode: "closed", nDays: 0, sentMs: null, expMs: null, widthPct: 0, overdue: false, daysOverdue: 0,
-    sendWhat: "resubmission", eventLabel: "", writerDaysAgo: null, windowStated: false,
+    sendWhat: "resubmission", eventLabel: "", writerDaysAgo: null, windowStated: false, windowSource: null,
   };
 
   if (ballHolder === "agent") {
@@ -161,7 +181,30 @@ export function queryAmbientStatus(
     const sentMs = sendIso ? getTime(sendIso) : NaN;
     if (!Number.isNaN(sentMs)) {
       const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
-      return { ...base, mode: "waiting", nDays, sentMs, expMs: sentMs + mDays * DAY, widthPct: Math.max(0, Math.min(1, nDays / mDays)) * 100, overdue: nDays > mDays, daysOverdue: Math.max(0, nDays - mDays), windowStated: !!(windowWeeks && windowWeeks > 0) };
+      /**
+       * ⚠️ THE WRITER'S OWN DATE IS HONOURED ON A DATED QUERY TOO, and it was not before. This
+       * branch read the agent's weeks or the house default and never looked at `responseDeadline`
+       * at all — the override was consulted only where there was no send date — so a writer who
+       * answered "Set a date" on an ordinary dated query changed nothing they could see.
+       *
+       * ⚠️ THE AGENCY'S FIGURE STILL WINS WHERE THEY HAVE STATED ONE. It is a fact about them
+       * rather than an estimate about them, and the control that sets the writer's date is offered
+       * only where the agency has stated nothing — so the two rarely meet, and when they do the
+       * attributable fact is the one worth drawing.
+       */
+      const overrideMs = query.responseDeadline ? getTime(query.responseDeadline) : NaN;
+      const agentStated = !!(windowWeeks && windowWeeks > 0);
+      const useOverride = !agentStated && !Number.isNaN(overrideMs);
+      const expMs = agentStated || !useOverride ? sentMs + mDays * DAY : overrideMs;
+      const span = Math.max(1, expMs - sentMs);
+      return {
+        ...base, mode: "waiting", nDays, sentMs, expMs,
+        widthPct: Math.max(0, Math.min(1, (now - sentMs) / span)) * 100,
+        overdue: now > expMs,
+        daysOverdue: Math.max(0, Math.floor((now - expMs) / DAY)),
+        windowStated: agentStated || useOverride,
+        windowSource: agentStated ? "agent" : useOverride ? "writer" : null,
+      };
     }
     // P4 — no stage send date to derive from: fall back to the stored responseDeadline OVERRIDE (a
     // legitimate user input — "Set an expected date"). Drives the readout's overdue/expected; without
@@ -170,7 +213,7 @@ export function queryAmbientStatus(
     if (!Number.isNaN(overrideMs)) {
       /* ⚠️ AN OVERRIDE IS A STATED WINDOW — the writer typed the date themselves through "Set an
          expected date". It is not the house assumption, so it earns a bar. */
-      return { ...base, mode: "waiting", sentMs: null, expMs: overrideMs, overdue: now > overrideMs, daysOverdue: Math.max(0, Math.floor((now - overrideMs) / DAY)), windowStated: true };
+      return { ...base, mode: "waiting", sentMs: null, expMs: overrideMs, overdue: now > overrideMs, daysOverdue: Math.max(0, Math.floor((now - overrideMs) / DAY)), windowStated: true, windowSource: "writer" };
     }
     // Undated import, no override — the pill reads "waiting" but there is no bar/date.
     return { ...base, mode: "waiting", sentMs: null, expMs: null };

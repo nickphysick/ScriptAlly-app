@@ -1260,11 +1260,11 @@
 .tl-waitmark--sage { border-color: var(--sage-edge); }
 .tl-waitmark--sage svg { stroke: var(--sageD); }
 
-/* ⚠️ WHAT THE AGENCY SAID IS A CHIP — their claim, on its own surface, so it cannot be read as one
-   of the app's own sentences. The bar beneath measures against that claim rather than an assumption. */
-.tl-said { display: inline-flex; align-items: baseline; gap: 5px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); background: var(--paper); border: 1px solid var(--hairline); border-radius: 7px; padding: 5px 10px; }
-.tl-said b { font-weight: 600; color: var(--ink); }
-.tl-said-x { color: var(--faint); }
+/* ⚠️ `.tl-said` IS DELETED WITH THE CHIP. Its job — give a claim its own surface so it cannot be
+   read as one of the app's own sentences — is done by the attribution in row 1, which can also name
+   the WRITER when the window is theirs. Left as a rule it would be an invitation to bring the chip
+   back beside the line that replaced it. The qualifier's own styling is `.tl-qual`. */
+.tl-qual b { font-weight: 500; color: var(--ink-2); }
 
 .tl-wbar { position: relative; height: 6px; border-radius: 3px; background: var(--n2); margin: 0 0 5px; overflow: hidden; }
 .tl-wbar i { display: block; height: 100%; border-radius: 3px; background: var(--sage-edge); }

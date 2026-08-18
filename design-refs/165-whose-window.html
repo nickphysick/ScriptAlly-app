@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — whose window is it</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.dt,.barf,.pastfig b{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1300px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.four{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.card{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:15px 16px;}
+.ev{position:relative;padding-left:38px;}
+.m{position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--oat);
+  color:#bdb8b0;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.m.live{box-shadow:inset 0 0 0 1.5px #9db09b;color:#4e6050;}
+.r1{display:flex;align-items:baseline;gap:8px;min-height:27px;flex-wrap:wrap;}
+.ttl{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;line-height:1.3;}
+.qual{font-size:12.5px;color:var(--faint);}
+.qual b{font-weight:500;color:var(--ink2);}
+.dt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);white-space:nowrap;}
+.r2{margin-top:8px;}
+.r2>*+*{margin-top:9px;}
+.bar{position:relative;height:6px;border-radius:3px;background:var(--n2);overflow:hidden;}
+.bar i{display:block;height:100%;width:52%;background:#9db09b;border-radius:3px;}
+.bar.past i{width:100%;background:var(--oat);}
+.bar.past::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(124,58,42,.15) 5px 10px);}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:5px;}
+.pastfig{font-size:12.5px;color:var(--ink2);}
+.pastfig b{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink);padding-right:2px;}
+.ask{display:flex;align-items:center;gap:10px;background:var(--n1);border-radius:9px;box-shadow:inset 0 0 0 1px var(--line);padding:10px 12px;font-size:11.5px;color:var(--ink2);line-height:1.5;}
+.ask a{margin-left:auto;color:var(--burg);text-decoration:underline;text-underline-offset:3px;white-space:nowrap;cursor:pointer;}
+/* in-place editor */
+.inline{background:#fff;border-radius:10px;box-shadow:inset 0 0 0 1.5px var(--sage-br);padding:11px 12px;}
+.inline .eyebrow{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:9px;}
+.slider{position:relative;height:26px;display:flex;align-items:center;}
+.track{position:absolute;left:0;right:0;height:4px;border-radius:2px;background:var(--n2);}
+.fill{position:absolute;left:0;width:44%;height:4px;border-radius:2px;background:var(--burg);opacity:.55;}
+.knob{position:absolute;left:44%;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(40,35,30,.3),inset 0 0 0 1.5px var(--burg);transform:translateX(-50%);}
+.ticks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.08em;color:#bdb8b0;margin-top:2px;}
+.val{display:flex;align-items:baseline;gap:6px;margin-top:8px;}
+.val b{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;}
+.val span{font-size:11.5px;color:var(--faint);}
+.hintk{margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#c4bfb7;}
+/* method menu */
+.mstage{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:15px 16px;position:relative;min-height:230px;}
+.trg{display:inline-flex;align-items:baseline;gap:8px;}
+.trg .qual{border-bottom:1px dashed var(--oat);cursor:pointer;padding-bottom:1px;}
+.pop{position:absolute;left:120px;top:56px;width:212px;background:#fff;border-radius:11px;
+  box-shadow:0 2px 6px rgba(40,35,30,.08),0 14px 30px -12px rgba(40,35,30,.38);padding:6px;}
+.pop h5{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:8px 9px 5px;font-weight:500;}
+.pi{display:flex;align-items:center;gap:9px;padding:9px;border-radius:8px;font-size:12.5px;cursor:pointer;color:var(--ink2);}
+.pi:hover{background:var(--n1);}
+.pi .tick{width:13px;color:var(--burg);font-size:11px;}
+.pi.on{color:var(--ink);font-weight:500;}
+.legend{max-width:1300px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+table{border-collapse:collapse;margin:8px 0 4px;font-size:12px;}
+td,th{text-align:left;padding:5px 16px 5px 0;border-bottom:1px solid var(--line);}
+th{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:400;}
+</style></head>
+<body>
+
+<h4>Whose window is it <s>— the same card, four truths, each attributed to whoever actually said it</s></h4>
+<div class="sheet"><div class="four">
+
+  <div><div class="lab">1 · The agent stated it<s>Their claim, their name</s></div>
+    <div class="card"><div class="ev"><span class="m live">⌛</span>
+      <div class="r1"><span class="ttl">Waiting to hear back</span><span class="qual">— Priya <b>advises 6 weeks</b></span><span class="dt">4 WEEKS</span></div>
+      <div class="r2"><div><div class="bar"><i></i></div><div class="barf"><span>Sent 1 May</span><span>Expected by ~12 Jun</span></div></div></div>
+    </div></div></div>
+
+  <div><div class="lab">2 · You set the date<s>Your estimate, and it says so</s></div>
+    <div class="card"><div class="ev"><span class="m live">⌛</span>
+      <div class="r1"><span class="ttl">Waiting to hear back</span><span class="qual">— <b>you expect a reply by 12 June</b></span><span class="dt">4 WEEKS</span></div>
+      <div class="r2"><div><div class="bar"><i></i></div><div class="barf"><span>Sent 1 May</span><span>Your estimate · 12 Jun</span></div></div></div>
+    </div></div></div>
+
+  <div><div class="lab">3 · Nobody said anything<s>No figure, no bar, one offer</s></div>
+    <div class="card"><div class="ev"><span class="m">⌛</span>
+      <div class="r1"><span class="ttl">Waiting to hear back</span><span class="dt">4 WEEKS</span></div>
+      <div class="r2">
+        <div style="font-size:12.5px;color:var(--ink2)">Priya Raman does not state a response time.</div>
+        <div class="ask">Enter an expected response date for more accurate tracking<a>Set a date</a></div>
+      </div>
+    </div></div></div>
+
+  <div><div class="lab">4 · Past the agent's window<s>Past tense, expiry on the bar</s></div>
+    <div class="card"><div class="ev"><span class="m">⌛</span>
+      <div class="r1"><span class="ttl">No reply</span><span class="qual">— The Lantern Agency <b>advised 6 weeks</b></span><span class="dt">2¼ YEARS</span></div>
+      <div class="r2">
+        <div><div class="bar past"><i></i></div><div class="barf"><span>Sent 11 Jun</span><span>Window expired 23 Jul</span></div></div>
+        <div class="pastfig"><b>2 years</b> past the window they stated</div>
+      </div>
+    </div></div></div>
+
+</div></div>
+
+<h4>Setting the date, in place <s>— the agent profile's own control, not the legacy sidebar</s></h4>
+<div class="sheet" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:820px">
+  <div><div class="lab">Before</div>
+    <div class="card"><div class="ev"><span class="m">⌛</span>
+      <div class="r1"><span class="ttl">Waiting to hear back</span><span class="dt">4 WEEKS</span></div>
+      <div class="r2"><div class="ask">Enter an expected response date for more accurate tracking<a>Set a date</a></div></div>
+    </div></div></div>
+  <div><div class="lab">Open</div>
+    <div class="card"><div class="ev"><span class="m">⌛</span>
+      <div class="r1"><span class="ttl">Waiting to hear back</span><span class="dt">4 WEEKS</span></div>
+      <div class="r2"><div class="inline">
+        <div class="eyebrow">Your expected response time</div>
+        <div class="slider"><span class="track"></span><span class="fill"></span><span class="knob"></span></div>
+        <div class="ticks"><span>1 wk</span><span>4</span><span>8</span><span>12</span><span>16+</span></div>
+        <div class="val"><b>6</b><span>weeks · around 12 June</span></div>
+        <div class="hintk">Enter to save · Esc to cancel</div>
+      </div></div>
+    </div></div></div>
+</div>
+
+<h4>The method menu <s>— capitalised, standard popover</s></h4>
+<div class="sheet" style="max-width:520px">
+  <div class="mstage">
+    <div class="trg"><span class="ttl">Query sent</span><span class="qual">· Email</span></div>
+    <div class="pop">
+      <h5>Sent via</h5>
+      <div class="pi on"><span class="tick">✓</span>Email</div>
+      <div class="pi"><span class="tick"></span>Online form</div>
+      <div class="pi"><span class="tick"></span>QueryManager</div>
+      <div class="pi"><span class="tick"></span>Post</div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <b>The contradiction has one cause: nothing distinguishes whose window it is.</b> A response window can arrive from three places, and the display treats them as one fact:
+  <table>
+    <tr><th>Source</th><th>Whose fact</th><th>What it may say</th></tr>
+    <tr><td>Agent record's stated time</td><td>The agency's claim</td><td><i>Priya advises 6 weeks</i></td></tr>
+    <tr><td>Date the writer set</td><td>Your own estimate</td><td><i>you expect a reply by 12 June</i></td></tr>
+    <tr><td>House 8/12/12-week default</td><td>Nobody's</td><td>Nothing at all</td></tr>
+  </table>
+  Card 2 is the case that produced your screenshot: a date you entered, rendered as though Priya had said it, while the body line correctly reported she had not. Both sentences were true; the attribution was invented. ⚠️ <b>The last pack removed the house assumption from every reader — this is one level up, so the sweep could not have caught it.</b><br><br>
+  <b>The chip is gone in all four.</b> Its job was to give a claim its own surface; attribution in the line does that better and costs no space. The expiry date stays on the bar's end label — one fact per surface, and card 2's label says <i>Your estimate</i> so the bar cannot be misread either.<br><br>
+  <b>Setting a date uses the agent profile's own response-time control</b>, in place: eyebrow, slider, the resolved date shown live beneath. ⚠️ The eyebrow reads <i>Your</i> expected response time deliberately — the same words that keep the estimate yours in the display should be the words on the control that sets it. It writes to the query, never to the agent record.
+</div>
+</body></html>

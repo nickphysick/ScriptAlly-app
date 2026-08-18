@@ -481,11 +481,48 @@ describe("queryAmbientStatus — responseDeadline override (P4; undated stage)",
   it("undated + NO override → no expected date (expMs null)", () => {
     expect(queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined }), "agent", undefined, NOW).expMs).toBeNull();
   });
-  it("a real stage send date WINS over the override (derived stays primary)", () => {
+  /**
+   * ⚠️ INVERTED, AND THE REASON IS THE WHOLE OF "WHOSE WINDOW IS IT". This asserted that the HOUSE
+   * default beat the writer's own date on a dated query — "derived stays primary" — which meant a
+   * writer who answered "Set a date" on an ordinary query changed nothing they could see. The house
+   * 8/12/12-week figure is nobody's fact; a date the writer typed is theirs. So the precedence is
+   * the agency's stated weeks, then the writer's date, then the assumption.
+   *
+   * ⚠️ THE SEND DATE STILL ANCHORS THE BAR either way — that half of the case was never at issue
+   * and is asserted below unchanged.
+   */
+  it("the writer's own date beats the house assumption, and the agency's beats both", () => {
     const sent = new Date(NOW - 10 * DAY).toISOString();
-    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, responseDeadline: new Date(NOW).toISOString() }), "agent", undefined, NOW);
-    expect(a.sentMs).toBe(new Date(sent).getTime());
-    expect(a.expMs).toBe(new Date(sent).getTime() + 56 * DAY); // derived, not the override
+    const mine = new Date(NOW).toISOString();
+    const withDate = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, responseDeadline: mine }), "agent", undefined, NOW);
+    expect(withDate.sentMs, "the send still anchors the bar").toBe(new Date(sent).getTime());
+    expect(withDate.expMs, "the house assumption beat the writer's own date").toBe(new Date(mine).getTime());
+    expect(withDate.windowSource).toBe("writer");
+
+    /* the agency states 4 weeks — their fact wins, and the writer's date is not drawn */
+    const stated = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, responseDeadline: mine }), "agent", undefined, NOW, 4);
+    expect(stated.expMs).toBe(new Date(sent).getTime() + 28 * DAY);
+    expect(stated.windowSource).toBe("agent");
+
+    /* nobody said anything — the house figure, and it belongs to no one */
+    const house = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent }), "agent", undefined, NOW);
+    expect(house.expMs).toBe(new Date(sent).getTime() + 56 * DAY);
+    expect(house.windowSource).toBeNull();
+    expect(house.windowStated, "the assumption reads as something someone stated").toBe(false);
+  });
+
+  /* ⚠️ `windowStated` IS DERIVED FROM THE SOURCE, so the two cannot drift apart — the fault this
+     section fixes was one boolean standing for two different people. */
+  it("windowStated is exactly 'the source is somebody'", () => {
+    const sent = new Date(NOW - 10 * DAY).toISOString();
+    for (const a of [
+      queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent }), "agent", undefined, NOW),
+      queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent }), "agent", undefined, NOW, 6),
+      queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, responseDeadline: new Date(NOW).toISOString() }), "agent", undefined, NOW),
+      queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, responseDeadline: new Date(NOW).toISOString() }), "agent", undefined, NOW),
+    ]) {
+      expect(a.windowStated, `windowStated and windowSource disagree (${a.windowSource})`).toBe(a.windowSource !== null);
+    }
   });
 });
 

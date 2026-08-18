@@ -20,7 +20,7 @@ import { elapsedPhrase, exactDate } from "../../lib/elapsed";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
-import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, silencePolicyLine, type ReminderTask } from "../../lib/nudgeState";
+import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, silencePolicyLine, windowAttribution, type ReminderTask } from "../../lib/nudgeState";
 
 /* ⚠️ `fmtNatural` IS DELETED WITH THE GRACE BOX THAT USED IT (§5). It spelled an ordinal date —
    "15th July" — for that one header; the shape it belonged to is folded into "past the window", and
@@ -513,11 +513,13 @@ const TlProjection: React.FC<{
   status: QueryStatus | string;
   title: string;
   date?: string;
+  /** §1 (whose-window pack) — row 1's one qualifier: who stated this window, and what they said. */
+  qual?: React.ReactNode;
   last?: boolean;
   /** §5 — sage while the stated window is open, oat once it has passed or was never stated. */
   tone?: "sage" | "oat";
   children?: React.ReactNode;
-}> = ({ status, title, date, last = false, tone, children }) => (
+}> = ({ status, title, date, qual, last = false, tone, children }) => (
   <TlEvent last={last} mark={tone
     ? <span className={`tl-waitmark tl-waitmark--${tone}`} aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
@@ -529,6 +531,7 @@ const TlProjection: React.FC<{
     <div className="tl-rowbody">
       <div className="tl-r1">
         <span className="tl-ttl tl-ttl--quiet">{title}</span>
+        {qual}
         {date && <span className="tl-meta">{date}</span>}
       </div>
       <div className="tl-body">{children}</div>
@@ -677,21 +680,23 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
             date={waiting.sentMs != null ? elapsedPhrase(waiting.nDays).toUpperCase() : undefined}
             tone={stated && !past ? "sage" : "oat"}
             last={!reminder}
+            /**
+             * ⚠️ THE CHIP IS GONE, AND THE ATTRIBUTION TOOK ITS PLACE IN ROW 1. `Priya says 6 weeks`
+             * sat on its own surface so a claim could not be read as one of the app's own sentences
+             * — the right instinct, the wrong device. It cost a body part to say four words and it
+             * could only ever carry the AGENCY's version; the qualifier carries whoever actually
+             * said it, and the writer's own estimate finally has a voice.
+             *
+             * ⚠️ AND THE EXPIRY DATE IS NOT RESTATED HERE. The chip appended "· window expired 23
+             * July" beside the bar's own "WINDOW EXPIRED 23 JUL"; one fact, one surface.
+             */
+            qual={(() => {
+              const a = windowAttribution({
+                source: waiting.windowSource, who, weeks: statedWeeks, expMs: waiting.expMs, past: !!past, formatDate: exactDate,
+              });
+              return a ? <span className="tl-qual">— {a.lead}<b>{a.strong}</b></span> : undefined;
+            })()}
           >
-            {/* what the agency said — their claim, on its own surface */}
-            {statedWeeks != null && (
-              <div className="tl-said">
-                {who.name} {who.plural ? "say" : "says"} <b>{statedWeeks} week{statedWeeks === 1 ? "" : "s"}</b>
-                {/* ⚠️ `exactDate`, THE ONE en-GB FORMATTER. The first build used the ordinal
-                    `fmtNatural` and appended the year by hand — "closed 19th July 2026" — which is a
-                    second spelling of a date this app already knows how to write, three lines above
-                    a bar that says "WINDOW EXPIRED 19 JUL".
-                    ⚠️ §4 · AND THE WORD IS `window expired`, NOT `closed`. Closing is something the
-                    WRITER does to a query and records; a window running out happens to the AGENCY's
-                    own stated deadline. On one card the two were the same word. */}
-                {past && waiting.expMs != null && <span className="tl-said-x"> · window expired {exactDate(waiting.expMs)}</span>}
-              </div>
-            )}
 
             {/**
               * ⚠️ §3 · THE BODY LINE ASKS WHETHER A WINDOW WAS STATED, NOT WHETHER A BAR CAN BE
@@ -718,8 +723,8 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                 <div className="tl-wbody">{who.name} {who.plural ? "do" : "does"} not state a response time.</div>
                 {onSetExpectedDate && (
                   <div className="tl-ask">
-                    <span>Add one and this becomes a date</span>
-                    <button type="button" className="tl-ask-a" onClick={onSetExpectedDate}>Set an expected date</button>
+                    <span>Enter an expected response date for more accurate tracking</span>
+                    <button type="button" className="tl-ask-a" onClick={onSetExpectedDate}>Set a date</button>
                   </div>
                 )}
               </>
@@ -731,7 +736,13 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                 <div className={`tl-wbar${past ? " tl-wbar--past" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>
                 <div className="tl-wbarf">
                   <span>Sent {fmtShort(waiting.sentMs!)}</span>
-                  <span>{past ? `Window expired ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>
+                  {/* ⚠️ THE END LABEL NAMES ITS OWNER TOO, so the bar cannot be misread once the
+                      line above it has been. A window the WRITER set never "expires" — nothing was
+                      promised — so its label states whose figure it is in both states, where an
+                      agency's window expires on the day they named. */}
+                  <span>{waiting.windowSource === "writer"
+                    ? `Your estimate · ${fmtShort(waiting.expMs!)}`
+                    : past ? `Window expired ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>
                 </div>
               </div>
             ) : (

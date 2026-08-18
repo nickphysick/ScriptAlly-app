@@ -10,7 +10,7 @@ import { QueryStatus } from "../types";
 import { getPrimaryAction } from "./queryPrimaryAction";
 import {
   chasedBy, nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo,
-  nudgeOutcomeLabel, nudgeHistoryLine, closureOffer, CLOSURE_OFFER_MONTHS, agoLabel, silencePolicyLine,
+  nudgeOutcomeLabel, nudgeHistoryLine, closureOffer, CLOSURE_OFFER_MONTHS, agoLabel, silencePolicyLine, windowAttribution,
 } from "./nudgeState";
 
 const DAY = 86400000;
@@ -476,5 +476,54 @@ describe("§4 · a window expires; a query is closed", () => {
   it("the derivation's own vocabulary moved too", () => {
     expect(st, "the input is still named for the query's act").not.toContain("windowClosedMs");
     expect(st, "the input was not renamed").toContain("windowExpiredMs");
+  });
+});
+
+/**
+ * §1 (whose-window pack) — the attribution beside the title.
+ *
+ * ⚠️ THE SUBJECT COMES FROM `chasedBy`, NOT FROM A HAND-MADE `who`, for the same reason the policy
+ * line's does: the verb agreement is that function's job in production, and a literal here would go
+ * green the day an agency stopped taking a plural verb.
+ */
+describe("§1 · whose window is it", () => {
+  const long = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+  const att = (source: "agent" | "writer" | null, agent: { name?: string; agency?: string }, over: Record<string, unknown> = {}) =>
+    windowAttribution({ source, who: chasedBy(agent), weeks: 6, expMs: NOW, past: false, formatDate: long, ...over });
+
+  it("the agency's claim is named, and agrees with its subject", () => {
+    expect(att("agent", { agency: "The Lantern Agency" })).toEqual({ lead: "The Lantern Agency ", strong: "advise 6 weeks" });
+    expect(att("agent", { name: "Priya Raman" })).toEqual({ lead: "Priya Raman ", strong: "advises 6 weeks" });
+  });
+
+  /* ⚠️ PAST THE WINDOW THEY `advised`. They have not withdrawn the claim, but the period it
+     described is over, and the present tense beside an expired bar reads as though the app had not
+     noticed. One verb, both subjects — the tense outranks the agreement here. */
+  it("the tense follows the window, not the statement", () => {
+    expect(att("agent", { agency: "The Lantern Agency" }, { past: true })!.strong).toBe("advised 6 weeks");
+    expect(att("agent", { name: "Priya Raman" }, { past: true })!.strong).toBe("advised 6 weeks");
+  });
+
+  /* ⚠️ THE WRITER'S OWN ESTIMATE HAS A VOICE, which the chip could never give it — this is the case
+     that produced the fault: a date the writer entered, rendered as though the agency had said it. */
+  it("the writer's date says it is theirs", () => {
+    expect(att("writer", { name: "Priya Raman" })).toEqual({ lead: "", strong: `you expect a reply by ${long(NOW)}` });
+    expect(att("writer", { name: "Priya Raman" }, { past: true })!.strong).toContain("you expected a reply by");
+  });
+
+  /**
+   * ⚠️ THE HOUSE ASSUMPTION GETS NO SENTENCE, and `null` is the point of the section rather than a
+   * missing case. It belongs to nobody, so there is nobody to attribute it to.
+   */
+  it("nobody's window says nothing", () => {
+    expect(att(null, { agency: "The Lantern Agency" }), "the house assumption was given a voice").toBeNull();
+  });
+
+  /* ⚠️ AND A VOICE WITH NOTHING TO SAY IS ALSO NULL — an agent source with no weeks, a writer source
+     with no date. Both are reachable states and neither may produce half a sentence. */
+  it("a voice with nothing to say is silent", () => {
+    expect(att("agent", { agency: "X" }, { weeks: null })).toBeNull();
+    expect(att("agent", { agency: "X" }, { weeks: 0 })).toBeNull();
+    expect(att("writer", { agency: "X" }, { expMs: null })).toBeNull();
   });
 });
