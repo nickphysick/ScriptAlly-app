@@ -878,14 +878,21 @@ describe("§5 (fp4) · what you sent — now the send event's own block", () => 
       .toContain("row.pills.length > 0 && !showsExtra");
   });
 
+  /**
+   * ⚠️ THE META LINE IS RETIRED (§2, event-grammar pack), so the three clauses asserting it are
+   * INVERTED rather than deleted. Genre and word count describe the MANUSCRIPT, not this send, and
+   * they are already on the page — a send event carrying facts that do not change when the send
+   * does. What the case is for is unchanged: the manuscript is named here, as a link, in the shared
+   * type. The guard those clauses were protecting — a meta printing when it has nothing to say — is
+   * moot once nothing prints at all, and is now the stronger claim that neither field is read here.
+   */
   it("the manuscript is the send's subject, and the way to its record", () => {
     expect(card, "the manuscript's name is not stated").toContain("activeMs.title");
     expect(card, "the name is not the shared type").toContain("qc-mname");
     expect(card, "the manuscript kept the burgundy link treatment").not.toContain("qp-msname");
-    expect(card, "the meta line is missing").toContain("qc-msec");
-    expect(card, "the meta prints regardless of whether it has anything to say")
-      .toContain("(!!activeMs.genre || !!activeMs.wordCount) &&");
-    expect(card, "the word count is printed unconditionally").toContain("activeMs.wordCount ?");
+    expect(card, "the retired meta line is rendering again").not.toContain("qc-msec");
+    expect(card, "the genre is back in the send event").not.toContain("activeMs.genre");
+    expect(card, "the word count is back in the send event").not.toContain("activeMs.wordCount");
   });
 
   it("the materials sit under the send that carried them", () => {

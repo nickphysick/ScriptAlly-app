@@ -5111,15 +5111,27 @@ export const Queries: React.FC<{
                                         underlined on hover and focus; 1.35 line-height with a pixel
                                         of bottom padding, because Playfair's descenders clip at
                                         tighter values and an underline makes it worse. */}
+                                    {/**
+                                      * ⚠️ §2 · THE MANUSCRIPT IS BODY CONTENT, NOT A HEADLINE. It
+                                      * rendered at 19px against a 14px event title, so the thing
+                                      * inside row 2 outweighed the event it belongs to. Its size is
+                                      * `--tl-mst`, DERIVED from `--tl-title` rather than stated
+                                      * beside it: two independent numbers can be put in the wrong
+                                      * order by anyone tuning either, and a `calc` cannot.
+                                      *
+                                      * ⚠️ GENRE AND WORD COUNT ARE GONE. They describe the
+                                      * manuscript, not this send — and they are already on the page,
+                                      * so repeating them here made a send event carry facts that do
+                                      * not change when the send does.
+                                      *
+                                      * ⚠️ THE LINK BEHAVIOUR IS UNTOUCHED: ink, no underline at
+                                      * rest, underlined on hover AND focus, keyboard-reachable.
+                                      */}
                                     <div className="qc-sentms">
+                                      <svg className="qc-sentbk" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z" /><path d="M5 17h14" /></svg>
                                       {onNavigate ? (
                                         <button type="button" className="qc-mname qc-mname--ms" onClick={() => onNavigate("manuscripts")} title="Open your manuscripts">{activeMs.title}</button>
                                       ) : <span className="qc-mname qc-mname--ms">{activeMs.title}</span>}
-                                      {(!!activeMs.genre || !!activeMs.wordCount) && (
-                                        <span className="qc-msec">
-                                          {[activeMs.genre || null, activeMs.wordCount ? `${activeMs.wordCount.toLocaleString()} words` : null].filter(Boolean).join(" · ")}
-                                        </span>
-                                      )}
                                     </div>
   <div className="qc-msub">
                                 {/* ⚠️ THE CHIP OPENS ITS OWN POPOVER (§5) rather than toggling on click. A single click that

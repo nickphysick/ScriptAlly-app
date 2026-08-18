@@ -2758,7 +2758,12 @@
    the row states it as a fact rather than as a warning — the group heading carries the alarm. */
 .f12-d2 { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tl-spent { background: repeating-linear-gradient(-45deg, var(--n4) 0 4px, var(--n2) 4px 9px); }
-.qc-sentms { display: flex; align-items: baseline; gap: 11px; min-width: 0; margin-bottom: 8px; }
+/* ⚠️ §2 · CENTRED, NOT BASELINED, BECAUSE THERE IS AN ICON ON THIS LINE NOW. An SVG has no
+   baseline — it aligns on its bottom margin edge — so a baselined row mixing a glyph and text drags
+   the glyph low. The same trap the pagebar wordmark was measured 7.6px out of place by. */
+.qc-sentms { display: flex; align-items: center; gap: 8px; min-width: 0; margin-bottom: 8px; }
+/* the mark, at the icon weight the card's other glyphs use */
+.qc-sentbk { width: 15px; height: 15px; flex: none; stroke: var(--burg); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 /* ⚠️ THE ROWS TAKE THE FREE WIDTH AND THE STATUS TAKES WHAT IT NEEDS — `minmax(0, 1fr) auto`. The
    `minmax(0, …)` is load-bearing: a `1fr` track's default minimum is min-content, so a long email
    address would refuse to shrink and push the status block off the card instead of ellipsising. */
@@ -2852,7 +2857,10 @@
  * ⚠️ ONE DECLARATION, so "same face, same weight, same ink" stays structural. If this modifier ever
  * carries a second property the two names have stopped being the same type.
  */
-.qc-mname--ms { font-size: 19px; }
+/* ⚠️ §2 · SMALLER THAN THE EVENT TITLE, AND DERIVED FROM IT. It was 19px against a 14px title — the
+   body outweighing its own heading. `--tl-mst` is `--tl-title - 1px`, so the order cannot be
+   inverted by tuning either number. */
+.qc-mname--ms { font-size: var(--tl-mst); }
 button.qc-mname { background: none; border: 0; padding: 0 0 1px; cursor: pointer; text-align: left; }
 /**
  * ⚠️ 2c · THE TITLE IS THE CARD'S ONE NAVIGATION, and it says so only when reached for. No
@@ -2874,7 +2882,9 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    card and it sat at the smallest mono size in the system — a caption's size for a subject's fact.
    The face and the weight are untouched: mono at 11px is still unmistakably subordinate to a 23px
    Playfair name, which is what keeps the pair a hierarchy rather than two headings. */
-.qc-msec { font-family: var(--f12-mono); font-size: 11px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
+/* ⚠️ `.qc-msec` IS DELETED WITH THE LINE IT DRESSED (§2). Genre and word count describe the
+   manuscript rather than the send, and they are already on the page; an orphan rule here would be
+   the next person's evidence that a send event still has a meta line to fill. */
 
 /* ── the two chip families ───────────────────────────────────────────────────────────────────
    ⚠️ SAME SIZE, SAME RADIUS, DIFFERENT GROUND — and they must not be unified. A contact is a place
