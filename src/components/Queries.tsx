@@ -3726,7 +3726,7 @@ export const Queries: React.FC<{
                   <button
                     ref={closeTriggerRef}
                     type="button"
-                    className="qc-btn qc-btn-shrink qc-btn-quiet"
+                    className="qc-btn qc-btn-shrink"
                     aria-haspopup="menu"
                     aria-expanded={isCloseMenuOpen}
                     title="Mark this query closed"
@@ -3743,7 +3743,7 @@ export const Queries: React.FC<{
                       the four LABELLED verbs reading as four. */}
                   <button
                     type="button"
-                    className="qc-btn qc-btn-icon qc-btn-quiet"
+                    className="qc-btn qc-btn-icon"
                     disabled={isGeneratingPDF}
                     title={isGeneratingPDF ? "Generating…" : "Download this query as PDF"}
                     aria-label={isGeneratingPDF ? "Generating PDF" : "Download this query as PDF"}
@@ -3791,11 +3791,11 @@ export const Queries: React.FC<{
                     would make the row move when a query is clicked, which is the fault the ghost
                     exists to prevent. */}
                 <span className="qc-gap" />
-                <button type="button" className="qc-btn qc-btn-shrink qc-btn-quiet" disabled tabIndex={-1}>
+                <button type="button" className="qc-btn qc-btn-shrink" disabled tabIndex={-1}>
                   <svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8M21 12a9 9 0 1 1-6.2-8.5" /></svg>
                   <span>Mark closed</span>
                 </button>
-                <button type="button" className="qc-btn qc-btn-icon qc-btn-quiet" disabled tabIndex={-1}>
+                <button type="button" className="qc-btn qc-btn-icon" disabled tabIndex={-1}>
                   <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
                 </button>
                 <button type="button" className="qc-btn qc-btn-shrink qc-btn-danger" disabled tabIndex={-1}>

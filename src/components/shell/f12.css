@@ -1807,16 +1807,26 @@
    put a second filled button one column from `Log new query`. */
 .qc-btn-pri { color: var(--ink); font-weight: 600; }
 /**
- * ⚠️ MUTED IS ITS OWN CLASS, NOT `.qc-btn-shrink`. Keying on the shrink modifier muted NUDGE too —
- * measured `rgb(161,158,154)` on a verb the pack puts with `Record response` — because that class
- * means "may lose its label when narrow", which three of the five happen to share. Two facts, two
- * classes: what a button DOES and how it behaves under pressure are unrelated.
+ * ⚠️ MUTED NOW MEANS "ALREADY DONE", NOT "LESS IMPORTANT" — and that reversal is the whole of §2.
+ * This class was a RANK: Mark closed, Export and Delete were quieter than the two verbs that move a
+ * query forward. But all three are unconditional — a query can always be closed, exported or
+ * deleted — and faded is the app's own word for unavailable, three buttons along from a Nudge whose
+ * fade means exactly that. A treatment cannot mean two things in one row.
+ *
+ * ⚠️ SO IT SURVIVES FOR ONE STATE, WHICH IS A FACT RATHER THAN A RANKING: Nudge once it has been
+ * used, where quiet says "you have already sent one" beside the elapsed figure that proves it. That
+ * is the only caller left.
+ *
+ * ⚠️ AND THE MUTING WAS DECORATIVE ALL ALONG — no disabled condition sat behind any of the three.
+ * Export alone carries a real one (`isGeneratingPDF`), which is transient and already handled by
+ * `:disabled`. Worth saying, because the same treatment is doing the same job elsewhere: any place
+ * a control is faded to express hierarchy is a place a reader will read as unavailable.
  */
 .qc-btn-quiet { color: var(--faint); }
-/* ⚠️ AND DELETE IS MUTED AT REST, TERRACOTTA ON HOVER. The pack puts it with the closing verbs, and
-   a permanently coloured destructive verb is a warning nobody is reading yet; on hover — the moment
-   before it is pressed — the signal is exactly where it is useful. */
-.qc-btn-danger { color: var(--faint); }
+/* ⚠️ DELETE IS INK AT REST AND TERRACOTTA ON HOVER (§2). It was muted at rest on the same
+   hierarchy argument, which put the app's unavailable treatment on a verb that is always
+   available. The hover is untouched: colour arrives at the moment before it is pressed, which is
+   where the signal is useful and where it cannot be mistaken for a disabled state. */
 .qc-btn-danger:hover { color: var(--qc-acc-late); background: var(--qc-acc-late-t); border-color: var(--qc-acc-late-b); }
 /* ══ §2 · LOG NEW QUERY — A MODIFIER, PLACED AFTER THE BASE IT MODIFIES ═════════════════════
  * ⚠️ SOURCE ORDER IS THE MECHANISM, and getting it wrong was silent: the modifier sat 200 lines

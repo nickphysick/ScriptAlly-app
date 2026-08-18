@@ -147,3 +147,51 @@ describe("the selected row is a flat fill, and the bookmark is retired", () => {
     expect(rule(css, ".f12-row.f12-sel::before"), "the bookmark came back").toBe("");
   });
 });
+
+/**
+ * ⚠️ §2 · A FADE IS THE APP'S WORD FOR UNAVAILABLE, so it cannot also mean "less important". Mark
+ * closed, Export and Delete are unconditional — a query can always be closed, exported or deleted —
+ * and they sat in `--faint` three buttons along from a Nudge whose fade means exactly that.
+ */
+describe("§2 · the closing verbs are never faded", () => {
+  const bar = (() => {
+    const at = queries.indexOf('className="qc-phead"');
+    return at < 0 ? "" : queries.slice(at, queries.indexOf("})() : null}", at));
+  })();
+  const ghost = (() => {
+    const at = queries.indexOf('className="qc-verbs-inert"');
+    return at < 0 ? "" : queries.slice(at, queries.indexOf("</span>\n            )}", at));
+  })();
+
+  it("both bars are there to test", () => {
+    expect(bar, "the live control row is missing — every case below would pass vacuously").not.toBe("");
+    expect(ghost, "the no-selection shape is missing").not.toBe("");
+  });
+
+  /* ⚠️ THE TOKEN IS BOUNDED — `qc-btn-quiet` is a prefix of nothing today, but the sweep that found
+     17 prefix-risk locks is why this asserts the whole attribute rather than a substring. */
+  it("neither Mark closed nor Export carries the muted class, selected or not", () => {
+    for (const [what, src] of [["the live row", bar], ["the no-selection shape", ghost]] as const) {
+      const closed = src.slice(src.indexOf("Mark closed") - 700, src.indexOf("Mark closed"));
+      expect(closed, `${what}: Mark closed is still muted`).not.toMatch(/["\s`]qc-btn-quiet["\s`]/);
+      const pdf = src.slice(src.indexOf("qc-btn-icon"), src.indexOf("qc-btn-icon") + 60);
+      expect(pdf, `${what}: Export is still muted`).not.toMatch(/["\s`]qc-btn-quiet["\s`]/);
+    }
+  });
+
+  it("Delete is ink at rest and keeps its hover", () => {
+    const danger = rule(css, ".qc-btn-danger");
+    expect(danger, "Delete's rest colour is back").not.toContain("color: var(--faint)");
+    expect(rule(css, ".qc-btn-danger:hover"), "Delete lost the terracotta it earns on hover")
+      .toContain("var(--qc-acc-late)");
+  });
+
+  /* ⚠️ AND THE CLASS SURVIVES FOR ONE STATE — Nudge once used, where quiet is a FACT rather than a
+     ranking. Asserted so a later sweep does not delete it as dead. */
+  it("the muted class is left with exactly one caller, and it is a state", () => {
+    expect(rule(css, ".qc-btn-quiet"), "the muted class lost its declaration").toContain("var(--faint)");
+    const callers = (queries.match(/qc-btn-quiet/g) ?? []).length;
+    expect(callers, `qc-btn-quiet has ${callers} callers — it should have one, the nudged state`).toBe(1);
+    expect(queries, "the surviving caller is not the nudged state").toContain('nudgeAgoDays != null ? " qc-btn-quiet"');
+  });
+});
