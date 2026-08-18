@@ -15,6 +15,7 @@
  */
 import { Query, QueryStatus } from "../types";
 import { queryBucket } from "./queryAmbient";
+import { writerExpectedIso } from "./expectedDate";
 
 /** The query-string key. Named once so the shell, the page and the locks cannot drift. */
 export const QUERIES_STATUS_PARAM = "status";
@@ -50,11 +51,16 @@ export function queriesPathFor(f: QueriesStatusFilter): string {
  *
  * Derived, never stored: still waiting on the agent, with the reply expectation in the past.
  */
-export function isOverdueForReply(q: Pick<Query, "status" | "responseDeadline">, nowMs: number): boolean {
+/* ⚠️ §2 · READS THE WRITER'S FIELD. It used to test `responseDeadline`, which is retired as a
+   written column — so this predicate would have gone permanently false and the "overdue for a
+   reply" filter would have matched nothing, silently. It deliberately does NOT resolve the
+   agency's window: that needs the agent, which this pure query-only helper does not take, and
+   inventing one here would put a second overdue rule beside `taskPrecedence`'s. */
+export function isOverdueForReply(q: Pick<Query, "status">, nowMs: number): boolean {
   return (
     queryBucket(q.status as QueryStatus) === "waiting" &&
-    !!q.responseDeadline &&
-    new Date(q.responseDeadline).getTime() < nowMs
+    !!writerExpectedIso(q as never) &&
+    new Date(writerExpectedIso(q as never)!).getTime() < nowMs
   );
 }
 
@@ -68,7 +74,7 @@ export function isOverdueForReply(q: Pick<Query, "status" | "responseDeadline">,
  * (`queryBucket === "move"`) is what the hub's own "Your move" control draws, and it stays there.
  */
 export function attentionCount(
-  queries: Pick<Query, "status" | "responseDeadline">[],
+  queries: Pick<Query, "status">[],
   nowMs: number,
 ): number {
   return queries.filter((q) => isOverdueForReply(q, nowMs)).length;

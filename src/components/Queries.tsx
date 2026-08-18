@@ -65,7 +65,7 @@ import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitl
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 /* §1 (provenance pack) — the writer's own expected date: its field name and its one accessor. */
-import { WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, writerExpectedIso, writerExpectedWrite } from "../lib/expectedDate";
+import { WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, writerExpectedIso, writerExpectedWrite, resolveExpectedDate } from "../lib/expectedDate";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
@@ -2064,8 +2064,11 @@ export const Queries: React.FC<{
         return aW - bW;
       }
       case "due_soonest": {
-        const aD = a.responseDeadline ? new Date(a.responseDeadline).getTime() : MAXT;
-        const bD = b.responseDeadline ? new Date(b.responseDeadline).getTime() : MAXT;
+        /* ⚠️ §2 · SORTS ON THE RESOLVED DATE. Reading the retired column made this comparator
+           return MAXT for every row, so "Due soonest" silently became "no order at all". */
+        const dueMs = (x: Query) => resolveExpectedDate(x, lastSendMs(x), agents.find(ag => ag.id === x.agentId)?.responseTimeWeeks).ms ?? MAXT;
+        const aD = dueMs(a);
+        const bD = dueMs(b);
         return aD - bD;
       }
       case "journey_depth": return journeyRank(a) - journeyRank(b);
@@ -2376,7 +2379,13 @@ export const Queries: React.FC<{
       const materialsIncluded = cleanMats.join(", ");
 
       const personalisationNote = q.personalisationNotes || "";
-      const responseDeadlineClean = formatCSVDate(q.responseDeadline);
+      /* ⚠️ §2 · THE EXPORT STATES THE RESOLVED DATE, so a spreadsheet does not go blank the day the
+         column it read stopped being written. */
+      const responseDeadlineClean = formatCSVDate(
+        resolveExpectedDate(q, lastSendMs(q), agents.find(ag => ag.id === q.agentId)?.responseTimeWeeks).ms
+          ? new Date(resolveExpectedDate(q, lastSendMs(q), agents.find(ag => ag.id === q.agentId)?.responseTimeWeeks).ms!).toISOString()
+          : undefined,
+      );
       const nudgeDateClean = formatCSVDate(q.nudgeDate);
       const lastStatusChange = getLastStatusChangeDate(q, activities);
       const guidelinesUrl = ag?.website || "";
@@ -2527,14 +2536,16 @@ export const Queries: React.FC<{
       ].includes(activeQuery.status);
 
       if (isQueryActive) {
-        const deadlineDate = activeQuery.responseDeadline || activeQuery.dateSent;
+        /* ⚠️ §2 · RESOLVED, not the retired column — a PDF is the one artefact a writer keeps. */
+        const resolvedExp = resolveExpectedDate(activeQuery, lastSendMs(activeQuery), activeAgent?.responseTimeWeeks);
+        const deadlineDate = (resolvedExp.ms ? new Date(resolvedExp.ms).toISOString() : undefined) || activeQuery.dateSent;
         timelineEvents.push({
           title: "Waiting to hear back",
           date: deadlineDate,
           formattedDate: new Date(deadlineDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
           detail: null,
           materials: null,
-          expectedDate: activeQuery.responseDeadline ? new Date(activeQuery.responseDeadline).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "None set",
+          expectedDate: resolvedExp.ms ? new Date(resolvedExp.ms).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "None set",
           nudgeDate: activeQuery.nudgeDate ? new Date(activeQuery.nudgeDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : null
         });
       } else {
@@ -3653,13 +3664,13 @@ export const Queries: React.FC<{
                   setIsMarkSentOpen(false);
                   setIsRecordResponseFocusFormOpen(true);
                 }}
-                onSave={async ({ sentDate, responseDeadline, nudgeDate }) => {
+                onSave={async ({ sentDate, writerExpectedDate, nudgeDate }) => {
                   await recordMaterialsSent({
                     queryId: activeQuery.id,
                     targetStatus: a2.target as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
                     sentDate,
                     isResubmit: a2.markKind === "resubmit",
-                    responseDeadline,
+                    writerExpectedDate,
                     nudgeDate,
                   });
                 }}
@@ -4991,7 +5002,7 @@ export const Queries: React.FC<{
                                   onClick={(e) => {
                                     const which = c.key === "waiting" ? "sent" : "expected";
                                     (dateTrigRef as React.MutableRefObject<HTMLElement | null>).current = e.currentTarget;
-                                    setDateDraft(toDateInputValue(which === "sent" ? activeQuery.dateSent : activeQuery.responseDeadline));
+                                    setDateDraft(toDateInputValue(which === "sent" ? activeQuery.dateSent : writerExpectedIso(activeQuery)));
                                     setDateEdit(which);
                                   }}
                                 >
@@ -5702,7 +5713,7 @@ export const Queries: React.FC<{
             const ms = new Date(`${dateDraft}T12:00:00`).getTime();
             const ops = dateEdit === "sent"
               ? { dateSentMs: ms }
-              : { queryFields: { responseDeadline: new Date(ms).toISOString() } };
+              : { queryFields: { writerExpectedDate: new Date(ms).toISOString() } };
             await commitQueryEdits(db, currentUser.id, activeQuery.id, ops as never, {
               agentName: agentPrimary(activeAgent), manuscriptId: activeQuery.manuscriptId, manuscriptTitle: activeMs?.title || "",
             });

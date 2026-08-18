@@ -97,6 +97,7 @@ import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
+import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
 import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
 import { replyTask } from "./taskPrecedence";
@@ -260,7 +261,7 @@ interface DbContextType {
     targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
     sentDate: string; // ISO
     isResubmit?: boolean;
-    responseDeadline?: string; // ISO — optional, set when the writer opts into a reminder
+    writerExpectedDate?: string; // ISO — optional; §2: the writer stating when they expect a reply
     nudgeDate?: string; // ISO — optional, set when a nudge reminder is chosen
   }) => Promise<void>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
@@ -1971,18 +1972,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   };
 
   // Writer marks materials as sent (Partial/Full Sent). One atomic-ish write: status + the
-  // matching *SentDate + optional responseDeadline/nudgeDate + one MATERIALS_SENT activity.
+  // matching *SentDate + optional writerExpectedDate/nudgeDate + one MATERIALS_SENT activity.
   // NOT a response: never touches responseReceivedAt and never increments the response count.
   const recordMaterialsSent = async (args: {
     queryId: string;
     targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
     sentDate: string;
     isResubmit?: boolean;
-    responseDeadline?: string;
+    /* ⚠️ §2 · NAMED FOR THE FIELD IT WRITES. It was `responseDeadline`, which meant a caller said
+       one thing and a different column was written — the same ambiguity at the parameter that §2
+       closed at the seam. */
+    writerExpectedDate?: string;
     nudgeDate?: string;
   }) => {
     if (!currentUser) return;
-    const { queryId, targetStatus, sentDate, isResubmit, responseDeadline, nudgeDate } = args;
+    const { queryId, targetStatus, sentDate, isResubmit, writerExpectedDate, nudgeDate } = args;
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
 
@@ -1999,14 +2003,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     // Only the writer-supplied inputs are written directly; status/dates/round are derived.
     const qUpdates: Record<string, any> = {};
-    if (responseDeadline) qUpdates.responseDeadline = new Date(responseDeadline).toISOString();
+    /**
+     * ⚠️ §2 · THE WRITER'S FIELD, NOT `responseDeadline`. This control asks the writer when they
+     * expect to hear back and used to store the answer in the field `addQuery` also seeded from the
+     * AGENCY's window — so one column held two people's claims and neither could be told from the
+     * other. It is the writer setting a date, so it is writer-attributed, and it carries the §1
+     * stamp because `writerExpectedWrite` is the only way either column is written.
+     */
+    if (writerExpectedDate) Object.assign(qUpdates, writerExpectedWrite(new Date(writerExpectedDate).toISOString()));
     if (nudgeDate) qUpdates.nudgeDate = new Date(nudgeDate).toISOString();
 
     const description = materialsSentDescription(targetStatus, agent, {
       resubmit: isResubmit,
       round: descriptionRound,
     });
-    const details = responseDeadline ? `Expected a response by ${formatHumanDate(responseDeadline)}` : "";
+    const details = writerExpectedDate ? `Expected a response by ${formatHumanDate(writerExpectedDate)}` : "";
 
     const activity: Omit<Activity, "id"> = {
       userId: currentUser.id,

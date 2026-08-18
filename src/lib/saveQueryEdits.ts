@@ -14,9 +14,10 @@
  * Undo is delete-the-record (a `delete` op), never a compensating entry — so the corrected log derives
  * the corrected status. Exact QueryStatus enum strings throughout (in lockstep with emailImportCommit).
  */
-import { Firestore, collection, doc, writeBatch, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import { Firestore, collection, doc, writeBatch, updateDoc, deleteDoc, deleteField, Timestamp } from "firebase/firestore";
 import { QueryStatus, ActivityType, QueryMaterial } from "../types";
 import { recomputeQuery } from "./recomputeQuery";
+import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 
 export interface QueryEditAppend {
   /** Local temp id (display only); the real subcollection id is minted at commit. */
@@ -46,7 +47,10 @@ export interface QueryEditOps {
     personalisationNotes?: string;
     agentId?: string;
     manuscriptId?: string;
-    responseDeadline?: string;
+    /* ⚠️ §2 · NAMED FOR THE FIELD IT WRITES. It was `responseDeadline`, so a caller said one thing
+       and a different column was written — the ambiguity this section exists to close, restated at
+       the seam. The value is the writer's stated date; the stamp is added by the writer below. */
+    writerExpectedDate?: string;
     ifNoResponse?: string;
     packageId?: string;
     rejectionType?: string;
@@ -162,7 +166,15 @@ export async function commitQueryEdits(
       if (f.personalisationNotes !== undefined) queryPatch.personalisationNotes = f.personalisationNotes;
       if (f.agentId !== undefined) queryPatch.agentId = f.agentId;
       if (f.manuscriptId !== undefined) queryPatch.manuscriptId = f.manuscriptId;
-      if (f.responseDeadline !== undefined) queryPatch.responseDeadline = f.responseDeadline;
+      /* ⚠️ §2 · THE WRITER'S FIELD. Same reasoning as mark-sent: the drawer's "expected response"
+         input is the writer stating a date, so it goes where writer-stated dates go, stamped. An
+         empty string means "clear it", which clears BOTH columns — a stamp surviving its date would
+         time a statement that no longer exists. */
+      if (f.writerExpectedDate !== undefined) {
+        Object.assign(queryPatch, f.writerExpectedDate
+          ? writerExpectedWrite(f.writerExpectedDate)
+          : { [WRITER_EXPECTED_FIELD]: deleteField(), [WRITER_EXPECTED_SET_AT_FIELD]: deleteField() });
+      }
       if (f.ifNoResponse !== undefined) queryPatch.ifNoResponse = f.ifNoResponse;
       if (f.packageId !== undefined) queryPatch.packageId = f.packageId;
       if (f.rejectionType !== undefined) queryPatch.rejectionType = f.rejectionType;

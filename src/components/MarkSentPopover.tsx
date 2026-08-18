@@ -41,7 +41,9 @@ export interface MarkSentPopoverProps {
   onClose: () => void;
   /** Manual override: the agent actually responded — switch to the full response/status path. */
   onRecordResponseInstead: () => void;
-  onSave: (args: { sentDate: string; responseDeadline?: string; nudgeDate?: string }) => Promise<void>;
+  /* ⚠️ §2 · `writerExpectedDate` — the writer is stating when they expect to hear back, so the
+     prop is named for the column that holds writer-stated dates. */
+  onSave: (args: { sentDate: string; writerExpectedDate?: string; nudgeDate?: string }) => Promise<void>;
 }
 
 const todayISO = () => new Date().toISOString().split("T")[0];
@@ -124,7 +126,7 @@ export const MarkSentPopover: React.FC<MarkSentPopoverProps> = ({
     setSaving(true);
     try {
       const reminder = wantReminder && expectedDate ? expectedDate : undefined;
-      await onSave({ sentDate, responseDeadline: reminder, nudgeDate: reminder });
+      await onSave({ sentDate, writerExpectedDate: reminder, nudgeDate: reminder });
       onClose();
     } catch {
       setSaving(false);

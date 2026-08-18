@@ -34,6 +34,7 @@ import { getStatusLabel } from "./StatusPill";
 import { getActivityTime, normalizeResultingStatus } from "../lib/queryDerivation";
 import { formatQueryMaterial } from "../lib/materials";
 import { computeResponseDeadline } from "../lib/responseDeadline";
+import { writerExpectedIso } from "../lib/expectedDate";
 import { editMaterialsUpdate } from "../lib/packageMetrics";
 import {
   validateTimeline, appendNoteFor, ADVANCE_OPTIONS, RECLASSIFY_OPTIONS, TimelineError,
@@ -165,7 +166,12 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   const effPackageId = draftPackageId ?? (query.packageId || "");
   const effRejectionType = draftRejectionType ?? (query.rejectionType || "Form rejection");
   const effAgentComments = draftAgentComments ?? (query.agentComments || "");
-  const effDeadlineInput = draftResponseDeadline ?? (query.responseDeadline ? toDateInput(new Date(query.responseDeadline).getTime()) : "");
+  /* ⚠️ §2 · READS THE WRITER'S FIELD, because that is now what it writes. Reading the retired
+     column while writing the new one would show the writer an empty box over a date they had set. */
+  const effDeadlineInput = draftResponseDeadline ?? ((): string => {
+    const mine = writerExpectedIso(query);
+    return mine ? toDateInput(new Date(mine).getTime()) : "";
+  })();
   const packageOptions = [
     { value: "", label: "Custom materials" },
     ...packages.filter((p) => p.status === "Active" && p.manuscriptId === effManuscriptId).map((p) => ({ value: p.id, label: p.packageName })),
@@ -213,7 +219,7 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   const notes = journalEntries.filter((j) => j.queryId === query.id).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const responseExpected: Date | null = (() => {
-    if (query.responseDeadline) { const d = new Date(query.responseDeadline); return isNaN(d.getTime()) ? null : d; }
+    if (writerExpectedIso(query)) { const d = new Date(writerExpectedIso(query)!); return isNaN(d.getTime()) ? null : d; }
     if (query.dateSent && typeof origAgent?.responseTimeWeeks === "number" && origAgent.responseTimeWeeks > 0) {
       const d = new Date(computeResponseDeadline(query.dateSent, origAgent.responseTimeWeeks));
       return isNaN(d.getTime()) ? null : d;
@@ -278,7 +284,7 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
     if (draftAgentId !== null) queryFields.agentId = draftAgentId;
     if (draftManuscriptId !== null) queryFields.manuscriptId = draftManuscriptId;
     if (draftIfNoResponse !== null) queryFields.ifNoResponse = draftIfNoResponse;
-    if (draftResponseDeadline !== null) queryFields.responseDeadline = draftResponseDeadline ? new Date(fromDateInput(draftResponseDeadline, 12)).toISOString() : "";
+    if (draftResponseDeadline !== null) queryFields.writerExpectedDate = draftResponseDeadline ? new Date(fromDateInput(draftResponseDeadline, 12)).toISOString() : "";
     if (draftRejectionType !== null) queryFields.rejectionType = draftRejectionType;
     if (draftAgentComments !== null) queryFields.agentComments = draftAgentComments;
     // Materials ⟷ package are one source of truth (editMaterialsUpdate clears the other side).
@@ -410,7 +416,7 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
           <Field>
             <Label>Response deadline <DirtyDot on={draftResponseDeadline !== null} /></Label>
             <input type="date" className="eq-datefield" value={effDeadlineInput}
-              onChange={(e) => setDraftResponseDeadline(e.target.value === (query.responseDeadline ? toDateInput(new Date(query.responseDeadline).getTime()) : "") ? null : e.target.value)} />
+              onChange={(e) => setDraftResponseDeadline(e.target.value === (writerExpectedIso(query) ? toDateInput(new Date(writerExpectedIso(query)!).getTime()) : "") ? null : e.target.value)} />
           </Field>
           <Field>
             <Label>If no response <DirtyDot on={draftIfNoResponse !== null} /></Label>

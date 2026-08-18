@@ -1,5 +1,6 @@
 import { Activity, ActivityType } from "../types";
 import { computeResponseDeadline } from "./responseDeadline";
+import { writerExpectedIso } from "./expectedDate";
 
 /** The OLD offer-recording path's celebration description ("Congratulations! You've received an
  *  offer of representation from …") — exported so the To-do done-band's terse-label deriver keys
@@ -103,9 +104,13 @@ export const replacePlaceholders = (
   const agencyName = agent ? agent.agency : "Agency";
   
   let deadlineStr = "the expected date";
-  if (q && q.responseDeadline) {
+  /* ⚠️ §2 · THE WRITER'S FIELD. `responseDeadline` is retired as a written column, so a template
+     reading it would have resolved every {expected response date} placeholder to the generic
+     fallback — a nudge letter quietly losing the one date it exists to state. */
+  const writerExpected = q ? writerExpectedIso(q as never) : undefined;
+  if (writerExpected) {
     try {
-      deadlineStr = new Date(q.responseDeadline).toLocaleDateString("en-GB", {
+      deadlineStr = new Date(writerExpected).toLocaleDateString("en-GB", {
         day: "numeric",
         month: "short",
         year: "numeric"

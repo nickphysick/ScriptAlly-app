@@ -272,12 +272,16 @@ describe("The ?status= filter — still live, now as in-page state", () => {
 describe("`Needs attention` is the past-reply-window set — ONE derivation, both shells", () => {
   const now = Date.UTC(2026, 7, 5);
   const day = 86_400_000;
+  /* ⚠️ §2 · THE FIXTURE CARRIES `writerExpectedDate`, BECAUSE `responseDeadline` IS RETIRED AS A
+     WRITTEN FIELD. A fixture still setting the old column would be handing the predicate an input
+     the system can no longer produce — the shape that keeps a test green over a function nothing
+     can reach. */
   const q = (status: QueryStatus, deadlineOffsetDays: number | null) => ({
     status,
-    responseDeadline: deadlineOffsetDays === null
-      ? undefined
-      : new Date(now + deadlineOffsetDays * day).toISOString(),
-  });
+    ...(deadlineOffsetDays === null
+      ? {}
+      : { writerExpectedDate: new Date(now + deadlineOffsetDays * day).toISOString() }),
+  }) as never;
 
   it("counts a waiting query whose deadline has passed", () => {
     expect(isOverdueForReply(q(QueryStatus.QUERIED, -1), now)).toBe(true);

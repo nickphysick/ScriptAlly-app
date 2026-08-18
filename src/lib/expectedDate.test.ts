@@ -8,6 +8,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { agentWindowMs, planExpectedDateMigration, resolveExpectedDate, writerExpectedIso, writerExpectedMs, writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, MIGRATION_TOLERANCE_MS } from "./expectedDate";
 import { queryAmbientStatus } from "./queryAmbient";
+import { windowAttribution } from "./nudgeState";
 import { QueryStatus } from "../types";
 
 const DAY = 86400000;
@@ -347,5 +348,71 @@ describe("§1 · recency between the two human statements", () => {
     const w = writerExpectedWrite(iso(NOW + 5 * DAY), at);
     expect(w[WRITER_EXPECTED_FIELD]).toBe(iso(NOW + 5 * DAY));
     expect(w[WRITER_EXPECTED_SET_AT_FIELD]).toBe(at.toISOString());
+  });
+});
+
+/**
+ * §2 (final pack) — ONE HOME for the expected date.
+ *
+ * ⚠️ THIS IS THE THREE-ACTIVITY-STORES FAULT IN MINIATURE, CAUGHT BEFORE IT SETTLED. Two controls
+ * wrote `responseDeadline` while the resolver read `writerExpectedDate`, so the same fact had two
+ * columns and which one held it depended on which control the writer had last used.
+ */
+describe("§2 · no live path writes responseDeadline", () => {
+  const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/[^\n]*/gm, "");
+
+  it("mark-sent writes the writer's field, stamped", () => {
+    const db = read("./db.tsx");
+    expect(db, "the reminder still lands in the retired column").not.toContain("qUpdates.responseDeadline");
+    expect(db, "mark-sent does not go through the one writer of both columns").toContain("writerExpectedWrite(");
+  });
+
+  it("the edit drawer's seam is named for the field it writes", () => {
+    const sq = read("./saveQueryEdits.ts");
+    expect(sq, "the seam still says responseDeadline, so a caller says one thing and another is written")
+      .not.toContain("f.responseDeadline");
+    expect(sq).toContain("f.writerExpectedDate");
+    /* clearing it must clear BOTH columns — a stamp outliving its date times a statement that is gone */
+    expect(sq).toContain("WRITER_EXPECTED_SET_AT_FIELD");
+  });
+
+  /**
+   * ⚠️ THE MIGRATION IS THE ONE PLACE THAT MAY STILL NAME IT, because deleting the column is how it
+   * is retired. Asserted rather than exempted by silence.
+   */
+  it("the only remaining mentions in db.tsx are the migration's deletes", () => {
+    const db = read("./db.tsx");
+    const writes = db.split("\n").filter((l) => /responseDeadline/.test(l) && /updateDoc|setDoc|qUpdates|queryPatch/.test(l));
+    for (const w of writes) expect(w, `an unexpected write survives: ${w.trim()}`).toContain("deleteField()");
+  });
+});
+
+/**
+ * §2 (final pack) — the house assumption still belongs to nobody.
+ *
+ * ⚠️ THE ONE THING THAT MUST NOT HAVE CHANGED. `queryAmbientStatus` keeps an 8/12/12-week fallback
+ * so its progress bar always has an anchor; the danger is that a refactor lets that figure reach a
+ * sentence attributing it to someone. It cannot, and this is why: `windowSource` is `null` exactly
+ * when the resolver returned nothing, and every attributed surface is gated on the SOURCE, never on
+ * the presence of `expMs`.
+ */
+describe("§2 · the house fallback never reaches an attributed display", () => {
+  const q = (over: Record<string, unknown> = {}) =>
+    ({ id: "q", userId: "u", manuscriptId: "m", agentId: "a", packageId: "", sendMethod: "Email",
+       status: QueryStatus.QUERIED, dateSent: iso(NOW - 30 * DAY), ...over }) as never;
+
+  it("with nobody stating anything: a bar exists, an attribution does not", () => {
+    const a = queryAmbientStatus(q(), "agent", undefined, NOW, undefined);
+    expect(a.expMs, "the bar lost its anchor").not.toBeNull();
+    expect(a.windowSource, "the house assumption acquired an owner").toBeNull();
+    expect(a.windowStated, "the house assumption is being reported as stated").toBe(false);
+  });
+
+  it("and windowAttribution returns nothing for a sourceless window", () => {
+    expect(windowAttribution({
+      source: null, who: { name: "Quill", plural: true }, weeks: 8,
+      expMs: NOW + 26 * DAY, past: false, formatDate: (m) => new Date(m).toISOString(),
+    }), "the app put words in somebody's mouth").toBeNull();
   });
 });
