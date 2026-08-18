@@ -161,3 +161,55 @@ describe("§4 · the Query Centre stopped keeping its own copies", () => {
     }
   });
 });
+
+/**
+ * ⚠️ §2 · ONE EDITOR, BOTH ROUTES — and the two used to open different things. Clicking an `Other`
+ * pill opened a popover; choosing `Other` from the Attach menu opened a text field BELOW the chips,
+ * with no anchor and no removal in it. Two routes to one job is how they come to disagree about
+ * what an editor is.
+ *
+ * ⚠️ THE CODE FOR §1 AND §2 IS ONE CHANGE, committed with §1 — the surface and the flows through it
+ * are the same component. These are §2's own clauses over it.
+ */
+describe("§2 · the attach menu and the shared editor", () => {
+  const page = readFileSync(new URL("../components/Queries.tsx", import.meta.url), "utf8");
+  const decls = page.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
+
+  it("the menu lists the four, and each row says what choosing it will do", () => {
+    for (const label of ["Query letter", "Synopsis", "Opening sample", "Other…"]) {
+      expect(decls, `the menu dropped ${label}`).toContain(`label: "${label}"`);
+    }
+    /* the two that hand over say so BEFORE the click; the two that attach and close say nothing */
+    expect(decls, "Opening sample does not announce its editor").toContain('hint: "→ SIZE"');
+    expect(decls, "Other does not announce its field").toContain('hint: "FREE TEXT"');
+    /* ⚠️ `ATTACHED` IS THE HINT, NOT A SUFFIX ON THE LABEL — "Synopsis · Attached" read as a
+       different material. */
+    expect(decls, "the attached state is welded to the label").not.toContain("· Attached`");
+    expect(decls, "the attached state is not stated").toContain('hint: on ? "ATTACHED"');
+    expect(decls, "an attached type is still choosable").toContain("disabled: on");
+  });
+
+  /* ⚠️ ONE COMPONENT: both routes set `matPop` and render `F12Panel`. Asserted as the ABSENCE of the
+     second editor as well, because the inline row is what a future pass would reach for again. */
+  it("both routes open the same editor, and the inline row is gone", () => {
+    expect((decls.match(/<F12Panel/g) ?? []).length, "there is more than one materials editor").toBe(1);
+    expect(decls, "the attach route does not open the editor").toContain('openMatPop("smp", anchor)');
+    expect(decls, "the Other route does not open the editor").toContain('openMatPop("oth", anchor)');
+    expect(decls, "the pill route does not open the editor").toContain('openMatPop("smp", el)');
+    expect(decls, "the inline Other row came back").not.toMatch(/["\s`]qc-msamp["\s`]/);
+    expect(decls, "the inline row's state came back").not.toContain("setOtherOpen");
+  });
+
+  /**
+   * ⚠️ THE AGENT'S PREFERENCE LIVES IN `agent.materialsWanted` — the same `string[]` the Add-Agent
+   * form and the Edit drawer write, read back through `agentMaterials.ts` rather than parsed here.
+   * It supplies the editor's DEFAULT and its hint line, and where the agency has stated nothing
+   * neither renders: an agency that said nothing must not appear to have asked for ten pages.
+   */
+  it("the sample preference is read from the agent's own materials, never invented", () => {
+    expect(decls, "the preference is not derived from the agent record").toContain("parseAgentMaterials(ag?.materialsWanted");
+    expect(decls, "an agent with no stated sample still yields one").toContain("if (!pill) return null;");
+    expect(decls, "the hint renders regardless of whether there is a preference").toContain("{pref && (");
+    expect(decls, "the default does not prefer the agent's own size").toContain("pref?.unit ?? sampleUnit");
+  });
+});
