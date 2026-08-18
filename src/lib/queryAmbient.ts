@@ -14,6 +14,7 @@ import { Query, QueryStatus } from "../types";
 import { elapsedPhrase } from "./elapsed";
 /* §1 (provenance pack) — the writer's own date, read through the one accessor that knows the field. */
 import { writerExpectedMs, resolveExpectedDate, type ExpectedSource } from "./expectedDate";
+import { replyStatedWindow, waitAnchorMs, type StoredHoldingReply } from "./holdingReply";
 import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
@@ -172,6 +173,12 @@ export function queryAmbientStatus(
   markKind: MarkKind,
   now: number = Date.now(),
   windowWeeks?: number,
+  /**
+   * ⚠️ PHASE 2 · THE QUERY'S OWN ACTIVITY EVENTS, additive and opt-in. Omitting them is
+   * byte-identical to the previous behaviour, which is what lets the surfaces that do not yet read
+   * holding replies stay untouched rather than being changed underneath them.
+   */
+  events?: readonly StoredHoldingReply[] | null,
 ): AmbientStatus {
   const base: AmbientStatus = {
     mode: "closed", nDays: 0, sentMs: null, expMs: null, widthPct: 0, overdue: false, daysOverdue: 0,
@@ -183,8 +190,22 @@ export function queryAmbientStatus(
     const stage: SendStage = st === QueryStatus.QUERIED ? "query" : st === QueryStatus.PARTIAL_SENT ? "partial" : "full";
     const sendIso = st === QueryStatus.QUERIED ? query.dateSent : st === QueryStatus.PARTIAL_SENT ? query.partialSentDate : query.fullSentDate;
     const mDays = (windowWeeks && windowWeeks > 0 ? windowWeeks : STAGE_RESPONSE_WINDOWS[stage]) * 7;
-    const sentMs = sendIso ? getTime(sendIso) : NaN;
-    if (!Number.isNaN(sentMs)) {
+    /**
+     * ⚠️ PHASE 2 · THE CLOCK RE-BASES ON THE LATER OF THE SEND AND THEIR LAST HOLDING REPLY.
+     *
+     * That is the whole of what a holding reply DOES to this card. You are not waiting on a
+     * two-year silence any more; you are waiting on the four days since they wrote. The meta
+     * figure and the bar re-base together because both read `sentMs`, which is now the anchor
+     * rather than the send — one value, so they cannot come to disagree.
+     *
+     * ⚠️ AND THE LIST DELIBERATELY DOES NOT (D2). It measures from the last outbound send and
+     * answers "how long has this been going"; this card answers "what am I waiting on now". Both
+     * true, and the visible difference between them is the point, not a bug to reconcile.
+     */
+    const rawSentMs = sendIso ? getTime(sendIso) : NaN;
+    const anchored = waitAnchorMs(Number.isNaN(rawSentMs) ? null : rawSentMs, events);
+    const sentMs = anchored ?? rawSentMs;
+    if (!Number.isNaN(sentMs) && sentMs != null) {
       const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
       /**
        * ⚠️ THE WRITER'S DATE IS NOW ITS OWN STORED FIELD AND WINS OUTRIGHT (provenance pack §1).
@@ -225,7 +246,10 @@ export function queryAmbientStatus(
          and the two surfaces disagreed about the same query. One resolver, and the house 8/12/12
          fallback stays HERE because it is this surface's own: it anchors a bar and is attributed to
          nobody, which is exactly why the resolver refuses to return it. */
-      const resolved = resolveExpectedDate(query, sentMs, windowWeeks);
+      /* ⚠️ THE REPLY-STATED WINDOW IS A DATED STATEMENT, and the resolver decides recency (D4).
+         It is derived from the events here rather than being passed pre-computed, so a caller
+         cannot hand this function a window from somewhere else. */
+      const resolved = resolveExpectedDate(query, sentMs, windowWeeks, replyStatedWindow(events));
       const expMs = resolved.ms ?? sentMs + mDays * DAY;
       const span = Math.max(1, expMs - sentMs);
       return {
@@ -242,6 +266,13 @@ export function queryAmbientStatus(
     // a send anchor there is still no progress bar (sentMs null).
     /* ⚠️ THE WRITER'S FIELD, NOT `responseDeadline` — on an undated query the stored deadline could
        still be an import's, and this branch has always meant "the writer typed a date themselves". */
+    /* an undated import: no send to anchor to, but a holding reply is still a statement */
+    const undatedResolved = resolveExpectedDate(query, null, undefined, replyStatedWindow(events));
+    if (undatedResolved.ms != null) {
+      return { ...base, mode: "waiting", sentMs: waitAnchorMs(null, events), expMs: undatedResolved.ms,
+        overdue: now > undatedResolved.ms, daysOverdue: Math.max(0, Math.floor((now - undatedResolved.ms) / DAY)),
+        windowStated: true, windowSource: undatedResolved.source };
+    }
     const overrideMs = writerExpectedMs(query);
     if (overrideMs != null) {
       return { ...base, mode: "waiting", sentMs: null, expMs: overrideMs, overdue: now > overrideMs, daysOverdue: Math.max(0, Math.floor((now - overrideMs) / DAY)), windowStated: true, windowSource: "writer" };

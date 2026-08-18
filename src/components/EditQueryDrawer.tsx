@@ -35,6 +35,7 @@ import { getActivityTime, normalizeResultingStatus } from "../lib/queryDerivatio
 import { formatQueryMaterial } from "../lib/materials";
 import { computeResponseDeadline } from "../lib/responseDeadline";
 import { writerExpectedIso } from "../lib/expectedDate";
+import { HOLDING_REPLY_TYPE } from "../lib/holdingReply";
 import { editMaterialsUpdate } from "../lib/packageMetrics";
 import {
   validateTimeline, appendNoteFor, ADVANCE_OPTIONS, RECLASSIFY_OPTIONS, TimelineError,
@@ -80,7 +81,7 @@ export interface EditQueryDrawerProps {
 }
 
 export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen, lockScroll, onClose, onSavedToast }) => {
-  const { agents, manuscripts, packages, journalEntries, currentUser, addJournalEntry, updateJournalEntry, deleteJournalEntry } = useScriptAllyDb();
+  const { agents, manuscripts, packages, journalEntries, activities, currentUser, addJournalEntry, updateJournalEntry, deleteJournalEntry } = useScriptAllyDb();
   const drawerRef = useRef<Form11DrawerHandle>(null);
 
   // ── staged edits ────────────────────────────────────────────────────────────────
@@ -264,7 +265,22 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   // Reassignment (consequence guard when the query has recorded responses).
   const pickAgent = (a: Agent) => {
     if (a.id === query.agentId) { setReassign(null); return; }
-    if (query.hasAgentResponded) setReassign({ search: reassign?.search ?? "", guardId: a.id });
+    /**
+     * ⚠️ D7 · THE GUARD ASKS "HAS THIS AGENT BEEN IN TOUCH", WHICH IS NOT WHAT `hasAgentResponded`
+     * MEANS. That field means HAS DECIDED — it derives from status-bearing rungs — and the two
+     * questions were identical until a reply could decide nothing. Reassigning a query away from an
+     * agent who acknowledged it would silently move THEIR correspondence onto someone else, which
+     * is exactly what this confirmation exists to prevent.
+     *
+     * ⚠️ DERIVED HERE, NOT A SECOND STORED FLAG (D7's instruction). Two booleans for two nearly
+     * identical questions is how they come to disagree; `hasAgentResponded` keeps its meaning
+     * everywhere and this one call site widens its own test, off the global feed it can already
+     * see — the twin of the authoritative row, written under the same id.
+     */
+    const beenInTouch = query.hasAgentResponded === true
+      || activities.some((ev) => ev.queryId === query.id
+        && (ev as { activityType?: string }).activityType === HOLDING_REPLY_TYPE);
+    if (beenInTouch) setReassign({ search: reassign?.search ?? "", guardId: a.id });
     else { setDraftAgentId(a.id); setReassign(null); }
   };
 

@@ -20,11 +20,12 @@ import {
   OUTCOME_ORDER, OUTCOME_LABEL, OUTCOME_DESC, OUTCOME_TONE,
   RESP_STEP_SHORT, RESP_STEP_TITLE, RESP_STEP_HINT, RESP_STEP_OPTIONAL,
   stepsFor, changeOutcome, droppedNotice,
-  repliedIn, type ResponseDraft, type ResponseOutcome, type RespStep,
+  repliedIn, repliedAround, type ResponseDraft, type ResponseOutcome, type RespStep,
 } from "../../lib/responseDraft";
 import { responseRefRows } from "../../lib/responseContext";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { AgentContextPanel } from "./AgentContextPanel";
+import { WeekSlider } from "../forms/WeekSlider";
 
 /** ⚠️ THE ORDER IS DERIVED FROM THE OUTCOME, never a constant. Before one is chosen the stack holds
  *  only the question that decides it — there is nothing honest to put beneath it yet. */
@@ -85,6 +86,7 @@ export const ResponsePane: React.FC<ResponsePaneProps> = ({
     asked: [draft.askedFor, draft.deadline && `by ${draft.deadline}`].filter(Boolean).join(" · "),
     offer: [draft.offerTerms, draft.offerReplyBy && `reply by ${draft.offerReplyBy}`].filter(Boolean).join(" · "),
     said: draft.theirWords.trim() ? "Kept" : "",
+    window: draft.replyWeeks.trim() ? `${draft.replyWeeks} weeks` : "",
     notes: draft.notes.trim() ? "Added" : "",
   };
 
@@ -109,6 +111,48 @@ export const ResponsePane: React.FC<ResponsePaneProps> = ({
             </span>
           </button>
         ))}
+        {/**
+          * ⚠️ BELOW A RULE, BECAUSE IT IS A DIFFERENT KIND OF ANSWER (Phase 3, ref 167). The six
+          * above all move the query; this one does not. Listing it among them would invite the
+          * writer to read it as a seventh stage, which is precisely the confusion the whole
+          * feature exists to remove — and the rule says "the one that changes nothing" without
+          * spending a sentence on it.
+          */}
+        <div className="qr-outrule" role="presentation" />
+        <button
+          type="button"
+          role="radio"
+          aria-checked={draft.outcome === "holding"}
+          className={`qr-out qr-out-holding${draft.outcome === "holding" ? " on" : ""}`}
+          onClick={() => pickOutcome("holding")}
+        >
+          <span className="qr-m qr-m-in" aria-hidden="true" />
+          <span className="qr-outtx">
+            <b>{OUTCOME_LABEL.holding}</b>
+            <i>{OUTCOME_DESC.holding}</i>
+          </span>
+        </button>
+      </div>
+    ),
+    /**
+     * ⚠️ THE SHARED `WeekSlider`, WITH ITS "none" POSITION — not a third slider (§C3's rule, and
+     * the pack says so in as many words). `onUnknown` is exactly the "they gave no date" case the
+     * component already models for the agent drawer, and most holding replies land there.
+     */
+    window: (
+      <div>
+        <WeekSlider
+          label="Their new timeframe"
+          value={draft.replyWeeks.trim() ? Number(draft.replyWeeks) : null}
+          onChange={(n) => set({ replyWeeks: String(n) })}
+          onUnknown={() => set({ replyWeeks: "" })}
+          unknownHint="Most holding replies give no date — leave this unset."
+        />
+        <div className="qc-fl" style={{ marginTop: 10 }}>
+          {draft.replyWeeks.trim()
+            ? `Expecting a reply around ${repliedAround(draft.dateArrived, Number(draft.replyWeeks))}`
+            : "No date given — the clock still restarts from their reply."}
+        </div>
       </div>
     ),
     when: (

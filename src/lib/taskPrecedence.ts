@@ -51,6 +51,19 @@ export interface ReplyTaskInput {
    * to-do list and the tracker's offer would be three chances for two of them to disagree.
    */
   reminderScheduled?: boolean;
+  /**
+   * ⚠️ PHASE 5 (D6) · WHEN THE AGENT LAST GOT IN TOUCH WITHOUT DECIDING ANYTHING.
+   *
+   * It clears the CLOSE suggestion and nothing else. "No response for two years — consider
+   * closing?" beside a reply from last week is the app failing to notice what the writer just
+   * recorded; the agent has engaged, so the inference closure rests on no longer holds.
+   *
+   * ⚠️ IT DOES NOT SUPPRESS THE NUDGE, AND THAT IS DELIBERATE. Chasing an agent who acknowledged
+   * you a month ago and then went quiet again is a perfectly reasonable thing to want, and the
+   * grace arithmetic below already re-bases on it. A reply ends the case for CLOSING, not the case
+   * for asking again.
+   */
+  repliedSinceMs?: number | null;
   now: number;
 }
 
@@ -118,13 +131,22 @@ export function replyTask(inp: ReplyTaskInput): ReplyTask {
 
   const sentMs = ms(inp.dateSent);
 
-  if (noResponseMeansNo) return "close"; // stated pass — never nudge
+  /* ⚠️ PHASE 5 (D6) · A REPLY SINCE THE WINDOW EXPIRED ENDS THE CASE FOR CLOSING. Computed once
+     here and applied to BOTH close routes below, so the stated-pass branch cannot reach past a
+     reply either: `noResponseMeansNo` says what SILENCE means, and this is not silence. */
+  const repliedSince = inp.repliedSinceMs != null && inp.repliedSinceMs > deadlineMs;
+
+  if (noResponseMeansNo) return repliedSince ? "none" : "close"; // stated pass — never nudge
 
   // noResponseMeansNo === false: nudge, unless the nudge was ignored or the hard ceiling is hit.
   const nudgeMs = ms(inp.lastNudgeSentDate);
   const nudgeIgnored = !Number.isNaN(nudgeMs) && now >= nudgeMs + responseTimeWeeks * 7 * DAY;
   const ceilingHit = !Number.isNaN(sentMs) && now >= sentMs + closeAfterDays(responseTimeWeeks) * DAY;
-  return nudgeIgnored || ceilingHit ? "close" : "nudge";
+  /* ⚠️ THE NUDGE SURVIVES A REPLY, THE CLOSE DOES NOT (D6). Chasing an agent who acknowledged you
+     a month ago and then went quiet again is reasonable; closing on the strength of a silence that
+     demonstrably ended is not. */
+  if (nudgeIgnored || ceilingHit) return repliedSince ? "nudge" : "close";
+  return "nudge";
 }
 
 /**

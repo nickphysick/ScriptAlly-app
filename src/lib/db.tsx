@@ -98,6 +98,7 @@ import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } fr
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
+import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
 import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
 import { replyTask } from "./taskPrecedence";
@@ -264,6 +265,11 @@ interface DbContextType {
     writerExpectedDate?: string; // ISO — optional; §2: the writer stating when they expect a reply
     nudgeDate?: string; // ISO — optional, set when a nudge reminder is chosen
   }) => Promise<void>;
+  /** Phase 3 — a reply that decides nothing. Non-status by construction; see lib/holdingReply.ts. */
+  recordHoldingReply: (
+    queryId: string,
+    input: { repliedOn: string; weeks?: number | null; note?: string },
+  ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
   undoQueryStatus: (id: string, previousStatus: QueryStatus, newStatus: QueryStatus) => Promise<void>;
   updateQuery: (id: string, fields: Partial<Query>) => Promise<void>;
   deleteQuery: (id: string) => Promise<void>;
@@ -645,6 +651,38 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     if (!currentUser) return;
 
     const calculatedTasks: Task[] = [];
+
+    /**
+
+     * PHASE 5 — the newest holding reply per query, from the global feed.
+
+     *
+
+     * ⚠️ BUILT ONCE, NOT PER QUERY. A `.filter()` inside the loop below would walk the whole
+
+     * activity feed for every query on the account, which is the shape that turns a hundred
+
+     * queries into ten thousand passes.
+
+     */
+
+    const holdingReplyByQuery = new Map<string, number>();
+
+    for (const a of activities) {
+
+      if ((a as { activityType?: string }).activityType !== HOLDING_REPLY_TYPE || !a.queryId) continue;
+
+      const t = new Date(a.date as string).getTime();
+
+      if (Number.isNaN(t)) continue;
+
+      const prev = holdingReplyByQuery.get(a.queryId);
+
+      if (prev === undefined || t > prev) holdingReplyByQuery.set(a.queryId, t);
+
+    }
+
+    const lastHoldingReplyFor = (id: string): number | null => holdingReplyByQuery.get(id) ?? null;
     const now = new Date();
     const todayISO = now.toISOString().slice(0, 10);
 
@@ -734,6 +772,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
            `scheduledReminder`'s, which is what the tracker's ghost rung draws from, so the feed and
            the timeline cannot disagree about whether a chase is booked. */
         reminderScheduled: !!scheduledReminder(userTasks, q.id, todayISO),
+        /**
+         * ⚠️ PHASE 5 (D6) · A HOLDING REPLY CLEARS THE CLOSE SUGGESTION. Read from the GLOBAL feed
+         * rather than the per-query subcollection, because that is the store this generator has —
+         * and the twin is written from the same build under the same id, so the two cannot disagree
+         * about whether a reply exists. It does not clear the nudge: chasing an agent who
+         * acknowledged you a month ago and then went quiet again is reasonable.
+         */
+        repliedSinceMs: lastHoldingReplyFor(q.id),
         now: now.getTime(),
       });
       if (reply === "close") {
@@ -2607,6 +2653,55 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * PHASE 3 — record a reply that decides nothing.
+   *
+   * ⚠️ THE TWIN-WRITE CONVENTION, AND DELIBERATELY NOT `recordQueryResponse`. That function is the
+   * app's single RESPONSE path and its whole contract is that a rung carries a `resultingStatus`;
+   * this event has none by construction. Same shape as `logNudge` — authoritative nested row first
+   * (abort on failure, because nothing may land without the source of truth), then the global
+   * projection under the SAME id, best-effort.
+   *
+   * ⚠️ AND NO `recomputeQuery` CALL. There is nothing to recompute: derivation reads only
+   * status-bearing rungs, so running it would do identical work for an identical result. Its
+   * absence is the clearest statement in this function that the event changes nothing stored.
+   *
+   * ⚠️ THE UNDO DELETES WHAT THIS CREATED — both twins, no compensating entries (the repo's undo
+   * law). Everything the reply affected was derived from those two documents' existence, so
+   * removing them restores the previous state exactly.
+   */
+  const recordHoldingReply = async (
+    queryId: string,
+    input: { repliedOn: string; weeks?: number | null; note?: string },
+  ): Promise<{ success: boolean; error?: string; undo: () => Promise<void> }> => {
+    const noop = async () => {};
+    if (!currentUser) return { success: false, error: "Session required.", undo: noop };
+    const q = queries.find(item => item.id === queryId);
+    if (!q) return { success: false, error: "Query not found.", undo: noop };
+    const agent = agents.find(a => a.id === q.agentId) || null;
+
+    const writes = buildHoldingReplyWrites(q, agent, input);
+    const actId = "act-" + Math.random().toString(36).substr(2, 9);
+    try {
+      await setDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId), writes.nested);
+    } catch (e) {
+      handleFirestoreError(e, OperationType.WRITE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
+      return { success: false, error: "Failed to record the reply.", undo: noop };
+    }
+    await addActivity({ ...writes.activity, id: actId });
+    return {
+      success: true,
+      undo: async () => {
+        try {
+          await deleteDoc(doc(db, "users", currentUser.id, "queries", queryId, "activity", actId));
+          await deleteDoc(doc(db, "users", currentUser.id, "activities", actId));
+        } catch (e) {
+          handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/queries/${queryId}/activity/${actId}`);
+        }
+      },
+    };
+  };
+
   /** The interim offer journey's ONE completion write (journey-logic P3): the writer's decision,
    *  never a re-log of the offer. Twin-write convention from logNudge — authoritative nested row
    *  first (abort on fail), then the global projection under the SAME id, then recompute:
@@ -2684,6 +2779,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addQuery,
         updateQueryStatus,
         recordMaterialsSent,
+        recordHoldingReply,
         undoQueryStatus,
         updateQuery,
         deleteQuery,

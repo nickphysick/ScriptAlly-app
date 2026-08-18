@@ -25,8 +25,19 @@ import type { RecordResponseData } from "./recordResponse";
  * that action exists precisely so removing "Mark closed" from the toolbar does not make the status
  * unreachable.
  */
+/**
+ * ⚠️ `holding` IS AN OUTCOME THAT DECIDES NOTHING (Phase 3), and the TYPES say so rather than a
+ * comment. Every other member maps to an exact `QueryStatus`; this one has none, and instead of
+ * weakening `OUTCOME_STATUS` to a partial map — which would let a real outcome go unmapped by
+ * accident — it is EXCLUDED from that record's key type. A holding reply that ever acquired a
+ * status would then be a compile error, which is the strongest form the "decides nothing" rule
+ * can take.
+ */
 export type ResponseOutcome =
-  | "partial" | "full" | "rr" | "offer" | "rejected" | "noreply";
+  | "partial" | "full" | "rr" | "offer" | "rejected" | "noreply" | "holding";
+
+/** The outcomes that move the query. `holding` is deliberately not among them. */
+export type DecidingOutcome = Exclude<ResponseOutcome, "holding">;
 
 /**
  * ⚠️ EVERY OUTCOME MAPS TO AN EXACT `QueryStatus` MEMBER, never a string that looks like one.
@@ -34,7 +45,7 @@ export type ResponseOutcome =
  * ampersand, "No Response" a space — and a near-miss would write a status nothing else in the app
  * recognises, which recomputes into a query that has quietly left the pipeline.
  */
-export const OUTCOME_STATUS: Record<ResponseOutcome, QueryStatus> = {
+export const OUTCOME_STATUS: Record<DecidingOutcome, QueryStatus> = {
   partial: QueryStatus.PARTIAL_REQUESTED,
   full: QueryStatus.FULL_REQUESTED,
   rr: QueryStatus.REVISE_RESUBMIT,
@@ -44,7 +55,7 @@ export const OUTCOME_STATUS: Record<ResponseOutcome, QueryStatus> = {
 };
 
 /** What `recordQueryResponse` calls each of these — its own vocabulary, mapped once. */
-export const OUTCOME_RESPONSE_TYPE: Record<ResponseOutcome, RecordResponseData["responseType"]> = {
+export const OUTCOME_RESPONSE_TYPE: Record<DecidingOutcome, RecordResponseData["responseType"]> = {
   partial: "partial",
   full: "full",
   rr: "rr",
@@ -53,7 +64,8 @@ export const OUTCOME_RESPONSE_TYPE: Record<ResponseOutcome, RecordResponseData["
   noreply: "close",
 };
 
-export const OUTCOME_ORDER: readonly ResponseOutcome[] = [
+/** The DECIDING outcomes, in order. The holding branch renders beneath a rule, not among these. */
+export const OUTCOME_ORDER: readonly DecidingOutcome[] = [
   "partial", "full", "rr", "offer", "rejected", "noreply",
 ] as const;
 
@@ -75,6 +87,8 @@ export type SealKind = "sage" | "burgundy" | "grey";
  * an invitation in the colour of a door closing.
  */
 export const OUTCOME_SEAL: Record<ResponseOutcome, SealKind> = {
+  /* sage: the work continues — nothing has closed and they are still reading */
+  holding: "sage",
   partial: "sage",
   full: "sage",
   rr: "sage",
@@ -91,6 +105,9 @@ export const OUTCOME_LABEL: Record<ResponseOutcome, string> = {
   offer: "Offer",
   rejected: "Rejection",
   noreply: "Closed — no reply",
+  /* ⚠️ THE REF'S WORDING, AND IT LEADS WITH THE REPLY. The first fact is that they wrote — the
+     writer's silence has ended, which is the thing they came to record. */
+  holding: "They replied, but not with a decision",
 };
 export const OUTCOME_DESC: Record<ResponseOutcome, string> = {
   partial: "They want to read more",
@@ -99,6 +116,7 @@ export const OUTCOME_DESC: Record<ResponseOutcome, string> = {
   offer: "Representation offered",
   rejected: "A pass",
   noreply: "Their stated window has passed",
+  holding: "An acknowledgement, a holding note, or a new date — the query stays where it is",
 };
 
 /**
@@ -114,14 +132,19 @@ export const OUTCOME_TONE: Record<ResponseOutcome, OutcomeTone> = {
   partial: "in", full: "in", rr: "in",
   offer: "offer",
   rejected: "shut", noreply: "shut",
+  /* incoming: the agent acted. The mark says direction, and this came from them. */
+  holding: "in",
 };
 
 /** Which step flow an outcome opens — §2 builds the bodies; the shape is decided here. */
-export type ResponseJourney = "request" | "offer" | "ending";
+export type ResponseJourney = "request" | "offer" | "ending" | "holding";
 export const OUTCOME_JOURNEY: Record<ResponseOutcome, ResponseJourney> = {
   partial: "request", full: "request", rr: "request",
   offer: "offer",
   rejected: "ending", noreply: "ending",
+  /* ⚠️ ITS OWN JOURNEY, because the three that exist all end in a status change. Two optional
+     steps and nothing else — the event alone is worth recording. */
+  holding: "holding",
 };
 
 export interface ResponseDraft {
@@ -139,6 +162,8 @@ export interface ResponseDraft {
   offerReplyBy: string;
   /** ending — their words, if the writer wants to keep them. */
   theirWords: string;
+  /** holding — the timeframe THEY gave, in weeks. "" is the "none" position, which is the norm. */
+  replyWeeks: string;
 }
 
 export const emptyResponseDraft = (dateArrived: string): ResponseDraft => ({
@@ -150,6 +175,7 @@ export const emptyResponseDraft = (dateArrived: string): ResponseDraft => ({
   offerTerms: "",
   offerReplyBy: "",
   theirWords: "",
+  replyWeeks: "",
 });
 
 /**
@@ -243,7 +269,7 @@ export function responseDraftToPayload(d: ResponseDraft): RecordResponseData {
 /* ══ §2 · THE STACK CHANGES WITH THE OUTCOME ════════════════════════════════════════════════ */
 
 /** Every step this journey can hold. Which of them apply depends on what came back. */
-export type RespStep = "outcome" | "when" | "asked" | "offer" | "said" | "notes";
+export type RespStep = "outcome" | "when" | "asked" | "offer" | "said" | "notes" | "window";
 
 /**
  * ⚠️ THE OUTCOME DECIDES THE STACK, and the three shapes are genuinely different questions rather
@@ -256,6 +282,10 @@ export const JOURNEY_STEPS: Record<ResponseJourney, readonly RespStep[]> = {
   request: ["outcome", "when", "asked", "notes"],
   offer: ["outcome", "when", "offer", "notes"],
   ending: ["outcome", "when", "said", "notes"],
+  /* ⚠️ BOTH BODY STEPS OPTIONAL (Phase 3). Most holding replies give no date and the writer may
+     keep no words; the EVENT is what ends the silence, so the stack must be completable with
+     nothing but the day it arrived. */
+  holding: ["outcome", "when", "window", "said"],
 };
 
 /** The stack for a draft — before an outcome is chosen there is only the question that decides it. */
@@ -264,6 +294,7 @@ export const stepsFor = (o: ResponseOutcome | null): readonly RespStep[] =>
 
 export const RESP_STEP_SHORT: Record<RespStep, string> = {
   outcome: "Outcome", when: "When", asked: "What", offer: "Offer", said: "Reply", notes: "Notes",
+  window: "Timeframe",
 };
 export const RESP_STEP_TITLE: Record<RespStep, string> = {
   outcome: "What came back?",
@@ -272,6 +303,7 @@ export const RESP_STEP_TITLE: Record<RespStep, string> = {
   offer: "The offer",
   said: "Anything they said",
   notes: "Notes",
+  window: "Did they give a new timeframe?",
 };
 export const RESP_STEP_HINT: Record<RespStep, string> = {
   outcome: "What the agent said",
@@ -280,14 +312,19 @@ export const RESP_STEP_HINT: Record<RespStep, string> = {
   offer: "Terms, and when they need an answer",
   said: "Optional — their words, if you want them",
   notes: "Optional — anything worth remembering",
+  window: "Optional — most holding replies give no date",
 };
 /** ⚠️ Everything after the outcome and the date is optional BY CONSTRUCTION (see responseReady). */
 export const RESP_STEP_OPTIONAL: Record<RespStep, boolean> = {
   outcome: false, when: false, asked: true, offer: true, said: true, notes: true,
+  /* ⚠️ OPTIONAL, AND THAT IS THE POINT OF THE BRANCH. Both of a holding reply's body steps can be
+     left empty — the event alone is worth recording, because it is what ends the silence. */
+  window: true,
 };
 
 /** Which draft fields belong to which step — the basis for knowing what a change would discard. */
 const STEP_FIELDS: Partial<Record<RespStep, (keyof ResponseDraft)[]>> = {
+  window: ["replyWeeks"],
   asked: ["askedFor", "deadline"],
   offer: ["offerTerms", "offerReplyBy"],
   said: ["theirWords"],
@@ -333,4 +370,17 @@ export function droppedNotice(dropped: RespStep[]): string | null {
     ? names[0]
     : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
   return `Changing the outcome cleared what you'd entered under ${list}.`;
+}
+
+/**
+ * The date a holding reply's stated weeks resolve to, spelled for the step's readout.
+ *
+ * ⚠️ FROM THE REPLY, NOT THE SEND — "two more weeks" means two weeks from when they said it. The
+ * same anchor `replyStatedWindow` uses, so the sentence the writer reads while recording and the
+ * date the tracker draws afterwards cannot disagree.
+ */
+export function repliedAround(dateArrivedISO: string, weeks: number): string {
+  const t = new Date(dateArrivedISO).getTime();
+  if (Number.isNaN(t) || !weeks || weeks <= 0) return "";
+  return new Date(t + weeks * 7 * 86400000).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
 }

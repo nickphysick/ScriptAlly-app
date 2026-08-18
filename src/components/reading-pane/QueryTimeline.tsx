@@ -22,6 +22,7 @@ import { sendMethodLabel } from "../../lib/agentDisplay";
 /* §4 — the app's ONE response-window slider, now that its DOM id is instance-unique. */
 import { WeekSlider } from "../forms/WeekSlider";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
+import { HOLDING_REPLY_NESTED_TYPE, HOLDING_REPLY_LABEL, replyStatedWindow, holdingReplyTimes } from "../../lib/holdingReply";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
 import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, silencePolicyLine, windowAttribution, type ReminderTask } from "../../lib/nudgeState";
@@ -116,7 +117,9 @@ export interface RowSpec {
    * the mark of a status it does not have. It DOES carry an `activityId` (a mis-logged nudge is
    * deletable), which the old note also denied.
    */
-  kind?: "nudge";
+  /* ⚠️ NON-STATUS FAMILIES. Both borrow a glyph decoratively and neither enters the status dedupe:
+     a nudge is the writer touching the agent, a holding reply is the agent touching back. */
+  kind?: "nudge" | "holding";
   status: QueryStatus;
   title: string;
   date?: string;
@@ -275,7 +278,32 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
       timeMs: getTime(evt.createdAt),
     }));
 
-  const merged = [...statusRows, ...nudgeRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
+  /**
+   * PHASE 4 — the holding reply's row. Incoming, and it opens no chapter (D5): `kind` is set, and
+   * `chapterise` only ever opens on a REQUEST, so an event inside the current round stays inside it.
+   *
+   * ⚠️ EVERY ONE RENDERS, LIKE A NUDGE AND UNLIKE A STATUS. Two acknowledgements a month apart are
+   * two distinct touches; the status dedupe would collapse them into one, which is exactly why this
+   * family sits outside it. The row claims no status — it borrows the incoming glyph decoratively,
+   * the same borrowing the nudge row makes.
+   */
+  const holdingRows: RowSpec[] = (events || [])
+    .filter((evt) => evt.type === HOLDING_REPLY_NESTED_TYPE)
+    .map((evt, i) => ({
+      key: `h-${typeof evt.id === "string" ? evt.id : i}`,
+      kind: "holding" as const,
+      status: QueryStatus.PARTIAL_REQUESTED, // decorative only — the incoming ring
+      title: HOLDING_REPLY_LABEL,
+      date: fmtShort(getTime(evt.createdAt)),
+      activityId: typeof evt.id === "string" ? evt.id : undefined,
+      dateISO: isoDay(getTime(evt.createdAt)),
+      /* ⚠️ ROW 2 IS THEIR WORDS AS A QUIET QUOTED LINE, and only when there are any — an empty
+         second row would draw the two-row grammar over one row's worth of fact. */
+      note: typeof evt.note === "string" ? evt.note : "",
+      timeMs: getTime(evt.createdAt),
+    }));
+
+  const merged = [...statusRows, ...nudgeRows, ...holdingRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
 
   /**
    * §5a — a nudge states its OUTCOME, not the act: "Nudged — no reply" while nothing has come back,
@@ -635,7 +663,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
      8/12/12-week house assumption while the list beside it counted to what the agency actually
      says — one screen, one query, two deadlines. Falls back to the house window when the record
      states none, which is the only case the assumption was ever for. */
-  const ambient = queryAmbientStatus(query, ballHolder, primaryAction?.markKind, Date.now(), agent?.responseTimeWeeks);
+  /* ⚠️ PHASE 2 · THE EVENTS GO IN, which is what makes the re-base and the reply-stated window
+     real on this card rather than only in the lib. Every other caller omits them and is byte-
+     identical to before — the surfaces that do not yet read holding replies are untouched. */
+  const ambient = queryAmbientStatus(query, ballHolder, primaryAction?.markKind, Date.now(), agent?.responseTimeWeeks, events);
   const waiting = ambient.mode === "waiting" ? ambient : null;
   const sendWhat = ambient.sendWhat;
 
@@ -646,8 +677,14 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
    * window expired" and the bar's expected marker cannot name two different days.
    */
   const nudges = nudgeTimes(events, NUDGE_NESTED_TYPE, (v) => getTime(v));
+  /* PHASE 5 — when the agent last got in touch without deciding. Null when they never have. */
+  const holdingTimes = holdingReplyTimes(events as never);
+  const lastHoldingReplyMs = holdingTimes.length ? holdingTimes[holdingTimes.length - 1] : null;
   const offer = closureOffer({
     times: nudges,
+    /* ⚠️ PHASE 5 · AN AGENT WHO REPLIED LAST WEEK IS NOT A CANDIDATE FOR "no response in two
+       years". The offer is about a silence, and the silence has demonstrably ended. */
+    repliedSinceMs: lastHoldingReplyMs,
     /* ⚠️ §3 · THE THIRD DISPLAY PATH THAT WAS READING THE HOUSE ASSUMPTION. The offer states "N
        since the window expired" — a sentence with no meaning when no window was ever stated, and one
        that would have quoted the app's own 8/12/12-week guess back as the agency's deadline. */
@@ -830,7 +867,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
               * attributed to the agency.
               */}
             {(() => {
-              const line = pastWindowLine(waiting.expMs, now, stated);
+              const line = pastWindowLine(waiting.expMs, now, stated, lastHoldingReplyMs);
               return line ? <div className="tl-pastfig"><b>{line.figure}</b> {line.tail}</div> : null;
             })()}
 
@@ -849,6 +886,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                    system tag; `elapsed.ts` is where this app spells a date in full, and the note at
                    the head of this file says exactly why a second formatter is not written here. */
                 policy: agent?.noResponseMeansNo, who, windowExpiredMs: waiting.expMs ?? null, now, formatDate: exactDate,
+                repliedSinceMs: lastHoldingReplyMs,
               });
               return policy ? <div className="tl-conv">{policy}</div> : null;
             })()}

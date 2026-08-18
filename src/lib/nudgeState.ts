@@ -194,8 +194,19 @@ export { agoLabel } from "./elapsed";
  * whether a nudge worked — the presence of an incoming event after it IS the answer, and a stored
  * flag would be a second copy of a fact the log already holds.
  */
-export function nudgeOutcomeLabel(nudgeMs: number, laterEvents: { status: QueryStatus | string; timeMs?: number }[]): string {
-  const answered = laterEvents.some((e) => (e.timeMs ?? 0) > nudgeMs && statusDirection(e.status) === "in");
+export function nudgeOutcomeLabel(
+  nudgeMs: number,
+  laterEvents: { status: QueryStatus | string; timeMs?: number; kind?: string }[],
+): string {
+  /**
+   * ⚠️ PHASE 2 · A HOLDING REPLY COUNTS AS "CAME BACK", and this is the clause the pack calls out
+   * by name. `statusDirection` classifies a STATUS, and a holding reply has none — so without this
+   * a nudge answered by an acknowledgement would keep reading "Nudged — no reply" directly above
+   * the reply that answered it. The row's own `kind` is the signal, because the event carries no
+   * status by construction and never will.
+   */
+  const answered = laterEvents.some((e) => (e.timeMs ?? 0) > nudgeMs
+    && (e.kind === "holding" || statusDirection(e.status) === "in"));
   return answered ? "Nudged" : "Nudged — no reply";
 }
 
@@ -246,6 +257,11 @@ export interface ClosureOfferInput {
    * answered the question the six-month wait exists to ask.
    */
   policy?: boolean;
+  /**
+   * PHASE 5 — when the agent last got in touch WITHOUT deciding anything, if they have. A holding
+   * reply after the window expired ends the silence this offer is about.
+   */
+  repliedSinceMs?: number | null;
 }
 
 /** How long past an expired window the offer waits — stated once, so it is tunable rather than hunted. */
@@ -265,6 +281,16 @@ export const CLOSURE_OFFER_MONTHS = 6;
 export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: string } {
   const { times, windowExpiredMs, now, dismissed } = inp;
   if (dismissed || windowExpiredMs == null) return { show: false, facts: "" };
+  /**
+   * ⚠️ PHASE 5 · THE SILENCE HAS ENDED, SO THE OFFER TO CLOSE IT IS WITHDRAWN. An agent who wrote
+   * last week is not a candidate for "no response in two years", and offering closure beside their
+   * reply would be the app failing to notice something the writer has just recorded.
+   *
+   * ⚠️ IT IS CHECKED BEFORE THE POLICY ROUTE TOO. `noResponseMeansNo` says what silence means; a
+   * reply is not silence, so a stated policy cannot reach past one. That ordering is the whole
+   * reason this sits with the other suppressions rather than inside the nudge branch.
+   */
+  if (inp.repliedSinceMs != null && inp.repliedSinceMs > windowExpiredMs) return { show: false, facts: "" };
   /* §3 — checked before either route, including the policy route: the agency's position does not
      override the writer's own decision to chase again. */
   if (inp.reminderScheduled) return { show: false, facts: "" };
@@ -315,8 +341,17 @@ export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: st
  * not "overdue" and not "late". A stated window is an intention, not a contract, and the app
  * reports rather than appraises — the same rule that retired "overdue" from this page.
  */
-export function pastWindowLine(windowExpiredMs: number | null, now: number, stated: boolean): { figure: string; tail: string } | null {
+export function pastWindowLine(
+  windowExpiredMs: number | null,
+  now: number,
+  stated: boolean,
+  /* PHASE 2 — when they last wrote without deciding. A reply ends the silence being measured. */
+  repliedSinceMs?: number | null,
+): { figure: string; tail: string } | null {
   if (!stated || windowExpiredMs == null || now <= windowExpiredMs) return null;
+  /* ⚠️ THE FIGURE MEASURES A SILENCE, AND THE SILENCE IS OVER. "Two years past the window they
+     stated" beside an event from last Tuesday states something the record contradicts. */
+  if (repliedSinceMs != null && repliedSinceMs > windowExpiredMs) return null;
   return { figure: elapsedPhrase(daysBetween(windowExpiredMs, now)), tail: "past the window they stated" };
 }
 
@@ -347,11 +382,16 @@ export interface SilencePolicyInput {
   now: number;
   /** Long-form date, injected so this module stays free of formatting. */
   formatDate: (ms: number) => string;
+  /** PHASE 5 — when they last wrote without deciding; a reply ends the silence. */
+  repliedSinceMs?: number | null;
 }
 
 export function silencePolicyLine(inp: SilencePolicyInput): string | null {
   const { policy, who, windowExpiredMs, now, formatDate } = inp;
   if (policy !== true || windowExpiredMs == null || now <= windowExpiredMs) return null;
+  /* ⚠️ PHASE 5 · A POLICY ABOUT SILENCE HAS NOTHING TO SAY ONCE THEY HAVE WRITTEN. "They treat
+     silence as a pass" above an agent's own reply is the app arguing with its own timeline. */
+  if (inp.repliedSinceMs != null && inp.repliedSinceMs > windowExpiredMs) return null;
   /* "their" for both — an agency takes it as a plural and a person takes it as the singular they,
      so the possessive is the one word in this sentence that does not need to agree. */
   return `${who.name} ${agree(who, "treat", "treats")} silence as a pass — their window expired ${formatDate(windowExpiredMs)}.`;

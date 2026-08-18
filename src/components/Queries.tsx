@@ -303,6 +303,7 @@ export const Queries: React.FC<{
     updateQuery,
     deleteQuery,
     recordMaterialsSent,
+    recordHoldingReply,
     deleteJournalEntry,
     updateJournalEntry,
     pinJournalEntry,
@@ -558,13 +559,33 @@ export const Queries: React.FC<{
     setRespError(null);
     try {
       const agent = agents.find((a) => a.id === q.agentId) ?? null;
+      /**
+       * ⚠️ PHASE 3 · THE HOLDING BRANCH DOES NOT GO THROUGH `recordQueryResponse`, AND THAT IS THE
+       * POINT RATHER THAN AN EXCEPTION. That function is the app's single RESPONSE path: it exists
+       * to append a rung carrying a `resultingStatus` and let `recomputeQuery` derive from it. A
+       * holding reply has no status, so routing it through there would mean either inventing one or
+       * threading a "no status" case through the one function whose whole contract is that there
+       * always is one. `buildHoldingReplyWrites` is its sibling — same twin-store shape, same
+       * shared id — and the two cannot be confused because neither can produce the other's writes.
+       */
+      let res: { undo: () => Promise<void> | void };
+      if (respDraft.outcome === "holding") {
+        const r = await recordHoldingReply(q.id, {
+          repliedOn: new Date(`${respDraft.dateArrived}T12:00:00`).toISOString(),
+          weeks: respDraft.replyWeeks.trim() ? Number(respDraft.replyWeeks) : null,
+          note: respDraft.theirWords,
+        });
+        if (!r.success) throw new Error(r.error || "Failed to record the reply.");
+        res = r;
+      } else {
       /* ⚠️ deps FIRST, then the payload — and the payload is built by a named function rather
          than assembled at the call site, so the eighteen fields it needs are stated in one place
          that can be tested without a database. */
-      const res = await recordQueryResponse(
+      res = await recordQueryResponse(
         { userId: currentUser.id, query: q, agent, manuscript: { title: activeMs?.title } },
         responseDraftToPayload(respDraft),
       );
+      }
       /* ⚠️ PAST THE WRITE, NEVER ON THE CLICK — a failed save must not have already animated a row
          that then reverts. Reduced motion completes directly, for want of an `animationend`.
 
