@@ -1281,6 +1281,32 @@
 .tl-ask { display: flex; align-items: center; gap: 9px; padding: 9px 11px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); }
 .tl-ask-a { margin-left: auto; padding: 0; border: 0; background: none; font: inherit; color: var(--burg); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; cursor: pointer; }
 
+/**
+ * ══ §2 (whose-window pack) · THE IN-PLACE WINDOW CONTROL ══════════════════════════════════════
+ *
+ * ⚠️ IT TAKES THE OFFER'S PLACE RATHER THAN OPENING SOMETHING. The sage rim is the same focus
+ * treatment the composer uses, so a card in the middle of being edited reads the same way wherever
+ * you are on the page.
+ *
+ * ⚠️ THE TRACK IS PAINTED FROM ONE CUSTOM PROPERTY the component sets, because a range input's
+ * fill cannot be expressed in CSS alone: `::-webkit-slider-runnable-track` has no access to the
+ * value. `--pct` is written on the element and read by both vendor tracks, so the two engines
+ * cannot drift apart the way two hand-written gradients would.
+ */
+.tl-setwin { background: var(--white); border: 1.5px solid var(--qc-ring); border-radius: 10px; padding: 11px 12px; }
+.tl-setwin-eb { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-bottom: 9px; }
+.tl-setwin-rg { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 26px; background: none; outline: none; cursor: pointer; }
+.tl-setwin-rg::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--burg) 0 var(--pct, 0%), var(--n2) var(--pct, 0%) 100%); }
+.tl-setwin-rg::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--burg) 0 var(--pct, 0%), var(--n2) var(--pct, 0%) 100%); }
+.tl-setwin-rg::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin-top: -6px; border-radius: 50%; background: var(--white); border: 1.5px solid var(--burg); box-shadow: 0 1px 3px rgba(40, 35, 30, 0.3); }
+.tl-setwin-rg::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--white); border: 1.5px solid var(--burg); box-shadow: 0 1px 3px rgba(40, 35, 30, 0.3); }
+.tl-setwin-rg:focus-visible { outline: 2px solid var(--qc-ring); outline-offset: 3px; }
+.tl-setwin-tk { display: flex; justify-content: space-between; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: var(--qc-tx-off); margin-top: 2px; }
+.tl-setwin-val { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; }
+.tl-setwin-val b { font-family: var(--f12-serif); font-size: 19px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
+.tl-setwin-val span { font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--faint); }
+.tl-setwin-k { margin-top: 9px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-off); }
+
 /* ══ §5 · WHAT A NUDGE LEAVES BEHIND ═════════════════════════════════════════════════════════
  *
  * ⚠️ THE HISTORY LINE IS A CAPTION ON THE WAIT, not a row of its own — mono, quiet, under whatever

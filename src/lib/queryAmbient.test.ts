@@ -550,8 +550,24 @@ describe("TWS P4 artefacts — no-date gate + set-date wiring", () => {
     expect(decls, "the copy still blames the writer").not.toContain("no expected date set");
     expect(tl, "the copy does not state whose absence it is").toContain("not state a response time.");
   });
-  it("Set an expected date opens the Edit drawer (which edits responseDeadline)", () => {
-    expect(qsrc.includes("onSetExpectedDate={() => openEditQuery(activeQuery.id)}")).toBe(true);
+  /**
+   * ⚠️ INVERTED (§2, whose-window pack). Opening the Edit Query overlay was a whole modal, most of
+   * it about something else, to answer the one question the card had just asked. The control is in
+   * the card now and hands back a resolved ISO date; what the case is FOR — that the offer is wired
+   * to something that writes `responseDeadline` — is asserted more directly than before.
+   *
+   * ⚠️ AND IT WRITES TO THE QUERY, NEVER THE AGENT. Writing the writer's estimate onto the agent
+   * record would put words in the agency's mouth — the fault §1 removes, committed to the database
+   * instead of to the screen — so that is asserted here rather than left to the reader.
+   */
+  it("Set a date writes responseDeadline on the query, in place", () => {
+    expect(qsrc, "the offer still opens the Edit Query overlay").not.toContain("onSetExpectedDate={() => openEditQuery");
+    expect(qsrc, "the offer is not wired to a resolved date").toContain("onSetExpectedDate={(iso) => {");
+    expect(qsrc, "the date is not written to the query").toContain("updateQuery(id, { responseDeadline: iso })");
+    const at = qsrc.indexOf("onSetExpectedDate={(iso) => {");
+    const handler = qsrc.slice(at, qsrc.indexOf("}}", qsrc.indexOf("showToast", at)));
+    expect(handler, "the handler is empty — this case is testing nothing").toContain("responseDeadline");
+    expect(handler, "the writer's estimate is being written to the agent record").not.toContain("updateAgent");
   });
 });
 

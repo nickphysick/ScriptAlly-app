@@ -5253,7 +5253,18 @@ export const Queries: React.FC<{
                                 await updateQuery(activeQuery.id, { closureOfferDismissed: true } as never);
                                 showToast({ message: "Still tracking this query" });
                               }}
-                              onSetExpectedDate={() => openEditQuery(activeQuery.id)}
+                              /* §2 (whose-window pack) — the card's own control hands back a
+                                 resolved date. It writes `responseDeadline` on the QUERY; the agent
+                                 record is not touched, because what the writer stated is what THEY
+                                 expect on this query rather than something the agency said. */
+                              onSetExpectedDate={(iso) => {
+                                const id = activeQuery.id, prev = activeQuery.responseDeadline;
+                                void updateQuery(id, { responseDeadline: iso });
+                                showToast({
+                                  message: `Expecting a reply by ${new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`,
+                                  undo: () => void updateQuery(id, prev ? { responseDeadline: prev } : { responseDeadline: deleteField() as unknown as string }),
+                                });
+                              }}
                               {...(() => {
                                 /**
                                  * §6b/§6c — the scheduled reminder, and the way to create one.

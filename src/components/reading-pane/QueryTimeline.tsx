@@ -155,8 +155,16 @@ export interface QueryTimelineProps {
   onDeleteEntry?: (entry: TimelineEntryRef) => void;
   /** Open the Nudge flow (now the fork's nudge chip; kept for the fork wiring). */
   onNudge?: () => void;
-  /** TWS P4 — open the "set an expected date" flow (writes responseDeadline) when none is derivable. */
-  onSetExpectedDate?: () => void;
+  /**
+   * §2 (whose-window pack) — SET THE EXPECTED DATE IN PLACE. It used to open the Edit Query
+   * overlay: a whole modal, most of it about something else, to answer one question the card had
+   * just asked. The card now carries the control and hands back a resolved ISO date.
+   *
+   * ⚠️ IT WRITES TO THE QUERY, NEVER TO THE AGENT RECORD. What the writer is stating is what THEY
+   * expect on THIS query; writing it to the agent would put words in the agency's mouth — which is
+   * the exact fault §1 exists to remove, committed to the database instead of to the screen.
+   */
+  onSetExpectedDate?: (iso: string) => void;
   /**
    * §2 — the send-method picker, opened FROM THE EVENT THAT STATES IT. Its third home this session
    * (`sentLine`, then the ⋯, now in place), and the one the three-verb grammar always pointed at:
@@ -539,6 +547,63 @@ const TlProjection: React.FC<{
   </TlEvent>
 );
 
+/**
+ * ══ §2 (whose-window pack) · SETTING THE DATE, IN PLACE ═══════════════════════════════════════
+ *
+ * ⚠️ THE OFFER USED TO OPEN THE EDIT QUERY OVERLAY — a whole modal, most of it about something
+ * else, to answer the one question the card had just asked. The control is here now: the offer's
+ * own line, and the editor in its place when you take it.
+ *
+ * ⚠️ IT IS BUILT HERE RATHER THAN REUSING `WeekSlider`, and the reason is a hazard this repo has
+ * already paid for once. `WeekSlider` hardcodes `id="sa-wk"` on its input and its label's `htmlFor`
+ * — exactly the `ScriptAllyLogo` fault — so mounting it beside the Add-Agent and Edit-Agent forms
+ * that already use it would put two elements with one id in the document and point a label at
+ * whichever came first. It is also Form 11 (`sa-fld`, `sa-label`) inside an F12 card. The SCALE is
+ * the shared one — whole weeks from 1 — and that is the part that had to agree.
+ *
+ * ⚠️ ENTER SAVES AND ESC CANCELS, stated on the control rather than assumed. A range input answers
+ * arrow keys for free; without the hint nothing says the value is not already committed.
+ *
+ * ⚠️ THE EYEBROW SAYS `YOUR`. The same word that keeps the estimate the writer's in the display
+ * belongs on the control that sets it — a control labelled "Expected response time" would read as
+ * though it were recording something the agency had said.
+ */
+const SET_WINDOW_MAX = 16;
+const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> = ({ anchorMs, onSave }) => {
+  const [open, setOpen] = useState(false);
+  const [weeks, setWeeks] = useState(6);
+  const resolved = anchorMs + weeks * 7 * 86400000;
+
+  if (!open) {
+    return (
+      <div className="tl-ask">
+        <span>Enter an expected response date for more accurate tracking</span>
+        <button type="button" className="tl-ask-a" onClick={() => setOpen(true)}>Set a date</button>
+      </div>
+    );
+  }
+  return (
+    <div
+      className="tl-setwin"
+      onKeyDown={(e) => {
+        if (e.key === "Enter") { e.preventDefault(); onSave(new Date(resolved).toISOString()); setOpen(false); }
+        if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOpen(false); }
+      }}
+    >
+      <div className="tl-setwin-eb">Your expected response time</div>
+      <input
+        type="range" className="tl-setwin-rg" min={1} max={SET_WINDOW_MAX} step={1} value={weeks} autoFocus
+        aria-label="Your expected response time, in weeks"
+        onChange={(e) => setWeeks(Number(e.target.value))}
+        style={{ ["--pct" as string]: `${((weeks - 1) / (SET_WINDOW_MAX - 1)) * 100}%` }}
+      />
+      <div className="tl-setwin-tk"><span>1 wk</span><span>4</span><span>8</span><span>12</span><span>{SET_WINDOW_MAX}+</span></div>
+      <div className="tl-setwin-val"><b>{weeks}</b><span>week{weeks === 1 ? "" : "s"} · around {exactDate(resolved).replace(/ \d{4}$/, "")}</span></div>
+      <div className="tl-setwin-k">Enter to save · Esc to cancel</div>
+    </div>
+  );
+};
+
 export const QueryTimeline: React.FC<QueryTimelineProps & {
   sentExtra?: React.ReactNode;
   onMarkClosed?: () => void;
@@ -722,10 +787,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
               <>
                 <div className="tl-wbody">{who.name} {who.plural ? "do" : "does"} not state a response time.</div>
                 {onSetExpectedDate && (
-                  <div className="tl-ask">
-                    <span>Enter an expected response date for more accurate tracking</span>
-                    <button type="button" className="tl-ask-a" onClick={onSetExpectedDate}>Set a date</button>
-                  </div>
+                  <SetWindow anchorMs={waiting.sentMs ?? now} onSave={onSetExpectedDate} />
                 )}
               </>
             ) : dated ? (

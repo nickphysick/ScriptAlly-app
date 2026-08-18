@@ -191,6 +191,21 @@ export function queryAmbientStatus(
        * rather than an estimate about them, and the control that sets the writer's date is offered
        * only where the agency has stated nothing — so the two rarely meet, and when they do the
        * attributable fact is the one worth drawing.
+       *
+       * ⚠️ KNOWN LIMIT, AND IT NEEDS A DECISION RATHER THAN A PATCH: `responseDeadline` IS NOT A
+       * RECORD OF WHO SET IT. `addQuery` writes it at creation from the AGENT's window, so a stored
+       * date is not evidence the writer typed one — the test below is "the agency states nothing
+       * now, so this date cannot be their window", which is sound for every query the app can
+       * currently create (with no stated weeks `computeResponseDeadline` produces an invalid date,
+       * so such a query is never born carrying one) and unsound for exactly one history: an agent
+       * who stated weeks and later had them cleared. `computeAgentDeadlineWrites` is deliberately
+       * non-destructive on a clear — "Not set → no writes" — so those queries keep a deadline
+       * derived from a window that no longer exists, and it would read here as the writer's.
+       *
+       * The fix is a stored fact, not more arithmetic: one optional field on `Query` saying the
+       * expected date is the writer's. That is a schema change and a rules deploy, so it stops for
+       * Nick rather than being invented here. Recorded at the point of the assumption, because a
+       * report is read once and this line is read every time someone touches the attribution.
        */
       const overrideMs = query.responseDeadline ? getTime(query.responseDeadline) : NaN;
       const agentStated = !!(windowWeeks && windowWeeks > 0);
