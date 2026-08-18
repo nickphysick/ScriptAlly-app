@@ -10,7 +10,7 @@ import { QueryStatus } from "../types";
 import { getPrimaryAction } from "./queryPrimaryAction";
 import {
   chasedBy, nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo,
-  nudgeOutcomeLabel, nudgeHistoryLine, closureOffer, CLOSURE_OFFER_MONTHS, agoLabel,
+  nudgeOutcomeLabel, nudgeHistoryLine, closureOffer, CLOSURE_OFFER_MONTHS, agoLabel, silencePolicyLine,
 } from "./nudgeState";
 
 const DAY = 86400000;
@@ -236,5 +236,101 @@ describe("§4 · the control reads the new derivation", () => {
 
   it("the reason is rendered, not just derived", () => {
     expect(page).toContain("nudgeReason(");
+  });
+});
+
+/**
+ * §1 (policy pack) — the agency's own silence policy, or nothing.
+ *
+ * ⚠️ THE INPUT IS `chasedBy`'s OUTPUT, NOT A HAND-MADE `who`. The subject and its verb agreement
+ * come from that function in production, so a literal here would be testing a shape the page cannot
+ * produce — and would go green the day an agency stopped taking a plural verb.
+ */
+describe("§1 · the agency's own policy, or nothing", () => {
+  const closed = NOW - 400 * DAY;
+  const long = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  const line = (policy: boolean | undefined, agent: { name?: string; agency?: string }, windowClosedMs: number | null = closed) =>
+    silencePolicyLine({ policy, who: chasedBy(agent), windowClosedMs, now: NOW, formatDate: long });
+
+  it("names the agency and the date their own window closed", () => {
+    const l = line(true, { name: "Marcus Reed", agency: "Bloomsbury Quill" });
+    expect(l).toBe(`Bloomsbury Quill treat silence as a pass — their window closed ${long(closed)}.`);
+  });
+
+  /* ⚠️ AN AGENT WITH NO AGENCY TAKES THE SINGULAR VERB — the same agreement every other sentence
+     on this card uses, from the same function. */
+  it("agrees its verb with whoever is being chased", () => {
+    expect(line(true, { name: "Marcus Reed" })).toContain("Marcus Reed treats silence as a pass");
+    expect(line(true, { agency: "Bloomsbury Quill" })).toContain("Bloomsbury Quill treat silence as a pass");
+  });
+
+  /**
+   * ⚠️ THE WHOLE POINT OF THE SECTION: SILENCE ABOUT SILENCE IS NOT A STATEMENT ABOUT IT. Absent
+   * and `false` both render nothing, and they are asserted separately because a `!== false` test
+   * would pass one and fail the other while looking correct.
+   */
+  it("renders nothing at all where the agency has not said so", () => {
+    expect(line(undefined, { agency: "Bloomsbury Quill" }), "an unstated policy produced a line").toBeNull();
+    expect(line(false, { agency: "Bloomsbury Quill" }), "an agency that replies either way was quoted as not replying").toBeNull();
+  });
+
+  /* ⚠️ AND IT NEEDS A CLOSED WINDOW TO BE PAST — the policy alone says nothing about this query. */
+  it("waits for the window to close", () => {
+    expect(line(true, { agency: "Bloomsbury Quill" }, null), "a policy with no window produced a line").toBeNull();
+    expect(line(true, { agency: "Bloomsbury Quill" }, NOW + 30 * DAY), "an open window was called closed").toBeNull();
+  });
+
+  /**
+   * §1 — the offer follows the line. The policy is a SECOND route into `closureOffer`, and it does
+   * not wait the six months the nudge route waits: that wait exists because closure is otherwise
+   * the app's own inference, and here it is the agency's published position.
+   */
+  it("the offer follows the policy, without a nudge and without the six-month wait", () => {
+    const recent = NOW - 20 * DAY;
+    expect(closureOffer({ times: [], windowClosedMs: recent, now: NOW, dismissed: false, policy: true }).show,
+      "a stated policy did not carry the offer").toBe(true);
+    expect(closureOffer({ times: [], windowClosedMs: recent, now: NOW, dismissed: false }).show,
+      "the nudge route started offering closure without a nudge").toBe(false);
+    expect(closureOffer({ times: [], windowClosedMs: recent, now: NOW, dismissed: false, policy: false }).show,
+      "an agency that replies either way carried the offer").toBe(false);
+  });
+
+  /* ⚠️ THE FACTS DO NOT RESTATE THE POLICY — the line above the offer says it, and an offer
+     repeating it would be the app pressing a point it has no business pressing. */
+  it("states facts and no verdict, and never repeats the policy", () => {
+    const o = closureOffer({ times: [], windowClosedMs: closed, now: NOW, dismissed: false, policy: true });
+    expect(o.facts).toContain("since their window closed");
+    expect(o.facts.toLowerCase()).not.toContain("silence as a pass");
+    for (const w of ["recommend", "should", "unlikely", "time to", "move on", "give up"]) {
+      expect(o.facts.toLowerCase(), `the offer appraises: "${w}"`).not.toContain(w);
+    }
+  });
+
+  /* the once-only dismissal is unchanged, and it covers the new route too */
+  it("honours the dismissal", () => {
+    expect(closureOffer({ times: [], windowClosedMs: closed, now: NOW, dismissed: true, policy: true }).show).toBe(false);
+  });
+});
+
+/**
+ * ⚠️ THE GENERIC LINE IS GONE FROM THE PAGE, asserted at source because an absence is what this
+ * section is. Comments are stripped first — this file's own prose quotes the retired sentence, and
+ * so does the derivation's, which is exactly the false red this repo has paid for seven times.
+ */
+describe("§1 · the generic convention line is gone", () => {
+  const strip = (src: string) => src.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
+  const tl = strip(readFileSync(new URL("../components/reading-pane/QueryTimeline.tsx", import.meta.url), "utf8"));
+  const st = strip(readFileSync(new URL("./nudgeState.ts", import.meta.url), "utf8"));
+
+  it("no house observation about the trade renders anywhere", () => {
+    for (const src of [tl, st]) {
+      expect(src, "the generic convention line is still rendered").not.toContain("Many agencies");
+      expect(src, "a house assumption about silence is stated in code").not.toMatch(/most agenc|usually means|generally treat/i);
+    }
+  });
+
+  it("the line the page draws comes from the derivation", () => {
+    expect(tl, "the page does not call the policy derivation").toContain("silencePolicyLine(");
+    expect(tl, "the policy line is not fed the agent's own field").toContain("policy: agent?.noResponseMeansNo");
   });
 });

@@ -222,6 +222,12 @@ export interface ClosureOfferInput {
   now: number;
   /** The writer already said "keep tracking" — §5d, the one stored thing in this section. */
   dismissed: boolean;
+  /**
+   * §1 (policy pack) — the agency's own `noResponseMeansNo`. `true` is a SECOND route into this
+   * offer, independent of the nudge history: an agency that has published "assume no" has already
+   * answered the question the six-month wait exists to ask.
+   */
+  policy?: boolean;
 }
 
 /** How long past a closed window the offer waits — stated once, so it is tunable rather than hunted. */
@@ -240,7 +246,30 @@ export const CLOSURE_OFFER_MONTHS = 6;
  */
 export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: string } {
   const { times, windowClosedMs, now, dismissed } = inp;
-  if (dismissed || !times.length || windowClosedMs == null) return { show: false, facts: "" };
+  if (dismissed || windowClosedMs == null) return { show: false, facts: "" };
+
+  /**
+   * ⚠️ §1 (policy pack) · THE POLICY ROUTE, AND IT DOES NOT WAIT SIX MONTHS. The nudge route below
+   * waits because closure is the app's inference and an inference needs evidence; where the AGENCY
+   * has stated that silence means no, closure is THEIR published position and the only thing left
+   * to establish is that the window has closed. No nudge is required either: chasing an agency that
+   * has already said it will not reply is a step the app should not be implying is missing.
+   *
+   * ⚠️ THE FACTS STOP SHORT OF THE POLICY ITSELF, because the line above the offer states it. An
+   * offer that repeated it would be the app pressing the point, which is the one thing this section
+   * forbids.
+   */
+  if (inp.policy === true && now > windowClosedMs) {
+    const since = elapsedPhrase(daysBetween(windowClosedMs, now));
+    return {
+      show: true,
+      facts: times.length
+        ? `No reply in the ${since} since their window closed, and ${times.length === 1 ? "a nudge" : `${times.length} nudges`} went unanswered.`
+        : `No reply in the ${since} since their window closed.`,
+    };
+  }
+
+  if (!times.length) return { show: false, facts: "" };
   const monthsPast = (now - windowClosedMs) / (DAY * 30.44);
   const lastNudge = times[times.length - 1];
   if (monthsPast <= CLOSURE_OFFER_MONTHS || now < lastNudge) return { show: false, facts: "" };
@@ -268,6 +297,43 @@ export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: st
 export function pastWindowLine(windowClosedMs: number | null, now: number, stated: boolean): { figure: string; tail: string } | null {
   if (!stated || windowClosedMs == null || now <= windowClosedMs) return null;
   return { figure: elapsedPhrase(daysBetween(windowClosedMs, now)), tail: "past the window they stated" };
+}
+
+/**
+ * §1 (policy pack) — THE AGENCY'S OWN SILENCE POLICY, OR NOTHING.
+ *
+ * ⚠️ THE GENERIC LINE IS GONE AND MUST NOT COME BACK. The card printed "Many agencies treat silence
+ * as a pass." on every past-window state — an industry observation on one specific query's tracker,
+ * true of the trade and unattributable to the agency in front of you. Where the agency HAS stated
+ * the policy, the app can name them; where it has not, it says nothing at all. There is no house
+ * fallback, exactly as there is no house window bar.
+ *
+ * ⚠️ THE RECOMMENDATION IS THEIRS, NOT OURS. The sentence quotes a fact the agency published and
+ * the date their own window closed; the app adds no verdict and never says "we recommend". That is
+ * what earns it the right to sit above an offer to close.
+ *
+ * ⚠️ `noResponseMeansNo` IS ALREADY THE FIELD — this needed no schema change. Absent means the
+ * agency has not said, `false` means they reply either way, and BOTH render nothing: only an
+ * explicit `true` produces a line. A `!== false` test here would turn silence about silence into a
+ * statement about it, which is the whole fault this section removes.
+ */
+export interface SilencePolicyInput {
+  /** The agent's `noResponseMeansNo` — absent = not stated. */
+  policy: boolean | undefined;
+  who: Chased;
+  /** When the agency's stated window closed. Null = no window, so nothing to be past. */
+  windowClosedMs: number | null;
+  now: number;
+  /** Long-form date, injected so this module stays free of formatting. */
+  formatDate: (ms: number) => string;
+}
+
+export function silencePolicyLine(inp: SilencePolicyInput): string | null {
+  const { policy, who, windowClosedMs, now, formatDate } = inp;
+  if (policy !== true || windowClosedMs == null || now <= windowClosedMs) return null;
+  /* "their" for both — an agency takes it as a plural and a person takes it as the singular they,
+     so the possessive is the one word in this sentence that does not need to agree. */
+  return `${who.name} ${agree(who, "treat", "treats")} silence as a pass — their window closed ${formatDate(windowClosedMs)}.`;
 }
 
 /** A task that is a scheduled reminder on this query: undone, scoped to it, and dated ahead. */

@@ -20,7 +20,7 @@ import { elapsedPhrase, exactDate } from "../../lib/elapsed";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
-import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, type ReminderTask } from "../../lib/nudgeState";
+import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, silencePolicyLine, type ReminderTask } from "../../lib/nudgeState";
 
 /* ⚠️ `fmtNatural` IS DELETED WITH THE GRACE BOX THAT USED IT (§5). It spelled an ordinal date —
    "15th July" — for that one header; the shape it belonged to is folded into "past the window", and
@@ -555,6 +555,9 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
     windowClosedMs: waiting?.windowStated ? waiting.expMs ?? null : null,
     now: Date.now(),
     dismissed: (query as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
+    /* §1 (policy pack) — the agency's own position, which is a second route in. Absent and `false`
+       both mean "they have not said silence is a no", and both leave the nudge route to decide. */
+    policy: agent?.noResponseMeansNo,
   });
 
   const sage = waiting ? !waiting.overdue : true; // sage within window, calm grey once past it
@@ -713,8 +716,24 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
               return line ? <div className="tl-pastfig"><b>{line.figure}</b> {line.tail}</div> : null;
             })()}
 
-            {/* the convention, only where silence has actually run past a stated window */}
-            {past && <div className="tl-conv">Many agencies treat silence as a pass.</div>}
+            {/**
+              * §1 (policy pack) — THE AGENCY'S OWN POLICY, OR NOTHING. This read "Many agencies
+              * treat silence as a pass." on every past-window state: a true observation about the
+              * trade, printed on one specific query's tracker where it was attributable to nobody.
+              * `silencePolicyLine` returns a sentence only where the agency has actually stated that
+              * silence means no, and null everywhere else — no generic fallback and no house
+              * assumption, the same rule the window bar already follows.
+              */}
+            {(() => {
+              const policy = silencePolicyLine({
+                /* ⚠️ `exactDate`, NOT `fmtShort` — this is PROSE, and the timeline's meta format is a
+                   bare uppercase day and month. "their window closed 23 JUL" mid-sentence reads as a
+                   system tag; `elapsed.ts` is where this app spells a date in full, and the note at
+                   the head of this file says exactly why a second formatter is not written here. */
+                policy: agent?.noResponseMeansNo, who, windowClosedMs: waiting.expMs ?? null, now, formatDate: exactDate,
+              });
+              return policy ? <div className="tl-conv">{policy}</div> : null;
+            })()}
 
             {/**
               * §5b (nudge pack) — the nudge history, beneath whatever state the wait is in. It is
