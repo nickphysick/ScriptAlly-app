@@ -323,7 +323,10 @@ export function commandBarStatus(a: AmbientStatus): { bold?: string; text: strin
   if (a.mode === "waiting") {
     if (a.sentMs == null) return { text: "Waiting to hear back" };
     const parts = [`Waiting to hear back · ${a.nDays} ${a.nDays === 1 ? "day" : "days"}`];
-    if (a.expMs != null) parts.push(`expected ~${fmtShort(a.expMs)}`);
+    /* ⚠️ §3 · `windowStated`, NOT `expMs` — the SECOND display path found reading the house
+       assumption. `expMs` is derived from the 8/12/12-week fallback whenever nobody has stated a
+       response time, so this printed "expected ~14 Sept" for an agency that never gave a date. */
+    if (a.windowStated && a.expMs != null) parts.push(`expected ~${fmtShort(a.expMs)}`);
     return { text: parts.join(" · ") };
   }
   if (a.mode === "writer") {

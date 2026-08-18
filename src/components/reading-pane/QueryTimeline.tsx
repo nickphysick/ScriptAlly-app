@@ -543,7 +543,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
   const nudges = nudgeTimes(events, NUDGE_NESTED_TYPE, (v) => getTime(v));
   const offer = closureOffer({
     times: nudges,
-    windowClosedMs: waiting?.expMs ?? null,
+    /* ⚠️ §3 · THE THIRD DISPLAY PATH THAT WAS READING THE HOUSE ASSUMPTION. The offer states "N
+       since the window closed" — a sentence with no meaning when no window was ever stated, and one
+       that would have quoted the app's own 8/12/12-week guess back as the agency's deadline. */
+    windowClosedMs: waiting?.windowStated ? waiting.expMs ?? null : null,
     now: Date.now(),
     dismissed: (query as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
   });
@@ -647,15 +650,18 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
               </div>
             )}
 
-            {dated ? (
-              <>
-                <div className={`tl-wbar${past ? " tl-wbar--past" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>
-                <div className="tl-wbarf">
-                  <span>Sent {fmtShort(waiting.sentMs!)}</span>
-                  <span>{past ? `Window closed ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>
-                </div>
-              </>
-            ) : (
+            {/**
+              * ⚠️ §3 · THE BODY LINE ASKS WHETHER A WINDOW WAS STATED, NOT WHETHER A BAR CAN BE
+              * DRAWN — and conflating the two is what made the card contradict itself. It read
+              * `dated ? bar : body`, and `dated` also requires both ENDS: so a query with a stated
+              * window and no recorded send date fell to the else branch and printed "…do not state
+              * a response time" directly beneath a chip quoting the weeks they stated.
+              *
+              * ⚠️ THREE OUTCOMES, NOT TWO. No window → the fact and the offer. A window with both
+              * ends → the bar. A window with no send date → the chip alone: there is a window and
+              * nothing to measure it from, and neither of the other two says that honestly.
+              */}
+            {!stated ? (
               /**
                * ⚠️ NO BAR AND NO END LABELS — there is nothing to measure against, and a track for a
                * window that does not exist would invent the fact the sentence beneath it is
@@ -674,6 +680,19 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                   </div>
                 )}
               </>
+            ) : dated ? (
+              <>
+                <div className={`tl-wbar${past ? " tl-wbar--past" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>
+                <div className="tl-wbarf">
+                  <span>Sent {fmtShort(waiting.sentMs!)}</span>
+                  <span>{past ? `Window closed ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>
+                </div>
+              </>
+            ) : (
+              /* ⚠️ A STATED WINDOW WITH NO SEND DATE: the chip above says what they said, and there
+                 is nothing to measure it from. No bar, and no sentence claiming they stated nothing
+                 — which is what this branch used to print. */
+              <div className="tl-wbody">No send date recorded, so that window has no closing date.</div>
             )}
 
             {/* the convention, only where silence has actually run past a stated window */}

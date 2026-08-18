@@ -56,12 +56,21 @@ describe("queryAmbientStatus — the shared open-state derivation", () => {
 });
 
 describe("commandBarStatus — the bar's centre text", () => {
-  it("waiting: WAITING TO HEAR BACK · N DAYS · EXPECTED ~date (singular-safe)", () => {
+  /**
+   * ⚠️ THE EXPECTED DATE APPEARS ONLY WHERE ONE WAS STATED (§3). This case passed a query with NO
+   * `windowWeeks` and asserted the date the house 8/12/12-week assumption produces — so it was
+   * locking in the app's own guess presented as the agency's word, on the bar beneath a card that
+   * has since stopped doing exactly that. Both halves are asserted now, against the same input
+   * differing only in whether an agency stated anything.
+   */
+  it("waiting: WAITING TO HEAR BACK · N DAYS, and the expected date only where one was stated", () => {
     const sent = new Date("2026-06-16T00:00:00Z").toISOString();
-    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent }), "agent", undefined, NOW);
-    const s = commandBarStatus(a)!;
-    expect(s.bold).toBeUndefined();
-    expect(s.text).toBe("Waiting to hear back · 20 days · expected ~11 Aug");
+    const query = q({ status: QueryStatus.QUERIED, dateSent: sent });
+    const houseOnly = commandBarStatus(queryAmbientStatus(query, "agent", undefined, NOW))!;
+    expect(houseOnly.bold).toBeUndefined();
+    expect(houseOnly.text, "the bar quoted the house assumption as a date").toBe("Waiting to hear back · 20 days");
+    const stated = commandBarStatus(queryAmbientStatus(query, "agent", undefined, NOW, 8))!;
+    expect(stated.text).toBe("Waiting to hear back · 20 days · expected ~11 Aug");
   });
 
   it("writer: burgundy 'Your move' fragment + the event/days-ago tail", () => {
@@ -345,7 +354,11 @@ describe("Bar P3 artefacts — end-anchors + hollow-circle milestones + hover/ta
     expect(branch, "the grace bar's anchor survives").not.toContain("FOLLOW-UP ");
     /* ⚠️ AND THE WHOLE BLOCK IS GATED ON A REAL WINDOW — end labels for a window nobody stated
        would be the house assumption wearing the agency's clothes. */
-    expect(branch, "the end labels are not gated on a stated window").toContain("{dated ? (");
+    /* ⚠️ THREE OUTCOMES SINCE §3, NOT TWO — `!stated` (the fact and the offer), `dated` (the bar),
+       and a stated window with no send date, which used to fall into the first and print "…do not
+       state a response time" beneath a chip quoting the weeks they stated. */
+    expect(branch, "the body line is not gated on a stated window").toContain("{!stated ? (");
+    expect(branch, "the end labels are not gated on both ends").toContain(") : dated ? (");
   });
 });
 
