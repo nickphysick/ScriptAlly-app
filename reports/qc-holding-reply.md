@@ -28,6 +28,61 @@ after: `npx playwright test --project=measure writerDeploy`.
 
 ---
 
+## Resumption attempt, 18 Aug — the canary still fails, and now we know exactly why
+
+**The precondition FAILED again, so §1, §2 and §4 are not started.** Per the brief: stopped and
+reported rather than worked around.
+
+⚠️ **But the second run diagnosed it, where the first could only say "denied".** A canary that
+reports a permission error cannot say whether the rules are absent, stale, or went to the other
+database in this project — three causes, three different fixes. `tests/e2e/rulesProbe.mjs`
+(committed) signs in as the harness user through the same path `seed.mjs` uses and attempts one
+field at a time, each labelled with the commit it arrived in, undoing every write it makes:
+
+```
+database: (default) · project: scriptally-dev
+read seed-query-1: OK — reads are allowed
+
+  ✅ personalisationNotes         (long-standing)      ACCEPTED
+  ✅ hasAgentResponded            (derived-status era) ACCEPTED
+  ✅ rejectedDate (deleteField)   (Tier 3, ~5 Aug)     ACCEPTED
+  ✅ closureOfferDismissed        (bd0cea5)            ACCEPTED
+  ❌ writerExpectedDate           (6461c54)            DENIED
+  ✅ nested activity create       (long-standing)      ACCEPTED
+```
+
+**The deployed rules are current through `bd0cea5` and lack exactly one line — `6461c54`'s.** So
+this is not the dual-database trap and not a stale-by-weeks deploy: it is a deploy taken from a
+tree that did not yet contain the last rules commit, or one that happened just before it landed.
+`(default)` is confirmed as the database dev reads (`.env.development` sets
+`VITE_FIREBASE_DATABASE_ID=(default)`, and `firebase.dev.json` pins the same).
+
+⚠️ **The second error in the first canary run was collateral, not a second gap.** `[ScriptAlly
+Backfill] Online heal failed for query: seed-query-11` looked like an independent denial; probing
+its two steps in isolation — the nested activity `setDoc`, then `recomputeQuery`'s full ten-key
+payload — both ACCEPTED. (`recomputeQuery` always touches all ten, `rejectedDate` included, since
+it writes `deleteField()` for absent ones and a delete still appears in `affectedKeys()`. Worth
+knowing: if `rejectedDate` ever *were* missing from a deployed allowlist, every recompute on that
+database would fail.) The probe's own writes were undone and `seed-query-11` verified back to its
+original nine keys.
+
+**What Nick deploys — one list, one deploy:**
+
+```bash
+firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev
+```
+
+That is the whole of it for dev, from a tree containing `6461c54` (and, when §1 lands, its
+timestamp field and Phase 1's activity type — the brief's "one deploy, not two"). Verify by
+release `updateTime` under `--debug`, never the success line, then re-run both:
+`npx playwright test --project=measure writerDeploy` and `node tests/e2e/rulesProbe.mjs`. The
+probe is the better check — it names which field is missing rather than reporting a failure.
+
+**§3 is done** (it depends on neither the deploy nor the decisions) — see below. §1's timestamp,
+§2's single home and §4's Phases 1–6 are all queued behind the deploy.
+
+---
+
 ## F1 and F2 — the two live faults (DONE, 18 Aug)
 
 **F1 · `getTimelineFamily`'s silent default — FIXED.** The final `default: return "outgoing"`
@@ -121,12 +176,38 @@ indexed), `Dashboard.tsx`'s `urgentRowCount` (computed at :1454, never read), an
 (styled and locked, rendered by nothing). None deleted — a reachability sweep is its own pass,
 and the repo's rule is to state which are dead before proposing a scope.
 
-**Incidental, committed separately:** `tasksLayout.css` carried a comment whose opening
-delimiter was missing, so `vite build` had been emitting a css-syntax-error warning on every
-build and the browser was discarding a whole rule (verified in `dist/` before and after). It
-cost nothing only because **nothing renders `.tpl-head`** — while `tasksViewport.test.tsx`
-locks that rule's declarations by reading SOURCE, so those assertions passed throughout over a
-rule that never applied. The dead class is left alone; that is a separate decision.
+**§3 — the CSS error, and the gate question that matters more than the rule.**
+
+⚠️ **Was it visible in gate output all along? Yes — and no gate could ever have failed on it.**
+Measured both ways: with the broken comment in place, `vite build` **exits 0** (it is a WARNING,
+not an error) and the line sits at **7 of 185**, while every gate reading in this repo takes the
+tail. So it was printed on every build for as long as the damage existed, above the fold of a
+command whose last six lines are all anyone reads. That is a standing hole, not a one-off:
+`vite build` will pass while printing any css-syntax-error, and the repo's gate convention cannot
+see it.
+
+**The rule was not wanted.** `TasksPageLayout` renders `tpl-body`, `tpl-cols`, `tpl-eyebrow`,
+`tpl-grow`, `tpl-hem`, `tpl-side`, `tpl-tools`, `tpl-wpg` and `tpl-zone` — and **not**
+`tpl-head`. The owner is alive; this one class is dead. So the rule is retired rather than
+restored, together with the sentence fragment the same damage left in the comment above it and a
+clause in a third comment crediting `tpl-head`'s `flex` for behaviour that is actually
+`.tpl-cols`/`.tpl-body`'s. (`WorkspacePageGrid.tsx` still describes `.tpl-head` in prose —
+another comment describing an element that is not rendered. Left for that stream.)
+
+**Both locks are gone, and they were doubly vacuous:** they required `flex: 0 0 auto` on
+`.tpl-head` by reading the stylesheet as TEXT, so they passed for months over a declaration the
+browser was discarding, *about a class that is never rendered*. The negative assertion at ~753
+("the split sheet paints no `tpl-head`") is correct and stays — forbidding a class is a
+different claim from requiring a property.
+
+⚠️ **Other locks reading stylesheet source: 21 assertions across 13 suites** —
+`agentDraft`, `agentFlip`, `agentLayout`, `agentMotion`, `agentToolbar`, `expectedDate`,
+`listKeyboard`, `queriesHubColumn`, `queryCentrePane`, `queryCentreSheet`, `queryCreateMotion`,
+`queryLoadAnimation`, `queryPaneStates`. None is wrong to exist — a source lock is the right tool
+for "this token is still emitted" or "this selector is not restated". Every one of them is the
+wrong tool for "this element ends up laid out like so", which is what the retired pair claimed.
+The rule to apply when adding another: **a stylesheet lock proves a rule was written, never that
+it reached an element.**
 
 ---
 
