@@ -83,7 +83,7 @@ import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, 
    fourteen days of grace before it can be true. The button answers a different question ("may I
    chase?"), and gating one on the other is what made Nudge permanently grey. The list's OVERDUE
    group still composes it, through `queryCentreGroups`. */
-import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo } from "../lib/nudgeState";
+import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, scheduledReminder } from "../lib/nudgeState";
 import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -309,6 +309,9 @@ export const Queries: React.FC<{
     deleteJournalEntry,
     updateJournalEntry,
     pinJournalEntry,
+    /* §6b/§6c — the stored task store the ghost rung reads, and the path that creates one */
+    userTasks,
+    addUserTask,
     deleteActivity,
     editActivity,
     updateAgent,
@@ -5230,6 +5233,38 @@ export const Queries: React.FC<{
                                 showToast({ message: "Still tracking this query" });
                               }}
                               onSetExpectedDate={() => openEditQuery(activeQuery.id)}
+                              {...(() => {
+                                /**
+                                 * §6b/§6c — the scheduled reminder, and the way to create one.
+                                 *
+                                 * ⚠️ THE STORED TASK STORE, NOT THE DERIVED FEED. `queryTaskBadge`
+                                 * counts what the app NOTICED off `relatedRecordId`; a reminder is
+                                 * something the writer SET, which lives in `userTasks` with a
+                                 * `queryId` and a `dueDate`. The bar's count reads both; the ghost
+                                 * must only ever draw the second.
+                                 *
+                                 * ⚠️ AND `Remind me later` GOES THROUGH `addUserTask`, the existing
+                                 * task-creation path — the same one the to-do composer uses — so the
+                                 * task it makes is an ordinary to-do that happens to be scoped here.
+                                 */
+                                const todayISO = new Date().toISOString().slice(0, 10);
+                                const reminder = scheduledReminder(userTasks as never, activeQuery.id, todayISO);
+                                return {
+                                  reminder,
+                                  onOpenReminder: () => onNavigate?.("todo"),
+                                  onRemindLater: async () => {
+                                    const due = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+                                    await addUserTask({
+                                      text: `Nudge ${agentPrimary(activeAgent)}`,
+                                      queryId: activeQuery.id,
+                                      agentId: activeAgent.id,
+                                      manuscriptId: activeQuery.manuscriptId,
+                                      dueDate: due,
+                                    });
+                                    showToast({ message: "Reminder set for two weeks' time" });
+                                  },
+                                };
+                              })()}
                               /* ⚠️ THE PICKER'S THIRD AND LAST HOME (§2). It anchors off the word it
                                  changes, so `methodPickTrigRef` is now a callback ref set by the
                                  in-place button rather than by a kebab that no longer exists — see

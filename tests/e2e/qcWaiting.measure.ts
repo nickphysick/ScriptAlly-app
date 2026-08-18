@@ -38,6 +38,10 @@ test("§5 — title, chip, bar and marker agree about what is true", async ({ pa
         body: (ev.querySelector(".tl-wbody")?.textContent || "").trim(),
         ask: (ev.querySelector(".tl-ask")?.textContent || "").replace(/\s+/g, " ").trim(),
         conv: (ev.querySelector(".tl-conv")?.textContent || "").trim(),
+        /* §6 */
+        pastFig: (ev.querySelector(".tl-pastfig")?.textContent || "").replace(/\s+/g, " ").trim(),
+        ghost: document.querySelectorAll(".tl-ev--ghost").length,
+        offerActions: [...document.querySelectorAll<HTMLElement>(".tl-offer-a button")].map((b) => (b.textContent || "").trim()),
         /* the retired fourth shape, and the retired copy */
         grace: document.querySelectorAll(".tl-gracebar").length,
         oldCopy: (ev.textContent || "").includes("no expected date set"),
@@ -53,6 +57,8 @@ test("§5 — title, chip, bar and marker agree about what is true", async ({ pa
     if (s.body) console.log(`         body  "${s.body}"`);
     if (s.ask) console.log(`         ask   "${s.ask}"`);
     if (s.conv) console.log(`         conv  "${s.conv}"`);
+    if (s.pastFig) console.log(`         past  "${s.pastFig}"`);
+    if (s.offerActions.length) console.log(`         offer ${s.offerActions.join(" · ")}`);
   }
   expect(seen.length, "no waiting query on the page").toBeGreaterThan(0);
 
@@ -96,6 +102,28 @@ test("§5 — title, chip, bar and marker agree about what is true", async ({ pa
       expect(s.chip, `row ${s.row}: a claim chip for an agency that stated nothing`).toBeNull();
     }
   }
+  /**
+   * §6a — ⚠️ THE FIGURE FOLLOWS THE STATED WINDOW, BOTH WAYS. Past a stated close it renders and
+   * says "past the window they stated"; anywhere else it must not, because a figure counted from
+   * the house assumption would be the app's arithmetic attributed to the agency.
+   */
+  for (const s of seen) {
+    if (s.bar?.past) {
+      expect(s.pastFig, `row ${s.row}: past its stated window and no figure`).toMatch(/past the window they stated$/);
+      expect(s.pastFig, `row ${s.row}'s figure appraises: "${s.pastFig}"`).not.toMatch(/overdue|late/i);
+    } else {
+      expect(s.pastFig, `row ${s.row}: a figure with no closed window to measure from`).toBe("");
+    }
+  }
+  /* §6c — the offer's three actions, where it renders at all */
+  const offered = seen.filter((s: any) => s.offerActions.length);
+  console.log(`\n${offered.length} of ${seen.length} queries carry an offer`);
+  for (const s of offered as any[]) {
+    /* ⚠️ EQUAL STANDING — three actions, not one primary and two dismissals. */
+    expect(s.offerActions.length, `row ${s.row}'s offer has ${s.offerActions.length} actions`).toBeGreaterThanOrEqual(2);
+  }
+  console.log(`ghost rungs on the page: ${seen.reduce((n: number, s: any) => n + s.ghost, 0)}`);
+
   console.log(`\nsituations rendered: ${[...kinds].join(", ")} (of inside, past, unstated, stated-undated)`);
   /* ⚠️ THE CONTRADICTION, ASSERTED ACROSS THE WHOLE LIST rather than on one card: no query anywhere
      may quote an agency's weeks and deny they stated any. */

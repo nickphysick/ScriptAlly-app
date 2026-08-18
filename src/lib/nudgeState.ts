@@ -252,3 +252,86 @@ export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: st
       + `and ${elapsedPhrase(daysBetween(windowClosedMs, now))} since the window closed.`,
   };
 }
+
+/**
+ * §6a — how long the silence has run PAST the window the agency stated.
+ *
+ * ⚠️ MEASURED FROM THE STATED CLOSE, AND ONLY WHERE ONE WAS STATED. Without a window there is
+ * nothing to be past, and the house 8/12/12-week assumption is not a thing to be past either — it
+ * is the app's own guess, and a figure counted from it would attribute the app's arithmetic to the
+ * agency. Null is the answer, and the card says something else instead.
+ *
+ * ⚠️ THE PHRASING KEEPS THE FACT ON THE AGENCY'S SIDE OF THE LINE: "past the window they stated",
+ * not "overdue" and not "late". A stated window is an intention, not a contract, and the app
+ * reports rather than appraises — the same rule that retired "overdue" from this page.
+ */
+export function pastWindowLine(windowClosedMs: number | null, now: number, stated: boolean): { figure: string; tail: string } | null {
+  if (!stated || windowClosedMs == null || now <= windowClosedMs) return null;
+  return { figure: elapsedPhrase(daysBetween(windowClosedMs, now)), tail: "past the window they stated" };
+}
+
+/** A task that is a scheduled reminder on this query: undone, scoped to it, and dated ahead. */
+export interface ReminderTask { id: string; text: string; done: boolean; queryId?: string; dueDate?: string }
+
+/**
+ * §6b — the scheduled reminder this query is waiting on, or null.
+ *
+ * ⚠️ THE PREDICATE IS `!done && queryId === id && dueDate > today` — three clauses, and each is
+ * load-bearing. A done task is history; a task scoped elsewhere is not this query's; and a task
+ * dated TODAY OR EARLIER is not a future to draw as a ghost — it is on the writer's list now, which
+ * is a different statement.
+ *
+ * ⚠️ AND IT READS THE STORED `UserTask` STORE, NOT THE DERIVED `Task` FEED. `queryTaskBadge` counts
+ * DERIVED suggestions off `relatedRecordId` — things the app noticed — and a reminder is something
+ * the writer SET. The bar's count reads both; a ghost rung must only ever draw the second, or the
+ * timeline would show a future the writer never scheduled.
+ *
+ * ⚠️ THE NEAREST ONE, so two reminders do not draw two rungs.
+ */
+export function scheduledReminder(tasks: readonly ReminderTask[] | undefined, queryId: string, todayISO: string): ReminderTask | null {
+  const ahead = (tasks ?? []).filter((t) => !t.done && t.queryId === queryId && !!t.dueDate && t.dueDate > todayISO);
+  return ahead.sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : 1))[0] ?? null;
+}
+
+export interface NextStepInput {
+  /** Nudge times on this query, oldest first. */
+  times: number[];
+  /** A reminder already scheduled — anything pending means no offer. */
+  reminder: ReminderTask | null;
+  now: number;
+  /** The writer already dismissed the card's offer — §5d's flag, reused. */
+  dismissed: boolean;
+  /** How recent a nudge still counts as pending, in days. */
+  recentDays?: number;
+}
+
+/** How long a nudge stays "pending" for the purposes of the offer — one stated figure. */
+export const NUDGE_PENDING_DAYS = 28;
+
+/**
+ * §6c — the offer appears only when there is genuinely nothing pending.
+ *
+ * ⚠️ NOTHING PENDING MEANS NOTHING PENDING: no reminder scheduled AND no recent unanswered nudge.
+ * An offer to nudge, beside a nudge sent last week, would be the app failing to notice what the
+ * writer just did.
+ *
+ * ⚠️ AND IT NEEDS NO DISMISSAL FLAG OF ITS OWN, WHICH IS THE FINDING. Every one of its three
+ * actions makes its own trigger false — nudging creates a recent nudge, "remind me later" creates
+ * the reminder, marking closed ends the query — so it self-dismisses by construction and there is
+ * no state where it would return having been answered. It still honours the CLOSURE offer's flag,
+ * because a writer who has said "keep tracking" has answered the card's offer as such.
+ */
+export function nextStepOffer(inp: NextStepInput): { show: boolean; facts: string } {
+  const { times, reminder, now, dismissed } = inp;
+  const recent = inp.recentDays ?? NUDGE_PENDING_DAYS;
+  if (dismissed || reminder) return { show: false, facts: "" };
+  const last = times[times.length - 1];
+  if (last != null && daysBetween(last, now) <= recent) return { show: false, facts: "" };
+  return {
+    show: true,
+    /* ⚠️ THE FACTS, AND NO ADVICE. Not "it may be time to chase" — what has and has not happened. */
+    facts: times.length
+      ? `Your last nudge was ${elapsedPhrase(daysBetween(last, now))} ago and no reminder is set.`
+      : "No nudge has been sent and no reminder is set.",
+  };
+}

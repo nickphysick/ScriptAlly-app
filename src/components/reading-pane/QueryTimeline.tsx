@@ -20,7 +20,7 @@ import { elapsedPhrase, exactDate } from "../../lib/elapsed";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
-import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy } from "../../lib/nudgeState";
+import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, type ReminderTask } from "../../lib/nudgeState";
 
 /* ⚠️ `fmtNatural` IS DELETED WITH THE GRACE BOX THAT USED IT (§5). It spelled an ordinal date —
    "15th July" — for that one header; the shape it belonged to is folded into "past the window", and
@@ -518,7 +518,13 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
   onMarkClosed?: () => void;
   /** §5d — "Keep tracking". Absent ⇒ the offer renders no dismissal, never a dead button. */
   onKeepTracking?: () => void;
-}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, sentExtra, onMarkClosed, onKeepTracking }) => {
+  /** §6b — the scheduled reminder this query is waiting on, derived by the caller. */
+  reminder?: ReminderTask | null;
+  /** §6b — open the to-do surface at that reminder. */
+  onOpenReminder?: () => void;
+  /** §6c — create the reminder task through the existing task-creation path. */
+  onRemindLater?: () => void;
+}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
   const rows = buildTimelineRows(events, query, agent);
@@ -695,6 +701,18 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
               <div className="tl-wbody">No send date recorded, so that window has no closing date.</div>
             )}
 
+            {/**
+              * §6a — THE SILENCE GETS A FIGURE, in Playfair, so the card has one finding rather than
+              * a bar and a chip to compare. It measures from the STATED close and renders only when
+              * a window was stated: `pastWindowLine` returns null otherwise, because the house
+              * assumption is the app's own arithmetic and a figure counted from it would be
+              * attributed to the agency.
+              */}
+            {(() => {
+              const line = pastWindowLine(waiting.expMs, now, stated);
+              return line ? <div className="tl-pastfig"><b>{line.figure}</b> {line.tail}</div> : null;
+            })()}
+
             {/* the convention, only where silence has actually run past a stated window */}
             {past && <div className="tl-conv">Many agencies treat silence as a pass.</div>}
 
@@ -717,24 +735,72 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                 </div>
               </div>
             )}
+
+            {/**
+              * §6c — WHEN NOTHING IS PENDING, THE OFFER CARRIES THE NEXT STEP. Three actions of
+              * equal standing: nudge now, set a reminder, or close it.
+              *
+              * ⚠️ IT NEVER SHOWS BESIDE THE CLOSURE OFFER, and not by a guard — the two triggers are
+              * opposites. The closure offer needs an unanswered nudge; this one needs nothing
+              * pending, which a recent nudge is.
+              *
+              * ⚠️ AND IT NEEDS NO DISMISSAL FLAG OF ITS OWN: each of its three actions makes its own
+              * trigger false, so it self-dismisses by construction. It honours the closure offer's
+              * flag all the same, because a writer who said "keep tracking" has answered the card's
+              * offer as such.
+              */}
+            {past && !offer.show && (() => {
+              const next = nextStepOffer({
+                times: nudges, reminder, now,
+                dismissed: (query as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
+              });
+              if (!next.show) return null;
+              return (
+                <div className="tl-offer">
+                  <div className="tl-offer-f">{next.facts}</div>
+                  <div className="tl-offer-a">
+                    {onNudge && <button type="button" className="tl-offer-go" onClick={onNudge}>Nudge now</button>}
+                    {onRemindLater && <button type="button" className="tl-offer-keep" onClick={onRemindLater}>Remind me later</button>}
+                    {onMarkClosed && <button type="button" className="tl-offer-keep" onClick={onMarkClosed}>Mark closed</button>}
+                  </div>
+                </div>
+              );
+            })()}
           </TlProjection>
         );
       })()}
 
-      {/* ⚠️ THE SCHEDULED NUDGE IS AN EVENT TOO, AND IT RENDERS ONLY WHEN ONE IS ACTUALLY SCHEDULED.
-          The ref draws it unconditionally; there is no date to put on it unless `nudgeDate` is set
-          and still ahead, and an undated future event would be chrome pretending to be a fact. */}
-      {ballHolder === "agent" && waiting && (() => {
-        const reminderMs = query.nudgeDate ? getTime(query.nudgeDate) : null;
-        if (reminderMs == null || reminderMs <= Date.now()) return null;
-        return (
-          <TlProjection status={QueryStatus.QUERIED} title="Nudge" date={fmtShort(reminderMs).toUpperCase()} last>
-            <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>
-              A task will appear on your to-do list
+      {/**
+        * ══ §6b · THE FUTURE GETS A GHOST RUNG ════════════════════════════════════════════════
+        *
+        * ⚠️ SOLID IS WHAT HAPPENED; HOLLOW IS WHAT HAS NOT. The ring is dashed with no fill, the
+        * connector into it is dashed, the ink is faint and the date is ahead — so the rung is
+        * unmistakably not-yet without a word saying so.
+        *
+        * ⚠️ IT RENDERS THE WRITER'S OWN REMINDER, NOT THE APP'S NOTICING. The caller derives it
+        * from the stored `UserTask` store (undone, scoped to this query, dated ahead) rather than
+        * from the derived task feed — see `scheduledReminder`. A ghost drawn from a suggestion
+        * would show a future nobody scheduled.
+        *
+        * ⚠️ AND IT GOES WHEN THE TASK DOES, because it IS the task: completing or deleting the
+        * reminder removes it from the store the caller reads, and nothing here is cached.
+        *
+        * ⚠️ THE OLD `nudgeDate` PROJECTION IS RETIRED WITH IT. That drew a rung from a field on the
+        * QUERY — a second record of a reminder whose real home is the to-do list — so a completed
+        * task left a phantom future on the timeline.
+        */}
+      {ballHolder === "agent" && waiting && reminder && (
+        <div className="tl-ev tl-ev--ghost tl-ev--last">
+          <div className="tl-evmark"><span className="tl-ghostmark" aria-hidden="true">🔔</span></div>
+          <div className="tl-rowbody">
+            <div className="tl-ghostline">
+              <span>Nudge reminder</span>
+              {onOpenReminder && <button type="button" className="tl-ghostlink" onClick={onOpenReminder}>from your to-do list</button>}
+              <span className="tl-ghostdate">{reminder.dueDate ? fmtShort(new Date(`${reminder.dueDate}T12:00:00`).getTime()).toUpperCase() : ""}</span>
             </div>
-          </TlProjection>
-        );
-      })()}
+          </div>
+        </div>
+      )}
 
       {ballHolder === "writer" && (
         /* YOUR MOVE (P2) — soft-pink fill + ink border, no divider beneath; Playfair title + burgundy

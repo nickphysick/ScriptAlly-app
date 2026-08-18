@@ -33,7 +33,12 @@ describe("§3 · waiting and the nudge are timeline events", () => {
        otherwise — so it is no longer a literal attribute to match. What this clause is for is that
        the wait is an EVENT rather than a trailing box, which the projection tag says. */
     expect(tl, "waiting is not an event").toMatch(/<TlProjection[\s\S]{0,300}title=\{past \? "No reply" : "Waiting to hear back"\}/);
-    expect(tl, "the nudge is not an event").toMatch(/<TlProjection[^>]*title="Nudge"/);
+    /* ⚠️ THE SCHEDULED NUDGE IS A GHOST RUNG NOW (§6b), NOT A PROJECTION — and the reason is where
+       it reads its date FROM. It drew off `query.nudgeDate`, a second record of a reminder whose
+       real home is the to-do list, so a completed task left a phantom future on the timeline. The
+       rung is the TASK: it goes when the task does. */
+    expect(tl, "the reminder is not a rung").toContain("tl-ev--ghost");
+    expect(tl, "the reminder still draws from the query's own field").not.toContain('title="Nudge"');
     /* ⚠️ SLICED TO THE WAITING BRANCH. A document-wide search for the old wrapper catches the
        writer's-turn block, which still trails as a box and which this section deliberately did not
        touch — so the unsliced assertion failed on code it was never about. */
@@ -76,10 +81,20 @@ describe("§3 · waiting and the nudge are timeline events", () => {
   /* ⚠️ AND THE NUDGE EVENT ONLY RENDERS WHEN ONE IS SCHEDULED. The ref draws it unconditionally;
      there is no date to put on it unless `nudgeDate` is set and still ahead, and an undated future
      event is chrome pretending to be a fact. */
-  it("the nudge event is gated on a real future date", () => {
-    expect(tl, "the nudge event lost its gate").toMatch(
-      /reminderMs == null \|\| reminderMs <= Date\.now\(\)/,
-    );
+  /**
+   * ⚠️ THE GATE MOVED INTO THE PREDICATE (§6b), AND IT GAINED A CLAUSE. It was "a `nudgeDate` set
+   * and still ahead"; it is now `!done && queryId === id && dueDate > today` — three clauses, each
+   * load-bearing. A done task is history, a task scoped elsewhere is not this query's, and a task
+   * dated today or earlier is on the writer's list NOW rather than a future to draw as a ghost.
+   */
+  it("the reminder rung is gated on a real, undone, future task", () => {
+    const lib = read("../lib/nudgeState.ts");
+    expect(lib, "the reminder predicate is missing").toContain("!t.done && t.queryId === queryId && !!t.dueDate && t.dueDate > todayISO");
+    expect(tl, "the rung renders without a reminder").toContain('ballHolder === "agent" && waiting && reminder && (');
+    /* ⚠️ AND IT READS THE STORED STORE, NOT THE DERIVED FEED — a ghost drawn from a suggestion would
+       show a future nobody scheduled. */
+    const page = read("../components/Queries.tsx");
+    expect(page, "the rung reads the derived task feed").toContain("scheduledReminder(userTasks as never, activeQuery.id, todayISO)");
   });
 
   /**

@@ -4108,3 +4108,22 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    the rows' right edge moved between `Queried` and `Revise & Resubmit` — browser-measured, four
    different edges across four queries. The width is the reserve; only the text inside it changes. */
 .qc-mstx { width: 132px; text-align: right; }
+
+/* ══ §6 · THE FIGURE, AND THE GHOST RUNG ══════════════════════════════════════════════════════
+ *
+ * ⚠️ THE FIGURE IS THE CARD'S ONE FINDING, so it is set in the heading face while everything
+ * around it stays in the body's. A bar and a chip state the same silence in fragments; this states
+ * it as a sentence.
+ */
+.tl-pastfig { margin-top: 10px; font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--ink-2); }
+.tl-pastfig b { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; color: var(--ink); padding-right: 2px; font-variant-numeric: tabular-nums; }
+
+/* ⚠️ DASHED RING, NO FILL, FAINT INK — the rung has to be unmistakably not-yet without a word
+   saying so. The connector INTO it is dashed for the same reason: the line between what happened
+   and what has not should not look like more of what happened. */
+.tl-ev--ghost .tl-evline { display: none; }
+.tl-ev:has(+ .tl-ev--ghost) .tl-evline { background: repeating-linear-gradient(180deg, var(--hairline) 0 3px, transparent 3px 7px); }
+.tl-ghostmark { width: 100%; height: 100%; border-radius: 50%; border: 1.5px dashed var(--oatline); background: var(--paper); display: grid; place-items: center; font-size: 11px; filter: grayscale(1); opacity: 0.75; }
+.tl-ghostline { display: flex; align-items: baseline; gap: 9px; min-height: var(--tl-mark); font-family: "Inter", sans-serif; font-size: 12px; color: var(--faint); }
+.tl-ghostlink { padding: 0; border: 0; background: none; font: inherit; color: var(--burg); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.tl-ghostdate { margin-left: auto; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-off); font-variant-numeric: tabular-nums; }
