@@ -135,6 +135,39 @@ test("§1 — the chain, the dock, the foot, the tint and the pin", async ({ pag
     expect(after.days, "no day separator rendered").toBeGreaterThan(0);
     expect(after.sticky, "the day separator does not stick").toBe("sticky");
 
+    /**
+     * §4 — ⚠️ AN EMPTY COMPOSER IS A FIELD AND NOTHING ELSE, and the shortcut it stopped printing
+     * still works. Both halves, because removing a hint is only safe if the thing it advertised
+     * survives — and the keystroke is exactly what a source lock cannot check.
+     */
+    const emptyState = await page.evaluate(() => {
+      const ta = document.querySelector<HTMLTextAreaElement>(".qn-ta")!;
+      ta.value = "";
+      return {
+        hints: document.querySelectorAll(".qn-hint").length,
+        saveButtons: document.querySelectorAll(".qn-send").length,
+        placeholder: ta.placeholder,
+        text: (document.querySelector(".qn-dock")?.textContent || "").trim(),
+      };
+    });
+    console.log(`\n  empty composer: "${emptyState.text}" · placeholder "${emptyState.placeholder}" · ${emptyState.hints} hints · ${emptyState.saveButtons} save buttons`);
+    expect(emptyState.hints, "the printed hint is still rendered").toBe(0);
+    expect(emptyState.text, "the empty composer prints something besides its placeholder").toBe("");
+    expect(emptyState.placeholder, "the placeholder went with the hint").toBe("Write a note…");
+
+    /* ⌘+Enter still saves — driven, not asserted at source */
+    const beforeKbd = await page.locator(".qn-note").count();
+    const kbdText = `${STAMP} saved with the keyboard`;
+    await page.locator(".qn-ta").fill(kbdText);
+    await page.waitForTimeout(200);
+    const withText = await page.locator(".qn-send").count();
+    await page.locator(".qn-ta").press("Meta+Enter");
+    await page.waitForTimeout(1200);
+    const afterKbd = await page.locator(".qn-note").count();
+    console.log(`  Save appears with text: ${withText === 1} · ⌘+Enter: ${beforeKbd} → ${afterKbd} notes`);
+    expect(withText, "the Save button does not appear once there is content").toBe(1);
+    expect(afterKbd, "⌘+Enter no longer saves").toBe(beforeKbd + 1);
+
     /* ── §1c · the pinned note is held ABOVE the scroller ── */
     const first = page.locator(".qn-note").first();
     await first.hover();

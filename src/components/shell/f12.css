@@ -4004,9 +4004,10 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .qn-ta { border: 0; outline: none; resize: none; background: transparent; font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink); min-height: 20px; max-height: 132px; overflow-y: auto; }
 .qn-ta::placeholder { color: var(--qc-tx-off); }
 .qn-crow { display: flex; align-items: center; gap: 8px; }
-.qn-hint { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-off); }
+/* ⚠️ `.qn-hint` IS RETIRED WITH THE PRINTED HINT (§4) — the shortcuts survive, their advertisement
+   does not. */
 .qn-send { margin-left: auto; height: 29px; padding: 0 13px; border: 1px solid var(--qc-rim-pink); border-radius: 8px; background: var(--pink); font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
-.qn-send:disabled { background: var(--paper); border-color: var(--hairline); color: var(--qc-tx-off); cursor: default; }
+/* the disabled state goes with the hint row: the button only exists once there is something to save */
 
 .qn-edit { display: flex; flex-direction: column; gap: 6px; }
 .qn-editta { width: 100%; font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink); background: var(--white); border: 1px solid var(--btn-line); border-radius: 7px; padding: 6px 8px; outline: none; resize: vertical; }

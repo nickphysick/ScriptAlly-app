@@ -249,10 +249,21 @@ export const NotesThread: React.FC<NotesThreadProps> = ({ notes, onAdd, onEdit, 
               if (e.key === "Escape" && draft) { e.preventDefault(); setDraft(""); if (areaRef.current) areaRef.current.style.height = "auto"; }
             }}
           />
-          <div className="qn-crow">
-            <span className="qn-hint">⌘ + Enter to save · Esc to clear</span>
-            <button type="button" className="qn-send" disabled={!draft.trim()} onClick={() => void save()}>Save</button>
-          </div>
+          {/**
+            * ⚠️ §4 · THE PRINTED HINT IS GONE, THE SHORTCUTS ARE NOT. `⌘ + ENTER TO SAVE · ESC TO
+            * CLEAR` sat under an empty field teaching two keys nobody had asked about yet — a line
+            * of instructions is what a composer says when its placeholder is not enough, and
+            * "Write a note…" is enough.
+            *
+            * ⚠️ AND THE ROW ONLY EXISTS ONCE THERE IS TEXT, so an empty composer is a field and
+            * nothing else. `⌘/Ctrl+Enter` still saves and `Esc` still clears — see the key handler,
+            * which is untouched.
+            */}
+          {draft.trim() && (
+            <div className="qn-crow">
+              <button type="button" className="qn-send" onClick={() => void save()}>Save</button>
+            </div>
+          )}
         </div>
       </div>
     </div>
