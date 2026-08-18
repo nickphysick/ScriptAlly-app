@@ -363,3 +363,65 @@ describe("§2 · the ghost rung asks the same source as the row above it", () =>
     expect(tl, "the rung does not say when").toContain("Scheduled for ${");
   });
 });
+
+/**
+ * §3 (policy pack) — the tracker's offer follows the same supersession.
+ *
+ * ⚠️ THE §6c NEXT-STEP OFFER ALREADY REFUSED TO APPEAR BESIDE A REMINDER; the CLOSURE offer did
+ * not, so a query with a booked chase could still be told to close — the exact contradiction the
+ * section removes, one surface along from the tasks popover.
+ */
+describe("§3 · no closure offer while a nudge is scheduled", () => {
+  const closed = NOW - 400 * DAY;
+  const base = { times: [NOW - 300 * DAY], windowClosedMs: closed, now: NOW, dismissed: false };
+
+  it("the nudge route is superseded", () => {
+    expect(closureOffer(base).show, "the fixture is not a closure candidate to begin with").toBe(true);
+    expect(closureOffer({ ...base, reminderScheduled: true }).show, "closure was offered beside a booked chase").toBe(false);
+  });
+
+  /* ⚠️ AND THE AGENCY'S OWN POLICY DOES NOT OUTRANK THE WRITER'S DECISION. §1's route is checked
+     after this one on purpose: what the agency published is a fact about them, and a scheduled
+     nudge is a decision by the person whose query it is. */
+  it("the policy route is superseded too", () => {
+    expect(closureOffer({ ...base, times: [], policy: true }).show).toBe(true);
+    expect(closureOffer({ ...base, times: [], policy: true, reminderScheduled: true }).show,
+      "the agency's policy overrode the writer's own scheduled chase").toBe(false);
+  });
+
+  /* derived each time — clearing the reminder brings the offer back */
+  it("clearing the reminder brings the offer back", () => {
+    expect(closureOffer({ ...base, reminderScheduled: true }).show).toBe(false);
+    expect(closureOffer({ ...base, reminderScheduled: false }).show).toBe(true);
+  });
+});
+
+/**
+ * §3 — the supersession lives in ONE derivation, and the surfaces read it rather than filtering.
+ */
+describe("§3 · one derivation, three surfaces", () => {
+  const strip = (src: string) => src.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
+  const feed = strip(readFileSync(new URL("./db.tsx", import.meta.url), "utf8"));
+  const tl = strip(readFileSync(new URL("../components/reading-pane/QueryTimeline.tsx", import.meta.url), "utf8"));
+  const board = strip(readFileSync(new URL("./todoBoard.ts", import.meta.url), "utf8"));
+
+  it("the task feed asks the predicate the ghost rung asks", () => {
+    expect(feed, "the feed does not consult the scheduled reminder").toContain("reminderScheduled: !!scheduledReminder(");
+    expect(feed, "the feed would not re-run when the reminder is cleared").toMatch(/\}, \[[^\]]*userTasks[^\]]*\]\);/);
+  });
+
+  it("the tracker's offer consults it too", () => {
+    expect(tl, "the tracker's offer ignores a scheduled reminder").toContain("reminderScheduled: !!reminder");
+  });
+
+  /* ⚠️ THE JARGON IS GONE FROM EVERY SURFACE THAT NAMES THIS TASK. The board never showed the
+     feed's title — it derived its own — so the two said different things about one task. */
+  it("no surface says 'No response limit hit'", () => {
+    for (const src of [feed, board, tl]) {
+      expect(src, "the system jargon is still rendered").not.toContain("No response limit hit");
+    }
+    expect(feed, "the feed does not state the silence").toContain("No response from ${aName} for ${elapsedPhrase(");
+    expect(board, "the board does not state the silence in the scaled figure").toContain("No response from ${name}");
+    expect(board, "the board went back to a raw day count in its title").not.toContain("silent${days");
+  });
+});

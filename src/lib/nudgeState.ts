@@ -223,6 +223,13 @@ export interface ClosureOfferInput {
   /** The writer already said "keep tracking" — §5d, the one stored thing in this section. */
   dismissed: boolean;
   /**
+   * §3 (policy pack) — a future nudge the writer has scheduled. It supersedes the offer for the
+   * same reason it supersedes the suggested task: a writer who has booked a chase has decided not
+   * to close, and offering closure beside their own reminder second-guesses them. The §6c
+   * next-step offer already refused to appear beside a reminder; this one did not.
+   */
+  reminderScheduled?: boolean;
+  /**
    * §1 (policy pack) — the agency's own `noResponseMeansNo`. `true` is a SECOND route into this
    * offer, independent of the nudge history: an agency that has published "assume no" has already
    * answered the question the six-month wait exists to ask.
@@ -247,6 +254,9 @@ export const CLOSURE_OFFER_MONTHS = 6;
 export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: string } {
   const { times, windowClosedMs, now, dismissed } = inp;
   if (dismissed || windowClosedMs == null) return { show: false, facts: "" };
+  /* §3 — checked before either route, including the policy route: the agency's position does not
+     override the writer's own decision to chase again. */
+  if (inp.reminderScheduled) return { show: false, facts: "" };
 
   /**
    * ⚠️ §1 (policy pack) · THE POLICY ROUTE, AND IT DOES NOT WAIT SIX MONTHS. The nudge route below

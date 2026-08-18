@@ -568,6 +568,9 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
     /* §1 (policy pack) — the agency's own position, which is a second route in. Absent and `false`
        both mean "they have not said silence is a no", and both leave the nudge route to decide. */
     policy: agent?.noResponseMeansNo,
+    /* §3 — and a chase the writer has already booked supersedes both routes. Same `reminder` the
+       ghost rung draws, so the offer and the rung cannot contradict each other on one card. */
+    reminderScheduled: !!reminder,
   });
 
   const sage = waiting ? !waiting.overdue : true; // sage within window, calm grey once past it

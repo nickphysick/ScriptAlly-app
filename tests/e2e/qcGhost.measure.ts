@@ -20,26 +20,41 @@ test("§2 — the ghost is an event, with the events' gap and its own marker", a
   await rows.first().click({ timeout: 8000 });
   await page.waitForTimeout(400);
 
-  /* find a query offering "Remind me later" */
+  /**
+   * ⚠️ A QUERY THAT ALREADY HAS A RUNG IS THE BETTER SUBJECT, and this run takes one where it can.
+   * The probe used to set its own reminder every time, which worked exactly until enough of them
+   * existed that no query was offering to set another — an offer §3 now suppresses on precisely the
+   * queries this was looking at. Use what is there; create one only when there is nothing.
+   */
   let found = -1;
+  let already = false;
   const n = Math.min(await rows.count(), 10);
   for (let i = 0; i < n; i++) {
     if (i >= await rows.count()) break;
     await rows.nth(i).click({ timeout: 6000 });
     await page.waitForTimeout(350);
-    if (await page.locator(".tl-offer-keep", { hasText: "Remind me later" }).count()) { found = i; break; }
+    if (await page.locator(".tl-ev--ghost").count()) { found = i; already = true; break; }
+    if (found < 0 && await page.locator(".tl-offer-keep", { hasText: "Remind me later" }).count()) found = i;
   }
-  expect(found, "no query on this account offers a reminder to set").toBeGreaterThan(-1);
-  console.log(`  setting a reminder on query ${found}`);
+  expect(found, "no query has a reminder and none offers a way to set one").toBeGreaterThan(-1);
 
-  await page.locator(".tl-offer-keep", { hasText: "Remind me later" }).first().click();
-  await page.waitForTimeout(1400);
+  if (!already) {
+    console.log(`  setting a reminder on query ${found}`);
+    await rows.nth(found).click({ timeout: 6000 });
+    await page.waitForTimeout(350);
+    await page.locator(".tl-offer-keep", { hasText: "Remind me later" }).first().click();
+    await page.waitForTimeout(1400);
+  } else {
+    console.log(`  query ${found} already carries a reminder`);
+  }
   /* ⚠️ NO CONFIRM STEP TO CHASE. `Remind me later` calls `addUserTask` directly — a fortnight out,
      with a toast — so the rung is on the page by the time the write lands. A generic
      `button:has-text("Save")` here matched the NOTES COMPOSER's永 always-present Save and waited on a
      disabled button for the full timeout, which is the shape a loose locator always takes. */
-  await page.locator(".f12-toast, [role=\"status\"]").first().waitFor({ timeout: 8000 }).catch(() => {});
-  await page.waitForTimeout(1200);
+  if (!already) {
+    await page.locator(".f12-toast, [role=\"status\"]").first().waitFor({ timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(1200);
+  }
 
   const g = await page.evaluate(() => {
     const evs = [...document.querySelectorAll<HTMLElement>(".tl-ev")];

@@ -18,6 +18,8 @@ import { OFFER_RECEIVED_DESC_RE } from "./activityUtils";
 import { queryAmbientStatus } from "./queryAmbient";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { agentPrimary, agentInitials } from "./agentDisplay";
+/* §3 — the app's one scaled elapsed figure; the stale card states its duration in it. */
+import { elapsedPhrase } from "./elapsed";
 import { flagMatchesTask, isFlagSuppressing } from "./taskFlags";
 import { clearedTodayItems } from "./clearedToday";
 import { isoWeekStart } from "./dashboardStats";
@@ -224,9 +226,21 @@ export function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefi
       const days = silentDays(q, now);
       return { kind: "AGENT WAITING", title: `Nudge ${name}`, who: name, subtitle: msTitle, due: days != null ? `${days} DAYS · NO REPLY` : "NO REPLY YET", warn: days != null && days > 84, status: q?.status, hk: false };
     }
+    /**
+     * ⚠️ §3 (policy pack) · THE SENTENCE THE WHOLE APP USES FOR THIS TASK. The board never showed
+     * the feed's "No response limit hit" jargon — it derived its own "{name} silent for 730 days" —
+     * so the two surfaces said different things about one task, and the board's figure was raw days
+     * where every other elapsed figure in the app is scaled. One wording now, in the app's one
+     * scaled formatter: the card's title states the fact and its subtitle asks the question, which
+     * is how this board splits a sentence across its two slots.
+     *
+     * ⚠️ THE `due` CELL KEEPS ITS DAY COUNT. That lane is tabular figures by its own law — it is
+     * scanned down a column and compared — and a scaled phrase there would make two rows with
+     * different silences read as the same one.
+     */
     case "no_response_close": {
       const days = silentDays(q, now);
-      return { kind: "STALE", title: `${name} silent${days != null ? ` for ${days} days` : ""}`, who: name, subtitle: "No reply — consider closing", due: days != null ? `SILENT ${days} DAYS` : "SILENT", warn: true, status: q?.status, hk: false };
+      return { kind: "STALE", title: `No response from ${name}${days != null ? ` for ${elapsedPhrase(days)}` : ""}`, who: name, subtitle: "Consider closing?", due: days != null ? `SILENT ${days} DAYS` : "SILENT", warn: true, status: q?.status, hk: false };
     }
     case "data_quality_poor": {
       const gap = ag ? agentDataQualityNeeds(ag)[0] : undefined;

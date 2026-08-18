@@ -98,6 +98,10 @@ import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } fr
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
 import { replyTask } from "./taskPrecedence";
+/* §3 — the suggestion's wording and its suppression both need these: `scheduledReminder` is the
+   same predicate the tracker's ghost rung uses, and `elapsedPhrase` is the app's one scaled figure. */
+import { scheduledReminder } from "./nudgeState";
+import { elapsedPhrase, daysBetween } from "./elapsed";
 import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed } from "./taskFlags";
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
@@ -639,6 +643,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
     const calculatedTasks: Task[] = [];
     const now = new Date();
+    const todayISO = now.toISOString().slice(0, 10);
 
     queries.forEach(q => {
       const manuscript = manuscripts.find(m => m.id === q.manuscriptId);
@@ -722,14 +727,30 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         responseTimeWeeks: agent.responseTimeWeeks,
         noResponseMeansNo: agent.noResponseMeansNo,
         lastNudgeSentDate: q.lastNudgeSentDate,
+        /* §3 — a nudge the writer has already scheduled supersedes both answers. The predicate is
+           `scheduledReminder`'s, which is what the tracker's ghost rung draws from, so the feed and
+           the timeline cannot disagree about whether a chase is booked. */
+        reminderScheduled: !!scheduledReminder(userTasks, q.id, todayISO),
         now: now.getTime(),
       });
       if (reply === "close") {
+        /**
+         * ⚠️ §3 · "No response limit hit" WAS SYSTEM JARGON — a limit is a thing the app keeps, and
+         * a writer reading their own to-do list has no limit in mind. The sentence now states the
+         * fact and asks the question, with the elapsed figure from the app's one scaled formatter.
+         *
+         * ⚠️ MEASURED FROM THE SEND, NOT THE DEADLINE. "No response for two years" is a statement
+         * about the silence, which began when the query went out; counting from the window's close
+         * would state a smaller number for the same silence and call it the same thing.
+         */
+        const silentDays = q.dateSent ? daysBetween(new Date(q.dateSent).getTime(), now.getTime()) : null;
         calculatedTasks.push({
           id: `task-no-res-close-${q.id}`,
           priority: "suggested",
-          title: `No response limit hit: ${aName}`,
-          description: `Response deadline passed. Under guidelines, this is a soft pass. Consider archiving.`,
+          title: silentDays != null
+            ? `No response from ${aName} for ${elapsedPhrase(silentDays)}. Consider closing?`
+            : `No response from ${aName}. Consider closing?`,
+          description: `Their stated window has passed with no reply.`,
           manuscriptTitle: mTitle,
           context: `Archiving recommendation`,
           relatedRecordId: q.id,
@@ -824,7 +845,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     setTasks(activeTasks);
-  }, [queries, manuscripts, agents, taskFlags, activities, currentUser]);
+    /* ⚠️ `userTasks` IS A DEPENDENCY SINCE §3 — the close suggestion is suppressed by a scheduled
+       reminder, so completing or deleting that reminder has to re-run this. Without it the
+       suggestion would reappear only on the next unrelated change, which is the shape of a bug
+       nobody can reproduce. */
+  }, [queries, manuscripts, agents, taskFlags, activities, currentUser, userTasks]);
 
   // Self-healing backfill routine to auto-create missing creation activities for existing agents and manuscripts.
   // This gracefully heals objects that were successfully added but whose activities were rejected by past Firestore rules.

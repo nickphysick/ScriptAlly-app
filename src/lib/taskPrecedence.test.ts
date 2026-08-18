@@ -6,7 +6,7 @@
 
 import { describe, it, expect } from "vitest";
 import { QueryStatus } from "../types";
-import { replyTask, replyOverdue, replyDeadlineMs, closeAfterDays, NUDGE_GRACE_DAYS, ReplyTask, ReplyTaskInput } from "./taskPrecedence";
+import { replyTask, replyTaskFor, replyOverdue, replyDeadlineMs, closeAfterDays, NUDGE_GRACE_DAYS, ReplyTask, ReplyTaskInput } from "./taskPrecedence";
 
 const NOW = Date.parse("2026-07-09T12:00:00Z");
 const DAY = 86400000;
@@ -145,5 +145,55 @@ describe("replyOverdue / replyDeadlineMs — one deadline, three predicates", ()
     expect(replyDeadlineMs(inp)).toBe(Date.parse(future));
     expect(replyOverdue(inp), "the override was ignored — a query the writer re-dated read as lapsed").toBe(false);
     expect(replyTask(inp)).toBe("none");
+  });
+});
+
+/**
+ * §3 (policy pack) — one suggestion at a time: a scheduled nudge supersedes the close.
+ *
+ * ⚠️ THE INPUTS ARE BUILT BY `replyTaskFor`, THE ADAPTER EVERY UI CALLER USES, rather than by hand.
+ * The suppression has to hold through the assembly as well as through the predicate — the file's own
+ * note above says the assembly is the second place this can drift and the one nobody watches.
+ */
+describe("§3 · a scheduled nudge supersedes the close suggestion", () => {
+  const NOW = Date.UTC(2026, 7, 18);
+  const DAY_MS = 86400000;
+  /* a query long past a stated window, with a nudge already ignored — a close candidate by every
+     other clause in the function */
+  const q = {
+    status: QueryStatus.QUERIED,
+    dateSent: new Date(NOW - 700 * DAY_MS).toISOString(),
+    lastNudgeSentDate: new Date(NOW - 300 * DAY_MS).toISOString(),
+  };
+  const agent = { responseTimeWeeks: 8, noResponseMeansNo: false };
+
+  it("without a reminder it is a close candidate", () => {
+    expect(replyTaskFor(q, agent, NOW)).toBe("close");
+  });
+
+  it("with a future reminder it suggests nothing at all", () => {
+    expect(replyTaskFor(q, agent, NOW, true), "the close suggestion survived a scheduled nudge").toBe("none");
+  });
+
+  /* ⚠️ IT SUPERSEDES THE NUDGE SUGGESTION TOO. A reminder to chase, beside the app suggesting a
+     chase, is the same contradiction one step earlier. */
+  it("it supersedes the nudge suggestion as well as the close", () => {
+    const fresh = { status: QueryStatus.QUERIED, dateSent: new Date(NOW - 100 * DAY_MS).toISOString() };
+    expect(replyTaskFor(fresh, agent, NOW)).toBe("nudge");
+    expect(replyTaskFor(fresh, agent, NOW, true)).toBe("none");
+  });
+
+  /* ⚠️ DERIVED EVERY TIME, NEVER STORED — deleting the reminder brings the suggestion back, which
+     is asserted by calling the same function twice rather than by reasoning about it. */
+  it("removing the reminder surfaces the suggestion again", () => {
+    expect(replyTaskFor(q, agent, NOW, true)).toBe("none");
+    expect(replyTaskFor(q, agent, NOW, false)).toBe("close");
+  });
+
+  /* ⚠️ AND IT DOES NOT REACH THE AGENCY'S OWN STATED PASS BY ACCIDENT: an agent whose silence IS
+     their answer is still superseded, because the writer's booked chase is a decision either way. */
+  it("a stated-pass agency is superseded too", () => {
+    expect(replyTaskFor(q, { responseTimeWeeks: 8, noResponseMeansNo: true }, NOW)).toBe("close");
+    expect(replyTaskFor(q, { responseTimeWeeks: 8, noResponseMeansNo: true }, NOW, true)).toBe("none");
   });
 });

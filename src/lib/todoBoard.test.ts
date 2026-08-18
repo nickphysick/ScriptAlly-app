@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { QueryStatus, Task, Query, Agent, Manuscript, UserTask, TaskFlag, Activity, ActivityType } from "../types";
 import { assembleBoard, boardStreamForTaskType, todaySplit, ribbonTiles, offerDue, offerQuiet, terseDoneLabel, reminderDue, reviewWeek, weekReviewStats, reviewSeedCandidates, reviewCompletionSnooze, BoardCard, BoardInput } from "./todoBoard";
 import { taskSurvivesMute } from "./todoHousekeeping";
+import { elapsedPhrase } from "./elapsed";
 import { todoCounts } from "./todoCount";
 
 const TODAY = "2026-07-09";
@@ -321,8 +322,15 @@ describe("Task Settings — the send key propagates from the ONE suppression poi
   });
 });
 
+/**
+ * ⚠️ SUPERSEDED WORDING, SAME CLAIM (§3, policy pack). The title read "{name} silent for {n} days";
+ * it is now the sentence every surface uses for this task — "No response from {name} for {phrase}",
+ * with the app's one SCALED formatter rather than a raw day count. What this case is for is
+ * unchanged and is the reason it is repointed rather than deleted: a stale card must always carry
+ * its duration, because a stale card with no figure is just an opinion.
+ */
 describe("II·B P4 — stale titles always carry the duration", () => {
-  it("a stale card's title reads '{name} silent for {n} days' (the ambient day count; stale tasks always have a dateSent)", () => {
+  it("a stale card's title states the silence, in the app's scaled figure", () => {
     const NOW = Date.parse("2026-07-19T12:00:00Z");
     const sent = new Date(NOW - 100 * 86400000).toISOString();
     const board = assembleBoard({
@@ -333,7 +341,13 @@ describe("II·B P4 — stale titles always carry the duration", () => {
       manuscripts: [], today: "2026-07-19", now: NOW,
     } as never);
     expect(board.hk).toHaveLength(1);
-    expect(board.hk[0].title).toBe("Marcus Reed silent for 100 days");
+    /* ⚠️ ASSERTED AGAINST `elapsedPhrase`, NOT AGAINST "3 months" — a literal here would be
+       testing this file's arithmetic rather than the app's, and would go red the day the scale
+       changed for a reason that has nothing to do with this card. */
+    expect(board.hk[0].title).toBe(`No response from Marcus Reed for ${elapsedPhrase(100)}`);
+    expect(board.hk[0].subtitle, "the card no longer asks the question").toBe("Consider closing?");
+    /* the figures lane keeps its day count — it is scanned down a column and compared */
+    expect(board.hk[0].due).toBe("SILENT 100 DAYS");
   });
 });
 

@@ -39,6 +39,18 @@ export interface ReplyTaskInput {
   responseTimeWeeks?: number; // the reply window; 0/undefined = no window recorded
   noResponseMeansNo: boolean;
   lastNudgeSentDate?: string; // ISO — when a nudge was actually sent (drives the progression)
+  /**
+   * §3 (policy pack) — a FUTURE nudge reminder the writer has scheduled on this query.
+   *
+   * ⚠️ IT SUPERSEDES BOTH ANSWERS, AND THAT IS A STATEMENT ABOUT THE WRITER, NOT THE DATES. A
+   * writer who has set a reminder to chase has decided not to close; suggesting closure beside
+   * their own scheduled nudge second-guesses a decision they have already made and recorded.
+   *
+   * ⚠️ AND IT LIVES HERE RATHER THAN AT EACH DISPLAY SITE. This function is the one place the app
+   * decides what a waiting query needs next; filtering the answer out at the tasks popover, the
+   * to-do list and the tracker's offer would be three chances for two of them to disagree.
+   */
+  reminderScheduled?: boolean;
   now: number;
 }
 
@@ -91,6 +103,13 @@ export function replyOverdue(inp: ReplyTaskInput): boolean {
 export function replyTask(inp: ReplyTaskInput): ReplyTask {
   const { noResponseMeansNo, responseTimeWeeks, now } = inp;
 
+  /* ⚠️ §3 · ONE SUGGESTION AT A TIME, AND THE SCHEDULED NUDGE WINS. Checked before anything else,
+     because none of the arithmetic below can produce an answer worth showing beside a chase the
+     writer has already booked. Derived every time, never stored: completing or deleting the
+     reminder removes it from the store the caller reads, and the close suggestion may then
+     legitimately appear. */
+  if (inp.reminderScheduled) return "none";
+
   const deadlineMs = replyDeadlineMs(inp);
   // Not an awaiting status, no window recorded, or undated — nothing to place in time.
   if (Number.isNaN(deadlineMs)) return "none";
@@ -125,9 +144,13 @@ export function replyTaskFor(
   query: { status: QueryStatus; dateSent?: string; responseDeadline?: string; lastNudgeSentDate?: string },
   agent: { responseTimeWeeks?: number; noResponseMeansNo?: boolean } | null | undefined,
   now: number,
+  /* §3 — a future reminder on this query, from the caller's own task store. Optional so the
+     existing call sites keep their exact behaviour; the feed that builds the suggestion passes it. */
+  reminderScheduled?: boolean,
 ): ReplyTask {
   if (!agent) return "none";
   return replyTask({
+    reminderScheduled,
     status: query.status,
     dateSent: query.dateSent,
     responseDeadline: query.responseDeadline,
