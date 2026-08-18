@@ -1,0 +1,10 @@
+{
+  "singleRows": 1,
+  "bulkPresent": false,
+  "pill": "Fix",
+  "title": "No record of what you sent Elinor Hale",
+  "sub": "Elinor Hale · Cavendish & Roe",
+  "fig": "No date on record",
+  "hasTick": false,
+  "pageErrors": 0
+}

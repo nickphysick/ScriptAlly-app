@@ -86,6 +86,23 @@ All four were green in 5,663 unit tests and wrong in the browser.
 **How this was verified without a deploy:** Playwright pointed at a **local dev server** signed into
 the dev project (`SA_E2E_BASE_URL=http://localhost:3000`). No deploy — §5 keeps those out of scope.
 
+### Both branches verified on the page
+
+| branch | how | result |
+|---|---|---|
+| **bulk** (≥3 gaps) | harness account, 19 gaps | `Fix` · "19 queries have no record of what you sent" · no subject line · no tick |
+| **singles** (<3 gaps) | `BULK_MATERIALS_THRESHOLD` forced to 100 locally, then reverted | `Fix` · "No record of what you sent Elinor Hale" · "Elinor Hale · Cavendish & Roe" · no tick |
+
+Mutual exclusivity holds **on the page**, not just in the unit test: with the threshold raised the
+bulk row was absent; at 3 the singles are. Zero page errors in both.
+
+⚠️ **One thing I did not resolve.** With the threshold forced to 100 and 19 gaps present, **one**
+single row rendered, not 19 — the list appears to cap or dedupe somewhere I did not trace (the
+footer reads "SHOWING 14 OF 12", so some capping is already in play for other rows too). In
+production the singles branch only ever shows **1–2** rows, since 3 triggers the bulk, so the branch
+is verified across its real range — but the capping question is genuinely open, and if the threshold
+is ever raised it matters.
+
 ---
 
 ## Phases not done, and what each would take
