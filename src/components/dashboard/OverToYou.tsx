@@ -23,6 +23,7 @@ import { Task, Query, Agent, UserTask } from "../../types";
 import { MountCard } from "../MountCard";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { agentCardKey } from "../../lib/todoBoard";
+import { resolveExpectedDate } from "../../lib/expectedDate";
 import {
   parchment,
   burgundy,
@@ -152,8 +153,27 @@ export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agen
       const agentName = (agent ? agentPrimary(agent) : "") || "the agent";
       const title = task.manuscriptTitle || "your manuscript";
 
-      const rawDeadline = q?.responseDeadline ? new Date(q.responseDeadline) : null;
-      const deadline = rawDeadline && !isNaN(rawDeadline.getTime()) ? rawDeadline : null;
+      /**
+       * ⚠️ F2 · THE RESOLVER, NOT `responseDeadline` — and this list is where the loss actually
+       * showed. That field is no longer seeded and the provenance migration deletes it, so almost
+       * every row arrived with `deadline: null`; the sort below is deadline-asc with nulls last,
+       * which means the documented ordering of the urgent list had quietly collapsed to task
+       * order, and the "N past window" clause had stopped appearing at all.
+       *
+       * ⚠️ IT CHANGES ORDER, NEVER MEMBERSHIP. What is IN this list is the task engine's answer;
+       * this only restores the sequence the list has always claimed to be in.
+       */
+      const resolved = q
+        ? resolveExpectedDate(
+            q,
+            [q.dateSent, q.partialSentDate, q.fullSentDate]
+              .map((iso) => (iso ? new Date(iso).getTime() : NaN))
+              .filter((t) => !Number.isNaN(t))
+              .reduce<number | null>((max, t) => (max == null || t > max ? t : max), null),
+            agent?.responseTimeWeeks,
+          )
+        : { ms: null, source: null };
+      const deadline = resolved.ms != null ? new Date(resolved.ms) : null;
 
       let description: React.ReactNode = "";
       switch (type) {

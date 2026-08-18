@@ -21,6 +21,7 @@ import { agentStanding, agentTurn } from "./agentList";
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "./agentDisplay";
 import { STATUS_ORDER } from "./statusOrder";
 import { AGENT_RESPONSE_STATUSES } from "./queryDerivation";
+import { resolveExpectedDate } from "./expectedDate";
 
 /** Monday 00:00 (local) of the ISO week containing `d`. */
 export const isoWeekStart = (d: Date): Date => {
@@ -265,7 +266,15 @@ export const agentStatusSummaries = (agents: Agent[], queries: Query[]): AgentSt
     const active = queries.filter((q) => q.agentId === a.id && ACTIVE_STATUSES.has(q.status));
     if (active.length === 0) return { ...base, status: null, respondBy: null };
     const best = active.reduce((top, q) => (rank(q.status) > rank(top.status) ? q : top));
-    return { ...base, status: best.status, respondBy: best.responseDeadline ?? null };
+    /* ⚠️ F2 · RESOLVED, NOT READ OFF THE QUERY. `responseDeadline` is no longer seeded and the
+       provenance migration deletes it, so this clause — the `· RESPOND BY 12 SEP` on the agents
+       card and its tooltip — had silently stopped appearing on every agent. The agency's weeks are
+       right here on `a`, which is the whole reason the window is worth deriving. */
+    const sends = [best.dateSent, best.partialSentDate, best.fullSentDate]
+      .map((iso) => (iso ? new Date(iso).getTime() : NaN))
+      .filter((t) => !Number.isNaN(t));
+    const resolved = resolveExpectedDate(best, sends.length ? Math.max(...sends) : null, a.responseTimeWeeks);
+    return { ...base, status: best.status, respondBy: resolved.ms != null ? new Date(resolved.ms).toISOString() : null };
   };
   return [...buckets.queried, ...buckets.idle].map(summarise);
 };
