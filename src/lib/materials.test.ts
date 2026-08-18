@@ -82,3 +82,45 @@ describe("statedQuantity — a placeholder never renders as a fact", () => {
       .toBe("50 pages");
   });
 });
+
+/**
+ * §2b — the opening sample names itself from its own size. `formatQueryMaterial` is where that
+ * happens, which is what makes the pill, the timeline, the CSV and the response takeover agree.
+ *
+ * ⚠️ THE INPUTS ARE THE TWO SHAPES THE APP REALLY STORES — a structured item as `commitSample`
+ * writes it, and the legacy string as older queries hold it — rather than hand-made text. A test
+ * that types its own argument is testing a function nobody calls with it.
+ */
+describe("§2b — the sample names itself from its size", () => {
+  const stored = (quantity: number, type: "chapters" | "pages" | "words") =>
+    ({ material: "Sample Pages", type, quantity }) as const;
+
+  it("states the unit and the amount", () => {
+    expect(formatQueryMaterial(stored(3, "chapters"))).toBe("First 3 chapters");
+    expect(formatQueryMaterial(stored(50, "pages"))).toBe("First 50 pages");
+  });
+
+  it("groups thousands", () => {
+    expect(formatQueryMaterial(stored(5500, "words"))).toBe("First 5,500 words");
+    expect(formatQueryMaterial(stored(10000, "words"))).toBe("First 10,000 words");
+  });
+
+  /* ⚠️ ONE DROPS THE NUMERAL. `First 1 chapter` is the tell that a label was assembled rather than
+     written; the word already carries the count. */
+  it("is singular at one, with no numeral", () => {
+    expect(formatQueryMaterial(stored(1, "chapters"))).toBe("First chapter");
+    expect(formatQueryMaterial(stored(1, "pages"))).toBe("First page");
+  });
+
+  /* ⚠️ AND THE LEGACY STRING TAKES THE SAME PATH — the two storage shapes are the "both routes"
+     this rule has to hold across, so they are asserted against each other rather than to literals. */
+  it("reads a legacy string identically", () => {
+    expect(formatQueryMaterial("First 3 chapters")).toBe(formatQueryMaterial(stored(3, "chapters")));
+    expect(formatQueryMaterial("First 1 chapter")).toBe(formatQueryMaterial(stored(1, "chapters")));
+    expect(formatQueryMaterial("10000 words")).toBe(formatQueryMaterial(stored(10000, "words")));
+  });
+
+  it("leaves Other's free text alone", () => {
+    expect(formatQueryMaterial({ material: "Other", type: "other", quantity: "Marketing plan" })).toBe("Marketing plan");
+  });
+});

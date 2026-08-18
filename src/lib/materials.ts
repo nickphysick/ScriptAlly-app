@@ -29,6 +29,22 @@ export function materialLabel(item: string | QueryMaterial): string {
  * vocabulary for structured items, so "50 pages" and the legacy "First 50 pages" render
  * identically.
  */
+/**
+ * ⚠️ THE SAMPLE NAMES ITSELF FROM ITS OWN SIZE — `First 3 chapters`, `First 50 pages`,
+ * `First 5,500 words`. Derived at render from the unit and the quantity, never stored: the artefact
+ * carries one `ComponentType` for all three units, so a stored label would be asserting a unit the
+ * record does not know. This is the whole of that rule, in the module that already declares itself
+ * the only formatter — so the pill, the timeline, the CSV and the response takeover cannot drift.
+ *
+ * ⚠️ AND ONE IS SINGULAR WITH NO NUMERAL AT ALL. `First 1 chapter` is a sentence nobody writes; the
+ * count is already carried by the word. Anything other than exactly one keeps its numeral, with the
+ * thousands separator the caller has already applied.
+ */
+function sized(n: string, unit: "page" | "chapter" | "word"): string {
+  const one = parseInt(n.replace(/[^0-9]/g, ""), 10) === 1;
+  return one ? `First ${unit}` : `First ${n} ${unit}s`;
+}
+
 function formatLegacyMaterial(mat: string): string {
   const norm = mat.toLowerCase().trim();
 
@@ -44,10 +60,10 @@ function formatLegacyMaterial(mat: string): string {
   const numStr = numMatch ? numMatch[0] : "";
 
   if (norm.includes("page")) {
-    return `First ${numStr || "50"} pages`;
+    return sized(numStr || "50", "page");
   }
   if (norm.includes("chapter")) {
-    return `First ${numStr || "3"} chapters`;
+    return sized(numStr || "3", "chapter");
   }
   if (norm.includes("word")) {
     let formattedNum = numStr;
@@ -57,7 +73,7 @@ function formatLegacyMaterial(mat: string): string {
         formattedNum = parsedNum.toLocaleString("en-GB");
       }
     }
-    return `First ${formattedNum || "3,000"} words`;
+    return sized(formattedNum || "3,000", "word");
   }
 
   // Truncate other text at 30 characters

@@ -191,3 +191,102 @@ test("§1/§2 — the editor is on-brand, commits as it goes, and both routes op
   console.log(`  removed from inside the editor: ${restored} pills`);
   expect(restored, "Remove from this send left the pill behind").toBe(before);
 });
+
+/**
+ * §2 (outlined-bar pack) — the pills are filled pink, and the sample names itself from its size.
+ *
+ * ⚠️ THE POINT OF MEASURING RATHER THAN LOCKING THE CSS is that the claim is "the SAME pink as the
+ * primary button", and only the page can settle that: the tokens are overridden per palette, so two
+ * rules naming two tokens can still paint one colour, and two rules naming ONE token can paint two.
+ * It reads the button and the pills and compares the values it finds.
+ */
+test("§2 — filled pink pills, and a sample that states its own size", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.locator(".f12-row").first().click({ timeout: 5000 });
+  await page.waitForTimeout(500);
+
+  const g = await page.evaluate(() => {
+    const read = (el: Element) => {
+      const c = getComputedStyle(el as HTMLElement);
+      return {
+        text: (el.textContent || "").replace(/\s+/g, " ").trim(),
+        bg: c.backgroundColor, rim: c.borderTopColor, ink: c.color, weight: c.fontWeight,
+        clip: (() => { const s = el.querySelector("svg"); return s ? getComputedStyle(s).stroke : null; })(),
+        figures: (() => { const t = el.querySelector(".qc-mchiptx"); return t ? getComputedStyle(t).fontVariantNumeric : null; })(),
+      };
+    };
+    const logq = document.querySelector(".qc-logq");
+    const row = document.querySelector(".f12-row.f12-sel") || document.querySelector(".f12-row");
+    return {
+      pills: [...document.querySelectorAll(".qc-sentmat .qc-mchip-att")].map(read),
+      primary: logq ? getComputedStyle(logq).backgroundColor : null,
+      selectedRow: row ? getComputedStyle(row).backgroundColor : null,
+      badges: document.querySelectorAll(".qc-mqtybadge").length,
+    };
+  });
+  console.log(`\nprimary fill ${g.primary} · selected row ${g.selectedRow} · quantity badges ${g.badges}`);
+  g.pills.forEach((p) => console.log(`  "${p.text}" · ${p.ink}/${p.weight} on ${p.bg} · rim ${p.rim} · clip ${p.clip} · ${p.figures}`));
+  expect(g.pills.length, "no materials on this query to read").toBeGreaterThan(0);
+
+  /* ⚠️ THE SAME FILL AS THE PRIMARY, ASSERTED AGAINST THE BUTTON RATHER THAN A HEX — the pack's
+     rule is "the pink the page already has", and a hex here would pass on the day someone added a
+     fourth pink that happened to match. */
+  for (const p of g.pills) {
+    expect(p.bg, `"${p.text}" is not the primary's fill`).toBe(g.primary);
+    expect(p.rim, `"${p.text}" has no rim of its own`).not.toBe(p.bg);
+    expect(Number(p.weight), `"${p.text}" is not at medium weight`).toBeGreaterThanOrEqual(500);
+    expect(p.clip, `"${p.text}"'s paperclip is not burgundy`).toBe("rgb(124, 58, 42)");
+    expect(p.figures, `"${p.text}" is not on tabular figures`).toContain("tabular-nums");
+  }
+  /* ⚠️ AND THE SIZE CHIP IS GONE, page-wide — not just off the sample. */
+  expect(g.badges, "a quantity badge is still rendering").toBe(0);
+
+  /* ⚠️ THE SAMPLE'S LABEL IS ITS SIZE. Reported rather than required, because whether this query
+     carries a sized sample is data, not markup — a `toBeGreaterThan(0)` here would fail on an
+     account whose first query happens to have sent only a letter. */
+  /* ⚠️ IF THIS QUERY HAS NO SAMPLE, ATTACH ONE AND MEASURE THAT — the derived label is the whole of
+     §2b and reporting it as "no data on this account" would leave the pack's main claim unproven on
+     a page. The attach route is the same one §2's flow above walks; the sample is removed again at
+     the end so the account is left as it was found. */
+  let pills = g.pills;
+  let attached = false;
+  if (!pills.some((p) => /^First /.test(p.text))) {
+    await page.locator(".qc-mchip-add").click();
+    await page.waitForTimeout(300);
+    await page.locator('[role="menu"] .f12-menu-item', { hasText: "Opening sample" }).click();
+    await page.waitForTimeout(900);
+    pills = await page.evaluate(() => [...document.querySelectorAll(".qc-sentmat .qc-mchip-att")].map((el) => ({
+      text: (el.textContent || "").replace(/\s+/g, " ").trim(),
+      bg: getComputedStyle(el as HTMLElement).backgroundColor, rim: "", ink: "", weight: "", clip: null as string | null, figures: null as string | null,
+    })));
+    attached = true;
+    console.log(`  attached a sample → ${pills.map((p) => `"${p.text}"`).join(", ")}`);
+  }
+  const sized = pills.filter((p) => /^First /.test(p.text));
+  console.log(`  sized samples: ${sized.length ? sized.map((s) => `"${s.text}"`).join(", ") : "(none on this query)"}`);
+  expect(sized.length, "no sample on this query and attaching one produced no sized pill").toBeGreaterThan(0);
+  for (const s of sized) {
+    expect(s.text, `"${s.text}" still names the type instead of the size`).not.toContain("Opening sample");
+    expect(s.text, `"${s.text}" reads as an assembled label`).not.toMatch(/First 1 /);
+    expect(s.text, `"${s.text}" states no unit`).toMatch(/chapters?|pages?|words?/);
+  }
+
+  /* ⚠️ LEAVE THE ACCOUNT AS IT WAS FOUND — through the editor the attach route already opened,
+     not through the pill's ×. The × is `display:none` until its pill is hovered, and a hovered
+     element under an undo toast is a click that waits for the full timeout: it cost seven minutes
+     of one run to find that out. The editor's own `Remove from this send` is on screen and is the
+     removal path the earlier case in this file already walks. */
+  if (attached) {
+    const rm = page.locator(".f12-panel button", { hasText: "Remove from this send" });
+    const seen = await rm.count();
+    if (seen === 1) {
+      await rm.click({ timeout: 5000 });
+      await page.waitForTimeout(600);
+      console.log(`  removed the attached sample · ${await page.locator(".qc-sentmat .qc-mchip-att").count()} pills left`);
+    } else {
+      /* ⚠️ REPORTED, NOT RETRIED. Two matches or none means the editor is not where this run left
+         it, and a click into that is how a cleanup step becomes a seven-minute timeout. */
+      console.log(`  ⚠️ the attached sample was NOT removed — ${seen} remove controls on screen`);
+    }
+  }
+});

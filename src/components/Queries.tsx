@@ -5088,11 +5088,15 @@ export const Queries: React.FC<{
                                  * ⚠️ REMOVAL IS IMMEDIATE, AND THE UNDO IS WHAT MAKES THAT SAFE —
                                  * `writeMaterials` already shows the toast with the prior value.
                                  */
-                                const attach = (key: string, label: string, qty: string | null, onClick: (el: HTMLElement) => void, title: string, onRemove: () => void) => (
+                                /* ⚠️ NO QUANTITY SLOT (§2b). The renderer used to take a `qty` and draw
+                                   it as a second, mono chip inside the pill — `Opening sample · 3
+                                   chapters`. The sample now NAMES itself from that same size, so the
+                                   badge would restate the amount beside the words carrying it, and a
+                                   pill holding a pill was the busiest thing in the row. */
+                                const attach = (key: string, label: string, onClick: (el: HTMLElement) => void, title: string, onRemove: () => void) => (
                                   <button key={key} type="button" className="qc-mchip qc-mchip-att" onClick={(e) => onClick(e.currentTarget)} title={title}>
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
                                     <span className="qc-mchiptx">{label}</span>
-                                    {qty && <span className="qc-mqtybadge">{qty}</span>}
                                     <span role="button" tabIndex={0} className="qc-mchipx"
                                       aria-label={`Remove ${label} from this send`} title={`Remove ${label}`}
                                       onClick={(e) => { e.stopPropagation(); onRemove(); }}
@@ -5121,24 +5125,29 @@ export const Queries: React.FC<{
                                 {/* ⚠️ THE CHIP OPENS ITS OWN POPOVER (§5) rather than toggling on click. A single click that
                                      silently flipped "sent" gave one control two of the three things a
                                      material can have done to it and no way to reach the third. */}
-                                {qlSent && attach("ql", "Query letter", null, (el) => openMatPop("ql", el), "Query letter", () => toggleDocMaterial(activeQuery, activeAgent, "query"))}
-                                {synSent && attach("syn", "Synopsis", null, (el) => openMatPop("syn", el), "Synopsis", () => toggleDocMaterial(activeQuery, activeAgent, "synopsis"))}
+                                {qlSent && attach("ql", "Query letter", (el) => openMatPop("ql", el), "Query letter", () => toggleDocMaterial(activeQuery, activeAgent, "query"))}
+                                {synSent && attach("syn", "Synopsis", (el) => openMatPop("syn", el), "Synopsis", () => toggleDocMaterial(activeQuery, activeAgent, "synopsis"))}
                                 {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
                                     sample is a quantity and a unit, not a yes. Its label carries what
                                     was sent; Remove keeps its own control, since a chip that both
                                     edits and clears on one click could not do either. */}
-                                {/* ⚠️ THE LABEL IS THE MATERIAL AND THE BADGE IS THE AMOUNT — `Opening sample · 3
-                                      chapters`, not `3 chapters`. And `Opening sample` is the locked
-                                      name: the three units all store as one `ComponentType`, so
-                                      "Sample pages" would assert a unit the artefact does not carry. */}
-                                  {sampleItem && attach("smp", "Opening sample", sampleMaterialText(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent))}
+                                {/* ⚠️ §2b · THE SAMPLE NAMES ITSELF FROM ITS OWN SIZE — `First 3 chapters`,
+                                      not `Opening sample` beside a badge reading `3 chapters`. The
+                                      label is DERIVED at render through `formatQueryMaterial`, the
+                                      module that is already the app's only material formatter, so
+                                      nothing new is stored: the artefact keeps one `ComponentType`
+                                      for all three units and the unit lives in the item.
+                                      ⚠️ `Opening sample` REMAINS THE NAME IN THE ATTACH MENU, and
+                                      that is not an inconsistency — the menu offers a type you have
+                                      not sized yet, and the pill states a thing you sent. */}
+                                  {sampleItem && attach("smp", formatQueryMaterial(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent))}
                                 {/* ⚠️ AND `Other` OPENS ITS EDITOR TOO (§2) — free text rather than a
                                     quantity. It was the one pill that could only be removed, so a
                                     typo in it meant deleting and retyping. Same renderer as the
                                     rest, so its × and its hover cannot drift from theirs. */}
                                 {otherItems.map((it, i) => attach(
-                                  `oth-${i}`, sampleMaterialText(it), null,
-                                  (el) => openOtherEditor(it, el), sampleMaterialText(it),
+                                  `oth-${i}`, formatQueryMaterial(it),
+                                  (el) => openOtherEditor(it, el), formatQueryMaterial(it),
                                   () => removeOtherMaterial(activeQuery, activeAgent, it),
                                 ))}
                                 {/* ⚠️ THE FLOATING `REMOVE` IS GONE (§4) — it now lives on the chip

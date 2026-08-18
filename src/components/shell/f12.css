@@ -2874,15 +2874,36 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    for something that had not been sent — a ghost, which is the app remembering something that did
    not happen. Every pill on the row is attached now, so the modifier, the muted ink it inverted and
    the ✓/○ marker it coloured are all gone: nothing is left for them to tell apart. */
-.qc-mchip-att { background: var(--n2); border: 1px solid transparent; color: var(--ink-2); }
-.qc-mchip-att:hover { background: var(--n3); color: var(--ink); }
+/**
+ * ⚠️ §2a · THE ATTACHED MATERIALS ARE FILLED PINK PILLS, AND THE PINK IS THE ONE THE PAGE ALREADY
+ * OWNS. `--pink` / `--pink-b` are declared in `index.css` as the soft-pink CTA fill and border —
+ * the same fill `.qc-logq` carries — and every palette already overrides them, so this adds no
+ * value to the page. The near-miss to avoid was inventing a fourth: the ref draws #f8e7dc/#ebcfc2,
+ * which is neither `--pink` nor `--pink-t`, and hard-coding it would have put two pinks a shade
+ * apart in one row. The selected row sits on `--pink-t`, one step lighter again; the pills match the
+ * button rather than the row, because what they are is a record of a send, not a selection.
+ *
+ * ⚠️ NEAR-BLACK TEXT, BURGUNDY CLIP. The label is the material's name and reads as text; the
+ * paperclip is the only thing here that says "attached", and it is the one accent.
+ */
+.qc-mchip-att { background: var(--pink); border: 1px solid var(--pink-b); color: var(--ink); font-weight: 500; }
+.qc-mchip-att svg { stroke: var(--burg); }
+.qc-mchip-att:hover { background: var(--pink-h); border-color: var(--pink-b); color: var(--ink); }
+/* ⚠️ TABULAR FIGURES, BECAUSE THE LABEL IS NOW A NUMBER. `First 3 chapters` sits beside
+   `First 50 pages` in the same row, and proportional digits make two pills of the same shape
+   different widths for no reason a reader can see. */
+.qc-mchiptx { font-variant-numeric: tabular-nums; }
 /* ⚠️ THE QUANTITY IS A BADGE ON THE CHIP, so the chip answers "how much" without being opened.
    `Opening sample · 3 chapters` is the whole point of the popover being optional. */
-.qc-mqtybadge { flex: none; font-family: var(--f12-mono); font-size: 9px; color: var(--faint); background: var(--white); border: 1px solid var(--qc-rim-off); border-radius: 4px; padding: 1px 5px; }
+/* ⚠️ `.qc-mqtybadge` IS GONE (§2b) — the sample states its size in its own words now, so the badge
+   restated the amount beside the words carrying it. Deleted rather than left unused: an orphan rule
+   in this file is the next person's evidence that a chip still has a quantity slot. */
 /* ⚠️ REMOVE BELONGS TO THE THING IT REMOVES. It was a floating `REMOVE` at the end of the row —
    a verb with no visible subject, which acted on whichever material happened to be the sample.
    Revealed on hover and on focus-within, so it is reachable without a pointer. */
-.qc-mchipx { flex: none; display: none; width: 16px; height: 16px; margin-right: -4px; border: 1px solid var(--qc-rim-off); border-radius: 4px; background: var(--white); color: var(--faint); font-size: 10px; line-height: 1; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
+/* ⚠️ THE × KEEPS ITS WHITE GROUND ON THE PINK PILL — it is the one part of the chip that is a
+   control rather than a label, and on a filled pill only a lighter surface says so. */
+.qc-mchipx { flex: none; display: none; width: 16px; height: 16px; margin-right: -4px; border: 1px solid var(--pink-b); border-radius: 4px; background: var(--white); color: var(--burg); font-size: 10px; line-height: 1; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
 .qc-mchip:hover .qc-mchipx, .qc-mchip:focus-within .qc-mchipx { display: inline-flex; }
 .qc-mchipx:hover { border-color: var(--burg); color: var(--burg); }
 /* a bare text action in a sub-row — Remove, ＋ Package, the upgrade line */

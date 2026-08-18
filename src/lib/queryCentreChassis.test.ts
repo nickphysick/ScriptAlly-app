@@ -290,10 +290,17 @@ describe("§1 · the query header is a mail header", () => {
     expect(base, "the chips lost their shared radius").toContain("border-radius: 7px");
     expect(con, "a contact is no longer white with a rim").toContain("background: var(--white)");
     expect(con, "a contact lost its rim").toMatch(/border:\s*1px solid var\(--qc-rim-off\)/);
-    expect(att, "an attachment is no longer a filled neutral").toContain("background: var(--n2)");
-    /* ⚠️ THE ATTACHMENT'S RIM IS TRANSPARENT, NOT ABSENT — `border: 0` would make it 2px shorter
-       than a contact, so the two families would differ in the one dimension they must share. */
-    expect(att, "the attachment lost the width that keeps both families one size").toContain("border: 1px solid transparent");
+    /* ⚠️ FILLED PINK SINCE §2a, NOT A FILLED NEUTRAL — and the clause is unchanged in what it is
+       FOR. The law above is that the two families differ in ground and in nothing else; the ground
+       an attachment takes is now the soft-pink CTA fill the primary button carries, so this asserts
+       the token rather than the old neutral step. What it must never become is `--white`, which is
+       the contact's ground and would collapse the two families into one. */
+    expect(att, "an attachment is no longer filled").toContain("background: var(--pink)");
+    expect(att, "an attachment took the contact's ground").not.toContain("var(--white)");
+    /* ⚠️ THE ATTACHMENT'S RIM IS A WHOLE PIXEL, whatever colour it is — it was transparent when the
+       fill did the work alone, and `border: 0` would make it 2px shorter than a contact, so the two
+       families would differ in the one dimension they must share. */
+    expect(att, "the attachment lost the width that keeps both families one size").toMatch(/border:\s*1px solid/);
     /* neither may declare a size of its own */
     for (const [n, r] of [["contact", con], ["attachment", att]] as const) {
       expect(r, `the ${n} family declared its own height`).not.toMatch(/(^|[;{\s])height:/);
