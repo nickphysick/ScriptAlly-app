@@ -16,7 +16,8 @@ test("§4 — the mark leads at full size, the initials are gone, the figure say
   const rows = await page.evaluate(() => {
     const out = [...document.querySelectorAll<HTMLElement>(".f12-row")].map((r) => {
       const rect = r.getBoundingClientRect();
-      const lead = r.querySelector<HTMLElement>(".f12-lead");
+      /* §3 reset the layout: the monogram leads and the mark sits over the figure on the right */
+      const lead = r.querySelector<HTMLElement>(".f12-end");
       /* ⚠️ THE MARK IS `StatusDot`'s OUTER SPAN — the tinted disc and its ring. The `<svg>` inside
          is the GLYPH, drawn at about two-thirds of it, so measuring the svg reported 19px for a
          30px mark and read as a failure of the size this section sets. */
@@ -34,6 +35,16 @@ test("§4 — the mark leads at full size, the initials are gone, the figure say
         /* is the mark actually the leftmost thing in the row? */
         markLeadsX: mark && nm ? Math.round(mark.left) < Math.round(nm.getBoundingClientRect().left) : false,
         monograms: r.querySelectorAll(".f12-av").length,
+        monogramLeads: (() => {
+          const av = r.querySelector<HTMLElement>(".f12-av");
+          const nm = r.querySelector<HTMLElement>(".f12-nm");
+          return av && nm ? Math.round(av.getBoundingClientRect().left) < Math.round(nm.getBoundingClientRect().left) : false;
+        })(),
+        dotAboveFigure: (() => {
+          const dot = r.querySelector<HTMLElement>(".f12-end > span:first-child");
+          const fig = r.querySelector<HTMLElement>(".f12-d2");
+          return dot && fig ? Math.round(dot.getBoundingClientRect().bottom) <= Math.round(fig.getBoundingClientRect().top) + 2 : false;
+        })(),
         /* the mark's own accessible name — the status, which is what a screen reader gets */
         status: (lead?.querySelector("[role='img']")?.getAttribute("aria-label") || "").trim(),
         /* the whole option's name, so the row can be read as a sentence */
@@ -49,15 +60,22 @@ test("§4 — the mark leads at full size, the initials are gone, the figure say
   });
 
   for (const r of rows.slice(0, 12)) {
-    console.log(`  ${r.sel ? "▸" : " "} mark ${String(r.markW).padStart(2)}px (glyph ${r.glyphW}) · ${r.name.padEnd(22)} ${r.agency.padEnd(22)} · "${r.figure}"  [${r.figureTitle}]`);
+    console.log(`  ${r.sel ? "▸" : " "} mark ${String(r.markW).padStart(2)}px · ${r.name.padEnd(22)} ${r.agency.padEnd(22)} · "${r.figure}"  [${r.figureTitle}]`);
   }
   expect(rows.length, "no rows on the page").toBeGreaterThan(2);
 
+  /**
+   * ⚠️ §3 REVERSED THE PREVIOUS PACK'S §4a, AND THESE CLAUSES TURN ROUND WITH IT. The monogram is
+   * back at the left — it is what tells two queries to one agent apart, which was that pack's own
+   * closing finding — and the mark is back in the right column over the figure. The mark was
+   * squeezed to 15px there because the elapsed block took two lines; it takes one now.
+   */
   for (const r of rows) {
-    expect(r.monograms, `"${r.name}" still renders a monogram`).toBe(0);
-    expect(r.markLeadsX, `"${r.name}": the mark does not lead the row`).toBe(true);
-    /* ⚠️ THE SIZE FLOOR THE SECTION NAMES — 17px was the fault, 12px is StatusDot's own floor. */
-    expect(r.markW, `"${r.name}": the mark renders at ${r.markW}px`).toBeGreaterThanOrEqual(26);
+    expect(r.monograms, `"${r.name}" renders no monogram`).toBe(1);
+    expect(r.monogramLeads, `"${r.name}": the monogram does not lead the row`).toBe(true);
+    expect(r.dotAboveFigure, `"${r.name}": the mark is not above the figure`).toBe(true);
+    /* small, but above `StatusDot`'s own 12px floor */
+    expect(r.markW, `"${r.name}": the mark renders at ${r.markW}px`).toBeGreaterThanOrEqual(15);
     expect(r.figure, `"${r.name}" states no figure`).not.toBe("");
     /* ⚠️ "ago" IS THE LABEL — a row that still needs a caption above the number has not changed. */
     expect(r.figure, `"${r.name}" reads "${r.figure}", which is not a relative date`).toMatch(/ ago$|^today$/);
@@ -102,7 +120,7 @@ test("§4 — the mark reads against the pink selected row", async ({ page }) =>
        the tinted disc and the glyph inside it in a third colour. Reading the svg's strokes answered
        a different question. */
     const dot = (r: HTMLElement | null) => {
-      const d = r?.querySelector<HTMLElement>(".f12-lead > span > span");
+      const d = r?.querySelector<HTMLElement>(".f12-end > span > span");
       if (!d) return null;
       const c = getComputedStyle(d);
       return { ring: `${c.borderTopWidth} ${c.borderTopColor}`, fill: c.backgroundColor, w: Math.round(d.getBoundingClientRect().width) };

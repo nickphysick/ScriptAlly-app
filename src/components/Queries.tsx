@@ -52,7 +52,7 @@ import { resolveInitialManuscriptId } from "../lib/logQuerySeed";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { READING_PANE_FLOOR_PX } from "../lib/agentsPage";
-import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, answeredSplit, DAY } from "../lib/queryAmbient";
+import { queryAmbientStatus, commandBarStatus, queryBucket, queriesPulse, createPlaceLine, recordPlaceLine, agentRepliesForManuscript, consequenceLine, trackingStatCells, DAY } from "../lib/queryAmbient";
 import {
   QueriesStatusFilter, filterStateFor, isOverdueForReply as isOverdueForReplyPure,
 } from "../lib/queriesFilterParam";
@@ -63,7 +63,7 @@ import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
-import { agentLabel, agentAgencyLine, agentPrimary, agentWebsiteHref } from "../lib/agentDisplay";
+import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref } from "../lib/agentDisplay";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
@@ -3982,17 +3982,16 @@ export const Queries: React.FC<{
                 ⚠️ AND IT SITS ABOVE THE SEARCH ROW, which does not move: search, filter and sort
                 narrow the list and belong with the rows, while the count states what the list IS.
                 Two different jobs, and the cap is the one that introduces the column. */}
-            <div className="f12-chh">
-              <span>{mastheadScopedQueries.length} {mastheadScopedQueries.length === 1 ? "query" : "queries"}</span>
-              {/* ⚠️ §4b · BOTH HALVES, AND THEY SUM. "17 awaiting" left the other half unsaid, so the
-                  reader had to subtract to learn how many have come back. The two figures come from
-                  ONE derivation with `notAnswered` taken by subtraction, which is why they add up to
-                  the total by construction rather than by two tallies agreeing. */}
-              {(() => {
-                const sp = answeredSplit(mastheadScopedQueries);
-                return <span className="qp-cardmeta">{sp.answered} answered · {sp.notAnswered} not</span>;
-              })()}
-            </div>
+            {/**
+              * ⚠️ §3 · THE SAGE HEADER BLOCK IS GONE, RESETTING TO THE EARLIER LAYOUT. It stated
+              * "25 queries" and an answered split above a list whose groups already state their own
+              * counts — a band of figures between the search field and the work, on a column that
+              * introduces itself twice.
+              *
+              * ⚠️ AND `answeredSplit` KEEPS ITS TESTS AND LOSES THIS CALLER. Reported rather than
+              * deleted: the derivation is sound and the decision that removed it is about where a
+              * count belongs, not about whether the count is right.
+              */}
             {/* ⚠️ THE COLUMN'S OWN HEADING IS GONE (§1a). It read "20 queries" — the same figure
                 the masthead states directly above it, on one screen, twice. Panes do not introduce
                 themselves: the page is titled once, and the count belongs to the title.
@@ -4164,37 +4163,34 @@ export const Queries: React.FC<{
                       }
                     }}
                   >
-                    {/* ⚠️ §4a · THE STATUS MARK LEADS, AND THE INITIALS GO. The mark was squeezed to
-                        15px in the right-hand stack because the two-line elapsed block was taking
-                        the width; at full size, where the eye starts, it is the first thing the row
-                        says. The monogram carried no information the two lines beside it did not.
-                        ⚠️ THE LOCKED COMPONENT, IMPORTED — `overrideSize` is the only thing this row
-                        says about it: no ring of its own, no recreation. */}
-                    {/* ⚠️ NOT `aria-hidden` — the mark is the row's STATUS, and hiding the wrapper
-                        would have taken it out of the option's accessible name along with it. The
-                        locked component carries its own `role="img"` and label; only the transient
-                        undo pulse is hidden, because it names no state. */}
-                    <span className="f12-lead">
-                      {undoingQueryIds.has(q.id) ? (
-                        /* ⚠️ NO BURGUNDY IN THE LIST — these three dots mark a row whose undo is in
-                           flight, and burgundy means OUTGOING on the mark they replace. */
-                        <span className="animate-pulse" aria-hidden="true" style={{ display: "inline-flex", gap: 3 }}>
-                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
-                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
-                          <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
-                        </span>
-                      ) : <StatusDot status={q.status} overrideSize={30} />}
-                    </span>
+                    {/**
+                      * ⚠️ §3 · THE MONOGRAM RETURNS TO THE LEFT AND THE MARK TO THE RIGHT — a reset
+                      * to the earlier layout, reversing the previous pack's §4a. That section moved
+                      * the mark to the lead because the two-line elapsed block had squeezed it to
+                      * 15px; the elapsed block is one line now, so the mark fits its old column at
+                      * a readable size and the monogram gets the position that distinguishes two
+                      * queries to the same agent.
+                      */}
+                    <span className="f12-av f12-av--sm" aria-hidden="true">{agentInitials(agent)}</span>
                     <span className="f12-mid">
                       <span className="f12-nm">{agentPrimary(agent)}</span>
                       <span className="f12-ag">{agentAgencyLine(agent)}</span>
                     </span>
-                    {/* ⚠️ THE FIGURE IS ALONE ON THE RIGHT, in one ink. It used to tint burgundy when
-                        the query was past its window — a lateness the number no longer expresses,
-                        now that it is a relative date rather than a position against a deadline.
-                        The group heading above it says "No reply yet"; the row does not restate it
-                        in colour. */}
-                    <span className="f12-d2" title={exact ? `Sent ${exact}` : undefined}>{queriedDate}</span>
+                    <span className="f12-end">
+                      {undoingQueryIds.has(q.id) ? (
+                        /* ⚠️ NO BURGUNDY IN THE LIST — these three dots mark a row whose undo is in
+                           flight, and burgundy means OUTGOING on the mark they replace. */
+                        <span className="animate-pulse" aria-hidden="true" style={{ display: "inline-flex", gap: 3 }}>
+                          <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--muted)" }} />
+                          <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--muted)" }} />
+                          <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--muted)" }} />
+                        </span>
+                      ) : <StatusDot status={q.status} overrideSize={17} />}
+                      {/* ⚠️ THE LANGUAGE DOES NOT RESET WITH THE LAYOUT. The screenshot shows
+                          `+19 DAYS` and `27 DAYS LEFT`; the figure stays a relative date measured
+                          from the last outbound send, with the exact date in its `title`. */}
+                      <span className="f12-d2" title={exact ? `Sent ${exact}` : undefined}>{queriedDate}</span>
+                    </span>
                   </button>
                 );
                   })}

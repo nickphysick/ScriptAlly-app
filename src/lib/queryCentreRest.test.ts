@@ -104,11 +104,12 @@ describe("§1c · the list's controls sit at the head of the list column", () =>
        columns are to read as one grid. */
     expect(code, "the label came back into the position the primary needs").not.toContain("THIS QUERY");
     /* the cap counts through the shared bucket, which is where the clause about agreement lives */
-    /* ⚠️ §4b — THE CAP STATES BOTH HALVES NOW, from ONE derivation whose second figure is taken by
-       SUBTRACTION, so the pair sums to the total by construction rather than by two tallies
-       agreeing. `queryBucket` was the right source for a single "awaiting" figure and the wrong one
-       for a pair: it does not account for closed and withdrawn. */
-    expect(code, "the cap counts some other way").toContain("answeredSplit(mastheadScopedQueries)");
+/* ⚠️ THE CAP IS GONE ENTIRELY (§3's reset) — the list opens with the search field, and the
+       groups state their own counts. So there is nothing left to count through the shared bucket,
+       and the clause becomes the one underneath it: the page states its count ONCE, which is what
+       made the cap's wording matter in the first place. `answeredSplit` keeps its tests and loses
+       this caller; reported, not deleted. */
+    expect(code, "the list's sage cap came back").not.toContain("answeredSplit(");
   });
 
   /* ⚠️ THE POINT OF THE WHOLE SPLIT. Six selected-query verbs used to sit above the list, all six
@@ -245,11 +246,12 @@ describe("§1b · the count caps the list it counts", () => {
     expect(code, "the masthead grew a count of its own").not.toMatch(/description=\{`\$\{\w+\.length\}/);
     /* ⚠️ AND THE CAP READS THE SAME BUCKET FUNCTION, so the two figures cannot disagree with the
        filter pills or with `getPrimaryAction` about whose turn anything is. */
-    /* ⚠️ §4b — THE CAP STATES BOTH HALVES NOW, from ONE derivation whose second figure is taken by
-       SUBTRACTION, so the pair sums to the total by construction rather than by two tallies
-       agreeing. `queryBucket` was the right source for a single "awaiting" figure and the wrong one
-       for a pair: it does not account for closed and withdrawn. */
-    expect(code, "the cap counts some other way").toContain("answeredSplit(mastheadScopedQueries)");
+/* ⚠️ THE CAP IS GONE ENTIRELY (§3's reset) — the list opens with the search field, and the
+       groups state their own counts. So there is nothing left to count through the shared bucket,
+       and the clause becomes the one underneath it: the page states its count ONCE, which is what
+       made the cap's wording matter in the first place. `answeredSplit` keeps its tests and loses
+       this caller; reported, not deleted. */
+    expect(code, "the list's sage cap came back").not.toContain("answeredSplit(");
   });
 
   /**
@@ -371,8 +373,11 @@ describe("§1g · the row carries status through the real StatusDot", () => {
        because the two-line elapsed block was taking the width. "Beside the date" is retired with
        that stack; what survives, and is what this case was ever really about, is that the row draws
        the IMPORTED component and never a recreation. */
-    expect(slice, "the mark is not in the lead slot").toContain('className="f12-lead"');
-    expect(slice, "the mark is not at full size").toContain("overrideSize={30}");
+    /* ⚠️ BACK BESIDE THE DATE (§3's reset), which is where this clause's title always said it was.
+       §4a moved it to the lead while the elapsed block took two lines and squeezed it to 15px; the
+       block is one line now, so the right column carries the mark over the figure. */
+    expect(slice, "the mark left the right column again").toContain('className="f12-end"');
+    expect(slice, "the mark is not the small one the column holds").toContain("overrideSize={17}");
     /* ⚠️ §4b MADE THE FIGURE A RELATIVE DATE, so the class is unconditional again — the burgundy
        late tint went with the position it expressed. */
     expect(slice, "the date/figure slot left the row").toContain('className="f12-d2"');

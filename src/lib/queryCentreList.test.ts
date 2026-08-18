@@ -212,18 +212,23 @@ describe("§4 · the list row", () => {
     expect(row, "the row's markup is missing — every case below would pass vacuously").not.toBe("");
   });
 
-  it("the mark leads, at full size, and it is the imported component", () => {
-    expect(row, "the lead slot is missing").toContain('className="f12-lead"');
-    expect(row, "the mark is not the locked component").toContain("<StatusDot status={q.status} overrideSize={30} />");
-    /* ⚠️ THE LEAD COMES BEFORE THE NAME IN SOURCE ORDER — a grid could place it anywhere, so this
-       is the structural half and the measure reads the rendered x. */
-    expect(row.indexOf('className="f12-lead"'), "the mark is not the row's first element")
+  /**
+   * ⚠️ REVERSED BY §3's RESET, AND THE REASON IS THE PREVIOUS PACK'S OWN CLOSING FINDING. §4a moved
+   * the mark to the lead because the two-line elapsed block had squeezed it to 15px in the right
+   * column — and its report ended by naming the cost: two queries to one agent, same mark, only the
+   * figure between them, because the monogram had gone. The elapsed block is one line now, so the
+   * right column holds the mark AND the figure, and the monogram gets the position that
+   * distinguishes them.
+   */
+  it("the monogram leads and the mark sits over the figure", () => {
+    expect(row, "the monogram did not come back").toMatch(/["\s`]f12-av["\s`]/);
+    expect(row, "the initials are not computed").toContain("agentInitials(agent)");
+    expect(row, "the mark is not the locked component").toContain("<StatusDot status={q.status} overrideSize={17} />");
+    expect(row, "the right column's stack is missing").toContain('className="f12-end"');
+    /* the monogram comes first in source order; the rendered x is `qcRow.measure.ts` */
+    expect(row.indexOf('className="f12-av'), "the monogram is not the row's first element")
       .toBeLessThan(row.indexOf('className="f12-mid"'));
-  });
-
-  it("no monogram survives, and nothing computes initials for it", () => {
-    expect(row, "the row still renders a monogram").not.toMatch(/["\s`]f12-av["\s`]/);
-    expect(queries, "the page still imports the initials helper for the row").not.toContain("agentInitials");
+    expect(row, "the retired lead slot came back").not.toContain('className="f12-lead"');
   });
 
   /**

@@ -2593,11 +2593,24 @@
  * ⚠️ IT PAINTS NOTHING. No plate, no ring, no fill: the mark brings its own, and a ground behind it
  * would be the monogram returning under another name.
  */
-.f12-lead { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex: none; }
-/* ⚠️ THE ROW'S MONOGRAM RULES ARE DELETED, not left inert. Every one was scoped `.f12-row .f12-av`
-   — base disc, the small modifier, the selected inversion and the closed-agency variants — so none
-   can match anything else, and a rule that cannot match is the next reader's false lead. `.f12-av`
-   itself survives elsewhere on the page and is untouched. */
+/* ══ §3 · THE ROW RESETS: MONOGRAM LEFT, MARK OVER FIGURE RIGHT ══════════════════════════════
+ *
+ * ⚠️ THE MONOGRAM IS BACK BECAUSE IT IS WHAT TELLS TWO QUERIES TO ONE AGENT APART — the finding the
+ * previous pack's own report ended on. The mark left the right column because a two-line elapsed
+ * block had squeezed it to 15px; that block is one line now, so the column holds both.
+ *
+ * ⚠️ AND `.f12-lead` GOES WITH THE LAYOUT IT SERVED — its slot has no renderer.
+ */
+.f12-row .f12-av { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--qc-row-sel); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; }
+.f12-row .f12-av--sm { width: 32px; height: 32px; font-size: 10.5px; }
+/* ⚠️ THE DISC INVERTS ON THE SELECTED ROW — a pink disc on a pink ground is not a disc, and the
+   inversion is the row's SECOND selection signal beside a fill that measures 1.24:1. */
+.f12-row.f12-sel .f12-av { background: var(--white); box-shadow: var(--sh-btn); }
+.f12-row .f12-end { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 0; }
+/* ⚠️ THE CLOSED-AGENCY MONOGRAM VARIANTS ARE NOT RESTORED with the disc — they tinted it for an
+   agency closed to submissions, which is a fact the Agent list carries and this row never explains.
+   Reported rather than revived: the reset is a layout, not a licence to bring back everything that
+   was ever attached to it. */
 /* ⚠️ `.f12-end` IS RETIRED WITH THE STACK IT ARRANGED — the right column is one figure now, so a
    flex column with a gap has nothing to arrange. Its rule is gone rather than left inert. */
 .f12-row .f12-d2 { width: 100%; text-align: right; font-family: var(--f12-mono); font-size: 9.5px; color: var(--faint); font-feature-settings: "tnum" 1; white-space: nowrap; }
@@ -2672,7 +2685,7 @@
    durations lines up. */
 /* ⚠️ THE FIGURE, ALONE AND IN ONE INK (§4b). Mono, because it is a measurement; `--ink-2`, because
    the row states it as a fact rather than as a warning — the group heading carries the alarm. */
-.f12-d2 { font-family: var(--f12-mono); font-size: 9.5px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.f12-d2 { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tl-spent { background: repeating-linear-gradient(-45deg, var(--n4) 0 4px, var(--n2) 4px 9px); }
 .qc-sentms { display: flex; align-items: baseline; gap: 11px; min-width: 0; margin-bottom: 8px; }
 /* ⚠️ THE ROWS TAKE THE FREE WIDTH AND THE STATUS TAKES WHAT IT NEEDS — `minmax(0, 1fr) auto`. The

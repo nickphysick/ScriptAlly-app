@@ -40,25 +40,16 @@ test("§1 — one count on the page, in a cap that matches the reading cards", a
   });
   console.log(JSON.stringify(m, null, 1));
 
-  expect(m.capCount, "there are not three caps — the list's, Tracking's and Notes'").toBe(3);
-  /* ⚠️ ONE PAINT ACROSS ALL THREE. A second gradient anywhere shows up here as a second string. */
-  expect([...new Set(m.paints)], `the caps are not one treatment: ${[...new Set(m.paints)].join(" ⁄ ")}`).toHaveLength(1);
-  expect(m.listCapText, "the cap does not state the count").toMatch(/\d+ quer(y|ies)/);
-  /* ⚠️ §4b — BOTH HALVES NOW, AND THEY SUM. "17 awaiting" left the other half unsaid, so the
-     reader had to subtract to learn how many have come back. Asserted as the SUM rather than as
-     two figures, which is the clause that matters: they come from one derivation whose second
-     number is taken by subtraction, and closed and withdrawn are inside the total. */
-  const parts = m.listCapText.match(/(\d+)\s+quer(?:y|ies)(\d+)\s+answered\s*·\s*(\d+)\s+not/i);
-  expect(parts, `the cap does not state both halves: "${m.listCapText}"`).toBeTruthy();
-  const [total, answered, not] = [1, 2, 3].map((i) => Number(parts![i]));
-  expect(answered + not, `${answered} answered + ${not} not ≠ ${total} total`).toBe(total);
-  /* ⚠️ NO RADIUS OF ITS OWN — the panel keeps the radius and clips the fill */
-  expect(m.listCapRadius, "the cap grew a radius of its own").toBe("0px");
-  expect(parseFloat(m.panelRadius), "the panel gave up its radius").toBeGreaterThan(0);
-  expect(m.listCapLeft, "the cap is inset from the panel — its fill must reach the rim").toBe(m.panelLeft + 1);
-  expect(m.capAboveSearch, "the cap is not above the search row").toBe(true);
-  expect(m.searchRowIntact.filter(Boolean).length, "the search row lost a control").toBe(3);
-  /* ⚠️ THE COUNT RENDERS ONCE. It was in the toolbar AND is now in the cap; two would be the
-     masthead-versus-column duplication this page has already retired once. */
-  expect(m.countsOnPage.length, `the count renders ${m.countsOnPage.length} times: ${m.countsOnPage.join(", ")}`).toBe(1);
+  /**
+   * ⚠️ INVERTED BY §3's RESET — THE LIST HAS NO CAP AT ALL NOW. This asserted three sage bands (the
+   * list's, Tracking's and Notes') and the wording of the list's own; §3 removes it, so the list
+   * opens with the search field and the groups state their own counts.
+   *
+   * ⚠️ WHAT SURVIVES IS THE CLAUSE UNDERNEATH IT: the page states its count ONCE. That was the
+   * reason the cap's wording mattered, and it is the reason its going is an improvement rather than
+   * a loss — the masthead says it, and the groups say their own.
+   */
+  expect(m.capCount, "the list's sage band came back").toBe(2);
+  expect(m.listCapText, "the list drew a cap above its search row").toBe("");
+  expect(m.countsOnPage.length, `the page states its count ${m.countsOnPage.length} times: ${m.countsOnPage.join(", ")}`).toBeLessThanOrEqual(1);
 });

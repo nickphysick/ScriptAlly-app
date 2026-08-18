@@ -556,11 +556,16 @@ describe("fix pack 7 §4 · the discs", () => {
    * ⚠️ AND `.f12-av` ITSELF IS UNTOUCHED — it is a different disc elsewhere on the page. What is
    * gone is every rule that scoped it to a list row.
    */
-  it("the row's disc is retired with the initials it carried", () => {
-    for (const sel of [".f12-row .f12-av", ".f12-row .f12-av--sm", ".f12-row.f12-sel .f12-av"]) {
-      expect(rule(sel), `${sel} survives with nothing wearing it`).toBe("");
-    }
-    expect(code, "the row still renders a monogram").not.toMatch(/["\s`]f12-av["\s`]/);
-    expect(code, "the row still computes initials").not.toContain("agentInitials(agent)");
+  /**
+   * ⚠️ THE DISC IS BACK (§3's reset) — and what does NOT come back with it is the closed-agency
+   * variant, which tinted the monogram for an agency shut to submissions. That is a fact the Agent
+   * list carries and this row never explained; a reset is a layout, not a licence to revive
+   * everything that was ever attached to it.
+   */
+  it("the row's disc returns, and the closed-agency variant does not", () => {
+    expect(rule(".f12-row .f12-av"), "the monogram has no rule").not.toBe("");
+    expect(declValue(rule(".f12-row.f12-sel .f12-av"), "background"), "the selected disc no longer inverts").toBe("var(--white)");
+    expect(rule(".f12-row.f12-shut .f12-av"), "the closed-agency tint came back with it").toBe("");
+    expect(code, "the row stopped computing its initials").toContain("agentInitials(agent)");
   });
 });

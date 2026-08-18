@@ -183,11 +183,12 @@ test("§2 — a keyboard row and a clicked row are identical, and neither wears 
     const read = (r: HTMLElement) => {
       const nm = r.querySelector<HTMLElement>(".f12-nm");
       const ag = r.querySelector<HTMLElement>(".f12-ag");
-      const dot = r.querySelector<HTMLElement>(".f12-lead > span > span");
+      const dot = r.querySelector<HTMLElement>(".f12-end > span > span");
       return {
         name: nm ? `${getComputedStyle(nm).color} ${getComputedStyle(nm).fontWeight}` : "(none)",
         agency: ag ? getComputedStyle(ag).color : "(none)",
         mark: dot ? `${getComputedStyle(dot).backgroundColor} / ${getComputedStyle(dot).borderTopColor}` : "(none)",
+        avatar: (() => { const a = r.querySelector<HTMLElement>(".f12-av"); return a ? getComputedStyle(a).backgroundColor : "(none)"; })(),
         monogram: r.querySelectorAll(".f12-av").length,
       };
     };
@@ -195,10 +196,16 @@ test("§2 — a keyboard row and a clicked row are identical, and neither wears 
   });
   console.log(`  selected  name ${signals.sel.name} · agency ${signals.sel.agency} · mark ${signals.sel.mark}`);
   console.log(`  unselected name ${signals.other.name} · agency ${signals.other.agency} · mark ${signals.other.mark}`);
-  console.log(`  monograms: ${signals.sel.monogram} (retired by §4 — it was the second signal)`);
+  console.log(`  monograms: ${signals.sel.monogram} · avatar ${signals.other.avatar} → ${signals.sel.avatar}`);
 
-  expect(signals.sel.monogram, "the monogram is back — the reasoning above needs revisiting").toBe(0);
-  expect(signals.sel.mark, "the status mark now changes on selection — a second signal exists again").toBe(signals.other.mark);
+  /**
+   * ⚠️ THE SECOND SIGNAL IS BACK, AND THAT REVISES THE REPORT THIS CASE CARRIED. §3's reset returned
+   * the monogram to the row, and it inverts on selection — so the pink fill is no longer the only
+   * thing distinguishing the selected row, which is what the 1.24:1 reading needed.
+   */
+  expect(signals.sel.monogram, "the monogram left the row again — the fill is the only signal").toBe(1);
+  expect(signals.sel.avatar, "the monogram no longer inverts on selection").not.toBe(signals.other.avatar);
+  expect(signals.sel.mark, "the status mark now changes on selection too").toBe(signals.other.mark);
   expect(signals.sel.name, "the name became a selection signal — the reasoning above needs revisiting").toBe(signals.other.name);
   expect(signals.sel.agency, "the agency line became a selection signal — the reasoning above needs revisiting").toBe(signals.other.agency);
 });
