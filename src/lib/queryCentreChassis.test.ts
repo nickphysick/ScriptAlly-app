@@ -322,8 +322,11 @@ describe("§1 · the query header is a mail header", () => {
     const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
     expect(card, "a contact chip shows the word rather than the value").not.toMatch(/>Email</);
     expect(card, "the website chip shows the word rather than the domain").not.toMatch(/>Website</);
-    expect(card, "the email chip has no full value in `title`").toContain("title={email ||");
-    expect(card, "the site chip has no full value in `title`").toContain("title={site ??");
+    /* ⚠️ §7 SPLIT THE PILL IN TWO — a link when there is a value, a control when there is not — so
+       the `title` is the value on the link and an invitation on the button. The clause is that the
+       FULL value is reachable where the pill truncates it, which only the link can be about. */
+    expect(card, "the email chip has no full value in `title`").toContain('href={`mailto:${email}`} title={email}');
+    expect(card, "the site chip has no full value in `title`").toContain('href={site} target="_blank" rel="noreferrer noopener" title={site}');
   });
 
   /**

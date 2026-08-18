@@ -1014,6 +1014,13 @@ export const Queries: React.FC<{
    * §6 — which of Tracking's two dates is being edited. `sent` writes the SEND date through the
    * activity log's own commit; `expected` writes the stored `responseDeadline` override.
    */
+  /**
+   * §7 — which of the agent's two contact fields is being added. It edits the AGENT record, not the
+   * query, which is why the popover names the agent and the toast says where it landed.
+   */
+  const [agentEdit, setAgentEdit] = useState<null | "email" | "website">(null);
+  const [agentDraft, setAgentDraft] = useState("");
+  const { triggerRef: agentEditTrigRef, menuStyle: agentEditStyle } = useFixedMenu<HTMLElement>(!!agentEdit);
   const [dateEdit, setDateEdit] = useState<null | "sent" | "expected">(null);
   const [dateDraft, setDateDraft] = useState("");
   const { triggerRef: dateTrigRef, menuStyle: dateMenuStyle } = useFixedMenu<HTMLElement>(!!dateEdit);
@@ -4590,26 +4597,56 @@ export const Queries: React.FC<{
                               <span className="qc-msec">{activeAgent.agency?.trim() || "No agency"}</span>
                             </div>
                             <div className="qc-msub">
-                              <a
-                                className={`qc-mchip qc-mchip-con${email ? "" : " off"}`}
-                                href={email ? `mailto:${email}` : undefined}
-                                title={email || "No email address on this agent's record"}
-                                aria-disabled={email ? undefined : true}
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7" /></svg>
-                                <span className="qc-mchiptx">{email || "No email"}</span>
-                              </a>
-                              <a
-                                className={`qc-mchip qc-mchip-con${site ? "" : " off"}`}
-                                href={site ?? undefined}
-                                target="_blank"
-                                rel="noreferrer noopener"
-                                title={site ?? "No website on this agent's record"}
-                                aria-disabled={site ? undefined : true}
-                              >
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></svg>
-                                <span className="qc-mchiptx">{siteText || "No website"}</span>
-                              </a>
+                              {/**
+                                * ⚠️ §7 · AN ABSENT VALUE IS AN ACTION, NOT A DEAD PILL. Both read
+                                * "No email" / "No website" and did nothing — a fact with no way to
+                                * change it, on a card the writer is looking at precisely because
+                                * they are dealing with this agent.
+                                *
+                                * ⚠️ AND IT EDITS THE AGENT, NOT THE QUERY. Stated in the popover's
+                                * own title and in the toast, because a control on a query's card
+                                * that silently changes shared data is the worse kind of surprise.
+                                */}
+                              {email ? (
+                                <a className="qc-mchip qc-mchip-con" href={`mailto:${email}`} title={email}>
+                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7" /></svg>
+                                  <span className="qc-mchiptx">{email}</span>
+                                </a>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="qc-mchip qc-mchip-con qc-mchip-add"
+                                  title="Add an email address to this agent's record"
+                                  onClick={(e) => {
+                                    (agentEditTrigRef as React.MutableRefObject<HTMLElement | null>).current = e.currentTarget;
+                                    setAgentDraft("");
+                                    setAgentEdit("email");
+                                  }}
+                                >
+                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7" /></svg>
+                                  <span className="qc-mchiptx">Add an email</span>
+                                </button>
+                              )}
+                              {site ? (
+                                <a className="qc-mchip qc-mchip-con" href={site} target="_blank" rel="noreferrer noopener" title={site}>
+                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></svg>
+                                  <span className="qc-mchiptx">{siteText}</span>
+                                </a>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="qc-mchip qc-mchip-con qc-mchip-add"
+                                  title="Add a website to this agent's record"
+                                  onClick={(e) => {
+                                    (agentEditTrigRef as React.MutableRefObject<HTMLElement | null>).current = e.currentTarget;
+                                    setAgentDraft("");
+                                    setAgentEdit("website");
+                                  }}
+                                >
+                                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></svg>
+                                  <span className="qc-mchiptx">Add a website</span>
+                                </button>
+                              )}
                             </div>
 
                             {/* ── SENT ── */}
@@ -5395,6 +5432,57 @@ export const Queries: React.FC<{
         }}
       />
     )}
+
+    {/**
+      * §7 — THE AGENT'S CONTACT EDITOR.
+      *
+      * ⚠️ IT WRITES THROUGH `updateAgent`, WHICH IS THE AGENT LIST'S OWN PATH — `AgentList`'s Done
+      * commits one `updateAgent(draft.id, payload)` and its undo calls the same function. One
+      * writer to an agent record, which is the rule this app has been applying everywhere else.
+      *
+      * ⚠️ AND IT SAYS WHOSE RECORD IT IS CHANGING, in the title and again in the toast. A control
+      * on a QUERY's card that quietly edits shared data is the surprise worth spending two words on.
+      *
+      * ⚠️ VALIDATION IS THE SHAPE ONLY. An email that looks like one, and a URL that resolves to a
+      * host through `agentWebsiteHref` — the same function the pill uses to build its link, so a
+      * value that saves is a value the pill can render. Nothing here checks that either EXISTS;
+      * that is not something a form can know.
+      */}
+    {agentEdit && activeAgent && (() => {
+      const value = agentDraft.trim();
+      const valid = agentEdit === "email"
+        ? /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)
+        : !!agentWebsiteHref(value);
+      return (
+        <F12Popover
+          width={286}
+          title={agentEdit === "email" ? `Email for ${agentPrimary(activeAgent)}` : `Website for ${agentPrimary(activeAgent)}`}
+          style={agentEditStyle}
+          onClose={() => setAgentEdit(null)}
+        >
+          <input
+            type={agentEdit === "email" ? "email" : "url"}
+            className="qc-pickfield"
+            autoFocus
+            value={agentDraft}
+            placeholder={agentEdit === "email" ? "name@agency.com" : "agency.com"}
+            aria-label={agentEdit === "email" ? "Email address" : "Website"}
+            onChange={(e) => setAgentDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && valid) { e.preventDefault(); (e.currentTarget.parentElement?.querySelector(".qc-mpopact") as HTMLButtonElement | null)?.click(); } }}
+          />
+          <button
+            type="button"
+            className="qc-mpopact"
+            disabled={!valid}
+            onClick={async () => {
+              await updateAgent(activeAgent.id, agentEdit === "email" ? { email: value } : { website: value });
+              setAgentEdit(null);
+              showToast({ message: agentEdit === "email" ? `Email added to ${agentPrimary(activeAgent)}` : `Website added to ${agentPrimary(activeAgent)}` });
+            }}
+          >Save to the agent&rsquo;s record</button>
+        </F12Popover>
+      );
+    })()}
 
     {/**
       * §6 — THE DATE EDITOR THE TWO TRACKING CELLS OPEN.

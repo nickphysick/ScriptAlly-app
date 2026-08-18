@@ -205,9 +205,18 @@ describe("§6 · the agent header — now the mail header's AGENT row", () => {
        beside it, because beside it the longest agency decided where every address began. */
     expect(rule(".qc-msub"), "the sub-row that holds them is missing").not.toBe("");
     expect(rule(".qc-mchip-con"), "the contact chips have no rule").not.toBe("");
-    expect(declValue(rule(".qc-mchip-con.off"), "pointer-events"), "a chip with no target is still clickable").toBe("none");
-    expect(code, "the email pill stopped stating its absence")
-      .toContain("No email address on this agent's record");
+    /**
+     * ⚠️ INVERTED BY §7 — AN ABSENT VALUE IS AN ACTION NOW, so the pill with no target is precisely
+     * the one that must be clickable. `pointer-events: none` was the right treatment while there
+     * was nothing to click and is the wrong one the moment there is; the `.off` state goes with it.
+     *
+     * ⚠️ AND THE ABSENCE IS STILL STATED, which is what the old clause was for — as an invitation
+     * rather than as a fact with no way out of it.
+     */
+    expect(code, "the dead-pill treatment is back").not.toContain('qc-mchip-con${email ? "" : " off"}');
+    expect(code, "the email pill stopped offering the way out of its absence").toContain("Add an email");
+    expect(code, "the website pill stopped offering the way out of its absence").toContain("Add a website");
+    expect(code, "adding an email does not write to the agent").toContain('updateAgent(activeAgent.id, agentEdit === "email" ? { email: value } : { website: value })');
   });
 });
 
