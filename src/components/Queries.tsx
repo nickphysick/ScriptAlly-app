@@ -63,7 +63,7 @@ import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
-import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref } from "../lib/agentDisplay";
+import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
@@ -178,15 +178,10 @@ function formatWhatsAppDate(dateString: string): string {
   return `${day} ${month}, ${time}`;
 }
 
-/* Send-method label for the What-you-sent "Sent by {method}" line (ref shows lower-case forms). */
-const sentViaLabel = (method?: string): string => {
-  if (!method) return "";
-  const m = method.toLowerCase().trim();
-  if (m === "email") return "email";
-  if (m === "online form" || m === "online_form") return "online form";
-  if (m === "querymanager" || m === "query manager") return "QueryManager";
-  return method;
-};
+/* §3 — one vocabulary for how a query was sent: `sendMethodLabel` in lib/agentDisplay. The two
+   copies that lived here — this one lower-case for a retired sentence, and `getSentViaLabel` inside
+   the PDF export capitalised — had already diverged, so one query printed `email` on the page and
+   `Email` in its own PDF. */
 
 /* ── Command-bar button (v2, ref queries-hub-v2.html .c) — icon+label SIDE-BY-SIDE, flat (no fill),
    faint hover; greyed-not-hidden when disabled so the bar keeps its shape. `primary` = coffee icon
@@ -1648,7 +1643,7 @@ export const Queries: React.FC<{
     if (!activeQuery || m === activeQuery.sendMethod) return;
     const id = activeQuery.id, prev = activeQuery.sendMethod;
     void updateQuery(id, { sendMethod: m });
-    showToast({ message: `Sent by ${sentViaLabel(m)}`, undo: () => void updateQuery(id, prev ? { sendMethod: prev } : { sendMethod: deleteField() as unknown as string }) });
+    showToast({ message: `Sent by ${sendMethodLabel(m)}`, undo: () => void updateQuery(id, prev ? { sendMethod: prev } : { sendMethod: deleteField() as unknown as string }) });
   };
   // Phase 6 — What-you-sent material writes. The query's own materialsWanted is the record of what was
   // sent; when it's empty we DISPLAY the agent's expected set, and the first edit promotes that set onto
@@ -2294,15 +2289,6 @@ export const Queries: React.FC<{
       }
     };
 
-    const getSentViaLabel = (method?: string): string => {
-      if (!method) return "";
-      const m = method.toLowerCase().trim();
-      if (m === "email") return "Email";
-      if (m === "online form" || m === "online_form") return "Online form";
-      if (m === "querymanager" || m === "query manager") return "QueryManager";
-      return method;
-    };
-
     const getLastStatusChangeDate = (q: Query, activitiesList: any[]): string => {
       const dates: Date[] = [];
       if (q.dateSent) {
@@ -2375,7 +2361,7 @@ export const Queries: React.FC<{
       const statusLabel = getCSVStatusLabel(q.status);
       const dateSentClean = formatCSVDate(q.dateSent);
       const daysSinceSent = calculateDaysSince(q.dateSent);
-      const sentVia = getSentViaLabel(q.sendMethod || ag?.submissionMethod);
+      const sentVia = sendMethodLabel(q.sendMethod || ag?.submissionMethod);
 
       const matsRaw = Array.isArray((q as any).materials)
         ? (q as any).materials
@@ -2481,7 +2467,10 @@ export const Queries: React.FC<{
         nudgeDate: string | null;
       }[] = [];
 
-      const sendMethodLabel = activeQuery.sendMethod || "Email";
+      /* ⚠️ RENAMED OFF `sendMethodLabel` (§3) — that name is now the shared display helper, and a
+         local `const` of the same name inside this function would shadow the import for every line
+         below it, silently. This one is the RAW stored value, not the label. */
+      const rawSendMethod = activeQuery.sendMethod || "Email";
       const queryMaterialsList = (() => {
         const list = Array.isArray((activeQuery as any).materialsWanted)
           ? (activeQuery as any).materialsWanted
@@ -2494,7 +2483,7 @@ export const Queries: React.FC<{
         title: "Query sent",
         date: activeQuery.dateSent,
         formattedDate: new Date(activeQuery.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }),
-        detail: `via ${sendMethodLabel}`,
+        detail: `via ${rawSendMethod}`,
         materials: queryMaterialsList.length > 0 ? queryMaterialsList.map(formatQueryMaterial).join(", ") : null,
         expectedDate: null,
         nudgeDate: null
@@ -5314,9 +5303,13 @@ export const Queries: React.FC<{
                             CONTROL could live rather than places the FACT was stated. Same menu, same
                             handler, same `useFixedMenu`; only the trigger changed, and the trigger is
                             now the word itself. */}
-                        <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method"
+                        {/* ⚠️ §3 · THE MENU STATES WHAT IT IS. Four bare words with a tick beside
+                            one of them read as a list of things to do; `Sent via` says the list is
+                            an ANSWER to a question the card already asked, which is what every other
+                            popover on this page does with its own head. */}
+                        <F12Menu open={methodPickOpen} onClose={() => setMethodPickOpen(false)} style={methodPickMenuStyle} ariaLabel="Change send method" heading="Sent via"
                           items={[SubmissionMethod.EMAIL, SubmissionMethod.ONLINE_FORM, SubmissionMethod.QUERY_MANAGER, SubmissionMethod.POST].map((m) => ({
-                            label: sentViaLabel(m),
+                            label: sendMethodLabel(m),
                             icon: activeQuery?.sendMethod === m ? <span aria-hidden="true">✓</span> : undefined,
                             onClick: () => pickSendMethod(m),
                           }))}

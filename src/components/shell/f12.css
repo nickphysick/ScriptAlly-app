@@ -4229,6 +4229,9 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 
 /* §2 — the menu row's right-aligned note: what choosing it will do */
 .f12-menu-hint { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.06em; color: var(--qc-tx-off); }
+/* ⚠️ §3 · THE MENU'S OWN HEAD — the same mono eyebrow the attach and filter popovers use, so a
+   headed menu reads as one of the page's popovers rather than as a new kind of object. */
+.f12-menu-head { padding: 8px 9px 5px; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); font-weight: 500; }
 
 /* ══ §5 · THE AGENT HEADER RESETS ═════════════════════════════════════════════════════════════
  *

@@ -17,6 +17,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { buildTimelineRows, TimelineRows } from "./QueryTimeline";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { QueryStatus, type Query } from "../../types";
+/* §3 — the one send-method vocabulary, asserted against rather than spelled out here. */
+import { sendMethodLabel } from "../../lib/agentDisplay";
 
 const q = (over: Record<string, any> = {}): Query =>
   ({ id: "q1", userId: "u1", manuscriptId: "m1", agentId: "a1", packageId: "", sendMethod: "Email", status: QueryStatus.QUERIED, dateSent: "2026-05-01T00:00:00.000Z", ...over }) as unknown as Query;
@@ -40,7 +42,11 @@ describe("buildTimelineRows — the nudge node (P2)", () => {
       q(), null,
     );
     expect(answered.find((r) => r.kind === "nudge")!.title, "a nudge that was answered still claims no reply").toBe("Nudged");
-    expect(nrow!.sub).toBe("via Email");
+    /* ⚠️ `Email`, NOT `via Email` (§3, whose-window pack). The qualifier sits behind a `·` in row 1,
+       so "Nudged · via Email" said the same thing twice; the preposition was left over from the
+       retired "Sent by …" line, where the word was mid-sentence. Asserted against the shared
+       vocabulary rather than a literal, so it moves with the one function that spells it. */
+    expect(nrow!.sub).toBe(sendMethodLabel("Email"));
     expect(nrow!.status).toBe(QueryStatus.QUERIED); // the OUTGOING glyph, decorative
     expect(rows.indexOf(nrow!)).toBeGreaterThan(rows.findIndex((r) => r.status === QueryStatus.QUERIED && !r.kind));
   });

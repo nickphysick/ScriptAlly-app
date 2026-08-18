@@ -252,7 +252,13 @@ export const F12Menu: React.FC<{
   style?: React.CSSProperties;
   items: F12MenuItem[];
   ariaLabel?: string;
-}> = ({ open, onClose, style, items, ariaLabel }) => {
+  /**
+   * ⚠️ ADDITIVE, AND ABSENT MEANS THE BARE LIST — every existing caller renders byte-for-byte as
+   * before. A menu that answers a question the page has already asked wants to say so; a menu of
+   * actions does not, and forcing a head onto both would put a label over `Delete · Duplicate`.
+   */
+  heading?: string;
+}> = ({ open, onClose, style, items, ariaLabel, heading }) => {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -270,6 +276,7 @@ export const F12Menu: React.FC<{
   return createPortal(
     <div className="t-f12 qc-neutral">
       <div ref={ref} className="f12-menu" style={{ zIndex: 60, ...style }} role="menu" aria-label={ariaLabel}>
+        {heading && <div className="f12-menu-head">{heading}</div>}
         {items.map((it, i) =>
           it === "divider" ? (
             <div key={i} className="f12-menu-sep" aria-hidden="true" />

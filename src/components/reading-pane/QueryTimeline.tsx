@@ -17,6 +17,8 @@ import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
 import { queryAmbientStatus } from "../../lib/queryAmbient";
 import { elapsedPhrase, exactDate } from "../../lib/elapsed";
+/* §3 — the one send-method vocabulary; see the note on the helper. */
+import { sendMethodLabel } from "../../lib/agentDisplay";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
@@ -230,7 +232,11 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
     const baseTitle = TL_TITLES[status] || status;
     const title = status === QueryStatus.FULL_SENT && (query.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${query.revisionRound})` : baseTitle;
     let sub: string | undefined;
-    if (status === QueryStatus.QUERIED) sub = `via ${query.sendMethod || "Email"}`;
+    /* ⚠️ §3 · `Email`, NOT `via Email`. The qualifier already sits behind a `·` in row 1 — "Query
+       sent · via Email" says the same thing twice, and the preposition was left over from the
+       retired "Sent by …" line, where it was mid-sentence. `sendMethodLabel` capitalises for the
+       same reason: the word is a method's NAME here, not a word in a clause. */
+    if (status === QueryStatus.QUERIED) sub = sendMethodLabel(query.sendMethod) || "Email";
     else if (status === QueryStatus.PARTIAL_REQUESTED || status === QueryStatus.FULL_REQUESTED) sub = `${agent?.name?.split(" ")[0] || "The agent"} asked for ${status === QueryStatus.PARTIAL_REQUESTED ? "a partial" : "the full"}`;
     return {
       key: `s-${status}-${i}`,
@@ -260,7 +266,7 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
       status: QueryStatus.QUERIED,
       title: "Nudged",
       date: fmtShort(getTime(evt.createdAt)),
-      sub: `via ${query.sendMethod || "Email"}`,
+      sub: sendMethodLabel(query.sendMethod) || "Email",
       activityId: typeof evt.id === "string" ? evt.id : undefined,
       dateISO: isoDay(getTime(evt.createdAt)),
       note: typeof evt.note === "string" ? evt.note : "",

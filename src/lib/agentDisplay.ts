@@ -81,3 +81,31 @@ export function agentWebsiteHref(website?: string | null): string | null {
   if (scheme) return scheme === "http" || scheme === "https" ? raw : null;
   return `https://${raw}`;
 }
+
+/**
+ * ══ §3 (whose-window pack) · HOW A QUERY WAS SENT, IN ONE VOCABULARY ═══════════════════════════
+ *
+ * ⚠️ THERE WERE TWO COPIES OF THIS MAPPING AND THEY HAD ALREADY DIVERGED. `sentViaLabel` returned
+ * lower-case forms for a line that read "Sent by email" — the word mid-clause — while
+ * `getSentViaLabel`, hidden inside the PDF export, returned the capitalised ones. Both were
+ * defensible where they sat and neither knew about the other, so one query printed `email` on the
+ * page and `Email` in its own PDF.
+ *
+ * ⚠️ CAPITALISED, because the word is a method's NAME rather than a word in a sentence. It is the
+ * event's qualifier (`Query sent · Email`) and a row in a menu; `QueryManager` was already
+ * capitalised in both copies, which is the tell that the lower-casing was about the retired
+ * sentence rather than about the thing.
+ *
+ * ⚠️ IT SERVES THE AGENT'S `submissionMethod` TOO — the PDF already read
+ * `q.sendMethod || ag?.submissionMethod` through one function, so the two fields share a vocabulary
+ * whether or not anyone said so. That is why this lives beside the agent's own display helpers.
+ */
+export function sendMethodLabel(method?: string): string {
+  if (!method) return "";
+  const m = method.toLowerCase().trim();
+  if (m === "email") return "Email";
+  if (m === "online form" || m === "online_form") return "Online form";
+  if (m === "querymanager" || m === "query manager") return "QueryManager";
+  if (m === "post") return "Post";
+  return method;
+}
