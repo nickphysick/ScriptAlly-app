@@ -11,7 +11,10 @@
  */
 
 /* ── the header block: title → subtitle → tool row, full content width ──
-   ⚠️ ONE RULE, FOLDED (fix pack, 10 Aug). `/**
+   (The sentence that stood here was a fragment left by the same damage that broke `.tpl-head`'s
+   comment below — it trailed off mid-clause into the plate note that follows. Both are repaired;
+   see the retirement note further down for what the damage cost.)
+/**
  * ⚠️ THE RESTING PLATE IS SIZED FOR A MARK THIS PAGE DOES NOT RENDER — 128px against 45px of
  * content, and that is the ~100px empty band above the control bar.
  *
@@ -34,28 +37,32 @@
   --wsh-plate-h: 84px;
 }
 
-/* ⚠️ ONE RULE NOW (fix pack, 10 Aug): `.tpl-head` was declared TWICE in this file — here for
-   its width and again ~80 lines down for `flex: 0 0 auto` — both single-class, so any property
-   they came to share would have resolved on source order alone. They never overlapped, which is
-   exactly how such a pair survives until the day it does.
+/* ⚠️ `.tpl-head` IS RETIRED, AND FIXING ITS COMMENT IS WHAT REVEALED IT.
+   The rule's comment had lost its opening delimiter, so the parser read everything from the class
+   name down to the next brace as ONE selector, found an invalid character in it, and discarded the
+   declaration block. `vite build` reported that on every build, in a css-syntax-error warning that
+   never failed the gate and so was never read.
 
-   ⚠️ AND THIS COMMENT'S OPENER WAS MISSING, which is the repo's own malformed-comment trap caught
-   in the act. Without it the parser read everything from the class name down to the next brace as
-   ONE selector — a selector containing a backtick, therefore invalid, therefore the declaration
-   block below was dropped whole by the browser. It cost nothing only because no component renders
-   this class (see the report); the next declaration written near it would have vanished the same
-   way, silently. `vite build` had been saying so on every single build, in a css-syntax-error
-   warning nobody read.
+   Repairing it put the rule back, and the question that followed — is it still wanted — answered
+   itself: `TasksPageLayout` renders `tpl-body`, `tpl-cols`, `tpl-eyebrow`, `tpl-grow`, `tpl-hem`,
+   `tpl-side`, `tpl-tools`, `tpl-wpg` and `tpl-zone`, and NOT `tpl-head`. The owner is alive; this
+   one class is not. So the rule goes rather than coming back, and its two locks go with it.
 
-   ⚠️ NOTE FOR ANYONE EDITING THIS BLOCK: a comment may not contain the two characters that end
-   one. Writing the broken form out to illustrate it is how this comment got broken a second time
-   while being repaired. Describe it; do not quote it. */
-.tpl-head { width: 100%; flex: 0 0 auto; }
+   ⚠️ THE LOCKS ARE THE REAL LESSON. Two assertions read this file as TEXT and required
+   `flex: 0 0 auto` on a rule the browser was discarding — green throughout, over a declaration that
+   never once applied to anything. A stylesheet lock proves a rule was written, never that it
+   reached an element; where the claim is about layout, the instrument is a measurement.
+
+   ⚠️ AND `WorkspacePageGrid.tsx` STILL DESCRIBES IT — "TasksPageLayout, whose `.tpl-head` has
+   always sat …". A comment describing an element that is not rendered, left in place deliberately:
+   correcting it is the WorkspacePageGrid stream's call, not this pack's. */
 /* ⚠️ `.tpl-title` AND `.tpl-sub` ARE DELETED (amendment 7). The plate carries the title and the
    description now; two orphaned rules left behind are a specificity contest waiting to happen.
    ⚠️ THE PLATE DOES NOT CONDENSE ON THESE PAGES, and that is correct rather than broken —
-   `.tpl-head` never scrolls (`flex: 0 0 auto`) and `.tpl-zone` below it is the only scroller, so
-   the plate is never covering anything that has to get past it.
+   the header block never scrolls and `.tpl-zone` below it is the only scroller, so the plate is
+   never covering anything that has to get past it. (This clause used to credit `.tpl-head`'s
+   `flex: 0 0 auto` for that, which was never true: the rule was being discarded, and the class is
+   not rendered. The behaviour is `.tpl-cols`/`.tpl-body`'s.)
    ⚠️ `.tpl-eyebrow` GAINS A RULE FOR THE FIRST TIME — it had NONE. The class was rendered and never
    styled, so the To-do list's date line has been showing as plain body text all along. It rides the
    tool row now (plate = identity, tool row = tallies and context) in the same mono treatment the

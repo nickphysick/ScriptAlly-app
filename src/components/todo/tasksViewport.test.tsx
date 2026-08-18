@@ -89,12 +89,21 @@ describe("⚠️ THE PAGE NEVER SCROLLS — the frame is a window, the zones do 
     }
   });
 
-  it("the header block is fixed — it never scrolls away from the list it controls", () => {
-    /* ⚠️ ONE RULE NOW (fix pack, 10 Aug): `.tpl-head` was declared twice in this file — width here,
-       `flex: 0 0 auto` eighty lines down — a single-class pair that would have resolved on source
-       order the day they shared a property. Folded, so the anchor is the whole rule. */
-    expect(rule(css, ".tpl-head {")).toContain("flex: 0 0 auto");
-  });
+  /**
+   * ⚠️ THIS ASSERTION IS RETIRED, AND WHY IT WAS GREEN IS THE POINT. It required
+   * `flex: 0 0 auto` on `.tpl-head` by reading this stylesheet as TEXT. The rule's comment had lost
+   * its opening delimiter, so the browser discarded the whole declaration block — and the lock went
+   * on passing, because the text it was searching was still in the file. It asserted, for months,
+   * a property that never once applied to an element.
+   *
+   * ⚠️ AND THE ELEMENT DOES NOT EXIST EITHER: `TasksPageLayout` renders eight `tpl-` classes and
+   * `tpl-head` is not among them. So the lock was doubly vacuous — a declaration that never
+   * applied, to a class that is never rendered.
+   *
+   * What actually holds the header still is the `flex: 1; min-height: 0` chain on `.tpl-cols` and
+   * `.tpl-body`, which the viewport locks below already assert, and which the acceptance matrix
+   * measures on a rendered page rather than reading out of a file.
+   */
 
   it("⚠️ THE ZONE IS THE ONLY DECLARED SCROLLER on a Tasks page", () => {
     expect(rule(css, ".tpl-zone {")).toContain("overflow: auto");
@@ -537,10 +546,9 @@ describe("⚠️ WHAT ACTUALLY BOUNDS THE TASKS FRAME — and it is not in the c
       expect(rule(sheet, sel), sel).toContain("min-height: 0");
       expect(rule(sheet, sel), sel).toMatch(/flex:\s*1/);
     }
-    /* ⚠️ ONE RULE NOW (fix pack, 10 Aug): `.tpl-head` was declared twice in this file — width here,
-       `flex: 0 0 auto` eighty lines down — a single-class pair that would have resolved on source
-       order the day they shared a property. Folded, so the anchor is the whole rule. */
-    expect(rule(css, ".tpl-head {")).toContain("flex: 0 0 auto"); // the header never shrinks
+    /* ⚠️ THE `.tpl-head` CLAUSE IS GONE FROM HERE TOO — same reason as the retired assertion
+       above: a discarded rule on an unrendered class, asserted by reading text. The chain the loop
+       above checks is the real one. */
   });
 });
 
