@@ -83,9 +83,24 @@ const h = doc(db, "users", uid, "queries", "seed-query-11", "activity", "probe-h
 await attempt("heal step 1 — activity setDoc", "long-standing",
   () => setDoc(h, { type: s11.data().status, resultingStatus: s11.data().status, createdAt: new Date().toISOString(), note: "probe", queryId: "seed-query-11", agentName: "x", manuscriptTitle: "y" }, { merge: true }),
   () => deleteDoc(h));
+/* ⚠️ IT UNDOES ITSELF. `revisionRound` and `hasAgentResponded` are absent on the seed record, so
+   writing them leaves the account in a state it was not in — and a probe that alters the fixture
+   it measures makes the next run's baseline its own last run. Both are cleared afterwards. */
 await attempt("heal step 2 — recompute's ten keys", "Tier 3",
   () => updateDoc(q11, { status: s11.data().status, partialRequestedDate: deleteField(), partialSentDate: deleteField(),
     fullRequestedDate: deleteField(), fullSentDate: deleteField(), revisionRound: 1, hasAgentResponded: false,
-    responseReceivedAt: deleteField(), rejectedDate: deleteField(), lastStatusChange: deleteField() }));
+    responseReceivedAt: deleteField(), rejectedDate: deleteField(), lastStatusChange: deleteField() }),
+  () => updateDoc(q11, { revisionRound: deleteField(), hasAgentResponded: deleteField() }));
+/* ⚠️ THE ID THE APP ACTUALLY GENERATES, not a clean one. `healId` is built from the STATUS, and
+   "Revise & Resubmit" contains an ampersand — which `isValidId`'s ^[a-zA-Z0-9_-]+$ rejects. The
+   probe's own clean id passed, which is exactly why the first pass called this collateral. */
+const realHealId = `act-status-${s11.data().status.replace(/\s+/g, "-").toLowerCase()}-seed-query-11`;
+console.log(`  the app's real heal id: "${realHealId}"`);
+await attempt("heal step 1 — with the APP's id", "isValidId",
+  () => setDoc(doc(db, "users", uid, "queries", "seed-query-11", "activity", realHealId),
+    { type: s11.data().status, resultingStatus: s11.data().status, createdAt: new Date().toISOString(), note: "probe", queryId: "seed-query-11" }),
+  () => deleteDoc(doc(db, "users", uid, "queries", "seed-query-11", "activity", realHealId)));
+const after11 = await getDoc(q11);
+console.log(`  seed-query-11 restored to: ${Object.keys(after11.data()).sort().join(",")}`);
 
 process.exit(0);

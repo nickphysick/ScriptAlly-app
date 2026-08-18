@@ -1003,7 +1003,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           else if (rawDate instanceof Date) dateVal = rawDate.getTime();
         }
         const note = statusReconstructionNote(q.status);
-        const healId = `act-status-${q.status.replace(/\s+/g, "-").toLowerCase()}-${q.id}`;
+        /**
+         * ⚠️ THE ID IS SANITISED TO THE CHARSET THE RULES ACCEPT, AND IT WAS NOT.
+         *
+         * `isValidId` requires `^[a-zA-Z0-9_-]+$`. This id is built from the STATUS, and one status
+         * contains an ampersand — "Revise & Resubmit" produced
+         * `act-status-revise-&-resubmit-<qid>`, which the rule rejects. So the heal for EVERY R&R
+         * query was denied, permanently and silently: its per-query log was never seeded, so its
+         * derived state never computed, and the only trace was one console line.
+         *
+         * ⚠️ NO OTHER STATUS IS AFFECTED and no working id changes: every other status is letters
+         * and spaces, so the collapse below is a no-op for them. The R&R ids this replaces never
+         * existed to migrate, because none of those writes ever landed.
+         */
+        const healId = `act-status-${q.status.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}-${q.id}`;
 
         try {
           const manuscriptTitle = manuscripts.find(ms => ms.id === q.manuscriptId)?.title || "";
