@@ -224,7 +224,7 @@ export const seedAgents: Agent[] = [
     materialsWanted: ["Query Letter", "Synopsis"],
     dateAdded: "2026-04-13T11:00:00Z",
     lastCheckedDate: "2026-05-22T09:00:00Z",
-    notes: "Currently closed, but says they will reopen in early June. Check her website on June 1st.",
+    notes: "Currently closed, but says they will reopen in early June. Check their website on June 1st.",
   },
   {
     id: "agent-5",
@@ -256,7 +256,7 @@ export const seedQueries: Query[] = [
     packageId: "pkg-1",
     status: QueryStatus.FULL_SENT,
     dateSent: "2026-04-16T10:00:00Z",
-    personalisationNotes: "Mentioned I loved her client's atmospheric treatment in 'The Clockmaker's Ghost'.",
+    personalisationNotes: "Mentioned I loved their client's atmospheric treatment in 'The Clockmaker's Ghost'.",
     sendMethod: SubmissionMethod.EMAIL,
     partialRequestedDate: "2026-04-20T11:00:00Z",
     partialSentDate: "2026-04-22T09:30:00Z",
@@ -275,7 +275,7 @@ export const seedQueries: Query[] = [
     status: QueryStatus.QUERIED,
     // Sent 20 days ago (relative to June 1st) => May 12th
     dateSent: "2026-05-12T11:00:00Z",
-    personalisationNotes: "Complimented her monster MSWL tweet.",
+    personalisationNotes: "Complimented their monster MSWL tweet.",
     sendMethod: SubmissionMethod.ONLINE_FORM,
     // Mary Shelley has 4 weeks response time, so expected by June 9th.
     responseDeadline: "2026-06-09T11:00:00Z",
@@ -468,7 +468,7 @@ export const seedJournalEntries: JournalEntry[] = [
     id: "j-5",
     userId: SEED_USER_ID,
     queryId: "q-3",
-    entryText: "Doyle has requested a partial chapter set! But I need to double check version v2 pages to make sure the London map updates align correctly with his query request.",
+    entryText: "Doyle has requested a partial chapter set! But I need to double check version v2 pages to make sure the London map updates align correctly with their query request.",
     createdAt: "2026-05-28T10:30:00Z"
   }
 ];

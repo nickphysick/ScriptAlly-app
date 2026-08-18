@@ -399,3 +399,78 @@ export function validateMaterials(rows: MaterialRow[]): { msg: string } | null {
   }
   return null;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE TWO READINGS OF A SAMPLE — `or` vs `·` (missing-materials pack, Phase 1)
+   ══════════════════════════════════════════════════════════════════════════════
+
+   ⚠️ ONE SAMPLE, TWO MEANINGS, AND THE JOIN IS THE WHOLE DIFFERENCE. `materialRowsFromAgent`
+   already emits one `sample` row PER SELECTED UNIT (decision 12), so two units side by side is a
+   shape both surfaces can hold — but they mean opposite things:
+
+     · an AGENT REQUIREMENT of chapters and pages is a CHOICE the agency offers
+       → "3 chapters or 50 pages"
+     · a RECORD OF WHAT WENT with chapters and pages is ONE parcel described two ways
+       → "3 chapters · 50 pages"
+
+   Reading the second as the first would tell a writer their agent accepts either, when what
+   happened is that they sent one thing and measured it twice. `summaryFromRows` joins `·`
+   unconditionally, which is correct for what it does (a record) and wrong for a requirement —
+   so the join becomes a parameter rather than a second formatter that would drift.
+
+   ⚠️ AND IT IS ONE FORMATTER, NOT TWO. A `formatRequirement` beside a `formatRecord` is how one
+   fact gets two wordings; the codebase has paid for that shape before. */
+
+export type SampleJoin = "or" | "and";
+
+/** The separator each reading uses. `and` is the interpunct — one parcel, two measures. */
+const JOIN_SEP: Record<SampleJoin, string> = { or: " or ", and: " · " };
+
+/**
+ * One sample row as words: `3 chapters`, `50 pages`, `5,000 words`.
+ * An `on` row with no amount reads as its bare unit rather than inventing a number.
+ */
+export function sampleRowText(row: Extract<MaterialRow, { kind: "qty" }>): string {
+  const amt = String(row.amount ?? "").trim();
+  const unit = row.unit.toLowerCase();
+  if (!amt) return unit;
+  const n = parseAmount(amt);
+  return Number.isNaN(n) ? unit : `${formatAmount(n)} ${n === 1 ? unit.replace(/s$/, "") : unit}`;
+}
+
+/**
+ * Every selected sample row, in the reading the caller asks for.
+ * Returns `null` when nothing is selected — absence is stated by the caller, never as "0 pages".
+ */
+export function formatSampleSpecs(rows: readonly MaterialRow[], join: SampleJoin): string | null {
+  const parts = rows
+    .filter((r): r is Extract<MaterialRow, { kind: "qty" }> => r.kind === "qty" && r.on)
+    .map(sampleRowText);
+  return parts.length ? parts.join(JOIN_SEP[join]) : null;
+}
+
+/**
+ * The "Will record:" strip and the `Sent previously` tile read from HERE, so the two can never
+ * describe the same commit differently. Materials in row order, the sample folded to one clause.
+ *
+ * ⚠️ IT STATES THE OUTCOME, NEVER A COUNT OF FORMS. "Covering letter · synopsis · 3 chapters"
+ * is what will be recorded; "3 items" is a fact about the interface instead of about the work.
+ */
+export function willRecordText(rows: readonly MaterialRow[], join: SampleJoin = "and"): string | null {
+  const parts: string[] = [];
+  for (const r of rows) {
+    if (!r.on) continue;
+    if (r.kind === "qty") continue; // folded in once, below, so two units read as one clause
+    if (r.kind === "text") { if (r.text.trim()) parts.push(r.text.trim()); continue; }
+    if (r.key === "synopsis" && r.pages.trim()) { parts.push(`${r.name} · ${formatAmount(r.pages)} pages`); continue; }
+    parts.push(r.name);
+  }
+  const sample = formatSampleSpecs(rows, join);
+  if (sample) {
+    // The sample keeps its position among the rows rather than being appended last.
+    const at = rows.findIndex((r) => r.kind === "qty" && r.on);
+    const before = rows.slice(0, at).filter((r) => r.on && r.kind !== "qty").length;
+    parts.splice(before, 0, sample);
+  }
+  return parts.length ? parts.join(" · ") : null;
+}

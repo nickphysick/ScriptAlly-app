@@ -1,0 +1,139 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * SampleSpecPicker — its own vocabulary (`ssp-`), deliberately.
+ *
+ * ⚠️ IT DOES NOT REUSE `agl-` / `f12-` / `qc-`. Three surfaces already draw this control in three
+ * class systems; borrowing one of them would tie a shared component to one page's stylesheet and
+ * make the other two harder to adopt later, not easier. The VALUES are the pane's own
+ * (#e0d5c8 hairlines, sage #8a9e88 focus) so it reads as part of the card it sits in.
+ *
+ * ⚠️ ONE RULE PER SELECTOR — this file is read by a stylesheet lock, and a grouped rule makes
+ * first-match slicing ambiguous (the fault that caught workspacePageGrid.css twice).
+ */
+
+.ssp { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── the three units ─────────────────────────────────────────────────────────────────────── */
+.ssp-units { display: inline-flex; gap: 4px; }
+
+.ssp-units button {
+  box-sizing: border-box;
+  border: 1px solid #e0d5c8;
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 13px;
+  font: inherit;
+  font-size: 11.5px;
+  color: #6b5a4e;
+  cursor: pointer;
+}
+
+.ssp-units button:hover:not(:disabled) { background: #fdfbf7; }
+
+.ssp-units button.on {
+  border-color: #8a9e88;
+  background: #f6faf5;
+  color: #3f4f3e;
+  font-weight: 600;
+}
+
+.ssp-units button:focus-visible {
+  outline: none;
+  border-color: #8a9e88;
+  box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12);
+}
+
+.ssp-units button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── one amount row per selected unit ────────────────────────────────────────────────────── */
+.ssp-amt { display: flex; align-items: center; gap: 9px; }
+
+.ssp-lbl {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a7a6c;
+  min-width: 62px;
+}
+
+.ssp-step {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  background: #fdfbf7;
+  border: 1px solid #e0d5c8;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.ssp-step:focus-within {
+  border-color: #8a9e88;
+  box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.12);
+}
+
+.ssp-step button {
+  border: 0;
+  background: transparent;
+  width: 28px;
+  height: 30px;
+  font-size: 15px;
+  line-height: 1;
+  color: #6b5a4e;
+  cursor: pointer;
+}
+
+.ssp-step button:hover:not(:disabled) { background: #f2ede7; }
+
+.ssp-step button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.ssp-step input {
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  color: #2b2118;
+  width: 46px;
+  text-align: right;
+  padding: 0;
+}
+
+/* ⚠️ SUPPRESSED ON BOTH ENGINES. The field is `type="text"` so these should never fire, but the
+   rules stay: a later change to `type="number"` would otherwise put spinners on top of the suffix. */
+.ssp-step input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+.ssp-step input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+.ssp-step input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* The unit rides INSIDE the field — the count and its measure are one value, not two controls. */
+.ssp-suffix {
+  font-size: 11px;
+  color: #8a7a6c;
+  padding: 0 8px 0 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ssp-floor {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a89a8a;
+}
+
+/* ── the reading ─────────────────────────────────────────────────────────────────────────── */
+.ssp-sum { margin: 0; font-size: 12px; color: #6b5a4e; }
+
+/* Absence in the muted mono treatment — stated, never an empty slot and never a zero. */
+.ssp-none {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #a89a8a;
+}

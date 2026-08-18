@@ -14,7 +14,7 @@
  *
  * ⚠️ AND CREATE BOUNDS NEVER CLIP A STATED REQUIREMENT. If an agent asks for 500 pages and this
  * clamped at 400, pre-ticking her row would write 400 — quietly altering what she asked for, in
- * the one record that is supposed to say what you sent her. The effective maximum is therefore
+ * the one record that is supposed to say what you sent the agent. The effective maximum is therefore
  * `max(bound, statedRequirement)`: the bound governs stepping and typed entry in the ordinary
  * case, and yields to the agent's own figure whenever that is higher.
  */
@@ -97,7 +97,7 @@ export function canStep(raw: string, unit: SampleUnit, dir: 1 | -1, stated?: num
  * The phrase for one requirement row — "a query letter", "a synopsis", "50 pages", "3 chapters".
  *
  * ⚠️ READ OFF THE SEEDED ROW, never re-parsed from the agent record. `materialRowsForDraft` has
- * already turned her requirements into rows; asking her record a second time here would give two
+ * already turned the agent's requirements into rows; asking the writer to record a second time here would give two
  * answers to one question the moment either changed. Words carry thousands separators, because
  * "5000 words" is a number you have to stop and read.
  */

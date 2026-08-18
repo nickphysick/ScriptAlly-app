@@ -133,7 +133,7 @@ const DrawerLab: React.FC = () => {
   const mockQuery = {
     id: "lab-query", userId: "lab", manuscriptId: "lab-ms", agentId: "lab-agent", packageId: "",
     status: QueryStatus.PARTIAL_REQUESTED, dateSent: "2026-03-04T10:00:00.000Z",
-    personalisationNotes: "Mentioned her love of saltmarsh settings and her recent podcast interview.",
+    personalisationNotes: "Mentioned their love of saltmarsh settings and a recent podcast interview.",
     sendMethod: SubmissionMethod.EMAIL,
     materialsWanted: ["Query Letter", "Synopsis", "First 50 pages"],
     responseDeadline: "2026-08-01T10:00:00.000Z",
