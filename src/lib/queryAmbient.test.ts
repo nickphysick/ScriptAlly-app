@@ -464,17 +464,24 @@ describe("TWS P2 artefacts — five readout treatments + CSS-only sage pulse", (
   });
 });
 
-describe("queryAmbientStatus — responseDeadline override (P4; undated stage)", () => {
-  it("undated + FUTURE responseDeadline → expMs = the override, no send anchor (no bar)", () => {
+/**
+ * ⚠️ RENAMED WITH THE FIELD (§1, provenance pack). "The override" was `responseDeadline`, which
+ * `addQuery` also seeded from the AGENT's window — so a stored date there was never evidence the
+ * writer set one. The writer's date has its own field now, written only by their control, and these
+ * cases move onto it. What they assert is unchanged: a date the writer typed drives the readout
+ * even where there is no send anchor to measure from.
+ */
+describe("queryAmbientStatus — the writer's own expected date (P4; undated stage)", () => {
+  it("undated + a FUTURE date of the writer's → expMs = that date, no send anchor (no bar)", () => {
     const future = new Date(NOW + 5 * DAY).toISOString();
-    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, responseDeadline: future }), "agent", undefined, NOW);
+    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, writerExpectedDate: future }), "agent", undefined, NOW);
     expect(a.expMs).toBe(new Date(future).getTime());
     expect(a.sentMs).toBeNull();
     expect(a.overdue).toBe(false);
   });
   it("undated + PAST responseDeadline → overdue by the override", () => {
     const past = new Date(NOW - 3 * DAY).toISOString();
-    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, responseDeadline: past }), "agent", undefined, NOW);
+    const a = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, writerExpectedDate: past }), "agent", undefined, NOW);
     expect(a.overdue).toBe(true);
     expect(a.daysOverdue).toBe(3);
   });
@@ -494,15 +501,21 @@ describe("queryAmbientStatus — responseDeadline override (P4; undated stage)",
   it("the writer's own date beats the house assumption, and the agency's beats both", () => {
     const sent = new Date(NOW - 10 * DAY).toISOString();
     const mine = new Date(NOW).toISOString();
-    const withDate = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, responseDeadline: mine }), "agent", undefined, NOW);
+    const withDate = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, writerExpectedDate: mine }), "agent", undefined, NOW);
     expect(withDate.sentMs, "the send still anchors the bar").toBe(new Date(sent).getTime());
     expect(withDate.expMs, "the house assumption beat the writer's own date").toBe(new Date(mine).getTime());
     expect(withDate.windowSource).toBe("writer");
 
     /* the agency states 4 weeks — their fact wins, and the writer's date is not drawn */
-    const stated = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, responseDeadline: mine }), "agent", undefined, NOW, 4);
-    expect(stated.expMs).toBe(new Date(sent).getTime() + 28 * DAY);
-    expect(stated.windowSource).toBe("agent");
+    /* ⚠️ REVERSED BY §1: the writer's own date now OUTRANKS the agency's window. It is an explicit
+       override entered to replace it, and it can only have come from the writer's control. */
+    const stated = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, writerExpectedDate: mine }), "agent", undefined, NOW, 4);
+    expect(stated.expMs, "the agency's window beat the writer's explicit date").toBe(new Date(mine).getTime());
+    expect(stated.windowSource).toBe("writer");
+    /* with no date of the writer's, the agency's window is what is drawn */
+    const theirs = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent }), "agent", undefined, NOW, 4);
+    expect(theirs.expMs).toBe(new Date(sent).getTime() + 28 * DAY);
+    expect(theirs.windowSource).toBe("agent");
 
     /* nobody said anything — the house figure, and it belongs to no one */
     const house = queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent }), "agent", undefined, NOW);
@@ -518,8 +531,8 @@ describe("queryAmbientStatus — responseDeadline override (P4; undated stage)",
     for (const a of [
       queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent }), "agent", undefined, NOW),
       queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent }), "agent", undefined, NOW, 6),
-      queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, responseDeadline: new Date(NOW).toISOString() }), "agent", undefined, NOW),
-      queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, responseDeadline: new Date(NOW).toISOString() }), "agent", undefined, NOW),
+      queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: sent, writerExpectedDate: new Date(NOW).toISOString() }), "agent", undefined, NOW),
+      queryAmbientStatus(q({ status: QueryStatus.QUERIED, dateSent: undefined, writerExpectedDate: new Date(NOW).toISOString() }), "agent", undefined, NOW),
     ]) {
       expect(a.windowStated, `windowStated and windowSource disagree (${a.windowSource})`).toBe(a.windowSource !== null);
     }
@@ -563,10 +576,13 @@ describe("TWS P4 artefacts — no-date gate + set-date wiring", () => {
   it("Set a date writes responseDeadline on the query, in place", () => {
     expect(qsrc, "the offer still opens the Edit Query overlay").not.toContain("onSetExpectedDate={() => openEditQuery");
     expect(qsrc, "the offer is not wired to a resolved date").toContain("onSetExpectedDate={(iso) => {");
-    expect(qsrc, "the date is not written to the query").toContain("updateQuery(id, { responseDeadline: iso })");
+    /* ⚠️ `writerExpectedDate` SINCE §1 — and this is the clause that matters most, because the
+       whole of provenance rests on nothing else writing there. */
+    expect(qsrc, "the date is not written to the writer's own field").toContain("{ [WRITER_EXPECTED_FIELD]: iso }");
+    expect(qsrc, "the control writes the shared deadline field again").not.toContain("updateQuery(id, { responseDeadline: iso })");
     const at = qsrc.indexOf("onSetExpectedDate={(iso) => {");
     const handler = qsrc.slice(at, qsrc.indexOf("}}", qsrc.indexOf("showToast", at)));
-    expect(handler, "the handler is empty — this case is testing nothing").toContain("responseDeadline");
+    expect(handler, "the handler is empty — this case is testing nothing").toContain("WRITER_EXPECTED_FIELD");
     expect(handler, "the writer's estimate is being written to the agent record").not.toContain("updateAgent");
   });
 });
@@ -674,8 +690,10 @@ describe("trackingStatCells — the strip keeps its shape whatever the record ho
     expect(c.map((x) => x.absent)).toEqual([true, true]);
   });
 
-  it("an override deadline with no send date → the expected cell fills, the other states its gap", () => {
-    const c = cells({ status: QueryStatus.QUERIED, dateSent: undefined, responseDeadline: "2026-09-01T00:00:00.000Z" }, "agent");
+  /* ⚠️ THE WRITER'S OWN FIELD SINCE §1 — `responseDeadline` no longer speaks for anyone, so an
+     undated query carrying one now correctly fills neither cell. */
+  it("a date of the writer's with no send date → the expected cell fills, the other states its gap", () => {
+    const c = cells({ status: QueryStatus.QUERIED, dateSent: undefined, writerExpectedDate: "2026-09-01T00:00:00.000Z" }, "agent");
     expect(c).toHaveLength(2);
     expect(c[0].absent, "a send date appeared from nowhere").toBe(true);
     expect(c[1].absent, "the override did not fill the expected cell").toBe(false);

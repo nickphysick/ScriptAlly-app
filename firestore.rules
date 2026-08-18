@@ -325,6 +325,17 @@ service cloud.firestore {
         // else in that section — the nudge count, the dates, whether a nudge went unanswered, how
         // long since the window closed — is read off the activity log.
         && (data.get('closureOfferDismissed', null) == null || data.closureOfferDismissed is bool)
+        // ⚠️ THE WRITER'S OWN EXPECTED DATE, AND IT IS STORED BECAUSE PROVENANCE CANNOT BE DERIVED.
+        // The AGENCY's window is derived at read time from their current stated weeks, so it moves
+        // and disappears with them; a date the WRITER set is a fact about the writer that nothing
+        // else can produce. Two fields for two facts, rather than one date and a flag beside it —
+        // a flag can drift from the value it describes, and any write path that sets one without
+        // the other produces a date attributed to the wrong person with nothing failing.
+        //
+        // ⚠️ NOTHING BUT THE WRITER'S CONTROL MAY WRITE HERE. That is what makes provenance
+        // structural: a value in this field is the writer's because there is nowhere else it can
+        // have come from.
+        && (data.get('writerExpectedDate', null) == null || (data.writerExpectedDate is string && data.writerExpectedDate.size() <= 64))
         && (data.get('offerDate', null) == null || (data.offerDate is timestamp || data.offerDate is string))
         && (data.get('offerResponseDeadline', null) == null || (data.offerResponseDeadline is timestamp || data.offerResponseDeadline is string))
         && (data.get('offerNotes', null) == null || (data.offerNotes is string && data.offerNotes.size() <= 16384))
@@ -613,7 +624,7 @@ service cloud.firestore {
             'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText',
             'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'rejectedDate', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes',
             'materialsWanted', 'ifNoResponse', 'agentId', 'rejectionType', 'agentComments',
-            'fullVersionSent', 'revisionRound', 'hasAgentResponded', 'closureOfferDismissed'
+            'fullVersionSent', 'revisionRound', 'hasAgentResponded', 'closureOfferDismissed', 'writerExpectedDate'
           ])
         );
 

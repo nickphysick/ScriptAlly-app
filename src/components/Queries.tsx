@@ -64,6 +64,8 @@ import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
+/* §1 (provenance pack) — the writer's own expected date: its field name and its one accessor. */
+import { WRITER_EXPECTED_FIELD, writerExpectedIso } from "../lib/expectedDate";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
@@ -5247,11 +5249,18 @@ export const Queries: React.FC<{
                                  record is not touched, because what the writer stated is what THEY
                                  expect on this query rather than something the agency said. */
                               onSetExpectedDate={(iso) => {
-                                const id = activeQuery.id, prev = activeQuery.responseDeadline;
-                                void updateQuery(id, { responseDeadline: iso });
+                                /* ⚠️ §1 (provenance pack) · IT WRITES `writerExpectedDate`, AND THIS
+                                   IS THE ONLY THING THAT DOES. That is what makes provenance
+                                   structural rather than recorded: a value in that field is the
+                                   writer's because there is nowhere else it can have come from.
+                                   `responseDeadline` is no longer written from here — it was the
+                                   field a create-time seed also wrote, so a date in it could never
+                                   be evidence of who set it. */
+                                const id = activeQuery.id, prev = writerExpectedIso(activeQuery);
+                                void updateQuery(id, { [WRITER_EXPECTED_FIELD]: iso } as never);
                                 showToast({
                                   message: `Expecting a reply by ${new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`,
-                                  undo: () => void updateQuery(id, prev ? { responseDeadline: prev } : { responseDeadline: deleteField() as unknown as string }),
+                                  undo: () => void updateQuery(id, (prev ? { [WRITER_EXPECTED_FIELD]: prev } : { [WRITER_EXPECTED_FIELD]: deleteField() }) as never),
                                 });
                               }}
                               {...(() => {

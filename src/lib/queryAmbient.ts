@@ -12,6 +12,8 @@ import { Query, QueryStatus } from "../types";
 /* the CTA engine — the consequence line promises what the ROW will offer, so it must ask the same
    function the row asks rather than restating the map */
 import { elapsedPhrase } from "./elapsed";
+/* §1 (provenance pack) — the writer's own date, read through the one accessor that knows the field. */
+import { writerExpectedMs } from "./expectedDate";
 import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
@@ -182,6 +184,17 @@ export function queryAmbientStatus(
     if (!Number.isNaN(sentMs)) {
       const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
       /**
+       * ⚠️ THE WRITER'S DATE IS NOW ITS OWN STORED FIELD AND WINS OUTRIGHT (provenance pack §1).
+       * It used to be inferred from `responseDeadline`, which `addQuery` seeded from the AGENT's
+       * window — so a stored date was never evidence the writer typed one, and the test had to be
+       * "the agency states nothing now, so this cannot be theirs". `writerExpectedDate` is written
+       * only by the writer's control, so a value there IS the writer's, and an explicit override
+       * outranks the window it was entered to replace.
+       *
+       * ⚠️ AND THE AGENCY'S WINDOW IS DERIVED FROM THE WEEKS THEY STATE TODAY, so clearing them
+       * removes it from every query at once. Nothing is stored to go stale.
+       *
+       * The old note, kept because it records what was wrong:
        * ⚠️ THE WRITER'S OWN DATE IS HONOURED ON A DATED QUERY TOO, and it was not before. This
        * branch read the agent's weeks or the house default and never looked at `responseDeadline`
        * at all — the override was consulted only where there was no send date — so a writer who
@@ -202,15 +215,12 @@ export function queryAmbientStatus(
        * non-destructive on a clear — "Not set → no writes" — so those queries keep a deadline
        * derived from a window that no longer exists, and it would read here as the writer's.
        *
-       * The fix is a stored fact, not more arithmetic: one optional field on `Query` saying the
-       * expected date is the writer's. That is a schema change and a rules deploy, so it stops for
-       * Nick rather than being invented here. Recorded at the point of the assumption, because a
-       * report is read once and this line is read every time someone touches the attribution.
+       * That fix is this section: the field exists, and the reasoning above is history.
        */
-      const overrideMs = query.responseDeadline ? getTime(query.responseDeadline) : NaN;
+      const mine = writerExpectedMs(query);
       const agentStated = !!(windowWeeks && windowWeeks > 0);
-      const useOverride = !agentStated && !Number.isNaN(overrideMs);
-      const expMs = agentStated || !useOverride ? sentMs + mDays * DAY : overrideMs;
+      const useOverride = mine != null;
+      const expMs = useOverride ? mine : sentMs + mDays * DAY;
       const span = Math.max(1, expMs - sentMs);
       return {
         ...base, mode: "waiting", nDays, sentMs, expMs,
@@ -218,16 +228,17 @@ export function queryAmbientStatus(
         overdue: now > expMs,
         daysOverdue: Math.max(0, Math.floor((now - expMs) / DAY)),
         windowStated: agentStated || useOverride,
-        windowSource: agentStated ? "agent" : useOverride ? "writer" : null,
+        /* precedence: the writer's own date, then the agency's current window, then nobody's */
+        windowSource: useOverride ? "writer" : agentStated ? "agent" : null,
       };
     }
     // P4 — no stage send date to derive from: fall back to the stored responseDeadline OVERRIDE (a
     // legitimate user input — "Set an expected date"). Drives the readout's overdue/expected; without
     // a send anchor there is still no progress bar (sentMs null).
-    const overrideMs = query.responseDeadline ? getTime(query.responseDeadline) : NaN;
-    if (!Number.isNaN(overrideMs)) {
-      /* ⚠️ AN OVERRIDE IS A STATED WINDOW — the writer typed the date themselves through "Set an
-         expected date". It is not the house assumption, so it earns a bar. */
+    /* ⚠️ THE WRITER'S FIELD, NOT `responseDeadline` — on an undated query the stored deadline could
+       still be an import's, and this branch has always meant "the writer typed a date themselves". */
+    const overrideMs = writerExpectedMs(query);
+    if (overrideMs != null) {
       return { ...base, mode: "waiting", sentMs: null, expMs: overrideMs, overdue: now > overrideMs, daysOverdue: Math.max(0, Math.floor((now - overrideMs) / DAY)), windowStated: true, windowSource: "writer" };
     }
     // Undated import, no override — the pill reads "waiting" but there is no bar/date.

@@ -97,6 +97,8 @@ import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
+/* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
+import { planExpectedDateMigration, type MigrationQuery } from "./expectedDate";
 import { replyTask } from "./taskPrecedence";
 /* §3 — the suggestion's wording and its suppression both need these: `scheduledReminder` is the
    same predicate the tracker's ghost rung uses, and `elapsedPhrase` is the app's one scaled figure. */
@@ -850,6 +852,56 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        suggestion would reappear only on the next unrelated change, which is the shape of a bug
        nobody can reproduce. */
   }, [queries, manuscripts, agents, taskFlags, activities, currentUser, userTasks]);
+
+  /**
+   * ══ §1 (provenance pack) · THE ONE-TIME EXPECTED-DATE MIGRATION ═════════════════════════════
+   *
+   * ⚠️ IT MOVES A FACT OUT OF THE WRONG FIELD, ONCE. Every stored `responseDeadline` is either the
+   * AGENCY's window written down at create time — derivable now, so it goes — or something the
+   * agency's window cannot explain, which as far as anything can tell is the writer's date and is
+   * copied into the field that says so.
+   *
+   * ⚠️ THE PLAN IS LOGGED WHETHER OR NOT THE WRITES LAND, because until the rules carrying
+   * `writerExpectedDate` are deployed every adopt is silently denied — and a migration that cannot
+   * report what it intended is a migration nobody can check.
+   *
+   * ⚠️ SAFE TO RUN TWICE. A query that already carries a writer's date is only ever dropped, never
+   * re-adopted, so a second pass cannot overwrite the first.
+   *
+   * ⚠️ AND IT NEEDS BOTH STORES LOADED. Running with `agents` empty would derive no window for any
+   * query and adopt the entire database into the writer's field — the exact wrong attribution this
+   * section exists to avoid, applied to everything at once.
+   */
+  const migratedExpected = useRef(false);
+  useEffect(() => {
+    if (!currentUser || migratedExpected.current) return;
+    if (queries.length === 0 || agents.length === 0) return;
+    migratedExpected.current = true;
+
+    const plan = planExpectedDateMigration(
+      queries as unknown as MigrationQuery[],
+      (agentId) => agents.find((a) => a.id === agentId)?.responseTimeWeeks,
+    );
+    console.log(
+      `[ScriptAlly] expected-date migration — ${plan.drop.length} agency-derived date${plan.drop.length === 1 ? "" : "s"} dropped, `
+      + `${plan.adopt.length} adopted as the writer's, of which ${plan.unresolvable.length} `
+      + `unresolvable (agent states no window now, so the stored date is either the writer's or debris from a cleared one)`,
+    );
+
+    void (async () => {
+      for (const id of plan.drop) {
+        try {
+          await updateDoc(doc(db, "users", currentUser.id, "queries", id), { responseDeadline: deleteField() });
+        } catch (e) { handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${id}`); }
+      }
+      for (const { id, iso } of plan.adopt) {
+        try {
+          await updateDoc(doc(db, "users", currentUser.id, "queries", id), { writerExpectedDate: iso, responseDeadline: deleteField() });
+        } catch (e) { handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/queries/${id}`); }
+      }
+      console.log("[ScriptAlly] expected-date migration — writes attempted");
+    })();
+  }, [currentUser, queries, agents]);
 
   // Self-healing backfill routine to auto-create missing creation activities for existing agents and manuscripts.
   // This gracefully heals objects that were successfully added but whose activities were rejected by past Firestore rules.
@@ -1628,15 +1680,21 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   ): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Session required." };
 
+    /**
+     * ⚠️ §1 (provenance pack) · THE CREATE-TIME SEED IS GONE, and it was a derived-over-stored
+     * violation that caused a real bug. Writing the AGENT's window onto the query froze a fact that
+     * belongs to the agent record: clearing their stated weeks left every query carrying a date
+     * derived from a window that no longer existed, and nothing could tell that debris from a date
+     * the writer had set. The agency's window is derived at read time now, so it moves and vanishes
+     * with them, and `responseDeadline` is no longer written on this path at all.
+     *
+     * ⚠️ AND IT WAS A LATENT THROW (§3). `computeResponseDeadline(now, undefined)` does
+     * `setDate(NaN)` and then `toISOString()` on an invalid date, which raises a RangeError — so
+     * this line would have killed `addQuery` for any agent with no stated weeks. The guard §3 adds
+     * stays regardless; this path simply no longer reaches it.
+     */
     const agent = agents.find(a => a.id === q.agentId);
-    let dead: string | undefined = undefined;
-    if (agent) {
-      // Create-time deadline. Shares the ONE canonical formula with the Prompt-3 fan-out + the
-      // activityUtils fallback (computeResponseDeadline) so the date a query is born with and the
-      // date an agent edit recomputes it to can never drift. Anchor stays "now" by design (a fresh
-      // send): now ≈ dateSent at creation. The day-arithmetic now lives in a single place.
-      dead = computeResponseDeadline(new Date().toISOString(), agent.responseTimeWeeks);
-    }
+    const dead: string | undefined = undefined;
 
     const id = q.id || "q-" + Math.random().toString(36).substr(2, 9);
     const newQ: any = {
