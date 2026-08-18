@@ -61,7 +61,7 @@ import { RecordResponseFocusForm } from "./RecordResponseFocusForm";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitle";
 import { activityEventLabel } from "../lib/activityEvent";
-import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref } from "../lib/agentDisplay";
+import { agentLabel, agentAgencyLine, agentPrimary, agentWebsiteHref } from "../lib/agentDisplay";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
@@ -73,15 +73,15 @@ import { NudgeModal } from "./NudgeModal";
 import { queryTaskBadge } from "../lib/queryTaskBadge";
 /* §5 — the list's four groups and the position figure, both derived, both composing rules that
    already exist (`queryBucket` for membership, `taskPrecedence` for the clock). */
-import { GROUP_ORDER, GROUP_LABEL, listGroupFor, rowFigure, figureText, foldClosed, elapsedSenseFor } from "../lib/queryCentreGroups";
-import { ELAPSED_LABEL, exactDate, elapsedPhrase } from "../lib/elapsed";
+import { GROUP_ORDER, GROUP_LABEL, listGroupFor, foldClosed, lastSendMs } from "../lib/queryCentreGroups";
+import { exactDate, elapsedPhrase, agoLabel, daysBetween } from "../lib/elapsed";
 import { nextIndex, typeAheadIndex, nearestSurvivor, pageSizeFor, isListNavKey, isTypeAheadKey, TYPEAHEAD_MS } from "../lib/listKeyboard";
 /* ⚠️ §4 — NUDGE NO LONGER READS `replyTaskFor`, AND THE RULE ITSELF IS UNTOUCHED. It is the
    to-do list's rule — "should the app raise this?" — which needs a stated window, a send date and
    fourteen days of grace before it can be true. The button answers a different question ("may I
    chase?"), and gating one on the other is what made Nudge permanently grey. The list's OVERDUE
    group still composes it, through `queryCentreGroups`. */
-import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo, nudgedAgoLabel } from "../lib/nudgeState";
+import { nudgeStanding, nudgeReason, nudgeConfirm, nudgeTimes, nudgedAgo } from "../lib/nudgeState";
 import { NUDGE_NESTED_TYPE } from "../lib/logNudge";
 import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
@@ -3691,7 +3691,7 @@ export const Queries: React.FC<{
                     type="button"
                     className={`qc-btn qc-btn-shrink${nudgeAt === "available" ? "" : " qc-btn-off"}${nudgeAgoDays != null ? " qc-btn-quiet" : ""}`}
                     aria-disabled={nudgeAt !== "available"}
-                    title={nudgeAt === "available" ? (nudgeAgoDays != null ? `Nudged ${nudgedAgoLabel(nudgeAgoDays)} — nudge again` : "Send a nudge") : nudgeWhy}
+                    title={nudgeAt === "available" ? (nudgeAgoDays != null ? `Nudged ${agoLabel(nudgeAgoDays)} — nudge again` : "Send a nudge") : nudgeWhy}
                     onClick={() => {
                       if (nudgeAt !== "available") return;
                       /* §4c — inside the agency's own stated window, state the facts and ask. Past
@@ -3715,7 +3715,7 @@ export const Queries: React.FC<{
                         sending a second follow-up they have already sent, and it uses §4's one
                         duration formatter rather than a count of days. */}
                     <span>{nudgeAgoDays != null ? "Nudged" : "Nudge"}</span>
-                    {nudgeAgoDays != null && <span className="qc-btn-sub">· {nudgedAgoLabel(nudgeAgoDays)}</span>}
+                    {nudgeAgoDays != null && <span className="qc-btn-sub">· {agoLabel(nudgeAgoDays)}</span>}
                   </button>
                   </span>
                   {/* ⚠️ THE GAP CARRIES THE DIVISION, NOT A RULE (§3c). Two groups: what moves the
@@ -3943,21 +3943,25 @@ export const Queries: React.FC<{
                   </div>
                   {!shut && items.map(({ q, agent, ms }) => {
                 const isSelected = selectedQueryId === q.id;
-                /* ⚠️ THE RIGHT-HAND FIGURE IS A POSITION, NOT A DATE (§5) — days left while the
-                   agent's window is open, days late once it has passed, and the date itself for the
-                   two groups where neither is meaningful. The date fallback is the ORIGINAL
-                   behaviour and is what an unplaceable row keeps. */
-                const figure = rowFigure(q as never, agent, nowMs);
-                const figureLabel = figureText(figure) ?? formatListRowDate(q.dateSent) ?? "—";
+                /**
+                 * ⚠️ §4b · THE FIGURE IS A RELATIVE DATE, AND "ago" IS WHAT RETIRES THE LABEL. It
+                 * was a POSITION — days left against the agent's window, days late past it — which
+                 * needed a caption above it ("with agent for") to say what the number measured, and
+                 * that two-line block is what squeezed the status mark to 17px. "5 weeks ago" needs
+                 * no caption: the word is the unit's own qualifier.
+                 *
+                 * ⚠️ IT MEASURES FROM THE LAST OUTBOUND SEND (`lastSendMs` — the newest of
+                 * `dateSent` / `partialSentDate` / `fullSentDate`), never from the query's creation.
+                 * A query whose partial went last month has been with the agent a month.
+                 *
+                 * ⚠️ ONE FORMATTER, "ago" APPENDED AT THE PRESENTATION LAYER — `agoLabel`, the same
+                 * function the Nudge control uses for the same kind of sentence.
+                 */
+                const sendMs = lastSendMs(q as never);
+                const figureLabel = sendMs != null ? agoLabel(daysBetween(sendMs, nowMs)) : (formatListRowDate(q.dateSent) ?? "—");
                 const queriedDate = figureLabel;
-                /* ⚠️ §4a · THE LABEL SITS ABOVE THE FIGURE, and it is the group's sense rather than
-                   the status's — so the words and the row's position cannot disagree. "With agent
-                   for" is TRUE only while the query is with an agent; on a closed row it would be a
-                   false sentence about the writer's own submission, which is worse than a vague
-                   one. Absent on a date fallback, where there is no duration to qualify. */
-                const senseLabel = figure.kind === "date" ? null : ELAPSED_LABEL[elapsedSenseFor(listGroupFor(q as never, agent, nowMs))];
-                /* approximate display, precise truth — the exact date rides in the title */
-                const exact = q.dateSent ? exactDate(new Date(q.dateSent).getTime()) : "";
+                /* approximate display, precise truth — the exact date of THAT send rides in the title */
+                const exact = sendMs != null ? exactDate(sendMs) : "";
                 return (
                   <button
                     key={q.id}
@@ -4000,31 +4004,37 @@ export const Queries: React.FC<{
                       }
                     }}
                   >
-                    <span className="f12-av f12-av--sm" aria-hidden="true">{agentInitials(agent)}</span>
-                    <span className="f12-mid">
-                      <span className="f12-nm">{agentPrimary(agent)}</span>
-                      <span className="f12-ag">{agentAgencyLine(agent)}</span>
-                    </span>
-                    <span className="f12-end">
+                    {/* ⚠️ §4a · THE STATUS MARK LEADS, AND THE INITIALS GO. The mark was squeezed to
+                        15px in the right-hand stack because the two-line elapsed block was taking
+                        the width; at full size, where the eye starts, it is the first thing the row
+                        says. The monogram carried no information the two lines beside it did not.
+                        ⚠️ THE LOCKED COMPONENT, IMPORTED — `overrideSize` is the only thing this row
+                        says about it: no ring of its own, no recreation. */}
+                    {/* ⚠️ NOT `aria-hidden` — the mark is the row's STATUS, and hiding the wrapper
+                        would have taken it out of the option's accessible name along with it. The
+                        locked component carries its own `role="img"` and label; only the transient
+                        undo pulse is hidden, because it names no state. */}
+                    <span className="f12-lead">
                       {undoingQueryIds.has(q.id) ? (
-                        /* ⚠️ NO BURGUNDY IN THE LIST (§4) — and this is the only place it was left.
-                           These three dots mark a row whose undo is in flight; burgundy means
-                           OUTGOING on the StatusDot in the same row, so a transient indicator was
-                           borrowing a colour that means something else two columns over. Muted ink
-                           says "working" without claiming a state. */
-                        <span className="animate-pulse" style={{ display: "inline-flex", gap: 3 }} aria-hidden="true">
+                        /* ⚠️ NO BURGUNDY IN THE LIST — these three dots mark a row whose undo is in
+                           flight, and burgundy means OUTGOING on the mark they replace. */
+                        <span className="animate-pulse" aria-hidden="true" style={{ display: "inline-flex", gap: 3 }}>
                           <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
                           <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
                           <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--muted)" }} />
                         </span>
-                      ) : (
-                        <StatusDot status={q.status} overrideSize={15} />
-                      )}
-                      <span className={`f12-d2${figure.kind === "late" ? " f12-d2-late" : ""}`} title={exact ? `Sent ${exact}` : undefined}>
-                        {senseLabel && <i className="f12-d2lab">{senseLabel}</i>}
-                        {queriedDate}
-                      </span>
+                      ) : <StatusDot status={q.status} overrideSize={30} />}
                     </span>
+                    <span className="f12-mid">
+                      <span className="f12-nm">{agentPrimary(agent)}</span>
+                      <span className="f12-ag">{agentAgencyLine(agent)}</span>
+                    </span>
+                    {/* ⚠️ THE FIGURE IS ALONE ON THE RIGHT, in one ink. It used to tint burgundy when
+                        the query was past its window — a lateness the number no longer expresses,
+                        now that it is a relative date rather than a position against a deadline.
+                        The group heading above it says "No reply yet"; the row does not restate it
+                        in colour. */}
+                    <span className="f12-d2" title={exact ? `Sent ${exact}` : undefined}>{queriedDate}</span>
                   </button>
                 );
                   })}

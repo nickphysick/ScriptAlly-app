@@ -524,16 +524,20 @@ describe("fix pack 7 §3 · the agent header stays white", () => {
 describe("fix pack 7 §4 · the discs", () => {
   /* ⚠️ A PINK DISC ON A PINK GROUND IS NOT A DISC. The selected row's monogram needs a ground it can
      sit ON — the same reasoning the ref gives for the header plate's avatar. */
-  it("the selected disc inverts, and the unselected ones are the pink token", () => {
-    const on = rule(".f12-row.f12-sel .f12-av");
-    expect(on, "the selected disc has no treatment of its own").not.toBe("");
-    expect(declValue(on, "background"), "the selected disc did not invert").toBe("var(--white)");
-    expect(declValue(on, "color"), "the selected disc's initials are not near-black").toBe("var(--ink)");
-    /* the base disc is the soft pink token, and the list's `--sm` modifier no longer overrides it */
-    expect(declValue(rule(".f12-row .f12-av"), "background"), "the base disc left the pink token").toBe("var(--pink-av)");
-    expect(declValue(rule(".f12-row .f12-av--sm"), "background"), "the warm-neutral override came back").toBe("");
-    /* ⚠️ AND THE TOKEN IT READ IS GONE WITH ITS ONLY READER — a token left defined and unread is an
-       invitation for the override to return without its argument. */
-    expect(css, "--mono-tonal came back").not.toContain("--mono-tonal:");
+  /**
+   * ⚠️ SUPERSEDED BY §4a — THE ROW HAS NO DISC AT ALL. The monogram was replaced by the status mark
+   * at the row's left, so the initials, their pink token and the selected inversion all went with
+   * it. The case is turned round rather than deleted: it now asserts the absence, so the disc
+   * cannot quietly return alongside the mark and give the row two round objects.
+   *
+   * ⚠️ AND `.f12-av` ITSELF IS UNTOUCHED — it is a different disc elsewhere on the page. What is
+   * gone is every rule that scoped it to a list row.
+   */
+  it("the row's disc is retired with the initials it carried", () => {
+    for (const sel of [".f12-row .f12-av", ".f12-row .f12-av--sm", ".f12-row.f12-sel .f12-av"]) {
+      expect(rule(sel), `${sel} survives with nothing wearing it`).toBe("");
+    }
+    expect(code, "the row still renders a monogram").not.toMatch(/["\s`]f12-av["\s`]/);
+    expect(code, "the row still computes initials").not.toContain("agentInitials(agent)");
   });
 });

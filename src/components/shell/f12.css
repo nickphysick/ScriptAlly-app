@@ -1989,7 +1989,6 @@
    already says in words and in a mark. Deleted rather than zeroed — a rule that paints nothing is
    the next thing someone puts a value back into, and the tint has now been through three of them
    (a warm pink, then n2, then this). */
-.f12-d2-late { color: var(--qc-acc-late); font-weight: 500; }
 
 /* ⚠️ THE MANUSCRIPT ROW MOVED UP AND CHANGED WEIGHT (§1). It was a 13.5px burgundy link inside a
    card; it is the pairing card's right-hand SUBJECT now, in the same 26px Playfair as the agent
@@ -2378,12 +2377,16 @@
  * wearing a different hat. `--f12-datew` is the one number; the em dash and the longest date share
  * it.
  */
-.t-f12 { --f12-datew: 56px; }
+/* ⚠️ WIDER SINCE §4b — the figure reads "2½ years ago", not "30 Jun". Still ONE number rather than
+   an `auto` track, because an auto column sizes to its own row's content and every name in the list
+   would then truncate at a different point. Browser-checked at the longest phrase the formatter can
+   produce. */
+.t-f12 { --f12-datew: 78px; }
 
 .f12-row {
   position: relative;
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) var(--f12-datew);
+  grid-template-columns: 30px minmax(0, 1fr) var(--f12-datew);
   align-items: center; gap: 11px;
   width: 100%; height: 56px; padding: 0 14px;
   cursor: pointer; transition: background 0.1s;
@@ -2499,7 +2502,6 @@
  * on pink muddies rather than contrasts. White with near-black initials, and the same 1px contact
  * shadow every other small raised thing on this page uses.
  */
-.f12-row.f12-sel .f12-av { background: var(--white); color: var(--ink); box-shadow: var(--sh-btn); }
 /* ⚠️ BURGUNDY, NOT INK (fix pack §2). On a white lifted row an ink spine reads as a third
    structural line beside the row's own hairline and the column's seam; burgundy is this page's mark
    for "this one", and it is the only place colour is spent on a row. */
@@ -2522,7 +2524,6 @@
    fill was a near-neutral step and something had to say which row was live; the fill says it now,
    and burgundy means OUTGOING on the StatusDots two columns to the right of it. No burgundy
    anywhere in this list — the rule is the section, and a zeroed rule would read as still true. */
-.f12-row .f12-av { flex: none; width: 30px; height: 30px; border-radius: 50%; background: var(--pink-av); color: var(--ink); display: flex; align-items: center; justify-content: center; font-family: var(--f12-mono); font-size: 9.5px; font-weight: 600; }
 /**
  * ⚠️ THE BEIGE AVATARS, AND THEIR CAUSE (§4). Nothing was resolving a token differently: `.f12-av`
  * reads `--pink-av` and always has. This `--sm` modifier — the query list's instance only, added
@@ -2537,14 +2538,27 @@
  * argument. The size modifier survives — 32px against the shared 30 — because that part was never
  * about colour.
  */
-.f12-row .f12-av--sm { width: 32px; height: 32px; color: var(--ink); border: none; font-size: 10.5px; }
 .f12-row .f12-mid { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .f12-row .f12-nm { font-weight: 500; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
 .f12-row .f12-ag { font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.09em; color: var(--faint); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* ⚠️ THE DATE FILLS THE TRACK AND ALIGNS RIGHT INSIDE IT, rather than hugging it. Right-aligned by
    `align-items` alone only its RIGHT edge is constant; a lock reading `left` — and an eye scanning
    down the column — sees the left edge. Filling the track makes both true. */
-.f12-row .f12-end { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; min-width: 0; }
+/**
+ * ⚠️ §4a · THE LEAD SLOT, WHERE THE MONOGRAM WAS. It holds the locked `StatusDot` at 30px — the
+ * scale of the row's other furniture rather than the 15px it was squeezed to on the right, where
+ * the two-line elapsed block was taking the width.
+ *
+ * ⚠️ IT PAINTS NOTHING. No plate, no ring, no fill: the mark brings its own, and a ground behind it
+ * would be the monogram returning under another name.
+ */
+.f12-lead { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; flex: none; }
+/* ⚠️ THE ROW'S MONOGRAM RULES ARE DELETED, not left inert. Every one was scoped `.f12-row .f12-av`
+   — base disc, the small modifier, the selected inversion and the closed-agency variants — so none
+   can match anything else, and a rule that cannot match is the next reader's false lead. `.f12-av`
+   itself survives elsewhere on the page and is untouched. */
+/* ⚠️ `.f12-end` IS RETIRED WITH THE STACK IT ARRANGED — the right column is one figure now, so a
+   flex column with a gap has nothing to arrange. Its rule is gone rather than left inert. */
 .f12-row .f12-d2 { width: 100%; text-align: right; font-family: var(--f12-mono); font-size: 9.5px; color: var(--faint); font-feature-settings: "tnum" 1; white-space: nowrap; }
 .f12-lfoot { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid var(--hairline); font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.09em; color: var(--faint); }
 .f12-lfoot b { color: var(--muted); font-weight: 600; }
@@ -2615,8 +2629,9 @@
 /* ⚠️ §4a · THE LABEL ABOVE THE FIGURE, which is what lets it be a sentence rather than a caption:
    the eye reads "with agent for" and then the number it qualifies. Tabular numerals so a column of
    durations lines up. */
-.f12-d2lab { display: block; font-style: normal; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-bottom: 3px; font-weight: 400; }
-.f12-d2 { font-variant-numeric: tabular-nums; }
+/* ⚠️ THE FIGURE, ALONE AND IN ONE INK (§4b). Mono, because it is a measurement; `--ink-2`, because
+   the row states it as a fact rather than as a warning — the group heading carries the alarm. */
+.f12-d2 { font-family: var(--f12-mono); font-size: 9.5px; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tl-spent { background: repeating-linear-gradient(-45deg, var(--n4) 0 4px, var(--n2) 4px 9px); }
 .qc-sentms { display: flex; align-items: baseline; gap: 11px; min-width: 0; margin-bottom: 8px; }
 /* ⚠️ THE ROWS TAKE THE FREE WIDTH AND THE STATUS TAKES WHAT IT NEEDS — `minmax(0, 1fr) auto`. The
@@ -2979,12 +2994,10 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .f12-qdots { display: flex; align-items: center; gap: 4px; }
 .f12-qdots .f12-qmore { font-family: var(--f12-mono); font-size: 8.5px; color: var(--faint); margin-left: 1px; }
 .f12-nq { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--qc-tx-nq); white-space: nowrap; }
-.f12-row.f12-shut .f12-av { background: var(--qc-surf-shut-av); color: var(--qc-tx-shut); }
 .f12-row.f12-shut .f12-nm { color: var(--qc-tx-shut); font-weight: 450; }
 .f12-row.f12-shut .f12-ag { color: var(--qc-tx-shut-2); }
 .f12-row.f12-shut .f12-qdots { opacity: 0.45; }
 .f12-row.f12-shut .f12-nq { color: var(--qc-tx-shut-3); }
-.f12-row.f12-shut.f12-sel .f12-av { background: var(--pink-av); color: var(--ink); }
 .f12-row.f12-shut.f12-sel .f12-nm { color: var(--ink); font-weight: 500; }
 .f12-row.f12-shut.f12-sel .f12-ag { color: var(--faint); }
 .f12-row.f12-shut.f12-sel .f12-qdots { opacity: 1; }

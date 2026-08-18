@@ -195,3 +195,71 @@ describe("§2 · the closing verbs are never faded", () => {
     expect(queries, "the surviving caller is not the nudged state").toContain('nudgeAgoDays != null ? " qc-btn-quiet"');
   });
 });
+
+/**
+ * ⚠️ §4 · THE ROW'S SHAPE — the status mark leads at full size, the initials are gone, and the
+ * elapsed figure is a relative date. What is asserted here is the DERIVATION and the wiring; the
+ * pixels (30px mark, no wrap, the ring against the pink) are `qcRow.measure.ts`, because a source
+ * lock cannot see the size the mark actually renders at.
+ */
+describe("§4 · the list row", () => {
+  const row = (() => {
+    const at = queries.indexOf('className={`f12-row${isSelected');
+    return at < 0 ? "" : queries.slice(queries.lastIndexOf("const isSelected", at), queries.indexOf('className="f12-lfoot"', at));
+  })();
+
+  it("the row is there to test", () => {
+    expect(row, "the row's markup is missing — every case below would pass vacuously").not.toBe("");
+  });
+
+  it("the mark leads, at full size, and it is the imported component", () => {
+    expect(row, "the lead slot is missing").toContain('className="f12-lead"');
+    expect(row, "the mark is not the locked component").toContain("<StatusDot status={q.status} overrideSize={30} />");
+    /* ⚠️ THE LEAD COMES BEFORE THE NAME IN SOURCE ORDER — a grid could place it anywhere, so this
+       is the structural half and the measure reads the rendered x. */
+    expect(row.indexOf('className="f12-lead"'), "the mark is not the row's first element")
+      .toBeLessThan(row.indexOf('className="f12-mid"'));
+  });
+
+  it("no monogram survives, and nothing computes initials for it", () => {
+    expect(row, "the row still renders a monogram").not.toMatch(/["\s`]f12-av["\s`]/);
+    expect(queries, "the page still imports the initials helper for the row").not.toContain("agentInitials");
+  });
+
+  /**
+   * ⚠️ §4b · THE FIGURE MEASURES FROM THE LAST OUTBOUND SEND. `lastSendMs` takes the newest of
+   * `dateSent` / `partialSentDate` / `fullSentDate`; `createdDate` is read nowhere.
+   */
+  it("the figure is a relative date from the last send, through the shared formatter", () => {
+    expect(row, "the figure is not anchored to the last send").toContain("lastSendMs(q as never)");
+    expect(row, "the figure does not use the shared ago-label").toContain("agoLabel(daysBetween(sendMs, nowMs))");
+    expect(row, "the exact date left the title").toContain("`Sent ${exact}`");
+    /* the caption, and the position wording it qualified, are both gone from the row */
+    expect(row, "the elapsed caption is still rendered").not.toContain("f12-d2lab");
+    expect(row, "the row still reads the sense label").not.toContain("ELAPSED_LABEL");
+  });
+
+  /* ⚠️ AND `agoLabel` IS ONE FUNCTION, in the formatter's own module — the Nudge control says the
+     same kind of thing, and two copies of "append ago, except at zero" is how one surface comes to
+     read "today" while the other reads "0 days ago". */
+  it("the ago-label has one definition and both surfaces read it", () => {
+    const elapsed = read("./elapsed.ts");
+    expect(elapsed, "the shared ago-label is missing").toContain("export const agoLabel");
+    const nudge = read("./nudgeState.ts");
+    expect(nudge, "nudgeState keeps a second copy").not.toMatch(/nudgedAgoLabel\s*=\s*\(/);
+    expect(nudge, "nudgeState does not share the one label").toContain('export { agoLabel } from "./elapsed"');
+  });
+
+  /**
+   * ⚠️ "with agent for" LEAVES THE ROW — and this asserts it left the PAGE, because the phrase was
+   * `ELAPSED_LABEL["with-agent"]` and the row was its only reader. The table survives in
+   * `elapsed.ts` with its own locks; nothing renders it.
+   */
+  it("no surface states 'with agent for' any more", () => {
+    for (const f of ["../components/Queries.tsx", "../components/reading-pane/QueryTimeline.tsx", "./queryAmbient.ts"]) {
+      const src = read(f).replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+      expect(src, `${f} still renders the with-agent caption`).not.toContain("ELAPSED_LABEL");
+      expect(src, `${f} still states "with agent for"`).not.toContain("with agent for");
+    }
+  });
+});

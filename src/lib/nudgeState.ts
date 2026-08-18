@@ -23,7 +23,7 @@
 import { QueryStatus } from "../types";
 import { getPrimaryAction } from "./queryPrimaryAction";
 import { statusDirection } from "../components/StatusDot";
-import { elapsedPhrase, daysBetween } from "./elapsed";
+import { elapsedPhrase, daysBetween, agoLabel } from "./elapsed";
 
 const DAY = 86400000;
 
@@ -180,11 +180,11 @@ export function nudgedAgo(times: number[], roundStartMs: number | null, now: num
 /**
  * §4d — how the control reports that it has been used.
  *
- * ⚠️ ZERO DAYS IS "TODAY", NOT "0 days ago". `elapsedPhrase` is a DURATION formatter and "0 days" is
- * the correct duration; as a sentence about when something happened it is the wrong words. Measured
- * on the deployed build immediately after a nudge: "Nudged · 0 days ago".
+ * ⚠️ IT IS `agoLabel`, MOVED TO `elapsed.ts` AND SHARED. The list row says the same kind of thing —
+ * "5 weeks ago" — and two copies of "append ago, except at zero" is exactly how one surface comes
+ * to read "today" while the other reads "0 days ago".
  */
-export const nudgedAgoLabel = (days: number): string => (days === 0 ? "today" : `${elapsedPhrase(days)} ago`);
+export { agoLabel } from "./elapsed";
 
 /**
  * §5a — what a nudge event says.

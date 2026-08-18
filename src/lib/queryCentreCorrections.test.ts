@@ -99,8 +99,11 @@ describe("§2 · rows on one grid", () => {
     expect(r, "the row rule is missing").not.toBe("");
     expect(r, "the row went back to flex — the date column would size to its content")
       .toContain("display: grid");
-    expect(r).toContain("grid-template-columns: 32px minmax(0, 1fr) var(--f12-datew)");
-    expect(css, "the date track's width is not declared").toContain("--f12-datew: 56px");
+    expect(r).toContain("grid-template-columns: 30px minmax(0, 1fr) var(--f12-datew)");
+    /* ⚠️ 78px SINCE §4b — the figure reads "2½ years ago", not "30 Jun". What this clause is
+       actually for is that the track is a NUMBER rather than `auto`: an auto column sizes to its
+       own row's content, so every name in the list would truncate at a different point. */
+    expect(css, "the date track's width is not declared").toContain("--f12-datew: 78px");
   });
 
   /* ⚠️ AN `auto` TRACK COLLAPSES ON AN EM DASH, which puts a dateless row's column somewhere else

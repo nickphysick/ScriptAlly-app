@@ -64,6 +64,18 @@ export const exactDate = (ms: number): string => {
 };
 
 /**
+ * A duration said as a RELATIVE DATE — "5 weeks ago", "2½ years ago".
+ *
+ * ⚠️ THE FORMATTER IS NOT FORKED; "ago" is appended at the presentation layer, which is what this
+ * is. The phrase itself still scales its unit exactly as everywhere else.
+ *
+ * ⚠️ AND ZERO DAYS IS "TODAY", NOT "0 days ago". "0 days" is the correct DURATION and the wrong
+ * sentence about when something happened — measured on the deployed build the day this was written,
+ * on a nudge sent moments earlier.
+ */
+export const agoLabel = (days: number): string => (days === 0 ? "today" : `${elapsedPhrase(days)} ago`);
+
+/**
  * How a list row describes where a query stands.
  *
  * ⚠️ "WITH AGENT FOR …" ONLY HOLDS WHILE IT IS ACTUALLY WITH AN AGENT. A rejected query is not

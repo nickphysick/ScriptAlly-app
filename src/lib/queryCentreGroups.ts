@@ -151,3 +151,25 @@ export function elapsedSenseFor(group: ListGroup): ElapsedSense {
   if (group === "move") return "your-move";
   return "with-agent";
 }
+
+/**
+ * WHEN THE WRITER LAST SENT SOMETHING — the anchor the list row's relative date measures from.
+ *
+ * ⚠️ THE LAST OUTBOUND SEND, NOT THE QUERY'S CREATION. A query whose partial went last month has
+ * been "with the agent" for a month, not for the eight months since it was first queried, and the
+ * row's figure is a statement about the current wait. `createdDate` is not read at all.
+ *
+ * ⚠️ IT IS THE NEWEST OF THE THREE SEND FIELDS, not a status→field map. Those are the only three
+ * dates on a query that record the writer sending something — `dateSent`, `partialSentDate`,
+ * `fullSentDate` — and taking the newest that EXISTS holds for a query in the writer's court too,
+ * where the current status names no send at all (a partial request's last send is still the query).
+ *
+ * ⚠️ AND A RESUBMISSION LANDS ON `fullSentDate` BY THE SAME ROUTE, because that is the field the
+ * mark-sent flow writes; the reading needs no knowledge of which round it is.
+ */
+export function lastSendMs(query: { dateSent?: string; partialSentDate?: string; fullSentDate?: string }): number | null {
+  const times = [query.dateSent, query.partialSentDate, query.fullSentDate]
+    .map((iso) => (iso ? new Date(iso).getTime() : NaN))
+    .filter((t) => !Number.isNaN(t));
+  return times.length ? Math.max(...times) : null;
+}

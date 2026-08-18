@@ -358,12 +358,16 @@ describe("§1g · the row carries status through the real StatusDot", () => {
     const end = code.indexOf('className="f12-lfoot"', body);
     const slice = code.slice(rows, end);
     expect(slice, "the row's status dot is gone").toContain("<StatusDot status={q.status}");
-    /* ⚠️ §5 MADE THE FIGURE A POSITION, so the class is conditional — `f12-d2` plus `f12-d2-late`
-       once the row is counting up. The slot itself is what this case is about and it is still one
-       element in the same place; the date fallback survives inside it for a row that cannot be
-       placed in time. */
-    expect(slice, "the date/position slot left the row").toContain("className={`f12-d2");
-    expect(slice, "the position figure is not derived").toContain("figureText(figure)");
+    /* ⚠️ §4a MOVED THE MARK TO THE ROW'S LEAD, at full size — it was 15px in the right-hand stack
+       because the two-line elapsed block was taking the width. "Beside the date" is retired with
+       that stack; what survives, and is what this case was ever really about, is that the row draws
+       the IMPORTED component and never a recreation. */
+    expect(slice, "the mark is not in the lead slot").toContain('className="f12-lead"');
+    expect(slice, "the mark is not at full size").toContain("overrideSize={30}");
+    /* ⚠️ §4b MADE THE FIGURE A RELATIVE DATE, so the class is unconditional again — the burgundy
+       late tint went with the position it expressed. */
+    expect(slice, "the date/figure slot left the row").toContain('className="f12-d2"');
+    expect(slice, "the figure is not derived from the last send").toContain("agoLabel(daysBetween(sendMs, nowMs))");
     expect(slice, "an unplaceable row lost its date fallback").toContain("formatListRowDate(q.dateSent)");
   });
 });
