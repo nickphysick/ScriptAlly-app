@@ -3982,3 +3982,21 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .qn-editx { background: transparent; color: var(--qc-tx-cancel); }
 .qn-editgo { background: var(--burg); color: var(--white); }
 .qn-editgo:disabled { background: var(--paper); color: var(--qc-tx-off); cursor: default; }
+
+/* ══ §4 · THE TRACKING SCROLLER IS HELD CLEAR OF ITS HEADER ═══════════════════════════════════
+ *
+ * ⚠️ MEASURED, NOT SUSPECTED: the scroller's top edge and the sage band's bottom sat at the same y
+ * (430 at a 620px viewport), so the first row under the header — the stat strip, then `Query sent`
+ * — began flush against it and read as sliced into the band.
+ *
+ * ⚠️ TWO DECLARATIONS, ONE FIGURE, AND THEY DO DIFFERENT JOBS. `padding-top` holds the REST
+ * position clear; `scroll-margin-top` holds an ANCHORED scroll clear — a `scrollIntoView` on an
+ * event (a correction, a future deep link) otherwise parks it under the band. Neither substitutes
+ * for the other, which is why the pack offers them as alternatives and both are here.
+ *
+ * ⚠️ AND IT IS INSIDE THE CLIPPING CONTEXT. Padding on the CARD would move the header too; this is
+ * the scroll region's own, so the band stays where it is and only the content starts lower.
+ */
+.t-f12 { --qc-track-clear: 12px; }
+.qc-trackscroll { padding-top: var(--qc-track-clear) !important; }
+.qc-trackscroll .tl-ev { scroll-margin-top: var(--qc-track-clear); }

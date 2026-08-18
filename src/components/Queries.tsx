@@ -4755,7 +4755,14 @@ export const Queries: React.FC<{
                     ) : undefined}
                     glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>}
                   >
-                      <PaneScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "0 0 18px" }}>
+                      {/* ⚠️ §4 · THE SCROLLER IS HELD CLEAR OF THE BAND. Its content began flush
+                          against the sage header — browser-measured, the scroller's top edge and the
+                          band's bottom at the same y — so the first thing under the header read as
+                          sliced into it. The clearance is a CLASS rather than an inline padding
+                          because it belongs with the events' `scroll-margin-top`, which has to be
+                          the same figure: one holds the rest position, the other holds an anchored
+                          scroll, and they are the same distance. */}
+                      <PaneScroll scrollClassName="f12-quiet-scroll qc-trackscroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ padding: "0 0 18px" }}>
                         {/**
                           * ⚠️ THE TWO STATS LEAD THE BODY (§2), in the comps page's grammar: icon
                           * plate, Playfair number, mono caption, one hairline between them.

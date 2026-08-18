@@ -88,7 +88,10 @@ describe("quiet scrollbars — the To-do pattern, reused", () => {
        contents of it, so a wrapper that owned the whole body would have scrolled the pinned note
        away. What matters is that the page keeps ONE scrollbar treatment, so `.qn-scroll` is named
        in the same rules rather than given a second one. */
-    expect(queries.match(/scrollClassName="f12-quiet-scroll"/g)?.length ?? 0).toBe(1);
+    /* ⚠️ THE CLASS IS NO LONGER ALONE ON THE ATTRIBUTE (§4) — Tracking's scroller also carries
+       `qc-trackscroll`, which holds it clear of the sage band. Matching the whole attribute value
+       counted zero and read as "the quiet scrollbar is gone"; the token is what this is about. */
+    expect(queries.match(/scrollClassName="f12-quiet-scroll[^"]*"/g)?.length ?? 0).toBe(1);
     expect(css, "the thread's scroller has its own scrollbar treatment").toContain(".qn-scroll { scrollbar-width: thin");
     expect(pane, "a create-mode inner scroller came back").not.toContain('className="f12-quiet-scroll"');
   });
