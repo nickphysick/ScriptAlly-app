@@ -131,8 +131,13 @@ describe("§4 · the Query Centre stopped keeping its own copies", () => {
     /* ⚠️ THE CHIP GOES THROUGH THE SHARED RENDERER SINCE §2, so the writer's words arrive as its
        LABEL argument rather than as JSX of their own — which is the point of the move: its ×, its
        hover and its editor cannot drift from the other three pills'. The clause is unchanged: the
-       label is what the writer typed, never a name of ours. */
-    expect(src, "the Other chip imposes a label of ours").toContain("sampleMaterialText(it), null,");
+       label is what the writer typed, never a name of ours.
+       ⚠️ AND THE FORMATTER IS NOW `formatQueryMaterial`, WHICH IS THE SAME PROMISE. The renderer
+       lost its quantity argument when the sample started naming itself from its size, so the old
+       `sampleMaterialText(it), null,` no longer exists to match; for an `other` item both functions
+       return the writer's text verbatim, and the one now used is the module's public entry point
+       rather than the readback beside it. */
+    expect(src, "the Other chip imposes a label of ours").toContain("formatQueryMaterial(it),");
   });
 
   it("the local unit triple and the catch-all predicate are gone", () => {

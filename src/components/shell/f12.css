@@ -4062,12 +4062,26 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    be clipped into a mystery. The focus rim is the page's one ring token. */
 .qn-compose { display: flex; flex-direction: column; gap: 8px; background: var(--white); border: 1px solid var(--btn-line); border-radius: 11px; padding: 10px 11px; }
 .qn-compose--on { border-color: var(--qc-ring); box-shadow: 0 0 0 1px var(--qc-ring); }
-.qn-ta { border: 0; outline: none; resize: none; background: transparent; font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink); min-height: 20px; max-height: 132px; overflow-y: auto; }
+/**
+ * ⚠️ §3 · THE LINE HEIGHT IS A PIXEL VALUE AND THE BOX MODEL IS DECLARED, not inherited. The height
+ * this field reports is `scrollHeight` measured after a reset to `auto`, so its arithmetic depends
+ * on both — and a rule whose maths depends on the box model should say which one it is rather than
+ * trust a preflight it does not own. `1.6` of 12.5px computed to exactly 20px, so nothing moves
+ * today; what changes is that a type-size tweak can no longer put the row height on a fraction.
+ *
+ * ⚠️ AND THE FIELD WAS NOT THE THING THAT JUMPED. Measured on the page at 1440: one row empty, one
+ * row with a line of text, five when it wrapped, then scrolling inside itself. The jump to two rows
+ * was the Save row arriving with the first character — fixed where it lived, in the component.
+ */
+.qn-ta { box-sizing: border-box; border: 0; outline: none; resize: none; background: transparent; font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 20px; color: var(--ink); min-height: 20px; max-height: 132px; overflow-y: auto; }
 .qn-ta::placeholder { color: var(--qc-tx-off); }
 .qn-crow { display: flex; align-items: center; gap: 8px; }
 /* ⚠️ `.qn-hint` IS RETIRED WITH THE PRINTED HINT (§4) — the shortcuts survive, their advertisement
    does not. */
-.qn-send { margin-left: auto; height: 29px; padding: 0 13px; border: 1px solid var(--qc-rim-pink); border-radius: 8px; background: var(--pink); font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.qn-send { margin-left: auto; height: 29px; padding: 0 13px; border: 1px solid var(--qc-rim-pink); border-radius: 8px; background: var(--pink); font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600; color: var(--ink); cursor: pointer; transition: opacity 0.15s; }
+/* ⚠️ FADED AND INERT, NOT HIDDEN AND NOT REMOVED (§3). The button keeps its exact box so the
+   composer is the same height empty as it is with a word in it — which is the whole of the fix. */
+.qn-send--off { opacity: 0.45; cursor: default; }
 /* the disabled state goes with the hint row: the button only exists once there is something to save */
 
 .qn-edit { display: flex; flex-direction: column; gap: 6px; }

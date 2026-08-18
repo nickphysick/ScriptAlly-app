@@ -255,15 +255,24 @@ export const NotesThread: React.FC<NotesThreadProps> = ({ notes, onAdd, onEdit, 
             * of instructions is what a composer says when its placeholder is not enough, and
             * "Write a note…" is enough.
             *
-            * ⚠️ AND THE ROW ONLY EXISTS ONCE THERE IS TEXT, so an empty composer is a field and
-            * nothing else. `⌘/Ctrl+Enter` still saves and `Esc` still clears — see the key handler,
-            * which is untouched.
+            * ⚠️ §3 · SAVE IS ALWAYS THERE — FADED AND INERT, THEN LIT. IT DOES NOT APPEAR. The row
+            * used to be gated on `draft.trim()`, and THAT is the "composer jumps to two rows" fault:
+            * measured on the page, the textarea's own height was correct throughout — one row empty,
+            * one row at a line of text, five when it wrapped — and what moved was the box around it,
+            * growing by the button and its gap the instant the first character landed. A control
+            * that arrives under the pointer as you type is worse than one that waits its turn, and
+            * the field's height was never the thing at fault.
+            *
+            * `⌘/Ctrl+Enter` still saves and `Esc` still clears — see the key handler, untouched.
             */}
-          {draft.trim() && (
-            <div className="qn-crow">
-              <button type="button" className="qn-send" onClick={() => void save()}>Save</button>
-            </div>
-          )}
+          <div className="qn-crow">
+            <button
+              type="button"
+              className={`qn-send${draft.trim() ? "" : " qn-send--off"}`}
+              disabled={!draft.trim()}
+              onClick={() => void save()}
+            >Save</button>
+          </div>
         </div>
       </div>
     </div>
