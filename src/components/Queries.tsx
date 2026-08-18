@@ -1405,15 +1405,20 @@ export const Queries: React.FC<{
    * `useFixedMenu` positions against `triggerRef.current`, so handing it the element that was
    * actually pressed is what keeps the popover under the right chip after the row reflows.
    */
-  const [matPop, setMatPop] = useState<null | "ql" | "syn" | "smp">(null);
+  /**
+   * §2 — which pill's editor is open. `oth` carries the ITEM as well, because "Other" is free text
+   * and the editor has to save back over the one it opened rather than appending a second.
+   */
+  const [matPop, setMatPop] = useState<null | "ql" | "syn" | "smp" | "oth">(null);
+  const [otherEditing, setOtherEditing] = useState<string | QueryMaterial | null>(null);
   const { triggerRef: matPopTrigRef, menuStyle: matPopStyle } = useFixedMenu<HTMLElement>(!!matPop);
-  const openMatPop = (key: "ql" | "syn" | "smp", el: HTMLElement) => {
+  const openMatPop = (key: "ql" | "syn" | "smp" | "oth", el: HTMLElement) => {
     (matPopTrigRef as React.MutableRefObject<HTMLElement | null>).current = el;
     setMatPop(key);
   };
   /* ⚠️ FOCUS RETURNS TO THE CHIP THAT OPENED IT (§6) — a popover that closes into nowhere ends the
      keyboard session, and the next Tab restarts at the page's first control. */
-  const closeMatPop = () => { const el = matPopTrigRef.current; setMatPop(null); el?.focus(); };
+  const closeMatPop = () => { const el = matPopTrigRef.current; setMatPop(null); setOtherEditing(null); el?.focus(); };
   const [addMatOpen, setAddMatOpen] = useState(false);
   const { triggerRef: addMatTrigRef, menuStyle: addMatMenuStyle } = useFixedMenu<HTMLButtonElement>(addMatOpen);
   const [otherOpen, setOtherOpen] = useState(false);
@@ -1662,7 +1667,9 @@ export const Queries: React.FC<{
     const name = kind === "query" ? "Query letter" : "Synopsis";
     const present = base.some(pred);
     const next = present ? base.filter((it) => !pred(it)) : [...base, { material: kind === "query" ? "Query Letter" : "Synopsis" } as QueryMaterial];
-    writeMaterials(q, next, present ? `${name} unmarked` : `${name} marked sent`);
+    /* ⚠️ "removed" / "attached", NOT "unmarked" / "marked sent" (§2). Marking was the vocabulary of
+       a state that no longer exists: a material is on the send or it is not. */
+    writeMaterials(q, next, present ? `${name} removed` : `${name} attached`);
   };
   const saveSampleMaterial = (q: Query, ag: Agent | null | undefined) => {
     const qty = sampleQty.trim();
@@ -1683,15 +1690,29 @@ export const Queries: React.FC<{
     const t = otherText.trim();
     if (!t) return;
     const item: QueryMaterial = { material: "Other", type: "other", quantity: t };
-    writeMaterials(q, [...baseMaterialsFor(q, ag), item], "Material added");
+    writeMaterials(q, [...baseMaterialsFor(q, ag), item], "Material attached");
     setOtherText("");
     setOtherOpen(false);
+  };
+  /**
+   * §2 — edit an existing `Other` in place: it saves OVER the item it opened rather than appending.
+   *
+   * ⚠️ IDENTITY BY REFERENCE, which is safe here and stated because it would not be everywhere:
+   * `baseMaterialsFor` returns the stored array itself, so the item handed to the editor is the
+   * same object the filter compares against. Two identical `Other` strings would otherwise be
+   * indistinguishable, and editing one would rewrite whichever came first.
+   */
+  const saveOtherEdit = (q: Query, ag: Agent | null | undefined, item: string | QueryMaterial, text: string) => {
+    const t = text.trim();
+    if (!t) return;
+    const next = baseMaterialsFor(q, ag).map((it) => (it === item ? ({ material: "Other", type: "other", quantity: t } as QueryMaterial) : it));
+    writeMaterials(q, next, "Material updated");
   };
   const removeOtherMaterial = (q: Query, ag: Agent | null | undefined, item: string | QueryMaterial) => {
     writeMaterials(q, baseMaterialsFor(q, ag).filter((it) => it !== item), "Material removed");
   };
   const removeSampleMaterial = (q: Query, ag: Agent | null | undefined) => {
-    writeMaterials(q, baseMaterialsFor(q, ag).filter((it) => !isSampleMat(it)), "Sample materials removed");
+    writeMaterials(q, baseMaterialsFor(q, ag).filter((it) => !isSampleMat(it)), "Opening sample removed");
     setSampleEditorOpen(false);
   };
   // Queries Hub subtitle — the manuscript currently in scope ("Tracking …").
@@ -4593,7 +4614,7 @@ export const Queries: React.FC<{
                         return (
                         <F12Popover
                           width={272}
-                          title={matPop === "ql" ? "Query letter" : matPop === "syn" ? "Synopsis" : "Opening sample"}
+                          title={matPop === "ql" ? "Query letter" : matPop === "syn" ? "Synopsis" : matPop === "oth" ? "Other" : "Opening sample"}
                           style={matPopStyle}
                           onClose={() => { setSampleEditorOpen(false); closeMatPop(); }}
                         >
@@ -4630,23 +4651,37 @@ export const Queries: React.FC<{
                               </button>
                             </>
                           )}
-                          {/* ⚠️ MARK AS SENT SHOWS THE CURRENT STATE rather than only the verb — a
-                              toggle that says "Mark as sent" whichever way it is set gives the
-                              writer no way to read the record without changing it. */}
-                          {matPop !== "smp" && (
-                            <button type="button" className="qc-mpopact" onClick={() => { toggleDocMaterial(activeQuery, activeAgent, matPop === "ql" ? "query" : "synopsis"); closeMatPop(); }}>
-                              {(matPop === "ql" ? qlSent : synSent) ? "Sent ✓ — un-mark" : "Mark as sent"}
-                            </button>
+                          {/* ⚠️ §2 · `MARK AS SENT` IS RETIRED WITH THE NOT-SENT STATE. A pill only
+                              exists because that material went with the send, so a control offering
+                              to un-mark it was offering to make it a ghost — the exact thing this
+                              section removes. Un-sending is removing, and it is the verb below. */}
+                          {matPop === "oth" && otherEditing != null && (
+                            <>
+                              <input
+                                type="text"
+                                className="qc-mfree"
+                                autoFocus
+                                value={otherText}
+                                aria-label="Other material"
+                                onChange={(e) => setOtherText(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveOtherEdit(activeQuery, activeAgent, otherEditing, otherText); closeMatPop(); } }}
+                              />
+                              <button type="button" className="qc-mpopact" disabled={!otherText.trim()}
+                                onClick={() => { saveOtherEdit(activeQuery, activeAgent, otherEditing, otherText); closeMatPop(); }}
+                              >Save</button>
+                            </>
                           )}
                           {/* ⚠️ REMOVE IS LAST AND BURGUNDY — the destructive verb furthest from the
-                              one your hand lands on first. */}
+                              one your hand lands on first. And it says "from this send", because
+                              that is what the pill belongs to. */}
                           <button type="button" className="qc-mpopact qc-mpopact-danger"
                             onClick={() => {
                               if (matPop === "smp") removeSampleMaterial(activeQuery, activeAgent);
+                              else if (matPop === "oth" && otherEditing != null) removeOtherMaterial(activeQuery, activeAgent, otherEditing);
                               else if ((matPop === "ql" ? qlSent : synSent)) toggleDocMaterial(activeQuery, activeAgent, matPop === "ql" ? "query" : "synopsis");
                               closeMatPop();
                             }}
-                          >Remove from query</button>
+                          >Remove from this send</button>
                         </F12Popover>
                         );
                       })()}
@@ -4822,6 +4857,11 @@ export const Queries: React.FC<{
                                   : [];
                                 const isPro = currentUser?.plan === UserPlan.PRO;
                                 const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
+                                const openOtherEditor = (item: string | QueryMaterial, el: HTMLElement) => {
+                                  setOtherEditing(item);
+                                  setOtherText(sampleMaterialText(item));
+                                  openMatPop("oth", el);
+                                };
                                 const openSampleEditor = () => {
                                   const stored = sampleItem && typeof sampleItem !== "string" ? sampleItem.type : undefined;
                                   const unit: SampleUnit = stored === "chapters" ? "Chapters" : stored === "words" ? "Words" : "Pages";
@@ -4830,19 +4870,32 @@ export const Queries: React.FC<{
                                   setSampleQty(qty || snapToUnit(unit));
                                   setSampleEditorOpen(true);
                                 };
-                                const attach = (key: string, label: string, qty: string | null, done: boolean, onClick: (el: HTMLElement) => void, title: string, onRemove?: () => void) => (
-                                  <button key={key} type="button" className={`qc-mchip qc-mchip-att${done ? " on" : ""}`} onClick={(e) => onClick(e.currentTarget)} title={title}>
+                                /**
+                                 * ══ §2 · A PILL EXISTS ONLY IF THAT MATERIAL WENT WITH THE SEND ══
+                                 *
+                                 * ⚠️ THE NOT-YET-SENT STATE IS RETIRED ENTIRELY. Every material had
+                                 * a pill whether or not it had been sent, distinguished by a `○`
+                                 * against a `✓` and a muted ink — a ghost, which is the app
+                                 * remembering something that did not happen. A material that has
+                                 * not been sent is simply not attached, so there is no flag on
+                                 * `QueryMaterial` and no rules change: the absence IS the state.
+                                 *
+                                 * ⚠️ AND THE TICK GOES WITH IT. Every rendered pill is attached
+                                 * now, so a ✓ on all of them states the one thing they all share.
+                                 *
+                                 * ⚠️ REMOVAL IS IMMEDIATE, AND THE UNDO IS WHAT MAKES THAT SAFE —
+                                 * `writeMaterials` already shows the toast with the prior value.
+                                 */
+                                const attach = (key: string, label: string, qty: string | null, onClick: (el: HTMLElement) => void, title: string, onRemove: () => void) => (
+                                  <button key={key} type="button" className="qc-mchip qc-mchip-att" onClick={(e) => onClick(e.currentTarget)} title={title}>
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
                                     <span className="qc-mchiptx">{label}</span>
                                     {qty && <span className="qc-mqtybadge">{qty}</span>}
-                                    <i aria-hidden="true">{done ? "✓" : "○"}</i>
-                                    {onRemove && (
-                                      <span role="button" tabIndex={0} className="qc-mchipx"
-                                        aria-label={`Remove ${label} from this query`} title={`Remove ${label}`}
-                                        onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                                        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onRemove(); } }}
-                                      >×</span>
-                                    )}
+                                    <span role="button" tabIndex={0} className="qc-mchipx"
+                                      aria-label={`Remove ${label} from this send`} title={`Remove ${label}`}
+                                      onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); onRemove(); } }}
+                                    >×</span>
                                   </button>
                                 );
                                 return (
@@ -4866,8 +4919,8 @@ export const Queries: React.FC<{
                                 {/* ⚠️ THE CHIP OPENS ITS OWN POPOVER (§5) rather than toggling on click. A single click that
                                      silently flipped "sent" gave one control two of the three things a
                                      material can have done to it and no way to reach the third. */}
-                                {attach("ql", "Query letter", null, qlSent, (el) => openMatPop("ql", el), "Query letter", qlSent ? () => toggleDocMaterial(activeQuery, activeAgent, "query") : undefined)}
-                                {attach("syn", "Synopsis", null, synSent, (el) => openMatPop("syn", el), "Synopsis", synSent ? () => toggleDocMaterial(activeQuery, activeAgent, "synopsis") : undefined)}
+                                {qlSent && attach("ql", "Query letter", null, (el) => openMatPop("ql", el), "Query letter", () => toggleDocMaterial(activeQuery, activeAgent, "query"))}
+                                {synSent && attach("syn", "Synopsis", null, (el) => openMatPop("syn", el), "Synopsis", () => toggleDocMaterial(activeQuery, activeAgent, "synopsis"))}
                                 {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
                                     sample is a quantity and a unit, not a yes. Its label carries what
                                     was sent; Remove keeps its own control, since a chip that both
@@ -4876,18 +4929,15 @@ export const Queries: React.FC<{
                                       chapters`, not `3 chapters`. And `Opening sample` is the locked
                                       name: the three units all store as one `ComponentType`, so
                                       "Sample pages" would assert a unit the artefact does not carry. */}
-                                  {attach("smp", "Opening sample", sampleItem ? sampleMaterialText(sampleItem) : null, !!sampleItem, (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", sampleItem ? () => removeSampleMaterial(activeQuery, activeAgent) : undefined)}
-                                {otherItems.map((it, i) => (
-                                  <span key={`oth-${i}`} className="qc-mchip qc-mchip-att on" title={sampleMaterialText(it)}>
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.5 20a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7.5-7.5" /></svg>
-                                    <span className="qc-mchiptx">{sampleMaterialText(it)}</span>
-                                    <i aria-hidden="true">✓</i>
-                                    <span role="button" tabIndex={0} className="qc-mchipx"
-                                      aria-label="Remove this material from the query" title="Remove"
-                                      onClick={(e) => { e.stopPropagation(); removeOtherMaterial(activeQuery, activeAgent, it); }}
-                                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); removeOtherMaterial(activeQuery, activeAgent, it); } }}
-                                    >×</span>
-                                  </span>
+                                  {sampleItem && attach("smp", "Opening sample", sampleMaterialText(sampleItem), (el) => { openSampleEditor(); openMatPop("smp", el); }, "Opening sample", () => removeSampleMaterial(activeQuery, activeAgent))}
+                                {/* ⚠️ AND `Other` OPENS ITS EDITOR TOO (§2) — free text rather than a
+                                    quantity. It was the one pill that could only be removed, so a
+                                    typo in it meant deleting and retyping. Same renderer as the
+                                    rest, so its × and its hover cannot drift from theirs. */}
+                                {otherItems.map((it, i) => attach(
+                                  `oth-${i}`, sampleMaterialText(it), null,
+                                  (el) => openOtherEditor(it, el), sampleMaterialText(it),
+                                  () => removeOtherMaterial(activeQuery, activeAgent, it),
                                 ))}
                                 {/* ⚠️ THE FLOATING `REMOVE` IS GONE (§4) — it now lives on the chip
                                     it removes. A verb parked at the end of a row of chips has no
@@ -4926,7 +4976,10 @@ export const Queries: React.FC<{
                                     ariaLabel="Add to this query"
                                     items={[
                                       ...MATERIAL_MENU.map((m) => ({
-                                        label: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0) ? `${m.label} · Added` : m.label,
+                                        /* ⚠️ "Attached", THE WORD THE PACK NAMES — and it is the
+                                           same word the row's × removes. "Added" was a second verb
+                                           for one relationship. */
+                                        label: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0) ? `${m.label} · Attached` : m.label,
                                         disabled: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0),
                                         onClick: () => { setAddMatOpen(false); m.add(); },
                                       })),

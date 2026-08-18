@@ -128,7 +128,11 @@ describe("§4 · the Query Centre stopped keeping its own copies", () => {
   it("free text renders as its own chip, in the writer's words", () => {
     expect(src, "nothing collects the Other items").toContain("const otherItems = base.filter(isOtherMat)");
     expect(src, "the Other items are collected and never drawn").toContain("otherItems.map(");
-    expect(src, "the Other chip imposes a label of ours").toContain("{sampleMaterialText(it)}");
+    /* ⚠️ THE CHIP GOES THROUGH THE SHARED RENDERER SINCE §2, so the writer's words arrive as its
+       LABEL argument rather than as JSX of their own — which is the point of the move: its ×, its
+       hover and its editor cannot drift from the other three pills'. The clause is unchanged: the
+       label is what the writer typed, never a name of ours. */
+    expect(src, "the Other chip imposes a label of ours").toContain("sampleMaterialText(it), null,");
   });
 
   it("the local unit triple and the catch-all predicate are gone", () => {

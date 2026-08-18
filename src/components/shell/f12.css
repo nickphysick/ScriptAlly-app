@@ -2807,11 +2807,12 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    that this agent has no address on file — which is a fact, and often the one worth acting on. */
 .qc-mchip-con.off { color: var(--qc-tx-off); border-color: var(--qc-rim-off-2); background: var(--qc-surf-pill-off); pointer-events: none; }
 /* attachments — a record of something done */
-.qc-mchip-att { background: var(--n2); border: 1px solid transparent; color: var(--qc-tx-off); }
-.qc-mchip-att.on { color: var(--ink-2); }
+/* ⚠️ §2 · ONE STATE, BECAUSE THERE IS ONLY ONE. `.on` distinguished a SENT material from a pill
+   for something that had not been sent — a ghost, which is the app remembering something that did
+   not happen. Every pill on the row is attached now, so the modifier, the muted ink it inverted and
+   the ✓/○ marker it coloured are all gone: nothing is left for them to tell apart. */
+.qc-mchip-att { background: var(--n2); border: 1px solid transparent; color: var(--ink-2); }
 .qc-mchip-att:hover { background: var(--n3); color: var(--ink); }
-.qc-mchip-att i { font-style: normal; font-size: 9px; flex: none; color: var(--qc-tx-off); }
-.qc-mchip-att.on i { color: var(--sageD); }
 /* ⚠️ THE QUANTITY IS A BADGE ON THE CHIP, so the chip answers "how much" without being opened.
    `Opening sample · 3 chapters` is the whole point of the popover being optional. */
 .qc-mqtybadge { flex: none; font-family: var(--f12-mono); font-size: 9px; color: var(--faint); background: var(--white); border: 1px solid var(--qc-rim-off); border-radius: 4px; padding: 1px 5px; }
