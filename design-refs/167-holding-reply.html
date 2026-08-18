@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — replies that change nothing</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-br:#b9c6b7;--sage-tx:#4e6050;--pinkc:#f8e7dc;--pinkb:#ebcfc2;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.dt,.barf,.sec b{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1320px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;align-items:start;}
+.card{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:15px 16px;}
+.pop{background:#fff;border-radius:11px;box-shadow:0 2px 6px rgba(40,35,30,.08),0 14px 30px -12px rgba(40,35,30,.38);padding:6px;}
+.pop h5{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:9px 9px 6px;font-weight:500;}
+.pi{display:flex;align-items:flex-start;gap:10px;padding:9px;border-radius:8px;font-size:12.5px;cursor:pointer;}
+.pi:hover{background:var(--n1);}
+.pi .ic{width:22px;height:22px;flex:none;border-radius:6px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--burg);margin-top:1px;}
+.pi u{text-decoration:none;display:block;}
+.pi s{text-decoration:none;display:block;font-size:11px;color:var(--faint);margin-top:2px;line-height:1.45;}
+.pi.on{background:var(--n1);}
+.sep{height:1px;background:var(--line);margin:5px 9px;}
+.form{padding:4px 9px 9px;}
+.field{margin-top:10px;}
+.field .fl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;}
+.slider{position:relative;height:24px;display:flex;align-items:center;}
+.track{position:absolute;left:0;right:0;height:4px;border-radius:2px;background:var(--n2);}
+.fill{position:absolute;left:0;width:18%;height:4px;border-radius:2px;background:var(--burg);opacity:.5;}
+.knob{position:absolute;left:18%;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(40,35,30,.3),inset 0 0 0 1.5px var(--burg);transform:translateX(-50%);}
+.ticks{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7px;color:#bdb8b0;}
+.val{font-size:12px;color:var(--ink2);margin-top:5px;}
+.val b{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink);}
+.ta{width:100%;font-family:inherit;font-size:12px;line-height:1.5;border:0;border-radius:9px;background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);padding:9px 10px;outline:none;resize:none;min-height:52px;color:var(--ink);}
+.ta::placeholder{color:#b5b0a8;}
+.pf{display:flex;gap:7px;justify-content:flex-end;padding:10px 9px 4px;}
+.mini{font-family:inherit;font-size:11.5px;height:31px;padding:0 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);cursor:pointer;}
+.mini.go{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+/* timeline */
+.ev{position:relative;padding:0 0 16px 38px;}
+.ev::before{content:'';position:absolute;left:12px;top:29px;bottom:0;width:1px;background:var(--line);}
+.ev:last-child{padding-bottom:0;}.ev:last-child::before{display:none;}
+.m{position:absolute;left:0;top:0;width:25px;height:25px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--burg);
+  color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:10px;}
+.m.in{box-shadow:inset 0 0 0 1.5px #9db09b;color:var(--sage-tx);}
+.m.live{box-shadow:inset 0 0 0 1.5px #9db09b;color:var(--sage-tx);}
+.m.sm{left:8px;top:4px;width:9px;height:9px;box-shadow:inset 0 0 0 1.5px var(--oat);background:var(--n1);}
+.ev.minor{padding-bottom:12px;}.ev.minor::before{top:15px;}
+.r1{display:flex;align-items:baseline;gap:8px;min-height:25px;}
+.ev.minor .r1{min-height:0;}
+.ttl{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;}
+.qual{font-size:12px;color:var(--faint);}
+.qual b{font-weight:500;color:var(--ink2);}
+.mline{font-size:12px;color:var(--ink2);}
+.dt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.r2{margin-top:7px;}
+.r2>*+*{margin-top:8px;}
+.quote{font-size:12px;color:var(--ink2);line-height:1.55;padding-left:10px;box-shadow:inset 2px 0 0 var(--oat);}
+.bar{position:relative;height:6px;border-radius:3px;background:var(--n2);overflow:hidden;}
+.bar i{display:block;height:100%;width:26%;background:#9db09b;border-radius:3px;}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-top:5px;}
+.sec{font-size:12px;color:var(--faint);}
+.sec b{font-weight:500;color:var(--ink2);}
+.legend{max-width:1320px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+table{border-collapse:collapse;margin:8px 0 4px;font-size:12px;width:100%;}
+td,th{text-align:left;padding:6px 16px 6px 0;border-bottom:1px solid var(--line);vertical-align:top;}
+th{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:400;}
+</style></head>
+<body>
+
+<h4>Record response <s>— every reply is one of four things, and only three of them move the query</s></h4>
+<div class="sheet"><div class="three">
+
+  <div><div class="lab">1 · The menu gains a fourth branch<s>The one that changes nothing</s></div>
+    <div class="pop">
+      <h5>What came back?</h5>
+      <div class="pi"><span class="ic">«</span><span><u>They asked for more</u><s>Partial, full, or a revise and resubmit</s></span></div>
+      <div class="pi"><span class="ic">★</span><span><u>They offered representation</u><s>The one you are waiting for</s></span></div>
+      <div class="pi"><span class="ic">×</span><span><u>They passed</u><s>Closes the query</s></span></div>
+      <div class="sep"></div>
+      <div class="pi on"><span class="ic">↩</span><span><u>They replied, but not with a decision</u><s>An acknowledgement, a holding note, or a new date — the query stays where it is</s></span></div>
+    </div></div>
+
+  <div><div class="lab">2 · What it asks for<s>Both fields optional; neither changes the status</s></div>
+    <div class="pop">
+      <h5>They replied · 22 August</h5>
+      <div class="form">
+        <div class="field">
+          <div class="fl">Did they give a new timeframe?</div>
+          <div class="slider"><span class="track"></span><span class="fill"></span><span class="knob"></span></div>
+          <div class="ticks"><span>none</span><span>2</span><span>6</span><span>12</span><span>16+</span></div>
+          <div class="val"><b>2</b> weeks · around 5 September</div>
+        </div>
+        <div class="field">
+          <div class="fl">What did they say?</div>
+          <textarea class="ta" placeholder="Optional — a line to remember it by">Apologised for the delay, asked for two more weeks.</textarea>
+        </div>
+      </div>
+      <div class="pf"><button class="mini">Cancel</button><button class="mini go">Record reply</button></div>
+    </div></div>
+
+  <div><div class="lab">3 · On the timeline<s>Status unchanged · the clock restarts from their word</s></div>
+    <div class="card">
+      <div class="ev minor"><span class="m sm"></span>
+        <div class="r1"><span class="mline">Nudged</span><span class="dt">18 AUG</span></div></div>
+      <div class="ev"><span class="m in">↩</span>
+        <div class="r1"><span class="ttl">They replied</span><span class="qual">— no decision yet</span><span class="dt">22 AUG</span></div>
+        <div class="r2"><div class="quote">Apologised for the delay, asked for two more weeks.</div></div>
+      </div>
+      <div class="ev"><span class="m live">⌛</span>
+        <div class="r1"><span class="ttl">Waiting to hear back</span><span class="qual">— Aisha <b>advises 2 weeks</b></span><span class="dt">4 DAYS</span></div>
+        <div class="r2">
+          <div><div class="bar"><i></i></div><div class="barf"><span>Replied 22 Aug</span><span>Expected by ~5 Sept</span></div></div>
+          <div class="sec">Queried 3 Apr 2024 · <b>2¼ years</b> in total</div>
+        </div>
+      </div>
+    </div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>The gap is real: a reply that decides nothing currently has nowhere to go.</b> An acknowledgement, "still reading", "sorry, two more weeks", "can you resend as a PDF" — all of these are contact from the agent, none of them move the query. Today you would have to either record nothing, and watch the tracker keep counting a silence that has ended, or record a false stage change.<br><br>
+  <b>What a holding reply does, and does not, do:</b>
+  <table>
+    <tr><th>Does</th><th>Does not</th></tr>
+    <tr>
+      <td>Sits on the timeline as an incoming event<br>Restarts the waiting clock from their reply<br>Supplies a new window <b>attributed to them</b><br>Ends the "no reply" state and any expiry figure<br>Marks the agent as having engaged</td>
+      <td>Change the query's status<br>Change whose turn it is — still theirs<br>Count as an answer in <i>11 answered · 14 not</i><br>Move the query out of <i>No reply yet</i><br>Close anything</td>
+    </tr>
+  </table>
+  ⚠️ <b>The counting distinction is the one to get right.</b> A holding reply is contact, not an answer — the query is still open and undecided, so it must stay on the unanswered side of the count and stay in its list group. If it silently moved to "answered", the number that tells you how your querying is going would start including agents who have decided nothing.<br><br>
+  <b>The new timeframe is theirs, not yours.</b> It arrives from their message, so it renders with their attribution — <i>Aisha advises 2 weeks</i> — under the same rule that separates the agency's claim from your own estimate. ⚠️ It should be stored on the reply event, not written back to the agent record: two weeks was what she said about this manuscript in August, not the agency's standing policy.<br><br>
+  <b>The total does not vanish</b> — <i>Queried 3 Apr 2024 · 2¼ years in total</i> stays as the secondary line, so the length of the whole thing is still visible while the live figure measures the thing you are actually waiting on.
+</div>
+</body></html>
