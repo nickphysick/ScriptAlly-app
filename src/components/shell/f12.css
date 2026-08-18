@@ -1215,6 +1215,39 @@
 .tl-evtitle { min-height: var(--tl-mark); display: flex; align-items: center; }
 .tl-evtitle > * { flex: 1 1 auto; min-width: 0; }
 
+/**
+ * ══ §1 · ONE EVENT GRAMMAR ═══════════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE UNTIDINESS HAD ONE CAUSE: EVERY EVENT TYPE INVENTED ITS OWN ARRANGEMENT. A status row put
+ * its title in Inter 14/600, the waiting projection used the same shape with muted ink, a minor row
+ * drew a third thing at 12px, and the reminder rung was a sentence with a link in the middle and a
+ * date wearing a `SCHEDULED FOR` prefix nothing else used. Each was a reasonable local decision,
+ * which is why none of them read as a mistake.
+ *
+ * ⚠️ ROW 1 IS `title · qualifier … meta right`, AND THE META SLOT NEVER HOLDS A WORD. Its meaning
+ * comes from its position — a date or a duration, right-aligned and mono. `SENT`, `SCHEDULED FOR`
+ * and their kind are prefixes explaining a slot that does not need explaining, and the moment one
+ * event has a prefix the others look like they are missing something.
+ *
+ * ⚠️ ROW 2 IS THE BODY BLOCK, AND THE GAP IS THE BLOCK'S, NOT EACH PART'S. Every part used to carry
+ * its own `margin-top` — 6, 7, 8, 9, 10, 11 and 12px across the file, each defensible alone — so
+ * the rhythm depended on seven rules agreeing. `> * + *` makes it one figure by construction, and a
+ * new body part inherits it without anyone remembering to.
+ *
+ * ⚠️ THE TITLE IS ONE SIZE FOR EVERY EVENT, including a minor one. A minor event's quietness is
+ * carried by its 9px hollow ring and its muted ink — the two devices it already had — not by a
+ * third one. Size was doing a job two other things were already doing.
+ */
+.tl-r1 { display: flex; align-items: baseline; gap: 9px; min-height: var(--tl-mark); }
+.tl-ev--minor .tl-r1 { min-height: var(--tl-mark-sm); }
+.tl-ttl { font-family: var(--f12-serif); font-size: var(--tl-title); font-weight: 500; line-height: 1.3; color: var(--ink); min-width: 0; }
+.tl-ttl--quiet { color: var(--muted); }
+.tl-qual { font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--faint); }
+/* ⚠️ NO PREFIX WORDS, EVER — see the note above. Mono, right, a date or a duration. */
+.tl-meta { margin-left: auto; display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-variant-numeric: tabular-nums; }
+.tl-body { margin-top: 7px; }
+.tl-body > * + * { margin-top: var(--tl-body-gap); }
+
 /* ══ §5 · THE WAITING STATE — ONE SHAPE, THREE SITUATIONS ════════════════════════════════════
  *
  * ⚠️ THE MARKER CARRIES THE STATE, so the rail is legible without reading a word: sage while the
@@ -1229,11 +1262,11 @@
 
 /* ⚠️ WHAT THE AGENCY SAID IS A CHIP — their claim, on its own surface, so it cannot be read as one
    of the app's own sentences. The bar beneath measures against that claim rather than an assumption. */
-.tl-said { display: inline-flex; align-items: baseline; gap: 5px; margin-top: 6px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); background: var(--paper); border: 1px solid var(--hairline); border-radius: 7px; padding: 5px 10px; }
+.tl-said { display: inline-flex; align-items: baseline; gap: 5px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); background: var(--paper); border: 1px solid var(--hairline); border-radius: 7px; padding: 5px 10px; }
 .tl-said b { font-weight: 600; color: var(--ink); }
 .tl-said-x { color: var(--faint); }
 
-.tl-wbar { position: relative; height: 6px; border-radius: 3px; background: var(--n2); margin: 11px 0 6px; overflow: hidden; }
+.tl-wbar { position: relative; height: 6px; border-radius: 3px; background: var(--n2); margin: 0 0 5px; overflow: hidden; }
 .tl-wbar i { display: block; height: 100%; border-radius: 3px; background: var(--sage-edge); }
 /* ⚠️ A SPENT HATCH, NOT A RED FILL — the window is used up, which is a fact about time rather than
    a warning about a person. The same device the nudge confirm and the old no-reply card used. */
@@ -1241,11 +1274,11 @@
 .tl-wbar--past::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, transparent 0 5px, rgba(124, 58, 42, 0.15) 5px 10px); }
 .tl-wbarf { display: flex; justify-content: space-between; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-variant-numeric: tabular-nums; }
 
-.tl-wbody { font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin-top: 7px; }
+.tl-wbody { font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
 /* the convention line — quieter than the facts above it, and italic because it is a generality */
-.tl-conv { font-family: "Inter", sans-serif; font-size: 12px; font-style: italic; color: var(--faint); margin-top: 8px; }
+.tl-conv { font-family: "Inter", sans-serif; font-size: 12px; font-style: italic; color: var(--faint); }
 /* the one offer that would change the absence: a statement, then the way to answer it */
-.tl-ask { display: flex; align-items: center; gap: 9px; margin-top: 11px; padding: 9px 11px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); }
+.tl-ask { display: flex; align-items: center; gap: 9px; padding: 9px 11px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); }
 .tl-ask-a { margin-left: auto; padding: 0; border: 0; background: none; font: inherit; color: var(--burg); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; cursor: pointer; }
 
 /* ══ §5 · WHAT A NUDGE LEAVES BEHIND ═════════════════════════════════════════════════════════
@@ -1253,12 +1286,12 @@
  * ⚠️ THE HISTORY LINE IS A CAPTION ON THE WAIT, not a row of its own — mono, quiet, under whatever
  * state the wait is in. It answers "have I already chased this" without the writer scrolling.
  */
-.tl-nhist { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); margin-top: 9px; font-variant-numeric: tabular-nums; }
+.tl-nhist { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-variant-numeric: tabular-nums; }
 
 /* ⚠️ TWO ANSWERS OF EQUAL STANDING, WHICH IS WHY NEITHER IS A LINK AND NEITHER IS THE PAGE'S PINK
    PRIMARY. `Mark closed` carries a light fill only because it is the one that changes something;
    `Keep tracking` is a real button beside it, not a dismissal set in small text. */
-.tl-offer { margin-top: 10px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; padding: 10px 11px; }
+.tl-offer { background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; padding: 10px 11px; }
 .tl-offer-f { font-family: "Inter", sans-serif; font-size: 11.5px; line-height: 1.55; color: var(--ink-2); }
 .tl-offer-a { display: flex; gap: 7px; margin-top: 9px; }
 /**
@@ -2703,7 +2736,7 @@
 .qc-mail > .qc-mailfr { border-radius: inherit; overflow: hidden; }
 .qc-mail::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 5px; background: var(--qc-card-border); pointer-events: none; }
 /* the send's own materials, under the `Query sent` rung */
-.qc-sentmat { margin-top: 10px; }
+.qc-sentmat { margin-top: 0; }
 /* ══ §4c · THE NO-REPLY EVENT — facts, convention, offer, and no verdict ════════════════════
  * ⚠️ THE PALETTE'S OWN TONES, NOT A RED CARD. A colour that means alarm is a verdict by another
  * route, and the app reports rather than appraises. The card is the neutral step the page already
@@ -4188,7 +4221,7 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  * around it stays in the body's. A bar and a chip state the same silence in fragments; this states
  * it as a sentence.
  */
-.tl-pastfig { margin-top: 10px; font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--ink-2); }
+.tl-pastfig { font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--ink-2); }
 .tl-pastfig b { font-family: var(--f12-serif); font-size: 17px; font-weight: 600; color: var(--ink); padding-right: 2px; font-variant-numeric: tabular-nums; }
 
 /* ⚠️ DASHED RING, NO FILL, FAINT INK — the rung has to be unmistakably not-yet without a word

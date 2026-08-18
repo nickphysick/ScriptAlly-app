@@ -352,11 +352,14 @@ export const TimelineRows: React.FC<{
       if (row.kind) {
         return (
           <TlEvent key={row.key} last={isLast} minor mark={<span className="tl-minormark" aria-hidden="true" />}>
+            {/* ⚠️ §1 · THE SAME ROW 1 AS EVERY OTHER EVENT. A minor row drew its own arrangement —
+                12px Inter, its own flex, its own 9px date — which is the whole fault the grammar
+                removes. Its quietness stays where it already was: a 9px hollow ring and muted ink. */}
             <div className="tl-rowbody">
-              <div className="tl-minor">
-                <span className="tl-minortx">{row.title}</span>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", marginLeft: "auto" }}>
-                  {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a" }}>{row.date}</span>}
+              <div className="tl-r1">
+                <span className="tl-ttl tl-ttl--quiet">{row.title}</span>
+                <span className="tl-meta">
+                  {row.date && <span>{row.date}</span>}
                   {row.activityId && onMenuOpen && (
                     <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                       <button
@@ -383,22 +386,24 @@ export const TimelineRows: React.FC<{
       return (
         <TlEvent key={row.key} last={isLast} mark={<StatusDot status={row.status} overrideSize={TL_MARK} />}>
           <div className="tl-rowbody">
-            <div className="tl-evtitle"><div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-              {/* ⚠️ THE EDITABLE FACT SITS ON THE TITLE LINE, NOT UNDER IT (§2). "Query sent" and
-                  "via email" are one statement about one event; on two lines the second read as a
-                  caption, which is why the picker kept being moved somewhere that felt more like a
-                  control. Here it IS the words, with a dashed rule saying so. */}
-              <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "#3a1c14" }}>
-                {row.title}
-                {row.subEditable && row.sub && onEditSendMethod && (
-                  <>
-                    {" · "}
-                    <button type="button" className="qp-inplace" onClick={(e) => onEditSendMethod(e.currentTarget)} title="Change how this query was sent">{row.sub}</button>
-                  </>
-                )}
-              </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap" }}>
-                {row.date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a" }}>{row.date}</span>}
+            <div className="tl-r1">
+              {/* ⚠️ §1 · THE TITLE IS PLAYFAIR AT `--tl-title`, THE ONE SIZE EVERY EVENT USES. It was
+                  Inter 14/600 in a hardcoded near-black here, muted Inter in the projection and 12px
+                  Inter in a minor row — three arrangements for one thing. */}
+              <span className="tl-ttl">{row.title}</span>
+              {/* ⚠️ THE EDITABLE FACT IS THE ROW'S ONE QUALIFIER (§2). "Query sent" and "via email"
+                  are one statement about one event; on two lines the second read as a caption, which
+                  is why the picker kept being moved somewhere that felt more like a control. It is a
+                  sibling of the title now rather than words inside it, because row 1 is a flex line
+                  and a nested inline button cannot sit on its baseline. */}
+              {row.subEditable && row.sub && onEditSendMethod && (
+                <span className="tl-qual">
+                  {"· "}
+                  <button type="button" className="qp-inplace" onClick={(e) => onEditSendMethod(e.currentTarget)} title="Change how this query was sent">{row.sub}</button>
+                </span>
+              )}
+              <span className="tl-meta">
+                {row.date && <span>{row.date}</span>}
                 {row.activityId && onMenuOpen && (
                   <span className="f12-popwrap" style={{ display: "inline-flex" }}>
                     <button
@@ -417,11 +422,15 @@ export const TimelineRows: React.FC<{
                   </span>
                 )}
               </span>
-            </div></div>
+            </div>
+            {/* ⚠️ §1 · ROW 2, AND EVERYTHING BELOW LIVES INSIDE IT. Nothing may render outside the
+                two rows, and the gap between the body's parts belongs to this block rather than to
+                each part — see `.tl-body` in f12.css. */}
+            <div className="tl-body">
             {/* ⚠️ NOT TWICE. A promoted sub is drawn on the title line above; drawing it here as well
                 would state the send method twice, three pixels apart. Rows without the flag — and
                 the flagged row when no picker was passed — keep the caption they have always had. */}
-            {row.sub && !(row.subEditable && onEditSendMethod) && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{row.sub}</div>}
+            {row.sub && !(row.subEditable && onEditSendMethod) && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e" }}>{row.sub}</div>}
             {/**
               * ⚠️ ONE MATERIALS LIST PER EVENT, AND THE RICHER ONE WINS.
               *
@@ -444,10 +453,11 @@ export const TimelineRows: React.FC<{
               * the richer list is the caller that suppresses the plain one.
               */}
             {row.pills && row.pills.length > 0 && !showsExtra && (
-              <div className="tl-pills" style={{ display: "flex", gap: 5, flexWrap: "wrap", marginTop: 8 }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
+              <div className="tl-pills" style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>
             )}
             {/* the send's own materials — rendered by the caller, on the send rung only */}
             {showsExtra && sentExtra}
+            </div>
           </div>
         </TlEvent>
       );
@@ -513,12 +523,15 @@ const TlProjection: React.FC<{
         <svg viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
       </span>
     : <StatusDot status={status} overrideSize={TL_MARK} ghost decorative />}>
+    {/* ⚠️ §1 · THE SAME TWO ROWS AS A REAL EVENT. The projection had the row-1 SHAPE but its own
+        type — muted Inter 14/600 against the status rows' near-black Inter — and its children fell
+        straight into the body with each part carrying its own margin. */}
     <div className="tl-rowbody">
-      <div className="tl-evtitle"><div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
-        <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "var(--muted, #7d7469)" }}>{title}</span>
-        {date && <span style={{ fontFamily: FONT_MONO, fontSize: 9, color: "#a89a8a", whiteSpace: "nowrap" }}>{date}</span>}
-      </div></div>
-      {children}
+      <div className="tl-r1">
+        <span className="tl-ttl tl-ttl--quiet">{title}</span>
+        {date && <span className="tl-meta">{date}</span>}
+      </div>
+      <div className="tl-body">{children}</div>
     </div>
   </TlEvent>
 );
@@ -708,13 +721,16 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                 )}
               </>
             ) : dated ? (
-              <>
+              /* ⚠️ §1 · THE BAR AND ITS END LABELS ARE ONE BODY PART, not two. As siblings they took
+                 the block's gap between them and the footer drifted away from the track it labels;
+                 a label belongs to its bar the way a caption belongs to a figure. */
+              <div>
                 <div className={`tl-wbar${past ? " tl-wbar--past" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>
                 <div className="tl-wbarf">
                   <span>Sent {fmtShort(waiting.sentMs!)}</span>
                   <span>{past ? `Window closed ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>
                 </div>
-              </>
+              </div>
             ) : (
               /* ⚠️ A STATED WINDOW WITH NO SEND DATE: the chip above says what they said, and there
                  is nothing to measure it from. No bar, and no sentence claiming they stated nothing

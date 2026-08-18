@@ -170,6 +170,19 @@
   /* §2 — a minor event's marker: part of the record, not a round. */
   --tl-mark-sm: 9px;
   --tl-gap: 22px;
+  /**
+   * ⚠️ ONE EVENT GRAMMAR (§1, event-grammar pack). Row 1 is `title · qualifier … meta right`; row 2
+   * is the body block with ONE gap between its parts. These three tokens are that rule's numbers,
+   * and they are here rather than beside the components for the reason above: `TimelineRows` is
+   * shared with To-do's focus sheet, which is nowhere near `.t-f12`.
+   *
+   * ⚠️ THE MANUSCRIPT'S SIZE IS DERIVED FROM THE TITLE'S, not stated beside it. The rule is that it
+   * is body content and must not outweigh the event it belongs to; two independent numbers can be
+   * put in the wrong order by anyone tuning either, and a `calc` cannot.
+   */
+  --tl-title: 16px;
+  --tl-mst: calc(var(--tl-title) - 1px);
+  --tl-body-gap: 9px;
   --n0: #ffffff;   /* panels, cards, plates — the only pure white     L* 100.0 */
   --n1: #fef8f0;   /* a page ground, one step below white             L*  97.8 */
   --n2: #f5f0e8;   /* a card header                                   L*  95.0 */
