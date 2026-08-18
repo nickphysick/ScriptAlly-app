@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import "./forms.css";
 
 export interface WeekSliderProps {
@@ -16,6 +16,17 @@ export interface WeekSliderProps {
   onUnknown?: () => void;
   /** Hover copy on the Unknown pill — recommend a typical turnaround so a chaser can go out in time. */
   unknownHint?: string;
+  /**
+   * ⚠️ THE SLIDER'S DOM ID IS INSTANCE-UNIQUE, and it used to be the constant `"sa-wk"` — the same
+   * fault `ScriptAllyLogo` was fixed for. Two mounts put two elements with one id in the document,
+   * and a `<label for>` then points at whichever comes first: the second slider's label would focus
+   * the first slider. It cost a real decision — the Query Centre's date control was built as a
+   * SECOND slider rather than reuse this one, purely to avoid the collision.
+   *
+   * ⚠️ `useId` RATHER THAN A REQUIRED PROP, so every existing caller is untouched and no future one
+   * can forget. Pass `id` only where something outside needs to address this input by name.
+   */
+  id?: string;
 }
 
 /**
@@ -31,7 +42,10 @@ export const WeekSlider: React.FC<WeekSliderProps> = ({
   label = "Response window",
   onUnknown,
   unknownHint,
+  id,
 }) => {
+  const auto = useId();
+  const inputId = id ?? `sa-wk-${auto}`;
   const unknown = value === null;
   const pos = unknown ? min : value;
   const pct = ((pos - min) / (max - min)) * 100;
@@ -40,7 +54,7 @@ export const WeekSlider: React.FC<WeekSliderProps> = ({
   return (
     <div className="sa-fld">
       <div className="sa-wk-head">
-        <label className="sa-label" htmlFor="sa-wk" style={{ marginBottom: 0 }}>
+        <label className="sa-label" htmlFor={inputId} style={{ marginBottom: 0 }}>
           {label}
         </label>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -63,7 +77,7 @@ export const WeekSlider: React.FC<WeekSliderProps> = ({
         </span>
       </div>
       <input
-        id="sa-wk"
+        id={inputId}
         type="range"
         className={`sa-wk-slider${unknown ? " notset" : ""}`}
         min={min}

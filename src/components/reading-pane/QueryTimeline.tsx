@@ -19,6 +19,8 @@ import { queryAmbientStatus } from "../../lib/queryAmbient";
 import { elapsedPhrase, exactDate } from "../../lib/elapsed";
 /* §3 — the one send-method vocabulary; see the note on the helper. */
 import { sendMethodLabel } from "../../lib/agentDisplay";
+/* §4 — the app's ONE response-window slider, now that its DOM id is instance-unique. */
+import { WeekSlider } from "../forms/WeekSlider";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
@@ -560,12 +562,16 @@ const TlProjection: React.FC<{
  * else, to answer the one question the card had just asked. The control is here now: the offer's
  * own line, and the editor in its place when you take it.
  *
- * ⚠️ IT IS BUILT HERE RATHER THAN REUSING `WeekSlider`, and the reason is a hazard this repo has
- * already paid for once. `WeekSlider` hardcodes `id="sa-wk"` on its input and its label's `htmlFor`
- * — exactly the `ScriptAllyLogo` fault — so mounting it beside the Add-Agent and Edit-Agent forms
- * that already use it would put two elements with one id in the document and point a label at
- * whichever came first. It is also Form 11 (`sa-fld`, `sa-label`) inside an F12 card. The SCALE is
- * the shared one — whole weeks from 1 — and that is the part that had to agree.
+ * ⚠️ IT USES THE SHARED `WeekSlider` (§4). It was built as a SECOND slider because `WeekSlider`
+ * hardcoded `id="sa-wk"`, which would have put two elements with one id in the document beside the
+ * Add-Agent and Edit-Agent forms — the `ScriptAllyLogo` fault. That was the right diagnosis and the
+ * wrong fix: two sliders that must stay in visual and behavioural step is the same debt as the two
+ * send-method vocabularies retired last pack. The id is instance-unique now and the local copy is
+ * gone.
+ *
+ * ⚠️ THE REF'S TICK MARKS GO WITH IT. `WeekSlider` states its value in a live readout and its ends
+ * beneath the track; the ticks were scaffolding for a figure this control already shows. A tick
+ * scale added to the shared component for one caller would be the same debt pointing the other way.
  *
  * ⚠️ ENTER SAVES AND ESC CANCELS, stated on the control rather than assumed. A range input answers
  * arrow keys for free; without the hint nothing says the value is not already committed.
@@ -596,15 +602,11 @@ const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> =
         if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOpen(false); }
       }}
     >
-      <div className="tl-setwin-eb">Your expected response time</div>
-      <input
-        type="range" className="tl-setwin-rg" min={1} max={SET_WINDOW_MAX} step={1} value={weeks} autoFocus
-        aria-label="Your expected response time, in weeks"
-        onChange={(e) => setWeeks(Number(e.target.value))}
-        style={{ ["--pct" as string]: `${((weeks - 1) / (SET_WINDOW_MAX - 1)) * 100}%` }}
-      />
-      <div className="tl-setwin-tk"><span>1 wk</span><span>4</span><span>8</span><span>12</span><span>{SET_WINDOW_MAX}+</span></div>
-      <div className="tl-setwin-val"><b>{weeks}</b><span>week{weeks === 1 ? "" : "s"} · around {exactDate(resolved).replace(/ \d{4}$/, "")}</span></div>
+      {/* ⚠️ THE EYEBROW IS THE SLIDER'S OWN LABEL — one `Your expected response time`, not a heading
+          above a control that repeats it. `WeekSlider` draws the label and the live readout together
+          on one line, which is what the local copy's eyebrow and value row were doing by hand. */}
+      <WeekSlider label="Your expected response time" value={weeks} onChange={setWeeks} min={1} max={SET_WINDOW_MAX} />
+      <div className="tl-setwin-val">around {exactDate(resolved).replace(/ \d{4}$/, "")}</div>
       <div className="tl-setwin-k">Enter to save · Esc to cancel</div>
     </div>
   );

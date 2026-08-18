@@ -187,3 +187,33 @@ describe("§2 · Done and Discard no longer share a class", () => {
     expect(editor, "the done button lost the shared shape").toContain('className="agl-hdrbtn agl-done"');
   });
 });
+
+/**
+ * §4 (provenance pack) — one response-window slider, and its id is its own.
+ *
+ * ⚠️ THE SECOND SLIDER EXISTED ONLY TO AVOID A DUPLICATE DOM ID, which was the right diagnosis and
+ * the wrong fix: two controls that must stay in visual and behavioural step is the same debt as the
+ * two send-method vocabularies. `useId` rather than a required prop, so every existing caller is
+ * untouched and no future one can forget.
+ */
+describe("§4 · the shared slider", () => {
+  const ws = readFileSync(new URL("../components/forms/WeekSlider.tsx", import.meta.url), "utf8");
+  const tl = readFileSync(new URL("../components/reading-pane/QueryTimeline.tsx", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../components/shell/f12.css", import.meta.url), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("the id is instance-unique, not a constant", () => {
+    expect(ws, "the hardcoded id is back").not.toContain('id="sa-wk"');
+    expect(ws, "the id is not derived per instance").toContain("useId()");
+    /* ⚠️ AND THE LABEL POINTS AT THE SAME ONE — a `htmlFor` left on the constant would focus
+       whichever slider came first in the document, which is the whole of the fault. */
+    expect(ws, "the label still points at a constant").toContain("htmlFor={inputId}");
+    expect(ws, "the input does not take the derived id").toContain("id={inputId}");
+  });
+
+  it("the Query Centre's control uses it, and its local copy is gone", () => {
+    expect(tl, "the shared slider is not used").toContain("<WeekSlider label=\"Your expected response time\"");
+    expect(tl, "the local range input is still here").not.toContain('className="tl-setwin-rg"');
+    expect(css, "the local slider's track styles outlived it").not.toContain(".tl-setwin-rg");
+    expect(css, "the local tick scale outlived it").not.toContain(".tl-setwin-tk");
+  });
+});

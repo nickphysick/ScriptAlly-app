@@ -1294,17 +1294,20 @@
  * cannot drift apart the way two hand-written gradients would.
  */
 .tl-setwin { background: var(--white); border: 1.5px solid var(--qc-ring); border-radius: 10px; padding: 11px 12px; }
-.tl-setwin-eb { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-bottom: 9px; }
-.tl-setwin-rg { -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 26px; background: none; outline: none; cursor: pointer; }
-.tl-setwin-rg::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--burg) 0 var(--pct, 0%), var(--n2) var(--pct, 0%) 100%); }
-.tl-setwin-rg::-moz-range-track { height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--burg) 0 var(--pct, 0%), var(--n2) var(--pct, 0%) 100%); }
-.tl-setwin-rg::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin-top: -6px; border-radius: 50%; background: var(--white); border: 1.5px solid var(--burg); box-shadow: 0 1px 3px rgba(40, 35, 30, 0.3); }
-.tl-setwin-rg::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--white); border: 1.5px solid var(--burg); box-shadow: 0 1px 3px rgba(40, 35, 30, 0.3); }
-.tl-setwin-rg:focus-visible { outline: 2px solid var(--qc-ring); outline-offset: 3px; }
-.tl-setwin-tk { display: flex; justify-content: space-between; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.08em; color: var(--qc-tx-off); margin-top: 2px; }
-.tl-setwin-val { display: flex; align-items: baseline; gap: 6px; margin-top: 8px; }
-.tl-setwin-val b { font-family: var(--f12-serif); font-size: 19px; font-weight: 500; color: var(--ink); font-variant-numeric: tabular-nums; }
-.tl-setwin-val span { font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--faint); }
+/**
+ * ⚠️ §4 · THE SLIDER IS `WeekSlider` NOW, AND THESE ARE THE ONLY OVERRIDES IT NEEDS. It is Form 11
+ * (`sa-fld`, `sa-label`) inside an F12 card, so the label takes this page's mono eyebrow and the
+ * field loses the form's bottom margin. Its TRACK, thumb and readout are left exactly as the
+ * Add-Agent and Edit-Agent forms draw them — the point of the reuse is that the three cannot drift,
+ * and restyling the parts that carry the value here would undo it.
+ *
+ * ⚠️ THE BESPOKE RANGE RULES ARE DELETED with the local copy: `.tl-setwin-rg` and its four vendor
+ * pseudo-elements, and `.tl-setwin-tk`. An orphan track style is the next person's evidence that
+ * this control still owns a slider.
+ */
+.tl-setwin .sa-fld { margin: 0; }
+.tl-setwin .sa-label { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+.tl-setwin-val { margin-top: 8px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--faint); }
 .tl-setwin-k { margin-top: 9px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-off); }
 
 /* ══ §5 · WHAT A NUDGE LEAVES BEHIND ═════════════════════════════════════════════════════════

@@ -34,40 +34,82 @@ test("§2 — the offer and the control, where a query has no stated window", as
     if (await page.locator(".tl-ask").count()) { found = i; break; }
   }
 
+  /**
+   * ⚠️ IF NOTHING OFFERS, MAKE THE STATE — the offer appears only where the agency states nothing,
+   * and every agent on this account states a time. Clearing one agency's weeks is now possible
+   * (§2 found the clear was never broken; a class was), so the section is finally reachable, and
+   * the agent is put back in a `finally`.
+   */
+  let cleared: { agent: string; weeks: string } | null = null;
   if (found < 0) {
-    console.log("  ⚠️ NO query on this account has an agency that states nothing, so the offer — and");
-    console.log("     with it this control and §1's cards 2 and 3 — cannot be reached. Unexercised on");
-    console.log("     the page; the control is asserted at source, and the states in unit tests.");
-    /* ⚠️ NOT A SILENT PASS: the absence is asserted so the console line above cannot be the only
-       record of it, and so this goes red the day the state becomes reachable and something breaks. */
-    expect(await page.locator(".tl-setwin").count(), "an editor is open with no offer to have opened it").toBe(0);
-    return;
+    const agent = await page.evaluate(() => {
+      const t = (document.querySelector(".f12-row.f12-sel")?.textContent || "").replace(/\s+/g, " ");
+      return (t.match(/[A-Z][a-z]+ [A-Z][a-z]+/) || [""])[0];
+    });
+    if (!agent) { console.log("  ⚠️ could not read an agent name to clear — unexercised"); return; }
+    await openRoute(page, "/agents", { width: 1440, height: 900 });
+    await page.waitForTimeout(1500);
+    await page.locator(".agl-acard", { hasText: agent }).first().locator(".agl-pencil").click({ timeout: 8000 });
+    await page.waitForTimeout(900);
+    const weeks = (await page.locator("#agl-weeks").inputValue()).trim();
+    await page.locator("#agl-weeks").fill("");
+    await page.locator(".agl-done").click({ timeout: 8000 });
+    await page.waitForTimeout(2000);
+    cleared = { agent, weeks };
+    console.log(`  cleared "${agent}"'s stated ${weeks} weeks to reach the offer`);
+    await openRoute(page, "/queries", { width: 1440, height: 900 });
+    await page.locator(".f12-row", { hasText: agent }).first().click({ timeout: 8000 });
+    await page.waitForTimeout(700);
+    found = 0;
   }
 
-  console.log(`  query ${found} offers a date`);
+  try {
+  console.log(`  a query offers a date`);
   await page.locator(".tl-ask-a").click();
   await page.waitForTimeout(400);
   const ed = await page.evaluate(() => {
     const e = document.querySelector<HTMLElement>(".tl-setwin");
     if (!e) return null;
+    const rg = e.querySelector<HTMLInputElement>('input[type="range"]');
     return {
-      eyebrow: (e.querySelector(".tl-setwin-eb")?.textContent || "").trim(),
+      eyebrow: (e.querySelector(".sa-label")?.textContent || "").trim(),
       value: (e.querySelector(".tl-setwin-val")?.textContent || "").replace(/\s+/g, " ").trim(),
+      readout: (e.querySelector(".sa-wk-read")?.textContent || "").trim(),
       keys: (e.querySelector(".tl-setwin-k")?.textContent || "").trim(),
-      range: !!e.querySelector('input[type="range"]'),
-      ticks: [...e.querySelectorAll(".tl-setwin-tk span")].map((s) => (s.textContent || "").trim()),
+      range: !!rg,
+      /* §4 — the SHARED slider, so its id must be instance-unique and not the old constant */
+      rangeId: rg?.id || "",
+      dupes: rg ? document.querySelectorAll(`#${CSS.escape(rg.id)}`).length : 0,
+      ticks: [],
       offerStillThere: !!document.querySelector(".tl-ask"),
     };
   });
-  console.log(`  editor · "${ed?.eyebrow}" · "${ed?.value}" · ticks ${ed?.ticks.join(" ")} · "${ed?.keys}"`);
+  console.log(`  editor · "${ed?.eyebrow}" · readout "${ed?.readout}" · "${ed?.value}" · "${ed?.keys}" · range #${ed?.rangeId} ×${ed?.dupes}`);
   expect(ed, "the offer opened nothing").not.toBeNull();
   expect(ed!.range, "the control is not a slider").toBe(true);
   expect(ed!.eyebrow, "the eyebrow does not keep the estimate the writer's").toBe("Your expected response time");
-  expect(ed!.value, "the control does not resolve to a date").toMatch(/weeks? · around \w/);
+  expect(ed!.readout, "the slider does not state its value").toMatch(/\d+ weeks?/);
+  expect(ed!.value, "the control does not resolve to a date").toMatch(/^around \w/);
+  /* ⚠️ §4 · THE SHARED SLIDER, AND ITS ID IS ITS OWN. The constant `sa-wk` is the reason a second
+     slider was built; a duplicate here would mean the reuse recreated the fault it removed. */
+  expect(ed!.rangeId, "the shared slider is back on its hardcoded id").not.toBe("sa-wk");
+  expect(ed!.dupes, "two elements share this slider's id").toBe(1);
   expect(ed!.keys, "the control does not say how to commit it").toContain("Enter to save");
   /* ⚠️ IT TAKES THE OFFER'S PLACE rather than opening beside it — the offer's whole job was to
      ask a question the control now answers. */
   expect(ed!.offerStillThere, "the control opened beside the offer instead of replacing it").toBe(false);
 
   await page.keyboard.press("Escape");
+  } finally {
+    if (cleared) {
+      await openRoute(page, "/agents", { width: 1440, height: 900 });
+      await page.waitForTimeout(1500);
+      await page.locator(".agl-acard", { hasText: cleared.agent }).first().locator(".agl-pencil").click({ timeout: 8000 });
+      await page.waitForTimeout(900);
+      await page.locator("#agl-weeks").fill(cleared.weeks);
+      await page.locator(".agl-done").click({ timeout: 8000 });
+      await page.waitForTimeout(1500);
+      console.log(`  restored "${cleared.agent}" to ${cleared.weeks} weeks`);
+    }
+  }
 });
