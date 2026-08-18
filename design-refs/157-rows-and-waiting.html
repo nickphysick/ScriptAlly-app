@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — list rows & the waiting state</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;--pinksel:#fbeee6;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+em,.el,.dt,.barf{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1320px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.cols{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+.col>.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.col>.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.4;}
+.panel{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:9px 10px;}
+.grp{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:2px 4px 6px;}
+.grp:after{content:'';flex:1;height:1px;background:var(--line);}
+.r{position:relative;display:grid;align-items:center;padding:9px 7px;border-radius:9px;}
+.r+.r{box-shadow:inset 0 1px 0 var(--line);}
+.r.sel{background:var(--pinksel);box-shadow:none;}
+.r.sel+.r{box-shadow:none;}
+.av{width:30px;height:30px;flex:none;border-radius:50%;background:var(--n2);color:var(--ink2);font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;align-items:center;justify-content:center;}
+.r.sel .av{background:#fff;}
+.nm{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ag{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.el{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink2);}
+.sd{border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);background:#fff;}
+.sd.big{width:26px;height:26px;font-size:11px;}
+.sd.xl{width:30px;height:30px;font-size:12px;}
+.sd.in{box-shadow:inset 0 0 0 1.5px #9db09b;color:var(--sage-tx);}
+
+/* A — today */
+.a .r{grid-template-columns:30px minmax(0,1fr) auto;gap:9px;}
+.a .meta{text-align:right;line-height:1.3;}
+.a .meta u{text-decoration:none;display:block;font-family:'JetBrains Mono',monospace;font-size:6.5px;letter-spacing:.1em;text-transform:uppercase;color:#b8b3ab;}
+.a .sd{position:absolute;right:7px;top:6px;width:17px;height:17px;font-size:8px;}
+.a .meta{padding-top:12px;}
+/* B — figure only, label in the group head */
+.b .r{grid-template-columns:30px minmax(0,1fr) auto auto;gap:10px;}
+/* C — elapsed on the agency line */
+.c .r{grid-template-columns:30px minmax(0,1fr) auto;gap:10px;}
+.c .agline{display:flex;gap:7px;align-items:baseline;}
+.c .agline .el{font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
+.c .agline .el::before{content:'· ';}
+/* D — status dot leads, avatar gone */
+.d .r{grid-template-columns:30px minmax(0,1fr) auto;gap:11px;}
+
+/* ---- waiting states ---- */
+.wcols{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.tl{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:15px 16px;}
+.ev{position:relative;padding-left:37px;}
+.m{position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--oat);
+  color:#bdb8b0;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.m.live{box-shadow:inset 0 0 0 1.5px #9db09b;color:var(--sage-tx);}
+.head{display:flex;align-items:baseline;gap:9px;min-height:26px;}
+.ttl{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;}
+.dt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.said{margin-top:6px;display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);
+  background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:7px;padding:5px 10px;}
+.said b{font-weight:500;color:var(--ink);}
+.bar{position:relative;height:6px;border-radius:3px;background:var(--n2);margin:11px 0 6px;overflow:hidden;}
+.bar i{display:block;height:100%;border-radius:3px;background:#9db09b;width:46%;}
+.bar.past i{width:100%;background:var(--oat);}
+.bar.past::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(124,58,42,.15) 5px 10px);}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.body{font-size:12.5px;color:var(--ink2);line-height:1.6;margin-top:7px;}
+.conv{margin-top:8px;font-size:12px;color:var(--faint);font-style:italic;}
+.ask{margin-top:11px;display:flex;align-items:center;gap:9px;background:var(--n1);border-radius:9px;box-shadow:inset 0 0 0 1px var(--line);padding:9px 11px;font-size:11.5px;color:var(--ink2);}
+.ask .ilink{margin-left:auto;color:var(--burg);text-decoration:underline;text-underline-offset:3px;white-space:nowrap;}
+.legend{max-width:1320px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>Query list rows <s>— the status dot is 17px because the two-line elapsed block is taking the width</s></h4>
+<div class="sheet"><div class="cols">
+
+  <div class="col a"><div class="lab">A · Today<s>Label repeated on every row; dot squeezed to 17px</s></div>
+    <div class="panel">
+      <div class="grp">No reply yet · 10</div>
+      <div class="r"><span class="av">SD</span><span><span class="nm">Sophie Dunn</span><span class="ag">Curtis Vane</span></span>
+        <span class="meta"><u>with agent for</u><span class="el">2½ years</span></span><span class="sd">»</span></div>
+      <div class="r sel"><span class="av">MR</span><span><span class="nm">Marcus Reed</span><span class="ag">Bloomsbury Quill</span></span>
+        <span class="meta"><u>with agent for</u><span class="el">2 years</span></span><span class="sd">✈</span></div>
+      <div class="r"><span class="av">PL</span><span><span class="nm">Penhallow Literary</span><span class="ag">Agent not specified</span></span>
+        <span class="meta"><u>with agent for</u><span class="el">2⅓ years</span></span><span class="sd">✈</span></div>
+    </div></div>
+
+  <div class="col b"><div class="lab">B · Label moves to the group head<s>Row keeps the figure only; dot back to 26px</s></div>
+    <div class="panel">
+      <div class="grp">No reply yet · 10 · with agent for</div>
+      <div class="r"><span class="av">SD</span><span><span class="nm">Sophie Dunn</span><span class="ag">Curtis Vane</span></span>
+        <span class="el">2½ yrs</span><span class="sd big">»</span></div>
+      <div class="r sel"><span class="av">MR</span><span><span class="nm">Marcus Reed</span><span class="ag">Bloomsbury Quill</span></span>
+        <span class="el">2 yrs</span><span class="sd big">✈</span></div>
+      <div class="r"><span class="av">PL</span><span><span class="nm">Penhallow Literary</span><span class="ag">Agent not specified</span></span>
+        <span class="el">2⅓ yrs</span><span class="sd big">✈</span></div>
+    </div></div>
+
+  <div class="col c"><div class="lab">C · Elapsed joins the agency line<s>Right column is the dot alone, at 30px</s></div>
+    <div class="panel">
+      <div class="grp">No reply yet · 10</div>
+      <div class="r"><span class="av">SD</span><span><span class="nm">Sophie Dunn</span><span class="agline"><span class="ag">Curtis Vane</span><span class="el">2½ yrs</span></span></span><span class="sd xl">»</span></div>
+      <div class="r sel"><span class="av">MR</span><span><span class="nm">Marcus Reed</span><span class="agline"><span class="ag">Bloomsbury Quill</span><span class="el">2 yrs</span></span></span><span class="sd xl">✈</span></div>
+      <div class="r"><span class="av">PL</span><span><span class="nm">Penhallow Literary</span><span class="agline"><span class="ag">Agent not specified</span><span class="el">2⅓ yrs</span></span></span><span class="sd xl">✈</span></div>
+    </div></div>
+
+  <div class="col d"><div class="lab">D · The dot leads, initials go<s>Status where the eye starts; elapsed right</s></div>
+    <div class="panel">
+      <div class="grp">No reply yet · 10</div>
+      <div class="r"><span class="sd xl">»</span><span><span class="nm">Sophie Dunn</span><span class="ag">Curtis Vane</span></span><span class="el">2½ yrs</span></div>
+      <div class="r sel"><span class="sd xl">✈</span><span><span class="nm">Marcus Reed</span><span class="ag">Bloomsbury Quill</span></span><span class="el">2 yrs</span></div>
+      <div class="r"><span class="sd xl">✈</span><span><span class="nm">Penhallow Literary</span><span class="ag">Agent not specified</span></span><span class="el">2⅓ yrs</span></div>
+    </div></div>
+
+</div></div>
+
+<h4>The waiting state <s>— three data situations, one shape</s></h4>
+<div class="sheet"><div class="wcols">
+
+  <div><div class="lab" style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px">1 · Inside the stated window</div>
+    <div class="tl"><div class="ev"><span class="m live">⌛</span>
+      <div class="head"><span class="ttl">Waiting to hear back</span><span class="dt">4 WEEKS</span></div>
+      <div class="said">Greenfield Literary say <b>eight weeks</b></div>
+      <div class="bar"><i></i></div>
+      <div class="barf"><span>Sent 13 Aug</span><span>Expected by ~8 Oct</span></div>
+    </div></div></div>
+
+  <div><div class="lab" style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px">2 · Past the stated window</div>
+    <div class="tl"><div class="ev"><span class="m">⌛</span>
+      <div class="head"><span class="ttl">No reply</span><span class="dt">2¼ YEARS</span></div>
+      <div class="said">Greenfield Literary say <b>eight weeks</b> · closed 8 Oct 2024</div>
+      <div class="bar past"><i></i></div>
+      <div class="barf"><span>Sent 13 Aug 2024</span><span>Window closed 8 Oct 2024</span></div>
+      <div class="conv">Many agencies treat silence as a pass.</div>
+    </div></div></div>
+
+  <div><div class="lab" style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px">3 · No response time stated</div>
+    <div class="tl"><div class="ev"><span class="m">⌛</span>
+      <div class="head"><span class="ttl">Waiting to hear back</span><span class="dt">5 WEEKS</span></div>
+      <div class="body">Greenfield Literary do not state a response time.</div>
+      <div class="ask">Add one and this becomes a date<a class="ilink">Set an expected date</a></div>
+    </div></div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>The rows.</b> The problem is that <i>with agent for</i> is printed on every row, and the label is what forces the two-line block that squeezes the dot to 17px. But the group heading already says <i>No reply yet</i>, so the context is established once at the top and repeated ten times below it.<br>
+  <b>B</b> moves the label into the group head and leaves the row a bare figure — dot back to 26px, one word of furniture instead of ten. <b>C</b> puts the elapsed on the agency line as a mono suffix, freeing the whole right column for a 30px dot; tightest of the four, and the agency name truncates sooner. <b>D</b> replaces the initials with the status mark, which is the boldest: the dot lands where the eye starts and gets full size, at the cost of the avatars that currently distinguish two Marcus Reeds. <b>My pick: C</b> — the elapsed is a property of the query, so it belongs on the query's own line, and it buys the biggest dot of the three that keep initials.<br><br>
+  <b>The waiting state.</b> One shape across all three, differing only in what is true.
+  <ul style="margin:6px 0 0 18px">
+    <li><b>What the agency said is a quoted chip</b>, not body text — <i>Greenfield Literary say eight weeks</i>. It is their claim, and giving it its own surface distinguishes it from the app's own words. The bar and its end labels then measure against that claim rather than an assumption.</li>
+    <li><b>State 2 adds the closing date to the same chip</b> and the convention line beneath, and the bar goes to spent hatch. The title changes from <i>Waiting to hear back</i> to <i>No reply</i>, which is the only wording change between them.</li>
+    <li><b>State 3 draws no bar at all</b> — there is nothing to measure. It states the fact plainly and offers the one thing that would change it. ⚠️ Note the copy: <i>do not state a response time</i>, not <i>no expected date set</i>, because the absence is the agency's, not the writer's oversight.</li>
+    <li><b>The marker carries the difference too</b>: sage ring while the window is open, oat ring once it has passed — so the state is legible from the rail alone.</li>
+  </ul>
+</div>
+</body></html>

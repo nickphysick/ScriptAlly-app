@@ -120,10 +120,27 @@ describe("the selected row is a flat fill, and the bookmark is retired", () => {
    */
   it("3px of ink no longer marks it — the fill does", () => {
     const sel = rule(css, ".f12-row.f12-sel");
-    /* ⚠️ `--qc-row-sel`, NOT `--pink-t` (overnight §2): with the keyboard ring removed the fill is the
-       list's ONLY cursor, so it deepened from `--n3` to `--n5`. It took its own token because
-       `--pink-t` is also a monogram and the collapsed band, and neither of those moved. */
+    /* ⚠️ `--qc-row-sel`, NOT `--pink-t`: with the keyboard ring removed the fill is the list's ONLY
+       cursor. It went `--n3` → `--n5` chasing contrast by VALUE, and is now the soft pink — a hue
+       separates at a much lighter value than a grey can. Its own token because `--pink-t` is also a
+       monogram and the collapsed band, and neither of those moved. */
     expect(sel, "the selected row lost its fill").toContain("background: var(--qc-row-sel)");
+
+    /**
+     * ⚠️ THE LITERAL IS RECONCILED AGAINST THE FAMILY IT CLAIMS TO COME FROM, not trusted. The
+     * neutral palette repoints `--pink-t` onto the grey scale, and a custom property substitutes at
+     * the USE SITE — so `var(--pink-t)` here would resolve back through that block to `--n3`. The
+     * value has to be restated, which is exactly the shape that drifts silently, so index.css's
+     * `.t-f12` declaration and f12.css's are asserted against EACH OTHER.
+     */
+    const idx = read("../index.css");
+    const family = idx.match(/--pink-t:\s*(#[0-9a-f]{6})/i)?.[1]?.toLowerCase();
+    const rowSel = css.match(/--qc-row-sel:\s*(#[0-9a-f]{6})/i)?.[1]?.toLowerCase();
+    expect(family, "index.css no longer declares --pink-t").toBeTruthy();
+    expect(rowSel, "the neutral palette states no literal for the selected row").toBeTruthy();
+    expect(rowSel, `the selected row is ${rowSel}, which is not the soft-pink family's ${family}`).toBe(family);
+    /* hover stays neutral — pink is the SELECTED state alone */
+    expect(rule(css, ".f12-row:hover"), "hover went pink too").toContain("var(--paper)");
     expect(sel, "a ring came back on top of the fill").toContain("box-shadow: none");
     expect(sel, "the blue came back").not.toContain("--blue-t");
     expect(sel, "the full-height inset edge should be gone").not.toContain("inset 3px 0 0");

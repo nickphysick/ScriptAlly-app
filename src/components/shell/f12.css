@@ -1655,8 +1655,19 @@
   --btn-line: var(--n5);
   --hairline: var(--n4);
   --qc-rim-h: var(--n6);
-  /* ⚠️ DEEPER THAN THE OTHER SURFACES BY DESIGN — it is the list's cursor, not a tint. */
-  --qc-row-sel: var(--n5);
+  /**
+   * ⚠️ THE ONE PINK THIS BLOCK LETS THROUGH, AND IT IS DELIBERATE. Everything else here repoints a
+   * pink SURFACE onto the neutral scale — including `--pink-t` two declarations above, which is why
+   * the selected row went neutral in the first place. The row is the exception: it is the list's
+   * only cursor, and a hue separates it from an unselected row in a way a value alone cannot at
+   * this lightness.
+   *
+   * ⚠️ IT IS `--pink-t`'s OWN VALUE, RESTATED, NOT A NEW PINK. `var(--pink-t)` cannot be used here:
+   * a custom property substitutes at the USE SITE, so the row would resolve it through this very
+   * block and land back on `--n3`. The literal is reconciled against index.css's `.t-f12` in
+   * `queryCentreList.test.ts` rather than trusted — two declarations asserted against each other.
+   */
+  --qc-row-sel: #f7e3dd;
   --qc-rim-off: var(--n4);
   --qc-rim-off-2: var(--n4);
   --qc-rim-sep: var(--n5);
@@ -2409,20 +2420,20 @@
  * set shadows; leaving this to inheritance is how a ring comes back without anyone choosing it.
  */
 /**
- * ⚠️ THE FILL IS THE CURSOR NOW, SO IT WAS DEEPENED (overnight §2). With the keyboard ring removed
- * this is the ONLY thing saying where the cursor is, and it measured 1.26:1 against an unselected
- * row — `--n3`, a 9-point L* step. It takes `--n5` instead, the deepest surface step before the
- * scale turns into text greys: 1.51:1, a 15.6-point step.
+ * ⚠️ THE FILL IS THE CURSOR, AND IT IS PINK. With the keyboard ring removed this is the only thing
+ * saying where the cursor is. It went `--n3` → `--n5` first, chasing contrast by VALUE, and that is
+ * the wrong axis: reaching 3:1 that way needs about #949494, a mid grey behind every selected row.
+ * The soft pink separates by HUE at a much lighter value, which is the whole reason a tint works
+ * where a grey has to be heavy.
  *
  * ⚠️ IT IS ITS OWN TOKEN RATHER THAN A REPOINTED `--pink-t`, which a monogram and the collapsed
- * band also read; and the warm palette keeps exactly what it had, because only the neutral one is
- * on the page this reasoning was measured on.
+ * band also read; and the warm palette keeps exactly what it had.
  *
- * ⚠️ AND IT STILL DOES NOT REACH 3:1 — the WCAG non-text bar for a state indicator. Reaching it
- * from white needs about #949494, a mid grey behind every selected row, which is a different page.
- * Stated here rather than quietly rounded to whatever was built: the fill is not the only signal
- * (the name goes ink-dark and the avatar inverts to white), and the conventional way to clear 3:1
- * for a keyboard cursor is a focus indicator, which this section deliberately removes.
+ * ⚠️ AND IT IS FURTHER FROM 3:1 THAN THE GREY WAS, NOT CLOSER — stated rather than rounded.
+ * Measured against an unselected white row: 1.24:1, where `--n5` was 1.51:1. Luminance contrast
+ * cannot see hue, so the number gets worse while the row gets more distinguishable. If it needs to
+ * be stronger the answer is a DEEPER PINK — `--pink-av` (#f6d7cf, 1.35:1) or `--pink-b` (#e8c8bc,
+ * 1.56:1), both already in the family — never a return to a neutral.
  */
 .f12-row.f12-sel { background: var(--qc-row-sel); box-shadow: none; }
 /**

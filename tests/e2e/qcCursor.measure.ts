@@ -147,17 +147,20 @@ test("§2 — a keyboard row and a clicked row are identical, and neither wears 
   expect(contrast, "no selected row to measure").not.toBeNull();
   /**
    * ⚠️ THE 3:1 NON-TEXT BAR (WCAG 1.4.11) IS NOT MET, AND THAT IS STATED RATHER THAN ASSERTED AWAY.
-   * Reaching it from white needs roughly #949494 — a mid grey behind every selected row, which is a
-   * different page from the one this is. What is asserted instead is what the design commits to:
-   * the fill was DEEPENED and must stay deepened (1.26:1 → 1.51:1, `--n3` → `--n5`), and the state
-   * carries more than one signal, so the fill is not doing this alone.
+   * It is also no longer the axis the design is working on: the fill separates by HUE now, and
+   * luminance contrast cannot see hue — so the ratio got WORSE (1.51:1 as a grey, 1.24:1 as the
+   * pink) while the row became more distinguishable, not less. Asserting a luminance floor here
+   * would fail the better design and pass the heavier one.
    *
-   * ⚠️ A FLOOR SET TO WHATEVER WAS JUST MEASURED WOULD ASSERT NOTHING. 1.4 is the previous value
-   * rounded UP — it fails if anyone puts the old `--n3` step back, which is the regression this
-   * guards, and it is honest about not being the accessibility bar.
+   * ⚠️ SO WHAT IS ASSERTED IS THE THING THAT ACTUALLY DOES THE WORK: the selected fill is a TINT,
+   * not a step on the grey scale — channel spread, the same measure the Editorial theme check uses
+   * in the opposite direction. #f7e3dd spreads 26; `--n5` spread 10; white spreads 0.
    */
-  expect(contrast!.ratio, `the selection fill fell back to the old faint step: ${contrast!.ratio}:1`).toBeGreaterThan(1.4);
   expect(contrast!.selected, "the selected row has no fill at all").not.toBe(contrast!.unselected);
+  const spread = (c: string) => { const v = c.match(/\d+/g)!.slice(0, 3).map(Number); return Math.max(...v) - Math.min(...v); };
+  console.log(`  channel spread: selected ${spread(contrast!.selected)} · unselected ${spread(contrast!.unselected)}`);
+  expect(spread(contrast!.selected), `the selected fill is a neutral (spread ${spread(contrast!.selected)}), not a tint — the pink went back to grey`).toBeGreaterThanOrEqual(20);
+  expect(spread(contrast!.unselected), "the unselected row is itself tinted, so hue separates nothing").toBeLessThan(8);
 
   const signals = await page.evaluate(() => {
     const rows = [...document.querySelectorAll<HTMLElement>(".f12-row")];
