@@ -156,3 +156,34 @@ describe("§1 · addQuery no longer seeds the agency's window", () => {
     expect(db, "the create-time seed is back").not.toContain("computeResponseDeadline(new Date().toISOString()");
   });
 });
+
+/**
+ * §2 (provenance pack) — the agent editor's clear was never broken.
+ *
+ * ⚠️ THE CAUSE WAS A CLASS, NOT A WRITE PATH. `.agl-done` was worn by BOTH the Done button and the
+ * Discard button beside it — a shared chassis named for one action and applied to its opposite,
+ * thirty pixels apart. A probe clicking `.agl-done` first hit DISCARD, threw the draft away, and
+ * the clear it was testing was reported as an agent-editor bug that does not exist. The write path
+ * is correct end to end: the draft diff pushes `responseTimeWeeks` into `deletes`, `saveAgentEdits`
+ * turns each delete into `deleteField()`, and the rules allow the key's absence.
+ */
+describe("§2 · Done and Discard no longer share a class", () => {
+  const editor = readFileSync(new URL("../components/agents/AgentEditor.tsx", import.meta.url), "utf8");
+  const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("exactly one control carries the committing class", () => {
+    /* ⚠️ BOUNDED, because `agl-done` is a prefix of nothing today and the looseness runs both ways —
+       this is the repo's own class-name rule, and the fault it guards is the one that caused this. */
+    const wearers = (editor.match(/className="[^"]*\bagl-done\b[^"]*"/g) || []);
+    expect(wearers, `agl-done is worn by ${wearers.length} controls: ${wearers.join(", ")}`).toHaveLength(1);
+    expect(wearers[0], "the discard button is wearing the committing class again").not.toContain("agl-disc");
+  });
+
+  it("the shape is shared through a chassis that names neither action", () => {
+    expect(css, "the chassis rule is missing").toContain(".aglist .agl-hdrbtn {");
+    expect(css, "the chassis is still named for one of the two actions").not.toMatch(/\.aglist \.agl-done \{/);
+    expect(editor, "the discard button lost the shared shape").toContain('className="agl-hdrbtn agl-disc"');
+    expect(editor, "the done button lost the shared shape").toContain('className="agl-hdrbtn agl-done"');
+  });
+});

@@ -53,10 +53,10 @@ test("§1 — an agency clearing its window loses it everywhere, on the page", a
   expect(before.qual, "this query attributes no window to begin with").toContain("advise");
 
   /* ── clear that agency's stated weeks ──
-     ⚠️ `.agl-done` RESOLVES TO TWO ELEMENTS — the flip card mounts both faces, so both Dones are in
-     the document at the same coordinates with only `backface-visibility` between them. A `.first()`
-     click lands on the wrong one and commits nothing, which is what made the last pack report this
-     clear as broken. Scope to the card holding the open editor. */
+     ⚠️ `.agl-done` USED TO MATCH TWO CONTROLS WITH OPPOSITE MEANINGS — the Discard button wore it
+     as a shared chassis, so `.first()` hit DISCARD, threw the draft away, and the clear was
+     reported as broken when it was never attempted. §2 renames the chassis; `.agl-done` is now the
+     one control that commits, and this reads as it should. */
   await openRoute(page, "/agents", { width: 1440, height: 900 });
   await page.waitForTimeout(1500);
   const card = page.locator(".agl-acard", { hasText: agent }).first();
@@ -64,7 +64,10 @@ test("§1 — an agency clearing its window loses it everywhere, on the page", a
   await page.waitForTimeout(900);
   const weeks = (await page.locator("#agl-weeks").inputValue()).trim();
   await page.locator("#agl-weeks").fill("");
-  await page.locator(".agl-done").last().click({ timeout: 8000 });
+  const dones = await page.locator(".agl-done").count();
+  console.log(`  .agl-done matches ${dones} control${dones === 1 ? "" : "s"}`);
+  expect(dones, "`.agl-done` matches more than the one control that commits").toBe(1);
+  await page.locator(".agl-done").click({ timeout: 8000 });
   await page.waitForTimeout(2000);
   console.log(`  cleared "${agent}"'s stated ${weeks} weeks`);
 
@@ -90,7 +93,7 @@ test("§1 — an agency clearing its window loses it everywhere, on the page", a
     await page.locator(".agl-acard", { hasText: agent }).first().locator(".agl-pencil").click({ timeout: 8000 });
     await page.waitForTimeout(900);
     await page.locator("#agl-weeks").fill(weeks);
-    await page.locator(".agl-done").last().click({ timeout: 8000 });
+    await page.locator(".agl-done").click({ timeout: 8000 });
     await page.waitForTimeout(1500);
     console.log(`  restored "${agent}" to ${weeks} weeks`);
   }

@@ -183,7 +183,7 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
           <span className="agl-discwrap">
             <button
               type="button"
-              className="agl-done agl-disc"
+              className="agl-hdrbtn agl-disc"
               onClick={() => (dirty ? setConfirmDiscard(true) : onDiscard())}
               title="Discard"
               aria-label="Discard"
@@ -201,7 +201,10 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
             )}
           </span>
         )}
-        <button type="button" className="agl-done" onClick={onDone} title="Done" aria-label="Done">
+        {/* ⚠️ THE ONLY `.agl-done` IN THE DOCUMENT. The Discard button beside it wore the same class
+            as a chassis, so `.agl-done` matched two controls with opposite meanings and a selector
+            taking the first got Discard — see the note on `.agl-hdrbtn` in agentList.css. */}
+        <button type="button" className="agl-hdrbtn agl-done" onClick={onDone} title="Done" aria-label="Done">
           <Check width={14} height={14} aria-hidden="true" />
         </button>
       </div>

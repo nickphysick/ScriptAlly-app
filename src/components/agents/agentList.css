@@ -642,12 +642,22 @@
 /* the nrn row: label left, toggle right, helper beneath (agent-list-fixes P4) */
 .aglist .agl-nrn .nrnhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .aglist .agl-nrn .subl { margin-top: 5px; }
-.aglist .agl-done {
+/**
+ * ⚠️ `.agl-hdrbtn` IS THE CHASSIS; `.agl-done` AND `.agl-disc` ARE THE ACTIONS. This rule was named
+ * `.agl-done` and worn by BOTH the Done button and the Discard button beside it — a class named for
+ * one action on its own opposite, thirty pixels apart. It cost a whole pack's worth of wrong
+ * conclusions: a probe clicking `.agl-done` first hit DISCARD, threw the draft away, and the clear
+ * it was testing was reported as a bug in the agent editor that does not exist.
+ *
+ * ⚠️ THE SHAPE IS SHARED AND THE MEANING IS NOT, which is exactly what a chassis class is for.
+ * Anything selecting `.agl-done` now gets the one control that commits.
+ */
+.aglist .agl-hdrbtn {
   width: 30px; height: 30px; border-radius: 50%; flex: none;
   background: var(--agl-ink); border: 1.5px solid var(--agl-ink); color: var(--agl-cream);
   cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s;
 }
-.aglist .agl-done:hover { background: #443027; }
+.aglist .agl-hdrbtn:hover { background: #443027; }
 
 /* clickable stars with the pure-CSS hover preview: hovering a star fills it and every
    star AFTER it unfills via the general-sibling combinator */
