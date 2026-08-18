@@ -1,8 +1,10 @@
 # Holding-reply pack — Step 0 recon, the decision block, and Parts B/C
 
-**Run: 18 Aug 2026, overnight. Part A is STOPPED at Step 0 twice over: the pack stops it for
-the decision block, and the precondition check failed — the `writerExpectedDate` rules deploy
-has NOT landed on dev.** Parts B (§B1) and C (§C1) are built, verified and committed; §B2 was
+**Run: 18 Aug 2026, overnight.** Step 0's inventory and the decision block are below; Nick's
+answers (D1–D8) are recorded against them. **Part A remains STOPPED**: Phases 1–6 are gated on
+the `writerExpectedDate` rules deploy, which has NOT landed on dev and is verified as absent by
+a committed canary. F1 and F2 — the two live faults, which depend on neither the deploy nor the
+decisions — are DONE. Parts B (§B1) and C (§C1) are built, verified and committed; §B2 was
 already built by the previous pack; §B3/§C2/§C3 are the write-ups at the foot of this file.
 
 ---
@@ -23,6 +25,75 @@ its rules reject.
 scriptally-dev` (both configs — the dual-DB rule), verified by release `updateTime` via
 `--debug`, never the success line. Prod rules ride Nick's normal prod flow. Re-run the canary
 after: `npx playwright test --project=measure writerDeploy`.
+
+---
+
+## F1 and F2 — the two live faults (DONE, 18 Aug)
+
+**F1 · `getTimelineFamily`'s silent default — FIXED.** The final `default: return "outgoing"`
+was reached by anything unplaceable, and `outgoing` is a claim about direction. A seventh
+family, `unknown`, plus a once-per-value `console.warn`; the Dashboard story feed cuts it
+through a new named seam, `isFeedDrawable`, so its two reasons for cutting a row stay
+separable. **The discriminator is the TYPE, not the description** — a legacy `Status Changed`
+with uncategorised prose is a known type and keeps its neutral reading; only a type string
+absent from `ActivityType` is unplaceable, and a row carrying a known `resultingStatus` is
+still placed by that status whatever its type says. Two incidental findings: the module had
+**no tests at all** (now `timelineEvent.test.ts`, verified red against the old default), and
+`FAMILY_CARD_STYLE` is imported by `Dashboard.tsx` and **never indexed** — a dead import,
+reported not touched.
+
+**F2 · Fortnight's "Response expected" — FIXED, and it was worse than stated.** The pack said
+`addQuery` no longer seeds `responseDeadline`; it is also true that the provenance pack added a
+migration that **deletes** every stored copy the agency's window can explain. So the panel had
+already gone quiet on dev for existing queries, not just future ones. (No data was lost: the
+`adopt` branch writes `writerExpectedDate` and the `deleteField` in the SAME `updateDoc`, so
+where the rules deny it the whole update is denied atomically and the stored date survives. The
+`drop` branch has landed, and those dates re-derive.)
+
+The composition was inlined in `queryAmbientStatus`, which is *why* Fortnight read a stored
+field — there was no resolver to call. **`resolveExpectedDate` now holds it once**: writer's own
+date → agency's current window → nothing. `queryAmbientStatus` keeps the house 8/12/12 fallback
+locally (it anchors a bar and belongs to nobody, which is precisely why the resolver will not
+return it); Fortnight adds no fallback, so with nothing stated it draws no event rather than
+inventing a date. `fortnightEvents` also had **no tests**; the new suite was verified red
+against the pre-fix read.
+
+⚠️ **D4's recency clause cannot be implemented, and it is a schema gap not a missing branch.**
+"The most recent of { reply-stated, writer's date }" needs to know *when each was stated*. A
+reply event carries its own date; **`writerExpectedDate` stores only the date expected, never
+the moment it was set.** With one human statement recency is trivially that one — which is why
+the resolver reads correctly today and is incomplete the moment a second arrives. Recording
+when the writer's date was set is a Phase-1 schema question, and it needs answering before
+Phase 2 can honour D4.
+
+⚠️ **`responseDeadline` now has two homes for one fact — a decision, not a bug to absorb.** The
+resolver deliberately does not read it (provenance §1). But two live controls still WRITE it:
+`MarkSentPopover` (the opt-in reminder at mark-sent, which writes the identical value to
+`nudgeDate`, so Fortnight still draws it as the follow-up reminder) and `EditQueryDrawer` /
+`saveQueryEdits`. So the writer's expected date can land in either field depending on which
+control they used. Either those two controls should write `writerExpectedDate`, or the field
+split means something narrower than it appears. **Nick's call.**
+
+**Everything else still reading `responseDeadline`** (requested inventory; none fixed):
+`taskPrecedence.replyDeadlineMs` (prefers stored, falls back to `dateSent + weeks` — degrades
+correctly, but note it does **not** read `writerExpectedDate`, so the writer's date does not
+move the to-do task or the NO REPLY YET group) · `queryCentreGroups.inputFor` (passes it
+through to the above) · `Queries.tsx` (the `due_soonest` sort, the CSV export column, a PDF
+line, the date-edit draft) · `EditQueryDrawer` (reads and writes) · `MarkSentPopover` (writes)
+· `todoBoard` / `todoLedger` / `todoHandoff` / `FocusFlow` / `ToDoPage` (the offer reply-by
+countdown and the reminder rows) · `OverToYou` · `dashboardStats.agentStatusSummaries`
+(`respondBy`) · `packageAnalytics` · `queriesFilterParam.isOverdueForReply` ·
+`computeAgentDeadlineWrites` (recomputes existing stored copies only) ·
+`activityUtils.replacePlaceholders`. **The one worth deciding soon is `taskPrecedence`**: the
+tracker honours the writer's date and the task engine does not, so a writer who sets a date
+still gets nudge/close suggestions timed off the agency's window.
+
+**Incidental, committed separately:** `tasksLayout.css` carried a comment whose opening
+delimiter was missing, so `vite build` had been emitting a css-syntax-error warning on every
+build and the browser was discarding a whole rule (verified in `dist/` before and after). It
+cost nothing only because **nothing renders `.tpl-head`** — while `tasksViewport.test.tsx`
+locks that rule's declarations by reading SOURCE, so those assertions passed throughout over a
+rule that never applied. The dead class is left alone; that is a separate decision.
 
 ---
 
@@ -119,6 +190,18 @@ both. One adjacent honesty note: Fortnight's "Response expected" still reads the
 for new queries; pre-existing, reported, not this pack's fault to fix invisibly.
 
 ---
+
+## Decisions — ANSWERED (18 Aug)
+
+D1 **No** · D2 **leave the list alone** · D3 **on the reply event** · D4 **recency between the
+two human statements, agency window as floor** (⚠️ blocked on the schema gap above — nothing
+records when the writer's date was set) · D5 **no chapter** · D6 **clears the close suggestion,
+never deletes a scheduled nudge; re-date it, or surface that it now falls inside their stated
+timeframe** · D7 **do not split `hasAgentResponded` — derive "has been in touch" at
+`EditQueryDrawer`'s guard from the activity log** · D8 **`HOLDING_REPLY = "Holding Reply"`,
+label "They replied — no decision yet"**.
+
+The original block, with the reasoning each answer was given against:
 
 ## Decisions for Nick — answer before Phase 1
 
