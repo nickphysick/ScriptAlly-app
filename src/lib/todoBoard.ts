@@ -250,6 +250,39 @@ export function derivedCopy(task: Task, q: Query | undefined, ag: Agent | undefi
       const kind = gap === "mswl" ? "WISH LIST" : gap === "materials" ? "MATERIALS" : gap === "responseTime" ? "REPLY WINDOW" : "DETAILS";
       return { kind, title: `${name} has ${dqLabel(gap)}`, who: name, subtitle: dqSub(gap), due: "", warn: false, status: undefined as QueryStatus | undefined, hk: true };
     }
+    /* ── SENDS THAT RECORDED NOTHING ──────────────────────────────────────────────────────────
+       ⚠️ THESE NEED THEIR OWN CASE, and measuring is what proved it. Falling through to `default`
+       gave the card `hk: false` (a housekeeping row wearing the status-dot slot), an empty `kind`
+       lane, and — because the bulk card resolves to no agent and is not a `SweepCard` —
+       `rowMeta`'s standing-subject fallback, which printed "Submission packages" in the slot where
+       the row's SUBJECT belongs. That fallback is correct for a card that stands for a place; this
+       one stands for a set of sends, which is the very case the fallback's own note warns about.
+
+       ⚠️ THE SUBTITLE IS THE SUBJECT, NOT A DESTINATION. The single names the manuscript the query
+       went out on; the bulk states the span it covers, because it has no single subject to name. */
+    case "materials_unrecorded":
+      return {
+        kind: "RECORD GAP",
+        title: task.title,
+        who: name,
+        subtitle: msTitle || "Nothing recorded for this send",
+        due: "NOT RECORDED",
+        warn: false,
+        status: undefined as QueryStatus | undefined,
+        hk: true,
+      };
+    case "materials_unrecorded_bulk":
+      return {
+        kind: "RECORD GAP",
+        title: task.title,
+        who: "",
+        /* ⚠️ NOT an agent and not a place — the honest subject of a bulk card is what it covers. */
+        subtitle: "Across your sent queries",
+        due: "NOT RECORDED",
+        warn: false,
+        status: undefined as QueryStatus | undefined,
+        hk: true,
+      };
     default:
       return { kind: "", title: task.title, who: "", subtitle: task.context, due: "", warn: false, status: q?.status, hk: false };
   }

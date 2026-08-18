@@ -18,7 +18,9 @@ import {
   MATERIALS_GAP_CAVEAT,
   MATERIALS_BULK_RECORD_ID,
 } from "./queryMaterialsGap";
-import { boardStreamForTaskType } from "./todoBoard";
+import { boardStreamForTaskType, derivedCopy } from "./todoBoard";
+import { rowMeta } from "./todoBuckets";
+import { completionVia, isTickable } from "./todoActions";
 import { cardJourney } from "./todoJourneys";
 import { agentDataQualityNeeds } from "./agentDataQuality";
 import { ActivityType, QueryStatus, SubmissionStatus, type Activity, type Agent, type Query } from "../types";
@@ -204,5 +206,47 @@ describe("⚠️ the two task types reach the board", () => {
 
   it("the bulk id survives `isValidId`'s charset — a flag doc id is composed from it", () => {
     expect(MATERIALS_BULK_RECORD_ID).toMatch(/^[a-zA-Z0-9_-]+$/);
+  });
+});
+
+/**
+ * ⚠️ THE THREE FAULTS MEASUREMENT FOUND, LOCKED. Every one of these was green in unit tests and
+ * wrong on the page: the card took `derivedCopy`'s `default` branch, which gave it `hk: false`, an
+ * empty KIND lane, and — via `rowMeta`'s standing-subject fallback — the words "Submission
+ * packages" in the slot where the row's subject belongs. The fourth was worse and invisible in a
+ * screenshot: the tick would have run a STATUS write.
+ */
+describe("⚠️ what the page showed that the locks could not", () => {
+  const card = (taskType: string, over: Record<string, unknown> = {}) =>
+    ({ taskType, key: "k", stream: "hk", relatedRecordId: "x", record: "", who: "", ...over }) as never;
+
+  it("a materials card is HOUSEKEEPING-glyphed, not status-dotted", () => {
+    const copy = derivedCopy(
+      { taskType: "materials_unrecorded", title: "t", context: "c" } as never,
+      undefined, undefined, undefined, Date.now(),
+    );
+    expect(copy.hk).toBe(true);
+    expect(copy.status).toBeUndefined();
+  });
+
+  it("it states a KIND rather than leaving the lane blank", () => {
+    for (const t of ["materials_unrecorded", "materials_unrecorded_bulk"]) {
+      const copy = derivedCopy({ taskType: t, title: "t", context: "c" } as never, undefined, undefined, undefined, Date.now());
+      expect(copy.kind).toBe("RECORD GAP");
+    }
+  });
+
+  it('⚠️ the bulk row never prints "Submission packages" as its subject', () => {
+    expect(rowMeta(card("materials_unrecorded_bulk"))).toBe("");
+    // …and the fallback is still there for the cards it IS honest for.
+    expect(rowMeta(card("something_else"))).toBe("Submission packages");
+  });
+
+  it("⚠️ NEITHER materials card is tickable — a tick would run a mark-sent STATUS write", () => {
+    expect(completionVia(card("materials_unrecorded"))).toBe("none");
+    expect(completionVia(card("materials_unrecorded_bulk"))).toBe("none");
+    expect(isTickable(card("materials_unrecorded"))).toBe(false);
+    // the default that would have caught it is unchanged for real sends
+    expect(completionVia(card("partial_requested"))).toBe("mark-sent");
   });
 });

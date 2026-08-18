@@ -211,6 +211,19 @@ export function completionVia(card: BoardCard): CompletionVia {
   if (!card.relatedRecordId) return "none";
   if (card.taskType === "no_response_close") return "close-query";
   if (card.taskType === "nudge_overdue") return "log-nudge";
+  /* ⚠️ A RECORD GAP IS NOT A SEND, AND THE DEFAULT BELOW WOULD HAVE MADE IT ONE. Ticking a card
+     whose `completionVia` is "mark-sent" runs `recordMaterialsSent` — a STATUS write. On a single
+     materials card that would advance the query it points at; on the bulk card, whose
+     `relatedRecordId` stands for a set rather than a record, it would aim that write at an id no
+     query has. Neither is what a tick on "no record of what you sent" means.
+
+     ⚠️ THIS IS THE SAME FAULT `cardJourney` NAMES — "anything not named above used to land in
+     `sendSheet` and be offered 'Mark sent' for a task that is not a send". That one was closed by
+     naming the two real send types; this default is the other door into it, and it was still open.
+
+     "none" until the recording journey lands: no tick renders at all, which is what the sweep card
+     beside it already does. Snooze and Dismiss stay — they are how this card leaves the list. */
+  if (card.taskType === "materials_unrecorded" || card.taskType === "materials_unrecorded_bulk") return "none";
   return "mark-sent";
 }
 

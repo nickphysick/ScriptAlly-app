@@ -1,0 +1,21 @@
+── 1440×900
+  present:        true      key: task-materials-bulk
+  bucket pill:    Fix
+  title:          19 queries have no record of what you sent
+  subject line:   ""   (must NOT be "Submission packages")
+  figure label:   No date on record
+  in viewport:    true
+  owns centre px: tdg-t
+  page scroll:    0px
+  scrollbar:      0px
+── 390×844
+  present:        true      key: task-materials-bulk
+  bucket pill:    Fix
+  title:          19 queries have no record of what you sent
+  subject line:   ""   (must NOT be "Submission packages")
+  figure label:   No date on record
+  in viewport:    false
+  owns centre px: tdg-t
+  page scroll:    0px
+  scrollbar:      0px
+── page errors: 0

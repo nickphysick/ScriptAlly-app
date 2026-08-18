@@ -275,7 +275,12 @@ export function rowMeta(c: BoardCard): string {
      A sweep has neither: it stands for n agents rather than for a place, so borrowing either
      fallback would put a destination in the slot where the row's subject belongs. Empty renders no
      line at all, which is the true answer. */
-  if (isSweepCard(c)) return "";
+  /* ⚠️ A BULK RECORD GAP STANDS FOR A SET, EXACTLY LIKE A SWEEP — so it takes the same exit.
+     It is not built by `sweepCardFor` (it has no HK_RULES rule and no batch-fix sheet behind it),
+     so `isSweepCard` does not catch it, and without this it printed "Submission packages" in the
+     slot where the row's subject belongs — a destination standing in for a subject, which is the
+     precise fault the note above describes. Measured on the page; no unit lock could see it. */
+  if (isSweepCard(c) || c.taskType === "materials_unrecorded_bulk") return "";
   return cardBucket(c) === "note" ? "Your noteboard" : "Submission packages";
 }
 
