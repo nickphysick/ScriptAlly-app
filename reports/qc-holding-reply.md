@@ -42,6 +42,30 @@ still placed by that status whatever its type says. Two incidental findings: the
 `FAMILY_CARD_STYLE` is imported by `Dashboard.tsx` and **never indexed** — a dead import,
 reported not touched.
 
+⚠️ **F2's BRIEF POINTED AT A SURFACE THAT IS NOT RENDERED — correction, and it is mine.** The
+brief said Fortnight's "Response expected" is "wrong on dev today". It is wrong in the code and
+invisible in the app: `deriveFortnightEvents` has exactly two callers — **`DeskBelow`, which has
+ZERO references anywhere**, and `DiaryCarousel`, mounted only by `DiaryLab`, which `App.tsx`
+gates behind `hash === "#/diary-lab" && import.meta.env.DEV`. The dashboard renders no Fortnight
+panel at all. I fixed it and traced upward afterwards, which is the wrong order and the repo's
+own standing rule; the fix and its tests stand (they are the module's only coverage) but the
+surface is a dev lab.
+
+**The same fault IS live in one place, and that one is now fixed too:** `buildOverToYouRows`
+(Dashboard → OneScreenDashboard → OneScreenTasks — traced to a rendered root and measured at
+1440: 18 rows, 4 urgent). It read `responseDeadline` for every urgent row's deadline, so with
+the field unseeded **every row arrived null** — and the sort is deadline-asc with nulls last, so
+the documented ordering of the urgent list had collapsed to task order. Silent, because a list
+in the wrong order looks exactly like a list in the right one. The `nudge_overdue` rows also
+lost their `· N past window` clause. **Order changes; membership does not** — what is in the
+list is still the task engine's answer, so no count anywhere moves. Four assertions, verified
+red against the pre-fix read.
+
+**A third reader was repointed and is ALSO dead:** `dashboardStats.agentStatusSummaries`'
+`respondBy`, feeding the agents stat card's `· RESPOND BY 12 SEP`. `StatCardFull` is imported by
+`Dashboard.tsx` and never rendered; its `statDefs` is computed at line 506 and never read. Left
+correct rather than reverted, and labelled.
+
 **F2 · Fortnight's "Response expected" — FIXED, and it was worse than stated.** The pack said
 `addQuery` no longer seeds `responseDeadline`; it is also true that the provenance pack added a
 migration that **deletes** every stored copy the agency's window can explain. So the panel had
@@ -86,7 +110,16 @@ countdown and the reminder rows) · `OverToYou` · `dashboardStats.agentStatusSu
 `computeAgentDeadlineWrites` (recomputes existing stored copies only) ·
 `activityUtils.replacePlaceholders`. **The one worth deciding soon is `taskPrecedence`**: the
 tracker honours the writer's date and the task engine does not, so a writer who sets a date
-still gets nudge/close suggestions timed off the agency's window.
+still gets nudge/close suggestions timed off the agency's window. Untouched tonight because it
+also drives Query Centre's NO REPLY YET group and the row figures, so changing its anchor moves
+three surfaces at once — a decision, not a repair.
+
+⚠️ **AND THE DEAD-SURFACE COUNT FROM TONIGHT'S TRACING IS ITS OWN FINDING**: `DeskBelow` (zero
+references), `StatCardFull` + `useStatDefs`/`statDefs` (imported, computed, never rendered),
+`DiaryCarousel`/`DiaryLab` (DEV-hash only), `FAMILY_CARD_STYLE` (imported by Dashboard, never
+indexed), `Dashboard.tsx`'s `urgentRowCount` (computed at :1454, never read), and `.tpl-head`
+(styled and locked, rendered by nothing). None deleted — a reachability sweep is its own pass,
+and the repo's rule is to state which are dead before proposing a scope.
 
 **Incidental, committed separately:** `tasksLayout.css` carried a comment whose opening
 delimiter was missing, so `vite build` had been emitting a css-syntax-error warning on every
