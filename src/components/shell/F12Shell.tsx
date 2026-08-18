@@ -119,9 +119,19 @@ export const F12Popover: React.FC<{
   headAction?: React.ReactNode;
   /** Footer-left live text, e.g. "6 of 20 queries". */
   footText?: React.ReactNode;
+  /**
+   * §8 — the panel's own element, for `useFixedMenu`'s `auto` placement.
+   *
+   * ⚠️ THE FLIP IS DECIDED BY MEASUREMENT, and the thing to measure is this element. Without a
+   * handle on it the hook has to guess how tall a filter panel is, which is the guess that puts a
+   * panel's foot below the fold.
+   */
+  panelRef?: React.RefObject<HTMLElement | null>;
   children: React.ReactNode;
-}> = ({ width, title, onClose, style, headAction, footText, children }) => {
+}> = ({ width, title, onClose, style, headAction, footText, panelRef, children }) => {
   const ref = useRef<HTMLDivElement>(null);
+  /* one element, two holders: the outside-click handler's and the caller's placement measurement */
+  useEffect(() => { if (panelRef) (panelRef as React.MutableRefObject<HTMLElement | null>).current = ref.current; });
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       const el = ref.current;
@@ -150,7 +160,9 @@ export const F12Popover: React.FC<{
       <div
         ref={ref}
         className="f12-pop"
-        style={{ width, display: "block", zIndex: 60, ...style }}
+        /* ⚠️ A FLEX COLUMN (§8), so a `max-height` from the caller squeezes the BODY and leaves the
+           head and foot pinned. As a block it scrolled as a whole and took the foot with it. */
+        style={{ width, display: "flex", flexDirection: "column", minHeight: 0, zIndex: 60, ...style }}
         role="dialog"
         aria-label={title}
       >

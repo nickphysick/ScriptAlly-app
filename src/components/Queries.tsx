@@ -1404,10 +1404,31 @@ export const Queries: React.FC<{
     return () => window.removeEventListener("keydown", onKey);
   }, [creating]);
 
-  // Portalled popovers anchor to their icon triggers via the codebase's fixed-position utility
-  // (chrome revision — the list pane keeps overflow:hidden; the portal escapes the clip).
-  const { triggerRef: filterTrigRef, menuStyle: filterMenuStyle } = useFixedMenu<HTMLButtonElement>(filterPopOpen);
-  const { triggerRef: sortTrigRef, menuStyle: sortMenuStyle } = useFixedMenu<HTMLButtonElement>(sortPopOpen);
+  /**
+   * ══ §8 · THE FILTER AND SORT PANELS ═══════════════════════════════════════════════════════
+   *
+   * Portalled, anchored through `useFixedMenu` — the page's ONE anchoring primitive, which the
+   * mark-sent popover, the close menu, the tasks surface and both editors above already use. A
+   * third mechanism would be the third thing to keep in step.
+   *
+   * ⚠️ THREE OPTIONS, EACH FOR A MEASURED FAULT. `align: "right"` because a 288px panel hung off
+   * the LEFT of a 40px icon reached 248px across the pane beside it. `placement: "auto"` so it
+   * flips above when there is no room below — measured at 1024×900 running 85px past the fold,
+   * with the foot (and its Done) at 984 against a 900px window. `constrain` because capping the
+   * BODY at 70vh was never enough: the head and the foot sit outside it, so the panel was always
+   * taller than the limit it appeared to have.
+   *
+   * ⚠️ AND `auto` NEEDS THE MENU'S REAL HEIGHT, which is why each passes a ref — the flip is
+   * decided by measurement, not by a guess at how tall a filter panel is.
+   */
+  const filterPopRef = useRef<HTMLElement>(null);
+  const sortPopRef = useRef<HTMLElement>(null);
+  const { triggerRef: filterTrigRef, menuStyle: filterMenuStyle } = useFixedMenu<HTMLButtonElement>(
+    filterPopOpen, { placement: "auto", align: "right", constrain: true, menuRef: filterPopRef },
+  );
+  const { triggerRef: sortTrigRef, menuStyle: sortMenuStyle } = useFixedMenu<HTMLButtonElement>(
+    sortPopOpen, { placement: "auto", align: "right", constrain: true, menuRef: sortPopRef },
+  );
   // 5d — reading-pane click-to-pick: send method + manuscript, constrained to valid values, written
   // straight to the query (updateQuery is a plain patch; both keys are in the query update allowlist)
   // with an undo. The Edit drawer stays the home for everything else (agent, dates, materials…).
@@ -2033,6 +2054,7 @@ export const Queries: React.FC<{
       width={288}
       title="Filter"
       style={filterMenuStyle}
+      panelRef={filterPopRef}
       onClose={() => setFilterPopOpen(false)}
       headAction={<button type="button" className="f12-reset" onClick={resetAllFilters}>RESET ALL</button>}
       footText={<><b>{filteredList.length}</b>&nbsp;OF {queries.length} QUERIES</>}
@@ -2092,6 +2114,7 @@ export const Queries: React.FC<{
       width={276}
       title="Sort"
       style={sortMenuStyle}
+      panelRef={sortPopRef}
       onClose={() => setSortPopOpen(false)}
       footText={(F12_SORT_GROUPS.flatMap(g => g.items).find(i => i.key === sortKey)?.label || "Last activity").toUpperCase()}
     >

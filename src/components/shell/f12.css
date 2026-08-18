@@ -1377,7 +1377,12 @@
 .f12-pop-head .f12-pt { font-family: var(--f12-serif); font-size: 15.5px; font-weight: 600; }
 .f12-pop-head .f12-reset { margin-left: auto; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--muted); padding: 4px 8px; border-radius: 99px; transition: background 0.12s, color 0.12s; }
 .f12-pop-head .f12-reset:hover { background: var(--panel); color: var(--ink); }
-.f12-pop-body { max-height: min(520px, 70vh); overflow-y: auto; padding: 5px; }
+/* ⚠️ THE BODY IS THE SCROLLER, AND IT IS A FLEX ITEM NOW (§8). Its own 70vh cap was never the
+   whole panel's: the head and the foot sit outside it, so a "capped" panel was always taller than
+   its cap. `flex: 1 1 auto; min-height: 0` lets the panel's max-height — the room the trigger
+   actually has — decide, with the head and foot pinned either side. */
+.f12-pop-body { flex: 1 1 auto; min-height: 0; max-height: min(520px, 70vh); overflow-y: auto; padding: 5px; }
+.f12-pop-head, .f12-pop-foot { flex: 0 0 auto; }
 .f12-pop-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 15px; background: var(--paper); border-top: 1px solid var(--line); font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; color: var(--faint); }
 .f12-pop-foot b { color: var(--ink); font-weight: 600; }
 .f12-pop-foot .f12-done { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.09em; font-weight: 600; color: var(--panel); background: var(--ink); padding: 6px 12px; border-radius: 99px; }
