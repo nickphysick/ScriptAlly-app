@@ -1261,10 +1261,19 @@
 .tl-offer { margin-top: 10px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; padding: 10px 11px; }
 .tl-offer-f { font-family: "Inter", sans-serif; font-size: 11.5px; line-height: 1.55; color: var(--ink-2); }
 .tl-offer-a { display: flex; gap: 7px; margin-top: 9px; }
+/**
+ * ⚠️ ONE TREATMENT FOR EVERY OFFER ACTION, WHICH IS WHAT "EQUAL STANDING" MEANS. `.tl-offer-go`
+ * carried a pink fill, so `Mark closed` was a primary beside a dismissal and `Nudge now` was a
+ * primary beside two alternatives — in both offers the clause said equal and the paint said not.
+ *
+ * ⚠️ AND IT KEPT PINK'S BUDGET HONEST: a measure counting pink KINDS across the page found
+ * `tl-offer-go` as a fifth, beside the one primary, the selection and the two monograms. Pink means
+ * a small number of things here; an offer's buttons are not among them.
+ *
+ * The two class names survive so each button still says which answer it is in the markup.
+ */
 .tl-offer-go, .tl-offer-keep { font-family: "Inter", sans-serif; font-size: 11.5px; height: 32px; padding: 0 12px; border-radius: 8px; cursor: pointer; border: 1px solid var(--btn-line); background: var(--white); color: var(--ink-2); }
-.tl-offer-go { background: var(--pink); border-color: var(--qc-rim-pink); color: var(--ink); font-weight: 600; }
-.tl-offer-go:hover { filter: brightness(0.98); }
-.tl-offer-keep:hover { background: var(--paper); }
+.tl-offer-go:hover, .tl-offer-keep:hover { background: var(--paper); color: var(--ink); }
 
 /* ══ §4 · NUDGE — THE STATE ON THE CONTROL, AND THE CONFIRM ══════════════════════════════════
  *
