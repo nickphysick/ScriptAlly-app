@@ -58,7 +58,9 @@ test("§1 — the policy line is the agency's, or there is no line", async ({ pa
     expect(s.conv, "the generic convention line is still on the page").not.toContain("Many agencies");
     if (s.conv) {
       expect(s.conv, "a line rendered without naming who states the policy").toMatch(/treats? silence as a pass/);
-      expect(s.conv, "the line does not state the date their window closed").toContain("window closed");
+      /* ⚠️ `window expired` SINCE §4 — a window EXPIRES; a query is CLOSED, and they were sharing
+         the word. The clause is unchanged in what it asserts: the line states the date. */
+      expect(s.conv, "the line does not state the date their window expired").toContain("window expired");
       /* the app adds no verdict of its own */
       for (const w of ["we recommend", "you should", "unlikely", "give up"]) {
         expect(s.conv.toLowerCase(), `the line appraises: "${w}"`).not.toContain(w);
