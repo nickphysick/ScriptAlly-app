@@ -34,6 +34,26 @@ import type { Query } from "../types";
 /** The stored field's name, in one place — the rules, the writer and the readers all quote it. */
 export const WRITER_EXPECTED_FIELD = "writerExpectedDate";
 
+/**
+ * ⚠️ §1 · WHEN THE WRITER SET THEIR DATE — a MOMENT OF RECORDING, never the date expected.
+ *
+ * The two being confused is the whole reason this exists, so the name says `SetAt` rather than
+ * anything with `Date` in it: `writerExpectedDate` is what they expect, `writerExpectedSetAt` is
+ * when they said so. A reader meeting either name in isolation can tell which is which.
+ *
+ * ⚠️ IT IS WHAT MAKES D4's RECENCY CLAUSE POSSIBLE AT ALL. "The most recent of { reply-stated,
+ * writer's date }" compares STATEMENTS, and a reply event carries its own date while the writer's
+ * date carried none — so with two statements in play there was nothing to compare. This is that
+ * missing half.
+ *
+ * ⚠️ ABSENCE MEANS OLDER THAN ANY REPLY — the conservative direction, and a one-time cost. A date
+ * stored before this field existed has no recorded set-time, and inventing one (from the query, from
+ * the send, from now) would manufacture the very fact the field exists to record. Losing to a reply
+ * is the safe failure: the reply is a thing the agent actually said, and the writer can always
+ * re-state their date, which stamps it.
+ */
+export const WRITER_EXPECTED_SET_AT_FIELD = "writerExpectedSetAt";
+
 const DAY = 86400000;
 const ms = (iso?: string): number => (iso ? new Date(iso).getTime() : NaN);
 
@@ -52,6 +72,30 @@ export function writerExpectedMs(query: Pick<Query, "id">): number | null {
 }
 
 /**
+ * When the writer set their date, as an instant. `null` when the row predates the field.
+ *
+ * ⚠️ CALLERS MUST NOT DEFAULT A `null` TO `now` OR TO THE DATE ITSELF. Both would invent a
+ * statement time and hand an unstamped legacy row a recency it never earned. `resolveExpectedDate`
+ * treats null as `-Infinity`, which is the rule stated as arithmetic.
+ */
+export function writerExpectedSetAtMs(query: Pick<Query, "id">): number | null {
+  const v = (query as unknown as Record<string, unknown>)[WRITER_EXPECTED_SET_AT_FIELD];
+  if (typeof v !== "string" || !v.trim()) return null;
+  const t = ms(v);
+  return Number.isNaN(t) ? null : t;
+}
+
+/**
+ * ⚠️ THE ONE PLACE THE WRITER'S TWO FIELDS ARE WRITTEN TOGETHER. They are one statement in two
+ * columns, and a write path that set the date without the stamp would produce exactly the row this
+ * section exists to stop existing: a writer's date that silently loses every recency contest.
+ * Every control that lets the writer state a date sends this, so there is no path that can forget.
+ */
+export function writerExpectedWrite(iso: string, now: Date = new Date()): Record<string, string> {
+  return { [WRITER_EXPECTED_FIELD]: iso, [WRITER_EXPECTED_SET_AT_FIELD]: now.toISOString() };
+}
+
+/**
  * The AGENCY's window, derived: their current stated weeks from the send anchor.
  *
  * ⚠️ `null` WHEN THEY STATE NOTHING, and that is the whole point of deriving it. There is no stored
@@ -66,7 +110,21 @@ export function agentWindowMs(sentMs: number | null, weeks?: number | null): num
 /* ══ THE RESOLVER — one place the expected date is composed ═══════════════════════════════════ */
 
 /** Whose the resolved date is. `null` when nobody has stated one. */
-export type ExpectedSource = "writer" | "agent" | null;
+export type ExpectedSource = "writer" | "agent" | "reply" | null;
+
+/**
+ * ⚠️ §1/D4 · A WINDOW THE AGENT STATED IN A REPLY — theirs, about this manuscript, on that day.
+ *
+ * It is a STATEMENT, so it carries when it was made (`statedAt` = the reply's own date) and that
+ * is what the recency comparison reads. The value is never written back to the agent record: two
+ * weeks was what she said about this manuscript in August, not the agency's standing policy (D3).
+ */
+export interface ReplyStatedWindow {
+  /** The expected date the reply implies. */
+  ms: number;
+  /** When they said it — the reply event's date. */
+  statedAt: number;
+}
 
 export interface ResolvedExpected {
   /** The expected date, or `null` when nobody has stated one. */
@@ -104,9 +162,33 @@ export function resolveExpectedDate(
   query: Pick<Query, "id">,
   sentMs: number | null,
   agencyWeeks?: number | null,
+  replyStated?: ReplyStatedWindow | null,
 ): ResolvedExpected {
+  /**
+   * ⚠️ D4 · RECENCY BETWEEN THE TWO HUMAN STATEMENTS, WITH THE AGENCY'S WINDOW AS THE FLOOR — and
+   * it is recency of the STATEMENT, not of the date. A writer who sets a date today after an
+   * agency said "two more weeks" last month is making the newer statement even if the date they
+   * pick falls earlier; a fixed ladder would have got that backwards in one direction or the other
+   * whichever way it was ordered.
+   *
+   * ⚠️ AN UNSTAMPED WRITER'S DATE IS `-Infinity`, WHICH IS THE ABSENCE RULE STATED AS ARITHMETIC:
+   * it still WINS where there is no reply to lose to, and loses to every reply that exists. That
+   * is the conservative direction — the reply is something the agent actually said.
+   */
+  const statements: { ms: number; source: ExpectedSource; statedAt: number }[] = [];
+
   const mine = writerExpectedMs(query);
-  if (mine != null) return { ms: mine, source: "writer" };
+  if (mine != null) statements.push({ ms: mine, source: "writer", statedAt: writerExpectedSetAtMs(query) ?? -Infinity });
+  if (replyStated) statements.push({ ms: replyStated.ms, source: "reply", statedAt: replyStated.statedAt });
+
+  if (statements.length) {
+    /* ⚠️ `>` NOT `>=`, so a tie keeps the FIRST — the writer's. Two statements at the same instant
+       is not a real history; if it ever happens, the writer's own date is the one they can see and
+       change, which makes it the honest one to show. */
+    const best = statements.reduce((top, s) => (s.statedAt > top.statedAt ? s : top));
+    return { ms: best.ms, source: best.source };
+  }
+
   const theirs = agentWindowMs(sentMs, agencyWeeks);
   if (theirs != null) return { ms: theirs, source: "agent" };
   return { ms: null, source: null };

@@ -577,12 +577,23 @@ describe("TWS P4 artefacts — no-date gate + set-date wiring", () => {
     expect(qsrc, "the offer still opens the Edit Query overlay").not.toContain("onSetExpectedDate={() => openEditQuery");
     expect(qsrc, "the offer is not wired to a resolved date").toContain("onSetExpectedDate={(iso) => {");
     /* ⚠️ `writerExpectedDate` SINCE §1 — and this is the clause that matters most, because the
-       whole of provenance rests on nothing else writing there. */
-    expect(qsrc, "the date is not written to the writer's own field").toContain("{ [WRITER_EXPECTED_FIELD]: iso }");
+       whole of provenance rests on nothing else writing there.
+
+       ⚠️ IT ASSERTS THE HELPER, NOT A LITERAL, AND THAT CHANGE WAS FORCED BY A RED. This read
+       `toContain("{ [WRITER_EXPECTED_FIELD]: iso }")` — the exact characters of one call site — so
+       it went red the moment the write moved behind `writerExpectedWrite`, which is a REFACTOR the
+       assertion had no business having an opinion about. The claim is "the writer's own field is
+       what gets written"; pinning the punctuation that happened to express it is the brittleness
+       this repo keeps paying for in source-string locks. */
+    expect(qsrc, "the date is not written through the one writer of both columns").toContain("writerExpectedWrite(iso)");
     expect(qsrc, "the control writes the shared deadline field again").not.toContain("updateQuery(id, { responseDeadline: iso })");
     const at = qsrc.indexOf("onSetExpectedDate={(iso) => {");
     const handler = qsrc.slice(at, qsrc.indexOf("}}", qsrc.indexOf("showToast", at)));
-    expect(handler, "the handler is empty — this case is testing nothing").toContain("WRITER_EXPECTED_FIELD");
+    expect(handler, "the handler is empty — this case is testing nothing").toContain("writerExpectedWrite");
+    /* ⚠️ §1 · AND THE UNDO RESTORES BOTH COLUMNS. An undo that put the date back without its stamp
+       would leave a statement with no time, which loses every recency contest — the state this
+       section exists to stop the app producing. */
+    expect(handler, "undo does not restore the set-at stamp").toContain("WRITER_EXPECTED_SET_AT_FIELD");
     expect(handler, "the writer's estimate is being written to the agent record").not.toContain("updateAgent");
   });
 });

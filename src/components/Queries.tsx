@@ -65,7 +65,7 @@ import { responseToastTitle, type ResponseStyle } from "../lib/responseToastTitl
 import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentInitials, agentWebsiteHref, sendMethodLabel } from "../lib/agentDisplay";
 /* §1 (provenance pack) — the writer's own expected date: its field name and its one accessor. */
-import { WRITER_EXPECTED_FIELD, writerExpectedIso } from "../lib/expectedDate";
+import { WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, writerExpectedIso, writerExpectedWrite } from "../lib/expectedDate";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
@@ -5256,11 +5256,21 @@ export const Queries: React.FC<{
                                    `responseDeadline` is no longer written from here — it was the
                                    field a create-time seed also wrote, so a date in it could never
                                    be evidence of who set it. */
-                                const id = activeQuery.id, prev = writerExpectedIso(activeQuery);
-                                void updateQuery(id, { [WRITER_EXPECTED_FIELD]: iso } as never);
+                                /* ⚠️ §1 · THE DATE AND ITS SET-AT STAMP GO IN ONE WRITE, through
+                                   `writerExpectedWrite` — they are one statement in two columns,
+                                   and a path that set the date alone would produce a row that
+                                   silently loses every recency contest (D4). */
+                                const id = activeQuery.id;
+                                const prev = writerExpectedIso(activeQuery);
+                                const prevAt = (activeQuery as unknown as Record<string, unknown>)[WRITER_EXPECTED_SET_AT_FIELD];
+                                void updateQuery(id, writerExpectedWrite(iso) as never);
                                 showToast({
                                   message: `Expecting a reply by ${new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`,
-                                  undo: () => void updateQuery(id, (prev ? { [WRITER_EXPECTED_FIELD]: prev } : { [WRITER_EXPECTED_FIELD]: deleteField() }) as never),
+                                  /* undo restores BOTH columns, or clears both — an undo that left
+                                     a stamp behind would date a statement that no longer exists. */
+                                  undo: () => void updateQuery(id, (prev
+                                    ? { [WRITER_EXPECTED_FIELD]: prev, [WRITER_EXPECTED_SET_AT_FIELD]: typeof prevAt === "string" ? prevAt : deleteField() }
+                                    : { [WRITER_EXPECTED_FIELD]: deleteField(), [WRITER_EXPECTED_SET_AT_FIELD]: deleteField() }) as never),
                                 });
                               }}
                               {...(() => {

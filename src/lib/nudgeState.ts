@@ -376,7 +376,10 @@ export function silencePolicyLine(inp: SilencePolicyInput): string | null {
  * expired bar reads as though the app had not noticed.
  */
 export interface WindowAttributionInput {
-  source: "agent" | "writer" | null;
+  /* ⚠️ §1 · FOUR SOURCES NOW, AND THE FOURTH IS ALSO THE AGENCY — but speaking about THIS
+     manuscript on a particular day rather than stating a standing policy, which is why it gets its
+     own sentence rather than borrowing the `agent` one. */
+  source: "agent" | "writer" | "reply" | null;
   who: Chased;
   /** The agency's stated weeks — required for the agent voice, ignored otherwise. */
   weeks?: number | null;
@@ -398,6 +401,18 @@ export function windowAttribution(inp: WindowAttributionInput): { lead: string; 
   if (source === "writer") {
     if (expMs == null) return null;
     return { lead: "", strong: `you expect${past ? "ed" : ""} a reply by ${formatDate(expMs)}` };
+  }
+  /**
+   * ⚠️ §1/D4 · A WINDOW FROM A REPLY IS QUOTED AS A THING THEY SAID, ON A DATE. Not "advise N
+   * weeks" — that is the agency's standing turnaround, and stating it that way would promote one
+   * message about one manuscript into a policy. The sentence names the date they gave, because
+   * that is the only part of it the record actually holds (D3: the timeframe lives on the reply
+   * event and is never written back to the agent).
+   */
+  if (source === "reply") {
+    if (expMs == null) return null;
+    const verb = past ? "said they would reply by" : agree(who, "say they will reply by", "says they will reply by");
+    return { lead: `${who.name} `, strong: `${verb} ${formatDate(expMs)}` };
   }
   return null;
 }

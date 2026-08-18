@@ -13,7 +13,7 @@ import { Query, QueryStatus } from "../types";
    function the row asks rather than restating the map */
 import { elapsedPhrase } from "./elapsed";
 /* §1 (provenance pack) — the writer's own date, read through the one accessor that knows the field. */
-import { writerExpectedMs, resolveExpectedDate } from "./expectedDate";
+import { writerExpectedMs, resolveExpectedDate, type ExpectedSource } from "./expectedDate";
 import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
@@ -144,7 +144,10 @@ export interface AmbientStatus {
    * ⚠️ THE PREVIOUS PACK REMOVED THE HOUSE ASSUMPTION FROM EVERY READER. This is a level above
    * that: the assumption was already excluded, and the remaining two were still one thing.
    */
-  windowSource: "agent" | "writer" | null;
+  /* ⚠️ §1 · `reply` JOINS THE SET (D4). A window an agent stated IN A REPLY is theirs, about this
+     manuscript, on that day — not the agency's standing policy, which is why it is a fourth value
+     rather than being folded into `agent`. */
+  windowSource: ExpectedSource;
 }
 
 /** Derive the open-state numbers for a query, given the CTA engine's ball-holder + markKind. */

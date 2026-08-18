@@ -68,6 +68,15 @@ await attempt("closureOfferDismissed", "bd0cea5", () => updateDoc(qref, { closur
   () => updateDoc(qref, { closureOfferDismissed: deleteField() }));
 await attempt("writerExpectedDate", "6461c54", () => updateDoc(qref, { writerExpectedDate: new Date().toISOString() }),
   () => updateDoc(qref, { writerExpectedDate: deleteField() }));
+await attempt("writerExpectedSetAt", "§1 final pack", () => updateDoc(qref, { writerExpectedSetAt: new Date().toISOString() }),
+  () => updateDoc(qref, { writerExpectedSetAt: deleteField() }));
+
+console.log("\nglobal activity feed (isValidActivity's enumerated activityType):");
+const gref = doc(db, "users", uid, "activities", "probe-holding-reply");
+await attempt("activityType 'Holding Reply'", "Phase 1",
+  () => setDoc(gref, { id: "probe-holding-reply", userId: uid, queryId: "seed-query-1", manuscriptId: "seed-ms-1",
+    activityType: "Holding Reply", description: "probe", date: new Date().toISOString(), details: "" }),
+  () => deleteDoc(gref));
 
 console.log("\nnested per-query activity CREATE (isValidActivityNested):");
 const aref = doc(db, "users", uid, "queries", "seed-query-1", "activity", "probe-activity");

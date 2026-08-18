@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
-import { agentWindowMs, planExpectedDateMigration, resolveExpectedDate, writerExpectedIso, writerExpectedMs, WRITER_EXPECTED_FIELD, MIGRATION_TOLERANCE_MS } from "./expectedDate";
+import { agentWindowMs, planExpectedDateMigration, resolveExpectedDate, writerExpectedIso, writerExpectedMs, writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, MIGRATION_TOLERANCE_MS } from "./expectedDate";
 import { queryAmbientStatus } from "./queryAmbient";
 import { QueryStatus } from "../types";
 
@@ -144,6 +144,11 @@ describe("the one-time migration", () => {
 describe("§1 · the rules carry the field", () => {
   const rules = readFileSync(new URL("../../firestore.rules", import.meta.url), "utf8");
   it("validated and allowlisted", () => {
+    /* ⚠️ §1 · THE STAMP RIDES THE SAME DEPLOY, and asserting it here is what stops the pair being
+       split across two: a date whose stamp is denied is exactly the unstamped row the absence rule
+       was written to tolerate rather than to produce. */
+    expect(rules, "the set-at stamp is not validated").toContain("data.get('writerExpectedSetAt', null) == null");
+    expect(rules, "the set-at stamp is not in the update allowlist").toContain("'writerExpectedSetAt'");
     expect(rules, "the field is not validated in isValidQuery").toContain("data.get('writerExpectedDate', null) == null");
     expect(rules, "the field is not in the query update allowlist").toMatch(/'closureOfferDismissed', 'writerExpectedDate'/);
   });
@@ -278,5 +283,69 @@ describe("F2 · resolveExpectedDate", () => {
   it("the legacy stored field is ignored, so a seeded date cannot pose as the writer's", () => {
     expect(resolveExpectedDate(q({ responseDeadline: iso(NOW + 2 * DAY) }), sent, undefined))
       .toEqual({ ms: null, source: null });
+  });
+});
+
+/**
+ * §1 (final pack) — D4's recency clause, now that a statement can be dated.
+ *
+ * ⚠️ THE COMPARISON IS OF STATEMENTS, NOT OF DATES. A writer who sets a date today after an agency
+ * said "two more weeks" last month is making the newer statement even if the date they choose falls
+ * earlier — a fixed ladder gets that backwards in one direction whichever way it is ordered.
+ */
+describe("§1 · recency between the two human statements", () => {
+  const sent = NOW - 30 * DAY;
+  const q = (over: Record<string, unknown> = {}) => ({ id: "q1", ...over }) as never;
+  /** The agent said, on `statedAt`, that they would reply by `ms`. */
+  const reply = (statedAt: number, ms: number) => ({ ms, statedAt });
+
+  it("a writer's date set AFTER a reply-stated window wins", () => {
+    const r = resolveExpectedDate(
+      q({ [WRITER_EXPECTED_FIELD]: iso(NOW + 20 * DAY), [WRITER_EXPECTED_SET_AT_FIELD]: iso(NOW - 1 * DAY) }),
+      sent, 8, reply(NOW - 10 * DAY, NOW + 4 * DAY),
+    );
+    expect(r.source, "the older reply outranked a newer statement by the writer").toBe("writer");
+    expect(r.ms).toBe(NOW + 20 * DAY);
+  });
+
+  it("a writer's date set BEFORE it loses", () => {
+    const r = resolveExpectedDate(
+      q({ [WRITER_EXPECTED_FIELD]: iso(NOW + 20 * DAY), [WRITER_EXPECTED_SET_AT_FIELD]: iso(NOW - 30 * DAY) }),
+      sent, 8, reply(NOW - 2 * DAY, NOW + 4 * DAY),
+    );
+    expect(r.source, "a stale writer's date outranked what the agent has just said").toBe("reply");
+    expect(r.ms).toBe(NOW + 4 * DAY);
+  });
+
+  /**
+   * ⚠️ THE ABSENCE RULE, AND IT IS CONSERVATIVE ON PURPOSE. A date stored before the stamp existed
+   * has no statement time; inventing one would manufacture the fact the field exists to record. It
+   * loses to a reply — something the agent actually said — and the writer can re-state to stamp it.
+   */
+  it("a writer's date with NO timestamp loses to any reply", () => {
+    const r = resolveExpectedDate(
+      q({ [WRITER_EXPECTED_FIELD]: iso(NOW + 20 * DAY) }),
+      sent, 8, reply(NOW - 300 * DAY, NOW + 4 * DAY),
+    );
+    expect(r.source, "an unstamped legacy date was given a recency it never earned").toBe("reply");
+  });
+
+  it("but an unstamped date still wins where there is no reply to lose to", () => {
+    const r = resolveExpectedDate(q({ [WRITER_EXPECTED_FIELD]: iso(NOW + 20 * DAY) }), sent, 8, null);
+    expect(r.source).toBe("writer");
+    expect(r.ms).toBe(NOW + 20 * DAY);
+  });
+
+  it("a reply-stated window outranks the agency's standing weeks", () => {
+    const r = resolveExpectedDate(q(), sent, 8, reply(NOW - 2 * DAY, NOW + 4 * DAY));
+    expect(r.source, "the standing policy outranked what they said about this manuscript").toBe("reply");
+  });
+
+  /** ⚠️ ONE PLACE WRITES BOTH FIELDS, so no path can set a date without stamping it. */
+  it("the writer's write carries both columns", () => {
+    const at = new Date(NOW);
+    const w = writerExpectedWrite(iso(NOW + 5 * DAY), at);
+    expect(w[WRITER_EXPECTED_FIELD]).toBe(iso(NOW + 5 * DAY));
+    expect(w[WRITER_EXPECTED_SET_AT_FIELD]).toBe(at.toISOString());
   });
 });
