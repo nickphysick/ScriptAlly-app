@@ -356,9 +356,18 @@ describe("§1 · the query header is a mail header", () => {
     const lead = rule(".qc-mlead");
     expect(lead, "the shared leader rule took a ground").not.toMatch(/background|border|box-shadow|border-radius/);
 
-    /* one size and one stroke on both — a single rule, so they cannot drift */
-    expect(rule(".qc-mlead svg"), "the leaders lost their shared size").toContain("width: 20px");
-    expect(rule(".qc-mlead svg"), "the leaders lost their shared stroke").toContain("stroke-width: 1.5");
+    /* ⚠️ 26px SINCE §3 — the mark is at the scale of a small avatar rather than a leading bullet,
+       and it is still ONE rule, which is the clause that matters here: the size cannot drift
+       between leaders because there is only ever one declaration of it. */
+    expect(rule(".qc-mlead svg"), "the leaders lost their shared size").toContain("width: 26px");
+    /* ⚠️ AND IT SPANS THE BLOCK — the row span is the §3 change; where the CENTRE actually lands is
+       a rect, and `qcLead.measure.ts` reads it, because `1 / -1` sat here looking correct while
+       spanning nothing. */
+    expect(lead, "the mark sits on the first line again").toContain("grid-row: 1 / span 2");
+    /* ⚠️ 1.35 SINCE §3 — the glyph grew 20 → 26px and a 1.5px stroke scales with it into a
+       heavier drawing than the one that was approved at 20. Thinner keeps the WEIGHT the same
+       while the SIZE changes, which is the point of the enlargement. Still one declaration. */
+    expect(rule(".qc-mlead svg"), "the leaders lost their shared stroke").toContain("stroke-width: 1.35");
     /* ⚠️ AND IT IS NOT BASELINED. An inline SVG has no baseline, so a baselined wrapper aligns its
        BOTTOM MARGIN EDGE to the text and the glyph drops below the line. */
     expect(lead, "the leader is baselined — the glyph would sit below the line").toContain("align-self: center");

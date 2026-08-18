@@ -2644,9 +2644,28 @@
  * `align-self: center` puts it on the value's own centre instead.
  *
  * ⚠️ BARE — no plate, no ring, no ground. The status mark stays the card's only circular element.
+ *
+ * ⚠️ AND IT SPANS THE WHOLE LEFT BLOCK (§3). It sat in row 1 and centred on the NAME, so beside a
+ * two-row block — name over contact pills — it read as a bullet on the first line rather than as
+ * the block's mark. `grid-row: 1 / span 2` puts it against both rows; `align-self: center` then
+ * finds their shared centre.
+ *
+ * ⚠️ `span 2`, NOT `1 / -1`, AND THE MEASUREMENT IS WHY. This grid declares no
+ * `grid-template-rows`, so every row is IMPLICIT — and a negative line number counts back from the
+ * EXPLICIT grid's end, which here is line 1. `grid-row: 1 / -1` therefore resolved to `1 / 1` and
+ * spanned nothing: browser-read, the mark's centre stayed exactly on the name's (293.0 against a
+ * block centre of 309.0), with a rule in the sheet that looked like it had done the job.
+ *
+ * ⚠️ SO THE `2` IS A COUNT OF SUB-ROWS AND A TEST GUARDS IT. `qcLead.measure.ts` asserts the mark's
+ * centre against the name-and-pills block's, and requires that block to have two rows — so a third
+ * sub-row arriving fails there rather than silently leaving the mark high.
+ *
+ * ⚠️ THE RAIL DOES NOT MOVE. The box stays 30px wide — the track it was measured into — and only
+ * the GLYPH grows, 20 → 26px, to the scale of a small avatar rather than a leading bullet. Growing
+ * the box would have shifted every sub-row's indent to enlarge a drawing.
  */
-.qc-mlead { grid-column: 1; align-self: center; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
-.qc-mlead svg { width: 20px; height: 20px; fill: none; stroke: var(--faint); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.qc-mlead { grid-column: 1; grid-row: 1 / span 2; align-self: center; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
+.qc-mlead svg { width: 26px; height: 26px; fill: none; stroke: var(--faint); stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
 /**
  * ⚠️ THE PINK DISC IS RETIRED (§1), AND ITS OWN REASON RETIRES IT. §4b gave the agent's leader a
  * disc so the card's TWO rows could be told apart without the type doing it. There is one row: the
