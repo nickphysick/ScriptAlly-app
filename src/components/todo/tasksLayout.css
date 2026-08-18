@@ -34,10 +34,22 @@
   --wsh-plate-h: 84px;
 }
 
-.tpl-head` was declared TWICE in this file — here for
+/* ⚠️ ONE RULE NOW (fix pack, 10 Aug): `.tpl-head` was declared TWICE in this file — here for
    its width and again ~80 lines down for `flex: 0 0 auto` — both single-class, so any property
    they came to share would have resolved on source order alone. They never overlapped, which is
-   exactly how such a pair survives until the day it does. */
+   exactly how such a pair survives until the day it does.
+
+   ⚠️ AND THIS COMMENT'S OPENER WAS MISSING, which is the repo's own malformed-comment trap caught
+   in the act. Without it the parser read everything from the class name down to the next brace as
+   ONE selector — a selector containing a backtick, therefore invalid, therefore the declaration
+   block below was dropped whole by the browser. It cost nothing only because no component renders
+   this class (see the report); the next declaration written near it would have vanished the same
+   way, silently. `vite build` had been saying so on every single build, in a css-syntax-error
+   warning nobody read.
+
+   ⚠️ NOTE FOR ANYONE EDITING THIS BLOCK: a comment may not contain the two characters that end
+   one. Writing the broken form out to illustrate it is how this comment got broken a second time
+   while being repaired. Describe it; do not quote it. */
 .tpl-head { width: 100%; flex: 0 0 auto; }
 /* ⚠️ `.tpl-title` AND `.tpl-sub` ARE DELETED (amendment 7). The plate carries the title and the
    description now; two orphaned rules left behind are a specificity contest waiting to happen.
