@@ -2784,7 +2784,11 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
   text-decoration-thickness: 1px;
   text-underline-offset: 4px;
 }
-.qc-msec { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
+/* ⚠️ §9 · 8px → 11px, AND NOTHING ELSE MOVES. The agency is the second most important fact on this
+   card and it sat at the smallest mono size in the system — a caption's size for a subject's fact.
+   The face and the weight are untouched: mono at 11px is still unmistakably subordinate to a 23px
+   Playfair name, which is what keeps the pair a hierarchy rather than two headings. */
+.qc-msec { font-family: var(--f12-mono); font-size: 11px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
 
 /* ── the two chip families ───────────────────────────────────────────────────────────────────
    ⚠️ SAME SIZE, SAME RADIUS, DIFFERENT GROUND — and they must not be unified. A contact is a place
@@ -2989,7 +2993,9 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  * by `PaneCard`, so unscoping costs nothing and leaves ONE declaration list with two hosts.
  */
 .f12-chh { flex: none; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 13px; background: linear-gradient(180deg, var(--sage-band), var(--sage-band-2)); border-bottom: 1px solid var(--sage-edge); font-family: var(--f12-serif); font-size: 18px; font-weight: 600; color: var(--ink); }
-.f12-chh svg { width: 19px; height: 19px; stroke: var(--sageD); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+/* ⚠️ §9 · NEAR-BLACK, NOT SAGE. A sage glyph on a sage band is a tint on a tint; the ink is what
+   makes it a mark. The SIZE was already 19px and stays — the card glyph inside it is what grew. */
+.f12-chh svg { width: 19px; height: 19px; stroke: var(--ink); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 /* ⚠️ THE LIST'S CAP READS LEFT, WHERE THE READING CARDS' READ CENTRED — the ref draws it that way,
    and the reason holds: a card header names one thing, while this one states a figure and then
    qualifies it, which is a sentence and wants a left edge. A modifier, so the shared treatment is
@@ -3752,7 +3758,10 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
    information. Its two tokens go with it rather than being set to transparent: a fill nobody can
    see is the next thing someone gives a value back to. */
 .qp-cardgl { width: 19px; height: 19px; flex: 0 0 19px; display: grid; place-items: center; }
-.qp-cardgl svg { width: 11px; height: 11px; stroke: var(--burg); fill: none; stroke-width: 1.6; }
+/* ⚠️ §9 · 11 → 17px AND NEAR-BLACK. At 11px in burgundy the card glyphs read as decoration beside
+   an 18px Playfair title — a tint the eye skips rather than a mark that names the card. Burgundy
+   also means OUTGOING in the StatusDot system, which is on this very page. */
+.qp-cardgl svg { width: 17px; height: 17px; stroke: var(--ink); fill: none; stroke-width: 1.5; }
 /* ⚠️ `margin-left: auto` IS WHAT RIGHT-ALIGNS IT, so the title keeps its natural width and a long
    one pushes the meta rather than being truncated by it. */
 /* ⚠️ THE META IS UNCHANGED IN EVERYTHING THE PACK NAMES — same slot, same size, same tracking, same
