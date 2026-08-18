@@ -639,8 +639,8 @@
 .aglist .agl-discpop .q { font-size: 12.5px; color: var(--agl-ink, #311e19); }
 .aglist .agl-discpop .acts { display: flex; gap: 7px; justify-content: flex-end; }
 .aglist .agl-btn-warn { background: var(--agl-pink-band); border-color: #e8c8bc; color: #7c3a2a; }
-/* the nrn row: label left, toggle right, helper beneath (agent-list-fixes P4) */
-.aglist .agl-nrn .nrnhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+/* §B1 — `.nrnhead` retired with the switch row it laid out (label left, toggle right); the
+   three-way segment stacks label → control → helper instead. */
 .aglist .agl-nrn .subl { margin-top: 5px; }
 /**
  * ⚠️ `.agl-hdrbtn` IS THE CHASSIS; `.agl-done` AND `.agl-disc` ARE THE ACTIONS. This rule was named
@@ -773,26 +773,18 @@
 
 /* ── no-response-means-no, formatted as a field beside the response time ── */
 .aglist .agl-nrn label { transition: color .18s; }
-/* struck only once the writer has SET it false; an unstated switch is greyed, not struck */
-.aglist .agl-nrn.off label { text-decoration: line-through; color: #b3a695; }
+/* §B1 — the strike-on-false rule is GONE with the switch it disambiguated: a switch drew false and
+   unset identically, so the label carried the difference; the three-way segment states all three
+   outright. Unset keeps its quiet grey — nothing stated still reads quieter. */
 .aglist .agl-nrn.unset label { color: #b3a695; }
+.aglist .agl-nrn .agl-useg { margin-top: 6px; display: flex; width: 100%; }
+.aglist .agl-nrn .agl-useg button { flex: 1 1 auto; padding: 6px 4px; white-space: nowrap; }
 .aglist .agl-nrn .ctlrow { display: flex; align-items: center; gap: 10px; min-height: 36px; }
 .aglist .agl-nrn .subl { font-size: 10px; color: var(--agl-ink-muted); font-weight: 300; line-height: 1.35; flex: 1; margin: 0; }
 
-.aglist .agl-sw {
-  width: 44px; height: 24px; border-radius: 999px; border: 1.5px solid var(--agl-ink);
-  background: var(--agl-grey-band); position: relative; cursor: pointer; flex: none;
-  transition: background .2s; padding: 0;
-}
-.aglist .agl-sw::after {
-  content: ''; position: absolute; top: 50%; left: 3px; transform: translateY(-50%);
-  width: 15px; height: 15px; border-radius: 50%; background: var(--agl-paper);
-  border: 1.25px solid var(--agl-ink); box-shadow: 0.5px 1px 0 rgba(49, 30, 25, .25);
-  transition: transform .2s ease;
-}
-/* decision 5: toggle "on" fills use the card's band colour */
-.aglist .agl-sw.on { background: var(--agl-band); }
-.aglist .agl-sw.on::after { transform: translate(20px, -50%); }
+/* §B1 — the `.agl-sw` switch rules are GONE with their only mount (the NRN toggle, now a three-way
+   segment). The "switches fill the band" grammar stands for any future switch; nothing draws one
+   today. Recoverable in git if one returns. */
 
 .aglist .agl-method-other { margin-top: 8px; }
 

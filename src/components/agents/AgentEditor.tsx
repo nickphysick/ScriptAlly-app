@@ -298,18 +298,39 @@ export const AgentEditor: React.FC<AgentEditorProps> = ({
                     </p>
                   )}
                 </div>
+                {/* §B1 (holding-reply pack) — THE POLICY CAN BE UN-SET. The switch could state the
+                    policy but never return it to not stated, so the app asserted something the
+                    agency may never have said, permanently — the same fault as a window the app
+                    invents. Three positions now, matching the Response-guidelines radio's shape
+                    (true / false / ABSENT — `agentReplyPolicy`'s law); the segment fills INK per
+                    the editor's fill grammar (band fills belong to switches). The old label
+                    strike-on-false grammar is superseded: it existed to tell false from unset on a
+                    control that drew both the same, and the segment states all three outright. */}
                 <div className={`agl-field agl-nrn ${nrnState(draft.noResponseMeansNo)}`}>
-                  <div className="nrnhead">
-                    <label className="agl-label">No response means no</label>
+                  <label className="agl-label">If they don&rsquo;t reply</label>
+                  <span className="agl-useg agl-nrnseg" role="radiogroup" aria-label="If they don't reply">
                     <button
-                      type="button"
-                      className={`agl-sw${draft.noResponseMeansNo ? " on" : ""}`}
-                      role="switch"
-                      aria-checked={!!draft.noResponseMeansNo}
-                      aria-label="No response means no"
-                      onClick={() => onChange({ noResponseMeansNo: !draft.noResponseMeansNo })}
-                    />
-                  </div>
+                      type="button" role="radio"
+                      aria-checked={draft.noResponseMeansNo === true}
+                      className={draft.noResponseMeansNo === true ? "on" : ""}
+                      title="No response means no"
+                      onClick={() => onChange({ noResponseMeansNo: true })}
+                    >Means no</button>
+                    <button
+                      type="button" role="radio"
+                      aria-checked={draft.noResponseMeansNo === false}
+                      className={draft.noResponseMeansNo === false ? "on" : ""}
+                      title="They reply either way"
+                      onClick={() => onChange({ noResponseMeansNo: false })}
+                    >They reply</button>
+                    <button
+                      type="button" role="radio"
+                      aria-checked={draft.noResponseMeansNo === undefined}
+                      className={draft.noResponseMeansNo === undefined ? "on" : ""}
+                      title="The agency has not said"
+                      onClick={() => onChange({ noResponseMeansNo: undefined })}
+                    >Not stated</button>
+                  </span>
                   <p className="subl">{nrnSubtitle(draft.noResponseMeansNo)}</p>
                 </div>
 

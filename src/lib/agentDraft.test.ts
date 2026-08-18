@@ -8,6 +8,7 @@
  * decision the writer never made.
  */
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   draftFromAgent,
   blankDraft,
@@ -206,5 +207,38 @@ describe("draftDirty — the discard confirmation's gate (agent-list-fixes P4)",
     expect(draftDirty({ ...clean, starRating: 3 })).toBe(true);
     expect(draftDirty({ ...clean, noResponseMeansNo: false })).toBe(true); // stated false IS a statement
     expect(draftDirty({ ...clean, materials: [{ ...clean.materials[0], on: true }, ...clean.materials.slice(1)] })).toBe(true);
+  });
+});
+
+/**
+ * §B1 (holding-reply pack) — THE POLICY CAN BE UN-SET.
+ *
+ * The flip editor's switch could state `noResponseMeansNo` but never return it to not stated — the
+ * same fault as a window the app invents: an assertion the agency may never have made, made
+ * permanent. The draft/diff layer supported the clear all along (the tri-state tests above); only
+ * the control could not reach it. Three explicit positions now, matching the Response-guidelines
+ * radio's shape (true / false / ABSENT — `agentReplyPolicy`'s law).
+ */
+describe("§B1 · the editor's silence policy offers not stated", () => {
+  const editor = readFileSync(new URL("../components/agents/AgentEditor.tsx", import.meta.url), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/[^\n]*/gm, "");
+  const css = readFileSync(new URL("../components/agents/agentList.css", import.meta.url), "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+
+  it("three radio positions, and the third writes ABSENCE", () => {
+    expect(editor, "the segment is not a radiogroup").toContain('className="agl-useg agl-nrnseg" role="radiogroup"');
+    expect(editor, "true is not reachable").toContain("onClick={() => onChange({ noResponseMeansNo: true })}");
+    expect(editor, "false is not reachable").toContain("onClick={() => onChange({ noResponseMeansNo: false })}");
+    /* undefined → diffDraft pushes the field into `deletes` → deleteField() — the tested clear */
+    expect(editor, "unset is not reachable — the whole point of §B1").toContain("onClick={() => onChange({ noResponseMeansNo: undefined })}");
+  });
+
+  it("the switch is gone, and so is its strike grammar", () => {
+    /* bounded per the class-name rule — `agl-sw` is a prefix of nothing live, and must stay so */
+    expect(editor, "the binary switch is back").not.toMatch(/["\s`]agl-sw["\s`]/);
+    expect(css, "the switch's rules outlived it").not.toMatch(/\.agl-sw[\s.{:]/);
+    /* the strike existed to tell false from unset on a control that drew both the same */
+    expect(css, "the strike-on-false rule outlived the switch").not.toMatch(/\.agl-nrn\.off label/);
+    expect(css, "unset lost its quiet grey").toContain(".aglist .agl-nrn.unset label");
   });
 });
