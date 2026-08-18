@@ -7,12 +7,24 @@
  * the window widened from −6…+7 (14 days) to −7…+7 (15 days, today centred at index 7).
  *
  * Derived-over-stored: every event is read from the derived model — query fields written by
- * recomputeQuery (dateSent / partial+full sent+requested dates / responseDeadline / nudgeDate /
- * the closed-response timestamps) and the activity log for the two entity-added markers. No stored
- * fields are added and nothing is written back.
+ * recomputeQuery (dateSent / partial+full sent+requested dates / nudgeDate / the closed-response
+ * timestamps) and the activity log for the two entity-added markers. No stored fields are added
+ * and nothing is written back.
+ *
+ * ⚠️ F2 (holding-reply pack) · "RESPONSE EXPECTED" READS THE RESOLVER, NOT `responseDeadline`, AND
+ * THIS WAS A LIVE REGRESSION. The provenance pack stopped `addQuery` seeding that field and added a
+ * migration that DELETES every stored copy the agency's window can explain — so on dev this panel
+ * had already gone quiet for exactly the queries it should be loudest about, and would have gone
+ * quiet for every new query ever created. Nothing failed; the events simply stopped existing.
+ *
+ * ⚠️ AND IT TAKES THE AGENCY'S WINDOW FROM THE AGENT RECORD, which is why the resolver needs the
+ * agent here: the whole point of deriving the window is that it lives on the agency and moves when
+ * they change it. Where nobody has stated anything the resolver returns null and NO event is
+ * pushed — the house 8/12/12-week assumption stays out of a panel that names dates.
  */
 import { Query, Agent, Manuscript, Activity, QueryStatus, ActivityType } from "../../types";
 import { extractAgentFromText } from "../../lib/activityUtils";
+import { resolveExpectedDate } from "../../lib/expectedDate";
 
 export const FORTNIGHT_PAST_DAYS = 7;
 export const FORTNIGHT_FUTURE_DAYS = 7;
@@ -218,7 +230,16 @@ export const deriveFortnightEvents = (
       q.status !== QueryStatus.OFFER && q.status !== QueryStatus.REJECTED &&
       q.status !== QueryStatus.WITHDRAWN && q.status !== QueryStatus.NO_RESPONSE;
     if (isOpen && !awaitingSend) {
-      const deadline = coerceDate(q.responseDeadline);
+      /* the send this reply is owed against — the same three fields the list's wait anchor reads */
+      const sendMs = [q.dateSent, q.partialSentDate, q.fullSentDate]
+        .map((iso) => (iso ? new Date(iso).getTime() : NaN))
+        .filter((t) => !Number.isNaN(t));
+      const expected = resolveExpectedDate(
+        q,
+        sendMs.length ? Math.max(...sendMs) : null,
+        agents.find((a) => a.id === q.agentId)?.responseTimeWeeks,
+      );
+      const deadline = expected.ms != null ? new Date(expected.ms) : null;
       if (deadline) {
         const diff = dayDiff(deadline, today);
         if (diff >= 0) pushQuery(q, "expected_upcoming", deadline, "Response expected", diff === 0 ? "today" : `${fmtDayMonth(deadline)} · ${relDays(deadline, today)}`);

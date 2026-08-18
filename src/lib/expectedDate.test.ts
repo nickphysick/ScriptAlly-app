@@ -6,7 +6,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
-import { agentWindowMs, planExpectedDateMigration, writerExpectedIso, writerExpectedMs, WRITER_EXPECTED_FIELD, MIGRATION_TOLERANCE_MS } from "./expectedDate";
+import { agentWindowMs, planExpectedDateMigration, resolveExpectedDate, writerExpectedIso, writerExpectedMs, WRITER_EXPECTED_FIELD, MIGRATION_TOLERANCE_MS } from "./expectedDate";
 import { queryAmbientStatus } from "./queryAmbient";
 import { QueryStatus } from "../types";
 
@@ -228,5 +228,55 @@ describe("§4 · the shared slider", () => {
     expect(cb, "the id is not derived per instance").toContain("useId()");
     expect(cb, "the label still points at a constant").toContain("htmlFor={inputId}");
     expect(cb, "the input does not take the derived id").toContain("id={inputId}");
+  });
+});
+
+/**
+ * F2 (holding-reply pack) — the composition, in one place.
+ *
+ * ⚠️ IT WAS INLINE IN `queryAmbientStatus`, which is why Fortnight read a stored field instead and
+ * the two surfaces disagreed about the same query. The tests below are the precedence itself; the
+ * tracker's own tests above prove the extraction did not change what that surface renders.
+ */
+describe("F2 · resolveExpectedDate", () => {
+  const sent = NOW - 30 * DAY;
+  const q = (over: Record<string, unknown> = {}) => ({ id: "q1", ...over }) as never;
+
+  it("the writer's own date wins outright", () => {
+    const mine = NOW + 5 * DAY;
+    expect(resolveExpectedDate(q({ [WRITER_EXPECTED_FIELD]: iso(mine) }), sent, 8)).toEqual({ ms: mine, source: "writer" });
+  });
+
+  it("otherwise the agency's window, derived from the weeks they state now", () => {
+    expect(resolveExpectedDate(q(), sent, 8)).toEqual({ ms: sent + 56 * DAY, source: "agent" });
+  });
+
+  /**
+   * ⚠️ `null` IS THE ANSWER, NOT A MISSING CASE. The house 8/12/12-week assumption is deliberately
+   * absent: it belongs to nobody, so it may anchor a bar but must never put a date in front of a
+   * writer as though someone had said it. A caller wanting it has to add it itself, in as many
+   * words — which is exactly what the tracker does and Fortnight does not.
+   */
+  it("states nothing when nobody has stated anything", () => {
+    expect(resolveExpectedDate(q(), sent, undefined)).toEqual({ ms: null, source: null });
+    expect(resolveExpectedDate(q(), sent, 0), "zero weeks is not a window").toEqual({ ms: null, source: null });
+    expect(resolveExpectedDate(q(), null, 8), "a window with nothing to anchor it to").toEqual({ ms: null, source: null });
+  });
+
+  /** An undated import with a writer's date still resolves — the date needs no send anchor. */
+  it("the writer's date needs no send anchor", () => {
+    const mine = NOW + 9 * DAY;
+    expect(resolveExpectedDate(q({ [WRITER_EXPECTED_FIELD]: iso(mine) }), null, undefined)).toEqual({ ms: mine, source: "writer" });
+  });
+
+  /**
+   * ⚠️ `responseDeadline` IS NOT READ, AND THAT IS PROVENANCE-PACK §1 HOLDING. `addQuery` used to
+   * seed that field from the AGENCY's window, so a value in it is not evidence the writer stated
+   * anything. Two live controls still write it (MarkSentPopover's opt-in reminder, EditQueryDrawer)
+   * — a decision for Nick, reported rather than papered over here.
+   */
+  it("the legacy stored field is ignored, so a seeded date cannot pose as the writer's", () => {
+    expect(resolveExpectedDate(q({ responseDeadline: iso(NOW + 2 * DAY) }), sent, undefined))
+      .toEqual({ ms: null, source: null });
   });
 });

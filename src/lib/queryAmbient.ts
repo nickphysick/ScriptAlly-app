@@ -13,7 +13,7 @@ import { Query, QueryStatus } from "../types";
    function the row asks rather than restating the map */
 import { elapsedPhrase } from "./elapsed";
 /* §1 (provenance pack) — the writer's own date, read through the one accessor that knows the field. */
-import { writerExpectedMs } from "./expectedDate";
+import { writerExpectedMs, resolveExpectedDate } from "./expectedDate";
 import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
@@ -217,19 +217,21 @@ export function queryAmbientStatus(
        *
        * That fix is this section: the field exists, and the reasoning above is history.
        */
-      const mine = writerExpectedMs(query);
-      const agentStated = !!(windowWeeks && windowWeeks > 0);
-      const useOverride = mine != null;
-      const expMs = useOverride ? mine : sentMs + mDays * DAY;
+      /* ⚠️ F2 · THE PRECEDENCE IS `resolveExpectedDate`'S, NOT A SECOND COPY OF IT. This block used
+         to compose it inline, so Fortnight — wanting the same answer — read a stored field instead
+         and the two surfaces disagreed about the same query. One resolver, and the house 8/12/12
+         fallback stays HERE because it is this surface's own: it anchors a bar and is attributed to
+         nobody, which is exactly why the resolver refuses to return it. */
+      const resolved = resolveExpectedDate(query, sentMs, windowWeeks);
+      const expMs = resolved.ms ?? sentMs + mDays * DAY;
       const span = Math.max(1, expMs - sentMs);
       return {
         ...base, mode: "waiting", nDays, sentMs, expMs,
         widthPct: Math.max(0, Math.min(1, (now - sentMs) / span)) * 100,
         overdue: now > expMs,
         daysOverdue: Math.max(0, Math.floor((now - expMs) / DAY)),
-        windowStated: agentStated || useOverride,
-        /* precedence: the writer's own date, then the agency's current window, then nobody's */
-        windowSource: useOverride ? "writer" : agentStated ? "agent" : null,
+        windowStated: resolved.source !== null,
+        windowSource: resolved.source,
       };
     }
     // P4 — no stage send date to derive from: fall back to the stored responseDeadline OVERRIDE (a

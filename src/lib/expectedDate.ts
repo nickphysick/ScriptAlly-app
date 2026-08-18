@@ -63,6 +63,55 @@ export function agentWindowMs(sentMs: number | null, weeks?: number | null): num
   return sentMs + weeks * 7 * DAY;
 }
 
+/* ══ THE RESOLVER — one place the expected date is composed ═══════════════════════════════════ */
+
+/** Whose the resolved date is. `null` when nobody has stated one. */
+export type ExpectedSource = "writer" | "agent" | null;
+
+export interface ResolvedExpected {
+  /** The expected date, or `null` when nobody has stated one. */
+  ms: number | null;
+  /** Whose it is — `null` exactly when `ms` is. */
+  source: ExpectedSource;
+}
+
+/**
+ * ⚠️ F2/D4 · THE COMPOSITION LIVES HERE, ONCE. It was inlined in `queryAmbientStatus`, which meant
+ * every other surface wanting an expected date either re-derived it or — as Fortnight did — read a
+ * stored field instead and quietly disagreed. The precedence is the pack's:
+ *
+ *     the writer's own date  →  the agency's current window  →  nothing
+ *
+ * ⚠️ `null` IS AN ANSWER, AND IT IS THE ONE THAT STOPS THE APP INVENTING A DATE. The house
+ * 8/12/12-week assumption is NOT in here: it belongs to nobody, so it can anchor a progress bar
+ * (the tracker adds it on top of this) but must never put a date in front of a writer as though
+ * someone had said it. A caller that wants the house figure has to ask for it in as many words.
+ *
+ * ⚠️ AND `responseDeadline` IS DELIBERATELY NOT READ. That is provenance-pack §1 and reversing it
+ * here would undo the whole point: `addQuery` used to seed that field from the AGENCY's window, so
+ * a value in it is not evidence the writer stated anything. It still has two live writers
+ * (MarkSentPopover's opt-in reminder, EditQueryDrawer) — see the report; that is a decision about
+ * which control writes which field, not something to paper over inside the resolver.
+ *
+ * ⚠️ D4's RECENCY CLAUSE CANNOT BE IMPLEMENTED YET, AND THE REASON IS A SCHEMA GAP RATHER THAN A
+ * MISSING BRANCH. "The most recent of { reply-stated, writer's date }" needs to know WHEN each was
+ * stated. A reply event carries its own date; `writerExpectedDate` stores only the date expected,
+ * never the moment it was set — so with two human statements in play there is nothing to compare.
+ * With one, recency is trivially that one, which is why this reads correctly today and is
+ * incomplete tomorrow. Recording when the writer's date was set is a Phase-1 schema question.
+ */
+export function resolveExpectedDate(
+  query: Pick<Query, "id">,
+  sentMs: number | null,
+  agencyWeeks?: number | null,
+): ResolvedExpected {
+  const mine = writerExpectedMs(query);
+  if (mine != null) return { ms: mine, source: "writer" };
+  const theirs = agentWindowMs(sentMs, agencyWeeks);
+  if (theirs != null) return { ms: theirs, source: "agent" };
+  return { ms: null, source: null };
+}
+
 /* ══ THE ONE-TIME MIGRATION ═══════════════════════════════════════════════════════════════════ */
 
 export interface MigrationQuery {
