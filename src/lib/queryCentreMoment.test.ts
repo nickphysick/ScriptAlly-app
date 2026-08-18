@@ -288,7 +288,16 @@ describe("§5 · reduced motion cuts to the final frame", () => {
        reduced-motion block — and the moment a `max-height` block landed below it, the lock reported
        "reduced motion HID the seal" about a `display: none` belonging to something else entirely.
        Third open-ended slice caught this way; an unbounded slice bets nothing will be added below. */
-    const at = m.lastIndexOf("@media (prefers-reduced-motion: reduce)");
+    /**
+     * ⚠️ `lastIndexOf` WAS THE WRONG ANCHOR, AND §1 PROVED IT. It meant "the reduced-motion block at
+     * the end of the file", which was true until a later section appended one of its own — the
+     * thread's settle — and this then sliced THAT block and reported "the reduced-motion block
+     * never closes". The fourth open-ended-anchor fault in this suite, and the same lesson: anchor
+     * on the CONTENT you are asserting about, never on a position in the file.
+     */
+    const marker = m.indexOf("#root.qc-lamp { transition: none; }");
+    expect(marker, "the §5 reduced-motion rule is missing").toBeGreaterThan(-1);
+    const at = m.lastIndexOf("@media (prefers-reduced-motion: reduce)", marker);
     expect(at, "the §5 reduced-motion block is missing").toBeGreaterThan(-1);
     const close = m.indexOf("\n}", at);
     expect(close, "the reduced-motion block never closes").toBeGreaterThan(at);

@@ -2392,12 +2392,14 @@
    ⚠️ To-do's rule has NO ::-webkit-scrollbar fallback, so its `scrollbar-color` half does
    nothing in Safari. The webkit pair below closes that; it is an ADDITION to the house
    pattern, and worth backporting to .tdb-tmid2 rather than leaving the two to diverge. ── */
-.f12-rows, .f12-quiet-scroll { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.f12-rows, .f12-quiet-scroll, .qn-scroll { scrollbar-width: thin; scrollbar-color: transparent transparent; }
 .f12-rows:hover, .f12-rows:focus-within,
+.qn-scroll:hover, .qn-scroll:focus-within,
 .f12-quiet-scroll:hover, .f12-quiet-scroll:focus-within { scrollbar-color: var(--hairline) transparent; }
-.f12-rows::-webkit-scrollbar, .f12-quiet-scroll::-webkit-scrollbar { width: 6px; }
-.f12-rows::-webkit-scrollbar-thumb, .f12-quiet-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; }
+.f12-rows::-webkit-scrollbar, .f12-quiet-scroll::-webkit-scrollbar, .qn-scroll::-webkit-scrollbar { width: 6px; }
+.f12-rows::-webkit-scrollbar-thumb, .f12-quiet-scroll::-webkit-scrollbar-thumb, .qn-scroll::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; }
 .f12-rows:hover::-webkit-scrollbar-thumb, .f12-rows:focus-within::-webkit-scrollbar-thumb,
+.qn-scroll:hover::-webkit-scrollbar-thumb, .qn-scroll:focus-within::-webkit-scrollbar-thumb,
 .f12-quiet-scroll:hover::-webkit-scrollbar-thumb, .f12-quiet-scroll:focus-within::-webkit-scrollbar-thumb { background: var(--hairline); }
 /**
  * ⚠️ A GRID, NOT A FLEX ROW (fix pack §2) — three columns: avatar, the name block, and a FIXED
@@ -3001,7 +3003,11 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  * `--paper` is #faf6f0, within a point, and `--line` is the same hairline the cards read. No new
  * token, no literal.
  */
-.qp-note { background: var(--paper); border: 1px solid var(--line); }
+/* ⚠️ `.qp-note` IS RETIRED WITH THE OLD NOTES BODY (§1). The thread's note is `.qn-note`, declared
+   with the rest of the thread. The rule is kept as a comment rather than deleted because
+   `paneJourney.css` cites it by name as the ground it follows — a deleted rule that another
+   stylesheet's prose points at is worse than a retired one that says so.
+   .qp-note { background: var(--paper); border: 1px solid var(--line); } */
 
 .f12-note { border: 1.5px dotted var(--qcj-rim-dash); background: transparent; border-radius: var(--r-md); padding: 13px 15px; }
 .f12-note .f12-nd { font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.13em; color: var(--faint); margin-bottom: 6px; }
@@ -3126,9 +3132,11 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
   /* ⚠️ THE `.f12-hero` OVERRIDES WENT WITH THE ELEMENT (§1) — including the one hiding a
      primary button on a card that had already lost its buttons two packs ago. */
 
-  /* touch rule: the note actions are hover-revealed on desktop and unreachable by tap — always
-     visible below md (out-specifies the pane's inline <style> rule) */
-  .f12-root .qp-note .qp-noteacts { opacity: 1; }
+  /* ⚠️ TOUCH RULE — the thread's note actions are hover-revealed on desktop and would be
+     UNREACHABLE BY TAP below md, so they are always visible there. Carried over from the old notes
+     body with the element renamed; a hover-only control on a touch device is a control that does
+     not exist, which is exactly what a lock caught when §1 rewrote this card. */
+  .f12-root .qn-acts { opacity: 1; }
 
   /* THE COMMAND BAR — the hub's settled espresso container, condensed (concept frame 03).
      Espresso = the F12 sheet's own --ink; the primary inside stays the soft-pink .f12-btn-pri
@@ -3904,3 +3912,72 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 /* the sheet's own children ride above the mark; the dock's opaque ground (folded into its one rule
    above) is what crops it */
 .qc-sheet-body { position: relative; z-index: 1; }
+
+/* ══ §1 · NOTES AS A THREAD (ref design-refs/159-notes-chat.html) ═════════════════════════════
+ *
+ * ⚠️ THE `min-height: 0` CHAIN IS THE WHOLE THING, AND IT IS UNBROKEN FROM THE CARD DOWN. A flex
+ * item's default minimum is its CONTENT, so one link without it makes the scroller grow instead of
+ * scroll and the card pushes the column open. `.f12-card` and `.f12-cfr` already carry theirs;
+ * these three complete it. Measured in `qcNotes.measure.ts`, because neither the source nor jsdom
+ * can see which link is missing.
+ */
+.qn-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.qn-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 14px 15px 6px; display: flex; flex-direction: column; gap: 10px; }
+/* ⚠️ `0 0 auto`, AND IT IS LOAD-BEARING. Beside a growing scroller a dock that CAN shrink does —
+   the composer thinning as the thread fills, which is the second of the two faults a browser pass
+   found on the to-do board. */
+.qn-dock { flex: 0 0 auto; padding: 11px 13px 13px; background: var(--white); box-shadow: inset 0 1px 0 var(--hairline); }
+
+/* the pinned strip — above the scroller, holding its place while the thread moves beneath it */
+.qn-pinned { flex: 0 0 auto; display: flex; align-items: flex-start; gap: 9px; padding: 10px 15px; background: var(--qc-row-sel); box-shadow: inset 0 -1px 0 var(--qc-rim-pink); font-family: "Inter", sans-serif; font-size: 12px; line-height: 1.55; color: var(--ink-2); }
+.qn-pinned svg { width: 13px; height: 13px; flex: none; stroke: var(--burg); fill: none; stroke-width: 1.7; margin-top: 2px; }
+.qn-pinnedtx { min-width: 0; }
+.qn-unpin { margin-left: auto; padding: 0; border: 0; background: none; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--faint); white-space: nowrap; cursor: pointer; }
+.qn-unpin:hover { color: var(--burg); }
+
+/* ⚠️ STICKY AT `top: -14px` — the scroller's own top PADDING, negated. At `top: 0` the separator
+   floats a padding's distance below the edge and the note above it shows through the gap. */
+.qn-day { position: sticky; top: -14px; z-index: 2; display: flex; align-items: center; gap: 9px; padding: 6px 0 4px; background: var(--white); font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+.qn-day::before, .qn-day::after { content: ""; flex: 1; height: 1px; background: var(--hairline); }
+
+.qn-note { position: relative; background: var(--paper); border: 1px solid var(--hairline); border-radius: 11px; padding: 11px 12px; }
+.qn-body { font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); white-space: pre-wrap; }
+.qn-meta { display: flex; align-items: center; gap: 8px; margin-top: 7px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-variant-numeric: tabular-nums; }
+/* ⚠️ HOVER-REVEALED, AND FOCUS-REVEALED TOO — an `opacity: 0` control that only hover restores is
+   reachable by Tab and invisible while it has focus. */
+.qn-acts { margin-left: auto; display: flex; gap: 9px; opacity: 0; transition: opacity 0.12s; }
+.qn-note:hover .qn-acts, .qn-acts:focus-within { opacity: 1; }
+.qn-acts button { padding: 0; border: 0; background: none; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; cursor: pointer; }
+.qn-acts button:hover { color: var(--burg); }
+/* the pinned note keeps its mark in the thread, so unpinning from either place is the same note */
+.qn-note--pin { border-color: var(--qc-rim-pink); }
+
+/* §1f — a new note lands in the tint and settles. `background-color` only: a border transition as
+   well would make the settle read as the note changing shape. */
+.qn-note--new { background: var(--qc-row-sel); border-color: var(--qc-rim-pink); transition: background-color 1.2s ease-out 1.2s, border-color 1.2s ease-out 1.2s; }
+@media (prefers-reduced-motion: reduce) { .qn-note--new { transition: none; } }
+
+.qn-empty { flex: 1; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+.qn-empty svg { width: 46px; height: 36px; stroke: var(--oatline); fill: none; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.qn-empty p { font-family: "Inter", sans-serif; font-size: 12px; line-height: 1.6; color: var(--faint); margin-top: 10px; }
+
+/* ⚠️ WHITE WITH A RIM, SAGE ON FOCUS — the field tinted PINK at rest, which spent the page's one
+   accent on a text box, and its round send button clipped at narrow widths. A labelled Save cannot
+   be clipped into a mystery. The focus rim is the page's one ring token. */
+.qn-compose { display: flex; flex-direction: column; gap: 8px; background: var(--white); border: 1px solid var(--btn-line); border-radius: 11px; padding: 10px 11px; }
+.qn-compose--on { border-color: var(--qc-ring); box-shadow: 0 0 0 1px var(--qc-ring); }
+.qn-ta { border: 0; outline: none; resize: none; background: transparent; font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink); min-height: 20px; max-height: 132px; overflow-y: auto; }
+.qn-ta::placeholder { color: var(--qc-tx-off); }
+.qn-crow { display: flex; align-items: center; gap: 8px; }
+.qn-hint { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-off); }
+.qn-send { margin-left: auto; height: 29px; padding: 0 13px; border: 1px solid var(--qc-rim-pink); border-radius: 8px; background: var(--pink); font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600; color: var(--ink); cursor: pointer; }
+.qn-send:disabled { background: var(--paper); border-color: var(--hairline); color: var(--qc-tx-off); cursor: default; }
+
+.qn-edit { display: flex; flex-direction: column; gap: 6px; }
+.qn-editta { width: 100%; font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink); background: var(--white); border: 1px solid var(--btn-line); border-radius: 7px; padding: 6px 8px; outline: none; resize: vertical; }
+.qn-editta:focus { border-color: var(--qc-ring); }
+.qn-editrow { display: flex; justify-content: flex-end; gap: 6px; }
+.qn-editx, .qn-editgo { font-family: var(--f12-mono); font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; border: 0; border-radius: 6px; padding: 5px 11px; cursor: pointer; }
+.qn-editx { background: transparent; color: var(--qc-tx-cancel); }
+.qn-editgo { background: var(--burg); color: var(--white); }
+.qn-editgo:disabled { background: var(--paper); color: var(--qc-tx-off); cursor: default; }

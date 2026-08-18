@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — Notes & materials</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;--pinksel:#fbeee6;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1340px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.card{position:relative;background:#fff;border-radius:12px;}
+.card::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);}
+.clip{border-radius:12px;overflow:hidden;}
+.ch{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));font-family:'Playfair Display',serif;font-size:17px;font-weight:500;}
+.ch svg{width:19px;height:19px;stroke:#1a1917;fill:none;stroke-width:1.7;}
+.ch .m2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);font-weight:400;}
+.cb{padding:14px 15px;}
+
+/* ---- notes ---- */
+.compose{display:flex;flex-direction:column;gap:8px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--oat);padding:11px 12px;}
+.compose.focus{box-shadow:inset 0 0 0 1.5px var(--sage-br);}
+.compose textarea{border:0;resize:none;font-family:inherit;font-size:12.5px;line-height:1.6;color:var(--ink);outline:none;background:transparent;min-height:38px;}
+.compose textarea::placeholder{color:#b5b0a8;}
+.crow{display:flex;align-items:center;gap:8px;}
+.hint{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#c0bbb3;}
+.send{margin-left:auto;font-family:inherit;font-size:11.5px;font-weight:500;height:30px;padding:0 13px;border:0;border-radius:8px;
+  background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);cursor:pointer;}
+.nlist{margin-top:13px;display:flex;flex-direction:column;gap:10px;}
+.note{position:relative;background:var(--n1);border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);padding:11px 12px;font-size:12.5px;line-height:1.6;color:var(--ink2);}
+.note .meta{display:flex;align-items:center;gap:8px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#b0aba3;}
+.note .acts{margin-left:auto;display:flex;gap:8px;opacity:0;transition:opacity .12s;}
+.note:hover .acts{opacity:1;}
+.note .acts span{cursor:pointer;color:var(--faint);}
+.note .acts span:hover{color:var(--burg);}
+.note.pinned{background:var(--pinksel);box-shadow:inset 0 0 0 1px var(--pinkb);}
+.pin{position:absolute;right:11px;top:11px;font-size:10px;color:var(--burg);}
+.daysep{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;text-transform:uppercase;color:#bdb8b0;margin:4px 0 -2px;}
+.daysep:after{content:'';flex:1;height:1px;background:var(--line);}
+.empty{text-align:center;padding:20px 12px;}
+.empty svg{width:46px;height:36px;stroke:var(--oat);fill:none;stroke-width:1.4;stroke-linecap:round;}
+.empty p{font-size:12px;color:var(--faint);line-height:1.6;margin-top:9px;}
+/* variant B — handwritten */
+.note.hand{font-family:'Caveat',cursive;font-size:16.5px;line-height:1.5;color:var(--ink);background:#fffdf8;box-shadow:inset 0 0 0 1px var(--oat);}
+/* variant C — flat, ruled */
+.note.flat{background:transparent;box-shadow:none;border-radius:0;padding:10px 2px;}
+.note.flat+.note.flat{box-shadow:inset 0 1px 0 var(--line);}
+
+/* ---- materials ---- */
+.mrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+.att{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);background:var(--n1);
+  box-shadow:inset 0 0 0 1px var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;}
+.att svg{width:12px;height:12px;stroke:var(--faint);fill:none;stroke-width:1.6;}
+.att:hover{box-shadow:inset 0 0 0 1px var(--oat);background:#fff;}
+.att .x{display:none;width:16px;height:16px;border-radius:5px;align-items:center;justify-content:center;font-size:11px;
+  color:var(--faint);background:#fff;box-shadow:inset 0 0 0 1px var(--line);margin-left:1px;}
+.att:hover .x{display:flex;}
+.att .x:hover{color:var(--burg);box-shadow:inset 0 0 0 1px var(--pinkb);background:var(--pinkc);}
+.att .qty{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);background:#fff;box-shadow:inset 0 0 0 1px var(--line);border-radius:4px;padding:1px 5px;}
+.addb{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--burg);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:8px;padding:6px 12px;cursor:pointer;}
+.addb:hover{box-shadow:inset 0 0 0 1px var(--burg);}
+.pop{position:absolute;z-index:9;width:250px;background:#fff;border-radius:11px;box-shadow:0 2px 6px rgba(40,35,30,.1),0 16px 34px -14px rgba(40,35,30,.42);padding:7px;}
+.pop h5{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:7px 9px 5px;font-weight:400;}
+.pi{display:flex;align-items:center;gap:10px;padding:9px;border-radius:8px;font-size:12.5px;cursor:pointer;}
+.pi:hover{background:var(--n1);}
+.pi .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;color:#c0bbb3;}
+.pi.done{color:#bdb8b0;cursor:default;}
+.pi.done:hover{background:transparent;}
+.sep{height:1px;background:var(--line);margin:5px 9px;}
+.stepper{display:flex;align-items:center;margin-left:auto;}
+.stepper button{width:24px;height:24px;border:0;background:#fff;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink2);cursor:pointer;font-size:13px;}
+.stepper button:first-child{border-radius:6px 0 0 6px;}.stepper button:last-child{border-radius:0 6px 6px 0;}
+.stepper span{font-family:'JetBrains Mono',monospace;font-size:11px;min-width:34px;height:24px;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -1px 0 var(--line),inset 0 1px 0 var(--line);}
+.units{display:flex;gap:4px;padding:4px 9px 8px;}
+.units span{font-size:11px;padding:4px 9px;border-radius:14px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer;}
+.units span.on{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--burg);}
+.toast{display:flex;align-items:center;gap:9px;background:#22201d;color:#f4f0eb;border-radius:10px;padding:10px 12px;font-size:12px;margin-top:11px;}
+.toast a{margin-left:auto;color:#f0d6c8;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+.wrapp{position:relative;display:inline-block;}
+.legend{max-width:1340px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>Notes <s>— three treatments for the same card</s></h4>
+<div class="sheet"><div class="cols3">
+
+  <div><div class="lab">A · Composer on top, notes beneath<s>Newest first. Composer is always reachable without scrolling.</s></div>
+    <div class="card"><div class="clip">
+      <div class="ch"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>Notes<span class="m2">3 notes</span></div>
+      <div class="cb">
+        <div class="compose focus">
+          <textarea placeholder="Write a note…">Agency moved to Submittable in June — the old form bounces.</textarea>
+          <div class="crow"><span class="hint">⌘ + Enter to save</span><button class="send">Save note</button></div>
+        </div>
+        <div class="nlist">
+          <div class="daysep">Today</div>
+          <div class="note pinned"><span class="pin">✎</span>Check the new Submittable link before nudging.
+            <div class="meta">09:14<span class="acts"><span>Edit</span><span>Delete</span></span></div></div>
+          <div class="daysep">June</div>
+          <div class="note">Priya mentioned she's clearing a backlog — said six weeks but sounded looser than that.
+            <div class="meta">30 Jun, 16:25<span class="acts"><span>Edit</span><span>Delete</span></span></div></div>
+          <div class="note">First impression: warm, specific about the comp titles.
+            <div class="meta">2 Jun, 11:02<span class="acts"><span>Edit</span><span>Delete</span></span></div></div>
+        </div>
+      </div>
+    </div></div></div>
+
+  <div><div class="lab">B · Handwritten notes<s>Caveat for the note body — the product's own "notes" voice</s></div>
+    <div class="card"><div class="clip">
+      <div class="ch"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>Notes<span class="m2">2 notes</span></div>
+      <div class="cb">
+        <div class="compose"><textarea placeholder="Write a note…"></textarea>
+          <div class="crow"><span class="hint">⌘ + Enter to save</span><button class="send">Save note</button></div></div>
+        <div class="nlist">
+          <div class="note hand">Priya mentioned she's clearing a backlog — said six weeks but sounded looser than that.
+            <div class="meta" style="font-family:'JetBrains Mono',monospace;font-size:7.5px">30 Jun, 16:25<span class="acts"><span>Edit</span><span>Delete</span></span></div></div>
+          <div class="note hand">First impression: warm, specific about the comp titles.
+            <div class="meta" style="font-family:'JetBrains Mono',monospace;font-size:7.5px">2 Jun, 11:02<span class="acts"><span>Edit</span><span>Delete</span></span></div></div>
+        </div>
+      </div>
+    </div></div></div>
+
+  <div><div class="lab">C · Flat and ruled + the empty state<s>No bubbles. Notes are a document, not a chat.</s></div>
+    <div class="card"><div class="clip">
+      <div class="ch"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>Notes<span class="m2">2 notes</span></div>
+      <div class="cb">
+        <div class="compose"><textarea placeholder="Write a note…"></textarea>
+          <div class="crow"><span class="hint">⌘ + Enter to save</span><button class="send">Save note</button></div></div>
+        <div class="nlist">
+          <div class="note flat">Priya mentioned she's clearing a backlog — said six weeks but sounded looser than that.
+            <div class="meta">30 Jun, 16:25<span class="acts"><span>Edit</span><span>Delete</span></span></div></div>
+          <div class="note flat">First impression: warm, specific about the comp titles.
+            <div class="meta">2 Jun, 11:02<span class="acts"><span>Edit</span><span>Delete</span></span></div></div>
+        </div>
+      </div>
+    </div></div>
+
+    <div class="card" style="margin-top:14px"><div class="clip">
+      <div class="ch"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>Notes</div>
+      <div class="cb">
+        <div class="compose"><textarea placeholder="Write a note…"></textarea>
+          <div class="crow"><span class="hint">⌘ + Enter to save</span><button class="send">Save note</button></div></div>
+        <div class="empty">
+          <svg viewBox="0 0 48 38"><path d="M8 6h26l6 6v20H8z"/><path d="M34 6v6h6"/><path d="M14 18h18M14 24h12"/></svg>
+          <p>Nothing noted yet. First impressions, what they said on the phone,<br>anything you'll want when they reply.</p>
+        </div>
+      </div>
+    </div></div></div>
+
+</div></div>
+
+<h4>Materials <s>— removing a pill removes it; the menu is where things come back</s></h4>
+<div class="sheet"><div class="cols3">
+
+  <div><div class="lab">1 · Rest, and hover<s>Only what was actually sent is shown</s></div>
+    <div class="card"><div class="cb">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:500">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter<span class="x">×</span></span>
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Synopsis<span class="x">×</span></span>
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Opening sample<span class="qty">3 ch</span><span class="x">×</span></span>
+        <span class="addb">+ Attach</span>
+      </div>
+    </div></div></div>
+
+  <div><div class="lab">2 · After removing the synopsis<s>The pill is gone. Undo sits in the toast, not in a ghost.</s></div>
+    <div class="card"><div class="cb">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:500">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Opening sample<span class="qty">3 ch</span></span>
+        <span class="addb">+ Attach</span>
+      </div>
+      <div class="toast">Synopsis removed<a>Undo</a></div>
+    </div></div></div>
+
+  <div><div class="lab">3 · The Attach menu, and the editor<s>Attached types are listed but inert — the menu states the full set</s></div>
+    <div class="card"><div class="cb">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:500">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+        <span class="wrapp"><span class="addb">+ Attach</span>
+          <div class="pop" style="left:0;top:36px">
+            <h5>Attach to this send</h5>
+            <div class="pi done">Query letter<span class="k">Attached</span></div>
+            <div class="pi">Synopsis</div>
+            <div class="pi">Opening sample</div>
+            <div class="pi">Other…<span class="k">Free text</span></div>
+            <div class="sep"></div>
+            <div class="pi" style="color:#6A89A7">Submission package<span class="k">Pro</span></div>
+          </div></span>
+      </div>
+      <div style="height:186px"></div>
+      <div class="wrapp" style="display:block">
+        <div class="pop" style="position:relative;top:0;width:260px;box-shadow:0 2px 6px rgba(40,35,30,.08),0 12px 26px -12px rgba(40,35,30,.34)">
+          <h5>Opening sample</h5>
+          <div class="pi" style="cursor:default">Quantity<span class="stepper"><button>−</button><span>3</span><button>+</button></span></div>
+          <div class="units"><span class="on">chapters</span><span>pages</span><span>words</span></div>
+          <div class="sep"></div>
+          <div class="pi" style="color:var(--burg)">Remove from this send</div>
+        </div>
+      </div>
+    </div></div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>Materials — your rule, applied.</b> A pill exists only if that material went with the send. Remove it and it disappears; there is no greyed ghost, because a ghost is the app remembering something that did not happen. The way back is <b>+ Attach</b>, whose menu lists the complete set of four with the attached ones shown inert — so the menu, not the row, is where you learn what a send <i>could</i> carry. Removal is undoable from the toast for a few seconds, which is what makes an instant disappearance safe. Clicking a pill opens its editor: quantity and unit for the opening sample, free text for <i>Other</i>, and remove at the foot.<br><br>
+  <b>Notes.</b> All three move the composer to the <b>top</b>, which is the significant change: a note gets written when you have just read something, so the writing surface should be where the eye already is rather than below a growing list. Newest first for the same reason. The composer is white with a rim, grows with the text, and takes ⌘+Enter — the field currently tints pink and clips its send button.<br>
+  <b>A</b> keeps notes as tinted cards with day separators and hover-revealed Edit and Delete; the pinned note is pink, which is the one use of pink here. <b>B</b> sets the note body in Caveat — the product's own handwriting voice, already in the design system for exactly this. Charming, and it will fight long or pasted notes. <b>C</b> drops the bubble entirely: notes as ruled entries in a document, which is the most restful and the most in keeping with a card that sits beside a timeline. It also shows the empty state.<br><br>
+  <b>My pick: C, with A's day separators</b> — and pinning worth adding whichever you choose, since the one note a writer needs at the top is usually the one about how to reach them.
+</div>
+</body></html>

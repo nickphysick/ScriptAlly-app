@@ -265,6 +265,8 @@ interface DbContextType {
   addJournalEntry: (queryId: string, entryText: string) => Promise<void>;
   deleteJournalEntry: (id: string) => Promise<void>;
   updateJournalEntry: (id: string, entryText: string) => Promise<void>;
+  /** §1c — pin/unpin one note. Its own writer: see the note on the implementation. */
+  pinJournalEntry: (id: string, pinned: boolean) => Promise<void>;
 
   // Note Actions (user-authored desk notes / dated tasks)
   addNote: (fields: { text: string; colour?: Note["colour"]; dueDate?: string | null }) => Promise<void>;
@@ -2054,6 +2056,23 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * §1c — pin state, per note.
+   *
+   * ⚠️ ITS OWN WRITER RATHER THAN A WIDENED `updateJournalEntry`, because they carry different
+   * risks: one rewrites the writer's prose and one flips a boolean, and a single function taking
+   * `Partial<JournalEntry>` is how a pin toggle comes to clear an entry's text. Both keys are in
+   * the update allowlist; `pinned` is optional, so an unpinned note simply does not carry it.
+   */
+  const pinJournalEntry = async (id: string, pinned: boolean) => {
+    if (!currentUser) return;
+    try {
+      await updateDoc(doc(db, "users", currentUser.id, "journalEntries", id), { pinned });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/journalEntries/${id}`);
+    }
+  };
+
   const updateJournalEntry = async (id: string, entryText: string) => {
     if (!currentUser) return;
     try {
@@ -2564,6 +2583,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addJournalEntry,
         deleteJournalEntry,
         updateJournalEntry,
+        pinJournalEntry,
         addNote,
         addPersonalGenre,
         updateNote,

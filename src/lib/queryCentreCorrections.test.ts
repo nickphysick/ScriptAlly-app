@@ -184,21 +184,34 @@ describe("§4 · the right stack fills honestly", () => {
   it("the meta counts THIS query's notes, the same set the body renders", () => {
     expect(code, "the meta counts every note in the account")
       .toContain("journalEntries.filter((e) => e.queryId === activeQuery.id).length");
-    expect(code, "the body stopped filtering to this query")
-      .toContain("journalEntries\n                            .filter(entry => entry.queryId === activeQuery.id)");
+    /* ⚠️ THE BODY IS `NotesThread` SINCE §1, so the reconciliation is that the PROP it is handed
+       filters the same set the meta counts — which is the clause, not the indentation. */
+    expect(code, "the thread is handed every note in the account")
+      .toContain(".filter((entry) => entry.queryId === activeQuery.id)");
   });
 
-  /* The list takes the remaining height and scrolls inside it; the composer holds its own. */
+  /* The thread takes the remaining height and scrolls inside it; the dock holds its own. */
   it("the list absorbs the height and the composer keeps its place", () => {
     const body = code.slice(code.indexOf('title="Notes"'), code.indexOf("</PaneCard>", code.indexOf('title="Notes"')));
-    expect(body, "the notes body stopped filling its card").toContain("flex: 1, minHeight: 0");
-    /* ⚠️ THE SCROLLER, NOT THE FADE. This named `<EdgeFadeScroll` as its proxy for "this is a
-       scroller", which was fair while the app had exactly one internal-scroll wrapper and made this
-       case fail for a reason it was never about the moment fix pack 3 §1 removed the fade from this
-       page. The two are separate concerns now: `PaneScroll` is the layout contract, `EdgeFadeScroll`
-       is that contract plus a gradient. What this case cares about is the former. */
-    expect(body, "the note list is not a scroller").toContain("<PaneScroll");
-    expect(body, "the composer can be squeezed out by a long list").toContain("flexShrink: 0");
+    /* ⚠️ THE FILL MOVED INTO THE STYLESHEET WITH THE THREAD (§1). It was an inline
+       `flex: 1, minHeight: 0` on a wrapper div; `.qn-wrap` carries both now, which is what lets the
+       browser measure walk the chain link by link instead of reading one inline style. */
+    expect(body, "the thread is not mounted here").toContain("<NotesThread");
+    const sheet = read("../components/shell/f12.css");
+    expect(sheet.slice(sheet.indexOf(".qn-wrap {")), "the thread's wrap stopped filling its card").toContain("flex: 1; min-height: 0;");
+    /**
+     * ⚠️ AND THE SCROLLER IS THE THREAD'S OWN SINCE §1 — not `PaneScroll`. This clause has been
+     * repointed twice for the same reason: it kept naming the WRAPPER of the day rather than the
+     * contract. It named `<EdgeFadeScroll`, then `<PaneScroll`, and what it has always been about is
+     * that the note list scrolls INSIDE the card rather than growing it.
+     *
+     * ⚠️ THE THREAD NEEDS ITS OWN because the pinned strip and the dock are siblings of the
+     * scroller, not contents of it — a generic wrapper would have put all three inside the scroll
+     * region and the pinned note would scroll away, which is the one thing §1c forbids.
+     */
+    expect(sheet.slice(sheet.indexOf(".qn-scroll {")), "the note list is not a scroller").toContain("overflow-y: auto");
+    /* ⚠️ IN THE STYLESHEET SINCE §1 — `.qn-dock { flex: 0 0 auto }`. Same clause, one layer along. */
+    expect(sheet.slice(sheet.indexOf(".qn-dock {")), "the composer can be squeezed out by a long thread").toContain("flex: 0 0 auto");
   });
 
   /* ⚠️ AND THE STACK IS WHAT GIVES IT A HEIGHT TO DIVIDE. Pack B's `flex: 1 1 0` on the stacked

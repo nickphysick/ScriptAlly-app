@@ -67,7 +67,7 @@ describe("frame interior padding", () => {
 
 describe("quiet scrollbars — the To-do pattern, reused", () => {
   it("thin and transparent at rest on the rows and every column body", () => {
-    expect(css).toContain(".f12-rows, .f12-quiet-scroll { scrollbar-width: thin; scrollbar-color: transparent transparent; }");
+    expect(css).toContain(".f12-rows, .f12-quiet-scroll, .qn-scroll { scrollbar-width: thin; scrollbar-color: transparent transparent; }");
     expect(todo, "To-do's pattern moved — these were meant to track each other")
       .toContain("scrollbar-color: transparent transparent");
   });
@@ -83,7 +83,13 @@ describe("quiet scrollbars — the To-do pattern, reused", () => {
      the pairing card, which does not scroll — it sizes to its contents, and a scroller there would
      be a card that hides half its own subject. Tracking and Notes keep theirs. */
   it("applied to the list rows and the reading pane's two card bodies", () => {
-    expect(queries.match(/scrollClassName="f12-quiet-scroll"/g)?.length ?? 0).toBe(2);
+    /* ⚠️ ONE `PaneScroll` NOW, AND THE THREAD JOINS THE FAMILY BY SELECTOR (§1). Notes stopped using
+       the shared wrapper — its pinned strip and dock are SIBLINGS of the scroller rather than
+       contents of it, so a wrapper that owned the whole body would have scrolled the pinned note
+       away. What matters is that the page keeps ONE scrollbar treatment, so `.qn-scroll` is named
+       in the same rules rather than given a second one. */
+    expect(queries.match(/scrollClassName="f12-quiet-scroll"/g)?.length ?? 0).toBe(1);
+    expect(css, "the thread's scroller has its own scrollbar treatment").toContain(".qn-scroll { scrollbar-width: thin");
     expect(pane, "a create-mode inner scroller came back").not.toContain('className="f12-quiet-scroll"');
   });
 

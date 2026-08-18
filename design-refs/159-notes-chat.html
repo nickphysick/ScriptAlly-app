@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — Notes as a thread</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;--pinksel:#fbeee6;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1040px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+
+.card{position:relative;background:#fff;border-radius:12px;height:520px;display:flex;flex-direction:column;min-height:0;}
+.card::after{content:'';position:absolute;inset:0;border-radius:12px;pointer-events:none;box-shadow:inset 0 0 0 1px var(--line);z-index:3;}
+.clip{border-radius:12px;overflow:hidden;display:flex;flex-direction:column;flex:1;min-height:0;}
+.ch{display:flex;align-items:center;gap:10px;padding:12px 16px;background:linear-gradient(180deg,var(--sage-a),var(--sage-b));
+  font-family:'Playfair Display',serif;font-size:17px;font-weight:500;flex:0 0 auto;}
+.ch svg{width:19px;height:19px;stroke:#1a1917;fill:none;stroke-width:1.7;}
+.ch .m2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-tx);font-weight:400;}
+
+.pinned{flex:0 0 auto;display:flex;align-items:flex-start;gap:9px;background:var(--pinksel);box-shadow:inset 0 -1px 0 var(--pinkb);
+  padding:10px 15px;font-size:12px;line-height:1.55;color:var(--ink2);}
+.pinned svg{width:13px;height:13px;flex:none;stroke:var(--burg);fill:none;stroke-width:1.7;margin-top:2px;}
+.pinned .un{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);cursor:pointer;white-space:nowrap;}
+
+.scroller{flex:1;min-height:0;overflow-y:auto;padding:14px 15px 6px;display:flex;flex-direction:column;gap:10px;}
+.scroller::-webkit-scrollbar{width:8px;}
+.scroller::-webkit-scrollbar-thumb{background:var(--oat);border-radius:4px;border:2px solid #fff;}
+.scroller::-webkit-scrollbar-track{background:transparent;}
+.daysep{display:flex;align-items:center;gap:9px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.14em;
+  text-transform:uppercase;color:#bdb8b0;position:sticky;top:-14px;background:#fff;padding:6px 0 4px;z-index:2;}
+.daysep:before,.daysep:after{content:'';flex:1;height:1px;background:var(--line);}
+.note{position:relative;background:var(--n1);border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);
+  padding:11px 12px;font-size:12.5px;line-height:1.6;color:var(--ink2);align-self:flex-start;max-width:92%;}
+.note.mine{align-self:stretch;max-width:100%;}
+.note .meta{display:flex;align-items:center;gap:8px;margin-top:7px;font-family:'JetBrains Mono',monospace;
+  font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#b0aba3;}
+.note .acts{margin-left:auto;display:flex;gap:9px;opacity:0;transition:opacity .12s;}
+.note:hover .acts{opacity:1;}
+.note .acts span{cursor:pointer;} .note .acts span:hover{color:var(--burg);}
+.note.new{background:var(--pinksel);box-shadow:inset 0 0 0 1px var(--pinkb);}
+
+.dock{flex:0 0 auto;padding:11px 13px 13px;background:#fff;box-shadow:inset 0 1px 0 var(--line);}
+.compose{display:flex;flex-direction:column;gap:8px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--oat);padding:10px 11px;}
+.compose.focus{box-shadow:inset 0 0 0 1.5px var(--sage-br);}
+.compose textarea{border:0;resize:none;font-family:inherit;font-size:12.5px;line-height:1.6;color:var(--ink);outline:none;background:transparent;min-height:20px;}
+.compose textarea::placeholder{color:#b5b0a8;}
+.crow{display:flex;align-items:center;gap:8px;}
+.hint{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#c4bfb7;}
+.send{margin-left:auto;font-family:inherit;font-size:11.5px;font-weight:500;height:29px;padding:0 13px;border:0;border-radius:8px;
+  background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);cursor:pointer;}
+.send.off{background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);color:#bdb8b0;}
+.jump{position:absolute;left:50%;transform:translateX(-50%);bottom:96px;z-index:4;display:inline-flex;align-items:center;gap:6px;
+  background:#22201d;color:#f4f0eb;border-radius:16px;padding:6px 12px;font-size:11px;box-shadow:0 6px 16px -6px rgba(40,35,30,.5);cursor:pointer;}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;}
+.empty svg{width:46px;height:36px;stroke:var(--oat);fill:none;stroke-width:1.4;stroke-linecap:round;}
+.empty p{font-size:12px;color:var(--faint);line-height:1.6;margin-top:10px;}
+.legend{max-width:1040px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>Notes as a thread <s>— oldest at the top, composer docked at the foot. Scroll the list.</s></h4>
+<div class="sheet"><div class="two">
+
+  <div><div class="lab">With notes<s>Pinned note held above the scroller · day separators stick · new note lands in pink</s></div>
+    <div class="card">
+      <div class="clip">
+        <div class="ch"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>Notes<span class="m2">5 notes</span></div>
+
+        <div class="pinned">
+          <svg viewBox="0 0 24 24"><path d="M12 17v5M9 3h6l-1 6 3 3v2H7v-2l3-3z"/></svg>
+          <span>Agency moved to Submittable in June — the old form bounces.</span>
+          <span class="un">Unpin</span>
+        </div>
+
+        <div class="scroller">
+          <div class="daysep">2 June</div>
+          <div class="note">First impression: warm, and specific about the comp titles rather than generic.
+            <div class="meta">11:02<span class="acts"><span>Edit</span><span>Pin</span><span>Delete</span></span></div></div>
+          <div class="note">Checked her MSWL again — she's asked for exactly this kind of unreliable narrator twice this year.
+            <div class="meta">11:09<span class="acts"><span>Edit</span><span>Pin</span><span>Delete</span></span></div></div>
+
+          <div class="daysep">30 June</div>
+          <div class="note">Priya mentioned she's clearing a backlog — said six weeks but sounded looser than that.
+            <div class="meta">16:25<span class="acts"><span>Edit</span><span>Pin</span><span>Delete</span></span></div></div>
+
+          <div class="daysep">Today</div>
+          <div class="note">Nudged. Kept it to three lines and referenced the partial date.
+            <div class="meta">09:14<span class="acts"><span>Edit</span><span>Pin</span><span>Delete</span></span></div></div>
+          <div class="note new">If nothing by the end of the month, close it and move to the Curtis Vane list.
+            <div class="meta">09:41<span class="acts"><span>Edit</span><span>Pin</span><span>Delete</span></span></div></div>
+        </div>
+
+        <div class="dock">
+          <div class="compose focus">
+            <textarea placeholder="Write a note…" rows="1"></textarea>
+            <div class="crow"><span class="hint">⌘ + Enter to save · Esc to clear</span><button class="send off">Save</button></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+  <div><div class="lab">Empty<s>The composer stays docked; the space above teaches</s></div>
+    <div class="card">
+      <div class="clip">
+        <div class="ch"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h14v13l-4 4H5z"/><path d="M15 21v-4h4"/></svg>Notes</div>
+        <div class="empty">
+          <svg viewBox="0 0 48 38"><path d="M8 6h26l6 6v20H8z"/><path d="M34 6v6h6"/><path d="M14 18h18M14 24h12"/></svg>
+          <p>Nothing noted yet.<br>First impressions, what they said on the phone,<br>anything you'll want when they finally reply.</p>
+        </div>
+        <div class="dock">
+          <div class="compose">
+            <textarea placeholder="Write a note…" rows="1"></textarea>
+            <div class="crow"><span class="hint">⌘ + Enter to save</span><button class="send off">Save</button></div>
+          </div>
+        </div>
+      </div>
+    </div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>A thread, read top to bottom.</b> Oldest first, newest at the foot, composer docked beneath — the phone-messaging arrangement, and it suits notes on a query because the thread is a chronology of one relationship. On open, the scroller is pinned to the bottom so the newest note is what you see.<br><br>
+  <b>Four things this arrangement needs to get right.</b>
+  <ul style="margin:6px 0 0 18px">
+    <li><b>The pinned note sits above the scroller, not inside it.</b> Chat order would otherwise bury the one note you always want — usually how to reach them, or what to check before nudging. It holds its place while the thread scrolls, and unpins from its own control.</li>
+    <li><b>Day separators are sticky</b>, so the date of whatever you are reading stays visible as you scroll a long thread.</li>
+    <li><b>The composer grows with the text</b> to a few lines then scrolls internally, so a long note never pushes the thread off-screen. ⌘+Enter saves, Esc clears, and Save is inert until there is something to save.</li>
+    <li><b>A new note lands in pink and settles to neutral.</b> Momentary, so you can see what you just added without the thread carrying a permanent second colour.</li>
+  </ul>
+  <br>
+  ⚠️ <b>This card scrolls internally</b>, which is the deliberate exception to the page's no-inner-scroll rule — the same exception the to-do list already makes. It needs the full <code>min-height:0</code> flex chain from card to scroller, and the dock must be <code>flex:0 0 auto</code> or it collapses as the thread grows. Both are the exact faults that took a browser pass to find on the to-do board.
+</div>
+</body></html>

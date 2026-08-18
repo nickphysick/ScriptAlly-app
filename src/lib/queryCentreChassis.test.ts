@@ -773,14 +773,15 @@ describe("§2 (fp4) · the reading pane's cards", () => {
  * note flat on its card is not a note; it is a paragraph.
  */
 describe("§4 (fp4) · the notes", () => {
+  /* ⚠️ `.qn-note` SINCE §1 — the thread's note, same clause: a note flat on its card is not a note,
+     it is a paragraph. `.qp-note` is retired with the body that rendered it. */
   it("a note's ground differs from the card it sits on", () => {
-    const note = declValue(rule(".qp-note"), "background");
+    const note = declValue(rule(".qn-note"), "background");
     const card = declValue(rule(".qp-cols .f12-card"), "background");
     expect(note, "the note declares no ground").not.toBe("");
     expect(note, "the note's ground collapsed into the card's — it reads as a paragraph")
       .not.toBe(card);
-    expect(note, "the note lost its hairline").toBeTruthy();
-    expect(rule(".qp-note"), "the note lost its rim").toContain("border: 1px solid var(--line)");
+    expect(rule(".qn-note"), "the note lost its rim").toContain("border: 1px solid var(--hairline)");
   });
 
   /**
@@ -788,20 +789,31 @@ describe("§4 (fp4) · the notes", () => {
    * which is why the note stayed white through a change to the surface underneath it. An inline
    * background is not a style, it is a fact nobody can argue with.
    */
+  /**
+   * ⚠️ THE THREAD MOVED TO ITS OWN FILE (§1), AND THE CLAUSE SURVIVES THE MOVE. What this case is
+   * for is that a note's ground is in the STYLESHEET, where a rule can reach it — it was inline,
+   * which is why the note stayed white through a change to the surface underneath it. The note is
+   * `.qn-note` now and it is declared in f12.css with everything else.
+   */
   it("the note's ground is not written inline, where no rule can reach it", () => {
-    const at = code.indexOf('className="qp-note"');
-    expect(at, "the note markup is missing").toBeGreaterThan(-1);
-    const tag = code.slice(at, code.indexOf(">", at));
-    expect(tag, "the note's ground went back inline").not.toContain("background:");
-    expect(tag, "the note's rim went back inline").not.toContain("border:");
+    const thread = read("../components/reading-pane/NotesThread.tsx");
+    expect(thread, "the thread component is missing").toContain('className="qn-wrap"');
+    expect(thread, "the note's colours went back inline").not.toMatch(/qn-note[^>]*style=\{\{[^}]*background/);
+    expect(rule(".qn-note"), "the note declares no ground in the sheet").toContain("background:");
+    expect(rule(".qn-note"), "the note lost its rim").toContain("border: 1px solid var(--hairline)");
   });
 
-  /* ⚠️ THE COMPOSER STAYS PINNED. `flexShrink: 0` is what stops a long note list squeezing it out
-     of the card — the one thing in this section that is about behaviour rather than colour. */
-  it("the composer cannot be squeezed out by a long list", () => {
-    const at = code.indexOf('className="qp-note"');
-    const after = code.slice(at);
-    expect(after, "the composer lost its pin").toContain("flexShrink: 0");
+  /**
+   * ⚠️ THE DOCK CANNOT BE SQUEEZED OUT, AND IT IS `flex: 0 0 auto` IN CSS NOW rather than an inline
+   * `flexShrink: 0`. Same fault, same fix, one layer along: beside a growing scroller a dock that
+   * CAN shrink does. ⚠️ AND THIS IS THE HALF A SOURCE LOCK CANNOT SETTLE — whether the chain above
+   * it also holds is `qcNotes.measure.ts`, which walks scroller → card and reads every link.
+   */
+  it("the composer cannot be squeezed out by a long thread", () => {
+    expect(rule(".qn-dock"), "the dock lost its pin").toContain("flex: 0 0 auto");
+    expect(rule(".qn-scroll"), "the scroller does not scroll").toContain("overflow-y: auto");
+    expect(rule(".qn-scroll"), "the scroller has no zero minimum — it will grow instead").toContain("min-height: 0");
+    expect(rule(".qn-wrap"), "the wrap has no zero minimum — the chain breaks there").toContain("min-height: 0");
   });
 });
 

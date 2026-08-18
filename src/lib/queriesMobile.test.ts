@@ -100,7 +100,7 @@ describe("create mode below md", () => {
 
 describe("touch + chassis rules", () => {
   it("the note actions are always visible below md (hover-only was tap-unreachable)", () => {
-    expect(css).toContain(".f12-root .qp-note .qp-noteacts { opacity: 1; }");
+    expect(css).toContain(".f12-root .qn-acts { opacity: 1; }");
   });
 
   it("the guided response flow presents in the sheet chassis below md — flow untouched", () => {

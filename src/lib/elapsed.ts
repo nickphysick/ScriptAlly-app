@@ -64,6 +64,25 @@ export const exactDate = (ms: number): string => {
 };
 
 /**
+ * A day, as a thread's separator says it: "Today", "Yesterday", then the date.
+ *
+ * ⚠️ IT LIVES BESIDE `exactDate` RATHER THAN IN THE COMPONENT, because this module is where this
+ * app spells dates. A separator wants a SHORTER form than the precise one — the year is noise on a
+ * thread you are reading top to bottom — so it is a second FORM, not a second formatter, and both
+ * are here where they can be compared.
+ */
+export function dayLabel(ms: number, now: number = Date.now()): string {
+  const d = new Date(ms);
+  if (Number.isNaN(d.getTime())) return "";
+  const day = (t: Date) => new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime();
+  const diff = Math.round((day(new Date(now)) - day(d)) / 86400000);
+  if (diff === 0) return "Today";
+  if (diff === 1) return "Yesterday";
+  const sameYear = d.getFullYear() === new Date(now).getFullYear();
+  return d.toLocaleDateString("en-GB", sameYear ? { day: "numeric", month: "long" } : { day: "numeric", month: "long", year: "numeric" });
+}
+
+/**
  * A duration said as a RELATIVE DATE — "5 weeks ago", "2½ years ago".
  *
  * ⚠️ THE FORMATTER IS NOT FORKED; "ago" is appended at the presentation layer, which is what this

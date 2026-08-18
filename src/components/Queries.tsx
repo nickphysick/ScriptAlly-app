@@ -88,6 +88,7 @@ import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
 import { QueryTimeline } from "./reading-pane/QueryTimeline";
+import { NotesThread } from "./reading-pane/NotesThread";
 import type { TimelineEntryRef } from "./reading-pane/QueryTimeline";
 import { useToast } from "./toast/ToastProvider";
 import { deriveQueryFields } from "../lib/queryDerivation";
@@ -136,7 +137,6 @@ import {
   Check,
   Download,
   Plus,
-  Pencil,
   Activity,
   Paperclip,
   Notebook,
@@ -149,7 +149,6 @@ import {
   MessageSquare,
   X,
   Camera,
-  Trash2,
   Move,
   Image as ImageIcon,
   Bell,
@@ -300,6 +299,7 @@ export const Queries: React.FC<{
     recordMaterialsSent,
     deleteJournalEntry,
     updateJournalEntry,
+    pinJournalEntry,
     deleteActivity,
     editActivity,
     updateAgent,
@@ -4467,10 +4467,6 @@ export const Queries: React.FC<{
             {activeQuery && activeAgent && activeMs ? (
               <>
                 <style>{`
-                  .qp-noteacts{ opacity:0; transition:opacity .14s; }
-                  .qp-note:hover .qp-noteacts{ opacity:1; }
-                  .qp-noteact{ width:22px; height:22px; border:none; background:transparent; border-radius:5px; color:var(--qc-tx-noteact); display:flex; align-items:center; justify-content:center; cursor:pointer; }
-                  .qp-noteact:hover{ background:var(--qc-surf-noteact-h); color:var(--burg); }
                 `}</style>
                 {/* ══ §1/§2 · THE QUERY HEADER IS A MAIL HEADER ═══════════════════════════════
                     ⚠️ IT REPLACES THE PAIRING CARD, which replaced the plate and "What you sent".
@@ -5072,67 +5068,33 @@ export const Queries: React.FC<{
                        card is hidden the stack no longer has the height being asked for, so reading
                        it afterwards measures the outcome instead of the intent. */
                   >
-                      {/* notes body — list (scrolls) + bottom-pinned composer */}
-                      <div style={{ padding: "16px 16px 18px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-                        {(() => {
-                          const notes = journalEntries
-                            .filter(entry => entry.queryId === activeQuery.id)
-                            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); // newest first
-                          const send = () => { const t = journalInput.trim(); if (!t) return; addJournalEntry(activeQuery.id, t); setJournalInput(""); };
-                          return (
-                            <>
-                              <PaneScroll scrollClassName="f12-quiet-scroll" outerStyle={{ flex: 1, minHeight: 0 }} scrollStyle={{ display: "flex", flexDirection: "column", paddingRight: 2 }}>
-                                {notes.length === 0 ? (
-                                  /* ghost first entry — DOTTED outline, no fill (a placeholder that looks
-                                     like one; ref .note); replaced on first save */
-                                  <div className="f12-note">
-                                    <div className="f12-nd">TODAY</div>
-                                    <div className="f12-nt">Your notes on this query appear here — first impressions, things they said, anything worth remembering.</div>
-                                  </div>
-                                ) : notes.map((entry) => {
-                                  const isEditing = editingJournalId === entry.id;
-                                  return (
-                                    <div key={entry.id} className="qp-note" style={{ borderRadius: 12, padding: "11px 13px", marginBottom: 9 }}>
-                                      {isEditing ? (
-                                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                                          <textarea value={editingJournalText} onChange={(e) => setEditingJournalText(e.target.value)} autoFocus rows={2} style={{ width: "100%", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "var(--qc-tx-input)", border: "1px solid var(--qc-rim-composer)", borderRadius: 7, padding: "6px 8px", outline: "none", resize: "vertical", background: "#fff" }} />
-                                          <div style={{ display: "flex", justifyContent: "flex-end", gap: 6 }}>
-                                            <button type="button" onClick={() => setEditingJournalId(null)} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: "transparent", border: "none", color: "var(--qc-tx-cancel)", cursor: "pointer" }}>Cancel</button>
-                                            <button type="button" onClick={async () => { if (!editingJournalText.trim()) return; await updateJournalEntry(entry.id, editingJournalText.trim()); setEditingJournalId(null); }} style={{ fontFamily: FONT_MONO, fontSize: 9, textTransform: "uppercase" as const, letterSpacing: ".04em", background: burgundy, color: "#fff", border: "none", borderRadius: 6, padding: "5px 11px", cursor: "pointer" }}>Save</button>
-                                          </div>
-                                        </div>
-                                      ) : (
-                                        <>
-                                          <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 13, color: "var(--qc-tx-note)", lineHeight: 1.48, whiteSpace: "pre-wrap" }}>{entry.entryText}</div>
-                                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 9 }}>
-                                            <span style={{ fontFamily: FONT_MONO, fontSize: 8, color: "var(--qc-tx-stamp)", letterSpacing: ".08em", textTransform: "uppercase" as const }}>{formatWhatsAppDate(entry.createdAt)}</span>
-                                            <div className="qp-noteacts" style={{ display: "flex", gap: 4 }}>
-                                              <button type="button" title="Edit" onClick={() => { setEditingJournalId(entry.id); setEditingJournalText(entry.entryText); }} className="qp-noteact"><Pencil style={{ width: 12, height: 12 }} /></button>
-                                              <button type="button" title="Delete" onClick={() => showConfirm({ title: "Delete this note?", danger: true, confirmLabel: "Delete", cancelLabel: "Keep it", body: <p style={{ margin: 0 }}>This note will be removed from the query's record.</p>, onConfirm: () => deleteJournalEntry(entry.id) })} className="qp-noteact"><Trash2 style={{ width: 12, height: 12 }} /></button>
-                                            </div>
-                                          </div>
-                                        </>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </PaneScroll>
-                              {/* composer — pinned to the column foot */}
-                              <div style={{ marginTop: 12, background: "var(--qc-surf-composer)", border: "1px solid var(--qc-rim-composer)", borderRadius: 10, padding: "9px 10px 9px 13px", display: "flex", alignItems: "flex-end", gap: 9, boxShadow: "0 1px 2px rgba(58,28,20,0.04)", flexShrink: 0 }}>
-                                <textarea
-                                  value={journalInput} rows={1} placeholder="Write a note…"
-                                  onChange={(e) => { setJournalInput(e.target.value); e.target.style.height = "auto"; e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px"; }}
-                                  onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); (e.target as HTMLTextAreaElement).style.height = "auto"; } }}
-                                  style={{ flex: 1, border: "none", outline: "none", background: "transparent", resize: "none", fontFamily: "'Inter',sans-serif", fontSize: 13, color: "var(--qc-tx-input)", lineHeight: 1.4, minHeight: 20, maxHeight: 120, padding: "4px 0", overflowY: "auto" }}
-                                />
-                                <button type="button" onClick={send} disabled={!journalInput.trim()} style={{ flexShrink: 0, width: 32, height: 32, border: "1px solid var(--qc-rim-pink)", background: journalInput.trim() ? "var(--qc-acc-pink-save)" : "var(--qc-surf-send-off)", borderRadius: 8, color: journalInput.trim() ? burgundy : "var(--qc-tx-send-off)", display: "flex", alignItems: "center", justifyContent: "center", cursor: journalInput.trim() ? "pointer" : "not-allowed" }}>
-                                  <svg viewBox="0 0 24 24" width={14} height={14} fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" /></svg>
-                                </button>
-                              </div>
-                            </>
-                          );
-                        })()}
-                      </div>
+                      {/**
+                        * §1 — THE THREAD. Extracted to `NotesThread`: the ordering, the scroll
+                        * anchor, the pinned strip, the composer and the settle are one card's
+                        * behaviour, and inline here they were four more pieces of state in a
+                        * component that already holds sixty.
+                        *
+                        * ⚠️ `resetKey` IS THE QUERY, so moving to another one is a different
+                        * thread rather than the same one with new data — a draft, an open editor
+                        * and a settling note all belong to the query they were started on.
+                        */}
+                      <NotesThread
+                        resetKey={activeQuery.id}
+                        notes={journalEntries
+                          .filter((entry) => entry.queryId === activeQuery.id)
+                          .map((e) => ({ id: e.id, entryText: e.entryText, createdAt: e.createdAt, pinned: (e as { pinned?: boolean }).pinned }))}
+                        onAdd={(text) => addJournalEntry(activeQuery.id, text)}
+                        onEdit={(id, text) => updateJournalEntry(id, text)}
+                        onPin={(id, pinned) => pinJournalEntry(id, pinned)}
+                        onDelete={(n) => showConfirm({
+                          title: "Delete this note?",
+                          danger: true,
+                          confirmLabel: "Delete",
+                          cancelLabel: "Keep it",
+                          body: <p style={{ margin: 0 }}>This note will be removed from the query&rsquo;s record.</p>,
+                          onConfirm: () => deleteJournalEntry(n.id),
+                        })}
+                      />
                   </PaneCard>
                   </div>{/* end the stacked right column */}
 
