@@ -19,7 +19,7 @@ import { NudgeModal } from "./NudgeModal";
 import { recordQueryResponse } from "../lib/recordResponse";
 import { StatusDot } from "./StatusDot";
 import { getPillLabelAndDot, renderTimelineDot } from "./TimelineDot";
-import { getTimelineFamily, FAMILY_CARD_STYLE } from "../lib/timelineEvent";
+import { isFeedDrawable, FAMILY_CARD_STYLE } from "../lib/timelineEvent";
 import {
   pageGround,
   bodyInk,
@@ -1072,11 +1072,12 @@ export const Dashboard: React.FC<{
   }, [activities]);
 
   const groupedEventsByDate: Record<string, typeof activities> = {};
-  // Story-so-far feed cuts the housekeeping family (agent/manuscript add/update/delete) at the
-  // render-grouping level only — mergedActivities itself stays intact for Fortnight in Focus's
-  // related-activity lookup. A day left with only housekeeping yields no group key, so no empty
-  // day-separator renders, and an emptied feed falls through to the existing empty-state.
-  mergedActivities.filter(act => getTimelineFamily(act) !== "housekeeping").forEach(act => {
+  // Story-so-far feed cuts the housekeeping family (agent/manuscript add/update/delete) and the
+  // `unknown` one (F1 — a type this build cannot place, drawn as nothing rather than guessed at)
+  // at the render-grouping level only — mergedActivities itself stays intact for Fortnight in
+  // Focus's related-activity lookup. A day left with only cut rows yields no group key, so no
+  // empty day-separator renders, and an emptied feed falls through to the existing empty-state.
+  mergedActivities.filter(isFeedDrawable).forEach(act => {
     const dStr = new Date(act.date).toLocaleDateString("en-GB", {
       day: "numeric",
       month: "short",
