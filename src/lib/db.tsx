@@ -109,6 +109,7 @@ import { elapsedPhrase, daysBetween } from "./elapsed";
 import { TaskFlagKey, taskFlagId, flagKeyForTask, flagMatchesTask, isFlagSuppressing, buildTaskFlagFromDismissed } from "./taskFlags";
 import { homeCountrySeed } from "./territory";
 import { agentDataQualityNeeds } from "./agentDataQuality";
+import { queriesMissingMaterials, isBulkMaterialsGap, MATERIALS_BULK_RECORD_ID } from "./queryMaterialsGap";
 import { agentPrimary } from "./agentDisplay";
 import { taskSurvivesMute } from "./todoHousekeeping";
 import { buildOfferDecisionWrites, hasOfferDecision, OfferDecision } from "./offerDecision";
@@ -822,6 +823,51 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         });
       }
     });
+
+    /* ── SENDS THAT RECORDED NOTHING (missing-materials pack, Phase 4) ────────────────────────
+       ⚠️ DERIVED AT READ TIME, LIKE EVERY OTHER TASK HERE — nothing is stored to make this bucket
+       exist. The predicate lives in `queryMaterialsGap` so it stays pure and testable without
+       firebase; this loop only turns each gap into the engine's own Task shape.
+
+       ⚠️ IT IS NOT `dq_materials`. That rule asks whether an AGENT has stated what they want;
+       this asks whether a SEND recorded what actually went. Two subjects, two fixes — see the
+       reconciliation invariants in `queryMaterialsGap.test.ts`.
+
+       ⚠️ AND THE SINGLES ARE SUPPRESSED AT OR ABOVE THE THRESHOLD. Above it the board shows ONE
+       bulk task instead, so a gap is never both a row and a member of a group — the same
+       double-count `boardColumns` guards for sweeps. */
+    const materialsGaps = queriesMissingMaterials({
+      queries, activities, agents, manuscripts, displayName: agentPrimary,
+    });
+    if (isBulkMaterialsGap(materialsGaps.length)) {
+      calculatedTasks.push({
+        id: "task-materials-bulk",
+        priority: "suggested",
+        title: `${materialsGaps.length} queries have no record of what you sent`,
+        description: `Fill them in together — the oldest first, where the details are hardest to recover.`,
+        manuscriptTitle: "",
+        context: `Record gap`,
+        relatedRecordId: MATERIALS_BULK_RECORD_ID,
+        taskType: "materials_unrecorded_bulk",
+        actionLabel: "Record materials",
+        actionPath: "todo"
+      });
+    } else {
+      materialsGaps.forEach(g => {
+        calculatedTasks.push({
+          id: `task-materials-${g.queryId}`,
+          priority: "suggested",
+          title: `No record of what you sent ${g.agentName}`,
+          description: `The query on '${g.manuscriptTitle}' went out without its materials recorded.`,
+          manuscriptTitle: g.manuscriptTitle,
+          context: `Record gap`,
+          relatedRecordId: g.queryId,
+          taskType: "materials_unrecorded",
+          actionLabel: "Record materials",
+          actionPath: "todo"
+        });
+      });
+    }
 
     manuscripts.forEach(m => {
       const qCount = queries.filter(q => q.manuscriptId === m.id).length;

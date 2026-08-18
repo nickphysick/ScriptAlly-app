@@ -38,7 +38,10 @@ export type BoardStream = "do" | "hk" | "nt" | "done";
 
 /** Derived task types the board surfaces (querying_unstarted / dream_agent are OUT of scope). */
 const DO_NEXT_TYPES: ReadonlySet<string> = new Set(["offer_received", "partial_requested", "full_requested", "revise_resubmit", "nudge_overdue"]);
-const HK_TYPES: ReadonlySet<string> = new Set(["data_quality_poor", "no_response_close"]);
+/* ⚠️ THE TWO MATERIALS TYPES ARE HOUSEKEEPING, NOT URGENT. A send that recorded nothing is a gap
+   in your own history — worth closing, never something an agent is waiting on. Putting it in the
+   `do` lane would make the urgent count disagree with what "urgent" means everywhere else. */
+const HK_TYPES: ReadonlySet<string> = new Set(["data_quality_poor", "no_response_close", "materials_unrecorded", "materials_unrecorded_bulk"]);
 
 /**
  * ⚠️ THE SILENCE ANCHOR — how long an agent has been quiet, in whole days.

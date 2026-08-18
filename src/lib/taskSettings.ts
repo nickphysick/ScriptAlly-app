@@ -101,6 +101,7 @@ const flagSubject = (f: TaskFlag, agents: Agent[], queries: Query[]): string => 
 const kindLabel: Record<string, string> = {
   offer_received: "offer", nudge_overdue: "nudge", no_response_close: "stale query",
   partial_requested: "request", full_requested: "request", revise_resubmit: "R&R", data_quality_poor: "record gap",
+  materials_unrecorded: "record gap", materials_unrecorded_bulk: "record gap",
 };
 
 /**

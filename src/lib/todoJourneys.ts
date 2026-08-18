@@ -19,7 +19,11 @@
 import { BoardCard } from "./todoBoard";
 import { QueryStatus } from "../types";
 
-export type CardJourney = "offer" | "send" | "resubmit" | "nudge" | "stale" | "dq" | "note";
+/* ⚠️ `materials` IS ITS OWN JOURNEY, NOT A `dq`. Both repair a gap, but `dq` edits the AGENT
+   (their reply window, their wish list, what they ask for) while this edits the record of a
+   SEND. Different subject, different write target, different form — sharing the surface would
+   mean branching on the task type inside it, which is what having a table is meant to avoid. */
+export type CardJourney = "offer" | "send" | "resubmit" | "nudge" | "stale" | "dq" | "materials" | "note";
 
 /**
  * ⚠️ THE ORDER OF THESE BRANCHES IS THE ORDER OF THEIR CERTAINTY, matching `cardBucket`'s: a
@@ -35,6 +39,8 @@ export function cardJourney(c: BoardCard): CardJourney {
   if (c.taskType === "nudge_overdue") return "nudge";
   if (c.taskType === "no_response_close") return "stale";
   if (c.taskType === "data_quality_poor") return "dq";
+  /* Both materials gaps run the same journey — the bulk one opens its table, the single its form. */
+  if (c.taskType === "materials_unrecorded" || c.taskType === "materials_unrecorded_bulk") return "materials";
   return "send";
 }
 
