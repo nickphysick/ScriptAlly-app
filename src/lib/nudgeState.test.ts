@@ -334,3 +334,32 @@ describe("§1 · the generic convention line is gone", () => {
     expect(tl, "the policy line is not fed the agent's own field").toContain("policy: agent?.noResponseMeansNo");
   });
 });
+
+/**
+ * §2 (policy pack) — the ghost rung is an event, and "is a reminder scheduled" is asked once.
+ *
+ * ⚠️ THE FAULT WAS TWO DERIVATIONS OF ONE FACT. The row above the rung took its `last` from
+ * `query.nudgeDate` — the projection §6b retired — while the rung itself renders from the task
+ * store, so a reminder set on the to-do list left the row marked last, and `--last` zeroes the gap.
+ * The rung fused to the sentence above it and nothing was wrong with the rung.
+ */
+describe("§2 · the ghost rung asks the same source as the row above it", () => {
+  const strip = (src: string) => src.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
+  const tl = strip(readFileSync(new URL("../components/reading-pane/QueryTimeline.tsx", import.meta.url), "utf8"));
+
+  it("the retired projection is not read at all", () => {
+    expect(tl, "the timeline is reading the retired nudgeDate projection again").not.toContain("query.nudgeDate");
+    expect(tl, "a second reminder derivation is back").not.toContain("reminderMs");
+  });
+
+  it("the row's last flag and the rung come from the one reminder", () => {
+    expect(tl, "the waiting row does not take its last flag from the reminder").toContain("last={!reminder}");
+    expect(tl, "the rung is not rendered off the reminder").toContain("reminder && (");
+  });
+
+  /* ⚠️ A SENTENCE, NOT A LABEL — and the date says when rather than sitting there as a bare day. */
+  it("the rung states what is true and when", () => {
+    expect(tl, "the rung reads as a fragment again").toContain("Nudge reminder set");
+    expect(tl, "the rung does not say when").toContain("Scheduled for ${");
+  });
+});

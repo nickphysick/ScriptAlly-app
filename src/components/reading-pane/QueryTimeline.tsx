@@ -79,6 +79,16 @@ const getTime = (val: any): number => {
   const t = new Date(val).getTime();
   return isNaN(t) ? Date.now() : t;
 };
+/**
+ * A day AHEAD: "MON 1 SEP" — the weekday leads, because a future date is read as a day of the week
+ * before it is read as a number. Deliberately not `fmtShort`: that spells dates that have HAPPENED,
+ * where the weekday is noise.
+ */
+const fmtDay = (ms: number): string => {
+  const d = new Date(ms);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).toUpperCase();
+};
 /** Mockup timeline dates: "1 MAY" — day + short month, uppercased, no year. */
 const fmtShort = (ms: number): string => {
   const d = new Date(ms);
@@ -629,7 +639,12 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         const who = chasedBy(agent);
         /* the scheduled follow-up, if one is still ahead — it has its own event below, and this
            only decides whether the wait is the timeline's last node */
-        const reminderMs = query.nudgeDate ? getTime(query.nudgeDate) : null;
+        /* ⚠️ §2 (policy pack) · `reminderMs` IS DELETED AND THIS ROW NOW ASKS THE GHOST'S OWN
+           SOURCE. It read `query.nudgeDate` — the retired projection this file's own §6b note says
+           was replaced by the task store — while the ghost beneath renders from `reminder`. So a
+           reminder set on the to-do list left `nudgeDate` untouched, this row came out `last`, and
+           `.tl-ev--last { padding-bottom: 0 }` fused the ghost to the sentence above it. Two
+           derivations of one fact, disagreeing exactly where it showed. */
         /* the AGENCY's own figure — not the house window, and not the writer's override */
         const statedWeeks = typeof agent?.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0
           ? agent.responseTimeWeeks : null;
@@ -645,7 +660,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
             title={past ? "No reply" : "Waiting to hear back"}
             date={waiting.sentMs != null ? elapsedPhrase(waiting.nDays).toUpperCase() : undefined}
             tone={stated && !past ? "sage" : "oat"}
-            last={!(reminderMs != null && reminderMs > now)}
+            last={!reminder}
           >
             {/* what the agency said — their claim, on its own surface */}
             {statedWeeks != null && (
@@ -812,10 +827,16 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         <div className="tl-ev tl-ev--ghost tl-ev--last">
           <div className="tl-evmark"><span className="tl-ghostmark" aria-hidden="true">🔔</span></div>
           <div className="tl-rowbody">
+            {/**
+              * ⚠️ §2 · A SENTENCE, NOT A FRAGMENT. It read "Nudge reminder", which is a label — a
+              * noun phrase the reader has to finish for themselves. `Nudge reminder set` states
+              * what is true, and the meta slot says when: `SCHEDULED FOR MON 1 SEP`, weekday first,
+              * because a future date is read as a day of the week before it is read as a number.
+              */}
             <div className="tl-ghostline">
-              <span>Nudge reminder</span>
+              <span>Nudge reminder set</span>
               {onOpenReminder && <button type="button" className="tl-ghostlink" onClick={onOpenReminder}>from your to-do list</button>}
-              <span className="tl-ghostdate">{reminder.dueDate ? fmtShort(new Date(`${reminder.dueDate}T12:00:00`).getTime()).toUpperCase() : ""}</span>
+              <span className="tl-ghostdate">{reminder.dueDate ? `Scheduled for ${fmtDay(new Date(`${reminder.dueDate}T12:00:00`).getTime())}` : ""}</span>
             </div>
           </div>
         </div>
