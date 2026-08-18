@@ -884,12 +884,20 @@ describe("§5 (fp4) · what you sent — now the send event's own block", () => 
     for (const t of ['toggleDocMaterial(activeQuery, activeAgent, "query")', 'toggleDocMaterial(activeQuery, activeAgent, "synopsis")', "openSampleEditor", "removeSampleMaterial(activeQuery, activeAgent)"]) {
       expect(card, `${t} was dropped in the move`).toContain(t);
     }
-    /* ⚠️ `saveSampleMaterial` IS THE POPOVER'S, AND THE POPOVER IS PORTALLED — its place in the
-       tree never mattered, so it did not move with the chips and is asserted against the file
-       rather than the block. Its own flags are re-derived at its site from `baseMaterialsFor`,
-       which is the same source the chips read: one answer to "is it sent", not two. */
-    expect(code, "the sample editor's save went with the move")
-      .toContain("saveSampleMaterial(activeQuery, activeAgent)");
+    /**
+     * ⚠️ THERE IS NO SAVE ANY MORE (§1). The editor commits on every change — `commitSample` on the
+     * stepper and the unit pills — so `saveSampleMaterial`, which existed to be the popover's Save
+     * button's handler, has no caller. The clause it was protecting is unchanged and stronger: the
+     * write is reachable, and now without a confirming click.
+     *
+     * ⚠️ AND IT TAKES THE VALUES RATHER THAN READING THE STATE, which is the fault a commit-on-change
+     * version invites: `setSampleQty` is asynchronous, so a commit reading `sampleQty` writes the
+     * value from before the keystroke.
+     */
+    expect(code, "the sample editor stopped committing as it goes").toContain("const commitSample = (qty: string, unit: SampleUnit)");
+    expect(code, "the sample editor took a Save button back").not.toContain("Save quantity");
+    expect(code, "the sample editor's write is unreachable")
+      .toContain("commitSample(v, sampleUnit)");
     expect(code, "the popover threads the flags down instead of deriving them")
       .toContain("const pbase = baseMaterialsFor(activeQuery, activeAgent);");
     expect(card, "the submission package was dropped in the move").toContain("linkedPackage");

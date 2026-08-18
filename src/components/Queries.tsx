@@ -26,7 +26,7 @@ import { QueryStatus, Agent, Manuscript, Query, SubmissionMethod, SubmissionStat
 import { TypeGlyph } from "./packages/TypeGlyph";
 import { StatusPill, getStatusLabel } from "./StatusPill";
 import { StatusDot } from "./StatusDot";
-import { PillTrig, F12Popover, F12Menu, PopSection, PRow, Chip } from "./shell/F12Shell";
+import { PillTrig, F12Popover, F12Menu, F12Panel, PopSection, PRow, Chip } from "./shell/F12Shell";
 import { QueryJourneySheet } from "./queries/QueryJourneySheet";
 import { PaneCard } from "./queries/PaneCard";
 import { QueryCreatePane } from "./queries/QueryCreatePane";
@@ -66,7 +66,7 @@ import { activityEventLabel } from "../lib/activityEvent";
 import { agentLabel, agentAgencyLine, agentPrimary, agentWebsiteHref } from "../lib/agentDisplay";
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
-import { classifyQueryMaterial, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
+import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
 import { formatQueryMaterial, materialLabel, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
@@ -1436,7 +1436,6 @@ export const Queries: React.FC<{
   const { triggerRef: methodPickTrigRef, menuStyle: methodPickMenuStyle } = useFixedMenu<HTMLButtonElement>(methodPickOpen);
   // Phase 6 — the What-you-sent sample-materials inline editor (unit toggle + quantity). Wired to the
   // existing QueryMaterial.type/quantity via updateQuery — no new fields.
-  const [sampleEditorOpen, setSampleEditorOpen] = useState(false);
   /* §5 — the Attach menu and the Other free-text editor. Both portal through the page's own
      `F12Menu` / `F12Popover`, anchored by `useFixedMenu`, which already close on Escape and on an
      outside click. A second popover primitive on this page would be a third way to open a menu. */
@@ -1455,7 +1454,11 @@ export const Queries: React.FC<{
    */
   const [matPop, setMatPop] = useState<null | "ql" | "syn" | "smp" | "oth">(null);
   const [otherEditing, setOtherEditing] = useState<string | QueryMaterial | null>(null);
-  const { triggerRef: matPopTrigRef, menuStyle: matPopStyle } = useFixedMenu<HTMLElement>(!!matPop);
+  const matPopPanelRef = useRef<HTMLElement>(null);
+  /* §1 — anchored, flipping and constrained exactly as the filter and sort panels are */
+  const { triggerRef: matPopTrigRef, menuStyle: matPopStyle } = useFixedMenu<HTMLElement>(
+    !!matPop, { placement: "auto", constrain: true, menuRef: matPopPanelRef },
+  );
   const openMatPop = (key: "ql" | "syn" | "smp" | "oth", el: HTMLElement) => {
     (matPopTrigRef as React.MutableRefObject<HTMLElement | null>).current = el;
     setMatPop(key);
@@ -1465,7 +1468,6 @@ export const Queries: React.FC<{
   const closeMatPop = () => { const el = matPopTrigRef.current; setMatPop(null); setOtherEditing(null); el?.focus(); };
   const [addMatOpen, setAddMatOpen] = useState(false);
   const { triggerRef: addMatTrigRef, menuStyle: addMatMenuStyle } = useFixedMenu<HTMLButtonElement>(addMatOpen);
-  const [otherOpen, setOtherOpen] = useState(false);
   const [otherText, setOtherText] = useState("");
   /* ⚠️ THE SHARED `SampleUnit`, NOT A LOCAL TRIPLE. This page had its own
      `["pages","chapters","words"]` — the same concept the agent list's Materials editor already
@@ -1696,13 +1698,74 @@ export const Queries: React.FC<{
    * ⚠️ AND `added` IS A PREDICATE RATHER THAN A FLAG, so the menu reads the query's real state
    * every time it opens rather than a copy taken when something last changed.
    */
-  const MATERIAL_MENU: { label: string; added: (ql: boolean, syn: boolean, smp: boolean, oth: boolean) => boolean; add: () => void }[] = [
+  /**
+   * §2 — the agent's own stated sample size, for the editor's hint line and its default.
+   *
+   * ⚠️ IT LIVES IN `agent.materialsWanted`, the same `string[]` the Add-Agent form and the Edit
+   * drawer write — encoded and read back through `agentMaterials.ts`, never parsed here. The three
+   * sample pills ("Sample pages" / "Sample chapters" / "Sample words") carry the unit and
+   * `counts[pill]` carries the number.
+   *
+   * ⚠️ AND IT IS A PREFERENCE, NOT A DEFAULT WITH AUTHORITY: absent, the editor falls back to the
+   * unit already on the send, and the hint line simply does not render. An agency that has said
+   * nothing must not appear to have asked for ten pages.
+   */
+  const agentSamplePref = (ag: Agent | null | undefined): { unit: SampleUnit; qty: string } | null => {
+    const parsed = parseAgentMaterials(ag?.materialsWanted as string[] | undefined);
+    const pill = parsed.selected.find((p) => p.startsWith("Sample "));
+    if (!pill) return null;
+    const unit: SampleUnit = pill === "Sample chapters" ? "Chapters" : pill === "Sample words" ? "Words" : "Pages";
+    const qty = parsed.counts[pill] || snapToUnit(unit);
+    return { unit, qty };
+  };
+
+  /**
+   * ⚠️ THE FOUR LOCKED TYPES, IN ONE PLACE, READ BY THE MENU. Query letter · Synopsis · Opening
+   * sample · Other. Author bio and Full manuscript are NOT here and must not come back: they were
+   * removed deliberately, and `materialsWantedFromRows` sheds them from legacy data on every write.
+   *
+   * ⚠️ `Opening sample` IS THE NAME, not "Sample pages". The three units all store as one
+   * `ComponentType`, so the artefact does not know which unit was asked for — a "Sample pages"
+   * label would assert a unit the data does not carry.
+   *
+   * ⚠️ AND `added` IS A PREDICATE RATHER THAN A FLAG, so the menu reads the query's real state
+   * every time it opens rather than a copy taken when something last changed.
+   *
+   * ⚠️ EACH ROW SAYS WHAT CHOOSING IT WILL DO (§2). Two of the four attach and close — there is
+   * nothing to configure about a query letter. The other two HAND OVER to an editor, and the hint
+   * says so before the click rather than after it: a sample without a size is half a fact, and
+   * `Other` without its words is a pill reading "Other".
+   */
+  const MATERIAL_MENU: { label: string; hint?: string; added: (ql: boolean, syn: boolean, smp: boolean, oth: boolean) => boolean; add: (anchor: HTMLElement) => void }[] = [
     { label: "Query letter", added: (ql) => ql, add: () => activeQuery && activeAgent && toggleDocMaterial(activeQuery, activeAgent, "query") },
     { label: "Synopsis", added: (_q, syn) => syn, add: () => activeQuery && activeAgent && toggleDocMaterial(activeQuery, activeAgent, "synopsis") },
-    { label: "Opening sample", added: (_q, _s, smp) => smp, add: () => setSampleEditorOpen(true) },
+    {
+      label: "Opening sample", hint: "→ SIZE", added: (_q, _s, smp) => smp,
+      /* ⚠️ IT ATTACHES AND HANDS OVER, in that order — the pill exists before its editor opens, so
+         closing without touching the stepper leaves a real material at the default rather than
+         nothing. The default is the AGENT's stated size where there is one. */
+      add: (anchor) => {
+        if (!activeQuery || !activeAgent) return;
+        const pref = agentSamplePref(activeAgent);
+        const unit = pref?.unit ?? sampleUnit;
+        const qty = pref?.qty ?? snapToUnit(unit);
+        setSampleUnit(unit); setSampleQty(qty);
+        commitSample(qty, unit);
+        openMatPop("smp", anchor);
+      },
+    },
     /* ⚠️ OTHER TAKES FREE TEXT, NOT A STEPPER — a quantity of what? Its chip's label is whatever
        the writer types, verbatim, which is why it has no unit and no amount. */
-    { label: "Other", added: (_q, _s, _m, oth) => oth, add: () => setOtherOpen(true) },
+    {
+      label: "Other…", hint: "FREE TEXT", added: (_q, _s, _m, oth) => oth,
+      add: (anchor) => {
+        if (!activeQuery || !activeAgent) return;
+        const item: QueryMaterial = { material: "Other", type: "other", quantity: "" };
+        writeMaterials(activeQuery, [...baseMaterialsFor(activeQuery, activeAgent), item], "Material attached");
+        setOtherEditing(item); setOtherText("");
+        openMatPop("oth", anchor);
+      },
+    },
   ];
 
   const toggleDocMaterial = (q: Query, ag: Agent | null | undefined, kind: "query" | "synopsis") => {
@@ -1715,29 +1778,27 @@ export const Queries: React.FC<{
        a state that no longer exists: a material is on the send or it is not. */
     writeMaterials(q, next, present ? `${name} removed` : `${name} attached`);
   };
-  const saveSampleMaterial = (q: Query, ag: Agent | null | undefined) => {
-    const qty = sampleQty.trim();
-    if (!qty) return;
-    const numeric = /^[\d,]+$/.test(qty) ? Number(qty.replace(/,/g, "")) : qty;
-    /* the stored `type` is the lowercase unit the schema uses; `SampleUnit` is the shared editor's */
-    const item: QueryMaterial = { material: "Sample Pages", type: sampleUnit.toLowerCase() as QueryMaterial["type"], quantity: numeric };
-    const next = [...baseMaterialsFor(q, ag).filter((it) => !isSampleMat(it)), item];
-    writeMaterials(q, next, "Sample materials updated");
-    setSampleEditorOpen(false);
-  };
   /**
-   * ⚠️ FREE TEXT, THROUGH THE SAME WRITER. `type: "other"` is what gives it an identity —
-   * `QueryMaterial` already carries the field, so this needed no schema change — and
-   * `classifyQueryMaterial` reads it first, which is what keeps it out of the sample bucket.
+   * §1 — the sample commits on every change rather than on a Save.
+   *
+   * ⚠️ IT TAKES THE VALUES RATHER THAN READING THE STATE. `setSampleQty` is asynchronous, so a
+   * commit that read `sampleQty` would write the value BEFORE the keystroke — the classic
+   * one-behind bug, and invisible until someone types two digits.
+   *
+   * ⚠️ AND AN EMPTY FIELD WRITES NOTHING. Clearing the box while retyping is not a request to
+   * remove the material; `Remove from this send` is.
    */
-  const saveOtherMaterial = (q: Query, ag: Agent | null | undefined) => {
-    const t = otherText.trim();
-    if (!t) return;
-    const item: QueryMaterial = { material: "Other", type: "other", quantity: t };
-    writeMaterials(q, [...baseMaterialsFor(q, ag), item], "Material attached");
-    setOtherText("");
-    setOtherOpen(false);
+  const commitSample = (qty: string, unit: SampleUnit) => {
+    if (!activeQuery || !qty.trim()) return;
+    const numeric = /^[\d,]+$/.test(qty.trim()) ? Number(qty.trim().replace(/,/g, "")) : qty.trim();
+    const item: QueryMaterial = { material: "Sample Pages", type: unit.toLowerCase() as QueryMaterial["type"], quantity: numeric };
+    const next = [...baseMaterialsFor(activeQuery, activeAgent).filter((it) => !isSampleMat(it)), item];
+    writeMaterials(activeQuery, next, "Opening sample updated");
   };
+  /* ⚠️ `saveSampleMaterial` IS DELETED WITH THE SAVE BUTTON IT SERVED (§1). Its only caller was the
+     popover's `Save quantity`; the editor commits on every change through `commitSample`, which
+     takes the values rather than reading state one keystroke behind. A writer with no caller is the
+     next reader's second way to do this. */
   /**
    * §2 — edit an existing `Other` in place: it saves OVER the item it opened rather than appending.
    *
@@ -1757,8 +1818,7 @@ export const Queries: React.FC<{
   };
   const removeSampleMaterial = (q: Query, ag: Agent | null | undefined) => {
     writeMaterials(q, baseMaterialsFor(q, ag).filter((it) => !isSampleMat(it)), "Opening sample removed");
-    setSampleEditorOpen(false);
-  };
+      };
   // Queries Hub subtitle — the manuscript currently in scope ("Tracking …").
   const trackedManuscript = selectedManuscriptFilter !== "All" ? manuscripts.find(m => m.id === selectedManuscriptFilter) : null;
   // Manuscripts that actually have queries — the MANUSCRIPT pill group only shows these.
@@ -4711,87 +4771,91 @@ export const Queries: React.FC<{
                           closes on Escape and on an outside click and escapes the pane's
                           `overflow: hidden`. A fourth popover primitive on this page would be a
                           fourth way to open a menu. */}
+                      {/**
+                        * ══ §1 + §2 · THE MATERIALS EDITOR — ONE COMPONENT, BOTH ROUTES ═════════
+                        *
+                        * ⚠️ THE SAME `matPop` STATE SERVES THE PILL CLICK AND THE ATTACH MENU. They
+                        * used to open different things: clicking a pill opened this editor, while
+                        * choosing `Other` from the menu opened a separate inline row below the
+                        * chips, and choosing `Opening sample` opened the editor with no anchor. Two
+                        * routes to one job is how they come to disagree about what an editor is.
+                        *
+                        * ⚠️ AND IT COMMITS AS IT GOES. There is no Done and no Save: the stepper,
+                        * the unit pills and the free-text field each write on change, and closing is
+                        * closing. The old sheet's black DONE existed because it did NOT commit as
+                        * you went; with that fixed the button had no job.
+                        */}
                       {matPop && (() => {
-                        /* ⚠️ THE FLAGS ARE DERIVED HERE, FROM THE SAME SOURCE THE CHIPS READ. The
-                           chips moved onto the send rung and took their locals with them; the
-                           popover is portalled, so its place in the tree never mattered — what it
-                           needed was the values. Re-derived from `baseMaterialsFor` rather than
-                           threaded down, because a second copy of "is it sent" is a second answer. */
                         const pbase = baseMaterialsFor(activeQuery, activeAgent);
-                        const qlSent = pbase.some(isQueryLetterMat);
-                        const synSent = pbase.some(isSynopsisMat);
+                        const pref = agentSamplePref(activeAgent);
+                        const eyebrow = matPop === "ql" ? "Query letter" : matPop === "syn" ? "Synopsis" : matPop === "oth" ? "Other" : "Opening sample";
+                        const removeThis = () => {
+                          if (matPop === "smp") removeSampleMaterial(activeQuery, activeAgent);
+                          else if (matPop === "oth" && otherEditing != null) removeOtherMaterial(activeQuery, activeAgent, otherEditing);
+                          else if (matPop === "ql" ? pbase.some(isQueryLetterMat) : pbase.some(isSynopsisMat)) {
+                            toggleDocMaterial(activeQuery, activeAgent, matPop === "ql" ? "query" : "synopsis");
+                          }
+                          closeMatPop();
+                        };
                         return (
-                        <F12Popover
-                          width={272}
-                          title={matPop === "ql" ? "Query letter" : matPop === "syn" ? "Synopsis" : matPop === "oth" ? "Other" : "Opening sample"}
-                          style={matPopStyle}
-                          onClose={() => { setSampleEditorOpen(false); closeMatPop(); }}
-                        >
+                        <F12Panel open eyebrow={eyebrow} style={matPopStyle} panelRef={matPopPanelRef} onClose={closeMatPop}>
                           {matPop === "smp" && (
                             <>
-                              {/* ⚠️ THE SHARED UNIT SET AND THE SHARED ARITHMETIC. Switching SNAPS
-                                  to that unit's default rather than converting 3 chapters into 3
-                                  pages, and the step is `stepAmount`'s — 1 chapter, 5 pages, 500
-                                  words — floored and capped by the range the rules validate. */}
-                              <div className="qc-mpoprow">
+                              {/* ⚠️ THE STEPPER TAKES TYPED DIGITS AND ARROW KEYS, and each change
+                                  commits. The unit SNAPS to its own default rather than converting
+                                  3 chapters into 3 pages, and the step is `stepAmount`'s — 1
+                                  chapter, 5 pages, 500 words. */}
+                              <div className="f12-panel-row">
                                 <span>Quantity</span>
-                                <span className="qc-mqty">
+                                <span className="f12-step">
+                                  <button type="button" aria-label={`Down one step of ${sampleUnit.toLowerCase()}`}
+                                    onClick={() => { const v = stepAmount(sampleQty, sampleUnit, -1); setSampleQty(v); commitSample(v, sampleUnit); }}>−</button>
                                   <input type="text" inputMode="numeric" value={sampleQty} aria-label="Quantity"
-                                    onChange={(e) => setSampleQty(e.target.value)}
+                                    onChange={(e) => { setSampleQty(e.target.value); commitSample(e.target.value, sampleUnit); }}
                                     onKeyDown={(e) => {
                                       if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
                                       e.preventDefault();
-                                      setSampleQty(stepAmount(sampleQty, sampleUnit, e.key === "ArrowUp" ? 1 : -1));
+                                      const v = stepAmount(sampleQty, sampleUnit, e.key === "ArrowUp" ? 1 : -1);
+                                      setSampleQty(v); commitSample(v, sampleUnit);
                                     }} />
-                                  <span className="qc-mqtysteps">
-                                    <button type="button" aria-label={`Up one step of ${sampleUnit.toLowerCase()}`} onClick={() => setSampleQty(stepAmount(sampleQty, sampleUnit, 1))}>▲</button>
-                                    <button type="button" aria-label={`Down one step of ${sampleUnit.toLowerCase()}`} onClick={() => setSampleQty(stepAmount(sampleQty, sampleUnit, -1))}>▼</button>
-                                  </span>
+                                  <button type="button" aria-label={`Up one step of ${sampleUnit.toLowerCase()}`}
+                                    onClick={() => { const v = stepAmount(sampleQty, sampleUnit, 1); setSampleQty(v); commitSample(v, sampleUnit); }}>+</button>
                                 </span>
                               </div>
-                              <div className="qc-mpopunits" role="group" aria-label="Sample unit">
+                              <div className="f12-units" role="group" aria-label="Sample unit">
                                 {SAMPLE_UNITS.map((u) => (
                                   <button key={u} type="button" aria-pressed={sampleUnit === u} className={sampleUnit === u ? "on" : undefined}
-                                    onClick={() => { setSampleUnit(u); setSampleQty(snapToUnit(u)); }}>{u}</button>
+                                    onClick={() => { const v = snapToUnit(u); setSampleUnit(u); setSampleQty(v); commitSample(v, u); }}>{u.toLowerCase()}</button>
                                 ))}
                               </div>
-                              <button type="button" className="qc-mpopact" onClick={() => { saveSampleMaterial(activeQuery, activeAgent); closeMatPop(); }} disabled={!sampleQty.trim()}>
-                                Save quantity
-                              </button>
+                              {/* ⚠️ ONLY WHEN THE AGENT HAS ONE. A hint line for an agency that has
+                                  stated nothing would invent a request. */}
+                              {pref && (
+                                <div className="f12-panel-hint">
+                                  {activeAgent.agency?.trim() || agentPrimary(activeAgent)} ask for {pref.qty} {pref.unit.toLowerCase()}
+                                </div>
+                              )}
                             </>
                           )}
-                          {/* ⚠️ §2 · `MARK AS SENT` IS RETIRED WITH THE NOT-SENT STATE. A pill only
-                              exists because that material went with the send, so a control offering
-                              to un-mark it was offering to make it a ghost — the exact thing this
-                              section removes. Un-sending is removing, and it is the verb below. */}
                           {matPop === "oth" && otherEditing != null && (
-                            <>
+                            <div className="f12-panel-free">
                               <input
                                 type="text"
-                                className="qc-mfree"
                                 autoFocus
                                 value={otherText}
+                                placeholder="What did you send?"
                                 aria-label="Other material"
-                                onChange={(e) => setOtherText(e.target.value)}
-                                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveOtherEdit(activeQuery, activeAgent, otherEditing, otherText); closeMatPop(); } }}
+                                onChange={(e) => { setOtherText(e.target.value); saveOtherEdit(activeQuery, activeAgent, otherEditing, e.target.value); }}
+                                onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); closeMatPop(); } }}
                               />
-                              <button type="button" className="qc-mpopact" disabled={!otherText.trim()}
-                                onClick={() => { saveOtherEdit(activeQuery, activeAgent, otherEditing, otherText); closeMatPop(); }}
-                              >Save</button>
-                            </>
+                            </div>
                           )}
-                          {/* ⚠️ REMOVE IS LAST AND BURGUNDY — the destructive verb furthest from the
-                              one your hand lands on first. And it says "from this send", because
-                              that is what the pill belongs to. */}
-                          <button type="button" className="qc-mpopact qc-mpopact-danger"
-                            onClick={() => {
-                              if (matPop === "smp") removeSampleMaterial(activeQuery, activeAgent);
-                              else if (matPop === "oth" && otherEditing != null) removeOtherMaterial(activeQuery, activeAgent, otherEditing);
-                              else if ((matPop === "ql" ? qlSent : synSent)) toggleDocMaterial(activeQuery, activeAgent, matPop === "ql" ? "query" : "synopsis");
-                              closeMatPop();
-                            }}
-                          >Remove from this send</button>
-                        </F12Popover>
+                          <div className="f12-panel-sep" />
+                          {/* ⚠️ THE SAME REMOVAL PATH AS THE HOVER ×, and quiet burgundy text rather
+                              than a button: the two must not look like different amounts of
+                              decision. It closes the panel and raises the undo toast. */}
+                          <button type="button" className="f12-panel-rm" onClick={removeThis}>Remove from this send</button>
+                        </F12Panel>
                         );
                       })()}
                     </div>
@@ -4996,7 +5060,6 @@ export const Queries: React.FC<{
                                   setSampleUnit(unit);
                                   const qty = sampleItem && typeof sampleItem !== "string" && sampleItem.quantity != null ? String(sampleItem.quantity) : "";
                                   setSampleQty(qty || snapToUnit(unit));
-                                  setSampleEditorOpen(true);
                                 };
                                 /**
                                  * ══ §2 · A PILL EXISTS ONLY IF THAT MATERIAL WENT WITH THE SEND ══
@@ -5103,14 +5166,22 @@ export const Queries: React.FC<{
                                     style={addMatMenuStyle}
                                     ariaLabel="Add to this query"
                                     items={[
-                                      ...MATERIAL_MENU.map((m) => ({
-                                        /* ⚠️ "Attached", THE WORD THE PACK NAMES — and it is the
-                                           same word the row's × removes. "Added" was a second verb
-                                           for one relationship. */
-                                        label: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0) ? `${m.label} · Attached` : m.label,
-                                        disabled: m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0),
-                                        onClick: () => { setAddMatOpen(false); m.add(); },
-                                      })),
+                                      ...MATERIAL_MENU.map((m) => {
+                                        const on = m.added(qlSent, synSent, !!sampleItem, otherItems.length > 0);
+                                        return {
+                                          label: m.label,
+                                          /* ⚠️ `ATTACHED` IS A HINT, NOT PART OF THE LABEL. As a suffix it
+                                             read as a different material ("Synopsis · Attached"); in the
+                                             hint column it is the row's state, where `→ SIZE` and
+                                             `FREE TEXT` say what the others will do. */
+                                          hint: on ? "ATTACHED" : m.hint,
+                                          disabled: on,
+                                          /* ⚠️ THE ANCHOR IS THE ATTACH BUTTON ITSELF — the editor that
+                                             opens next has to hang off something on screen, and the menu
+                                             row is gone by the time it does. */
+                                          onClick: () => { setAddMatOpen(false); if (addMatTrigRef.current) m.add(addMatTrigRef.current); },
+                                        };
+                                      }),
                                       "divider" as const,
                                       {
                                         label: isPro ? "Attach a submission package" : "Attach a submission package · Pro",
@@ -5123,29 +5194,11 @@ export const Queries: React.FC<{
 
                               {/* ⚠️ OTHER TAKES A FIELD, NOT A STEPPER — a quantity of what? Its chip
                                   reads whatever the writer types, verbatim. */}
-                              {otherOpen && (
-                                <div className="qc-msub qc-msamp">
-                                  <input
-                                    type="text"
-                                    className="qc-mfree"
-                                    autoFocus
-                                    value={otherText}
-                                    placeholder="What else did you send?"
-                                    aria-label="Other material"
-                                    onChange={(e) => setOtherText(e.target.value)}
-                                    /* ⚠️ ENTER SAVES; ESCAPE IS DELIBERATELY NOT HANDLED HERE. The
-                                       page's rule is EXACTLY ONE Escape listener — two, both reaching
-                                       the journey's exit, run the dirty guard twice and ask about a
-                                       draft the first has already discarded. A field-level Escape is
-                                       a different thing and the rule cannot tell them apart; Cancel
-                                       is beside the field, and the overlays that DO own Escape own it
-                                       through `F12Popover` and `F12Menu`. */
-                                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); saveOtherMaterial(activeQuery, activeAgent); } }}
-                                  />
-                                  <button type="button" onClick={() => saveOtherMaterial(activeQuery, activeAgent)} disabled={!otherText.trim()} style={{ padding: "7px 16px", fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: burgundy, background: "var(--qc-acc-pink-save)", border: "1px solid var(--qc-rim-pink)", borderRadius: 8, cursor: otherText.trim() ? "pointer" : "default", opacity: otherText.trim() ? 1 : 0.5 }}>Add</button>
-                                  <button type="button" className="qc-mact" onClick={() => { setOtherOpen(false); setOtherText(""); }}>Cancel</button>
-                                </div>
-                              )}
+                              {/* ⚠️ THE INLINE `Other` ROW IS RETIRED (§2). Choosing `Other` from the
+                                  Attach menu opened a text field BELOW the chips while clicking an
+                                  Other pill opened a popover — two editors for one material, and
+                                  the one the menu opened had no anchor and no removal. Both routes
+                                  open `F12Panel` now. */}
                                   </div>
                                 );
                               })()}

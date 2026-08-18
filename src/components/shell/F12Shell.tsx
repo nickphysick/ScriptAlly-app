@@ -182,13 +182,70 @@ export const F12Popover: React.FC<{
 };
 
 /**
+ * F12Panel — the page's ONE editor popover (§1, ref design-refs/161-attach-popover.html).
+ *
+ * ⚠️ IT REPLACES `F12Popover` FOR EDITORS, and the difference is not decoration. `F12Popover` is a
+ * titled FILTER DIALOG: a cream head, a display-size Playfair title and a DONE foot — a shape that
+ * says "make your changes and confirm". The materials editors commit as you go, so the confirm had
+ * no job, and the surface was making a promise the behaviour did not keep. Nothing else in the
+ * product looks like that sheet.
+ *
+ * ⚠️ SO THERE IS NO `Done` AND NO `Save`, AND THAT IS A PROPERTY OF THE COMPONENT rather than a
+ * choice each caller makes. Click away or Esc closes, exactly as the filter and sort panels do.
+ *
+ * ⚠️ AND IT RETURNS FOCUS TO WHAT OPENED IT. A popover that closes into nowhere leaves a keyboard
+ * reader at the top of the document; `onClose` is where the caller re-focuses, and Esc routes
+ * through it rather than around it.
+ */
+export const F12Panel: React.FC<{
+  open: boolean;
+  /** The mono eyebrow — `OPENING SAMPLE`, `EMAIL`. Never a display-size title. */
+  eyebrow: string;
+  onClose: () => void;
+  style?: React.CSSProperties;
+  width?: number;
+  panelRef?: React.RefObject<HTMLElement | null>;
+  children: React.ReactNode;
+}> = ({ open, eyebrow, onClose, style, width = 246, panelRef, children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (panelRef) (panelRef as React.MutableRefObject<HTMLElement | null>).current = ref.current; });
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (ref.current?.contains(t) || (t instanceof Element && t.closest(".f12-popwrap"))) return;
+      onClose();
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); onClose(); } };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => { document.removeEventListener("mousedown", onDown); document.removeEventListener("keydown", onKey); };
+  }, [open, onClose]);
+  if (!open) return null;
+  return createPortal(
+    <div className="t-f12 qc-neutral">
+      <div ref={ref} className="f12-panel" style={{ width, zIndex: 60, ...style }} role="dialog" aria-label={eyebrow}>
+        <div className="f12-panel-eyebrow">{eyebrow}</div>
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+};
+
+/**
  * F12Menu — a lightweight portalled action menu (chrome revision / interactions): the ⋯ overflow
  * on the control bar, the corrections ⋯ on timeline rows, etc. Unlike F12Popover (titled filter
  * dialog), this is a bare list of actions. Portalled to document.body inside a .t-f12 wrapper
  * (tokens resolve, no clip), positioned via the caller's useFixedMenu `style`. Keep the trigger in
  * an .f12-popwrap so its own onClick owns the toggle. Escape + outside-click close.
  */
-export type F12MenuItem = "divider" | { label: string; icon?: React.ReactNode; onClick: () => void; danger?: boolean; disabled?: boolean };
+/**
+ * ⚠️ `hint` IS A RIGHT-ALIGNED MONO NOTE, not a second label (§2). It states what choosing the row
+ * WILL DO — `ATTACHED` on one already on the send, `→ SIZE` on one that hands over to an editor,
+ * `FREE TEXT` on one that opens a field. A writer should know that before clicking, not after.
+ */
+export type F12MenuItem = "divider" | { label: string; hint?: string; icon?: React.ReactNode; onClick: () => void; danger?: boolean; disabled?: boolean };
 export const F12Menu: React.FC<{
   open: boolean;
   onClose: () => void;
@@ -227,6 +284,7 @@ export const F12Menu: React.FC<{
             >
               {it.icon}
               {it.label}
+              {it.hint && <span className="f12-menu-hint">{it.hint}</span>}
             </button>
           )
         )}

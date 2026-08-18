@@ -4034,3 +4034,40 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 .qp-stat--edit { width: 100%; text-align: left; background: transparent; border: 0; font: inherit; color: inherit; cursor: pointer; border-radius: 9px; transition: background-color 0.12s; }
 .qp-stat--edit:hover { background: var(--paper); }
 .qp-stat--edit:focus-visible { outline: 2px solid var(--qc-ring); outline-offset: 1px; }
+
+/* ══ §1 · THE EDITOR PANEL — ONE SURFACE, THREE CONTENTS ══════════════════════════════════════
+ *
+ * ⚠️ WHITE, THE SHADOW THE FILTER AND SORT PANELS USE, A HAIRLINE RIM. The materials editors were
+ * rendering as a cream sheet with a display-size Playfair head and a black DONE pill — nothing
+ * else in the product looks like that, and the confirm was a promise the behaviour did not keep,
+ * because every change already committed as it was made.
+ *
+ * ⚠️ THE EYEBROW IS MONO AND SMALL. A popover that names a field does not need a title the size of
+ * a card's; the words are a label for what is beneath them.
+ */
+.f12-panel { background: var(--white); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--sh-3); padding: 6px; }
+.f12-panel-eyebrow { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); padding: 8px 9px 5px; font-weight: 500; }
+.f12-panel-row { display: flex; align-items: center; gap: 10px; padding: 8px 9px 4px; font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--ink-2); }
+.f12-panel-sep { height: 1px; background: var(--line); margin: 5px 9px; }
+/* ⚠️ A QUIET BURGUNDY TEXT ACTION, NOT A BUTTON. It is the same removal the hover × performs, and
+   the two must not look like different amounts of decision. */
+.f12-panel-rm { display: block; width: 100%; text-align: left; padding: 9px; border: 0; border-radius: 8px; background: none; font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--burg); cursor: pointer; }
+.f12-panel-rm:hover { background: var(--paper); }
+.f12-panel-hint { padding: 0 9px 8px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-off); }
+.f12-panel-free { display: flex; margin: 2px 9px 8px; }
+.f12-panel-free input { flex: 1; height: 30px; padding: 0 10px; border: 1px solid var(--btn-line); border-radius: 8px; background: var(--white); font-family: "Inter", sans-serif; font-size: 12px; color: var(--ink); outline: none; }
+.f12-panel-free input:focus { border-color: var(--qc-ring); box-shadow: 0 0 0 1px var(--qc-ring); }
+
+/* the stepper — typeable, and its buttons flank the value */
+.f12-step { display: flex; align-items: center; margin-left: auto; }
+.f12-step button { width: 26px; height: 26px; border: 1px solid var(--line); background: var(--white); color: var(--ink-2); font-size: 14px; line-height: 1; cursor: pointer; }
+.f12-step button:hover { background: var(--paper); }
+.f12-step button:first-child { border-radius: 7px 0 0 7px; }
+.f12-step button:last-child { border-radius: 0 7px 7px 0; }
+.f12-step input { width: 44px; height: 26px; text-align: center; border: 1px solid var(--line); border-left: 0; border-right: 0; background: var(--white); font-family: var(--f12-mono); font-size: 11.5px; color: var(--ink); outline: none; }
+.f12-units { display: flex; gap: 4px; padding: 6px 9px 9px; }
+.f12-units button { padding: 4px 10px; border: 1px solid var(--line); border-radius: 14px; background: var(--paper); font-family: "Inter", sans-serif; font-size: 11px; color: var(--ink-2); cursor: pointer; }
+.f12-units button.on { background: var(--pink); border-color: var(--qc-rim-pink); color: var(--burg); font-weight: 500; }
+
+/* §2 — the menu row's right-aligned note: what choosing it will do */
+.f12-menu-hint { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.06em; color: var(--qc-tx-off); }

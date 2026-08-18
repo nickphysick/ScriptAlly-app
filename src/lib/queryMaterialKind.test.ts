@@ -150,7 +150,10 @@ describe("§4 · the Query Centre stopped keeping its own copies", () => {
     const w = src.slice(src.indexOf("const writeMaterials ="), src.indexOf("const toggleDocMaterial ="));
     expect(w, "the writer is missing").toContain("updateQuery(q.id, { materialsWanted: next })");
     expect(w, "the writer grew an activity entry").not.toMatch(/addActivity|logActivity|ActivityType/);
-    for (const caller of ["toggleDocMaterial", "saveSampleMaterial", "removeSampleMaterial"]) {
+    /* ⚠️ `commitSample` REPLACES `saveSampleMaterial` (§1) — the editor commits on every change, so
+       the Save button and its handler are gone. The clause is unchanged: every path that writes
+       materials goes through the one writer. */
+    for (const caller of ["toggleDocMaterial", "commitSample", "removeSampleMaterial"]) {
       const at = src.indexOf(`const ${caller} =`);
       expect(at, `${caller} is missing`).toBeGreaterThan(-1);
       const body = src.slice(at, src.indexOf("\n  const ", at + 10));

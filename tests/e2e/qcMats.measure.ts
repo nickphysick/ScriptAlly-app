@@ -61,10 +61,13 @@ test("§2 — every pill is attached, removal is immediate and undoable, the men
   }
   /* ⚠️ ATTACHED ONES ARE LISTED AND INERT — hiding them would make the menu shorter every time it
      was used, and leave a writer unable to see that a type exists at all. */
-  for (const m of menu.filter((x) => /Attached/.test(x.label))) {
+  /* ⚠️ `ATTACHED` IS A HINT NOW (§2), in its own column rather than suffixed onto the label — so
+     the match is case-insensitive and reads the whole row. As a suffix it read as a different
+     material ("Synopsis · Attached"). */
+  for (const m of menu.filter((x) => /attached/i.test(x.label))) {
     expect(m.disabled, `"${m.label}" is marked Attached and still clickable`).toBe(true);
   }
-  const attachedInMenu = menu.filter((m) => /Attached/.test(m.label)).length;
+  const attachedInMenu = menu.filter((m) => /attached/i.test(m.label)).length;
   expect(attachedInMenu, "no menu row reflects what is already on the send").toBeGreaterThan(0);
   await page.keyboard.press("Escape");
   await page.waitForTimeout(250);
@@ -104,4 +107,87 @@ test("§2 — every pill is attached, removal is immediate and undoable, the men
   const restored = await page.locator(".qc-sentmat .qc-mchip-att").count();
   console.log(`  undone: ${restored} pills`);
   expect(restored, "undo did not restore the material").toBe(before);
+});
+
+test("§1/§2 — the editor is on-brand, commits as it goes, and both routes open it", async ({ page }) => {
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.locator(".f12-row").first().click({ timeout: 5000 });
+  await page.waitForTimeout(450);
+
+  /* ── the pill route ── */
+  const pill = page.locator(".qc-sentmat .qc-mchip-att").first();
+  const pillLabel = (await pill.innerText()).replace(/\s+/g, " ").trim();
+  await pill.click();
+  await page.waitForTimeout(400);
+  const panel = await page.evaluate(() => {
+    const p = document.querySelector<HTMLElement>(".f12-panel");
+    if (!p) return null;
+    const c = getComputedStyle(p);
+    const r = p.getBoundingClientRect();
+    const eyebrow = p.querySelector<HTMLElement>(".f12-panel-eyebrow");
+    return {
+      bg: c.backgroundColor, shadow: c.boxShadow.slice(0, 40), border: `${c.borderTopWidth} ${c.borderTopColor}`,
+      onScreen: r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth,
+      eyebrow: (eyebrow?.textContent || "").trim(),
+      eyebrowFont: eyebrow ? `${getComputedStyle(eyebrow).fontFamily.split(",")[0]} ${getComputedStyle(eyebrow).fontSize}` : "",
+      buttons: [...p.querySelectorAll("button")].map((b) => (b.textContent || "").trim()),
+      /* the old sheet, asserted gone */
+      oldSheet: document.querySelectorAll(".f12-pop .f12-done").length,
+    };
+  });
+  console.log(`\npill "${pillLabel}" → panel: ${panel ? `${panel.bg} · shadow ${panel.shadow} · border ${panel.border}` : "(none)"}`);
+  console.log(`  eyebrow "${panel?.eyebrow}" in ${panel?.eyebrowFont} · buttons ${JSON.stringify(panel?.buttons)}`);
+  expect(panel, "the pill opened no editor").not.toBeNull();
+  expect(panel!.onScreen, "the editor opened off screen").toBe(true);
+  /* ⚠️ WHITE, WITH THE PAGE'S STANDARD POPOVER SHADOW AND A HAIRLINE — not the cream sheet. */
+  expect(panel!.bg, "the editor is not on white").toBe("rgb(255, 255, 255)");
+  expect(panel!.shadow, "the editor has no shadow").not.toBe("none");
+  expect(panel!.border, "the editor has no hairline rim").toContain("1px");
+  expect(panel!.eyebrowFont.toLowerCase(), "the eyebrow is not mono").toContain("mono");
+  expect(parseFloat(panel!.eyebrowFont.split(" ").pop() || "99"), "the eyebrow is display-size").toBeLessThan(12);
+  /* ⚠️ NO DONE AND NO SAVE — the section's own test, and the whole reason the surface changed. */
+  for (const b of panel!.buttons) {
+    expect(b.toLowerCase(), `the editor still carries a "${b}" control`).not.toMatch(/^(done|save)/);
+  }
+  expect(panel!.oldSheet, "the old sheet's DONE foot is still rendered").toBe(0);
+
+  /* Esc closes and returns focus to the opener */
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
+  const after = await page.evaluate(() => ({
+    open: document.querySelectorAll(".f12-panel").length,
+    focused: (document.activeElement?.className || "").toString().slice(0, 30),
+  }));
+  console.log(`  after Esc: ${after.open} panels · focus on "${after.focused}"`);
+  expect(after.open, "Esc left the editor open").toBe(0);
+  expect(after.focused, "Esc did not return focus to the opener").toContain("qc-mchip");
+
+  /* ── the attach route: Opening sample attaches AND hands over ── */
+  const before = await page.locator(".qc-sentmat .qc-mchip-att").count();
+  await page.locator(".qc-mchip-add").click();
+  await page.waitForTimeout(300);
+  await page.locator('[role="menu"] .f12-menu-item', { hasText: "Opening sample" }).click();
+  await page.waitForTimeout(900);
+  const handed = await page.evaluate(() => ({
+    pills: document.querySelectorAll(".qc-sentmat .qc-mchip-att").length,
+    eyebrow: (document.querySelector(".f12-panel-eyebrow")?.textContent || "").trim(),
+    stepper: document.querySelectorAll(".f12-step input").length,
+    units: [...document.querySelectorAll<HTMLElement>(".f12-units button")].map((b) => `${(b.textContent || "").trim()}${b.classList.contains("on") ? "*" : ""}`),
+    hint: (document.querySelector(".f12-panel-hint")?.textContent || "").trim(),
+  }));
+  console.log(`\nAttach → Opening sample: ${before} → ${handed.pills} pills · editor "${handed.eyebrow}" · units ${handed.units.join(" ")} · hint "${handed.hint}"`);
+  /* ⚠️ IT ATTACHES AND THEN OPENS — a sample without a size is half a fact, and the pill must exist
+     before the editor does so that closing without touching it leaves a real material. */
+  expect(handed.pills, "choosing Opening sample did not attach it").toBe(before + 1);
+  expect(handed.eyebrow.toLowerCase(), "it attached without handing over to the editor").toBe("opening sample");
+  expect(handed.stepper, "the editor has no typeable stepper").toBe(1);
+  expect(handed.units.length, "the editor has no unit pills").toBe(3);
+  console.log(`  (the hint line renders only when the agent states a size — this agent: ${handed.hint ? "yes" : "no"})`);
+
+  /* clean up: remove what the walk attached, from inside the editor */
+  await page.locator(".f12-panel-rm").click();
+  await page.waitForTimeout(900);
+  const restored = await page.locator(".qc-sentmat .qc-mchip-att").count();
+  console.log(`  removed from inside the editor: ${restored} pills`);
+  expect(restored, "Remove from this send left the pill behind").toBe(before);
 });

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — the attach popovers, on brand</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;
+--popsh:0 2px 6px rgba(40,35,30,.08),0 14px 30px -12px rgba(40,35,30,.38);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1340px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.stage{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:16px;min-height:330px;}
+.ttl{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;}
+.mrow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+.att{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);background:var(--n1);
+  box-shadow:inset 0 0 0 1px var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;}
+.att svg{width:12px;height:12px;stroke:var(--faint);fill:none;stroke-width:1.6;}
+.att.open{box-shadow:inset 0 0 0 1.5px var(--sage-br);background:#fff;}
+.att .x{width:16px;height:16px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;
+  color:var(--faint);background:#fff;box-shadow:inset 0 0 0 1px var(--line);}
+.att .qty{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--faint);background:#fff;box-shadow:inset 0 0 0 1px var(--line);border-radius:4px;padding:1px 5px;}
+.addb{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--burg);background:#fff;box-shadow:inset 0 0 0 1px var(--oat);border-radius:8px;padding:6px 12px;cursor:pointer;}
+.addb.open{box-shadow:inset 0 0 0 1.5px var(--sage-br);}
+.wrapp{position:relative;display:inline-block;}
+.pop{position:absolute;left:0;top:calc(100% + 6px);z-index:9;width:246px;background:#fff;border-radius:11px;box-shadow:var(--popsh);padding:6px;}
+.pop h5{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:8px 9px 5px;font-weight:500;}
+.pi{display:flex;align-items:center;gap:10px;padding:9px;border-radius:8px;font-size:12.5px;cursor:pointer;}
+.pi:hover{background:var(--n1);}
+.pi:focus-visible{outline:2px solid var(--sage-br);outline-offset:-2px;}
+.pi .k{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.06em;color:#c0bbb3;}
+.pi.done{color:#bdb8b0;cursor:default;}
+.pi.done:hover{background:transparent;}
+.pi.rm{color:var(--burg);}
+.sep{height:1px;background:var(--line);margin:5px 9px;}
+.qrow{display:flex;align-items:center;gap:10px;padding:8px 9px 4px;font-size:12.5px;color:var(--ink2);}
+.stepper{display:flex;align-items:center;margin-left:auto;}
+.stepper button{width:26px;height:26px;border:0;background:#fff;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink2);cursor:pointer;font-size:14px;}
+.stepper button:hover{background:var(--n1);}
+.stepper button:first-child{border-radius:7px 0 0 7px;}
+.stepper button:last-child{border-radius:0 7px 7px 0;}
+.stepper input{font-family:'JetBrains Mono',monospace;font-size:11.5px;width:44px;height:26px;text-align:center;border:0;
+  box-shadow:inset 0 1px 0 var(--line),inset 0 -1px 0 var(--line);outline:none;color:var(--ink);}
+.units{display:flex;gap:4px;padding:6px 9px 9px;}
+.units span{font-size:11px;padding:4px 10px;border-radius:14px;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer;color:var(--ink2);}
+.units span.on{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--burg);font-weight:500;}
+.hintline{padding:0 9px 8px;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:#c4bfb7;}
+.toast{position:absolute;left:16px;bottom:14px;right:16px;display:flex;align-items:center;gap:9px;background:#22201d;color:#f4f0eb;border-radius:10px;padding:10px 12px;font-size:12px;}
+.toast a{margin-left:auto;color:#f0d6c8;text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+.stage{position:relative;}
+.legend{max-width:1340px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+.freetext{margin:2px 9px 8px;display:flex;}
+.freetext input{flex:1;font-family:inherit;font-size:12px;height:30px;padding:0 10px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);outline:none;color:var(--ink);}
+.freetext input:focus{box-shadow:inset 0 0 0 1.5px var(--sage-br);}
+</style></head>
+<body>
+
+<h4>The three popovers — anchored to what opened them, white, standard shadow, no black anywhere</h4>
+<div class="grid">
+
+  <div><div class="lab">1 · + Attach<s>The menu states the full set; attached types inert. Opening sample goes straight to its editor.</s></div>
+    <div class="stage">
+      <div class="ttl">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+        <span class="wrapp"><span class="addb open">+ Attach</span>
+          <div class="pop" role="menu">
+            <h5>Attach to this send</h5>
+            <div class="pi done">Query letter<span class="k">ATTACHED</span></div>
+            <div class="pi">Synopsis</div>
+            <div class="pi">Opening sample<span class="k">→ SIZE</span></div>
+            <div class="pi">Other…<span class="k">FREE TEXT</span></div>
+          </div></span>
+      </div>
+    </div></div>
+
+  <div><div class="lab">2 · The opening sample editor<s>Same component from the Attach route and from clicking the pill</s></div>
+    <div class="stage">
+      <div class="ttl">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+        <span class="wrapp"><span class="att open"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Opening sample<span class="qty">3 ch</span></span>
+          <div class="pop">
+            <h5>Opening sample</h5>
+            <div class="qrow">Quantity<span class="stepper"><button>−</button><input value="3"><button>+</button></span></div>
+            <div class="units"><span class="on">chapters</span><span>pages</span><span>words</span></div>
+            <div class="hintline">Foxglove ask for the first three chapters</div>
+            <div class="sep"></div>
+            <div class="pi rm">Remove from this send</div>
+          </div></span>
+      </div>
+    </div></div>
+
+  <div><div class="lab">3 · Other, and removal<s>Free text names it; removing closes the popover and offers undo</s></div>
+    <div class="stage">
+      <div class="ttl">Murphy&rsquo;s Day Out</div>
+      <div class="mrow">
+        <span class="att"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Query letter</span>
+        <span class="wrapp"><span class="att open"><svg viewBox="0 0 24 24"><path d="M8 12V7a4 4 0 1 1 8 0v9a6 6 0 0 1-12 0V8"/></svg>Other<span class="x">×</span></span>
+          <div class="pop">
+            <h5>Other</h5>
+            <div class="freetext"><input value="Marketing plan" placeholder="What did you send?"></div>
+            <div class="sep"></div>
+            <div class="pi rm">Remove from this send</div>
+          </div></span>
+      </div>
+      <div class="toast">Opening sample removed<a>Undo</a></div>
+    </div></div>
+
+</div>
+
+<div class="legend">
+  <b>One surface, three contents.</b> White panel, the same shadow the filter and sort panels use, hairline rim, anchored to the pill or button that opened it with a 6px offset — <code>useFixedMenu</code> like everything else, flipping and constraining the same way.<br><br>
+  <b>Functionality:</b>
+  <ul style="margin:6px 0 0 18px">
+    <li><b>The Attach menu</b> lists the full set of four; attached types stay listed but inert, so the menu is where you learn what a send can carry. <b>Synopsis and Query letter attach on click and the menu closes</b> — nothing to configure. <b>Opening sample attaches and hands straight over to its editor</b>, because a sample without a size is half a fact; the <code>→ SIZE</code> hint says that before you click. <b>Other</b> opens with the free-text field focused.</li>
+    <li><b>The editor</b>: stepper with a typeable value, unit pills, and the agent's stated preference as a hint line — <i>Foxglove ask for the first three chapters</i> — so the writer can match it without leaving the popover. That line renders only when the agent record has a preference.</li>
+    <li><b>Every change commits immediately.</b> There is no Done and no Save: click away or Esc to close, exactly as the filter and sort panels behave. The old black Done pill existed because the sheet didn't commit as you went; once it does, the button has no job.</li>
+    <li><b>Remove from this send</b> sits at the foot of both editors: closes the popover, the pill disappears, the undo toast appears. One removal path whether you start from the × on hover or from inside the editor.</li>
+    <li><b>Keyboard</b>: arrows move the menu, Enter chooses, Esc closes and returns focus to the pill; the stepper takes typed digits and arrow keys.</li>
+  </ul>
+</div>
+</body></html>

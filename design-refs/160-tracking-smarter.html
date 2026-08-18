@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — the waiting state, smarter</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage-a:#d7ddd5;--sage-b:#d5dbd3;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+em,.dt,.barf,.pastfig b{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1100px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.tl{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:16px 17px;}
+.ev{position:relative;padding-left:38px;padding-bottom:18px;}
+.ev::before{content:'';position:absolute;left:13px;top:30px;bottom:0;width:1px;background:var(--line);}
+.ev:last-child{padding-bottom:0;}.ev:last-child::before{display:none;}
+.ev.ghost::before{display:none;}
+.ev.pre-ghost::before{background:repeating-linear-gradient(180deg,var(--line) 0 3px,transparent 3px 7px);}
+.m{position:absolute;left:0;top:0;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--burg);
+  color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.m.q{box-shadow:inset 0 0 0 1.5px var(--oat);color:#bdb8b0;}
+.m.gh{box-shadow:none;border:1.5px dashed var(--oat);color:#c9c4bc;background:var(--ground);}
+.head{display:flex;align-items:baseline;gap:10px;min-height:27px;}
+.ttl{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;}
+.dt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.said{margin-top:7px;display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);
+  background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);border-radius:7px;padding:5px 10px;}
+.said b{font-weight:500;color:var(--ink);}
+.bar{position:relative;height:6px;border-radius:3px;background:var(--n2);margin:11px 0 6px;overflow:hidden;}
+.bar i{display:block;height:100%;width:100%;background:var(--oat);}
+.bar::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(135deg,transparent 0 5px,rgba(124,58,42,.15) 5px 10px);}
+.barf{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.pastfig{margin-top:10px;font-size:12.5px;color:var(--ink2);}
+.pastfig b{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink);padding-right:2px;}
+.conv{margin-top:7px;font-size:12px;color:var(--faint);font-style:italic;}
+.hist{margin-top:9px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#a9a49c;}
+.ghostline{display:flex;align-items:baseline;gap:9px;font-size:12px;color:var(--faint);}
+.ghostline .gdt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:#c4bfb7;}
+.ghostline a{color:var(--burg);text-decoration:underline;text-underline-offset:3px;text-decoration-color:#dfc0b4;cursor:pointer;font-size:11px;}
+.offer{margin-top:12px;background:var(--n1);border-radius:9px;box-shadow:inset 0 0 0 1px var(--line);padding:10px 12px;font-size:11.5px;color:var(--ink2);line-height:1.55;}
+.acts{display:flex;gap:7px;margin-top:9px;}
+.mini{font-family:inherit;font-size:11.5px;height:31px;padding:0 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);cursor:pointer;}
+.mini.go{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.legend{max-width:1100px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>The waiting state, smarter — the silence measured, and what happens next made visible</h4>
+<div class="two">
+
+  <div><div class="lab">A nudge reminder is scheduled<s>The future appears as a ghost rung — dashed connector, dashed ring</s></div>
+    <div class="tl">
+      <div class="ev pre-ghost"><span class="m q">⌛</span>
+        <div class="head"><span class="ttl">No reply</span><span class="dt">2¼ YEARS</span></div>
+        <div class="said">Foxglove Literary say <b>6 weeks</b> · closed 11 Aug 2024</div>
+        <div class="bar"><i></i></div>
+        <div class="barf"><span>Sent 30 Jun 2024</span><span>Window closed 11 Aug 2024</span></div>
+        <div class="pastfig"><b>2 years</b> past the window they stated</div>
+        <div class="hist">Nudged once · 19 Mar 25</div>
+        <div class="conv">Many agencies treat silence as a pass.</div>
+      </div>
+      <div class="ev ghost"><span class="m gh">🔔</span>
+        <div class="ghostline">Nudge reminder<span>·</span><a>from your to-do list</a><span class="gdt">FRI 22 AUG</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div><div class="lab">No reminder scheduled<s>The same facts, and the offer carries the next step instead</s></div>
+    <div class="tl">
+      <div class="ev"><span class="m q">⌛</span>
+        <div class="head"><span class="ttl">No reply</span><span class="dt">2¼ YEARS</span></div>
+        <div class="said">Foxglove Literary say <b>6 weeks</b> · closed 11 Aug 2024</div>
+        <div class="bar"><i></i></div>
+        <div class="barf"><span>Sent 30 Jun 2024</span><span>Window closed 11 Aug 2024</span></div>
+        <div class="pastfig"><b>2 years</b> past the window they stated</div>
+        <div class="conv">Many agencies treat silence as a pass.</div>
+        <div class="offer">No nudge has been sent and no reminder is set.
+          <div class="acts"><button class="mini go">Nudge now</button><button class="mini">Remind me later</button><button class="mini">Mark closed</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="legend">
+  <b>The silence gets a figure.</b> <i>2 years past the window they stated</i> — the scaled formatter, measured from the stated close, in Playfair so it reads as the card's one finding. It only renders when a window was stated; without one there is nothing to be past, and the card says so instead. The phrasing keeps the fact on the agency's side of the line: <i>past the window <b>they</b> stated</i>, not "overdue".<br><br>
+  <b>The future appears as a ghost rung.</b> When a nudge reminder exists on the to-do list, the timeline shows it where it will happen: dashed ring, dashed connector, faint ink, dated in the future. The record above is solid because it happened; this is hollow because it hasn't. It links to the task, and it answers the question a writer actually has in a long silence — <i>is anything going to happen, or is this drifting?</i><br><br>
+  <b>When nothing is scheduled, the offer carries the next step instead</b> — three equal-standing actions: <b>Nudge now</b>, <b>Remind me later</b> (creates the to-do task, which then appears as the ghost), and <b>Mark closed</b>. The offer only appears when there is genuinely nothing pending: no unanswered recent nudge, no reminder. One prompt, facts first, never repeated after dismissal — same rules as the closure offer.
+</div>
+</body></html>
