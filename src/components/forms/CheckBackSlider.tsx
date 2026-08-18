@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import "./forms.css";
 
 /**
@@ -27,6 +27,11 @@ export interface CheckBackSliderProps {
 }
 
 export const CheckBackSlider: React.FC<CheckBackSliderProps> = ({ valueDays, onChangeDays, label = "Check back in" }) => {
+  /* §C1 — INSTANCE-UNIQUE, the same fix `WeekSlider` took for `sa-wk`. A hardcoded id means two
+     mounts put two elements with one id in the document, and the label focuses whichever comes
+     first. One caller today; this is the shape that bites the day there are two. */
+  const auto = useId();
+  const inputId = `sa-checkback-${auto}`;
   let index = CHECK_BACK_SCALE_DAYS.indexOf(valueDays);
   if (index < 0) index = CHECK_BACK_SCALE_DAYS.indexOf(14); // default to the "2 weeks" stop
   const max = CHECK_BACK_SCALE_DAYS.length - 1;
@@ -42,7 +47,7 @@ export const CheckBackSlider: React.FC<CheckBackSliderProps> = ({ valueDays, onC
   return (
     <div className="sa-fld">
       <div className="sa-wk-head">
-        <label className="sa-label" htmlFor="sa-checkback" style={{ marginBottom: 0 }}>
+        <label className="sa-label" htmlFor={inputId} style={{ marginBottom: 0 }}>
           {label}
         </label>
         <span className="sa-wk-read" aria-hidden="true">
@@ -50,7 +55,7 @@ export const CheckBackSlider: React.FC<CheckBackSliderProps> = ({ valueDays, onC
         </span>
       </div>
       <input
-        id="sa-checkback"
+        id={inputId}
         type="range"
         className="sa-wk-slider"
         min={0}

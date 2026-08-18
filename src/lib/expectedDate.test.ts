@@ -216,4 +216,17 @@ describe("§4 · the shared slider", () => {
     expect(css, "the local slider's track styles outlived it").not.toContain(".tl-setwin-rg");
     expect(css, "the local tick scale outlived it").not.toContain(".tl-setwin-tk");
   });
+
+  /**
+   * §C1 (holding-reply pack) — the sibling slider takes the same fix. `sa-checkback` was the
+   * identical hardcoded-id shape to `sa-wk`: one caller today, and the day a second mounts, its
+   * label focuses whichever slider comes first in the document.
+   */
+  it("CheckBackSlider's id is instance-unique too", () => {
+    const cb = readFileSync(new URL("../components/forms/CheckBackSlider.tsx", import.meta.url), "utf8");
+    expect(cb, "the hardcoded id is back").not.toContain('id="sa-checkback"');
+    expect(cb, "the id is not derived per instance").toContain("useId()");
+    expect(cb, "the label still points at a constant").toContain("htmlFor={inputId}");
+    expect(cb, "the input does not take the derived id").toContain("id={inputId}");
+  });
 });
