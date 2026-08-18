@@ -153,7 +153,11 @@ describe("§6 · the agent header — now the mail header's AGENT row", () => {
    */
   it("no portrait, and the name is the same step as the manuscript's", () => {
     expect(rule(".f12-heroband .f12-bigav"), "the monogram came back").toBe("");
-    expect(code, "the initials are computed again with nothing to render them").not.toContain("agentInitials(activeAgent)");
+    /* ⚠️ INVERTED BY §5's RESET — the header's monogram disc IS the initials, and it is the same
+       device the list rows use, so the card confirms the row you clicked with the same mark. What
+       this clause was protecting is that nothing is COMPUTED with nothing to render it, which is
+       still true: the disc renders exactly what this call returns. */
+    expect(code, "the header's monogram stopped computing its initials").toContain("agentInitials(activeAgent)");
     /* ⚠️ 26 → 20 (subrows §1). Not a reduction but a re-scaling: the pairing card gave each name a
        half of the card, and a row gives it a line. 20 is a step above the reading cards' 18px
        headers, which is the hierarchy this card already had. Both names still read one element. */
@@ -188,14 +192,19 @@ describe("§6 · the agent header — now the mail header's AGENT row", () => {
    */
   it("the dot is the real StatusDot, and it is the card's left mark", () => {
     expect(code, "the mark is not the locked component at the stated size")
-      .toContain("<StatusDot status={activeQuery.status} overrideSize={56} />");
+      /* ⚠️ 26px SINCE §5's RESET — the clause is that it is the LOCKED component in that position,
+         not that it is any particular size, and the size is asserted once in the chassis suite. */
+      .toContain("<StatusDot status={activeQuery.status} overrideSize={26} />");
     /* ⚠️ THE MARK IS THE STATUS BLOCK'S NOW, NOT THE AGENT ROW'S — one mark on the card, in the
        right-hand column, which is what let the second one go. "It leads its name" was true of a
        two-subject card and has no subject here. */
     const block = code.slice(code.indexOf('<div className="qc-mstatus">'), code.indexOf('<div className="qp-cols"'));
     expect(block, "the status block does not hold the mark").toContain("<StatusDot");
-    expect(block.indexOf("<StatusDot"), "the mark fell behind its own label")
-      .toBeLessThan(block.indexOf("qc-mswd"));
+    /* ⚠️ INVERTED BY §5's RESET — the mark FOLLOWS the words now, as the ref draws it: the word
+       names the state and the mark carries the direction beside it, rather than a 56px disc
+       announcing a status the words are about to name anyway. */
+    expect(block.indexOf("<StatusDot"), "the mark went back in front of its own label")
+      .toBeGreaterThan(block.indexOf("qc-mswd"));
     const card = code.slice(code.indexOf('<div className="qc-mail">'), code.indexOf('<div className="qp-cols"'));
     expect((card.match(/<StatusDot/g) ?? []).length, "a second mark was drawn on the card").toBe(1);
   });

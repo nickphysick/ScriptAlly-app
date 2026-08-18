@@ -192,7 +192,13 @@ describe("§2 · the attach menu and the shared editor", () => {
   /* ⚠️ ONE COMPONENT: both routes set `matPop` and render `F12Panel`. Asserted as the ABSENCE of the
      second editor as well, because the inline row is what a future pass would reach for again. */
   it("both routes open the same editor, and the inline row is gone", () => {
-    expect((decls.match(/<F12Panel/g) ?? []).length, "there is more than one materials editor").toBe(1);
+    /* ⚠️ COUNTED WITHIN THE MATERIALS EDITOR'S OWN BRANCH, not across the page. §5 put the agent's
+       contact editor on the same surface — which is the point of having one — so a document-wide
+       count of `<F12Panel` now answers "how many editors use the shared panel", which is a
+       different and much less interesting question. */
+    const matBranch = decls.slice(decls.indexOf("{matPop && (() => {"), decls.indexOf("</F12Panel>", decls.indexOf("{matPop && (() => {")));
+    expect((matBranch.match(/<F12Panel/g) ?? []).length, "there is more than one materials editor").toBe(1);
+    expect(decls, "the contact editor is not on the shared surface").toContain("<F12Panel\n          open\n          eyebrow={agentEdit");
     expect(decls, "the attach route does not open the editor").toContain('openMatPop("smp", anchor)');
     expect(decls, "the Other route does not open the editor").toContain('openMatPop("oth", anchor)');
     expect(decls, "the pill route does not open the editor").toContain('openMatPop("smp", el)');

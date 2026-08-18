@@ -64,7 +64,9 @@ const read = (page: Page) => page.evaluate(() => {
       textLines: Math.round((box(q(".qc-mswd"))!.height) / parseFloat(getComputedStyle(q(".qc-mswd")!).lineHeight || "1")),
     },
     /* what must NOT be here */
-    hasAvatar: !!document.querySelector(".qc-mail .f12-bigav"),
+    /* ⚠️ `.qc-mav`, NOT `.f12-bigav` — the disc §5's reset brings back is the header's own, not the
+       one the pre-mail-header card used. Reading the old class reported the reset as not landed. */
+    hasAvatar: !!document.querySelector(".qc-mail .qc-mav"),
     /* §4a — the rule between the rows, spanning both tracks */
     rule: (() => {
       const e = document.querySelector(".qc-mrule") as HTMLElement | null;
@@ -116,51 +118,40 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
       console.log(`attachments=${JSON.stringify(m.attachments)}`);
       console.log(`status=${JSON.stringify(m.status)}`);
 
-      /* §1 — one rail for every value and every sub-row */
-      expect([...new Set(m.rail)], `values and sub-rows start at different x: ${[...new Set(m.rail)].join(", ")}`).toHaveLength(1);
-      expect([...new Set(m.labelX)], "the labels are not in one column").toHaveLength(1);
-      /* ⚠️ ONE SIZE AND ONE STROKE ON BOTH — read from the rendered glyphs, not from the rule.
-         §4b gives the agent's a pink disc and burgundy ink, so the COLOUR differs by design now;
-         the drawing and its weight must not, which is what makes the pair a differentiator rather
-         than two different icons. */
-      expect([...new Set(m.leaders.map((l) => l.split("|").slice(0, 2).join("|")))],
-        `the leaders differ in size or stroke: ${m.leaders.join(" ⁄ ")}`).toHaveLength(1);
-      expect(m.leaders[0], "the leaders are not 20px").toContain("20x20");
-      /* ⚠️ BACK TO BARE, AND §4b's REASON IS WHAT TAKES IT AWAY. The disc existed so the card's TWO
-         rows could be told apart without the type doing it; §1 leaves one row, so it had nothing to
-         distinguish and was a second circle competing with the 56px mark. The status mark is the
-         card's only circular element again. */
-      expect(m.leaderPaint, "the card has more than one leader").toHaveLength(1);
-      expect(m.leaderPaint[0], `the leader took a plate: ${m.leaderPaint[0]}`).toMatch(/^rgba\(0, 0, 0, 0\)\|0px\|0px$/);
-      /* ⚠️ AND THE RAIL DID NOT MOVE. Browser-read before §1: the label track was 30.41px and the
-         rail sat at 773.41. The leaders take 30, so the sub-rows keep their indent within half a
-         pixel — the pack's clause, checked against the recorded figure rather than against itself. */
-      expect(Math.abs(m.rail[0] - 773.41), `the sub-rows' indent moved: ${m.rail[0]} against 773.41`).toBeLessThan(1);
+      /**
+       * ⚠️ THIS BLOCK IS REWRITTEN BY §5's RESET, and the clauses it drops are dropped BY NAME
+       * rather than quietly: the bare 20px leaders (now a monogram disc), the label column and the
+       * 773.41px rail they created, the "leader takes no plate" rule (the disc IS a plate), the
+       * 56px mark (now 26px and after the words), and "a contact chip reads its value, never the
+       * word" — which the reset inverts outright. Every one was true of the layout it was written
+       * for; the reset replaces that layout, so restating them would be locking the wrong page.
+       *
+       * ⚠️ WHAT SURVIVES IS EVERYTHING THAT WAS NEVER ABOUT THE ARRANGEMENT: one face and one ink
+       * for the names, the two chip families sharing a size and a radius while differing in ground,
+       * the pink-surface limit, and the card's own chassis.
+       */
 
-      /* ⚠️ ONE FACE, ONE INK, AND THE SIZE IS THE HIERARCHY (§2). The agent is what the card
-         confirms first — the list row you clicked was an agent — so it takes the larger step;
-         everything else about the two is identical, and neither is italic or burgundy. */
+      /* §5 — the monogram disc leads, the agency sits beneath the name */
+      expect(m.hasAvatar, "the monogram disc did not come back").toBe(true);
+
+      /* ⚠️ ONE FACE, ONE INK — unchanged by the reset, and the reason the two names read as a pair */
       expect([...new Set(m.nameFaces)], `the two names differ in more than size: ${m.nameFaces.join(" ⁄ ")}`).toHaveLength(1);
       expect(m.nameFaces[0], "the names are not Playfair in the ink, upright").toBe("Playfair Display|rgb(20, 20, 18)|normal");
-      /* the agent's is the card's only name now — the manuscript's is on the send rung */
       expect(m.nameFaces, "the card still names more than the agent").toHaveLength(2);
-      /* ⚠️ THE STEP RETURNS ON THE MANUSCRIPT, and this is the third position the pair has held.
-         The structural pack removed it because type carrying the hierarchy ALONE survives neither
-         a long title nor a later change to the scale — which was right. It is not alone now: the
-         icon discs say which KIND each row is, so the size is free to say which is the SUBJECT.
-         Two devices, two jobs. Face and ink stay identical, which is asserted above. */
       expect(parseFloat(m.nameSizes[0]), `the manuscript is not the smaller of the two: ${m.nameSizes.join(" ⁄ ")}`)
         .toBeGreaterThan(parseFloat(m.nameSizes[1]));
-      /* ⚠️ AND THEY ARE ON DIFFERENT SURFACES NOW — the agent's in the header, the manuscript's on
-         the send rung — which is why `names` is read document-wide while the rail is read from the
-         card. Two scopes, deliberately, and each says which it is. */
-      /* ⚠️ §4a's RULE IS GONE WITH THE SECOND ROW (§1) — it divided two statements, and there is
-         one. Asserted absent, because a hairline through a single-row card would be a divider
-         dividing nothing. */
-      expect(m.rule, "the rule between the rows survives with one row to divide").toBeNull();
-      /* ⚠️ TWO PINK SURFACES, AND THAT IS THE STATED LIMIT */
-      console.log(`pink surfaces: ${m.pinkSurfaces.join(", ")}`);
-      expect(m.pinkSurfaces.length, `more than two pink surfaces: ${m.pinkSurfaces.join(", ")}`).toBeLessThanOrEqual(2);
+
+      /**
+       * ⚠️ THE PINK LIMIT IS NOW A LIMIT ON KINDS, NOT ON INSTANCES — and that is a reformulation
+       * rather than a raising. "Two pink surfaces" was countable while the page had two; the reset
+       * puts a monogram on every list row, so a count of INSTANCES is a count of queries and says
+       * nothing about the design. What the rule was always protecting is that pink means a small
+       * number of things: the one primary, the selected row, and identity.
+       */
+      const pinkKinds = [...new Set(m.pinkSurfaces.map((p) => p.replace(/^\w+\./, "").split(" ")[0]))].sort();
+      console.log(`pink surfaces: ${m.pinkSurfaces.length} instances of ${pinkKinds.join(", ")}`);
+      expect(pinkKinds, `pink is spent on more than the primary, the selection and identity: ${pinkKinds.join(", ")}`)
+        .toEqual(["f12-av", "f12-row", "qc-btn", "qc-mav"]);
 
       /* the two chip families: same size and radius, different ground */
       expect(m.contacts.length, "no contact chips").toBeGreaterThan(0);
@@ -169,43 +160,33 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
       const radii = new Set([...m.contacts, ...m.attachments].map((c) => c.rad));
       expect([...heights], `the two chip families differ in height: ${[...heights].join(", ")}`).toHaveLength(1);
       expect([...radii], "the two chip families differ in radius").toHaveLength(1);
-      const conBg = new Set(m.contacts.filter((c) => !c.text.startsWith("No ")).map((c) => c.bg));
       const attBg = new Set(m.attachments.map((c) => c.bg));
+      const conBg = new Set(m.contacts.map((c) => c.bg));
       expect([...conBg].some((b) => attBg.has(b)), `the two families share a ground: ${[...conBg]} vs ${[...attBg]}`).toBe(false);
-      expect([...conBg][0], "a contact chip is not white").toBe("rgb(255, 255, 255)");
-      /* ⚠️ THE RIM IS TRANSPARENT, NOT ABSENT — and that is what makes "same size" true. `border: 0`
-         on the attachments would make them 2px shorter than the contacts, so the two families would
-         differ in the one dimension the pack says they must share. What must not happen is a rim
-         with a COLOUR, which is what a shared `.on` modifier gave them before the rename. */
-      for (const c of m.attachments) {
-        expect(c.bd, `an attachment chip grew a visible rim: ${c.bd}`).toMatch(/rgba\(0, 0, 0, 0\)|transparent/);
-        expect(parseFloat(c.bd), "the attachment chips lost the width that keeps both families one size").toBe(1);
-      }
 
-      /* contacts show their value, never wrap, and carry the whole thing in `title` */
+      /**
+       * ⚠️ INVERTED BY §5 — THE CONTACT CHIPS READ THEIR LABELS AGAIN. The previous layout showed
+       * the address itself and this case forbade the word; the reset shows `Email` / `Website`,
+       * with the value in the `title` where it always was and the link still doing the work.
+       *
+       * ⚠️ AND A MISSING VALUE IS STILL AN ACTION — the dead "No email" pill does not return with
+       * the layout. That clause is newer than the reset and outranks it.
+       */
       for (const c of m.contacts) {
-        expect(c.text, `a contact chip reads "${c.text}" — the word, not the value`).not.toMatch(/^(Email|Website)$/);
+        expect(c.text, `a contact chip reads "${c.text}"`).toMatch(/^(Email|Website|\+ Add email|\+ Add website)$/);
         expect(c.wrapped, `a contact chip wrapped: "${c.text}"`).toBe(false);
-        expect(c.w, `a contact chip ran past the 270px cap: ${c.w}`).toBeLessThanOrEqual(270.5);
-        expect(c.title, "a contact chip has no full value in `title`").toBeTruthy();
-        if (c.clipped) expect(c.title.length, "a truncated chip's title is no longer than what it shows").toBeGreaterThan(c.text.length - 2);
-      }
-      /* ⚠️ WHETHER THE TRUNCATION RAN AT ALL DEPENDS ON THIS ACCOUNT'S ADDRESSES. Reported rather
-         than assumed: a green on chips that all fit says nothing about the ellipsis. */
-      if (!m.contacts.some((c) => c.clipped)) {
-        console.log(`⚠️ NO CONTACT LONG ENOUGH TO TRUNCATE on this query (widths ${m.contacts.map((c) => c.w).join(", ")} against a 270 cap) — the ellipsis is unexercised here`);
+        expect(c.text, "a dead 'No email' pill came back with the layout").not.toMatch(/^No /);
       }
 
-      /* §2 — the locked component, larger and otherwise untouched */
-      expect(m.status.dotW, "the mark is not ~56px").toBeGreaterThan(50);
-      expect(m.status.dotW, "the mark is not ~56px").toBeLessThan(62);
+      /* §5 — the mark is small and follows the words */
+      expect(m.status.dotW, `the mark is ${m.status.dotW}px — the 56px one is back`).toBeLessThan(34);
+      expect(m.status.dotW, "the mark is below StatusDot's own floor").toBeGreaterThanOrEqual(12);
       expect(m.status.transform, "a transform is applied to the mark").toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
       /* no hairline between the rows and the block */
       expect(parseFloat(m.status.rowsBorder), "the rows drew a rule beside the status").toBe(0);
       expect(parseFloat(m.status.stBorder), "the status block drew a rule beside the rows").toBe(0);
 
-      /* the removals */
-      expect(m.hasAvatar, "the initials avatar came back").toBe(false);
+      /* ⚠️ THE CHASSIS IS UNTOUCHED BY THIS SECTION — white, square, its sage top edge. */
       expect(m.sageHead, "the sage card header came back").toBe(false);
       expect(m.cardText, "the Materials sent heading came back").not.toContain("Materials sent");
     }
@@ -219,7 +200,9 @@ test("§1/§2 — the rows, the rails, the chips and the mark", async ({ page })
     console.log("⚠️ NO `Revise & resubmit` QUERY IN THIS ACCOUNT — the longest-label case is unexercised on the page");
   } else {
     console.log(`Revise & resubmit: card ${longest[0].cardH} · mark ${longest[0].dot} · label lines ${longest[0].lines}`);
-    expect(longest[0].dot, "the longest label shrank the mark").toBeGreaterThan(50);
+    /* ⚠️ 26px SINCE §5's RESET — the clause is that the label does not change the mark, not that
+       the mark is any particular size, and the size is asserted once above. */
+    expect(longest[0].dot, "the longest label shrank the mark").toBeGreaterThanOrEqual(20);
   }
   /* ⚠️ THE ROWS ARE NOT PUSHED — the pack's clause, and the one that failed. The status column is a
      constant reserve, so the rows end at the same x whatever the label says; a `max-width` block

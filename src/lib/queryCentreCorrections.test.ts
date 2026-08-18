@@ -170,7 +170,9 @@ describe("§3 · the hero's initials — REMOVED with the plate", () => {
        defend the tonal difference between them; the mail header has one, so the mark IS the status
        and needs no defending. Still the locked component, still resized and nothing else. */
     expect(code, "the mark is not the locked component at the stated size")
-      .toContain("<StatusDot status={activeQuery.status} overrideSize={56} />");
+      /* ⚠️ 26px SINCE §5's RESET — the clause is that it is the LOCKED component in that position,
+         not that it is any particular size, and the size is asserted once in the chassis suite. */
+      .toContain("<StatusDot status={activeQuery.status} overrideSize={26} />");
   });
 });
 

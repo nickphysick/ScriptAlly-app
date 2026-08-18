@@ -2694,7 +2694,7 @@
 .qc-mailgrid { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 26px; padding: 22px 26px; }
 /* ⚠️ THE LABEL TRACK IS THE RAIL. `max-content` on it means the widest label sets the column and
    both sub-rows inherit it; a fixed px would need re-deriving the day a third label appears. */
-.qc-mailrows { display: grid; grid-template-columns: 30px minmax(0, 1fr); column-gap: 18px; row-gap: 5px; align-items: baseline; min-width: 0; }
+.qc-mailrows { display: grid; grid-template-columns: 46px minmax(0, 1fr); column-gap: 18px; row-gap: 5px; align-items: baseline; min-width: 0; }
 /* ⚠️ §4a's RULE IS RETIRED (§1) — it divided the card's two statements, and the manuscript's row
    left for the send event that carries it. A hairline through a one-row card divides nothing. */
 /* every sub-row starts in column 2 — the rail, stated once */
@@ -2733,6 +2733,8 @@
  * the GLYPH grows, 20 → 26px, to the scale of a small avatar rather than a leading bullet. Growing
  * the box would have shifted every sub-row's indent to enlarge a drawing.
  */
+/* ⚠️ `.qc-mlead` IS SUPERSEDED BY `.qc-mav` (§5's reset) — the bare glyph became the monogram disc.
+   Its rule stays for the moment only as the note above it, which records why the span was `2`. */
 .qc-mlead { grid-column: 1; grid-row: 1 / span 2; align-self: center; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; }
 .qc-mlead svg { width: 26px; height: 26px; fill: none; stroke: var(--faint); stroke-width: 1.35; stroke-linecap: round; stroke-linejoin: round; }
 /**
@@ -4085,3 +4087,24 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
 
 /* §2 — the menu row's right-aligned note: what choosing it will do */
 .f12-menu-hint { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.06em; color: var(--qc-tx-off); }
+
+/* ══ §5 · THE AGENT HEADER RESETS ═════════════════════════════════════════════════════════════
+ *
+ * ⚠️ THE ARRANGEMENT CHANGES, THE CHASSIS DOES NOT. The card stays white, square, lifted, with its
+ * sage top edge — `.qc-mail` and `.qc-mail::before` are untouched. This block moves what is inside.
+ */
+.qc-mav {
+  grid-column: 1; grid-row: 1 / span 3; align-self: center;
+  width: 46px; height: 46px; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--qc-row-sel); color: var(--ink);
+  font-family: var(--f12-mono); font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+}
+/* ⚠️ THE AGENCY IS ITS OWN ROW NOW — small mono uppercase under the name, as the ref draws it. */
+.qc-magency { grid-column: 2; font-family: var(--f12-mono); font-size: 9.5px; letter-spacing: 0.13em; text-transform: uppercase; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+/* the mark follows the words rather than leading them, and the block reads right-to-left as a unit */
+.qc-mstatus { align-items: center; gap: 11px; }
+/* ⚠️ A CONSTANT RESERVE, NOT `auto` (§5). As `auto` the status column sized to its own label, so
+   the rows' right edge moved between `Queried` and `Revise & Resubmit` — browser-measured, four
+   different edges across four queries. The width is the reserve; only the text inside it changes. */
+.qc-mstx { width: 132px; text-align: right; }

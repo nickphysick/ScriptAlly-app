@@ -4655,9 +4655,14 @@ export const Queries: React.FC<{
                                 ⚠️ BARE: no plate, no ring, no ground. The status mark stays the only
                                 circular element on the card, which is what keeps the eye going name,
                                 then status. */}
-                            <span className="qc-mlead" aria-hidden="true">
-                              <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20a7.5 7.5 0 0 1 15 0" /></svg>
-                            </span>
+                            {/**
+                              * ⚠️ §5 · THE MONOGRAM DISC RETURNS, replacing the bare person glyph.
+                              * A glyph said "this row is a person" to a reader who could already
+                              * see a name; the disc says WHICH person, and it is the same device
+                              * the list rows use one column over — so the card confirms the row you
+                              * clicked with the same mark.
+                              */}
+                            <span className="qc-mav" aria-hidden="true">{agentInitials(activeAgent)}</span>
                             <div className="qc-mval">
                               {/* ⚠️ THE SIZE DIFFERENCE IS REMOVED (§4), REVERSING THE EARLIER
                                   PACK'S §2. Its argument was sound — the list row you clicked was
@@ -4673,8 +4678,11 @@ export const Queries: React.FC<{
                                   agent with no agency on file is a real record in this app; "No
                                   agency" is a fact, and a blank there is indistinguishable from a
                                   field nobody has looked at. */}
-                              <span className="qc-msec">{activeAgent.agency?.trim() || "No agency"}</span>
                             </div>
+                            {/* ⚠️ §5 · THE AGENCY SITS UNDER THE NAME, not beside it. Beside it the
+                                longest agency decided where the name ended; beneath, each has its
+                                own line and neither truncates the other. */}
+                            <div className="qc-magency">{activeAgent.agency?.trim() || "No agency"}</div>
                             <div className="qc-msub">
                               {/**
                                 * ⚠️ §7 · AN ABSENT VALUE IS AN ACTION, NOT A DEAD PILL. Both read
@@ -4689,7 +4697,7 @@ export const Queries: React.FC<{
                               {email ? (
                                 <a className="qc-mchip qc-mchip-con" href={`mailto:${email}`} title={email}>
                                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7" /></svg>
-                                  <span className="qc-mchiptx">{email}</span>
+                                  <span className="qc-mchiptx">Email</span>
                                 </a>
                               ) : (
                                 <button
@@ -4703,13 +4711,13 @@ export const Queries: React.FC<{
                                   }}
                                 >
                                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18v14H3zM3 5l9 7 9-7" /></svg>
-                                  <span className="qc-mchiptx">Add an email</span>
+                                  <span className="qc-mchiptx">+ Add email</span>
                                 </button>
                               )}
                               {site ? (
                                 <a className="qc-mchip qc-mchip-con" href={site} target="_blank" rel="noreferrer noopener" title={site}>
                                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></svg>
-                                  <span className="qc-mchiptx">{siteText}</span>
+                                  <span className="qc-mchiptx">Website</span>
                                 </a>
                               ) : (
                                 <button
@@ -4723,7 +4731,7 @@ export const Queries: React.FC<{
                                   }}
                                 >
                                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM3 12h18M12 3a15 15 0 0 1 0 18 15 15 0 0 1 0-18Z" /></svg>
-                                  <span className="qc-mchiptx">Add a website</span>
+                                  <span className="qc-mchiptx">+ Add website</span>
                                 </button>
                               )}
                             </div>
@@ -4741,7 +4749,6 @@ export const Queries: React.FC<{
                               ⚠️ AND NO HAIRLINE BESIDE IT. The status is a mark applied to the
                               paper, not a field ruled off from the rows. */}
                           <div className="qc-mstatus">
-                            <StatusDot status={activeQuery.status} overrideSize={56} />
                             <div className="qc-mstx">
                               <div className="qc-mswd">{statusDisplayLabel(activeQuery)}</div>
                               {/* ⚠️ THE DATE OF THE MOST RECENT DEVELOPMENT, not the send date.
@@ -4756,6 +4763,11 @@ export const Queries: React.FC<{
                                 return moved ? <div className="qc-msdate">{moved}</div> : null;
                               })()}
                             </div>
+                            {/* ⚠️ §5 · THE MARK IS SMALL AND SITS AFTER THE WORDS. At 56px it was
+                                the largest object on the page and the card's subject appeared to be
+                                its status; the word already names the state, and the mark's job
+                                here is to carry the direction the word cannot. */}
+                            <StatusDot status={activeQuery.status} overrideSize={26} />
                           </div>
 
                         </div>
@@ -5525,34 +5537,51 @@ export const Queries: React.FC<{
       const valid = agentEdit === "email"
         ? /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)
         : !!agentWebsiteHref(value);
+      const commit = async () => {
+        if (!valid) return;
+        await updateAgent(activeAgent.id, agentEdit === "email" ? { email: value } : { website: value });
+        setAgentEdit(null);
+        showToast({ message: agentEdit === "email" ? `Email added to ${agentPrimary(activeAgent)}` : `Website added to ${agentPrimary(activeAgent)}` });
+      };
       return (
-        <F12Popover
-          width={286}
-          title={agentEdit === "email" ? `Email for ${agentPrimary(activeAgent)}` : `Website for ${agentPrimary(activeAgent)}`}
+        /**
+         * ⚠️ §5 · THE SAME SURFACE AND CONVENTIONS AS THE MATERIALS EDITORS — `F12Panel`, a mono
+         * eyebrow, a single focused field, Enter to commit, Esc to close. It was a bespoke form
+         * with a titled head and a `Save to the agent's record` button; two editor shapes on one
+         * page is two sets of conventions for a reader to learn.
+         *
+         * ⚠️ AND IT COMMITS ON ENTER RATHER THAN ON EVERY KEYSTROKE, which is the one place this
+         * differs from the materials editors and the reason is the write's SHAPE: a sample's
+         * quantity is idempotent, while a half-typed address written to a shared agent record is a
+         * wrong value other pages would read. The validation gates it either way.
+         *
+         * ⚠️ IT STILL SAYS WHOSE RECORD IT CHANGES, in the eyebrow — a control on a QUERY's card
+         * that quietly edits shared data is the surprise worth spending two words on.
+         */
+        <F12Panel
+          open
+          eyebrow={agentEdit === "email" ? `Email · ${agentPrimary(activeAgent)}` : `Website · ${agentPrimary(activeAgent)}`}
+          width={272}
           style={agentEditStyle}
           onClose={() => setAgentEdit(null)}
         >
-          <input
-            type={agentEdit === "email" ? "email" : "url"}
-            className="qc-pickfield"
-            autoFocus
-            value={agentDraft}
-            placeholder={agentEdit === "email" ? "name@agency.com" : "agency.com"}
-            aria-label={agentEdit === "email" ? "Email address" : "Website"}
-            onChange={(e) => setAgentDraft(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && valid) { e.preventDefault(); (e.currentTarget.parentElement?.querySelector(".qc-mpopact") as HTMLButtonElement | null)?.click(); } }}
-          />
-          <button
-            type="button"
-            className="qc-mpopact"
-            disabled={!valid}
-            onClick={async () => {
-              await updateAgent(activeAgent.id, agentEdit === "email" ? { email: value } : { website: value });
-              setAgentEdit(null);
-              showToast({ message: agentEdit === "email" ? `Email added to ${agentPrimary(activeAgent)}` : `Website added to ${agentPrimary(activeAgent)}` });
-            }}
-          >Save to the agent&rsquo;s record</button>
-        </F12Popover>
+          <div className="f12-panel-free">
+            <input
+              type={agentEdit === "email" ? "email" : "url"}
+              autoFocus
+              value={agentDraft}
+              placeholder={agentEdit === "email" ? "name@agency.com" : "agency.com"}
+              aria-label={agentEdit === "email" ? "Email address" : "Website"}
+              onChange={(e) => setAgentDraft(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void commit(); } }}
+            />
+          </div>
+          {/* ⚠️ WHAT ENTER WILL DO, not an instruction to press it — and only while the value is
+              not yet usable, so a valid address shows nothing and a half-typed one says why. */}
+          {!valid && agentDraft.trim() !== "" && (
+            <div className="f12-panel-hint">{agentEdit === "email" ? "Needs an address like name@agency.com" : "Needs a web address"}</div>
+          )}
+        </F12Panel>
       );
     })()}
 

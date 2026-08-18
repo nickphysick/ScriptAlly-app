@@ -262,7 +262,7 @@ describe("§1 · the query header is a mail header", () => {
     /* ⚠️ THE TRACK IS A STATED WIDTH SINCE §1, NOT `max-content`. It held the words `AGENT`/`SENT`
        and resolved to 30.41px; the leaders that replaced them take 30, so the rail is the same
        within half a pixel and no longer depends on the length of a label that is gone. */
-    expect(rows, "the label track stopped being a track of its own").toContain("grid-template-columns: 30px minmax(0, 1fr)");
+    expect(rows, "the label track stopped being a track of its own").toContain("grid-template-columns: 46px minmax(0, 1fr)");
     expect(rule(".qc-mlead"), "the leaders left column 1").toContain("grid-column: 1");
     expect(rule(".qc-mval"), "the values left column 2").toContain("grid-column: 2");
     expect(rule(".qc-msub"), "a sub-row is not on the rail — it would indent by hand").toContain("grid-column: 2");
@@ -320,8 +320,11 @@ describe("§1 · the query header is a mail header", () => {
     expect(rule(".qc-mchiptx"), "the chip's text may wrap").toContain("white-space: nowrap");
     expect(rule(".qc-mchiptx"), "the clipped text has no ellipsis").toContain("text-overflow: ellipsis");
     const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
-    expect(card, "a contact chip shows the word rather than the value").not.toMatch(/>Email</);
-    expect(card, "the website chip shows the word rather than the domain").not.toMatch(/>Website</);
+    /* ⚠️ INVERTED BY §5's RESET — the chips read their LABELS again, with the value in the `title`
+       and the link still doing the work. The clause it replaces was written for the layout the
+       reset replaces. */
+    expect(card, "a contact chip stopped reading its label").toMatch(/>Email</);
+    expect(card, "the website chip stopped reading its label").toMatch(/>Website</);
     /* ⚠️ §7 SPLIT THE PILL IN TWO — a link when there is a value, a control when there is not — so
        the `title` is the value on the link and an invitation on the button. The clause is that the
        FULL value is reachable where the pill truncates it, which only the link can be about. */
@@ -346,7 +349,10 @@ describe("§1 · the query header is a mail header", () => {
     /* ⚠️ ONE ROW, ONE LEADER, AND IT IS BARE AGAIN (§1). The manuscript's row left for the send
        event that carries it, so the pink disc §4b gave the agent's glyph had nothing left to
        distinguish — it was a second circle competing with the 56px status mark. */
-    expect((card.match(/className="qc-mlead"/g) ?? []).length, "the card is not one row").toBe(1);
+    /* ⚠️ §5's RESET REPLACED THE BARE GLYPH WITH THE MONOGRAM DISC. One leader, still — it is
+       `.qc-mav` now, and the clause is that the card has ONE thing in its left track. */
+    expect((card.match(/className="qc-mav"/g) ?? []).length, "the card is not one row").toBe(1);
+    expect(card, "the bare glyph came back beside the disc").not.toContain('className="qc-mlead"');
     expect(card, "the manuscript's row is still in the header").not.toContain("qc-mlead--ms");
     expect(card, "the leader took its disc back").not.toContain("qc-mlead--ag");
     expect(cssCode, "the disc's rule survives with nothing wearing it").not.toContain("qc-mlead--ag");
@@ -378,7 +384,11 @@ describe("§1 · the query header is a mail header", () => {
 
   it("the removals hold: no initials, no sage cap, no materials heading, no separate queried date", () => {
     const card = sliceBetween(code, '<div className="qc-mail">', '<div className="qp-cols"');
-    expect(card, "the initials disc came back").not.toMatch(/agentInitials|f12-bigav/);
+    /* ⚠️ INVERTED BY §5 — the disc IS the initials, and it is the same device the list rows use, so
+       the card confirms the row you clicked with the same mark. What must NOT come back is the
+       pre-mail-header `f12-bigav` portrait, which was a different object at a different size. */
+    expect(card, "the monogram disc did not come back").toContain("agentInitials(activeAgent)");
+    expect(card, "the old portrait came back").not.toContain("f12-bigav");
     expect(card, "the sage card header came back").not.toContain("f12-chh");
     expect(card, "the Materials sent heading came back").not.toContain("Materials sent");
     /* ⚠️ THE DATE SURVIVES ONLY BENEATH THE STATUS. It is no longer a field of its own; §2 gives it
@@ -433,8 +443,11 @@ describe("§1 · the query header is a mail header", () => {
  */
 describe("§2 · the status block", () => {
   it("it renders the locked StatusDot, larger and otherwise untouched", () => {
+    /* ⚠️ 26px SINCE §5's RESET, AND THE CLAUSE IS THE COMPONENT rather than the number. At 56px it
+       was the largest object on the page and the card appeared to be about its status; the word
+       already names the state, and the mark's job beside it is the direction the word cannot say. */
     expect(code, "the mark is not the locked component at the stated size")
-      .toContain("<StatusDot status={activeQuery.status} overrideSize={56} />");
+      .toContain("<StatusDot status={activeQuery.status} overrideSize={26} />");
     expect(code, "StatusDot is reimplemented rather than imported")
       .toMatch(/import \{[^}]*StatusDot[^}]*\} from "\.\/StatusDot"/);
     const block = sliceBetween(code, '<div className="qc-mstatus">', '<div className="qp-cols"');
