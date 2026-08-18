@@ -29,7 +29,10 @@ describe("§3 · waiting and the nudge are timeline events", () => {
     expect(tl, "the projection marker stopped being the drained ghost").toMatch(
       /<StatusDot[^>]*ghost/,
     );
-    expect(tl, "waiting is not an event").toMatch(/<TlProjection[\s\S]{0,200}title="Waiting to hear back"/);
+    /* ⚠️ THE TITLE IS DERIVED SINCE §5 — "No reply" past the stated window, "Waiting to hear back"
+       otherwise — so it is no longer a literal attribute to match. What this clause is for is that
+       the wait is an EVENT rather than a trailing box, which the projection tag says. */
+    expect(tl, "waiting is not an event").toMatch(/<TlProjection[\s\S]{0,300}title=\{past \? "No reply" : "Waiting to hear back"\}/);
     expect(tl, "the nudge is not an event").toMatch(/<TlProjection[^>]*title="Nudge"/);
     /* ⚠️ SLICED TO THE WAITING BRANCH. A document-wide search for the old wrapper catches the
        writer's-turn block, which still trails as a box and which this section deliberately did not
@@ -48,10 +51,26 @@ describe("§3 · waiting and the nudge are timeline events", () => {
    * the expected marker, and grace measured against the nudge horizon. Replacing them with a plain
    * percentage would look like the mockup and throw away every derivation behind it.
    */
-  it("the bar keeps its three derived states inside the event", () => {
-    for (const t of ["trackingBar(", "geo.overdueZone", "geo.markerPct", "geo.graceTickPct"]) {
-      expect(tl, `the bar lost ${t} — it was rebuilt rather than moved`).toContain(t);
+  /**
+   * ⚠️ INVERTED BY §5 — THE THREE DERIVED BAR STATES ARE ONE. `trackingBar`'s geometry existed to
+   * draw an overdue hatch zone beside an expected marker, and a grace bar running to a scheduled
+   * follow-up, on top of the within-window fill. §5's claim is ONE shape across three SITUATIONS,
+   * and those situations are about the window, not about the app's escalation ladder: inside it,
+   * past it, or never stated. A bar with a marker, a hatch zone and a grace tick is three shapes.
+   *
+   * ⚠️ NOTHING IS LOST WITH THE GRACE STATE. The scheduled follow-up has its own projection event
+   * below the wait, and the nudge history line lists every nudge with its date.
+   *
+   * ⚠️ AND `trackingBar` / `deriveEscalation` ARE NOT DELETED — pure, locked, and now without a
+   * caller in this file. Reported rather than removed, which is a separate decision from this one.
+   */
+  it("the bar is one derivation now, and the escalation ladder has left the pane", () => {
+    for (const t of ["trackingBar(", "geo.overdueZone", "geo.markerPct", "geo.graceTickPct", "deriveEscalation("]) {
+      expect(tl, `the escalation ladder is back: ${t}`).not.toContain(t);
     }
+    /* the one bar: a fill to the elapsed proportion, and a spent hatch once the window has passed */
+    expect(tl, "the wait lost its bar").toContain('className={`tl-wbar${past ? " tl-wbar--past" : ""}`}');
+    expect(tl, "the bar is not gated on a real window").toContain("const dated = stated && waiting.sentMs != null && waiting.expMs != null;");
   });
 
   /* ⚠️ AND THE NUDGE EVENT ONLY RENDERS WHEN ONE IS SCHEDULED. The ref draws it unconditionally;
@@ -64,16 +83,24 @@ describe("§3 · waiting and the nudge are timeline events", () => {
   });
 
   /**
-   * ⚠️ THE FRAME SURVIVES, THE ALARM DOES NOT (§4c). The clause was that the escalated states keep
-   * a frame because there it is an ESCALATION rather than a container — and that is unchanged. What
-   * changed is the tone: a pink card and a red fill said the agency had failed an obligation they
-   * never made, and the app reports rather than appraises. The no-reply card is the palette's own
-   * neutral step and the bar is a spent hatch.
+   * ⚠️ THE FRAMES GO WITH THE LADDER (§5), AND THE REASONING THEY CARRIED IS WHY. The clause was
+   * that an escalated state keeps a frame because there it is an ESCALATION rather than a
+   * container. §5 removes the escalation: past a window is a FACT about the window, and the state
+   * is carried by the title, the marker's ring and a spent bar rather than by a box round it.
+   *
+   * What survives, and is what the earlier clause was really protecting, is that no alarm colour
+   * appears anywhere in the wait — a pink card or a red fill would say the agency had failed an
+   * obligation they never made.
    */
-  it("the escalation treatments keep their frames, in the palette's own tones", () => {
-    expect(tl, "the no-reply card lost its frame").toContain('className="tl-noreply"');
-    expect(tl, "the no-reply card kept an alarm colour").not.toContain('background: "var(--pink-t)"');
-    expect(tl, "the grace card lost its dashed sage frame").toContain('border: "1px dashed var(--sage');
+  it("no state in the wait wears an alarm colour", () => {
+    const at = tl.indexOf('ballHolder === "agent" && waiting');
+    expect(at, "the waiting branch is missing").toBeGreaterThan(-1);
+    const branch = tl.slice(at, tl.indexOf('title="Nudge"', at));
+    expect(branch, "the boxes came back").not.toContain('className="tl-noreply"');
+    expect(branch, "the grace card came back").not.toContain("1px dashed var(--sage");
+    for (const alarm of ["--pink-t", "--pink-i", "--pink-b", "red"]) {
+      expect(branch, `the wait wears ${alarm}`).not.toContain(alarm);
+    }
   });
 });
 

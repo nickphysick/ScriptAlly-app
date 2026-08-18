@@ -1215,6 +1215,39 @@
 .tl-evtitle { min-height: var(--tl-mark); display: flex; align-items: center; }
 .tl-evtitle > * { flex: 1 1 auto; min-width: 0; }
 
+/* ══ §5 · THE WAITING STATE — ONE SHAPE, THREE SITUATIONS ════════════════════════════════════
+ *
+ * ⚠️ THE MARKER CARRIES THE STATE, so the rail is legible without reading a word: sage while the
+ * agency's stated window is open, oat once it has passed or was never stated. It is a container-
+ * drawn ring rather than a `StatusDot`, because a drained STATUS glyph cannot say which of those
+ * is true — see the note on `TlProjection`.
+ */
+.tl-waitmark { width: 100%; height: 100%; border-radius: 50%; background: var(--white); border: 1.5px solid var(--oatline); display: grid; place-items: center; }
+.tl-waitmark svg { width: 13px; height: 13px; fill: none; stroke: var(--faint); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tl-waitmark--sage { border-color: var(--sage-edge); }
+.tl-waitmark--sage svg { stroke: var(--sageD); }
+
+/* ⚠️ WHAT THE AGENCY SAID IS A CHIP — their claim, on its own surface, so it cannot be read as one
+   of the app's own sentences. The bar beneath measures against that claim rather than an assumption. */
+.tl-said { display: inline-flex; align-items: baseline; gap: 5px; margin-top: 6px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); background: var(--paper); border: 1px solid var(--hairline); border-radius: 7px; padding: 5px 10px; }
+.tl-said b { font-weight: 600; color: var(--ink); }
+.tl-said-x { color: var(--faint); }
+
+.tl-wbar { position: relative; height: 6px; border-radius: 3px; background: var(--n2); margin: 11px 0 6px; overflow: hidden; }
+.tl-wbar i { display: block; height: 100%; border-radius: 3px; background: var(--sage-edge); }
+/* ⚠️ A SPENT HATCH, NOT A RED FILL — the window is used up, which is a fact about time rather than
+   a warning about a person. The same device the nudge confirm and the old no-reply card used. */
+.tl-wbar--past i { background: var(--n4); }
+.tl-wbar--past::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, transparent 0 5px, rgba(124, 58, 42, 0.15) 5px 10px); }
+.tl-wbarf { display: flex; justify-content: space-between; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-variant-numeric: tabular-nums; }
+
+.tl-wbody { font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin-top: 7px; }
+/* the convention line — quieter than the facts above it, and italic because it is a generality */
+.tl-conv { font-family: "Inter", sans-serif; font-size: 12px; font-style: italic; color: var(--faint); margin-top: 8px; }
+/* the one offer that would change the absence: a statement, then the way to answer it */
+.tl-ask { display: flex; align-items: center; gap: 9px; margin-top: 11px; padding: 9px 11px; background: var(--paper); border: 1px solid var(--hairline); border-radius: 9px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--ink-2); }
+.tl-ask-a { margin-left: auto; padding: 0; border: 0; background: none; font: inherit; color: var(--burg); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; cursor: pointer; }
+
 /* ══ §5 · WHAT A NUDGE LEAVES BEHIND ═════════════════════════════════════════════════════════
  *
  * ⚠️ THE HISTORY LINE IS A CAPTION ON THE WAIT, not a row of its own — mono, quiet, under whatever

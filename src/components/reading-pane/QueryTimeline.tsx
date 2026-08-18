@@ -15,21 +15,17 @@ import React, { useState } from "react";
 import { StatusDot } from "../StatusDot";
 import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";
 import { formatQueryMaterial } from "../../lib/materials";
-import { queryAmbientStatus, deriveEscalation, trackingBar } from "../../lib/queryAmbient";
-import { elapsedPhrase } from "../../lib/elapsed";
+import { queryAmbientStatus } from "../../lib/queryAmbient";
+import { elapsedPhrase, exactDate } from "../../lib/elapsed";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { dropSupersededProvisional } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
-import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer } from "../../lib/nudgeState";
+import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy } from "../../lib/nudgeState";
 
-/** TWS-revised — natural-language date for the grace header ("15th July"), the header's own font. */
-const fmtNatural = (ms: number): string => {
-  const d = new Date(ms);
-  if (isNaN(d.getTime())) return "";
-  const day = d.getDate();
-  const ord = day % 10 === 1 && day !== 11 ? "st" : day % 10 === 2 && day !== 12 ? "nd" : day % 10 === 3 && day !== 13 ? "rd" : "th";
-  return `${day}${ord} ${d.toLocaleDateString("en-GB", { month: "long" })}`;
-};
+/* ⚠️ `fmtNatural` IS DELETED WITH THE GRACE BOX THAT USED IT (§5). It spelled an ordinal date —
+   "15th July" — for that one header; the shape it belonged to is folded into "past the window", and
+   `exactDate` is the app's one en-GB spelling. A second date formatter with no caller is the next
+   surface's temptation to spell a date differently. */
 
 /**
  * The marker's diameter, in px — the ONE size every event's dot is drawn at.
@@ -63,49 +59,15 @@ const TL_TITLES: Record<QueryStatus, string> = {
 };
 const FONT_SERIF = "'Playfair Display', serif";
 
-/**
- * A bare bar milestone (bar-anchors-hover rule): a hollow-circle marker at `pct` on the bar whose
- * date label appears ONLY on hover (fine pointers) or tap (touch). The pop-up renders ABOVE the bar
- * (the end-anchor labels sit below), and anchors inward near an edge so it can't overflow — overlap
- * is impossible by construction. Touch-wired: hover is pointerType-guarded (hover doesn't exist on
- * touch), and an onClick pin drives it on tap. One pop-up per marker; each bar carries exactly one.
- */
-const BarMilestone: React.FC<{ pct: number; label: string }> = ({ pct, label }) => {
-  const [hover, setHover] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  const open = hover || pinned;
-  const p = Math.max(0, Math.min(100, pct));
-  const edge = p < 22 ? "start" : p > 78 ? "end" : "mid";
-  return (
-    <>
-      <button
-        type="button"
-        aria-label={label}
-        aria-expanded={open}
-        onPointerEnter={(e) => { if (e.pointerType === "mouse") setHover(true); }}
-        onPointerLeave={(e) => { if (e.pointerType === "mouse") setHover(false); }}
-        onClick={() => setPinned((v) => !v)}
-        style={{
-          position: "absolute", left: `${p}%`, top: "50%", transform: "translate(-50%, -50%)",
-          width: 13, height: 13, borderRadius: "50%", background: "var(--panel, #fffdfb)",
-          border: "1.5px solid var(--faint, #b3a596)", padding: 0, cursor: "pointer", zIndex: 2,
-        }}
-      />
-      {open && (
-        <div
-          role="tooltip"
-          style={{
-            position: "absolute", bottom: "calc(100% + 8px)", zIndex: 3, pointerEvents: "none",
-            ...(edge === "end" ? { right: `${100 - p}%` } : { left: `${p}%` }),
-            transform: edge === "mid" ? "translateX(-50%)" : "none",
-            whiteSpace: "nowrap", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em",
-            color: "var(--panel, #fffdfb)", background: "var(--ink, #1e1a16)", borderRadius: 6, padding: "3px 7px",
-          }}
-        >{label}</div>
-      )}
-    </>
-  );
-};
+/* ⚠️ `BarMilestone` IS DELETED WITH THE BARS THAT CARRIED IT (§5). It marked a point INSIDE a bar —
+   the expected date on an overdue track, the original deadline on a grace one — and the wait draws
+   one fill with two end labels now, where the expected date IS the end while the window is open and
+   the closing date IS the end once it has passed. A component with no caller is the next reader's
+   false lead; `deriveEscalation` and `trackingBar` stay in `queryAmbient` with their own tests and
+   one live caller each (TimelineComposer reads `deriveEscalation`), so those are reported rather
+   than removed.
+   ⚠️ ITS TOUCH WIRING IS WORTH REMEMBERING IF A MID-BAR MARKER EVER RETURNS: hover was
+   `pointerType`-guarded because hover does not exist on touch, and a click pinned the pop-up. */
 
 // STAGE_RESPONSE_WINDOWS + the waiting/writer derivation moved to lib/queryAmbient.ts (one source
 // shared with the command bar). This file consumes it via queryAmbientStatus.
@@ -517,18 +479,30 @@ export const TimelineRows: React.FC<{
  * `TimelineRows`, which is exactly the arrangement where the markers drift a pixel or two apart and
  * the timeline bends where the future starts. Both render `TlEvent`; there is nothing left to match.
  *
- * ⚠️ AND THE MARKER IS `ghost`, WHICH ALREADY MEANS THIS. `StatusDot`'s ghost is the same dot
- * drained to neutral grey with no pulse — the "would-be" treatment. Inventing a second hollow
- * marker would have given the app two ways to draw "not yet".
+ * ⚠️ THE MARKER IS `ghost` — `StatusDot` drained to neutral with no pulse, the "would-be"
+ * treatment — EXCEPT ON THE WAIT, which takes a `tone` (§5).
+ *
+ * ⚠️ AND THAT EXCEPTION REVERSES THIS NOTE'S OWN ARGUMENT, WITH A REASON. It used to say inventing
+ * a second hollow marker would give the app two ways to draw "not yet". True of a would-be STATUS —
+ * the scheduled nudge still uses it. The WAIT is not a would-be status: it is the state the query
+ * is in right now, and §5 asks the rail to carry whether the agency's window is still open. A
+ * drained status glyph cannot say that, and the ring is where it is legible without reading a word.
+ * `StatusDot` itself is untouched and remains the only thing that draws a status.
  */
 const TlProjection: React.FC<{
   status: QueryStatus | string;
   title: string;
   date?: string;
   last?: boolean;
+  /** §5 — sage while the stated window is open, oat once it has passed or was never stated. */
+  tone?: "sage" | "oat";
   children?: React.ReactNode;
-}> = ({ status, title, date, last = false, children }) => (
-  <TlEvent last={last} mark={<StatusDot status={status} overrideSize={TL_MARK} ghost decorative />}>
+}> = ({ status, title, date, last = false, tone, children }) => (
+  <TlEvent last={last} mark={tone
+    ? <span className={`tl-waitmark tl-waitmark--${tone}`} aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
+      </span>
+    : <StatusDot status={status} overrideSize={TL_MARK} ghost decorative />}>
     <div className="tl-rowbody">
       <div className="tl-evtitle"><div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
         <span style={{ fontFamily: "'Inter',sans-serif", fontSize: 14, fontWeight: 600, color: "var(--muted, #7d7469)" }}>{title}</span>
@@ -613,259 +587,117 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
         * events' own inset and gap; those numbers were the events', not its own, so the rhythm is
         * unchanged by its going. Deleted rather than hidden, and its CSS with it.
         */}
-      {/* ── trailing open-state block — calm within window, ESCALATED to needs-you once overdue.
-          The escalation is the pane's ONLY needs-you signal (the fork below stays neutral). ── */}
+      {/**
+        * ══ §5 · THE WAITING STATE — THREE SITUATIONS, ONE SHAPE ══════════════════════════════
+        *
+        * Title, what the agency said, then the measurement — differing only in what is true:
+        *   inside the stated window — "Waiting to hear back", sage ring, chip, sage bar
+        *   past it                  — "No reply", oat ring, chip + closing date, spent hatch,
+        *                              and the convention line
+        *   no window stated         — "Waiting to hear back", oat ring, NO bar and no end labels,
+        *                              the fact, and the one offer that would change it
+        *
+        * ⚠️ ALL THREE READ `windowStated`, NEVER `expMs`. `queryAmbientStatus` derives an expected
+        * date from the house 8/12/12-week assumption when nobody has stated one, so anything keyed
+        * on `expMs` presents the app's guess as the agency's word.
+        *
+        * ⚠️ WHAT THE AGENCY SAID IS A CHIP, NOT BODY TEXT. It is their claim, and its own surface
+        * is what distinguishes it from the app's sentences around it. It renders only when the
+        * AGENCY stated weeks: a window the writer set themselves through "Set an expected date" is
+        * a real window and gets a bar, but quoting it back as the agency's would misattribute it.
+        *
+        * ⚠️ AND THE GRACE STATE IS FOLDED INTO "PAST THE WINDOW". It was a fourth shape — a dashed
+        * box counting to a scheduled follow-up — and this section's whole claim is one shape. None
+        * of its information is lost: the scheduled nudge has its own projection event below, and
+        * the nudge history line beneath the bar lists every nudge with its date. `deriveEscalation`
+        * and `trackingBar` keep their tests and lose this caller; reported, not deleted.
+        */}
       {ballHolder === "agent" && waiting && (() => {
-        // P1/P2 — the escalation state (within/overdue/grace), derived from the overdue clock + the
-        // latest nudge's reminder (Query.nudgeDate) + when it fired (Query.lastNudgeSentDate).
+        const now = Date.now();
+        const who = chasedBy(agent);
+        /* the scheduled follow-up, if one is still ahead — it has its own event below, and this
+           only decides whether the wait is the timeline's last node */
         const reminderMs = query.nudgeDate ? getTime(query.nudgeDate) : null;
-        const lastNudgeMs = query.lastNudgeSentDate ? getTime(query.lastNudgeSentDate) : null;
-        const escal = deriveEscalation(waiting, { reminderMs, lastNudgeMs, now: Date.now() });
-        /* ⚠️ THE COUNT COMES FROM THE TIMES, not from a second pass. `nudgeCount` and `nudgeTimes`
-           would answer the same question through two filters, which is how the headline and the
-           history line below it come to disagree about how many nudges there have been. */
-        const nudgeN = nudges.length;
-        /**
-         * ⚠️ §4 · NO BAR WITHOUT A WINDOW TO MEASURE AGAINST. `expMs` is almost never null: when
-         * nobody has stated a response time, `queryAmbientStatus` still derives one from the house
-         * 8/12/12-week assumption so the numbers have an anchor. Every bar drawn off that was
-         * presenting the app's guess as something the agency had said — including "EXPECTED BY ~"
-         * beneath it, in a date nobody gave. `windowStated` is true only when the AGENT states a
-         * window or the writer set an expected date themselves.
-         */
-        const dated = waiting.sentMs != null && waiting.expMs != null && waiting.windowStated;
-        const hasExpected = waiting.expMs != null;                     // P4 — derived OR overridden
-        // P4 — derived bar geometry (no magic percentages): within ends at expected (no marker);
-        // overdue spans sent→now with the expected marker + hatch; grace spans sent→reminder with a
-        // faded original-expected tick.
-        const geo = trackingBar(escal, waiting, reminderMs, Date.now());
-        const baseFillPct = geo.overdueZone && geo.markerPct != null ? geo.markerPct : geo.fillPct;
-
-        const clockIcon = (
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
-        );
-        const bar = dated ? (
-          <>
-            <div style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, overflow: "hidden", background: wcol.barBg }}>
-              {/* base fill — warm in grace, sage otherwise; stops at the marker when there's a hatch */}
-              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${baseFillPct}%`, background: escal === "grace" ? "linear-gradient(90deg,#d9c3ac,#c9a988)" : wcol.barFill }} />
-              {/* overdue hatch zone beyond the expected marker */}
-              {geo.overdueZone && geo.markerPct != null && (
-                <div style={{ position: "absolute", left: `${geo.markerPct}%`, top: 0, bottom: 0, width: `${Math.max(0, geo.fillPct - geo.markerPct)}%`, background: "linear-gradient(90deg, var(--pink-b), var(--pink-i))" }} />
-              )}
-              {/* EXPECTED marker (overdue only — within-window the bar END is expected, no marker) */}
-              {geo.markerPct != null && (
-                <div style={{ position: "absolute", left: `${geo.markerPct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "var(--pink-i)" }} />
-              )}
-              {/* grace — faded tick where the ORIGINAL expected lapsed (bar end is the reminder horizon) */}
-              {geo.graceTickPct != null && (
-                <div style={{ position: "absolute", left: `${geo.graceTickPct}%`, top: 0, bottom: 0, width: 2, transform: "translateX(-1px)", background: "#b7a48f", opacity: 0.6 }} />
-              )}
-            </div>
-            {/* This shared bar serves within-window + overdue only (grace has its own pulse bar). No
-                strikethrough: the expectation LAPSED, it wasn't withdrawn — burgundy tone + marker say so. */}
-            <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
-              <span>SENT {fmtShort(waiting.sentMs!)}</span>
-              <span style={{ color: escal === "overdue" ? "var(--pink-i)" : "#7d7268" }}>EXPECTED BY ~{fmtShort(waiting.expMs!)}</span>
-            </div>
-          </>
-        ) : null;
-
-        /**
-         * ⚠️ WAITING IS A STAGE ON THE TIMELINE, NOT A BOX AFTER IT (fix pack 4 §3, reversing fix
-         * pack 3's "kept as built"). It used to trail the history as a separate card, which said
-         * the wait was a note ABOUT the query rather than the part of it you are currently in.
-         *
-         * ⚠️ THE BAR MOVED; IT WAS NOT REBUILT. Every state below is the code that was already
-         * here — the derived geometry from `trackingBar`, the overdue hatch and marker, the grace
-         * two-tone against the nudge horizon, the milestone pop-ups. The ref draws a simpler fill
-         * and it is deliberately not adopted: three states carrying real derivations are worth more
-         * than a mockup's single one.
-         *
-         * ⚠️ ONLY THE WITHIN-WINDOW STATE GIVES UP ITS BOX. That box was the thing this section is
-         * removing. Overdue and grace keep theirs because there the frame is an ESCALATION, not a
-         * container — a pink card and a dashed sage card say something the event row cannot.
-         */
-        const nudgeAhead = reminderMs != null && reminderMs > Date.now();
-        /* the agent's stated window, from the agent — falling back to nothing rather than to an
-           invented number when they have not stated one */
-        const statedWeeks = (agent as any)?.responseTimeWeeks as number | undefined;
-        /* ⚠️ AND SO DOES THE WINDOW LINE. Its fallback printed "Expected by ~{date}" off `expMs`,
-           which is the house assumption whenever nobody has stated anything — a date presented as
-           an expectation that no one set. */
-        const windowLine = typeof statedWeeks === "number" && statedWeeks > 0
-          ? `${agent?.name?.split(" ")[0] || "They"} states ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}`
-          : waiting.windowStated && waiting.expMs != null ? `Expected by ~${fmtShort(waiting.expMs)}` : null;
+        /* the AGENCY's own figure — not the house window, and not the writer's override */
+        const statedWeeks = typeof agent?.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0
+          ? agent.responseTimeWeeks : null;
+        const stated = waiting.windowStated;
+        const past = stated && waiting.overdue;
+        /* a bar needs a window AND both of its ends */
+        const dated = stated && waiting.sentMs != null && waiting.expMs != null;
+        const pct = dated ? Math.max(0, Math.min(100, ((now - waiting.sentMs!) / (waiting.expMs! - waiting.sentMs!)) * 100)) : 0;
 
         return (
           <TlProjection
             status={query.status}
-            title="Waiting to hear back"
+            title={past ? "No reply" : "Waiting to hear back"}
             date={waiting.sentMs != null ? elapsedPhrase(waiting.nDays).toUpperCase() : undefined}
-            last={!nudgeAhead}
+            tone={stated && !past ? "sage" : "oat"}
+            last={!(reminderMs != null && reminderMs > now)}
           >
-            {!hasExpected ? (
-              /* NO EXPECTED DATE (P2/P4) — nothing derivable AND no responseDeadline override. Dashed
-                 section + a burgundy "Set an expected date" link (opens the Edit drawer, P4). */
-              <div style={{ border: "1px dashed var(--line, #e6dccd)", borderRadius: 11, padding: "12px 14px" }}>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 9, fontSize: 13, color: "var(--muted, #8a7d6c)" }}>
-                  {clockIcon}
-                  Awaiting response — no expected date set
-                </span>
-                {onSetExpectedDate && (
-                  <button type="button" onClick={onSetExpectedDate} style={{ display: "block", marginTop: 9, background: "none", border: "none", padding: 0, fontFamily: "'Inter',sans-serif", fontSize: 12.5, fontWeight: 600, color: "var(--burg, #7c3a2a)", cursor: "pointer" }}>
-                    Set an expected date →
-                  </button>
-                )}
+            {/* what the agency said — their claim, on its own surface */}
+            {statedWeeks != null && (
+              <div className="tl-said">
+                {who.name} {who.plural ? "say" : "says"} <b>{statedWeeks} week{statedWeeks === 1 ? "" : "s"}</b>
+                {/* ⚠️ `exactDate`, THE ONE en-GB FORMATTER. The first build used the ordinal
+                    `fmtNatural` and appended the year by hand — "closed 19th July 2026" — which is a
+                    second spelling of a date this app already knows how to write, three lines above
+                    a bar that says "WINDOW CLOSED 19 JUL". */}
+                {past && waiting.expMs != null && <span className="tl-said-x"> · closed {exactDate(waiting.expMs)}</span>}
               </div>
-            ) : escal === "grace" ? (
-              /* GRACE (P2, revised) — DASHED box, no fill. Natural-language header in the header font,
-                 single ink (no burgundy split). Two-tone bar (sage sent→deadline, red deadline→today),
-                 the fill ends at TODAY; deadline marker only; the shimmer sweeps within the fill. */
-              (() => {
-                const now = Date.now();
-                const graceDated = dated && reminderMs != null && reminderMs > waiting.sentMs!;
-                const span = graceDated ? reminderMs! - waiting.sentMs! : 0;
-                const pct = (n: number) => Math.max(0, Math.min(100, (n / span) * 100));
-                const deadlinePct = graceDated ? pct(waiting.expMs! - waiting.sentMs!) : 0;
-                const todayPct = graceDated ? pct(now - waiting.sentMs!) : 0;
-                const sageEnd = Math.min(deadlinePct, todayPct);
-                return (
-                  <div style={{ border: "1px dashed var(--sage, #8a9e88)", borderRadius: 11, padding: "11px 13px" }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink, #1e1a16)" }}>
-                      No reply after {elapsedPhrase(waiting.daysOverdue)} past the window — nudge sent {lastNudgeMs != null ? fmtNatural(lastNudgeMs) : "recently"}
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--muted, #7d7469)", marginTop: 4 }}>
-                      Scheduled follow-up set for {reminderMs != null ? fmtNatural(reminderMs) : "—"}
-                    </div>
-                    {graceDated && (
-                      <>
-                        {/* outer wrapper = the positioned context for the milestone + its pop-up, kept
-                            OUTSIDE the overflow:hidden fill layer so the pop-up can escape above the bar */}
-                        <div style={{ position: "relative", marginTop: 11 }}>
-                          <div className="tl-gracebar" style={{ position: "relative", height: 6, borderRadius: 6, overflow: "hidden", background: "var(--sageC, #e9ede6)" }}>
-                            {/* sage: sent → deadline (capped at today) */}
-                            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${sageEnd}%`, background: "var(--sage, #8a9e88)" }} />
-                            {/* overdue red: deadline → today */}
-                            {todayPct > deadlinePct && (
-                              <div style={{ position: "absolute", left: `${deadlinePct}%`, top: 0, bottom: 0, width: `${todayPct - deadlinePct}%`, background: "linear-gradient(90deg, var(--pink-b), var(--pink-i))" }} />
-                            )}
-                            {/* shimmer confined to the fill (0 → today) */}
-                            <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${todayPct}%`, overflow: "hidden" }}><div className="tl-sweep" aria-hidden="true" /></div>
-                          </div>
-                          {/* original-deadline milestone — bare hollow circle; its date shows on hover/tap */}
-                          <BarMilestone pct={deadlinePct} label={`DEADLINE ${fmtShort(waiting.expMs!)}`} />
-                        </div>
-                        {/* end-anchor labels only */}
-                        <div style={{ display: "flex", justifyContent: "space-between", fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
-                          <span>SENT {fmtShort(waiting.sentMs!)}</span>
-                          <span style={{ color: "var(--sageD, #5a6e58)" }}>FOLLOW-UP {fmtShort(reminderMs!)}</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })()
-            ) : escal === "overdue" ? (
-              /* OVERDUE (revised) — pink card. Plain ink Playfair "Response overdue by {elapsed}[ · nudged
-                 N×]" text (no pill) + ink hourglass, no nudge CTA. Bar fully filled sent→today
-                 (rose→burgundy) to the full end of the track — no warning glyph (redundant with the
-                 headline). Axis = SENT only; the "response expected" date rides a hollow-circle
-                 milestone (hover/tap pop-up). */
-              (() => {
-                const now = Date.now();
-                const expectedPct = dated ? Math.max(0, Math.min(100, ((waiting.expMs! - waiting.sentMs!) / Math.max(1, now - waiting.sentMs!)) * 100)) : 0;
-                return (
-                  /**
-                   * ⚠️ §4c · THE FACTS, THEN THE CONVENTION, THEN AN OFFER — and no verdict anywhere.
-                   * "Response overdue by 4 weeks" said the agency had failed an obligation; a stated
-                   * window is an intention, not a contract. What the app can honestly say is what
-                   * the agency stated, when that window closed, and what silence usually means.
-                   *
-                   * ⚠️ AND THE OFFER IS QUIET AND OPTIONAL. "You can mark this closed if you'd
-                   * rather stop tracking it" leaves the decision where it belongs; "close this" or
-                   * "give up on this" would be the app deciding for them.
-                   *
-                   * ⚠️ NO RED FILL. The card is the palette's own tones and the bar is a spent
-                   * hatch — a colour that means alarm is a verdict by another route.
-                   */
-                  <div className="tl-noreply">
-                    <div className="tl-noreply-h">
-                      {clockIcon}
-                      <span>No reply{nudgeN > 0 ? ` · nudged ${nudgeN === 1 ? "once" : `${nudgeN}×`}` : ""}</span>
-                    </div>
-                    {/* ⚠️ AND THE SENTENCE OBEYS THE SAME RULE AS THE BAR. "That window closed in
-                        March" was gated on `expMs`, which the house assumption supplies — so a card
-                        could name the month an agency's window closed when the agency had never
-                        stated one. Both clauses now hang on the window actually existing. */}
-                    {waiting.windowStated && (
-                      <div className="tl-noreply-f">
-                        {statedWeeks ? `${agent?.agency?.trim() || agent?.name?.split(" ")[0] || "They"} state ${statedWeeks} week${statedWeeks === 1 ? "" : "s"}. ` : ""}
-                        {waiting.expMs != null ? `That window closed in ${new Date(waiting.expMs).toLocaleDateString("en-GB", { month: "long", year: "numeric" })}.` : ""}
-                      </div>
-                    )}
-                    <div className="tl-noreply-c">Many agencies treat silence as a pass.</div>
-                    {/**
-                      * ⚠️ §5c · THE QUIET LINK IS SUPERSEDED, AND ITS FAULT WAS WHEN IT APPEARED.
-                      * "You can mark this closed…" rendered on EVERY overdue query, including one
-                      * the writer has never nudged — where the obvious next step is a nudge, not
-                      * closure. The offer is now gated on facts: at least one unanswered nudge, and
-                      * a window that closed more than six months ago.
-                      *
-                      * ⚠️ AND IT OFFERS BOTH ANSWERS WITH EQUAL STANDING. `Keep tracking` is not a
-                      * dismissal beside a primary — it is the other answer, and choosing it ends the
-                      * offer for this query permanently. A prompt that returns next month in
-                      * stronger words is nagging.
-                      */}
-                    {offer.show && (
-                      <div className="tl-offer">
-                        <div className="tl-offer-f">{offer.facts}</div>
-                        <div className="tl-offer-a">
-                          {onMarkClosed && <button type="button" className="tl-offer-go" onClick={onMarkClosed}>Mark closed</button>}
-                          {onKeepTracking && <button type="button" className="tl-offer-keep" onClick={onKeepTracking}>Keep tracking</button>}
-                        </div>
-                      </div>
-                    )}
-                    {dated && (
-                      <>
-                        {/* the fill runs to the full end of the track — no warning glyph (redundant with
-                            the headline), so no gap where it sat */}
-                        <div style={{ position: "relative", height: 6, borderRadius: 6, marginTop: 11, background: "var(--pink-b)" }}>
-                          {/* ⚠️ A SPENT HATCH, NOT A RED FILL (§4c) — the window is used up, which
-                              is a fact about time rather than a warning about a person. */}
-                          <div className="tl-spent" style={{ position: "absolute", inset: 0, borderRadius: 6 }} />
-                          {/* response-expected milestone — bare hollow circle; its date shows on hover/tap */}
-                          <BarMilestone pct={expectedPct} label={`RESPONSE EXPECTED ${fmtShort(waiting.expMs!)}`} />
-                        </div>
-                        {/* end-anchor label only — SENT at the start (no end label; the fill IS the end) */}
-                        <div style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.04em", color: "#7d7268", marginTop: 7 }}>
-                          <span>SENT {fmtShort(waiting.sentMs!)}</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              })()
-            ) : (
-              /* ⚠️ WITHIN-WINDOW — NO BOX. The event's own title carries "Waiting to hear back", so
-                 the old readout line would have stated it twice and has gone with the box; what is
-                 left is the window and the bar, which is exactly what the event is for. */
+            )}
+
+            {dated ? (
               <>
-                {windowLine && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e", marginTop: 2 }}>{windowLine}</div>}
-                {bar}
+                <div className={`tl-wbar${past ? " tl-wbar--past" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>
+                <div className="tl-wbarf">
+                  <span>Sent {fmtShort(waiting.sentMs!)}</span>
+                  <span>{past ? `Window closed ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>
+                </div>
+              </>
+            ) : (
+              /**
+               * ⚠️ NO BAR AND NO END LABELS — there is nothing to measure against, and a track for a
+               * window that does not exist would invent the fact the sentence beneath it is
+               * admitting the record does not hold. Same rule as the nudge confirm's bar.
+               *
+               * ⚠️ AND THE COPY IS THE AGENCY'S ABSENCE, NOT THE WRITER'S OVERSIGHT. It read
+               * "Awaiting response — no expected date set", which quietly made a missing agency
+               * figure sound like something the writer had failed to fill in.
+               */
+              <>
+                <div className="tl-wbody">{who.name} {who.plural ? "do" : "does"} not state a response time.</div>
+                {onSetExpectedDate && (
+                  <div className="tl-ask">
+                    <span>Add one and this becomes a date</span>
+                    <button type="button" className="tl-ask-a" onClick={onSetExpectedDate}>Set an expected date</button>
+                  </div>
+                )}
               </>
             )}
+
+            {/* the convention, only where silence has actually run past a stated window */}
+            {past && <div className="tl-conv">Many agencies treat silence as a pass.</div>}
+
             {/**
-              * ⚠️ §5b · THE NUDGE HISTORY, BENEATH WHATEVER STATE THE WAIT IS IN. It is the single
-              * most useful fact during a long silence and it existed nowhere: without it a writer
-              * scrolls the whole timeline to work out whether they already followed up.
-              *
-              * ⚠️ OUTSIDE THE STATE BOXES, DELIBERATELY. Within-window, overdue and grace each draw
-              * their own frame; putting the line inside all three would be the same sentence
-              * written three times, and inside one of them it would appear and vanish as a query
-              * crossed a threshold that has nothing to do with whether it has been nudged.
+              * §5b (nudge pack) — the nudge history, beneath whatever state the wait is in. It is
+              * the most useful fact in a long silence and it exists nowhere else on the card.
               */}
             {nudges.length > 0 && <div className="tl-nhist">{nudgeHistoryLine(nudges, (ms) => fmtShort(ms).toUpperCase())}</div>}
+
+            {/**
+              * §5c (nudge pack) — closure offered once, on facts: at least one unanswered nudge AND
+              * a window closed more than six months ago. Both answers, equal standing.
+              */}
+            {offer.show && (
+              <div className="tl-offer">
+                <div className="tl-offer-f">{offer.facts}</div>
+                <div className="tl-offer-a">
+                  {onMarkClosed && <button type="button" className="tl-offer-go" onClick={onMarkClosed}>Mark closed</button>}
+                  {onKeepTracking && <button type="button" className="tl-offer-keep" onClick={onKeepTracking}>Keep tracking</button>}
+                </div>
+              </div>
+            )}
           </TlProjection>
         );
       })()}

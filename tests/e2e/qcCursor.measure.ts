@@ -155,6 +155,10 @@ test("§2 — a keyboard row and a clicked row are identical, and neither wears 
    * ⚠️ SO WHAT IS ASSERTED IS THE THING THAT ACTUALLY DOES THE WORK: the selected fill is a TINT,
    * not a step on the grey scale — channel spread, the same measure the Editorial theme check uses
    * in the opposite direction. #f7e3dd spreads 26; `--n5` spread 10; white spreads 0.
+   *
+   * ⚠️ AND SINCE §4 IT IS THE ONLY SIGNAL. The monogram's inversion used to carry the state
+   * alongside the fill; the status mark that replaced it is identical on both rows by design. The
+   * absences are asserted below so that fact cannot quietly outlive its evidence.
    */
   expect(contrast!.selected, "the selected row has no fill at all").not.toBe(contrast!.unselected);
   const spread = (c: string) => { const v = c.match(/\d+/g)!.slice(0, 3).map(Number); return Math.max(...v) - Math.min(...v); };
@@ -162,28 +166,41 @@ test("§2 — a keyboard row and a clicked row are identical, and neither wears 
   expect(spread(contrast!.selected), `the selected fill is a neutral (spread ${spread(contrast!.selected)}), not a tint — the pink went back to grey`).toBeGreaterThanOrEqual(20);
   expect(spread(contrast!.unselected), "the unselected row is itself tinted, so hue separates nothing").toBeLessThan(8);
 
+  /**
+   * ⚠️ THE SECOND SIGNAL IS GONE, AND THAT IS A FINDING RATHER THAN A BROKEN PROBE. This read the
+   * monogram's inversion — the tinted disc going white on the selected row — as the thing that
+   * carried the state alongside the fill. §4 replaced the monogram with the status mark, and the
+   * mark is IDENTICAL on both rows by design (`qcRow.measure.ts` asserts its ring and fill do not
+   * change), so the fill is now the only differentiator at 1.24:1.
+   *
+   * ⚠️ IT IS ASSERTED AS AN ABSENCE so it cannot be forgotten: if a second signal is ever added,
+   * this fails and the reasoning above gets revisited rather than quietly outliving its evidence.
+   */
   const signals = await page.evaluate(() => {
     const rows = [...document.querySelectorAll<HTMLElement>(".f12-row")];
     const sel = rows.find((r) => r.classList.contains("f12-sel"))!;
     const other = rows.find((r) => !r.classList.contains("f12-sel"))!;
-    const read = (r: HTMLElement) => ({
-      name: getComputedStyle(r.querySelector(".f12-nm") as HTMLElement).color,
-      avatar: getComputedStyle(r.querySelector(".f12-av") as HTMLElement).backgroundColor,
-    });
+    const read = (r: HTMLElement) => {
+      const nm = r.querySelector<HTMLElement>(".f12-nm");
+      const ag = r.querySelector<HTMLElement>(".f12-ag");
+      const dot = r.querySelector<HTMLElement>(".f12-lead > span > span");
+      return {
+        name: nm ? `${getComputedStyle(nm).color} ${getComputedStyle(nm).fontWeight}` : "(none)",
+        agency: ag ? getComputedStyle(ag).color : "(none)",
+        mark: dot ? `${getComputedStyle(dot).backgroundColor} / ${getComputedStyle(dot).borderTopColor}` : "(none)",
+        monogram: r.querySelectorAll(".f12-av").length,
+      };
+    };
     return { sel: read(sel), other: read(other) };
   });
-  console.log(`  name ${signals.other.name} → ${signals.sel.name} · avatar ${signals.other.avatar} → ${signals.sel.avatar}`);
-  /**
-   * ⚠️ THE FILL IS NOT THE ONLY SIGNAL — the argument for accepting 1.51:1, asserted rather than
-   * asserted-about: the monogram inverts from the tinted step to white.
-   *
-   * ⚠️ AND THE NAME IS NOT A SECOND SIGNAL, WHICH THIS RUN CORRECTED. `.f12-sel .f12-nm { color:
-   * var(--ink) }` restates the colour the base row already has — measured rgb(20,20,18) in BOTH
-   * states — so it is a guard against drifting muted, not a change. Claiming it as a distinguishing
-   * signal would have been a false sentence in a report about accessibility.
-   */
-  expect(signals.sel.avatar, "the selected row's monogram no longer inverts — the fill is alone").not.toBe(signals.other.avatar);
+  console.log(`  selected  name ${signals.sel.name} · agency ${signals.sel.agency} · mark ${signals.sel.mark}`);
+  console.log(`  unselected name ${signals.other.name} · agency ${signals.other.agency} · mark ${signals.other.mark}`);
+  console.log(`  monograms: ${signals.sel.monogram} (retired by §4 — it was the second signal)`);
+
+  expect(signals.sel.monogram, "the monogram is back — the reasoning above needs revisiting").toBe(0);
+  expect(signals.sel.mark, "the status mark now changes on selection — a second signal exists again").toBe(signals.other.mark);
   expect(signals.sel.name, "the name became a selection signal — the reasoning above needs revisiting").toBe(signals.other.name);
+  expect(signals.sel.agency, "the agency line became a selection signal — the reasoning above needs revisiting").toBe(signals.other.agency);
 });
 
 test("§2 — buttons keep the page's focus ring", async ({ page }) => {

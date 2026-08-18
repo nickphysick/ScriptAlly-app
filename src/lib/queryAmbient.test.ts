@@ -225,26 +225,44 @@ describe("queryAmbientStatus — overdue boundary (P6; derived from now vs expec
 describe("P6 artefacts — one escalation signal per pane (readout escalates, fork stays neutral)", () => {
   const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
   const composer = readFileSync(resolve(__dirname, "../components/reading-pane/TimelineComposer.tsx"), "utf8");
-  it("the overdue readout escalates to the needs-you token + badge (no inline nudge CTA — TR P3)", () => {
-    expect(tl.includes("var(--pink-i)")).toBe(true);           // needs-you escalation colour
-    expect(tl.includes("Response overdue by")).toBe(true);     // the revised badge (elapsed-labelled)
-    expect(tl.includes("RESPONSE EXPECTED")).toBe(true);       // the expected-marker date (now a hover/tap pop-up)
+  /**
+   * ⚠️ INVERTED BY §5 — THE ESCALATION IS GONE, AND EACH PIECE WENT FOR ITS OWN STATED REASON.
+   * "Response overdue by …" said the agency had failed an obligation a stated window never was
+   * (retired earlier, with "overdue" itself); `--pink-i` was an alarm colour on a fact about time;
+   * and the expected-marker pop-up belonged to a bar with a hatch zone and a marker, which §5
+   * replaces with one fill and two end labels. Past the window is now a TITLE ("No reply"), an oat
+   * ring and a spent bar — no needs-you token anywhere in the wait.
+   */
+  it("the wait carries no escalation token, badge or marker pop-up", () => {
+    const at = tl.indexOf('ballHolder === "agent" && waiting');
+    const branch = tl.slice(at, tl.indexOf('title="Nudge"', at));
+    expect(at, "the waiting branch is missing").toBeGreaterThan(-1);
+    for (const gone of ["var(--pink-i)", "Response overdue by", "RESPONSE EXPECTED", "<BarMilestone"]) {
+      expect(branch, `the escalation is back: ${gone}`).not.toContain(gone);
+    }
+    /* what replaced them, so this case still says what the pane DOES */
+    expect(branch, "past the window no longer changes the title").toContain('past ? "No reply" : "Waiting to hear back"');
+    expect(branch, "the marker no longer carries the state").toContain('tone={stated && !past ? "sage" : "oat"}');
   });
 
   it("P3 tidy — no strikethrough anywhere (the expectation lapsed, it wasn't withdrawn)", () => {
     expect(tl.includes("line-through")).toBe(false);
   });
 
-  it("TR P3 re-escalation copy — the overdue badge appends 'nudged N×' when chased, omits it when never", () => {
-    expect(tl.includes("· nudged ")).toBe(true);   // the append fragment
-    expect(tl.includes('"once"')).toBe(true);      // a single chase reads 'once'
-    /* ⚠️ THE COUNT IS `nudgeN` NOW — §5 gave the pane ONE nudge derivation (`nudgeTimes`), and the
-       count comes off its length rather than from a second filter over the same events. Two passes
-       answering the same question is how this headline and §5b's history line would have come to
-       state different numbers on one card. */
-    expect(tl.includes("${nudgeN}×")).toBe(true);  // repeats read 'N×'
-    expect(tl.includes("nudgeN > 0 ?")).toBe(true); // omitted entirely when never nudged
+  /**
+   * ⚠️ THE "nudged N×" BADGE IS SUPERSEDED BY THE HISTORY LINE, which says strictly more: "Nudged
+   * twice · 19 MAR, 2 JUN" carries the dates the badge only counted. Two statements of one fact on
+   * one card is how they come to disagree, and the badge was the weaker.
+   *
+   * ⚠️ AND THE ONE-DERIVATION CLAUSE SURVIVES, because it is the part that can silently break:
+   * every nudge figure on this pane comes from `nudgeTimes`, never a second filter over the same
+   * events.
+   */
+  it("the nudge count is stated once, by the history line, from one derivation", () => {
+    expect(tl, "the counting badge came back").not.toContain("· nudged ");
+    expect(tl, "the history line is gone").toContain("nudgeHistoryLine(nudges");
     expect(tl, "the pane counts nudges twice").not.toContain("nudgeCount(");
+    expect((tl.match(/nudgeTimes\(/g) ?? []).length, "the pane derives nudges more than once").toBe(1);
   });
 
   /**
@@ -284,25 +302,30 @@ describe("Bar P3 artefacts — end-anchors + hollow-circle milestones + hover/ta
   // itself is flagged for Nick's in-browser check on dev.
   const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
 
-  it("a reusable BarMilestone renders a hollow circle — --panel fill, thin grey (--faint) outline", () => {
-    expect(tl.includes("const BarMilestone")).toBe(true);
-    expect(tl.includes('borderRadius: "50%"')).toBe(true);
-    expect(tl.includes("var(--faint, #b3a596)")).toBe(true); // thin grey outline (#b3a596-equivalent token)
-  });
-
-  it("the milestone is touch-wired — pointerType-guarded hover AND an onClick pin (not hover-only)", () => {
-    expect(tl.includes('e.pointerType === "mouse"')).toBe(true); // hover only fires for a real mouse
-    expect(tl.includes("setPinned")).toBe(true);                 // tap toggles the pop-up on touch
-  });
-
-  it("the pop-up renders ABOVE the bar (anchors sit below) and anchors inward near an edge", () => {
-    expect(tl.includes('bottom: "calc(100% + 8px)"')).toBe(true); // above the bar
-    expect(tl.includes('p < 22 ? "start"') && tl.includes('p > 78 ? "end"')).toBe(true); // inward near edges
-  });
-
-  it("both bars mount a milestone at its DERIVED position (expected for overdue, deadline for grace)", () => {
-    expect(tl.includes("<BarMilestone pct={expectedPct}")).toBe(true);
-    expect(tl.includes("<BarMilestone pct={deadlinePct}")).toBe(true);
+  /**
+   * ⚠️ `BarMilestone` IS DELETED (§5), AND ITS THREE CASES BECOME ONE. It marked a point INSIDE a
+   * bar — the expected date on an overdue track, the original deadline on a grace one — and the
+   * wait draws one fill with two end labels now: the expected date IS the end while the window is
+   * open, and the closing date IS the end once it has passed. Nothing was left for it to place.
+   *
+   * ⚠️ WHAT ITS CASES PROTECTED IS WORTH CARRYING FORWARD RATHER THAN DELETING. It was
+   * `pointerType`-guarded on hover AND pinned on click, because hover does not exist on touch; a
+   * mid-bar marker that returns without that is a control a phone cannot open. The requirement is
+   * restated here so it is not rediscovered.
+   */
+  it("the mid-bar milestone is retired, wiring and all", () => {
+    /* ⚠️ COMMENTS STRIPPED, AND MY OWN GUARD IS WHY. The `if (tl.includes("BarMilestone"))` below
+       fired on the NOTE that records the retirement — the name appears four times in prose there —
+       and demanded touch wiring for a component that no longer exists. This repo's most-repeated
+       false red, produced here by the assertion written to prevent a different one. */
+    const decls = tl.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(decls, "the milestone component is back without its cases").not.toContain("const BarMilestone");
+    expect(decls, "a milestone is mounted on a bar").not.toContain("<BarMilestone");
+    /* ⚠️ AND IF ONE RETURNS IT MUST BE TOUCH-WIRED — hover alone is a control a phone cannot open. */
+    if (decls.includes("BarMilestone")) {
+      expect(decls).toContain('e.pointerType === "mouse"');
+      expect(decls).toContain("setPinned");
+    }
   });
 
   it("mid-bar persistent labels are gone — the old clamped inline expected label is removed", () => {
@@ -310,9 +333,19 @@ describe("Bar P3 artefacts — end-anchors + hollow-circle milestones + hover/ta
     expect(tl.includes("Math.min(84, expectedPct")).toBe(false);
   });
 
-  it("end-anchors only: overdue = SENT (no end label — the glyph is the end); grace = SENT + FOLLOW-UP", () => {
-    expect(tl.includes("SENT ")).toBe(true);
-    expect(tl.includes("FOLLOW-UP ")).toBe(true);
+  /* ⚠️ ONE PAIR OF END ANCHORS NOW (§5): `Sent {date}` and either `Expected by ~{date}` while the
+     window is open or `Window closed {date}` once it has passed. The grace bar's FOLLOW-UP anchor
+     went with the grace state; the scheduled follow-up has its own event below the wait. */
+  it("the wait states both ends of its bar, and only where there is a bar", () => {
+    const at = tl.indexOf('ballHolder === "agent" && waiting');
+    const branch = tl.slice(at, tl.indexOf('title="Nudge"', at));
+    expect(branch).toContain("Sent {fmtShort(waiting.sentMs!)}");
+    expect(branch).toContain("Expected by ~${fmtShort(waiting.expMs!)}");
+    expect(branch).toContain("Window closed ${fmtShort(waiting.expMs!)}");
+    expect(branch, "the grace bar's anchor survives").not.toContain("FOLLOW-UP ");
+    /* ⚠️ AND THE WHOLE BLOCK IS GATED ON A REAL WINDOW — end labels for a window nobody stated
+       would be the house assumption wearing the agency's clothes. */
+    expect(branch, "the end labels are not gated on a stated window").toContain("{dated ? (");
   });
 });
 
@@ -384,12 +417,14 @@ describe("TWS P2 artefacts — five readout treatments + CSS-only sage pulse", (
   const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
   const css = readFileSync(resolve(__dirname, "../components/shell/f12.css"), "utf8");
 
-  it("grace is DASHED + sage-pulse (the Warm --grace-* treatment is gone)", () => {
-    expect(tl.includes('"1px dashed var(--sage')).toBe(true);
-    expect(tl.includes("tl-gracebar")).toBe(true);
-    expect(tl.includes("tl-sweep")).toBe(true);
-    expect(tl.includes("var(--grace-bg")).toBe(false); // Warm treatment removed
-    expect(tl.includes("Nudge again")).toBe(false);     // the grace nudge link removed
+  /* ⚠️ THE GRACE STATE IS RETIRED (§5) — it was a FOURTH shape, a dashed box counting to a
+     scheduled follow-up, and this section's claim is one shape across three situations about the
+     WINDOW. Its information survives: the scheduled nudge has its own projection event, and the
+     history line lists every nudge with its date. */
+  it("the grace box is gone, with its bar and its sweep", () => {
+    for (const gone of ['"1px dashed var(--sage', "tl-gracebar", "tl-sweep", "Nudge again", "var(--grace-bg"]) {
+      expect(tl, `the grace treatment is back: ${gone}`).not.toContain(gone);
+    }
   });
   it("overdue carries NO nudge CTA in the readout (nudge is a fork chip now)", () => {
     expect(tl.includes("Nudge {agentFirst}")).toBe(false);
@@ -442,9 +477,26 @@ describe("queryAmbientStatus — responseDeadline override (P4; undated stage)",
 describe("TWS P4 artefacts — no-date gate + set-date wiring", () => {
   const tl = readFileSync(resolve(__dirname, "../components/reading-pane/QueryTimeline.tsx"), "utf8");
   const qsrc = readFileSync(resolve(__dirname, "../components/Queries.tsx"), "utf8");
-  it("the no-expected-date branch gates on hasExpected (expMs), not merely a send date", () => {
-    expect(tl.includes("const hasExpected = waiting.expMs != null")).toBe(true);
-    expect(tl.includes("{!hasExpected ? (")).toBe(true);
+  /**
+   * ⚠️ INVERTED TWICE, AND THE SECOND TIME IS THE POINT. The clause was that the no-date branch
+   * gates on `expMs` rather than on a send date. `expMs` turned out to be the wrong test entirely:
+   * `queryAmbientStatus` derives one from the house 8/12/12-week assumption when nobody has stated
+   * a response time, so it is almost never null and the branch almost never fired — which is how a
+   * bar and an "expected by" date came to be drawn for agencies that never gave one.
+   *
+   * ⚠️ AND THE COPY CHANGED WITH IT. "no expected date set" made a missing AGENCY figure sound like
+   * something the writer had failed to fill in.
+   */
+  it("the no-window branch gates on windowStated, never on expMs", () => {
+    expect(tl, "the branch still tests the derived date").not.toContain("const hasExpected = waiting.expMs != null");
+    expect(tl, "the branch does not read the stated-window fact").toContain("const stated = waiting.windowStated;");
+    expect(tl, "the bar is not gated on a stated window").toContain("const dated = stated && waiting.sentMs != null");
+    /* ⚠️ COMMENTS STRIPPED FIRST — the retired wording is quoted in the note that explains its
+       retirement, three lines from the code, and an unstripped `toContain` found it there. This
+       repo's most-repeated false red, caught here on the first run. */
+    const decls = tl.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(decls, "the copy still blames the writer").not.toContain("no expected date set");
+    expect(tl, "the copy does not state whose absence it is").toContain("not state a response time.");
   });
   it("Set an expected date opens the Edit drawer (which edits responseDeadline)", () => {
     expect(qsrc.includes("onSetExpectedDate={() => openEditQuery(activeQuery.id)}")).toBe(true);
