@@ -567,15 +567,15 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
    * §5b/§5c — every nudge on this query, once, read by the history line and the closure offer.
    *
    * ⚠️ THE WINDOW'S CLOSE IS `waiting.expMs`, THE SAME FIGURE THE BAR DRAWS. The offer's "since the
-   * window closed" and the bar's expected marker cannot name two different days.
+   * window expired" and the bar's expected marker cannot name two different days.
    */
   const nudges = nudgeTimes(events, NUDGE_NESTED_TYPE, (v) => getTime(v));
   const offer = closureOffer({
     times: nudges,
     /* ⚠️ §3 · THE THIRD DISPLAY PATH THAT WAS READING THE HOUSE ASSUMPTION. The offer states "N
-       since the window closed" — a sentence with no meaning when no window was ever stated, and one
+       since the window expired" — a sentence with no meaning when no window was ever stated, and one
        that would have quoted the app's own 8/12/12-week guess back as the agency's deadline. */
-    windowClosedMs: waiting?.windowStated ? waiting.expMs ?? null : null,
+    windowExpiredMs: waiting?.windowStated ? waiting.expMs ?? null : null,
     now: Date.now(),
     dismissed: (query as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,
     /* §1 (policy pack) — the agency's own position, which is a second route in. Absent and `false`
@@ -685,8 +685,11 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                 {/* ⚠️ `exactDate`, THE ONE en-GB FORMATTER. The first build used the ordinal
                     `fmtNatural` and appended the year by hand — "closed 19th July 2026" — which is a
                     second spelling of a date this app already knows how to write, three lines above
-                    a bar that says "WINDOW CLOSED 19 JUL". */}
-                {past && waiting.expMs != null && <span className="tl-said-x"> · closed {exactDate(waiting.expMs)}</span>}
+                    a bar that says "WINDOW EXPIRED 19 JUL".
+                    ⚠️ §4 · AND THE WORD IS `window expired`, NOT `closed`. Closing is something the
+                    WRITER does to a query and records; a window running out happens to the AGENCY's
+                    own stated deadline. On one card the two were the same word. */}
+                {past && waiting.expMs != null && <span className="tl-said-x"> · window expired {exactDate(waiting.expMs)}</span>}
               </div>
             )}
 
@@ -728,7 +731,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                 <div className={`tl-wbar${past ? " tl-wbar--past" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>
                 <div className="tl-wbarf">
                   <span>Sent {fmtShort(waiting.sentMs!)}</span>
-                  <span>{past ? `Window closed ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>
+                  <span>{past ? `Window expired ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>
                 </div>
               </div>
             ) : (
@@ -761,10 +764,10 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
             {(() => {
               const policy = silencePolicyLine({
                 /* ⚠️ `exactDate`, NOT `fmtShort` — this is PROSE, and the timeline's meta format is a
-                   bare uppercase day and month. "their window closed 23 JUL" mid-sentence reads as a
+                   bare uppercase day and month. "their window expired 23 JUL" mid-sentence reads as a
                    system tag; `elapsed.ts` is where this app spells a date in full, and the note at
                    the head of this file says exactly why a second formatter is not written here. */
-                policy: agent?.noResponseMeansNo, who, windowClosedMs: waiting.expMs ?? null, now, formatDate: exactDate,
+                policy: agent?.noResponseMeansNo, who, windowExpiredMs: waiting.expMs ?? null, now, formatDate: exactDate,
               });
               return policy ? <div className="tl-conv">{policy}</div> : null;
             })()}
@@ -777,7 +780,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
 
             {/**
               * §5c (nudge pack) — closure offered once, on facts: at least one unanswered nudge AND
-              * a window closed more than six months ago. Both answers, equal standing.
+              * a window expired more than six months ago. Both answers, equal standing.
               */}
             {offer.show && (
               <div className="tl-offer">

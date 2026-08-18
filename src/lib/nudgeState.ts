@@ -108,10 +108,10 @@ export interface ConfirmInput {
  * §4c — a nudge inside the agency's own stated window asks first.
  *
  * ⚠️ IT STATES FACTS AND STOPS. No "are you sure", no "this may annoy them", no recommendation: what
- * the agency said, when the window closes, and how far off that is. The app reports; the writer
+ * the agency said, when the window expires, and how far off that is. The app reports; the writer
  * decides — the same rule the no-reply card and every duration label are held to.
  *
- * ⚠️ NULL MEANS PROCEED. Once the window has closed there is nothing left to state, so the confirm
+ * ⚠️ NULL MEANS PROCEED. Once the window has expired there is nothing left to state, so the confirm
  * is absent rather than reworded — an interruption that carries no information is just friction.
  *
  * ⚠️ AND THE WINDOW IS THE AGENT'S STATED ONE, NEVER THE HOUSE ASSUMPTION. `queryAmbientStatus`
@@ -128,9 +128,9 @@ export function nudgeConfirm({ agent, sentMs, now, formatDate }: ConfirmInput): 
     if (now >= closesMs) return null; // the window has passed — nudge proceeds directly
     return {
       kind: "inside-window",
-      title: "Nudge before their window closes?",
+      title: "Nudge before their window expires?",
       body: `${who.name} ${agree(who, "state", "states")} ${weeks} week${weeks === 1 ? "" : "s"}. `
-        + `That window closes on ${formatDate(closesMs)} — ${elapsedPhrase(daysBetween(now, closesMs))} from now.`,
+        + `That window expires on ${formatDate(closesMs)} — ${elapsedPhrase(daysBetween(now, closesMs))} from now.`,
       bar: {
         pct: Math.max(0, Math.min(100, ((now - sentMs) / (closesMs - sentMs)) * 100)),
         sentLabel: `Sent ${formatDate(sentMs)}`,
@@ -145,8 +145,8 @@ export function nudgeConfirm({ agent, sentMs, now, formatDate }: ConfirmInput): 
   if (stated) {
     return {
       kind: "inside-window",
-      title: "Nudge before their window closes?",
-      body: `${who.name} ${agree(who, "state", "states")} ${weeks} week${weeks === 1 ? "" : "s"}. This query has no send date recorded, so that window has no closing date.`,
+      title: "Nudge before their window expires?",
+      body: `${who.name} ${agree(who, "state", "states")} ${weeks} week${weeks === 1 ? "" : "s"}. This query has no send date recorded, so that window has no expiry date.`,
     };
   }
 
@@ -214,11 +214,22 @@ export function nudgeHistoryLine(times: number[], formatDate: (ms: number) => st
   return `Nudged ${n} · ${times.map(formatDate).join(", ")}`;
 }
 
+/**
+ * ⚠️ §4 (event-grammar pack) · A RESPONSE WINDOW **EXPIRES**; A QUERY IS **CLOSED**. Both used the
+ * one word, and they are different acts by different people: closing a query is something the WRITER
+ * does and records, and a window running out is something that happens to the AGENCY's own stated
+ * deadline. So `closed 23 July 2024` on a tracker read as "the writer closed this", which is
+ * precisely what it did not mean.
+ *
+ * ⚠️ AND THE FIELD NAME MOVED WITH THE WORDS. `windowClosedMs` is `windowExpiredMs`, because the
+ * thing that makes a renamed vocabulary drift back is a parameter still called the old name: the
+ * next person writing a sentence from it reaches for the word in front of them.
+ */
 export interface ClosureOfferInput {
   /** Nudge times on this query, oldest first. */
   times: number[];
-  /** When the agent's window closed. Null = no window to be past. */
-  windowClosedMs: number | null;
+  /** When the agent's window expired. Null = no window to be past. */
+  windowExpiredMs: number | null;
   now: number;
   /** The writer already said "keep tracking" — §5d, the one stored thing in this section. */
   dismissed: boolean;
@@ -237,7 +248,7 @@ export interface ClosureOfferInput {
   policy?: boolean;
 }
 
-/** How long past a closed window the offer waits — stated once, so it is tunable rather than hunted. */
+/** How long past an expired window the offer waits — stated once, so it is tunable rather than hunted. */
 export const CLOSURE_OFFER_MONTHS = 6;
 
 /**
@@ -245,15 +256,15 @@ export const CLOSURE_OFFER_MONTHS = 6;
  *
  * ⚠️ THE TRIGGER IS FACTS, NOT THE CLOCK. A query that has never been nudged never gets the offer,
  * however old it is: the obvious next step there is a nudge, not closure. Both conditions must hold
- * — at least one nudge has gone unanswered, AND the window closed more than six months ago.
+ * — at least one nudge has gone unanswered, AND the window expired more than six months ago.
  *
  * ⚠️ AND THE LAST NUDGE MUST BE OLD TOO. Six months past a window plus a nudge sent yesterday is a
  * query the writer has just acted on; offering to close it would be answering a question they have
  * already answered.
  */
 export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: string } {
-  const { times, windowClosedMs, now, dismissed } = inp;
-  if (dismissed || windowClosedMs == null) return { show: false, facts: "" };
+  const { times, windowExpiredMs, now, dismissed } = inp;
+  if (dismissed || windowExpiredMs == null) return { show: false, facts: "" };
   /* §3 — checked before either route, including the policy route: the agency's position does not
      override the writer's own decision to chase again. */
   if (inp.reminderScheduled) return { show: false, facts: "" };
@@ -262,25 +273,25 @@ export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: st
    * ⚠️ §1 (policy pack) · THE POLICY ROUTE, AND IT DOES NOT WAIT SIX MONTHS. The nudge route below
    * waits because closure is the app's inference and an inference needs evidence; where the AGENCY
    * has stated that silence means no, closure is THEIR published position and the only thing left
-   * to establish is that the window has closed. No nudge is required either: chasing an agency that
+   * to establish is that the window has expired. No nudge is required either: chasing an agency that
    * has already said it will not reply is a step the app should not be implying is missing.
    *
    * ⚠️ THE FACTS STOP SHORT OF THE POLICY ITSELF, because the line above the offer states it. An
    * offer that repeated it would be the app pressing the point, which is the one thing this section
    * forbids.
    */
-  if (inp.policy === true && now > windowClosedMs) {
-    const since = elapsedPhrase(daysBetween(windowClosedMs, now));
+  if (inp.policy === true && now > windowExpiredMs) {
+    const since = elapsedPhrase(daysBetween(windowExpiredMs, now));
     return {
       show: true,
       facts: times.length
-        ? `No reply in the ${since} since their window closed, and ${times.length === 1 ? "a nudge" : `${times.length} nudges`} went unanswered.`
-        : `No reply in the ${since} since their window closed.`,
+        ? `No reply in the ${since} since their window expired, and ${times.length === 1 ? "a nudge" : `${times.length} nudges`} went unanswered.`
+        : `No reply in the ${since} since their window expired.`,
     };
   }
 
   if (!times.length) return { show: false, facts: "" };
-  const monthsPast = (now - windowClosedMs) / (DAY * 30.44);
+  const monthsPast = (now - windowExpiredMs) / (DAY * 30.44);
   const lastNudge = times[times.length - 1];
   if (monthsPast <= CLOSURE_OFFER_MONTHS || now < lastNudge) return { show: false, facts: "" };
   return {
@@ -288,7 +299,7 @@ export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: st
     /* ⚠️ THE ACCUMULATED FACTS AND NOTHING ELSE. Not "time to move on", not "unlikely to reply" —
        the offer names what has happened and lets the writer draw the conclusion. */
     facts: `${CARDINAL[times.length] ?? times.length} nudge${times.length === 1 ? "" : "s"}, no reply, `
-      + `and ${elapsedPhrase(daysBetween(windowClosedMs, now))} since the window closed.`,
+      + `and ${elapsedPhrase(daysBetween(windowExpiredMs, now))} since the window expired.`,
   };
 }
 
@@ -304,9 +315,9 @@ export function closureOffer(inp: ClosureOfferInput): { show: boolean; facts: st
  * not "overdue" and not "late". A stated window is an intention, not a contract, and the app
  * reports rather than appraises — the same rule that retired "overdue" from this page.
  */
-export function pastWindowLine(windowClosedMs: number | null, now: number, stated: boolean): { figure: string; tail: string } | null {
-  if (!stated || windowClosedMs == null || now <= windowClosedMs) return null;
-  return { figure: elapsedPhrase(daysBetween(windowClosedMs, now)), tail: "past the window they stated" };
+export function pastWindowLine(windowExpiredMs: number | null, now: number, stated: boolean): { figure: string; tail: string } | null {
+  if (!stated || windowExpiredMs == null || now <= windowExpiredMs) return null;
+  return { figure: elapsedPhrase(daysBetween(windowExpiredMs, now)), tail: "past the window they stated" };
 }
 
 /**
@@ -319,7 +330,7 @@ export function pastWindowLine(windowClosedMs: number | null, now: number, state
  * fallback, exactly as there is no house window bar.
  *
  * ⚠️ THE RECOMMENDATION IS THEIRS, NOT OURS. The sentence quotes a fact the agency published and
- * the date their own window closed; the app adds no verdict and never says "we recommend". That is
+ * the date their own window expired; the app adds no verdict and never says "we recommend". That is
  * what earns it the right to sit above an offer to close.
  *
  * ⚠️ `noResponseMeansNo` IS ALREADY THE FIELD — this needed no schema change. Absent means the
@@ -331,19 +342,19 @@ export interface SilencePolicyInput {
   /** The agent's `noResponseMeansNo` — absent = not stated. */
   policy: boolean | undefined;
   who: Chased;
-  /** When the agency's stated window closed. Null = no window, so nothing to be past. */
-  windowClosedMs: number | null;
+  /** When the agency's stated window expired. Null = no window, so nothing to be past. */
+  windowExpiredMs: number | null;
   now: number;
   /** Long-form date, injected so this module stays free of formatting. */
   formatDate: (ms: number) => string;
 }
 
 export function silencePolicyLine(inp: SilencePolicyInput): string | null {
-  const { policy, who, windowClosedMs, now, formatDate } = inp;
-  if (policy !== true || windowClosedMs == null || now <= windowClosedMs) return null;
+  const { policy, who, windowExpiredMs, now, formatDate } = inp;
+  if (policy !== true || windowExpiredMs == null || now <= windowExpiredMs) return null;
   /* "their" for both — an agency takes it as a plural and a person takes it as the singular they,
      so the possessive is the one word in this sentence that does not need to agree. */
-  return `${who.name} ${agree(who, "treat", "treats")} silence as a pass — their window closed ${formatDate(windowClosedMs)}.`;
+  return `${who.name} ${agree(who, "treat", "treats")} silence as a pass — their window expired ${formatDate(windowExpiredMs)}.`;
 }
 
 /** A task that is a scheduled reminder on this query: undone, scoped to it, and dated ahead. */

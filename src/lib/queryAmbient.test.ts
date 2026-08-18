@@ -343,14 +343,16 @@ describe("Bar P3 artefacts — end-anchors + hollow-circle milestones + hover/ta
   });
 
   /* ⚠️ ONE PAIR OF END ANCHORS NOW (§5): `Sent {date}` and either `Expected by ~{date}` while the
-     window is open or `Window closed {date}` once it has passed. The grace bar's FOLLOW-UP anchor
+     window is open or `Window expired {date}` once it has passed (§4 — a window EXPIRES; a query is
+     CLOSED, and they were sharing the word). The grace bar's FOLLOW-UP anchor
      went with the grace state; the scheduled follow-up has its own event below the wait. */
   it("the wait states both ends of its bar, and only where there is a bar", () => {
     const at = tl.indexOf('ballHolder === "agent" && waiting');
     const branch = tl.slice(at, tl.indexOf('title="Nudge"', at));
     expect(branch).toContain("Sent {fmtShort(waiting.sentMs!)}");
     expect(branch).toContain("Expected by ~${fmtShort(waiting.expMs!)}");
-    expect(branch).toContain("Window closed ${fmtShort(waiting.expMs!)}");
+    expect(branch).toContain("Window expired ${fmtShort(waiting.expMs!)}");
+    expect(branch, "the bar's end label went back to the query-status word").not.toContain("Window closed");
     expect(branch, "the grace bar's anchor survives").not.toContain("FOLLOW-UP ");
     /* ⚠️ AND THE WHOLE BLOCK IS GATED ON A REAL WINDOW — end labels for a window nobody stated
        would be the house assumption wearing the agency's clothes. */

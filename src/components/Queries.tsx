@@ -5703,7 +5703,7 @@ export const Queries: React.FC<{
     )}
 
     {/**
-      * §4c — THE CONFIRM. It states what the agency said, when that window closes and how far off
+      * §4c — THE CONFIRM. It states what the agency said, when that window expires and how far off
       * that is, then offers the two answers.
       *
       * ⚠️ NO VERDICT, WHICH IS WHY THERE IS NO "ARE YOU SURE". The copy is built by `nudgeConfirm`

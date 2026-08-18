@@ -243,7 +243,7 @@
 .dc-evrow .dc-l1 { font-size: 11.5px; font-weight: 500; line-height: 1.3; color: var(--dc-ink); }
 .dc-evrow .dc-l2 { font-size: 10px; color: var(--dc-muted); font-weight: 300; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* Forward-looking reminder ring (nudge due / materials due / window closes) — a deliberately
+/* Forward-looking reminder ring (nudge due / materials due / window expires) — a deliberately
    local element: reminder states must never be added to StatusDot (locked component). */
 .dc-rem {
   width: 13px;

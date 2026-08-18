@@ -110,7 +110,7 @@ export function rowFigure(query: QueryLike, agent: AgentLike, now: number = Date
  * ⚠️ SINGULARS AGREE. "1 DAYS LEFT" is the kind of thing that makes a writer distrust every other
  * number on the page, and it is one `=== 1`.
  *
- * ⚠️ AND `+0 DAYS` IS `DUE TODAY`. The day the window closes is neither "left" nor "late" by any
+ * ⚠️ AND `+0 DAYS` IS `DUE TODAY`. The day the window expires is neither "left" nor "late" by any
  * useful reading, and a zero on a row is the least informative thing it could say.
  */
 /**

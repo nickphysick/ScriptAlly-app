@@ -514,8 +514,20 @@ export function trackingStatCells(a: AmbientStatus): TrackingStatCell[] {
     a.sentMs != null
       ? { key: "waiting", ...splitPhrase(elapsedPhrase(a.nDays)), caption: "Waiting so far", absent: false }
       : { key: "waiting", value: "Not set", caption: "Date sent", absent: true },
+    /**
+     * ⚠️ §4 (event-grammar pack) · ONCE THE WINDOW HAS PASSED THE CAPTION IS `Window expired`, and
+     * that is a correctness fix rather than a rename. A date in the past under "Reply expected by"
+     * states an expectation that has already failed — the tile was still describing the future.
+     *
+     * ⚠️ AND THE WORD IS `expired`, NOT `closed`. Closing is something the WRITER does to a query
+     * and records; a window running out happens to the AGENCY's own stated deadline. Sharing one
+     * word made `closed 23 July` read as "the writer closed this".
+     *
+     * ⚠️ THE ABSENT CELL KEEPS `Reply expected by`, because there is no window to have expired —
+     * what is missing is the expectation itself, which is what that caption names.
+     */
     a.expMs != null
-      ? { key: "expected", value: STAT_DAY(a.expMs), unit: STAT_MON(a.expMs), caption: "Reply expected by", absent: false }
+      ? { key: "expected", value: STAT_DAY(a.expMs), unit: STAT_MON(a.expMs), caption: a.overdue ? "Window expired" : "Reply expected by", absent: false }
       : { key: "expected", value: "Not set", caption: "Reply expected by", absent: true },
   ];
 }

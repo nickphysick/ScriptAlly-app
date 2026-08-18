@@ -979,7 +979,9 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
     /* the first option is the window's own date where the record has one — a close usually happened
        when their window ran out, not on the day the writer got round to recording it */
     const closeWhen: WhenOption[] = [
-      ...(windowClosed ? [{ mode: "closed", label: "When their window closed", ymd: windowClosed }] : []),
+      /* §4 (event-grammar pack) — a response window EXPIRES; a query is CLOSED. The `mode` key is
+         the option's identity and stays; only the words the writer reads change. */
+      ...(windowClosed ? [{ mode: "closed", label: "When their window expired", ymd: windowClosed }] : []),
       whenSent(),
       WHEN_OTHER,
     ];
@@ -1585,7 +1587,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   /* ── the shared step vocabulary ─────────────────────────────────────────────────────────────
    *
    * ⚠️ EVERY JOURNEY THAT RECORDS AN EVENT ASKS `When` THE SAME WAY, so it is built once. The
-   * options differ — a close offers "When their window closed" where a send offers "Today" — but
+   * options differ — a close offers "When their window expired" where a send offers "Today" — but
    * the control does not, because two versions of one question are two things to keep in step.
    * `sentDate` stays the single Y-M-D the write reads; `whenMode` only lights a segment.
    *

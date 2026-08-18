@@ -87,8 +87,8 @@ describe("§4c · the confirm states facts and stops", () => {
     const sent = NOW - 21 * DAY;
     const c = nudgeConfirm({ agent: MARSH, sentMs: sent, now: NOW, formatDate: day })!;
     expect(c.kind).toBe("inside-window");
-    expect(c.title).toBe("Nudge before their window closes?");
-    expect(c.body).toBe("The Marsh Agency state 8 weeks. That window closes on 6 July — 5 weeks from now.");
+    expect(c.title).toBe("Nudge before their window expires?");
+    expect(c.body).toBe("The Marsh Agency state 8 weeks. That window expires on 6 July — 5 weeks from now.");
     /* §4 — the bar exists because there is a window to measure against, filled to the elapsed part */
     expect(c.bar, "a stated window drew no bar").toBeTruthy();
     expect(Math.round(c.bar!.pct), "21 of 56 days is 37.5%").toBe(38);
@@ -188,25 +188,25 @@ describe("§5c · closure is offered on facts, and only once", () => {
   const closed = NOW - 14 * 30.44 * DAY; // fourteen months ago
 
   it("both conditions must hold", () => {
-    expect(closureOffer({ times: [NOW - 13 * 30.44 * DAY], windowClosedMs: closed, now: NOW, dismissed: false }).show).toBe(true);
+    expect(closureOffer({ times: [NOW - 13 * 30.44 * DAY], windowExpiredMs: closed, now: NOW, dismissed: false }).show).toBe(true);
     /* ⚠️ NEVER NUDGED, NEVER OFFERED — the obvious next step there is a nudge, not closure. */
-    expect(closureOffer({ times: [], windowClosedMs: closed, now: NOW, dismissed: false }).show, "a query that was never nudged was offered closure").toBe(false);
+    expect(closureOffer({ times: [], windowExpiredMs: closed, now: NOW, dismissed: false }).show, "a query that was never nudged was offered closure").toBe(false);
     /* one nudge and four months is an ordinary state of affairs (the ref's first card) */
-    expect(closureOffer({ times: [NOW - 70 * DAY], windowClosedMs: NOW - 120 * DAY, now: NOW, dismissed: false }).show).toBe(false);
-    expect(closureOffer({ times: [NOW - 10 * DAY], windowClosedMs: null, now: NOW, dismissed: false }).show).toBe(false);
+    expect(closureOffer({ times: [NOW - 70 * DAY], windowExpiredMs: NOW - 120 * DAY, now: NOW, dismissed: false }).show).toBe(false);
+    expect(closureOffer({ times: [NOW - 10 * DAY], windowExpiredMs: null, now: NOW, dismissed: false }).show).toBe(false);
   });
 
   it("it states the accumulated facts and no verdict", () => {
-    const o = closureOffer({ times: [NOW - 400 * DAY, NOW - 300 * DAY], windowClosedMs: closed, now: NOW, dismissed: false });
-    expect(o.facts).toBe("Two nudges, no reply, and 14 months since the window closed.");
+    const o = closureOffer({ times: [NOW - 400 * DAY, NOW - 300 * DAY], windowExpiredMs: closed, now: NOW, dismissed: false });
+    expect(o.facts).toBe("Two nudges, no reply, and 14 months since the window expired.");
     expect(o.facts).not.toMatch(/time to|unlikely|move on|give up|probably|should/i);
-    expect(closureOffer({ times: [NOW - 400 * DAY], windowClosedMs: closed, now: NOW, dismissed: false }).facts)
-      .toBe("One nudge, no reply, and 14 months since the window closed.");
+    expect(closureOffer({ times: [NOW - 400 * DAY], windowExpiredMs: closed, now: NOW, dismissed: false }).facts)
+      .toBe("One nudge, no reply, and 14 months since the window expired.");
   });
 
   /* §5d — the one stored thing in the section */
   it("keeping tracking ends it permanently", () => {
-    const inp = { times: [NOW - 400 * DAY], windowClosedMs: closed, now: NOW };
+    const inp = { times: [NOW - 400 * DAY], windowExpiredMs: closed, now: NOW };
     expect(closureOffer({ ...inp, dismissed: false }).show).toBe(true);
     expect(closureOffer({ ...inp, dismissed: true }).show, "the offer came back after being dismissed").toBe(false);
   });
@@ -215,8 +215,8 @@ describe("§5c · closure is offered on facts, and only once", () => {
     expect(CLOSURE_OFFER_MONTHS).toBe(6);
     const justUnder = NOW - (CLOSURE_OFFER_MONTHS * 30.44 - 2) * DAY;
     const justOver = NOW - (CLOSURE_OFFER_MONTHS * 30.44 + 2) * DAY;
-    expect(closureOffer({ times: [NOW - 300 * DAY], windowClosedMs: justUnder, now: NOW, dismissed: false }).show).toBe(false);
-    expect(closureOffer({ times: [NOW - 300 * DAY], windowClosedMs: justOver, now: NOW, dismissed: false }).show).toBe(true);
+    expect(closureOffer({ times: [NOW - 300 * DAY], windowExpiredMs: justUnder, now: NOW, dismissed: false }).show).toBe(false);
+    expect(closureOffer({ times: [NOW - 300 * DAY], windowExpiredMs: justOver, now: NOW, dismissed: false }).show).toBe(true);
   });
 });
 
@@ -249,12 +249,12 @@ describe("§4 · the control reads the new derivation", () => {
 describe("§1 · the agency's own policy, or nothing", () => {
   const closed = NOW - 400 * DAY;
   const long = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  const line = (policy: boolean | undefined, agent: { name?: string; agency?: string }, windowClosedMs: number | null = closed) =>
-    silencePolicyLine({ policy, who: chasedBy(agent), windowClosedMs, now: NOW, formatDate: long });
+  const line = (policy: boolean | undefined, agent: { name?: string; agency?: string }, windowExpiredMs: number | null = closed) =>
+    silencePolicyLine({ policy, who: chasedBy(agent), windowExpiredMs, now: NOW, formatDate: long });
 
-  it("names the agency and the date their own window closed", () => {
+  it("names the agency and the date their own window expired", () => {
     const l = line(true, { name: "Marcus Reed", agency: "Bloomsbury Quill" });
-    expect(l).toBe(`Bloomsbury Quill treat silence as a pass — their window closed ${long(closed)}.`);
+    expect(l).toBe(`Bloomsbury Quill treat silence as a pass — their window expired ${long(closed)}.`);
   });
 
   /* ⚠️ AN AGENT WITH NO AGENCY TAKES THE SINGULAR VERB — the same agreement every other sentence
@@ -287,19 +287,19 @@ describe("§1 · the agency's own policy, or nothing", () => {
    */
   it("the offer follows the policy, without a nudge and without the six-month wait", () => {
     const recent = NOW - 20 * DAY;
-    expect(closureOffer({ times: [], windowClosedMs: recent, now: NOW, dismissed: false, policy: true }).show,
+    expect(closureOffer({ times: [], windowExpiredMs: recent, now: NOW, dismissed: false, policy: true }).show,
       "a stated policy did not carry the offer").toBe(true);
-    expect(closureOffer({ times: [], windowClosedMs: recent, now: NOW, dismissed: false }).show,
+    expect(closureOffer({ times: [], windowExpiredMs: recent, now: NOW, dismissed: false }).show,
       "the nudge route started offering closure without a nudge").toBe(false);
-    expect(closureOffer({ times: [], windowClosedMs: recent, now: NOW, dismissed: false, policy: false }).show,
+    expect(closureOffer({ times: [], windowExpiredMs: recent, now: NOW, dismissed: false, policy: false }).show,
       "an agency that replies either way carried the offer").toBe(false);
   });
 
   /* ⚠️ THE FACTS DO NOT RESTATE THE POLICY — the line above the offer says it, and an offer
      repeating it would be the app pressing a point it has no business pressing. */
   it("states facts and no verdict, and never repeats the policy", () => {
-    const o = closureOffer({ times: [], windowClosedMs: closed, now: NOW, dismissed: false, policy: true });
-    expect(o.facts).toContain("since their window closed");
+    const o = closureOffer({ times: [], windowExpiredMs: closed, now: NOW, dismissed: false, policy: true });
+    expect(o.facts).toContain("since their window expired");
     expect(o.facts.toLowerCase()).not.toContain("silence as a pass");
     for (const w of ["recommend", "should", "unlikely", "time to", "move on", "give up"]) {
       expect(o.facts.toLowerCase(), `the offer appraises: "${w}"`).not.toContain(w);
@@ -308,7 +308,7 @@ describe("§1 · the agency's own policy, or nothing", () => {
 
   /* the once-only dismissal is unchanged, and it covers the new route too */
   it("honours the dismissal", () => {
-    expect(closureOffer({ times: [], windowClosedMs: closed, now: NOW, dismissed: true, policy: true }).show).toBe(false);
+    expect(closureOffer({ times: [], windowExpiredMs: closed, now: NOW, dismissed: true, policy: true }).show).toBe(false);
   });
 });
 
@@ -379,7 +379,7 @@ describe("§2 · the ghost rung asks the same source as the row above it", () =>
  */
 describe("§3 · no closure offer while a nudge is scheduled", () => {
   const closed = NOW - 400 * DAY;
-  const base = { times: [NOW - 300 * DAY], windowClosedMs: closed, now: NOW, dismissed: false };
+  const base = { times: [NOW - 300 * DAY], windowExpiredMs: closed, now: NOW, dismissed: false };
 
   it("the nudge route is superseded", () => {
     expect(closureOffer(base).show, "the fixture is not a closure candidate to begin with").toBe(true);
@@ -429,5 +429,52 @@ describe("§3 · one derivation, three surfaces", () => {
     expect(feed, "the feed does not state the silence").toContain("No response from ${aName} for ${elapsedPhrase(");
     expect(board, "the board does not state the silence in the scaled figure").toContain("No response from ${name}");
     expect(board, "the board went back to a raw day count in its title").not.toContain("silent${days");
+  });
+});
+
+/**
+ * §4 (event-grammar pack) — a response window EXPIRES; a query is CLOSED.
+ *
+ * ⚠️ THE TWO WORDS WERE THE SAME WORD, AND THEY ARE DIFFERENT ACTS BY DIFFERENT PEOPLE. Closing a
+ * query is something the WRITER does and records; a window running out happens to the AGENCY's own
+ * stated deadline. `closed 23 July 2024` on a tracker therefore read as "the writer closed this",
+ * which is precisely what it did not mean.
+ *
+ * ⚠️ AND THE SWEEP IS ASSERTED IN BOTH DIRECTIONS, because a rename is only half a rule: the window
+ * must lose the word AND the query status must keep it. A one-sided test passes a codebase that
+ * renamed everything.
+ */
+describe("§4 · a window expires; a query is closed", () => {
+  const strip = (src: string) => src.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
+  const st = strip(readFileSync(new URL("./nudgeState.ts", import.meta.url), "utf8"));
+  const tl = strip(readFileSync(new URL("../components/reading-pane/QueryTimeline.tsx", import.meta.url), "utf8"));
+  const amb = strip(readFileSync(new URL("./queryAmbient.ts", import.meta.url), "utf8"));
+
+  it("no window string says closed", () => {
+    for (const [name, src] of [["nudgeState", st], ["QueryTimeline", tl], ["queryAmbient", amb]] as const) {
+      expect(src, `${name} still says "window closed"`).not.toMatch(/window clos(ed|es|ing)/i);
+      expect(src, `${name} still says "Window closed"`).not.toContain("Window closed");
+    }
+  });
+
+  /* ⚠️ THE OTHER HALF. `Mark closed`, the closed status label and the closed bucket are the WRITER's
+     act and must survive the sweep untouched — a rename that took them with it would have been a
+     regression wearing a tidy-up's clothes. */
+  it("the query status keeps the word", () => {
+    expect(tl, "Mark closed was swept away with the windows").toContain("Mark closed");
+    expect(tl, "the no-response status label lost its wording").toContain("Closed — no response");
+    expect(st, "the finished-standing sentence lost its wording").toContain("This query is closed");
+  });
+
+  /* the stat tile stops describing the future once the window is behind it */
+  it("the tile names the expiry once the window has passed", () => {
+    expect(amb, "the tile still calls a past date an expectation").toContain('a.overdue ? "Window expired" : "Reply expected by"');
+  });
+
+  /* ⚠️ AND THE FIELD NAME MOVED WITH THE WORDS, because the thing that makes a renamed vocabulary
+     drift back is a parameter still called the old name. */
+  it("the derivation's own vocabulary moved too", () => {
+    expect(st, "the input is still named for the query's act").not.toContain("windowClosedMs");
+    expect(st, "the input was not renamed").toContain("windowExpiredMs");
   });
 });

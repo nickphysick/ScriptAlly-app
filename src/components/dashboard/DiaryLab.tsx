@@ -32,7 +32,7 @@ export const DiaryLab: React.FC = () => {
   const [theme, setTheme] = useState<Theme>("t-capp");
 
   // Mock queries shaped to reproduce the mockup's fortnight: query sent −5 · full requested −4 ·
-  // query sent −2 · nudge due +1 · full due to send +3 · response window closes +7. Today quiet.
+  // query sent −2 · nudge due +1 · full due to send +3 · response window expires +7. Today quiet.
   const queries = useMemo<Query[]>(() => {
     const today = startOfDay(new Date());
     const iso = (off: number) => {

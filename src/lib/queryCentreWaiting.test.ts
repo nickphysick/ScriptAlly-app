@@ -113,9 +113,17 @@ describe("§3 · waiting and the nudge are timeline events", () => {
     const branch = tl.slice(at, tl.indexOf('title="Nudge"', at));
     expect(branch, "the boxes came back").not.toContain('className="tl-noreply"');
     expect(branch, "the grace card came back").not.toContain("1px dashed var(--sage");
-    for (const alarm of ["--pink-t", "--pink-i", "--pink-b", "red"]) {
+    /**
+     * ⚠️ `red` IS BOUNDED, AND THE UNBOUNDED FORM WENT RED ON A CORRECT FILE. §4 renamed the
+     * window's end from "closed" to "expired", and `not.toContain("red")` matched **expi·red** —
+     * the same substring family as the class-name locks in CLAUDE.md, arrived at from a new
+     * direction. A colour word is a whole word; `\b` says so and cannot be defeated by a longer
+     * one that happens to end in it.
+     */
+    for (const alarm of ["--pink-t", "--pink-i", "--pink-b"]) {
       expect(branch, `the wait wears ${alarm}`).not.toContain(alarm);
     }
+    expect(branch, "the wait wears red").not.toMatch(/\bred\b/);
   });
 });
 
