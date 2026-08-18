@@ -4638,7 +4638,7 @@ export const Queries: React.FC<{
                               ) : (
                                 <button
                                   type="button"
-                                  className="qc-mchip qc-mchip-con qc-mchip-add"
+                                  className="qc-mchip qc-mchip-con qc-mchip-plus"
                                   title="Add an email address to this agent's record"
                                   onClick={(e) => {
                                     (agentEditTrigRef as React.MutableRefObject<HTMLElement | null>).current = e.currentTarget;
@@ -4658,7 +4658,7 @@ export const Queries: React.FC<{
                               ) : (
                                 <button
                                   type="button"
-                                  className="qc-mchip qc-mchip-con qc-mchip-add"
+                                  className="qc-mchip qc-mchip-con qc-mchip-plus"
                                   title="Add a website to this agent's record"
                                   onClick={(e) => {
                                     (agentEditTrigRef as React.MutableRefObject<HTMLElement | null>).current = e.currentTarget;
