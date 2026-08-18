@@ -3739,6 +3739,39 @@ export const Queries: React.FC<{
                     {nudgeAgoDays != null && <span className="qc-btn-sub">· {agoLabel(nudgeAgoDays)}</span>}
                   </button>
                   </span>
+                  {/**
+                    * ══ §5 · VIEW RELATED TASKS ═══════════════════════════════════════════════
+                    *
+                    * ⚠️ IT REUSES WHAT ALREADY LINKS TASKS TO QUERIES, both halves: `queryTaskBadge`
+                    * for the count — the same derivation the list row's badge and the filter read,
+                    * never a fresh tally — and `TasksPopover` with a `{ queryId }` scope for the
+                    * surface, which itself reads `Task.relatedRecordId` for the derived suggestions
+                    * and `UserTask.queryId` for the stored ones. Nothing new links anything.
+                    *
+                    * ⚠️ HIDDEN AT ZERO, NOT DISABLED READING "(0)". A control that opens onto
+                    * nothing is a control that lies about having something to show — and a disabled
+                    * one states a number whose only content is that there is nothing to state.
+                    *
+                    * ⚠️ THE COUNT IS A MONO FIGURE, NOT A BADGE. A badge is an alert; this is a
+                    * quantity beside a verb, and the bar has no other alerts on it.
+                    */}
+                  {queryTaskBadge(tasks, activeQuery.id).count > 0 && (
+                    <span className="f12-popwrap" style={{ display: "inline-flex" }}>
+                      <button
+                        ref={tasksTrigRef}
+                        type="button"
+                        className="qc-btn qc-btn-shrink"
+                        aria-haspopup="dialog"
+                        aria-expanded={isTasksOpen}
+                        title="Tasks on this query"
+                        onClick={() => setIsTasksOpen((o) => !o)}
+                      >
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" /></svg>
+                        <span>View related tasks</span>
+                        <span className="qc-btn-sub">({queryTaskBadge(tasks, activeQuery.id).count})</span>
+                      </button>
+                    </span>
+                  )}
                   {/* ⚠️ THE GAP CARRIES THE DIVISION, NOT A RULE (§3c). Two groups: what moves the
                       query forward, then what ends it or takes it out of the app. A 1px rule between
                       them was a second device saying what the space already says, and it read as
@@ -4734,25 +4767,15 @@ export const Queries: React.FC<{
                        the hero band's badge reads, so the band and the card cannot disagree about
                        what state this query is in. */
                     meta={statusDisplayLabel(activeQuery)}
-                    /* ⚠️ `View tasks` LANDED HERE WHEN THE ⋯ WENT (§2), AND THE PACK DOES NOT NAME IT.
-                       §2's rule for everything that is not one of the four verbs is "moves to where
-                       its subject is named" — and this query's outstanding work is named in
-                       Tracking, which is the card about where the query stands over time. The count
-                       is the existing `queryTaskBadge`, never a fresh tally.
+                    /* ⚠️ §5 · THE TASKS CONTROL HAS LEFT THIS HEADER for the command bar, where the
+                       query's other verbs are. A count in a card's band read as part of the card's
+                       subject — Tracking is about where the query stands over TIME — while what it
+                       actually offered was an action on the query as a whole.
 
-                       ⚠️ ABSENT AT ZERO, not "0 TASKS". A control that opens a drawer onto nothing
-                       is a control that lies about having something to show. */
-                    action={queryTaskBadge(tasks, activeQuery.id).count > 0 ? (
-                      <button
-                        ref={tasksTrigRef}
-                        type="button"
-                        className="qp-cardact"
-                        onClick={() => setIsTasksOpen(true)}
-                        title="View this query's tasks"
-                      >
-                        {queryTaskBadge(tasks, activeQuery.id).count} {queryTaskBadge(tasks, activeQuery.id).count === 1 ? "TASK" : "TASKS"}
-                      </button>
-                    ) : undefined}
+                       ⚠️ AND IT WAS DEAD. `setIsTasksOpen(true)` had no listener: `TasksPopover` was
+                       imported and never mounted, so "1 TASK" opened nothing at all. Reported rather
+                       than quietly fixed in passing — the control is rebuilt in the bar WITH its
+                       surface this time. */
                     glyph={<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg>}
                   >
                       {/* ⚠️ §4 · THE SCROLLER IS HELD CLEAR OF THE BAND. Its content began flush
@@ -5333,6 +5356,18 @@ export const Queries: React.FC<{
           triggerToast({ queryId: activeQuery.id, agentName: agentPrimary(activeAgent), manuscriptTitle: activeMs?.title || "", responseStyle: null });
         }}
       />
+    )}
+
+    {/**
+      * §5 — THE TASK SURFACE THE BAR'S CONTROL OPENS.
+      *
+      * ⚠️ IT WAS NEVER MOUNTED. `TasksPopover` was imported and `setIsTasksOpen(true)` was wired to
+      * the old Tracking-header count, with nothing listening — so that control opened nothing for
+      * as long as it existed. Anchored off the bar's button through the page's own `useFixedMenu`,
+      * like every other popover here.
+      */}
+    {isTasksOpen && activeQuery && (
+      <TasksPopover scope={{ queryId: activeQuery.id }} style={tasksMenuStyle} onClose={() => setIsTasksOpen(false)} />
     )}
 
     {/**

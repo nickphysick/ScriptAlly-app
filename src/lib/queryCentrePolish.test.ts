@@ -131,7 +131,9 @@ describe("§3 · one button rule, app-wide on this page", () => {
     expect(row, "the primary was given the shrinking modifier — it would lose its label at 1280")
       .not.toMatch(/qc-btn qc-btn-pri[^"]*qc-btn-shrink/);
     /* … and exactly three controls do */
-    expect((row.match(/qc-btn-shrink/g) || []).length, "the shrinking set is not the three secondaries").toBe(3);
+    /* ⚠️ FOUR SINCE §5 — `View related tasks` joined the bar and sheds its label at the same width
+       as the other secondaries. What this clause is for is that the PRIMARY is not among them. */
+    expect((row.match(/qc-btn-shrink/g) || []).length, "the shrinking set is not the secondaries").toBe(4);
   });
 });
 
@@ -414,10 +416,22 @@ describe("§9 · nothing selected", () => {
     for (const verb of ["Nudge", "Mark closed", "Delete"]) {
       expect(ghost, `${verb} is missing from the inert row — the row would reflow on selection`).toContain(`<span>${verb}</span>`);
     }
-    /* same counts of every structural part */
+    /**
+     * ⚠️ THE UNCONDITIONAL VERBS ONLY, SINCE §5. `View related tasks` is HIDDEN at zero — a control
+     * that opens onto nothing is a control that lies — so it is absent on most queries and cannot
+     * be in a shape drawn for no query at all. Putting it in the ghost would promise a button most
+     * selections do not produce, which is the same reflow this clause guards against, pointing the
+     * other way.
+     *
+     * ⚠️ SO THE COMPARISON DROPS IT FROM THE LIVE SIDE rather than adding it to the ghost, and the
+     * clause is unchanged for the four verbs that are always there.
+     */
+    const withoutTasks = live.replace(/\{queryTaskBadge\(tasks, activeQuery\.id\)\.count > 0 && \([\s\S]*?\)\}/, "");
+    expect(withoutTasks.length, "the tasks control was not found in the live row — the comparison below is vacuous")
+      .toBeLessThan(live.length);
     for (const part of ["qc-btn-shrink", "qc-sep", "qc-btn-icon"]) {
       const n = (s: string) => (s.match(new RegExp(part, "g")) || []).length;
-      expect(n(ghost), `the inert row has a different number of ${part} — selection would reflow the row`).toBe(n(live));
+      expect(n(ghost), `the inert row has a different number of ${part} — selection would reflow the row`).toBe(n(withoutTasks));
     }
   });
 

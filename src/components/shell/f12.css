@@ -1952,8 +1952,9 @@
 .qp-lnk-off { color: var(--qc-tx-off); border-color: var(--qc-rim-off-2); background: var(--qc-surf-pill-off); pointer-events: none; }
 
 /* The card band's interactive slot — a control, so it is not mistaken for the mono fact beside it. */
-.qp-cardact { font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--sageD); background: var(--qc-surf-headact); border: 1px solid var(--qc-rim-headact); border-radius: 5px; padding: 2px 6px; margin-left: 8px; cursor: pointer; white-space: nowrap; }
-.qp-cardact:hover { background: var(--qc-surf-headact-h); color: var(--ink); }
+/* ⚠️ `.qp-cardact` IS RETIRED WITH THE TASK COUNT IT DREW (§5) — the only control that ever wore
+   it. `PaneCard`'s `action` slot survives and is documented on the component; the next card that
+   needs one declares its own treatment rather than inheriting a rule shaped for a count. */
 /* ⚠️ AND `.qp-cardmeta` KEEPS ITS `margin-left: auto`, so the meta still pushes right and the
    control sits after it. Two `auto`s would fight; the second element takes a fixed gap instead. */
 

@@ -319,9 +319,18 @@ describe("§1e / §1f · the verbs have a subject, or they are not drawn", () =>
     /* ⚠️ `qp-msname` RETIRED WITH THE MERGE (§1) — the manuscript is the pairing card's right-hand
        subject now, in the same element as the agent. The clause is the destination, not the class. */
     expect(code, "the manuscript lost its way in").toContain('onNavigate("manuscripts")');
-    /* View tasks kept its handler and moved to Tracking, where this query's work is named */
-    expect(code, "View tasks lost its opener").toContain("setIsTasksOpen(true)");
-    expect(code, "the task count is not on Tracking's band").toContain('className="qp-cardact"');
+    /* View tasks kept its handler; §5 moved it from Tracking's band into the command bar */
+    /* ⚠️ A TOGGLE SINCE §5 — the control moved into the command bar, where pressing it twice
+         should close what it opened, as every other popover trigger in that row does.
+         ⚠️ AND IT FINALLY HAS SOMETHING TO OPEN: `TasksPopover` was imported and never mounted, so
+         this clause was satisfied by a call with no listener for as long as it existed. */
+      expect(code, "View tasks lost its opener").toContain("setIsTasksOpen((o) => !o)");
+      expect(code, "the tasks surface is still unmounted").toContain("<TasksPopover scope={{ queryId: activeQuery.id }}");
+    /* ⚠️ AND IT IS NOT ON TRACKING'S BAND ANY MORE (§5). A count in a card's header read as part of
+       that card's subject — Tracking is about where the query stands over TIME — while what it
+       offered was an action on the query as a whole. It sits with the query's other verbs now. */
+    expect(code, "the task count is back on Tracking's band").not.toContain('className="qp-cardact"');
+    expect(code, "the control is not in the command bar").toContain("<span>View related tasks</span>");
     /* ⚠️ AND THE PDF IS REPORTED, NOT RESOLVED. Its subject IS the query, so by §2's own rule it
        cannot move — and it is not among the four verbs. It stays as an icon rather than being
        deleted to make a list of four come out right. */
