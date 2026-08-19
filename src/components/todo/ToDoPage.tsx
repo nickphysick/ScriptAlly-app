@@ -22,6 +22,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText } from "../../lib/agentMaterials";
 import { queriesMissingMaterials, MATERIALS_BULK_RECORD_ID } from "../../lib/queryMaterialsGap";
 import { agentPrimary } from "../../lib/agentDisplay";
+import { formatQueryMaterials } from "../../lib/materials";
 import { recordSweepRow, sweepWrites, sweepActLabel, type RecordSweepRow } from "../../lib/materialsSweep";
 import { Funnel, Pin, ChevronRight, ChevronLeft, X, Clock, ArrowUpDown, ExternalLink, Plus } from "lucide-react";
 import { StatusDot } from "../StatusDot";
@@ -1525,6 +1526,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   /* ⚠️ THE PAGE DERIVES THE MATERIALS because the package and its versions live
                      here; the card states what it is handed. */
                   materials={dockMaterials}
+                  sentPreviously={(c) => {
+                    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+                    return formatQueryMaterials(q?.materialsWanted);
+                  }}
                   /* §4.4 — the page derives it because `notifyGroups` needs the whole query set */
                   holders={dockHolders}
                   onPrimary={(c) => dockPrimary(c)}

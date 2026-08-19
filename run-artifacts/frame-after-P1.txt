@@ -1,0 +1,55 @@
+── page frame · 27 assertions · 9 RED · 18 green
+  RED    F1 list card is 372 ± 2
+           list=518 listCard=520
+  RED    F2 task pane ≥ 900 (brief) — see report for the honest ceiling
+           pane=350
+  green  F3 no horizontal scrollbar on documentElement
+           overflowX=0px
+  green  F4 no list row deed/agent line ellipsised
+           []
+  green  P1 close · no [object Object] anywhere in the pane
+           clean
+  green  T1 close · all tiles share one offsetTop (one row)
+           tiles=2 tops=[423]
+  green  P1 close · no [object Object] in the journey
+           clean
+  RED    J1 close · form and timeline side by side at 1440 (same offsetTop)
+           form={"w":286,"top":488} story={"w":286,"top":960}
+  RED    J2 close · timeline 300 ± 2 and form ≥ 420
+           story.w=286 form.w=286
+  green  J3 close · neither card is 0px
+           form=286 story=286
+  green  P1 send · no [object Object] anywhere in the pane
+           clean
+  green  T1 send · all tiles share one offsetTop (one row)
+           tiles=3 tops=[531]
+  green  P1 send · no [object Object] in the journey
+           clean
+  RED    J1 send · form and timeline side by side at 1440 (same offsetTop)
+           form={"w":286,"top":609} story={"w":286,"top":1432}
+  RED    J2 send · timeline 300 ± 2 and form ≥ 420
+           story.w=286 form.w=286
+  green  J3 send · neither card is 0px
+           form=286 story=286
+  green  P1 decide · no [object Object] anywhere in the pane
+           clean
+  green  T1 decide · all tiles share one offsetTop (one row)
+           tiles=2 tops=[439]
+  green  P1 decide · no [object Object] in the journey
+           clean
+  RED    J1 decide · form and timeline side by side at 1440 (same offsetTop)
+           form={"w":286,"top":488} story={"w":286,"top":834}
+  RED    J2 decide · timeline 300 ± 2 and form ≥ 420
+           story.w=286 form.w=286
+  green  J3 decide · neither card is 0px
+           form=286 story=286
+  green  P1 note · no [object Object] anywhere in the pane
+           clean
+  green  P1 note · no [object Object] in the journey
+           clean
+  green  P1 bulk · no [object Object] anywhere in the pane
+           clean
+  green  N1 390 · form and timeline stacked (different offsetTop)
+           formTop=1605 storyTop=2657
+  RED    N2 390 · neither overflows and neither is 0px
+           hScroll=0 formW=0 storyW=34

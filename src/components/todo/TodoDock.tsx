@@ -122,6 +122,8 @@ export interface TodoDockProps {
   /** ⚠️ THE MATERIALS ON FILE — a RECORD, not a choice. The page derives them because the package
    *  and its versions live there; the card states what it is handed. */
   materials?: (card: BoardCard) => MaterialRow[];
+  /** The "Sent previously" tile's one line — the query's own materials through `formatQueryMaterials`. */
+  sentPreviously?: (card: BoardCard) => string | null;
   /** The timeline, derived by the page from the activity log. */
   timeline: (card: BoardCard) => DockTimelineEvent[];
   /** The flow's ink act. `spec` is present only for the send flow. */
@@ -217,7 +219,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, card, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyRecord, onLeaveUnrecorded, recordSweep, onCommitRecordSweep, onDismissRecordSweep, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, card, activeKey, onSelect, onClose, timeline, materials, sentPreviously, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyRecord, onLeaveUnrecorded, recordSweep, onCommitRecordSweep, onDismissRecordSweep, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const surfaceRef = useRef<HTMLDivElement>(null);
   /* ⚠️ `confirmSend` IS RETIRED WITH THE CHECKBOX (Phase 6). It was the card's own copy of a
@@ -306,7 +308,12 @@ export const TodoDock: React.FC<TodoDockProps> = ({
     ...(cardBucket(card) === "send"
       ? [{
           k: "Sent previously",
-          v: (materials?.(card) ?? []).join(" · "),
+          /* ⚠️ NOT `materials(card)` — TWO faults lived in that one expression. Those are the
+             SEND rows (todoHandoff MaterialRow objects describing what is about to go), so the
+             join printed "[object Object]" — and even formatted they would have been the wrong
+             FACT: this tile states what already went. `sentPreviously` is the page's reading of
+             the query's own `materialsWanted` through the one formatter in `materials.ts`. */
+          v: sentPreviously?.(card) ?? "",
           u: "",
           absent: "None sent",
         }]

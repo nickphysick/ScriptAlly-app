@@ -56,6 +56,22 @@ export function materialLabel(token: string): string {
 }
 
 /**
+ * A WHOLE materials list as one display line — every item through `formatQueryMaterial`, joined
+ * with the record interpunct.
+ *
+ * ⚠️ THIS LIVES HERE AND NOWHERE ELSE. The "Sent previously" tile joined its list at the call
+ * site — `.join(" · ")` over raw entries — and a structured `QueryMaterial` reached the string
+ * slot as "[object Object]" on every send card. A list is formatted by the module that owns the
+ * item formatter, so a second call site can never repeat the fault with different punctuation.
+ *
+ * `null` for an absent or empty list — absence is the CALLER's sentence ("None sent"), never "".
+ */
+export function formatQueryMaterials(items: readonly (string | QueryMaterial)[] | undefined | null): string | null {
+  if (!items || items.length === 0) return null;
+  return items.map(formatQueryMaterial).join(" · ");
+}
+
+/**
  * Legacy free-string formatter (formerly Queries.formatSubmissionMaterial). Internal —
  * `formatQueryMaterial` is the only public entry point. Also used as the canonical
  * vocabulary for structured items, so "50 pages" and the legacy "First 50 pages" render

@@ -13,7 +13,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { materialLabel, materialToken, formatQueryMaterial } from "./materials";
+import { materialLabel, materialToken, formatQueryMaterial, formatQueryMaterials } from "./materials";
 import {
   MAT_OPTS, MATERIAL_ROW_NAMES, buildAgentMaterials, parseAgentMaterials,
   materialRowsFromAgent, materialsWantedFromRows, emptyMaterials,
@@ -110,5 +110,20 @@ describe("no material-naming surface hard-codes the token as display copy", () =
   it("⚠️ and PaneJourney keeps the token in its `stored` field — display moved, storage did not", () => {
     const src = readFileSync(join(root, "components/todo/PaneJourney.tsx"), "utf8");
     expect(src).toContain('stored: "Query letter"');
+  });
+});
+
+describe("formatQueryMaterials — the list reading of the one formatter", () => {
+  it("routes every item through formatQueryMaterial, so an object can never reach a string slot", () => {
+    expect(formatQueryMaterials(["Query Letter", { material: "Sample Pages", type: "pages", quantity: 50 }]))
+      .toBe("Covering letter · First 50 pages");
+    // ⚠️ the fault this exists for: a raw join would have printed "[object Object]"
+    expect(formatQueryMaterials([{ material: "Synopsis" }])).not.toContain("[object");
+  });
+
+  it("absence is null — the caller's sentence, never an empty string", () => {
+    expect(formatQueryMaterials(undefined)).toBeNull();
+    expect(formatQueryMaterials(null)).toBeNull();
+    expect(formatQueryMaterials([])).toBeNull();
   });
 });
