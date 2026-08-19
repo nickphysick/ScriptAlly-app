@@ -215,6 +215,17 @@ export interface AnalyticsRow {
   /** When the agent FIRST acted, from the earliest incoming rung of the log. */
   respondedMs: number | null;
   /**
+   * WHAT that first act was — the status of the rung `respondedMs` came from.
+   *
+   * ⚠️ IT IS NOT THE QUERY'S CURRENT STATUS, and the difference is the whole reason it exists. A
+   * query that drew a partial request in May and was declined in August has a RESPONSE of "partial
+   * request" and a STANDING of "pass"; a row dated May and labelled from the current status would
+   * put August's outcome against May's date. Seen on the dev account in its ugliest form — a query
+   * marked "No Response" carrying a recorded rejection, listed under Latest responses as "Window
+   * elapsed", which is a description of the query and not of the thing that arrived.
+   */
+  respondedStatus: QueryStatus | null;
+  /**
    * Whether the agent has acted at all — which is a DIFFERENT question from when.
    *
    * ⚠️ A RESPONSE WITH NO DERIVABLE DATE IS STILL A RESPONSE. Counting only dated ones would make
@@ -277,9 +288,13 @@ export function buildRows(
        this page and `recomputeQuery`'s own `responseReceivedAt` cannot disagree about what
        counts as the agent having acted. */
     let respondedMs: number | null = null;
+    let respondedStatus: QueryStatus | null = null;
     for (const status of AGENT_RESPONSE_STATUSES) {
       const t = stageMs[status];
-      if (t !== undefined && (respondedMs === null || t < respondedMs)) respondedMs = t;
+      if (t !== undefined && (respondedMs === null || t < respondedMs)) {
+        respondedMs = t;
+        respondedStatus = status;
+      }
     }
     /**
      * ⚠️ THE LOG ONLY — `responseReceivedAt` IS DELIBERATELY NOT A FALLBACK HERE, and it was one
@@ -340,6 +355,7 @@ export function buildRows(
       outcome: outcomeFor(q.status),
       sentMs,
       respondedMs,
+      respondedStatus,
       /* the stored flag is `recomputeQuery`'s own answer; the rung's existence is the same answer
          derived here, and either is enough — this is "did they act", not "when" */
       hasResponded: q.hasAgentResponded === true || respondedMs !== null,
@@ -810,13 +826,17 @@ export interface ResponseRow {
   chipLabel: string;
 }
 
-const RESPONSE_CHIP: Record<AnalyticsOutcome, { dotStatus: QueryStatus; label: string }> = {
-  open: { dotStatus: QueryStatus.QUERIED, label: "Queried" },
-  partial: { dotStatus: QueryStatus.PARTIAL_REQUESTED, label: "Partial request" },
-  full: { dotStatus: QueryStatus.FULL_REQUESTED, label: "Full request" },
-  offer: { dotStatus: QueryStatus.OFFER, label: "Offer" },
-  pass: { dotStatus: QueryStatus.REJECTED, label: "Pass" },
-  elapsed: { dotStatus: QueryStatus.NO_RESPONSE, label: "Window elapsed" },
+/**
+ * ⚠️ KEYED ON THE RESPONSE, NOT ON THE QUERY'S STANDING. Every member of
+ * `AGENT_RESPONSE_STATUSES` has a row here, because those are the only statuses a first incoming
+ * rung can carry — so the label describes what actually arrived on the date beside it.
+ */
+const RESPONSE_CHIP: Partial<Record<QueryStatus, string>> = {
+  [QueryStatus.PARTIAL_REQUESTED]: "Partial request",
+  [QueryStatus.FULL_REQUESTED]: "Full request",
+  [QueryStatus.REVISE_RESUBMIT]: "Revise & resubmit",
+  [QueryStatus.OFFER]: "Offer",
+  [QueryStatus.REJECTED]: "Pass",
 };
 
 export function latestResponses(rows: AnalyticsRow[], limit = 7): ResponseRow[] {
@@ -833,8 +853,10 @@ export function latestResponses(rows: AnalyticsRow[], limit = 7): ResponseRow[] 
       sentMs: r.sentMs,
       respondedMs: r.respondedMs as number,
       replyDays: r.replyDays,
-      dotStatus: RESPONSE_CHIP[r.outcome].dotStatus,
-      chipLabel: RESPONSE_CHIP[r.outcome].label,
+      /* the rung's own status drives both the glyph and the label; a row with no rung cannot be
+         in this list at all, so the fallback is unreachable in practice and honest if reached */
+      dotStatus: r.respondedStatus ?? r.status,
+      chipLabel: (r.respondedStatus && RESPONSE_CHIP[r.respondedStatus]) ?? "Response",
     }));
 }
 

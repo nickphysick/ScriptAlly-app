@@ -256,3 +256,31 @@
 .an-hd { margin-left: auto; text-align: right; flex: none; }
 .an-hd b { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 21px; overflow: visible; }
 .an-horizonempty { color: #9a8c80; font-size: 12px; font-weight: 300; padding: 6px 2px; line-height: 1.6; }
+
+/* ── fulls under consideration ───────────────────────────────────────────── */
+.an-fullrow { display: flex; align-items: center; gap: 13px; padding: 12px 8px; border-bottom: 1px solid #f4ede3; transition: background .14s ease; }
+.an-fullrow:hover { background: #fdfaf5; }
+.an-fullrow:last-of-type { border-bottom: none; }
+.an-fi { flex: none; width: 30px; height: 30px; display: inline-flex; }
+.an-fullname { min-width: 0; }
+.an-fullrow b { display: block; font-size: 13px; font-weight: 500; }
+.an-fullrow i { font-style: normal; font-size: 11px; color: #9a8c80; font-weight: 300; }
+.an-fd { margin-left: auto; text-align: right; flex: none; }
+.an-fd b { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 20px; font-weight: 500; }
+
+/* ── latest responses ────────────────────────────────────────────────────────
+   ⚠️ A REAL TABLE. Four columns of the same four things per row is a table by definition, and the
+   header association a `<th scope="col">` gives is not worth rebuilding out of divs. */
+.an-table { width: 100%; border-collapse: collapse; }
+.an-table th { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9px; letter-spacing: 0.17em; font-weight: 500; text-transform: uppercase; color: #9c8878; text-align: left; padding: 2px 10px 10px; border-bottom: 1px solid #f0e8dc; }
+.an-table th:last-child, .an-table td:last-child { text-align: right; }
+.an-table td { padding: 10px; border-bottom: 1px solid #f4ede3; font-size: 12.5px; color: #3a1c14; }
+.an-table tr:last-child td { border-bottom: none; }
+.an-table tbody tr { transition: background .14s ease; }
+.an-table tbody tr:hover { background: #fdfaf5; }
+.an-agname { font-weight: 500; display: block; }
+.an-agsub { font-size: 11px; color: #9a8c80; font-weight: 300; }
+.an-tdate { color: #6a5a50; white-space: nowrap; }
+.an-days { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 16px; color: #2b1a12; white-space: nowrap; }
+.an-days small { font-family: inherit; font-size: 10.5px; color: #9a8c80; }
+.an-chip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase; padding: 4px 10px 4px 6px; border-radius: 13px; border: 1px solid #ece3d7; background: #fdfaf5; color: #6a5a50; white-space: nowrap; }

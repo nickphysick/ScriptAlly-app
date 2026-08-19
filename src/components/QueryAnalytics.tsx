@@ -43,6 +43,8 @@ import { StatusDonut } from "./analytics/StatusDonut";
 import { ReplyHistogram, histogramNote } from "./analytics/ReplyHistogram";
 import { AgingChart, agingNote } from "./analytics/AgingChart";
 import { Horizon, horizonNote, horizonWorthShowing } from "./analytics/Horizon";
+import { FullsPanel, fullsNote } from "./analytics/FullsPanel";
+import { LatestResponses, latestResponsesNote } from "./analytics/LatestResponses";
 import {
   AnalyticsRange,
   AnalyticsRow,
@@ -195,6 +197,15 @@ export const QueryAnalytics: React.FC = () => {
                 </Panel>
               </PanelRow>
             ) : null}
+
+            <PanelRow>
+              <Panel icon="pages" title="Fulls under consideration" span={5} note={fullsNote(rows, nowMs)}>
+                <FullsPanel rows={rows} nowMs={nowMs} />
+              </Panel>
+              <Panel icon="mail" title="Latest responses" span={7} note={latestResponsesNote(rows)}>
+                <LatestResponses rows={rows} />
+              </Panel>
+            </PanelRow>
           </>
         )}
       </WorkspacePageGrid>
