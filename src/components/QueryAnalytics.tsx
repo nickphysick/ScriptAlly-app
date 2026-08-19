@@ -42,6 +42,7 @@ import { SendingChart, SENDING_NOTE } from "./analytics/SendingChart";
 import { StatusDonut } from "./analytics/StatusDonut";
 import { ReplyHistogram, histogramNote } from "./analytics/ReplyHistogram";
 import { AgingChart, agingNote } from "./analytics/AgingChart";
+import { Horizon, horizonNote, horizonWorthShowing } from "./analytics/Horizon";
 import {
   AnalyticsRange,
   AnalyticsRow,
@@ -182,6 +183,18 @@ export const QueryAnalytics: React.FC = () => {
                 <AgingChart rows={rows} />
               </Panel>
             </PanelRow>
+
+            {/* ⚠️ THE PANEL IS ABSENT WHEN IT HAS NOTHING TO SAY, rather than present and empty.
+                Every other panel on this page reports on history, which always exists once there
+                are queries; this one reports on the next four weeks, which can genuinely be
+                empty — and a full-width band saying "nothing" is a worse answer than no band. */}
+            {horizonWorthShowing(rows, nowMs) ? (
+              <PanelRow>
+                <Panel icon="calendar" title="On the horizon" span={12} note={horizonNote(rows, nowMs)}>
+                  <Horizon rows={rows} nowMs={nowMs} />
+                </Panel>
+              </PanelRow>
+            ) : null}
           </>
         )}
       </WorkspacePageGrid>

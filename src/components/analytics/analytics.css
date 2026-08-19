@@ -239,3 +239,20 @@
 /* legend keys drawn as the marks they describe, rather than as generic squares */
 .an-swc { width: 11px; height: 11px; border-radius: 50%; flex: none; background: #f5e2da; border: 1px solid #7c3a2a; box-sizing: border-box; }
 .an-swl { width: 14px; border-top: 1px dashed #9c8878; display: inline-block; flex: none; }
+
+/* ── on the horizon ──────────────────────────────────────────────────────────
+   Cards wrap rather than scroll: this is a short list by construction (four weeks of windows),
+   and a horizontal scroller would hide the later dates behind a gesture. */
+.an-horizonrow { display: flex; gap: 14px; flex-wrap: wrap; }
+.an-hcard {
+  flex: 1 1 190px; min-width: 190px; background: #fdfaf5; border: 1px solid #ece3d7;
+  border-radius: 12px; padding: 13px 15px; display: flex; align-items: center; gap: 12px;
+  transition: box-shadow .15s ease;
+}
+.an-hcard:hover { box-shadow: 0 3px 12px rgba(58, 28, 20, 0.08); }
+.an-hn { min-width: 0; }
+.an-hcard b { display: block; font-size: 12.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.an-hcard i { font-style: normal; font-size: 10.5px; color: #9a8c80; font-weight: 300; display: block; }
+.an-hd { margin-left: auto; text-align: right; flex: none; }
+.an-hd b { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 21px; overflow: visible; }
+.an-horizonempty { color: #9a8c80; font-size: 12px; font-weight: 300; padding: 6px 2px; line-height: 1.6; }
