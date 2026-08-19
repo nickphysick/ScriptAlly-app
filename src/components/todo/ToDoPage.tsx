@@ -714,7 +714,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * is a hoisted `function`, so it is callable here; its CLOSURE is what would have thrown, which
    * is the TDZ trap this file has been bitten by before.)
    */
-  const allDockable = dockQueue(dockAllCards());
+  /* ⚠️ THE PANE WALKS THE LIST'S OWN ARRAY (frame2 Phase 2). `dockAllCards()` was a second
+     derivation — it read `board` where the rail reads `boardCols`, and produced a different total,
+     which is why the pane said "of 14" beside a list of 11. The queue is now the cards the list is
+     showing, in the order it shows them, so "TASK n OF m" cannot describe a set you cannot see. */
+  const allDockable = dockQueue(railGroups().flatMap((g) => g.cards));
   /* the chip narrows the SAME list the rail draws, so the pane walks exactly what you can see */
   const dockable = allDockable.filter((c) => chipMatchesCard(chip, c));
   /* ⚠️ THE REF IS WRITTEN DURING RENDER, and that is safe because it is idempotent: the value is

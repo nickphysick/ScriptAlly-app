@@ -83,8 +83,16 @@ export function applyView(
   view: ListView,
   days: (c: BoardCard) => number | null,
 ): TaskGroup[] {
-  const keptGroups = groups.filter((g) => (GROUP_IDS as string[]).includes(g.id)
-    ? view.groups.includes(g.id as GroupId) : true);
+  /* ⚠️ SNOOZED LEAVES THE ARRAY UNLESS THE VIEW ADMITS IT (frame2 Phase 2). It used to survive as a
+     fourth group, which is the whole reason the footer said 11 while the meter said 10 — the meter
+     counts the three families and the footer counted every group, so a snoozed task was inside one
+     total and outside the other. One array, one membership rule: what is not shown is not counted,
+     anywhere. */
+  const keptGroups = groups.filter((g) => {
+    if ((GROUP_IDS as string[]).includes(g.id)) return view.groups.includes(g.id as GroupId);
+    if (g.id === "snoozed") return view.includeSnoozed;
+    return true;
+  });
 
   const order = (cards: BoardCard[]): BoardCard[] => {
     const by = [...cards];

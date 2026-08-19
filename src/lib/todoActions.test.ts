@@ -216,7 +216,12 @@ describe("⚠️ DOCK ENTRY IS ONE FILTER, and it was already a seam", () => {
        it on the way in; the queue is DERIVED now, so the filter moved to the one place the list
        is built. Same filter, same single seam — it is simply upstream of the entrance rather than
        inside it. */
-    expect(page).toContain("const allDockable = dockQueue(dockAllCards());");
+    /* ⚠️ RE-ANCHORED AGAIN (frame2 Phase 2). The queue's SOURCE moved — `dockAllCards()` read
+       `board` where the rail reads `boardCols`, and the two produced different totals, so the pane
+       said "of 14" beside a list of 11. It walks the list's own array now. The claim this case
+       makes is unchanged and is about the SEAM, not the source: one derived queue, filtered
+       upstream, with no filter inside the entrance. */
+    expect(page).toContain("const allDockable = dockQueue(railGroups().flatMap((g) => g.cards));");
     expect(page).not.toContain("function openDock(queue:");
   });
 });

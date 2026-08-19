@@ -1,4 +1,4 @@
-── frame2 · 22 assertions · 8 RED · 14 green
+── frame2 · 25 assertions · 7 RED · 18 green
   green  P1.1 1440 · equal scroll-row padding, all four sides
            queries=0/35/0/35 todo=0/35/0/35
   green  P1.2 1440 · the list cards start at the same x
@@ -15,8 +15,14 @@
            queries=11 todo=12
   green  P1.4 1920 · /todo's page title is no larger than the Query Centre's
            queries=38px todo=38px
-  RED    P2.1 · with no filters the four numbers agree
-           rail=15 meter=10 footer=11 pane=14 rows=11
+  green  P2.1 · the three view counts are one array
+           meter=14 footer=14 pane=14 rows=14
+  green  P2.2 · the rail badge differs only by its own documented definition
+           badge=15 (actionable: urgent + housekeeping GAPS + yours-tasks, no notes) · view=14 (the cards shown) · Δ=1
+  green  P2.3 · filtering a type moves the three together, by the same amount
+           before=14 after meter=12 footer=12 pane=12
+  green  P2.4 · the suite restored the view
+           before=14 after restore=14
   RED    P3.1 · a note renders no tiles
            tiles=1 labels=["Added","Added","Sent previously"]
   green  P3.2 · a note renders no timeline

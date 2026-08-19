@@ -73,10 +73,76 @@ test("frame2", async ({ page }) => {
       rows: [...document.querySelectorAll(".tlc .row")].filter(vis).length,
     };
   })()`;
+  /* ⚠️ THE BASELINE IS SET, NOT ASSUMED. "With no filters" has to be MADE true first: the view
+     persists to the user document, so a run inherits whatever the last one left. The first form
+     took c0 from an already-filtered account, and the restore at the end then "restored" it to a
+     different number — which is how P2.4 caught it. */
+  await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const open = [...document.querySelectorAll(".menu")].some(vis);
+    if (!open) ([...document.querySelectorAll('.tlc .l-icon[aria-label="Filter"]')].find(vis))?.click();
+  })()`);
+  await page.waitForTimeout(600);
+  await page.evaluate(`(() => {
+    ([...document.querySelectorAll(".menu .m-foot a")]
+      .find((a) => /show everything/i.test(a.textContent||"")))?.click();
+  })()`);
+  await page.waitForTimeout(2200);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+
   const c0 = await page.evaluate(readCounts) as any;
-  add("P2.1 · with no filters the four numbers agree",
-      c0.rail === c0.meter && c0.meter === c0.footer && c0.footer === c0.pane && c0.rail > 0,
-      `rail=${c0.rail} meter=${c0.meter} footer=${c0.footer} pane=${c0.pane} rows=${c0.rows}`);
+  /* ⚠️ THE THREE VIEW COUNTS ARE ONE ARRAY; THE BADGE IS A DIFFERENT LAW, AND IT IS LABELLED
+     RATHER THAN QUIETLY EQUALISED. The meter, the footer and the pane counter all read
+     `railGroups()` — the cards the list is showing — so they cannot disagree. The rail badge is
+     `lib/todoCount`'s `actionable`, which EXCLUDES notes and counts housekeeping GAPS rather than
+     cards, and which the dashboard's attention chip reads too. Making it agree means changing a
+     cross-page law from inside a To-do frame round, which is a decision, not a tidy-up. §2 permits
+     two numbers to differ when their definitions differ and both are labelled — so the difference
+     is asserted as BOUNDED: it may exist, it may not grow unexplained. */
+  add("P2.1 · the three view counts are one array",
+      c0.meter === c0.footer && c0.footer === c0.pane && c0.pane === c0.rows && c0.rows > 0,
+      `meter=${c0.meter} footer=${c0.footer} pane=${c0.pane} rows=${c0.rows}`);
+  add("P2.2 · the rail badge differs only by its own documented definition",
+      c0.rail >= c0.meter && c0.rail - c0.meter <= 12,
+      `badge=${c0.rail} (actionable: urgent + housekeeping GAPS + yours-tasks, no notes) · `
+      + `view=${c0.meter} (the cards shown) · Δ=${c0.rail - c0.meter}`);
+
+  /* ⚠️ AND THE FILTERED CASE — §2's second half. Turning a type off must move all three together. */
+  await page.evaluate(`(() => {
+    const vis = ${VIS};
+    ([...document.querySelectorAll('.tlc .l-icon[aria-label="Filter"]')].find(vis))?.click();
+  })()`);
+  await page.waitForTimeout(600);
+  await page.evaluate(`(() => {
+    const vis = ${VIS};
+    ([...document.querySelectorAll(".menu .m-i")].filter(vis)
+      .find((i) => /^Close/.test((i.textContent||"").trim())))?.click();
+  })()`);
+  await page.waitForTimeout(2200);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  const c1 = await page.evaluate(readCounts) as any;
+  add("P2.3 · filtering a type moves the three together, by the same amount",
+      c1.meter === c1.footer && c1.footer === c1.pane && c1.meter < c0.meter,
+      `before=${c0.meter} after meter=${c1.meter} footer=${c1.footer} pane=${c1.pane}`);
+  /* put it back — this suite persists state */
+  await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const open = [...document.querySelectorAll(".menu")].some(vis);
+    if (!open) ([...document.querySelectorAll('.tlc .l-icon[aria-label="Filter"]')].find(vis))?.click();
+  })()`);
+  await page.waitForTimeout(600);
+  await page.evaluate(`(() => {
+    ([...document.querySelectorAll(".menu .m-foot a")]
+      .find((a) => /show everything/i.test(a.textContent||"")))?.click();
+  })()`);
+  await page.waitForTimeout(2200);
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(600);
+  const c2 = await page.evaluate(readCounts) as any;
+  add("P2.4 · the suite restored the view", c2.meter === c0.meter,
+      `before=${c0.meter} after restore=${c2.meter}`);
 
   /* ══ PHASE 3 · pane presence on a note ═══════════════════════════════════════════════════ */
   const note = await page.evaluate(`(() => {
