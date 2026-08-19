@@ -109,3 +109,39 @@
   .ob-spmob { display: inline; }
   .ob-head { padding: 12px 16px; gap: 10px; }
 }
+
+/* ── the handover's tally and destination note (ref option E) ── */
+.ob-tally { display: flex; gap: 10px; margin: 4px 0 16px; }
+.ob-tal {
+  flex: 1; min-width: 0; text-align: center;
+  background: #ffffff;              /* onbOptionRest */
+  border: 1px solid #e2d9cc;        /* onbOptionEdge */
+  border-radius: 12px; padding: 14px 10px;
+}
+.ob-taln {
+  font-family: "Playfair Display", Georgia, serif; font-size: 27px; font-weight: 600;
+  color: #241711;                   /* onbHeadingInk */
+  line-height: 1;
+}
+.ob-tall {
+  font-family: "JetBrains Mono", "Fira Mono", monospace;
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #6f635b;                   /* onbMuted */
+  margin-top: 7px;
+}
+.ob-next { display: flex; gap: 11px; padding: 12px 0 4px; }
+.ob-nextrule { flex: none; width: 3px; border-radius: 2px; background: #5a6e58; opacity: 0.55; } /* sageText */
+.ob-next p {
+  margin: 0; font-family: "Source Sans Pro", system-ui, sans-serif;
+  font-size: 13px; line-height: 1.6; color: #6f635b;   /* onbMuted */
+}
+.ob-next strong { color: #241711; font-weight: 600; }  /* onbHeadingInk */
+/* The second exit sits with the content, not in the foot — the foot's one primary is the named
+   destination, and a ghost beside it would read as an equal choice rather than a quieter one. */
+.ob-handghost {
+  display: block; margin: 10px auto 0; background: none; border: none; cursor: pointer;
+  font-family: "Source Sans Pro", system-ui, sans-serif; font-size: 12.5px;
+  color: #a5988e;                   /* onbFaint */
+  text-decoration: underline; text-underline-offset: 3px; padding: 2px 0;
+}
+.ob-handghost:hover { color: #6f635b; }  /* onbMuted */

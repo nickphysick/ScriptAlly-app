@@ -30,6 +30,8 @@ import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
 import { CaptureOption, CAPTURE_HEADING, CAPTURE_SUB, capturePrimaryLabel } from "../../lib/captureFork";
 import { CaptureFork } from "./CaptureFork";
 import { subStepFor, subStepLabel } from "../../lib/onboardingSpine";
+import { HandoverScreen } from "./HandoverScreen";
+import { shouldHandOver, HandoverTally } from "../../lib/onboardingHandover";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
  *  errors — Promise.all rejects as soon as the commit does). */
@@ -54,7 +56,13 @@ export interface BranchBProps {
   /** Escape hatch — finish onboarding into the Import desk (ImportCsv). */
   onOpenImportDesk: () => void;
   /** Import committed — parent finishes onboarding to the dashboard. */
-  onImportComplete: (outcome: CommitOutcome) => void;
+  /**
+   * Import committed — the parent finishes onboarding.
+   *
+   * ⚠️ THE DESTINATION IS THE HANDOVER'S TO CHOOSE. Landing everyone on the dashboard put a writer
+   * who had just imported nine queries somewhere those queries are not.
+   */
+  onImportComplete: (outcome: CommitOutcome, destination: "queries" | "dashboard") => void;
   /** "Upgrade to Pro" from the blocked (free-used) state — finish onboarding into the Plans page. */
   onUpgrade?: () => void;
   /** Surfaced save/limit error from the parent (e.g. the Free-tier manuscript cap). */
@@ -463,7 +471,11 @@ export const BranchB: React.FC<BranchBProps> = ({
     return (
       <ImportingLoader
         complete={importComplete}
-        onProceed={() => { if (outcome) onImportComplete(outcome); }}
+        /* ⚠️ THE LOADER HANDS OVER TO THE HANDOVER, NOT TO THE DASHBOARD. It used to call
+           onImportComplete directly, so a successful import went straight out of onboarding and
+           the writer never saw what had landed — the `done` screen existed only for the
+           nothing-imported case. That silent exit is the seam this phase adds. */
+        onProceed={() => setScreen("done")}
         userName={currentUser?.name}
       />
     );
@@ -500,6 +512,29 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "done" && outcome) {
     const skippedReasons = [...new Set((validated?.skipped || []).map((s) => s.reason))];
     const ok = outcome.queriesImported > 0;
+
+    /* ⚠️ THE HANDOVER REPLACES THE SUCCESS CARD, AND ONLY THE SUCCESS CARD. The failure half below
+       ("That didn't work") is not a handover — it is a report of a thing that did not happen, and
+       it keeps its own screen and its route back to the review.
+
+       ⚠️ AND IT IS GATED ON SOMETHING ACTUALLY HAVING LANDED. A commit that reports success with
+       nothing in it would otherwise reach a tally of zeroes, which is the app remarking on how far
+       along the writer is. */
+    const tally: HandoverTally = {
+      agents: outcome.agentsCreated,
+      queries: outcome.queriesImported,
+      // The manuscript this import was attached to — one, and only once it exists.
+      manuscripts: fields.title.trim() ? 1 : 0,
+    };
+    if (ok && shouldHandOver(tally)) {
+      return (
+        <HandoverScreen
+          tally={tally}
+          onOpenQueryCentre={() => onImportComplete(outcome, "queries")}
+          onDashboard={() => onImportComplete(outcome, "dashboard")}
+        />
+      );
+    }
     return (
       <OnboardingCard
         step={bandStep}
@@ -509,7 +544,7 @@ export const BranchB: React.FC<BranchBProps> = ({
         motif={<InboxMotif />}
         onBack={() => setScreen("review")}
         primaryLabel={ok ? "Continue →" : "Back to the review →"}
-        onPrimary={() => (ok ? onImportComplete(outcome) : setScreen("review"))}
+        onPrimary={() => (ok ? onImportComplete(outcome, "dashboard") : setScreen("review"))}
       >
         <div style={{ fontFamily: FONT_SANS, fontSize: 13, color: "#3a1c14", lineHeight: 1.7 }}>
           <p style={{ margin: "0 0 10px" }}>

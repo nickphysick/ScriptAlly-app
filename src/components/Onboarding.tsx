@@ -421,7 +421,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 sessionStorage.setItem("scriptally_post_onboarding_tab", "import");
                 await finishOnboarding();
               }}
-              onImportComplete={() => void finishOnboarding()}
+              onImportComplete={(_outcome, destination) => {
+                /* The existing post-onboarding hatch App already reads and clears — the same one
+                   the by-hand branch uses for the agent list. Dashboard is the absence of a hatch. */
+                if (destination === "queries") sessionStorage.setItem("scriptally_post_onboarding_tab", "queries");
+                void finishOnboarding();
+              }}
               onUpgrade={() => {
                 // Free import spent → leave onboarding into the Plans page via the existing
                 // post-onboarding-tab hatch (App reads + clears it on completion).
