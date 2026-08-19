@@ -27,8 +27,14 @@
   --ground:#f7f4ee; --window:#fefcfa; --white:#ffffff; --field:#fdfbf7;
   --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
   --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#ece4d9;
-  --burg:#7c3a2a; --sage:#5a6e58;
-  --pink:#f5e2da; --pink-b:#e8c8bc; --pink-h:#efd5ca;
+  --burg:#7c3a2a;
+  /* ⚠️ `--sage`, `--pink`, `--pink-b` and `--pink-h` ARE DELIBERATELY NOT REDEFINED HERE, and that
+     is adaptation 4 doing its job rather than an omission. The ref sets all four; leaving them set
+     would SHADOW the app's own tokens of the same name, so every `var(--pink)` in the ported rules
+     below would resolve to the drawing's hex and the substitution further down would reach nothing.
+     Removed, they inherit — the pane's chips, ticks, segmented control and primary all paint the
+     app's palette through the mockup's own declarations, unedited. The ref's values, for the
+     record: --sage #5a6e58, --pink #f5e2da, --pink-b #e8c8bc, --pink-h #efd5ca. */
   --rim:rgba(124,58,42,0.28); --rimline:rgba(124,58,42,0.13);
   --u-now-1:#f3e0d6; --u-now-2:#eed7ca; --u-now-ink:#7c3a2a; --u-now-rule:rgba(124,58,42,0.16);
   --u-house-1:#d7ddd5; --u-house-2:#d5dbd3; --u-house-ink:#4c5f4a; --u-house-rule:rgba(90,110,88,0.20);
@@ -216,3 +222,84 @@
   .tpn .band { flex-direction:column; }
   .tpn .bandfig { text-align:left; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE APP FRAME — four adaptations, and nothing else. Everything above this line is the mockup's.
+ *
+ * The mockup is a standalone page: it caps its own width at 1420, scrolls as a document, and steps
+ * at one breakpoint. None of those survive contact with a workspace pane that is already inside a
+ * fixed-height frame. Each change below states what it replaces.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1 · FULL WIDTH ────────────────────────────────────────────────────────────────────────────
+   The ref's `.frame` is `372px minmax(0,1fr)` capped at `max-width:1420px`, because it draws the
+   list and the pane together on a page of its own. Here the LIST is the app's, `.tdw-work` gives
+   the pane its measure, and the cap belongs to the shell's content column — so the pane takes the
+   width it is given and states none of its own. */
+.tpn { width: 100%; min-width: 0; }
+
+/* ── 2 · ONE SCREEN, SCROLLING INTERNALLY ──────────────────────────────────────────────────────
+   The mockup scrolls as a document; this page must not, and the mechanism is the Query Centre's,
+   which is `flex: 1; min-height: 0` down to a child that owns `overflow-y: auto`. `.v` is that
+   child: it is the mockup's own column, so the scrollport is a property added to an existing
+   element rather than a wrapper the port did not have.
+
+   ⚠️ `min-height: 0` IS NOT OPTIONAL ANYWHERE ON THE CHAIN. A flex item's automatic minimum is its
+   content, so without it the pane grows past the frame and the PAGE scrolls — which is the fault
+   this whole clause exists to prevent, and it fails silently. */
+.tpn { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.tpn .v { flex: 1; min-height: 0; overflow-y: auto; }
+
+/* ── 3 · FLUID COLUMNS ─────────────────────────────────────────────────────────────────────────
+   Replaces the ref's `@media (max-width:1160px)` entirely — the media block above is superseded by
+   the three rules here, which reach the same three outcomes without a threshold.
+
+   ⚠️ THE WORKROW WRAPS RATHER THAN SWITCHING TEMPLATES, and the two numbers are the ref's own. A
+   grid cannot wrap, so the ref needs a query to stack; a flex row does it by measure. The grows
+   are asymmetric — paired, the surplus goes to the ACT, which is the ref's `minmax(0,1fr) 300px`;
+   stacked, the timeline is alone on its line and takes all of it. Measured on the retired pane:
+   with no grow on the timeline, a wrapped card stayed 300px and read as starved.
+
+   ⚠️ AND THE TILES COUNT THEMSELVES. `.n3`/`.n4` are a React prop deciding layout; `auto-fit` lets
+   the browser decide, which is the same outcome at every width the ref drew and a better one at
+   the widths it did not. */
+.tpn .workrow { display: flex; flex-wrap: wrap; align-items: flex-start; }
+.tpn .workrow > .fc:first-child { flex: 999 1 420px; min-width: 0; }
+.tpn .workrow > .fc:last-child { flex: 1 1 300px; min-width: 0; }
+.tpn .tiles, .tpn .tiles.n3, .tpn .tiles.n4 {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+/* the ref's narrow band stacks its figure under the deed; a wrap does it without a threshold */
+.tpn .band { flex-wrap: wrap; }
+
+/* ── 4 · THE APP'S TOKENS ──────────────────────────────────────────────────────────────────────
+   The ref's band stops were sampled off a drawing. The app already names these exact surfaces —
+   `--sage-band`/`--sage-band-2`/`--sage-edge` are what the Query Centre's Tracking header paints,
+   and `--pink`/`--pink-h`/`--pink-b` are its Log-new-query CTA. Reading them by NAME is what makes
+   the pane follow the app's palette instead of a hex that has to be kept in step with it.
+
+   ⚠️ THE OVERRIDES SIT ON `.tpn`, SO THE MOCKUP'S VALUES ARE STILL ABOVE THEM IN THE FILE. That is
+   deliberate: the port stays readable as a port, and every substitution is visible as a line that
+   replaces a named one rather than as an edit to the ported block. */
+.tpn {
+  --u-now-1: var(--pink); --u-now-2: var(--pink-h); --u-now-rule: var(--pink-b);
+  --u-house-1: var(--sage-band); --u-house-2: var(--sage-band-2); --u-house-rule: var(--sage-edge);
+  --u-yours-1: var(--gold-t); --u-yours-2: var(--gold-b); --u-yours-rule: var(--gold-b);
+}
+
+/* ── the one control the mockup has no markup for ──────────────────────────────────────────────
+   Task navigation is behaviour the brief requires carried; the ref navigates by clicking a list
+   row, so it draws nothing for this. Prefixed `tpn-` so the class-name assertion can tell a named
+   exemption from an invention, and styled in the ref's own mono register so it does not read as a
+   different designer's control. */
+.tpn-nav { display: flex; align-items: center; gap: 8px; padding: 0 2px 10px; }
+.tpn-navk {
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); margin-right: auto;
+}
+.tpn-navb {
+  cursor: pointer; background: var(--white); border: 0.5px solid var(--hair2);
+  border-radius: 8px; width: 26px; height: 24px; line-height: 1; color: var(--ink2);
+  font-size: 13px; transition: all .18s;
+}
+.tpn-navb:hover { border-color: #c9a89e; color: var(--burg); }

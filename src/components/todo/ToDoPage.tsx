@@ -706,64 +706,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    */
   const paneCard = docked.card ?? (allDockable.length > 0 ? heldCard.current : null);
 
-  /**
-   * ⚠️ THE PORTED PANE'S INPUTS, GATHERED ONCE. `TaskPane` renders the mockup's `DATA` shape and
-   * nothing else, so everything it needs is answered here from derivations the page already runs —
-   * `figureFor` for the wait, `cardMenu` for what a card offers, `rowPrimaryLabel` for the verb.
-   * None of it is re-derived: a second opinion here is how the pane and the rail come to state
-   * different waits, which this page has already been caught by once.
-   */
-  const [paneBody, setPaneBody] = React.useState<SendBodyValues>({ materials: [], when: "Today", also: "" });
-  /* the answers reset with the card — a half-filled form carried onto another task is answers
-     about the wrong query, which is the sweep's own rule applied to one card */
-  React.useEffect(() => { setPaneBody({ materials: [], when: "Today", also: "" }); }, [paneCard?.key]);
-
-  const paneFacts = React.useMemo(() => {
-    if (!paneCard) return [];
-    const q = paneCard.relatedRecordId ? queries.find((x) => x.id === paneCard.relatedRecordId) : undefined;
-    const ag = paneCard.agentId ? agents.find((a) => a.id === paneCard.agentId) : undefined;
-    const f = figureFor(paneCard);
-    const anchorMs = waitAnchorMs(cardBucket(paneCard), paneCard.taskType, {
-      dateSent: q?.dateSent,
-      partialRequestedDate: q?.partialRequestedDate,
-      fullRequestedDate: q?.fullRequestedDate,
-      partialSentDate: q?.partialSentDate,
-      fullSentDate: q?.fullSentDate,
-      lastNudgeSentDate: q?.lastNudgeSentDate,
-      lastReplyAt: isoOf(q?.responseReceivedAt),
-      statusMovedAt: isoOf(q?.lastStatusChange),
-      createdAt: paneCard.userTaskId ? userTasks.find((t) => t.id === paneCard.userTaskId)?.createdAt : undefined,
-    });
-    const longDay = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
-    const out: { k: string; v: string }[] = [];
-    if (f.label && f.value) out.push({ k: f.label, v: `${f.value}${f.unit ? ` ${f.unit}` : ""}` });
-    if (Number.isFinite(anchorMs)) out.push({ k: anchorNoun(paneCard), v: longDay(anchorMs) });
-    const fwd = bandForward(paneCard, isoOf(q?.responseDeadline) ?? null, ag?.responseTimeWeeks ?? null,
-      (iso) => longDay(new Date(iso).getTime()), !!ag);
-    if (fwd) out.push({ k: fwd.k, v: fwd.v });
-    return out;
-  }, [paneCard, queries, agents, userTasks]);
-
-  /* ⚠️ THE VERBS ARE `cardMenu`'s, NOT A SECOND LIST. The band's Snooze and Dismiss are the same
-     entries the ⋯ menu offers, so a card that cannot be snoozed shows no Snooze in either place. */
-  const paneVerbs = React.useMemo(() => {
-    const none = { disabled: true, onPress: () => {} };
-    if (!paneCard) return { snooze: none, openQuery: none, dismiss: none };
-    const col = groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent");
-    const menu = cardMenu(paneCard, col);
-    const offers = (id: string) => menu.some((g) => g.entries.some((e) =>
-      e.kind === "leaf" ? e.id === id && !e.disabled : e.sub.some((x) => x.id === id && !x.disabled)));
-    return {
-      snooze: { disabled: !offers("snooze-1"), onPress: (anchor: HTMLElement) => { cbSnooze.current = anchor; setCbDial(true); } },
-      openQuery: { disabled: !paneCard.relatedRecordId, onPress: () => paneCard.relatedRecordId && onNavigate("queries", paneCard.relatedRecordId) },
-      dismiss: { disabled: !offers("dismiss-week"), onPress: () => forkStale(paneCard, "notNow") },
-    };
-  }, [paneCard]);
-
-  /* what the primary will write, in the mockup's own `Will record:` grammar */
-  const paneWill = paneCard
-    ? `${rowPrimaryLabel(paneCard, groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent"))} · ${paneBody.when.toLowerCase().replace("…", "")}`
-    : "";
 
   /* ⚠️ THE DOCKED QUERY'S OWN ACTIVITY ROWS — the AUTHORITATIVE subcollection, which is what the
      Query Centre reads. The global `activities` feed the dock used before is a best-effort
@@ -907,6 +849,79 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       elapsedDays: Number.isFinite(anchor) ? daysSince(anchor, now) : undefined,
     });
   }
+
+  /**
+   * ⚠️ THIS BLOCK SITS HERE, BELOW `userTasks`, `isoOf` AND `figureFor`, AND THAT IS LOAD-BEARING.
+   * It was written 150 lines higher and the page threw on render — `useMemo`'s factory runs DURING
+   * render, so every `const` declared beneath it was in the temporal dead zone. `tsc` passed and
+   * 5,683 tests passed: the references live inside closures, which TypeScript cannot prove run at
+   * render time (the same shape this repo has been caught by in `AllManuscripts.tsx`).
+   *
+   * ⚠️ WHAT CAUGHT IT WAS THE PAGE. The e2e harness could not sign in, because the workspace never
+   * mounted — the app's error boundary was showing "Something went wrong" and a source-reading
+   * suite cannot see that. Bisected across three worktrees to be sure it was mine and not the
+   * concurrent session's onboarding work.
+   *
+   * Anything moved above `figureFor` reintroduces it, silently.
+   */
+  /**
+   * ⚠️ THE PORTED PANE'S INPUTS, GATHERED ONCE. `TaskPane` renders the mockup's `DATA` shape and
+   * nothing else, so everything it needs is answered here from derivations the page already runs —
+   * `figureFor` for the wait, `cardMenu` for what a card offers, `rowPrimaryLabel` for the verb.
+   * None of it is re-derived: a second opinion here is how the pane and the rail come to state
+   * different waits, which this page has already been caught by once.
+   */
+  const [paneBody, setPaneBody] = React.useState<SendBodyValues>({ materials: [], when: "Today", also: "" });
+  /* the answers reset with the card — a half-filled form carried onto another task is answers
+     about the wrong query, which is the sweep's own rule applied to one card */
+  React.useEffect(() => { setPaneBody({ materials: [], when: "Today", also: "" }); }, [paneCard?.key]);
+
+  const paneFacts = React.useMemo(() => {
+    if (!paneCard) return [];
+    const q = paneCard.relatedRecordId ? queries.find((x) => x.id === paneCard.relatedRecordId) : undefined;
+    const ag = paneCard.agentId ? agents.find((a) => a.id === paneCard.agentId) : undefined;
+    const f = figureFor(paneCard);
+    const anchorMs = waitAnchorMs(cardBucket(paneCard), paneCard.taskType, {
+      dateSent: q?.dateSent,
+      partialRequestedDate: q?.partialRequestedDate,
+      fullRequestedDate: q?.fullRequestedDate,
+      partialSentDate: q?.partialSentDate,
+      fullSentDate: q?.fullSentDate,
+      lastNudgeSentDate: q?.lastNudgeSentDate,
+      lastReplyAt: isoOf(q?.responseReceivedAt),
+      statusMovedAt: isoOf(q?.lastStatusChange),
+      createdAt: paneCard.userTaskId ? userTasks.find((t) => t.id === paneCard.userTaskId)?.createdAt : undefined,
+    });
+    const longDay = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+    const out: { k: string; v: string }[] = [];
+    if (f.label && f.value) out.push({ k: f.label, v: `${f.value}${f.unit ? ` ${f.unit}` : ""}` });
+    if (Number.isFinite(anchorMs)) out.push({ k: anchorNoun(paneCard), v: longDay(anchorMs) });
+    const fwd = bandForward(paneCard, isoOf(q?.responseDeadline) ?? null, ag?.responseTimeWeeks ?? null,
+      (iso) => longDay(new Date(iso).getTime()), !!ag);
+    if (fwd) out.push({ k: fwd.k, v: fwd.v });
+    return out;
+  }, [paneCard, queries, agents, userTasks]);
+
+  /* ⚠️ THE VERBS ARE `cardMenu`'s, NOT A SECOND LIST. The band's Snooze and Dismiss are the same
+     entries the ⋯ menu offers, so a card that cannot be snoozed shows no Snooze in either place. */
+  const paneVerbs = React.useMemo(() => {
+    const none = { disabled: true, onPress: () => {} };
+    if (!paneCard) return { snooze: none, openQuery: none, dismiss: none };
+    const col = groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent");
+    const menu = cardMenu(paneCard, col);
+    const offers = (id: string) => menu.some((g) => g.entries.some((e) =>
+      e.kind === "leaf" ? e.id === id && !e.disabled : e.sub.some((x) => x.id === id && !x.disabled)));
+    return {
+      snooze: { disabled: !offers("snooze-1"), onPress: (anchor: HTMLElement) => { cbSnooze.current = anchor; setCbDial(true); } },
+      openQuery: { disabled: !paneCard.relatedRecordId, onPress: () => paneCard.relatedRecordId && onNavigate("queries", paneCard.relatedRecordId) },
+      dismiss: { disabled: !offers("dismiss-week"), onPress: () => forkStale(paneCard, "notNow") },
+    };
+  }, [paneCard]);
+
+  /* what the primary will write, in the mockup's own `Will record:` grammar */
+  const paneWill = paneCard
+    ? `${rowPrimaryLabel(paneCard, groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent"))} · ${paneBody.when.toLowerCase().replace("…", "")}`
+    : "";
 
   /** What the rail is showing — the groups it draws, flattened. One derivation, two readers. */
   function railShown(): number {

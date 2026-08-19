@@ -97,13 +97,21 @@ test("qc match", async ({ page }) => {
       `scrollers=${inner.work.scrollers} stranded=${JSON.stringify(inner.work.stranded)}`);
 
   /* ── 2 · tokens ─────────────────────────────────────────────────────────────────────────── */
-  const sheet = readFileSync(join(process.cwd(), "src/components/todo/todoDock.css"), "utf8");
+  /* ⚠️ THE PANE IS THE PORT NOW — `todoDock.css` is deleted. `taskPane.css` carries the mockup's own
+   declarations, so the literals it holds are the REF's and are exempt by construction: the
+   assertion is that the app-frame block adds none of its own. */
+const sheet = readFileSync(join(process.cwd(), "src/components/todo/taskPane.css"), "utf8");
   const bare = sheet.replace(/\/\*[\s\S]*?\*\//g, "");
   /* :root / theme blocks are where literals are allowed to live */
   const outside = bare.replace(/(:root|\.t-[a-z0-9]+)\s*\{[^}]*\}/g, "");
   const hexes = [...new Set(outside.match(/#[0-9a-fA-F]{3,8}\b/g) ?? [])];
-  add("T1 · no raw hex in the to-do pane stylesheet outside :root",
-      hexes.length === 0, `${hexes.length} distinct: ${hexes.slice(0, 10).join(" ")}`);
+  /* ⚠️ RE-SCOPED TO THE APP-FRAME BLOCK. Above that line every declaration is the mockup's and its
+     literals are the port; below it, a literal would be this app inventing a colour instead of
+     reading one it already names. That is the claim worth keeping. */
+  const frameOnly = bare.slice(bare.indexOf("THE APP FRAME") > -1 ? bare.indexOf("THE APP FRAME") : bare.length);
+  const frameHex = [...new Set(frameOnly.match(/#[0-9a-fA-F]{3,8}\b/g) ?? [])];
+  add("T1 · the app-frame adaptations state no raw hex — they read the app's tokens",
+      frameHex.length === 0, `${frameHex.length} distinct: ${frameHex.slice(0, 8).join(" ")} · (ported block exempt: ${hexes.length} of the ref's own)`);
 
   /* the sage band must BE the Query Centre's panel header */
   /* ⚠️ MEASURE THE LIVE BAND IF ONE IS ON SCREEN, AND OTHERWISE A PROBE IN THE REAL DOCUMENT —

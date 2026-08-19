@@ -109,7 +109,10 @@ describe("1 · the pane's class names are the mockup's", () => {
   it("the mockup's own scoping is the only edit to its stylesheet", () => {
     /* every rule is scoped, and the class names inside the selectors are untouched */
     const rules = strip(PANE_CSS).split("\n").filter((l) => l.includes("{") && !l.startsWith("@"));
-    const unscoped = rules.filter((l) => l.trim() && !/^\s*\.tpn[\s.{:>]/.test(l) && !/^\s*}/.test(l));
+    /* ⚠️ TWO SHAPES ARE SCOPED AND NOTHING ELSE IS: `.tpn <mockup class>` — a ported rule — and
+       `.tpn-<name>` — one of the named exemptions the mockup has no markup for. Both are confined
+       to this pane; anything else would reach the whole app, which is the fault this guards. */
+    const unscoped = rules.filter((l) => l.trim() && !/^\s*\.tpn[-\s.{:>]/.test(l) && !/^\s*}/.test(l));
     expect(unscoped, `unscoped rules would reach the whole app:\n${unscoped.slice(0, 5).join("\n")}`)
       .toHaveLength(0);
   });
@@ -188,6 +191,73 @@ describe("3 · no class from the retired pane survives", () => {
       let found = true;
       try { readFileSync(join(process.cwd(), "src/components/todo", f), "utf8"); } catch { found = false; }
       expect(found, `${f} is still on disk`).toBe(false);
+    }
+  });
+});
+
+/**
+ * ⚠️ FOUR ADAPTATIONS, FOUR ASSERTIONS — and each says what it REPLACED, so a reader can tell an
+ * adaptation from a liberty. Anything the app frame required that is not one of these four is a
+ * change nobody sanctioned.
+ */
+describe("the app frame — four named adaptations, and only four", () => {
+  const decls = strip(PANE_CSS);
+  const frame = decls.slice(decls.indexOf("THE APP FRAME") > -1 ? 0 : 0);
+  /**
+   * ⚠️ EVERY BLOCK FOR THE SELECTOR, JOINED — not the first one. This file declares `.tpn` THREE
+   * times on purpose: the ported token block, then each adaptation as its own rule, so a reader can
+   * see what the app frame added without it being folded into the port. First-match slicing reads
+   * whichever comes first and reports the others missing, which is exactly what it did here — the
+   * documented ambiguity, produced by the very structure that makes the file readable.
+   */
+  const rule = (sel: string) => {
+    const parts: string[] = [];
+    for (let i = decls.indexOf(sel + " {"); i > -1; i = decls.indexOf(sel + " {", i + 1)) {
+      parts.push(decls.slice(i, decls.indexOf("}", i)));
+    }
+    expect(parts.length, `${sel} has no rule`).toBeGreaterThan(0);
+    return parts.join("\n");
+  };
+
+  it("1 · full width — the ref's own cap is gone", () => {
+    expect(rule(".tpn")).toContain("width: 100%");
+    /* the ref caps its frame at 1420 because it draws a whole page; the shell's content column
+       owns the cap here, and a second one would fight it */
+    expect(decls, "the ref's page cap came across").not.toContain("max-width:1420px");
+    expect(decls, "the ref's list track came across").not.toContain("372px");
+  });
+
+  it("2 · one screen — the Query Centre's mechanism, not a second one", () => {
+    /* `flex: 1; min-height: 0` down to a child that owns the overflow — the same chain `/queries`
+       runs, and `min-height: 0` on every link because a flex item's automatic minimum is content */
+    expect(frame).toContain("flex-direction: column");
+    const v = decls.slice(decls.indexOf(".tpn .v { flex: 1"));
+    expect(v).toContain("min-height: 0");
+    expect(v).toContain("overflow-y: auto");
+  });
+
+  it("3 · fluid columns — no breakpoint decides anything", () => {
+    /* the ref's `@media (max-width:1160px)` is superseded by rules that reach the same outcomes
+       by measure. The block is still in the file, above, and these override it. */
+    const wr = rule(".tpn .workrow");
+    expect(wr).toContain("flex-wrap: wrap");
+    expect(decls).toContain("flex: 999 1 420px");
+    expect(decls).toContain("flex: 1 1 300px");
+    /* the tiles count themselves rather than taking `.n3`/`.n4` from a prop */
+    expect(decls).toContain("repeat(auto-fit, minmax(150px, 1fr))");
+  });
+
+  it("4 · the app's tokens — by name, and the shadows removed so the names reach them", () => {
+    /* the band's three papers read the app's own surfaces */
+    expect(decls).toContain("--u-house-1: var(--sage-band)");
+    expect(decls).toContain("--u-house-2: var(--sage-band-2)");
+    expect(decls).toContain("--u-now-1: var(--pink)");
+    /* ⚠️ AND THE REF'S OWN `--pink`/`--sage` DEFINITIONS ARE GONE FROM `.tpn`. Left in place they
+       would shadow the app's tokens of the same name, and every substitution above would resolve
+       to the drawing's hex — an adaptation that reads as done and reaches nothing. */
+    const root = decls.slice(decls.indexOf(".tpn {"), decls.indexOf("}", decls.indexOf(".tpn {")));
+    for (const shadow of ["--pink:", "--pink-b:", "--pink-h:", "--sage:"]) {
+      expect(root, `${shadow} still shadows the app's token`).not.toContain(shadow);
     }
   });
 });
