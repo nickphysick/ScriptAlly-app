@@ -1,6 +1,7 @@
 # To-do follow-up run — report
 
 **Baseline:** 322 files · **5667 passed** · 2 skipped · **0 failed**.
+**Final:** 328 files · **5744 passed** · 2 skipped · **0 failed**. +77 tests, no regressions.
 Follows `todo-overnight-report.md` (`f4726e9`, `3749fce`, `c4eef53`, `632c2ba`, `cba5323`).
 
 ---
@@ -87,3 +88,97 @@ dead comparison, named here, not fixed.
 3. Phase A returns `"none"` for `offer_received`, removing a tick that could never write. Behaviour
    preserving in every write sense; visible in that one affordance disappears.
 4. `TASK_TYPES` omits `exclusive_expiring` — a census states what the app can produce.
+
+### `c9fe505` — Phase D: the single-query materials form
+*landed (code + unit + measured at both viewports), +9 tests*
+
+One step, because the query already answers three of the send's four questions. **No date field** —
+it states "These attach to the query sent on 4 May 2026 — no new date is recorded." Nothing ticked
+on open; the agency's requirements are a **button**. Measured: 0 ticked, then 2 after "Start from
+this", strip reading "Will record: Covering letter · Synopsis".
+
+⚠️ **The one constraint is structural, not careful.** `updateQuery(id, { materialsWanted })` writes
+only the fields handed to it, and the field is one.
+
+⚠️ **The target is the query, not the send activity — a recorded trade-off.** The rules name
+`Activity.materials` canonical, but nothing writes it, there is no `updateActivity`, and an imported
+query may carry no send activity. **This is the top thing to revisit.**
+
+Three faults the page showed: a **duplicate row** (`other` rendered twice), the primary reading
+generic **"Action"**, and — the interesting one — the summary saying **"Choose how this one ended."**
+`journeySummary` was an if-ladder *ending* on the close journey's sentence. Phase A's fault one
+register along: a permissive default answering *as* another journey. Now exhaustive.
+
+### `70a8ade` — Phase D (second half): closed queries stay fixable
+*landed (source-locked + measured), +4 tests*
+
+**Nothing needed building.** `Queries.tsx` already carries the §2 materials editor — same four rows,
+`toggleDocMaterial`. A second one *is* the fork the brief forbids. It is **not status-gated**, which
+is what makes Phase B's exclusion safe; locked as the absence of a terminal-status guard.
+
+⚠️ **Not verified end-to-end:** I could not select a specifically *closed* query in the Query Centre
+from this account (rows print no status, no Closed filter pill found). The claim is from source plus
+the editor rendering generally. **Worth one manual click.**
+
+### `5b6161c` — Phase E: the bulk table
+*landed (code + unit + measured), +16 tests*
+
+⚠️ **The brief asked for full width; the pane is 378px and the contract says otherwise.**
+`PaneSweep`'s own note: a cohort "is not a different kind of object from a task". The columns became
+a row's own lines. Deviation taken on the contract's authority.
+
+Measured: 5 rows + "Show 5 more", oldest first, 0 ticked, 0 editors open, **"Record 0 queries"
+disabled**, "Leave them all unrecorded" beside it. After fill: "Record 10 queries". Copy-down
+propagates.
+
+⚠️ **One acceptance item could not be demonstrated here, and I checked rather than guessed.**
+"Fill produces different values per row" measured *identical*. The unit tests prove the function
+differentiates — so I read the data: the Contact list carries 12 materials lines and **exactly one
+distinct summary**. Every agency on this account asks for the same two things. (My first check
+looked conclusive and was not — a per-name lookup matched a shared ancestor five times.)
+
+### `10a80ea` — Phase G: acceptance
+*+21 tests*
+
+Status-write assertion **verified red** by injection. On the page: 0 zero-height boxes, 0 page scroll
+at both viewports, **0 console errors beyond the 6 known duplicate-key warnings**.
+
+⚠️ The probe's own false alarm is recorded: it first reported six zero-height boxes on a page with
+none, because the workspace keeps 7 other pages mounted and a child of a hidden *ancestor* still
+computes `display: block`.
+
+---
+
+## Phase F (Pro) — skipped, and not for time
+
+The harness account is **Free**, there is **no dev plan override** anywhere in `src/`, and this run's
+standard is that a claim is verified on a real page. Building a version picker I could not measure
+would produce exactly the "landed in code" claim both reports argue against. The brief ranks F first
+to cut.
+
+Its contingency does **not** apply: `SubmissionPackage.samplePagesVersionId` is structured, not free
+text — there is no string to refuse to parse. **What it needs is a Pro fixture or a plan override.**
+
+---
+
+## ⚠️ The one thing to look at first in the morning
+
+**Where recorded materials are stored.** Phase D and E write `Query.materialsWanted`. The rules
+commit (`1a0c397`, 17 Aug) says `Activity.materials` is canonical because the query-level field is
+ambiguous between "what they ask for" and "what you sent" — but nothing writes it, there is no
+`updateActivity`, and an imported query may have no send activity to attach to. Both paths go
+through one encoder, so moving them later is one function, not two surfaces. **It is cheap now and
+expensive after data accumulates.**
+
+## Pre-existing, named not fixed
+
+- **The foot hint squeeze.** Measured across journeys on a 378px foot: materials 53px/4 lines, close
+  82px/4, **send 51px/7**. The worst is the oldest journey — shared CSS, needs its own walk.
+- **Duplicate React key warnings on `/todo`** — 6 per load, unrelated, uninvestigated.
+- **`Queries.tsx:1795`** builds a persisted activity description from the token. Relabelling would
+  split the timeline between old and new wording. **Open call.**
+- **`response_overdue`** is compared twice in `Dashboard.tsx` and never produced by the engine.
+- Everything in the brief's out-of-scope list.
+
+**Nothing on the do-not-touch list moved.** `recomputeQuery`, `StatusDot`, `MountPanel`,
+`HubHeaderBar`, `packageMetrics`, the nav, `#/pkg-lab` and `functions/` are all untouched. No deploy.
