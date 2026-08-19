@@ -371,8 +371,15 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
            ⚠️ `/queries/analytics` NEEDS NO ENTRY: its routeKey is `queries`, already listed. A
            third clause naming it would read as a fourth route and never fire. */
+        /* ⚠️ AND SETTINGS (account-settings P2). Its plane is the one scroll region on the page,
+            and it was the fourth surface to learn this the same way: a complete `flex:1;
+            min-height:0` chain from `StagePage layout="fill"` down through `.acct-page` to
+            `.acct-plane`, and the stage still scrolled — browser-measured, `#app-stage-scroll`
+            clientH 810 against `.ws-work` 876, with `.acct-plane` reporting no overflow of its
+            own. Every link below was correct; the break is here. `plans` and `help` are their own
+            route keys and keep the growing wrapper. */
         fit={routeKey === "queries" || routeKey === "dashboard" || routeKey === "todo"
-          || routeKey === "agents" || routeKey === "manuscripts"}
+          || routeKey === "agents" || routeKey === "manuscripts" || routeKey === "account"}
         sections={sections}
         icons={WORKSPACE_ICONS}
         onNavigatePath={goPath}

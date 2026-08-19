@@ -740,9 +740,14 @@ function AppContent() {
         {/* Secondary pages mount on demand (same lifecycle as the old conditional render).
             /account, /plans and /help are BACK in this shell (capsule fixes P5 — the focus
             tier is retired); only /pricing stays out, on the marketing tier. */}
+        {/* ⚠️ SETTINGS IS `fill` AND OWNS ITS OWN COLUMN — no `.sv2-focuscol`. That wrapper is a
+            860px flowing block, which does two things settings cannot have: it caps the width
+            below what a rail plus a 660px comparison needs, and it gives the page no height, so
+            the STAGE scrolls rather than the settings plane. `fill` hands down flex:1/min-height:0
+            and `.acct-page` continues the chain. /plans and /help keep the wrapper unchanged. */}
         {routeKey === "account" && (
-          <StagePage active>
-            <div className="sv2-focuscol"><AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} /></div>
+          <StagePage active layout="fill">
+            <AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
           </StagePage>
         )}
         {routeKey === "plans" && (

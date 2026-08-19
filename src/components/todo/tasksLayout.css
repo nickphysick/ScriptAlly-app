@@ -57,8 +57,16 @@
  * viewport instead of 50 — the same numbers `/queries` measures.
  */
 .tpl-wpg .wpg-scroll { padding-inline: var(--content-gutter-tight); }
+/* ⚠️ THE TOKEN, NOT A SECOND NUMBER. `--content-top-gap: 0px` is exactly how `.qc-wpg` does it;
+   a `padding-top: 0` beside it restates the same fact in a second place, which is what this
+   file's own lock forbids and what the squash was. */
+/* ⚠️ BOTH VARIANTS, BECAUSE THE PAGE IS ONLY SOMETIMES `--working`. The header condenses on
+   engagement, so at REST the page carries no `.wpg--working` and `--content-top-gap` resolves to
+   `--content-top-gap-rest` — 44px. Setting only the working variant left the rest state untouched
+   and the measurement unchanged, which is how a one-line override reads as done and is not.
+   `.qc-wpg` states both for exactly this reason; this is the same pair. */
+.tpl-wpg:not(.wpg--working) { --content-top-gap: 0px; }
 .tpl-wpg.wpg--working { --content-top-gap: 0px; }
-.tpl-wpg .wpg-scroll { padding-top: 0; }
 
 /* ⚠️ THE SOLO TITLE IS 40px APP-WIDE, AND THIS PAGE OPTS OUT. `.wsh--solo` gives a page with no
    subtitle two extra points; the Query Centre has a subtitle and so renders 38. Matching it here is

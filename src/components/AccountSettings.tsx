@@ -34,8 +34,10 @@ import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, 
 import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
 import { validateDisplayName } from "../lib/accountValidation";
-import { MountCard } from "./MountCard";
-import { PageHeader } from "./shell/PageHeader";
+import { MountPanel } from "./MountPanel";
+import { SECTION_BANDS } from "./settings/sectionBands";
+import { initialsOf } from "../lib/searchSuggestionsCore";
+import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
 import {
   pageGround,
@@ -57,14 +59,7 @@ import {
   FONT_MONO,
 } from "../lib/designTokens";
 import {
-  User as UserIcon,
   Mail,
-  Shield,
-  Sparkles,
-  Bell,
-  SlidersHorizontal,
-  ListChecks,
-  Database,
   Trash2,
   LogOut,
   Check,
@@ -85,25 +80,14 @@ const SUCCESS_GREEN = "#3B6D11";
 const ERROR_RED = "#A32D2D";
 
 /* ── The rail sections ──────────────────────────────────────────────────────
- * ⚠️ THE ORDER AND THE WORDS COME FROM `accountRoutes`, NOT FROM HERE. Each section is a real
- * path now, and the rail is the thing that walks between them — a second list of labels in this
- * file would be a rail that could disagree with the URL it navigates to. Only the ICON is the
- * page's own business, so only the icon is declared here. */
+ * ⚠️ ORDER, WORDS AND MARK ALL COME FROM ELSEWHERE — `accountRoutes` for the first two,
+ * `sectionBands` for the third. The page briefly kept its own icon map beside them; that was a
+ * third list of the same six sections, and the rail's glyph could have drifted from the glyph on
+ * the card the rail opens. The rail is the thing that WALKS between sections, not a place that
+ * decides what they are. */
 type SectionId = AccountSectionId;
-const SECTION_ICONS: Record<SectionId, React.ComponentType<any>> = {
-  profile: UserIcon,
-  security: Shield,
-  plan: Sparkles,
-  notifications: Bell,
-  preferences: SlidersHorizontal,
-  /* ⚠️ TASKS — the settings sheet's SECOND DOOR (tasks-viewport P5). The sheet used to be
-     reachable only from the To-do sidebar's foot, and since P1 that sidebar mounts on one page of
-     four; a writer on Today or the Calendar had no route to their own task settings. */
-  tasks: ListChecks,
-  data: Database,
-};
 const SECTIONS: { id: SectionId; label: string; path: string; Icon: React.ComponentType<any> }[] =
-  ACCOUNT_ROUTES.map((r) => ({ id: r.id, label: r.label, path: r.path, Icon: SECTION_ICONS[r.id] }));
+  ACCOUNT_ROUTES.map((r) => ({ id: r.id, label: r.label, path: r.path, Icon: SECTION_BANDS[r.id].Icon }));
 
 /* ── Shared field/label/button styling (inline so brand.tsx's non-important body-font
  *    rule can't override it, and Tailwind can't silently re-colour it) ──────────────── */
@@ -256,37 +240,94 @@ const InertNotice: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </div>
 );
 
-/**
- * CardShell — the three-layer clipping card the app already uses correctly elsewhere (the
- * onboarding "Database populated" card; mirrors scriptally-header-fill-target.html):
- *   1. panel — the Form 11 parchment surface (+ paper grain), outer radius + shadow, and an even
- *              `padding` on all four sides → that padding IS the uniform rim.
- *   2. frame — a 1px burgundy border with its own (smaller) radius + `overflow:hidden`; this is the
- *              clipping context. Its transparent interior lets the panel's grain show through the body.
- *   3. header/body — laid INSIDE the frame; a header fill stops at the frame border and is clipped to
- *              the frame's rounded corners by overflow:hidden, so it never reaches the card's outer edge.
- * This replaces the old overlay-border frame (a border drawn over the fill can't contain it → spill).
- */
-const CardShell: React.FC<{ children: React.ReactNode; style?: React.CSSProperties; className?: string }> = ({ children, style, className }) => (
-  <div
-    className={className}
-    style={{ background: parchment, backgroundImage: PAPER_TEXTURE, borderRadius: 14, boxShadow: mountShadow, padding: 6, border: "1px solid rgba(124,58,42,0.10)", ...style }}
-  >
-    <div style={{ border: insetBorder, borderRadius: 9, overflow: "hidden" }}>{children}</div>
-  </div>
-);
+/* ⚠️ `CardShell` IS GONE — IT WAS `MountPanel` RETYPED. Both declared the same three layers with
+   the same values (parchment panel + 6px rim, a 1px `insetBorder` frame with `overflow:hidden` as
+   the clipping context, children inside it), and the shared one carries the docblock explaining
+   why the frame is a real clipping container rather than an overlay border. One card, one place. */
 
-/** A section card: the sage-band (or danger-tinted) uniform header + body, inside the clipping frame. */
+/**
+ * A section card: the sage band header + body, inside MountPanel's clipping frame.
+ *
+ * ⚠️ THE BAND CARRIES NO RADIUS AND NO MARGIN. The frame's `overflow: hidden` rounds it and stops
+ * the fill at the frame border. The design ref instead draws the frame as a `::before` overlay
+ * and then hand-matches `border-radius: 8px 8px 0 0` + `margin: 6px 6px 0` on the band to fake
+ * the same result — an overlay border cannot contain a fill, so the fill reaches the card's outer
+ * edge at the corners. Do not port that.
+ *
+ * The band's anatomy is the ref's: disc · mono pre-label · Playfair name · sub-line, with the
+ * section's own mark repeated faint and large at the right.
+ */
 const SectionCard: React.FC<{
+  section: SectionId;
+  /** Overrides the band's Playfair line — Profile puts the writer's name here. */
+  name?: string;
+  /** Overrides the band's sub-line — Profile puts the account email here. */
+  sub?: string;
+  /** Replaces the disc's icon with initials (Profile only). */
+  disc?: string;
+  danger?: boolean;
+  headingId?: string;
+  children: React.ReactNode;
+}> = ({ section, name, sub, disc, danger, headingId, children }) => {
+  const band = SECTION_BANDS[section];
+  const Icon = band.Icon;
+  const ink = danger ? DANGER_INK : burgundy;
+  return (
+    <MountPanel style={{ marginBottom: 20 }}>
+      <div
+        className="acct-band"
+        style={{
+          background: danger ? DANGER_BAND : sageBandGradient,
+          borderBottom: `1px solid ${danger ? DANGER_RULE : sageBandRule}`,
+        }}
+      >
+        <Icon
+          className="acct-band-motif"
+          width={62}
+          height={62}
+          strokeWidth={0.9}
+          style={{ color: bodyInk, opacity: 0.3 }}
+          aria-hidden="true"
+        />
+        <span className="acct-band-id">
+          <span className="acct-band-disc" aria-hidden="true" style={danger ? { color: DANGER_INK } : undefined}>
+            {disc ?? <Icon width={16} height={16} strokeWidth={1.8} style={{ color: ink }} />}
+          </span>
+          <span style={{ minWidth: 0 }}>
+            <span className="acct-band-pre">{band.pre}</span>
+            <span
+              id={headingId}
+              role="heading"
+              aria-level={2}
+              className="acct-band-name"
+              style={{ display: "block", color: danger ? DANGER_INK : headingInk }}
+            >
+              {name ?? band.name}
+            </span>
+            {(sub ?? band.sub) && <span className="acct-band-sub" style={{ display: "block" }}>{sub ?? band.sub}</span>}
+          </span>
+        </span>
+      </div>
+      <div style={{ padding: 18 }}>{children}</div>
+    </MountPanel>
+  );
+};
+
+/**
+ * A card WITHIN a section — Signing out and the Danger zone, which sit under Your data.
+ *
+ * ⚠️ IT KEEPS THE PLAIN TITLED HEADER, DELIBERATELY. The band's disc/pre-label/name/sub-line
+ * anatomy says "this is a section of settings"; wearing it twice on one screen would make two of
+ * the three cards under Your data look like sections the rail forgot to list.
+ */
+const SubCard: React.FC<{
   title: string;
   Icon: React.ComponentType<any>;
   danger?: boolean;
   headingId?: string;
   children: React.ReactNode;
 }> = ({ title, Icon, danger, headingId, children }) => (
-  <CardShell style={{ marginBottom: 20 }}>
-    {/* header — NO radius and NO margin of its own; the frame's overflow:hidden clips it to the
-        rounded top corners and the fill stops at the frame border (never the card's outer edge). */}
+  <MountPanel style={{ marginBottom: 20 }}>
     <div
       style={{
         padding: "13px 18px 11px",
@@ -301,15 +342,7 @@ const SectionCard: React.FC<{
       <span className="flex items-center" style={{ minWidth: 0 }}>
         <span
           aria-hidden="true"
-          style={{
-            width: 3,
-            height: 18,
-            borderRadius: 2,
-            background: danger ? DANGER_INK : burgundy,
-            marginRight: 12,
-            flexShrink: 0,
-            display: "inline-block",
-          }}
+          style={{ width: 3, height: 18, borderRadius: 2, background: danger ? DANGER_INK : burgundy, marginRight: 12, flexShrink: 0, display: "inline-block" }}
         />
         <span
           id={headingId}
@@ -323,7 +356,7 @@ const SectionCard: React.FC<{
       <Icon style={{ width: 19, height: 19, color: danger ? DANGER_INK : burgundy, flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />
     </div>
     <div style={{ padding: 18 }}>{children}</div>
-  </CardShell>
+  </MountPanel>
 );
 
 /* ── The left section rail — a lighter/secondary MountCard, keyboard-navigable (tablist) ── */
@@ -356,15 +389,14 @@ const Rail: React.FC<{ active: SectionId; onSelect: (id: SectionId) => void }> =
   };
 
   return (
-    <MountCard className="md:sticky md:self-start" style={{ top: 84 }}>
-      <div style={{ position: "relative", zIndex: 4, margin: 6, padding: 8 }}>
+    <MountPanel>
+      <div style={{ padding: 8 }}>
         <p style={{ ...labelStyle, padding: "2px 8px 8px", marginBottom: 0, color: mutedInk }}>Settings</p>
         <div
           role="tablist"
           aria-label="Account settings sections"
           aria-orientation="vertical"
-          className="flex md:flex-col"
-          style={{ gap: 2, overflowX: "auto" }}
+          className="acct-navlist"
         >
           {SECTIONS.map((s) => {
             const isActive = s.id === active;
@@ -378,25 +410,7 @@ const Rail: React.FC<{ active: SectionId; onSelect: (id: SectionId) => void }> =
                 tabIndex={isActive ? 0 : -1}
                 onClick={() => onSelect(s.id)}
                 onKeyDown={onKeyDown}
-                className="acct-rail-item"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  width: "100%",
-                  textAlign: "left",
-                  whiteSpace: "nowrap",
-                  padding: "9px 12px",
-                  borderRadius: 9,
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: FONT_SANS,
-                  fontSize: 13.5,
-                  fontWeight: isActive ? 600 : 500,
-                  color: isActive ? burgundy : "#6a5a50",
-                  background: isActive ? "#f8e7dc" : "transparent",
-                  transition: "background 0.12s, color 0.12s",
-                }}
+                className="acct-navitem"
               >
                 <s.Icon style={{ width: 16, height: 16, flexShrink: 0, color: isActive ? burgundy : mutedInk }} strokeWidth={1.9} aria-hidden="true" />
                 {s.label}
@@ -405,7 +419,7 @@ const Rail: React.FC<{ active: SectionId; onSelect: (id: SectionId) => void }> =
           })}
         </div>
       </div>
-    </MountCard>
+    </MountPanel>
   );
 };
 
@@ -459,7 +473,7 @@ const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string;
         onMouseDown={(e) => e.stopPropagation()}
         style={{ width: "100%", maxWidth: 460 }}
       >
-        <CardShell>
+        <MountPanel>
           <div
             style={{
               padding: "13px 18px 11px",
@@ -541,7 +555,7 @@ const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string;
               and we'll close your account by hand. Nothing has been deleted.
             </p>
           </div>
-        </CardShell>
+        </MountPanel>
       </div>
     </div>,
     document.body,
@@ -668,7 +682,7 @@ export const AccountSettings: React.FC<{
   };
 
   const profileSection = (
-    <SectionCard title="Profile" Icon={UserIcon} headingId="acct-h-profile">
+    <SectionCard section="profile" name={currentUser.name || "Your account"} sub={currentUser.email} disc={initialsOf(currentUser.name || currentUser.email)} headingId="acct-h-profile">
       <div className="flex items-center" style={{ gap: 14, marginBottom: 20 }}>
         <span
           aria-hidden="true"
@@ -760,23 +774,15 @@ export const AccountSettings: React.FC<{
         </div>
       </div>
 
-      {/* Pen name — coming soon. Not a User field and not in the Firestore allowlist, so it
-          can't be stored; rendering it live would silently drop the value (a desync trap). */}
-      <div style={{ marginTop: 22, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
-        <div className="flex items-center" style={{ gap: 10, marginBottom: 6 }}>
-          <label htmlFor="account-penname" style={{ ...labelStyle, marginBottom: 0 }}>
-            Pen name
-          </label>
-          <ComingSoonPill />
-        </div>
-        <input id="account-penname" type="text" disabled placeholder="The name your work is published under" className="acct-input" style={{ ...inputStyle, opacity: 0.6, cursor: "not-allowed" }} />
-        <p style={{ ...helpText, marginTop: 6 }}>A separate publishing name is coming soon.</p>
-      </div>
+      {/* ⚠️ PEN NAME IS REMOVED, NOT DISABLED. It was never a `User` field and never in the
+          Firestore allowlist, so it could not be stored — and a permanently disabled input is a
+          promise on the page with nothing behind it. Settings states what your account IS; a
+          field that cannot hold a value states nothing. It comes back when it has somewhere to go. */}
     </SectionCard>
   );
 
   const securitySection = (
-    <SectionCard title="Sign-in & security" Icon={Shield} headingId="acct-h-security">
+    <SectionCard section="security" headingId="acct-h-security">
       <label htmlFor="account-email" style={labelStyle}>
         Email
       </label>
@@ -824,7 +830,7 @@ export const AccountSettings: React.FC<{
   );
 
   const planSection = (
-    <SectionCard title="Plan & billing" Icon={Sparkles} headingId="acct-h-plan">
+    <SectionCard section="plan" headingId="acct-h-plan">
       <div className="flex items-center justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
         <div style={{ minWidth: 0 }}>
           <p style={{ fontFamily: FONT_SERIF, fontSize: 18, color: bodyInk, lineHeight: 1.2 }}>{currentUser.plan} plan</p>
@@ -858,7 +864,7 @@ export const AccountSettings: React.FC<{
   );
 
   const notificationsSection = (
-    <SectionCard title="Notifications" Icon={Bell} headingId="acct-h-notifications">
+    <SectionCard section="notifications" headingId="acct-h-notifications">
       <InertNotice>
         Email notifications aren't switched on yet — these preferences are coming soon, so nothing is saved here for now.
       </InertNotice>
@@ -877,8 +883,50 @@ export const AccountSettings: React.FC<{
     </SectionCard>
   );
 
+  /* ⚠️ ONE SHEET, TWO DOORS — never a second copy of the settings UI (tasks-viewport P5).
+     This section does NOT re-render the four behaviours; it navigates to the board and opens the
+     ONE TaskSettingsSheet, which is where they are defined, written and persisted. Building a
+     second form here would mean two places to change a default and two chances to disagree about
+     it — and the sheet writes `User.todoPrefs` through one path precisely so that cannot happen.
+     The navigate-then-dispatch pattern is the account menu's own, already proven: the sheet is
+     hosted by the To-do page, so the route has to land before the event can find a listener. */
+  /* ⚠️ ONE SHEET, TWO DOORS — never a second copy of the settings UI (tasks-viewport P5).
+     This row does NOT re-render the task behaviours; it navigates to the board and opens the ONE
+     TaskSettingsSheet, which is where they are defined, written and persisted. Building a second
+     form here would mean two places to change a default and two chances to disagree about it.
+     The navigate-then-dispatch order is the account menu's own proven pattern: the sheet is
+     hosted by the To-do page, so the route has to land before the event can find a listener.
+
+     ⚠️ IT LIVES IN PREFERENCES NOW, NOT IN A RAIL SECTION OF ITS OWN. The rail is six items, and
+     "how my tasks behave" is a workspace preference rather than a seventh area of the account.
+     The row moved WITH the rail item rather than after it: deleting a working door and rebuilding
+     it several commits later would leave the sheet reachable from one page of four in between,
+     which is the exact gap this second door was added to close. */
+  const taskSettingsRow = (
+    <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", padding: "14px 0" }}>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Task settings</p>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk, lineHeight: 1.5 }}>
+          How long before something counts as stale, whether unfinished work rolls forward, and
+          your weekly review. Opens on your to-do board.
+        </p>
+      </div>
+      <button
+        type="button"
+        style={ghostBtn}
+        onClick={() => {
+          /* the route first — the sheet lives on the board, so the event needs a listener */
+          onNavigate("todo");
+          window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS));
+        }}
+      >
+        Open task settings
+      </button>
+    </div>
+  );
+
   const preferencesSection = (
-    <SectionCard title="Preferences" Icon={SlidersHorizontal} headingId="acct-h-preferences">
+    <SectionCard section="preferences" headingId="acct-h-preferences">
       {/* Theme — functional today (applies to the Queries page). Persisted on the user profile. */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "14px 0", borderBottom: "0.5px solid #efe5da", marginBottom: 4 }}>
         <div style={{ minWidth: 0 }}>
@@ -925,12 +973,13 @@ export const AccountSettings: React.FC<{
           </select>
         }
       />
+      {taskSettingsRow}
     </SectionCard>
   );
 
   const dataSection = (
     <>
-      <SectionCard title="Your data" Icon={Database} headingId="acct-h-data">
+      <SectionCard section="data" headingId="acct-h-data">
         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Export your data</p>
@@ -971,7 +1020,7 @@ export const AccountSettings: React.FC<{
 
           ⚠️ ONE IMPLEMENTATION, TWO DOORS. This is the same `logout` the account menu calls, so
           where sign-out leaves you cannot differ by the door you used. */}
-      <SectionCard title="Signing out" Icon={LogOut} headingId="acct-h-signout">
+      <SubCard title="Signing out" Icon={LogOut} headingId="acct-h-signout">
         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Sign out</p>
@@ -982,9 +1031,9 @@ export const AccountSettings: React.FC<{
             <LogOut style={{ width: 14, height: 14 }} aria-hidden="true" /> Sign out
           </button>
         </div>
-      </SectionCard>
+      </SubCard>
 
-      <SectionCard title="Danger zone" Icon={Trash2} danger headingId="acct-h-danger">
+      <SubCard title="Danger zone" Icon={Trash2} danger headingId="acct-h-danger">
         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Delete account</p>
@@ -997,40 +1046,8 @@ export const AccountSettings: React.FC<{
             <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account…
           </button>
         </div>
-      </SectionCard>
+      </SubCard>
     </>
-  );
-
-  /* ⚠️ ONE SHEET, TWO DOORS — never a second copy of the settings UI (tasks-viewport P5).
-     This section does NOT re-render the four behaviours; it navigates to the board and opens the
-     ONE TaskSettingsSheet, which is where they are defined, written and persisted. Building a
-     second form here would mean two places to change a default and two chances to disagree about
-     it — and the sheet writes `User.todoPrefs` through one path precisely so that cannot happen.
-     The navigate-then-dispatch pattern is the account menu's own, already proven: the sheet is
-     hosted by the To-do page, so the route has to land before the event can find a listener. */
-  const tasksSection = (
-    <SectionCard title="Tasks" Icon={ListChecks} headingId="acct-h-tasks">
-      <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", padding: "14px 0" }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Task settings</p>
-          <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk, lineHeight: 1.5 }}>
-            How long before something counts as stale, what a good day looks like, whether
-            unfinished work rolls forward, and your weekly review. Opens on your to-do board.
-          </p>
-        </div>
-        <button
-          type="button"
-          style={primaryBtn}
-          onClick={() => {
-            /* the route first — the sheet lives on the board, so the event needs a listener */
-            onNavigate("todo");
-            window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS));
-          }}
-        >
-          Open task settings
-        </button>
-      </div>
-    </SectionCard>
   );
 
   const sectionContent: Record<SectionId, React.ReactNode> = {
@@ -1039,36 +1056,41 @@ export const AccountSettings: React.FC<{
     plan: planSection,
     notifications: notificationsSection,
     preferences: preferencesSection,
-    tasks: tasksSection,
     data: dataSection,
   };
 
   return (
-    <div className="min-h-screen pb-16 font-sans" style={{ background: pageGround, color: bodyInk }}>
+    <div className="acct-page font-sans" style={{ background: pageGround, color: bodyInk }}>
       {/* Fixed page grain — over the kraft ground, under the positioned cards (matches the dashboard). */}
       <div aria-hidden="true" style={{ position: "fixed", inset: 0, opacity: 0.25, pointerEvents: "none", zIndex: 0, backgroundImage: PAGE_GRAIN }} />
 
-      {/* On-brand focus ring + rail hover (scoped; inline can't express :focus/:hover). */}
+      {/* On-brand field focus ring (scoped; inline can't express :focus). The rail's own states
+          live in settings.css beside the chassis they belong to. */}
       <style>{`
         .acct-input:focus { border-color: ${burgundy}; box-shadow: 0 0 0 3px rgba(124,58,42,0.12); }
-        .acct-rail-item:hover:not([aria-selected="true"]) { background: rgba(124,58,42,0.05); }
-        .acct-rail-item:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }
       `}</style>
 
-      <div className="relative" style={{ zIndex: 1, maxWidth: 1040, margin: "0 auto", padding: "12px 16px 0" }}>
-        {/* The standard page header (capsule fixes P5 — re-homed from the DELETED FocusShell
-            into the capsule shell): full variant replaces the bespoke h1 + sub. */}
-        <PageHeader
-          variant="full"
-          title="Account settings"
-          description="Manage your profile, plan and preferences."
-        />
+      {/* ⚠️ NO SUBTITLE, AND NO `PageHeader`. The bar above already carries the saved-status line
+          and the breadcrumb already reads Setup / Account, so "Manage your profile, plan and
+          preferences." was the third statement of the same fact inside one screen-height. The
+          title is plain Playfair in ink — no italic accent word: that treatment is an artefact of
+          the form-11 demo file, not a heading style this app has. */}
+      <header className="acct-head" style={{ position: "relative", zIndex: 1 }}>
+        <h1 className="acct-title">Account settings</h1>
+      </header>
 
-        <div className="flex flex-col md:flex-row" style={{ gap: 24, alignItems: "flex-start" }}>
-          <div className="w-full md:w-56 md:flex-shrink-0">
+      <div className="acct-plane" style={{ position: "relative", zIndex: 1 }}>
+        <div className={`acct-grid${active === "plan" ? " acct-grid--wide" : ""}`}>
+          <div className="acct-rail">
             <Rail active={active} onSelect={goSection} />
           </div>
-          <div id="acct-panel" role="tabpanel" aria-labelledby={`acct-tab-${active}`} tabIndex={0} className="flex-1 min-w-0" style={{ outline: "none" }}>
+          <div
+            id="acct-panel"
+            role="tabpanel"
+            aria-labelledby={`acct-tab-${active}`}
+            tabIndex={0}
+            className="acct-col"
+          >
             {sectionContent[active]}
           </div>
         </div>

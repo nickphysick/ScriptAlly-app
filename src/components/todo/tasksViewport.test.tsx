@@ -22,6 +22,7 @@ import { join } from "node:path";
 import { TasksPageLayout, TplZone } from "./TasksPageLayout";
 import { ArtSlot, ART_SLOTS, ArtSlotName } from "./ArtSlot";
 import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
+import { sliceBetween } from "../../test/sliceBetween";
 
 const here = __dirname;
 const css = readFileSync(join(here, "tasksLayout.css"), "utf8");
@@ -381,15 +382,24 @@ describe("⚠️ ONE SHEET, TWO DOORS — and never a second copy of the setting
     expect(board).toContain("TODO_OPEN_TASK_SETTINGS");
   });
 
-  /* ⚠️ THE SECTION LIST MOVED TO `lib/accountRoutes` when settings became real routes, so the
-     door is asserted against THAT TABLE rather than against a literal in the page. The old form
-     read `'{ id: "tasks", label: "Tasks"'` out of AccountSettings.tsx — a source-string lock on a
-     line that had every right to move, and which said nothing about whether the section was
-     reachable. The table is what the router, the rail and the redirect all read. */
-  it("door two: a Tasks section on the app Settings page", () => {
-    expect(ACCOUNT_ROUTES.map((r) => r.id)).toContain("tasks");
-    expect(acct).toContain("tasks: tasksSection");
+  /* ⚠️ DOOR TWO MOVED INTO PREFERENCES, AND IS NO LONGER A SECTION OF ITS OWN (settings P2). The
+     rail is six items; "how my tasks behave" is a workspace preference, not a seventh area of the
+     account. What this test protects is unchanged — that a second door EXISTS on the settings
+     page and opens the ONE sheet — so it now asserts the row is rendered by Preferences rather
+     than that a `tasks` section exists.
+
+     ⚠️ AND `tasks` MUST NOT COME BACK AS A RAIL SECTION without this test being reconsidered: two
+     doors in settings, one in the rail and one in Preferences, is the duplication the whole
+     describe block exists to forbid. */
+  it("door two: a Task settings row on the app Settings page, inside Preferences", () => {
+    expect(ACCOUNT_ROUTES.map((r) => r.id)).not.toContain("tasks");
+    expect(acct).toContain("const taskSettingsRow");
+    expect(acct).toContain("{taskSettingsRow}");
     expect(acct).toContain("TODO_OPEN_TASK_SETTINGS");
+    /* rendered by Preferences, not left defined and unmounted — a const nothing reaches is a
+       door that does not exist (the reachability rule in CLAUDE.md). */
+    const prefs = sliceBetween(acct, "const preferencesSection", "const dataSection", "preferences section");
+    expect(prefs).toContain("{taskSettingsRow}");
   });
 
   it("⚠️ BOTH DOORS OPEN THE SAME COMPONENT — the settings UI is written ONCE", () => {
@@ -414,8 +424,11 @@ describe("⚠️ ONE SHEET, TWO DOORS — and never a second copy of the setting
   it("⚠️ THE ROUTE LANDS BEFORE THE EVENT — the sheet is hosted by the board", () => {
     /* Dispatching first would fire into a page that is not mounted, and the door would silently
        do nothing from /account. The account menu's existing door already works this way. */
-    const sec = acct.slice(acct.indexOf("const tasksSection"));
-    expect(acct.indexOf("const tasksSection")).toBeGreaterThan(-1); // the anchor
+    /* ⚠️ `sliceBetween`, NOT `slice(indexOf(...))`. A missing anchor makes `indexOf` return -1 and
+       `slice(-1)` reads ONE CHARACTER FROM THE END — the lock does not go red, it goes vague, and
+       then passes on whatever happens to sit further down the file. This anchor has already moved
+       once (`tasksSection` → `taskSettingsRow`). */
+    const sec = sliceBetween(acct, "const taskSettingsRow", "const preferencesSection", "task settings row");
     expect(sec.indexOf('onNavigate("todo")')).toBeLessThan(sec.indexOf("TODO_OPEN_TASK_SETTINGS"));
   });
 
@@ -997,7 +1010,10 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
     /* ⚠️ ONE RHYTHM ON ALL FOUR SIDES NOW THE BAR IS NOT ABOVE IT. This was `0 22px 20px` — no top at
        all, because the bar's own `margin-bottom` stood in for it. With the bar gone that top would
        have collapsed to nothing and the split would sit hard against the header. */
-    expect(split).toContain("padding: 22px");
+    /* ⚠️ THE SPLIT TAKES THE QUERY CENTRE'S BODY PADDING NOW (frame2 Phase 1) — `20px 0 32px`, with
+       NO horizontal component, because the scroll row's 35px gutter is the inset and a second one
+       put this page's cards 23px further in than the Query Centre's. */
+    expect(split).toContain("padding: 20px 0 32px");
     /* and the border is still there to do the delineating alone */
     expect(rule(splitCss, ".tdw-rail {")).toContain("border: 1px solid var(--tdw-hair)");
   });

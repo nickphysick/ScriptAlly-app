@@ -29,7 +29,6 @@ export type AccountSectionId =
   | "plan"
   | "notifications"
   | "preferences"
-  | "tasks"
   | "data";
 
 export interface AccountRoute {
@@ -40,14 +39,14 @@ export interface AccountRoute {
 }
 
 /**
- * The rail's order, top to bottom.
+ * The rail's order, top to bottom. SIX sections — the rail is the whole list.
  *
- * ⚠️ `tasks` IS TRANSITIONAL AND LEAVES IN PHASE 2. It is here so that THIS commit changes the
- * routing mechanism and nothing else: the page still renders seven sections today, and dropping
- * one of them in a commit whose subject is "routes" would hide a content change inside a
- * mechanism change. Its content becomes a link row inside Preferences; when the rail item goes,
- * `/account/tasks` stops resolving and falls to the redirect below, which is the correct
- * behaviour for a retired path — not a dead end.
+ * ⚠️ `tasks` WAS THE SEVENTH AND IS RETIRED (Phase 2). Its one link row now sits at the foot of
+ * Preferences, because "how my tasks behave" is a workspace preference rather than a seventh area
+ * of the account — and the row moved WITH the rail item, in one commit, rather than being deleted
+ * and rebuilt later: the To-do settings sheet is reachable from one page of four without it.
+ * `/account/tasks` now falls to the redirect below, which is the right answer for a retired path
+ * — an old link lands on the section list rather than on nothing.
  */
 export const ACCOUNT_ROUTES: AccountRoute[] = [
   { id: "profile", label: "Profile", path: "/account/profile" },
@@ -55,7 +54,6 @@ export const ACCOUNT_ROUTES: AccountRoute[] = [
   { id: "plan", label: "Plan & billing", path: "/account/plan" },
   { id: "notifications", label: "Notifications", path: "/account/notifications" },
   { id: "preferences", label: "Preferences", path: "/account/preferences" },
-  { id: "tasks", label: "Tasks", path: "/account/tasks" },
   { id: "data", label: "Your data", path: "/account/data" },
 ];
 

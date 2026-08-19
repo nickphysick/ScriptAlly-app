@@ -1,0 +1,219 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Settings chassis — the page shell, the scroll plane and the section rail.
+ *
+ * ⚠️ ONLY THE PLANE SCROLLS, AND IT DOES IT THROUGH A `min-height: 0` FLEX CHAIN — never
+ * viewport-height arithmetic. `100vh` minus a bar height is a number that is wrong the moment a
+ * bar changes, and in this app it is wrong immediately: the stage, not the window, is the scroll
+ * container, so page heights are stage-relative (CLAUDE.md). The chain is
+ * StagePage `layout="fill"` (flex:1; min-height:0) → `.acct-page` (height:100%) →
+ * `.acct-plane` (flex:1; min-height:0; overflow-y:auto). Every link needs its `min-height: 0`:
+ * a flex item's default `min-height: auto` refuses to shrink below its content, which is how a
+ * page ends up scrolling in two places at once.
+ *
+ * ⚠️ THE CONTENT WIDTH IS ONE CUSTOM PROPERTY, read inside the grid template. Plan & billing is
+ * two columns and needs 660 where the rest need 500; setting `--acct-col` on the page beats
+ * writing a second grid rule, and — because it is read inside a `calc()`/track rather than
+ * resolved at `:root` — a modifier class further down genuinely overrides it (the resolution-site
+ * rule in CLAUDE.md).
+ */
+
+/* ── The page: a fill column inside the stage slot ─────────────────────────── */
+.acct-page {
+  --acct-col: 500px;
+  --acct-rail: 216px;
+  --acct-gap: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Plan & billing only — the comparison is two columns side by side. Set on the GRID, which is the
+   element whose `grid-template-columns` reads it, so the override lands at the resolution site. */
+.acct-grid--wide { --acct-col: 660px; }
+
+/* ── Page header — plain Playfair in ink, centred, NO subtitle ──────────────
+   The bar already carries the saved-status line and the breadcrumb already says Settings, so a
+   subtitle here would be the third statement of the same fact above the fold. */
+.acct-head {
+  flex: none;
+  padding: 22px 24px 18px;
+  text-align: center;
+}
+.acct-title {
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #3a1c14;
+  margin: 0;
+}
+
+/* ── The scroll plane — the ONE scroll region on this page ──────────────────── */
+.acct-plane {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 24px 64px;
+}
+
+/* ── Rail + content ─────────────────────────────────────────────────────────
+   `align-items: start` is load-bearing twice over: it lets the rail be its own height rather than
+   stretching to the section's, and a stretched grid item cannot `position: sticky` at all. */
+.acct-grid {
+  display: grid;
+  grid-template-columns: var(--acct-rail) minmax(0, var(--acct-col));
+  justify-content: center;
+  align-items: start;
+  gap: var(--acct-gap);
+}
+
+.acct-rail {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.acct-col { min-width: 0; }
+.acct-col:focus { outline: none; }
+
+/* ⚠️ THE RAIL GOES ABOVE THE CONTENT, NOT BESIDE IT, BELOW ~900px — and it stops sticking.
+   A sticky strip pinned to the top of a narrow plane eats the height the content needs; at this
+   width the rail is a header, not a sidebar. */
+@media (max-width: 900px) {
+  .acct-grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }
+  .acct-rail { position: static; }
+  .acct-plane { padding-inline: 16px; }
+  .acct-head { padding-inline: 16px; }
+}
+
+/* ── Rail items ─────────────────────────────────────────────────────────────
+   ⚠️ ACTIVE IS THE DROPDOWN'S SELECTED-OPTION GRAMMAR (#f5e2da fill, burgundy text), NOT A NAV
+   PILL. Settings sections are options in a list you are choosing between, which is what the
+   locked dropdown's selected row already means; a burgundy-filled nav state would say something
+   different in the one place the two grammars sit closest together. */
+.acct-navlist {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.acct-navitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  background: transparent;
+  color: #6a5a50;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.12s, color 0.12s;
+}
+.acct-navitem:hover:not([aria-selected="true"]) { background: rgba(124, 58, 42, 0.05); }
+.acct-navitem[aria-selected="true"] {
+  background: #f5e2da;
+  color: #7c3a2a;
+  font-weight: 500;
+}
+
+/* ⚠️ SAGE, NOT BURGUNDY. The ring must not read as the active state arriving — burgundy is what
+   the selected row's text already is, so a burgundy ring on an unselected row says "chosen" to
+   anyone tabbing through. Sage is the app's focus colour everywhere else a field has one. */
+.acct-navitem:focus-visible {
+  outline: 2px solid #8a9e88;
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .acct-navlist {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 4px;
+  }
+  .acct-navitem { width: auto; }
+}
+
+/* ── The section band ───────────────────────────────────────────────────────
+   The band lives INSIDE MountPanel's clipping frame and therefore carries no radius and no
+   margin of its own: the frame's `overflow: hidden` rounds it and stops the fill at the frame
+   border. The design ref draws this as a `::before` overlay with a hand-matched
+   `border-radius: 8px 8px 0 0` and `margin: 6px 6px 0` on the band — an overlay border cannot
+   contain a fill, which is the spill this structure exists to prevent. */
+.acct-band {
+  position: relative;
+  overflow: hidden;
+  min-height: 78px;
+  padding: 16px 22px 14px;
+  display: flex;
+  align-items: center;
+}
+.acct-band-motif {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+}
+.acct-band-id {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+}
+.acct-band-disc {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fdfaf5;
+  border: 1px solid rgba(124, 58, 42, 0.25);
+  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: #7c3a2a;
+}
+.acct-band-pre {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5a6e58;
+  margin-bottom: 1px;
+}
+.acct-band-name {
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: #2e3a2c;
+  line-height: 1.1;
+}
+.acct-band-sub {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 11px;
+  font-weight: 300;
+  color: #6a7e68;
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
