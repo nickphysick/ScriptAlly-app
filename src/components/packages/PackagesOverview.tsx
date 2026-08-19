@@ -45,6 +45,75 @@ export interface PackagesOverviewProps {
   onOpenTracking: () => void;
 }
 
+/**
+ * The three steps — copy verbatim from the ref (D7), line art lifted from it unchanged (D8).
+ *
+ * ⚠️ THE PLATES ARE PLACEHOLDERS AND ARE MARKED AS SUCH. These are the ref's own strokes, drawn
+ * dashed and labelled ILLUSTRATION, because the real drawings are a later pass. They are not
+ * `manuscriptMarks` — that file is a closed set of five baked illustrations for the manuscript
+ * card, and adding provisional line art to it would put placeholders in a finished collection.
+ *
+ * ⚠️ NO VERDICT WORDS (D7). "Replies land against the package that went out" reports; "the best
+ * package" would appraise. The app reports and the writer decides.
+ */
+const STEPS = [
+  {
+    n: 1,
+    title: "Add your materials",
+    body: (
+      <>
+        Versions of your <strong>covering letter, synopsis and sample pages</strong> — written here
+        or pasted in. Most writers keep two or three of each.
+      </>
+    ),
+    art: (
+      <svg viewBox="0 0 64 64" fill="none" strokeWidth={1.2} strokeLinecap="round" aria-hidden="true">
+        <rect x="10" y="14" width="28" height="38" rx="2" />
+        <path d="M16 22h16M16 28h16M16 34h10" />
+        <rect x="24" y="10" width="28" height="38" rx="2" fill="var(--pkg-card)" />
+        <path d="M30 18h16M30 24h16M30 30h12M30 36h16M30 42h8" />
+      </svg>
+    ),
+  },
+  {
+    n: 2,
+    title: "Arrange them into packages",
+    body: (
+      <>
+        Pick one of each and give the combination a name. Build as many as you like, then{" "}
+        <strong>attach a package when you log a query</strong>.
+      </>
+    ),
+    art: (
+      <svg viewBox="0 0 64 64" fill="none" strokeWidth={1.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M32 8l20 10v18L32 46 12 36V18L32 8z" />
+        <path d="M32 24l20-6M32 24v22M32 24L12 18" />
+        <path d="M22 13l20 10" strokeDasharray="2 3" />
+      </svg>
+    ),
+  },
+  {
+    n: 3,
+    title: "Track what comes back",
+    body: (
+      <>
+        Replies land against the package that went out. Tracking shows{" "}
+        <strong>which materials sit behind each response and request</strong> — reported, not
+        guessed.
+      </>
+    ),
+    art: (
+      <svg viewBox="0 0 64 64" fill="none" strokeWidth={1.2} strokeLinecap="round" aria-hidden="true">
+        <path d="M10 52h44M10 52V14" />
+        <rect x="17" y="36" width="7" height="16" />
+        <rect x="29" y="26" width="7" height="26" />
+        <rect x="41" y="18" width="7" height="34" />
+        <path d="M18 30c8-4 14-10 30-14" strokeDasharray="2 3" />
+      </svg>
+    ),
+  },
+] as const;
+
 /** One rail panel: sage head, mono label, derived count chip, optional outlined action. */
 const Panel: React.FC<{
   label: string;
@@ -165,9 +234,52 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
       </aside>
 
       <div className="pkgo-stage">
-        {/* Phase 3 — problem statement + how-it-works. `steps` is derived here so the stage and the
-            rail's chips can only ever be the same counts. */}
-        {steps.length > 0 ? null : null}
+        {/* ⚠️ THE PROBLEM STATEMENT IS THE OLD `.pkgw-strip`, PROMOTED — not a second pitch. The
+            page used to carry this same sentence as a thin strip above the tab row; the ref makes
+            it the stage's opening card, so the strip is removed rather than left to say the same
+            thing twice. Copy is the ref's, verbatim (D7). */}
+        <section className="pkgo-prob">
+          <p className="pkgo-hand">Fed up of guessing which materials are landing with agents?</p>
+          <p className="pkgo-probsub">
+            Every package keeps its own scorecard. ScriptAlly records{" "}
+            <strong>which letter, synopsis and pages went to each agent</strong> — so the answer sits
+            on the page, not in your head.
+          </p>
+        </section>
+
+        <section>
+          <div className="pkgo-hiwhead">
+            <h2>How it works</h2>
+            <span className="pkgo-hiwtag">Three steps</span>
+          </div>
+          {/* ⚠️ THE INFOGRAPHIC DOUBLES AS PROGRESS (D3) AND READS THE SAME COUNTS THE RAIL DOES.
+              `steps` comes from `howItWorks(versions.length, packages.length, live)` — the very
+              numbers the chips above render — so the stage cannot claim "2 BUILT" beside a register
+              listing three. One derivation, two surfaces. */}
+          <div className="pkgo-steps">
+            {STEPS.map((s, i) => {
+              const state = steps[i];
+              return (
+                <article key={s.n} className={`pkgo-step${state.live ? " pkgo-step--live" : ""}`}>
+                  <div className="pkgo-eyebrow">
+                    <span className={`pkgo-num${state.done ? " pkgo-num--done" : ""}`}>{s.n}</span>
+                    {state.tick && (
+                      <span className={`pkgo-tick${state.live ? " pkgo-tick--live" : ""}`}>{state.tick}</span>
+                    )}
+                  </div>
+                  {/* D8 — the illustrations are not drawn yet, and the plate says so rather than
+                      pretending. Dashed is this page's provisional grammar. */}
+                  <div className="pkgo-plate">
+                    {s.art}
+                    <span className="pkgo-platelbl">Illustration</span>
+                  </div>
+                  <h3>{s.title}</h3>
+                  <p>{s.body}</p>
+                </article>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -254,14 +254,11 @@ export const SubmissionPackages: React.FC = () => {
           ) : undefined}
         />
       }>
-      <div className="pkgw-strip">
-        <ShieldCheck className="sh" aria-hidden="true" />
-        <span className="stx">
-          <b>Every package keeps its own scorecard.</b> ScriptAlly records which letter, synopsis and pages
-          went to each agent — so you can see which combination gets replies, rather than guessing.
-        </span>
-      </div>
-
+      {/* ⚠️ `.pkgw-strip` IS RETIRED FROM THIS PAGE (restructure). It carried the scorecard sentence
+          as a thin band above the tab row; the overview's problem-statement card is that same
+          sentence promoted to the stage, in the ref's own words. Keeping both would state the
+          page's one argument twice, a few pixels apart. Removed from the render rather than hidden;
+          its CSS stays in packageWorkshop.css because the DEV `#/pkg-lab` route still draws it. */}
       {!activeMs ? (
         <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 40, textAlign: "center" }}>
           <div>

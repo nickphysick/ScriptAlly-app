@@ -1,0 +1,56 @@
+{
+  "stage": {
+    "x": 668,
+    "y": 301,
+    "w": 1134,
+    "h": 577
+  },
+  "hand": "Fed up of guessing which materials are landing with agents?",
+  "handFont": "Caveat, cursive",
+  "probSub": "Every package keeps its own scorecard. ScriptAlly records which letter, synopsis and pages went to each agent — so the answer sits on the page, not in your head.",
+  "hiwHead": "How it works",
+  "hiwTag": "Three steps",
+  "stepCount": 3,
+  "stepWidths": [
+    366,
+    366,
+    366
+  ],
+  "stepTitles": [
+    "Add your materials",
+    "Arrange them into packages",
+    "Track what comes back"
+  ],
+  "ticks": [
+    "✓ 4 ADDED",
+    "✓ 2 BUILT",
+    "● LIVE"
+  ],
+  "numsDone": [
+    true,
+    true,
+    true
+  ],
+  "liveStep": [
+    false,
+    false,
+    true
+  ],
+  "plateHeights": [
+    150,
+    150,
+    150
+  ],
+  "plateLabels": [
+    "Illustration",
+    "Illustration",
+    "Illustration"
+  ],
+  "plateSvgs": 3,
+  "onScreen": [
+    true,
+    true,
+    true
+  ],
+  "stripPresent": false
+}

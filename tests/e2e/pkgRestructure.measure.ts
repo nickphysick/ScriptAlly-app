@@ -231,3 +231,71 @@ test("phase 2 — rail registers, populated", async ({ page }) => {
   writeFileSync(`${ART}/p2-rail-populated.txt`, JSON.stringify(r, null, 2) + "\n");
   console.log(JSON.stringify(r, null, 2));
 });
+
+/**
+ * The stage: problem statement + how-it-works, with the derived progress.
+ *
+ * ⚠️ THE PLATE HEIGHT AND THE STEP WIDTHS ARE MEASURED ON THE RENDERED BOXES, not read from the
+ * declarations that produced them. A CSS lock proves a rule exists; it does not prove what the
+ * cascade and the box model did with it — which is how `repeat(auto-fit, minmax(0, 1fr))` passed
+ * its own lock while resolving to two real tracks and a hundred phantom ones.
+ */
+const STAGE = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const box = (el) => { const r = el.getBoundingClientRect();
+    return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) }; };
+  const stage = root.querySelector(".pkgo-stage");
+  const prob = root.querySelector(".pkgo-prob");
+  const steps = Array.from(root.querySelectorAll(".pkgo-step"));
+  const plates = Array.from(root.querySelectorAll(".pkgo-plate"));
+  const vw = window.innerWidth, vh = window.innerHeight;
+  return {
+    stage: stage ? box(stage) : null,
+    hand: (root.querySelector(".pkgo-hand")?.textContent || "").trim(),
+    handFont: root.querySelector(".pkgo-hand") ? getComputedStyle(root.querySelector(".pkgo-hand")).fontFamily : null,
+    probSub: (root.querySelector(".pkgo-probsub")?.textContent || "").trim(),
+    hiwHead: (root.querySelector(".pkgo-hiwhead h2")?.textContent || "").trim(),
+    hiwTag: (root.querySelector(".pkgo-hiwtag")?.textContent || "").trim(),
+    stepCount: steps.length,
+    stepWidths: steps.map((s) => Math.round(s.getBoundingClientRect().width)),
+    stepTitles: steps.map((s) => (s.querySelector("h3")?.textContent || "").trim()),
+    ticks: steps.map((s) => (s.querySelector(".pkgo-tick")?.textContent || "").trim() || null),
+    numsDone: steps.map((s) => !!s.querySelector(".pkgo-num--done")),
+    liveStep: steps.map((s) => s.classList.contains("pkgo-step--live")),
+    plateHeights: plates.map((p) => Math.round(p.getBoundingClientRect().height)),
+    plateLabels: Array.from(root.querySelectorAll(".pkgo-platelbl")).map((l) => (l.textContent || "").trim()),
+    plateSvgs: plates.filter((p) => !!p.querySelector("svg")).length,
+    /* ⚠️ prove the boxes are ON SCREEN before any claim about them — a rect outside the viewport
+       is not a measurement, and elementsFromPoint there returns an empty array that satisfies a
+       naive assertion by returning nothing at all. */
+    onScreen: steps.map((s) => { const r = s.getBoundingClientRect();
+      return r.top >= 0 && r.left >= 0 && r.bottom <= vh && r.right <= vw; }),
+    stripPresent: !!root.querySelector(".pkgw-strip"),
+  };
+})()`;
+
+test("phase 3 — stage: problem statement + how it works", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const r = await page.evaluate(STAGE);
+  await page.screenshot({ path: `${OUT}/p3-stage-1440.png`, fullPage: true });
+  writeFileSync(`${ART}/p3-stage.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});
+
+/**
+ * ⚠️ A SECOND WIDTH, because a law that holds at exactly one width is a coincidence. The ref's
+ * canvas is 1240px; inside the app the content column is 1170 at a 1440 viewport, so the stage is
+ * narrower than the ref's and the step cards cannot be the ref's absolute width. What must hold at
+ * BOTH widths is the ref's actual rules: three equal tracks, and a 150px plate.
+ */
+test("phase 3 — stage at 1920 (the ref's canvas width and beyond)", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1920, height: 1200 });
+  const r = await page.evaluate(STAGE);
+  await page.screenshot({ path: `${OUT}/p3-stage-1920.png`, fullPage: true });
+  writeFileSync(`${ART}/p3-stage-1920.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify({
+    stageW: r.stage?.w, stepWidths: r.stepWidths, plateHeights: r.plateHeights,
+    equal: new Set(r.stepWidths).size === 1, onScreen: r.onScreen, ticks: r.ticks,
+  }, null, 2));
+});

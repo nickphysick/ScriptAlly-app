@@ -497,10 +497,19 @@ MATERIALS  chip 4   + ADD
 PACKAGES   chip 2   + NEW
   Standard UK        Hook-first · One-page · Chapters 1-3     Sent with 6 queries
   Comps-led variant  Comps-forward · One-page · Chapters 1-3  Sent with 2 queries
-TRACKING   chip "3 replies"
-  Replies by package     Standard UK · 3 of 6 replied
+TRACKING   chip "2 replies"
+  Replies by package     Standard UK · 2 of 6 replied
   Requests by material   2 requests logged
 ```
+
+> **Corrected after Phase 3, and the reason is worth keeping.** This block first read `3 replies` /
+> `3 of 6 replied`. Both figures are derived, so neither was wrong when taken — the *fixture* moved
+> underneath them. My seed writes Rejected queries without `hasAgentResponded`, and the app's own
+> `recomputeQuery` heals that field once the page has loaded, at which point a rejection starts
+> counting as a response. Between the two captures I ran `--clean` and re-seeded, which replaced the
+> healed documents with fresh unhealed ones and took the count back down. The figures above are the
+> re-measured, currently-true ones. **A seeded fixture is not settled until the app has run over
+> it** — worth knowing before anyone quotes these numbers back.
 
 Rail width **300px**. Screenshots: `p2-rail-populated-1440.png`, `p2-rail-empty-1440.png`.
 
@@ -646,3 +655,86 @@ reports `VITEST_EXIT=1`, and the reason is worth stating rather than hiding behi
 vitest exits non-zero on the `[vitest-worker]: Timeout calling "onTaskUpdate"` unhandled error, an
 RPC timeout between the runner and a worker under the same contention that has been inflating these
 durations all evening. It is an infrastructure error, not an assertion — no test failed.
+
+---
+
+## Phase 3 — Stage
+
+**What shipped:** the problem-statement card, the how-it-works head, and three step cards whose
+progress is derived (D3). Illustration plates ship as placeholders (D8). The old `.pkgw-strip` is
+retired from this page.
+
+### Copy is the ref's, verbatim (D7) — verified by reading it back off the page
+
+```
+"Fed up of guessing which materials are landing with agents?"          (Caveat, cursive)
+"Every package keeps its own scorecard. ScriptAlly records which letter, synopsis and
+ pages went to each agent — so the answer sits on the page, not in your head."
+"How it works" · "Three steps"
+"Add your materials" · "Arrange them into packages" · "Track what comes back"
+```
+
+No verdict words: step 3 reads *"reported, not guessed"* — the app reports, the writer decides.
+
+### The strip is retired, not duplicated
+
+`.pkgw-strip` carried the scorecard sentence as a thin band above the tab row. The ref promotes that
+same sentence to the stage's opening card, so keeping both would state the page's one argument twice
+a few pixels apart. It is removed from the render; its CSS stays, because the DEV `#/pkg-lab` route
+still draws it — **verified, not assumed**: `PkgLab.tsx:124` contains `.pkgw-strip`. Measured
+`stripPresent: false` on the live page.
+
+### Measured at TWO widths — because one width is a coincidence
+
+| | 1440×900 | 1920×1200 |
+|---|---|---|
+| Stage width | 654 | 1134 |
+| Step widths | **206 · 206 · 206** | **366 · 366 · 366** |
+| Equal | ✓ | ✓ |
+| Plate heights | **150 · 150 · 150** | **150 · 150 · 150** |
+| Plate SVGs / `ILLUSTRATION` labels | 3 / 3 | 3 / 3 |
+| Ticks | `✓ 4 ADDED` · `✓ 2 BUILT` · `● LIVE` | same |
+| `pkgo-step--live` | step 3 only | step 3 only |
+| `.pkgw-strip` present | false | false |
+
+**Plate height is exactly the ref's 150px at both widths** — inside the ±2px the phase asked for,
+with nothing to round.
+
+**On the "1240px canvas" the phase specified:** the ref is a standalone canvas capped at 1240px, but
+inside the app the content column is 1170 at a 1440 viewport, so the stage is narrower than the
+ref's and the step cards *cannot* be the ref's absolute width. What is portable is the ref's actual
+rule — three equal tracks and a 150px plate — and that is what is asserted, at two widths. At 1920
+the stage reaches 1134, which is the closest this shell gets to the ref's canvas.
+
+**⚠️ `repeat(3, minmax(0, 1fr))`, not `repeat(3, 1fr)`.** A bare `1fr` carries an `auto` minimum, so
+the widest step's content would set its own track and the three would stop being equal — the very
+property being measured. The zero minimum makes equality a property of the grid rather than a
+coincidence of the copy. (`auto-fit` with a zero minimum is the opposite trap and is deliberately
+avoided: it is what resolved a stat block to two real tracks followed by a hundred phantom `0px`
+ones and rendered correctly only by luck.)
+
+**⚠️ The on-screen guard fired at 1440 and that is correct behaviour, not a failure.** The probe
+records `onScreen: [false, false, false]` there — the step cards sit below the fold in a 900px
+viewport — and `[true, true, true]` at 1920. The width and height readings stand either way
+(`getBoundingClientRect` is defined off-screen; it is `elementsFromPoint` that silently returns an
+empty array and satisfies a naive assertion by measuring nothing). The guard is in the probe so that
+any *coordinate* claim added later cannot be made about a box the browser never looked at.
+
+### Phase 3 gates
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | exit 0, clean |
+| `vite build` | exit 0; whole log grepped — no diagnostics |
+| Targeted suites (6 files) | **133 passed** |
+
+Screenshots: `p3-stage-1440.png`, `p3-stage-1920.png`.
+
+**Incidental, and it resolves F5:** at 1920 the `PRO` pill is visible beside the title. The clipped
+heading is a 1440-only symptom of the same 770px plate width recorded in F6 — the title, the Pro
+pill, the manuscript chip and the primary button share a plate that is 210px narrower than the body
+beneath it. If F6 is taken, F5 goes with it.
+
+**Phase 3 full suite: `VITEST_EXIT=0` — 331/331 files, 5614 tests, zero failures, and no unhandled
+worker error this time.** The cleanest run of the session, and the first with a genuinely green exit
+code; the contention that produced the RPC timeouts in Phases 1–2 had eased.
