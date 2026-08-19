@@ -65,10 +65,15 @@ test("contract", async ({ page }) => {
       /\.tdw-split\s*\{[^}]*flex-wrap:\s*wrap/.test(bare.replace(/\s+/g, " ").replace(/\{ /g, "{"))
         || /flex-wrap: wrap/.test((bare.match(/\.tdw-split \{[^}]*\}/) ?? [""])[0]),
       (bare.match(/\.tdw-split \{[^}]*\}/) ?? ["not found"])[0].replace(/\s+/g, " ").slice(0, 100));
+  /* ⚠️ WHITESPACE-NORMALISED, because this reads the SERVED stylesheet and the production build
+     MINIFIES it: `flex: 0 1 340px` ships as `flex:0 1 340px`. The spaced form passed locally on the
+     dev server and failed on dev the moment it was deployed — a source-shape assertion read against
+     a built artefact. Collapse the spacing first, then match. */
+  const tight = bare.replace(/\s*([:;{}])\s*/g, "$1").replace(/\s+/g, " ");
   add("D7 · the list asks 340 and floors at 260; the pane asks 420",
-      /\.tdw-split > \.tdw-rail \{[^}]*flex: 0 1 340px[^}]*min-width: 260px/.test(bare)
-        && /\.tdw-split > \.tdw-work \{[^}]*flex: 1 1 420px/.test(bare),
-      (bare.match(/\.tdw-split > \.tdw-rail \{[^}]*\}/) ?? ["not found"])[0].replace(/\s+/g, " ").slice(0, 80));
+      /\.tdw-split>\.tdw-rail\{[^}]*flex:0 1 340px[^}]*min-width:260px/.test(tight)
+        && /\.tdw-split>\.tdw-work\{[^}]*flex:1 1 420px/.test(tight),
+      (tight.match(/\.tdw-split>\.tdw-rail\{[^}]*\}/) ?? ["not found"])[0].slice(0, 90));
   add("D9 · tiles are repeat(auto-fit, minmax(150px, 1fr))",
       /repeat\(\s*auto-fit\s*,\s*minmax\(\s*150px\s*,\s*1fr\s*\)\s*\)/.test(bare.replace(/\s+/g, " ")),
       (css.replace(/\s+/g, " ").match(/\.tdk-tiles\s*\{[^}]*/) ?? ["not found"])[0].slice(0, 90));
