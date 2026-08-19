@@ -6,6 +6,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../lib/db";
+import { OnboardingHeader } from "./onboarding/OnboardingHeader";
 import { BETA_MODE, INVITE_GATE_ENABLED } from "../lib/beta";
 import {
   INVITE_LABEL, INVITE_PLACEHOLDER, INVITE_MISSING, INVITE_REJECTED,
@@ -198,22 +199,16 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup" }> = ({ initialMo
 
   return (
     <div className="sa-au-root">
-      <div className="topnav">
-        <div className="nav-brand">
-          <div className="nav-chip"><QuillMark size={16} /></div>
-          <span className="nav-word">ScriptAlly</span>
-        </div>
-        <div className="nav-right">
-          {/* ⚠️ NO "Founding Members open" PILL. It was hardcoded — nothing read a cap, a count or
-              a date, so it asserted an open programme whatever the truth was. The waitlist machinery
-              that could back a claim like this (functions/src/waitlist.ts, counters/waitlist) is not
-              wired to any live page. A status pill needs a status behind it. */}
-          <button type="button" className="nav-link" onClick={() => goPublic("/")}>
-            Back to site
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"><path d="M7 17 17 7M9 7h8v8" /></svg>
-          </button>
-        </div>
-      </div>
+      {/* ⚠️ THE SAME HEADER THE ONBOARDING WEARS — WORDMARK AND EXIT, NO SPINE. Signing in is not
+          a step in the flow, so a position here would claim progress through something the writer
+          has not started. What it buys is continuity: the landing, the auth screens and the
+          onboarding now carry one masthead instead of three, so nothing about arriving reads as
+          having left the product.
+
+          ⚠️ WRAPPER ONLY. The cards, the fields and the invite gate below are untouched, and the
+          exit keeps its own words — "Back to site" is where this one goes, not the onboarding's
+          "Skip for now". */}
+      <OnboardingHeader onExit={() => goPublic("/")} exitLabel="Back to site" />
 
       <div className="scene">
         <div className="split-card paper">
