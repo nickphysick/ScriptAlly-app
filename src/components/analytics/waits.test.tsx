@@ -10,6 +10,7 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import { Activity, ActivityType, Agent, Query, QueryStatus } from "../../types";
 import { buildRows, replyBuckets } from "../../lib/analytics";
 import { ReplyHistogram, histogramNote } from "./ReplyHistogram";
@@ -44,8 +45,16 @@ function open(a: Agent, sent: number) {
 const build = (parts: { q: Query; acts: Activity[] }[], agents: Agent[]) =>
   buildRows(parts.map((p) => p.q), parts.flatMap((p) => p.acts), agents, NOW);
 
-const histo = (rows: ReturnType<typeof build>) => renderToStaticMarkup(<ReplyHistogram rows={rows} />);
-const aging = (rows: ReturnType<typeof build>) => renderToStaticMarkup(<AgingChart rows={rows} />);
+/**
+ * ⚠️ RENDERED INSIDE A ROUTER, because every mark on this page is now a door and the components
+ * call `useNavigate`. Wrapping is what makes these specs exercise the SAME component the app
+ * mounts — a props-only twin without the hook would be a different component that happens to look
+ * the same.
+ */
+const inRouter = (node: React.ReactNode) =>
+  renderToStaticMarkup(<MemoryRouter initialEntries={["/queries/analytics"]}>{node}</MemoryRouter>);
+const histo = (rows: ReturnType<typeof build>) => inRouter(<ReplyHistogram rows={rows} />);
+const aging = (rows: ReturnType<typeof build>) => inRouter(<AgingChart rows={rows} />);
 
 describe("the reply-time histogram", () => {
   const A = agent();

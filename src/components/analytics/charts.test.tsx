@@ -20,6 +20,7 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import { Activity, ActivityType, Agent, Query, QueryStatus } from "../../types";
 import { buildRows, MAX_TIMELINE_MONTHS, statusBreakdown } from "../../lib/analytics";
 import { SendingChart } from "./SendingChart";
@@ -43,9 +44,17 @@ const rung = (queryId: string, status: QueryStatus, date: string): Activity =>
 
 const build = (qs: Query[], acts: Activity[]) => buildRows(qs, acts, [AGENT], NOW);
 
+/**
+ * ⚠️ RENDERED INSIDE A ROUTER, because every mark on this page is now a door and the components
+ * call `useNavigate`. Wrapping is what makes these specs exercise the SAME component the app
+ * mounts — a props-only twin without the hook would be a different component that happens to look
+ * the same.
+ */
+const inRouter = (node: React.ReactNode) =>
+  renderToStaticMarkup(<MemoryRouter initialEntries={["/queries/analytics"]}>{node}</MemoryRouter>);
 const timeline = (rows: ReturnType<typeof build>) =>
-  renderToStaticMarkup(<SendingChart rows={rows} range="all" nowMs={NOW} />);
-const donut = (rows: ReturnType<typeof build>) => renderToStaticMarkup(<StatusDonut rows={rows} />);
+  inRouter(<SendingChart rows={rows} range="all" nowMs={NOW} />);
+const donut = (rows: ReturnType<typeof build>) => inRouter(<StatusDonut rows={rows} />);
 
 /* the diamond marks are the only <path> whose `d` starts with a move followed by four corners */
 const markCount = (html: string) => (html.match(/class="an-mark"/g) ?? []).length;

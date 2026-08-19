@@ -16,6 +16,7 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import { Activity, ActivityType, Agent, Query, QueryStatus } from "../../types";
 import { buildRows, MIN_SAMPLE, READING_THE_NUMBERS, FUNNEL_REFERENCE_NOTE } from "../../lib/analytics";
 import { JourneyFunnel, funnelNote, funnelHeadline } from "./JourneyFunnel";
@@ -52,7 +53,15 @@ function rowsFor(openCount: number, journeys: QueryStatus[][] = []) {
   return buildRows(qs, acts, [AGENT], NOW);
 }
 
-const render = (rows: ReturnType<typeof rowsFor>) => renderToStaticMarkup(<JourneyFunnel rows={rows} />);
+/**
+ * ⚠️ RENDERED INSIDE A ROUTER, because every mark on this page is now a door and the components
+ * call `useNavigate`. Wrapping is what makes these specs exercise the SAME component the app
+ * mounts — a props-only twin without the hook would be a different component that happens to look
+ * the same.
+ */
+const inRouter = (node: React.ReactNode) =>
+  renderToStaticMarkup(<MemoryRouter initialEntries={["/queries/analytics"]}>{node}</MemoryRouter>);
+const render = (rows: ReturnType<typeof rowsFor>) => inRouter(<JourneyFunnel rows={rows} />);
 
 describe("the journey funnel", () => {
   it("draws its four stages through the real StatusDot, never a local recreation", () => {

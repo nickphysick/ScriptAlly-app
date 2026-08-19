@@ -22,9 +22,11 @@ import { QueryStatus } from "../../types";
 import { AnalyticsRow, FULLS_NOTE, fullsUnderConsideration } from "../../lib/analytics";
 import { IllustrationSlot } from "./IllustrationSlot";
 import { shortDateYear } from "./chartPlumbing";
+import { useOpenTarget } from "./useOpenTarget";
 
 export const FullsPanel: React.FC<{ rows: AnalyticsRow[]; nowMs: number }> = ({ rows, nowMs }) => {
   const fulls = fullsUnderConsideration(rows, nowMs);
+  const open = useOpenTarget();
 
   if (fulls.length === 0) {
     return (
@@ -42,7 +44,9 @@ export const FullsPanel: React.FC<{ rows: AnalyticsRow[]; nowMs: number }> = ({ 
   return (
     <>
       {fulls.map((f) => (
-        <div className="an-fullrow" key={f.queryId}>
+        <button type="button" className="an-fullrow" key={f.queryId}
+          onClick={open({ kind: "query", queryId: f.queryId })}
+          aria-label={`Open ${f.agentName} in the Query Centre — full out ${f.dwellDays} ${f.dwellDays === 1 ? "day" : "days"}`}>
           <span className="an-fi">
             <StatusDot status={QueryStatus.FULL_SENT} overrideSize={30} decorative />
           </span>
@@ -56,7 +60,7 @@ export const FullsPanel: React.FC<{ rows: AnalyticsRow[]; nowMs: number }> = ({ 
             <b>{f.dwellDays}</b>
             <i>{f.dwellDays === 1 ? "day with the agent" : "days with the agent"}</i>
           </div>
-        </div>
+        </button>
       ))}
       <div className="an-guardnote">{FULLS_NOTE}</div>
     </>

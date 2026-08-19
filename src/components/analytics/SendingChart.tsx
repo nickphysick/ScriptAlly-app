@@ -28,6 +28,7 @@ import {
   monthlySeries,
 } from "../../lib/analytics";
 import { gridTicks, shortDate, useChartTip, useMeasuredWidth } from "./chartPlumbing";
+import { useOpenTarget, svgDoor } from "./useOpenTarget";
 
 const H = 240;
 const PAD_L = 30;
@@ -42,6 +43,7 @@ export const SendingChart: React.FC<{
 }> = ({ rows, range, nowMs }) => {
   const [ref, W] = useMeasuredWidth(860);
   const tip = useChartTip();
+  const open = useOpenTarget();
 
   const series = monthlySeries(rows, range, nowMs);
   const marks = eventMarks(rows).filter((m) => series.months.includes(m.monthKey));
@@ -127,6 +129,7 @@ export const SendingChart: React.FC<{
                 fill={m.kind === "offer" ? CHART.offer : "#fdfaf5"}
                 stroke={CHART.offer}
                 strokeWidth={1.2}
+                {...svgDoor(open({ kind: "query", queryId: m.queryId }), { kind: "query", queryId: m.queryId }, m.agentName)}
                 {...tip.bind({
                   kicker: `${m.label} · ${shortDate(m.atMs)}`,
                   headline: m.agentName,

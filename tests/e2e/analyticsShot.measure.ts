@@ -29,5 +29,11 @@ test("Analytics: screenshots", async ({ page }) => {
       await page.waitForTimeout(250);
       await page.screenshot({ path: `reports/analytics/page-${w}-scroll${n}.png` });
     }
+    /* the share card, opened from the journey panel's own button */
+    await page.evaluate(() => { (document.querySelector(".qa-wpg .wpg-scroll") as HTMLElement).scrollTop = 0; });
+    await page.getByRole("button", { name: /Share card/ }).click();
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: `reports/analytics/share-${w}.png` });
+    await page.keyboard.press("Escape");
   }
 });

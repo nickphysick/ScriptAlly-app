@@ -7,6 +7,7 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import { Agent, Query, QueryStatus } from "../../types";
 import { buildRows, HORIZON_DAYS } from "../../lib/analytics";
 import { Horizon, horizonNote, horizonWorthShowing } from "./Horizon";
@@ -26,8 +27,16 @@ const query = (agentId: string, over: Partial<Query> = {}): Query =>
      personalisationNotes: "", sendMethod: "Email", ...over }) as unknown as Query;
 
 const build = (qs: Query[], agents: Agent[]) => buildRows(qs, [], agents, NOW);
+/**
+ * ⚠️ RENDERED INSIDE A ROUTER, because every mark on this page is now a door and the components
+ * call `useNavigate`. Wrapping is what makes these specs exercise the SAME component the app
+ * mounts — a props-only twin without the hook would be a different component that happens to look
+ * the same.
+ */
+const inRouter = (node: React.ReactNode) =>
+  renderToStaticMarkup(<MemoryRouter initialEntries={["/queries/analytics"]}>{node}</MemoryRouter>);
 const render = (rows: ReturnType<typeof build>) =>
-  renderToStaticMarkup(<Horizon rows={rows} nowMs={NOW} />);
+  inRouter(<Horizon rows={rows} nowMs={NOW} />);
 
 describe("on the horizon", () => {
   it("lists only the windows closing inside four weeks, soonest first", () => {

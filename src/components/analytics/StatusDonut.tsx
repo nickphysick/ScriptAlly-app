@@ -18,6 +18,8 @@
 import React from "react";
 import { AnalyticsRow, statusBreakdown } from "../../lib/analytics";
 import { useChartTip } from "./chartPlumbing";
+import { useOpenTarget, svgDoor } from "./useOpenTarget";
+import { AnalyticsTarget } from "./openInQueryCentre";
 
 const SIZE = 168;
 const C = SIZE / 2;
@@ -25,8 +27,14 @@ const R = 64;
 const STROKE = 22;
 const CIRC = 2 * Math.PI * R;
 
+/* ⚠️ NONE OF THE FIVE ROLES IS EXACTLY EXPRESSIBLE by the hub's four-value param — `awaiting` is
+   wider than "still out" and `closed` spans both settled roles — so each opens the hub unfiltered
+   with its intent recorded. See FILTER_GAP. */
+const roleTarget = (key: string): AnalyticsTarget => ({ kind: "unfiltered", intent: `donut:${key}` });
+
 export const StatusDonut: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
   const tip = useChartTip();
+  const open = useOpenTarget();
   const segments = statusBreakdown(rows);
   const total = segments.reduce((n, s) => n + s.count, 0);
 
@@ -63,6 +71,7 @@ export const StatusDonut: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
                 strokeDasharray={`${lit} ${CIRC - lit}`}
                 /* start at twelve o'clock rather than three */
                 strokeDashoffset={-acc * CIRC + CIRC * 0.25}
+                {...svgDoor(open(roleTarget(s.key)), roleTarget(s.key), `${s.count} ${s.label.toLowerCase()}`)}
                 {...tip.bind({
                   kicker: s.label,
                   headline: `${s.count} of ${total} · ${s.percent}%`,
@@ -79,13 +88,15 @@ export const StatusDonut: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
 
         <div className="an-dlist">
           {segments.map((s) => (
-            <div className="an-drow" key={s.key}
+            <button type="button" className="an-drow" key={s.key}
+              onClick={open(roleTarget(s.key))}
+              aria-label={`Open the Query Centre — ${s.count} ${s.label.toLowerCase()}`}
               {...tip.bind({ kicker: s.label, headline: `${s.count} of ${total} · ${s.percent}%`, detail: s.note })}>
               <span className="an-sw" style={{ background: s.colour }} />
               <span className="an-dname">{s.label}</span>
               <span className="an-dn">{s.count}</span>
               <span className="an-dp">{s.percent}%</span>
-            </div>
+            </button>
           ))}
         </div>
       </div>

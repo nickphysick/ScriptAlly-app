@@ -16,6 +16,12 @@
 import React from "react";
 import { AnalyticsRow, CHART, median, replyBuckets, REPLY_HISTOGRAM_NOTE } from "../../lib/analytics";
 import { gridTicks, useChartTip, useMeasuredWidth } from "./chartPlumbing";
+import { useOpenTarget, svgDoor } from "./useOpenTarget";
+import { AnalyticsTarget } from "./openInQueryCentre";
+
+/* ⚠️ THE HUB MODELS NO REPLY-TIME FILTER AT ALL, so a band opens it unfiltered rather than
+   landing the reader on a list that has nothing to do with the bar they clicked. See FILTER_GAP. */
+const BAND_TARGET: AnalyticsTarget = { kind: "unfiltered", intent: "histogram:band" };
 
 const H = 200;
 const PAD_L = 26;
@@ -26,6 +32,7 @@ const PAD_B = 26;
 export const ReplyHistogram: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
   const [ref, W] = useMeasuredWidth(620);
   const tip = useChartTip();
+  const open = useOpenTarget();
   const buckets = replyBuckets(rows);
   const answered = buckets.reduce((n, b) => n + b.count, 0);
 
@@ -77,6 +84,7 @@ export const ReplyHistogram: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => 
                   height={h}
                   rx={4}
                   fill={CHART.resp}
+                  {...svgDoor(open(BAND_TARGET), BAND_TARGET, `${noun} in ${b.label}`)}
                   {...tip.bind({ kicker: b.label, headline: `${noun} arrived in this window` })}
                 />
                 {/* ⚠️ THE COUNT SITS ABOVE ITS OWN BAR RATHER THAN ON A HOVER. A distribution is

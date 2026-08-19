@@ -7,6 +7,7 @@
 import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import { Activity, ActivityType, Agent, Query, QueryStatus } from "../../types";
 import { buildRows, latestResponses } from "../../lib/analytics";
 import { AGENT_RESPONSE_STATUSES } from "../../lib/queryDerivation";
@@ -29,10 +30,18 @@ const rung = (queryId: string, status: QueryStatus, date: string): Activity =>
      description: "", date, details: "", resultingStatus: status }) as unknown as Activity;
 
 const build = (qs: Query[], acts: Activity[]) => buildRows(qs, acts, [AGENT], NOW);
+/**
+ * ⚠️ RENDERED INSIDE A ROUTER, because every mark on this page is now a door and the components
+ * call `useNavigate`. Wrapping is what makes these specs exercise the SAME component the app
+ * mounts — a props-only twin without the hook would be a different component that happens to look
+ * the same.
+ */
+const inRouter = (node: React.ReactNode) =>
+  renderToStaticMarkup(<MemoryRouter initialEntries={["/queries/analytics"]}>{node}</MemoryRouter>);
 const fulls = (rows: ReturnType<typeof build>) =>
-  renderToStaticMarkup(<FullsPanel rows={rows} nowMs={NOW} />);
+  inRouter(<FullsPanel rows={rows} nowMs={NOW} />);
 const responses = (rows: ReturnType<typeof build>) =>
-  renderToStaticMarkup(<LatestResponses rows={rows} />);
+  inRouter(<LatestResponses rows={rows} />);
 
 describe("fulls under consideration", () => {
   it("lists a full that is out, longest first, with its dwell", () => {
@@ -151,7 +160,11 @@ describe("latest responses", () => {
     const qs = Array.from({ length: 9 }, (_, i) => query({ status: QueryStatus.REJECTED, dateSent: daysAgo(300 - i) }));
     const rows = build(qs, qs.map((q, i) => rung(q.id, QueryStatus.REJECTED, daysAgo(200 - i))));
     expect(latestResponsesNote(rows)).toBe("Most recent 7 of 9");
-    expect([...responses(rows).matchAll(/<tr>/g)]).toHaveLength(8); // 7 rows + the header row
+    /* ⚠️ THE BODY ROWS BY THEIR OWN CLASS, not a bare `<tr>`. Counting `<tr>` swept in the header
+       row and — once the row gained a class — stopped matching the body rows at all, so the figure
+       was measuring the markup's punctuation rather than the list. */
+    expect([...responses(rows).matchAll(/class="an-trow"/g)], "the list is not capped at seven")
+      .toHaveLength(7);
   });
 
   it("…and says the plain count when nothing is cut", () => {

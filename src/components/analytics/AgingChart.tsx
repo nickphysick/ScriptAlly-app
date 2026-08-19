@@ -22,6 +22,7 @@
 import React from "react";
 import { AnalyticsRow, agingSet, CHART } from "../../lib/analytics";
 import { shortDate, useChartTip, useMeasuredWidth } from "./chartPlumbing";
+import { useOpenTarget, svgDoor } from "./useOpenTarget";
 
 const MIN_H = 200;
 const PAD_L = 26;
@@ -48,6 +49,7 @@ const MAX_LANES = 8;
 export const AgingChart: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
   const [ref, W] = useMeasuredWidth(620);
   const tip = useChartTip();
+  const open = useOpenTarget();
   const set = agingSet(rows);
 
   if (set.points.length === 0) {
@@ -106,6 +108,7 @@ export const AgingChart: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
 
           {placed.map((p) => (
             <g key={p.queryId} className="an-dotg"
+              {...svgDoor(open({ kind: "query", queryId: p.queryId }), { kind: "query", queryId: p.queryId }, p.agentName)}
               {...tip.bind({
                 kicker: `${p.daysOut} days of a ${p.windowWeeks}-week window · ${Math.round(p.fraction * 100)}%`,
                 headline: p.agentName,

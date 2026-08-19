@@ -45,6 +45,7 @@ import { AgingChart, agingNote } from "./analytics/AgingChart";
 import { Horizon, horizonNote, horizonWorthShowing } from "./analytics/Horizon";
 import { FullsPanel, fullsNote } from "./analytics/FullsPanel";
 import { LatestResponses, latestResponsesNote } from "./analytics/LatestResponses";
+import { ShareCard } from "./analytics/ShareCard";
 import {
   AnalyticsRange,
   AnalyticsRow,
@@ -70,6 +71,9 @@ export const QueryAnalytics: React.FC = () => {
    * writer return next week to a three-month window they set once and forgot.
    */
   const [range, setRange] = React.useState<AnalyticsRange>("all");
+  /* the share card is a view of the journey panel, so the panel's own button owns it */
+  const [shareOpen, setShareOpen] = React.useState(false);
+  const shareBtn = React.useRef<HTMLButtonElement>(null);
 
   /* Read every render — see the scope note above. */
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
@@ -163,7 +167,21 @@ export const QueryAnalytics: React.FC = () => {
             ) : null}
 
             <PanelRow>
-              <Panel icon="journey" title="The journey so far" span={12} note={funnelNote(rows)}>
+              <Panel
+                icon="journey"
+                title="The journey so far"
+                span={12}
+                note={funnelNote(rows)}
+                action={
+                  <button type="button" className="an-sharebtn" ref={shareBtn}
+                    onClick={() => setShareOpen(true)} aria-haspopup="dialog">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 15 V4" /><path d="M8 7.5 L12 3.5 L16 7.5" /><path d="M5 12 v7 h14 v-7" />
+                    </svg>
+                    Share card
+                  </button>
+                }
+              >
                 <JourneyFunnel rows={rows} />
               </Panel>
             </PanelRow>
@@ -209,6 +227,17 @@ export const QueryAnalytics: React.FC = () => {
           </>
         )}
       </WorkspacePageGrid>
+
+      {/* ⚠️ FOCUS GOES BACK TO THE BUTTON THAT OPENED IT. A dialog that closes and leaves focus on
+          the document body drops a keyboard user at the top of the page. */}
+      {shareOpen && manuscript ? (
+        <ShareCard
+          rows={rows}
+          manuscriptTitle={manuscript.title}
+          nowMs={nowMs}
+          onClose={() => { setShareOpen(false); shareBtn.current?.focus(); }}
+        />
+      ) : null}
     </div>
   );
 };

@@ -20,11 +20,13 @@ import React from "react";
 import { StatusDot } from "../StatusDot";
 import { AnalyticsRow, latestResponses } from "../../lib/analytics";
 import { shortDateYear } from "./chartPlumbing";
+import { useOpenTarget } from "./useOpenTarget";
 
 const LIMIT = 7;
 
 export const LatestResponses: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
   const responses = latestResponses(rows, LIMIT);
+  const open = useOpenTarget();
 
   if (responses.length === 0) {
     return (
@@ -49,10 +51,18 @@ export const LatestResponses: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) =>
       </thead>
       <tbody>
         {responses.map((r) => (
-          <tr key={r.queryId}>
+          /* ⚠️ THE ROW IS CLICKABLE FOR A POINTER AND THE NAME IS A REAL BUTTON FOR EVERYTHING
+             ELSE. Putting `role="button"` on the `<tr>` would trade away the table semantics that
+             let a screen reader move by column and hear each cell's header — so the row keeps
+             being a row, and the door inside it is a control. */
+          <tr key={r.queryId} className="an-trow" onClick={open({ kind: "query", queryId: r.queryId })}>
             <td>
-              <span className="an-agname">{r.agentName}</span>
-              {r.agentSub ? <span className="an-agsub">{r.agentSub}</span> : null}
+              <button type="button" className="an-rowbtn"
+                onClick={open({ kind: "query", queryId: r.queryId })}
+                aria-label={`Open ${r.agentName} in the Query Centre`}>
+                <span className="an-agname">{r.agentName}</span>
+                {r.agentSub ? <span className="an-agsub">{r.agentSub}</span> : null}
+              </button>
             </td>
             <td className="an-tdate">{r.sentMs === null ? "—" : shortDateYear(r.sentMs)}</td>
             <td>

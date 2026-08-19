@@ -20,6 +20,8 @@
  */
 import React from "react";
 import { StatusDot } from "../StatusDot";
+import { useOpenTarget } from "./useOpenTarget";
+import { AnalyticsTarget } from "./openInQueryCentre";
 import { IllustrationSlot } from "./IllustrationSlot";
 import {
   AnalyticsRow,
@@ -30,9 +32,23 @@ import {
   safePct,
 } from "../../lib/analytics";
 
+/**
+ * ⚠️ ONLY THE FIRST RUNG HAS AN EXACT DESTINATION. "Queried" is every query, which the hub's
+ * `all` expresses; the other three name sets the param cannot, so they open the hub unfiltered
+ * with their intent recorded in `FILTER_GAP`. A near-miss filter would land the reader on a list
+ * that does not match the number they just clicked.
+ */
+const STAGE_TARGET: Record<string, AnalyticsTarget> = {
+  queried: { kind: "all" },
+  requested: { kind: "unfiltered", intent: "funnel:requested" },
+  full: { kind: "unfiltered", intent: "funnel:full" },
+  offer: { kind: "unfiltered", intent: "funnel:offer" },
+};
+
 export const JourneyFunnel: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
   const stages = funnelStages(rows);
   const transitions = funnelTransitions(stages);
+  const open = useOpenTarget();
 
   return (
     <>
@@ -40,7 +56,8 @@ export const JourneyFunnel: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
         <div className="an-funnel">
           {stages.map((s, i) => (
             <React.Fragment key={s.key}>
-              <div className="an-fstage">
+              <button type="button" className="an-fstage" onClick={open(STAGE_TARGET[s.key])}
+                aria-label={`Open the Query Centre — ${s.count} ${s.name.toLowerCase()}`}>
                 <div className="an-fdot">
                   {/* decorative: the stage's own name is the next line down */}
                   <StatusDot status={s.dotStatus} overrideSize={56} decorative />
@@ -48,7 +65,7 @@ export const JourneyFunnel: React.FC<{ rows: AnalyticsRow[] }> = ({ rows }) => {
                 <div className="an-fnum">{s.count}</div>
                 <div className="an-fname">{s.name}</div>
                 <div className="an-fdesc">{s.description}</div>
-              </div>
+              </button>
               {i < transitions.length ? (
                 <div className="an-fconv" aria-hidden="true">
                   {/* the arrow fades along the journey — fewer queries reach each rung */}

@@ -22,9 +22,11 @@ import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { AnalyticsRow, HORIZON_DAYS, horizonSet } from "../../lib/analytics";
 import { shortDateYear } from "./chartPlumbing";
+import { useOpenTarget } from "./useOpenTarget";
 
 export const Horizon: React.FC<{ rows: AnalyticsRow[]; nowMs: number }> = ({ rows, nowMs }) => {
   const set = horizonSet(rows, nowMs);
+  const open = useOpenTarget();
 
   if (set.soon.length === 0) {
     return (
@@ -39,7 +41,9 @@ export const Horizon: React.FC<{ rows: AnalyticsRow[]; nowMs: number }> = ({ row
   return (
     <div className="an-horizonrow">
       {set.soon.map((h) => (
-        <div className="an-hcard" key={h.queryId}>
+        <button type="button" className="an-hcard" key={h.queryId}
+          onClick={open({ kind: "query", queryId: h.queryId })}
+          aria-label={`Open ${h.agentName} in the Query Centre — window closes ${shortDateYear(h.closesMs)}`}>
           {/* the query is still out, so it is drawn as what it is */}
           <StatusDot status={QueryStatus.QUERIED} overrideSize={26} decorative />
           <div className="an-hn">
@@ -52,7 +56,7 @@ export const Horizon: React.FC<{ rows: AnalyticsRow[]; nowMs: number }> = ({ row
             <b>{h.daysLeft}</b>
             <i>{h.daysLeft === 1 ? "day left" : "days left"}</i>
           </div>
-        </div>
+        </button>
       ))}
     </div>
   );
