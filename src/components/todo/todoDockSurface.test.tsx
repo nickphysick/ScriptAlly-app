@@ -500,7 +500,14 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     const hint = dockCssRule(".tdk-foothint {");
     expect(hint).toContain("margin-right: auto");
     expect(hint).toContain("min-width: 0");
-    expect(hint).toContain("text-overflow: ellipsis");
+    /* ⚠️ IT GIVES BY WRAPPING NOW, NOT BY ELLIPSING — and the intent is unchanged: the hint is
+       still the only thing that yields, and `.tdk-vb`'s `flex: none` below is still what keeps the
+       buttons on one row. The mechanism changed because the ellipsis cut the sentence mid-word on
+       the note pane ("…this records…"), and a promise the reader cannot finish is worse than a
+       second line. Asserted as the absence of the truncation pair, so it cannot come back. */
+    expect(hint).not.toContain("text-overflow: ellipsis");
+    expect(hint).not.toContain("white-space: nowrap");
+    expect(hint).toContain("overflow-wrap: anywhere");
     expect(dockCssRule(".tdk-vb {")).toContain("flex: none");
   });
 

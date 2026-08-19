@@ -41,6 +41,7 @@ import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
 import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandDeed, bandSubline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow, recordNote } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
+import { cardFootHint } from "../../lib/todoBuckets";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
 
@@ -867,7 +868,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                 min-width of 0, so on a narrow pane the hint truncates and then drops before any
                 button wraps. Buttons never wrap to a second row: a verb on its own line reads as a
                 different control from the three above it. */}
-            <span className="tdk-foothint">Nothing is sent from here — this records what happened.</span>
+            <span className="tdk-foothint">{cardFootHint(card)}</span>
             {(() => {
               const v = verbs?.(card);
               if (!v) return null;

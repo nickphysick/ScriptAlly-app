@@ -424,11 +424,20 @@
 .tdk-vb:disabled svg { color: #cbbcae; }
 .tdk-vbsep { width: 1px; height: 22px; background: #e8ddd0; margin: 0 3px; flex: none; }
 /* the consequence, quiet and italic — it states, it does not instruct */
+/* ⚠️ IT WRAPS, IT DOES NOT ELLIPSE. `white-space: nowrap` plus `text-overflow: ellipsis` cut this
+   sentence mid-word — measured on the note pane as "Nothing is sent from here — this records…",
+   which is a promise the reader cannot finish. A hint that cannot be read is worse than a hint on
+   two lines, and the row's own note already says the buttons must never wrap; only the hint gives.
+   `min-width: 0` stays so it is still the thing that yields first. */
 .tdk-foothint {
   font-size: 11.5px; color: #a89684; font-style: italic;
+  line-height: 1.4;
   min-width: 0; margin-right: auto; padding-right: 12px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  overflow-wrap: anywhere;
 }
+
+/* the foot's buttons keep their line — the hint is what gives, and it gives by wrapping now */
+.tdk-foot { align-items: center; }
 
 /* ⚠️ BLACK MEANS "THIS ADVANCES" — the same grammar as the calendar's confirm and the bar's Action,
    reading the token rather than restating a near-black hex. */

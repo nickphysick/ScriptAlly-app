@@ -76,6 +76,43 @@ export function cardBucket(c: BoardCard): Bucket {
 }
 
 /**
+ * THE CARD FOOTER'S HINT — what pressing the primary will and will not do.
+ *
+ * ⚠️ THIS WAS A HARDCODED SENTENCE, NOT A DEFAULT — which is worse. `TodoDock` rendered
+ * "Nothing is sent from here — this records what happened." on EVERY card, for all six buckets. It
+ * is wrong on a Note (nothing is recorded about a send), wrong on a Close (the query IS closed by
+ * it) and wrong on a record gap (nothing about the query moves at all). One journey's reassurance
+ * standing in for six.
+ *
+ * ⚠️ THE SAME FAMILY AS `completionVia` AND `journeySummary`, one register further out: those were
+ * permissive DEFAULTS answering as another journey; this did not even branch. Exhaustive over
+ * `Bucket` with the house `never` guard, so the next bucket fails to compile until it says what
+ * pressing its primary does.
+ *
+ * ⚠️ AND IT IS THE CARD'S HINT, NOT THE JOURNEY'S. `JOURNEY_HINT` speaks at the moment of commit
+ * ("this records what you sent"); this speaks before the form opens, about the act the primary
+ * begins. Two moments, two sentences — folding them would put a commit's promise on a button that
+ * only opens something.
+ */
+export function cardFootHint(c: BoardCard): string {
+  /* ⚠️ HOISTED so the `never` guard can narrow — calling `cardBucket(c)` again in the default
+     gives TypeScript a fresh `Bucket` it cannot know is exhausted, and the guard stops guarding. */
+  const bucket = cardBucket(c);
+  switch (bucket) {
+    case "send":   return "Nothing is sent from here — this records what you sent.";
+    case "chase":  return "Nothing is sent from here — this records the nudge you sent.";
+    case "close":  return "This closes the record. It does not tell the agent anything.";
+    case "decide": return "This records what you decided. Telling anyone is still your email.";
+    case "fix":    return "This fills in your own record. The query does not move.";
+    case "note":   return "Your own task — ticking it off is what finishes it.";
+    default: {
+      const unhandled: never = bucket;
+      return unhandled;
+    }
+  }
+}
+
+/**
  * ⚠️ THE TIE TO THE FAMILIES, STATED ONCE. A bucket rolls up to exactly one family, so the pill
  * and the group heading above it can never claim different piles. `liveFamily` remains the
  * authority for which GROUP a card is in; this is how a bucket agrees with it.
