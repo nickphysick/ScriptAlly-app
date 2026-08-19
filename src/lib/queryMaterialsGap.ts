@@ -28,6 +28,7 @@
  * everything.
  */
 import { ActivityType, type Activity, type Agent, type Query } from "../types";
+import { isTerminalStatus } from "./agentList";
 
 /**
  * ⚠️ THREE, AND IT IS NAMED BECAUSE IT IS A JUDGEMENT. Below it the singles are the better page —
@@ -109,6 +110,22 @@ export function queriesMissingMaterials(input: GapInput): MaterialsGap[] {
 
   for (const q of queries) {
     if (!q.dateSent) continue;
+    /* ⚠️ A CLOSED QUERY NEEDS NOTHING DONE TO IT, so it is not a task. Nineteen chores on a page
+       whose premise is "what needs you" is the feature introducing itself as a nag, and the oldest
+       of them are the least answerable — a rejection from eight months ago is precisely the send
+       whose materials nobody remembers.
+
+       ⚠️ RECOVERABILITY IS PRESERVED ELSEWHERE, NOT BY ASKING. The same recording affordance sits
+       on the query's own reading pane, so a writer who wants that history can reach it without
+       having been prompted. Widening this later stays clean because nobody will have dismissed
+       anything in the meantime.
+
+       ⚠️ `isTerminalStatus`, NOT `queryBucket`. The two disagree about an OFFER: `queryBucket` files
+       it under "closed" because no action is owed, which is right for a filter pill and wrong here —
+       an offer is a live query, and `TERMINAL_STATUSES` says so in as many words. Reusing the
+       nearest-looking derivation instead of the one that answers this question would have quietly
+       dropped every offer. */
+    if (isTerminalStatus(q.status)) continue;
     const sentMs = new Date(q.dateSent as unknown as string).getTime();
     if (Number.isNaN(sentMs)) continue;
     if (sendMaterialsRecorded(q, activities)) continue;

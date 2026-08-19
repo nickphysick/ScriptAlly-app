@@ -23,6 +23,8 @@ import { rowMeta } from "./todoBuckets";
 import { completionVia, isTickable } from "./todoActions";
 import { cardJourney } from "./todoJourneys";
 import { agentDataQualityNeeds } from "./agentDataQuality";
+import { queryBucket } from "./queryAmbient";
+import { isTerminalStatus } from "./agentList";
 import { ActivityType, QueryStatus, SubmissionStatus, type Activity, type Agent, type Query } from "../types";
 
 const agent = (over: Partial<Agent> = {}): Agent => ({
@@ -122,9 +124,26 @@ describe("queriesMissingMaterials", () => {
     expect(run({ queries: qs, activities: acts }).map((g) => g.queryId)).toEqual(["old", "mid", "new"]);
   });
 
-  it("includes closed queries — the send happened whatever the outcome", () => {
-    const rejected = query({ id: "qr", status: QueryStatus.REJECTED });
-    expect(run({ queries: [rejected], activities: [sendActivity({ queryId: "qr" })] })).toHaveLength(1);
+  it("⚠️ EXCLUDES closed queries — a closed query needs nothing done to it", () => {
+    for (const st of [QueryStatus.REJECTED, QueryStatus.WITHDRAWN, QueryStatus.NO_RESPONSE]) {
+      const closed = query({ id: "qr", status: st });
+      expect(run({ queries: [closed], activities: [sendActivity({ queryId: "qr" })] }), st).toHaveLength(0);
+    }
+  });
+
+  it("⚠️ an OFFER is NOT closed — `queryBucket` files it under closed, and that is the wrong derivation here", () => {
+    const offer = query({ id: "qo", status: QueryStatus.OFFER });
+    expect(run({ queries: [offer], activities: [sendActivity({ queryId: "qo" })] })).toHaveLength(1);
+    // stated as a reconciliation, so the two derivations cannot silently converge
+    expect(queryBucket(QueryStatus.OFFER)).toBe("closed");
+    expect(isTerminalStatus(QueryStatus.OFFER)).toBe(false);
+  });
+
+  it("every live status still reports its gap", () => {
+    for (const st of [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT,
+                      QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]) {
+      expect(run({ queries: [query({ id: "q1", status: st })] }), st).toHaveLength(1);
+    }
   });
 
   it("an unparseable date is skipped rather than sorted as NaN", () => {

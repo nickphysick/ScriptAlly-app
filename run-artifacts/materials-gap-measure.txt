@@ -1,7 +1,7 @@
 ── 1440×900
   present:        true      key: task-materials-bulk
   bucket pill:    Fix
-  title:          19 queries have no record of what you sent
+  title:          10 queries have no record of what you sent
   subject line:   ""   (must NOT be "Submission packages")
   figure label:   No date on record
   in viewport:    true
@@ -11,7 +11,7 @@
 ── 390×844
   present:        true      key: task-materials-bulk
   bucket pill:    Fix
-  title:          19 queries have no record of what you sent
+  title:          10 queries have no record of what you sent
   subject line:   ""   (must NOT be "Submission packages")
   figure label:   No date on record
   in viewport:    false
