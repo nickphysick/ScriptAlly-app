@@ -21,6 +21,11 @@ const plateOf = (page: any) => page.evaluate(() => {
     plateH: plate ? Math.round(plate.getBoundingClientRect().height) : null,
     subH: sub ? Math.round(sub.getBoundingClientRect().height) : null,
     subText: (sub?.textContent || "").trim(),
+    font: sub ? getComputedStyle(sub).fontFamily : "",
+    size: sub ? getComputedStyle(sub).fontSize : "",
+    weight: sub ? getComputedStyle(sub).fontWeight : "",
+    tracking: sub ? getComputedStyle(sub).letterSpacing : "",
+    colour: sub ? getComputedStyle(sub).color : "",
     lines: sub ? Math.round(sub.getBoundingClientRect().height / parseFloat(getComputedStyle(sub).lineHeight || "20")) : 0,
     condensed: !!plate?.className.includes("wsh--scrolled"),
   };
@@ -32,6 +37,32 @@ test("a short description is untouched", async ({ page }) => {
   const r = await plateOf(page);
   console.log(`  manuscripts: ${JSON.stringify(r)}`);
   expect(r.lines, "a one-line description now wraps — existing pages were disturbed").toBe(1);
+});
+
+/**
+ * ⚠️ THE TWO SUBTITLES ARE COMPARED TO EACH OTHER, NOT TO LITERALS. "Same font as the manuscripts
+ * page" is a claim about two rendered elements agreeing, so a hard-coded 14px would go green the
+ * day someone retoned the shared rule and BOTH pages moved together — which is the state this
+ * asserts, not a particular size.
+ *
+ * ⚠️ AND IT IS MEASURED, NOT READ OUT OF THE STYLESHEET. The divergence was a page-scoped override
+ * (`.qc-wpg .wsh-sub`, mono 11px, left behind by the retired counts) beating a shared rule that was
+ * itself perfectly correct — so a lock reading either file would have found nothing wrong. Only the
+ * cascade's answer shows it.
+ */
+test("both pages' subtitles render identically", async ({ page }) => {
+  const typography = async (route: string) => {
+    await openRoute(page, route, { width: 1440, height: 900 });
+    await page.waitForTimeout(1800);
+    const r = await plateOf(page);
+    return { font: r.font, size: r.size, weight: r.weight, tracking: r.tracking, colour: r.colour };
+  };
+  const manuscripts = await typography("/manuscripts");
+  const queries = await typography("/queries");
+  console.log(`  manuscripts: ${JSON.stringify(manuscripts)}`);
+  console.log(`  queries:     ${JSON.stringify(queries)}`);
+  expect(manuscripts.font, "the fixture measured nothing").toBeTruthy();
+  expect(queries, "Query Centre's subtitle is not in the shared treatment").toEqual(manuscripts);
 });
 
 test("the collapse still gives the space back", async ({ page }) => {

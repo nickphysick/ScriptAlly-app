@@ -2217,15 +2217,17 @@
 .qc-wpg.wpg--working > .wpg-scroll { --wpg-reclaim-pad: 0px; }
 
 /**
- * ⚠️ THE MASTHEAD'S SUBTITLE IS MONO NOW — it carries counts, not prose (§1b). Page-scoped, so the
- * shared header keeps its 14px description on the other nine pages.
+ * ⚠️ THE MONO SUBTITLE IS RETIRED, AND IT WENT WITH THE THING IT WAS FOR. The rule read "the
+ * masthead's subtitle is mono NOW — it carries counts, not prose (§1b)", and mono was the right
+ * voice for a line of figures. The counts were then retired themselves, and this rule outlived
+ * them: the slot sat empty, so nothing looked wrong, until prose was put back into it and rendered
+ * at 11px tracked-out mono beside Manuscripts' 14px.
+ *
+ * ⚠️ THE FIX IS DELETION, NOT A SECOND OVERRIDE. Restating 14px here would have been an override
+ * of an override, and the shared `.wsh-sub` already says exactly what this page wants — which is
+ * the point of a shared header. Measured before: 11px / 0.66px tracking / #9c8878 against
+ * Manuscripts' 14px / normal / #6b5a51.
  */
-.qc-wpg .wsh-sub {
-  font-family: var(--f12-mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: var(--shell-muted);
-}
 
 /**
  * ══ THE DOCK (§3) ═════════════════════════════════════════════════════════════════════════════

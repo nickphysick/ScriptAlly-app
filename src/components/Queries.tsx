@@ -3542,7 +3542,7 @@ export const Queries: React.FC<{
              * The counts §1b put here in its place are separately retired (see the note below) —
              * so this is not displacing them, it is filling a slot that has been empty since.
              */
-            description="The home of every query you've sent and every response you've had back. Log, review and update, all in one place."
+            description="Every query, every response — track every step of your journey so far"
             /* ⚠️ WHY THE COUNTS WENT (§1b, then §1). They were two facts the reader could not get by
                looking, both from `queryBucket` — the same function the filter pills and
                `getPrimaryAction` read — and manuscript-scoped rather than view-scoped, so the
