@@ -7,7 +7,7 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  SPINE_LABELS, spineFor, spineIndex, stepOfLabel, subStepLabel, OnboardingBranch,
+  SPINE_LABELS, spineFor, spineIndex, stepOfLabel, subStepLabel, subStepFor, OnboardingBranch,
 } from "./onboardingSpine";
 
 const BRANCHES: OnboardingBranch[] = [null, "A", "B"];
@@ -103,5 +103,48 @@ describe("the strings a person reads", () => {
 
   it("carries a sub-position without inventing a step", () => {
     expect(subStepLabel(2, "Reviewing 2 of 3")).toBe("Step 3 · Reviewing 2 of 3");
+  });
+});
+
+describe("⚠️ the import sub-flow lives in the band, never in the spine", () => {
+  /**
+   * Every screen after the manuscript is "Your list". Expanding the import walk into dots would
+   * make the Smart Import path look longer than the template path — the progress bar growing
+   * because of a choice the writer made, which is the one thing the spine may never do.
+   */
+  const SUB_SCREENS = ["pipeline", "confirm", "blocked", "reading", "overview", "review", "fallback", "importing", "done"];
+
+  it("the branch's step count is the same on every sub-screen", () => {
+    for (const _ of SUB_SCREENS) expect(spineFor("B").length).toBe(3);
+  });
+
+  it("and the list step is the last one throughout", () => {
+    for (const _ of SUB_SCREENS) expect(spineIndex(spineFor("B"), "list")).toBe(2);
+  });
+
+  /** ⚠️ `null` MEANS "THE STEP ITSELF". The capture fork IS "Your list" — a sub-name there would
+   *  imply a position inside a screen that has none. */
+  it("names a sub-position only where there is one", () => {
+    expect(subStepFor("pipeline")).toBeNull();
+    expect(subStepFor("blocked")).toBeNull();
+    expect(subStepFor("confirm")).toBe("Confirming your file");
+    expect(subStepFor("reading")).toBe("Reading your sheet");
+    expect(subStepFor("importing")).toBe("Bringing it in");
+  });
+
+  /**
+   * ⚠️ IT NAMES A PLACE, IT DOES NOT COUNT ONE. "Reviewing 2 of 3" needs a total, and the screens
+   * that have one — the review's agents/duplicates/queries walk — render their own full-screen
+   * shells with no card band to state it in. No sub-label invents a number.
+   */
+  it("no sub-label claims a count", () => {
+    for (const s of SUB_SCREENS) {
+      const sub = subStepFor(s);
+      if (sub) expect(sub, `${s} states a count it cannot know`).not.toMatch(/\d+\s+of\s+\d+/);
+    }
+  });
+
+  it("composes onto the step rather than replacing it", () => {
+    expect(subStepLabel(2, subStepFor("reading")!)).toBe("Step 3 · Reading your sheet");
   });
 });

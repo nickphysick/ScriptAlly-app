@@ -81,3 +81,24 @@ export function stepOfLabel(index: number, total: number): string {
 export function subStepLabel(index: number, sub: string): string {
   return `Step ${index + 1} · ${sub}`;
 }
+
+/**
+ * The import sub-flow's position within "Your list", for the card band's meta.
+ *
+ * ⚠️ IT NAMES A PLACE, IT DOES NOT COUNT ONE. "Reviewing 2 of 3" needs a total, and the screens
+ * that have one — the review's agents/duplicates/queries walk — render their own full-screen shells
+ * rather than an `OnboardingCard`, so they have no band to state it in. Rather than invent a band
+ * for them (no ref draws one) or a number for the screens that do have a band (there is nothing to
+ * count), each card-based sub-screen states what it is doing and the rest state the step alone.
+ *
+ * ⚠️ `null` MEANS "THE STEP ITSELF", NOT "UNKNOWN". The capture fork IS "Your list"; giving it a
+ * sub-name would imply a position inside a screen that has none.
+ */
+export function subStepFor(screen: string): string | null {
+  switch (screen) {
+    case "confirm": return "Confirming your file";
+    case "reading": return "Reading your sheet";
+    case "importing": return "Bringing it in";
+    default: return null;
+  }
+}

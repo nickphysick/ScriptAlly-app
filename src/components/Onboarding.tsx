@@ -395,6 +395,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           <CenterWrap>
             <BranchB
               stepLabel={stepLabel}
+              stepIndex={spineAt}
               onSkip={handleSkip}
               onStage={setSpineStep}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}

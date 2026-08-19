@@ -29,6 +29,7 @@ import { ManuscriptFields, ManuscriptFieldsState, emptyManuscriptFields } from "
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
 import { CaptureOption, CAPTURE_HEADING, CAPTURE_SUB, capturePrimaryLabel } from "../../lib/captureFork";
 import { CaptureFork } from "./CaptureFork";
+import { subStepFor, subStepLabel } from "../../lib/onboardingSpine";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
  *  errors — Promise.all rejects as soon as the commit does). */
@@ -67,8 +68,16 @@ export interface BranchBProps {
    * progress bar growing because of a choice the writer made.
    */
   onStage?: (stage: "book" | "list") => void;
-  /** The band's right-hand meta — `Step 3 of 3`, or a sub-position within it. */
+  /** The band's right-hand meta — `Step 3 of 3`. */
   stepLabel?: string;
+  /**
+   * The same position as a number, for composing a sub-step.
+   *
+   * ⚠️ PASSED, NEVER PARSED BACK OUT OF `stepLabel`. Reading "3" out of "Step 3 of 3" would be
+   * deriving state from a display string — the fault this repo already forbids by name, and one
+   * that breaks silently the moment the wording changes.
+   */
+  stepIndex?: number;
 }
 
 /* ⚠️ NO "tidying" MEMBER. It sat in this union with a render branch guarding it, and
@@ -130,7 +139,7 @@ const EscapeHatch: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, onUpgrade, error, onStage, stepLabel,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, onUpgrade, error, onStage, stepLabel, stepIndex,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
@@ -141,9 +150,12 @@ export const BranchB: React.FC<BranchBProps> = ({
      owns how many steps this branch has. */
   useEffect(() => { onStage?.(screen === "book" ? "book" : "list"); }, [screen, onStage]);
 
-  /* The band's meta. Phase 5 gives the import sub-flow its own sub-position here; for now every
-     screen on this branch states the branch's own step. */
-  const bandStep = stepLabel;
+  /* The band's meta: the step, plus what this screen is doing when that is a real sub-position.
+     ⚠️ THE SPINE IS NOT TOLD ANY OF THIS. Sub-steps stay in the band by design — expanding a dot
+     into three would make the Smart Import path look longer than the template path, which is the
+     progress bar growing because of a choice the writer made. */
+  const sub = subStepFor(screen);
+  const bandStep = sub !== null && stepIndex !== undefined ? subStepLabel(stepIndex, sub) : stepLabel;
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
   const [fields, setFields] = useState<ManuscriptFieldsState>(initialBook ?? emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
