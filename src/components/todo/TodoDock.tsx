@@ -368,7 +368,13 @@ export const TodoDock: React.FC<TodoDockProps> = ({
         {/* ⚠️ THE VARIANT COMES FROM `bandVariant`, NOT FROM THE FAMILY. This read
             `fam-${bandFamily(card)}`, and family answers "how urgent is this" — `urgent` covers
             every send, every R&R and the offer alike, so nine cards of ten rendered pink. */}
-        <div className={`tdk-band v-${bandVariant(card)}`}>
+        {/* ⚠️ THE TINT FOLLOWS THE URGENCY GROUP, FROM `liveFamily` — the SAME derivation `todoGroups`
+              uses to head the list's sections, so the band and the section a card sits under can
+              never disagree about which pile it is in. A second mapping here is exactly how the
+              `fam-*` set went wrong before: it keyed on urgency and painted nine cards of ten pink.
+              `bandVariant` survives alongside it because the OFFER is a celebration rather than a
+              group — one card, its own paper. */}
+          <div className={`tdk-band v-${bandVariant(card)} g-${liveFamily(card)}`}>
           <DockMotif motif={bandMotif(card)} />
           {/* ⚠️ NO MONOGRAM. It was an agency disc leading a surface whose job is to say what you
               are DOING; the writer already knows who they clicked. Removed rather than shrunk —

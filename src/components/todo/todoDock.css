@@ -212,9 +212,52 @@
 /* ⚠️ SAGE IS THE DEFAULT AND PINK IS THE OFFER — two variants, not four families. The `.fam-*`
    set is gone from this band: it keyed on urgency, so every send and every R&R came out pink. */
 .tdk-band.v-default { background: linear-gradient(135deg, #dee4dc 0%, #d5dbd3 100%); border-bottom-color: rgba(90, 110, 88, 0.2); }
-.tdk-band.v-offer { background: linear-gradient(135deg, #f3e0d6 0%, #eed4c8 100%); border-bottom-color: rgba(124, 58, 42, 0.14); }
-.tdk-band.v-offer .tdk-sub { color: #8a6558; }
-.tdk-band.v-offer .tdk-deed { color: #3a1c14; }
+
+/* ── §2's THREE GROUP TINTS ────────────────────────────────────────────────────────────────────
+   ⚠️ KEYED ON THE GROUP, NOT THE BUCKET, and the group is `liveFamily`'s — the same answer the
+   list's own section heads read. The deed and its sub-line take the group's inks with it: a
+   burgundy emphasis on a sage band reads as an error rather than as emphasis.
+
+   ⚠️ ORDER IS THE MECHANISM, AND I GOT IT WRONG FIRST TIME. `.tdk-band.v-default` and
+   `.tdk-band.g-urgent` are both 0-2-0, so the LATER rule wins. I placed these above `.v-default`
+   while the comment claimed they sat below it — the comment describing the intent while the code
+   did the opposite, which is the exact fault this codebase has a note about. A7 caught it: every
+   band still measured `.v-default`'s sage. They sit after it now, and `.v-offer` sits after THEM,
+   so the offer keeps its own paper. Do not reorder without re-reading this. */
+.tdk-band.g-urgent {
+  background: linear-gradient(135deg, #f3e0d6 0%, #eed7ca 100%);
+  border-bottom-color: rgba(124, 58, 42, 0.16);
+}
+
+.tdk-band.g-urgent .tdk-deed { color: #3a1c14; }
+
+.tdk-band.g-urgent .tdk-deed em { color: #7c3a2a; }
+
+.tdk-band.g-urgent .tdk-sub { color: #8a6558; }
+
+.tdk-band.g-housekeeping {
+  background: linear-gradient(135deg, #d7ddd5 0%, #d5dbd3 100%);
+  border-bottom-color: rgba(90, 110, 88, 0.2);
+}
+
+/* ⚠️ THE HOUSEKEEPING DEED TAKES THE SAGE INK, per §2 — burgundy on this band is the wrong family */
+.tdk-band.g-housekeeping .tdk-deed { color: #2e3a2c; }
+
+.tdk-band.g-housekeeping .tdk-deed em { color: #405a3c; }
+
+.tdk-band.g-housekeeping .tdk-sub { color: #5f7059; }
+
+.tdk-band.g-yours {
+  background: linear-gradient(135deg, #f7f0e2 0%, #f2e9d6 100%);
+  border-bottom-color: rgba(138, 116, 64, 0.16);
+}
+
+.tdk-band.g-yours .tdk-deed { color: #3a2c14; }
+
+.tdk-band.g-yours .tdk-deed em { color: #8a7440; }
+
+.tdk-band.g-yours .tdk-sub { color: #8a7a5c; }
+
 
 /* ⚠️ BEHIND THE TEXT AND CLIPPED BY THE BAND — `z-index: 1` under the content's 2, and the band's
    own `overflow: hidden` is what makes it a corner motif rather than a floating illustration. */
@@ -698,3 +741,9 @@
 /* §3.11 — the factual paragraph beneath Tracking. Quieter than an entry, because it is context
    rather than a thing that happened. */
 .tdk-recnote { font-size: 12px; color: var(--muted); line-height: 1.55; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hairline); }
+
+.tdk-band.v-offer { background: linear-gradient(135deg, #f3e0d6 0%, #eed4c8 100%); border-bottom-color: rgba(124, 58, 42, 0.14); }
+
+.tdk-band.v-offer .tdk-sub { color: #8a6558; }
+
+.tdk-band.v-offer .tdk-deed { color: #3a1c14; }

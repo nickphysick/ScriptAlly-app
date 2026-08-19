@@ -156,8 +156,28 @@ test("pane chassis", async ({ page }) => {
     add(P(6, "band fills the rim — flush on three edges, all four corners"),
         m.corners.length === 4 && m.corners.every((c) => c === "band") && m.flush === "1,1,1",
         "corners=" + JSON.stringify(m.corners) + " gaps(top,left,right)=" + m.flush);
-    add(P(7, "band carries a gradient"),
-        !!m.bandImage && m.bandImage.includes("gradient"), (m.bandImage ?? "").slice(0, 70));
+    /* ⚠️ THE GROUP'S OWN TWO STOPS, not "a gradient" — the weak form passed on the pre-change build
+       because the band already had one. §2's table, per group. */
+    const STOPS: Record<string, [string, string]> = {
+      urgent:       ["rgb(243, 224, 214)", "rgb(238, 215, 202)"],
+      housekeeping: ["rgb(215, 221, 213)", "rgb(213, 219, 211)"],
+      yours:        ["rgb(247, 240, 226)", "rgb(242, 233, 214)"],
+    };
+    const GROUP_OF: Record<string, string> = {
+      close: "housekeeping", bulk: "housekeeping", note: "yours", send: "urgent", decide: "urgent",
+    };
+    const grp = GROUP_OF[j.key];
+    const stops = STOPS[grp];
+    /* ⚠️ THE OFFER KEEPS ITS OWN PAPER — a celebration, not a group — so `decide` is exempted from
+       the stop check and asserted only to carry a gradient of its own. */
+    if (j.key === "decide") {
+      add(P(7, "the offer keeps its own paper"), !!m.bandImage && m.bandImage.includes("gradient"),
+          (m.bandImage ?? "").slice(0, 80));
+    } else {
+      add(P(7, "band carries " + grp + "'s two stops"),
+          !!m.bandImage && stops.every((c) => (m.bandImage ?? "").includes(c)),
+          "want=" + JSON.stringify(stops) + " got=" + (m.bandImage ?? "").slice(0, 90));
+    }
     add(P(8, "no bucket pill in the band"), !m.bandPill, m.bandPill ? "pill present" : "none");
     /* ⚠️ "not nested" is satisfied by "absent". Where a timeline is REQUIRED, it must exist and
        share the form's parent; where it is not, this assertion does not apply. */
