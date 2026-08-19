@@ -1,0 +1,9 @@
+── deployed dev site (https://scriptally-dev.web.app), 1440×900
+  bulk card:            10 queries have no record of what you sent
+  ⚠️ tick on materials:  false   (MUST be false — Phase A)
+  ⚠️ tick on offer:      false   (MUST be false — Phase A)
+  bulk table opens:     true
+  primary:              "Record 0 queries"
+  "covering letter":    true   (Phase C)
+  known dup-key warns:  0
+  ⚠️ OTHER errors:       0   (MUST be 0)
