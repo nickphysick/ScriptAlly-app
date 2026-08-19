@@ -1,0 +1,564 @@
+SCROLLBAR WIDTH: 0px
+{
+  "url": "/manuscripts/packages",
+  "hasRoot": true,
+  "hasTabs": true,
+  "tabLabels": [
+    "Workshop",
+    "Analytics"
+  ],
+  "hasStrip": true,
+  "stripText": "Every package keeps its own scorecard. ScriptAlly records which letter, synopsis and pages went to each agent — so you c",
+  "hasPropill": true,
+  "title": "Query Centre",
+  "plate": {
+    "x": 0,
+    "y": 0,
+    "w": 0,
+    "h": 0
+  },
+  "root": {
+    "x": 247,
+    "y": 111,
+    "w": 1170,
+    "h": 810
+  },
+  "filledControls": [
+    {
+      "t": "Submission packages",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Upgrade",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Search⌘K",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "New",
+      "bg": "rgb(28, 19, 14)"
+    },
+    {
+      "t": "TSThe Smoke Test",
+      "bg": "rgb(253, 250, 245)"
+    },
+    {
+      "t": "Search…⌘K",
+      "bg": "rgb(247, 242, 233)"
+    },
+    {
+      "t": "+",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Mark sent",
+      "bg": "rgb(43, 33, 24)"
+    },
+    {
+      "t": "Mark sent",
+      "bg": "rgb(43, 33, 24)"
+    },
+    {
+      "t": "Record",
+      "bg": "rgb(43, 33, 24)"
+    },
+    {
+      "t": "Review",
+      "bg": "rgb(43, 33, 24)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Edit Agent",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Close Query",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Close Query",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "ScriptAlly ProMore room for th",
+      "bg": "rgb(255, 253, 249)"
+    },
+    {
+      "t": "Set a goal",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "All queries(20)",
+      "bg": "rgba(124, 58, 42, 0.05)"
+    },
+    {
+      "t": "All queries(20)",
+      "bg": "rgba(124, 58, 42, 0.05)"
+    },
+    {
+      "t": "Newest first",
+      "bg": "rgba(124, 58, 42, 0.05)"
+    },
+    {
+      "t": "⏪ Undo Style (Classic)",
+      "bg": "rgba(124, 58, 42, 0.05)"
+    },
+    {
+      "t": "Export",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log new query",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Reopen",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Nudge",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Mark closed",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Delete",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "PVPeter VanceVance Associates1",
+      "bg": "rgb(247, 227, 221)"
+    },
+    {
+      "t": "+ Add website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Covering letter×",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Synopsis×",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "＋ Attach",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Save",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Add a task",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Add a note",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Snooze",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Dismiss",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "‹",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "›",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Snooze",
+      "bg": "rgba(255, 253, 250, 0.8)"
+    },
+    {
+      "t": "Today",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Yesterday",
+      "bg": "rgb(253, 251, 247)"
+    },
+    {
+      "t": "Another date…",
+      "bg": "rgb(253, 251, 247)"
+    },
+    {
+      "t": "Complete",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Today",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Month ▾",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Everything ▾",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Add task or note",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Closed David Marsh — no respon",
+      "bg": "rgb(242, 244, 241)"
+    },
+    {
+      "t": "Closed David Marsh — no respon",
+      "bg": "rgb(242, 244, 241)"
+    },
+    {
+      "t": "Closed David Marsh — no respon",
+      "bg": "rgb(242, 244, 241)"
+    },
+    {
+      "t": "Closed David Marsh — no respon",
+      "bg": "rgb(242, 244, 241)"
+    },
+    {
+      "t": "Closed David Marsh — no respon",
+      "bg": "rgb(242, 244, 241)"
+    },
+    {
+      "t": "Closed David Marsh — no respon",
+      "bg": "rgb(242, 244, 241)"
+    },
+    {
+      "t": "Closed David Marsh — no respon",
+      "bg": "rgb(242, 244, 241)"
+    },
+    {
+      "t": "Closed Peter Vance — no respon",
+      "bg": "rgb(242, 244, 241)"
+    },
+    {
+      "t": "Noah Bright has made an offer",
+      "bg": "rgb(248, 226, 217)"
+    },
+    {
+      "t": "Send your full to Ana Duarte",
+      "bg": "rgb(248, 226, 217)"
+    },
+    {
+      "t": "Resubmit your R&R to Iris Kwan",
+      "bg": "rgb(248, 226, 217)"
+    },
+    {
+      "t": "Nudge Tom Ellery",
+      "bg": "rgb(233, 237, 230)"
+    },
+    {
+      "t": "Nudge Marcus Reed",
+      "bg": "rgb(233, 237, 230)"
+    },
+    {
+      "t": "Nudge Joan Whitfield",
+      "bg": "rgb(233, 237, 230)"
+    },
+    {
+      "t": "#All ▾",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Read as a column",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Pin a note",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Pin your first note",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "Add new agent",
+      "bg": "rgb(42, 26, 19)"
+    },
+    {
+      "t": "Filters",
+      "bg": "rgb(253, 250, 245)"
+    },
+    {
+      "t": "Group",
+      "bg": "rgb(253, 250, 245)"
+    },
+    {
+      "t": "Sort",
+      "bg": "rgb(253, 250, 245)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(49, 30, 25)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Log query",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "View website",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "New package",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "＋ Add a query letter",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "＋ Add a synopsis",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "＋ Add sample pages",
+      "bg": "rgb(245, 226, 218)"
+    },
+    {
+      "t": "＋Create your first packageName",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "Try it with example data →",
+      "bg": "rgb(255, 255, 255)"
+    },
+    {
+      "t": "BG lab",
+      "bg": "rgb(255, 254, 251)"
+    },
+    {
+      "t": "Give feedback",
+      "bg": "rgb(255, 254, 251)"
+    },
+    {
+      "t": "",
+      "bg": "rgb(124, 58, 42)"
+    }
+  ]
+}

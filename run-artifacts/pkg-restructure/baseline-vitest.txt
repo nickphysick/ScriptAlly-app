@@ -1,0 +1,137 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-app
+
+·······-········································································································································································x···············································-·········································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································stdout | functions/src/suggestCompsCore.test.ts > the request shape > sends no sampling parameters
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > gives the model web search
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > names the current model and asks for adaptive thinking
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > retries once on unparseable output, then succeeds
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > retries once on unparseable output, then succeeds
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > gives up after the retry
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > gives up after the retry
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > surfaces a refusal without spending a retry
+suggestComps: tokens in=1 out=1
+
+·······················································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > parses a good first response (strips fences)
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > retries once on malformed, then succeeds
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > retries once on malformed, then succeeds
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > throws MalformedAssistError when both attempts fail
+assistAgentData: rule=dq_mswl agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > throws MalformedAssistError when both attempts fail
+assistAgentData: rule=dq_mswl agents=2 tokens in=? out=?
+
+·············································································································································································································································································································································································································································································stderr | src/lib/timelineEvent.test.ts > F1 · a type this build does not know > resolves to `unknown` rather than claiming a direction
+[ScriptAlly] timeline: activity type "Holding Reply" is not in this build's ActivityType. Its events are drawn as "unknown" and cut from the story feed rather than guessed at — this client is older than the record.
+[ScriptAlly] timeline: activity type "Something Nobody Has Written Yet" is not in this build's ActivityType. Its events are drawn as "unknown" and cut from the story feed rather than guessed at — this client is older than the record.
+
+·········································································································································································································································································································································································································································································································································
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/components/todo/tasksViewport.test.tsx > ⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED > the filter menu reads `railChips`, the same derivation the bands read
+AssertionError: expected 'function renderList() {\n    const ch…' to contain '{ch.label} <span className="tdw-mn">{…'
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- {ch.label} <span className="tdw-mn">{ch.count}</span>[39m
+[31m+ function renderList() {[39m
+[31m+     const chips = railChips(boardCols);[39m
+[31m+     return ([39m
+[31m+       <TaskList[39m
+[31m+         groups={railGroups()}[39m
+[31m+         onOpen={(c) => openDock(c.key)}[39m
+[31m+         selectedKey={docked.card?.key}[39m
+[31m+         rowInputs={listRowInputs}[39m
+[31m+         search={search}[39m
+[31m+         onSearch={setSearch}[39m
+[31m+         onAdd={() => openComposer("task")}[39m
+[31m+         onExport={exportRail}[39m
+[31m+         /* ⚠️ THE FUNNEL LIGHTS FROM THE VIEW, NOT FROM A FLAG. `isFiltered` compares to the default,[39m
+[31m+          so toggling something back off turns the light off too — a tracked "touched" boolean would[39m
+[31m+          leave a full list wearing the filtered marker. */[39m
+[31m+       filterActive={isFiltered(view)}[39m
+[31m+       onFilter={(el) => { filterAnchor.current = el; setSortOpen(false); setFilterOpen((v) => !v); }}[39m
+[31m+       filterMenu={filterOpen && filterAnchor.current ? ([39m
+[31m+         <AnchoredPanel anchor={filterAnchor.current} ariaLabel="Filter tasks"[39m
+[31m+           onClose={(back) => { setFilterOpen(false); if (back) filterAnchor.current?.focus(); }}>[39m
+[31m+           <FilterMenu[39m
+[31m+             view={view}[39m
+[31m+             groupCounts={viewGroupCounts(railGroupsAll())}[39m
+[31m+             typeCounts={viewTypeCounts(railGroupsAll())}[39m
+[31m+             snoozedCount={narrowCards(boardCols.snoozed).length}[39m
+[31m+             shown={viewTotal(railGroups())}[39m
+[31m+             onChange={setView}[39m
+[31m+           />[39m
+[31m+         </AnchoredPanel>[39m
+[31m+       ) : null}[39m
+[31m+       sortActive={isSorted(view)}[39m
+[31m+       onSort={(el) => { sortAnchor.current = el; setFilterOpen(false); setSortOpen((v) => !v); }}[39m
+[31m+       sortMenu={sortOpen && sortAnchor.current ? ([39m
+[31m+         <AnchoredPanel anchor={sortAnchor.current} ariaLabel="Sort tasks"[39m
+[31m+           onClose={(back) => { setSortOpen(false); if (back) sortAnchor.current?.focus(); }}>[39m
+[31m+           <SortMenu view={view} onChange={setView} />[39m
+[31m+         </AnchoredPanel>[39m
+[31m+       ) : null}[39m
+[31m+     />[39m
+[31m+     );[39m
+[31m+   }[39m
+[31m+[39m
+[31m+   /* ⚠️ `performBoardPlan` AND `dropPlan` SURVIVE UNMOUNTED — drag was the board's, and the list[39m
+[31m+      has no drop targets. They are left whole rather than deleted because every verb a drag[39m
+[31m+      performed is also on the ⋯ menu, which is what the list uses; the sweep is a commit of its[39m
+[31m+      own (the house rule on orphans). */[39m
+[31m+   // (the hover ✓/⏸ quick rail and its pause helper are retired — the card contract's verb row,[39m
+[31m+   // the ledger's head checkbox + "Snooze or dismiss" menu, and the undo toast are the quick surfaces.)[39m
+[31m+[39m
+[31m+   // ── the Sunday-review entry card (finishing P3): derived + dismissible for the week; its click[39m
+[31m+   //    opens the weeklyReview mode with the live Urgent cards as the seed source. ──[39m
+[31m+   // MUST be a hoisted `function` (not a post-return `const`): the banner/bar JSX calls it from[39m
+[31m+   // within the component's return — a `const` here sits in the TDZ for the whole render (the[39m
+[31m+   // demotion bug's lesson).[39m
+[31m+   function openSundayReview() {[39m
+[31m+     // board.do is review-free by construction (P1) — no filter needed[39m
+[31m+     setFlow({ items: board.do.map((card) => ({ kind: "card" as const, card })), mode: "weeklyReview" });[39m
+[31m+   }[39m
+[31m+[39m
+[31m+   // Standalone receipt/dismissed cards — the live card vanished with the write; the receipt persists.[39m
+[31m+   function overlayCards(lane: "do" | "hk" | "nt") {[39m
+[31m+     return Object.entries(overlays)[39m
+[31m+       .filter(([, o]) => (o.kind === "receipt" |[39m
+
+ ❯ src/components/todo/tasksViewport.test.tsx:1169:16
+    1167|     const fn = board.slice(at, at + 3200);
+    1168|     /* ⚠️ RE-POINTED (frame round). The contract's filter counts by GR…
+    1169|        come from `railGroupsAll()` — the same array the section bands …
+       |                ^
+    1170|        read. The claim is the one this case has always made: the menu'…
+    1171|        figures are one derivation, so they cannot disagree. The chips'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 328 passed (329)
+      Tests  1 failed | 5556 passed | 2 skipped (5559)
+   Start at  22:09:37
+   Duration  48.40s (transform 27.89s, setup 0ms, collect 110.75s, tests 51.52s, environment 295ms, prepare 41.93s)
+
