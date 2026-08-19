@@ -1,0 +1,22 @@
+── the bulk record table (1440×900)
+  table present:     true     rows shown: 5   (5 + disclosure)
+  disclosure:        Show 5 more
+  caveat:            Requirements are what each agency asks for — n…
+  ⚠️ ticked on open:  0   (MUST be 0)
+  editors open:      0   (MUST be 0 — on demand only)
+  primary:           "Record 0 queries"   disabled: true   (MUST be true at zero)
+  bulk dismissal:    "Leave them all unrecorded"
+  sent dates:        ["Sent 4 May 2026","Sent 8 May 2026","Sent 12 May 2026"]
+── after “Start from what each agent asks for”
+  ticked:            10
+  primary:           "Record 10 queries"   disabled: false
+  ⚠️ per-row values:  ["Covering letter · Synopsis","Covering letter · Synopsis","Covering letter · Synopsis","Covering letter · Synopsis","Covering letter · Synopsis"]
+  ⚠️ all identical?:  YES
+  agents:            ["Elinor Hale","Tom Ellery","Marcus Reed","Priya Nair","Joan Whitfield"]
+  per-row ticks:     [["Covering letter","Synopsis"],["Covering letter","Synopsis"],["Covering letter","Synopsis"],["Covering letter","Synopsis"],["Covering letter","Synopsis"]]
+── after “Copy the first row down”
+  primary:           "Record 10 queries"
+  ⚠️ now identical?:  YES — propagated
+── 390×844
+  table present:     true   full-page scroll: 0px
+  page errors:       0

@@ -30,6 +30,8 @@ import { StatusDot } from "../StatusDot";
 import { EdgeFadeScroll } from "../EdgeFadeScroll";
 import { PaneJourney, PaneJourneyFoot } from "./PaneJourney";
 import { PaneSweep, PaneSweepFoot, SweepMember } from "./PaneSweep";
+import { PaneRecordSweep, PaneRecordSweepFoot } from "./PaneRecordSweep";
+import type { RecordSweepRow } from "../../lib/materialsSweep";
 import { SWEEP_PRELINE, SweepRow, SweepRule, emptySweepRow, skipTheRest, sweepAnswered } from "../../lib/paneSweep";
 import { JOURNEY_ACT, JOURNEY_PRELINE, JourneyKind, JourneySendValues, openSend } from "../../lib/paneJourney";
 import { QueryStatus } from "../../types";
@@ -151,6 +153,14 @@ export interface TodoDockProps {
   /** materials only — suppress this task without writing material data. */
   onLeaveUnrecorded?: (card: BoardCard) => void;
   /**
+   * ⚠️ THE BULK RECORD GAP — a cohort of QUERIES, distinct from `sweep`'s cohort of AGENTS. Kept a
+   * separate prop rather than widened into `sweep`, because bending `SweepRow` to hold a material
+   * set would distort the shape three live housekeeping rules depend on.
+   */
+  recordSweep?: (card: BoardCard) => RecordSweepRow[] | undefined;
+  onCommitRecordSweep?: (card: BoardCard, rows: RecordSweepRow[]) => Promise<void> | void;
+  onDismissRecordSweep?: (card: BoardCard, rows: RecordSweepRow[]) => void;
+  /**
    * ⚠️ THE GROUP SWEEP — a card that stands for a cohort rather than for one agent. The page
    * supplies the rule and the members because it owns the agent list; the dock only renders and
    * hands the answers back. Absent → the card is an ordinary one and nothing changes.
@@ -206,7 +216,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, card, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyRecord, onLeaveUnrecorded, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, card, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyRecord, onLeaveUnrecorded, recordSweep, onCommitRecordSweep, onDismissRecordSweep, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const surfaceRef = useRef<HTMLDivElement>(null);
   /* ⚠️ `confirmSend` IS RETIRED WITH THE CHECKBOX (Phase 6). It was the card's own copy of a
@@ -224,6 +234,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
    * surface cannot bend: guessing an agent's requirements and having a writer accept it by not
    * looking is how bad data gets in.
    */
+  const [recDraft, setRecDraft] = useState<RecordSweepRow[] | null>(null);
   const [sweepRows, setSweepRows] = useState<SweepRow[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -281,6 +292,12 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const stats = trackingStats(facts, !!(card.agentId || card.who));
   /* ⚠️ RESOLVED ONCE — the body, the band's progress and the footer must all be answering about the
      same cohort, and three calls could disagree the moment the page's memo identity changes. */
+  /* ⚠️ THE COHORT'S ANSWERS RESET WITH THE CARD, exactly as the sweep's do — a half-filled table
+     carried onto a different task is answers about the wrong queries. */
+  const recCohort = recordSweep?.(card);
+  const recRows = recCohort
+    ? (recDraft && recDraft.length === recCohort.length ? recDraft : recCohort)
+    : [];
   const cohort = sweep?.(card);
   const rows = cohort
     ? (sweepRows.length === cohort.members.length ? sweepRows : cohort.members.map(() => emptySweepRow()))
@@ -430,9 +447,11 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           /* ⚠️ `display` IS PASSED, because the wrapper sets it INLINE and inline beats the class.
              Without this the two-column grid silently becomes a block and the doing column drops
              below the record on every card. */
-          scrollStyle={{ display: draft || cohort ? "block" : "grid" }}
+          scrollStyle={{ display: draft || cohort || recCohort ? "block" : "grid" }}
         >
-          {cohort ? (
+          {recCohort ? (
+            <PaneRecordSweep rows={recRows} onChange={setRecDraft} />
+          ) : cohort ? (
             <PaneSweep rule={cohort.rule} members={cohort.members} rows={rows} onChange={setSweepRows} />
           ) : draft ? (
             <PaneJourney
@@ -767,6 +786,19 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           */}
         {/* ⚠️ PINNED, AS A SIBLING OF THE SCROLLER — see `PaneJourneyFoot`'s note for what building
             it inside the scroller actually did (the commit at y 1271 in a 1000px viewport). */}
+        {recCohort && (
+          <PaneRecordSweepFoot
+            rows={recRows}
+            onDismissAll={() => onDismissRecordSweep?.(card, recRows)}
+            onCommit={async () => {
+              if (!onCommitRecordSweep) return;
+              setSaving(true);
+              try { await onCommitRecordSweep(card, recRows); } finally { setSaving(false); }
+            }}
+            saving={saving}
+          />
+        )}
+
         {cohort && (
           <PaneSweepFoot
             rule={cohort.rule}
@@ -781,7 +813,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           />
         )}
 
-        {!cohort && draft && (
+        {!cohort && !recCohort && draft && (
           <PaneJourneyFoot
             kind={journeyKind?.(card) ?? "send"}
             /* ⚠️ THE JOURNEY'S COMMIT NAMES THE DEED; THE CARD'S FOOTER SAYS "Action". That is the
@@ -808,7 +840,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
         {/* ⚠️ THE CARD'S FOOTER STANDS DOWN WHILE THE JOURNEY IS OPEN — the journey carries its own,
             with Cancel and the commit. Two footers would put two primaries on one card, and the
             outer one would offer to re-open a journey that is already open. */}
-        {!draft && !cohort && (
+        {!draft && !cohort && !recCohort && (
           <div className="tdk-foot">
             {/* the consequence, stated before the act rather than discovered after it.
                 ⚠️ IT TAKES THE REMAINING SPACE AND GIVES IT UP FIRST — `margin-right: auto` plus a

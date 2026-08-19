@@ -396,10 +396,18 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
   it("⚠️ ONE FOOTER AT A TIME — the card's stands down and the journey brings its own", () => {
     /* two footers would put two primaries on one card, and the outer one would offer to re-open a
        journey that is already open */
-    /* ⚠️ AND THE SWEEP JOINS THE RULE RATHER THAN BYPASSING IT. Three footers exist in this file;
-       the card's own stands down for either of the other two, and the two never render together. */
-    expect(code(dockSrc)).toContain("{!draft && !cohort && (");
-    expect(code(dockSrc)).toContain("{!cohort && draft && (");
+    /* ⚠️ AND EVERY BULK SURFACE JOINS THE RULE RATHER THAN BYPASSING IT. FOUR footers exist in this
+       file now — the card's own, the journey's, the housekeeping sweep's and the record sweep's —
+       and the card's stands down for any of the other three, which never render together.
+
+       ⚠️ ASSERTED AS THE GUARD'S TERMS, NOT AS ONE LITERAL. This read `{!cohort && draft && (` and
+       went red the moment a third surface joined the guard — a correct change failing a lock that
+       was pinned to the old arity rather than to the rule. The terms are what the rule is. */
+    for (const term of ["!draft", "!cohort", "!recCohort"]) {
+      expect(code(dockSrc), `the card's own foot ignores ${term}`).toContain(term);
+    }
+    expect(code(dockSrc)).toContain("{!draft && !cohort && !recCohort && (");
+    expect(code(dockSrc)).toContain("{!cohort && !recCohort && draft && (");
     const pj = code(readFileSync(join(here, "PaneJourney.tsx"), "utf8"));
     expect(pj).toContain("pj-foot");
     expect(pj).toContain("pj-prime");

@@ -1,0 +1,4 @@
+── what each agency asks for (from the Contact list)
+  materials lines found: 12
+  DISTINCT summaries:    1
+    · Covering letter · Synopsis

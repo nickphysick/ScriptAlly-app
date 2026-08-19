@@ -20,6 +20,9 @@
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText } from "../../lib/agentMaterials";
+import { queriesMissingMaterials, MATERIALS_BULK_RECORD_ID } from "../../lib/queryMaterialsGap";
+import { agentPrimary } from "../../lib/agentDisplay";
+import { recordSweepRow, sweepWrites, sweepActLabel, type RecordSweepRow } from "../../lib/materialsSweep";
 import { Funnel, Pin, ChevronRight, ChevronLeft, X, Clock, ArrowUpDown, ExternalLink, Plus } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
@@ -1537,6 +1540,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   journeyGaps={cardGaps}
                   journeyRecord={journeyRecord}
                   onLeaveUnrecorded={leaveMaterialsUnrecorded}
+                  recordSweep={recordSweepFor}
+                  onCommitRecordSweep={commitRecordSweep}
+                  onDismissRecordSweep={dismissRecordSweep}
                   /* ⚠️ THE PAGE OWNS THE COHORT because it owns the agent list; the dock renders it
                      and hands the answers back. The members are the GROUP's own, in the group's own
                      order — not re-derived here, which would be a second answer to "who is in it". */
@@ -2555,6 +2561,69 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     setOverlay(card.key, {
       kind: "dismissed", lane: "hk",
       text: "Left unrecorded — the query is unchanged.",
+      undo,
+    });
+    flash("Left unrecorded", { label: "Undo", fn: async () => { await undo(); clearOverlay(card.key); flash("Restored"); } });
+  }
+
+  /**
+   * ⚠️ THE BULK COHORT IS THE SAME DERIVATION THE CARD WAS RAISED BY — `queriesMissingMaterials`,
+   * not a second scan. A card that stands for ten queries and a table that lists eleven is the
+   * class of disagreement this page has paid for before.
+   */
+  function recordSweepFor(card: BoardCard): RecordSweepRow[] | undefined {
+    if (card.taskType !== "materials_unrecorded_bulk") return undefined;
+    const gaps = queriesMissingMaterials({
+      queries, activities, agents, manuscripts, displayName: agentPrimary,
+    });
+    if (!gaps.length) return undefined;
+    return gaps.map((g) => {
+      const ag = agents.find((a) => a.id === g.agentId);
+      return recordSweepRow(g, {
+        ...(ag?.agency ? { agency: ag.agency } : {}),
+        sentOn: new Date(g.dateSent).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
+        ...(ag?.materialsWanted ? { agentMaterials: ag.materialsWanted } : {}),
+      });
+    });
+  }
+
+  /**
+   * ⚠️ ONE `updateQuery` PER ANSWERED ROW, AND NOTHING FOR THE REST. Same single-field write as the
+   * one-query form, so the bulk path cannot record something the single path could not — and a row
+   * the writer skipped or left empty is not written at all.
+   */
+  async function commitRecordSweep(card: BoardCard, rows: RecordSweepRow[]) {
+    const writes = sweepWrites(rows);
+    if (!writes.length) return;
+    const before = new Map(writes.map((w) => [w.queryId, queries.find((q) => q.id === w.queryId)?.materialsWanted]));
+    for (const w of writes) await updateQuery(w.queryId, { materialsWanted: w.materialsWanted });
+    const undo = async () => {
+      for (const w of writes) await updateQuery(w.queryId, { materialsWanted: before.get(w.queryId) ?? [] });
+    };
+    setOverlay(card.key, {
+      kind: "receipt", lane: "hk",
+      title: sweepActLabel(writes.length),
+      line: "Recorded on your queries — nothing else about them changed.",
+      undo,
+    });
+    doneToast(card, async () => { await undo(); clearOverlay(card.key); flash("Restored"); });
+  }
+
+  /**
+   * ⚠️ ONE PRESS FOR THE WHOLE SET — fourteen tasks must not need dismissing one at a time. It
+   * writes no material data: each query is suppressed through the same permanent-dismiss path the
+   * single form's escape hatch uses.
+   */
+  function dismissRecordSweep(card: BoardCard, rows: RecordSweepRow[]) {
+    for (const r of rows) dismissTask("materials_unrecorded", r.queryId, "permanent");
+    dismissTask("materials_unrecorded_bulk", MATERIALS_BULK_RECORD_ID, "permanent");
+    const undo = async () => {
+      for (const r of rows) await upsertTaskFlag(flagKeyForTask("materials_unrecorded", r.queryId), { snoozedUntil: null });
+      await upsertTaskFlag(flagKeyForTask("materials_unrecorded_bulk", MATERIALS_BULK_RECORD_ID), { snoozedUntil: null });
+    };
+    setOverlay(card.key, {
+      kind: "dismissed", lane: "hk",
+      text: `Left unrecorded — ${rows.length} ${rows.length === 1 ? "query is" : "queries are"} unchanged.`,
       undo,
     });
     flash("Left unrecorded", { label: "Undo", fn: async () => { await undo(); clearOverlay(card.key); flash("Restored"); } });
