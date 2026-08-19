@@ -158,3 +158,70 @@
 /* the one Caveat on the page — a margin note, and the only handwritten thing here */
 .an-ffoot { border-top: 1px solid #f0e8dc; margin-top: 12px; padding-top: 12px; font-size: 11px; color: #8a7a6c; font-weight: 300; display: flex; gap: 9px; align-items: baseline; }
 .an-ffoot em { font-family: 'Caveat', cursive; font-style: normal; font-size: 16px; color: #7c3a2a; flex: none; }
+
+/* ── charts ──────────────────────────────────────────────────────────────────
+   ⚠️ THE SVG IS DRAWN AT REAL PIXEL WIDTH, never scaled to fit. A scaled viewBox takes the type
+   with it, so an axis label would be a different size on a wide window than a narrow one. */
+.an-chartwrap { width: 100%; min-width: 0; }
+.an-chart { width: 100%; display: block; }
+.an-axis { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9px; letter-spacing: 0.05em; fill: #9c8878; }
+.an-axis--big { letter-spacing: 0.12em; }
+/* a range change re-draws the bars; the transition is what stops that reading as a flicker */
+.an-bar { transition: height .35s cubic-bezier(.22, 1, .36, 1), y .35s cubic-bezier(.22, 1, .36, 1); }
+.an-bar:hover { filter: brightness(0.97); }
+.an-mark { cursor: default; }
+.an-legend { display: flex; gap: 18px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0e8dc; flex-wrap: wrap; }
+.an-leg { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #6a5a50; }
+.an-sw { width: 11px; height: 11px; border-radius: 3.5px; flex: none; box-sizing: border-box; }
+/* the event marks, restated in the legend as the diamonds they are */
+.an-swd { width: 11px; height: 11px; flex: none; transform: rotate(45deg); border: 1.2px solid #7c3a2a; box-sizing: border-box; }
+.an-swd--full { background: #fdfaf5; }
+.an-swd--offer { background: #7c3a2a; }
+.an-guardnote { margin-top: 12px; padding-top: 11px; border-top: 1px solid #f0e8dc; font-size: 11px; color: #9a8c80; font-weight: 300; line-height: 1.5; }
+
+/* ── the donut ───────────────────────────────────────────────────────────────
+   The ring gives the shape, the rows give the figures — each doing what it is good at. */
+/* ⚠️ THE PANEL BODY IS THE CONTAINER, AND THIS IS A CONTAINER QUERY RATHER THAN A MEDIA QUERY.
+   The donut sits in a four-column panel whose width depends on the window AND on the grid, so the
+   viewport is the wrong thing to ask: at 1440 the body is ~274px and the list was crushed to a
+   single character per label, while the same panel at 1920 has room for both. It asks its own box.
+   ⚠️ AND IT STACKS BELOW THE THRESHOLD RATHER THAN SHRINKING THE RING. A smaller donut would make
+   the one thing the panel is for harder to read in order to keep a layout nobody asked for. */
+.an-pb { container-type: inline-size; }
+.an-donutwrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+@container (min-width: 340px) {
+  .an-donutwrap { flex-direction: row; align-items: center; gap: 8px; }
+}
+.an-donutwrap svg { flex: none; }
+.an-donuttotal { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 30px; fill: #2b1a12; }
+.an-arc { transition: opacity .14s ease; }
+.an-arc:hover { opacity: 0.86; }
+.an-dlist { flex: 1 1 auto; align-self: stretch; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.an-drow { display: flex; align-items: center; gap: 9px; font-size: 12px; color: #3a1c14; padding: 5px 8px; border-radius: 9px; transition: background .14s ease; min-width: 0; }
+.an-drow:hover { background: #fdfaf5; }
+.an-dname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-dn { margin-left: auto; font-family: var(--font-serif, 'Playfair Display', serif); font-size: 16px; color: #2b1a12; }
+.an-dp { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9px; color: #9c8878; width: 34px; text-align: right; flex: none; }
+
+/* ── the tooltip ─────────────────────────────────────────────────────────────
+   ⚠️ ONE TIP, `position: fixed`, RENDERED AT PAGE LEVEL. Inside a panel it would be clipped by the
+   panel's own `overflow: hidden`; inside the scroller it would move with the content while the
+   pointer did not. `pointer-events: none` so it can never sit between the pointer and the mark it
+   is describing. */
+.an-tip {
+  position: fixed; z-index: 200; background: #2e2418; color: #f5ede8; border-radius: 10px;
+  padding: 8px 12px; font-size: 11.5px; pointer-events: none; max-width: 250px; line-height: 1.5;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+.an-tip b { color: #f5e2da; font-weight: 500; }
+.an-tipk { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #b8a898; display: block; margin-bottom: 2px; }
+.an-tipd { margin-top: 2px; }
+
+/* ── a panel with nothing in it yet ──────────────────────────────────────────
+   ⚠️ IT STATES WHAT WILL FILL IT, WHICH IS THE ONLY USEFUL THING AN EMPTY PANEL CAN SAY. */
+.an-emptystate { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14px 18px 20px; gap: 14px; }
+.an-emptystate p { color: #9a8c80; font-size: 12px; font-weight: 300; line-height: 1.6; max-width: 280px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .an-bar { transition: none; }
+}

@@ -593,8 +593,10 @@ export function eventMarks(rows: AnalyticsRow[]): EventMark[] {
 
 /* ────────────────────────────────── status breakdown ────────────────────────────────── */
 
+export type DonutRole = "open" | "inplay" | "offer" | "pass" | "elapsed";
+
 export interface DonutSegment {
-  key: AnalyticsOutcome;
+  key: DonutRole;
   label: string;
   note: string;
   colour: string;
@@ -603,13 +605,25 @@ export interface DonutSegment {
   percent: number;
 }
 
-const OUTCOME_ROLES: { key: AnalyticsOutcome; label: string; note: string; colour: string }[] = [
-  { key: "open", label: "Still out", note: "Awaiting a first response", colour: CHART.open },
-  { key: "partial", label: "Requests in play", note: "Material with agents now", colour: CHART.inplay },
-  { key: "full", label: "Full manuscript out", note: "The whole book with an agent", colour: CHART.inplay },
-  { key: "offer", label: "Offer", note: "Offers of representation", colour: CHART.offer },
-  { key: "pass", label: "Pass or withdrawn", note: "Closed — the agent passed, or you withdrew", colour: CHART.pass },
-  { key: "elapsed", label: "Window elapsed", note: "Closed once the agency's stated window passed", colour: CHART.elapsed },
+/**
+ * ⚠️ FIVE ROLES, AND THE SIX OUTCOMES FOLD INTO THEM — `partial` and `full` are both "requests in
+ * play". They are genuinely different things, and the page says so twice already: the stat strip
+ * splits them (`1 partial · 4 full`) and the funnel gives the full its own rung. What the donut
+ * answers is "where does everything stand", and at that altitude both are the same answer — an
+ * agent is reading something of yours.
+ *
+ * ⚠️ IT WAS BUILT AS SIX AND THAT WAS VISIBLY WRONG, which is the reason for this note. Two
+ * segments carrying the SAME fill sat side by side on the ring, so the donut drew what looked like
+ * one region split by a hairline for no stated reason, and the list spent two rows on a
+ * distinction the colour did not make. Either they differ in colour or they are one role; one
+ * role is the truthful answer here.
+ */
+const DONUT_ROLES: { key: DonutRole; outcomes: AnalyticsOutcome[]; label: string; note: string; colour: string }[] = [
+  { key: "open", outcomes: ["open"], label: "Still out", note: "Awaiting a first response", colour: CHART.open },
+  { key: "inplay", outcomes: ["partial", "full"], label: "Requests in play", note: "Material with agents now", colour: CHART.inplay },
+  { key: "offer", outcomes: ["offer"], label: "Offer", note: "Offers of representation", colour: CHART.offer },
+  { key: "pass", outcomes: ["pass"], label: "Pass or withdrawn", note: "Closed — the agent passed, or you withdrew", colour: CHART.pass },
+  { key: "elapsed", outcomes: ["elapsed"], label: "Window elapsed", note: "Closed once the agency's stated window passed", colour: CHART.elapsed },
 ];
 
 /**
@@ -618,8 +632,8 @@ const OUTCOME_ROLES: { key: AnalyticsOutcome; label: string; note: string; colou
  */
 export function statusBreakdown(rows: AnalyticsRow[]): DonutSegment[] {
   const total = rows.length;
-  return OUTCOME_ROLES.map((role) => {
-    const count = rows.filter((r) => r.outcome === role.key).length;
+  return DONUT_ROLES.map(({ outcomes, ...role }) => {
+    const count = rows.filter((r) => outcomes.includes(r.outcome)).length;
     return { ...role, count, percent: total > 0 ? Math.round((count / total) * 100) : 0 };
   }).filter((s) => s.count > 0);
 }
