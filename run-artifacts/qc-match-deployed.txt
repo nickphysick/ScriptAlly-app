@@ -4,22 +4,22 @@
   green  W1440 · /todo documentElement has no vertical scrollbar
            overflow=0px
   green  W1440 · the page's scroll row does not scroll on /todo
-           todo scrollers=["ws-nav","tpl-zone","tdk-w"]  qc=["ws-nav","f12-rows"]
+           todo scrollers=["ws-nav","tpl-zone","v"]  qc=["ws-nav","f12-rows"]
   green  W1920 · To-do content width equals the Query Centre's (±2)
            todo=1580 (pad 35px/35px)  qc=1580 (pad 35px/35px)
   green  W1920 · /todo documentElement has no vertical scrollbar
            overflow=0px
   green  W1920 · the page's scroll row does not scroll on /todo
-           todo scrollers=["ws-nav","tpl-zone","tdk-w"]  qc=["ws-nav","f12-rows"]
+           todo scrollers=["ws-nav","tpl-zone","v"]  qc=["ws-nav","f12-rows"]
   green  L1 · the list column scrolls, and strands nothing
            scrollers=1 stranded=[]
   green  L2 · the pane column scrolls, and strands nothing
            scrollers=2 stranded=[]
-  green  T1 · no raw hex in the to-do pane stylesheet outside :root
-           0 distinct: 
+  green  T1 · the app-frame adaptations state no raw hex — they read the app's tokens
+           0 distinct:  · (ported block exempt: 42 of the ref's own)
   green  T2 · a sage band on /todo paints the Query Centre panel header's colours
            todo=rgb(220, 224, 217) rgb(208, 214, 204)  qc=rgb(220, 224, 217) rgb(208, 214, 204)
   green  N1 · at 390 the pane keeps a real width — no starved track
            rail=94 work=164
   green  F1 · no container query, no media query, in the pane sheet
-           none
+           @media (max-width: 1160px) 

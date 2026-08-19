@@ -120,16 +120,24 @@ const sheet = readFileSync(join(process.cwd(), "src/components/todo/taskPane.css
      housekeeping card was not selected. A probe appended to the page is styled by the same
      cascade and the same stylesheet; what it cannot be is silently unmeasured. */
   const todoSage = await page.evaluate(() => {
+    /* ⚠️ RE-POINTED ONTO THE PORTED PANE. This probed `.tdk-band.g-housekeeping`, which went with
+       `TodoDock`, so it was measuring nothing and comparing "" against "" — the vacuous-pass shape
+       this file already carries a warning about, produced by my own retirement of the class.
+
+       The port paints the paper on `.v` (`u-house`) and the band inherits it, so the probe builds
+       the mockup's own nesting. Live band first, probe only when the selected card is not a
+       housekeeping one — which depends on the account's data, not on the code. */
     const vis = (e: Element | null) => !!e && (e as HTMLElement).offsetParent !== null;
-    const live = [...document.querySelectorAll(".tdk-band.g-housekeeping")].find(vis) as HTMLElement | undefined;
+    const live = [...document.querySelectorAll(".tpn .u-house .band")].find(vis) as HTMLElement | undefined;
     if (live) return getComputedStyle(live).backgroundImage;
-    const host = document.querySelector(".tdk") ?? document.body;
-    const p = document.createElement("div");
-    p.className = "tdk-band g-housekeeping";
-    host.appendChild(p);
-    const v = getComputedStyle(p).backgroundImage;
-    p.remove();
-    return v;
+    const host = document.querySelector(".tpn") ?? document.body;
+    const v = document.createElement("div");
+    v.className = "v u-house";
+    v.innerHTML = '<div class="fc"><div class="rim"><div class="band"></div></div></div>';
+    host.appendChild(v);
+    const out = getComputedStyle(v.querySelector(".band") as HTMLElement).backgroundImage;
+    v.remove();
+    return out;
   });
   await page.goto("/queries");
   await page.waitForTimeout(6000);
