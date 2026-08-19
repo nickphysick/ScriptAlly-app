@@ -26,7 +26,7 @@
  *                  typed-confirmation modal is present; the final delete action is disabled —
  *                  irreversible deletion is never wired unsupervised, and no endpoint exists).
  */
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
@@ -34,6 +34,13 @@ import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, 
 import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
 import { useDirtyField } from "../lib/useSaveState";
+import { auth } from "../lib/firebase";
+import { sendEmailVerification } from "firebase/auth";
+import {
+  passwordMode, federatedNames, federatedLine,
+  signOutOtherSessions, SESSION_REVOKE_UNAVAILABLE,
+} from "../lib/accountSecurity";
+import { readAuthFacts } from "../lib/accountAuthFacts";
 import { dirtyFieldKeys } from "../lib/saveSignal";
 import { useToast } from "./toast/ToastProvider";
 import { validateDisplayName } from "../lib/accountValidation";
@@ -180,6 +187,36 @@ const ComingSoonPill: React.FC = () => (
     }}
   >
     Coming soon
+  </span>
+);
+
+/**
+ * The email's Verified / Unverified chip.
+ *
+ * ⚠️ UNVERIFIED IS NOT AN ERROR, AND IS NOT DRAWN AS ONE. Most accounts reach this page unverified
+ * and perfectly functional; a red chip would turn a piece of status into an accusation. It is the
+ * muted treatment with a plain word, and the action beside it is what makes it actionable.
+ */
+const VerifiedChip: React.FC<{ verified: boolean }> = ({ verified }) => (
+  <span
+    style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      flexShrink: 0,
+      fontFamily: FONT_MONO,
+      fontSize: 9,
+      letterSpacing: "0.08em",
+      textTransform: "uppercase",
+      borderRadius: 999,
+      padding: "4px 9px",
+      color: verified ? "#3B6D11" : mutedInk,
+      background: verified ? "rgba(59,109,17,0.07)" : "rgba(124,58,42,0.06)",
+      border: `0.5px solid ${verified ? "rgba(59,109,17,0.22)" : "rgba(124,58,42,0.16)"}`,
+    }}
+  >
+    {verified && <Check style={{ width: 11, height: 11 }} aria-hidden="true" />}
+    {verified ? "Verified" : "Unverified"}
   </span>
 );
 
@@ -620,6 +657,12 @@ export const AccountSettings: React.FC<{
   const [countryStatus, setCountryStatus] = useState<{ type: "idle" | "saving" | "error"; msg?: string }>({ type: "idle" });
   const { showToast } = useToast();
   const [resetMsg, setResetMsg] = useState<string | null>(null);
+  const [verifyMsg, setVerifyMsg] = useState<string | null>(null);
+  const [sessionMsg, setSessionMsg] = useState<string | null>(null);
+  /* ⚠️ READ ONCE PER MOUNT, NOT SUBSCRIBED. `auth.currentUser` is not reactive and `emailVerified`
+     in particular only moves on a reload — so a snapshot at mount is exactly as fresh as anything
+     a subscription could offer, and it does not pretend otherwise. */
+  const authFacts = useMemo(() => readAuthFacts(), []);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [showDelete, setShowDelete] = useState(false);
 
@@ -639,6 +682,7 @@ export const AccountSettings: React.FC<{
    * quieter status of this page's own. `useDirtyField` clears the key on unmount, so leaving
    * mid-edit cannot strand the bar.
    */
+  const pwMode = passwordMode(authFacts?.providerIds ?? ["password"]);
   const nameChanged = name.trim() !== (currentUser.name ?? "").trim();
   const nameValid = validateDisplayName(name).ok;
   useDirtyField(DIRTY_DISPLAY_NAME, nameChanged);
@@ -688,6 +732,26 @@ export const AccountSettings: React.FC<{
     } catch {
       setCountryStatus({ type: "error", msg: "Couldn't save. Please try again." });
     }
+  };
+
+  /* ⚠️ IT TELLS YOU TO RELOAD RATHER THAN FLIPPING THE CHIP. `emailVerified` is a snapshot; the
+     app cannot know you have clicked the link until the token refreshes, and a chip that turned
+     green on send would be asserting an outcome nobody has observed. */
+  const resendVerification = async () => {
+    if (!auth.currentUser) return;
+    setVerifyMsg("sending");
+    try {
+      await sendEmailVerification(auth.currentUser);
+      setVerifyMsg("Verification email sent. Click the link, then reload this page.");
+    } catch {
+      setVerifyMsg("Couldn't send it just now. Please try again.");
+    }
+  };
+
+  /** Calls the named stub and states its answer — never a quiet success. */
+  const endOtherSessions = async () => {
+    const r = await signOutOtherSessions();
+    setSessionMsg(r.ok ? null : SESSION_REVOKE_UNAVAILABLE);
   };
 
   const sendReset = async () => {
@@ -836,45 +900,110 @@ export const AccountSettings: React.FC<{
       <label htmlFor="account-email" style={labelStyle}>
         Email
       </label>
-      <div style={{ position: "relative", marginBottom: 6 }}>
-        <Mail style={{ position: "absolute", left: 11, top: 11, width: 16, height: 16, color: "rgba(58,28,20,0.4)" }} aria-hidden="true" />
-        <input
-          id="account-email"
-          type="email"
-          value={currentUser.email}
-          readOnly
-          disabled
-          className="acct-input"
-          style={{ ...inputStyle, paddingLeft: 34, opacity: 0.7, cursor: "not-allowed" }}
-        />
-      </div>
-      <p style={helpText}>Changing your email is coming soon — it needs you to re-enter your password for security.</p>
-
-      {/* Password — fully working via the existing reset-email flow (no reauth needed). */}
-      <div style={{ marginTop: 20, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 3 }}>Password</p>
-        <p style={{ ...helpText, marginBottom: 12 }}>We'll email you a secure link to set a new password.</p>
-        <button onClick={sendReset} style={ghostBtn}>
-          <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Send password reset email
-        </button>
-        {resetMsg && <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN, marginTop: 12 }}>{resetMsg}</p>}
+      <div className="flex items-center" style={{ gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+        <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
+          <Mail style={{ position: "absolute", left: 11, top: 11, width: 16, height: 16, color: "rgba(58,28,20,0.4)" }} aria-hidden="true" />
+          <input
+            id="account-email"
+            type="email"
+            value={currentUser.email}
+            readOnly
+            className="acct-input"
+            style={{ ...inputStyle, paddingLeft: 34, background: "#faf6f0", color: "#6a5a50" }}
+          />
+        </div>
+        <VerifiedChip verified={authFacts?.emailVerified ?? true} />
       </div>
 
-      <div style={{ marginTop: 20, paddingTop: 4 }}>
-        <InertRow
-          first
-          title="Two-factor authentication"
-          desc="Add a one-time code at sign-in for extra protection."
-        />
-        <InertRow
-          title="Active sessions"
-          desc="Review and sign out devices currently signed in."
-          control={
-            <span className="flex items-center" style={{ gap: 6, ...helpText }}>
-              <Smartphone style={{ width: 15, height: 15, color: mutedInk }} aria-hidden="true" /> This device
+      {/* ⚠️ `emailVerified` DOES NOT RE-RENDER. It is a snapshot on the auth user, refreshed only
+          by a reload or an explicit `reload()`; polling it would spin, and flipping the chip
+          locally after sending would be the UI asserting an outcome it has not observed. So the
+          confirmation says to reload — the one honest instruction. */}
+      {authFacts && !authFacts.emailVerified && (
+        <div className="flex items-center" style={{ gap: 12, marginTop: 4, marginBottom: 4, flexWrap: "wrap" }}>
+          <button onClick={resendVerification} disabled={verifyMsg === "sending"} style={ghostBtn}>
+            {verifyMsg === "sending" ? "Sending…" : "Resend verification"}
+          </button>
+          {verifyMsg && verifyMsg !== "sending" && (
+            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: verifyMsg.startsWith("Couldn") ? ERROR_RED : SUCCESS_GREEN }}>
+              {verifyMsg}
             </span>
-          }
-        />
+          )}
+        </div>
+      )}
+
+      {/* ⚠️ "Change email" GOES TO SUPPORT, BECAUSE THERE IS NO FLOW BEHIND IT. Firebase's
+          `verifyBeforeUpdateEmail` needs a recent sign-in and a re-auth path this app has never
+          built, and a button that opens nothing is the disabled-field fault wearing a verb. This
+          reuses Your data's own "Correct something we hold" route, which exists for exactly the
+          case where the writer cannot change something themselves. */}
+      <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", marginTop: 12 }}>
+        <p style={{ ...helpText, margin: 0, flex: 1, minWidth: 200 }}>
+          Your email is how you sign in, so changing it is something we do with you rather than
+          something you can switch here.
+        </p>
+        <button onClick={() => onNavigate("contact")} style={ghostBtn}>Change email</button>
+      </div>
+
+      {/* ── Password — provider-aware ──────────────────────────────────────── */}
+      <div style={{ marginTop: 20, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
+        {pwMode === "federated-only" ? (
+          <>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 3 }}>How you sign in</p>
+            <p style={{ ...helpText, margin: 0 }}>{federatedLine(authFacts?.providerIds ?? [], currentUser.email)}</p>
+            <p style={{ ...helpText, marginTop: 6 }}>There's no ScriptAlly password on this account, so there's nothing here to change.</p>
+          </>
+        ) : (
+          <>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 3 }}>Password</p>
+            {/* ⚠️ NO "LAST CHANGED {date}" LINE. Firebase exposes creationTime and lastSignInTime
+                and nothing else; printing either under that label is a real date wearing the wrong
+                name. See PASSWORD_LAST_CHANGED_AVAILABLE. */}
+            <div className="flex items-center" style={{ gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
+              <input
+                type="password"
+                value="············"
+                readOnly
+                aria-label="Password (hidden)"
+                className="acct-input"
+                style={{ ...inputStyle, width: "auto", minWidth: 180, background: "#faf6f0", color: "#6a5a50", letterSpacing: "0.12em" }}
+              />
+            </div>
+            {pwMode === "both" && (
+              <p style={{ ...helpText, marginBottom: 10 }}>
+                You can also sign in with {federatedNames(authFacts?.providerIds ?? []).join(" and ")}.
+              </p>
+            )}
+            <p style={{ ...helpText, marginBottom: 12 }}>We'll email you a secure link to set a new one.</p>
+            <button onClick={sendReset} style={ghostBtn}>
+              <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Change password
+            </button>
+            {resetMsg && <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN, marginTop: 12 }}>{resetMsg}</p>}
+          </>
+        )}
+      </div>
+
+      {/* ── Sessions ───────────────────────────────────────────────────────────
+          ⚠️ THE ACTION IS REAL AND ITS ANSWER IS HONEST. Revoking other sessions needs
+          `revokeRefreshTokens` on the Admin SDK — a Cloud Function this project does not have, and
+          the client SDK cannot do it at all. The button therefore calls a named stub and reports
+          what the stub says. It must never resolve quietly: someone believing they have locked out
+          a device they have not is worse off than someone told the feature is missing.
+          ⚠️ AND PASSKEYS, 2FA AND A DEVICE LIST ARE OUT OF SCOPE — deliberately absent rather than
+          rendered as coming-soon rows. */}
+      <div style={{ marginTop: 20, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
+        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Other sessions</p>
+            <p style={helpText}>Ends every other signed-in session. This device stays signed in.</p>
+          </div>
+          <button onClick={endOtherSessions} style={ghostBtn}>
+            <Smartphone style={{ width: 14, height: 14 }} aria-hidden="true" /> Sign out of all other sessions
+          </button>
+        </div>
+        {sessionMsg && (
+          <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: mutedInk, marginTop: 10, lineHeight: 1.5 }}>{sessionMsg}</p>
+        )}
       </div>
     </SectionCard>
   );
