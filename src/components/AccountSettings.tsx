@@ -33,6 +33,9 @@ import { useScriptAllyDb } from "../lib/db";
 import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, deletionConfirmed } from "../lib/dataExport";
 import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
+import { useDirtyField } from "../lib/useSaveState";
+import { dirtyFieldKeys } from "../lib/saveSignal";
+import { useToast } from "./toast/ToastProvider";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountPanel } from "./MountPanel";
 import { SECTION_BANDS } from "./settings/sectionBands";
@@ -88,6 +91,24 @@ const ERROR_RED = "#A32D2D";
 type SectionId = AccountSectionId;
 const SECTIONS: { id: SectionId; label: string; path: string; Icon: React.ComponentType<any> }[] =
   ACCOUNT_ROUTES.map((r) => ({ id: r.id, label: r.label, path: r.path, Icon: SECTION_BANDS[r.id].Icon }));
+
+/**
+ * The dirty-field keys this page registers with `saveSignal`, and the words the leave-warning
+ * uses for them.
+ *
+ * ⚠️ ONE MAP, NOT TWO LISTS. The key is what the bar counts and the label is what the toast says;
+ * written separately they would drift, and the failure is a warning that names a field the reader
+ * cannot find. Free-text fields only — an instant-commit control is never dirty, by construction.
+ */
+export const DIRTY_DISPLAY_NAME = "settings:display-name";
+const DIRTY_LABELS: Record<string, string> = {
+  [DIRTY_DISPLAY_NAME]: "Display name",
+};
+
+/** The human names of whatever is currently unsaved — used by the leave-warning only. */
+function dirtyFieldLabels(): string[] {
+  return dirtyFieldKeys().map((k) => DIRTY_LABELS[k]).filter(Boolean);
+}
 
 /* ── Shared field/label/button styling (inline so brand.tsx's non-important body-font
  *    rule can't override it, and Tailwind can't silently re-colour it) ──────────────── */
@@ -579,21 +600,52 @@ export const AccountSettings: React.FC<{
      the prop reads it back through App.tsx, so there is exactly one copy of "where am I". */
   const navigate = useNavigate();
   const active = section;
+  /**
+   * ⚠️ LEAVING WITH A DIRTY FIELD WARNS AND CONTINUES — it does not block, and it does not discard.
+   * A modal asking permission to change SECTION would be the heaviest interruption on the page
+   * guarding its lightest edit; and silently dropping typed text is the one outcome nobody can
+   * recover from. The value stays in the input, the bar keeps saying "Unsaved changes", and the
+   * toast says which field it was — so the writer can walk back to it.
+   */
   const goSection = (id: SectionId) => {
     const hit = SECTIONS.find((s) => s.id === id);
-    if (hit) navigate(hit.path);
+    if (!hit || hit.id === active) return;
+    for (const label of dirtyFieldLabels()) {
+      showToast({ message: `${label} not saved yet`, duration: 4000, replaces: "settings-dirty" });
+    }
+    navigate(hit.path);
   };
   const [name, setName] = useState(currentUser?.name ?? "");
-  const [nameStatus, setNameStatus] = useState<{ type: "idle" | "saving" | "saved" | "error"; msg?: string }>({ type: "idle" });
-  const [countryStatus, setCountryStatus] = useState<{ type: "idle" | "saving" | "saved" | "error"; msg?: string }>({ type: "idle" });
+  const [nameStatus, setNameStatus] = useState<{ type: "idle" | "saving" | "error"; msg?: string }>({ type: "idle" });
+  const [countryStatus, setCountryStatus] = useState<{ type: "idle" | "saving" | "error"; msg?: string }>({ type: "idle" });
+  const { showToast } = useToast();
   const [resetMsg, setResetMsg] = useState<string | null>(null);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [showDelete, setShowDelete] = useState(false);
 
   if (!currentUser) return null;
 
+  /**
+   * ⚠️ THE SAVE MODEL IS HYBRID, AND THE SPLIT IS ABOUT WHAT AN EDIT *IS*.
+   *
+   * A toggle or a select COMMITS INSTANTLY and says so with a receipt: the gesture is the whole
+   * decision, and a Save button beside it would ask the writer to confirm something they have
+   * already, unambiguously, chosen. FREE TEXT commits EXPLICITLY: half-typed text is not a
+   * decision, and a field that saved as you type would write "Nic" on the way to "Nicholas".
+   *
+   * ⚠️ AND THE BAR MUST NEVER SAY "ALL CHANGES SAVED" OVER A DIRTY FIELD. That is the whisper's
+   * own stated law — it exists so the status can never show a false "saved" — so the dirty
+   * registration lives in `saveSignal` beside the in-flight counter rather than as a second,
+   * quieter status of this page's own. `useDirtyField` clears the key on unmount, so leaving
+   * mid-edit cannot strand the bar.
+   */
   const nameChanged = name.trim() !== (currentUser.name ?? "").trim();
   const nameValid = validateDisplayName(name).ok;
+  useDirtyField(DIRTY_DISPLAY_NAME, nameChanged);
+
+  /** The one receipt for an instant commit. Channelled, so a run of quick changes replaces rather
+   *  than stacks — three toasts each offering nothing to undo is noise, not reassurance. */
+  const savedReceipt = (what: string) => showToast({ message: `${what} saved`, duration: 2200, replaces: "settings-saved" });
 
   const saveName = async () => {
     const v = validateDisplayName(name);
@@ -604,11 +656,22 @@ export const AccountSettings: React.FC<{
     setNameStatus({ type: "saving" });
     try {
       await updateUserProfile({ name: v.value });
-      setNameStatus({ type: "saved", msg: "Saved" });
-      setTimeout(() => setNameStatus({ type: "idle" }), 2500);
+      setNameStatus({ type: "idle" });
+      /* Re-baseline: the field is now what the account says, so the Save/Discard row retreats and
+         the bar goes clean — both derive from `nameChanged`, which is why there is nothing else
+         to reset here. */
+      setName(v.value);
+      savedReceipt("Display name");
     } catch {
       setNameStatus({ type: "error", msg: "Couldn't save. Please try again." });
     }
+  };
+
+  /** Discard restores the saved value. No confirm: the field is visibly back to what it was, and
+   *  the edit was never anywhere but this input. */
+  const discardName = () => {
+    setName(currentUser.name ?? "");
+    setNameStatus({ type: "idle" });
   };
 
   /** Save-on-select (the Preferences theme-radio convention). An empty pick — the combobox's
@@ -620,8 +683,8 @@ export const AccountSettings: React.FC<{
     setCountryStatus({ type: "saving" });
     try {
       await updateUserProfile({ homeCountry: code });
-      setCountryStatus({ type: "saved", msg: "Saved" });
-      setTimeout(() => setCountryStatus({ type: "idle" }), 2500);
+      setCountryStatus({ type: "idle" });
+      savedReceipt("Home country");
     } catch {
       setCountryStatus({ type: "error", msg: "Couldn't save. Please try again." });
     }
@@ -683,31 +746,19 @@ export const AccountSettings: React.FC<{
 
   const profileSection = (
     <SectionCard section="profile" name={currentUser.name || "Your account"} sub={currentUser.email} disc={initialsOf(currentUser.name || currentUser.email)} headingId="acct-h-profile">
-      <div className="flex items-center" style={{ gap: 14, marginBottom: 20 }}>
-        <span
-          aria-hidden="true"
-          style={{
-            width: 52,
-            height: 52,
-            borderRadius: "50%",
-            background: "#f8e7dc",
-            border: "1px solid rgba(124,58,42,0.18)",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: FONT_SERIF,
-            fontSize: 22,
-            color: burgundy,
-            flexShrink: 0,
-          }}
-        >
-          {initial}
-        </span>
-        <div style={{ minWidth: 0 }}>
-          <p style={{ fontFamily: FONT_SERIF, fontSize: 17, color: bodyInk, lineHeight: 1.2 }}>{currentUser.name || "—"}</p>
-          <p style={helpText}>{currentUser.email}</p>
-        </div>
-      </div>
+      {/* ⚠️ NO AUTHOR-PHOTO CONTROL, AND NO DISABLED PLACEHOLDER FOR ONE. Firebase Storage is not
+          configured in this project — no `storage.rules`, no storage block in either hosting
+          config, no `firebase/storage` import anywhere in src. A "Change photo" button that
+          cannot store a photo is the Pen name field wearing a different label, and this build
+          removed that one for exactly this reason. The dashboard byline's initials fallback
+          stands alone until Storage exists.
+          STANDING FLAG: `OneScreenAuthor.tsx:62`'s "Add a photo +" navigates here and will find
+          nothing — left untouched, as a one-line follow-up rather than a change smuggled into
+          this phase. */}
+
+      {/* ⚠️ NO IDENTITY BLOCK EITHER. A 52px monogram over the name and email used to open this
+          body, and the band directly above now carries the same monogram, the same name and the
+          same email — the writer's own address printed twice, four centimetres apart. */}
 
       <label htmlFor="account-name" style={labelStyle}>
         Display name
@@ -720,29 +771,41 @@ export const AccountSettings: React.FC<{
         onChange={(e) => setName(e.target.value)}
         className="acct-input"
         style={inputStyle}
+        aria-describedby={nameStatus.type === "error" ? "account-name-error" : undefined}
       />
-      <div className="flex items-center" style={{ gap: 12, marginTop: 12, flexWrap: "wrap" }}>
-        <button
-          onClick={saveName}
-          disabled={!nameChanged || !nameValid || nameStatus.type === "saving"}
-          style={{ ...primaryBtn, opacity: !nameChanged || !nameValid || nameStatus.type === "saving" ? 0.4 : 1, cursor: !nameChanged || !nameValid ? "not-allowed" : "pointer" }}
-        >
-          {nameStatus.type === "saving" ? "Saving…" : "Save name"}
-        </button>
-        {nameStatus.type === "saved" && (
-          <span className="flex items-center" style={{ gap: 5, fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN }}>
-            <Check style={{ width: 14, height: 14 }} aria-hidden="true" /> {nameStatus.msg}
-          </span>
-        )}
-        {nameStatus.type === "error" && (
-          <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED }}>{nameStatus.msg}</span>
-        )}
-      </div>
+
+      {/* ⚠️ THE ROW IS ABSENT UNTIL THE FIELD DIVERGES, not present-and-disabled. A permanently
+          greyed Save button is a control that spends its whole life saying no; its arrival is the
+          page telling you there is something to do. It leaves again the moment the value matches
+          what is stored — including when you type your way back to it by hand. */}
+      {nameChanged && (
+        <div className="flex items-center" style={{ gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+          <button
+            onClick={saveName}
+            disabled={!nameValid || nameStatus.type === "saving"}
+            style={{ ...primaryBtn, opacity: !nameValid || nameStatus.type === "saving" ? 0.4 : 1, cursor: nameValid ? "pointer" : "not-allowed" }}
+          >
+            {nameStatus.type === "saving" ? "Saving…" : "Save"}
+          </button>
+          <button onClick={discardName} disabled={nameStatus.type === "saving"} style={ghostBtn}>
+            Discard
+          </button>
+        </div>
+      )}
+      {nameStatus.type === "error" && (
+        <p id="account-name-error" style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED, marginTop: 8 }}>
+          {nameStatus.msg}
+        </p>
+      )}
 
       {/* Home country — seeded silently at signup from the browser locale (key omitted when
           unresolvable) and previously never writable again: a wrong guess was a permanent trap
           for the agent territory split (Tier 2 · Phase 4). Absent shows as "Not set" and is
-          settable; once set it can be changed but not cleared (the origin-state law). */}
+          settable; once set it can be changed but not cleared (the origin-state law).
+
+          ⚠️ IT COMMITS ON SELECT, WITH A RECEIPT AND NO SAVE BUTTON — choosing from a list IS the
+          decision. `CountryCombobox` is the app's own control; a native `<select>` would drop the
+          flags and take the OS's menu styling into the middle of a Form 11 card. */}
       <div style={{ marginTop: 22, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
         <label htmlFor="account-homecountry" style={labelStyle}>
           Home country
@@ -760,24 +823,11 @@ export const AccountSettings: React.FC<{
             Sets your home market — the agent list uses it to tell domestic agents from
             international ones. It can be changed any time, but not cleared once set.
           </p>
-          {countryStatus.type === "saving" && (
-            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: mutedInk }}>Saving…</span>
-          )}
-          {countryStatus.type === "saved" && (
-            <span className="flex items-center" style={{ gap: 5, fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN }}>
-              <Check style={{ width: 14, height: 14 }} aria-hidden="true" /> {countryStatus.msg}
-            </span>
-          )}
-          {countryStatus.type === "error" && (
-            <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED }}>{countryStatus.msg}</span>
-          )}
         </div>
+        {countryStatus.type === "error" && (
+          <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED, marginTop: 8 }}>{countryStatus.msg}</p>
+        )}
       </div>
-
-      {/* ⚠️ PEN NAME IS REMOVED, NOT DISABLED. It was never a `User` field and never in the
-          Firestore allowlist, so it could not be stored — and a permanently disabled input is a
-          promise on the page with nothing behind it. Settings states what your account IS; a
-          field that cannot hold a value states nothing. It comes back when it has somewhere to go. */}
     </SectionCard>
   );
 

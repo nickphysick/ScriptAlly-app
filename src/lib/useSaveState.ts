@@ -7,8 +7,8 @@
  * Split from the counter itself so the counter stays a plain module: db.tsx instruments its
  * firestore imports with it, and the unit suite exercises it without React.
  */
-import { useSyncExternalStore } from "react";
-import { SaveState, saveState, subscribeSave } from "./saveSignal";
+import { useEffect, useSyncExternalStore } from "react";
+import { SaveState, saveState, subscribeSave, markDirty, clearDirty } from "./saveSignal";
 
 /**
  * ⚠️ `useSyncExternalStore` rather than an effect + useState, because the counter changes DURING
@@ -31,5 +31,22 @@ export function useSaveState(): SaveState {
  * error word here would be a second, quieter error surface that nobody would think to check.
  */
 export function saveWhisper(s: SaveState): string {
-  return s === "saving" ? "Saving…" : "All changes saved";
+  if (s === "saving") return "Saving…";
+  if (s === "dirty") return "Unsaved changes";
+  return "All changes saved";
+}
+
+/**
+ * Register this component's field as dirty for as long as `isDirty` holds.
+ *
+ * ⚠️ THE CLEANUP IS THE POINT. The effect clears the key on unmount and whenever the key changes,
+ * so leaving a page mid-edit cannot leave the bar reading "Unsaved changes" over a form that is
+ * no longer on screen — a stuck warning is worse than none, because the next real one is ignored.
+ */
+export function useDirtyField(key: string, isDirty: boolean): void {
+  useEffect(() => {
+    if (!isDirty) { clearDirty(key); return; }
+    markDirty(key);
+    return () => clearDirty(key);
+  }, [key, isDirty]);
 }

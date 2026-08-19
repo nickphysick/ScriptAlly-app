@@ -7,6 +7,7 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
   __resetSaveSignal, beginWrite, endWrite, saveState, subscribeSave, tracked, trackWrite,
+  markDirty, clearDirty, dirtyFieldKeys,
 } from "./saveSignal";
 import { saveWhisper } from "./useSaveState";
 
@@ -100,11 +101,75 @@ describe("the whisper's words", () => {
   it("reflects the state rather than a constant", () => {
     expect(saveWhisper("idle")).toBe("All changes saved");
     expect(saveWhisper("saving")).toBe("Saving…");
+    expect(saveWhisper("dirty")).toBe("Unsaved changes");
   });
 
-  /* ⚠️ THERE IS NO ERROR WORD. A failed write is the failing flow's business to report, and those
-     flows already do; a third string here would be a second, quieter error surface nobody checks. */
-  it("has exactly two strings", () => {
-    expect(new Set([saveWhisper("idle"), saveWhisper("saving")]).size).toBe(2);
+  /* ⚠️ THERE IS STILL NO ERROR WORD, AND `dirty` IS NOT ONE. A failed write is the failing flow's
+     business to report, and those flows already do; an error string here would be a second,
+     quieter error surface nobody checks. "Unsaved changes" is not a failure — it is the whisper's
+     own law being kept, that it must never show a false "saved". */
+  it("has exactly three strings, one per state", () => {
+    expect(new Set([saveWhisper("idle"), saveWhisper("saving"), saveWhisper("dirty")]).size).toBe(3);
+  });
+});
+
+describe("the dirty registry — the bar must never claim saved over unsaved text", () => {
+  it("a marked field turns the state dirty; clearing it returns to idle", () => {
+    expect(saveState()).toBe("idle");
+    markDirty("a");
+    expect(saveState()).toBe("dirty");
+    clearDirty("a");
+    expect(saveState()).toBe("idle");
+  });
+
+  /* ⚠️ THE REASON IT IS A SET AND NOT A FLAG. Saving one of two dirty fields must not make the
+     bar claim the other one is saved too. */
+  it("stays dirty while ANY field is dirty", () => {
+    markDirty("a");
+    markDirty("b");
+    clearDirty("a");
+    expect(saveState()).toBe("dirty");
+    clearDirty("b");
+    expect(saveState()).toBe("idle");
+  });
+
+  it("marking the same field twice is one dirty field", () => {
+    markDirty("a");
+    markDirty("a");
+    clearDirty("a");
+    expect(saveState()).toBe("idle");
+  });
+
+  it("clearing a field that was never dirty changes nothing", () => {
+    clearDirty("never");
+    expect(saveState()).toBe("idle");
+  });
+
+  it("an in-flight write outranks dirty, and dirty survives the write finishing", async () => {
+    markDirty("a");
+    const p = trackWrite(Promise.resolve(1));
+    expect(saveState()).toBe("saving");
+    await p;
+    expect(saveState()).toBe("dirty");
+    clearDirty("a");
+    expect(saveState()).toBe("idle");
+  });
+
+  it("notifies subscribers on the idle→dirty→idle edges", () => {
+    const seen: string[] = [];
+    const off = subscribeSave((st) => seen.push(st));
+    markDirty("a");
+    markDirty("b");   // already dirty — no second notification
+    clearDirty("a");  // still dirty — none either
+    clearDirty("b");
+    off();
+    expect(seen).toEqual(["dirty", "idle"]);
+  });
+
+  it("names what is dirty, for the leave-warning to read", () => {
+    markDirty("settings:display-name");
+    expect(dirtyFieldKeys()).toEqual(["settings:display-name"]);
+    clearDirty("settings:display-name");
+    expect(dirtyFieldKeys()).toEqual([]);
   });
 });
