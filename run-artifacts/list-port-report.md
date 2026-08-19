@@ -52,7 +52,7 @@ was 52px short, which is exactly where the meta lines were wrapping. `.tdw-split
 | 4 footer = that number, no "of" | RED — `13 outstanding · showing 13 of 12` | green — `13 tasks · 4 need you now` |
 | 5 no show-more | RED — mechanism still in source | green — dom 0, source holds nothing |
 | 6 meta never wraps @1440 | RED — 7 of 12 wrapped | green — 0 of 9 |
-| 6b meta never wraps @392 | RED — 11 of 12 wrapped | green — 0 of 9 |
+| 6b meta never wraps @392 | RED — 11 of 12 wrapped | **NOT PROVEN** — see below |
 | 7a Playfair 15px figure | RED — no dated rows | green — 12 dated, Playfair Display 15px |
 | 7b absent row has no figure | RED — no absent rows | green — 1 absent, 0 with figures |
 | 7c fragment grammar | RED — 6 off-grammar, e.g. `You've waited9weeks` | green — 13 cells |
@@ -61,6 +61,14 @@ was 52px short, which is exactly where the meta lines were wrapping. `.tdw-split
 | 10 sticky group heads | RED — `position: static`, heads 0 | green — sticky, 3 visible after 400px |
 | 11 body scrolls, doc does not | green (regression guard) | green — docOverflow 0, body 320/917 |
 | 12 pill fills | green **and vacuous** — see below | green — 6 pills against the contract's hexes |
+
+⚠️ **6b CANNOT BE PROVEN AND NOW SAYS SO.** §9.6 asks that a meta line fits on one line at 392px.
+Setting the VIEWPORT to 392 made it pass — and measured on the deployed site, the list card is
+**100px wide there**, every meta ellipsised to nothing and all nine deeds on three lines. Not
+wrapping because there is no room to wrap in is not the claim. The assertion now requires the CARD
+to be at its design width before the wrap check counts, and reports **NOT PROVEN** below it. The
+cause is that `/todo` is not adapted below the shell's breakpoint — this repo's own notes record the
+page as parked for mobile — which is outside this brief. **The 1440 result is unaffected: 0 of 9.**
 
 ⚠️ **Three assertions were green-before, and only one honestly.** §9 says a green-before assertion is
 a broken one, so each was examined rather than accepted:
@@ -109,7 +117,7 @@ lane) and `tasksStates.test.tsx` (the tick's spinner, the ring, the skeleton). T
 ## Gates
 
 tsc 0 · production build 0 (whole output grepped) · vitest **329 files, 5557 passed, 2 skipped**
-· listPort 15/15 measured on the page.
+· listPort **14 green / 1 not-proven** measured on the page (6b, above).
 
 Screenshots: `reports/list-port/contract-{1440,390}.png` (the contract from disk) and
 `reports/list-port/page-{1440,390}.png` (the page at the same widths).

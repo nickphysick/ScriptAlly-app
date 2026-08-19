@@ -245,19 +245,40 @@ test("list port", async ({ page }) => {
                       : `checked ${probe.pills.map((p) => p.key).join(",")}`);
 
   /* ── 6b · the narrow width ─────────────────────────────────────────────────────────────── */
+  /* ⚠️ THE NARROW CHECK NEEDS THE CARD TO BE AT ITS DESIGN WIDTH, OR IT PROVES NOTHING. §9.6 asks
+     that a meta line fits on one line at 392px. The first form set the VIEWPORT to 392 and asked
+     whether any `.r-meta` wrapped — and it passed, because at that viewport the list column is
+     ~97px and every meta is ellipsised to almost nothing. Not wrapping because there is no room to
+     wrap in is not the claim. So the card's own width is asserted FIRST, and the wrap check only
+     means something above it.
+
+     ⚠️ AND AT 390 THE PAGE IS NOT ADAPTED — measured on the deployed site: card 97px, all nine
+     deeds on three lines, split tracks `99px 159px`. That is the mobile state of `/todo`, which
+     this repo's own notes record as parked, and it is out of this brief's scope. Reported rather
+     than asserted away: this case now says so instead of passing quietly. */
   await page.setViewportSize({ width: 392, height: 900 });
   await page.waitForTimeout(1200);
   const narrowWrap = await page.evaluate((S) => {
     const vis = (e: Element | null) => !!e && (e as HTMLElement).offsetParent !== null;
+    const card = [...document.querySelectorAll(S.card)].filter(vis)[0] as HTMLElement | undefined;
     const m = [...document.querySelectorAll(S.meta)].filter(vis) as HTMLElement[];
-    return { total: m.length, wrapped: m.filter((x) => {
-      const lh = parseFloat(getComputedStyle(x).lineHeight) || parseFloat(getComputedStyle(x).fontSize) * 1.4;
-      return x.getBoundingClientRect().height > lh * 1.6;
-    }).length };
+    const lh = (e: HTMLElement) =>
+      parseFloat(getComputedStyle(e).lineHeight) || parseFloat(getComputedStyle(e).fontSize) * 1.4;
+    return {
+      cardW: card ? Math.round(card.getBoundingClientRect().width) : -1,
+      total: m.length,
+      wrapped: m.filter((x) => x.getBoundingClientRect().height > lh(x) * 1.6).length,
+    };
   }, SEL);
-  add("6b · meta lines still do not wrap at 392px",
-      narrowWrap.total === 0 || narrowWrap.wrapped === 0,
-      `${narrowWrap.wrapped} of ${narrowWrap.total} wrapped` + (narrowWrap.total === 0 ? " (list not mounted at this width)" : ""));
+  /* the design width is 392; anything under ~300 is the parked mobile layout, not this claim */
+  const atDesignWidth = narrowWrap.cardW >= 300;
+  add("6b · at the card's design width, meta lines still do not wrap",
+      atDesignWidth ? narrowWrap.wrapped === 0 : false,
+      atDesignWidth
+        ? `card=${narrowWrap.cardW}px · ${narrowWrap.wrapped} of ${narrowWrap.total} wrapped`
+        : `NOT PROVEN — card is ${narrowWrap.cardW}px at a 392 viewport, so nothing can wrap. `
+          + `/todo is not adapted below the shell's breakpoint (parked); out of this brief's scope.`);
+
 
   const red = out.filter((r) => !r.ok);
   const lines = [`── list port · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`];
