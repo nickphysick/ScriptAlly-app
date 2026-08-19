@@ -110,15 +110,21 @@
    `height` entirely — the bar measured `7x0` on the deployed page while its inline width said
    `8.33333%`, so the fill was there, correct, and invisible. The TEXT above it rendered fine, which
    is what made it survive a source reading: only measuring the box found it. */
-/* ⚠️ IT CLEARS THE MOTIF THE WAY THE FACTS STRIP DOES — same stacking, same reserved box, same
-   tokens. Measured on the deployed page before this: the illustration drew straight across
-   "Answered / 1 of 12" and hid the figure. A static element takes no z-index, so raising it needs
-   `position: relative` as well; and stacking alone is not clearance, which is why the padding
-   reserves the motif's own width rather than trusting the order things paint in. */
+/* ⚠️ THERE IS NO MOTIF LEFT TO CLEAR (audit B) — this reserved the illustration's own width so
+   "Answered / 1 of 12" was not drawn across, which was a real fault measured on the deployed page.
+   With the artwork gone the reservation held the figure off an empty corner.
+
+   ⚠️ AND THE `calc()` WAS THE DANGEROUS HALF. It read three tokens that the same pass deleted, and
+   `calc()` on an undefined custom property is invalid — so the browser drops the WHOLE declaration
+   and says nothing. Caught in `dist/` before it deployed, and only because the check ran the right
+   way round: not "did what I wrote arrive" but "does everything READ still resolve". Checking the
+   file I edited would never have found it; the read was in a different sheet.
+
+   The stacking stays. A static element takes no z-index, and the band is still a surface things
+   can be laid on. */
 .psw-prog {
   display: block; margin-left: auto; text-align: right; flex: none;
   position: relative; z-index: 2;
-  padding-right: calc(var(--tdk-motif-right) + var(--tdk-motif-w) - var(--tdk-facts-inset));
 }
 .psw-progk {
   display: block;
