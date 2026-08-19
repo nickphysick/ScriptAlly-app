@@ -23,6 +23,7 @@
 import React, { useState } from "react";
 import rolodexMark from "../../assets/shell/agents-on-file-icon.png";
 import manuscriptMark from "../../assets/shell/manuscript-icon.png";
+import allQueriesMark from "../../assets/shell/all-queries-icon.png";
 
 /** The four marks, and the brief each one is waiting for. */
 export type MarkName =
@@ -79,8 +80,24 @@ const MARK: Record<MarkName, { label: string; icon: React.ReactNode; src?: strin
   },
 
   /* ── the page-band marks. Briefs in comments only, per the ArtSlot convention. ── */
-  /* a paper plane in flight, ink-drawn */
-  queries: { label: "plane", icon: <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" /> },
+  /**
+   * the paper plane, sitting on the stack it came off — the queries you have sent.
+   *
+   * ⚠️ ADDING `src` IS THE WHOLE CHANGE, AND IT RESIZES THE HEADER BY ITSELF. `markHasArt` reads
+   * this one field, so Query Centre's mark goes from the 38px plated glyph to the 88px bare
+   * illustration without a call site being touched — which is the point of the rule below. The
+   * monoline plane stays as the degrade path, and it is the same drawing, so a 404 changes the
+   * fidelity and not the subject.
+   *
+   * ⚠️ THE ASSET IS ON WHITE PAPER, NOT TRANSPARENCY (verified: `hasAlpha: no`), which is exactly
+   * what `.wsh-mark--xl .os-mark img`'s `mix-blend-mode: multiply` is there for — and why the
+   * entrance-animation guard beneath it must not be removed as redundant.
+   */
+  queries: {
+    label: "plane",
+    src: allQueriesMark,
+    icon: <path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z" />,
+  },
   /* a ticked checklist on a clipboard */
   todo: { label: "check", icon: <><path d="M4 6h11M4 12h11M4 18h7" /><path d="M17 16l2 2 4-4" /></> },
   /* a calendar leaf, one date circled */
