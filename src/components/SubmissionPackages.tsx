@@ -272,11 +272,20 @@ export const SubmissionPackages: React.FC = () => {
       ) : (
         <>
           {view === "overview" ? (
+            /* ⚠️ THE REAL, MANUSCRIPT-SCOPED DATA — never the tour fixture. `wsVersions` and its
+               siblings swap to `EXAMPLE_*` while the guided tour runs, which is right for the
+               Workshop (the tour drives it) and wrong here: the overview is where you see what YOU
+               have, and a register quietly listing four invented materials is a page lying about
+               the writer's own work. The tour never opens on this surface. */
             <PackagesOverview
-              materialCount={msVersions.length}
-              packageCount={msPackages.length}
+              versions={msVersions}
+              packages={msPackages}
+              queries={msQueries}
               onAddMaterial={() => { setView("workshop"); setOpenMatSignal((n) => n + 1); }}
+              onOpenMaterial={(id) => { setView("workshop"); setOpenMat(id); }}
               onNewPackage={() => { setView("workshop"); setNewPkgSignal((n) => n + 1); }}
+              onOpenPackage={(id) => { setView("workshop"); setOpenPkg(id); }}
+              onOpenTracking={() => setView("analytics")}
             />
           ) : view === "workshop" ? (
             /* ⚠️ `role="tabpanel"` IS GONE FROM BOTH SURFACES, and dropping it was required rather

@@ -446,3 +446,203 @@ src/lib/packagesOverview.test.ts          src/components/packages/workshopEmpty.
 
 That includes `materialsPageSmoke`, which asserts `wsh-title">Submission packages` — the smoke that
 would catch this page failing to render at all.
+
+---
+
+## Phase 2 — Rail
+
+**What shipped:** three registers rendering real, manuscript-scoped, derived data; dashed ghost
+empty states (D6); `+ ADD` / `+ NEW` and every row wired to flows that already existed (R5).
+
+### Derivations, and where they live
+
+All in the new pure `src/lib/packagesOverview.ts`, unit-locked in `packagesOverview.test.ts`
+(**29 tests**). Nothing is stored, and **no counting is re-implemented** — `sent`, `replies` and
+`requests` all come from the locked `packageMetrics`, so the rail cannot disagree with the analytics
+view it opens. That is the same reconciliation the dashboard and the To-do board needed after they
+counted "urgent" two different ways.
+
+| Rail line | Source |
+|---|---|
+| Type eyebrow | `TYPE_META[type].label` — never a literal. Resolves to **"Covering letter"** (UK copy) while the stored token stays `Query letter` |
+| Material detail | `versionMeta()` word count + `agoLabel(daysBetween(…))` from the app's ONE elapsed formatter |
+| Composition | the three slot ids → `versionName`, in `BUILDER_TYPES` order, via the existing `SLOT_FIELD` map |
+| "Sent with N queries" | `packageMetrics(pkgId, queries).sent` |
+| "N of M replied" | `.responses` of `.sent` |
+| "N requests logged" | `isRequest` over the packaged queries |
+| Tracking chip | replies summed across packages |
+
+### Two honesty corrections against the ref's literal copy
+
+Both are flagged rather than silent, and both are the *same* fault the Manuscripts plate already
+had to be protected from — a plausible number stating something untrue.
+
+1. **"added", not "edited".** `ManuscriptVersion` carries exactly one timestamp, `createdDate`.
+   Rendering it under the ref's "edited 4 days ago" would label a created date as an edit.
+2. **No "v3".** There is no version-number field; `versionName` is free text (the ref's own
+   "Hook-first" is the name). An ordinal from creation order would be a number the writer never
+   chose. The line carries only what is real.
+
+Locked by tests that assert the *absence*: `detail` must contain "added", must not contain
+"edited", and must not match `/\bv\d+\b/`.
+
+### Measured — populated (real seeded data, read from the rendered DOM)
+
+```
+MATERIALS  chip 4   + ADD
+  COVERING LETTER · Hook-first      · added 4 days ago
+  COVERING LETTER · Comps-forward   · added 2 weeks ago
+  SYNOPSIS        · One-page        · added 6 days ago
+  SAMPLE PAGES    · Chapters 1-3    · ~520 words · added 9 days ago
+PACKAGES   chip 2   + NEW
+  Standard UK        Hook-first · One-page · Chapters 1-3     Sent with 6 queries
+  Comps-led variant  Comps-forward · One-page · Chapters 1-3  Sent with 2 queries
+TRACKING   chip "3 replies"
+  Replies by package     Standard UK · 3 of 6 replied
+  Requests by material   2 requests logged
+```
+
+Rail width **300px**. Screenshots: `p2-rail-populated-1440.png`, `p2-rail-empty-1440.png`.
+
+### Measured — empty (first visit)
+
+Chips read `0` / `0`; Tracking has **no chip at all** (never "0 replies"). The three ghosts render,
+and the D6 distinction is confirmed **in the DOM, not by intent**:
+
+| Panel | Element | Inert |
+|---|---|---|
+| Materials — "Add a material" | `BUTTON` | no |
+| Packages — "Build a package" | `BUTTON` | no |
+| Tracking — "Replies land here once a package goes out with a query." | **`DIV`** | **yes** |
+
+Tracking's note is a `div`, not a disabled button: you make a reply arrive by sending a query, not
+by pressing a panel, and a control that does nothing is worse than none.
+
+### ⚠️ The filled-control probe was wrong, and I changed the measure rather than the design
+
+The first Phase 2 reading was **`filledCount: 9`**, which looks like a D5 violation. It was not —
+it was a fault in my probe. I had defined "filled" as *any button whose background is not
+transparent*, and the register rows are `<button>` elements (so they are keyboard-reachable and
+announced as controls) with a white fill. **The ref draws them that way too**: `.reg-row` has
+`background: var(--white)` in the same file whose only filled button is `.btn.primary`. So
+white-on-a-surface is what a row *is*, and counting surfaces as controls was the error.
+
+The probe now excludes white and keeps its teeth — a second pink or ink button still trips it.
+**Both readings are recorded rather than the old one being quietly dropped:**
+
+* `filledCount: 1` — `New package`, `rgb(245, 226, 218)` (D5 satisfied)
+* `anyNonTransparent: 9` — the eight white rows plus that one
+
+I am flagging this because "the number came out wrong so I redefined the number" is exactly the
+move that should be visible to a reviewer, not buried.
+
+*(A smaller one, recorded for the same reason: the fixed probe initially reported nothing at all —
+Playwright said `No tests found` because I had put backticks inside a template literal and closed
+it. The stale artefact I read next still held the previous run's figures. It was caught, but it is
+precisely how a stale number gets reported as fresh.)*
+
+### The row seam
+
+`+ ADD` and material rows needed a host-level seam the materials editor never had — packages
+already had `newPackageSignal` / `openPackageId`, materials had nothing above `WorkshopTab`. Added
+as that seam's exact mirror (`openMaterialsSignal`, `openMaterialId`, `onOpenedMaterial`), landing
+on the same `enterMat` the band and the empty state already call. **No editor is duplicated and no
+new editor is built**, per R5. Every row type has a real destination, so **no row is inert** and
+D10's inert-row flag does not arise.
+
+### The overview shows YOUR data, never the tour fixture
+
+The host passes `msVersions` / `msPackages` / `msQueries`, **not** the `ws*` variables the Workshop
+takes. Those swap to `EXAMPLE_*` while the guided tour runs — correct for the Workshop, which the
+tour drives, and wrong here: a register quietly listing four invented materials is the page lying
+about the writer's own work.
+
+### Phase 2 gates
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | exit 0, clean |
+| `vite build` | exit 0; whole log grepped — no diagnostics |
+| Targeted suites (6 files covering every touched file) | **133 passed** |
+| `packagesOverview.test.ts` | **29 passed** (new) |
+
+### Seeding — additive, and a rules constraint forced the shape
+
+`tests/e2e/seedPackages.mjs` is new: `seed.mjs` covers manuscripts, agents and queries but writes
+every query with `packageId: ""`, and other measurements rely on that fixture. This script only
+**adds** documents under its own `seed-pkg*` prefix, and `--clean` removes exactly what it wrote
+(both states above were captured that way).
+
+**⚠️ The packaged queries are CREATED, not updated, and that is a rules constraint rather than a
+style choice** — which is what turned up F7.
+
+---
+
+## F7 — a live bug found while seeding: attaching a package to an existing query is silently denied
+
+**Not introduced here, not fixed here** (`firestore.rules` is do-not-touch), and worth Nick's
+attention because it is silent.
+
+`packageId` is required by `isValidQuery` (line 282), so it must be present when a query is
+**created**. It is **absent from the query UPDATE allowlist**:
+
+```
+allow update: … && incoming().diff(existing()).affectedKeys().hasOnly([
+  'manuscriptId','dateSent','status','personalisationNotes','sendMethod', … 44 more …
+])                                    ← no 'packageId'
+```
+
+`hasOnly` fails the **whole write** if any changed key is outside the list. So:
+
+* Writing `packageId` with an **unchanged** value is fine — it is not in `affectedKeys()`.
+* **Changing** it — attaching a package to an existing query, or detaching one — fails the rule and
+  the entire update is rejected.
+
+There is a live call site: `src/components/EditQueryDrawer.tsx:307` does
+`Object.assign(queryFields, editMaterialsUpdate({ touched: true, packageId: effPackageId, … }))`,
+and `editMaterialsUpdate` returns `{ packageId, materialsWanted }` by design (the "exactly one
+source of truth" guard). Whenever a writer edits a query's materials **and the package link changes
+in the process**, that save should be denied — taking the materials edit down with it, since it is
+one write.
+
+CLAUDE.md already records this failure family: *"client field writes must be in the rule's hasOnly()
+allowlist or they're silently denied & can trap UI"*. It also anticipated this exact feature —
+*"the future attach-to-query flow"* — so the gap is most likely simply that the allowlist was never
+extended when the link was introduced.
+
+**Proposed fix (one line, not applied):** add `'packageId'` to the query update allowlist, then
+deploy dev rules per the Deployment section and confirm with `tests/e2e/rulesProbe.mjs`. Worth
+confirming against prod's deployed vintage too, since the prod rules queue is already several
+commits deep.
+
+*How it surfaced:* my seed needed eight queries carrying a `packageId`. Updating `seed.mjs`'s
+existing queries would have been denied, so the script creates its own — and the reason it had to
+is this gap.
+
+## F8 — D4's white substitution flattens the rail's row-on-panel step
+
+Applied as instructed, flagged as a consequence rather than quietly deviated from.
+
+In the ref the rail panel is parchment `#fdfaf5` and the register rows are white `#ffffff`, so a row
+reads as a **card lying on** the panel. D4 names "rail panels" among the containers to substitute to
+white — and `.reg-row` is *already* white in the ref, so applying D4 literally makes row and panel
+the same colour. The rows now read as hairline-outlined boxes rather than cards; the hover shadow
+and the 1px edge carry the separation, and in the screenshots it is legible.
+
+Two one-line options if the step is wanted back, both for Nick rather than for me to pick:
+give the rows `--pkg-card`, or return the panels to the ref's parchment. I have changed neither,
+because D4 is a baked decision and this is a taste call sitting on top of it.
+
+### Phase 2 — full suite
+
+| | Baseline | Phase 1 | **Phase 2** |
+|---|---|---|---|
+| Test files | 1 failed / 328 passed | 1 failed / 330 passed | **0 failed / 331 passed** |
+| Tests | 1 failed / 5556 passed | 1 failed / 5613 passed | **0 failed / 5614 passed** |
+| Duration | 48s | 231s | 111s |
+
+**Zero test failures — strictly better than baseline**, which carried a real one. The command still
+reports `VITEST_EXIT=1`, and the reason is worth stating rather than hiding behind a green count:
+vitest exits non-zero on the `[vitest-worker]: Timeout calling "onTaskUpdate"` unhandled error, an
+RPC timeout between the runner and a worker under the same contention that has been inflating these
+durations all evening. It is an infrastructure error, not an assertion — no test failed.

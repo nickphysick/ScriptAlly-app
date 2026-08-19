@@ -1,0 +1,46 @@
+{
+  "panels": [
+    {
+      "label": "Materials",
+      "chip": "0",
+      "action": "+ ADD",
+      "ghost": {
+        "inert": false,
+        "tag": "BUTTON",
+        "text": "Add a materialA covering letter, synopsis or sample — written here or pasted in."
+      },
+      "rows": []
+    },
+    {
+      "label": "Packages",
+      "chip": "0",
+      "action": "+ NEW",
+      "ghost": {
+        "inert": false,
+        "tag": "BUTTON",
+        "text": "Build a packagePick one of each material. You'll need at least a covering letter first."
+      },
+      "rows": []
+    },
+    {
+      "label": "Tracking",
+      "chip": null,
+      "action": null,
+      "ghost": {
+        "inert": true,
+        "tag": "DIV",
+        "text": "Replies land here once a package goes out with a query."
+      },
+      "rows": []
+    }
+  ],
+  "filled": [
+    {
+      "label": "New package",
+      "bg": "rgb(245, 226, 218)"
+    }
+  ],
+  "filledCount": 1,
+  "anyNonTransparent": 1,
+  "railW": 300
+}

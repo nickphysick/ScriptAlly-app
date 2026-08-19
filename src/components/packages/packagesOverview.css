@@ -146,3 +146,104 @@
   transition: background 0.15s, border-color 0.15s;
 }
 .pkgo-back:hover { background: rgba(255, 255, 255, 0.6); border-color: var(--pkg-pinkline); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   GHOST EMPTY STATES — dashed means provisional (D6)
+   ══════════════════════════════════════════════════════════════════════════════
+
+   ⚠️ TWO ELEMENTS, NOT ONE WITH A CURSOR SWAP. Materials and Packages are invitations and render as
+   buttons; Tracking's note explains what will happen and is a plain div, because you make a reply
+   arrive by sending a query, not by pressing a panel. A button that does nothing is worse than no
+   button — the same reasoning that keeps a restore affordance off scrolling pages. */
+.pkgo-ghost {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  border: 1.5px dashed var(--pkgo-dash);
+  border-radius: 10px;
+  padding: 18px 14px;
+  text-align: center;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pkgo-ghost:hover { background: rgba(245, 226, 218, 0.35); border-color: var(--pkg-pinkline); }
+
+/* Inert variant — no pointer, no hover, and it is a div rather than a disabled button so nothing
+   about it invites a press. */
+.pkgo-ghost--inert { cursor: default; }
+.pkgo-ghost--inert:hover { background: transparent; border-color: var(--pkgo-dash); }
+
+.pkgo-gtitle {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 15px;
+  color: var(--pkg-burg);
+}
+.pkgo-gsub {
+  font-size: 11px;
+  color: var(--pkg-muted);
+  line-height: 1.5;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   REGISTER ROWS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgo-reg { display: flex; flex-direction: column; gap: 6px; }
+
+/* ⚠️ A BUTTON, NOT A DIV WITH A HANDLER. Every row opens something, so each one is reachable by
+   keyboard and announced as a control for free. `text-align: left` and the flex column are what
+   stop a button element centring its contents the way the ghost deliberately does. */
+.pkgo-row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: left;
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 8px;
+  padding: 9px 11px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.pkgo-row:hover {
+  border-color: var(--pkg-pinkline);
+  box-shadow: 0 2px 8px rgba(58, 28, 20, 0.06);
+}
+
+.pkgo-type {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  color: var(--pkg-muted);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+/* ⚠️ `overflow-wrap: anywhere` RATHER THAN A TRUNCATION. A material's name is the writer's own, and
+   a 300px rail is narrow enough that a long one would otherwise push the row's box wider than the
+   panel. Wrapping keeps the whole name readable; an ellipsis would hide the end of something they
+   chose. The stage track's `minmax(0, 1fr)` handles the same problem from the other side. */
+.pkgo-name {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--pkg-ink);
+  overflow-wrap: anywhere;
+}
+
+.pkgo-comp {
+  font-size: 10.5px;
+  color: var(--pkg-ink-soft);
+  margin-top: 3px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.pkgo-detail {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--pkg-muted);
+  margin-top: 3px;
+}

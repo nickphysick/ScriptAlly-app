@@ -183,3 +183,51 @@ test("probe3 — body cap", async ({ page }) => {
   writeFileSync(`${ART}/p1-bodycap.txt`, JSON.stringify(r, null, 2) + "\n");
   console.log(JSON.stringify(r, null, 2));
 });
+
+/** The rail's registers, populated. Reads the RENDERED strings — never a predicted number. */
+const RAIL = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const panels = Array.from(root.querySelectorAll(".pkgo-panel")).map((p) => ({
+    label: (p.querySelector(".pkgo-lbl")?.textContent || "").trim(),
+    chip: (p.querySelector(".pkgo-chip")?.textContent || "").trim() || null,
+    action: (p.querySelector(".pkgo-add")?.textContent || "").trim() || null,
+    ghost: p.querySelector(".pkgo-ghost")
+      ? { inert: p.querySelector(".pkgo-ghost").classList.contains("pkgo-ghost--inert"),
+          tag: p.querySelector(".pkgo-ghost").tagName,
+          text: (p.querySelector(".pkgo-ghost").textContent || "").trim() }
+      : null,
+    rows: Array.from(p.querySelectorAll(".pkgo-row")).map((r) => ({
+      tag: r.tagName,
+      type: (r.querySelector(".pkgo-type")?.textContent || "").trim() || null,
+      name: (r.querySelector(".pkgo-name")?.textContent || "").trim(),
+      comp: (r.querySelector(".pkgo-comp")?.textContent || "").trim() || null,
+      detail: (r.querySelector(".pkgo-detail")?.textContent || "").trim(),
+    })),
+  }));
+  /* ⚠️ A FILLED CONTROL IS ONE CARRYING A FILL DISTINCT FROM THE PAGE SURFACE — not merely any
+     button with a non-transparent background. The first version of this probe counted the white
+     register ROWS and reported 9, which is a fault in the measure rather than the design: the ref
+     itself draws .reg-row with a white background alongside a single .btn.primary, so
+     white-on-a-surface is what a row IS. Excluding white keeps the check's teeth — a second pink
+     or ink button still trips it — while not counting surfaces as controls. Both readings are
+     recorded so nothing is hidden by the change. */
+  const isSurface = (bg) => bg === "rgba(0, 0, 0, 0)" || bg === "transparent" || bg === "rgb(255, 255, 255)";
+  const btns = Array.from(root.querySelectorAll("button"));
+  const filled = btns.filter((b) => !isSurface(getComputedStyle(b).backgroundColor))
+    .map((b) => ({ label: (b.textContent || "").trim().slice(0, 32), bg: getComputedStyle(b).backgroundColor }));
+  const anyNonTransparent = btns.filter((b) => {
+    const bg = getComputedStyle(b).backgroundColor;
+    return bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent";
+  }).length;
+  return { panels, filled, filledCount: filled.length, anyNonTransparent,
+           railW: Math.round(root.querySelector(".pkgo-rail").getBoundingClientRect().width) };
+})()`;
+
+test("phase 2 — rail registers, populated", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const r = await page.evaluate(RAIL);
+  await page.screenshot({ path: `${OUT}/p2-rail-populated-1440.png`, fullPage: true });
+  writeFileSync(`${ART}/p2-rail-populated.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});
