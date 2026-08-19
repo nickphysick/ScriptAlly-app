@@ -39,7 +39,7 @@ import { ArtSlot } from "./ArtSlot";
 import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
-import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow, recordNote } from "../../lib/todoHandoff";
+import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandDeed, bandSubline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow, recordNote } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
@@ -359,8 +359,10 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             every send, every R&R and the offer alike, so nine cards of ten rendered pink. */}
         <div className={`tdk-band v-${bandVariant(card)}`}>
           <DockMotif motif={bandMotif(card)} />
+          {/* ⚠️ NO MONOGRAM. It was an agency disc leading a surface whose job is to say what you
+              are DOING; the writer already knows who they clicked. Removed rather than shrunk —
+              a smaller disc is the same answer to the same wrong question. */}
           <div className="tdk-id">
-            <span className="tdk-av" aria-hidden>{card.initials}</span>
             <span className="tdk-idtx">
               {/* the pre-line names the ACT, so the band reads as a sentence into the name */}
               {/* ⚠️ THE BAND STAYS AND ONLY THE PRE-LINE CHANGES. "Sending your partial to" becomes
@@ -370,15 +372,16 @@ export const TodoDock: React.FC<TodoDockProps> = ({
                   / 16 agents". `bandSubject` would fall back to the card's title here, which is
                   already the row's own words ("16 materials wanted"), so the band would repeat the
                   rail. The sweep's own pre-line and count say the two halves of one sentence. */}
-              <span className="tdk-pre">
+              {/* ⚠️ THE DEED FIRST AND LARGEST — `card.title`, the row's own words, so one task
+                  never carries two names. The pre-line and the agent drop to the sub-line, where
+                  they read as the sentence they always were. */}
+              <span className="tdk-deed">
+                {cohort ? `${cohort.members.length} ${cohort.members.length === 1 ? "agent" : "agents"}` : bandDeed(card)}
+              </span>
+              <span className="tdk-sub">
                 {cohort ? SWEEP_PRELINE[cohort.rule]
-                  : draft ? JOURNEY_PRELINE[journeyKind?.(card) ?? "send"]
-                  : bandPreline(card)}
+                  : bandSubline(card, draft ? JOURNEY_PRELINE[journeyKind?.(card) ?? "send"] : bandPreline(card))}
               </span>
-              <span className="tdk-name">
-                {cohort ? `${cohort.members.length} ${cohort.members.length === 1 ? "agent" : "agents"}` : bandSubject(card)}
-              </span>
-              {!cohort && bandUnder(card) && <span className="tdk-agency">{bandUnder(card)}</span>}
             </span>
           </div>
           {/* ⚠️ THE PROGRESS BLOCK REPORTS THIS PASS, NOT THE RECORD'S COMPLETENESS. It starts at

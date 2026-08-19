@@ -149,45 +149,44 @@
    shoves the facts off their own edge — which is what "the facts float across the title" was. */
 .tdk-id { display: flex; align-items: center; gap: 11px; min-width: 0; flex: 1; position: relative; z-index: 2; }
 
-/* ⚠️ §2.1 — 40px, WHICH IS THE SPECIFICATION'S NUMBER AND v14'S (`.an-c-avatar`). It stood at 38
-   with no reason recorded anywhere — a value that had simply drifted from the two artefacts that
-   both name it. The band does not grow: the identity block beside it is already taller than the
-   disc (9px pre + 20px name at 1.15 + 11px agency), so this is the disc filling its row rather
-   than the row resizing to it. */
-.tdk-av {
-  width: 40px; height: 40px; border-radius: 50%; flex: none;
-  background: #fdfaf5; border: 1px solid rgba(124, 58, 42, 0.25);
-  display: flex; align-items: center; justify-content: center;
-  font-family: "Playfair Display", Georgia, serif; font-size: 14px; font-weight: 500;
-  color: #7c3a2a;
-}
+/* ⚠️ THE MONOGRAM RULE IS RETIRED WITH ITS ELEMENT (Phase A). `.tdk-av` drew a 40px agency disc
+   at the head of the band; the band now leads with the DEED, so there is nothing for a disc to
+   introduce. Deleted rather than left unused — a dormant rule is how the disc comes back. */
+
 
 .tdk-idtx { min-width: 0; }
 
-.tdk-pre {
-  display: block;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
-  color: #5a6e58; margin-bottom: 1px;
-}
 
-.tdk-name {
+
+.tdk-deed {
   display: block;
   font-family: "Playfair Display", Georgia, serif;
-  /* ⚠️ §2.3 — 20px and 1.15, both v14's (`.an-c-name`). Same drift as the disc above. */
-  font-size: 20px; font-weight: 500; color: #2b2118; line-height: 1.15;
+  /* §2 — 26px/500, the deed is the largest thing in the pane */
+  font-size: 26px; font-weight: 500; color: #3a1c14; line-height: 1.12;
   overflow-wrap: anywhere;
 }
 
-.tdk-agency { display: block; font-size: 11px; color: #6a7e68; font-weight: 300; margin-top: 1px; }
+.tdk-deed em { font-style: italic; color: #7c3a2a; }
+
+/* ⚠️ THE SUB-LINE CARRIES THE FACTS THE TITLE USED TO — agent, agency, and the act's own clause.
+   Inter 11.5/300 per §2; it wraps rather than truncating, because a name cut mid-word is worse
+   than a second line. */
+.tdk-sub {
+  display: block;
+  font-size: 11.5px; font-weight: 300; line-height: 1.45;
+  color: #5f7059; margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+
+
 
 /* the pink band is the offer's — its inks take the burgundy family rather than the sage */
 /* ⚠️ SAGE IS THE DEFAULT AND PINK IS THE OFFER — two variants, not four families. The `.fam-*`
    set is gone from this band: it keyed on urgency, so every send and every R&R came out pink. */
 .tdk-band.v-default { background: linear-gradient(135deg, #dee4dc 0%, #d5dbd3 100%); border-bottom-color: rgba(90, 110, 88, 0.2); }
 .tdk-band.v-offer { background: linear-gradient(135deg, #f3e0d6 0%, #eed4c8 100%); border-bottom-color: rgba(124, 58, 42, 0.14); }
-.tdk-band.v-offer .tdk-pre, .tdk-band.v-offer .tdk-agency { color: #9a6a56; }
-.tdk-band.v-offer .tdk-name { color: #4a241a; }
+.tdk-band.v-offer .tdk-sub { color: #8a6558; }
+.tdk-band.v-offer .tdk-deed { color: #3a1c14; }
 
 /* ⚠️ BEHIND THE TEXT AND CLIPPED BY THE BAND — `z-index: 1` under the content's 2, and the band's
    own `overflow: hidden` is what makes it a corner motif rather than a floating illustration. */

@@ -303,14 +303,18 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     expect(html).not.toContain('class="tdk-t"');
   });
 
-  it("⚠️ THE SUBJECT IS NOT ALWAYS A PERSON — a note's band names the standing subject", () => {
-    /* a Fix card's subject can be a manuscript and a Note's is the writer's own board; a blank
-       disc with an empty line beside it is the collision in a quieter form */
+  it("⚠️ THE BAND LEADS WITH THE DEED — a note's band names the note, not a standing subject", () => {
+    /* ⚠️ SUPERSEDED BY PHASE A, AND INVERTED RATHER THAN DELETED. This asserted "Your noteboard":
+       the band led with the agent, so a card with no person fell back to a standing label to give
+       the disc something to introduce. There is no disc now and the band leads with the DEED, so a
+       note names the note. The old fallback would today be the band answering a question nobody
+       asked. */
     const note = renderToStaticMarkup(
       <TodoDock queue={QUEUE} card={QUEUE.find((c) => c.key === "c") ?? QUEUE[0]} activeKey="c" onSelect={() => {}} onClose={() => {}}
         timeline={() => []} onPrimary={() => {}} onMore={() => {}} />,
     );
-    expect(note).toContain("Your noteboard");
+    expect(note).toContain("Redraft the opening");
+    expect(note, "the retired monogram is back").not.toMatch(/["\s]tdk-av["\s]/);
   });
 
   it("the timeline renders when there is history, and is absent when there is none", () => {
@@ -330,10 +334,15 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
    * makes the next drift one red rather than three separate silences.
    */
   it("⚠️ §2.1 / §2.3 / §3.8 — the disc, the subject and the date track are the named figures", () => {
-    expect(dockCssRule(".tdk-av {")).toContain("width: 40px; height: 40px");   // §2.1
-    const name = dockCssRule(".tdk-name {");
-    expect(name).toContain("font-size: 20px");                                  // §2.3
-    expect(name).toContain("line-height: 1.15");
+    /* ⚠️ §2.1's DISC IS RETIRED (Phase A) AND THE LOCK NOW GUARDS ITS ABSENCE — the stronger
+       claim. A rule left in the stylesheet for a deleted element is how the disc comes back. */
+    expect(readFileSync(join(here, "todoDock.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, ""),
+      "the monogram rule is back in the stylesheet").not.toContain(".tdk-av {");
+    /* §2.3 is the DEED now, at the chassis contract's 26px/500 — `.tdk-name` is gone with the
+       agent-led band that needed it. */
+    const deed = dockCssRule(".tdk-deed {");
+    expect(deed).toContain("font-size: 26px");
+    expect(deed).toContain("font-weight: 500");
     /* ⚠️ §3.8's 66px DATE TRACK IS SUPERSEDED, and this lock caught the change rather than being
        quietly edited around it. `todo-journey-in-pane.html` is the newer of the two authoritative
        refs and describes the pane this timeline is in; its `.tl-row` is 60 · 20 · rest, and the
@@ -1004,9 +1013,12 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
        assertion would be reading the body while claiming to read the band. */
     const bodyAt = html.indexOf('class="tdk-body"');
     expect(bodyAt, "the body marker is gone").toBeGreaterThan(-1);
-    /* the band names the surface, not the note — which is precisely why the body must carry it */
-    expect(html.slice(0, bodyAt)).toContain("Your noteboard");
-    expect(html.slice(0, bodyAt)).not.toContain("Redraft the opening");
+    /* ⚠️ INVERTED BY PHASE A. This read "the band names the surface, not the note" — true while the
+       band led with an agent and needed a standing label for cards with no person. The band leads
+       with the DEED now, so the note's own words ARE the band's subject, and the old assertion
+       would be pinning the very fallback the redesign removed. */
+    expect(html.slice(0, bodyAt)).toContain("Redraft the opening");
+    expect(html.slice(0, bodyAt)).not.toContain("Your noteboard");
     /* ⚠️ THE NOTE IS IN THE RECORD COLUMN NOW, NOT THE DOING ONE (pane faults, Phase 2) — it is
        the content of a note card, so it leads, in the WIDE column. It was in the bounded column
        beside a hint sentence while the wide one held a stat tile and an empty Tracking section. */

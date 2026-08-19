@@ -16,7 +16,7 @@
  */
 import { BoardCard } from "./todoBoard";
 import { sendSpecFor } from "./todoDock";
-import { ADDED_LABEL, cardBucket, Bucket } from "./todoBuckets";
+import { ADDED_LABEL, cardBucket, rowDeed, Bucket } from "./todoBuckets";
 
 export interface HandoffLink {
   /** The href, or null where the record has nothing to build one from. */
@@ -329,6 +329,44 @@ export function bandSubject(c: BoardCard): string {
  * `record` is already "name · agency", so the agency is what follows the separator; where there is
  * none, the line is absent rather than an echo of the name above it.
  */
+/**
+ * ⚠️ THE BAND LEADS WITH THE DEED, NOT THE AGENT — the whole of Phase A in one function.
+ *
+ * It led with an agency monogram and the agent's name as its title, which answers "who is this
+ * about" on a surface whose entire job is "what are you doing". The writer already knows who they
+ * clicked; what the pane has to tell them is the act.
+ *
+ * ⚠️ THE DEED IS THE ROW'S OWN TITLE, NOT A SECOND WORDING. `card.title` is what the list states
+ * and what the writer just read; deriving a parallel phrase here would give one task two names
+ * that drift the first time either is edited.
+ */
+/**
+ * ⚠️ IT IS `rowDeed`, NOT `card.title` — and measuring is what proved it. My first version returned
+ * `c.title`, which for a close card is "No response from Elinor Hale for 4 months" while the LIST
+ * row states "Log the close". Two names for one task, and the pane would have carried the one the
+ * writer had not just read. `rowDeed` is what the row renders; reusing it is the whole point.
+ */
+export const bandDeed = (c: BoardCard): string => rowDeed(c);
+
+/**
+ * The sub-line — the facts, in the app's existing sentence grammar. The pre-line already reads as
+ * a clause running into the name ("Closing your query to"), so the agent and agency join it there
+ * rather than becoming a second stack of their own.
+ *
+ * ⚠️ EACH PART OMITS ITSELF. No agent → the pre-line alone; no agency → no interpunct; no pre-line
+ * → just the name. A sub-line is never rendered with a dangling "to" or a leading separator.
+ *
+ * ⚠️ NAMED `bandSubline`, NOT `bandFacts` — that name is taken by the label/value pair builder a
+ * few functions down, and tsc caught the collision. Two different things about one band.
+ */
+export function bandSubline(c: BoardCard, preline: string): string {
+  const who = (c.who ?? "").trim();
+  const agency = bandUnder(c);
+  if (!who) return preline;
+  const name = agency ? who + " · " + agency : who;
+  return preline ? preline + " " + name : name;
+}
+
 export function bandUnder(c: BoardCard): string {
   if (!c.who || !c.record) return "";
   const rest = c.record.startsWith(c.who) ? c.record.slice(c.who.length) : c.record;
