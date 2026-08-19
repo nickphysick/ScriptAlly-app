@@ -209,7 +209,9 @@ describe("⚠️ SELECTION IS STILL NOT BUILT — and `x` is no longer free for 
     const groupsCss = readFileSync(join(here, "todoGroups.css"), "utf8");
     const listSrc = readFileSync(join(here, "TaskList.tsx"), "utf8");
     const pageSrc = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
-    expect(groupsCss).toContain(".tdg-row.sel");
+    /* ⚠️ THE SELECTED STATE IS THE PORTED ROW'S (list port) — `.tdg-row.sel` went with the retired
+       sheet. The claim is unchanged: a selection marker ships with the thing that produces it. */
+    expect(readFileSync(join(here, "taskList.css"), "utf8")).toContain(".tlc .row.sel");
     expect(listSrc).toContain('c.key === selectedKey ? " sel" : ""');
     /* the producer is the PANE'S key, not a second selection the list keeps for itself */
     /* ⚠️ RE-ANCHORED (P5): the pane no longer stores a queue, so there is no `dock` object to

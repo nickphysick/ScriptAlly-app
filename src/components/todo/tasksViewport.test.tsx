@@ -1085,8 +1085,13 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
   });
 
   it("both surfaces set the same two registers — mono label, Playfair value", () => {
-    const railLab = rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-figlab {");
-    const railNum = rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-fignum {");
+    /* ⚠️ THE RAIL'S HALF IS THE PORTED `.r-fig` NOW — a mono line with a Playfair figure inside
+       it, which is the contract's own two registers. `.tdg-figlab`/`.tdg-fignum` went with the
+       retired sheet. The comparison this case exists for — that the rail and the card set the SAME
+       two registers — is unchanged; both sides moved. */
+    const listCss = readFileSync(join(here, "taskList.css"), "utf8");
+    const railLab = rule(listCss, ".tlc .r-fig {");
+    const railNum = rule(listCss, ".tlc .r-fig b {");
     /* ⚠️ THE CARD'S HALF MOVED FROM `.tdk-fact` TO THE BAND FIGURE (audit B). `.tdk-facts` was a
        SECOND figure beside the first, in the opposite grammar — a mono key over an Inter value next
        to a Playfair numeral over a mono unit — so this case was reading the register of the strip
@@ -1119,7 +1124,7 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
     /* re-pointed onto the ported band figure */
     expect(rule(dockCss, ".tpn .bandfig .n {")).not.toContain("#7c3a2a");
     expect(rule(dockCss, ".tpn .bandfig .n {")).not.toContain("var(--burg)");
-    expect(rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-fignum.hot {")).toContain("#7c3a2a");
+    expect(rule(readFileSync(join(here, "taskList.css"), "utf8"), ".tlc .r-fig.hot b {")).toContain("var(--burg)");
   });
 });
 
