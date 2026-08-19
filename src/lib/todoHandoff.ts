@@ -366,7 +366,13 @@ export function panePresence(c: BoardCard): PanePresence {
    * The reasoning this replaces was mine and it was thin: it read "no query" and concluded "nothing
    * to state", which is true of the history and false of the other two.
    */
-  if (c.userTaskId || c.nature || c.stream === "nt") return { tiles: true, figure: true, timeline: false };
+  /* ⚠️ A NOTE HAS NO QUERY, SO IT HAS NO TILES AND NO TIMELINE (frame2 Phase 3). This line has now
+     been decided both ways: the contract round reversed it to `tiles: true` on the instruction that
+     a note has a real added-date and a real age, and the frame2 brief reverses it back — because
+     what a note actually rendered was two tiles BOTH labelled "Added" and a "Sent previously /
+     None sent" tile about materials that were never asked for. The figure stays: it is the band's
+     own slot and a note's age belongs there, stated once. */
+  if (c.userTaskId || c.nature || c.stream === "nt") return { tiles: false, figure: true, timeline: false };
   /* a cohort has no single record behind it */
   if (c.taskType === "materials_unrecorded_bulk") return none;
   /* a single record gap has a query, so it keeps its history — but the deed says what is missing,

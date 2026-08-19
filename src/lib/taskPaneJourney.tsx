@@ -73,6 +73,14 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
   const presence = panePresence(c);
   const isNote = !!(c.userTaskId || c.nature || c.stream === "nt");
 
+  /**
+   * ⚠️ A LABEL MAY NOT REPEAT INSIDE ONE TILE ROW (frame2 Phase 3). `paneFacts` can return two
+   * entries whose keys resolve to the same word — a card with no query behind it produced "Added"
+   * twice, one reading "12 days" and one "7 August", which states one fact under one name in two
+   * places and invites the reader to think they are different. The FIRST wins: it is the row's own
+   * order, and the second was the duplicate.
+   */
+  const seen = new Set<string>();
   const tiles: TaskPaneTile[] | null = presence.tiles
     ? [
         ...input.facts.map((f) => ({ k: f.k, val: f.v })),
@@ -81,7 +89,12 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
           val: input.sentPreviously ?? "None sent",
           absent: !input.sentPreviously,
         },
-      ]
+      ].filter((t) => {
+        const key = t.k.trim().toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
     : null;
 
   /**

@@ -1,4 +1,4 @@
-── frame2 · 25 assertions · 7 RED · 18 green
+── frame2 · 25 assertions · 4 RED · 21 green
   green  P1.1 1440 · equal scroll-row padding, all four sides
            queries=0/35/0/35 todo=0/35/0/35
   green  P1.2 1440 · the list cards start at the same x
@@ -23,14 +23,14 @@
            before=14 after meter=12 footer=12 pane=12
   green  P2.4 · the suite restored the view
            before=14 after restore=14
-  RED    P3.1 · a note renders no tiles
-           tiles=1 labels=["Added","Added","Sent previously"]
+  green  P3.1 · a note renders no tiles
+           tiles=0 labels=[]
   green  P3.2 · a note renders no timeline
            tl-head=0
-  RED    P3.3 · no label repeats inside one tile row
-           duplicated: ["Added"]
-  RED    P3.4 · Snooze appears once on the page, in the command bar
-           band=["Snooze"] bar=["Add a task","Add a note","Snooze","Dismiss"]
+  green  P3.3 · no label repeats inside one tile row
+           none
+  green  P3.4 · Snooze appears once on the page, in the command bar
+           band=[] bar=["Add a task","Add a note","Snooze","Dismiss"]
   RED    P4.1 · the note journey's form heading is 'Your note'
            heading="Complete"
   RED    P4.2 · the note journey's primary is 'Tick it off'
@@ -38,7 +38,7 @@
   RED    P4.3 · a field label with nothing beneath it does not render
            empty: ["What goes","Anything else?"]
   RED    P4.4 · no retired verb appears in the pane
-           found: complete (in 334 chars)
+           found: complete (in 269 chars)
   green  P6 · deed is the contract's 27px
            got=27px want=27px
   green  P6 · label is the contract's 9.5px

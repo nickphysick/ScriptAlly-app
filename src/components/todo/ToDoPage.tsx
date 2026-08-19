@@ -1724,10 +1724,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                       />
                     ),
                     /* the band's buttons are the mockup's `btns` array — carried behaviour, its markup */
-                    btns: [
-                      ...(paneVerbs.snooze.disabled ? [] : [{ label: "Snooze", onPress: paneVerbs.snooze.onPress }]),
-                      ...(paneVerbs.dismiss.disabled ? [] : [{ label: "Dismiss", onPress: () => paneVerbs.dismiss.onPress() }]),
-                    ],
+                    /* ⚠️ THE BAND CARRIES NO VERBS (frame2 Phase 3). Snooze and Dismiss both live in the
+                       command bar and act on the open task; the band's copies put two of each on one screen,
+                       and two controls for one act is how they come to disagree about whether it is available. */
+                    btns: [],
                     onOpenQuery: () => paneVerbs.openQuery.onPress(),
                   })}
                   onPrimary={() => dockPrimary(paneCard)}
