@@ -27,7 +27,33 @@ export interface TodoPrefs {
   rollForward: boolean;
   /** Mondays, the weekly review briefing above the list. */
   weeklyBriefing: boolean;
+  /**
+   * ⚠️ WHICH TASK TYPES ARE GENERATED AT ALL — the sheet's half of the line the funnel draws the
+   * other side of. Generation decides what EXISTS; the funnel decides what is SHOWN. A type turned
+   * off here produces no card, so it is absent from the list, the meter, the footer and the pane
+   * queue at once, because all four read the one array.
+   *
+   * ⚠️ NOTES HAVE NO ENTRY. A note the writer wrote is not the app's to suppress.
+   * ⚠️ AND `decide` IS ALWAYS TRUE. An offer is not something a setting may hide; the sheet renders
+   * its switch on and disabled with the reason stated, rather than greying it mysteriously.
+   */
+  types: Record<TaskTypeKey, boolean>;
 }
+
+/** the five generated kinds — `note` is deliberately absent (see `types`) */
+export type TaskTypeKey = "send" | "decide" | "chase" | "close" | "fix";
+export const TASK_TYPE_KEYS: TaskTypeKey[] = ["send", "decide", "chase", "close", "fix"];
+/** the reviewed language, matching the filter menu — Nudge not Chase, Fill in not Fix */
+export const TASK_TYPE_LABEL: Record<TaskTypeKey, string> = {
+  send: "Send", decide: "Decide", chase: "Nudge", close: "Close", fix: "Fill in",
+};
+export const TASK_TYPE_GLOSS: Record<TaskTypeKey, string> = {
+  send: "When an agent has asked for pages",
+  decide: "When an offer of representation arrives",
+  chase: "When a query passes the agent's stated window",
+  close: "When a query has been silent past your threshold",
+  fix: "When an imported query is missing its materials",
+};
 
 /** ⚠️ THE DEFAULTS ARE THE BEHAVIOUR THE APP ALREADY HAD — a setting's arrival must not silently
  *  change anything for a writer who never opens it. 12 months is the existing close ceiling's
@@ -36,6 +62,7 @@ export const TODO_PREFS_DEFAULT: TodoPrefs = {
   staleMonths: 12,
   rollForward: true,
   weeklyBriefing: true,
+  types: { send: true, decide: true, chase: true, close: true, fix: true },
 };
 
 /** The bounds a stored value must sit inside — a corrupt or hostile value reads as the default
@@ -51,6 +78,14 @@ export function todoPrefs(stored: Partial<TodoPrefs> | undefined | null): TodoPr
     staleMonths,
     rollForward: typeof s.rollForward === "boolean" ? s.rollForward : TODO_PREFS_DEFAULT.rollForward,
     weeklyBriefing: typeof s.weeklyBriefing === "boolean" ? s.weeklyBriefing : TODO_PREFS_DEFAULT.weeklyBriefing,
+    /* ⚠️ TOTAL, AND `decide` IS FORCED. A stored map from a future build cannot switch a type this
+       one does not know about, and cannot turn offers off — the one value the sheet refuses to
+       take an instruction on. Unknown keys are dropped; missing ones default to on. */
+    types: TASK_TYPE_KEYS.reduce((acc, k) => {
+      const v = (s.types ?? {})[k];
+      acc[k] = k === "decide" ? true : (typeof v === "boolean" ? v : true);
+      return acc;
+    }, {} as Record<TaskTypeKey, boolean>),
   };
 }
 

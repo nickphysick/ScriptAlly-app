@@ -11,7 +11,7 @@
  */
 import React, { useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
-import { todoPrefs, STALE_MONTHS_CHOICES, staleLabel } from "../../lib/todoPrefs";
+import { todoPrefs, STALE_MONTHS_CHOICES, staleLabel, TASK_TYPE_KEYS, TASK_TYPE_LABEL, TASK_TYPE_GLOSS } from "../../lib/todoPrefs";
 import { TagsSheet } from "./TagsSheet";
 import { useOverlay } from "../shell/useOverlay";
 import { TASK_SETTING_ROWS, GROUP_LABEL, TaskSettingGroup, typeIsOn, setTypeMute, hiddenItems, HiddenItem } from "../../lib/taskSettings";
@@ -87,6 +87,42 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
                 each with its plain-spoken subtitle, each persisted on the user doc through the
                 ONE todoPrefs map, each actually driving something (the good-day row feeds the
                 Today column's WIP line; a setting that changed nothing would be furniture). */}
+            {/* ⚠️ GENERATION, NOT VIEW — and the sheet says so in one line, because the two are a
+                pair of controls in different places doing different jobs. A type turned off here
+                produces no card at all; the funnel in the toolbar narrows what is already made. */}
+            <div className="tdb-tsetgroup">
+              <div className="tdb-tsetgl"><span className="tdb-tsetgd" aria-hidden />WHAT APPEARS IN YOUR LIST</div>
+              <p className="tdb-tsets" style={{ margin: "0 0 8px" }}>
+                This decides what gets made. The funnel above the list decides what you see.
+              </p>
+              {TASK_TYPE_KEYS.map((k) => {
+                const forced = k === "decide";
+                return (
+                  <div className="tdb-tsetrow" key={k}>
+                    <div className="tdb-tsettx">
+                      <div className="tdb-tsett">
+                        <span className={`pill ${k}`} style={{ marginRight: 8, padding: "3px 8px" }}>
+                          {TASK_TYPE_LABEL[k]}
+                        </span>
+                      </div>
+                      <div className="tdb-tsets">{TASK_TYPE_GLOSS[k]}</div>
+                    </div>
+                    <input
+                      type="checkbox"
+                      role="switch"
+                      aria-label={TASK_TYPE_LABEL[k]}
+                      checked={forced ? true : prefs.types[k]}
+                      disabled={forced}
+                      onChange={(e) => void setPref({ types: { ...prefs.types, [k]: e.target.checked } })}
+                    />
+                  </div>
+                );
+              })}
+              {/* ⚠️ THE REFUSAL STATES ITS REASON. A switch that is on and cannot be moved, with no
+                  explanation, reads as a bug; this is the parchment fact the sheet already uses. */}
+              <div className="tdb-tsetfact">Offers always appear.</div>
+            </div>
+
             <div className="tdb-tsetgroup">
               <div className="tdb-tsetgl"><span className="tdb-tsetgd" aria-hidden />HOW THE DESK BEHAVES</div>
 

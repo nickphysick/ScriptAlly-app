@@ -1,4 +1,4 @@
-── frame2 · 25 assertions · 0 RED · 25 green
+── frame2 · 28 assertions · 0 RED · 28 green
   green  P1.1 1440 · equal scroll-row padding, all four sides
            queries=0/35/0/35 todo=0/35/0/35
   green  P1.2 1440 · the list cards start at the same x
@@ -39,6 +39,12 @@
            none
   green  P4.4 · no retired verb appears in the pane
            none, in 266 chars
+  green  P5.1 · the sheet carries the five generation toggles, and no toggle for notes
+           switches=["Send","Decide","Nudge","Close","Fill in"]
+  green  P5.2 · Decide is present, on, disabled, and says why
+           on=true disabled=true factRendered=true
+  green  P5.3 · the sheet states that generation is not the view
+           present
   green  P6 · deed is the contract's 27px
            got=27px want=27px
   green  P6 · label is the contract's 9.5px

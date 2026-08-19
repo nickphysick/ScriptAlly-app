@@ -71,7 +71,12 @@ describe("⚠️ the four behaviours — one stored map, a TOTAL reader, real de
 
   it("a stored value inside the bounds is honoured", () => {
     expect(todoPrefs({ staleMonths: 6, rollForward: false, weeklyBriefing: false }))
-      .toEqual({ staleMonths: 6, rollForward: false, weeklyBriefing: false });
+      /* ⚠️ THE MAP GAINED THE PER-TYPE SWITCHES (frame2 Phase 5), and the reader is still TOTAL —
+         which is the claim this case makes. A stored map that says nothing about types gets all
+         five on, and `decide` is forced on whatever it says, because an offer is not something a
+         setting may hide. */
+      .toEqual({ staleMonths: 6, rollForward: false, weeklyBriefing: false,
+                 types: { send: true, decide: true, chase: true, close: true, fix: true } });
     expect(STALE_MONTHS_CHOICES).toContain(6);
     expect(staleLabel(1)).toBe("1 month");
     expect(staleLabel(12)).toBe("12 months");

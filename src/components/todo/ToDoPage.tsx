@@ -78,7 +78,7 @@ import {
   applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
   typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
 } from "../../lib/todoListView";
-import { groupColumn } from "../../lib/todoGroups";
+import { groupColumn, TaskGroup } from "../../lib/todoGroups";
 import { paneCopy } from "../../lib/taskListRow";
 import { daysBetween } from "../../lib/elapsed";
 import { useDockActivity } from "./useDockActivity";
@@ -3083,10 +3083,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        all read the SAME post-filter array. Applying it in the component would give the meter a
        different array from the rows, which is the disagreement this page has already been caught
        by twice. */
-    return applyView(chipGroups(taskGroups(narrowed), chip), view, (c) => {
+    return applyView(generatedGroups(chipGroups(taskGroups(narrowed), chip)), view, (c) => {
       const f = listRowInputs(c);
       return f.days;
     });
+  }
+
+  /**
+   * ⚠️ GENERATION IS UPSTREAM OF THE VIEW (frame2 Phase 5). The settings sheet decides what EXISTS;
+   * the funnel decides what is SHOWN. A type switched off in the sheet is removed here, before the
+   * view is applied — so it is absent from the list, the meter, the footer, the pane queue AND the
+   * funnel's own counts at once, because all of them read what this returns. Filtering it in
+   * `applyView` instead would have made a disabled type still countable in the menu that hides it.
+   */
+  function generatedGroups(gs: TaskGroup[]): TaskGroup[] {
+    const on = todoPrefs(currentUser?.todoPrefs).types;
+    return gs.map((g) => ({
+      ...g,
+      cards: g.cards.filter((c) => {
+        const b = cardBucket(c);
+        return b === "note" ? true : on[b as keyof typeof on] !== false;
+      }),
+    })).filter((g) => g.cards.length > 0);
   }
 
   /* the UNFILTERED groups — what the menu's live counts are of, so a zero is information rather
@@ -3098,7 +3116,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       snoozed: narrowCards(boardCols.snoozed),
       done: narrowCards(boardCols.done),
     };
-    return chipGroups(taskGroups(narrowed), chip);
+    return generatedGroups(chipGroups(taskGroups(narrowed), chip));
   }
 
   /**

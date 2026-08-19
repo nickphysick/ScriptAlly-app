@@ -217,6 +217,39 @@ test("frame2", async ({ page }) => {
         : found.length ? `found: ${found.join(" ")} (in ${paneText.length} chars)`
                        : `none, in ${paneText.length} chars`);
 
+  /* ══ PHASE 5 · the type toggles in the existing sheet ═══════════════════════════════════ */
+  /* ⚠️ THE SHEET OPENS ON A WINDOW EVENT, NOT A PAGE BUTTON. The shell sidebar's Task-settings
+     control dispatches it so the page can stay mounted behind other routes — so a probe hunting
+     for a gear on the page finds nothing and reports the sheet missing when it is simply shut. */
+  const gear = await page.evaluate(() => {
+    window.dispatchEvent(new Event("sa:open-task-settings"));
+    return true;
+  }) as boolean;
+  await page.waitForTimeout(1200);
+  const sheet = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const sw = [...document.querySelectorAll('input[role=switch]')].filter(vis)
+      .map((i) => ({ label: i.getAttribute("aria-label"), on: i.checked, off: i.disabled }));
+    const fact = [...document.querySelectorAll("*")].filter(vis)
+      .some((e) => e.children.length === 0 && /offers always appear/i.test(e.textContent||""));
+    const line = [...document.querySelectorAll("*")].filter(vis)
+      .some((e) => e.children.length === 0 && /funnel above the list decides what you see/i.test(e.textContent||""));
+    return { switches: sw, fact, line };
+  })()`) as any;
+  const want = ["Send", "Decide", "Nudge", "Close", "Fill in"];
+  const got = (sheet.switches ?? []).map((s: any) => s.label);
+  add("P5.1 · the sheet carries the five generation toggles, and no toggle for notes",
+      gear && want.every((w) => got.includes(w)) && !got.includes("Notes") && !got.includes("Note"),
+      gear ? `switches=${JSON.stringify(got)}` : "the gear control was not found");
+  const dec = (sheet.switches ?? []).find((s: any) => s.label === "Decide");
+  add("P5.2 · Decide is present, on, disabled, and says why",
+      !!dec && dec.on === true && dec.off === true && sheet.fact,
+      dec ? `on=${dec.on} disabled=${dec.off} factRendered=${sheet.fact}` : "no Decide switch");
+  add("P5.3 · the sheet states that generation is not the view", !!sheet.line,
+      sheet.line ? "present" : "the generation-vs-view line is missing");
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(700);
+
   /* ══ PHASE 6 · type scale ════════════════════════════════════════════════════════════════ */
   /* ⚠️ MEASURED ON A JOURNEY THAT HAS A TIMELINE. The note above has none by design, so the two
      timeline sizes came back -1 — a missing element reported as a wrong size, which would have read
