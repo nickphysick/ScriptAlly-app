@@ -84,25 +84,15 @@ export const InboxMotif: React.FC = () => (
  * two steps into a five-step flow that did not exist. Where a screen genuinely knows its position,
  * the card's band states it in words instead (`step`).
  */
-export const OnbChrome: React.FC<{ onSkip: () => void }> = ({ onSkip }) => (
-  <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", padding: "0 4px" }}>
-    <button
-      onClick={onSkip}
-      style={{
-        fontFamily: FONT_SANS, fontSize: 13.5, color: onbFaint, background: "none", border: "none",
-        cursor: "pointer", padding: 0, textDecoration: "underline", textUnderlineOffset: 3,
-        transition: "color 0.15s",
-      }}
-      onMouseEnter={(e) => (e.currentTarget.style.color = onbMuted)}
-      onMouseLeave={(e) => (e.currentTarget.style.color = onbFaint)}
-    >
-      Skip setup
-    </button>
-  </div>
-);
+/* ⚠️ `OnbChrome` IS RETIRED, AND ITS PROMINENCE WAS THE DEFECT. It drew "Skip setup" at 13.5px
+   above the card as the ONLY thing on the screen besides the card itself — so the loudest element
+   on a writer's first minute in the product was the way out of it. The exit now lives in the
+   onboarding header's right-hand slot, quiet, in mono, beside the two things that ground you: the
+   wordmark and the spine. One exit, and it is no longer the headline. */
 
 export interface OnboardingCardProps {
-  onSkip: () => void;
+  /* ⚠️ NO `onSkip`. The card no longer draws an exit — the header does. A prop kept "for the
+     callers' sake" and never rendered is the shape that let a whole sign-out go unreachable. */
   /** Mono eyebrow in the band — the phase of setup, not a step count. */
   pre: string;
   /** The screen's heading, in the body. */
@@ -122,12 +112,11 @@ export interface OnboardingCardProps {
 
 /** A full onboarding screen: chrome row, card (band + body), footer. */
 export const OnboardingCard: React.FC<OnboardingCardProps> = ({
-  onSkip, pre, name, sub, motif, step, children, onBack, primaryLabel, onPrimary, primaryDisabled,
+  pre, name, sub, motif, step, children, onBack, primaryLabel, onPrimary, primaryDisabled,
 }) => {
   const [hoverPrimary, setHoverPrimary] = React.useState(false);
   return (
     <div style={{ width: "100%", maxWidth: 588, display: "flex", flexDirection: "column", gap: 12 }}>
-      <OnbChrome onSkip={onSkip} />
       <div
         className="sa-onb-card"
         style={{

@@ -20,7 +20,6 @@ export interface BranchAResult {
 }
 
 export interface BranchAProps {
-  onSkip: () => void;
   /** Back from A2 — returns to the welcome step. */
   onExit: () => void;
   /** A3a Continue (Ready to Query / Revising) — save, then on to the agents step. */
@@ -64,7 +63,7 @@ const READINESS: { status: ManuscriptStatus; title: string; desc: string; icon: 
   },
 ];
 
-export const BranchA: React.FC<BranchAProps> = ({ onSkip, onExit, onSaveReady, onSaveStillWriting, error }) => {
+export const BranchA: React.FC<BranchAProps> = ({ onExit, onSaveReady, onSaveStillWriting, error }) => {
   const [screen, setScreen] = useState<"readiness" | "details">("readiness");
   const [status, setStatus] = useState<ManuscriptStatus | null>(null);
   const [fields, setFields] = useState<ManuscriptFieldsState>(emptyManuscriptFields());
@@ -78,7 +77,6 @@ export const BranchA: React.FC<BranchAProps> = ({ onSkip, onExit, onSaveReady, o
   if (screen === "readiness") {
     return (
       <OnboardingCard
-        onSkip={onSkip}
         pre="Your manuscript"
         name="Where are you with it?"
         sub="No wrong answer — it points us the right way"
@@ -105,7 +103,6 @@ export const BranchA: React.FC<BranchAProps> = ({ onSkip, onExit, onSaveReady, o
   // A3 — details, in the variant the readiness answer picked.
   return (
     <OnboardingCard
-      onSkip={onSkip}
       pre="Your manuscript"
       name={stillWriting ? "No rush at all" : "A little about it"}
       sub={stillWriting ? "We'll keep it safe for when you're ready" : "Just the essentials — flesh it out anytime"}

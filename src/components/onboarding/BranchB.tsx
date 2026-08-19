@@ -9,7 +9,7 @@
  *        template-first fallback layout when the mapping call fails.
  * The review screen matches scriptally-smart-import-review.html; nothing writes before confirm.
  */
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { QueryStatus } from "../../types";
 import { SmartImportResult } from "../../types/smartImport";
@@ -58,6 +58,15 @@ export interface BranchBProps {
   onUpgrade?: () => void;
   /** Surfaced save/limit error from the parent (e.g. the Free-tier manuscript cap). */
   error?: string | null;
+  /**
+   * Which spine step this branch is standing on, reported up so the header can mark it.
+   *
+   * ⚠️ TWO NAMES, NOT TEN. Every screen after the manuscript — the fork, the confirm, the loader,
+   * the review, the duplicates — is "Your list". The import sub-flow does NOT become spine steps:
+   * expanding it would make the Smart Import path look longer than the template path, which is the
+   * progress bar growing because of a choice the writer made.
+   */
+  onStage?: (stage: "book" | "list") => void;
 }
 
 /* ⚠️ NO "tidying" MEMBER. It sat in this union with a render branch guarding it, and
@@ -119,12 +128,16 @@ const EscapeHatch: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, onUpgrade, error,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, onUpgrade, error, onStage,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
 
   const [screen, setScreen] = useState<B3Screen>("book");
+
+  /* Report the named position up rather than an index — an index is not a place, and the header
+     owns how many steps this branch has. */
+  useEffect(() => { onStage?.(screen === "book" ? "book" : "list"); }, [screen, onStage]);
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
   const [fields, setFields] = useState<ManuscriptFieldsState>(initialBook ?? emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -265,7 +278,6 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "book") {
     return (
       <OnboardingCard
-        onSkip={onSkip}
         pre="Your manuscript"
         name="The book you're querying"
         sub="We'll attach your pipeline to this"
@@ -295,7 +307,6 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "pipeline") {
     return (
       <OnboardingCard
-        onSkip={onSkip}
         pre="Your list"
         name={CAPTURE_HEADING}
         sub={CAPTURE_SUB}
@@ -341,7 +352,6 @@ export const BranchB: React.FC<BranchBProps> = ({
     const isPro = entitlement.tier === "pro";
     return (
       <OnboardingCard
-        onSkip={onSkip}
         pre="Your pipeline"
         name="This uses your Smart Import"
         sub={isPro ? "One per month on Pro" : "Your one free Smart Import"}
@@ -376,7 +386,6 @@ export const BranchB: React.FC<BranchBProps> = ({
       : "next month";
     return (
       <OnboardingCard
-        onSkip={onSkip}
         pre="Your pipeline"
         name={isFreeUsed ? "Smart Import already used" : "Next Smart Import next month"}
         sub={isFreeUsed ? "Upgrade for one every month" : `Available ${nextLabel}`}
@@ -447,7 +456,6 @@ export const BranchB: React.FC<BranchBProps> = ({
         manuscriptTitle={fields.title}
         userName={currentUser?.name}
         onContinue={() => setScreen("review")}
-        onSkip={onSkip}
       />
     );
   }
@@ -459,7 +467,6 @@ export const BranchB: React.FC<BranchBProps> = ({
       <SmartImportReview
         result={validated.result}
         onBack={() => setScreen("pipeline")}
-        onSkip={onSkip}
         error={commitError}
         onImport={handleImport}
         userName={currentUser?.name}
@@ -473,7 +480,6 @@ export const BranchB: React.FC<BranchBProps> = ({
     const ok = outcome.queriesImported > 0;
     return (
       <OnboardingCard
-        onSkip={onSkip}
         pre="Your pipeline"
         name={ok ? "Brought across" : "That didn't work"}
         sub={ok ? "Here's what landed in ScriptAlly" : "Nothing was imported — here's why"}
@@ -527,7 +533,6 @@ export const BranchB: React.FC<BranchBProps> = ({
     console.error("BranchB: unhandled screen state", { screen, hasValidated: !!validated, hasOutcome: !!outcome });
     return (
       <OnboardingCard
-        onSkip={onSkip}
         pre="Your pipeline"
         name="That step didn't load"
         sub="Nothing is lost — pick up from here"
@@ -554,7 +559,6 @@ export const BranchB: React.FC<BranchBProps> = ({
 
   return (
     <OnboardingCard
-      onSkip={onSkip}
       pre="Your pipeline"
       name="Bring it across"
       sub="Use our template, or add by hand"

@@ -14,6 +14,8 @@ import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
+import { spineFor, spineIndex, SpineId } from "../lib/onboardingSpine";
+import { OnboardingHeader } from "./onboarding/OnboardingHeader";
 import { Check } from "lucide-react";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -97,10 +99,8 @@ const WelcomeStageScreen: React.FC<{
   selected: QueryingStage | null;
   onSelect: (s: QueryingStage) => void;
   onContinue: () => void;
-  onSkip: () => void;
-}> = ({ selected, onSelect, onContinue, onSkip }) => (
+}> = ({ selected, onSelect, onContinue }) => (
   <OnboardingCard
-    onSkip={onSkip}
     pre="Getting set up"
     name="Let's set things up around your journey"
     sub="A calm home for every query, agent and deadline. No wrong answer here — it just shapes what you see first."
@@ -202,6 +202,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     if (!queryingStage) return;
     saveProgress({ queryingStage });
     persistProfile({ queryingStage });
+    setSpineStep("book"); // both branches open on their manuscript screen
     setFlow(STAGE_TO_BRANCH[queryingStage]);
   };
 
@@ -219,6 +220,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   // Save/limit error surfaced inside the active branch screen.
   const [branchError, setBranchError] = useState<string | null>(null);
+
+  /* ⚠️ THE SPINE READS THE COMMITTED BRANCH, NOT THE PENDING RADIO. `flow` is null until Continue,
+     so comparing options on the opening question cannot make the spine flicker between two and
+     three dots — which would be the lengthening fault wearing a different coat. */
+  const [spineStep, setSpineStep] = useState<SpineId>("you");
+  const spineSteps = spineFor(flow);
+  const spineAt = Math.max(0, spineIndex(spineSteps, spineStep));
 
   // The one manuscript writer for every onboarding branch (A3a, A3b, B2): shared payload shape +
   // shared Free-tier limit check, then the same addManuscript the rest of the app uses.
@@ -343,17 +351,32 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       background: onbGround,
       zIndex: 9999,
       display: "flex",
-      alignItems: step === 1 ? "stretch" : "center",
-      justifyContent: "center",
+      flexDirection: "column",
       overflowY: "auto",
     }}>
+      {/* ⚠️ THE HEADER IS A SIBLING OF THE FLOW, NOT A CHILD OF ANY SCREEN. Rendered inside
+          `ScreenTransition` it would animate in and out on every step change, so the one element
+          whose job is to say "you are still in the same place" would be the one thing that kept
+          moving. */}
+      <OnboardingHeader
+        steps={spineSteps}
+        activeIndex={spineAt}
+        onExit={handleStageSkip}
+      />
+
+      <div style={{
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        alignItems: step === 1 ? "stretch" : "center",
+        justifyContent: "center",
+      }}>
       <ScreenTransition stepKey={flow ? FLOW_KEY[flow] : step}>
         {/* Branch A — manuscript-led setup: A2 readiness → A3a details / A3b still-writing. */}
         {flow === "A" && (
           <CenterWrap>
             <BranchA
-              onSkip={handleSkip}
-              onExit={() => { setBranchError(null); setFlow(null); }}
+              onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
               onSaveReady={(r) => void handleBranchASaveReady(r)}
               onSaveStillWriting={(r) => void handleBranchAStillWriting(r)}
               error={branchError}
@@ -366,7 +389,8 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           <CenterWrap>
             <BranchB
               onSkip={handleSkip}
-              onExit={() => { setBranchError(null); setFlow(null); }}
+              onStage={setSpineStep}
+              onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
               onSaveBook={handleBranchBSaveBook}
               initialBook={b2Draft}
               onEnsureManuscript={ensureBranchBManuscript}
@@ -415,12 +439,12 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               selected={queryingStage}
               onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); if (STAGE_TO_BRANCH[s] !== "B") forgetB2Draft(); }}
               onContinue={handleStageContinue}
-              onSkip={handleStageSkip}
             />
           </div>
         )}
 
       </ScreenTransition>
+      </div>
 
       {/* Submitting overlay */}
       {isSubmitting && (
