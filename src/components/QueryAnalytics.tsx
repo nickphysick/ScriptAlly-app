@@ -36,6 +36,8 @@ import { resolveScopedManuscript } from "../lib/shellSidebar";
 import { IllustrationSlot } from "./analytics/IllustrationSlot";
 import { RangeToggle, ExportButton } from "./analytics/HeaderControls";
 import { StatStrip, statCells } from "./analytics/StatStrip";
+import { Panel, PanelRow } from "./analytics/Panel";
+import { JourneyFunnel, funnelNote } from "./analytics/JourneyFunnel";
 import {
   AnalyticsRange,
   AnalyticsRow,
@@ -152,6 +154,12 @@ export const QueryAnalytics: React.FC = () => {
                 <b>Early days —</b> {EARLY_STATE_HINT}
               </div>
             ) : null}
+
+            <PanelRow>
+              <Panel icon="journey" title="The journey so far" span={12} note={funnelNote(rows)}>
+                <JourneyFunnel rows={rows} />
+              </Panel>
+            </PanelRow>
           </>
         )}
       </WorkspacePageGrid>
