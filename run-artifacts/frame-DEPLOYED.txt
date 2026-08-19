@@ -1,0 +1,65 @@
+── page frame · 32 assertions · 0 RED · 32 green
+  green  F1 list card is 372 ± 2
+           list=370 listCard=372
+  green  F2 task pane ≥ 490 at 1440 (brief's ≥900 impossible — see frame-measurements.md)
+           pane=498
+  green  F3 no horizontal scrollbar on documentElement
+           overflowX=0px
+  green  F4 no list row deed/agent line ellipsised
+           []
+  green  P1 close · no [object Object] anywhere in the pane
+           clean
+  green  T1 close · all tiles share one offsetTop (one row)
+           tiles=2 tops=[423]
+  green  P1 close · no [object Object] in the journey
+           clean
+  green  J1 close · 1440 is deliberately stacked (different offsetTop)
+           form={"w":434,"top":488} story={"w":434,"top":960}
+  green  J2 close · stacked form still meets the 420 floor
+           form.w=434
+  green  J3 close · neither card is 0px
+           form=434 story=434
+  green  P1 send · no [object Object] anywhere in the pane
+           clean
+  green  T1 send · all tiles share one offsetTop (one row)
+           tiles=3 tops=[423]
+  green  P1 send · no [object Object] in the journey
+           clean
+  green  J1 send · 1440 is deliberately stacked (different offsetTop)
+           form={"w":434,"top":505} story={"w":434,"top":1309}
+  green  J2 send · stacked form still meets the 420 floor
+           form.w=434
+  green  J3 send · neither card is 0px
+           form=434 story=434
+  green  P1 decide · no [object Object] anywhere in the pane
+           clean
+  green  T1 decide · all tiles share one offsetTop (one row)
+           tiles=2 tops=[423]
+  green  P1 decide · no [object Object] in the journey
+           clean
+  green  J1 decide · 1440 is deliberately stacked (different offsetTop)
+           form={"w":434,"top":488} story={"w":434,"top":782}
+  green  J2 decide · stacked form still meets the 420 floor
+           form.w=434
+  green  J3 decide · neither card is 0px
+           form=434 story=434
+  green  P1 note · no [object Object] anywhere in the pane
+           clean
+  green  P1 note · no [object Object] in the journey
+           clean
+  green  P1 bulk · no [object Object] anywhere in the pane
+           clean
+  green  W1 1920 · pane ≥ 960
+           pane=978
+  green  W2 1920 · form and timeline side by side (same offsetTop)
+           form={"w":598,"top":488} story={"w":300,"top":488}
+  green  W3 1920 · timeline 300 ± 2 and form ≥ 420
+           story.w=300 form.w=598
+  green  W4 1920 · all tiles share one offsetTop
+           [423]
+  green  N1 390 · form and timeline stacked (different offsetTop)
+           formTop=-421 storyTop=162
+  green  N1b 390 · tiles never sit four-across in a sliver (≤2 per row)
+           tiles=2 rows=1
+  green  N2 390 · neither overflows and neither is 0px
+           hScroll=0 formW=172 storyW=172
