@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onboarding chrome — options</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ground:#f7f4ee; --surface:#fefcfa; --plate:#ffffff;
+    --ink:#241711; --primary:#1c130f; --body-ink:#4a3d33;
+    --muted:#8a7a6c; --label:#9c8878;
+    --hairline:#e7ddcf; --hairline-soft:#efe7da;
+    --sage-1:#d7ded4; --sage-2:#dadfd7; --sage-tint:#eef1ec;
+    --sage-text:#5a6e58; --sage-accent:#8a9e88;
+    --blush-tint:#f6ebe4; --burgundy:#773c2d;
+    --sh-card:0 1px 2px rgba(36,23,17,.04), 0 8px 24px rgba(36,23,17,.06);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#efe9e0;color:var(--body-ink);font-family:'Inter',sans-serif;font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;padding:36px 20px 80px;}
+  .page{max-width:1120px;margin:0 auto;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.17em;text-transform:uppercase;color:var(--label);}
+  .page-head{margin-bottom:34px;}
+  .page-head h1{font-family:'Playfair Display',serif;font-size:29px;font-weight:600;color:var(--ink);line-height:1.15;margin:8px 0 6px;}
+  .page-head p{max-width:70ch;}
+
+  .opt-block{margin-bottom:46px;}
+  .opt-head{display:flex;align-items:baseline;gap:12px;margin-bottom:5px;}
+  .opt-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.17em;color:var(--label);}
+  .opt-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:600;color:var(--ink);}
+  .opt-rule{flex:1;height:1px;background:#ddd2c4;}
+  .verdict{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;padding:3px 8px;border-radius:5px;}
+  .verdict.rec{background:var(--sage-tint);color:var(--sage-text);border:1px solid var(--sage-accent);}
+  .verdict.no{background:#f1ebe1;color:#7a6552;}
+  .opt-why{font-size:12.5px;color:#6d6055;margin-bottom:14px;max-width:76ch;}
+  .opt-why b{color:var(--ink);font-weight:600;}
+
+  /* browser frame */
+  .frame{border:1px solid #d8cdbd;border-radius:12px;overflow:hidden;background:var(--ground);box-shadow:0 6px 20px rgba(36,23,17,.07);}
+  .stage{padding:0 0 34px;min-height:200px;}
+
+  /* ── shared onboarding card ─────────────────── */
+  .ob{max-width:600px;margin:0 auto;background:var(--surface);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--sh-card);overflow:hidden;}
+  .ob-band{background:linear-gradient(135deg,var(--sage-1),var(--sage-2));border-bottom:1px solid rgba(90,110,88,.18);padding:15px 22px;display:flex;align-items:center;gap:13px;}
+  .ob-mark{width:40px;height:40px;flex:none;background:var(--plate);border:1px solid rgba(90,110,88,.28);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+  .ob-mark svg{width:20px;height:20px;stroke:var(--burgundy);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
+  .ob-band .eyebrow{color:var(--sage-text);}
+  .ob-count{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--sage-text);}
+  .ob-body{padding:24px 22px 18px;}
+  .ob-body h2{font-family:'Playfair Display',serif;font-size:23px;font-weight:600;color:var(--ink);line-height:1.15;margin-bottom:7px;}
+  .ob-sub{font-size:13.5px;margin-bottom:18px;max-width:52ch;}
+  .q-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--label);margin-bottom:9px;}
+  .row{display:flex;gap:12px;align-items:flex-start;background:var(--plate);border:1px solid var(--hairline);border-radius:10px;padding:12px 14px;margin-bottom:8px;}
+  .row.on{border-color:var(--sage-accent);background:var(--sage-tint);}
+  .ring{width:18px;height:18px;flex:none;margin-top:2px;border:1.5px solid #cfc2b0;border-radius:50%;background:var(--plate);display:flex;align-items:center;justify-content:center;}
+  .row.on .ring{background:var(--sage-accent);border-color:var(--sage-accent);}
+  .ring svg{width:9px;height:9px;stroke:#fff;stroke-width:2.4;fill:none;stroke-linecap:round;opacity:0;}
+  .row.on .ring svg{opacity:1;}
+  .row strong{display:block;font-size:13.5px;color:var(--ink);font-weight:600;}
+  .row span{font-size:12.5px;color:var(--body-ink);}
+  .ob-foot{display:flex;align-items:center;padding:14px 22px 18px;border-top:1px solid var(--hairline-soft);}
+  .btn{display:inline-flex;align-items:center;gap:7px;border-radius:9px;font-size:12.5px;font-weight:500;font-family:inherit;padding:9px 16px;border:1px solid transparent;cursor:pointer;}
+  .btn-primary{background:var(--primary);color:#fdfaf5;margin-left:auto;}
+  .btn-ghost{background:var(--plate);border-color:var(--hairline);color:var(--body-ink);}
+  .link-q{margin-left:auto;font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;background:none;border:none;cursor:pointer;font-family:inherit;}
+
+  /* ── A · bare (today) ───────────────────────── */
+  .bare-top{display:flex;justify-content:flex-end;padding:18px 26px 14px;}
+  .bare-top a{font-size:12.5px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;}
+
+  /* ── B · reduced header + spine ─────────────── */
+  .mk-head{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--hairline);background:var(--ground);}
+  .brand{display:flex;align-items:center;gap:9px;}
+  .brand svg{width:22px;height:22px;}
+  .wordmark{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);}
+  .head-right{display:flex;align-items:center;gap:16px;}
+  .head-right .quiet{font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;}
+  .spine{display:flex;align-items:center;gap:0;}
+  .sp{display:flex;align-items:center;gap:7px;}
+  .sp-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid #cfc2b0;background:var(--plate);flex:none;}
+  .sp.done .sp-dot{background:var(--sage-accent);border-color:var(--sage-accent);}
+  .sp.now .sp-dot{background:var(--burgundy);border-color:var(--burgundy);box-shadow:0 0 0 3px rgba(119,60,45,.13);}
+  .sp-lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);}
+  .sp.now .sp-lab{color:var(--ink);}
+  .sp-join{width:26px;height:1px;background:#ded3c5;margin:0 10px;}
+  .spine-mob{display:none;}
+
+  /* ── C · sidebar spine ──────────────────────── */
+  .side-wrap{display:grid;grid-template-columns:232px 1fr;min-height:430px;}
+  .side{background:var(--surface);border-right:1px solid var(--hairline);padding:22px 20px;}
+  .side .brand{margin-bottom:26px;}
+  .side .eyebrow{margin-bottom:14px;display:block;}
+  .vstep{display:flex;gap:11px;align-items:flex-start;padding:9px 0;}
+  .vs-dot{width:18px;height:18px;flex:none;border-radius:50%;border:1.5px solid #cfc2b0;background:var(--plate);display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .vs-dot svg{width:9px;height:9px;stroke:#fff;stroke-width:2.4;fill:none;stroke-linecap:round;opacity:0;}
+  .vstep.done .vs-dot{background:var(--sage-accent);border-color:var(--sage-accent);}
+  .vstep.done .vs-dot svg{opacity:1;}
+  .vstep.now .vs-dot{border-color:var(--burgundy);border-width:2px;}
+  .vstep strong{display:block;font-size:13px;color:#9c8878;font-weight:500;}
+  .vstep.now strong{color:var(--ink);font-weight:600;}
+  .vstep.done strong{color:var(--body-ink);}
+  .vstep span{font-size:11.5px;color:var(--muted);}
+  .vline{width:1px;height:12px;background:#e2d8ca;margin-left:8px;}
+  .side-foot{margin-top:22px;padding-top:16px;border-top:1px solid var(--hairline-soft);}
+  .side-foot a{font-size:12px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;}
+  .side-main{padding:34px 26px;display:flex;align-items:flex-start;justify-content:center;}
+  .side-main .ob{margin:0;width:100%;max-width:560px;}
+
+  /* ── D · full workspace shell (rejected) ────── */
+  .ws{display:grid;grid-template-columns:60px 1fr;min-height:400px;position:relative;}
+  .ws-rail{background:var(--surface);border-right:1px solid var(--hairline);padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:14px;opacity:.42;}
+  .ws-ico{width:30px;height:30px;border-radius:8px;background:#f1ebe1;border:1px solid var(--hairline-soft);}
+  .ws-top{height:48px;border-bottom:1px solid var(--hairline);display:flex;align-items:center;justify-content:space-between;padding:0 18px;opacity:.42;}
+  .ws-pill{height:22px;width:110px;border-radius:6px;background:#f1ebe1;border:1px solid var(--hairline-soft);}
+  .ws-main{padding:26px 22px;}
+  .ws-veil{position:absolute;inset:0;background:rgba(247,244,238,.55);pointer-events:none;}
+  .ws-flag{position:absolute;top:12px;right:14px;z-index:2;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;background:var(--blush-tint);color:var(--burgundy);border:1px solid rgba(119,60,45,.25);padding:4px 9px;border-radius:5px;}
+
+  /* ── E · handover ───────────────────────────── */
+  .hand{max-width:600px;margin:0 auto;}
+  .hand-card{background:var(--surface);border:1px solid var(--hairline);border-radius:14px;box-shadow:var(--sh-card);overflow:hidden;}
+  .hand-body{padding:30px 26px 24px;}
+  .hand-body h2{font-family:'Playfair Display',serif;font-size:25px;font-weight:600;color:var(--ink);margin-bottom:8px;}
+  .hand-sub{font-size:13.5px;margin-bottom:22px;max-width:50ch;}
+  .tally{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+  .tal{background:var(--plate);border:1px solid var(--hairline-soft);border-radius:11px;padding:15px 16px;}
+  .tal .n{font-family:'Playfair Display',serif;font-size:27px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:5px;}
+  .tal .l{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);}
+  .next{display:flex;gap:12px;align-items:flex-start;background:var(--plate);border:1px solid var(--hairline-soft);border-radius:11px;padding:15px 17px;}
+  .next .r{width:3px;align-self:stretch;border-radius:3px;background:var(--sage-accent);flex:none;}
+  .next p{font-size:12.5px;margin:0;}
+  .next p b{color:var(--ink);}
+
+  .compare{background:var(--surface);border:1px solid var(--hairline);border-radius:12px;padding:22px 24px;margin-top:10px;}
+  .compare h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--ink);margin-bottom:12px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{text-align:left;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);font-weight:500;padding:0 10px 9px 0;border-bottom:1px solid var(--hairline-soft);}
+  td{padding:10px 10px 10px 0;border-bottom:1px solid var(--hairline-soft);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td b{color:var(--ink);}
+
+  @media (max-width:760px){
+    .side-wrap{grid-template-columns:1fr;} .side{border-right:none;border-bottom:1px solid var(--hairline);}
+    .spine{display:none;} .spine-mob{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--label);}
+    .tally{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="page-head">
+    <div class="eyebrow">ScriptAlly · Onboarding chrome</div>
+    <h1>Four ways to hold the onboarding, and the handover screen</h1>
+    <p>The same screen — step one, "where are you in your querying journey" — wearing four different chromes. Then the piece that doesn't exist yet in any of them.</p>
+  </div>
+
+  <!-- ══ A ══ -->
+  <section class="opt-block">
+    <div class="opt-head"><span class="opt-num">A</span><span class="opt-name">Bare card — what's live today</span><span class="verdict no">Baseline</span><span class="opt-rule"></span></div>
+    <p class="opt-why">A card floating on the ground, with <b>Skip setup</b> the only thing above it. No wordmark, no position, no end in sight — and the escape hatch is the most prominent element on the page. This is the thing you're reacting to.</p>
+    <div class="frame">
+      <div class="bare-top"><a href="#">Skip setup</a></div>
+      <div class="stage">
+        <div class="ob">
+          <div class="ob-band">
+            <div class="ob-mark"><svg viewBox="0 0 24 24"><path d="M4 5h7v14H4zM13 5h7v14h-7z"/></svg></div>
+            <span class="eyebrow">Getting set up</span>
+          </div>
+          <div class="ob-body">
+            <h2>Let's set things up around your journey</h2>
+            <p class="ob-sub">A calm home for every query, agent and deadline. No wrong answer here — it just shapes what you see first.</p>
+            <div class="q-label">Where are you in your querying journey?</div>
+            <div class="row on"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Just getting started</strong><span>Haven't sent any queries yet</span></span></div>
+            <div class="row"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>A few queries out</strong><span>Early days, waiting to hear back</span></span></div>
+            <div class="row"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Deep in it</strong><span>Lots of queries in flight</span></span></div>
+          </div>
+          <div class="ob-foot"><button class="btn btn-primary">Continue</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ B ══ -->
+  <section class="opt-block">
+    <div class="opt-head"><span class="opt-num">B</span><span class="opt-name">Reduced header + horizontal spine</span><span class="verdict rec">Recommended</span><span class="opt-rule"></span></div>
+    <p class="opt-why">The <b>mk-head</b> you already built, stripped to wordmark and a step spine. You're in ScriptAlly, you can see all the steps, you can see which one you're on, and the exit is demoted to a quiet link. <b>Nothing new is built</b> — the header exists, the spine is one small component. Branch-honest: the spine shortens when the path does.</p>
+    <div class="frame">
+      <div class="mk-head">
+        <div class="brand">
+          <svg viewBox="0 0 26 26"><path d="M2 13 24 4 15 23 12 15Z" fill="none" stroke="#773c2d" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15 24 4" fill="none" stroke="#773c2d" stroke-width="1.8"/></svg>
+          <span class="wordmark">ScriptAlly</span>
+        </div>
+        <div class="spine">
+          <div class="sp now"><span class="sp-dot"></span><span class="sp-lab">You</span></div>
+          <span class="sp-join"></span>
+          <div class="sp"><span class="sp-dot"></span><span class="sp-lab">Your book</span></div>
+          <span class="sp-join"></span>
+          <div class="sp"><span class="sp-dot"></span><span class="sp-lab">Your list</span></div>
+        </div>
+        <span class="spine-mob">Step 1 of 3</span>
+        <div class="head-right"><a class="quiet" href="#">Skip for now</a></div>
+      </div>
+      <div class="stage" style="padding-top:30px">
+        <div class="ob">
+          <div class="ob-band">
+            <div class="ob-mark"><svg viewBox="0 0 24 24"><path d="M4 5h7v14H4zM13 5h7v14h-7z"/></svg></div>
+            <span class="eyebrow">Getting set up</span>
+            <span class="ob-count">Step 1 of 3</span>
+          </div>
+          <div class="ob-body">
+            <h2>Let's set things up around your journey</h2>
+            <p class="ob-sub">A calm home for every query, agent and deadline. No wrong answer here — it just shapes what you see first.</p>
+            <div class="q-label">Where are you in your querying journey?</div>
+            <div class="row on"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Just getting started</strong><span>Haven't sent any queries yet</span></span></div>
+            <div class="row"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>A few queries out</strong><span>Early days, waiting to hear back</span></span></div>
+            <div class="row"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Deep in it</strong><span>Lots of queries in flight</span></span></div>
+          </div>
+          <div class="ob-foot"><button class="btn btn-primary">Continue</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ C ══ -->
+  <section class="opt-block">
+    <div class="opt-head"><span class="opt-num">C</span><span class="opt-name">Sidebar spine — the Stripe pattern</span><span class="verdict no">Strong second</span><span class="opt-rule"></span></div>
+    <p class="opt-why">Steps live down the left with descriptions, so the whole shape of the task is visible before you start it. <b>Better for long or branching flows</b> — and yours branches. But it rhymes with the workspace rail without being it, which risks teaching the wrong thing about what that column means.</p>
+    <div class="frame">
+      <div class="side-wrap">
+        <div class="side">
+          <div class="brand">
+            <svg viewBox="0 0 26 26"><path d="M2 13 24 4 15 23 12 15Z" fill="none" stroke="#773c2d" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15 24 4" fill="none" stroke="#773c2d" stroke-width="1.8"/></svg>
+            <span class="wordmark">ScriptAlly</span>
+          </div>
+          <span class="eyebrow">Getting set up</span>
+          <div class="vstep now"><span class="vs-dot"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Where you are</strong><span>Shapes what you see first</span></span></div>
+          <div class="vline"></div>
+          <div class="vstep"><span class="vs-dot"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Your book</strong><span>Title, genre, word count</span></span></div>
+          <div class="vline"></div>
+          <div class="vstep"><span class="vs-dot"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Your agents &amp; queries</strong><span>Import, template, or by hand</span></span></div>
+          <div class="side-foot"><a href="#">Skip for now</a></div>
+        </div>
+        <div class="side-main">
+          <div class="ob">
+            <div class="ob-band">
+              <div class="ob-mark"><svg viewBox="0 0 24 24"><path d="M4 5h7v14H4zM13 5h7v14h-7z"/></svg></div>
+              <span class="eyebrow">Step 1</span>
+            </div>
+            <div class="ob-body">
+              <h2>Let's set things up around your journey</h2>
+              <p class="ob-sub">A calm home for every query, agent and deadline. No wrong answer here — it just shapes what you see first.</p>
+              <div class="q-label">Where are you in your querying journey?</div>
+              <div class="row on"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Just getting started</strong><span>Haven't sent any queries yet</span></span></div>
+              <div class="row"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>A few queries out</strong><span>Early days, waiting to hear back</span></span></div>
+              <div class="row"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Deep in it</strong><span>Lots of queries in flight</span></span></div>
+            </div>
+            <div class="ob-foot"><button class="btn btn-primary">Continue</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ D ══ -->
+  <section class="opt-block">
+    <div class="opt-head"><span class="opt-num">D</span><span class="opt-name">Full workspace shell behind the card</span><span class="verdict no">Not recommended</span><span class="opt-rule"></span></div>
+    <p class="opt-why">Shown so you can see why not. The rail has six destinations and every one is empty or unreachable — <b>nav you can't click teaches that nav is decorative</b>, at the worst possible moment. It also makes a fifth shell variant, which is the consolidation problem you already have, made worse.</p>
+    <div class="frame">
+      <div class="ws">
+        <span class="ws-flag">Rail: 6 destinations, 0 usable</span>
+        <div class="ws-rail"><div class="ws-ico"></div><div class="ws-ico"></div><div class="ws-ico"></div><div class="ws-ico"></div><div class="ws-ico"></div><div class="ws-ico"></div></div>
+        <div>
+          <div class="ws-top"><div class="ws-pill"></div><div class="ws-pill" style="width:70px"></div></div>
+          <div class="ws-main">
+            <div class="ob" style="max-width:520px">
+              <div class="ob-band">
+                <div class="ob-mark"><svg viewBox="0 0 24 24"><path d="M4 5h7v14H4zM13 5h7v14h-7z"/></svg></div>
+                <span class="eyebrow">Getting set up</span>
+              </div>
+              <div class="ob-body">
+                <h2>Let's set things up around your journey</h2>
+                <p class="ob-sub">A calm home for every query, agent and deadline.</p>
+                <div class="row on"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>Just getting started</strong><span>Haven't sent any queries yet</span></span></div>
+                <div class="row"><span class="ring"><svg viewBox="0 0 12 12"><path d="M2 6.4 4.7 9 10 3.2"/></svg></span><span><strong>A few queries out</strong><span>Early days, waiting to hear back</span></span></div>
+              </div>
+              <div class="ob-foot"><button class="btn btn-primary">Continue</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="ws-veil"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ E ══ -->
+  <section class="opt-block">
+    <div class="opt-head"><span class="opt-num">E</span><span class="opt-name">The handover — missing from all four</span><span class="verdict rec">Build regardless</span><span class="opt-rule"></span></div>
+    <p class="opt-why">This is what actually fixes "taken out of the app" — not chrome, but the seam at the end. It reports what was captured as <b>facts, not congratulation</b>, and names where you're being put. Then lands them somewhere specific: imported queries → Query Centre; skipped → dashboard, empty states doing the orientation.</p>
+    <div class="frame">
+      <div class="mk-head">
+        <div class="brand">
+          <svg viewBox="0 0 26 26"><path d="M2 13 24 4 15 23 12 15Z" fill="none" stroke="#773c2d" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 15 24 4" fill="none" stroke="#773c2d" stroke-width="1.8"/></svg>
+          <span class="wordmark">ScriptAlly</span>
+        </div>
+        <div class="spine">
+          <div class="sp done"><span class="sp-dot"></span><span class="sp-lab">You</span></div>
+          <span class="sp-join"></span>
+          <div class="sp done"><span class="sp-dot"></span><span class="sp-lab">Your book</span></div>
+          <span class="sp-join"></span>
+          <div class="sp done"><span class="sp-dot"></span><span class="sp-lab">Your list</span></div>
+        </div>
+        <div class="head-right"></div>
+      </div>
+      <div class="stage" style="padding-top:30px">
+        <div class="hand">
+          <div class="hand-card">
+            <div class="ob-band">
+              <div class="ob-mark"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3.5 7.5 12 14l8.5-6.5"/></svg></div>
+              <span class="eyebrow">Ready</span>
+            </div>
+            <div class="hand-body">
+              <h2>That's everything captured</h2>
+              <p class="hand-sub">Here's what's now in ScriptAlly. Nothing is fixed — you can add, edit or remove any of it whenever you like.</p>
+              <div class="tally">
+                <div class="tal"><div class="n">14</div><div class="l">Agents</div></div>
+                <div class="tal"><div class="n">9</div><div class="l">Queries</div></div>
+                <div class="tal"><div class="n">1</div><div class="l">Manuscript</div></div>
+              </div>
+              <div class="next"><span class="r"></span><p><b>Taking you to the Query Centre</b> — that's where your nine queries live, and where you'll record anything that comes back.</p></div>
+            </div>
+            <div class="ob-foot">
+              <button class="btn btn-ghost">Take me to the dashboard instead</button>
+              <button class="btn btn-primary">Open Query Centre</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="compare">
+    <h3>Side by side</h3>
+    <table>
+      <tr><th>&nbsp;</th><th>Grounds the user</th><th>Shows the end</th><th>New components</th><th>Risk</th></tr>
+      <tr><td><b>A · Bare</b></td><td>No</td><td>No</td><td>None</td><td>Feels placeless; exit is the loudest thing on screen</td></tr>
+      <tr><td><b>B · Header + spine</b></td><td>Yes — wordmark</td><td>Yes — horizontal</td><td>One small spine; header already exists</td><td>Spine needs to stay honest when the path branches</td></tr>
+      <tr><td><b>C · Sidebar spine</b></td><td>Yes — wordmark</td><td>Yes, with descriptions</td><td>A layout plus the spine</td><td>Rhymes with the rail without being it</td></tr>
+      <tr><td><b>D · Full shell</b></td><td>Too much</td><td>No</td><td>A fifth shell variant</td><td>Teaches that nav is decorative; worsens shell sprawl</td></tr>
+      <tr><td><b>E · Handover</b></td><td>—</td><td>It <i>is</i> the end</td><td>One screen</td><td>Must report, never congratulate</td></tr>
+    </table>
+  </div>
+
+</div>
+</body>
+</html>
