@@ -1,0 +1,17 @@
+── 1440×900
+  grid present:            true
+  zero-height boxes:       0   (MUST be 0 — the flex min-height chain)
+  other pages mounted:     7   (kept mounted by the workspace, expected)
+  full-page scroll, list:  0px   (MUST be 0)
+  materials surface opens: true
+  full-page scroll, open:  0px   (MUST be 0)
+── 390×844
+  grid present:            true
+  zero-height boxes:       0   (MUST be 0 — the flex min-height chain)
+  other pages mounted:     7   (kept mounted by the workspace, expected)
+  full-page scroll, list:  0px   (MUST be 0)
+  materials surface opens: true
+  full-page scroll, open:  0px   (MUST be 0)
+── console
+  known duplicate-key warnings: 6   (out of scope, counted not tolerated)
+  ⚠️ OTHER errors:              0   (MUST be 0)
