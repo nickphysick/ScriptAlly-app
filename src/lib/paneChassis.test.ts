@@ -125,7 +125,10 @@ describe("the journey's grid", () => {
     expect(base).toContain("grid-template-columns: minmax(0, 1fr)");
     expect(base, "the two-column form must be behind a query, not the default").not.toContain("300px");
     /* ⚠️ A CONTAINER QUERY, because the pane's width comes from the split, not the viewport */
-    expect(dockCss).toContain("@container (min-width: 680px)");
+    /* ⚠️ 680 → 786 (frame run): 680 was a guess; 786 is derived — grid loses 50 to rim borders and
+       scroll padding, and side-by-side needs form 420 + gap 16 + timeline 300 = 736. Re-pointed,
+       not deleted. */
+    expect(dockCss).toContain("@container (min-width: 786px)");
     expect(dockCss, "a media query would go two-column on a wide screen with a 350px pane")
       .not.toMatch(/@media[^{]*\)\s*\{\s*\.tdk-jgrid/);
   });

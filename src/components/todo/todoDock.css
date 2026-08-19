@@ -820,6 +820,15 @@
 }
 
 /* ⚠️ ABSENCE IS SAID, in §2's muted mono — never an empty tile and never a zero. */
+/* ⚠️ TWO-BY-TWO WHERE ONE ROW CANNOT HOLD THEM — and the boundary is measured, not chosen: at the
+   1440 frame the container is 486 and three tiles sit one row with ~150 each; in the 390 stack it
+   is ~220 and a row of three is three slivers. Below 360 the row becomes a two-column grid and the
+   interior dividers come off — a border between wrapped cells reads as a broken table. */
+@container (max-width: 360px) {
+  .tdk-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+  .tdk-tile { border-right: 0; padding: 0; }
+}
+
 .tdk-tilenone {
   display: block;
   font-family: "JetBrains Mono", ui-monospace, monospace;
@@ -856,8 +865,17 @@
   min-height: 0;
 }
 
-/* 330 for the form (the doing column's own floor elsewhere) + 16 gap + 300 for the story = 646 */
-@container (min-width: 680px) {
+/* ⚠️ 786, DERIVED FROM THE MEASURED CHAIN — not 680, which was a guess, and not the brief's 740.
+   The container is `.tdk-w`'s content box; the grid inside it loses 50 (rim borders 2 + scroll pad
+   24/24). Side-by-side needs grid ≥ form 420 + gap 16 + timeline 300 = 736 → container ≥ 786.
+
+   Where that lands after the frame rebalance (frame-measurements.md):
+     1440 → container 486 → STACKED, form = the full 436
+     1680 → container 726 → stacked, form 676
+     1920 → container 966 → SIDE BY SIDE, form 600, timeline 300
+   The 420 floor is the brief's own and it is MET AT EVERY VIEWPORT this way — what changes with
+   width is only whether the timeline sits beside the form or below it. */
+@container (min-width: 786px) {
   .tdk-jgrid { grid-template-columns: minmax(0, 1fr) 300px; }
 }
 
