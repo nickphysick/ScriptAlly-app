@@ -3523,13 +3523,30 @@ export const Queries: React.FC<{
                and the page's own heading must say the same thing — a page whose sidebar entry
                and title disagree makes you check you are where you think you are. */
             title="Query Centre"
-            /* ⚠️ THE COUNTS, NOT A DESCRIPTION (§1b). "Every query you've sent, and exactly where
-               each one stands" told the reader what page they were on while they stood on it. These
-               are two facts they cannot get by looking, and both come from `queryBucket` — the same
-               function the filter pills and `getPrimaryAction` read — so the masthead cannot
-               disagree with the list beneath it about whose turn anything is.
-               ⚠️ MANUSCRIPT-SCOPED, NOT VIEW-SCOPED, matching `queriesPulse`'s existing rule: the
-               status filter and the search narrow the LIST, not the page's own totals. */
+            /**
+             * ⚠️ THE DESCRIPTION IS REINSTATED (Nick's copy, supplied directly), AND §1b's
+             * REASONING IS AMENDED RATHER THAN DELETED — because the objection it recorded was to a
+             * DIFFERENT SENTENCE, not to the idea of a subtitle.
+             *
+             * What §1b threw out was "Every query you've sent, and exactly where each one stands",
+             * on the grounds that it told the reader what page they were on while they stood on it.
+             * That objection stands and this copy does not meet it: the first clause says what the
+             * page holds, and the second says what you can DO here — log, review, update — which is
+             * the thing a writer arriving for the first time cannot get by looking.
+             *
+             * ⚠️ AND IT MATCHES MANUSCRIPTS BY MECHANISM, NOT BY IMITATION. `PageHeader` renders any
+             * `description` as the same `.wsh-sub` paragraph and steps the title from 40px to 38px
+             * by dropping `wsh--solo`; there is no second treatment to keep in step, which is why
+             * "same format as the manuscripts page" needed no styling at all.
+             *
+             * The counts §1b put here in its place are separately retired (see the note below) —
+             * so this is not displacing them, it is filling a slot that has been empty since.
+             */
+            description="The home of every query you've sent and every response you've had back. Log, review and update, all in one place."
+            /* ⚠️ WHY THE COUNTS WENT (§1b, then §1). They were two facts the reader could not get by
+               looking, both from `queryBucket` — the same function the filter pills and
+               `getPrimaryAction` read — and manuscript-scoped rather than view-scoped, so the
+               status filter and the search narrowed the LIST and never the page's own totals. */
             /* ⚠️ THE MASTHEAD'S COUNT IS RETIRED (§1), AND THE EARLIER PACK PREDICTED THIS. It
                flagged the duplication rather than resolving it — "the plate's description is not
                drawn once the header condenses, which is the state the page spends its life in" —

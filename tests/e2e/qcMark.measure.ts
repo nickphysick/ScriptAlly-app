@@ -23,6 +23,15 @@ test("current Query Centre header mark", async ({ page }) => {
       blend: img ? getComputedStyle(img).mixBlendMode : "",
       imgOpacity: img ? getComputedStyle(img).opacity : "",
       naturalW: img ? (img as HTMLImageElement).naturalWidth : 0,
+      /* the subtitle, and the title size it steps the heading down to */
+      sub: (document.querySelector(".wsh-sub")?.textContent || "").trim(),
+      titleSize: (() => { const t = document.querySelector(".wsh-title"); return t ? getComputedStyle(t).fontSize : ""; })(),
+      /* ⚠️ SCOPED TO THIS PLATE. A page-wide `querySelector` for the solo class finds any header
+         on the page — including a journey's — and reports it as this one's state. */
+      plates: document.querySelectorAll(".wsh").length,
+      thisTitleSolo: !!plate?.querySelector(".wsh-title--solo"),
+      thisSub: !!plate?.querySelector(".wsh-sub"),
+      soloElsewhere: document.querySelectorAll(".wsh-title--solo").length,
     };
   });
   console.log(`  ${JSON.stringify(r)}`);

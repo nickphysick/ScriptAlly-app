@@ -431,10 +431,27 @@
    the rule exists to prevent. */
 /* the step is the token above; the class stays because the markup and its lock read it */
 .wsh-title--solo { font-size: var(--wsh-title-size); }
+/**
+ * ⚠️ IT WRAPS TO TWO LINES RATHER THAN TRUNCATING AT ONE, and the change is invisible on every
+ * page that existed before it. `white-space: nowrap` + ellipsis meant a description longer than the
+ * column was CUT — measured on Query Centre, whose copy lost its entire second sentence to an
+ * ellipsis. Every other page's description is short enough that it never reached the limit, so the
+ * rule looked correct for as long as nobody wrote a long one.
+ *
+ * ⚠️ TWO LINES IS A CEILING, NOT A TARGET. A one-line description still renders on one line and its
+ * plate is unchanged; the clamp only engages past that, and still ends in an ellipsis if a third
+ * line is attempted — so the box can never grow without limit and the plate's height stays a rule
+ * rather than a function of how much someone typed.
+ *
+ * ⚠️ AND `max-height` STAYS LOAD-BEARING, which is why it doubles rather than going away: the
+ * collapse below animates it to 0 to give the space back, and opacity alone would leave the box
+ * holding the title off-centre in the 56px condensed plate.
+ */
 .wsh-sub {
   margin: 0; font-size: 14px; color: #6b5a51;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
-  max-height: 20px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden; min-width: 0;
+  max-height: 40px;
   transition: opacity .14s ease, max-height .22s cubic-bezier(.4, 0, .2, 1), margin .22s cubic-bezier(.4, 0, .2, 1);
 }
 /* ⚠️ THE DESCRIPTION FADES AND COLLAPSES TOGETHER. Opacity alone would leave its box holding the
