@@ -22,6 +22,8 @@ export interface BranchAResult {
 export interface BranchAProps {
   /** Back from A2 — returns to the welcome step. */
   onExit: () => void;
+  /** The band's right-hand meta — `Step 2 of 2` on this branch. */
+  stepLabel?: string;
   /** A3a Continue (Ready to Query / Revising) — save, then on to the agents step. */
   onSaveReady: (r: BranchAResult) => void;
   /** A3b "Save & explore agents →" (Still writing) — save as Drafting, route to the agent database. */
@@ -63,7 +65,7 @@ const READINESS: { status: ManuscriptStatus; title: string; desc: string; icon: 
   },
 ];
 
-export const BranchA: React.FC<BranchAProps> = ({ onExit, onSaveReady, onSaveStillWriting, error }) => {
+export const BranchA: React.FC<BranchAProps> = ({ onExit, onSaveReady, onSaveStillWriting, error, stepLabel }) => {
   const [screen, setScreen] = useState<"readiness" | "details">("readiness");
   const [status, setStatus] = useState<ManuscriptStatus | null>(null);
   const [fields, setFields] = useState<ManuscriptFieldsState>(emptyManuscriptFields());
@@ -77,6 +79,7 @@ export const BranchA: React.FC<BranchAProps> = ({ onExit, onSaveReady, onSaveSti
   if (screen === "readiness") {
     return (
       <OnboardingCard
+        step={stepLabel}
         pre="Your manuscript"
         name="Where are you with it?"
         sub="No wrong answer — it points us the right way"
@@ -103,6 +106,7 @@ export const BranchA: React.FC<BranchAProps> = ({ onExit, onSaveReady, onSaveSti
   // A3 — details, in the variant the readiness answer picked.
   return (
     <OnboardingCard
+        step={stepLabel}
       pre="Your manuscript"
       name={stillWriting ? "No rush at all" : "A little about it"}
       sub={stillWriting ? "We'll keep it safe for when you're ready" : "Just the essentials — flesh it out anytime"}

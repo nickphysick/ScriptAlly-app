@@ -14,7 +14,7 @@ import { BranchB } from "./onboarding/BranchB";
 import { ManuscriptFieldsState } from "./onboarding/ManuscriptFields";
 import { buildManuscriptPayload, manuscriptLimitError, ensureManuscriptOnce, ManuscriptIdCache } from "../lib/manuscripts";
 import { effectiveQueryingStage, importDefaultForStage } from "../lib/onboardingStage";
-import { spineFor, spineIndex, SpineId } from "../lib/onboardingSpine";
+import { spineFor, spineIndex, stepOfLabel, SpineId } from "../lib/onboardingSpine";
 import { OnboardingHeader } from "./onboarding/OnboardingHeader";
 import { Check } from "lucide-react";
 
@@ -99,8 +99,10 @@ const WelcomeStageScreen: React.FC<{
   selected: QueryingStage | null;
   onSelect: (s: QueryingStage) => void;
   onContinue: () => void;
-}> = ({ selected, onSelect, onContinue }) => (
+  stepLabel?: string;
+}> = ({ selected, onSelect, onContinue, stepLabel }) => (
   <OnboardingCard
+    step={stepLabel}
     pre="Getting set up"
     name="Let's set things up around your journey"
     sub="A calm home for every query, agent and deadline. No wrong answer here — it just shapes what you see first."
@@ -227,6 +229,9 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [spineStep, setSpineStep] = useState<SpineId>("you");
   const spineSteps = spineFor(flow);
   const spineAt = Math.max(0, spineIndex(spineSteps, spineStep));
+  /* The card band states the same position in words, in its existing right-hand meta slot — one
+     source, two renderings, so the dots and the sentence cannot disagree. */
+  const stepLabel = stepOfLabel(spineAt, spineSteps.length);
 
   // The one manuscript writer for every onboarding branch (A3a, A3b, B2): shared payload shape +
   // shared Free-tier limit check, then the same addManuscript the rest of the app uses.
@@ -376,6 +381,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {flow === "A" && (
           <CenterWrap>
             <BranchA
+              stepLabel={stepLabel}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
               onSaveReady={(r) => void handleBranchASaveReady(r)}
               onSaveStillWriting={(r) => void handleBranchAStillWriting(r)}
@@ -388,6 +394,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         {flow === "B" && (
           <CenterWrap>
             <BranchB
+              stepLabel={stepLabel}
               onSkip={handleSkip}
               onStage={setSpineStep}
               onExit={() => { setBranchError(null); setFlow(null); setSpineStep("you"); }}
@@ -436,6 +443,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             boxSizing: "border-box",
           }}>
             <WelcomeStageScreen
+              stepLabel={stepLabel}
               selected={queryingStage}
               onSelect={(s) => { setQueryingStage(s); saveProgress({ queryingStage: s }); if (STAGE_TO_BRANCH[s] !== "B") forgetB2Draft(); }}
               onContinue={handleStageContinue}

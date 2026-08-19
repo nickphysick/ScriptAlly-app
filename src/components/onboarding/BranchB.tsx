@@ -67,6 +67,8 @@ export interface BranchBProps {
    * progress bar growing because of a choice the writer made.
    */
   onStage?: (stage: "book" | "list") => void;
+  /** The band's right-hand meta — `Step 3 of 3`, or a sub-position within it. */
+  stepLabel?: string;
 }
 
 /* ⚠️ NO "tidying" MEMBER. It sat in this union with a render branch guarding it, and
@@ -128,7 +130,7 @@ const EscapeHatch: React.FC<{ onOpen: () => void }> = ({ onOpen }) => (
 // it hands to handleImport — see SmartImportReview + smartImportReviewModel.
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, onUpgrade, error, onStage,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, defaultImport, onAddByHand, onOpenImportDesk, onImportComplete, onUpgrade, error, onStage, stepLabel,
 }) => {
   const { currentUser, agents, addAgent, addQuery } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
@@ -138,6 +140,10 @@ export const BranchB: React.FC<BranchBProps> = ({
   /* Report the named position up rather than an index — an index is not a place, and the header
      owns how many steps this branch has. */
   useEffect(() => { onStage?.(screen === "book" ? "book" : "list"); }, [screen, onStage]);
+
+  /* The band's meta. Phase 5 gives the import sub-flow its own sub-position here; for now every
+     screen on this branch states the branch's own step. */
+  const bandStep = stepLabel;
   // Seed from any held draft so Back-to-welcome-then-forward re-fills the book step.
   const [fields, setFields] = useState<ManuscriptFieldsState>(initialBook ?? emptyManuscriptFields());
   const [fieldError, setFieldError] = useState<string | null>(null);
@@ -278,6 +284,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "book") {
     return (
       <OnboardingCard
+        step={bandStep}
         pre="Your manuscript"
         name="The book you're querying"
         sub="We'll attach your pipeline to this"
@@ -307,6 +314,7 @@ export const BranchB: React.FC<BranchBProps> = ({
   if (screen === "pipeline") {
     return (
       <OnboardingCard
+        step={bandStep}
         pre="Your list"
         name={CAPTURE_HEADING}
         sub={CAPTURE_SUB}
@@ -352,6 +360,7 @@ export const BranchB: React.FC<BranchBProps> = ({
     const isPro = entitlement.tier === "pro";
     return (
       <OnboardingCard
+        step={bandStep}
         pre="Your pipeline"
         name="This uses your Smart Import"
         sub={isPro ? "One per month on Pro" : "Your one free Smart Import"}
@@ -386,6 +395,7 @@ export const BranchB: React.FC<BranchBProps> = ({
       : "next month";
     return (
       <OnboardingCard
+        step={bandStep}
         pre="Your pipeline"
         name={isFreeUsed ? "Smart Import already used" : "Next Smart Import next month"}
         sub={isFreeUsed ? "Upgrade for one every month" : `Available ${nextLabel}`}
@@ -480,6 +490,7 @@ export const BranchB: React.FC<BranchBProps> = ({
     const ok = outcome.queriesImported > 0;
     return (
       <OnboardingCard
+        step={bandStep}
         pre="Your pipeline"
         name={ok ? "Brought across" : "That didn't work"}
         sub={ok ? "Here's what landed in ScriptAlly" : "Nothing was imported — here's why"}
@@ -533,6 +544,7 @@ export const BranchB: React.FC<BranchBProps> = ({
     console.error("BranchB: unhandled screen state", { screen, hasValidated: !!validated, hasOutcome: !!outcome });
     return (
       <OnboardingCard
+        step={bandStep}
         pre="Your pipeline"
         name="That step didn't load"
         sub="Nothing is lost — pick up from here"
@@ -559,6 +571,7 @@ export const BranchB: React.FC<BranchBProps> = ({
 
   return (
     <OnboardingCard
+        step={bandStep}
       pre="Your pipeline"
       name="Bring it across"
       sub="Use our template, or add by hand"
