@@ -308,6 +308,10 @@ export const TodoDock: React.FC<TodoDockProps> = ({
    */
   const tiles = [
     ...stats.map((st) => ({ k: st.k, v: st.v, u: st.u, absent: "Not recorded" })),
+    /* ⚠️ THE STATED WINDOW IS A TILE, NOT A SECOND FIGURE ON THE BAND — the contract's "Then
+       expect". It is the same `forward` fact, in the row built for facts about the task, rather
+       than a second numeral in a second grammar beside the first. */
+    ...(forward ? [{ k: forward.k, v: forward.v, u: "", absent: "Not stated" }] : []),
     ...(cardBucket(card) === "send"
       ? [{
           k: "Sent previously",
@@ -415,7 +419,14 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               `bandVariant` survives alongside it because the OFFER is a celebration rather than a
               group — one card, its own paper. */}
           <div className={`tdk-band v-${bandVariant(card)} g-${liveFamily(card)}${presence.figure && bandFig ? "" : " nofig"}`}>
-          <DockMotif motif={bandMotif(card)} />
+          {/* ⚠️ THE BAND CARRIES NO ILLUSTRATION (audit B). The materials contract draws decorative
+              artwork nowhere — not in the band, not anywhere on the card — and a 92px motif behind
+              the deed was both a thing the design does not have and a thing the facts strip had to
+              reserve 100px of padding to clear. `DockMotif.tsx` and `bandMotif` are LEFT IN PLACE
+              rather than deleted: this removes the artwork the audit asked to remove, and whether
+              the component itself should go is a separate call. Traced first — this was its only
+              caller, so the component is now unreferenced and will read as live to the next person
+              unless that call is made. */}
           {/* ⚠️ NO MONOGRAM. It was an agency disc leading a surface whose job is to say what you
               are DOING; the writer already knows who they clicked. Removed rather than shrunk —
               a smaller disc is the same answer to the same wrong question. */}
@@ -468,16 +479,12 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               {bandFig.unit && <span className="u">{bandFig.unit}</span>}
             </span>
           )}
-          {forward && (
-            <span className="tdk-facts">
-              {[forward].map((f) => (
-                <span className="tdk-fact" key={f.k}>
-                  <span className="k">{f.k}</span>
-                  <span className="v">{f.v}</span>
-                </span>
-              ))}
-            </span>
-          )}
+          {/* ⚠️ THE BAND CARRIES ONE FIGURE (audit B). The forward fact — the agent's stated window
+              — was a SECOND figure beside it, drawn as a mono label over a plain value, so the band
+              held two numbers in two different grammars: a Playfair numeral over a mono unit, and a
+              mono key over an Inter value. The materials contract has one figure on the band and
+              states the window as a TILE ("Then expect · 6–8 weeks · the stated window"), which is
+              where it goes now. Nothing is lost and the band stops arguing with itself. */}
           <button type="button" className="tdk-x" aria-label="Back to the board" onClick={onClose}>
             <X size={13} aria-hidden />
           </button>
@@ -611,59 +618,20 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               </>
             ) : (
               <>
-                <div className="tdk-storyk">TRACKING</div>
-            {/* Derived from the activity log, never stored. Absent when the record has no history
-                yet, rather than an empty frame implying something is missing. */}
-            {events.length > 0 ? (
-              <ol className="tdk-tl">
-                {events.map((e) => (
-                  <li key={e.key}>
-                    <span className="tdk-tlw">{e.when}</span>
-                    {/**
-                      * ⚠️ THE REAL `StatusDot`, IMPORTED — NEVER A RING DRAWN HERE. The previous
-                      * pass built local rings from `statusDirection`, on my own earlier wording
-                      * ("direction-coloured from the existing StatusDot logic"), and that wording
-                      * was wrong: `StatusDot` is locked app-wide, never recreated locally, and
-                      * even legends render the real component.
-                      *
-                      * ⚠️ WHAT THE LOCAL RINGS THREW AWAY, which is the reason it is a lock and not
-                      * a preference. Outgoing is a burgundy ring with a pink centre and an arrow
-                      * RIGHT; incoming a sage ring with a sage centre and an arrow LEFT; an offer a
-                      * solid burgundy disc with a parchment tick; a closure a grey ring with an ×.
-                      * A hollow circle beside a filled circle says none of that — it distinguishes
-                      * two rungs without telling you what either one is.
-                      *
-                      * ⚠️ THE CONNECTOR IS STILL THE TRACK'S, not the list's: one rule between two
-                      * marks, never a `border-left` drawn THROUGH them.
-                      */}
-                    <span className="tdk-tlm">
-                      {e.status && <StatusDot status={e.status} overrideSize={20} decorative />}
-                    </span>
-                    <span className="tdk-tle">
-                      {/* the event in 600, the channel appended in regular — one line, two weights */}
-                      <b>{e.label}</b>{e.via && <span className="via"> · {e.via}</span>}
-                      {/* anything the agent said, in their own words */}
-                      {e.note && <span className="tdk-tlq">{e.note}</span>}
-                      {/* ⚠️ THE BAR IS AGAINST THE AGENT'S STATED WINDOW, and both ends are
-                          labelled — a bar with no scale is a shape, not a fact. Sage inside the
-                          window, burgundy once past it, which is the same rule the rail's numeral
-                          follows so the two surfaces cannot disagree about "late". */}
-                      {e.progress && (
-                        <span className="tdk-prog">
-                          <span className="bar"><i className={e.progress.over ? "fill over" : "fill"} style={{ width: `${e.progress.pct}%` }} /></span>
-                          <span className="ends"><span>{e.progress.from}</span><span>{e.progress.to}</span></span>
-                        </span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <div className="tdk-storynone">Nothing logged yet.</div>
-            )}
-                {/* ⚠️ §3.11 — WHAT THE RECORD SHOWS, beneath Tracking. These strings lived in the
-                    DOING column keyed on `dockFlowKind`, which folds send and chase into one; they
-                    are re-keyed on the BUCKET and moved here, not rewritten. */}
+                {/* ⚠️ THE STORY IS RENDERED ONCE, IN THE TIMELINE CARD (audit A1). A `TRACKING`
+                    section stood here AND `The story so far` stood in card 3, both derived from the
+                    same `timeline(card)` — the same events, twice, three inches apart. Two mounts of
+                    one derivation cannot state different facts, but they can and did state the same
+                    fact twice, which is what pushed the form below the fold.
+
+                    ⚠️ THE RICH RENDER WAS THIS ONE AND IT MOVED RATHER THAN DIED — the StatusDot
+                    marks, the channel, the agent's own words and the window bar all went to card 3.
+                    Deleting the richer of two duplicates and keeping the plainer is how a
+                    consolidation quietly loses content. */}
+                {/* ⚠️ §3.11 — WHAT THE RECORD SHOWS. These strings lived in the DOING column keyed
+                    on `dockFlowKind`, which folds send and chase into one; they are re-keyed on the
+                    BUCKET, not rewritten. It reads as the form's own preamble now that the Tracking
+                    section above it is gone — which is where the audit says it belongs. */}
                 <div className="tdk-recnote">{recordNote(card)}</div>
               </>
             )}
@@ -870,16 +838,63 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               <aside className="tdk-story tdk-story--card" aria-label="Tracking">
                 <div className="tdk-storyhd">
                   <span className="tdk-storyk">The story so far</span>
-                  <span className="tdk-storyn">{events.length}</span>
+                  {/* the ref's `.tl-head .c` — the count on the right, in words, not a bare digit */}
+                  <span className="tdk-storyn">{events.length} {events.length === 1 ? "entry" : "entries"}</span>
                 </div>
                 {events.length > 0 ? (
+                  /**
+                   * ⚠️ THE DATE SITS BENEATH THE EVENT, NOT IN A COLUMN BESIDE IT (audit A2/D), and
+                   * that is the fix for the wrapping rather than a wider card. The entry was a
+                   * `60px 20px minmax(0, 1fr)` grid, so a 284px card left the NAME about 150px and
+                   * "Full requested" broke across two lines. Taking the date out of the row gives
+                   * the name the whole measure at any width — the ref's own shape, and the reason
+                   * it is that shape.
+                   *
+                   * ⚠️ THE MARKS ARE `StatusDot`, NOT THE REF'S PLAIN RINGS. The ref draws a hollow
+                   * circle in three colours; this app has one way of drawing a query status and
+                   * legends render the real component rather than a recreation. A ring says "a
+                   * rung happened"; the real dot says whether it went out or came in, and whether
+                   * it was an offer or a closure.
+                   */
                   <ol className="tdk-tl">
                     {events.map((e) => (
                       <li key={e.key}>
+                        <span className="tdk-tlm">
+                          {/* ⚠️ AN EVENT WITH NO STATUS DRAWS NO MARK, as before. A locally-drawn
+                              ring was tried here once and retired, and "it is only for the statusless
+                              case" is exactly how it would come back. The rail runs past an unmarked
+                              entry, which reads as a rung without a name rather than a fake one. */}
+                          {e.status && <StatusDot status={e.status} overrideSize={16} decorative />}
+                        </span>
+                        <span className="tdk-tle">
+                          <b>{e.label}</b>{e.via && <span className="via"> · {e.via}</span>}
+                          {e.note && <span className="tdk-tlq">{e.note}</span>}
+                          {e.progress && (
+                            <span className="tdk-prog">
+                              <span className="bar"><i className={e.progress.over ? "fill over" : "fill"} style={{ width: `${e.progress.pct}%` }} /></span>
+                              <span className="ends"><span>{e.progress.from}</span><span>{e.progress.to}</span></span>
+                            </span>
+                          )}
+                        </span>
                         <span className="tdk-tlw">{e.when}</span>
-                        <span className="tdk-tlt">{e.label}</span>
                       </li>
                     ))}
+                    {/**
+                      * ⚠️ THE RAIL CLOSES ON THE PRESENT (the ref's `['now','Your turn','Today']`).
+                      * Without it the story stops at the last thing that happened and the card
+                      * never says that the next move is yours — which is the one fact the pane
+                      * exists to state.
+                      *
+                      * ⚠️ ITS MARK IS DELIBERATELY NOT A `StatusDot`, and that is not a breach of
+                      * the lock. Every dot that draws a QUERY STATUS goes through the component;
+                      * this one draws a TURN, which is not a status and has no member to pass. A
+                      * filled disc beside the rings reads as "you are here", which is what it is.
+                      */}
+                    <li className="tdk-tlnow">
+                      <span className="tdk-tlm"><span className="tdk-tldisc" aria-hidden /></span>
+                      <span className="tdk-tle"><b>Your turn</b></span>
+                      <span className="tdk-tlw">Today</span>
+                    </li>
                   </ol>
                 ) : <div className="tdk-storynone">Nothing logged yet.</div>}
                 {card.relatedRecordId && (

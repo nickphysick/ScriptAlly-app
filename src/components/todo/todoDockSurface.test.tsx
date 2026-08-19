@@ -228,64 +228,47 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     const x = dockCssRule(".tdk-x {");
     expect(x).toContain("position: relative");
     expect(x).toContain("z-index: 3");
-    /* the three layers, in order, asserted together so no one of them can drift alone */
-    expect(dockCssRule(".tdk-motif {")).toContain("z-index: 1");
+    /* ⚠️ TWO LAYERS NOW, NOT THREE — the motif's `z-index: 1` went with the artwork (audit B).
+       The remaining claim is the one that mattered: the close control is positioned AND stacked
+       above the band's contents, because a static `.tdk-x` takes no z-index at all and was found
+       sitting under a neighbour once already. */
     expect(dockCssRule(".tdk-id {")).toContain("z-index: 2");
   });
 
-  it("⚠️ each bucket carries its own motif, behind the text and clipped by the band", () => {
-    /* keyed on the BUCKET, so a new task type inherits the mark of the act it performs */
-    expect(render("a")).toContain("tdk-motif");                     // send → the manuscript stack
-    expect(render("c")).toContain("tdk-motif");                     // note → the torn note
-    const m = dockCssRule(".tdk-motif {");
-    expect(m).toContain("position: absolute");
-    expect(m).toContain("z-index: 1");                              // BEHIND the content's 2
-    expect(m).toContain("pointer-events: none");
-    expect(dockCssRule(".tdk-band {")).toContain("overflow: hidden"); // what clips it
-    /* ⚠️ THE FACTS STRIP CLEARS IT, in ONE declaration — a second `padding-right` later in the
-       same rule is what silently wins, and that is exactly how this was first written. */
-    const facts = dockCssRule(".tdk-facts {");
-    expect((facts.match(/padding-right:/g) ?? [])).toHaveLength(1);
-    /* ⚠️ §2.5 — COMPUTED FROM THE MOTIF'S LANE, NEVER RESTATED. This asserted a flat `96px` beside
-       a motif at `right: 22px` with a 92px box — two authored numbers that could drift apart, and
-       had: 96 < 22 + 92, so the figures already overlapped the illustration while the rule's own
-       prose said they cleared it. A lock on the literal could not see that; a lock on the
-       RELATIONSHIP can only be satisfied by keeping it. */
-    expect(facts).toContain("calc(var(--tdk-motif-right) + var(--tdk-motif-w) - var(--tdk-facts-inset))");
-    expect(facts).not.toMatch(/padding-right:\s*\d/);
+  it("⚠️ THE BAND CARRIES NO ILLUSTRATION — the artwork is gone, and so is the space it reserved", () => {
+    /* ⚠️ INVERTED (audit B). This required a per-bucket motif behind the deed; the materials
+       contract draws decorative artwork nowhere on the card, so the requirement was for a thing the
+       design does not have. Both halves are asserted, because removing the render and leaving the
+       rule is how it returns — this file's own §2.1 note says exactly that about the retired disc. */
+    expect(render("a"), "the illustration is back in the band").not.toMatch(/["\s`]tdk-motif["\s`]/);
+    expect(render("c"), "the illustration is back in the band").not.toMatch(/["\s`]tdk-motif["\s`]/);
+    const css = readFileSync(join(here, "todoDock.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css, "the motif rule survives the element").not.toContain(".tdk-motif {");
+    expect(css, "the motif's lane tokens are still defined").not.toContain("--tdk-motif");
+    /* ⚠️ AND THE FACTS STRIP THAT PAID FOR IT IS RETIRED TOO (audit B) — it reserved about 100px
+       of the band's width to clear the artwork, and it was itself a second figure in a second
+       grammar. The band still clips, because the band is still a surface things can be laid on. */
+    expect(css, "the retired facts strip is back").not.toContain(".tdk-facts {");
+    expect(css, "the strip's inset token is still defined").not.toContain("--tdk-facts-inset");
+    expect(dockCssRule(".tdk-band {")).toContain("overflow: hidden");
   });
 
-  it("⚠️ §2.5 — the motif's lane is derived from the close control's, and clears it", () => {
+  it("⚠️ §2.5 — the band's own geometry, with the motif's lane retired", () => {
     const band = dockCssRule(".tdk-band {");
-    /* the three authored measurements, and nothing else authored downstream of them */
+    /* ⚠️ THE LANE ARITHMETIC IS GONE WITH THE ILLUSTRATION (audit B). What this case protected was
+       real and is worth restating rather than deleting silently: the motif's offset was a SUM of
+       things that exist — the band's padding plus the close control's width — so moving either
+       moved the artwork with them, and an earlier flat `96px` had already drifted into an overlap
+       that the rule's own prose denied. With nothing behind the band there is no lane to derive,
+       and the facts strip's `calc()` (whose sign this case also evaluated) is gone too.
+
+       ⚠️ THE TWO AUTHORED MEASUREMENTS SURVIVE because other rules still read them. */
     expect(band).toContain("--tdk-band-px: 26px");
     expect(band).toContain("--tdk-x-w: 19px");
-    expect(band).toContain("--tdk-motif-w: 92px");
-    /* ⚠️ THE LANE IS A SUM OF THINGS THAT EXIST, not a chosen offset — so moving the band's
-       padding or the control's size moves the motif with them. */
-    expect(band).toContain("--tdk-motif-right: calc(var(--tdk-band-px) + var(--tdk-x-w) + 8px)");
-    /* the band reads its own tokens rather than restating their values */
+    expect(band, "the motif's lane is back without the motif").not.toContain("--tdk-motif");
     /* ⚠️ RE-POINTED: the contract's band padding is 20/24/18 */
     expect(band).toContain("padding: 20px 24px 18px");
     expect(band).toContain("gap: var(--tdk-band-gap)");
-    /* ⚠️ AND THE REF'S 22px IS GONE FROM THE MOTIF. v14 drew that offset into a band with NO close
-       button; taking it literally is what put the illustration behind the control. */
-    const motif = dockCssRule(".tdk-motif {");
-    expect(motif).toContain("right: var(--tdk-motif-right)");
-    expect(motif).not.toContain("right: 22px");
-    /* ⚠️ THE SUBTRAHEND IS BUILT FROM THE SAME THREE NUMBERS — otherwise the facts' `calc()` would
-       subtract a stale inset and the padding would drift silently in whichever direction the band
-       moved. */
-    expect(band).toContain("--tdk-facts-inset: calc(var(--tdk-band-px) + var(--tdk-x-w) + var(--tdk-band-gap))");
-    /* ⚠️ AND THE SUM IS EVALUATED, because `calc()` has no opinion about signs: a facts padding
-       that came out NEGATIVE would push the figures right, back over the illustration and under
-       the ×, and the stylesheet would parse without complaint. Read the authored values and do the
-       arithmetic here rather than trusting the shape of the expression. */
-    const px = (k: string) => Number(/(\d+)px/.exec(new RegExp(`${k}:([^;]+)`).exec(band)![1])![1]);
-    const motifLeftEdge = px("--tdk-band-px") + px("--tdk-x-w") + 8 + px("--tdk-motif-w");
-    const factsInset = px("--tdk-band-px") + px("--tdk-x-w") + px("--tdk-band-gap");
-    expect(motifLeftEdge - factsInset, "the facts' computed padding is negative — the figures land back on the motif")
-      .toBeGreaterThan(0);
   });
 
   it("⚠️ AND THE BODY REPEATS NEITHER THE NAME NOR THE TITLE", () => {
@@ -345,11 +328,15 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     /* ⚠️ RE-POINTED: the contract's deed is 27px, not the 26 sampled last run */
     expect(deed).toContain("font-size: 27px");
     expect(deed).toContain("font-weight: 500");
-    /* ⚠️ §3.8's 66px DATE TRACK IS SUPERSEDED, and this lock caught the change rather than being
-       quietly edited around it. `todo-journey-in-pane.html` is the newer of the two authoritative
-       refs and describes the pane this timeline is in; its `.tl-row` is 60 · 20 · rest, and the
-       20 is sized for a real `StatusDot` rather than for the local ring 66 was drawn around. */
-    expect(dockCssRule(".tdk-tl li {")).toContain("grid-template-columns: 60px 20px");
+    /* ⚠️ THERE IS NO DATE TRACK AT ALL NOW (audit A2/D), which supersedes both the 66px original
+       and the 60 · 20 · rest that replaced it. A fixed date column spends 80px of every card before
+       the event name is given anything, and at 284px the name had about 150 and broke mid-phrase.
+       The date sits BENEATH the name — the materials contract's own `.tl-e .d` — so the name has
+       the whole measure at every width and no card can be narrow enough to bring the wrap back. */
+    const entry = dockCssRule(".tdk-tl li {");
+    expect(entry, "the date track is back").not.toContain("grid-template-columns");
+    expect(entry).toContain("padding: 6px 0 6px 26px");
+    expect(dockCssRule(".tdk-tlw {"), "the date is not a block beneath the name").toContain("display: block");
   });
 
   /* ── Item 9 · the journey renders in the pane ──────────────────────────────────────────────── */
@@ -568,10 +555,18 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
        statuses: `<svg>` (several statuses are a tinted disc with no glyph) and `var(--sd-centre)`
        (Offer and the closed set keep their own palette rather than the theme tokens — the
        StatusDot lock says so). The root span's own signature is true of every status. */
-    const ROOT = "width:20px;height:20px;flex-shrink:0;display:inline-flex";
-    const marks = html.split('class="tdk-tlm"').slice(1);
-    expect(marks).toHaveLength(3);
+    const ROOT = "width:16px;height:16px;flex-shrink:0;display:inline-flex";
+    const all = html.split('class="tdk-tlm"').slice(1);
+    /* ⚠️ FOUR MARKS FOR THREE EVENTS — the fourth is the rail's terminus ("Your turn · Today"), and
+       it is deliberately NOT a StatusDot. Every dot drawing a query STATUS goes through the
+       component; this one draws a TURN, which is not a status and has no member to pass. Asserted
+       explicitly rather than sliced away, because "the last mark is different" is exactly the shape
+       a regression would take. */
+    expect(all).toHaveLength(4);
+    const marks = all.slice(0, 3);
     for (const m of marks) expect(m.slice(0, 600)).toContain(ROOT);
+    expect(all[3]).toContain("tdk-tldisc");
+    expect(all[3].slice(0, 600), "the terminus became a StatusDot").not.toContain(ROOT);
     /* ⚠️ AND THE THREE DIFFER — one glyph per status. A dot that rendered the same mark for every
        rung would satisfy "it renders StatusDot" and still say nothing. */
     const glyphs = marks.map((m) => m.slice(0, 900));
@@ -597,8 +592,13 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     for (const dead of [".tdk-tlm i", "--tdk-ring", "r-out", "r-in", "r-now"]) {
       expect(css, `${dead} survives in the stylesheet`).not.toContain(dead);
     }
-    /* the connector is the track's, and it is still there */
-    expect(css).toContain(".tdk-tl li:not(:last-child) .tdk-tlm::after");
+    /* ⚠️ THE CONNECTOR IS ONE RAIL BEHIND THE MARKS NOW, not a segment drawn between each pair.
+       The per-marker form had to know which entry was last, and pinned its `bottom` to a
+       `padding-bottom` the row no longer has. The claim — a line on the track, never a
+       `border-left` through the entries — is unchanged and is what is asserted. */
+    expect(css).toContain(".tdk-tl::before");
+    expect(css, "the retired per-marker connector is back").not.toContain(".tdk-tlm::after");
+    expect(css, "a border-left is being drawn through the entries").not.toMatch(/\.tdk-tl \{[^}]*border-left/);
   });
 });
 
@@ -967,7 +967,13 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
         onPrimary={() => {}} onMore={() => {}}
         handoff={() => ({ waitLabel: "Greg has waited", waitValue: "6 weeks", anchorLabel: "Requested", anchorValue: "28 Jun" })} />,
     );
-    expect(html).toContain("TRACKING");
+    /* ⚠️ INVERTED (audit A1): `TRACKING` is GONE from the form card. It stood here while `The story
+       so far` stood in card 3, both mapped from the same `timeline(card)` — one derivation rendered
+       twice, three inches apart, which is what pushed the form below the fold. The story is card
+       3's alone; what remains in this column is the record NOTE, which reads as the form's
+       preamble rather than as a second history. */
+    expect(html, "the duplicated story is back in the form card").not.toContain("TRACKING");
+    expect(html, "the one story lost its home").toContain("The story so far");
     /* ⚠️ THE STAT PAIR LEFT THIS COLUMN (Phase D). It sat above Tracking and read as its preamble;
        §2 puts these facts in the HEADER, beside the deed they describe. The figures are unchanged
        and still `trackingStats`' — only their home moved, so the assertions below still hold. */

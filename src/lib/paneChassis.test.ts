@@ -165,8 +165,20 @@ describe("the journey's grid", () => {
     const i = dockCss.indexOf(".tdk-workrow {");
     expect(i, ".tdk-workrow has no rule").toBeGreaterThan(-1);
     const row = dockCss.slice(i, dockCss.indexOf("}", i));
-    expect(row).toContain("flex-wrap: wrap");
+    /* ⚠️ RE-POINTED AGAIN, TO A GRID (audit A2/A3), and the wrapping row it replaces is what this
+       case was written to require. It had WRAPPED: `flex: 1 1 420px` + `flex: 0 1 300px` is 720px
+       of basis in a 650px workrow, so the timeline dropped below the form — measured at 300x181
+       under a 650x482 form, and 284px wide with a journey open. The entries wrapped because the
+       card was starved, and the page was twice as tall as it needed to be. A lock requiring
+       `flex-wrap: wrap` could only ever have been green while that was true.
+
+       ⚠️ THE CLAIM IN THE TITLE SURVIVES: no query, no fixed width. The second track is a `clamp`,
+       so it flows rather than jumping, and nothing here states a width the browser cannot argue
+       with. */
+    expect(row).toContain("grid-template-columns: minmax(0, 1fr) clamp(200px, 32%, 300px)");
+    expect(row, "the wrapping row is back — the timeline will stack and starve").not.toContain("flex-wrap");
     expect(row).toContain("gap: 16px");
+    expect(dockCss, "a flex basis is back on a grid item").not.toContain("flex: 0 1 300px");
     /* ⚠️ ASSERTED OVER `dockCss`, WHICH IS ALREADY COMMENT-STRIPPED — and it had to be. My own
        note above says the words "@container" and "tdk-jgrid" while explaining their removal, and
        an unstripped read matches the prose that documents the retirement. That is the source-lock

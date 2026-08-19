@@ -1050,8 +1050,15 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
   it("both surfaces set the same two registers — mono label, Playfair value", () => {
     const railLab = rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-figlab {");
     const railNum = rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-fignum {");
-    const cardLab = rule(readFileSync(join(here, "todoDock.css"), "utf8"), ".tdk-fact .k {");
-    const cardVal = rule(readFileSync(join(here, "todoDock.css"), "utf8"), ".tdk-fact .v {");
+    /* ⚠️ THE CARD'S HALF MOVED FROM `.tdk-fact` TO THE BAND FIGURE (audit B). `.tdk-facts` was a
+       SECOND figure beside the first, in the opposite grammar — a mono key over an Inter value next
+       to a Playfair numeral over a mono unit — so this case was reading the register of the strip
+       that broke the rule it states. The band's own figure is the card's figure now, and it is the
+       one this compares against the rail. */
+    const dock = readFileSync(join(here, "todoDock.css"), "utf8");
+    const cardLab = rule(dock, ".tdk-bandfig .u {");
+    const cardVal = rule(dock, ".tdk-bandfig .n {");
+    expect(dock, "the retired facts strip is back in the stylesheet").not.toContain(".tdk-facts {");
     for (const r of [railLab, cardLab]) {
       expect(r).toContain('font-family: "JetBrains Mono"');
       expect(r).toContain("text-transform: uppercase");
@@ -1067,7 +1074,9 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
    */
   it("the card's facts carry no hot treatment — burgundy is the rail numeral's alone", () => {
     const dockCss = readFileSync(join(here, "todoDock.css"), "utf8");
-    expect(rule(dockCss, ".tdk-fact .v {")).not.toContain("#7c3a2a");
+    /* re-pointed to the band figure — `.tdk-fact` is retired (audit B) */
+    expect(rule(dockCss, ".tdk-bandfig .n {")).not.toContain("#7c3a2a");
+    expect(rule(dockCss, ".tdk-bandfig .n {")).not.toContain("var(--burg)");
     expect(rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-fignum.hot {")).toContain("#7c3a2a");
   });
 });

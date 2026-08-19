@@ -106,7 +106,9 @@
 }
 
 /* the act card is the one that scrolls, so it owns the column's spare height */
-.tdk-workrow > .tdk-fc:first-child { flex: 1 1 420px; min-height: 0; display: flex; flex-direction: column; }
+/* ⚠️ NO FLEX BASIS — the track is the width now, and a basis on a grid item applies to nothing
+   while still reading as the number in charge. */
+.tdk-workrow > .tdk-fc:first-child { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 
 .tdk-workrow > .tdk-fc:first-child > .tdk-rim {
   box-sizing: border-box;
@@ -118,7 +120,7 @@
 
 /* ⚠️ THE TIMELINE CARD IS A BASIS, NOT A WIDTH — `flex: 0 1 300px` with a 240 floor, so it gives
    before it wraps and wraps before it crushes. A fixed 300 is what would sneak back in here. */
-.tdk-workrow > .tdk-fc:last-child { flex: 0 1 300px; min-width: 240px; }
+.tdk-workrow > .tdk-fc:last-child { min-width: 0; }
 
 /* the contract's act padding */
 .tdk-act { padding: 21px 24px 22px; min-width: 0; display: flex; flex-direction: column; min-height: 0; flex: 1; }
@@ -161,7 +163,6 @@
    offset:
      `--tdk-band-px`  the band's own side padding, read by `padding` below and by both lanes
      `--tdk-x-w`      the close control's box — its 13px glyph plus `.tdk-x`'s 3px either side
-     `--tdk-motif-w`  the WIDEST motif box in `DockMotif` (the manuscript stack, 92px)
 
    ⚠️ WHY THE CONFLICT EXISTS AT ALL: the ref's band HAS NO CLOSE BUTTON. `todo-workspace-v14.html`
    draws `.motif { right: 22px }` into a band whose right edge is empty, so 22px is a perfectly
@@ -175,13 +176,10 @@
   --tdk-band-px: 26px;
   --tdk-band-gap: 16px;
   --tdk-x-w: 19px;
-  --tdk-motif-w: 92px;
   /* the motif's right edge stops 8px short of the close control's left edge */
-  --tdk-motif-right: calc(var(--tdk-band-px) + var(--tdk-x-w) + 8px);
   /* how far the facts strip's OWN right edge already sits in from the band's — the band padding,
      the control it sits beside, and the flex gap between them. Without subtracting this the
      padding would clear the motif twice over. */
-  --tdk-facts-inset: calc(var(--tdk-band-px) + var(--tdk-x-w) + var(--tdk-band-gap));
   display: flex;
   align-items: flex-start;
   gap: var(--tdk-band-gap);
@@ -286,7 +284,10 @@
    own `overflow: hidden` is what makes it a corner motif rather than a floating illustration. */
 /* ⚠️ §2.5 — `right` IS THE DERIVED LANE, NOT THE REF'S 22px. See the note on `.tdk-band` for why
    the mockup's number cannot survive the close control this band carries. */
-.tdk-motif { position: absolute; right: var(--tdk-motif-right); top: 50%; transform: translateY(-50%); pointer-events: none; z-index: 1; opacity: .85; display: block; }
+/* ⚠️ `.tdk-motif` IS GONE WITH THE ARTWORK IT DREW (audit B). Left in the stylesheet it would be
+   a rule for an element nothing renders — which this file's own §2.1 note already names as how a
+   retired mark comes back. `DockMotif.tsx` and `bandMotif` survive in the tree, so the illustration
+   is recoverable; nothing on the page draws one. */
 
 .tdk-band i {
   font-family: "JetBrains Mono", ui-monospace, monospace;
@@ -384,24 +385,36 @@
    `border-left: 2px` down the whole `<ol>`, which draws one continuous rule THROUGH the entries.
    That reads as a margin rule beside a list, not as a record with rungs — and it is why §3.5
    called the rings the largest remaining gap: there was nothing on the line at all.
-   ⚠️ A GRID, so the event text wraps against its own track rather than against the date's. */
-.tdk-tl { list-style: none; margin: 0; padding: 0; border: 0; }
+   ⚠️ NO LONGER A GRID — see the entry rule below. The line is the `<ol>`'s own `::before`
+   now, behind the marks rather than between them. */
+.tdk-tl { list-style: none; margin: 0; padding: 0; border: 0; position: relative; }
+/* the rail — ONE line behind every mark, at the marker column's centre */
+.tdk-tl::before {
+  content: ""; position: absolute; left: 8px; top: 12px; bottom: 12px;
+  width: 1.5px; background: var(--hair);
+}
+/* ⚠️ THE ROW IS A BLOCK WITH A GUTTER, NOT A THREE-TRACK GRID (audit A2/D). It was
+   `60px 20px minmax(0, 1fr)`, which spends 80px of every card on a date and a mark before the
+   event name gets anything — at 284px that left the name about 150 and "Full requested" broke
+   mid-phrase. The date moved BENEATH the name (the ref's `.tl-e .d`), so the name has the full
+   measure at every width and the wrap cannot return by the card getting narrower. The previous
+   note here reasoned about which ref's date track was authoritative; neither is, now that there
+   is no date track. */
 .tdk-tl li {
-  display: grid;
-  /* ⚠️ 60 · 20 · rest, THE JOURNEY-IN-PANE REF'S MEASURE (`.tl-row`), which supersedes the card
-     specification's 66px date track. Both are authoritative and they disagree; the newer one
-     describes the pane this timeline is actually in, and its mark track is sized for a `StatusDot`
-     rather than for the local ring the older figure was drawn around. */
-  grid-template-columns: 60px 20px minmax(0, 1fr);
-  gap: 0 11px; align-items: start;
-  font-size: 12.5px; color: var(--ink-2); padding: 0 0 15px;
+  position: relative;
+  padding: 6px 0 6px 26px;
+  font-size: 12.5px; color: var(--ink-2);
 }
+
 .tdk-tl li:last-child { padding-bottom: 0; }
+/* beneath the event now, in the muted mono — no longer a fixed column to the left of it */
 .tdk-tlw {
+  display: block;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px; letter-spacing: .08em; color: var(--faint); white-space: nowrap;
-  text-align: right; padding-top: 4px;
+  font-size: 8.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+  margin-top: 2px;
 }
+
 
 /* ⚠️ THE MARK IS THE REAL `StatusDot`, IMPORTED — NOT A RING DRAWN HERE.
    The previous pass built local rings (`.tdk-tlm i` plus `.r-out` / `.r-in` / `.r-now`) from
@@ -412,16 +425,23 @@
    ⚠️ SO THERE IS NO FILL, NO BORDER AND NO SIZE FOR THE MARK IN THIS FILE. The component owns all
    three; a rule here that painted it would be the local drawing coming back through the stylesheet.
    The track's WIDTH is layout and stays (ref `.tl-m`, 20px). */
-.tdk-tlm { position: relative; display: flex; justify-content: center; padding-top: 2px; }
+.tdk-tlm {
+  position: absolute; left: 0; top: 6px; width: 16px;
+  display: flex; justify-content: center;
+  /* the mark sits ON the rail, so it needs the card's own ground behind it */
+  background: var(--white); z-index: 1;
+}
+/* the terminus: filled, because it is where you are rather than something that happened */
+.tdk-tldisc { width: 9px; height: 9px; margin-top: 3px; border-radius: 50%; background: var(--burg); }
+.tdk-tlnow .tdk-tle b { color: var(--burg); }
 
 /* ⚠️ THE CONNECTOR RUNS BETWEEN MARKS, NEVER THROUGH THEM — it starts below this mark and stops at
    the next one's top. `bottom` is the row's own `padding-bottom`, so the two move together; the
    last entry has nothing below it and draws none. */
-.tdk-tl li:not(:last-child) .tdk-tlm::after {
-  content: "";
-  position: absolute; left: 50%; transform: translateX(-50%);
-  top: 22px; bottom: -15px; width: 1.5px; background: var(--hair); z-index: 1;
-}
+/* ⚠️ THE PER-MARKER CONNECTOR IS RETIRED — the rail is ONE line behind every mark
+   (`.tdk-tl::before`). The segment version had to know which entry was last, and its `bottom` was
+   pinned to a `padding-bottom` that this row no longer has. */
+
 
 .tdk-flow { margin-top: 18px; }
 .tdk-fk {
@@ -661,32 +681,12 @@
    far this strip's right edge already sits in from the band's.
    ⚠️ ONE DECLARATION, NOT TWO — a second `padding-right` later in the same rule is what silently
    wins, and that is exactly how this was first written. */
-.tdk-facts {
-  display: flex; gap: 26px; position: relative; z-index: 2; flex: none;
-  padding-right: calc(var(--tdk-motif-right) + var(--tdk-motif-w) - var(--tdk-facts-inset));
-}
-.tdk-fact { text-align: right; display: block; }
-
-.tdk-fact .k {
-  display: block;
-  font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8.5px;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  color: var(--sageD);
-  opacity: 0.8;
-}
-
-.tdk-fact .v {
-  display: block;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 16px;
-  color: var(--ink);
-  margin-top: 2px;
-}
-
-/* the pink band is the offer's — its labels take the burgundy family rather than the sage */
-.tdk-band.v-offer .tdk-fact .k { color: var(--pink-i); }
+/* ⚠️ `.tdk-facts` / `.tdk-fact` ARE RETIRED WITH THE SECOND FIGURE (audit B). The strip drew the
+   agent's stated window as a mono key over an Inter value, beside a Playfair numeral over a mono
+   unit — two numbers on one band in two different grammars. The window is a TILE now ("Then
+   expect"), which is where the materials contract puts it. Rules deleted rather than left unused:
+   this file's own §2.1 note is that a rule kept for a retired element is how the element returns.
+   The `--tdk-facts-inset` token goes with them; nothing else read it. */
 
 /* ══ TRACKING (journeys pack, Phase 2; ref todo-workspace-v14.html `.tstats` / `.chips` / `.prog`)
    ⚠️ THE SHAPE IS THE QUERY CENTRE'S `.qp-stats` — icon tile, Playfair figure, mono caption, one
@@ -886,9 +886,24 @@
    `flex: 1 1 420px` on the form and `flex: 0 1 300px; min-width: 240px` on the timeline: the row
    holds both while it can, and wraps the moment 420 + 16 + 240 stops fitting. No width is stated
    anywhere that the browser cannot overrule. */
+/* ⚠️ A GRID, NOT A WRAPPING ROW — and it HAD wrapped, which is the cause of three separate
+   symptoms in the audit. `flex: 1 1 420px` + `flex: 0 1 300px` is 720px of basis inside a 650px
+   workrow, so the timeline dropped onto its own line: measured, the form at 650x482 and the
+   timeline BELOW it at 300x181, narrowing to 284 once a journey was open. That is why the entries
+   wrapped, why the card looked starved, and half of why the page did not fit — a stacked pair is
+   twice as tall as a paired one.
+
+   ⚠️ THE SAME FAULT AS `.tdw-split`'s, ONE LEVEL DOWN, and it survived that fix because the fix
+   went where the symptom was measured. Stated plainly so the next one is found by reading rather
+   than by measuring: a wrapping flex row cannot be bounded by its container on the cross axis, so
+   anywhere a fixed-height surface uses one, it is wrong for the same reason.
+
+   ⚠️ THE SECOND TRACK IS FLUID SO IT NEVER NEEDS A BREAKPOINT. The ref states a flat `300px`,
+   which cannot hold inside a pane that is itself a fraction of the window; `clamp` keeps the ref's
+   number wherever there is room and gives the form the floor everywhere else. */
 .tdk-workrow {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(200px, 32%, 300px);
   gap: 16px;
   align-items: start;
   min-width: 0;
@@ -913,9 +928,12 @@
 .tdk-storyhd {
   display: flex;
   align-items: baseline;
+  /* the ref's `.tl-head`: label left, count hard right — they ran together as one phrase */
+  justify-content: space-between;
   gap: 8px;
   margin-bottom: 10px;
 }
+
 
 /* the quiet mono header §2 names, with its entry count beside it */
 .tdk-storyhd .tdk-storyk {

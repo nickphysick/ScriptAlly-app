@@ -1,0 +1,70 @@
+picked send row: true
+{
+ "picked": true,
+ "trackingBlocks": [],
+ "storyCards": [
+  "tdk-story tdk-story--card 1136,516 192×234"
+ ],
+ "eventTexts": [],
+ "tlEntries": [
+  "Full requested · via emailFull manuscript re | h=67 | nameW=-",
+  "Full requested · via emailFull manuscript re | h=40 | nameW=-",
+  "Your turnToday | h=40 | nameW=-",
+  "Your turn | h=19 | nameW=-"
+ ],
+ "tlCardW": "1136,516 192×234",
+ "fold": {
+  "paneH": 518,
+  "paneContent": 1195
+ },
+ "tileCount": 3,
+ "tileTexts": [
+  "Ana's waited10weeks",
+  "Requested5 June",
+  "Sent previouslyNone sent"
+ ],
+ "tileGrid": "211.328px 211.328px 211.328px 0px",
+ "figKids": [
+  "n:\"10\" \"Playfair Display\" 33px",
+  "u:\"weeks\" \"JetBrains Mono\" 8.5px"
+ ],
+ "deedHTML": "Send your full",
+ "subText": "Recording what you sent to Ana Duarte · Duarte Words",
+ "imgs": [
+  "svg [object SVGAnimatedString] 1288,354 13×13"
+ ],
+ "closeBtn": "1285,351 19×19",
+ "bandBtns": [
+  ""
+ ],
+ "snooze": [
+  "tdg-fold 305,1520 338×47"
+ ],
+ "actHeads": [
+  "What went",
+  "How it went",
+  "When",
+  "Anything to remember"
+ ],
+ "labels": [
+  "Anything else?"
+ ],
+ "actText": "Back to the taskOn the recordFull manuscript requested · 5 JunAna Duarte · Duarte Words01What wentThe full — as Ana asked92,000 wordsAnything else?02How it wentEmailAgency portalPost03WhenTodayYesterdayAnother date…04Anything to rememberoptional",
+ "primary": [],
+ "willRec": [],
+ "tlHeadKids": [
+  "tdk-storyk:\"The story so far\"",
+  "tdk-storyn:\"1 entry\""
+ ],
+ "dots": 3,
+ "railLine": "::before content=\"\" w=1.5px bg=rgb(231, 221, 210)",
+ "rows": [
+  "DecideAnswer the offerNoah Bright · Bright LiteraryYou've waited9weeks || kids=[tdg-cc,tdg-bpill,tdg-content,tdg-fig] h=78",
+  "SendSend your fullAna Duarte · Duarte WordsAna's waited10weeks || kids=[tdg-cc,tdg-bpill,tdg-content,tdg-fig] h=78",
+  "SendSend your partialRachel Lin · Lin LiteraryRachel's waited11weeks || kids=[tdg-cc,tdg-bpill,tdg-content,tdg-fig] h=78",
+  "DecideSend your revisionIris Kwan · Kwan & HallIris's waited9weeks || kids=[tdg-cc,tdg-bpill,tdg-content,tdg-fig] h=97"
+ ],
+ "checkboxes": 9,
+ "railW": "304,285 340×566",
+ "foot": "13 outstanding · showing 13 of 12Export CSV"
+}
