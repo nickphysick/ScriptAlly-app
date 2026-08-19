@@ -1,0 +1,31 @@
+── list port · 15 assertions · 12 RED · 3 green
+  RED    1 · no checkbox control renders in any row
+           9 tick/checkbox controls across 12 rows
+  RED    2 · a row gains no controls on hover — the row is the only control
+           rest=2 hover=2 (want 0/0 — the row div carries the click)
+  green  3 · every task renders — rows equal what the group heads claim
+           rows=12 groupSum=12
+  RED    4 · the footer states that same number, and never 'of'
+           foot="13 outstanding · showing 13 of 12Export CSV" n=13 rows=12
+  RED    5 · no show-more control renders, and the mechanism is gone from the source
+           dom=0 · source still holds: groupSlice showMoreLabel hkExpanded onToggleHk
+  RED    6 · every meta line is a single line box at 1440
+           7 of 12 wrapped
+  RED    7a · a dated row's figure is Playfair 15px
+           no dated rows found
+  RED    7b · an absent row carries no figure at all
+           no absent rows found
+  RED    7c · every right cell reads as the contract's sentence fragment
+           6 off-grammar, e.g. "You've waited9weeks"
+  RED    8 · each bucket's deed is the contract's string
+           decide: "Answer the offer" ≠ "Reply to the offer" · send: "Send your full" ≠ "Send your full manuscript" · close: "Log the close" ≠ "Consider closing" · fix: "12 wish lists" ≠ "Fill in what you sent"
+  RED    9 · the retired verbs appear nowhere in the list's text
+           found: log record
+  RED    10 · group heads are sticky and stay in the card after a 400px scroll
+           heads=3 position=static visible-after-scroll=2
+  green  11 · the list body scrolls; the document does not
+           docOverflow=0 body=466/1232
+  green  12 · each pill's fill is the contract's hex
+           checked decide,send,close,fix,note
+  RED    6b · meta lines still do not wrap at 392px
+           11 of 12 wrapped

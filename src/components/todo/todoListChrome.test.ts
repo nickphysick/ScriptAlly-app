@@ -96,7 +96,10 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     /* ⚠️ THE TOOL ROW IS RETIRED (corrections, Phase 4). The Add moved into the control bar as the
        one list-level action there; the session launcher stays extinct. */
     expect(page).toContain("Add task or note");
-    expect(page).toContain('onClick={() => openComposer("task")}');
+    /* ⚠️ THE ADD MOVED INTO THE CARD (list port) and calls the SAME opener — one composer, one
+       entrance. Read from the card, where the button now is. */
+    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain("onClick={onAdd}");
+    expect(page).toContain('onAdd={() => openComposer("task")}');
     expect(page).not.toContain("tdb-ghb");
     expect(page).not.toContain("function renderTools");
   });

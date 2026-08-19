@@ -121,6 +121,13 @@ const CHAIN = [
      tasksViewport.test.tsx, where the rest of the chain is pinned — and this list is what stops a
      THIRD wrapper arriving unnoticed between them, which is exactly what `.tdb-board` was. */
   "tdw-split", "tdw-rail",
+  /* ⚠️ THE PORTED LIST CARD (list port). `.tlc` is the contract's `.listcard`: it owns the
+     toolbar, the scrolling body and the footer as one object, so it replaced the rail's inner
+     wrappers rather than adding to them. Named here for the same reason the two above are —
+     an unnamed box between the body and the scroller is the fault this list exists to catch. */
+  /* the card carries BOTH words: `tlc` scopes the ported rules, `listcard` is the contract's
+     own name for the element — see TaskList's note on why it keeps the contract's vocabulary */
+  "tlc", "listcard",
 ];
 
 describe("⚠️ NOTHING UNNAMED MAY SIT BETWEEN `.tpl-body` AND THE SCROLLER", () => {
@@ -129,12 +136,16 @@ describe("⚠️ NOTHING UNNAMED MAY SIT BETWEEN `.tpl-body` AND THE SCROLLER", 
   );
 
   it("the populated page renders a zone at all (or this case proves nothing)", () => {
-    expect(html).toContain("tpl-zone");
-    expect(html).toContain("tdg-panel"); // …with real rows in it
+    /* ⚠️ THE LIST'S SCROLLER IS `.l-body` NOW, inside the ported card — `.tpl-zone` was the
+       rail's wrapper and went with it. The chain rule is unchanged and still worth guarding:
+       exactly one designated scroller, with nothing unnamed above it. */
+    expect(html).toContain("l-body");
+    /* the card's own body is the panel now */
+    expect(html).toContain("l-body"); // …with real rows in it
   });
 
   it("every element above the zone is an enumerated chain link", () => {
-    const above = ancestorClasses(html, "tpl-zone");
+    const above = ancestorClasses(html, "l-body");
     expect(above, "the zone must be in the rendered page").not.toBeNull();
     const start = above!.indexOf("tpl-body");
     expect(start, "`.tpl-body` must be an ancestor of the zone").toBeGreaterThan(-1);

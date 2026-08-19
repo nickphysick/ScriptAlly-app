@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — task list · design contract (final)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ground:#f7f4ee; --white:#ffffff; --field:#fdfbf7;
+  --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
+  --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e6dccd;
+  --burg:#7c3a2a; --sage:#5a6e58;
+  --pink:#f5e2da; --pink-b:#e8c8bc;
+}
+body{font-family:'Inter',sans-serif;background:radial-gradient(ellipse at 50% 0%, rgba(255,252,247,0.55) 0%, transparent 55%),var(--ground);color:var(--ink);min-height:100vh;padding:34px 26px 90px;display:flex;justify-content:center;align-items:flex-start;}
+body::before{content:'';position:fixed;inset:0;opacity:0.22;pointer-events:none;z-index:1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+body>*{position:relative;z-index:2;}
+
+/* ═══════════ THE LIST CARD ═══════════ */
+.listcard{width:392px;background:var(--white);border:1px solid var(--edge);border-radius:12px;
+  box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);
+  overflow:hidden;display:flex;flex-direction:column;max-height:calc(100vh - 130px);}
+
+/* ── toolbar ── */
+.l-bar{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair);flex:0 0 auto;}
+.l-search{flex:1;display:flex;align-items:center;gap:8px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:8px 12px;transition:border-color .15s;}
+.l-search:focus-within{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
+.l-search svg{color:var(--muted);flex-shrink:0;}
+.l-search input{border:0;outline:0;font-size:12.5px;color:var(--ink);width:100%;background:transparent;font-family:'Inter',sans-serif;}
+.l-search input::placeholder{color:#c8b8a8;}
+.l-icon{cursor:pointer;width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--white);border:0.5px solid var(--hair2);border-radius:9px;color:var(--muted2);transition:all .16s;}
+.l-icon:hover{border-color:#c9a89e;color:var(--burg);}
+.l-add{cursor:pointer;width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--pink);border:0.5px solid var(--pink-b);border-radius:9px;color:var(--burg);transition:all .16s;}
+.l-add:hover{background:#efd5ca;}
+
+/* ── scroll body ── */
+.l-body{overflow-y:auto;flex:1 1 auto;min-height:0;padding-bottom:4px;}
+.l-body::-webkit-scrollbar{width:9px;}
+.l-body::-webkit-scrollbar-thumb{background:#e2d6c8;border-radius:5px;border:2px solid var(--white);}
+
+/* ── group heads ── */
+.grp{position:sticky;top:0;z-index:3;display:flex;align-items:baseline;gap:9px;
+  padding:15px 16px 8px;background:var(--white);}
+.grp::after{content:'';height:1px;background:var(--hair);flex:1;transform:translateY(-3px);}
+.grp .g-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transform:translateY(-1px);}
+.grp.now .g-dot{background:#c96f52;}
+.grp.house .g-dot{background:#7e937c;}
+.grp.yours .g-dot{background:#c2a869;}
+.grp .g-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink2);font-weight:500;white-space:nowrap;}
+.grp .g-n{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;color:#c0b0a0;}
+
+/* ── rows ── */
+.row{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:11px;align-items:center;
+  padding:11px 16px 11px 13px;cursor:pointer;border-left:3px solid transparent;transition:background .13s;position:relative;}
+.row:hover{background:#fbf7f2;}
+.row.sel{background:#f6efe7;border-left-color:var(--burg);}
+.row+.row::before{content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:#f3ece3;}
+.row.sel::before,.row.sel+.row::before{display:none;}
+
+/* pill */
+.pill{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;border-radius:6px;
+  padding:4.5px 0;text-align:center;font-weight:500;text-transform:uppercase;}
+.pill.send{background:#fbeee7;border:0.5px solid #f2dccf;color:#a05a42;}
+.pill.decide{background:#f6e3da;border:0.5px solid #e8c8bc;color:#7c3a2a;}
+.pill.chase{background:#f4efe4;border:0.5px solid #e9e0cc;color:#8a7440;}
+.pill.close{background:#eef1ec;border:0.5px solid #dfe5dc;color:#5a6e58;}
+.pill.fix{background:#eceef2;border:0.5px solid #dde1e8;color:#5c6a80;}
+.pill.note{background:#faf4e8;border:0.5px solid #efe4cc;color:#a08a58;}
+
+/* middle */
+.r-deed{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;letter-spacing:0.001em;}
+.r-meta{font-size:11px;color:var(--muted2);font-weight:300;margin-top:2.5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.r-meta .dot{color:#d8ccbe;padding:0 1px;}
+.r-note{font-family:'Caveat',cursive;font-size:17.5px;color:#6a5a48;font-weight:500;line-height:1.1;}
+
+/* right column — one grammar: the sentence fragment */
+.r-fig{text-align:right;min-width:78px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.07em;line-height:1.55;color:var(--muted2);text-transform:uppercase;}
+.r-fig b{font-family:'Playfair Display',serif;font-size:15px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink2);padding-right:1px;font-variant-numeric:lining-nums;}
+.r-fig.hot b{color:var(--burg);}
+.r-fig.absent{color:#c0b0a0;font-size:8.5px;letter-spacing:0.09em;}
+
+/* ── footer ── */
+.l-foot{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-top:1px solid var(--hair);flex:0 0 auto;background:var(--white);}
+.l-foot .c{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.l-foot .c b{color:var(--ink2);font-weight:500;}
+.l-foot a{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none;}
+
+/* ═══════════ side notes ═══════════ */
+.notes{width:330px;padding-top:6px;}
+.notes h2{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;color:var(--ink2);margin-bottom:14px;}
+.notes p{font-size:12px;line-height:1.65;color:#6a584a;font-weight:300;margin-bottom:12px;}
+.notes b{font-weight:500;color:var(--ink2);}
+.notes .k{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--burg);}
+</style>
+</head>
+<body>
+
+<div class="listcard">
+
+  <!-- toolbar: search grows, controls tuck right -->
+  <div class="l-bar">
+    <div class="l-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      <input placeholder="Search your tasks…">
+    </div>
+    <button class="l-icon" title="Filter"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.5 10 19 14 21 14 12.5 22 3"/></svg></button>
+    <button class="l-icon" title="Sort"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5h10M11 9h7M11 13h4M3 17V3M3 3L1 5.5M3 3l2 2.5M7 7v14M7 21l-2-2.5M7 21l2-2.5" transform="scale(0.9) translate(1,1)"/></svg></button>
+    <button class="l-add" title="Add a task"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+  </div>
+
+  <div class="l-body">
+
+    <!-- ── NEEDS YOU NOW ── -->
+    <div class="grp now"><span class="g-dot"></span><span class="g-lbl">Needs you now</span><span class="g-n">3</span></div>
+
+    <div class="row sel">
+      <span class="pill send">Send</span>
+      <div>
+        <div class="r-deed">Send your full manuscript</div>
+        <div class="r-meta">Jonathan Marsh asked for it<span class="dot"> · </span>The Marsh Agency</div>
+      </div>
+      <div class="r-fig absent">no date<br>on record</div>
+    </div>
+
+    <div class="row">
+      <span class="pill send">Send</span>
+      <div>
+        <div class="r-deed">Send your partial</div>
+        <div class="r-meta">Daniel O'Rourke asked for the first 3 chapters</div>
+      </div>
+      <div class="r-fig absent">no date<br>on record</div>
+    </div>
+
+    <div class="row">
+      <span class="pill send">Send</span>
+      <div>
+        <div class="r-deed">Send your partial</div>
+        <div class="r-meta">Greg Panetta asked for the first 50 pages</div>
+      </div>
+      <div class="r-fig">waiting<br><b>7</b> weeks</div>
+    </div>
+
+    <!-- ── HOUSEKEEPING ── -->
+    <div class="grp house"><span class="g-dot"></span><span class="g-lbl">Housekeeping</span><span class="g-n">11</span></div>
+
+    <div class="row">
+      <span class="pill fix">Fix</span>
+      <div>
+        <div class="r-deed">Fill in what you sent</div>
+        <div class="r-meta">10 imported queries are missing their materials</div>
+      </div>
+      <div class="r-fig"><b>10</b> queries<br>to fill in</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">Jonathan Marsh<span class="dot"> · </span>The Marsh Agency</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2¼</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">Marcus Reed<span class="dot"> · </span>Bloomsbury Quill</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2¼</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">Aisha Kapoor<span class="dot"> · </span>The Lantern Agency</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2⅓</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">Penhallow Literary<span class="dot"> · </span>agent not specified</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2½</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">Sophie Dunn<span class="dot"> · </span>Curtis Vane</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2¼</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">William Tan<span class="dot"> · </span>Foxglove Literary</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2¼</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">Priya Raman<span class="dot"> · </span>no agency</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">Marcus Reed<span class="dot"> · </span>Bloomsbury Quill</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill close">Close</span>
+      <div>
+        <div class="r-deed">Consider closing</div>
+        <div class="r-meta">Eleanor Whitfield<span class="dot"> · </span>Whitfield Reps</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>2</b> years</div>
+    </div>
+
+    <div class="row">
+      <span class="pill chase">Chase</span>
+      <div>
+        <div class="r-deed">Worth a nudge</div>
+        <div class="r-meta">Quiet for 9 weeks — past their stated window</div>
+      </div>
+      <div class="r-fig">quiet for<br><b>9</b> weeks</div>
+    </div>
+
+    <!-- ── YOUR TASKS ── -->
+    <div class="grp yours"><span class="g-dot"></span><span class="g-lbl">Your tasks</span><span class="g-n">3</span></div>
+
+    <div class="row">
+      <span class="pill note">Note</span>
+      <div><div class="r-note">Check W&amp;A for new children's agents</div></div>
+      <div class="r-fig">added<br><b>2</b> days ago</div>
+    </div>
+
+    <div class="row">
+      <span class="pill note">Note</span>
+      <div><div class="r-note">Nudge Marcus Reed</div></div>
+      <div class="r-fig">added<br><b>11</b> days ago</div>
+    </div>
+
+    <div class="row">
+      <span class="pill note">Note</span>
+      <div><div class="r-note">Rework synopsis para 2 before next batch</div></div>
+      <div class="r-fig absent">no date set</div>
+    </div>
+
+  </div>
+
+  <div class="l-foot">
+    <span class="c"><b>17</b> tasks · 3 need you now</span>
+    <a href="#">Export CSV</a>
+  </div>
+
+</div>
+
+</body>
+</html>

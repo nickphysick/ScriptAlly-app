@@ -20,8 +20,8 @@ describe("TOUR_STOPS — eight stops (notes-and-tasks adds the note/task step), 
       // would have vanished silently; the chips' old one still MATCHES — it would have pointed
       // confidently at the page's sort and Add while describing filters. The second is why this
       // census exists: a stop can go wrong without going missing.
-      ".tdw-search",
-      ".tdw-menuwrap",
+      ".l-search",
+      ".l-menuwrap",
       ".tdb-revlink",
       ".tdb-tile, .tdb-gcard, .tdb-lrow",
       // workspace P3: Today's stop left the retired corner for the sidebar group that reaches it.
@@ -139,8 +139,8 @@ describe("⚠️ EVERY TOUR TARGET STILL EXISTS — a stop that misses is droppe
 
   it("⚠️ AND THE TWO THE REBUILD MOVED POINT AT THE RAIL, not at the page's tool row", () => {
     const sels = TOUR_STOPS.map((s) => s.sel);
-    expect(sels).toContain(".tdw-search");
-    expect(sels).toContain(".tdw-menuwrap");
+    expect(sels).toContain(".l-search");
+    expect(sels).toContain(".l-menuwrap");
     /* `.tdb-bsearch` is extinct; `.tdb-tools` still exists but is no longer what this stop meant */
     expect(sels).not.toContain(".tdb-bsearch");
     expect(sels).not.toContain(".tdb-tools");

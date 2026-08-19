@@ -61,7 +61,12 @@
      340 wherever 340 is under a third of the measure and a proportion of it everywhere else, so
      the pane always keeps two thirds. Fluid by construction, and no breakpoint decides it. */
   display: grid;
-  grid-template-columns: min(340px, 34%) minmax(0, 1fr);
+  /* ⚠️ 392px, NOT 340 — THE LIST'S DESIGN WIDTH, and the list is what this track holds. The task
+     list contract draws its card at 392 and its row grammar is measured there: a 56px pill column,
+     a middle that must not wrap, and a 78px right column. At 340 the middle had 52px less than it
+     was designed with, which is exactly where the meta lines were wrapping. The number lives here,
+     once, because the card fills the column rather than restating it. */
+  grid-template-columns: min(392px, 36%) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
   gap: 18px;

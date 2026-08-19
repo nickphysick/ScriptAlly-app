@@ -30,7 +30,7 @@ const rule = (sel: string): string => {
 };
 
 describe("notes-and-tasks P1 — the empty Notes section", () => {
-  const emptyFn = sliceBetween(page, "function renderNotesEmpty", "function renderRailTools");
+  const emptyFn = sliceBetween(page, "function renderNotesEmpty", "function renderList");
 
   it("the Notes section renders the dashed butter card (frame 1) when it is empty", () => {
     expect(page).toContain("function renderNotesEmpty()");

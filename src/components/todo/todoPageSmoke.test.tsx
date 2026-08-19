@@ -113,20 +113,30 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        RENDERED page, which is the one check a source lock cannot make. One seeded task: the bar
        says "1 outstanding" and the heading beside the card says "1". The chips used to state the
        same number a third time. */
-    expect(html).toContain("1 outstanding");
-    expect(html).toContain('<span class="tdg-n">1</span>');
+    /* ⚠️ THE FOOTER'S GRAMMAR IS THE CONTRACT'S NOW — "{n} tasks · {m} need you now", one count
+       from the array the rows render from. "N outstanding" went with the retired rail footer, and
+       with it the second number that made "showing 13 of 12" possible. */
+    expect(html).toContain("1</b> tasks");
+    expect(html).toContain('<span class="g-n">1</span>');
     expect(html).toContain("Your tasks");                // the group heading, outside its panel
-    expect(html).toContain("tdg-panel");                 // the white panel
+    /* ⚠️ THE WHITE PANEL IS THE PORTED CARD — `.tlc` with its own `.l-body`. `tdg-panel` went
+       with the retired list, and the claim is unchanged: the populated page draws a card. */
+    /* the card carries both words — the scope and the contract's own name */
+    expect(html).toContain('class="tlc listcard"');
     expect(html).toContain("Redraft the opening chapter");
     /* ⚠️ THE SEAT IS ALWAYS THERE; THE SPLIT IS NOT (Fix 4). The seeded row is a writer's own
        task, whose TICK is the act — so it draws the seat and no control, which is the deliberate
        shape rather than a gap. A derived card's split is exercised in tasksList.test.tsx. */
-    expect(html).toContain("tdg-acts");
-    expect(html).toContain("tdg-tick");
+    /* ⚠️ NO ACTION CLUSTER — the brief removes hover actions from the row, which now does one
+       thing: select. Asserted as an ABSENCE so a future row cannot quietly grow one back. */
+    expect(html, "the row grew an action cluster").not.toContain("tdg-acts");
+    /* ⚠️ NO TICK — the row's only job is selection now, and the completion path is the pane's.
+       Asserted as an absence so a second place to finish work cannot reappear. */
+    expect(html, "the row grew a tick again").not.toContain("tdg-tick");
     expect(html).not.toMatch(/["\s`]tdg-split["\s`]/);
     /* ⚠️ THE ROW IS ONE ELEMENT — never `display: contents`, which fractures hover, focus and any
        selected band into per-cell rectangles. Asserted against RENDERED output, not source. */
-    expect(html).toContain('class="tdg-row"');
+    expect(html).toContain('class="row"');   // the ported row
   });
 
   /* tasks-pages P3 — the Calendar is REAL; its placeholder era ended. Smoke from day one,

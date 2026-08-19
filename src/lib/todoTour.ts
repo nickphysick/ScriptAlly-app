@@ -46,7 +46,11 @@ export const TOUR_STOPS: TourStop[] = [
        tools block, so `.tdb-bsearch` matched nothing — and a stop whose selector misses is
        FILTERED OUT silently, which means this step would simply have stopped existing with
        nobody told. Its copy said "from the bar", which was the other half of the same staleness. */
-    sel: ".tdw-search",
+    /* ⚠️ RE-POINTED WITH THE LIST PORT — `.tdw-search` was the rail's own field and went with the
+       rail's toolbar; the contract draws the search inside the card as `.l-search`. A tour stop
+       whose selector misses is DROPPED IN SILENCE, so this is the kind of rename that costs a stop
+       without anything going red. */
+    sel: ".l-search",
     h: "Search your list.",
     p: "It narrows the list beside it as you type — the card you are working on stays put. ⌘K from anywhere.",
     cta: "Next →",
@@ -64,7 +68,8 @@ export const TOUR_STOPS: TourStop[] = [
        `.tdw-chips` stopped existing. Found by grepping the built bundle before a deploy — the
        census below passed it because an orphaned CSS rule still matched, which is a hole this
        commit also closes. */
-    sel: ".tdw-menuwrap",
+    /* re-pointed with the list port — the filter/sort wrappers are the card's `.l-menuwrap` now */
+    sel: ".l-menuwrap",
     h: "Narrow the list.",
     p: "Filter and sort sit beside the search. The filter fills with ink while a narrowing is on, so a short list is never a mystery.",
     cta: "Next →",

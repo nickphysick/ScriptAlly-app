@@ -152,7 +152,11 @@ describe("the copy, at its edges", () => {
     expect(page).toContain("return railGroups().reduce((n, g) => n + g.cards.length, 0);");
     /* the sentence moved into `showingLine` when the bar's half of it was absorbed — the figure is
        still `railShown()`, which is what this case is about */
-    expect(page).toContain("showingLine(railShown(), allDockable.length)");
+    /* ⚠️ ONE COUNT NOW, AND IT IS THE ARRAY'S OWN LENGTH. `showingLine(shown, total)` stated two
+       numbers and is retired with the rail's footer; the ported card prints
+       `groups.reduce((n, g) => n + g.cards.length, 0)` — the same array the rows map over, so a
+       second figure does not exist to disagree. */
+    expect(page, "the two-number footer came back").not.toContain("showingLine(");
     expect(code(page)).not.toContain("taskStats(");
     expect(page).not.toContain("boardSubtitleCopy(boardFigures(boardCols))");
     const fn = page.slice(page.indexOf("function railGroups"), page.indexOf("function railGroups") + 900);

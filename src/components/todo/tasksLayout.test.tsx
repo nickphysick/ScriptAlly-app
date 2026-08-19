@@ -213,34 +213,32 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
        contents went to the things they act on. The rule this case holds is unchanged and is in fact
        better served: every control sits above the surface it acts on, and the bar was the one that
        sat above nothing in particular. */
-    expect(listPage).toContain('className="tdw-tools"');   // the list's own instruments
-    expect(listPage).toContain('className="tdw-foot"');    // the list's own counts + export
+    /* ⚠️ THE TOOL ROW IS THE CARD'S NOW (list port) — the contract draws the toolbar inside the
+       list card, so the page passes none and there is nothing left to float. The claim is the
+       same one, asserted from the other side. */
+    expect(listPage, "the page grew a tool row again").not.toContain('className="tdw-tools"');
+    /* ⚠️ THE RAIL'S TOOLBAR AND FOOTER ARE RETIRED (list port). The ported card renders its own,
+       because the contract draws toolbar, body and footer as ONE object — and the retired footer is
+       precisely where "showing 13 of 12" was written. The claim that survives is the ABSENCE: there
+       is no second toolbar and no second count for the first to disagree with. */
+    expect(listPage, "a second footer came back").not.toContain('className="tdw-foot"');
     expect(listPage).not.toContain('className="tdw-cbar"');
   });
 
-  it("the RAIL's instruments live in renderRailTools, and nowhere else", () => {
-    const railTools = sliceBetween(listPage, "function renderRailTools", "function renderList");
-    /* ⚠️ THE CHIP STRIP FOLDED INTO THE FILTER MENU (corrections, Phase 5), and the standalone
-       sort button became an icon beside it. Both are 38px icon buttons to the LEFT of the search,
-       which fills the rest of the row. */
+  it("the rail's instruments moved INTO the card, and the page keeps none", () => {
+    /* ⚠️ RE-POINTED (list port). `renderRailTools` is deleted: the contract draws search, filter,
+       sort and add inside the list card, so the four instruments live in `TaskList` and the page
+       holds none of them. The claim — one home for the list's controls — is unchanged; the home
+       moved. Comments stripped first, because the note explaining the deletion names it. */
+    const bare = listPage.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(bare, "the rail grew a toolbar again").not.toContain("renderRailTools");
     for (const cls of ["tdw-search", "tdw-menuwrap", "tdw-cbic"]) {
-      expect(railTools, cls).toContain(cls);
+      expect(bare, `${cls} is still on the page`).not.toContain(cls);
     }
-    expect(railTools).not.toContain("tdw-chips");
-    expect(railTools).not.toContain('className="tdw-sort"');
-    /* the icons come BEFORE the field in the row */
-    expect(railTools.indexOf("tdw-menuwrap")).toBeLessThan(railTools.indexOf("tdw-search"));
-    /* the page row keeps none of it */
-    expect(listPage).not.toContain("tdb-bsearch");
-    expect(listPage).not.toContain('className="tdb-sortb"');
-    /* the search left the page tool row entirely — not duplicated into the rail */
-    expect(listPage).not.toContain("tdb-bsearch");
-    /* ⚠️ `renderTools` IS RETIRED — the page passes no tool row at all, which the case above
-       already asserts. Slicing it read the whole file, so this had been checking that the string
-       `tdw-search` appeared nowhere on the page — which is false and only passed because the slice
-       was empty, not because it was wrong. Asserted as what is actually true: there is no page
-       tool row to put a search in. */
-    expect(listPage).not.toContain("function renderTools");
+    const card = readFileSync(join(here, "TaskList.tsx"), "utf8");
+    for (const cls of ["l-search", "l-icon", "l-add"]) {
+      expect(card, `${cls} is missing from the card's toolbar`).toContain(cls);
+    }
   });
 
   it("⚠️ NEITHER BLOCK SCROLLS WITH WHAT IT NARROWS", () => {
@@ -250,7 +248,7 @@ describe("⚠️ every control sits above the surface it acts on, and nothing fl
     const splitCss = readFileSync(join(here, "todoSplit.css"), "utf8");
     const toolsRule = splitCss.slice(splitCss.indexOf(".tdw-tools {"), splitCss.indexOf("}", splitCss.indexOf(".tdw-tools {")));
     expect(toolsRule).toContain("flex: none");
-    expect(listPage.indexOf("{renderRailTools()}")).toBeLessThan(listPage.indexOf(") : renderList()}"));
+    expect(listPage.replace(/\/\*[\s\S]*?\*\//g, ""), "the rail grew a toolbar again").not.toContain("renderRailTools");
   });
 
   /* ⚠️ TODAY'S TITLE-ROW SPEC WENT WITH THE PAGE (tasks-consolidation P1, 9 Aug). It asserted

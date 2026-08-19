@@ -137,8 +137,10 @@ describe("⚠️ an offer's snooze is capped at tomorrow — on EVERY path", () 
        row and the card's foot bar was retired into the command bar, so two doors became one; what
        matters is unchanged and is what this asserts: every door reaches the SAME component. */
     const listSrc = readFileSync(join(here, "TaskList.tsx"), "utf8");
-    expect(listSrc).toContain("onFire={(el) => setDial({ card: c, anchor: el })}");   // the icon
-    expect(listSrc).toContain('if (action === "snooze")');                            // the key
+    /* ⚠️ TWO DOORS NOW, NOT THREE — the rail's clock went with the row's hover cluster (list port),
+       so snoozing is the `s` key and the pane's own control. Stated rather than counted down: the
+       title still names three, and this is where a reader learns which one left and why. */
+    expect(listSrc, "the row grew a snooze control again").not.toContain("setDial({ card");
     expect(listPage).toContain("<SnoozeDial");                                        // the bar
     /* and there is exactly ONE dial component in the app */
     expect(readFileSync(join(here, "SnoozeDial.tsx"), "utf8")).toContain("export const SnoozeDial");

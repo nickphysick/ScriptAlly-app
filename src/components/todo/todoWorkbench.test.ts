@@ -574,7 +574,8 @@ describe("Final Shape P4 — the wrapped grid + TYPOGRAPHIC sections (todo rebui
 describe("polish P3 — the centre stack: three sibling containers", () => {
   it("review card · sheet — siblings inside .tdb-centre; the sheet holds neither", () => {
     const centre = page.indexOf('className="tdb-centre"');
-    const zone = page.indexOf("<TplZone scrollRef={zoneRef}");
+    /* re-anchored on the list itself — `TplZone` went with the retired rail wrapper */
+    const zone = page.indexOf("<TaskList");
     expect(centre).toBeGreaterThan(0);
     /* ⚠️ THE BRIEFING SIBLING IS UNMOUNTED, so the order this case protects is now centre → body.
        Its SLOT is still the first thing inside `.tdb-centre` — the unmount comment sits exactly
