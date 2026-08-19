@@ -12,7 +12,7 @@
  * separately for the same rules, which closes most of that gap.
  */
 import { test, expect } from "@playwright/test";
-import { openRoute, scrollbarWidth } from "./measure";
+import { openRoute, scrollbarWidth, liftMotionSuppression } from "./measure";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 const OUT = "reports/pkg-restructure";
@@ -298,4 +298,101 @@ test("phase 3 — stage at 1920 (the ref's canvas width and beyond)", async ({ p
     stageW: r.stage?.w, stepWidths: r.stepWidths, plateHeights: r.plateHeights,
     equal: new Set(r.stepWidths).size === 1, onScreen: r.onScreen, ticks: r.ticks,
   }, null, 2));
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PHASE 4 — acceptance
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/** The three stated gates, scoped inside the page. */
+const ACCEPT = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const cs = (el, p) => el ? getComputedStyle(el).getPropertyValue(p).trim() : null;
+  const plate = root.querySelector(".wsh");
+  const rail = root.querySelector(".pkgo-rail");
+  const isSurface = (bg) => bg === "rgba(0, 0, 0, 0)" || bg === "transparent" || bg === "rgb(255, 255, 255)";
+  const filled = Array.from(root.querySelectorAll("button"))
+    .filter((b) => !isSurface(getComputedStyle(b).backgroundColor))
+    .map((b) => ({ label: (b.textContent || "").trim().slice(0, 32), bg: getComputedStyle(b).backgroundColor }));
+  return {
+    railWidth: rail ? Math.round(rail.getBoundingClientRect().width) : null,
+    headerBorderTop: cs(plate, "border-top-width"),
+    headerBorderTopColor: cs(plate, "border-top-color"),
+    headerRadius: cs(plate, "border-top-left-radius"),
+    headerBg: cs(plate, "background-color"),
+    filled,
+    filledCount: filled.length,
+    tabsGone: !root.querySelector(".pkgw-tabs"),
+    stripGone: !root.querySelector(".pkgw-strip"),
+    panels: Array.from(root.querySelectorAll(".pkgo-lbl")).map((l) => (l.textContent || "").trim()),
+    steps: root.querySelectorAll(".pkgo-step").length,
+    pageScrollX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  };
+})()`;
+
+for (const vp of [{ width: 1440, height: 900 }, { width: 1920, height: 1200 }]) {
+  test(`phase 4 — acceptance at ${vp.width}`, async ({ page }) => {
+    await openRoute(page, ROUTE, vp);
+    const sbw = await scrollbarWidth(page);
+    const r = await page.evaluate(ACCEPT);
+    await page.screenshot({ path: `${OUT}/p4-accept-${vp.width}.png`, fullPage: true });
+    writeFileSync(`${ART}/p4-accept-${vp.width}.txt`, `SCROLLBAR: ${sbw}px\n${JSON.stringify(r, null, 2)}\n`);
+    console.log(`── ${vp.width} ──\n` + JSON.stringify(r, null, 2));
+  });
+}
+
+/**
+ * The flows, driven for real.
+ *
+ * ⚠️ MOTION SUPPRESSION IS LIFTED FIRST. A harness that kills animation cannot exercise anything
+ * that tears down on `animationend`, and it has twice reported a working flow as broken in this
+ * repo. These view swaps are plain conditional renders rather than animation-driven, but the rule
+ * is "suppress for static geometry, lift for anything that changes state" — and this changes state
+ * four times.
+ */
+test("phase 4 — the rail actually opens what it says it opens", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  const steps: Record<string, unknown>[] = [];
+
+  const state = async () => page.evaluate(`(() => {
+    const root = document.querySelector(".pkg-root");
+    /* NOTE: .pkgw-tv[role=region], NOT the first [role=region] in the page. The grid's own scroll
+       row is also a labelled region ("Package Workshop"), so a bare query returned IT at every
+       step and the field read the same value whatever the page was showing — the wrong-element
+       trap again, one scope further in. The view's own region is the one that changes. */
+    const region = root.querySelector('.pkgw-tv[role="region"]');
+    return {
+      overview: !!root.querySelector(".pkgo-grid"),
+      region: region ? region.getAttribute("aria-label") : null,
+      back: !!root.querySelector(".pkgo-back"),
+      matEditor: !!root.querySelector(".pkgw-med, .pkgw-mchip"),
+    };
+  })()`);
+
+  steps.push({ at: "landing", ...(await state() as object) });
+
+  /* material row → the Workshop's materials editor */
+  await page.locator(".pkgo-row").first().click();
+  await page.waitForTimeout(600);
+  steps.push({ at: "after material row", ...(await state() as object) });
+
+  await page.locator(".pkgo-back").click();
+  await page.waitForTimeout(400);
+  steps.push({ at: "after back", ...(await state() as object) });
+
+  /* Tracking row → the existing analytics view */
+  const trackRow = page.locator(".pkgo-panel", { hasText: "Tracking" }).locator(".pkgo-row").first();
+  await trackRow.click();
+  await page.waitForTimeout(600);
+  steps.push({ at: "after tracking row", ...(await state() as object) });
+
+  await page.locator(".pkgo-back").click();
+  await page.waitForTimeout(400);
+  steps.push({ at: "after back again", ...(await state() as object) });
+
+  await page.screenshot({ path: `${OUT}/p4-flows-end.png`, fullPage: true });
+  writeFileSync(`${ART}/p4-flows.txt`, JSON.stringify(steps, null, 2) + "\n");
+  console.log(JSON.stringify(steps, null, 2));
 });

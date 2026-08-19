@@ -738,3 +738,126 @@ beneath it. If F6 is taken, F5 goes with it.
 **Phase 3 full suite: `VITEST_EXIT=0` — 331/331 files, 5614 tests, zero failures, and no unhandled
 worker error this time.** The cleanest run of the session, and the first with a genuinely green exit
 code; the contention that produced the RPC timeouts in Phases 1–2 had eased.
+
+---
+
+## Phase 4 — Verify & close
+
+### The three stated gates, at BOTH widths
+
+| Gate | 1440×900 | 1920×1200 |
+|---|---|---|
+| **Rail width** | **300px** | **300px** |
+| **Header sage border** | **5px** `rgb(154, 168, 150)` | **5px** `rgb(154, 168, 150)` |
+| **Filled controls (in `.pkg-root`)** | **1** — `New package` `rgb(245,226,218)` | **1** — same |
+| Header square / white | `0px` radius, `rgb(255,255,255)` | same |
+| Tab strip gone | ✓ | ✓ |
+| `.pkgw-strip` gone | ✓ | ✓ |
+| Panels | Materials · Packages · Tracking | same |
+| Steps | 3 | 3 |
+| Horizontal page overflow | **0** | **0** |
+| Measured scrollbar | 0px (overlay) | 0px (overlay) |
+
+Screenshots: `p4-accept-1440.png`, `p4-accept-1920.png`, `p4-flows-end.png`.
+
+### The rail actually opens what it says it opens
+
+Gates prove geometry; they do not prove the restructure *works*. The flows were driven for real,
+with motion suppression **lifted** first (a harness that kills animation has twice reported a
+working flow as broken in this repo):
+
+| Step | overview | view region | back control | materials editor |
+|---|---|---|---|---|
+| landing | ✓ | — | — | — |
+| click a **material row** | — | **Workshop** | ✓ | **✓ open** |
+| click **← Overview** | ✓ | — | — | — |
+| click a **Tracking row** | — | **Tracking** | ✓ | — |
+| click **← Overview** | ✓ | — | — | — |
+
+So a material row lands in the existing materials editor, a Tracking row reveals the existing
+analytics view, and the return works from both. **No new editor and no new analytics were built** —
+D1's "reuse it, do not rebuild it", demonstrated rather than asserted.
+
+**⚠️ And that table required fixing the probe twice, which is the more useful finding.** The
+`region` field first read **"Package Workshop" at every single step** — the grid's own scroll row is
+also a labelled region, so a bare `[role="region"]` query returned it regardless of what the page
+was showing. It is the same wrong-element fault as the recon's `.wpg-plate`, one scope further in,
+and it would have sat in the report looking like evidence. Scoped to `.pkgw-tv[role="region"]` it
+reads `Workshop` / `Tracking` / `null` and actually distinguishes the states.
+
+*(Twice, too, a comment containing backticks inside a JS template literal closed the string and the
+run died with `ReferenceError: tv is not defined`. Loud and instant — but the first time it happened
+the run reported `No tests found`, and the artefact I read next was the **previous** run's. That is
+how a stale number gets published as a fresh one.)*
+
+### Only my paths changed
+
+`git diff --name-only HEAD` re-run at close. Every modified tracked file belongs to another stream
+(`reports/audit/`, `reports/card-conformance/`, `reports/pane/`, `run-artifacts/audit-*`,
+`run-artifacts/qc-*`, `run-artifacts/list-port-deployed.txt`) — plus this stream's own
+`tests/e2e/pkgRestructure.measure.ts`, committed with this phase. **No `src/` file of mine is left
+uncommitted.**
+
+Two changes against the Phase 0 baseline, both other streams' and both benign:
+`src/components/todo/*` and `src/lib/elapsed.ts` are **no longer dirty** — the to-do stream
+committed them mid-session, which is also why its failing test now passes. `test-results/`
+(Playwright failure artefacts) was created and removed; it is gitignored anyway.
+
+---
+
+## What shipped
+
+| | |
+|---|---|
+| **Route** | `/manuscripts/packages` — unchanged. `App.tsx` never edited |
+| **Landing surface** | overview: 300px rail + fluid stage, replacing the Workshop/Analytics tabs |
+| **Header** | white, square, lifted, 5px sage top, icon disc, Pro pill preserved, one filled control |
+| **Rail** | Materials · Packages · Tracking, real derived data, dashed ghosts when empty |
+| **Stage** | problem statement + three-step infographic doubling as derived progress |
+| **Reused whole** | `WorkshopTab`, `AnalyticsTab`, the materials editor, the composer, the guided tour, `packageMetrics` |
+| **Retired from this page** | `PackageTabs` (survives for `#/pkg-lab`), `.pkgw-strip` (same) |
+| **New files** | `PackagesOverview.tsx`, `packagesOverview.css`, `lib/packagesOverview.ts` (+29 tests), `tests/e2e/seedPackages.mjs`, `tests/e2e/pkgRestructure.measure.ts` |
+
+### Derivations used — all read-time, nothing stored (D2)
+
+`materialRows` · `materialDetail` · `addedLabel` · `packageRows` · `sentLine` · `trackingRows` ·
+`packagedQueries` · `replyCount` · `howItWorks`, all in `src/lib/packagesOverview.ts`, all pure, all
+unit-locked. Counting is delegated to the locked `packageMetrics` (`packageMetrics`, `isRequest`,
+`isSlotFilled`) and labels to `TYPE_META` / `SLOT_FIELD` / `BUILDER_TYPES`, so **no figure and no
+label is implemented twice**.
+
+### Final gate summary
+
+| | Baseline | Final |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `vite build` | exit 0, no diagnostics | **exit 0, no diagnostics** |
+| `vitest run` | **1 file / 1 test FAILED** | **331/331 files, 5614 tests, 0 failed, exit 0** |
+
+Strictly better than baseline on every gate.
+
+---
+
+## Flags for Nick — the short list
+
+| | Flag | Needs |
+|---|---|---|
+| **F1** | Analytics tab is reused whole; Tracking rows are now its only route in | nothing |
+| **F2** | Reply-per-package **is** derivable today — no engine work | nothing |
+| **F3** | Packages hold real material ids — **no migration needed** | nothing |
+| **F4** | `npm run build:dev` aborts on its deploy guard; evidence says a `dist/` race with a concurrent session, not a bad bundle | one clean re-run before deploying |
+| **F5** | Title clipped at 1440 (fine at 1920) — same cause as F6 | goes away with F6 |
+| **F6** | Header card doesn't align with the body: 120px shell `--header-inset` + 15px scrollbar gutter | **a decision** — one line either way |
+| **F7** | **Live bug**: `packageId` missing from the query UPDATE allowlist, so attaching/detaching a package on an existing query is silently denied | a rules line + dev deploy |
+| **F8** | D4's white substitution flattens the rail's row-on-panel step | **a taste call** |
+| **F9** | The Workshop's empty state still carries its own three-step strip, so two how-it-works surfaces now exist | worth a look, not urgent |
+
+**The two that want an actual decision are F6 and F8; the one that is a real defect is F7.**
+
+### Not done, and deliberately
+
+* **No deploys.** Nothing was deployed; `#/pkg-lab` is still present and still needs removing before
+  any prod deploy (as the brief notes).
+* **Illustrations** remain dashed placeholders (D8).
+* **`--header-inset`** left at the shell default (F6).
+* **`firestore.rules`** untouched (F7 flagged, not fixed).

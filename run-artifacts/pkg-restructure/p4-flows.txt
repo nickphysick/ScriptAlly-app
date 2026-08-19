@@ -1,0 +1,37 @@
+[
+  {
+    "at": "landing",
+    "overview": true,
+    "region": null,
+    "back": false,
+    "matEditor": false
+  },
+  {
+    "at": "after material row",
+    "overview": false,
+    "region": "Workshop",
+    "back": true,
+    "matEditor": true
+  },
+  {
+    "at": "after back",
+    "overview": true,
+    "region": null,
+    "back": false,
+    "matEditor": false
+  },
+  {
+    "at": "after tracking row",
+    "overview": false,
+    "region": "Tracking",
+    "back": true,
+    "matEditor": false
+  },
+  {
+    "at": "after back again",
+    "overview": true,
+    "region": null,
+    "back": false,
+    "matEditor": false
+  }
+]

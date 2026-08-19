@@ -1,0 +1,24 @@
+SCROLLBAR: 0px
+{
+  "railWidth": 300,
+  "headerBorderTop": "5px",
+  "headerBorderTopColor": "rgb(154, 168, 150)",
+  "headerRadius": "0px",
+  "headerBg": "rgb(255, 255, 255)",
+  "filled": [
+    {
+      "label": "New package",
+      "bg": "rgb(245, 226, 218)"
+    }
+  ],
+  "filledCount": 1,
+  "tabsGone": true,
+  "stripGone": true,
+  "panels": [
+    "Materials",
+    "Packages",
+    "Tracking"
+  ],
+  "steps": 3,
+  "pageScrollX": 0
+}
