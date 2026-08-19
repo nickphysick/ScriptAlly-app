@@ -19,6 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText } from "../../lib/agentMaterials";
 import { Funnel, Pin, ChevronRight, ChevronLeft, X, Clock, ArrowUpDown, ExternalLink, Plus } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { useScriptAllyDb } from "../../lib/db";
@@ -254,7 +255,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, versions, currentUser, collectionsReady,
     addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile, recordOfferDecision,
-    recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, deleteActivity, resolveTaskFlag, updateAgent,
+    recordMaterialsSent, logNudge, dismissTask, undoQueryStatus, updateQueryStatus, updateQuery, deleteActivity, resolveTaskFlag, updateAgent,
   } = useScriptAllyDb();
   const { toast, flash, dismiss: dismissToast, pause: pauseToast, resume: resumeToast, remember: rememberUndo, recall: recallUndo } = useTodoToast();
   const { ask: confirmAsk, node: confirmAskNode } = useConfirmAsk();
@@ -1534,6 +1535,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   onCommitSend={paneJourneyKind(paneCard) ? commitFromPane : undefined}
                   journeyKind={paneJourneyKind}
                   journeyGaps={cardGaps}
+                  journeyRecord={journeyRecord}
+                  onLeaveUnrecorded={leaveMaterialsUnrecorded}
                   /* ⚠️ THE PAGE OWNS THE COHORT because it owns the agent list; the dock renders it
                      and hands the answers back. The members are the GROUP's own, in the group's own
                      order — not re-derived here, which would be a second answer to "who is in it". */
@@ -2397,6 +2400,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (card.userTaskId) return "note";
     if (card.taskType === "offer_received") return "offer";
     if (card.taskType === "revise_resubmit") return "send";
+    /* ⚠️ THE SINGLE RECORD GAP ONLY. The bulk card stands for a set and has no query behind it, so
+       it has no band subject, no send date and no agent requirements to start from — a one-query
+       form pointed at it would state facts about a record that does not exist. It keeps the
+       hand-off until its own table lands. */
+    if (card.taskType === "materials_unrecorded") return "materials";
     switch (cardBucket(card)) {
       case "send": return "send";
       case "chase": return "chase";
@@ -2493,7 +2501,86 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        already. One primitive, four entrances. */
     if (kind === "note") return quickDone(card);
     if (kind === "fix") return commitFixFromPane(card, v);
+    if (kind === "materials") return commitMaterialsFromPane(card, v);
     return commitSendFromPane(card, v);
+  }
+
+  /**
+   * ⚠️ THE ONE CONSTRAINT OF THIS WHOLE JOURNEY: it writes `materialsWanted` AND NOTHING ELSE.
+   * No status, no response count, no `revisionRound`, no pipeline date. `updateQuery` writes only
+   * the fields handed to it, and the field is one — so the query's position is untouched by
+   * construction rather than by care.
+   *
+   * ⚠️ THE ENCODER IS `agentMaterials`' OWN. `materialsWantedFromRows` is what the agent editor
+   * writes through; using it here means a sample recorded on this form and one recorded there
+   * cannot come out in different shapes. Nothing new is defined.
+   *
+   * ⚠️ AND THE TARGET IS THE QUERY, NOT THE SEND ACTIVITY — a deliberate, recorded trade-off.
+   * `firestore.rules` (1a0c397) names `Activity.materials` the canonical home for what went with an
+   * EVENT, because a query-level field has to carry both "what they ask for" and "what you sent".
+   * But nothing writes that field yet, there is no `updateActivity` in `db.tsx`, and an imported
+   * query may carry no send activity to attach to — so writing there tonight would mean a new db
+   * method, a type change, and a target that does not always exist. The query field is what the
+   * create pane already writes (`draftMaterialsToQuery`) and what this bucket's own predicate
+   * already reads, so the gap closes today and the migration stays exactly as open as it was.
+   */
+  async function commitMaterialsFromPane(card: BoardCard, v: JourneySendValues) {
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    if (!q) return;
+    const wanted = materialsWantedFromRows(v.recordRows);
+    /* nothing ticked is not a save — the escape hatch is how you leave without recording */
+    if (!wanted.length) return;
+    const before = q.materialsWanted;
+    await updateQuery(q.id, { materialsWanted: wanted });
+    const undo = () => updateQuery(q.id, { materialsWanted: before ?? [] });
+    setOverlay(card.key, {
+      kind: "receipt", lane: "hk",
+      title: card.who || "Recorded",
+      line: `${willRecordText(v.recordRows, "and") ?? "Materials"} — on your query to ${card.who || "the agent"}.`,
+      undo,
+    });
+    doneToast(card, async () => { await undo(); clearOverlay(card.key); flash("Restored"); });
+  }
+
+  /**
+   * ⚠️ THE ESCAPE HATCH WRITES NO MATERIAL DATA — that is the entire reason it exists rather than
+   * being "save with nothing ticked". It suppresses the task through the same permanent-dismiss
+   * path every other card uses, so the query is untouched and the row does not come back.
+   */
+  function leaveMaterialsUnrecorded(card: BoardCard) {
+    if (!card.relatedRecordId) return;
+    dismissTask("materials_unrecorded", card.relatedRecordId, "permanent");
+    const undo = () => upsertTaskFlag(
+      flagKeyForTask("materials_unrecorded", card.relatedRecordId!), { snoozedUntil: null });
+    setOverlay(card.key, {
+      kind: "dismissed", lane: "hk",
+      text: "Left unrecorded — the query is unchanged.",
+      undo,
+    });
+    flash("Left unrecorded", { label: "Undo", fn: async () => { await undo(); clearOverlay(card.key); flash("Restored"); } });
+  }
+
+  /**
+   * ⚠️ THE RECORD CONTEXT IS READ, NEVER GUESSED. The date is the query's own `dateSent`; the
+   * requirements are the AGENT's, through the same `materialRowsFromAgent` the agent editor uses.
+   * An agency with nothing on file states that rather than rendering an empty affordance.
+   */
+  function journeyRecord(card: BoardCard) {
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    if (!q) return undefined;
+    const ag = agents.find((a) => a.id === q.agentId);
+    const asks = materialRowsFromAgent(ag?.materialsWanted);
+    const asksLine = summaryFromRows(asks);
+    return {
+      sentOn: q.dateSent
+        ? new Date(String(q.dateSent)).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
+        : "",
+      /* ⚠️ ONLY THE ROWS THE AGENCY ACTUALLY ASKS FOR — `materialRowsFromAgent` returns all four
+         whatever is stored, so handing them over wholesale would "start from" a set of unticked
+         rows and read as though the button had done nothing. */
+      asks: asks.filter((r) => r.on),
+      asksLine: asksLine ? `They ask for ${asksLine}` : null,
+    };
   }
 
   /**

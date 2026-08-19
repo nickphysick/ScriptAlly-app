@@ -214,7 +214,7 @@ describe("⚠️ THE OFFER IS A BRANCH, NOT A STACK", () => {
   it("it has no step stack at all — the type says so, and so does the table", () => {
     /* `JOURNEY_STEPS` is keyed `Exclude<JourneyKind, "offer">`. A placeholder entry is how a branch
        quietly becomes a stack later, so there is none to find. */
-    expect(Object.keys(JOURNEY_STEPS).sort()).toEqual(["chase", "close", "fix", "note", "send"]);
+    expect(Object.keys(JOURNEY_STEPS).sort()).toEqual(["chase", "close", "fix", "materials", "note", "send"]);
     /* ⚠️ AND `fix`'s ENTRY IS EMPTY FOR THE OPPOSITE REASON — it is a stack, but a DERIVED one, so
        the table holds no steps to be read instead of the card's gaps. A non-empty entry here would
        silently become the thing `fixSteps` is meant to replace. */

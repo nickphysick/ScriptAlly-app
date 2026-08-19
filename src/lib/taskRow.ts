@@ -121,6 +121,9 @@ export function rowPrimaryLabel(c: BoardCard, column: TodoColumnId): string {
   if (column === "snoozed") return "Return";
   if (isSweepCard(c)) return "Start";
   if (c.taskType === "no_response_close") return "Close";
+  /* ⚠️ "Action" IS THE SHORTHAND OF LAST RESORT, and it read that way on a record gap — the same
+     fault the chase's commit button had. The deed names itself: you are recording, not "actioning". */
+  if (c.taskType === "materials_unrecorded" || c.taskType === "materials_unrecorded_bulk") return "Record";
   /* ⚠️ A WRITER'S OWN ITEM IS COMPLETED, NOT "ACTIONED" (icon-cluster P2). The split button never
      drew this branch — `cardMenu` offers a user task no primary, so the button simply did not
      render and the word was never needed. The cluster has a FIXED first slot, so the deed is

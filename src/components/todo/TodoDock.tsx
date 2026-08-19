@@ -23,6 +23,7 @@
  * decides what to OFFER; it never decides what happens.
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import type { MaterialRow as MatEditorRow } from "../../lib/agentMaterials";
 import { Clock, MoreHorizontal, X, ChevronLeft, ChevronRight, Mail, Globe, Copy, Check, ExternalLink } from "lucide-react";
 import { BoardCard } from "../../lib/todoBoard";
 import { StatusDot } from "../StatusDot";
@@ -145,6 +146,10 @@ export interface TodoDockProps {
    * here would give one fact two sources.
    */
   journeyGaps?: (card: BoardCard) => readonly ("responseTime" | "materials" | "mswl")[];
+  /** materials only — the send these attach to, and what the agency asks for. Page-derived. */
+  journeyRecord?: (card: BoardCard) => { sentOn: string; asks: MatEditorRow[]; asksLine: string | null } | undefined;
+  /** materials only — suppress this task without writing material data. */
+  onLeaveUnrecorded?: (card: BoardCard) => void;
   /**
    * ⚠️ THE GROUP SWEEP — a card that stands for a cohort rather than for one agent. The page
    * supplies the rule and the members because it owns the agent list; the dock only renders and
@@ -201,7 +206,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, card, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, card, activeKey, onSelect, onClose, timeline, materials, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyRecord, onLeaveUnrecorded, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const surfaceRef = useRef<HTMLDivElement>(null);
   /* ⚠️ `confirmSend` IS RETIRED WITH THE CHECKBOX (Phase 6). It was the card's own copy of a
@@ -438,6 +443,8 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               wrote={{ title: card.title, ...(card.detail ? { detail: card.detail } : {}) }}
               materials={materials?.(card) ?? []}
               ask={ask?.(card)}
+              record={journeyRecord?.(card)}
+              onLeaveUnrecorded={onLeaveUnrecorded ? () => onLeaveUnrecorded(card) : undefined}
               value={draft}
               onChange={setDraft}
               onCancel={() => setDraft(null)}

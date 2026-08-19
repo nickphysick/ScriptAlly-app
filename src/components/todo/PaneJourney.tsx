@@ -27,6 +27,16 @@
 import React, { useMemo, useRef, useState } from "react";
 import { ArrowLeft, Check, ChevronRight } from "lucide-react";
 import { MaterialRow } from "../../lib/todoHandoff";
+/* ⚠️ TWO TYPES SHARE THE NAME `MaterialRow` IN THIS CODEBASE, and they are not related:
+   `todoHandoff`'s (imported above) is a display row with a `label`, used by the reference panel;
+   `agentMaterials`' is the editor's four-row model with a `key`. Aliased rather than renamed —
+   renaming either is a sweep, and an unqualified import here would resolve to the wrong one
+   silently, which is exactly what tsc caught. */
+import {
+  MATERIAL_ROW_NAMES, snapToUnit, willRecordText,
+  type MaterialRow as MatEditorRow,
+} from "../../lib/agentMaterials";
+import { SampleSpecPicker } from "../materials/SampleSpecPicker";
 import {
   CLOSE_REASON_COPY, CloseReason, JOURNEY_HINT, JOURNEY_STEPS, JourneyKind, JourneySendValues,
   OFFER_ACT, OFFER_BRANCHES, OFFER_HINT, OfferBranch, SEND_METHODS, SendMethod,
@@ -49,6 +59,7 @@ const STEP_TITLE: Record<StepId, string> = {
   "gap-responseTime": "How long they take",
   "gap-materials": "What they ask for",
   "gap-mswl": "What they are looking for",
+  "gap-sent-materials": "What went with it",
 };
 
 /**
@@ -113,9 +124,26 @@ export interface PaneJourneyProps {
   onChange: (v: JourneySendValues) => void;
   /** `Back to the task` — the way out at the TOP of the body. Writes nothing. */
   onCancel: () => void;
+  /**
+   * materials only — the send these materials attach to, stated so the form never asks for a date
+   * it already has, and what the agency asks for so the writer can start from it.
+   */
+  record?: {
+    /** The existing send's date, already formatted for reading. */
+    sentOn: string;
+    /** The agent's own requirements as rows — the "start from" button's source. */
+    asks: MatEditorRow[];
+    /** The one-line statement of what that agency asks for, or null when nothing is on file. */
+    asksLine: string | null;
+  };
+  /**
+   * materials only — the escape hatch. Suppresses the task for this query WITHOUT writing any
+   * material data, which is the whole reason it cannot be a save with nothing ticked.
+   */
+  onLeaveUnrecorded?: () => void;
 }
 
-export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, gaps, holders, replyBy, wrote, value, onChange, onCancel }) => {
+export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, gaps, holders, replyBy, wrote, value, onChange, onCancel, record, onLeaveUnrecorded }) => {
   const now = useMemo(() => new Date(), []);
   /* declared for five kinds, derived from the card's own gaps for `fix` — see the note at the map */
   const steps = useMemo(() => (kind === "fix" ? fixSteps(gaps ?? []) : JOURNEY_STEPS[kind]), [kind, gaps]);
@@ -405,6 +433,108 @@ export const PaneJourney: React.FC<PaneJourneyProps> = ({ materials, ask, kind, 
             })}
           </div>
         );
+      case "gap-sent-materials": {
+        /* ⚠️ EVERY DERIVATION HERE IS `agentMaterials`' OWN. The rows, the sample's physics and the
+           "Will record" wording all come from the module that already owns them, so this form and
+           the agent editor cannot come to describe the same parcel differently. */
+        const rows = value.recordRows;
+        const setRows = (next: MatEditorRow[]) => set({ recordRows: next });
+        const patch = (key: MatEditorRow["key"], p: Record<string, unknown>) =>
+          setRows(rows.map((r) => (r.key === key ? ({ ...r, ...p } as MatEditorRow) : r)));
+        const willRecord = willRecordText(rows, "and");
+        return (
+          <div className="pj-opts pj-rec">
+            {/* ⚠️ A FACT, THEN A BUTTON — never a pre-tick. The line states what the agency asks
+                for; the row only changes if the writer says so. Absent requirements state their
+                own absence rather than rendering an empty affordance. */}
+            <div className="pj-recask">
+              {record?.asksLine
+                ? (<>
+                    <span className="pj-recasktx">{record.asksLine}</span>
+                    <button type="button" className="pj-recstart"
+                      onClick={() => record.asks.length && setRows(record.asks.map((r) => ({ ...r })))}>
+                      Start from this
+                    </button>
+                  </>)
+                : <span className="pj-recnone">No requirements on file for this agency</span>}
+            </div>
+
+            {/* ⚠️ THE TWO PLAIN ROWS ONLY. `sample` carries its own unit control and `other` its own
+                free-text field, and both have dedicated blocks below — filtering on `sample` alone
+                rendered "Other" here AND "Something else" beneath it. Measured on the page. */}
+            {rows.filter((r) => r.kind === "binary").map((r) => (
+              <button type="button" key={r.key} className={`pj-orow${r.on ? " on" : ""}`} aria-pressed={r.on}
+                onClick={() => patch(r.key, { on: !r.on })}>
+                <span className="pj-bx" aria-hidden>{r.on ? <Check size={10} /> : null}</span>
+                <span className="pj-otx">{r.name}</span>
+              </button>
+            ))}
+
+            {/* the opening sample keeps its own control — one parcel measured two ways, join "·" */}
+            {(() => {
+              const sample = rows.find((r) => r.kind === "qty");
+              const on = rows.some((r) => r.kind === "qty" && r.on);
+              if (!sample) return null;
+              return (
+                <div className={`pj-orow pj-recsample${on ? " on" : ""}`}>
+                  <button type="button" className="pj-recsamplehd" aria-pressed={on}
+                    onClick={() => on
+                      ? setRows(rows.map((r) => (r.kind === "qty" ? { ...r, on: false, amount: "" } : r)))
+                      : setRows(rows.map((r) => (r.kind === "qty" ? { ...r, on: true, amount: snapToUnit(r.unit) } : r)))}>
+                    <span className="pj-bx" aria-hidden>{on ? <Check size={10} /> : null}</span>
+                    <span className="pj-otx">{MATERIAL_ROW_NAMES.sample}</span>
+                  </button>
+                  {on && <SampleSpecPicker rows={rows} onChange={setRows} join="and" idPrefix="pjrec" />}
+                </div>
+              );
+            })()}
+
+            {(() => {
+              const other = rows.find((r) => r.kind === "text");
+              if (!other) return null;
+              return other.on ? (
+                <div className="pj-also bare">
+                  <input type="text" className="pj-recother" autoFocus value={other.text}
+                    placeholder="What else went with it?"
+                    onChange={(e) => patch("other", { text: e.target.value })} />
+                  <button type="button" className="pj-recdrop" onClick={() => patch("other", { on: false, text: "" })}>
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <button type="button" className="pj-orow" aria-pressed={false} onClick={() => patch("other", { on: true })}>
+                  <span className="pj-bx" aria-hidden />
+                  <span className="pj-otx">Something else</span>
+                </button>
+              );
+            })()}
+
+            {/* ⚠️ NO DATE FIELD. It attaches to a send that already has one; a second date control
+                would invite a contradictory answer onto the same event. State it instead. */}
+            {record?.sentOn && (
+              <p className="pj-recdate">
+                These attach to the query sent on {record.sentOn} — no new date is recorded.
+              </p>
+            )}
+
+            {/* the strip states the OUTCOME in words, never a count of forms */}
+            <p className="pj-recwill">
+              {willRecord
+                ? <><span className="pj-recwilllab">Will record:</span> {willRecord}</>
+                : <span className="pj-recnone">Nothing ticked yet</span>}
+            </p>
+
+            {/* ⚠️ THE ESCAPE HATCH IS NOT OPTIONAL, and it is not a save. It suppresses the task and
+                writes no material data — the honest answer to "I cannot remember". */}
+            {onLeaveUnrecorded && (
+              <button type="button" className="pj-recescape" onClick={onLeaveUnrecorded}>
+                Can&rsquo;t remember what went? Leave it unrecorded — the query stays as it is and
+                this task won&rsquo;t come back.
+              </button>
+            )}
+          </div>
+        );
+      }
       case "gap-mswl":
         return (
           <div className="pj-also bare">

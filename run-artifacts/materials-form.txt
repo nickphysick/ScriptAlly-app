@@ -1,0 +1,21 @@
+── the materials form (1440×900)
+  form present:        true
+  "asks for" row:      true
+  material rows:       4
+  ⚠️ ticked by default: 0   (MUST be 0)
+  Will-record strip:   Nothing ticked yet
+  date statement:      These attach to the query sent on 4 May 2026 — no new date is recorded.
+  no date FIELD:       true
+  escape hatch:        Can’t remember what went? Leave it unrecorded — the query st…
+  step title rendered: true
+  row labels:          ["Covering letter","Synopsis","Opening sample","Something else"]
+  commit button:       Record what you sent
+  primary clicked:     Record
+  buttons seen:        ["Snooze","Open query","Dismiss","Record"]
+── after pressing “Start from this”
+  rows now ticked:     2   (MUST be > 0 — and only after the press)
+  Will-record strip:   Will record: Covering letter · Synopsis
+── 390×844
+  form present:        true
+  full-page scroll:    0px
+  page errors:         0

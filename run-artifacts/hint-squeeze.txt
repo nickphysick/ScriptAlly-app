@@ -1,0 +1,4 @@
+── foot hint width per journey (1440×900)
+  materials  hint   53px / 4 lines · foot 378px · buttons [65,180]  "Your record only — the query does not move."
+  close      hint   82px / 4 lines · foot 378px · buttons [65,151]  "This closes the record. It does not tell the agent"
+  send       hint   51px / 7 lines · foot 378px · buttons [65,182]  "Nothing is sent from here — this records what you "

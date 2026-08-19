@@ -22,6 +22,13 @@
  * to record different things.
  */
 
+/* ⚠️ THE MODULE'S ONE IMPORT, AND IT IS DELIBERATE. `paneJourney` is otherwise dependency-free
+   declarations; `MaterialRow` is imported rather than restated because `agentMaterials` has owned
+   the material shape for months, and a second copy of it here is precisely the drift this journey
+   exists to avoid. `agentMaterials` is pure — no firebase — so nothing about the module's
+   testability changes. */
+import { materialRowsFromAgent, willRecordText, type MaterialRow } from "./agentMaterials";
+
 /**
  * ⚠️ THE STEPS ARE DECLARED PER JOURNEY, AND THE STACKS ARE DELIBERATELY DIFFERENT LENGTHS.
  *
@@ -37,7 +44,10 @@
  *
  * Declared as a table rather than branched in the component — the same law `paneSections` follows.
  */
-export type JourneyKind = "send" | "chase" | "close" | "offer" | "note" | "fix";
+/* ⚠️ `materials` IS NOT `send`, AND NOT `fix`. A send RECORDS AN EVENT and moves the query on; this
+   records what went with an event that already happened and moves nothing. A fix edits the AGENT.
+   Same surface family, three different subjects and three different writes. */
+export type JourneyKind = "send" | "chase" | "close" | "offer" | "note" | "fix" | "materials";
 
 /**
  * ⚠️ THE OFFER IS A BRANCH, NOT A STACK, AND FLATTENING IT WOULD BE A LIE ABOUT THE DECISION.
@@ -58,7 +68,9 @@ export const OFFER_BRANCHES: { key: OfferBranch; title: string; gloss: string }[
 
 export type StepId = "what-went" | "how" | "when" | "check-back" | "why" | "remember" | "wrote"
   /* the fix journey's three, one per gap `agentDataQualityNeeds` can report */
-  | "gap-responseTime" | "gap-materials" | "gap-mswl";
+  | "gap-responseTime" | "gap-materials" | "gap-mswl"
+  /* the materials journey's one step — named for the RECORD it fills, not for the send it describes */
+  | "gap-sent-materials";
 
 /* ⚠️ `Exclude<…, "offer">` IS THE TYPE SAYING WHAT THE DESIGN SAYS: the offer has no step stack,
    because it branches. A `Record<JourneyKind, …>` would have forced a placeholder entry here, and a
@@ -89,6 +101,17 @@ export const JOURNEY_STEPS: Record<Exclude<JourneyKind, "offer">, readonly StepI
    * form.
    */
   fix: [],
+  /**
+   * ⚠️ ONE STEP, AND PADDING IT WOULD BE INVENTING WORK. A send asks four things because a send HAS
+   * four — what went, how, when, anything to remember. This journey knows three of them already:
+   * the query records its own `dateSent` and `sendMethod`, and the event happened months ago. The
+   * only unknown is WHAT WENT, so that is the only question.
+   *
+   * ⚠️ AND THERE IS NO DATE FIELD, DELIBERATELY. These materials attach to a send that already has
+   * a date; offering another would invite a second, contradictory one onto the same event. The form
+   * states the existing date instead of asking for one.
+   */
+  materials: ["gap-sent-materials"],
 };
 
 /** The `fix` journey's steps — one per gap, in the order `agentDataQualityNeeds` reports them. */
@@ -113,6 +136,9 @@ export const JOURNEY_PRELINE: Record<JourneyKind, string> = {
   fix: "Filling in the record for",
   /* a note has no agent — the band already falls through to the standing subject */
   note: "Ticking off",
+  /* ⚠️ PAST TENSE, because the send already happened — "Recording what you sent to" is the send's
+     line and reads as though the parcel is going out now. */
+  materials: "Filling in what you sent",
 };
 
 /**
@@ -127,6 +153,7 @@ export const JOURNEY_ACT: Record<Exclude<JourneyKind, "send" | "offer">, string>
   close: "Close the record",
   note: "Mark it done",
   fix: "Save to the record",
+  materials: "Record what you sent",
 };
 
 /**
@@ -140,6 +167,16 @@ export const JOURNEY_HINT: Record<Exclude<JourneyKind, "offer">, string> = {
   close: "This closes the record. It does not tell the agent anything.",
   note: "Struck through on Today — undo is on the toast.",
   fix: "This updates the agent's record. It tells them nothing.",
+  /* ⚠️ THE HINT HAS TO SAY WHAT IS *NOT* HAPPENING. This is the one journey a writer could mistake
+     for changing where the query stands — it is on a card about a send, and the word "record" is a
+     verb elsewhere on this page. Nothing moves. */
+  /* ⚠️ KEPT SHORT — BUT THE SQUEEZE IS NOT MINE AND SHORTENING DOES NOT CURE IT. `.pj-hint` carries
+     `min-width: 0` between two `flex: none` buttons, so it is the only thing in the foot row that
+     can give. Measured at 1440 on a 378px foot: materials 53px/4 lines, close 82px/4, and SEND
+     51px/7 — the worst of the three is the oldest journey, so this is a pre-existing fault of the
+     shared row rather than anything this kind introduced. Reported, not fixed: the rule is load
+     bearing for five other journeys and widening it needs its own walk. */
+  materials: "Your record only — the query does not move.",
 };
 
 /** The three ways a query ends — the close journey's one real question. */
@@ -170,6 +207,15 @@ export interface JourneySendValues {
   fixMaterials: string[];
   /** Their wish list, verbatim. */
   fixMswl: string;
+  /**
+   * materials only — the four rows, in `agentMaterials`' own model so the picker, the "Will record"
+   * strip and the encoder all read one shape.
+   *
+   * ⚠️ EVERY ROW STARTS UNTICKED. Nothing is inferred from what the agency asks for unless the
+   * writer presses the button that says so — a pre-ticked row would turn a requirement into a
+   * record of what was posted, and nothing downstream could tell the two apart afterwards.
+   */
+  recordRows: MaterialRow[];
   /** offer only — `null` while the writer is on the branch selector. */
   branch: OfferBranch | null;
   /** offer · decide — accepted or declined. `null` until said. */
@@ -221,6 +267,10 @@ export function openSend(
   const m = SEND_METHODS.find((x) => x.toLowerCase() === String(queryMethod ?? "").toLowerCase());
   return {
     materials: [...materials], also: "", method: m ?? "Email", sentDate: ymdLocal(now), note: "",
+    /* ⚠️ THE FOUR ROWS, ALL OFF. Built from an EMPTY stored list, so the shape is
+       `materialRowsFromAgent`'s own and nothing arrives pre-ticked. Starting from what the agency
+       asks for is a BUTTON the writer presses, never the state they find. */
+    recordRows: materialRowsFromAgent([]),
     /* ⚠️ THE DEFAULT IS THE ONE THE QUICK PATH ALREADY STATES — `DEFAULT_CHECKBACK_DAYS`'s 14. A
        second default here would be a second answer to "when does a nudge come back". */
     checkBackDays: 14,
@@ -413,10 +463,29 @@ export function journeySummary(kind: JourneyKind, v: JourneySendValues, now: Dat
      here would say the same thing twice on one screen. It states the DEED. */
   if (kind === "note") return "Marking this done.";
   if (kind === "fix") return fixSummary(v);
+  /**
+   * ⚠️ THE MATERIALS SUMMARY, AND THE REASON THIS FUNCTION IS NOW EXHAUSTIVE. This ladder used to
+   * END on the close journey's sentence, so any kind without a branch inherited it — and the
+   * materials form duly rendered "Choose how this one ended." beneath a form about what was posted.
+   * Measured on the page; nothing failed, it simply said the wrong thing.
+   *
+   * It is the same shape Phase A removed from `completionVia`, one register along: a permissive
+   * default answering AS another journey rather than writing as one. The close case is explicit
+   * now and the fall-through is a compile error.
+   */
+  if (kind === "materials") {
+    const what = willRecordText(v.recordRows, "and");
+    return what ? `Recording ${what.toLowerCase()} on this send.` : "Tick what went with this query.";
+  }
   const mode = whenMode(v.sentDate, now);
   const when = mode === "today" ? "today" : mode === "yesterday" ? "yesterday" : `on ${shortDay(v.sentDate)}`;
   if (kind === "chase") return `Logging a nudge sent ${when}, coming back ${checkBackLabel(v.checkBackDays)}.`;
-  const r = CLOSE_REASON_COPY.find((x) => x.key === v.reason);
-  /* ⚠️ IT SAYS WHAT IS MISSING RATHER THAN GUESSING — the one journey that can be unanswerable */
-  return r ? `Closing the query: ${r.label.toLowerCase()}.` : "Choose how this one ended.";
+  if (kind === "close") {
+    const r = CLOSE_REASON_COPY.find((x) => x.key === v.reason);
+    /* ⚠️ IT SAYS WHAT IS MISSING RATHER THAN GUESSING — the one journey that can be unanswerable */
+    return r ? `Closing the query: ${r.label.toLowerCase()}.` : "Choose how this one ended.";
+  }
+  /* the compile-time guard: a new journey must say what it is about before it can render */
+  const unhandled: never = kind;
+  return unhandled;
 }
