@@ -1,0 +1,148 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages — the restructured overview: a page-local rail of three registers beside a
+ * stage carrying the problem statement and the how-it-works infographic.
+ * Design authority: design-refs/submission-packages-restructure.html.
+ *
+ * ⚠️ THE TOKENS LIVE IN `packageWorkshop.css`'s `.pkgw` BLOCK, NOT HERE, and that is deliberate.
+ * A second `.pkgw { … }` rule in a second file is exactly the ambiguity that has caught
+ * `workspacePageGrid.css` twice: a lock that finds its rule with `indexOf(".pkgw {")` reads
+ * whichever block comes first in the bundle and silently asserts against the wrong one. One rule
+ * per selector; this file declares only `.pkgo-*` classes, which nothing else in the app owns.
+ *
+ * ⚠️ EVERY CONTAINER FILL IS `--pkgo-surface` (white), never the ref's parchment — the one
+ * sanctioned deviation from the ref's values (D4), named once at the token and never restated as
+ * a literal here.
+ *
+ * ⚠️ SINGLE-LOOK, like the rest of this page. `packageWorkshop.css`'s header records the standing
+ * call: no `.t-capp` / `.t-bold` / `.t-edn` variants — the page renders identically in all three
+ * themes, as the agent list and Discover do. So the ref's literal sage and pink are correct here
+ * rather than a themed-surface violation; the chroma-spread law governs pages that DO fork by
+ * theme, and this one deliberately does not.
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE TWO-COLUMN BODY
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠️ `align-items: start` IS WHAT MAKES THE RAIL A RAIL. Without it the grid stretches both
+   columns to the tallest, and the three rail panels — which are content-sized objects — would be
+   pulled to the stage's height with the last one's fill running to the bottom of the page. The ref
+   says the same thing in its own `.body-grid`. */
+.pkgo-grid {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 26px;
+  align-items: start;
+}
+
+/* ⚠️ `minmax(0, 1fr)` AND NOT `1fr` ON THE STAGE. A bare `1fr` track has an `auto` minimum, so a
+   single long unbreakable string inside the stage (a package name, a composition line) makes the
+   track wider than its share and pushes the rail off its 300px — the grid grows rather than the
+   text wrapping. The zero minimum is what lets the content wrap instead of the layout moving.
+   This is the same failure the stat block hit with `auto-fit`, from the other direction. */
+
+.pkgo-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.pkgo-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   RAIL PANELS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgo-panel {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.pkgo-head {
+  background: linear-gradient(180deg, var(--pkgo-sage-a), var(--pkgo-sage-b));
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pkgo-lbl {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--pkg-ink);
+  text-transform: uppercase;
+}
+
+.pkgo-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.pkgo-chip {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(58, 28, 20, 0.12);
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: var(--pkg-ink-soft);
+  white-space: nowrap;
+}
+
+/* The rail's own action. Outlined, never filled — the page has exactly one filled control and it
+   is `New package` in the header (D5). */
+.pkgo-add {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(58, 28, 20, 0.22);
+  background: transparent;
+  color: var(--pkg-ink);
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.pkgo-add:hover { background: rgba(255, 255, 255, 0.55); }
+
+.pkgo-body { padding: 10px; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   BACK TO THE OVERVIEW
+   ══════════════════════════════════════════════════════════════════════════════
+
+   The return from a surface the rail opened. Outlined, because `New package` is the page's only
+   filled control (D5). Aligned left and self-sized so it never spans the surface it sits above. */
+.pkgo-back {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid rgba(58, 28, 20, 0.22);
+  background: transparent;
+  color: var(--pkg-ink);
+  padding: 5px 11px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pkgo-back:hover { background: rgba(255, 255, 255, 0.6); border-color: var(--pkg-pinkline); }

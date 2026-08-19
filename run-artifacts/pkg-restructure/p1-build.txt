@@ -1,0 +1,178 @@
+vite v6.4.3 building for production...
+transforming...
+✓ 2793 modules transformed.
+node_modules/lottie-web/build/player/lottie.js (14422:32): Use of eval in "node_modules/lottie-web/build/player/lottie.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/src/lib/firebase.ts is dynamically imported by /Users/nickphysick/ScriptAlly-app/src/components/dashboard/OneScreenDashboard.tsx but also statically imported by /Users/nickphysick/ScriptAlly-app/src/components/DiscoverNewAgents.tsx, /Users/nickphysick/ScriptAlly-app/src/components/EditQueryDrawer.tsx, /Users/nickphysick/ScriptAlly-app/src/components/Queries.tsx, /Users/nickphysick/ScriptAlly-app/src/components/RecordResponseFocusForm.tsx, /Users/nickphysick/ScriptAlly-app/src/components/agents/AgentList.tsx, /Users/nickphysick/ScriptAlly-app/src/components/todo/useDockActivity.ts, /Users/nickphysick/ScriptAlly-app/src/lib/authActions.ts, /Users/nickphysick/ScriptAlly-app/src/lib/db.tsx, /Users/nickphysick/ScriptAlly-app/src/lib/emailImportCommit.ts, /Users/nickphysick/ScriptAlly-app/src/lib/recomputeQuery.ts, /Users/nickphysick/ScriptAlly-app/src/lib/recordResponse.ts, /Users/nickphysick/ScriptAlly-app/src/lib/seedCommunityAgents.ts, /Users/nickphysick/ScriptAlly-app/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/functions/dist/esm/index.esm.js is dynamically imported by /Users/nickphysick/ScriptAlly-app/src/components/Auth.tsx, /Users/nickphysick/ScriptAlly-app/src/components/Auth.tsx, /Users/nickphysick/ScriptAlly-app/src/components/shell/FeedbackDock.tsx, /Users/nickphysick/ScriptAlly-app/src/marketing/ContactPage.tsx but also statically imported by /Users/nickphysick/ScriptAlly-app/src/lib/assistFill.ts, /Users/nickphysick/ScriptAlly-app/src/lib/emailImport.ts, /Users/nickphysick/ScriptAlly-app/src/lib/smartImport.ts, /Users/nickphysick/ScriptAlly-app/src/lib/suggestComps.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/xlsx/xlsx.mjs is dynamically imported by /Users/nickphysick/ScriptAlly-app/src/lib/templateFile.ts, /Users/nickphysick/ScriptAlly-app/src/lib/templateImport.ts but also statically imported by /Users/nickphysick/ScriptAlly-app/src/lib/smartImport.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist/index.html                                   1.87 kB │ gzip:     0.94 kB
+dist/assets/gu-SbvrH0uZ.svg                       4.19 kB │ gzip:     1.76 kB
+dist/assets/gu-Di1JYREk.svg                       4.33 kB │ gzip:     1.84 kB
+dist/assets/sz-D39eIL5d.svg                       4.63 kB │ gzip:     1.92 kB
+dist/assets/sz-qxMwa2gs.svg                       4.66 kB │ gzip:     1.92 kB
+dist/assets/kg-B0FsxZiL.svg                       4.74 kB │ gzip:     1.92 kB
+dist/assets/kg-CjfitMyT.svg                       4.79 kB │ gzip:     1.95 kB
+dist/assets/gq-Cag8QTk2.svg                       4.94 kB │ gzip:     2.02 kB
+dist/assets/gq-CPnMO1hT.svg                       5.07 kB │ gzip:     2.12 kB
+dist/assets/zm-D8B-0kdx.svg                       5.31 kB │ gzip:     2.25 kB
+dist/assets/nf-DGrQb42O.svg                       5.37 kB │ gzip:     2.37 kB
+dist/assets/zm-BmsW91ne.svg                       5.42 kB │ gzip:     2.27 kB
+dist/assets/cy-bZuP8hmf.svg                       5.47 kB │ gzip:     2.37 kB
+dist/assets/cy-DJKnEFYW.svg                       5.51 kB │ gzip:     2.42 kB
+dist/assets/nf-Dl00mlk2.svg                       5.56 kB │ gzip:     2.46 kB
+dist/assets/ki-p_fAQGbS.svg                       5.63 kB │ gzip:     1.64 kB
+dist/assets/ki-fuIMkEYQ.svg                       5.81 kB │ gzip:     1.70 kB
+dist/assets/ms-DxciGbUu.svg                       5.83 kB │ gzip:     2.55 kB
+dist/assets/ms-B-w7hFKu.svg                       5.91 kB │ gzip:     2.50 kB
+dist/assets/zw-CSuuaw9K.svg                       6.17 kB │ gzip:     2.46 kB
+dist/assets/zw-U0m7oJ5e.svg                       6.19 kB │ gzip:     2.49 kB
+dist/assets/br-Dr5rMAMb.svg                       6.75 kB │ gzip:     2.21 kB
+dist/assets/tc-CJHJmJj1.svg                       7.09 kB │ gzip:     2.99 kB
+dist/assets/kz-CwKXYZ8s.svg                       7.09 kB │ gzip:     2.92 kB
+dist/assets/kz-Dkyx6q-p.svg                       7.10 kB │ gzip:     2.91 kB
+dist/assets/tc-dtelpZmc.svg                       7.12 kB │ gzip:     2.99 kB
+dist/assets/kh-BeWfuE30.svg                       7.12 kB │ gzip:     2.72 kB
+dist/assets/kh-BBvObpUS.svg                       7.12 kB │ gzip:     2.74 kB
+dist/assets/br-Cu5YU29T.svg                       7.14 kB │ gzip:     2.41 kB
+dist/assets/li-CHdhvNcr.svg                       7.32 kB │ gzip:     2.96 kB
+dist/assets/li-CMlf0YU8.svg                       7.34 kB │ gzip:     2.97 kB
+dist/assets/xk-Cdz2uTvR.svg                       7.74 kB │ gzip:     3.05 kB
+dist/assets/pt-DZ2ADgIR.svg                       8.00 kB │ gzip:     3.25 kB
+dist/assets/xk-Bj15g7cp.svg                       8.27 kB │ gzip:     3.26 kB
+dist/assets/pt-BTevY6N2.svg                       8.37 kB │ gzip:     3.27 kB
+dist/assets/vi-BSdsyIxY.svg                       8.45 kB │ gzip:     3.55 kB
+dist/assets/vi-BC_zcciE.svg                       8.52 kB │ gzip:     3.59 kB
+dist/assets/eg-YC70hswZ.svg                       8.73 kB │ gzip:     3.55 kB
+dist/assets/eg-DwOkwyQ0.svg                       8.74 kB │ gzip:     3.57 kB
+dist/assets/aw-W0PWLK5p.svg                       9.00 kB │ gzip:     1.67 kB
+dist/assets/gb-wls-CK0XlKT-.svg                   9.01 kB │ gzip:     4.03 kB
+dist/assets/gb-wls-Bxz9hxvX.svg                   9.10 kB │ gzip:     4.14 kB
+dist/assets/im--VPIqfkF.svg                       9.13 kB │ gzip:     3.51 kB
+dist/assets/im-Dd9p-0-T.svg                       9.70 kB │ gzip:     3.81 kB
+dist/assets/sa-DnlyVVKx.svg                       9.85 kB │ gzip:     4.19 kB
+dist/assets/sa-Dh79zbT9.svg                       9.97 kB │ gzip:     4.25 kB
+dist/assets/vg-ClZ-0KpG.svg                      10.00 kB │ gzip:     4.14 kB
+dist/assets/vg-C7xY6pic.svg                      10.02 kB │ gzip:     4.14 kB
+dist/assets/aw-CLCX8uk5.svg                      10.36 kB │ gzip:     1.79 kB
+dist/assets/lk-DUkgV9Tq.svg                      10.72 kB │ gzip:     4.46 kB
+dist/assets/lk-DSQoDxn_.svg                      10.74 kB │ gzip:     4.46 kB
+dist/assets/md-DRlxvNwm.svg                      11.13 kB │ gzip:     2.84 kB
+dist/assets/new-shoots-icon-rtkKHRFF.png         11.14 kB
+dist/assets/md-DTi94M3M.svg                      11.24 kB │ gzip:     2.71 kB
+dist/assets/sx-RKKs0ph6.svg                      12.16 kB │ gzip:     4.12 kB
+dist/assets/sx-nDhIaDNb.svg                      12.21 kB │ gzip:     4.30 kB
+dist/assets/search-icon-BO3cLelW.png             12.28 kB
+dist/assets/mt-YDa8zgzO.svg                      12.71 kB │ gzip:     5.37 kB
+dist/assets/ht-DIMg4gti.svg                      13.30 kB │ gzip:     4.75 kB
+dist/assets/bn-B6T3O78g.svg                      13.34 kB │ gzip:     5.64 kB
+dist/assets/pn-BPAlH32D.svg                      13.44 kB │ gzip:     4.93 kB
+dist/assets/ht-pweRl6ZP.svg                      13.46 kB │ gzip:     4.82 kB
+dist/assets/bn-CPQcA8Ol.svg                      13.47 kB │ gzip:     5.68 kB
+dist/assets/pn-DgxdtieE.svg                      13.47 kB │ gzip:     4.98 kB
+dist/assets/eac-CwGQsyAM.svg                     13.63 kB │ gzip:     4.81 kB
+dist/assets/eac-h4QKADRE.svg                     13.64 kB │ gzip:     4.81 kB
+dist/assets/mt-YqzKx9xl.svg                      13.93 kB │ gzip:     5.86 kB
+dist/assets/ir-Q03Mij62.svg                      15.30 kB │ gzip:     2.28 kB
+dist/assets/ir-cCIgaNf6.svg                      15.40 kB │ gzip:     2.24 kB
+dist/assets/sm-BKrUHzrq.svg                      15.54 kB │ gzip:     5.35 kB
+dist/assets/sm-DGBIRFB_.svg                      15.68 kB │ gzip:     5.27 kB
+dist/assets/dm-Cbhezfe1.svg                      15.79 kB │ gzip:     3.08 kB
+dist/assets/py-mNzh0mZC.svg                      16.18 kB │ gzip:     5.77 kB
+dist/assets/dm-DPPHwW2M.svg                      16.27 kB │ gzip:     3.23 kB
+dist/assets/py-BKi5dxWt.svg                      16.36 kB │ gzip:     5.84 kB
+dist/assets/ni-CcFCSQxm.svg                      17.25 kB │ gzip:     5.36 kB
+dist/assets/ni-BX2WCaNt.svg                      17.29 kB │ gzip:     5.43 kB
+dist/assets/un-Bqg4Cbbh.svg                      18.70 kB │ gzip:     7.44 kB
+dist/assets/af-Bc2fqp73.svg                      18.98 kB │ gzip:     7.68 kB
+dist/assets/un-DabL4p35.svg                      19.00 kB │ gzip:     7.58 kB
+dist/assets/af-C77Rf6cE.svg                      19.19 kB │ gzip:     7.76 kB
+dist/assets/manuscript-icon-D4jO4iMC.png         19.25 kB
+dist/assets/response-rate-icon-CYTQUBpK.png      19.81 kB
+dist/assets/agents-on-file-icon-CC2y-cuN.png     20.34 kB
+dist/assets/query-target-icon-CEARTR3M.png       21.94 kB
+dist/assets/om-nN8zP2Bu.svg                      22.21 kB │ gzip:     4.38 kB
+dist/assets/om-DcqxRdQL.svg                      22.22 kB │ gzip:     4.37 kB
+dist/assets/gb-nir-D4gikpNq.svg                  22.28 kB │ gzip:     5.97 kB
+dist/assets/bm-DvNWWcPM.svg                      22.39 kB │ gzip:     7.17 kB
+dist/assets/bm-BeYgB2z9.svg                      22.46 kB │ gzip:     7.18 kB
+dist/assets/mp-CrOApEqW.svg                      22.57 kB │ gzip:     6.98 kB
+dist/assets/io-BImhNBcd.svg                      22.72 kB │ gzip:     4.11 kB
+dist/assets/dg-DqkWLbnk.svg                      22.72 kB │ gzip:     4.11 kB
+dist/assets/mp-CuaQmCLf.svg                      22.80 kB │ gzip:     7.02 kB
+dist/assets/io-13HOfeJD.svg                      23.02 kB │ gzip:     4.11 kB
+dist/assets/dg-CJPJrjiZ.svg                      23.02 kB │ gzip:     4.11 kB
+dist/assets/ky-BqaZHuhf.svg                      23.37 kB │ gzip:     8.57 kB
+dist/assets/ky-Dpsu1myA.svg                      23.39 kB │ gzip:     8.56 kB
+dist/assets/gb-nir-vEp1ZXy6.svg                  23.92 kB │ gzip:     5.49 kB
+dist/assets/fj-DEAVMg38.svg                      24.10 kB │ gzip:     9.09 kB
+dist/assets/fj-u3dAPoew.svg                      24.14 kB │ gzip:     9.13 kB
+dist/assets/arab-C4CYPgyC.svg                    24.43 kB │ gzip:     8.53 kB
+dist/assets/bt-SxWnbWW0.svg                      24.50 kB │ gzip:     9.95 kB
+dist/assets/arab-C-KgnQEz.svg                    24.59 kB │ gzip:     8.58 kB
+dist/assets/bt-BTo4qm10.svg                      24.78 kB │ gzip:    10.09 kB
+dist/assets/es-ga-D9xG2hYr.svg                   28.21 kB │ gzip:     6.26 kB
+dist/assets/sh-ta-BFo5zkKU.svg                   28.29 kB │ gzip:    10.82 kB
+dist/assets/es-ga-DXhVZ333.svg                   28.34 kB │ gzip:     6.26 kB
+dist/assets/fk-B-RvQ4Hz.svg                      28.49 kB │ gzip:     8.83 kB
+dist/assets/va-s7kyhqIM.svg                      28.66 kB │ gzip:     9.67 kB
+dist/assets/va-B9-hqIE-.svg                      28.72 kB │ gzip:     9.68 kB
+dist/assets/fk-nuUF_Ak3.svg                      28.74 kB │ gzip:     9.20 kB
+dist/assets/sh-ta-CPJublpi.svg                   28.78 kB │ gzip:    11.03 kB
+dist/assets/ec-CaVOFQ3t.svg                      28.78 kB │ gzip:     6.83 kB
+dist/assets/ad-Blhdm5jl.svg                      29.14 kB │ gzip:    10.60 kB
+dist/assets/ec-cwfBJlvF.svg                      29.35 kB │ gzip:     6.72 kB
+dist/assets/as-Dekqy8Of.svg                      30.45 kB │ gzip:    11.46 kB
+dist/assets/ad-B18i8NGa.svg                      30.51 kB │ gzip:    11.15 kB
+dist/assets/hr-fzLfaANM.svg                      30.73 kB │ gzip:    13.14 kB
+dist/assets/as-BTEVCXG-.svg                      30.98 kB │ gzip:    11.62 kB
+dist/assets/hr-BpiVVBoV.svg                      31.28 kB │ gzip:    13.31 kB
+dist/assets/gt-BLpn5qMn.svg                      31.35 kB │ gzip:    11.30 kB
+dist/assets/gt-CJo5DI-7.svg                      31.35 kB │ gzip:    11.30 kB
+dist/assets/gs-DiiNa0F5.svg                      31.50 kB │ gzip:    11.41 kB
+dist/assets/gs-DOgYbHsY.svg                      31.92 kB │ gzip:    11.09 kB
+dist/assets/je-DyWbhIiC.svg                      34.19 kB │ gzip:     9.81 kB
+dist/assets/sh-hl-CgxUDvtv.svg                   34.78 kB │ gzip:    12.58 kB
+dist/assets/je-vXe0Dr49.svg                      35.03 kB │ gzip:    10.03 kB
+dist/assets/sh-hl-CqtQPzWZ.svg                   35.43 kB │ gzip:    12.88 kB
+dist/assets/tm-DGBJvQay.svg                      38.22 kB │ gzip:    11.99 kB
+dist/assets/tm-C_WSgUcv.svg                      38.35 kB │ gzip:    12.09 kB
+dist/assets/do-B86d445t.svg                      40.35 kB │ gzip:    14.40 kB
+dist/assets/do-DeRnbj4d.svg                      41.34 kB │ gzip:    14.76 kB
+dist/assets/bz-BCKHR4_q.svg                      42.51 kB │ gzip:    15.61 kB
+dist/assets/bz-CoBdB-p8.svg                      42.68 kB │ gzip:    15.60 kB
+dist/assets/all-queries-icon-D2VyRa_7.png        53.30 kB
+dist/assets/me-Cv4Gwqah.svg                      56.37 kB │ gzip:    21.28 kB
+dist/assets/me-CfGorN3b.svg                      56.95 kB │ gzip:    21.57 kB
+dist/assets/sv-CJIHhYwF.svg                      77.27 kB │ gzip:    21.83 kB
+dist/assets/sv-RZ39q5hO.svg                      77.72 kB │ gzip:    22.08 kB
+dist/assets/mx-CvCwYHGF.svg                      80.21 kB │ gzip:    27.77 kB
+dist/assets/es-d5m8M5h8.svg                      80.96 kB │ gzip:    14.80 kB
+dist/assets/es-BuSGTZm_.svg                      82.15 kB │ gzip:    15.47 kB
+dist/assets/mx-Cc8Ccfe8.svg                      84.75 kB │ gzip:    29.50 kB
+dist/assets/bo-CcUiMqkJ.svg                     102.88 kB │ gzip:    24.83 kB
+dist/assets/bo-Dry0C6UA.svg                     104.73 kB │ gzip:    25.14 kB
+dist/assets/send-BSv9TXgM.png                   111.74 kB
+dist/assets/sh-ac-D-aE2xRW.svg                  140.52 kB │ gzip:    47.08 kB
+dist/assets/sh-ac-FjwY7RYr.svg                  143.37 kB │ gzip:    47.70 kB
+dist/assets/rs-CnTO3ehk.svg                     181.48 kB │ gzip:    49.93 kB
+dist/assets/rs-BfwKwXtn.svg                     181.63 kB │ gzip:    50.19 kB
+dist/assets/active-query-image-PYoS8NLu.png     743.23 kB
+dist/assets/index-zDiwjp1h.css                1,120.30 kB │ gzip:   215.26 kB
+dist/assets/purify.es-V6uLfjnH.js                26.92 kB │ gzip:    10.17 kB
+dist/assets/index.es-DdTyxgCZ.js                159.60 kB │ gzip:    53.52 kB
+dist/assets/html2canvas.esm-QH1iLAAe.js         202.38 kB │ gzip:    48.04 kB
+dist/assets/index-CICLJVTR.js                 4,190.71 kB │ gzip: 1,176.71 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.62s

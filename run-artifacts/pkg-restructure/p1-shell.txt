@@ -1,0 +1,53 @@
+SCROLLBAR: 0px
+{
+  "plate": {
+    "x": 447,
+    "y": 129,
+    "w": 770,
+    "h": 128
+  },
+  "plateBorderTop": "5px",
+  "plateBorderTopColor": "rgb(154, 168, 150)",
+  "plateRadius": "0px",
+  "plateBg": "rgb(255, 255, 255)",
+  "grid": {
+    "x": 342,
+    "y": 359,
+    "w": 980,
+    "h": 219
+  },
+  "gridCols": "300px 654px",
+  "gridGap": "26px",
+  "rail": {
+    "x": 342,
+    "y": 359,
+    "w": 300,
+    "h": 219
+  },
+  "stage": {
+    "x": 668,
+    "y": 359,
+    "w": 654,
+    "h": 0
+  },
+  "panelCount": 3,
+  "panelLabels": [
+    "Materials",
+    "Packages",
+    "Tracking"
+  ],
+  "panelBg": "rgb(255, 255, 255)",
+  "panelWidths": [
+    300,
+    300,
+    300
+  ],
+  "filled": [
+    {
+      "label": "New package",
+      "bg": "rgb(245, 226, 218)"
+    }
+  ],
+  "filledCount": 1,
+  "hasTabs": false
+}

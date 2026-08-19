@@ -64,3 +64,122 @@ test("recon — current Submission packages page", async ({ page }) => {
   console.log(JSON.stringify(found, null, 2));
   expect(found.hasRoot).toBe(true);
 });
+
+/**
+ * ⚠️ EVERY SELECTOR BELOW IS SCOPED INSIDE `.pkg-root`. Workspace pages stay mounted and toggle
+ * `display`, so a document-wide query on this route can and does return the hidden Query Centre's
+ * elements — recon proved it by reading a 0x0 `.wpg-plate` and the title "Query Centre".
+ */
+const SCOPED = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const box = (el) => { if (!el) return null; const r = el.getBoundingClientRect();
+    return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) }; };
+  const cs = (el, p) => el ? getComputedStyle(el).getPropertyValue(p).trim() : null;
+  const plate = root.querySelector(".wsh");
+  const grid = root.querySelector(".pkgo-grid");
+  const rail = root.querySelector(".pkgo-rail");
+  const stage = root.querySelector(".pkgo-stage");
+  const panels = Array.from(root.querySelectorAll(".pkgo-panel"));
+  /* filled = any button inside the page whose background is not transparent */
+  const filled = Array.from(root.querySelectorAll("button")).filter((b) => {
+    const bg = getComputedStyle(b).backgroundColor;
+    return bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent";
+  }).map((b) => ({ label: (b.textContent || "").trim().slice(0, 32), bg: getComputedStyle(b).backgroundColor }));
+  return {
+    plate: box(plate),
+    plateBorderTop: cs(plate, "border-top-width"),
+    plateBorderTopColor: cs(plate, "border-top-color"),
+    plateRadius: cs(plate, "border-top-left-radius"),
+    plateBg: cs(plate, "background-color"),
+    grid: box(grid),
+    gridCols: cs(grid, "grid-template-columns"),
+    gridGap: cs(grid, "column-gap"),
+    rail: box(rail),
+    stage: box(stage),
+    panelCount: panels.length,
+    panelLabels: panels.map((p) => (p.querySelector(".pkgo-lbl")?.textContent || "").trim()),
+    panelBg: panels[0] ? cs(panels[0], "background-color") : null,
+    panelWidths: panels.map((p) => Math.round(p.getBoundingClientRect().width)),
+    filled,
+    filledCount: filled.length,
+    hasTabs: !!root.querySelector(".pkgw-tabs"),
+  };
+})()`;
+
+test("phase 1 — shell: header card + two-column grid", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const sbw = await scrollbarWidth(page);
+  const r = await page.evaluate(SCOPED);
+  await page.screenshot({ path: `${OUT}/p1-shell-1440.png`, fullPage: true });
+  writeFileSync(`${ART}/p1-shell.txt`, `SCROLLBAR: ${sbw}px\n${JSON.stringify(r, null, 2)}\n`);
+  console.log(JSON.stringify(r, null, 2));
+});
+
+/** Where does the plate's width come from? One box per ancestor, scoped inside the page. */
+test("probe — plate vs body width chain", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const r = await page.evaluate(`(() => {
+    const root = document.querySelector(".pkg-root");
+    const b = (s) => { const el = root.querySelector(s); if (!el) return { sel: s, missing: true };
+      const rect = el.getBoundingClientRect(); const c = getComputedStyle(el);
+      return { sel: s, x: Math.round(rect.x), w: Math.round(rect.width), maxW: c.maxWidth,
+        padL: c.paddingLeft, padR: c.paddingRight, ml: c.marginLeft, mr: c.marginRight,
+        gridCol: c.gridColumn, display: c.display, justifySelf: c.justifySelf }; };
+    const rootBox = (() => { const rect = root.getBoundingClientRect(); const c = getComputedStyle(root);
+      return { sel: ".pkg-root", x: Math.round(rect.x), w: Math.round(rect.width), maxW: c.maxWidth,
+        padL: c.paddingLeft, padR: c.paddingRight, display: c.display,
+        cols: getComputedStyle(root.querySelector(".pkgw-wpg")).gridTemplateColumns }; })();
+    return [rootBox, ...[".pkgw-wpg", ".wsh-wrap", ".wsh", ".wpg-scroll", ".pkgw-strip", ".pkgo-grid"].map(b)];
+  })()`);
+  writeFileSync(`${ART}/p1-widthchain.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});
+
+/** The grid's own placement properties — why is row 1 narrower than row 3? */
+test("probe2 — grid placement", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const r = await page.evaluate(`(() => {
+    const root = document.querySelector(".pkg-root");
+    const wpg = root.querySelector(".pkgw-wpg");
+    const c = getComputedStyle(wpg);
+    const kids = Array.from(wpg.children).map((k) => {
+      const kc = getComputedStyle(k); const rect = k.getBoundingClientRect();
+      return { cls: k.className, x: Math.round(rect.x), w: Math.round(rect.width),
+        gridColumn: kc.gridColumn, gridRow: kc.gridRow, justifySelf: kc.justifySelf, width: kc.width };
+    });
+    return {
+      gridTemplateColumns: c.gridTemplateColumns,
+      gridTemplateRows: c.gridTemplateRows,
+      gridAutoColumns: c.gridAutoColumns,
+      gridAutoFlow: c.gridAutoFlow,
+      justifyItems: c.justifyItems,
+      justifyContent: c.justifyContent,
+      kids,
+    };
+  })()`);
+  writeFileSync(`${ART}/p1-gridplacement.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});
+
+/** Why is the body 980 inside a 1010 content box? Resolve the insets and the flex alignment. */
+test("probe3 — body cap", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const r = await page.evaluate(`(() => {
+    const root = document.querySelector(".pkg-root");
+    const scroll = root.querySelector(".wpg-scroll");
+    const strip = root.querySelector(".pkgw-strip");
+    const sc = getComputedStyle(scroll), st = getComputedStyle(strip);
+    const rc = getComputedStyle(root);
+    return {
+      contentGutter: rc.getPropertyValue("--content-gutter").trim(),
+      headerInset: rc.getPropertyValue("--header-inset").trim(),
+      scroll: { alignItems: sc.alignItems, display: sc.display, padL: sc.paddingLeft, padR: sc.paddingRight,
+                w: Math.round(scroll.getBoundingClientRect().width), clientW: scroll.clientWidth },
+      strip: { alignSelf: st.alignSelf, width: st.width, maxW: st.maxWidth, marginL: st.marginLeft,
+               marginR: st.marginRight, w: Math.round(strip.getBoundingClientRect().width) },
+    };
+  })()`);
+  writeFileSync(`${ART}/p1-bodycap.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});

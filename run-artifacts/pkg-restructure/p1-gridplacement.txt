@@ -1,0 +1,46 @@
+{
+  "gridTemplateColumns": "1170px",
+  "gridTemplateRows": "146px 0px 647.75px 0px",
+  "gridAutoColumns": "auto",
+  "gridAutoFlow": "row",
+  "justifyItems": "normal",
+  "justifyContent": "normal",
+  "kids": [
+    {
+      "cls": "wpg-plate",
+      "x": 247,
+      "w": 1170,
+      "gridColumn": "1",
+      "gridRow": "1",
+      "justifySelf": "auto",
+      "width": "1170px"
+    },
+    {
+      "cls": "wpg-scroll",
+      "x": 247,
+      "w": 1170,
+      "gridColumn": "1",
+      "gridRow": "3",
+      "justifySelf": "auto",
+      "width": "1170px"
+    },
+    {
+      "cls": "wpg-hem wpg-hem--top",
+      "x": 247,
+      "w": 1170,
+      "gridColumn": "1",
+      "gridRow": "3",
+      "justifySelf": "auto",
+      "width": "1170px"
+    },
+    {
+      "cls": "wpg-hem wpg-hem--bot",
+      "x": 247,
+      "w": 1170,
+      "gridColumn": "1",
+      "gridRow": "3",
+      "justifySelf": "auto",
+      "width": "1170px"
+    }
+  ]
+}

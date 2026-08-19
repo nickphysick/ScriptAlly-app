@@ -1,0 +1,20 @@
+{
+  "contentGutter": "80px",
+  "headerInset": "120px",
+  "scroll": {
+    "alignItems": "normal",
+    "display": "flex",
+    "padL": "80px",
+    "padR": "80px",
+    "w": 1170,
+    "clientW": 1140
+  },
+  "strip": {
+    "alignSelf": "auto",
+    "width": "980px",
+    "maxW": "none",
+    "marginL": "0px",
+    "marginR": "0px",
+    "w": 980
+  }
+}

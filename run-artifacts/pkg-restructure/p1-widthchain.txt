@@ -1,0 +1,90 @@
+[
+  {
+    "sel": ".pkg-root",
+    "x": 247,
+    "w": 1170,
+    "maxW": "none",
+    "padL": "0px",
+    "padR": "0px",
+    "display": "flex",
+    "cols": "1170px"
+  },
+  {
+    "sel": ".pkgw-wpg",
+    "x": 247,
+    "w": 1170,
+    "maxW": "none",
+    "padL": "0px",
+    "padR": "0px",
+    "ml": "0px",
+    "mr": "0px",
+    "gridCol": "auto",
+    "display": "grid",
+    "justifySelf": "auto"
+  },
+  {
+    "sel": ".wsh-wrap",
+    "x": 447,
+    "w": 770,
+    "maxW": "none",
+    "padL": "0px",
+    "padR": "0px",
+    "ml": "0px",
+    "mr": "0px",
+    "gridCol": "auto",
+    "display": "block",
+    "justifySelf": "auto"
+  },
+  {
+    "sel": ".wsh",
+    "x": 447,
+    "w": 770,
+    "maxW": "none",
+    "padL": "0px",
+    "padR": "0px",
+    "ml": "0px",
+    "mr": "0px",
+    "gridCol": "auto",
+    "display": "block",
+    "justifySelf": "auto"
+  },
+  {
+    "sel": ".wpg-scroll",
+    "x": 247,
+    "w": 1170,
+    "maxW": "none",
+    "padL": "80px",
+    "padR": "80px",
+    "ml": "0px",
+    "mr": "0px",
+    "gridCol": "1",
+    "display": "flex",
+    "justifySelf": "auto"
+  },
+  {
+    "sel": ".pkgw-strip",
+    "x": 342,
+    "w": 980,
+    "maxW": "none",
+    "padL": "16px",
+    "padR": "16px",
+    "ml": "0px",
+    "mr": "0px",
+    "gridCol": "auto",
+    "display": "flex",
+    "justifySelf": "auto"
+  },
+  {
+    "sel": ".pkgo-grid",
+    "x": 342,
+    "w": 980,
+    "maxW": "none",
+    "padL": "0px",
+    "padR": "0px",
+    "ml": "0px",
+    "mr": "0px",
+    "gridCol": "auto",
+    "display": "grid",
+    "justifySelf": "auto"
+  }
+]

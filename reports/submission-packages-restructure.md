@@ -336,3 +336,113 @@ Paths: `design-refs/submission-packages-restructure.html`,
 `run-artifacts/pkg-restructure/*`, `tests/e2e/pkgRestructure.measure.ts`, `.claude/launch.json`.
 
 No `src/` file is touched by this phase.
+
+---
+
+## Phase 1 — Shell
+
+**What shipped:** the header card treatment (D5), the two-column grid (300px rail / fluid stage),
+white containers (D4), and the tab strip removed (D1). The rail panels render their heads; their
+registers and the stage's contents are Phases 2 and 3.
+
+### The header card is a TOKEN override, not a component fork
+
+`PageHeader` is shared by eleven pages and `.wsh` reads all three of its card properties through
+`var()` **inside its own rule** — so overriding them on the `.pkgw` ancestor resolves at the use
+site and every consuming declaration stays where it is. That is the mechanism CLAUDE.md records for
+`--header-inset`, and the same aliasing the Agents page does through `--ag-*`. This page had already
+refused to fork `PageHeader` once (for its Pro rule); this follows that decision rather than
+re-opening it.
+
+Two of the four properties needed nothing — `--wsh-plate-bg` is **already** `#ffffff` at `:root`.
+So the change is `--wsh-plate-radius: 0px`, the ref's more-lifted `--wsh-plate-sh`, and one rule for
+the sage edge.
+
+**⚠️ The sage edge is scoped `:not(.wsh--scrolled)`, and that is load-bearing rather than tidy.**
+This page scrolls (its grid takes no `fill` prop), so the plate condenses to a bare strip on
+engagement — `.wsh--scrolled` deletes the border, radius and shadow precisely so what remains reads
+as the page's own top edge. My selector is 0-2-0 against that rule's 0-1-0, so **without the
+negation the sage edge would outrank `border-color: transparent` and survive into the working
+state**: the one piece of card treatment that refused to leave. Scoping it to rest keeps the
+collapse-on-engagement law intact instead of quietly winning against it.
+
+### Measured at 1440×900 (scrollbar 0px, overlay)
+
+| Claim | Measured |
+|---|---|
+| Header top border | **5px**, `rgb(154, 168, 150)` = `#9aa896` ✓ |
+| Header corners square | `border-top-left-radius: 0px` ✓ |
+| Header fill white | `rgb(255, 255, 255)` ✓ |
+| Grid columns | `300px 654px`, `column-gap: 26px` ✓ |
+| Rail width | **300px** exactly ✓ |
+| Panels | 3 — `Materials`, `Packages`, `Tracking`, each 300px, each white ✓ |
+| Tab strip present | **false** ✓ (D1) |
+| Filled controls **inside `.pkg-root`** | **1** — `New package`, `rgb(245, 226, 218)` ✓ (D5) |
+
+The filled-control count reaching 1 at Phase 1 is partly a side effect worth naming: the three pink
+`＋ Add a query letter / synopsis / sample pages` buttons in the old empty state are pink, and they
+are no longer on this surface because the overview replaced it. They still exist inside the
+Workshop, which is where they belong.
+
+Screenshot: `reports/pkg-restructure/p1-shell-1440.png`.
+
+### F6 — the header card does not align with the body, and it did not before either
+
+Measured: plate content **770px** wide, body content **980px**, plate inset a further 105px each
+side. It is visible in both the recon and Phase 1 screenshots. Fully explained, and **neither term
+is mine**:
+
+* `.wpg-plate { padding-inline: calc(var(--content-gutter) + var(--header-inset)) }` — 80 + **120**.
+  The 120 is the shell's standing "masthead is an inset island" law, applied on all nine workspace
+  pages.
+* `.wpg-scroll { scrollbar-gutter: stable both-edges }` — **15px each side** on this machine's
+  forced classic scrollbars, and **0 on overlay scrollbars**, which is what Nick's browser uses.
+
+So the gap is `120px` constant plus a scrollbar-dependent `15px`. CLAUDE.md documents the one-line
+fix (`--header-inset: 0` page-scoped, as Query Centre once did) — and **I have not applied it**,
+deliberately. The ref draws a standalone canvas with no shell, so it cannot speak to a law that
+governs eight other pages; making this page the only one whose masthead is full-width is a
+consistency decision that belongs to Nick, not a defect to fix inside a restructure. Flagged with
+the numbers so the call can be made in one line either way.
+
+Note the second term is the harness's known blind spot pointing at something real: the 15px exists
+**only** under classic scrollbars, so the misalignment Nick sees will be 120px each side, not 135.
+
+### Phase 1 gates
+
+| Gate | Baseline | Phase 1 | Verdict |
+|---|---|---|---|
+| `tsc --noEmit` | exit 0, clean | **exit 0, clean** | no worse |
+| `vite build` | exit 0, no diagnostics | **exit 0, no diagnostics** | no worse |
+| `vitest run` (full) | 1 file / 1 test failed | 1 file / 1 test failed | no worse |
+
+**⚠️ The full-suite failure is a TIMEOUT under machine contention, not an assertion — and the
+distinction matters, because a raw count would have read as "same as baseline" for the wrong
+reason.** The three concurrent streams turned a 48s suite into a 230s one, and slow source-reading
+guards started hitting the 120s per-test ceiling:
+
+* **Baseline** failed `src/components/todo/tasksViewport.test.tsx` on a **real assertion** (the
+  to-do stream's WIP). Suite duration **48.40s**.
+* **Phase 1** failed `src/test/pageStructure.test.ts > components/Queries.tsx …` with
+  `Error: Test timed out in 120000ms`, alongside a `[vitest-worker]: Timeout calling "onTaskUpdate"`
+  unhandled error. Suite duration **230.56s** — 4.8× baseline. `Queries.tsx` is a file this work
+  never touches, and the suite **passes in isolation**.
+* An intermediate run failed *three* files, all different ones, and I discarded it rather than
+  reporting it: I had edited files while it was running, which is exactly the pollution that makes
+  a gate meaningless. It is recorded here rather than quietly dropped.
+* `tasksViewport.test.tsx` **passes now** — the other stream fixed it mid-session. The tree is live,
+  so a baseline is a snapshot, not a constant.
+
+Because a contended full suite cannot distinguish "my change broke it" from "the machine was busy",
+the load-bearing evidence is a **targeted run of every suite that covers a file I touched**, on a
+quiet machine:
+
+```
+src/test/pageStructure.test.ts            src/components/materialsPageSmoke.test.tsx
+src/components/shell/workspacePageGrid.test.ts(x)  src/components/shell/pageHeader.test.tsx
+src/lib/packagesOverview.test.ts          src/components/packages/workshopEmpty.test.tsx
+→ 6 files, 133 tests, ALL PASSING (36.65s)
+```
+
+That includes `materialsPageSmoke`, which asserts `wsh-title">Submission packages` — the smoke that
+would catch this page failing to render at all.

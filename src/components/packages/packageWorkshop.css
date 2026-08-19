@@ -49,6 +49,41 @@
   --pkg-print: 2px 3px 0 rgba(46, 39, 35, 0.07);
   --pkg-print-active: 3px 5px 0 rgba(46, 39, 35, 0.13);
 
+  /* ══ the restructure's own values (ref design-refs/submission-packages-restructure.html) ══
+     Read off the ref's `:root`, not eyeballed. Two families, plus one sanctioned substitution.
+
+     ⚠️ THE REF'S `--parchment` CONTAINER FILL IS SUBSTITUTED FOR WHITE, EVERYWHERE IT IS A
+     CONTAINER (rail panels, problem card, step cards). That is the one deliberate deviation from
+     the ref's values, and it is a prompt decision (D4), not a drift: the page sits on cream, and
+     parchment-on-cream is about a point of lightness apart — the same non-division that made the
+     header band grow a hairline when it went white. `--pkgo-surface` is that one substitution
+     named once, so no rule restates `#ffffff` and no later reader has to guess which whites were
+     deliberate. The ref's parchment SURVIVES where it is not a container: the header disc's fill
+     and the plate's wash still read `--pkg-card`. */
+  --pkgo-surface: #ffffff;
+  --pkgo-sage-a: #d7ddd5;              /* rail-head gradient, top */
+  --pkgo-sage-b: #d5dbd3;              /* rail-head gradient, bottom */
+  --pkgo-sage-deep: #9aa896;           /* the header card's 5px top edge + done step-numbers */
+  --pkgo-sage-ink: #5c7053;            /* tick text — the ref's own darker sage */
+  --pkgo-sage-tint: rgba(215, 221, 213, 0.55);
+  --pkgo-sage-line: rgba(154, 168, 150, 0.55);
+  --pkgo-pink-band: #f3e0d6;           /* the problem card's corner wash */
+  --pkgo-hairline: rgba(124, 58, 42, 0.16);
+  --pkgo-hairline-soft: rgba(58, 28, 20, 0.10);
+  --pkgo-dash: rgba(124, 58, 42, 0.35); /* ghost panels — dashed means provisional (D6) */
+  --pkgo-dash-soft: rgba(124, 58, 42, 0.30);
+
+  /* ══ the header card (D5) ══
+     ⚠️ TOKENS, NOT A RULE FORK. `.wsh` reads `--wsh-plate-*` through `var()` inside its own rule,
+     so an override on this ancestor resolves AT THE USE SITE and every consuming declaration
+     stays exactly where it is — the mechanism CLAUDE.md records for `--header-inset`, and the
+     same aliasing the Agents page does through its `--ag-*` layer. Restyling `.wsh` itself would
+     fork a component eleven pages share; this page already refused that once for its Pro rule.
+     `--wsh-plate-bg` is ALREADY #ffffff at :root and the radius is already 2px, so the only real
+     moves are square corners and the ref's more-lifted cast. */
+  --wsh-plate-radius: 0px;
+  --wsh-plate-sh: 0 10px 28px rgba(58, 28, 20, 0.09), 0 2px 6px rgba(58, 28, 20, 0.05);
+
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -772,3 +807,21 @@
    tokens above; the button is now the shared `.svh-btn`; the pill reads the same tokens Discover's
    does. Anything a page mounts in the strip scales because the strip says so, not because someone
    remembered to write it a second rule. */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE HEADER CARD'S SAGE TOP EDGE (restructure D5)
+   ══════════════════════════════════════════════════════════════════════════════
+
+   ⚠️ `:not(.wsh--scrolled)` IS LOAD-BEARING, NOT TIDINESS. This page scrolls (no `fill` prop on
+   its grid), so the plate condenses to a bare strip on engagement — `.wsh--scrolled` deletes the
+   border, the radius and the shadow precisely so what remains reads as the page's own top edge
+   rather than a squashed card. This selector is 0-2-0 against that rule's 0-1-0, so WITHOUT the
+   negation the sage edge would outrank `border-color: transparent` and survive into the working
+   state: the one piece of card treatment that refused to leave. Scoping it to rest keeps the
+   collapse law intact instead of quietly winning against it.
+
+   5px per the ref's `.head-card`. `box-sizing: border-box` is already on `.wsh`, so this comes out
+   of the plate's interior and `--wsh-plate-h` is untouched — the 128/44 rhythm does not move. */
+.pkgw .wsh:not(.wsh--scrolled) {
+  border-top: 5px solid var(--pkgo-sage-deep);
+}

@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 import { PackageSaveFields } from "./packages/PackageWorkshop";
 import { WorkshopTab } from "./packages/WorkshopTab";
 import { AnalyticsTab, AnalyticsScope } from "./packages/AnalyticsTab";
-import { PackageTabs, PackageTab } from "./packages/PackageTabs";
+import { PackagesOverview } from "./packages/PackagesOverview";
 import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
@@ -33,6 +33,23 @@ import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
+
+/** The three surfaces this route can show. The overview is where you land. */
+type PkgView = "overview" | "workshop" | "analytics";
+
+/**
+ * The way back from a surface the rail opened.
+ *
+ * ⚠️ IT IS OUTLINED, NOT FILLED, and that is the page's one-filled-control rule (D5) rather than a
+ * taste call: `New package` in the header is the single filled thing on this route, so every other
+ * control on it — the rail's `+ ADD` / `+ NEW`, and this — is an outline. It is also why this is
+ * not a pink "Done"-style button, which is what a return control usually wants to be here.
+ */
+const BackToOverview: React.FC<{ onClick: () => void }> = ({ onClick }) => (
+  <button type="button" className="pkgo-back" onClick={onClick}>
+    ← Overview
+  </button>
+);
 
 export const SubmissionPackages: React.FC = () => {
   const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile, setActivePackage } = useScriptAllyDb();
@@ -48,11 +65,20 @@ export const SubmissionPackages: React.FC = () => {
   const [tourActive, setTourActive] = useState(false);
   // Pulse the "＋ Add materials" affordance after the tour ends with no materials yet (FR4).
   const [pulseAdd, setPulseAdd] = useState(false);
-  // Which tab is showing. Component-local UI state by design — deliberately NOT persisted, so the
-  // workshop is always what you land on.
-  const [tab, setTab] = useState<PackageTab>("workshop");
+  /* Which surface is showing. Component-local UI state by design — deliberately NOT persisted and
+     deliberately not a route, so you always land on the overview.
+
+     ⚠️ THE TAB STRIP IS GONE AND THIS IS WHAT REPLACED IT (restructure D1). `PackageTab` was two
+     values and this is three, because the overview is a real destination rather than a third tab:
+     the rail IS the navigation now, and Workshop and Analytics are what it opens. The strip's
+     component survives untouched for the DEV `#/pkg-lab` route, which still mounts it. */
+  const [view, setView] = useState<PkgView>("overview");
   // Bumped by the header's "＋ New package" — the workshop opens a fresh draft on each change.
   const [newPkgSignal, setNewPkgSignal] = useState(0);
+  // Bumped by the rail's "+ ADD" — the workshop opens its MATERIALS editor on each change.
+  const [openMatSignal, setOpenMatSignal] = useState(0);
+  // The rail asked the workshop to open one material for editing.
+  const [openMat, setOpenMat] = useState<string | null>(null);
   // Analytics scope: "all" or a package id. Local UI state, like the tab itself.
   const [scope, setScope] = useState<AnalyticsScope>("all");
   // A recommendation asked the Workshop tab to open a particular package.
@@ -221,7 +247,7 @@ export const SubmissionPackages: React.FC = () => {
                   `svh-btn-primary` resolve to the same three constants (`--pink` / `--pink-b` /
                   `--burg`), so nothing about it looks different; it simply stops being separate.
                   `.pkgw-btn` survives for the page BODY, where it belongs. */}
-              <button type="button" className="svh-btn svh-btn-primary" onClick={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}>
+              <button type="button" className="svh-btn svh-btn-primary" onClick={() => { setView("workshop"); setNewPkgSignal((n) => n + 1); }}>
                 <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
               </button>
             </div>
@@ -245,10 +271,20 @@ export const SubmissionPackages: React.FC = () => {
         </div>
       ) : (
         <>
-          <PackageTabs tab={tab} onTab={setTab} />
-
-          {tab === "workshop" ? (
-            <div className="pkgw-tv" role="tabpanel" aria-label="Workshop">
+          {view === "overview" ? (
+            <PackagesOverview
+              materialCount={msVersions.length}
+              packageCount={msPackages.length}
+              onAddMaterial={() => { setView("workshop"); setOpenMatSignal((n) => n + 1); }}
+              onNewPackage={() => { setView("workshop"); setNewPkgSignal((n) => n + 1); }}
+            />
+          ) : view === "workshop" ? (
+            /* ⚠️ `role="tabpanel"` IS GONE FROM BOTH SURFACES, and dropping it was required rather
+               than tidy: a tabpanel with no tablist is a broken ARIA relationship, and the strip
+               that provided the tablist is retired (D1). They are labelled regions now, reached
+               from the rail. */
+            <div className="pkgw-tv" role="region" aria-label="Workshop">
+              <BackToOverview onClick={() => setView("overview")} />
               <WorkshopTab
                 versions={wsVersions}
                 packages={wsPackages}
@@ -261,6 +297,9 @@ export const SubmissionPackages: React.FC = () => {
                 onMakeActive={tourActive || !msId ? noop : (pid) => void setActivePackage(msId, pid)}
                 onTryExample={startTour}
                 newPackageSignal={newPkgSignal}
+                openMaterialsSignal={openMatSignal}
+                openMaterialId={openMat}
+                onOpenedMaterial={() => setOpenMat(null)}
                 openPackageId={openPkg}
                 onOpenedPackage={() => setOpenPkg(null)}
                 pulseAddMaterials={pulseAdd && !tourActive}
@@ -268,7 +307,8 @@ export const SubmissionPackages: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="pkgw-tv" role="tabpanel" aria-label="Analytics">
+            <div className="pkgw-tv" role="region" aria-label="Tracking">
+              <BackToOverview onClick={() => setView("overview")} />
               <AnalyticsTab
                 versions={wsVersions}
                 packages={wsPackages}
@@ -278,8 +318,8 @@ export const SubmissionPackages: React.FC = () => {
                 scope={scope}
                 onScope={setScope}
                 onOpenQueries={() => navigate("/queries")}
-                onOpenPackage={(pid) => { setTab("workshop"); setOpenPkg(pid); }}
-                onNewPackage={() => { setTab("workshop"); setNewPkgSignal((n) => n + 1); }}
+                onOpenPackage={(pid) => { setView("workshop"); setOpenPkg(pid); }}
+                onNewPackage={() => { setView("workshop"); setNewPkgSignal((n) => n + 1); }}
                 onTryExample={startTour}
               />
             </div>

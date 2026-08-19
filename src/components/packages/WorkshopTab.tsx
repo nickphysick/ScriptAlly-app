@@ -69,6 +69,21 @@ export interface WorkshopTabProps {
   onMakeActive: (packageId: string) => void;
   /** Bumped by the header's "＋ New package" button — each change opens a fresh draft. */
   newPackageSignal?: number;
+  /**
+   * Bumped by the overview rail's "+ ADD" — each change opens the MATERIALS editor.
+   *
+   * ⚠️ THE MATERIALS EDITOR HAD NO HOST-LEVEL SEAM AND PACKAGES DID, which is the whole reason this
+   * exists. `newPackageSignal` and `openPackageId` already let the host reach a package; the
+   * materials editor was reachable only from inside this component (`WorkshopEmpty`'s
+   * `onAddMaterial`, and the band's own toggle). The rail needs the same reach, so this is the
+   * package seam's exact mirror rather than a second mechanism — signal for "start something new",
+   * id for "open this one". No editor is duplicated: both land on `enterMat`, the one the band and
+   * the empty state already call.
+   */
+  openMaterialsSignal?: number;
+  /** The overview rail asked for one material to be opened for editing. */
+  openMaterialId?: string | null;
+  onOpenedMaterial?: () => void;
   /** A recommendation on the Analytics tab asked for this package to be opened for editing. */
   openPackageId?: string | null;
   onOpenedPackage?: () => void;
@@ -85,6 +100,7 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
   versions, packages, queries, activePackageId,
   onCreateVersion, onUpdateVersion, onDeleteVersion, onSavePackage, onMakeActive,
   newPackageSignal, openPackageId, onOpenedPackage, onTryExample, pulseAddMaterials, onDismissPulse,
+  openMaterialsSignal, openMaterialId, onOpenedMaterial,
 }) => {
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [editId, setEditId] = useState<string | null>(null);
@@ -146,6 +162,31 @@ export const WorkshopTab: React.FC<WorkshopTabProps> = ({
     newPackage();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newPackageSignal]);
+
+  /* The overview rail's "+ ADD" — the materials mirror of `newPackageSignal`, and it takes the same
+     seen-ref guard for the same reason: an effect on a defined value fires on mount, so without it
+     landing on the workshop would throw you straight into the materials editor having clicked
+     nothing. */
+  const seenMatSignal = useRef(openMaterialsSignal);
+  useEffect(() => {
+    if (openMaterialsSignal === undefined || openMaterialsSignal === seenMatSignal.current) return;
+    seenMatSignal.current = openMaterialsSignal;
+    setSelMat(null);
+    setNewType(null);
+    setMatMode(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openMaterialsSignal]);
+
+  /* A rail row ("edit this material") hands the workshop one material to open. Mirrors
+     `openPackageId` below, including the acknowledge-and-clear so a re-render cannot reopen it. */
+  useEffect(() => {
+    if (!openMaterialId) return;
+    setNewType(null);
+    setSelMat(openMaterialId);
+    setMatMode(true);
+    onOpenedMaterial?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openMaterialId]);
 
   // A recommendation ("Open {package}") hands the workshop a package to edit.
   useEffect(() => {

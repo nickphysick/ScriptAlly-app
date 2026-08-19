@@ -1,0 +1,1196 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-app
+
+·······-···································································································-·····································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································x·······························································································································································································································································································································································································································································································································································x········································································································································································································································································································································································································································································································································································································································································································································································································x······················································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································stderr | src/lib/timelineEvent.test.ts > F1 · a type this build does not know > resolves to `unknown` rather than claiming a direction
+[ScriptAlly] timeline: activity type "Holding Reply" is not in this build's ActivityType. Its events are drawn as "unknown" and cut from the story feed rather than guessed at — this client is older than the record.
+[ScriptAlly] timeline: activity type "Something Nobody Has Written Yet" is not in this build's ActivityType. Its events are drawn as "unknown" and cut from the story feed rather than guessed at — this client is older than the record.
+
+··········································································································································································································································································································································································································stdout | functions/src/suggestCompsCore.test.ts > the request shape > sends no sampling parameters
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > gives the model web search
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > names the current model and asks for adaptive thinking
+suggestComps: tokens in=1 out=1
+
+··············stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > retries once on unparseable output, then succeeds
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > retries once on unparseable output, then succeeds
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > gives up after the retry
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > gives up after the retry
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > surfaces a refusal without spending a retry
+suggestComps: tokens in=1 out=1
+
+······························································································································································································································································································································································································································stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > parses a good first response (strips fences)
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > retries once on malformed, then succeeds
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > retries once on malformed, then succeeds
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > throws MalformedAssistError when both attempts fail
+assistAgentData: rule=dq_mswl agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > throws MalformedAssistError when both attempts fail
+assistAgentData: rule=dq_mswl agents=2 tokens in=? out=?
+
+············································································································································································································································································································································································································································································································································································································································································································
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/test/pageStructure.test.ts > ⚠️ no page reads a post-return const from its render (the crash's shape) > components/Queries.tsx declares nothing below its return that the JSX above it touches
+Error: Test timed out in 120000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/test/pageStructure.test.ts:167:5
+    165|        ⚠️ THE REAL ANSWER IS THAT THE WALK IS SLOW, and that is a sepa…
+    166|        is a guard people learn to ignore, which is worse than a slow o…
+    167|     it(`${rel} declares nothing below its return that the JSX above it…
+       |     ^
+    168|       const src = read(rel);
+    169|       expect(src.length, `${rel} must be readable`).toBeGreaterThan(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/lib/taskSettings.test.ts > hiddenItems — rule-mutes + permanent dismisses + live snoozes (Phase 3) > a live snooze → SNOOZED UNTIL {date}; an expired one is not listed
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/taskSettings.test.ts:60:3
+     58|   });
+     59| 
+     60|   it("a live snooze → SNOOZED UNTIL {date}; an expired one is not list…
+       |   ^
+     61|     const future = new Date(NOW + 5 * 86400000).toISOString();
+     62|     const past = new Date(NOW - 86400000).toISOString();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/components/todo/tasksViewport.test.tsx > ⚠️ ONE SHEET, TWO DOORS — and never a second copy of the settings UI > door two: a Tasks section on the app Settings page
+AssertionError: expected '/**\n * @license\n * SPDX-License-Ide…' to contain '{ id: "tasks", label: "Tasks"'
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- { id: "tasks", label: "Tasks"[39m
+[31m+ /**[39m
+[31m+  * @license[39m
+[31m+  * SPDX-License-Identifier: Apache-2.0[39m
+[31m+  *[39m
+[31m+  * Account settings — rebuilt onto the Form 11 / dashboard design system:[39m
+[31m+  * the dashboard ground (pageGround + fixed page grain), a sticky left section rail,[39m
+[31m+  * and parchment cards carrying the sage-band uniform header (3px burgundy rule + Playfair[39m
+[31m+  * title + far-right lucide emblem). Section/danger cards use CardShell — the same three-layer[39m
+[31m+  * clipping structure the app already uses correctly (the onboarding "Database populated" card):[39m
+[31m+  * an outer parchment panel whose even padding is the rim, an inner 1px frame with overflow:hidden[39m
+[31m+  * as the clipping context, and a header with no radius/margin so its fill stops at the frame border[39m
+[31m+  * and is clipped to the rounded corners (never an overlay border, which can't contain a fill → spill).[39m
+[31m+  *[39m
+[31m+  * Wiring rule: a control is wired only when its end-to-end behaviour already exists (or is[39m
+[31m+  * trivially self-contained this pass). Everything else is rendered on-brand but clearly inert[39m
+[31m+  * and persists NOTHING (a dead stored pref is a desync trap).[39m
+[31m+  *   WIRED ........ display name (updateUserProfile), home country (updateUserProfile — drives[39m
+[31m+  *                  the agent territory split; changeable but never cleared back to unset, per[39m
+[31m+  *                  the origin-state law), password reset (resetPassword),[39m
+[31m+  *                  plan + trial display, View plans (onNavigate "plans" — a workspace route;[39m
+[31m+  *                  the focus tier is retired),[39m
+[31m+  *                  data export (client-side JSON of the already-loaded data),[39m
+[31m+  *                  data import (onNavigate "import" → ImportCsv).[39m
+[31m+  *   COMING-SOON .. pen name, email change, two-factor, active sessions, manage billing,[39m
+[31m+  *                  notification prefs, time zone / date format, account deletion (the[39m
+[31m+  *                  typed-confirmation modal is present; the final delete action is disabled —[39m
+[31m+  *                  irreversible deletion is never wired unsupervised, and no endpoint exists).[39m
+[31m+  */[39m
+[31m+ import React, { useState, useRef, useEffect, useCallback } from "react";[39m
+[31m+ import { useNavigate } from "react-router-dom";[39m
+[31m+ import { createPortal } from "react-dom";[39m
+[31m+ import { useScriptAllyDb } from "../lib/db";[39m
+[31m+ import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, deletionConfirmed } from "../lib/dataExport";[39m
+[31m+ import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";[39m
+[31m+ import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";[39m
+[31m+ import { validateDisplayName } from "../lib/accountValidation";[39m
+[31m+ import { MountCard } from "./MountCard";[39m
+[31m+ import { PageHeader } from "./shell/PageHeader";[39m
+[31m+ import { CountryCombobox } from "./forms";[39m
+[31m+ import {[39m
+[31m+   pageGround,[39m
+[31m+   PAGE_GRAIN,[39m
+[31m+   parchment,[39m
+[31m+   PAPER_TEXTURE,[39m
+[31m+   mountShadow,[39m
+[31m+   insetBorder,[39m
+[31m+   sageBandGradient,[39m
+[31m+   sageBandRule,[39m
+[31m+   sageAccent,[39m
+[31m+   burgundy,[39m
+[31m+   headingInk,[39m
+[31m+   bodyInk,[39m
+[31m+   mutedInk,[39m
+[31m+   labelColor,[39m
+[31m+   FONT_SERIF,[39m
+[31m+   FONT_SANS,[39m
+[31m+   FONT_MONO,[39m
+[31m+ } from "../lib/designTokens";[39m
+[31m+ import {[39m
+[31m+   User as UserIcon,[39m
+[31m+   Mail,[39m
+[31m+   Shield,[39m
+[31m+   Sparkles,[39m
+[31m+   Bell,[39m
+[31m+   SlidersHorizontal,[39m
+[31m+   ListChecks,[39m
+[31m+   Database,[39m
+[31m+   Trash2,[39m
+[31m+   LogOut,[39m
+[31m+   Check,[39m
+[31m+   ChevronRight,[39m
+[31m+   Download,[39m
+[31m+   Upload,[39m
+[31m+   Smartphone,[39m
+[31m+   KeyRound,[39m
+[31m+   AlertTriangle,[39m
+[31m+   X,[39m
+[31m+ } from "lucide-react";[39m
+[31m+[39m
+[31m+ /* ── Danger palette (kept in the warm parchment family, reads as a warning) ── */[39m
+[31m+ const DANGER_INK = "#8c2f2f";[39m
+[31m+ const DANGER_BAND = "linear-gradient(135deg, #f1ddd7 0%, #ecccc4 100%)";[39m
+[31m+ const DANGER_RULE = "rgba(140,47,47,0.22)";[39m
+[31m+ const SUCCESS_GREEN = "#3B6D11";[39m
+[31m+ const ERROR_RED = "#A32D2D";[39m
+[31m+[39m
+[31m+ /* ── The rail sections ──────────────────────────────────────────────────────[39m
+[31m+  * ⚠️ THE ORDER AND THE WORDS COME FROM `accountRoutes`, NOT FROM HERE. Each section is a real[39m
+[31m+  * path now, and the rail is the thing that walks between them — a second list of labels in this[39m
+[31m+  * file would be a rail that could disagree with the URL it navigates to. Only the ICON is the[39m
+[31m+  * page's own business, so only the icon is declared here. */[39m
+[31m+ type SectionId = AccountSectionId;[39m
+[31m+ const SECTION_ICONS: Record<SectionId, React.ComponentType<any>> = {[39m
+[31m+   profile: UserIcon,[39m
+[31m+   security: Shield,[39m
+[31m+   plan: Sparkles,[39m
+[31m+   notifications: Bell,[39m
+[31m+   preferences: SlidersHorizontal,[39m
+[31m+   /* ⚠️ TASKS — the settings sheet's SECOND DOOR (tasks-viewport P5). The sheet used to be[39m
+[31m+      reachable only from the To-do sidebar's foot, and since P1 that sidebar mounts on one page of[39m
+[31m+      four; a writer on Today or the Calendar had no route to their own task settings. */[39m
+[31m+   tasks: ListChecks,[39m
+[31m+   data: Database,[39m
+[31m+ };[39m
+[31m+ const SECTIONS: { id: SectionId; label: string; path: string; Icon: React.ComponentType<any> }[] =[39m
+[31m+   ACCOUNT_ROUTES.map((r) => ({ id: r.id, label: r.label, path: r.path, Icon: SECTION_ICONS[r.id] }));[39m
+[31m+[39m
+[31m+ /* ── Shared field/label/button styling (inline so brand.tsx's non-important body-font[39m
+[31m+  *    rule can't override it, and Tailwind can't silently re-colour it) ──────────────── */[39m
+[31m+ const labelStyle: React.CSSProperties = {[39m
+[31m+   display: "block",[39m
+[31m+   fontFamily: FONT_MONO,[39m
+[31m+   fontSize: 9,[39m
+[31m+   letterSpacing: "0.14em",[39m
+[31m+   textTransform: "uppercase",[39m
+[31m+   fontWeight: 500,[39m
+[31m+   color: labelColor,[39m
+[31m+   marginBottom: 6,[39m
+[31m+ };[39m
+[31m+ const inputStyle: React.CSSProperties = {[39m
+[31m+   width: "100%",[39m
+[31m+   padding: "9px 12px",[39m
+[31m+   fontFamily: FONT_SANS,[39m
+[31m+   fontSize: 14,[39m
+[31m+   color: bodyInk,[39m
+[31m+   background: "#fffdfa",[39m
+[31m+   border: "1px solid rgba(124,58,42,0.18)",[39m
+[31m+   borderRadius: 8,[39m
+[31m+   outline: "none",[39m
+[31m+ };[39m
+[31m+ const primaryBtn: React.CSSProperties = {[39m
+[31m+   display: "inline-flex",[39m
+[31m+   alignItems: "center",[39m
+[31m+   gap: 6,[39m
+[31m+   padding: "9px 16px",[39m
+[31m+   fontFamily: FONT_SERIF,[39m
+[31m+   fontSize: 14,[39m
+[31m+   fontWeight: 500,[39m
+[31m+   color: "#fff",[39m
+[31m+   background: burgundy,[39m
+[31m+   border: "none",[39m
+[31m+   borderRadius: 8,[39m
+[31m+   cursor: "pointer",[39m
+[31m+ };[39m
+[31m+ const ghostBtn: React.CSSProperties = {[39m
+[31m+   display: "inline-flex",[39m
+[31m+   alignItems: "center",[39m
+[31m+   gap: 6,[39m
+[31m+   padding: "9px 16px",[39m
+[31m+   fontFamily: FONT_SERIF,[39m
+[31m+   fontSize: 14,[39m
+[31m+   fontWeight: 500,[39m
+[31m+   color: burgundy,[39m
+[31m+   background: "#fff",[39m
+[31m+   border: `1px solid ${burgundy}`,[39m
+[31m+   borderRadius: 8,[39m
+[31m+   cursor: "pointer",[39m
+[31m+ };[39m
+[31m+ const helpText: React.CSSProperties = { fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk, lineHeight: 1.45 };[39m
+[31m+[39m
+[31m+ /* ── Small inert affordances ─────────────────────────────────────────────── */[39m
+[31m+ const ComingSoonPill: React.FC = () => ([39m
+[31m+   <span[39m
+[31m+     style={{[39m
+[31m+       fontFamily: FONT_MONO,[39m
+[31m+       fontSize: 9,[39m
+[31m+       letterSpacing: "0.08em",[39m
+[31m+       textTransform: "uppercase",[39m
+[31m+       color: mutedInk,[39m
+[31m+       background: "rgba(124,58,42,0.06)",[39m
+[31m+       border: "0.5px solid rgba(124,58,42,0.16)",[39m
+[31m+       borderRadius: 999,[39m
+[31m+       padding: "3px 8px",[39m
+[31m+       whiteSpace: "nowrap",[39m
+[31m+     }}[39m
+[31m+   >[39m
+[31m+     Coming soon[39m
+[31m+   </span>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+ /** A purely visual, non-interactive toggle (off, dimmed) — marks a setting as not-yet-live. */[39m
+[31m+ const InertToggle: React.FC<{ on?: boolean }> = ({ on = false }) => ([39m
+[31m+   <span[39m
+[31m+     aria-hidden="true"[39m
+[31m+     style={{[39m
+[31m+       width: 38,[39m
+[31m+       height: 22,[39m
+[31m+       borderRadius: 999,[39m
+[31m+       background: on ? sageAccent : "#e2d7c9",[39m
+[31m+       position: "relative",[39m
+[31m+       display: "inline-block",[39m
+[31m+       flexShrink: 0,[39m
+[31m+       opacity: 0.55,[39m
+[31m+     }}[39m
+[31m+   >[39m
+[31m+     <span[39m
+[31m+       style={{[39m
+[31m+         position: "absolute",[39m
+[31m+         top: 2,[39m
+[31m+         left: on ? 18 : 2,[39m
+[31m+         width: 18,[39m
+[31m+         height: 18,[39m
+[31m+         borderRadius: "50%",[39m
+[31m+         background: "#fff",[39m
+[31m+         boxShadow: "0 1px 2px rgba(58,28,20,0.2)",[39m
+[31m+       }}[39m
+[31m+     />[39m
+[31m+   </span>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+ /** One inert preference row: label + description on the left, an inert control + Coming soon on the right. */[39m
+[31m+ const InertRow: React.FC<{ title: string; desc: string; control?: React.ReactNode; first?: boolean }> = ({[39m
+[31m+   title,[39m
+[31m+   desc,[39m
+[31m+   control,[39m
+[31m+   first,[39m
+[31m+ }) => ([39m
+[31m+   <div[39m
+[31m+     aria-disabled="true"[39m
+[31m+     style={{[39m
+[31m+       display: "flex",[39m
+[31m+       alignItems: "center",[39m
+[31m+       justifyContent: "space-between",[39m
+[31m+       gap: 14,[39m
+[31m+       padding: "14px 0",[39m
+[31m+       borderTop: first ? "none" : "0.5px solid #efe5da",[39m
+[31m+       opacity: 0.72,[39m
+[31m+     }}[39m
+[31m+   >[39m
+[31m+     <div style={{ minWidth: 0 }}>[39m
+[31m+       <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>{title}</p>[39m
+[31m+       <p style={helpText}>{desc}</p>[39m
+[31m+     </div>[39m
+[31m+     <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }}>[39m
+[31m+       {control ?? <InertToggle />}[39m
+[31m+       <ComingSoonPill />[39m
+[31m+     </div>[39m
+[31m+   </div>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+ /** A notice banner shown atop a section whose behaviour isn't switched on yet. */[39m
+[31m+ const InertNotice: React.FC<{ children: React.ReactNode }> = ({ children }) => ([39m
+[31m+   <div[39m
+[31m+     style={{[39m
+[31m+       display: "flex",[39m
+[31m+       gap: 8,[39m
+[31m+       alignItems: "flex-start",[39m
+[31m+       background: "rgba(124,58,42,0.045)",[39m
+[31m+       border: "0.5px solid rgba(124,58,42,0.14)",[39m
+[31m+       borderRadius: 10,[39m
+[31m+       padding: "10px 12px",[39m
+[31m+       marginBottom: 16,[39m
+[31m+     }}[39m
+[31m+   >[39m
+[31m+     <span style={helpText}>{children}</span>[39m
+[31m+   </div>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+ /**[39m
+[31m+  * CardShell — the three-layer clipping card the app already uses correctly elsewhere (the[39m
+[31m+  * onboarding "Database populated" card; mirrors scriptally-header-fill-target.html):[39m
+[31m+  *   1. panel — the Form 11 parchment surface (+ paper grain), outer radius + shadow, and an even[39m
+[31m+  *              `padding` on all four sides → that padding IS the uniform rim.[39m
+[31m+  *   2. frame — a 1px burgundy border with its own (smaller) radius + `overflow:hidden`; this is the[39m
+[31m+  *              clipping context. Its transparent interior lets the panel's grain show through the body.[39m
+[31m+  *   3. header/body — laid INSIDE the frame; a header fill stops at the frame border and is clipped to[39m
+[31m+  *              the frame's rounded corners by overflow:hidden, so it never reaches the card's outer edge.[39m
+[31m+  * This replaces the old overlay-border frame (a border drawn over the fill can't contain it → spill).[39m
+[31m+  */[39m
+[31m+ const CardShell: React.FC<{ children: React.ReactNode; style?: React.CSSProperties; className?: string }> = ({ children, style, className }) => ([39m
+[31m+   <div[39m
+[31m+     className={className}[39m
+[31m+     style={{ background: parchment, backgroundImage: PAPER_TEXTURE, borderRadius: 14, boxShadow: mountShadow, padding: 6, border: "1px solid rgba(124,58,42,0.10)", ...style }}[39m
+[31m+   >[39m
+[31m+     <div style={{ border: insetBorder, borderRadius: 9, overflow: "hidden" }}>{children}</div>[39m
+[31m+   </div>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+ /** A section card: the sage-band (or danger-tinted) uniform header + body, inside the clipping frame. */[39m
+[31m+ const SectionCard: React.FC<{[39m
+[31m+   title: string;[39m
+[31m+   Icon: React.ComponentType<any>;[39m
+[31m+   danger?: boolean;[39m
+[31m+   headingId?: string;[39m
+[31m+   children: React.ReactNode;[39m
+[31m+ }> = ({ title, Icon, danger, headingId, children }) => ([39m
+[31m+   <CardShell style={{ marginBottom: 20 }}>[39m
+[31m+     {/* header — NO radius and NO margin of its own; the frame's overflow:hidden clips it to the[39m
+[31m+         rounded top corners and the fill stops at the frame border (never the card's outer edge). */}[39m
+[31m+     <div[39m
+[31m+       style={{[39m
+[31m+         padding: "13px 18px 11px",[39m
+[31m+         background: danger ? DANGER_BAND : sageBandGradient,[39m
+[31m+         borderBottom: `1px solid ${danger ? DANGER_RULE : sageBandRule}`,[39m
+[31m+         display: "flex",[39m
+[31m+         alignItems: "center",[39m
+[31m+         justifyContent: "space-between",[39m
+[31m+         gap: 10,[39m
+[31m+       }}[39m
+[31m+     >[39m
+[31m+       <span className="flex items-center" style={{ minWidth: 0 }}>[39m
+[31m+         <span[39m
+[31m+           aria-hidden="true"[39m
+[31m+           style={{[39m
+[31m+             width: 3,[39m
+[31m+             height: 18,[39m
+[31m+             borderRadius: 2,[39m
+[31m+             background: danger ? DANGER_INK : burgundy,[39m
+[31m+             marginRight: 12,[39m
+[31m+             flexShrink: 0,[39m
+[31m+             display: "inline-block",[39m
+[31m+           }}[39m
+[31m+         />[39m
+[31m+         <span[39m
+[31m+           id={headingId}[39m
+[31m+           role="heading"[39m
+[31m+           aria-level={2}[39m
+[31m+           style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 500, color: danger ? DANGER_INK : headingInk, lineHeight: 1.1 }}[39m
+[31m+         >[39m
+[31m+           {title}[39m
+[31m+         </span>[39m
+[31m+       </span>[39m
+[31m+       <Icon style={{ width: 19, height: 19, color: danger ? DANGER_INK : burgundy, flexShrink: 0 }} strokeWidth={1.8} aria-hidden="true" />[39m
+[31m+     </div>[39m
+[31m+     <div style={{ padding: 18 }}>{children}</div>[39m
+[31m+   </CardShell>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+ /* ── The left section rail — a lighter/secondary MountCard, keyboard-navigable (tablist) ── */[39m
+[31m+ const Rail: React.FC<{ active: SectionId; onSelect: (id: SectionId) => void }> = ({ active, onSelect }) => {[39m
+[31m+   const idx = SECTIONS.findIndex((s) => s.id === active);[39m
+[31m+   const focusTab = (i: number) => requestAnimationFrame(() => document.getElementById(`acct-tab-${SECTIONS[i].id}`)?.focus());[39m
+[31m+   const onKeyDown = (e: React.KeyboardEvent) => {[39m
+[31m+     let next = idx;[39m
+[31m+     switch (e.key) {[39m
+[31m+       case "ArrowDown":[39m
+[31m+       case "ArrowRight":[39m
+[31m+         next = (idx + 1) % SECTIONS.length;[39m
+[31m+         break;[39m
+[31m+       case "ArrowUp":[39m
+[31m+       case "ArrowLeft":[39m
+[31m+         next = (idx - 1 + SECTIONS.length) % SECTIONS.length;[39m
+[31m+         break;[39m
+[31m+       case "Home":[39m
+[31m+         next = 0;[39m
+[31m+         break;[39m
+[31m+       case "End":[39m
+[31m+         next = SECTIONS.length - 1;[39m
+[31m+         break;[39m
+[31m+       default:[39m
+[31m+         return;[39m
+[31m+     }[39m
+[31m+     e.preventDefault();[39m
+[31m+     onSelect(SECTIONS[next].id);[39m
+[31m+     focusTab(next);[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   return ([39m
+[31m+     <MountCard className="md:sticky md:self-start" style={{ top: 84 }}>[39m
+[31m+       <div style={{ position: "relative", zIndex: 4, margin: 6, padding: 8 }}>[39m
+[31m+         <p style={{ ...labelStyle, padding: "2px 8px 8px", marginBottom: 0, color: mutedInk }}>Settings</p>[39m
+[31m+         <div[39m
+[31m+           role="tablist"[39m
+[31m+           aria-label="Account settings sections"[39m
+[31m+           aria-orientation="vertical"[39m
+[31m+           className="flex md:flex-col"[39m
+[31m+           style={{ gap: 2, overflowX: "auto" }}[39m
+[31m+         >[39m
+[31m+           {SECTIONS.map((s) => {[39m
+[31m+             const isActive = s.id === active;[39m
+[31m+             return ([39m
+[31m+               <button[39m
+[31m+                 key={s.id}[39m
+[31m+                 id={`acct-tab-${s.id}`}[39m
+[31m+                 role="tab"[39m
+[31m+                 aria-selected={isActive}[39m
+[31m+                 aria-controls="acct-panel"[39m
+[31m+                 tabIndex={isActive ? 0 : -1}[39m
+[31m+                 onClick={() => onSelect(s.id)}[39m
+[31m+                 onKeyDown={onKeyDown}[39m
+[31m+                 className="acct-rail-item"[39m
+[31m+                 style={{[39m
+[31m+                   display: "flex",[39m
+[31m+                   alignItems: "center",[39m
+[31m+                   gap: 10,[39m
+[31m+                   width: "100%",[39m
+[31m+                   textAlign: "left",[39m
+[31m+                   whiteSpace: "nowrap",[39m
+[31m+                   padding: "9px 12px",[39m
+[31m+                   borderRadius: 9,[39m
+[31m+                   border: "none",[39m
+[31m+                   cursor: "pointer",[39m
+[31m+                   fontFamily: FONT_SANS,[39m
+[31m+                   fontSize: 13.5,[39m
+[31m+                   fontWeight: isActive ? 600 : 500,[39m
+[31m+                   color: isActive ? burgundy : "#6a5a50",[39m
+[31m+                   background: isActive ? "#f8e7dc" : "transparent",[39m
+[31m+                   transition: "background 0.12s, color 0.12s",[39m
+[31m+                 }}[39m
+[31m+               >[39m
+[31m+                 <s.Icon style={{ width: 16, height: 16, flexShrink: 0, color: isActive ? burgundy : mutedInk }} strokeWidth={1.9} aria-hidden="true" />[39m
+[31m+                 {s.label}[39m
+[31m+               </button>[39m
+[31m+             );[39m
+[31m+           })}[39m
+[31m+         </div>[39m
+[31m+       </div>[39m
+[31m+     </MountCard>[39m
+[31m+   );[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ /* ── Delete-account modal: a typed-confirmation pattern. The confirm step is present and[39m
+[31m+  *    functional, but the final action is DISABLED ("coming soon") — no deletion endpoint[39m
+[31m+  *    exists and irreversible deletion is never wired unsupervised. ───────────────────── */[39m
+[31m+ /**[39m
+[31m+  * ⚠️ THE CONFIRMATION IS THE ACCOUNT EMAIL, NOT THE WORD "DELETE" — and not a checkbox.[39m
+[31m+  * "DELETE" is a word anyone can type without reading; your own address is a sentence you have to[39m
+[31m+  * mean, and it is the one string that is different for every account. `deletionConfirmed` also[39m
+[31m+  * refuses an empty account email, so a half-loaded user document cannot arm the button.[39m
+[31m+  *[39m
+[31m+  * ⚠️ AND THE BUTTON STAYS DISABLED WHATEVER IS TYPED. `ACCOUNT_DELETION_ENABLED` is the outer gate:[39m
+[31m+  * nothing in this repo deletes a user's records, and the flag exists so the mechanism gets reviewed[39m
+[31m+  * before it is switched on. The confirm proves intent; the flag proves the code has been read.[39m
+[31m+  */[39m
+[31m+ const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string; onContact: () => void }> = ({ onClose, accountEmail, onContact }) => {[39m
+[31m+   const [confirm, setConfirm] = useState("");[39m
+[31m+   const matched = deletionConfirmed(confirm, accountEmail);[39m
+[31m+   const inputRef = useRef<HTMLInputElement>(null);[39m
+[31m+   const closeRef = useRef<HTMLButtonElement>(null);[39m
+[31m+[39m
+[31m+   useEffect(() => {[39m
+[31m+     closeRef.current?.focus();[39m
+[31m+     const onKey = (e: KeyboardEvent) => {[39m
+[31m+       if (e.key === "Escape") onClose();[39m
+[31m+     };[39m
+[31m+     window.addEventListener("keydown", onKey);[39m
+[31m+     return () => window.removeEventListener("keydown", onKey);[39m
+[31m+   }, [onClose]);[39m
+[31m+[39m
+[31m+   return createPortal([39m
+[31m+     <div[39m
+[31m+       role="presentation"[39m
+[31m+       onMouseDown={onClose}[39m
+[31m+       style={{[39m
+[31m+         position: "fixed",[39m
+[31m+         inset: 0,[39m
+[31m+         zIndex: 120,[39m
+[31m+         background: "rgba(46,28,20,0.45)",[39m
+[31m+         display: "flex",[39m
+[31m+         alignItems: "center",[39m
+[31m+         justifyContent: "center",[39m
+[31m+         padding: 16,[39m
+[31m+       }}[39m
+[31m+     >[39m
+[31m+       <div[39m
+[31m+         role="dialog"[39m
+[31m+         aria-modal="true"[39m
+[31m+         aria-labelledby="del-title"[39m
+[31m+         onMouseDown={(e) => e.stopPropagation()}[39m
+[31m+         style={{ width: "100%", maxWidth: 460 }}[39m
+[31m+       >[39m
+[31m+         <CardShell>[39m
+[31m+           <div[39m
+[31m+             style={{[39m
+[31m+               padding: "13px 18px 11px",[39m
+[31m+               background: DANGER_BAND,[39m
+[31m+               borderBottom: `1px solid ${DANGER_RULE}`,[39m
+[31m+               display: "flex",[39m
+[31m+               alignItems: "center",[39m
+[31m+               justifyContent: "space-between",[39m
+[31m+               gap: 10,[39m
+[31m+             }}[39m
+[31m+           >[39m
+[31m+             <span className="flex items-center">[39m
+[31m+               <AlertTriangle style={{ width: 18, height: 18, color: DANGER_INK, marginRight: 10, flexShrink: 0 }} strokeWidth={2} aria-hidden="true" />[39m
+[31m+               <span id="del-title" style={{ fontFamily: FONT_SERIF, fontSize: 18, fontWeight: 500, color: DANGER_INK }}>[39m
+[31m+                 Delete account[39m
+[31m+               </span>[39m
+[31m+             </span>[39m
+[31m+             <button ref={closeRef} onClick={onClose} aria-label="Close" style={{ background: "transparent", border: "none", cursor: "pointer", color: DANGER_INK, display: "inline-flex", padding: 2 }}>[39m
+[31m+               <X style={{ width: 18, height: 18 }} strokeWidth={2} aria-hidden="true" />[39m
+[31m+             </button>[39m
+[31m+           </div>[39m
+[31m+           <div style={{ padding: 18 }}>[39m
+[31m+             <p style={{ ...helpText, color: bodyInk, marginBottom: 14 }}>[39m
+[31m+               This permanently removes your account and every manuscript, agent and query you've tracked.[39m
+[31m+               This <strong>cannot be undone</strong>.[39m
+[31m+             </p>[39m
+[31m+             <label htmlFor="del-confirm" style={labelStyle}>[39m
+[31m+               Type your account email to confirm[39m
+[31m+             </label>[39m
+[31m+             <input[39m
+[31m+               id="del-confirm"[39m
+[31m+               ref={inputRef}[39m
+[31m+               type="text"[39m
+[31m+               value={confirm}[39m
+[31m+               onChange={(e) => setConfirm(e.target.value)}[39m
+[31m+               autoComplete="off"[39m
+[31m+               placeholder={accountEmail ?? "you@example.com"}[39m
+[31m+               className="acct-input"[39m
+[31m+               style={inputStyle}[39m
+[31m+               aria-describedby="del-note"[39m
+[31m+             />[39m
+[31m+             <div style={{ minHeight: 18, marginTop: 6 }}>[39m
+[31m+               {matched && ([39m
+[31m+                 <span className="flex items-center" style={{ gap: 5, fontFamily: FONT_SANS, fontSize: 12, fontWeight: 500, color: SUCCESS_GREEN }}>[39m
+[31m+                   <Check style={{ width: 13, height: 13 }} aria-hidden="true" /> Confirmation matches[39m
+[31m+                 </span>[39m
+[31m+               )}[39m
+[31m+             </div>[39m
+[31m+             <div className="flex items-center justify-between" style={{ gap: 12, marginTop: 14 }}>[39m
+[31m+               <button onClick={onClose} style={{ ...ghostBtn, borderColor: "#d8cdc0", color: "#6a5a50" }}>[39m
+[31m+                 Cancel[39m
+[31m+               </button>[39m
+[31m+               <button[39m
+[31m+                 type="button"[39m
+[31m+                 disabled[39m
+[31m+                 aria-disabled="true"[39m
+[31m+                 title="Account deletion isn't available yet"[39m
+[31m+                 style={{[39m
+[31m+                   ...primaryBtn,[39m
+[31m+                   background: DANGER_INK,[39m
+[31m+                   opacity: 0.4,[39m
+[31m+                   cursor: "not-allowed",[39m
+[31m+                 }}[39m
+[31m+               >[39m
+[31m+                 <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account[39m
+[31m+               </button>[39m
+[31m+             </div>[39m
+[31m+             {/* ⚠️ SAID PLAINLY, AND WITH A ROUTE THAT WORKS. A writer who wants out needs one; a[39m
+[31m+                 disabled button and "coming soon" leaves them with nowhere to go. */}[39m
+[31m+             <p id="del-note" style={{ ...helpText, marginTop: 12 }}>[39m
+[31m+               Self-service deletion isn't switched on yet.{" "}[39m
+[31m+               <button[39m
+[31m+                 type="button"[39m
+[31m+                 onClick={onContact}[39m
+[31m+                 style={{ background: "none", border: "none", padding: 0, font: "inherit", color: DANGER_INK, textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}[39m
+[31m+               >[39m
+[31m+                 Write to us[39m
+[31m+               </button>{" "}[39m
+[31m+               and we'll close your account by hand. Nothing has been deleted.[39m
+[31m+             </p>[39m
+[31m+           </div>[39m
+[31m+         </CardShell>[39m
+[31m+       </div>[39m
+[31m+     </div>,[39m
+[31m+     document.body,[39m
+[31m+   );[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ export const AccountSettings: React.FC<{[39m
+[31m+   /** The section the URL resolves to — App.tsx redirects anything that resolves to nothing, so[39m
+[31m+    *  this is always a real section by the time the page renders. */[39m
+[31m+   section: AccountSectionId;[39m
+[31m+   onNavigate: (tab: string, subPageName?: string) => void;[39m
+[31m+ }> = ({ section, onNavigate }) => {[39m
+[31m+   const {[39m
+[31m+     currentUser, updateUserProfile, resetPassword,[39m
+[31m+     agents, queries, manuscripts, versions, packages, activities, notes, userTasks,[39m
+[31m+     logout,[39m
+[31m+   } = useScriptAllyDb();[39m
+[31m+[39m
+[31m+   /* ⚠️ THE SECTION IS THE URL, NOT STATE. It used to be `useState("profile")`, which made every[39m
+[31m+      section unlinkable and reset the page on refresh — see accountRoutes.ts. `navigate` writes it;[39m
+[31m+      the prop reads it back through App.tsx, so there is exactly one copy of "where am I". */[39m
+[31m+   const navigate = useNavigate();[39m
+[31m+   const active = section;[39m
+[31m+   const goSection = (id: SectionId) => {[39m
+[31m+     const hit = SECTIONS.find((s) => s.id === id);[39m
+[31m+     if (hit) navigate(hit.path);[39m
+[31m+   };[39m
+[31m+   const [name, setName] = useState(currentUser?.name ?? "");[39m
+[31m+   const [nameStatus, setNameStatus] = useState<{ type: "idle" | "saving" | "saved" | "error"; msg?: string }>({ type: "idle" });[39m
+[31m+   const [countryStatus, setCountryStatus] = useState<{ type: "idle" | "saving" | "saved" | "error"; msg?: string }>({ type: "idle" });[39m
+[31m+   const [resetMsg, setResetMsg] = useState<string | null>(null);[39m
+[31m+   const [exportMsg, setExportMsg] = useState<string | null>(null);[39m
+[31m+   const [showDelete, setShowDelete] = useState(false);[39m
+[31m+[39m
+[31m+   if (!currentUser) return null;[39m
+[31m+[39m
+[31m+   const nameChanged = name.trim() !== (currentUser.name ?? "").trim();[39m
+[31m+   const nameValid = validateDisplayName(name).ok;[39m
+[31m+[39m
+[31m+   const saveName = async () => {[39m
+[31m+     const v = validateDisplayName(name);[39m
+[31m+     if (!v.ok) {[39m
+[31m+       setNameStatus({ type: "error", msg: v.error });[39m
+[31m+       return;[39m
+[31m+     }[39m
+[31m+     setNameStatus({ type: "saving" });[39m
+[31m+     try {[39m
+[31m+       await updateUserProfile({ name: v.value });[39m
+[31m+       setNameStatus({ type: "saved", msg: "Saved" });[39m
+[31m+       setTimeout(() => setNameStatus({ type: "idle" }), 2500);[39m
+[31m+     } catch {[39m
+[31m+       setNameStatus({ type: "error", msg: "Couldn't save. Please try again." });[39m
+[31m+     }[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   /** Save-on-select (the Preferences theme-radio convention). An empty pick — the combobox's[39m
+[31m+    *  "Clear selection" row — is deliberately a no-op: unstated is an ORIGIN state, not a[39m
+[31m+    *  destination (the agent-editor law), and the territory model never stores "" (unset means[39m
+[31m+    *  the key is omitted, seeded once at signup). The helper text below states the rule. */[39m
+[31m+   const saveHomeCountry = async (code: string) => {[39m
+[31m+     if (!code || code === currentUser?.homeCountry) return;[39m
+[31m+     setCountryStatus({ type: "saving" });[39m
+[31m+     try {[39m
+[31m+       await updateUserProfile({ homeCountry: code });[39m
+[31m+       setCountryStatus({ type: "saved", msg: "Saved" });[39m
+[31m+       setTimeout(() => setCountryStatus({ type: "idle" }), 2500);[39m
+[31m+     } catch {[39m
+[31m+       setCountryStatus({ type: "error", msg: "Couldn't save. Please try again." });[39m
+[31m+     }[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   const sendReset = async () => {[39m
+[31m+     setResetMsg(null);[39m
+[31m+     try {[39m
+[31m+       await resetPassword(currentUser.email);[39m
+[31m+       setResetMsg(`Password reset link sent to ${currentUser.email}. Check your inbox.`);[39m
+[31m+     } catch (e: any) {[39m
+[31m+       setResetMsg(e?.message || "Couldn't send the reset link. Please try again.");[39m
+[31m+     }[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   /**[39m
+[31m+    * Self-contained client-side export of the already-loaded data — no backend, no writes.[39m
+[31m+    *[39m
+[31m+    * ⚠️ IT USED TO EXPORT THREE COLLECTIONS AND THE POLICY PROMISED SIX. Manuscripts, agents and[39m
+[31m+    * queries went out; submission packages, notes, activity history, manuscript versions and tasks[39m
+[31m+    * did not — while section 2 of the privacy policy names the querying records "including[39m
+[31m+    * submission packages, notes and activity history", and section 8 offers export as a right. The[39m
+[31m+    * shape now lives in `lib/dataExport.ts` with the collection list asserted against it, so a[39m
+[31m+    * record type added to the app cannot quietly fall out of the file a writer is told is[39m
+[31m+    * everything.[39m
+[31m+    */[39m
+[31m+   const exportData = useCallback(() => {[39m
+[31m+     const now = new Date();[39m
+[31m+     const bundle = buildExport([39m
+[31m+       {[39m
+[31m+         // The account record as the writer's own document, not a hand-picked three fields: an[39m
+[31m+         // export is a copy of what is held, and choosing which parts to include is the thing that[39m
+[31m+         // made the old one incomplete.[39m
+[31m+         user: currentUser,[39m
+[31m+         manuscripts, versions, packages, agents, queries, activities, notes, userTasks,[39m
+[31m+       },[39m
+[31m+       now,[39m
+[31m+     );[39m
+[31m+     downloadExport(bundle, exportFilename(now));[39m
+[31m+     setExportMsg([39m
+[31m+       `Downloaded ${manuscripts.length} manuscript${manuscripts.length === 1 ? "" : "s"}, ${agents.length} agent${[39m
+[31m+         agents.length === 1 ? "" : "s"[39m
+[31m+       }, ${queries.length} quer${queries.length === 1 ? "y" : "ies"} and your full activity history as JSON.`,[39m
+[31m+     );[39m
+[31m+   }, [currentUser, manuscripts, versions, packages, agents, queries, activities, notes, userTasks]);[39m
+[31m+[39m
+[31m+   const initial = (currentUser.name || currentUser.email || "?").trim().charAt(0).toUpperCase();[39m
+[31m+   const fmtDate = (iso?: string) => {[39m
+[31m+     if (!iso) return "";[39m
+[31m+     const d = new Date(iso);[39m
+[31m+     return isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });[39m
+[31m+   };[39m
+[31m+   const statusLabel: Record<typeof currentUser.subscriptionStatus, string> = {[39m
+[31m+     trialing: "Free trial",[39m
+[31m+     active: "Active subscription",[39m
+[31m+     canceled: "Cancelled",[39m
+[31m+     none: "No active subscription",[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   const profileSection = ([39m
+[31m+     <SectionCard title="Profile" Icon={UserIcon} headingId="acct-h-profile">[39m
+[31m+       <div className="flex items-center" style={{ gap: 14, marginBottom: 20 }}>[39m
+[31m+         <span[39m
+[31m+           aria-hidden="true"[39m
+[31m+           style={{[39m
+[31m+             width: 52,[39m
+[31m+             height: 52,[39m
+[31m+             borderRadius: "50%",[39m
+[31m+             background: "#f8e7dc",[39m
+[31m+             border: "1px solid rgba(124,58,42,0.18)",[39m
+[31m+             display: "inline-flex",[39m
+[31m+             alignItems: "center",[39m
+[31m+             justifyContent: "center",[39m
+[31m+             fontFamily: FONT_SERIF,[39m
+[31m+             fontSize: 22,[39m
+[31m+             color: burgundy,[39m
+[31m+             flexShrink: 0,[39m
+[31m+           }}[39m
+[31m+         >[39m
+[31m+           {initial}[39m
+[31m+         </span>[39m
+[31m+         <div style={{ minWidth: 0 }}>[39m
+[31m+           <p style={{ fontFamily: FONT_SERIF, fontSize: 17, color: bodyInk, lineHeight: 1.2 }}>{currentUser.name || "—"}</p>[39m
+[31m+           <p style={helpText}>{currentUser.email}</p>[39m
+[31m+         </div>[39m
+[31m+       </div>[39m
+[31m+[39m
+[31m+       <label htmlFor="account-name" style={labelStyle}>[39m
+[31m+         Display name[39m
+[31m+       </label>[39m
+[31m+       <input[39m
+[31m+         id="account-name"[39m
+[31m+         type="text"[39m
+[31m+         value={name}[39m
+[31m+         maxLength={256}[39m
+[31m+         onChange={(e) => setName(e.target.value)}[39m
+[31m+         className="acct-input"[39m
+[31m+         style={inputStyle}[39m
+[31m+       />[39m
+[31m+       <div className="flex items-center" style={{ gap: 12, marginTop: 12, flexWrap: "wrap" }}>[39m
+[31m+         <button[39m
+[31m+           onClick={saveName}[39m
+[31m+           disabled={!nameChanged || !nameValid || nameStatus.type === "saving"}[39m
+[31m+           style={{ ...primaryBtn, opacity: !nameChanged || !nameValid || nameStatus.type === "saving" ? 0.4 : 1, cursor: !nameChanged || !nameValid ? "not-allowed" : "pointer" }}[39m
+[31m+         >[39m
+[31m+           {nameStatus.type === "saving" ? "Saving…" : "Save name"}[39m
+[31m+         </button>[39m
+[31m+         {nameStatus.type === "saved" && ([39m
+[31m+           <span className="flex items-center" style={{ gap: 5, fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN }}>[39m
+[31m+             <Check style={{ width: 14, height: 14 }} aria-hidden="true" /> {nameStatus.msg}[39m
+[31m+           </span>[39m
+[31m+         )}[39m
+[31m+         {nameStatus.type === "error" && ([39m
+[31m+           <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED }}>{nameStatus.msg}</span>[39m
+[31m+         )}[39m
+[31m+       </div>[39m
+[31m+[39m
+[31m+       {/* Home country — seeded silently at signup from the browser locale (key omitted when[39m
+[31m+           unresolvable) and previously never writable again: a wrong guess was a permanent trap[39m
+[31m+           for the agent territory split (Tier 2 · Phase 4). Absent shows as "Not set" and is[39m
+[31m+           settable; once set it can be changed but not cleared (the origin-state law). */}[39m
+[31m+       <div style={{ marginTop: 22, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>[39m
+[31m+         <label htmlFor="account-homecountry" style={labelStyle}>[39m
+[31m+           Home country[39m
+[31m+         </label>[39m
+[31m+         <div style={{ maxWidth: 360 }}>[39m
+[31m+           <CountryCombobox[39m
+[31m+             id="account-homecountry"[39m
+[31m+             value={currentUser.homeCountry ?? ""}[39m
+[31m+             onChange={saveHomeCountry}[39m
+[31m+             placeholder="Not set"[39m
+[31m+           />[39m
+[31m+         </div>[39m
+[31m+         <div className="flex items-center" style={{ gap: 12, marginTop: 8, flexWrap: "wrap" }}>[39m
+[31m+           <p style={{ ...helpText, margin: 0 }}>[39m
+[31m+             Sets your home market — the agent list uses it to tell domestic agents from[39m
+[31m+             international ones. It can be changed any time, but not cleared once set.[39m
+[31m+           </p>[39m
+[31m+           {countryStatus.type === "saving" && ([39m
+[31m+             <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: mutedInk }}>Saving…</span>[39m
+[31m+           )}[39m
+[31m+           {countryStatus.type === "saved" && ([39m
+[31m+             <span className="flex items-center" style={{ gap: 5, fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN }}>[39m
+[31m+               <Check style={{ width: 14, height: 14 }} aria-hidden="true" /> {countryStatus.msg}[39m
+[31m+             </span>[39m
+[31m+           )}[39m
+[31m+           {countryStatus.type === "error" && ([39m
+[31m+             <span style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED }}>{countryStatus.msg}</span>[39m
+[31m+           )}[39m
+[31m+         </div>[39m
+[31m+       </div>[39m
+[31m+[39m
+[31m+       {/* Pen name — coming soon. Not a User field and not in the Firestore allowlist, so it[39m
+[31m+           can't be stored; rendering it live would silently drop the value (a desync trap). */}[39m
+[31m+       <div style={{ marginTop: 22, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>[39m
+[31m+         <div className="flex items-center" style={{ gap: 10, marginBottom: 6 }}>[39m
+[31m+           <label htmlFor="account-penname" style={{ ...labelStyle, marginBottom: 0 }}>[39m
+[31m+             Pen name[39m
+[31m+           </label>[39m
+[31m+           <ComingSoonPill />[39m
+[31m+         </div>[39m
+[31m+         <input id="account-penname" type="text" disabled placeholder="The name your work is published under" className="acct-input" style={{ ...inputStyle, opacity: 0.6, cursor: "not-allowed" }} />[39m
+[31m+         <p style={{ ...helpText, marginTop: 6 }}>A separate publishing name is coming soon.</p>[39m
+[31m+       </div>[39m
+[31m+     </SectionCard>[39m
+[31m+   );[39m
+[31m+[39m
+[31m+   const securitySection = ([39m
+[31m+     <SectionCard title="Sign-in & security" Icon={Shield} headingId="acct-h-security">[39m
+[31m+       <label htmlFor="account-email" style={labelStyle}>[39m
+[31m+         Email[39m
+[31m+       </label>[39m
+[31m+       <div style={{ position: "relative", marginBottom: 6 }}>[39m
+[31m+         <Mail style={{ position: "absolute", left: 11, top: 11, width: 16, height: 16, color: "rgba(58,28,20,0.4)" }} aria-hidden="true" />[39m
+[31m+         <input[39m
+[31m+           id="account-email"[39m
+[31m+           type="email"[39m
+[31m+           value={currentUser.email}[39m
+[31m+           readOnly[39m
+[31m+           disabled[39m
+[31m+           className="acct-input"[39m
+[31m+           style={{ ...inputStyle, paddingLeft: 34, opacity: 0.7, cursor: "not-allowed" }}[39m
+[31m+         />[39m
+[31m+       </div>[39m
+[31m+       <p style={helpText}>Changing your email is coming soon — it needs you to re-enter your password for security.</p>[39m
+[31m+[39m
+[31m+       {/* Password — fully working via the existing reset-email flow (no reauth needed). */}[39m
+[31m+       <div style={{ marginTop: 20, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>[39m
+[31m+         <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 3 }}>Password</p>[39m
+[31m+         <p style={{ ...helpText, marginBottom: 12 }}>We'll email you a secure link to set a new password.</p>[39m
+[31m+         <button onClick={sendReset} style={ghostBtn}>[39m
+[31m+           <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Send password reset email[39m
+[31m+         </button>[39m
+[31m+         {resetMsg && <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN, marginTop: 12 }}>{resetMsg}</p>}[39m
+[31m+       </div>[39m
+[31m+[39m
+[31m+       <div style={{ marginTop: 20, paddingTop: 4 }}>[39m
+[31m+         <InertRow[39m
+[31m+           first[39m
+[31m+           title="Two-factor authentication"[39m
+[31m+           desc="Add a one-time code at sign-in for extra protection."[39m
+[31m+         />[39m
+[31m+         <InertRow[39m
+[31m+           title="Active sessions"[39m
+[31m+           desc="Review and sign out devices currently signed in."[39m
+[31m+           control={[39m
+[31m+             <span className="flex items-center" style={{ gap: 6, ...helpText }}>[39m
+[31m+               <Smartphone style={{ width: 15, height: 15, color: mutedInk }} aria-hidden="true" /> This device[39m
+[31m+             </span>[39m
+[31m+           }[39m
+[31m+         />[39m
+[31m+       </div>[39m
+[31m+     </SectionCard>[39m
+[31m+   );[39m
+[31m+[39m
+[31m+   const planSection = ([39m
+[31m+     <SectionCard title="Plan & billing" Icon={Sparkles} headingId="acct-h-plan">[39m
+[31m+       <div className="flex items-center justify-between" style={{ gap: 14, flexWrap: "wrap" }}>[39m
+[31m+         <div style={{ minWidth: 0 }}>[39m
+[31m+           <p style={{ fontFamily: FONT_SERIF, fontSize: 18, color: bodyInk, lineHeight: 1.2 }}>{currentUser.plan} plan</p>[39m
+[31m+           <p style={{ ...helpText, marginTop: 2 }}>[39m
+[31m+             {statusLabel[currentUser.subscriptionStatus] ?? currentUser.subscriptionStatus}[39m
+[31m+             {currentUser.subscriptionStatus === "trialing" && currentUser.trialStartDate[39m
+[31m+               ? ` · started ${fmtDate(currentUser.trialStartDate)}`[39m
+[31m+               : ""}[39m
+[31m+           </p>[39m
+[31m+         </div>[39m
+[31m+         {/* In-app upgrade CTAs target /plans (a workspace route in the capsule shell — the[39m
+[31m+             focus tier is retired); the public /pricing keeps the marketing tier. */}[39m
+[31m+         <button onClick={() => onNavigate("plans")} style={primaryBtn}>[39m
+[31m+           View plans &amp; upgrade <ChevronRight style={{ width: 15, height: 15 }} aria-hidden="true" />[39m
+[31m+         </button>[39m
+[31m+       </div>[39m
+[31m+[39m
+[31m+       <div style={{ marginTop: 20, paddingTop: 4 }}>[39m
+[31m+         <InertRow[39m
+[31m+           first[39m
+[31m+           title="Manage billing"[39m
+[31m+           desc="Update your payment method, view invoices and receipts."[39m
+[31m+           control={[39m
+[31m+             <button type="button" disabled aria-disabled="true" style={{ ...ghostBtn, padding: "7px 12px", fontSize: 13, borderColor: "#d8cdc0", color: "#6a5a50", opacity: 0.55, cursor: "not-allowed" }}>[39m
+[31m+               Manage billing[39m
+[31m+             </button>[39m
+[31m+           }[39m
+[31m+         />[39m
+[31m+       </div>[39m
+[31m+     </SectionCard>[39m
+[31m+   );[39m
+[31m+[39m
+[31m+   const notificationsSection = ([39m
+[31m+     <SectionCard title="Notifications" Icon={Bell} headingId="acct-h-notifications">[39m
+[31m+       <InertNotice>[39m
+[31m+         Email notifications aren't switched on yet — these preferences are coming soon, so nothing is saved here for now.[39m
+[31m+       </InertNotice>[39m
+[31m+       <InertRow first title="Follow-up reminders" desc="Email me when a query is due a nudge." />[39m
+[31m+       <InertRow title="Weekly digest" desc="A Monday summary of what's coming up." />[39m
+[31m+       <InertRow title="Product updates" desc="Occasional news about new ScriptAlly features." />[39m
+[31m+       <InertRow[39m
+[31m+         title="Reminder timing"[39m
+[31m+         desc="When to send a follow-up reminder."[39m
+[31m+         control={[39m
+[31m+           <select disabled aria-disabled="true" className="acct-input" style={{ ...inputStyle, width: "auto", padding: "7px 10px", fontSize: 13, opacity: 0.6, cursor: "not-allowed" }}>[39m
+[31m+             <option>On the due date</option>[39m
+[31m+           </select>[39m
+[31m+         }[39m
+[31m+       />[39m
+[31m+     </SectionCard>[39m
+[31m+   );[39m
+[31m+[39m
+[31m+   const preferencesSection = ([39m
+[31m+     <SectionCard title="Preferences" Icon={SlidersHorizontal} headingId="acct-h-preferences">[39m
+[31m+       {/* Theme — functional today (applies to the Queries page). Persisted on the user profile. */}[39m
+[31m+       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "14px 0", borderBottom: "0.5px solid #efe5da", marginBottom: 4 }}>[39m
+[31m+         <div style={{ minWidth: 0 }}>[39m
+[31m+           <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Theme</p>[39m
+[31m+           <p style={helpText}>The look of your Queries page. (Coming to the rest of the app later.)</p>[39m
+[31m+         </div>[39m
+[31m+         <div role="radiogroup" aria-label="Queries page theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>[39m
+[31m+           {([["cappuccino", "Cappuccino"], ["bold", "Bold Pastille"], ["editorial", "Editorial"]] as const).map(([val, label]) => {[39m
+[31m+             const on = (currentUser?.queriesTheme ?? "cappuccino") === val;[39m
+[31m+             return ([39m
+[31m+               <button[39m
+[31m+                 key={val}[39m
+[31m+                 type="button"[39m
+[31m+                 role="radio"[39m
+[31m+                 aria-checked={on}[39m
+[31m+                 onClick={() => updateUserProfile({ queriesTheme: val })}[39m
+[31m+                 style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 13px", cursor: "pointer", whiteSpace: "nowrap" }}[39m
+[31m+               >[39m
+[31m+                 {label}[39m
+[31m+               </button>[39m
+[31m+             );[39m
+[31m+           })}[39m
+[31m+         </div>[39m
+[31m+       </div>[39m
+[31m+       <InertNotice>[39m
+[31m+         ScriptAlly doesn't apply these app-wide yet — they're coming soon. Dates currently follow your device's UK locale.[39m
+[31m+       </InertNotice>[39m
+[31m+       <InertRow[39m
+[31m+         first[39m
+[31m+         title="Time zone"[39m
+[31m+         desc="Used for deadlines and reminder timing."[39m
+[31m+         control={[39m
+[31m+           <select disabled aria-disabled="true" className="acct-input" style={{ ...inputStyle, width: "auto", padding: "7px 10px", fontSize: 13, opacity: 0.6, cursor: "not-allowed" }}>[39m
+[31m+             <option>Europe/London</option>[39m
+[31m+           </select>[39m
+[31m+         }[39m
+[31m+       />[39m
+[31m+       <InertRow[39m
+[31m+         title="Date format"[39m
+[31m+         desc="How dates appear across the app."[39m
+[31m+         control={[39m
+[31m+           <select disabled aria-disabled="true" className="acct-input" style={{ ...inputStyle, width: "auto", padding: "7px 10px", fontSize: 13, opacity: 0.6, cursor: "not-allowed" }}>[39m
+[31m+             <option>DD/MM/YYYY</option>[39m
+[31m+           </select>[39m
+[31m+         }[39m
+[31m+       />[39m
+[31m+     </SectionCard>[39m
+[31m+   );[39m
+[31m+[39m
+[31m+   const dataSection = ([39m
+[31m+     <>[39m
+[31m+       <SectionCard title="Your data" Icon={Database} headingId="acct-h-data">[39m
+[31m+         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>[39m
+[31m+           <div style={{ minWidth: 0, flex: 1 }}>[39m
+[31m+             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Export your data</p>[39m
+[31m+             <p style={helpText}>Download your manuscripts, agents and queries as a JSON file.</p>[39m
+[31m+           </div>[39m
+[31m+           <button onClick={exportData} style={ghostBtn}>[39m
+[31m+             <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Export JSON[39m
+[31m+           </button>[39m
+[31m+         </div>[39m
+[31m+         {exportMsg && <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN, marginTop: -4, marginBottom: 16 }}>{exportMsg}</p>}[39m
+[31m+[39m
+[31m+         {/* ⚠️ THE THIRD DATA RIGHT, AND IT HAD NO ROUTE. The privacy policy offers access, export,[39m
+[31m+             CORRECTION and deletion; export and deletion had surfaces here and correction had none,[39m
+[31m+             so the one right a writer is most likely to need was the one with nowhere to click. */}[39m
+[31m+         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>[39m
+[31m+           <div style={{ minWidth: 0, flex: 1 }}>[39m
+[31m+             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Correct something we hold</p>[39m
+[31m+             <p style={helpText}>Most things you can edit yourself. For anything you can't, write to us and we'll put it right.</p>[39m
+[31m+           </div>[39m
+[31m+           <button onClick={() => onNavigate("contact")} style={ghostBtn}>Get in touch</button>[39m
+[31m+         </div>[39m
+[31m+[39m
+[31m+         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>[39m
+[31m+           <div style={{ minWidth: 0, flex: 1 }}>[39m
+[31m+             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Import agents &amp; queries</p>[39m
+[31m+             <p style={helpText}>Bring in your existing tracking from a spreadsheet.</p>[39m
+[31m+           </div>[39m
+[31m+           <button onClick={() => onNavigate("import")} style={ghostBtn}>[39m
+[31m+             <Upload style={{ width: 14, height: 14 }} aria-hidden="true" /> Open import[39m
+[31m+           </button>[39m
+[31m+         </div>[39m
+[31m+       </SectionCard>[39m
+[31m+[39m
+[31m+       {/* ⚠️ SIGN OUT SITS ABOVE THE DANGER ZONE, NOT BELOW IT. Someone scrolling to close their[39m
+[31m+           account should not pass the way out on the journey to deletion — and someone looking for[39m
+[31m+           the way out should not have to scroll past a delete button to find it. Two exits, and the[39m
+[31m+           reversible one comes first.[39m
+[31m+[39m
+[31m+           ⚠️ ONE IMPLEMENTATION, TWO DOORS. This is the same `logout` the account menu calls, so[39m
+[31m+           where sign-out leaves you cannot differ by the door you used. */}[39m
+[31m+       <SectionCard title="Signing out" Icon={LogOut} headingId="acct-h-signout">[39m
+[31m+         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>[39m
+[31m+           <div style={{ minWidth: 0, flex: 1 }}>[39m
+[31m+             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Sign out</p>[39m
+[31m+             <p style={helpText}>Ends this session and takes you back to the ScriptAlly home page. Your work stays where it is.</p>[39m
+[31m+           </div>[39m
+[31m+           {/* No confirm: leaving is not destructive, and signing back in costs a password. */}[39m
+[31m+           <button onClick={() => { void logout(); }} style={ghostBtn}>[39m
+[31m+             <LogOut style={{ width: 14, height: 14 }} aria-hidden="true" /> Sign out[39m
+[31m+           </button>[39m
+[31m+         </div>[39m
+[31m+       </SectionCard>[39m
+[31m+[39m
+[31m+       <SectionCard title="Danger zone" Icon={Trash2} danger headingId="acct-h-danger">[39m
+[31m+         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>[39m
+[31m+           <div style={{ minWidth: 0, flex: 1 }}>[39m
+[31m+             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Delete account</p>[39m
+[31m+             <p style={helpText}>Permanently remove your account and all of your data. This cannot be undone.</p>[39m
+[31m+           </div>[39m
+[31m+           <button[39m
+[31m+             onClick={() => setShowDelete(true)}[39m
+[31m+             style={{ ...ghostBtn, color: DANGER_INK, borderColor: DANGER_INK }}[39m
+[31m+           >[39m
+[31m+             <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account…[39m
+[31m+           </button>[39m
+[31m+         </div>[39m
+[31m+       </SectionCard>[39m
+[31m+     </>[39m
+[31m+   );[39m
+[31m+[39m
+[31m+   /* ⚠️ ONE SHEET, TWO DOORS — never a second copy of the settings UI (tasks-viewport P5).[39m
+[31m+      This section does NOT re-render the four behaviours; it navigates to the board and opens the[39m
+[31m+      ONE TaskSettingsSheet, which is where they are defined, written and persisted. Building a[39m
+[31m+      second form here would mean two places to change a default and two chances to disagree about[39m
+[31m+      it — and the sheet writes `User.todoPrefs` through one path precisely so that cannot happen.[39m
+[31m+      The navigate-then-dispatch pattern is the account menu's own, already proven: the sheet is[39m
+[31m+      hosted by the To-do page, so the route has to land before the event can find a listener. */[39m
+[31m+   const tasksSection = ([39m
+[31m+     <SectionCard title="Tasks" Icon={ListChecks} headingId="acct-h-tasks">[39m
+[31m+       <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", padding: "14px 0" }}>[39m
+[31m+         <div style={{ minWidth: 0, flex: 1 }}>[39m
+[31m+           <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Task settings</p>[39m
+[31m+           <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk, lineHeight: 1.5 }}>[39m
+[31m+             How long before something counts as stale, what a good day looks like, whether[39m
+[31m+             unfinished work rolls forward, and your weekly review. Opens on your to-do board.[39m
+[31m+           </p>[39m
+[31m+         </div>[39m
+[31m+         <button[39m
+[31m+           type="button"[39m
+[31m+           style={primaryBtn}[39m
+[31m+           onClick={() => {[39m
+[31m+             /* the route first — the sheet lives on the board, so the event needs a listener */[39m
+[31m+             onNavigate("todo");[39m
+[31m+             window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS));[39m
+[31m+           }}[39m
+[31m+         >[39m
+[31m+           Open task settings[39m
+[31m+         </button>[39m
+[31m+       </div>[39m
+[31m+     </SectionCard>[39m
+[31m+   );[39m
+[31m+[39m
+[31m+   const sectionContent: Record<SectionId, React.ReactNode> = {[39m
+[31m+     profile: profileSection,[39m
+[31m+     security: securitySection,[39m
+[31m+     plan: planSection,[39m
+[31m+     notifications: notificationsSection,[39m
+[31m+     preferences: preferencesSection,[39m
+[31m+     tasks: tasksSection,[39m
+[31m+     data: dataSection,[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   return ([39m
+[31m+     <div className="min-h-screen pb-16 font-sans" style={{ background: pageGround, color: bodyInk }}>[39m
+[31m+       {/* Fixed page grain — over the kraft ground, under the positioned cards (matches the dashboard). */}[39m
+[31m+       <div aria-hidden="true" style={{ position: "fixed", inset: 0, opacity: 0.25, pointerEvents: "none", zIndex: 0, backgroundImage: PAGE_GRAIN }} />[39m
+[31m+[39m
+[31m+       {/* On-brand focus ring + rail hover (scoped; inline can't express :focus/:hover). */}[39m
+[31m+       <style>{`[39m
+[31m+         .acct-input:focus { border-color: ${burgundy}; box-shadow: 0 0 0 3px rgba(124,58,42,0.12); }[39m
+[31m+         .acct-rail-item:hover:not([aria-selected="true"]) { background: rgba(124,58,42,0.05); }[39m
+[31m+         .acct-rail-item:focus-visible { outline: 2px solid ${burgundy}; outline-offset: 2px; }[39m
+[31m+       `}</style>[39m
+[31m+[39m
+[31m+       <div className="relative" style={{ zIndex: 1, maxWidth: 1040, margin: "0 auto", padding: "12px 16px 0" }}>[39m
+[31m+         {/* The standard page header (capsule fixes P5 — re-homed from the DELETED FocusShell[39m
+[31m+             into the capsule shell): full variant replaces the bespoke h1 + sub. */}[39m
+[31m+         <PageHeader[39m
+[31m+           variant="full"[39m
+[31m+           title="Account settings"[39m
+[31m+           description="Manage your profile, plan and preferences."[39m
+[31m+         />[39m
+[31m+[39m
+[31m+         <div className="flex flex-col md:flex-row" style={{ gap: 24, alignItems: "flex-start" }}>[39m
+[31m+           <div className="w-full md:w-56 md:flex-shrink-0">[39m
+[31m+             <Rail active={active} onSelect={goSection} />[39m
+[31m+           </div>[39m
+[31m+           <div id="acct-panel" role="tabpanel" aria-labelledby={`acct-tab-${active}`} tabIndex={0} className="flex-1 min-w-0" style={{ outline: "none" }}>[39m
+[31m+             {sectionContent[active]}[39m
+[31m+           </div>[39m
+[31m+         </div>[39m
+[31m+       </div>[39m
+[31m+[39m
+[31m+       {showDelete && <DeleteAccountModal onClose={() => setShowDelete(false)} accountEmail={currentUser.email} onContact={() => onNavigate("contact")} />}[39m
+[31m+     </div>[39m
+[31m+   );[39m
+[31m+ };[39m
+[31m+[39m
+
+ ❯ src/components/todo/tasksViewport.test.tsx:384:18
+    382| 
+    383|   it("door two: a Tasks section on the app Settings page", () => {
+    384|     expect(acct).toContain('{ id: "tasks", label: "Tasks"');
+       |                  ^
+    385|     expect(acct).toContain("tasks: tasksSection");
+    386|     expect(acct).toContain("TODO_OPEN_TASK_SETTINGS");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯⎯⎯ Unhandled Error ⎯⎯⎯⎯⎯⎯⎯
+Error: [vitest-worker]: Timeout calling "onTaskUpdate"
+ ❯ Object.onTimeoutError node_modules/vitest/dist/chunks/rpc.-pEldfrD.js:53:10
+ ❯ Timeout._onTimeout node_modules/vitest/dist/chunks/index.B521nVV-.js:59:62
+ ❯ listOnTimeout node:internal/timers:605:17
+ ❯ processTimers node:internal/timers:541:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  3 failed | 327 passed (330)
+      Tests  3 failed | 5582 passed | 2 skipped (5587)
+     Errors  1 error
+   Start at  22:30:45
+   Duration  217.21s (transform 168.89s, setup 0ms, collect 740.10s, tests 364.04s, environment 516ms, prepare 250.44s)
+
