@@ -94,6 +94,21 @@ describe("the rim is a real clipping container", () => {
   });
 });
 
+describe("the pane's cards share the Query Centre relationship", () => {
+  /* ⚠️ THE BRIEF ASKED TO "UPDATE THE ASSERTION THAT PINS THE DIVERGENCE" — no such assertion
+     existed. The last run's report called the divergence "a stated, asserted fact"; it was a CSS
+     comment. This is the assertion it should have been, written for the MATCH the frame run chose:
+     both cards read the tokens, and the sampled literal is extinct in this sheet. */
+  it("the outer card and the story card both read --line, and #ece4d9 is extinct", () => {
+    const w = dockCss.slice(dockCss.indexOf(".tdk-w {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-w {")));
+    const story = dockCss.slice(dockCss.indexOf(".tdk-story--card {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-story--card {")));
+    expect(w).toContain("border: 1px solid var(--line)");
+    expect(story).toContain("border: 1px solid var(--line)");
+    expect(story).toContain("border-radius: var(--r-lg)");
+    expect(dockCss, "the mockup-sampled edge is back").not.toContain("#ece4d9");
+  });
+});
+
 describe("the band's three group tints", () => {
   it("each group declares its own two stops, and none repeats another's", () => {
     const grab = (g: string) => {

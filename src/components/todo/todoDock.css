@@ -69,13 +69,11 @@
      deployed page: `rgb(255, 255, 255)`. Reading the base rule would have produced a near-match
      that was wrong by exactly the amount nobody can see and everybody can feel.
      The other three ARE the base rule's, and are unshadowed: `--line`, `--r-lg`, `--sh-1`. */
-  /* ⚠️ THE CARD KEEPS ITS TOKENS, and Phase B's own instruction is why: "read the values from the
-     live stylesheet where tokens already exist". They do — `--white`, `--line`, `--r-lg`, `--sh-1`
-     — and a live lock couples all four to the Query Centre's `.f12-card` so the two panels cannot
-     drift apart silently. §2's table names #ece4d9 / 14px, which differ from `--line` (#e6dccd) and
-     `--r-lg` (12px) by an amount invisible side by side and would have broken that coupling for
-     nothing. The genuinely NEW things — the 6px reveal and the rim — are additive, which is the
-     other half of the same instruction. Deviation recorded in the run report. */
+  /* ⚠️ THE QUERY CENTRE RELATIONSHIP IS THE DECISION NOW, NOT A DEVIATION HELD OPEN. The chassis
+     run kept these tokens over the mockup's sampled #ece4d9/14px and flagged the choice for the
+     morning; the frame brief answered it — "a relationship beats a sample". `--white`, `--line`,
+     `--r-lg`, `--sh-1`, all coupled to `.f12-card` by a live lock, and the story card inside the
+     rim now reads the same pair. The 6px reveal and the rim remain the pane's own, additive. */
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
@@ -883,10 +881,14 @@
    width" — a 300px empty track would keep the form narrow for a card that has nothing to show. */
 .tdk-jgrid--solo { grid-template-columns: minmax(0, 1fr); }
 
+/* ⚠️ THE STORY CARD JOINS THE QUERY CENTRE RELATIONSHIP (frame run, Phase 5 — Nick's call: "a
+   relationship beats a sample"). Its #ece4d9 was the last survivor of the mockup-sampled values;
+   the border is `--line` and the radius `--r-lg` now, the same pair the outer card and `.f12-card`
+   share, so a retone of the Query Centre lands here too instead of leaving one card behind. */
 .tdk-story--card {
   background: #fdfbf7;
-  border: 1px solid #ece4d9;
-  border-radius: 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
   padding: 14px 16px;
 }
 
