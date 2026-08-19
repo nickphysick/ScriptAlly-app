@@ -21,6 +21,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { TasksPageLayout, TplZone } from "./TasksPageLayout";
 import { ArtSlot, ART_SLOTS, ArtSlotName } from "./ArtSlot";
+import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
 
 const here = __dirname;
 const css = readFileSync(join(here, "tasksLayout.css"), "utf8");
@@ -380,8 +381,13 @@ describe("⚠️ ONE SHEET, TWO DOORS — and never a second copy of the setting
     expect(board).toContain("TODO_OPEN_TASK_SETTINGS");
   });
 
+  /* ⚠️ THE SECTION LIST MOVED TO `lib/accountRoutes` when settings became real routes, so the
+     door is asserted against THAT TABLE rather than against a literal in the page. The old form
+     read `'{ id: "tasks", label: "Tasks"'` out of AccountSettings.tsx — a source-string lock on a
+     line that had every right to move, and which said nothing about whether the section was
+     reachable. The table is what the router, the rail and the redirect all read. */
   it("door two: a Tasks section on the app Settings page", () => {
-    expect(acct).toContain('{ id: "tasks", label: "Tasks"');
+    expect(ACCOUNT_ROUTES.map((r) => r.id)).toContain("tasks");
     expect(acct).toContain("tasks: tasksSection");
     expect(acct).toContain("TODO_OPEN_TASK_SETTINGS");
   });

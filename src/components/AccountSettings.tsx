@@ -27,10 +27,12 @@
  *                  irreversible deletion is never wired unsupervised, and no endpoint exists).
  */
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, deletionConfirmed } from "../lib/dataExport";
 import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
+import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountCard } from "./MountCard";
 import { PageHeader } from "./shell/PageHeader";
@@ -82,20 +84,26 @@ const DANGER_RULE = "rgba(140,47,47,0.22)";
 const SUCCESS_GREEN = "#3B6D11";
 const ERROR_RED = "#A32D2D";
 
-/* ── The six rail sections (Danger zone lives at the foot of "Your data") ── */
-type SectionId = "profile" | "security" | "plan" | "notifications" | "preferences" | "tasks" | "data";
-const SECTIONS: { id: SectionId; label: string; Icon: React.ComponentType<any> }[] = [
-  { id: "profile", label: "Profile", Icon: UserIcon },
-  { id: "security", label: "Sign-in & security", Icon: Shield },
-  { id: "plan", label: "Plan & billing", Icon: Sparkles },
-  { id: "notifications", label: "Notifications", Icon: Bell },
-  { id: "preferences", label: "Preferences", Icon: SlidersHorizontal },
+/* ── The rail sections ──────────────────────────────────────────────────────
+ * ⚠️ THE ORDER AND THE WORDS COME FROM `accountRoutes`, NOT FROM HERE. Each section is a real
+ * path now, and the rail is the thing that walks between them — a second list of labels in this
+ * file would be a rail that could disagree with the URL it navigates to. Only the ICON is the
+ * page's own business, so only the icon is declared here. */
+type SectionId = AccountSectionId;
+const SECTION_ICONS: Record<SectionId, React.ComponentType<any>> = {
+  profile: UserIcon,
+  security: Shield,
+  plan: Sparkles,
+  notifications: Bell,
+  preferences: SlidersHorizontal,
   /* ⚠️ TASKS — the settings sheet's SECOND DOOR (tasks-viewport P5). The sheet used to be
      reachable only from the To-do sidebar's foot, and since P1 that sidebar mounts on one page of
      four; a writer on Today or the Calendar had no route to their own task settings. */
-  { id: "tasks", label: "Tasks", Icon: ListChecks },
-  { id: "data", label: "Your data", Icon: Database },
-];
+  tasks: ListChecks,
+  data: Database,
+};
+const SECTIONS: { id: SectionId; label: string; path: string; Icon: React.ComponentType<any> }[] =
+  ACCOUNT_ROUTES.map((r) => ({ id: r.id, label: r.label, path: r.path, Icon: SECTION_ICONS[r.id] }));
 
 /* ── Shared field/label/button styling (inline so brand.tsx's non-important body-font
  *    rule can't override it, and Tailwind can't silently re-colour it) ──────────────── */
@@ -540,14 +548,27 @@ const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string;
   );
 };
 
-export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?: string) => void }> = ({ onNavigate }) => {
+export const AccountSettings: React.FC<{
+  /** The section the URL resolves to — App.tsx redirects anything that resolves to nothing, so
+   *  this is always a real section by the time the page renders. */
+  section: AccountSectionId;
+  onNavigate: (tab: string, subPageName?: string) => void;
+}> = ({ section, onNavigate }) => {
   const {
     currentUser, updateUserProfile, resetPassword,
     agents, queries, manuscripts, versions, packages, activities, notes, userTasks,
     logout,
   } = useScriptAllyDb();
 
-  const [active, setActive] = useState<SectionId>("profile");
+  /* ⚠️ THE SECTION IS THE URL, NOT STATE. It used to be `useState("profile")`, which made every
+     section unlinkable and reset the page on refresh — see accountRoutes.ts. `navigate` writes it;
+     the prop reads it back through App.tsx, so there is exactly one copy of "where am I". */
+  const navigate = useNavigate();
+  const active = section;
+  const goSection = (id: SectionId) => {
+    const hit = SECTIONS.find((s) => s.id === id);
+    if (hit) navigate(hit.path);
+  };
   const [name, setName] = useState(currentUser?.name ?? "");
   const [nameStatus, setNameStatus] = useState<{ type: "idle" | "saving" | "saved" | "error"; msg?: string }>({ type: "idle" });
   const [countryStatus, setCountryStatus] = useState<{ type: "idle" | "saving" | "saved" | "error"; msg?: string }>({ type: "idle" });
@@ -1045,7 +1066,7 @@ export const AccountSettings: React.FC<{ onNavigate: (tab: string, subPageName?:
 
         <div className="flex flex-col md:flex-row" style={{ gap: 24, alignItems: "flex-start" }}>
           <div className="w-full md:w-56 md:flex-shrink-0">
-            <Rail active={active} onSelect={setActive} />
+            <Rail active={active} onSelect={goSection} />
           </div>
           <div id="acct-panel" role="tabpanel" aria-labelledby={`acct-tab-${active}`} tabIndex={0} className="flex-1 min-w-0" style={{ outline: "none" }}>
             {sectionContent[active]}

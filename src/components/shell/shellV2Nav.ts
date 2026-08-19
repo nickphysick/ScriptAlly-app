@@ -23,6 +23,7 @@
  */
 
 import { TODO_ROUTES } from "../../lib/todoRoutes";
+import { ACCOUNT_SECTION_PATHS } from "../../lib/accountRoutes";
 
 export interface ShellV2Page {
   key: string;
@@ -96,15 +97,25 @@ export const SHELL_RAIL = [
  *  capsule shell like everything signed-in). */
 export const SHELL_SETUP = { key: "setup", caption: "Setup", path: "/account" } as const;
 
-/** The Setup family — off-nav workspace routes that light the Setup rib (fixes P5). */
-export const SHELL_SETUP_PATHS = new Set(["/account", "/plans", "/help"]);
+/** The Setup family — off-nav workspace routes that light the Setup rib (fixes P5).
+ *  Settings' sections are spread from `accountRoutes`: they are `/account` wearing a section
+ *  name, so the rib must treat them as the same destination. */
+export const SHELL_SETUP_PATHS = new Set(["/account", "/plans", "/help", ...ACCOUNT_SECTION_PATHS]);
 
-/** Off-nav routes that still deserve a breadcrumb; `rail` names the rib they light (if any). */
+/** Off-nav routes that still deserve a breadcrumb; `rail` names the rib they light (if any).
+ *
+ *  ⚠️ EVERY SETTINGS SECTION READS "Setup / Account", NOT ITS OWN NAME. The crumb answers "where
+ *  am I in the app", and the answer is Settings; which pane of Settings is the rail's job, and it
+ *  is already showing it. A crumb that renamed itself per section would put the same fact on
+ *  screen twice, in two grammars, a few pixels apart. */
 const CRUMB_EXTRAS: Record<string, { section: string; page: string; rail: "dashboard" | ShellV2Section["key"] | null }> = {
   "/import": { section: "Shelf", page: "Import", rail: "shelf" },
   "/account": { section: "Setup", page: "Account", rail: null },
   "/plans": { section: "Setup", page: "Plans", rail: null },
   "/help": { section: "Setup", page: "Help centre", rail: null },
+  ...Object.fromEntries(
+    ACCOUNT_SECTION_PATHS.map((p) => [p, { section: "Setup", page: "Account", rail: null }] as const)
+  ),
 };
 
 /** The page (and its owning section, null for the flat Dashboard) an exact pathname maps to. */

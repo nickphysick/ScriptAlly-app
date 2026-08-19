@@ -10,6 +10,7 @@
  * Pure module: no React, no Firebase — App.tsx branches on tierForPath, and the tests lock
  * the resolution table.
  */
+import { ACCOUNT_SECTION_PATHS } from "../lib/accountRoutes";
 
 /**
  * ⚠️ /terms AND /privacy ARE ROUTES, NOT FILES, AND THAT IS FORCED. Both hosting configs rewrite
@@ -32,6 +33,10 @@ export const WORKSPACE_PATHS = new Set([
   "/agents", "/agents/discover",
   "/manuscripts", "/manuscripts/comps", "/manuscripts/packages", "/import",
   "/account", "/plans", "/help",
+  /* The settings SECTIONS are real routes (`/account/profile`, …) — spread from the one table so
+     a new section cannot be added without being registered here. `/account` itself stays listed
+     above: it must survive this check for App.tsx's redirect to it run at all. */
+  ...ACCOUNT_SECTION_PATHS,
 ]);
 
 export type RouteTier = "marketing" | "workspace" | null;

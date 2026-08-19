@@ -45,6 +45,7 @@ import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
 import { shellForRoute } from "./lib/shellForRoute";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
 import { todoPageForPath } from "./lib/todoRoutes";
+import { accountRedirectFor, accountSectionForPath } from "./lib/accountRoutes";
 import { TodoCalendarPage } from "./components/todo/TodoCalendarPage";
 import { TodoNoteboardPage } from "./components/todo/TodoNoteboardPage";
 // ⚠️ PARKED, NOT DELETED (Amendment 1, G4) — held for the public marketing site.
@@ -581,6 +582,14 @@ function AppContent() {
   // routes now, rendered in the one capsule shell below. FocusShell is deleted; the shell
   // census is capsule (signed-in) · marketing (logged-out) · onboarding-outside.)
 
+  /* Settings resolves to a SECTION, so the bare `/account` and any unrecognised `/account/*` are
+     replaced with the first section rather than rendered. This sits ABOVE the unknown-path guard
+     deliberately: `/account/nonsense` is not a workspace path, so the guard below would send it
+     to the dashboard — landing a mistyped settings link on the wrong page entirely instead of on
+     the section list. `replace`, so Back leaves settings rather than bouncing off the redirect. */
+  const accountRedirect = accountRedirectFor(path);
+  if (accountRedirect) return <Navigate to={accountRedirect} replace />;
+
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
   if (!WORKSPACE_PATHS.has(path)) {
@@ -733,7 +742,7 @@ function AppContent() {
             tier is retired); only /pricing stays out, on the marketing tier. */}
         {routeKey === "account" && (
           <StagePage active>
-            <div className="sv2-focuscol"><AccountSettings onNavigate={handleNavigate} /></div>
+            <div className="sv2-focuscol"><AccountSettings section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} /></div>
           </StagePage>
         )}
         {routeKey === "plans" && (

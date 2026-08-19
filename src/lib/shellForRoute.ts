@@ -14,6 +14,7 @@
  * Contact were all in the pack's list and are all absent: they go in when they are built. Adding
  * a route here without building it is the one way to reintroduce a dead link.
  */
+import { ACCOUNT_SECTION_PATHS } from "./accountRoutes";
 
 /**
  * ⚠️⚠️ AMENDMENT 1 (G) — EVERY SIGNED-IN ROUTE IS A WORKSPACE ROUTE NOW, and the dashboard is the
@@ -37,9 +38,13 @@ export const WORKSPACE_SHELL_PATHS = new Set([
   "/manuscripts/comps",
   // Data entry against your own records — it belongs beside the queries it creates.
   "/import",
-  "/account", // Settings
+  "/account", // Settings — the bare route, which redirects to its first section
   "/plans",   // Plan & billing
   "/help",    // Help centre
+  /* Settings' six sections are routes of their own. Spread rather than restated: an unmapped
+     path throws here in development, so a hand-typed list is a dev-only crash waiting on the
+     next section to be added. */
+  ...ACCOUNT_SECTION_PATHS,
 ]);
 
 /**

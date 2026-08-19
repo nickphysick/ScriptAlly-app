@@ -19,6 +19,7 @@ import {
   shellPageForPath,
   shellSectionKeyForPath,
 } from "./shellV2Nav";
+import { ACCOUNT_SECTION_PATHS } from "../../lib/accountRoutes";
 
 describe("shellV2Nav — the accordion model", () => {
   it("Dashboard is flat (no children) and the FOUR sections carry the baked pages", () => {
@@ -99,8 +100,15 @@ describe("shellV2Nav — path matching", () => {
     expect(shellCrumbForPath("/nope")).toBeNull();
   });
 
+  /* ⚠️ THE SETTINGS SECTIONS ARE DERIVED, NOT LISTED. `/account/profile` and its siblings are
+     `/account` under a section name, so they join this family automatically — restating them here
+     would be a hand-written list on both sides of the assertion, which goes green the day both
+     copies are edited in the same wrong direction. The three standalone routes stay literal
+     because nothing derives them. */
   it("the Setup family lights the Setup rib, not a section rib (fixes P5)", () => {
-    expect([...SHELL_SETUP_PATHS].sort()).toEqual(["/account", "/help", "/plans"]);
+    expect([...SHELL_SETUP_PATHS].sort()).toEqual(
+      ["/account", "/help", "/plans", ...ACCOUNT_SECTION_PATHS].sort()
+    );
     for (const p of SHELL_SETUP_PATHS) expect(shellSectionKeyForPath(p)).toBeNull();
   });
 });
