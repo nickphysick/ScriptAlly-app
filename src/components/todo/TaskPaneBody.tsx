@@ -39,16 +39,22 @@ const WHEN: SendBodyValues["when"][] = ["Today", "Yesterday", "Another date…"]
 
 export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ materials, value, onChange, upsell }) => (
   <>
-    <label className="f-lbl">What goes</label>
-    {/* ⚠️ THE MOCKUP PUTS THIS ROW'S LAYOUT IN A `style` ATTRIBUTE, and so does the port — it is
-        four declarations with no class name behind them, and inventing one would be a decision. */}
-    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-      {materials.map((m) => (
-        <span className="chip" key={m.label}>
-          <span className="tick">✓</span> {m.label}{m.detail ? ` · ${m.detail}` : ""}
-        </span>
-      ))}
-    </div>
+    {/* ⚠️ A LABEL WITH NOTHING BENEATH IT DOES NOT RENDER (frame2 Phase 4). A note has no
+        materials, so "What goes" stood over an empty row — a question the page then declined to
+        answer. Absence is a value: no materials, no label. */}
+    {materials.length > 0 && (
+      <>
+        <label className="f-lbl">What goes</label>
+        {/* the mockup puts this row's layout in a `style` attribute; so does the port */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+          {materials.map((m) => (
+            <span className="chip" key={m.label}>
+              <span className="tick">✓</span> {m.label}{m.detail ? ` · ${m.detail}` : ""}
+            </span>
+          ))}
+        </div>
+      </>
+    )}
 
     <label className="f-lbl">When</label>
     <div className="seg" style={{ marginBottom: 16 }}>

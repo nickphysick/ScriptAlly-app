@@ -79,6 +79,7 @@ import {
   typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
 } from "../../lib/todoListView";
 import { groupColumn } from "../../lib/todoGroups";
+import { paneCopy } from "../../lib/taskListRow";
 import { daysBetween } from "../../lib/elapsed";
 import { useDockActivity } from "./useDockActivity";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
@@ -996,7 +997,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /* what the primary will write, in the mockup's own `Will record:` grammar */
   const paneWill = paneCard
-    ? `${rowPrimaryLabel(paneCard, groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent"))} · ${paneBody.when.toLowerCase().replace("…", "")}`
+    /* ⚠️ THE WILL-RECORD LINE TAKES THE PANE'S OWN VERB (frame2 Phase 4). It printed
+       `rowPrimaryLabel`, which for a note is "Complete" — a retired word, rendered in the one place
+       nobody looks for copy. The pane's table is the pane's language throughout. */
+    ? `${paneCopy(paneCard).primary} · ${paneBody.when.toLowerCase().replace("…", "")}`
     : "";
 
   /** What the rail is showing — the groups it draws, flattened. One derivation, two readers. */

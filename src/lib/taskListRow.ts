@@ -172,3 +172,40 @@ export function listFragment(i: RowInputs): RowFragment {
 
 /** the pill's word — the existing label map, unchanged; the list only renders it */
 export const rowBucket = (c: BoardCard): Bucket => cardBucket(c);
+
+/* ── the pane's copy ──────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ⚠️ THE PANE SPEAKS THE LIST'S LANGUAGE (frame2 Phase 4). The row said "Consider closing" while
+ * the form beside it said "Complete" — two halves of one page in two registers, and "Complete" is
+ * on the retired list besides. One table, keyed by the bucket the row is already keyed by, so the
+ * two cannot drift into different words for one act.
+ *
+ * ⚠️ A HEADING OF `null` MEANS THE JOURNEY HAS NONE. Nudge is the case: there is nothing to fill
+ * in, so a heading would announce a form that is not there. Absence is a value here, exactly as it
+ * is for tiles and the timeline.
+ */
+export interface PaneCopy {
+  /** `.act h3` — null renders no heading at all */
+  heading: string | null;
+  /** `.b-primary` */
+  primary: string;
+}
+
+export const PANE_COPY: Record<Bucket, PaneCopy> = {
+  send:   { heading: "Sent it? Note it here",      primary: "I've sent it" },
+  chase:  { heading: null,                          primary: "I've nudged them" },
+  close:  { heading: "Ready to close this one?",   primary: "Close this query" },
+  fix:    { heading: "What went with the query?",  primary: "Record what went" },
+  note:   { heading: "Your note",                   primary: "Tick it off" },
+  /* ⚠️ DECIDE IS NOT IN THE BRIEF'S TABLE. An offer is answered in its own journey, not by a
+     one-line form, so it keeps the deed as its heading rather than inheriting another bucket's
+     words — reported rather than invented. */
+  decide: { heading: null,                          primary: "Reply to the offer" },
+};
+
+/** the verbatim line the close journey must carry */
+export const CLOSE_NOTE =
+  "Closing records no response — not a rejection, so your response rate stays honest.";
+
+export const paneCopy = (c: BoardCard): PaneCopy => PANE_COPY[cardBucket(c)];

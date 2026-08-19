@@ -25,6 +25,7 @@ import { BoardCard } from "./todoBoard";
 import { GROUP_CLASS, liveFamily } from "./todoFamily";
 import { bandDeed, bandSubline, bandPreline, panePresence } from "./todoHandoff";
 import { cardFootHint } from "./todoBuckets";
+import { paneCopy } from "./taskListRow";
 import type { TaskPaneEvent, TaskPaneJourney, TaskPaneTile } from "../components/todo/TaskPane";
 
 /** what the page hands in — every one of these is already computed for the list */
@@ -123,12 +124,15 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     figU: input.figure?.unit ?? "",
     btns: input.btns,
     tiles,
-    actTitle: input.primaryLabel,
+    /* ⚠️ THE PANE'S WORDS COME FROM THE ONE TABLE, not from the row's verb. `primaryLabel` is what
+       the LIST says a card is for; the form beside it asks a different question, and the two had
+       drifted into "Consider closing" against "Complete". */
+    actTitle: paneCopy(c).heading ?? "",
     actSub: cardFootHint(c),
     body: input.body,
     will: input.will,
     quiet: input.quiet,
-    prim: input.primaryLabel,
+    prim: paneCopy(c).primary,
     primDisabled: input.primDisabled,
     tl,
     onOpenQuery: c.relatedRecordId ? input.onOpenQuery : undefined,

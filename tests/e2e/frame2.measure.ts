@@ -165,9 +165,17 @@ test("frame2", async ({ page }) => {
       timeline: all(".tpn .tl-head").length,
       bandBtns: all(".tpn .bandbtns button").map((b) => (b.textContent||"").trim()),
       barBtns: all(".cmdbar button").map((b) => (b.textContent||"").trim()),
+      /* ⚠️ A FORM CONTROL HAS NO textContent. The first form counted "Anything else?" as empty
+         because a <textarea> reports none — a label with a real field under it, reported as bare.
+         A following element that is a control, or that has text, or that has visible size, counts
+         as content. */
       emptyLabels: all(".tpn .f-lbl").filter((l) => {
-        let n = l.nextElementSibling;
-        return !n || !(n.textContent||"").trim();
+        const n = l.nextElementSibling;
+        if (!n) return true;
+        if (/^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(n.tagName)) return false;
+        if ((n.textContent||"").trim()) return false;
+        const r = n.getBoundingClientRect();
+        return r.height < 4;
       }).map((l) => (l.textContent||"").trim()),
       formHeading: (all(".tpn .act h3")[0]||{}).textContent || "",
       primary: (all(".tpn .b-primary")[0]||{}).textContent || "",

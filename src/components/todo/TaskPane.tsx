@@ -160,7 +160,9 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
         <div className="workrow">
           <div className="fc"><div className="rim">
             <div className="act">
-              <h3>{d.actTitle}</h3>
+              {/* ⚠️ NO HEADING ELEMENT WHEN THERE IS NO HEADING. Nudge has nothing to fill in, so
+                  an empty `h3` would leave a gap where a question should be. */}
+              {d.actTitle && <h3>{d.actTitle}</h3>}
               <div className="sub">{d.actSub}</div>
               {d.body}
               <div className="acts">
