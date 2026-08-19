@@ -214,6 +214,13 @@ export interface AnalyticsRow {
   sentMs: number | null;
   /** When the agent FIRST acted, from the earliest incoming rung of the log. */
   respondedMs: number | null;
+  /**
+   * Whether the agent has acted at all — which is a DIFFERENT question from when.
+   *
+   * ⚠️ A RESPONSE WITH NO DERIVABLE DATE IS STILL A RESPONSE. Counting only dated ones would make
+   * a pre-log account look like nobody had ever replied to it.
+   */
+  hasResponded: boolean;
   /** Days from send to first response; `null` unless both dates exist and the order is sane. */
   replyDays: number | null;
   /** Earliest activity date per status — the one mechanism every stage date below comes from. */
@@ -274,7 +281,23 @@ export function buildRows(
       const t = stageMs[status];
       if (t !== undefined && (respondedMs === null || t < respondedMs)) respondedMs = t;
     }
-    if (respondedMs === null) respondedMs = whenMs(q.responseReceivedAt);
+    /**
+     * ⚠️ THE LOG ONLY — `responseReceivedAt` IS DELIBERATELY NOT A FALLBACK HERE, and it was one
+     * until real data was looked at.
+     *
+     * The field is derived by `recomputeQuery` today, but legacy values from the stamping era
+     * survive on any document that has not been recomputed since, and on this app's own dev
+     * account most of them are EQUAL TO `dateSent`. Read as a response date, each of those is a
+     * nought-day wait — a true-looking figure that measured nothing. Measured on the harness
+     * account: nine such queries dragged the median to `0 days`, while `dashboardStats`'
+     * `medianReplyDays`, which reads the log alone, said 24. Two derivations, one page, and the
+     * one on screen was the wrong one.
+     *
+     * So the wait comes from the log, exactly as `medianReplyDays` takes it — the two now agree by
+     * CONSTRUCTION rather than by fixture. What is lost is a date for responses logged before the
+     * log existed, and `hasResponded` below carries those instead: "responded, date unknown" is
+     * the honest pair, and it is the pair `recomputeQuery`'s own docstring names.
+     */
 
     /* ⚠️ THE ORDER CHECK IS NOT PEDANTRY. An imported query can carry a response dated before its
        own send date; a negative wait would enter the median and the histogram as a real figure. */
@@ -317,6 +340,9 @@ export function buildRows(
       outcome: outcomeFor(q.status),
       sentMs,
       respondedMs,
+      /* the stored flag is `recomputeQuery`'s own answer; the rung's existence is the same answer
+         derived here, and either is enough — this is "did they act", not "when" */
+      hasResponded: q.hasAgentResponded === true || respondedMs !== null,
       replyDays,
       stageMs,
       fullSentMs,

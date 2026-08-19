@@ -218,6 +218,26 @@ describe("the reply-time histogram", () => {
     expect(replyBuckets(rows).find((b) => b.label === "3 mo +")?.count).toBe(0);
   });
 
+  it("⚠️ ignores a legacy `responseReceivedAt` stamped equal to the send date", () => {
+    /* ⚠️ THE SHAPE FOUND ON REAL DATA, not an invented one. Documents that predate the derived
+       era carry a `responseReceivedAt` equal to their own `dateSent`; read as a response date each
+       is a nought-day wait, and on this app's dev account nine of them pulled the median to `0`
+       while `medianReplyDays` — which reads the log alone — said 24. The wait comes from the log,
+       so the two agree by construction. The response itself is not lost: `hasResponded` carries
+       it, which is "responded, date unknown", the honest pair. */
+    const a = agent();
+    const sent = daysAgo(60);
+    const q = query({ agentId: a.id, status: QueryStatus.PARTIAL_REQUESTED, dateSent: sent });
+    (q as unknown as { responseReceivedAt: string }).responseReceivedAt = sent;
+    (q as unknown as { hasAgentResponded: boolean }).hasAgentResponded = true;
+    const rows = buildRows([q], [], [a], NOW);
+    expect(rows[0].respondedMs).toBeNull();
+    expect(rows[0].replyDays).toBeNull();
+    expect(rows[0].hasResponded).toBe(true);
+    expect(replyBuckets(rows).reduce((n, b) => n + b.count, 0)).toBe(0);
+    expect(statSet(rows).medianReplyDays).toBe(medianReplyDays([q], []));
+  });
+
   it("discards a response dated before its own send rather than counting a negative wait", () => {
     const a = agent();
     const q = query({ agentId: a.id, status: QueryStatus.REJECTED, dateSent: daysAgo(10) });
