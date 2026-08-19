@@ -201,30 +201,101 @@ export type CompletionVia =
   | "none";            // nothing to complete — the kind has no honest arm
 
 /**
+ * ⚠️ EVERY `taskType` THE ENGINE CAN PUT ON A CARD, DECLARED ONCE. `Task.taskType` is a bare
+ * `string` in `types.ts`, so nothing has ever forced a new kind to say how it completes — which is
+ * precisely how a status write became the thing you got for free by not thinking about it.
+ *
+ * ⚠️ THIS IS A CENSUS, NOT A WISH LIST. Each entry is pushed by the derivation engine in `db.tsx`
+ * or built as a card elsewhere; `exclusive_expiring` is deliberately ABSENT because it survives
+ * only in test fixtures, and listing it here would assert a kind the app cannot produce.
+ */
+export const TASK_TYPES = [
+  "offer_received",
+  "partial_requested",
+  "full_requested",
+  "revise_resubmit",
+  "nudge_overdue",
+  "no_response_close",
+  "data_quality_poor",
+  "querying_unstarted",
+  "dream_agent_unqueried",
+  "materials_unrecorded",
+  "materials_unrecorded_bulk",
+  "weekly_review",
+] as const;
+
+export type TaskType = (typeof TASK_TYPES)[number];
+
+export const isTaskType = (v: unknown): v is TaskType =>
+  typeof v === "string" && (TASK_TYPES as readonly string[]).includes(v);
+
+/**
  * ⚠️ ONE MAP FROM KIND TO WRITE PATH. `quickDone` grew this as an if-ladder inside the page, so
  * "which kinds can be ticked" was answerable only by reading a 90-line function. Stated once, it
  * is also what the row can ask before it draws a tick at all — a tick that does nothing is worse
  * than no tick.
+ *
+ * ⚠️ THE FALLBACK IS INERT, AND THAT IS THE WHOLE POINT OF THIS SHAPE. It used to be `mark-sent` —
+ * a STATUS write — so every task type ever added shipped with a write attached until somebody
+ * remembered to opt out. Two kinds had already reached it that way and both had to be closed by
+ * hand (`cardJourney`'s send fall-through, then the materials pair). A default that writes is a
+ * default that is wrong in the expensive direction; unknown now completes nothing.
+ *
+ * ⚠️ AND THE SWITCH IS EXHAUSTIVE OVER `TaskType`, so the next kind FAILS TO COMPILE until it
+ * declares how it finishes. That is the guard the two hand-fixes above were substituting for.
+ *
+ * ⚠️ `mark-sent` IS NOW EXACTLY THE THREE KINDS THAT ARE REALLY SENDS — the same three
+ * `sendSpecFor` recognises, and the same three whose statuses `getPrimaryAction` answers
+ * "mark-sent" for. Everything else that reached it by default was ALREADY a no-op: `quickDone`
+ * refuses when `getPrimaryAction(q.status).kind !== "mark-sent"`, so an offer card drew a tick and
+ * then silently did nothing. No write changes here; what changes is that a tick which could never
+ * write no longer renders.
  */
 export function completionVia(card: BoardCard): CompletionVia {
   if (card.userTaskId) return "user-task";
   if (!card.relatedRecordId) return "none";
-  if (card.taskType === "no_response_close") return "close-query";
-  if (card.taskType === "nudge_overdue") return "log-nudge";
-  /* ⚠️ A RECORD GAP IS NOT A SEND, AND THE DEFAULT BELOW WOULD HAVE MADE IT ONE. Ticking a card
-     whose `completionVia` is "mark-sent" runs `recordMaterialsSent` — a STATUS write. On a single
-     materials card that would advance the query it points at; on the bulk card, whose
-     `relatedRecordId` stands for a set rather than a record, it would aim that write at an id no
-     query has. Neither is what a tick on "no record of what you sent" means.
+  /* An unrecognised or absent kind completes nothing — see the inert-fallback note above. */
+  if (!isTaskType(card.taskType)) return "none";
 
-     ⚠️ THIS IS THE SAME FAULT `cardJourney` NAMES — "anything not named above used to land in
-     `sendSheet` and be offered 'Mark sent' for a task that is not a send". That one was closed by
-     naming the two real send types; this default is the other door into it, and it was still open.
+  switch (card.taskType) {
+    case "no_response_close":
+      return "close-query";
+    case "nudge_overdue":
+      return "log-nudge";
 
-     "none" until the recording journey lands: no tick renders at all, which is what the sweep card
-     beside it already does. Snooze and Dismiss stay — they are how this card leaves the list. */
-  if (card.taskType === "materials_unrecorded" || card.taskType === "materials_unrecorded_bulk") return "none";
-  return "mark-sent";
+    /* the three genuine sends */
+    case "partial_requested":
+    case "full_requested":
+    case "revise_resubmit":
+      return "mark-sent";
+
+    /* ⚠️ A DECISION IS NOT A SEND. `getPrimaryAction(Offer)` answers "record", so this never
+       wrote; it only drew a tick that refused. The offer's own journey is where it completes. */
+    case "offer_received":
+      return "none";
+
+    /* ⚠️ RECORD GAPS COMPLETE BY RECORDING, NOT BY TICKING. A tick here would aim a send at the
+       query a single card points at, or at an id no query has for the bulk card. */
+    case "materials_unrecorded":
+    case "materials_unrecorded_bulk":
+      return "none";
+
+    /* Housekeeping and prompts: fixed by editing the record they point at, never by a tick.
+       `data_quality_poor` normally arrives collapsed into a sweep, which carries no
+       `relatedRecordId` and is already inert — this covers the loose card whose agent did not
+       resolve, which `groupHousekeeping` skips and leaves in the lane. */
+    case "data_quality_poor":
+    case "querying_unstarted":
+    case "dream_agent_unqueried":
+    case "weekly_review":
+      return "none";
+
+    default: {
+      /* The compile-time guard. Adding a member to TASK_TYPES without a case fails here. */
+      const unhandled: never = card.taskType;
+      return unhandled;
+    }
+  }
 }
 
 /** Whether the row should render a tick at all — the derived answer, never a per-row guess. */

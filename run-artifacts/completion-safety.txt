@@ -1,0 +1,17 @@
+── rows and their tick affordance (1440×900)
+    —   Decide  task-offer-seed-query-12   Answer the offer
+  TICK  Send    task-full-seed-query-9     Send your full
+  TICK  Send    task-partial-seed-query-7  Send your partial
+  TICK  Decide  task-rr-seed-query-11      Send your revision
+  TICK  Close   task-no-res-close-seed-query-1 Log the close
+  TICK  Close   task-no-res-close-seed-query-4 Log the close
+    —   Fix     sweep-dq_mswl              12 wish lists
+    —   Fix     task-materials-bulk        19 queries have no record of what you sent
+  TICK  Note    task-5vu38eiwm             Nudge Tom Ellery
+  TICK  Note    task-29ap4q9zg             Nudge Marcus Reed
+  TICK  Note    task-grfl3yi7y             Nudge Joan Whitfield
+  TICK  Note    task-02zdg9mh0             Nudge Sam Okoro
+
+  offer rows with a tick:     0  (expect 0)
+  materials rows with a tick: 0  (expect 0)
+  page errors: 0
