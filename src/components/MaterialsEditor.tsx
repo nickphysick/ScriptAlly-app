@@ -14,7 +14,7 @@
  */
 import React, { useState } from "react";
 import { BrandDropdown } from "./forms";
-import { materialLabel, type MaterialType } from "../lib/materials";
+import { materialLabel, materialToken, type MaterialType } from "../lib/materials";
 import type { QueryMaterial } from "../types";
 
 const TYPE_OPTIONS = [
@@ -53,7 +53,7 @@ export const MaterialsEditor: React.FC<MaterialsEditorProps> = ({
   const [customText, setCustomText] = useState("");
 
   const indexOf = (label: string) =>
-    value.findIndex((it) => materialLabel(it).toLowerCase() === label.toLowerCase());
+    value.findIndex((it) => materialToken(it).toLowerCase() === label.toLowerCase());
   const isSelected = (label: string) => indexOf(label) >= 0;
 
   const toggle = (label: string) => {
@@ -98,7 +98,7 @@ export const MaterialsEditor: React.FC<MaterialsEditorProps> = ({
 
   // Palette plus any custom/extra labels already present in the value.
   const extras = value
-    .map(materialLabel)
+    .map(materialToken)
     .filter((l) => !palette.some((p) => p.toLowerCase() === l.toLowerCase()));
   const allChips = [...palette, ...extras];
   // Only quantifiable materials (Sample Pages) get a type+quantity row; the others are

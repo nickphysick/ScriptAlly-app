@@ -74,12 +74,12 @@ describe("sampleRowText", () => {
 describe("willRecordText — the strip states the outcome, not a count of forms", () => {
   it("names the materials in row order with the sample in place", () => {
     const r = rows(["Query letter", "Synopsis", "First 3 chapters"]);
-    expect(willRecordText(r)).toBe("Query letter · Synopsis · 3 chapters");
+    expect(willRecordText(r)).toBe("Covering letter · Synopsis · 3 chapters");
   });
 
   it("folds two sample units into ONE clause rather than listing them as two materials", () => {
     const r = rows(["Query letter", "First 3 chapters", "First 50 pages"]);
-    expect(willRecordText(r)).toBe("Query letter · 3 chapters · 50 pages");
+    expect(willRecordText(r)).toBe("Covering letter · 3 chapters · 50 pages");
     // …and the fold is real: the sample contributes one segment, not two.
     expect(willRecordText(r)?.split(" · ")).toHaveLength(3);
   });
@@ -100,8 +100,10 @@ describe("willRecordText — the strip states the outcome, not a count of forms"
 
   it("⚠️ round-trips: what the strip promises is what the rows would store", () => {
     const r = rows(["Query letter", "Synopsis", "First 3 chapters"]);
-    // The strip is a reading of the SAME rows the write path encodes — not a parallel derivation.
+    /* ⚠️ THE SEPARATION, IN ONE BLOCK: the STORED tokens are unchanged while the DISPLAY reads
+       "Covering letter". This pair is the whole of Phase C — if a later edit ever lets the stored
+       side follow the label, this line fails and the migration is caught at the door. */
     expect(materialsWantedFromRows(r)).toEqual(["Query letter", "Synopsis", "First 3 chapters"]);
-    expect(willRecordText(r)).toBe("Query letter · Synopsis · 3 chapters");
+    expect(willRecordText(r)).toBe("Covering letter · Synopsis · 3 chapters");
   });
 });

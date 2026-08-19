@@ -501,7 +501,7 @@ describe("agentList · card history + wishlist", () => {
 
 describe("agentList · materials summary (the canonical string[] — one source with the editor)", () => {
   it("summarises the stored strings through the editor's own row model", () => {
-    expect(materialsSummary(mkAgent({ materialsWanted: ["Query letter", "Synopsis"] }))).toBe("Query letter  ·  Synopsis");
+    expect(materialsSummary(mkAgent({ materialsWanted: ["Query letter", "Synopsis"] }))).toBe("Covering letter  ·  Synopsis");
   });
 
   it("names the sample unit", () => {

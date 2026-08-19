@@ -18,9 +18,41 @@ import type { QueryMaterial } from "../types";
 
 export type MaterialType = "pages" | "words" | "chapters" | "other";
 
-/** The base material name, whether stored as a legacy string or a structured item. */
-export function materialLabel(item: string | QueryMaterial): string {
+/** The stored TOKEN, whether the item is a legacy string or a structured entry. Used for matching
+ *  and comparison — never for display. (Was `materialLabel`, which is what the display map is now
+ *  called: the old name described the string's shape rather than its job, and the two are opposites
+ *  here — one is what the record holds, the other is what a reader sees.) */
+export function materialToken(item: string | QueryMaterial): string {
   return typeof item === "string" ? item : item.material;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   DISPLAY LABELS — one map, and it never touches what is stored
+   ══════════════════════════════════════════════════════════════════════════════
+
+   ⚠️ THE TOKEN AND THE LABEL ARE DIFFERENT STRINGS AND MUST STAY THAT WAY. `"Query letter"` is a
+   STORED value — `MAT_OPTS[0]`, `ComponentType.QUERY_LETTER`, and a literal inside thousands of
+   existing Firestore documents. Renaming it would be a data migration touching `packageMetrics`,
+   the component-type enum and every seeded agent. This map changes only what a reader sees.
+
+   ⚠️ UK COPY: a covering letter is what this is called here. The token stays `Query letter` for
+   ever, and nothing in storage, comparison or round-tripping may read this map.
+
+   ⚠️ MATCHING IS CASE-INSENSITIVE ON PURPOSE. The corpus holds BOTH `"Query letter"` and
+   `"Query Letter"` — the agent editor writes the first, `ComponentType.QUERY_LETTER` and the seeds
+   the second. A case-sensitive map would relabel half the app and leave the other half untouched,
+   which is worse than not doing it at all. */
+const DISPLAY_LABELS: Readonly<Record<string, string>> = {
+  "query letter": "Covering letter",
+  "query letters": "Covering letters",
+};
+
+/**
+ * A stored material token as display copy. Unknown tokens are returned unchanged — the writer's own
+ * free text under "Other" is their words, and a map that rewrote those would be editing prose.
+ */
+export function materialLabel(token: string): string {
+  return DISPLAY_LABELS[token.trim().toLowerCase()] ?? token;
 }
 
 /**
@@ -49,7 +81,9 @@ function formatLegacyMaterial(mat: string): string {
   const norm = mat.toLowerCase().trim();
 
   if (norm === "query letter" || norm === "query" || norm.includes("query letter")) {
-    return "Query letter";
+    /* through the ONE display map — this formatter is what the query detail, the timeline, the CSV
+       export and the response takeover all render, so the label lands everywhere at once. */
+    return materialLabel("Query letter");
   }
   if (norm === "synopsis" || norm.includes("synopsis")) {
     return "Synopsis";

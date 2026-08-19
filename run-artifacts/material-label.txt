@@ -1,0 +1,5 @@
+── material label on the page (1440×900)
+  /queries       "covering letter" ×1   "query letter" ×0
+  /manuscripts   "covering letter" ×0   "query letter" ×0
+  /agents        "covering letter" ×12   "query letter" ×0
+  page errors: 0

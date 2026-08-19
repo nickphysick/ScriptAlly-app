@@ -204,7 +204,7 @@ describe("tile 4 — Submission materials", () => {
   it("lists the materials that exist, with counts, and omits the ones that do not", () => {
     const vs = [ver(ComponentType.QUERY_LETTER, "a"), ver(ComponentType.QUERY_LETTER, "b"), ver(ComponentType.SYNOPSIS, "c")];
     const t = submissionMaterials([pkg("p")], vs);
-    expect(t.detail).toBe("Query letter (2) · Synopsis (1).");
+    expect(t.detail).toBe("Covering letter (2) · Synopsis (1).");
     expect(t.detail).not.toContain("Sample pages");
     expect(t.detail).not.toContain("not added");
   });

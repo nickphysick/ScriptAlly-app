@@ -20,7 +20,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { SAMPLE_UNITS, UNIT_CFG, snapToUnit, stepAmount } from "./agentMaterials";
 import { draftMaterialsToQuery } from "./queryDraft";
-import { materialLabel, sampleMaterialText } from "./materials";
+import { materialToken, sampleMaterialText } from "./materials";
 import type { QueryMaterial } from "../types";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -171,7 +171,7 @@ describe("unit round-trip · create mode → stored query → post-save editor",
       { key: "other", kind: "text", name: "Other", on: true, text: "Author bio" },
     ]);
     const isSampleMat = (it: string | QueryMaterial) => {
-      const l = materialLabel(it).toLowerCase();
+      const l = materialToken(it).toLowerCase();
       return !l.includes("query") && !l.includes("synopsis");
     };
     // the read is fine — order saves it

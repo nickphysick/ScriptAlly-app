@@ -9,6 +9,7 @@
  */
 import { ComponentType, SubmissionPackage } from "../../types";
 import { UNFILLED_SLOT } from "../../lib/packageMetrics";
+import { materialLabel } from "../../lib/materials";
 
 export interface TypeMeta {
   /** Singular label ("Query letter"). */
@@ -22,7 +23,7 @@ export interface TypeMeta {
 }
 
 export const TYPE_META: Record<ComponentType, TypeMeta> = {
-  [ComponentType.QUERY_LETTER]: { label: "Query letter", plural: "Query letters", tint: "var(--tl)", ink: "var(--burg)" },
+  [ComponentType.QUERY_LETTER]: { label: materialLabel("Query letter"), plural: materialLabel("Query letters"), tint: "var(--tl)", ink: "var(--burg)" },
   [ComponentType.SYNOPSIS]: { label: "Synopsis", plural: "Synopses", tint: "var(--ts)", ink: "var(--sage-d)" },
   [ComponentType.SAMPLE_PAGES]: { label: "Sample pages", plural: "Sample pages", tint: "var(--tp)", ink: "var(--gold)" },
   // Present for exhaustiveness only — the builder never renders it.

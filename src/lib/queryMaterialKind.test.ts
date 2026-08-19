@@ -181,7 +181,12 @@ describe("§2 · the attach menu and the shared editor", () => {
   const decls = page.replace(/\{?\/\*[\s\S]*?\*\/\}?/g, "").replace(/^\s*\/\/.*$/gm, "");
 
   it("the menu lists the four, and each row says what choosing it will do", () => {
-    for (const label of ["Query letter", "Synopsis", "Opening sample", "Other…"]) {
+    /* ⚠️ THE COVERING LETTER IS NAMED THROUGH THE DISPLAY MAP, NOT HARD-CODED. `"Query letter"` is
+       the STORED token; what the menu shows is `materialLabel("Query letter")` → "Covering letter".
+       Asserting the call rather than the literal is the stronger claim: it fails if the row goes
+       back to hard-coding either string. The other three have no display alias and read plainly. */
+    expect(decls, "the menu dropped the covering letter").toContain('label: materialLabel("Query letter")');
+    for (const label of ["Synopsis", "Opening sample", "Other…"]) {
       expect(decls, `the menu dropped ${label}`).toContain(`label: "${label}"`);
     }
     /* the two that hand over say so BEFORE the click; the two that attach and close say nothing */

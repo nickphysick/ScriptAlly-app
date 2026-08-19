@@ -145,9 +145,10 @@ describe("the reference panel is there on the first frame", () => {
        differently depending on whether it answers a query letter or a full. */
     const sent = rows.find((r) => r.label === "You sent");
     expect(sent, "the send row is missing").toBeTruthy();
-    /* `formatQueryMaterial` normalises the casing — the row shows what the app calls it, not what
-       the stored string happens to be capitalised as. */
-    expect(sent!.text.toLowerCase()).toContain("query letter");
+    /* `formatQueryMaterial` normalises the casing AND the wording — the row shows the DISPLAY
+       label, not whatever the stored string happens to be. The token stays `Query letter`; the
+       reader sees "covering letter". */
+    expect(sent!.text.toLowerCase()).toContain("covering letter");
     expect(sent!.text).toContain("Email");
     expect(rows.map((r) => r.label)).toContain("They said");
   });

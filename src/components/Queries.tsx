@@ -69,7 +69,7 @@ import { WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD, writerExpectedIso,
 /* the shared date formatter — it OMITS an unparseable date rather than printing "Invalid Date" */
 import { refDate } from "../lib/responseContext";
 import { classifyQueryMaterial, parseAgentMaterials, SAMPLE_UNITS, SampleUnit, snapToUnit, stepAmount } from "../lib/agentMaterials";
-import { formatQueryMaterial, materialLabel, sampleMaterialText } from "../lib/materials";
+import { formatQueryMaterial, materialLabel, materialToken, sampleMaterialText } from "../lib/materials";
 import { formatListRowDate } from "../lib/listRowDate";
 import { MarkSentPopover } from "./MarkSentPopover";
 import { createPortal } from "react-dom";
@@ -1758,7 +1758,7 @@ export const Queries: React.FC<{
    * `Other` without its words is a pill reading "Other".
    */
   const MATERIAL_MENU: { label: string; hint?: string; added: (ql: boolean, syn: boolean, smp: boolean, oth: boolean) => boolean; add: (anchor: HTMLElement) => void }[] = [
-    { label: "Query letter", added: (ql) => ql, add: () => activeQuery && activeAgent && toggleDocMaterial(activeQuery, activeAgent, "query") },
+    { label: materialLabel("Query letter"), added: (ql) => ql, add: () => activeQuery && activeAgent && toggleDocMaterial(activeQuery, activeAgent, "query") },
     { label: "Synopsis", added: (_q, syn) => syn, add: () => activeQuery && activeAgent && toggleDocMaterial(activeQuery, activeAgent, "synopsis") },
     {
       label: "Opening sample", hint: "→ SIZE", added: (_q, _s, smp) => smp,
@@ -4822,7 +4822,7 @@ export const Queries: React.FC<{
                       {matPop && (() => {
                         const pbase = baseMaterialsFor(activeQuery, activeAgent);
                         const pref = agentSamplePref(activeAgent);
-                        const eyebrow = matPop === "ql" ? "Query letter" : matPop === "syn" ? "Synopsis" : matPop === "oth" ? "Other" : "Opening sample";
+                        const eyebrow = matPop === "ql" ? materialLabel("Query letter") : matPop === "syn" ? "Synopsis" : matPop === "oth" ? "Other" : "Opening sample";
                         const removeThis = () => {
                           if (matPop === "smp") removeSampleMaterial(activeQuery, activeAgent);
                           else if (matPop === "oth" && otherEditing != null) removeOtherMaterial(activeQuery, activeAgent, otherEditing);
@@ -5079,7 +5079,7 @@ export const Queries: React.FC<{
                                 const otherItems = base.filter(isOtherMat);
                                 const linkedPackage = activeQuery.packageId ? packages.find(p => p.id === activeQuery.packageId) : null;
                                 const pkgComponents = linkedPackage
-                                  ? [["Query letter", linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
+                                  ? [[materialLabel("Query letter"), linkedPackage.queryLetterVersionId], ["Synopsis", linkedPackage.synopsisVersionId], ["Sample pages", linkedPackage.samplePagesVersionId]].filter(([, v]) => !!v).map(([l]) => l as string)
                                   : [];
                                 const isPro = currentUser?.plan === UserPlan.PRO;
                                 const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
@@ -5160,7 +5160,7 @@ export const Queries: React.FC<{
                                 {/* ⚠️ THE CHIP OPENS ITS OWN POPOVER (§5) rather than toggling on click. A single click that
                                      silently flipped "sent" gave one control two of the three things a
                                      material can have done to it and no way to reach the third. */}
-                                {qlSent && attach("ql", "Query letter", (el) => openMatPop("ql", el), "Query letter", () => toggleDocMaterial(activeQuery, activeAgent, "query"))}
+                                {qlSent && attach("ql", materialLabel("Query letter"), (el) => openMatPop("ql", el), materialLabel("Query letter"), () => toggleDocMaterial(activeQuery, activeAgent, "query"))}
                                 {synSent && attach("syn", "Synopsis", (el) => openMatPop("syn", el), "Synopsis", () => toggleDocMaterial(activeQuery, activeAgent, "synopsis"))}
                                 {/* ⚠️ THE SAMPLE CHIP OPENS ITS EDITOR RATHER THAN TOGGLING, because a
                                     sample is a quantity and a unit, not a yes. Its label carries what

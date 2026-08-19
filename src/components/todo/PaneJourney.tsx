@@ -35,6 +35,7 @@ import {
 import { HolderRow } from "../../lib/todoHandoff";
 import { RecordingCalendar } from "./RecordingCalendar";
 import "./paneJourney.css";
+import { materialLabel } from "../../lib/materials";
 
 /** One title per step id — the numbering comes from the stack's position, never from here. */
 const STEP_TITLE: Record<StepId, string> = {
@@ -59,7 +60,7 @@ const STEP_TITLE: Record<StepId, string> = {
  * Other.
  */
 const FIX_MATERIALS: { label: string; stored: string }[] = [
-  { label: "Query letter", stored: "Query letter" },
+  { label: materialLabel("Query letter"), stored: "Query letter" },
   { label: "Synopsis", stored: "Synopsis" },
   { label: "Opening sample", stored: "Sample pages" },
 ];

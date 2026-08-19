@@ -31,7 +31,7 @@ const pane = (versions: ManuscriptVersion[] = [], packages: SubmissionPackage[] 
 describe("the four rows always render, and absence is SAID", () => {
   it("names all four slots even with nothing on file", () => {
     const html = pane();
-    for (const label of ["Query letter", "Synopsis", "Opening sample", "Packages compiled"]) {
+    for (const label of ["Covering letter", "Synopsis", "Opening sample", "Packages compiled"]) {
       expect(html).toContain(label);
     }
     expect(html.match(/class="msv-frow"/g)).toHaveLength(4);
@@ -54,7 +54,7 @@ describe("the four rows always render, and absence is SAID", () => {
       [pkg("p")],
     );
     expect(rows).toEqual([
-      { label: "Query letter", count: "2 versions" },
+      { label: "Covering letter", count: "2 versions" },
       { label: "Synopsis", count: "1 version" },
       { label: "Opening sample", count: null },
       { label: "Packages compiled", count: "1 package" },

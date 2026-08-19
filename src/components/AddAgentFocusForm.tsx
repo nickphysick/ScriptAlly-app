@@ -22,6 +22,7 @@ import {
 import profileAnimation from "../assets/agent-profile-animation.json";
 import { SOCIAL_PLATFORMS, METHOD_OPTIONS as METHOD_LIST } from "../lib/agentOptions";
 import { buildAgentMaterials, materialsCountErrors, type AgentMaterialsState } from "../lib/agentMaterials";
+import { materialLabel } from "../lib/materials";
 
 interface AddAgentFocusFormProps {
   isOpen: boolean;
@@ -394,7 +395,7 @@ export const AddAgentFocusForm: React.FC<AddAgentFocusFormProps> = ({
 
       <FormField label="Materials wanted">
         <div className="sa-aa-chips">
-          <div className={`sa-aa-chip${materials.queryLetter ? " on" : ""}`} onClick={() => toggleMat("queryLetter")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("queryLetter"); } }}>Query letter</div>
+          <div className={`sa-aa-chip${materials.queryLetter ? " on" : ""}`} onClick={() => toggleMat("queryLetter")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("queryLetter"); } }}>{materialLabel("Query letter")}</div>
           <div className={`sa-aa-chip${materials.authorBio ? " on" : ""}`} onClick={() => toggleMat("authorBio")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("authorBio"); } }}>Author bio</div>
           <div className={`sa-aa-chip${materials.synopsis.on ? " on" : ""}`} onClick={() => toggleMat("synopsis")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("synopsis"); } }}>Synopsis</div>
           <div className={`sa-aa-chip${materials.pages.on ? " on" : ""}`} onClick={() => toggleMat("pages")} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleMat("pages"); } }}>Sample pages</div>

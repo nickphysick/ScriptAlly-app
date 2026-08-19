@@ -36,6 +36,7 @@
  */
 
 import { ComponentType } from "../types";
+import { materialLabel } from "./materials";
 
 /** Pill options, in display order. The four in MAT_QTY reveal a count input. */
 export const MAT_OPTS = [
@@ -296,7 +297,9 @@ export type MaterialRow =
   | { key: "other"; kind: "text"; name: string; on: boolean; text: string };
 
 export const MATERIAL_ROW_NAMES = {
-  queryLetter: "Query letter",
+  /* ⚠️ DISPLAY, through the one map — the STORED token stays "Query letter" (see MAT_OPTS and
+     `materialsWantedFromRows`, which push the literal and must never read this). */
+  queryLetter: materialLabel("Query letter"),
   synopsis: "Synopsis",
   sample: "Opening sample",
   other: "Other",

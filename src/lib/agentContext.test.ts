@@ -509,7 +509,7 @@ describe("a missing thing omits itself, entirely", () => {
 
   it("what they ask for carries its quantity, from the checklist's own derivation", () => {
     expect(agentAsks(bare({ materialsWanted: ["Query Letter", "First 5 Chapters"] })))
-      .toEqual([{ name: "Query letter", qty: null }, { name: "Opening sample", qty: "5 chapters" }]);
+      .toEqual([{ name: "Covering letter", qty: null }, { name: "Opening sample", qty: "5 chapters" }]);
     expect(read("./agentContext.ts")).toContain("materialRowsFromAgent");
   });
 });

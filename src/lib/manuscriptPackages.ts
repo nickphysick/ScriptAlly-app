@@ -16,6 +16,7 @@
  * information twice.
  */
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
+import { materialLabel } from "./materials";
 
 /**
  * ⚠️ THE THREE PACKAGE-SLOT MATERIALS, AND THIS LIST IS SHARED WITH THE DETAILS TILE.
@@ -45,7 +46,7 @@ export const PACKAGE_MATERIALS: ComponentType[] = [
  * only name true of all three. One artefact, one name, on both surfaces.
  */
 export const MATERIAL_LABEL: Record<ComponentType, string> = {
-  [ComponentType.QUERY_LETTER]: "Query letter",
+  [ComponentType.QUERY_LETTER]: materialLabel("Query letter"),
   [ComponentType.SYNOPSIS]: "Synopsis",
   [ComponentType.SAMPLE_PAGES]: "Opening sample",
   [ComponentType.FULL_MANUSCRIPT]: "Full manuscript",
