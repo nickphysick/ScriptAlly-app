@@ -1,0 +1,8 @@
+── a closed query's reading pane (1440×900)
+  Closed filter applied: false
+  closed query selected: false
+  row: 
+  material chips/add:  true
+  "covering letter":   true
+  materials area:      true
+  page errors:         0
