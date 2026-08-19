@@ -1,0 +1,78 @@
+
+════ 1440×900  (documentElement.clientWidth 1440, devicePixelRatio 1)
+  list 518  listParent 518  |  dock 398  pane(.tdk-w) 350  rim 336  inner 334
+  ancestors (pane → body), width + constraining declaration:
+      350px  tdk-w                  flex:1 1 0%  pad:6px/6px
+      398px  tdk                    flex:1 1 0%  pad:24px/24px
+      398px  tdw-work               flex:0 1 auto
+      980px  tdw-split              cols:520px 398px  pad:22px/22px
+      980px  tdb-centre             flex:1 1 auto
+      980px  tpl-body               flex:1 1 0%
+      980px  tpl-cols               flex:1 1 0%
+     1170px  wpg-scroll             flex:0 1 auto  pad:80px/80px
+     1170px  wpg                    cols:1170px
+     1170px  tdb-col                flex:1 1 0%
+     1170px  tdb-wrap               flex:1 1 0%
+     1170px  t-f12                  flex:1 1 0%
+     1170px  div                    flex:1 1 0%
+     1170px  ws-work                flex:1 1 0px
+     1170px  ws-wbody               flex:1 1 0%
+     1172px  ws-window              flex:1 1 0%
+     1216px  ws-main                flex:1 1 0%  pad:22px/22px
+     1440px  ws-app                 flex:1 1 0%
+     1440px  sv2-app                flex:1 1 auto
+     1440px  t-capp                 flex:0 1 auto
+     1440px  text-[#3a1c14]         
+     1440px  div                    
+
+════ 1680×1050  (documentElement.clientWidth 1680, devicePixelRatio 1)
+  list 518  listParent 518  |  dock 638  pane(.tdk-w) 590  rim 576  inner 574
+  ancestors (pane → body), width + constraining declaration:
+      590px  tdk-w                  flex:1 1 0%  pad:6px/6px
+      638px  tdk                    flex:1 1 0%  pad:24px/24px
+      638px  tdw-work               flex:0 1 auto
+     1220px  tdw-split              cols:520px 638px  pad:22px/22px
+     1220px  tdb-centre             flex:1 1 auto
+     1220px  tpl-body               flex:1 1 0%
+     1220px  tpl-cols               flex:1 1 0%
+     1410px  wpg-scroll             flex:0 1 auto  pad:80px/80px
+     1410px  wpg                    cols:1410px
+     1410px  tdb-col                flex:1 1 0%
+     1410px  tdb-wrap               flex:1 1 0%
+     1410px  t-f12                  flex:1 1 0%
+     1410px  div                    flex:1 1 0%
+     1410px  ws-work                flex:1 1 0px
+     1410px  ws-wbody               flex:1 1 0%
+     1412px  ws-window              flex:1 1 0%
+     1456px  ws-main                flex:1 1 0%  pad:22px/22px
+     1680px  ws-app                 flex:1 1 0%
+     1680px  sv2-app                flex:1 1 auto
+     1680px  t-capp                 flex:0 1 auto
+     1680px  text-[#3a1c14]         
+     1680px  div                    
+
+════ 1920×1080  (documentElement.clientWidth 1920, devicePixelRatio 1)
+  list 518  listParent 518  |  dock 878  pane(.tdk-w) 830  rim 816  inner 814
+  ancestors (pane → body), width + constraining declaration:
+      830px  tdk-w                  flex:1 1 0%  pad:6px/6px
+      878px  tdk                    flex:1 1 0%  pad:24px/24px
+      878px  tdw-work               flex:0 1 auto
+     1460px  tdw-split              cols:520px 878px  pad:22px/22px
+     1460px  tdb-centre             flex:1 1 auto
+     1460px  tpl-body               flex:1 1 0%
+     1460px  tpl-cols               flex:1 1 0%
+     1650px  wpg-scroll             flex:0 1 auto  pad:80px/80px
+     1650px  wpg                    cols:1650px
+     1650px  tdb-col                flex:1 1 0%
+     1650px  tdb-wrap               flex:1 1 0%
+     1650px  t-f12                  flex:1 1 0%
+     1650px  div                    flex:1 1 0%
+     1650px  ws-work                flex:1 1 0px
+     1650px  ws-wbody               flex:1 1 0%
+     1652px  ws-window              flex:1 1 0%
+     1696px  ws-main                flex:1 1 0%  pad:22px/22px
+     1920px  ws-app                 flex:1 1 0%
+     1920px  sv2-app                flex:1 1 auto
+     1920px  t-capp                 flex:0 1 auto
+     1920px  text-[#3a1c14]         
+     1920px  div                    

@@ -911,14 +911,15 @@
 
 .tdg-row.done .tdg-notett { color: #b8a898; text-decoration: line-through; }
 
-/* line two: agent · agency, one line, ellipsised. No date — the figure column carries the time. */
+/* ⚠️ LINE TWO WRAPS NOW — the one-line ellipsis is REVERSED (frame run, F4). At the 372px list
+   the content lane is ~150px and "Elinor Hale · Cavendish & Roe" is ~190: a third of the agent
+   lines truncated mid-name, measured. A name cut short is worse than a second line; the figure
+   column still carries the time, so nothing else changes. No date on this line, as before. */
 .tdg-sub {
   font-size: 11.5px;
   color: #8a7666;
   margin-top: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .tdg-sep { color: #cbbcae; margin: 0 5px; }

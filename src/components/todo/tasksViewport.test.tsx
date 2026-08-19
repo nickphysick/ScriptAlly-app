@@ -609,7 +609,11 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        is left. 520 since the visual rebuild: the row gained a 68px bucket pill and a 104px figure
        column, and v9 draws the pane at 520. (It was 440, itself widened from the earlier ref's
        408 when the lane structure grew — the width has always followed the row.) */
-    expect(split).toContain("--tdw-rail-w: 520px");
+    expect(split).toContain("--tdw-rail-w: 372px");
+    /* ⚠️ 520 → 372 (frame run): the list was the fixed track at 520 while the PANE took the
+       leftovers — 350px at 1440 for the surface being worked on. 372 is the design's own row
+       width; the no-ellipsis assertion in paneFrame.measure.ts is what keeps it honest. */
+    void ("re-pointed, not deleted");
     /* the panes are objects on a ground now, not two halves of a sheet — so the split carries the
        gap and the ground, and the rail no longer carries a divider */
     expect(split).toContain("gap: 18px");
