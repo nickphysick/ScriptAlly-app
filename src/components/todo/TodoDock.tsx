@@ -512,6 +512,15 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           ) : cohort ? (
             <PaneSweep rule={cohort.rule} members={cohort.members} rows={rows} onChange={setSweepRows} />
           ) : draft ? (
+            /* ⚠️ THE STORY STANDS BESIDE THE FORM, NOT BEHIND IT (Phase E, §2). Opening a journey
+               used to REPLACE the timeline, so the writer lost the record they were recording
+               against at exactly the moment they were recording against it. Both are children of
+               one grid now; when presence says there is no timeline the form runs full width, which
+               `.tdk-jgrid--solo` does with a single column rather than an empty second track. */
+            <div className={`tdk-jgrid${presence.timeline ? "" : " tdk-jgrid--solo"}`}>
+            {/* ⚠️ A REAL CONTAINER, because `PaneJourney` returns a FRAGMENT. Without one its
+                children become direct children of the grid and each takes a cell of its own. */}
+            <div className="tdk-jform">
             <PaneJourney
               kind={journeyKind?.(card) ?? "send"}
               gaps={journeyGaps?.(card)}
@@ -526,9 +535,42 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               onChange={setDraft}
               onCancel={() => setDraft(null)}
             />
+            </div>
+            {presence.timeline && (
+              <aside className="tdk-story tdk-story--card" aria-label="Tracking">
+                <div className="tdk-storyhd">
+                  <span className="tdk-storyk">The story so far</span>
+                  <span className="tdk-storyn">{events.length}</span>
+                </div>
+                {events.length > 0 ? (
+                  <ol className="tdk-tl">
+                    {events.map((e) => (
+                      <li key={e.key}>
+                        <span className="tdk-tlw">{e.when}</span>
+                        <span className="tdk-tlt">{e.label}</span>
+                      </li>
+                    ))}
+                  </ol>
+                ) : <div className="tdk-storynone">Nothing logged yet.</div>}
+                {card.relatedRecordId && (
+                  <button type="button" className="tdk-storylink"
+                    onClick={() => verbs?.(card)?.openQuery.onPress()}>
+                    Open the full query →
+                  </button>
+                )}
+              </aside>
+            )}
+            </div>
           ) : (
           <>
-          <aside className="tdk-story" aria-label={isNote ? "Your note" : "Tracking"}>
+          {/* ⚠️ THE CARD STATE'S STORY OBEYS THE SAME PRESENCE. A note kept a Tracking section with
+              nothing in it — an empty frame implying something is missing — which §2's table
+              removes. The note's own words render below, outside this aside. */}
+          {/* ⚠️ A NOTE'S WORDS ARE NOT A TIMELINE. They lived inside `.tdk-story`, so §2's "no
+              timeline on a note" could not be honoured without hiding the note itself. The element
+              is named for what it holds now, and the presence table governs the story alone. */}
+          <aside className={isNote ? "tdk-noteown" : `tdk-story${presence.timeline ? "" : " tdk-story--off"}`}
+            aria-label={isNote ? "Your note" : "Tracking"}>
             {/**
               * ⚠️ THE STAT PAIR IS THE BAND'S TWO FACTS, IN THE QUERY CENTRE'S GRAMMAR (Phase 2).
               * Icon tile, Playfair figure with the unit in Inter beside it, mono caption beneath —

@@ -276,3 +276,21 @@
 }
 
 .pj-recescape:hover { color: #6b5a4e; }
+
+
+/* ⚠️ THE JOURNEY'S FOOT HINT TAKES ITS OWN ROW WHEN THE FOOT CANNOT AFFORD IT INLINE — the same
+   fix the card's foot took, for the same measured reason. `.pj-hint` carries `min-width: 0`
+   between two `flex: none` buttons, so it is the only thing that can give; in a 350px pane it was
+   handed ~50px and wrapped to one word a line. Measured across journeys before this run:
+   materials 53px/4 lines, close 82px/4, send 51px/7 — a pre-existing fault of the shared row that
+   the chassis made impossible to keep ignoring, since the hint is now the sentence that explains
+   what the primary will do.
+
+   ⚠️ A CONTAINER QUERY, because the pane's width comes from the split rather than the viewport. */
+.pj-foot { flex-wrap: wrap; }
+
+.pj-hint { flex: 1 1 100%; margin-bottom: 2px; }
+
+@container (min-width: 560px) {
+  .pj-hint { flex: 0 1 auto; margin-bottom: 0; }
+}

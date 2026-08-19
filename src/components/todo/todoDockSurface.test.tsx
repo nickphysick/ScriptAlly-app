@@ -1033,8 +1033,13 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
     /* ⚠️ THE NOTE IS IN THE RECORD COLUMN NOW, NOT THE DOING ONE (pane faults, Phase 2) — it is
        the content of a note card, so it leads, in the WIDE column. It was in the bounded column
        beside a hint sentence while the wide one held a stat tile and an empty Tracking section. */
-    const story = html.indexOf('class="tdk-story"');
-    expect(story, "the record column is gone").toBeGreaterThan(-1);
+    /* ⚠️ A NOTE'S COLUMN IS `.tdk-noteown` NOW, NOT `.tdk-story` (Phase E). §2 gives a note no
+       timeline, and while its words lived inside the story element that rule could not be honoured
+       without hiding the note itself. The column is named for what it holds; this lock still
+       asserts the note leads in the wide column, which is the claim that mattered. */
+    const story = html.indexOf('class="tdk-noteown"');
+    expect(story, "the note's own column is gone").toBeGreaterThan(-1);
+    expect(html, "a note is still rendering a Tracking column").not.toContain('class="tdk-story"');
     expect(story).toBeLessThan(at);
     const rec = html.slice(story, at);
     expect(rec, "the note's own text renders nowhere on its own pane").toContain("Redraft the opening");

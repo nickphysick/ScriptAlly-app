@@ -436,8 +436,17 @@
   overflow-wrap: anywhere;
 }
 
-/* the foot's buttons keep their line — the hint is what gives, and it gives by wrapping now */
-.tdk-foot { align-items: center; }
+/* ⚠️ THE HINT TAKES ITS OWN ROW WHEN THE FOOT CANNOT AFFORD IT INLINE. Wrapping alone was not
+   enough: at 350px the buttons are `flex: none`, so the hint was handed ~40px and wrapped to one
+   word per line — legible in principle and unreadable in fact. It sits above the buttons instead,
+   full width, and goes back inline once there is room. The buttons still never wrap. */
+.tdk-foot { align-items: center; flex-wrap: wrap; }
+
+.tdk-foothint { flex: 1 1 100%; margin-bottom: 2px; }
+
+@container (min-width: 560px) {
+  .tdk-foothint { flex: 0 1 auto; margin-bottom: 0; }
+}
 
 /* ⚠️ BLACK MEANS "THIS ADVANCES" — the same grammar as the calendar's confirm and the bar's Action,
    reading the token rather than restating a near-black hex. */
@@ -819,3 +828,93 @@
   text-transform: uppercase;
   color: #c0b0a0;
 }
+
+
+/* ── §2's TIMELINE AS A SIBLING CARD ──────────────────────────────────────────────────────────
+   ⚠️ THE STORY STANDS BESIDE THE FORM, in one grid, 300px and a 16px gap. It used to be REPLACED
+   by the journey, so the writer lost the record they were recording against at the moment they
+   were recording against it. */
+/* ⚠️ ONE COLUMN BY DEFAULT, AND THIS IS THE FINDING OF PHASE E. §2 asks for a 300px timeline
+   BESIDE the form. Measured at 1440: the pane is 350px wide, the rim 336 and the grid 286 — so a
+   300px sibling left the form at EXACTLY 0px, holding a full rendered journey. That is the
+   grid-collapse fault this codebase already has a note about, arriving through a design value
+   rather than through a flex chain.
+
+   The card is a reading measure, not a workspace; the ref that specified 300px beside a form was
+   drawn against something wider than this pane ever is. So the story STACKS beneath the form until
+   the container can actually afford both — still its own sibling card in the same grid, which is
+   what §2's structural claim is about, just not always to the right of it.
+
+   ⚠️ A CONTAINER QUERY, NOT A MEDIA QUERY. The pane's width is set by the split, not the viewport
+   — `.tdk-w` already declares `container-type: inline-size` for exactly this. A media query would
+   go two-column on a wide screen whose pane is still 350px. */
+.tdk-jgrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  min-height: 0;
+}
+
+/* 330 for the form (the doing column's own floor elsewhere) + 16 gap + 300 for the story = 646 */
+@container (min-width: 680px) {
+  .tdk-jgrid { grid-template-columns: minmax(0, 1fr) 300px; }
+}
+
+/* ⚠️ ONE COLUMN, NOT AN EMPTY SECOND TRACK. §2: "when the timeline is absent the form runs full
+   width" — a 300px empty track would keep the form narrow for a card that has nothing to show. */
+.tdk-jgrid--solo { grid-template-columns: minmax(0, 1fr); }
+
+.tdk-story--card {
+  background: #fdfbf7;
+  border: 1px solid #ece4d9;
+  border-radius: 9px;
+  padding: 14px 16px;
+}
+
+.tdk-storyhd {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* the quiet mono header §2 names, with its entry count beside it */
+.tdk-storyhd .tdk-storyk {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9c8878;
+}
+
+.tdk-storyn {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  color: #c0b0a0;
+}
+
+.tdk-storylink {
+  margin-top: 12px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7c3a2a;
+  cursor: pointer;
+}
+
+.tdk-storylink:hover { text-decoration: underline; }
+
+/* a card with no history to show renders no story column at all — §2's presence table */
+.tdk-story--off { display: none; }
+
+/* the journey's own column in the grid — a real box, because PaneJourney returns a fragment */
+.tdk-jform { min-width: 0; display: flex; flex-direction: column; }
+
+/* ⚠️ A NOTE'S WORDS TAKE THE STORY COLUMN'S BOX WITHOUT BEING A STORY — same measure, no header,
+   no Tracking. §2 gives a note no timeline; it does not take away the note. */
+.tdk-noteown { min-width: 0; }

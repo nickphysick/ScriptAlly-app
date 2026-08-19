@@ -132,7 +132,8 @@ test("pane chassis", async ({ page }) => {
         hint: (pane.querySelector(".pj-hint, .tdk-hint")?.textContent ?? "").trim(),
         gridKids: (() => {
           const story = pane.querySelector(".tdk-story");
-          const form = pane.querySelector(".pj-body, .tdk-form, .tdk-doing");
+          /* the journey's own column — , a real box because PaneJourney returns a fragment */
+          const form = pane.querySelector(".tdk-jform");
           if (!story || !form) return "story=" + !!story + " form=" + !!form;
           return story.parentElement === form.parentElement ? "same-parent" : "different-parents";
         })(),
