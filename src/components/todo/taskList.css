@@ -83,3 +83,12 @@
 .tlc .l-foot .c { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted); }
 .tlc .l-foot .c b { color:var(--ink2);font-weight:500; }
 .tlc .l-foot a { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
+
+/* ⚠️ THE ACTIVE FUNNEL LIVES HERE, NOT IN `todoFrame.css`, BECAUSE THE BUTTON DOES. The frame
+   contract states `.l-icon.active` and its badge dot, and porting them under `.tdf` put the rule in
+   a scope the toolbar is not inside — the class landed on the element and painted nothing.
+   Measured: `cls="l-icon active"` with `background: rgb(255,255,255)`. A scoped port has to follow
+   the element, not the document the rule was read from. */
+.tlc .l-icon { position: relative; }
+.tlc .l-icon.active { background:var(--pink);border-color:var(--pink-b);color:var(--burg); }
+.tlc .l-icon.active::after { content:'';position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--burg);border:1.5px solid var(--white); }

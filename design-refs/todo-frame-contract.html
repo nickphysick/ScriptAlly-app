@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — To-do frame + settings · design contract (final)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ground:#f7f4ee; --white:#ffffff; --field:#fdfbf7; --barbg:#fafafa;
+  --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
+  --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8;
+  --burg:#7c3a2a; --burg-h:#6c3224; --sage:#5a6e58;
+  --pink:#f5e2da; --pink-b:#e8c8bc;
+  --c-now:#e8c8bc; --c-house:#c8d1c5; --c-yours:#efe4cc;
+  --c-now-ink:#7c3a2a; --c-house-ink:#4c5f4a; --c-yours-ink:#8a7440;
+}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);overflow:hidden;display:flex;flex-direction:column;padding:18px 22px;gap:0;}
+body::before{content:'';position:fixed;inset:0;opacity:0.22;pointer-events:none;z-index:1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+body>*{position:relative;z-index:2;}
+
+/* ═══ COMMAND BAR — the Query Centre's grammar ═══ */
+.cmdbar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 2px 14px;}
+.cmd-l,.cmd-r{display:flex;align-items:center;gap:8px;}
+.cb{cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;transition:all .16s;white-space:nowrap;font-family:'Inter',sans-serif;}
+.cb svg{flex-shrink:0;}
+.cb.fill{background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600;}
+.cb.fill:hover{background:#efd5ca;border-color:#d8a89a;}
+.cb.line{background:var(--white);border:1px solid var(--edge);color:#57534e;}
+.cb.line:hover{background:#f5f2ee;}
+.cb.line:disabled{opacity:0.45;cursor:default;}
+.cb.icon-only{width:34px;padding:0;justify-content:center;}
+.cmd-rule{flex:0 0 auto;height:1px;background:var(--edge);margin:0 2px 16px;}
+
+/* ═══ OPTION C — segmented meter ═══ */
+.meter{display:flex;flex-direction:column;gap:6px;min-width:300px;max-width:380px;flex:1;cursor:default;}
+.meter .track{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px;}
+.meter .track span{border-radius:3px;transition:filter .15s;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(58,28,20,0.10);}
+.meter .track span:hover{filter:brightness(0.95);}
+.meter .legend{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.11em;text-transform:uppercase;color:var(--muted);}
+.meter .legend b{color:var(--ink2);font-weight:500;font-size:9px;}
+
+
+.cmd-mid{flex:1;display:flex;justify-content:center;min-width:0;}
+
+/* ═══ PAGE SPLIT — fills remaining height, page never scrolls ═══ */
+.frame{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:min(392px,36%) minmax(0,1fr);gap:18px;align-items:stretch;}
+
+/* ── list card: full column height ── */
+.listcard{background:var(--white);border:1px solid var(--edge);border-radius:12px;
+  box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);
+  overflow:hidden;display:flex;flex-direction:column;height:100%;}
+.l-bar{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--hair);flex:0 0 auto;}
+.l-search{flex:1;display:flex;align-items:center;gap:8px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:8px 12px;}
+.l-search:focus-within{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
+.l-search svg{color:var(--muted);flex-shrink:0;}
+.l-search input{border:0;outline:0;font-size:12.5px;color:var(--ink);width:100%;background:transparent;font-family:'Inter',sans-serif;}
+.l-search input::placeholder{color:#c8b8a8;}
+.l-icon{cursor:pointer;width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--white);border:0.5px solid var(--hair2);border-radius:9px;color:var(--muted2);transition:all .16s;position:relative;}
+.l-icon:hover,.l-icon.open{border-color:#c9a89e;color:var(--burg);}
+.l-icon.active{background:var(--pink);border-color:var(--pink-b);color:var(--burg);}
+.l-icon.active::after{content:'';position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--burg);border:1.5px solid var(--white);}
+.l-add{cursor:pointer;width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--pink);border:0.5px solid var(--pink-b);border-radius:9px;color:var(--burg);transition:all .16s;}
+.l-add:hover{background:#efd5ca;}
+
+.l-body{overflow-y:auto;flex:1 1 auto;min-height:0;}
+.l-body::-webkit-scrollbar{width:9px;}
+.l-body::-webkit-scrollbar-thumb{background:#e2d6c8;border-radius:5px;border:2px solid var(--white);}
+.grp{position:sticky;top:0;z-index:3;display:flex;align-items:baseline;gap:9px;padding:15px 16px 8px;background:var(--white);}
+.grp::after{content:'';height:1px;background:var(--hair);flex:1;transform:translateY(-3px);}
+.grp .g-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;transform:translateY(-1px);}
+.grp.now .g-dot{background:#c96f52;}
+.grp.house .g-dot{background:#7e937c;}
+.grp.yours .g-dot{background:#c2a869;}
+.grp .g-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--ink2);font-weight:500;white-space:nowrap;}
+.grp .g-n{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;color:#c0b0a0;}
+.row{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:11px;align-items:center;padding:11px 16px 11px 13px;cursor:pointer;border-left:3px solid transparent;transition:background .13s;position:relative;}
+.row:hover{background:#fbf7f2;}
+.row.sel{background:#f6efe7;border-left-color:var(--burg);}
+.row+.row::before{content:'';position:absolute;top:0;left:16px;right:16px;height:1px;background:#f3ece3;}
+.row.sel::before,.row.sel+.row::before{display:none;}
+.pill{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;border-radius:6px;padding:4.5px 0;text-align:center;font-weight:500;text-transform:uppercase;}
+.pill.send{background:#fbeee7;border:0.5px solid #f2dccf;color:#a05a42;}
+.pill.close{background:#eef1ec;border:0.5px solid #dfe5dc;color:#5a6e58;}
+.pill.fix{background:#eceef2;border:0.5px solid #dde1e8;color:#5c6a80;}
+.pill.note{background:#faf4e8;border:0.5px solid #efe4cc;color:#a08a58;}
+.r-deed{font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;}
+.r-meta{font-size:11px;color:var(--muted2);font-weight:300;margin-top:2.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.r-meta .dot{color:#d8ccbe;}
+.r-note{font-family:'Caveat',cursive;font-size:17.5px;color:#6a5a48;font-weight:500;line-height:1.1;}
+.r-fig{text-align:right;min-width:78px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.07em;line-height:1.55;color:var(--muted2);text-transform:uppercase;}
+.r-fig b{font-family:'Playfair Display',serif;font-size:15px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink2);}
+.r-fig.absent{color:#c0b0a0;font-size:8.5px;}
+.l-foot{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-top:1px solid var(--hair);flex:0 0 auto;background:var(--white);}
+.l-foot .c{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+.l-foot .c b{color:var(--ink2);font-weight:500;}
+.l-foot a{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none;}
+
+/* ── pane placeholder: proves the height ── */
+.pane{background:var(--white);border:1px solid var(--edge);border-radius:12px;height:100%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(58,28,20,0.04);}
+.pane .ph{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#c0b0a0;text-align:center;line-height:2.1;}
+
+/* ═══ SNOOZE PANEL ═══ */
+.panel{position:fixed;z-index:70;background:var(--white);border:1px solid var(--edge);border-radius:12px;
+  box-shadow:0 4px 8px rgba(58,28,20,0.06),0 16px 44px rgba(58,28,20,0.15);width:288px;padding:16px;display:none;}
+.panel.open{display:block;}
+.p-h{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;color:var(--ink2);}
+.p-sub{font-size:11px;color:var(--muted2);font-weight:300;margin-top:2px;line-height:1.5;}
+.p-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:14px 0 8px;}
+.chips{display:flex;gap:7px;flex-wrap:wrap;}
+.chip{cursor:pointer;font-size:11.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:8px;padding:7px 12px;color:var(--ink2);transition:all .15s;font-family:'Inter',sans-serif;}
+.chip:hover{border-color:#c9a89e;}
+.chip.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+/* the slider */
+.slide{margin-top:4px;}
+.slide input[type=range]{width:100%;appearance:none;height:5px;border-radius:3px;background:linear-gradient(to right,var(--pink-b) 0%,var(--pink-b) var(--pc,25%),#efe6da var(--pc,25%),#efe6da 100%);outline:none;}
+.slide input[type=range]::-webkit-slider-thumb{appearance:none;width:17px;height:17px;border-radius:50%;background:var(--white);border:2px solid var(--burg);cursor:pointer;box-shadow:0 1px 3px rgba(58,28,20,0.2);}
+.slide .readout{display:flex;justify-content:space-between;align-items:baseline;margin-top:9px;}
+.slide .readout .v{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2);}
+.slide .readout .until{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);}
+.p-foot{display:flex;justify-content:flex-end;gap:9px;margin-top:15px;padding-top:13px;border-top:1px solid var(--hair);}
+.b-quiet{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;background:var(--field);color:var(--ink2);border:0.5px solid var(--hair2);border-radius:9px;padding:9px 14px;}
+.b-quiet:hover{border-color:#c9a89e;color:var(--burg);}
+.b-go{cursor:pointer;font-size:12px;font-weight:600;background:var(--pink);color:var(--burg);border:1px solid var(--pink-b);border-radius:999px;padding:9px 17px;}
+.b-go:hover{background:#efd5ca;border-color:#d8a89a;}
+.note-line{font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:10px;line-height:1.5;}
+
+
+/* ═══ the panel ═══ */
+.tsp{width:326px;background:var(--white);border:1px solid var(--edge);border-radius:12px;
+  box-shadow:0 4px 8px rgba(58,28,20,0.06),0 16px 44px rgba(58,28,20,0.15);
+  overflow:hidden;flex-shrink:0;}
+.tsp-head{padding:15px 18px 13px;border-bottom:1px solid var(--hair);}
+.p-h{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;color:var(--ink2);}
+.p-sub{font-size:11px;color:var(--muted2);font-weight:300;margin-top:2px;line-height:1.5;}
+.tsp-body{padding:6px 18px 16px;max-height:520px;overflow-y:auto;}
+.p-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:16px 0 9px;display:flex;align-items:baseline;gap:8px;}
+.p-lbl::after{content:'';height:1px;background:var(--hair);flex:1;transform:translateY(-2px);}
+
+/* setting rows */
+.set{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 0;}
+.set .k{font-size:12.5px;color:var(--ink);font-weight:400;line-height:1.35;}
+.set .k small{display:block;font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:1px;}
+select.ctl{background:var(--field);border:0.5px solid var(--hair2);border-radius:8px;padding:7px 26px 7px 10px;
+  font-family:'Inter',sans-serif;font-size:11.5px;color:var(--ink2);outline:none;cursor:pointer;
+  appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='9' height='6' viewBox='0 0 9 6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l3.5 3.5L8 1' stroke='%239c8878' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;flex-shrink:0;}
+select.ctl:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
+
+/* read-only fact */
+.inherit{font-size:10.5px;color:var(--muted2);font-weight:300;line-height:1.5;margin:-2px 0 4px;padding-left:1px;}
+.fact{background:var(--field);border:0.5px dashed #ddd0c0;border-radius:9px;padding:10px 12px;margin-top:2px;}
+.fact .f{font-size:11.5px;color:var(--muted2);font-weight:300;line-height:1.55;}
+.fact .f b{color:var(--ink2);font-weight:500;}
+
+/* toggle rows for task types */
+.tog{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0;}
+.tog .l{display:flex;align-items:center;gap:9px;min-width:0;}
+.tpill{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;border-radius:5px;padding:3.5px 8px;text-align:center;font-weight:500;text-transform:uppercase;flex-shrink:0;}
+.tpill.send{background:#fbeee7;border:0.5px solid #f2dccf;color:#a05a42;}
+.tpill.decide{background:#f6e3da;border:0.5px solid #e8c8bc;color:#7c3a2a;}
+.tpill.chase{background:#f4efe4;border:0.5px solid #e9e0cc;color:#8a7440;}
+.tpill.close{background:#eef1ec;border:0.5px solid #dfe5dc;color:#5a6e58;}
+.tpill.fix{background:#eceef2;border:0.5px solid #dde1e8;color:#5c6a80;}
+.tog .t{font-size:12px;color:var(--ink);}
+.tog .t small{display:block;font-size:10px;color:var(--muted2);font-weight:300;}
+/* the switch */
+.sw{position:relative;width:34px;height:20px;flex-shrink:0;cursor:pointer;}
+.sw input{opacity:0;width:0;height:0;}
+.sw .tr{position:absolute;inset:0;border-radius:999px;background:#e9e0d4;border:0.5px solid var(--hair2);transition:all .18s;}
+.sw .tr::before{content:'';position:absolute;left:2px;top:1.5px;width:15px;height:15px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(58,28,20,0.18);transition:transform .18s;}
+.sw input:checked+.tr{background:var(--pink);border-color:var(--pink-b);}
+.sw input:checked+.tr::before{transform:translateX(14px);border:0.5px solid var(--pink-b);}
+.tog.off .t,.tog.off .tpill{opacity:0.45;}
+
+.tsp-foot{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-top:1px solid var(--hair);background:var(--white);}
+.tsp-foot .hint{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.09em;text-transform:uppercase;color:#c0b0a0;}
+.b-done{cursor:pointer;font-size:12px;font-weight:600;background:var(--pink);color:var(--burg);border:1px solid var(--pink-b);border-radius:999px;padding:8px 16px;}
+.b-done:hover{background:#efd5ca;}
+
+
+.tsp{position:fixed;z-index:70;display:none;}
+.tsp.open{display:block;}
+
+/* ═══ MENUS — anchored, edge-aware ═══ */
+.menu{position:fixed;z-index:60;background:var(--white);border:1px solid var(--edge);border-radius:11px;
+  box-shadow:0 4px 8px rgba(58,28,20,0.06),0 14px 38px rgba(58,28,20,0.14);
+  min-width:228px;padding:7px;display:none;}
+.menu.open{display:block;}
+.m-h{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:8px 10px 5px;}
+.m-i{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--ink);transition:background .12s;}
+.m-i:hover{background:#fbf7f2;}
+.m-i .swatch{width:8px;height:8px;border-radius:3px;flex-shrink:0;}
+.m-i .mark{margin-left:auto;color:var(--burg);opacity:0;font-size:12px;}
+.m-i.on .mark{opacity:1;}
+.m-i.on{background:#fdf4ef;}
+.m-i .cnt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;color:#c0b0a0;}
+.m-i.on .cnt{display:none;}
+.m-rule{height:1px;background:var(--hair);margin:6px 4px;}
+.m-foot{display:flex;justify-content:space-between;align-items:center;padding:7px 10px 4px;}
+.m-foot a{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none;cursor:pointer;}
+.m-foot .n{font-family:'JetBrains Mono',monospace;font-size:9px;color:#c0b0a0;letter-spacing:0.08em;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ COMMAND BAR ═══════════ -->
+<div class="cmdbar">
+  <div class="cmd-l">
+    <button class="cb fill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add a task</button>
+    <button class="cb line"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Add a note</button>
+  </div>
+  <div class="cmd-mid">
+    <div class="meter">
+      <div class="track">
+        <span style="flex:3;background:var(--c-now);" title="3 need you now"></span>
+        <span style="flex:11;background:var(--c-house);" title="11 housekeeping"></span>
+        <span style="flex:3;background:var(--c-yours);" title="3 yours"></span>
+      </div>
+      <div class="legend">
+        <span style="color:var(--c-now-ink);"><b style="color:var(--c-now-ink);">3</b> need you now</span>
+        <span style="color:var(--c-house-ink);"><b style="color:var(--c-house-ink);">11</b> housekeeping</span>
+        <span style="color:var(--c-yours-ink);"><b style="color:var(--c-yours-ink);">3</b> yours</span>
+      </div>
+    </div>
+  </div>
+  <div class="cmd-r">
+    <button class="cb line" id="snoozeBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><polyline points="12 8 12 12 15 14"/></svg>Snooze</button>
+    <button class="cb line"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Dismiss</button>
+    <button class="cb line icon-only" id="settingsBtn" title="Task settings"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.08a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </div>
+</div>
+<div class="cmd-rule"></div>
+
+<!-- ═══════════ SPLIT ═══════════ -->
+<div class="frame">
+
+  <div class="listcard">
+    <div class="l-bar">
+      <div class="l-search">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+        <input placeholder="Search your tasks…">
+      </div>
+      <button class="l-icon" id="filterBtn" title="Filter"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.5 10 19 14 21 14 12.5 22 3"/></svg></button>
+      <button class="l-icon" id="sortBtn" title="Sort"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5h10M11 9h7M11 13h4M3 17V3M3 3L1 5.5M3 3l2 2.5M7 7v14M7 21l-2-2.5M7 21l2-2.5" transform="scale(0.9) translate(1,1)"/></svg></button>
+      <button class="l-add" title="Add a task"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>
+
+    <div class="l-body">
+      <div class="grp now"><span class="g-dot"></span><span class="g-lbl">Needs you now</span><span class="g-n">3</span></div>
+      <div class="row sel">
+        <span class="pill send">Send</span>
+        <div><div class="r-deed">Send your full manuscript</div><div class="r-meta">Jonathan Marsh asked for it <span class="dot">·</span> The Marsh Agency</div></div>
+        <div class="r-fig absent">no date<br>on record</div>
+      </div>
+      <div class="row">
+        <span class="pill send">Send</span>
+        <div><div class="r-deed">Send your partial</div><div class="r-meta">Greg Panetta asked for the first 50 pages</div></div>
+        <div class="r-fig">waiting<br><b>7</b> weeks</div>
+      </div>
+      <div class="row">
+        <span class="pill send">Send</span>
+        <div><div class="r-deed">Send your partial</div><div class="r-meta">Daniel O'Rourke asked for the first 3 chapters</div></div>
+        <div class="r-fig absent">no date<br>on record</div>
+      </div>
+
+      <div class="grp house"><span class="g-dot"></span><span class="g-lbl">Housekeeping</span><span class="g-n">11</span></div>
+      <div class="row">
+        <span class="pill fix">Fix</span>
+        <div><div class="r-deed">Fill in what you sent</div><div class="r-meta">10 imported queries are missing their materials</div></div>
+        <div class="r-fig"><b>10</b> queries<br>to fill in</div>
+      </div>
+      <div class="row">
+        <span class="pill close">Close</span>
+        <div><div class="r-deed">Consider closing</div><div class="r-meta">Jonathan Marsh <span class="dot">·</span> The Marsh Agency</div></div>
+        <div class="r-fig">quiet for<br><b>2¼</b> years</div>
+      </div>
+      <div class="row">
+        <span class="pill close">Close</span>
+        <div><div class="r-deed">Consider closing</div><div class="r-meta">Marcus Reed <span class="dot">·</span> Bloomsbury Quill</div></div>
+        <div class="r-fig">quiet for<br><b>2¼</b> years</div>
+      </div>
+      <div class="row">
+        <span class="pill close">Close</span>
+        <div><div class="r-deed">Consider closing</div><div class="r-meta">Aisha Kapoor <span class="dot">·</span> The Lantern Agency</div></div>
+        <div class="r-fig">quiet for<br><b>2⅓</b> years</div>
+      </div>
+      <div class="row">
+        <span class="pill close">Close</span>
+        <div><div class="r-deed">Consider closing</div><div class="r-meta">Sophie Dunn <span class="dot">·</span> Curtis Vane</div></div>
+        <div class="r-fig">quiet for<br><b>4</b> weeks</div>
+      </div>
+
+      <div class="grp yours"><span class="g-dot"></span><span class="g-lbl">Your tasks</span><span class="g-n">3</span></div>
+      <div class="row">
+        <span class="pill note">Note</span>
+        <div><div class="r-note">Check W&amp;A for new children's agents</div></div>
+        <div class="r-fig">added<br><b>2</b> days ago</div>
+      </div>
+      <div class="row">
+        <span class="pill note">Note</span>
+        <div><div class="r-note">Rework synopsis para 2 before next batch</div></div>
+        <div class="r-fig absent">no date set</div>
+      </div>
+    </div>
+
+    <div class="l-foot">
+      <span class="c"><b>17</b> tasks · 3 need you now</span>
+      <a href="#">Export CSV</a>
+    </div>
+  </div>
+
+  <div class="pane">
+    <div class="ph">Task pane<br>(unchanged — fills the same height as the list)</div>
+  </div>
+</div>
+
+<div class="panel" id="snoozePanel">
+  <div class="p-h">Snooze this task</div>
+  <div class="p-sub">Send your full manuscript — it leaves the list and comes back when you say.</div>
+  <div class="p-lbl">Until</div>
+  <div class="chips">
+    <button class="chip" onclick="setChip(this,1)">Tomorrow</button>
+    <button class="chip on" onclick="setChip(this,7)">Next week</button>
+    <button class="chip" onclick="setChip(this,30)">Next month</button>
+  </div>
+  <div class="p-lbl">Or slide it</div>
+  <div class="slide">
+    <input type="range" min="1" max="90" value="7" id="snRange" oninput="setSlide(this.value)">
+    <div class="readout">
+      <span class="v" id="snV">1 week</span>
+      <span class="until" id="snU">Returns Wed 26 Aug</span>
+    </div>
+  </div>
+  <div class="note-line">Snoozed tasks live behind the filter's "Include snoozed" — nothing is lost.</div>
+  <div class="p-foot">
+    <button class="b-quiet" onclick="closePanel()">Cancel</button>
+    <button class="b-go" onclick="closePanel()">Snooze it</button>
+  </div>
+</div>
+
+<div class="tsp" id="settingsPanel">
+  <div class="tsp-head">
+    <div class="p-h">Task settings</div>
+    <div class="p-sub">How your list is generated. What you see today is filtered up in the toolbar.</div>
+  </div>
+
+  <div class="tsp-body">
+
+    <div class="p-lbl">Reminders</div>
+    <div class="set">
+      <span class="k">Remind me to nudge<small>When an agent's window closes</small></span>
+      <select class="ctl">
+        <option>A week before</option>
+        <option selected>The day before</option>
+        <option>On the day</option>
+        <option>Don't remind me</option>
+      </select>
+    </div>
+    <div class="inherit">Queries where you chose a different reminder keep it.</div>
+    <div class="set">
+      <span class="k">Suggest closing after<small>How long a query sits quiet first</small></span>
+      <select class="ctl">
+        <option>6 months</option>
+        <option selected>A year</option>
+        <option>2 years</option>
+        <option>Never suggest</option>
+      </select>
+    </div>
+
+    <div class="p-lbl">Snoozing</div>
+    <div class="set">
+      <span class="k">Usual snooze<small>The panel's starting position</small></span>
+      <select class="ctl">
+        <option>Tomorrow</option>
+        <option selected>Next week</option>
+        <option>Next month</option>
+      </select>
+    </div>
+
+    <div class="p-lbl">What appears in your list</div>
+    <div class="tog">
+      <span class="l"><span class="tpill send">Send</span><span class="t">Things to send<small>Requested partials and fulls</small></span></span>
+      <label class="sw"><input type="checkbox" checked onchange="dim(this)"><span class="tr"></span></label>
+    </div>
+    <div class="tog">
+      <span class="l"><span class="tpill decide">Decide</span><span class="t">Offers to answer<small>When representation is offered</small></span></span>
+      <label class="sw"><input type="checkbox" checked disabled onchange="dim(this)"><span class="tr" style="opacity:0.6;"></span></label>
+    </div>
+    <div class="tog">
+      <span class="l"><span class="tpill chase">Nudge</span><span class="t">Nudge suggestions<small>Quiet past the stated window</small></span></span>
+      <label class="sw"><input type="checkbox" checked onchange="dim(this)"><span class="tr"></span></label>
+    </div>
+    <div class="tog">
+      <span class="l"><span class="tpill close">Close</span><span class="t">Closing suggestions<small>Long-quiet queries</small></span></span>
+      <label class="sw"><input type="checkbox" checked onchange="dim(this)"><span class="tr"></span></label>
+    </div>
+    <div class="tog">
+      <span class="l"><span class="tpill fix">Fill in</span><span class="t">Gaps to fill in<small>Imports missing their materials</small></span></span>
+      <label class="sw"><input type="checkbox" checked onchange="dim(this)"><span class="tr"></span></label>
+    </div>
+
+    <div class="fact" style="margin-top:12px;">
+      <div class="f"><b>Offers always appear.</b> An offer of representation is the one task ScriptAlly won't let go quiet — its toggle stays on.</div>
+    </div>
+
+  </div>
+
+  <div class="tsp-foot">
+    <span class="hint">Saved as you change them</span>
+    <button class="b-done">Done</button>
+  </div>
+</div>
+
+
+
+<!-- ═══════════ FILTER MENU ═══════════ -->
+<div class="menu" id="filterMenu">
+  <div class="m-h">Show tasks</div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#c96f52;"></span>Needs you now<span class="cnt">3</span><span class="mark">✓</span></div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#7e937c;"></span>Housekeeping<span class="cnt">11</span><span class="mark">✓</span></div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#c2a869;"></span>Your tasks<span class="cnt">3</span><span class="mark">✓</span></div>
+  <div class="m-rule"></div>
+  <div class="m-h">By type</div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#f2dccf;"></span>Send<span class="cnt">3</span><span class="mark">✓</span></div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#e8c8bc;"></span>Decide<span class="cnt">0</span><span class="mark">✓</span></div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#e9e0cc;"></span>Nudge<span class="cnt">1</span><span class="mark">✓</span></div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#dfe5dc;"></span>Close<span class="cnt">9</span><span class="mark">✓</span></div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#dde1e8;"></span>Fill in<span class="cnt">2</span><span class="mark">✓</span></div>
+  <div class="m-i on" onclick="tick(this)"><span class="swatch" style="background:#efe4cc;"></span>Notes<span class="cnt">3</span><span class="mark">✓</span></div>
+  <div class="m-rule"></div>
+  <div class="m-i" onclick="tick(this)">Include snoozed<span class="cnt">2</span><span class="mark">✓</span></div>
+  <div class="m-foot"><a onclick="clearFilters()">Show everything</a><span class="n" id="fcount">17 shown</span></div>
+</div>
+
+<!-- ═══════════ SORT MENU ═══════════ -->
+<div class="menu" id="sortMenu">
+  <div class="m-h">Order by</div>
+  <div class="m-i on" onclick="pick(this)">Needs you first<span class="mark">✓</span></div>
+  <div class="m-i" onclick="pick(this)">Longest waiting first<span class="mark">✓</span></div>
+  <div class="m-i" onclick="pick(this)">Newest first<span class="mark">✓</span></div>
+  <div class="m-i" onclick="pick(this)">By agent, A to Z<span class="mark">✓</span></div>
+  <div class="m-i" onclick="pick(this)">By manuscript<span class="mark">✓</span></div>
+  <div class="m-rule"></div>
+  <div class="m-h">Grouping</div>
+  <div class="m-i on" onclick="pick(this,'g')">Grouped by urgency<span class="mark">✓</span></div>
+  <div class="m-i" onclick="pick(this,'g')">One flat list<span class="mark">✓</span></div>
+</div>
+
+<script>
+/* ── anchored, edge-aware menus ── */
+function place(menu, btn){
+  const r = btn.getBoundingClientRect();
+  menu.classList.add('open');
+  const mw = menu.offsetWidth, mh = menu.offsetHeight, vw = innerWidth, vh = innerHeight, pad = 10;
+  let left = r.right - mw;              // right-align to the button by default
+  if (left < pad) left = r.left;        // flip to left-align if it would clip
+  if (left + mw > vw - pad) left = vw - pad - mw;
+  let top = r.bottom + 6;               // open downward by default
+  if (top + mh > vh - pad) top = r.top - mh - 6;   // flip above if it would clip
+  if (top < pad) top = pad;
+  menu.style.left = left+'px'; menu.style.top = top+'px';
+}
+function wire(btnId, menuId){
+  const btn = document.getElementById(btnId), menu = document.getElementById(menuId);
+  btn.addEventListener('click', e=>{
+    e.stopPropagation();
+    const was = menu.classList.contains('open');
+    closeAll();
+    if(!was){ place(menu, btn); btn.classList.add('open'); }
+  });
+}
+function closeAll(){
+  document.querySelectorAll('.menu').forEach(m=>m.classList.remove('open'));
+  document.querySelectorAll('.l-icon').forEach(b=>b.classList.remove('open'));
+}
+document.addEventListener('click', e=>{ if(!e.target.closest('.menu')) closeAll(); if(!e.target.closest('.panel')&&!e.target.closest('#snoozeBtn')) closePanel(); if(!e.target.closest('.tsp')&&!e.target.closest('#settingsBtn')) closeSettings(); });
+addEventListener('resize', closeAll);
+wire('filterBtn','filterMenu'); wire('sortBtn','sortMenu');
+
+function openPanel(btn){
+  const p=document.getElementById('snoozePanel');
+  const r=btn.getBoundingClientRect();
+  p.classList.add('open');
+  const pw=p.offsetWidth, ph=p.offsetHeight, pad=10;
+  let left=r.right-pw; if(left<pad)left=r.left; if(left+pw>innerWidth-pad)left=innerWidth-pad-pw;
+  let top=r.bottom+7; if(top+ph>innerHeight-pad)top=r.top-ph-7; if(top<pad)top=pad;
+  p.style.left=left+'px'; p.style.top=top+'px';
+}
+function closePanel(){document.getElementById('snoozePanel').classList.remove('open');}
+document.getElementById('snoozeBtn').addEventListener('click',e=>{e.stopPropagation();openPanel(e.currentTarget);});
+function openSettings(btn){
+  const p=document.getElementById('settingsPanel'); const r=btn.getBoundingClientRect();
+  p.classList.add('open');
+  const pw=p.offsetWidth,ph=p.offsetHeight,pad=10;
+  let left=r.right-pw; if(left<pad)left=r.left; if(left+pw>innerWidth-pad)left=innerWidth-pad-pw;
+  let top=r.bottom+7; if(top+ph>innerHeight-pad)top=Math.max(pad,r.top-ph-7);
+  p.style.left=left+'px'; p.style.top=top+'px';
+}
+function closeSettings(){document.getElementById('settingsPanel').classList.remove('open');}
+document.getElementById('settingsBtn').addEventListener('click',e=>{e.stopPropagation();closeAll();closePanel();openSettings(e.currentTarget);});
+function dim(cb){ cb.closest('.tog').classList.toggle('off', !cb.checked); }
+
+
+const NAMES={1:'1 day',2:'2 days',3:'3 days',7:'1 week',14:'2 weeks',21:'3 weeks',30:'1 month',60:'2 months',90:'3 months'};
+function nice(d){
+  if(NAMES[d])return NAMES[d];
+  if(d<7)return d+' days';
+  if(d<28){const w=Math.round(d/7);return w+(w===1?' week':' weeks');}
+  const m=Math.round(d/30);return m+(m===1?' month':' months');
+}
+function ret(d){
+  const dt=new Date(2026,7,19); dt.setDate(dt.getDate()+parseInt(d));
+  return 'Returns '+dt.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+}
+function setSlide(v){
+  document.getElementById('snV').textContent=nice(+v);
+  document.getElementById('snU').textContent=ret(v);
+  document.getElementById('snRange').style.setProperty('--pc',(v/90*100)+'%');
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+}
+function setChip(el,d){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  const r=document.getElementById('snRange'); r.value=d;
+  document.getElementById('snV').textContent=nice(d);
+  document.getElementById('snU').textContent=ret(d);
+  r.style.setProperty('--pc',(d/90*100)+'%');
+}
+setSlide(7); document.querySelectorAll('.chip')[1].classList.add('on');
+
+/* filter: multi-tick; button shows active dot when any filter is off-default */
+function tick(el){
+  el.classList.toggle('on');
+  const anyOff = [...document.querySelectorAll('#filterMenu .m-i')].some(i=>!i.classList.contains('on') && !i.textContent.includes('Include snoozed'));
+  document.getElementById('filterBtn').classList.toggle('active', anyOff);
+}
+function clearFilters(){
+  document.querySelectorAll('#filterMenu .m-i').forEach(i=>{ if(!i.textContent.includes('Include snoozed')) i.classList.add('on'); });
+  document.getElementById('filterBtn').classList.remove('active');
+}
+/* sort: single-pick per section */
+function pick(el, section){
+  const sel = section==='g'
+    ? [...document.querySelectorAll('#sortMenu .m-i')].slice(5)
+    : [...document.querySelectorAll('#sortMenu .m-i')].slice(0,5);
+  sel.forEach(i=>i.classList.remove('on'));
+  el.classList.add('on');
+  const isDefault = document.querySelectorAll('#sortMenu .m-i')[0].classList.contains('on')
+                 && document.querySelectorAll('#sortMenu .m-i')[5].classList.contains('on');
+  document.getElementById('sortBtn').classList.toggle('active', !isDefault);
+}
+</script>
+
+</body>
+</html>

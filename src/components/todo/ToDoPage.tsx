@@ -71,6 +71,13 @@ import {
    answered by the groups themselves. Neither component is deleted in this phase (the house rule
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList } from "./TaskList";
+import { TodoCommandBar } from "./TodoCommandBar";
+import { AnchoredPanel } from "./AnchoredPanel";
+import { FilterMenu, SortMenu, SnoozePanel } from "./TodoFrameMenus";
+import {
+  applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
+  typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
+} from "../../lib/todoListView";
 import { groupColumn } from "../../lib/todoGroups";
 import { daysBetween } from "../../lib/elapsed";
 import { useDockActivity } from "./useDockActivity";
@@ -401,6 +408,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      sidebar, narrows nothing the rail draws, and a chip strip in a third vocabulary beside the
      group headings would file one card under two names. */
   const [chip, setChip] = useState<RailChipId>("all");
+
+  /**
+   * ⚠️ THE VIEW PERSISTS THROUGH `todoPrefs`, WHICH NEEDED NO RULES CHANGE — the field is validated
+   * as `is map` with unconstrained inner keys and is already in the user-update allowlist. Checked
+   * before building on it, because a preference the rules silently deny is worse than a
+   * session-only one: it looks saved and is not.
+   *
+   * ⚠️ AND IT IS PARSED, NEVER TRUSTED. `parseView` drops values it does not recognise and falls
+   * back per field, so a stored view from a future build cannot empty the list.
+   */
+  const view: ListView = React.useMemo(
+    () => parseView((currentUser?.todoPrefs as Record<string, unknown> | undefined)?.listView),
+    [currentUser?.todoPrefs],
+  );
+  const setView = React.useCallback((v: ListView) => {
+    void updateUserProfile({ todoPrefs: { ...(currentUser?.todoPrefs ?? {}), listView: v } as never });
+  }, [currentUser?.todoPrefs, updateUserProfile]);
+
+  /* the two menus and the snooze panel, each anchored to the control that opened it */
+  const [snoozeAnchor, setSnoozeAnchor] = useState<HTMLElement | null>(null);
+  const filterAnchor = React.useRef<HTMLElement | null>(null);
+  const sortAnchor = React.useRef<HTMLElement | null>(null);
   // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
   const [filters, setFilters] = useState<TodoFilterState>(DEFAULT_FILTERS);
   const filtersRef = useRef<TodoFilterState>(DEFAULT_FILTERS);
@@ -1593,7 +1622,38 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               onClose={(rf) => { if (rf) cbSnooze.current?.focus(); setCbDial(false); }}
             />
           )}
+          {/* ⚠️ THE COMMAND BAR SITS ABOVE THE SPLIT, and the split still fills what is left — the
+              frame's height chain is `.wpg--fill`'s, unchanged, with one more `flex: 0 0 auto` row on
+              top of it. Adding a bar must not cost the panes their alignment; the frame assertions
+              measure both card bottoms and were green before this and stay green after. */}
+          <TodoCommandBar
+            groups={railGroups()}
+            onAddTask={() => openComposer("task")}
+            onAddNote={() => openComposer("note")}
+            hasSelection={!!docked.card}
+            onSnooze={(el) => setSnoozeAnchor(el)}
+            onDismiss={() => docked.card && forkStale(docked.card, "notNow")}
+            onJumpTo={(g) => {
+              const el = document.querySelector(`.tlc .grp.${{ urgent: "now", housekeeping: "house", yours: "yours" }[g]}`);
+              el?.scrollIntoView({ behavior: "smooth", block: "start" });
+            }}
+          />
+          {/* ⚠️ THE THIRD DOOR, RESTORED. The list round removed the row's hover clock and left snoozing
+              to the `s` key and the pane; this panel puts it back on a surface that says what it will do
+              before it does it — the deed named, the return date stated, and the note that nothing is
+              lost. It writes through `snoozeCard`, the existing primitive: one choke point, three doors. */}
+          {snoozeAnchor && docked.card && (
+            <AnchoredPanel anchor={snoozeAnchor} ariaLabel="Snooze this task" variant="panel"
+              onClose={(back) => { const a = snoozeAnchor; setSnoozeAnchor(null); if (back) a?.focus(); }}>
+              <SnoozePanel
+                deed={rowDeed(docked.card)}
+                onCancel={() => { const a = snoozeAnchor; setSnoozeAnchor(null); a?.focus(); }}
+                onConfirm={(days, when) => { snoozeCard(docked.card!, days, when); setSnoozeAnchor(null); }}
+              />
+            </AnchoredPanel>
+          )}
           <div className="tdw-split">
+            {/* the frame contract's command bar, above the split */}
             <div className="tdw-rail">
               {/* ⚠️ A NARROWED-TO-NOTHING RAIL IS A RAIL FACT, AND IT STAYS IN THE RAIL (Phase 4).
                   It used to replace the whole body, which meant a search that matched nothing took
@@ -3011,6 +3071,25 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       snoozed: narrowCards(boardCols.snoozed),
       done: narrowCards(boardCols.done),
     };
+    /* ⚠️ THE VIEW IS APPLIED HERE, ONCE — so the list, the meter, the group heads and the footer
+       all read the SAME post-filter array. Applying it in the component would give the meter a
+       different array from the rows, which is the disagreement this page has already been caught
+       by twice. */
+    return applyView(chipGroups(taskGroups(narrowed), chip), view, (c) => {
+      const f = listRowInputs(c);
+      return f.days;
+    });
+  }
+
+  /* the UNFILTERED groups — what the menu's live counts are of, so a zero is information rather
+     than a consequence of the filter that is hiding it */
+  function railGroupsAll() {
+    const narrowed = {
+      todo: narrowCards(boardCols.todo),
+      today: narrowCards(boardCols.today),
+      snoozed: narrowCards(boardCols.snoozed),
+      done: narrowCards(boardCols.done),
+    };
     return chipGroups(taskGroups(narrowed), chip);
   }
 
@@ -3021,7 +3100,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * is that there is only one place a count can be written.
    */
   function renderList() {
-    const chips = railChips(boardCols);
+    /* ⚠️ `railChips` IS NO LONGER THE FILTER'S SOURCE (frame round). The contract's menu counts by
+       GROUP and by TYPE, both from `railGroupsAll()` — the same array the bands and the meter read,
+       so the one-derivation claim the chips carried is unchanged and the artefact moved. */
     return (
       <TaskList
         groups={railGroups()}
@@ -3032,29 +3113,33 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         onSearch={setSearch}
         onAdd={() => openComposer("task")}
         onExport={exportRail}
-        filterActive={filterOpen}
-        onFilter={() => { setSortOpen(false); setFilterOpen((v) => !v); }}
-        filterMenu={filterOpen ? (
-          <div className="tdb-sortmenu" role="menu">
-            {chips.map((ch) => (
-              <button key={ch.id} type="button" role="menuitem" aria-current={ch.id === chip}
-                onClick={() => { setChip(ch.id); setFilterOpen(false); }}>
-                {ch.label} <span className="tdw-mn">{ch.count}</span>
-              </button>
-            ))}
-          </div>
-        ) : null}
-        sortActive={sortOpen}
-        onSort={() => { setFilterOpen(false); setSortOpen((v) => !v); }}
-        sortMenu={sortOpen ? (
-          <div className="tdb-sortmenu" role="menu">
-            {TODO_SORTS.map((so) => (
-              <button key={so.id} type="button" role="menuitem" aria-current={so.id === sort}
-                onClick={() => { setSort(so.id); setSortOpen(false); }}>{so.label}</button>
-            ))}
-          </div>
-        ) : null}
-      />
+        /* ⚠️ THE FUNNEL LIGHTS FROM THE VIEW, NOT FROM A FLAG. `isFiltered` compares to the default,
+         so toggling something back off turns the light off too — a tracked "touched" boolean would
+         leave a full list wearing the filtered marker. */
+      filterActive={isFiltered(view)}
+      onFilter={(el) => { filterAnchor.current = el; setSortOpen(false); setFilterOpen((v) => !v); }}
+      filterMenu={filterOpen && filterAnchor.current ? (
+        <AnchoredPanel anchor={filterAnchor.current} ariaLabel="Filter tasks"
+          onClose={(back) => { setFilterOpen(false); if (back) filterAnchor.current?.focus(); }}>
+          <FilterMenu
+            view={view}
+            groupCounts={viewGroupCounts(railGroupsAll())}
+            typeCounts={viewTypeCounts(railGroupsAll())}
+            snoozedCount={narrowCards(boardCols.snoozed).length}
+            shown={viewTotal(railGroups())}
+            onChange={setView}
+          />
+        </AnchoredPanel>
+      ) : null}
+      sortActive={isSorted(view)}
+      onSort={(el) => { sortAnchor.current = el; setFilterOpen(false); setSortOpen((v) => !v); }}
+      sortMenu={sortOpen && sortAnchor.current ? (
+        <AnchoredPanel anchor={sortAnchor.current} ariaLabel="Sort tasks"
+          onClose={(back) => { setSortOpen(false); if (back) sortAnchor.current?.focus(); }}>
+          <SortMenu view={view} onChange={setView} />
+        </AnchoredPanel>
+      ) : null}
+    />
     );
   }
 

@@ -1,55 +1,27 @@
-── page frame · 27 assertions · 11 RED · 16 green
-  RED    F1 list card is 372 ± 2
-           list=518 listCard=520
-  RED    F2 task pane ≥ 900 (brief) — see report for the honest ceiling
-           pane=350
-  green  F3 no horizontal scrollbar on documentElement
-           overflowX=0px
-  green  F4 no list row deed/agent line ellipsised
-           []
-  green  P1 close · no [object Object] anywhere in the pane
-           clean
-  green  T1 close · all tiles share one offsetTop (one row)
-           tiles=2 tops=[423]
-  green  P1 close · no [object Object] in the journey
-           clean
-  RED    J1 close · form and timeline side by side at 1440 (same offsetTop)
-           form={"w":286,"top":488} story={"w":286,"top":960}
-  RED    J2 close · timeline 300 ± 2 and form ≥ 420
-           story.w=286 form.w=286
-  green  J3 close · neither card is 0px
-           form=286 story=286
-  RED    P1 send · no [object Object] anywhere in the pane
-           FOUND
-  green  T1 send · all tiles share one offsetTop (one row)
-           tiles=3 tops=[531]
-  RED    P1 send · no [object Object] in the journey
-           FOUND
-  RED    J1 send · form and timeline side by side at 1440 (same offsetTop)
-           form={"w":286,"top":628} story={"w":286,"top":1450}
-  RED    J2 send · timeline 300 ± 2 and form ≥ 420
-           story.w=286 form.w=286
-  green  J3 send · neither card is 0px
-           form=286 story=286
-  green  P1 decide · no [object Object] anywhere in the pane
-           clean
-  green  T1 decide · all tiles share one offsetTop (one row)
-           tiles=2 tops=[439]
-  green  P1 decide · no [object Object] in the journey
-           clean
-  RED    J1 decide · form and timeline side by side at 1440 (same offsetTop)
-           form={"w":286,"top":488} story={"w":286,"top":834}
-  RED    J2 decide · timeline 300 ± 2 and form ≥ 420
-           story.w=286 form.w=286
-  green  J3 decide · neither card is 0px
-           form=286 story=286
-  green  P1 note · no [object Object] anywhere in the pane
-           clean
-  green  P1 note · no [object Object] in the journey
-           clean
-  green  P1 bulk · no [object Object] anywhere in the pane
-           clean
-  green  N1 390 · form and timeline stacked (different offsetTop)
-           formTop=1605 storyTop=2657
-  RED    N2 390 · neither overflows and neither is 0px
-           hScroll=0 formW=0 storyW=34
+── frame port · 13 assertions · 8 RED · 5 green
+  green  1a 1440 · the document has no vertical scrollbar
+           overflow=0px
+  green  1b 1440 · list and pane bottom edges align within 2px
+           list=850 pane=851 Δ=1
+  green  1a 1920 · the document has no vertical scrollbar
+           overflow=0px
+  green  1b 1920 · list and pane bottom edges align within 2px
+           list=1030 pane=1031 Δ=1
+  green  2 · no button on /todo is filled burgundy
+           none
+  RED    3a · the meter exists and its segments equal the group counts
+           segs=[] groups=[4,4,4,1]
+  RED    3b · the legend states the same counts
+           legend=[] groups=[4,4,4,1]
+  RED    7a · the bar carries Snooze and Dismiss
+           snooze=undefined dismiss=undefined selectedRows=1
+  RED    7b · with a task selected they are enabled
+           selected=1 snoozeDisabled=undefined dismissDisabled=undefined
+  RED    4 @1280 · the filter menu opens fully inside the viewport
+           no menu (opened)
+  RED    4 @390 · the filter menu opens fully inside the viewport
+           no menu (opened)
+  RED    10 · Escape closes the menu and focus returns to the trigger
+           stillOpen=0 focus=
+  RED    5 · one type off gives the funnel the active fill and a badge dot
+           bg=rgb(255, 255, 255) cls="l-icon" dot=rgba(0, 0, 0, 0) content=none

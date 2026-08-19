@@ -37,10 +37,10 @@ export interface TaskListProps {
   onExport: () => void;
   /** the filter and sort triggers keep their menus; only their clothing is the contract's */
   filterActive?: boolean;
-  onFilter: () => void;
+  onFilter: (anchor: HTMLElement) => void;
   filterMenu?: React.ReactNode;
   sortActive?: boolean;
-  onSort: () => void;
+  onSort: (anchor: HTMLElement) => void;
   sortMenu?: React.ReactNode;
 }
 
@@ -98,15 +98,19 @@ export const TaskList: React.FC<TaskListProps> = ({
             placeholder="Search your tasks…" aria-label="Search your tasks" />
         </label>
         <span className="l-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
-          <button type="button" className="l-icon" title="Filter" aria-label="Filter"
-            aria-haspopup="menu" aria-expanded={!!filterActive} onClick={onFilter}>
+          <button type="button" title="Filter" aria-label="Filter"
+            aria-haspopup="menu" aria-expanded={!!filterActive}
+            className={filterActive ? "l-icon active" : "l-icon"}
+            onClick={(e) => onFilter(e.currentTarget)}>
             <FilterIcon />
           </button>
           {filterMenu}
         </span>
         <span className="l-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
-          <button type="button" className="l-icon" title="Sort" aria-label="Sort"
-            aria-haspopup="menu" aria-expanded={!!sortActive} onClick={onSort}>
+          <button type="button" title="Sort" aria-label="Sort"
+            aria-haspopup="menu" aria-expanded={!!sortActive}
+            className={sortActive ? "l-icon active" : "l-icon"}
+            onClick={(e) => onSort(e.currentTarget)}>
             <SortIcon />
           </button>
           {sortMenu}
@@ -120,7 +124,12 @@ export const TaskList: React.FC<TaskListProps> = ({
       <div className="l-body">
         {groups.map((g) => (
           <React.Fragment key={g.id}>
-            <div className={`grp ${GRP_CLASS[g.id] ?? "house"}`}>
+            {/* ⚠️ AN UNKNOWN GROUP TAKES NO FAMILY CLASS. The fallback was `?? "house"`, which gave the
+                Snoozed group a housekeeping dot AND made it indistinguishable from housekeeping to
+                anything selecting on `.grp.house` — the command bar's meter compares itself against
+                the three families, and a fourth head wearing one of their classes made the two
+                disagree. A group the map does not know renders a head with no tint. */}
+            <div className={GRP_CLASS[g.id] ? `grp ${GRP_CLASS[g.id]}` : "grp"}>
               <span className="g-dot" />
               <span className="g-lbl">{GRP_LABEL[g.id] ?? g.label}</span>
               <span className="g-n">{g.cards.length}</span>

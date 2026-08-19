@@ -139,3 +139,26 @@ export const ELAPSED_LABEL: Record<ElapsedSense, string> = {
      an outstanding obligation on either side. */
   closed: "closed after",
 };
+
+/**
+ * ⚠️ A SNOOZE IS SAID DIFFERENTLY FROM AN ELAPSED WAIT, and that is a real distinction rather than
+ * a second formatter. `elapsedParts` describes how long something HAS been — its thresholds are
+ * chosen so "13 days" stays precise, because a wait's exact length is the fact. A snooze describes
+ * a length the writer is CHOOSING, where "1 week" is what they mean and "7 days" is the same answer
+ * in the wrong register. Same file, same conventions, one place to change either.
+ *
+ * 1–6 days as days · 7–27 as whole weeks · 28+ as whole months (the frame contract, §4).
+ */
+export function snoozeParts(days: number): ElapsedParts {
+  const n = Math.max(1, Math.round(days));
+  if (n < 7) return { figure: String(n), unit: n === 1 ? "day" : "days" };
+  if (n < 28) { const w = Math.floor(n / 7); return { figure: String(w), unit: w === 1 ? "week" : "weeks" }; }
+  const m = Math.floor(n / 30);
+  return { figure: String(Math.max(1, m)), unit: Math.max(1, m) === 1 ? "month" : "months" };
+}
+
+/** "1 week" — the snooze panel's readout, as one string */
+export const snoozePhrase = (days: number): string => {
+  const p = snoozeParts(days);
+  return `${p.figure} ${p.unit}`;
+};

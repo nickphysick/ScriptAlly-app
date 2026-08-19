@@ -1138,7 +1138,10 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    */
   it("the filter button takes the active fill whenever the chip is not `all`", () => {
     /* the narrowed-state marker is the card's `filterActive` now — same fact, the card's clothing */
-    expect(board).toContain("filterActive={filterOpen}");
+    /* ⚠️ THE FUNNEL LIGHTS FROM THE VIEW, not from whether the menu is open (frame round). A menu
+       being open says nothing about whether the list is narrowed; `isFiltered(view)` compares to
+       the default, so a list that was filtered and then unfiltered stops wearing the marker. */
+    expect(board).toContain("filterActive={isFiltered(view)}");
     const on = rule(splitCss, ".tdw-cbic.on {");
     expect(on).toContain("background: #2b2118");
     expect(on).toContain("color: #fdfaf5");
@@ -1162,8 +1165,13 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
     const at = board.indexOf("function renderList");
     expect(at, "the rail tools are gone — this slice would read nothing").toBeGreaterThan(-1);
     const fn = board.slice(at, at + 3200);
-    expect(fn).toContain("const chips = railChips(boardCols);");
-    expect(fn).toContain("{ch.label} <span className=\"tdw-mn\">{ch.count}</span>");
+    /* ⚠️ RE-POINTED (frame round). The contract's filter counts by GROUP and by TYPE, and both
+       come from `railGroupsAll()` — the same array the section bands and the command bar's meter
+       read. The claim is the one this case has always made: the menu's figures and the bands'
+       figures are one derivation, so they cannot disagree. The chips' own map is retired with them. */
+    expect(fn).toContain("groupCounts={viewGroupCounts(railGroupsAll())}");
+    expect(fn).toContain("typeCounts={viewTypeCounts(railGroupsAll())}");
+    expect(fn).toContain("shown={viewTotal(railGroups())}");
   });
 
   /**
@@ -1183,8 +1191,9 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
     expect(eff).not.toContain("stopPropagation");
     /* mutually exclusive: opening one shuts the other */
     /* the same two-menu exclusivity, now handed to the card as `onFilter` */
-    expect(board).toContain("onFilter={() => { setSortOpen(false); setFilterOpen((v) => !v); }}");
-    expect(board).toContain("onSort={() => { setFilterOpen(false); setSortOpen((v) => !v); }}");
+    /* the same two-menu exclusivity, now also handing the trigger element up so the menu can anchor */
+    expect(board).toContain("onFilter={(el) => { filterAnchor.current = el; setSortOpen(false); setFilterOpen((v) => !v); }}");
+    expect(board).toContain("onSort={(el) => { sortAnchor.current = el; setFilterOpen(false); setSortOpen((v) => !v); }}");
   });
 });
 

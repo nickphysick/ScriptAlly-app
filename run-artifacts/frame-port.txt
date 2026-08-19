@@ -1,0 +1,27 @@
+── frame port · 13 assertions · 0 RED · 13 green
+  green  1a 1440 · the document has no vertical scrollbar
+           overflow=0px
+  green  1b 1440 · list and pane bottom edges align within 2px
+           list=850 pane=851 Δ=1
+  green  1a 1920 · the document has no vertical scrollbar
+           overflow=0px
+  green  1b 1920 · list and pane bottom edges align within 2px
+           list=1030 pane=1031 Δ=1
+  green  2 · no button on /todo is filled burgundy
+           none
+  green  3a · the meter exists and its segments equal the group counts
+           segs=[2,4,4] groups=[2,4,4]
+  green  3b · the legend states the same counts
+           legend=["2","4","4"] groups=[2,4,4]
+  green  7a · the bar carries Snooze and Dismiss
+           snooze=false dismiss=false selectedRows=1
+  green  7b · with a task selected they are enabled
+           selected=1 snoozeDisabled=false dismissDisabled=false
+  green  4 @1280 · the filter menu opens fully inside the viewport
+           menu 299..527 of 1280, 417..883 of 900
+  green  4 @390 · the filter menu opens fully inside the viewport
+           menu 8..236 of 390, 8..474 of 900
+  green  10 · Escape closes the menu and focus returns to the trigger
+           stillOpen=0 focus=Filter
+  green  5 · one type off gives the funnel the active fill and a badge dot
+           bg=rgb(245, 226, 218) cls="l-icon active" dot=rgb(124, 58, 42) content=""
