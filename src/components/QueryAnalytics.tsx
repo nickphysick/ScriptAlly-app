@@ -40,6 +40,8 @@ import { Panel, PanelRow } from "./analytics/Panel";
 import { JourneyFunnel, funnelNote } from "./analytics/JourneyFunnel";
 import { SendingChart, SENDING_NOTE } from "./analytics/SendingChart";
 import { StatusDonut } from "./analytics/StatusDonut";
+import { ReplyHistogram, histogramNote } from "./analytics/ReplyHistogram";
+import { AgingChart, agingNote } from "./analytics/AgingChart";
 import {
   AnalyticsRange,
   AnalyticsRow,
@@ -169,6 +171,15 @@ export const QueryAnalytics: React.FC = () => {
               </Panel>
               <Panel icon="donut" title="Where things stand" span={4}>
                 <StatusDonut rows={rows} />
+              </Panel>
+            </PanelRow>
+
+            <PanelRow>
+              <Panel icon="clock" title="How long replies take" span={6} note={histogramNote(rows)}>
+                <ReplyHistogram rows={rows} />
+              </Panel>
+              <Panel icon="hourglass" title="Queries still out" span={6} note={agingNote(rows)}>
+                <AgingChart rows={rows} />
               </Panel>
             </PanelRow>
           </>

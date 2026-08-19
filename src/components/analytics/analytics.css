@@ -225,3 +225,17 @@
 @media (prefers-reduced-motion: reduce) {
   .an-bar { transition: none; }
 }
+
+/* ── the histogram's value labels ────────────────────────────────────────────
+   The count sits above its own bar rather than behind a hover: a distribution is read by
+   comparing heights, and the figures are what make a near-tie legible. */
+.an-barval { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 15px; fill: #2b1a12; }
+
+/* ── the aging chart ─────────────────────────────────────────────────────────
+   ⚠️ THE WHOLE GROUP IS THE TARGET, not the 18px circle inside it. A dot, its stem and its arrow
+   are one query; hovering the stem and getting nothing would read as a dead spot. */
+.an-dotg { cursor: default; }
+.an-dotg:hover circle { filter: brightness(0.97); }
+/* legend keys drawn as the marks they describe, rather than as generic squares */
+.an-swc { width: 11px; height: 11px; border-radius: 50%; flex: none; background: #f5e2da; border: 1px solid #7c3a2a; box-sizing: border-box; }
+.an-swl { width: 14px; border-top: 1px dashed #9c8878; display: inline-block; flex: none; }
