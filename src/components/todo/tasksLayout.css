@@ -43,7 +43,28 @@
    masthead in with its content and put the header out of true with the other nine. This page and
    Query Centre are the two master–detail surfaces; at the shell's 80 they were 90px apart in
    measure while claiming to be siblings. */
+/**
+ * ⚠️ THE FOUR INSETS THAT DIFFERED FROM `/queries`, MEASURED AND MATCHED (frame2 Phase 1). The
+ * gutter was already shared; these were not. Every value below is the Query Centre's own, read off
+ * the page rather than taken from a brief:
+ *
+ *   `.wpg-scroll` padding      44/35/0/35  →  0/35/0/35   (`--content-top-gap: 0`, as `.qc-wpg` does)
+ *   `.tdb-col.tpl` padding-bot 48          →  0
+ *   `.tdw-split` padding       22 all round →  20/0/32/0   (`.f12-body`'s)
+ *   `.tpl-cols` margin-top     6           →  0
+ *
+ * Together they put the list card's left edge at 282 instead of 305, and its bottom 11px off the
+ * viewport instead of 50 — the same numbers `/queries` measures.
+ */
 .tpl-wpg .wpg-scroll { padding-inline: var(--content-gutter-tight); }
+.tpl-wpg.wpg--working { --content-top-gap: 0px; }
+.tpl-wpg .wpg-scroll { padding-top: 0; }
+
+/* ⚠️ THE SOLO TITLE IS 40px APP-WIDE, AND THIS PAGE OPTS OUT. `.wsh--solo` gives a page with no
+   subtitle two extra points; the Query Centre has a subtitle and so renders 38. Matching it here is
+   a page-scoped override rather than a change to the solo rule, because every other solo page still
+   wants the larger setting. */
+.tpl-wpg .wsh--solo { --wsh-title-size: 38px; }
 
 /* ⚠️ `.tpl-head` IS RETIRED, AND FIXING ITS COMMENT IS WHAT REVEALED IT.
    The rule's comment had lost its opening delimiter, so the parser read everything from the class
@@ -116,7 +137,7 @@
    known to need it. Query Centre needed the identical declaration a pass later, so the concept is
    named once in workspacePageGrid.css and both pages opt in through the `fill` prop. */
 
-.tpl-cols { display: flex; align-items: stretch; gap: 26px; margin-top: 6px; flex: 1; min-height: 0; }
+.tpl-cols { display: flex; align-items: stretch; gap: 26px; flex: 1; min-height: 0; }
 .tpl-side { flex: 0 0 auto; overflow: auto; min-height: 0; }
 .tpl-body { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
 
@@ -166,11 +187,15 @@
    ⚠️ FOLDED, NOT APPENDED. A second `.tdb-col.tpl` block made the selector ambiguous and the lock
    read the wrong half — the duplicate-selector trap, caught by its own lock this time. The
    vertical padding survives: it gutters content, which is a different job. */
+/* ⚠️ AND THE COLUMN'S 48px BOTTOM GOES WITH THEM. `.tdb-col` pads 48 at the foot for the scrolling
+   board it was written for; on a page whose panes scroll internally it is 48px of dead ground under
+   two cards that already stop where the viewport does. */
 .tdb-col.tpl {
   display: flex; flex-direction: column; flex: 1; min-height: 0;
   max-width: none;
   padding-left: 0;
   padding-right: 0;
+  padding-bottom: 0;
 }
 /* ⚠️ `.tdb-wrap`'s OWN rule is edited IN PLACE in todo.css (it is where `overflow-y: auto` was
    declared). A second single-class rule here would have equal specificity and win or lose on

@@ -74,7 +74,10 @@
      at all, because the command bar's own `margin-bottom` was standing in for it, and 20 at the
      foot. With the bar gone the top would have collapsed to nothing and the page would sit hard
      against the header. 22 on every side is the horizontal rhythm the split already had. */
-  padding: 22px;
+  /* ⚠️ `/queries`' OWN FIGURES (frame2 Phase 1). `.f12-body` is `20/0/32/0` — no side padding at
+     all, because the scroll row's 35px gutter is the inset and a second one put this page's cards
+     23px further in than the Query Centre's. Top 20 and bottom 32 are its vertical rhythm. */
+  padding: 20px 0 32px;
   /* ⚠️ THE CONTAINERS CARRY NO FILLS AT ALL NOW (journeys pack, Phase 1). The split, the bar, the
      list card and the desk pane all sit on the SHEET's own ground; hairlines and the section bands
      do every piece of delineating. A fill under a card that also has one was two surfaces doing
