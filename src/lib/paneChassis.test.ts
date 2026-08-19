@@ -175,10 +175,22 @@ describe("the journey's grid", () => {
        ⚠️ THE CLAIM IN THE TITLE SURVIVES: no query, no fixed width. The second track is a `clamp`,
        so it flows rather than jumping, and nothing here states a width the browser cannot argue
        with. */
-    expect(row).toContain("grid-template-columns: minmax(0, 1fr) clamp(200px, 32%, 300px)");
-    expect(row, "the wrapping row is back — the timeline will stack and starve").not.toContain("flex-wrap");
+    /* ⚠️ CORRECTED AGAIN, BACK TO THE WRAP — and the grid that briefly stood here was the wrong
+       fix for a real symptom. The timeline DID sit below the form at 300x181 and shrink to 284 in a
+       journey, but the cause was a missing GROW factor: `flex: 0 1 300px` stays 300 wide on a line
+       it has to itself. A grid cannot wrap, so it broke what the wrap was for — measured, the form
+       fell to 314px in a journey at 1440 and to ZERO at 390, which `paneFrame.measure.ts` caught.
+
+       ⚠️ AND THE SPLIT'S FIX DOES NOT TRANSFER HERE, WHICH IS THE LESSON. `.tdw-split` sits in a
+       fixed-height frame, so content-sizing is its bug; this row sits inside a scrollport, so
+       content-sizing is its job and stacking when the measure is short is the intended layout. */
+    expect(row).toContain("flex-wrap: wrap");
+    expect(row, "the grid is back — the row cannot stack and the form starves").not.toContain("grid-template-columns");
     expect(row).toContain("gap: 16px");
-    expect(dockCss, "a flex basis is back on a grid item").not.toContain("flex: 0 1 300px");
+    /* the fault itself: a wrapped timeline with no grow is a 300px card under a full-width form */
+    expect(dockCss, "the timeline lost its grow — it will starve on its own line")
+      .toContain("flex: 1 1 300px");
+    expect(dockCss).toContain("flex: 999 1 420px");
     /* ⚠️ ASSERTED OVER `dockCss`, WHICH IS ALREADY COMMENT-STRIPPED — and it had to be. My own
        note above says the words "@container" and "tdk-jgrid" while explaining their removal, and
        an unstripped read matches the prose that documents the retirement. That is the source-lock

@@ -20,13 +20,25 @@ That single fact explains three separate items in the audit — the entries wrap
 starved card), the timeline card looking wrong, and half of why the page did not fit (a stacked
 pair is twice as tall as a paired one).
 
-It is a grid now: measured `cols=426px 208px`, both cards on the same line, pane overflow
-**993 → 790**.
+⚠️ **AND MY FIRST FIX FOR IT WAS WRONG — recorded because the wrong fix was plausible and passed
+four suites.** I made it a grid, on the reasoning that this was the `.tdw-split` fault one level
+down. It is not. **`.tdw-split` sits in a fixed-height frame, so being sized by its content is its
+bug; `.tdk-workrow` sits inside `.tdk-w`'s scrollport, so being sized by its content is its job**,
+and stacking when the measure is short is the *intended* layout — `paneFrame.measure.ts` states and
+reasons it: side-by-side needs a 736px workrow, 1440 gives about 436. A grid cannot wrap, so it
+broke exactly what the wrap was for: **the form fell to 314px in a journey at 1440 and to ZERO at
+390** — the starved-track fault, reintroduced by the fix for it. `paneFrame` caught it on the
+deployed site; the four suites I re-ran locally did not cover it.
 
-**And it is the fault removed from `.tdw-split` in the previous pass, one level down.** It survived
-because that fix went where the symptom was measured. The rule now states the general form, so the
-next one is found by reading: a wrapping flex row cannot be bounded by its container on the cross
-axis, so anywhere a fixed-height surface uses one, it is wrong for the same reason.
+**The actual cause was one missing grow factor.** `flex: 0 1 300px` has no grow, so a timeline that
+wrapped onto its own line stayed 300px and read as a starved card under a full-width form. With
+`flex: 1 1 300px` it fills the line: measured **650×250 where it was 300×181**, and the entry name
+gets 574px where it had 20.
+
+⚠️ **AND ITEM 4 IS NOT IMPROVED — pane overflow at rest is 993 → 1003.** The duplicated story saved
+about 200px and the contract's own timeline shape gave it back: a date beneath each name is two
+lines where a side column was one, plus the terminus row. That is the design, and it means the card
+is not going to fit until the form does — see item 5 below.
 
 ## Worked, in the audit's order
 

@@ -106,9 +106,7 @@
 }
 
 /* the act card is the one that scrolls, so it owns the column's spare height */
-/* ⚠️ NO FLEX BASIS — the track is the width now, and a basis on a grid item applies to nothing
-   while still reading as the number in charge. */
-.tdk-workrow > .tdk-fc:first-child { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.tdk-workrow > .tdk-fc:first-child { flex: 999 1 420px; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
 
 .tdk-workrow > .tdk-fc:first-child > .tdk-rim {
   box-sizing: border-box;
@@ -120,7 +118,7 @@
 
 /* ⚠️ THE TIMELINE CARD IS A BASIS, NOT A WIDTH — `flex: 0 1 300px` with a 240 floor, so it gives
    before it wraps and wraps before it crushes. A fixed 300 is what would sneak back in here. */
-.tdk-workrow > .tdk-fc:last-child { min-width: 0; }
+.tdk-workrow > .tdk-fc:last-child { flex: 1 1 300px; min-width: 0; }
 
 /* the contract's act padding */
 .tdk-act { padding: 21px 24px 22px; min-width: 0; display: flex; flex-direction: column; min-height: 0; flex: 1; }
@@ -886,28 +884,34 @@
    `flex: 1 1 420px` on the form and `flex: 0 1 300px; min-width: 240px` on the timeline: the row
    holds both while it can, and wraps the moment 420 + 16 + 240 stops fitting. No width is stated
    anywhere that the browser cannot overrule. */
-/* ⚠️ A GRID, NOT A WRAPPING ROW — and it HAD wrapped, which is the cause of three separate
-   symptoms in the audit. `flex: 1 1 420px` + `flex: 0 1 300px` is 720px of basis inside a 650px
-   workrow, so the timeline dropped onto its own line: measured, the form at 650x482 and the
-   timeline BELOW it at 300x181, narrowing to 284 once a journey was open. That is why the entries
-   wrapped, why the card looked starved, and half of why the page did not fit — a stacked pair is
-   twice as tall as a paired one.
+/* ⚠️ A WRAPPING ROW, AND THE GRID THAT BRIEFLY REPLACED IT WAS THE WRONG CORRECTION. The audit's
+   symptoms were real — the timeline sat BELOW the form at 300x181 and shrank to 284 in a journey —
+   but the wrap was not the cause. `flex: 0 1 300px` has no GROW, so when the timeline wrapped onto
+   its own line it stayed 300px wide and read as a starved card under a full-width form. One
+   missing grow factor, not the wrong display.
 
-   ⚠️ THE SAME FAULT AS `.tdw-split`'s, ONE LEVEL DOWN, and it survived that fix because the fix
-   went where the symptom was measured. Stated plainly so the next one is found by reading rather
-   than by measuring: a wrapping flex row cannot be bounded by its container on the cross axis, so
-   anywhere a fixed-height surface uses one, it is wrong for the same reason.
+   ⚠️ AND THIS ROW IS THE OPPOSITE OF `.tdw-split`, WHICH IS WHY THE SPLIT'S FIX DOES NOT TRANSFER.
+   The split lives in a fixed-height frame, so being sized by its content is the bug. This row lives
+   INSIDE `.tdk-w`'s scrollport, so being sized by its content is the whole point, and stacking when
+   the measure is short is the intended layout — `paneFrame.measure.ts` states it and reasons it:
+   side-by-side needs a 736px workrow, 1440 gives about 436, so 1440 is deliberately stacked with
+   the form at its 420 floor and 1920 pairs. A grid cannot wrap, so it held both at once: measured,
+   the form fell to 314px in a journey at 1440 and to ZERO at 390 — the starved-track fault the
+   split had, one level down.
 
-   ⚠️ THE SECOND TRACK IS FLUID SO IT NEVER NEEDS A BREAKPOINT. The ref states a flat `300px`,
-   which cannot hold inside a pane that is itself a fraction of the window; `clamp` keeps the ref's
-   number wherever there is room and gives the form the floor everywhere else. */
+   ⚠️ THE GROW FACTORS ARE ASYMMETRIC ON PURPOSE. Paired, the extra width should go to the FORM —
+   the ref draws `minmax(0, 1fr) 300px`, so the timeline is a fixed measure beside a flexible one.
+   Stacked, the timeline is alone on its line and must fill it. `999` against `1` expresses both
+   with one pair of numbers: the timeline takes a fraction of a pixel of any shared surplus, and
+   100% of a line it has to itself. */
 .tdk-workrow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(200px, 32%, 300px);
+  display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   align-items: start;
   min-width: 0;
 }
+
 
 /* ⚠️ THE 420 BASIS BELONGS TO THE CARD, NOT TO THIS. `.tdk-workrow > .tdk-fc:first-child` carries
    it; a second copy here put a 420px basis on an item inside `.tdk-act`'s COLUMN flex, where the
