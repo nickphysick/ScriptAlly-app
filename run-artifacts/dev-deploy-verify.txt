@@ -1,0 +1,14 @@
+── https://scriptally-dev.web.app/todo · 1440×900
+  bundles loaded:      ["/assets/index-BPsT9aJU.js","/assets/index-B0SZUPf6.css"]
+
+  sidebar To-do badge: "13"
+  list footer:         "13 outstanding · showing 13 of 12Export CSV"
+  pane header:         "Task 8 of 12 · Your tasks"
+  visible rows:        12
+  section heads:       ["Urgent4","Urgent","Housekeeping4","Housekeeping","Your tasks4","Your tasks"]
+
+  materials card:      "10 queries have no record of what you sent"
+  other pages mounted: 7  (excluded from every count above)
+
+  known dup-key warns: 0
+  ⚠️ OTHER errors:      0
