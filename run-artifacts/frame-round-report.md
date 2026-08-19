@@ -40,7 +40,7 @@ because it looks saved and is not.
 ## The assertions — red before, green after
 
 `run-artifacts/frame-RED-before.txt` → `run-artifacts/frame-port.txt`.
-**8 RED / 5 green before · 13 green after**, and the suite was run **twice** to prove no
+**8 RED / 5 green before · 14 green after**, and the suite was run **twice** to prove no
 order dependency.
 
 | # | before | after |
@@ -56,6 +56,7 @@ order dependency.
 | 4 @390 menu inside the viewport | RED — no menu | green |
 | 10 Escape closes, focus returns | RED | green — focus back on Filter |
 | 5 funnel active fill + badge dot | RED | green |
+| R the suite left the view as it found it | RED | green |
 
 ## Three faults the assertions found
 
@@ -67,10 +68,14 @@ order dependency.
   group a housekeeping dot *and* made it indistinguishable from housekeeping to anything selecting
   `.grp.house` — so the meter (three families) and the heads (four) could not be reconciled. A group
   the map does not know now renders a head with no tint.
-- **The suite left the account filtered.** Assertion 5 turns a type off and the view *persists*, so
-  the next run and every screenshot described a narrowed list — and on the second run the same click
-  toggled Send back *on*, correctly darkening the funnel and failing the case. It now sets its own
-  starting state and restores the default at the end.
+- **The suite left the account filtered, twice.** Assertion 5 turns a type off and the view
+  *persists*, so the next run and every screenshot described a narrowed list — and on the second run
+  the same click toggled Send back *on*, correctly darkening the funnel and failing the case. It now
+  sets its own starting state. ⚠️ **And the first undo failed silently**: case 5 leaves the menu
+  open, so clicking the trigger to "open" it *closed* it and the reset link was never there to
+  click. The deployed screenshots showed a narrowed list before this was caught. The restore is now
+  an **assertion of its own** (`R`), because an undo that can fail without saying so is the same
+  shape as a probe that cannot fail.
 
 ## Two probe faults, both of the documented family
 
@@ -111,9 +116,17 @@ Backing fields, for when it is built:
 - **The five type toggles — partially.** `mutedTaskRules` exists on the user and the sheet already
   touches it; whether it is per-rule or per-type needs its own recon.
 
+## One artefact clobbered, and restored
+
+⚠️ **macOS's FILESYSTEM IS CASE-INSENSITIVE AND GIT IS NOT.** `SA_FRAME_OUT=run-artifacts/frame-deployed.txt`
+wrote straight into `run-artifacts/frame-DEPLOYED.txt` — a tracked file from an earlier round holding
+that round's `paneFrame` results — and `git status` reported it modified under the name I had never
+typed. `git add` on the lowercase path silently did nothing, which is what surfaced it. Restored
+from HEAD; this round's output is `frame-port-deployed.txt`.
+
 ## Gates
 
 tsc 0 · production build 0 (whole output grepped) · vitest **329 files, 5557 passed, 2 skipped**
-· framePort **13/13**, run twice.
+· framePort **14/14**, run twice, on the deployed site.
 
 Screenshots: `reports/frame/contract-{1440,1920,390}.png` and `reports/frame/page-{1440,1920,390}.png`.

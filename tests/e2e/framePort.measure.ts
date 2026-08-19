@@ -249,27 +249,37 @@ test("frame port", async ({ page }) => {
       funnel ? `bg=${funnel.bg} cls="${funnel.cls}" dot=${funnel.dotBg} content=${funnel.dotContent}`
              : `no funnel (${filtered.note || active.note})`);
 
-  /* ⚠️ THE SUITE PUTS THE VIEW BACK. Assertion 5 turns a type off, and the view PERSISTS to the
-     user document — so without this the harness account is left filtered and every later run, and
-     every screenshot, describes a narrowed list. A measurement that changes the thing it measures
-     has to undo it. */
-  await page.evaluate(() => {
+  /* ⚠️ THE SUITE PUTS THE VIEW BACK, AND OPENS THE MENU ONLY IF IT IS SHUT. Case 5 leaves the menu
+     open; clicking the trigger to "open" it therefore CLOSED it, and the reset link was never
+     there to click. The undo ran, reported nothing, and left the account filtered — which is how
+     a narrowed list ended up in the deployed screenshots. */
+  const VISFN = `(e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }`;
+  await page.evaluate(`(() => {
+    const vis = ${VISFN};
+    const open = [...document.querySelectorAll(".menu")].some(vis);
+    if (!open) ([...document.querySelectorAll('.tlc .l-icon[aria-label="Filter"]')].find(vis))?.click();
+  })()`);
+  await page.waitForTimeout(600);
+  await page.evaluate(`(() => {
+    const link = [...document.querySelectorAll(".menu .m-foot a")]
+      .find((a) => /show everything/i.test(a.textContent || ""));
+    link?.click();
+  })()`);
+  /* ⚠️ THE RESTORE IS ASSERTED, NOT ASSUMED. The first form clicked "Show everything" and moved on;
+     when the click missed, the account was left filtered and the next run's screenshots described
+     a narrowed list — silently, because nothing checked. An undo that can fail without saying so is
+     the same shape as a probe that cannot fail. */
+  const restored = await page.evaluate(() => {
     const vis = (e: Element | null) => {
       if (!e) return false;
       const r = (e as HTMLElement).getBoundingClientRect();
       return r.width > 0 && r.height > 0;
     };
     const t = [...document.querySelectorAll('.tlc .l-icon[aria-label="Filter"]')].find(vis) as HTMLElement | undefined;
-    t?.click();
+    return t ? t.className : "?";
   });
-  await page.waitForTimeout(400);
-  await page.evaluate(() => {
-    const reset = [...document.querySelectorAll(".menu .m-foot a")]
-      .find((a) => /show everything/i.test(a.textContent ?? "")) as HTMLElement | undefined;
-    reset?.click();
-  });
-  await page.waitForTimeout(1500);
-  await page.keyboard.press("Escape");
+  add("R · the suite left the view as it found it", !/active/.test(restored),
+      `funnel after restore: "${restored}"`);
 
   const red = out.filter((r) => !r.ok);
   const lines = [`── frame port · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`];
