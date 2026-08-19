@@ -967,7 +967,7 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
    * facts — one derivation, three presentations — and its rows read `activityEventLabel`, which
    * `dockTimeline` already called.
    */
-  it("the column is headed TRACKING and opens with the stat pair", () => {
+  it("the column is headed TRACKING; the stat pair moved to the header's tiles", () => {
     const html = renderToStaticMarkup(
       <TodoDock queue={QUEUE} card={QUEUE[0]} activeKey="a" onSelect={() => {}} onClose={() => {}}
         timeline={() => [{ key: "e1", label: "Full requested", when: "12 Jul" }]}
@@ -975,7 +975,11 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
         handoff={() => ({ waitLabel: "Greg has waited", waitValue: "6 weeks", anchorLabel: "Requested", anchorValue: "28 Jun" })} />,
     );
     expect(html).toContain("TRACKING");
-    expect(html).toContain("tdk-tstats");
+    /* ⚠️ THE STAT PAIR LEFT THIS COLUMN (Phase D). It sat above Tracking and read as its preamble;
+       §2 puts these facts in the HEADER, beside the deed they describe. The figures are unchanged
+       and still `trackingStats`' — only their home moved, so the assertions below still hold. */
+    expect(html, "the stat row is back in the story column").not.toContain("tdk-tstats");
+    expect(html, "the tiles did not render in the header").toContain("tdk-tiles");
     expect(html).toContain("6");            // the Playfair figure
     expect(html).toContain("weeks");        // …with the unit split off for Inter
     expect(html).toContain("28 Jun");

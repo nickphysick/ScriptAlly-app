@@ -756,3 +756,66 @@
 .tdk-band.v-offer .tdk-sub { color: #8a6558; }
 
 .tdk-band.v-offer .tdk-deed { color: #3a1c14; }
+
+
+/* ── §2's TILES ───────────────────────────────────────────────────────────────────────────────
+   ⚠️ IN THE HEADER, UNDER THE BAND AND INSIDE THE RIM — facts about the task, beside the deed that
+   names it. They were in the story column, above Tracking, where they read as its preamble.
+
+   ⚠️ DIVIDED BY THE INTERNAL DIVIDER, AND NOT AFTER THE LAST. §2's rule; a trailing rule draws an
+   edge the card already has. */
+.tdk-tiles {
+  display: flex;
+  align-items: stretch;
+  background: #ffffff;
+  padding: 12px 22px;
+}
+
+.tdk-tile {
+  flex: 1;
+  min-width: 0;
+  padding: 0 16px;
+  border-right: 1px solid rgba(124, 58, 42, 0.13);
+}
+
+.tdk-tile:first-child { padding-left: 0; }
+
+.tdk-tile:last-child { border-right: 0; padding-right: 0; }
+
+.tdk-tilek {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9c8878;
+  margin-bottom: 3px;
+}
+
+.tdk-tilev {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: #2b2118;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.tdk-tileu {
+  font-family: "Source Sans Pro", system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 300;
+  color: #8a7a6c;
+  margin-left: 4px;
+}
+
+/* ⚠️ ABSENCE IS SAID, in §2's muted mono — never an empty tile and never a zero. */
+.tdk-tilenone {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #c0b0a0;
+}

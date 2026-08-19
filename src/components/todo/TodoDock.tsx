@@ -39,9 +39,9 @@ import { ArtSlot } from "./ArtSlot";
 import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
-import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, bandPreline, bandDeed, bandSubline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow, recordNote } from "../../lib/todoHandoff";
+import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, panePresence, bandPreline, bandDeed, bandSubline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow, recordNote } from "../../lib/todoHandoff";
 import { liveFamily } from "../../lib/todoFamily";
-import { cardFootHint } from "../../lib/todoBuckets";
+import { cardFootHint, cardBucket } from "../../lib/todoBuckets";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
 
@@ -291,6 +291,27 @@ export const TodoDock: React.FC<TodoDockProps> = ({
      showing the day its TASK was created; a note about nobody keeps that date because it is the
      only one it has. `card.who` counts: an imported card can name an agent it holds no id for. */
   const stats = trackingStats(facts, !!(card.agentId || card.who));
+  /* §2's presence table, once, so the tiles, the figure and the story card cannot disagree. */
+  const presence = panePresence(card);
+  /**
+   * ⚠️ THE TILES ARE THE STATS PLUS ONE: "Sent previously", which §2 names and the old three-stat
+   * row had no equivalent of. It states what already went to this agent, so a writer recording a
+   * partial can see what the query carried without opening the query.
+   *
+   * ⚠️ AND IT IS ONLY ON A SEND. Elsewhere it would be answering a question the deed did not ask —
+   * §2's own reason for refusing a "what they want" tile.
+   */
+  const tiles = [
+    ...stats.map((st) => ({ k: st.k, v: st.v, u: st.u, absent: "Not recorded" })),
+    ...(cardBucket(card) === "send"
+      ? [{
+          k: "Sent previously",
+          v: (materials?.(card) ?? []).join(" · "),
+          u: "",
+          absent: "None sent",
+        }]
+      : []),
+  ];
   /* ⚠️ RESOLVED ONCE — the body, the band's progress and the footer must all be answering about the
      same cohort, and three calls could disagree the moment the page's memo identity changes. */
   /* ⚠️ THE COHORT'S ANSWERS RESET WITH THE CARD, exactly as the sweep's do — a half-filled table
@@ -458,6 +479,22 @@ export const TodoDock: React.FC<TodoDockProps> = ({
         {/* ⚠️ THE CARD'S BODY BECOMES THE FORM — one scroller, two contents. Nothing overlays and
             nothing has to be dismissed, which is the whole of Item 9 and is also what removes the
             `inert` seal: a journey that is not an overlay never calls `useOverlay`. */}
+        {/* ⚠️ THE TILES SIT IN THE HEADER, UNDER THE BAND AND INSIDE THE RIM — facts about the
+            task, beside the deed that names it. Presence is `panePresence`'s, not a second rule:
+            a note has no query to state facts about and a cohort has no single one. */}
+        {presence.tiles && tiles.length > 0 && (
+          <div className="tdk-tiles">
+            {tiles.map((t, n) => (
+              <div className="tdk-tile" key={t.k + n}>
+                <span className="tdk-tilek">{t.k}</span>
+                {t.v
+                  ? <span className="tdk-tilev">{t.v}{t.u && <span className="tdk-tileu">{t.u}</span>}</span>
+                  /* ⚠️ ABSENCE IS STATED IN THE MUTED MONO, never an empty tile and never a zero */
+                  : <span className="tdk-tilenone">{t.absent}</span>}
+              </div>
+            ))}
+          </div>
+        )}
         <EdgeFadeScroll
           /* ⚠️ THE FADE IS THE CARD'S GROUND, AND THE CARD IS WHITE NOW. It read `--paper`, which was
               correct while the body was parchment and would have drawn a cream mist over a white
@@ -498,19 +535,9 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               * the shape `.qp-stats` uses over there. The FIGURES are the same `figureFor` the rail
               * and the band already read, so a third statement of the wait is impossible.
               */}
-            {stats.length > 0 && (
-              <div className="tdk-tstats">
-                {stats.map((st) => (
-                  <div className="tdk-tstat" key={st.k}>
-                    <span className="ico" aria-hidden>{st.icon}</span>
-                    <span>
-                      <span className="big">{st.v}{st.u && <span className="u">{st.u}</span>}</span>
-                      <span className="k">{st.k}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* ⚠️ THE TILES MOVED INTO THE HEADER CARD (Phase D). They are facts ABOUT the task, so
+                they belong with the deed that names it — not inside the story column, where they
+                sat above a Tracking section and read as its preamble. */}
             {/**
               * ⚠️ A NOTE LEADS WITH THE NOTE, AND SHOWS NO TRACKING. The note's words were in the
               * BOUNDED column beside a hint sentence while the wide column held a stat tile and an

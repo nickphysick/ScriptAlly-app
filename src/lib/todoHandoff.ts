@@ -330,6 +330,40 @@ export function bandSubject(c: BoardCard): string {
  * none, the line is absent rather than an echo of the name above it.
  */
 /**
+ * §2's PRESENCE TABLE, as one derivation — which of the pane's three optional parts a task shows.
+ *
+ * ⚠️ ONE SOURCE FOR ALL THREE, because they answer one question: how much does the app actually
+ * know about this task. A send has a query behind it, so it has facts to tile, a wait to figure and
+ * a history to show. A note has none of the three — it is the writer's own sentence — and rendering
+ * an empty Tracking section beside it is an empty frame implying something is missing, which the
+ * pane already learned once.
+ *
+ * ⚠️ THE BULK RECORD GAP STANDS FOR A SET, so it has no single query and therefore no timeline;
+ * the SINGLE one does. That is the only row of the table where the two materials tasks differ, and
+ * it is why they are distinguished here rather than lumped as "materials".
+ */
+export interface PanePresence {
+  /** The fact tiles under the band. */
+  tiles: boolean;
+  /** The band's right-hand figure and its unit label. */
+  figure: boolean;
+  /** The story card beside the form. */
+  timeline: boolean;
+}
+
+export function panePresence(c: BoardCard): PanePresence {
+  const none: PanePresence = { tiles: false, figure: false, timeline: false };
+  /* the writer's own item — no query, no history, nothing to tile */
+  if (c.userTaskId || c.nature || c.stream === "nt") return none;
+  /* a cohort has no single record behind it */
+  if (c.taskType === "materials_unrecorded_bulk") return none;
+  /* a single record gap has a query, so it keeps its history — but the deed says what is missing,
+     so tiles and a figure would restate the row it was raised from */
+  if (c.taskType === "materials_unrecorded") return { tiles: false, figure: false, timeline: true };
+  return { tiles: true, figure: true, timeline: true };
+}
+
+/**
  * ⚠️ THE BAND LEADS WITH THE DEED, NOT THE AGENT — the whole of Phase A in one function.
  *
  * It led with an agency monogram and the agent's name as its title, which answers "who is this

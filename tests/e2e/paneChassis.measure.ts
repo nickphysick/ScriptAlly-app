@@ -193,8 +193,14 @@ test("pane chassis", async ({ page }) => {
     if (wantsTiles) {
       /* ⚠️ THE POSITIVE HALF MATTERS. "no tile reads X" is satisfied by having no tiles at all —
          vacuous on today's build, which has none. Require "Sent previously" to be among them. */
-      add(P(10, "tiles include 'Sent previously' and none reads 'what they want'"),
-          m.tileLabels.some((l) => /sent previously/i.test(l))
+      /* ⚠️ §4 SCOPES THE POSITIVE HALF TO A SEND — "a Send task's tile set includes 'Sent
+         previously'". A close has nothing previously sent to state, so requiring it there was my
+         over-application, not a gap. The NEGATIVE half applies everywhere. */
+      const needsSentPreviously = j.key === "send";
+      add(P(10, needsSentPreviously
+            ? "tiles include 'Sent previously' and none reads 'what they want'"
+            : "no tile reads 'what they want'"),
+          (!needsSentPreviously || m.tileLabels.some((l) => /sent previously/i.test(l)))
             && !m.tileLabels.some((l) => /what they want/i.test(l)),
           JSON.stringify(m.tileLabels));
     }
