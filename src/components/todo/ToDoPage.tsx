@@ -70,7 +70,9 @@ import {
    so a column asking where a card belongs, and a FILTERS facet asking what kind it is, are both
    answered by the groups themselves. Neither component is deleted in this phase (the house rule
    on orphans: flag, then sweep in a commit of its own). */
-import { TaskList, groupColumn } from "./TaskList";
+import { TaskList } from "./TaskList";
+import { groupColumn } from "../../lib/todoGroups";
+import { daysBetween } from "../../lib/elapsed";
 import { useDockActivity } from "./useDockActivity";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
 import { notifyGroups, reminderFields } from "../../lib/offerNotify";
@@ -876,6 +878,47 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
      about the wrong query, which is the sweep's own rule applied to one card */
   React.useEffect(() => { setPaneBody({ materials: [], when: "Today", also: "" }); }, [paneCard?.key]);
 
+  /**
+   * ⚠️ WHAT A LIST ROW NEEDS BEYOND ITS CARD, and every one of these is a lookup rather than a new
+   * derivation. `waitAnchorMs` is the SAME clock the rail's figure already runs on, so the row's
+   * duration and the pane's cannot disagree; `sendSpecFor` is what already decides partial-versus-
+   * full; `queriesMissingMaterials` is the derivation the bulk card was raised by.
+   *
+   * ⚠️ AND WHERE THE RECORD IS SILENT, THIS RETURNS NULL RATHER THAN A GUESS. `listMeta` falls back
+   * to the agent-and-agency pair, which is the contract's own instruction. Two facts are absent on
+   * this account and reported rather than invented: the partial's SPECIFIC ASK ("the first 3
+   * chapters") has no field on the request record, and an offer's date is `offerDate`, which the
+   * imported queries do not carry.
+   */
+  const listRowInputs = React.useCallback((c: BoardCard) => {
+    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
+    const anchorMs = waitAnchorMs(cardBucket(c), c.taskType, {
+      dateSent: q?.dateSent,
+      partialRequestedDate: q?.partialRequestedDate,
+      fullRequestedDate: q?.fullRequestedDate,
+      partialSentDate: q?.partialSentDate,
+      fullSentDate: q?.fullSentDate,
+      lastNudgeSentDate: q?.lastNudgeSentDate,
+      lastReplyAt: isoOf(q?.responseReceivedAt),
+      statusMovedAt: isoOf(q?.lastStatusChange),
+      createdAt: c.userTaskId ? userTasks.find((t) => t.id === c.userTaskId)?.createdAt : undefined,
+    });
+    const spec = sendSpecFor(c);
+    const offer = isoOf(q?.offerDate);
+    const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
+    return {
+      agency: ag?.agency ?? null,
+      days: Number.isFinite(anchorMs) ? daysBetween(anchorMs, Date.now()) : null,
+      partial: spec?.material === "partial",
+      /* the ask, through the ONE materials formatter — absent when the request recorded none */
+      ask: formatQueryMaterials(q?.materialsWanted),
+      offeredOn: offer ? new Date(offer).toLocaleDateString("en-GB", { day: "numeric", month: "long" }) : null,
+      bulkCount: c.taskType === "materials_unrecorded_bulk"
+        ? queriesMissingMaterials({ queries, activities, agents, manuscripts, displayName: agentPrimary }).length
+        : null,
+    };
+  }, [queries, userTasks, activities, agents, manuscripts]);
+
   const paneFacts = React.useMemo(() => {
     if (!paneCard) return [];
     const q = paneCard.relatedRecordId ? queries.find((x) => x.id === paneCard.relatedRecordId) : undefined;
@@ -1552,7 +1595,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           )}
           <div className="tdw-split">
             <div className="tdw-rail">
-              {renderRailTools()}
               {/* ⚠️ A NARROWED-TO-NOTHING RAIL IS A RAIL FACT, AND IT STAYS IN THE RAIL (Phase 4).
                   It used to replace the whole body, which meant a search that matched nothing took
                   the workspace with it — the pane cleared because a search box narrowed, which is
@@ -1572,23 +1614,17 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               {/* ⚠️ THE FOOTER CLOSES THE CARD, and it states the scope the EXPORT writes. A count
                   saying "12 of 34" beside a button that wrote 34 would be two statements of one
                   scope, and the button's is the one nobody checks until the file is open. */}
-              <div className="tdw-foot">
-                {/* ⚠️ ONE LINE, ONE PLACE. The bar said "30 tasks · 16 outstanding" while the
-                    footer said "Showing 16 of 30" — two statements of overlapping facts, in two
-                    surfaces, either of which could be read as the whole truth. Both figures read
-                    `railShown()` and `allDockable`, the SAME derivation the section bands read, so
-                    a count and the band it names cannot disagree. */}
-                <span className="tdw-showing">{showingLine(railShown(), allDockable.length)}</span>
-                <span className="tdw-footgrow" />
-                <button
-                  type="button"
-                  className="tdw-export"
-                  disabled={railShown() === 0}
-                  onClick={exportRail}
-                >
-                  Export CSV
-                </button>
-              </div>
+              {/* ⚠️ THE RAIL'S TOOLBAR AND FOOTER ARE RETIRED — the ported card renders its own,
+                  because the contract draws toolbar, body and footer as ONE object. Leaving these
+                  would have given the page two toolbars and two footers, and the second footer was
+                  the one saying "showing 13 of 12". One surface, one count.
+
+                  ⚠️ AND THE BRACES ARE LOAD-BEARING. In JSX CHILDREN a bare slash-star comment is
+                  literal TEXT — the first form of this note rendered on the page, under the list, in
+                  full. It is the mirror of the trap at EXPRESSION position, where the braced form
+                  parses as a block instead: same characters, opposite rule, decided by where it
+                  sits. (And the braced form cannot be quoted inside a comment either — its closing
+                  sequence ends the comment early, which is how the second attempt at this failed.) */}
             </div>
             <div className="tdw-work">
               {paneCard ? (
@@ -2953,96 +2989,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    *
    * (A hoisted `function`, not a post-return const — the render calls it; the TDZ law.)
    */
-  function renderRailTools() {
-    const chips = railChips(boardCols);
-    const active = chips.find((ch) => ch.id === chip);
-    return (
-      <div className="tdw-tools">
-        <div className="tdw-toolrow">
-          {/* ⚠️ THE FILTER READS AS ACTIVE WHENEVER IT IS NOT `All` (corrections, Phase 5) — solid
-              ink, the same treatment the active chip carried. A narrowed list must never be
-              silently narrowed: the chips used to say so by standing there, and with them folded
-              into a menu the button is the only thing left that can. */}
-          <span className="tdw-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className={`tdw-cbic${chip === "all" ? "" : " on"}`}
-              title="Filter" aria-label="Filter" aria-haspopup="menu" aria-expanded={filterOpen}
-              onClick={() => { setSortOpen(false); setFilterOpen((v) => !v); }}
-            >
-              <Funnel size={15} aria-hidden />
-            </button>
-            {filterOpen && (
-              <div className="tdb-sortmenu" role="menu">
-                {/* ⚠️ THE COUNTS ARE `railChips`', the SAME derivation the section bands read — a
-                    chip and the band it names cannot disagree. Snoozed still appears only when
-                    non-zero, which is the chip strip's own rule carried over intact. */}
-                {chips.map((ch) => (
-                  <button key={ch.id} type="button" role="menuitem" aria-current={ch.id === chip}
-                    onClick={() => { setChip(ch.id); setFilterOpen(false); }}>
-                    {ch.label} <span className="tdw-mn">{ch.count}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </span>
-          <span className="tdw-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="tdw-cbic"
-              title="Sort" aria-label="Sort" aria-haspopup="menu" aria-expanded={sortOpen}
-              onClick={() => { setFilterOpen(false); setSortOpen((v) => !v); }}
-            >
-              <ArrowUpDown size={15} aria-hidden />
-            </button>
-            {sortOpen && (
-              <div className="tdb-sortmenu" role="menu">
-                {TODO_SORTS.map((o) => (
-                  <button key={o.id} type="button" role="menuitem" aria-current={o.id === sort}
-                    onClick={() => { setSort(o.id); setSortOpen(false); }}>
-                    {o.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </span>
-          <div className={`tdw-search${search ? " has" : ""}`}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder="Search your list…"
-              aria-label="Search your list"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Escape") { setSearch(""); (e.target as HTMLInputElement).blur(); } }}
-            />
-            {search && (
-              <button type="button" className="tdw-clr" aria-label="Clear the search" onClick={() => setSearch("")}>
-                <X size={13} aria-hidden />
-              </button>
-            )}
-          </div>
-          {/* ⚠️ IT ACTS ON THE LIST, SO IT LIVES ON THE LIST. `Add task or note` was in the command
-              bar, which acted on nothing in particular — the bar was simply the only permanent
-              surface, so everything homeless ended up there. Same handler (`openComposer("task")`),
-              new home, beside the two other controls that narrow and order this list.
-              ⚠️ PINK, NOT INK. Black is reserved for "this advances" — a commit. Adding opens a
-              composer, which is the start of something rather than the end of it. */}
-          <button type="button" className="tdw-cbic tdw-add" title="Add task or note"
-            aria-label="Add task or note" onClick={() => openComposer("task")}>
-            <Plus size={15} aria-hidden />
-          </button>
-        </div>
-        {/* ⚠️ THE CHIP STRIP IS GONE (Phase 5) — its contents ARE the filter menu, and the active
-            one is marked there. What it said by standing on the page, the button's ink fill says
-            now, which is why that fill is not optional. */}
-        {active && chip !== "all" && (
-          <span className="tdw-narrowed">Showing {active.label} only</span>
-        )}
-      </div>
-    );
-  }
+  /* ⚠️ `renderRailTools` IS DELETED, NOT ORPHANED. It drew the rail's search, filter, sort and
+     add — all four of which the ported card now renders itself, because the contract draws the
+     toolbar as part of the card. Leaving the function standing with no caller is the shape this
+     repo has been caught by twice: code that looks live, is not, and gets hardened by someone
+     who never checks whether it renders. Recoverable in git. */
 
   /**
    * ⚠️ THE GROUPS THE RAIL DRAWS — computed ONCE and read by both the list and the "is it empty"
@@ -3063,33 +3014,47 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return chipGroups(taskGroups(narrowed), chip);
   }
 
+  /**
+   * ⚠️ THE LIST IS THE PORTED CARD NOW — it renders its own toolbar, body and footer, because the
+   * contract draws all three as one object. The page's `.tdw-tools` and `.tdw-foot` are retired
+   * with it: two surfaces stating one scope is exactly the "showing 13 of 12" fault, and the fix
+   * is that there is only one place a count can be written.
+   */
   function renderList() {
-    /* ⚠️ THE LIST REGION IS THE SCROLLZONE (tasks-viewport P1). The page never scrolls; the
-       header block is fixed and the groups scroll inside this zone. */
+    const chips = railChips(boardCols);
     return (
-      <TplZone scrollRef={zoneRef} label="Your tasks" hem={false}>
-        <TaskList
-          groups={railGroups()}
-          hkExpanded={hkExpanded}
-          onToggleHk={() => setHkExpanded(true)}
-          onOpen={(c) => openDock(c.key)}
-          /* ⚠️ THE MARK IS THE PANE'S OWN KEY, NOT A SECOND SELECTION. The rail marks what the
-             workspace is showing, so the two cannot disagree about which one is current — and
-             when nothing is docked, nothing is marked. */
-          selectedKey={docked.card?.key}
-          onTick={(c) => void quickDone(c)}
-          onVerb={(c, v, column) => performCardVerb(c, v, column)}
-          /* ⚠️ THE DIAL DECIDES NOTHING — it hands over an ALREADY-CLAMPED value and the page
-             performs it through `snoozeCard`, the same primitive the ⋯ tiers and the dock use.
-             One choke point, three entrances. */
-          onSnooze={(c, days, when) => snoozeCard(c, days, when)}
-          /* ⚠️ "NO TASKS" AND "WE DO NOT KNOW YET" ARE DIFFERENT SENTENCES (P5). `collectionsReady`
-             is the db's own first-snapshot flag — the same one the Dashboard's skeleton reads — so
-             the page cannot tell the second as the first and flash an empty desk on boot. */
-          figure={figureFor}
-          loading={!collectionsReady}
-        />
-      </TplZone>
+      <TaskList
+        groups={railGroups()}
+        onOpen={(c) => openDock(c.key)}
+        selectedKey={docked.card?.key}
+        rowInputs={listRowInputs}
+        search={search}
+        onSearch={setSearch}
+        onAdd={() => openComposer("task")}
+        onExport={exportRail}
+        filterActive={filterOpen}
+        onFilter={() => { setSortOpen(false); setFilterOpen((v) => !v); }}
+        filterMenu={filterOpen ? (
+          <div className="tdb-sortmenu" role="menu">
+            {chips.map((ch) => (
+              <button key={ch.id} type="button" role="menuitem" aria-current={ch.id === chip}
+                onClick={() => { setChip(ch.id); setFilterOpen(false); }}>
+                {ch.label} <span className="tdw-mn">{ch.count}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+        sortActive={sortOpen}
+        onSort={() => { setFilterOpen(false); setSortOpen((v) => !v); }}
+        sortMenu={sortOpen ? (
+          <div className="tdb-sortmenu" role="menu">
+            {TODO_SORTS.map((so) => (
+              <button key={so.id} type="button" role="menuitem" aria-current={so.id === sort}
+                onClick={() => { setSort(so.id); setSortOpen(false); }}>{so.label}</button>
+            ))}
+          </div>
+        ) : null}
+      />
     );
   }
 

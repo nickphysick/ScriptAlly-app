@@ -33,11 +33,27 @@ const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
  */
 const QUARTER = ["", "¼", "½", "¾"] as const;
 
-export function elapsedPhrase(days: number): string {
+/**
+ * ⚠️ THE SAME DURATION, SPLIT INTO ITS TWO TYPOGRAPHIC HALVES — added for the task list, whose
+ * right column sets the FIGURE in Playfair and the UNIT in mono, on two lines. Splitting
+ * `elapsedPhrase`'s output on a space at the call site would work until the day a phrase gained a
+ * second word, and it would put the rule about how a duration is said in a component. This is the
+ * extension the list brief asks for: in the formatter's own file, with `elapsedPhrase` built FROM
+ * it, so there is exactly one place that decides days-versus-weeks-versus-quarters-of-a-year.
+ */
+export interface ElapsedParts {
+  /** "7" · "2¼" — never contains a space */
+  figure: string;
+  /** "weeks" · "years" — already pluralised for the figure */
+  unit: string;
+}
+
+export function elapsedParts(days: number): ElapsedParts {
   const n = Math.max(0, Math.round(days));
-  if (n < DAYS_MAX) return plural(n, "day");
-  if (n < WEEKS_MAX) return plural(Math.round(n / 7), "week");
-  if (n < MONTHS_MAX) return plural(Math.max(1, Math.round(n / 30.44)), "month");
+  const split = (v: number, one: string): ElapsedParts => ({ figure: String(v), unit: one + (v === 1 ? "" : "s") });
+  if (n < DAYS_MAX) return split(n, "day");
+  if (n < WEEKS_MAX) return split(Math.round(n / 7), "week");
+  if (n < MONTHS_MAX) return split(Math.max(1, Math.round(n / 30.44)), "month");
   /* years, to the nearest quarter */
   const y = n / 365.25;
   const whole = Math.floor(y);
@@ -45,8 +61,12 @@ export function elapsedPhrase(days: number): string {
   /* a quarter that rounds up to four is the next whole year */
   const yy = q === 4 ? whole + 1 : whole;
   const frac = q === 4 ? 0 : q;
-  const unit = yy === 1 && frac === 0 ? "year" : "years";
-  return `${yy}${QUARTER[frac]} ${unit}`;
+  return { figure: `${yy}${QUARTER[frac]}`, unit: yy === 1 && frac === 0 ? "year" : "years" };
+}
+
+export function elapsedPhrase(days: number): string {
+  const p = elapsedParts(days);
+  return `${p.figure} ${p.unit}`;
 }
 
 /** Days between two instants, floored — the input every caller already has. */

@@ -20,6 +20,7 @@
  * KIND of thing is this" instead of "where did you put it".
  */
 import { BoardCard } from "./todoBoard";
+import { TodoColumnId } from "./todoColumns";
 import { BoardColumns } from "./todoColumns";
 import { liveFamily } from "./todoFamily";
 
@@ -251,4 +252,15 @@ export function taskStats(cols: BoardColumns, estimatedMin: number): TaskStat[] 
      Today page's stat row was built on; it carries over intact.) */
   if (estimatedMin > 0) out.push({ label: "Estimated", value: `${estimatedMin} min` });
   return out;
+}
+
+/**
+ * ⚠️ LIFTED OUT OF `TaskList` WHEN THE LIST WAS PORTED. It maps a group id to the column whose
+ * verbs apply to its cards, which is a fact about the MODEL — the list only ever imported it to
+ * pass along. It survived the component because it was never part of it.
+ */
+export function groupColumn(id: TaskGroup["id"]): TodoColumnId {
+  if (id === "snoozed") return "snoozed";
+  if (id === "done") return "done";
+  return "todo";
 }

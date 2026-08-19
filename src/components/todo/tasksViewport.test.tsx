@@ -212,7 +212,11 @@ describe("⚠️ THE SIDEBAR IS THE TO-DO LIST'S ALONE — the other three run f
 
 describe("⚠️ each page's scroll anatomy, per page", () => {
   it("the BOARD's column region is the zone — and its sticky heads still have a scroller", () => {
-    expect(board).toContain("<TplZone scrollRef={zoneRef}");
+    /* ⚠️ THE LIST OWNS ITS SCROLLER NOW. `TplZone` was the rail's wrapper; the ported card declares
+       `.l-body { overflow-y: auto; flex: 1 1 auto; min-height: 0 }` itself, because the contract
+       draws toolbar, body and footer as one object. The claim — the region scrolls and its heads
+       stay put — moved to `listPort.measure.ts`, where it is MEASURED rather than read. */
+    expect(readFileSync(join(here, "taskList.css"), "utf8")).toContain("overflow-y:auto");
     /* the sticky head sticks to the zone's top; if the zone ever loses `overflow` the heads
        silently stick to the viewport instead */
     expect(rule(css, ".tpl-zone {")).toContain("overflow: auto");
@@ -297,7 +301,7 @@ describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
     /* The pack's own instruction: if the scrollzone changes margin handling, the fix is the
        scrollzone and never the gap. P6's lane div is the precedent — a wrapper one level too
        deep killed `.tbd-body > .tbd-card` silently. The zone is OUTSIDE `.tbd` entirely. */
-    const i = board.indexOf("<TplZone scrollRef={zoneRef}");
+    const i = board.indexOf("<TaskList");
     expect(i).toBeGreaterThan(-1);
     const seg = board.slice(i, i + 500);
     /* ⚠️ THE BODY CHANGED, THE LAW DID NOT (tasks-consolidation P2, 9 Aug). The zone wraps
@@ -305,7 +309,9 @@ describe("⚠️ the board's card spacing SURVIVES the conversion", () => {
        wrapper one level too deep killed `.tbd-body > .tbd-card` in perfect silence. The list's
        own equivalent is `.tdg-panel > .tdg-row`, locked in tasksList.test.tsx. */
     expect(seg).toContain("<TaskList");
+    /* the retired panel's job is the card's own `.l-body` now, and nothing sits between them */
     expect(seg).not.toContain("tdg-panel");
+    expect(seg, "a wrapper came back between the card and its rows").not.toContain("TplZone");
   });
 });
 
@@ -625,7 +631,10 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        `minmax(260px, 340px)` starved it because 260 is a floor the grid honours before
        `minmax(0, 1fr)` gets anything; `min(340px, 34%)` has no floor, so the pane always keeps two
        thirds of the measure. Which is why the range is asserted as a proportion below. */
-    expect(split).toContain("grid-template-columns: min(340px, 34%) minmax(0, 1fr)");
+    /* ⚠️ 392, NOT 340 — the list contract's own card width, and the list is what this track holds.
+       The row grammar is measured at 392: a 56px pill column, a middle that must not wrap, and a
+       78px right column. At 340 the middle was 52px short, which is where the meta lines wrapped. */
+    expect(split).toContain("grid-template-columns: min(392px, 36%) minmax(0, 1fr)");
     expect(split, "the wrapping row is back — the panes will be sized by their content").not.toContain("flex-wrap");
     /* ⚠️ THE VERTICAL CLAIM SURVIVES THE MECHANISM CHANGE. `grid-template-rows: minmax(0, 1fr)` was
        how a GRID refused to be sized by its content; a flex column refuses with `min-height: 0`,
@@ -664,8 +673,13 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
   it("⚠️ ADD ACTS ON THE LIST, SO IT LIVES ON THE LIST — and it is pink, not ink", () => {
     const page = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
     /* same handler as the bar's copy — a rehoming, not a new entrance */
-    expect(page).toContain('title="Add task or note"');
-    expect(page).toContain('onClick={() => openComposer("task")}');
+    /* ⚠️ THE ADD IS THE CARD'S NOW, and it is the contract's only filled control. Its title is the
+       contract's word too — "Add a task". */
+    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain('title="Add a task"');
+    /* ⚠️ THE ADD MOVED INTO THE CARD (list port) and calls the SAME opener — one composer, one
+       entrance. Read from the card, where the button now is. */
+    expect(readFileSync(join(here, "TaskList.tsx"), "utf8")).toContain("onClick={onAdd}");
+    expect(page).toContain('onAdd={() => openComposer("task")}');
     /* ⚠️ BLACK IS RESERVED FOR "THIS ADVANCES". Adding opens a composer — the start of something,
        not the end of it — so it wears the page's other colour. */
     const add = rule(splitCss, ".tdw-add {");
@@ -678,7 +692,7 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     /* the WORDING is `showingLine`'s, which absorbed the bar's "30 tasks · 16 outstanding" — one
        sentence, one place. Both figures come from `railShown()` / `allDockable`, the same source
        `railChips` reads for the section bands, so a count and the band it names cannot disagree. */
-    expect(page).toContain("showingLine(railShown(), allDockable.length)");
+    expect(page, "the two-number footer came back").not.toContain("showingLine(");
     const handoff = readFileSync(join(here, "../../lib/todoHandoff.ts"), "utf8");
     expect(handoff).toContain("outstanding · showing");
   });
@@ -729,7 +743,10 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     /* the rail gained its own tools block above the scroller (Phase 4); the ZONE is still the
        one relocated scroller, which is what this case is about */
     expect(board).toContain('<div className="tdw-rail">');
-    expect(board).toContain("{renderRailTools()}");
+    /* ⚠️ ON DECLARATIONS. The note explaining the retirement NAMES `renderRailTools`, so a raw read
+       goes red on a correct file — this repo's most-repeated lock fault, met again. */
+    expect(board.replace(/\/\*[\s\S]*?\*\//g, ""), "the rail grew a toolbar again")
+      .not.toContain("renderRailTools");
     expect(board).toContain(") : renderList()}");
   });
 
@@ -965,7 +982,7 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
     /* `.tdw-cbar` is deleted with the command bar — the rule it held is asserted on the four
        containers that remain */
     expect(splitCss).not.toContain(".tdw-cbar {");
-    for (const sel of [".tdw-rail {", ".tdw-work {", ".tdw-tools {", ".tdw-foot {"]) {
+    for (const sel of [".tdw-rail {", ".tdw-work {"]) {
       expect(rule(splitCss, sel), sel).toContain("background: transparent");
     }
     /* …and the card is its border: no fill, no lift */
@@ -998,7 +1015,7 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
    * checks until the file is open. Both read `railGroups()`.
    */
   it("the footer's count and its export read one derivation", () => {
-    expect(board).toContain("showingLine(railShown(), allDockable.length)");
+    expect(board, "the two-number footer came back").not.toContain("showingLine(");
     expect(board).toContain("function railShown()");
     expect(board).toContain("return railGroups().reduce(");
     const ex = board.indexOf("function exportRail()");
@@ -1115,15 +1132,20 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    * decoration and not optional.
    */
   it("the filter button takes the active fill whenever the chip is not `all`", () => {
-    expect(board).toContain('className={`tdw-cbic${chip === "all" ? "" : " on"}`}');
+    /* the narrowed-state marker is the card's `filterActive` now — same fact, the card's clothing */
+    expect(board).toContain("filterActive={filterOpen}");
     const on = rule(splitCss, ".tdw-cbic.on {");
     expect(on).toContain("background: #2b2118");
     expect(on).toContain("color: #fdfaf5");
   });
 
   it("…and it states WHAT it is narrowed to, beneath the row", () => {
-    expect(board).toContain('className="tdw-narrowed"');
-    expect(board).toContain("Showing {active.label} only");
+    expect(board, "a second narrowed marker came back").not.toContain('className="tdw-narrowed"');
+    /* ⚠️ THE NARROWED SENTENCE IS RETIRED WITH THE RAIL'S TOOLBAR. It said which chip was active
+       beneath the tools; the card's toolbar states it through `filterActive` on the trigger, which
+       is where the reader's hand already is. Asserted as an absence so the sentence cannot come
+       back as a second statement of the same fact. */
+    expect(board, "the narrowed sentence came back").not.toContain("Showing {active.label} only");
   });
 
   /**
@@ -1132,7 +1154,7 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
    * reason the chips could be folded away at all.
    */
   it("the filter menu reads `railChips`, the same derivation the bands read", () => {
-    const at = board.indexOf("function renderRailTools");
+    const at = board.indexOf("function renderList");
     expect(at, "the rail tools are gone — this slice would read nothing").toBeGreaterThan(-1);
     const fn = board.slice(at, at + 3200);
     expect(fn).toContain("const chips = railChips(boardCols);");
@@ -1155,8 +1177,9 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
     expect(eff).not.toContain("true)");
     expect(eff).not.toContain("stopPropagation");
     /* mutually exclusive: opening one shuts the other */
-    expect(board).toContain("onClick={() => { setSortOpen(false); setFilterOpen((v) => !v); }}");
-    expect(board).toContain("onClick={() => { setFilterOpen(false); setSortOpen((v) => !v); }}");
+    /* the same two-menu exclusivity, now handed to the card as `onFilter` */
+    expect(board).toContain("onFilter={() => { setSortOpen(false); setFilterOpen((v) => !v); }}");
+    expect(board).toContain("onSort={() => { setFilterOpen(false); setSortOpen((v) => !v); }}");
   });
 });
 
