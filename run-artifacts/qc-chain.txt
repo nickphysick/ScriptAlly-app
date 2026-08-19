@@ -1,0 +1,161 @@
+══════ /queries ══════
+wpg-scroll  h=664/664  disp=flex flex=0 1 auto minH=0px ovY=auto dir=column wrap=nowrap
+  f12-body  h=664/664  disp=grid flex=1 1 0% minH=0px ovY=visible rows=54px 539.75px
+    qc-barrule  h=1/1  disp=block flex=0 1 auto minH=auto ovY=visible
+    qc-lhead  h=54/54  disp=flex flex=0 1 auto minH=auto ovY=visible dir=row wrap=nowrap
+      qc-btn.qc-logq  h=40/38  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+        [object.SVGAnimatedString]  h=16/16  disp=block flex=0 0 16px minH=auto ovY=hidden
+          [object.SVGAnimatedString]  h=9/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+        SPAN  h=13/15  disp=block flex=0 1 auto minH=auto ovY=visible
+    qc-phead  h=54/54  disp=flex flex=0 1 auto minH=auto ovY=hidden dir=row wrap=nowrap
+      qc-btn.qc-btn-fwd  h=40/38  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+        [object.SVGAnimatedString]  h=16/16  disp=block flex=0 0 16px minH=auto ovY=hidden
+          [object.SVGAnimatedString]  h=13/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+        SPAN  h=13/15  disp=block flex=0 1 auto minH=auto ovY=visible
+      f12-popwrap  h=40/40  disp=flex flex=0 1 auto minH=auto ovY=visible dir=row wrap=nowrap
+        qc-btn.qc-btn-shrink.qc-btn-fwd.qc-btn-off  h=40/38  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+          [object.SVGAnimatedString]  h=16/16  disp=block flex=0 0 16px minH=auto ovY=hidden
+            [object.SVGAnimatedString]  h=13/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+          SPAN  h=13/15  disp=block flex=0 1 auto minH=auto ovY=visible
+      qc-gap  h=0/0  disp=block flex=1 1 0% minH=auto ovY=visible
+      qc-btn.qc-btn-shrink  h=40/38  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+        [object.SVGAnimatedString]  h=16/16  disp=block flex=0 0 16px minH=auto ovY=hidden
+          [object.SVGAnimatedString]  h=12/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+        SPAN  h=13/15  disp=block flex=0 1 auto minH=auto ovY=visible
+    f12-list  h=540/538  disp=flex flex=0 1 auto minH=0px ovY=hidden dir=column wrap=nowrap
+      f12-lhead  h=40/40  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+        f12-lsearch  h=40/38  disp=flex flex=1 1 0% minH=auto ovY=visible dir=row wrap=nowrap
+          [object.SVGAnimatedString]  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            [object.SVGAnimatedString]  h=8/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+            [object.SVGAnimatedString]  h=2/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+          INPUT  h=18/18  disp=block flex=1 1 0% minH=auto ovY=clip
+        f12-popwrap  h=40/40  disp=flex flex=0 1 auto minH=auto ovY=visible dir=row wrap=nowrap
+          f12-pill  h=40/38  disp=grid flex=0 0 auto minH=auto ovY=visible rows=38px
+            [object.SVGAnimatedString]  h=15/15  disp=block flex=0 0 auto minH=auto ovY=hidden
+              [object.SVGAnimatedString]  h=9/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+        f12-popwrap  h=40/40  disp=flex flex=0 1 auto minH=auto ovY=visible dir=row wrap=nowrap
+          f12-pill  h=40/38  disp=grid flex=0 0 auto minH=auto ovY=visible rows=38px
+            [object.SVGAnimatedString]  h=15/15  disp=block flex=0 0 auto minH=auto ovY=hidden
+              [object.SVGAnimatedString]  h=10/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+      f12-rows  h=438/1238  disp=block flex=1 1 0% minH=0px ovY=auto
+        qc-grp  h=366/366  disp=block flex=0 1 auto minH=0px ovY=visible
+          qc-gh.qc-gh-od  h=30/30  disp=flex flex=0 1 auto minH=0px ovY=visible dir=row wrap=nowrap
+            SPAN  h=12/12  disp=block flex=0 1 auto minH=auto ovY=visible
+            I  h=1/1  disp=block flex=1 1 0% minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/17  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/17  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/17  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+        qc-grp  h=86/86  disp=block flex=0 1 auto minH=0px ovY=visible
+          qc-gh  h=30/30  disp=flex flex=0 1 auto minH=0px ovY=visible dir=row wrap=nowrap
+            SPAN  h=12/12  disp=block flex=0 1 auto minH=auto ovY=visible
+            I  h=1/1  disp=block flex=1 1 0% minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/17  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+        qc-grp  h=198/198  disp=block flex=0 1 auto minH=0px ovY=visible
+          qc-gh  h=30/30  disp=flex flex=0 1 auto minH=0px ovY=visible dir=row wrap=nowrap
+            SPAN  h=12/12  disp=block flex=0 1 auto minH=auto ovY=visible
+            I  h=1/1  disp=block flex=1 1 0% minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/23  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/23  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/23  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+        qc-grp  h=590/590  disp=block flex=0 1 auto minH=0px ovY=visible
+          qc-gh.qc-gh-fold  h=30/30  disp=flex flex=0 1 auto minH=0px ovY=visible dir=row wrap=nowrap
+            SPAN  h=12/12  disp=block flex=0 1 auto minH=auto ovY=visible
+            I  h=1/1  disp=block flex=1 1 0% minH=auto ovY=visible
+            EM  h=11/11  disp=block flex=0 1 auto minH=auto ovY=visible
+          f12-row.f12-sel  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/17  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/17  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+          f12-row  h=56/56  disp=grid flex=0 1 auto minH=0px ovY=visible rows=56px
+            f12-av.f12-av--sm  h=32/32  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+            f12-mid  h=36/36  disp=flex flex=1 1 0% minH=auto ovY=visible dir=column wrap=nowrap
+              f12-nm  h=20/20  disp=block flex=0 1 auto minH=auto ovY=hidden
+              f12-ag  h=14/14  disp=block flex=0 1 auto minH=auto ovY=hidden
+            f12-end  h=35/35  disp=flex flex=0 1 auto minH=auto ovY=visible dir=column wrap=nowrap
+              SPAN  h=17/17  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              f12-d2  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+      f12-lfoot  h=39/38  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+        SPAN  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+          B  h=12/0  disp=inline flex=0 1 auto minH=0px ovY=visible
+        BUTTON  h=18/18  disp=block flex=0 1 auto minH=auto ovY=visible
+
+══════ /todo ══════
+wpg-scroll  h=660/660  disp=flex flex=0 1 auto minH=0px ovY=auto dir=column wrap=nowrap
+  tpl-cols  h=610/610  disp=flex flex=1 1 0% minH=0px ovY=visible dir=row wrap=nowrap
+    tpl-body  h=610/610  disp=flex flex=1 1 0% minH=0px ovY=visible dir=column wrap=nowrap
+      tdb-centre  h=610/610  disp=flex flex=1 1 auto minH=0px ovY=visible dir=column wrap=nowrap
+        tdw-split  h=610/610  disp=grid flex=1 1 0% minH=0px ovY=visible rows=565.75px
+          tdw-rail  h=566/564  disp=flex flex=0 1 auto minH=0px ovY=hidden dir=column wrap=nowrap
+            tdw-tools  h=63/62  disp=block flex=0 0 auto minH=auto ovY=visible
+              tdw-toolrow  h=38/38  disp=flex flex=0 1 auto minH=0px ovY=visible dir=row wrap=nowrap
+            tpl-zone  h=466/1232  disp=block flex=1 1 0% minH=0px ovY=auto
+              tdg  h=1202/1202  disp=block flex=0 1 auto minH=0px ovY=visible
+            tdw-foot  h=35/34  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              tdw-showing  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+              tdw-footgrow  h=0/0  disp=block flex=1 1 0% minH=auto ovY=visible
+              tdw-export  h=14/14  disp=block flex=0 1 auto minH=auto ovY=visible
+          tdw-work  h=566/691  disp=flex flex=0 1 auto minH=0px ovY=hidden dir=column wrap=nowrap
+            tdk  h=566/691  disp=flex flex=1 1 0% minH=0px ovY=visible dir=column wrap=nowrap
+              tdk-head  h=28/28  disp=flex flex=0 0 auto minH=auto ovY=visible dir=row wrap=nowrap
+              tdk-w  h=518/653  disp=flex flex=1 1 0% minH=0px ovY=visible dir=column wrap=nowrap

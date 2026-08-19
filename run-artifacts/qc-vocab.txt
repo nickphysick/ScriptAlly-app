@@ -1,0 +1,225 @@
+#000  --color-black
+#000000  --btnT --hdr --hdrOn --headT --hub-head --rail-btn-tx --slab-ttl
+#141412  --n8 --wsh-band-ink
+#1a1512  --cmdbar-prime-bd --cmdbar-prime-bg --hub-body --hub-item --qh-colhead-tx --qh-primary --qh-primary-bd
+#1d100c  --nt-ink-bd
+#1e1a16  --crumb-cur --ink
+#261603  --hub-monogram
+#2a1a13  --nt-ink-bg --nt-seg-on-bd --spine-chip-on-bg
+#2b2118  --nt-empty-h --nt-ttl
+#2b4a6b  --blue-i
+#2e2723  --shell-ink
+#3a1c14  --color-custom-dark-text --hub-ink --nt-comp-bd --qc-tx-input --rail-ink --tdb-sticker-bd
+#3a2c20  --nt-seg-on-bg
+#3d4a3b  --container-head-ink
+#422701  --acc --cmdbar-btn-bd --cmdbar-btn-tx --crumb-bar-tx --hub-accent --rail-accent
+#42543b  --qp-genre-tx
+#4a3c30  --qc-tx-note
+#4a4036  --band-strong
+#4a443c  --crumb-seg-hov --ink-2 --qc-acc-sage-tick-i
+#4e3628  --qh-mono-bg
+#4f6b86  --slate-deep
+#54614f  --hk-ink
+#5a4a40  --rail-itemtx
+#5a6e58  --container-head-mono --sage-d --sageD
+#5c554b  --sub
+#5c5a58  --n7
+#5d4037  --abtn-ink --cmd-primary-bg --cmdbar-meta --crumb-bar-mut --hub-band-process-tx --hub-band-reference-tx --hub-primary --hub-primary-bd --navtext
+#5d5245  --nt-dtl
+#6a615a  --shell-ink-soft
+#6a89a7  --pro --slate
+#6b5a41  --coffee-ink
+#6b5a4e  --nt-dtl-note --spine-chip-tx
+#6e3325  --pink-deep
+#705e4c  --hub-toggle-on
+#7a6420  --note-i
+#7a6544  --hk-cof-ink
+#7c3a2a  --burg --color-burgundy --color-custom-primary --sd-hue --shell-burgundy
+#7d621d  --gold-i
+#7d7469  --muted
+#7e9178  --qc-ring
+#8a4030  --pink-i
+#8a7048  --lat-ink
+#8a755a  --coffee-deep
+#8a7d6e  --nt-empty-p
+#8a9e88  --sage
+#8f877b  --qc-tx-quiet
+#9a3b2a  --terra
+#9a4a30  --qcj-acc-shut-i
+#9c8878  --band-meta --hub-label --rail-label --shell-muted --slab-meta
+#9d8f80  --crumb-seg
+#9db29a  --dot-s
+#a05a45  --qc-acc-late
+#a19e9a  --n6
+#a2947f  --qcj-tx-cap
+#a49a8d  --qc-tx-shut
+#a5988c  --nt-fld-blank --nt-hint
+#a8842c  --gold
+#a89a8a  --qc-tx-cancel --shell-rail-icon --shell-rail-tx
+#a89e91  --faint
+#aebdb0  --shell-desk
+#b07a63  --qc-acc-today
+#b3a596  --qc-tx-stamp
+#b3a598  --shell-quiet
+#b3a79b  --qc-tx-fold
+#b4c1b0  --qc-card-border
+#b9c3b3  --hk-spine
+#b9c9b4  --container-head-rule --nt-task-line
+#ba7517  --color-custom-secondary
+#bcae9e  --qc-tx-noteact
+#bdb3a6  --qc-tx-nq
+#c3b9ac  --qc-tx-shut-2
+#c4b9ac  --qc-tx-off
+#c5b9b0  --qc-tx-send-off
+#c7d6e3  --slate-line
+#c8b8a8  --qcj-tx-chev
+#c8bba9  --crumb-sep
+#c8d0c5  --sage-edge
+#c99a4e  --qcj-acc-star
+#cbb995  --dot-lat --lat-mark
+#cbbcab  --qc-rim-dash
+#cbd3c8  --qc-ref-band-rule
+#cdb58f  --hk-cof-edge
+#cdbfa9  --qcj-rim-ctx
+#cfc3b1  --qcj-rim-tick
+#cfc6ba  --qc-tx-shut-3
+#cfc7bb  --qcj-surf-step-prev
+#d0d6cc  --hk-sage-2 --sage-band-2
+#d2c8ba  --qcj-rim-dash
+#d3c2a6  --coffee-edge
+#d3e0ee  --blue-b
+#d3e3cc  --qp-genre-bd
+#d5dbd3  --nt-block-task
+#d6c9ba  --qc-rim-h
+#d6d2cc  --n5
+#d6dcd3  --qc-ref-band-b
+#d8c4b2  --qcj-rim-focus
+#d8ccbc  --qcj-tx-star
+#d8cebf  --bd
+#d9c87a  --dot-y
+#d9cbb8  --stat-muted
+#d9cca8  --nt-empty-bd
+#d9cfc0  --qcj-rim-box
+#dccdb5  --coffee-2
+#dce0d9  --hk-sage --postit-sage --sage-band
+#dce8d7  --hub-row-on --navpill --selBg
+#ddc0b6  --crumb-bar-bg --rail-btn-bg
+#ddd0bc  --lat-bd
+#ddd2c2  --shell-seam
+#ddd2c4  --nt-fld-bd --nt-seg-bd
+#dde3da  --qc-ref-band-a
+#ded3c2  --abtn-bd --cmd-btn-bd --rail-btn-bd
+#ded4c6  --qcj-rim-add
+#e0bda9  --qcj-acc-shut-b
+#e0d3a8  --nt-tile-bd
+#e0d3c1  --oatline
+#e0d5c8  --btnBd
+#e0d6c6  --tsh-active-border
+#e1dcd6  --n4
+#e2d2b9  --hk-cof-2
+#e2d8ca  --btn-line
+#e2dbd0  --tdb-panel-bd
+#e3d9cf  --shell-line
+#e4dbcd  --strip-bd
+#e4e9e1  --qc-card-inset
+#e59b8f  --dot-p
+#e5a89f  --pop-pink-b
+#e5ddcd  --band-b
+#e6dccd  --crumb-strip-rule --line --qc-acc-pink-h-b --qc-rim-composer --qc-rim-pink
+#e6ddd0  --qc-rim-sep
+#e6e0d5  --shell-edge
+#e7d9b8  --gold-b
+#e7dbc9  --coffee
+#e7ddd2  --cmd-bar-bd --crumb-hair --hair --hub-hair --rail-bd --rail-hair --slab-bd
+#e7e0d5  --shell-ground
+#e7ece4  --ts
+#e7eef6  --blue-t
+#e8c3b5  --qc-acc-late-b
+#e8d3c6  --qc-rim-ms
+#e8ddd0  --desk
+#e8ded0  --hub-desk
+#e8e3dd  --shell-bar-tint-solid
+#e9dcc8  --hk-cof
+#e9ded0  --float-hairline
+#e9e2d7  --ws-edge
+#e9e4dd  --n3
+#e9ece4  --rail-pill
+#e9ede6  --sageC
+#eaf1e7  --hub-band-process --qp-genre-bg
+#ecd0c2  --cmd-primary-bd
+#ecdda4  --note-b
+#ece3da  --shell-line-soft
+#ece5d8  --band-a --tdb-panel-hair --tdw-hair
+#ece5d9  --qc-rim-title --spine-chip-hov
+#ece7de  --shell-hair
+#eceae6  --qc-surf-shut-av
+#eecdc3  --pink-b
+#eedfae  --nt-block-note --tdb-sticker-butter
+#eee4d6  --qc-rim-off
+#eee5d4  --tdb-sticker-latte
+#eee5d7  --qh-row-on
+#eef2f7  --slate-tint
+#efd5ca  --pink-h
+#efe6d8  --hub-cell-bd
+#efe7d9  --lat-2
+#efe7db  --shell-rail --shell-side
+#efe8de  --hair-soft
+#efe8df  --shell-inset
+#f0bcb6  --pop-pink-2
+#f0bfb8  --pink-btn-h
+#f0eae1  --hairline
+#f1e8dc  --oat --qc-acc-pink-h --qc-acc-pink-save --qc-acc-sage-tick
+#f1ebe3  --shell-bar-bg
+#f1f1f0  --qc-surf-send-off
+#f2cec1  --nt-block-due --tdb-sticker-pink
+#f2ddd5  --band
+#f2e9db  --hub-row-hair
+#f2ece2  --qc-rim-off-2
+#f2ede7  --shell-panel --shell-parch
+#f3e6cf  --tp
+#f3e7da  --nt-ink-tx --nt-seg-on-tx --spine-chip-on-tx
+#f3ebe0  --qc-surf-noteact-h
+#f4c7c2  --pop-pink
+#f4ecd4  --nt-tile-bg
+#f4efe7  --shell-rail-hi
+#f4f2ef  --abtn-hov --rail-btn-hov
+#f5e2da  --pink
+#f5e3da  --shell-avatar-bg
+#f5efe6  --lat-1
+#f5f0e6  --winBg
+#f5f0e8  --n2 --strip-bg
+#f5f0ea  --color-custom-background
+#f6cfc9  --pink-btn
+#f6d7cf  --pink-av
+#f6ddd3  --tl
+#f6efdd  --gold-t
+#f6efe6  --qh-mono-tx
+#f6f1e6  --hub-band-reference
+#f6f1e8  --qh-colhead-bg
+#f7e3dd  --pink-t --qc-row-sel
+#f7eee7  --shell-page
+#f7f2e9  --qc-ref-plate --shell-canvas
+#f7f2ea  --btnH
+#f7f3ed  --rail-hov
+#f7f4ee  --ws-ground
+#f8e7dc  --pinkC --sd-centre
+#f8ecb0  --postit-note
+#f8faf7  --qp-listfoot-bg
+#f9d9d2  --postit-pink
+#f9e8e2  --pink-hero
+#faf0c8  --note-t
+#faf6f0  --paper --qc-acc-late-t
+#faf7f1  --cmdbar-prime-tx --nt-fld-bg --nt-seg-bg --qh-primary-tx
+#faf9f6  --rail-card
+#fbeae1  --qcj-surf-dot
+#fbf7ee  --nt-empty-bg
+#fbf9f5  --qcj-surf-ctx --shell-chrome
+#fdfaf5  --hub-cell --hub-monogram-tx --shell-card
+#fdfbf7  --qc-surf-pill-off
+#fdfbf8  --qcj-surf-ghost
+#fef8f0  --n1
+#fff  --color-white --tw-ring-offset-color
+#fffdf9  --qc-surf-composer
+#fffdfb  --crumb-strip-bg --panel
+#fffefb  --btnBg --card --cmd-bar-bg --hub-cmd --hub-col --hub-list --hub-pane-process --hub-pane-reference --hub-slab --pane --qp-cmd-bg --qp-col-bg --slab-bg
+#ffffff  --abtn-bg --cmd-btn-bg --cmd-primary-tx --hub-btn-bg --hub-pill-rail --hub-primary-tx --hub-toggle-on-tx --listbg --n0 --shell-active-fill --white --wsh-band-bg --wsh-plate-bg

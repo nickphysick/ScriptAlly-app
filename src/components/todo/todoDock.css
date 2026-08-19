@@ -1,3 +1,13 @@
+/* ⚠️ THE ONLY LITERALS IN THIS SHEET, AND THEY ARE HERE BECAUSE NOTHING NAMES THEM YET.
+   Every other colour the pane paints is now a token read by name, so the pane follows whichever
+   palette its page is in rather than restating a hex sampled off a mockup. These two are the
+   card rim and the hairlines inside it — a burgundy at two alphas, which no existing token
+   carries (`--qc-rim-*` are all opaque). Added additively; nothing else in the app reads them. */
+:root {
+  --tdk-rim: rgba(124, 58, 42, 0.28);
+  --tdk-rimline: rgba(124, 58, 42, 0.13);
+}
+
 /**
  * The dock (board+dock P4) — 30/70, the queue left, the work surface right.
  * Families reuse the board's map, so a card looks like itself when it docks.
@@ -58,6 +68,18 @@
   flex: 1;
   min-height: 0;
   min-width: 0;
+  /* ⚠️ THIS IS THE PANE'S SCROLLPORT, and it is the Query Centre's `.f12-rows` in this page's
+     clothing — `flex: 1; min-height: 0; overflow-y: auto`, the same three declarations. It had
+     `overflow: visible` while the PAGE scrolled, which hid the fault: the cards simply grew past
+     the pane and the whole page took the overflow. The moment the page stopped scrolling, 125px
+     of card — the whole Snooze/Open query/Dismiss/Complete footer — was clipped by `.tdw-work`
+     with nothing able to reach it. Measured, not reasoned: 566 tall against 691 of content.
+
+     ⚠️ AND THE ASSERTION THAT MISSED IT ASKED THE WRONG QUESTION. "The pane column owns a
+     scroller" was satisfied by the form card's own EdgeFadeScroll — a scroller, just not the one
+     that needed to exist. The honest form is the one now in qcMatch: nothing anywhere in the
+     column may have content taller than its box while clipping it. */
+  overflow-y: auto;
 }
 
 /* the column: three cards, contract gap 16 */
@@ -88,7 +110,7 @@
 
 .tdk-workrow > .tdk-fc:first-child > .tdk-rim {
   box-sizing: border-box;
-  border: 1px solid rgba(124, 58, 42, 0.28);
+  border: 1px solid var(--tdk-rim);
   border-radius: 9px;
   overflow: hidden;
   min-width: 0;
@@ -111,7 +133,7 @@
    moved here, because the thing that scrolls has to be inside the thing that clips. */
 .tdk-rim {
   box-sizing: border-box;
-  border: 1px solid rgba(124, 58, 42, 0.28);
+  border: 1px solid var(--tdk-rim);
   border-radius: 9px;
   overflow: hidden;
   display: flex;
@@ -171,7 +193,7 @@
      `overflow: hidden` clips it to the radius, which is how `.f12-card` seats its own header. */
   margin: 0;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(90, 110, 88, 0.2);
+  border-bottom: 1px solid var(--sage-edge);
 }
 
 /* ⚠️ `min-width: 0` IS THE WHOLE FIX. Without it a long agency cannot wrap, so the block grows and
@@ -191,11 +213,11 @@
   display: block;
   font-family: "Playfair Display", Georgia, serif;
   /* §2 — 26px/500, the deed is the largest thing in the pane */
-  font-size: 27px; font-weight: 500; color: #3a1c14; line-height: 1.12;
+  font-size: 27px; font-weight: 500; color: var(--ink); line-height: 1.12;
   overflow-wrap: anywhere;
 }
 
-.tdk-deed em { font-style: italic; color: #7c3a2a; }
+.tdk-deed em { font-style: italic; color: var(--burg); }
 
 /* ⚠️ THE SUB-LINE CARRIES THE FACTS THE TITLE USED TO — agent, agency, and the act's own clause.
    Inter 11.5/300 per §2; it wraps rather than truncating, because a name cut mid-word is worse
@@ -203,7 +225,7 @@
 .tdk-sub {
   display: block;
   font-size: 11.5px; font-weight: 300; line-height: 1.45;
-  color: #5f7059; margin-top: 3px;
+  color: var(--sageD); margin-top: 3px;
   overflow-wrap: anywhere;
 }
 
@@ -212,7 +234,7 @@
 /* the pink band is the offer's — its inks take the burgundy family rather than the sage */
 /* ⚠️ SAGE IS THE DEFAULT AND PINK IS THE OFFER — two variants, not four families. The `.fam-*`
    set is gone from this band: it keyed on urgency, so every send and every R&R came out pink. */
-.tdk-band.v-default { background: linear-gradient(135deg, #dee4dc 0%, #d5dbd3 100%); border-bottom-color: rgba(90, 110, 88, 0.2); }
+.tdk-band.v-default { background: linear-gradient(135deg, var(--qc-ref-band-a) 0%, var(--qc-ref-band-b) 100%); border-bottom-color: var(--sage-edge); }
 
 /* ── §2's THREE GROUP TINTS ────────────────────────────────────────────────────────────────────
    ⚠️ KEYED ON THE GROUP, NOT THE BUCKET, and the group is `liveFamily`'s — the same answer the
@@ -226,38 +248,38 @@
    band still measured `.v-default`'s sage. They sit after it now, and `.v-offer` sits after THEM,
    so the offer keeps its own paper. Do not reorder without re-reading this. */
 .tdk-band.g-urgent {
-  background: linear-gradient(135deg, #f3e0d6 0%, #eed7ca 100%);
-  border-bottom-color: rgba(124, 58, 42, 0.16);
+  background: linear-gradient(135deg, var(--pink) 0%, var(--pink-h) 100%);
+  border-bottom-color: var(--pink-b);
 }
 
-.tdk-band.g-urgent .tdk-deed { color: #3a1c14; }
+.tdk-band.g-urgent .tdk-deed { color: var(--ink); }
 
-.tdk-band.g-urgent .tdk-deed em { color: #7c3a2a; }
+.tdk-band.g-urgent .tdk-deed em { color: var(--burg); }
 
-.tdk-band.g-urgent .tdk-sub { color: #8a6558; }
+.tdk-band.g-urgent .tdk-sub { color: var(--pink-i); }
 
 .tdk-band.g-housekeeping {
-  background: linear-gradient(135deg, #d7ddd5 0%, #d5dbd3 100%);
-  border-bottom-color: rgba(90, 110, 88, 0.2);
+  background: linear-gradient(135deg, var(--sage-band) 0%, var(--sage-band-2) 100%);
+  border-bottom-color: var(--sage-edge);
 }
 
 /* ⚠️ THE HOUSEKEEPING DEED TAKES THE SAGE INK, per §2 — burgundy on this band is the wrong family */
-.tdk-band.g-housekeeping .tdk-deed { color: #2e3a2c; }
+.tdk-band.g-housekeeping .tdk-deed { color: var(--sageD); }
 
-.tdk-band.g-housekeeping .tdk-deed em { color: #405a3c; }
+.tdk-band.g-housekeeping .tdk-deed em { color: var(--sageD); }
 
-.tdk-band.g-housekeeping .tdk-sub { color: #5f7059; }
+.tdk-band.g-housekeeping .tdk-sub { color: var(--sageD); }
 
 .tdk-band.g-yours {
-  background: linear-gradient(135deg, #f7f0e2 0%, #f2e9d6 100%);
-  border-bottom-color: rgba(138, 116, 64, 0.16);
+  background: linear-gradient(135deg, var(--gold-t) 0%, var(--gold-b) 100%);
+  border-bottom-color: var(--gold-b);
 }
 
-.tdk-band.g-yours .tdk-deed { color: #3a2c14; }
+.tdk-band.g-yours .tdk-deed { color: var(--gold-i); }
 
-.tdk-band.g-yours .tdk-deed em { color: #8a7440; }
+.tdk-band.g-yours .tdk-deed em { color: var(--gold-i); }
 
-.tdk-band.g-yours .tdk-sub { color: #8a7a5c; }
+.tdk-band.g-yours .tdk-sub { color: var(--muted); }
 
 
 /* ⚠️ BEHIND THE TEXT AND CLIPPED BY THE BAND — `z-index: 1` under the content's 2, and the band's
@@ -268,7 +290,7 @@
 
 .tdk-band i {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 7.5px; letter-spacing: 0.14em; font-style: normal; text-transform: uppercase; color: #3a1c14;
+  font-size: 7.5px; letter-spacing: 0.14em; font-style: normal; text-transform: uppercase; color: var(--ink);
 }
 /* ⚠️ THE CLOSE CONTROL IS POSITIONED AND STACKED, and it was neither — that is why the motif drew
    over it. `.tdk-motif` is `position: absolute; z-index: 1`; a STATIC element takes no z-index at
@@ -278,8 +300,8 @@
    block wraps there and the taller band pushes the vertically-centred motif clear — a fault that
    comes and goes with the viewport is still a fault.
    ⚠️ z-index 3, ABOVE the content's 2, because a control must sit above the text as well. */
-.tdk-x { position: relative; z-index: 3; margin-left: auto; background: transparent; border: 0; color: #8a6a58; cursor: pointer; line-height: 0; padding: 3px; border-radius: 5px; }
-.tdk-x:hover { background: rgba(0,0,0,.06); color: #2a1a13; }
+.tdk-x { position: relative; z-index: 3; margin-left: auto; background: transparent; border: 0; color: var(--muted); cursor: pointer; line-height: 0; padding: 3px; border-radius: 5px; }
+.tdk-x:hover { background: rgba(0,0,0,.06); color: var(--ink); }
 
 /* ⚠️ THE TWO-COLUMN SHEET (board-optimise P4; ref board-optimised.html §2): the story at ~230px
    on the left, the work on the right. The story ran ABOVE the work before, so a long history
@@ -327,31 +349,35 @@
 .tdk-work { min-width: 0; border-left: 1px solid var(--hairline); padding-left: 30px; }
 .tdk-storyk {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 7px; letter-spacing: 0.18em; color: #b3a394; padding-bottom: 8px;
+  font-size: 7px; letter-spacing: 0.18em; color: var(--faint); padding-bottom: 8px;
 }
 /* ⚠️ THE WRITER'S OWN NOTE, AT READING SIZE AND IN THEIR OWN HAND (ref v14 `.big-note`, 28px
    Caveat). It is the SUBJECT of this pane, not a field on it — the band above carries only the
    standing label "Your noteboard", so if this does not render the note, nothing does. */
-.tdk-bignote { font-family: "Caveat", cursive; font-size: 28px; line-height: 1.4; color: #4a3a2e; padding: 4px 2px; margin-bottom: 10px; }
+.tdk-bignote { font-family: "Caveat", cursive; font-size: 28px; line-height: 1.4; color: var(--ink-2); padding: 4px 2px; margin-bottom: 10px; }
 
-.tdk-storynone { font-size: 11.5px; color: #a5988c; }
+.tdk-storynone { font-size: 11.5px; color: var(--faint); }
 
 /* ⚠️ THE STACK IS A CONTAINER QUERY, NOT A MEDIA QUERY. This card sits in a pane whose width the
    viewport does not describe — the split's rail takes its share first — so a viewport breakpoint
    stacked it on a wide screen and left it two-up in a narrow pane. The card is the container.
    The story still reads FIRST when stacked, as it always did, and the hairline becomes a rule
    ABOVE the doing rather than beside it. */
-.tdk-w { container-type: inline-size; }
-/* ⚠️ THE THRESHOLD IS WHERE THE RECORD CAN ACTUALLY BE THE WIDER COLUMN, not an arbitrary narrow
-   step. Below ~800px of card the doing's 360 max would leave the fr track less than itself, which
-   is a two-column layout that breaks the law it exists to serve — so it stacks instead. */
+/* ⚠️ `container-type: inline-size` IS GONE FROM `.tdk-w`, AND SO IS THE THRESHOLD NOTE THAT SAT
+   UNDER IT. The last `@container` query in this sheet was removed when the pane went fluid, so the
+   declaration named a context nothing read — dead weight that still LOOKS load-bearing, and not
+   inert either: `container-type` applies containment and makes the element a containing block for
+   fixed descendants. Checked before removing — this sheet declares no `position: fixed`, and
+   todo.css's remaining query is answered by `.tdb-jnbody`, its own container, in the takeover
+   that is portalled clear of this column. The comment described a two-column rule that no longer
+   exists at all. */
 
 
 .tdk-t {
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 25px; font-weight: 600; color: #2a1a13; margin: 0; line-height: 1.15;
+  font-size: 25px; font-weight: 600; color: var(--ink); margin: 0; line-height: 1.15;
 }
-.tdk-rec { font-size: 12.5px; color: #8a7a6d; margin-top: 5px; }
+.tdk-rec { font-size: 12.5px; color: var(--muted); margin-top: 5px; }
 
 /* the timeline — quiet, and only when there is history to show */
 /* ⚠️ §3.5 — THREE TRACKS: DATE · RING · EVENT (ref v14 `.tl-row`). It was a flex row with a single
@@ -368,12 +394,12 @@
      rather than for the local ring the older figure was drawn around. */
   grid-template-columns: 60px 20px minmax(0, 1fr);
   gap: 0 11px; align-items: start;
-  font-size: 12.5px; color: #4d4238; padding: 0 0 15px;
+  font-size: 12.5px; color: var(--ink-2); padding: 0 0 15px;
 }
 .tdk-tl li:last-child { padding-bottom: 0; }
 .tdk-tlw {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 9px; letter-spacing: .08em; color: #a5988c; white-space: nowrap;
+  font-size: 9px; letter-spacing: .08em; color: var(--faint); white-space: nowrap;
   text-align: right; padding-top: 4px;
 }
 
@@ -394,17 +420,17 @@
 .tdk-tl li:not(:last-child) .tdk-tlm::after {
   content: "";
   position: absolute; left: 50%; transform: translateX(-50%);
-  top: 22px; bottom: -15px; width: 1.5px; background: #eee2d4; z-index: 1;
+  top: 22px; bottom: -15px; width: 1.5px; background: var(--hair); z-index: 1;
 }
 
 .tdk-flow { margin-top: 18px; }
 .tdk-fk {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: #8a7a6d; margin-bottom: 7px;
+  font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px;
 }
-.tdk-check { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #2a1a13; cursor: pointer; }
-.tdk-note { font-size: 13px; color: #6b6055; line-height: 1.5; }
-.tdk-detail { font-size: 13.5px; color: #2a1a13; line-height: 1.5; margin: 0 0 10px; }
+.tdk-check { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink); cursor: pointer; }
+.tdk-note { font-size: 13px; color: var(--sub); line-height: 1.5; }
+.tdk-detail { font-size: 13.5px; color: var(--ink); line-height: 1.5; margin: 0 0 10px; }
 
 /* ── the foot ────────────────────────────────────────────────────────── */
 /* ⚠️ THE FOOT BAND SITS INSIDE THE 6px INSET, like the band above it — `margin: 0 6px 6px` and the
@@ -418,8 +444,8 @@
   display: flex; align-items: center; gap: 12px;
   margin: 0 6px 6px;
   padding: 11px 22px;
-  border-top: 1px solid #eee4d7;
-  background: #fbf6ee;
+  border-top: 1px solid var(--hair);
+  background: var(--paper);
   border-radius: 0 0 8px 8px;
 }
 /* ⚠️ THE HINT TAKES THE SPACE AND GIVES IT UP FIRST. `margin-right: auto` puts the buttons hard
@@ -428,15 +454,15 @@
 .tdk-footgrow { flex: 1; }
 .tdk-vb {
   display: inline-flex; align-items: center; gap: 7px; cursor: pointer; flex: none;
-  font: inherit; font-size: 12.5px; color: #6a5a50;
-  background: #fff; border: 1px solid #e2d8c8; border-radius: 9px; padding: 9px 13px; white-space: nowrap;
+  font: inherit; font-size: 12.5px; color: var(--sub);
+  background: var(--white); border: 1px solid var(--line); border-radius: 9px; padding: 9px 13px; white-space: nowrap;
 }
-.tdk-vb:hover:not(:disabled) { border-color: #d8c8b8; color: #241209; }
-.tdk-vb svg { color: #a89684; }
+.tdk-vb:hover:not(:disabled) { border-color: var(--line); color: var(--ink); }
+.tdk-vb svg { color: var(--muted); }
 /* the house disabled grammar — paper, hairline, faint, not-allowed; never opacity alone */
-.tdk-vb:disabled { background: var(--shell-card, #fdfaf5); border-color: #e8dfd1; color: #b3a394; cursor: not-allowed; }
-.tdk-vb:disabled svg { color: #cbbcae; }
-.tdk-vbsep { width: 1px; height: 22px; background: #e8ddd0; margin: 0 3px; flex: none; }
+.tdk-vb:disabled { background: var(--shell-card); border-color: var(--line); color: var(--faint); cursor: not-allowed; }
+.tdk-vb:disabled svg { color: var(--faint); }
+.tdk-vbsep { width: 1px; height: 22px; background: var(--desk); margin: 0 3px; flex: none; }
 /* the consequence, quiet and italic — it states, it does not instruct */
 /* ⚠️ IT WRAPS, IT DOES NOT ELLIPSE. `white-space: nowrap` plus `text-overflow: ellipsis` cut this
    sentence mid-word — measured on the note pane as "Nothing is sent from here — this records…",
@@ -444,7 +470,7 @@
    two lines, and the row's own note already says the buttons must never wrap; only the hint gives.
    `min-width: 0` stays so it is still the thing that yields first. */
 .tdk-foothint {
-  font-size: 11.5px; color: #a89684; font-style: italic;
+  font-size: 11.5px; color: var(--muted); font-style: italic;
   line-height: 1.4;
   min-width: 0; margin-right: auto; padding-right: 12px;
   overflow-wrap: anywhere;
@@ -467,26 +493,26 @@
    reading the token rather than restating a near-black hex. */
 .tdk-prime {
   font: inherit; font-size: 13px; font-weight: 500; height: 38px; padding: 0 20px; border-radius: 9px;
-  background: var(--ink-strong, #241209); border: 1px solid var(--ink-strong, #241209);
-  color: var(--paper, #fdfaf5); cursor: pointer;
+  background: var(--ink); border: 1px solid var(--ink);
+  color: var(--paper); cursor: pointer;
   display: inline-flex; align-items: center; gap: 7px; flex: none; white-space: nowrap;
 }
-.tdk-prime:hover:not(:disabled) { background: #3a1c14; border-color: #3a1c14; }
+.tdk-prime:hover:not(:disabled) { background: var(--ink); border-color: var(--ink); }
 /* the house disabled grammar — paper, hairline, faint, not-allowed; never opacity */
 .tdk-prime:disabled {
-  background: var(--shell-card, #fdfaf5); border-color: #e8dfd1; color: #b3a394; cursor: not-allowed;
+  background: var(--shell-card); border-color: var(--line); color: var(--faint); cursor: not-allowed;
 }
 
 .tdk-quiet {
-  background: transparent; border: 1px solid #e2d8c8; border-radius: 8px; color: #6b6055;
+  background: transparent; border: 1px solid var(--line); border-radius: 8px; color: var(--sub);
   height: 32px; width: 32px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
 }
-.tdk-quiet:hover { background: #f4f2ef; color: #2a1a13; }
+.tdk-quiet:hover { background: var(--paper); color: var(--ink); }
 
 .tdk-next {
   margin-left: auto;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8.5px; letter-spacing: .13em; text-transform: uppercase; color: #a5988c;
+  font-size: 8.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--faint);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40%;
 }
 
@@ -520,7 +546,7 @@
   font-size: 9.5px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: #a89684;
+  color: var(--muted);
 }
 
 .tdk-headgrow { flex: 1; }
@@ -534,16 +560,16 @@
   width: 28px;
   height: 28px;
   border-radius: 9px;
-  border: 1px solid #ddd2c4;
-  background: #fff;
-  color: #7c3a2a;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--burg);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 
-.tdk-nav:hover:not(:disabled) { background: #f5e2da; border-color: #d8a89a; }
+.tdk-nav:hover:not(:disabled) { background: var(--pink); border-color: var(--pink-b); }
 .tdk-nav:disabled { opacity: 0.35; cursor: default; }
 
 .tdk-hoff { display: flex; gap: 9px; flex-wrap: wrap; }
@@ -558,17 +584,17 @@
   height: 34px;
   padding: 0 14px;
   border-radius: 9px;
-  border: 1px solid #d8a89a;
-  background: #f5e2da;
+  border: 1px solid var(--pink-b);
+  background: var(--pink);
   /* ink, not burgundy — see `.tdb-addb`'s note; scoped to this page, the token is app-wide */
-  color: #241209;
+  color: var(--ink);
   font-size: 12.5px;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
 }
 
-.tdk-hbtn.quiet { background: #fff; border-color: #ddd2c4; color: #4d4238; font-weight: 500; }
+.tdk-hbtn.quiet { background: var(--white); border-color: var(--line); color: var(--ink-2); font-weight: 500; }
 .tdk-hbtn.off { opacity: 0.4; cursor: default; }
 
 .tdk-subj {
@@ -576,8 +602,8 @@
   align-items: center;
   gap: 8px;
   margin-top: 11px;
-  background: #faf7f1;
-  border: 1px solid #ece0d2;
+  background: var(--paper);
+  border: 1px solid var(--line);
   border-radius: 9px;
   padding: 9px 11px;
 }
@@ -587,7 +613,7 @@
   min-width: 0;
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 11px;
-  color: #4d4238;
+  color: var(--ink-2);
   overflow-wrap: anywhere;
 }
 
@@ -595,30 +621,30 @@
   flex: none;
   border: 0;
   background: none;
-  color: #a89684;
+  color: var(--muted);
   cursor: pointer;
   padding: 2px;
   line-height: 0;
 }
 
-.tdk-copy:hover { color: #7c3a2a; }
+.tdk-copy:hover { color: var(--burg); }
 
 /* the one italic line, stating that the app is not the postbox */
 .tdk-hnote {
   margin: 10px 0 0;
   font-style: italic;
   font-size: 12px;
-  color: #8a7d6e;
+  color: var(--muted);
 }
 
-.tdk-sect { padding: 16px 2px; border-top: 1px solid #efe6da; }
+.tdk-sect { padding: 16px 2px; border-top: 1px solid var(--hair); }
 
 .tdk-sectk {
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 9.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #a89684;
+  color: var(--muted);
   font-weight: 500;
   margin: 0 0 9px;
 }
@@ -647,7 +673,7 @@
   font-size: 8.5px;
   letter-spacing: 0.11em;
   text-transform: uppercase;
-  color: #5a6e58;
+  color: var(--sageD);
   opacity: 0.8;
 }
 
@@ -655,12 +681,12 @@
   display: block;
   font-family: "Playfair Display", Georgia, serif;
   font-size: 16px;
-  color: #2b2118;
+  color: var(--ink);
   margin-top: 2px;
 }
 
 /* the pink band is the offer's — its labels take the burgundy family rather than the sage */
-.tdk-band.v-offer .tdk-fact .k { color: #9a6a56; }
+.tdk-band.v-offer .tdk-fact .k { color: var(--pink-i); }
 
 /* ══ TRACKING (journeys pack, Phase 2; ref todo-workspace-v14.html `.tstats` / `.chips` / `.prog`)
    ⚠️ THE SHAPE IS THE QUERY CENTRE'S `.qp-stats` — icon tile, Playfair figure, mono caption, one
@@ -677,44 +703,44 @@
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  border: 1px solid #ece0d2;
+  border: 1px solid var(--line);
   border-radius: 11px;
   overflow: hidden;
   margin-bottom: 16px;
 }
 
 .tdk-tstat { padding: 12px 14px; display: flex; align-items: center; gap: 11px; min-width: 0; }
-.tdk-tstat + .tdk-tstat { border-left: 1px solid #ece0d2; }
+.tdk-tstat + .tdk-tstat { border-left: 1px solid var(--line); }
 
 .tdk-tstat .ico {
   width: 30px; height: 30px; border-radius: 9px; flex: none;
-  background: #f6efe6; color: #7c3a2a;
+  background: var(--oat); color: var(--burg);
   display: flex; align-items: center; justify-content: center; font-size: 15px;
 }
 
 .tdk-tstat .big {
   display: block;
   font-family: "Playfair Display", Georgia, serif;
-  font-size: 19px; color: #2b2118; line-height: 1;
+  font-size: 19px; color: var(--ink); line-height: 1;
 }
 
 /* ⚠️ THE UNIT IS INTER BESIDE A PLAYFAIR FIGURE — two faces, which is why the derivation splits
    the value rather than handing the row one string. */
-.tdk-tstat .big .u { font-family: inherit; font-size: 12px; color: #8a7666; margin-left: 3px; }
+.tdk-tstat .big .u { font-family: inherit; font-size: 12px; color: var(--muted); margin-left: 3px; }
 
 .tdk-tstat .k {
   display: block;
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: #b3a496; margin-top: 4px;
+  font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); margin-top: 4px;
 }
 
 /* the entry: the event in 600, the channel appended in regular */
 .tdk-tle { display: block; min-width: 0; }
 .tdk-tle b { font-weight: 600; }
-.tdk-tle .via { font-weight: 400; color: #8a7666; }
+.tdk-tle .via { font-weight: 400; color: var(--muted); }
 
 /* anything the agent said, in their own words */
-.tdk-tlq { display: block; font-size: 11.5px; color: #8a7666; margin-top: 4px; font-style: italic; }
+.tdk-tlq { display: block; font-size: 11.5px; color: var(--muted); margin-top: 4px; font-style: italic; }
 
 /* (⚠️ THE MATERIAL CHIPS ARE CUT — `Activity` carries no package or version reference, so
    structured chips are possible on ZERO entries, and faking them from the free-text `details`
@@ -725,13 +751,13 @@
    agent's stated window, burgundy once past it, which is the rule the rail's numeral follows so
    the two surfaces cannot disagree about "late". */
 .tdk-prog { display: block; margin-top: 8px; }
-.tdk-prog .bar { display: block; height: 4px; border-radius: 3px; background: #f0e8dd; position: relative; overflow: hidden; }
-.tdk-prog .fill { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: #8a9e88; }
-.tdk-prog .fill.over { background: #7c3a2a; }
+.tdk-prog .bar { display: block; height: 4px; border-radius: 3px; background: var(--hairline); position: relative; overflow: hidden; }
+.tdk-prog .fill { position: absolute; inset: 0 auto 0 0; border-radius: 3px; background: var(--sage); }
+.tdk-prog .fill.over { background: var(--burg); }
 .tdk-prog .ends { display: flex; justify-content: space-between; margin-top: 5px; }
 .tdk-prog .ends span {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #b8a898;
+  font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint);
 }
 
 /* ⚠️ THE TAG ROW SITS INSIDE THE CARD (pane faults, Phase 5). It had `padding: 10px 0 2px` and is a
@@ -748,7 +774,7 @@
 /* ⚠️ WHITE GROUND ON THE PARCHMENT CARD — the row is a filed item, and the card is the file. */
 .tdk-mats { display: flex; flex-direction: column; gap: 8px; }
 .tdk-mat { display: flex; align-items: center; gap: 11px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
-.tdk-matic { width: 28px; height: 28px; flex: none; border-radius: 8px; background: #f6efe6; color: var(--burg); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+.tdk-matic { width: 28px; height: 28px; flex: none; border-radius: 8px; background: var(--oat); color: var(--burg); display: flex; align-items: center; justify-content: center; font-size: 13px; }
 .tdk-mattx { flex: 1; min-width: 0; font-size: 13px; color: var(--ink); }
 .tdk-mattx b { display: block; font-weight: 500; }
 .tdk-mattx span { display: block; font-family: var(--f12-mono); font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); margin-top: 3px; }
@@ -775,11 +801,11 @@
    rather than a thing that happened. */
 .tdk-recnote { font-size: 12px; color: var(--muted); line-height: 1.55; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--hairline); }
 
-.tdk-band.v-offer { background: linear-gradient(135deg, #f3e0d6 0%, #eed4c8 100%); border-bottom-color: rgba(124, 58, 42, 0.14); }
+.tdk-band.v-offer { background: linear-gradient(135deg, var(--pink-t) 0%, var(--pink-h) 100%); border-bottom-color: rgba(124, 58, 42, 0.14); }
 
-.tdk-band.v-offer .tdk-sub { color: #8a6558; }
+.tdk-band.v-offer .tdk-sub { color: var(--pink-i); }
 
-.tdk-band.v-offer .tdk-deed { color: #3a1c14; }
+.tdk-band.v-offer .tdk-deed { color: var(--ink); }
 
 
 /* ── §2's TILES ───────────────────────────────────────────────────────────────────────────────
@@ -794,7 +820,7 @@
      counts, not a media query and not a React prop. */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  background: #ffffff;
+  background: var(--white);
   padding: 0;
 }
 
@@ -802,7 +828,7 @@
   flex: 1;
   min-width: 0;
   padding: 0 16px;
-  border-right: 1px solid rgba(124, 58, 42, 0.13);
+  border-right: 1px solid var(--tdk-rimline);
 }
 
 .tdk-tile:first-child { padding-left: 0; }
@@ -815,7 +841,7 @@
   font-size: 8.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #9c8878;
+  color: var(--muted);
   margin-bottom: 3px;
 }
 
@@ -824,7 +850,7 @@
   font-family: "Playfair Display", Georgia, serif;
   font-size: 16px;
   font-weight: 500;
-  color: #2b2118;
+  color: var(--ink);
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
@@ -833,7 +859,7 @@
   font-family: "Source Sans Pro", system-ui, sans-serif;
   font-size: 10.5px;
   font-weight: 300;
-  color: #8a7a6c;
+  color: var(--muted);
   margin-left: 4px;
 }
 
@@ -844,7 +870,7 @@
   font-size: 10px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #c0b0a0;
+  color: var(--faint);
 }
 
 
@@ -878,7 +904,7 @@
    the border is `--line` and the radius `--r-lg` now, the same pair the outer card and `.f12-card`
    share, so a retone of the Query Centre lands here too instead of leaving one card behind. */
 .tdk-story--card {
-  background: #fdfbf7;
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   padding: 14px 16px;
@@ -897,13 +923,13 @@
   font-size: 8.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #9c8878;
+  color: var(--muted);
 }
 
 .tdk-storyn {
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 9px;
-  color: #c0b0a0;
+  color: var(--faint);
 }
 
 .tdk-storylink {
@@ -915,7 +941,7 @@
   font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #7c3a2a;
+  color: var(--burg);
   cursor: pointer;
 }
 
@@ -947,15 +973,15 @@
   font-family: "Source Sans Pro", system-ui, sans-serif;
   font-size: 10.5px;
   font-weight: 300;
-  color: #8a7a6c;
+  color: var(--muted);
   margin-top: 2px;
   line-height: 1.35;
 }
 
 /* D4 — the timeline card's head and foot sit on --rimline, per the contract */
-.tdk-storyhd { border-bottom: 1px solid rgba(124, 58, 42, 0.13); padding: 12px 17px; margin: 0; }
+.tdk-storyhd { border-bottom: 1px solid var(--tdk-rimline); padding: 12px 17px; margin: 0; }
 
-.tdk-storyfoot { border-top: 1px solid rgba(124, 58, 42, 0.13); padding: 11px 17px; }
+.tdk-storyfoot { border-top: 1px solid var(--tdk-rimline); padding: 11px 17px; }
 
 .tdk-story--card { background: var(--white); border: 0; border-radius: 0; padding: 0; }
 
@@ -974,7 +1000,7 @@
   font-size: 33px;
   font-weight: 500;
   line-height: 1;
-  color: #3a1c14;
+  color: var(--ink);
 }
 
 .tdk-bandfig .u {
@@ -984,10 +1010,10 @@
   letter-spacing: 0.13em;
   text-transform: uppercase;
   margin-top: 4px;
-  color: #9c8878;
+  color: var(--muted);
 }
 
 /* the housekeeping and yours bands take their own figure ink, as the deed does */
-.tdk-band.g-housekeeping .tdk-bandfig .n { color: #2e3a2c; }
+.tdk-band.g-housekeeping .tdk-bandfig .n { color: var(--sageD); }
 
-.tdk-band.g-yours .tdk-bandfig .n { color: #3a2c14; }
+.tdk-band.g-yours .tdk-bandfig .n { color: var(--gold-i); }

@@ -26,7 +26,15 @@ const here = __dirname;
 const css = readFileSync(join(here, "tasksLayout.css"), "utf8");
 const pageCss = readFileSync(join(here, "todo.css"), "utf8");
 const calCss = readFileSync(join(here, "todoCalendar.css"), "utf8");
-const splitCss = readFileSync(join(here, "todoSplit.css"), "utf8");
+/* ⚠️ COMMENTS OUT BEFORE ANYTHING IS ASSERTED. Two cases below forbid a token by name, and this
+   sheet's prose NAMES what it retired — `flex: 0 1 340px` and `.tpl-head` are both quoted in the
+   comments that explain why they are gone, and both produced a red on a correct file. The failure
+   also runs the other way: a `toContain` satisfied by a comment is a lock passing over code that
+   no longer does the thing. Strip first, assert second. */
+const rawSplitCss = readFileSync(join(here, "todoSplit.css"), "utf8");
+const decomment = (src: string): string =>
+  src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+const splitCss = decomment(rawSplitCss);
 const layout = readFileSync(join(here, "TasksPageLayout.tsx"), "utf8");
 const board = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const cal = readFileSync(join(here, "TodoCalendarPage.tsx"), "utf8");
@@ -606,17 +614,24 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     /* ⚠️ RE-POINTED (contract run, D7): the rail was a fixed token — 520, then 372 — and both stated
        a width the browser could not argue with. It is a RANGE now, so the list gives when the shell
        is tight and stops hoarding when it is generous. */
-    /* ⚠️ RE-POINTED AGAIN (contract run): the split is a WRAPPING ROW, not a grid. The brief's
-       `minmax(260px, 340px) minmax(0, 1fr)` gave a zero-width pane at 390 — the first track takes
-       340 of a ~346 container and the second resolves to nothing, and a grid cannot wrap. The same
-       two numbers as flex bases do. */
-    expect(split).toContain("flex-wrap: wrap");
-    expect(split, "a grid track is back").not.toContain("grid-template-columns");
+    /* ⚠️ RE-POINTED AGAIN, BACK TO A GRID (Query Centre match) — and the wrapping row it replaces
+       is what this very case exists to forbid. In a WRAPPING row the line's cross size is the
+       tallest item's own content height, so both panes measured 1331px inside a 669px split, the
+       page's scroll row took the overflow, and the frame the title calls unscrollable scrolled.
+       The lock could not see it: `flex-wrap: wrap` and `min-height: 0` were both present and both
+       true, and the fault was in what wrap does to the CROSS axis.
+
+       ⚠️ THE 390px ZERO-WIDTH PANE THE WRAP WAS ADDED FOR IS FIXED IN THE TRACK, NOT THE DISPLAY.
+       `minmax(260px, 340px)` starved it because 260 is a floor the grid honours before
+       `minmax(0, 1fr)` gets anything; `min(340px, 34%)` has no floor, so the pane always keeps two
+       thirds of the measure. Which is why the range is asserted as a proportion below. */
+    expect(split).toContain("grid-template-columns: min(340px, 34%) minmax(0, 1fr)");
+    expect(split, "the wrapping row is back — the panes will be sized by their content").not.toContain("flex-wrap");
     /* ⚠️ THE VERTICAL CLAIM SURVIVES THE MECHANISM CHANGE. `grid-template-rows: minmax(0, 1fr)` was
        how a GRID refused to be sized by its content; a flex column refuses with `min-height: 0`,
        which the split already declares. Same law, stated in the language the container now speaks. */
     expect(split).toContain("min-height: 0");
-    expect(split, "a grid row track is back").not.toContain("grid-template-rows");
+    expect(split, "the row track stopped refusing to be sized by its content").toContain("grid-template-rows: minmax(0, 1fr)");
     /* the value, stated once and read once — the rail is a fixed measure, the workspace is what
        is left. 520 since the visual rebuild: the row gained a 68px bucket pill and a 104px figure
        column, and v9 draws the pane at 520. (It was 440, itself widened from the earlier ref's
@@ -626,9 +641,7 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        instruction is a RANGE, so there is no `--tdw-rail-w` left to pin. */
     expect(split, "the rail is a fixed token again").not.toContain("--tdw-rail-w:");
     /* the two bases live on the CHILDREN now — the row itself only says how it wraps */
-    const css = readFileSync(join(here, "todoSplit.css"), "utf8");
-    expect(css).toContain("flex: 0 1 340px");
-    expect(css).toContain("min-width: 260px");
+    expect(splitCss, "a flex basis is back on a child of a grid").not.toContain("flex: 0 1 340px");
     /* ⚠️ 520 → 372 (frame run): the list was the fixed track at 520 while the PANE took the
        leftovers — 350px at 1440 for the surface being worked on. 372 is the design's own row
        width; the no-ellipsis assertion in paneFrame.measure.ts is what keeps it honest. */
@@ -991,7 +1004,11 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
     const todoCss = readFileSync(join(here, "todo.css"), "utf8");
     const dockCss = readFileSync(join(here, "todoDock.css"), "utf8");
     expect(todoCss).toContain("color: #241209");
-    expect(dockCss).toContain("color: #241209");
+    /* ⚠️ THE PANE STATES IT AS A TOKEN (Query Centre match) — every literal in `todoDock.css` is
+       gone. The claim is the same: this page's pink buttons carry INK, not burgundy. `todo.css` is
+       out of that pass's two files and still holds the hex. */
+    expect(dockCss).toContain("color: var(--ink)");
+    expect(dockCss, "a literal came back to the pane sheet").not.toContain("#241209");
     /* the fill is still the token, so a future retone of the app's pink still reaches this page */
     expect(todoCss).toContain("background: var(--pink, #f5e2da)");
     /* and index.css is not touched by this page's decision */

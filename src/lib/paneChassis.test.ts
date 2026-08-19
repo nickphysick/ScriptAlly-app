@@ -86,7 +86,12 @@ describe("the rim is a real clipping container", () => {
   it("declares overflow hidden and the burgundy hairline, and is not a pseudo-element", () => {
     const rim = dockCss.slice(dockCss.indexOf(".tdk-rim {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-rim {")));
     expect(rim).toContain("overflow: hidden");
-    expect(rim).toContain("rgba(124, 58, 42, 0.28)");
+    /* ⚠️ THE COLOUR IS A TOKEN NOW, AND THE CLAIM IS THE SAME ONE IN TWO PARTS — the rim reads a
+       name, and the name still carries the burgundy at that alpha. Asserting only the `var()`
+       would pass over a token repointed to anything at all; asserting only the rgba would go red
+       the moment the value moved to where every other colour in this sheet already lives. */
+    expect(rim).toContain("var(--tdk-rim)");
+    expect(dockCss).toContain("--tdk-rim: rgba(124, 58, 42, 0.28)");
     expect(rim).toContain("border-radius: 9px");
     expect(dockCss, "an overlay border is back — it spills the band's fill").not.toContain(".tdk-w::before");
     expect(dockCss).not.toContain(".tdk-rim::before");
@@ -128,10 +133,17 @@ describe("the band's three group tints", () => {
       return dockCss.slice(i, dockCss.indexOf("}", i));
     };
     const urgent = grab("urgent"), hk = grab("housekeeping"), yours = grab("yours");
-    expect(urgent).toContain("#f3e0d6");
-    expect(hk).toContain("#d7ddd5");
-    expect(yours).toContain("#f7f0e2");
+    /* ⚠️ THE STOPS ARE TOKENS NOW (Query Centre match). The three literals asserted here were
+       sampled off a mockup; the housekeeping pair in particular was a near-miss of `--sage-band`,
+       which is the exact pair the Query Centre's own panel header paints. The claim is untouched —
+       three groups, three distinct pairs, none borrowing another's — and it is a stronger claim
+       over names, because two tokens that drift to the same value still read as two decisions. */
+    expect(urgent).toContain("var(--pink)");
+    expect(hk).toContain("var(--sage-band)");
+    expect(yours).toContain("var(--gold-t)");
     expect(new Set([urgent, hk, yours]).size).toBe(3);
+    for (const [name, r] of [["urgent", urgent], ["housekeeping", hk], ["yours", yours]] as const)
+      expect(r, `${name} went back to a literal`).not.toMatch(/#[0-9a-fA-F]{3,8}/);
   });
 
   it("⚠️ ORDER IS THE MECHANISM — the groups sit after `.v-default`, the offer after them", () => {
@@ -160,6 +172,12 @@ describe("the journey's grid", () => {
        an unstripped read matches the prose that documents the retirement. That is the source-lock
        fault this codebase has paid for seven times in one session. */
     expect(dockCss, "a container query is back in the pane").not.toContain("@container");
+    /* ⚠️ AND NO CONTAINER CONTEXT EITHER. `@container` alone does not cover it: `.tdk-w` kept
+       `container-type: inline-size` for a whole pass after the last query that read it was
+       deleted, so the pane declared a containment context, and a containing block for fixed
+       descendants, in service of nothing. A dead declaration that looks structural is the harder
+       half of this to notice, because removing the queries reads as finishing the job. */
+    expect(dockCss, "a container context is back in the pane").not.toContain("container-type");
     expect(dockCss, "the retired jgrid is back").not.toContain("tdk-jgrid");
   });
 });

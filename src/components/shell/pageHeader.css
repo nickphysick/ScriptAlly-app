@@ -39,6 +39,12 @@
  */
 :root {
   --content-gutter: 80px;
+  /* ⚠️ THE TIGHTER GUTTER THE TWO WORKSPACE PAGES SHARE — one number, read by both. Query Centre
+     and To-do are master–detail surfaces whose panes scroll internally; at the shell's 80 they
+     lose 90px of measure to margin they have no use for. It is 35 and not 50 because the scrollbar
+     gutter is already paying 15. Stated once here rather than as a literal in each page's own
+     sheet, so the two cannot drift apart the day one of them is retuned. */
+  --content-gutter-tight: 35px;
   --header-inset: 120px;
   /* ⚠️ THE AIR UNDER THE HAIRLINE, AND IT IS A PROPERTY OF THE BOUNDARY — not of the toolbar.
      Content began flush against the hairline. The gap therefore sits above whatever comes FIRST

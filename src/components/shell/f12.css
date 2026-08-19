@@ -1648,7 +1648,7 @@
  * ⚠️ AND IT IS 35, NOT 50, BECAUSE THE SCROLLBAR GUTTER IS ALREADY PAYING 15. Writing 50 here would
  * land the content at 65 and look like an arithmetic slip six months from now.
  */
-.qc-wpg .wpg-scroll { padding-inline: 35px; }
+.qc-wpg .wpg-scroll { padding-inline: var(--content-gutter-tight); }
 
 /* ── §1 · THE TWO CONTROL CELLS ───────────────────────────────────────────────────────────────
    Row 1 of the split. Left cell = what the list IS (count, sub-count) and the two controls that

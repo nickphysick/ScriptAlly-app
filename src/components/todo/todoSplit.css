@@ -43,24 +43,27 @@
 /* ⚠️ THE CONTAINER FOR THE SPLIT'S OWN QUERY, on its parent — a grid cannot query itself. Inline-
    size containment only; the column's height model is untouched. */
 .tdw-split {
-  /* ⚠️ THE LIST IS A RANGE, NOT A NUMBER (contract run). It was 520 fixed, then 372 fixed; both
-     stated a width the browser could not argue with. `minmax(260px, 340px)` lets it give when the
-     shell is tight and stops it hoarding when the shell is generous — the pane takes everything
-     else through `minmax(0, 1fr)`. The rows carry a pill, a deed, an agent line and a figure, and
-     the no-ellipsis assertion is what proves they still fit at 260. */
+  /* ⚠️ THE LIST IS A PROPORTION, NOT A NUMBER (contract run; corrected below). It was 520 fixed,
+     then 372 fixed, then a 260–340 range; all three stated a width the browser could not argue
+     with. The rows carry a pill, a deed, an agent line and a figure, and the no-ellipsis assertion
+     is what proves they still fit when the measure is tight. */
   --tdw-hair: var(--tdb-panel-hair);
-  /* ⚠️ A WRAPPING FLEX ROW, NOT THE GRID THE BRIEF STATED — and this is a measured correction to
-     the instruction, not a liberty. `grid-template-columns: minmax(260px, 340px) minmax(0, 1fr)`
-     is right wherever both tracks fit; at 390 the container is ~346, the first track takes 340,
-     and the second resolves to ZERO — measured, pane w=0, the whole work surface gone. A grid
-     cannot wrap, so with no breakpoint left there is nothing to catch it.
+  /* ⚠️ THE SAME MECHANISM AS THE QUERY CENTRE, WHICH IS A GRID — and the wrapping flex row that
+     stood here was measured to break the one thing this page is for. In a WRAPPING row the line's
+     cross size is the tallest item's own content height, not the container's: `.tdw-rail` and
+     `.tdw-work` measured 1331px inside a 669px split, `.wpg-scroll` took the overflow, and the
+     page scrolled as one block with the header travelling with it. `align-content: stretch` cannot
+     save it — there is no leftover space to distribute when the content already exceeds the line.
 
-     The same two numbers as a flex basis DO wrap: the list asks for 340 and refuses to go under
-     260, the pane asks for 420, and when both cannot fit the pane takes its own full-width line.
-     Identical at desktop; survivable at 390. Flex-wrap decides the stacking, nothing else. */
-  display: flex;
-  flex-wrap: wrap;
-  align-content: stretch;
+     ⚠️ AND THE 390px FAULT THE WRAP WAS INTRODUCED TO FIX IS FIXED IN THE TRACK INSTEAD. The old
+     `minmax(260px, 340px)` starved the pane to ZERO at 390 because 260 is a floor the grid must
+     honour before `minmax(0, 1fr)` gets anything. `min(340px, 34%)` has no floor to honour: it is
+     340 wherever 340 is under a third of the measure and a proportion of it everywhere else, so
+     the pane always keeps two thirds. Fluid by construction, and no breakpoint decides it. */
+  display: grid;
+  grid-template-columns: min(340px, 34%) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
   gap: 18px;
   /* ⚠️ ONE RHYTHM ON ALL FOUR SIDES, NOW THE BAR IS NOT ABOVE IT. This was `0 22px 20px` — no top
      at all, because the command bar's own `margin-bottom` was standing in for it, and 20 at the
@@ -371,8 +374,11 @@
    Recoverable at 23d9310. */
 
 
-/* the list: asks for 340, never gives below 260 */
-.tdw-split > .tdw-rail { flex: 0 1 340px; min-width: 260px; }
-
-/* the workspace: asks for 420 and takes everything spare; wraps to its own line when it cannot */
-.tdw-split > .tdw-work { flex: 1 1 420px; min-width: 0; }
+/* ⚠️ THE WIDTHS ARE THE GRID'S TRACKS, AND THESE TWO CARRY NONE. They held `flex: 0 1 340px` and
+   `flex: 1 1 420px` while the split was a wrapping row; on a grid item a flex basis applies to
+   nothing at all, so leaving them would have been two numbers that look load-bearing and are not
+   — the same trap as the `.tpl-head` rule the browser was discarding. `min-width: 0` stays on
+   both, because a grid item's automatic minimum is still its content: without it a long agent
+   name would push its own track wider than the track says. */
+.tdw-split > .tdw-rail { min-width: 0; }
+.tdw-split > .tdw-work { min-width: 0; }

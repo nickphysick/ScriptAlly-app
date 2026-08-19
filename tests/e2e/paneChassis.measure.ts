@@ -161,16 +161,42 @@ test("pane chassis", async ({ page }) => {
         "corners=" + JSON.stringify(m.corners) + " gaps(top,left,right)=" + m.flush);
     /* ⚠️ THE GROUP'S OWN TWO STOPS, not "a gradient" — the weak form passed on the pre-change build
        because the band already had one. §2's table, per group. */
-    const STOPS: Record<string, [string, string]> = {
-      urgent:       ["rgb(243, 224, 214)", "rgb(238, 215, 202)"],
-      housekeeping: ["rgb(215, 221, 213)", "rgb(213, 219, 211)"],
-      yours:        ["rgb(247, 240, 226)", "rgb(242, 233, 214)"],
-    };
+    /* ⚠️ THE EXPECTATION IS DERIVED FROM THE TOKENS, NOT RESTATED AS HEX (Query Centre match).
+       These three pairs used to be six literals copied out of the stylesheet, which is a lock
+       asserting a file against itself: it went red the moment the bands stopped being literals,
+       and it would have gone GREEN for a band repointed at the wrong token so long as the value
+       happened to match. Reading the token the band claims to read, and checking the band paints
+       it, is the same shape as the reconciliation invariants — two derivations against each other,
+       never against a number typed by hand. */
+    const tokenStops = await page.evaluate(() => {
+      /* ⚠️ READ FROM AN ELEMENT INSIDE THE THEME SCOPE, NOT `documentElement`. These tokens are
+         defined on `.t-f12`, which is a DESCENDANT of the root, so `getComputedStyle(root)` returns
+         empty for every one of them — the first form of this probe reported UNRESOLVED for four
+         tokens the page was demonstrably painting. */
+      const host = document.querySelector(".tdk-band") ?? document.querySelector(".tdk")
+        ?? document.documentElement;
+      const cs = getComputedStyle(host);
+      const rgb = (name: string) => {
+        const v = cs.getPropertyValue(name).trim();
+        const m = /^#?([0-9a-f]{6})$/i.exec(v);
+        if (!m) return "UNRESOLVED:" + name;
+        const n = parseInt(m[1], 16);
+        return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+      };
+      return {
+        urgent:       [rgb("--pink"), rgb("--pink-h")],
+        housekeeping: [rgb("--sage-band"), rgb("--sage-band-2")],
+        yours:        [rgb("--gold-t"), rgb("--gold-b")],
+      } as Record<string, [string, string]>;
+    });
+    const STOPS = tokenStops;
     const GROUP_OF: Record<string, string> = {
       close: "housekeeping", bulk: "housekeeping", note: "yours", send: "urgent", decide: "urgent",
     };
     const grp = GROUP_OF[j.key];
     const stops = STOPS[grp];
+    add(P(7, `${grp}'s two tokens both resolve`),
+        stops.every((c) => c.startsWith("rgb(")), stops.join(" "));
     /* ⚠️ THE OFFER KEEPS ITS OWN PAPER — a celebration, not a group — so `decide` is exempted from
        the stop check and asserted only to carry a gradient of its own. */
     if (j.key === "decide") {

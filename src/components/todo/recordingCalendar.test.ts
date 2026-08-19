@@ -43,7 +43,12 @@ describe("⚠️ A BLACK BUTTON ALWAYS MEANS 'THIS ADVANCES' — one grammar, bo
        bar's copy, which is retired with the button: the deed belongs on the object it acts on. The
        grammar this case protects moved with it rather than being dropped. */
     const prim = rule(dockCss, ".tdk-prime {");
-    expect(prim).toContain("background: var(--ink-strong");
+    /* ⚠️ `--ink-strong` IS DEFINED NOWHERE IN `src/`, so `var(--ink-strong, #241209)` was the hex
+       doing the whole job and the token name was decoration. Four other sheets still read it
+       (todo.css, forms.css, paneJourney.css, paneSweep.css) and are out of this pass's two files;
+       this one now reads `--ink`, which resolves. The GRAMMAR the case protects — ink fill,
+       parchment text — is what is asserted, not which name carries the ink. */
+    expect(prim).toContain("background: var(--ink)");
     expect(prim).toContain("color: var(--paper");
     /* ⚠️ THE FILL AND THE TEXT MOVE TOGETHER OR NOT AT ALL. The first pass changed only the fill and
        left `color: #241209` — ink on ink, an invisible label, and a rule that still parsed. */

@@ -1236,7 +1236,12 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
        this lock that never stopped being true. */
     const rimRule = dockCssRule(".tdk-rim {");
     expect(rimRule, "the rim is not a real clipping container").toContain("overflow: hidden");
-    expect(rimRule).toContain("rgba(124, 58, 42, 0.28)");
+    /* ⚠️ THE COLOUR IS A TOKEN NOW, AND THE CLAIM IS THE SAME ONE IN TWO PARTS — the rim reads a
+       name, and the name still carries the burgundy at that alpha. Asserting only the `var()`
+       would pass over a token repointed to anything at all; asserting only the rgba would go red
+       the moment the value moved to where every other colour in this sheet already lives. */
+    expect(rimRule).toContain("var(--tdk-rim)");
+    expect(css).toContain("--tdk-rim: rgba(124, 58, 42, 0.28)");
     const band = dockCssRule(".tdk-band {");
     expect(band).toContain("margin: 0");
     expect(band).toContain("overflow: hidden");
