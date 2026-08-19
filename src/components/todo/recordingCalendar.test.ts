@@ -22,7 +22,10 @@ const here = __dirname;
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 const todoCss = strip(readFileSync(join(here, "todo.css"), "utf8"));
 const splitCss = strip(readFileSync(join(here, "todoSplit.css"), "utf8"));
-const dockCss = strip(readFileSync(join(here, "todoDock.css"), "utf8"));
+/* ⚠️ THE PANE IS THE PORT NOW — `todoDock.css` is deleted. The calendar's own claims are about
+   `todo.css`; the one case that read the pane's primary is re-pointed at `taskPane.css`, where the
+   mockup's `.b-primary` carries the same grammar (pink fill, ink text). */
+const dockCss = strip(readFileSync(join(here, "taskPane.css"), "utf8"));
 const calSrc = readFileSync(join(here, "RecordingCalendar.tsx"), "utf8");
 
 const rule = (css: string, sel: string): string => {
@@ -42,14 +45,19 @@ describe("⚠️ A BLACK BUTTON ALWAYS MEANS 'THIS ADVANCES' — one grammar, bo
     /* ⚠️ IT IS `.tdk-prime` NOW — the card FOOTER's primary. This read `.tdw-cbprim`, the command
        bar's copy, which is retired with the button: the deed belongs on the object it acts on. The
        grammar this case protects moved with it rather than being dropped. */
-    const prim = rule(dockCss, ".tdk-prime {");
+    /* ⚠️ RE-POINTED TO THE PORT'S `.b-primary`. The retired pane's `.tdk-prime` was an INK fill;
+       the mockup's primary is a pink fill with ink text, and the port takes the mockup. The claim
+       this case protects is the one that survives: the primary and its text move together, and the
+       label is never the same colour as the fill. */
+    const prim = rule(dockCss, ".tpn .b-primary {");
     /* ⚠️ `--ink-strong` IS DEFINED NOWHERE IN `src/`, so `var(--ink-strong, #241209)` was the hex
        doing the whole job and the token name was decoration. Four other sheets still read it
        (todo.css, forms.css, paneJourney.css, paneSweep.css) and are out of this pass's two files;
        this one now reads `--ink`, which resolves. The GRAMMAR the case protects — ink fill,
        parchment text — is what is asserted, not which name carries the ink. */
-    expect(prim).toContain("background: var(--ink)");
-    expect(prim).toContain("color: var(--paper");
+    expect(prim).toContain("background:var(--pink)");
+    expect(prim).toContain("color:var(--ink)");
+
     /* ⚠️ THE FILL AND THE TEXT MOVE TOGETHER OR NOT AT ALL. The first pass changed only the fill and
        left `color: #241209` — ink on ink, an invisible label, and a rule that still parsed. */
     expect(prim).not.toContain("color: #241209");

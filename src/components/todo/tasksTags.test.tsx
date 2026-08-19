@@ -20,7 +20,9 @@ import {
 const here = __dirname;
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const noteboard = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
-const dock = readFileSync(join(here, "TodoDock.tsx"), "utf8");
+/* ⚠️ RE-POINTED AT THE PORTED PANE — `TodoDock.tsx` is deleted. Where a case's subject was the
+   retired component's own markup it is retired with it; what survives is read here. */
+const dock = readFileSync(join(here, "TaskPane.tsx"), "utf8");
 const picker = readFileSync(join(here, "TagPicker.tsx"), "utf8");
 const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
 /* board-optimise P5: the tag CRUD moved to its OWN sheet — these locks follow it there, and the
@@ -69,9 +71,16 @@ describe("⚠️ ONE TagPicker, mounted in exactly three places", () => {
     const composer = listPage.slice(listPage.indexOf("tdb-nc-tags"), listPage.indexOf("tdb-nc-tags") + 700);
     expect(composer).toContain("<TagPicker");
     // 2. the dock's tagsSlot
-    expect(dock).toContain("tagsSlot?: (card: BoardCard) => React.ReactNode");
-    expect(dock).toContain("tagsSlot && card.userTaskId");
-    expect(listPage).toContain("tagsSlot={(c) => c.userTaskId ? (");
+    /* ⚠️ THE PANE'S TAG SLOT WENT WITH THE RETIRED PANE, and that is a REAL GAP rather than a
+       tidying: the ported pane has no tags surface because the mockup has none. Recorded here so
+       the third mount is not quietly forgotten — the composer and the ⋯ menu still carry it. */
+    expect(dock).not.toContain("tagsSlot.ReactNode");
+
+    /* ⚠️ TWO MOUNTS NOW, NOT THREE — the pane's tag surface went with the retired `TodoDock`,
+       because the mockup this pane is a port of has no tags anywhere. Stated as an absence rather
+       than quietly dropped from the count: the title still says three, and this is where a reader
+       finds out why it is two and what restoring the third would take. */
+    expect(listPage, "the pane grew a tags slot without the mockup gaining one").not.toContain("tagsSlot=");
     // 3. the ⋯ menu's Tags… sheet — on the board AND the noteboard, same component
     expect(listPage).toContain("MOUNT 3 of 3");
     expect(noteboard.match(/<TagPicker/g)?.length).toBe(1);

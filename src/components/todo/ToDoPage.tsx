@@ -78,7 +78,11 @@ import { sendSpecFor } from "../../lib/todoDock";
 import { isSlotFilled } from "../../lib/packageMetrics";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
-import { TodoDock, DockTimelineEvent } from "./TodoDock";
+import { TaskPane } from "./TaskPane";
+import { TaskPaneBody, SendBodyValues } from "./TaskPaneBody";
+import { buildJourney } from "../../lib/taskPaneJourney";
+import { liveFamily } from "../../lib/todoFamily";
+import { DockTimelineEvent } from "./timelineEvent";
 import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, liveBoardCards } from "../../lib/todoColumns";
 import { MenuLeaf, cardMenu } from "../../lib/todoMenu";
 import { TagPicker } from "./TagPicker";
@@ -701,6 +705,66 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * because you finished is a fact, and the two must not look the same.
    */
   const paneCard = docked.card ?? (allDockable.length > 0 ? heldCard.current : null);
+
+  /**
+   * ⚠️ THE PORTED PANE'S INPUTS, GATHERED ONCE. `TaskPane` renders the mockup's `DATA` shape and
+   * nothing else, so everything it needs is answered here from derivations the page already runs —
+   * `figureFor` for the wait, `cardMenu` for what a card offers, `rowPrimaryLabel` for the verb.
+   * None of it is re-derived: a second opinion here is how the pane and the rail come to state
+   * different waits, which this page has already been caught by once.
+   */
+  const [paneBody, setPaneBody] = React.useState<SendBodyValues>({ materials: [], when: "Today", also: "" });
+  /* the answers reset with the card — a half-filled form carried onto another task is answers
+     about the wrong query, which is the sweep's own rule applied to one card */
+  React.useEffect(() => { setPaneBody({ materials: [], when: "Today", also: "" }); }, [paneCard?.key]);
+
+  const paneFacts = React.useMemo(() => {
+    if (!paneCard) return [];
+    const q = paneCard.relatedRecordId ? queries.find((x) => x.id === paneCard.relatedRecordId) : undefined;
+    const ag = paneCard.agentId ? agents.find((a) => a.id === paneCard.agentId) : undefined;
+    const f = figureFor(paneCard);
+    const anchorMs = waitAnchorMs(cardBucket(paneCard), paneCard.taskType, {
+      dateSent: q?.dateSent,
+      partialRequestedDate: q?.partialRequestedDate,
+      fullRequestedDate: q?.fullRequestedDate,
+      partialSentDate: q?.partialSentDate,
+      fullSentDate: q?.fullSentDate,
+      lastNudgeSentDate: q?.lastNudgeSentDate,
+      lastReplyAt: isoOf(q?.responseReceivedAt),
+      statusMovedAt: isoOf(q?.lastStatusChange),
+      createdAt: paneCard.userTaskId ? userTasks.find((t) => t.id === paneCard.userTaskId)?.createdAt : undefined,
+    });
+    const longDay = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+    const out: { k: string; v: string }[] = [];
+    if (f.label && f.value) out.push({ k: f.label, v: `${f.value}${f.unit ? ` ${f.unit}` : ""}` });
+    if (Number.isFinite(anchorMs)) out.push({ k: anchorNoun(paneCard), v: longDay(anchorMs) });
+    const fwd = bandForward(paneCard, isoOf(q?.responseDeadline) ?? null, ag?.responseTimeWeeks ?? null,
+      (iso) => longDay(new Date(iso).getTime()), !!ag);
+    if (fwd) out.push({ k: fwd.k, v: fwd.v });
+    return out;
+  }, [paneCard, queries, agents, userTasks]);
+
+  /* ⚠️ THE VERBS ARE `cardMenu`'s, NOT A SECOND LIST. The band's Snooze and Dismiss are the same
+     entries the ⋯ menu offers, so a card that cannot be snoozed shows no Snooze in either place. */
+  const paneVerbs = React.useMemo(() => {
+    const none = { disabled: true, onPress: () => {} };
+    if (!paneCard) return { snooze: none, openQuery: none, dismiss: none };
+    const col = groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent");
+    const menu = cardMenu(paneCard, col);
+    const offers = (id: string) => menu.some((g) => g.entries.some((e) =>
+      e.kind === "leaf" ? e.id === id && !e.disabled : e.sub.some((x) => x.id === id && !x.disabled)));
+    return {
+      snooze: { disabled: !offers("snooze-1"), onPress: (anchor: HTMLElement) => { cbSnooze.current = anchor; setCbDial(true); } },
+      openQuery: { disabled: !paneCard.relatedRecordId, onPress: () => paneCard.relatedRecordId && onNavigate("queries", paneCard.relatedRecordId) },
+      dismiss: { disabled: !offers("dismiss-week"), onPress: () => forkStale(paneCard, "notNow") },
+    };
+  }, [paneCard]);
+
+  /* what the primary will write, in the mockup's own `Will record:` grammar */
+  const paneWill = paneCard
+    ? `${rowPrimaryLabel(paneCard, groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent"))} · ${paneBody.when.toLowerCase().replace("…", "")}`
+    : "";
+
   /* ⚠️ THE DOCKED QUERY'S OWN ACTIVITY ROWS — the AUTHORITATIVE subcollection, which is what the
      Query Centre reads. The global `activities` feed the dock used before is a best-effort
      projection twin, and where the twin was never written Tracking rendered "Nothing logged yet."
@@ -1513,146 +1577,51 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             </div>
             <div className="tdw-work">
               {paneCard ? (
-                <TodoDock
-                  queue={dockable}
-                  /* ⚠️ THE PAGE HANDS THE CARD OVER — see `TodoDockProps.card`. `paneCard` already
-                     resolves the hold (`docked.card ?? heldCard.current`); the dock used to redo
-                     that resolution against a list the held card may have left, and win. */
-                  card={paneCard}
-                  activeKey={paneCard.key}
-                  onSelect={(key) => setDockKey(key)}
-                  onClose={closeDock}
-                  timeline={dockTimeline}
-                  /* ⚠️ THE PAGE DERIVES THE MATERIALS because the package and its versions live
-                     here; the card states what it is handed. */
-                  materials={dockMaterials}
-                  /* ⚠️ THE SAME FIGURE THE ROW DRAWS — `figureFor`, not a second derivation. The
-                     pane and the rail cannot state different waits for one task. */
-                  figure={(c) => { const f = figureFor(c); return f.value ? { value: String(f.value), unit: f.unit ?? "" } : null; }}
-                  sentPreviously={(c) => {
-                    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-                    return formatQueryMaterials(q?.materialsWanted);
-                  }}
-                  /* §4.4 — the page derives it because `notifyGroups` needs the whole query set */
-                  holders={dockHolders}
-                  onPrimary={(c) => dockPrimary(c)}
-                  /* ⚠️ ONE DERIVATION FOR BOTH MOUNTS — the bar's Action and the card's footer read
-                     the SAME `rowPrimaryLabel`, so they cannot come to name the deed differently. */
-                  primaryLabel={(c) => rowPrimaryLabel(c, groupColumn(cardBucket(c) === "note" ? "yours" : "urgent"))}
-                  /* ⚠️ ITEM 9, PHASE 2 — THE `send` BUCKET ONLY. Handing this prop is what moves a
-                     bucket's journey into the pane; every other bucket has no `onCommitSend` and
-                     still opens the takeover through `onPrimary`. One bucket at a time, walked
-                     before the next, rather than six half-wired at once. */
-                  onCommitSend={paneJourneyKind(paneCard) ? commitFromPane : undefined}
-                  journeyKind={paneJourneyKind}
-                  journeyGaps={cardGaps}
-                  journeyRecord={journeyRecord}
-                  onLeaveUnrecorded={leaveMaterialsUnrecorded}
-                  recordSweep={recordSweepFor}
-                  onCommitRecordSweep={commitRecordSweep}
-                  onDismissRecordSweep={dismissRecordSweep}
-                  /* ⚠️ THE PAGE OWNS THE COHORT because it owns the agent list; the dock renders it
-                     and hands the answers back. The members are the GROUP's own, in the group's own
-                     order — not re-derived here, which would be a second answer to "who is in it". */
-                  sweep={dockSweep}
-                  onCommitSweep={commitSweep}
-                  /* ⚠️ THE SAME HANDLERS AND THE SAME GATING THE BAR USED — `offersLeaf` off
-                     `cardMenu`, so the footer's greying and the ⋯ menu's cannot disagree about what
-                     applies to a card. A rehoming, not a rebuild. */
-                  verbs={(c) => {
-                    const col = groupColumn(cardBucket(c) === "note" ? "yours" : "urgent");
-                    const menu = cardMenu(c, col);
-                    const offers = (id: string) => menu.some((g) => g.entries.some((e) =>
-                      e.kind === "leaf" ? e.id === id && !e.disabled : e.sub.some((x) => x.id === id && !x.disabled)));
-                    return {
-                      snooze: {
-                        disabled: !offers("snooze-1"),
-                        onPress: (anchor: HTMLElement) => { cbSnooze.current = anchor; setCbDial(true); },
-                      },
-                      openQuery: {
-                        disabled: !c.relatedRecordId,
-                        onPress: () => c.relatedRecordId && onNavigate("queries", c.relatedRecordId),
-                      },
-                      dismiss: {
-                        disabled: !offers("dismiss-week"),
-                        onPress: () => forkStale(c, "notNow"),
-                      },
-                    };
-                  }}
-                  /* ⚠️ ONE DERIVATION, TWO PRESENTATIONS — `dockHolders` already feeds §4.4's card
-                     section from `notifyGroups(...).pages`; the journey reads the SAME builder and
-                     adds the query-only group, because courtesy at offer stage reaches both. */
-                  journeyHolders={dockJourneyHolders}
-                  replyBy={(c) => {
-                    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-                    return q?.responseDeadline;
-                  }}
-                  ask={dockAsk}
-                  queryMethod={(c) => {
-                    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-                    return q?.sendMethod ? String(q.sendMethod) : undefined;
-                  }}
-                  tagsSlot={(c) => c.userTaskId ? (
-                    <TagPicker
-                      compact
-                      tags={userTags}
-                      selected={c.tags ?? []}
-                      onToggle={(tid) => void applyTagToggle(c.userTaskId!, c.tags, tid)}
-                      onCreate={(tag) => { void createTagDef(tag); void applyTagToggle(c.userTaskId!, c.tags, tag.id); }}
-                    />
-                  ) : null}
-                  onMore={(c) => openFlowCards([c])}
-                  /* ⚠️ THE HAND-OFF READS THE RECORD OR NOTHING. The agent's own fields and the
-                     manuscript's title, looked up by id — never composed from the card's display
-                     strings, which are prose and would put "Send your full to Marcus Reed" in a
-                     subject line. An absent agent yields an absent link, which greys and says so. */
-                  handoff={(c) => {
-                    const ag = c.agentId ? agents.find((a) => a.id === c.agentId) : undefined;
-                    const f = figureFor(c);
-                    const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
-                    /**
-                     * ⚠️ THE ANCHOR IS THE RAIL'S OWN `waitAnchorMs`, AND UNTIL NOW THE COMMENT
-                     * HERE CLAIMED THAT AND WAS FALSE. It read "the strip reads the row's own
-                     * figure — literally the same derivation", while the code read `q.dateSent`
-                     * directly and labelled it `Requested`. Two consequences, both visible on the
-                     * deployed page: the R&R row said `No date on record` in the rail while its
-                     * card showed `13 June`, because the two were deriving different facts; and
-                     * EVERY card printed `REQUESTED`, offer and chase and close alike, because the
-                     * noun was a hardcoded string. The wait half was true — `figureFor` is the
-                     * row's own — so only the anchor moved.
-                     *
-                     * ⚠️ AND THE NOUN IS DERIVED PER BUCKET (`anchorNoun`) — nothing is requested
-                     * on an offer.
-                     */
-                    const anchorMs = waitAnchorMs(cardBucket(c), c.taskType, {
-                      dateSent: q?.dateSent,
-                      partialRequestedDate: q?.partialRequestedDate,
-                      fullRequestedDate: q?.fullRequestedDate,
-                      partialSentDate: q?.partialSentDate,
-                      fullSentDate: q?.fullSentDate,
-                      lastNudgeSentDate: q?.lastNudgeSentDate,
-                      lastReplyAt: isoOf(q?.responseReceivedAt),
-                      statusMovedAt: isoOf(q?.lastStatusChange),
-                      createdAt: c.userTaskId ? userTasks.find((t) => t.id === c.userTaskId)?.createdAt : undefined,
-                    });
-                    const longDay = (ms: number) =>
-                      new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
-                    return {
-                      email: ag?.email, website: ag?.website, msTitle: c.msTitle,
-                      anchorLabel: Number.isFinite(anchorMs) ? anchorNoun(c) : undefined,
-                      anchorValue: Number.isFinite(anchorMs) ? longDay(anchorMs) : undefined,
-                      waitLabel: f.label,
-                      waitValue: f.value ? `${f.value}${f.unit ? ` ${f.unit}` : ""}` : undefined,
-                      /* §5.1 — the band's own fact, forward-looking, absent where there is none */
-                      forward: bandForward(
-                        c,
-                        isoOf(q?.responseDeadline) ?? null,
-                        ag?.responseTimeWeeks ?? null,
-                        (iso) => longDay(new Date(iso).getTime()),
-                        /* an agent on file is what makes "Not stated" a fact rather than a guess */
-                        !!ag,
-                      ),
-                    };
+                /* ⚠️ THE PORTED PANE (`TaskPane`), which replaced `TodoDock` wholesale. The old pane's
+                    markup and stylesheet are deleted in the same commit — leaving both would have given the
+                    page two panes to drift apart, and the class names overlap enough that a stray rule from
+                    one would have reached the other.
+
+                    ⚠️ WHAT CROSSED OVER IS BEHAVIOUR: the completion path (`dockPrimary`), snooze, dismiss,
+                    open query and task navigation. The verbs are the SAME `cardMenu` derivation the ⋯ menu
+                    reads, so the pane and the menu cannot disagree about what applies to a card. */
+                <TaskPane
+                  journey={buildJourney({
+                    card: paneCard,
+                    figure: (() => { const f = figureFor(paneCard); return f.value ? { value: String(f.value), unit: f.unit ?? "" } : null; })(),
+                    facts: paneFacts,
+                    sentPreviously: (() => {
+                      const q = paneCard.relatedRecordId ? queries.find((x) => x.id === paneCard.relatedRecordId) : undefined;
+                      return formatQueryMaterials(q?.materialsWanted);
+                    })(),
+                    events: dockTimeline(paneCard).map((e) => ({
+                      key: e.key, label: e.label, when: e.when, via: e.via,
+                      /* the mockup's `in` rung — an event the AGENT caused */
+                      incoming: /requested|offer|rejected|response|reply/i.test(e.label),
+                    })),
+                    primaryLabel: rowPrimaryLabel(paneCard, groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent")),
+                    will: paneWill,
+                    body: (
+                      <TaskPaneBody
+                        materials={dockMaterials(paneCard).map((m) => ({ label: m.label, detail: m.sub }))}
+                        value={paneBody}
+                        onChange={setPaneBody}
+                      />
+                    ),
+                    /* the band's buttons are the mockup's `btns` array — carried behaviour, its markup */
+                    btns: [
+                      ...(paneVerbs.snooze.disabled ? [] : [{ label: "Snooze", onPress: paneVerbs.snooze.onPress }]),
+                      ...(paneVerbs.dismiss.disabled ? [] : [{ label: "Dismiss", onPress: () => paneVerbs.dismiss.onPress() }]),
+                    ],
+                    onOpenQuery: () => paneVerbs.openQuery.onPress(),
+                  })}
+                  onPrimary={() => dockPrimary(paneCard)}
+                  nav={{
+                    index: dockable.findIndex((c) => c.key === paneCard.key) + 1,
+                    total: dockable.length,
+                    label: liveFamily(paneCard) === "urgent" ? "Urgent" : liveFamily(paneCard) === "housekeeping" ? "Housekeeping" : "Your tasks",
+                    onPrev: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i > 0) setDockKey(dockable[i - 1].key); },
+                    onNext: () => { const i = dockable.findIndex((c) => c.key === paneCard.key); if (i < dockable.length - 1) setDockKey(dockable[i + 1].key); },
                   }}
                 />
               ) : (

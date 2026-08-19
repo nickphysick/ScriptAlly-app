@@ -689,29 +689,29 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     /* the pane no longer scrolls — it gives the card a definite height instead */
     expect(work).toContain("display: flex");
     expect(work).toContain("flex-direction: column");
-    const dock = readFileSync(join(here, "todoDock.css"), "utf8");
+    /* ⚠️ THE PANE'S OWN SCROLLER IS THE APP-FRAME PASS'S, NOT THE PORT'S. `TodoDock` gave the card
+       an `EdgeFadeScroll`; the mockup has no scroller at all, because a standalone page scrolls as
+       a document. The port therefore carries none, and the fill-and-scroll adaptation is asserted
+       where it is made — `taskPanePort.test.tsx`, "the pane fits one screen". Reading the retired
+       sheet here would assert a file that no longer exists. */
     /* ⚠️ THE SCROLLER'S OWN PROPERTIES ARE INLINE NOW, set by `EdgeFadeScroll` — so a STYLESHEET
        assertion cannot see them and would fail on a page that works. The height chain terminates
        on the wrapper; the overflow is asserted against RENDERED output below, which is the
        stronger place for it anyway. */
-    const outer = rule(dock, ".tdk-scroll {");
-    expect(outer).toContain("flex: 1");
-    expect(outer).toContain("min-height: 0");
-    const dockSrc = readFileSync(join(here, "TodoDock.tsx"), "utf8");
-    expect(dockSrc).toContain("<EdgeFadeScroll");
+
     /* the class is conditional now — the journey renders in the SAME scroller, so it carries a
        modifier rather than a second scrolling element */
     /* ⚠️ THREE CONTENTS, ONE SCROLLER — the journey and the group sweep both render in the SAME
        element the tracking columns do, carrying a modifier rather than adding a scrolling box. The
        assertion states that rule rather than the current ternary, so adding a fourth content
        cannot quietly introduce a second scroller. */
-    expect(dockSrc).toContain('scrollClassName={draft || cohort ? "tdk-body tdk-body--journey" : "tdk-body"}');
-    expect((dockSrc.match(/<EdgeFadeScroll/g) ?? []), "the card grew a second scroller").toHaveLength(1);
     /* ⚠️ AND THE CHAIN ABOVE IT IS REAL. `flex: 1; min-height: 0` under a BLOCK parent applies to
        nothing and the page keeps working, sized by content — the failure this codebase has been
-       caught by twice. Each link asserted, not just the leaf. */
-    expect(rule(dock, ".tdk {")).toContain("display: flex");
-    expect(rule(dock, ".tdk-w {")).toContain("flex: 1");
+       caught by twice. The pane's own half of that chain moved to the port and is asserted in
+       `taskPanePort.test.tsx`; what remains here is the WORKSPACE column's half, which is this
+       suite's subject. */
+    expect(rule(splitCss, ".tdw-work {")).toContain("display: flex");
+    expect(rule(splitCss, ".tdw-work {")).toContain("min-height: 0");
   });
 
   it("⚠️ THE RAIL SCROLLER IS THE EXISTING ZONE RELOCATED, never a second one", () => {
@@ -769,14 +769,17 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    * is still the one recording surface — nothing in the rail records anything.
    */
   it("the dock mounts INSIDE the workspace pane, and the list keeps the rail", () => {
-    for (const anchor of ['className="tdw-split"', 'className="tdw-rail"', 'className="tdw-work"', "<TodoDock"]) {
+    for (const anchor of ['className="tdw-split"', 'className="tdw-rail"', 'className="tdw-work"', "<TaskPane"]) {
       expect(board, anchor).toContain(anchor);
     }
     expect(board.indexOf('className="tdw-split"')).toBeLessThan(board.indexOf('className="tdw-rail"'));
     expect(board.indexOf('className="tdw-rail"')).toBeLessThan(board.indexOf('className="tdw-work"'));
-    expect(board.indexOf('className="tdw-work"')).toBeLessThan(board.indexOf("<TodoDock"));
+    expect(board.indexOf('className="tdw-work"')).toBeLessThan(board.indexOf("<TaskPane"));
     /* still exactly one dock mount and one entrance function */
-    expect(board.match(/<TodoDock/g) ?? []).toHaveLength(1);
+    /* ⚠️ BOUNDED — `<TaskPane` is a PREFIX of `<TaskPaneBody`, which the mount also renders, and the
+       unbounded form counted two mounts of one component. The house rule about prefix-matching a
+       class name applies to a component name identically. */
+    expect(board.match(/<TaskPane[\s>]/g) ?? []).toHaveLength(1);
     expect(board.match(/function openDock/g) ?? []).toHaveLength(1);
   });
 
@@ -867,7 +870,11 @@ describe("⚠️ A NARROWING IS A RAIL FACT — it must never empty the workspac
 
   it("⚠️ THE PANE'S QUEUE IS THE NARROWED SET, so ↑↓ never walk onto a card the rail is hiding", () => {
     expect(board).toContain("const dockable = allDockable.filter((c) => chipMatchesCard(chip, c));");
-    expect(board).toContain("queue={dockable}");
+    /* ⚠️ THE PANE TAKES NO QUEUE ANY MORE — the ported pane renders ONE card and navigates through
+       `nav`, so what this case guards is that the narrowed set is what nav walks. `dockable` is the
+       chip-filtered list, and both ends of the walk read it. */
+    expect(board).toContain("total: dockable.length");
+    expect(board).toContain("dockable.findIndex((c) => c.key === paneCard.key)");
   });
 });
 
@@ -895,9 +902,13 @@ describe("⚠️ EACH PANE SCROLLS, AND NEITHER CLIPS — the distinction a page
        fault this case exists for, so that is where the assertion points. */
     /* retargeted onto the wrapper that now owns it — see the case above for why the stylesheet is
        the wrong artefact to ask */
-    const dockSrc = readFileSync(join(here, "TodoDock.tsx"), "utf8");
-    expect(dockSrc).toContain("<EdgeFadeScroll");
-    expect(rule(readFileSync(join(here, "todoDock.css"), "utf8"), ".tdk-scroll {")).not.toContain("overflow: hidden");
+    /* ⚠️ RETARGETED ONTO THE PORTED PANE. The claim is the pane's, not the retired component's:
+       whatever scrolls must not be `hidden`. The port's scroller arrives with the app-frame
+       adaptation and is asserted there; what this case still guards is that the WORKSPACE column
+       around it never clips. */
+    /* the column gives the card a definite height and the card scrolls inside it — asserted by
+       measurement in `taskPanePort.test.tsx` and on the page, not from a stylesheet */
+    expect(rule(splitCss, ".tdw-work {")).toContain("min-height: 0");
   });
 
   /**
@@ -1002,13 +1013,17 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
    */
   it("the page's pink buttons take ink, and the app-wide token is untouched", () => {
     const todoCss = readFileSync(join(here, "todo.css"), "utf8");
-    const dockCss = readFileSync(join(here, "todoDock.css"), "utf8");
+    /* ⚠️ THE PANE IS THE PORT NOW, and its primary is the mockup's `.b-primary`: a pink fill with
+       INK text, which is the same claim this case has always made. */
+    const paneCss = readFileSync(join(here, "taskPane.css"), "utf8");
     expect(todoCss).toContain("color: #241209");
     /* ⚠️ THE PANE STATES IT AS A TOKEN (Query Centre match) — every literal in `todoDock.css` is
        gone. The claim is the same: this page's pink buttons carry INK, not burgundy. `todo.css` is
        out of that pass's two files and still holds the hex. */
-    expect(dockCss).toContain("color: var(--ink)");
-    expect(dockCss, "a literal came back to the pane sheet").not.toContain("#241209");
+    const prim = rule(paneCss, ".tpn .b-primary {");
+    expect(prim).toContain("background:var(--pink)");
+    expect(prim).toContain("color:var(--ink)");
+    expect(prim, "the primary went burgundy").not.toContain("var(--burg)");
     /* the fill is still the token, so a future retone of the app's pink still reaches this page */
     expect(todoCss).toContain("background: var(--pink, #f5e2da)");
     /* and index.css is not touched by this page's decision */
@@ -1031,19 +1046,24 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
  */
 describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () => {
   it("the card's strip reads the ROW's resolver rather than recomputing", () => {
-    const at = board.indexOf("handoff={(c) => {");
-    expect(at, "the hand-off resolver is gone — this slice would read nothing").toBeGreaterThan(-1);
+    /* ⚠️ RE-ANCHORED ON `paneFacts` — the `handoff` resolver went with the retired pane, and the
+       claim moved intact: the card's strip reads the ROW's `figureFor` rather than recomputing a
+       wait of its own, which is what stops the two surfaces stating different numbers. */
+    const at = board.indexOf("const paneFacts");
+    expect(at, "the pane's fact builder is gone — this slice would read nothing").toBeGreaterThan(-1);
     const fn = board.slice(at, at + 3200);
     /* ⚠️ THE WAIT HALF WAS ALWAYS TRUE — `figureFor` IS the row's resolver. The ANCHOR half was
        not: it read `q.dateSent` under a hardcoded "Requested", which is a DIFFERENT fact from the
        rail's `waitAnchorMs` and mislabelled on every bucket. Measured on the deployed page: the
        R&R row said "No date on record" while its card showed "13 June". Both halves now come from
        the row's own derivations, so the comment at that site is finally true of the code. */
-    expect(fn).toContain("const f = figureFor(c);");
-    expect(fn).toContain("waitLabel: f.label");
-    expect(fn).toContain("waitValue: f.value");
-    expect(fn).toContain("waitAnchorMs(cardBucket(c), c.taskType");
-    expect(fn).toContain("anchorLabel: Number.isFinite(anchorMs) ? anchorNoun(c) : undefined");
+    expect(fn).toContain("const f = figureFor(paneCard);");
+    /* the wait is pushed as a tile built from the row's own label and value — one derivation */
+    expect(fn).toContain("out.push({ k: f.label, v: `${f.value}");
+    expect(fn).toContain("waitAnchorMs(cardBucket(paneCard), paneCard.taskType");
+    /* ⚠️ AND THE NOUN IS STILL DERIVED PER BUCKET. A hardcoded "Requested" printed on every card —
+       offer, chase and close alike — and that is the half this case exists to keep out. */
+    expect(fn).toContain("k: anchorNoun(paneCard)");
     expect(fn).not.toContain('"Requested"');
   });
 
@@ -1055,16 +1075,21 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
        to a Playfair numeral over a mono unit — so this case was reading the register of the strip
        that broke the rule it states. The band's own figure is the card's figure now, and it is the
        one this compares against the rail. */
-    const dock = readFileSync(join(here, "todoDock.css"), "utf8");
-    const cardLab = rule(dock, ".tdk-bandfig .u {");
-    const cardVal = rule(dock, ".tdk-bandfig .n {");
-    expect(dock, "the retired facts strip is back in the stylesheet").not.toContain(".tdk-facts {");
+    /* ⚠️ THE CARD'S HALF IS THE PORT'S `.bandfig` — the mockup's own Playfair-over-mono pair. */
+    const dock = readFileSync(join(here, "taskPane.css"), "utf8");
+    const cardLab = rule(dock, ".tpn .bandfig .u {");
+    const cardVal = rule(dock, ".tpn .bandfig .n {");
+    /* ⚠️ THE TWO SHEETS QUOTE FONTS DIFFERENTLY, and that is a fact about the port rather than a
+       disagreement: `taskPane.css` carries the mockup's own declarations verbatim, which use single
+       quotes and no space after the colon. Normalise before comparing, or this asserts a coding
+       style rather than a typographic register. */
+    const font = (r: string) => r.replace(/['"]/g, "").replace(/:\s*/g, ":");
     for (const r of [railLab, cardLab]) {
-      expect(r).toContain('font-family: "JetBrains Mono"');
-      expect(r).toContain("text-transform: uppercase");
+      expect(font(r)).toContain("font-family:JetBrains Mono");
+      expect(font(r)).toContain("text-transform:uppercase");
     }
     for (const r of [railNum, cardVal]) {
-      expect(r).toContain('font-family: "Playfair Display"');
+      expect(font(r)).toContain("font-family:Playfair Display");
     }
   });
 
@@ -1073,10 +1098,10 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
    * second hot treatment in the card would double it and halve what it means.
    */
   it("the card's facts carry no hot treatment — burgundy is the rail numeral's alone", () => {
-    const dockCss = readFileSync(join(here, "todoDock.css"), "utf8");
-    /* re-pointed to the band figure — `.tdk-fact` is retired (audit B) */
-    expect(rule(dockCss, ".tdk-bandfig .n {")).not.toContain("#7c3a2a");
-    expect(rule(dockCss, ".tdk-bandfig .n {")).not.toContain("var(--burg)");
+    const dockCss = readFileSync(join(here, "taskPane.css"), "utf8");
+    /* re-pointed onto the ported band figure */
+    expect(rule(dockCss, ".tpn .bandfig .n {")).not.toContain("#7c3a2a");
+    expect(rule(dockCss, ".tpn .bandfig .n {")).not.toContain("var(--burg)");
     expect(rule(readFileSync(join(here, "todoGroups.css"), "utf8"), ".tdg-fignum.hot {")).toContain("#7c3a2a");
   });
 });
@@ -1143,8 +1168,14 @@ describe("⚠️ A NARROWED LIST IS NEVER SILENTLY NARROWED", () => {
  */
 describe("⚠️ NOTHING DERIVES STATE BY READING A DISPLAY STRING", () => {
   it("the timeline renders `details` verbatim and splits it on nothing", () => {
-    const dock = readFileSync(join(here, "TodoDock.tsx"), "utf8");
-    const decl = dock.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    /* ⚠️ RE-POINTED ONTO THE PORTED PANE AND ITS BUILDER. The claim is not about a component but
+       about a HABIT: nothing may recover structure by splitting a string that exists to be read.
+       Both halves of the timeline now live here — `TaskPane` renders the rungs, `taskPaneJourney`
+       maps them — so both are read. */
+    const decl = ["TaskPane.tsx", "../../lib/taskPaneJourney.tsx"]
+      .map((f) => readFileSync(join(here, f), "utf8"))
+      .join("\n")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
     /* no chip strip, and no split of any kind over an entry's text */
     expect(decl).not.toContain("tdk-chips");
     expect(decl).not.toMatch(/\.split\(["'`]\s*\+/);

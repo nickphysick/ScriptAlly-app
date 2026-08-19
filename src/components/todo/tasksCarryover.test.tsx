@@ -28,7 +28,9 @@ const here = __dirname;
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
 const sidebar = readFileSync(join(here, "..", "shell", "ShellSidebar.tsx"), "utf8");
 const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
-const dock = readFileSync(join(here, "TodoDock.tsx"), "utf8");
+/* ⚠️ RE-POINTED AT THE PORTED PANE — `TodoDock.tsx` is deleted. Where a case's subject was the
+   retired component's own markup it is retired with it; what survives is read here. */
+const dock = readFileSync(join(here, "TaskPane.tsx"), "utf8");
 /* ⚠️ ON DECLARATIONS, NOT ON PROSE. These files explain themselves by QUOTING what they replaced —
    the dock's own note names the two tiers it retired — so a raw substring match reads the comment
    and fails a file that is correct. It caught me four separate times in one session. */
