@@ -1,0 +1,105 @@
+/**
+ * Analytics — page styles (ref design-refs/scriptally-analytics-v6-ideas.html).
+ *
+ * ⚠️ NO CAP, AND THE MOCKUP'S 1560 IS DELIBERATELY NOT HERE. Caps are retired app-wide for grid
+ * pages (`--wpg-cap` and `--sa-col-max` both went): every row is full container width and states
+ * its own inset as padding, which the grid already applies from `--content-gutter`. A max-width
+ * column reintroduced here would put this page's chrome and its content at two different widths,
+ * which is the fault the retirement was for.
+ *
+ * ⚠️ ONE RULE PER SELECTOR. A second block for the same class makes any lock that finds its rule
+ * with `indexOf(".x {")` read whichever comes first — this stylesheet has that as an invariant
+ * because `workspacePageGrid.css` was caught by it twice.
+ *
+ * ⚠️ EVERY COLOUR IS A LITERAL, DELIBERATELY. This page is a chart surface with its own locked
+ * Burgundy & Sage scheme (see CHART in lib/analytics.ts); it is not themed, because a chart whose
+ * series changed hue per theme would need three legends. The one thing it must never restyle is
+ * `StatusDot`, which brings its own theming with it.
+ */
+
+/* ⚠️ THE PAGE ROOT AND THE GRID ROOT ARE NOT HERE — they are `.qa-wrap` and `.qa-wpg` in
+   `shell/workspaceShell.css`, where they have always been, and they keep their names.
+   `workspacePageGrid.test.tsx`'s width-chain lock reads that file for `.qa-wrap` by name; renaming
+   the root would leave the lock looking for a selector that no longer exists, finding no blocks,
+   and passing vacuously — the failure shape this codebase keeps re-teaching. The pill clearance
+   (`--wpg-foot`) is declared on `.qa-wpg` in that same file, so each selector still has exactly one
+   rule in one place. Everything below is this page's own furniture. */
+
+/* ── header: the mono sub-line and the range/export controls ─────────────────
+   ⚠️ THE SUB-LINE IS MONO BECAUSE IT IS A TALLY, not a sentence. It replaces the placeholder's
+   prose description in the same slot, so the header's own layout is untouched. */
+.qa-wrap .wsh-sub {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #9a8c80;
+}
+.an-head { display: flex; align-items: center; gap: 12px; flex: none; }
+.an-range { display: flex; background: #fdfaf5; border: 1px solid #ece3d7; border-radius: 12px; padding: 3px; gap: 2px; flex: none; }
+.an-range button {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px; letter-spacing: 0.07em; font-weight: 500; text-transform: uppercase;
+  color: #8a7a6c; background: transparent; border: 1px solid transparent; border-radius: 9px;
+  padding: 9px 15px; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.an-range button:hover { color: #7c3a2a; }
+.an-range button[aria-pressed="true"] { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; }
+/* ⚠️ NO BURGUNDY-FILLED BUTTONS ON THIS PAGE. Export and Share are parchment with a hairline —
+   a solid primary here would outrank the figures it sits beside. */
+.an-btn {
+  flex: none; background: #fff; border: 1px solid #ece3d7; border-radius: 12px;
+  padding: 11px 18px; font-size: 13px; color: #3a2a20;
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  transition: background .15s ease;
+}
+.an-btn:hover { background: #fdfaf5; }
+.an-btn svg { width: 15px; height: 15px; stroke: #5c4a3e; fill: none; stroke-width: 1.6; }
+
+/* ── focus ───────────────────────────────────────────────────────────────────
+   ⚠️ ONE VISIBLE RING FOR EVERY INTERACTIVE THING ON THE PAGE, including the ones drawn in SVG.
+   Phase 8 makes every figure a door; a door with no focus state is a door only a mouse can open. */
+.qa-wrap :focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; border-radius: 8px; }
+
+/* ── illustration slots ──────────────────────────────────────────────────────
+   Plates sized for the final artwork. Swap the inner <svg>; keep the box. */
+.an-illo {
+  flex: none; border-radius: 14px; background: #fdfaf5; border: 1px dashed #e4d9cb;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.an-illo--stat { width: 54px; height: 54px; }
+.an-illo--empty { width: 120px; height: 120px; border-radius: 20px; }
+.an-illo--hero { width: 168px; height: 150px; border-radius: 22px; }
+.an-illo--stat svg { width: 32px; height: 32px; }
+.an-illo--empty svg { width: 74px; height: 74px; }
+.an-illo--hero svg { width: 104px; height: 104px; }
+
+/* ── the stat strip ──────────────────────────────────────────────────────────
+   ONE panel, hairline-divided — five stats that read as one object rather than five cards. */
+.an-strip {
+  background: #fff; border: 1px solid #ece3d7; border-radius: 18px;
+  display: flex; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.03);
+}
+.an-stat { flex: 1; display: flex; align-items: center; gap: 14px; padding: 20px; border-left: 1px solid #f0e8dc; min-width: 0; }
+.an-stat:first-child { border-left: none; }
+.an-stat-txt { min-width: 0; }
+.an-stat-k { font-size: 12.5px; color: #6a5a50; }
+.an-stat-v { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 31px; font-weight: 500; color: #2b1a12; line-height: 1.1; margin-top: 2px; }
+/* the guarded form is a fraction, and a fraction needs less room to shout with */
+.an-stat-v--frac { font-size: 22px; padding-top: 6px; }
+.an-stat-v small { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 17px; color: #8a7a6c; }
+.an-stat-m { font-size: 11px; color: #9a8c80; font-weight: 300; margin-top: 4px; }
+/* ⚠️ THE PREVIOUS-PERIOD LINE IS PLAIN TEXT — no arrow, no colour, no up-or-down. A rising median
+   is a fact about a set of agents, not a failure of the person reading it. */
+.an-stat-prev { font-size: 10.5px; color: #b0a294; font-weight: 300; margin-top: 3px; }
+
+/* ── the early-state hint ────────────────────────────────────────────────────
+   ⚠️ A ROADMAP, NOT A SCOLD. It says when each figure firms up; it never says the writer has too
+   few queries out. */
+.an-early { background: #fdfaf5; border: 1px dashed #e4d9cb; border-radius: 12px; padding: 12px 18px; font-size: 12px; color: #7a6a5c; margin-top: 14px; line-height: 1.6; }
+.an-early b { font-family: 'Caveat', cursive; font-size: 16px; color: #7c3a2a; font-weight: 500; }
+
+/* ── the empty page ──────────────────────────────────────────────────────────
+   ⚠️ ZERO QUERIES IS ITS OWN STATE, not a page of zeroes. Five stats reading 0 and four empty
+   charts describe a broken page; one line describes an account that has not started yet. */
+.an-blank { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 56px 20px; }
+.an-blank p { color: #9a8c80; font-size: 13px; font-weight: 300; line-height: 1.7; max-width: 340px; }

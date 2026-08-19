@@ -664,7 +664,17 @@ function AppContent() {
             together and centred the lot. Measured at 2400px against the built stylesheet:
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
-        <StagePage active={queriesAnalytics}>
+        {/* ⚠️ `layout="fill"`, AND IT WAS `flow` UNTIL THE PAGE HAD CONTENT IN IT. A flow slot is a
+            plain block, so `.qa-wrap`'s `height: 100%` resolved against a content-sized parent and
+            the grid took its content's height instead of the row's. That is invisible while the
+            page is short — measured empty at 1600×900: grid 439px, row 3 the scroller, page
+            scroll 0, all correct — and inverts the moment it is not. Measured again with 3000px of
+            content injected: `.qa-wrap` 3469px, row 3's own scrollable range ZERO, and the shell's
+            `.ws-wbody` absorbing 2659px, which scrolls the pinned plate away with the content.
+            `fill` gives the slot `flex: 1; min-height: 0`, so it takes the REMAINING height of the
+            fixed-viewport work wrapper and the chain resolves. Same fault as `.tpl-cols` and
+            `.f12-body`; same tell — a page that scrolls where its spec says its rows do. */}
+        <StagePage active={queriesAnalytics} layout="fill" clip>
           <QueryAnalytics />
         </StagePage>
 
