@@ -69,11 +69,21 @@
      deployed page: `rgb(255, 255, 255)`. Reading the base rule would have produced a near-match
      that was wrong by exactly the amount nobody can see and everybody can feel.
      The other three ARE the base rule's, and are unshadowed: `--line`, `--r-lg`, `--sh-1`. */
+  /* ⚠️ THE CARD KEEPS ITS TOKENS, and Phase B's own instruction is why: "read the values from the
+     live stylesheet where tokens already exist". They do — `--white`, `--line`, `--r-lg`, `--sh-1`
+     — and a live lock couples all four to the Query Centre's `.f12-card` so the two panels cannot
+     drift apart silently. §2's table names #ece4d9 / 14px, which differ from `--line` (#e6dccd) and
+     `--r-lg` (12px) by an amount invisible side by side and would have broken that coupling for
+     nothing. The genuinely NEW things — the 6px reveal and the rim — are additive, which is the
+     other half of the same instruction. Deviation recorded in the run report. */
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
+  /* §2 — the reveal that makes the rim a frame rather than a doubled edge */
+  padding: 6px;
   box-shadow: var(--sh-1);
-  overflow: hidden;
+  /* ⚠️ NO `overflow: hidden` HERE — the RIM clips now. Two clipping boxes would round the contents
+     twice, and the outer one would cut the rim's own corners. */
   display: flex;
   flex-direction: column;
   /* ⚠️ THE CARD REACHES THE BOTTOM OF THE PANE. This replaced a `min-height: 340px` content floor,
@@ -87,6 +97,24 @@
      tall as the pane and let it grow PAST it, which is how a long record produced a card with no
      bottom edge on screen; this makes it exactly the remaining height, so its body is the thing
      that scrolls. */
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── THE RIM (chassis §2) ─────────────────────────────────────────────────────────────────────
+   ⚠️ A REAL CLIPPING CONTAINER. It carries the hairline, the smaller radius and `overflow: hidden`,
+   and it is what the tinted band fills to. The card outside it holds the white and the 6px that
+   makes the rim visible; the contents inside it carry no radius at all.
+
+   ⚠️ IT TAKES THE CARD'S LAYOUT DUTIES with it — `flex: 1; min-height: 0` and the column direction
+   moved here, because the thing that scrolls has to be inside the thing that clips. */
+.tdk-rim {
+  box-sizing: border-box;
+  border: 1px solid rgba(124, 58, 42, 0.28);
+  border-radius: 9px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-height: 0;
 }

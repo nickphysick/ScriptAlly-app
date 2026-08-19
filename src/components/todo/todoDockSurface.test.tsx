@@ -1212,8 +1212,19 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
        gutter around a sage band. Flush now, clipped by the card's own `overflow: hidden`, which is
        how `.f12-card` seats its header. */
     const css = readFileSync(join(here, "todoDock.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    /* ⚠️ THE `::before` PROHIBITION STANDS AND IS NOW THE CHASSIS'S OWN RULE TOO. §2 requires the
+       rim to be a REAL clipping container precisely because an overlay border spilled the MountCard
+       header fill — so what this half forbids is what the redesign also refuses. */
     expect(css).not.toContain(".tdk-w::before");
-    expect(css).not.toContain("rgba(124, 58, 42, 0.28)");
+    /* ⚠️ THE COLOUR BAN IS SUPERSEDED, AND A DIFFERENT OBJECT IS WHAT BRINGS THE COLOUR BACK. The
+       frame retired at `acdf126` was an inset RULE on a white panel with the band held off it by
+       margins, and the note calling it "a second border inside the first" was right about that one.
+       `.tdk-rim` is the frame the band fills TO — a clipping child, measured flush at 1px on every
+       edge. Same colour, opposite job; the three margins below are still gone, which is the half of
+       this lock that never stopped being true. */
+    const rimRule = dockCssRule(".tdk-rim {");
+    expect(rimRule, "the rim is not a real clipping container").toContain("overflow: hidden");
+    expect(rimRule).toContain("rgba(124, 58, 42, 0.28)");
     const band = dockCssRule(".tdk-band {");
     expect(band).toContain("margin: 0");
     expect(band).toContain("overflow: hidden");

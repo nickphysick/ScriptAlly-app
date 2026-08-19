@@ -1,0 +1,134 @@
+── pane chassis · 66 assertions · 15 RED · 51 green
+  green  A1 close · heading IS the deed, and is not the agency
+           heading="Log the close" deed="Log the close" agency=""
+  green  A2 close · no monogram in the pane
+           count=0
+  green  A3 close · no gendered pronoun
+           clean
+  green  A4 close · rim: overflow hidden + burgundy top border
+           overflow=hidden borderTop=rgba(124, 58, 42, 0.28)
+  green  A5 close · card background is pure white
+           bg=rgb(255, 255, 255)
+  green  A6 close · band fills the rim — flush on three edges, all four corners
+           corners=["band","band","band","band"] gaps(top,left,right)=1,1,1
+  green  A7 close · band carries a gradient
+           linear-gradient(135deg, rgb(222, 228, 220) 0%, rgb(213, 219, 211) 100%
+  green  A8 close · no bucket pill in the band
+           none
+  RED    A12 close · timeline is a SIBLING of the form, both in one grid
+           story=false form=false
+  green  A15 close · nothing ellipsised
+           []
+  RED    A9 close · tiles >0
+           tiles=0 statRow=0
+  RED    A10 close · tiles include 'Sent previously' and none reads 'what they want'
+           []
+  RED    A13 close · timeline present
+           story=0
+  green  A14 close · foot hint is this journey's own, never another's
+           hint="This closes the record. It does not tell the agent anything."
+  green  A1 send · heading IS the deed, and is not the agency
+           heading="Send your full" deed="Send your full" agency=""
+  green  A2 send · no monogram in the pane
+           count=0
+  green  A3 send · no gendered pronoun
+           clean
+  green  A4 send · rim: overflow hidden + burgundy top border
+           overflow=hidden borderTop=rgba(124, 58, 42, 0.28)
+  green  A5 send · card background is pure white
+           bg=rgb(255, 255, 255)
+  green  A6 send · band fills the rim — flush on three edges, all four corners
+           corners=["band","band","band","band"] gaps(top,left,right)=1,1,1
+  green  A7 send · band carries a gradient
+           linear-gradient(135deg, rgb(222, 228, 220) 0%, rgb(213, 219, 211) 100%
+  green  A8 send · no bucket pill in the band
+           none
+  RED    A12 send · timeline is a SIBLING of the form, both in one grid
+           story=false form=false
+  green  A15 send · nothing ellipsised
+           []
+  RED    A9 send · tiles >0
+           tiles=0 statRow=0
+  RED    A10 send · tiles include 'Sent previously' and none reads 'what they want'
+           []
+  RED    A13 send · timeline present
+           story=0
+  green  A14 send · foot hint is this journey's own, never another's
+           hint="Nothing is sent from here — this records what you sent."
+  green  A1 decide · heading IS the deed, and is not the agency
+           heading="Answer the offer" deed="Answer the offer" agency=""
+  green  A2 decide · no monogram in the pane
+           count=0
+  green  A3 decide · no gendered pronoun
+           clean
+  green  A4 decide · rim: overflow hidden + burgundy top border
+           overflow=hidden borderTop=rgba(124, 58, 42, 0.28)
+  green  A5 decide · card background is pure white
+           bg=rgb(255, 255, 255)
+  green  A6 decide · band fills the rim — flush on three edges, all four corners
+           corners=["band","band","band","band"] gaps(top,left,right)=1,1,1
+  green  A7 decide · band carries a gradient
+           linear-gradient(135deg, rgb(243, 224, 214) 0%, rgb(238, 212, 200) 100%
+  green  A8 decide · no bucket pill in the band
+           none
+  RED    A12 decide · timeline is a SIBLING of the form, both in one grid
+           story=false form=false
+  green  A15 decide · nothing ellipsised
+           []
+  RED    A9 decide · tiles >0
+           tiles=0 statRow=0
+  RED    A10 decide · tiles include 'Sent previously' and none reads 'what they want'
+           []
+  RED    A13 decide · timeline present
+           story=0
+  green  A14 decide · foot hint is this journey's own, never another's
+           hint="Three ways to answer this — pick the one you are here for."
+  green  A1 note · heading IS the deed, and is not the agency
+           heading="Nudge Tom Ellery" deed="Nudge Tom Ellery" agency=""
+  green  A2 note · no monogram in the pane
+           count=0
+  green  A3 note · no gendered pronoun
+           clean
+  green  A4 note · rim: overflow hidden + burgundy top border
+           overflow=hidden borderTop=rgba(124, 58, 42, 0.28)
+  green  A5 note · card background is pure white
+           bg=rgb(255, 255, 255)
+  green  A6 note · band fills the rim — flush on three edges, all four corners
+           corners=["band","band","band","band"] gaps(top,left,right)=1,1,1
+  green  A7 note · band carries a gradient
+           linear-gradient(135deg, rgb(222, 228, 220) 0%, rgb(213, 219, 211) 100%
+  green  A8 note · no bucket pill in the band
+           none
+  RED    A15 note · nothing ellipsised
+           ["Nothing is sent from here — this records"]
+  RED    A9 note · tiles ==0
+           tiles=2 statRow=1
+  RED    A13 note · timeline absent
+           story=1
+  green  A14 note · foot hint is this journey's own, never another's
+           hint=""
+  green  A1 bulk · heading IS the deed, and is not the agency
+           heading="10 queries have no record of what you sent" deed="10 queries have no record of what you sent" agency=""
+  green  A2 bulk · no monogram in the pane
+           count=0
+  green  A3 bulk · no gendered pronoun
+           clean
+  green  A4 bulk · rim: overflow hidden + burgundy top border
+           overflow=hidden borderTop=rgba(124, 58, 42, 0.28)
+  green  A5 bulk · card background is pure white
+           bg=rgb(255, 255, 255)
+  green  A6 bulk · band fills the rim — flush on three edges, all four corners
+           corners=["band","band","band","band"] gaps(top,left,right)=1,1,1
+  green  A7 bulk · band carries a gradient
+           linear-gradient(135deg, rgb(222, 228, 220) 0%, rgb(213, 219, 211) 100%
+  green  A8 bulk · no bucket pill in the band
+           none
+  green  A15 bulk · nothing ellipsised
+           []
+  green  A9 bulk · tiles ==0
+           tiles=0 statRow=0
+  green  A13 bulk · timeline absent
+           story=0
+  green  A14 bulk · foot hint is this journey's own, never another's
+           hint=""
+  page errors: 0

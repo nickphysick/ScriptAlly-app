@@ -338,6 +338,17 @@ export const TodoDock: React.FC<TodoDockProps> = ({
 
       {/* ── THE WORK SURFACE ─────────────────────────────────────────────── */}
       <section className="tdk-w">
+        {/* ⚠️ THE RIM IS A REAL CLIPPING CONTAINER, NOT A `::before` OVERLAY. Three layers: the
+            card carries the white, the edge and 6px of padding; THIS carries the burgundy hairline,
+            the smaller radius and `overflow: hidden`; the contents carry no radius of their own and
+            are clipped to it. An overlay border is what spilled the MountCard header fill, and the
+            tinted band fills right to this edge, so it would spill here too.
+
+            ⚠️ AND THIS IS NOT THE FRAME RETIRED AT `acdf126`. That one was an inset RULE drawn on a
+            white panel with the band held off it by margins — "a second border inside the first",
+            and the note removing it was right about that. This one is the frame the band fills TO.
+            Different object, same colour. */}
+        <div className="tdk-rim">
         {/* ⚠️ THE DOCK-SEAL IS UNMOUNTED WITH THE PRIMARY IT RODE OVER (Phase 4) — the act is the
             command bar's now. `ArtSlot name="dock-seal"` and its 600ms are untouched in the sheet;
             the flourish returns the day a completion has a home in this surface again. */}
@@ -916,6 +927,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           * `NEXT:` forward look → the bar's previous/next pair, which says the same thing as a
           * position rather than as a name. Nothing became unreachable.
           */}
+        </div>
       </section>
     </div>
   );

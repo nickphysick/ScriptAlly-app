@@ -78,13 +78,24 @@ test("pane chassis", async ({ page }) => {
       const card = (rim?.parentElement ?? pane.querySelector(".tdk-card")) as HTMLElement | null;
 
       let corners: string[] = [];
+      let flush = "";
       if (rim && band) {
         const r = rim.getBoundingClientRect();
-        const bh = band.getBoundingClientRect().height;
+        const b = band.getBoundingClientRect();
+        /* ⚠️ THE ANTI-SPILL CLAIM IS FLUSHNESS, and it is measured directly: the band's edges sit on
+           the rim's 1px border on all three sides. A spill is a GAP, and a gap is a number. */
+        flush = [Math.round(b.top - r.top), Math.round(b.left - r.left), Math.round(r.right - b.right)].join(",");
+        /* ⚠️ INSET 4, NOT 2 — AND THAT IS GEOMETRY, NOT TOLERANCE. The rim's radius is 9px, so the
+           rounded corner's diagonal boundary is 0.293 × 9 ≈ 2.6px in; a point 2px from the corner is
+           OUTSIDE the shape and `elementFromPoint` correctly returns what is behind it. My first
+           version sampled there and reported a spill on a pane that has none — measured: inset 2
+           gives [rim, card, band, band] while 4, 6 and 12 all give four bands. */
+        const INSET = 4;
+        const bh = b.height;
         const pts: [number, number][] = [
-          [r.left + 2, r.top + 2], [r.right - 2, r.top + 2],
-          [r.left + 2, r.top + Math.min(r.height, bh) - 2],
-          [r.right - 2, r.top + Math.min(r.height, bh) - 2],
+          [r.left + INSET, r.top + INSET], [r.right - INSET, r.top + INSET],
+          [r.left + INSET, r.top + Math.min(r.height, bh) - INSET],
+          [r.right - INSET, r.top + Math.min(r.height, bh) - INSET],
         ];
         corners = pts.map(([x, y]) => {
           const el = document.elementFromPoint(x, y);
@@ -108,6 +119,7 @@ test("pane chassis", async ({ page }) => {
         rim: rim ? { overflow: cs(rim).overflow, borderTop: cs(rim).borderTopColor } : null,
         cardBg: card ? cs(card).backgroundColor : null,
         corners,
+        flush,
         bandImage: band ? cs(band).backgroundImage : null,
         bandPill: !!band?.querySelector("[class*='bpill']"),
         tiles: tiles.length,
@@ -141,8 +153,9 @@ test("pane chassis", async ({ page }) => {
         !!m.rim && m.rim.overflow === "hidden" && m.rim.borderTop === RIM_BORDER,
         m.rim ? "overflow=" + m.rim.overflow + " borderTop=" + m.rim.borderTop : "no rim element");
     add(P(5, "card background is pure white"), m.cardBg === "rgb(255, 255, 255)", "bg=" + m.cardBg);
-    add(P(6, "band reaches all four rim corners"),
-        m.corners.length === 4 && m.corners.every((c) => c === "band"), JSON.stringify(m.corners));
+    add(P(6, "band fills the rim — flush on three edges, all four corners"),
+        m.corners.length === 4 && m.corners.every((c) => c === "band") && m.flush === "1,1,1",
+        "corners=" + JSON.stringify(m.corners) + " gaps(top,left,right)=" + m.flush);
     add(P(7, "band carries a gradient"),
         !!m.bandImage && m.bandImage.includes("gradient"), (m.bandImage ?? "").slice(0, 70));
     add(P(8, "no bucket pill in the band"), !m.bandPill, m.bandPill ? "pill present" : "none");
