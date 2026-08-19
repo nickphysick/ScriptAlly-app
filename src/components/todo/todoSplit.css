@@ -42,19 +42,15 @@
    elsewhere in the shell, so nothing was invented. */
 /* ⚠️ THE CONTAINER FOR THE SPLIT'S OWN QUERY, on its parent — a grid cannot query itself. Inline-
    size containment only; the column's height model is untouched. */
-.tdb-centre { container-type: inline-size; }
-
 .tdw-split {
-  /* ⚠️ 372, AND THE LIST IS THE FIXED TRACK — the design's relationship, restored. It was 520 with
-     the PANE taking the leftovers, which at 1440 handed the work surface 350px: the directory held
-     its width while the thing being worked on got what remained. The rows carry a pill, a deed, an
-     agent line and a figure; 372 is what the design drew them at, and the ellipsis assertion in
-     paneFrame.measure.ts is what proves they still fit. Measured after: pane 350 → 498 at 1440,
-     830 → 978 at 1920. */
-  --tdw-rail-w: 372px;
+  /* ⚠️ THE LIST IS A RANGE, NOT A NUMBER (contract run). It was 520 fixed, then 372 fixed; both
+     stated a width the browser could not argue with. `minmax(260px, 340px)` lets it give when the
+     shell is tight and stops it hoarding when the shell is generous — the pane takes everything
+     else through `minmax(0, 1fr)`. The rows carry a pill, a deed, an agent line and a figure, and
+     the no-ellipsis assertion is what proves they still fit at 260. */
   --tdw-hair: var(--tdb-panel-hair);
   display: grid;
-  grid-template-columns: var(--tdw-rail-w) minmax(0, 1fr);
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   gap: 18px;
   /* ⚠️ ONE RHYTHM ON ALL FOUR SIDES, NOW THE BAR IS NOT ABOVE IT. This was `0 22px 20px` — no top
@@ -71,29 +67,6 @@
   min-height: 0;
   min-width: 0;
   box-sizing: border-box;
-}
-
-/* ⚠️ THE STACK THE PAGE NEVER HAD. The split kept `520px minmax(0,1fr)` at every width, so below
-   ~900 the pane's track shrank toward zero — MEASURED at 390: the journey's form 0px wide, the
-   timeline 34px, the grid-collapse fault live on mobile today. The brief's "stacks beneath, as
-   now" assumed a breakpoint that did not exist.
-
-   ⚠️ 780 IS DERIVED, NOT CHOSEN: side-by-side stays while the pane track ≥ ~348 (pane ≥ 300px —
-   under today's working 350 by a margin, still a usable card). track = container − 44 (split pad)
-   − 372 (list) − 18 (gap) → container ≥ 782, rounded down. Below it the two stack half-and-half —
-   both scroll internally, nothing is ever handed 0px.
-
-   ⚠️ A CONTAINER QUERY, NOT A MEDIA QUERY — the split's width is set by the shell (sidebar,
-   gutters), not the viewport; at 1024 the viewport is wide and the container is 564. */
-/* ⚠️ REPAIRED IN THE SAME PASS THAT BROKE IT: the insertion above first closed `.tdw-split` early
-   and orphaned its `min-height/min-width/box-sizing` inside this block — declarations outside any
-   selector, silently dropped, the malformed-CSS class this repo documents. The viewport locks in
-   `tasksViewport.test.tsx` went red and caught it; the page itself showed nothing. */
-@container (max-width: 780px) {
-  .tdw-split {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
-  }
 }
 
 /**

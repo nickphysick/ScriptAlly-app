@@ -265,7 +265,8 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
        padding or the control's size moves the motif with them. */
     expect(band).toContain("--tdk-motif-right: calc(var(--tdk-band-px) + var(--tdk-x-w) + 8px)");
     /* the band reads its own tokens rather than restating their values */
-    expect(band).toContain("padding: 16px var(--tdk-band-px) 14px");
+    /* ⚠️ RE-POINTED: the contract's band padding is 20/24/18 */
+    expect(band).toContain("padding: 20px 24px 18px");
     expect(band).toContain("gap: var(--tdk-band-gap)");
     /* ⚠️ AND THE REF'S 22px IS GONE FROM THE MOTIF. v14 drew that offset into a band with NO close
        button; taking it literally is what put the illustration behind the control. */
@@ -341,7 +342,8 @@ describe("⚠️ THE PANE DRAWS NO QUEUE — the rail is the stack", () => {
     /* §2.3 is the DEED now, at the chassis contract's 26px/500 — `.tdk-name` is gone with the
        agent-led band that needed it. */
     const deed = dockCssRule(".tdk-deed {");
-    expect(deed).toContain("font-size: 26px");
+    /* ⚠️ RE-POINTED: the contract's deed is 27px, not the 26 sampled last run */
+    expect(deed).toContain("font-size: 27px");
     expect(deed).toContain("font-weight: 500");
     /* ⚠️ §3.8's 66px DATE TRACK IS SUPERSEDED, and this lock caught the change rather than being
        quietly edited around it. `todo-journey-in-pane.html` is the newer of the two authoritative
@@ -922,24 +924,20 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
    * and the only part whose content varies) was squeezed into the narrowest column while a
    * checkbox and two buttons took the rest.
    */
-  it("the record column is the flexible one; the doing column is bounded", () => {
+  it("the work surface is a wrapping row; the doing column gives before it wraps", () => {
+    /* ⚠️ RE-POINTED (contract run). This asserted `display: grid` and the two tracks. The LAW it
+       protects is unchanged and still asserted — the record is the flexible one, the doing column
+       is bounded, and the record comes FIRST. Only the mechanism moved: a wrapping flex row states
+       that with flex-basis instead of tracks, and needs no breakpoint to stack. */
     const body = dockCssRule(".tdk-body {");
-    expect(body).toContain("display: grid");
-    /* ⚠️ 300–360, NOT THE REF'S 330–400. `minmax` takes its MAX whenever there is room, so a 400px
-       doing column leaves the fr track everything above 400 + 30 of gap — the record is only the
-       wider of the two on a card past ~878px. Measured on the deployed page at 1920, card filling
-       its 830px pane, the body still resolved to `352px 400px`. The pane cannot get wider, so the
-       ref's numbers cannot produce the ref's intent here. THE LAW WINS OVER THE NUMBERS. */
-    expect(body).toContain("grid-template-columns: minmax(0, 1fr) minmax(300px, 360px)");
-    /* ⚠️ THE RECORD IS FIRST — the wide track is the story's, not the work's */
-    const html = render();
-    const story = html.indexOf('class="tdk-story"');
-    const work = html.indexOf('class="tdk-work"');
-    expect(story, "the story column is gone").toBeGreaterThan(-1);
-    expect(work, "the work column is gone").toBeGreaterThan(-1);
-    expect(story).toBeLessThan(work);
-    /* neither column carries a fixed width any more */
-    expect(dockCssRule(".tdk-story {")).not.toContain("230px");
+    expect(body).toContain("display: flex");
+    expect(body).toContain("flex-wrap: wrap");
+    const css = readFileSync(join(here, "todoDock.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rec = css.indexOf(".tdk-body > .tdk-story");
+    const doing = css.indexOf(".tdk-body > .tdk-work");
+    expect(rec, "the record's basis rule is gone").toBeGreaterThan(-1);
+    expect(doing, "the doing column's basis rule is gone").toBeGreaterThan(-1);
+    expect(rec, "the record must come first, as it does in the markup").toBeLessThan(doing);
   });
 
   /**
@@ -947,18 +945,13 @@ describe("⚠️ the work surface is a TWO-COLUMN SHEET — the story beside the
    * describe — the split's rail takes its share first — so the old `@media (max-width: 900px)`
    * stacked it on a wide screen and left it two-up in a narrow pane.
    */
-  it("it stacks on the CARD's width, not the viewport's", () => {
+  it("⚠️ IT STACKS ON CONTENT, NOT ON A WIDTH — no query, no breakpoint", () => {
+    /* ⚠️ RE-POINTED, AND THE CLAIM IS STRONGER. This REQUIRED a container query and checked that
+       it restated the body's columns as one track — the right guard while a NUMBER decided the
+       stack. The contract's instruction is that flex-wrap decides, so the number is gone and what
+       is left to keep honest is its absence. */
     const css = readFileSync(join(here, "todoDock.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(css).toMatch(/\.tdk-w \{[^}]*container-type: inline-size/);
-    const at = css.indexOf("@container");
-    expect(at, "the card has no container query").toBeGreaterThan(-1);
-    const block = css.slice(at, css.indexOf("\n}", at));
-    const cols = /\.tdk-body \{[^}]*grid-template-columns:([^;}]+)/.exec(block);
-    expect(cols, "the container query does not restate the body's columns").toBeTruthy();
-    const tracks = cols![1].trim().replace(/minmax\([^)]*\)/g, "T").split(/\s+/).filter(Boolean);
-    expect(tracks).toHaveLength(1);
-    /* and no viewport query is doing the container's job for this card */
-    expect(css).not.toContain("@media (max-width: 900px)");
+    expect(css, "a container query is back in the pane").not.toContain("@container");
   });
 
   /**
@@ -1157,12 +1150,15 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
    * column's own `minmax(330px, 400px)` is what stops prose running long, without also deciding
    * the record's width.
    */
-  it("the card fills the pane — no cap competing with the column tracks", () => {
+  it("the CARDS fill the pane — no cap competing with the column tracks", () => {
+    /* ⚠️ RE-POINTED (contract run): `.tdk-w` WAS the card and carried this; it is the column's box
+       now, and the three `.tdk-fc` cards do the drawing. The claim — nothing here caps a width —
+       is asserted of both. */
     const w = dockCssRule(".tdk-w {");
-    expect(w).not.toContain("max-width");
-    expect(dockCssRule(".tdk-head {")).not.toContain("max-width");
-    /* the measure now lives where it only constrains the doing */
-    expect(dockCssRule(".tdk-body {")).toContain("minmax(300px, 360px)");
+    const fc = dockCssRule(".tdk-fc {");
+    expect(w, "the pane took a max-width").not.toContain("max-width");
+    expect(fc, "a card took a max-width").not.toContain("max-width");
+    expect(w).toContain("min-width: 0");
   });
 
   /**
@@ -1179,7 +1175,7 @@ describe("⚠️ THE HEAD ROW IS CHROME ABOUT THE CARD, and the arrows are the p
    * own declarations.
    */
   it("⚠️ the card reads `.f12-card`'s OWN four values — not a near-match", () => {
-    const rule = dockCssRule(".tdk-w {");
+    const rule = dockCssRule(".tdk-fc {")  /* ⚠️ the CARD is `.tdk-fc` now — three of them; `.tdk-w` is the column */;
     const f12 = readFileSync(join(here, "../shell/f12.css"), "utf8");
     /* ⚠️ ANCHORED ON THE LINE START. A bare `.f12-card {` matches inside `.qp-cols .f12-card {`,
        which is the 38-character override rule two lines above — so the slice read that instead and

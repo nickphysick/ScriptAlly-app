@@ -1526,6 +1526,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                   /* ⚠️ THE PAGE DERIVES THE MATERIALS because the package and its versions live
                      here; the card states what it is handed. */
                   materials={dockMaterials}
+                  /* ⚠️ THE SAME FIGURE THE ROW DRAWS — `figureFor`, not a second derivation. The
+                     pane and the rail cannot state different waits for one task. */
+                  figure={(c) => { const f = figureFor(c); return f.value ? { value: String(f.value), unit: f.unit ?? "" } : null; }}
                   sentPreviously={(c) => {
                     const q = c.relatedRecordId ? queries.find((x) => x.id === c.relatedRecordId) : undefined;
                     return formatQueryMaterials(q?.materialsWanted);

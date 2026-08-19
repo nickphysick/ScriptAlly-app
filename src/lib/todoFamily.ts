@@ -32,6 +32,20 @@ import { BoardCard } from "./todoBoard";
 export type BandFamily = "urgent" | "housekeeping" | "yours" | "done";
 
 /** The live families — what a card is while it still wants something from you. */
+/**
+ * The contract's own column classes for the three urgency groups — `.u-now` / `.u-house` /
+ * `.u-yours`, which its band gradients are written against.
+ *
+ * ⚠️ A NAMING MAP, NOT A SECOND GROUPING. `liveFamily` decides which pile a card is in and the
+ * list's section heads read the same function; this only says what the contract calls that pile.
+ * Keyed off `liveFamily`'s return type, so a fourth family cannot be added without landing here.
+ */
+export const GROUP_CLASS: Record<ReturnType<typeof liveFamily>, "now" | "house" | "yours"> = {
+  urgent: "now",
+  housekeeping: "house",
+  yours: "yours",
+};
+
 export function liveFamily(c: BoardCard): Exclude<BandFamily, "done"> {
   if (c.userTaskId || c.nature || c.stream === "nt") return "yours";
   /* the lane, not the glyph flag: STALE (`no_response_close`) lives in the hk lane with hk:false,

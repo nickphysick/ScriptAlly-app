@@ -353,8 +353,20 @@ export interface PanePresence {
 
 export function panePresence(c: BoardCard): PanePresence {
   const none: PanePresence = { tiles: false, figure: false, timeline: false };
-  /* the writer's own item — no query, no history, nothing to tile */
-  if (c.userTaskId || c.nature || c.stream === "nt") return none;
+  /**
+   * ⚠️ A NOTE KEEPS ITS TILES AND ITS FIGURE — REVERSED DELIBERATELY (contract run, D6), on the
+   * owner's own correction: "I wrote 'Note has no figure and no tiles' into a brief after drawing
+   * the mockup with both, and never reconciled them. The mockup is right."
+   *
+   * And it is right. A note HAS a real added-date and a real age, so the figure states something
+   * true; "Due · No date set" and "Attached to · Nothing" are the absent-data grammar doing exactly
+   * the job it exists for, rather than an empty frame. What it has no business showing is a
+   * TIMELINE — there is no query behind it and no history to draw.
+   *
+   * The reasoning this replaces was mine and it was thin: it read "no query" and concluded "nothing
+   * to state", which is true of the history and false of the other two.
+   */
+  if (c.userTaskId || c.nature || c.stream === "nt") return { tiles: true, figure: true, timeline: false };
   /* a cohort has no single record behind it */
   if (c.taskType === "materials_unrecorded_bulk") return none;
   /* a single record gap has a query, so it keeps its history — but the deed says what is missing,

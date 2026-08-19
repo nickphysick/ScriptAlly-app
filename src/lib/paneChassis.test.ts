@@ -55,8 +55,13 @@ describe("§2's presence table has ONE source", () => {
   const single = panePresence(card({ taskType: "materials_unrecorded" }));
   const send = panePresence(card({ taskType: "full_requested" }));
 
-  it("a note shows none of the three", () => {
-    expect(notePresence).toEqual({ tiles: false, figure: false, timeline: false });
+  it("⚠️ a note keeps its tiles and figure, and shows NO TIMELINE", () => {
+    /* ⚠️ REVERSED DELIBERATELY (contract run, D6), on the owner's own correction: the brief that
+       said "no figure and no tiles" was written after a mockup drawn WITH both, and never
+       reconciled. A note has a real added-date and a real age; "Due · No date set" and
+       "Attached to · Nothing" are the absent-data grammar working, not an empty frame. What it has
+       no business drawing is a history it does not have. */
+    expect(notePresence).toEqual({ tiles: true, figure: true, timeline: false });
   });
 
   it("⚠️ the two materials tasks differ on exactly ONE row — the single keeps its history", () => {
@@ -87,10 +92,16 @@ describe("the rim is a real clipping container", () => {
     expect(dockCss).not.toContain(".tdk-rim::before");
   });
 
-  it("⚠️ the card reveals it — 6px of padding, and the card no longer clips", () => {
+  it("⚠️ the CARD reveals it — and the card is `.tdk-fc` now, three of them", () => {
+    /* ⚠️ RE-POINTED (contract run, D1): `.tdk-w` WAS the single card. The contract has three
+       `.tdk-fc` cards in a column, each with its own rim; `.tdk-w` is the column's box and draws
+       nothing. The claim is unchanged — the card reveals the rim with 6px and does not itself clip
+       — it is simply asserted of the element that is now the card. */
+    const fc = dockCss.slice(dockCss.indexOf(".tdk-fc {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-fc {")));
+    expect(fc).toContain("padding: 6px");
+    expect(fc, "two clipping boxes would round the contents twice").not.toContain("overflow: hidden");
     const w = dockCss.slice(dockCss.indexOf(".tdk-w {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-w {")));
-    expect(w).toContain("padding: 6px");
-    expect(w, "two clipping boxes would round the contents twice").not.toContain("overflow: hidden");
+    expect(w, "the pane is drawing a card again").not.toContain("border-radius");
   });
 });
 
@@ -100,11 +111,11 @@ describe("the pane's cards share the Query Centre relationship", () => {
      comment. This is the assertion it should have been, written for the MATCH the frame run chose:
      both cards read the tokens, and the sampled literal is extinct in this sheet. */
   it("the outer card and the story card both read --line, and #ece4d9 is extinct", () => {
-    const w = dockCss.slice(dockCss.indexOf(".tdk-w {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-w {")));
-    const story = dockCss.slice(dockCss.indexOf(".tdk-story--card {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-story--card {")));
-    expect(w).toContain("border: 1px solid var(--line)");
-    expect(story).toContain("border: 1px solid var(--line)");
-    expect(story).toContain("border-radius: var(--r-lg)");
+    /* ⚠️ RE-POINTED: every card is `.tdk-fc` now, and the story sits INSIDE one rather than being
+       a card itself — so the relationship is asserted once, where the card is drawn. */
+    const fc = dockCss.slice(dockCss.indexOf(".tdk-fc {"), dockCss.indexOf("}", dockCss.indexOf(".tdk-fc {")));
+    expect(fc).toContain("border: 1px solid var(--line)");
+    expect(fc).toContain("border-radius: var(--r-lg)");
     expect(dockCss, "the mockup-sampled edge is back").not.toContain("#ece4d9");
   });
 });
@@ -134,17 +145,21 @@ describe("the band's three group tints", () => {
 });
 
 describe("the journey's grid", () => {
-  it("⚠️ ONE COLUMN UNTIL THE CONTAINER CAN AFFORD TWO — a 300px sibling left the form at 0px", () => {
-    const i = dockCss.indexOf(".tdk-jgrid {");
-    const base = dockCss.slice(i, dockCss.indexOf("}", i));
-    expect(base).toContain("grid-template-columns: minmax(0, 1fr)");
-    expect(base, "the two-column form must be behind a query, not the default").not.toContain("300px");
-    /* ⚠️ A CONTAINER QUERY, because the pane's width comes from the split, not the viewport */
-    /* ⚠️ 680 → 786 (frame run): 680 was a guess; 786 is derived — grid loses 50 to rim borders and
-       scroll padding, and side-by-side needs form 420 + gap 16 + timeline 300 = 736. Re-pointed,
-       not deleted. */
-    expect(dockCss).toContain("@container (min-width: 786px)");
-    expect(dockCss, "a media query would go two-column on a wide screen with a 350px pane")
-      .not.toMatch(/@media[^{]*\)\s*\{\s*\.tdk-jgrid/);
+  it("⚠️ FLEX-WRAP DECIDES STACKING — no query, no fixed width (contract run)", () => {
+    /* ⚠️ RE-POINTED FROM `.tdk-jgrid`, a grid behind `@container (min-width: 786px)`. That
+       threshold was carefully derived and was still a breakpoint: the layout jumped rather than
+       flowed, and 1440 sat permanently on the wrong side of it. The contract's instruction is a
+       wrapping flex row; this guards the absence of every gate that used to decide for it. */
+    const i = dockCss.indexOf(".tdk-workrow {");
+    expect(i, ".tdk-workrow has no rule").toBeGreaterThan(-1);
+    const row = dockCss.slice(i, dockCss.indexOf("}", i));
+    expect(row).toContain("flex-wrap: wrap");
+    expect(row).toContain("gap: 16px");
+    /* ⚠️ ASSERTED OVER `dockCss`, WHICH IS ALREADY COMMENT-STRIPPED — and it had to be. My own
+       note above says the words "@container" and "tdk-jgrid" while explaining their removal, and
+       an unstripped read matches the prose that documents the retirement. That is the source-lock
+       fault this codebase has paid for seven times in one session. */
+    expect(dockCss, "a container query is back in the pane").not.toContain("@container");
+    expect(dockCss, "the retired jgrid is back").not.toContain("tdk-jgrid");
   });
 });

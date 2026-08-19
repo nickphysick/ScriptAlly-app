@@ -289,8 +289,9 @@
    ⚠️ A CONTAINER QUERY, because the pane's width comes from the split rather than the viewport. */
 .pj-foot { flex-wrap: wrap; }
 
-.pj-hint { flex: 1 1 100%; margin-bottom: 2px; }
+.pj-hint { flex: 1 1 220px; min-width: 0; }
+/* ⚠️ A BASIS, NOT A BREAKPOINT. `flex: 1 1 220px` in a wrapping foot takes its own row the moment
+   220px stops fitting beside the buttons, and sits inline when it does — the same behaviour the
+   560px query gave, decided by the content instead of by a number. */
 
-@container (min-width: 560px) {
-  .pj-hint { flex: 0 1 auto; margin-bottom: 0; }
-}
+

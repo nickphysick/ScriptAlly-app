@@ -603,13 +603,20 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
    */
   it("the tracks refuse to be sized by their content, on BOTH axes", () => {
     const split = rule(splitCss, ".tdw-split {");
-    expect(split).toContain("grid-template-columns: var(--tdw-rail-w) minmax(0, 1fr)");
+    /* ⚠️ RE-POINTED (contract run, D7): the rail was a fixed token — 520, then 372 — and both stated
+       a width the browser could not argue with. It is a RANGE now, so the list gives when the shell
+       is tight and stops hoarding when it is generous. */
+    expect(split).toContain("grid-template-columns: minmax(260px, 340px) minmax(0, 1fr)");
     expect(split).toContain("grid-template-rows: minmax(0, 1fr)");
     /* the value, stated once and read once — the rail is a fixed measure, the workspace is what
        is left. 520 since the visual rebuild: the row gained a 68px bucket pill and a 104px figure
        column, and v9 draws the pane at 520. (It was 440, itself widened from the earlier ref's
        408 when the lane structure grew — the width has always followed the row.) */
-    expect(split).toContain("--tdw-rail-w: 372px");
+    /* ⚠️ RE-POINTED AGAIN, AND THIS TIME OFF A TOKEN ENTIRELY (contract run, D7). The rail was
+       520, then 372 — both fixed, both a width the browser could not argue with. The contract's
+       instruction is a RANGE, so there is no `--tdw-rail-w` left to pin. */
+    expect(split, "the rail is a fixed token again").not.toContain("--tdw-rail-w:");
+    expect(split).toContain("minmax(260px, 340px)");
     /* ⚠️ 520 → 372 (frame run): the list was the fixed track at 520 while the PANE took the
        leftovers — 350px at 1440 for the surface being worked on. 372 is the design's own row
        width; the no-ellipsis assertion in paneFrame.measure.ts is what keeps it honest. */

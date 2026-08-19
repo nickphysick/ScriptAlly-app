@@ -40,7 +40,7 @@ import { bandVariant, bandMotif, MaterialRow } from "../../lib/todoHandoff";
 import { DockMotif } from "./DockMotif";
 import { dockFlowKind, sendSpecFor, stepQueue, SendSpec } from "../../lib/todoDock";
 import { handoffFor, panePosition, paneSections, bandFacts, trackingStats, panePresence, bandPreline, bandDeed, bandSubline, bandSubject, bandUnder, HANDOFF_NOTE, BandFact, HolderRow, recordNote } from "../../lib/todoHandoff";
-import { liveFamily } from "../../lib/todoFamily";
+import { liveFamily, GROUP_CLASS } from "../../lib/todoFamily";
 import { cardFootHint, cardBucket } from "../../lib/todoBuckets";
 import { TASK_GROUP_META } from "../../lib/todoGroups";
 import "./todoDock.css";
@@ -124,6 +124,8 @@ export interface TodoDockProps {
   materials?: (card: BoardCard) => MaterialRow[];
   /** The "Sent previously" tile's one line — the query's own materials through `formatQueryMaterials`. */
   sentPreviously?: (card: BoardCard) => string | null;
+  /** The band's figure — the SAME `figureFor` the list row draws. One derivation, two surfaces. */
+  figure?: (card: BoardCard) => { value: string; unit: string } | null;
   /** The timeline, derived by the page from the activity log. */
   timeline: (card: BoardCard) => DockTimelineEvent[];
   /** The flow's ink act. `spec` is present only for the send flow. */
@@ -219,7 +221,7 @@ export interface TodoDockProps {
 
 
 export const TodoDock: React.FC<TodoDockProps> = ({
-  queue, card, activeKey, onSelect, onClose, timeline, materials, sentPreviously, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyRecord, onLeaveUnrecorded, recordSweep, onCommitRecordSweep, onDismissRecordSweep, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
+  queue, card, activeKey, onSelect, onClose, timeline, materials, sentPreviously, figure, holders, onPrimary, primaryLabel, onCommitSend, sweep, onCommitSweep, journeyKind, journeyGaps, journeyRecord, onLeaveUnrecorded, recordSweep, onCommitRecordSweep, onDismissRecordSweep, journeyHolders, replyBy, verbs, ask, queryMethod, onMore, tagsSlot, handoff,
 }) => {
   const surfaceRef = useRef<HTMLDivElement>(null);
   /* ⚠️ `confirmSend` IS RETIRED WITH THE CHECKBOX (Phase 6). It was the card's own copy of a
@@ -295,6 +297,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
   const stats = trackingStats(facts, !!(card.agentId || card.who));
   /* §2's presence table, once, so the tiles, the figure and the story card cannot disagree. */
   const presence = panePresence(card);
+  const bandFig = figure?.(card) ?? null;
   /**
    * ⚠️ THE TILES ARE THE STATS PLUS ONE: "Sent previously", which §2 names and the old three-stat
    * row had no equivalent of. It states what already went to this agent, so a writer recording a
@@ -377,7 +380,15 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             white panel with the band held off it by margins — "a second border inside the first",
             and the note removing it was right about that. This one is the frame the band fills TO.
             Different object, same colour. */}
-        <div className="tdk-rim">
+        {/* ⚠️ THE COLUMN CARRIES THE GROUP (D5), where the contract puts it, so the band, the
+            tiles and anything else inside the card read ONE ancestor. The group itself is still
+            `liveFamily`'s — the derivation that heads the list's own sections. The class moved;
+            the source did not, because a second mapping is the thing that drifts. */}
+        <div className={`tdk-v u-${GROUP_CLASS[liveFamily(card)]}`}>
+        {/* ⚠️ CARD 1 OF THREE — the header. Each card is its own `.tdk-fc` with its OWN `.tdk-rim`.
+            The pane was ONE card whose single rim wrapped band, tiles, form and timeline together;
+            three runs of assertions asked only "does a rim exist" and passed on it. */}
+        <div className="tdk-fc"><div className="tdk-rim">
         {/* ⚠️ THE DOCK-SEAL IS UNMOUNTED WITH THE PRIMARY IT RODE OVER (Phase 4) — the act is the
             command bar's now. `ArtSlot name="dock-seal"` and its 600ms are untouched in the sheet;
             the flourish returns the day a completion has a home in this surface again. */}
@@ -403,7 +414,7 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               `fam-*` set went wrong before: it keyed on urgency and painted nine cards of ten pink.
               `bandVariant` survives alongside it because the OFFER is a celebration rather than a
               group — one card, its own paper. */}
-          <div className={`tdk-band v-${bandVariant(card)} g-${liveFamily(card)}`}>
+          <div className={`tdk-band v-${bandVariant(card)} g-${liveFamily(card)}${presence.figure && bandFig ? "" : " nofig"}`}>
           <DockMotif motif={bandMotif(card)} />
           {/* ⚠️ NO MONOGRAM. It was an agency disc leading a surface whose job is to say what you
               are DOING; the writer already knows who they clicked. Removed rather than shrunk —
@@ -447,6 +458,16 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               facts beside a block that wraps, never the other way round. */}
           {/* ⚠️ THE BAND SHOWS THE ANCHOR ALONE. It showed both, and the stat pair three inches
               below showed the same two — one figure twice, in one glance. */}
+          {/* ⚠️ THE BAND'S FIGURE (D6) — Playfair numeral over a mono unit, per the contract. It is
+              the SAME `figureFor` the list row draws, handed in by the page: one derivation, two
+              surfaces, so the pane and the row can never state different waits. Gated on
+              `presence.figure`, which is the contract's own DATA table. */}
+          {presence.figure && bandFig && (
+            <span className="tdk-bandfig">
+              <span className="n">{bandFig.value}</span>
+              {bandFig.unit && <span className="u">{bandFig.unit}</span>}
+            </span>
+          )}
           {forward && (
             <span className="tdk-facts">
               {[forward].map((f) => (
@@ -502,6 +523,14 @@ export const TodoDock: React.FC<TodoDockProps> = ({
             ))}
           </div>
         )}
+        </div></div>
+
+        {/* ⚠️ A SIBLING OF THE HEADER CARD, NOT A DESCENDANT (D2) — the whole of the contract's
+            structure. Stacking is `flex-wrap`'s alone: no breakpoint, no container query, and no
+            stated width the browser cannot overrule. */}
+        <div className="tdk-workrow">
+        {/* CARD 2 — the act. */}
+        <div className="tdk-fc"><div className="tdk-rim"><div className="tdk-act">
         <EdgeFadeScroll
           /* ⚠️ THE FADE IS THE CARD'S GROUND, AND THE CARD IS WHITE NOW. It read `--paper`, which was
               correct while the body was parchment and would have drawn a cream mist over a white
@@ -519,14 +548,16 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           ) : cohort ? (
             <PaneSweep rule={cohort.rule} members={cohort.members} rows={rows} onChange={setSweepRows} />
           ) : draft ? (
-            /* ⚠️ THE STORY STANDS BESIDE THE FORM, NOT BEHIND IT (Phase E, §2). Opening a journey
-               used to REPLACE the timeline, so the writer lost the record they were recording
-               against at exactly the moment they were recording against it. Both are children of
-               one grid now; when presence says there is no timeline the form runs full width, which
-               `.tdk-jgrid--solo` does with a single column rather than an empty second track. */
-            <div className={`tdk-jgrid${presence.timeline ? "" : " tdk-jgrid--solo"}`}>
-            {/* ⚠️ A REAL CONTAINER, because `PaneJourney` returns a FRAGMENT. Without one its
-                children become direct children of the grid and each takes a cell of its own. */}
+            /* ⚠️ THE STORY STANDS BESIDE THE FORM — and it is a SIBLING CARD in the workrow now,
+               not a column of an inner grid. Opening a journey once REPLACED the timeline; then it
+               shared the form's grid inside one rim; the contract has it as its own card. */
+            /* ⚠️ A REAL CONTAINER, because `PaneJourney` returns a FRAGMENT — the contract's own
+               instruction. The SPLIT it feeds is the workrow, one level out, so this wraps the
+               journey and nothing else; the inner grid that held the timeline is gone with it.
+               ⚠️ AND IT IS A PLAIN BLOCK COMMENT, NOT A BRACED JSX ONE — at expression position,
+               before the element opens, the braced form parses as a block and tsc reports a
+               missing paren. (Writing the two forms out literally here closed this comment early
+               and produced exactly that error — the malformed-comment fault, in JS this time.) */
             <div className="tdk-jform">
             <PaneJourney
               kind={journeyKind?.(card) ?? "send"}
@@ -542,31 +573,6 @@ export const TodoDock: React.FC<TodoDockProps> = ({
               onChange={setDraft}
               onCancel={() => setDraft(null)}
             />
-            </div>
-            {presence.timeline && (
-              <aside className="tdk-story tdk-story--card" aria-label="Tracking">
-                <div className="tdk-storyhd">
-                  <span className="tdk-storyk">The story so far</span>
-                  <span className="tdk-storyn">{events.length}</span>
-                </div>
-                {events.length > 0 ? (
-                  <ol className="tdk-tl">
-                    {events.map((e) => (
-                      <li key={e.key}>
-                        <span className="tdk-tlw">{e.when}</span>
-                        <span className="tdk-tlt">{e.label}</span>
-                      </li>
-                    ))}
-                  </ol>
-                ) : <div className="tdk-storynone">Nothing logged yet.</div>}
-                {card.relatedRecordId && (
-                  <button type="button" className="tdk-storylink"
-                    onClick={() => verbs?.(card)?.openQuery.onPress()}>
-                    Open the full query →
-                  </button>
-                )}
-              </aside>
-            )}
             </div>
           ) : (
           <>
@@ -855,6 +861,39 @@ export const TodoDock: React.FC<TodoDockProps> = ({
           </>
           )}
         </EdgeFadeScroll>
+        </div></div></div>
+
+        {/* ⚠️ CARD 3 — the timeline, its own card with its own rim, a sibling of the act. It lived
+            INSIDE the journey's grid, inside the act's scroller, inside the one shared rim. */}
+            {presence.timeline && (
+              <div className="tdk-fc"><div className="tdk-rim">
+              <aside className="tdk-story tdk-story--card" aria-label="Tracking">
+                <div className="tdk-storyhd">
+                  <span className="tdk-storyk">The story so far</span>
+                  <span className="tdk-storyn">{events.length}</span>
+                </div>
+                {events.length > 0 ? (
+                  <ol className="tdk-tl">
+                    {events.map((e) => (
+                      <li key={e.key}>
+                        <span className="tdk-tlw">{e.when}</span>
+                        <span className="tdk-tlt">{e.label}</span>
+                      </li>
+                    ))}
+                  </ol>
+                ) : <div className="tdk-storynone">Nothing logged yet.</div>}
+                {card.relatedRecordId && (
+                  /* the contract's `.tl-foot` — its own band on --rimline, not a bare link */
+                  <div className="tdk-storyfoot">
+                    <button type="button" className="tdk-storylink"
+                      onClick={() => verbs?.(card)?.openQuery.onPress()}>
+                      Open the full query →
+                    </button>
+                  </div>
+                )}
+              </aside>
+              </div></div>
+            )}        </div>
 
         {/* ── THE FOOT ─────────────────────────────────────────────────────
             The flow's ink primary, the two quiet verbs, and where you are going next. */}

@@ -47,57 +47,60 @@
  *     well would draw the edge twice;
  *   · the GRAIN, at the app's own 0.03 slope — the same turbulence the manuscript plate uses.
  */
+/* ⚠️ THE PANE IS NO LONGER A CARD (contract run, D1). It held the white, the edge, the radius and
+   the single rim; the contract has THREE cards in a column inside it, each with its own. This is
+   the column's box and nothing else — the cards do the drawing. */
 .tdk-w {
   position: relative;
-  /**
-   * ⚠️ THE CARD FILLS THE PANE — and the 640px cap I kept here is what inverted Phase 3's columns.
-   * Measured at 1920: the body resolved to `162px 400px`, the RECORD on 162 and the doing on 400,
-   * which is precisely the fault Phase 3 was meant to fix. The arithmetic: a 640 card leaves 592
-   * of content, minus the 30px gap is 562 — and the doing column's `minmax(330px, 400px)` takes
-   * 400 of that, so the fr track can only ever have 162. The track numbers are the ref's and they
-   * are right; the cap was mine and it was wrong. Two columns need 330 + 30 + 330 = 690 of content
-   * before the record gets an equal share, which a 640 card can never provide.
-   *
-   * ⚠️ AND THE REF SAYS SO IN ITS OWN COMMENT: "the card fills the pane; the frame is the
-   * workspace edge". `.f11` has `flex: 1` and no max-width. The pane is already bounded by the
-   * split, so the pane is the measure — a second cap inside it was one constraint too many.
-   */
-  /* ⚠️ THE QUERY CENTRE'S OWN VALUES — AND THE WHITE WAS READ OFF THE RENDERED PANEL, NOT OFF
-     `.f12-card`'s DECLARATION. That distinction is the whole of this note. `.f12-card` declares
-     `background: var(--panel)` (#fffdfb), but the Tracking panel sits inside `.qp-cols`, and
-     the rule `.qp-cols .f12-card` sets `background: var(--white)` and is more specific. Measured on the
-     deployed page: `rgb(255, 255, 255)`. Reading the base rule would have produced a near-match
-     that was wrong by exactly the amount nobody can see and everybody can feel.
-     The other three ARE the base rule's, and are unshadowed: `--line`, `--r-lg`, `--sh-1`. */
-  /* ⚠️ THE QUERY CENTRE RELATIONSHIP IS THE DECISION NOW, NOT A DEVIATION HELD OPEN. The chassis
-     run kept these tokens over the mockup's sampled #ece4d9/14px and flagged the choice for the
-     morning; the frame brief answered it — "a relationship beats a sample". `--white`, `--line`,
-     `--r-lg`, `--sh-1`, all coupled to `.f12-card` by a live lock, and the story card inside the
-     rim now reads the same pair. The 6px reveal and the rim remain the pane's own, additive. */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* the column: three cards, contract gap 16 */
+.tdk-v {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* ⚠️ ONE CARD, THREE TIMES — `.fc` in the contract. The QC relationship stands for the colour
+   (`--line` over the contract's #ece4d9, settled and re-affirmed) and the geometry is the
+   contract's: 14px radius, 6px of reveal, the rim inside it. */
+.tdk-fc {
+  box-sizing: border-box;
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  /* §2 — the reveal that makes the rim a frame rather than a doubled edge */
   padding: 6px;
   box-shadow: var(--sh-1);
-  /* ⚠️ NO `overflow: hidden` HERE — the RIM clips now. Two clipping boxes would round the contents
-     twice, and the outer one would cut the rim's own corners. */
-  display: flex;
-  flex-direction: column;
-  /* ⚠️ THE CARD REACHES THE BOTTOM OF THE PANE. This replaced a `min-height: 340px` content floor,
-     which left a stub card floating in a tall pane; `.tdw-work` still scrolls when the record
-     outgrows it. The READING MEASURE is the doing column's own `minmax(330px, 400px)` now — the
-     bounded track is what stops prose running long, which is a better place for it than a cap on
-     the whole card that also decided the record's width.
-     ⚠️ `box-sizing` IS DECLARED rather than inherited, because the maths depends on it. */
-  box-sizing: border-box;
-  /* ⚠️ `flex: 1; min-height: 0` REPLACES `min-height: 100%`. The old rule made the card at least as
-     tall as the pane and let it grow PAST it, which is how a long record produced a card with no
-     bottom edge on screen; this makes it exactly the remaining height, so its body is the thing
-     that scrolls. */
-  flex: 1;
-  min-height: 0;
+  min-width: 0;
 }
+
+/* the act card is the one that scrolls, so it owns the column's spare height */
+.tdk-workrow > .tdk-fc:first-child { flex: 1 1 420px; min-height: 0; display: flex; flex-direction: column; }
+
+.tdk-workrow > .tdk-fc:first-child > .tdk-rim {
+  box-sizing: border-box;
+  border: 1px solid rgba(124, 58, 42, 0.28);
+  border-radius: 9px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ⚠️ THE TIMELINE CARD IS A BASIS, NOT A WIDTH — `flex: 0 1 300px` with a 240 floor, so it gives
+   before it wraps and wraps before it crushes. A fixed 300 is what would sneak back in here. */
+.tdk-workrow > .tdk-fc:last-child { flex: 0 1 300px; min-width: 240px; }
+
+/* the contract's act padding */
+.tdk-act { padding: 21px 24px 22px; min-width: 0; display: flex; flex-direction: column; min-height: 0; flex: 1; }
+
 
 /* ── THE RIM (chassis §2) ─────────────────────────────────────────────────────────────────────
    ⚠️ A REAL CLIPPING CONTAINER. It carries the hairline, the smaller radius and `overflow: hidden`,
@@ -160,7 +163,7 @@
   display: flex;
   align-items: flex-start;
   gap: var(--tdk-band-gap);
-  padding: 16px var(--tdk-band-px) 14px;
+  padding: 20px 24px 18px;
   position: relative;
   overflow: hidden;
   /* ⚠️ FLUSH, NOW THE FRAME IS GONE. This carried `margin: 6px 6px 0` to stay inside the inset
@@ -188,7 +191,7 @@
   display: block;
   font-family: "Playfair Display", Georgia, serif;
   /* §2 — 26px/500, the deed is the largest thing in the pane */
-  font-size: 26px; font-weight: 500; color: #3a1c14; line-height: 1.12;
+  font-size: 27px; font-weight: 500; color: #3a1c14; line-height: 1.12;
   overflow-wrap: anywhere;
 }
 
@@ -303,7 +306,23 @@
    gradient overlays off `.tdk-scroll` and sets the scroller's own `flex`/`min-height`/`overflow`
    inline, so the height chain terminates here rather than on `.tdk-body`. */
 .tdk-scroll { flex: 1; min-height: 0; }
-.tdk-body { padding: 18px 24px 6px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 0 30px; align-content: start; min-height: 0; }
+.tdk-body {
+  /* ⚠️ FLUID, LIKE THE WORKROW ABOVE IT (contract run). This was a two-column grid behind
+     `@container (max-width: 800px)` — the last breakpoint in the pane. A wrapping flex row does
+     the same job without a number: the record takes what it needs, the doing column gives to 300
+     and wraps beneath when it cannot. */
+  padding: 18px 24px 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 30px;
+  align-content: start;
+  min-height: 0;
+  min-width: 0;
+}
+
+.tdk-body > .tdk-story, .tdk-body > .tdk-noteown { flex: 1 1 320px; min-width: 0; }
+
+.tdk-body > .tdk-work { flex: 1 1 300px; min-width: 0; }
 .tdk-story { min-width: 0; }
 .tdk-work { min-width: 0; border-left: 1px solid var(--hairline); padding-left: 30px; }
 .tdk-storyk {
@@ -326,10 +345,7 @@
 /* ⚠️ THE THRESHOLD IS WHERE THE RECORD CAN ACTUALLY BE THE WIDER COLUMN, not an arbitrary narrow
    step. Below ~800px of card the doing's 360 max would leave the fr track less than itself, which
    is a two-column layout that breaks the law it exists to serve — so it stacks instead. */
-@container (max-width: 800px) {
-  .tdk-body { grid-template-columns: minmax(0, 1fr); gap: 16px 0; }
-  .tdk-work { border-left: 0; padding-left: 0; border-top: 1px solid var(--hairline); padding-top: 16px; }
-}
+
 
 .tdk-t {
   font-family: "Playfair Display", Georgia, serif;
@@ -440,11 +456,12 @@
    full width, and goes back inline once there is room. The buttons still never wrap. */
 .tdk-foot { align-items: center; flex-wrap: wrap; }
 
-.tdk-foothint { flex: 1 1 100%; margin-bottom: 2px; }
+.tdk-foothint { flex: 1 1 220px; min-width: 0; }
+/* ⚠️ A BASIS, NOT A BREAKPOINT. `flex: 1 1 220px` in a wrapping foot takes its own row the moment
+   220px stops fitting beside the buttons, and sits inline when it does — the same behaviour the
+   560px query gave, decided by the content instead of by a number. */
 
-@container (min-width: 560px) {
-  .tdk-foothint { flex: 0 1 auto; margin-bottom: 0; }
-}
+
 
 /* ⚠️ BLACK MEANS "THIS ADVANCES" — the same grammar as the calendar's confirm and the bar's Action,
    reading the token rather than restating a near-black hex. */
@@ -772,10 +789,13 @@
    ⚠️ DIVIDED BY THE INTERNAL DIVIDER, AND NOT AFTER THE LAST. §2's rule; a trailing rule draws an
    edge the card already has. */
 .tdk-tiles {
-  display: flex;
-  align-items: stretch;
+  /* ⚠️ AUTO-FIT DECIDES THE COLUMN COUNT — no `.n4`/`.n3` classes and no breakpoint. Four tiles
+     across at full width, two-up when 150px each stops fitting, one when it must; the browser
+     counts, not a media query and not a React prop. */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   background: #ffffff;
-  padding: 12px 22px;
+  padding: 0;
 }
 
 .tdk-tile {
@@ -818,15 +838,6 @@
 }
 
 /* ⚠️ ABSENCE IS SAID, in §2's muted mono — never an empty tile and never a zero. */
-/* ⚠️ TWO-BY-TWO WHERE ONE ROW CANNOT HOLD THEM — and the boundary is measured, not chosen: at the
-   1440 frame the container is 486 and three tiles sit one row with ~150 each; in the 390 stack it
-   is ~220 and a row of three is three slivers. Below 360 the row becomes a two-column grid and the
-   interior dividers come off — a border between wrapped cells reads as a broken table. */
-@container (max-width: 360px) {
-  .tdk-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
-  .tdk-tile { border-right: 0; padding: 0; }
-}
-
 .tdk-tilenone {
   display: block;
   font-family: "JetBrains Mono", ui-monospace, monospace;
@@ -841,45 +852,23 @@
    ⚠️ THE STORY STANDS BESIDE THE FORM, in one grid, 300px and a 16px gap. It used to be REPLACED
    by the journey, so the writer lost the record they were recording against at the moment they
    were recording against it. */
-/* ⚠️ ONE COLUMN BY DEFAULT, AND THIS IS THE FINDING OF PHASE E. §2 asks for a 300px timeline
-   BESIDE the form. Measured at 1440: the pane is 350px wide, the rim 336 and the grid 286 — so a
-   300px sibling left the form at EXACTLY 0px, holding a full rendered journey. That is the
-   grid-collapse fault this codebase already has a note about, arriving through a design value
-   rather than through a flex chain.
+/* ── §"workspace" · THE WORKROW IS A WRAPPING FLEX ROW, AND FLEX-WRAP IS THE ONLY THING THAT
+   DECIDES STACKING (contract run). It was a grid behind an `@container (min-width: 786px)` gate —
+   a threshold I derived carefully and which was still a breakpoint, so the layout jumped rather
+   than flowed and 1440 sat permanently on the wrong side of it.
 
-   The card is a reading measure, not a workspace; the ref that specified 300px beside a form was
-   drawn against something wider than this pane ever is. So the story STACKS beneath the form until
-   the container can actually afford both — still its own sibling card in the same grid, which is
-   what §2's structural claim is about, just not always to the right of it.
-
-   ⚠️ A CONTAINER QUERY, NOT A MEDIA QUERY. The pane's width is set by the split, not the viewport
-   — `.tdk-w` already declares `container-type: inline-size` for exactly this. A media query would
-   go two-column on a wide screen whose pane is still 350px. */
-.tdk-jgrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+   `flex: 1 1 420px` on the form and `flex: 0 1 300px; min-width: 240px` on the timeline: the row
+   holds both while it can, and wraps the moment 420 + 16 + 240 stops fitting. No width is stated
+   anywhere that the browser cannot overrule. */
+.tdk-workrow {
+  display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   align-items: start;
-  min-height: 0;
+  min-width: 0;
 }
 
-/* ⚠️ 786, DERIVED FROM THE MEASURED CHAIN — not 680, which was a guess, and not the brief's 740.
-   The container is `.tdk-w`'s content box; the grid inside it loses 50 (rim borders 2 + scroll pad
-   24/24). Side-by-side needs grid ≥ form 420 + gap 16 + timeline 300 = 736 → container ≥ 786.
-
-   Where that lands after the frame rebalance (frame-measurements.md):
-     1440 → container 486 → STACKED, form = the full 436
-     1680 → container 726 → stacked, form 676
-     1920 → container 966 → SIDE BY SIDE, form 600, timeline 300
-   The 420 floor is the brief's own and it is MET AT EVERY VIEWPORT this way — what changes with
-   width is only whether the timeline sits beside the form or below it. */
-@container (min-width: 786px) {
-  .tdk-jgrid { grid-template-columns: minmax(0, 1fr) 300px; }
-}
-
-/* ⚠️ ONE COLUMN, NOT AN EMPTY SECOND TRACK. §2: "when the timeline is absent the form runs full
-   width" — a 300px empty track would keep the form narrow for a card that has nothing to show. */
-.tdk-jgrid--solo { grid-template-columns: minmax(0, 1fr); }
+.tdk-jform { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; }
 
 /* ⚠️ THE STORY CARD JOINS THE QUERY CENTRE RELATIONSHIP (frame run, Phase 5 — Nick's call: "a
    relationship beats a sample"). Its #ece4d9 was the last survivor of the mockup-sampled values;
@@ -938,3 +927,64 @@
 /* ⚠️ A NOTE'S WORDS TAKE THE STORY COLUMN'S BOX WITHOUT BEING A STORY — same measure, no header,
    no Tracking. §2 gives a note no timeline; it does not take away the note. */
 .tdk-noteown { min-width: 0; }
+
+
+/* ⚠️ `.nofig` — the contract's own modifier. With no figure the band's buttons align to the top
+   rather than to a numeral that is not there. */
+.tdk-band.nofig { align-items: flex-start; }
+
+/* D13 — the contract's tile metrics */
+.tdk-tile { padding: 14px 20px 15px; }
+
+.tdk-tilek { font-weight: 500; }
+
+/* the sub line under a tile value — Inter 10.5/300, its own block */
+.tdk-tilesub {
+  display: block;
+  font-family: "Source Sans Pro", system-ui, sans-serif;
+  font-size: 10.5px;
+  font-weight: 300;
+  color: #8a7a6c;
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+/* D4 — the timeline card's head and foot sit on --rimline, per the contract */
+.tdk-storyhd { border-bottom: 1px solid rgba(124, 58, 42, 0.13); padding: 12px 17px; margin: 0; }
+
+.tdk-storyfoot { border-top: 1px solid rgba(124, 58, 42, 0.13); padding: 11px 17px; }
+
+.tdk-story--card { background: var(--white); border: 0; border-radius: 0; padding: 0; }
+
+.tdk-story--card .tdk-tl { padding: 15px 17px 17px; }
+
+
+/* ── THE BAND'S FIGURE (contract `.bandfig`) ──────────────────────────────────────────────────
+   ⚠️ THE UNIT SITS UNDER THE NUMERAL, NOT BESIDE IT. Inline they read as one word — measured
+   "10weeks" on the send card — and the contract stacks them: Playfair 33 over mono 8.5 at 0.13em
+   with 4px between. */
+.tdk-bandfig { text-align: right; flex-shrink: 0; }
+
+.tdk-bandfig .n {
+  display: block;
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 33px;
+  font-weight: 500;
+  line-height: 1;
+  color: #3a1c14;
+}
+
+.tdk-bandfig .u {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  color: #9c8878;
+}
+
+/* the housekeeping and yours bands take their own figure ink, as the deed does */
+.tdk-band.g-housekeeping .tdk-bandfig .n { color: #2e3a2c; }
+
+.tdk-band.g-yours .tdk-bandfig .n { color: #3a2c14; }
