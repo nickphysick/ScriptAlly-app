@@ -147,3 +147,22 @@ derivations against each other, never against a number typed by hand.
 
 tsc 0 · production build 0 (grepped whole output) · vitest **330 files, 5776 passed, 2 skipped**
 · qcMatch 12/12 · paneChassis 72/72 · paneFrame 32/32 · contract 91/93 (the two above).
+
+---
+
+## Deployed to dev — 19 Aug, `b04c180`
+
+`npm run build:dev` (whole output grepped: no error, no `[WARNING]`, no `css-syntax-error`) then
+`firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`. Hosting only —
+nothing in this pass touched functions or rules.
+
+**Verified on the deployed site, not on the CLI's word.** The served bundle is
+`index-D4-owRei.css`, byte-identical in name to the one built here. Checked in `dist/` before
+deploying, consumption → definition: **all 40 tokens the pane reads resolve to a definition in the
+shipped bundle**, and `--content-gutter-tight` / `--tdk-rim` / `--tdk-rimline` are all present.
+(The first grep for those three returned zero and it was the grep, not the build — esbuild keeps
+the space after the colon in a custom property's value.)
+
+Against `https://scriptally-dev.web.app`: **qcMatch 12/12**, paneChassis 72/72, paneFrame 32/32,
+contract 91/93 (the two `chase`/`fix1` reachability reds, which were red on the previous deploy
+too). Screenshots from the deployed site: `reports/qc-match/dev/`.
