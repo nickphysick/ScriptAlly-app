@@ -56,9 +56,19 @@ test("contract", async ({ page }) => {
   add("D7 · the rail is fluid, not a fixed px track",
       !/--tdw-rail-w:\s*\d+px/.test(bare),
       (css.match(/--tdw-rail-w:[^;]*/) ?? ["absent"])[0]);
-  add("D7 · page columns are minmax(260px, 340px) minmax(0, 1fr)",
-      /minmax\(\s*260px\s*,\s*340px\s*\)\s+minmax\(\s*0\s*,\s*1fr\s*\)/.test(bare.replace(/\s+/g, " ")),
-      (css.replace(/\s+/g, " ").match(/grid-template-columns:[^;]*minmax\(0, ?1fr\)[^;]*/) ?? ["not found"])[0].slice(0, 70));
+  /* ⚠️ RE-POINTED, AND THE BRIEF'S OWN GRID IS WHY. `minmax(260px, 340px) minmax(0, 1fr)` is right
+     wherever both tracks fit and produces a ZERO-WIDTH pane at 390, where the container is ~346:
+     the first track takes 340 and the second resolves to nothing. A grid cannot wrap, and with no
+     breakpoint left there is nothing to catch it — measured, pane w=0. The same two numbers as
+     flex bases wrap instead, which is the brief's own closing rule: flex-wrap decides stacking. */
+  add("D7 · the page is a wrapping row carrying the brief's two bases",
+      /\.tdw-split\s*\{[^}]*flex-wrap:\s*wrap/.test(bare.replace(/\s+/g, " ").replace(/\{ /g, "{"))
+        || /flex-wrap: wrap/.test((bare.match(/\.tdw-split \{[^}]*\}/) ?? [""])[0]),
+      (bare.match(/\.tdw-split \{[^}]*\}/) ?? ["not found"])[0].replace(/\s+/g, " ").slice(0, 100));
+  add("D7 · the list asks 340 and floors at 260; the pane asks 420",
+      /\.tdw-split > \.tdw-rail \{[^}]*flex: 0 1 340px[^}]*min-width: 260px/.test(bare)
+        && /\.tdw-split > \.tdw-work \{[^}]*flex: 1 1 420px/.test(bare),
+      (bare.match(/\.tdw-split > \.tdw-rail \{[^}]*\}/) ?? ["not found"])[0].replace(/\s+/g, " ").slice(0, 80));
   add("D9 · tiles are repeat(auto-fit, minmax(150px, 1fr))",
       /repeat\(\s*auto-fit\s*,\s*minmax\(\s*150px\s*,\s*1fr\s*\)\s*\)/.test(bare.replace(/\s+/g, " ")),
       (css.replace(/\s+/g, " ").match(/\.tdk-tiles\s*\{[^}]*/) ?? ["not found"])[0].slice(0, 90));

@@ -606,8 +606,17 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
     /* ⚠️ RE-POINTED (contract run, D7): the rail was a fixed token — 520, then 372 — and both stated
        a width the browser could not argue with. It is a RANGE now, so the list gives when the shell
        is tight and stops hoarding when it is generous. */
-    expect(split).toContain("grid-template-columns: minmax(260px, 340px) minmax(0, 1fr)");
-    expect(split).toContain("grid-template-rows: minmax(0, 1fr)");
+    /* ⚠️ RE-POINTED AGAIN (contract run): the split is a WRAPPING ROW, not a grid. The brief's
+       `minmax(260px, 340px) minmax(0, 1fr)` gave a zero-width pane at 390 — the first track takes
+       340 of a ~346 container and the second resolves to nothing, and a grid cannot wrap. The same
+       two numbers as flex bases do. */
+    expect(split).toContain("flex-wrap: wrap");
+    expect(split, "a grid track is back").not.toContain("grid-template-columns");
+    /* ⚠️ THE VERTICAL CLAIM SURVIVES THE MECHANISM CHANGE. `grid-template-rows: minmax(0, 1fr)` was
+       how a GRID refused to be sized by its content; a flex column refuses with `min-height: 0`,
+       which the split already declares. Same law, stated in the language the container now speaks. */
+    expect(split).toContain("min-height: 0");
+    expect(split, "a grid row track is back").not.toContain("grid-template-rows");
     /* the value, stated once and read once — the rail is a fixed measure, the workspace is what
        is left. 520 since the visual rebuild: the row gained a 68px bucket pill and a 104px figure
        column, and v9 draws the pane at 520. (It was 440, itself widened from the earlier ref's
@@ -616,7 +625,10 @@ describe("⚠️ TWO PANES, TWO SCROLLERS, AND THE FRAME STILL NEVER SCROLLS", (
        520, then 372 — both fixed, both a width the browser could not argue with. The contract's
        instruction is a RANGE, so there is no `--tdw-rail-w` left to pin. */
     expect(split, "the rail is a fixed token again").not.toContain("--tdw-rail-w:");
-    expect(split).toContain("minmax(260px, 340px)");
+    /* the two bases live on the CHILDREN now — the row itself only says how it wraps */
+    const css = readFileSync(join(here, "todoSplit.css"), "utf8");
+    expect(css).toContain("flex: 0 1 340px");
+    expect(css).toContain("min-width: 260px");
     /* ⚠️ 520 → 372 (frame run): the list was the fixed track at 520 while the PANE took the
        leftovers — 350px at 1440 for the surface being worked on. 372 is the design's own row
        width; the no-ellipsis assertion in paneFrame.measure.ts is what keeps it honest. */

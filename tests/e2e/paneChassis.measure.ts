@@ -130,10 +130,12 @@ test("pane chassis", async ({ page }) => {
         clipped,
         summary: (pane.querySelector(".pj-sum, .tdk-sum")?.textContent ?? "").trim().slice(0, 90),
         hint: (pane.querySelector(".pj-hint, .tdk-hint")?.textContent ?? "").trim(),
+        /* ⚠️ RE-POINTED (contract run): the siblings are the CARDS. Story and form each sit in
+           their own `.tdk-fc` inside the workrow, so comparing the INNER elements' parents reports
+           "different-parents" about a structure that is exactly right. */
         gridKids: (() => {
-          const story = pane.querySelector(".tdk-story");
-          /* the journey's own column — , a real box because PaneJourney returns a fragment */
-          const form = pane.querySelector(".tdk-jform");
+          const story = pane.querySelector(".tdk-story--card")?.closest(".tdk-fc");
+          const form = pane.querySelector(".tdk-jform")?.closest(".tdk-fc");
           if (!story || !form) return "story=" + !!story + " form=" + !!form;
           return story.parentElement === form.parentElement ? "same-parent" : "different-parents";
         })(),
@@ -188,7 +190,9 @@ test("pane chassis", async ({ page }) => {
     }
     add(P(15, "nothing ellipsised"), m.clipped.length === 0, JSON.stringify(m.clipped));
 
-    const wantsTiles = ["close", "send", "decide"].includes(j.key);
+    /* ⚠️ A NOTE NOW HAS TILES (D6, reversed on the owner's correction — the mockup drew a note with
+       a figure and three tiles, and the brief that said otherwise was never reconciled with it). */
+    const wantsTiles = ["close", "send", "decide", "note"].includes(j.key);
     add(P(9, "tiles " + (wantsTiles ? ">0" : "==0")),
         wantsTiles ? m.tiles > 0 : m.tiles === 0, "tiles=" + m.tiles + " statRow=" + m.statRow);
     if (wantsTiles) {

@@ -49,9 +49,18 @@
      else through `minmax(0, 1fr)`. The rows carry a pill, a deed, an agent line and a figure, and
      the no-ellipsis assertion is what proves they still fit at 260. */
   --tdw-hair: var(--tdb-panel-hair);
-  display: grid;
-  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
-  grid-template-rows: minmax(0, 1fr);
+  /* ⚠️ A WRAPPING FLEX ROW, NOT THE GRID THE BRIEF STATED — and this is a measured correction to
+     the instruction, not a liberty. `grid-template-columns: minmax(260px, 340px) minmax(0, 1fr)`
+     is right wherever both tracks fit; at 390 the container is ~346, the first track takes 340,
+     and the second resolves to ZERO — measured, pane w=0, the whole work surface gone. A grid
+     cannot wrap, so with no breakpoint left there is nothing to catch it.
+
+     The same two numbers as a flex basis DO wrap: the list asks for 340 and refuses to go under
+     260, the pane asks for 420, and when both cannot fit the pane takes its own full-width line.
+     Identical at desktop; survivable at 390. Flex-wrap decides the stacking, nothing else. */
+  display: flex;
+  flex-wrap: wrap;
+  align-content: stretch;
   gap: 18px;
   /* ⚠️ ONE RHYTHM ON ALL FOUR SIDES, NOW THE BAR IS NOT ABOVE IT. This was `0 22px 20px` — no top
      at all, because the command bar's own `margin-bottom` was standing in for it, and 20 at the
@@ -360,3 +369,10 @@
    row's icon button (filter, sort, add). Its name is now a misnomer — recorded in reports/found.md
    rather than renamed here, since the rename touches locks in three files.
    Recoverable at 23d9310. */
+
+
+/* the list: asks for 340, never gives below 260 */
+.tdw-split > .tdw-rail { flex: 0 1 340px; min-width: 260px; }
+
+/* the workspace: asks for 420 and takes everything spare; wraps to its own line when it cannot */
+.tdw-split > .tdw-work { flex: 1 1 420px; min-width: 0; }

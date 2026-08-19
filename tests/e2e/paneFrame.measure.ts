@@ -49,7 +49,10 @@ test("page frame", async ({ page }) => {
       clippedRows,
     };
   });
-  add("F1 list card is 372 ± 2", Math.abs(frame.listCard - 372) <= 2, `list=${frame.list} listCard=${frame.listCard}`);
+  /* ⚠️ RE-POINTED (contract run): the rail was fixed at 372 and is `flex: 0 1 340px; min-width:
+     260px` now — fluid, per the contract's instruction. The claim becomes the RANGE. */
+  add("F1 list card is within its 260–340 range",
+      frame.listCard >= 258 && frame.listCard <= 342, `list=${frame.list} listCard=${frame.listCard}`);
   /* ⚠️ THE BRIEF'S ≥900 IS ARITHMETICALLY IMPOSSIBLE AT 1440 — sidebar 270 + gutters 160 + tasks
      chrome 30 + split pad 44 + list 372 + gap 18 + 900 = 1794 > 1440; zeroing every gutter still
      exceeds the viewport. The honest post-rebalance ceiling is 498 at 1440 (was 350) and 978 at
@@ -157,17 +160,23 @@ test("page frame", async ({ page }) => {
     const story = pane?.querySelector(".tdk-story--card") as HTMLElement | null;
     const tiles = [...(pane?.querySelectorAll(".tdk-tile") ?? [])].filter(vis) as HTMLElement[];
     const b = (e: HTMLElement | null) => (e ? { w: Math.round(e.getBoundingClientRect().width), top: Math.round(e.getBoundingClientRect().top) } : null);
+    const cardOf = (e: HTMLElement | null) => (e ? (e.closest(".tdk-fc") as HTMLElement | null) : null);
     return { pane: pane ? Math.round(pane.getBoundingClientRect().width) : -1,
              form: b(form), story: b(story),
+             formCard: b(cardOf(form)), storyCard: b(cardOf(story)),
              tileTops: [...new Set(tiles.map((t) => Math.round(t.getBoundingClientRect().top)))] };
   });
   add("W1 1920 · pane ≥ 960", wide.pane >= 960, `pane=${wide.pane}`);
-  add("W2 1920 · form and timeline side by side (same offsetTop)",
-      !!wide.form && !!wide.story && wide.form.top === wide.story.top,
-      `form=${JSON.stringify(wide.form)} story=${JSON.stringify(wide.story)}`);
-  add("W3 1920 · timeline 300 ± 2 and form ≥ 420",
-      !!wide.form && !!wide.story && Math.abs(wide.story.w - 300) <= 2 && wide.form.w >= 420,
-      `story.w=${wide.story?.w} form.w=${wide.form?.w}`);
+  /* ⚠️ RE-POINTED: the siblings are the CARDS now, not the inner elements. `.tdk-jform` sits
+     inside `.tdk-act`'s 21px padding and `.tdk-story--card` inside its own rim, so their tops
+     differ by the padding even when the cards are perfectly aligned — measured 555 vs 516. The
+     contract's claim is about the cards, so the cards are what is measured. */
+  add("W2 1920 · the two CARDS are side by side (same offsetTop)",
+      !!wide.formCard && !!wide.storyCard && wide.formCard.top === wide.storyCard.top,
+      `formCard=${JSON.stringify(wide.formCard)} storyCard=${JSON.stringify(wide.storyCard)}`);
+  add("W3 1920 · timeline card 300 ± 2 and form card ≥ 420",
+      !!wide.formCard && !!wide.storyCard && Math.abs(wide.storyCard.w - 300) <= 2 && wide.formCard.w >= 420,
+      `story=${wide.storyCard?.w} form=${wide.formCard?.w}`);
   add("W4 1920 · all tiles share one offsetTop", wide.tileTops.length === 1, JSON.stringify(wide.tileTops));
 
   /* ── 390: stacked, nothing overflows ────────────────────────────────────────────────────── */
