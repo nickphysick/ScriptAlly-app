@@ -100,11 +100,14 @@
 .plc-label { font-size: 13px; font-weight: 600; line-height: 1.3; }
 .plc-sub { font-size: 11px; line-height: 1.4; margin-top: 2px; }
 
+/* ⚠️ NO `nowrap` (law 4). "1 (lifetime)" is a VALUE, not a chip label, and at a narrow column it
+   must be allowed to take a second line rather than push the row wider than its cell. The chip
+   above keeps its nowrap because a two-line "CURRENT" pill is not a pill. */
 .plc-figure {
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 11.5px;
   color: #3a1c14;
-  white-space: nowrap;
+  text-align: right;
   flex-shrink: 0;
   padding-top: 1px;
 }

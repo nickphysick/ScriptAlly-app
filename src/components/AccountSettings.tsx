@@ -216,7 +216,7 @@ const VerifiedChip: React.FC<{ verified: boolean }> = ({ verified }) => (
 
 /** A group heading inside a section — mono, muted, the same grammar as the rail's SETTINGS label. */
 const GroupLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <p style={{ ...labelStyle, marginTop: 18, marginBottom: 2, color: mutedInk }}>{children}</p>
+  <p className="acct-grouplabel">{children}</p>
 );
 
 /**
@@ -246,8 +246,8 @@ const ToggleRow: React.FC<{
     }}
   >
     <div style={{ minWidth: 0 }}>
-      <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>{title}</p>
-      <p style={helpText}>{desc}</p>
+      <p className="acct-rowtitle">{title}</p>
+      <p className="acct-note">{desc}</p>
     </div>
     <button
       type="button"
@@ -300,7 +300,7 @@ const InertNotice: React.FC<{ children: React.ReactNode }> = ({ children }) => (
       marginBottom: 16,
     }}
   >
-    <span style={helpText}>{children}</span>
+    <span className="acct-note">{children}</span>
   </div>
 );
 
@@ -351,12 +351,18 @@ const SectionCard: React.FC<{
         </span>
         <span className="acct-band-sub">{band.sub}</span>
       </div>
+      {/* ⚠️ CONTENT → SPACER → FOOT (law 1). The illustration is a SIBLING of the content, pushed to
+          the card's floor by a flex spacer — not a layer over it. The build this replaces placed it
+          absolutely and spent a phase proving by measurement that it did not overlap anything; in
+          flow there is nothing left to prove, which is the better kind of correct. */}
       <div className="acct-cardbody">
         {children}
-        {/* ⚠️ LAST IN THE BODY AND UNDER IT. The watermark is what stops a 520px card looking empty
-            behind a short section; it is decoration, so it is aria-hidden, takes no pointer events,
-            and sits beneath everything the body renders. */}
-        {hasSectionWatermark(section) && <SettingsIllo slot="section" section={section} />}
+        {hasSectionWatermark(section) && (
+          <>
+            <div className="acct-spacer" aria-hidden="true" />
+            <div className="acct-foot"><SettingsIllo slot="section" section={section} /></div>
+          </>
+        )}
       </div>
     </MountPanel>
   );
@@ -560,11 +566,11 @@ const DeleteAccountModal: React.FC<{
                 <li key={line} style={{ ...helpText, color: bodyInk, marginBottom: 3 }}>{line}</li>
               ))}
             </ul>
-            <p style={{ ...helpText, marginBottom: 14 }}>
+            <p className="acct-note">
               You'll have <strong>{DELETION_GRACE_DAYS} days</strong> to change your mind. Nothing
               is removed before then.
             </p>
-            <label htmlFor="del-confirm" style={labelStyle}>
+            <label htmlFor="del-confirm" className="acct-label">
               Type {DELETION_CONFIRM_WORD} to confirm
             </label>
             <input
@@ -895,7 +901,7 @@ export const AccountSettings: React.FC<{
           body, and the band directly above now carries the same monogram, the same name and the
           same email — the writer's own address printed twice, four centimetres apart. */}
 
-      <label htmlFor="account-name" style={labelStyle}>
+      <label htmlFor="account-name" className="acct-label">
         Display name
       </label>
       <input
@@ -914,7 +920,7 @@ export const AccountSettings: React.FC<{
           page telling you there is something to do. It leaves again the moment the value matches
           what is stored — including when you type your way back to it by hand. */}
       {nameChanged && (
-        <div className="flex items-center" style={{ gap: 10, marginTop: 12, flexWrap: "wrap" }}>
+        <div className="acct-actions">
           <button
             onClick={saveName}
             disabled={!nameValid || nameStatus.type === "saving"}
@@ -928,7 +934,7 @@ export const AccountSettings: React.FC<{
         </div>
       )}
       {nameStatus.type === "error" && (
-        <p id="account-name-error" style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED, marginTop: 8 }}>
+        <p id="account-name-error" className="acct-err">
           {nameStatus.msg}
         </p>
       )}
@@ -943,8 +949,8 @@ export const AccountSettings: React.FC<{
           ⚠️ IT COMMITS ON SELECT, WITH A RECEIPT AND NO SAVE BUTTON — choosing from a list IS the
           decision. `CountryCombobox` is the app's own control; a native `<select>` would drop the
           flags and take the OS's menu styling into the middle of a Form 11 card. */}
-      <div style={{ marginTop: 22, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
-        <label htmlFor="account-homecountry" style={labelStyle}>
+      <div className="acct-ruled">
+        <label htmlFor="account-homecountry" className="acct-label">
           Home country
         </label>
         <div style={{ maxWidth: 360 }}>
@@ -955,14 +961,14 @@ export const AccountSettings: React.FC<{
             placeholder="Not set"
           />
         </div>
-        <div className="flex items-center" style={{ gap: 12, marginTop: 8, flexWrap: "wrap" }}>
-          <p style={{ ...helpText, margin: 0 }}>
+        <div className="acct-actions">
+          <p className="acct-note acct-note--tight">
             Sets your home market — the agent list uses it to tell domestic agents from
             international ones. It can be changed any time, but not cleared once set.
           </p>
         </div>
         {countryStatus.type === "error" && (
-          <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED, marginTop: 8 }}>{countryStatus.msg}</p>
+          <p className="acct-err">{countryStatus.msg}</p>
         )}
       </div>
         </div>
@@ -975,10 +981,10 @@ export const AccountSettings: React.FC<{
       <div className="acct-two">
         <div>
 
-      <label htmlFor="account-email" style={labelStyle}>
+      <label htmlFor="account-email" className="acct-label">
         Email
       </label>
-      <div className="flex items-center" style={{ gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+      <div className="acct-actions acct-actions--tight">
         <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
           <Mail style={{ position: "absolute", left: 11, top: 11, width: 16, height: 16, color: "rgba(58,28,20,0.4)" }} aria-hidden="true" />
           <input
@@ -998,7 +1004,7 @@ export const AccountSettings: React.FC<{
           locally after sending would be the UI asserting an outcome it has not observed. So the
           confirmation says to reload — the one honest instruction. */}
       {authFacts && !authFacts.emailVerified && (
-        <div className="flex items-center" style={{ gap: 12, marginTop: 4, marginBottom: 4, flexWrap: "wrap" }}>
+        <div className="acct-actions">
           <button onClick={resendVerification} disabled={verifyMsg === "sending"} style={ghostBtn}>
             {verifyMsg === "sending" ? "Sending…" : "Resend verification"}
           </button>
@@ -1015,7 +1021,7 @@ export const AccountSettings: React.FC<{
           built, and a button that opens nothing is the disabled-field fault wearing a verb. This
           reuses Your data's own "Correct something we hold" route, which exists for exactly the
           case where the writer cannot change something themselves. */}
-      <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", marginTop: 12 }}>
+      <div className="acct-row acct-block">
         <p style={{ ...helpText, margin: 0, flex: 1, minWidth: 200 }}>
           Your email is how you sign in, so changing it is something we do with you rather than
           something you can switch here.
@@ -1026,20 +1032,20 @@ export const AccountSettings: React.FC<{
         </div>
         <div>
       {/* ── Password — provider-aware ──────────────────────────────────────── */}
-      <div style={{ marginTop: 20, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
+      <div className="acct-ruled">
         {pwMode === "federated-only" ? (
           <>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 3 }}>How you sign in</p>
-            <p style={{ ...helpText, margin: 0 }}>{federatedLine(authFacts?.providerIds ?? [], currentUser.email)}</p>
-            <p style={{ ...helpText, marginTop: 6 }}>There's no ScriptAlly password on this account, so there's nothing here to change.</p>
+            <p className="acct-rowtitle">How you sign in</p>
+            <p className="acct-note acct-note--tight">{federatedLine(authFacts?.providerIds ?? [], currentUser.email)}</p>
+            <p className="acct-note">There's no ScriptAlly password on this account, so there's nothing here to change.</p>
           </>
         ) : (
           <>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 3 }}>Password</p>
+            <p className="acct-rowtitle">Password</p>
             {/* ⚠️ NO "LAST CHANGED {date}" LINE. Firebase exposes creationTime and lastSignInTime
                 and nothing else; printing either under that label is a real date wearing the wrong
                 name. See PASSWORD_LAST_CHANGED_AVAILABLE. */}
-            <div className="flex items-center" style={{ gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
+            <div className="acct-actions acct-actions--tight">
               <input
                 type="password"
                 value="············"
@@ -1050,15 +1056,15 @@ export const AccountSettings: React.FC<{
               />
             </div>
             {pwMode === "both" && (
-              <p style={{ ...helpText, marginBottom: 10 }}>
+              <p className="acct-note">
                 You can also sign in with {federatedNames(authFacts?.providerIds ?? []).join(" and ")}.
               </p>
             )}
-            <p style={{ ...helpText, marginBottom: 12 }}>We'll email you a secure link to set a new one.</p>
+            <p className="acct-note">We'll email you a secure link to set a new one.</p>
             <button onClick={sendReset} style={ghostBtn}>
               <KeyRound style={{ width: 14, height: 14 }} aria-hidden="true" /> Change password
             </button>
-            {resetMsg && <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN, marginTop: 12 }}>{resetMsg}</p>}
+            {resetMsg && <p className="acct-note" style={{ color: SUCCESS_GREEN, fontWeight: 500 }}>{resetMsg}</p>}
           </>
         )}
       </div>
@@ -1090,12 +1096,12 @@ export const AccountSettings: React.FC<{
           opens this page for, and it is the half that ages into nagging.
           ⚠️ AND CSV EXPORT IS NOT MENTIONED HERE. It is a data right, it lives in Your data, and
           naming it beside a plan comparison invites the reading that it is a plan feature. */}
-      <div style={{ marginTop: 22, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 3 }}>Billing</p>
+      <div className="acct-ruled">
+        <p className="acct-rowtitle">Billing</p>
         {/* The empty state IS the state: there is no payment path in the app at all, so every
             account reads this. It says what will appear and when, rather than pretending a
             payment method is merely missing. */}
-        <p style={helpText}>
+        <p className="acct-note">
           No payment details on file. Your payment method and invoices will appear here once a paid
           plan starts.
         </p>
@@ -1151,7 +1157,7 @@ export const AccountSettings: React.FC<{
         onChange={saveMarketing}
       />
 
-      <p style={{ ...helpText, marginTop: 16, paddingTop: 14, borderTop: "0.5px solid #efe5da" }}>
+      <p className="acct-note acct-ruled">
         {ALWAYS_SENT_LINE}
       </p>
         </div>
@@ -1179,9 +1185,9 @@ export const AccountSettings: React.FC<{
      it several commits later would leave the sheet reachable from one page of four in between,
      which is the exact gap this second door was added to close. */
   const taskSettingsRow = (
-    <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", padding: "14px 0" }}>
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Task settings</p>
+    <div className="acct-row acct-row--pad">
+      <div className="acct-rowmain">
+        <p className="acct-rowtitle">Task settings</p>
         <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk, lineHeight: 1.5 }}>
           How long before something counts as stale, whether unfinished work rolls forward, and
           your weekly review. Opens on your to-do board.
@@ -1214,8 +1220,8 @@ export const AccountSettings: React.FC<{
           .t-edn. Instant commit, receipt, no Save button. */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "14px 0" }}>
         <div style={{ minWidth: 0 }}>
-          <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Theme</p>
-          <p style={helpText}>The look of your workspace.</p>
+          <p className="acct-rowtitle">Theme</p>
+          <p className="acct-note">The look of your workspace.</p>
         </div>
         <div role="radiogroup" aria-label="Workspace theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
           {([["cappuccino", "Cappuccino"], ["bold", "Bold Pastille"], ["editorial", "Editorial"]] as const).map(([val, label]) => {
@@ -1227,7 +1233,7 @@ export const AccountSettings: React.FC<{
                 role="radio"
                 aria-checked={on}
                 onClick={() => { void updateUserProfile({ queriesTheme: val }); savedReceipt("Theme"); }}
-                style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 13px", cursor: "pointer", whiteSpace: "nowrap" }}
+                style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 13px", cursor: "pointer" }}
               >
                 {label}
               </button>
@@ -1245,9 +1251,9 @@ export const AccountSettings: React.FC<{
           its BROWSER's zone, not Europe/London — pinning a writer in Chicago to London would give
           them wrong day boundaries with nothing on screen to explain it. */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, padding: "14px 0", borderTop: "0.5px solid #efe5da" }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Time zone</p>
-          <p style={helpText}>{TZ_HELPER}</p>
+        <div className="acct-rowmain">
+          <p className="acct-rowtitle">Time zone</p>
+          <p className="acct-note">{TZ_HELPER}</p>
         </div>
         <select
           id="account-timezone"
@@ -1292,10 +1298,10 @@ export const AccountSettings: React.FC<{
             ⚠️ AND IT IS THE JSON BUNDLE, NOT A CSV. The brief said "CSV export"; the CSV that
             exists covers the query LIST only, and a partial file is not the complete copy the
             right is about. `buildExport` is the whole account. */}
-        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Export your data</p>
-            <p style={helpText}>
+        <div className="acct-row acct-rowsplit">
+          <div className="acct-rowmain">
+            <p className="acct-rowtitle">Export your data</p>
+            <p className="acct-note">
               A complete copy of everything on your account — manuscripts, agents, queries and their
               full history — in a file another program can read. It's yours to take anywhere.
             </p>
@@ -1304,23 +1310,23 @@ export const AccountSettings: React.FC<{
             <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Export
           </button>
         </div>
-        {exportMsg && <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN, marginTop: -4, marginBottom: 16 }}>{exportMsg}</p>}
+        {exportMsg && <p className="acct-note" style={{ color: SUCCESS_GREEN, fontWeight: 500 }}>{exportMsg}</p>}
 
         {/* ⚠️ THE THIRD DATA RIGHT, AND IT HAD NO ROUTE. The privacy policy offers access, export,
             CORRECTION and deletion; export and deletion had surfaces here and correction had none,
             so the one right a writer is most likely to need was the one with nowhere to click. */}
-        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Correct something we hold</p>
-            <p style={helpText}>Most things you can edit yourself. For anything you can't, write to us and we'll put it right.</p>
+        <div className="acct-row acct-rowsplit">
+          <div className="acct-rowmain">
+            <p className="acct-rowtitle">Correct something we hold</p>
+            <p className="acct-note">Most things you can edit yourself. For anything you can't, write to us and we'll put it right.</p>
           </div>
           <button onClick={() => onNavigate("contact")} style={ghostBtn}>Get in touch</button>
         </div>
 
-        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Import agents &amp; queries</p>
-            <p style={helpText}>Bring in your existing tracking from a spreadsheet.</p>
+        <div className="acct-row acct-rowsplit">
+          <div className="acct-rowmain">
+            <p className="acct-rowtitle">Import agents &amp; queries</p>
+            <p className="acct-note">Bring in your existing tracking from a spreadsheet.</p>
           </div>
           <button onClick={() => onNavigate("import")} style={ghostBtn}>
             <Upload style={{ width: 14, height: 14 }} aria-hidden="true" /> Open import
@@ -1331,8 +1337,8 @@ export const AccountSettings: React.FC<{
             and all: it is a figure nobody has confirmed, and settings quoting a confident "30 days"
             beside a policy that hedges would be the app disagreeing with its own notice. */}
         <div>
-          <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>How long we keep it</p>
-          <p style={helpText}>{RETENTION_LINE}</p>
+          <p className="acct-rowtitle">How long we keep it</p>
+          <p className="acct-note">{RETENTION_LINE}</p>
         </div>
       </SectionCard>
 
@@ -1345,10 +1351,10 @@ export const AccountSettings: React.FC<{
           ⚠️ ONE IMPLEMENTATION, TWO DOORS. This is the same `logout` the account menu calls, so
           where sign-out leaves you cannot differ by the door you used. */}
       <SubCard title="Signing out" Icon={LogOut} headingId="acct-h-signout">
-        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Sign out</p>
-            <p style={helpText}>Ends this session and takes you back to the ScriptAlly home page. Your work stays where it is.</p>
+        <div className="acct-row">
+          <div className="acct-rowmain">
+            <p className="acct-rowtitle">Sign out</p>
+            <p className="acct-note">Ends this session and takes you back to the ScriptAlly home page. Your work stays where it is.</p>
           </div>
           {/* No confirm: leaving is not destructive, and signing back in costs a password. */}
           <button onClick={() => { void logout(); }} style={ghostBtn}>
@@ -1373,7 +1379,7 @@ export const AccountSettings: React.FC<{
             {/* ⚠️ STATED, BECAUSE IT IS TRUE AND THE ALTERNATIVE IS A PROMISE NOBODY KEEPS. There
                 is no job that purges an account, so the page must not imply one runs on the date.
                 It offers the route that does work. */}
-            <p style={{ ...helpText, marginBottom: 14 }}>
+            <p className="acct-note">
               Deletion isn't automatic yet — we complete it by hand.{" "}
               <button
                 type="button"
@@ -1387,10 +1393,10 @@ export const AccountSettings: React.FC<{
             <button onClick={cancelDeletion} style={ghostBtn}>Cancel deletion</button>
           </div>
         ) : (
-          <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Delete account</p>
-              <p style={helpText}>
+          <div className="acct-row">
+            <div className="acct-rowmain">
+              <p className="acct-rowtitle">Delete account</p>
+              <p className="acct-note">
                 Removes your account and everything on it, after a {DELETION_GRACE_DAYS}-day window
                 in which you can change your mind.
               </p>

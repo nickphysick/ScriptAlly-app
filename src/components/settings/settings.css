@@ -22,8 +22,21 @@
 /* ── The page: a fill column inside the stage slot ─────────────────────────── */
 .acct-page {
   --acct-rail: 224px;
-  --acct-gap: 22px;
+  --acct-gap: 20px;
   --acct-max: 1120px;
+
+  /* ⚠️ ONE VERTICAL RHYTHM, DEFINED HERE AND NOWHERE ELSE (law 3). Every gap in the settings scope
+     is one of these four; a component that wants a fifth is a component that has found a case the
+     rhythm does not cover, and that is a conversation rather than a `style={{ marginTop: 14 }}`.
+     The build this replaces carried EIGHTY inline margin/padding declarations, which is how a page
+     ends up with nine different gaps that all look like mistakes for each other.
+     ⚠️ AND NONE OF THEM MAY BE NEGATIVE (law 2). The ref pulls its helper notes up into the control
+     above with `margin: -8px 0 16px`; a note sits BELOW its control by a stated gap, and a pull-up
+     is how a note ends up inside the thing it describes at a width nobody tested. */
+  --acct-s-label: 6px;   /* label → control */
+  --acct-s-note: 8px;    /* control → its helper note */
+  --acct-s-block: 20px;  /* between field blocks */
+  --acct-s-rule: 18px;   /* above and below a hairline */
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -72,11 +85,14 @@
    rule above); this takes everything left over, so the left column reaches the same depth as the
    work column instead of stopping a third of the way down. */
 .acct-rail .acct-aside { flex: 1 1 auto; min-height: 150px; }
+.acct-aside-note { max-width: 160px; }
 .acct-aside-in {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;   /* the spacer is the flex gap above the bottom-aligned text */
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   position: relative;
   overflow: hidden;
   padding: 16px;
@@ -126,9 +142,25 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 520px;
+  min-height: 460px;
 }
-.acct-cardbody { padding: 22px 26px 26px; position: relative; flex: 1; }
+
+/* ⚠️ A FLOOR, NEVER A CEILING (law 4). Nothing here caps a text container's height; the card grows
+   past 460 whenever its content needs to, and Plan does. */
+.acct-cardbody {
+  padding: 24px 26px 22px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ⚠️ CONTENT → SPACER → ILLUSTRATION, IN THAT ORDER, ALL IN FLOW (law 1). The spacer is what puts
+   the mark at the foot of a short card; the mark is a sibling of the content, never a layer over
+   it. Overlap is not prevented here — it is made structurally impossible, which is why the Phase 6
+   gate has nothing left to find. */
+.acct-spacer { flex: 1 1 auto; min-height: 10px; }
+.acct-foot { display: flex; justify-content: flex-end; padding-top: 10px; flex: 0 0 auto; }
+.acct-foot .acct-illo { opacity: 0.3; }
 
 .acct-col:focus { outline: none; }
 
@@ -157,20 +189,41 @@
    data is export+retention | deletion. Plan is NOT in here: `PlanComparison` is already two
    columns of its own, and nesting a two-column comparison inside a two-column body would give
    four columns of 250px and a table nobody can read across. */
+/* ⚠️ THE DIVIDER IS A BORDER ON THE SECOND CELL, NOT A GAP. A hairline drawn as a gap cannot run
+   the full height of the taller cell; a border on the cell can, which is what makes the two groups
+   read as two columns rather than as two stacks that happen to be side by side. */
 .acct-two {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 30px;
-  align-items: start;
+  align-items: stretch;
 }
-.acct-two > * { min-width: 0; }
+.acct-two > * { min-width: 0; padding-right: 28px; }
+.acct-two > * + * {
+  border-left: 0.5px solid #ece0d2;
+  padding-left: 28px;
+  padding-right: 0;
+}
 
-/* Your data's columns are whole CARDS rather than content inside one, so they need the gap on both
-   axes and their own stacking below the breakpoint. */
+/* Your data's columns are whole CARDS rather than content inside one, so they keep a gap and no
+   divider — a hairline between two framed cards would be a third edge in the same place. */
 .acct-two--cards { gap: 20px; align-items: start; }
+.acct-two--cards > * { padding-right: 0; }
+.acct-two--cards > * + * { border-left: 0; padding-left: 0; }
 
-@media (max-width: 820px) {
+/* ⚠️ THE DIVIDER TURNS HORIZONTAL RATHER THAN VANISHING. Below the breakpoint the two groups are
+   stacked, and the line that separated them left-to-right is the same line that separates them
+   top-to-bottom — dropping it would merge two groups into one run of fields. */
+@media (max-width: 860px) {
   .acct-two { grid-template-columns: 1fr; }
+  .acct-two > * { padding-right: 0; }
+  .acct-two > * + * {
+    border-left: 0;
+    padding-left: 0;
+    border-top: 0.5px solid #ece0d2;
+    padding-top: var(--acct-s-rule);
+    margin-top: var(--acct-s-rule);
+  }
+  .acct-two--cards > * + * { border-top: 0; padding-top: 0; margin-top: 0; }
 }
 
 /* ── Rail items ─────────────────────────────────────────────────────────────
@@ -189,7 +242,6 @@
   gap: 10px;
   width: 100%;
   text-align: left;
-  white-space: nowrap;
   padding: 9px 12px;
   border: none;
   border-radius: 9px;
@@ -403,3 +455,100 @@
 
 /* The rail aside's mark sits above the bottom-aligned text, in its own row. */
 .acct-illo--aside { margin: 0 auto; opacity: 0.5; }
+
+/* ── Field furniture — the rhythm, applied ─────────────────────────────────
+   ⚠️ THESE EXIST SO THE PAGE STOPS CARRYING SPACING IN `style=""`. Every class below is one of the
+   four tokens; nothing here invents a number. */
+.acct-label {
+  display: block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #9c8878;
+  margin-bottom: var(--acct-s-label);
+}
+
+/* A note sits BELOW the control it describes, by a stated gap. Never a pull-up. */
+.acct-note {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12.5px;
+  color: #8a7a6c;
+  line-height: 1.5;
+  margin: var(--acct-s-note) 0 0;
+}
+
+/* One field block — label, control, note — separated from the next by one token. */
+.acct-block + .acct-block { margin-top: var(--acct-s-block); }
+
+/* A block that opens with a hairline. The rule's breathing room is one token on each side. */
+.acct-ruled {
+  margin-top: var(--acct-s-rule);
+  padding-top: var(--acct-s-rule);
+  border-top: 0.5px solid #efe5da;
+}
+
+/* A row of controls under a field. */
+.acct-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: var(--acct-s-note);
+}
+
+/* ⚠️ A GROUP HEADING, AND THE GAP ABOVE IT IS THE BLOCK TOKEN — not a bespoke 22. */
+.acct-group + .acct-group { margin-top: var(--acct-s-block); }
+.acct-grouplabel {
+  display: block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #a08e7c;
+  margin-bottom: var(--acct-s-note);
+}
+
+/* ── The settings ROW — a labelled thing with a control beside it ───────────
+   ⚠️ TEN COPIES OF THIS SHAPE CARRIED THEIR OWN `gap: 14` AND `marginBottom: 2`. One class each,
+   so the row's internal rhythm is as governed as the page's. */
+.acct-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.acct-row--pad { padding: 14px 0; }
+.acct-rowmain { min-width: 0; flex: 1; }
+.acct-rowtitle {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #3a1c14;
+  margin: 0 0 2px;
+}
+.acct-rowside { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+/* A row that closes with a hairline — export, correct, import all share it. */
+.acct-rowsplit {
+  padding-bottom: var(--acct-s-rule);
+  border-bottom: 0.5px solid #efe5da;
+  margin-bottom: var(--acct-s-rule);
+}
+
+/* An error line under a field. */
+.acct-err {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #A32D2D;
+  margin: var(--acct-s-note) 0 0;
+}
+
+/* Two tight variants — a note or an action row that opens its block rather than following a
+   control. Named rather than overridden inline, so the exception is visible in the stylesheet. */
+.acct-note--tight { margin-top: 0; }
+.acct-actions--tight { margin-top: 0; }
