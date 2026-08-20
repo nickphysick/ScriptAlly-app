@@ -4,6 +4,49 @@
  * the roll-forward whisper, "+N MORE" folds, and the legend row).
  */
 
+/* ══ THE `cal-` COLLISION (fixes pack, Phase 1) ═════════════════════════════════════════════
+ *
+ * ⚠️ THREE OF THIS PAGE'S CLASS NAMES ARE ALSO THE RecordingCalendar's, IN `todo.css`. A CSS
+ * import is global whatever mounts, so both rules are live here — and the browser confirmed it:
+ * `.cal-d` matched `todo.css`'s square-day-button rule AND this sheet's numeral rule at once.
+ * This sheet is later in the bundle, so it won every property it DECLARES — and `aspect-ratio: 1`,
+ * which it did not declare, survived and squared the 8px numeral row to **76.28px inside a 96px
+ * cell** (measured, both widths). The three pips then flex-SHRANK to 8px with their text clipped,
+ * which is exactly why every count assertion passed while the month looked empty.
+ *
+ * ⚠️ THE FIX IS AN ANCESTOR SCOPE PLUS AN EXPLICIT RESET, and both halves are load-bearing.
+ *   · The scope takes each rule to 0-2-0 so it wins even if the import order ever flips — bundle
+ *     order is not a contract, and at equal specificity it is the only thing deciding this today.
+ *   · The reset names every property `todo.css` sets that this sheet otherwise would not, because
+ *     specificity cannot help with a property you never mention.
+ *
+ * ⚠️ THE SCOPES ARE EXISTING ANCESTORS, NOT A NEW CLASS ON THE PAGE ROOT. A first attempt added
+ * `calm` to `.t-f12.spine-root` and went red against `tasksViewport.test.tsx`'s law that all four
+ * Tasks pages wear the SAME column. That lock is right. `.cal-layout` is this page's own box and
+ * already wraps the grid; `.tpl-tools` is the chassis's tool row and already wraps the controls.
+ *
+ * ⚠️ AND `.cal-nav` IS NOT RE-DECLARED HERE — the same suite forbids it, also rightly: it is
+ * SHARED chrome (the Noteboard and the To-do list wear it). The page-local `.calm-nav` modifier
+ * un-bleeds `todo.css`'s `width: 26px` for this page only; the shared control is untouched, and
+ * the identical bleed on the Noteboard is REPORTED rather than reached into.
+ *
+ * ⚠️ THE GUARD IS A TEST, NOT THIS COMMENT. `todoCalendar.test.ts` re-derives the bleed set from
+ * both stylesheets and fails if `todo.css` ever gains a `.cal-*` property this sheet neither
+ * declares nor resets. Neutralising one property at a time is vigilance; the test is the guard.
+ */
+.cal-layout .cal-d {
+  /* the reset: everything todo.css's square-day-button sets that this row must not inherit */
+  aspect-ratio: auto; border: 0; background: none; border-radius: 0;
+  cursor: default; justify-content: flex-start; transition: none;
+  align-items: baseline;
+}
+.cal-layout .cal-dow {
+  /* todo.css's `.cal-dow` is a seven-column CONTAINER; here each weekday is one CELL of the grid */
+  display: block; grid-template-columns: none; gap: normal; margin-bottom: 0;
+}
+/* the tool row's controls, un-bled — a modifier, never a redefinition of the shared control */
+.tpl-tools .calm-nav { width: auto; justify-content: flex-start; }
+
 /* ⚠️ THE MONTH IS ALWAYS ON SCREEN (tasks-viewport P1/P3) — the grid TAKES the remaining
    viewport height rather than scrolling out of it, so a calendar is a calendar and not a
    document. `grid-auto-rows: 1fr` divides that height evenly; the cells clip internally and fold

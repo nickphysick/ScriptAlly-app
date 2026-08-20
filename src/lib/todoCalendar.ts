@@ -202,8 +202,18 @@ export const CAL_CELL_CAP = 3;
 
 /* ══ THE FOLD THRESHOLD (tasks-viewport pack, Phase 3) ══════════════════════════════════════ */
 
-/** A pip's own height plus its top margin — the ref's `.pip2` (2px pad × 2 + ~11px line + 3px). */
-export const CAL_PIP_H = 19;
+/**
+ * A pip's own height plus its top margin.
+ *
+ * ⚠️ 25, NOT 19 — MEASURED, after the `cal-` collision was fixed (fixes pack, Phase 1). The old
+ * value was taken from the ref's `.pip2` and understated the shipped pip by about six pixels:
+ * the browser reports `font-size: 8.5px / line-height: 12.75px`, `padding: 3px 6px` and a 1px
+ * border, which is 20.75px, plus the 4px `margin-top` — **24.75px**. Rounded UP, because the
+ * error that matters is over-promising: a cap one too high puts a pip into space that does not
+ * exist, and a fixed-height flex column answers that by SHRINKING every pip rather than dropping
+ * the last, which is silent and illegible. One too few is merely one fewer.
+ */
+export const CAL_PIP_H = 25;
 /** The date line at the cell's head, plus the cell's vertical padding and border. */
 export const CAL_CELL_CHROME = 26;
 
@@ -521,9 +531,17 @@ export const REC_LEGEND: { dir: RecordDir; label: string }[] = [
 export interface CellSlots<T, R> { shownItems: T[]; shownRecs: R[]; overflow: number }
 
 export function cellSlots<T, R>(items: readonly T[], recs: readonly R[], cap: number): CellSlots<T, R> {
-  const room = Math.max(0, cap);
+  const cells = Math.max(0, cap);
+  const total = items.length + recs.length;
+  /* ⚠️ THE COUNTER TAKES A SLOT, AND UNTIL NOW IT DID NOT (fixes pack, Phase 1). `calFoldCap`'s
+     own comment claimed a row was reserved for "+N MORE"; the arithmetic never reserved one, so a
+     day at exactly the cap drew `cap` pips AND a counter into room for `cap`. The cell is a
+     fixed-height flex column, so the overflow was absorbed by SHRINKING every pip — the failure is
+     silent and looks like an empty month.
+     The ref's rule, and now the code's: everything fits, or one slot goes to the counter. */
+  const room = total <= cells ? cells : Math.max(0, cells - 1);
   const shownItems = items.slice(0, room);
   const shownRecs = recs.slice(0, Math.max(0, room - shownItems.length));
-  const overflow = (items.length + recs.length) - shownItems.length - shownRecs.length;
+  const overflow = total - shownItems.length - shownRecs.length;
   return { shownItems, shownRecs, overflow: Math.max(0, overflow) };
 }

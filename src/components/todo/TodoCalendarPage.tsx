@@ -366,9 +366,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
           subtitle={subtitle}
           tools={
             <>
-              <button type="button" className="cal-nav" aria-label="Previous" onClick={() => setAnchor(shiftMonth(anchor, -1))}><ChevronLeft size={14} aria-hidden /></button>
-              <button type="button" className="cal-nav cal-today" onClick={() => setAnchor(today)}>Today</button>
-              <button type="button" className="cal-nav" aria-label="Next" onClick={() => setAnchor(shiftMonth(anchor, 1))}><ChevronRight size={14} aria-hidden /></button>
+              <button type="button" className="cal-nav calm-nav" aria-label="Previous" onClick={() => setAnchor(shiftMonth(anchor, -1))}><ChevronLeft size={14} aria-hidden /></button>
+              <button type="button" className="cal-nav calm-nav cal-today" onClick={() => setAnchor(today)}>Today</button>
+              <button type="button" className="cal-nav calm-nav" aria-label="Next" onClick={() => setAnchor(shiftMonth(anchor, 1))}><ChevronRight size={14} aria-hidden /></button>
 
               {/* ⚠️ THE FACET LIVES IN THE TOOL ROW NOW (tasks-viewport P3). It was the page
                   sidebar's FILTERS list; the sidebar is the To-do list's alone since P1, and
@@ -378,7 +378,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                   rather than two controls. It reaches the pips, the day lists AND the day sheet,
                   because they all read `byDay`, which is derived under the facet. */}
               <span className="cal-facetwrap">
-                <button type="button" className="cal-nav cal-facet" aria-haspopup="menu"
+                <button type="button" className="cal-nav calm-nav cal-facet" aria-haspopup="menu"
                   aria-expanded={facetOpen} onClick={() => setFacetOpen((o) => !o)}>
                   {TODO_FACETS.find((f) => f.id === facet)?.label} ▾
                 </button>
@@ -407,7 +407,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
               <span className="cal-sep" aria-hidden />
               <button
                 type="button"
-                className="cal-nav cal-recbtn"
+                className="cal-nav calm-nav cal-recbtn"
                 aria-pressed={showRecord}
                 onClick={() => setShowRecord((v) => !v)}
               >

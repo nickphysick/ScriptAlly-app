@@ -16,6 +16,7 @@ import {
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
+  CAL_PIP_H,
   exchangeLine,
   REC_TONE, REC_LEGEND,
 } from "./todoCalendar";
@@ -154,8 +155,11 @@ describe("the fold, the map, the wiring", () => {
        worth testing rather than a line worth quoting. The CLAIM is unchanged — the cap still binds
        the live items — but it is now asserted by CALLING the arithmetic instead of matching the
        expression that used to express it. */
-    expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b", "c"]);
-    expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).overflow).toBe(1);
+    /* ⚠️ AMENDED 20 Aug (fixes pack, Phase 1): the counter now takes a slot, so four items in a
+       cap of three draw TWO pips and the counter — not three pips crushed against it. */
+    expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b"]);
+    expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).overflow).toBe(2);
+    expect(cellSlots(["a", "b", "c"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b", "c"]);
     expect(pageSrc).toContain("cellSlots(items, recs, cellCap)");
     expect(pageSrc).toContain("calFoldCap(rowPx)");
     expect(pageSrc).toContain("+{overflow} MORE");
@@ -212,12 +216,17 @@ describe("the fold, the map, the wiring", () => {
 /* ── the derived fold (tasks-viewport P3) ──────────────────────────────────────────────────── */
 
 describe("⚠️ the fold threshold derives from the cell, never from a flat constant", () => {
+  /* ⚠️ RENUMBERED 20 Aug 2026 (fixes pack, Phase 1) — the CLAIM is untouched, the constant moved.
+     `CAL_PIP_H` was the ref's 19 and is now the browser-measured 25, so every boundary shifts by
+     the same six pixels. The old numbers described a pip six pixels shorter than the one that
+     ships, which is precisely how a cap promised room that did not exist. */
   it("a tall row shows the ceiling; a short one folds sooner", () => {
-    // 26px chrome + 3 × 19px pips = 83px of room for the full three
-    expect(calFoldCap(120)).toBe(CAL_CELL_CAP);
-    expect(calFoldCap(84)).toBe(3);
-    expect(calFoldCap(64)).toBe(2);   // 38px of room — two fit
-    expect(calFoldCap(46)).toBe(1);   // 20px — one
+    // 26px chrome + 3 × 25px pips = 101px of row for the full three
+    expect(calFoldCap(120)).toBe(CAL_CELL_CAP); // room 94 — three fit
+    expect(calFoldCap(101)).toBe(3);            // room 75 — exactly three
+    expect(calFoldCap(90)).toBe(2);             // room 64 — two
+    expect(calFoldCap(60)).toBe(1);             // room 34 — one
+    expect(calFoldCap(46)).toBe(1);             // room 20 — the floor holds at one
   });
 
   it("⚠️ AT LEAST ONE PIP ALWAYS SHOWS — a cell that folds everything says only '+3 MORE'", () => {
@@ -394,10 +403,11 @@ const calCss = readFileSync(join(here, "..", "components", "todo", "todoCalendar
 
 describe("⚠️ the record is recessive, and it folds with everything else", () => {
   it("live work fills the cell FIRST; the record takes what is left", () => {
-    // two live, one record, cap 3 → everything shows, live first
+    // two live, one record, cap 3 → everything fits, live first, no counter needed
     expect(cellSlots(["a", "b"], ["r"], 3)).toEqual({ shownItems: ["a", "b"], shownRecs: ["r"], overflow: 0 });
-    // three live, two record, cap 3 → the live work takes every slot and the record all folds
-    expect(cellSlots(["a", "b", "c"], ["r", "s"], 3)).toEqual({ shownItems: ["a", "b", "c"], shownRecs: [], overflow: 2 });
+    /* three live, two record, cap 3 → over the cap, so one slot goes to the counter and the live
+       work takes the other two (fixes pack, Phase 1 — it used to take all three) */
+    expect(cellSlots(["a", "b", "c"], ["r", "s"], 3)).toEqual({ shownItems: ["a", "b"], shownRecs: [], overflow: 3 });
   });
 
   it("⚠️ a busy day never pushes today's work under the fold to make room for history", () => {
@@ -405,12 +415,12 @@ describe("⚠️ the record is recessive, and it folds with everything else", ()
     // past events and one live task would fold the ONE thing the writer still has to do.
     const { shownItems, shownRecs } = cellSlots(["live"], ["r1", "r2", "r3", "r4"], 3);
     expect(shownItems).toEqual(["live"]);
-    expect(shownRecs).toEqual(["r1", "r2"]);
+    expect(shownRecs).toEqual(["r1"]); // the third slot is the counter's (fixes pack, Phase 1)
   });
 
   it("⚠️ the fold counts BOTH layers — a record pip is a pip", () => {
-    expect(cellSlots([], ["r", "s", "t", "u"], 3).overflow).toBe(1);
-    expect(cellSlots(["a", "b"], ["r", "s"], 3).overflow).toBe(1);
+    expect(cellSlots([], ["r", "s", "t", "u"], 3).overflow).toBe(2);
+    expect(cellSlots(["a", "b"], ["r", "s"], 3).overflow).toBe(2);
     // the record alone, well within the cap, folds nothing
     expect(cellSlots([], ["r"], 3)).toEqual({ shownItems: [], shownRecs: ["r"], overflow: 0 });
     // an empty day, and the degenerate cap, both stay honest
@@ -693,5 +703,121 @@ describe("⚠️ the week view is gone, and so are the helpers that served it", 
   it("⚠️ there was never a List view — nothing to delete, and nothing invented to delete", () => {
     expect(decls(pageSrc)).not.toMatch(/["\s`]cal-list["\s`]/);
     expect(decls(pageSrc)).not.toContain('"list"');
+  });
+});
+
+/* ══ THE `cal-` COLLISION GUARD (fixes pack, Phase 1) ═══════════════════════════════════════ */
+
+describe("⚠️ no property may bleed from todo.css's cal- classes into this page", () => {
+  /** Every `prop: value` declared on a bare selector in a stylesheet, comments stripped. */
+  const propsOf = (css: string, sel: string): Record<string, string> => {
+    const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
+    const out: Record<string, string> = {};
+    const re = new RegExp(`(^|})\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`, "gm");
+    for (const m of clean.matchAll(re)) {
+      for (const d of m[2].split(";")) {
+        const i = d.indexOf(":");
+        if (i > 0) out[d.slice(0, i).trim()] = d.slice(i + 1).trim();
+      }
+    }
+    return out;
+  };
+
+  const todoCss = readFileSync(join(here, "..", "components", "todo", "todo.css"), "utf8");
+  const chromeCss = readFileSync(join(here, "..", "components", "todo", "taskChrome.css"), "utf8");
+
+  /* the three names this page shares with the RecordingCalendar, plus the shared tool-row control */
+  const COLLIDING = [".cal-d", ".cal-dow", ".cal-grid", ".cal-nav"];
+
+  it("⚠️ THE COLLISION IS REAL — this is not a hypothetical guard", () => {
+    // if todo.css ever stops declaring these, the guard below becomes vacuous, so assert the premise
+    expect(Object.keys(propsOf(todoCss, ".cal-d")).length, "todo.css no longer styles .cal-d").toBeGreaterThan(0);
+    expect(propsOf(todoCss, ".cal-d")["aspect-ratio"], "the fatal property is gone — retire this guard").toBe("1");
+  });
+
+  it("every property todo.css sets is DECLARED OR RESET by a later sheet, for all four", () => {
+    /* ⚠️ THE FAILURE THIS CATCHES IS SILENT. A property todo.css sets and this page never mentions
+       cannot be beaten by specificity, load order or care — it simply applies. `aspect-ratio: 1`
+       reached a 96px cell that way and cost a whole review cycle. */
+    const unresolved: string[] = [];
+    for (const sel of COLLIDING) {
+      const theirs = propsOf(todoCss, sel);
+      /* mine, both bare and under the `.calm` scope; plus the shared chrome for .cal-nav */
+      const ours = {
+        ...propsOf(chromeCss, sel),
+        ...propsOf(calCss, sel),
+        ...propsOf(calCss, `.cal-layout ${sel}`),
+        ...(sel === ".cal-nav" ? propsOf(calCss, ".tpl-tools .calm-nav") : {}),
+      };
+      for (const prop of Object.keys(theirs)) {
+        if (!(prop in ours)) unresolved.push(`${sel} { ${prop}: ${theirs[prop]} }`);
+      }
+    }
+    expect(unresolved, `these bleed from todo.css into the Calendar:\n  ${unresolved.join("\n  ")}`).toEqual([]);
+  });
+
+  it("⚠️ the scopes are EXISTING ancestors — the shared page root is not touched", () => {
+    // tasksViewport.test.tsx's law: all four Tasks pages wear the same column. A first attempt
+    // added a class to `.t-f12.spine-root` and went red against it; that lock is right.
+    expect(pageSrc).toContain('className="t-f12 spine-root"');
+    expect(pageSrc).not.toContain("spine-root calm");
+    expect(calCss).toContain(".cal-layout .cal-d");
+    expect(calCss).toContain(".cal-layout .cal-dow");
+    expect(calCss).toContain(".tpl-tools .calm-nav");
+    // the fatal one, named explicitly
+    expect(calCss).toMatch(/\.cal-layout \.cal-d\s*\{[^}]*aspect-ratio:\s*auto/);
+  });
+
+  it("⚠️ .cal-nav is NOT redefined here — it is shared chrome, only un-bled", () => {
+    // the Noteboard and the To-do list wear the same control; this page fixes the width bleed for
+    // itself and reports the same bleed on their pages rather than reaching into taskChrome.css
+    const scoped = propsOf(calCss, ".tpl-tools .calm-nav");
+    expect(Object.keys(scoped).sort()).toEqual(["justify-content", "width"]);
+    expect(scoped.width).toBe("auto");
+    // ⚠️ the sibling suite forbids the substring ".cal-nav {" in this sheet, and it is right to:
+    // the control is shared chrome. Asserted here too so the reason travels with the rule.
+    expect(calCss).not.toContain(".cal-nav {");
+    expect(propsOf(calCss, ".cal-nav")).toEqual({});
+  });
+});
+
+describe("⚠️ the counter takes a slot (fixes pack, Phase 1)", () => {
+  it("everything fits when the total is within the cap — no counter, no shrink", () => {
+    expect(cellSlots(["a", "b", "c"], [], 3)).toEqual({ shownItems: ["a", "b", "c"], shownRecs: [], overflow: 0 });
+    expect(cellSlots(["a", "b"], ["r"], 3)).toEqual({ shownItems: ["a", "b"], shownRecs: ["r"], overflow: 0 });
+  });
+
+  it("⚠️ THE BOUNDARY: one more than the cap gives cap-1 pips AND the counter its own line", () => {
+    // the bug this replaces drew 3 pips + a counter into room for 3, and the flex column absorbed
+    // it by squashing every pip to 8px — measured on dev, both widths
+    const r = cellSlots(["a", "b", "c", "d"], [], 3);
+    expect(r.shownItems).toEqual(["a", "b"]);
+    expect(r.overflow).toBe(2);
+    expect(r.shownItems.length + (r.overflow > 0 ? 1 : 0)).toBeLessThanOrEqual(3);
+  });
+
+  it("the shown count plus the counter's line never exceeds the cap, at any size", () => {
+    for (let n = 0; n < 12; n++) {
+      for (const cap of [1, 2, 3, 4]) {
+        const items = Array.from({ length: n }, (_, i) => `i${i}`);
+        const r = cellSlots(items, [], cap);
+        const lines = r.shownItems.length + r.shownRecs.length + (r.overflow > 0 ? 1 : 0);
+        expect(lines, `n=${n} cap=${cap} => ${JSON.stringify(r)}`).toBeLessThanOrEqual(cap);
+        // and nothing is ever lost or invented
+        expect(r.shownItems.length + r.shownRecs.length + r.overflow).toBe(n);
+      }
+    }
+  });
+
+  it("live work still fills first when the counter takes its slot", () => {
+    const r = cellSlots(["live"], ["r1", "r2", "r3"], 3);
+    expect(r.shownItems).toEqual(["live"]);
+    expect(r.shownRecs).toEqual(["r1"]);
+    expect(r.overflow).toBe(2);
+  });
+
+  it("CAL_PIP_H is the MEASURED pip height, not the ref's estimate", () => {
+    // browser-measured: 12.75 line + 6 padding + 2 border + 4 margin = 24.75, rounded up
+    expect(CAL_PIP_H).toBe(25);
   });
 });
