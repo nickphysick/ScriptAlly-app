@@ -1,0 +1,62 @@
+[
+  {
+    "at": "opened for edit",
+    "title": "Edit package",
+    "name": "Standard UK",
+    "letter": "seed-mat-ql1",
+    "synopsis": "seed-mat-syn",
+    "sample": "seed-mat-pag",
+    "comp": "THIS PACKAGE SENDS  →  Hook-first · One-page · Chapters 1-3"
+  },
+  {
+    "at": "after edit",
+    "livePreview": "THIS PACKAGE SENDS  →  Hook-first · One-page",
+    "gate": {
+      "railNewDisabled": false,
+      "headerNewDisabled": false,
+      "ghostTag": null,
+      "ghostLocked": null,
+      "ghostNext": null,
+      "ghostTitle": null,
+      "ghostSub": null,
+      "clickableInsideGhost": null,
+      "pkgRows": [
+        {
+          "name": "Standard UK edited",
+          "comp": "Hook-first · One-page",
+          "detail": "Sent with 6 queries"
+        },
+        {
+          "name": "Comps-led variant",
+          "comp": "Comps-forward · One-page · Chapters 1-3",
+          "detail": "Sent with 2 queries"
+        }
+      ]
+    }
+  },
+  {
+    "at": "restored",
+    "gate": {
+      "railNewDisabled": false,
+      "headerNewDisabled": false,
+      "ghostTag": null,
+      "ghostLocked": null,
+      "ghostNext": null,
+      "ghostTitle": null,
+      "ghostSub": null,
+      "clickableInsideGhost": null,
+      "pkgRows": [
+        {
+          "name": "Standard UK",
+          "comp": "Hook-first · One-page · Chapters 1-3",
+          "detail": "Sent with 6 queries"
+        },
+        {
+          "name": "Comps-led variant",
+          "comp": "Comps-forward · One-page · Chapters 1-3",
+          "detail": "Sent with 2 queries"
+        }
+      ]
+    }
+  }
+]

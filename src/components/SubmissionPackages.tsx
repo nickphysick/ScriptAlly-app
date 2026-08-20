@@ -20,14 +20,15 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { resolveActivePackage } from "../lib/packageMetrics";
-import { ComponentType, ManuscriptVersion } from "../types";
+import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
 import { PackageSaveFields } from "./packages/PackageWorkshop";
 import { WorkshopTab } from "./packages/WorkshopTab";
 import { AnalyticsTab, AnalyticsScope } from "./packages/AnalyticsTab";
 import { PackagesOverview } from "./packages/PackagesOverview";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
-import { createPayload, updatePayload } from "../lib/materialDraft";
+import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
+import { canBuildPackage, createPayload, updatePayload } from "../lib/materialDraft";
 import { deleteField } from "firebase/firestore";
 import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
@@ -86,6 +87,9 @@ export const SubmissionPackages: React.FC = () => {
      being edited, or null when adding. Both local — a modal is not a destination. */
   const [matModal, setMatModal] = useState(false);
   const [matEditing, setMatEditing] = useState<ManuscriptVersion | null>(null);
+  /* The package builder (flow pack Phase 3). */
+  const [pkgModal, setPkgModal] = useState(false);
+  const [pkgEditing, setPkgEditing] = useState<SubmissionPackage | null>(null);
   // Analytics scope: "all" or a package id. Local UI state, like the tab itself.
   const [scope, setScope] = useState<AnalyticsScope>("all");
   // A recommendation asked the Workshop tab to open a particular package.
@@ -155,6 +159,36 @@ export const SubmissionPackages: React.FC = () => {
     }
     setMatModal(false);
     setMatEditing(null);
+  };
+
+  /**
+   * The builder's write. Create or update through the SAME `addPackage` / `updatePackage` the
+   * Workshop composer uses.
+   *
+   * ⚠️ THE EMPTY SAMPLE SLOT IS `""`, NOT AN ABSENT KEY. `isValidPackage` requires all three slot
+   * keys to be PRESENT, so omitting one fails the rule outright — this is the single place on this
+   * page where `deleteField()` would be the wrong instinct, and the modal sends `UNFILLED_SLOT`.
+   */
+  const savePackageDraft = async (d: PackageDraftResult): Promise<string | null> => {
+    if (!msId) return "No manuscript is selected.";
+    const fields = {
+      packageName: d.name.trim() || "Untitled package",
+      queryLetterVersionId: d.letterId,
+      synopsisVersionId: d.synopsisId,
+      samplePagesVersionId: d.sampleId,
+    };
+    if (pkgEditing) {
+      await updatePackage(pkgEditing.id, fields);
+    } else {
+      /* ⚠️ THE REFUSAL IS RETURNED, NOT DISCARDED. `addPackage` declines on a FREE plan with a
+         reason; the existing `savePackage` above drops it on the floor (`res.success ? … :
+         undefined`), which is why a free user's Save appeared to work and did nothing. */
+      const res = await addPackage({ manuscriptId: msId, ...fields });
+      if (!res.success) return res.error ?? "Couldn't save that package.";
+    }
+    setPkgModal(false);
+    setPkgEditing(null);
+    return null;
   };
 
   const savePackage = async (baseId: string | null, fields: PackageSaveFields): Promise<string | undefined> => {
@@ -277,7 +311,13 @@ export const SubmissionPackages: React.FC = () => {
                   `svh-btn-primary` resolve to the same three constants (`--pink` / `--pink-b` /
                   `--burg`), so nothing about it looks different; it simply stops being separate.
                   `.pkgw-btn` survives for the page BODY, where it belongs. */}
-              <button type="button" className="svh-btn svh-btn-primary" onClick={() => { setView("workshop"); setNewPkgSignal((n) => n + 1); }}>
+              {/* ⚠️ DISABLED IN LOCKSTEP WITH THE RAIL'S `+ NEW` (D4) — one derivation, two renders,
+                  so the two controls cannot disagree about whether a package can be built. */}
+              <button
+                type="button" className="svh-btn svh-btn-primary"
+                disabled={!canBuildPackage(msVersions)}
+                onClick={() => { setPkgEditing(null); setPkgModal(true); }}
+              >
                 <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
               </button>
             </div>
@@ -317,8 +357,12 @@ export const SubmissionPackages: React.FC = () => {
                 setMatEditing(v);
                 setMatModal(true);
               }}
-              onNewPackage={() => { setView("workshop"); setNewPkgSignal((n) => n + 1); }}
-              onOpenPackage={(id) => { setView("workshop"); setOpenPkg(id); }}
+              /* ⚠️ THE BUILDER, NOT THE WORKSHOP (D9). Same retirement as the material entries. */
+              onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
+              onOpenPackage={(id) => {
+                setPkgEditing(msPackages.find((p) => p.id === id) ?? null);
+                setPkgModal(true);
+              }}
               onOpenTracking={() => setView("analytics")}
             />
           ) : view === "workshop" ? (
@@ -385,6 +429,15 @@ export const SubmissionPackages: React.FC = () => {
         versions={msVersions}
         onClose={() => { setMatModal(false); setMatEditing(null); }}
         onSave={saveMaterial}
+      />}
+
+      {pkgModal && <PackageModal
+        key={pkgEditing?.id ?? "new-package"}
+        editing={pkgEditing}
+        versions={msVersions}
+        packageCount={msPackages.length}
+        onClose={() => { setPkgModal(false); setPkgEditing(null); }}
+        onSave={savePackageDraft}
       />}
       </WorkspacePageGrid>
     </div>

@@ -181,3 +181,60 @@
   border: 1px solid var(--pkgo-hairline-soft); border-radius: 999px;
   padding: 1px 5px; color: var(--pkg-muted);
 }
+
+/* Lead hint — left-aligned and above the fields, unlike the type step's centred one. */
+.pkgf-hint--lead { text-align: left; margin-top: 0; margin-bottom: 16px; }
+
+/* Saved-material dropdowns — burgundy chevron, per the ref (D5). */
+.pkgf-fld select {
+  appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237c3a2a' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+  padding-right: 32px; cursor: pointer;
+}
+
+/* The live composition preview — dashed, because it is a readout rather than a field. */
+.pkgf-comp {
+  font-family: var(--font-mono); font-size: 9.5px; color: var(--pkg-ink-soft);
+  border: 1px dashed var(--pkgo-hairline); border-radius: 8px;
+  padding: 9px 11px; margin-bottom: 14px; line-height: 1.6;
+}
+.pkgf-comp b { color: var(--pkg-burg); font-weight: 700; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE LOCKED PACKAGES GHOST (D4)
+   ══════════════════════════════════════════════════════════════════════════════
+
+   ⚠️ PURE EXPLANATION — NO BUTTONS, NOTHING CLICKABLE INSIDE IT. A locked state that offers a
+   control you cannot use teaches the wrong thing twice: it implies the door is stuck rather than
+   not yet reached, and it puts a dead control under the pointer. This is a `div` with a cursor of
+   `default`, and its title goes muted so it does not read as an invitation the way the live ghosts'
+   burgundy italic does. */
+.pkgo-ghost--locked { cursor: default; }
+.pkgo-ghost--locked:hover { background: transparent; border-color: var(--pkgo-dash); }
+.pkgo-ghost--locked .pkgo-gtitle { color: var(--pkg-muted); font-style: normal; }
+
+/* The "next thing to do" ghost — tinted, because at this point it IS the next action. */
+.pkgo-ghost--next { border-color: var(--pkg-pinkline); background: rgba(245, 226, 218, 0.22); }
+
+/* ⚠️ DISABLED CONTROLS MOVE IN LOCKSTEP WITH THE GATE (D4) — the rail's `+ NEW` and the header's
+   `New package` are the same decision rendered twice, so they are disabled by the same boolean.
+   The house disabled treatment: paper fill, faint text, not-allowed — never opacity alone, which
+   reads as a rendering fault rather than a state. */
+.pkgo-add:disabled {
+  cursor: not-allowed;
+  color: var(--pkg-muted);
+  border-color: var(--pkgo-hairline-soft);
+  background: transparent;
+}
+.pkgo-add:disabled:hover { background: transparent; }
+
+/* ⚠️ A REFUSED WRITE IS SHOWN, NOT SWALLOWED. `addPackage` declines on a FREE plan and returns its
+   reason; the pre-existing Workshop composer discards it, so the form closed on a save that never
+   happened. This is where that reason lands — burgundy on blush, inside the modal, with the draft
+   still in the fields behind it. */
+.pkgf-error {
+  font-size: 12px; line-height: 1.5; color: var(--pkg-burg);
+  background: var(--pkg-pink); border: 1px solid var(--pkg-pinkline);
+  border-radius: 8px; padding: 9px 11px; margin-bottom: 4px;
+}

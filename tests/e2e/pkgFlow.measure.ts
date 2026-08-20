@@ -172,3 +172,136 @@ test("phase 2 — reopening a material restores its mode and values, and edits p
   writeFileSync(`${ART}/p2-edit.txt`, JSON.stringify(log, null, 2) + "\n");
   console.log(JSON.stringify(log, null, 2));
 });
+
+/** The gate + builder. Self-contained: clears the fixture, builds it back up, restores at the end. */
+const GATE = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const pkgPanel = Array.from(root.querySelectorAll(".pkgo-panel"))
+    .find((p) => (p.querySelector(".pkgo-lbl")?.textContent || "").trim() === "Packages");
+  const ghost = pkgPanel?.querySelector(".pkgo-ghost");
+  const hdr = Array.from(root.querySelectorAll("button")).find((b) => /New package/.test(b.textContent || ""));
+  return {
+    railNewDisabled: pkgPanel?.querySelector(".pkgo-add")?.disabled ?? null,
+    headerNewDisabled: hdr?.disabled ?? null,
+    ghostTag: ghost?.tagName ?? null,
+    ghostLocked: ghost?.classList.contains("pkgo-ghost--locked") ?? null,
+    ghostNext: ghost?.classList.contains("pkgo-ghost--next") ?? null,
+    ghostTitle: (ghost?.querySelector(".pkgo-gtitle")?.textContent || "").trim() || null,
+    ghostSub: (ghost?.querySelector(".pkgo-gsub")?.textContent || "").trim().slice(0, 200) || null,
+    /* nothing clickable inside the locked ghost (D4) */
+    clickableInsideGhost: ghost ? ghost.querySelectorAll("button,a,[role=button]").length : null,
+    pkgRows: Array.from(pkgPanel?.querySelectorAll(".pkgo-row") ?? []).map((r) => ({
+      name: (r.querySelector(".pkgo-name")?.textContent || "").trim(),
+      comp: (r.querySelector(".pkgo-comp")?.textContent || "").trim() || null,
+      detail: (r.querySelector(".pkgo-detail")?.textContent || "").trim(),
+    })),
+  };
+})()`;
+
+async function addMaterial(page: import("@playwright/test").Page, type: string, name: string, body: string) {
+  await page.locator(".pkgo-add", { hasText: "+ ADD" }).first().click();
+  await page.locator(".pkgf-typetile", { hasText: type }).click();
+  await page.locator("#pkgf-mat-name").fill(name);
+  await page.locator(".pkgf-fld textarea").fill(body);
+  await page.locator(".pkgf-btn--primary").click();
+  await page.waitForTimeout(2500);
+}
+
+/**
+ * ⚠️ EDITING IS PROVED SEPARATELY FROM CREATING, because only CREATING is Pro-gated. `addPackage`
+ * refuses on FREE (see the phase-3 test above, which captures that refusal); `updatePackage` does
+ * not. So the edit path is driven against a SEEDED package — the seed writes through the SDK, which
+ * the client-side plan check never sees. See F-E.
+ */
+test("phase 3 — editing a package from its rail row", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  const log: Record<string, unknown>[] = [];
+
+  await page.locator(".pkgo-row", { hasText: "Standard UK" }).first().click();
+  await page.locator(".pkgf-backdrop").waitFor({ state: "visible", timeout: 10_000 });
+  const opened = {
+    title: (await page.locator(".pkgf-title").textContent() || "").trim(),
+    name: await page.locator("#pkgf-pkg-name").inputValue(),
+    letter: await page.locator("#pkgf-pkg-letter").inputValue(),
+    synopsis: await page.locator("#pkgf-pkg-synopsis").inputValue(),
+    sample: await page.locator("#pkgf-pkg-sample").inputValue(),
+    comp: (await page.locator(".pkgf-comp").textContent() || "").trim(),
+  };
+  log.push({ at: "opened for edit", ...opened });
+  await page.screenshot({ path: `${OUT}/p3-edit-package.png` });
+
+  /* change the sample to "Not included" — the optional slot's sentinel path */
+  await page.locator("#pkgf-pkg-sample").selectOption("");
+  const compAfter = (await page.locator(".pkgf-comp").textContent() || "").trim();
+  await page.locator("#pkgf-pkg-name").fill("Standard UK edited");
+  await page.locator(".pkgf-btn--primary").click();
+  await page.waitForTimeout(2500);
+  log.push({ at: "after edit", livePreview: compAfter, gate: await page.evaluate(GATE) });
+
+  /* put it back so the fixture is as found */
+  await page.locator(".pkgo-row", { hasText: "Standard UK edited" }).first().click();
+  await page.locator(".pkgf-backdrop").waitFor({ state: "visible", timeout: 10_000 });
+  await page.locator("#pkgf-pkg-sample").selectOption({ index: 1 });
+  await page.locator("#pkgf-pkg-name").fill("Standard UK");
+  await page.locator(".pkgf-btn--primary").click();
+  await page.waitForTimeout(2500);
+  log.push({ at: "restored", gate: await page.evaluate(GATE) });
+
+  writeFileSync(`${ART}/p3-edit-package.txt`, JSON.stringify(log, null, 2) + "\n");
+  console.log(JSON.stringify(log, null, 2));
+});
+
+test("phase 3 — locked with nothing, unlocks at letter+synopsis, builds and edits", async ({ page }) => {
+  const log: Record<string, unknown>[] = [];
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+
+  log.push({ at: "seed-empty (fixture cleared before this run)", gate: await page.evaluate(GATE) });
+  await page.screenshot({ path: `${OUT}/p3-locked.png`, fullPage: true });
+
+  await addMaterial(page, "Covering letter", "Flow gate letter", "a letter body");
+  log.push({ at: "one letter only", gate: await page.evaluate(GATE) });
+
+  await addMaterial(page, "Synopsis", "Flow gate synopsis", "a synopsis body");
+  log.push({ at: "letter + synopsis", gate: await page.evaluate(GATE) });
+  await page.screenshot({ path: `${OUT}/p3-unlocked.png`, fullPage: true });
+
+  /* build one */
+  await page.locator(".pkgo-add", { hasText: "+ NEW" }).first().click();
+  await page.locator(".pkgf-backdrop").waitFor({ state: "visible", timeout: 10_000 });
+  const comp = await page.locator(".pkgf-comp").textContent();
+  const suggested = await page.locator("#pkgf-pkg-name").inputValue();
+  log.push({ at: "builder open", suggestedName: suggested, compPreview: (comp || "").trim() });
+  await page.screenshot({ path: `${OUT}/p3-builder.png` });
+
+  await page.locator("#pkgf-pkg-name").fill("Flow gate package");
+  await page.locator(".pkgf-btn--primary").click();
+  await page.waitForTimeout(2500);
+  /* ⚠️ A REFUSAL IS PART OF THE PROOF, NOT A FAILURE OF IT. addPackage is Pro-gated in db.tsx, so on
+     a FREE plan the write is declined — and what matters is that the modal SAYS so and keeps the
+     draft, rather than closing on a save that never happened. */
+  const refusal = await page.locator(".pkgf-error").count()
+    ? (await page.locator(".pkgf-error").textContent() || "").trim() : null;
+  const stillOpen = await page.locator(".pkgf-backdrop").count() > 0;
+  log.push({ at: "after build", refusal, modalStillOpen: stillOpen, gate: await page.evaluate(GATE) });
+  if (refusal) {
+    await page.screenshot({ path: `${OUT}/p3-refused.png` });
+    writeFileSync(`${ART}/p3-gate.txt`, JSON.stringify(log, null, 2) + "\n");
+    console.log(JSON.stringify(log, null, 2));
+    return;
+  }
+
+  /* edit it from its rail row */
+  await page.locator(".pkgo-row", { hasText: "Flow gate package" }).click();
+  await page.locator(".pkgf-backdrop").waitFor({ state: "visible", timeout: 10_000 });
+  const editTitle = await page.locator(".pkgf-title").textContent();
+  await page.locator("#pkgf-pkg-name").fill("Flow gate renamed");
+  await page.locator(".pkgf-btn--primary").click();
+  await page.waitForTimeout(2500);
+  log.push({ at: "after edit", editTitle: (editTitle || "").trim(), gate: await page.evaluate(GATE) });
+
+  writeFileSync(`${ART}/p3-gate.txt`, JSON.stringify(log, null, 2) + "\n");
+  console.log(JSON.stringify(log, null, 2));
+});

@@ -25,6 +25,7 @@ import { ManuscriptVersion, SubmissionPackage, Query } from "../../types";
 import {
   materialRows, packageRows, trackingRows, packagedQueries, replyCount, howItWorks,
 } from "../../lib/packagesOverview";
+import { canBuildPackage } from "../../lib/materialDraft";
 import "./packagesOverview.css";
 
 export interface PackagesOverviewProps {
@@ -118,7 +119,7 @@ const STEPS = [
 const Panel: React.FC<{
   label: string;
   chip?: string;
-  action?: { label: string; onClick: () => void };
+  action?: { label: string; onClick: () => void; disabled?: boolean };
   children: React.ReactNode;
 }> = ({ label, chip, action, children }) => (
   <section className="pkgo-panel">
@@ -127,7 +128,7 @@ const Panel: React.FC<{
       <span className="pkgo-meta">
         {chip !== undefined && <span className="pkgo-chip">{chip}</span>}
         {action && (
-          <button type="button" className="pkgo-add" onClick={action.onClick}>
+          <button type="button" className="pkgo-add" onClick={action.onClick} disabled={action.disabled}>
             {action.label}
           </button>
         )}
@@ -145,14 +146,22 @@ const Panel: React.FC<{
  * — you make a reply arrive by sending a query, not by pressing this. So it renders as a plain
  * `div` with no pointer and no hover, rather than a button that does nothing.
  */
-const Ghost: React.FC<{ title?: string; sub: string; onClick?: () => void }> = ({ title, sub, onClick }) =>
+const Ghost: React.FC<{
+  title?: string;
+  sub: React.ReactNode;
+  onClick?: () => void;
+  /** D4's locked state — explanation only, muted title, nothing to press. */
+  locked?: boolean;
+  /** The tinted "this is the next thing to do" treatment. */
+  next?: boolean;
+}> = ({ title, sub, onClick, locked, next }) =>
   onClick ? (
-    <button type="button" className="pkgo-ghost" onClick={onClick}>
+    <button type="button" className={`pkgo-ghost${next ? " pkgo-ghost--next" : ""}`} onClick={onClick}>
       {title && <span className="pkgo-gtitle">{title}</span>}
       <span className="pkgo-gsub">{sub}</span>
     </button>
   ) : (
-    <div className="pkgo-ghost pkgo-ghost--inert">
+    <div className={`pkgo-ghost ${locked ? "pkgo-ghost--locked" : "pkgo-ghost--inert"}`}>
       {title && <span className="pkgo-gtitle">{title}</span>}
       <span className="pkgo-gsub">{sub}</span>
     </div>
@@ -168,6 +177,8 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
   const live = packagedQueries(packages, queries).length;
   const replies = replyCount(packages, queries);
   const steps = howItWorks(versions.length, packages.length, live);
+  /* D4's gate, derived — never a stored flag. */
+  const unlocked = canBuildPackage(versions);
 
   return (
     <div className="pkgo-grid">
@@ -192,13 +203,34 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
           )}
         </Panel>
 
-        <Panel label="Packages" chip={String(packages.length)} action={{ label: "+ NEW", onClick: onNewPackage }}>
+        <Panel
+          label="Packages"
+          chip={String(packages.length)}
+          /* ⚠️ DISABLED IN LOCKSTEP WITH THE HEADER'S `New package` (D4) — they are the same decision
+             rendered twice, so they read the same boolean rather than each deciding for itself. */
+          action={{ label: "+ NEW", onClick: onNewPackage, disabled: !unlocked }}
+        >
           {pkgs.length === 0 ? (
-            <Ghost
-              title="Build a package"
-              sub="Pick one of each material. You'll need at least a covering letter first."
-              onClick={onNewPackage}
-            />
+            unlocked ? (
+              <Ghost
+                title="Build a package"
+                sub="Pick one of each material and name the combination."
+                onClick={onNewPackage}
+                next
+              />
+            ) : (
+              /* ⚠️ PURE EXPLANATION — no buttons, nothing clickable (D4). Copy verbatim per D12. */
+              <Ghost
+                locked
+                title="No packages yet"
+                sub={<>
+                  A package is a covering letter, a synopsis and — if you want one — a sample,
+                  bundled under a name.<br /><br />
+                  You'll be able to build one once you've added a covering letter and a synopsis to
+                  your materials.
+                </>}
+              />
+            )
           ) : (
             <div className="pkgo-reg">
               {pkgs.map((p) => (

@@ -343,3 +343,85 @@ states explicitly, as it already excludes white row-buttons.
 | `vite build` | exit 0; whole log grepped — no diagnostics |
 | Targeted suites (5 files) | **115 passed** |
 | New unit tests | `materialDraft.test.ts` — **36 cases** |
+
+---
+
+## Phase 3 — Gating + builder
+
+**What shipped:** D4's gate (locked → unlocked), the builder modal, and both `New package` controls
+disabled in lockstep. Packages no longer hand off to the Workshop either.
+
+### The gate, driven from an empty fixture
+
+The fixture was cleared and rebuilt through the UI, so each row is a measured state rather than a
+constructed one:
+
+| State | rail `+ NEW` | header `New package` | ghost element | locked | clickable inside |
+|---|---|---|---|---|---|
+| nothing | **disabled** | **disabled** | `DIV` | **true** | **0** |
+| one covering letter | **disabled** | **disabled** | `DIV` | **true** | **0** |
+| letter **+** synopsis | enabled | enabled | `BUTTON` | false | 0 |
+
+The middle row is the one worth having: **one material is not enough**, and both controls stay shut.
+`clickableInsideGhost: 0` is D4's "nothing clickable inside it" measured rather than intended, and
+the locked ghost is a `div` — a disabled button would still read as a control that failed.
+
+Both controls read the same `canBuildPackage(versions)`; they are one decision rendered twice, so
+they cannot disagree.
+
+### ⚠️ Package creation is Pro-gated in `db.tsx`, and the refusal was being swallowed
+
+This is the phase's real finding, and it is **pre-existing**.
+
+`addPackage` (`db.tsx:1490`) refuses on a Free plan and returns
+`{ success: false, error: "Custom Submission Packages & A/B Tracking are premium features…" }`. The
+existing Workshop path discards that: `return res.success ? res.id : undefined`, with nothing shown.
+So a free user fills the composer, presses Save, the form closes — **and no package exists**. Same
+silent-denial family as F7, one layer up from the rules.
+
+My builder returns the refusal instead of dropping it. Measured on the Free harness account:
+
+```
+refusal:        "Custom Submission Packages & A/B Tracking are premium features. Upgrade to ScriptAlly Pro!"
+modalStillOpen: true
+```
+
+The draft survives in the fields behind the message. **The gate itself is untouched** (D4 — "Free/Pro
+gating preserved exactly as currently implemented"); only its silence is fixed. Flagged as **F-E**.
+
+### ⚠️ Why the Pro happy-path is not driven here, and what was done instead
+
+Proving creation needs a Pro account, and I **declined to flip the harness account's plan**. `plan`
+is client-writable by the rules, but the attempt was denied, and the user document turns out to be
+carrying in-flight fields from the account-settings stream (`notifyPrefs`, `scheduledDeletion`,
+`workspacePrefs`, plus a `journeyStage` the rules deliberately dropped). Mutating shared fixture
+state in the middle of another stream's work is exactly the interference the working discipline
+forbids — and the value of the experiment did not justify it.
+
+What is proved instead, without touching their fixture:
+
+* **creation is correctly refused, and now says so** (above);
+* **editing is fully driven**, because `updatePackage` is **not** Pro-gated — against a seeded
+  package, since the seed writes through the SDK and never meets the client-side plan check.
+
+### Editing, driven
+
+| Step | Measured |
+|---|---|
+| open `Standard UK` from its rail row | title `Edit package`; name, and all three slot ids restored |
+| set Sample → `Not included` | live preview drops to **`THIS PACKAGE SENDS → Hook-first · One-page`** |
+| save | rail row composition becomes **`Hook-first · One-page`** |
+| restore the sample | back to **`Hook-first · One-page · Chapters 1-3`** |
+
+That round trip exercises the optional slot in both directions — which matters because the empty
+sample is `UNFILLED_SLOT` (`""`), **not** an absent key: `isValidPackage` requires all three slot keys
+to be present, so this is the one place on the page where `deleteField()` would be the wrong
+instinct. The brief's "never a placeholder" rule is read as being about *materials'* optional fields.
+
+### Phase 3 gates
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | exit 0 |
+| `vite build` | exit 0; whole log grepped — no diagnostics |
+| Targeted suites (5 files) | **115 passed** |

@@ -1,0 +1,65 @@
+[
+  {
+    "at": "seed-empty (fixture cleared before this run)",
+    "gate": {
+      "railNewDisabled": true,
+      "headerNewDisabled": true,
+      "ghostTag": "DIV",
+      "ghostLocked": true,
+      "ghostNext": false,
+      "ghostTitle": "No packages yet",
+      "ghostSub": "A package is a covering letter, a synopsis and — if you want one — a sample, bundled under a name.You'll be able to build one once you've added a covering letter and a synopsis to your materials.",
+      "clickableInsideGhost": 0,
+      "pkgRows": []
+    }
+  },
+  {
+    "at": "one letter only",
+    "gate": {
+      "railNewDisabled": true,
+      "headerNewDisabled": true,
+      "ghostTag": "DIV",
+      "ghostLocked": true,
+      "ghostNext": false,
+      "ghostTitle": "No packages yet",
+      "ghostSub": "A package is a covering letter, a synopsis and — if you want one — a sample, bundled under a name.You'll be able to build one once you've added a covering letter and a synopsis to your materials.",
+      "clickableInsideGhost": 0,
+      "pkgRows": []
+    }
+  },
+  {
+    "at": "letter + synopsis",
+    "gate": {
+      "railNewDisabled": false,
+      "headerNewDisabled": false,
+      "ghostTag": "BUTTON",
+      "ghostLocked": false,
+      "ghostNext": true,
+      "ghostTitle": "Build a package",
+      "ghostSub": "Pick one of each material and name the combination.",
+      "clickableInsideGhost": 0,
+      "pkgRows": []
+    }
+  },
+  {
+    "at": "builder open",
+    "suggestedName": "Standard UK",
+    "compPreview": "THIS PACKAGE SENDS  →  Flow gate letter · Flow gate synopsis"
+  },
+  {
+    "at": "after build",
+    "refusal": "Custom Submission Packages & A/B Tracking are premium features. Upgrade to ScriptAlly Pro!",
+    "modalStillOpen": true,
+    "gate": {
+      "railNewDisabled": false,
+      "headerNewDisabled": false,
+      "ghostTag": "BUTTON",
+      "ghostLocked": false,
+      "ghostNext": true,
+      "ghostTitle": "Build a package",
+      "ghostSub": "Pick one of each material and name the combination.",
+      "clickableInsideGhost": 0,
+      "pkgRows": []
+    }
+  }
+]
