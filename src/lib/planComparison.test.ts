@@ -6,7 +6,7 @@
  * must not make.
  */
 import { describe, it, expect } from "vitest";
-import { PLAN_ROWS, PLAN_CTA_LABEL, PlanCell } from "./planComparison";
+import { PLAN_ROWS, PLAN_CTA_LABEL, PlanCell, planAllowanceLine } from "./planComparison";
 import { getSmartImportEntitlement } from "./smartImportEntitlement";
 import { UserPlan } from "../types";
 import { PRICING_TIERS } from "../marketing/landingCopy";
@@ -130,5 +130,31 @@ describe("the table sells nothing and counts nothing", () => {
     for (const word of ["remaining", "you have used", "of your", "left this"]) {
       expect(text, word).not.toContain(word);
     }
+  });
+});
+
+/* ⚠️ THE ASIDE'S LINE IS THE TABLE'S OWN DATA, and these assertions are what stop it becoming a
+   second hand-written feature list in the rail. */
+describe("planAllowanceLine — the rail aside reads the comparison, it does not restate it", () => {
+  it("states the standing capacities, singular where the figure is one", () => {
+    expect(planAllowanceLine("free")).toBe("1 manuscript · unlimited agents · unlimited queries");
+    expect(planAllowanceLine("pro")).toBe("unlimited manuscripts · unlimited agents · unlimited queries");
+  });
+
+  /* Smart Import's figures carry a period — "1 (lifetime)", "1 a month" — so they are an allowance
+     over time, not a capacity you hold, and they must not land in a list beside "1 manuscript". */
+  it("leaves the metered allowance out, by the qualifier and not by its name", () => {
+    for (const tier of ["free", "pro"] as const) {
+      expect(planAllowanceLine(tier).toLowerCase()).not.toContain("smart import");
+      expect(planAllowanceLine(tier)).not.toContain("(");
+      expect(planAllowanceLine(tier)).not.toMatch(/\ba (month|lifetime)\b/);
+    }
+  });
+
+  it("carries every standing-capacity row, so a new one joins without an edit here", () => {
+    const standing = PLAN_ROWS.filter(
+      (r) => r.free.kind === "figure" && !/[()]|\ba\s+(day|week|month|year)\b/i.test((r.free as { text: string }).text),
+    );
+    expect(planAllowanceLine("free").split(" · ")).toHaveLength(standing.length);
   });
 });

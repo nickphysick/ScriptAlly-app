@@ -56,6 +56,7 @@ import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
 import { PlanComparison } from "./plans/PlanComparison";
 import { AccountHeader } from "./settings/AccountHeader";
+import { RailAside } from "./settings/RailAside";
 import { accountFacts, sentCount } from "../lib/accountHeaderFacts";
 import {
   pageGround,
@@ -1427,6 +1428,7 @@ export const AccountSettings: React.FC<{
         <div className="acct-grid">
           <div className="acct-rail">
             <Rail active={active} onSelect={goSection} />
+            <RailAside plan={currentUser.plan === UserPlan.PRO ? "pro" : "free"} />
           </div>
           <div
             id="acct-panel"

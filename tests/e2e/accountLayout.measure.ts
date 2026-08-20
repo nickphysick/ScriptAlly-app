@@ -14,6 +14,7 @@
 import { test, expect } from "@playwright/test";
 import { openRoute } from "./measure";
 import { ACCOUNT_ROUTES } from "../../src/lib/accountRoutes";
+import { planAllowanceLine } from "../../src/lib/planComparison";
 
 const rect = (page: import("@playwright/test").Page, sel: string) =>
   page.evaluate((s) => {
@@ -157,4 +158,55 @@ test("the plane is still the only scroll region at 1440x900", async ({ page }) =
   console.log("SCROLL", JSON.stringify(scroll));
   expect(scroll.stageMax, "the stage must not scroll").toBeLessThanOrEqual(0);
   expect(scroll.pageMax, "nor the page box").toBeLessThanOrEqual(1);
+});
+
+/* ═══ PHASE 3 — the rail column ══════════════════════════════════════════════ */
+
+test("the rail column reaches the same depth as the work column", async ({ page }) => {
+  const rows: string[] = [];
+  for (const r of ACCOUNT_ROUTES) {
+    await openRoute(page, r.path, { width: 1440, height: 900 });
+    const g = await page.evaluate(() => {
+      const rail = document.querySelector(".acct-rail") as HTMLElement;
+      const work = document.querySelector(".acct-work") as HTMLElement;
+      const nav = rail.firstElementChild as HTMLElement;
+      const aside = rail.querySelector(".acct-aside") as HTMLElement | null;
+      const rb = rail.getBoundingClientRect(), wb = work.getBoundingClientRect();
+      return {
+        railBottom: Math.round(rb.bottom), workBottom: Math.round(wb.bottom),
+        navH: Math.round(nav.getBoundingClientRect().height),
+        asideH: aside ? Math.round(aside.getBoundingClientRect().height) : -1,
+      };
+    });
+    rows.push(`${r.id.padEnd(15)} rail↓${g.railBottom}  work↓${g.workBottom}  nav ${g.navH}  aside ${g.asideH}`);
+    expect(Math.abs(g.railBottom - g.workBottom), `${r.id}: the columns must end together`).toBeLessThanOrEqual(2);
+    /* ⚠️ THE ASIDE MUST HAVE ACTUALLY GROWN, or the columns match for some other reason and this
+       proves nothing about the thing that was built. */
+    expect(g.asideH, `${r.id}: the aside fills what the nav leaves`).toBeGreaterThan(150);
+  }
+  console.log("\nRAIL DEPTH\n" + rows.join("\n"));
+});
+
+test("the aside states the plan, and its line is the comparison's own data", async ({ page }) => {
+  await openRoute(page, "/account/profile", { width: 1440, height: 900 });
+  const a = await page.evaluate(() => ({
+    k: document.querySelector(".acct-aside-k")?.textContent ?? null,
+    v: document.querySelector(".acct-aside-v")?.textContent ?? null,
+    note: document.querySelector(".acct-aside-note")?.textContent ?? null,
+  }));
+  console.log("ASIDE", JSON.stringify(a));
+  expect(a.k?.toLowerCase()).toBe("your plan");
+  expect(a.v).toBeTruthy();
+  /* The derived line, not a hand-written sentence — and it must agree with the table. */
+  expect(a.note).toBe(`${planAllowanceLine("free")}.`);
+});
+
+test("the aside hides below 900px rather than becoming a full-width band", async ({ page }) => {
+  await openRoute(page, "/account/profile", { width: 800, height: 900 });
+  const shown = await page.evaluate(() => {
+    const el = document.querySelector(".acct-aside") as HTMLElement | null;
+    return el ? getComputedStyle(el).display : "absent";
+  });
+  console.log("aside @800 display:", shown);
+  expect(shown).toBe("none");
 });

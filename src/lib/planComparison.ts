@@ -100,3 +100,31 @@ export const PLAN_CTA_LABEL = "See Pro plans";
 /** The words for the "this is the one you are on" marker. */
 export const CURRENT_PLAN_CHIP = "Current";
 export const CURRENT_PLAN_CTA = "Your plan";
+
+/* ── The rail aside's one line ───────────────────────────────────────────────
+   ⚠️ DERIVED FROM `PLAN_ROWS`, NEVER WRITTEN OUT AGAIN. The aside states what your plan gives you,
+   which is exactly what the comparison states — and a second hand-written sentence is the
+   duplication this build spent a whole phase removing from `PlansPage`. If a row's figure changes,
+   the rail changes with it or not at all.
+
+   ⚠️ THE STANDING CAPACITIES ONLY, SELECTED BY A RULE RATHER THAN BY NAME. Smart Import's figures
+   carry a PERIOD — "1 (lifetime)", "1 a month" — so they are an allowance over time rather than a
+   capacity you hold, and they do not compose into a list beside "1 manuscript". The predicate is
+   the qualifier, not a hardcoded list of three labels, so a new capacity row joins the line on its
+   own and a new metered one stays out of it. */
+const isStandingCapacity = (text: string): boolean => !/[()]|\ba\s+(day|week|month|year)\b/i.test(text);
+
+/** "1 manuscript · unlimited agents · unlimited queries" */
+export function planAllowanceLine(tier: "free" | "pro"): string {
+  return PLAN_ROWS
+    .map((r) => ({ row: r, cell: tier === "free" ? r.free : r.pro }))
+    .filter((x): x is { row: PlanRow; cell: { kind: "figure"; text: string } } =>
+      x.cell.kind === "figure" && isStandingCapacity(x.cell.text))
+    .map(({ row, cell }) => {
+      /* Labels are plural nouns; a figure of exactly one needs the singular, and "Unlimited" reads
+         as prose here rather than as a table value. */
+      const noun = cell.text === "1" ? row.label.replace(/s$/, "") : row.label;
+      return `${cell.text.toLowerCase()} ${noun.toLowerCase()}`;
+    })
+    .join(" · ");
+}

@@ -68,6 +68,45 @@
 }
 .acct-rail > * { flex: 0 0 auto; }
 
+/* ⚠️ THE ASIDE IS THE ONE THING IN THE COLUMN THAT GROWS. The nav card stays its own height (the
+   rule above); this takes everything left over, so the left column reaches the same depth as the
+   work column instead of stopping a third of the way down. */
+.acct-rail .acct-aside { flex: 1 1 auto; min-height: 150px; }
+.acct-aside-in {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;   /* bottom-aligned — the illustration sits in the space above */
+  position: relative;
+  overflow: hidden;
+  padding: 16px;
+}
+.acct-aside-txt { position: relative; z-index: 2; }
+.acct-aside-k {
+  display: block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #a08e7c;
+}
+.acct-aside-v {
+  display: block;
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: 17px;
+  color: #3a1c14;
+  margin: 2px 0 8px;
+}
+.acct-aside-note {
+  display: block;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 10.5px;
+  font-weight: 300;
+  color: #8a7a6c;
+  line-height: 1.5;
+}
+
 .acct-work {
   flex: 1;
   min-width: 0;
@@ -96,6 +135,11 @@
   .acct-grid { flex-direction: column; }
   .acct-rail { width: auto; }
   .acct-plane { padding-inline: 16px; }
+  /* ⚠️ THE ASIDE HIDES RATHER THAN STACKING. Its whole purpose is to give the rail COLUMN depth
+     beside the work column; once the rail is a header strip across the top there is no column to
+     fill, and the card would become a full-width band of plan trivia between the nav and the
+     section you came to read. */
+  .acct-rail .acct-aside { display: none; }
 }
 
 /* ── Two-column section bodies ──────────────────────────────────────────────
