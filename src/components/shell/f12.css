@@ -1272,6 +1272,52 @@
    a warning about a person. The same device the nudge confirm and the old no-reply card used. */
 .tl-wbar--past i { background: var(--n4); }
 .tl-wbar--past::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(135deg, transparent 0 5px, rgba(124, 58, 42, 0.15) 5px 10px); }
+/**
+ * ══ §2 · WHOSE WINDOW IT IS, SEEN RATHER THAN READ (ref 168-window-provenance-visual.html) ═════
+ *
+ * The distinction rested on one pronoun — "Priya advises" against "you expect" — and when the bar
+ * fails to draw, that word is the only signal left. The bar carries it too, in the grammar this
+ * page already speaks: SOLID means stated or happened, DASHED means provisional. The ghost rung
+ * established that (`.tl-ghostmark`, `.tl-ghostpanel`); a writer's own estimate is the same kind of
+ * claim — a future nobody has confirmed — so it takes the same treatment.
+ *
+ * ⚠️ IT STAYS SAGE, AND THE REF IS SUPERSEDED HERE. `168`'s `.bar.est` draws the rail in `--oat`, a
+ * warm grey — while its own MARKER draws the estimate in `--sage-br`. The pack names the value and
+ * gives the reason ("a date you set is a real expectation, just not the agency's word — dashed
+ * means provisional, never wrong"), and a reasoned value in prose beats an unreasoned one in an
+ * artefact. Grey would read as degraded and amber as a warning; both would say the writer's date is
+ * worth less, which is not what provisional means.
+ *
+ * ⚠️ AND THE EXPIRED STATE IS UNTOUCHED BY ALL OF IT. `--past` keeps its spent hatch whichever
+ * source the window came from: once a window has run out, what matters is that it ran out.
+ */
+.tl-wbar--est { background: transparent; overflow: visible; border-radius: 0; }
+/* the rail: a dashed line through the track's midline, in place of the solid ground */
+.tl-wbar--est::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-50%);
+  border-radius: 1px;
+  background: repeating-linear-gradient(90deg, var(--sage-edge) 0 5px, transparent 5px 10px);
+}
+/* the fill: an OUTLINE rather than a weight — the same span, claimed more lightly */
+.tl-wbar--est i {
+  position: absolute; left: 0; top: 0; height: 100%; border-radius: 3px;
+  background: transparent; box-shadow: inset 0 0 0 1.5px var(--sage-edge);
+}
+.tl-wbar--est i::after {
+  content: ""; position: absolute; left: 0; top: 50%; height: 2px; width: 100%; transform: translateY(-50%);
+  border-radius: 1px; background: var(--sage-edge); opacity: 0.55;
+}
+/* ⚠️ PAST WINS OVER EST — the hatch and its spent fill are the state that matters once a window has
+   expired, so the outline treatment stands down rather than compounding with it. */
+.tl-wbar--past.tl-wbar--est { background: var(--n2); overflow: hidden; border-radius: 3px; }
+.tl-wbar--past.tl-wbar--est::before { display: none; }
+.tl-wbar--past.tl-wbar--est i { position: static; background: var(--n4); box-shadow: none; }
+.tl-wbar--past.tl-wbar--est i::after { display: none; }
+
+/* the marker ring: dashed sage, the same claim as the bar it labels */
+.tl-waitmark--est { border-style: dashed; border-color: var(--sage-edge); }
+.tl-waitmark--est svg { stroke: var(--sageD); }
+
 .tl-wbarf { display: flex; justify-content: space-between; font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-variant-numeric: tabular-nums; }
 
 .tl-wbody { font-family: "Inter", sans-serif; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }

@@ -568,10 +568,12 @@ const TlProjection: React.FC<{
   last?: boolean;
   /** §5 — sage while the stated window is open, oat once it has passed or was never stated. */
   tone?: "sage" | "oat";
+  /** §2 — the window is the writer's estimate: dashed ring, matching the dashed bar. */
+  est?: boolean;
   children?: React.ReactNode;
-}> = ({ status, title, date, qual, last = false, tone, children }) => (
+}> = ({ status, title, date, qual, last = false, tone, est = false, children }) => (
   <TlEvent last={last} mark={tone
-    ? <span className={`tl-waitmark tl-waitmark--${tone}`} aria-hidden="true">
+    ? <span className={`tl-waitmark tl-waitmark--${tone}${est ? " tl-waitmark--est" : ""}`} aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>
       </span>
     : <StatusDot status={status} overrideSize={TL_MARK} ghost decorative />}>
@@ -795,6 +797,9 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
             title={past ? "No reply" : "Waiting to hear back"}
             date={waiting.sentMs != null ? elapsedPhrase(waiting.nDays).toUpperCase() : undefined}
             tone={stated && !past ? "sage" : "oat"}
+            /* §2 — dashed ring for a window the WRITER set. Same source as the bar and the
+               sentence; three surfaces, one fact, so they cannot come to disagree. */
+            est={waiting.windowSource === "writer" && !past}
             last={!reminder}
             /**
              * ⚠️ THE CHIP IS GONE, AND THE ATTRIBUTION TOOK ITS PLACE IN ROW 1. `Priya says 6 weeks`
@@ -846,9 +851,15 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                  the block's gap between them and the footer drifted away from the track it labels;
                  a label belongs to its bar the way a caption belongs to a figure. */
               <div>
-                <div className={`tl-wbar${past ? " tl-wbar--past" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>
+                {/* §2 — the bar carries the provenance the sentence above states. `est` is read
+                    from the SAME resolver the sentence is: `windowSource`, never a second signal. */}
+                <div className={`tl-wbar${past ? " tl-wbar--past" : ""}${waiting.windowSource === "writer" ? " tl-wbar--est" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>
                 <div className="tl-wbarf">
-                  <span>Sent {fmtShort(waiting.sentMs!)}</span>
+                  {/* ⚠️ §3a · THE LABEL NAMES THE ANCHOR'S OWN EVENT. It read "Sent 18 Aug" where
+                      18 August was the day the AGENT replied — the arithmetic right and the word
+                      wrong. Derived from `anchorKind`, which is computed WITH the instant rather
+                      than beside it, so the figure and the noun cannot describe different events. */}
+                  <span>{waiting.anchorKind === "reply" ? "Replied" : "Sent"} {fmtShort(waiting.sentMs!)}</span>
                   {/* ⚠️ THE END LABEL NAMES ITS OWNER TOO, so the bar cannot be misread once the
                       line above it has been. A window the WRITER set never "expires" — nothing was
                       promised — so its label states whose figure it is in both states, where an
