@@ -1,0 +1,23 @@
+{
+  "railWidth": 300,
+  "railPanels": [
+    "Materials",
+    "Packages"
+  ],
+  "headerBorderTop": "5px",
+  "headerBorderColor": "rgb(154, 168, 150)",
+  "filled": [
+    {
+      "label": "New package",
+      "bg": "rgb(245, 226, 218)"
+    }
+  ],
+  "filledCount": 1,
+  "tabsGone": true,
+  "stripGone": true,
+  "materials": 6,
+  "tiles": 2,
+  "onboarding": false,
+  "dashboard": true,
+  "pageScrollX": 0
+}

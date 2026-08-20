@@ -484,3 +484,47 @@ test("phase 5 — attaching a package moves the derived figures", async ({ page 
   writeFileSync(`${ART}/p5-live.txt`, JSON.stringify(log, null, 2) + "\n");
   console.log(JSON.stringify(log, null, 2));
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   PHASE 6 — acceptance
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+const ACCEPT6 = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const cs = (el, p) => el ? getComputedStyle(el).getPropertyValue(p).trim() : null;
+  /* ⚠️ WHAT COUNTS AS A FILLED CONTROL, stated rather than assumed. Excluded: white (register rows
+     and tiles are SURFACES, and the ref draws them white beside its single filled button); and the
+     ON segment of a mode control, which is a state indicator the ref also fills. What is left is
+     controls carrying a call-to-action fill — which is the thing D5 says there is one of. */
+  const isSurface = (bg) => bg === "rgba(0, 0, 0, 0)" || bg === "transparent" || bg === "rgb(255, 255, 255)";
+  const filled = Array.from(root.querySelectorAll("button"))
+    .filter((b) => !isSurface(getComputedStyle(b).backgroundColor))
+    .filter((b) => !b.classList.contains("on"))
+    .map((b) => ({ label: (b.textContent || "").trim().slice(0, 28), bg: getComputedStyle(b).backgroundColor }));
+  const plate = root.querySelector(".wsh");
+  return {
+    railWidth: Math.round(root.querySelector(".pkgo-rail")?.getBoundingClientRect().width ?? 0),
+    railPanels: Array.from(root.querySelectorAll(".pkgo-rail .pkgo-lbl")).map((l) => (l.textContent || "").trim()),
+    headerBorderTop: cs(plate, "border-top-width"),
+    headerBorderColor: cs(plate, "border-top-color"),
+    filled, filledCount: filled.length,
+    tabsGone: !root.querySelector(".pkgw-tabs"),
+    stripGone: !root.querySelector(".pkgw-strip"),
+    materials: root.querySelectorAll(".pkgo-panel .pkgo-row").length,
+    tiles: root.querySelectorAll(".pkgf-tile:not(.pkgf-tile--ghost)").length,
+    onboarding: !!root.querySelector(".pkgo-prob"),
+    dashboard: !!root.querySelector(".pkgf-statstrip") || !!root.querySelector(".pkgf-nudge"),
+    pageScrollX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  };
+})()`;
+
+for (const w of [1440, 1920]) {
+  test(`phase 6 — acceptance at ${w}`, async ({ page }) => {
+    await openRoute(page, ROUTE, { width: w, height: w === 1440 ? 900 : 1200 });
+    const r = await page.evaluate(ACCEPT6);
+    await page.screenshot({ path: `${OUT}/p6-accept-${w}.png`, fullPage: true });
+    writeFileSync(`${ART}/p6-accept-${w}.txt`, JSON.stringify(r, null, 2) + "\n");
+    console.log(`── ${w} ──\n` + JSON.stringify(r, null, 2));
+  });
+}

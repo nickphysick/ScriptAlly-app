@@ -625,3 +625,100 @@ retired.
 | `tsc --noEmit` | exit 0 |
 | `vite build` | exit 0; whole log grepped — no diagnostics |
 | Targeted suites (6 files) | **150 passed** (+28 for the adapter) |
+
+---
+
+## Phase 6 — Verify + deploy
+
+### Acceptance at both widths — local, then deployed
+
+| Gate | 1440 | 1920 | **Deployed 1440** | **Deployed 1920** |
+|---|---|---|---|---|
+| Rail width | 300 | 300 | **300** | **300** |
+| Rail panels | Materials · Packages | same | same | same |
+| Header sage border | 5px `rgb(154,168,150)` | same | same | same |
+| **Filled controls** | **1** (`New package`) | **1** | **1** | **1** |
+| Tab strip gone | ✓ | ✓ | ✓ | ✓ |
+| `.pkgw-strip` gone | ✓ | ✓ | ✓ | ✓ |
+| Tiles | 2 | 2 | 2 | 2 |
+| Dashboard present | ✓ | ✓ | ✓ | ✓ |
+| **Horizontal overflow** | **0** | **0** | **0** | **0** |
+
+**What "filled" excludes, stated rather than assumed:** white (register rows and package tiles are
+*surfaces* — the ref draws them white beside its single filled button) and the **`on` segment** of a
+mode control (a state indicator the ref also fills). What remains is controls carrying a
+call-to-action fill, which is the thing D5 says there is one of.
+
+### States covered
+
+| State | Where proved |
+|---|---|
+| empty (no materials) | Phase 3 — locked gate, both controls disabled, `DIV` ghost, 0 clickable |
+| materials only | Phase 3 — unlocked at letter+synopsis; Phase 4 — onboarding stage, `tileCount: 0` |
+| package, unsent | Phase 5 — nudge naming the package, two dashed ghost panels |
+| package with activity | Phases 4 & 5 — tiles with scorecards, stat strip `8 / 2 / 2`, both bar panels |
+
+### Deploy
+
+Pre-flight: `git fetch` → **0 behind** `origin/main` (84 ahead). `npm run build:dev` → exit 0 with
+its guard passing — *"bundle targets scriptally-dev (dev); gen-lang-client-0801391782 absent."*
+
+Verified independently before uploading rather than trusting the guard:
+
+```
+index-DNmQPOwS.js   projectId:"scriptally-dev"   prod-id occurrences: 0
+  pkgf-modal ✓  pkgf-tile ✓  pkgf-statstrip ✓
+  "Choose one of each from the materials" ✓   "Reported, not guessed" ✓
+index-Dj00Jvtv.css  pkgf-frame ✓  pkgf-tile ✓  pkgf-bsent ✓
+```
+
+```
+firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev
+→ ✔ Deploy complete!   https://scriptally-dev.web.app
+```
+
+Built and uploaded back-to-back, because `dist/` is shared mutable state across the sessions in this
+checkout — the hazard F4 turned out to be, and which the deploy path still has no guard against.
+
+**Rules were deployed separately in Phase 1** (`releases/cloud.firestore` `updateTime`
+`2026-08-20T10:31:53Z`), because a rules deploy and a hosting deploy are different acts with
+different blast radii. Nothing went to prod.
+
+### Final gates
+
+| | Baseline | Final |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `vite build` | — | **exit 0, no diagnostics** |
+| `vitest run` | **6 files / 24 tests FAILED** | **343/343 files, 5873 tests, 0 failed, exit 0** |
+
+Strictly better than baseline. The 24 baseline failures belonged to the to-do, calendar, Query Centre
+and marketing streams and have since been fixed by them; this work added none.
+
+### `git diff --name-only HEAD` at close
+
+**Nothing outside the 63-path baseline changed**, and every path this build touched is committed.
+`#/pkg-lab` is still present and still must be removed before any prod deploy — that guard note
+stands.
+
+---
+
+## Flags for Nick
+
+| | Flag | Needs |
+|---|---|---|
+| **F-A** | **ATTACH FILE needs Firebase Storage.** Proposed shape, not built: a `packages/{uid}/{versionId}` bucket path, a Storage rules file mirroring `isValidVersion`'s ownership check, `fileAttached: true` + `fileName` on the version, and the existing `contentType: "file"` mode enabled. **Blaze implications**: Storage is a paid product beyond the free tier, so this is a billing decision before it is an engineering one. The control ships visible-and-disabled with a `SOON` tag rather than hidden, so the app says "not yet" instead of "never intended". |
+| **F-B** | **Two deletions need designed guards, and neither is built (D11).** *Deleting a material referenced by a package*: `deleteVersion` already refuses with an `alert()` — functional but not designed, and it names no package. *Deleting a package that has been sent with queries*: **no guard at all**, and those queries carry its `packageId`, so deleting one silently orphans every tracking figure derived from it. Proposed: refuse-with-reason for referenced materials (naming the packages), and retire-rather-than-delete for sent packages — `status: "Retired"` already exists and is already filtered out of `msPackages`. |
+| **F-C** | **What the retired `AnalyticsTab` had that the new dashboard does not.** Median reply windows (`medianReplyDays` / `daysToWeeks`), the funnel stages, per-package scope pills, **generated recommendations**, community percentiles, and overdue-send prompts. The new dashboard deliberately carries only counts. If any of that should live on, the main **Analytics** page is the natural home — it is a different question ("how is my querying going?") from this page's ("which package went where?"). The component is untouched on disk. |
+| **F-D** | **`LogQueryFocusForm`'s package picker needs nothing.** Checked, not assumed: packages have referenced material IDs already (R1), so the migration that would have broken it never happened. **I did not touch it.** |
+| **F-E** | **Package creation is Pro-gated in `db.tsx` while the page presents itself as ungated.** `addPackage` refuses on Free and returns a reason the old Workshop discarded. My builder now shows it, so a free user is told rather than left with a form that closed and did nothing — but the underlying product question stands: this route has no Pro gate anywhere else, so a free user can add materials, is invited to build, and is refused at the last step. Either the gate should be visible earlier, or it should not be there. |
+| **F-F** | **The guided tour now has no door.** `startTour` has exactly one reference — its own declaration. Its only entries were `onTryExample` on the two surfaces D9 retired. **The machinery is intact and deliberately not deleted**: where a tour belongs on the restructured page is a product decision. ⚠️ Do not give it a door by re-opening a Workshop route — that restores what D9 retired. |
+
+### Not done, deliberately
+
+* **No deletion affordances** for materials or packages (D11), pending F-B.
+* **ATTACH FILE** ships disabled (D2), pending F-A.
+* **The Pro create path was not driven**, and the harness account's plan was not flipped — the user
+  document is carrying the account-settings stream's in-flight fields, and mutating shared fixture
+  state during their work is the interference the discipline forbids.
+* **Nothing to prod.** `#/pkg-lab` still must be removed before any prod deploy.
