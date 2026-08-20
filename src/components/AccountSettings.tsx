@@ -40,7 +40,6 @@ import {
   DELETION_GRACE_DAYS, DELETION_CONFIRM_WORD, DELETION_REMOVES, RETENTION_LINE,
   deletionArmed, deletionRequest, scheduledDeletion, deletionNotice,
 } from "../lib/accountDeletion";
-import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
 import { useDirtyField } from "../lib/useSaveState";
 import { auth } from "../lib/firebase";
@@ -59,6 +58,11 @@ import { AccountHeader } from "./settings/AccountHeader";
 import { RailAside } from "./settings/RailAside";
 import { SettingsIllo, hasSectionWatermark } from "./settings/SettingsIllo";
 import { accountFacts, sentCount } from "../lib/accountHeaderFacts";
+import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
+import {
+  optionalTaskTypes, mutedRuleRows, unmute, ALWAYS_ON_LINE, MUTED_EMPTY_LINE,
+  staleOptionLabel, STALE_NOTE,
+} from "../lib/accountTasks";
 import {
   parchment,
   PAPER_TEXTURE,
@@ -235,19 +239,10 @@ const ToggleRow: React.FC<{
   onChange: (next: boolean) => void;
   first?: boolean;
 }> = ({ title, desc, on, onChange, first }) => (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 14,
-      padding: "14px 0",
-      borderTop: first ? "none" : "0.5px solid #efe5da",
-    }}
-  >
-    <div style={{ minWidth: 0 }}>
+  <div className={`acct-row acct-row--pad${first ? "" : " acct-row--ruled"}`}>
+    <div className="acct-rowmain">
       <p className="acct-rowtitle">{title}</p>
-      <p className="acct-note">{desc}</p>
+      <p className="acct-note acct-note--tight">{desc}</p>
     </div>
     <button
       type="button"
@@ -698,6 +693,31 @@ export const AccountSettings: React.FC<{
   /* ⚠️ EVERY FACT IS ALREADY IN MEMORY — no new read, no new field. The plan is on the user doc,
      the joined date rides the auth metadata settings already reads for providers, and the counts
      are the collections the db context loads for every page. */
+  /* ⚠️ THROUGH `todoPrefs()`, WHICH IS TOTAL. An absent map, an absent field and a nonsense value
+     all resolve to the same stated default, so this page never needs a `?? false` of its own. */
+  const prefs = todoPrefs(currentUser.todoPrefs);
+  const mutedRows = mutedRuleRows(currentUser.mutedTaskRules);
+
+  /** Every task pref commits instantly with the standard receipt — the same model as every other
+   *  toggle and select on this page. */
+  const saveTodoPref = async (patch: Partial<typeof prefs>, what: string) => {
+    try {
+      await updateUserProfile({ todoPrefs: { ...prefs, ...patch } });
+      savedReceipt(what);
+    } catch {
+      showToast({ message: `Couldn't save ${what.toLowerCase()} — try again?`, duration: 4000 });
+    }
+  };
+
+  const switchBackOn = async (key: string, label: string) => {
+    try {
+      await updateUserProfile({ mutedTaskRules: unmute(currentUser.mutedTaskRules, key) });
+      savedReceipt(label);
+    } catch {
+      showToast({ message: "Couldn't switch that back on — try again?", duration: 4000 });
+    }
+  };
+
   const headerFacts = accountFacts({
     creationTime: authFacts?.createdAt,
     manuscriptCount: manuscripts.length,
@@ -1165,47 +1185,9 @@ export const AccountSettings: React.FC<{
     </SectionCard>
   );
 
-  /* ⚠️ ONE SHEET, TWO DOORS — never a second copy of the settings UI (tasks-viewport P5).
-     This section does NOT re-render the four behaviours; it navigates to the board and opens the
-     ONE TaskSettingsSheet, which is where they are defined, written and persisted. Building a
-     second form here would mean two places to change a default and two chances to disagree about
-     it — and the sheet writes `User.todoPrefs` through one path precisely so that cannot happen.
-     The navigate-then-dispatch pattern is the account menu's own, already proven: the sheet is
-     hosted by the To-do page, so the route has to land before the event can find a listener. */
-  /* ⚠️ ONE SHEET, TWO DOORS — never a second copy of the settings UI (tasks-viewport P5).
-     This row does NOT re-render the task behaviours; it navigates to the board and opens the ONE
-     TaskSettingsSheet, which is where they are defined, written and persisted. Building a second
-     form here would mean two places to change a default and two chances to disagree about it.
-     The navigate-then-dispatch order is the account menu's own proven pattern: the sheet is
-     hosted by the To-do page, so the route has to land before the event can find a listener.
-
-     ⚠️ IT LIVES IN PREFERENCES NOW, NOT IN A RAIL SECTION OF ITS OWN. The rail is six items, and
-     "how my tasks behave" is a workspace preference rather than a seventh area of the account.
-     The row moved WITH the rail item rather than after it: deleting a working door and rebuilding
-     it several commits later would leave the sheet reachable from one page of four in between,
-     which is the exact gap this second door was added to close. */
-  const taskSettingsRow = (
-    <div className="acct-row acct-row--pad">
-      <div className="acct-rowmain">
-        <p className="acct-rowtitle">Task settings</p>
-        <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk, lineHeight: 1.5 }}>
-          How long before something counts as stale, whether unfinished work rolls forward, and
-          your weekly review. Opens on your to-do board.
-        </p>
-      </div>
-      <button
-        type="button"
-        style={ghostBtn}
-        onClick={() => {
-          /* the route first — the sheet lives on the board, so the event needs a listener */
-          onNavigate("todo");
-          window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS));
-        }}
-      >
-        Open task settings
-      </button>
-    </div>
-  );
+  /* ⚠️ THE PREFERENCES LINK ROW IS DELETED, NOT RE-POINTED. Tasks is a rail section again, and a
+     link row from inside Preferences to a sibling section is clutter — the rail is already the way
+     between sections. What it used to open, `TaskSettingsSheet`, is retired in this same commit. */
 
   const preferencesSection = (
     <SectionCard section="preferences" headingId="acct-h-preferences">
@@ -1277,7 +1259,6 @@ export const AccountSettings: React.FC<{
         </div>
         <div>
       <GroupLabel>Tasks</GroupLabel>
-      {taskSettingsRow}
         </div>
       </div>
     </SectionCard>
@@ -1289,6 +1270,100 @@ export const AccountSettings: React.FC<{
      button. Putting the destructive column beside the routine one uses the width the way the other
      sections do, and keeps the two apart in the way this page has kept them since the sign-out row
      was placed above the danger zone rather than below it. */
+  /**
+   * THE TASKS SECTION — and it is now the ONLY form for these fields.
+   *
+   * ⚠️ `TaskSettingsSheet` IS RETIRED IN THE SAME COMMIT THIS SHIPS. Two forms over one set of
+   * fields must not coexist for even one commit: "two places to change a default and two chances
+   * to disagree about it" is the fault the sheet itself was built to prevent, and leaving both
+   * alive briefly would be committing that fault on purpose.
+   *
+   * All four `todoPrefs` values live here — `rollForward`, `weeklyBriefing`, `staleMonths` and
+   * `types` — plus the muted-rule list, so nothing is stranded when the sheet goes.
+   */
+  const tasksSection = (
+    <SectionCard section="tasks" headingId="acct-h-tasks">
+      <div className="acct-two">
+        <div>
+          <div className="acct-group">
+            <span className="acct-grouplabel">Your to-do list</span>
+            <ToggleRow
+              title="Keep unfinished tasks"
+              desc="Anything you don't finish moves to today rather than being left behind."
+              first
+              on={prefs.rollForward}
+              onChange={(v) => saveTodoPref({ rollForward: v }, "Keep unfinished tasks")}
+            />
+            <ToggleRow
+              title="Start the week with a summary"
+              desc="A short review of the week just gone, on Monday."
+              on={prefs.weeklyBriefing}
+              onChange={(v) => saveTodoPref({ weeklyBriefing: v }, "Weekly summary")}
+            />
+            <div className="acct-block">
+              <label className="acct-label" htmlFor="account-stale">
+                Move a task to the back of the list after
+              </label>
+              <select
+                id="account-stale"
+                className="acct-input acct-select"
+                value={prefs.staleMonths}
+                onChange={(e) => saveTodoPref({ staleMonths: Number(e.target.value) }, "Waiting time")}
+              >
+                {STALE_MONTHS_CHOICES.map((m) => (
+                  <option key={m} value={m}>{staleOptionLabel(m)}</option>
+                ))}
+              </select>
+              <p className="acct-note">{STALE_NOTE}</p>
+            </div>
+          </div>
+
+          {/* ⚠️ `decide` GETS A SENTENCE, NOT A SWITCH. `todoPrefs` forces it true — the one value
+              the prefs resolver refuses to take an instruction on — so a toggle for it would be a
+              control that cannot act, which this build has removed twice already. */}
+          <div className="acct-group">
+            <span className="acct-grouplabel">What appears on your list</span>
+            {optionalTaskTypes().map((t, i) => (
+              <ToggleRow
+                key={t.key}
+                title={t.label}
+                desc={t.gloss}
+                first={i === 0}
+                on={prefs.types[t.key]}
+                onChange={(v) => saveTodoPref({ types: { ...prefs.types, [t.key]: v } }, t.label)}
+              />
+            ))}
+            <p className="acct-note">{ALWAYS_ON_LINE}</p>
+          </div>
+        </div>
+
+        <div>
+          <div className="acct-group">
+            <span className="acct-grouplabel">Reminders you&rsquo;ve switched off</span>
+            {mutedRows.length === 0 ? (
+              <p className="acct-note acct-note--tight">{MUTED_EMPTY_LINE}</p>
+            ) : (
+              mutedRows.map((r) => (
+                <div key={r.key} className="acct-muterow">
+                  <div className="acct-rowmain">
+                    <p className="acct-rowtitle">{r.label}</p>
+                    {/* ⚠️ NO DATE. `mutedTaskRules` is a bare string[] and records no time; the ref
+                        draws one, and inventing it would be a plausible number stating something
+                        untrue. */}
+                    <p className="acct-mutewhen">Switched off</p>
+                  </div>
+                  <button type="button" style={ghostBtn} onClick={() => switchBackOn(r.key, r.label)}>
+                    Switch back on
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </SectionCard>
+  );
+
   const dataSection = (
     <div className="acct-two acct-two--cards">
       <SectionCard section="data" headingId="acct-h-data">
@@ -1420,6 +1495,7 @@ export const AccountSettings: React.FC<{
     plan: planSection,
     notifications: notificationsSection,
     preferences: preferencesSection,
+    tasks: tasksSection,
     data: dataSection,
   };
 

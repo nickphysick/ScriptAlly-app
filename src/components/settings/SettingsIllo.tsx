@@ -88,6 +88,12 @@ const PLACEHOLDER_ART: Record<string, { w: number; h: number; vb?: string; sw?: 
     d: (<><rect x="20" y="40" width="64" height="46" rx="3" /><path d="M20 44l32 24 32-24" />
         <path d="M96 30c8 0 14 6 14 14 0 10-4 12-4 12h-20s-4-2-4-12c0-8 6-14 14-14z" /><path d="M92 60h16" /></>),
   },
+  "section:tasks": {
+    w: 130, h: 118,
+    d: (<><path d="M22 34h18M22 58h18M22 82h18" /><path d="M12 30l5 6 9-11" /><path d="M12 54l5 6 9-11" />
+        <path d="M12 78l5 6 9-11" /><rect x="58" y="20" width="58" height="80" rx="3" />
+        <path d="M70 40h34M70 54h34M70 68h20" /></>),
+  },
   "section:preferences": {
     w: 140, h: 120,
     d: (<><circle cx="64" cy="56" r="26" /><path d="M64 40v16l11 7" />
@@ -104,7 +110,7 @@ const PLACEHOLDER_ART: Record<string, { w: number; h: number; vb?: string; sw?: 
  *     that ought to feel plain.
  */
 const SECTION_WATERMARK: Partial<Record<AccountSectionId, true>> = {
-  profile: true, security: true, notifications: true, preferences: true,
+  profile: true, security: true, notifications: true, preferences: true, tasks: true,
 };
 
 export const hasSectionWatermark = (id: AccountSectionId): boolean => SECTION_WATERMARK[id] === true;

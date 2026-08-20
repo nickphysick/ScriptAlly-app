@@ -17,7 +17,6 @@ import { placeMenu } from "../../lib/todoMenu";
 import { Settings, SlidersHorizontal, HelpCircle, LogOut } from "lucide-react";
 import { UserPlan } from "../../types";
 import { planLine } from "../../lib/shellSidebar";
-import { TODO_OPEN_TASK_SETTINGS } from "../../lib/todoRoutes";
 import "./accountMenu.css";
 
 export interface AccountMenuProps {
@@ -136,18 +135,12 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
       <button type="button" className="am-row" role="menuitem" onClick={go("/account")}>
         <Settings aria-hidden="true" /><span>Settings</span>
       </button>
-      {/* Task settings is a SHEET inside /todo, not a route — the existing contract is navigate
-          there, then dispatch the event the page already listens for. */}
-      <button
-        type="button"
-        className="am-row"
-        role="menuitem"
-        onClick={() => {
-          onClose();
-          window.dispatchEvent(new CustomEvent(TODO_OPEN_TASK_SETTINGS));
-          onNavigatePath("/todo");
-        }}
-      >
+      {/* ⚠️ TASK SETTINGS IS A ROUTE NOW, NOT A SHEET. It was navigate-then-dispatch: land on /todo,
+          then fire `sa:open-task-settings` for the page to catch. The sheet is retired and
+          `/account/tasks` is the one form for those fields, so this is a plain navigation — and
+          the dispatch went in the SAME commit as the listener, because an event with no listener
+          is a menu row that silently does nothing. */}
+      <button type="button" className="am-row" role="menuitem" onClick={go("/account/tasks")}>
         <SlidersHorizontal aria-hidden="true" /><span>Task settings</span>
       </button>
       <button type="button" className="am-row" role="menuitem" onClick={go("/help")}>

@@ -22,7 +22,7 @@
  * rail that shows it.
  */
 import React from "react";
-import { User as UserIcon, Shield, CreditCard, Bell, SlidersHorizontal, Database } from "lucide-react";
+import { User as UserIcon, Shield, CreditCard, Bell, SlidersHorizontal, ListChecks, Database } from "lucide-react";
 import { AccountSectionId } from "../../lib/accountRoutes";
 
 export interface SectionBand {
@@ -46,6 +46,7 @@ export const SECTION_BANDS: Record<AccountSectionId, SectionBand> = {
   plan: { name: "Plan & billing", sub: "What your plan includes", Icon: CreditCard },
   notifications: { name: "Notifications", sub: "What ScriptAlly emails you about", Icon: Bell },
   preferences: { name: "Preferences", sub: "How your workspace behaves", Icon: SlidersHorizontal },
+  tasks: { name: "Tasks", sub: "What reaches your to-do list", Icon: ListChecks },
   data: { name: "Your data", sub: "Export or remove what's stored", Icon: Database },
 };
 

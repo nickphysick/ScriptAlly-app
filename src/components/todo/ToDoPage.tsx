@@ -61,9 +61,8 @@ import { SweepMember } from "./PaneSweep";
 import { SweepRow, SweepRule, emptySweepRow, isSweepRule, sweepFields, sweepOutcome } from "../../lib/paneSweep";
 import { BrandDatePicker } from "../forms";
 import { FocusFlow, FocusItem } from "./FocusFlow";
-import { TaskSettingsSheet } from "./TaskSettingsSheet";
 import {
-  TODO_OPEN_COMPOSER, TODO_OPEN_TASK_SETTINGS, TODO_ADD_TO_TODAY,
+  TODO_OPEN_COMPOSER, TODO_ADD_TO_TODAY,
 } from "../../lib/todoRoutes";
 /* ⚠️ THE FOUR-COLUMN BOARD IS RETIRED AS THIS PAGE'S BODY (tasks-consolidation P2). `TodoBoard`
    and `TodoSideContainer` are no longer mounted here — the ranked order of ONE list is the plan,
@@ -327,7 +326,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   // THE completion surface — the focus flow (queue of one for a card click; a set for the two walks).
   const [flow, setFlow] = useState<{ items: FocusItem[]; mode?: "sweep" | "weeklyReview"; ritual?: boolean } | null>(null);
   const [flowPrefill, setFlowPrefill] = useState<{ sentDate?: string; method?: string; materials?: string[] } | undefined>(undefined);
-  const [settingsOpen, setSettingsOpen] = useState(false); // the Task Settings sheet ("What lands on your desk?")
   // VI P1 — "Done today" collapses by default to the ✓ row; expanding is in place, session-only.
   /* (showDone was the corner panel's done-row toggle — retired with it in workspace P3.) */
   // ── workbench shell state. View is a DEVICE UI pref → the sa. localStorage convention.
@@ -1290,13 +1288,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     window.addEventListener("sa:todo-replay-tour", onReplay);
     return () => window.removeEventListener("sa:todo-replay-tour", onReplay);
   }, []);
-  // The v2 shell sidebar's Task-settings button opens the sheet from outside the page — the
-  // same window-event pattern as the tour replay (the page stays mounted behind other routes).
-  useEffect(() => {
-    const onOpen = () => setSettingsOpen(true);
-    window.addEventListener(TODO_OPEN_TASK_SETTINGS, onOpen);
-    return () => window.removeEventListener(TODO_OPEN_TASK_SETTINGS, onOpen);
-  }, []);
+  /* ⚠️ THE TASK-SETTINGS SHEET IS RETIRED — its listener, its state and its render all left with
+     it, and `/account/tasks` is the one form for these fields now. The dispatch that fed this
+     listener went in the same commit: an event with no listener is a button that silently does
+     nothing, which is worse than the two-forms problem it would have been left to avoid. */
   /* ⚠️ THE BAR'S ＋ New, ON A TO-DO PAGE (Phase 1) — the same window-event pattern again. It opens
      THIS composer rather than a second create surface, in TASK mode (audit item 7: one verb per
      control; the page's own pink action is the one that lets you choose). The shell announces and
@@ -2031,7 +2026,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         />
       )}
       {confirmAskNode}
-      {settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}
       {/* tasks-pages P5 — MOUNT 3 of 3: the ⋯ menu's "Tags…" sheet, the same ONE picker. Writes
           are immediate (toggle → the task; create → the definitions + the task in hand). */}
       {tagsFor && tagsFor.userTaskId && (

@@ -75,8 +75,12 @@ describe("the To-do list page's chrome — present in BOTH views", () => {
     expect(chrome).not.toContain("<TodoSideContainer");
     expect(chrome).not.toContain("sidebar={");
     // the settings sheet is still HOSTED here — the Settings page's route lands before the event
-    expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
-    expect(page).toContain("<TaskSettingsSheet");
+        /* ⚠️ THE SHEET IS RETIRED — `/account/tasks` is the one form for these fields, and the event
+       went with the listener (a dispatch with nothing listening is a control that silently does
+       nothing). This assertion is inverted rather than deleted: the page must not grow a second
+       sheet host back. */
+    expect(page).not.toContain("TODO_OPEN_TASK_SETTINGS");
+    expect(page).not.toContain("<TaskSettingsSheet");
   });
 
   it("the body is the GROUPED LIST — the four columns, the ledger and the view toggle are all gone", () => {

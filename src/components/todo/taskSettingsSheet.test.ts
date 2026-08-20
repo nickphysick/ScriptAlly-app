@@ -59,8 +59,10 @@ describe("TaskSettingsSheet — source locks", () => {
     /* ⚠️ THE LITERAL BECAME A CONSTANT (To-do workspace pack, Phase 1) — TODO_OPEN_TASK_SETTINGS
        in lib/todoRoutes, because the name was typed in two files and a re-typed event name is a
        listener that silently never fires. The contract is unchanged; the assertion follows it. */
-    expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
-    expect(page).toContain("setSettingsOpen(true)");
-    expect(page).toContain("{settingsOpen && <TaskSettingsSheet onClose={() => setSettingsOpen(false)} />}");
+    /* ⚠️ THE SHEET IS RETIRED — `/account/tasks` is the one form for these fields. Inverted rather
+       than deleted, so the page cannot grow a second sheet host back. */
+    expect(page).not.toContain("TODO_OPEN_TASK_SETTINGS");
+    expect(page).not.toContain("setSettingsOpen");
+    expect(page).not.toContain("<TaskSettingsSheet");
   });
 });

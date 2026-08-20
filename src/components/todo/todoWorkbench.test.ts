@@ -74,7 +74,11 @@ describe("Final Shape P2 — THE FILTER RAIL (vertical quiet pills; the squares 
     /* ⚠️ THE LITERAL BECAME A CONSTANT (To-do workspace pack, Phase 1) — TODO_OPEN_TASK_SETTINGS
        in lib/todoRoutes, because the name was typed in two files and a re-typed event name is a
        listener that silently never fires. The contract is unchanged; the assertion follows it. */
-    expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
+        /* ⚠️ THE SHEET IS RETIRED — `/account/tasks` is the one form for these fields, and the event
+       went with the listener (a dispatch with nothing listening is a control that silently does
+       nothing). This assertion is inverted rather than deleted: the page must not grow a second
+       sheet host back. */
+    expect(page).not.toContain("TODO_OPEN_TASK_SETTINGS");
     /* ⚠️ `renderFilterSection` IS RETIRED — this slice had been reading the whole file, so the
        assertion was vacuous. Stated over the whole page instead, which is stronger than the
        bounded version ever was. */
@@ -398,8 +402,12 @@ describe("hero-pair P1 — the pair (SETTLED: it now leads the SIDEBAR, not the 
     /* ⚠️ THE LITERAL BECAME A CONSTANT (To-do workspace pack, Phase 1) — TODO_OPEN_TASK_SETTINGS
        in lib/todoRoutes, because the name was typed in two files and a re-typed event name is a
        listener that silently never fires. The contract is unchanged; the assertion follows it. */
-    expect(page).toContain("TODO_OPEN_TASK_SETTINGS");
-    expect(page).toContain("setSettingsOpen(true)");
+        /* ⚠️ THE SHEET IS RETIRED — `/account/tasks` is the one form for these fields, and the event
+       went with the listener (a dispatch with nothing listening is a control that silently does
+       nothing). This assertion is inverted rather than deleted: the page must not grow a second
+       sheet host back. */
+    expect(page).not.toContain("TODO_OPEN_TASK_SETTINGS");
+    expect(page).not.toContain("setSettingsOpen");
     expect(page).not.toContain("tdb-sic");
   });
 });

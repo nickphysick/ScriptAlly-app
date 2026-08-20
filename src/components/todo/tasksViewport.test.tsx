@@ -378,66 +378,51 @@ describe("⚠️ the Noteboard: no sidebar, masonry as the scrollzone, the empty
   });
 });
 
-/* ── Phase 5: Task settings, two doors ─────────────────────────────────────────────────────── */
+/* ── Task settings: ONE FORM, AND IT IS A PAGE ─────────────────────────────────────────────── */
 
-describe("⚠️ ONE SHEET, TWO DOORS — and never a second copy of the settings UI", () => {
+/**
+ * ⚠️ THE SHEET IS RETIRED AND `/account/tasks` REPLACES IT. This block used to assert TWO DOORS
+ * into one sheet, and the rule it protected — never a second copy of the settings UI — is
+ * unchanged. What changed is which artefact is the one copy: the sheet's listener, state and
+ * render left `ToDoPage.tsx`, and the page owns all four `todoPrefs` values plus the muted-rule
+ * list, so nothing is stranded.
+ *
+ * ⚠️ THE ASSERTIONS ARE NOW ABOUT ABSENCE, WHICH IS THE HARDER HALF. A second form appearing later
+ * is the failure this has always been here to catch; it now catches it by requiring that the page
+ * is the only thing that writes these fields.
+ */
+describe("⚠️ ONE FORM FOR THE TASK FIELDS, AND IT IS THE SETTINGS PAGE", () => {
   const acct = readFileSync(join(here, "..", "AccountSettings.tsx"), "utf8");
-  const sidebar = readFileSync(join(here, "TodoSideContainer.tsx"), "utf8");
-  const sheet = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
+  const menu = readFileSync(join(here, "..", "shell", "AccountMenu.tsx"), "utf8");
 
-  it("door one: the board sidebar's foot, unchanged", () => {
-    expect(sidebar).toContain("onOpenTaskSettings");
-    expect(board).toContain("TODO_OPEN_TASK_SETTINGS");
+  it("the board no longer hosts the sheet — listener, state and render are all gone", () => {
+    expect(board).not.toContain("TaskSettingsSheet");
+    expect(board).not.toContain("settingsOpen");
+    /* ⚠️ AND THE EVENT WENT WITH IT. A dispatch with no listener is a control that silently does
+       nothing, which is worse than the duplication it would have been left to avoid. */
+    expect(board).not.toContain("TODO_OPEN_TASK_SETTINGS");
+    expect(menu).not.toContain("TODO_OPEN_TASK_SETTINGS");
   });
 
-  /* ⚠️ DOOR TWO MOVED INTO PREFERENCES, AND IS NO LONGER A SECTION OF ITS OWN (settings P2). The
-     rail is six items; "how my tasks behave" is a workspace preference, not a seventh area of the
-     account. What this test protects is unchanged — that a second door EXISTS on the settings
-     page and opens the ONE sheet — so it now asserts the row is rendered by Preferences rather
-     than that a `tasks` section exists.
-
-     ⚠️ AND `tasks` MUST NOT COME BACK AS A RAIL SECTION without this test being reconsidered: two
-     doors in settings, one in the rail and one in Preferences, is the duplication the whole
-     describe block exists to forbid. */
-  it("door two: a Task settings row on the app Settings page, inside Preferences", () => {
-    expect(ACCOUNT_ROUTES.map((r) => r.id)).not.toContain("tasks");
-    expect(acct).toContain("const taskSettingsRow");
-    expect(acct).toContain("{taskSettingsRow}");
-    expect(acct).toContain("TODO_OPEN_TASK_SETTINGS");
-    /* rendered by Preferences, not left defined and unmounted — a const nothing reaches is a
-       door that does not exist (the reachability rule in CLAUDE.md). */
-    const prefs = sliceBetween(acct, "const preferencesSection", "const dataSection", "preferences section");
-    expect(prefs).toContain("{taskSettingsRow}");
+  it("the account menu navigates to the page instead", () => {
+    expect(menu).toContain('go("/account/tasks")');
   });
 
-  it("⚠️ BOTH DOORS OPEN THE SAME COMPONENT — the settings UI is written ONCE", () => {
-    /* The Settings page must NOT re-render the four behaviours. Two forms would mean two places
-       to change a default and two chances to disagree; the sheet writes `User.todoPrefs` through
-       one path precisely so that cannot happen. */
-    /* ⚠️ THREE BEHAVIOURS NOW — `goodDay` is retired (tasks-consolidation P2 follow-up, 9 Aug):
-       it advised on the size of the day's commitment, which the consolidation removed. The rule
-       here is untouched and is about DUPLICATION, not about the count. */
-    const behaviours = ["staleMonths", "rollForward", "weeklyBriefing"];
-    for (const behaviour of [...behaviours, "goodDay"]) {
-      expect(acct, behaviour).not.toContain(behaviour);
+  it("`tasks` is a rail section again, and the Preferences link row is deleted", () => {
+    expect(ACCOUNT_ROUTES.map((r) => r.id)).toContain("tasks");
+    expect(acct).toContain("const tasksSection");
+    /* Deleted rather than re-pointed: a link row to a sibling section from inside Preferences is
+       clutter when the rail is already the way between sections. */
+    expect(acct).not.toContain("taskSettingsRow");
+  });
+
+  /* ⚠️ THE PAGE OWNS ALL FOUR FIELDS, so retiring the sheet stranded nothing. Asserted against
+     `todoPrefs`'s own key list rather than a hand-written one. */
+  it("every task preference has a home on the page", () => {
+    for (const key of ["rollForward", "weeklyBriefing", "staleMonths", "types"]) {
+      expect(acct, key).toContain(key);
     }
-    expect(acct).not.toContain("TODO_PREF_ROWS");
-    expect(acct).not.toContain("todoPrefs(");
-    // the sheet remains the one home for every behaviour that still exists
-    for (const behaviour of behaviours) {
-      expect(sheet, behaviour).toContain(behaviour);
-    }
-  });
-
-  it("⚠️ THE ROUTE LANDS BEFORE THE EVENT — the sheet is hosted by the board", () => {
-    /* Dispatching first would fire into a page that is not mounted, and the door would silently
-       do nothing from /account. The account menu's existing door already works this way. */
-    /* ⚠️ `sliceBetween`, NOT `slice(indexOf(...))`. A missing anchor makes `indexOf` return -1 and
-       `slice(-1)` reads ONE CHARACTER FROM THE END — the lock does not go red, it goes vague, and
-       then passes on whatever happens to sit further down the file. This anchor has already moved
-       once (`tasksSection` → `taskSettingsRow`). */
-    const sec = sliceBetween(acct, "const taskSettingsRow", "const preferencesSection", "task settings row");
-    expect(sec.indexOf('onNavigate("todo")')).toBeLessThan(sec.indexOf("TODO_OPEN_TASK_SETTINGS"));
+    expect(acct).toContain("mutedRuleRows");
   });
 
   it("no gear in any tool row — the doors are the two named places", () => {

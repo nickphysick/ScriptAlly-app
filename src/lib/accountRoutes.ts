@@ -29,6 +29,7 @@ export type AccountSectionId =
   | "plan"
   | "notifications"
   | "preferences"
+  | "tasks"
   | "data";
 
 export interface AccountRoute {
@@ -39,14 +40,12 @@ export interface AccountRoute {
 }
 
 /**
- * The rail's order, top to bottom. SIX sections — the rail is the whole list.
+ * The rail's order, top to bottom. SEVEN sections — the rail is the whole list.
  *
- * ⚠️ `tasks` WAS THE SEVENTH AND IS RETIRED (Phase 2). Its one link row now sits at the foot of
- * Preferences, because "how my tasks behave" is a workspace preference rather than a seventh area
- * of the account — and the row moved WITH the rail item, in one commit, rather than being deleted
- * and rebuilt later: the To-do settings sheet is reachable from one page of four without it.
- * `/account/tasks` now falls to the redirect below, which is the right answer for a retired path
- * — an old link lands on the section list rather than on nothing.
+ * ⚠️ `tasks` IS A SECTION AGAIN, AND IT IS NOW THE ONLY FORM FOR ITS FIELDS. It was briefly a link
+ * row inside Preferences pointing at `TaskSettingsSheet`; that sheet is retired and this page
+ * replaces it, owning all four `todoPrefs` values and the muted-rule list. A link row to a sibling
+ * section from inside Preferences would be clutter, so it is deleted rather than re-pointed.
  */
 export const ACCOUNT_ROUTES: AccountRoute[] = [
   { id: "profile", label: "Profile", path: "/account/profile" },
@@ -54,6 +53,7 @@ export const ACCOUNT_ROUTES: AccountRoute[] = [
   { id: "plan", label: "Plan & billing", path: "/account/plan" },
   { id: "notifications", label: "Notifications", path: "/account/notifications" },
   { id: "preferences", label: "Preferences", path: "/account/preferences" },
+  { id: "tasks", label: "Tasks", path: "/account/tasks" },
   { id: "data", label: "Your data", path: "/account/data" },
 ];
 
