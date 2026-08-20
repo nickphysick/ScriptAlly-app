@@ -412,6 +412,14 @@
      importing a fifth warm ink from a document drawn against its own palette is how a scale drifts.
      Size from the ref, colour from the scale. */
   margin: 6px 0 0; font-size: 13.5px; color: var(--shell-ink-soft);
+  /* ⚠️ IT DECLARES ITS OWN LINE-HEIGHT OR IT INHERITS THE PAGE'S, AND THE PAGES DISAGREE. Measured
+     on the built dev bundle at 1440×900 with every other value identical — same 26/20 padding, same
+     30px title, same 16px margin, nothing between the masthead and the control row — the text block
+     still came out 53px on Analytics, 57 on the Contact list and 58 on Submission packages. The
+     only input left was the line-height each page root happens to set, arriving here by
+     inheritance. A masthead that measures differently per page because of a rule written for that
+     page's body copy is the cross-page equality the acceptance matrix exists to hold. */
+  line-height: 1.4;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
   overflow: hidden; min-width: 0;
   /* ⚠️ THE CLAMP STAYS AND `max-height` GOES. Two lines is still a ceiling — a plate's height was a

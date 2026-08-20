@@ -25,15 +25,17 @@
    (`--wpg-foot`) is declared on `.qa-wpg` in that same file, so each selector still has exactly one
    rule in one place. Everything below is this page's own furniture. */
 
-/* ── header: the mono sub-line and the range/export controls ─────────────────
-   ⚠️ THE SUB-LINE IS MONO BECAUSE IT IS A TALLY, not a sentence. It replaces the placeholder's
-   prose description in the same slot, so the header's own layout is untouched. */
-.qa-wrap .wsh-sub {
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  color: #9a8c80;
-}
+/* ── header: the range/export controls ───────────────────────────────────────
+   ⚠️ `.qa-wrap .wsh-sub` IS DELETED, AND ITS OWN COMMENT IS WHY (in-flow masthead, step 2). It set
+   this page's description in mono at 11px, and stated the reason plainly: "THE SUB-LINE IS MONO
+   BECAUSE IT IS A TALLY, not a sentence." That stopped being true the moment the tally moved to the
+   control row — the description is now a sentence about the page, exactly like every other one, and
+   the override was making it a different size and a different voice from all nine of them.
+
+   Measured before removing, on the built dev bundle at 1440×900: with every other value identical,
+   this page's masthead came out 99px against the Contact list's 102, entirely from a 15px
+   description box where the shared rule gives 19. A page-scoped rule surviving the reason it was
+   written for is exactly what the cross-page matrix is built to catch. */
 .an-head { display: flex; align-items: center; gap: 12px; flex: none; }
 .an-range { display: flex; background: #fdfaf5; border: 1px solid #ece3d7; border-radius: 12px; padding: 3px; gap: 2px; flex: none; }
 .an-range button {

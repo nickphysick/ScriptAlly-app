@@ -814,20 +814,15 @@
    does. Anything a page mounts in the strip scales because the strip says so, not because someone
    remembered to write it a second rule. */
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   THE HEADER CARD'S SAGE TOP EDGE (restructure D5)
-   ══════════════════════════════════════════════════════════════════════════════
+/* ⚠️ THE HEADER CARD'S SAGE TOP EDGE IS DELETED (in-flow masthead, step 2), AND ITS OWN NOTE IS
+   THE ARGUMENT. It read: "`box-sizing: border-box` is already on `.wsh`, so this comes out of the
+   plate's interior and `--wsh-plate-h` is untouched — the 128/44 rhythm does not move." That was
+   exactly right while `.wsh` carried `height: var(--wsh-plate-h)`: a border on a fixed-height box
+   eats its interior. The masthead is content-sized now, so the same 5px ADDS instead — measured on
+   the built dev bundle at 1440×900, this page's masthead came out 109px against every other page's
+   102, and 5 of the 7 were this rule.
 
-   ⚠️ `:not(.wsh--scrolled)` IS LOAD-BEARING, NOT TIDINESS. This page scrolls (no `fill` prop on
-   its grid), so the plate condenses to a bare strip on engagement — `.wsh--scrolled` deletes the
-   border, the radius and the shadow precisely so what remains reads as the page's own top edge
-   rather than a squashed card. This selector is 0-2-0 against that rule's 0-1-0, so WITHOUT the
-   negation the sage edge would outrank `border-color: transparent` and survive into the working
-   state: the one piece of card treatment that refused to leave. Scoping it to rest keeps the
-   collapse law intact instead of quietly winning against it.
-
-   5px per the ref's `.head-card`. `box-sizing: border-box` is already on `.wsh`, so this comes out
-   of the plate's interior and `--wsh-plate-h` is untouched — the 128/44 rhythm does not move. */
-.pkgw .wsh:not(.wsh--scrolled) {
-  border-top: 5px solid var(--pkgo-sage-deep);
-}
+   ⚠️ AND IT WOULD HAVE TO GO ANYWAY. The masthead has no card treatment on any page — no fill, no
+   border, no radius, no shadow — which is the whole of what step 1 did; a sage edge on one page is
+   card treatment, and the acceptance matrix compares every masthead against every other. Its
+   `:not(.wsh--scrolled)` guard is dead too: nothing emits that class any more. */

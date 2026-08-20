@@ -375,7 +375,19 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
               scroller — the page's controls sitting on top of its own title. Being in the scroller
               is also what lets it be `position: sticky` there (step 2), which is how it takes over
               the anchoring job the chrome row used to do. */}
-          {toolbar && <div className="wpg-tools">{toolbar}</div>}
+          {toolbar && (
+            /* ⚠️ THE STUCK CLASS COMES FROM `stuck` ALONE, NEVER FROM `condensed` (step 2). The union
+               also carries `engaged` and the mode, both of which fire on FILL pages where nothing
+               scrolls — so reading it here would draw a "this row is anchored" hairline and shadow
+               on a row that has not moved and cannot. `stuck` is the only one of the three that
+               means what this treatment claims.
+
+               ⚠️ AND THE THRESHOLD IS THE EXISTING `scrollTop > 2`, not the pack's 4. They are
+               imperceptible apart, and the same evaluation also drives the top hem — changing the
+               number would move the hem's trigger with it, which is a second behaviour for one
+               edit. One derivation, one threshold. */
+            <div className={`wpg-tools${stuck ? " wpg-tools--stuck" : ""}`}>{toolbar}</div>
+          )}
           {children}
         </div>
         {/* ⚠️ THE HEMS ARE GRID CHILDREN OF ROW 3, NOT CHILDREN OF THE SCROLLER. Inside the

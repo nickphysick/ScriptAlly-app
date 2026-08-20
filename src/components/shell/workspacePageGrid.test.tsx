@@ -16,7 +16,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { WorkspacePageGrid, PlateCondensedContext } from "./WorkspacePageGrid";
+import { WorkspacePageGrid, PlateCondensedContext, PageTally } from "./WorkspacePageGrid";
+import { PageHeader } from "./PageHeader";
 
 const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
 const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
@@ -43,20 +44,32 @@ const block = (selector: string): string => {
 };
 
 describe("the grid — the scroller owns the page (in-flow masthead)", () => {
-  it("⚠️ NOTHING IS STICKY AND NOTHING TAKES A `top` — that is the whole point", () => {
-    /* The sticky arrangement encoded another element's height as a literal (`calc(56px + gap)`),
-       which was silently wrong by 32px on the Tasks family. Siblings of the scroller need no
-       offset, so there is no number to get wrong. */
-    expect(cssRules, "a sticky position came back into the grid — chrome outside the scroller does not need one, and needing one is the bug").not.toContain("position: sticky");
+  it("⚠️ ONE STICKY ELEMENT, AND ITS `top` IS 0 — no offset encodes another element's height", () => {
+    /* ⚠️ THIS RULE IS AMENDED, NOT ABANDONED, AND THE DISTINCTION IS THE WHOLE OF IT. What it
+       forbade was a sticky element whose `top` encoded ANOTHER element's height as a literal —
+       `calc(56px + gap)`, silently wrong by 32px on the Tasks family, the same fault as the banned
+       `calc(100vh - 64px)`. The control row is sticky now (step 2) and takes `top: 0`, which
+       encodes nothing: there is no chrome above the scroller for it to clear, because the masthead
+       is inside the scroller with it.
+
+       So the check that mattered is unchanged and still runs over the whole sheet: every `top` in
+       this file must be exactly 0. The day one is not, something above the scroller is being
+       measured into a rule again. */
+    const tops = [...cssRules.matchAll(/(?:^|[;{\s])top\s*:\s*([^;}]+)/gm)].map((m) => m[1].trim());
+    expect(tops.length, "no `top` is declared at all — the sticky row lost its anchor").toBeGreaterThan(0);
     /* ⚠️ EXTRACT THE VALUE, DO NOT LOOK AHEAD PAST IT. The first draft was
        `not.toMatch(/top\s*:\s*(?!0)/)` and it flagged `top: 0` — `\s*` backtracks to zero width, so
        the lookahead tested the SPACE rather than the digit and passed. Reading each declaration and
        comparing it says what is meant, and cannot be defeated by backtracking. */
-    const tops = [...cssRules.matchAll(/(?:^|[;{\s])top\s*:\s*([^;}]+)/gm)].map((m) => m[1].trim());
     for (const value of tops) {
       expect(value, `a non-zero \`top\` offset appeared (\`top: ${value}\`) — that is another element's height encoded as a literal, the \`calc(100vh - 64px)\` fault`).toBe("0");
     }
-    expect(srcCode, "the component reintroduced sticky positioning").not.toContain("sticky");
+    /* ⚠️ AND EXACTLY ONE ELEMENT MAY STICK. Two stickies in one scroller is the arrangement this
+       grid was built to replace: the second has to clear the first, which is where the literal
+       comes from. The control row is it. */
+    const sticky = [...cssRules.matchAll(/position\s*:\s*sticky/g)];
+    expect(sticky.length, "more than one element sticks — the second would have to clear the first, and that is where the encoded height comes back").toBe(1);
+    expect(block(".wpg-tools"), "the sticky element is not the control row").toContain("position: sticky");
   });
 
   it("the scroll row is `minmax(0, 1fr)` — a plain `1fr` grows to its content and never scrolls", () => {
@@ -80,15 +93,65 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       .not.toContain("grid-row");
   });
 
-  it("the toolbar row has NO container — one hairline, no frame, no fill", () => {
+  it("⚠️ THE CONTROL ROW IS INVISIBLE AT REST — its ground is the scroller's own", () => {
+    /* ⚠️ THE RULE IS UNCHANGED IN INTENT: it is controls, not a second plate. What changed is that a
+       sticky element MUST paint an opaque ground or the content passes straight through it — so the
+       row now has a background, and the whole of the claim is WHICH one. Painting the scroller's own
+       token means at rest it is indistinguishable from the content around it, which is the
+       condition that keeps it from reading as chrome. */
     const t = block(".wpg-tools").replace(/\s+/g, " ");
-    expect(t, "the toolbar gained a fill — it is controls and a hairline, not a second plate").not.toMatch(/(^|[;\s])background\s*:/);
-    expect(t, "the toolbar gained a shadow").not.toMatch(/(^|[;\s])box-shadow\s*:/);
-    expect(t, "the toolbar gained a full border — the one line beneath it is the chrome/content boundary").not.toMatch(/(^|[;\s])border\s*:/);
-    /* ⚠️ REVERSED: THE TOOLBAR MUST NOT DRAW A HAIRLINE. This required one, from before the line
-       moved to row 1 — so every toolbar page rendered TWO lines 20px apart in the working state.
-       The boundary between chrome and content is row 1's bottom edge; row 2 is below it. */
-    expect(t, "the toolbar drew a hairline of its own — that is a second line under the header's").not.toMatch(/(^|[;\s])border-bottom\s*:/);
+    const bg = /(?:^|[;\s])background\s*:\s*([^;}]+)/.exec(t);
+    expect(bg, "the sticky row paints no ground — content would show through it").toBeTruthy();
+    /* ⚠️ THE TOKEN, NEVER A LITERAL — and `.wpg-hem` is why this is asserted rather than trusted.
+       It read `#ffffff` "BECAUSE THE WINDOW IS WHITE", which was true until the window went to
+       #fefcfa, and two hardcoded hems then painted a lighter band across every scroller in the app. */
+    expect(bg![1].trim(), "the row's ground is a literal — it will be wrong the next time the window is retoned")
+      .toBe("var(--ws-window)");
+
+    /* still not a plate: no frame, no radius, and no border of its own in EITHER state */
+    expect(t, "the control row gained a full border").not.toMatch(/(^|[;\s])border\s*:/);
+    expect(t, "the control row gained a radius — that is a card").not.toMatch(/(^|[;\s])border-radius\s*:/);
+    /* ⚠️ AND NO `border-bottom`, WHICH IS THE ORIGINAL CLAUSE AND STILL RIGHT FOR A NEW REASON. It
+       used to draw one, so every toolbar page rendered TWO lines 20px apart. Now the stuck hairline
+       is a SHADOW (`0 1px 0`), so the row's height is identical in both states — a real border would
+       add a pixel on the frame the class lands, which is a layout shift on every scroll. */
+    expect(t, "the control row drew a real hairline — the stuck edge is a shadow so the height cannot move")
+      .not.toMatch(/(^|[;\s])border-bottom\s*:/);
+
+    /* ⚠️ AND THE EDGE AND SHADOW BELONG TO THE STUCK STATE ONLY. At rest both are declared at zero
+       alpha rather than omitted, so they TRANSITION rather than snapping in — but neither may be
+       visible until the row has actually anchored. */
+    const stuck = block(".wpg-tools--stuck").replace(/\s+/g, " ");
+    expect(stuck, "the stuck state draws no hairline").toContain("0 1px 0 var(--ws-edge)");
+    expect(stuck, "the stuck state changes the row's padding by more than the 12 → 10 step").toContain("padding: 10px 0 14px");
+    expect(stuck, "the stuck state swaps the fill — same ground in both states, or the row announces itself as chrome")
+      .not.toMatch(/(^|[;\s])background\s*:/);
+
+    /* ⚠️ THE ROW'S MARGIN BOX MUST BE IDENTICAL IN BOTH STATES, and the arithmetic is checked here
+       rather than trusted. The row is INSIDE the scroller, so its height is part of `scrollHeight`:
+       tightening the padding without giving the difference back would drop max scroll by the same
+       amount the moment it sticks, and a page overflowing by a few pixels would then clamp, unstick
+       and cycle — the exact shape `--wpg-reclaim-pad` was built for on a different element. */
+    /* ⚠️ THE SHORTHAND IS EXPANDED, NEVER READ AS ONE NUMBER. `padding: 12px 0` and
+       `padding: 10px 0 14px` have different vertical totals and the same first value — reading
+       `[0]` alone would call them equal, which is precisely the bug this case exists to catch.
+       ⚠️ AND `margin-bottom` IS NOT PART OF THE SUM ANY MORE. It was, and it silently did nothing:
+       adjacent siblings' margins COLLAPSE, so the compensation was absorbed by the next element's
+       `margin-top` and the row still shrank by 4. Padding cannot collapse. */
+    const vbox = (rule: string) => {
+      const m = /(?:^|[;\s])padding\s*:\s*([^;}]+)/.exec(rule);
+      expect(m, "no padding declared").toBeTruthy();
+      const v = m![1].trim().split(/\s+/).map((x) => Number(x.replace("px", "")));
+      const top = v[0];
+      const bottom = v.length >= 3 ? v[2] : v[0];
+      return top + bottom;
+    };
+    expect(stuck, "the compensation went back to a margin — adjacent margins collapse, so it would do nothing")
+      .not.toMatch(/(^|[;\s])margin/);
+    const restBox = vbox(t);
+    const stuckBox = vbox(stuck);
+    expect(stuckBox, `the stuck row's margin box is ${stuckBox}px against the resting ${restBox}px — max scroll moves when it sticks, and a barely-overflowing page will clamp and cycle`)
+      .toBe(restBox);
   });
 
   /**
@@ -451,39 +514,30 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * stylesheet's own file. It must equal the reclaim exactly and must not be transitioned: easing
    * it opens a frame in which max scroll is wrong, which is the clamp again, just harder to see.
    */
-  it("⚠️ stripping does not change max scroll — the reclaim is added back as padding", () => {
-    /* ⚠️ IT CONTRIBUTES A TOKEN RATHER THAN SETTING THE PADDING, and a collision is why. Written as
-       `padding-bottom` this rule is 0-2-0, and three pages declare `.aglist .wpg-scroll {
-       padding-bottom: 48px }` at the same specificity LATER in the bundle — so they won silently
-       and exactly those three measured max scroll falling by 62 while the rest held. Both values
-       now land in one `calc` on `.wpg-scroll` and add. */
-    /**
-     * ⚠️ AND IT IS SCOPED TO SCROLLING PAGES — `:not(.wpg--fill)`, which became load-bearing the
-     * moment fill pages gained a working state of their own. A fill page has no scroll to clamp, so
-     * it has nothing to protect; worse, `.wpg--fill > .wpg-scroll` is a flex COLUMN filling the row,
-     * so a `padding-bottom` comes out of its content box and would shove the panes up by the whole
-     * reclaim on collapse and back down on restore. Query Centre could already reach this rule
-     * through its journey mode, so the guard is a fix as much as a precaution.
-     */
-    const rule = block(".wpg--working:not(.wpg--fill) > .wpg-scroll");
-    expect(rule, "the invariance contribution is missing — stripping shrinks max scroll and a barely-scrolling page oscillates")
-      .toContain("--wpg-reclaim-pad");
-    expect(block(".wpg--working > .wpg-scroll"), "the reclaim lost its `:not(.wpg--fill)` guard — it now lands on pages that cannot scroll, where it shoves the panes up by its own height")
-      .toBe("");
-    /* ⚠️ THE HEADER DELTA *PLUS* THE GAP DELTA, and the second term is the one that goes missing.
-       Stripping now gives back the card's extra height AND 35px of the gap under the hairline; a
-       padding that only replaces the first drops max scroll by 35 on every page, the browser clamps
-       `scrollTop`, and the oscillation comes back on anything near the boundary. Four tokens, no
-       literals — each the same token the thing it compensates for reads. */
-    for (const term of ["var(--wsh-plate-h)", "var(--wsh-plate-gap)", "var(--wsh-plate-h-scrolled)",
-                        "var(--content-top-gap-rest)", "var(--content-top-gap-work)"]) {
-      expect(rule, `the reclaim no longer names ${term} — it is compensating for something it cannot see`).toContain(term);
-    }
-    expect(/\d+px/.test(rule.replace(/\/\*[\s\S]*?\*\//g, "")), "the reclaim contains a literal length — it must be a calc from the same tokens").toBe(false);
-    expect(rule, "the padding is transitioned — it must land on the same frame as the height").not.toContain("transition");
-    const scroll = block(".wpg-scroll");
-    expect(scroll, "the scroll row stopped summing the two contributions — a page's foot gutter would override the reclaim again")
-      .toContain("padding-bottom: calc(var(--wpg-foot, 0px) + var(--wpg-reclaim-pad, 0px))");
+  it("⚠️ THE RECLAIM PADDING IS DELETED — nothing changes height when the page scrolls", () => {
+    /* ⚠️ THIS INVERTS ITS OWN SUBJECT, AND THE INVERSION WAS MEASURED RATHER THAN REASONED. The
+       case used to REQUIRE `--wpg-reclaim-pad`: row 1 shrank when the header stripped, growing
+       `clientHeight`, so max scroll fell by the same amount unless `scrollHeight` was grown to
+       match — otherwise a page overflowing by less than the reclaim clamped to 0, the header came
+       back, and it cycled.
+
+       The masthead is content now. It scrolls; it changes no heights. But `.wpg--working` is set by
+       `stuck`, so the compensation started firing when the CONTROL ROW anchored — adding ~103px of
+       bottom padding to correct for a collapse that no longer happens. Measured on the built dev
+       bundle at 1440×900: Contact list's `scrollHeight` went 1904 → 2003 the instant the row stuck.
+       With it deleted, all five scrolling pages hold max scroll across the state change.
+
+       ⚠️ THE `calc()` SHAPE STAYS THOUGH ITS SECOND TERM IS GONE, and that is not tidiness: this
+       declaration is 0-1-0 and three pages declare `.aglist .wpg-scroll { padding-bottom: 48px }`
+       at 0-2-0, later in the bundle. A page and a component contributing to one property must SUM
+       through tokens; raising specificity makes one replace the other. */
+    const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(live, "the reclaim came back — it compensates for a collapse that no longer happens")
+      .not.toContain("--wpg-reclaim-pad");
+    expect(live, "the working state started re-declaring the gap token — `manuscriptLibrary.css` reads it for its foot padding")
+      .not.toContain("--content-top-gap-work");
+    expect(block(".wpg-scroll"), "the foot padding stopped being a sum — a page's own contribution would replace the component's")
+      .toContain("padding-bottom: calc(var(--wpg-foot, 0px))");
   });
 
   it("⚠️ THE PLATE IS TOLD, IT DOES NOT LOOK — no DOM traversal, no class strings", () => {
@@ -669,6 +723,35 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * `.wsh-wrap`, the reservation padding, the frosted state and the legacy scroll listener — comes
    * out, and not before.
    */
+  it("⚠️ THE STUCK TREATMENT IS NEVER SERVER-RENDERED — the first paint is the rest state", () => {
+    /* `stuck` is derived from `scrollTop`, so a fresh page is at the top by definition. If the class
+       ever rendered on the first paint every page would flash a hairline and a shadow on mount —
+       and worse, it would be claiming the row is holding still against content that has not moved. */
+    const html = renderToStaticMarkup(
+      <WorkspacePageGrid masthead={<span />} toolbar={<i>tools</i>}>{null}</WorkspacePageGrid>,
+    );
+    expect(html).toContain("wpg-tools");
+    expect(html, "the row rendered stuck before anything scrolled").not.toContain("wpg-tools--stuck");
+  });
+
+  it("⚠️ THE ANCHORED ROW KEEPS THE COUNT, NEVER THE PAGE NAME", () => {
+    /* ⚠️ `170-sticky-control-row.html` OFFERS BOTH AS A TOGGLE, and the count is the choice. Once
+       the masthead has scrolled away this row is the only thing left stating anything about the
+       page — and the page's NAME is the one fact the reader can already get, from the sidebar, from
+       the breadcrumb, from what they clicked. The count is not.
+       ⚠️ ASSERTED AGAINST RENDERED OUTPUT, so a page cannot slip the title in through a wrapper. */
+    const html = renderToStaticMarkup(
+      <WorkspacePageGrid
+        masthead={<PageHeader variant="workspace" title="Contact list" mark="contacts" />}
+        toolbar={<PageTally value="16 of 16" note="4 WITH LIVE QUERIES" />}
+      >{null}</WorkspacePageGrid>,
+    );
+    const row = sliceBetween(html, '<div class="wpg-tools', "</div>");
+    expect(row, "the tally is not in the control row").toContain("wpg-tally");
+    expect(row, "the page name came back into the anchored row — the reader already knows where they are")
+      .not.toContain("Contact list");
+  });
+
   it("⚠️ THE CENSUS — every page that renders a masthead renders it through the grid", () => {
     /* ⚠️ THE PREDICATE IS `variant="workspace"`, NOT `toolbar=`, AND THE FIRST VERSION WAS WRONG.
        It listed only pages that pass a toolbar — so Discover, Submission packages and Analytics were

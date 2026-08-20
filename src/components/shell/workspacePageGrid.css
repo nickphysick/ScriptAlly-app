@@ -96,6 +96,33 @@
   /* ⚠️ `flex: none` — on a fill page the scroller is a flex COLUMN, and without this the control
      row would shrink as the panes below claim the space. Same reason the masthead states it. */
   flex: none;
+  /**
+   * ⚠️ THE ROW IS THE PAGE'S ANCHOR (step 2). The masthead scrolls away because it is content; this
+   * is what stays, and `top: 0` is the whole of it — no offset, because there is no longer any
+   * chrome above it whose height would have to be encoded here. That is the fault the grid was
+   * originally built to remove (`calc(56px + gap)`), and sticky reintroduces it only if something
+   * is pinned above the scroller. Nothing is.
+   *
+   * ⚠️ IT NEEDS AN OPAQUE GROUND OR CONTENT PASSES THROUGH IT. The ground is the scroller's own —
+   * the window token, never a literal. `.wpg-hem` learnt this the expensive way: it read `#ffffff`
+   * "BECAUSE THE WINDOW IS WHITE", which was true until the window went to #fefcfa and two hardcoded
+   * hems painted a lighter band across every scroller in the app.
+   *
+   * ⚠️ AND IT IS INERT ON A FILL PAGE RATHER THAN SCOPED OFF ONE. A fill page's scroller does not
+   * scroll, so `stuck` can never be true and the row simply never sticks. Left unscoped because a
+   * fill page whose height chain regresses DOES scroll — measured twice in this repo — and on that
+   * day the honest behaviour is for the row to anchor rather than slide away.
+   */
+  position: sticky;
+  top: 0;
+  /* above the content that passes beneath it, below the hems (3) which must stay over everything */
+  z-index: 2;
+  background: var(--ws-window);
+  /* ⚠️ THE HAIRLINE IS A SHADOW, NOT A BORDER, so the row's height is identical in both states and
+     only the padding moves it. A border would add a pixel on the frame the class lands, which is a
+     layout shift on every scroll away from the top. */
+  box-shadow: 0 1px 0 rgba(var(--ws-window-rgb), 0), 0 10px 14px -12px rgba(58, 28, 20, 0);
+  transition: box-shadow .18s ease, padding .2s cubic-bezier(.4, 0, .2, 1);
   /* ⚠️ NO BORDER — THE HAIRLINE IS ROW 1'S, AND THIS DREW A SECOND ONE (spec §3). Row 2 carried
      its own `border-bottom`, so any page with a toolbar showed TWO lines in the working state,
      20px apart: the header row's, then the toolbar's. Reported on Manuscripts, but it was every
@@ -138,13 +165,14 @@
      had one, this row on pages that did not — which needed `.wpg--tools` to zero one of them so it
      was never paid twice. The masthead is the first thing in here now and it states its own 26px
      above and 20px below; there is no boundary above this row to keep air beneath. */
-  /* ⚠️ THE FOOT PADDING IS A SUM, NOT A VALUE, AND A COLLISION IS WHY. The invariance padding was
-     written as `padding-bottom` on `.wpg--working > .wpg-scroll` (0-2-0) and three pages declare
-     `.aglist .wpg-scroll { padding-bottom: 48px }` at the SAME specificity, later in the bundle —
-     so they won, the reclaim was never added, and exactly those three measured max scroll falling
-     by 62 while the others held. Pages contribute `--wpg-foot`; the working state contributes
-     `--wpg-reclaim-pad`; both land here and ADD. Nothing overrides anything. */
-  padding-bottom: calc(var(--wpg-foot, 0px) + var(--wpg-reclaim-pad, 0px));
+  /* ⚠️ STILL A SUM WITH ONE TERM, AND THE SHAPE IS KEPT ON PURPOSE. `--wpg-reclaim-pad` is deleted
+     (see the note at the foot of this file), so only the page's own contribution remains. The
+     `calc()` stays because the COLLISION it solved is still live: this declaration is 0-1-0 and
+     three pages declare `.aglist .wpg-scroll { padding-bottom: 48px }` at 0-2-0, later in the
+     bundle. A page and a component both contributing to one property must each contribute a TOKEN
+     and have the property sum them — raising specificity makes one REPLACE the other, which is the
+     same bug pointing the other way. */
+  padding-bottom: calc(var(--wpg-foot, 0px));
   scrollbar-gutter: stable both-edges;
 }
 
@@ -259,56 +287,68 @@
    first, and no stylesheet in `src/` was reading it. */
 
 /**
- * ⚠️ STRIPPING MUST NOT CHANGE MAX SCROLL — this is what makes the state a pure function.
+ * ══ THE INVARIANCE PADDING AND THE WORKING GAP ARE DELETED (in-flow masthead, step 2) ═════════
  *
- * Row 1 shrinks by the reclaim when the header strips, which grows `clientHeight` by that amount.
- * Left alone, max scroll falls by the same amount: a page overflowing by less than the reclaim is
- * clamped to 0, the header returns, and it oscillates. That used to be guarded against, at the
- * cost of a dead zone where a barely-scrolling page never stripped at all.
+ * ⚠️ PULLED FORWARD FROM STEP 4 BECAUSE THEY WERE ACTIVELY WRONG, not merely dead. Both hung off
+ * `.wpg--working`, and that class is now set by `stuck` — so the moment the control row anchored,
+ * a scrolling page gained `--wpg-reclaim-pad` of bottom padding compensating for a header collapse
+ * that no longer happens. Measured on the built dev bundle at 1440×900: Contact list's
+ * `scrollHeight` went 1904 → 2003 the instant the row stuck, moving max scroll by 99px.
  *
- * Adding exactly the reclaim as `padding-bottom` grows `scrollHeight` by the same amount, so
- * `scrollHeight − clientHeight` is IDENTICAL in both states and `scrollTop` can never be clamped
- * by the state change. The oscillation is impossible rather than avoided.
+ * What they were for, so neither is reinvented: row 1 shrank by the reclaim when the header
+ * stripped, which grew `clientHeight`; left alone, max scroll fell by the same amount, a page
+ * overflowing by less than the reclaim was clamped to 0, the header returned, and it oscillated.
+ * The padding grew `scrollHeight` by exactly the same figure so the difference was invariant.
  *
- * ⚠️ INSTANT, NEVER TRANSITIONED. The padding must be in place on the same frame the height
- * changes; easing it would open a window in which max scroll is briefly wrong, which is the clamp
- * again, just harder to see.
+ * ⚠️ THE MASTHEAD CHANGES NO HEIGHTS ON A SCROLLING PAGE — it scrolls, because it is content — so
+ * there is nothing to compensate for and the compensation is pure error. The one element that DOES
+ * change height on scroll is the control row itself, and it balances its own box: see the margin
+ * note on `.wpg-tools--stuck`.
  *
- * The cost is ~62px of empty scrollable space at the very bottom of a stripped page, where 30px of
- * padding already sits. Accepted deliberately.
+ * ⚠️ AND THE GAP HALVING GOES WITH IT, WHICH FIXES A SECOND COUPLING NOBODY WAS WATCHING.
+ * `.wpg--working { --content-top-gap: var(--content-top-gap-work) }` was the air under the chrome
+ * hairline shrinking with the strip. No row reads that token for a gap any more — but
+ * `manuscriptLibrary.css` reads it for something else entirely (`--wpg-foot: var(--content-top-gap)`),
+ * so opening a manuscript dossier was quietly taking 9px off that page's foot padding.
  */
-/* ⚠️ THE WORKING GAP IS HALVED HERE, ON THE GRID — not on `:root` — so it cascades to whichever
-   row is first below the hairline and transitions with everything else (§2). */
-.wpg--working { --content-top-gap: var(--content-top-gap-work); }
 
 /**
- * ⚠️ THE RECLAIM IS THE HEADER DELTA *PLUS* THE GAP DELTA, and missing the second term is a silent
- * failure this file already exists to prevent. Stripping gives back the card's extra height, and
- * now ALSO 35px of the gap under the hairline; if the padding only replaces the first, max scroll
- * falls by 35 on every page, the browser clamps `scrollTop`, and the oscillation the invariance was
- * built to make impossible comes back on anything sitting near the boundary. Manuscripts — 70px of
- * overflow — finds it first.
- *
- * ⚠️ FOUR TOKENS, NO LITERALS. Every term is the same token the thing it compensates for reads, so
- * changing a height or a gap moves the padding with it. The lock that proves this is not here: it
- * is the matrix's invariance column, measured on the real pages in both states.
+ * ⚠️ STUCK IS A HAIRLINE, A SOFT SHADOW AND 2px OF PADDING — AND NOTHING ELSE (step 2; ref
+ * `170-sticky-control-row.html`). Same ground, no fill swap, no border, no radius, no register
+ * change. At rest the row must be indistinguishable from the content it sits in; the treatment
+ * exists only to say "this is holding still while that moves", which needs an edge and a shadow and
+ * nothing more. Anything louder makes it chrome again, which is what this whole pack removed.
  */
-/**
- * ⚠️ SCROLLING PAGES ONLY — `:not(.wpg--fill)`, and this became load-bearing the moment fill pages
- * gained a working state (collapse-on-engagement). The padding exists to keep MAX SCROLL identical
- * across the state change; a fill page has no scroll to clamp, so it has nothing to protect.
- *
- * ⚠️ AND ON A FILL PAGE IT IS ACTIVELY WRONG, not merely redundant. `.wpg--fill > .wpg-scroll` is a
- * flex COLUMN filling the row, so a `padding-bottom` comes out of the content box: the panes would
- * be shoved up by the whole reclaim the moment the header collapsed, and back down when it
- * restored. Query Centre was already inside this rule via its journey mode — the only fill page
- * that could reach the working state before now — so this is a fix as well as a guard.
- */
-.wpg--working:not(.wpg--fill) > .wpg-scroll {
-  --wpg-reclaim-pad: calc(
-    var(--wsh-plate-h) + var(--wsh-plate-gap) - var(--wsh-plate-h-scrolled)
-    + var(--content-top-gap-rest) - var(--content-top-gap-work)
-  );
+.wpg-tools--stuck {
+  padding: 10px 0 14px;
+  /**
+   * ⚠️ THE 4px IT GIVES UP AT THE TOP, IT TAKES BACK AT THE BOTTOM — AND AS PADDING, NOT MARGIN.
+   *
+   * This row is INSIDE the scroller, so its box is part of `scrollHeight`. Tightening 12 → 10 on
+   * both edges removes 4px from the scrollable content while `clientHeight` is unchanged, so max
+   * scroll falls by 4 the instant the row sticks. On a page overflowing by only a few pixels that
+   * is fatal in the way this repo has already documented: scroll to 3, the row sticks, max scroll
+   * becomes 0, the browser clamps `scrollTop` back to 0, `stuck` goes false, the row un-sticks and
+   * max scroll is 3 again — shrink, clamp, un-shrink, repeat.
+   *
+   * ⚠️ THE FIRST VERSION USED `margin-bottom: 4px` AND IT SILENTLY DID NOTHING. Adjacent siblings'
+   * margins COLLAPSE, so the 4px was absorbed by the following element's `margin-top` and the row's
+   * contribution to `scrollHeight` still fell by 4. Measured, not reasoned: with the reclaim
+   * padding removed the delta was exactly −4 with the margin declared. Padding cannot collapse.
+   *
+   * ⚠️ SO THE TIGHTEN IS ASYMMETRIC, DELIBERATELY. 10 above and 14 below: the controls move UP 2px
+   * and the boundary line stays where it was, which is the half of the effect worth having — an
+   * anchored row that has drawn itself closer to the content it is holding above. A symmetric
+   * tighten cannot be had without moving everything below it on every scroll.
+   *
+   * ⚠️ IT IS `2 × (rest − stuckTop)` AND MUST BE RETUNED WITH THE STEP. The unit lock checks that
+   * arithmetic; `stickyRow.measure.ts` checks the pixels it produces.
+   */
+  box-shadow: 0 1px 0 var(--ws-edge), 0 10px 14px -12px rgba(58, 28, 20, 0.18);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* the STATE still changes — only the crossfade goes, exactly as the hems do */
+  .wpg-tools { transition: none; }
 }
 
 /* ══ THE CONTROL ROW'S TALLY (in-flow masthead, step 1; ref 170-sticky-control-row.html `.cnt`) ══
@@ -319,8 +359,6 @@
  *
  * ⚠️ PLAYFAIR FOR THE FIGURE, MONO FOR ITS NOTE. The figure is the thing being stated and reads as
  * display type; the note qualifies it and reads as a label, in the mono the shell already speaks.
- * The two must not be the same voice — a mono figure beside a mono label is one string, and the
- * whole point is that the second is subordinate to the first.
  */
 .wpg-tally {
   margin-right: auto;

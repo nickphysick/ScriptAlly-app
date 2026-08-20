@@ -135,8 +135,23 @@ export const QueryAnalytics: React.FC = () => {
             variant="workspace"
             mark="analytics"
             title="Analytics"
-            /* ⚠️ NO DESCRIPTION AND NO ACTIONS. The description was a tally and the actions were the
-               range toggle and Export; all three are in the control row below. */
+            /**
+             * ⚠️ THE DESCRIPTION IS NEW COPY, NOT THE OLD ONE RESTORED (Nick's, step 2). What used
+             * to sit here was a TALLY — "25 queries · 16 awaiting reply" — which is two figures
+             * rather than a sentence about the page, and it is the control row's count now. Leaving
+             * the slot empty would have made this the one workspace page with no description; it
+             * has one for the same reason every other page does.
+             *
+             * ⚠️ AND IT REPORTS RATHER THAN APPRAISING, which on THIS page is load-bearing rather
+             * than stylistic. Analytics is where an app is most tempted to tell a writer how they
+             * are doing, and this one deliberately does not: the early-state hint says when figures
+             * firm up, the funnel footnote calls its reference rate self-reported and widely
+             * varying. "what the numbers can and can't tell you" is that same honesty in the
+             * page's own opening line.
+             *
+             * ⚠️ NO ACTIONS EITHER — the range toggle and Export are in the control row below.
+             */
+            description="How your querying is going — response rates, timings, and what the numbers can and can't tell you."
           />
         }
         toolbar={
