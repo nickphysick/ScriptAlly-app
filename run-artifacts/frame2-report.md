@@ -131,6 +131,26 @@ Screenshots: `reports/frame2/{todo,queries}-{1440,1920}.png` and `reports/frame2
 (Decide · Send · Close · Fix · Note — the five this account can reach; Nudge and the bulk Fill-in
 have no card on it today).
 
+## Deployed to dev
+
+Built from a clean tree (no uncommitted source), so the build ships exactly HEAD — this
+round's six commits plus the concurrent session's settings and packages work, all committed.
+Served bundle `index-B2B9MIwr.css`, byte-identical in name to the one built.
+
+⚠️ **`tsc` was red, and not on anything that ships.** The four errors are all in
+`tests/e2e/pkgRestructure.measure.ts` — the other session's Playwright probe, which the vite
+build does not include. **Zero errors under `src/`**, checked rather than assumed, and vitest
+fully green at 332 files.
+
+Verified in `dist/` before deploying: both `--content-top-gap` variants, the split's
+`20px 0 32px`, the column's zeroed bottom, and the page-scoped 38px title. ⚠️ Three of those
+grepped **zero** first — the minifier keeps the space after the colon in a custom property's
+value, which is the third time that has caught a `dist/` check.
+
+On the deployed site: **frame2 28/28 · framePort 14/14 · listPort 14/15 · qcMatch 12/12** —
+68 of 69, the one red being the documented not-proven mobile case (`/todo` is not adapted
+below the shell's breakpoint).
+
 ## Out of scope, untouched
 
 Nudge reminders in any form (no `nudgeReminderWhen` exists). `Query.materialsWanted` vs
