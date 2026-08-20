@@ -330,8 +330,14 @@ const SectionCard: React.FC<{
   children: React.ReactNode;
 }> = ({ section, headingId, children }) => {
   const band = SECTION_BANDS[section];
+  /* ⚠️ `fill` IS LOAD-BEARING, NOT DECORATION. MountPanel wraps its children in an inner FRAME div,
+        and that frame is a plain block unless `fill` makes it a stretching flex column — so
+        `.acct-cardbody { flex: 1 }` was addressing a parent that could not grant it. Measured: the
+        body filled 213px of a 520px card, leaving three hundred pixels of bare panel below the
+        frame and a card that looked like it had stopped early. The min-height was doing its job
+     the whole time; nothing inside it was. */
   return (
-    <MountPanel className="acct-card">
+    <MountPanel className="acct-card" fill>
       <div
         className="acct-band"
         style={{ background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}` }}

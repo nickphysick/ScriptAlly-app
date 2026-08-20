@@ -266,3 +266,43 @@ test("no illustration ever intercepts a pointer", async ({ page }) => {
     expect(probe!.hitIsIllo, `${id}: the mark took the hit at its own centre`).toBe(false);
   }
 });
+
+/* ⚠️ THE THREE MARKS MUST NOT SIT ON TOP OF WHAT THEY DECORATE. Two of these were real faults, and
+   neither was visible in the source: MountPanel wraps children in an inner FRAME that is a plain
+   block unless `fill` is passed, so the section body filled 213px of a 520px card and the aside's
+   `height: 100%` resolved to 111px of 211 — in both cases the mark and the text ended up in the
+   same place because the box that should have separated them had collapsed. */
+test("no illustration sits on top of the text it decorates", async ({ page }) => {
+  await openRoute(page, "/account/profile", { width: 1440, height: 900 });
+  const g = await page.evaluate(() => {
+    const r = (s: string) => { const e = document.querySelector(s) as HTMLElement | null;
+      if (!e) return null; const b = e.getBoundingClientRect();
+      return { x: b.left, y: b.top, w: b.width, h: b.height }; };
+    const hits = (a: any, b: any) => !!a && !!b && a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+    const facts = r(".acct-hdr-facts")!;
+    const topAt = (x: number, y: number) => { const e = document.elementFromPoint(x, y); return e ? e.className.toString() : null; };
+    return {
+      /* The aside's text and the section watermark must not overlap AT ALL — there is room. */
+      asideCollide: hits(r(".acct-illo--aside"), r(".acct-aside-txt")),
+      sectionCollide: hits(r("#acct-panel .acct-illo--section"), r("#acct-panel .acct-two")),
+      /* The header mark is BEHIND the facts by design, so the test is legibility: the facts win
+         the hit test at their own centre. */
+      overFacts: topAt(facts.x + facts.w / 2, facts.y + facts.h / 2),
+      /* And the boxes that collapsed must be filling again. */
+      bodyH: r("#acct-panel .acct-cardbody")!.h,
+      cardH: r("#acct-panel .acct-card")!.h,
+      asideInH: r(".acct-aside-in")!.h,
+      asideH: r(".acct-aside")!.h,
+    };
+  });
+  console.log("COLLISIONS " + JSON.stringify(g));
+
+  expect(g.asideCollide, "the aside's mark must clear its own text").toBe(false);
+  expect(g.sectionCollide, "the watermark must sit below the body's content").toBe(false);
+  expect(g.overFacts, "the facts must be on top of the header mark").not.toContain("acct-illo");
+
+  /* ⚠️ THE FILL CHAIN, ASSERTED AS A NUMBER. `flex: 1` on a child of a block parent is a
+     declaration that applies and does nothing; only the resulting height says whether it worked. */
+  expect(g.bodyH, "the card body fills the card").toBeGreaterThan(g.cardH - 90);
+  expect(g.asideInH, "the aside's inner box fills the aside").toBeGreaterThan(g.asideH - 30);
+});

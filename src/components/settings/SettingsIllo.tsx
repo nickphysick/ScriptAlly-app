@@ -45,8 +45,11 @@ const STROKE = {
  * arrive this map is what changes.
  */
 const PLACEHOLDER_ART: Record<string, { w: number; h: number; d: React.ReactNode }> = {
+  /* ⚠️ 96x80, NOT THE STUDY'S 132x110. The panel is 280 wide and the fact rows take 187 of it;
+     a 132-wide mark leaves 319 to fit in 280, so it sat UNDER the values rather than beside them.
+     The study drew its panel with shorter values than real data produces. */
   header: {
-    w: 132, h: 110,
+    w: 96, h: 80,
     d: (<><rect x="16" y="30" width="72" height="52" rx="3" /><path d="M16 34 52 60 88 34" />
         <path d="M62 18h44M62 26h30" /><circle cx="104" cy="72" r="13" /><path d="M104 65v7l5 3" /></>),
   },

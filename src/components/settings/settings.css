@@ -139,7 +139,12 @@
      beside the work column; once the rail is a header strip across the top there is no column to
      fill, and the card would become a full-width band of plan trivia between the nav and the
      section you came to read. */
-  .acct-rail .acct-aside { display: none; }
+  /* ⚠️ `!important` BECAUSE `fill` PUTS `display: flex` INLINE ON MountPanel, and an inline
+     declaration beats a stylesheet rule however specific — the aside stayed visible at 800px with
+     a `display: none` that was applying and losing. The repo already carries this footgun in
+     writing for the rail's own collapse ("inline display beats Tailwind breakpoint utilities");
+     this is the same shape from a component prop rather than a utility class. */
+  .acct-rail .acct-aside { display: none !important; }
 }
 
 /* ── Two-column section bodies ──────────────────────────────────────────────
@@ -216,6 +221,118 @@
   .acct-navitem { width: auto; }
 }
 
+/* ── The account header — the page's fixed point and its top edge ───────────
+   ⚠️ THIS BLOCK WAS DELETED ONCE AND NOTHING WENT RED. A consolidation commit rewrote this file
+   for the grid and took the fifteen `.acct-hdr-*` rules with it, so the header rendered as a
+   column of unstyled text — no disc, no tinted panel, no rows — for three commits. The
+   measurement that should have caught it compared the six sections to EACH OTHER and was
+   satisfied by six equally-broken pages. The assertions now anchor on absolute facts (the panel
+   is 280 wide, the disc is 56, the row is a flex row), which is the only shape that can fail when
+   a rule goes missing. */
+.acct-hdr-row {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.acct-hdr-main {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.acct-hdr-av {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f5e2da;
+  border: 1px solid rgba(124, 58, 42, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: 19px;
+  font-weight: 500;
+  color: #7c3a2a;
+}
+
+.acct-hdr-who { min-width: 0; }
+.acct-hdr-pre {
+  display: block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #9c8878;
+}
+.acct-hdr-name {
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: 26px;
+  font-weight: 500;
+  color: #2b1a14;
+  line-height: 1.1;
+  margin: 2px 0 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.acct-hdr-mail {
+  display: block;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 300;
+  color: #8a7a6c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ⚠️ A FIXED 280px, AND IT DROPS RATHER THAN SQUEEZES. Three key/value rows stop reading as rows
+   the moment the values wrap, and 280 is where they stop wrapping.
+   ⚠️ `position: relative` IS LOAD-BEARING: it is the containing block for the header illustration,
+   which is absolutely placed and bleeds past the corner. Without it the mark positions against the
+   page and lands in the bottom-right of the viewport. */
+.acct-hdr-side {
+  width: 280px;
+  flex-shrink: 0;
+  border-left: 0.5px solid #ece0d2;
+  background: linear-gradient(135deg, #f6f1ea 0%, #f1ece4 100%);
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.acct-hdr-facts { position: relative; z-index: 2; margin: 0; }
+.acct-hdr-fact { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; }
+.acct-hdr-k {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a08e7c;
+  width: 74px;
+  flex-shrink: 0;
+  margin: 0;
+}
+.acct-hdr-v {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12px;
+  color: #3a1c14;
+  margin: 0;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .acct-hdr-row { flex-direction: column; }
+  .acct-hdr-side { width: auto; border-left: 0; border-top: 0.5px solid #ece0d2; }
+}
+
 /* ── The section head — slim, and about the SECTION ─────────────────────────
    It lives INSIDE MountPanel's clipping frame and therefore carries no radius and no margin of
    its own: the frame's `overflow: hidden` rounds it and stops the fill at the frame border. The
@@ -251,7 +368,6 @@
 
 /* The section body. Its own padding, so the card can carry a floor height in Phase 2 without the
    body's spacing being tangled up in it. */
-.acct-cardbody { padding: 22px 26px 26px; }
 
 /* ── Illustration slots ─────────────────────────────────────────────────────
    ⚠️ EVERY SLOT IS DECORATION: absolutely placed, `pointer-events: none`, and beneath the content
@@ -262,7 +378,7 @@
 .acct-illo { position: absolute; pointer-events: none; }
 
 /* Header panel — bottom-right, bleeding past the corner; MountPanel's frame clips it. */
-.acct-illo--header { right: -10px; bottom: -14px; opacity: 0.4; z-index: 1; }
+.acct-illo--header { right: -8px; bottom: -10px; opacity: 0.4; z-index: 1; }
 
 /* Rail aside — top-centre, in the space the bottom-aligned text leaves above it. */
 .acct-illo--aside { left: 50%; top: 26px; transform: translateX(-50%); opacity: 0.5; z-index: 1; }
