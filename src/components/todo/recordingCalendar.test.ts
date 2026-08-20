@@ -49,14 +49,21 @@ describe("⚠️ A BLACK BUTTON ALWAYS MEANS 'THIS ADVANCES' — one grammar, bo
        the mockup's primary is a pink fill with ink text, and the port takes the mockup. The claim
        this case protects is the one that survives: the primary and its text move together, and the
        label is never the same colour as the fill. */
-    const prim = rule(dockCss, ".tpn .b-primary {");
+    const prim = rule(dockCss, ".tpn .ab.go {");
+    /* ⚠️ PANE CONTRACT: pink fill, BURGUNDY label (the materials contract paired pink with ink).
+       The grammar this case protects is unchanged and is what is asserted below — the fill and the
+       text are both tokens, and they are never the same one. */
     /* ⚠️ `--ink-strong` IS DEFINED NOWHERE IN `src/`, so `var(--ink-strong, #241209)` was the hex
        doing the whole job and the token name was decoration. Four other sheets still read it
        (todo.css, forms.css, paneJourney.css, paneSweep.css) and are out of this pass's two files;
        this one now reads `--ink`, which resolves. The GRAMMAR the case protects — ink fill,
        parchment text — is what is asserted, not which name carries the ink. */
     expect(prim).toContain("background:var(--pink)");
-    expect(prim).toContain("color:var(--ink)");
+    const cFill = /background:\s*var\(--([a-z-]+)/.exec(prim)?.[1];
+    const cText = /(?:^|;)\s*color:\s*var\(--([a-z-]+)/.exec(prim)?.[1];
+    expect(cFill).toBeTruthy();
+    expect(cText).toBeTruthy();
+    expect(cText, "the label is the same token as the fill").not.toBe(cFill);
 
     /* ⚠️ THE FILL AND THE TEXT MOVE TOGETHER OR NOT AT ALL. The first pass changed only the fill and
        left `color: #241209` — ink on ink, an invisible label, and a rule that still parsed. */

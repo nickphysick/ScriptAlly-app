@@ -1067,10 +1067,19 @@ describe("⚠️ TWO CARDS ON A GROUND, not one sheet with a line down it", () =
     /* ⚠️ THE PANE STATES IT AS A TOKEN (Query Centre match) — every literal in `todoDock.css` is
        gone. The claim is the same: this page's pink buttons carry INK, not burgundy. `todo.css` is
        out of that pass's two files and still holds the hex. */
-    const prim = rule(paneCss, ".tpn .b-primary {");
+    /* ⚠️ THE PAIRING IS THE PANE CONTRACT'S NOW, AND IT CHANGED: pink fill with BURGUNDY text,
+       where the materials contract paired pink with ink. Both are legible and both are the
+       contract's own call, so this case stops asserting WHICH ink and asserts the invariant that
+       actually protects the button — the fill is the app's pink token, and the label is never the
+       same value as the fill. An earlier line here forbade `--burg` outright; that was a reading of
+       the older contract, not a rule, and it would have failed a correct port. */
+    const prim = rule(paneCss, ".tpn .ab.go {");
     expect(prim).toContain("background:var(--pink)");
-    expect(prim).toContain("color:var(--ink)");
-    expect(prim, "the primary went burgundy").not.toContain("var(--burg)");
+    const fill = /background:\s*var\(--([a-z-]+)/.exec(prim)?.[1];
+    const text = /(?:^|;)\s*color:\s*var\(--([a-z-]+)/.exec(prim)?.[1];
+    expect(fill, "the primary's fill is not a token").toBeTruthy();
+    expect(text, "the primary's label is not a token").toBeTruthy();
+    expect(text, "the label is the same token as the fill — an invisible button").not.toBe(fill);
     /* the fill is still the token, so a future retone of the app's pink still reaches this page */
     expect(todoCss).toContain("background: var(--pink, #f5e2da)");
     /* and index.css is not touched by this page's decision */
@@ -1114,7 +1123,7 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
     expect(fn).not.toContain('"Requested"');
   });
 
-  it("both surfaces set the same two registers — mono label, Playfair value", () => {
+  it("the figure is stated ONCE, on the rail, in the contract's two registers", () => {
     /* ⚠️ THE RAIL'S HALF IS THE PORTED `.r-fig` NOW — a mono line with a Playfair figure inside
        it, which is the contract's own two registers. `.tdg-figlab`/`.tdg-fignum` went with the
        retired sheet. The comparison this case exists for — that the rail and the card set the SAME
@@ -1122,38 +1131,38 @@ describe("⚠️ THE RAIL'S FIGURE AND THE CARD'S FACTS ARE ONE DERIVATION", () 
     const listCss = readFileSync(join(here, "taskList.css"), "utf8");
     const railLab = rule(listCss, ".tlc .r-fig {");
     const railNum = rule(listCss, ".tlc .r-fig b {");
-    /* ⚠️ THE CARD'S HALF MOVED FROM `.tdk-fact` TO THE BAND FIGURE (audit B). `.tdk-facts` was a
-       SECOND figure beside the first, in the opposite grammar — a mono key over an Inter value next
-       to a Playfair numeral over a mono unit — so this case was reading the register of the strip
-       that broke the rule it states. The band's own figure is the card's figure now, and it is the
-       one this compares against the rail. */
-    /* ⚠️ THE CARD'S HALF IS THE PORT'S `.bandfig` — the mockup's own Playfair-over-mono pair. */
+    /* ⚠️ AND THE CARD NO LONGER HAS A HALF (pane round, Phase 2) — which is the strongest form
+       this case has taken. It began as "the two figures agree", was re-pointed twice as the card's
+       figure moved between strips, and each time it guarded against a DIVERGENCE that was still
+       possible. The pane contract's band is deed + sub-line + arrows: there is no second figure to
+       agree with, so the rail's is simply the page's. The two registers are still asserted, on the
+       one element that sets them; the card's side becomes an absence claim. */
     const dock = readFileSync(join(here, "taskPane.css"), "utf8");
-    const cardLab = rule(dock, ".tpn .bandfig .u {");
-    const cardVal = rule(dock, ".tpn .bandfig .n {");
+    expect(dock, "the pane grew a figure back").not.toContain("bandfig");
     /* ⚠️ THE TWO SHEETS QUOTE FONTS DIFFERENTLY, and that is a fact about the port rather than a
        disagreement: `taskPane.css` carries the mockup's own declarations verbatim, which use single
        quotes and no space after the colon. Normalise before comparing, or this asserts a coding
        style rather than a typographic register. */
     const font = (r: string) => r.replace(/['"]/g, "").replace(/:\s*/g, ":");
-    for (const r of [railLab, cardLab]) {
-      expect(font(r)).toContain("font-family:JetBrains Mono");
-      expect(font(r)).toContain("text-transform:uppercase");
-    }
-    for (const r of [railNum, cardVal]) {
-      expect(font(r)).toContain("font-family:Playfair Display");
-    }
+    expect(font(railLab)).toContain("font-family:JetBrains Mono");
+    expect(font(railLab)).toContain("text-transform:uppercase");
+    expect(font(railNum)).toContain("font-family:Playfair Display");
   });
 
   /**
    * ⚠️ AND BURGUNDY STAYS ON THE RAIL'S NUMERAL ALONE. It is the page's only colour emphasis; a
    * second hot treatment in the card would double it and halve what it means.
    */
-  it("the card's facts carry no hot treatment — burgundy is the rail numeral's alone", () => {
+  it("the card sets no Playfair numeral — burgundy is the rail numeral's alone", () => {
     const dockCss = readFileSync(join(here, "taskPane.css"), "utf8");
-    /* re-pointed onto the ported band figure */
-    expect(rule(dockCss, ".tpn .bandfig .n {")).not.toContain("#7c3a2a");
-    expect(rule(dockCss, ".tpn .bandfig .n {")).not.toContain("var(--burg)");
+    /* ⚠️ ASSERTED ON THE REGISTER, NOT ON A CLASS (pane round, Phase 2). The band figure this used
+       to read is retired, and a case re-pointed at a deleted selector would go vacuous rather than
+       red — `rule()` on a missing rule returns nothing, and `not.toContain` on nothing passes. So
+       the claim is made against the whole sheet: the pane sets no Playfair numeral for a figure at
+       all, which is why it cannot carry a hot one. `.deed` is Playfair and is prose, not a figure —
+       excluded by naming the numeral's own size register rather than the family. */
+    const numerals = [...dockCss.matchAll(/font-size:\s*3\d(?:\.\d+)?px/g)].length;
+    expect(numerals, "the pane grew a display numeral").toBe(0);
     expect(rule(readFileSync(join(here, "taskList.css"), "utf8"), ".tlc .r-fig.hot b {")).toContain("var(--burg)");
   });
 });

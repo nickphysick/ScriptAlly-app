@@ -10,10 +10,9 @@
  * answer those fields from a `BoardCard`; it never reaches into the pane's markup, and the pane
  * never branches on a task type.
  *
- * ⚠️ ABSENCE IS A VALUE HERE, NOT A MISSING BRANCH. `fig: null` is what puts `.nofig` on the band;
- * `tiles: null` hides the row; `tl: null` drops the timeline card and leaves the workrow one
- * column. Every one of those is the mockup's own handling, which is exactly why the structure does
- * not have to bend when a journey is thin.
+ * ⚠️ ABSENCE IS A VALUE HERE, NOT A MISSING BRANCH. `tiles: null` hides the tile row; `tl: null`
+ * drops the story column and leaves the middle one column. Both are the contract's own handling,
+ * which is exactly why the structure does not have to bend when a journey is thin.
  *
  * ⚠️ THE DERIVATIONS ARE THE ONES ALREADY IN THE APP — `liveFamily`/`GROUP_CLASS` for the paper,
  * `bandDeed`/`bandSubline` for the words, `panePresence` for what a journey carries, `cardBucket`
@@ -31,8 +30,6 @@ import type { TaskPaneEvent, TaskPaneJourney, TaskPaneTile } from "../components
 /** what the page hands in — every one of these is already computed for the list */
 export interface JourneyInputs {
   card: BoardCard;
-  /** the rail's own figure, so the two surfaces cannot state different waits */
-  figure: { value: string; unit: string } | null;
   /** the stat pair the header already derives */
   facts: { k: string; v: string }[];
   /** what already went to this agent, formatted through the one formatter */
@@ -48,6 +45,9 @@ export interface JourneyInputs {
   quiet?: { label: string; onPress: () => void };
   onOpenQuery?: () => void;
   primDisabled?: boolean;
+  /** the action bar's verbs — see `TaskPaneJourney` for why absence is not the same as disabled */
+  onSnooze?: (anchor: HTMLElement) => void;
+  onDismiss?: () => void;
 }
 
 /**
@@ -120,8 +120,6 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     deed: isNote ? c.title : deedNode(c),
     hand: isNote,
     sub: isNote ? cardFootHint(c) : bandSubline(c, bandPreline(c)),
-    fig: presence.figure && input.figure?.value ? input.figure.value : null,
-    figU: input.figure?.unit ?? "",
     btns: input.btns,
     tiles,
     /* ⚠️ THE PANE'S WORDS COME FROM THE ONE TABLE, not from the row's verb. `primaryLabel` is what
@@ -136,5 +134,7 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     primDisabled: input.primDisabled,
     tl,
     onOpenQuery: c.relatedRecordId ? input.onOpenQuery : undefined,
+    onSnooze: input.onSnooze,
+    onDismiss: input.onDismiss,
   };
 }

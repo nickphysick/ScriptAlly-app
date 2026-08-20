@@ -48,51 +48,18 @@
   --dash:#efe6da;
 }
 
-.tpn .fc { background:var(--white);border:1px solid var(--edge);border-radius:14px;padding:6px; box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.08); }
-.tpn .fc>.rim { border:1px solid var(--rim);border-radius:9px;overflow:hidden; }
 .tpn .pane { min-width:0; }
-.tpn .v { display:flex;flex-direction:column;gap:16px; }
-.tpn .band { padding:20px 24px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:18px;position:relative; }
-.tpn .band::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px; }
 .tpn .u-now .band { background:linear-gradient(135deg,var(--u-now-1) 0%,var(--u-now-2) 100%); }
 .tpn .u-now .band::after { background:var(--u-now-rule); }
 .tpn .u-house .band { background:linear-gradient(135deg,var(--u-house-1) 0%,var(--u-house-2) 100%); }
 .tpn .u-house .band::after { background:var(--u-house-rule); }
 .tpn .u-yours .band { background:linear-gradient(135deg,var(--u-yours-1) 0%,var(--u-yours-2) 100%); }
 .tpn .u-yours .band::after { background:var(--u-yours-rule); }
-.tpn .deed { font-family:'Playfair Display',serif;font-size:27px;font-weight:500;color:var(--ink2);line-height:1.14; }
-.tpn .deed em { font-style:italic;color:var(--burg); }
 .tpn .u-house .deed { color:#2e3a2c; }
 .tpn .u-house .deed em { color:#405a3c; }
-.tpn .deed.hand { font-family:'Caveat',cursive;font-size:30px;color:#5a4a38;line-height:1.05; }
-.tpn .b-sub { font-size:11.5px;font-weight:300;margin-top:6px; }
 .tpn .u-now .b-sub { color:#8a6558; }
 .tpn .u-house .b-sub { color:#5f7059; }
 .tpn .u-yours .b-sub { color:#8a7a5c; }
-.tpn .bandfig { text-align:right;flex-shrink:0; }
-.tpn .bandfig .n { font-family:'Playfair Display',serif;font-size:33px;font-weight:500;line-height:1;color:var(--ink2); }
-.tpn .u-house .bandfig .n { color:#2e3a2c; }
-.tpn .bandfig .u { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.13em;text-transform:uppercase;margin-top:4px; }
-.tpn .u-now .bandfig .u { color:var(--u-now-ink); }
-.tpn .u-house .bandfig .u { color:var(--u-house-ink); }
-.tpn .u-yours .bandfig .u { color:var(--u-yours-ink); }
-.tpn .bandbtns { display:flex;gap:8px;margin-top:12px;justify-content:flex-end; }
-.tpn .band.nofig .bandbtns { margin-top:2px; }
-.tpn .b-onband { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:0.06em;background:rgba(255,253,250,0.8);color:var(--ink2);border:0.5px solid rgba(58,28,20,0.13);border-radius:9px;padding:8px 14px;transition:all .18s; }
-.tpn .b-onband:hover { background:#fffdfa;border-color:rgba(58,28,20,0.24); }
-.tpn .tiles { display:grid; }
-.tpn .tiles.n4 { grid-template-columns:repeat(4,1fr); }
-.tpn .tiles.n3 { grid-template-columns:repeat(3,1fr); }
-.tpn .tile { padding:14px 20px 15px;border-right:1px solid var(--rimline);min-width:0; }
-.tpn .tile:last-child { border-right:0; }
-.tpn .tile .k { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500; }
-.tpn .tile .val { font-family:'Playfair Display',serif;font-size:16px;font-weight:500;color:var(--ink2);margin-top:5px;line-height:1.2; }
-.tpn .tile .val small { font-family:'Inter',sans-serif;font-size:10.5px;color:var(--muted2);font-weight:300;display:block;margin-top:2px;line-height:1.35; }
-.tpn .tile .val a { color:var(--burg);text-decoration:none;border-bottom:1px solid rgba(124,58,42,0.3); }
-.tpn .tile .val.absent { color:#c0b0a0;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase; }
-.tpn .workrow { display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start; }
-.tpn .act { padding:21px 24px 22px; }
-.tpn .act h3 { font-family:'Playfair Display',serif;font-size:18px;font-weight:500;color:var(--ink2); }
 .tpn .act .sub { font-size:12px;color:var(--muted2);font-weight:300;margin-top:3px;margin-bottom:17px;line-height:1.5; }
 .tpn .act .sub a, .tpn .act a.lk { color:var(--burg);text-decoration:none;border-bottom:1px solid rgba(124,58,42,0.3); }
 .tpn .f-lbl { font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:7px;display:block;font-weight:500; }
@@ -104,14 +71,6 @@
 .tpn .seg button.on { background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500; }
 .tpn textarea.note-in { width:100%;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:10px 13px;font-family:'Caveat',cursive;font-size:17px;color:#5a4a38;outline:none;resize:vertical;min-height:54px;box-shadow:inset 0 1px 2px rgba(58,28,20,0.03); }
 .tpn textarea.note-in:focus { border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12); }
-.tpn .b-primary { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:0.07em;background:var(--pink);color:var(--ink);border:0.5px solid var(--pink-b);border-radius:10px;padding:11px 26px;transition:all .2s; }
-.tpn .b-primary:hover { background:var(--pink-h);border-color:#d8a89a; }
-.tpn .b-primary:disabled { background:var(--field);border-color:var(--hair2);color:#c0b0a0;cursor:not-allowed; }
-.tpn .b-quiet { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:0.06em;background:var(--field);color:var(--ink2);border:0.5px solid var(--hair2);border-radius:10px;padding:10px 17px;transition:all .18s; }
-.tpn .b-quiet:hover { border-color:#c9a89e;color:var(--burg); }
-.tpn .acts { display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap; }
-.tpn .willrec { font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:auto; }
-.tpn .willrec b { color:var(--ink2);font-weight:500; }
 .tpn .mats { display:flex;flex-direction:column;gap:8px;margin-bottom:6px; }
 .tpn .mat { display:flex;align-items:center;gap:11px;padding:9px 13px;background:var(--field);border:0.5px solid var(--hair2);border-radius:10px;cursor:pointer;transition:all .15s; }
 .tpn .mat:hover { border-color:#c9a89e; }
@@ -216,11 +175,9 @@
 
 /* the mockup's own narrow step, ported as it stands; the app-frame pass replaces it. */
 @media (max-width: 1160px) {
-  .tpn .workrow { grid-template-columns:1fr; }
   .tpn .tiles.n4 { grid-template-columns:repeat(2,1fr); }
   .tpn .tiles.n4 .tile:nth-child(2) { border-right:0; }
   .tpn .band { flex-direction:column; }
-  .tpn .bandfig { text-align:left; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════
@@ -248,7 +205,6 @@
    content, so without it the pane grows past the frame and the PAGE scrolls — which is the fault
    this whole clause exists to prevent, and it fails silently. */
 .tpn { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.tpn .v { flex: 1; min-height: 0; overflow-y: auto; }
 
 /* ── 3 · FLUID COLUMNS ─────────────────────────────────────────────────────────────────────────
    Replaces the ref's `@media (max-width:1160px)` entirely — the media block above is superseded by
@@ -263,14 +219,10 @@
    ⚠️ AND THE TILES COUNT THEMSELVES. `.n3`/`.n4` are a React prop deciding layout; `auto-fit` lets
    the browser decide, which is the same outcome at every width the ref drew and a better one at
    the widths it did not. */
-.tpn .workrow { display: flex; flex-wrap: wrap; align-items: flex-start; }
-.tpn .workrow > .fc:first-child { flex: 999 1 420px; min-width: 0; }
-.tpn .workrow > .fc:last-child { flex: 1 1 300px; min-width: 0; }
 .tpn .tiles, .tpn .tiles.n3, .tpn .tiles.n4 {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 /* the ref's narrow band stacks its figure under the deed; a wrap does it without a threshold */
-.tpn .band { flex-wrap: wrap; }
 
 /* ── 4 · THE APP'S TOKENS ──────────────────────────────────────────────────────────────────────
    The ref's band stops were sampled off a drawing. The app already names these exact surfaces —
@@ -315,3 +267,83 @@
   font-size: 13px; line-height: 1; transition: all .18s;
 }
 .tpn .navsq:hover { background: #fffdfa; border-color: rgba(58, 28, 20, 0.24); }
+
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════
+ * THE PANE CONTRACT'S CHASSIS (pane round, Phase 2) — `design-refs/todo-pane-contract.html`.
+ *
+ * ⚠️ THIS SUPERSEDES THE MATERIALS CONTRACT'S CARD-IN-CARD. That structure was `.v` → `.fc` →
+ * card with three zones — a fixed band, a scrolling middle, a fixed action bar. The `.fc`/`.rim`
+ * wrappers are retired with it, and the rules for them go in the same commit rather than sitting
+ * beside their replacement.
+ *
+ * ⚠️ SCOPED UNDER `.tpn`, class names untouched — the same treatment every port here carries.
+ * ═════════════════════════════════════════════════════════════════════════════════════════════ */
+
+.tpn .pane { background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);display:flex;flex-direction:column;overflow:hidden;min-width:0; }
+.tpn .band { flex:0 0 auto;padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative; }
+.tpn .band::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px; }
+.tpn .pane.u-now .band { background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2)); }
+.tpn .pane.u-now .band::after { background:var(--u-now-rule); }
+.tpn .pane.u-house .band { background:linear-gradient(135deg,var(--u-house-1),var(--u-house-2)); }
+.tpn .pane.u-house .band::after { background:var(--u-house-rule); }
+.tpn .deed { font-family:'Playfair Display',serif;font-size:21px;font-weight:500;color:var(--ink2);line-height:1.12; }
+.tpn .deed em { font-style:italic;color:var(--burg); }
+.tpn .b-sub { font-size:11px;font-weight:300;margin-top:3px; }
+.tpn .b-nav { display:flex;gap:6px;flex-shrink:0; }
+.tpn .b-nav button { cursor:pointer;width:28px;height:28px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);display:flex;align-items:center;justify-content:center; }
+.tpn .b-nav button:hover { background:#fffdfa; }
+.tpn .tiles { flex:0 0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-bottom:1px solid var(--hair); }
+.tpn .tile { padding:10px 18px 11px;border-right:1px solid rgba(124,58,42,0.10);min-width:0; }
+.tpn .tile:last-child { border-right:0; }
+.tpn .tile .k { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500; }
+.tpn .tile .v { font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--ink2);margin-top:3px;line-height:1.2; }
+.tpn .tile .v small { font-family:'Inter',sans-serif;font-size:10px;color:var(--muted2);font-weight:300;display:block;margin-top:1px; }
+.tpn .tile .v.absent { color:#c0b0a0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase; }
+.tpn .mid { flex:1 1 auto;min-height:0;overflow-y:auto;padding:18px 20px 20px;display:flex;gap:16px;align-items:flex-start; }
+.tpn .mid::-webkit-scrollbar { width:9px; }
+.tpn .mid::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
+.tpn .formcol { flex:1 1 460px;min-width:0; }
+.tpn .storycol { flex:0 1 280px;min-width:230px; }
+.tpn .f-h { font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2); }
+.tpn .f-sub { font-size:11.5px;color:var(--muted2);font-weight:300;margin:3px 0 15px;line-height:1.5; }
+.tpn .sect { margin-bottom:16px; }
+.tpn .story { background:var(--white);border:0.5px solid var(--hair2);border-radius:11px;overflow:hidden; }
+.tpn .actbar { flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--hair);background:var(--white); }
+.tpn .willrec { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.tpn .willrec b { color:var(--ink2);font-weight:500; }
+.tpn .ab { cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s; }
+.tpn .ab.quiet { background:var(--white);border:1px solid var(--edge);color:#57534e; }
+.tpn .ab.quiet:hover { background:#f5f2ee; }
+.tpn .ab.go { background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600; }
+.tpn .ab.go:hover { background:#efd5ca; }
+.tpn .ab.go:disabled { background:var(--field);border-color:var(--hair2);color:#c0b0a0;cursor:not-allowed; }
+.tpn .dlg { position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(40,20,14,0.35); }
+.tpn .dlg.open { display:flex; }
+.tpn .dlg-card { width:380px;background:var(--white);border:1px solid var(--edge);border-radius:13px;box-shadow:0 20px 60px rgba(40,20,14,0.3);padding:20px 22px; }
+.tpn .dlg-card h3 { font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2); }
+.tpn .dlg-card p { font-size:12px;color:#6a584a;font-weight:300;line-height:1.6;margin:8px 0 0; }
+.tpn .dlg-card p b { font-weight:500;color:var(--ink2); }
+.tpn .dlg-where { background:var(--field);border:0.5px dashed #ddd0c0;border-radius:9px;padding:10px 12px;margin-top:12px;font-size:11px;color:var(--muted2);font-weight:300;line-height:1.55; }
+.tpn .dlg-where b { color:var(--ink2);font-weight:500; }
+.tpn .dlg-foot { display:flex;justify-content:flex-end;gap:9px;margin-top:16px; }
+
+/* ⚠️ THE PANE FILLS ITS COLUMN AND IS THE CARD (pane round, Phase 2). The materials contract made
+   the pane a grid CELL holding framed cards; the pane contract makes it the card itself, so the
+   three zones can be `flex: 0 0 auto` / `1 1 auto` / `0 0 auto` against a definite height. Without
+   this the action bar sat wherever the content ended — measured 718 against a pane bottom of 889,
+   which is a "fixed" bar 171px up the card. */
+.tpn { display: flex; flex-direction: column; }
+.tpn .pane {
+  flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column;
+  background: var(--white); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden;
+  box-shadow: 0 1px 2px rgba(58,28,20,0.05), 0 8px 26px rgba(58,28,20,0.07);
+}
+
+/* ⚠️ THE MIDDLE WRAPS BY MEASURE (pane round, Phase 2) — the fluid rule the retired `.workrow`
+   carried, on the element that replaced it. The form column asks for most of the surplus and the
+   story column takes the line it has to itself when they cannot sit side by side; the two numbers
+   are the ones the workrow proved, moved rather than re-derived. */
+.tpn .mid { flex-wrap: wrap; }
+.tpn .mid > .formcol { flex: 999 1 420px; min-width: 0; }
+.tpn .mid > .storycol { flex: 1 1 300px; min-width: 0; }

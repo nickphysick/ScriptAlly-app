@@ -432,6 +432,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
 
   /* the two menus and the snooze panel, each anchored to the control that opened it */
   const [snoozeAnchor, setSnoozeAnchor] = useState<HTMLElement | null>(null);
+  /* Phase 7 owns the dialog; Phase 2 only opens the state so the button is wired to something
+     honest rather than to a write with no confirmation. */
+  const [dismissOpen, setDismissOpen] = useState(false);
   const filterAnchor = React.useRef<HTMLElement | null>(null);
   const sortAnchor = React.useRef<HTMLElement | null>(null);
   // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
@@ -1716,7 +1719,6 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                 <TaskPane
                   journey={buildJourney({
                     card: paneCard,
-                    figure: (() => { const f = figureFor(paneCard); return f.value ? { value: String(f.value), unit: f.unit ?? "" } : null; })(),
                     facts: paneFacts,
                     sentPreviously: (() => {
                       const q = paneCard.relatedRecordId ? queries.find((x) => x.id === paneCard.relatedRecordId) : undefined;
@@ -1742,6 +1744,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                        and two controls for one act is how they come to disagree about whether it is available. */
                     btns: [],
                     onOpenQuery: () => paneVerbs.openQuery.onPress(),
+                    /* ⚠️ SNOOZE ANCHORS TO THE PANE'S OWN BUTTON. `AnchoredPanel` takes any element
+                       and places against its rect — recon 6 confirmed it needs nothing else, so the
+                       panel moved surface without a line of change inside it. */
+                    onSnooze: paneVerbs.snooze.disabled ? undefined : (el) => setSnoozeAnchor(el),
+                    /* ⚠️ STUBBED UNTIL PHASE 7. The confirm dialog and the `TaskFlag` write are that
+                       phase's; wiring `forkStale` straight to this button would dismiss with no
+                       confirmation and no way back, which is the thing Phase 7 exists to prevent. */
+                    onDismiss: paneVerbs.dismiss.disabled ? undefined : () => setDismissOpen(true),
                   })}
                   onPrimary={() => dockPrimary(paneCard)}
                   nav={{

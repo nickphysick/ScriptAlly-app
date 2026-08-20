@@ -14,7 +14,7 @@
  *   3 · no class from the retired pane survives anywhere in `src/`.
  *
  * ⚠️ THE MOCKUP IS THE INPUT, NOT A FIXTURE. Every expectation below is derived from
- * `design-refs/todo-materials-contract.html` at run time, so the day the ref changes this suite
+ * `design-refs/todo-pane-contract.html` at run time, so the day the ref changes this suite
  * changes with it — which is the only way a "port" claim can stay true. A hand-written list of
  * class names would pass forever over a file nobody had opened since.
  */
@@ -26,7 +26,13 @@ import React from "react";
 import { TaskPane, TaskPaneJourney } from "./TaskPane";
 import { TaskPaneBody } from "./TaskPaneBody";
 
-const REF = readFileSync(join(process.cwd(), "design-refs/todo-materials-contract.html"), "utf8");
+const REF = readFileSync(join(process.cwd(), "design-refs/todo-pane-contract.html"), "utf8");
+/* ⚠️ TWO CONTRACTS ARE IN FORCE, and saying so is more honest than pretending one is. The pane
+   contract owns the CHASSIS — band, middle, action bar — and supersedes the materials contract
+   there. The form's fields and the story's entries are still the materials contract's until
+   Phases 3 and 8 replace them, so its vocabulary is still legitimate. The assertion is that every
+   rendered class comes from ONE OF THE TWO, which is what stops a name being invented here. */
+const REF_MATERIALS = readFileSync(join(process.cwd(), "design-refs/todo-materials-contract.html"), "utf8");
 const PANE_CSS = readFileSync(join(process.cwd(), "src/components/todo/taskPane.css"), "utf8");
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
@@ -35,8 +41,6 @@ const SEND: TaskPaneJourney = {
   cls: "u-now",
   deed: <>Send your <em>full manuscript</em></>,
   sub: "Requested by Jonathan Marsh, The Marsh Agency · 14 Aug 2026",
-  fig: "4",
-  figU: "days with you",
   btns: [{ label: "Snooze", onPress: () => {} }],
   tiles: [
     { k: "Send to", val: "Jonathan Marsh", small: "j.marsh@marshagency.co.uk" },
@@ -64,7 +68,8 @@ const SEND: TaskPaneJourney = {
   onOpenQuery: () => {},
 };
 
-const HTML = renderToStaticMarkup(<TaskPane journey={SEND} onPrimary={() => {}} />);
+const NAV = { index: 2, total: 9, label: "Needs you now", onPrev: () => {}, onNext: () => {} };
+const HTML = renderToStaticMarkup(<TaskPane journey={SEND} onPrimary={() => {}} nav={NAV} />);
 /** every class the rendered pane actually carries */
 const rendered = new Set(
   [...HTML.matchAll(/class="([^"]+)"/g)].flatMap((m) => m[1].split(/\s+/)).filter(Boolean),
@@ -76,8 +81,11 @@ describe("1 · the pane's class names are the mockup's", () => {
    * words are its vocabulary; anything the pane renders that is not in that set is a name this
    * port invented, which is the thing the brief forbids.
    */
-  const mockCss = strip(REF.slice(REF.indexOf("<style>"), REF.indexOf("</style>")));
-  const mockClasses = new Set([...mockCss.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]));
+  const cssOf = (src: string) => strip(src.slice(src.indexOf("<style>"), src.indexOf("</style>")));
+  const mockClasses = new Set([
+    ...[...cssOf(REF).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]),
+    ...[...cssOf(REF_MATERIALS).matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]),
+  ]);
 
   it("every class the pane renders is a word from the mockup", () => {
     /* ⚠️ THE ONE EXEMPTION IS NAMED AND PREFIXED. Task navigation is behaviour the brief requires
@@ -89,21 +97,20 @@ describe("1 · the pane's class names are the mockup's", () => {
   });
 
   it("the structural names are present, and nested as the mockup nests them", () => {
-    for (const c of ["v", "fc", "rim", "band", "tiles", "tile", "workrow", "act", "acts"]) {
+    for (const c of ["pane", "band", "deed", "b-sub", "mid", "formcol", "actbar", "willrec"]) {
       expect(rendered.has(c), `${c} is missing from the rendered pane`).toBe(true);
     }
-    /* ⚠️ `.workrow` IS A SIBLING OF THE HEADER CARD, NOT A DESCENDANT — the whole of the contract's
-       structure, and the assertion that has been silently green before by only checking a `.rim`
-       exists. The header card closes before the workrow opens. */
-    const headerCard = HTML.indexOf('<div class="fc">');
-    const workrow = HTML.indexOf('<div class="workrow">');
-    const tilesEnd = HTML.indexOf('class="tiles');
-    expect(headerCard).toBeGreaterThan(-1);
-    expect(workrow).toBeGreaterThan(tilesEnd);
-    expect(HTML.slice(headerCard, workrow)).not.toContain("workrow");
-    /* three cards, each with its own rim — the header, the act, the timeline */
-    expect((HTML.match(/class="fc"/g) ?? [])).toHaveLength(3);
-    expect((HTML.match(/class="rim"/g) ?? [])).toHaveLength(3);
+    /* ⚠️ THREE ZONES IN ORDER, INSIDE ONE CARD — band, then middle, then action bar. The
+       materials contract's three framed cards are retired with their wrappers; a `.fc` or `.rim`
+       surviving here would mean the old chassis came back beside the new one. */
+    const band = HTML.indexOf('class="band"');
+    const mid = HTML.indexOf('class="mid"');
+    const bar = HTML.indexOf('class="actbar"');
+    expect(band).toBeGreaterThan(-1);
+    expect(mid).toBeGreaterThan(band);
+    expect(bar).toBeGreaterThan(mid);
+    expect(HTML, "the retired card-in-card is back").not.toContain('class="fc"');
+    expect(HTML, "the retired rim is back").not.toContain('class="rim"');
   });
 
   it("the mockup's own scoping is the only edit to its stylesheet", () => {
@@ -130,9 +137,13 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
       .filter(Boolean),
   );
   /* the pane's own — the list, the harness and the other journeys' controls are not this test's */
-  const PANE_PARTS = ["band", "deed", "b-sub", "bandfig", "bandbtns", "b-onband",
-    "tiles", "tile", "act", "acts", "willrec", "b-quiet", "b-primary",
-    "tl-head", "tl-in", "tl", "tl-e", "dot", "tl-foot", "f-lbl", "chip", "tick", "seg", "note-in"];
+  /* ⚠️ THE AUTHORITY MOVED (pane round, Phase 2). This asserted the MATERIALS contract's
+     card-in-card — `.v` → `.fc` → `.rim`, a `.workrow` of two framed cards, `.bandfig`,
+     `.b-onband`. The pane contract supersedes that chassis with one card and three zones, so the
+     checklist is its parts, read from its own markup. The CLAIM is unchanged: the pane is a port
+     of its contract, and the contract is the input rather than a fixture. */
+  const PANE_PARTS = ["pane", "band", "deed", "b-sub", "b-nav", "tiles", "tile",
+    "mid", "formcol", "storycol", "story", "actbar", "willrec", "ab"];
 
   it("the mockup emits every part this checks", () => {
     /* the guard on the guard: a part that stopped being in the ref would silently drop out */
@@ -147,22 +158,23 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
 
   it("the band's three states are the mockup's, driven by data and not by a branch", () => {
     /* `.nofig` is what a journey with no figure gets — the mockup's own modifier */
-    const noFig = renderToStaticMarkup(
-      <TaskPane journey={{ ...SEND, fig: null }} onPrimary={() => {}} />);
-    expect(noFig).toContain('class="band nofig"');
-    expect(noFig).not.toContain('class="bandfig"');
+    /* ⚠️ THE FIGURE LEFT THE BAND WITH THE CHASSIS. The pane contract's band is deed + sub-line +
+       nav; the materials contract's Playfair figure and its `.nofig` modifier are not in it, and a
+       journey with no figure now differs by having nothing there rather than by a class. */
+    const noFig = renderToStaticMarkup(<TaskPane journey={SEND} onPrimary={() => {}} />);
+    expect(noFig, "the retired band figure is back").not.toContain("bandfig");
+    expect(noFig, "the retired absence modifier is back").not.toMatch(/["\s`]nofig["\s`]/);
     /* and a journey with no timeline drops the card, leaving the workrow one child */
     const noTl = renderToStaticMarkup(
       <TaskPane journey={{ ...SEND, tiles: null, tl: null }} onPrimary={() => {}} />);
-    expect(noTl).not.toContain("tl-head");
-    expect((noTl.match(/class="fc"/g) ?? []), "the timeline card is still there").toHaveLength(2);
-    expect(noTl).not.toContain('class="tiles');
+    expect(noTl, "the story column survived a journey with no story").not.toContain("storycol");
+    expect(noTl, "an empty tile row rendered").not.toContain('class="tiles"');
   });
 
   it("the paper is the mockup's three, set on `.v`", () => {
     for (const cls of ["u-now", "u-house", "u-yours"] as const) {
       const html = renderToStaticMarkup(<TaskPane journey={{ ...SEND, cls }} onPrimary={() => {}} />);
-      expect(html).toContain(`class="v ${cls}"`);
+      expect(html).toContain(`class="pane ${cls}"`);
     }
   });
 });
@@ -231,18 +243,26 @@ describe("the app frame — four named adaptations, and only four", () => {
     /* `flex: 1; min-height: 0` down to a child that owns the overflow — the same chain `/queries`
        runs, and `min-height: 0` on every link because a flex item's automatic minimum is content */
     expect(frame).toContain("flex-direction: column");
-    const v = decls.slice(decls.indexOf(".tpn .v { flex: 1"));
-    expect(v).toContain("min-height: 0");
-    expect(v).toContain("overflow-y: auto");
+    /* ⚠️ THE SCROLLPORT MOVED WITH THE CHASSIS (pane round, Phase 2). It was `.v`, the materials
+       contract's column; the pane contract's middle zone owns it, between a fixed band and a fixed
+       action bar. Same chain, same three declarations, one element along. */
+    const mid = rule(".tpn .mid");
+    expect(mid).toContain("min-height:0");
+    expect(mid).toContain("overflow-y:auto");
+    expect(mid).toContain("flex:1 1 auto");
   });
 
   it("3 · fluid columns — no breakpoint decides anything", () => {
     /* the ref's `@media (max-width:1160px)` is superseded by rules that reach the same outcomes
        by measure. The block is still in the file, above, and these override it. */
-    const wr = rule(".tpn .workrow");
-    expect(wr).toContain("flex-wrap: wrap");
-    expect(decls).toContain("flex: 999 1 420px");
-    expect(decls).toContain("flex: 1 1 300px");
+    /* ⚠️ THE WORKROW IS RETIRED WITH THE CARD-IN-CARD. The pane contract's middle is one flex row
+       of two columns — `.formcol` and `.storycol` — which wrap by measure exactly as the workrow
+       did, without the two framed cards between them. Asserted on the survivors. */
+    expect(decls, "the retired workrow is back").not.toContain(".tpn .workrow");
+    const mid2 = rule(".tpn .mid");
+    /* ⚠️ WHITESPACE-NORMALISED: one of these rules is PORTED (tight, as the contract writes it)
+       and one is AUTHORED (spaced, as this repo writes it), and the claim is about neither. */
+    expect(mid2.replace(/\s*:\s*/g, ":")).toContain("flex-wrap:wrap");
     /* the tiles count themselves rather than taking `.n3`/`.n4` from a prop */
     expect(decls).toContain("repeat(auto-fit, minmax(150px, 1fr))");
   });

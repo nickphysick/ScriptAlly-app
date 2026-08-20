@@ -345,40 +345,30 @@ export function bandSubject(c: BoardCard): string {
 export interface PanePresence {
   /** The fact tiles under the band. */
   tiles: boolean;
-  /** The band's right-hand figure and its unit label. */
-  figure: boolean;
   /** The story card beside the form. */
   timeline: boolean;
 }
 
 export function panePresence(c: BoardCard): PanePresence {
-  const none: PanePresence = { tiles: false, figure: false, timeline: false };
-  /**
-   * ⚠️ A NOTE KEEPS ITS TILES AND ITS FIGURE — REVERSED DELIBERATELY (contract run, D6), on the
-   * owner's own correction: "I wrote 'Note has no figure and no tiles' into a brief after drawing
-   * the mockup with both, and never reconciled them. The mockup is right."
-   *
-   * And it is right. A note HAS a real added-date and a real age, so the figure states something
-   * true; "Due · No date set" and "Attached to · Nothing" are the absent-data grammar doing exactly
-   * the job it exists for, rather than an empty frame. What it has no business showing is a
-   * TIMELINE — there is no query behind it and no history to draw.
-   *
-   * The reasoning this replaces was mine and it was thin: it read "no query" and concluded "nothing
-   * to state", which is true of the history and false of the other two.
-   */
+  const none: PanePresence = { tiles: false, timeline: false };
   /* ⚠️ A NOTE HAS NO QUERY, SO IT HAS NO TILES AND NO TIMELINE (frame2 Phase 3). This line has now
      been decided both ways: the contract round reversed it to `tiles: true` on the instruction that
      a note has a real added-date and a real age, and the frame2 brief reverses it back — because
      what a note actually rendered was two tiles BOTH labelled "Added" and a "Sent previously /
-     None sent" tile about materials that were never asked for. The figure stays: it is the band's
-     own slot and a note's age belongs there, stated once. */
-  if (c.userTaskId || c.nature || c.stream === "nt") return { tiles: false, figure: true, timeline: false };
+     None sent" tile about materials that were never asked for.
+
+     ⚠️ THE THIRD FIELD OF THIS TABLE WAS `figure`, AND IT IS GONE — deleted, not defaulted (pane
+     round, Phase 2). The argument recorded here at length was about where a note's AGE belongs, and
+     the pane contract settles it by not drawing a figure in the band at all; the age is the list
+     row's right-hand fragment now. The prose that argued the case went with the field, because a
+     comment reasoning about a property nothing declares is the fault this file has caught before. */
+  if (c.userTaskId || c.nature || c.stream === "nt") return { tiles: false, timeline: false };
   /* a cohort has no single record behind it */
   if (c.taskType === "materials_unrecorded_bulk") return none;
   /* a single record gap has a query, so it keeps its history — but the deed says what is missing,
      so tiles and a figure would restate the row it was raised from */
-  if (c.taskType === "materials_unrecorded") return { tiles: false, figure: false, timeline: true };
-  return { tiles: true, figure: true, timeline: true };
+  if (c.taskType === "materials_unrecorded") return { tiles: false, timeline: true };
+  return { tiles: true, timeline: true };
 }
 
 /**

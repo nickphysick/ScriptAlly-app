@@ -10,10 +10,18 @@
  * `TodoDock` appears anywhere in this file.
  *
  * ⚠️ THE PROP CONTRACT IS THE MOCKUP'S OWN `DATA` SHAPE. Its render reads
- * `{cls, deed, sub, fig, figU, btns, tiles, actTitle, actSub, body, will, quiet, prim, tl}` and so
+ * `{cls, deed, sub, btns, tiles, actTitle, actSub, body, will, quiet, prim, tl}` and so
  * does this. That is what stops the structure bending to suit the data: a journey supplies those
- * fields or it supplies null, and `null` is what the `.nofig` modifier and the hidden timeline card
+ * fields or it supplies null, and `null` is what the hidden tile row and the hidden timeline card
  * are FOR. Nothing here branches on a task type.
+ *
+ * ⚠️ THE BAND'S FIGURE IS GONE, NOT HIDDEN (pane round, Phase 2). The materials contract drew a
+ * Playfair numeral on the right of the band; the pane contract's band is deed + sub + arrows, and
+ * nothing renders a figure. So `fig`/`figU` are deleted rather than left as props with no reader —
+ * the whole chain went with them (`PanePresence.figure`, `JourneyInputs.figure`, `.bandfig`), which
+ * is the sweep the retirement asks for rather than four dead symbols in four files. The FIGURE
+ * ITSELF still reaches the reader: it is the list row's right-hand fragment, which is where the
+ * "two panes read as one page" rule always wanted it.
  *
  * ⚠️ BEHAVIOUR IS CARRIED, PRESENTATION IS NOT. The callbacks below are the retired pane's
  * contracts — the completion path, snooze, dismiss, open query, task navigation — and nothing else
@@ -57,10 +65,6 @@ export interface TaskPaneJourney {
   hand?: boolean;
   /** `.b-sub` */
   sub: React.ReactNode;
-  /** `.bandfig .n` — `null` puts `.nofig` on the band, which is the mockup's own handling */
-  fig: string | null;
-  /** `.bandfig .u` */
-  figU?: string;
   /** `.bandbtns` — the mockup's `btns` array, in order */
   btns?: { label: string; onPress: (anchor: HTMLElement) => void }[];
   /** `.tiles.n{N}` — `null` hides the row, as the mockup's render does */
@@ -83,6 +87,11 @@ export interface TaskPaneJourney {
   tl: TaskPaneEvent[] | null;
   /** `.tl-foot a` */
   onOpenQuery?: () => void;
+  /** ⚠️ THE ACTION BAR'S VERBS, on the pane because that is where the open task is (Phase 1/2).
+   *  Absent means the journey does not offer it — the button is not rendered rather than disabled,
+   *  because "this task cannot be snoozed" and "nothing is selected" are different sentences. */
+  onSnooze?: (anchor: HTMLElement) => void;
+  onDismiss?: () => void;
 }
 
 export interface TaskPaneProps {
@@ -100,7 +109,6 @@ export interface TaskPaneProps {
 const entryCount = (tl: TaskPaneEvent[]): number => tl.filter((e) => e.kind !== "now").length;
 
 export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }) => {
-  const fig = d.fig;
   return (
     <div className="tpn">
       {/* ⚠️ THE COUNTER ROW IS GONE AND ITS HEIGHT WENT TO THE PANE (pane round, Phase 1). It said
@@ -108,96 +116,59 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
           states, spending ~40px to hold the pane's top edge below the list's. The arrows survive,
           in the band, where the contract puts them; the count does not survive at all, because the
           one that mattered is beside the rows it counts. */}
-      <div className={`v ${d.cls}`}>
-        <div className="fc">
-          <div className="rim">
-            <div className={fig ? "band" : "band nofig"}>
-              <div>
-                <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
-                <div className="b-sub">{d.sub}</div>
-              </div>
-              <div>
-                {fig && (
-                  <div className="bandfig">
-                    <div className="n">{fig}</div>
-                    <div className="u">{d.figU}</div>
-                  </div>
-                )}
-                <div className="bandbtns">
-                  {(d.btns ?? []).map((b) => (
-                    <button key={b.label} type="button" className="b-onband"
-                      onClick={(e) => b.onPress(e.currentTarget)}>{b.label}</button>
-                  ))}
-                  {/* ⚠️ THE ARROWS, IN THE BAND — the contract's 28px squares. They moved here from
-                      the retired counter row: navigation belongs beside the thing it navigates. */}
-                  {nav && (
-                    <>
-                      <button type="button" className="navsq" onClick={nav.onPrev}
-                        aria-label="Previous task">‹</button>
-                      <button type="button" className="navsq" onClick={nav.onNext}
-                        aria-label="Next task">›</button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* ⚠️ `n{N}` FROM THE COUNT, exactly as the mockup's render sets it. */}
-            {d.tiles && d.tiles.length > 0 && (
-              <div className={`tiles n${d.tiles.length}`}>
-                {d.tiles.map((t, i) => (
-                  <div className="tile" key={`${t.k}-${i}`}>
-                    <div className="k">{t.k}</div>
-                    {t.absent
-                      ? <div className="val absent">{t.val}</div>
-                      : <div className="val">{t.val}{t.small && <small>{t.small}</small>}</div>}
-                  </div>
-                ))}
-              </div>
-            )}
+      {/* ⚠️ ONE CARD, THREE ZONES (pane round, Phase 2) — the pane contract's chassis, which
+          supersedes the materials contract's card-in-card. That drew `.v` → `.fc` → `.rim` around
+          the band, then a `.workrow` of two more framed cards; this draws a fixed band, a middle
+          that scrolls, and an action bar pinned to the foot. The rims went with it. */}
+      <div className={`pane ${d.cls}`}>
+        <div className="band">
+          <div style={{ minWidth: 0 }}>
+            <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
+            <div className="b-sub">{d.sub}</div>
           </div>
+          {/* ⚠️ THE ARROWS LIVE HERE, not in a counter row above the card — Phase 1's retirement. */}
+          {nav && (
+            <div className="b-nav">
+              <button type="button" onClick={nav.onPrev} aria-label="Previous task">‹</button>
+              <button type="button" onClick={nav.onNext} aria-label="Next task">›</button>
+            </div>
+          )}
         </div>
 
-        {/* ⚠️ A SIBLING OF THE HEADER CARD, never a descendant — the whole of the contract's
-            structure, and the one thing a reader can check at a glance. */}
-        <div className="workrow">
-          <div className="fc"><div className="rim">
-            <div className="act">
-              {/* ⚠️ NO HEADING ELEMENT WHEN THERE IS NO HEADING. Nudge has nothing to fill in, so
-                  an empty `h3` would leave a gap where a question should be. */}
-              {d.actTitle && <h3>{d.actTitle}</h3>}
-              <div className="sub">{d.actSub}</div>
-              {d.body}
-              <div className="acts">
-                <span className="willrec">Will record: <b>{d.will}</b></span>
-                {d.quiet && (
-                  <button type="button" className="b-quiet" onClick={d.quiet.onPress}>{d.quiet.label}</button>
-                )}
-                <button type="button" className="b-primary" disabled={d.primDisabled} onClick={onPrimary}>
-                  {d.prim}
-                </button>
+        {/* ⚠️ ABSENT, NOT EMPTY, WHERE A JOURNEY HAS NOTHING TO SUMMARISE. The bulk journey has no
+            single query behind it, so it renders no tile row at all rather than a row of dashes. */}
+        {d.tiles && d.tiles.length > 0 && (
+          <div className="tiles">
+            {d.tiles.map((t, i) => (
+              <div className="tile" key={`${t.k}-${i}`}>
+                <div className="k">{t.k}</div>
+                {t.absent
+                  ? <div className="v absent">{t.val}</div>
+                  : <div className="v">{t.val}{t.small && <small>{t.small}</small>}</div>}
               </div>
-            </div>
-          </div></div>
+            ))}
+          </div>
+        )}
 
+        {/* ⚠️ THE ONLY SCROLLING ELEMENT IN THE PANE. `flex: 1 1 auto; min-height: 0; overflow-y:
+            auto` — the band above and the bar below are `flex: 0 0 auto`, so a long form scrolls
+            between them and never takes the primary off screen. */}
+        <div className="mid">
+          <div className="formcol">
+            {d.actTitle && <div className="f-h">{d.actTitle}</div>}
+            {d.actSub && <div className="f-sub">{d.actSub}</div>}
+            {d.body}
+          </div>
           {d.tl && (
-            <div className="fc"><div className="rim">
-              <div>
-                <div className="tl-head">
-                  <span className="t">The story so far</span>
-                  <span className="c">{entryCount(d.tl)} {entryCount(d.tl) === 1 ? "entry" : "entries"}</span>
-                </div>
-                <div className="tl-in">
-                  <div className="tl">
-                    {d.tl.map((e) => (
-                      <div className={e.kind ? `tl-e ${e.kind}` : "tl-e"} key={e.key}>
-                        <span className="dot" />
-                        <div className="t">{e.t}</div>
-                        <div className="d">{e.d}</div>
-                      </div>
-                    ))}
+            <div className="storycol">
+              <div className="story">
+                {d.tl.map((e) => (
+                  <div className={e.kind ? `tl-e ${e.kind}` : "tl-e"} key={e.key}>
+                    <span className="dot" />
+                    <div className="t">{e.t}</div>
+                    <div className="d">{e.d}</div>
                   </div>
-                </div>
+                ))}
                 {d.onOpenQuery && (
                   <div className="tl-foot">
                     <a href="#" onClick={(ev) => { ev.preventDefault(); d.onOpenQuery?.(); }}>
@@ -206,8 +177,26 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   </div>
                 )}
               </div>
-            </div></div>
+            </div>
           )}
+        </div>
+
+        {/* ⚠️ THE ACTION BAR IS FIXED, and it is where Snooze and Dismiss live now — they act on
+            the OPEN TASK, and this is where the open task is. The will-record strip states the
+            actual values the primary will write, so the button is never the only description of
+            what pressing it does. */}
+        <div className="actbar">
+          <span className="willrec">Will record: <b>{d.will}</b></span>
+          {d.onSnooze && (
+            <button type="button" className="ab quiet"
+              onClick={(e) => d.onSnooze?.(e.currentTarget)}>Snooze</button>
+          )}
+          {d.onDismiss && (
+            <button type="button" className="ab quiet" onClick={d.onDismiss}>Dismiss</button>
+          )}
+          <button type="button" className="ab go" disabled={d.primDisabled} onClick={onPrimary}>
+            {d.prim}
+          </button>
         </div>
       </div>
     </div>

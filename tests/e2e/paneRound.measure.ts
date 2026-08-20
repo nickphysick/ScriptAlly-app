@@ -62,7 +62,13 @@ test("pane round", async ({ page }) => {
     const pane = one(".tpn");
     if (!pane) return null;
     const band = one(".tpn .band"), mid = one(".tpn .mid"), bar = one(".tpn .actbar");
+    /* A form control scrolls its own content, and that is not a second scroller in the pane: a
+       textarea computes overflow-y auto by default, so the first form of this counted the notes
+       field as a rival to the middle. The claim is about LAYOUT boxes; controls go by tag.
+       (No backticks in here — this comment lives inside a template literal, and a backtick would
+       end the string. Fourth variant this session of a comment breaking its own container.) */
     const scrollers = [...pane.querySelectorAll("*")].filter(vis).filter((e) => {
+      if (/^(TEXTAREA|INPUT|SELECT)$/.test(e.tagName)) return false;
       const c = getComputedStyle(e);
       return /(auto|scroll)/.test(c.overflowY);
     }).map((e) => String(e.className).split(" ")[0]);
