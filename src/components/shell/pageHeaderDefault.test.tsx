@@ -121,7 +121,10 @@ describe("the workspace variant", () => {
        above it. That ORDER is the contract: the control row anchors, so it has to come second. */
     const out = renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />);
     expect(out).not.toContain("wsh-wrap");
-    expect(out).toMatch(/<div class="wpg-scroll"[^>]*><header class="wsh"><div class="wsh-row">/);
+    /* ⚠️ `.wpg-mast` SITS BETWEEN THEM NOW (step 3) — the grid's own wrapper, which is what animates
+       the fill-page collapse. The claim is unchanged: the masthead OPENS the scroll row, because
+       the control row beneath it is what anchors. */
+    expect(out).toMatch(/<div class="wpg-scroll"[^>]*><div class="wpg-mast"><header class="wsh"><div class="wsh-row">/);
   });
 
   it("⚠️ THERE IS NO CONDENSED STATE — the band and its classes are unreachable", () => {

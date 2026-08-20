@@ -383,6 +383,42 @@
   color: var(--shell-ink); margin: 0; white-space: nowrap;
   /* 1.02 per both refs — a display line, set tight */
   line-height: 1.02;
+  /* the positioning context for any ornament a page hangs on the title — see below */
+  position: relative;
+}
+/**
+ * ══ ORNAMENTS DO NOT AFFECT THE MASTHEAD'S HEIGHT ═══════════════════════════════════════════
+ *
+ * ⚠️ THE RULE: the masthead's height is a function of the MARK AND THE TITLE, on every page,
+ * whatever a page chooses to hang on its title. Two do — Discover's `Pro` pill and Submission
+ * packages' `Pro` pill with its shield — and measured on the built dev bundle they took the title's
+ * line box from 31px to 32, which propagated to a 104px masthead against every other page's 102.
+ *
+ * ⚠️ IT IS TAKEN OUT OF FLOW RATHER THAN TUNED DOWN, and that distinction is the whole point. A
+ * smaller font, a `line-height: 0`, a negative margin — each would fix THIS pill, at this size,
+ * and the next badge would do it again with nothing to catch it. Absolutely positioned, an
+ * ornament contributes nothing to the line box by construction: there is no size it can be that
+ * changes the masthead's height.
+ *
+ * ⚠️ AND WIDENING THE MATRIX'S TOLERANCE WAS THE ALTERNATIVE, REJECTED. A 2px allowance is a
+ * standing invitation for the next ornament to spend it.
+ *
+ * `left: 100%` puts it immediately after the title text — the title is `white-space: nowrap`, so
+ * its box is exactly its text — and the vertical centring is on the title's own line box, so an
+ * ornament rides the type rather than a number someone chose. The space to its right is empty on
+ * every page: the masthead holds no actions.
+ */
+/* ⚠️ 0-2-0, AND THAT IS NOT DECORATION. The two pills it governs are single-class rules in their
+   own page sheets (`.pkgw-propill` sets `position: relative; top: 2px`), so at equal specificity
+   this would resolve on bundle source order — which is exactly the coin-flip this codebase keeps
+   re-teaching. The shared rule has to win outright, or an ornament's height depends on which
+   stylesheet happened to be emitted second. */
+.wsh .wsh-title > * {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 9px;
 }
 /* ⚠️ NO DESCRIPTION → THE TITLE STEPS UP. The plate's HEIGHT does not change with it — the two
    states must read as deliberate side by side, not as one page missing something.

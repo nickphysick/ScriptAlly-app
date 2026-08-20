@@ -111,3 +111,45 @@ The residual 2px on Packages is its `titleAdornment` (the Pro pill) adding 1px t
 
 - **Analytics — charts under a sticky row.** Reads correctly: the panels pass under an opaque row and are cut cleanly at the hairline.
 - **Submission packages — card grids under a hairline.** No oddness: the cards are inset by their own layout and scroll under the row without crowding it.
+
+
+---
+
+## Step 3 — the masthead vanishes on engagement (fill pages)
+
+First `pointerdown` in the content area collapses `.wpg-mast` to nothing — `max-height` 220 → 0, opacity out, ~.26s, hairline included. No restore affordance; it returns on the next visit to the page.
+
+**Measured on all five fill pages** (`tests/e2e/mastheadVanish.measure.ts`), 1440×900, built dev bundle:
+
+| Page | masthead at rest | after one content click | reclaimed |
+|---|---|---|---|
+| Query Centre | 118.5 | 0 (opacity 0) | 119 |
+| Manuscripts | 118.5 | 0 | 119 |
+| To-do list | 101 | 0 | 101 |
+| Calendar | 118.5 | 0 | 119 |
+| Noteboard | 118.5 | 0 | 119 |
+
+To-do is 101 rather than 118.5 because it has no description — title-only pages are simply shorter, which is the step-1 rule doing its job.
+
+**A click ON the masthead does not collapse it.** That used to be structural (the header was row 1, only rows 2–4 carried the handler); inside the scroller it needs a containment test — `mastRef.current?.contains(e.target)` — rather than a `stopPropagation`, which would change what every other listener sees in order to fix what this one does.
+
+### The Manuscripts dossier, both ways
+
+- **Opened during the visit:** arrives 118.5 / not working → dossier open → 0 / working. Leaving it leaves the masthead gone, which is the latch behaving.
+- **Already open on arrival — it cannot currently happen, and that is a verified fact rather than an untested case.** `AllManuscripts` initialises `openId` to `null` and never seeds it: it *writes* `scriptally_active_manuscript_id` for the comps and packages sub-pages to read, and never reads it back into its own view state. Measured too — returning to `/manuscripts` with a pointer already in `localStorage` gives masthead 118.5, not working.
+- **The risk behind the question is real and is now locked.** A fill page whose `condensed` is true at first paint must render with `wpg--working` already on the root, so the stylesheet collapses from the first frame rather than drawing a full masthead and snatching it away. `workspacePageGrid.test.tsx` asserts that against rendered output, and the measurement asserts the *current* answer so the day Manuscripts starts restoring a selection, the note above goes red instead of quietly becoming false.
+
+### ⚠️ TWO MEASUREMENT BUGS, BOTH OF WHICH REPORTED A CORRECT APP AS BROKEN
+
+Worth recording because both are about the *probe*, not the product, and both had confident wrong answers:
+
+1. **The probe clicked a link.** The content point was "120px below the masthead, horizontally centred" — which on Query Centre is inside the reading pane, where it landed on an agent link. The app navigated to `/agents`, the post-click read found the Contact list's grid, and the report was "the first click did not register as engagement". **Fixed twice over:** the click now lands in the scroller's own horizontal gutter (content area, structurally incapable of holding a control), the probe asserts the point is not on an `A`/`BUTTON`/`INPUT`, and it asserts the URL is unchanged after the click.
+
+2. **`.tpl-wpg` is not unique.** To-do, Calendar and Noteboard are three pages through one layout, so they share the grid class. `document.querySelector` returned To-do's grid on every one of them, and the run reported "the wrong page is showing" about Calendar while Calendar was showing perfectly well. **The selector is now class *and* displayed** — the class names the family, the box names which of them you are on.
+
+**The general form:** a measurement addresses its subject by something that is unique *and* stable across the interaction. "The first `.wpg` with a box" fails the moment anything navigates; a shared class fails when a family shares a layout. Both failures look exactly like a broken feature.
+
+## Also in step 3
+
+- **The Packages 2px is closed by decision, not tolerance** (Nick's call). Ornaments hung on the title — the two `Pro` pills — are absolutely positioned out of the title's line box, so the masthead's height is a function of the mark and the title only, whatever a page hangs on it. Measured after: **all five scrolling pages 102px, title 31px**, both pills vertically centred and 9px clear of the title. Tuning the pill down would have fixed this pill at this size; the next badge would have done it again.
+- **The margin-collapse trap is logged in `CLAUDE.md`** alongside the other "applies cleanly, does nothing" faults.

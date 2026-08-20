@@ -378,3 +378,51 @@
   color: var(--shell-muted);
   margin-left: 9px;
 }
+
+/* ══ THE MASTHEAD VANISHES ON ENGAGEMENT — FILL PAGES ONLY (step 3; ref 169-inflow-masthead-qc) ══
+ *
+ * ⚠️ TWO PROXIES FOR ONE THING. The masthead leaves when the user starts working. On a scrolling
+ * page scrolling is that signal and the masthead simply scrolls away — it is content, and nothing
+ * here touches it. On a FILL page the panes scroll and the page does not, so there is no scroll to
+ * read; the signal is the first click in the content area, and the masthead has to leave under its
+ * own power. That is what these rules are, and they apply to nothing else.
+ *
+ * ⚠️ FIVE PAGES COULD NEVER COLLAPSE AT ALL BEFORE THIS EXISTED — Query Centre, Manuscripts, To-do,
+ * Calendar, Noteboard — because their sentinel had nothing to report. The card stayed forever on
+ * exactly the pages with the least room to spare.
+ *
+ * ⚠️ IT COLLAPSES TO NOTHING, NOT TO A BAND. There is no strip left behind and no way back within
+ * the visit: the whole of the masthead's height is handed to the panes, and it returns on the next
+ * visit to the page (the grid's hidden → shown reset). That is only defensible because the masthead
+ * holds NO ACTIONS — a writer who does not see it again has lost nothing they could have used, and
+ * `PageHeader` throws if a page tries to put a control in one.
+ *
+ * ⚠️ `max-height` NEEDS A DEFINITE VALUE AT REST OR THERE IS NOTHING TO TRANSITION FROM. 220px per
+ * the ref, comfortably above the ~102px a masthead measures, so it never clips at rest.
+ *
+ * ⚠️ AND `overflow: hidden` IS SCOPED TO FILL PAGES, NOT PUT ON THE WRAPPER OUTRIGHT. It is needed
+ * here — the collapse has to clip — and it is a latent trap everywhere else: two scrolling pages
+ * hang an absolutely-positioned ornament off their title, and a wrapper that clips would cut it the
+ * day a title grew long enough to push it near the edge. Fill pages have no ornaments.
+ */
+.wpg-mast { min-width: 0; }
+.wpg--fill > .wpg-scroll > .wpg-mast {
+  flex: none;
+  overflow: hidden;
+  max-height: 220px;
+  opacity: 1;
+  transition:
+    max-height .26s cubic-bezier(.4, 0, .2, 1),
+    opacity .18s ease;
+}
+/* ⚠️ THE HAIRLINE GOES WITH IT — it belongs to the masthead, and a rule left hanging over content
+   that has risen to the top would read as the page's own top edge, which is what the band was. */
+.wpg--fill.wpg--working > .wpg-scroll > .wpg-mast {
+  max-height: 0;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* the STATE still changes — the masthead must still go, or the height it was collapsing to give
+     back is never given back. Only the tweening goes, exactly as everywhere else in this file. */
+  .wpg--fill > .wpg-scroll > .wpg-mast { transition: none; }
+}

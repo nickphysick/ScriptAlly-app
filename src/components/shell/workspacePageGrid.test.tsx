@@ -597,8 +597,12 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     /* ⚠️ POINTERDOWN, NOT CLICK — a drag inside the content never produces a `click`, and it is the
        least ambiguous act of working there is. */
     expect(live, "the scroller stopped reporting engagement").toMatch(/className="wpg-scroll"[\s\S]{0,200}onPointerDown=\{engage\}/);
+    /* ⚠️ STILL GATED ON `fill`, and the shape changed with step 3's containment test — an early
+       `if (!fill) return` rather than a wrapped `if (fill)`. The claim is what matters: a scrolling
+       page already has its own signal, and a click that engaged one would strip it at `scrollTop 0`
+       where the sentinel says it must be resting. */
     expect(live, "`engage` stopped being gated on `fill` — a scrolling page has its own signal and the two would fight")
-      .toMatch(/const engage[\s\S]{0,160}if \(fill\) setEngaged\(true\)/);
+      .toMatch(/const engage[\s\S]{0,200}if \(!fill\) return;/);
   });
 
   it("⚠️ THERE IS NO RESTORE AFFORDANCE — the band it belonged to is gone", () => {
@@ -750,6 +754,67 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(row, "the tally is not in the control row").toContain("wpg-tally");
     expect(row, "the page name came back into the anchored row — the reader already knows where they are")
       .not.toContain("Contact list");
+  });
+
+  it("⚠️ THE MASTHEAD COLLAPSES ON FILL PAGES ONLY — a scrolling page's leaves by scrolling", () => {
+    /* Two proxies for one thing: the user has started working. On a scrolling page that is the
+       scroll, and the masthead is content, so nothing has to act. On a fill page the panes scroll
+       and the page does not, so it has to leave under its own power. Scoping matters in BOTH
+       directions — a scrolling page whose masthead also collapsed would lose it at `scrollTop 0`,
+       where the sentinel says it must be resting. */
+    const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(live, "the collapse is not scoped to fill pages")
+      .toContain(".wpg--fill.wpg--working > .wpg-scroll > .wpg-mast");
+    /* it goes to NOTHING — no band, no strip, no residue to click */
+    const gone = block(".wpg--fill.wpg--working > .wpg-scroll > .wpg-mast").replace(/\s+/g, " ");
+    expect(gone, "the masthead collapses to a band rather than to nothing").toContain("max-height: 0");
+    expect(gone, "the masthead is still painted when collapsed").toContain("opacity: 0");
+    /* ⚠️ AND `max-height` NEEDS A DEFINITE REST VALUE or there is nothing to transition from. */
+    expect(block(".wpg--fill > .wpg-scroll > .wpg-mast"), "no resting max-height — the collapse would snap")
+      .toMatch(/max-height:\s*\d+px/);
+  });
+
+  it("⚠️ A GRID THAT ARRIVES WORKING ARRIVES COLLAPSED — never one frame of full masthead", () => {
+    /**
+     * ⚠️ THIS IS THE CASE THAT CANNOT BE REACHED BY CLICKING, AND IT IS THE ONE THAT WOULD FAIL
+     * SILENTLY. A fill page whose `condensed` prop is true at FIRST PAINT — a dossier or a journey
+     * restored on mount — must render with the working class already on the root, so the stylesheet
+     * collapses the masthead from the very first frame. If the class arrived a frame later the page
+     * would draw a full masthead and then snatch it away, which reads as a glitch rather than as a
+     * page that knows you are working.
+     *
+     * ⚠️ NO LIVE PAGE REACHES IT TODAY — verified, not assumed: `AllManuscripts` initialises
+     * `openId` to `null` and never seeds it from storage (it WRITES the active-manuscript pointer
+     * for the comps and packages sub-pages, and never reads it back into its own view state), and
+     * Query Centre passes no `condensed` at all. This is here so that the day one of them restores
+     * a selection on mount, the behaviour is already decided.
+     */
+    const html = renderToStaticMarkup(
+      <WorkspacePageGrid masthead={<PageHeader variant="workspace" title="Manuscripts" mark="manuscripts" />} fill condensed>
+        {null}
+      </WorkspacePageGrid>,
+    );
+    expect(html, "a grid that arrives working does not say so on its root — the stylesheet cannot collapse what it cannot see")
+      .toContain("wpg--working");
+    expect(html).toContain("wpg--fill");
+    /* the wrapper is present in both states — it is what animates, so it cannot be conditional */
+    expect(html, "the masthead wrapper is conditional — there would be nothing to transition").toContain("wpg-mast");
+  });
+
+  it("⚠️ A CLICK ON THE MASTHEAD IS NOT ENGAGEMENT — and it is a containment test, not a stopPropagation", () => {
+    /* The old rule was structural: the header was row 1 and only rows 2-4 carried the handler. Now
+       the masthead is INSIDE the scroller, so its clicks bubble to the same handler — and a header
+       that collapsed when you clicked it would be a control that hides itself when used.
+       ⚠️ `stopPropagation` WOULD HAVE CHANGED WHAT EVERY OTHER LISTENER SEES in order to fix what
+       this one does. Asking whether the event began inside the masthead changes nothing. */
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
+    const live = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(live, "engagement no longer excludes the masthead — it would collapse under the pointer")
+      .toMatch(/mastRef\.current\?\.contains\(e\.target as Node\)/);
+    expect(live, "the masthead wrapper lost its ref — the containment test has nothing to ask")
+      .toMatch(/className="wpg-mast" ref=\{mastRef\}/);
+    expect(live, "a stopPropagation appeared on the masthead — that changes what every other listener sees")
+      .not.toMatch(/wpg-mast[\s\S]{0,120}stopPropagation/);
   });
 
   it("⚠️ THE CENSUS — every page that renders a masthead renders it through the grid", () => {

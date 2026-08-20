@@ -287,8 +287,24 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * ⚠️ POINTERDOWN, NOT CLICK. A drag inside the content — reordering a To-do card, dragging a comp
    * — never produces a `click`, and it is the least ambiguous act of working there is.
    */
-  const engage = React.useCallback(() => {
-    if (fill) setEngaged(true);
+  /**
+   * ⚠️ A CLICK ON THE MASTHEAD IS NOT ENGAGEMENT, AND THIS IS WHERE THAT SURVIVED THE MOVE.
+   *
+   * The old rule was structural: the header was row 1 and only rows 2–4 carried the handler, so
+   * "clicking the header is not working on the page" needed no code. The masthead is inside the
+   * scroller now, so a click on it BUBBLES to the scroller and would collapse the very thing under
+   * the pointer — a control that hides itself when you touch it, which is the fault the original
+   * rule named.
+   *
+   * ⚠️ A CONTAINMENT TEST, NOT `stopPropagation`. Stopping the event would change what every other
+   * listener sees in order to fix what this one does; asking whether the event started inside the
+   * masthead changes nothing and says exactly what is meant.
+   */
+  const mastRef = React.useRef<HTMLDivElement>(null);
+  const engage = React.useCallback((e: React.PointerEvent) => {
+    if (!fill) return;
+    if (mastRef.current?.contains(e.target as Node)) return;
+    setEngaged(true);
   }, [fill]);
 
   /**
@@ -358,17 +374,17 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
           role={scrollLabel ? "region" : undefined}
           aria-label={scrollLabel}
         >
-          {/* ⚠️ THE MASTHEAD IS THE FIRST THING IN THE SCROLLER, and on a scrolling page that is
-              the entire mechanism: it leaves with the content because it IS content. No sentinel
-              feeds it, no class describes it, nothing reserves its height.
+          {/* ⚠️ THE MASTHEAD IS THE FIRST THING IN THE SCROLLER, and on a SCROLLING page that is the
+              entire mechanism: it leaves with the content because it IS content. No sentinel feeds
+              it, no class describes it, nothing reserves its height.
 
-              ⚠️ AND IT IS NOT WRAPPED IN AN ENGAGEMENT HANDLER. `onPointerDown` is on the scroller,
-              so a click on the masthead reaches it by bubbling — which was deliberately NOT true of
-              the old row 1 ("clicking the header is not working on the page"). That distinction is
-              reinstated at step 3, where the collapse arrives and the masthead needs to stop
-              collapsing itself out from under the pointer. Until then nothing collapses, so there
-              is nothing to protect. */}
-          {masthead}
+              ⚠️ ON A FILL PAGE NOTHING SCROLLS, so it leaves the other way — it collapses on the
+              first click in the content area (step 3). Same rule, two proxies for the same thing:
+              the user has started working. `.wpg-mast` is what animates; see the stylesheet. */}
+          {/* ⚠️ THE WRAPPER IS THE GRID'S, AND THE COLLAPSE IS ON IT RATHER THAN ON THE HEADER.
+              The grid owns when a page is working; it must not also know what class the header
+              wears. One element, one job: `.wpg-mast` animates, `PageHeader` renders. */}
+          <div className="wpg-mast" ref={mastRef}>{masthead}</div>
           {/* ⚠️ THE CONTROL ROW FOLLOWS THE MASTHEAD, INSIDE THE SCROLLER, and it has to be here
               rather than a grid row above it for one reason: the masthead must come FIRST. Left as
               row 2 of the grid it would have been pinned ABOVE a masthead that had moved into the
