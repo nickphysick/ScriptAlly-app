@@ -22,7 +22,32 @@
  */
 import React from "react";
 import { SampleSpecPicker } from "../materials/SampleSpecPicker";
+import { BrandDatePicker } from "../forms/BrandDatePicker";
 import type { MaterialRow } from "../../lib/agentMaterials";
+
+/**
+ * ⚠️ EVERY CHOICE IS A UNION WITH `null` FOR UNCHOSEN, AND `null` IS NEVER A DEFAULT (finishing
+ * round, Phase 3).
+ *
+ * These were plain values seeded on open — When "Today", the window from the agent's record, the
+ * reminder a week before. Each looked like an answer the writer had given, and none of them was:
+ * the strip read "today · reply expected ~15 Oct · nudge 8 Oct" before anybody had touched the
+ * form, and pressing the primary would have recorded three facts nobody stated.
+ *
+ * ⚠️ AND "No reminder" IS A CHOICE, NOT AN ABSENCE. It is `{ kind: "none" }`, distinct from the
+ * `null` that means the question is unanswered — which is exactly the distinction a single
+ * `number | null` could not carry, and the reason these are unions rather than nullable numbers.
+ */
+export type DayChoice =
+  | { kind: "today" }
+  | { kind: "yesterday" }
+  | { kind: "date"; ymd: string };
+export type ExpectChoice =
+  | { kind: "weeks"; weeks: number }
+  | { kind: "date"; ymd: string };
+export type RemindChoice =
+  | { kind: "lead"; days: number }
+  | { kind: "none" };
 
 export interface SendBodyValues {
   /**
@@ -33,15 +58,12 @@ export interface SendBodyValues {
   rows: MaterialRow[];
   /** "Anything else going with it? e.g. author bio" — the writer's own words, verbatim */
   alongside: string;
-  /** which of the contract's three `When` options is chosen */
-  when: "Today" | "Yesterday" | "Another date…";
-  /**
-   * ⚠️ WHEN YOU EXPECT TO HEAR BACK — the writer's own expectation, in weeks from the send.
-   * `null` is "A date…", which has no week count and is answered by a picker rather than a pill.
-   */
-  expectWeeks: number | null;
-  /** how early the reminder lands, in days before the expected reply. `null` = no reminder. */
-  remindDaysBefore: number | null;
+  /** the day it went — `null` until the writer says */
+  when: DayChoice | null;
+  /** when a reply is expected — a window, or an explicit date. `null` until chosen. */
+  expect: ExpectChoice | null;
+  /** the nudge reminder — a lead, or the explicit choice of none. `null` until chosen. */
+  remind: RemindChoice | null;
   /** the free text under "Anything else?" */
   also: string;
 }
@@ -49,20 +71,46 @@ export interface SendBodyValues {
 /** the contract's four windows, in its order */
 export const EXPECT_WEEKS = [4, 6, 8, 12] as const;
 
+/** the contract's three When options, in its order */
+export const DAY_OPTIONS: { label: string; make: () => DayChoice | "picker" }[] = [
+  { label: "Today", make: () => ({ kind: "today" }) },
+  { label: "Yesterday", make: () => ({ kind: "yesterday" }) },
+  { label: "Another date…", make: () => "picker" },
+];
+
 /**
  * ⚠️ THE REMINDER IS EXPRESSED AS A LEAD, NOT A DATE. "The week before" has to keep meaning the
  * week before even when the expected reply moves, so what is stored on the form is the OFFSET and
  * the date is derived from it — the same reason `surfaceOffset` is a lead rather than a stamp.
  */
-export const REMIND_OPTIONS: { label: string; days: number | null }[] = [
-  { label: "On the day", days: 0 },
-  { label: "The week before", days: 7 },
-  { label: "No reminder", days: null },
+export const REMIND_OPTIONS: { label: string; make: () => RemindChoice | "picker" }[] = [
+  { label: "On the day", make: () => ({ kind: "lead", days: 0 }) },
+  { label: "The week before", make: () => ({ kind: "lead", days: 7 }) },
+  { label: "A custom date…", make: () => "picker" },
+  { label: "No reminder", make: () => ({ kind: "none" }) },
 ];
+
+/** is this option the one currently chosen? — read from the value, never from a second state */
+export const dayIsOn = (v: DayChoice | null, label: string): boolean =>
+  !!v && ((v.kind === "today" && label === "Today")
+       || (v.kind === "yesterday" && label === "Yesterday")
+       || (v.kind === "date" && label === "Another date…"));
+export const remindIsOn = (v: RemindChoice | null, label: string): boolean =>
+  !!v && ((v.kind === "none" && label === "No reminder")
+       || (v.kind === "lead" && v.days === 0 && label === "On the day")
+       || (v.kind === "lead" && v.days === 7 && label === "The week before")
+       || (v.kind === "lead" && v.days !== 0 && v.days !== 7 && label === "A custom date…"));
 
 export interface TaskPaneBodyProps {
   value: SendBodyValues;
   onChange: (v: SendBodyValues) => void;
+  /**
+   * ⚠️ SHOWN, NEVER CHOSEN (Phase 3). The agency's own stated window is the best information on
+   * record and the worst possible default: pre-selecting it would put the agency's answer in the
+   * writer's mouth, and the strip would then record it as something they said. It renders as a
+   * quiet line under the pills instead — there to be agreed with, or not.
+   */
+  statedWeeks?: number | null;
   /**
    * ⚠️ THE SAMPLE QUESTION IS ASKED ONLY WHERE A SAMPLE IS GOING. A nudge, a close and a note have
    * no parcel, so the whole section is absent rather than an empty control — the same rule the tile
@@ -73,10 +121,17 @@ export interface TaskPaneBodyProps {
   upsell?: React.ReactNode;
 }
 
-/** the mockup's three, in its order */
-const WHEN: SendBodyValues["when"][] = ["Today", "Yesterday", "Another date…"];
+/* (the three When options are `DAY_OPTIONS` now — each carries what choosing it MAKES, so the
+   label and the value it produces cannot drift apart, and "Another date…" says "picker" rather
+   than pretending to be a value.) */
 
-export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, upsell }) => (
+/** today as YYYY-MM-DD, local — the picker's own vocabulary */
+const todayYmd = (): string => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, statedWeeks, upsell }) => (
   <>
     {/* ⚠️ A LABEL WITH NOTHING BENEATH IT DOES NOT RENDER (frame2 Phase 4). A note has no parcel,
         so the question stood over an empty row — a question the page then declined to answer.
@@ -104,12 +159,28 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
       </div>
     )}
 
-    <label className="f-lbl">When</label>
-    <div className="seg" style={{ marginBottom: 16 }}>
-      {WHEN.map((w) => (
-        <button type="button" key={w} className={value.when === w ? "on" : undefined}
-          onClick={() => onChange({ ...value, when: w })}>{w}</button>
-      ))}
+    <div className="sect">
+      <label className="f-lbl" data-req="when">When</label>
+      <div className="seg">
+        {DAY_OPTIONS.map((o) => (
+          <button type="button" key={o.label}
+            className={dayIsOn(value.when, o.label) ? "on" : undefined}
+            onClick={() => {
+              const made = o.make();
+              onChange({ ...value, when: made === "picker" ? { kind: "date", ymd: "" } : made });
+            }}>{o.label}</button>
+        ))}
+      </div>
+      {/* ⚠️ THE PICKER IS THE APP'S OWN, and expect-back opens the SAME one — the brief's rule, and
+          the reason a second date control would be wrong is that two pickers on one form is two
+          places for a date to come from. */}
+      {value.when?.kind === "date" && (
+        <div style={{ marginTop: 8 }}>
+          <BrandDatePicker value={value.when.ymd} placeholder="Pick the day it went"
+            max={todayYmd()}
+            onChange={(ymd) => onChange({ ...value, when: { kind: "date", ymd } })} />
+        </div>
+      )}
     </div>
 
     {/* ⚠️ THE EXPECTATION BLOCK IS THE SEND JOURNEY'S ALONE. It asks when a reply is due and when
@@ -117,19 +188,38 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         nothing to answer here and the block is absent rather than disabled. */}
     {sample && (
       <div className="expect">
-        <label className="f-lbl">When do you expect to hear back?</label>
+        <label className="f-lbl" data-req="expect">When do you expect to hear back?</label>
         <div className="seg" style={{ marginBottom: 11 }}>
           {EXPECT_WEEKS.map((w) => (
-            <button type="button" key={w} className={value.expectWeeks === w ? "on" : undefined}
-              onClick={() => onChange({ ...value, expectWeeks: w })}>{w} weeks</button>
+            <button type="button" key={w}
+              className={value.expect?.kind === "weeks" && value.expect.weeks === w ? "on" : undefined}
+              onClick={() => onChange({ ...value, expect: { kind: "weeks", weeks: w } })}>{w} weeks</button>
           ))}
+          <button type="button"
+            className={value.expect?.kind === "date" ? "on" : undefined}
+            onClick={() => onChange({ ...value, expect: { kind: "date", ymd: "" } })}>Another date…</button>
         </div>
-        <label className="f-lbl">Remind you to nudge?</label>
+        {value.expect?.kind === "date" && (
+          <div style={{ marginBottom: 11 }}>
+            <BrandDatePicker value={value.expect.ymd} placeholder="Pick when you expect to hear"
+              min={todayYmd()}
+              onChange={(ymd) => onChange({ ...value, expect: { kind: "date", ymd } })} />
+          </div>
+        )}
+        {/* ⚠️ THE AGENCY'S OWN FIGURE, STATED AND NOT CHOSEN. Absent where the record holds none —
+            a line reading "Their stated window is —" would be the app talking about its own gap. */}
+        {typeof statedWeeks === "number" && statedWeeks > 0 && (
+          <div className="stated">Their stated window is {statedWeeks} weeks.</div>
+        )}
+        <label className="f-lbl" data-req="remind">Remind you to nudge?</label>
         <div className="seg">
           {REMIND_OPTIONS.map((o) => (
             <button type="button" key={o.label}
-              className={value.remindDaysBefore === o.days ? "on" : undefined}
-              onClick={() => onChange({ ...value, remindDaysBefore: o.days })}>{o.label}</button>
+              className={remindIsOn(value.remind, o.label) ? "on" : undefined}
+              onClick={() => {
+                const made = o.make();
+                onChange({ ...value, remind: made === "picker" ? { kind: "lead", days: 14 } : made });
+              }}>{o.label}</button>
           ))}
         </div>
         {/* ⚠️ AND IT SAYS WHERE THE REMINDER GOES. The contract's own line, and it is the honest

@@ -391,3 +391,8 @@
 .tpn .expect { background:var(--field);border:0.5px solid var(--hair2);border-radius:11px;padding:14px 15px;margin-bottom:16px; }
 .tpn .expect .f-lbl { margin-top:0; }
 .tpn .inherit { font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5; }
+
+/* ⚠️ THE AGENCY'S OWN FIGURE, SHOWN AND NOT CHOSEN (finishing round, Phase 3). Quiet by design: it
+   sits under the pills as information, and anything with the weight of an option would read as one
+   more thing to pick. */
+.tpn .stated { font-size:10.5px;color:var(--muted2);font-weight:300;margin:-4px 0 11px;line-height:1.5; }

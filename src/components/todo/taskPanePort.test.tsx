@@ -56,7 +56,9 @@ const SEND: TaskPaneJourney = {
       sample
       value={{
         rows: [{ key: "sample", kind: "qty", name: "Opening sample", on: true, unit: "Chapters", amount: "3" }],
-        alongside: "", when: "Today", also: "", expectWeeks: 6, remindDaysBefore: 7,
+        /* ⚠️ THE FIXTURE OPENS UNCHOSEN, like the real form. A fixture with answers in it would
+           render every pill lit and quietly assert the opposite of Phase 3's rule. */
+        alongside: "", when: null, expect: null, remind: null, also: "",
       }}
       onChange={() => {}}
       upsell={<><span className="tag">Pro</span><span>Records which draft went to each agent.</span></>}

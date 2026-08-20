@@ -937,23 +937,27 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }, [queries]);
 
   /**
-   * ⚠️ THE EXPECTATION DEFAULTS TO THE AGENT'S OWN STATED WINDOW, ROUNDED TO A PILL — never to a
-   * house figure. An agency that says eight weeks is the best answer available, and defaulting to
-   * six would quietly disagree with a fact the record already holds. Absent, the form opens on the
-   * contract's own default of six. The reminder defaults to the week before, as the contract draws.
+   * ⚠️ THE AGENT'S STATED WINDOW IS SHOWN, NOT CHOSEN (finishing round, Phase 3). This used to SEED
+   * the expectation — the nearest pill to the agency's own figure — which read as an answer the
+   * writer had given and was recorded as one. It is the best information on file and the worst
+   * possible default: pre-selecting it puts the agency's answer in the writer's mouth.
+   *
+   * It is now a quiet line beneath the pills, and this returns the FIGURE rather than a choice.
+   * `null` where the record holds none — the line is then absent rather than reading "— weeks".
    */
-  const seedExpect = React.useCallback((card: BoardCard | null): number => {
+  const statedWeeks = React.useCallback((card: BoardCard | null): number | null => {
     const q = card?.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
     const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
     const w = ag?.responseTimeWeeks;
-    if (typeof w !== "number" || w <= 0) return 6;
-    /* the nearest offered window, so the pill the writer sees is one they could have picked */
-    return [...EXPECT_WEEKS].sort((a, b) => Math.abs(a - w) - Math.abs(b - w))[0];
+    return typeof w === "number" && w > 0 ? w : null;
   }, [queries, agents]);
 
+  /* ⚠️ EVERY CHOICE STARTS UNCHOSEN. The count fields still seed on a unit choice — a starting
+     number is not a decision — but nothing here is an answer until the writer gives one. */
+  const BLANK: Omit<SendBodyValues, "rows"> =
+    { alongside: "", when: null, expect: null, remind: null, also: "" };
   const [paneBody, setPaneBody] = React.useState<SendBodyValues>(
-    { rows: seedRows(null), alongside: "", when: "Today", also: "",
-      expectWeeks: 6, remindDaysBefore: 7 });
+    { rows: seedRows(null), ...BLANK });
   /* the answers reset with the card — a half-filled form carried onto another task is answers
      about the wrong query, which is the sweep's own rule applied to one card */
   /**
@@ -971,13 +975,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * is the only thing that should clear a half-filled form, because a form carried onto another
    * task is answers about the wrong query.
    */
-  const seeds = React.useRef({ rows: seedRows, expect: seedExpect });
-  seeds.current = { rows: seedRows, expect: seedExpect };
+  const seeds = React.useRef({ rows: seedRows });
+  seeds.current = { rows: seedRows };
   React.useEffect(() => {
-    setPaneBody({
-      rows: seeds.current.rows(paneCard ?? null), alongside: "", when: "Today", also: "",
-      expectWeeks: seeds.current.expect(paneCard ?? null), remindDaysBefore: 7,
-    });
+    setPaneBody({ rows: seeds.current.rows(paneCard ?? null), ...BLANK });
   }, [paneCard?.key]);
 
   /**
@@ -1071,27 +1072,72 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     /* ⚠️ THE PARCEL IS IN THE LINE, THROUGH THE ONE FORMATTER. `formatSampleSpecs` is what the
        `Sent previously` tile reads, so the strip stating what WILL be recorded and the tile stating
        what WAS cannot describe the same parcel in two grammars. Absent where there is no sample. */
-    ? [paneCopy(paneCard).primary,
-       sendSpecFor(paneCard) ? formatSampleSpecs(paneBody.rows, "and") : null,
-       paneBody.when.toLowerCase().replace("…", ""),
-       /* ⚠️ THE EXPECTATION IS STATED ONLY WHERE IT WAS ASKED. The contract's own grammar —
-          "reply expected ~9 Oct · nudge 2 Oct" — with the tilde, because a stated window is an
-          expectation rather than an appointment. */
-       ...(sendSpecFor(paneCard) ? paneExpectParts() : [])]
-        .filter(Boolean).join(" · ")
+    /* ⚠️ THE STRIP GROWS ONLY WITH ACTUAL CHOICES (finishing round, Phase 3), and it starts at an
+       em dash. It used to open reading "today · reply expected ~15 Oct · nudge 8 Oct" over a form
+       nobody had touched — three facts stated as the writer's before they had said any of them.
+       Every part below is absent until its question is answered, and with none answered the strip
+       says "—", which is the honest sentence: nothing yet. */
+    ? (() => {
+        /* ⚠️ THE STRIP STATES WHAT WILL BE WRITTEN, NOT WHAT THE BUTTON SAYS. It led with
+           `paneCopy(...).primary` — the BUTTON'S label — so it read "Log as sent · today", which is
+           the control describing itself. The contract's own strip reads "Partial sent · first 3
+           chapters · today": the STATUS the record will carry, then the facts. `sendSpecFor` is
+           what already decides partial-versus-full, so the strip and the deed cannot disagree. */
+        const spec = sendSpecFor(paneCard);
+        const parts = [
+          spec ? formatSampleSpecs(paneBody.rows, "and") : null,
+          dayPart(paneBody.when),
+          ...(spec ? paneExpectParts() : []),
+        ].filter(Boolean);
+        /* nothing chosen, nothing stated — the em dash IS the honest sentence at rest */
+        /* the "Will record:" prefix belongs to the strip's own markup — this supplies the RECORD */
+        if (!parts.length) return "—";
+        const lead = spec ? spec.targetStatus : paneCopy(paneCard).heading ?? "";
+        return [lead, ...parts].filter(Boolean).join(" · ");
+      })()
     : "";
 
-  /** the two dates the expectation block implies, in the contract's words */
+  /** the chosen day, in the strip's words — absent until chosen, and never a placeholder date */
+  function dayPart(w: SendBodyValues["when"]): string | null {
+    if (!w) return null;
+    if (w.kind === "today") return "today";
+    if (w.kind === "yesterday") return "yesterday";
+    return w.ymd ? new Date(`${w.ymd}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
+  }
+
+  /** the day the send is dated from — the writer's own choice, falling back to nothing */
+  function sentDateISO(): string | null {
+    const w = paneBody.when;
+    if (!w) return null;
+    if (w.kind === "date") return w.ymd || null;
+    const d = new Date();
+    if (w.kind === "yesterday") d.setDate(d.getDate() - 1);
+    return localYMD(d.getTime());
+  }
+
+  /**
+   * ⚠️ THE TWO DATES THE EXPECTATION IMPLIES, and each appears only once its own question is
+   * answered. A window with no send date behind it cannot state a reply date — it would be counting
+   * weeks from a day nobody named — so both halves check their inputs rather than assuming today.
+   */
   function paneExpectParts(): string[] {
-    if (paneBody.expectWeeks == null) return [];
-    const sent = new Date(`${paneSentISO()}T12:00:00`);
-    const reply = new Date(sent); reply.setDate(reply.getDate() + paneBody.expectWeeks * 7);
+    const e = paneBody.expect;
+    if (!e) return [];
     const day = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    let reply: Date | null = null;
+    if (e.kind === "date") reply = e.ymd ? new Date(`${e.ymd}T12:00:00`) : null;
+    else {
+      const from = sentDateISO();
+      if (from) { reply = new Date(`${from}T12:00:00`); reply.setDate(reply.getDate() + e.weeks * 7); }
+    }
+    if (!reply) return [];
     const out = [`reply expected ~${day(reply)}`];
-    if (paneBody.remindDaysBefore != null) {
-      const nudge = new Date(reply); nudge.setDate(nudge.getDate() - paneBody.remindDaysBefore);
+    const r = paneBody.remind;
+    if (r && r.kind === "lead") {
+      const nudge = new Date(reply); nudge.setDate(nudge.getDate() - r.days);
       out.push(`nudge ${day(nudge)}`);
     }
+    if (r && r.kind === "none") out.push("no reminder");
     return out;
   }
 
@@ -1840,6 +1886,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                            what already decides partial-versus-full, so this cannot come to disagree
                            with the deed above it about whether there is anything to send. */
                         sample={!!sendSpecFor(paneCard)}
+                        statedWeeks={statedWeeks(paneCard)}
                         value={paneBody}
                         onChange={setPaneBody}
                       />
@@ -3193,21 +3240,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     const spec = sendSpecFor(card);
     if (spec) {
       setFlowPrefill({
-        sentDate: paneSentISO(),
+        /* ⚠️ ONLY A DATE THE WRITER CHOSE TRAVELS. Unanswered, the key is omitted and the journey
+           opens on its own default — which is honest, where sending today's date as though it had
+           been picked is not. */
+        ...(sentDateISO() ? { sentDate: sentDateISO() as string } : {}),
         materials: materialsWantedFromRows(paneBody.rows),
       });
     }
     openFlowCards([card]);
   }
 
-  /** the pane's `When` as an ISO day — the contract's three options, resolved once */
-  function paneSentISO(): string {
-    const d = new Date();
-    if (paneBody.when === "Yesterday") d.setDate(d.getDate() - 1);
-    /* "Another date…" has no date of its own on this surface; the journey's own picker asks, and
-       opening it on today is what it already does. */
-    return localYMD(d.getTime());
-  }
+/* (`paneSentISO` is `sentDateISO` now, beside the strip that reads it. It returned TODAY for an
+   unanswered When and for "Another date…" alike — a real date standing in for an unmade choice,
+   which is the fault Phase 3 exists to remove. It returns null until the writer says.) */
 
   /* ⚠️ `advanceDock` IS RETIRED WITH THE INLINE WRITE (one-primary pass). It pointed the pane at
      the next card once the bar had recorded this one — and the bar no longer records anything, so

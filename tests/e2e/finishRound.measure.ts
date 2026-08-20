@@ -185,6 +185,40 @@ test("finishing round", async ({ page }) => {
       !!send && (send.text.match(/Another date/g) || []).length >= 2,
       send ? `occurrences=${(send.text.match(/Another date/g) || []).length}` : "-");
 
+  /* ⚠️ THE STRIP GROWS WITH CHOICES, MEASURED BY MAKING THEM. "Starts at an em dash" is only half
+     the claim; the half that matters is that each answer ARRIVES in the strip and nothing else
+     does. Clicked, not simulated. */
+  await page.evaluate(OPEN("Send"));
+  await page.waitForTimeout(1200);
+  const grew = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const all = (s) => [...document.querySelectorAll(s)].filter(vis);
+    const strip = () => (all(".tpn .willrec")[0] || {}).textContent || "";
+    const before = strip();
+    const hit = (sel, label) => {
+      const b = all(sel).find((x) => (x.textContent || "").trim() === label);
+      if (b) b.click();
+      return !!b;
+    };
+    const okDay = hit(".tpn .formcol .seg button", "Today");
+    return { before, okDay };
+  })()`) as any;
+  await page.waitForTimeout(600);
+  const afterDay = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const s = ([...document.querySelectorAll(".tpn .willrec")].filter(vis)[0] || {}).textContent || "";
+    const another = [...document.querySelectorAll(".tpn .formcol .seg button")].filter(vis)
+      .filter((b) => (b.textContent || "").trim() === "Another date…").length;
+    return { strip: s, another };
+  })()`) as any;
+  add("P3.5 · the strip grows with a choice, and only with it",
+      !!grew && grew.okDay && !!afterDay && /today/i.test(afterDay.strip)
+        && !/reply expected|nudge/i.test(afterDay.strip),
+      afterDay ? `"${grew?.before}" → "${afterDay.strip}"` : "-");
+  add("P3.6 · Another date is offered on BOTH When and expect-back, one picker between them",
+      !!afterDay && afterDay.another === 2,
+      afterDay ? `occurrences=${afterDay.another}` : "-");
+
   /* ══ PHASE 4 · gated primaries ═══════════════════════════════════════════════════════════ */
   add("P4.1 · the primaries are the owner's override wording",
       !!send && /Log as sent/.test(send.prim) && !!close && /Log the close/.test(close.prim)
