@@ -614,7 +614,7 @@ const DeleteAccountModal: React.FC<{
                 afterwards either (there is no scheduler in this project). Saying "your account
                 will be deleted on the 3rd" would be the one piece of copy in this build the code
                 cannot back — on the most consequential control on the page. */}
-            <p id="del-note" style={{ ...helpText, marginTop: 12 }}>
+            <p id="del-note" className="acct-note">
               Confirming records the request and starts the {DELETION_GRACE_DAYS}-day window.
               Nothing is removed at this point.
             </p>
@@ -983,8 +983,8 @@ export const AccountSettings: React.FC<{
         </div>
         <div className="acct-actions">
           <p className="acct-note acct-note--tight">
-            Sets your home market — the agent list uses it to tell domestic agents from
-            international ones. It can be changed any time, but not cleared once set.
+            The agent list uses this to tell agents in your country from international ones. You can change
+            it any time.
           </p>
         </div>
         {countryStatus.type === "error" && (
@@ -1043,8 +1043,7 @@ export const AccountSettings: React.FC<{
           case where the writer cannot change something themselves. */}
       <div className="acct-row acct-block">
         <p style={{ ...helpText, margin: 0, flex: 1, minWidth: 200 }}>
-          Your email is how you sign in, so changing it is something we do with you rather than
-          something you can switch here.
+          The address you sign in with. To change it, you'll confirm from both the old and new address.
         </p>
         <button onClick={() => onNavigate("contact")} style={ghostBtn}>Change email</button>
       </div>
@@ -1122,8 +1121,8 @@ export const AccountSettings: React.FC<{
             account reads this. It says what will appear and when, rather than pretending a
             payment method is merely missing. */}
         <p className="acct-note">
-          No payment details on file. Your payment method and invoices will appear here once a paid
-          plan starts.
+          Price to be confirmed. Nothing to pay on the Free plan — your invoices will appear here if
+          you move to a paid plan.
         </p>
       </div>
     </SectionCard>
@@ -1155,10 +1154,10 @@ export const AccountSettings: React.FC<{
         onChange={(v) => saveNotify({ nudges: v }, "Nudge reminders")}
       />
       <ToggleRow
-        title="Weekly digest"
-        desc="A Monday summary of what's coming up."
+        title="Weekly summary"
+        desc="One email each Monday with what happened in the past week."
         on={notify.weeklyDigest}
-        onChange={(v) => saveNotify({ weeklyDigest: v }, "Weekly digest")}
+        onChange={(v) => saveNotify({ weeklyDigest: v }, "Weekly summary")}
       />
 
         </div>
@@ -1168,7 +1167,7 @@ export const AccountSettings: React.FC<{
           pre-ticked, writes a timestamped record in BOTH directions, and takes effect on the
           click rather than on a Save. Withdrawal rewrites the record rather than deleting it: the
           evidence that consent existed, and when it stopped, is the half a regulator asks about. */}
-      <GroupLabel>Marketing</GroupLabel>
+      <GroupLabel>News from ScriptAlly</GroupLabel>
       <ToggleRow
         first
         title="Product news"
@@ -1375,14 +1374,14 @@ export const AccountSettings: React.FC<{
             right is about. `buildExport` is the whole account. */}
         <div className="acct-row acct-rowsplit">
           <div className="acct-rowmain">
-            <p className="acct-rowtitle">Export your data</p>
+            <p className="acct-rowtitle">Take a copy of your data</p>
             <p className="acct-note">
-              A complete copy of everything on your account — manuscripts, agents, queries and their
-              full history — in a file another program can read. It's yours to take anywhere.
+              Downloads everything ScriptAlly holds about your querying — your agents, queries, and
+              history — as files you can open anywhere.
             </p>
           </div>
           <button onClick={exportData} style={ghostBtn}>
-            <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Export
+            <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Download my data
           </button>
         </div>
         {exportMsg && <p className="acct-note" style={{ color: SUCCESS_GREEN, fontWeight: 500 }}>{exportMsg}</p>}
@@ -1472,8 +1471,9 @@ export const AccountSettings: React.FC<{
             <div className="acct-rowmain">
               <p className="acct-rowtitle">Delete account</p>
               <p className="acct-note">
-                Removes your account and everything on it, after a {DELETION_GRACE_DAYS}-day window
-                in which you can change your mind.
+                This removes your account and everything in it — manuscripts, agents, queries, and
+                history. You&rsquo;ll have {DELETION_GRACE_DAYS} days to change your mind: signing in
+                again within that time cancels it.
               </p>
             </div>
             <button

@@ -16,7 +16,6 @@
  * question is asked.
  */
 import { deletionConfirmed } from "./dataExport";
-import { DELETION_WINDOW_DAYS } from "./companyInfo";
 
 /**
  * ⚠️ FOURTEEN DAYS, AND THE WINDOW IS THE WHOLE SAFETY MECHANISM. An account deletion that took
@@ -102,15 +101,19 @@ export function deletionNotice(s: ScheduledDeletion, now: Date = new Date()): st
 /**
  * The retention sentence.
  *
- * ⚠️ THE PERIOD COMES FROM `companyInfo.DELETION_WINDOW_DAYS`, which the privacy policy also
- * reads, and it is the literal string "[30]" — a PLACEHOLDER nobody has confirmed. Rendering the
- * brackets is the point: legalCopy's own docblock refuses to assert a retention period nobody has
- * confirmed, and settings quoting a confident "30 days" beside a policy hedging in brackets would
- * be the app disagreeing with its own privacy notice.
+ * ⚠️ NO NUMBER, BECAUSE NOBODY HAS CONFIRMED ONE. `companyInfo.DELETION_WINDOW_DAYS` is the literal
+ * string "[30]" — a placeholder the privacy policy also renders — and the v5 copy brief made the
+ * period a REQUIRED INPUT that arrived blank. The instruction for that case is explicit: ship
+ * without a figure, keep the constant's brackets, and flag it. Turning a placeholder into a
+ * retention commitment in a privacy notice is not a formatting fix and is not this build's call.
+ *
+ * The sentence therefore says what is true and no more. When a period is confirmed, ONE edit to
+ * `DELETION_WINDOW_DAYS` fixes settings and the policy together, and this line takes the number
+ * back.
  */
 export const RETENTION_LINE =
-  `Your records are kept for as long as your account exists. After deletion they are removed from ` +
-  `our systems within ${DELETION_WINDOW_DAYS} days, allowing for backup cycles.`;
+  "Your data is kept while your account exists. If you delete your account, it's removed from our " +
+  "backups soon afterwards.";
 
 /** Exactly what goes, named. Vague reassurance is not consent to lose your work. */
 export const DELETION_REMOVES = [

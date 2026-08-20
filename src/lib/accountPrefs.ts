@@ -76,7 +76,8 @@ export function marketingConsentRecord(granted: boolean, now: Date = new Date())
  * cannot honour and should not.
  */
 export const ALWAYS_SENT_LINE =
-  "Emails about your account itself — sign-in, billing, data requests — are always sent.";
+  "We're not sending emails just yet — your choices here are saved and will apply the day we do. " +
+  "Emails about your account itself (sign-in, billing, your data) are always sent.";
 
 /* ── Workspace ─────────────────────────────────────────────────────────────── */
 

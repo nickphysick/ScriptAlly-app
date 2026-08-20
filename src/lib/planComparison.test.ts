@@ -6,7 +6,7 @@
  * must not make.
  */
 import { describe, it, expect } from "vitest";
-import { PLAN_ROWS, PLAN_CTA_LABEL, PlanCell, planAllowanceLine } from "./planComparison";
+import { PLAN_ROWS, PLAN_CTA_LABEL, PlanCell, planAllowanceLine, isStandingCapacity } from "./planComparison";
 import { getSmartImportEntitlement } from "./smartImportEntitlement";
 import { UserPlan } from "../types";
 import { PRICING_TIERS } from "../marketing/landingCopy";
@@ -53,7 +53,7 @@ describe("Smart Import states the entitlement the server actually enforces", () 
   it("Free is once for the lifetime of the account — not 'at sign-up', and not unlimited", () => {
     expect(getSmartImportEntitlement(UserPlan.FREE, null).allowed).toBe(true);
     expect(getSmartImportEntitlement(UserPlan.FREE, { smartImportFreeUsed: true }).allowed).toBe(false);
-    expect((R.free as { text: string }).text).toBe("1 (lifetime)");
+    expect((R.free as { text: string }).text).toBe("One import");
   });
 
   it("Pro is one per calendar month, so the table must not say Unlimited", () => {
@@ -62,7 +62,7 @@ describe("Smart Import states the entitlement the server actually enforces", () 
     expect(
       getSmartImportEntitlement(UserPlan.PRO, { smartImportLastUsedMonth: "2026-08" }, now).allowed,
     ).toBe(false);
-    expect((R.pro as { text: string }).text).toBe("1 a month");
+    expect((R.pro as { text: string }).text).toBe("One a month");
     expect((R.pro as { text: string }).text.toLowerCase()).not.toContain("unlimited");
   });
 });
@@ -152,8 +152,10 @@ describe("planAllowanceLine — the rail aside reads the comparison, it does not
   });
 
   it("carries every standing-capacity row, so a new one joins without an edit here", () => {
+    /* ⚠️ THE PREDICATE ITSELF, NOT A COPY OF IT. Re-typing the regex here made this a comparison
+       of two hand-written rules, and it failed the moment the figures were reworded. */
     const standing = PLAN_ROWS.filter(
-      (r) => r.free.kind === "figure" && !/[()]|\ba\s+(day|week|month|year)\b/i.test((r.free as { text: string }).text),
+      (r) => r.free.kind === "figure" && isStandingCapacity((r.free as { text: string }).text),
     );
     expect(planAllowanceLine("free").split(" · ")).toHaveLength(standing.length);
   });

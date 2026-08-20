@@ -71,8 +71,8 @@ export const PLAN_ROWS: PlanRow[] = [
   {
     label: "Smart Import",
     sub: "Bring the spreadsheet you've been wrangling and we'll spin it into a living database in moments.",
-    free: figure("1 (lifetime)"),
-    pro: figure("1 a month"),
+    free: figure("One import"),
+    pro: figure("One a month"),
   },
   { label: "Agent Discovery", free: YES, pro: YES },
   {
@@ -112,7 +112,11 @@ export const CURRENT_PLAN_CTA = "Your plan";
    capacity you hold, and they do not compose into a list beside "1 manuscript". The predicate is
    the qualifier, not a hardcoded list of three labels, so a new capacity row joins the line on its
    own and a new metered one stays out of it. */
-const isStandingCapacity = (text: string): boolean => !/[()]|\ba\s+(day|week|month|year)\b/i.test(text);
+/** ⚠️ EXPORTED SO THE TEST CANNOT RESTATE IT. A spec that re-typed this regex was asserting one
+ *  hand-written rule against another, and it went red the moment the figures changed wording —
+ *  correctly, but for the wrong reason. Two derivations must be the SAME derivation. */
+export const isStandingCapacity = (text: string): boolean =>
+  !/[()]|\b(a|per)\s+(day|week|month|year)\b|\bimport\b/i.test(text);
 
 /** "1 manuscript · unlimited agents · unlimited queries" */
 export function planAllowanceLine(tier: "free" | "pro"): string {

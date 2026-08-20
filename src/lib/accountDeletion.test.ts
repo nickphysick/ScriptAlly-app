@@ -121,8 +121,18 @@ describe("what the writer is told they will lose", () => {
 
   /* One source for the retention period, shared with the privacy policy — including its brackets,
      which mark it as a figure nobody has confirmed. */
-  it("the retention line quotes the policy's own constant, brackets and all", () => {
-    expect(RETENTION_LINE).toContain(DELETION_WINDOW_DAYS);
-    expect(RETENTION_LINE).toContain("[");
+  /* ⚠️ THE LINE NOW CARRIES NO PERIOD AT ALL, AND THAT IS THE INSTRUCTION. `DELETION_WINDOW_DAYS`
+     is still the placeholder "[30]" that the privacy policy renders; the v5 copy brief made the
+     retention period a REQUIRED INPUT and it arrived blank, with an explicit rule for that case —
+     ship without a figure, leave the constant's brackets alone, flag it. A bracketed placeholder
+     reaching a reader is worse than no figure, and inventing a confirmed one is not a formatting
+     decision. When a period is agreed, one edit to the constant fixes settings and the policy
+     together and this line takes its number back. */
+  it("states no retention period, because none has been confirmed", () => {
+    expect(RETENTION_LINE).not.toContain("[");
+    expect(RETENTION_LINE).not.toMatch(/\d+\s*days?/);
+    expect(RETENTION_LINE).toContain("soon afterwards");
+    /* the placeholder is untouched where it lives — this build did not turn it into a promise */
+    expect(DELETION_WINDOW_DAYS).toBe("[30]");
   });
 });

@@ -57,11 +57,21 @@ describe("marketing consent", () => {
     expect(marketingConsentRecord(false, now)).toEqual({ granted: false, at: now.toISOString() });
   });
 
-  it("the account-mail carve-out names the three kinds and promises nothing else", () => {
-    for (const kind of ["sign-in", "billing", "data requests"]) {
-      expect(ALWAYS_SENT_LINE).toContain(kind);
+  /* ⚠️ THE LINE GAINED ITS FIRST SENTENCE IN THE v5 COPY PASS. It now says the emails are not
+     being sent yet before it says which are always sent — the honest order, because a reader
+     deciding about notifications should learn the current state before the carve-out. The three
+     kinds are still named, in the brief's own wording ("your data" rather than "data requests"). */
+  it("says nothing is being sent yet, then names the three kinds that always are", () => {
+    expect(ALWAYS_SENT_LINE).toContain("not sending emails just yet");
+    expect(ALWAYS_SENT_LINE).toContain("saved and will apply the day we do");
+    for (const kind of ["sign-in", "billing", "your data"]) {
+      expect(ALWAYS_SENT_LINE, kind).toContain(kind);
     }
     expect(ALWAYS_SENT_LINE).toContain("always sent");
+    /* Still not a toggle, and still promising nothing about frequency. */
+    for (const word of ["unsubscribe", "opt out", "weekly", "daily"]) {
+      expect(ALWAYS_SENT_LINE.toLowerCase(), word).not.toContain(word);
+    }
   });
 });
 
