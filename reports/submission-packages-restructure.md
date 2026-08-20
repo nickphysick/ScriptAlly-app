@@ -941,3 +941,93 @@ That is correct behaviour, not a broken page: every state here is derived from y
 have no materials or packages on that manuscript. Add one material and step 1 ticks.
 
 The seeded data lives only on `harness@scriptally.test` and cannot appear in your view.
+
+---
+
+# Morning follow-ups — 20 Aug
+
+## A0 — the parked rules edits: there were none
+
+The brief warned that `firestore.rules` was carrying uncommitted `writerExpectedDate` edits from the
+Query Centre stream, and made committing them Step A1. **That premise was already stale.**
+
+* `git status -- firestore.rules` → **clean**.
+* The field is present in the **committed** file, both halves: the validator (`isValidQuery`,
+  line 338) and the query update allowlist (line 635).
+* `git log -S writerExpectedDate -- firestore.rules` attributes it to **`6461c541 §1 — provenance
+  becomes structural`** — a Query Centre commit that landed some time ago, not a parked edit.
+
+So **Commit 1 is a no-op and was not made.** There was nothing to attribute and nothing to smuggle;
+manufacturing an empty commit to satisfy the step would have been worse than skipping it. Two
+commits, not three.
+
+**One red-gate condition did fire and then cleared.** The edit tool reported `firestore.rules` as
+"modified on disk since you last read it" — the brief's third gate ("another session touching it
+live"). I stopped and inventoried the whole file: `git diff -- firestore.rules` shows **exactly one
+hunk, mine**. The warning was my own stale read (I had inspected the file with `grep`/`awk` rather
+than the tracked reader), not a concurrent writer. Recorded because the check is the point, and it
+is the one that would have caught a real collision.
+
+## Baseline — and it was RED, in my own file
+
+| Gate | Baseline |
+|---|---|
+| `tsc --noEmit` | **exit 2 — 6 errors** |
+| `vite build` | exit 0, no diagnostics |
+| `vitest run` | **335 files / 5718 tests, all passing** |
+
+**⚠️ Every one of those tsc errors was mine, in `tests/e2e/pkgRestructure.measure.ts`, and I shipped
+them last night.** `page.evaluate(<string>)` returns `unknown`, so the six property reads in the
+1920 stage case are `TS2339`s. They exist because **the phase's tsc gate ran BEFORE I added that
+test, and nothing re-ran it before the commit** — the same "green locally proves nothing about what
+you pushed" trap CLAUDE.md records, arriving from the side where a file was *added* after the gate
+rather than left out of the commit. CI would have caught it on push; the work is unpushed, so it had
+not yet.
+
+Fixed here as part of this run (a `StageReading` interface and one cast), because leaving a known-red
+typecheck in place to preserve a tidy "no worse than baseline" reading would be gaming the gate.
+`tsc` is now **exit 0**.
+
+## F7 — the fix
+
+One key added to the query UPDATE allowlist, beside `materialsWanted`:
+
+```
+'materialsWanted', 'packageId', 'ifNoResponse', 'agentId', …
+```
+
+Placed there rather than appended because the two are written **as a pair**: `materialsLinkWrites`
+enforces exactly one source of truth for a query's materials — package link OR free text, always
+clearing the other — so any save touching one touches both. Had only one been allowlisted the write
+would still have failed `hasOnly`, and the fix would have looked done while nothing worked.
+
+### The lock, and it was verified RED before being believed
+
+New: `src/lib/packageLinkRule.test.ts` (4 cases), following the house rule-test pattern
+(`homeCountryRule`, `agentCountryRule`, `agentIdentityRule`) — asserting the real `firestore.rules`
+text, since there is no Firestore emulator here (no Java).
+
+It asserts the two halves **separately**, which is the whole point: `packageId` *was* in
+`isValidQuery` all along, and that is what made the omission invisible — the rule looked as though
+it knew about the field, and it did, in the half that never runs on an update.
+
+**Proved red by neutering the fix**, and deliberately in the nastiest way: I removed the key and
+**left the nine-line comment naming it in place**, so the file still contained **7 occurrences of
+`packageId`**. The lock went red anyway.
+
+```
+Tests  1 failed | 3 passed (4)
+  ✗ the query UPDATE allowlist admits packageId, so a link can be attached and detached
+```
+
+That is the comment-stripping trap defended against rather than described: a bare
+`toContain("packageId")` over the raw block would have passed on the prose explaining the fix while
+the key itself was gone — this repo's single most-repeated lock failure, and the allowlist now
+carries exactly the kind of comment that triggers it. The lock strips `//` comments and compares
+**exact keys**, not substrings. Restored and green: 4/4.
+
+| Gate after the fix | Result |
+|---|---|
+| `tsc --noEmit` | exit 0 |
+| `vite build` | exit 0, whole log grepped, no diagnostics |
+| `packageLinkRule.test.ts` | 4 passed |

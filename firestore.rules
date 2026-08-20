@@ -631,7 +631,16 @@ service cloud.firestore {
             'lastStatusChange', 'responseReceivedAt', 'materialsRequestedType', 'materialsRequestedQuantity',
             'expectedSendDate', 'sendReminderDate', 'rrNotes', 'rejectionFeedbackType', 'rejectionFeedbackText',
             'rejectionReflection', 'rejectionLesson', 'rejectedFromStatus', 'rejectedDate', 'offerDate', 'offerResponseDeadline', 'offerNotes', 'closingReason', 'closingNotes',
-            'materialsWanted', 'ifNoResponse', 'agentId', 'rejectionType', 'agentComments',
+            // ⚠️ `packageId` TRAVELS WITH `materialsWanted` AND IS LISTED BESIDE IT ON PURPOSE.
+            // `materialsLinkWrites` (packageMetrics.ts) enforces exactly one source of truth for a
+            // query's materials — it writes the package link OR the free-text materials and always
+            // clears the other — so every save that touches one touches both. `packageId` was
+            // required by isValidQuery (a create-time shape check) but missing from THIS list, so
+            // any update that CHANGED it failed hasOnly and the whole write was denied, silently,
+            // taking the materials edit down with it. Live call site: EditQueryDrawer.tsx's
+            // editMaterialsUpdate. Unchanged values were never affectedKeys, which is why attaching
+            // a package failed while ordinary query edits did not — the narrow, quiet kind.
+            'materialsWanted', 'packageId', 'ifNoResponse', 'agentId', 'rejectionType', 'agentComments',
             'fullVersionSent', 'revisionRound', 'hasAgentResponded', 'closureOfferDismissed', 'writerExpectedDate', 'writerExpectedSetAt'
           ])
         );

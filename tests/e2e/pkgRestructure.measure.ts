@@ -240,6 +240,15 @@ test("phase 2 — rail registers, populated", async ({ page }) => {
  * cascade and the box model did with it — which is how `repeat(auto-fit, minmax(0, 1fr))` passed
  * its own lock while resolving to two real tracks and a hundred phantom ones.
  */
+/** What `STAGE` returns — only the fields the 1920 case reads off it. */
+interface StageReading {
+  stage: { x: number; y: number; w: number; h: number } | null;
+  stepWidths: number[];
+  plateHeights: number[];
+  onScreen: boolean[];
+  ticks: (string | null)[];
+}
+
 const STAGE = `(() => {
   const root = document.querySelector(".pkg-root");
   if (!root) return { error: "no .pkg-root" };
@@ -291,7 +300,11 @@ test("phase 3 — stage: problem statement + how it works", async ({ page }) => 
  */
 test("phase 3 — stage at 1920 (the ref's canvas width and beyond)", async ({ page }) => {
   await openRoute(page, ROUTE, { width: 1920, height: 1200 });
-  const r = await page.evaluate(STAGE);
+  /* ⚠️ TYPED, because `page.evaluate(<string>)` returns `unknown` and every property read off it is
+     a TS2339. This shipped red: the gate for this phase ran BEFORE this test was added, and nothing
+     re-ran it before the commit — the "green locally proves nothing about what you pushed" trap,
+     from the side where the file was added rather than left behind. */
+  const r = (await page.evaluate(STAGE)) as StageReading;
   await page.screenshot({ path: `${OUT}/p3-stage-1920.png`, fullPage: true });
   writeFileSync(`${ART}/p3-stage-1920.txt`, JSON.stringify(r, null, 2) + "\n");
   console.log(JSON.stringify({
