@@ -674,7 +674,18 @@ service cloud.firestore {
           // from this allowlist fails with a permission error the UI shows as nothing happening —
           // the `affectedKeys` trap this repo has a note about. Added with the shape check above,
           // in the same deploy, because either alone is broken.
-          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials'])
+          // ⚠️ `queryId` AND `manuscriptId` ARE HERE BECAUSE AN EVENT CAN BE RE-FILED (correction
+          // pack §B). Moving an entry to another query is a correction to WHERE a true event is
+          // recorded, not a new event — so the document keeps its id and its contents, and exactly
+          // these two fields change. Without them the authoritative log moved and the global-feed
+          // twin stayed behind: the two-store divergence, one field deep, and the batch that
+          // carries both was refused whole rather than half-applied.
+          //
+          // ⚠️ THEY MOVE TOGETHER OR NOT AT ALL. Allowing `queryId` alone would let an event be
+          // filed under a query belonging to a different manuscript while the feed still counted
+          // it against the old book — which is worse than the denial it replaces, because it looks
+          // correct on the page the writer is standing on.
+          incoming().diff(existing()).affectedKeys().hasOnly(['activityType', 'description', 'date', 'details', 'resultingStatus', 'materials', 'queryId', 'manuscriptId'])
         );
       }
 

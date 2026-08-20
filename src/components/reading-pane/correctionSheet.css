@@ -105,3 +105,94 @@
   position: fixed; inset: 0; z-index: 70; display: grid; place-items: center;
   background: rgba(26, 25, 23, 0.28); padding: 20px;
 }
+
+/* ── the move (ref 172 cards 10 and 11) ──────────────────────────────────────────────────── */
+
+/* ⚠️ WIDER THAN THE OTHER SHEETS, because it carries two consequence blocks side by side. It is a
+   modifier rather than a second chassis: the top rule, the Playfair question and the mono subject
+   are the correction grammar and must not fork. */
+.cor-sheet--wide { max-width: 620px; }
+
+.cor-search { margin-bottom: 10px; }
+
+/* ⚠️ THE LIST SCROLLS INSIDE THE SHEET, never the sheet itself — a dialog that grows past the
+   viewport puts its actions off screen, which is the one place they must always be. */
+.cor-picklist {
+  max-height: 260px;
+  overflow-y: auto;
+  border-top: 1px solid var(--cor-line, #e7ddd2);
+  margin-bottom: 14px;
+}
+
+.cor-pick {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "nm st" "ag st";
+  gap: 0 12px;
+  width: 100%;
+  padding: 9px 4px;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--cor-line, #e7ddd2);
+  cursor: pointer;
+}
+.cor-pick:hover { background: var(--shell-inset, #efe8df); }
+.cor-picknm { grid-area: nm; font-family: var(--font-serif, "Playfair Display", serif); font-size: 15px; }
+.cor-pickag { grid-area: ag; font-size: 11px; color: var(--cor-quiet, #8a7d6c); }
+.cor-pickst {
+  grid-area: st;
+  align-self: center;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--cor-quiet, #8a7d6c);
+}
+/* ⚠️ A CLOSED DESTINATION IS MARKED, NOT DISABLED — it is a legitimate landing (card 11), and a
+   greyed-out row would say "not allowed" about the one case this feature exists to fix. */
+.cor-pick--closed .cor-pickst { color: var(--cor-closed, #9b8c7a); font-style: italic; }
+
+.cor-mvgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 4px 0 14px;
+}
+@media (max-width: 560px) { .cor-mvgrid { grid-template-columns: 1fr; } }
+
+.cor-mvblock {
+  padding: 10px 12px;
+  background: var(--shell-inset, #efe8df);
+  border: 1px solid var(--cor-line, #e7ddd2);
+}
+.cor-mvhead { display: flex; flex-direction: column; gap: 1px; margin-bottom: 7px; }
+.cor-mvhead b { font-family: var(--font-serif, "Playfair Display", serif); font-size: 14px; }
+.cor-mvhead span {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--cor-quiet, #8a7d6c);
+}
+
+.cor-notice {
+  padding: 9px 11px;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  background: var(--shell-inset, #efe8df);
+  border-left: 3px solid var(--cor-quiet, #8a7d6c);
+}
+/* ⚠️ THE STALE-NOTE WARNING IS THE ONLY BLUSH SURFACE HERE. The closed-target notice is a FACT
+   about the destination, not a problem with the move; giving both the same alarm treatment would
+   make the ordinary case look like a fault. */
+.cor-notice--warn {
+  background: var(--blush, #faf0ea);
+  border-left-color: var(--burgundy, #7c3a2a);
+}
+
+/* ⚠️ THE MOVE BRANCH IS SUBORDINATE, not a third peer — a misfiling is a case of "the record is
+   wrong", so it reads beneath the two questions rather than beside them. */
+.cor-branch--minor { border-top: 1px solid var(--cor-line, #e7ddd2); }
+.cor-branch--minor .cor-btx b { font-size: 13.5px; }

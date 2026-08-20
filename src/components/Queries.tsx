@@ -99,9 +99,10 @@ import { deriveQueryFields } from "../lib/queryDerivation";
 import { subcollectionDocToDerivable } from "../lib/recomputeQuery";
 /* the correction pack — one engine, one set of guards, one undo contract */
 import { previewCorrection, type CorrectionDiff } from "../lib/correctionPreview";
-import { canCorrect, rootGuard, dependencyGuard, type GuardEvent } from "../lib/correctionGuards";
-import { undoMessage, undoStillValid, type PendingUndo } from "../lib/correctionUndo";
-import { CorrectionFork, CorrectionEdit, ConsequenceSheet } from "./reading-pane/CorrectionSheet";
+import { canCorrect, rootGuard, dependencyGuard, type GuardEvent, moveGuard } from "../lib/correctionGuards";
+import { undoMessage, undoMoveMessage, undoStillValid, type PendingUndo } from "../lib/correctionUndo";
+import { moveCandidates, moveNotices, type MoveCandidate, type MoveNotices } from "../lib/correctionMove";
+import { CorrectionFork, CorrectionEdit, ConsequenceSheet, MovePicker, MoveSheet } from "./reading-pane/CorrectionSheet";
 import { TasksPopover } from "./TasksPopover";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
@@ -315,7 +316,7 @@ export const Queries: React.FC<{
     /* §6b/§6c — the stored task store the ghost rung reads, and the path that creates one */
     userTasks,
     addUserTask,
-    deleteActivity, deleteActivities,
+    deleteActivity, deleteActivities, readQueryActivity, moveActivity,
     editActivity,
     updateAgent,
     updateQueryStatus,
@@ -1019,6 +1020,12 @@ export const Queries: React.FC<{
     | { step: "fork"; entry: TimelineEntryRef }
     | { step: "edit"; entry: TimelineEntryRef }
     | { step: "sheet"; entry: TimelineEntryRef; question: string; diff: CorrectionDiff; commit: () => Promise<void>; partners: string[] }
+    /* the move's two steps — choose a destination, then read what it costs on BOTH queries */
+    | { step: "pick"; entry: TimelineEntryRef }
+    | {
+        step: "move"; entry: TimelineEntryRef; target: MoveCandidate;
+        notices: MoveNotices; sourceDiff: CorrectionDiff; targetDiff: CorrectionDiff; note: string;
+      }
     | null
   >(null);
 
@@ -1083,6 +1090,77 @@ export const Queries: React.FC<{
   };
 
   const onEditEntry = (entry: TimelineEntryRef) => setCorrecting({ step: "fork", entry });
+
+  /**
+   * ⚠️ A FUNCTION, NOT A `useMemo`, AND THE REASON IS THE TDZ. `activeQuery` is declared further
+   * down this component, so a memo here EVALUATES DURING RENDER against a `const` in its temporal
+   * dead zone and throws — taking the whole page with it. `tsc` caught this one because the
+   * reference shares the declaration's scope; the same mistake read from inside a helper typechecks
+   * clean, which is how this shape has shipped before. Called from the JSX, it runs after.
+   *
+   * ⚠️ AN EMPTY RESULT MEANS THE FORK SHOWS NO MOVE ROW — never a disabled one. The writer's only
+   * query has nowhere to send an entry, and a control that can never act is worse than its absence.
+   */
+  const moveTargetsFor = () => (activeQuery ? moveCandidates(queries as never, agents as never, activeQuery.id) : []);
+
+  /**
+   * ⚠️ BOTH SIDES COME FROM `previewCorrection`, RUN ONCE PER QUERY — the same engine, the same row
+   * builder, twice. The target's log has to be READ (the page only subscribes to the selected
+   * query's), and the target's rows are built with the TARGET's query and agent, or the preview
+   * would describe the destination using the source's context.
+   */
+  const openMoveSheet = async (entry: TimelineEntryRef, target: MoveCandidate) => {
+    if (!activeQuery) return;
+    const moving = trackingEvents.find((e: any) => e.id === entry.activityId);
+    if (!moving) return;
+
+    const targetDocs = await readQueryActivity(target.queryId);
+    const targetQuery = queries.find((q) => q.id === target.queryId);
+    const targetAgent = agents.find((a) => a.id === targetQuery?.agentId) ?? null;
+
+    const sourceDiff = previewFor(trackingEvents.filter((e: any) => e.id !== entry.activityId));
+    const targetDiff = previewCorrection({
+      current: targetDocs as never,
+      proposed: [...targetDocs, { id: entry.activityId, data: moving as Record<string, unknown> }] as never,
+      buildRows: (docs) => buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), targetQuery as never, targetAgent as never) as never,
+      agencyWeeks: (targetAgent as never as { responseTimeWeeks?: number } | null)?.responseTimeWeeks ?? null,
+      query: { id: target.queryId },
+    });
+
+    setCorrecting({
+      step: "move",
+      entry,
+      target,
+      notices: moveNotices(target, entry.note, agentPrimary(activeAgent)),
+      sourceDiff,
+      targetDiff,
+      note: entry.note,
+    });
+  };
+
+  /**
+   * ⚠️ ONE TOAST, ONE UNDO, BOTH QUERIES — the reversal is `moveActivity`'s own closure, built from
+   * documents captured before the batch. Never a toast per side: two receipts for one decision
+   * leaves the writer choosing which half of a move to keep.
+   */
+  const commitMove = async (entry: TimelineEntryRef, target: MoveCandidate, note: string) => {
+    if (!activeQuery) return;
+    const fromName = agentPrimary(activeAgent);
+    const res = await moveActivity(
+      entry.activityId, activeQuery.id, target.queryId,
+      note !== entry.note ? { note } : undefined,
+    );
+    if (!res.success) {
+      setCorrecting(null);
+      showToast({ message: res.error || "Couldn't move that entry." });
+      return;
+    }
+    await finishCorrection(
+      undoMoveMessage(entry.label, fromName, target.agentName),
+      res.undo,
+      activeQuery.id,
+    );
+  };
 
   /**
    * ⚠️ DELETE GOES THROUGH THE CONSEQUENCE SHEET NOW, not a status-only confirm. The old dialog
@@ -3823,6 +3901,20 @@ export const Queries: React.FC<{
                   /* ⚠️ BRANCH TWO ROUTES — the record is true, so the answer is to append, and the
                      flow that appends already exists. No third way to record a response. */
                   onAppend={() => { setCorrecting(null); setIsRecordResponseFocusFormOpen(true); }}
+                  /* ⚠️ MOVE SITS ON THE CORRECTION BRANCH, not beside it. Filing an event under the
+                     wrong agent IS the record being wrong, so it belongs with "I'm correcting a
+                     mistake"; offering it as a third peer would suggest a move is a different KIND
+                     of act from an edit, which is the distinction the fork exists to draw. */
+                  onMove={moveTargetsFor().length ? () => {
+                    const evts = guardEvents();
+                    const me = evts.find((e) => e.activityId === correcting.entry.activityId);
+                    const guard = me ? moveGuard(me, evts) : { kind: "allow" as const };
+                    if (guard.kind === "route") {
+                      showConfirm({ title: "This entry cannot move", body: <p style={{ margin: 0 }}>{guard.message}</p>, confirmLabel: "Close", onConfirm: async () => {} });
+                      return;
+                    }
+                    setCorrecting({ step: "pick", entry: correcting.entry });
+                  } : undefined}
                   onCancel={() => setCorrecting(null)}
                 />
               )}
@@ -3851,12 +3943,24 @@ export const Queries: React.FC<{
                           ? { ...e, createdAt: new Date(`${d.dateISO}T12:00:00`).toISOString(), note: d.note }
                           : e);
                       const diff = previewFor(proposed);
+                      /* ⚠️ THE PRIOR VALUES ARE CAPTURED BEFORE THE WRITE, not read back after it.
+                         This closure was `async () => {}` — the same empty-undo fault found on the
+                         removal, in the branch beside it: the toast said UNDO and the correction
+                         would have stood. One fault, two call sites, and the second survived an
+                         audit of the first because it hides behind a positional argument rather
+                         than an `undo:` key. */
+                      const wasDate = new Date(`${correcting.entry.dateISO}T12:00:00`).toISOString();
+                      const wasNote = correcting.entry.note;
                       const commit = async () => {
                         await editActivity(activeQuery.id, correcting.entry.activityId, {
                           date: new Date(`${d.dateISO}T12:00:00`).toISOString(),
                           details: d.note,
                         });
-                        await finishCorrection(`${correcting.entry.label} corrected`, async () => {});
+                        await finishCorrection(
+                          `${correcting.entry.label} corrected`,
+                          async () => { await editActivity(activeQuery.id, correcting.entry.activityId, { date: wasDate, details: wasNote }); },
+                          activeQuery.id,
+                        );
                       };
                       /* ⚠️ AN EMPTY DIFF RAISES NO SHEET — it saves, toasts, and is done. */
                       if (diff.empty) { void commit(); return; }
@@ -3865,6 +3969,50 @@ export const Queries: React.FC<{
                   />
                 );
               })()}
+
+              {correcting.step === "pick" && (
+                <MovePicker
+                  subject={`${correcting.entry.label} · ${fmtShortISO(correcting.entry.dateISO)}`}
+                  candidates={moveTargetsFor()}
+                  onPick={(c) => void openMoveSheet(correcting.entry, c)}
+                  /* ⚠️ ESCAPE AND CANCEL BOTH RETURN TO THE FORK, not to the page. The writer is
+                     mid-correction; dropping them out of the flow entirely would make backing out of
+                     a destination list cost them the whole act. */
+                  onCancel={() => setCorrecting({ step: "fork", entry: correcting.entry })}
+                />
+              )}
+
+              {correcting.step === "move" && (
+                <MoveSheet
+                  subject={`${correcting.entry.label} · ${fmtShortISO(correcting.entry.dateISO)}`}
+                  target={correcting.target}
+                  notices={correcting.notices}
+                  sourceDiff={correcting.sourceDiff}
+                  targetDiff={correcting.targetDiff}
+                  note={correcting.note}
+                  onNoteChange={(v) => setCorrecting({ ...correcting, note: v })}
+                  actions={[
+                    /* ⚠️ CARD 10's TWO OFFERS ARE ONE CONTROL PLUS ONE, not a mode switch. "Move
+                       with edited note" is the ordinary action once the note has been edited in
+                       place above; "Move and clear the note" is the shortcut for prose that should
+                       not travel at all. Both are moves — neither is a confirmation of the other. */
+                    ...(correcting.notices.staleNote
+                      ? [
+                          { label: "Move with this note", cost: "the note travels as written above", onClick: () => void commitMove(correcting.entry, correcting.target, correcting.note) },
+                          { label: "Move and clear the note", cost: "the event travels, the prose does not", onClick: () => void commitMove(correcting.entry, correcting.target, "") },
+                        ]
+                      : [{ label: "Move it", cost: "one undo restores both queries", onClick: () => void commitMove(correcting.entry, correcting.target, correcting.note) }]),
+                    /* ⚠️ CARD 11 — the offer to reopen comes FIRST in the writer's mind and second
+                       in the stack, because it is the rarer intention. It routes to the close menu
+                       rather than reopening silently: reopening is a status change with its own
+                       consequences, and burying it inside a move would perform two acts on one press. */
+                    ...(correcting.target.closed
+                      ? [{ label: `Reopen ${correcting.target.agentName}'s query first…`, cost: "opens that query so you can change its status", onClick: () => { setCorrecting(null); setSelectedQueryId(correcting.target.queryId); } }]
+                      : []),
+                  ]}
+                  onCancel={() => setCorrecting({ step: "pick", entry: correcting.entry })}
+                />
+              )}
 
               {correcting.step === "sheet" && (
                 <ConsequenceSheet

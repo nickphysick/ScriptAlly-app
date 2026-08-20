@@ -107,9 +107,14 @@ const SHAPES = [
     ["Partial Sent", 62, "Partial sent to Rachel Lin"],
     ["Full Sent", 28, "Full sent to Rachel Lin"],
   ] },
+  /* ⚠️ THE CLOSURE IS RECENT ON PURPOSE. Card 11's claim is about an event arriving BEFORE the
+     closure — that is the case that must not reopen the query. cor-move-a's request is 30 days old,
+     so this closure sits at 10 days and the moved event lands underneath it. Dated the other way
+     round the move genuinely DOES reopen the query, correctly, and a check written that way
+     measures the opposite of what card 11 says. */
   { id: "cor-move-c", agent: "seed-agent-5", status: "Rejected", rows: [
     ["Queried", 90, "Query sent to Joan Whitfield"],
-    ["Rejected", 45, "Rejected by Joan Whitfield"],
+    ["Rejected", 10, "Rejected by Joan Whitfield"],
   ] },
 ];
 

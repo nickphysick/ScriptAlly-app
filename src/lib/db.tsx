@@ -301,6 +301,12 @@ interface DbContextType {
   // Activity Actions
   addActivity: (act: Omit<Activity, "id" | "userId"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
   deleteActivity: (id: string) => Promise<void>;
+  /** Correction primitive: one query's raw activity documents, for previewing a move's other side. */
+  readQueryActivity: (queryId: string) => Promise<{ id: string; data: Record<string, unknown> }[]>;
+  /** Correction primitive: move one entry between queries atomically, with a reversal for both. */
+  moveActivity: (
+    activityId: string, fromQueryId: string, toQueryId: string, patch?: { note?: string },
+  ) => Promise<{ success: boolean; error?: string; undo: () => Promise<void> }>;
   /** Correction primitive: remove entries and return the closure that puts them back. */
   deleteActivities: (ids: string[]) => Promise<() => Promise<void>>;
   /** Correction primitive: patch an entry in a query's activity log, then recompute its derived fields. */
@@ -2541,6 +2547,108 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
   };
 
+  /**
+   * Read one query's authoritative activity log. The preview needs the TARGET's log to derive what
+   * the target becomes, and the page only ever subscribes to the selected query's.
+   *
+   * ⚠️ IT RETURNS THE RAW DOCUMENTS, not a rendered shape — `previewCorrection` and
+   * `buildTimelineRows` both take raw docs, and handing them anything pre-digested here would put a
+   * second reading of the log between the engine and the truth.
+   */
+  const readQueryActivity = async (queryId: string): Promise<{ id: string; data: Record<string, unknown> }[]> => {
+    if (!currentUser) return [];
+    const snap = await getDocs(collection(db, "users", currentUser.id, "queries", queryId, "activity"));
+    return snap.docs.map((d) => ({ id: d.id, data: d.data() as Record<string, unknown> }));
+  };
+
+  /**
+   * ⚠️ MOVE AN ENTRY BETWEEN TWO QUERIES — THE RISKIEST WRITE IN THE CORRECTION FEATURE, because
+   * two logs change and one reversal has to undo both.
+   *
+   * ⚠️ IT IS ONE BATCH, SO THERE IS NO HALF-MOVE TO FIND. Written as four sequential writes, a
+   * failure between the target's set and the source's delete leaves the entry in BOTH histories, and
+   * a failure the other way leaves it in NEITHER — the second being unrecoverable, because after the
+   * delete nothing holds the contents. A `writeBatch` commits all four or none, which removes that
+   * class of outcome rather than handling it.
+   *
+   * ⚠️ WHAT IS *NOT* IN THE BATCH IS THE TWO RECOMPUTES, and that is the honest residue. Firestore
+   * batches document writes, not derivations, so a failure after the commit leaves both logs correct
+   * and one or both queries' DERIVED fields stale. That is the recoverable direction — the log is
+   * the fact, derived fields are rebuilt from it by the next write to either query — and it is
+   * reported rather than hidden. A stale derived field shows as a status that has not caught up; a
+   * lost log entry could not be shown at all.
+   *
+   * ⚠️ AND THE CAPTURE HAPPENS BEFORE THE BATCH, never after. Same rule as `deleteActivities`: the
+   * closure that reverses this is built from documents read while they still exist.
+   */
+  const moveActivity = async (
+    activityId: string,
+    fromQueryId: string,
+    toQueryId: string,
+    patch?: { note?: string },
+  ): Promise<{ success: boolean; error?: string; undo: () => Promise<void> }> => {
+    const noop = async () => {};
+    if (!currentUser) return { success: false, error: "Session required.", undo: noop };
+    const uid = currentUser.id;
+
+    const logRef = doc(db, "users", uid, "queries", fromQueryId, "activity", activityId);
+    const feedRef = doc(db, "users", uid, "activities", activityId);
+    const [logSnap, feedSnap] = await Promise.all([getDoc(logRef), getDoc(feedRef)]);
+    if (!logSnap.exists()) return { success: false, error: "That entry is no longer on this query.", undo: noop };
+
+    const logBefore = logSnap.data() as Record<string, unknown>;
+    const feedBefore = feedSnap.exists() ? (feedSnap.data() as Record<string, unknown>) : null;
+    const target = queries.find((q) => q.id === toQueryId);
+
+    /* ⚠️ THE FEED TWIN'S `queryId` AND `manuscriptId` BOTH MOVE. Leaving the manuscript behind would
+       file the event under the destination query while the global feed still counted it against the
+       old book — the two-store divergence, one field deep. */
+    const logAfter = patch?.note !== undefined ? { ...logBefore, note: patch.note } : logBefore;
+    const feedAfter = feedBefore ? {
+      ...feedBefore,
+      queryId: toQueryId,
+      manuscriptId: target?.manuscriptId ?? feedBefore.manuscriptId,
+      ...(patch?.note !== undefined ? { details: patch.note } : {}),
+    } : null;
+
+    try {
+      const batch = writeBatch(db);
+      batch.delete(logRef);
+      batch.set(doc(db, "users", uid, "queries", toQueryId, "activity", activityId), logAfter);
+      if (feedAfter) batch.set(feedRef, feedAfter);
+      await batch.commit();
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${uid}/queries/${toQueryId}/activity/${activityId}`);
+      /* ⚠️ THE BATCH IS ALL-OR-NOTHING, so a failure here means NOTHING moved — the message can say
+         so plainly rather than hedging about what state the record might be in. */
+      return { success: false, error: "Couldn't move that entry — nothing was changed.", undo: noop };
+    }
+
+    /* ⚠️ PAST THIS POINT THE LOGS ARE CORRECT AND ONLY DERIVED FIELDS CAN LAG (see the note above).
+       Each recompute is independent: if the first throws, the second must still run, or a failure on
+       the source would leave the TARGET stale as well for no reason. */
+    const stale: string[] = [];
+    for (const qid of [fromQueryId, toQueryId]) {
+      try { await recompute(qid); } catch { stale.push(qid); }
+    }
+    if (stale.length) console.warn(`[move] entry moved; derived fields stale on ${stale.join(", ")} until the next write`);
+
+    return {
+      success: true,
+      /* ⚠️ ONE CLOSURE, BOTH QUERIES, ONE BATCH — never a reversal per side. Two undos for one act
+         would leave the writer choosing which half of a move to keep. */
+      undo: async () => {
+        const batch = writeBatch(db);
+        batch.delete(doc(db, "users", uid, "queries", toQueryId, "activity", activityId));
+        batch.set(logRef, logBefore);
+        if (feedBefore) batch.set(feedRef, feedBefore);
+        await batch.commit();
+        await recompute(toQueryId);
+        await recompute(fromQueryId);
+      },
+    };
+  };
+
   const deleteActivity = async (id: string) => {
     if (!currentUser) return;
     const target = activities.find(act => act.id === id);
@@ -2924,6 +3032,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addActivity,
         deleteActivity,
         deleteActivities,
+        readQueryActivity,
+        moveActivity,
         editActivity,
         updateUserProfile,
         dismissTask,
