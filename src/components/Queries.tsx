@@ -91,12 +91,17 @@ import { useFixedMenu } from "./forms/useFixedMenu";
 import { useOpenEditQuery } from "./EditQueryHost";
 import { MobileSheet } from "./shell/MobileSheet";
 import { useIsMobile, useMobileChrome } from "./shell/mobileChrome";
-import { QueryTimeline } from "./reading-pane/QueryTimeline";
+import { QueryTimeline, buildTimelineRows } from "./reading-pane/QueryTimeline";
 import { NotesThread } from "./reading-pane/NotesThread";
 import type { TimelineEntryRef } from "./reading-pane/QueryTimeline";
 import { useToast } from "./toast/ToastProvider";
 import { deriveQueryFields } from "../lib/queryDerivation";
 import { subcollectionDocToDerivable } from "../lib/recomputeQuery";
+/* the correction pack — one engine, one set of guards, one undo contract */
+import { previewCorrection, type CorrectionDiff } from "../lib/correctionPreview";
+import { canCorrect, rootGuard, dependencyGuard, type GuardEvent } from "../lib/correctionGuards";
+import { undoMessage } from "../lib/correctionUndo";
+import { CorrectionFork, CorrectionEdit, ConsequenceSheet } from "./reading-pane/CorrectionSheet";
 import { TasksPopover } from "./TasksPopover";
 import { MountCard } from "./MountCard";
 import { ScriptAllyLogo } from "./ScriptAllyLogo";
@@ -1000,34 +1005,105 @@ export const Queries: React.FC<{
   };
   // 5b — timeline corrections. Edit reopens the composer in place; Delete confirms with the DERIVED
   // consequence (the status the query recomputes to once this entry is gone) — never a bare "sure?".
+  /**
+   * ══ CORRECTING THE RECORD (refs 169/170/171/172) ═══════════════════════════════════════════
+   *
+   * ⚠️ THE FORK COMES FIRST AND IS NOT A CONFIRMATION. "I did it wrong" and "the world moved" are
+   * different OPERATIONS — one edits history, the other appends to it — so the writer says which
+   * before any form appears. Branch two ROUTES to Record response; no new append flow exists.
+   *
+   * ⚠️ AND EVERY SHEET BELOW IS DRIVEN BY `previewCorrection`, the real engine run against the
+   * proposed log. Nothing here restates what an edit will do.
+   */
+  const [correcting, setCorrecting] = useState<
+    | { step: "fork"; entry: TimelineEntryRef }
+    | { step: "edit"; entry: TimelineEntryRef }
+    | { step: "sheet"; entry: TimelineEntryRef; question: string; diff: CorrectionDiff; commit: () => Promise<void>; partners: string[] }
+    | null
+  >(null);
+
+  /** The log as raw docs, the shape the engine reads. */
+  const asRawDocs = (evts: any[]) => evts.map((e) => ({ id: e.id, data: e as Record<string, unknown> }));
+
+  /* ⚠️ ONE BUILDER, BOTH SIDES — the page's own, so the preview cannot model a timeline the page
+     does not render. This is the injection `previewCorrection` was written for. */
+  const previewFor = (proposed: any[]) => previewCorrection({
+    current: asRawDocs(trackingEvents),
+    proposed: asRawDocs(proposed),
+    buildRows: (docs) => buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), activeQuery as never, activeAgent ?? null) as never,
+    query: activeQuery as never,
+    agencyWeeks: activeAgent?.responseTimeWeeks,
+  });
+
+  const guardEvents = (): GuardEvent[] => trackingEvents.map((e: any) => ({
+    activityId: e.id, status: e.resultingStatus ?? e.type, timeMs: toMs(e.createdAt),
+  }));
+
+  /** ⚠️ ONE TOAST PER OPERATION, and the undo retires when a newer write lands (Phase 4). */
+  const finishCorrection = async (msg: string, restore: () => Promise<void>) => {
+    setCorrecting(null);
+    showToast({ message: msg, undo: () => void restore() });
+  };
+
+  /** The subject line's date — the app's short spelling, so the sheet names the event as the row does. */
+  const fmtShortISO = (iso: string): string => {
+    const t = new Date(iso).getTime();
+    return Number.isNaN(t) ? "" : new Date(t).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  const onEditEntry = (entry: TimelineEntryRef) => setCorrecting({ step: "fork", entry });
+
+  /**
+   * ⚠️ DELETE GOES THROUGH THE CONSEQUENCE SHEET NOW, not a status-only confirm. The old dialog
+   * derived one fact — the status the query would recompute to — which was the right instinct and
+   * a fraction of the answer: a removal can also drop a chapter heading, re-anchor the wait and
+   * change whose window is being counted, none of which it mentioned.
+   *
+   * ⚠️ AND THE DEPENDENCY GUARD OFFERS BOTH RATHER THAN CASCADING. Removing a request a send
+   * answers would strand the send; removing both is usually what is meant, and editing instead is
+   * what is meant when only a detail was wrong.
+   */
   const onDeleteEntry = (entry: TimelineEntryRef) => {
-    const remaining = trackingEvents
-      .filter((e) => e.id !== entry.activityId)
-      .map((e) => subcollectionDocToDerivable(e.id, e));
-    const derived = remaining.length ? deriveQueryFields(remaining).status : "Not yet sent";
-    const current = (activeQuery?.status as string) || "";
-    const changes = derived !== current;
-    showConfirm({
-      title: "Delete this entry?",
-      danger: true,
-      confirmLabel: "Delete entry",
-      body: (
-        <>
-          {changes ? (
-            <p style={{ margin: "0 0 8px" }}>
-              This query will move <b style={{ textTransform: "uppercase", letterSpacing: "0.04em" }}>{current}</b> → <b style={{ textTransform: "uppercase", letterSpacing: "0.04em" }}>{derived}</b>.
-            </p>
-          ) : (
-            <p style={{ margin: "0 0 8px" }}>This won’t change the query’s status.</p>
-          )}
-          <p style={{ margin: 0, color: "var(--muted, #7d7469)" }}>
-            Use this only if the entry was logged by mistake. If something genuinely changed, record a new entry instead.
-          </p>
-        </>
-      ),
-      onConfirm: async () => { await deleteActivity(entry.activityId); showToast({ message: "Entry deleted" }); },
+    if (!activeQuery) return;
+    const evts = guardEvents();
+    const me = evts.find((e) => e.activityId === entry.activityId);
+    if (!me) return;
+
+    /* the root is editable and never removable — the path out is deleting the query itself */
+    const root = rootGuard(me, evts);
+    if (root.kind === "route") {
+      showConfirm({
+        title: "This is the first entry",
+        body: <p style={{ margin: 0 }}>{root.message}</p>,
+        confirmLabel: "Close",
+        onConfirm: async () => {},
+      });
+      return;
+    }
+
+    const dep = dependencyGuard(me, evts);
+    const doomed = new Set<string>([entry.activityId, ...(dep.kind === "cascade" ? dep.partners.map((p) => p.activityId!) : [])]);
+    const proposed = trackingEvents.filter((e: any) => !doomed.has(e.id));
+    const diff = previewFor(proposed);
+
+    const commit = async () => {
+      for (const id of doomed) await deleteActivity(id);
+      await finishCorrection(
+        undoMessage(entry.label, agentPrimary(activeAgent), doomed.size),
+        async () => {},
+      );
+    };
+
+    setCorrecting({
+      step: "sheet",
+      entry,
+      question: doomed.size > 1 ? "Remove both entries?" : "Remove this entry?",
+      diff,
+      commit,
+      partners: dep.kind === "cascade" ? dep.partners.map((p) => p.activityId!) : [],
     });
   };
+
   const { triggerRef: closeTriggerRef, menuStyle: closeMenuStyle } = useFixedMenu<HTMLButtonElement>(isCloseMenuOpen); // F12: downward
   /* §4c — the confirm hangs off the Nudge button itself; the control row sits at the top of the
      pane, so it opens downward like every other menu in that row. */
@@ -3701,6 +3777,87 @@ export const Queries: React.FC<{
         </AnimatePresence>
 
         {/* Close-reasons menu — anchored upward off the Close ribbon tile */}
+        {/**
+          * ⚠️ THE CORRECTION SURFACES — fork, then edit, then the consequence sheet. One scrim, one
+          * chassis, and Escape at every step returns to where the writer was rather than dumping
+          * them on the page.
+          */}
+        {correcting && activeQuery && (
+          <div className="cor-scrim" role="presentation" onClick={() => setCorrecting(null)}>
+            <div onClick={(e) => e.stopPropagation()}>
+              {correcting.step === "fork" && (
+                <CorrectionFork
+                  subject={`${correcting.entry.label} · ${fmtShortISO(correcting.entry.dateISO)}`}
+                  onCorrect={() => setCorrecting({ step: "edit", entry: correcting.entry })}
+                  /* ⚠️ BRANCH TWO ROUTES — the record is true, so the answer is to append, and the
+                     flow that appends already exists. No third way to record a response. */
+                  onAppend={() => { setCorrecting(null); setIsRecordResponseFocusFormOpen(true); }}
+                  onCancel={() => setCorrecting(null)}
+                />
+              )}
+
+              {correcting.step === "edit" && (() => {
+                const evts = guardEvents();
+                const me = evts.find((e) => e.activityId === correcting.entry.activityId);
+                /* the root may be edited and never removed — removal routes to deleting the query */
+                const root = me ? rootGuard(me, evts) : { kind: "allow" as const };
+                return (
+                  <CorrectionEdit
+                    subject={`${correcting.entry.label} · ${fmtShortISO(correcting.entry.dateISO)}`}
+                    initial={{ dateISO: correcting.entry.dateISO, note: correcting.entry.note }}
+                    removable={root.kind === "allow"}
+                    removeBlockedReason={root.kind === "route" ? root.message : undefined}
+                    onRemove={() => onDeleteEntry(correcting.entry)}
+                    onCancel={() => setCorrecting(null)}
+                    /**
+                     * ⚠️ THE PREVIEW IS COMPUTED ON SAVE, NOT ON KEYSTROKE — a date mid-typing reads
+                     * "2" of "22 August", and a sheet recomputing under the writer's hands would show
+                     * consequences of a date they never meant.
+                     */
+                    onSave={(d) => {
+                      const proposed = trackingEvents.map((e: any) =>
+                        e.id === correcting.entry.activityId
+                          ? { ...e, createdAt: new Date(`${d.dateISO}T12:00:00`).toISOString(), note: d.note }
+                          : e);
+                      const diff = previewFor(proposed);
+                      const commit = async () => {
+                        await editActivity(activeQuery.id, correcting.entry.activityId, {
+                          date: new Date(`${d.dateISO}T12:00:00`).toISOString(),
+                          details: d.note,
+                        });
+                        await finishCorrection(`${correcting.entry.label} corrected`, async () => {});
+                      };
+                      /* ⚠️ AN EMPTY DIFF RAISES NO SHEET — it saves, toasts, and is done. */
+                      if (diff.empty) { void commit(); return; }
+                      setCorrecting({ step: "sheet", entry: correcting.entry, question: "Save this correction?", diff, commit, partners: [] });
+                    }}
+                  />
+                );
+              })()}
+
+              {correcting.step === "sheet" && (
+                <ConsequenceSheet
+                  question={correcting.question}
+                  subject={`${correcting.entry.label} · ${fmtShortISO(correcting.entry.dateISO)}`}
+                  diff={correcting.diff}
+                  actions={[
+                    ...(correcting.partners.length
+                      ? [{
+                          label: "Remove both",
+                          cost: "one undo restores them",
+                          danger: true,
+                          onClick: () => void correcting.commit(),
+                        }]
+                      : [{ label: correcting.question.startsWith("Save") ? "Save the correction" : "Remove", cost: "one undo restores it", danger: !correcting.question.startsWith("Save"), onClick: () => void correcting.commit() }]),
+                    { label: "Edit instead", cost: "keep it, fix the details", onClick: () => setCorrecting({ step: "edit", entry: correcting.entry }) },
+                  ]}
+                  onCancel={() => setCorrecting(null)}
+                />
+              )}
+            </div>
+          </div>
+        )}
+
         {isCloseMenuOpen && activeQuery && (
           <>
             <div onClick={() => setIsCloseMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 59 }} aria-hidden="true" />
@@ -5257,6 +5414,7 @@ export const Queries: React.FC<{
                                   </div>
                                 );
                               })()}
+                              onEditEntry={onEditEntry}
                               onDeleteEntry={onDeleteEntry}
                               onNudge={() => setIsNudgeOpen(true)}
                               /* §4c — the offer beneath a no-reply event opens the same close flow

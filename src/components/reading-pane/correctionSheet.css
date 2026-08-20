@@ -97,3 +97,11 @@
 .cor-act--danger b { color: var(--burg, #7c3a2a); }
 /* Cancel is quiet at the foot and never competes with the actions above it. */
 .cor-sheetacts .cor-cancel { align-self: flex-start; margin-top: 3px; }
+
+/* ⚠️ ONE SCRIM FOR ALL THREE STEPS — the fork, the edit and the sheet are one act, so the ground
+   behind them must not flash between them. Clicking it cancels, which is the same answer Escape
+   gives at every step. */
+.cor-scrim {
+  position: fixed; inset: 0; z-index: 70; display: grid; place-items: center;
+  background: rgba(26, 25, 23, 0.28); padding: 20px;
+}
