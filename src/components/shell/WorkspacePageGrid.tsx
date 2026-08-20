@@ -172,6 +172,31 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    */
   const [hem, setHem] = React.useState({ top: false, bot: false });
   /**
+   * ⚠️ THE TOP HEM MUST START BELOW THE STICKY CHROME, NOT AT THE SCROLLER'S TOP — and this is the
+   * height it starts below.
+   *
+   * The hem is a grid item pinned to the row's top edge, and the control row is sticky at `top: 0`
+   * inside that same row, so the gradient was washing straight over the anchored controls: a fade
+   * whose job is to say "content is passing under this" was drawn ON the thing it passes under.
+   *
+   * ⚠️ MEASURED, NEVER A CONSTANT. The sticky chrome is not one height — it is the control row
+   * alone today and the mini bar plus the control row once that lands, and pages differ anyway
+   * because their control rows hold different things. A literal here would be right for one page
+   * on one day. The refs below are summed at evaluate time and published as a custom property.
+   *
+   * ⚠️ IT IS THE ELEMENT'S OWN HEIGHT, NOT A COORDINATE. Every sticky element is pinned at the top
+   * of the scroller when stuck, so its height IS its contribution — nothing here depends on where
+   * the scroller happens to be on screen.
+   *
+   * ⚠️ AND IT IS THE RECT'S HEIGHT, NOT `offsetHeight`, BECAUSE `offsetHeight` ROUNDS. Measured on
+   * Analytics: a 67.5px control row reports 68. Rounding UP is harmless — the hem starts half a
+   * pixel low — but it rounds DOWN just as readily, and then the gradient is drawn a fraction
+   * inside the anchored controls, which is the exact fault this offset exists to remove. Sub-pixel
+   * and invisible is still the wrong side of a boundary the lock asserts.
+   */
+  const [stuckH, setStuckH] = React.useState(0);
+  const toolsRef = React.useRef<HTMLDivElement>(null);
+  /**
    * ⚠️ THE THIRD INPUT — ENGAGEMENT (collapse-on-engagement).
    *
    * THE RULE: the header collapses when the user starts working. On a scrolling page, scrolling is
@@ -235,6 +260,11 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
          that only because a boolean compares by value. */
       const next = { top: top > 2, bot: top < root.scrollHeight - root.clientHeight - 2 };
       setHem((prev) => (prev.top === next.top && prev.bot === next.bot ? prev : next));
+      /* ⚠️ ONE EVALUATION FOR ALL THREE — the same reason the hems live in this component at all.
+         A second listener measuring the chrome would be a second answer to "where is this scroller",
+         and the two would disagree on exactly the frames anyone would notice. */
+      const chrome = top > 2 ? (toolsRef.current?.getBoundingClientRect().height ?? 0) : 0;
+      setStuckH((prev) => (prev === chrome ? prev : chrome));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
@@ -348,6 +378,9 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   return (
       <div
         ref={rootRef}
+        /* ⚠️ A CUSTOM PROPERTY RATHER THAN A CLASS, because the value is a MEASUREMENT and classes
+           carry states. The stylesheet reads it; nothing else needs to know it exists. */
+        style={{ ["--wpg-stuck-h" as string]: `${stuckH}px` } as React.CSSProperties}
         /* ⚠️ `wpg--tools` IS GONE FROM THIS LIST. It existed for ONE rule — `.wpg--tools > .wpg-scroll`,
            which zeroed the scroller's top gap when a toolbar row had already paid it — and that
            arbitration died with the chrome rows. Grepped before removing: no stylesheet in `src/`
@@ -397,7 +430,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
                imperceptible apart, and the same evaluation also drives the top hem — changing the
                number would move the hem's trigger with it, which is a second behaviour for one
                edit. One derivation, one threshold. */
-            <div className={`wpg-tools${stuck ? " wpg-tools--stuck" : ""}`}>{toolbar}</div>
+            <div ref={toolsRef} className={`wpg-tools${stuck ? " wpg-tools--stuck" : ""}`}>{toolbar}</div>
           )}
           {children}
         </div>

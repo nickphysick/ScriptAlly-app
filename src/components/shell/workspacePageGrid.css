@@ -254,7 +254,21 @@
   opacity: 0;
   transition: opacity .18s ease;
 }
-.wpg-hem--top { align-self: start; background: linear-gradient(to bottom, var(--ws-window) 12%, rgba(var(--ws-window-rgb), 0)); }
+/**
+ * ⚠️ THE TOP HEM STARTS BELOW THE STICKY CHROME (masthead rethink, step 1) — it was starting at the
+ * scroller's top edge and washing straight over the anchored control row. A fade whose whole job is
+ * to say "content is passing UNDER this" was being drawn ON the thing it passes under.
+ *
+ * ⚠️ THE OFFSET IS A MEASUREMENT PUBLISHED BY THE COMPONENT, not a number written here. The sticky
+ * chrome is the control row today and the mini bar plus the control row once that lands, and pages
+ * differ anyway because their control rows hold different things — a literal would be right for one
+ * page on one day. `--wpg-stuck-h` is `0px` whenever nothing is stuck, so at rest this is inert.
+ */
+.wpg-hem--top {
+  align-self: start;
+  margin-top: var(--wpg-stuck-h, 0px);
+  background: linear-gradient(to bottom, var(--ws-window) 12%, rgba(var(--ws-window-rgb), 0));
+}
 .wpg-hem--bot { align-self: end; background: linear-gradient(to top, var(--ws-window) 12%, rgba(var(--ws-window-rgb), 0)); }
 .wpg-hem.on { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {
