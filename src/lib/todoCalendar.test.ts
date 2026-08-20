@@ -915,3 +915,56 @@ describe("⚠️ the month is ONE panel, ruled — not forty-two floating cards"
     expect(decl).not.toMatch(/\.cal-cell[^{]*\{[^}]*#f8e2d9/);
   });
 });
+
+/* ══ THE COMMAND BAR (fixes pack, Phase 4) ══════════════════════════════════════════════════ */
+
+describe("⚠️ the record's chip reads as one control", () => {
+  const rule = (sel: string) => {
+    const m = new RegExp(`^${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`, "m").exec(calCss);
+    expect(m, `${sel} has no rule of its own at a line start`).not.toBeNull();
+    return m![1];
+  };
+
+  it("one line always, with the swatch inside the chip", () => {
+    const b = rule(".cal-recbtn");
+    expect(b).toContain("white-space: nowrap");
+    expect(b).toContain("display: inline-flex"); // the swatch is a child, not a sibling
+    expect(pageSrc).toContain('<span className="cal-recsw"');
+    /* ⚠️ THE ANCHOR IS THE EXACT className, NOT THE PREFIX. `indexOf("cal-recbtn")` finds
+       `cal-recbtn2` — the day panel's action button — which sits earlier in the file, and the slice
+       then describes the wrong control entirely. Same family as the `.cal-dow` / `.cal-layout
+       .cal-dow` slip in Phase 2: a token that is a prefix of a live class is never a safe anchor. */
+    const anchor = 'className="cal-nav calm-nav cal-recbtn"';
+    const i = pageSrc.indexOf(anchor);
+    expect(i, "the record chip's exact className is missing").toBeGreaterThan(-1);
+    const seg = pageSrc.slice(i, i + 420);
+    expect(seg).toContain("cal-recsw");
+    expect(rule(".cal-recsw")).toContain("width: 7px");
+  });
+
+  it("⚠️ the separator is a RULE — 1px × 18px, centred, not a full-height column edge", () => {
+    const s = rule(".cal-sep");
+    expect(s).toContain("width: 1px");
+    expect(s).toContain("height: 18px");
+    expect(s).toContain("align-self: center");
+    expect(s).not.toContain("align-self: stretch");
+    // breathing room on both sides, between the facet control and the record's chip
+    expect(s).toMatch(/margin:\s*0\s+9px/);
+  });
+
+  it("off is visibly off — the whole chip, not the label alone", () => {
+    expect(calCss).toContain('.cal-recbtn[aria-pressed="false"] { opacity: 0.42; }');
+    // and the state is on the element the assistive tree reads, not only in the paint
+    expect(pageSrc).toContain("aria-pressed={showRecord}");
+  });
+
+  it("⚠️ prev/next carry a real glyph — the buttons were empty at 26px wide", () => {
+    // the cause was the .cal-nav width bleed (Phase 1); the glyph was always there
+    expect(pageSrc).toContain("<ChevronLeft size={14}");
+    expect(pageSrc).toContain("<ChevronRight size={14}");
+    expect(pageSrc).toContain('aria-label="Previous"');
+    expect(pageSrc).toContain('aria-label="Next"');
+    // and they wear the un-bleed modifier
+    expect(pageSrc).toMatch(/className="cal-nav calm-nav"[^>]*aria-label="Previous"/);
+  });
+});

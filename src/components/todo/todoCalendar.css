@@ -238,16 +238,24 @@
 /* ⚠️ THE RECORD'S SWITCH, AND THE RULE THAT SEPARATES IT FROM THE FACETS (record-layer P4). The
    separator is not decoration: the facet control speaks the shared TODO_FACETS vocabulary that the
    board and the sidebar badge also read, and this one governs a layer only the calendar has. */
+/* ⚠️ A RULE, NOT A STRETCHED DIVIDER — 1px × 18px, centred, with room on both sides. `align-self:
+   stretch` made it the full height of the tool row, which reads as a column edge rather than a
+   separator between two controls. The margin is the "breathing room" from the facet dropdown. */
 .cal-sep {
-  width: 1px; align-self: stretch; margin: 0 2px;
+  width: 1px; height: 18px; align-self: center; margin: 0 9px;
   background: #e7dcce; flex: none;
 }
-.cal-recbtn { display: inline-flex; align-items: center; gap: 6px; }
+/* ⚠️ ONE LINE, ALWAYS, AND THE SWATCH IS INSIDE THE CHIP. It wrapped to two with the swatch
+   orphaned outside — a `width: 26px` bled onto `.cal-nav` from todo.css (Phase 1). `nowrap` is the
+   belt: the control names a layer, and a control that reflows says the bar is out of room when it
+   is not. */
+.cal-recbtn { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .cal-recsw { width: 7px; height: 7px; border-radius: 50%; flex: none; }
-/* off reads as off — the swatch drops back rather than the label going grey, so the control still
-   states WHICH layer it governs while it is not governing it */
-.cal-recbtn[aria-pressed="false"] { color: #a2937f; }
-.cal-recbtn[aria-pressed="false"] .cal-recsw { opacity: 0.45; }
+/* ⚠️ OFF IS VISIBLY OFF. The whole chip drops back rather than the label alone going grey — a
+   swatch at full strength beside muted text reads as a control mid-transition. The swatch keeps
+   its hue at reduced strength, so the chip still states WHICH layer it governs while it is not
+   governing it. */
+.cal-recbtn[aria-pressed="false"] { opacity: 0.42; }
 .cal-recbtn[aria-pressed="true"] { background: #f6f1ea; border-color: #b9a48f; }
 
 /* ══ THE IN-FOCUS DAY PANEL (record-layer pack, Phase 5) ════════════════════════════════════
