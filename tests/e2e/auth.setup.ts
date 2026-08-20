@@ -14,9 +14,10 @@
  * `tests/e2e/.auth/` is gitignored for the same reason the password is.
  */
 import { test as setup, expect } from "@playwright/test";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { STORAGE_STATE } from "../../playwright.config";
+import { assertLocalBundleIsDev } from "./bundleGuard";
 
 const EMAIL = process.env.SA_E2E_EMAIL ?? "harness@scriptally.test";
 
@@ -32,41 +33,6 @@ function passwordFromEnvLocal(): string | null {
   return null;
 }
 
-/**
- * ⚠️ A LOCAL RUN MUST BE SERVING A **DEV** BUNDLE, AND THIS IS WHERE THAT IS CHECKED.
- *
- * `dist/` is one directory shared by every session in this checkout, and a production build —
- * `npm run build` as a gate, from ANY session — silently replaces the dev bundle a
- * `vite preview` is serving. The pages still load, the harness signs in, and the measurements
- * read a real page: it is simply the PRODUCTION Firebase project.
- *
- * Measured 20 Aug, and it is not hypothetical: a settings measurement ran against a prod bundle
- * for several minutes. Its writes were correctly DENIED (prod rules are older, and the field it
- * was writing did not exist there), and the denial read exactly like a broken feature — the
- * diagnosis went through the rules, a redeploy, a vintage probe and a per-field SDK write, all of
- * which said the write was fine, before the request payload named `gen-lang-client-…` in its URL.
- * Nothing in prod was modified, and nothing should have been at risk of it.
- *
- * The check is skipped for a remote BASE_URL, where `dist/` is not what is being served.
- */
-function assertLocalBundleIsDev(): void {
-  const base = process.env.SA_E2E_BASE_URL ?? "";
-  if (!/^https?:\/\/(localhost|127\.0\.0\.1)/.test(base)) return;
-  const dir = resolve(process.cwd(), "dist/assets");
-  if (!existsSync(dir)) throw new Error(`No dist/ to serve. Run \`npm run build:dev\` first.`);
-  const js = readdirSync(dir).filter((f) => f.endsWith(".js"));
-  const bundle = js.map((f) => readFileSync(resolve(dir, f), "utf8")).join("");
-  if (bundle.includes(PROD_PROJECT_ID)) {
-    throw new Error(
-      `dist/ is a PRODUCTION bundle (${PROD_PROJECT_ID} present) and ${base} is serving it. ` +
-      `Measuring would point the harness account at prod. Run \`npm run build:dev\` and retry — ` +
-      `a production build from any session in this checkout overwrites dist/.`,
-    );
-  }
-}
-
-/** The prod project id, the one string that must never appear in a locally-served bundle. */
-const PROD_PROJECT_ID = "gen-lang-client-0801391782";
 
 setup("authenticate", async ({ page }) => {
   assertLocalBundleIsDev();

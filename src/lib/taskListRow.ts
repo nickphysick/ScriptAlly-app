@@ -177,11 +177,29 @@ export const rowBucket = (c: BoardCard): Bucket => cardBucket(c);
  * is for tiles and the timeline.
  */
 export interface PaneCopy {
-  /** `.act h3` — null renders no heading at all */
+  /** `.f-h` — null renders no heading at all */
   heading: string | null;
-  /** `.b-primary` */
+  /** `.ab.go` */
   primary: string;
+  /**
+   * ⚠️ `.f-sub` WHERE THE JOURNEY HAS WORDS OF ITS OWN, absent where the generic hint will do.
+   * Close is the case: the contract gives it a line that has to be carried verbatim, because it is
+   * the sentence that stops "closing" reading as "rejecting" — and it makes a claim about the
+   * writer's own statistics that the app has to be able to stand behind.
+   */
+  note?: string;
 }
+
+/**
+ * ⚠️ DECLARED ABOVE `PANE_COPY`, WHICH READS IT. A `const` in a module's temporal dead zone
+ * throws when the table below is initialised, and the table is initialised on import — so the
+ * page renders nothing and no test that reads source can see it. The house rule, stated in
+ * CLAUDE.md, is that initialisation goes at the END of a module; this is the same rule read
+ * forwards.
+ *
+ * the verbatim line the close journey must carry */
+export const CLOSE_NOTE =
+  "Closing records no response — not a rejection, so your response rate stays honest.";
 
 /**
  * ⚠️ THE PRIMARIES ARE FIRST-PERSON OR PLAIN-CONSEQUENCE, NEVER A RETIRED VERB. The pane contract
@@ -197,7 +215,11 @@ export interface PaneCopy {
 export const PANE_COPY: Record<Bucket, PaneCopy> = {
   send:   { heading: "Sent it? Note it here",      primary: "I've sent it" },
   chase:  { heading: null,                          primary: "I've nudged them" },
-  close:  { heading: "Ready to close this one?",   primary: "Close this query" },
+  close:  { heading: "Ready to close this one?",   primary: "Close this query",
+            /* ⚠️ COMPOSED FROM `CLOSE_NOTE`, NOT RETYPED. The first sentence is the verbatim line
+               and is asserted as such; retyping it here would put the same claim about response
+               rates in two places, and the one that drifts is always the copy. */
+            note: `${CLOSE_NOTE} It does not tell the agent anything.` },
   fix:    { heading: "What went with the query?",  primary: "Record what went" },
   note:   { heading: "Your note",                   primary: "Tick it off" },
   /* ⚠️ DECIDE IS NOT IN THE BRIEF'S TABLE. An offer is answered in its own journey, not by a
@@ -205,9 +227,5 @@ export const PANE_COPY: Record<Bucket, PaneCopy> = {
      words — reported rather than invented. */
   decide: { heading: null,                          primary: "Reply to the offer" },
 };
-
-/** the verbatim line the close journey must carry */
-export const CLOSE_NOTE =
-  "Closing records no response — not a rejection, so your response rate stays honest.";
 
 export const paneCopy = (c: BoardCard): PaneCopy => PANE_COPY[cardBucket(c)];

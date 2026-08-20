@@ -368,7 +368,7 @@ describe("⚠️ §5.3 — THE ANCHOR'S NOUN NAMES WHAT ACTUALLY HAPPENED", () =
     expect(anchorNoun(bcard({ taskType: "revise_resubmit" }))).toBe("Revision requested");
     expect(anchorNoun(bcard({ taskType: "full_requested" }))).toBe("Requested");
     expect(anchorNoun(bcard({ taskType: "nudge_overdue" }))).toBe("Queried");
-    expect(anchorNoun(bcard({ taskType: "no_response_close" }))).toBe("Last entry");
+    expect(anchorNoun(bcard({ taskType: "no_response_close" }))).toBe("Most recent interaction");
     expect(anchorNoun(bcard({ userTaskId: "u1" }))).toBe("Added");
     expect(anchorNoun(bcard({ taskType: "data_quality_poor" }))).toBe("Noticed");
   });

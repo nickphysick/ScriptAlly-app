@@ -16,6 +16,7 @@
 import { Page, expect } from "@playwright/test";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { assertLocalBundleIsDev } from "./bundleGuard";
 
 /**
  * ⚠️⚠️ THIS BROWSER CANNOT PRODUCE A CLASSIC SCROLLBAR, AND EVERY REPORT MUST SAY SO.
@@ -110,6 +111,11 @@ const SHELL = ".ws-panel, .ws-work, .ws-window, #app-stage-scroll";
  * changing the app's auth persistence to suit its test harness.
  */
 export async function ensureSignedIn(page: Page) {
+  /* ⚠️ THE BUNDLE GUARD RUNS HERE, NOT ONLY IN SETUP. `auth.setup.ts` runs once and is SKIPPED when
+     a cached `storageState` is still valid — so a run that reuses the session never reached the
+     check, and could measure a production or a stale bundle with nothing said. Every measure spec
+     calls this function; the guard belongs where the traffic is. */
+  assertLocalBundleIsDev();
   /* ⚠️ WAIT FOR ONE OF THE TWO, DO NOT COUNT IMMEDIATELY. Checking `count()` straight after a
      `goto` reads a document the app has not rendered into yet, so it always looked signed-out —
      and then tried to sign in again, on a route that redirects away from the form when the session

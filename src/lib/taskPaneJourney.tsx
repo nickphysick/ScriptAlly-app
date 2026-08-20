@@ -22,7 +22,7 @@
 import React from "react";
 import { BoardCard } from "./todoBoard";
 import { GROUP_CLASS, liveFamily } from "./todoFamily";
-import { bandDeed, bandSubline, bandPreline, panePresence } from "./todoHandoff";
+import { anchorNoun, bandDeed, bandSubline, bandPreline, panePresence } from "./todoHandoff";
 import { cardFootHint } from "./todoBuckets";
 import { paneCopy } from "./taskListRow";
 import type { TaskPaneEvent, TaskPaneJourney, TaskPaneTile } from "../components/todo/TaskPane";
@@ -81,10 +81,30 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
    * places and invites the reader to think they are different. The FIRST wins: it is the row's own
    * order, and the second was the duplicate.
    */
+  /**
+   * ⚠️ THE "MOST RECENT INTERACTION" TILE READS THE STORY COLUMN'S OWN LAST RUNG (pane round,
+   * Phase 5), rather than re-deriving "the latest thing" from the query. Two derivations of the
+   * same fact, side by side in one pane, is how a tile comes to say 4 May while the rail beneath it
+   * ends on 23 July — and the reader has no way to tell which is the record. One array, read twice.
+   *
+   * ⚠️ AND IT DEGRADES TO THE DATE RATHER THAN TO NOTHING. A close card whose query has no logged
+   * activity still has an anchor date, which is a true fact; what it does not have is an
+   * interaction to name, so the tile keeps the date and adds no second line.
+   */
+  const lastEvent = input.events.length ? input.events[input.events.length - 1] : null;
+  const anchorKey = anchorNoun(c);
+
   const seen = new Set<string>();
   const tiles: TaskPaneTile[] | null = presence.tiles
     ? [
-        ...input.facts.map((f) => ({ k: f.k, val: f.v })),
+        ...input.facts.map((f) =>
+          f.k === anchorKey && lastEvent
+            ? {
+                k: f.k,
+                val: lastEvent.label,
+                small: lastEvent.via ? `${lastEvent.when} · ${lastEvent.via}` : lastEvent.when,
+              }
+            : { k: f.k, val: f.v }),
         {
           k: "Sent previously",
           val: input.sentPreviously ?? "None sent",
@@ -126,7 +146,10 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
        the LIST says a card is for; the form beside it asks a different question, and the two had
        drifted into "Consider closing" against "Complete". */
     actTitle: paneCopy(c).heading ?? "",
-    actSub: cardFootHint(c),
+    /* ⚠️ THE JOURNEY'S OWN WORDS WHERE IT HAS THEM (Phase 5). Close carries a line that has to be
+       carried verbatim — it is what stops "closing" reading as "rejecting" — and the generic foot
+       hint said something true but weaker in its place. Everything else still falls back. */
+    actSub: paneCopy(c).note ?? cardFootHint(c),
     body: input.body,
     will: input.will,
     quiet: input.quiet,

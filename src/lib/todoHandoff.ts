@@ -599,7 +599,11 @@ export function anchorNoun(c: BoardCard): string {
     case "decide": return c.taskType === "offer_received" ? "Offer received" : "Revision requested";
     case "send": return "Requested";
     case "chase": return "Queried";
-    case "close": return "Last entry";
+    /* ⚠️ "Most recent interaction", NOT "Last entry" (pane round, Phase 5). The tile beneath it no
+       longer states a bare date: it states WHAT happened and when, so "Last entry · 4 May" — a noun
+       naming a row in a log — became a phrase naming a thing that passed between two people. The
+       contract's own words, and the reason the tile could change is that it now reads the story. */
+    case "close": return "Most recent interaction";
     case "note": return ADDED_LABEL;
     /* a housekeeping gap is NOTICED, not requested — and `rowFigure` already says so on the rail */
     case "fix": return "Noticed";

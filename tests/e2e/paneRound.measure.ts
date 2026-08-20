@@ -103,8 +103,13 @@ test("pane round", async ({ page }) => {
     return {
       deed: t(".tpn .deed"),
       tiles: all(".tpn .tile .k").map((e) => (e.textContent||"").trim()),
-      heading: t(".tpn .act h3, .tpn .mid h3"),
-      primary: t(".tpn .b-primary, .tpn .actbar .b-primary"),
+      /* ⚠️ THE CONTRACT'S OWN SELECTORS. These read \`.act h3\` and \`.b-primary\` — the MATERIALS
+         contract's, retired with the chassis in Phase 2 — so both probes reported an empty string
+         about a heading and a primary that were on the page and correct. A false RED is the
+         harmless direction of this fault and it is still the fault: a probe must be pointed at
+         what the page renders, or it is measuring its own memory. */
+      heading: t(".tpn .formcol .f-h"),
+      primary: t(".tpn .actbar .ab.go"),
       rate: (all(".tpn")[0]?.innerText||"").includes("response rate stays honest"),
     };
   })()`) as any;
