@@ -15,6 +15,8 @@ import {
   monthGridDays, weekDays, monthLabel, weekLabel, shiftMonth, shiftWeek, sameMonth,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
+  cellSlots,
+  REC_TONE, REC_LEGEND, REC_INK,
 } from "./todoCalendar";
 import { HOLDING_REPLY_TYPE } from "./holdingReply";
 import { CAL_PIP, CAL_LEGEND } from "./todoFamily";
@@ -151,8 +153,16 @@ describe("the fold, the map, the wiring", () => {
        resolved to, not read flat off the constant. A flat 3 asked a 44px row on a short laptop to
        hold three 19px pips, and the third was sheared in half — a clipped pip is worse than an
        honest fold, because the fold says "there are more" while a half-pip says the app is
-       broken. CAL_CELL_CAP survives as the CEILING, which is what this test really pinned. */
-    expect(pageSrc).toContain("items.slice(0, cellCap)");
+       broken. CAL_CELL_CAP survives as the CEILING, which is what this test really pinned.
+
+       ⚠️ RETARGETED 20 Aug 2026 (record-layer P3): the slicing moved out of the JSX into the pure
+       `cellSlots`, because the cell now seats two layers and the ordering between them is a rule
+       worth testing rather than a line worth quoting. The CLAIM is unchanged — the cap still binds
+       the live items — but it is now asserted by CALLING the arithmetic instead of matching the
+       expression that used to express it. */
+    expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b", "c"]);
+    expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).overflow).toBe(1);
+    expect(pageSrc).toContain("cellSlots(items, recs, cellCap)");
     expect(pageSrc).toContain("calFoldCap(rowPx)");
     expect(pageSrc).toContain("+{overflow} MORE");
   });
@@ -370,5 +380,94 @@ describe("the record buckets by day, beside the live work", () => {
     // 12 Aug is real, but a September grid does not contain it
     expect(rec([act({ activityType: ActivityType.QUERY_SENT })], monthGridDays("2026-10-05")).size).toBe(0);
     expect(rec([]).size).toBe(0);
+  });
+});
+
+/* ══ THE RECORD IN THE GRID (record-layer pack, Phase 3) ════════════════════════════════════
+ *
+ * ⚠️ NEGATIVE ASSERTIONS STRIP COMMENTS FIRST. This codebase documents every retirement by
+ * quoting what it retired, so a lock forbidding a token finds it in the prose explaining why it
+ * is gone. Positive assertions read the raw source; `decls` is for `not.` only.
+ */
+const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+const calCss = readFileSync(join(here, "..", "components", "todo", "todoCalendar.css"), "utf8");
+
+describe("⚠️ the record is recessive, and it folds with everything else", () => {
+  it("live work fills the cell FIRST; the record takes what is left", () => {
+    // two live, one record, cap 3 → everything shows, live first
+    expect(cellSlots(["a", "b"], ["r"], 3)).toEqual({ shownItems: ["a", "b"], shownRecs: ["r"], overflow: 0 });
+    // three live, two record, cap 3 → the live work takes every slot and the record all folds
+    expect(cellSlots(["a", "b", "c"], ["r", "s"], 3)).toEqual({ shownItems: ["a", "b", "c"], shownRecs: [], overflow: 2 });
+  });
+
+  it("⚠️ a busy day never pushes today's work under the fold to make room for history", () => {
+    // the failure this ordering prevents: were the record to take slots first, a day with four
+    // past events and one live task would fold the ONE thing the writer still has to do.
+    const { shownItems, shownRecs } = cellSlots(["live"], ["r1", "r2", "r3", "r4"], 3);
+    expect(shownItems).toEqual(["live"]);
+    expect(shownRecs).toEqual(["r1", "r2"]);
+  });
+
+  it("⚠️ the fold counts BOTH layers — a record pip is a pip", () => {
+    expect(cellSlots([], ["r", "s", "t", "u"], 3).overflow).toBe(1);
+    expect(cellSlots(["a", "b"], ["r", "s"], 3).overflow).toBe(1);
+    // the record alone, well within the cap, folds nothing
+    expect(cellSlots([], ["r"], 3)).toEqual({ shownItems: [], shownRecs: ["r"], overflow: 0 });
+    // an empty day, and the degenerate cap, both stay honest
+    expect(cellSlots([], [], 3)).toEqual({ shownItems: [], shownRecs: [], overflow: 0 });
+    expect(cellSlots(["a"], ["r"], 0)).toEqual({ shownItems: [], shownRecs: [], overflow: 2 });
+    // calFoldCap is consumed unchanged — this pack does not touch the measured fold
+    expect(pageSrc).toContain("calFoldCap(rowPx)");
+    expect(pageSrc).toContain("cellSlots(items, recs, cellCap)");
+    expect(calFoldCap(0)).toBe(CAL_CELL_CAP);
+  });
+
+  it("⚠️ record pips keep .cal-pip's BOX — the fold counts in CAL_PIP_H, so height must not drift", () => {
+    expect(pageSrc).toContain('className="cal-pip cal-rec"');
+    const rec = calCss.slice(calCss.indexOf(".cal-pip.cal-rec {"));
+    expect(calCss.indexOf(".cal-pip.cal-rec {"), "the record pip rule is missing").toBeGreaterThan(-1);
+    const block = rec.slice(0, rec.indexOf("}"));
+    // paint only — no height, padding-block, margin or font-size may be restated here
+    for (const prop of ["height", "padding:", "padding-top", "padding-bottom", "margin", "font-size", "line-height"]) {
+      expect(block, `.cal-pip.cal-rec must not restate ${prop}`).not.toContain(prop);
+    }
+  });
+
+  it("⚠️ the card pips are NOT restyled — CAL_PIP still paints them, untouched", () => {
+    expect(pageSrc).toContain("CAL_PIP[it.family]");
+    // the record's tones never reach a card pip
+    expect(decls(pageSrc)).not.toMatch(/CAL_PIP\[[^\]]+\][^\n]*REC_TONE/);
+  });
+});
+
+describe("⚠️ the record's tones are calendar-local, and the legend still renders FROM a record", () => {
+  it("the two dots are the ref's, and they are the only two", () => {
+    expect(REC_TONE.out.dot).toBe("#b9a48f");
+    expect(REC_TONE.in.dot).toBe("#8a9e88");
+    expect(Object.keys(REC_TONE).sort()).toEqual(["in", "out"]);
+    expect(REC_INK).toBe("#7d6b5d");
+  });
+
+  it("⚠️ CAL_PIP IS NOT WIDENED — the record is a layer, not a fifth family", () => {
+    // Two locks outside this session's territory assert the four, and the shapes differ anyway:
+    // a CAL_PIP entry is {bg,tx,bd} and the record has no fill and no border.
+    expect(Object.keys(CAL_PIP).sort()).toEqual(["agent", "done", "snoozed", "task"]);
+    expect(CAL_LEGEND.map((l) => l.family)).toEqual(Object.keys(CAL_PIP));
+  });
+
+  it("the legend reads both records and writes no tone of its own", () => {
+    expect(pageSrc).toContain("CAL_LEGEND.map");
+    expect(pageSrc).toContain("REC_LEGEND.map");
+    expect(REC_LEGEND.map((l) => l.dir)).toEqual(["out", "in"]);
+    // no record hex is written in the page — the tones come from the record
+    expect(decls(pageSrc)).not.toContain("#b9a48f");
+    expect(decls(pageSrc)).not.toContain("#8a9e88");
+  });
+
+  it("⚠️ the record is NOT narrowed by the facet — there is no urgent history", () => {
+    // FILTERS narrow live WORK; a facet reaching the record would answer a question about the
+    // past with a rule written for the present. Only THE RECORD governs it.
+    expect(pageSrc).toContain("recordDays(activities, queries, agents, visible)");
+    expect(decls(pageSrc)).not.toMatch(/applyFacet\([^)]*rec/i);
   });
 });

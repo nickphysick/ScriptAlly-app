@@ -435,3 +435,59 @@ export function recordDays(
   }
   return byDay;
 }
+
+/**
+ * ⚠️ THE RECORD'S TONES ARE CALENDAR-LOCAL, AND THE SHAPE IS THE REASON — not just the fence.
+ *
+ * `todoFamily.CAL_PIP` is the one place colour vocabulary lives, and its own comment says so, so
+ * this looks at first like the wrong home. Three things say otherwise, and the first is the one
+ * that would still hold if the fence lifted:
+ *
+ *  1. THE SHAPES DO NOT MATCH. A `CAL_PIP` entry is `{ bg, tx, bd }` — a filled, bordered chip.
+ *     The record layer has NO fill and NO border by design; it is a dot and a muted word. Putting
+ *     it in that map means writing `bg: "transparent", bd: "transparent"`, which encodes "there is
+ *     no fill here" in a vocabulary whose every other entry means "this is the fill". That is a
+ *     map lying about its own contents.
+ *  2. IT IS NOT A PIP FAMILY. `CalPipFamily` classifies LIVE work by who it belongs to. The record
+ *     is a different layer, not a fifth family — and widening the union would invite a `CAL_PIP`
+ *     consumer to treat a past event as a live card.
+ *  3. TWO LOCKS OUTSIDE THIS SESSION'S TERRITORY ASSERT THE FOUR (`tasksAuditLegend.test.tsx`
+ *     requires legend and map to have identical keys; `todoCalendar.test.ts` names the four
+ *     exactly). Both are right, and neither is mine to edit.
+ *
+ * The legend still renders FROM a record rather than from literals in the page — the rule that
+ * matters — it simply reads two records now, each owning the layer it describes.
+ */
+export const REC_TONE: Record<RecordDir, { dot: string }> = {
+  out: { dot: "#b9a48f" },
+  in: { dot: "#8a9e88" },
+};
+
+/** The record's own legend rows, in the order the layer reads. */
+export const REC_LEGEND: { dir: RecordDir; label: string }[] = [
+  { dir: "out", label: "YOU SENT" },
+  { dir: "in", label: "THEY REPLIED" },
+];
+
+/** The muted ink every record pip and row wears — never a card pip's ink. */
+export const REC_INK = "#7d6b5d";
+
+/**
+ * ⚠️ THE CELL'S SLOT ARITHMETIC IS A FUNCTION, NOT A LINE OF JSX — because a source-string lock
+ * proves the expression was written and never that it computes the right thing. The two layers
+ * share one cap, and the order is the rule: LIVE WORK TAKES ITS SLOTS FIRST, the record takes what
+ * is left, and the fold counts everything that did not fit. A busy day therefore never pushes
+ * today's work under a "+N MORE" to make room for last week's history.
+ *
+ * `cap` comes from `calFoldCap`, which is untouched by this pack: it answers "how many pips fit",
+ * and a record pip is a pip — same box, same `CAL_PIP_H`.
+ */
+export interface CellSlots<T, R> { shownItems: T[]; shownRecs: R[]; overflow: number }
+
+export function cellSlots<T, R>(items: readonly T[], recs: readonly R[], cap: number): CellSlots<T, R> {
+  const room = Math.max(0, cap);
+  const shownItems = items.slice(0, room);
+  const shownRecs = recs.slice(0, Math.max(0, room - shownItems.length));
+  const overflow = (items.length + recs.length) - shownItems.length - shownRecs.length;
+  return { shownItems, shownRecs, overflow: Math.max(0, overflow) };
+}

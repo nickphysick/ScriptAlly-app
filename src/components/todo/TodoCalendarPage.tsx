@@ -31,6 +31,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, weekDays, monthLabel, weekLabel,
   shiftMonth, shiftWeek, sameMonth, CAL_CELL_CAP, calFoldCap,
+  RecordItem, recordDays, cellSlots, REC_TONE, REC_LEGEND, REC_INK,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
@@ -58,6 +59,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
   const [facet, setFacet] = useState<TodoFacetId>("all");
   const [tagSel, setTagSel] = useState<string[]>([]); // tasks-pages P5 — additive with FILTERS
   const [view, setView] = useState<"month" | "week">("month");
+  /* ⚠️ THE RECORD'S TOGGLE IS THE PAGE'S OWN STATE, AND DELIBERATELY NOT A FACET (record-layer P4).
+     `TODO_FACETS` is ONE vocabulary shared with the board and the sidebar badge; the board has no
+     history, so a fifth facet would leak a calendar-only concept into a control two other surfaces
+     read. Session-only and default on: the record is what the page gained, so it shows by default,
+     and a preference stored for a view toggle is a preference nobody asked to keep. */
+  const [showRecord, setShowRecord] = useState(true);
   /* ⚠️ THE FOLD THRESHOLD IS MEASURED, NOT GUESSED (tasks-viewport P3). The grid resolves its own
      row height from whatever the frame leaves it, so the only honest source for "how many pips
      fit" is the grid itself. A ResizeObserver keeps it true through window resizes and through
@@ -121,6 +128,18 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
      a different number from the board's for the same facet. */
   const facetTotals = facetCounts(liveBoardCards(assembled.cols));
 
+  /* ⚠️ THE RECORD IS A SECOND, INDEPENDENT DERIVATION OVER THE SAME VISIBLE DAYS (record-layer P2).
+     It reads `activities` — already loaded unwindowed by the db provider — so the whole layer costs
+     one pass over an array in memory: no new query, no new hook, no stored field. It is deliberately
+     NOT narrowed by the facet: FILTERS narrow live WORK ("show me only what is urgent"), and there
+     is no urgent history — a facet reaching the record would quietly answer a question about the
+     past with a rule written for the present. The one control that governs it is THE RECORD. */
+  const recByDay = useMemo(
+    () => recordDays(activities, queries, agents, visible),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activities, queries, agents, visible.join("|")],
+  );
+
   const subtitle = view === "month"
     ? `${monthLabel(anchor)} — every item on the day it needs you.`
     : `${weekLabel(anchor)} — every item on the day it needs you.`;
@@ -130,6 +149,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
   };
 
   const dayData = (ymd: string) => byDay.get(ymd) ?? { items: [], rolled: 0 };
+  const recordFor = (ymd: string): RecordItem[] => (showRecord ? recByDay.get(ymd) ?? [] : []);
 
   return (
     <div className="t-f12 spine-root">
@@ -202,11 +222,14 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
             {DOW.map((d) => <div key={d} className="cal-dow" role="columnheader">{d}</div>)}
             {visible.map((ymd) => {
               const { items, rolled } = dayData(ymd);
+              const recs = recordFor(ymd);
               /* ⚠️ THE FOLD RESPONDS TO THE VIEWPORT (tasks-viewport P3): the cap comes from the
                  row height the grid actually resolved to, so a short laptop folds sooner rather
-                 than shearing a pip in half. */
-              const overflow = Math.max(0, items.length - cellCap);
-              const shown = items.slice(0, cellCap);
+                 than shearing a pip in half.
+                 ⚠️ THE RECORD FOLDS WITH EVERYTHING ELSE (record-layer P3), and the arithmetic is
+                 `cellSlots` rather than three expressions here — a rule this easy to get subtly
+                 wrong belongs somewhere a test can call it. `calFoldCap` is untouched. */
+              const { shownItems: shown, shownRecs, overflow } = cellSlots(items, recs, cellCap);
               const past = ymd < today;
               const off = view === "month" && !sameMonth(ymd, anchor);
               return (
@@ -214,11 +237,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                   key={ymd}
                   role="gridcell"
                   className={`cal-cell${ymd === today ? " today" : ""}${past ? " past" : ""}${off ? " off" : ""}`}
-                  onClick={() => items.length > 0 && setOpenDay(ymd)}
+                  onClick={() => (items.length > 0 || recs.length > 0) && setOpenDay(ymd)}
                 >
                   <div className="cal-d">
                     {Number(ymd.slice(8))}
-                    {items.length > 0 && <span className="cal-c2">{items.length}</span>}
+                    {items.length + recs.length > 0 && <span className="cal-c2">{items.length + recs.length}</span>}
                   </div>
                   {shown.map((it) => (
                     <button
@@ -232,6 +255,22 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                       {it.label}
                     </button>
                   ))}
+                  {/* ⚠️ THE RECORD SITS UNDER THE LIVE WORK, AND WEARS THE SAME BOX. It reuses
+                      `.cal-pip` geometry deliberately: `CAL_PIP_H` is the fold's unit, so a record
+                      pip of a different height would make the measured cap describe a cell it does
+                      not fit. Only the paint differs — no fill, no border, a dot and muted ink. */}
+                  {shownRecs.map((r) => (
+                    <button
+                      key={r.key}
+                      type="button"
+                      className="cal-pip cal-rec"
+                      title={r.agent ? `${r.label} · ${r.agent}` : r.label}
+                      onClick={(e) => { e.stopPropagation(); setOpenDay(ymd); }}
+                    >
+                      <span className="cal-recdot" style={{ background: REC_TONE[r.dir].dot }} aria-hidden />
+                      {r.label}
+                    </button>
+                  ))}
                   {overflow > 0 && <div className="cal-more2">+{overflow} MORE</div>}
                   {rolled > 0 && <span className="cal-rolled">{rolled} ROLLED FORWARD ↗</span>}
                 </div>
@@ -239,11 +278,19 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
             })}
           </div>
 
-          {/* the legend renders FROM the one map — never a second list */}
+          {/* ⚠️ THE LEGEND RENDERS FROM THE RECORDS — never a second list. It reads TWO now, each
+              owning the layer it describes: CAL_LEGEND for the live families, REC_LEGEND for the
+              record. The rule that matters is unchanged — no label or tone is written here. */}
           <div className="cal-legend" aria-hidden>
             {CAL_LEGEND.map((l) => (
               <span key={l.family}>
                 <i style={{ background: CAL_PIP[l.family].bg, borderColor: CAL_PIP[l.family].bd }} />
+                {l.label}
+              </span>
+            ))}
+            {showRecord && REC_LEGEND.map((l) => (
+              <span key={l.dir}>
+                <i className="cal-legdot" style={{ background: REC_TONE[l.dir].dot }} />
                 {l.label}
               </span>
             ))}

@@ -134,3 +134,23 @@
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 10px; color: #a5988c;
 }
+
+/* ══ THE RECORD LAYER (record-layer pack, Phase 3) ══════════════════════════════════════════
+ *
+ * ⚠️ RECESSIVE BY CONSTRUCTION: no fill, no border, a dot and a muted word. The live work is the
+ * page's subject and the record sits beneath it — if a past event drew as strongly as a live card,
+ * a busy month would read as a wall of equal demands, which is the opposite of what the layer is
+ * for.
+ *
+ * ⚠️ IT KEEPS `.cal-pip`'s BOX ON PURPOSE. `CAL_PIP_H` (todoCalendar.ts) is the unit the measured
+ * fold counts in, so a record pip of a different height would make `calFoldCap` describe a cell it
+ * does not fit. Only the paint is overridden here — never the geometry.
+ */
+.cal-pip.cal-rec {
+  background: transparent; border-color: transparent; color: #7d6b5d;
+  display: flex; align-items: center; gap: 5px; padding-left: 2px;
+}
+.cal-pip.cal-rec:hover { background: #faf7f2; }
+.cal-recdot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+/* the legend's record swatch is a dot, matching the pip; the live families keep their square */
+.cal-legend i.cal-legdot { width: 6px; height: 6px; border-radius: 50%; border-color: transparent; }
