@@ -202,3 +202,71 @@ column**, and once on its ban on this sheet **re-declaring the shared control** 
 rule tripped as a *substring* (`".cal-nav {"`). Both objections were correct, and the fix was mine
 to change, not theirs. The scopes are now existing ancestors and the nav takes a modifier. **Their
 files are untouched.**
+
+---
+
+## Phases 2–5, and Phase 6 acceptance
+
+| Phase | Commit | What |
+|---|---|---|
+| 2 | `5d19fedf` | the month becomes one ruled panel |
+| 3 | `6fe139b8` | cell anatomy — numeral box, today as a disc, two caps |
+| 4 | `f9e1f178` | the record's chip reads as one control |
+| 5 | `78367424` | the count line becomes legible; one record layer in the legend |
+
+### Acceptance — assertions, not prints
+
+`tests/e2e/calFold.measure.ts` gained a second test that **fails** rather than reports. Run against
+the dev-targeted local build at 1440, 1920 and 1000:
+
+```
+@1440 OK — 6 populated cells, panel 370×662, count "6 ITEMS"
+@1920 OK — 6 populated cells, panel 370×662, count "6 ITEMS"
+@1000 OK — one column, grid 420px, panel 640×325
+```
+
+Every claim the pack asked for, checked on the rendered page at both widths:
+
+| Claim | How it is asserted | Result |
+|---|---|---|
+| pips visible in every populated cell | `shown > 0`, `minPipH > 15`, per cell | 2 pips, min 24.75px |
+| no pip clipped, no cell overflowing | `scrollHeight <= clientHeight`, `p.scrollHeight <= p.clientHeight` | `101 vs 101` — fits |
+| counter **only** where items exceed the cap | `hasMore === (shown < total)`, per cell | holds on all 6 |
+| today's disc rendered | `.cal-cell.today .cal-dn` background | `rgb(124, 58, 42)` |
+| today draws no box | `.cal-cell.today` border-top width | `0px` |
+| no wash on past days | past cell's ground **vs its future twin in the same column** | identical |
+| the past says so quietly | past `.cal-dn` colour | `rgb(195, 179, 164)` |
+| the record toggle on one line | `white-space`, height < 40, `scrollWidth <= clientWidth` | `nowrap`, 32px, not clipped |
+| panel at its track width | `.cal-focus` width | **370** at both |
+| `.tpl-body` non-zero | walked up from `.cal-grid` | 661.75 |
+| 1080 collapse functioning | resolved column count, panel height, grid floor | 1 column, panel 640×325, grid 420 |
+
+### Two more first-match slips, both caught by their own tests
+
+Worth recording because they are the same family as the `.cal-d` collision itself — a name that is
+a *prefix or suffix* of another live name:
+
+1. `indexOf(".cal-dow {")` also matches `.cal-layout .cal-dow {` — the Phase 1 reset — so a Phase 2
+   assertion sliced the wrong block. The helper is anchored to a line start now.
+2. `indexOf("cal-recbtn")` finds **`cal-recbtn2`**, the day panel's action button, which sits
+   earlier in the file. Anchored on the exact `className` now.
+3. In the acceptance run itself, `querySelector(".cal-cell.past")` returned **27 July** — which is
+   also `.off`, so it legitimately paints the adjacent-month ground and said nothing about the
+   wash. The check now compares a past cell against **its future twin in the same weekday column**,
+   which is the question actually being asked.
+
+All three went red before they could go falsely green, which is the only reason they are footnotes
+rather than findings.
+
+### The cap, and why it is 2 rather than 3 at a 900px viewport
+
+The numeral's fixed 20px box took `CAL_CELL_CHROME` from 26 to 33, and that alone dropped a busy
+day to **one** pip — measured, not predicted. The cause was reserving a whole 25px pip slot for a
+12px counter. The fold now asks two questions:
+
+- `calFoldCap(rowPx)` — how many pips fit **alone**
+- `calFoldCapFolded(rowPx)` — how many fit **beside** the counter
+
+At the shipping size these are the same number, which is exactly the row the single-cap version was
+throwing away. A taller viewport returns a third pip (`rowPx >= 108`); this is a real consequence of
+the disc's size, not a regression.

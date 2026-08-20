@@ -16,7 +16,7 @@
  * — not the element anyone was looking at. So the readings walk from `.wpg-scroll` down to
  * `.cal-cell` and report every height, rather than asking the one element under suspicion.
  */
-import { test } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import { openRoute, scrollbarWidth } from "./measure";
 
 const ROUTE = "/todo/calendar";
@@ -291,4 +291,159 @@ test("calendar — the fold, the chain, the track", async ({ page }) => {
   lines.push(`  panel ${JSON.stringify(collapse.panel)}   (viewport h=${collapse.viewportH})`);
 
   console.log(lines.join("\n"));
+});
+
+/**
+ * ⚠️ THE ACCEPTANCE RUN — assertions, not prints (fixes pack, Phase 6).
+ *
+ * The measurement above reports; this one FAILS. Every claim the fixes pack makes about the
+ * rendered page is checked here at both widths, because the whole reason this pack exists is that
+ * "landed in code" was mistaken for "landed on the page" once already.
+ */
+test("calendar — acceptance", async ({ page }) => {
+  for (const width of [1440, 1920]) {
+    await openRoute(page, ROUTE, { width, height: 900 });
+    const r = await page.evaluate(() => {
+      const grid = document.querySelector(".cal-grid") as HTMLElement;
+      const cells = Array.from(document.querySelectorAll(".cal-cell")) as HTMLElement[];
+      const populated = cells
+        .map((c) => {
+          const pips = Array.from(c.querySelectorAll(".cal-pip")) as HTMLElement[];
+          const more = c.querySelector(".cal-more2");
+          const chip = c.querySelector(".cal-c2");
+          return {
+            day: (c.querySelector(".cal-dn")?.textContent ?? "").trim(),
+            total: Number(chip?.textContent ?? 0),
+            shown: pips.length,
+            hasMore: !!more,
+            clipped: pips.some((p) => p.scrollHeight > p.clientHeight + 1),
+            overflowing: c.scrollHeight > c.clientHeight + 1,
+            minPipH: pips.length ? Math.min(...pips.map((p) => p.getBoundingClientRect().height)) : null,
+          };
+        })
+        .filter((c) => c.total > 0);
+
+      /* the min-height chain, walked UP — never queried by class (see the head note) */
+      let el: HTMLElement | null = grid;
+      const chain: Record<string, number> = {};
+      while (el && el !== document.body) {
+        const cls = (el.className || "").toString();
+        if (/\b(tpl-body|tpl-cols|wpg-scroll|cal-layout|cal-main)\b/.test(cls)) {
+          chain[cls.split(/\s+/).find((c) => /^(tpl-body|tpl-cols|wpg-scroll|cal-layout|cal-main)$/.test(c))!] =
+            el.getBoundingClientRect().height;
+        }
+        el = el.parentElement;
+      }
+
+      const todayNum = document.querySelector(".cal-cell.today .cal-dn") as HTMLElement | null;
+      /* ⚠️ COMPARE LIKE WITH LIKE. `querySelector(".cal-cell.past")` returns 27 JULY — which is
+         also `.off`, so it legitimately paints the adjacent-month ground and the reading says
+         nothing about the wash. The honest question is whether `.past` ADDS anything, so take a
+         past and a future cell that are otherwise identical (same weekday column, neither
+         adjacent-month) and compare their grounds. */
+      const plain = (c: HTMLElement) => !c.classList.contains("off");
+      const weekdayCol = (c: HTMLElement) => {
+        const i = Array.from(c.parentElement!.children).indexOf(c);
+        return (i - 7) % 7; /* 0..6, the DOW row occupying 0..6 */
+      };
+      const pastPlain = cells.filter((c) => c.classList.contains("past") && plain(c));
+      const futurePlain = cells.filter((c) => !c.classList.contains("past") && plain(c));
+      const pastCell = pastPlain[pastPlain.length - 1] ?? null;
+      const pastTwin = pastCell
+        ? futurePlain.find((c) => weekdayCol(c) === weekdayCol(pastCell)) ?? null
+        : null;
+      const weekendCell = document.querySelector(".cal-cell:nth-child(7n + 6)") as HTMLElement | null;
+      const rec = document.querySelector(".cal-recbtn") as HTMLElement | null;
+      const panel = document.querySelector(".cal-focus") as HTMLElement | null;
+      const dow = document.querySelector(".cal-dow") as HTMLElement | null;
+
+      return {
+        populated, chain,
+        gridRadius: getComputedStyle(grid).borderRadius,
+        gridOverflow: getComputedStyle(grid).overflow,
+        gridGap: getComputedStyle(grid).gap,
+        dowBg: dow ? getComputedStyle(dow).backgroundImage : "",
+        dowColor: dow ? getComputedStyle(dow).color : "",
+        todayBg: todayNum ? getComputedStyle(todayNum).backgroundColor : null,
+        todayCellBorderTop: document.querySelector(".cal-cell.today")
+          ? getComputedStyle(document.querySelector(".cal-cell.today") as HTMLElement).borderTopWidth : null,
+        pastBg: pastCell ? getComputedStyle(pastCell).backgroundColor : null,
+        pastTwinBg: pastTwin ? getComputedStyle(pastTwin).backgroundColor : null,
+        pastNumeral: pastCell ? getComputedStyle(pastCell.querySelector(".cal-dn") as HTMLElement).color : null,
+        weekendBg: weekendCell ? getComputedStyle(weekendCell).backgroundColor : null,
+        recBox: rec ? { w: rec.getBoundingClientRect().width, h: rec.getBoundingClientRect().height,
+                        scrollW: rec.scrollWidth, clientW: rec.clientWidth,
+                        ws: getComputedStyle(rec).whiteSpace } : null,
+        panelW: panel ? Math.round(panel.getBoundingClientRect().width) : null,
+        panelH: panel ? Math.round(panel.getBoundingClientRect().height) : null,
+        countLine: document.querySelector(".cal-fpcount")?.textContent ?? null,
+      };
+    });
+
+    const at = `@${width}`;
+
+    /* ── the fold ─────────────────────────────────────────────────────────────────────────── */
+    expect(r.populated.length, `${at} no populated cells to check`).toBeGreaterThan(0);
+    for (const c of r.populated) {
+      expect(c.shown, `${at} day ${c.day} shows no pip`).toBeGreaterThan(0);
+      expect(c.clipped, `${at} day ${c.day} has a clipped pip`).toBe(false);
+      expect(c.overflowing, `${at} day ${c.day} overflows its cell`).toBe(false);
+      expect(c.minPipH!, `${at} day ${c.day} has a squashed pip`).toBeGreaterThan(15);
+      /* the counter appears IFF something is hidden */
+      expect(c.hasMore, `${at} day ${c.day}: ${c.shown} of ${c.total} shown, counter=${c.hasMore}`)
+        .toBe(c.shown < c.total);
+    }
+
+    /* ── the chain is not collapsed ───────────────────────────────────────────────────────── */
+    for (const [name, h] of Object.entries(r.chain)) {
+      expect(h, `${at} ${name} is ${h}px`).toBeGreaterThan(0);
+    }
+
+    /* ── the chassis ──────────────────────────────────────────────────────────────────────── */
+    expect(r.gridGap, `${at} the grid still has a gap`).toBe("0px");
+    expect(r.gridRadius).toBe("14px");
+    expect(r.gridOverflow).toBe("hidden");
+    expect(r.dowBg, `${at} the weekday band has no gradient`).toContain("linear-gradient");
+    expect(r.dowColor).toBe("rgb(90, 110, 88)");
+
+    /* ── today, and the wash ──────────────────────────────────────────────────────────────── */
+    expect(r.todayBg, `${at} today's disc`).toBe("rgb(124, 58, 42)");
+    expect(r.todayCellBorderTop, `${at} today still draws a box`).toBe("0px");
+    /* ⚠️ NO WASH: a past cell paints exactly what its future twin in the same column paints. */
+    expect(r.pastTwinBg, `${at} no comparable future cell found`).not.toBeNull();
+    expect(r.pastBg, `${at} past days carry a wash their future twin does not`).toBe(r.pastTwinBg);
+    /* the past says so with a muted numeral instead */
+    expect(r.pastNumeral, `${at} the past numeral is not muted`).toBe("rgb(195, 179, 164)");
+
+    /* ── the command bar ──────────────────────────────────────────────────────────────────── */
+    expect(r.recBox!.ws).toBe("nowrap");
+    expect(r.recBox!.h, `${at} the record chip is ${r.recBox!.h}px tall — wrapped?`).toBeLessThan(40);
+    expect(r.recBox!.w, `${at} the record chip is ${r.recBox!.w}px wide`).toBeGreaterThan(60);
+    expect(r.recBox!.scrollW, `${at} the record chip's content is clipped`)
+      .toBeLessThanOrEqual(r.recBox!.clientW + 1);
+
+    /* ── the panel ────────────────────────────────────────────────────────────────────────── */
+    expect(r.panelW, `${at} the panel is off its track`).toBe(370);
+    expect(r.panelH!, `${at} the panel has no height`).toBeGreaterThan(400);
+    expect(r.countLine, `${at} the count line is missing`).toMatch(/\d+ ITEMS?/);
+
+    console.log(`${at} OK — ${r.populated.length} populated cells, panel ${r.panelW}×${r.panelH}, count "${r.countLine}"`);
+  }
+
+  /* ── the 1080 collapse ──────────────────────────────────────────────────────────────────── */
+  await openRoute(page, ROUTE, { width: 1000, height: 900 });
+  const c = await page.evaluate(() => {
+    const l = document.querySelector(".cal-layout") as HTMLElement;
+    const f = document.querySelector(".cal-focus") as HTMLElement;
+    const fr = f.getBoundingClientRect();
+    return {
+      cols: getComputedStyle(l).gridTemplateColumns.split(" ").length,
+      panelW: Math.round(fr.width), panelH: Math.round(fr.height),
+      gridH: Math.round((document.querySelector(".cal-grid") as HTMLElement).getBoundingClientRect().height),
+    };
+  });
+  expect(c.cols, "the 1080 collapse did not engage").toBe(1);
+  expect(c.panelH, "the panel vanished in the collapsed layout").toBeGreaterThan(100);
+  expect(c.gridH, "the month crushed in the collapsed layout").toBeGreaterThanOrEqual(400);
+  console.log(`@1000 OK — one column, grid ${c.gridH}px, panel ${c.panelW}×${c.panelH}`);
 });
