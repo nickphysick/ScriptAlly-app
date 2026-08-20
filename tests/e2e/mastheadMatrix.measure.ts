@@ -43,9 +43,13 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
   const sc = g.querySelector(".wpg-scroll") as HTMLElement;
   const row = g.querySelector(".wpg-tools") as HTMLElement | null;
   const mark = mast.querySelector(".os-mark") as HTMLElement | null;
+  const mini = g.querySelector(".wpg-mini") as HTMLElement | null;
   const title = mast.querySelector(".wsh-title") as HTMLElement;
   const cs = getComputedStyle(mast);
   const scb = sc.getBoundingClientRect();
+  /* edges are reported as insets from BOTH window edges, so a reading names a position rather than
+     a coordinate that changes with the viewport */
+  const win = document.documentElement.clientWidth;
   return {
     fill: g.classList.contains("wpg--fill"),
     height: r(mast.getBoundingClientRect().height),
@@ -71,13 +75,38 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     titleH: r(title.getBoundingClientRect().height),
     padSum: r(parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderBottomWidth)),
     illustrated: !!mark?.querySelector("img"),
-    /* ⚠️ STRUCTURAL, NEVER A LIST OF LABELS. A name list passes the day someone adds a control this
-       matrix has never heard of, which is exactly the day it should fail. */
-    actionable: mast.querySelectorAll("button, a, input, select, textarea, [role='button']").length,
+    /**
+     * ⚠️ STRUCTURAL, NEVER A LIST OF LABELS. A name list passes the day someone adds a control this
+     * matrix has never heard of, which is exactly the day it should fail.
+     *
+     * ⚠️ COUNTED ON `.wpg-mast`, THE MASTHEAD AS A WHOLE — not on `.wsh` (masthead rethink, step 5).
+     * Hide is the one permitted action and it is rendered BESIDE the header rather than through it,
+     * so counting inside `.wsh` alone would report zero on a fill page and the rule would be
+     * asserting nothing about the very control it exists to bound.
+     */
+    actionable: wrap.querySelectorAll("button, a, input, select, textarea, [role='button']").length,
+    /* the header element itself must still carry none — no page may put a control in it */
+    headerActionable: mast.querySelectorAll("button, a, input, select, textarea, [role='button']").length,
     /* where the control row sits relative to the scroller — the gap between chrome and controls */
     rowTop: row ? r(row.getBoundingClientRect().top - scb.top) : -1,
     hasRow: !!row,
     wrapTop: r(wrap.getBoundingClientRect().top - scb.top),
+    /**
+     * ⚠️ THE THREE THINGS THAT MUST SHARE ONE WIDTH: the masthead, its closing hairline (drawn as
+     * the header's own `border-bottom`, so the header's box IS the hairline's width) and the mini
+     * bar. They are what the masthead system is; a bar at the content gutter beside a masthead 64px
+     * wider would read as a different object arriving rather than the same one folding.
+     */
+    mastEdges: `${r(wrap.getBoundingClientRect().left)}/${r(win - wrap.getBoundingClientRect().right)}`,
+    ruleEdges: `${r(mast.getBoundingClientRect().left)}/${r(win - mast.getBoundingClientRect().right)}`,
+    miniEdges: mini ? `${r(mini.getBoundingClientRect().left)}/${r(win - mini.getBoundingClientRect().right)}` : "",
+    /* the mini bar: rendered on every scrolling page (at zero height until stuck), absent on a fill
+       page until its masthead is folded */
+    miniPresent: !!mini,
+    miniActionable: mini ? mini.querySelectorAll("button, a, input, [role='button']").length : -1,
+    /* the inset, with the scrollbar reservation measured beside it rather than assumed away */
+    barReserve: r((sc.offsetWidth - sc.clientWidth) / 2),
+    mastInset: r(wrap.getBoundingClientRect().left - sc.getBoundingClientRect().left),
   };
 }, cls);
 
@@ -174,11 +203,59 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
     expect(r.borderTop, `${name}: the masthead has a top border`).toBe("0px");
     expect(r.borderLeft, `${name}: the masthead has a side border`).toBe("0px");
     expect(r.borderBottom, `${name}: the masthead lost its closing hairline`).toBe("1px");
-    /* ⚠️ NOTHING ACTIONABLE, EVER. It is the condition the whole design rests on: a masthead with
-       nothing to reach for never needs restoring, which is what lets it scroll away or vanish. */
-    expect(r.actionable, `${name}: the masthead contains ${r.actionable} actionable element(s)`).toBe(0);
+    /**
+     * ⚠️ ONE ACTION ON A FILL PAGE, NONE ON A SCROLLING ONE — and the exception is exactly one thing.
+     *
+     * The rule the design rests on is that the masthead holds nothing you might reach for, so it
+     * never needs restoring within a visit. A fill page cannot honour that literally: nothing
+     * scrolls, so the masthead needs a way to leave, and Hide IS that way. A scrolling page has one
+     * already — scrolling — so it keeps the rule unchanged.
+     *
+     * ⚠️ AND THE HEADER ELEMENT ITSELF CARRIES NONE ON EVERY PAGE. Hide is the grid's, rendered
+     * beside `.wsh`; `PageHeader` still throws if a page hands it an action. Two counts, because
+     * "one control on the masthead" and "no page may add one" are different claims.
+     */
+    const pages = PAGES.find((p) => p.name === name)!;
+    expect(r.actionable, `${name}: the masthead carries ${r.actionable} controls; a ${pages.fill ? "fill" : "scrolling"} page's carries ${pages.fill ? 1 : 0}`)
+      .toBe(pages.fill ? 1 : 0);
+    expect(r.headerActionable, `${name}: a control was put inside the header element itself`).toBe(0);
     /* the masthead opens the scroll row — the control row anchors, so it must come second */
     expect(r.wrapTop, `${name}: something sits above the masthead inside the scroller`).toBeLessThanOrEqual(0.5);
+  }
+
+  /**
+   * ⚠️ THE MASTHEAD, ITS HAIRLINE AND THE MINI BAR SHARE ONE WIDTH, AND IT IS THE SAME ON EVERY
+   * PAGE — 16px inside the scroll row's own edge, once the scrollbar reservation is taken off.
+   *
+   * ⚠️ THE RESERVATION IS MEASURED, NOT ASSUMED AWAY. `scrollbar-gutter: stable both-edges` takes
+   * one scrollbar width per side: 0 under overlay scrollbars (the real app), ~15 under classic ones
+   * (the harness). Subtracting what is actually there asserts 16 in both modes rather than pinning
+   * whichever the machine happens to be in.
+   */
+  for (const { name, r } of rows) {
+    expect(r.mastInset - r.barReserve, `${name}: the masthead sits ${r.mastInset - r.barReserve}px inside the scroll row (bar reserve ${r.barReserve})`)
+      .toBeCloseTo(16, 0);
+    expect(r.ruleEdges, `${name}: the closing hairline is not the masthead's own width`).toBe(r.mastEdges);
+    if (r.miniPresent) {
+      expect(r.miniEdges, `${name}: the mini bar sits at ${r.miniEdges} against the masthead's ${r.mastEdges} — it would read as a different object arriving`)
+        .toBe(r.mastEdges);
+    }
+  }
+  same("mastEdges", "the masthead's edges");
+
+  /**
+   * ⚠️ THE MINI BAR IS RENDERED ON EVERY SCROLLING PAGE AND ON NO FILL PAGE AT REST — presence, not
+   * height. It is 0px tall until the page sticks, which is why this asserts that it EXISTS rather
+   * than what it measures; the height and the stacking are `miniBar.measure.ts`'s job.
+   *
+   * ⚠️ AND ITS ONE CONTROL IS A FILL-PAGE AFFORDANCE. A scrolling page's masthead comes back by
+   * scrolling up, so a chevron there would be a second way to do what the page already does — and
+   * `-1` here means "no bar at all", which is the correct answer for a fill page at rest.
+   */
+  for (const { name, r } of rows) {
+    const fill = PAGES.find((p) => p.name === name)!.fill;
+    expect(r.miniPresent, `${name}: a ${fill ? "fill" : "scrolling"} page ${r.miniPresent ? "renders" : "does not render"} a mini bar at rest`).toBe(!fill);
+    if (!fill) expect(r.miniActionable, `${name}: the mini bar carries ${r.miniActionable} control(s) on a scrolling page`).toBe(0);
   }
 
   /* ⚠️ TWO MARK SIZES AND EXACTLY TWO — illustrated bare, monoline on its parchment plate. Derived
