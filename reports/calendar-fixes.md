@@ -270,3 +270,121 @@ day to **one** pip — measured, not predicted. The cause was reserving a whole 
 At the shipping size these are the same number, which is exactly the row the single-cap version was
 throwing away. A taller viewport returns a third pip (`rowPx >= 108`); this is a real consequence of
 the disc's size, not a regression.
+
+---
+
+## Deployed to dev
+
+**https://scriptally-dev.web.app** → Tasks → Calendar. Hosting-only; no rules, no functions.
+
+Checklist, in order:
+
+- `git fetch` → **0 behind** origin/main (55 ahead — the four sessions' unpushed work)
+- **⚠️ Source was NOT clean at build time** — see the flag below
+- `tsc` **0 errors**
+- `npm run build:dev` exit 0, whole log grepped (only the chunk-size note), target guard:
+  *"bundle targets scriptally-dev (dev); gen-lang-client-0801391782 absent"*
+- `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`
+- Verified against the **live** asset `/assets/index-D_z8rBbN.css`, not `dist/`: the three collision
+  resets, the parchment panel, the sage band, today's disc, the 9px count line and the legend rule
+  are all present, and `.cal-cell.past` sets **only** `color: #c3b3a4` — no wash.
+- **Acceptance re-run against the deployed site** (not just the local build): passes at 1440, 1920
+  and 1000.
+
+---
+
+## FLAGS FOR NICK
+
+### 1. What Phase 0 found — and it is **not** a third silent-box occurrence
+
+**Nothing was collapsed.** `calFoldCap` returned the correct 3 from a correctly-measured 104.17px
+row at both widths, and every ancestor from `.cal-grid` up to `.ws-window` measured 638–900px.
+
+The cause was a **class-name collision**: `todo.css:1599` styles a different `.cal-d` — the
+RecordingCalendar's square day *button* — and a CSS import is global whatever mounts. This page's
+rule is later in the bundle so it won the four properties it declared, but it never declared
+`aspect-ratio`, so **`aspect-ratio: 1` survived and squared an 8px numeral row to 76.28px inside a
+96px cell**. The three pips then **flex-shrank to 8px with clipped text** rather than being
+dropped — which is exactly why every count assertion passed while the month looked empty. The same
+collision gave `.cal-nav` `width: 26px` (empty prev/next glyphs, "The record" wrapping) and
+`.cal-dow` `display: grid` (the unstyled weekday row). **One cause, all four symptoms.**
+
+> **⚠️ For CLAUDE.md, the honest entry is not the silent box — it is this:** *on this app a
+> measurement probe must reach its element by walking up from something known to be on the visible
+> page, never by class.* My first Phase 0 reading said `.tpl-body` was 0px and that a third
+> `min-height:0` collapse had happened. It had not — `document.querySelector(".tpl-body")` returned
+> the **To-do list page's** copy, which is mounted-but-hidden. Every workspace page stays mounted.
+> Had I reported that first reading, a fact that is not true would have entered CLAUDE.md.
+
+**And the second entry worth having: a class name is a global.** Three stylesheets in one directory
+share the `cal-` prefix for three different components. The guard now in
+`todoCalendar.test.ts` re-derives the bleed set from `todo.css`, `taskChrome.css` and this page's
+sheet and **fails if `todo.css` ever gains a `.cal-*` property this page neither declares nor
+resets** — verified red by deleting the `aspect-ratio` reset.
+
+### 2. Before/after fold-cap numbers, both widths
+
+Identical at 1440 and 1920 (the grid's height does not vary with width):
+
+| | before | after |
+|---|---|---|
+| `.cal-d` | 76.28px | **12.75px** → **20.75px** (Phase 3's numeral box) |
+| pip heights | `[8, 8, 8]`, all clipped | `[24.75, 24.75]`, none clipped |
+| cell | `scrollHeight 136 vs 96` — overflowing | `101 vs 101` — fits |
+| `CAL_PIP_H` | 19 (the ref's estimate) | **25** (measured 24.75, rounded up) |
+| `CAL_CELL_CHROME` | 26 | **33** (the 20px numeral box) |
+| `calFoldCap(104.17)` | 3 — for the wrong reason | **2**, plus `calFoldCapFolded` = 2 |
+| a 12-item day | 3 pips crushed against a counter | **2 pips + `+10 MORE`** |
+
+The cap is 2 rather than 3 at a 900px viewport because the disc's 20px box costs seven pixels of
+chrome. A taller viewport returns the third pip at `rowPx >= 108`. **The two-cap model is what
+recovered the second pip** — a single cap reserved a whole 25px slot for a 12px counter and
+rendered one.
+
+### 3. What fought `TasksPageLayout`, and how it was resolved inside my own files
+
+Nothing fought the chassis itself — the panel still lives in `children` and `TasksPageLayout` is
+untouched. What fought me was **two of the To-do session's locks, and both were right**:
+
+- My first fix put a `calm` class on `.t-f12.spine-root`. `tasksViewport.test.tsx` asserts that
+  **all four Tasks pages wear the same column**. Correct law; I withdrew the class.
+- My first `.calm .cal-nav { … }` rule tripped their ban on this sheet **re-declaring the shared
+  control** — by substring (`".cal-nav {"`). Also correct: it is shared chrome.
+
+Resolved entirely in my files: the scopes are now **existing ancestors** (`.cal-layout` for the
+grid, `.tpl-tools` for the controls) and the nav takes a page-local `.calm-nav` modifier that
+un-bleeds the width without redefining anything shared.
+
+### 4. Cross-session ride-alongs, and one collision to pass on
+
+**⚠️ The deploy carries eight uncommitted files of the To-do session's in-flight pane work**, and
+their tree was oscillating red/green while I waited (~3 min). At build time `tsc` was 0 and the
+build was clean, but **two of their style locks were red** — `recordingCalendar.test.ts` ("the
+card's Action is ink-filled") and `tasksViewport.test.tsx` ("the page's pink buttons take ink").
+Both are source-string style assertions on **their** pages, not runtime breakage, and the calendar
+is unaffected — but the To-do pane on dev right now is mid-change, not finished work. I did not
+touch, revert or stash any of it.
+
+Files riding along uncommitted: `TaskPane.tsx`, `ToDoPage.tsx`, `taskPane.css`,
+`taskPaneJourney.tsx`, `taskPanePort.test.tsx`, `tasksViewport.test.tsx`,
+`recordingCalendar.test.ts`, `tests/e2e/paneRound.measure.ts`.
+
+**One collision to pass to whoever owns `taskChrome.css`:** `todo.css`'s `.cal-nav` pins
+`width: 26px` and `taskChrome.css` never restates it, so **the same bleed is live on the Noteboard
+and the To-do list**, whose tool rows wear the same control. I fixed it for this page only — their
+sheet is not mine. My change also orphans `.cal-viewwrap` in `taskChrome.css` (nothing renders it
+since the Week view retired); `.cal-viewmenu` beside it is still live for the Noteboard.
+
+### 5. What I could not verify
+
+Very little this time, and that is the difference the harness makes:
+
+- **The scrollbar**, as always — 0px on this machine, the instrument's one blind spot. A
+  classic-scrollbar question still needs your own browser.
+- **Other viewport heights.** Everything is measured at 900px tall. The cap is height-sensitive by
+  design, so a 1080px-tall screen will show three pips where these numbers show two. That is
+  intended, not unverified — but I have not seen it.
+- **The record layer with real history on screen.** The harness account's August has six populated
+  days and the record entries visible are `Holding reply` and `Closed …`. I have not seen a month
+  dense with record entries, so the layer's *density* at scale is unmeasured.
+- **`prefers-reduced-motion`** is declared and not exercised.
