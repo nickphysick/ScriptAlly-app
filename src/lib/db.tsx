@@ -301,6 +301,8 @@ interface DbContextType {
   // Activity Actions
   addActivity: (act: Omit<Activity, "id" | "userId"> & { id?: string }) => Promise<{ success: boolean; error?: string }>;
   deleteActivity: (id: string) => Promise<void>;
+  /** Correction primitive: remove entries and return the closure that puts them back. */
+  deleteActivities: (ids: string[]) => Promise<() => Promise<void>>;
   /** Correction primitive: patch an entry in a query's activity log, then recompute its derived fields. */
   editActivity: (
     queryId: string,
@@ -2491,6 +2493,54 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
    * per-query log entry when one exists (updateQueryStatus and the backfill write the two
    * stores under one id; response/mark-sent projections have independent ids and are cosmetic).
    */
+  /**
+   * ⚠️ REMOVAL WITH AN INVERSE — the correction sheet promises an undo, so one has to exist.
+   *
+   * `deleteActivity` has no counterpart, and the first wiring of the correction sheet handed its
+   * toast an empty restore: the writer would have been offered "Undo", pressed it, and been told
+   * the entries were back while nothing moved. That is worse than offering no undo at all, because
+   * it converts a recoverable mistake into one the writer believes they already fixed.
+   *
+   * ⚠️ THE DOCUMENTS ARE READ BEFORE THEY ARE DELETED, and the closure holds them. Restoring "by id"
+   * is only possible if something kept the contents, and after the delete there is nowhere left to
+   * read them from — so the capture happens first or not at all.
+   *
+   * ⚠️ AND BOTH STORES TRAVEL TOGETHER. An entry is a projection in the global feed and a document
+   * in the query's own log; restoring one would leave the timeline and the feed disagreeing about
+   * what happened, which is the exact divergence the two-store arrangement is written to avoid.
+   */
+  const deleteActivities = async (ids: string[]): Promise<() => Promise<void>> => {
+    if (!currentUser) return async () => {};
+    const uid = currentUser.id;
+    const captured: { id: string; queryId?: string; feed?: any; log?: any }[] = [];
+
+    for (const id of ids) {
+      const queryId = activities.find((a) => a.id === id)?.queryId;
+      const feedRef = doc(db, "users", uid, "activities", id);
+      const feedSnap = await getDoc(feedRef);
+      let log: any;
+      if (queryId) {
+        const logSnap = await getDoc(doc(db, "users", uid, "queries", queryId, "activity", id));
+        if (logSnap.exists()) log = logSnap.data();
+      }
+      captured.push({ id, queryId, feed: feedSnap.exists() ? feedSnap.data() : undefined, log });
+    }
+
+    for (const id of ids) await deleteActivity(id);
+
+    return async () => {
+      for (const c of captured) {
+        if (c.feed) await setDoc(doc(db, "users", uid, "activities", c.id), c.feed);
+        if (c.log && c.queryId) await setDoc(doc(db, "users", uid, "queries", c.queryId, "activity", c.id), c.log);
+      }
+      /* ⚠️ RECOMPUTE ONCE PER QUERY, AFTER EVERY DOCUMENT IS BACK — a recompute run between two
+         restores would derive from a log that is momentarily half-restored, and write a status the
+         writer never had. */
+      const qids = Array.from(new Set(captured.map((c) => c.queryId).filter(Boolean) as string[]));
+      for (const qid of qids) await recompute(qid);
+    };
+  };
+
   const deleteActivity = async (id: string) => {
     if (!currentUser) return;
     const target = activities.find(act => act.id === id);
@@ -2873,6 +2923,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         deleteUserTask,
         addActivity,
         deleteActivity,
+        deleteActivities,
         editActivity,
         updateUserProfile,
         dismissTask,

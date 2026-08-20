@@ -315,7 +315,7 @@ export const Queries: React.FC<{
     /* §6b/§6c — the stored task store the ghost rung reads, and the path that creates one */
     userTasks,
     addUserTask,
-    deleteActivity,
+    deleteActivity, deleteActivities,
     editActivity,
     updateAgent,
     updateQueryStatus,
@@ -1087,11 +1087,11 @@ export const Queries: React.FC<{
     const diff = previewFor(proposed);
 
     const commit = async () => {
-      for (const id of doomed) await deleteActivity(id);
-      await finishCorrection(
-        undoMessage(entry.label, agentPrimary(activeAgent), doomed.size),
-        async () => {},
-      );
+      /* ⚠️ ONE CALL, HOWEVER MANY DOCUMENTS MOVED — and it hands back the closure that reverses it.
+         The undo contract (Phase 4) is one toast per operation; a loop of single deletes would have
+         no inverse to give it, which is how the first wiring came to offer an Undo that did nothing. */
+      const restore = await deleteActivities(Array.from(doomed));
+      await finishCorrection(undoMessage(entry.label, agentPrimary(activeAgent), doomed.size), restore);
     };
 
     setCorrecting({
