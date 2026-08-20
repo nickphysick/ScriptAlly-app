@@ -396,3 +396,21 @@
    sits under the pills as information, and anything with the weight of an option would read as one
    more thing to pick. */
 .tpn .stated { font-size:10.5px;color:var(--muted2);font-weight:300;margin:-4px 0 11px;line-height:1.5; }
+
+/* ⚠️ THE FLASH ON A MISSING ANSWER (finishing round, Phase 4). It runs on the LABEL rather than the
+   control, because the label is what names the thing that is missing — a ring around a row of pills
+   says "something here" and the label says which question. Retriggerable by removing the class and
+   forcing a reflow; adding a class that is already present restarts nothing. */
+@keyframes tpn-askme {
+  0%, 100% { color: var(--muted); }
+  20%, 60% { color: var(--burg); }
+}
+.tpn .askme { animation: tpn-askme 1s ease-in-out 1; }
+@media (prefers-reduced-motion: reduce) {
+  /* no flash, but the answer still says which one it is — the colour holds instead of pulsing */
+  .tpn .askme { animation: none; color: var(--burg); }
+}
+
+/* ⚠️ OPTION B: REQUIRED FIELDS CARRY NO MARK, OPTIONAL ONES CARRY ONE WORD. An asterisk marks the
+   majority and teaches nothing; the rare case is the one worth naming. */
+.tpn .opttag { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;color:#b3a494;font-weight:400;margin-left:2px; }

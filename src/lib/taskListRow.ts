@@ -202,25 +202,28 @@ export const CLOSE_NOTE =
   "Closing records no response — not a rejection, so your response rate stays honest.";
 
 /**
- * ⚠️ THE PRIMARIES ARE FIRST-PERSON OR PLAIN-CONSEQUENCE, NEVER A RETIRED VERB. The pane contract
- * asked for "Log as sent", "Log the close" and "Log {n} queries" — all three reintroduce "log",
- * which the language review retired, and all three contradict the table the review settled. Newest
- * would have won on the tiebreak rule; the newer wording was the regression, so it does not.
+ * ⚠️ "LOG" IS REINSTATED FOR THESE PRIMARIES BY OWNER OVERRIDE (finishing round), AND THE OVERRIDE
+ * IS RECORDED HERE SO IT IS NOT "FIXED" BACK.
  *
- * ⚠️ THE BULK PRIMARY IS "Record {n} queries" AND THAT IS A JUDGEMENT CALL, recorded as one.
- * "Fill in {n} queries" would echo the deed exactly ("Fill in what you sent"); "Record" names what
- * the writer is doing to their OWN records, which is the distinction the review drew when it
- * retired "record" as a HEADING verb while leaving the app free to say "Will record:" about itself.
+ * The language review retired "log" as a heading verb, and the previous round changed these three
+ * to "I've sent it" / "Close this query" / "Record {n} queries" on that rule. The owner has since
+ * overridden it deliberately, after that round shipped: the primaries are "Log as sent", "Log the
+ * close", "Log {n} queries" and "Tick it off". That is a later decision by the person whose
+ * language table it is — not a regression, and not the contract leaking an old string.
+ *
+ * ⚠️ SO THE RETIRED-VERB ASSERTION IS SCOPED, NOT DELETED. "log" remains retired everywhere it was
+ * retired — deeds, headings, list rows — and is permitted on these four primaries alone. A blanket
+ * ban and a blanket permission are both wrong; the exception is named.
  */
 export const PANE_COPY: Record<Bucket, PaneCopy> = {
-  send:   { heading: "Sent it? Note it here",      primary: "I've sent it" },
+  send:   { heading: "Sent it? Note it here",      primary: "Log as sent" },
   chase:  { heading: null,                          primary: "I've nudged them" },
-  close:  { heading: "Ready to close this one?",   primary: "Close this query",
+  close:  { heading: "Ready to close this one?",   primary: "Log the close",
             /* ⚠️ COMPOSED FROM `CLOSE_NOTE`, NOT RETYPED. The first sentence is the verbatim line
                and is asserted as such; retyping it here would put the same claim about response
                rates in two places, and the one that drifts is always the copy. */
             note: `${CLOSE_NOTE} It does not tell the agent anything.` },
-  fix:    { heading: "What went with the query?",  primary: "Record what went" },
+  fix:    { heading: "What went with the query?",  primary: "Log as sent" },
   note:   { heading: "Your note",                   primary: "Tick it off" },
   /* ⚠️ DECIDE IS NOT IN THE BRIEF'S TABLE. An offer is answered in its own journey, not by a
      one-line form, so it keeps the deed as its heading rather than inheriting another bucket's

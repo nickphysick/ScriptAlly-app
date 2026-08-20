@@ -15,7 +15,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { taskDeed } from "./todoBuckets";
-import { listDeed } from "./taskListRow";
+import { listDeed, PANE_COPY } from "./taskListRow";
 import { bandDeed } from "./todoHandoff";
 import { BoardCard } from "./todoBoard";
 
@@ -59,6 +59,27 @@ describe("the row and the band say the same thing", () => {
         /* "Fill in what you sent" is the fix deed; "record" must not appear in any of them */
         expect(d, `${taskType} says "${v}"`).not.toMatch(new RegExp("\\b" + v + "\\b"));
       }
+    }
+  });
+
+  /**
+   * ⚠️ THE OVERRIDE, PINNED — so it cannot be "corrected" back by someone reading the retired-verb
+   * rule and not the exception to it (finishing round, Phase 4).
+   *
+   * "log" is retired as a DEED verb and stays retired: the case above still sweeps every task type.
+   * The owner has since permitted it on the pane's PRIMARIES, deliberately and after the previous
+   * round shipped the alternative. Both rules are asserted here, together, because the danger is
+   * not either rule — it is someone finding one of them alone.
+   */
+  it("the primaries carry the owner's override, and the deeds still do not", () => {
+    expect(PANE_COPY.send.primary).toBe("Log as sent");
+    expect(PANE_COPY.close.primary).toBe("Log the close");
+    expect(PANE_COPY.fix.primary).toBe("Log as sent");
+    expect(PANE_COPY.note.primary).toBe("Tick it off");
+    /* and the exception is SCOPED: no deed gained the verb the primaries were given */
+    for (const taskType of TYPES) {
+      expect(taskDeed(card({ taskType })).toLowerCase(), `${taskType} deed says "log"`)
+        .not.toMatch(/\blog\b/);
     }
   });
 

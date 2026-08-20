@@ -138,7 +138,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         Absence is a value: no sample, no section. */}
     {sample && (
       <div className="sect">
-        <label className="f-lbl">What are you sending?</label>
+        <label className="f-lbl" data-req="unit">What are you sending?</label>
         <div className="f-sub" style={{ margin: "-3px 0 9px" }}>
           Pick the unit you actually sent in — one only.
         </div>
@@ -229,7 +229,9 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
       </div>
     )}
 
-    <label className="f-lbl">Anything else?</label>
+    {/* ⚠️ THE ONE OPTIONAL FIELD ON THIS FORM, AND IT SAYS SO. Everything above is required and
+        carries no mark — Option B, where the exception is named rather than the rule. */}
+    <label className="f-lbl">Anything else? <span className="opttag">OPTIONAL</span></label>
     <textarea className="note-in" placeholder="e.g. included the revised opening"
       value={value.also} onChange={(e) => onChange({ ...value, also: e.target.value })} />
 

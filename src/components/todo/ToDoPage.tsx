@@ -94,6 +94,7 @@ import { ArtSlot } from "./ArtSlot";
 import { TaskPane } from "./TaskPane";
 import { TaskPaneBody, SendBodyValues, EXPECT_WEEKS } from "./TaskPaneBody";
 import { buildJourney } from "../../lib/taskPaneJourney";
+import { journeyKind, firstMissing, isBulkCard, type GateAnswers, type ReqField } from "../../lib/paneGate";
 import { liveFamily } from "../../lib/todoFamily";
 import { DockTimelineEvent } from "./timelineEvent";
 import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, liveBoardCards } from "../../lib/todoColumns";
@@ -436,6 +437,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   /* Phase 7 owns the dialog; Phase 2 only opens the state so the button is wired to something
      honest rather than to a write with no confirmation. */
   const [dismissOpen, setDismissOpen] = useState(false);
+  /**
+   * ⚠️ HOW MANY BULK ROWS THE WRITER HAS TOUCHED — ONE SOURCE, three readers (the band's count, the
+   * will-record strip and the primary's own label). Declared here in Phase 4 because the GATE needs
+   * it; the table that moves it arrives in Phase 6. Zero until then, which is exactly what the
+   * gate should say about a table nobody has filled in.
+   */
+  const [bulkTouched, setBulkTouched] = useState(0);
   const filterAnchor = React.useRef<HTMLElement | null>(null);
   const sortAnchor = React.useRef<HTMLElement | null>(null);
   // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
@@ -1906,6 +1914,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                        one that asks — see `TaskDismissDialog` for why that is about WHERE IT GOES
                        rather than about certainty. */
                     onDismiss: paneVerbs.dismiss.disabled ? undefined : () => setDismissOpen(true),
+                    /* the cohort's numbers, where this IS a cohort — absent everywhere else, so a
+                       single journey can never accidentally wear a counted primary */
+                    ...(isBulkCard(paneCard)
+                      ? { bulk: { count: listRowInputs(paneCard).bulkCount ?? 0, touched: bulkTouched } }
+                      : {}),
                   })}
                   onPrimary={() => dockPrimary(paneCard)}
                   nav={{
@@ -3236,7 +3249,42 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * `.expect` block is therefore ASKED and not yet STORED — see the run report; it is the
    * remaining half of Phase 4, and half a write path is worse than none.
    */
+  /**
+   * ⚠️ THE ANSWERS, AS THE GATE SEES THEM. Read from the form's own state, never from the DOM —
+   * a gate that queried the page for what had been chosen would be a second reading of a fact the
+   * component already holds, and the two would disagree the first time one of them changed.
+   */
+  function gateAnswers(card: BoardCard): GateAnswers {
+    const spec = sendSpecFor(card);
+    /* ⚠️ A FULL MANUSCRIPT HAS NO UNIT TO PICK, so the parcel requirement is met by the material
+       itself. Requiring a unit there would ask the writer to measure a whole book in chapters. */
+    const wholeThing = spec?.material === "full";
+    const picked = paneBody.rows.some((r) => r.kind === "qty" && r.on && String(r.amount).trim() !== "");
+    return {
+      unit: wholeThing || picked,
+      when: !!paneBody.when && (paneBody.when.kind !== "date" || !!paneBody.when.ymd),
+      expect: !!paneBody.expect && (paneBody.expect.kind !== "date" || !!paneBody.expect.ymd),
+      remind: !!paneBody.remind,
+      rows: bulkTouched > 0,
+    };
+  }
+
+  /**
+   * ⚠️ THE PRIMARY IS ALWAYS CLICKABLE, AND AN INCOMPLETE CLICK TEACHES RATHER THAN REFUSING.
+   *
+   * A disabled button states that something is wrong and declines to say what — the writer is left
+   * hunting the form for the thing it will not name. So the click always lands: if a requirement is
+   * unmet, nothing is written and the pane SHOWS the first missing answer — scrolls it into view,
+   * focuses it, and flashes its label. `firstMissing` returns the field's identity precisely so
+   * this is possible; a boolean could not have told the writer where to look.
+   *
+   * ⚠️ BULK IS THE STATED EXCEPTION and it is inert at zero, because there is no single field to
+   * scroll to — the answer is "touch a row", and every row is equally the one meant.
+   */
   function dockPrimary(card: BoardCard) {
+    const kind = journeyKind(card);
+    const missing = firstMissing(kind, gateAnswers(card));
+    if (missing) { showMissing(missing); return; }
     const spec = sendSpecFor(card);
     if (spec) {
       setFlowPrefill({
@@ -3248,6 +3296,26 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       });
     }
     openFlowCards([card]);
+  }
+
+  /**
+   * ⚠️ SHOW THE WRITER THE ANSWER THEY HAVE NOT GIVEN. Found by the label's own `data-req`, which
+   * is the same key the declaration uses — so a field the gate can require is a field the pane can
+   * point at, by construction rather than through a second lookup table.
+   */
+  function showMissing(field: ReqField) {
+    const label = document.querySelector<HTMLElement>(`.tpn [data-req="${field}"]`);
+    if (!label) return;
+    label.scrollIntoView({ block: "center", behavior: "smooth" });
+    /* the control the label names — the first focusable thing in its own section */
+    const sect = label.closest(".sect, .expect") ?? label.parentElement;
+    const focusable = sect?.querySelector<HTMLElement>("button, input, textarea, [tabindex]");
+    (focusable ?? label).focus?.();
+    /* ⚠️ THE FLASH IS RETRIGGERABLE. Adding a class that is already there restarts no animation, so
+       a second click on the same missing field would look like the page ignoring it. */
+    label.classList.remove("askme");
+    void label.offsetWidth;
+    label.classList.add("askme");
   }
 
 /* (`paneSentISO` is `sentDateISO` now, beside the strip that reads it. It returned TODAY for an

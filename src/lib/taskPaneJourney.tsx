@@ -52,6 +52,12 @@ export interface JourneyInputs {
   quiet?: { label: string; onPress: () => void };
   onOpenQuery?: () => void;
   primDisabled?: boolean;
+  /**
+   * ⚠️ THE COHORT'S TWO NUMBERS. `count` is how many queries the gap stands for; `touched` is how
+   * many the writer has filled in. One source for the band, the strip and the primary's own label —
+   * three surfaces that must never be able to state different totals about one table.
+   */
+  bulk?: { count: number; touched: number };
   /** the action bar's verbs — see `TaskPaneJourney` for why absence is not the same as disabled */
   onSnooze?: (anchor: HTMLElement) => void;
   onDismiss?: () => void;
@@ -172,8 +178,15 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     body: input.body,
     will: input.will,
     quiet: input.quiet,
-    prim: paneCopy(c).primary,
-    primDisabled: input.primDisabled,
+    /* ⚠️ THE BULK PRIMARY STATES ITS COUNT, AND IS INERT AT ZERO — the ONE journey whose primary is
+       not always clickable, and the reason is stated rather than inherited: every other journey can
+       point at the first missing field, and a table cannot, because every row is equally the one
+       meant. A button reading "Log 0 queries" says what it would do; a disabled button with a
+       generic label would say only that something is wrong. */
+    prim: input.bulk
+      ? `Log ${input.bulk.touched} ${input.bulk.touched === 1 ? "query" : "queries"}`
+      : paneCopy(c).primary,
+    primDisabled: input.bulk ? input.bulk.touched === 0 : input.primDisabled,
     tl,
     onOpenQuery: c.relatedRecordId ? input.onOpenQuery : undefined,
     onSnooze: input.onSnooze,

@@ -144,8 +144,23 @@ describe("1 · the pane's class names are the mockup's", () => {
   });
 
   it("the mockup's own scoping is the only edit to its stylesheet", () => {
-    /* every rule is scoped, and the class names inside the selectors are untouched */
-    const rules = strip(PANE_CSS).split("\n").filter((l) => l.includes("{") && !l.startsWith("@"));
+    /* ⚠️ AN AT-RULE'S BODY IS NOT A SELECTOR LIST, and this counted it as one. `@keyframes` steps
+       read `0%, 100% {` — there is nothing to scope, and no way to write one that would satisfy a
+       `.tpn` prefix — so the first animation added to this sheet failed a lock about where rules
+       REACH. The at-rule's own line was already skipped; its contents were not. Skipped by depth:
+       everything between an `@` line and the brace that closes it is the at-rule's business. */
+    const lines = strip(PANE_CSS).split("\n");
+    const rules: string[] = [];
+    let inAt = 0;
+    for (const l of lines) {
+      if (/^\s*@/.test(l)) { inAt = 1; continue; }
+      if (inAt) {
+        inAt += (l.match(/{/g) || []).length - (l.match(/}/g) || []).length;
+        if (inAt <= 0) inAt = 0;
+        continue;
+      }
+      if (l.includes("{")) rules.push(l);
+    }
     /* ⚠️ TWO SHAPES ARE SCOPED AND NOTHING ELSE IS: `.tpn <mockup class>` — a ported rule — and
        `.tpn-<name>` — one of the named exemptions the mockup has no markup for. Both are confined
        to this pane; anything else would reach the whole app, which is the fault this guards. */
