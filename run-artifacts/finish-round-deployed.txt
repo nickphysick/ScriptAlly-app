@@ -1,0 +1,59 @@
+── finishing round · 29 assertions · 0 RED · 29 green
+  green  P1.1 · a query journey draws three rim cards; bulk and note draw two
+           send=3 close=3 note=2 bulk=2
+  green  P1.2 · the pane column is transparent on the ground, gap 12
+           bg=rgba(0, 0, 0, 0) gap=12px
+  green  P1.3 · the band tint reaches all four corners inside the rim, which clips
+           onScreen=true hits=[1,1,1,1] rimOverflow=hidden
+  green  P1.4 · the mid is the only scrolling box in the pane
+           ["mid"]
+  green  P2.1 · the mid aligns its cards to the start, so they hug rather than stretch
+           align-items=flex-start
+  green  P2.2 · no card in the pane declares a minimum height
+           send=["0px","0px"] note=["0px"]
+  green  P2.3 · a note's form card is content-driven; Send's is taller
+           note 226/412 = 0.55 · send 663
+  green  P2.4 · the action bar stays at the pane's foot on the shortest journey
+           bar=889 pane=889
+  green  P3.1 · no option is pre-selected on first render, on any journey
+           send=0 close=0 note=0 bulk=0
+  green  P3.2 · the strip starts at an em dash and states nothing unchosen
+           will="Will record: —"
+  green  P3.3 · the agent's stated window is shown, not chosen
+           present
+  green  P3.4 · expect-back offers Another date
+           occurrences=2
+  green  P3.5 · the strip grows with a choice, and only with it
+           "Will record: —" → "Will record: Full Sent · today"
+  green  P3.6 · Another date is offered on BOTH When and expect-back, one picker between them
+           occurrences=2
+  green  P4.1 · the primaries are the owner's override wording
+           send="Log as sent" close="Log the close" note="Tick it off" bulk="Log 0 queries"
+  green  P4.2 · no asterisk marks a required field anywhere in the pane
+           first * at: send=-1 close=-1 note=-1 bulk=-1
+  green  P4.3 · exactly one OPTIONAL tag on each journey that has an optional field
+           send=1 close=1 note=1 bulk=1
+  green  P4.4 · bulk is the stated exception — inert at zero, with its count showing
+           disabled=true prim="Log 0 queries"
+  green  P4.5 · every other primary stays clickable while incomplete
+           send=false close=false note=false
+  green  P4.6 · an incomplete click writes nothing and lands focus in the form
+           scrollTop 0→196 · active=BUTTON inPane=true tookOver=false
+  green  P5.1 · the finishing sentence appears exactly once in the pane, total
+           count=1
+  green  P5.2 · a note has no When segment
+           segs=0
+  green  P5.3 · the note's own words are the centrepiece, Caveat at 26px
+           26px Caveat, cursive
+  green  P6.1 · the bulk table renders one row per query, five visible with the rest folded
+           rows=5 showAll=1
+  green  P6.2 · its columns are the contract's six
+           ["Agent","Sent","Covering letter","Synopsis","Opening sample","Something else OPTIONAL"]
+  green  P6.3 · rows are ordered oldest sent first
+           ["1777852800000","1778198400000","1778544000000","1778889600000","1779235200000"]
+  green  P6.4 · both fill actions are offered, with the requirements caveat verbatim
+           ["Start from what each agent asks for","Copy the first row down"]
+  green  P6.5 · the band states the cohort, and the truncated sub-line is unreproducible
+           sub="15 imported queries are missing their materials"
+  green  P6.6 · the bar offers Dismiss all beside the counted primary
+           ["Snooze","Dismiss all","Log 0 queries"]
