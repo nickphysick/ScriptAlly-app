@@ -53,8 +53,15 @@
    to "+N MORE" sooner on a short viewport. This is the one Tasks region that answers the lock by
    COMPRESSING instead of scrolling. */
 .cal-grid {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  display: grid; grid-template-columns: repeat(7, 1fr);
   flex: 1; min-height: 0;
+  /* ⚠️ ONE PANEL, NOT FORTY-TWO CARDS (fixes pack, Phase 2). The cells were separate rounded boxes
+     floating on the page ground with a 6px gap; the ref draws a single sheet of parchment ruled
+     into squares. `gap` goes to 0 and the division becomes hairline BORDERS, so there is no ground
+     showing between days — a month is one object. `overflow: hidden` is what lets the outer radius
+     actually clip the corner cells. */
+  gap: 0;
+  background: #fdfaf5; border: 1px solid #ece0d2; border-radius: 14px; overflow: hidden;
   /* ⚠️ ROW 1 IS THE DAY-NAME STRIP AND IT IS `auto`, NOT A WEEK. The DOW labels share this grid
      with the cells, so without this they take a week row's share of the height — a 100px-tall
      "MON TUE WED". One explicit `auto` row, then the weeks. */
@@ -68,14 +75,24 @@
   grid-auto-rows: minmax(0, 1fr);
 }
 
+/* ⚠️ THE WEEKDAY NAMES ARE A BAND, NOT SEVEN FLOATING LABELS. They share the grid with the cells,
+   so each is one cell of row 1; the gradient runs across all seven and reads as a single header
+   because there is no gap left between them. */
 .cal-dow {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 6.5px; letter-spacing: 0.17em; color: #b3a394;
-  text-align: center; padding-bottom: 3px;
+  font-size: 6.5px; letter-spacing: 0.17em; color: #5a6e58;
+  text-align: center; padding: 6px 0 5px;
+  background: linear-gradient(135deg, #d7ddd5, #d5dbd3);
+  border-bottom: 1px solid #ece0d2;
 }
 
 .cal-cell {
-  background: #fff; border: 1px solid #efe8dc; border-radius: 9px;
+  /* ⚠️ NO FILL, NO RADIUS, NO BOX — the panel is the surface and these are its rules. Only the
+     right and bottom hairlines are drawn; the edge cells drop theirs so the panel's own border is
+     the outer line rather than a doubled one. */
+  background: transparent;
+  border: 0; border-right: 1px solid #f0e9dd; border-bottom: 1px solid #f0e9dd;
+  border-radius: 0;
   padding: 6px 7px; cursor: pointer;
   /* ⚠️ NO `min-height` — it was 104px, and a floor on the cell is a floor on its row: six of
      them plus the header block cannot fit a laptop, so the month scrolled. The cell takes the
@@ -84,9 +101,24 @@
   min-height: 0; overflow: hidden;
   display: flex; flex-direction: column;
 }
+/* the panel's own border is the outer line: the last column drops its right rule, the last row its
+   bottom. `nth-child` counts across ALL the grid's children, and the seven DOW cells occupy 1–7 —
+   so the compound `.cal-cell:nth-child(7n)` cannot match a weekday label, only a day. */
+.cal-cell:nth-child(7n) { border-right: 0; }
+.cal-cell:nth-last-child(-n + 7) { border-bottom: 0; }
+
+/* ⚠️ WEEKENDS TAKE A FAINTLY WARMER GROUND, adjacent months a dimmer one — columns 6 and 7 of each
+   week, which are children 7n+6 and 7n+7 (again, the DOW row's copies are not `.cal-cell`). */
+.cal-cell:nth-child(7n + 6),
+.cal-cell:nth-child(7n + 7) { background: #fbf7f0; }
+.cal-cell.off { background: #f8f4ed; }
+.cal-cell.off .cal-d { color: #cfc2b3; }
+
+/* ⚠️ THE PAST IS A MUTED NUMERAL AND NOTHING ELSE (fixes pack, Phase 2). It wore a wash, and a
+   wash across three weeks of a month reads as three weeks of alarm — that tint belongs to the
+   urgency band, which is the To-do list's alone. The day is over; the app says so quietly. */
+.cal-cell.past .cal-d { color: #c3b3a4; }
 .cal-cell.today { border: 1.5px solid #2a1a13; }
-.cal-cell.past { background: #faf7f2; }
-.cal-cell.off { opacity: 0.55; }
 
 .cal-d {
   font-family: "JetBrains Mono", ui-monospace, monospace;

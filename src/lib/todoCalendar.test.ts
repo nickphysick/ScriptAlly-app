@@ -821,3 +821,69 @@ describe("⚠️ the counter takes a slot (fixes pack, Phase 1)", () => {
     expect(CAL_PIP_H).toBe(25);
   });
 });
+
+/* ══ THE MONTH CHASSIS (fixes pack, Phase 2) ════════════════════════════════════════════════ */
+
+describe("⚠️ the month is ONE panel, ruled — not forty-two floating cards", () => {
+  /* ⚠️ ANCHORED TO THE LINE START, because `indexOf(".cal-dow {")` also matches
+     `.cal-layout .cal-dow {` — the Phase 1 reset, which sits earlier in the file. First-match
+     slicing on a selector that is a SUFFIX of another selector reads the wrong block and asserts
+     about rules nobody wrote. It cost a red here before it could cost a false green. */
+  const rule = (sel: string) => {
+    const m = new RegExp(`^${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`, "m").exec(calCss);
+    expect(m, `${sel} has no rule of its own at a line start`).not.toBeNull();
+    return m![1];
+  };
+
+  it("the grid is the parchment panel, and it clips its own corners", () => {
+    const g = rule(".cal-grid");
+    expect(g).toContain("background: #fdfaf5");
+    expect(g).toContain("border: 1px solid #ece0d2");
+    expect(g).toContain("border-radius: 14px");
+    expect(g).toContain("overflow: hidden"); // without it the radius cannot clip the corner cells
+    expect(g).toContain("gap: 0");
+  });
+
+  it("⚠️ cells are RULED, not boxed — no gap, no radius, no fill of their own", () => {
+    const c = rule(".cal-cell");
+    expect(c).toContain("background: transparent");
+    expect(c).toContain("border-radius: 0");
+    expect(c).toContain("border-right: 1px solid");
+    expect(c).toContain("border-bottom: 1px solid");
+    // the old floating-card treatment is gone, not merely overridden further down
+    expect(c).not.toMatch(/background:\s*#fff\b/);
+    expect(c).not.toMatch(/border-radius:\s*9px/);
+  });
+
+  it("the edge cells drop their rule so the panel's border is not doubled", () => {
+    expect(calCss).toContain(".cal-cell:nth-child(7n) { border-right: 0; }");
+    expect(calCss).toContain(".cal-cell:nth-last-child(-n + 7) { border-bottom: 0; }");
+  });
+
+  it("⚠️ the weekday row is a SAGE BAND, in the ref's gradient and ink", () => {
+    const d = rule(".cal-dow");
+    expect(d).toContain("linear-gradient(135deg, #d7ddd5, #d5dbd3)");
+    expect(d).toContain("color: #5a6e58");
+    expect(d).not.toContain("#b3a394"); // the old floating-label ink
+  });
+
+  it("weekends warm faintly; adjacent months dim; both by ground, not opacity", () => {
+    expect(calCss).toContain(".cal-cell:nth-child(7n + 6)");
+    expect(calCss).toContain(".cal-cell:nth-child(7n + 7)");
+    expect(calCss).toContain("background: #fbf7f0");
+    expect(rule(".cal-cell.off")).toContain("background: #f8f4ed");
+    // ⚠️ opacity is retired: it dimmed the pips too, and a real pip on an adjacent-month day is
+    // still a real pip. The GROUND changes; what sits on it does not.
+    expect(rule(".cal-cell.off")).not.toContain("opacity");
+  });
+
+  it("⚠️ THE PAST IS A MUTED NUMERAL AND NOTHING ELSE — no wash", () => {
+    // a wash across three weeks of a month reads as three weeks of alarm; that tint belongs to the
+    // urgency band, which is the To-do list's alone
+    expect(calCss).toContain(".cal-cell.past .cal-d { color: #c3b3a4; }");
+    expect(calCss).not.toMatch(/\.cal-cell\.past\s*\{[^}]*background/);
+    // and nothing on this page reaches for the urgency band's pink
+    const decl = decls(calCss);
+    expect(decl).not.toMatch(/\.cal-cell[^{]*\{[^}]*#f8e2d9/);
+  });
+});
