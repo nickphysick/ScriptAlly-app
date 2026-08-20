@@ -23,7 +23,7 @@ const ROUTE = "/todo/calendar";
 const WIDTHS = [1440, 1920];
 
 /** The page's own constants, restated here ONLY so the report can show the arithmetic. */
-const CAL_PIP_H = 19;
+const CAL_PIP_H = 25;   /* corrected in Phase 1 — browser-measured 24.75, rounded up */
 const CAL_CELL_CHROME = 26;
 const CAL_CELL_CAP = 3;
 
@@ -200,6 +200,7 @@ test("calendar — the fold, the chain, the track", async ({ page }) => {
 
       return {
         chain, pipGeom, observed, rowTracks, colTracks,
+        panelBox: box(document.querySelector(".cal-focus")),
         layoutCols: layoutCs?.gridTemplateColumns ?? null,
         cellSample, totalPips, totalMore, moreTexts, populated,
         chassis, bar, panelHead, legendDots,
@@ -251,8 +252,9 @@ test("calendar — the fold, the chain, the track", async ({ page }) => {
     /* ── the day panel's track ─────────────────────────────────────────────────────────────── */
     lines.push("\n-- the day panel's track --");
     lines.push(`  .cal-layout grid-template-columns = ${reading.layoutCols}`);
-    lines.push(`  month column  w=${reading.chain["cal-main"]?.w ?? "?"}`);
-    lines.push(`  panel column  w=${reading.chain["cal-focus"]?.w ?? "?"}  h=${reading.chain["cal-focus"]?.h ?? "?"}`);
+    const byTag = (frag: string) => reading.chain.find((c) => c.tag.includes(frag));
+    lines.push(`  month column  w=${byTag("cal-main")?.w ?? "?"}`);
+    lines.push(`  panel column  w=${reading.panelBox?.w ?? "?"}  h=${reading.panelBox?.h ?? "?"}`);
     lines.push(`  panel head: date=${JSON.stringify(reading.panelHead.date)} count=${JSON.stringify(reading.panelHead.count)}`);
 
     /* ── chassis + bar, for phases 2–5 ─────────────────────────────────────────────────────── */

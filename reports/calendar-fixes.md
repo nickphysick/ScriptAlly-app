@@ -154,3 +154,51 @@ actually measured:
   classes off the shared `cal-` prefix is the only fix that cannot silently regress the next time a
   property is added to `todo.css` — neutralising `aspect-ratio` one property at a time is vigilance,
   not a guard.
+
+---
+
+## Phase 1 — after the fix, re-measured on the locally-built dev bundle
+
+`npm run build:dev` (target guard: *"bundle targets scriptally-dev; gen-lang-client-0801391782
+absent"*), served at `localhost:4180`, harness pointed at it via `SA_E2E_BASE_URL`.
+**⚠️ `npm run preview` on a plain `vite build` would have served a PROD-targeted bundle** — signing
+in would have touched production data. The launch entry runs `build:dev` for exactly that reason.
+
+### Before → after, at 1440 (1920 identical)
+
+| | before | after |
+|---|---|---|
+| `.cal-d` height | **76.28px** | **12.75px** |
+| pip heights | `[8, 8, 8]` | `[20.75, 20.75]` (and `[19.8 × 3]` where nothing folds) |
+| pip text clipped | `[true, true, true]` | `[false, false]` |
+| cell scrollHeight vs clientHeight | **136 vs 96 — OVERFLOWING** | **96 vs 96 — fits** |
+| `fits = floor(room / CAL_PIP_H)` | `floor(78.17 / 19) = 4` | `floor(78.17 / 25) = 3` |
+| `calFoldCap(rowPx)` | 3 | 3 *(same answer, now for the right reason)* |
+| a 12-item day | 3 pips **+ counter** crushed into room for 3 | **2 pips + counter**, `+10 MORE` |
+| `.cal-recbtn` width | **26px**, wrapped | **89.84px** |
+| prev / next / Today width | 26 / 26 / 26 | **35 / 35 / 53.89** |
+| month ÷ panel track | 682 / 370 | 682 / 370 *(unchanged — it was always right)* |
+
+**Pips are legible in every populated cell** — the 1440 screenshot reads `Closed David…`,
+`Holding reply`, `Nudge Tom Ell…`, `Noah Bright h…`, and the counters `+10 MORE` / `+4 MORE`.
+`calFoldCap` returns the same 3 it always did; what changed is that the cell can now honour it.
+
+### What the fix was, precisely
+
+- `.cal-layout .cal-d` and `.cal-layout .cal-dow` — ancestor-scoped (0-2-0) with an **explicit
+  reset** of every property `todo.css` sets that this sheet does not. Scope alone would not have
+  helped: specificity cannot beat a property you never declare.
+- `.tpl-tools .calm-nav` — a page-local modifier undoing `width: 26px`. `.cal-nav` itself is
+  **not** re-declared; it is shared chrome.
+- `CAL_PIP_H` 19 → **25**, browser-measured.
+- `cellSlots` reserves the counter's slot, which its own comment had claimed and the arithmetic
+  never did.
+
+### ⚠️ Two of the To-do session's locks caught my first attempt, and both were right
+
+The first version put a `calm` class on `.t-f12.spine-root` and wrote `.calm .cal-nav { … }`.
+`tasksViewport.test.tsx` went red twice: once on its law that **all four Tasks pages wear the same
+column**, and once on its ban on this sheet **re-declaring the shared control** — which my scoped
+rule tripped as a *substring* (`".cal-nav {"`). Both objections were correct, and the fix was mine
+to change, not theirs. The scopes are now existing ancestors and the nav takes a modifier. **Their
+files are untouched.**
