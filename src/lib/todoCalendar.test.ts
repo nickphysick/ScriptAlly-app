@@ -16,6 +16,7 @@ import {
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
+  exchangeLine,
   REC_TONE, REC_LEGEND, REC_INK,
 } from "./todoCalendar";
 import { HOLDING_REPLY_TYPE } from "./holdingReply";
@@ -194,11 +195,17 @@ describe("the fold, the map, the wiring", () => {
     expect(pageSrc).toContain('facet === "all" ? userTasks : []');
   });
 
-  it("clicks: a pip opens the item sheet (FocusFlow), a day opens its list", () => {
+  /* ⚠️ RETARGETED 20 Aug 2026 (record-layer P5): a day is now SELECTED, not opened. The modal it
+     asserted (`setOpenDay` / `.cal-daypanel`) is retired — the in-focus panel is permanent chrome
+     beside the month, so there is no dialogue to open and no scrim to dismiss. The CLAIM that
+     mattered is unchanged and still asserted: a pip opens the item sheet, and clicking a day sends
+     it to the day surface. Its retirement is locked positively in the Phase 5 block below, so this
+     is a retarget rather than a deletion. */
+  it("clicks: a pip opens the item sheet (FocusFlow), a day is selected into the panel", () => {
     expect(pageSrc).toContain("setFlowCard(item.card)");
     expect(pageSrc).toContain("<FocusFlow");
-    expect(pageSrc).toContain("setOpenDay(ymd)");
-    expect(pageSrc).toContain("cal-daypanel");
+    expect(pageSrc).toContain("onClick={() => selectDay(ymd)}");
+    expect(pageSrc).toContain('className="cal-focus"');
   });
 
   it("the roll-forward marker's copy is the ref's", () => {
@@ -505,5 +512,159 @@ describe("⚠️ one switch for the record, and it is NOT a facet", () => {
     expect(d).toContain("facetCounts(liveBoardCards(assembled.cols))");
     expect(d).not.toMatch(/facetCounts\([^)]*rec/i);
     expect(d).not.toMatch(/TODO_FACETS[^\n]*record/i);
+  });
+});
+
+/* ══ THE IN-FOCUS DAY PANEL (record-layer pack, Phase 5) ════════════════════════════════════ */
+
+describe("⚠️ the exchange line reports and does not judge", () => {
+  const r = (over: Partial<{ exchange: number; gapDays: number; turned: boolean; dir: "out" | "in" }>) =>
+    exchangeLine({ exchange: 1, turned: false, dir: "out", ...over } as never);
+
+  it("the first exchange states its position and nothing else", () => {
+    expect(r({ exchange: 1 })).toBe("Exchange 1");
+  });
+
+  it("a reply names who moved — and 'they' for an agent, never a gendered pronoun", () => {
+    expect(r({ exchange: 2, gapDays: 1, turned: true, dir: "out" })).toBe("Exchange 2 · you replied in 1 day");
+    expect(r({ exchange: 3, gapDays: 12, turned: true, dir: "in" })).toBe("Exchange 3 · they replied in 12 days");
+  });
+
+  it("⚠️ two moves in the same direction are NOT a reply — elapsed time only", () => {
+    // a second send is not a reply to the first, and saying so would invent an exchange
+    expect(r({ exchange: 2, gapDays: 4, turned: false, dir: "out" })).toBe("Exchange 2 · 4 days later");
+  });
+
+  it("singulars agree, and no verdict word appears in any form", () => {
+    expect(r({ exchange: 2, gapDays: 1, turned: false })).toContain("1 day later");
+    expect(r({ exchange: 2, gapDays: 2, turned: false })).toContain("2 days later");
+    for (const line of [
+      r({ exchange: 1 }),
+      r({ exchange: 2, gapDays: 1, turned: true, dir: "out" }),
+      r({ exchange: 2, gapDays: 40, turned: true, dir: "in" }),
+      r({ exchange: 2, gapDays: 3, turned: false }),
+    ]) {
+      expect(line).not.toMatch(/quick|slow|fast|prompt|good|bad|only|already|still|finally|overdue/i);
+    }
+  });
+});
+
+describe("⚠️ the exchange count sequences over the QUERY, not over the visible days", () => {
+  const seq = (dates: string[], types: Partial<Activity>[]) =>
+    dates.map((d, i) => act({ id: `e${i}`, date: d, ...types[i] }));
+
+  it("exchange 3 stays exchange 3 when the reader is looking at a later month", () => {
+    // three events: two in July, one in August. The August grid shows only the third — and it is
+    // still the third thing that passed between them, not the first.
+    const acts = seq(
+      ["2026-07-02T09:00:00Z", "2026-07-20T09:00:00Z", "2026-08-12T09:00:00Z"],
+      [
+        { activityType: ActivityType.QUERY_SENT },
+        { resultingStatus: QueryStatus.FULL_REQUESTED },
+        { activityType: ActivityType.MATERIALS_SENT, resultingStatus: QueryStatus.FULL_SENT },
+      ],
+    );
+    // a September grid contains none of July, so only the 12 Aug row is placed
+    const got = recordDays(acts, RQ, [AGENT], monthGridDays("2026-08-12"));
+    const row = got.get("2026-08-12")![0];
+    expect(row.label).toBe("Full sent");
+    expect(row.exchange).toBe(3);
+    expect(row.gapDays).toBe(23);
+    expect(row.turned).toBe(true); // a request came in, materials went out
+    expect(exchangeLine(row)).toBe("Exchange 3 · you replied in 23 days");
+  });
+
+  it("the first exchange carries no gap, and two sends running do not read as a reply", () => {
+    const acts = seq(
+      ["2026-08-03T09:00:00Z", "2026-08-06T09:00:00Z"],
+      [{ activityType: ActivityType.QUERY_SENT }, { activityType: ActivityType.NUDGE_SENT }],
+    );
+    const got = recordDays(acts, RQ, [AGENT], AUG);
+    expect(got.get("2026-08-03")![0]).toMatchObject({ exchange: 1, turned: false });
+    expect(got.get("2026-08-03")![0].gapDays).toBeUndefined();
+    expect(got.get("2026-08-06")![0]).toMatchObject({ exchange: 2, gapDays: 3, turned: false });
+  });
+});
+
+describe("⚠️ the day panel replaces the modal, inside the chassis", () => {
+  it("⚠️ THE MODAL IS GONE — page and stylesheet together, not left inert", () => {
+    // verified against the diff, not just intended: these classes render nowhere and no rule
+    // defines them. A bounded token, so a longer live class cannot satisfy the assertion.
+    for (const c of ["cal-dayscrim", "cal-daypanel", "cal-dayhead", "cal-dayx", "cal-dayrow"]) {
+      expect(decls(pageSrc), `${c} still renders`).not.toMatch(new RegExp(`["\\s\`]${c}["\\s\`]`));
+      expect(decls(calCss), `${c} still has a rule`).not.toMatch(new RegExp(`\\.${c}[\\s{.:,]`));
+    }
+    expect(decls(pageSrc)).not.toContain('role="dialog"');
+  });
+
+  it("the panel is this page's own box inside .tpl-body — TasksPageLayout is not forked", () => {
+    expect(pageSrc).toContain('className="cal-layout"');
+    expect(pageSrc).toContain('className="cal-focus"');
+    // still the shared chassis, and still no TplZone: the month compresses, it does not scroll
+    expect(pageSrc).toContain("<TasksPageLayout");
+    expect(decls(pageSrc)).not.toContain("<TplZone");
+  });
+
+  it("⚠️ NO viewport arithmetic — the stage is the scroll container, not the window", () => {
+    expect(decls(calCss)).not.toMatch(/100vh/);
+    expect(decls(calCss)).not.toMatch(/100dvh/);
+  });
+
+  it("sections read live work first and the record last, grouped by voice", () => {
+    const order = ["Yours", "Coming back", "Done", "On the record"];
+    let at = -1;
+    for (const s of order) {
+      const i = pageSrc.indexOf(`section("${s}"`);
+      expect(i, `${s} section is missing`).toBeGreaterThan(-1);
+      expect(i, `${s} is out of order`).toBeGreaterThan(at);
+      at = i;
+    }
+  });
+
+  it("⚠️ live rows open the SAME FocusFlow the pips open — one action surface", () => {
+    expect(pageSrc).toContain("onOpenCard={openSheet}");
+    expect(pageSrc).toContain("<FocusFlow");
+    // and the record never manufactures a card to get into that flow
+    expect(decls(pageSrc)).not.toMatch(/kind:\s*"card"[^\n]*rec/i);
+  });
+
+  it("⚠️ EDIT THIS ENTRY routes — no calendar-local editor, no second correction surface", () => {
+    expect(pageSrc).toContain("EDIT THIS ENTRY");
+    expect(pageSrc).toContain("OPEN QUERY");
+    expect(pageSrc).toContain("/queries?q=");
+    const d = decls(pageSrc);
+    expect(d).not.toContain("editActivity");
+    expect(d).not.toContain("deleteActivity");
+    expect(d).not.toContain("TimelineComposer");
+  });
+
+  it("⚠️ NO COMPOSER — one composer, on the To-do list, reached by the existing announcement", () => {
+    expect(pageSrc).toContain("TODO_OPEN_COMPOSER");
+    const d = decls(pageSrc);
+    expect(d).not.toContain("addUserTask");
+    expect(d).not.toContain("createUserTask");
+    expect(d).not.toContain("<textarea");
+  });
+
+  it("an empty day says so without apologising or prompting", () => {
+    expect(pageSrc).toContain("A clear day.");
+    expect(pageSrc).toContain("Nothing scheduled · nothing waiting");
+    const d = decls(pageSrc);
+    expect(d).not.toMatch(/sorry|why not|get started|add your first|make the most/i);
+  });
+
+  it("⚠️ changing day clears any expanded row, and 'overdue' appears nowhere", () => {
+    expect(pageSrc).toContain("const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); };");
+    expect(decls(pageSrc).toLowerCase()).not.toContain("overdue");
+    expect(decls(calCss).toLowerCase()).not.toContain("overdue");
+  });
+
+  it("the keyboard moves the selection and keeps the month in step, inert while typing", () => {
+    expect(pageSrc).toContain('e.key === "ArrowLeft"');
+    expect(pageSrc).toContain("if (!visible.includes(next)) setAnchor(next);");
+    expect(pageSrc).toContain('tag === "INPUT" || tag === "TEXTAREA"');
+    expect(pageSrc).toMatch(/e\.key === "t" \|\| e\.key === "T"/);
+    expect(calCss).toContain("prefers-reduced-motion");
+    expect(calCss).toContain(":focus-visible");
   });
 });

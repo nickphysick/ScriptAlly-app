@@ -28,7 +28,7 @@ import { Activity, ActivityType, Agent, Query, QueryStatus, TaskFlag, UserTask }
 import { HOLDING_REPLY_TYPE } from "./holdingReply";
 import { BoardCard, terseDoneLabel } from "./todoBoard";
 import { BoardColumns } from "./todoColumns";
-import { agentPrimary } from "./agentDisplay";
+import { agentPrimary, agentSecondary } from "./agentDisplay";
 import { CLEARING_ACTIVITY_TYPES } from "./clearedToday";
 import { flagSleeps } from "./taskFlags";
 
@@ -362,6 +362,36 @@ export interface RecordItem {
   activityId: string;
   /** Display name — `agentPrimary`, the same helper every other agent-naming surface reads. */
   agent: string;
+  /** `agentSecondary` — the agency, or the canonical stand-in once the agency IS the primary. */
+  agency: string;
+  /** The day panel resolves the title; carrying the id keeps this layer off the manuscript list. */
+  manuscriptId: string;
+  /** What the entry says, verbatim from the log. Never re-worded here. */
+  note: string;
+  /** What accompanied it, where the log recorded any ("QL v2 + Syn v4", an agent's quote). */
+  detail: string;
+  /** 1-based position in THIS query's record — "Exchange 2". */
+  exchange: number;
+  /** Whole days since the previous exchange on this query. Absent on the first. */
+  gapDays?: number;
+  /** Did the direction flip since the previous exchange — i.e. is this a reply to it? */
+  turned: boolean;
+}
+
+/**
+ * ⚠️ THE EXCHANGE LINE REPORTS AND DOES NOT JUDGE. It states position, elapsed days and who moved
+ * — never a verdict on any of them. "You replied in 1 day" is a fact; "quick turnaround" is an
+ * opinion the app has no standing to hold, and a writer reading their own record does not need it.
+ *
+ * The turn is only claimed when the direction actually FLIPPED. Two sends in a row are not a
+ * reply to anything, so they read as elapsed time and nothing more.
+ */
+export function exchangeLine(r: Pick<RecordItem, "exchange" | "gapDays" | "turned" | "dir">): string {
+  const head = `Exchange ${r.exchange}`;
+  if (r.gapDays === undefined) return head;
+  const days = `${r.gapDays} ${r.gapDays === 1 ? "day" : "days"}`;
+  if (!r.turned) return `${head} · ${days} later`;
+  return `${head} · ${r.dir === "out" ? "you" : "they"} replied in ${days}`;
 }
 
 /**
@@ -413,13 +443,30 @@ export function recordDays(
     return d !== 0 ? d : String(a.id).localeCompare(String(b.id));
   });
 
+  /* ⚠️ THE EXCHANGE COUNT SEQUENCES OVER THE WHOLE QUERY, NOT OVER THE VISIBLE DAYS. Exchange 3
+     is the third thing that passed between the writer and the agency — it does not become
+     "exchange 1" because the reader happens to be looking at September. So the run below walks
+     EVERY eligible activity and the range filter is applied afterwards, when the item is placed. */
+  const seen = new Map<string, { n: number; ms: number; dir: RecordDir }>();
+
   for (const act of ordered) {
-    const ymd = isoToYmd(act.date);
-    if (!ymd || !visible.has(ymd)) continue;
     const spec = recordSpecFor(act.activityType as string, act.resultingStatus as string | undefined);
     if (!spec) continue;
     const query = queryById.get(act.queryId);
     if (!query) continue;
+
+    const prev = seen.get(act.queryId);
+    const exchange = (prev?.n ?? 0) + 1;
+    const ms = new Date(act.date).getTime();
+    const gapDays = prev && !Number.isNaN(ms) && !Number.isNaN(prev.ms)
+      ? Math.max(0, Math.round((ms - prev.ms) / 86400000))
+      : undefined;
+    const turned = !!prev && prev.dir !== spec.dir;
+    seen.set(act.queryId, { n: exchange, ms, dir: spec.dir });
+
+    const ymd = isoToYmd(act.date);
+    if (!ymd || !visible.has(ymd)) continue;
+
     const agent = agentById.get(query.agentId);
     const list = byDay.get(ymd) ?? [];
     list.push({
@@ -430,6 +477,13 @@ export function recordDays(
       queryId: act.queryId,
       activityId: act.id,
       agent: agent ? agentPrimary(agent) : "",
+      agency: agent ? agentSecondary(agent) : "",
+      manuscriptId: act.manuscriptId ?? "",
+      note: act.description ?? "",
+      detail: act.details ?? "",
+      exchange,
+      ...(gapDays === undefined ? {} : { gapDays }),
+      turned,
     });
     byDay.set(ymd, list);
   }
