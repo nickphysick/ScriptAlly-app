@@ -26,6 +26,7 @@
  */
 import { Activity, ActivityType, Agent, Query, QueryStatus, TaskFlag, UserTask } from "../types";
 import { HOLDING_REPLY_TYPE } from "./holdingReply";
+import type { TaskType } from "./todoActions";
 import { BoardCard, terseDoneLabel } from "./todoBoard";
 import { BoardColumns } from "./todoColumns";
 import { agentPrimary, agentSecondary } from "./agentDisplay";
@@ -52,6 +53,15 @@ export interface CalendarItem {
    * how two readings of it come to disagree.
    */
   activityId?: string;
+  /**
+   * The day this item was originally due, when the clock has since rolled it onto today.
+   *
+   * ⚠️ KEPT, NOT RECOMPUTED. It is `action` — the value the roll-forward branch already had one
+   * line above the marker it used to feed. Deriving it a second time at render (`cardActionYmd`
+   * is exported and pure, and the page has `queries`) would work and is rejected: two readings of
+   * one fact is how they come to disagree.
+   */
+  rolledFrom?: string;
 }
 
 export interface CalendarDayData {
@@ -162,9 +172,15 @@ export function calendarDays(input: CalendarInput, visible: string[]): Map<strin
        (audit item 6) — today's cell says "this came back", not "this just landed". */
     const family = c.returnedToday ? "snoozed" as const : liveFamilyOf(c);
     if (action < input.today) {
-      /* ⚠️ ROLL-FORWARD: the item renders TODAY; the origin day keeps one marker. */
+      /* ⚠️ ROLL-FORWARD: the item renders TODAY, and carries the day it came from.
+         ⚠️ `rolled` IS STILL COUNTED AND NO LONGER DRAWN (pill pack, Phase 4). The grid's
+         "{n} ROLLED FORWARD ↗" marker is gone: it was bookkeeping about a MOVE placed on a day
+         where nothing happened, which reads as an event on a calendar. The count survives on the
+         data — nothing else consumed it, and removing it would be a second change wearing the
+         first one's clothes — but the provenance now travels WITH the item, to the one place a
+         reader is looking at it. */
       day(action).rolled += 1;
-      day(input.today).items.push({ key: `cal-${c.key}`, ymd: input.today, label: c.title, family, card: c });
+      day(input.today).items.push({ key: `cal-${c.key}`, ymd: input.today, label: c.title, family, card: c, rolledFrom: action });
     } else {
       day(action).items.push({ key: `cal-${c.key}`, ymd: action, label: c.title, family, card: c });
     }
@@ -233,6 +249,16 @@ export const CAL_CELL_FLOOR = 2;
 /**
  * A pip's own height plus its top margin.
  *
+ * ⚠️ 27, RE-MEASURED — the pill grammar changed the box (pill pack, Phase 5). The label went
+ * 8.5px/12.75 to 10px/15 and the padding 3px 6px to 3px 9px, so the flow height a stack divides by
+ * moved from 24.75 to 27 (browser-measured at 1000, 1440 and 1920, all three identical). Leaving
+ * this at 25 would have been the SAME fault this constant was created to fix, one pack later: a
+ * cap promising room the cell does not have.
+ *
+ * ⚠️ AND IT DOES NOT MOVE ALONE. At 27 the collapsed width's grid floor was 1.2px short of two
+ * pips plus the counter, so `.cal-grid`'s `min-height` went 600 -> 620 in the same change. The two
+ * are one decision; changing either by itself re-opens the gap.
+ *
  * ⚠️ 25, NOT 19 — MEASURED, after the `cal-` collision was fixed (fixes pack, Phase 1). The old
  * value was taken from the ref's `.pip2` and understated the shipped pip by about six pixels:
  * the browser reports `font-size: 8.5px / line-height: 12.75px`, `padding: 3px 6px` and a 1px
@@ -251,7 +277,7 @@ export const CAL_PIP_H = 25;
  * this arithmetic** — `tests/e2e/calFold.measure.ts` reports the real `.cal-d` and cell heights,
  * and the acceptance run checks that no cell overflows.
  */
-export const CAL_CELL_CHROME = 33;
+export const CAL_CELL_CHROME = 35;
 
 /**
  * The "+N MORE" line's own height — browser-measured at 12px (6px mono + 3px padding-top).
@@ -261,7 +287,7 @@ export const CAL_CELL_CHROME = 33;
  * viewport that turned a two-pip cell into a ONE-pip cell, measured. The fold reserves the
  * counter's real height instead.
  */
-export const CAL_MORE_H = 12;
+export const CAL_MORE_H = 11;
 
 /**
  * ⚠️ THE FOLD DERIVES FROM THE CELL, NOT FROM A CONSTANT. `CAL_CELL_CAP` was a flat 3 whatever
@@ -641,4 +667,70 @@ export function dedupeAgainstRecord(
   const shown = new Set(recordItems.map((r) => r.activityId).filter(Boolean));
   if (shown.size === 0) return [...items];
   return items.filter((i) => !(i.family === "done" && i.activityId && shown.has(i.activityId)));
+}
+
+/* ══ THE PILL GRAMMAR (pill pack, Phase 2) ══════════════════════════════════════════════════
+ *
+ * ⚠️ SUMMARISATION IS A GRID-RENDER CONCERN, AND THIS IS THE ONLY FUNCTION THAT DOES IT.
+ * Nothing upstream is shortened: `calendarDays` and `recordDays` keep full labels, the day panel
+ * reads them unchanged, and `FocusFlow` receives the same card it always did. The design ref makes
+ * the opposite choice — it shortens at the data layer — and copying that here would degrade the
+ * TO-DO LIST, which reads the same `assembleBoardColumns` output. One vocabulary, applied at one
+ * call site, on one surface.
+ *
+ * ⚠️ THE RECORD SIDE IS ALREADY THIS GRAMMAR, so it is returned untouched rather than re-derived.
+ * `RECORD_TYPES`/`RECORD_STATUS` were written two packs ago as two-word labels — "Query sent",
+ * "Partial requested", "Holding reply", "Offer received", "Closed" — and a second table restating
+ * them is how two readings of one vocabulary come to disagree. The lock asserts that equality
+ * rather than assuming it.
+ *
+ * ⚠️ A WRITER'S OWN TASK IS NEVER SUMMARISED. "Book the library room" is their sentence, not the
+ * app's to abbreviate; it is returned whole and the CELL truncates it with an ellipsis, so the
+ * tooltip and the panel still carry every word. That is also why this function does no slicing —
+ * cutting the string here would put a shortened value where a full one is expected.
+ */
+
+/**
+ * The two-word vocabulary for a query task, keyed on the board's own `taskType`.
+ *
+ * ⚠️ `Partial<>`, DELIBERATELY. Only the five "do" kinds reach the calendar at all — housekeeping
+ * has no action date (`cardActionYmd` returns null for it) — and giving a pill to a kind that
+ * cannot render would assert a surface that does not exist. The lock derives which kinds calendar
+ * by CALLING `cardActionYmd`, and checks this table against that, so neither list is hand-written
+ * on both sides.
+ *
+ * ⚠️ `offer_received` IS ABSENT AND THAT IS A REPORTED GAP, NOT AN OMISSION. The pack's table has
+ * no card row for an offer, and inventing one would be inventing product copy overnight. It falls
+ * through to its own label, truncated by the cell, and is flagged.
+ */
+export const PILL_BY_TASK: Partial<Record<TaskType, string>> = {
+  partial_requested: "Send partial",
+  full_requested: "Send full",
+  /* ⚠️ "resubmission", NOT "pages". The pack suggested `Send pages`; this app's noun for R&R
+     materials is `resubmission` — `queryAmbient.ts:114` types it (`"partial" | "full" |
+     "resubmission"`), `nudgeState.ts:76` says "send your resubmission first", and the Queries
+     command bar reads "Record your resubmission". And "pages" is actively WRONG here: it collides
+     with the opening sample, whose label was deliberately retired FROM "Sample pages" because that
+     name asserts a unit the data does not carry. */
+  revise_resubmit: "Send resubmission",
+  nudge_overdue: "Nudge due",
+};
+
+/** The snoozed family's pill — a return is a return whatever came back. */
+export const PILL_SNOOZED = "Task returns";
+
+/**
+ * The grid's label for one item. Full fidelity in, two words out — and only here.
+ *
+ * Returns the item's OWN text for a writer's task and for anything the table does not cover, so an
+ * unknown kind degrades to the truth rather than to an invented summary.
+ */
+export function pillLabel(item: CalendarItem | RecordItem): string {
+  /* a record entry: `family` is the discriminator, and the record's label is already two words */
+  if (!("family" in item)) return item.label;
+  if (item.family === "snoozed") return PILL_SNOOZED;
+  /* the writer's own words, and completed work's own words — never summarised on their behalf */
+  if (item.family === "task" || item.family === "done") return item.label;
+  const t = item.card?.taskType as TaskType | undefined;
+  return (t && PILL_BY_TASK[t]) || item.label;
 }

@@ -18,11 +18,14 @@ import {
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
   dedupeAgainstRecord,
+  pillLabel, PILL_BY_TASK, PILL_SNOOZED,
   calFoldCapFolded, CAL_MORE_H, CAL_CELL_FLOOR, CAL_PIP_H, CAL_CELL_CHROME,
   exchangeLine,
   REC_TONE, REC_LEGEND,
 } from "./todoCalendar";
 import { HOLDING_REPLY_TYPE } from "./holdingReply";
+import { TASK_TYPES } from "./todoActions";
+import { boardStreamForTaskType } from "./todoBoard";
 import { CAL_PIP, CAL_LEGEND } from "./todoFamily";
 import { TODO_FACETS } from "./todoBoardSort";
 
@@ -228,10 +231,12 @@ describe("⚠️ the fold threshold derives from the cell, never from a flat con
     /* ⚠️ RENUMBERED AGAIN 20 Aug (fixes pack, Phase 3): the numeral moved into a fixed 20px box,
        so `CAL_CELL_CHROME` went 26 -> 33. The claim is still the claim; the row simply has seven
        fewer pixels to give away. */
-    // 33px chrome + 3 × 25px pips = 108px of row for the full three
-    expect(calFoldCap(120)).toBe(CAL_CELL_CAP); // room 87 — three fit
-    expect(calFoldCap(108)).toBe(3);            // room 75 — exactly three
-    expect(calFoldCap(95)).toBe(2);             // room 62 — two
+    /* ⚠️ RENUMBERED AGAIN 21 Aug (pill pack, Phase 5) — third time, same reason each time: the
+       CLAIM never moves, the measured pill does. 19 -> 25 when the `cal-` collision was fixed,
+       25 -> 27 when the label became a pill. 33px chrome + 3 × 27px = 114px of row for three. */
+    expect(calFoldCap(140)).toBe(CAL_CELL_CAP); // room 105 — three fit easily
+    expect(calFoldCap(110)).toBe(3);            // room 75 — exactly three
+    expect(calFoldCap(95)).toBe(2);             // room 60 — two, the third does not fit
     /* ⚠️ AMENDED 21 Aug (dedupe pack, Phase 3, Nick's ruling): the floor is TWO, not one, so a
        short row no longer falls to a single pip. The arithmetic below the floor is unchanged —
        what changed is where it stops. See `CAL_CELL_FLOOR`. */
@@ -242,9 +247,13 @@ describe("⚠️ the fold threshold derives from the cell, never from a flat con
   it("⚠️ TWO CAPS — the counter is 12px, not a whole pip, and that is worth a row", () => {
     // measured on the deployed page: reserving a full pip slot for the counter turned a two-pip
     // cell into a one-pip cell at a 900px viewport. Beside the counter, two still fit.
-    expect(CAL_MORE_H).toBe(12);
+    expect(CAL_MORE_H).toBe(11);
     expect(calFoldCapFolded(104)).toBe(calFoldCap(104)); // the shipping size — same number
-    expect(calFoldCapFolded(120)).toBe(3);
+    /* ⚠️ AND AT 120 THEY DIVERGE, which is the whole point of asking twice: three pips fit alone
+       (room 87) but only two fit beside the counter (75). A single cap has to assume the worst. */
+    expect(calFoldCap(120)).toBe(3);
+    expect(calFoldCapFolded(120)).toBe(2);
+    expect(calFoldCapFolded(130)).toBe(3);      // room 95 — three fit even beside the counter
     // and it never claims more than the unfolded cap, nor less than one
     for (const px of [0, 20, 46, 60, 80, 104, 120, 300]) {
       expect(calFoldCapFolded(px)).toBeLessThanOrEqual(Math.max(calFoldCap(px), 1));
@@ -270,9 +279,9 @@ describe("⚠️ the fold threshold derives from the cell, never from a flat con
   it("the collapsed width's grid floor is derived from the density floor, not chosen", () => {
     /* 2 pips + the counter = 2 × 25 + 12 = 62px of room; + 33 chrome = rowPx 95; × 6 rows + 13
        for the weekday band = 583. 600 carries the margin. */
-    expect(calCss).toContain("min-height: 600px");
+    expect(calCss).toContain("min-height: 620px");
     const need = 6 * (CAL_CELL_CHROME_FOR_TEST + CAL_CELL_FLOOR * CAL_PIP_H + CAL_MORE_H) + 13;
-    expect(600).toBeGreaterThanOrEqual(need);
+    expect(620).toBeGreaterThanOrEqual(need);
   });
 
   it("it never exceeds the ceiling, however tall the row", () => {
@@ -698,7 +707,10 @@ describe("⚠️ the day panel replaces the modal, inside the chassis", () => {
   });
 
   it("⚠️ changing day clears any expanded row, and 'overdue' appears nowhere", () => {
-    expect(pageSrc).toContain("const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); };");
+    /* ⚠️ AMENDED 21 Aug (pill pack, Phase 3): `selectDay` now clears a THIRD thing — the pill's
+       scroll request — so pinning its whole body went red on a change that strengthened it. The
+       law is unchanged and is what is asserted: changing day clears the expansion. */
+    expect(pageSrc).toMatch(/const selectDay = \(ymd: string\) => \{[^}]*setSelDay\(ymd\)[^}]*setOpenRec\(null\)[^}]*\}/);
     expect(decls(pageSrc).toLowerCase()).not.toContain("overdue");
     expect(decls(calCss).toLowerCase()).not.toContain("overdue");
   });
@@ -867,7 +879,10 @@ describe("⚠️ the counter takes a slot (fixes pack, Phase 1)", () => {
   });
 
   it("CAL_PIP_H is the MEASURED pip height, not the ref's estimate", () => {
-    // browser-measured: 12.75 line + 6 padding + 2 border + 4 margin = 24.75, rounded up
+    /* browser-measured after the pill grammar, at 1000/1440/1920 (all three identical):
+       15px line + 6 padding + 2 border + 2 margin = 25. The pill is TALLER than the old bar
+       (15px line, not 12.75) and its margin is tighter (2, not 4) — see `.cal-pip`'s note for why
+       the margin had to give: the grid lost 32px of height this week. */
     expect(CAL_PIP_H).toBe(25);
   });
 });
@@ -1116,5 +1131,197 @@ describe("⚠️ the record pip names the agent, as the card pips beside it do",
     expect(m, ".cal-pip has no rule").not.toBeNull();
     expect(m![1]).toContain("white-space: nowrap");
     expect(m![1]).toContain("text-overflow: ellipsis");
+  });
+});
+
+/* ══ THE PILL GRAMMAR (pill pack, Phase 2) ══════════════════════════════════════════════════ */
+
+describe("⚠️ two words on the grid — and summarisation happens NOWHERE else", () => {
+  const ci = (over: Partial<CalendarItem>): CalendarItem =>
+    ({ key: "k", ymd: "2026-08-12", label: "L", family: "agent", ...over });
+  const withTask = (taskType: string, label: string) =>
+    ci({ family: "agent", label, card: card({ taskType, relatedRecordId: "q1" }) });
+
+  it("query tasks take the two-word vocabulary", () => {
+    expect(pillLabel(withTask("partial_requested", "Send your partial to Marcus Reed"))).toBe("Send partial");
+    expect(pillLabel(withTask("full_requested", "Send your full to Ana Duarte"))).toBe("Send full");
+    expect(pillLabel(withTask("nudge_overdue", "Nudge Tom Ellery"))).toBe("Nudge due");
+  });
+
+  it("⚠️ R&R MATERIALS ARE A 'resubmission' — the app's own noun, never 'pages'", () => {
+    // queryAmbient types it (`"partial" | "full" | "resubmission"`), nudgeState says "send your
+    // resubmission first", the Queries command bar reads "Record your resubmission".
+    // "pages" would collide with the opening sample, whose label was deliberately retired FROM
+    // "Sample pages" because that name asserts a unit the data does not carry.
+    expect(pillLabel(withTask("revise_resubmit", "Resubmit your R&R to Iris Kwan"))).toBe("Send resubmission");
+    for (const v of Object.values(PILL_BY_TASK)) expect(v!.toLowerCase()).not.toContain("pages");
+  });
+
+  it("a snoozed return says so, whatever came back", () => {
+    expect(pillLabel(ci({ family: "snoozed", label: "Send your full to Ana Duarte" }))).toBe(PILL_SNOOZED);
+    expect(PILL_SNOOZED).toBe("Task returns");
+  });
+
+  it("⚠️ A WRITER'S OWN TASK IS NEVER SUMMARISED — their sentence, returned whole", () => {
+    const t = ci({ family: "task", label: "Book the library room for Thursday" });
+    expect(pillLabel(t)).toBe("Book the library room for Thursday");
+    // and completed work keeps its own words too
+    expect(pillLabel(ci({ family: "done", label: "Closed David Marsh — no response", struck: true })))
+      .toBe("Closed David Marsh — no response");
+  });
+
+  it("⚠️ THE CELL TRUNCATES, NOT THIS FUNCTION — so the tooltip and panel keep every word", () => {
+    const long = "A very long task the writer wrote themselves and would like to read in full";
+    expect(pillLabel(ci({ family: "task", label: long })), "pillLabel sliced a string").toBe(long);
+    const m = /^\.cal-pip\s*\{([^}]*)\}/m.exec(calCss);
+    expect(m).not.toBeNull();
+    expect(m![1]).toContain("text-overflow: ellipsis");
+    expect(m![1]).toContain("white-space: nowrap");
+  });
+
+  it("⚠️ THE RECORD SIDE IS ALREADY THIS GRAMMAR — asserted, not assumed", () => {
+    // RECORD_TYPES/RECORD_STATUS were written two packs ago as two-word labels. A second table
+    // restating them is how two readings of one vocabulary drift; so pillLabel returns them
+    // untouched, and this checks the premise that lets it.
+    const rec = (label: string): RecordItem =>
+      ({ key: "r", ymd: "2026-08-12", label, dir: "out", queryId: "q1", activityId: "a1",
+         agent: "Marcus Reed", agency: "Reed Literary", manuscriptId: "m1", note: "", detail: "",
+         exchange: 1, turned: false });
+    expect(pillLabel(rec("Query sent"))).toBe("Query sent");
+    for (const spec of Object.values(RECORD_STATUS)) {
+      if (!spec) continue;
+      expect(spec.label.split(/\s+/).length, `"${spec.label}" is not a short label`).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it("⚠️ NO AGENT NAME ON ANY PILL — the grid is a density map", () => {
+    const rec: RecordItem =
+      { key: "r", ymd: "2026-08-12", label: "Holding reply", dir: "in", queryId: "q1",
+        activityId: "a1", agent: "Sam Okoro", agency: "Okoro Bell", manuscriptId: "m1",
+        note: "", detail: "", exchange: 1, turned: false };
+    expect(pillLabel(rec)).toBe("Holding reply");
+    expect(pillLabel(rec)).not.toContain("Sam Okoro");
+    // the page renders pillLabel, and keeps the full form in the tooltip
+    expect(pageSrc).toContain("{pillLabel(r)}");
+    expect(pageSrc).toContain("title={r.agent ? `${r.label} · ${r.agent}` : r.label}");
+  });
+
+  it("⚠️ EVERY KIND THAT CAN CALENDAR IS EITHER IN THE TABLE OR DELIBERATELY OUT", () => {
+    /* Derived on BOTH sides, not hand-listed: the stream comes from `boardStreamForTaskType` —
+       the board's own derivation — and the action date from `cardActionYmd`. Neither list is
+       written twice.
+       ⚠️ A FIRST VERSION FORCED `stream: "do"` ON EVERY TYPE and "found" that housekeeping
+       calendars. It does not: the stream is DERIVED from the kind, so a hk type on the do stream
+       is an input the system cannot produce — and a test that hands a function an impossible
+       argument is testing a function nobody runs. */
+    const q = [{ id: "q1", agentId: "a1", dateSent: "2026-08-01T09:00:00Z" } as Query];
+    const canCalendar = TASK_TYPES.filter((t) => {
+      const stream = boardStreamForTaskType(t);
+      if (!stream) return false;
+      return cardActionYmd(card({ taskType: t, stream, relatedRecordId: "q1" }), q) !== null;
+    });
+    expect(canCalendar.length, "no task type can reach the calendar — the probe is wrong").toBeGreaterThan(0);
+    const covered = canCalendar.filter((t) => t in PILL_BY_TASK);
+    const uncovered = canCalendar.filter((t) => !(t in PILL_BY_TASK));
+    /* `offer_received` is the reported gap: the pack's table has no card row for an offer, and
+       inventing product copy overnight is out of scope. It degrades to its own label. */
+    expect(uncovered, "an uncovered kind appeared — decide its pill or confirm the fallback")
+      .toEqual(["offer_received"]);
+    expect(covered.sort()).toEqual(["full_requested", "nudge_overdue", "partial_requested", "revise_resubmit"]);
+    // and the fallback is the truth, not an invented summary
+    expect(pillLabel(withTask("offer_received", "Noah Bright has made an offer")))
+      .toBe("Noah Bright has made an offer");
+  });
+
+  it("⚠️ NOTHING UPSTREAM WAS SHORTENED — the derivation still emits full labels", () => {
+    const full = calendarDays({
+      ...EMPTY,
+      cols: { ...EMPTY.cols, todo: [card({ key: "c1", taskType: "full_requested", stream: "do", relatedRecordId: "q1", title: "Send your full to Ana Duarte" })] },
+      queries: [q({ id: "q1", lastStatusChange: "2026-08-12T09:00:00Z" } as Partial<Query>)],
+    }, AUG);
+    const item = full.get("2026-08-12")!.items[0];
+    expect(item.label, "calendarDays emitted a shortened label").toBe("Send your full to Ana Duarte");
+    expect(pillLabel(item)).toBe("Send full");
+  });
+});
+
+/* ══ CLICK-THROUGH + ROLLED-FORWARD (pill pack, Phases 3–4) ═════════════════════════════════ */
+
+describe("⚠️ a pill points at its row — and actioning is untouched", () => {
+  it("a card pill selects its day and asks for its row; a record pill also opens it", () => {
+    expect(pageSrc).toContain("const focusCard = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(key); };");
+    expect(pageSrc).toContain("const focusRecord = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(key); setFocusKey(key); };");
+    expect(pageSrc).toContain("focusCard(ymd, it.key)");
+    expect(pageSrc).toContain("focusRecord(ymd, r.key)");
+  });
+
+  it("⚠️ CELL WHITESPACE AND THE COUNTER STILL SELECT THE DAY ONLY", () => {
+    expect(pageSrc).toContain("onClick={() => selectDay(ymd)}");
+    // the counter is not a button and carries no handler of its own
+    expect(pageSrc).toContain('<div className="cal-more2">+{overflow} MORE</div>');
+    expect(pageSrc).not.toMatch(/cal-more2[^>]*onClick/);
+  });
+
+  it("⚠️ SELECTING A DIFFERENT DAY STILL CLEARS THE EXPANSION — and now the focus request too", () => {
+    expect(pageSrc).toContain("const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(null); };");
+  });
+
+  it("⚠️ ACTIONING IS UNCHANGED — the row still opens FocusFlow with the same card", () => {
+    // the pill routes TO the row, never past it; the row's handler is the one it always was
+    expect(pageSrc).toContain("onClick={() => onOpenCard(it)}");
+    expect(pageSrc).toContain("onOpenCard={openSheet}");
+    expect(pageSrc).toContain("const openSheet = (item: CalendarItem) => {");
+    // and the writer's own checkbox task still completes from the panel, unchanged
+    expect(pageSrc).toContain("<FocusFlow");
+  });
+
+  it("the scroll request is cleared once honoured, so a re-render cannot scroll again", () => {
+    expect(pageSrc).toContain("onFocused();");
+    expect(pageSrc).toContain("onFocused={() => setFocusKey(null)}");
+    expect(pageSrc).toContain('data-rowkey={it.key}');
+    expect(pageSrc).toContain('data-rowkey={r.key}');
+  });
+});
+
+describe("⚠️ rolled-forward: the marker goes, the provenance travels with the item", () => {
+  const overdue = card({ key: "late", userTaskId: "t1", nature: "task", dueYmd: "2026-08-04", title: "Chase the reference" });
+  const days = calendarDays({ ...EMPTY, cols: { ...EMPTY.cols, todo: [overdue] } }, AUG);
+
+  it("⚠️ THE DATA LAW IS UNCHANGED — the count is still produced, it is simply not drawn", () => {
+    /* The two pre-existing assertions in this file keep their laws exactly:
+       · "the day they left holds the marker count — not the items" — still true, `rolled` is
+         still incremented and the origin day still holds no items;
+       · "completed items NEVER roll" — still true, `rolled` stays 0 on a done day.
+       Only the RENDER went. Removing the count as well would have been a second change wearing
+       the first one's clothes. */
+    expect(days.get("2026-08-04")!.rolled).toBe(1);
+    expect(days.get("2026-08-04")!.items).toHaveLength(0);
+  });
+
+  it("the item carries the day it came from, and it is the day it left", () => {
+    const onToday = days.get(TODAY)!.items.find((i) => i.key === "cal-late")!;
+    expect(onToday.rolledFrom).toBe("2026-08-04");
+    expect(onToday.ymd).toBe(TODAY);
+  });
+
+  it("⚠️ AN ITEM ON ITS OWN DAY CARRIES NO PROVENANCE — absence means it never moved", () => {
+    const onTime = calendarDays({
+      ...EMPTY,
+      cols: { ...EMPTY.cols, todo: [card({ key: "ok", userTaskId: "t2", nature: "task", dueYmd: TODAY, title: "Today's" })] },
+    }, AUG);
+    expect(onTime.get(TODAY)!.items[0].rolledFrom).toBeUndefined();
+  });
+
+  it("⚠️ THE MARKER IS OFF THE GRID, and its class cannot come back by accident", () => {
+    const src = decls(pageSrc);            // comments stripped — the removal is EXPLAINED in one
+    expect(src).not.toContain("ROLLED FORWARD");
+    expect(src).not.toMatch(/["\s`]cal-rolled["\s`]/);
+    expect(decls(calCss)).not.toMatch(/^\.cal-rolled\s*\{/m);
+  });
+
+  it("the provenance line renders on the panel row, from the item's own field", () => {
+    expect(pageSrc).toContain("{it.rolledFrom && <span className=\"cal-fporig\">Originally due {shortDate(it.rolledFrom)}</span>}");
+    // reusing the existing formatter rather than adding a third date format
+    expect(pageSrc).toContain('import { shortDate } from "../../lib/recordingCalendar";');
   });
 });

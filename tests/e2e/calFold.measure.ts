@@ -23,8 +23,8 @@ const ROUTE = "/todo/calendar";
 const WIDTHS = [1440, 1920];
 
 /** The page's own constants, restated here ONLY so the report can show the arithmetic. */
-const CAL_PIP_H = 25;   /* corrected in Phase 1 — browser-measured 24.75, rounded up */
-const CAL_CELL_CHROME = 33;  /* Phase 3 — the numeral's 20px box */
+const CAL_PIP_H = 25;   /* re-measured for the pill: 15 line + 6 pad + 2 border + 2 margin */
+const CAL_CELL_CHROME = 35;  /* measured: rowPx 97.33 - 63.25px of pip room */
 const CAL_CELL_CAP = 3;
 
 /** The shipped `calFoldCap`, mirrored so the report can state what the page computes today. */

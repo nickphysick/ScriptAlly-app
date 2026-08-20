@@ -31,9 +31,12 @@ import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, monthLabel,
   shiftMonth, sameMonth, calFoldCap, calFoldCapFolded,
-  RecordItem, recordDays, cellSlots, exchangeLine, dedupeAgainstRecord, REC_TONE, REC_LEGEND,
+  RecordItem, recordDays, cellSlots, exchangeLine, dedupeAgainstRecord, pillLabel, REC_TONE, REC_LEGEND,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
+/* ⚠️ REUSED, not re-written — `shortDate` already renders "7 Aug" for the RecordingCalendar's
+   anchor button, and a third date formatter is a third chance for two surfaces to disagree. */
+import { shortDate } from "../../lib/recordingCalendar";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
 import "./tasksLayout.css";
 import "./taskChrome.css";
@@ -63,6 +66,9 @@ interface CalDayPanelProps {
   recs: RecordItem[];
   manuscripts: { id: string; title: string }[];
   openRec: string | null;
+  /** A row to bring into view — set by a grid pill click, cleared once honoured. */
+  focusKey: string | null;
+  onFocused: () => void;
   onToggleRec: (key: string) => void;
   onOpenCard: (item: CalendarItem) => void;
   onOpenQuery: (queryId: string) => void;
@@ -70,7 +76,7 @@ interface CalDayPanelProps {
 }
 
 const CalDayPanel: React.FC<CalDayPanelProps> = ({
-  ymd, today, items, recs, manuscripts, openRec, onToggleRec, onOpenCard, onOpenQuery, onCompose,
+  ymd, today, items, recs, manuscripts, openRec, focusKey, onFocused, onToggleRec, onOpenCard, onOpenQuery, onCompose,
 }) => {
   const d = new Date(`${ymd}T12:00:00`);
   const weekday = d.toLocaleDateString("en-GB", { weekday: "long" });
@@ -93,6 +99,19 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
     recs.length ? `${recs.length} ON THE RECORD` : "",
   ].filter(Boolean).join(" · ");
 
+  /* ⚠️ THE PILL BRINGS ITS ROW INTO VIEW, and the effect is the only place that scrolls. It runs
+     on the KEY and the DAY together: a pill on a different day changes both, and honouring only
+     the key would scroll to a row the panel has not rendered yet. `onFocused` clears the request
+     so a later re-render cannot scroll a second time under the reader. */
+  const bodyRef = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    if (!focusKey) return;
+    const el = bodyRef.current?.querySelector(`[data-rowkey="${CSS.escape(focusKey)}"]`);
+    if (el) (el as HTMLElement).scrollIntoView({ block: "nearest", behavior: "auto" });
+    onFocused();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusKey, ymd]);
+
   const section = (title: string, rows: React.ReactNode[]) =>
     rows.length === 0 ? null : (
       <div className="cal-fpsec">
@@ -106,11 +125,17 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
       key={it.key}
       type="button"
       className={`cal-fprow${extra}${it.struck ? " struck" : ""}`}
+      data-rowkey={it.key}
       disabled={!it.card}
       onClick={() => onOpenCard(it)}
     >
       <i className="cal-fpdot" style={{ background: CAL_PIP[it.family].bg, borderColor: CAL_PIP[it.family].bd }} aria-hidden />
       <span className="cal-fptxt">{it.label}</span>
+      {/* ⚠️ PROVENANCE TRAVELS WITH THE ITEM, not with the day it left. The grid's marker sat on an
+          empty day and said a move had happened there; this says the same thing where the reader is
+          actually looking — on today's row, in the panel, muted. Derived from `rolledFrom`, which
+          is the value the marker itself was counted from. */}
+      {it.rolledFrom && <span className="cal-fporig">Originally due {shortDate(it.rolledFrom)}</span>}
     </button>
   );
 
@@ -127,7 +152,7 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
         {countLine && <div className="cal-fpcount">{countLine}</div>}
       </div>
 
-      <div className="cal-fpbody">
+      <div className="cal-fpbody" ref={bodyRef}>
         {total === 0 ? (
           /* ⚠️ AN EMPTY DAY IS NOT A FAILURE STATE. No apology, no prompt to do more — a writer
              with a clear day is entitled to read that as good news, or as nothing at all. */
@@ -151,7 +176,7 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
               const open = openRec === r.key;
               const title = msTitle(r.manuscriptId);
               return (
-                <div key={r.key} className={`cal-recrow${open ? " open" : ""}`}>
+                <div key={r.key} className={`cal-recrow${open ? " open" : ""}`} data-rowkey={r.key}>
                   <button
                     type="button"
                     className="cal-recmain"
@@ -268,7 +293,17 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
   /* which record row is expanded, if any. Cleared whenever the day changes — an expansion belongs
      to the entry the writer opened, not to the position it occupied in some other day's list. */
   const [openRec, setOpenRec] = useState<string | null>(null);
-  const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); };
+  const [focusKey, setFocusKey] = useState<string | null>(null);
+  const selectDay = (ymd: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(null); };
+  /* ⚠️ A PILL SELECTS ITS DAY *AND* POINTS AT ITS ROW (pill pack, Phase 3). The grid is a density
+     map now: two words and a colour. Whatever the pill abbreviates is one click away in full, so
+     the click has to land somewhere — the panel row it summarises.
+     ⚠️ NOT VIA `selectDay`: that clears the expansion, which is right for whitespace and wrong
+     here. These set the day and the target together, in one render, so nothing is set and undone.
+     ⚠️ ACTIONING IS UNCHANGED. The row still opens `FocusFlow` with the same card and the same
+     props; the pill routes to the row rather than past it. */
+  const focusCard = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(null); setFocusKey(key); };
+  const focusRecord = (ymd: string, key: string) => { setSelDay(ymd); setOpenRec(key); setFocusKey(key); };
   const [flowCard, setFlowCard] = useState<BoardCard | null>(null);
 
   const assembled = useMemo(
@@ -450,7 +485,6 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
           <div className="cal-grid" role="grid" ref={gridRef} aria-label={monthLabel(anchor)}>
             {DOW.map((d) => <div key={d} className="cal-dow" role="columnheader">{d}</div>)}
             {visible.map((ymd) => {
-              const { rolled } = dayData(ymd);
               const items = itemsFor(ymd);
               const recs = recordFor(ymd);
               /* ⚠️ THE FOLD RESPONDS TO THE VIEWPORT (tasks-viewport P3): the cap comes from the
@@ -483,9 +517,13 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                       className={`cal-pip${it.struck ? " struck" : ""}${it.card ? "" : " inert"}`}
                       style={{ background: CAL_PIP[it.family].bg, color: CAL_PIP[it.family].tx, borderColor: CAL_PIP[it.family].bd }}
                       title={it.label}
-                      onClick={(e) => { e.stopPropagation(); it.card ? openSheet(it) : selectDay(ymd); }}
+                      onClick={(e) => { e.stopPropagation(); it.card ? focusCard(ymd, it.key) : selectDay(ymd); }}
                     >
-                      {it.label}
+                      {/* ⚠️ THE GRID SUMMARISES; NOTHING UPSTREAM DOES. `pillLabel` is the only
+                          place two-word labels exist — the tooltip above, the day panel and
+                          FocusFlow all still read `it.label` in full. A writer's own task returns
+                          its own words and the cell ellipsises them. */}
+                      {pillLabel(it)}
                     </button>
                   ))}
                   {/* ⚠️ THE RECORD SITS UNDER THE LIVE WORK, AND WEARS THE SAME BOX. It reuses
@@ -498,18 +536,24 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                       type="button"
                       className="cal-pip cal-rec"
                       title={r.agent ? `${r.label} · ${r.agent}` : r.label}
-                      onClick={(e) => { e.stopPropagation(); selectDay(ymd); }}
+                      onClick={(e) => { e.stopPropagation(); focusRecord(ymd, r.key); }}
                     >
                       <span className="cal-recdot" style={{ background: REC_TONE[r.dir].dot }} aria-hidden />
-                      {/* ⚠️ THE PIP NAMES THE AGENT, as the card pips beside it do. A bare "Holding
-                          reply" next to "Nudge Tom Ellery" is two grammars in one cell, and the name
-                          is the thing a writer scans a month FOR. Truncation is the card pips' —
-                          one line, ellipsis — so a long name shortens rather than wrapping. */}
-                      {r.agent ? `${r.label} · ${r.agent}` : r.label}
+                      {/* ⚠️ NO AGENT NAME ON A PILL — REVERSING THE PREVIOUS PACK, on Nick's
+                          instruction. The name was added here so the record read like the card pips
+                          beside it; under the pill grammar BOTH sides drop names, so the two are
+                          consistent again by the opposite route. The grid is a density map; the
+                          name is one click away in the panel, and the tooltip above still carries
+                          `Label · Name` in full. */}
+                      {pillLabel(r)}
                     </button>
                   ))}
                   {overflow > 0 && <div className="cal-more2">+{overflow} MORE</div>}
-                  {rolled > 0 && <span className="cal-rolled">{rolled} ROLLED FORWARD ↗</span>}
+                  {/* ⚠️ "{n} ROLLED FORWARD ↗" IS GONE (pill pack, Phase 4). It was bookkeeping
+                      about a MOVE, drawn on a day where nothing happened — which on a calendar
+                      reads as an event. The work itself was never on that day once it rolled; it
+                      is on today, and its provenance now rides the item's own panel row as
+                      "Originally due {date}". Nothing else consumed the marker. */}
                 </div>
               );
             })}
@@ -544,6 +588,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
             recs={recordFor(selDay)}
             manuscripts={manuscripts}
             openRec={openRec}
+            focusKey={focusKey}
+            onFocused={() => setFocusKey(null)}
             onToggleRec={(k) => setOpenRec((cur) => (cur === k ? null : k))}
             onOpenCard={openSheet}
             onOpenQuery={(queryId) => onNavigatePath(`/queries?q=${encodeURIComponent(queryId)}`)}

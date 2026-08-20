@@ -149,8 +149,19 @@
    ever miscounts again. */
 .cal-pip {
   display: block; width: 100%; text-align: left; border: 1px solid transparent; flex: none;
-  border-radius: 5px; font-size: 8.5px; font-weight: 600; font-family: inherit;
-  padding: 3px 6px; margin-top: 4px; cursor: pointer;
+  /* ⚠️ A PILL, NOT A BAR (pill pack, Phase 2). The grid is a density map: every item is a rounded
+     capsule with a two-word label, so a month reads as shape and colour before it reads as text.
+     999px rather than a large fixed radius, so the cap stays a semicircle whatever the height
+     becomes. The PANEL's rows are untouched by this — they are the reading surface. */
+  border-radius: 999px; font-size: 10px; font-weight: 600; font-family: inherit;
+  /* ⚠️ `margin-top` 4 -> 2 (pill pack, Phase 5) — the ONE value here no pack specifies, and the
+     only place left to find room. The pill's own box grew (10px label, 3px 9px padding, both
+     specified), and the grid separately LOST 32px of height this week — clientHeight 638 -> 606,
+     the weekday band 13 -> 22 — so two pills plus the counter no longer fit a row. Measured:
+     63.25px of space against 66px needed. Two pixels between pills still reads as a gap because
+     each carries its own fill and border. Flagged: the cushion is now ~2px, so the next change to
+     the chassis's height re-opens this. */
+  padding: 3px 9px; margin-top: 2px; cursor: pointer;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .cal-pip.struck { text-decoration: line-through; }
@@ -161,9 +172,18 @@
 .cal-more2 {
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 6px; letter-spacing: 0.12em; color: #b3a394;
-  padding: 3px 2px 0; margin-top: auto; text-align: center; flex: none;
+  /* padding-top 3 -> 2 for the same reason as the pill's margin — see `.cal-pip` */
+  padding: 2px 2px 0; margin-top: auto; text-align: center; flex: none;
 }
-.cal-rolled {
+/* the provenance line on a rolled item's PANEL row — muted, mono, and never on the grid */
+.cal-fporig {
+  display: block;
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 8px; letter-spacing: 0.08em; color: #b3a394; margin-top: 2px;
+}
+/* ⚠️ `.cal-rolled` IS RETIRED WITH ITS MARKER (pill pack, Phase 4) — the rule goes so the class
+   cannot quietly come back with a new caller. The count it drew still exists on the data. */
+.cal-rolled-RETIRED {
   display: block;
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 6px; letter-spacing: 0.12em; color: #b3a394; margin-top: 4px;
@@ -413,7 +433,11 @@
      needs 2 × CAL_PIP_H + CAL_MORE_H = 62px of room, hence rowPx >= 33 + 62 = 95, hence
      6 × 95 + 13 (the weekday band) = 583. 600 carries the margin. At 420 this width gave rowPx 66
      and a cap of ONE — measured on dev before the change. */
-  .cal-grid { min-height: 600px; }
+  /* ⚠️ 620, RE-DERIVED (pill pack, Phase 5) — was 600. The pill's measured flow height went 25 ->
+     27, so two pips plus the counter now need 66px of room and 600 left 64.8: short by 1.2px, which
+     the density floor of two would have promised anyway. 6 × (33 + 66) + 13 = 607; 620 carries the
+     margin. This number and CAL_PIP_H are one decision. */
+  .cal-grid { min-height: 620px; }
   .cal-focus { max-height: none; }
 }
 
