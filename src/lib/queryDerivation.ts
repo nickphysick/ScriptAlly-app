@@ -97,8 +97,37 @@ export function getActivityTime(date: unknown): number {
 }
 
 /**
- * Status-bearing activities in chronological order. Tiebreak on id (then original index) so the
- * order — and therefore the derived status — is stable regardless of fetch order.
+ * ══ THE EVENT ORDER — ONE RULE, THREE SURFACES ═══════════════════════════════════════════════
+ *
+ * ⚠️ THREE ORDERINGS FOR ONE CONCEPT IS THE THREE-ACTIVITY-STORES FAULT ONE LAYER DOWN, and that
+ * is what this export exists to end. The rule was stated here and NOWHERE ELSE: the Query Centre's
+ * timeline sorted on time alone and was correct only by accident — its input arrives from
+ * `onSnapshot(..., orderBy('createdAt','asc'))`, which Firestore completes with `__name__`, and
+ * `Array#sort` is stable — while the To-do focus sheet ran that same tiebreak-free sort over the
+ * UNSORTED global feed and could already order two same-day events differently for one query.
+ *
+ * ⚠️ AND IT IS LOAD-BEARING FOR THE CORRECTION PREVIEW. That preview sorts a PROPOSED array which
+ * never came from Firestore, so without a stated rule it would compare its own order against
+ * `orderBy`'s — and diverge on exactly the case a correction most often creates: moving an event
+ * onto a day that already has one.
+ *
+ * Time, then document id, then original index. The id is the tiebreak that makes it deterministic;
+ * the index is the last resort for rows that have no id yet (a synthesised root, a preview row).
+ */
+export interface EventOrderKey {
+  time: number;
+  /** The document id. `""` for a row with no document behind it — falls through to `i`. */
+  id: string;
+  /** Position in the caller's own input, so an id-less pair is still stable. */
+  i: number;
+}
+
+export const byEventOrder = (a: EventOrderKey, b: EventOrderKey): number =>
+  a.time - b.time || a.id.localeCompare(b.id) || a.i - b.i;
+
+/**
+ * Status-bearing activities in chronological order, by `byEventOrder` — so the order, and therefore
+ * the derived status, is stable regardless of fetch order.
  */
 export function orderedStatusBearing(activities: DerivableActivity[]): {
   status: QueryStatus;
@@ -108,7 +137,7 @@ export function orderedStatusBearing(activities: DerivableActivity[]): {
   return activities
     .map((a, i) => ({ status: normalizeResultingStatus(a.resultingStatus), time: getActivityTime(a.date), provisional: a.dateProvisional === true, id: a.id ?? "", i }))
     .filter((a): a is { status: QueryStatus; time: number; provisional: boolean; id: string; i: number } => a.status !== null)
-    .sort((a, b) => a.time - b.time || a.id.localeCompare(b.id) || a.i - b.i)
+    .sort(byEventOrder)
     .map(({ status, time, provisional }) => ({ status, time, provisional }));
 }
 

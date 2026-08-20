@@ -23,7 +23,7 @@ import { sendMethodLabel } from "../../lib/agentDisplay";
 import { WeekSlider } from "../forms/WeekSlider";
 import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";
 import { HOLDING_REPLY_NESTED_TYPE, HOLDING_REPLY_LABEL, replyStatedWindow, holdingReplyTimes } from "../../lib/holdingReply";
-import { dropSupersededProvisional } from "../../lib/queryDerivation";
+import { dropSupersededProvisional, byEventOrder } from "../../lib/queryDerivation";
 import { chapterise } from "../../lib/timelineChapters";
 import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, silencePolicyLine, windowAttribution, type ReminderTask } from "../../lib/nudgeState";
 
@@ -224,7 +224,13 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
     const t = evt.type as string;
     if (!byType[t] || getTime(evt.createdAt) < getTime(byType[t].createdAt)) byType[t] = evt;
   });
-  const statusEvents = Object.values(byType).sort((a, b) => getTime(a.createdAt) - getTime(b.createdAt));
+  /* ⚠️ THE SHARED RULE, IMPORTED (correction pack, Phase 1). This sorted on time alone and was
+     correct only because Firestore had already ordered the input; a caller handing it an unsorted
+     array — the focus sheet does, and so will the correction preview — got whatever order it gave. */
+  const statusEvents = Object.values(byType)
+    .map((evt, i) => ({ evt, time: getTime(evt.createdAt), id: typeof evt.id === "string" ? evt.id : "", i }))
+    .sort(byEventOrder)
+    .map(({ evt }) => evt);
   // Synthesise the "Query sent" root from dateSent when no Queried rung exists.
   if (!statusEvents.some((e) => e.type === QueryStatus.QUERIED) && query.dateSent) {
     statusEvents.unshift({ type: QueryStatus.QUERIED, createdAt: query.dateSent });
@@ -309,7 +315,13 @@ export function buildTimelineRows(events: any[], query: Query, agent: Agent | nu
       timeMs: getTime(evt.createdAt),
     }));
 
-  const merged = [...statusRows, ...nudgeRows, ...holdingRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));
+  /* ⚠️ AND THE MERGE TOO — the same rule, so a status rung and a nudge on one day cannot land in a
+     different order here than the derivation puts them in. `activityId` is the id where a row has a
+     document; the synthesised root and any preview row fall through to their index. */
+  const merged = [...statusRows, ...nudgeRows, ...holdingRows]
+    .map((row, i) => ({ row, time: row.timeMs ?? 0, id: row.activityId ?? "", i }))
+    .sort(byEventOrder)
+    .map(({ row }) => row);
 
   /**
    * §5a — a nudge states its OUTCOME, not the act: "Nudged — no reply" while nothing has come back,

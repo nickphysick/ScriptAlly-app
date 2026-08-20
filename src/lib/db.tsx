@@ -2545,6 +2545,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // Map the Activity-shaped patch onto the subcollection doc's field names.
       const subPatch: Record<string, any> = {};
       if (patch.description !== undefined) subPatch.note = patch.description;
+      /**
+       * ⚠️ `details` WAS ACCEPTED AND NEVER MAPPED — a silent divergence between the two stores.
+       * The patch type has always listed it, and this block handled description, date and
+       * resultingStatus only, so a details edit reached the GLOBAL projection while the
+       * AUTHORITATIVE log kept the old value. Nothing caught it because the one caller
+       * (`TimelineComposer`) never sent one; the correction form sends details for most of what a
+       * note edit is, and the fault would surface later as "the edit didn't save".
+       *
+       * ⚠️ IT MAPS ONTO `note`, LIKE `description`, because the subcollection has one prose field
+       * and the timeline renders it beneath the row — which is where both the nudge's follow-up
+       * line and the holding reply's kept words already live. A caller sending both wins with
+       * `details`, deliberately: it is the field that carries the writer's own words.
+       */
+      if (patch.details !== undefined) subPatch.note = patch.details;
       if (patch.date !== undefined) subPatch.createdAt = Timestamp.fromDate(new Date(patch.date));
       if (patch.resultingStatus !== undefined) {
         subPatch.type = patch.resultingStatus;
