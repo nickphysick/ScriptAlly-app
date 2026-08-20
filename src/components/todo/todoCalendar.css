@@ -154,3 +154,18 @@
 .cal-recdot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
 /* the legend's record swatch is a dot, matching the pip; the live families keep their square */
 .cal-legend i.cal-legdot { width: 6px; height: 6px; border-radius: 50%; border-color: transparent; }
+
+/* ⚠️ THE RECORD'S SWITCH, AND THE RULE THAT SEPARATES IT FROM THE FACETS (record-layer P4). The
+   separator is not decoration: the facet control speaks the shared TODO_FACETS vocabulary that the
+   board and the sidebar badge also read, and this one governs a layer only the calendar has. */
+.cal-sep {
+  width: 1px; align-self: stretch; margin: 0 2px;
+  background: #e7dcce; flex: none;
+}
+.cal-recbtn { display: inline-flex; align-items: center; gap: 6px; }
+.cal-recsw { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+/* off reads as off — the swatch drops back rather than the label going grey, so the control still
+   states WHICH layer it governs while it is not governing it */
+.cal-recbtn[aria-pressed="false"] { color: #a2937f; }
+.cal-recbtn[aria-pressed="false"] .cal-recsw { opacity: 0.45; }
+.cal-recbtn[aria-pressed="true"] { background: #f6f1ea; border-color: #b9a48f; }

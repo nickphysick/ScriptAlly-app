@@ -206,6 +206,22 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                   </div>
                 )}
               </span>
+              {/* ⚠️ THE RECORD'S CONTROL STANDS APART FROM THE FACETS, AND THE RULE BETWEEN THEM IS
+                  THE POINT (record-layer P4). `TODO_FACETS` is ONE vocabulary shared with the board
+                  and the sidebar badge — a fifth entry there would leak a calendar-only concept into
+                  a control two other surfaces read, and the board has no history for it to mean
+                  anything about. So this is a separate switch for a separate layer, and the
+                  separator says so before anyone has to read a tooltip. */}
+              <span className="cal-sep" aria-hidden />
+              <button
+                type="button"
+                className="cal-nav cal-recbtn"
+                aria-pressed={showRecord}
+                onClick={() => setShowRecord((v) => !v)}
+              >
+                <span className="cal-recsw" style={{ background: REC_TONE.out.dot }} aria-hidden />
+                The record
+              </button>
               <TplGrow />
               {/* the pink creation action: the ONE composer lives on the To-do list page — go
                   there and announce, the bar's ＋ New pattern (never a second create surface) */}

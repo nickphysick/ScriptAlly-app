@@ -20,6 +20,7 @@ import {
 } from "./todoCalendar";
 import { HOLDING_REPLY_TYPE } from "./holdingReply";
 import { CAL_PIP, CAL_LEGEND } from "./todoFamily";
+import { TODO_FACETS } from "./todoBoardSort";
 
 const here = __dirname;
 const pageSrc = readFileSync(join(here, "..", "components", "todo", "TodoCalendarPage.tsx"), "utf8");
@@ -469,5 +470,40 @@ describe("⚠️ the record's tones are calendar-local, and the legend still ren
     // past with a rule written for the present. Only THE RECORD governs it.
     expect(pageSrc).toContain("recordDays(activities, queries, agents, visible)");
     expect(decls(pageSrc)).not.toMatch(/applyFacet\([^)]*rec/i);
+  });
+});
+
+/* ══ THE RECORD'S CONTROL (record-layer pack, Phase 4) ══════════════════════════════════════ */
+
+describe("⚠️ one switch for the record, and it is NOT a facet", () => {
+  it("TODO_FACETS is untouched — still the four the board and the sidebar badge read", () => {
+    // The shared vocabulary. A fifth entry here would reach two surfaces that have no history.
+    expect(TODO_FACETS.map((f) => f.id)).toEqual(["all", "urgent", "housekeeping", "yours"]);
+    expect(TODO_FACETS.map((f) => f.label)).toEqual(["Everything", "Urgent", "Housekeeping", "Your tasks"]);
+  });
+
+  it("the record's toggle is the page's own state, separated by a rule", () => {
+    expect(pageSrc).toContain("useState(true)");
+    expect(pageSrc).toContain('aria-pressed={showRecord}');
+    expect(pageSrc).toContain('className="cal-sep"');
+    // it governs the pips, the legend and the day list together — one boolean, read in one place
+    expect(pageSrc).toContain("showRecord ? recByDay.get(ymd) ?? [] : []");
+  });
+
+  it("⚠️ the record's state is SESSION-ONLY — never persisted", () => {
+    // a preference stored for a view toggle is a preference nobody asked to keep, and the To-do
+    // prefs document belongs to another surface entirely
+    const d = decls(pageSrc);
+    expect(d).not.toMatch(/localStorage[^\n]*[Rr]ecord/);
+    expect(d).not.toMatch(/todoPrefs[^\n]*[Rr]ecord/);
+    expect(d).not.toMatch(/showRecord[^\n]*localStorage/);
+  });
+
+  it("⚠️ the facet never reaches the record, and the record never reaches the facet counts", () => {
+    const d = decls(pageSrc);
+    // facetCounts still reads the LIVE cards only — the record is not a countable facet
+    expect(d).toContain("facetCounts(liveBoardCards(assembled.cols))");
+    expect(d).not.toMatch(/facetCounts\([^)]*rec/i);
+    expect(d).not.toMatch(/TODO_FACETS[^\n]*record/i);
   });
 });
