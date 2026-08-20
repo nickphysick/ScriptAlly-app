@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — the consequence sheet, properly</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage:#9db09b;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;
+--popsh:0 2px 6px rgba(40,35,30,.08),0 18px 38px -14px rgba(40,35,30,.42);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.old,.new,.dt{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheetbg{max-width:1360px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+
+.pop{background:#fff;border-radius:0;box-shadow:var(--popsh);position:relative;}
+.pop::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:var(--sage-br);}
+.ph{padding:18px 20px 0;}
+.ph b{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;display:block;line-height:1.3;}
+.ph s{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);display:block;margin-top:5px;}
+.warn{margin:14px 20px 0;background:#faf1ea;border-radius:10px;box-shadow:inset 0 0 0 1px #eed9cc;padding:12px 14px;font-size:12.5px;color:var(--ink2);line-height:1.6;}
+.warn b{color:var(--ink);font-weight:500;}
+.pf{display:flex;flex-direction:column;gap:8px;padding:16px 20px 18px;}
+.act{font-family:inherit;font-size:12.5px;min-height:38px;padding:0 14px;border:0;border-radius:10px;background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink);cursor:pointer;display:flex;align-items:center;text-align:left;}
+.act:hover{box-shadow:inset 0 0 0 1px var(--ink2);}
+.act.go{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);font-weight:500;}
+.act u{text-decoration:none;color:var(--faint);font-size:11px;margin-left:auto;padding-left:14px;font-weight:400;}
+.act.quiet{box-shadow:none;color:var(--ink2);min-height:32px;justify-content:center;}
+.act.quiet:hover{box-shadow:inset 0 0 0 1px var(--oat);}
+
+/* A · ledger */
+.ledger{margin:16px 20px 0;}
+.lh2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+  padding-bottom:9px;box-shadow:inset 0 -1px 0 var(--line);}
+.lrow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center;padding:11px 0;}
+.lrow+.lrow{box-shadow:inset 0 1px 0 var(--line);}
+.lk2{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);line-height:1.5;}
+.chg{display:flex;align-items:center;gap:9px;font-size:13px;min-width:0;flex-wrap:wrap;}
+.old{color:#b0aba3;text-decoration:line-through;text-decoration-color:#cfc9c1;text-decoration-thickness:1px;}
+.arr{color:#c4bfb7;font-size:12px;}
+.new{color:var(--ink);font-weight:500;}
+.sd{width:19px;height:19px;flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:8.5px;background:#fff;}
+.sd.out{box-shadow:inset 0 0 0 1.5px var(--burg);color:var(--burg);}
+.sd.dim{box-shadow:inset 0 0 0 1.5px var(--oat);color:#c4bfb7;}
+.gone{color:#b0aba3;}
+.gone i{font-style:normal;text-decoration:line-through;text-decoration-color:#cfc9c1;}
+.plain{color:var(--ink2);}
+
+/* B · the timeline itself, previewed */
+.tlprev{margin:16px 20px 0;background:var(--ground);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);padding:13px 14px;}
+.tph{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:11px;}
+.ev{position:relative;padding:0 0 13px 32px;}
+.ev::before{content:'';position:absolute;left:10px;top:24px;bottom:0;width:1px;background:var(--line);}
+.ev:last-child{padding-bottom:0;}.ev:last-child::before{display:none;}
+.m{position:absolute;left:0;top:0;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px var(--burg);
+  color:var(--burg);display:flex;align-items:center;justify-content:center;font-size:9px;}
+.m.q{box-shadow:inset 0 0 0 1.5px var(--oat);color:#bdb8b0;}
+.tr1{display:flex;align-items:baseline;gap:8px;min-height:21px;font-size:12.5px;}
+.tt{font-family:'Playfair Display',serif;font-size:13.5px;font-weight:500;}
+.dt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.ev.out{opacity:.42;}
+.ev.out .tt,.ev.out .tr1{text-decoration:line-through;text-decoration-color:#b8b3ab;text-decoration-thickness:1px;}
+.ev.out::before{background:repeating-linear-gradient(180deg,var(--line) 0 3px,transparent 3px 6px);}
+.sum{margin:12px 20px 0;font-size:12.5px;color:var(--ink2);line-height:1.6;}
+.sum b{color:var(--ink);font-weight:500;}
+
+/* C · prose */
+.prose{margin:14px 20px 0;font-size:13px;color:var(--ink2);line-height:1.75;}
+.prose b{color:var(--ink);font-weight:500;}
+.legend{max-width:1360px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>The same removal, three formats <s>— Remove both: the partial request and the send that answered it</s></h4>
+<div class="sheetbg"><div class="grid3">
+
+  <div><div class="lab">A · The ledger<s>Label column, then was → becomes with the old struck</s></div>
+    <div class="pop">
+      <div class="ph"><b>Remove both entries?</b><s>The partial · requested and sent, 1 May</s></div>
+      <div class="ledger">
+        <div class="lh2">After this change</div>
+        <div class="lrow"><span class="lk2">Status</span>
+          <span class="chg"><span class="sd dim">›</span><span class="old">Partial Sent</span><span class="arr">→</span><span class="sd out">✈</span><span class="new">Queried</span></span></div>
+        <div class="lrow"><span class="lk2">Timeline</span>
+          <span class="chg gone"><i>Partial requested</i> and <i>Partial sent</i> are removed</span></div>
+        <div class="lrow"><span class="lk2">Chapters</span>
+          <span class="chg gone">The heading <i>The partial</i> goes</span></div>
+        <div class="lrow"><span class="lk2">Waiting</span>
+          <span class="chg"><span class="old">since the partial send</span><span class="arr">→</span><span class="new">since the query, 1 May</span></span></div>
+        <div class="lrow"><span class="lk2">Tasks</span>
+          <span class="chg plain">1 suggested task re-evaluated</span></div>
+      </div>
+      <div class="pf">
+        <button class="act go">Remove both<u>one undo restores them</u></button>
+        <button class="act">Edit instead<u>keep both, fix the details</u></button>
+        <button class="act quiet">Cancel</button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">B · The timeline shows itself<s>The record as it will be, with the removed rungs struck</s></div>
+    <div class="pop">
+      <div class="ph"><b>Remove both entries?</b><s>The partial · requested and sent, 1 May</s></div>
+      <div class="tlprev">
+        <div class="tph">The timeline, after</div>
+        <div class="ev"><span class="m">✈</span><div class="tr1"><span class="tt">Query sent</span><span class="dt">1 MAY</span></div></div>
+        <div class="ev out"><span class="m q">«</span><div class="tr1"><span class="tt">Partial requested</span><span class="dt">1 MAY</span></div></div>
+        <div class="ev out"><span class="m q">›</span><div class="tr1"><span class="tt">Partial sent</span><span class="dt">1 MAY</span></div></div>
+        <div class="ev"><span class="m q">⌛</span><div class="tr1"><span class="tt">Waiting to hear back</span><span class="dt">2¼ YEARS</span></div></div>
+      </div>
+      <div class="sum">Status returns to <b>Queried</b> · the <b>The partial</b> heading goes · the wait re-anchors to <b>1 May</b> · 1 task re-evaluated</div>
+      <div class="pf">
+        <button class="act go">Remove both<u>one undo restores them</u></button>
+        <button class="act">Edit instead<u>keep both, fix the details</u></button>
+        <button class="act quiet">Cancel</button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">C · Prose<s>Three sentences, no apparatus</s></div>
+    <div class="pop">
+      <div class="ph"><b>Remove both entries?</b><s>The partial · requested and sent, 1 May</s></div>
+      <div class="prose">
+        The status returns to <b>Queried</b>, as it was before the request. The <b>The partial</b> chapter heading goes with its two entries, and the waiting state re-anchors to the query send on <b>1 May</b>. One suggested task will be re-evaluated.
+      </div>
+      <div class="pf">
+        <button class="act go">Remove both<u>one undo restores them</u></button>
+        <button class="act">Edit instead<u>keep both, fix the details</u></button>
+        <button class="act quiet">Cancel</button>
+      </div>
+    </div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>All three share the fixed chassis</b>: square card with the sage top edge (the header's own treatment — this is a serious surface), Playfair question, mono subject line, stacked actions each carrying its own cost, Cancel quiet at the foot. The dependant warning strip slots between header and body when one exists.<br><br>
+  <b>A · The ledger</b> is the most scannable: a label column in mono, then <i>was → becomes</i> with the old value struck and the new in ink — and the status row renders the real StatusDot rings, so the change reads in the app's own vocabulary. Scales to many rows without getting louder.<br>
+  <b>B · The timeline previews itself.</b> The removed rungs struck and faded, the connector dashed through them, the survivors solid — the answer to "what will this do" shown as the thing it will do it to, with one summary line beneath for the non-timeline effects. Most honest, and nothing to learn; it costs height, and a change with many non-timeline effects leans on the summary line.<br>
+  <b>C · Prose</b> is quietest and reads like the product speaks elsewhere, but consequences buried mid-sentence are easy to skim past, and it degrades worst as effects multiply.<br><br>
+  ⚠️ <b>My pick: B, with A as its fallback.</b> The timeline preview when the change touches the timeline — which is nearly always, and it is literally the same renderer showing a proposed log, so it can never lie. The ledger for the rare change whose effects are mostly elsewhere. Both share the chassis, so the fallback is a body swap, not a second design.
+</div>
+</body></html>

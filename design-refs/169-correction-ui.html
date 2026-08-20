@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — correcting the record</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage:#9db09b;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;
+--popsh:0 2px 6px rgba(40,35,30,.08),0 14px 30px -12px rgba(40,35,30,.38);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.dt{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1340px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.stage{background:#fff;border-radius:12px;box-shadow:inset 0 0 0 1px var(--line);padding:14px 15px;}
+.ev{position:relative;padding-left:36px;}
+.m{position:absolute;left:0;top:0;width:25px;height:25px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 1.5px #9db09b;
+  color:var(--sage-tx);display:flex;align-items:center;justify-content:center;font-size:10px;}
+.r1{display:flex;align-items:baseline;gap:8px;min-height:25px;}
+.ttl{font-family:'Playfair Display',serif;font-size:15.5px;font-weight:500;}
+.dt{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);}
+.dots{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--faint);cursor:pointer;background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);}
+.body{font-size:12px;color:var(--ink2);margin-top:5px;}
+.pop{background:#fff;border-radius:11px;box-shadow:var(--popsh);padding:6px;margin-top:10px;max-width:250px;}
+.pop h5{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding:8px 9px 5px;font-weight:500;}
+.pi{display:flex;align-items:flex-start;gap:9px;padding:9px;border-radius:8px;font-size:12.5px;cursor:pointer;}
+.pi:hover{background:var(--n1);}
+.pi u{text-decoration:none;display:block;}
+.pi s{text-decoration:none;display:block;font-size:11px;color:var(--faint);margin-top:2px;line-height:1.45;}
+.pi.rm{color:var(--burg);}
+.sep{height:1px;background:var(--line);margin:5px 9px;}
+.form{padding:2px 9px 9px;}
+.field{margin-top:10px;}
+.fl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;}
+.inp{width:100%;font-family:inherit;font-size:12.5px;height:34px;padding:0 10px;border:0;border-radius:8px;background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);outline:none;color:var(--ink);}
+.pf{display:flex;gap:7px;justify-content:flex-end;padding:11px 9px 4px;}
+.mini{font-family:inherit;font-size:11.5px;height:31px;padding:0 12px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);cursor:pointer;}
+.mini.go{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.mini.off{background:var(--n1);box-shadow:inset 0 0 0 1px var(--line);color:#c4bfb7;}
+.consq{margin:10px 9px 0;background:var(--n1);border-radius:9px;box-shadow:inset 0 0 0 1px var(--line);padding:10px 11px;}
+.consq .ch2{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:7px;}
+.cline{display:flex;align-items:baseline;gap:8px;font-size:12px;color:var(--ink2);padding:3px 0;}
+.cline b{font-weight:500;color:var(--ink);}
+.cline .arr{color:var(--faint);}
+.legend{max-width:1340px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+table{border-collapse:collapse;margin:8px 0 4px;font-size:12px;width:100%;}
+td,th{text-align:left;padding:6px 14px 6px 0;border-bottom:1px solid var(--line);vertical-align:top;}
+th{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:400;}
+</style></head>
+<body>
+
+<h4>The four surfaces <s>— the menu, the fork, the edit, and the consequences</s></h4>
+<div class="sheet"><div class="grid4">
+
+  <div><div class="lab">1 · Every event gets a quiet ⋯<s>Hover-revealed, keyboard-reachable</s></div>
+    <div class="stage">
+      <div class="ev"><span class="m">«</span>
+        <div class="r1"><span class="ttl">Partial requested</span><span class="dt">1 MAY</span><span class="dots">⋯</span></div>
+        <div class="body">Priya asked for a partial</div>
+      </div>
+      <div class="pop">
+        <div class="pi"><span><u>Something about this is wrong</u><s>Fix the date, the details, or remove it</s></span></div>
+        <div class="pi"><span><u>Things have moved on since</u><s>Record what happened next</s></span></div>
+      </div>
+    </div></div>
+
+  <div><div class="lab">2 · The fork, spelled out<s>Two different questions, never one form</s></div>
+    <div class="pop" style="max-width:none">
+      <h5>Partial requested · 1 May</h5>
+      <div class="pi"><span style="font-size:15px">✏</span><span><u>I'm correcting a mistake</u><s>The record is wrong — wrong query, wrong date, misread email. This changes history, because it never happened that way.</s></span></div>
+      <div class="sep"></div>
+      <div class="pi"><span style="font-size:15px">↩</span><span><u>Something changed since</u><s>The agent reached out, reversed a decision, asked for something else. The record stays — what happened next goes on top.</s></span></div>
+    </div></div>
+
+  <div><div class="lab">3 · The edit<s>Date, detail, note — Save inert until changed</s></div>
+    <div class="pop" style="max-width:none">
+      <h5>Edit · Partial requested</h5>
+      <div class="form">
+        <div class="field"><div class="fl">Date</div><input class="inp" value="1 May 2024"></div>
+        <div class="field"><div class="fl">Note</div><input class="inp" value="Priya asked for a partial"></div>
+      </div>
+      <div class="sep"></div>
+      <div class="pi rm">Remove this entry…</div>
+      <div class="pf"><button class="mini">Cancel</button><button class="mini off">Save</button></div>
+    </div></div>
+
+  <div><div class="lab">4 · Consequences, shown before commit<s>The derived engine, run ahead of the write</s></div>
+    <div class="pop" style="max-width:none">
+      <h5>Remove · Partial requested</h5>
+      <div class="consq">
+        <div class="ch2">This will also change</div>
+        <div class="cline"><b>Status</b><span class="arr">Partial Sent →</span><b>Queried</b></div>
+        <div class="cline"><b>Partial sent · 1 May</b><span>no longer answers a request</span></div>
+        <div class="cline"><b>The partial</b><span>chapter heading goes</span></div>
+        <div class="cline"><b>1 task</b><span>will be re-evaluated</span></div>
+      </div>
+      <div style="padding:10px 9px 0;font-size:12px;color:var(--ink2);line-height:1.5">
+        <b style="color:var(--ink)">Partial sent</b> depends on this entry. Remove both, or keep it and edit instead?</div>
+      <div class="pf"><button class="mini">Keep both</button><button class="mini">Remove both</button><button class="mini go">Remove request only</button></div>
+    </div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>The fork is the design.</b> Your two reasons are two different operations, and the menu says so in plain words before any form appears:
+  <table>
+    <tr><th></th><th>"I did it wrong"</th><th>"The agent changed their mind"</th></tr>
+    <tr><td>What it is</td><td>The record is false</td><td>The record is true; the world moved</td></tr>
+    <tr><td>What happens</td><td><b>Edit or delete the event</b></td><td><b>Append a new event on top</b></td></tr>
+    <tr><td>History</td><td>Changes — it never happened that way</td><td>Stands — superseded, not erased</td></tr>
+    <tr><td>Where it goes</td><td>The new edit surface</td><td><b>Record response / holding reply — flows that already exist</b></td></tr>
+  </table>
+  The second branch costs almost nothing: an agent reversing a decision is just the next response, and the machinery for that shipped weeks ago. The build is branch one.<br><br>
+  <b>How everything across the app reacts: it already does.</b> Status, counts, chapters, windows, nudge availability, the waiting state's anchor — all derive from the activity log through <code>recomputeQuery</code>. Edit the log, recompute, and every surface follows <i>by construction</i>. That is the payoff of every derived-over-stored decision this app has made. The work is not propagation — it is three guards around the write:<br><br>
+  <b>1 · Consequences are shown before commit, not discovered after.</b> Run the derived engine against the proposed log and diff the result — card 4 is that diff. The engine is pure, so running it ahead of the write is free, and the preview can never disagree with what actually happens because it is the same code.<br>
+  <b>2 · Dependency guards.</b> Deleting a request that a send answers strands the send. The preview names the dependant and offers the three honest resolutions — never a silent cascade, never a refusal without a path.<br>
+  <b>3 · Undo, always.</b> Every correction commits through the existing undo toast. A mis-correction of a mis-entry is the most human sequence imaginable, and it must cost one click.<br><br>
+  ⚠️ <b>One decision for you: does a correction leave a trace?</b> Derived-over-stored says the log is the truth and an edit simply changes it — no audit trail, which is right for a single-writer personal record. The alternative (a "corrected on" line on the event) adds honesty the writer may not want to see forever. My recommendation is <b>no trace</b> — this is the writer's own record of their own querying, not a ledger — but it is a product stance, so it is yours.
+</div>
+</body></html>

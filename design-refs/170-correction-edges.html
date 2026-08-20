@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — breaking the correction UI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage:#9db09b;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;
+--popsh:0 2px 6px rgba(40,35,30,.08),0 14px 30px -12px rgba(40,35,30,.38);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.cv,.dt{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheet{max-width:1360px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.pop{background:#fff;border-radius:12px;box-shadow:var(--popsh);}
+.ph{padding:14px 16px 0;}
+.ph b{font-family:'Playfair Display',serif;font-size:16px;font-weight:500;display:block;}
+.ph s{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);display:block;margin-top:3px;}
+.pb{padding:12px 16px 0;font-size:12.5px;color:var(--ink2);line-height:1.6;}
+.pf{display:flex;gap:8px;padding:14px 16px 15px;}
+.pf.stack{flex-direction:column;}
+.mini{font-family:inherit;font-size:12px;height:34px;padding:0 13px;border:0;border-radius:9px;background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:center;}
+.pf.stack .mini{justify-content:flex-start;}
+.mini.go{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.mini b{font-weight:500;margin-right:6px;}
+.mini u{text-decoration:none;color:var(--faint);font-size:11px;margin-left:auto;padding-left:12px;}
+.consq{margin:12px 16px 0;background:var(--n1);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line);padding:12px 13px;}
+.ch2{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:9px;}
+.cline{display:grid;grid-template-columns:16px minmax(0,1fr);gap:9px;align-items:baseline;padding:5px 0;font-size:12.5px;color:var(--ink2);line-height:1.5;}
+.cline+.cline{box-shadow:inset 0 1px 0 var(--line);}
+.cline .ic{font-size:11px;color:var(--faint);text-align:center;}
+.cline b{font-weight:500;color:var(--ink);}
+.cv{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink2);}
+.warn{margin:12px 16px 0;background:#faf1ea;border-radius:10px;box-shadow:inset 0 0 0 1px #eed9cc;padding:11px 13px;font-size:12.5px;color:var(--ink2);line-height:1.55;}
+.warn b{color:var(--ink);font-weight:500;}
+.pickrow{display:flex;align-items:center;gap:10px;margin:0 16px;padding:9px 4px;font-size:12.5px;cursor:pointer;border-radius:8px;}
+.pickrow:hover{background:var(--n1);}
+.pickrow .av{width:26px;height:26px;border-radius:50%;background:var(--n2);font-family:'JetBrains Mono',monospace;font-size:8px;display:flex;align-items:center;justify-content:center;color:var(--ink2);}
+.pickrow u{text-decoration:none;}
+.pickrow s{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);display:block;}
+.pickrow .st2{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);}
+.legend{max-width:1360px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+.inp{width:100%;font-family:inherit;font-size:12.5px;height:34px;padding:0 10px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px #d9a08c;outline:none;color:var(--ink);}
+.ferr{font-size:11px;color:#9c4a33;margin-top:6px;}
+</style></head>
+<body>
+
+<h4>Trying to break it <s>— six states the happy path never meets</s></h4>
+<div class="sheet"><div class="grid3">
+
+  <div><div class="lab">1 · The consequence sheet, given room<s>Step 4 rebuilt — one change per line, choices stacked</s></div>
+    <div class="pop">
+      <div class="ph"><b>Remove this entry?</b><s>Partial requested · 1 May</s></div>
+      <div class="warn"><b>Partial sent · 1 May answers this request.</b> Removing the request on its own leaves that send answering nothing.</div>
+      <div class="consq">
+        <div class="ch2">If both are removed</div>
+        <div class="cline"><span class="ic">◉</span><span><b>Status</b> <span class="cv">Partial Sent → Queried</span></span></div>
+        <div class="cline"><span class="ic">§</span><span><b>The partial</b> chapter heading goes</span></div>
+        <div class="cline"><span class="ic">⌛</span><span><b>Waiting state</b> re-anchors to the query send, 1 May</span></div>
+        <div class="cline"><span class="ic">☑</span><span><b>1 suggested task</b> will be re-evaluated</span></div>
+      </div>
+      <div class="pf stack">
+        <button class="mini go"><b>Remove both</b><u>request and send</u></button>
+        <button class="mini"><b>Edit instead</b><u>keep both, fix the details</u></button>
+        <button class="mini"><b>Cancel</b></button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">2 · A date edit that reorders<s>Moving Partial sent to 20 Apr crosses the request it answers</s></div>
+    <div class="pop">
+      <div class="ph"><b>That date changes the order</b><s>Partial sent · 1 May → 20 Apr</s></div>
+      <div class="pb">20 April is before the request it answers (1 May). The timeline would read as a partial sent before Priya asked for one.</div>
+      <div class="consq">
+        <div class="ch2">If saved</div>
+        <div class="cline"><span class="ic">↕</span><span><b>Partial sent</b> moves above <b>Partial requested</b></span></div>
+        <div class="cline"><span class="ic">◉</span><span><b>Status</b> <span class="cv">unchanged — Partial Sent</span></span></div>
+        <div class="cline"><span class="ic">§</span><span><b>The partial</b> chapter now opens at the send</span></div>
+      </div>
+      <div class="pf stack">
+        <button class="mini go"><b>Save anyway</b><u>the dates are what they are</u></button>
+        <button class="mini"><b>Change the request's date too</b></button>
+        <button class="mini"><b>Cancel</b></button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">3 · The root is protected<s>Query sent is the record's foundation</s></div>
+    <div class="pop">
+      <div class="ph"><b>This is the query&rsquo;s first event</b><s>Query sent · 1 May</s></div>
+      <div class="pb">Everything on this timeline follows from the send. Its <b>date, method and materials can be edited</b> — but removing it means removing the query.</div>
+      <div class="pf stack">
+        <button class="mini go"><b>Edit this entry</b></button>
+        <button class="mini"><b>Delete the whole query…</b><u>the existing flow</u></button>
+        <button class="mini"><b>Cancel</b></button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">4 · Logged against the wrong query<s>Your own example — the entry moves, both records preview</s></div>
+    <div class="pop">
+      <div class="ph"><b>Move to another query</b><s>Full requested · 9 Apr</s></div>
+      <div class="pickrow"><span class="av">MR</span><span><u>Marcus Reed</u><s>Bloomsbury Quill</s></span><span class="st2">Queried</span></div>
+      <div class="consq">
+        <div class="ch2">Both queries change</div>
+        <div class="cline"><span class="ic">−</span><span><b>Jonathan Marsh</b> <span class="cv">Full Requested → Queried</span> · window re-anchors</span></div>
+        <div class="cline"><span class="ic">+</span><span><b>Marcus Reed</b> <span class="cv">Queried → Full Requested</span> · gains "The full"</span></div>
+      </div>
+      <div class="pf stack">
+        <button class="mini go"><b>Move it</b><u>one undo restores both</u></button>
+        <button class="mini"><b>Cancel</b></button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">5 · A date in the future<s>Facts only — plans live on the to-do list</s></div>
+    <div class="pop">
+      <div class="ph"><b>Edit · Nudged</b><s>18 Aug</s></div>
+      <div class="pb" style="padding-bottom:0">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:6px">Date</div>
+        <input class="inp" value="30 August 2026">
+        <div class="ferr">That&rsquo;s in the future. The timeline records what happened — to plan a nudge, set a reminder instead.</div>
+      </div>
+      <div class="pf"><button class="mini">Cancel</button><button class="mini" style="opacity:.5;cursor:default">Save</button></div>
+    </div></div>
+
+  <div><div class="lab">6 · Nothing else changes<s>A note edit skips the ceremony entirely</s></div>
+    <div class="pop">
+      <div class="ph"><b>Edit · Partial requested</b><s>1 May</s></div>
+      <div class="pb">Note changed from <i>"Priya asked for a partial"</i> to <i>"Priya asked for the first 50pp"</i>.</div>
+      <div class="pb" style="color:var(--faint);font-size:12px;padding-top:6px">No consequence sheet — the diff is empty, so Save just saves and the undo toast is the only ceremony.</div>
+      <div class="pf"><button class="mini">Cancel</button><button class="mini go">Save</button></div>
+    </div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>What trying to break it turned up, in order of how much it matters.</b><br><br>
+  <b>1 · Date edits are the sharpest edge, not deletions.</b> A deletion's consequences are obvious; a date edit that quietly reorders the log can flip status, move a chapter boundary, and re-anchor the window — all from a one-character change. The rule: <b>any edit whose derived diff is non-empty gets the consequence sheet; an edit whose diff is empty skips it</b> (card 6). Same engine decides both, so there is no second judgement to maintain. Card 2's middle option matters: half the time a crossing date means <i>both</i> dates are wrong.<br>
+  <b>2 · The root event is load-bearing.</b> Editable, never removable — removing the send means removing the query, and that flow already exists (card 3).<br>
+  <b>3 · "Wrong query" is a move, not an edit</b> — your own first example, and it needs its own verb: remove here, append there, two recomputes, <b>one atomic undo restoring both</b> (card 4). ⚠️ Root events cannot move; the target picker should surface each candidate's current status so a nonsensical landing (a Partial sent onto a query with no request) shows its consequence on the target side before commit.<br>
+  <b>4 · No future dates.</b> The timeline records what happened; plans are reminders (card 5).<br>
+  <b>5 · Same-day ordering needs a stated tiebreak.</b> Two events on 1 May already exist in the fixture — the derivation must order same-day events by a stable secondary key, and a date edit landing on an occupied day keeps insertion order rather than shuffling. ⚠️ CC must report what that tiebreak currently is; if the answer is "none", that is a pre-existing fault this work would expose.<br>
+  <b>6 · Undo must be atomic for cascades.</b> "Remove both" and "Move it" are one undo each, restoring everything in one batch — never a toast per fragment.<br>
+  <b>7 · One free coherence, worth claiming:</b> if Mark closed writes a closure event, then <b>deleting that event is Reopen</b> — the parked reopen CTA falls out of this work for nothing. CC should confirm closure is an event and not a stored flag before we bank it.
+</div>
+</body></html>

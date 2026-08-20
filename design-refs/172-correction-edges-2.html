@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8"><title>ScriptAlly — second sweep: subtler ways it breaks</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--ground:#fefcfa;--n1:#f4f1ed;--n2:#eceae6;--line:#e6e3dd;--oat:#dcd8d1;--ink:#1a1917;--ink2:#5c5854;--faint:#8d8880;
+--burg:#7c3a2a;--sage:#9db09b;--sage-tx:#4e6050;--sage-br:#b9c6b7;--pinkc:#f8e7dc;--pinkb:#ebcfc2;
+--popsh:0 2px 6px rgba(40,35,30,.08),0 18px 38px -14px rgba(40,35,30,.42);}
+body{font-family:'Inter',sans-serif;background:#ded9d1;color:var(--ink);padding:18px;-webkit-font-smoothing:antialiased;}
+.old,.new,.dt{font-variant-numeric:tabular-nums;}
+h4{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#6b6560;font-weight:500;margin:22px 0 8px;}
+h4:first-child{margin-top:0;}
+h4 s{text-decoration:none;color:#a29d95;text-transform:none;letter-spacing:.02em;font-size:11px;font-family:'Inter',sans-serif;margin-left:10px;}
+.sheetbg{max-width:1360px;background:var(--ground);border-radius:12px;padding:16px 20px;box-shadow:0 8px 22px rgba(40,35,30,.11);}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;align-items:start;}
+.lab{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#a9a49c;margin-bottom:9px;}
+.lab s{text-decoration:none;display:block;color:#c2bdb5;text-transform:none;letter-spacing:.02em;font-size:10px;margin-top:3px;line-height:1.45;}
+.pop{background:#fff;border-radius:0;box-shadow:var(--popsh);position:relative;}
+.pop::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:var(--sage-br);}
+.ph{padding:16px 18px 0;}
+.ph b{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;display:block;line-height:1.3;}
+.ph s{text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);display:block;margin-top:4px;}
+.ledger{margin:13px 18px 0;}
+.lh2{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);padding-bottom:8px;box-shadow:inset 0 -1px 0 var(--line);}
+.lrow{display:grid;grid-template-columns:86px minmax(0,1fr);gap:12px;align-items:baseline;padding:10px 0;}
+.lrow+.lrow{box-shadow:inset 0 1px 0 var(--line);}
+.lk2{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--faint);line-height:1.5;}
+.chg{font-size:12.5px;line-height:1.5;color:var(--ink2);}
+.old{color:#b0aba3;text-decoration:line-through;text-decoration-color:#cfc9c1;text-decoration-thickness:1px;}
+.arr{color:#c4bfb7;padding:0 3px;}
+.new{color:var(--ink);font-weight:500;}
+.warn{margin:13px 18px 0;background:#faf1ea;border-radius:10px;box-shadow:inset 0 0 0 1px #eed9cc;padding:11px 13px;font-size:12px;color:var(--ink2);line-height:1.6;}
+.warn b{color:var(--ink);font-weight:500;}
+.pf{display:flex;flex-direction:column;gap:7px;padding:14px 18px 16px;}
+.act{font-family:inherit;font-size:12.5px;min-height:36px;padding:0 13px;border:0;border-radius:9px;background:#fff;
+  box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink);cursor:pointer;display:flex;align-items:center;text-align:left;}
+.act.go{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);font-weight:500;}
+.act u{text-decoration:none;color:var(--faint);font-size:10.5px;margin-left:auto;padding-left:12px;font-weight:400;}
+.act.quiet{box-shadow:none;color:var(--ink2);min-height:30px;justify-content:center;}
+.seg{display:flex;gap:5px;margin:12px 18px 0;}
+.seg span{flex:1;text-align:center;font-size:12px;padding:8px 0;border-radius:9px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);color:var(--ink2);cursor:pointer;}
+.seg span.on{background:var(--pinkc);box-shadow:inset 0 0 0 1px var(--pinkb);color:var(--ink);font-weight:500;}
+.field{margin:12px 18px 0;}
+.fl{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;}
+.inp{width:100%;font-family:inherit;font-size:12.5px;height:34px;padding:0 10px;border:0;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--oat);outline:none;color:var(--ink);}
+.inp.flag{box-shadow:inset 0 0 0 1.5px #d9a08c;}
+.fnote{font-size:11px;color:#9c4a33;margin-top:6px;line-height:1.5;}
+.toast{display:flex;align-items:center;gap:9px;background:#22201d;color:#f4f0eb;border-radius:10px;padding:10px 13px;font-size:12px;max-width:420px;}
+.toast b{color:#fff;font-weight:500;}
+.toast a{margin-left:auto;color:#f0d6c8;text-decoration:underline;text-underline-offset:3px;cursor:pointer;white-space:nowrap;}
+.legend{max-width:1360px;margin-top:16px;padding:15px 19px;background:#fff;border-radius:11px;box-shadow:inset 0 0 0 1px var(--line);font-size:12.5px;line-height:1.72;color:var(--ink2);}
+.legend b{color:var(--burg);}
+</style></head>
+<body>
+
+<h4>Second sweep <s>— the subtler breaks, each with its fix</s></h4>
+<div class="sheetbg"><div class="grid3">
+
+  <div><div class="lab">7 · A date edit flips whose window wins<s>Moving their reply after your estimate changes the attribution</s></div>
+    <div class="pop">
+      <div class="ph"><b>That date changes whose window this is</b><s>They replied · 22 Aug → 2 Oct</s></div>
+      <div class="ledger">
+        <div class="lh2">After this change</div>
+        <div class="lrow"><span class="lk2">Window</span>
+          <span class="chg"><span class="old">you expect a reply by 29 Sept</span><span class="arr">→</span><span class="new">Aisha advises 2 weeks</span></span></div>
+        <div class="lrow"><span class="lk2">Waiting</span>
+          <span class="chg">re-anchors to <span class="new">their reply, 2 Oct</span></span></div>
+        <div class="lrow"><span class="lk2">Bar</span>
+          <span class="chg"><span class="old">dashed · your estimate</span><span class="arr">→</span><span class="new">solid · their word</span></span></div>
+      </div>
+      <div class="pf">
+        <button class="act go">Save<u>the dates are what they are</u></button>
+        <button class="act quiet">Cancel</button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">8 · Deleting a holding reply resurrects the silence<s>The no-reply state, the expiry figure and the nudge's outcome all return</s></div>
+    <div class="pop">
+      <div class="ph"><b>Remove this reply?</b><s>They replied · 22 Aug</s></div>
+      <div class="ledger">
+        <div class="lh2">The silence resumes</div>
+        <div class="lrow"><span class="lk2">Waiting</span>
+          <span class="chg"><span class="old">4 days since their reply</span><span class="arr">→</span><span class="new">No reply · 2¼ years</span></span></div>
+        <div class="lrow"><span class="lk2">Window</span>
+          <span class="chg"><span class="old">Aisha advises 2 weeks</span><span class="arr">→</span><span class="new">window expired 15 May 2024</span></span></div>
+        <div class="lrow"><span class="lk2">Nudge</span>
+          <span class="chg">18 Aug reads <span class="new">Nudged — no reply</span> again</span></div>
+        <div class="lrow"><span class="lk2">Tasks</span>
+          <span class="chg">the close suggestion becomes eligible again</span></div>
+      </div>
+      <div class="pf">
+        <button class="act go">Remove it<u>one undo restores everything</u></button>
+        <button class="act quiet">Cancel</button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">9 · The event's kind is itself editable<s>"Misread the email — it was a full, not a partial"</s></div>
+    <div class="pop">
+      <div class="ph"><b>Edit · Partial requested</b><s>1 May</s></div>
+      <div class="field"><div class="fl">What they asked for</div></div>
+      <div class="seg"><span>Partial</span><span class="on">Full</span><span>R&amp;R</span></div>
+      <div class="ledger">
+        <div class="lh2">After this change</div>
+        <div class="lrow"><span class="lk2">Status</span>
+          <span class="chg"><span class="old">Partial Sent</span><span class="arr">→</span><span class="new">Full Requested</span></span></div>
+        <div class="lrow"><span class="lk2">Timeline</span>
+          <span class="chg"><span class="old">Partial sent · 1 May</span> no longer answers this — it stays, unanswered</span></div>
+        <div class="lrow"><span class="lk2">Chapters</span>
+          <span class="chg"><span class="old">The partial</span><span class="arr">→</span><span class="new">The full</span></span></div>
+      </div>
+      <div class="warn"><b>The send that answered this was a partial.</b> If the email said full, the send's kind is probably wrong too — edit it next, or this preview stands.</div>
+      <div class="pf">
+        <button class="act go">Save, then edit the send<u>the likely pair</u></button>
+        <button class="act">Save this only</button>
+        <button class="act quiet">Cancel</button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">10 · Moved prose goes stale<s>The note names the wrong agent once the event moves</s></div>
+    <div class="pop">
+      <div class="ph"><b>Move to Marcus Reed</b><s>Full requested · 9 Apr</s></div>
+      <div class="field">
+        <div class="fl">Note · travels with the event</div>
+        <input class="inp flag" value="Jonathan asked for the full">
+        <div class="fnote">This note names Jonathan, and the event is moving to Marcus's query. Edit it before it travels, or clear it.</div>
+      </div>
+      <div class="pf">
+        <button class="act go">Move with edited note</button>
+        <button class="act">Move and clear the note</button>
+        <button class="act quiet">Cancel</button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">11 · Moving onto a closed query<s>The preview tells the truth even when it surprises</s></div>
+    <div class="pop">
+      <div class="ph"><b>Move to Sophie Dunn</b><s>Partial requested · 1 May</s></div>
+      <div class="warn"><b>Sophie Dunn's query is closed</b> — she passed in March. A request arriving before the closure doesn't reopen it.</div>
+      <div class="ledger">
+        <div class="lh2">After the move</div>
+        <div class="lrow"><span class="lk2">Sophie Dunn</span>
+          <span class="chg">status stays <span class="new">Closed</span> · the request slots into its place in the record</span></div>
+        <div class="lrow"><span class="lk2">This query</span>
+          <span class="chg"><span class="old">Partial Sent</span><span class="arr">→</span><span class="new">Queried</span> · the send is stranded — resolve it first</span></div>
+      </div>
+      <div class="pf">
+        <button class="act go">Move it</button>
+        <button class="act">Reopen Sophie's query first…</button>
+        <button class="act quiet">Cancel</button>
+      </div>
+    </div></div>
+
+  <div><div class="lab">12 · Undo names its subject, and yields<s>The toast survives a selection change; a new write retires it</s></div>
+    <div class="pop" style="box-shadow:none;background:transparent"><div style="display:flex;flex-direction:column;gap:10px;padding-top:4px">
+      <div class="toast"><span>Removed <b>Partial requested</b> from <b>Jonathan Marsh</b></span><a>Undo</a></div>
+      <div class="toast" style="opacity:.45"><span>Removed <b>Partial requested</b> from <b>Jonathan Marsh</b></span><a style="text-decoration:none;color:#8d8880">Superseded</a></div>
+      <div style="font-size:11.5px;color:var(--ink2);line-height:1.6;padding:0 2px">
+        The toast names event <i>and</i> query, so switching selection cannot misdirect it — undo restores by id, wherever you are. And <b>any new write to the same query retires its pending undo</b>: once something is built on top of the corrected record, "put it back" is no longer a truthful offer.</div>
+    </div></div></div>
+
+</div></div>
+
+<div class="legend">
+  <b>Rules this sweep adds — beyond what the cards show:</b><br><br>
+  <b>The root is the earliest event, not the "Query sent" event.</b> Imported queries can begin at <i>Partial Sent</i> with no request before it — the guard must protect by position, or an import's foundation is deletable while a normal query's is not. ⚠️ CC must confirm what imports actually produce as their first event.<br><br>
+  <b>Kind edits stay within direction.</b> A request can become another kind of request, a send another kind of send — an event can never cross from incoming to outgoing by editing, because that is not a correction, it is a different fact. Card 9's paired-edit nudge exists because a misread email usually poisons both halves of the round.<br><br>
+  <b>Ordinal headings renumber themselves.</b> Delete the first partial round and "The second partial" becomes "The partial" — free, because the labels derive, but the preview should show it so the writer isn't surprised.<br><br>
+  <b>The preview computes on change, not on keystroke.</b> A date field mid-typing reads "2" of "22 August" — running the engine on every character flashes nonsense consequences. Compute on blur or completed change.<br><br>
+  <b>The ⋯ affordance mounts in the Query Centre only.</b> <code>TimelineRows</code> also serves the To-do focus sheet — the correction menu is a prop, off by default, so FocusFlow is untouched.<br><br>
+  <b>And the undo contract, stated once:</b> restores by id; names event and query; survives selection changes; retired by any newer write to the same query; always one toast per operation however many documents moved.
+</div>
+</body></html>
