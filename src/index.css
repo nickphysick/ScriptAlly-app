@@ -131,12 +131,8 @@
      Playfair and an 88px mark need the room, and the rest height is the one number every page's
      header is measured against. The CONDENSED height is deliberately unchanged — 52px is sized by
      the 11.5px mono label, which did not move. */
-  --wsh-plate-h: 128px;
   /* ⚠️ 56 → 52 (consolidated spec §2 + ref 84, which states `--strip:52px`). The strip is the
      17px title's line box plus its breathing room; it is not derived from the rest height. */
-  --wsh-plate-h-scrolled: 52px;
-  --wsh-plate-gap: 18px;
-  --wsh-plate-bg: #ffffff;
 
   /**
    * ══ THE WARM NEUTRAL SCALE ═══════════════════════════════════════════════════════════════════
@@ -221,7 +217,6 @@
    * against a near-white band, and this band is near-white again — but the boundary it drew is now
    * the plate's own shadow and the content's edge. The token remains absent and asserted absent.
    */
-  --wsh-band-bg: var(--n0);
   /**
    * ⚠️ ONE FOREGROUND FOR EVERYTHING ON THE BAND — label, glyphs, focus ring, button text and the
    * strip's inherited `color`. That plumbing came in with the slate pass and is the part of it
@@ -233,9 +228,6 @@
    * it is declared once, at `:root`, and nothing overrides it — so the one-value rule the band is
    * built on now holds by construction instead of by avoiding a token. 17.9:1 on n3.
    */
-  --wsh-band-ink: var(--n8);
-  --wsh-plate-radius: 2px;
-  --wsh-plate-sh: 0 1px 2px rgba(58, 28, 20, 0.05), 0 6px 18px rgba(58, 28, 20, 0.09);
 
   /* THE TWO CAPSULES (app-shell pack, Baked 3). There are two now, not three — the panel folded
      into the column — and both fills come from the sage-desk mockup. The old cream trio was

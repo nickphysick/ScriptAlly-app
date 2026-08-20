@@ -210,9 +210,26 @@
  * against a bar. (Generalising this to every `.wpg--fill` row belongs in workspacePageGrid.css,
  * which is not this pass's file — flagged in the report.)
  */
+/**
+ * ⚠️ THIS RULE LOST ITS MIRROR, AND THE VALUE IS STATED RATHER THAN BORROWED (in-flow masthead,
+ * step 4). It is the one place in the app that read `--content-top-gap` for something other than a
+ * top gap, and it said why: the dossier's BOTTOM inset read the TOP gap's own token, "so the
+ * vertical inset is even BY CONSTRUCTION in both states rather than by two numbers someone
+ * matched." That was good reasoning and it is no longer available — the top inset is the masthead's
+ * own 26/20 padding now, and on this page in the dossier state the masthead is collapsed to nothing
+ * at all, so there is no top gap left for a bottom one to mirror.
+ *
+ * ⚠️ SO IT IS 44px, WHICH IS EXACTLY WHAT IT HAS BEEN RENDERING — `--content-top-gap` resolved to
+ * `--content-top-gap-rest`. Nothing moves; what changes is that the number now says it is a chosen
+ * value rather than pretending to a symmetry it cannot have. If a mirror is wanted back, the honest
+ * partner is the masthead's own padding, and it would have to be stated as such.
+ *
+ * ⚠️ `--wpg-reclaim-pad: 0px` GOES WITH IT. The reclaim it opted out of is deleted (step 2, pulled
+ * forward: it was compensating for a header collapse that no longer happens), so a rule zeroing it
+ * is a rule about nothing.
+ */
 .msv-wpg.wpg--fill > .wpg-scroll {
-  --wpg-reclaim-pad: 0px;
-  --wpg-foot: var(--content-top-gap);
+  --wpg-foot: 44px;
 }
 
 /* ⚠️ THE LIBRARY IS NOT IN THE CHAIN. `.wpg--fill` makes the scroll row a flex column, which would

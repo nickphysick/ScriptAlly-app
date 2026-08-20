@@ -16,7 +16,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { WorkspacePageGrid, PlateCondensedContext, PageTally } from "./WorkspacePageGrid";
+import { WorkspacePageGrid, PageTally } from "./WorkspacePageGrid";
 import { PageHeader } from "./PageHeader";
 
 const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
@@ -540,13 +540,19 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       .toContain("padding-bottom: calc(var(--wpg-foot, 0px))");
   });
 
-  it("⚠️ THE PLATE IS TOLD, IT DOES NOT LOOK — no DOM traversal, no class strings", () => {
+  it("⚠️ THE GRID NEVER GOES LOOKING FOR ITS SCROLLER — it owns one", () => {
     /* `closest(grid) → querySelector(scroll)` holds until something inside the scroll row is itself
        a scroller, and then it silently finds the wrong one. Two strings coupling two components
-       across the DOM is the hardcoded `top` offset again, just harder to spot. */
-    expect(srcCode, "a DOM lookup for the scroller appeared — that is the fragility the context replaces").not.toContain("querySelector");
+       across the DOM is the hardcoded `top` offset again, just harder to spot.
+       ⚠️ THE CONTEXT HALF OF THIS IS RETIRED (step 4). It used to end "the context is gone — the
+       plate would have to go looking again", because the header read its state through
+       `PlateCondensedContext`. The header has no state to read; the union drives a class on the
+       grid's own root and the stylesheet reads it from there, which cannot be mounted outside its
+       provider and cannot resolve to `null`. What remains is the half that was always the point:
+       the grid holds a ref to the element it owns and traverses nothing. */
+    expect(srcCode, "a DOM lookup for the scroller appeared — the grid owns its scroller, it must not hunt for one").not.toContain("querySelector");
     expect(srcCode, "a `closest()` traversal appeared").not.toContain("closest(");
-    expect(src, "the context is gone — the plate would have to go looking again").toContain("PlateCondensedContext");
+    expect(srcCode, "the grid stopped holding a ref to its own scroller").toContain("ref={scrollRef}");
   });
 
   /**
@@ -559,14 +565,15 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * sufficient and neither can veto the other.
    */
   it("⚠️ the mode half condenses with no scrolling at all", () => {
-    const seen: (boolean | null)[] = [];
-    const Probe: React.FC = () => { seen.push(React.useContext(PlateCondensedContext)); return null; };
-    renderToStaticMarkup(
-      <WorkspacePageGrid masthead={<Probe />} condensed>{null}</WorkspacePageGrid>,
+    /* ⚠️ OBSERVED ON THE ROOT'S CLASS, NOT THROUGH A CONTEXT (step 4). The context is deleted — the
+       union drives `wpg--working` on the grid root and the stylesheet reads it there. Same single
+       boolean, same union, one fewer mechanism; the probe moves to where the value actually goes. */
+    const html = renderToStaticMarkup(
+      <WorkspacePageGrid masthead={<span />} condensed>{null}</WorkspacePageGrid>,
     );
-    /* there is no IntersectionObserver in this environment, so `stuck` can only be false here —
-       which is exactly the case worth locking: the mode alone must be enough */
-    expect(seen[0], "the mode input does not reach the header — a workspace page would never strip, because nothing scrolls on it").toBe(true);
+    /* there is nothing to scroll in this environment, so `stuck` can only be false here — which is
+       exactly the case worth locking: the mode alone must be enough */
+    expect(html, "the mode input does not reach the root — a workspace page would never strip, because nothing scrolls on it").toContain("wpg--working");
   });
 
   /**
@@ -654,10 +661,8 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
   });
 
   it("without the mode, an unscrolled page is at rest", () => {
-    const seen: (boolean | null)[] = [];
-    const Probe: React.FC = () => { seen.push(React.useContext(PlateCondensedContext)); return null; };
-    renderToStaticMarkup(<WorkspacePageGrid masthead={<Probe />}>{null}</WorkspacePageGrid>);
-    expect(seen[0], "the grid condenses by default — every page would open in the working state").toBe(false);
+    const html = renderToStaticMarkup(<WorkspacePageGrid masthead={<span />}>{null}</WorkspacePageGrid>);
+    expect(html, "the grid condenses by default — every page would open in the working state").not.toContain("wpg--working");
   });
 
   it("⚠️ the row and the header read ONE value, so they cannot disagree", () => {
@@ -677,9 +682,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        term joining it. */
     expect(src, "the union is not computed in one place — two derivations of one state is how the row and the header come to disagree")
       .toMatch(/const condensed = stuck \|\| condensedByMode \|\| engaged;/);
-    /* the OPENING tag only — `</PlateCondensedContext.Provider>` is the same provider, and counting
-       both made a correct single provider read as two */
-    expect((src.match(/<PlateCondensedContext\.Provider/g) ?? []).length, "a second context appeared — the header would have two answers to one question").toBe(1);
+    /* ⚠️ THE PROVIDER-COUNT ASSERTION IS RETIRED WITH THE PROVIDER (step 4). It guarded against a
+       SECOND context appearing beside the first, so the header could not have two answers to one
+       question. There is no context: the union lands on the root's class, and a class is singular
+       by construction — an element cannot carry two of it. The guard's real subject is the line
+       above, which is that the union is computed in exactly one place. */
     /* ⚠️ ONE WRITER AGAIN, AND FEWER IS THE POINT. The observer era had two — one to set on the
        sentinel moving, one to clear on resize. The derived version has a single `evaluate()` that
        both the scroll listener and the ResizeObserver call, so there is exactly one place the
@@ -689,14 +696,27 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(src, "the reclaim moved back into JS — it is a stylesheet calc now, shared by the height and the padding").not.toContain("reclaimedPx");
   });
 
-  it("⚠️ the context default is `null`, distinguishable from `false`", () => {
-    /* `false` would be a plausible default and a plate mounted outside a grid would read it and
-       quietly never condense. `null` means "no grid above me", which a consumer can complain about. */
-    expect(src).toContain("React.createContext<boolean | null>(null)");
-    let seen: boolean | null | undefined;
-    const Probe: React.FC = () => { seen = React.useContext(PlateCondensedContext); return null; };
-    renderToStaticMarkup(<Probe />);
-    expect(seen, "the context no longer defaults to null outside a grid").toBeNull();
+  it("⚠️ THE CONTEXT IS DELETED, AND THE PROBLEM ITS `null` SOLVED CANNOT ARISE", () => {
+    /**
+     * ⚠️ THIS CASE INVERTS, AND THE REASONING IS WORTH KEEPING BECAUSE IT WAS GOOD. The context
+     * defaulted to `null` rather than `false` deliberately: `false` is a plausible-looking answer,
+     * so a header mounted outside a grid would read it and quietly never condense — a whole page
+     * with a header that silently does not work. `null` meant "no grid above me", which a consumer
+     * could complain about, and `PageHeader` threw on it in development.
+     *
+     * The header has no state to read now. The union drives a CLASS on the grid's own root and the
+     * stylesheet reads it from there — which cannot be mounted outside its provider, cannot resolve
+     * to a plausible default, and needs no throw to say so. The whole failure mode is gone rather
+     * than guarded, which is the better outcome and the reason the context goes.
+     */
+    /* ⚠️ COMMENTS STRIPPED FIRST, AND THIS FILE'S OWN PROSE IS WHY. The retirement is documented in
+       `WorkspacePageGrid.tsx` by NAMING what was retired — as every retirement in this codebase is —
+       so a bare search over the raw source finds the explanation and calls it the code. Caught on
+       the first run of this very case. */
+    const live = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(live, "the context came back — the header would have a second way to learn a state it does not have")
+      .not.toContain("PlateCondensedContext");
+    expect(live, "a React context appeared in the grid at all").not.toContain("createContext");
   });
 
   it("the scroller holds masthead → control row → content, and NO control row without one", () => {

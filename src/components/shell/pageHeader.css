@@ -15,11 +15,13 @@
  * ⚠️ WIDTHS ARE RELATIONSHIPS, NOT CAPS (consolidated header spec §1). There is no maximum width
  * anywhere in the workspace any more. Two tokens, and everything derives:
  *
- *     content = window − 2 × --content-gutter        (toolbar, cards, panes)
- *     header  = content − 2 × --header-inset         (at rest)
- *     header  = the full container                   (stripped)
+ *     content = window − 2 × --content-gutter        (masthead, control row, cards, panes)
  *
- * At a 2000px window: content 1840, header 1600, strip 2000.
+ * ⚠️ ONE RELATIONSHIP NOW, NOT THREE. There used to be a second — `header = content − 2 ×
+ * --header-inset` — because the header was a PLATE floating above the content and an object needs
+ * a margin. The masthead is content: it is a child of the scroll row, takes that row's gutter and
+ * states no width of its own, which is what puts every page's mark on the same vertical as the
+ * cards beneath it without either of them naming a number.
  *
  * ⚠️ THEY ARE PADDING, NEVER `max-width`. A cap centres a column and leaves the SCROLLBAR outside
  * it, which is how a classic scrollbar came to eat 15px of the content column while overlay
@@ -45,35 +47,32 @@
      gutter is already paying 15. Stated once here rather than as a literal in each page's own
      sheet, so the two cannot drift apart the day one of them is retuned. */
   --content-gutter-tight: 35px;
-  --header-inset: 120px;
-  /* ⚠️ THE AIR UNDER THE HAIRLINE, AND IT IS A PROPERTY OF THE BOUNDARY — not of the toolbar.
-     Content began flush against the hairline. The gap therefore sits above whatever comes FIRST
-     below the line: the toolbar row where a page has one, the scroll row where it does not, so a
-     page gains and loses a toolbar without gaining or losing its top margin.
-     ⚠️ IT DOES NOT CHANGE WHEN THE HEADER STRIPS. The gap is the distance from the boundary to
-     the content, and the boundary does not move — only what is above it does. */
-  /**
-   * ⚠️ 70 → 44 (header-gap-vs-height, preset B). Same token, same single application; it is still
-   * paid ONCE, by whichever element sits first below the hairline.
-   *
-   * ⚠️ IT IS A VALUE, NOT A DERIVATION, AND THE DERIVATION WAS CONSIDERED AND REJECTED. The obvious
-   * rule is "half the header's height, rounded" — 128 → 64 — and it is tempting because it makes
-   * the gap move with the plate for free. It is NOT what was chosen: 44 is deliberately tighter
-   * than half. Recorded here because a half-height rule is exactly the kind of tidiness someone
-   * later "restores", and doing so would silently add 20px under every header in the app.
-   *
-   * ⚠️ AND THE GAP IS THE GRID'S ALONE — a page that adds its own top padding defeats the token
-   * without contradicting it. Two did: `.ct-pagebody` (+22, rendering 92) and `.dv-hero` (+84,
-   * rendering 154). Both are now 0, and `gapAudit.measure.ts` reports the pixel distance per page
-   * so the next one shows up as a number rather than as a page that just looks roomy.
-   */
-  --content-top-gap-rest: 44px;
-  /* ⚠️ HALVED WHEN WORKING (§2). The strip is lighter than the card, so it needs proportionally
-     less separation from what follows. Both values are tokens because §3's invariance padding is
-     computed from the DIFFERENCE between them, and a literal there is the whole failure mode. */
-  --content-top-gap-work: 35px;
-  --content-top-gap: var(--content-top-gap-rest);
 }
+/**
+ * ══ FOUR TOKENS RETIRED HERE (in-flow masthead, step 4) ══════════════════════════════════════
+ *
+ * `--header-inset` · `--content-top-gap` · `--content-top-gap-rest` · `--content-top-gap-work`
+ *
+ * ⚠️ THEY DESCRIBED A HEADER THAT WAS CHROME, and every one of them is now unanswerable rather
+ * than merely unused — which is why they go rather than being left at a default.
+ *
+ *   `--header-inset` was the distance the PLATE sat inside the content it floated above: an object
+ *   needs a margin. The masthead is content, takes the scroll row's own gutter and states no width
+ *   of its own, so there is no second inset for the token to be.
+ *
+ *   `--content-top-gap` was the air under the CHROME hairline, paid by whichever element came first
+ *   below it — which needed a `-rest`/`-work` pair, because the gap shrank when the header stripped,
+ *   and an arbitration (`.wpg--tools > .wpg-scroll`) so it was never paid twice. There is no chrome
+ *   boundary now. The masthead is the first thing in the scroller and states its own rhythm: 26
+ *   above, 20 below, its hairline, then 16 to whatever follows. One element declares all of it.
+ *
+ * ⚠️ AND `--content-top-gap` HAD ONE CONSUMER THAT WAS NOT USING IT FOR A GAP. `manuscriptLibrary.css`
+ * read it as `--wpg-foot` — the dossier's BOTTOM inset — so that the two ends matched "by
+ * construction rather than by two numbers someone matched". Good reasoning, and it stopped being
+ * available the moment the top inset stopped being this token. That page states its own value now,
+ * with the mirror it has lost written down; see the note there. It is named rather than worked
+ * around, which is the whole reason this paragraph exists.
+ */
 
 .svh { margin-bottom: 26px; }
 .svh-top {
@@ -257,67 +256,8 @@
   border-bottom: 1px solid var(--ws-edge);
   margin-bottom: 16px;
 }
-/* ⚠️ `.wsh-wrap` IS DELETED — element and rules together. It existed to RESERVE a sticky plate's
-   rest height so condensing could not pull the content below it upward. There is no sticky, no
-   plate and no condense, so there is nothing to reserve; the last rule standing was already a
-   `padding: 0` no-op holding the name alive. */
-/**
- * ⚠️ THE WORKING STATE IS A STRIP, NOT A SMALLER CARD (spec §2, ref 84). Everything that made the
- * header an OBJECT goes at once — border, radius, shadow — and the row it sits in loses its inset,
- * so what remains reads as the page's own top edge. Halving the height and keeping the frame is
- * what this rule did before, and it read as a card that had been squashed.
- *
- * ⚠️ NO TRANSLUCENCY AND NO BLUR, and their absence is the point. Nothing overlaps: the scroller is
- * the row BENEATH, so content arriving at the hairline has run out of room rather than sliding
- * under glass. `--wsh-plate-bg-scrolled`, `--wsh-plate-blur` and `--wsh-plate-edge-scrolled` are no
- * longer read; they are deleted at step 3 together with the token lock that still demands them.
- */
-/**
- * ⚠️ A BAND, NOT A CARD ON WHITE (ref 91). The working state takes the parchment ground and draws
- * its OWN bottom edge — no border on the other three sides, no radius, no shadow, exactly as
- * before.
- *
- * ⚠️ THE EDGE IS THE EXISTING BORDER BOX RE-COLOURED, not a new element. Three sides go
- * transparent and the fourth becomes the band's line, so it inherits the `border-color` transition
- * already declared above and the strip stays exactly 52px (`box-sizing: border-box` — the 1px
- * comes out of the content, not off the height the matrix asserts).
- *
- * ⚠️ AND IT REPLACES THE GRID ROW'S FLOATING HAIRLINE, which is DELETED rather than hidden.
- * Keeping both drew two lines a pixel apart — and the row's version was inset to the content
- * gutter while this one spans the container, so they would not even have agreed on their length.
- */
-/**
- * ⚠️ THE BAND IS DARK SLATE NOW, AND THE RULE BENEATH IS GONE. The note above describes the state
- * this replaces — a parchment ground closed by its own bottom edge — and both halves of it change
- * together: a warm hairline on `#333c4d` reads as a scratch, and a saturated band states its own
- * boundary without one. All four sides go transparent; the border BOX stays, because the strip's
- * 52px is `box-sizing: border-box` and removing the border would give the content a pixel back.
- *
- * ⚠️ EVERYTHING ON IT READS `--wsh-band-ink` — one ground, one foreground. The label below takes
- * it, and so does the primary's inverted fill, so a later adjustment is one token rather than a
- * hunt through rules that happen to agree.
- */
-.wsh--scrolled {
-  height: var(--wsh-plate-h-scrolled);
-  background: var(--wsh-band-bg);
-  border-color: transparent;
-  border-radius: 0;
-  /* ⚠️ THE HAIRLINE IS BACK (§2), AND WHITE IS WHY. `--wsh-band-edge` was deleted on the reasoning
-     that "a tinted band states its own boundary" — true of slate, of sage and of n3, and false the
-     moment the band went white: white against the warm cream beneath it is about a point of
-     lightness, which is not a division. Drawn as an INSET SHADOW rather than a border so the band's
-     height is untouched, and reading `--n5`, the scale's own rim tone, so it is the same hairline
-     every card on the page draws. The TOKEN stays absent — one no rule reads is the next thing
-     someone wires back up; this is a rule, and it has a reader. */
-  box-shadow: inset 0 -1px 0 var(--n5);
-  /* ⚠️ THE INHERITED INK MOVES WITH THE GROUND, and this line is the token doing its stated job
-     rather than four rules that happen to agree. Measured on the deployed band: `.wsh-row`,
-     `.wsh-txt` and `.wsh-acts` all inherit `#1e1a16` — near-black, 1.4:1 here — so the strip reads
-     correctly today only because its ONE text node sets its own colour. Anything added to the row
-     later would be invisible, with nothing to point at. Nothing is unreadable now; this stops the
-     next thing being so. */
-  color: var(--wsh-band-ink);
-}
+
+
 /* ⚠️ 30px AT REST, THE CONTENT GUTTER WHEN WORKING (spec §2), AND IT LIVES HERE. Layout is on the
    inner row, never on `.wsh` — `.wsh` carries the state class, and a single-class layout rule
    sharing an element with a multi-class state rule is how the last two mockups broke.
@@ -359,12 +299,18 @@
    heading in the shell is 500; this masthead is the one place that goes heavier, so the weight is
    named where it is used and read once. A bare `600` here would be indistinguishable from the
    start of a house-wide change, and the next person matching a heading to it would spread it. */
-.wsh { --wsh-plate-title-w: 600; }
+/* ⚠️ RENAMED FROM `--wsh-plate-title-w` (step 4). It was never plate machinery — it is the
+   masthead's heading weight — but a token naming an object that has been deleted is the kind
+   of residue that sends the next reader looking for a plate. The value is untouched. */
+.wsh { --wsh-title-w: 600; }
 /* ⚠️ THE CONTROL AND PILL LADDER IS DELETED — the two-step `--wsh-ctl-*` / `--wsh-pill-*` sets and
-   their `.wsh--scrolled` halves. They existed so a control mounted INTO the header would condense
-   with it; the masthead carries no controls at all now, and its pills have exactly one size. The
-   ladder's stated reason — "a page cannot forget to opt into a token it already reads" — was about
-   two pills disagreeing across a state change that no longer exists. */
+   their condensed halves. They existed so a control mounted INTO the header would condense with it;
+   the masthead carries no controls at all now, and its pills have exactly one size. The ladder's
+   stated reason — "a page cannot forget to opt into a token it already reads" — was about two pills
+   disagreeing across a state change that no longer exists.
+   ⚠️ TWO PAGE SHEETS STILL READ THEM THROUGH A FALLBACK (`var(--wsh-pill-fs, 8.5px)`), which is why
+   nothing broke when they went. Those reads are retired at step 4 in the sheets that make them: a
+   `var()` on a token nobody defines is a rule that looks parameterised and is not. */
 /* ⚠️ THE RESTING SIZE IS A TOKEN because the cross-fade keyframes have to NAME it. `font-family`
    and `text-transform` do not interpolate, so the register change is done with keyframes that hold
    the outgoing values while the title is invisible — and a keyframe cannot read "whatever this
@@ -379,7 +325,7 @@
    markup emits and no rule consumes is what a bundle sweep exists to find. */
 .wsh { --wsh-title-size: 30px; }
 .wsh-title {
-  font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-plate-title-w);
+  font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-title-w);
   color: var(--shell-ink); margin: 0; white-space: nowrap;
   /* 1.02 per both refs — a display line, set tight */
   line-height: 1.02;
@@ -463,157 +409,8 @@
      back, because nothing condenses. `-webkit-line-clamp` alone does the clamping; the explicit
      40px was there for the collapse. */
 }
-/* ⚠️ THE DESCRIPTION FADES AND COLLAPSES TOGETHER. Opacity alone would leave its box holding the
-   title off-centre in a 56px plate; `max-height:0` is what actually gives the space back. */
-.wsh--scrolled .wsh-row { padding: 0 var(--content-gutter); }
-.wsh--scrolled .wsh-sub { opacity: 0; max-height: 0; margin-top: 0; }
-/**
- * ══ THE WORKING TITLE IS A LABEL, NOT A SHRUNKEN MASTHEAD (ref 90, option E) ═════════════════
- *
- * ⚠️ IT CHANGES REGISTER RATHER THAN SIZE. Playfair at 17px reads as squashed display type — the
- * same voice, quieter, which is what makes it look like a mistake. Mono uppercase at 11.5px is a
- * different voice altogether: the page's name as a LABEL, in the mono the shell already speaks.
- *
- * ⚠️ THE COLOUR IS `--wsh-band-ink`, AND THE ARGUMENT IT REPLACES IS RECORDED because it was a
- * good one for the ground it was written against. It read `--shell-ink-soft`, deliberately not the
- * tertiary `--shell-muted`, so the page's own identity was never fainter than a tally beside it.
- * Both are warm inks tuned for a near-white band and neither survives dark slate — a #6a615a label
- * on #333c4d is under 2:1. The band's own foreground token takes over; the RANKING the old note
- * protected still holds, because nothing else in the strip is brighter than the label.
- */
-.wsh--scrolled .wsh-title {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 500;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--wsh-band-ink);
-}
-/* ⚠️ THE MARK STAYS, AT 30px, AND THIS REVERSES THE SPEC (strip-fixes ref 87). §2 said the mark
-   was removed on collapse; it is not. At 30px in full colour it is what still IDENTIFIES the page
-   once the title has dropped to 17px and the description has gone — a strip with no mark is a line
-   of text, and every page's line of text looks alike.
-   ⚠️ NO OPACITY CHANGE AND NO NEGATIVE MARGIN. Both were compensations for a mark that vanished:
-   the fade because it was leaving, the `-16px` because the row's gap would otherwise hold a hole
-   open where it had been. The mark is present, so the gap is wanted and the mark is opaque.
-   ⚠️ A PAGE WITH NO ILLUSTRATION SHRINKS ON THE SAME RULE — its 38px monoline glyph on its
-   parchment plate goes to 30 as well, so the two mark families keep one size in the strip. */
-/**
- * ⚠️ THE MARK DROPS ENTIRELY, AND THIS REVERSES THE RULE THAT STOOD HERE. It kept the mark at 30px
- * "because it is what still IDENTIFIES the page once the title has dropped to 17px" — which was
- * true while the title was still a shrunken masthead. Under the label treatment the strip is
- * carried by the label, and a 30px illustration beside mono uppercase is two voices competing for
- * the same job. The note it replaces is deleted rather than left standing; it would argue the mark
- * back the next time someone read it.
- */
-.wsh--scrolled .wsh-mark,
-.wsh--scrolled .wsh-mark--xl { flex: 0 0 0; width: 0; opacity: 0; }
-.wsh--scrolled .wsh-mark .os-mark,
-.wsh--scrolled .wsh-mark--xl .os-mark { width: 0; height: 0; flex-basis: 0; border: none; }
-/**
- * ══ THE REGISTER CROSS-FADE (§1) ══════════════════════════════════════════════════════════════
- *
- * ⚠️ `font-family` AND `text-transform` DO NOT INTERPOLATE, so there is nothing to transition:
- * they flip on the frame the class lands, and a size-and-spacing transition running THROUGH that
- * flip is what reads as a glitch. The title dips to zero instead, swaps while it is invisible, and
- * comes back — a fade reads as deliberate where a morph reads as a fault.
- *
- * ⚠️ THE OUTGOING VALUES ARE HELD IN THE KEYFRAMES, and that is the only way to show the OLD
- * register fading out: the element already carries the new one by the time any animation runs.
- * Non-interpolable properties animate DISCRETELY — they flip at the midpoint of the interval
- * between the keyframes that mention them — so naming them at 0% and 45%, and omitting them at
- * 55%, puts the swap at exactly 50%, in the middle of the ten frames where opacity is 0.
- *
- * Inside the shared .22s: out to 45% ≈ 99ms, invisible 45–55%, back over ≈ 121ms.
- *
- * ⚠️ AND IT IS ARMED ONLY AFTER THE FIRST STATE CHANGE (`.wsh--swap`, set by PageHeader). Hung on
- * the resting rule alone it would play on MOUNT: every page load would show its title, blink it
- * out and fade it back, which is a worse artefact than the glitch this removes.
- */
-/* ⚠️ BOTH ENDS ARE NAMED EXPLICITLY — an implicit 100% keyframe does NOT bring a non-interpolable
-   property back to the underlying value. Measured on the deployed build: with the target values
-   left implicit, size, weight, letterspacing and case all landed correctly (they interpolate, or
-   flip discretely to the underlying value) while `font-family` stayed on its last stated keyframe —
-   Playfair at 11.5px uppercase, which is the squashed masthead this whole section removes, wearing
-   the label's metrics. Stating the destination at 55% also puts the discrete flip at 50%, dead
-   centre of the invisible window, instead of at 72.5% where the fade-in has already begun. */
-@keyframes wsh-title-to-label {
-  0%   { opacity: 1; font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-plate-title-w); letter-spacing: normal; text-transform: none; }
-  45%  { opacity: 0; font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-plate-title-w); letter-spacing: normal; text-transform: none; }
-  55%  { opacity: 0; font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
-  100% { opacity: 1; font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
-}
-@keyframes wsh-title-to-masthead {
-  0%   { opacity: 1; font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
-  45%  { opacity: 0; font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; }
-  55%  { opacity: 0; font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-plate-title-w); letter-spacing: normal; text-transform: none; }
-  100% { opacity: 1; font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-plate-title-w); letter-spacing: normal; text-transform: none; }
-}
-.wsh--swap.wsh--scrolled .wsh-title { animation: wsh-title-to-label .22s cubic-bezier(.4, 0, .2, 1) both; }
-.wsh--swap:not(.wsh--scrolled) .wsh-title { animation: wsh-title-to-masthead .22s cubic-bezier(.4, 0, .2, 1) both; }
 
-/* ⚠️ THE HEIGHT, NOT THE PADDING — and the padding version was a no-op. `.svh-btn` is a FIXED
-   `height: 38px`, so `padding: 7px 13px` changed nothing at all: the vertical values are ignored
-   inside a fixed height and the button stayed 38px in a 52px strip. Measured on the seeded dev
-   account: Contact list and Manuscripts 38, Submission packages 30 — the inconsistency was real
-   and it was on the pages I had NOT touched, because `.pkgw-btn` gained an explicit working height
-   in the last pass while the shared button never did.
-   ⚠️ AND THIS IS WHY THE EMPTY ACCOUNT HID IT. `.wsh-acts` renders only when a page has actions to
-   show; on an empty account Packages had none, so the one element that differed was absent from
-   every measurement and all six headers "matched". */
-.wsh--scrolled .svh-btn { height: 30px; padding: 0 13px; font-size: 12px; }
-/**
- * ══ BOTH BUTTONS ARE WHITE ON THE BAND, AND THE INVERSION IS REMOVED ═════════════════════════
- *
- * ⚠️ THE INVERSION IS DELETED, NOT ADAPTED. The slate band took a white-filled primary with a
- * slate label, because #2a1a13 on #333c4d was 1.4:1 — invisible — and because a white button there
- * became the brightest element on screen. Both of those were facts about SLATE. On #c9d2c7 the ink
- * primary is legible and a white button reads as raised rather than as the loudest thing present,
- * so the special case has nothing left to do and goes rather than being re-tuned into something
- * that only looks like it still has a reason.
- *
- * ⚠️ THE PAIR IS NOW SEPARATED BY WEIGHT, NOT BY FILL. Both grounds are white; the primary carries
- * a shadow to sit it above the band and the secondary a faint rim instead. That is a QUIETER
- * hierarchy than filled-versus-outlined by design — flagged for judgement in the report rather
- * than pre-emptively corrected, because the correction (a transparent Export) is one line and
- * should follow a look, not an assumption.
- *
- * ⚠️ BOTH READ THE BAND'S OWN INK for label and glyph, so a ground change moves them with it. The
- * ghost's glyph was `--shell-muted` — a parchment-tuned tint that has now been wrong on two
- * successive band colours; naming the band's token ends that.
- */
-.wsh--scrolled .svh-btn-ink,
-.wsh--scrolled .svh-btn-ghost {
-  background: #ffffff;
-  color: var(--wsh-band-ink);
-}
-.wsh--scrolled .svh-btn-ink svg,
-.wsh--scrolled .svh-btn-ghost svg { color: var(--wsh-band-ink); }
-/* the primary sits ABOVE the band — a shadow, no rim, so nothing outlines the heavier of the two */
-.wsh--scrolled .svh-btn-ink {
-  border-color: #ffffff;
-  box-shadow: 0 1px 2px rgba(36, 28, 21, 0.10), 0 2px 6px rgba(36, 28, 21, 0.12);
-  font-weight: 600;
-}
-/* the secondary sits ON it — a faint rim, no shadow: the same distinction the light band drew */
-.wsh--scrolled .svh-btn-ghost {
-  border-color: rgba(36, 28, 21, 0.14);
-  box-shadow: none;
-}
-/* ⚠️ THE HOVER STEPS DOWN FROM WHITE, ONTO THE SCALE'S OWN LIGHTEST STEP. Brighter is not available
-   — the resting button is already white — so the hover is `--n1`, which keeps it in the band's
-   family instead of the cool #f7f8f6 it inherited from the sage pass. */
-.wsh--scrolled .svh-btn-ink:hover { background: var(--n1); border-color: var(--n1); }
-.wsh--scrolled .svh-btn-ghost:hover { background: var(--n1); border-color: rgba(36, 28, 21, 0.22); }
-/* ⚠️ THE FOCUS RING IS THE BAND'S FOREGROUND, and this survives the retone unchanged because it
-   was written against the token rather than against slate. `--shell-focus` is a burgundy at 45%
-   alpha tuned for parchment and was invisible on the last ground; on this one the band's own ink
-   is what keeps a keyboard user able to see the strip. */
-.wsh--scrolled .svh-btn:focus-visible,
-.wsh--scrolled button:focus-visible {
-  outline: 2px solid var(--wsh-band-ink);
-  outline-offset: 2px;
-}
+
 /* ⚠️ A SLATE-ERA HOVER (#e7e9ee) AND A DUPLICATE FOCUS BLOCK STOOD HERE, AND THE HOVER WAS LIVE.
    Being later in the file it OVERRODE the one above, so through the whole sage pass the band's
    primary hovered to a cool blue-grey on a green ground — a colour from two grounds ago, surviving

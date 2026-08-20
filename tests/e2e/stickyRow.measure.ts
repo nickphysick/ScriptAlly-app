@@ -52,6 +52,9 @@ const read = (page: Page) => page.evaluate(() => {
     marginBox: r(rb.height + parseFloat(cs.marginBottom)),
     rowTop: r(rb.top - sb.top),
     mastH: r(mast.getBoundingClientRect().height),
+    /* has the masthead actually scrolled out of the scrollport? — the precondition of the
+       invariance claim, and it must be read rather than assumed from the scroll distance */
+    mastGone: mast.getBoundingClientRect().bottom <= sb.top + 0.5,
     maxScroll: r(sc.scrollHeight - sc.clientHeight),
     scrollTop: r(sc.scrollTop),
     /* ⚠️ WHAT OWNS THE PIXEL JUST UNDER THE ROW once it is stuck — the check that the row is
@@ -114,11 +117,27 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
        not a failure — it is a page with nothing to scroll — and asserting on it would fail for a
        reason that has nothing to do with the row. */
     if (rest.maxScroll > 10) {
+      const mastGone = moved.mastGone;
       expect(moved.stuckClass, `${name}: the row did not stick after scrolling ${moved.scrollTop}px`).toBe(true);
       expect(moved.rowTop, `${name}: the row is not pinned to the scroller's top edge once stuck`).toBeLessThanOrEqual(1);
       expect(moved.shadow, `${name}: the stuck row draws no edge`).not.toBe("none");
-      /* ⚠️ MAX SCROLL IS THE WHOLE POINT. Identical in both states, or a barely-overflowing page
-         clamps, unsticks and cycles. 1px of tolerance for sub-pixel layout, not 4. */
+      /**
+       * ⚠️ MAX SCROLL IS THE WHOLE POINT, AND THIS IS THE PROPERTY THE DELETED PADDING EXISTED TO
+       * GUARANTEE. Identical in both states, or a barely-overflowing page clamps, unsticks and
+       * cycles. 1px of tolerance for sub-pixel layout, not 4.
+       *
+       * ⚠️ IT IS TRUE BY CONSTRUCTION NOW RATHER THAN BY COMPENSATION, which is exactly why it has
+       * to keep being MEASURED. `--wpg-reclaim-pad` used to hold this by adding back, in the
+       * scroller's foot, precisely what a condensing header took out of the flow — five tokens of
+       * arithmetic. The masthead is content and changes no heights, so nothing needs adding back
+       * and the padding is retired (step 4). A property that holds by construction is one nobody
+       * thinks to check, and the construction is a paragraph of CSS anyone can change.
+       *
+       * ⚠️ AND THE CLAIM IS ONLY WORTH ANYTHING IF THE MASTHEAD ACTUALLY LEFT — see the assertion
+       * below. Max scroll being constant across a scroll that never moved the masthead out of view
+       * is a measurement of nothing.
+       */
+      expect(mastGone, `${name}: the masthead is still in view after scrolling ${moved.scrollTop}px — the invariance claim is about a state the page never reached`).toBe(true);
       expect(Math.abs(moved.maxScroll - rest.maxScroll), `${name}: max scroll moved ${rest.maxScroll} → ${moved.maxScroll} when the row stuck`).toBeLessThanOrEqual(1);
       expect(moved.marginBox, `${name}: the row's margin box changed when it stuck — that is what moves max scroll`).toBeCloseTo(rest.marginBox, 0);
       expect(back.stuckClass, `${name}: the row stayed stuck after returning to the top`).toBe(false);

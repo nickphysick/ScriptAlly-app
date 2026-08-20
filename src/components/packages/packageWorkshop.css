@@ -578,12 +578,13 @@
 .pkgw-propill {
   display: inline-flex; align-items: center; gap: 5px;
   font-family: 'JetBrains Mono', monospace; letter-spacing: .14em; text-transform: uppercase;
-  font-size: var(--wsh-pill-fs, 8px);
+  /* the value, not a `var()` on a retired token — see the note in discover.css */
+  font-size: 8px;
   color: var(--slate); background: var(--slate-tint, #eef2f7); border: 1px solid var(--slate-line, #c7d6e3);
-  border-radius: 99px; padding: var(--wsh-pill-pad, 4px 10px);
-  position: relative; top: var(--wsh-pill-dy, 2px); flex: none;
+  border-radius: 99px; padding: 4px 10px;
+  position: relative; top: 2px; flex: none;
 }
-.pkgw-propill svg { width: var(--wsh-pill-icon, 10px); height: var(--wsh-pill-icon, 10px); }
+.pkgw-propill svg { width: 10px; height: 10px; }
 
 /* The right cluster — manuscript selector + primary action, on the title's line. Both go
    through actionsSlot because PageHeader treats `actions` and `actionsSlot` as exclusive. */
@@ -802,7 +803,8 @@
   display: inline-flex; align-items: center; gap: 9px;
   font-family: 'Playfair Display', Georgia, serif; font-size: 15px; font-weight: 600;
   color: var(--ink); background: #fffefb; border: var(--bdw) solid var(--bd); border-radius: 10px;
-  height: var(--wsh-ctl-h, 38px); padding: var(--wsh-ctl-pad, 0 14px); cursor: pointer;
+  /* the values, not `var()`s on retired tokens — see the note in discover.css */
+  height: 38px; padding: 0 14px; cursor: pointer;
   transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
     font-size .22s cubic-bezier(.4, 0, .2, 1);
 }

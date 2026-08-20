@@ -40,16 +40,11 @@
  * viewport instead of 50 — the same numbers `/queries` measures.
  */
 .tpl-wpg .wpg-scroll { padding-inline: var(--content-gutter-tight); }
-/* ⚠️ THE TOKEN, NOT A SECOND NUMBER. `--content-top-gap: 0px` is exactly how `.qc-wpg` does it;
-   a `padding-top: 0` beside it restates the same fact in a second place, which is what this
-   file's own lock forbids and what the squash was. */
-/* ⚠️ BOTH VARIANTS, BECAUSE THE PAGE IS ONLY SOMETIMES `--working`. The header condenses on
-   engagement, so at REST the page carries no `.wpg--working` and `--content-top-gap` resolves to
-   `--content-top-gap-rest` — 44px. Setting only the working variant left the rest state untouched
-   and the measurement unchanged, which is how a one-line override reads as done and is not.
-   `.qc-wpg` states both for exactly this reason; this is the same pair. */
-.tpl-wpg:not(.wpg--working) { --content-top-gap: 0px; }
-.tpl-wpg.wpg--working { --content-top-gap: 0px; }
+/* ⚠️ THE PAGE-SCOPED `--content-top-gap` OVERRIDES ARE DELETED (in-flow masthead, step 4).
+   Both states set it to 0 so this page's content sat flush under the chrome hairline instead of
+   taking the shell's 44px. There is no chrome hairline and no gap token: the masthead states its
+   own rhythm — 26 above, 20 below, its own hairline, 16 to whatever follows — and nothing above
+   the content pays a gap at all. Overriding a token nothing reads is a rule about nothing. */
 
 /* ⚠️ THE SOLO-TITLE OVERRIDE IS DELETED WITH `.wsh--solo` ITSELF. The solo step existed because a
    fixed-height plate had to fill its height with or without a description; in flow a title-only page

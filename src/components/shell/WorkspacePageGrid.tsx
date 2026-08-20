@@ -32,20 +32,16 @@ import React from "react";
 import "./workspacePageGrid.css";
 
 /**
- * ⚠️ THE GRID TELLS THE PLATE WHEN TO CONDENSE — the plate never goes looking.
+ * ⚠️ `PlateCondensedContext` IS DELETED (in-flow masthead, step 4), AND ITS LAST READER WENT AT
+ * STEP 1. It carried one boolean from the grid to the header so the header never had to find its
+ * own scroller — the right shape for a header that condensed, and a header that condenses is
+ * exactly what this pack removed. `PageHeader` reads nothing now: the masthead has no state.
  *
- * The obvious alternative was a DOM lookup: `closest('.sa-chrome-grid')?.querySelector('.scroll')`.
- * That holds until something INSIDE the scroll row is itself a scroller, at which point
- * `querySelector` returns the wrong element and the plate condenses on a stranger — silent
- * misbehaviour with a new mechanism. Two strings coupling two components across the DOM is the
- * hardcoded `top` offset again, just harder to spot.
- *
- * Context carries a BOOLEAN rather than a ref, which is the smaller contract: the grid owns the
- * scroller, owns the sentinel and owns the observer, so the plate needs no ref, no traversal and no
- * knowledge of where it sits. `null` means "no grid above me" and is distinguishable from `false`,
- * which is what lets a consumer complain instead of quietly reading a plausible default.
+ * ⚠️ WHAT IT CARRIED IS NOT GONE — the union `stuck || condensedByMode || engaged` still exists and
+ * still drives the fill-page collapse, through the ROOT'S CLASS rather than through React. That is
+ * the smaller contract of the two: a stylesheet reading a class on an ancestor cannot be mounted
+ * outside its provider, cannot read `null`, and needs no throw to say so.
  */
-export const PlateCondensedContext = React.createContext<boolean | null>(null);
 
 /**
  * PageTally — the control row's count, and the reason it is a component rather than a class.
@@ -350,7 +346,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   }, []);
 
   return (
-    <PlateCondensedContext.Provider value={condensed}>
       <div
         ref={rootRef}
         /* ⚠️ `wpg--tools` IS GONE FROM THIS LIST. It existed for ONE rule — `.wpg--tools > .wpg-scroll`,
@@ -440,6 +435,5 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         {/* the dock is a content row too — acting in it is working on the page */}
         {dock && <div className="wpg-dock" onPointerDown={engage}>{dock}</div>}
       </div>
-    </PlateCondensedContext.Provider>
   );
 };

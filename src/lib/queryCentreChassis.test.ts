@@ -87,12 +87,19 @@ describe("§1b · the masthead is a card, like every other page's", () => {
     /* ⚠️ COMMENTS STRIPPED FIRST. The reversal note in f12.css names the deleted declaration in
        prose, and the raw file therefore contains the exact string this case forbids — the assertion
        failed on its own explanation. Strip, then match. */
+    /* ⚠️ `--header-inset` IS RETIRED, AND WITH IT BOTH HALVES OF THIS (in-flow masthead, step 4).
+       The token was the distance the PLATE sat inside the content it floated above — an object
+       needs a margin — and this page had opted out of it with a page-scoped `0`, which the case
+       forbade because a use-site token can be overridden from any ancestor.
+       The masthead is content. It takes the scroll row's own gutter and states no width, so there
+       is no inset for a page to opt out OF. Asserted as absent at both ends: the page must not
+       resurrect a scoped override, and the shell must not resurrect the token. */
     const css = read("../components/shell/f12.css").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(css, "the opt-out came back under a different selector — the token resolves at its use site, so any ancestor of .wpg-plate will do it")
-      .not.toMatch(/--header-inset:\s*0/);
-    const shell = read("../components/shell/pageHeader.css");
-    expect(shell, "the shell's own inset was changed — that would move all ten pages")
-      .toContain("--header-inset: 120px");
+    expect(css, "a page-scoped header inset came back — the masthead would sit inside the content again")
+      .not.toMatch(/--header-inset:/);
+    const shell = read("../components/shell/pageHeader.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(shell, "the shell redeclared --header-inset — the masthead shares the content's gutter now")
+      .not.toMatch(/--header-inset:/);
   });
 
   it("⚠️ NO PAGE-SCOPED BAND — the plate keeps its border, radius and shadow", () => {

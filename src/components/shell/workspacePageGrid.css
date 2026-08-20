@@ -55,7 +55,7 @@
    the toolbar `--content-gutter`, the scroller `--content-gutter`. With the masthead and the
    control row INSIDE the scroller they inherit the scroller's gutter and state nothing of their
    own — which is what puts every page's mark, controls and content on one vertical without any of
-   the three naming a number. `--header-inset` has no reader left; it retires at step 4.
+   the three naming a number. `--header-inset` is retired (step 4) — there is no second inset for it to be.
 
    ⚠️ THE GUTTER GOES INSIDE THE SCROLL ROW, AND THE ROW RESERVES THE SCROLLBAR ON BOTH EDGES. A
    `max-width` column centred in a full-width scroller left the scrollbar OUTSIDE the column, so a

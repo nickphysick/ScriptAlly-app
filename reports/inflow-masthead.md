@@ -153,3 +153,50 @@ Worth recording because both are about the *probe*, not the product, and both ha
 
 - **The Packages 2px is closed by decision, not tolerance** (Nick's call). Ornaments hung on the title — the two `Pro` pills — are absolutely positioned out of the title's line box, so the masthead's height is a function of the mark and the title only, whatever a page hangs on it. Measured after: **all five scrolling pages 102px, title 31px**, both pills vertically centred and 9px clear of the title. Tuning the pill down would have fixed this pill at this size; the next badge would have done it again.
 - **The margin-collapse trap is logged in `CLAUDE.md`** alongside the other "applies cleanly, does nothing" faults.
+
+
+---
+
+## Step 4 — retire the machinery
+
+**203 insertions, 337 deletions**, and most of the insertions are the notes recording what went and why. Nothing needed a compensating addition except the one coupling named below.
+
+### Deleted
+
+| | |
+|---|---|
+| **The band** | every `.wsh--scrolled` rule — the ground, the 52px height, the mono-label register, the mark drop, the description collapse, the white-on-band buttons and their hover and focus ring |
+| **The cross-fade** | `@keyframes wsh-title-to-label` / `wsh-title-to-masthead` and the two `.wsh--swap` rules that ran them |
+| **Plate + band tokens** | `--wsh-plate-h` · `-h-scrolled` · `-gap` · `-bg` · `-radius` · `-sh` · `--wsh-band-bg` · `--wsh-band-ink` |
+| **Gap + inset tokens** | `--header-inset` · `--content-top-gap` · `-rest` · `-work`, and the page-scoped `0` overrides on Query Centre and the Tasks family |
+| **The reclaim opt-outs** | `.qc-wpg …{ --wpg-reclaim-pad: 0 }` and Manuscripts' — the reclaim itself went at step 2 |
+| **`PlateCondensedContext`** | its last reader went at step 1 |
+| **The control/pill ladders** | `--wsh-ctl-*` and `--wsh-pill-*` were deleted at step 1; two page sheets were still *reading* them through fallbacks, which is a rule that looks parameterised and is not. Now literals. |
+
+`--wsh-plate-title-w` was **renamed** to `--wsh-title-w` — it was never plate machinery, but a token naming a deleted object sends the next reader looking for it.
+
+### ⚠️ ONE DELETION HAD A LIVE CONSUMER, AND IT WAS NOT USING THE TOKEN FOR WHAT IT SAID
+
+`manuscriptLibrary.css` read `--content-top-gap` as `--wpg-foot` — the dossier's **bottom** inset — and it said why: reading the top gap's own token made the two ends match *"by construction rather than by two numbers someone matched"*. That is good reasoning, and it stopped being available the moment the top inset stopped being that token: the masthead states its own 26/20 now, and in the dossier state it is collapsed to nothing, so there is no top inset left to mirror.
+
+**Named, not worked around.** The page states `--wpg-foot: 44px` — exactly what the token resolved to, so nothing moves — with the lost mirror written down and the honest partner named should anyone want it back. Its lock is amended to assert the value *and* the absence of the borrowed token.
+
+### The probes moved, and that is a real change worth stating
+
+Five unit cases observed the condensed state **through the context**. With the context gone they observe the root's class instead — the same union, the same single boolean, one fewer mechanism. The `null`-default case inverts entirely, and its reasoning is kept because it was good: `null` existed so a header mounted outside a grid could *complain* rather than read a plausible `false` and silently never condense. A class on an ancestor cannot be mounted outside its provider and cannot resolve to a plausible default, so the failure mode is **gone rather than guarded**.
+
+### The invariance proof, re-measured after the deletion
+
+The padding existed to guarantee that max scroll does not move. It is now true by construction — the masthead is content and changes no heights — but a property that holds by construction is one nobody thinks to check, and the construction is a paragraph of CSS anyone can change. So `stickyRow.measure.ts` keeps asserting it, and gained the precondition it was missing:
+
+> **the masthead must actually have left the viewport** before the claim means anything. Max scroll being constant across a scroll that never moved the masthead out of view is a measurement of nothing.
+
+Re-measured on all five scrolling pages after every deletion: **max scroll identical at rest, scrolled and returned**, masthead confirmed out of view in the scrolled reading, and every masthead now **102.5px**.
+
+### ⚠️ ONE DIVERGENCE REMAINS, DIAGNOSED, FOR STEP 5
+
+**Submission packages' control row sits 14px lower than every other page's** — `rowTop` 132.5 against 118.5. Not the masthead, which measures 102.5 like all the others.
+
+The cause: `.pkgw .wpg-scroll { display: flex; flex-direction: column; gap: 14px }`. That gap is the page's own vertical rhythm and was written when its panels were the scroller's only children. **The masthead and the control row are children of that scroller now**, so the page's body rhythm applies to the grid's chrome — 16px of masthead margin plus 14px of page gap.
+
+The clean fix is for the page to wrap its own body in an element carrying the flex column and the gap, leaving the scroller a block like every other page. The rule's own comment says a wrapper "would collapse those gaps into one", which is true of a plain wrapper and not of one that carries the same `display: flex; gap: 14px`. **Left for step 5**, where the cross-page equality matrix lives and will assert it rather than accept it.

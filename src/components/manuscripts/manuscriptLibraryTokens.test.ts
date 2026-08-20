@@ -122,11 +122,20 @@ describe("the meter's two roles are declared in every theme", () => {
    * dossier does not scroll, so on this page it is dead space exactly the size of what the header
    * gave back. Condensing the header is what introduced it.
    */
-  it("zeroes the scroll row's reclaim on the non-scrolling dossier, and gutters it from the top gap", () => {
+  it("states the dossier's foot inset as a value, because the token it mirrored is retired", () => {
+    /* ⚠️ AMENDED (in-flow masthead, step 4). This asserted `--wpg-foot: var(--content-top-gap)` —
+       the dossier's bottom inset reading the TOP gap's own token, so the two ends matched by
+       construction rather than by two numbers someone had aligned. That was the right shape while
+       a chrome hairline owned the top gap. The masthead states its own rhythm now, and in the
+       dossier it is collapsed to nothing, so there is no top inset left to mirror; the token is
+       deleted and the value — 44px, exactly what it resolved to — is stated here instead.
+       ⚠️ AND THE RECLAIM OPT-OUT GOES WITH THE RECLAIM. `--wpg-reclaim-pad` compensated for a
+       header collapse that no longer happens; a rule zeroing a token nothing reads is a rule about
+       nothing. */
     const r = rule(LIB, ".msv-wpg.wpg--fill > .wpg-scroll");
-    expect(r).toContain("--wpg-reclaim-pad: 0px");
-    /* Reading the TOP gap's own token is what makes the inset even without two matched numbers. */
-    expect(r).toContain("--wpg-foot: var(--content-top-gap)");
+    expect(r).toContain("--wpg-foot: 44px");
+    expect(r, "the reclaim opt-out survived the reclaim").not.toContain("--wpg-reclaim-pad");
+    expect(r, "the foot went back to borrowing a retired token").not.toContain("--content-top-gap");
   });
 
   /* ⚠️ NO HEIGHT ARITHMETIC ANYWHERE — the height arrives from the grid row and is passed down. */

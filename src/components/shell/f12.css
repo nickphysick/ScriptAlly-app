@@ -2218,7 +2218,6 @@
  * `.wpg--working` (0-1-0) on the SAME element and be decided by bundle order, which is the fault
  * this repo has recorded twice. Both states are named explicitly at 0-2-0 instead.
  */
-.qc-wpg:not(.wpg--working) { --content-top-gap: 0px; }
 
 /**
  * ⚠️ ZERO, BECAUSE THE LIST'S GROUND STARTS AT THE MASTHEAD RULE (fix pack 3 §2). The gap was 18px
@@ -2261,7 +2260,6 @@
  * below works and the inset override above did. Different shape, different answer — and the two
  * look identical from a distance, which is the whole reason it is written down.
  */
-.qc-wpg.wpg--working { --content-top-gap: 0px; }
 
 /**
  * ⚠️ THE INVARIANCE PADDING IS INERT ON THIS PAGE, SO IT IS ZEROED HERE — and the reason matters
@@ -2278,7 +2276,15 @@
  * here because there is no scroll to clamp; on Contact list or Manuscripts it would put the
  * oscillation straight back.
  */
-.qc-wpg.wpg--working > .wpg-scroll { --wpg-reclaim-pad: 0px; }
+/* ⚠️ THE PAGE-SCOPED `--content-top-gap` OVERRIDES ARE DELETED (in-flow masthead, step 4).
+   Both states set it to 0 so this page's content sat flush under the chrome hairline instead of
+   taking the shell's 44px. There is no chrome hairline and no gap token: the masthead states its
+   own rhythm — 26 above, 20 below, its own hairline, 16 to whatever follows — and nothing above
+   the content pays a gap at all. Overriding a token nothing reads is a rule about nothing. */
+/* ⚠️ AND THE RECLAIM OPT-OUT GOES WITH THE RECLAIM ITSELF. `--wpg-reclaim-pad` compensated for a
+   header collapse that no longer happens (deleted at step 2, where it was measured adding 99px on
+   every scrolling page the moment the control row anchored). A rule zeroing a token nothing reads
+   is a rule about nothing. */
 
 /**
  * ⚠️ THE MONO SUBTITLE IS RETIRED, AND IT WENT WITH THE THING IT WAS FOR. The rule read "the

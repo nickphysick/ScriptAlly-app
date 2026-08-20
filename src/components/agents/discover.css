@@ -143,13 +143,18 @@
    token a page reads rather than a rule a page must remember to write. */
 .dv-propill {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: var(--wsh-pill-fs, 8.5px);
+  /* ⚠️ THE VALUE, NOT A `var()` ON A TOKEN NOBODY DEFINES (step 4). It read `--wsh-pill-fs`,
+     the masthead's two-step pill ladder, which is retired with the state it stepped between —
+     so this has been resolving to its own fallback. A `var()` whose token has no definition is
+     a rule that LOOKS parameterised and is not, which is worse than a literal: the next reader
+     goes looking for the knob. 8.5px is the value it has been rendering. */
+  font-size: 8.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   background: var(--slate, #6a89a7);
   color: var(--dv-paper);
   border-radius: 99px;
-  padding: var(--wsh-pill-pad, 4px 10px);
+  padding: 4px 10px;
   flex: none;
   position: relative;
   top: -6px;

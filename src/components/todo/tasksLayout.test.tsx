@@ -161,12 +161,15 @@ describe("⚠️ the order: header block → hairline → sidebar and body on th
        every other page. What this file still owns is the row's CONTENT. */
     expect(layoutCss, "the Tasks tool row drew its own hairline again — that is a second line under the header's")
       .not.toMatch(/\.tpl-tools\s*\{[^}]*border-bottom/s);
-    /* ⚠️ THE BOUNDARY IS THE BAND'S GROUND NOW, NOT A LINE. It was the header's own bottom edge, a
-       parchment hairline; the band is dark slate, which announces its boundary by contrast and needs
-       no rule — a warm hairline on it would read as a scratch. What this case protects is unchanged
-       either way: Tasks must not draw a second line of its own, which is the assertion above. */
+    /* ⚠️ THE BAND IS DELETED (in-flow masthead, step 4), AND THE BOUNDARY IS THE MASTHEAD'S OWN
+       HAIRLINE AGAIN. This half of the case tracked where the chrome/content line lived as it moved
+       — the header's bottom edge, then a slate band's ground — and it has moved once more, back to
+       a hairline the masthead draws for itself and takes with it when it goes.
+       What the case protects is unchanged, and it is the assertion above: Tasks must not draw a
+       second line of its own. */
     const hdr = readFileSync(join(here, "..", "shell", "pageHeader.css"), "utf8");
-    expect(hdr, "the band lost the ground that IS the chrome/content boundary now").toContain("background: var(--wsh-band-bg)");
+    expect(hdr, "the masthead stopped drawing its own closing hairline").toContain("border-bottom: 1px solid var(--ws-edge)");
+    expect(hdr.replace(/\/\*[\s\S]*?\*\//g, ""), "the band came back").not.toContain("wsh--scrolled");
   });
 
   it("the sidebar is OPTIONAL — absent means no aside at all, never an empty gutter", () => {
