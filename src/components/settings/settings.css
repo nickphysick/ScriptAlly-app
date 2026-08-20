@@ -13,138 +13,21 @@
  * a flex item's default `min-height: auto` refuses to shrink below its content, which is how a
  * page ends up scrolling in two places at once.
  *
- * ⚠️ THE CONTENT WIDTH IS ONE CUSTOM PROPERTY, read inside the grid template. Plan & billing is
- * two columns and needs 660 where the rest need 500; setting `--acct-col` on the page beats
- * writing a second grid rule, and — because it is read inside a `calc()`/track rather than
- * resolved at `:root` — a modifier class further down genuinely overrides it (the resolution-site
- * rule in CLAUDE.md).
+ * ⚠️ THE WORK COLUMN IS NO LONGER SIZED PER SECTION. It used to be a 500px track widened to 660
+ * for Plan alone, which meant the card changed WIDTH as well as height when you navigated. The
+ * column is now one width for every section — rail 224, gap 22, the rest — and sections that need
+ * two groups side by side get them INSIDE the card (`.acct-two`) rather than by resizing it.
  */
 
 /* ── The page: a fill column inside the stage slot ─────────────────────────── */
 .acct-page {
-  --acct-col: 500px;
-  --acct-rail: 216px;
-  --acct-gap: 24px;
+  --acct-rail: 224px;
+  --acct-gap: 22px;
+  --acct-max: 1120px;
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
-}
-
-/* Plan & billing only — the comparison is two columns side by side. Set on the GRID, which is the
-   element whose `grid-template-columns` reads it, so the override lands at the resolution site. */
-.acct-grid--wide { --acct-col: 660px; }
-
-/* ── The account header — the page's fixed point and its top edge ───────────
-   ⚠️ THE PAGE TITLE IS GONE. A centred "Account settings" over an empty plane was the second of
-   the three faults this rework fixes: the content had nothing to sit against. The header is the
-   top edge now, it is full width, and it is IDENTICAL in all six sections — the first fault was
-   that every section card repeated the identity, so nothing on screen held still while you
-   navigated. */
-.acct-hdr { margin-bottom: 22px; }
-
-/* The row lives INSIDE MountPanel's clipping frame, so the tinted panel's fill and the
-   illustration that bleeds past its corner are both stopped at the frame border — the same reason
-   the sage band carries no radius of its own. */
-.acct-hdr-row {
-  display: flex;
-  align-items: stretch;
-  min-width: 0;
-}
-
-.acct-hdr-main {
-  flex: 1;
-  min-width: 0;
-  padding: 22px 26px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.acct-hdr-av {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: #f5e2da;
-  border: 1px solid rgba(124, 58, 42, 0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: 19px;
-  font-weight: 500;
-  color: #7c3a2a;
-}
-
-.acct-hdr-who { min-width: 0; }
-.acct-hdr-pre {
-  display: block;
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 9px;
-  letter-spacing: 0.17em;
-  text-transform: uppercase;
-  font-weight: 500;
-  color: #9c8878;
-}
-.acct-hdr-name {
-  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: 26px;
-  font-weight: 500;
-  color: #2b1a14;
-  line-height: 1.1;
-  margin: 2px 0 1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.acct-hdr-mail {
-  display: block;
-  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
-  font-size: 12px;
-  font-weight: 300;
-  color: #8a7a6c;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* ⚠️ A FIXED 280px, AND IT DROPS RATHER THAN SQUEEZES. Three key/value rows stop reading as rows
-   the moment the values wrap, and 280 is where they stop wrapping. */
-.acct-hdr-side {
-  width: 280px;
-  flex-shrink: 0;
-  border-left: 0.5px solid #ece0d2;
-  background: linear-gradient(135deg, #f6f1ea 0%, #f1ece4 100%);
-  padding: 20px 22px;
-  display: flex;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-}
-.acct-hdr-facts { position: relative; z-index: 2; margin: 0; }
-.acct-hdr-fact { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; }
-.acct-hdr-k {
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 8.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #a08e7c;
-  width: 74px;
-  flex-shrink: 0;
-  margin: 0;
-}
-.acct-hdr-v {
-  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
-  font-size: 12px;
-  color: #3a1c14;
-  margin: 0;
-  min-width: 0;
-}
-
-@media (max-width: 900px) {
-  .acct-hdr-row { flex-direction: column; }
-  .acct-hdr-side { width: auto; border-left: 0; border-top: 0.5px solid #ece0d2; }
 }
 
 /* ── The scroll plane — the ONE scroll region on this page ──────────────────── */
@@ -156,36 +39,85 @@
   padding: 30px 40px 70px;
 }
 
-/* ── Rail + content ─────────────────────────────────────────────────────────
-   `align-items: start` is load-bearing twice over: it lets the rail be its own height rather than
-   stretching to the section's, and a stretched grid item cannot `position: sticky` at all. */
+/* Everything in the plane sits inside one column, so the header and the grid share both edges. */
+.acct-hdr,
 .acct-grid {
-  display: grid;
-  grid-template-columns: var(--acct-rail) minmax(0, var(--acct-col));
-  justify-content: center;
-  align-items: start;
+  max-width: var(--acct-max);
+  margin-inline: auto;
+}
+
+/* ── Rail + work ────────────────────────────────────────────────────────────
+   ⚠️ `align-items: stretch`, NOT `start` — AND THAT IS A REVERSAL. It was `start` so the rail card
+   could be its own height, which is exactly what made the left column look stubby beside a tall
+   work column. Both columns now run the full depth and the rail's aside fills what the nav does
+   not use (Phase 3). The rail card itself stays `flex: 0 0 auto` inside its column, so it is still
+   its own height — the column stretches, the card does not. */
+.acct-grid {
+  display: flex;
   gap: var(--acct-gap);
+  align-items: stretch;
 }
 
 .acct-rail {
-  position: sticky;
-  top: 0;
-  z-index: 2;
+  width: var(--acct-rail);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.acct-rail > * { flex: 0 0 auto; }
+
+.acct-work {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.acct-col { min-width: 0; }
+/* ⚠️ THE SECTION CARD HAS A FLOOR, AND THE FLOOR IS THE POINT. Security is short and Plan is tall;
+   without a minimum the card resized under the pointer on every click — the third of the three
+   faults. The floor does not CAP anything: Plan grows past it, which is correct. It exists so the
+   short sections do not collapse and take the rail's depth with them. */
+.acct-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+}
+.acct-cardbody { padding: 22px 26px 26px; position: relative; flex: 1; }
+
 .acct-col:focus { outline: none; }
 
 /* ⚠️ THE RAIL GOES ABOVE THE CONTENT, NOT BESIDE IT, BELOW ~900px — and it stops sticking.
    A sticky strip pinned to the top of a narrow plane eats the height the content needs; at this
    width the rail is a header, not a sidebar. */
 @media (max-width: 900px) {
-  .acct-grid {
-    grid-template-columns: minmax(0, 1fr);
-    justify-content: stretch;
-  }
-  .acct-rail { position: static; }
+  .acct-grid { flex-direction: column; }
+  .acct-rail { width: auto; }
   .acct-plane { padding-inline: 16px; }
+}
+
+/* ── Two-column section bodies ──────────────────────────────────────────────
+   ⚠️ ONLY WHERE THE CONTENT IS TWO INDEPENDENT GROUPS. Profile is name | country, Security is
+   email | password, Notifications is querying | marketing, Preferences is workspace | tasks, Your
+   data is export+retention | deletion. Plan is NOT in here: `PlanComparison` is already two
+   columns of its own, and nesting a two-column comparison inside a two-column body would give
+   four columns of 250px and a table nobody can read across. */
+.acct-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 30px;
+  align-items: start;
+}
+.acct-two > * { min-width: 0; }
+
+/* Your data's columns are whole CARDS rather than content inside one, so they need the gap on both
+   axes and their own stacking below the breakpoint. */
+.acct-two--cards { gap: 20px; align-items: start; }
+
+@media (max-width: 820px) {
+  .acct-two { grid-template-columns: 1fr; }
 }
 
 /* ── Rail items ─────────────────────────────────────────────────────────────

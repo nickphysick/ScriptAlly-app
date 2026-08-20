@@ -867,6 +867,9 @@ export const AccountSettings: React.FC<{
 
   const profileSection = (
     <SectionCard section="profile" headingId="acct-h-profile">
+      <div className="acct-two">
+        <div>
+
       {/* ⚠️ NO AUTHOR-PHOTO CONTROL, AND NO DISABLED PLACEHOLDER FOR ONE. Firebase Storage is not
           configured in this project — no `storage.rules`, no storage block in either hosting
           config, no `firebase/storage` import anywhere in src. A "Change photo" button that
@@ -919,6 +922,8 @@ export const AccountSettings: React.FC<{
         </p>
       )}
 
+        </div>
+        <div>
       {/* Home country — seeded silently at signup from the browser locale (key omitted when
           unresolvable) and previously never writable again: a wrong guess was a permanent trap
           for the agent territory split (Tier 2 · Phase 4). Absent shows as "Not set" and is
@@ -949,11 +954,16 @@ export const AccountSettings: React.FC<{
           <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: ERROR_RED, marginTop: 8 }}>{countryStatus.msg}</p>
         )}
       </div>
+        </div>
+      </div>
     </SectionCard>
   );
 
   const securitySection = (
     <SectionCard section="security" headingId="acct-h-security">
+      <div className="acct-two">
+        <div>
+
       <label htmlFor="account-email" style={labelStyle}>
         Email
       </label>
@@ -1002,6 +1012,8 @@ export const AccountSettings: React.FC<{
         <button onClick={() => onNavigate("contact")} style={ghostBtn}>Change email</button>
       </div>
 
+        </div>
+        <div>
       {/* ── Password — provider-aware ──────────────────────────────────────── */}
       <div style={{ marginTop: 20, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
         {pwMode === "federated-only" ? (
@@ -1049,6 +1061,8 @@ export const AccountSettings: React.FC<{
           with their tests: the seam is where the Cloud Function lands, and deleting it would mean
           rediscovering that the client SDK cannot revoke a session at all.
           ⚠️ PASSKEYS, 2FA AND A DEVICE LIST ARE OUT OF SCOPE — absent, not advertised. */}
+        </div>
+      </div>
     </SectionCard>
   );
 
@@ -1080,6 +1094,9 @@ export const AccountSettings: React.FC<{
 
   const notificationsSection = (
     <SectionCard section="notifications" headingId="acct-h-notifications">
+      <div className="acct-two">
+        <div>
+
       {/* ⚠️ THE NOTICE IS WHAT MAKES THESE TOGGLES HONEST. There is no email-sending
           infrastructure in this app and no scheduler to run one — `functions/` holds eight
           callables and zero scheduled jobs, and even "contact us" writes a Firestore document
@@ -1107,6 +1124,8 @@ export const AccountSettings: React.FC<{
         onChange={(v) => saveNotify({ weeklyDigest: v }, "Weekly digest")}
       />
 
+        </div>
+        <div>
       {/* ⚠️ MARKETING IS ITS OWN GROUP, AND ITS OWN STORED FIELD. Under UK PECR consent must be
           affirmative, evidenced and withdrawable in one action — so it defaults OFF, is never
           pre-ticked, writes a timestamped record in BOTH directions, and takes effect on the
@@ -1124,6 +1143,8 @@ export const AccountSettings: React.FC<{
       <p style={{ ...helpText, marginTop: 16, paddingTop: 14, borderTop: "0.5px solid #efe5da" }}>
         {ALWAYS_SENT_LINE}
       </p>
+        </div>
+      </div>
     </SectionCard>
   );
 
@@ -1171,6 +1192,9 @@ export const AccountSettings: React.FC<{
 
   const preferencesSection = (
     <SectionCard section="preferences" headingId="acct-h-preferences">
+      <div className="acct-two">
+        <div>
+
       <GroupLabel>Workspace</GroupLabel>
 
       {/* Theme — the one setting on this card that changes something the moment you click it.
@@ -1233,13 +1257,23 @@ export const AccountSettings: React.FC<{
           same fault that removed Pen name, the author-photo control and the sessions button. They
           arrive with a shared formatter, not before one. */}
 
+        </div>
+        <div>
       <GroupLabel>Tasks</GroupLabel>
       {taskSettingsRow}
+        </div>
+      </div>
     </SectionCard>
   );
 
+  /* ⚠️ YOUR DATA SPLITS AT THE CARD LEVEL, NOT INSIDE ONE CARD — the only section that does. Its
+     two independent groups are "what you can take away" and "how you leave", and the second lives
+     in its own cards because a deletion control does not belong in the same frame as an export
+     button. Putting the destructive column beside the routine one uses the width the way the other
+     sections do, and keeps the two apart in the way this page has kept them since the sign-out row
+     was placed above the danger zone rather than below it. */
   const dataSection = (
-    <>
+    <div className="acct-two acct-two--cards">
       <SectionCard section="data" headingId="acct-h-data">
         {/* ⚠️ THE EXPORT IS THE PORTABILITY RIGHT, SAID WITHOUT LEGALESE. UK GDPR gives you a copy
             of your own records in a form a machine can read; the copy says that in plain words
@@ -1291,6 +1325,7 @@ export const AccountSettings: React.FC<{
         </div>
       </SectionCard>
 
+      <div>
       {/* ⚠️ SIGN OUT SITS ABOVE THE DANGER ZONE, NOT BELOW IT. Someone scrolling to close their
           account should not pass the way out on the journey to deletion — and someone looking for
           the way out should not have to scroll past a delete button to find it. Two exits, and the
@@ -1358,7 +1393,8 @@ export const AccountSettings: React.FC<{
           </div>
         )}
       </SubCard>
-    </>
+      </div>
+    </div>
   );
 
   const sectionContent: Record<SectionId, React.ReactNode> = {
@@ -1388,7 +1424,7 @@ export const AccountSettings: React.FC<{
           did. */}
       <div className="acct-plane" style={{ position: "relative", zIndex: 1 }}>
         <AccountHeader name={currentUser.name} email={currentUser.email} facts={headerFacts} />
-        <div className={`acct-grid${active === "plan" ? " acct-grid--wide" : ""}`}>
+        <div className="acct-grid">
           <div className="acct-rail">
             <Rail active={active} onSelect={goSection} />
           </div>
@@ -1397,7 +1433,7 @@ export const AccountSettings: React.FC<{
             role="tabpanel"
             aria-labelledby={`acct-tab-${active}`}
             tabIndex={0}
-            className="acct-col"
+            className="acct-work"
           >
             {sectionContent[active]}
           </div>
