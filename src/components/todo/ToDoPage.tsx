@@ -83,7 +83,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
 import { paneCopy } from "../../lib/taskListRow";
-import { daysBetween } from "../../lib/elapsed";
+import { daysBetween, elapsedParts } from "../../lib/elapsed";
 import { useDockActivity } from "./useDockActivity";
 import { materialRows, materialName, anchorNoun, bandForward, holderRows } from "../../lib/todoHandoff";
 import { notifyGroups, reminderFields } from "../../lib/offerNotify";
@@ -1097,13 +1097,31 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
           dayPart(paneBody.when),
           ...(spec ? paneExpectParts() : []),
         ].filter(Boolean);
-        /* nothing chosen, nothing stated — the em dash IS the honest sentence at rest */
-        /* the "Will record:" prefix belongs to the strip's own markup — this supplies the RECORD */
+        /* ⚠️ A NOTE STATES ITS RECORD FROM THE START, because it has no questions to answer: the
+           tick IS the act and it carries today's date. The em dash is for a form whose questions
+           are unanswered, and a note has none to answer. */
+        if (paneCard.userTaskId) return "Ticked off · today";
+        /* nothing chosen, nothing stated — the em dash IS the honest sentence at rest.
+           The "Will record:" prefix belongs to the strip's own markup; this supplies the RECORD. */
         if (!parts.length) return "—";
         const lead = spec ? spec.targetStatus : paneCopy(paneCard).heading ?? "";
         return [lead, ...parts].filter(Boolean).join(" · ");
       })()
     : "";
+
+  /** a note's created date, formatted for the form's meta line — "18 Aug" */
+  function noteAddedDate(c: BoardCard): string {
+    const t = c.userTaskId ? userTasks.find((x) => x.id === c.userTaskId) : undefined;
+    const iso = isoOf(t?.createdAt);
+    return iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—";
+  }
+  /** and its age in words, for the band — the rail's own elapsed formatter, never a second one */
+  function noteAgo(c: BoardCard): string {
+    const d = listRowInputs(c).days;
+    if (typeof d !== "number") return "";
+    const p = elapsedParts(d);
+    return `${p.figure} ${p.unit} ago`;
+  }
 
   /** the chosen day, in the strip's words — absent until chosen, and never a placeholder date */
   function dayPart(w: SendBodyValues["when"]): string | null {
@@ -1887,6 +1905,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                       incoming: /requested|offer|rejected|response|reply/i.test(e.label),
                     })),
                     primaryLabel: rowPrimaryLabel(paneCard, groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent")),
+                    ...(paneCard.userTaskId ? { noteAdded: noteAgo(paneCard) } : {}),
                     will: paneWill,
                     body: (
                       <TaskPaneBody
@@ -1895,6 +1914,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                            with the deed above it about whether there is anything to send. */
                         sample={!!sendSpecFor(paneCard)}
                         statedWeeks={statedWeeks(paneCard)}
+                        /* the note's own words and its date — the centrepiece, and the one line
+                           beneath. Both derived from the task the writer wrote, never restated. */
+                        note={paneCard.userTaskId
+                          ? { text: paneCard.title, added: noteAddedDate(paneCard) }
+                          : undefined}
                         value={paneBody}
                         onChange={setPaneBody}
                       />

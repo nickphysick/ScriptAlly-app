@@ -414,3 +414,9 @@
 /* ⚠️ OPTION B: REQUIRED FIELDS CARRY NO MARK, OPTIONAL ONES CARRY ONE WORD. An asterisk marks the
    majority and teaches nothing; the rare case is the one worth naming. */
 .tpn .opttag { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;color:#b3a494;font-weight:400;margin-left:2px; }
+
+/* ── the note journey's centrepiece (finishing round, Phase 5) ──────────────────────────────
+   The writer's own words, in the hand the list writes notes in, at reading size — and one mono
+   line beneath carrying the date and the sentence about finishing. */
+.tpn .notebody { font-family:'Caveat',cursive;font-size:26px;color:#4a3a28;line-height:1.35; }
+.tpn .notemeta { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-top:9px; }

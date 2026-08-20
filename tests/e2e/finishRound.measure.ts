@@ -288,7 +288,7 @@ test("finishing round", async ({ page }) => {
     await page.waitForTimeout(1000);
     return await page.evaluate(`(() => {
       const vis = ${VIS};
-      const el = [...document.querySelectorAll(".tpn .formcol .notetext")].filter(vis)[0];
+      const el = [...document.querySelectorAll(".tpn .formcol .notebody")].filter(vis)[0];
       if (!el) return null;
       const cs = getComputedStyle(el);
       return { size: cs.fontSize, family: cs.fontFamily };

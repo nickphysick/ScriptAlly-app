@@ -45,6 +45,10 @@ export interface JourneyInputs {
   events: { key: string; label: string; when: string; via?: string; status?: string; incoming?: boolean; minor?: boolean }[];
   /** the verb the list row states, so the pane cannot name the deed differently */
   primaryLabel: string;
+  /** a note's age, already formatted — "2 days ago". Absent on every other journey. */
+  noteAdded?: string;
+  /** a note's own added date, for the form's meta line — "18 Aug" */
+  noteAddedDate?: string;
   /** what pressing the primary will write */
   will: string;
   body: React.ReactNode;
@@ -164,17 +168,24 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
     cls: `u-${GROUP_CLASS[liveFamily(c)]}` as TaskPaneJourney["cls"],
     deed: isNote ? c.title : deedNode(c),
     hand: isNote,
-    sub: isNote ? cardFootHint(c) : bandSubline(c, bandPreline(c)),
+    /* ⚠️ THE NOTE'S SUB-LINE SAYS WHOSE IT IS AND HOW OLD (finishing round, Phase 5). It printed
+       `cardFootHint`, which is the sentence about ticking it off — the SAME sentence the form's
+       meta line carries, so the pane said it twice, three inches apart. The band now states the
+       provenance, which is the thing a sub-line is for; the form keeps the sentence. */
+    sub: isNote ? (input.noteAdded ? `Your own note · added ${input.noteAdded}` : "Your own note") : bandSubline(c, bandPreline(c)),
     btns: input.btns,
     tiles,
     /* ⚠️ THE PANE'S WORDS COME FROM THE ONE TABLE, not from the row's verb. `primaryLabel` is what
        the LIST says a card is for; the form beside it asks a different question, and the two had
        drifted into "Consider closing" against "Complete". */
-    actTitle: paneCopy(c).heading ?? "",
+    /* a note's form has no heading either — the words ARE the heading */
+    actTitle: isNote ? "" : paneCopy(c).heading ?? "",
     /* ⚠️ THE JOURNEY'S OWN WORDS WHERE IT HAS THEM (Phase 5). Close carries a line that has to be
        carried verbatim — it is what stops "closing" reading as "rejecting" — and the generic foot
        hint said something true but weaker in its place. Everything else still falls back. */
-    actSub: paneCopy(c).note ?? cardFootHint(c),
+    /* ⚠️ AND A NOTE HAS NO ACT SUB-LINE AT ALL. Its form opens with the writer's own words; a hint
+       above them would be the app speaking first on the one journey that is entirely the writer's. */
+    actSub: isNote ? "" : paneCopy(c).note ?? cardFootHint(c),
     body: input.body,
     will: input.will,
     quiet: input.quiet,

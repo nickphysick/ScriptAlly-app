@@ -117,6 +117,12 @@ export interface TaskPaneBodyProps {
    * row and the story column already follow.
    */
   sample?: boolean;
+  /**
+   * ⚠️ A NOTE'S OWN WORDS, AS THE CENTREPIECE (finishing round, Phase 5). Present only on the note
+   * journey, and its presence is also what removes the When section: a note is dated by the tick,
+   * so asking when it happened is asking about an event that has not happened yet.
+   */
+  note?: { text: string; added: string };
   /** the free-plan `.upsell`; omitted for Pro */
   upsell?: React.ReactNode;
 }
@@ -131,8 +137,18 @@ const todayYmd = (): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, statedWeeks, upsell }) => (
+export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, note, statedWeeks, upsell }) => (
   <>
+    {/* ⚠️ THE WRITER'S OWN SENTENCE, AT READING SIZE. It was a label above a form; it is the thing
+        the pane is about, so it is the first thing in it and it is set in the hand the list writes
+        notes in. The meta line beneath carries the date and the one sentence about finishing —
+        ONCE, in the pane, total: it used to appear here AND in the band's sub-line. */}
+    {note && (
+      <>
+        <div className="notebody">{note.text}</div>
+        <div className="notemeta">Added {note.added} · ticking it off is what finishes it</div>
+      </>
+    )}
     {/* ⚠️ A LABEL WITH NOTHING BENEATH IT DOES NOT RENDER (frame2 Phase 4). A note has no parcel,
         so the question stood over an empty row — a question the page then declined to answer.
         Absence is a value: no sample, no section. */}
@@ -159,7 +175,10 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
       </div>
     )}
 
-    <div className="sect">
+    {/* ⚠️ A NOTE HAS NO `When`. Ticking it off IS the act and the tick carries its own date, so the
+        question has no subject — an empty segmented control here would be asking the writer to date
+        something that has not happened. Absent, not disabled. */}
+    {!note && <div className="sect">
       <label className="f-lbl" data-req="when">When</label>
       <div className="seg">
         {DAY_OPTIONS.map((o) => (
@@ -181,7 +200,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
             onChange={(ymd) => onChange({ ...value, when: { kind: "date", ymd } })} />
         </div>
       )}
-    </div>
+    </div>}
 
     {/* ⚠️ THE EXPECTATION BLOCK IS THE SEND JOURNEY'S ALONE. It asks when a reply is due and when
         to be reminded — both facts about a parcel in transit — so a nudge, a close and a note have
@@ -231,7 +250,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
 
     {/* ⚠️ THE ONE OPTIONAL FIELD ON THIS FORM, AND IT SAYS SO. Everything above is required and
         carries no mark — Option B, where the exception is named rather than the rule. */}
-    <label className="f-lbl">Anything else? <span className="opttag">OPTIONAL</span></label>
+    <label className="f-lbl" style={note ? { marginTop: 16 } : undefined}>Anything else? <span className="opttag">OPTIONAL</span></label>
     <textarea className="note-in" placeholder="e.g. included the revised opening"
       value={value.also} onChange={(e) => onChange({ ...value, also: e.target.value })} />
 
