@@ -292,9 +292,17 @@ describe("⚠️ the Calendar's tool-row facet — the sidebar's filter, rehouse
     expect(cal).toContain("dayData(ymd)");
   });
 
-  it("the week view obeys the same lock — no zone, the grid still fills", () => {
+  /* ⚠️ RETARGETED 20 Aug 2026 by the `calendar` session (record-layer P6), which retired the week
+     view. This is the ONE assertion outside that session's stated territory that its deletion made
+     stale, and it was edited rather than left red so `main` stayed green for the other sessions
+     working tonight — flagged in reports/calendar-record-layer.md for review.
+     THE LAW IT ASSERTS IS UNCHANGED and both halves survive: the Calendar takes no `TplZone`
+     because its grid COMPRESSES to the frame instead of scrolling, and the ResizeObserver's row
+     divisor is still the number of week rows the grid holds. That divisor was a ternary only
+     because there were two views; with the month the only grid, it is 6. */
+  it("the month grid obeys the same lock — no zone, the grid still fills", () => {
     expect(cal).not.toContain("<TplZone");
-    expect(cal).toContain('view === "month" ? 6 : 1'); // the row divisor follows the view
+    expect(cal).toContain("const rows = 6;"); // the row divisor is the month's six week rows
   });
 });
 

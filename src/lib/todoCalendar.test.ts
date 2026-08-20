@@ -12,7 +12,7 @@ import { join } from "node:path";
 import { Query, Agent, UserTask, TaskFlag, Activity, ActivityType, QueryStatus } from "../types";
 import { BoardCard } from "./todoBoard";
 import {
-  monthGridDays, weekDays, monthLabel, weekLabel, shiftMonth, shiftWeek, sameMonth,
+  monthGridDays, monthLabel, shiftMonth, sameMonth,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
@@ -56,19 +56,11 @@ describe("the month grid — Monday-start full weeks, never a torn row", () => {
     expect(AUG.length % 7).toBe(0);
   });
 
-  it("the week runs Monday to Sunday around any anchor", () => {
-    const w = weekDays("2026-08-07"); // a Friday
-    expect(w[0]).toBe("2026-08-03");
-    expect(w[6]).toBe("2026-08-09");
-    expect(w).toHaveLength(7);
-  });
 
   it("labels + shifts", () => {
     expect(monthLabel("2026-08-07")).toBe("August 2026");
-    expect(weekLabel("2026-08-07")).toBe("3–9 August 2026");
     expect(shiftMonth("2026-08-07", 1)).toBe("2026-09-01");
     expect(shiftMonth("2026-08-07", -1)).toBe("2026-07-01");
-    expect(shiftWeek("2026-08-07", 1)).toBe("2026-08-14");
     expect(sameMonth("2026-08-01", "2026-08-31")).toBe(true);
     expect(sameMonth("2026-08-31", "2026-09-01")).toBe(false);
   });
@@ -666,5 +658,39 @@ describe("⚠️ the day panel replaces the modal, inside the chassis", () => {
     expect(pageSrc).toMatch(/e\.key === "t" \|\| e\.key === "T"/);
     expect(calCss).toContain("prefers-reduced-motion");
     expect(calCss).toContain(":focus-visible");
+  });
+});
+
+/* ══ THE WEEK VIEW IS RETIRED (record-layer pack, Phase 6) ══════════════════════════════════ */
+
+describe("⚠️ the week view is gone, and so are the helpers that served it", () => {
+  it("the page has no view switcher and no week branch", () => {
+    const d = decls(pageSrc);
+    expect(d).not.toMatch(/["\s`]cal-viewwrap["\s`]/);
+    expect(d).not.toMatch(/["\s`]cal-viewmenu["\s`]/);
+    expect(d).not.toContain("setView");
+    expect(d).not.toContain('"month" | "week"');
+    expect(d).not.toContain("weekDays");
+    expect(d).not.toContain("shiftWeek");
+    // the month is now the only grid, and it says so without a ternary
+    expect(pageSrc).toContain("const visible = monthGridDays(anchor);");
+  });
+
+  it("⚠️ the module no longer EXPORTS them — traced to zero callers before removal", () => {
+    const lib = readFileSync(join(here, "todoCalendar.ts"), "utf8");
+    const src = decls(lib);
+    for (const fn of ["weekDays", "weekLabel", "shiftWeek"]) {
+      expect(src, `${fn} is still defined`).not.toContain(`export function ${fn}`);
+    }
+    // and the survivors are untouched
+    expect(monthGridDays("2026-08-07")).toHaveLength(42);
+    expect(monthLabel("2026-08-07")).toBe("August 2026");
+    expect(shiftMonth("2026-08-07", 1)).toBe("2026-09-01");
+    expect(sameMonth("2026-08-31", "2026-09-01")).toBe(false);
+  });
+
+  it("⚠️ there was never a List view — nothing to delete, and nothing invented to delete", () => {
+    expect(decls(pageSrc)).not.toMatch(/["\s`]cal-list["\s`]/);
+    expect(decls(pageSrc)).not.toContain('"list"');
   });
 });

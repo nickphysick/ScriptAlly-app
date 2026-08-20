@@ -82,37 +82,17 @@ export function monthGridDays(anchorYmd: string): string[] {
   return days;
 }
 
-/** The 7 days of the anchor's Monday-start week. */
-export function weekDays(anchorYmd: string): string[] {
-  const anchor = parseYmd(anchorYmd);
-  const start = new Date(anchor);
-  start.setDate(anchor.getDate() - mondayIndex(anchor));
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    return toYmd(d);
-  });
-}
-
 export function monthLabel(anchorYmd: string): string {
   return parseYmd(anchorYmd).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
 }
-export function weekLabel(anchorYmd: string): string {
-  const [a, b] = [weekDays(anchorYmd)[0], weekDays(anchorYmd)[6]].map(parseYmd);
-  const same = a.getMonth() === b.getMonth();
-  const left = a.toLocaleDateString("en-GB", same ? { day: "numeric" } : { day: "numeric", month: "long" });
-  const right = b.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  return `${left}–${right}`;
-}
 
+/* ⚠️ `weekDays`, `weekLabel` and `shiftWeek` ARE RETIRED (record-layer P6) along with the week
+   view they served — traced to zero remaining callers before removal. The `weekLabel` still in the
+   dashboard files is a DIFFERENT symbol: a local const in DeskStats and an object property in
+   StatCards, neither of which ever imported this module. */
 export function shiftMonth(anchorYmd: string, delta: number): string {
   const d = parseYmd(anchorYmd);
   return toYmd(new Date(d.getFullYear(), d.getMonth() + delta, 1));
-}
-export function shiftWeek(anchorYmd: string, delta: number): string {
-  const d = parseYmd(anchorYmd);
-  d.setDate(d.getDate() + delta * 7);
-  return toYmd(d);
 }
 
 export function sameMonth(aYmd: string, bYmd: string): boolean {

@@ -29,8 +29,8 @@ import { TodoFacetId, facetCounts, applyFacet, TODO_FACETS } from "../../lib/tod
 import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
 import { BoardCard } from "../../lib/todoBoard";
 import {
-  CalendarItem, calendarDays, monthGridDays, weekDays, monthLabel, weekLabel,
-  shiftMonth, shiftWeek, sameMonth, CAL_CELL_CAP, calFoldCap,
+  CalendarItem, calendarDays, monthGridDays, monthLabel,
+  shiftMonth, sameMonth, CAL_CELL_CAP, calFoldCap,
   RecordItem, recordDays, cellSlots, exchangeLine, REC_TONE, REC_LEGEND, REC_INK,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
@@ -218,7 +218,12 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
   const { createTagDef } = useTagWrites(flash);
   const [facet, setFacet] = useState<TodoFacetId>("all");
   const [tagSel, setTagSel] = useState<string[]>([]); // tasks-pages P5 — additive with FILTERS
-  const [view, setView] = useState<"month" | "week">("month");
+  /* ⚠️ THE WEEK VIEW IS RETIRED (record-layer P6). A week of seven cells showed the same items the
+     month already showed, in more space and with less context — and the record layer sharpened the
+     point: "what happened in August" is the question this page answers, and a week cannot answer
+     it. `weekDays`, `weekLabel` and `shiftWeek` went with it, traced to zero remaining callers
+     first. (The `weekLabel` in the dashboard files is a different, local symbol.) There was never
+     a List view to delete. */
   /* ⚠️ THE RECORD'S TOGGLE IS THE PAGE'S OWN STATE, AND DELIBERATELY NOT A FACET (record-layer P4).
      `TODO_FACETS` is ONE vocabulary shared with the board and the sidebar badge; the board has no
      history, so a fifth facet would leak a calendar-only concept into a control two other surfaces
@@ -236,7 +241,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
     const el = gridRef.current;
     if (!el || typeof ResizeObserver === "undefined") return;
     const ro = new ResizeObserver(() => {
-      const rows = view === "month" ? 6 : 1;
+      /* the month grid is always six week rows */
+      const rows = 6;
       /* the grid's height less the day-name row, divided by the week rows it holds */
       const first = el.firstElementChild as HTMLElement | null;
       const dow = first?.offsetHeight ?? 0;
@@ -244,10 +250,9 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
     });
     ro.observe(el);
     return () => ro.disconnect();
-  }, [view]);
+  }, []);
   const cellCap = calFoldCap(rowPx);
 
-  const [viewOpen, setViewOpen] = useState(false);
   const [facetOpen, setFacetOpen] = useState(false);
   const [anchor, setAnchor] = useState(today);
   /* ⚠️ THE DAY PANEL REPLACES THE MODAL (record-layer P5). A day is now SELECTED rather than
@@ -270,7 +275,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
     [tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules],
   );
 
-  const visible = view === "month" ? monthGridDays(anchor) : weekDays(anchor);
+  const visible = monthGridDays(anchor);
   /* ⚠️ THE KEYBOARD MOVES THE SELECTION, AND IT KEEPS THE MONTH IN STEP. Arrowing off the edge of
      the visible grid re-anchors the month, so the selected day is never one the writer cannot see —
      the state and the view cannot drift apart.
@@ -343,9 +348,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
     [activities, queries, agents, visible.join("|")],
   );
 
-  const subtitle = view === "month"
-    ? `${monthLabel(anchor)} — every item on the day it needs you.`
-    : `${weekLabel(anchor)} — every item on the day it needs you.`;
+  const subtitle = `${monthLabel(anchor)} — every item on the day it needs you.`;
 
   const openSheet = (item: CalendarItem) => {
     if (item.card) setFlowCard(item.card);
@@ -363,24 +366,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
           subtitle={subtitle}
           tools={
             <>
-              <button type="button" className="cal-nav" aria-label="Previous" onClick={() => setAnchor(view === "month" ? shiftMonth(anchor, -1) : shiftWeek(anchor, -1))}><ChevronLeft size={14} aria-hidden /></button>
+              <button type="button" className="cal-nav" aria-label="Previous" onClick={() => setAnchor(shiftMonth(anchor, -1))}><ChevronLeft size={14} aria-hidden /></button>
               <button type="button" className="cal-nav cal-today" onClick={() => setAnchor(today)}>Today</button>
-              <button type="button" className="cal-nav" aria-label="Next" onClick={() => setAnchor(view === "month" ? shiftMonth(anchor, 1) : shiftWeek(anchor, 1))}><ChevronRight size={14} aria-hidden /></button>
-              <span className="cal-viewwrap">
-                <button type="button" className="cal-nav" aria-haspopup="menu" aria-expanded={viewOpen} onClick={() => setViewOpen((v) => !v)}>
-                  {view === "month" ? "Month" : "Week"} ▾
-                </button>
-                {viewOpen && (
-                  <div className="cal-viewmenu" role="menu">
-                    {(["month", "week"] as const).map((v) => (
-                      <button key={v} type="button" role="menuitem" aria-current={view === v}
-                        onClick={() => { setView(v); setViewOpen(false); }}>
-                        {v === "month" ? "Month" : "Week"}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </span>
+              <button type="button" className="cal-nav" aria-label="Next" onClick={() => setAnchor(shiftMonth(anchor, 1))}><ChevronRight size={14} aria-hidden /></button>
+
               {/* ⚠️ THE FACET LIVES IN THE TOOL ROW NOW (tasks-viewport P3). It was the page
                   sidebar's FILTERS list; the sidebar is the To-do list's alone since P1, and
                   between P1 and here the Calendar could not be narrowed at all. Same four facets
@@ -444,7 +433,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
               (tasks-viewport P1/P3), and only the panel has a scroller of its own. */}
           <div className="cal-layout">
           <div className="cal-main">
-          <div className="cal-grid" role="grid" ref={gridRef} aria-label={view === "month" ? monthLabel(anchor) : weekLabel(anchor)}>
+          <div className="cal-grid" role="grid" ref={gridRef} aria-label={monthLabel(anchor)}>
             {DOW.map((d) => <div key={d} className="cal-dow" role="columnheader">{d}</div>)}
             {visible.map((ymd) => {
               const { items, rolled } = dayData(ymd);
@@ -457,7 +446,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                  wrong belongs somewhere a test can call it. `calFoldCap` is untouched. */
               const { shownItems: shown, shownRecs, overflow } = cellSlots(items, recs, cellCap);
               const past = ymd < today;
-              const off = view === "month" && !sameMonth(ymd, anchor);
+              const off = !sameMonth(ymd, anchor);
               return (
                 <div
                   key={ymd}
