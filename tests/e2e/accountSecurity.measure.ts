@@ -44,16 +44,19 @@ test("the email is read-only and carries a verification chip", async ({ page }) 
   expect(/Verified|Unverified/.test(panel), "a verification chip must be present").toBe(true);
 });
 
-test("sign-out-everywhere reports the truth rather than a quiet success", async ({ page }) => {
+/* ⚠️ THE SESSIONS BLOCK IS GONE, and this asserts the absence rather than deleting the test with
+   it. It was built, wired to a named stub and honest about being unable to act — and an honest
+   dead control is still a dead control. If it comes back it must come back with a server action
+   behind it, which is a change this assertion will make someone notice. */
+test("there is no sessions control — an honest apology is still a dead control", async ({ page }) => {
   await openRoute(page, "/account/security", { width: 1440, height: 900 });
-  const btn = page.locator('#acct-panel button:has-text("Sign out of all other sessions")');
-  expect(await btn.count()).toBe(1);
-  await btn.click();
-  await page.waitForTimeout(600);
   const panel = (await page.locator("#acct-panel").textContent()) ?? "";
-  console.log("after click:", panel.replace(/\s+/g, " ").match(/isn.t available[^.]*\./)?.[0]);
-
-  expect(panel, "it must say it did not happen").toContain("isn't available yet");
-  /* ⚠️ AND IT MUST NOT HAVE SIGNED THIS DEVICE OUT — the helper text promises the opposite. */
-  expect(new URL(page.url()).pathname).toBe("/account/security");
+  expect(await page.locator('#acct-panel button:has-text("Sign out of all other sessions")').count()).toBe(0);
+  for (const gone of ["Other sessions", "Ends every other signed-in session", "isn't available yet"]) {
+    expect(panel, gone).not.toContain(gone);
+  }
+  /* Signing out of THIS device is a different control and lives in Your data — untouched. */
+  const data = await openRoute(page, "/account/data", { width: 1440, height: 900 })
+    .then(() => page.locator("#acct-panel").textContent());
+  expect(data ?? "").toContain("Sign out");
 });

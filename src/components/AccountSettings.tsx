@@ -36,10 +36,7 @@ import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
 import { useDirtyField } from "../lib/useSaveState";
 import { auth } from "../lib/firebase";
 import { sendEmailVerification } from "firebase/auth";
-import {
-  passwordMode, federatedNames, federatedLine,
-  signOutOtherSessions, SESSION_REVOKE_UNAVAILABLE,
-} from "../lib/accountSecurity";
+import { passwordMode, federatedNames, federatedLine } from "../lib/accountSecurity";
 import { readAuthFacts } from "../lib/accountAuthFacts";
 import { dirtyFieldKeys } from "../lib/saveSignal";
 import { useToast } from "./toast/ToastProvider";
@@ -76,7 +73,6 @@ import {
   ChevronRight,
   Download,
   Upload,
-  Smartphone,
   KeyRound,
   AlertTriangle,
   X,
@@ -658,7 +654,6 @@ export const AccountSettings: React.FC<{
   const { showToast } = useToast();
   const [resetMsg, setResetMsg] = useState<string | null>(null);
   const [verifyMsg, setVerifyMsg] = useState<string | null>(null);
-  const [sessionMsg, setSessionMsg] = useState<string | null>(null);
   /* ⚠️ READ ONCE PER MOUNT, NOT SUBSCRIBED. `auth.currentUser` is not reactive and `emailVerified`
      in particular only moves on a reload — so a snapshot at mount is exactly as fresh as anything
      a subscription could offer, and it does not pretend otherwise. */
@@ -746,12 +741,6 @@ export const AccountSettings: React.FC<{
     } catch {
       setVerifyMsg("Couldn't send it just now. Please try again.");
     }
-  };
-
-  /** Calls the named stub and states its answer — never a quiet success. */
-  const endOtherSessions = async () => {
-    const r = await signOutOtherSessions();
-    setSessionMsg(r.ok ? null : SESSION_REVOKE_UNAVAILABLE);
   };
 
   const sendReset = async () => {
@@ -983,28 +972,15 @@ export const AccountSettings: React.FC<{
         )}
       </div>
 
-      {/* ── Sessions ───────────────────────────────────────────────────────────
-          ⚠️ THE ACTION IS REAL AND ITS ANSWER IS HONEST. Revoking other sessions needs
-          `revokeRefreshTokens` on the Admin SDK — a Cloud Function this project does not have, and
-          the client SDK cannot do it at all. The button therefore calls a named stub and reports
-          what the stub says. It must never resolve quietly: someone believing they have locked out
-          a device they have not is worse off than someone told the feature is missing.
-          ⚠️ AND PASSKEYS, 2FA AND A DEVICE LIST ARE OUT OF SCOPE — deliberately absent rather than
-          rendered as coming-soon rows. */}
-      <div style={{ marginTop: 20, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
-        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Other sessions</p>
-            <p style={helpText}>Ends every other signed-in session. This device stays signed in.</p>
-          </div>
-          <button onClick={endOtherSessions} style={ghostBtn}>
-            <Smartphone style={{ width: 14, height: 14 }} aria-hidden="true" /> Sign out of all other sessions
-          </button>
-        </div>
-        {sessionMsg && (
-          <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: mutedInk, marginTop: 10, lineHeight: 1.5 }}>{sessionMsg}</p>
-        )}
-      </div>
+      {/* ⚠️ NO SESSIONS BLOCK. "Sign out of all other sessions" was built here, wired to a named
+          stub, and reported honestly that it could not act — and an honest dead control is still a
+          dead control. Settings states what your account IS and offers what it can DO; a button
+          whose only outcome is an apology fails that on both counts. Same rule that removed the
+          Pen name field and the author-photo control.
+          `signOutOtherSessions` and `SESSION_REVOKE_UNAVAILABLE` survive in `lib/accountSecurity`
+          with their tests: the seam is where the Cloud Function lands, and deleting it would mean
+          rediscovering that the client SDK cannot revoke a session at all.
+          ⚠️ PASSKEYS, 2FA AND A DEVICE LIST ARE OUT OF SCOPE — absent, not advertised. */}
     </SectionCard>
   );
 
