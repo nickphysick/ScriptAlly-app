@@ -1219,14 +1219,25 @@ hosting deploy.
 
 ### `git diff --name-only HEAD` at close
 
-Only other streams' paths remain modified — `reports/audit/`, `reports/card-conformance/`,
-`reports/pane/`, `run-artifacts/audit-*`, `run-artifacts/qc-*`, `run-artifacts/list-port-deployed.txt`,
-`run-artifacts/frame-DEPLOYED2.txt`. **No `src/`, `firestore.rules` or `tests/e2e/` file of mine is
-left uncommitted.**
+Only other streams' paths remain modified. **Every path I touched is committed** — verified by
+running the check scoped to my own files rather than to `src/` as a whole:
 
-Two differences from last night's baseline, both other streams' and both benign: `AccountSettings.tsx`
-and `src/components/settings/` have been committed (settings stream), and `firestore.rules` — which
-the brief expected to be dirty — was already clean.
+```
+src/components/packages/  src/lib/packagesOverview{,.test}.ts  src/lib/packageLinkRule.test.ts
+firestore.rules  tests/e2e/{pkgRestructure,packageAttach}.measure.ts
+tests/e2e/{seedPackages,rulesProbe}.mjs  reports/  → all clean
+```
+
+The unscoped listing does show modified `src/` files — `todo/ToDoPage.tsx`, `todo/todoCalendar.css`,
+`lib/taskListRow.ts`, `lib/todoBuckets.ts`, `lib/todoCalendar.test.ts`, `lib/todoHandoff.ts`, and an
+untracked `lib/deedSynonyms.test.ts`. **None are mine**; the to-do/calendar stream picked up work
+while this ran, and its commits are interleaved with mine in the log. Worth stating explicitly,
+because "src/ is dirty at close" reads as a failed check until you scope it.
+
+Differences from last night's baseline, all other streams' and all benign: `AccountSettings.tsx` and
+`src/components/settings/` are now committed (settings stream); `firestore.rules` — which the brief
+expected to be dirty — was already clean; and `auth.setup.ts` gained the prod-bundle guard noted
+under F8.
 
 ### Open flags after today
 
