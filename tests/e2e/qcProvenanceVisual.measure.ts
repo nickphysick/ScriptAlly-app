@@ -36,13 +36,20 @@ test("§2 — the bar and ring carry the provenance", async ({ page }) => {
   const rows = page.locator(".f12-row");
   const n = Math.min(await rows.count(), 20);
   const seen: Record<string, any> = {};
+  /* ⚠️ REMEMBER WHICH ROW HAD THE BAR. The sweep leaves the page on the LAST row it clicked, which
+     need not have one — measuring there returns null and reads as "the treatment is missing". */
+  const seenAt: Record<string, number> = {};
   for (let i = 0; i < n; i++) {
-    await rows.nth(i).click({ timeout: 6000 });
+    /* ⚠️ A ROW THAT WILL NOT TAKE A CLICK MUST NOT END THE SWEEP. One unclickable row (a journey
+       open over the list, a row mid-animation) previously threw and the run stopped before the
+       second half was ever measured — a probe failing at its own choreography and reporting it as
+       a finding about the page. */
+    try { await rows.nth(i).click({ timeout: 2500 }); } catch { continue; }
     await page.waitForTimeout(320);
     const r = await read(page);
     if (!r.found || r.past) continue;
     const key = r.est ? "writer" : "agent";
-    if (!seen[key]) { seen[key] = r; console.log(`  ${key}: ${JSON.stringify(r)}`); }
+    if (!seen[key]) { seen[key] = r; seenAt[key] = i; console.log(`  ${key}: ${JSON.stringify(r)}`); }
     if (seen.writer && seen.agent) break;
   }
 
@@ -63,6 +70,8 @@ test("§2 — the bar and ring carry the provenance", async ({ page }) => {
    * in the component source and by tsc instead.
    */
   if (!seen.writer && seen.agent) {
+    await rows.nth(seenAt.agent).click({ timeout: 4000 }).catch(() => {});
+    await page.waitForTimeout(500);
     const forced = await page.evaluate(() => {
       const bar = document.querySelector<HTMLElement>(".tl-wbar");
       const mark = document.querySelector<HTMLElement>(".tl-waitmark");
