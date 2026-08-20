@@ -259,8 +259,33 @@ export interface ManuscriptVersion {
   // Authoring fields (redesign). `contentType` selects the mode: 'text' uses contentDraft, 'link' uses
   // contentLink; 'file' is reserved (v1 renders Attach-file as a disabled "coming soon" — no Storage).
   notes?: string;
-  contentType?: "text" | "link" | "file";
+  /**
+   * ⚠️ `"ref"` IS THE FLOW PACK'S **NAME ONLY** MODE AND IS NOT `"link"`. `link` was a URL to
+   * somewhere the text lives; `ref` records that the material exists elsewhere and names the file it
+   * is in — the writer keeps a Word document and wants the register to say so. They are different
+   * facts, so `ref` is added rather than `link` being quietly repurposed: reusing it would relabel
+   * every stored URL as a filename on the day the register shipped.
+   *
+   * `file` stays reserved — ATTACH FILE renders visible-but-disabled (D2) because there is no
+   * Firebase Storage in this app yet. See F-A.
+   */
+  contentType?: "text" | "link" | "file" | "ref";
   contentLink?: string;
+  /**
+   * Words in `contentDraft`, counted at WRITE time (flow pack D1).
+   *
+   * ⚠️ STORED, WHERE THE REST OF THIS PAGE DERIVES — and the exception is deliberate. Everything the
+   * tracking dashboard shows is derived at read because it is a MEASUREMENT of live data that must
+   * never drift from its source. A word count is not that: it is a property of one immutable blob of
+   * text the writer pasted, it cannot change without an edit that rewrites it anyway, and deriving it
+   * meant re-counting every material's whole body on every render of the register. `versionMeta()`
+   * still derives it for legacy records that predate this field, so nothing is orphaned.
+   *
+   * Absent for `ref` and `file` materials — there is no text to count, and a stored `0` would state
+   * that a document contains no words rather than that we have not read it (`deleteField()` on unset,
+   * never a zero placeholder).
+   */
+  wordCount?: number;
 }
 
 export interface SubmissionPackage {

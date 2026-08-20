@@ -149,3 +149,98 @@ Plus the two `BackToOverview` controls and the `view` state itself.
 | No writable materials model / no migration shape | **No** — `versions` is writable and R1 needs no migration |
 | A required edit lands in a do-not-touch file | **No** — `types.ts` and `db.tsx` are additive-only by the brief; `firestore.rules` has an authorised Phase 1 deploy; `App.tsx`, `index.css`, Query Centre files and locked components are untouched |
 | Another session has the same files staged | **No** — the index is clean, and all five files I need are clean in the working tree |
+
+---
+
+## Phase 1 — Data layer
+
+**No migration** (R1). The model gains exactly two things, both additive, and the collection stays
+`versions` per Nick's standing ruling.
+
+### `ManuscriptVersion` — two additions
+
+| Addition | Why it is not something that already exists |
+|---|---|
+| `contentType: … \| "ref"` | **`ref` is NAME ONLY and is not `link`.** `link` was a URL to where the text lives; `ref` records that the material exists elsewhere and names the file it sits in. Repurposing `link` would relabel every stored URL as a filename on the day the register shipped. |
+| `wordCount?: number` | Words in `contentDraft`, counted at write. |
+
+**⚠️ `wordCount` is STORED on a page where everything else derives, and the exception is argued
+rather than assumed.** The tracking figures derive because they are *measurements of live data* that
+must never drift from their source. A word count is not that: it is a property of one immutable blob
+of text, it cannot change without an edit that rewrites it anyway, and deriving it meant re-counting
+every material's whole body on every render of the register. `versionMeta()` still derives it for
+legacy records that predate the field, so nothing is orphaned.
+
+It is **absent** — never `0` — on `ref` and `file` materials. A stored zero would assert the document
+contains no words rather than that we have not read it, so mode switches write `deleteField()` (D6).
+
+### `db.tsx` — widened, additively
+
+`updateVersion`'s **implementation accepted four keys while the interface had been promising seven**
+— a latent narrowness, not something this pack introduced. Widened to match, plus `wordCount`, and
+retyped to `unknown` values so a mode switch can pass `deleteField()`. Nothing that compiled before
+stops compiling.
+
+### Rules — and the second half is the one that matters
+
+```
+isValidVersion:  … || data.contentType == 'ref'
+                 && (!data.keys().hasAll(['wordCount']) || (data.wordCount is int
+                     && data.wordCount >= 0 && data.wordCount <= 10000000));
+
+versions update:  hasOnly([… , 'contentLink', 'wordCount'])
+```
+
+**The allowlist entry was written at the same moment as the field, deliberately.** `wordCount`
+changes on every edit of pasted text, so omitting it from `affectedKeys().hasOnly` would deny the
+whole save — silently — which is *exactly* F7 one collection along. That bug cost a day to find
+because the field was perfectly validated; validation and the update allowlist are different gates
+and the first one passing tells you nothing about the second.
+
+**⚠️ A grep during pre-flight matched the wrong `wordCount`** — `isValidManuscript` has one too, at
+line 105. The check was redone scoped to `isValidVersion`'s body with comments stripped before it was
+believed. Same wrong-element family as the recon's `.wpg-plate`; a `grep -c` that returns a hit is
+not evidence about *which* hit.
+
+### The lock — proved red first
+
+`src/lib/materialModelRule.test.ts` (7 cases) asserts the validator and the update allowlist
+**separately**, because F7's whole lesson is that a field can be validated and still undeployable.
+Neutering both additions — while leaving the comments that name them, so `wordCount` still appeared
+**5 times** and `'ref'` once in the file — turned it red on 3 of 7. Comments are stripped before
+assertion; keys are compared exactly, not as substrings.
+
+### Deployed to dev, and proved on the deployed rules
+
+Pre-flight: `git fetch` → **0 behind** `origin/main`; the three declarations confirmed present in the
+working tree (scoped, per the grep note above).
+
+```
+firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev --debug
+→ ✔ compiled successfully → ✔ released rules → ✔ Deploy complete!
+prod-id mentions in the whole deploy log: 0
+releases/cloud.firestore updateTime: 2026-08-20T10:31:53.112606Z
+```
+
+Then `rulesProbe.mjs`, extended with a materials section, against the deployed rules:
+
+```
+database: (default) · project: scriptally-dev
+versions / materials — the flow pack's two additions:
+  ✅ wordCount (int)                 (flow P1) ACCEPTED
+  ✅ wordCount (deleteField / unset) (flow P1) ACCEPTED
+  ✅ contentType 'ref' (name only)   (flow P1) ACCEPTED
+```
+
+**Each probe write changes the value**, and the unset case is probed separately from the set case —
+an unchanged key never enters `affectedKeys`, so a probe that writes what is already stored passes on
+rules that forbid it. The F7 lesson applied to the probe itself.
+
+### Phase 1 gates
+
+| Gate | Baseline | Phase 1 |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `vite build` | exit 0, no diagnostics | **exit 0, no diagnostics** |
+| Targeted suites (6 files incl. the new lock) | — | **90 passed** |
+| Full `vitest` | 6 files / 24 tests failed (other streams) | unchanged by this phase — no shared file touched |

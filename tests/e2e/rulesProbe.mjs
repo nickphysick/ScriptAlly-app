@@ -77,6 +77,24 @@ await attempt("writerExpectedSetAt", "§1 final pack", () => updateDoc(qref, { w
 await attempt("packageId (attach)", "F7, 33b52b6", () => updateDoc(qref, { packageId: "seed-pkg-1" }),
   () => updateDoc(qref, { packageId: "" }));
 
+/* ── the MATERIALS model (flow pack Phase 1) ────────────────────────────────────────────────── */
+console.log("\nversions / materials — the flow pack's two additions:");
+const vref = doc(db, "users", uid, "versions", "seed-mat-ql1");
+const vsnap = await getDoc(vref);
+if (!vsnap.exists()) {
+  console.log("  ⚠️  seed-mat-ql1 missing — run `node tests/e2e/seedPackages.mjs` first");
+} else {
+  /* ⚠️ EACH WRITE CHANGES THE VALUE. An unchanged key is never in affectedKeys, so writing what is
+     already stored passes on rules that forbid it — the F7 lesson, applied to the probe itself. */
+  const before = vsnap.data();
+  await attempt("wordCount (int)", "flow P1", () => updateDoc(vref, { wordCount: (before.wordCount ?? 0) + 7 }),
+    () => updateDoc(vref, before.wordCount === undefined ? { wordCount: deleteField() } : { wordCount: before.wordCount }));
+  await attempt("wordCount (deleteField / unset)", "flow P1", () => updateDoc(vref, { wordCount: deleteField() }),
+    () => (before.wordCount === undefined ? Promise.resolve() : updateDoc(vref, { wordCount: before.wordCount })));
+  await attempt("contentType 'ref' (name only)", "flow P1", () => updateDoc(vref, { contentType: "ref" }),
+    () => updateDoc(vref, { contentType: before.contentType ?? "text" }));
+}
+
 console.log("\nglobal activity feed (isValidActivity's enumerated activityType):");
 const gref = doc(db, "users", uid, "activities", "probe-holding-reply");
 await attempt("activityType 'Holding Reply'", "Phase 1",

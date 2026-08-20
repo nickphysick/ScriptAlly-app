@@ -145,8 +145,17 @@ service cloud.firestore {
         && (!data.keys().hasAll(['fileName']) || (data.fileName is string && data.fileName.size() <= 512))
         && (!data.keys().hasAll(['contentDraft']) || (data.contentDraft is string && data.contentDraft.size() <= 262144))
         && (!data.keys().hasAll(['notes']) || (data.notes is string && data.notes.size() <= 16384))
-        && (!data.keys().hasAll(['contentType']) || (data.contentType is string && (data.contentType == 'text' || data.contentType == 'link' || data.contentType == 'file')))
-        && (!data.keys().hasAll(['contentLink']) || (data.contentLink is string && data.contentLink.size() <= 2048));
+        // ⚠️ 'ref' IS THE NAME-ONLY MODE AND IS NOT 'link'. link was a URL to where the text lives;
+        // ref records that the material exists elsewhere and names the file. Added rather than
+        // repurposing link, which would relabel every stored URL as a filename.
+        && (!data.keys().hasAll(['contentType']) || (data.contentType is string && (data.contentType == 'text' || data.contentType == 'link' || data.contentType == 'file' || data.contentType == 'ref')))
+        && (!data.keys().hasAll(['contentLink']) || (data.contentLink is string && data.contentLink.size() <= 2048))
+        // ⚠️ ABSENT-OR-INT, NEVER NULL. `is int` is false for null, so "not counted" must mean the key
+        // is omitted — the absent-means-absent idiom this file already uses for every optional field.
+        // A ref or file material carries no wordCount at all rather than a 0, which would assert the
+        // document is empty rather than unread. Bounded because a stored count is a claim about text
+        // we hold, and contentDraft itself is capped at 256KB.
+        && (!data.keys().hasAll(['wordCount']) || (data.wordCount is int && data.wordCount >= 0 && data.wordCount <= 10000000));
     }
 
     function isValidPackage(data, userId) {
@@ -574,7 +583,10 @@ service cloud.firestore {
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidId(versionId) && isValidVersion(incoming(), userId);
         allow update: if isOwner(userId) && isValidId(versionId) && isValidVersion(incoming(), userId) && (
-          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink'])
+          // ⚠️ `wordCount` MUST BE HERE OR EVERY EDIT THAT CHANGES PASTED TEXT IS DENIED — hasOnly fails
+          // the WHOLE write on one unlisted changed key, silently. Exactly the F7 shape, one
+          // collection along; added with the field rather than after someone reports a dead Save.
+          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount'])
         );
       }
 

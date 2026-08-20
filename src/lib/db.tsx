@@ -230,7 +230,8 @@ interface DbContextType {
   
   // Version Actions
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
-  updateVersion: (id: string, fields: Partial<Pick<ManuscriptVersion, "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink">>) => Promise<void>;
+  /** `unknown` values so a mode switch can pass `deleteField()` to UNSET rather than write a zero. */
+  updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount", unknown>>) => Promise<void>;
   deleteVersion: (id: string) => Promise<void>;
 
   // Package Actions
@@ -1441,9 +1442,24 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  /**
+   * ⚠️ THE IMPLEMENTATION'S FIELD SET WAS NARROWER THAN THE INTERFACE ALREADY DECLARED — it accepted
+   * four keys where the context type promised seven. Widened to match, additively, plus the flow
+   * pack's `wordCount`. Nothing that compiled before stops compiling; callers simply get the fields
+   * the type has been advertising all along.
+   *
+   * ⚠️ AND IT TAKES `FieldValue`, SO A MODE SWITCH CAN **UNSET** RATHER THAN ZERO. Turning a pasted
+   * material into a name-only one has to clear the body and its word count, and writing `0` there
+   * would state that the document contains no words rather than that we have not read it. The rules'
+   * `wordCount is int` check rejects a literal null, so `deleteField()` is the only honest way to say
+   * "not applicable" — the same absent-means-absent idiom as `starRating` and `responseTimeWeeks`.
+   */
   const updateVersion = async (
     id: string,
-    fields: Partial<Pick<ManuscriptVersion, "versionName" | "contentDraft" | "fileAttached" | "fileName">>,
+    fields: Partial<Record<
+      "versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount",
+      unknown
+    >>,
   ) => {
     if (!currentUser) return;
     try {
