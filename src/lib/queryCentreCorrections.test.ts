@@ -247,12 +247,15 @@ describe("§5 · tighten, never scroll", () => {
   it("the masthead steps down through the shell's token", () => {
     const m = rules("max-height: 768px");
     expect(m, "the short-viewport block is missing").not.toBe("");
-    expect(css, "the masthead's step sets a raw font-size instead of the token")
-      .toContain("--wsh-title-size: 33px");
-    /* the base it is derived FROM, asserted here so the pair cannot drift apart again unnoticed */
+    /* ⚠️ THE MASTHEAD'S PAGE-SCOPED STEP IS RETIRED (in-flow masthead, step 1), AND ITS ABSENCE IS
+       WHAT IS ASSERTED NOW. It shrank this page's title at 0.86 of the app-wide base on a short
+       viewport, because a fixed-height plate cost the panes height they could not spare. The
+       masthead is content and leaves on engagement, so a short viewport reclaims all of it — and
+       the pack requires every page's title to measure the same as every other's. */
+    expect(css, "a page-scoped masthead step came back — the acceptance matrix compares titles across pages")
+      .not.toContain("--wsh-title-size");
     const shell = read("../components/shell/pageHeader.css");
-    expect(shell, "the resting title moved without this page's step moving with it — re-derive at 0.86 of the new base")
-      .toContain("--wsh-title-size: 38px");
+    expect(shell, "the app-wide title size moved off 30px").toContain("--wsh-title-size: 30px");
   });
 
   /**

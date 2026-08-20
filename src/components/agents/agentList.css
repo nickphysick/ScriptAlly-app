@@ -203,7 +203,10 @@
 /* ══════════════════════════════════════════════════════════════════════════
    THE TOOLBAR (rebuild v2) — ONE row replacing five stacked bands. The chips
    row, the two full-width selects, the colour legend and the count line are all
-   DELETED; search + three controls sit left, the result count right.
+   DELETED.
+   ⚠️ AMENDED (in-flow masthead, step 1): the TALLY leads the row and the page's creation action
+   closes it — count left, verbs right, the grammar all five control rows share. Search and the
+   three controls sit between them.
    ══════════════════════════════════════════════════════════════════════════ */
 .aglist .agl-toolbar {
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -237,11 +240,24 @@
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px;
   background: var(--agl-burg); color: #fff; border-radius: 999px; padding: 2px 7px;
 }
-.aglist .agl-count {
-  margin-left: auto; white-space: nowrap;
-  font-family: 'JetBrains Mono', monospace; font-size: 9px;
-  letter-spacing: 0.11em; text-transform: uppercase; color: var(--agl-muted);
+/* ⚠️ `.agl-count` IS DELETED — the figure moved, not the rule (in-flow masthead, step 1). It was a
+   mono caption pinned right by `margin-left: auto`; the same `{resultCount} of {total}` now leads
+   the row as the shared `PageTally`, whose own `margin-right: auto` does the pushing in the other
+   direction. A page-local count rule beside a shared one is exactly how five control rows would
+   drift apart. */
+/* ⚠️ THE PAGE'S CREATION ACTION, ARRIVED FROM THE MASTHEAD. It wears the row's own control ladder —
+   36px, 10px radius, the toolbar's metrics — rather than the shell's `svh-btn`, because it sits in
+   a row of `.agl-ctl`s and a button a different height beside three of them reads as misaligned
+   rather than as emphasised. Pink is the house creation fill. */
+.aglist .agl-tbadd {
+  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  height: 36px; padding: 0 14px; border-radius: 10px;
+  background: var(--agl-pink); border: 1px solid var(--agl-pinkline);
+  font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--agl-burg);
+  cursor: pointer; transition: background .15s, border-color .15s;
 }
+.aglist .agl-tbadd svg { flex: none; color: var(--agl-burg); }
+.aglist .agl-tbadd:hover { background: var(--agl-pinkline); }
 
 /* ── the popover ────────────────────────────────────────────────────────── */
 .aglist .agl-pop {

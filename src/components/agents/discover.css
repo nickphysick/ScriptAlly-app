@@ -863,3 +863,9 @@ button.dv-msel:hover { border-color: var(--dv-pinkline); background: var(--dv-pi
 @media (prefers-reduced-motion: reduce) {
   .dv-ctl, .dv-add, .dv-draft, .dv-dismiss, .dv-msel, .dv-nomatch .go { transition: none; }
 }
+
+/* ⚠️ THE GATED ROW'S SPACER — Discover is the one control row whose tally can be absent, because a
+   page that has matched nothing has no count to state. `PageTally` normally does the pushing with
+   its own `margin-right: auto`; with no tally rendered, this stands in so the state chip still pins
+   right instead of sliding to the left edge where the figure would have been. */
+.dv-tallysp { flex: 1 1 auto; }

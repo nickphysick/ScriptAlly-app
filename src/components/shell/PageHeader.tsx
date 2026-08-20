@@ -2,51 +2,33 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * PageHeader — the standard page header of the v2 shell (Phase 4 of the rollout; ref
- * design-refs/scriptally-shell-v2.html .pagehead): title → optional description → up to TWO
- * actions bottom-right on the description's baseline → a hairline rule closing the header.
- * Everything below the rule is page content.
+ * PageHeader — TWO layouts, and they are different objects rather than two sizes of one.
  *
- * ONE variant (the flyouts pack retired compact AND greeting — the dashboard returned to its
- * original centred header): full — 40px Playfair title, optional Playfair description, up to
- * two actions, the closing rule. Every routed page except the dashboard renders it.
+ *   `full`      the standard header of the v2 shell: title → optional description → the page's
+ *               actions on their own row → a hairline closing the header. Unchanged, byte for
+ *               byte, and `pageHeaderDefault.test.tsx` fails if a pixel of it moves. Import, Help
+ *               centre, Plans and the dev package lab render it.
  *
- * Actions: maximum two, enforced in the type (a tuple union) AND with a runtime slice for
- * un-typed call sites. Secondary = parchment + hairline; primary = the Form 11 soft-pink
- * button. There is no dark-pill CTA anywhere in the app.
+ *   `workspace` THE MASTHEAD (in-flow masthead pack; refs design-refs/169-inflow-masthead-qc.html
+ *               + design-refs/170-sticky-control-row.html). Mark, title, description, a closing
+ *               hairline — and NOTHING ELSE.
+ *
+ * ⚠️ THE RULE, AND EVERY OTHER DECISION IN THIS COMPONENT FOLLOWS FROM IT: the masthead is the
+ * first thing on a page and it leaves when the user starts working — by scrolling on pages that
+ * scroll, by the first click on pages that do not. **It holds no actions, so it never needs to
+ * come back within a visit.**
+ *
+ * ⚠️ WHAT THIS REPLACES, so none of it is reinvented: the workspace variant used to be a PLATE — a
+ * fixed-height card with its own fill, border, radius and shadow — that condensed on scroll into a
+ * 52px BAND whose title cross-faded into a mono uppercase label. Plate, band, label, cross-fade,
+ * the sticky wrapper and its reservation are all gone. The masthead is content; the page's control
+ * row does the anchoring.
  */
 import React from "react";
 import { MoreHorizontal } from "lucide-react";
 import { OneScreenMark, MarkName, markHasArt } from "../dashboard/OneScreenMark";
-import { PlateCondensedContext } from "./WorkspacePageGrid";
 import "./pageHeader.css";
 
-/**
- * ⚠️ THE PLATE FINDS ITS OWN SCROLLER, because there is no single one to assume. `.aglist`,
- * `.msv1` and `.pkgw` scroll THEMSELVES; Discover scrolls in the shell's `.ws-wbody` two levels
- * up; `.ctpage` is `overflow:hidden` and never scrolls at all. Hard-coding any one of those would
- * leave the plate stuck at rest on the other pages — silently, since a header that never condenses
- * looks exactly like a header that has not been scrolled yet.
- *
- * ⚠️ IT MATCHES ON THE COMPUTED `overflow`, NOT ON WHETHER CONTENT CURRENTLY OVERFLOWS. At mount
- * a list may be empty or still loading, so `scrollHeight > clientHeight` is false and the real
- * scroller would be walked straight past — the plate would then never condense on that page for
- * the rest of the session.
- *
- * A page whose root cannot scroll (`.ctpage`) simply keeps the rest state, which is correct: the
- * plate is not covering anything, so it has nothing to condense out of the way for.
- */
-const nearestScroller = (from: HTMLElement): HTMLElement | null => {
-  let p: HTMLElement | null = from.parentElement;
-  while (p) {
-    const oy = window.getComputedStyle(p).overflowY;
-    if (oy === "auto" || oy === "scroll") return p;
-    p = p.parentElement;
-  }
-  return null;
-};
-
-/** Condensed once the scroller has moved at all — the pack's `scrollTop > 4`. */
 
 export interface PageHeaderAction {
   label: string;
@@ -105,28 +87,18 @@ export interface PageHeaderProps {
      their figure REHOMED rather than dropped; see the notes at those call sites. Deleting the prop
      rather than leaving it inert is deliberate: an accepted-but-unrendered prop is how a page ends
      up passing data that silently goes nowhere. */
-  /** The workspace header's 38px mark. Required when `variant="workspace"`; ignored otherwise. */
+  /** The masthead's mark: 52px BARE when the name has artwork, 38px on its parchment plate when
+   *  it is a monoline glyph. Required when `variant="workspace"`; ignored otherwise. */
   mark?: MarkName;
   /* ⚠️ THERE IS NO `markSize` PROP, and its removal was the point. It was a KNOB — any page could
-     ask for any size — and the size is a RULE: illustrated → 64px bare, monoline → 38px on a plate.
+     ask for any size — and the size is a RULE: illustrated → 52px bare, monoline → 38px on a plate.
      `markHasArt` decides, so a page converts when its drawing lands rather than when someone
      remembers to pass a prop. See the note on `markHasArt` in OneScreenMark.tsx. */
   actions?: PageHeaderActions;
   /**
-   * ⚠️ THE TOOL ROW — the plate's SECOND row (amendment 8, Phase B): search, filters, group, sort,
-   * and the right-aligned mono tally. It rides INSIDE the plate rather than beside it, so the
-   * controls pin with the header they belong to.
-   *
-   * ⚠️ IT IS A ROW OF THE PLATE, NOT A SECOND STICKY ELEMENT. The alternative — a separate sticky
-   * strip with `top` set to the plate's height — has to track that height through the condense
-   * transition, so it is wrong for 200ms on every scroll and fragile by construction. One
-   * container, one border, one shadow, one background, one sticky element.
-   *
-   * ⚠️ AND IT DOES NOT CONDENSE. Only the identity row shrinks; the controls stay the same size,
-   * because a filter you can no longer read is not a filter. See the reservation note in the
-   * stylesheet for how the page below is kept from moving when the identity row does shrink.
-   *
-   * Absent → NO row and NO hairline, and the plate reserves nothing for it.
+   * The `full` layout's tool row. ⚠️ REJECTED BY `workspace`, WHICH THROWS — see the guard in the
+   * render. A masthead that carried controls would have to survive the user starting work, which
+   * is exactly what this design stops doing.
    */
   toolbar?: React.ReactNode;
   /** Rendered inline immediately right of the title text, baseline-aligned (Discover's Pro pill).
@@ -139,16 +111,6 @@ export interface PageHeaderProps {
    *  If a page has six things it can do, five of them are not primary and the header should
    *  say so. Ignored on a compact header, whose actions stay inline. */
   overflow?: PageHeaderOverflowItem[];
-  /**
-   * The lean masthead for WORKSPACE pages — a fixed-height master–detail surface where every
-   * pixel of header is working area taken from the panes below (the Queries Hub). Drops the
-   * subtitle, takes the title to 26px, tightens the vertical padding and centres the title row
-   * against the actions. Default false: every other page is byte-identical without it.
-   *
-   * NOT a return of the retired `variant: "compact"` — that was a second full layout, and one
-   * header layout for every page is the win worth keeping. This is a density flag on the one
-   * layout. See pageHeader.test.tsx, which locks both halves of that distinction.
-   */
 }
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
@@ -163,60 +125,21 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   overflow,
 }) => {
   const acts = (actions ?? []).slice(0, 2); // runtime guard behind the tuple type
-  const wsActs = (actions ?? []).slice(0, 2);
   const [moreOpen, setMoreOpen] = React.useState(false);
   const moreRef = React.useRef<HTMLDivElement>(null);
-  /* ⚠️ THE HOOK RUNS FOR EVERY VARIANT, and it must — hooks cannot sit behind the `workspace`
-     early return without breaking the rules of hooks the moment a caller changes variant. It is
-     GATED instead: the default variant passes `false` and never attaches a listener. */
-  const plateRef = React.useRef<HTMLElement>(null);
   /**
-   * ⚠️ TWO PATHS, AND BOTH ARE LIVE ON PURPOSE (amendment 9, mid-conversion). A page inside a
-   * `WorkspacePageGrid` is TOLD when to condense — the grid owns the scroller, the sentinel and the
-   * observer, so there is nothing to find and nothing to compute. A page still on the old sticky
-   * arrangement has no grid above it, reads `null`, and keeps the legacy scroll listener.
+   * ⚠️ THE MASTHEAD NO LONGER HAS A STATE, AND THAT IS THE WHOLE OF THE IN-FLOW DESIGN.
    *
-   * ⚠️ `null` IS WHY THIS WORKS. It is distinguishable from `false`, so "no grid above me" and "in a
-   * grid, not yet scrolled" are different answers; with a `false` default every unconverted page
-   * would silently stop condensing. The legacy hook is GATED on that same null, so a converted page
-   * attaches no listener at all.
+   * It used to read `PlateCondensedContext`, latch a cross-fade and swap its title into a mono
+   * label on a band. All of it is gone: the masthead is the first thing on the page and it leaves
+   * when the user starts working — by scrolling on pages that scroll, by the first click on pages
+   * that do not. There is nothing to condense INTO, so there is nothing to condense.
    *
-   * ⚠️ THIS FALLBACK IS TEMPORARY. It goes when the last page converts, together with the sticky
-   * wrapper, the reservation padding and the frosted state. Until then the old path must stay alive,
-   * because a half-converted app is the one thing worse than a slow conversion.
+   * ⚠️ THE CONTEXT READ WENT WITH IT, so this component no longer needs a grid above it and no
+   * longer throws when it has none. What replaces the throw is the guard below: a masthead that is
+   * handed an action is a masthead that would need restoring, which is the one thing this design
+   * cannot afford.
    */
-  /**
-   * ⚠️ THE HEADER IS TOLD, AND THERE IS NO LONGER ANYTHING TO FALL BACK TO. Every page that
-   * renders this variant is inside a `WorkspacePageGrid`, so the context always has a value. The
-   * legacy scroll listener — which found its own scroller by walking up from the plate — is
-   * deleted with the last page that needed it, and a mount outside a grid now THROWS in
-   * development rather than silently attaching to the shell's scroller and condensing on the
-   * wrong element.
-   */
-  const condensed = React.useContext(PlateCondensedContext);
-  if (condensed === null && variant === "workspace" && process.env.NODE_ENV !== "production") {
-    throw new Error(
-      "PageHeader variant=\"workspace\" was mounted outside a WorkspacePageGrid. The working state " +
-      "comes from the grid through context; without one it can never condense.",
-    );
-  }
-  /**
-   * ⚠️ THE CROSS-FADE IS ARMED ONLY AFTER THE FIRST STATE CHANGE, never on mount. The register swap
-   * is a keyframe animation (see the note in pageHeader.css — `font-family` cannot be
-   * transitioned), and an animation hung on the resting rule alone plays as soon as the element
-   * exists: every page load would show its title, blink it out and fade it back. That is a worse
-   * artefact than the glitch the fade removes, and it would appear on nine pages rather than
-   * during one interaction.
-   *
-   * ⚠️ IT LATCHES ON, deliberately. Once the page has changed state at all, every later change
-   * should animate — including the return — so this is "has this ever moved", not "is it moving".
-   */
-  const [swapArmed, setSwapArmed] = React.useState(false);
-  const firstState = React.useRef(true);
-  React.useEffect(() => {
-    if (firstState.current) { firstState.current = false; return; }
-    setSwapArmed(true);
-  }, [condensed]);
 
   React.useEffect(() => {
     if (!moreOpen) return;
@@ -294,69 +217,53 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
    * multi-class visibility rule is how the last two mockups broke.
    */
   if (variant === "workspace") {
+    /**
+     * ⚠️ THE MASTHEAD HOLDS NO ACTIONS, AND THIS THROW IS THE GUARD RATHER THAN A COMMENT.
+     *
+     * It is the condition the whole design rests on: a masthead with nothing actionable in it never
+     * needs restoring mid-visit, so it can scroll away on a scrolling page and vanish outright on a
+     * fill page without stranding a control. The moment one button lands here that stops being
+     * true, and the failure is silent — the page simply becomes unusable once the user scrolls.
+     *
+     * ⚠️ IT THROWS RATHER THAN IGNORING. Accepting a prop and rendering nothing is how a page ends
+     * up passing an action that quietly goes nowhere, which is the same fault as the deleted
+     * `count` slot. Every button a masthead used to carry moved to its page's control row; see
+     * `169-inflow-masthead-qc.html` (fenced: the ref still draws Export here) and
+     * `170-sticky-control-row.html`, which draws the arrangement that replaces it.
+     */
+    if (process.env.NODE_ENV !== "production" && (actions?.length || actionsSlot || toolbar || overflow?.length)) {
+      throw new Error(
+        `PageHeader variant="workspace" ("${title}") was passed an action, a slot, a toolbar or an ` +
+        "overflow menu. The masthead holds NO actions — they belong in the page's control row, " +
+        "which is the element that anchors once the masthead has gone.",
+      );
+    }
     return (
-      /* ⚠️ THE STICKY WRAPPER PAINTS NOTHING — no backing strip, ever. See pageHeader.css: an
-         opaque band across the gutters is the dead margin this design exists to avoid, and content
-         is meant to run under the plate and out past both its edges. */
-      /* ⚠️ THE CONDENSED CLASS IS ON THE WRAPPER TOO, and that is the reservation. Only the IDENTITY
-         row shrinks (88 → 56), so the wrapper gives back exactly that 32px as padding while it is
-         condensed — which keeps the page below from sliding up. It is done with a class rather than
-         a measured height because the TOOL ROW's height is unknown to CSS, so the old fixed
-         `calc(88 + 2·gap)` reservation could not survive a second row.
-
-         ⚠️ AND IT CARRIES NO STATE CLASS. `wsh-wrap--scrolled` was written for rules governing the
-         sticky reservation; both are deleted, so the class had no reader left — a class the markup
-         emits and no stylesheet consumes is exactly what a bundle sweep is for. */
-      <div className="wsh-wrap">
-        {/* ⚠️ BOTH CLASSES ARE DERIVED — one from `description`, one from the scroller's position.
-            There is no height prop and must never be one; see the knob-versus-rule note in the
-            stylesheet. */}
-        <header ref={plateRef} className={`wsh${description ? "" : " wsh--solo"}${condensed ? " wsh--scrolled" : ""}${swapArmed ? " wsh--swap" : ""}`}>
+      /* ⚠️ NO WRAPPER, NO CARD, NO STATE CLASS. `.wsh-wrap` existed to reserve a sticky plate's rest
+         height; the plate is content now, so there is nothing to reserve and nothing to stick. The
+         element draws its own closing hairline and the gap beneath it — see pageHeader.css. */
+      <header className="wsh">
         <div className="wsh-row">
-          {/* ⚠️ DERIVED FROM THE ARTWORK, NEVER PASSED IN — see the `markHasArt` note. */}
+          {/* ⚠️ DERIVED FROM THE ARTWORK, NEVER PASSED IN — see the `markHasArt` note. The
+              illustrated mark is 52px and BARE; a monoline glyph keeps its parchment plate at its
+              own family size, because scaling a plated icon to an illustration's size turns a small
+              badge into a large blank tile. Two rest sizes, and the matrix asserts exactly those. */}
           {mark && (
             <span className={`wsh-mark wsh-mark--${markHasArt(mark) ? "xl" : "md"}`}>
               <OneScreenMark name={mark} />
             </span>
           )}
-          {/* ⚠️ TITLE OVER DESCRIPTION IN ONE COLUMN. The count that used to sit to their right is
-              GONE (amendment 7) — the plate is mark + title + description + actions. */}
           <div className="wsh-txt">
-            <h1 className={`wsh-title${description ? "" : " wsh-title--solo"}`}>
+            <h1 className="wsh-title">
               {title}{titleAdornment}
             </h1>
-            {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING and the title steps up. The plate keeps its
-                full height either way — two pages side by side must read as deliberate, not as one
-                being broken. */}
+            {/* ⚠️ ABSENT DESCRIPTION RENDERS NOTHING AND RESERVES NOTHING (spec, step 1). It used to
+                keep the plate's full height either way because the plate was a fixed-height object;
+                in flow there is no height to keep, so a title-only page is simply shorter. */}
             {description && <p className="wsh-sub">{description}</p>}
           </div>
-          <span className="wsh-grow" aria-hidden="true" />
-          {(wsActs.length > 0 || actionsSlot) && (
-            <div className="wsh-acts">
-              {wsActs.length === 0 && actionsSlot}
-              {wsActs.map((action, i) => (
-                /* ⚠️ THE EXISTING BUTTON STYLES, REUSED — `svh-btn-ink` and `svh-btn-ghost` both
-                   already exist. This variant changes WHERE the button sits, not what it is. */
-                <button
-                  key={i}
-                  type="button"
-                  className={action.primary ? "svh-btn svh-btn-ink" : "svh-btn svh-btn-ghost"}
-                  onClick={action.onClick}
-                  disabled={action.disabled}
-                >
-                  {action.icon}
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
-        {/* ⚠️ NO TOOLBAR → NO ROW AND NO HAIRLINE, and the plate reserves nothing for it. An empty
-            row would draw its own separator against the identity row with nothing beneath it —
-            the same fault the count strip's empty state had. */}
-        {toolbar && <div className="wsh-tools">{toolbar}</div>}
-        </header>
-      </div>
+      </header>
     );
   }
 

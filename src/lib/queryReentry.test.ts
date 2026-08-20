@@ -59,7 +59,13 @@ describe("re-entry is a no-op, from every entry point", () => {
        and only the empty branch's survives. The clause is unchanged: a re-entry point that is
        already drafting says so rather than looking live and doing nothing, which is now asserted
        on the toolbar's button as well. */
-    expect(queries.match(/disabled: creating,/g)?.length ?? 0).toBe(1);
+    /* ⚠️ ZERO NOW, NOT ONE (in-flow masthead, step 1). The one occurrence was the MASTHEAD's
+       `Log query` action — the empty branch's re-entry point, disabled while a draft was open. The
+       masthead holds no actions at all, and that button was a duplicate of the welcome pane's
+       `Log your first query` rather than a control that needed rehoming. What the clause protects
+       is unchanged and is asserted on the survivor below: a re-entry point that is already drafting
+       says so rather than looking live and doing nothing. */
+    expect(queries.match(/disabled: creating,/g)?.length ?? 0).toBe(0);
     expect(queries, "the toolbar's Log button stays live while a draft is open")
       .toMatch(/className="qc-btn qc-logq"[\s\S]{0,40}disabled=\{creating\}/);
   });

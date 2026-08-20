@@ -3511,7 +3511,7 @@ export const Queries: React.FC<{
              recording`, which was right while a journey REPLACED the page. A journey is an overlay
              now: the desk stays whole underneath it, band and all, and stripping the chrome behind
              a scrim would animate a page the writer is not looking at. */
-          plate={
+          masthead={
           <PageHeader
             variant="workspace"
             mark="queries"
@@ -3561,44 +3561,27 @@ export const Queries: React.FC<{
                function with a live suite covering a real rule (the zero clause is omitted, never
                printed), and removing one in a visual pass is a separate decision. The cap derives
                the same two figures from the same `queryBucket`, so they cannot disagree. */
-            /* ⚠️ A JOURNEY LEAVES THE ACTIONS EMPTY, AND THE `Close` THAT WAS HERE IS GONE. The
-               reason the strip carries no actions during a journey is unchanged: `Log query` would
-               start a SECOND journey on top of the open one, and disabling it leaves a dead control
-               where the only useful action belongs.
-               ⚠️ WHAT WENT WAS A DUPLICATE, NOT AN EXIT. `Close` called `closeCreate` /
-               `closeRecord` — byte for byte the handlers the in-pane Cancel already calls — so the
-               same act was offered twice, eight pixels apart, on the same screen. Cancel and Esc
-               keep doing the job, on the journey's own header, which is where the writer is
-               looking. The header BAND itself stays: it is the page's own chrome, it strips on
-               `creating || recording`, and removing it would undo three packs of that work. */
-            actions={creating || recording
-              ? []
-              : queries.length > 0
-              ? [
-                  {
-                    label: "Export",
-                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5" /><path d="M4 19h16" /></svg>,
-                    onClick: () => { if (sortedList.length > 0) handleExportFilteredCSV(); },
-                  },
-                  /* ⚠️ `Log query` LEFT THE BAND (§2) — it is the toolbar's left column now, over
-                     the list it adds to. The action must not exist twice on one page, and of the
-                     two seats this is the one that reads as a band of chrome beside the destructive
-                     verbs. Export stays: it acts on the page, not on the column. */
-                ]
-              : [
-                  /* ⚠️ THE EMPTY BRANCH KEEPS ITS OWN, and that is not a second copy: `.f12-body-empty`
-                     opts out of the grid, so the toolbar's left column — and §2's button with it —
-                     is not rendered at all when there is nothing to list. One control in each
-                     state, never two in either. */
-                  {
-                    label: "Log query",
-                    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>,
-                    onClick: () => onNavigate?.("queries", "Log a query"),
-                    primary: true,
-                    // Already drafting? The CTA says so rather than looking live and doing nothing.
-                    disabled: creating,
-                  },
-                ]}
+            /**
+             * ⚠️ NO ACTIONS AT ALL (in-flow masthead, step 1). Two lived here and each left by a
+             * different route, which is worth stating because they look like one change:
+             *
+             *   `Export`      → DROPPED. The list column's FOOT has carried an `EXPORT CSV` button
+             *                   calling the same `handleExportFilteredCSV` for as long as the foot
+             *                   has existed, so the masthead's copy was a third seat for one act.
+             *                   The foot is also the honest home: both read `sortedList`, the
+             *                   FILTERED column, and the foot states `SHOWING n OF m` right beside
+             *                   it — so what you are about to export is named next to the button
+             *                   that exports it. The masthead's note claimed Export "acts on the
+             *                   page, not on the column"; the call disagreed with the note.
+             *
+             *   `Log query`   → DROPPED. It rendered only in the empty branch, where
+             *                   `.qc-welcome` already draws `Log your first query` calling the same
+             *                   `openCreate()`. One control, two seats, one screen.
+             *
+             * ⚠️ AND THE JOURNEY CASE DISSOLVES WITH THEM. The band emptied its actions on
+             * `creating || recording` so a second journey could not be started on top of an open
+             * one; with no actions in any state there is nothing left to gate.
+             */
           />
           }
         >

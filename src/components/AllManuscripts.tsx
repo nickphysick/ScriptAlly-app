@@ -224,7 +224,7 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
          * learns which half fired — exactly as Query Centre's journeys already work.
          */
         condensed={!!selected}
-        plate={
+        masthead={
           <PageHeader
             variant="workspace"
           mark="manuscripts"
@@ -236,12 +236,17 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
              the home existed on a sibling page all along. */
           title="Manuscripts"
           description="Every manuscript on your shelf, and what each one is out doing." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
-          actions={[{
-            label: "Add manuscript",
-            icon: <Plus aria-hidden="true" />,
-            onClick: () => onNavigate?.("manuscripts", "Add a manuscript"),
-            primary: true,
-          }]}
+          /**
+           * ⚠️ `Add manuscript` IS DROPPED, NOT REHOMED — and this is the one masthead action that
+           * did not need a control row built for it, because the page already offers it TWICE.
+           * `ManuscriptAddTile` renders in the library grid at every count including one (its own
+           * note argues for exactly that), and the zero-manuscript panel carries its own button. A
+           * third copy in the masthead was the surplus.
+           *
+           * ⚠️ THE DOSSIER HAS NO ADD AFFORDANCE AND THAT IS CORRECT. The grid — and its tile —
+           * render only while nothing is selected; with a manuscript open you are reading one, not
+           * making another, and the library is one click away.
+           */
           />
         }
         /* ⚠️ NO TOOLBAR AT ALL. The `{n} MANUSCRIPTS · {m} IN SUBMISSION` tally is DELETED, not
@@ -251,7 +256,8 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
            the plate beneath it in any case.
            ⚠️ AND WITH IT GOES THE SECOND HAIRLINE. Row 2 drew its own rule under the tally, so
            Manuscripts showed two lines 20px apart in the working state. No toolbar → no row 2, and
-           the 20px gap comes from the scroll row instead (`.wpg--tools` governs which pays). */
+           the gap comes from the masthead's own `margin-bottom` instead — one element states the
+           whole rhythm now, so there is nothing left to arbitrate (`.wpg--tools` is retired). */
       >
       {/* ⚠️ THE WRAPPER JOINS THE HEIGHT CHAIN ONLY FOR THE DOSSIER. It sits between the grid's
           scroll row and the card, so without the modifier `.msv-doss`'s `flex: 1` has no flex

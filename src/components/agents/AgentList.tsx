@@ -814,13 +814,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
        <WorkspacePageGrid
          className="agl-wpg"
          scrollLabel="Agent list"
-         plate={
+         masthead={
            <PageHeader
             variant="workspace"
             mark="contacts"
             title="Contact list"
             description="Everyone you're querying, watching, or saving for later."
-            actions={[{ label: "Add new agent", icon: <Plus aria-hidden="true" />, onClick: onAddAgent, primary: true }]}
+            /* ⚠️ NO ACTIONS — `Add new agent` moved to the control row below (in-flow masthead,
+               step 1), which is the row that stays on screen once the masthead has scrolled away.
+               `PageHeader` throws in development if a masthead is handed one. */
            />
          }
          toolbar={
@@ -841,6 +843,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate })
             sortOptions={AGENT_SORT_OPTIONS}
             defaultSort={DEFAULT_AGENT_SORT}
             onSort={(k) => setSort(k as AgentListSort)}
+            onAddAgent={onAddAgent}
           />
          }
        >

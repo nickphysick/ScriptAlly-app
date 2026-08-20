@@ -241,15 +241,21 @@ describe("the journey's strip offers no exit of its own", () => {
    * the page's own chrome; it strips on `creating || recording`, and removing it would undo three
    * packs of that work. What a journey must not do is offer a SECOND way out of itself.
    */
-  it("a journey renders no actions at all", () => {
-    expect(code, "the journey's action list is not empty").toContain("actions={creating || recording\n              ? []");
-  });
-
-  it("and no `Close` label survives in the header's actions", () => {
-    const at = code.indexOf("actions={creating || recording");
-    expect(at, "the actions prop moved — this slice is testing nothing").toBeGreaterThan(-1);
-    const slice = code.slice(at, at + 400);
-    expect(slice, "the duplicate exit came back").not.toContain('label: "Close"');
+  it("the masthead renders no actions in ANY state — journey or not", () => {
+    /* ⚠️ THE GATE IS GONE BECAUSE THE ACTIONS ARE (in-flow masthead, step 1). This used to assert
+       `actions={creating || recording ? [] : …}` — the journey emptying the strip so a second
+       journey could not be started on top of an open one. The masthead holds no actions in any
+       state now, so there is nothing left to gate and the case becomes the stronger claim: the
+       prop is not passed at all.
+       ⚠️ AND THE TWO THAT LEFT BOTH LEFT AS DUPLICATES, not relocations — `Export` to the list
+       foot's existing `EXPORT CSV`, `Log query` to the welcome pane's `Log your first query`. */
+    const mast = sliceBetween(code, 'variant="workspace"', "/>");
+    for (const gone of ["actions=", "actionsSlot=", "overflow="]) {
+      expect(mast, `the masthead was handed \`${gone}\` — PageHeader throws on it in development`)
+        .not.toContain(gone);
+    }
+    /* the duplicate exit this case was originally written for must still not come back */
+    expect(mast).not.toContain('label: "Close"');
   });
 
   /* ⚠️ REPO LAW, RESTATED WHERE IT CAN BE BROKEN: nothing in this page's height chain may be sized

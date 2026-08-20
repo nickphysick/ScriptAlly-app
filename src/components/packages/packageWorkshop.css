@@ -84,16 +84,11 @@
      for a meaning it does not have. */
   --pkgo-well: var(--shell-panel);
 
-  /* ══ the header card (D5) ══
-     ⚠️ TOKENS, NOT A RULE FORK. `.wsh` reads `--wsh-plate-*` through `var()` inside its own rule,
-     so an override on this ancestor resolves AT THE USE SITE and every consuming declaration
-     stays exactly where it is — the mechanism CLAUDE.md records for `--header-inset`, and the
-     same aliasing the Agents page does through its `--ag-*` layer. Restyling `.wsh` itself would
-     fork a component eleven pages share; this page already refused that once for its Pro rule.
-     `--wsh-plate-bg` is ALREADY #ffffff at :root and the radius is already 2px, so the only real
-     moves are square corners and the ref's more-lifted cast. */
-  --wsh-plate-radius: 0px;
-  --wsh-plate-sh: 0 10px 28px rgba(58, 28, 20, 0.09), 0 2px 6px rgba(58, 28, 20, 0.05);
+  /* ⚠️ THE `--wsh-plate-radius` / `--wsh-plate-sh` OVERRIDES ARE DELETED (in-flow masthead, step 1).
+     They squared this page's masthead corners and gave it the ref's more-lifted cast — both
+     modifiers of a CARD, and the masthead has no card treatment left to modify: no fill, no border,
+     no radius, no shadow, on any page. The reasoning they were written under still stands and is
+     worth keeping: tokens on an ancestor, never a rule fork of a component eleven pages share. */
 
   height: 100%;
   display: flex;

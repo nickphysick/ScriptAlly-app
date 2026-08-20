@@ -4023,14 +4023,13 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  * avatar to 44; the band's is 46, and the equivalent step lands at 40.
  * ══════════════════════════════════════════════════════════════════════════════════════════════ */
 @media (max-height: 768px) {
-  /* ⚠️ THE TOKEN, NOT THE PROPERTY. `.wsh-title` reads `--wsh-title-size` (33px resting), and the
-     shell also derives the plate's height from its own token — so the step is set where the shell
-     already looks for it and the two stay in proportion. The ref drops 22 to 19, a factor of 0.86.
-     ⚠️ 28 → 33, BECAUSE THE BASE MOVED AND THIS DID NOT. 28 was 0.86 of a 33px title; the resting
-     title is 38 now, which left this at a factor of 0.74 — a short-viewport step twice as steep as
-     the one the comment claims, on the one page that also drops its hero band. The factor is the
-     rule and the number is derived from it: 0.86 × 38 ≈ 33. */
-  .qc-wpg .wsh { --wsh-title-size: 33px; }
+  /* ⚠️ THE PAGE-SCOPED MASTHEAD STEP IS DELETED (in-flow masthead, step 1). It shrank this page's
+     title on short viewports at 0.86 of the app-wide base, because a fixed-height PLATE cost the
+     panes height they could not spare here. The masthead is content now — it scrolls away on a
+     scrolling page and vanishes on engagement on this one — so a short viewport reclaims the whole
+     of it rather than a few points of type, and the acceptance matrix requires every page's title
+     to measure the same. The pairing card's own step below is untouched: that is a card, not the
+     masthead, and its reasoning is unaffected. */
   /* ⚠️ THE PAIRING CARD GIVES UP AIR AND TYPE, BUT NOT ITS MARKS. Reclaiming from the padding is
      what keeps the container while the row gets shorter — the same 0.86 step the masthead takes,
      26/30 landing at 22/26. The marks hold their 66px: they are the two subjects, and shrinking

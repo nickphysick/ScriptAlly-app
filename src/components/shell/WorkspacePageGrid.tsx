@@ -47,11 +47,54 @@ import "./workspacePageGrid.css";
  */
 export const PlateCondensedContext = React.createContext<boolean | null>(null);
 
+/**
+ * PageTally — the control row's count, and the reason it is a component rather than a class.
+ *
+ * ⚠️ THE ROW KEEPS THE COUNT, NEVER THE PAGE NAME. `170-sticky-control-row.html` offers both as a
+ * toggle and the count wins: once the masthead has scrolled away this row is the only thing left
+ * stating anything about the page, and the page's NAME is the one fact the reader can already get
+ * — from the sidebar, from the breadcrumb, from what they clicked. The count is not.
+ *
+ * ⚠️ IT PUSHES THE ROW'S CONTROLS RIGHT BY ITSELF (`margin-right: auto`), so no page renders a
+ * spacer element and none of them can forget to. Count left, verbs right, on all five rows.
+ *
+ * ⚠️ AND EVERY PAGE SUPPLIES ITS OWN STRINGS FROM ITS OWN DERIVATION — there is no shared count
+ * function and there must not be one. The figures differ in kind (agents, queries, comps, packages)
+ * and each already has exactly one source on its page; a second derivation here would be a second
+ * answer to a question the page has already answered.
+ */
+export const PageTally: React.FC<{ value: string; note?: string }> = ({ value, note }) => (
+  <span className="wpg-tally">
+    {value}
+    {/* ⚠️ THE NOTE IS OMITTED, NEVER EMPTIED. An `<i>` holding nothing still takes its left margin,
+        which reads as a figure that has lost its label rather than one that never had it. */}
+    {note ? <i>{note}</i> : null}
+  </span>
+);
+
 export interface WorkspacePageGridProps {
-  /** Row 1 — the plate. Identity only: mark, title, description, primary action. */
-  plate: React.ReactNode;
   /**
-   * Row 2 — the page's controls, plus its tally.
+   * THE MASTHEAD — identity only: mark, title, description. **No actions.**
+   *
+   * ⚠️ IT IS NOT A ROW OF THIS GRID ANY MORE; IT IS THE FIRST THING INSIDE THE SCROLLER. That one
+   * move is the whole of the in-flow masthead pack: on a scrolling page it leaves with the content
+   * because it IS content — no collapse mechanism, no state, no boolean — and on a fill page it
+   * vanishes on engagement instead. Named `masthead` rather than `plate` because a plate was a
+   * card, and this has no fill, border, radius or shadow to be one with.
+   */
+  masthead: React.ReactNode;
+  /**
+   * THE CONTROL ROW — the page's tally on the left, its verbs on the right.
+   *
+   * ⚠️ IT IS THE PAGE'S ANCHOR NOW, WHICH IS A PROMOTION, NOT A RELOCATION. With the masthead gone
+   * from the chrome, this is the element that stays put once the user starts working: it moved
+   * INSIDE the scroller so it can be `position: sticky` there (step 2), and it is where every
+   * button that used to sit in a masthead now lives.
+   *
+   * ⚠️ AND IT KEEPS THE COUNT, NEVER THE PAGE NAME. `170-sticky-control-row.html` offers both as a
+   * toggle; the count is the fact you cannot get by looking, and the page name is the one you can.
+   *
+   * The original note follows, and still holds:
    *
    * ⚠️ NO CONTAINER. No border, no shadow, no background, and NO state change on scroll — just the
    * controls and a hairline beneath. Because it never changes appearance as you scroll, the
@@ -118,7 +161,7 @@ export interface WorkspacePageGridProps {
 }
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  plate, toolbar, children, className, scrollLabel, dock, fill = false, condensed: condensedByMode = false,
+  masthead, toolbar, children, className, scrollLabel, dock, fill = false, condensed: condensedByMode = false,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
@@ -249,16 +292,17 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   }, [fill]);
 
   /**
-   * ⚠️ THE BAND IS THE WAY BACK, and it carries NO chevron and NO label. The affordance is the
-   * pointer and a hover shift — a control drawn in the strip would be a second thing competing
-   * with the page's own actions for the one row that exists to have almost nothing in it.
+   * ⚠️ THERE IS NO RESTORE, AND THAT IS A DECISION RATHER THAN A DEFERRAL (in-flow masthead).
    *
-   * ⚠️ RESTORE IS NOT OFFERED ON A SCROLLING PAGE. There the state is a pure function of
-   * `scrollTop`, so a click that set it false would be overwritten by the next evaluated frame —
-   * an affordance that visibly does nothing is worse than none.
+   * `restorable` and `restore` are deleted with the band they belonged to. The collapsed band WAS
+   * the way back — a bare surface you clicked to bring the header out again — and the masthead does
+   * not collapse to a band any more; on a fill page it vanishes outright (step 3) and returns on the
+   * next visit to the page.
+   *
+   * ⚠️ AND NOTHING IS STRANDED BY THAT, which is the condition the whole design rests on: the
+   * masthead holds no actions, so a writer who never sees it again within a visit has lost nothing
+   * they could have used. `PageHeader` throws if a page tries to put an action in one.
    */
-  const restorable = fill && condensed;
-  const restore = React.useCallback(() => setEngaged(false), []);
 
   /**
    * ⚠️ A PAGE VISIT RESETS IT — the card is the front door, and a fresh arrival gets it.
@@ -293,20 +337,18 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     <PlateCondensedContext.Provider value={condensed}>
       <div
         ref={rootRef}
-        className={`wpg${condensed ? " wpg--working" : ""}${toolbar ? " wpg--tools" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}
+        /* ⚠️ `wpg--tools` IS GONE FROM THIS LIST. It existed for ONE rule — `.wpg--tools > .wpg-scroll`,
+           which zeroed the scroller's top gap when a toolbar row had already paid it — and that
+           arbitration died with the chrome rows. Grepped before removing: no stylesheet in `src/`
+           reads it. A class the markup emits and nothing consumes is what a bundle sweep exists to
+           find, and leaving it would imply a rule someone would go looking for. */
+        className={`wpg${condensed ? " wpg--working" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}
       >
-        {/* ⚠️ ROW 1 CARRIES THE STATE CLASS TOO, not just the header inside it. The width change and
-            the hairline are the ROW's (the header fills its row in both states), so the row has to
-            know. Same boolean, one source — it cannot disagree with the header. */}
-        {/* ⚠️ ROW 1 NEVER ENGAGES — clicking the header is not working on the page, and a header that
-            collapsed when you clicked it would be a control that hides itself. */}
-        <div
-          className={`wpg-plate${condensed ? " wpg-plate--working" : ""}${restorable ? " wpg-plate--restorable" : ""}`}
-          onPointerDown={restorable ? restore : undefined}
-        >
-          {plate}
-        </div>
-        {toolbar && <div className="wpg-tools" onPointerDown={engage}>{toolbar}</div>}
+        {/* ⚠️ THE CHROME ROWS ARE GONE. Rows 1 and 2 were the plate and the toolbar, pinned as
+            siblings of the scroller; both now sit INSIDE it, which is the whole of this pack. The
+            grid is the scroller and the dock, and the masthead's departure is a scroll on a
+            scrolling page and a collapse on a fill one — neither of which the grid has to reserve
+            height for. */}
         <div
           className="wpg-scroll"
           ref={scrollRef}
@@ -316,6 +358,24 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
           role={scrollLabel ? "region" : undefined}
           aria-label={scrollLabel}
         >
+          {/* ⚠️ THE MASTHEAD IS THE FIRST THING IN THE SCROLLER, and on a scrolling page that is
+              the entire mechanism: it leaves with the content because it IS content. No sentinel
+              feeds it, no class describes it, nothing reserves its height.
+
+              ⚠️ AND IT IS NOT WRAPPED IN AN ENGAGEMENT HANDLER. `onPointerDown` is on the scroller,
+              so a click on the masthead reaches it by bubbling — which was deliberately NOT true of
+              the old row 1 ("clicking the header is not working on the page"). That distinction is
+              reinstated at step 3, where the collapse arrives and the masthead needs to stop
+              collapsing itself out from under the pointer. Until then nothing collapses, so there
+              is nothing to protect. */}
+          {masthead}
+          {/* ⚠️ THE CONTROL ROW FOLLOWS THE MASTHEAD, INSIDE THE SCROLLER, and it has to be here
+              rather than a grid row above it for one reason: the masthead must come FIRST. Left as
+              row 2 of the grid it would have been pinned ABOVE a masthead that had moved into the
+              scroller — the page's controls sitting on top of its own title. Being in the scroller
+              is also what lets it be `position: sticky` there (step 2), which is how it takes over
+              the anchoring job the chrome row used to do. */}
+          {toolbar && <div className="wpg-tools">{toolbar}</div>}
           {children}
         </div>
         {/* ⚠️ THE HEMS ARE GRID CHILDREN OF ROW 3, NOT CHILDREN OF THE SCROLLER. Inside the

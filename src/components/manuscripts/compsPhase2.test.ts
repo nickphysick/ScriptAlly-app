@@ -57,7 +57,7 @@ describe("Phase 2 — the page scrolls, and it stopped doing the grid's job", ()
    * "would start filling the row instead of flowing past it, which changes what scrolls".
    */
   it("passes no fill prop — this page flows, it does not fill", () => {
-    const grid = sliceBetween(tsx, "<WorkspacePageGrid", "plate={");
+    const grid = sliceBetween(tsx, "<WorkspacePageGrid", "masthead={");
     expect(grid).not.toContain("fill");
   });
 

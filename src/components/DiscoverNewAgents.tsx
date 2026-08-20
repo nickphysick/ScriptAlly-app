@@ -53,7 +53,7 @@ import {
 import { getHomeCountry, flagFor, countryName } from "../lib/territory";
 import { agentInitials, agentPrimary, agentSecondary } from "../lib/agentDisplay";
 import { PageHeader } from "./shell/PageHeader";
-import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
+import { WorkspacePageGrid, PageTally } from "./shell/WorkspacePageGrid";
 import {
   ShieldCheck,
   Check,
@@ -610,50 +610,56 @@ export const DiscoverNewAgents: React.FC<DiscoverNewAgentsProps> = ({ onNavigate
       {/* THE shared page header — identical to the agent list's but for two things: the Pro pill
           beside the title, and the closing rule rendered 2px in the Pro token (discover.css). The
           manuscript selector occupies the same slot as the agent list's "Add new agent" button. */}
-      {/* ⚠️ THE HEADER IS BACK INSIDE `.dv-wrap`, reversing the previous pass on purpose: a band was
-          chrome and spanned the window, a PLATE is an object whose edges must meet the first and
-          last card — and past the cap this centred column is the only place they agree. */}
-      {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate is row 1; the matches scroll
-          in row 3. Discover passes NO toolbar, so the grid renders no row 2 and no hairline — it
-          reserves nothing for a row it does not have. */}
-      <WorkspacePageGrid className="dv-wpg" scrollLabel="Discover" plate={
+      {/* ⚠️ THE MASTHEAD IS THE FIRST THING IN THE SCROLLER AND LEAVES WITH THE CONTENT (in-flow
+          masthead, step 1). It was a plate in a pinned chrome row; it is content now, so the matches
+          scroll past it and the CONTROL ROW beneath does the anchoring. Discover gained that row in
+          this pack — it had none, and its controls were sitting in the masthead. */}
+      <WorkspacePageGrid className="dv-wpg" scrollLabel="Discover" masthead={
         <PageHeader
             variant="workspace"
             mark="discover"
             title="Discover"
             description="Verified agents matched to your manuscript — with the reasons they fit."
             titleAdornment={<span className="dv-propill">Pro</span>}
-            /* ⚠️ THE SLOT IS THE ONLY THING THE BAND EXPOSES, AND THAT IS DELIBERATE. `PageHeader`
-               is a locked component; what changes here is what this page HANDS it, never the band
-               itself. Live, the slot carries the manuscript selector; as a feature page it carries
-               a static state chip — a control that switched manuscripts would promise matching the
-               page is not doing. */
-            actionsSlot={
-              DISCOVER_LIVE ? (
-                selected ? (
-                  pickable.length >= 2 ? (
-                    <button
-                      type="button"
-                      className="dv-msel"
-                      onClick={tryNextManuscript}
-                      title="Switch manuscript"
-                    >
-                      <span className="k">Finding for</span>
-                      {selected.title}
-                      <ChevronDown aria-hidden="true" />
-                    </button>
-                  ) : (
-                    <span className="dv-msel">
-                      <span className="k">Finding for</span>
-                      {selected.title}
-                    </span>
-                  )
-                ) : undefined
-              ) : (
-                <span className="dv-soon">Coming soon</span>
-              )
-            }
+            /* ⚠️ NO ACTIONS SLOT — it moved to the control row (in-flow masthead, step 1). What it
+               held is unchanged and so is its reasoning: live, the manuscript selector; as a feature
+               page, a static state chip, because a control that switched manuscripts would promise
+               matching the page is not doing. */
         />
+      }
+      toolbar={
+        <>
+          {/* ⚠️ THE COUNT IS LIVE-ONLY, AND ITS ABSENCE IS CORRECT RATHER THAN A GAP. Nothing has
+              been matched on the feature page, so there is no number to state; a `0 matches` there
+              would report a result for a search that never ran. `PageTally` also carries the row's
+              `margin-right: auto`, so the gated row pins its chip right with a plain spacer. */}
+          {DISCOVER_LIVE && selected
+            ? <PageTally value={`${visible.length} ${visible.length === 1 ? "match" : "matches"}`} />
+            : <span className="dv-tallysp" aria-hidden="true" />}
+          {DISCOVER_LIVE ? (
+            selected ? (
+              pickable.length >= 2 ? (
+                <button
+                  type="button"
+                  className="dv-msel"
+                  onClick={tryNextManuscript}
+                  title="Switch manuscript"
+                >
+                  <span className="k">Finding for</span>
+                  {selected.title}
+                  <ChevronDown aria-hidden="true" />
+                </button>
+              ) : (
+                <span className="dv-msel">
+                  <span className="k">Finding for</span>
+                  {selected.title}
+                </span>
+              )
+            ) : undefined
+          ) : (
+            <span className="dv-soon">Coming soon</span>
+          )}
+        </>
       }>
       <div className="dv-wrap">
         <div>

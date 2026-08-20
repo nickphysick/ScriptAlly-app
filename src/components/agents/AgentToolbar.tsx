@@ -19,7 +19,8 @@
  * a second grammar.
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Filter, Rows3, Search, SlidersHorizontal } from "lucide-react";
+import { Check, ChevronDown, Filter, Plus, Rows3, Search, SlidersHorizontal } from "lucide-react";
+import { PageTally } from "../shell/WorkspacePageGrid";
 import {
   AgentDoor,
   AgentFilterSet,
@@ -183,6 +184,11 @@ export interface AgentToolbarProps {
   /** How many agents the current filter set yields — the popover footer states it live. */
   resultCount: number;
   total: number;
+  /** ⚠️ THE PAGE'S CREATION ACTION, WHICH USED TO SIT IN THE MASTHEAD (in-flow masthead, step 1).
+   *  The masthead holds no actions, so every button that was in one moved to its page's control
+   *  row — this row. It is the rightmost thing here by the row's own grammar: tally left, verbs
+   *  right, primary last. */
+  onAddAgent: () => void;
   /** Group + Sort are single-choice controls; their option lists are owned by the caller. */
   group: string;
   groupOptions: readonly { key: string; label: string }[];
@@ -197,6 +203,7 @@ export interface AgentToolbarProps {
 export const AgentToolbar: React.FC<AgentToolbarProps> = ({
   search, onSearch, filters, onFilters, counts, starCounts, locCounts,
   resultCount, total, group, groupOptions, onGroup, sort, sortOptions, defaultSort, onSort, searchRef,
+  onAddAgent,
 }) => {
   const [openPop, setOpenPop] = useState<string | null>(null);
   const nFilters = filterCount(filters);
@@ -212,6 +219,14 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
 
   return (
     <div className="agl-toolbar">
+      {/* ⚠️ THE TALLY LEADS THE ROW (in-flow masthead, step 1). It used to close it, on the right,
+          which was fine while the row was a strip under a header that named the page. Now that the
+          masthead scrolls away this row is what remains, and what remains should lead with the fact
+          rather than end with it. `PageTally` carries its own `margin-right: auto`, so it is also
+          what pushes everything below to the right — there is no spacer element.
+          ⚠️ AND THE FIGURES ARE UNCHANGED: `{resultCount} of {total}`, the page's own existing
+          string, moved rather than restated. */}
+      <PageTally value={`${resultCount} of ${total}`} />
       <div className="agl-search">
         <Search width={14} height={14} aria-hidden="true" />
         <input
@@ -352,7 +367,12 @@ export const AgentToolbar: React.FC<AgentToolbarProps> = ({
         ))}
       </Pop>
 
-      <span className="agl-count">{resultCount} of {total}</span>
+      {/* ⚠️ `Add new agent` LANDS HERE FROM THE MASTHEAD — one home, and it is the row that stays
+          on screen while you work through the list you are adding to. */}
+      <button type="button" className="agl-tbadd" onClick={onAddAgent}>
+        <Plus width={15} height={15} aria-hidden="true" />
+        Add new agent
+      </button>
     </div>
   );
 };

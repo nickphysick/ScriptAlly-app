@@ -19,17 +19,21 @@ import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { PageHeader } from "./PageHeader";
 import { WorkspacePageGrid } from "./WorkspacePageGrid";
+/* ⚠️ THE BOUNDED SLICE FAILS LOUDLY ON A MISSING ANCHOR. `indexOf` returns -1 and `slice(-1)`
+   reads as "one character from the end", so a renamed marker silently widens the slice to the rest
+   of the document and every assertion over it starts covering markup it was never meant to see. */
+import { sliceBetween } from "../../test/sliceBetween";
 
 /**
- * ⚠️ THE WORKSPACE VARIANT MUST BE MOUNTED INSIDE A GRID, and rendering it bare now THROWS in
- * development — deliberately. Its working state comes from the grid through context; outside one
- * it can never condense, and the old fallback that walked up to find a scroller is deleted. These
- * tests rendered it bare and the throw caught every one of them, which is the guard working.
+ * ⚠️ THE MASTHEAD NO LONGER NEEDS A GRID ABOVE IT (in-flow masthead, step 1). It read the grid's
+ * condensed state through context and threw without one; it has no state at all now, so it renders
+ * bare quite happily. `renderInGrid` survives because several assertions below are about where the
+ * masthead sits INSIDE the grid, which is the thing this pack moved.
  */
 const render = (el: React.ReactElement) => renderToStaticMarkup(el);
 /** the workspace variant only — it reads its state from the grid and throws without one */
 const renderInGrid = (el: React.ReactElement) =>
-  renderToStaticMarkup(<WorkspacePageGrid plate={el}>{null}</WorkspacePageGrid>);
+  renderToStaticMarkup(<WorkspacePageGrid masthead={el}>{null}</WorkspacePageGrid>);
 
 describe("⚠️ the default variant is frozen", () => {
   it("title only — byte for byte", () => {
@@ -74,20 +78,33 @@ describe("⚠️ the default variant is frozen", () => {
 });
 
 describe("the workspace variant", () => {
-  it("renders title, mark and actions", () => {
-    const out = renderInGrid(
-      <PageHeader
-        variant="workspace"
-        title="Query Centre"
-        mark="queries"
-        actions={[{ label: "Export", onClick: () => {} }, { label: "Log query", onClick: () => {}, primary: true }]}
-      />
-    );
-    expect(out).toMatch(/class="wsh( wsh--solo)?"/);
+  it("renders title and mark — and NOTHING actionable", () => {
+    const out = renderInGrid(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
+    expect(out).toContain('class="wsh"');
     expect(out).toContain("Query Centre");
     expect(out).toContain('data-mark="queries"');
-    /* ⚠️ THE EXISTING INK BUTTON, REUSED — not a new class of this variant's own. */
-    expect(out).toContain("svh-btn-ink");
+    /* ⚠️ ASSERTED STRUCTURALLY, NOT AGAINST A LIST OF LABELS. A name list passes the day someone
+       adds a button this test has never heard of, which is precisely the day it should fail. */
+    const masthead = sliceBetween(out, '<header class="wsh"', "</header>");
+    expect(masthead).not.toContain("<button");
+    expect(masthead).not.toContain("<a ");
+  });
+
+  it("⚠️ THE MASTHEAD REFUSES AN ACTION RATHER THAN IGNORING IT", () => {
+    /* The whole design rests on the masthead having nothing actionable in it: that is what lets it
+       scroll away on a scrolling page and vanish outright on a fill one without stranding a
+       control. Accepting the prop and rendering nothing would be a page passing an action that
+       silently goes nowhere — so it throws, and this is that throw. */
+    for (const props of [
+      { actions: [{ label: "Export", onClick: () => {} }] as const },
+      { actionsSlot: <span>chip</span> },
+      { toolbar: <span>tools</span> },
+      { overflow: [{ label: "Delete", onClick: () => {} }] },
+    ]) {
+      expect(() => renderInGrid(
+        <PageHeader variant="workspace" title="T" mark="todo" {...(props as object)} />
+      )).toThrow(/masthead holds NO actions/i);
+    }
   });
 
   it("⚠️ THE COUNT SLOT IS GONE FROM THE MARKUP, not merely unused (amendment 7)", () => {
@@ -97,32 +114,46 @@ describe("the workspace variant", () => {
     expect(out).not.toContain("wsh-count");
   });
 
-  it("⚠️ THE PLATE IS WRAPPED BY ITS STICKY HOST, and that host paints nothing", () => {
-    /* The wrapper is what sticks; the plate is what condenses. A backing fill here would put an
-       opaque band across the gutters beside the plate — the dead margin the ref exists to rule out. */
+  it("⚠️ THE STICKY WRAPPER IS GONE, AND THE MASTHEAD IS THE FIRST THING IN THE SCROLLER", () => {
+    /* `.wsh-wrap` reserved a sticky plate's rest height so condensing could not pull the content
+       below it upward. Nothing sticks and nothing condenses, so both the wrapper and the
+       reservation are deleted — and the masthead now opens the scroll row rather than a chrome row
+       above it. That ORDER is the contract: the control row anchors, so it has to come second. */
     const out = renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />);
-    expect(out).toMatch(/<div class="wsh-wrap"><header class="wsh( wsh--solo)?"><div class="wsh-row">/);
+    expect(out).not.toContain("wsh-wrap");
+    expect(out).toMatch(/<div class="wpg-scroll"[^>]*><header class="wsh"><div class="wsh-row">/);
   });
 
-  it("⚠️ AT REST THE PLATE IS NOT CONDENSED — the scrolled class is never server-rendered", () => {
-    /* `wsh--scrolled` is driven by a scroll listener, so the first paint must be the rest state.
-       If it ever rendered condensed, every page would flash 88 → 56 → 88 on mount. */
-    expect(renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />)).not.toContain("wsh--scrolled");
+  it("⚠️ THERE IS NO CONDENSED STATE — the band and its classes are unreachable", () => {
+    /* This used to assert that the rest state renders first, because a condensed first paint would
+       flash 88 → 56 → 88 on mount. The state itself is gone: no band, no label register, no
+       cross-fade. Asserted against the RENDERED output in both grid states, so a `condensed` grid
+       cannot bring it back through a path the markup forgot about. */
+    for (const condensed of [false, true]) {
+      const out = renderToStaticMarkup(
+        <WorkspacePageGrid masthead={<PageHeader variant="workspace" title="T" mark="todo" />} condensed={condensed}>{null}</WorkspacePageGrid>
+      );
+      expect(out).not.toContain("wsh--scrolled");
+      expect(out).not.toContain("wsh--swap");
+    }
   });
 
-  it("⚠️ NO DESCRIPTION → no sub element and the title steps up — but the PLATE KEEPS ITS HEIGHT", () => {
-    /* ⚠️ AMENDED (amendment 7): the height half of this is gone. The plate is one height, 88px, and
-       56px once scrolled — the 78/60 pair went with the band. `wsh--solo` now governs the TYPE
-       only, which is why it is still asserted while no height claim is. */
+  it("⚠️ NO DESCRIPTION → NO ELEMENT, AND NO SOLO STEP EITHER", () => {
+    /* ⚠️ THE SOLO STEP IS RETIRED (in-flow masthead, step 1), and its reason went with the plate.
+       A fixed-height card kept its height with or without a description, so a title-only page had
+       to grow its type to look deliberate rather than broken. In flow a title-only page is simply
+       shorter — nothing is reserved, so there is nothing to fill. One title size app-wide.
+       ⚠️ THE CLASSES ARE ASSERTED ABSENT, not merely unstyled: a class the markup emits and no rule
+       consumes is what a bundle sweep exists to find. */
     const solo = renderInGrid(<PageHeader variant="workspace" title="Query Centre" mark="queries" />);
     expect(solo).not.toContain("wsh-sub");
-    expect(solo).toContain("wsh-title--solo"); // the type step, not a height
-    expect(solo).toContain("wsh--solo");
+    expect(solo).not.toContain("wsh--solo");
+    expect(solo).not.toContain("wsh-title--solo");
     const withSub = renderInGrid(<PageHeader variant="workspace" title="Contact list" mark="contacts" description="Everyone you're querying." />);
     expect(withSub).toContain("wsh-sub");
-    expect(withSub).not.toContain("wsh-title--solo");
-    expect(withSub).not.toContain("wsh--solo");
-    /* the pixel values are CSS; the CLASSES are the contract, and they are asserted here */
+    /* ⚠️ ONE CLASS IN BOTH STATES — the only difference is whether the paragraph exists. */
+    expect(withSub).toContain('class="wsh"');
+    expect(solo).toContain('class="wsh"');
   });
 
   it("every mark key renders", () => {
@@ -146,39 +177,42 @@ describe("⚠️ the shell never mounts PageHeader", () => {
 });
 
 /**
- * ⚠️ HEIGHT IS A RULE, NOT A KNOB. `compact` and `greeting` were retired because any caller could
- * shrink any header for any reason — the height was a caller's opinion. These assert that no prop
- * can produce a height other than the two DERIVED ones, which is what makes this different from
- * the variants that were removed.
+ * ⚠️ THE MASTHEAD'S SHAPE IS A RULE, NOT A KNOB — and this describe block survives its own subject.
+ *
+ * It was written when `compact` and `greeting` were retired: any caller could shrink any header for
+ * any reason, so the height was a caller's opinion. There is no height to choose now (the masthead
+ * is sized by its contents), but the underlying claim is the same and still worth holding: exactly
+ * ONE input changes what this component renders, and it is `description`.
  */
-describe("no prop can choose the header's height", () => {
-  /* the workspace variant reads its state from the grid, so it must be mounted in one */
-  const heightClass = (el: React.ReactElement) =>
-    /class="wsh( wsh--solo)?"/.exec(renderInGrid(el))?.[0];
+describe("no prop can choose the masthead's shape", () => {
+  /** the masthead's own markup, sliced out of whatever it is mounted in */
+  const shape = (el: React.ReactElement) => sliceBetween(renderInGrid(el), '<header class="wsh"', "</header>");
 
-  it("only `description` moves it — everything else is inert", () => {
-    const tall = 'class="wsh"', short = 'class="wsh wsh--solo"';
-    expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" />)).toBe(short);
-    expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" description="D" />)).toBe(tall);
+  it("only `description` changes it — and it changes ONE element", () => {
+    const solo = shape(<PageHeader variant="workspace" title="T" mark="todo" />);
+    const withSub = shape(<PageHeader variant="workspace" title="T" mark="todo" description="D" />);
+    expect(solo).not.toContain("wsh-sub");
+    expect(withSub).toContain("wsh-sub");
+    /* ⚠️ AND NOTHING ELSE MOVES WITH IT. Adding the paragraph must not change the header's class,
+       the title's class or the mark's — the solo step is retired, so the two states differ by the
+       description alone. */
+    expect(withSub.replace(/<p class="wsh-sub">.*?<\/p>/, "")).toBe(solo);
 
-    // every other prop, with and without a description — none may change the height class
+    /* ⚠️ THE ACTION-BEARING PROPS ARE NOT IN THIS LIST ANY MORE — they THROW (see above) rather
+       than being inert, which is the stronger guarantee and the one the design needs. What remains
+       are the props a masthead legitimately takes. */
     for (const extra of [
-      { count: "9 THINGS" },
-      { actions: [{ label: "A", onClick: () => {} }] as const },
       { titleAdornment: <span>Pro</span> },
-      /* ⚠️ `compact` IS GONE FROM THE TYPE, so it can no longer be passed even by mistake — the
-         prop, its branches and its own describe block were retired with Query Centre, its last
-         caller. The row is kept as a note: this list is "every other prop", and the one that was
-         most tempting to let through is now impossible rather than merely inert. */
-      { overflow: [{ label: "X", onClick: () => {} }] as const },
+      { scrollLabel: "ignored" },
     ]) {
-      expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" {...(extra as object)} />), JSON.stringify(Object.keys(extra))).toBe(short);
-      expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" description="D" {...(extra as object)} />)).toBe(tall);
+      const s2 = shape(<PageHeader variant="workspace" title="T" mark="todo" {...(extra as object)} />);
+      /* the adornment lands INSIDE the title and nothing else shifts */
+      expect(s2.replace(/<span>Pro<\/span>/, ""), JSON.stringify(Object.keys(extra))).toBe(solo);
     }
   });
 
-  it("⚠️ an EMPTY description is not a description — it must not buy 18px of nothing", () => {
-    expect(heightClass(<PageHeader variant="workspace" title="T" mark="todo" description="" />))
-      .toBe('class="wsh wsh--solo"');
+  it("⚠️ an EMPTY description is not a description — it must not buy an empty paragraph", () => {
+    expect(shape(<PageHeader variant="workspace" title="T" mark="todo" description="" />))
+      .toBe(shape(<PageHeader variant="workspace" title="T" mark="todo" />));
   });
 });

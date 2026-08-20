@@ -62,8 +62,13 @@ describe("/queries/analytics renders", () => {
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
     /* the strip is mounted — the empty branches render no strip at all */
     expect(html).toContain("an-strip");
-    /* the seed is one query, sent and unanswered: the tally and both figures follow from it */
-    expect(html).toContain("1 query · 1 awaiting reply");
+    /* ⚠️ THE TALLY MOVED OUT OF THE MASTHEAD (in-flow masthead, step 1). It was the description —
+       "1 query · 1 awaiting reply" — which is two figures rather than a sentence about the page, so
+       it became the control row's count. Same derivation, same two numbers, split across the
+       tally's own value/note pair. The seed is one query, sent and unanswered. */
+    expect(html).toContain("wpg-tally");
+    expect(html).toContain("1 query");
+    expect(html).toContain("1 AWAITING REPLY");
     expect(html).toContain("Queries sent");
     expect(html).toContain("Median wait");
   });

@@ -42,7 +42,7 @@ const block = (selector: string): string => {
   return out.join(" ");
 };
 
-describe("the three-row grid — chrome outside the scroller", () => {
+describe("the grid — the scroller owns the page (in-flow masthead)", () => {
   it("⚠️ NOTHING IS STICKY AND NOTHING TAKES A `top` — that is the whole point", () => {
     /* The sticky arrangement encoded another element's height as a literal (`calc(56px + gap)`),
        which was silently wrong by 32px on the Tasks family. Siblings of the scroller need no
@@ -60,18 +60,24 @@ describe("the three-row grid — chrome outside the scroller", () => {
   });
 
   it("the scroll row is `minmax(0, 1fr)` — a plain `1fr` grows to its content and never scrolls", () => {
-    expect(block(".wpg"), "the grid lost its row template").toContain("grid-template-rows: auto auto minmax(0, 1fr)");
+    /* ⚠️ TWO ROWS SINCE THE MASTHEAD MOVED INSIDE THE SCROLLER — the scroller, then the dock. */
+    expect(block(".wpg"), "the grid lost its row template").toContain("grid-template-rows: minmax(0, 1fr) auto");
     expect(block(".wpg"), "the grid itself started scrolling — only row 3 may").toContain("overflow: hidden");
     expect(block(".wpg-scroll"), "the scroll row stopped scrolling").toContain("overflow-y: auto");
     expect(block(".wpg-scroll"), "`min-height: 0` went — the row will refuse to shrink below its content and push the frame open").toContain("min-height: 0");
   });
 
-  it("⚠️ EVERY ROW IS PLACED EXPLICITLY — auto-placement breaks the toolbar-less pages", () => {
-    /* Without a toolbar, auto-placement puts the scroller in track 2 (an `auto` track), so it sizes
-       to its content and never scrolls — on exactly the pages with least to show. */
-    expect(block(".wpg-plate")).toContain("grid-row: 1");
-    expect(block(".wpg-tools")).toContain("grid-row: 2");
-    expect(block(".wpg-scroll")).toContain("grid-row: 3");
+  it("⚠️ EVERY ROW IS PLACED EXPLICITLY — auto-placement would put the scroller in an `auto` track", () => {
+    /* The original fault is unchanged in kind, only in arithmetic: an auto-placed scroller lands in
+       a track that sizes to its content and therefore never scrolls. Two rows now — the scroller
+       and the dock — because the masthead and the control row are children of the scroller. */
+    expect(block(".wpg-scroll")).toContain("grid-row: 1");
+    expect(block(".wpg-dock")).toContain("grid-row: 2");
+    /* ⚠️ AND THE CONTROL ROW MUST NOT NAME ONE. It is in flow inside the scroller; a `grid-row`
+       left on it would be inert today and actively wrong the moment anyone put it back in the grid
+       without re-reading why it moved. */
+    expect(block(".wpg-tools"), "the control row still claims a grid row — it is not a grid item any more")
+      .not.toContain("grid-row");
   });
 
   it("the toolbar row has NO container — one hairline, no frame, no fill", () => {
@@ -97,36 +103,48 @@ describe("the three-row grid — chrome outside the scroller", () => {
    * edges at three window widths rather than naming a figure — a hardcoded number here would have
    * to be edited every time either token moved, which is how a lock stops describing the design.
    */
-  it("⚠️ the header's edges sit exactly the inset inside the content's, at three widths", () => {
-    /* ⚠️ THE TOKENS LIVE IN pageHeader.css, NOT THIS SHEET — the grid READS them and defines
-       neither, which is the point: one declaration, three consumers. */
-    const tokenCss = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
-    const root = /:root\s*\{[^}]*--content-gutter:\s*(\d+)px[^}]*--header-inset:\s*(\d+)px[^}]*\}/s.exec(tokenCss);
-    expect(root, "the two width tokens are not both declared on :root — every width below is unresolvable").toBeTruthy();
-    const gutter = Number(root![1]);
-    const inset = Number(root![2]);
-    expect(gutter, "the gutter went to zero — content would touch the window edge").toBeGreaterThan(0);
-    expect(inset, "the inset went to zero — the header would be the content's width and the card would read as a band").toBeGreaterThan(0);
+  it("⚠️ ONE INSET, NOT TWO — the masthead shares the content's gutter exactly", () => {
+    /* ⚠️ THIS REVERSES WHAT STOOD HERE, ON THE PACK'S TERMS. The old rule was a RELATIONSHIP:
+       content = window − 2×gutter, header = content − 2×inset, so the plate sat `--header-inset`
+       inside the cards it floated above. A plate was an object and an object needs a margin.
 
-    /* the three rows state those tokens as PADDING — a max-width anywhere re-creates the centred
-       column whose scrollbar took 15px off the content under classic scrollbars */
-    expect(block(".wpg-plate"), "the header row stopped reading gutter + inset")
-      .toContain("padding-inline: calc(var(--content-gutter) + var(--header-inset))");
-    expect(block(".wpg-tools"), "the toolbar row left the content gutter — it would not line up with the cards beneath it")
-      .toContain("var(--content-gutter)");
+       The masthead is content. It is a child of the scroll row, so it takes the scroll row's gutter
+       and states nothing of its own — which is what puts every page's mark on the same vertical as
+       the content beneath it without either naming a number. The inset has no reader left. */
+    const tokenCss = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
+    const gutter = /:root\s*\{[^}]*--content-gutter:\s*(\d+)px/s.exec(tokenCss);
+    expect(gutter, "the content gutter is not declared on :root — every width below is unresolvable").toBeTruthy();
+    expect(Number(gutter![1]), "the gutter went to zero — content would touch the window edge").toBeGreaterThan(0);
+
+    /* the scroller states the gutter; nothing inside it restates one */
     expect(block(".wpg-scroll"), "the gutter left the scrollport, so the scrollbar comes out of the content column again")
       .toContain("padding-inline: var(--content-gutter)");
-    for (const sel of [".wpg-plate", ".wpg-tools", ".wpg-scroll"]) {
+    for (const sel of [".wpg-tools", ".wpg-scroll"]) {
       expect(block(sel), `${sel} took a max-width — widths are relationships, not caps`).not.toContain("max-width");
     }
+    /* ⚠️ THE CONTROL ROW MUST NOT RE-GUTTER. It is inside the scroller, so a `padding-inline` here
+       would inset it a second time and pull the page's controls off the vertical its cards sit on —
+       the doubled-gutter fault, in the one row most likely to be measured against them. */
+    expect(block(".wpg-tools"), "the control row re-states a horizontal inset it has already inherited")
+      .not.toContain("padding-inline");
+    const tools = block(".wpg-tools");
+    const pad = /padding:\s*([^;]+);/.exec(tools);
+    expect(pad, "the control row states no padding at all").toBeTruthy();
+    /* ⚠️ EXTRACTED AND COMPARED, NEVER A `(?!…)` LOOKAHEAD — after optional whitespace a lookahead
+       backtracks to zero width and tests against the SPACE, so `padding: 12px 80px` would pass a
+       rule written to forbid it. */
+    const sides = pad![1].trim().split(/\s+/);
+    expect(sides.length, "the control row's padding names horizontal values — the scroller pays those").toBe(2);
+    expect(sides[1], "the control row gained a horizontal inset").toBe("0");
 
-    /* the relationship itself, computed at three windows — no figure is written down */
-    for (const win of [1280, 1700, 2400]) {
-      const content = win - 2 * gutter;
-      const header = content - 2 * inset;
-      expect(header, `at ${win}px the header is not ${inset}px inside the content on each side`).toBe(win - 2 * (gutter + inset));
-      expect(content - header, `at ${win}px the header/content difference is not twice the inset`).toBe(2 * inset);
-      expect(header, `at ${win}px the header has collapsed — the inset is too large for this window`).toBeGreaterThan(0);
+    /* ⚠️ AND THE RETIRED TOKEN HAS NO READER. `--header-inset` survives its own declaration until
+       step 4; what must be true now is that nothing consumes it, or the masthead is being inset
+       away from the content again by a rule nobody remembers writing. */
+    const gridCss = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
+    const live = (css: string) => css.replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const [name, css] of [["the grid", gridCss], ["the header", tokenCss]] as const) {
+      expect(live(css), `${name} still reads --header-inset — the masthead would sit inside the content again`)
+        .not.toContain("var(--header-inset)");
     }
   });
 
@@ -230,37 +248,32 @@ describe("the three-row grid — chrome outside the scroller", () => {
   });
 
   /* ══ §2 — THE GAP UNDER THE HAIRLINE ═════════════════════════════════════════════════════════ */
-  it("⚠️ the gap is 44px, ONE token, and it is never paid twice", () => {
-    /* ⚠️ NOTHING ASSERTED THIS TOKEN AT ALL BEFORE NOW — it had gone 20 → 70 with no lock on
-       either the value or, more importantly, the once-only rule. The gap sits above whatever comes
-       FIRST below the hairline: the toolbar row where a page has one, the scroll row where it does
-       not. `.wpg--tools` zeroes the scroll row's copy so a page gains and loses a toolbar without
-       gaining or losing its top margin — two elements, one gap, never both. */
-    /* ⚠️ TWO VALUES NOW, AND BOTH ARE TOKENS BECAUSE §3 SUBTRACTS THEM. The gap halves when the
-       strip is working — the strip is lighter than the card and needs proportionally less
-       separation — and the invariance padding below is computed from the DIFFERENCE, so a literal
-       in either place is the failure mode this whole section exists to prevent. */
-    /**
-     * ⚠️ 44 IS A VALUE, AND THE DERIVATION WAS OFFERED AND REJECTED. "Half the header's height,
-     * rounded" would give 64 from a 128px plate and would move the gap with the plate for free; 44
-     * is deliberately tighter than half and was chosen over it. Asserted as a literal HERE, in the
-     * one place that also names the header height, so anyone "restoring" the tidier rule has to
-     * delete a case that says in words that it was not picked.
-     */
+  it("⚠️ THE MASTHEAD OWNS THE RHYTHM ABOVE THE CONTENT — one element, not an arbitration", () => {
+    /* ⚠️ THIS REPLACES THE "ONE TOKEN, NEVER PAID TWICE" RULE, AND THE PROBLEM IT SOLVED IS GONE
+       RATHER THAN SOLVED DIFFERENTLY. `--content-top-gap` was the air under the CHROME hairline,
+       and it needed arbitrating because it had to sit above whichever element came first below that
+       boundary — the toolbar row on pages that had one, the scroll row on pages that did not — with
+       `.wpg--tools` zeroing whichever had not paid.
+
+       There is no chrome boundary now. The masthead is the first thing in the scroller and states
+       its own air: 26 above, 20 below, then its hairline, then 16 to whatever follows. One element
+       declares all of it, so nothing can pay it twice and there is nothing to arbitrate. */
     const header = readFileSync(resolve(__dirname, "pageHeader.css"), "utf8");
-    expect(header, "the resting gap changed value without this case changing with it").toContain("--content-top-gap-rest: 44px");
-    const idx = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    expect(idx, "the resting plate height changed without this case changing with it").toContain("--wsh-plate-h: 128px");
-    expect(header, "the gap became half the header height — that rule was considered and NOT chosen; 44 is deliberately tighter")
-      .not.toMatch(/--content-top-gap-rest:\s*calc/);
-    expect(header, "the working gap changed value without this case changing with it").toContain("--content-top-gap-work: 35px");
-    expect(header, "the gap everything reads is no longer the resting one").toContain("--content-top-gap: var(--content-top-gap-rest)");
-    expect(block(".wpg--working"), "the working state does not halve the gap").toContain("--content-top-gap: var(--content-top-gap-work)");
-    expect(block(".wpg-scroll"), "the scroll row stopped paying the gap").toContain("padding-top: var(--content-top-gap)");
-    expect(block(".wpg-tools"), "the toolbar row stopped paying the gap").toContain("var(--content-top-gap)");
-    const both = block(".wpg--tools > .wpg-scroll") + block(".wpg--tools .wpg-scroll");
-    expect(both, "a page with a toolbar pays the gap twice — the toolbar row and the scroll row both")
-      .toMatch(/padding-top:\s*0/);
+    const wsh = /\.wsh\s*\{([^}]*)\}/.exec(header);
+    expect(wsh, "the masthead has no rule at all").toBeTruthy();
+    const body = wsh![1].replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(body, "the masthead stopped stating its own vertical air").toContain("padding: 26px 0 20px");
+    expect(body, "the masthead lost the gap to whatever follows it").toContain("margin-bottom: 16px");
+
+    /* ⚠️ AND NEITHER GRID ROW MAY RE-ADD ONE. A `padding-top` on the scroller would sit ABOVE the
+       masthead — pushing the page's title down while claiming to be the gap under it — and the
+       control row already states its own 12. */
+    expect(block(".wpg-scroll"), "the scroll row pays a top gap again — it would sit above the masthead")
+      .not.toContain("padding-top: var(--content-top-gap)");
+    const gridCss = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
+    const live = gridCss.replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(live, "the once-only arbitration came back — there is nothing left to arbitrate")
+      .not.toContain(".wpg--tools > .wpg-scroll");
   });
 
   /**
@@ -307,12 +320,12 @@ describe("the three-row grid — chrome outside the scroller", () => {
        the fade drags up the page instead of hemming it. Asserted at source because there is no
        jsdom here and no layout to measure; the Playwright matrix takes the pixels. */
     const hem = block(".wpg-hem");
-    expect(hem, "the hems left the grid — as children of the scroller they scroll with the content").toContain("grid-row: 3");
+    expect(hem, "the hems left the grid — as children of the scroller they scroll with the content").toContain("grid-row: 1");
     /* ⚠️ EVERY ROW MUST NAME THE COLUMN, because grid auto-placement NEVER OVERLAPS: two items
        share a cell only when BOTH are explicitly positioned. Without this the hems took column 1
        and the auto-placed scroller was pushed into an implicit column 2 — browser-measured, the
        header rows read 688px of right margin against 449 on nine of ten pages. */
-    for (const sel of [".wpg", ".wpg-plate", ".wpg-tools", ".wpg-scroll", ".wpg-hem"]) {
+    for (const sel of [".wpg", ".wpg-scroll", ".wpg-dock", ".wpg-hem"]) {
       expect(block(sel), `${sel} does not name its grid column — an auto-placed row cannot share a cell with the hems`)
         .toMatch(/grid-(column|template-columns):/);
     }
@@ -495,7 +508,7 @@ describe("the three-row grid — chrome outside the scroller", () => {
     const seen: (boolean | null)[] = [];
     const Probe: React.FC = () => { seen.push(React.useContext(PlateCondensedContext)); return null; };
     renderToStaticMarkup(
-      <WorkspacePageGrid plate={<Probe />} condensed>{null}</WorkspacePageGrid>,
+      <WorkspacePageGrid masthead={<Probe />} condensed>{null}</WorkspacePageGrid>,
     );
     /* there is no IntersectionObserver in this environment, so `stuck` can only be false here —
        which is exactly the case worth locking: the mode alone must be enough */
@@ -513,52 +526,44 @@ describe("the three-row grid — chrome outside the scroller", () => {
    * pages with the least room to spare. Query Centre was the only one with a way out, and only
    * because a journey sets the mode.
    */
-  it("⚠️ ENGAGEMENT IS THE THIRD INPUT, and it is wired to the content rows ONLY", () => {
-    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    /* ⚠️ NO DOCUMENT LISTENER. One would fire for the sidebar, the breadcrumb and the top bar —
-       none of which is working on this page — and would then need a `closest()` test against markup
-       this component does not own to guess its way back out. */
-    expect(src, "a document-level listener appeared — a click in the sidebar or the top bar would collapse the page's header")
-      .not.toMatch(/document\.addEventListener|window\.addEventListener/);
-    expect(src, "the engage handler is gone — nothing would collapse a fill page").toContain("const engage");
-    /* ⚠️ GATED ON `fill`. On a scrolling page the state is a pure function of `scrollTop`, so a
-       click setting it true would be overwritten by the next evaluated frame — the header would
-       flicker and settle back, which reads as a bug rather than as a rule. */
-    expect(src, "engagement is no longer gated on `fill` — a click would fight the sentinel on every scrolling page")
-      .toMatch(/const engage = [\s\S]{0,120}?if \(fill\)/);
-    /* row 1 must NOT engage — clicking a header is not working, and a header that hid itself on
-       click would be a control that removes itself when used */
-    const plateRow = /className=\{`wpg-plate\$\{[\s\S]*?\}`\}[\s\S]{0,200}?>/.exec(src)?.[0] ?? "";
-    expect(plateRow, "the plate row's markup is not where this case expects it — re-anchor before trusting the assertion below").toContain("wpg-plate");
-    expect(plateRow, "row 1 engages — clicking the header would collapse it").not.toContain("onPointerDown={engage}");
+  it("⚠️ ENGAGEMENT LISTENS ON THE SCROLLER, NEVER ON THE DOCUMENT", () => {
+    /* ⚠️ THE ROW-BY-ROW WIRING IS GONE BECAUSE THE ROWS ARE. Engagement used to be attached to the
+       toolbar row and the scroll row individually, so that row 1 — the header — could be excluded:
+       clicking a header is not working on the page. Both are inside the scroller now, so one
+       handler on the scroller covers the content by construction.
+
+       ⚠️ WHAT MUST NOT CHANGE IS THE OTHER HALF: never a document-level listener. One would fire
+       for the sidebar, the breadcrumb and the top bar — none of which is working on this page — and
+       would then need a `closest()` test against markup the grid does not own to guess its way back
+       out. Asserted at source, because there is no jsdom here to dispatch into. */
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
+    const live = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(live, "engagement went to the document — it would fire for the whole shell")
+      .not.toMatch(/document\.addEventListener\(\s*["'`]pointerdown/);
+    /* ⚠️ POINTERDOWN, NOT CLICK — a drag inside the content never produces a `click`, and it is the
+       least ambiguous act of working there is. */
+    expect(live, "the scroller stopped reporting engagement").toMatch(/className="wpg-scroll"[\s\S]{0,200}onPointerDown=\{engage\}/);
+    expect(live, "`engage` stopped being gated on `fill` — a scrolling page has its own signal and the two would fight")
+      .toMatch(/const engage[\s\S]{0,160}if \(fill\) setEngaged\(true\)/);
   });
 
-  it("⚠️ THE BAND RESTORES, AND ONLY ON A FILL PAGE — no chevron, no label", () => {
-    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(src, "the restorable gate stopped requiring both `fill` and `condensed` — a resting card would take a pointer cursor")
-      .toMatch(/const restorable = fill && condensed;/);
-    /**
-     * ⚠️ THE HOVER SHIFT IS DELETED, AND THE POINTER IS THE WHOLE AFFORDANCE. This asserted the
-     * shift EXISTED, on the reasoning that "the band would be clickable with nothing to say so" —
-     * fair while the band carried a tint, and wrong about the one thing the band must not do. It is
-     * a fixed surface the eye uses to locate the page; repainting its ground under the pointer
-     * reads as a control that has been pressed. The rule's own comment always said "nothing drawn",
-     * and a background swap IS drawing something.
-     *
-     * ⚠️ INVERTED RATHER THAN DELETED, because this ground has now moved four times and a case that
-     * merely stopped failing would let the shift come back with the fifth.
-     */
-    const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
-    expect(block(".wpg-plate--restorable"), "the restore affordance lost its pointer").toContain("cursor: pointer");
-    expect(css.replace(/\/\*[\s\S]*?\*\//g, ""), "the band repaints on hover again — it must render identically at rest, on hover and during scroll")
-      .not.toMatch(/\.wpg-plate--restorable:hover/);
-    expect(css, "a chevron or a label appeared in the band — it stays bare").not.toMatch(/wpg-plate--restorable[^{]*::(before|after)/);
-    /* ⚠️ RENDERED, NOT JUST DECLARED. A `restorable` const that never reaches the markup would pass
-       every assertion above and do nothing at all. */
-    const html = renderToStaticMarkup(<WorkspacePageGrid plate={<span />} fill condensed>{null}</WorkspacePageGrid>);
-    expect(html, "a condensed fill page does not mark its band restorable").toContain("wpg-plate--restorable");
-    const scrolling = renderToStaticMarkup(<WorkspacePageGrid plate={<span />} condensed>{null}</WorkspacePageGrid>);
-    expect(scrolling, "a scrolling page's band offers a restore its sentinel would immediately overwrite").not.toContain("wpg-plate--restorable");
+  it("⚠️ THERE IS NO RESTORE AFFORDANCE — the band it belonged to is gone", () => {
+    /* The collapsed band WAS the way back: a bare surface with a pointer cursor that you clicked to
+       bring the header out again. The masthead does not collapse to a band — on a fill page it
+       vanishes outright and returns on the next visit to the page — so there is no surface to
+       click and nothing to restore.
+
+       ⚠️ AND NOTHING IS STRANDED BY THAT, which is the condition the whole design rests on: the
+       masthead holds no actions, so a visit that never shows it again has cost the writer nothing.
+       If a restore ever comes back, this case is what should stop it long enough to ask why. */
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
+    const live = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    for (const gone of ["restorable", "restore"]) {
+      expect(live, `\`${gone}\` came back — see the note in this case before reinstating it`).not.toContain(gone);
+    }
+    const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    expect(css, "a pointer cursor came back to the header — it would promise a control that does not exist")
+      .not.toContain("cursor: pointer");
   });
 
   /**
@@ -593,13 +598,19 @@ describe("the three-row grid — chrome outside the scroller", () => {
   it("without the mode, an unscrolled page is at rest", () => {
     const seen: (boolean | null)[] = [];
     const Probe: React.FC = () => { seen.push(React.useContext(PlateCondensedContext)); return null; };
-    renderToStaticMarkup(<WorkspacePageGrid plate={<Probe />}>{null}</WorkspacePageGrid>);
+    renderToStaticMarkup(<WorkspacePageGrid masthead={<Probe />}>{null}</WorkspacePageGrid>);
     expect(seen[0], "the grid condenses by default — every page would open in the working state").toBe(false);
   });
 
   it("⚠️ the row and the header read ONE value, so they cannot disagree", () => {
-    const html = renderToStaticMarkup(<WorkspacePageGrid plate={<span />} condensed>{null}</WorkspacePageGrid>);
-    expect(html, "row 1 did not take the working class from the mode — the header would flatten inside a row still holding its inset").toContain("wpg-plate--working");
+    /* ⚠️ THE ROW'S HALF OF THIS IS GONE WITH THE ROW. `.wpg-plate--working` was how the CHROME ROW
+       took the same boolean as the header inside it, so the two could not disagree about the state.
+       There is no chrome row; the class the grid still carries is the root's, and it is what step 3
+       will drive the fill-page collapse from. The union below is the part that matters and it is
+       unchanged. */
+    const html = renderToStaticMarkup(<WorkspacePageGrid masthead={<span />} condensed>{null}</WorkspacePageGrid>);
+    expect(html, "the root stopped carrying the working state — nothing downstream could read it").toContain("wpg--working");
+    expect(html, "a plate row came back").not.toContain("wpg-plate");
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     /* ⚠️ THREE INPUTS NOW, STILL ONE UNION AND STILL ONE BOOLEAN OUT (collapse-on-engagement).
        `engaged` joined `stuck` and the mode; the header receives the same single value and still
@@ -630,17 +641,20 @@ describe("the three-row grid — chrome outside the scroller", () => {
     expect(seen, "the context no longer defaults to null outside a grid").toBeNull();
   });
 
-  it("renders three rows, and NO toolbar row when there is no toolbar", () => {
+  it("the scroller holds masthead → control row → content, and NO control row without one", () => {
     const withBar = renderToStaticMarkup(
-      <WorkspacePageGrid plate={<i>plate</i>} toolbar={<i>tools</i>}>body</WorkspacePageGrid>,
+      <WorkspacePageGrid masthead={<i>plate</i>} toolbar={<i>tools</i>}>body</WorkspacePageGrid>,
     );
-    expect(withBar).toContain("wpg-plate");
-    expect(withBar).toContain("wpg-tools");
     expect(withBar).toContain("wpg-scroll");
-    /* the chrome rows are SIBLINGS of the scroller — the plate must not be inside it */
-    expect(withBar.indexOf("wpg-plate")).toBeLessThan(withBar.indexOf("wpg-scroll"));
+    expect(withBar).toContain("wpg-tools");
+    /* ⚠️ THE ORDER REVERSED, AND IT IS THE POINT OF THE PACK. The chrome rows used to be SIBLINGS
+       of the scroller, above it, pinned by construction. Both are inside it now: the masthead first,
+       so it can leave, then the control row, which is what stays. */
+    expect(withBar.indexOf("wpg-scroll")).toBeLessThan(withBar.indexOf("wpg-tools"));
+    expect(withBar.indexOf("wpg-scroll"), "the masthead is not inside the scroller").toBeLessThan(withBar.indexOf("plate"));
+    expect(withBar.indexOf("plate"), "the masthead does not come before the control row").toBeLessThan(withBar.indexOf("wpg-tools"));
 
-    const bare = renderToStaticMarkup(<WorkspacePageGrid plate={<i>plate</i>}>body</WorkspacePageGrid>);
+    const bare = renderToStaticMarkup(<WorkspacePageGrid masthead={<i>plate</i>}>body</WorkspacePageGrid>);
     expect(bare, "an empty toolbar row rendered — it would draw its hairline with nothing above it, and reserve space the page does not use").not.toContain("wpg-tools");
   });
 
@@ -655,59 +669,42 @@ describe("the three-row grid — chrome outside the scroller", () => {
    * `.wsh-wrap`, the reservation padding, the frosted state and the legacy scroll listener — comes
    * out, and not before.
    */
-  it("⚠️ THE CONVERSION IS PARTIAL, and both halves are asserted", () => {
+  it("⚠️ THE CENSUS — every page that renders a masthead renders it through the grid", () => {
     /* ⚠️ THE PREDICATE IS `variant="workspace"`, NOT `toolbar=`, AND THE FIRST VERSION WAS WRONG.
        It listed only pages that pass a toolbar — so Discover, Submission packages and Analytics were
-       absent from BOTH halves while all three still rendered the sticky plate. The census would have
-       read "empty" with three pages still depending on `.wsh-wrap`, the reservation and the frost,
-       and the cleanup commit would have deleted machinery in use. Anything that renders the plate is
-       on one path or the other; that is what has to be enumerated. */
+       absent while all three still rendered the header. Anything that renders a masthead is on this
+       list; that is what has to be enumerated.
+
+       ⚠️ AND QUERY CENTRE WAS MISSING FROM IT UNTIL THIS PACK, which is the fault CLAUDE.md records
+       in its own words: a matrix that omits the page you just changed is the "all six headers
+       identical" report all over again. Ten routes, eight call sites — the Tasks family is three
+       pages through one layout. */
     const CONVERTED = [
+      ["Query Centre", "../Queries.tsx"],
       ["Contact list", "../agents/AgentList.tsx"],
       ["Manuscripts", "../AllManuscripts.tsx"],
       ["Comparable titles", "../manuscripts/ComparableTitlesPage.tsx"],
       ["Discover", "../DiscoverNewAgents.tsx"],
       ["Submission packages", "../SubmissionPackages.tsx"],
       ["Analytics", "../QueryAnalytics.tsx"],
-      /* the last three, converted at step 5 — which is what lets the sticky path be deleted */
-      ["Tasks family", "../todo/TasksPageLayout.tsx"],
+      ["Tasks family (To-do · Calendar · Noteboard)", "../todo/TasksPageLayout.tsx"],
     ] as const;
-    /* ⚠️ THE CENSUS BRIEFLY GREW A "NO PLATE" HALF, AND THAT WAS THE CENSUS BEING WRONG RATHER
-       THAN THE WORLD MOVING. `ee0094b` put the plate on all three Tasks pages; `a7b5d54` reverted
-       it; a later pass read the reverted source, concluded the Tasks family had left the plate
-       behind, and rewrote this half to assert the ABSENCE of `variant="workspace"` — pinning a
-       regression as though it were a decision. The half is `NOT_YET` again, meaning exactly what
-       it always meant: still on the sticky plate, awaiting conversion to the grid.
-       ⚠️ THE LESSON, AND IT IS WHY THIS COMMENT STAYS: a census read off current source can only
-       ever describe what is there. It cannot tell a decision from a revert, so when its two halves
-       stop fitting, the first question is which commit last moved the page — not which half to
-       widen. */
-    /* ⚠️ NOT_YET IS EMPTY, AND THAT IS THE SIGNAL TO DELETE THE OLD PATH. Every page that renders a
-       plate is on the grid. `.wsh-wrap`'s `position: sticky`, its height reservation and the legacy
-       scroll listener exist ONLY for pages on the other path, and there are none — step 7 removes
-       them. Until then the half stays declared and empty rather than deleted, so the fact that it
-       is empty is asserted rather than merely true. */
-    const NOT_YET: readonly (readonly [string, string])[] = [];
     for (const [page, file] of CONVERTED) {
-      expect(
-        readFileSync(resolve(__dirname, file), "utf8"),
-        `${page} is listed as converted but no longer renders the grid`,
-      ).toContain("WorkspacePageGrid");
+      const src = readFileSync(resolve(__dirname, file), "utf8");
+      expect(src, `${page} is listed as rendering the grid and no longer does`).toContain("WorkspacePageGrid");
+      expect(src, `${page} stopped rendering a masthead`).toContain('variant="workspace"');
     }
-    for (const [page, file] of NOT_YET) {
-      const t = readFileSync(resolve(__dirname, file), "utf8");
-      expect(t, `${page} converted — move it into CONVERTED above, and check whether this was the LAST one`).not.toContain("WorkspacePageGrid");
-      expect(t, `${page} is still on the old path, so it must still render the plate the old way`).toContain('variant="workspace"');
+
+    /* ⚠️ THE OLD PATH IS FULLY GONE, AND BOTH ITS HALVES ARE ASSERTED ABSENT (in-flow masthead).
+       The header used to read the grid's condensed state through context and throw when mounted
+       without a grid; before that it found its own scroller by walking up from the plate. It has no
+       state at all now, so all three are retired together — and a residue of any of them is how a
+       future reader concludes the masthead still has a working state. */
+    const ph = readFileSync(resolve(__dirname, "PageHeader.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    for (const gone of ["PlateCondensedContext", "useCondensed", "nearestScroller", "mounted outside a WorkspacePageGrid"]) {
+      expect(ph, `PageHeader still carries \`${gone}\` — the masthead has no state for it to feed`).not.toContain(gone);
     }
-    /* the legacy path must survive while anything is still on it */
-    const ph = readFileSync(resolve(__dirname, "PageHeader.tsx"), "utf8");
-    expect(ph, "PageHeader stopped consuming the grid — converted pages would fall back to the scroll listener and condense on the wrong element").toContain("PlateCondensedContext");
-    /* ⚠️ REVERSED: THE LEGACY LISTENER IS RETIRED. It found its own scroller by walking up from the
-       plate, and existed only for pages not yet on the grid. There are none — Query Centre was the
-       last — so it is deleted, and a workspace header mounted outside a grid THROWS in development
-       instead of silently attaching to the shell's scroller and condensing on the wrong element. */
-    expect(ph, "the legacy scroll listener came back — nothing needs it, and it condenses on the wrong element").not.toContain("useCondensed");
-    expect(ph, "the dev throw went — a header outside a grid would silently never condense").toContain("mounted outside a WorkspacePageGrid");
   });
 
   /**

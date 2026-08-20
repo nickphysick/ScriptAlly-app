@@ -30,7 +30,7 @@
  */
 import React from "react";
 import { PageHeader } from "./shell/PageHeader";
-import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
+import { WorkspacePageGrid, PageTally } from "./shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../lib/db";
 import { resolveScopedManuscript } from "../lib/shellSidebar";
 import { IllustrationSlot } from "./analytics/IllustrationSlot";
@@ -109,7 +109,18 @@ export const QueryAnalytics: React.FC = () => {
   const cells = statCells(stats, prevStats, previousWindowLabel(range), range === "all");
 
   /* The mono tally under the title — the two figures a writer checks first. */
-  const subLine = `${stats.sent} ${stats.sent === 1 ? "query" : "queries"} · ${stats.open} awaiting reply`;
+  /**
+   * ⚠️ THIS WAS THE MASTHEAD'S DESCRIPTION AND IT IS A TALLY, WHICH IS WHY IT MOVED (in-flow
+   * masthead, step 1). "25 queries · 16 awaiting reply" says nothing about what the page is FOR —
+   * it states two figures, in exactly the shape the Contact list's row has always stated its own.
+   * Split rather than reworded: same two numbers, same derivation, now the control row's count.
+   *
+   * ⚠️ SO THE MASTHEAD IS TITLE-ONLY, and that is a real consequence rather than an oversight. The
+   * page has no description now because it never had one — it had a count in the slot. Flagged for
+   * Nick: a sentence saying what Analytics is for would go in the description if he wants one.
+   */
+  const tallyValue = `${stats.sent} ${stats.sent === 1 ? "query" : "queries"}`;
+  const tallyNote = `${stats.open} AWAITING REPLY`;
 
   return (
     <div className="qa-wrap">
@@ -119,19 +130,23 @@ export const QueryAnalytics: React.FC = () => {
       <WorkspacePageGrid
         className="qa-wpg"
         scrollLabel="Analytics"
-        plate={
+        masthead={
           <PageHeader
             variant="workspace"
             mark="analytics"
             title="Analytics"
-            description={subLine}
-            actionsSlot={
-              <div className="an-head">
-                <RangeToggle value={range} onChange={setRange} />
-                <ExportButton />
-              </div>
-            }
+            /* ⚠️ NO DESCRIPTION AND NO ACTIONS. The description was a tally and the actions were the
+               range toggle and Export; all three are in the control row below. */
           />
+        }
+        toolbar={
+          <>
+            <PageTally value={tallyValue} note={tallyNote} />
+            <div className="an-head">
+              <RangeToggle value={range} onChange={setRange} />
+              <ExportButton />
+            </div>
+          </>
         }
       >
         {/* ⚠️ THREE STATES, AND THE TWO EMPTY ONES ARE NOT A PAGE OF ZEROES. Five stats reading 0

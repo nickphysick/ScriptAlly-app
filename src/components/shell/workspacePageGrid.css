@@ -1,7 +1,19 @@
-/* ── WorkspacePageGrid — chrome outside the scroller (amendment 9) ────────────────────────────
-   Three rows: plate · toolbar · scroller. The chrome rows are SIBLINGS of the scrolling row, so
-   they are pinned by construction. Nothing here is `position: sticky` and nothing takes a `top`
-   offset — there is no number to compute, and therefore none to get wrong on any page type. */
+/* ── WorkspacePageGrid — the scroller owns the page (in-flow masthead pack, step 1) ───────────
+   TWO rows: the scroller, then the dock.
+
+   ⚠️ THIS REVERSES THE RULE THE FILE WAS BUILT ON, AND ON ITS OWN TERMS. It read "chrome belongs
+   outside the scroller", and that was right while the header WAS chrome: a fixed-height plate that
+   condensed into a band, which had to be pinned so it could not scroll away. The masthead is no
+   longer chrome — it is the first thing on the page, and it leaves when the user starts working.
+   Content does not need pinning, so the rows that pinned it are gone.
+
+   ⚠️ WHAT THE OLD ARRANGEMENT WAS PROTECTING AGAINST IS STILL TRUE, and none of it comes back:
+     1. A `top` offset that encoded another element's height as a literal. Nothing takes a `top`
+        offset here; step 2's sticky control row is `top: 0`, which encodes nothing.
+     2. A reservation padding to cancel an in-flow sticky element's height change. The masthead
+        changes no heights on a scrolling page — it scrolls — so there is nothing to cancel.
+     3. Two stacking contexts and a `backdrop-filter` repainting every scroll frame. The control
+        row draws a hairline and a shadow, and only once it is stuck. */
 
 /* ⚠️ `minmax(0, 1fr)` ON THE SCROLL ROW, NOT `1fr`. A grid track's automatic minimum is its
    content, so a plain `1fr` row grows to fit a long list and the grid pushes past the frame
@@ -9,9 +21,11 @@
    documents, in grid's own spelling. */
 .wpg {
   display: grid;
-  /* rows: plate · toolbar · the scroller · the dock. Row 4 is `auto`, so it costs nothing when no
-     page passes one — and when one does, its height comes out of row 3 (see the `dock` prop). */
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  /* ⚠️ TWO ROWS: THE SCROLLER, THEN THE DOCK (in-flow masthead, step 1). It was four — plate,
+     toolbar, scroller, dock — and the first two are now children of the scroller, because the
+     masthead has to come FIRST and it is content. Row 2 is `auto`, so it costs nothing when no page
+     passes a dock, and when one does its height still comes out of row 1. */
+  grid-template-rows: minmax(0, 1fr) auto;
   /* ⚠️ ONE EXPLICIT COLUMN, AND EVERY ROW NAMES IT — because grid auto-placement NEVER OVERLAPS.
      The hems share row 3 with the scroller, and the moment they claimed column 1 the auto-placed
      scroller was pushed into an implicit column 2: the header rows measured 688px of right margin
@@ -34,89 +48,54 @@
    passes NO toolbar would put its scroller in track 2 — an `auto` track — so the scroller would
    size to its content and never scroll, on exactly the pages with least to show. */
 /* ⚠️ NO CAP ANYWHERE — WIDTHS ARE PADDING (consolidated header spec §1). `--wpg-cap` is retired
-   along with `--sa-col-max` and the four per-page gutter values. Every row is FULL container
-   width and states its own inset as padding:
+   along with `--sa-col-max` and the four per-page gutter values. Every row is FULL container width
+   and states its own inset as padding.
 
-     row 1 header   →  --content-gutter + --header-inset   (at rest)
-     row 2 toolbar  →  --content-gutter
-     row 3 scroller →  --content-gutter
+   ⚠️ AND THERE IS ONE INSET NOW, NOT THREE. The plate stated `--content-gutter + --header-inset`,
+   the toolbar `--content-gutter`, the scroller `--content-gutter`. With the masthead and the
+   control row INSIDE the scroller they inherit the scroller's gutter and state nothing of their
+   own — which is what puts every page's mark, controls and content on one vertical without any of
+   the three naming a number. `--header-inset` has no reader left; it retires at step 4.
 
-   ⚠️ THE GUTTER GOES INSIDE ROW 3, AND ROW 3 RESERVES THE SCROLLBAR ON BOTH EDGES. A `max-width`
-   column centred in a full-width scroller left the scrollbar OUTSIDE the column, so a classic
-   scrollbar's 15px came off the content — measured 1240 → 1225, invisible under overlay
+   ⚠️ THE GUTTER GOES INSIDE THE SCROLL ROW, AND THE ROW RESERVES THE SCROLLBAR ON BOTH EDGES. A
+   `max-width` column centred in a full-width scroller left the scrollbar OUTSIDE the column, so a
+   classic scrollbar's 15px came off the content — measured 1240 → 1225, invisible under overlay
    scrollbars, which is how it shipped. Padding fixes the CAP fault but not the scrollbar: it sits
    inside the scrollport wherever the padding goes. `stable both-edges` keeps the two gutters
-   symmetric and, more importantly, stops the content jumping sideways when a scrollbar appears or
-   disappears — see the rule itself for the measurements. It goes with the cap.
+   symmetric and stops the content jumping sideways when a scrollbar appears or disappears.
 
-   ⚠️ AND PADDING, NOT MARGIN, ON ROW 3: a margin would move the scrollbar inward with the content
-   and put the fault back. */
-.wpg-plate,
-.wpg-tools { width: 100%; min-width: 0; box-sizing: border-box; }
-/* ⚠️ EACH ROW DECLARES ITS OWN `box-sizing`, and that is not belt-and-braces. These widths are
-   `width: 100%` PLUS padding, so under `content-box` every row is wider than its container by
-   twice its padding — the header overflowed by 400px in the measuring harness for exactly this
-   reason. The app inherits `border-box` from Tailwind's preflight; a rule whose maths depends on
-   the box model states it rather than inheriting it, per the house rule. */
-/**
- * ⚠️ ROW 1 IS WHERE THE WIDTH CHANGE HAPPENS, NOT THE HEADER (spec §2). At rest the row insets the
- * plate by gutter + inset; working, the inset goes to 0 and the header fills the container. The
- * header itself never states a width — it fills its row in both states — so "the strip is full
- * width" is one padding transition rather than two rules that have to agree.
- *
- * ⚠️ THE HAIRLINE BELONGS TO THE ROW, NOT THE PLATE, and spans the full container. On the plate it
- * would stop at the plate's edges and leave two gaps where the inset used to be; it is the line
- * between chrome and content, so it has to reach both walls. It fades rather than appears: the
- * plate's own border is still dissolving over .22s, and a line snapping in at t=0 reads as a
- * second, unrelated event.
- */
-.wpg-plate {
-  grid-row: 1;
-  grid-column: 1;
-  position: relative;
-  padding-block: var(--wsh-plate-gap) 0;
-  padding-inline: calc(var(--content-gutter) + var(--header-inset));
-  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
-}
-.wpg-plate--working { padding: 0; }
-/**
- * ⚠️ THE BAND IS THE WAY BACK, AND IT STAYS BARE (collapse-on-engagement). No chevron, no label —
- * the affordance is the pointer and a hover shift, nothing drawn. A control in the strip would
- * compete with the page's own actions for the one row that exists to hold almost nothing.
- *
- * ⚠️ FILL PAGES ONLY, and the class says so rather than the stylesheet guessing. On a scrolling
- * page the state is a pure function of `scrollTop`, so a click that cleared it would be overwritten
- * on the next evaluated frame — a pointer cursor promising something that visibly does not happen.
- */
-.wpg-plate--restorable { cursor: pointer; }
-/* ⚠️ THE HOVER SHIFT IS DELETED (§5), AND THE POINTER IS THE WHOLE AFFORDANCE NOW. It repainted the
-   band's ground on hover — the one thing this element must not do, because the band is a fixed
-   surface the eye uses to locate the page, and a surface that changes colour when the mouse passes
-   over it reads as a control that has been pressed. The comment above still holds: "nothing drawn"
-   was always the intent, and a background swap IS drawing something. The band renders identically
-   at rest, on hover and during scroll. */
-/* ⚠️ THE FLOATING HAIRLINE IS DELETED (ref 91). The row drew a 1px rule inset to the content
-   gutter, fading in with the working state; the header now draws its OWN bottom edge as a band,
-   spanning the container. Keeping both gave two lines a pixel apart that did not even agree on
-   their length. The line belongs to the thing that draws it — see `.wsh--scrolled` in
-   pageHeader.css. */
-
+   ⚠️ AND PADDING, NOT MARGIN, ON THE SCROLL ROW: a margin would move the scrollbar inward with the
+   content and put the fault back. */
+/* ⚠️ `.wpg-plate`, `.wpg-plate--working` AND `.wpg-plate--restorable` ARE DELETED — the row is gone
+   from the markup, so these describe an element nothing renders. The band, the collapsed-state
+   tokens and the invariance padding are the STATE machinery and retire together at step 4; this is
+   the structure, and it goes with the structure it described. */
 
 /* ⚠️ THE TOOLBAR HAS NO CONTAINER — no border, no shadow, no background, and no state change on
    scroll. Just the controls and ONE hairline beneath, which is the line between chrome and content.
    Giving it a frame would make it read as a second plate stacked under the first, which is the
    arrangement amendment 9 exists to undo. */
 .wpg-tools {
-  grid-row: 2;
-  grid-column: 1;
+  /* ⚠️ EVERY BOX WHOSE MATHS DEPENDS ON THE BOX MODEL DECLARES IT — the house rule, and the
+     render harness is why: it loads a hand-picked stylesheet list without Tailwind's preflight, so
+     an inherited `border-box` silently becomes `content-box` and every padded row measures wide. */
+  box-sizing: border-box;
+  /* ⚠️ NO GRID PLACEMENT — it is a child of the scroller now, in flow, directly beneath the
+     masthead's closing hairline. Step 2 makes it `position: sticky` here, which is how it takes
+     over the anchoring the chrome row used to do by construction. */
   min-width: 0;
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  padding: var(--content-top-gap) var(--content-gutter) 12px;
-  /* the gap halves with the strip (§2) — it must land on the same frame as the collapse */
-  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
+  /* ⚠️ NO HORIZONTAL PADDING AND NO GAP TOKEN. The scroller's gutter insets it, and the air above
+     it is the masthead's own `margin-bottom: 16px` — so 16 + 12 = 28px from hairline to controls,
+     which is what both refs draw. `--content-top-gap` paid that gap when the boundary was a chrome
+     edge two rows up; there is no such boundary now, and the token retires at step 4. */
+  padding: 12px 0;
+  /* ⚠️ `flex: none` — on a fill page the scroller is a flex COLUMN, and without this the control
+     row would shrink as the panes below claim the space. Same reason the masthead states it. */
+  flex: none;
   /* ⚠️ NO BORDER — THE HAIRLINE IS ROW 1'S, AND THIS DREW A SECOND ONE (spec §3). Row 2 carried
      its own `border-bottom`, so any page with a toolbar showed TWO lines in the working state,
      20px apart: the header row's, then the toolbar's. Reported on Manuscripts, but it was every
@@ -125,7 +104,7 @@
 }
 
 .wpg-scroll {
-  grid-row: 3;
+  grid-row: 1;
   grid-column: 1;
   min-width: 0;
   box-sizing: border-box;
@@ -154,12 +133,11 @@
      gone and the width is now correct; the reservation is doing its actual job. The cost is the
      scrollbar's width off each side of the nominal gutter, under 1.5% at any real window. */
   padding-inline: var(--content-gutter);
-  /* ⚠️ THE NO-TOOLBAR CASE. With a toolbar the gap is that row's top padding; without one the
-     scroll row is the first thing under the hairline and carries it here instead, so the
-     boundary keeps its air either way. `.wpg--tools` zeroes it when the toolbar has already
-     paid — two elements, one gap, never both. */
-  padding-top: var(--content-top-gap);
-  transition: padding-top .22s cubic-bezier(.4, 0, .2, 1);
+  /* ⚠️ NO TOP PADDING, AND THE WHOLE "WHICH ELEMENT PAYS THE GAP" QUESTION GOES WITH IT. The gap
+     used to sit above whatever came FIRST below the chrome hairline — the toolbar row on pages that
+     had one, this row on pages that did not — which needed `.wpg--tools` to zero one of them so it
+     was never paid twice. The masthead is the first thing in here now and it states its own 26px
+     above and 20px below; there is no boundary above this row to keep air beneath. */
   /* ⚠️ THE FOOT PADDING IS A SUM, NOT A VALUE, AND A COLLISION IS WHY. The invariance padding was
      written as `padding-bottom` on `.wpg--working > .wpg-scroll` (0-2-0) and three pages declare
      `.aglist .wpg-scroll { padding-bottom: 48px }` at the SAME specificity, later in the bundle —
@@ -215,7 +193,7 @@
  * faintly cold panel over a warm ground — the same fault as the hems, wearing an alpha.
  */
 .wpg-dock {
-  grid-row: 4;
+  grid-row: 2;
   grid-column: 1;
   border-top: 1px solid var(--ws-edge);
   background: rgba(var(--ws-window-rgb), 0.86);
@@ -240,7 +218,7 @@
  * through white and only show against content.
  */
 .wpg-hem {
-  grid-row: 3;
+  grid-row: 1;
   grid-column: 1;
   z-index: 3;
   height: var(--wpg-hem-h, 44px);
@@ -270,11 +248,15 @@
  * frosted state go together and this goes with them. It outranks `.wsh-wrap--scrolled` (0,2,0 to
  * 0,1,0), so the reservation cannot come back through the condensed state.
  */
-/* the seam that neutralised the sticky path is no longer needed — the path is deleted */
-.wpg-plate .wsh-wrap { height: auto; }
+/* ⚠️ THE `.wpg-plate .wsh-wrap` SEAM IS DELETED — both of its elements are. It neutralised the
+   sticky wrapper's reserved height for pages that had converted to the grid while others had not;
+   `.wsh-wrap` no longer renders and `.wpg-plate` no longer exists. */
 
-/* the toolbar exists → it has already paid the gap, so the scroller must not pay it twice */
-.wpg--tools > .wpg-scroll { padding-top: 0; }
+/* ⚠️ THE "TWO ELEMENTS, ONE GAP" ARBITRATION IS DELETED. `.wpg--tools > .wpg-scroll` zeroed the
+   scroller's top padding when a toolbar row had already paid the gap. Both now sit inside the
+   scroller and neither pays a gap: the masthead's own padding and margin are the only vertical
+   rhythm above the content. The `wpg--tools` CLASS is deleted from the markup with it — grepped
+   first, and no stylesheet in `src/` was reading it. */
 
 /**
  * ⚠️ STRIPPING MUST NOT CHANGE MAX SCROLL — this is what makes the state a pure function.
@@ -327,4 +309,34 @@
     var(--wsh-plate-h) + var(--wsh-plate-gap) - var(--wsh-plate-h-scrolled)
     + var(--content-top-gap-rest) - var(--content-top-gap-work)
   );
+}
+
+/* ══ THE CONTROL ROW'S TALLY (in-flow masthead, step 1; ref 170-sticky-control-row.html `.cnt`) ══
+ *
+ * ⚠️ `margin-right: auto` IS THE ROW'S WHOLE LAYOUT. The tally pushes every control after it to the
+ * right, so no page renders a spacer and no page can forget one — which is how the five rows stay
+ * one arrangement rather than five that happen to agree today.
+ *
+ * ⚠️ PLAYFAIR FOR THE FIGURE, MONO FOR ITS NOTE. The figure is the thing being stated and reads as
+ * display type; the note qualifies it and reads as a label, in the mono the shell already speaks.
+ * The two must not be the same voice — a mono figure beside a mono label is one string, and the
+ * whole point is that the second is subordinate to the first.
+ */
+.wpg-tally {
+  margin-right: auto;
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--shell-ink);
+}
+.wpg-tally i {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--shell-muted);
+  margin-left: 9px;
 }

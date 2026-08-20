@@ -239,57 +239,28 @@
  * without a description keeps the full height — only the type steps up.
  */
 .wsh {
+  /* ⚠️ `flex: 0 0 auto` IS LOAD-BEARING ON A FILL PAGE AND HARMLESS ON A SCROLLING ONE. The
+     masthead is now a child of `.wpg-scroll`, which is a flex COLUMN under `.wpg--fill`; without
+     this it would shrink under the default `flex-shrink: 1` as the panes below claim the row. */
   flex: 0 0 auto;
-  height: var(--wsh-plate-h);
   box-sizing: border-box;
-  background: var(--wsh-plate-bg);
-  border: 1px solid var(--ws-edge);
-  border-radius: var(--wsh-plate-radius);
-  box-shadow: var(--wsh-plate-sh);
-  transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
-    background .22s cubic-bezier(.4, 0, .2, 1),
-    border-color .22s cubic-bezier(.4, 0, .2, 1), border-radius .22s cubic-bezier(.4, 0, .2, 1),
-    box-shadow .22s cubic-bezier(.4, 0, .2, 1);
+  /* ⚠️ NO CARD TREATMENT — no fill, no border, no radius, no shadow. This is the whole visual
+     change: the masthead is the first thing ON the page rather than an object laid on it, so it
+     paints nothing and inherits the window's ground. Anything reinstated here turns content back
+     into chrome and re-earns the collapse mechanism this pack deleted. */
+  /* 26px above, 20px below — `169-inflow-masthead-qc.html` (`--mpad`/`--mpadb`) and
+     `170-sticky-control-row.html` agree. The horizontal inset is NOT here: the scroll row's own
+     gutter pays it, so the masthead lines up with the content beneath it by construction. */
+  padding: 26px 0 20px;
+  /* the hairline that closes it, then 16px of air to the control row (`--mrule` in the QC ref).
+     `--rim` in the refs is this app's `--ws-edge` — the window's own edge tone. */
+  border-bottom: 1px solid var(--ws-edge);
+  margin-bottom: 16px;
 }
-/**
- * ⚠️ THE STICKY WRAPPER PAINTS NOTHING. Giving it a fill would put an opaque strip across the
- * gutters beside the plate, and content would vanish into that dead band before it ever reached
- * the plate's edge — the exact fault the ref was built to demonstrate (its `body.strip` toggle).
- * Content runs UNDER the plate and continues past both edges. If a glitch ever seems to want a
- * backing strip here, that is a report, not a fix.
- *
- * The vertical padding is the plate's breathing room and doubles as its stuck offset: at rest it
- * separates plate from content, and once stuck it is transparent space that content scrolls
- * through above the plate.
- *
- * ⚠️ THE WRAPPER RESERVES THE PLATE'S REST HEIGHT, and this is not tidiness — it is the fix for a
- * MEASURED fault. The plate is in flow, so without the reservation the 88 → 56 condense pulled
- * every following element up by 32px: `scrollHeight` measured 952 at rest and 920 condensed, which
- * is precisely the "condensing must not shift the content below it" check. Worse than the jump, it
- * invites a loop — shrinking moves content up, which can move the scroll position back under the
- * trigger, which expands it again.
- *
- * So the wrapper's height is fixed at the REST height and the plate shrinks INSIDE it. Condensed,
- * the leftover 32px is transparent wrapper that content scrolls through — invisible, because
- * content already runs under the plate by design.
- */
-/* ⚠️ `flex: none` BECAUSE TWO OF THE HOSTS ARE FLEX COLUMNS. `.ctpage` and `.pkgw` are
-   `display:flex; flex-direction:column`, so the wrapper is a flex ITEM there and would otherwise
-   shrink under the default `flex-shrink:1` — taking the reserved height with it and reintroducing
-   the very reflow the reservation exists to stop, but only on those two pages. */
-/* ⚠️ THE STICKY PATH AND ITS RESERVATION ARE RETIRED — the wrapper is now a plain box. It carried
-   `position: sticky; top: 0`, a `z-index`, and a height of `--wsh-plate-h + 2 * --wsh-plate-gap`
-   so the plate could shrink INSIDE a wrapper that kept the rest height, stopping the condense from
-   pulling content up. On the grid there is nothing to reserve: row 1 is a grid track and the
-   scroller is a sibling. The reservation was also the strip's real height bug, holding the header
-   block at 132px while the plate inside collapsed to 52.
-   The element itself survives because it is the plate's mount point in the markup; only its
-   behaviour is gone. */
-.wsh-wrap {
-  padding: 0;
-  box-sizing: border-box;
-  background: none;
-}
+/* ⚠️ `.wsh-wrap` IS DELETED — element and rules together. It existed to RESERVE a sticky plate's
+   rest height so condensing could not pull the content below it upward. There is no sticky, no
+   plate and no condense, so there is nothing to reserve; the last rule standing was already a
+   `padding: 0` no-op holding the name alive. */
 /**
  * ⚠️ THE WORKING STATE IS A STRIP, NOT A SMALLER CARD (spec §2, ref 84). Everything that made the
  * header an OBJECT goes at once — border, radius, shadow — and the row it sits in loses its inset,
@@ -355,9 +326,11 @@
    rather than a narrower band laid on it. Ref 84 shows 26px at rest against its own single 70px
    gutter — a different geometry from ours, so the spec's 30 is what applies. */
 .wsh-row {
-  display: flex; align-items: center; gap: 16px; height: 100%;
-  padding: 0 30px;
-  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
+  /* ⚠️ NO PADDING AND NO HEIGHT. Both were the plate's: 30px of its own inset, and `height: 100%`
+     of a fixed-height card. In flow the masthead is sized by its contents and inset by the scroll
+     row's gutter — which is what puts its mark on the same vertical as the content below it, on
+     every page, without either of them naming a number. */
+  display: flex; align-items: center; gap: 16px;
 }
 
 /* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: the description truncates first. Title and
@@ -368,75 +341,55 @@
    notes in AllManuscripts.tsx and ComparableTitlesPage.tsx. */
 /* ⚠️ .22s ON GEOMETRY, .14s ON FADES (spec §2, ref 84). One curve throughout — a fade that outlasts
    the collapse leaves the mark visible over a row that has already closed. */
-.wsh-mark { flex: 0 0 38px; transition: opacity .14s ease, flex-basis .22s cubic-bezier(.4, 0, .2, 1), width .22s cubic-bezier(.4, 0, .2, 1), height .22s cubic-bezier(.4, 0, .2, 1); }
+/* ⚠️ NO TRANSITION — it tweened the mark THROUGH the condense, and nothing condenses. Step 3
+   gives the fill pages a collapse, and that animates the masthead as a whole rather than each
+   of its parts separately. */
+.wsh-mark { flex: 0 0 38px; }
 /* ⚠️ 64 → 88 (preset B) — the illustrated mark only. The 38px monoline glyph on its parchment
    plate is the OTHER mark family and is deliberately untouched: it is a plated icon, not a
    drawing, and scaling it with the illustration would turn a small badge into a large blank tile.
    Two legitimate rest sizes, 38 and 88, and the matrix asserts exactly those two. */
-.wsh-mark--xl { flex: 0 0 88px; }
-.wsh-txt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 0 1 auto; }
+.wsh-mark--xl { flex: 0 0 52px; }
+.wsh-txt { display: flex; flex-direction: column; min-width: 0; flex: 0 1 auto; }
 /* ⚠️ 600 IS A TOKEN, NOT A LITERAL, AND IT MUST NOT PROPAGATE (amendment 12). Every other Playfair
    heading in the shell is 500; this plate is the one place that goes heavier, so the weight is
    named where it is used and read once. A bare `600` here would be indistinguishable from the
    start of a house-wide change, and the next person matching a heading to it would spread it. */
-.wsh {
-  --wsh-plate-title-w: 600;
-  /**
-   * ⚠️ THE STRIP'S CONTROL AND PILL LADDER, DECLARED ONCE. Anything a page mounts into the header
-   * — a scope chip, a PRO pill — reads these instead of restating a second ladder, and the page
-   * keeps only its paint.
-   *
-   * ⚠️ IT EXISTS BECAUSE TWO PILLS BEHAVED DIFFERENTLY AND BOTH LOOKED RIGHT IN ISOLATION.
-   * Measured on the seeded pages: Packages' pill stepped 8px → 7px with the strip, Discover's held
-   * 8.5px in BOTH states — it had simply never been given a scrolled rule, and nothing said it was
-   * missing one. A page cannot forget to opt into a token it already reads.
-   */
-  --wsh-ctl-h: 38px;
-  --wsh-ctl-pad: 0 13px;
-  --wsh-ctl-fs: 13px;
-  --wsh-pill-fs: 8.5px;
-  --wsh-pill-pad: 4px 10px;
-  --wsh-pill-icon: 10px;
-  --wsh-pill-dy: 2px;
-}
-.wsh--scrolled {
-  --wsh-ctl-h: 30px;
-  --wsh-ctl-pad: 0 11px;
-  --wsh-ctl-fs: 12px;
-  --wsh-pill-fs: 7px;
-  --wsh-pill-pad: 3px 8px;
-  --wsh-pill-icon: 9px;
-  --wsh-pill-dy: 1px;
-}
-/* ⚠️ ONE TRANSITION FOR EVERYTHING THAT RIDES THE LADDER, so a page's control condenses on the
-   same frame as the title rather than snapping while the row animates around it. */
-.wsh [class$="-propill"],
-.wsh [class*="-propill "],
-.wsh [class$="-mschip"],
-.wsh [class*="-mschip "] {
-  transition: height .22s cubic-bezier(.4, 0, .2, 1), padding .22s cubic-bezier(.4, 0, .2, 1),
-    font-size .22s cubic-bezier(.4, 0, .2, 1), top .22s cubic-bezier(.4, 0, .2, 1);
-}
+/* ⚠️ 600 IS A TOKEN, NOT A LITERAL, AND IT MUST NOT PROPAGATE (amendment 12). Every other Playfair
+   heading in the shell is 500; this masthead is the one place that goes heavier, so the weight is
+   named where it is used and read once. A bare `600` here would be indistinguishable from the
+   start of a house-wide change, and the next person matching a heading to it would spread it. */
+.wsh { --wsh-plate-title-w: 600; }
+/* ⚠️ THE CONTROL AND PILL LADDER IS DELETED — the two-step `--wsh-ctl-*` / `--wsh-pill-*` sets and
+   their `.wsh--scrolled` halves. They existed so a control mounted INTO the header would condense
+   with it; the masthead carries no controls at all now, and its pills have exactly one size. The
+   ladder's stated reason — "a page cannot forget to opt into a token it already reads" — was about
+   two pills disagreeing across a state change that no longer exists. */
 /* ⚠️ THE RESTING SIZE IS A TOKEN because the cross-fade keyframes have to NAME it. `font-family`
    and `text-transform` do not interpolate, so the register change is done with keyframes that hold
    the outgoing values while the title is invisible — and a keyframe cannot read "whatever this
    element had before". Restating 33 in two places is exactly how the solo step would drift. */
 /* ⚠️ 33 → 38 (preset B). The solo step stays +2 and is stated as its own value rather than as
    `calc(--wsh-title-size + 2px)`, because the cross-fade keyframes have to NAME both. */
-.wsh { --wsh-title-size: 38px; }
-.wsh--solo { --wsh-title-size: 40px; }
+/* ⚠️ ONE SIZE, AND THE SOLO STEP IS RETIRED WITH THE FIXED-HEIGHT PLATE. The +2 step existed
+   because the plate kept its full height with or without a description, so a title-only page had
+   to grow to look deliberate rather than broken. In flow a title-only page is simply shorter —
+   there is no reserved space to fill — so the step has nothing left to do.
+   ⚠️ AND THE `--solo` CLASSES GO WITH IT, out of the markup as well as the sheet: a class the
+   markup emits and no rule consumes is what a bundle sweep exists to find. */
+.wsh { --wsh-title-size: 30px; }
 .wsh-title {
   font-family: var(--font-serif); font-size: var(--wsh-title-size); font-weight: var(--wsh-plate-title-w);
-  color: var(--shell-ink); margin: 0; white-space: nowrap; line-height: 1.12;
-  transition: font-size .22s cubic-bezier(.4, 0, .2, 1);
+  color: var(--shell-ink); margin: 0; white-space: nowrap;
+  /* 1.02 per both refs — a display line, set tight */
+  line-height: 1.02;
 }
 /* ⚠️ NO DESCRIPTION → THE TITLE STEPS UP. The plate's HEIGHT does not change with it — the two
    states must read as deliberate side by side, not as one page missing something.
    ⚠️ THE STEP IS +2, AND IT SCALES FROM 33 — it was 27 against a 25px base. Restating 27 beside a
    33px title would make the solo state SMALLER than the ordinary one, which is the exact inversion
    the rule exists to prevent. */
-/* the step is the token above; the class stays because the markup and its lock read it */
-.wsh-title--solo { font-size: var(--wsh-title-size); }
+/* `.wsh-title--solo` is deleted with `.wsh--solo` — see the one-size note above. */
 /**
  * ⚠️ IT WRAPS TO TWO LINES RATHER THAN TRUNCATING AT ONE, and the change is invisible on every
  * page that existed before it. `white-space: nowrap` + ellipsis meant a description longer than the
@@ -454,11 +407,17 @@
  * holding the title off-centre in the 56px condensed plate.
  */
 .wsh-sub {
-  margin: 0; font-size: 14px; color: #6b5a51;
+  /* ⚠️ 13.5px PER BOTH REFS. The ink is the app's OWN secondary token rather than the refs'
+     `#8a7a70`: this rule carried the near-identical literal `#6b5a51` for its whole life, and
+     importing a fifth warm ink from a document drawn against its own palette is how a scale drifts.
+     Size from the ref, colour from the scale. */
+  margin: 6px 0 0; font-size: 13.5px; color: var(--shell-ink-soft);
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
   overflow: hidden; min-width: 0;
-  max-height: 40px;
-  transition: opacity .14s ease, max-height .22s cubic-bezier(.4, 0, .2, 1), margin .22s cubic-bezier(.4, 0, .2, 1);
+  /* ⚠️ THE CLAMP STAYS AND `max-height` GOES. Two lines is still a ceiling — a plate's height was a
+     rule and a masthead's still is — but the box no longer has to animate to 0 to hand its space
+     back, because nothing condenses. `-webkit-line-clamp` alone does the clamping; the explicit
+     40px was there for the collapse. */
 }
 /* ⚠️ THE DESCRIPTION FADES AND COLLAPSES TOGETHER. Opacity alone would leave its box holding the
    title off-centre in a 56px plate; `max-height:0` is what actually gives the space back. */
@@ -616,8 +575,9 @@
    primary hovered to a cool blue-grey on a green ground — a colour from two grounds ago, surviving
    two retones because nothing measured a hover. Deleted rather than corrected: the rule above it
    already says what the hover is. */
-.wsh-grow { flex: 1 1 auto; min-width: 10px; }
-.wsh-acts { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
+/* ⚠️ `.wsh-grow` AND `.wsh-acts` ARE DELETED. They were the spacer and the action cluster of a
+   masthead that had actions. It has none — the guard in PageHeader throws if a page passes one —
+   so both elements are gone from the markup and their rules with them. */
 
 /* ⚠️ THE PLATE IS WARM AND REALLY BORDERED — a translucent plate read fine on sage and DISSOLVES
    on white, which is why it grew to 38px and gained `--shell-line`, the same warm hairline the
@@ -645,7 +605,7 @@
  * are. See the CLAUDE.md entry; do not remove this as redundant.
  */
 .wsh-mark--xl .os-mark {
-  width: 88px; height: 88px; flex: 0 0 88px;
+  width: 52px; height: 52px; flex: 0 0 52px;
   background: none; border: none; box-shadow: none; border-radius: 0;
 }
 .wsh-mark--xl .os-mark img {
@@ -654,14 +614,13 @@
 }
 .wsh-mark--xl .os-mark svg { width: 34px; height: 34px; }  /* the degrade path, still centred */
 .agl-anim .wsh .wsh-mark--xl .os-mark img { opacity: 0; }
-/* the plate's own size transition, so the mark condenses WITH it rather than snapping */
-.wsh-mark .os-mark { transition: width .22s cubic-bezier(.4, 0, .2, 1), height .22s cubic-bezier(.4, 0, .2, 1), flex-basis .22s cubic-bezier(.4, 0, .2, 1); }
 
 /**
  * ⚠️ REDUCED MOTION KILLS THE TRANSITIONS, NEVER THE STATES. The plate must still condense — the
  * scrolled state is a layout, not an embellishment, and a header that stayed 88px would eat the
  * working area it was condensing to give back. Only the tweening goes.
  */
-@media (prefers-reduced-motion: reduce) {
-  .wsh, .wsh-title, .wsh-sub, .wsh-mark, .wsh-mark .os-mark, .wsh .svh-btn { transition: none; }
-}
+/* ⚠️ THE MASTHEAD'S REDUCED-MOTION BLOCK IS GONE BECAUSE THE MASTHEAD HAS NO TRANSITIONS LEFT.
+   Every one of them tweened the condense — height, title size, mark box, the button ladder — and
+   the condense is deleted. Step 3's collapse brings its own guard for the one animation that
+   returns; a block suppressing transitions that do not exist would read as coverage it is not. */

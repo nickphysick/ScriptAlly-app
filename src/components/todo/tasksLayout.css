@@ -14,28 +14,11 @@
    (The sentence that stood here was a fragment left by the same damage that broke `.tpl-head`'s
    comment below — it trailed off mid-clause into the plate note that follows. Both are repaired;
    see the retirement note further down for what the damage cost.)
-/**
- * ⚠️ THE RESTING PLATE IS SIZED FOR A MARK THIS PAGE DOES NOT RENDER — 128px against 45px of
- * content, and that is the ~100px empty band above the control bar.
- *
- * The shell's `--wsh-plate-h: 128px` carries its own reason in `index.css`: "38px Playfair and an
- * 88px mark need the room". The Tasks pages render `wsh-mark--md`, which is 38px — measured on the
- * deployed page, along with a 44.8px title block. So the premise of the 128 does not hold here, and
- * roughly 83px of the plate is empty by construction.
- *
- * ⚠️ THE 44px GAP BELOW THE HEADER IS NOT TOUCHED, DELIBERATELY. It is a locked value with a
- * recorded rejection — "half the header's height, rounded" would give 64 and was refused in favour
- * of 44 — and it is exactly the tidiness a later pass "restores". The band shrinks because the
- * plate fits its contents, not because the rhythm under it was traded away.
- *
- * ⚠️ AND IT IS SCOPED TO THIS LAYOUT, NOT CHANGED IN `index.css`. Nine pages read that token and
- * most of them render the larger mark; a global edit would shrink headers that are correctly sized.
- * The lock on `--wsh-plate-h: 128px` in `workspacePageGrid.test.tsx` therefore still holds, which is
- * the check that a scoped override is the honest shape here rather than a way round a rule.
- */
-.tpl-wpg {
-  --wsh-plate-h: 84px;
-}
+/* ⚠️ `--wsh-plate-h: 84px` IS DELETED (in-flow masthead, step 1). It shortened the FIXED-HEIGHT
+   PLATE on these three pages, because a master–detail surface could not afford the app-wide 128.
+   The masthead has no height to set any more — it is sized by its contents, and its 26/20 padding
+   is the same on every page — so the override has nothing to modify and the divergence it existed
+   to create is the divergence the acceptance matrix now forbids. */
 
 /* ⚠️ THE SAME GUTTER AS THE QUERY CENTRE, AND THE SAME WAY OF GETTING IT — the ROW'S padding is
    overridden, never the `--content-gutter` token. The token is read by `.wpg-plate` through
@@ -68,11 +51,9 @@
 .tpl-wpg:not(.wpg--working) { --content-top-gap: 0px; }
 .tpl-wpg.wpg--working { --content-top-gap: 0px; }
 
-/* ⚠️ THE SOLO TITLE IS 40px APP-WIDE, AND THIS PAGE OPTS OUT. `.wsh--solo` gives a page with no
-   subtitle two extra points; the Query Centre has a subtitle and so renders 38. Matching it here is
-   a page-scoped override rather than a change to the solo rule, because every other solo page still
-   wants the larger setting. */
-.tpl-wpg .wsh--solo { --wsh-title-size: 38px; }
+/* ⚠️ THE SOLO-TITLE OVERRIDE IS DELETED WITH `.wsh--solo` ITSELF. The solo step existed because a
+   fixed-height plate had to fill its height with or without a description; in flow a title-only page
+   is simply shorter. One title size app-wide, so there is nothing left to opt out of. */
 
 /* ⚠️ `.tpl-head` IS RETIRED, AND FIXING ITS COMMENT IS WHAT REVEALED IT.
    The rule's comment had lost its opening delimiter, so the parser read everything from the class

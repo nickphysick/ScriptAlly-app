@@ -21,7 +21,7 @@ import { ChevronDown, Plus, Copy, Check, Pencil, X, Sparkles, Lock, RefreshCw, B
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
 import { PageHeader } from "../shell/PageHeader";
-import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
+import { WorkspacePageGrid, PageTally } from "../shell/WorkspacePageGrid";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import {
@@ -601,7 +601,7 @@ export const ComparableTitlesPage: React.FC<{
       <WorkspacePageGrid
         className="ct-wpg"
         scrollLabel="Comparable titles"
-        plate={
+        masthead={
           <PageHeader
           variant="workspace"
           mark="comps"
@@ -612,6 +612,28 @@ export const ComparableTitlesPage: React.FC<{
           title="Comparable titles"
           description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
           />
+        }
+        toolbar={
+          /* ⚠️ THIS ROW IS THE PAGE'S ANCHOR, AND ON THIS PAGE IT IS THE COUNT ALONE (in-flow
+             masthead, step 1). Comps has no page-level verbs: adding and removing happen inside the
+             panel that holds the list, and the manuscript selector is the shell's. So the row
+             carries what remains — the tally — and its job here is not to hold controls but to keep
+             a fact on screen once the masthead has scrolled away.
+
+             ⚠️ AND A LONE TALLY IS THE FAULT THIS REPO ALREADY RECORDED, which is why it is stated
+             rather than repeated by accident: Manuscripts' `{n} MANUSCRIPTS · {m} IN SUBMISSION`
+             read as a stray caption in its own row because `margin-left: auto` pushed it away from
+             nothing. This one leads the row and is pushed away from nothing on the RIGHT, which is
+             where a page's controls will land the day it grows some.
+
+             ⚠️ REUSING `compCounts`, NEVER A SECOND DERIVATION — the same function the hero's stat
+             rail reads, so the two figures cannot disagree. */
+          activeMs ? (
+            <PageTally
+              value={`${counts.total} ${counts.total === 1 ? "comp" : "comps"}`}
+              note={counts.inQuery > 0 ? `${counts.inQuery} IN YOUR QUERY` : undefined}
+            />
+          ) : undefined
         }
           /* ⚠️ NO TOOLBAR ROW ON THIS PAGE (Amendment 1 §1). The tally moved into the hero's stat
              rail and the manuscript selector is the shell's; what remained would have been an empty

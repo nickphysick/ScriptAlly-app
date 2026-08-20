@@ -30,7 +30,7 @@ import { Tour } from "./Tour";
 import { WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
 import { PageHeader } from "./shell/PageHeader";
-import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
+import { WorkspacePageGrid, PageTally } from "./shell/WorkspacePageGrid";
 import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
@@ -257,36 +257,42 @@ export const SubmissionPackages: React.FC = () => {
           eleven pages share. */}
       {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate is row 1; the strip, the tabs
           and the workshop scroll in row 3. No toolbar → no row 2 and no hairline. */}
-      <WorkspacePageGrid className="pkgw-wpg" scrollLabel="Package Workshop" plate={
+      <WorkspacePageGrid className="pkgw-wpg" scrollLabel="Package Workshop" masthead={
         <PageHeader
           variant="workspace"
           mark="packages"
           title="Submission packages"
           description="Bundle your materials once, then send them without rebuilding each time."
           titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}
-          actionsSlot={activeMs ? (
-            <div className="pkgw-hact">
-              {msSelector}
-              {/* ⚠️ THE SHARED BUTTON, NOT `.pkgw-btn`. A page-specific button class in a header is a
-                  second implementation of the strip's control ladder — this one happened to agree
-                  (38 → 30) because it was given an explicit working height in a previous pass,
-                  which is exactly how it read as correct while being a copy. `--primary` and
-                  `svh-btn-primary` resolve to the same three constants (`--pink` / `--pink-b` /
-                  `--burg`), so nothing about it looks different; it simply stops being separate.
-                  `.pkgw-btn` survives for the page BODY, where it belongs. */}
-              {/* ⚠️ DISABLED IN LOCKSTEP WITH THE RAIL'S `+ NEW` (D4) — one derivation, two renders,
-                  so the two controls cannot disagree about whether a package can be built. */}
-              <button
-                type="button" className="svh-btn svh-btn-primary"
-                disabled={!canBuildPackage(msVersions)}
-                onClick={() => { setPkgEditing(null); setPkgModal(true); }}
-              >
-                <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
-              </button>
-            </div>
-          ) : undefined}
+          /* ⚠️ NO ACTIONS SLOT — the manuscript selector and `New package` moved to the control row
+             below (in-flow masthead, step 1). */
         />
-      }>
+      }
+      toolbar={activeMs ? (
+        <>
+          {/* ⚠️ TWO FIGURES, AND THE PAIR IS THE POINT. `{n} packages` alone would restate the
+              `Your packages` section tag a few inches below it; the page's tally is what it HOLDS —
+              materials on file and packages built from them — which is the same two-part grammar
+              the Contact list's row has. Both counts come from the arrays the page already renders
+              from, so neither is a second derivation. */}
+          <PageTally
+            value={`${msVersions.length} ${msVersions.length === 1 ? "material" : "materials"}`}
+            note={`${msPackages.length} ${msPackages.length === 1 ? "PACKAGE" : "PACKAGES"}`}
+          />
+          <div className="pkgw-hact">
+            {msSelector}
+            {/* ⚠️ DISABLED IN LOCKSTEP WITH THE RAIL'S `+ NEW` (D4) — one derivation, two renders,
+                so the two controls cannot disagree about whether a package can be built. */}
+            <button
+              type="button" className="svh-btn svh-btn-primary"
+              disabled={!canBuildPackage(msVersions)}
+              onClick={() => { setPkgEditing(null); setPkgModal(true); }}
+            >
+              <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
+            </button>
+          </div>
+        </>
+      ) : undefined}>
       {/* ⚠️ `.pkgw-strip` IS RETIRED FROM THIS PAGE (restructure). It carried the scorecard sentence
           as a thin band above the tab row; the overview's problem-statement card is that same
           sentence promoted to the stage, in the ref's own words. Keeping both would state the

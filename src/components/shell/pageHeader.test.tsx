@@ -176,10 +176,21 @@ describe("the tool row", () => {
  * row's inset that opens and closes. Reading only this file would leave the strip's defining
  * property — full container width — unlocked.
  */
-describe("the header's two states", () => {
+/**
+ * ⚠️ THE MASTHEAD HAS ONE STATE, AND THIS BLOCK REPLACES THE ONE THAT ASSERTED TWO.
+ *
+ * What stood here locked the plate ↔ band condense: the card's border/radius/shadow at rest, the
+ * 52px strip, the mark dropping to zero, the register cross-fade, the white-on-band buttons, the
+ * shared .22s curve. Every one of those described a state the masthead can no longer reach, so the
+ * whole block was asserting CSS no element can match — which is the vacuous-lock family CLAUDE.md
+ * keeps re-teaching, in its most expensive form: green, detailed, and about nothing.
+ *
+ * The band's RULES are still in pageHeader.css and are deleted at step 4 with the rest of the
+ * machinery. These assert what the masthead IS.
+ */
+describe("the masthead is content, not chrome", () => {
   const hdrCss = readFileSync(resolve(__dirname, "./pageHeader.css"), "utf8");
   const gridCss = readFileSync(resolve(__dirname, "./workspacePageGrid.css"), "utf8");
-  /* the swap's arming lives in the component, not the stylesheet — both halves or neither */
   const hdrSrc = readFileSync(resolve(__dirname, "./PageHeader.tsx"), "utf8");
   /** every block for a selector, joined — never the first (see the grouped-rule note in CLAUDE.md) */
   const all = (css: string, sel: string): string => {
@@ -189,299 +200,87 @@ describe("the header's two states", () => {
     }
     return out.join("\n");
   };
+  /* ⚠️ COMMENTS STRIPPED BEFORE ANY `not.toContain`. This file's prose names every property it
+     retired, so a bare search over the raw text finds the explanation and calls it the code. */
+  const decls = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
-  it("at rest the header is an OBJECT — border, radius, shadow, and its own inset", () => {
-    const wsh = all(hdrCss, ".wsh");
-    expect(wsh, "the plate lost its border").toContain("border: 1px solid var(--ws-edge)");
-    expect(wsh, "the plate lost its radius").toContain("border-radius: var(--wsh-plate-radius)");
-    expect(wsh, "the plate lost its shadow — it would read as a band, not an object").toContain("box-shadow: var(--wsh-plate-sh)");
-    expect(all(gridCss, ".wpg-plate"), "row 1 stopped insetting the header — it would already be full width at rest")
-      .toContain("padding-inline: calc(var(--content-gutter) + var(--header-inset))");
-  });
-
-  /**
-   * ⚠️ THE ROW'S HEIGHT, NOT ITS PADDING — and the distinction is not pedantry, it is the bug.
-   * `.wpg-plate--working { padding: 0 }` was correct and shipped, and the header block still stood
-   * at ~130px on dev, because `.wsh-wrap` sat between the row and the plate holding its sticky-path
-   * RESERVATION (`--wsh-plate-h` + 2 × `--wsh-plate-gap` = 132px) open. A lock on the padding rule
-   * would have passed the broken build. There is no layout engine here, so the outcome is COMPUTED
-   * from the tokens and every contributor is named — anything that adds height and is not in this
-   * sum makes the sum wrong, which is the property a padding assertion lacks.
-   */
-  it("⚠️ the working header row resolves to the strip height and nothing more", () => {
-    const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    const px = (name: string): number => {
-      const m = new RegExp(`--${name}:\\s*(\\d+)px`).exec(tokens);
-      expect(m, `--${name} is not declared — the height below cannot be computed`).toBeTruthy();
-      return Number(m![1]);
-    };
-    const strip = px("wsh-plate-h-scrolled");
-    const gap = px("wsh-plate-gap");
-    const rest = px("wsh-plate-h");
-
-    /* contributor 1 — the row's own padding, which must be zero when working */
-    expect(all(gridCss, ".wpg-plate--working"), "the row keeps its resting padding, so the block stays tall and the hairline lands below the strip")
-      .toContain("padding: 0");
-    /* contributor 2 — the wrapper's reservation, which must not apply inside the grid */
-    expect(all(gridCss, ".wpg-plate .wsh-wrap"), "the sticky reservation still applies inside the grid — it holds the row at the REST height whatever the plate does")
-      .toContain("height: auto");
-    /* contributor 3 — the plate itself */
-    expect(all(hdrCss, ".wsh--scrolled"), "the plate is not taking the strip height").toContain("height: var(--wsh-plate-h-scrolled)");
-
-    /* the outcome: with the other two neutralised, the row IS the strip */
-    const workingRow = strip;
-    expect(workingRow, "the working row is not the strip's height").toBe(strip);
-    expect(workingRow, "the working row still carries the resting reservation — this is the 132px fault").not.toBe(rest + 2 * gap);
-    expect(workingRow, "the working row still carries the row gap").toBeLessThan(strip + gap);
-  });
-
-  it("⚠️ working, EVERY object property drops at once — not a smaller card", () => {
-    const strip = all(hdrCss, ".wsh--scrolled");
-    expect(strip, "the strip kept its border").toContain("border-color: transparent");
-    expect(strip, "the strip kept its radius").toContain("border-radius: 0");
-    /* ⚠️ THE SHADOW IS GONE AND A HAIRLINE HAS TAKEN ITS PLACE (§2). The clause is that every
-       OBJECT property drops at once — the card's border, radius and cast — and it still does: what
-       the band draws now is a 1px inset rule at its foot, which is a boundary rather than an
-       elevation. A white band on warm cream is about a point of lightness apart, and a point of
-       lightness does not divide anything. */
-    expect(strip, "the strip kept the card's cast").not.toMatch(/box-shadow:[^;]*rgba/);
-    expect(strip, "the band lost the hairline that divides it from the page").toContain("box-shadow: inset 0 -1px 0 var(--n5)");
-    expect(strip, "the strip is not taking the strip height").toContain("height: var(--wsh-plate-h-scrolled)");
-    expect(all(gridCss, ".wpg-plate--working"), "the row kept its inset — the strip would not reach the container's edges")
-      .toContain("padding: 0");
-  });
-
-  it("⚠️ NO TRANSLUCENCY, NO BLUR — nothing overlaps, so nothing needs to be seen through", () => {
-    const strip = all(hdrCss, ".wsh--scrolled");
-    expect(strip, "the strip went translucent again — the scroller is the row BENEATH it, so there is nothing behind it to reveal").not.toContain("--wsh-plate-bg-scrolled");
-    expect(strip, "a backdrop-filter came back — it also creates a stacking context, which is its own class of bug").not.toContain("backdrop-filter");
-    expect(strip, "the scrolled edge token came back").not.toContain("--wsh-plate-edge-scrolled");
-  });
-
-  /* ⚠️ RETARGETED, AND IT REVERSES ITSELF (strip-fixes ref 87). This asserted the mark was REMOVED,
-     which was the spec's §2 and is wrong: at 30px in full colour the mark is what still identifies
-     the page once the title has dropped to 17px and the description has gone. The two compensations
-     that came with removal — the opacity fade and the `-16px` margin closing the row's gap — are
-     asserted ABSENT, because each of them re-creates half of the deleted behaviour on its own. */
-  /**
-   * ⚠️ THE MARK DROPS ENTIRELY, AND THIS CASE PREVIOUSLY ASSERTED THE OPPOSITE. It read "the mark
-   * SHRINKS to 30px and keeps its colour", with the fade and the negative margin asserted ABSENT
-   * because each re-created half of a deleted behaviour. Under the label treatment (ref 90, option
-   * E) the reasoning inverts: the strip is carried by a mono uppercase label, and a 30px
-   * illustration beside it is two voices doing one job. The whole case is rewritten rather than
-   * softened — a half-updated version would have kept arguing for the mark.
-   */
-  it("the mark drops entirely — width and opacity both to zero", () => {
-    const mark = all(hdrCss, ".wsh--scrolled .wsh-mark,\n.wsh--scrolled .wsh-mark--xl");
-    expect(mark, "the mark still takes width in the strip").toContain("width: 0");
-    expect(mark, "the mark is still holding a flex basis — it would keep the row's gap open").toContain("flex: 0 0 0");
-    expect(mark, "the mark did not fade — it appears and vanishes on the frame the class lands").toContain("opacity: 0");
-    const box = all(hdrCss, ".wsh--scrolled .wsh-mark .os-mark,\n.wsh--scrolled .wsh-mark--xl .os-mark");
-    expect(box, "the inner box kept its height — an illustration would still paint in a zero-width slot").toContain("height: 0");
-    expect(box, "the monoline glyph's plate border survived — a 1px hairline with no box inside it").toContain("border: none");
-    /* it fades rather than snapping: the property has to be transitioned on the resting rule */
-    expect(all(hdrCss, ".wsh-mark"), "the mark has no opacity transition, so it disappears on one frame").toContain("opacity");
-  });
-
-  /**
-   * ⚠️ THE TITLE CHANGES REGISTER, IT DOES NOT STEP DOWN. 17px Playfair was a masthead shrunk, and
-   * a masthead shrunk reads as squashed. The working title is the page's name as a LABEL, in the
-   * mono the shell already speaks.
-   */
-  it("the title becomes an editorial label, and the description collapses rather than fading in place", () => {
-    const t = all(hdrCss, ".wsh--scrolled .wsh-title");
-    expect(t, "the working title is still display type").toContain("font-family: var(--font-mono)");
-    expect(t, "the label size changed").toContain("font-size: 11.5px");
-    expect(t, "the label weight changed").toContain("font-weight: 500");
-    expect(t, "the letterspacing that makes it read as a label is gone").toContain("letter-spacing: 0.2em");
-    expect(t, "the label is not uppercase").toContain("text-transform: uppercase");
-    /* ⚠️ A TOKEN, NOT A LITERAL — and specifically not the tertiary muted, which is the
-       counts-and-captions tier: the page's own identity must not be fainter than a tally. */
-    /* ⚠️ `--shell-ink-soft` → `--wsh-band-ink`. Both `--shell-ink-soft` (#6a615a) and the tertiary
-       `--shell-muted` are WARM inks tuned for a near-white band; on #333c4d the first is under 2:1.
-       The band's own foreground token takes over. What the old assertion protected — that the
-       label is not demoted to the counts tier — still holds, since nothing in the strip is brighter
-       than it. */
-    expect(t, "the label colour is a literal, or it went back to an ink tuned for a near-white band").toContain("color: var(--wsh-band-ink)");
-    const sub = all(hdrCss, ".wsh--scrolled .wsh-sub");
-    expect(sub, "the description faded but kept its box, holding the title off-centre in a 52px strip").toContain("max-height: 0");
-  });
-
-  /**
-   * ⚠️ THE REGISTER CANNOT BE TRANSITIONED, so the swap is hidden inside a fade. `font-family` and
-   * `text-transform` do not interpolate — they flip on the frame the class lands — and a
-   * size-and-spacing transition running through that flip is what reads as a glitch.
-   */
-  it("⚠️ the register swap is a cross-fade, and it never plays on mount", () => {
-    for (const name of ["wsh-title-to-label", "wsh-title-to-masthead"]) {
-      const kf = hdrCss.slice(hdrCss.indexOf(`@keyframes ${name}`), hdrCss.indexOf("}", hdrCss.indexOf(`@keyframes ${name}`) + 400));
-      expect(kf, `${name} is missing — one direction of the swap does not fade`).not.toBe("");
-      expect(kf, `${name} does not go invisible, so the swap happens in view`).toContain("opacity: 0");
-      /* ⚠️ THE OUTGOING VALUES ARE NAMED IN THE KEYFRAMES. Without them the element already wears
-         the new register when the animation starts, so there is nothing to fade OUT — only in. */
-      expect(kf, `${name} does not hold the outgoing family, so the old register is never shown fading`)
-        .toMatch(/font-family:\s*var\(--font-(serif|mono)\)/);
-      /* the invisible window: 45% out, 55% back — the discrete flip lands at 50%, between them */
-      expect(kf, `${name}'s invisible window is gone — the swap would show mid-fade`).toMatch(/55%\s*\{\s*opacity:\s*0/);
-      /* ⚠️ AND THE DESTINATION IS NAMED, not left implicit. Measured: with the target values
-         omitted from 55%/100%, `font-family` stayed on its last stated keyframe — Playfair at
-         11.5px uppercase, the squashed masthead wearing the label's metrics — while every
-         interpolable property landed correctly. An implicit final keyframe does not return a
-         non-interpolable property to the underlying value. */
-      expect((kf.match(/font-family/g) ?? []).length, `${name} names its family at only one end — the swap lands on the wrong one`)
-        .toBeGreaterThan(2);
+  it("⚠️ NO CARD TREATMENT — the masthead paints nothing", () => {
+    /* This is the visual whole of the pack: an object laid ON the page becomes the first thing ON
+       it. Anything reinstated here turns content back into chrome and re-earns the collapse
+       mechanism the pack deleted. */
+    const wsh = decls(all(hdrCss, ".wsh"));
+    for (const prop of ["background:", "border-radius:", "box-shadow:", "border: 1px", "height:"]) {
+      expect(wsh, `.wsh regained \`${prop}\` — the masthead is drawing itself as an object again`)
+        .not.toContain(prop);
     }
-    /* ⚠️ ARMED BY A CLASS, NOT BY THE RESTING RULE. Hung on `.wsh-title` it plays on MOUNT: every
-       page load would show its title, blink it out and fade it back — nine pages' worth of a
-       worse artefact than the one this removes. */
-    expect(hdrCss, "the swap is not gated on the armed class").toContain(".wsh--swap.wsh--scrolled .wsh-title");
-    expect(hdrSrc, "nothing arms the swap class, so the fade never runs").toContain("wsh--swap");
-    expect(hdrSrc, "the arming does not skip the first render — the fade would play on mount").toContain("firstState");
+    /* what it DOES draw: the closing hairline, and the air around it */
+    expect(wsh).toContain("border-bottom: 1px solid var(--ws-edge)");
+    expect(wsh).toContain("padding: 26px 0 20px");
+    expect(wsh).toContain("margin-bottom: 16px");
   });
 
-  /**
-   * ⚠️ THE LINE MOVED HOUSE, AND THIS CASE REVERSES TWICE OVER. It first asserted a FULL-WIDTH
-   * hairline on the grid row; then the opposite, inset to the content gutter, "sitting with the
-   * content it separates". Both described a rule the ROW drew, floating beneath a card. The
-   * working state is a BAND now (ref 91): it takes the parchment ground and draws its own bottom
-   * edge, spanning the container. Keeping the row's rule as well gave two lines a pixel apart that
-   * did not even agree on their length — one gutter-inset, one full-bleed.
-   *
-   * The line belongs to the thing that draws it. Asserted as ABSENT here, because a leftover
-   * `::after` would be invisible at rest and a double rule the moment anyone scrolled.
-   */
-  /**
-   * ══ BOTH BUTTONS ARE WHITE, AND THE INVERSION IS GONE ═══════════════════════════════════════
-   *
-   * ⚠️ THIS REPLACES TWO CASES — "the primary inverts" and "the secondary outlines" — and both are
-   * DELETED rather than loosened, because each described a fact about SLATE. The primary inverted
-   * because #2a1a13 on #333c4d was 1.4:1; the secondary outlined because a white chip there became
-   * the brightest thing on screen and tied the primary. On #c9d2c7 neither holds: the band is light
-   * enough that white reads as raised rather than loudest.
-   *
-   * ⚠️ SO THE PAIR IS SEPARATED BY WEIGHT, NOT BY FILL — shadow versus rim, which is the same
-   * distinction the original light band drew. Asserted as a PAIR: each half passes on its own if
-   * both ever became shadowed or both rimmed, which is precisely the state that would stop reading
-   * as a hierarchy.
-   */
-  it("⚠️ BOTH BUTTONS ARE WHITE ON THE BAND — separated by weight, not by fill", () => {
-    const pair = all(hdrCss, ".wsh--scrolled .svh-btn-ink,\n.wsh--scrolled .svh-btn-ghost");
-    expect(pair, "the shared white ground is gone — the inversion or the outline has come back").not.toBe("");
-    expect(pair, "the buttons stopped sharing a white ground").toContain("background: #ffffff");
-    expect(pair, "the buttons' label is not the band's ink").toContain("color: var(--wsh-band-ink)");
-    /* the primary carries the shadow and NO rim; the secondary the rim and NO shadow */
-    const primary = all(hdrCss, ".wsh--scrolled .svh-btn-ink");
-    const ghost = all(hdrCss, ".wsh--scrolled .svh-btn-ghost");
-    expect(primary, "the primary lost the shadow that sits it above the band").toContain("box-shadow:");
-    expect(primary, "the primary stopped being the heavier of the two").toContain("font-weight: 600");
-    expect(ghost, "the secondary lost its rim").toContain("border-color: rgba(36, 28, 21, 0.14)");
-    expect(ghost, "the secondary grew a shadow — it would read as a second primary").toContain("box-shadow: none");
-    /* ⚠️ THE SLATE-ERA INVERSION MUST NOT SURVIVE ANYWHERE. Its shape was `background:
-       var(--wsh-band-ink)` on the primary, which now resolves to near-black — a black pill on sage.
-       Asserted at the sheet level, because a leftover copy under another selector would render. */
-    expect(hdrCss, "the slate inversion survives — on sage its fill resolves to near-black")
-      .not.toContain("background: var(--wsh-band-ink)");
-    /* and the app-wide pair is untouched — this is `.wsh--scrolled` scoped */
-    expect(all(hdrCss, ".svh-btn-ink"), "the app-wide dark pill was changed").toContain("background: #2a1a13");
-    expect(all(hdrCss, ".svh-btn-ghost"), "the app-wide ghost was changed").toContain("background: var(--shell-card)");
-  });
-
-  /**
-   * ⚠️ THE FOCUS RING HAD TO MOVE TOO, and it is the quietest of the four things on this band.
-   * `--shell-focus` is a burgundy at 45% alpha tuned to sit on parchment; on `#333c4d` it is a dark
-   * ring on a dark ground and effectively absent — a keyboard user loses the strip entirely.
-   */
-  it("⚠️ THE FOCUS RING READS THE BAND'S FOREGROUND — a parchment ring is invisible here", () => {
-    const ring = all(hdrCss, ".wsh--scrolled .svh-btn:focus-visible,\n.wsh--scrolled button:focus-visible");
-    expect(ring, "nothing gives the strip a focus ring against its dark ground").not.toBe("");
-    expect(ring, "the ring is not on the band's foreground token").toContain("var(--wsh-band-ink)");
-  });
-
-  it("⚠️ THE BAND DRAWS ITS OWN EDGE — the row's floating hairline is GONE", () => {
-    expect(all(gridCss, ".wpg-plate::after"), "the row's hairline came back — with the band's edge it draws two lines a pixel apart").toBe("");
-    expect(all(gridCss, ".wpg-plate--working::after"), "the row's working hairline came back").toBe("");
-    const band = all(hdrCss, ".wsh--scrolled");
-    expect(band, "the band has no ground — it is still a card floating on the window").toContain("background: var(--wsh-band-bg)");
-    /* ⚠️ INVERTED — THE RULE BENEATH IS GONE. A warm parchment hairline on dark slate reads as a
-       scratch, and a saturated band states its own boundary. All four sides transparent; the border
-       BOX stays, because the strip's 52px is `box-sizing: border-box` and dropping the border would
-       hand the content a pixel back — which is the height the matrix asserts. */
-    /* ⚠️ REVERSED BY §2, AND THE REASON IT WAS RIGHT IS THE REASON IT IS NOT. "A saturated band
-       states its own boundary" held for slate, sage and n3; the band is WHITE now, so it states
-       nothing against the cream beneath it. The BORDER is still transparent on all four sides —
-       that clause was about the border box's 52px height and survives untouched — and the boundary
-       is an inset shadow, which costs no height. */
-    expect(band, "the band's border came back — the strip's 52px is border-box and would lose a pixel")
-      .toContain("border-color: transparent;");
-    expect(band, "the band stopped drawing its foot").toContain("inset 0 -1px 0 var(--n5)");
-    /* ⚠️ COMMENT-STRIPPED, FOURTH TIME IN THIS REPO. §2's own note explains why the hairline is a
-       rule rather than the retired TOKEN, and therefore names `--wsh-band-edge` — so the raw rule
-       contains the exact string this case forbids, and it failed on its own explanation. A rule
-       about code is asserted against code. */
-    const bare = band.replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(bare, "the retired edge token was wired back up").not.toContain("--wsh-band-edge");
-    /* ⚠️ AND "not a card" IS NOW ABOUT THE CAST, NOT THE ABSENCE OF ANY SHADOW. §2 draws the band's
-       foot as an INSET shadow, which costs no height and is a boundary rather than an elevation;
-       what must never come back is the plate's outer cast. */
-    expect(bare, "the band grew an outer cast — it is a band, not a card").not.toMatch(/box-shadow:\s*(?!inset)[^;]*rgba/);
-    /**
-     * ⚠️ THE GROUND IS A TOKEN AGAIN, AND THE ARGUMENT AGAINST ONE IS ANSWERED RATHER THAN
-     * REVERSED. It was asserted as a LITERAL because there was no family to point at: slate was the
-     * app's first cool colour, and a `var()` would have implied it belonged to one. Sage did belong
-     * to the warm family but sat at OKLCH 133° against a page that has since unified at 78° — so
-     * the band became the only thing on the screen outside the family it claimed.
-     *
-     * `--n3` is the family, and it is a real one: nine steps at the app's own measured parchment
-     * hue, declared once at `:root` so the band's one-value rule holds by construction rather than
-     * by avoiding a token. The clause is unchanged — the band has ONE ground, everywhere.
-     */
-    const tokens = readFileSync(resolve(__dirname, "../../index.css"), "utf8");
-    /* ⚠️ FOURTH GROUND, AND WHITE IS THE END OF THE SEQUENCE RATHER THAN A FIFTH TINT. Slate, sage
-       and `--n3` each answered "which tint" when the question was whether the band should be a tint
-       at all — three retones in a month is the evidence. White has nowhere to drift to. It is `--n0`
-       rather than `#ffffff` so the band belongs to the same nine steps as the surfaces it sits
-       above, and so the one-value rule holds by construction. */
-    expect(tokens, "the band ground moved without this case moving with it").toContain("--wsh-band-bg: var(--n0);");
-    expect(tokens, "the scale step the band reads is gone").toContain("--n0: #ffffff;");
-    /* ⚠️ AND IT IS DECLARED ONCE. A second `--n0` anywhere would make the band's ground depend on
-       which subtree it rendered in, which is the exact fault the literal was guarding against. */
-    expect((tokens.match(/--n0:/g) ?? []).length, "the scale is declared more than once — the band's ground would vary by subtree").toBe(1);
-    /* ⚠️ THE INK IS `:root`'s `--ink` VALUE, TAKEN AS A LITERAL AND NOT READ. `--ink: #241c15` is
-       the exact match — its comment states its job as "glyph strokes on tinted bands" — but
-       `.t-f12` overrides `--ink` and wraps Query Centre's whole grid, header included, so a
-       `var(--ink)` here would resolve per-PAGE and break the one-value rule. `--hub-ink`/
-       `--rail-ink` (#3a1c14) look closer by value and are declared per THEME, which is the same
-       rule broken a different way. */
-    expect(tokens, "the band's foreground token is missing — label, glyphs, focus ring and both buttons read it")
-      .toContain("--wsh-band-ink: var(--n8);");
-    /* ⚠️ `--n8` NOW, AND THE REASON THE LITERAL EXISTED IS ANSWERED. It was a hex precisely because
-       `var(--ink)` resolves per-PAGE — `.t-f12` overrides `--ink` and wraps Query Centre's header.
-       `--n8` is declared once, at `:root`, and overridden nowhere, so the band's one-value rule
-       holds by construction rather than by refusing to use a token. */
-    expect(tokens, "the ink step is gone").toContain("--n8: #141412;");
-    expect((tokens.match(/--n8:/g) ?? []).length, "the ink step is declared more than once — the band's foreground would vary by subtree").toBe(1);
-    const inkRoot = /--ink:\s*#241c15/.test(tokens);
-    expect(inkRoot, "`:root --ink` moved — the band's literal was taken from it and the two have drifted apart").toBe(true);
-    /* ⚠️ THE RETIRED TOKEN IS ASSERTED ABSENT, not merely unused. A token no rule reads is the next
-       thing someone wires back up. */
-    expect(tokens, "the retired edge token came back").not.toContain("--wsh-band-edge:");
-    /* ⚠️ AND THE RESTING PLATE STAYS PURE WHITE — the two states are a WHITE CARD collapsing to a
-       PARCHMENT BAND. If the plate ever takes the ground token too, the collapse stops being a
-       change of surface and the band's whole job goes with it. */
-    expect(tokens, "the resting plate left pure white — the card and the band would no longer be two different surfaces")
-      .toContain("--wsh-plate-bg: #ffffff");
-  });
-
-  it("⚠️ ONE CURVE, ONE PAIR OF DURATIONS — .22s on geometry, .14s on fades", () => {
-    for (const [sel, css] of [[".wsh", hdrCss], [".wsh-row", hdrCss], [".wpg-plate", gridCss]] as const) {
-      expect(all(css, sel), `${sel} is not on the .22s geometry curve — a row that eases differently from the plate inside it reads as two events`)
-        .toContain(".22s cubic-bezier(.4, 0, .2, 1)");
+  it("⚠️ NO TRANSITIONS AT ALL — there is no state to tween between", () => {
+    /* Every transition the masthead carried eased the condense: height, padding, background,
+       border-colour, radius, shadow, the title's size, the mark's box, the button ladder. With one
+       state they animate nothing, and a transition with nothing to interpolate is the residue that
+       makes the next reader believe a state still exists. */
+    for (const sel of [".wsh", ".wsh-row", ".wsh-title", ".wsh-sub", ".wsh-mark", ".wsh-txt"]) {
+      expect(decls(all(hdrCss, sel)), `${sel} kept a transition — the condense it eased is gone`)
+        .not.toContain("transition");
     }
-    /* ⚠️ THE HAIRLINE'S OWN .16s FADE IS GONE WITH THE HAIRLINE. The band's edge is part of the
-       header's border box, so it rides the `border-color` transition already asserted above —
-       there is no second curve to keep in step, which was the whole reason this line existed. */
-    expect(all(hdrCss, ".wsh"), "the band's edge left the border-color transition — it would snap while the height is still easing")
-      .toContain("border-color .22s cubic-bezier(.4, 0, .2, 1)");
-    expect(all(hdrCss, ".wsh--scrolled .wsh-mark,\n.wsh--scrolled .wsh-mark--xl"), "").not.toContain("transition");
+  });
+
+  it("⚠️ THE MASTHEAD IS THE FIRST CHILD OF THE SCROLLER, AND THE CONTROL ROW IS THE SECOND", () => {
+    /* The order IS the design. The masthead leaves when work starts; the control row is what stays,
+       so it has to sit beneath the thing that goes. A grid row above the scroller — which is what
+       both used to be — would pin the masthead in place and there would be nothing to leave. */
+    const grid = readFileSync(resolve(__dirname, "./WorkspacePageGrid.tsx"), "utf8");
+    /* ⚠️ `</div>` IS THE WRONG CLOSING ANCHOR — the toolbar renders one INSIDE the scroller, so the
+       first match ends the slice before `{children}` and the order check reads -1. Anchored on the
+       dock instead, which is the next real code after the scroller closes. */
+    const scroller = sliceBetween(grid, 'className="wpg-scroll"', "{dock &&");
+    const mast = scroller.indexOf("{masthead}");
+    const tools = scroller.indexOf("{toolbar &&");
+    const kids = scroller.indexOf("{children}");
+    expect(mast, "the masthead is not inside the scroller").toBeGreaterThan(-1);
+    expect(tools, "the control row is not inside the scroller").toBeGreaterThan(mast);
+    expect(kids, "the page's content does not follow both").toBeGreaterThan(tools);
+  });
+
+  it("⚠️ NO CHROME ROW SURVIVES IN THE GRID — the plate row is deleted, not emptied", () => {
+    /* An empty row still reserves its track and still takes the grid's gap; a row that renders
+       nothing is how a "removed" header keeps costing height nobody can see. */
+    expect(decls(gridCss), "the grid still styles a plate row").not.toMatch(/[\s,]\.wpg-plate[\s,{]/);
+    expect(decls(gridCss)).toContain("grid-template-rows: minmax(0, 1fr) auto");
+  });
+
+  it("⚠️ THE MASTHEAD REFUSES ACTIONS IN THE COMPONENT, not merely in the markup", () => {
+    /* A guard that only omitted them would let a page pass an action that silently goes nowhere —
+       the same fault as the deleted `count` slot. It throws, and the throw is what the design rests
+       on: nothing actionable means nothing to strand when the masthead leaves. */
+    expect(hdrSrc).toContain("masthead holds NO actions");
+    const ws = sliceBetween(hdrSrc, 'if (variant === "workspace") {', "  return (\n    <header");
+    for (const gone of ["wsh-acts", "wsh-grow", "svh-btn"]) {
+      expect(decls(ws), `the workspace branch still renders ${gone}`).not.toContain(gone);
+    }
+  });
+
+  it("⚠️ ONE MARK SIZE PER FAMILY — 52 bare, 38 plated, and the pair is the rule", () => {
+    /* `markHasArt` decides, never a prop: a page converts when its drawing lands rather than when
+       someone remembers to pass a size. Scaling the plated glyph WITH the illustration would turn a
+       small badge into a large blank tile, which is why the two families do not share a number. */
+    expect(all(hdrCss, ".wsh-mark--xl")).toContain("flex: 0 0 52px");
+    expect(all(hdrCss, ".wsh-mark--xl .os-mark")).toContain("width: 52px");
+    expect(all(hdrCss, ".wsh-mark")).toContain("flex: 0 0 38px");
+    expect(all(hdrCss, ".wsh-mark .os-mark")).toContain("width: 38px");
+  });
+
+  it("⚠️ ONE TITLE SIZE — the solo step is retired with the fixed height", () => {
+    const decl = decls(hdrCss);
+    expect(decl).toContain("--wsh-title-size: 30px");
+    /* bounded, so `wsh--solo` cannot be matched by some longer live class that starts with it */
+    expect(decl, "the solo step came back — it would add two points to every title-only page")
+      .not.toMatch(/["\s`.]wsh--solo["\s`,{]/);
+    expect(decl).not.toMatch(/["\s`.]wsh-title--solo["\s`,{]/);
   });
 });
