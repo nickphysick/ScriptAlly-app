@@ -43,6 +43,15 @@ export interface CalendarItem {
   /** Present on live items — the pip opens the item sheet on it. Completed items carry none. */
   card?: BoardCard;
   struck?: boolean;
+  /**
+   * The activity a DONE item was built from, when it was built from one.
+   *
+   * ⚠️ CARRIED, NOT PARSED BACK OUT OF `key`. The key already embeds it, but it embeds a fallback
+   * too (`a.id ?? queryId-date`), so parsing would be lossy in exactly the case where the id is
+   * missing — and that is the case where dedupe must NOT fire. A second encoding of one fact is
+   * how two readings of it come to disagree.
+   */
+  activityId?: string;
 }
 
 export interface CalendarDayData {
@@ -191,6 +200,7 @@ export function calendarDays(input: CalendarInput, visible: string[]): Map<strin
     day(ymd).items.push({
       key: `cal-done-act-${a.id ?? `${a.queryId}-${a.date}`}`,
       ymd, label: terseDoneLabel(a, agn ? agentPrimary(agn) : undefined), family: "done", struck: true,
+      ...(a.id ? { activityId: a.id } : {}),
     });
   }
 
@@ -199,6 +209,24 @@ export function calendarDays(input: CalendarInput, visible: string[]): Map<strin
 
 /** Busy days fold past this many pips to "+N MORE" (the ref draws 3 + the fold). */
 export const CAL_CELL_CAP = 3;
+
+/**
+ * ⚠️ THE DENSITY FLOOR: a cell never shows fewer than two occupants — one pip plus the counter's
+ * line — at any supported width (dedupe pack, Phase 3, Nick's ruling).
+ *
+ * A one-pip month is not a calendar; it is a list of counters. Measured before this change, at
+ * 1000px wide the collapsed layout gave `rowPx 66` and a cap of **1**, so every busy day read
+ * "1 item and eleven you cannot see".
+ *
+ * ⚠️ THIS CONSTANT CANNOT CREATE SPACE — it only states the rule. The room has to come from
+ * `.cal-grid`'s `min-height` at the collapsed width, which was raised to 600px in the same change
+ * (derived: a folded cell needs `2 × CAL_PIP_H + CAL_MORE_H = 62px` of room, so
+ * `rowPx >= 33 + 62 = 95`, so `6 × 95 + 13 = 583` — 600 with margin). If the two ever disagree the
+ * cell OVERFLOWS rather than squashing, because `.cal-pip` is `flex: none` — a loud failure, and
+ * the acceptance run asserts against it at every width. The floor and the CSS are reconciled by
+ * measurement, never by this comment.
+ */
+export const CAL_CELL_FLOOR = 2;
 
 /* ══ THE FOLD THRESHOLD (tasks-viewport pack, Phase 3) ══════════════════════════════════════ */
 
@@ -251,7 +279,7 @@ export const CAL_MORE_H = 12;
 export function calFoldCap(rowPx: number): number {
   if (!rowPx || rowPx <= 0) return CAL_CELL_CAP;
   const fits = Math.floor((rowPx - CAL_CELL_CHROME) / CAL_PIP_H);
-  return Math.max(1, Math.min(CAL_CELL_CAP, fits));
+  return Math.max(CAL_CELL_FLOOR, Math.min(CAL_CELL_CAP, fits));
 }
 
 /**
@@ -264,9 +292,9 @@ export function calFoldCap(rowPx: number): number {
  * often the SAME number, which is exactly the row the single-cap version was throwing away.
  */
 export function calFoldCapFolded(rowPx: number): number {
-  if (!rowPx || rowPx <= 0) return Math.max(1, CAL_CELL_CAP - 1);
+  if (!rowPx || rowPx <= 0) return Math.max(CAL_CELL_FLOOR, CAL_CELL_CAP - 1);
   const fits = Math.floor((rowPx - CAL_CELL_CHROME - CAL_MORE_H) / CAL_PIP_H);
-  return Math.max(1, Math.min(CAL_CELL_CAP, fits));
+  return Math.max(CAL_CELL_FLOOR, Math.min(CAL_CELL_CAP, fits));
 }
 
 /* ══ THE RECORD LAYER (record-layer pack, Phase 2; ref design-refs/calendar-month-focus-v2.html) ═
@@ -576,4 +604,41 @@ export function cellSlots<T, R>(
   const shownRecs = recs.slice(0, Math.max(0, room - shownItems.length));
   const overflow = total - shownItems.length - shownRecs.length;
   return { shownItems, shownRecs, overflow: Math.max(0, overflow) };
+}
+
+/**
+ * ⚠️ ONE FACT, ONE PIP — the record supersedes the done card that reports the same activity.
+ *
+ * A send, a nudge and a close each leave ONE `Activity`, and the calendar was drawing it twice:
+ * once as a struck done item (`calendarDays` reads `CLEARING_ACTIVITY_TYPES` off the feed) and once
+ * as a record entry (`recordDays` reads the same feed). Measured on 12 August: "12 ITEMS · 6 ON THE
+ * RECORD" — six activities, twelve pips, half the cell's cap spent restating what the other half
+ * already said.
+ *
+ * ⚠️ THE MATCH IS THE ACTIVITY ID, NOT THE TASK TYPE. Both sides derive from the same documents, so
+ * this is an identity rather than a guess — and it is what makes the near-misses safe. An activity
+ * the record layer EXCLUDED (an orphan; a `STATUS_CHANGED` with no `resultingStatus`) has no record
+ * entry to supersede it, so its done card survives, which is the direction that must never be
+ * wrong. Matching on type would have hidden those.
+ *
+ * ⚠️ AND IT TAKES THE DAY'S RECORD AS AN ARGUMENT RATHER THAN A FLAG. The caller passes whatever is
+ * on screen, so when the layer is hidden it passes `[]`, nothing is superseded and every done card
+ * returns — no `if (showRecord)` anywhere, and therefore no way for the two states to drift. A cell
+ * cannot go blank because a hidden layer superseded a visible one.
+ *
+ * The Done FACET still governs whatever survives: this is presentation of the same feed, and the
+ * board is untouched.
+ */
+export function dedupeAgainstRecord(
+  items: readonly CalendarItem[],
+  recordItems: readonly RecordItem[],
+): CalendarItem[] {
+  /* ⚠️ THE RESTORE IS STRUCTURAL, NOT GUARDED — and that is deliberate. An empty record supersedes
+     nothing because there is nothing in the set to match, so the hidden-layer behaviour cannot be
+     removed by deleting a check. A `recordItems.length === 0` early return sat here and was a pure
+     no-op: verified by deleting it and watching all 101 tests still pass, which is the honest way to
+     find out that a guard is decoration. One guard now, and it is the one doing the work. */
+  const shown = new Set(recordItems.map((r) => r.activityId).filter(Boolean));
+  if (shown.size === 0) return [...items];
+  return items.filter((i) => !(i.family === "done" && i.activityId && shown.has(i.activityId)));
 }

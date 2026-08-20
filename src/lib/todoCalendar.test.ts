@@ -11,13 +11,14 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Query, Agent, UserTask, TaskFlag, Activity, ActivityType, QueryStatus } from "../types";
 import { BoardCard } from "./todoBoard";
+import type { CalendarItem, RecordItem } from "./todoCalendar";
 import {
   monthGridDays, monthLabel, shiftMonth, sameMonth,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
-  calFoldCapFolded, CAL_MORE_H,
-  CAL_PIP_H,
+  dedupeAgainstRecord,
+  calFoldCapFolded, CAL_MORE_H, CAL_CELL_FLOOR, CAL_PIP_H, CAL_CELL_CHROME,
   exchangeLine,
   REC_TONE, REC_LEGEND,
 } from "./todoCalendar";
@@ -27,6 +28,8 @@ import { TODO_FACETS } from "./todoBoardSort";
 
 const here = __dirname;
 const pageSrc = readFileSync(join(here, "..", "components", "todo", "TodoCalendarPage.tsx"), "utf8");
+
+const CAL_CELL_CHROME_FOR_TEST = CAL_CELL_CHROME;
 
 const NOW = Date.parse("2026-08-07T12:00:00Z");
 const TODAY = "2026-08-07";
@@ -229,8 +232,11 @@ describe("⚠️ the fold threshold derives from the cell, never from a flat con
     expect(calFoldCap(120)).toBe(CAL_CELL_CAP); // room 87 — three fit
     expect(calFoldCap(108)).toBe(3);            // room 75 — exactly three
     expect(calFoldCap(95)).toBe(2);             // room 62 — two
-    expect(calFoldCap(70)).toBe(1);             // room 37 — one
-    expect(calFoldCap(46)).toBe(1);             // room 13 — the floor holds at one
+    /* ⚠️ AMENDED 21 Aug (dedupe pack, Phase 3, Nick's ruling): the floor is TWO, not one, so a
+       short row no longer falls to a single pip. The arithmetic below the floor is unchanged —
+       what changed is where it stops. See `CAL_CELL_FLOOR`. */
+    expect(calFoldCap(70)).toBe(CAL_CELL_FLOOR);  // room 37 — one fits, the floor says two
+    expect(calFoldCap(46)).toBe(CAL_CELL_FLOOR);  // room 13 — likewise
   });
 
   it("⚠️ TWO CAPS — the counter is 12px, not a whole pip, and that is worth a row", () => {
@@ -246,11 +252,27 @@ describe("⚠️ the fold threshold derives from the cell, never from a flat con
     }
   });
 
-  it("⚠️ AT LEAST ONE PIP ALWAYS SHOWS — a cell that folds everything says only '+3 MORE'", () => {
-    /* which tells you the day is busy but not what it holds — the fold is meant to abbreviate a
-       list, not replace it. */
-    expect(calFoldCap(30)).toBe(1);
-    expect(calFoldCap(1)).toBe(1);
+  it("⚠️ THE DENSITY FLOOR IS TWO — one pip plus the counter's line, at any supported width", () => {
+    /* The rule was "at least ONE pip", and one pip plus a counter is a day that says "1 item and
+       eleven you cannot see" — a list of counters rather than a calendar. Measured on dev before
+       this change, 1000px wide gave rowPx 66 and a cap of exactly that. Nick's ruling raised it.
+       ⚠️ THE CONSTANT CANNOT CREATE THE SPACE — `.cal-grid`'s min-height at the collapsed width
+       was raised to 600px in the same change, and the acceptance run is what reconciles them: if
+       they ever disagree the cell OVERFLOWS (pips are `flex: none`), loudly, at every width. */
+    expect(CAL_CELL_FLOOR).toBe(2);
+    expect(calFoldCap(30)).toBe(CAL_CELL_FLOOR);
+    expect(calFoldCap(1)).toBe(CAL_CELL_FLOOR);
+    expect(calFoldCapFolded(30)).toBe(CAL_CELL_FLOOR);
+    // and the floor never exceeds the ceiling
+    expect(CAL_CELL_FLOOR).toBeLessThanOrEqual(CAL_CELL_CAP);
+  });
+
+  it("the collapsed width's grid floor is derived from the density floor, not chosen", () => {
+    /* 2 pips + the counter = 2 × 25 + 12 = 62px of room; + 33 chrome = rowPx 95; × 6 rows + 13
+       for the weekday band = 583. 600 carries the margin. */
+    expect(calCss).toContain("min-height: 600px");
+    const need = 6 * (CAL_CELL_CHROME_FOR_TEST + CAL_CELL_FLOOR * CAL_PIP_H + CAL_MORE_H) + 13;
+    expect(600).toBeGreaterThanOrEqual(need);
   });
 
   it("it never exceeds the ceiling, however tall the row", () => {
@@ -1012,5 +1034,87 @@ describe("⚠️ the count line, and the legend's one record layer", () => {
     expect(pageSrc).toContain("CAL_LEGEND.map");
     expect(decls(pageSrc)).not.toContain("YOU SENT");
     expect(decls(pageSrc)).not.toContain("THEY REPLIED");
+  });
+});
+
+/* ══ THE DEDUPE, AND THE NAMED PIP (dedupe pack, Phases 1–2) ════════════════════════════════ */
+
+describe("⚠️ one fact, one pip — the record supersedes the done card that restates it", () => {
+  const done = (id: string, over: Partial<CalendarItem> = {}): CalendarItem =>
+    ({ key: `cal-done-act-${id}`, ymd: "2026-08-12", label: "Query sent to Harriet Vane",
+       family: "done", struck: true, activityId: id, ...over });
+  const recOf = (id: string): RecordItem =>
+    ({ key: `rec-${id}`, ymd: "2026-08-12", label: "Query sent", dir: "out", queryId: "q1",
+       activityId: id, agent: "Harriet Vane", agency: "Vane & Co", manuscriptId: "m1",
+       note: "", detail: "", exchange: 1, turned: false });
+
+  it("a send's done card is superseded by its record entry", () => {
+    const out = dedupeAgainstRecord([done("a1")], [recOf("a1")]);
+    expect(out).toEqual([]);
+  });
+
+  it("⚠️ A USER TASK IS NEVER DEDUPED — it has no activity, so nothing can supersede it", () => {
+    // "Book the library room" carries no activityId at all
+    const task: CalendarItem = { key: "cal-done-task-t1", ymd: "2026-08-12",
+      label: "Book the library room", family: "done", struck: true };
+    expect(dedupeAgainstRecord([task], [recOf("a1")])).toEqual([task]);
+  });
+
+  it("⚠️ THE RECORD HIDDEN RESTORES EVERY DONE CARD — a day never loses its only evidence", () => {
+    // the caller passes what is ON SCREEN, so a hidden layer passes [] and supersedes nothing.
+    // No `if (showRecord)` exists anywhere, which is what stops the two states drifting.
+    const items = [done("a1"), done("a2")];
+    expect(dedupeAgainstRecord(items, [])).toEqual(items);
+  });
+
+  it("⚠️ AN ACTIVITY THE RECORD EXCLUDED KEEPS ITS DONE CARD — the safe direction", () => {
+    // an orphan, or a STATUS_CHANGED with no resultingStatus: no record entry exists to supersede
+    // it. Matching on TASK TYPE would have hidden these; matching on the id cannot.
+    const out = dedupeAgainstRecord([done("a1"), done("a2")], [recOf("a2")]);
+    expect(out.map((i) => i.activityId)).toEqual(["a1"]);
+  });
+
+  it("an activity with no id is never deduped — the key's fallback would make a parse lossy", () => {
+    const noId = done("x", { activityId: undefined, key: "cal-done-act-q1-2026-08-12" });
+    expect(dedupeAgainstRecord([noId], [recOf("x")])).toEqual([noId]);
+  });
+
+  it("⚠️ ONLY THE done FAMILY IS A CANDIDATE — nothing still waiting is ever hidden", () => {
+    const live: CalendarItem = { key: "cal-k", ymd: "2026-08-12", label: "Send your full",
+      family: "agent", activityId: "a1" };
+    expect(dedupeAgainstRecord([live], [recOf("a1")])).toEqual([live]);
+  });
+
+  it("⚠️ THE REAL SHAPE, END TO END: calendarDays + recordDays over ONE activity", () => {
+    /* the fault as it shipped — the same Activity drawn twice. Derived from the two producers
+       rather than hand-built, so a change to either side fails here. */
+    const a = act({ id: "dup1", date: "2026-08-12T09:00:00Z", activityType: ActivityType.QUERY_SENT });
+    const live = calendarDays({ ...EMPTY, activities: [a], queries: RQ, agents: [AGENT] }, AUG);
+    const recs = recordDays([a], RQ, [AGENT], AUG);
+    const before = live.get("2026-08-12")!.items;
+    const rec = recs.get("2026-08-12")!;
+    expect(before, "the done item is missing — the fixture no longer reproduces the fault").toHaveLength(1);
+    expect(rec).toHaveLength(1);
+    expect(before[0].activityId).toBe(rec[0].activityId);
+    expect(dedupeAgainstRecord(before, rec)).toEqual([]);
+    // and with the layer hidden the done card is the day's evidence again
+    expect(dedupeAgainstRecord(before, [])).toHaveLength(1);
+  });
+});
+
+describe("⚠️ the record pip names the agent, as the card pips beside it do", () => {
+  it("the grid pip reads 'Label · Name', and falls back to the label alone", () => {
+    expect(pageSrc).toContain("{r.agent ? `${r.label} · ${r.agent}` : r.label}");
+  });
+
+  it("the panel row keeps its own format — the name is already in its title", () => {
+    expect(pageSrc).toContain('<span className="cal-recwho"> · {r.agent}</span>');
+  });
+
+  it("truncation is the card pips' — one line, ellipsis, never a wrap", () => {
+    const m = /^\.cal-pip\s*\{([^}]*)\}/m.exec(calCss);
+    expect(m, ".cal-pip has no rule").not.toBeNull();
+    expect(m![1]).toContain("white-space: nowrap");
+    expect(m![1]).toContain("text-overflow: ellipsis");
   });
 });

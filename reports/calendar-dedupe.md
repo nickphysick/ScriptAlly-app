@@ -92,3 +92,114 @@ the same fact, and the `??` fallback would make the parse lossy. `CalendarItem` 
 `recordFor(ymd)`, which returns `[]` when the layer is hidden, so passing it to
 `dedupeAgainstRecord` supersedes nothing and every done card returns. One call site, both states,
 no `if (showRecord)` anywhere — which is what stops the two states drifting apart.
+
+---
+
+## Phases 1–4 — done, deployed, measured
+
+**https://scriptally-dev.web.app** → Tasks → Calendar.
+
+### The three rulings, before → after (deployed dev, both runs)
+
+| | before | after |
+|---|---|---|
+| **1. Sends showing twice** — 12 Aug chip | **12** (6 activities, 12 pips) | **6** |
+| **2. Record pip text** | `"Holding reply"` | `"Closed · David Marsh"` |
+| **3. Cap at 1000px** — `rowPx` / max pips | `66.00` / **1** | `96.00` / **2** |
+
+### Caps at all four widths
+
+| width | rowPx before → after | cellH | cols | max pips before → after | day 12 |
+|---|---|---|---|---|---|
+| 1000 | 66.00 → **96.00** | 65 → 95 | 1 | **1 → 2** | chip 6, shown 2, +4 |
+| 1280 | 102.17 → 102.17 | 101 | 2 | 2 → 2 | chip 6, shown 2, +4 |
+| 1440 | 102.17 → 102.17 | 101 | 2 | 2 → 2 | chip 6, shown 2, +4 |
+| 1920 | 102.17 → 102.17 | 101 | 2 | 2 → 2 | chip 6, shown 2, +4 |
+
+**What the floor change actually was:** two halves, and only together.
+`CAL_CELL_FLOOR = 2` states the rule; `.cal-grid { min-height: 420px → 600px }` at the collapsed
+width supplies the room. **600 is derived, not chosen** — a folding cell needs
+`2 × CAL_PIP_H + CAL_MORE_H = 62px`, so `rowPx ≥ 33 + 62 = 95`, so `6 × 95 + 13 = 583`; 600 carries
+the margin. The constant cannot create space, so if the two ever disagree the cell **overflows**
+(pips are `flex: none`) rather than squashing — loudly, and the acceptance run asserts against it at
+every width. Both halves are mutation-verified: reverting either goes red on its own test.
+
+### Acceptance, on the deployed page
+
+```
+@1440 OK — 6 populated cells, panel 370×662, count "6 ITEMS"
+@1920 OK — 6 populated cells, panel 370×662, count "6 ITEMS"
+@1000 OK — one column, grid 600px, panel 640×325
+```
+
+Plus, asserted at all four widths: **chip = shown + overflow** in every populated cell.
+
+### The toggle — the ruling's own test
+
+Neutral click first (the plate's collapse-on-engagement moves the tool row otherwise):
+
+```
+ON : 12→chip 6 (2 rec, +4) · 13→5 (2 rec, +3) · 17→2 (2 rec) · 18→3 (3 rec) · 20→6 · 1→5
+OFF: 12→chip 6 (0 rec, +4) · 13→5 (0 rec, +3) · 17→2 (0 rec)  ·  —      · 20→6 · 1→5
+```
+
+**12 August reads 6 in both states** — the record entries when the layer is on, the restored done
+cards when it is off. Never doubled, never emptied. 18 August is absent with the record off because
+all three of its items are holding replies, which are not a clearing activity and so never produced
+a done card in the first place. Reconciliation holds in both states.
+
+### Live-asset verification
+
+`/assets/index-CgvgbQQl.css` and `/assets/index-tNdhMGUv.js`, fetched from the deployed site:
+grid floor 600 ✓, collision resets still present ✓, dedupe in the bundle ✓, named record pip ✓.
+
+---
+
+## FLAGS FOR NICK
+
+### 1. The linkage, and what was left undeduped — **nothing**
+
+The match is `Activity.id`. The calendar's done items are **not `BoardCard`s**: `calendarDays`
+builds them straight from the activity feed, and `recordDays` walks the same array — so a send is
+one document rendered twice. A nudge and a holding reply on one query on one day are different
+documents and cannot collide, so **no ambiguous pair exists and nothing was left undeduped for
+safety**.
+
+Three cases fail **safe**, keeping the done card, and all three are tested: an activity with no
+`id`; an orphan whose query is gone; a `STATUS_CHANGED` or `MATERIALS_SENT` carrying no
+`resultingStatus`. That last one is why the match is on ids rather than on task *type* — matching
+by type would have hidden them.
+
+### 2. Before/after caps — above. The floor change was the constant **and** the CSS min-height.
+
+### 3. What the dedupe changed in the panel counts
+
+**Every populated day roughly halved**, which is the point, but two things are worth your eye on
+real data:
+
+- **12 August still reads 6 with the record off.** Those are the six done cards returning. So the
+  day genuinely holds six closes of David Marsh — the dedupe removed a *duplicate*, not a real item.
+  Six closes for one agent on one day looks like test-data noise rather than a bug in the projection,
+  but you would know better than I would.
+- **18 August vanishes when the record is hidden.** Correct — holding replies are not a clearing
+  activity, so they never had a done card to fall back to. Worth knowing it is by design: a day
+  whose only content is agent replies is *empty* on the work layer.
+
+### 4. Cross-session observations
+
+- **Sixteen files of other sessions' uncommitted work rode along in this deploy** — Account
+  settings, Submission packages (including four untracked new files: `MaterialModal.tsx`,
+  `packagesFlow.css`, `materialDraft.ts(.test)`, `pkgFlow.measure.ts`) and the To-do session's
+  `ToDoPage.tsx` / `TaskPaneBody.tsx` / `taskPanePort.test.tsx`. At build time the To-do work had
+  **4 tsc errors** (`'materials' does not exist in type 'SendBodyValues'`) — `vite build` does not
+  typecheck, so the bundle built anyway. By the end of the run their tree had gone green and the
+  full suite was **341 files / 5830 passed / 0 failed**, tsc **0**. Nothing of theirs was touched.
+- **A useful guard appeared mid-run from another session:** `tests/e2e/bundleGuard.ts` refuses to
+  measure a local preview whose `dist/` is older than `src/`, naming the exact trap ("Measuring now
+  would report your edit as absent"). It caught me once, correctly.
+- **The local preview server would not stay up** — `vite preview` exited twice under
+  `preview_start`, so the before/after numbers were taken against the **deployed** site either side
+  of the deploy rather than against a local build. That is stronger evidence, not weaker, but it
+  means dev briefly carried the un-deduped page between the two runs.
+- **The 21px chassis defect is untouched**, as instructed — `workspacePageGrid.css` belongs to
+  `tasks-chassis`. The day panel's foot is still below the fold on this page.

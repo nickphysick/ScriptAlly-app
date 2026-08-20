@@ -31,7 +31,7 @@ import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, monthLabel,
   shiftMonth, sameMonth, calFoldCap, calFoldCapFolded,
-  RecordItem, recordDays, cellSlots, exchangeLine, REC_TONE, REC_LEGEND,
+  RecordItem, recordDays, cellSlots, exchangeLine, dedupeAgainstRecord, REC_TONE, REC_LEGEND,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
@@ -365,6 +365,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
 
   const dayData = (ymd: string) => byDay.get(ymd) ?? { items: [], rolled: 0 };
   const recordFor = (ymd: string): RecordItem[] => (showRecord ? recByDay.get(ymd) ?? [] : []);
+  /* ⚠️ THE ONE READING OF A DAY, so the grid, the day panel and the count line cannot disagree
+     about what is on it. `recordFor` returns [] when the layer is hidden, so the same call restores
+     every superseded done card — the record-off behaviour needs no branch of its own. */
+  const itemsFor = (ymd: string): CalendarItem[] =>
+    dedupeAgainstRecord(dayData(ymd).items, recordFor(ymd));
 
   return (
     <div className="t-f12 spine-root">
@@ -445,7 +450,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
           <div className="cal-grid" role="grid" ref={gridRef} aria-label={monthLabel(anchor)}>
             {DOW.map((d) => <div key={d} className="cal-dow" role="columnheader">{d}</div>)}
             {visible.map((ymd) => {
-              const { items, rolled } = dayData(ymd);
+              const { rolled } = dayData(ymd);
+              const items = itemsFor(ymd);
               const recs = recordFor(ymd);
               /* ⚠️ THE FOLD RESPONDS TO THE VIEWPORT (tasks-viewport P3): the cap comes from the
                  row height the grid actually resolved to, so a short laptop folds sooner rather
@@ -495,7 +501,11 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                       onClick={(e) => { e.stopPropagation(); selectDay(ymd); }}
                     >
                       <span className="cal-recdot" style={{ background: REC_TONE[r.dir].dot }} aria-hidden />
-                      {r.label}
+                      {/* ⚠️ THE PIP NAMES THE AGENT, as the card pips beside it do. A bare "Holding
+                          reply" next to "Nudge Tom Ellery" is two grammars in one cell, and the name
+                          is the thing a writer scans a month FOR. Truncation is the card pips' —
+                          one line, ellipsis — so a long name shortens rather than wrapping. */}
+                      {r.agent ? `${r.label} · ${r.agent}` : r.label}
                     </button>
                   ))}
                   {overflow > 0 && <div className="cal-more2">+{overflow} MORE</div>}
@@ -530,7 +540,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
           <CalDayPanel
             ymd={selDay}
             today={today}
-            items={dayData(selDay).items}
+            items={itemsFor(selDay)}
             recs={recordFor(selDay)}
             manuscripts={manuscripts}
             openRec={openRec}

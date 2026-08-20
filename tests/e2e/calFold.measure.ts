@@ -447,3 +447,53 @@ test("calendar — acceptance", async ({ page }) => {
   expect(c.gridH, "the month crushed in the collapsed layout").toBeGreaterThanOrEqual(400);
   console.log(`@1000 OK — one column, grid ${c.gridH}px, panel ${c.panelW}×${c.panelH}`);
 });
+
+/**
+ * ⚠️ THE WIDTH SWEEP — the fold floor is a claim about every supported width, so it is measured at
+ * every supported width (dedupe pack, Phase 3). Also reports the day-12 totals, which is where the
+ * done/record duplication was observed.
+ */
+test("calendar — caps across the supported widths", async ({ page }) => {
+  const rows: string[] = [];
+  for (const width of [1000, 1280, 1440, 1920]) {
+    await openRoute(page, ROUTE, { width, height: 900 });
+    const r = await page.evaluate(() => {
+      const grid = document.querySelector(".cal-grid") as HTMLElement;
+      const dow = grid.firstElementChild as HTMLElement;
+      const cells = Array.from(document.querySelectorAll(".cal-cell")) as HTMLElement[];
+      const populated = cells
+        .map((c) => ({
+          day: (c.querySelector(".cal-dn")?.textContent ?? "").trim(),
+          chip: Number(c.querySelector(".cal-c2")?.textContent ?? 0),
+          shown: c.querySelectorAll(".cal-pip").length,
+          rec: c.querySelectorAll(".cal-pip.cal-rec").length,
+          more: Number((c.querySelector(".cal-more2")?.textContent ?? "0").replace(/\D/g, "")),
+          recText: Array.from(c.querySelectorAll(".cal-pip.cal-rec")).map((p) => (p.textContent ?? "").trim()),
+        }))
+        .filter((c) => c.chip > 0);
+      const cellH = cells[8]?.clientHeight ?? 0;
+      return {
+        gridH: grid.clientHeight, dowH: dow.offsetHeight, cellH,
+        rowPx: (grid.clientHeight - dow.offsetHeight) / 6,
+        maxShown: Math.max(0, ...populated.map((c) => c.shown)),
+        populated,
+        layoutCols: getComputedStyle(document.querySelector(".cal-layout") as HTMLElement)
+          .gridTemplateColumns.split(" ").length,
+      };
+    });
+    rows.push(
+      `${String(width).padStart(4)} | rowPx ${r.rowPx.toFixed(2).padStart(6)} | cellH ${String(r.cellH).padStart(3)}` +
+      ` | cols ${r.layoutCols} | max pips shown ${r.maxShown}` +
+      ` | day12 chip=${r.populated.find((p) => p.day === "12")?.chip ?? "-"}` +
+      ` shown=${r.populated.find((p) => p.day === "12")?.shown ?? "-"}` +
+      ` more=${r.populated.find((p) => p.day === "12")?.more ?? "-"}`);
+    const withRec = r.populated.find((p) => p.rec > 0);
+    if (withRec) rows.push(`     | record pip text: ${JSON.stringify(withRec.recText[0])}`);
+    /* the reconciliation check, re-run at every width */
+    for (const c of r.populated) {
+      expect(c.shown + c.more, `@${width} day ${c.day}: chip ${c.chip} != shown ${c.shown} + more ${c.more}`)
+        .toBe(c.chip);
+    }
+  }
+  console.log("\n" + rows.join("\n"));
+});

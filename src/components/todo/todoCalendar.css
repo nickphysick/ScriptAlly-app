@@ -409,7 +409,11 @@
    silent: above 1080 the tasks-viewport law holds exactly as before. */
 @media (max-width: 1079px) {
   .cal-layout { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
-  .cal-grid { min-height: 420px; }
+  /* ⚠️ 600, DERIVED — not chosen. The density floor says two occupants minimum, so a folding cell
+     needs 2 × CAL_PIP_H + CAL_MORE_H = 62px of room, hence rowPx >= 33 + 62 = 95, hence
+     6 × 95 + 13 (the weekday band) = 583. 600 carries the margin. At 420 this width gave rowPx 66
+     and a cap of ONE — measured on dev before the change. */
+  .cal-grid { min-height: 600px; }
   .cal-focus { max-height: none; }
 }
 
