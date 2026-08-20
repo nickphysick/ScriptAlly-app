@@ -254,3 +254,186 @@ I do **not** import `statusDirection` into it. `StatusDot` is untouched. Flagged
 ---
 
 *Recon complete. No code written in this step. Report committed alone.*
+
+---
+
+# Build log — Phases 1–6 COMPLETE
+
+All six phases landed on `main`, seven commits, one per phase plus a cleanup. **No deploy.**
+
+| Phase | Commit | What |
+|---|---|---|
+| 1 | `c827fd10` | the design ref |
+| 2 | `a1d4336f` | the record derivation — two tables |
+| 3 | `064fc8c3` | record pips in the grid |
+| 4 | `7bae8ed0` | the record's switch |
+| 5 | `68c76c62` | the in-focus day panel; the modal retires |
+| 6 | `4c691db2` | the week view retires |
+| — | `6f3cc1f4` | a constant nothing read, and two dead imports |
+
+**Final gates:** tsc **6 errors, exactly the Step 0 baseline**, all in the Submission
+packages session's `tests/e2e/pkgRestructure.measure.ts` — none in any calendar file.
+`vite build` exit 0, whole log grepped (only the expected chunk-size note). Vitest **335 files
+/ 5718 passed / 2 skipped / 0 failed** — recorded fresh at this commit, not copied.
+
+**⚠️ What is NOT verified.** Everything here is a **code-and-unit** claim. No deploy this run,
+so the e2e instrument could not be pointed at it, and **nothing in the panel's geometry has been
+measured on a rendered page**. The panel's grid track, its scroll behaviour inside `.tpl-body`'s
+`min-height: 0` chain, and the 1080px collapse are the three things most likely to be wrong in a
+way unit tests cannot see — the `flex: 1; min-height: 0` chain has produced a silent 0px box in
+this repo twice before. Measure before believing the layout.
+
+Every derivation was **verified red by mutation** before being believed, and each file restored
+byte-identical afterwards: the Offer direction (`in`→`out`), the slot ordering (record before live
+work), the `turned` flag (every gap reading as a reply), and the exchange sequence (counted over
+visible days rather than the query).
+
+---
+
+## FLAGS FOR NICK
+
+### 1. Activity types excluded from `RECORD_TYPES` as ambiguous
+
+Only one class was genuinely a judgement call, and it went to exclusion:
+
+- **`AGENT_ADDED` / `AGENT_UPDATED` / `AGENT_DELETED` / `MANUSCRIPT_*`** — excluded. These are
+  things the writer did to their **files**, not to a submission. `AGENT_UPDATED` is the closest
+  call, because the agent list already derives a closed-door date from it — but a door closing is
+  a fact about an agency, not an exchange with one.
+- **`STATUS_CHANGED` with no `resultingStatus`** — excluded. The type carries no meaning of its
+  own, so a pre-migration row without a status cannot be classified. `MATERIALS_SENT` behaves the
+  same way, which means **a pre-migration materials row with no status will not appear**. That is
+  the one place the whitelist knowingly drops real data, and it is the direction the pack asked
+  for (a missing row is recoverable; a wrong one is not).
+- **Orphans** — an activity whose query no longer exists is excluded, because every record row
+  offers OPEN QUERY and its agent is only reachable through the query.
+
+**A decision worth your eye:** the three closures all read **"Closed"**, per the pack's label
+list. Rejected/Withdrawn/No Response are separated by **direction** (a rejection came from the
+agency; a withdrawal and a no-response close are the writer's own act) and by the expanded row,
+but not by the pip's word. A month of the word "Rejected" across the grid felt like a running
+commentary rather than a record. If you want them distinguished, it is one line in `RECORD_STATUS`.
+
+### 2. Is `TimelineComposer` callable from the calendar?
+
+**No — and not because of coupling. It has no importer anywhere in the repo.** Its `editActivity`
+call at `TimelineComposer.tsx:230` is the only one in any component, and nothing mounts it.
+`Queries.tsx:5388` states it "survives for the dashboard's own flows"; there are none.
+
+So **no correction UI for editing an entry is reachable on any surface today.** Deleting one is
+(`Queries.tsx:1003` → `deleteActivity`, with a derived-consequence confirm). Editing is not.
+EDIT THIS ENTRY therefore routes to the reading pane, per the pack's fallback. **This also
+corrects my previous report**, which answered this flag "yes" from the definition without checking
+reachability. Re-mounting `TimelineComposer` is a real piece of daylight work — it needs
+`onOpenRichForm`, `onMarkSent` and `onNudge`, all Query Centre flows.
+
+### 3. Does `FocusItem` admit record entries?
+
+**No.** `FocusItem = { kind: "card"; card: BoardCard } | { kind: "group"; group: HkGroup }`. A
+record entry is an `Activity`, and manufacturing a synthetic `BoardCard` to squeeze one in would
+put a fabricated card through a journey that **writes**. The record routes; it never opens a flow.
+Live card rows in the panel open `FocusFlow` exactly as the pips do — same call, same props.
+
+### 4. Did the day panel fit inside `TplGrow`/`TplZone`?
+
+**Yes — no fork, and `TasksPageLayout` is untouched** (verified in the diff). `children` lands in
+`.tpl-body`, already `display:flex; flex-direction:column; min-height:0`, so the two-column split
+is the page's own box inside it. `TplZone` is deliberately **not** used and never was on this
+page: the month **compresses** to the frame rather than scrolling (tasks-viewport P1/P3), and the
+panel is the only scroller.
+
+I did not use the `sidebar` prop — it renders `.tpl-side` on the **left**, and this panel is on
+the right.
+
+### 5. Did `todoFamily.ts` accept the record colours additively?
+
+**No, and I would not add them even with the fence lifted.** They are calendar-local
+(`REC_TONE`/`REC_LEGEND` in `todoCalendar.ts`). Three reasons, the first the strongest:
+
+1. **The shapes do not match.** A `CAL_PIP` entry is `{bg, tx, bd}` — a filled, bordered chip. The
+   record has no fill and no border, so joining that map means writing `bg: "transparent"`, which
+   encodes "there is no fill here" in a vocabulary whose every other entry means "this is the fill".
+2. **It is not a pip family.** `CalPipFamily` classifies live work by whose it is; widening the
+   union would invite a consumer to treat a past event as a live card.
+3. **Two locks outside my territory assert the four** — `tasksAuditLegend.test.tsx:30` requires
+   legend and map to have identical keys, and `todoCalendar.test.ts:166` names the four exactly.
+
+The legend still renders **from** records rather than literals; it reads two now, each owning its
+layer. If you would rather the tones lived in `todoFamily.ts`, it wants a second map beside
+`CAL_PIP` — not an entry inside it.
+
+### 6. Can `calFoldCap` starve the `+N` counter of its line?
+
+**Yes.** The comment says a row is reserved; the arithmetic does not reserve one.
+
+```ts
+const room = rowPx - CAL_CELL_CHROME;   // 26
+const fits = Math.floor(room / CAL_PIP_H); // 19
+return Math.max(1, Math.min(CAL_CELL_CAP, fits));
+```
+
+`fits` is pure pip capacity — nothing subtracts the height of `.cal-more2`, which the cell renders
+*in addition* to `cap` pips whenever anything folds. At `rowPx = 83`: `room = 57`, `fits = 3`,
+`cap = 3`; three pips fill the room exactly and the counter is clipped by the cell's
+`overflow: hidden`. The window is roughly `rowPx` 77–96, and the same recurs at the
+`Math.max(1, …)` floor.
+
+**Flagged, not fixed, per the pack.** `calFoldCap` is untouched — the record folds through it as
+ordinary cell occupants, and record pips deliberately keep `.cal-pip`'s box because `CAL_PIP_H` is
+the unit the fold counts in. **This is worth measuring rather than reasoning about**, since it
+depends on the real rendered height of `.cal-more2`.
+
+### 7. Cross-session collisions
+
+**a. One file outside my territory was edited — `tasksViewport.test.tsx`.** Its assertion
+`expect(cal).toContain('view === "month" ? 6 : 1')` was made stale by the Phase 6 deletion you
+ordered. I retargeted that one assertion — the law it asserts is unchanged, and both halves
+survive — rather than leave `main` red all night for three other sessions. Nothing else in the
+file was touched, and a sweep confirmed it was the only such lock (the many
+`not.toContain("const [view, setView]")` assertions elsewhere are about `ToDoPage`, unaffected).
+**Please confirm you are happy with that call.**
+
+**b. A copy collision I could not resolve in your favour.** The pack names the panel's first
+section with a phrase the To-do session **retired repo-wide**, locked by
+`todoWorkbench.test.ts` ("THE RENAME, repo-wide: zero matches … in src"). A pack does not overturn
+a recorded decision, so the heading reads **"Yours"** — which matches the panel's own count line
+("N YOURS") and describes exactly what the section holds. Note the lock greps **raw source**, so
+the phrase cannot even be quoted in a code comment to explain itself; the note in the file
+describes it instead of naming it. **If you want the original wording back, the lock is the thing
+to change, and it is the To-do session's.**
+
+**c. My change orphaned `.cal-viewwrap` in `taskChrome.css`** — that file is not mine and was
+**not touched**. `.cal-viewmenu` beside it stays live for the Noteboard, so only the one rule is
+now dead. One line for whoever owns that file.
+
+**d. Baseline moved under me, twice.** At Step 0: tsc 6 errors (Submission packages), Vitest all
+green. Mid-run the Account settings session briefly had 14 errors in `AccountSettings.tsx` and
+`settings/sectionBands.tsx`; they cleared before I finished. **I fixed none of them.** The suite
+also grew from 5645 to 5718 tests as the other sessions landed work — every figure in this report
+was taken fresh, never copied.
+
+**e. No locked component needed a prop it lacked.** `FocusFlow`, `TasksPageLayout`, `StatusDot`,
+`TODO_FACETS`, `assembleBoardColumns`, `todoFamily` and `todoBoardSort` were all consumed verbatim
+and are all confirmed unmodified in `git status`.
+
+**f. No global token was wanted.** `index.css` was not opened. Every colour is either a literal in
+my own stylesheet or a value in my own module.
+
+### 8. What in the design ref I could not implement faithfully
+
+Three deviations, each because a decision recorded in this repo outranks a mockup:
+
+1. **`align-items: stretch`, not the ref's `start`.** The ref draws a page that scrolls, where
+   hugging is right. Here the frame **is** the viewport and the month compresses to fill it
+   (tasks-viewport P1/P3). With `start` both columns would hug their content, `.cal-grid`'s
+   `flex: 1` would have nothing to fill, and the grid would collapse to min-content.
+2. **No `max-height: calc(100vh - 60px)`, and no `sticky`.** CLAUDE.md is explicit that the stage
+   is this app's scroll container, not the window, and that viewport arithmetic in page heights is
+   forbidden. The panel takes its height from the layout row and scrolls inside it — which is what
+   the ref's sticky-plus-max-height was reaching for on a page that had no such row to sit in.
+3. **The section heading**, as in flag 7b.
+
+Two smaller notes on fidelity: **"OPEN QUERY" lands on the query, not on the entry** — there is no
+activity-level anchor in the router, only `/queries?q=<id>`, so "scrolled to this entry" is not
+currently expressible. And **below 1080px the layout becomes the scroller** with a 420px floor on
+the month; that is the one width at which this page scrolls at all, stated rather than left silent.
