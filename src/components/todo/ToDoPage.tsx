@@ -75,6 +75,7 @@ import { TODO_ROUTES } from "../../lib/todoRoutes";
 import { TodoCommandBar } from "./TodoCommandBar";
 import { AnchoredPanel } from "./AnchoredPanel";
 import { FilterMenu, SortMenu, SnoozePanel } from "./TodoFrameMenus";
+import { TaskDismissDialog } from "./TaskDismissDialog";
 import {
   applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
   typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
@@ -1672,6 +1673,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
               />
             </AnchoredPanel>
           )}
+          {/* ⚠️ THE CONFIRM SITS BESIDE THE SNOOZE PANEL, and both read `docked.card` rather than
+              the row that was clicked — the pane is the open task, so the two doors and the card
+              can never come to be about different things. */}
+          {dismissOpen && docked.card && (
+            <TaskDismissDialog
+              deed={taskDeed(docked.card)}
+              hasQuery={!!docked.card.relatedRecordId && !docked.card.userTaskId}
+              agent={docked.card.who}
+              onKeep={() => setDismissOpen(false)}
+              onDismiss={() => { dismissCard(docked.card!); setDismissOpen(false); }}
+            />
+          )}
           <div className="tdw-split">
             {/* the frame contract's command bar, above the split */}
             <div className="tdw-rail">
@@ -1748,9 +1761,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                        and places against its rect — recon 6 confirmed it needs nothing else, so the
                        panel moved surface without a line of change inside it. */
                     onSnooze: paneVerbs.snooze.disabled ? undefined : (el) => setSnoozeAnchor(el),
-                    /* ⚠️ STUBBED UNTIL PHASE 7. The confirm dialog and the `TaskFlag` write are that
-                       phase's; wiring `forkStale` straight to this button would dismiss with no
-                       confirmation and no way back, which is the thing Phase 7 exists to prevent. */
+                    /* ⚠️ IT OPENS THE QUESTION; IT DOES NOT ACT (Phase 7). This is the one verb on
+                       the page whose result cannot be read off the page afterwards, so it is the
+                       one that asks — see `TaskDismissDialog` for why that is about WHERE IT GOES
+                       rather than about certainty. */
                     onDismiss: paneVerbs.dismiss.disabled ? undefined : () => setDismissOpen(true),
                   })}
                   onPrimary={() => dockPrimary(paneCard)}
@@ -2205,6 +2219,27 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       : c.taskType && c.relatedRecordId ? flagKeyForTask(c.taskType, c.relatedRecordId) : null;
     if (key) upsertTaskFlag(key, { snoozedUntil: null, unbumpSnooze: true });
   }
+  /**
+   * ⚠️ THE DISMISSAL WRITE — one field, on the flag already keyed to the CAUSE (pane round,
+   * Phase 7). `flagKeyForTask(taskType, relatedRecordId)` is the same key snooze and commit use, so
+   * a dismissal lands on the same document rather than a parallel record of the writer's stance.
+   *
+   * ⚠️ AND IT IS UNDOABLE BY THE SAME ROUTE IT WAS MADE: `skippedAt: null` clears it. The dialog
+   * promises the task can be brought back from behind the filter, and this is what makes that true
+   * rather than aspirational.
+   */
+  function dismissCard(c: BoardCard) {
+    const key = c.userTaskId
+      ? { taskType: USER_TASK_FLAG_TYPE, queryId: c.userTaskId }
+      : c.taskType && c.relatedRecordId ? flagKeyForTask(c.taskType, c.relatedRecordId) : null;
+    if (!key) return;
+    upsertTaskFlag(key, { skippedAt: new Date().toISOString() });
+    flash("Dismissed", { label: "Undo", fn: async () => {
+      upsertTaskFlag(key, { skippedAt: null });
+      flash("Restored");
+    } });
+  }
+
   /** Un-tick — quickDone's own reverse, which is exactly what its undo toast already calls. */
   async function unDone(c: BoardCard) {
     if (!c.userTaskId) return;
@@ -3096,6 +3131,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       todo: narrowCards(boardCols.todo),
       today: narrowCards(boardCols.today),
       snoozed: narrowCards(boardCols.snoozed),
+      dismissed: narrowCards(boardCols.dismissed),
       done: narrowCards(boardCols.done),
     };
     /* ⚠️ THE VIEW IS APPLIED HERE, ONCE — so the list, the meter, the group heads and the footer
@@ -3133,6 +3169,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       todo: narrowCards(boardCols.todo),
       today: narrowCards(boardCols.today),
       snoozed: narrowCards(boardCols.snoozed),
+      dismissed: narrowCards(boardCols.dismissed),
       done: narrowCards(boardCols.done),
     };
     return generatedGroups(chipGroups(taskGroups(narrowed), chip));
@@ -3171,6 +3208,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             groupCounts={viewGroupCounts(railGroupsAll())}
             typeCounts={viewTypeCounts(railGroupsAll())}
             snoozedCount={narrowCards(boardCols.snoozed).length}
+            dismissedCount={narrowCards(boardCols.dismissed).length}
             shown={viewTotal(railGroups())}
             onChange={setView}
           />

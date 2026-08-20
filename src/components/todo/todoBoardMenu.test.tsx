@@ -58,6 +58,7 @@ describe("⚠️ the menu is a PORTAL — never a descendant of the card", () =>
       todo: [card({ key: "a", taskType: "full_requested", relatedRecordId: "q1" })],
       today: [card({ key: "b" })],
       snoozed: [],
+      dismissed: [],
       done: [],
     };
     const html = renderToStaticMarkup(

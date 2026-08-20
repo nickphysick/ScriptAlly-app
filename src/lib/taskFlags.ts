@@ -72,11 +72,31 @@ export function flagReturnedToday(flag: Pick<TaskFlag, "snoozedUntil">, nowMs: n
   return localYmdOf(until) === localYmdOf(nowMs);
 }
 
+/**
+ * DISMISSED: the writer said no, without a date (pane round, Phase 7).
+ *
+ * ⚠️ IT IS ITS OWN STATE, NOT A FAR-FUTURE SNOOZE. `MUTED_UNTIL` already means "muted
+ * indefinitely" and would have carried a dismissal with no schema change at all — but it is what
+ * the housekeeping GROUP MUTE writes, so reusing it would have retitled every muted rule group as
+ * "dismissed" the moment the filter learned the word. Two acts, two fields, and the writer's own
+ * distinction between "not this group, ever" and "not this task" survives.
+ *
+ * ⚠️ AND `skippedAt` NEEDED NO RULES DEPLOY: it is already in `isValidTaskFlag`'s allowlist, has
+ * been since the flag store was written, and until now nothing wrote it and nothing read it. A
+ * field in the allowlist with no writer is exactly what a dismissal wanted.
+ */
+export function flagDismissed(flag: Pick<TaskFlag, "skippedAt">): boolean {
+  return typeof flag.skippedAt === "string" && flag.skippedAt.length > 0;
+}
+
 /** ⚠️ DELEGATES to the boundary (tasks-audit P1) — this compared instants, so a snooze written
  *  at 09:00 "until tomorrow" returned at 09:00 sharp while day-level readers still called it
- *  sleeping. One clock, one boundary, everywhere. */
+ *  sleeping. One clock, one boundary, everywhere.
+ *
+ *  ⚠️ AND A DISMISSAL SUPPRESSES WITH NO CLOCK AT ALL — "it won't come back on its own" is the
+ *  promise the confirm dialog makes, so there is no date to compare against. */
 export function isFlagSuppressing(flag: TaskFlag, now: number): boolean {
-  return flagSleeps(flag, now);
+  return flagSleeps(flag, now) || flagDismissed(flag);
 }
 
 /** Migrate one legacy DismissedTask into a TaskFlag (permanent → indefinite mute; else the snooze). */

@@ -39,12 +39,13 @@ export interface FilterMenuProps {
   groupCounts: Record<GroupId, number>;
   typeCounts: Record<Bucket, number>;
   snoozedCount: number;
+  dismissedCount: number;
   shown: number;
   onChange: (v: ListView) => void;
 }
 
 export const FilterMenu: React.FC<FilterMenuProps> = ({
-  view, groupCounts, typeCounts, snoozedCount, shown, onChange,
+  view, groupCounts, typeCounts, snoozedCount, dismissedCount, shown, onChange,
 }) => {
   /* ⚠️ A MULTI-SELECT NEVER EMPTIES ITSELF. Turning the last one off would show nothing and read as
      a broken page; the toggle simply refuses, which is what "these are alternatives" means. */
@@ -67,6 +68,10 @@ export const FilterMenu: React.FC<FilterMenuProps> = ({
       <div className="m-rule" />
       <Item on={view.includeSnoozed} count={snoozedCount}
         onPick={() => onChange({ ...view, includeSnoozed: !view.includeSnoozed })}>Include snoozed</Item>
+      {/* ⚠️ BESIDE IT, NOT INSTEAD OF IT (pane round, Phase 7). Two states, two entries, both off by
+          default — the list shows what is live, and either can be admitted without the other. */}
+      <Item on={view.includeDismissed} count={dismissedCount}
+        onPick={() => onChange({ ...view, includeDismissed: !view.includeDismissed })}>Include dismissed</Item>
       <div className="m-foot">
         <a role="button" tabIndex={0} onClick={() => onChange({ ...VIEW_DEFAULT })}>Show everything</a>
         <span className="n">{shown} shown</span>

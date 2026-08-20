@@ -325,6 +325,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
       todo: narrow(assembled.cols.todo),
       today: narrow(assembled.cols.today),
       snoozed: narrow(assembled.cols.snoozed),
+      /* ⚠️ THE CALENDAR SHOWS NO DISMISSED CARDS, DELIBERATELY. A dismissed task has no action
+         date — that is what dismissing it removed — so it has no day to sit on. Empty rather than
+         narrowed: there is nothing to narrow. */
+      dismissed: [],
       done: assembled.cols.done,
     };
     return calendarDays({

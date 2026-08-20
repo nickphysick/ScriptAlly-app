@@ -23,17 +23,28 @@ const card = (over: Partial<BoardCard> = {}): BoardCard => ({
   key: "k", stream: "do", title: "t", who: "", subtitle: "", due: "", warn: false, snoozes: 0,
   hk: false, initials: "•", record: "", committed: false, done: false, ...over,
 });
+/**
+ * ⚠️ THE CAST IS WHY A MISSING COLUMN WAS SILENT (pane round, Phase 7). `as BoardColumns` over an
+ * object literal tells `tsc` to stop asking, so when the interface gained `dismissed` this helper
+ * kept compiling and thirteen cases failed at RUNTIME reading `.length` of undefined. The cast is
+ * gone: the literal now has to satisfy the interface, which is the whole point of having one.
+ */
 const cols = (over: Partial<BoardColumns> = {}): BoardColumns =>
-  ({ todo: [], today: [], snoozed: [], done: [], ...over }) as BoardColumns;
+  ({ todo: [], today: [], snoozed: [], dismissed: [], done: [], ...over });
 
 /* one of each family, by the rules liveFamily already states */
 const urgent = (k: string) => card({ key: k, stream: "do" });
 const house = (k: string) => card({ key: k, stream: "hk" });
 const mine = (k: string) => card({ key: k, userTaskId: `u${k}` });
 
-describe("⚠️ five groups, derived — never a second derivation", () => {
+describe("⚠️ six groups, derived — never a second derivation", () => {
   it("the order descends from 'someone is waiting' to 'nothing is waiting'", () => {
-    expect(TASK_GROUP_ORDER).toEqual(["urgent", "housekeeping", "yours", "snoozed", "done"]);
+    /* ⚠️ DISMISSED SITS BETWEEN SNOOZED AND DONE (pane round, Phase 7), and the order still reads
+       as the sentence this case names: urgent someone is waiting · housekeeping · yours · snoozed
+       (waiting, on a date) · dismissed (nobody is waiting, by your decision) · done (nobody is
+       waiting, because it is finished). It is not last: done is the day's own log and closes the
+       list, and a group of things you set aside is not a record of what you achieved. */
+    expect(TASK_GROUP_ORDER).toEqual(["urgent", "housekeeping", "yours", "snoozed", "dismissed", "done"]);
   });
 
   it("each card lands in exactly ONE group, and the live groups partition the live cards", () => {

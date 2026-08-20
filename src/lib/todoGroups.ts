@@ -37,7 +37,7 @@ import { liveFamily } from "./todoFamily";
  * prevent. The id is not stored anywhere (the one browser-storage key that sounds related,
  * `sa.todoGroupsOpen`, is keyed by SWEEP RULE), so the rename needed no migration.
  */
-export type TaskGroupId = "urgent" | "housekeeping" | "yours" | "snoozed" | "done";
+export type TaskGroupId = "urgent" | "housekeeping" | "yours" | "snoozed" | "dismissed" | "done";
 
 export interface TaskGroup {
   id: TaskGroupId;
@@ -53,7 +53,7 @@ export interface TaskGroup {
  * yourself, then what is asleep, then what is finished. It descends from "someone is waiting" to
  * "nothing is waiting", which is the only ordering a writer never has to think about.
  */
-export const TASK_GROUP_ORDER: TaskGroupId[] = ["urgent", "housekeeping", "yours", "snoozed", "done"];
+export const TASK_GROUP_ORDER: TaskGroupId[] = ["urgent", "housekeeping", "yours", "snoozed", "dismissed", "done"];
 
 /**
  * ⚠️ THE NAMES LIVE HERE AND NOWHERE ELSE — `TODO_LISTS` imports them rather than restating them.
@@ -80,6 +80,12 @@ export const TASK_GROUP_META: Record<TaskGroupId, { label: string; description: 
     label: "Snoozed",
     description: "Put away until their day.",
   },
+  /* ⚠️ A SENTENCE, NOT A LABEL — and it states the promise the dialog made. The writer said this
+     one would not come back on its own; the description is where the app is held to that. */
+  dismissed: {
+    label: "Dismissed",
+    description: "Set aside. They do not come back on their own.",
+  },
   done: {
     label: "Done today",
     description: "Cleared since midnight. It clears itself overnight.",
@@ -104,6 +110,7 @@ export function taskGroups(cols: BoardColumns): TaskGroup[] {
      know a kind from a state. */
   const cardsFor = (id: TaskGroupId): BoardCard[] =>
     id === "snoozed" ? cols.snoozed
+    : id === "dismissed" ? cols.dismissed
     : id === "done" ? cols.done
     : byFamily(id);
 

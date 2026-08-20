@@ -28,7 +28,7 @@ const card = (over: Partial<BoardCard>): BoardCard => ({
   hk: false, initials: "\u2022", record: "", committed: false, done: false, ...over,
 });
 const cols = (over: Partial<Record<TodoColumnId, BoardCard[]>> = {}) =>
-  ({ todo: [], today: [], snoozed: [], done: [], ...over }) as Record<TodoColumnId, BoardCard[]>;
+  ({ todo: [], today: [], snoozed: [], dismissed: [], done: [], ...over });
 
 describe("⚠️ time estimates live ONLY on Today, from a FIXED ladder", () => {
   const est = readFileSync(join(here, "..", "..", "lib", "todoEstimate.ts"), "utf8");

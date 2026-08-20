@@ -24,7 +24,7 @@
 import { BoardCard, AssembledBoard, derivedCopy, assembleBoard, BoardInput } from "./todoBoard";
 import { groupHousekeeping, HkGroup } from "./todoHousekeeping";
 import { TaskFlag, Query, Agent, Manuscript, UserTask, Task } from "../types";
-import { flagSleeps, flagReturnedToday, flagMatchesTask } from "./taskFlags";
+import { flagSleeps, flagDismissed, flagReturnedToday, flagMatchesTask } from "./taskFlags";
 import { USER_TASK_FLAG_TYPE } from "./todoBoard";
 import { agentPrimary, agentInitials } from "./agentDisplay";
 import { cardFamily } from "./todoFamily";
@@ -132,14 +132,24 @@ export function backOnLabel(snoozedUntilIso: string): string {
   return `BACK ${d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase()}`;
 }
 
-export function snoozedCards(input: SnoozedInput): BoardCard[] {
+/**
+ * ⚠️ ONE CARD BUILDER, TWO STATES (pane round, Phase 7). A dismissed card is rebuilt from its flag
+ * exactly as a sleeping one is — same title source, same kind, same identity — and differs only in
+ * the band it wears. Copying this map for the second state would have been a second derivation of
+ * one card, which is the fault this file's own comments already record twice.
+ */
+function flagCards(
+  input: SnoozedInput,
+  pick: (f: TaskFlag) => boolean,
+  band: (f: TaskFlag) => { due: string; mark: string },
+): BoardCard[] {
   return input.flags
     /* ⚠️ SLEEPING ONLY — the return boundary's choke (tasks-audit P1): a flag due back today is
        RETURNED and renders in the lanes, never here. AND NEVER OFFERS: an offer cannot be put
        away (the standing law offerGuard already enforces on drag) — its snooze flag is the
        "I need time" QUIET reminder, and the engine deliberately keeps the card on the board.
        This column picking those flags up is exactly how one offer rendered in two columns. */
-    .filter((f) => flagSleeps(f, input.nowMs) && f.taskType !== "offer_received")
+    .filter((f) => pick(f) && f.taskType !== "offer_received")
     .map((f) => {
       const q = f.queryId ? input.queries.find((x) => x.id === f.queryId) : undefined;
       const ag = input.agents.find((a) => a.id === (f.agentId ?? q?.agentId));
@@ -163,13 +173,13 @@ export function snoozedCards(input: SnoozedInput): BoardCard[] {
             return { title: c.title, kind: c.kind || "SNOOZED" };
           })();
       return {
-        key: `snz-${f.id}`,
+        key: `${band(f).mark === DISMISSED_MARK ? "dis" : "snz"}-${f.id}`,
         stream: "hk" as const,
         title: copy.title || (who ? who : "Snoozed"),
         who,
         subtitle: "",
-        due: f.snoozedUntil ? backOnLabel(f.snoozedUntil) : "ASLEEP",
-        kind: `${copy.kind} · 🕐`,
+        due: band(f).due,
+        kind: `${copy.kind} · ${band(f).mark}`,
         warn: false,
         snoozes: f.snoozeCount ?? 0,
         hk: true,
@@ -182,6 +192,35 @@ export function snoozedCards(input: SnoozedInput): BoardCard[] {
         ...(f.taskType === "user_task" && f.queryId ? { userTaskId: f.queryId } : {}),
       };
     });
+}
+
+/** the two bands, as data — the only thing that differs between the states */
+const SLEEP_MARK = "🕐";
+const DISMISSED_MARK = "✕";
+
+export function snoozedCards(input: SnoozedInput): BoardCard[] {
+  /* ⚠️ SLEEPING ONLY — the return boundary's choke (tasks-audit P1): a flag due back today is
+     RETURNED and renders in the lanes, never here. AND NEVER OFFERS: an offer cannot be put
+     away (the standing law offerGuard already enforces on drag) — its snooze flag is the
+     "I need time" QUIET reminder, and the engine deliberately keeps the card on the board.
+     This column picking those flags up is exactly how one offer rendered in two columns.
+
+     ⚠️ AND A DISMISSED FLAG IS NOT A SLEEPING ONE, so it is excluded here explicitly rather than
+     by luck: a dismissal writes no `snoozedUntil`, but a task that was snoozed and LATER dismissed
+     carries both, and it belongs in one list. Dismissal is the later word, so it wins. */
+  return flagCards(input, (f) => flagSleeps(f, input.nowMs) && !flagDismissed(f),
+    (f) => ({ due: f.snoozedUntil ? backOnLabel(f.snoozedUntil) : "ASLEEP", mark: SLEEP_MARK }));
+}
+
+/**
+ * ⚠️ DISMISSED CARDS ARE REBUILT, NOT REMEMBERED. Nothing stores the card — the flag stores the
+ * writer's stance and the card is derived from the query exactly as every other card is, so a
+ * dismissed task shown behind the filter is the CURRENT state of that query, not a snapshot of the
+ * day it was put away. That is what makes the dialog's promise honest: the query keeps its own
+ * record, and this list is a view of it.
+ */
+export function dismissedCards(input: SnoozedInput): BoardCard[] {
+  return flagCards(input, flagDismissed, () => ({ due: "DISMISSED", mark: DISMISSED_MARK }));
 }
 
 /**
@@ -269,6 +308,12 @@ export interface BoardColumns {
   today: BoardCard[];
   snoozed: BoardCard[];
   done: BoardCard[];
+  /**
+   * ⚠️ NOT A `TodoColumnId` (pane round, Phase 7). The four above are drag targets; this is a
+   * VIEW, reachable only through the filter's "Include dismissed". Adding it to the drag union
+   * would have offered a drop zone for an act that has a confirm dialog in front of it.
+   */
+  dismissed: BoardCard[];
 }
 
 export function boardColumns(input: ColumnInput): BoardColumns {
@@ -309,8 +354,13 @@ export function boardColumns(input: ColumnInput): BoardColumns {
     manuscripts: input.manuscripts, userTasks: input.userTasks, nowMs: input.nowMs,
   }));
 
+  const dismissed = boardEligible(dismissedCards({
+    flags: input.flags, queries: input.queries, agents: input.agents,
+    manuscripts: input.manuscripts, userTasks: input.userTasks, nowMs: input.nowMs,
+  }));
+
   // Done is today's log, projected — the SAME `cleared` union the Today page reads.
-  return { todo, today, snoozed, done: boardEligible(input.board.cleared) };
+  return { todo, today, snoozed, done: boardEligible(input.board.cleared), dismissed };
 }
 
 /* ── the editorial board's pure fittings (board fixes II, P6) ─────────────────────────────── */

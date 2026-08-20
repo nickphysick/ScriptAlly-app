@@ -84,7 +84,7 @@ describe("⚠️ sibling cards keep their vertical gap — the rule AND the stru
     snoozes: 0, hk: false, initials: "•", record: "", committed: false, done: false, ...over,
   });
   const columns = (over: Partial<Record<TodoColumnId, BoardCard[]>> = {}) =>
-    ({ todo: [], today: [], snoozed: [], done: [], ...over }) as Record<TodoColumnId, BoardCard[]>;
+    ({ todo: [], today: [], snoozed: [], dismissed: [], done: [], ...over });
   const render = (over: Partial<Record<TodoColumnId, BoardCard[]>>) =>
     renderToStaticMarkup(
       <TodoBoard columns={columns(over)} onPlan={() => {}} onOpen={() => {}} onVerb={() => {}} />,

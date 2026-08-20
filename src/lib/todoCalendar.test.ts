@@ -42,7 +42,7 @@ const q = (over: Partial<Query>): Query => ({
 } as Query);
 
 const EMPTY = {
-  cols: { todo: [], today: [], snoozed: [], done: [] },
+  cols: { todo: [], today: [], snoozed: [], dismissed: [], done: [] },
   flags: [] as TaskFlag[], queries: [] as Query[], agents: [] as Agent[],
   userTasks: [] as UserTask[], activities: [] as Activity[], today: TODAY, nowMs: NOW,
 };
@@ -393,7 +393,7 @@ describe("the record buckets by day, beside the live work", () => {
     const day = "2026-08-12";
     const live = calendarDays({
       ...EMPTY,
-      cols: { todo: [card({ key: "t1", userTaskId: "t1", nature: "task", dueYmd: day })], today: [], snoozed: [], done: [] },
+      cols: { todo: [card({ key: "t1", userTaskId: "t1", nature: "task", dueYmd: day })], today: [], snoozed: [], dismissed: [], done: [] },
       queries: RQ,
     }, AUG);
     const record = rec([act({ date: `${day}T09:00:00Z`, activityType: ActivityType.QUERY_SENT })]);

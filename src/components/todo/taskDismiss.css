@@ -1,0 +1,44 @@
+/**
+ * taskDismiss.css — the contract's `#dismissDlg`, ported.
+ *
+ * ⚠️ SCOPED UNDER `.tdlg`, NOT `.tpn`. The dialog is `position: fixed` and renders outside the
+ * pane — a scoped port follows the ELEMENT, not the document the rule came from, and a `.tpn`
+ * prefix here would simply never match. Class names inside are the contract's own.
+ *
+ * ⚠️ AND IT DECLARES THE TOKENS IT READS. `taskPane.css` sets them on `.tpn`; this root is a
+ * sibling of that subtree, not a descendant, so inheriting them was never going to happen. A
+ * `var()` with no definition yields NaN inside a calc and drops the whole declaration silently —
+ * which is why they are restated here rather than assumed.
+ */
+.tdlg {
+  --white: #fffdfa; --field: #f7f4ee; --edge: #e6dcd0; --hair2: #ece3d8;
+  --ink2: #2b1a12; --muted2: #7a6858; --pink: #f5e2da; --pink-b: #e8c8bc; --burg: #7c3a2a;
+}
+
+.tdlg { position: fixed; inset: 0; z-index: 80; display: none;
+  align-items: center; justify-content: center; background: rgba(40,20,14,0.35); }
+.tdlg.open { display: flex; }
+.tdlg .dlg-card { width: 380px; max-width: calc(100vw - 32px); background: var(--white);
+  border: 1px solid var(--edge); border-radius: 13px;
+  box-shadow: 0 20px 60px rgba(40,20,14,0.3); padding: 20px 22px; }
+.tdlg .dlg-card h3 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 500;
+  color: var(--ink2); margin: 0; }
+.tdlg .dlg-card p { font-size: 12px; color: #6a584a; font-weight: 300; line-height: 1.6;
+  margin: 8px 0 0; }
+.tdlg .dlg-card p b { font-weight: 500; color: var(--ink2); }
+.tdlg .dlg-where { background: var(--field); border: 0.5px dashed #ddd0c0; border-radius: 9px;
+  padding: 10px 12px; margin-top: 12px; font-size: 11px; color: var(--muted2);
+  font-weight: 300; line-height: 1.55; }
+.tdlg .dlg-where b { color: var(--ink2); font-weight: 500; }
+
+/* the deed, so the dialog names its subject — mono, quiet, and never mistaken for the copy */
+.tdlg .dlg-subj { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted2); margin-top: 12px; }
+
+.tdlg .dlg-foot { display: flex; justify-content: flex-end; gap: 9px; margin-top: 16px; }
+.tdlg .ab { font-family: inherit; font-size: 12px; padding: 8px 14px; border-radius: 8px;
+  cursor: pointer; border: 1px solid var(--hair2); background: var(--white); color: var(--ink2); }
+.tdlg .ab.quiet:hover { background: var(--field); }
+.tdlg .ab.go { background: var(--pink); border: 1px solid var(--pink-b); color: var(--burg);
+  font-weight: 600; }
+.tdlg .ab.go:hover { background: #efd5ca; }

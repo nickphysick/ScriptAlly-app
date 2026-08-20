@@ -48,13 +48,19 @@ export interface ListView {
   /** which task types are shown */
   types: Bucket[];
   includeSnoozed: boolean;
+  /**
+   * ⚠️ ITS OWN KEY, NOT A SECOND MEANING FOR `includeSnoozed` (pane round, Phase 7). "Put away
+   * until Tuesday" and "set aside for good" are different answers, and a writer looking for one is
+   * usually not looking for the other. Both default OFF: the list shows what is live.
+   */
+  includeDismissed: boolean;
   sort: SortId;
   grouping: GroupingId;
 }
 
 /** everything on, needs-you-first, grouped — the state the funnel calls "not filtered" */
 export const VIEW_DEFAULT: ListView = {
-  groups: [...GROUP_IDS], types: [...TYPE_ORDER], includeSnoozed: false,
+  groups: [...GROUP_IDS], types: [...TYPE_ORDER], includeSnoozed: false, includeDismissed: false,
   sort: "needs-you", grouping: "grouped",
 };
 
@@ -64,7 +70,8 @@ export const VIEW_DEFAULT: ListView = {
  * default cannot. A filtered list must never be able to pass as the full one.
  */
 export const isFiltered = (v: ListView): boolean =>
-  v.groups.length !== GROUP_IDS.length || v.types.length !== TYPE_ORDER.length || v.includeSnoozed;
+  v.groups.length !== GROUP_IDS.length || v.types.length !== TYPE_ORDER.length
+  || v.includeSnoozed || v.includeDismissed;
 
 export const isSorted = (v: ListView): boolean =>
   v.sort !== VIEW_DEFAULT.sort || v.grouping !== VIEW_DEFAULT.grouping;
@@ -91,6 +98,7 @@ export function applyView(
   const keptGroups = groups.filter((g) => {
     if ((GROUP_IDS as string[]).includes(g.id)) return view.groups.includes(g.id as GroupId);
     if (g.id === "snoozed") return view.includeSnoozed;
+    if (g.id === "dismissed") return view.includeDismissed;
     return true;
   });
 
@@ -145,6 +153,7 @@ export function parseView(raw: unknown): ListView {
     groups: groups.length ? groups : VIEW_DEFAULT.groups,
     types: types.length ? types : VIEW_DEFAULT.types,
     includeSnoozed: typeof r.includeSnoozed === "boolean" ? r.includeSnoozed : false,
+    includeDismissed: typeof r.includeDismissed === "boolean" ? r.includeDismissed : false,
     sort: (Object.keys(SORT_LABEL) as SortId[]).includes(r.sort as SortId) ? (r.sort as SortId) : VIEW_DEFAULT.sort,
     grouping: (Object.keys(GROUPING_LABEL) as GroupingId[]).includes(r.grouping as GroupingId)
       ? (r.grouping as GroupingId) : VIEW_DEFAULT.grouping,

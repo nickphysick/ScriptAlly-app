@@ -21,6 +21,7 @@ import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { sliceBetween } from "../../test/sliceBetween";
 import { TaskFlag, UserTask, Task } from "../../types";
 import { flagSleeps, flagReturnedToday, isFlagSuppressing } from "../../lib/taskFlags";
 import { assembleBoardColumns, snoozedCards, liveBoardCards } from "../../lib/todoColumns";
@@ -62,8 +63,20 @@ describe("⚠️ the choke: day-level, one clock — yesterday / TODAY / tomorro
   });
 
   it("⚠️ every consumer reads THIS boundary: the engine's suppression delegates; no instant compare survives", () => {
-    expect(flagsLib).toContain("export function isFlagSuppressing(flag: TaskFlag, now: number): boolean {\n  return flagSleeps(flag, now);\n}");
+    /* ⚠️ THE CLAIM IS THE DELEGATION, NOT THE BODY (pane round, Phase 7). This quoted the whole
+       function verbatim, so it went red the day a SECOND state was added beside the first — a true
+       change failing a case that was written about a different question. What it exists to stop is
+       an INSTANT COMPARE creeping back in, so that is what it asserts: the boundary function is
+       called, and no local date arithmetic sits beside it. */
+    const body = sliceBetween(flagsLib, "export function isFlagSuppressing", "\n}");
+    expect(body).toContain("flagSleeps(flag, now)");
+    expect(body, "an instant compare came back").not.toMatch(/Date\.parse|getTime\(\)|[<>]=?\s*now/);
     expect(isFlagSuppressing(flag("2026-08-07T23:00:00"), NOW)).toBe(false); // returned → not suppressed
+    /* ⚠️ AND THE SECOND STATE HAS NO CLOCK AT ALL — a dismissal suppresses whatever `now` says,
+       which is exactly the promise its dialog makes. Both directions, so the clause cannot be
+       satisfied by a function that ignores the field. */
+    expect(isFlagSuppressing({ ...flag("2026-08-06T09:00:00"), skippedAt: "2026-08-01T00:00:00.000Z" }, NOW)).toBe(true);
+    expect(isFlagSuppressing({ ...flag("2026-08-06T09:00:00"), skippedAt: "" }, NOW)).toBe(false);
     // the engine keeps its OFFER exemption (quiet mode) — the column-side law is what changed
     expect(db).toContain('isFlagSuppressing(flag, nowMs) && t.taskType !== "offer_received"');
   });

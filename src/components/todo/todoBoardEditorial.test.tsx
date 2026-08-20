@@ -30,7 +30,7 @@ const card = (over: Partial<BoardCard>): BoardCard => ({
 const render = (columns: Partial<Record<"todo" | "today" | "snoozed" | "done", BoardCard[]>>) =>
   renderToStaticMarkup(
     <TodoBoard
-      columns={{ todo: [], today: [], snoozed: [], done: [], ...columns }}
+      columns={{ todo: [], today: [], snoozed: [], dismissed: [], done: [], ...columns }}
       onPlan={() => {}} onOpen={() => {}} onVerb={() => {}}
     />,
   );
