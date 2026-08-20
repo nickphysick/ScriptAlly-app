@@ -56,7 +56,7 @@ const SEND: TaskPaneJourney = {
       sample
       value={{
         rows: [{ key: "sample", kind: "qty", name: "Opening sample", on: true, unit: "Chapters", amount: "3" }],
-        alongside: "", when: "Today", also: "",
+        alongside: "", when: "Today", also: "", expectWeeks: 6, remindDaysBefore: 7,
       }}
       onChange={() => {}}
       upsell={<><span className="tag">Pro</span><span>Records which draft went to each agent.</span></>}

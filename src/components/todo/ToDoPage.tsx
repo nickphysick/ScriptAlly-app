@@ -92,7 +92,7 @@ import { isSlotFilled } from "../../lib/packageMetrics";
 import { TasksPageLayout, TplGrow, TplZone } from "./TasksPageLayout";
 import { ArtSlot } from "./ArtSlot";
 import { TaskPane } from "./TaskPane";
-import { TaskPaneBody, SendBodyValues } from "./TaskPaneBody";
+import { TaskPaneBody, SendBodyValues, EXPECT_WEEKS } from "./TaskPaneBody";
 import { buildJourney } from "../../lib/taskPaneJourney";
 import { liveFamily } from "../../lib/todoFamily";
 import { DockTimelineEvent } from "./timelineEvent";
@@ -936,13 +936,32 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       : [{ key: "sample", kind: "qty", name: "Opening sample", on: false, unit: "Chapters", amount: "" }];
   }, [queries]);
 
+  /**
+   * ⚠️ THE EXPECTATION DEFAULTS TO THE AGENT'S OWN STATED WINDOW, ROUNDED TO A PILL — never to a
+   * house figure. An agency that says eight weeks is the best answer available, and defaulting to
+   * six would quietly disagree with a fact the record already holds. Absent, the form opens on the
+   * contract's own default of six. The reminder defaults to the week before, as the contract draws.
+   */
+  const seedExpect = React.useCallback((card: BoardCard | null): number => {
+    const q = card?.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    const ag = q ? agents.find((a) => a.id === q.agentId) : undefined;
+    const w = ag?.responseTimeWeeks;
+    if (typeof w !== "number" || w <= 0) return 6;
+    /* the nearest offered window, so the pill the writer sees is one they could have picked */
+    return [...EXPECT_WEEKS].sort((a, b) => Math.abs(a - w) - Math.abs(b - w))[0];
+  }, [queries, agents]);
+
   const [paneBody, setPaneBody] = React.useState<SendBodyValues>(
-    { rows: seedRows(null), alongside: "", when: "Today", also: "" });
+    { rows: seedRows(null), alongside: "", when: "Today", also: "",
+      expectWeeks: 6, remindDaysBefore: 7 });
   /* the answers reset with the card — a half-filled form carried onto another task is answers
      about the wrong query, which is the sweep's own rule applied to one card */
   React.useEffect(() => {
-    setPaneBody({ rows: seedRows(paneCard ?? null), alongside: "", when: "Today", also: "" });
-  }, [paneCard?.key, seedRows]);
+    setPaneBody({
+      rows: seedRows(paneCard ?? null), alongside: "", when: "Today", also: "",
+      expectWeeks: seedExpect(paneCard ?? null), remindDaysBefore: 7,
+    });
+  }, [paneCard?.key, seedRows, seedExpect]);
 
   /**
    * ⚠️ WHAT A LIST ROW NEEDS BEYOND ITS CARD, and every one of these is a lookup rather than a new
@@ -1037,9 +1056,27 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        what WAS cannot describe the same parcel in two grammars. Absent where there is no sample. */
     ? [paneCopy(paneCard).primary,
        sendSpecFor(paneCard) ? formatSampleSpecs(paneBody.rows, "and") : null,
-       paneBody.when.toLowerCase().replace("…", "")]
+       paneBody.when.toLowerCase().replace("…", ""),
+       /* ⚠️ THE EXPECTATION IS STATED ONLY WHERE IT WAS ASKED. The contract's own grammar —
+          "reply expected ~9 Oct · nudge 2 Oct" — with the tilde, because a stated window is an
+          expectation rather than an appointment. */
+       ...(sendSpecFor(paneCard) ? paneExpectParts() : [])]
         .filter(Boolean).join(" · ")
     : "";
+
+  /** the two dates the expectation block implies, in the contract's words */
+  function paneExpectParts(): string[] {
+    if (paneBody.expectWeeks == null) return [];
+    const sent = new Date(`${paneSentISO()}T12:00:00`);
+    const reply = new Date(sent); reply.setDate(reply.getDate() + paneBody.expectWeeks * 7);
+    const day = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    const out = [`reply expected ~${day(reply)}`];
+    if (paneBody.remindDaysBefore != null) {
+      const nudge = new Date(reply); nudge.setDate(nudge.getDate() - paneBody.remindDaysBefore);
+      out.push(`nudge ${day(nudge)}`);
+    }
+    return out;
+  }
 
   /** What the rail is showing — the groups it draws, flattened. One derivation, two readers. */
   function railShown(): number {
@@ -3118,8 +3155,41 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * away remains DERIVED — the engine stops generating it once the status moves, so nothing ticks
    * it and nothing needs to.
    */
+  /**
+   * ⚠️ THE PANE'S ANSWERS TRAVEL AS A PREFILL; THEY ARE NOT A SECOND WRITE (pane round, Phases 3
+   * and 4).
+   *
+   * The standing law in this file is that the action button never completes directly — it opens
+   * the journey, and the journey commits. The pane contract puts a form and a `Will record:` strip
+   * in front of that button, which is easy to read as "this records", and building it that way
+   * would give one act two write paths that could disagree. `FocusFlow` already accepts a
+   * `prefill`, so the pane's answers ARRIVE at the one commit path as its opening values, and the
+   * writer sees them again before anything is written.
+   *
+   * ⚠️ WHAT DOES NOT TRAVEL YET, STATED PLAINLY: the expectation dates. `recordMaterialsSent`
+   * accepts `writerExpectedDate` and `nudgeDate` and the rules allow both, but `markSentWriteArgs`
+   * (lib/todoWalk.ts) does not pass them and `FocusFlow`'s prefill has no field for them. The
+   * `.expect` block is therefore ASKED and not yet STORED — see the run report; it is the
+   * remaining half of Phase 4, and half a write path is worse than none.
+   */
   function dockPrimary(card: BoardCard) {
+    const spec = sendSpecFor(card);
+    if (spec) {
+      setFlowPrefill({
+        sentDate: paneSentISO(),
+        materials: materialsWantedFromRows(paneBody.rows),
+      });
+    }
     openFlowCards([card]);
+  }
+
+  /** the pane's `When` as an ISO day — the contract's three options, resolved once */
+  function paneSentISO(): string {
+    const d = new Date();
+    if (paneBody.when === "Yesterday") d.setDate(d.getDate() - 1);
+    /* "Another date…" has no date of its own on this surface; the journey's own picker asks, and
+       opening it on today is what it already does. */
+    return localYMD(d.getTime());
   }
 
   /* ⚠️ `advanceDock` IS RETIRED WITH THE INLINE WRITE (one-primary pass). It pointed the pane at

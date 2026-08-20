@@ -357,3 +357,12 @@
 .tpn .mid { flex-wrap: wrap; }
 .tpn .mid > .formcol { flex: 999 1 420px; min-width: 0; }
 .tpn .mid > .storycol { flex: 1 1 300px; min-width: 0; }
+
+/* ── the send form's own furniture (pane round, Phases 3 and 4) ─────────────────────────────
+   Ported from `design-refs/todo-pane-contract.html`, scoped and otherwise unchanged. `.expect`
+   is a FIELD-COLOURED BOX rather than another run of labels: the two questions inside it are
+   about the future, and everything above them is about what just happened. */
+.tpn .txt { width:100%;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:12px;color:var(--ink);outline:none;margin-top:4px; }
+.tpn .expect { background:var(--field);border:0.5px solid var(--hair2);border-radius:11px;padding:14px 15px;margin-bottom:16px; }
+.tpn .expect .f-lbl { margin-top:0; }
+.tpn .inherit { font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5; }

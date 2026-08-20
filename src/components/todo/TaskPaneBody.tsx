@@ -35,9 +35,30 @@ export interface SendBodyValues {
   alongside: string;
   /** which of the contract's three `When` options is chosen */
   when: "Today" | "Yesterday" | "Another date…";
+  /**
+   * ⚠️ WHEN YOU EXPECT TO HEAR BACK — the writer's own expectation, in weeks from the send.
+   * `null` is "A date…", which has no week count and is answered by a picker rather than a pill.
+   */
+  expectWeeks: number | null;
+  /** how early the reminder lands, in days before the expected reply. `null` = no reminder. */
+  remindDaysBefore: number | null;
   /** the free text under "Anything else?" */
   also: string;
 }
+
+/** the contract's four windows, in its order */
+export const EXPECT_WEEKS = [4, 6, 8, 12] as const;
+
+/**
+ * ⚠️ THE REMINDER IS EXPRESSED AS A LEAD, NOT A DATE. "The week before" has to keep meaning the
+ * week before even when the expected reply moves, so what is stored on the form is the OFFSET and
+ * the date is derived from it — the same reason `surfaceOffset` is a lead rather than a stamp.
+ */
+export const REMIND_OPTIONS: { label: string; days: number | null }[] = [
+  { label: "On the day", days: 0 },
+  { label: "The week before", days: 7 },
+  { label: "No reminder", days: null },
+];
 
 export interface TaskPaneBodyProps {
   value: SendBodyValues;
@@ -90,6 +111,33 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
           onClick={() => onChange({ ...value, when: w })}>{w}</button>
       ))}
     </div>
+
+    {/* ⚠️ THE EXPECTATION BLOCK IS THE SEND JOURNEY'S ALONE. It asks when a reply is due and when
+        to be reminded — both facts about a parcel in transit — so a nudge, a close and a note have
+        nothing to answer here and the block is absent rather than disabled. */}
+    {sample && (
+      <div className="expect">
+        <label className="f-lbl">When do you expect to hear back?</label>
+        <div className="seg" style={{ marginBottom: 11 }}>
+          {EXPECT_WEEKS.map((w) => (
+            <button type="button" key={w} className={value.expectWeeks === w ? "on" : undefined}
+              onClick={() => onChange({ ...value, expectWeeks: w })}>{w} weeks</button>
+          ))}
+        </div>
+        <label className="f-lbl">Remind you to nudge?</label>
+        <div className="seg">
+          {REMIND_OPTIONS.map((o) => (
+            <button type="button" key={o.label}
+              className={value.remindDaysBefore === o.days ? "on" : undefined}
+              onClick={() => onChange({ ...value, remindDaysBefore: o.days })}>{o.label}</button>
+          ))}
+        </div>
+        {/* ⚠️ AND IT SAYS WHERE THE REMINDER GOES. The contract's own line, and it is the honest
+            one: this app has no notification delivery of any kind, so a reminder that implied a
+            push or an email would be promising something nothing sends. It lands on this list. */}
+        <div className="inherit">The reminder lands here, on your list, when the time comes.</div>
+      </div>
+    )}
 
     <label className="f-lbl">Anything else?</label>
     <textarea className="note-in" placeholder="e.g. included the revised opening"
