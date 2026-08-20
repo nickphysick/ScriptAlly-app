@@ -23,13 +23,14 @@ describe("joinedLabel", () => {
 });
 
 describe("queryingLabel", () => {
-  it("agrees with itself on one manuscript", () => {
-    expect(queryingLabel(1, 9)).toBe("1 manuscript · 9 out");
-    expect(queryingLabel(2, 9)).toBe("2 manuscripts · 9 out");
+  it("agrees with itself on both counts", () => {
+    expect(queryingLabel(1, 9)).toBe("1 manuscript · 9 queries out");
+    expect(queryingLabel(2, 9)).toBe("2 manuscripts · 9 queries out");
+    expect(queryingLabel(1, 1)).toBe("1 manuscript · 1 query out");
   });
 
   it("states a true zero rather than hiding it", () => {
-    expect(queryingLabel(0, 0)).toBe("0 manuscripts · 0 out");
+    expect(queryingLabel(0, 0)).toBe("0 manuscripts · 0 queries out");
   });
 });
 
@@ -50,16 +51,22 @@ describe("sentCount counts what has gone out, not what is on file", () => {
 });
 
 describe("accountFacts — order, and the omission", () => {
-  const base = { plan: "Free", creationTime: "2026-03-04T09:00:00.000Z", manuscriptCount: 1, sentCount: 9 };
+  const base = { creationTime: "2026-03-04T09:00:00.000Z", manuscriptCount: 1, sentCount: 9 };
 
-  it("states Plan, Joined and Querying, in that order", () => {
-    expect(accountFacts(base).map((f) => f.key)).toEqual(["Plan", "Joined", "Querying"]);
-    expect(accountFacts(base).map((f) => f.value)).toEqual(["Free", "4 March 2026", "1 manuscript · 9 out"]);
+  it("states Joined and Querying, in that order", () => {
+    expect(accountFacts(base).map((f) => f.key)).toEqual(["Joined", "Querying"]);
+    expect(accountFacts(base).map((f) => f.value)).toEqual(["4 March 2026", "1 manuscript · 9 queries out"]);
+  });
+
+  /* ⚠️ NO PLAN ROW. It states itself in the rail aside and in its own section; a third copy in the
+     header would be the one most likely to go stale. */
+  it("never states the plan — that belongs to the aside and its own section", () => {
+    expect(accountFacts(base).map((f) => f.key)).not.toContain("Plan");
   });
 
   it("drops Joined entirely when the date is unavailable — never renders it empty", () => {
     const rows = accountFacts({ ...base, creationTime: null });
-    expect(rows.map((f) => f.key)).toEqual(["Plan", "Querying"]);
+    expect(rows.map((f) => f.key)).toEqual(["Querying"]);
     for (const r of rows) expect(r.value.length).toBeGreaterThan(0);
   });
 

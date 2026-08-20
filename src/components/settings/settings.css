@@ -76,12 +76,16 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;   /* bottom-aligned — the illustration sits in the space above */
+  justify-content: flex-end;   /* the spacer is the flex gap above the bottom-aligned text */
   position: relative;
   overflow: hidden;
   padding: 16px;
 }
-.acct-aside-txt { position: relative; z-index: 2; }
+/* ⚠️ THE MARK IS A ROW, THE SPACER IS THE GAP, THE TEXT IS THE FOOT — the ref's `.sec-foot`
+   pattern. The old build put the mark at `top: 26px` absolute and the text at the bottom, and the
+   two overlapped whenever the aside was short. In flow they cannot. */
+.acct-aside-illo { flex: 0 0 auto; display: flex; justify-content: center; padding-bottom: 12px; }
+.acct-aside-txt { flex: 0 0 auto; }
 .acct-aside-k {
   display: block;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
@@ -223,13 +227,16 @@
 
 /* ── The account header — the page's fixed point and its top edge ───────────
    ⚠️ THIS BLOCK WAS DELETED ONCE AND NOTHING WENT RED. A consolidation commit rewrote this file
-   for the grid and took the fifteen `.acct-hdr-*` rules with it, so the header rendered as a
-   column of unstyled text — no disc, no tinted panel, no rows — for three commits. The
-   measurement that should have caught it compared the six sections to EACH OTHER and was
-   satisfied by six equally-broken pages. The assertions now anchor on absolute facts (the panel
-   is 280 wide, the disc is 56, the row is a flex row), which is the only shape that can fail when
-   a rule goes missing. */
-.acct-hdr-row {
+   and took the header's rules with it, so the header rendered as a column of unstyled text for
+   three commits. The measurement that should have caught it compared the six sections to EACH
+   OTHER and was satisfied by six equally-broken pages. The assertions now anchor on absolute
+   facts — the plate is 238 wide, the disc is 60, the top row is a flex row — which is the only
+   shape that can fail when a rule goes missing. */
+.acct-hdr { margin-bottom: 20px; }
+
+/* The top row and the facts strip both live INSIDE MountPanel's clipping frame, so the plate's
+   gradient and the strip's fill are stopped at the frame border and rounded by it. */
+.acct-hdr-top {
   display: flex;
   align-items: stretch;
   min-width: 0;
@@ -238,24 +245,25 @@
 .acct-hdr-main {
   flex: 1;
   min-width: 0;
-  padding: 22px 26px;
+  padding: 24px 28px 22px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 17px;
 }
 
 .acct-hdr-av {
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background: #f5e2da;
   border: 1px solid rgba(124, 58, 42, 0.22);
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.07);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 500;
   color: #7c3a2a;
 }
@@ -270,67 +278,75 @@
   font-weight: 500;
   color: #9c8878;
 }
+/* ⚠️ NO `white-space: nowrap` AND NO FIXED HEIGHT (laws 3 and 4). A long name wraps and the header
+   grows; it does not clip, ellipsis away, or push the plate off the row. */
 .acct-hdr-name {
   font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: 26px;
+  font-size: 27px;
   font-weight: 500;
   color: #2b1a14;
-  line-height: 1.1;
-  margin: 2px 0 1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.12;
+  margin: 2px 0;
+  overflow-wrap: anywhere;
 }
 .acct-hdr-mail {
   display: block;
   font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 300;
   color: #8a7a6c;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
-/* ⚠️ A FIXED 280px, AND IT DROPS RATHER THAN SQUEEZES. Three key/value rows stop reading as rows
-   the moment the values wrap, and 280 is where they stop wrapping.
-   ⚠️ `position: relative` IS LOAD-BEARING: it is the containing block for the header illustration,
-   which is absolutely placed and bleeds past the corner. Without it the mark positions against the
-   page and lands in the bottom-right of the viewport. */
-.acct-hdr-side {
-  width: 280px;
+/* The illustration plate — a fixed 238 so the main block keeps a predictable measure. */
+.acct-hdr-plate {
+  width: 238px;
   flex-shrink: 0;
-  border-left: 0.5px solid #ece0d2;
-  background: linear-gradient(135deg, #f6f1ea 0%, #f1ece4 100%);
-  padding: 20px 22px;
+  background: linear-gradient(135deg, #f8ece3 0%, #f4e4d8 100%);
+  border-left: 0.5px solid rgba(124, 58, 42, 0.16);
   display: flex;
   align-items: center;
-  position: relative;
+  justify-content: center;
   overflow: hidden;
 }
-.acct-hdr-facts { position: relative; z-index: 2; margin: 0; }
-.acct-hdr-fact { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; }
+
+/* ⚠️ THE FACTS STRIP IS A FLEX ROW THAT WRAPS, not a fixed pair of columns. The values are dates
+   and counts whose length is not knowable, and a wrapping row lets a long one take a second line
+   instead of colliding with its neighbour — which is the collision the ref's own layout allows at
+   narrow widths. */
+.acct-hdr-facts {
+  border-top: 0.5px solid rgba(124, 58, 42, 0.14);
+  background: #faf6f0;
+  padding: 11px 28px;
+  display: flex;
+  align-items: baseline;
+  gap: 12px 46px;
+  flex-wrap: wrap;
+  margin: 0;
+}
+.acct-hdr-fact { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 .acct-hdr-k {
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 8.5px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #a08e7c;
-  width: 74px;
+  font-weight: 500;
   flex-shrink: 0;
   margin: 0;
 }
 .acct-hdr-v {
   font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
-  font-size: 12px;
+  font-size: 12.5px;
   color: #3a1c14;
   margin: 0;
   min-width: 0;
 }
 
+/* ⚠️ THE PLATE GOES, THE FACTS STAY. Decoration is what yields when width runs out. */
 @media (max-width: 900px) {
-  .acct-hdr-row { flex-direction: column; }
-  .acct-hdr-side { width: auto; border-left: 0; border-top: 0.5px solid #ece0d2; }
+  .acct-hdr-plate { display: none; }
+  .acct-hdr-facts { gap: 10px 26px; padding-inline: 20px; }
 }
 
 /* ── The section head — slim, and about the SECTION ─────────────────────────
@@ -370,24 +386,20 @@
    body's spacing being tangled up in it. */
 
 /* ── Illustration slots ─────────────────────────────────────────────────────
-   ⚠️ EVERY SLOT IS DECORATION: absolutely placed, `pointer-events: none`, and beneath the content
-   it sits behind. The section watermark is the one that matters — it lies under a card body full
-   of controls, and a mark that swallowed a click would be a far worse trade than an empty corner.
-   The measurement asks the browser what is at a control's coordinates rather than reading these
-   declarations, because a z-index is a claim and an `elementFromPoint` is an answer. */
-.acct-illo { position: absolute; pointer-events: none; }
+   ⚠️ LAW 1: AN ILLUSTRATION LIVES IN THE LAYOUT FLOW AND NEVER SHARES SPACE WITH TEXT. The old
+   build positioned all three absolutely, and the header plate proved why that is the wrong
+   default the moment the plate arrived: `.acct-illo--header` was `position: absolute; right: -8px;
+   bottom: -10px`, its plate was not a positioned ancestor, so the drawing flew to the nearest one
+   and rendered at the bottom-right of the whole page — a 210x152 desk scene hanging off the card
+   while the plate it belonged to sat empty. Nothing was broken in the plate; the mark was simply
+   somewhere else.
 
-/* Header panel — bottom-right, bleeding past the corner; MountPanel's frame clips it. */
-.acct-illo--header { right: -8px; bottom: -10px; opacity: 0.4; z-index: 1; }
+   In flow, an illustration cannot land anywhere but the box that holds it, and the overlap gate
+   in Phase 6 then has nothing left to catch. */
+.acct-illo { display: block; max-width: 100%; height: auto; pointer-events: none; }
 
-/* Rail aside — top-centre, in the space the bottom-aligned text leaves above it. */
-.acct-illo--aside { left: 50%; top: 26px; transform: translateX(-50%); opacity: 0.5; z-index: 1; }
+/* The plate centres its own drawing with flex; the mark takes no positioning of its own. */
+.acct-hdr-plate .acct-illo { flex-shrink: 0; }
 
-/* Section body — bottom-right, behind the content. `z-index: 0` against the body's own stacking
-   context, with the content above it by source order. */
-.acct-illo--section { right: 22px; bottom: 18px; opacity: 0.28; z-index: 0; }
-
-/* ⚠️ THE BODY'S CONTENT NEEDS ITS OWN STACKING, or a watermark drawn after it in source order
-   paints on top of the controls. The two-column body and every direct child of the card body sit
-   above the mark deliberately. */
-.acct-cardbody > *:not(.acct-illo) { position: relative; z-index: 1; }
+/* The rail aside's mark sits above the bottom-aligned text, in its own row. */
+.acct-illo--aside { margin: 0 auto; opacity: 0.5; }

@@ -39,6 +39,62 @@ test("the account header is identical in all six sections, to the pixel", async 
   }
 });
 
+/* ⚠️ ABSOLUTE ANCHORS, BECAUSE THE INVARIANCE TEST ABOVE CANNOT FAIL ON ITS OWN. The header once
+   rendered as a column of unstyled text for three commits — its CSS had been deleted — and the
+   "identical across sections" check passed the whole time, because six equally-broken pages ARE
+   identical. These are the facts a missing rule breaks. */
+test("the header is composed, not merely consistent", async ({ page }) => {
+  await openRoute(page, "/account/profile", { width: 1440, height: 900 });
+  const g = await page.evaluate(() => {
+    const q = (s: string) => document.querySelector(s) as HTMLElement | null;
+    const box = (e: HTMLElement | null) => e ? e.getBoundingClientRect() : null;
+    const top = q(".acct-hdr-top"), av = q(".acct-hdr-av"), plate = q(".acct-hdr-plate");
+    const facts = q(".acct-hdr-facts");
+    return {
+      topDisplay: top ? getComputedStyle(top).display : null,
+      avW: Math.round(box(av)?.width ?? 0), avH: Math.round(box(av)?.height ?? 0),
+      avRadius: av ? getComputedStyle(av).borderRadius : null,
+      plateW: Math.round(box(plate)?.width ?? 0),
+      plateHasIllo: !!plate?.querySelector("svg"),
+      /* the strip runs the full width of the frame, under both */
+      factsW: Math.round(box(facts)?.width ?? 0),
+      topW: Math.round(box(top)?.width ?? 0),
+      factsBelow: (box(facts)?.top ?? 0) >= (box(top)?.bottom ?? 0) - 1,
+      keys: [...document.querySelectorAll(".acct-hdr-k")].map((k) => k.textContent),
+    };
+  });
+  console.log("HEADER COMPOSITION " + JSON.stringify(g));
+
+  expect(g.topDisplay, "the top row is a flex row").toBe("flex");
+  expect(g.avW, "60px monogram disc").toBe(60);
+  expect(g.avH).toBe(60);
+  expect(g.avRadius, "and it is a disc").toBe("50%");
+  expect(g.plateW, "238px illustration plate").toBe(238);
+  expect(g.plateHasIllo, "with an illustration in it").toBe(true);
+  expect(g.factsW, "the facts strip spans the full frame width").toBe(g.topW);
+  expect(g.factsBelow, "and sits below the top row, not beside it").toBe(true);
+
+  /* ⚠️ NO PLAN FACT. It states itself in the aside and its own section; a third copy here would be
+     the one nobody thinks to update. */
+  expect(g.keys).not.toContain("Plan");
+  expect(g.keys).toContain("Querying");
+});
+
+test("the plate hides below 900px and the facts strip does not", async ({ page }) => {
+  await openRoute(page, "/account/profile", { width: 800, height: 900 });
+  const g = await page.evaluate(() => ({
+    plate: (() => { const e = document.querySelector(".acct-hdr-plate") as HTMLElement | null;
+      return e ? getComputedStyle(e).display : "absent"; })(),
+    facts: (() => { const e = document.querySelector(".acct-hdr-facts") as HTMLElement | null;
+      return e ? getComputedStyle(e).display : "absent"; })(),
+    factCount: document.querySelectorAll(".acct-hdr-fact").length,
+  }));
+  console.log("@800 " + JSON.stringify(g));
+  expect(g.plate, "decoration yields when width runs out").toBe("none");
+  expect(g.facts, "information does not").not.toBe("none");
+  expect(g.factCount).toBeGreaterThan(0);
+});
+
 test("identity appears ONCE — in the header, never in a section card", async ({ page }) => {
   for (const r of ACCOUNT_ROUTES) {
     await openRoute(page, r.path, { width: 1440, height: 900 });

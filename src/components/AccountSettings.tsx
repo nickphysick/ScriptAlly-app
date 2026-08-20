@@ -693,7 +693,6 @@ export const AccountSettings: React.FC<{
      the joined date rides the auth metadata settings already reads for providers, and the counts
      are the collections the db context loads for every page. */
   const headerFacts = accountFacts({
-    plan: `${currentUser.plan} plan`,
     creationTime: authFacts?.createdAt,
     manuscriptCount: manuscripts.length,
     sentCount: sentCount(queries),

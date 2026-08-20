@@ -28,7 +28,7 @@ import { SettingsIllo } from "./SettingsIllo";
 export const RailAside: React.FC<{ plan: "free" | "pro" }> = ({ plan }) => (
   <MountPanel className="acct-aside" fill>
     <div className="acct-aside-in">
-      <SettingsIllo slot="aside" />
+      <div className="acct-aside-illo"><SettingsIllo slot="aside" /></div>
       <div className="acct-aside-txt">
         <span className="acct-aside-k">Your plan</span>
         <span className="acct-aside-v">{plan === "pro" ? "Pro" : "Free"}</span>

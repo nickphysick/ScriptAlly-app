@@ -36,7 +36,7 @@ export function joinedLabel(creationTime: string | null | undefined): string | n
 }
 
 /**
- * "1 manuscript · 9 out".
+ * "1 manuscript · 9 queries out".
  *
  * ⚠️ "OUT" IS QUERIES WITH A `dateSent`, NOT EVERY QUERY ON FILE. The field is optional and the
  * type says why — "absent for provisional (undated) imported queries" — so a total would count
@@ -45,7 +45,8 @@ export function joinedLabel(creationTime: string | null | undefined): string | n
  */
 export function queryingLabel(manuscriptCount: number, sentCount: number): string {
   const ms = `${manuscriptCount} manuscript${manuscriptCount === 1 ? "" : "s"}`;
-  return `${ms} · ${sentCount} out`;
+  const qs = `${sentCount} quer${sentCount === 1 ? "y" : "ies"} out`;
+  return `${ms} · ${qs}`;
 }
 
 /** Queries that have actually gone out. */
@@ -54,18 +55,23 @@ export function sentCount(queries: { dateSent?: string }[]): number {
 }
 
 /**
- * The panel's rows, in order, with anything unavailable OMITTED rather than shown empty.
+ * The facts strip's rows, in order, with anything unavailable OMITTED rather than shown empty.
  *
  * ⚠️ THE ROWS ARE BUILT HERE SO THE OMISSION RULE HAS ONE HOME. A component deciding per-row
- * whether to render is a component that will one day render a fourth row and forget.
+ * whether to render is a component that will one day render another row and forget.
+ *
+ * ⚠️ THERE IS NO PLAN ROW, AND ITS ABSENCE IS THE POINT. The plan already states itself twice —
+ * in the rail aside and in its own section — and a third statement in the header would be the one
+ * most likely to go stale, because it is the one nobody would think to look at when the plan
+ * model changes. The header says who you are and what you have been doing; what you are paying
+ * for is a different question with its own home.
  */
 export function accountFacts(input: {
-  plan: string;
   creationTime: string | null | undefined;
   manuscriptCount: number;
   sentCount: number;
 }): AccountFact[] {
-  const rows: AccountFact[] = [{ key: "Plan", value: input.plan }];
+  const rows: AccountFact[] = [];
   const joined = joinedLabel(input.creationTime);
   if (joined) rows.push({ key: "Joined", value: joined });
   rows.push({ key: "Querying", value: queryingLabel(input.manuscriptCount, input.sentCount) });

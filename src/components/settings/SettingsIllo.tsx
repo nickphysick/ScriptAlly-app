@@ -44,14 +44,28 @@ const STROKE = {
  * ⚠️ PLACEHOLDER ART — REPLACE, DO NOT EXTEND. Each entry is one drawing; the day the real assets
  * arrive this map is what changes.
  */
-const PLACEHOLDER_ART: Record<string, { w: number; h: number; d: React.ReactNode }> = {
-  /* ⚠️ 96x80, NOT THE STUDY'S 132x110. The panel is 280 wide and the fact rows take 187 of it;
-     a 132-wide mark leaves 319 to fit in 280, so it sat UNDER the values rather than beside them.
-     The study drew its panel with shorter values than real data produces. */
+const PLACEHOLDER_ART: Record<string, { w: number; h: number; vb?: string; sw?: number; d: React.ReactNode }> = {
+  /**
+   * The header plate's desk scene — the v5 ref's own drawing, at its stated 210x152 inside a
+   * 220x158 viewBox. It has a 238px plate to itself and does not sit behind text, so unlike the
+   * earlier header mark it needs no shrinking: the plate is its own column, which is exactly why
+   * the ref moved it out of the facts panel.
+   */
   header: {
-    w: 96, h: 80,
-    d: (<><rect x="16" y="30" width="72" height="52" rx="3" /><path d="M16 34 52 60 88 34" />
-        <path d="M62 18h44M62 26h30" /><circle cx="104" cy="72" r="13" /><path d="M104 65v7l5 3" /></>),
+    w: 210, h: 152, vb: "0 0 220 158", sw: 1.1,
+    d: (<>
+      <path d="M10 128h200" /><path d="M26 128v14M196 128v14" />
+      <rect x="118" y="80" width="62" height="42" rx="1.5" />
+      <path d="M124 90h50M124 98h50M124 106h34" />
+      <path d="M168 52l-26 52" strokeWidth={1.3} /><path d="M168 52l6-8 3 2-5 9z" />
+      <rect x="88" y="106" width="20" height="16" rx="2" /><rect x="94" y="99" width="8" height="7" rx="1.5" />
+      <rect x="22" y="100" width="54" height="22" rx="2" /><path d="M22 103l27 15 27-15" />
+      <rect x="30" y="90" width="50" height="8" rx="1.5" />
+      <circle cx="52" cy="40" r="17" /><path d="M44 36c3-4 13-4 16 0M44 44c3 4 13 4 16 0" strokeWidth={0.9} />
+      <path d="M78 32h34M78 40h26M78 48h18" strokeWidth={0.9} />
+      <path d="M196 122c0-10 3-16 3-16M199 122c0-7 6-12 6-12M193 122c0-6-5-9-5-9" strokeWidth={1} />
+      <path d="M188 122h20l-2.5 6h-15z" />
+    </>),
   },
   aside: {
     w: 86, h: 70,
@@ -108,10 +122,11 @@ export const SettingsIllo: React.FC<{
       className={`acct-illo acct-illo--${slot}`}
       width={art.w}
       height={art.h}
-      viewBox={`0 0 ${art.w} ${art.h}`}
+      viewBox={art.vb ?? `0 0 ${art.w} ${art.h}`}
       aria-hidden="true"
       focusable="false"
       {...STROKE}
+      strokeWidth={art.sw ?? STROKE.strokeWidth}
     >
       {art.d}
     </svg>
