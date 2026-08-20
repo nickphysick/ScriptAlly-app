@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScriptAlly — task pane · fixed header, action bar, send flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ground:#f7f4ee; --white:#ffffff; --field:#fdfbf7;
+  --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
+  --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8;
+  --burg:#7c3a2a; --sd:#7c3d3d; --sage:#5a6e58;
+  --pink:#f5e2da; --pink-b:#e8c8bc;
+  --u-now-1:#f3e0d6; --u-now-2:#eed7ca; --u-now-rule:rgba(124,58,42,0.16);
+  --u-house-1:#d7ddd5; --u-house-2:#d5dbd3; --u-house-rule:rgba(90,110,88,0.20);
+}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;background:var(--ground);color:var(--ink);overflow:hidden;display:flex;flex-direction:column;padding:16px 22px;}
+body::before{content:'';position:fixed;inset:0;opacity:0.22;pointer-events:none;z-index:1;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+body>*{position:relative;z-index:2;}
+
+/* command bar */
+.cmdbar{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 2px 13px;}
+.cmd-l,.cmd-r{display:flex;align-items:center;gap:8px;}
+.cb{cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;transition:all .16s;white-space:nowrap;}
+.cb.fill{background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600;}
+.cb.fill:hover{background:#efd5ca;}
+.cb.line{background:var(--white);border:1px solid var(--edge);color:#57534e;}
+.cb.line:hover{background:#f5f2ee;}
+.meter{display:flex;flex-direction:column;gap:5px;width:min(360px,30vw);}
+.meter .track{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px;}
+.meter .track span{border-radius:3px;box-shadow:inset 0 0 0 1px rgba(58,28,20,0.10);}
+.meter .legend{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.11em;text-transform:uppercase;}
+.meter .legend b{font-weight:500;font-size:9px;}
+.cmd-rule{flex:0 0 auto;height:1px;background:var(--edge);margin:0 2px 12px;}
+
+/* split — pane starts at the hairline, no counter row */
+.frame{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:min(392px,32%) minmax(0,1fr);gap:18px;align-items:stretch;}
+.listcard{background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);display:flex;flex-direction:column;overflow:hidden;}
+.l-ph{flex:1;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#c0b0a0;text-align:center;line-height:2;}
+
+/* ═══ THE PANE — fixed band, scrolling middle, fixed action bar ═══ */
+.pane{background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* fixed band — reduced height, carries prev/next since the counter row is gone */
+.band{flex:0 0 auto;padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;}
+.band::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;}
+.pane.u-now .band{background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2));}
+.pane.u-now .band::after{background:var(--u-now-rule);}
+.pane.u-house .band{background:linear-gradient(135deg,var(--u-house-1),var(--u-house-2));}
+.pane.u-house .band::after{background:var(--u-house-rule);}
+.deed{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;color:var(--ink2);line-height:1.12;}
+.deed em{font-style:italic;color:var(--burg);}
+.u-house .deed{color:#2e3a2c;}
+.u-house .deed em{color:#405a3c;}
+.b-sub{font-size:11px;font-weight:300;margin-top:3px;}
+.u-now .b-sub{color:#8a6558;}
+.u-house .b-sub{color:#5f7059;}
+.b-nav{display:flex;gap:6px;flex-shrink:0;}
+.b-nav button{cursor:pointer;width:28px;height:28px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);display:flex;align-items:center;justify-content:center;}
+.b-nav button:hover{background:#fffdfa;}
+
+/* tiles inside the fixed header */
+.tiles{flex:0 0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-bottom:1px solid var(--hair);}
+.tile{padding:10px 18px 11px;border-right:1px solid rgba(124,58,42,0.10);min-width:0;}
+.tile:last-child{border-right:0;}
+.tile .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.tile .v{font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--ink2);margin-top:3px;line-height:1.2;}
+.tile .v small{font-family:'Inter',sans-serif;font-size:10px;color:var(--muted2);font-weight:300;display:block;margin-top:1px;}
+.tile .v.absent{color:#c0b0a0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;}
+
+/* scrolling middle */
+.mid{flex:1 1 auto;min-height:0;overflow-y:auto;padding:18px 20px 20px;display:flex;gap:16px;align-items:flex-start;}
+.mid::-webkit-scrollbar{width:9px;}
+.mid::-webkit-scrollbar-thumb{background:#e2d6c8;border-radius:5px;border:2px solid var(--white);}
+.formcol{flex:1 1 460px;min-width:0;}
+.storycol{flex:0 1 280px;min-width:230px;}
+
+.f-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin:0 0 7px;display:block;font-weight:500;}
+.f-h{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2);}
+.f-sub{font-size:11.5px;color:var(--muted2);font-weight:300;margin:3px 0 15px;line-height:1.5;}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);background:var(--field);border:0.5px solid var(--hair2);border-radius:8px;padding:6px 11px;}
+.chip .tick{color:var(--sage);}
+.seg{display:flex;gap:8px;flex-wrap:wrap;}
+.seg button{cursor:pointer;font-size:12px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:8px 14px;color:var(--ink2);transition:all .15s;}
+.seg button:hover{border-color:#c9a89e;}
+.seg button.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+textarea.note-in,input.txt{width:100%;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:9px 12px;font-family:'Inter',sans-serif;font-size:12px;color:var(--ink);outline:none;}
+textarea.note-in{font-family:'Caveat',cursive;font-size:16.5px;color:#5a4a38;resize:vertical;min-height:48px;}
+textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12);}
+.sect{margin-bottom:16px;}
+
+/* sample selector (the live agent-form grammar) */
+.unitrow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px;}
+.unitpill{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.07em;background:var(--white);border:0.5px solid var(--hair2);border-radius:20px;padding:6px 13px;color:#a99a8a;transition:all .15s;}
+.unitpill.on{background:var(--pink);border-color:var(--pink-b);color:var(--burg);font-weight:500;}
+.cnt{display:none;align-items:center;gap:8px;margin-bottom:7px;}
+.cnt.show{display:flex;}
+.cf{position:relative;display:inline-block;}
+.cf input{background:var(--white);border:0.5px solid var(--hair2);border-radius:8px;padding:7px 62px 7px 11px;font-size:12px;color:var(--ink);outline:none;width:128px;-moz-appearance:textfield;}
+.cf input::-webkit-outer-spin-button,.cf input::-webkit-inner-spin-button{-webkit-appearance:none;}
+.cf .sfx{position:absolute;right:36px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:#b8a898;pointer-events:none;}
+.step{display:inline-flex;flex-direction:column;position:absolute;right:5px;top:50%;transform:translateY(-50%);gap:1px;}
+.step button{cursor:pointer;width:22px;height:13px;display:flex;align-items:center;justify-content:center;background:var(--field);border:0.5px solid var(--hair2);color:var(--muted2);font-size:8px;line-height:1;border-radius:4px;padding:0;transition:all .12s;}
+.step button:hover{border-color:#c9a89e;color:var(--burg);background:#fdf4ef;}
+
+/* expectations block */
+.expect{background:var(--field);border:0.5px solid var(--hair2);border-radius:11px;padding:14px 15px;margin-bottom:16px;}
+.expect .f-lbl{margin-top:0;}
+.inherit{font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5;}
+
+/* story column with real StatusDots */
+.story{background:var(--white);border:0.5px solid var(--hair2);border-radius:11px;overflow:hidden;}
+.story-h{display:flex;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--hair);}
+.story-h .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.story-h .c{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#c0b0a0;letter-spacing:0.1em;text-transform:uppercase;}
+.story-b{padding:13px 15px;}
+.tl{position:relative;padding-left:20px;}
+.tl::before{content:'';position:absolute;left:5.5px;top:8px;bottom:8px;width:1.5px;background:#e1d7d0;}
+.tl-e{position:relative;padding:6px 0;}
+.tl-e .sd{position:absolute;left:-20px;top:9px;}
+.tl-e .t{font-size:11.5px;color:var(--ink);font-weight:500;line-height:1.3;}
+.tl-e .d{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.08em;color:var(--muted);margin-top:1px;}
+.tl-e.now .t{color:var(--burg);}
+.story-f{padding:10px 15px;border-top:1px solid var(--hair);}
+.story-f a{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none;}
+
+/* ═══ fixed action bar ═══ */
+.actbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--hair);background:var(--white);}
+.willrec{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.willrec b{color:var(--ink2);font-weight:500;}
+.ab{cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s;}
+.ab.quiet{background:var(--white);border:1px solid var(--edge);color:#57534e;}
+.ab.quiet:hover{background:#f5f2ee;}
+.ab.go{background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600;}
+.ab.go:hover{background:#efd5ca;}
+.ab.go:disabled{background:var(--field);border-color:var(--hair2);color:#c0b0a0;cursor:not-allowed;}
+
+/* dismiss confirm */
+.dlg{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:rgba(40,20,14,0.35);}
+.dlg.open{display:flex;}
+.dlg-card{width:380px;background:var(--white);border:1px solid var(--edge);border-radius:13px;box-shadow:0 20px 60px rgba(40,20,14,0.3);padding:20px 22px;}
+.dlg-card h3{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2);}
+.dlg-card p{font-size:12px;color:#6a584a;font-weight:300;line-height:1.6;margin:8px 0 0;}
+.dlg-card p b{font-weight:500;color:var(--ink2);}
+.dlg-where{background:var(--field);border:0.5px dashed #ddd0c0;border-radius:9px;padding:10px 12px;margin-top:12px;font-size:11px;color:var(--muted2);font-weight:300;line-height:1.55;}
+.dlg-where b{color:var(--ink2);font-weight:500;}
+.dlg-foot{display:flex;justify-content:flex-end;gap:9px;margin-top:16px;}
+
+/* switcher */
+.switch{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);z-index:50;display:flex;gap:8px;background:var(--white);border:1px solid var(--edge);border-radius:999px;padding:6px;box-shadow:0 6px 24px rgba(58,28,20,0.14);}
+.sw{cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.05em;background:transparent;border:0;border-radius:999px;padding:7px 13px;color:var(--muted2);}
+.sw.on{background:var(--pink);color:var(--burg);font-weight:500;}
+</style>
+</head>
+<body>
+
+<div class="cmdbar">
+  <div class="cmd-l">
+    <button class="cb fill">+ Add a task</button>
+    <button class="cb line">✎ Add a note</button>
+  </div>
+  <div class="meter">
+    <div class="track"><span style="flex:3;background:#e8c8bc;"></span><span style="flex:11;background:#c8d1c5;"></span><span style="flex:3;background:#efe4cc;"></span></div>
+    <div class="legend"><span style="color:#7c3a2a;"><b>3</b> need you now</span><span style="color:#4c5f4a;"><b>11</b> housekeeping</span><span style="color:#8a7440;"><b>3</b> yours</span></div>
+  </div>
+  <div class="cmd-r">
+    <button class="cb line"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Go to calendar</button>
+    <button class="cb line" style="width:34px;padding:0;justify-content:center;">⚙</button>
+  </div>
+</div>
+<div class="cmd-rule"></div>
+
+<div class="frame">
+  <div class="listcard"><div class="l-ph">Task list<br>(as shipped — unchanged)<br><br>Pane top now sits level<br>with this card's top</div></div>
+
+  <!-- ═══ SEND A PARTIAL ═══ -->
+  <div class="pane u-now" id="p-send">
+    <div class="band">
+      <div style="min-width:0;">
+        <div class="deed">Send your <em>partial</em></div>
+        <div class="b-sub">Greg Panetta asked for it · 28 June</div>
+      </div>
+      <div class="b-nav"><button>‹</button><button>›</button></div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="k">Greg's waited</div><div class="v">7 weeks</div></div>
+      <div class="tile"><div class="k">Query with him since</div><div class="v">25 Jun<small>8 weeks ago</small></div></div>
+      <div class="tile"><div class="k">Sent previously</div><div class="v">2 items<small>letter · synopsis</small></div></div>
+    </div>
+
+    <div class="mid">
+      <div class="formcol">
+        <div class="f-h">Sent it? Note it here</div>
+        <div class="f-sub">Nothing is sent from here — this records what you sent.</div>
+
+        <div class="sect">
+          <span class="f-lbl">What are you sending?</span>
+          <div class="f-sub" style="margin:-3px 0 9px;">Pick the unit you actually sent in — one only.</div>
+          <div class="unitrow">
+            <button class="unitpill" data-u="pages" onclick="tu(this)">Pages</button>
+            <button class="unitpill on" data-u="chapters" onclick="tu(this)">Chapters</button>
+            <button class="unitpill" data-u="words" onclick="tu(this)">Words</button>
+          </div>
+          <div class="cnt show" data-c="chapters"><span class="cf"><input type="number" min="1" value="3" data-inc="1" style="padding-right:92px;"><span class="sfx">chapters</span><span class="step"><button onclick="bump(this,1)">▲</button><button onclick="bump(this,-1)">▼</button></span></span></div>
+          <div class="cnt" data-c="pages"><span class="cf"><input type="number" min="1" value="10" data-inc="5" style="padding-right:92px;"><span class="sfx">pages</span><span class="step"><button onclick="bump(this,1)">▲</button><button onclick="bump(this,-1)">▼</button></span></span></div>
+          <div class="cnt" data-c="words"><span class="cf"><input type="number" min="500" value="10000" data-inc="500" style="padding-right:92px;"><span class="sfx">words</span><span class="step"><button onclick="bump(this,1)">▲</button><button onclick="bump(this,-1)">▼</button></span></span></div>
+          <input class="txt" placeholder="Anything else going with it? e.g. author bio" style="margin-top:4px;">
+        </div>
+
+        <div class="sect">
+          <span class="f-lbl">When</span>
+          <div class="seg"><button class="on">Today</button><button>Yesterday</button><button>Another date…</button></div>
+        </div>
+
+        <div class="expect">
+          <span class="f-lbl">When do you expect to hear back?</span>
+          <div class="seg" style="margin-bottom:11px;"><button>4 weeks</button><button class="on">6 weeks</button><button>8 weeks</button><button>12 weeks</button><button>A date…</button></div>
+          <span class="f-lbl">Remind you to nudge?</span>
+          <div class="seg"><button>On the day</button><button class="on">The week before</button><button>A custom date…</button><button>No reminder</button></div>
+          <div class="inherit">The reminder lands here, on your list, when the time comes.</div>
+        </div>
+
+        <div class="sect">
+          <span class="f-lbl">Anything else?</span>
+          <textarea class="note-in" placeholder="Add any further details you want to keep on file"></textarea>
+        </div>
+      </div>
+
+      <div class="storycol">
+        <div class="story">
+          <div class="story-h"><span class="t">The story so far</span><span class="c">2 entries</span></div>
+          <div class="story-b">
+            <div class="tl">
+              <div class="tl-e"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg></span><div class="t">Query sent</div><div class="d">25 Jun · via email</div></div>
+              <div class="tl-e"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/><path d="M6 1 A5 5 0 0 1 9.76 3.5 L6 6 Z" fill="#7c3d3d"/></svg></span><div class="t">Partial requested</div><div class="d">28 Jun · via email</div></div>
+              <div class="tl-e now"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#7c3d3d"/></svg></span><div class="t">Your turn</div><div class="d">Today</div></div>
+            </div>
+          </div>
+          <div class="story-f"><a href="#">Open the full query →</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actbar">
+      <span class="willrec">Will record: <b>Partial sent · first 3 chapters · today</b> · reply expected ~9 Oct · nudge 2 Oct</span>
+      <button class="ab quiet" onclick="openSnooze()">Snooze</button>
+      <button class="ab quiet" onclick="openDismiss()">Dismiss</button>
+      <button class="ab go">Log as sent</button>
+    </div>
+  </div>
+
+  <!-- ═══ CONSIDER CLOSING ═══ -->
+  <div class="pane u-house" id="p-close" style="display:none;">
+    <div class="band">
+      <div style="min-width:0;">
+        <div class="deed">Consider <em>closing</em></div>
+        <div class="b-sub">Sophie Dunn, Curtis Vane · quiet for 4 weeks</div>
+      </div>
+      <div class="b-nav"><button>‹</button><button>›</button></div>
+    </div>
+    <div class="tiles">
+      <div class="tile"><div class="k">You've waited</div><div class="v">4 weeks</div></div>
+      <div class="tile"><div class="k">Most recent interaction</div><div class="v">Nudge sent<small>23 July · via email</small></div></div>
+      <div class="tile"><div class="k">Sent previously</div><div class="v">2 items<small>letter · first 5,000 words</small></div></div>
+    </div>
+    <div class="mid">
+      <div class="formcol">
+        <div class="f-h">Ready to close this one?</div>
+        <div class="f-sub">Closing records no response — not a rejection, so your response rate stays honest. It does not tell the agent anything.</div>
+        <div class="sect">
+          <span class="f-lbl">When</span>
+          <div class="seg"><button class="on">Today</button><button>Yesterday</button><button>Another date…</button></div>
+        </div>
+        <div class="sect">
+          <span class="f-lbl">Anything else?</span>
+          <textarea class="note-in" placeholder="Add any further details you want to keep on file"></textarea>
+        </div>
+      </div>
+      <div class="storycol">
+        <div class="story">
+          <div class="story-h"><span class="t">The story so far</span><span class="c">2 entries</span></div>
+          <div class="story-b">
+            <div class="tl">
+              <div class="tl-e"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg></span><div class="t">Query sent</div><div class="d">14 Mar · via email</div></div>
+              <div class="tl-e"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg></span><div class="t">Nudge sent</div><div class="d">23 Jul · via email</div></div>
+              <div class="tl-e now"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12"><circle cx="6" cy="6" r="5" fill="#7c3d3d"/></svg></span><div class="t">Your turn</div><div class="d">Today</div></div>
+            </div>
+          </div>
+          <div class="story-f"><a href="#">Open the full query →</a></div>
+        </div>
+      </div>
+    </div>
+    <div class="actbar">
+      <span class="willrec">Will record: <b>Closed · no response · today</b></span>
+      <button class="ab quiet" onclick="openSnooze()">Snooze</button>
+      <button class="ab quiet" onclick="openDismiss()">Dismiss</button>
+      <button class="ab go">Log the close</button>
+    </div>
+  </div>
+
+  <!-- ═══ BULK FILL-IN (corrected) ═══ -->
+  <div class="pane u-house" id="p-bulk" style="display:none;">
+    <div class="band">
+      <div style="min-width:0;">
+        <div class="deed">Fill in <em>what you sent</em></div>
+        <div class="b-sub">10 imported queries are missing their materials · from your import on 12 August</div>
+      </div>
+      <div class="b-nav"><button>‹</button><button>›</button></div>
+    </div>
+    <!-- no tiles: nothing to summarise that the sub-line doesn't say -->
+    <div class="mid">
+      <div class="formcol" style="flex-basis:100%;">
+        <div class="f-h">What went with each query?</div>
+        <div class="f-sub">Work down the list. Anything left untouched stays unrecorded — nothing is filled in for you. This fills in your own record; the queries do not move.</div>
+        <div class="chip" style="margin-bottom:10px;">Table renders here as shipped in the list round — full-word heads, tick cells, per-row sample editor</div>
+        <div class="f-sub" style="margin:0;">Fixed in this contract: the header reads the task's own deed (not "16 materials wanted"), the sub-line is complete (not "A gap on the record for"), tiles are absent, and the primary in the bar below states its count.</div>
+      </div>
+    </div>
+    <div class="actbar">
+      <span class="willrec">Will record: <b>Materials on 0 queries</b></span>
+      <button class="ab quiet" onclick="openSnooze()">Snooze</button>
+      <button class="ab quiet" onclick="openDismiss()">Dismiss</button>
+      <button class="ab go" disabled>Log 0 queries</button>
+    </div>
+  </div>
+</div>
+
+<!-- dismiss confirm -->
+<div class="dlg" id="dismissDlg">
+  <div class="dlg-card">
+    <h3>Dismiss this task?</h3>
+    <p>It leaves your list and <b>won't come back on its own</b> — the query itself doesn't change.</p>
+    <div class="dlg-where"><b>Where it goes:</b> dismissed tasks sit behind the filter's "Include dismissed", and the query keeps its own record — you can act on it any time from the Query Centre. If the situation changes (Greg replies, say), a fresh task appears as normal.</div>
+    <div class="dlg-foot">
+      <button class="ab quiet" onclick="closeDismiss()">Keep it</button>
+      <button class="ab go" onclick="closeDismiss()">Dismiss it</button>
+    </div>
+  </div>
+</div>
+
+<div class="switch">
+  <button class="sw on" onclick="show('p-send',this)">Send a partial</button>
+  <button class="sw" onclick="show('p-close',this)">Consider closing</button>
+  <button class="sw" onclick="show('p-bulk',this)">Bulk fill-in</button>
+</div>
+
+<script>
+function show(id,btn){
+  ['p-send','p-close','p-bulk'].forEach(p=>document.getElementById(p).style.display=(p===id?'flex':'none'));
+  document.querySelectorAll('.sw').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+/* Writer side is SINGLE-select: you sent one thing, measured one way.
+   (The agent-side picker stays multi-select — an agency may accept
+   "3 chapters or 10,000 words". Same component, different mode.) */
+function tu(b){
+  if(b.classList.contains('on')) return;            // already chosen; never toggles off
+  document.querySelectorAll('.unitpill').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.cnt').forEach(c=>c.classList.remove('show'));
+  b.classList.add('on');
+  document.querySelector('.cnt[data-c="'+b.getAttribute('data-u')+'"]').classList.add('show');
+}
+document.querySelectorAll('.seg').forEach(s=>s.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  s.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+}));
+function bump(btn,dir){
+  const input=btn.closest('.cf').querySelector('input');
+  const inc=parseInt(input.getAttribute('data-inc'),10);
+  const min=parseInt(input.min,10)||1;
+  const v=(parseInt(input.value,10)||0)+dir*inc;
+  input.value=Math.max(min,v);
+}
+function openDismiss(){document.getElementById('dismissDlg').classList.add('open');}
+function closeDismiss(){document.getElementById('dismissDlg').classList.remove('open');}
+function openSnooze(){alert('Opens the existing snooze panel (chips + slider), anchored to this button');}
+</script>
+
+</body>
+</html>
