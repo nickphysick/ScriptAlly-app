@@ -11,7 +11,7 @@
  * these tests exist to make sure it never quietly becomes that.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { materialLabel, materialToken, formatQueryMaterial, formatQueryMaterials } from "./materials";
 import {
@@ -94,10 +94,15 @@ describe("no material-naming surface hard-codes the token as display copy", () =
   const root = join(__dirname, "..");
   const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
+  /* ⚠️ `components/todo/PaneJourney.tsx` IS GONE (pane round, Phase 3) — deleted, not renamed. Its
+     entry is REMOVED rather than repointed at the nearest survivor: this case's claim is about
+     surfaces that NAME a material, and the pane names materials through `SampleSpecPicker` now,
+     which takes its words from `agentMaterials` and has no copy of its own to get wrong. A case
+     kept pointing at a deleted path fails loudly; one repointed at an unrelated file passes for
+     the wrong reason, which is worse. */
   const SURFACES = [
     "lib/manuscriptPackages.ts",
     "components/packages/typeMeta.ts",
-    "components/todo/PaneJourney.tsx",
   ];
 
   it.each(SURFACES)("%s names the covering letter through materialLabel", (rel) => {
@@ -107,9 +112,11 @@ describe("no material-naming surface hard-codes the token as display copy", () =
     expect(src, `${rel} should call materialLabel`).toContain("materialLabel(");
   });
 
-  it("⚠️ and PaneJourney keeps the token in its `stored` field — display moved, storage did not", () => {
-    const src = readFileSync(join(root, "components/todo/PaneJourney.tsx"), "utf8");
-    expect(src).toContain('stored: "Query letter"');
+  /* ⚠️ AND THE DELETION IS ASSERTED, so the file cannot quietly come back with its own copy of the
+     material names. The claim the retired case made — display moved, storage did not — is now
+     structural: there is no second surface holding the token. */
+  it("⚠️ the retired PaneJourney is gone, not merely unmounted", () => {
+    expect(existsSync(join(root, "components/todo/PaneJourney.tsx"))).toBe(false);
   });
 });
 

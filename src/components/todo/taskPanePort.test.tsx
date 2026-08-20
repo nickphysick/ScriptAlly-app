@@ -53,8 +53,11 @@ const SEND: TaskPaneJourney = {
   actSub: "One entry updates the query, its timeline and this task.",
   body: (
     <TaskPaneBody
-      materials={[{ label: "Full manuscript", detail: "84,200 words" }]}
-      value={{ materials: [], when: "Today", also: "" }}
+      sample
+      value={{
+        rows: [{ key: "sample", kind: "qty", name: "Opening sample", on: true, unit: "Chapters", amount: "3" }],
+        alongside: "", when: "Today", also: "",
+      }}
       onChange={() => {}}
       upsell={<><span className="tag">Pro</span><span>Records which draft went to each agent.</span></>}
     />
@@ -97,14 +100,22 @@ describe("1 · the pane's class names are the mockup's", () => {
        carried and the mockup has no control for it — it navigates by clicking a list row. Those
        classes carry a `tpn-` prefix precisely so this assertion can tell them apart from a name
        that was invented while porting. */
-    /* ⚠️ AND A SHARED COMPONENT BRINGS ITS OWN VOCABULARY, WHICH IS THE POINT (Phase 8). The story
-       renders the real `StatusDot`, whose internals are `sa-`-namespaced. Requiring those to be
-       contract words would mean the pane could only satisfy this case by REDRAWING a status dot in
-       local CSS — the one thing the app-wide rule forbids — so the case would be pushing against
-       the law it sits beside. The exemption is the NAMESPACE, not a list of strings, so it cannot
-       go stale as that component changes. */
-    const invented = [...rendered]
-      .filter((c) => !mockClasses.has(c) && !/^tpn(-|$)/.test(c) && !/^sa-/.test(c));
+    /* ⚠️ AND A MOUNTED COMPONENT BRINGS ITS OWN VOCABULARY, WHICH IS THE POINT (Phases 3 and 8).
+       The census is about words the PANE INVENTS. A component the pane MOUNTS names its own
+       internals, and requiring those to be contract words would mean the pane could only satisfy
+       this case by redrawing that component locally — which is the one thing the reuse law forbids,
+       so the case would be pushing against the law it sits beside.
+
+       Each exemption is a NAMESPACE with a named owner, not a list of strings, so it cannot go
+       stale as those components change — and a genuinely invented word still has nowhere to hide,
+       because inventing one would mean claiming a namespace that belongs to something else. */
+    const MOUNTED = [
+      { ns: /^sa-/, why: "StatusDot — the app's one drawing of a query status (Phase 8)" },
+      /* the root carries the bare namespace, the parts carry it hyphenated — both are its own */
+      { ns: /^ssp(-|$)/, why: "SampleSpecPicker — the sample's units and amounts (Phase 3)" },
+    ];
+    const invented = [...rendered].filter((c) =>
+      !mockClasses.has(c) && !/^tpn(-|$)/.test(c) && !MOUNTED.some((m) => m.ns.test(c)));
     expect(invented, `classes not in the mockup: ${invented.join(" ")}`).toHaveLength(0);
   });
 

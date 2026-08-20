@@ -19,7 +19,7 @@
  * dispatches the same sa:todo-replay-tour event).
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText } from "../../lib/agentMaterials";
+import { materialRowsFromAgent, materialsWantedFromRows, summaryFromRows, willRecordText, formatSampleSpecs, type MaterialRow } from "../../lib/agentMaterials";
 import { queriesMissingMaterials, MATERIALS_BULK_RECORD_ID } from "../../lib/queryMaterialsGap";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { formatQueryMaterials } from "../../lib/materials";
@@ -914,10 +914,35 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * None of it is re-derived: a second opinion here is how the pane and the rail come to state
    * different waits, which this page has already been caught by once.
    */
-  const [paneBody, setPaneBody] = React.useState<SendBodyValues>({ materials: [], when: "Today", also: "" });
+  /**
+   * ⚠️ THE PARCEL IS SEEDED FROM WHAT WAS ASKED FOR, AND NARROWED TO ONE UNIT (pane round, Phase 3).
+   *
+   * What the agency asked for is the best guess at what went, so the form opens on it rather than
+   * empty — but a request may name TWO measures ("three chapters or fifty pages") and a record of
+   * what you sent may name only one. So the seed keeps the FIRST ticked unit and drops the rest.
+   *
+   * ⚠️ IT IS A DEFAULT, NOT A RECORD. Nothing is written until the primary is pressed, and the
+   * writer can change the unit or the amount first — which is the whole reason the row of read-only
+   * chips this replaced was wrong: an agency that asked for three chapters and got five had nowhere
+   * on the page to say so.
+   */
+  const seedRows = React.useCallback((card: BoardCard | null): MaterialRow[] => {
+    const q = card?.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    const asked = materialRowsFromAgent(q?.materialsWanted as string[] | undefined);
+    const ticked = asked.filter((r) => r.kind === "qty" && r.on);
+    const keep = ticked.length ? [ticked[0]] : asked.filter((r) => r.kind === "qty").slice(0, 1);
+    return keep.length
+      ? keep
+      : [{ key: "sample", kind: "qty", name: "Opening sample", on: false, unit: "Chapters", amount: "" }];
+  }, [queries]);
+
+  const [paneBody, setPaneBody] = React.useState<SendBodyValues>(
+    { rows: seedRows(null), alongside: "", when: "Today", also: "" });
   /* the answers reset with the card — a half-filled form carried onto another task is answers
      about the wrong query, which is the sweep's own rule applied to one card */
-  React.useEffect(() => { setPaneBody({ materials: [], when: "Today", also: "" }); }, [paneCard?.key]);
+  React.useEffect(() => {
+    setPaneBody({ rows: seedRows(paneCard ?? null), alongside: "", when: "Today", also: "" });
+  }, [paneCard?.key, seedRows]);
 
   /**
    * ⚠️ WHAT A LIST ROW NEEDS BEYOND ITS CARD, and every one of these is a lookup rather than a new
@@ -1007,7 +1032,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     /* ⚠️ THE WILL-RECORD LINE TAKES THE PANE'S OWN VERB (frame2 Phase 4). It printed
        `rowPrimaryLabel`, which for a note is "Complete" — a retired word, rendered in the one place
        nobody looks for copy. The pane's table is the pane's language throughout. */
-    ? `${paneCopy(paneCard).primary} · ${paneBody.when.toLowerCase().replace("…", "")}`
+    /* ⚠️ THE PARCEL IS IN THE LINE, THROUGH THE ONE FORMATTER. `formatSampleSpecs` is what the
+       `Sent previously` tile reads, so the strip stating what WILL be recorded and the tile stating
+       what WAS cannot describe the same parcel in two grammars. Absent where there is no sample. */
+    ? [paneCopy(paneCard).primary,
+       sendSpecFor(paneCard) ? formatSampleSpecs(paneBody.rows, "and") : null,
+       paneBody.when.toLowerCase().replace("…", "")]
+        .filter(Boolean).join(" · ")
     : "";
 
   /** What the rail is showing — the groups it draws, flattened. One derivation, two readers. */
@@ -1751,7 +1782,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     will: paneWill,
                     body: (
                       <TaskPaneBody
-                        materials={dockMaterials(paneCard).map((m) => ({ label: m.label, detail: m.sub }))}
+                        /* ⚠️ THE QUESTION IS ASKED ONLY WHERE A PARCEL IS GOING — `sendSpecFor` is
+                           what already decides partial-versus-full, so this cannot come to disagree
+                           with the deed above it about whether there is anything to send. */
+                        sample={!!sendSpecFor(paneCard)}
                         value={paneBody}
                         onChange={setPaneBody}
                       />

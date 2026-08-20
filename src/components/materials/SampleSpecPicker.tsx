@@ -43,6 +43,23 @@ export interface SampleSpecPickerProps {
   onChange: (rows: MaterialRow[]) => void;
   /** How two units read together. Requirements choose "or"; records choose "and". */
   join: SampleJoin;
+  /**
+   * ⚠️ WHAT THE PICKER IS FOR, AND IT CHANGES THE ARITHMETIC OF SELECTION (pane round, Phase 3).
+   *
+   * `"wanted"` (the default, and every existing caller) records what an AGENCY ASKED FOR, which is
+   * genuinely multi-unit: "three chapters or fifty pages" is one requirement with two measures, and
+   * `materialRowsFromAgent` has emitted a row per unit since decision 12.
+   *
+   * `"sent"` records what YOU PUT IN THE ENVELOPE, and that is one parcel measured one way. The
+   * contract says it in as many words — "Pick the unit you actually sent in — one only" — and it
+   * is not a styling preference: two units ticked here would encode a claim that the same pages
+   * were sent twice, in two measures, which is not a thing that can have happened.
+   *
+   * So in `"sent"` a unit REPLACES the selection rather than adding to it. Unticking the chosen
+   * unit still clears to the unticked row, exactly as before; the difference is only that there
+   * can never be a second one.
+   */
+  mode?: "wanted" | "sent";
   /** Distinguishes this instance's inputs when several sit on one page (the bulk table). */
   idPrefix?: string;
   /** The bulk table renders many of these — it states its own summary instead. */
@@ -56,7 +73,7 @@ export function selectedUnits(rows: readonly MaterialRow[]): SampleUnit[] {
 }
 
 export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
-  rows, onChange, join, idPrefix = "ssp", hideSummary, disabled,
+  rows, onChange, join, mode = "wanted", idPrefix = "ssp", hideSummary, disabled,
 }) => {
   const chosen = selectedUnits(rows);
   const qtyRows = rows.filter(isQty).filter((r) => r.on);
@@ -72,8 +89,16 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
       onChange(left.some(isQty) ? left : [...left, { key: "sample", kind: "qty", name: "Opening sample", on: false, unit: "Chapters", amount: "" }]);
       return;
     }
-    const blank = rows.find((r) => isQty(r) && !r.on);
     const seeded: QtyRow = { key: "sample", kind: "qty", name: "Opening sample", on: true, unit, amount: snapToUnit(unit) };
+    /* ⚠️ ONE PARCEL, ONE MEASURE. In `"sent"` the new unit REPLACES every sample row rather than
+       joining them — see `mode`. The seed is the unit's own default, never a conversion of the
+       amount that was there: 3 chapters is not 3 pages, and carrying the number across would state
+       a quantity nobody chose. */
+    if (mode === "sent") {
+      onChange([...rows.filter((r) => !isQty(r)), seeded]);
+      return;
+    }
+    const blank = rows.find((r) => isQty(r) && !r.on);
     onChange(blank ? rows.map((r) => (r === blank ? seeded : r)) : [...rows, seeded]);
   };
 
@@ -82,13 +107,18 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
 
   return (
     <div className="ssp" data-join={join}>
-      <div className="ssp-units" role="group" aria-label="Sample unit">
+      <div className="ssp-units" role={mode === "sent" ? "radiogroup" : "group"} aria-label="Sample unit">
         {SAMPLE_UNITS.map((u) => (
           <button
             key={u}
             type="button"
+            /* ⚠️ THE ROLE FOLLOWS THE ARITHMETIC. A single-select group announced as toggle buttons
+               tells a screen reader it may pick several; `radio`/`radiogroup` says one of three,
+               which is what `"sent"` enforces. */
+            {...(mode === "sent"
+              ? { role: "radio" as const, "aria-checked": chosen.includes(u) }
+              : { "aria-pressed": chosen.includes(u) })}
             className={chosen.includes(u) ? "on" : ""}
-            aria-pressed={chosen.includes(u)}
             disabled={disabled}
             onClick={() => toggleUnit(u)}
           >
