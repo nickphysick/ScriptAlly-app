@@ -19,7 +19,8 @@ import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
    stored flag cannot disagree about what counts as a reply. */
-import { AGENT_RESPONSE_STATUSES } from "./queryDerivation";
+import { AGENT_RESPONSE_STATUSES, normalizeResultingStatus } from "./queryDerivation";
+import { isRequestStatus } from "./timelineChapters";
 
 /**
  * Filter-bar STATUS bucket — the derived state the CTA engine (getPrimaryAction, Queries.tsx)
@@ -174,6 +175,21 @@ export interface AmbientStatus {
  * surfaces are untouched by this — their divergence from the agent's window is REPORTED, not
  * silently changed underneath them.
  */
+/**
+ * §3 — when the agent last ASKED for something, from the log.
+ *
+ * ⚠️ LOCAL, AND DELIBERATELY NOT BESIDE `waitAnchor`. That one composes a send with a holding reply
+ * and lives with the holding-reply model; this is a different fact with one consumer, and moving it
+ * into that module would file "when did they ask" under "a reply that decides nothing".
+ */
+function lastRequestMs(events: readonly StoredHoldingReply[] | null | undefined): number | null {
+  const times = (events || [])
+    .map((e) => ({ s: normalizeResultingStatus((e as { type?: unknown }).type), t: new Date(String((e as { createdAt?: unknown }).createdAt ?? "")).getTime() }))
+    .filter((e) => e.s !== null && isRequestStatus(e.s) && !Number.isNaN(e.t))
+    .map((e) => e.t);
+  return times.length ? Math.max(...times) : null;
+}
+
 export function queryAmbientStatus(
   query: Query,
   ballHolder: BallHolder,
@@ -307,10 +323,27 @@ export function queryAmbientStatus(
     const eventLabel = st === QueryStatus.PARTIAL_REQUESTED ? "partial requested"
       : st === QueryStatus.FULL_REQUESTED ? "full requested"
       : "revise & resubmit";
+    /**
+     * ⚠️ §3 · THE SAME STATUS-KEYED FAULT AS THE SEND ANCHOR, ON THIS FUNCTION'S OTHER BRANCH.
+     *
+     * This picked `partialRequestedDate` or `fullRequestedDate` by status with NO fallback, and both
+     * are `recomputeQuery`'s output — so a query at Partial Requested whose stage date had not been
+     * derived produced `writerDaysAgo: null` and the card lost "N days ago" entirely. Measured
+     * before changing it. The R&R branch already fell back through `lastStatusChange`, which is why
+     * only two of the three could go blank.
+     *
+     * ⚠️ REQUESTS COME FROM `isRequestStatus`, THE CTA ENGINE'S ANSWER — "a status whose primary
+     * action is mark-sent" — the mirror of the `isSendStatus` the send anchor reads. Neither is a
+     * list of statuses written out here, so a new request stage joins both for free.
+     *
+     * ⚠️ THE FIELD REMAINS THE FALLBACK because `events` is optional: a caller that passes no log
+     * behaves exactly as before, which is what keeps this additive.
+     */
+    const reqFromLog = lastRequestMs(events);
     const reqIso = st === QueryStatus.PARTIAL_REQUESTED ? query.partialRequestedDate
       : st === QueryStatus.FULL_REQUESTED ? query.fullRequestedDate
       : (query.lastStatusChange ?? query.dateSent);
-    const reqMs = reqIso ? getTime(reqIso) : NaN;
+    const reqMs = reqFromLog ?? (reqIso ? getTime(reqIso) : NaN);
     const writerDaysAgo = Number.isNaN(reqMs) ? null : Math.max(0, Math.floor((now - reqMs) / DAY));
     return { ...base, mode: "writer", sendWhat, eventLabel, writerDaysAgo };
   }

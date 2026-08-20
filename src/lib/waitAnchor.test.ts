@@ -156,3 +156,45 @@ describe("§3b · a holding reply is a reply", () => {
     expect(agentRepliesForManuscript([holding], "m1", "q1")).toBe(0);
   });
 });
+
+/**
+ * §3 — the same status-keyed fault on this function's OTHER branch.
+ *
+ * ⚠️ THE SWEEP FOUND IT BECAUSE IT LOOKED FOR THE SHAPE, NOT THE SYMPTOM. `reqIso` picked
+ * `partialRequestedDate` or `fullRequestedDate` by status with no fallback, so a writer's-turn card
+ * whose stage date had not been derived lost "N days ago" entirely — the identical failure to §1's,
+ * on the identical kind of field, in the identical function.
+ */
+describe("§3 · the writer's-turn figure reads the log too", () => {
+  const rung = (status: QueryStatus, daysAgo: number) => ({ type: status, createdAt: iso(NOW - daysAgo * DAY) });
+  const q = { id: "q", status: QueryStatus.PARTIAL_REQUESTED, dateSent: iso(NOW - 100 * DAY) } as never;
+
+  it("THE FAULT: without the log there is no figure", () => {
+    expect(queryAmbientStatus(q, "writer", "partial", NOW).writerDaysAgo,
+      "the fixture no longer reproduces the fault it was written for").toBeNull();
+  });
+
+  it("THE FIX: the log's most recent request supplies it", () => {
+    const a = queryAmbientStatus(q, "writer", "partial", NOW, undefined,
+      [rung(QueryStatus.QUERIED, 100), rung(QueryStatus.PARTIAL_REQUESTED, 12)]);
+    expect(a.writerDaysAgo, "the card still has no figure with the request in its own log").toBe(12);
+  });
+
+  /** ⚠️ REQUESTS ONLY — a send is not the agent asking for something. */
+  it("an outbound send is not read as a request", () => {
+    const a = queryAmbientStatus(q, "writer", "partial", NOW, undefined, [rung(QueryStatus.PARTIAL_SENT, 3)]);
+    expect(a.writerDaysAgo, "the writer's own send was counted as the agent's request").toBeNull();
+  });
+
+  /** ⚠️ THE MOST RECENT REQUEST — an R&R after a full request is what the writer owes now. */
+  it("takes the latest request", () => {
+    const a = queryAmbientStatus(q, "writer", "partial", NOW, undefined,
+      [rung(QueryStatus.PARTIAL_REQUESTED, 40), rung(QueryStatus.FULL_REQUESTED, 6)]);
+    expect(a.writerDaysAgo).toBe(6);
+  });
+
+  it("a caller passing no events keeps the field-based behaviour", () => {
+    const dated = { id: "q", status: QueryStatus.PARTIAL_REQUESTED, partialRequestedDate: iso(NOW - 9 * DAY) } as never;
+    expect(queryAmbientStatus(dated, "writer", "partial", NOW).writerDaysAgo).toBe(9);
+  });
+});
