@@ -1,0 +1,16 @@
+{
+  "trackingHeadPresent": true,
+  "tag": "Reported, not guessed",
+  "nudge": "Attach Standard UK when you log your next query — replies land back here against it.Log a query ›",
+  "ghostPanels": [
+    "Replies by package",
+    "Requests by material"
+  ],
+  "stats": [],
+  "panels": [],
+  "railPanels": [
+    "Materials",
+    "Packages"
+  ],
+  "dashPercent": false
+}

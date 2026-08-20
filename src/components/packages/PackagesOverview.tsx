@@ -23,10 +23,12 @@
 import React from "react";
 import { ManuscriptVersion, SubmissionPackage, Query } from "../../types";
 import {
-  materialRows, packageRows, trackingRows, packagedQueries, replyCount, howItWorks,
-  packageTiles, tileFooter,
+  materialRows, packageRows, packagedQueries, howItWorks, packageTiles, tileFooter,
 } from "../../lib/packagesOverview";
 import { canBuildPackage } from "../../lib/materialDraft";
+import {
+  trackingTotals, repliesByPackage, requestsByMaterial, trackingNudge, STAT_CELLS, BarRow,
+} from "../../lib/packageTracking";
 import "./packagesOverview.css";
 import "./packagesFlow.css";
 
@@ -44,8 +46,8 @@ export interface PackagesOverviewProps {
   onNewPackage: () => void;
   /** Open one package for editing in the Workshop. */
   onOpenPackage: (id: string) => void;
-  /** Reveal the existing analytics view — Tracking's only job. */
-  onOpenTracking: () => void;
+  /** The nudge's one action: go and log a query, which is where a package gets attached. */
+  onLogQuery?: () => void;
 }
 
 /**
@@ -169,15 +171,50 @@ const Ghost: React.FC<{
     </div>
   );
 
+/**
+ * One dashboard panel — the rail's chassis reused, holding a key and a stack of layered bars.
+ *
+ * ⚠️ THE BARS ARE LAYERED, AND THE KEY NAMES BOTH HALVES. The sage bar sits inside the pink one, so
+ * "came back" reads as a subset of "went out" rather than a rival quantity — which is what keeps
+ * this a picture of volume instead of an unstated percentage.
+ */
+const BarPanel: React.FC<{ label: string; backLabel: string; rows: BarRow[] }> = ({ label, backLabel, rows }) => (
+  <section className="pkgo-panel">
+    <div className="pkgo-head"><span className="pkgo-lbl">{label}</span></div>
+    <div className="pkgo-body">
+      <div className="pkgf-barkey">
+        <span><i className="pkgf-sw" style={{ background: "var(--pkgo-pink-band)" }} />Sent</span>
+        <span><i className="pkgf-sw" style={{ background: "var(--pkgo-sage-deep)" }} />{backLabel}</span>
+      </div>
+      <div className="pkgf-dashrows">
+        {rows.map((r) => (
+          <div key={r.id}>
+            <div className="pkgf-drow-top">
+              <span className="pkgf-drname">
+                {r.eyebrow && <span className="pkgf-dreyebrow">{r.eyebrow}</span>}
+                {r.name}
+              </span>
+              <span className="pkgf-drmeta">{r.meta}</span>
+            </div>
+            <div className="pkgf-bar">
+              <div className="pkgf-bsent" style={{ width: `${r.sentPct}%` }}>
+                <div className="pkgf-bin" style={{ width: `${r.inPct}%` }} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
   versions, packages, queries, now = Date.now(),
-  onAddMaterial, onOpenMaterial, onNewPackage, onOpenPackage, onOpenTracking,
+  onAddMaterial, onOpenMaterial, onNewPackage, onOpenPackage, onLogQuery,
 }) => {
   const mats = materialRows(versions, now);
   const pkgs = packageRows(packages, versions, queries);
-  const track = trackingRows(packages, versions, queries);
   const live = packagedQueries(packages, queries).length;
-  const replies = replyCount(packages, queries);
   const steps = howItWorks(versions.length, packages.length, live);
   /* D4's gate, derived — never a stored flag. */
   const unlocked = canBuildPackage(versions);
@@ -189,6 +226,11 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
    * both opened the editor would make the rail a duplicate control rather than a way of finding
    * something — and the tile itself is what opens the builder.
    */
+  const totals = trackingTotals(packages, queries);
+  const nudge = trackingNudge(packages, queries);
+  const byPackage = repliesByPackage(packages, queries);
+  const byMaterial = requestsByMaterial(packages, versions, queries);
+
   const tileRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
   const [flashed, setFlashed] = React.useState<string | null>(null);
   const jumpToTile = (id: string) => {
@@ -263,23 +305,11 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
           )}
         </Panel>
 
-        {/* ⚠️ TRACKING CARRIES NO ACTION, deliberately — you do not "add" a reply. Its head is a
-            label and, once anything has come back, a count; the rows beneath are the route to the
-            existing analytics view, which is the whole of D1's "the rail replaces the tab strip". */}
-        <Panel label="Tracking" chip={replies > 0 ? `${replies} ${replies === 1 ? "reply" : "replies"}` : undefined}>
-          {track.length === 0 ? (
-            <Ghost sub="Replies land here once a package goes out with a query." />
-          ) : (
-            <div className="pkgo-reg">
-              {track.map((t) => (
-                <button key={t.key} type="button" className="pkgo-row" onClick={onOpenTracking}>
-                  <span className="pkgo-name">{t.name}</span>
-                  <span className="pkgo-detail">{t.detail}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </Panel>
+        {/* ⚠️ THE TRACKING RAIL PANEL IS RETIRED (D9). The rail is Materials + Packages — the two
+            things you MAKE. Tracking is what came back, it now has a whole dashboard on the stage,
+            and a third rail panel summarising it made the rail half index and half readout. Its
+            route into the old AnalyticsTab goes with it: nothing on this page reaches that component
+            any more, though it stays on disk and stays mounted by `#/pkg-lab`. */}
       </aside>
 
       <div className="pkgo-stage">
@@ -344,7 +374,61 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
                 </button>
               </div>
             </section>
-            {/* Phase 5 mounts the tracking dashboard here. */}
+            {/* ── the tracking dashboard (D8) ── */}
+            <section>
+              <div className="pkgf-workhead">
+                <h2>Tracking</h2>
+                <span className="pkgf-worktag">Reported, not guessed</span>
+              </div>
+              {nudge ? (
+                <>
+                  {/* ⚠️ PRE-SENT: a nudge naming the FIRST package, then two dashed ghosts saying what
+                      will appear. Ghosts rather than empty panels, because an axis with no bars reads
+                      as a broken chart while a dashed note reads as "not yet". */}
+                  <div className="pkgf-nudge">
+                    Attach <strong>{nudge.packageName}</strong> when you log your next query — replies
+                    land back here against it.
+                    {onLogQuery && (
+                      <button type="button" className="pkgf-nudgelink" onClick={onLogQuery}>
+                        Log a query ›
+                      </button>
+                    )}
+                  </div>
+                  <div className="pkgf-dashghosts">
+                    <div className="pkgo-ghost pkgo-ghost--inert">
+                      <span className="pkgo-gtitle" style={{ color: "var(--pkg-muted)", fontStyle: "normal" }}>
+                        Replies by package
+                      </span>
+                      <span className="pkgo-gsub">Appears once a package goes out with a query.</span>
+                    </div>
+                    <div className="pkgo-ghost pkgo-ghost--inert">
+                      <span className="pkgo-gtitle" style={{ color: "var(--pkg-muted)", fontStyle: "normal" }}>
+                        Requests by material
+                      </span>
+                      <span className="pkgo-gsub">Shows which materials sit behind each request.</span>
+                    </div>
+                  </div>
+                </>
+              ) : totals.sent > 0 ? (
+                <>
+                  <div className="pkgf-statstrip">
+                    {STAT_CELLS.map((c) => (
+                      <div key={c.key} className="pkgf-stat">
+                        <div className="pkgf-statn">{totals[c.key]}</div>
+                        <div className="pkgf-statl">
+                          <span className={`pkgf-dir pkgf-dir--${c.direction}`}>{c.dir}</span>
+                          {c.label}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="pkgf-dashgrid">
+                    <BarPanel label="Replies by package" backLabel="Replied" rows={byPackage} />
+                    <BarPanel label="Requests by material" backLabel="Requested" rows={byMaterial} />
+                  </div>
+                </>
+              ) : null}
+            </section>
           </>
         ) : (
         <>

@@ -320,3 +320,74 @@
   .pkgf-tile--flash { animation: none; }
   .pkgf-tile { transition: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE TRACKING DASHBOARD (D8)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgf-nudge {
+  border: 1px solid var(--pkg-pinkline);
+  background: rgba(245, 226, 218, 0.3);
+  border-radius: 8px; padding: 10px 12px;
+  font-size: 11px; color: var(--pkg-ink-soft); line-height: 1.55;
+  max-width: 640px;
+}
+.pkgf-nudge strong { color: var(--pkg-burg); font-weight: 600; }
+.pkgf-nudgelink {
+  display: inline-block; margin-top: 6px;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em;
+  color: var(--pkg-burg); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px;
+  background: none; border: none; padding: 0;
+}
+
+.pkgf-dashghosts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+
+.pkgf-statstrip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 16px; }
+.pkgf-stat {
+  background: var(--pkgo-surface); border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 12px; padding: 14px 18px 13px;
+}
+.pkgf-statn { font-family: var(--font-serif); font-size: 30px; font-weight: 600; line-height: 1; color: var(--pkg-ink); }
+.pkgf-statl {
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--pkg-muted); margin-top: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+/* ⚠️ THE ARROW CARRIES THE DIRECTION, AND ITS COLOUR IS THE SAME VOCABULARY AS THE TILES: burgundy
+   for what left, sage for what came back. It is the one piece of colour on this dashboard that means
+   something, which is why the numbers themselves stay ink. */
+.pkgf-dir { font-size: 10px; }
+.pkgf-dir--out { color: var(--pkg-burg); }
+.pkgf-dir--in { color: var(--pkgo-sage-ink); }
+
+.pkgf-dashgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.pkgf-dashrows { display: flex; flex-direction: column; gap: 12px; padding: 4px 4px 6px; }
+
+.pkgf-drow-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 5px; }
+.pkgf-drname { font-size: 12.5px; font-weight: 600; color: var(--pkg-ink); }
+.pkgf-dreyebrow {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.12em;
+  color: var(--pkg-muted); text-transform: uppercase; display: block;
+  margin-bottom: 2px; font-weight: 400;
+}
+.pkgf-drmeta { font-family: var(--font-mono); font-size: 8.5px; color: var(--pkg-ink-soft); white-space: nowrap; }
+
+/* ⚠️ LAYERED, NOT SIDE BY SIDE. The sage bar sits INSIDE the pink one, so "came back" is visibly a
+   subset of "went out" rather than a competing quantity. Two adjacent bars would invite reading them
+   as a ratio, which is exactly the percentage this dashboard refuses to state. */
+.pkgf-bar { height: 8px; border-radius: 4px; background: rgba(58, 28, 20, 0.06); overflow: hidden; }
+.pkgf-bsent { height: 100%; background: var(--pkgo-pink-band); border-radius: 4px; position: relative; overflow: hidden; }
+.pkgf-bin { height: 100%; background: var(--pkgo-sage-deep); border-radius: 4px 0 0 4px; }
+
+.pkgf-barkey {
+  display: flex; gap: 16px; padding: 2px 4px 8px;
+  font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em;
+  color: var(--pkg-muted); text-transform: uppercase;
+}
+.pkgf-barkey span { display: flex; align-items: center; gap: 5px; }
+.pkgf-sw { width: 14px; height: 7px; border-radius: 3px; display: inline-block; }
+
+@media (max-width: 1080px) {
+  .pkgf-dashgrid, .pkgf-dashghosts, .pkgf-statstrip { grid-template-columns: minmax(0, 1fr); }
+}

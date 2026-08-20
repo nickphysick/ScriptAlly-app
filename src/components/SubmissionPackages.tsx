@@ -19,44 +19,23 @@
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { resolveActivePackage } from "../lib/packageMetrics";
-import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
+import { ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
-import { PackageSaveFields } from "./packages/PackageWorkshop";
-import { WorkshopTab } from "./packages/WorkshopTab";
-import { AnalyticsTab, AnalyticsScope } from "./packages/AnalyticsTab";
 import { PackagesOverview } from "./packages/PackagesOverview";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
 import { canBuildPackage, createPayload, updatePayload } from "../lib/materialDraft";
 import { deleteField } from "firebase/firestore";
 import { Tour } from "./Tour";
-import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
+import { WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
 import { PageHeader } from "./shell/PageHeader";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
-/** The three surfaces this route can show. The overview is where you land. */
-type PkgView = "overview" | "workshop" | "analytics";
-
-/**
- * The way back from a surface the rail opened.
- *
- * ⚠️ IT IS OUTLINED, NOT FILLED, and that is the page's one-filled-control rule (D5) rather than a
- * taste call: `New package` in the header is the single filled thing on this route, so every other
- * control on it — the rail's `+ ADD` / `+ NEW`, and this — is an outline. It is also why this is
- * not a pink "Done"-style button, which is what a return control usually wants to be here.
- */
-const BackToOverview: React.FC<{ onClick: () => void }> = ({ onClick }) => (
-  <button type="button" className="pkgo-back" onClick={onClick}>
-    ← Overview
-  </button>
-);
-
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, agents, addVersion, updateVersion, deleteVersion, addPackage, updatePackage, updateUserProfile, setActivePackage } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, addVersion, updateVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
   const navigate = useNavigate();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
@@ -67,8 +46,6 @@ export const SubmissionPackages: React.FC = () => {
   // The guided tour. While active the workshop renders the PURE example fixture (never persisted) and
   // the gold badge; on end we clear it and stamp hasSeenTour so it never auto-runs again.
   const [tourActive, setTourActive] = useState(false);
-  // Pulse the "＋ Add materials" affordance after the tour ends with no materials yet (FR4).
-  const [pulseAdd, setPulseAdd] = useState(false);
   /* Which surface is showing. Component-local UI state by design — deliberately NOT persisted and
      deliberately not a route, so you always land on the overview.
 
@@ -76,18 +53,13 @@ export const SubmissionPackages: React.FC = () => {
      values and this is three, because the overview is a real destination rather than a third tab:
      the rail IS the navigation now, and Workshop and Analytics are what it opens. The strip's
      component survives untouched for the DEV `#/pkg-lab` route, which still mounts it. */
-  /* ⚠️ EVERY OVERVIEW ENTRY POINT INTO THE WORKSHOP IS RETIRED (flow pack D9, R5's list). Materials
-     open the modal, packages open the builder, and the header's `New package` opens the builder too
-     — so `view` no longer has anything on this page that sets it to "workshop". The Workshop and
-     Analytics COMPONENTS stay on disk and stay mounted by `#/pkg-lab`; what is gone is this page's
-     routes into them. The state itself survives for Tracking (Phase 5 decides its fate). */
-  const [view, setView] = useState<PkgView>("overview");
-  // Bumped by the header's "＋ New package" — the workshop opens a fresh draft on each change.
-  const [newPkgSignal, setNewPkgSignal] = useState(0);
-  // Bumped by the rail's "+ ADD" — the workshop opens its MATERIALS editor on each change.
-  const [openMatSignal, setOpenMatSignal] = useState(0);
-  // The rail asked the workshop to open one material for editing.
-  const [openMat, setOpenMat] = useState<string | null>(null);
+  /* ⚠️ THE `view` STATE IS GONE, AND SO ARE BOTH BRANCHES IT SWITCHED (D9, R5's whole list).
+     Materials open the modal, packages open the builder, and Tracking is a dashboard on the stage —
+     so nothing on this page could set `view` to anything but "overview" any more, which made the
+     WorkshopTab and AnalyticsTab branches unreachable code. Traced to a rendered root before
+     removing, in both directions: the two components, `BackToOverview`, the four signal states and
+     the analytics scope were reachable ONLY from those branches. The COMPONENTS stay on disk and
+     stay mounted by `#/pkg-lab`; what is deleted is this page's dead switch. */
   /* The material modal (flow pack Phase 2). `matModal` is the open flag; `matEditing` is the record
      being edited, or null when adding. Both local — a modal is not a destination. */
   const [matModal, setMatModal] = useState(false);
@@ -95,10 +67,6 @@ export const SubmissionPackages: React.FC = () => {
   /* The package builder (flow pack Phase 3). */
   const [pkgModal, setPkgModal] = useState(false);
   const [pkgEditing, setPkgEditing] = useState<SubmissionPackage | null>(null);
-  // Analytics scope: "all" or a package id. Local UI state, like the tab itself.
-  const [scope, setScope] = useState<AnalyticsScope>("all");
-  // A recommendation asked the Workshop tab to open a particular package.
-  const [openPkg, setOpenPkg] = useState<string | null>(null);
 
   // Default to the first manuscript when none is selected / the saved one is gone.
   useEffect(() => {
@@ -125,9 +93,6 @@ export const SubmissionPackages: React.FC = () => {
   const msVersions = useMemo(() => versions.filter((v) => v.manuscriptId === msId), [versions, msId]);
   const msPackages = useMemo(() => packages.filter((p) => p.manuscriptId === msId && p.status !== "Retired"), [packages, msId]);
   const msQueries = useMemo(() => queries.filter((q) => q.manuscriptId === msId), [queries, msId]);
-  // The manuscript's chosen active package — read-only here; null when unset, retired, missing or
-  // cross-manuscript. It drives the ACTIVE card treatment and which card is editable.
-  const activePkg = useMemo(() => resolveActivePackage(activeMs, msPackages), [activeMs, msPackages]);
 
   if (!currentUser) return null;
 
@@ -139,10 +104,6 @@ export const SubmissionPackages: React.FC = () => {
   const multiMs = manuscripts.length > 1;
 
   // ── Workshop persistence — all scoped to the active manuscript. ──
-  const createVersion = async (type: ComponentType, name: string, contentDraft: string): Promise<string | undefined> => {
-    if (!msId) return undefined;
-    return addVersion({ manuscriptId: msId, componentType: type, versionName: name, fileAttached: false, contentDraft, contentType: "text" });
-  };
   /**
    * The material modal's write. Create or update, through the SAME primitives the Workshop editor
    * uses (R2) — this page adds no second persistence path.
@@ -196,12 +157,6 @@ export const SubmissionPackages: React.FC = () => {
     return null;
   };
 
-  const savePackage = async (baseId: string | null, fields: PackageSaveFields): Promise<string | undefined> => {
-    if (!msId) return undefined;
-    if (baseId) { await updatePackage(baseId, fields); return baseId; }
-    const res = await addPackage({ manuscriptId: msId, ...fields });
-    return res.success ? res.id : undefined;
-  };
 
   // ── Guided tour ──
   const hasSeenTour = !!currentUser.hasSeenTour;
@@ -210,20 +165,23 @@ export const SubmissionPackages: React.FC = () => {
   const endTour = () => {
     setTourActive(false);
     if (!hasSeenTour) void updateUserProfile({ hasSeenTour: true });
-    // The tour ends on the empty workshop — nudge the writer to their first real action.
-    if (msVersions.length === 0) setPulseAdd(true);
   };
   // The ONE way into the guided tour: the example-data band on the workshop's empty state and the
   // matching action on the analytics empty state both call this. hasSeenTour still stamps on end.
   const startTour = () => setTourActive(true);
 
-  // While the tour runs the workshop shows the PURE example fixture (never persisted); otherwise the
-  // real manuscript-scoped data. The example writes are no-ops (host handlers ignore them).
-  const noop = () => undefined;
-  const wsVersions = tourActive ? EXAMPLE_VERSIONS : msVersions;
-  const wsPackages = tourActive ? EXAMPLE_PACKAGES : msPackages;
-  const wsQueries = tourActive ? EXAMPLE_QUERIES : msQueries;
-  const wsAgents = tourActive ? EXAMPLE_AGENTS : agents;
+  /* ⚠️ THE GUIDED TOUR IS CURRENTLY UNREACHABLE, AND THAT IS A CONSEQUENCE TO DECIDE ON, NOT A BUG
+     TO PATCH BLIND. Its only two doors were `onTryExample` on WorkshopEmpty and AnalyticsEmpty —
+     both on surfaces this page no longer opens (D9). So `startTour` has no caller, `tourActive` can
+     never become true, and the `<Tour>` overlay below cannot render.
+
+     The machinery is left INTACT rather than deleted: where a tour belongs on the restructured page
+     is a product decision (the modal's type step? the onboarding stage?), and deleting a feature to
+     tidy up a sweep would make that decision by accident. Flagged as F-F. What IS removed is the
+     `EXAMPLE_*` aliasing, which only ever fed the two retired surfaces.
+
+     ⚠️ Do not "fix" this by re-opening a Workshop route — that is the thing D9 retired. Give the
+     tour a door on a surface that still exists. */
 
   // Book glyph for the manuscript selector — burgundy strokes.
   const bookIcon = (
@@ -343,13 +301,12 @@ export const SubmissionPackages: React.FC = () => {
         </div>
       ) : (
         <>
-          {view === "overview" ? (
-            /* ⚠️ THE REAL, MANUSCRIPT-SCOPED DATA — never the tour fixture. `wsVersions` and its
-               siblings swap to `EXAMPLE_*` while the guided tour runs, which is right for the
-               Workshop (the tour drives it) and wrong here: the overview is where you see what YOU
-               have, and a register quietly listing four invented materials is a page lying about
-               the writer's own work. The tour never opens on this surface. */
-            <PackagesOverview
+          {/* ⚠️ THE REAL, MANUSCRIPT-SCOPED DATA — never the tour fixture. `wsVersions` and its
+              siblings swap to `EXAMPLE_*` while the guided tour runs, which was right for the
+              Workshop (the tour drove it) and wrong here: the overview is where you see what YOU
+              have, and a register quietly listing four invented materials is a page lying about
+              the writer's own work. The tour never opens on this surface. */}
+          <PackagesOverview
               versions={msVersions}
               packages={msPackages}
               queries={msQueries}
@@ -368,62 +325,11 @@ export const SubmissionPackages: React.FC = () => {
                 setPkgEditing(msPackages.find((p) => p.id === id) ?? null);
                 setPkgModal(true);
               }}
-              onOpenTracking={() => setView("analytics")}
+              /* ⚠️ NO `onOpenTracking` ANY MORE (D9). Tracking is a dashboard on the stage, not a
+                 rail panel that opens another surface — so this page's last route into AnalyticsTab
+                 is gone. The component stays on disk and stays mounted by `#/pkg-lab`. */
+              onLogQuery={() => navigate("/queries")}
             />
-          ) : view === "workshop" ? (
-            /* ⚠️ `role="tabpanel"` IS GONE FROM BOTH SURFACES, and dropping it was required rather
-               than tidy: a tabpanel with no tablist is a broken ARIA relationship, and the strip
-               that provided the tablist is retired (D1). They are labelled regions now, reached
-               from the rail. */
-            <div className="pkgw-tv" role="region" aria-label="Workshop">
-              <BackToOverview onClick={() => setView("overview")} />
-              <WorkshopTab
-                versions={wsVersions}
-                packages={wsPackages}
-                queries={wsQueries}
-                activePackageId={tourActive ? null : activePkg?.id ?? null}
-                onCreateVersion={tourActive ? noop : createVersion}
-                onUpdateVersion={tourActive ? noop : (id, f) => updateVersion(id, f)}
-                onDeleteVersion={tourActive ? noop : (id) => deleteVersion(id)}
-                onSavePackage={tourActive ? noop : savePackage}
-                onMakeActive={tourActive || !msId ? noop : (pid) => void setActivePackage(msId, pid)}
-                onTryExample={startTour}
-                newPackageSignal={newPkgSignal}
-                openMaterialsSignal={openMatSignal}
-                openMaterialId={openMat}
-                onOpenedMaterial={() => setOpenMat(null)}
-                openPackageId={openPkg}
-                onOpenedPackage={() => setOpenPkg(null)}
-                pulseAddMaterials={pulseAdd && !tourActive}
-                onDismissPulse={() => setPulseAdd(false)}
-              />
-            </div>
-          ) : (
-            <div className="pkgw-tv" role="region" aria-label="Tracking">
-              <BackToOverview onClick={() => setView("overview")} />
-              <AnalyticsTab
-                versions={wsVersions}
-                packages={wsPackages}
-                queries={wsQueries}
-                agents={wsAgents}
-                activePackageId={tourActive ? null : activePkg?.id ?? null}
-                scope={scope}
-                onScope={setScope}
-                onOpenQueries={() => navigate("/queries")}
-                /* ⚠️ ANALYTICS' OWN TWO HAND-OFFS GO TO THE BUILDER, NOT THE WORKSHOP (R5 #7/#8).
-                   They were the last routes from this page into the Workshop; leaving them would
-                   have made a recommendation the one way to reach a surface the page had otherwise
-                   retired. Phase 5 retires Tracking's route into Analytics as well, at which point
-                   neither component is reachable from here at all. */
-                onOpenPackage={(pid) => {
-                  setPkgEditing(msPackages.find((p) => p.id === pid) ?? null);
-                  setPkgModal(true);
-                }}
-                onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
-                onTryExample={startTour}
-              />
-            </div>
-          )}
         </>
       )}
 

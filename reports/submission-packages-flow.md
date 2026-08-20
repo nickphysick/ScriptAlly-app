@@ -502,3 +502,126 @@ moment as the field, every time.
 | `tsc --noEmit` | exit 0 |
 | `vite build` | exit 0; whole log grepped — no diagnostics |
 | Targeted suites (5 files) | **122 passed** (+7 for `packageTiles`) |
+
+---
+
+## Phase 5 — Tracking dashboard
+
+**What shipped:** `src/lib/packageTracking.ts` (the adapter), the pre-sent and populated dashboard
+states, and D9's retirement of the Tracking rail panel.
+
+### The adapter, and D8's constraint locked rather than intended
+
+`packageTracking.ts` is pure, and its import list is **asserted**:
+
+```
+imports === ["../components/packages/typeMeta", "../types", "./packageMetrics"]
+```
+
+No Query Centre component, no React, no Firestore — and a test that fails if any appear. It also
+asserts what the module must **not** do: no `ActivityType`, no `activities`, no `requestRate` /
+`responseRate`. Counts only (D8): `packageMetrics` exposes rates and this module deliberately ignores
+them, because at querying sample sizes a request rate is noise wearing a percentage sign.
+
+**It derives from queries, not the activity log** (R4). `recomputeQuery` is the single writer that
+turns the log into query state, so re-deriving replies from activities would be a second
+implementation of something it already owns.
+
+### The aggregation is the panel's whole point
+
+`requestsByMaterial` sums a material across **every** package containing it. Measured on the live
+page, with a synopsis and a sample shared by both packages:
+
+| Material | Measured |
+|---|---|
+| Synopsis · One-page | **`2 requests from 8 sent`** ← in both packages (6 + 2) |
+| Sample pages · Chapters 1-3 | **`2 requests from 8 sent`** ← in both |
+| Covering letter · Hook-first | `2 requests from 6 sent` ← one package |
+| Covering letter · Comps-forward | `0 requests from 2 sent` ← one package |
+
+Counting per-package would understate every shared material — which is most of them, since a writer
+typically keeps one synopsis and varies the letter.
+
+### Both states, driven
+
+**Pre-sent** (packages exist, nothing sent): the nudge names the first package —
+*"Attach **Standard UK** when you log your next query — replies land back here against it."* — over
+two dashed ghost panels. Ghosts rather than empty charts: an axis with no bars reads as broken, a
+dashed note reads as "not yet".
+
+**Populated**: stat strip `8 / 2 / 2` with direction glyphs measured at `rgb(124, 58, 42)` burgundy
+for `→` and `rgb(92, 112, 83)` sage for `←`; two panels of layered bars with their keys; tag
+**"Reported, not guessed"**. `dashPercent: false` — **no percentage anywhere the dashboard renders**.
+
+The bars are layered, not side by side: the sage bar sits *inside* the pink one, so "came back" reads
+as a subset of "went out". Two adjacent bars would invite reading them as a ratio — the very
+percentage this dashboard refuses to state.
+
+### The live proof — exact before/after
+
+Attached a package to an existing query through `EditQueryDrawer` (the write **F7** unblocked this
+morning), at a mobile viewport because that is the only place the control exists (F10):
+
+| | BEFORE | AFTER |
+|---|---|---|
+| nudge | *"Attach **Standard UK**…"* | **null** |
+| Queries sent with a package | — | **1** |
+| Replies received | — | 0 |
+| Requests for more | — | 0 |
+| Replies by package | ghost panel | **`0 of 1 replied`** |
+| Requests by material | ghost panel | **`0 requests from 1 sent`** × 3 |
+
+`packageWas: ""` — a real change, so it entered `affectedKeys` and genuinely needed F7's allowlist
+entry. The whole chain is visible in one run: **rules fix → the write lands → the adapter derives →
+the dashboard renders.** The fixture was restored afterwards (`packageId` back to `""`, seed
+re-run).
+
+### D9 — the Tracking rail panel is gone, and so is the dead switch behind it
+
+Measured: `railPanels: ["Materials", "Packages"]`. The rail is the two things you **make**; Tracking
+is what came back, and it has a dashboard on the stage now.
+
+That removed this page's last route into `AnalyticsTab` — and with it, `view` could only ever be
+`"overview"`, making the `WorkshopTab` and `AnalyticsTab` branches **unreachable code**. A fixed-point
+sweep followed, as the house rule prescribes:
+
+| Round | Removed |
+|---|---|
+| 1 | the `view` state, both branches, `BackToOverview`, `PkgView`, four signal states, the analytics scope |
+| 2 | `WorkshopTab` / `AnalyticsTab` / `PackageSaveFields` imports, `savePackage`, `createVersion`, the `EXAMPLE_*` aliasing |
+| 3 | `deleteVersion`, `setActivePackage`, `agents`, `activePkg`, `resolveActivePackage`, `ComponentType` |
+| 4 | nothing new — fixed point |
+
+`SubmissionPackages.tsx` went from ~440 lines to **364**. Both components stay on disk and stay
+mounted by `#/pkg-lab` (D9).
+
+### ⚠️ F-F — the sweep left the guided tour with no door, and I did not delete it
+
+`startTour` now has **exactly one reference: its own declaration.** Its only two doors were
+`onTryExample` on `WorkshopEmpty` and `AnalyticsEmpty` — both on surfaces this page no longer opens.
+So `tourActive` can never become true and the `<Tour>` overlay cannot render.
+
+**The machinery is left intact and commented rather than deleted.** Where a tour belongs on the
+restructured page is a product decision — the modal's type step? the onboarding stage? — and deleting
+a feature to tidy up a sweep would make that decision by accident. The comment in the file also says
+what *not* to do: re-opening a Workshop route to give it a door would restore exactly what D9
+retired.
+
+### ⚠️ Three probe faults in this phase, all mine
+
+1. **A "no percentages" check that read a stylesheet.** `root.textContent` includes the contents of
+   inline `<style>`, and this page has one — so the check matched a CSS rule and reported a rate the
+   page does not show. Scoped to the dashboard's own panels, it reads **false**.
+2. **The same backtick-in-a-template-literal syntax error, for the third time in this build.** A
+   comment containing `` `root.textContent` `` closed the string; Playwright reported *No tests
+   found*. It is loud, but it is loud *after* a run that silently used stale artefacts once already.
+3. An earlier edit whose anchor never matched, so the "fixed" probe was still the original — which is
+   why the wrong reading persisted across two runs before I checked the file rather than the output.
+
+### Phase 5 gates
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | exit 0 |
+| `vite build` | exit 0; whole log grepped — no diagnostics |
+| Targeted suites (6 files) | **150 passed** (+28 for the adapter) |

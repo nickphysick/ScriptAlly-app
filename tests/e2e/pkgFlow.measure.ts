@@ -371,3 +371,116 @@ test("phase 4 — onboarding stage returns when the last package goes", async ({
   writeFileSync(`${ART}/p4-onboarding.txt`, JSON.stringify(r, null, 2) + "\n");
   console.log(JSON.stringify(r, null, 2));
 });
+
+/** The tracking dashboard — pre-sent and populated. */
+const DASH = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const heads = Array.from(root.querySelectorAll(".pkgf-workhead h2")).map((h) => (h.textContent || "").trim());
+  const stats = Array.from(root.querySelectorAll(".pkgf-stat")).map((s) => ({
+    n: (s.querySelector(".pkgf-statn")?.textContent || "").trim(),
+    label: (s.querySelector(".pkgf-statl")?.textContent || "").trim(),
+    dirColor: s.querySelector(".pkgf-dir") ? getComputedStyle(s.querySelector(".pkgf-dir")).color : null,
+  }));
+  const panels = Array.from(root.querySelectorAll(".pkgf-dashgrid .pkgo-panel")).map((p) => ({
+    label: (p.querySelector(".pkgo-lbl")?.textContent || "").trim(),
+    key: Array.from(p.querySelectorAll(".pkgf-barkey span")).map((k) => (k.textContent || "").trim()),
+    rows: Array.from(p.querySelectorAll(".pkgf-dashrows > div")).map((r) => ({
+      eyebrow: (r.querySelector(".pkgf-dreyebrow")?.textContent || "").trim() || null,
+      name: (r.querySelector(".pkgf-drname")?.textContent || "").trim(),
+      meta: (r.querySelector(".pkgf-drmeta")?.textContent || "").trim(),
+      sentW: r.querySelector(".pkgf-bsent")?.style.width ?? null,
+      inW: r.querySelector(".pkgf-bin")?.style.width ?? null,
+    })),
+  }));
+  return {
+    trackingHeadPresent: heads.includes("Tracking"),
+    tag: (Array.from(root.querySelectorAll(".pkgf-worktag")).map((t) => (t.textContent || "").trim())
+      .find((t) => /reported/i.test(t))) ?? null,
+    nudge: (root.querySelector(".pkgf-nudge")?.textContent || "").trim() || null,
+    ghostPanels: Array.from(root.querySelectorAll(".pkgf-dashghosts .pkgo-ghost")).map(
+      (g) => (g.querySelector(".pkgo-gtitle")?.textContent || "").trim()),
+    stats, panels,
+    /* the rail is Materials + Packages only (D9) */
+    railPanels: Array.from(root.querySelectorAll(".pkgo-rail .pkgo-lbl")).map((l) => (l.textContent || "").trim()),
+    /* ⚠️ SCOPED TO THE DASHBOARD. The first version tested root.textContent, which INCLUDES the
+       page's inline <style> — so it matched a CSS rule and reported a rate the page does not show.
+       The percent-hunt probe confirmed the only match had a STYLE parent. The claim worth making is
+       narrower and checkable: nothing the tracking panels RENDER is a percentage. */
+    dashPercent: Array.from(root.querySelectorAll(".pkgf-dashgrid, .pkgf-statstrip"))
+      .some((el) => /[0-9]\\s*%/.test(el.textContent || "")),
+  };
+})()`;
+
+test("phase 5 — the tracking dashboard, populated", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  const r = await page.evaluate(DASH);
+  await page.screenshot({ path: `${OUT}/p5-dashboard.png`, fullPage: true });
+  writeFileSync(`${ART}/p5-dashboard.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});
+
+/** Where exactly does a "%" appear? D8 forbids rates on this dashboard. */
+test("probe — percent hunt", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const hits = await page.evaluate(`(() => {
+    const root = document.querySelector(".pkg-root");
+    const out = [];
+    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let n;
+    while ((n = walk.nextNode())) {
+      if (/\\d\\s*%/.test(n.textContent || "")) {
+        out.push({ text: (n.textContent || "").trim().slice(0, 80),
+                   parent: n.parentElement?.className || n.parentElement?.tagName });
+      }
+    }
+    return out;
+  })()`);
+  console.log("PERCENT_HITS " + JSON.stringify(hits, null, 2));
+});
+
+/**
+ * The brief's live proof: attach a package to an EXISTING query through EditQueryDrawer — the write
+ * F7 unblocked — and watch the dashboard's derived figures move.
+ *
+ * ⚠️ MOBILE VIEWPORT, because that is where the control lives. The Edit button that opens the drawer
+ * from Query Centre sits inside `isMobile && mobileDetailOn`; on desktop there is no route into it
+ * at all (F10 in the restructure report).
+ */
+test("phase 5 — attaching a package moves the derived figures", async ({ page }) => {
+  const log: Record<string, unknown>[] = [];
+  const VP = { width: 390, height: 844 };
+
+  const readDash = async () => {
+    await openRoute(page, ROUTE, { width: 1440, height: 900 });
+    await liftMotionSuppression(page);
+    return page.evaluate(DASH);
+  };
+
+  log.push({ at: "BEFORE — nothing sent", dash: await readDash() });
+
+  /* attach, through the real drawer */
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await page.setViewportSize(VP);
+  await page.goto("/queries");
+  await page.waitForTimeout(2500);
+  await liftMotionSuppression(page);
+  await page.locator("[class*=f12-row]").first().click();
+  await page.locator("button.qh-mq", { hasText: /^Edit$/ }).first().waitFor({ state: "visible", timeout: 20_000 });
+  await page.locator("button.qh-mq", { hasText: /^Edit$/ }).first().click();
+  await page.locator('[aria-label="Submission package"]').first().waitFor({ state: "visible", timeout: 20_000 });
+  const before = await page.locator('[aria-label="Submission package"]').inputValue();
+  await page.selectOption('[aria-label="Submission package"]', "seed-pkg-1");
+  const save = page.locator(".f11-discard + button");
+  await expect(save).toBeEnabled({ timeout: 15_000 });
+  await save.click();
+  await page.waitForTimeout(3500);
+  log.push({ at: "attached seed-pkg-1 to a query", packageWas: before });
+
+  log.push({ at: "AFTER — one send", dash: await readDash() });
+
+  await page.screenshot({ path: `${OUT}/p5-after-attach.png`, fullPage: true });
+  writeFileSync(`${ART}/p5-live.txt`, JSON.stringify(log, null, 2) + "\n");
+  console.log(JSON.stringify(log, null, 2));
+});
