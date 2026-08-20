@@ -303,3 +303,15 @@
   font-size: 13px; transition: all .18s;
 }
 .tpn-navb:hover { border-color: #c9a89e; color: var(--burg); }
+
+/* ⚠️ THE BAND'S NAV SQUARES (pane round, Phase 1) — the contract's own 28px, on the band's own
+   translucent fill. They replace the retired "TASK n OF m" row, whose height went to the pane so
+   its top edge lines up with the list card's. */
+.tpn .navsq {
+  cursor: pointer; width: 28px; height: 28px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(255, 253, 250, 0.8); color: var(--ink2);
+  border: 0.5px solid rgba(58, 28, 20, 0.13); border-radius: 8px;
+  font-size: 13px; line-height: 1; transition: all .18s;
+}
+.tpn .navsq:hover { background: #fffdfa; border-color: rgba(58, 28, 20, 0.24); }

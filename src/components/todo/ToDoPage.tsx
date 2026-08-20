@@ -71,6 +71,7 @@ import {
    answered by the groups themselves. Neither component is deleted in this phase (the house rule
    on orphans: flag, then sweep in a commit of its own). */
 import { TaskList } from "./TaskList";
+import { TODO_ROUTES } from "../../lib/todoRoutes";
 import { TodoCommandBar } from "./TodoCommandBar";
 import { AnchoredPanel } from "./AnchoredPanel";
 import { FilterMenu, SortMenu, SnoozePanel } from "./TodoFrameMenus";
@@ -78,6 +79,7 @@ import {
   applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
   typeCounts as viewTypeCounts, viewTotal, VIEW_DEFAULT,
 } from "../../lib/todoListView";
+import { useNavigate } from "react-router-dom";
 import { groupColumn, TaskGroup } from "../../lib/todoGroups";
 import { paneCopy } from "../../lib/taskListRow";
 import { daysBetween } from "../../lib/elapsed";
@@ -270,6 +272,7 @@ export interface ToDoPageProps {
    an Undo that reversed whichever you happened to click. The type comes with it. */
 
 export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
+  const navigate = useNavigate();
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, versions, currentUser, collectionsReady,
     addUserTask, updateUserTask, deleteUserTask, upsertTaskFlag, updateUserProfile, recordOfferDecision,
@@ -1638,9 +1641,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             groups={railGroups()}
             onAddTask={() => openComposer("task")}
             onAddNote={() => openComposer("note")}
-            hasSelection={!!docked.card}
-            onSnooze={(el) => setSnoozeAnchor(el)}
-            onDismiss={() => docked.card && forkStale(docked.card, "notNow")}
+            /* ⚠️ THE ROUTER DIRECTLY (the house rule for new code) — `/todo/calendar` is a real
+               route (todoRoutes.ts:41, mounted in App.tsx), which recon confirmed before this
+               button was drawn. A calendar link with no calendar is the dead link the brief forbids.
+
+               ⚠️ AND THIS COMMENT IS BARE, NOT BRACED. Inside a JSX OPENING TAG the braced form is
+               a syntax error; in CHILDREN it is required; at EXPRESSION position it parses as a
+               block. Three positions, three rules, same two characters — all three have cost time
+               in this session. */
+            onCalendar={() => navigate(TODO_ROUTES.find((p) => p.id === "calendar")!.path)}
             onJumpTo={(g) => {
               const el = document.querySelector(`.tlc .grp.${{ urgent: "now", housekeeping: "house", yours: "yours" }[g]}`);
               el?.scrollIntoView({ behavior: "smooth", block: "start" });

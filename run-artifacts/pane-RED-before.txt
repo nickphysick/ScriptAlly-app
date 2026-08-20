@@ -1,0 +1,37 @@
+── pane round · 18 assertions · 16 RED · 2 green
+  green  P1.1 · the pane's top edge aligns with the list card's
+           list=311 pane=310
+  RED    P1.2 · no TASK n OF m counter anywhere
+           found "TASK 11 OF 14"
+  RED    P1.3 · the bar carries no Snooze and no Dismiss
+           ["Add a task","Add a note","Snooze","Dismiss"]
+  RED    P1.4 · the bar carries Go to calendar
+           ["Add a task","Add a note","Snooze","Dismiss"]
+  RED    P2.1 · the band is 68px or less
+           band=93px
+  RED    P2.2 · the middle is the only scrolling element in the pane
+           ["v","note-in"]
+  RED    P2.3 · the action bar is fixed at the pane's foot
+           bar=-1 pane=889
+  RED    P2.4 · the prev/next arrows live in the band
+           0 buttons in the band
+  RED    P5.1 · the close band reads the row's own deed
+           deed="Log the close"
+  RED    P5.2 · its tiles are the three the contract names
+           ["You've waited","Last entry","Sent previously"]
+  green  P5.3 · the form asks 'Ready to close this one?'
+           heading="Ready to close this one?"
+  RED    P5.4 · the response-rate line is kept verbatim
+           missing
+  RED    P5.5 · the primary reads 'Log the close'
+           primary="Close this query"
+  RED    P7.1 · Dismiss opens the confirm dialog with the contract's copy
+           no dialog (dismissBtn=false)
+  RED    P7.2 · the where-it-goes box makes all three promises
+           -
+  RED    P7.3 · its buttons are Keep it and Dismiss it
+           -
+  RED    P7.4 · the filter offers 'Include dismissed' beside 'Include snoozed'
+           ["Include snoozed1✓"]
+  RED    P8.1 · the story renders the real StatusDot, not redrawn spans
+           statusDots=0 plainSpans=2

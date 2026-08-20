@@ -28,9 +28,9 @@ export interface TodoCommandBarProps {
   onAddTask: () => void;
   onAddNote: () => void;
   /** null when nothing is open — both task verbs then render disabled */
-  hasSelection: boolean;
-  onSnooze: (anchor: HTMLElement) => void;
-  onDismiss: () => void;
+  /** ⚠️ NO LONGER USED BY THE BAR — Snooze and Dismiss moved to the pane's action bar, where the
+   *  open task is. Kept off the props entirely rather than passed and ignored. */
+  onCalendar: () => void;
   /** scroll the list to a group's head */
   onJumpTo: (id: GroupId) => void;
 }
@@ -41,7 +41,7 @@ const Ic = ({ d }: { d: string }) => (
 );
 
 export const TodoCommandBar: React.FC<TodoCommandBarProps> = ({
-  groups, onAddTask, onAddNote, hasSelection, onSnooze, onDismiss, onJumpTo,
+  groups, onAddTask, onAddNote, onCalendar, onJumpTo,
 }) => {
   const count = (id: GroupId) => groups.find((g) => g.id === id)?.cards.length ?? 0;
   const counts = GROUP_IDS.map((id) => ({ id, n: count(id) }));
@@ -87,14 +87,13 @@ export const TodoCommandBar: React.FC<TodoCommandBarProps> = ({
         </div>
 
         <div className="cmd-r">
-          {/* ⚠️ BOTH ACT ON THE OPEN TASK, so with nothing open they are disabled rather than absent
-              — a control that vanishes teaches that the page changed, not that nothing is selected. */}
-          <button type="button" className="cb line" disabled={!hasSelection}
-            onClick={(e) => onSnooze(e.currentTarget)}>
-            <Ic d="M12 6v6l4 2M12 2a10 10 0 100 20 10 10 0 000-20z" />Snooze
-          </button>
-          <button type="button" className="cb line" disabled={!hasSelection} onClick={onDismiss}>
-            <Ic d="M18 6L6 18M6 6l12 12" />Dismiss
+          {/* ⚠️ SNOOZE AND DISMISS LEFT THE BAR (pane round, Phase 1). They act on the OPEN TASK, and
+              the pane is where the open task is — a verb two zones away from its object is a verb
+              you have to aim. Both live in the pane's action bar now; the bar keeps only what acts
+              on the page. */}
+          <button type="button" className="cb line" onClick={onCalendar}>
+            <Ic d="M3 9h18M7 3v4M17 3v4M4 5h16a1 1 0 011 1v14a1 1 0 01-1 1H4a1 1 0 01-1-1V6a1 1 0 011-1z" />
+            Go to calendar
           </button>
         </div>
       </div>

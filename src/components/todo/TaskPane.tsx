@@ -103,18 +103,11 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
   const fig = d.fig;
   return (
     <div className="tpn">
-      {/* ⚠️ NOT IN THE MOCKUP, AND REQUIRED BY THE BRIEF — task navigation is named behaviour to
-          carry, and the mockup has no control for it because it draws the list beside the pane and
-          navigates by clicking a row. Rendered OUTSIDE `.v`, in its own class, so the port's
-          structure is exactly the mockup's from `.v` down and this is visibly not part of it. */}
-      {nav && (
-        <div className="tpn-nav">
-          <span className="tpn-navk">Task {nav.index} of {nav.total} · {nav.label}</span>
-          <button type="button" className="tpn-navb" onClick={nav.onPrev} aria-label="Previous task">‹</button>
-          <button type="button" className="tpn-navb" onClick={nav.onNext} aria-label="Next task">›</button>
-        </div>
-      )}
-
+      {/* ⚠️ THE COUNTER ROW IS GONE AND ITS HEIGHT WENT TO THE PANE (pane round, Phase 1). It said
+          "TASK 11 OF 14 · YOUR TASKS" above the card — a number the list's own footer already
+          states, spending ~40px to hold the pane's top edge below the list's. The arrows survive,
+          in the band, where the contract puts them; the count does not survive at all, because the
+          one that mattered is beside the rows it counts. */}
       <div className={`v ${d.cls}`}>
         <div className="fc">
           <div className="rim">
@@ -135,6 +128,16 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                     <button key={b.label} type="button" className="b-onband"
                       onClick={(e) => b.onPress(e.currentTarget)}>{b.label}</button>
                   ))}
+                  {/* ⚠️ THE ARROWS, IN THE BAND — the contract's 28px squares. They moved here from
+                      the retired counter row: navigation belongs beside the thing it navigates. */}
+                  {nav && (
+                    <>
+                      <button type="button" className="navsq" onClick={nav.onPrev}
+                        aria-label="Previous task">‹</button>
+                      <button type="button" className="navsq" onClick={nav.onNext}
+                        aria-label="Next task">›</button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
