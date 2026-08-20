@@ -17,12 +17,12 @@ const OPEN = (kind: string) => `(() => {
 /* ⚠️ THE PILL LABELS ARE `BUCKET_LABEL`s, NOT THE JOURNEY NAMES I first guessed — "Nudge",
    "Offer" and "Fill in" match no row, so three journeys were reported as absent from the account
    when they were absent from my list. */
-const KINDS = ["Send", "Decide", "Chase", "Close", "Fix", "Note"];
+const KINDS = ["Send", "Close", "Note"];
 
 test("pane shots", async ({ page }) => {
-  mkdirSync("reports/pane-round", { recursive: true });
+  mkdirSync("reports/finish-round", { recursive: true });
   await ensureSignedIn(page);
-  for (const w of [1440, 1920]) {
+  for (const w of [1440, 1920, 390]) {
     await page.setViewportSize({ width: w, height: 900 });
     await page.goto("/todo");
     await page.waitForTimeout(7000);
@@ -30,7 +30,7 @@ test("pane shots", async ({ page }) => {
       const ok = await page.evaluate(OPEN(kind));
       if (!ok) { console.log(`skip ${kind} @${w} — no such row on this account`); continue; }
       await page.waitForTimeout(1200);
-      await page.screenshot({ path: `reports/pane-round/${kind.toLowerCase().replace(/\s+/g, "-")}-${w}.png` });
+      await page.screenshot({ path: `reports/finish-round/${kind.toLowerCase()}-${w}.png` });
       console.log(`shot ${kind} @${w}`);
     }
   }
@@ -38,6 +38,24 @@ test("pane shots", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/todo");
   await page.waitForTimeout(7000);
+  /* ⚠️ THE BULK JOURNEY IS OPENED BY ITS SUB-LINE, not its pill. Both fill-ins wear "Fix", so
+     "the Fix row" is whichever comes first — the SINGLE one on this account. */
+  for (const w of [1440, 1920, 390]) {
+    await page.setViewportSize({ width: w, height: 900 });
+    await page.goto("/todo");
+    await page.waitForTimeout(7000);
+    const ok = await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const row = [...document.querySelectorAll(".tlc .row")].filter(vis)
+        .find((r) => /imported queries are missing their materials/.test((r.querySelector(".r-meta") || {}).textContent || ""));
+      if (!row) return false; row.click(); return true;
+    })()`);
+    if (!ok) { console.log(`skip bulk @${w}`); continue; }
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `reports/finish-round/bulk-${w}.png` });
+    console.log(`shot bulk @${w}`);
+  }
+
   /* the first attempt shot a pane that had not changed card and a dialog that was not open, and
      the picture said neither — a screenshot cannot fail, so the check has to be made explicitly */
   const opened = await page.evaluate(OPEN("Send"));
