@@ -70,6 +70,12 @@ await attempt("writerExpectedDate", "6461c54", () => updateDoc(qref, { writerExp
   () => updateDoc(qref, { writerExpectedDate: deleteField() }));
 await attempt("writerExpectedSetAt", "§1 final pack", () => updateDoc(qref, { writerExpectedSetAt: new Date().toISOString() }),
   () => updateDoc(qref, { writerExpectedSetAt: deleteField() }));
+/* ⚠️ THE VALUE MUST CHANGE OR THIS PROVES NOTHING. `affectedKeys()` lists keys whose value DIFFERS,
+   so writing the packageId a query already has leaves it out of the diff entirely and the attempt
+   passes on rules that forbid it — a green that means "I did not test the thing". The seed writes
+   packageId:"" on this query, so a non-empty value is a real change. Undone straight after. */
+await attempt("packageId (attach)", "F7, 33b52b6", () => updateDoc(qref, { packageId: "seed-pkg-1" }),
+  () => updateDoc(qref, { packageId: "" }));
 
 console.log("\nglobal activity feed (isValidActivity's enumerated activityType):");
 const gref = doc(db, "users", uid, "activities", "probe-holding-reply");

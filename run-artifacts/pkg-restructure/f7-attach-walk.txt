@@ -1,0 +1,25 @@
+[
+  {
+    "step": "drawer open (before)",
+    "value": "",
+    "options": [
+      "",
+      "seed-pkg-1",
+      "seed-pkg-2"
+    ]
+  },
+  {
+    "step": "plan",
+    "from": "",
+    "to": "seed-pkg-1",
+    "thenBackTo": ""
+  },
+  {
+    "step": "after reload (attached?)",
+    "value": "seed-pkg-1"
+  },
+  {
+    "step": "after reload (restored?)",
+    "value": ""
+  }
+]

@@ -1031,3 +1031,98 @@ carries exactly the kind of comment that triggers it. The lock strips `//` comme
 | `tsc --noEmit` | exit 0 |
 | `vite build` | exit 0, whole log grepped, no diagnostics |
 | `packageLinkRule.test.ts` | 4 passed |
+
+## A3 — the rules deploy
+
+```
+firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev --debug
+→ ✔ cloud.firestore: rules file firestore.rules compiled successfully
+→ ✔ firestore: released rules firestore.rules to cloud.firestore
+```
+
+**Verified by release `updateTime`, never the success line** (which never names the database):
+
+| Release | updateTime |
+|---|---|
+| `projects/scriptally-dev/releases/cloud.firestore` | **2026-08-20T08:33:44.860297Z** ← this deploy |
+| `…/releases/cloud.firestore/ai-studio-ae82196c-…` | 2026-08-20T07:57:09.337285Z (untouched by me) |
+
+**And the dual-database contradiction CLAUDE.md records as unresolved is now resolved, for dev at
+least.** The note says to deploy dev rules with both configs because nobody was sure which database
+the app reads. It is answerable from the env files:
+
+* `.env.development` → `VITE_FIREBASE_DATABASE_ID=(default)`
+* `.env.production`  → `VITE_FIREBASE_DATABASE_ID=ai-studio-ae82196c-…`
+
+and `firebase.ts` calls `getFirestore(app)` with no id when the value is `(default)`. So **the dev
+app reads `(default)`**, which is exactly what `firebase.dev.json` pins and exactly what this deploy
+released to. The second config was not needed. `rulesProbe.mjs` confirms it from the other end — its
+first line prints `database: (default) · project: scriptally-dev`.
+
+*(The `ai-studio` string does appear in `dist/` — but that is because `dist/` currently holds the
+PRODUCTION build I ran for the build gate, not a dev bundle. Worth noting so the next reader does
+not take it as evidence the dev app uses it.)*
+
+## A4 — proved on dev, twice over
+
+### 1. The rule, via `rulesProbe.mjs`
+
+Added a `packageId` case to the probe's query-update section (its own purpose: *"which rules are
+live on the database dev actually reads"*):
+
+```
+database: (default) · project: scriptally-dev
+query UPDATE allowlist, oldest field first:
+  ✅ writerExpectedSetAt   (§1 final pack)  ACCEPTED
+  ✅ packageId (attach)    (F7, 33b52b6)    ACCEPTED
+```
+
+**⚠️ The probe writes a value that DIFFERS from the one already stored, and that is load-bearing.**
+`affectedKeys()` lists keys whose value *changed*, so writing the packageId a query already has
+leaves it out of the diff entirely — the attempt would pass on rules that forbid it. A green there
+would have meant "I did not test the thing".
+
+### 2. The real call site, through `EditQueryDrawer`
+
+`tests/e2e/packageAttach.measure.ts`, against the deployed dev site, signed in as the harness user:
+
+| Step | Package select |
+|---|---|
+| drawer opened | `""` (options: `""`, `seed-pkg-1`, `seed-pkg-2`) |
+| attach `seed-pkg-1`, Save, **full page reload**, reopen | **`seed-pkg-1`** ✓ |
+| detach, Save, **full page reload**, reopen | **`""`** ✓ |
+
+**The proof is the value surviving a reload, not the absence of an error toast** — that is precisely
+what this bug did: Firestore rejected the write, the UI showed nothing, and the drawer closed looking
+successful.
+
+### F10 — found while doing it: the desktop Query Centre has no way into the Edit Query drawer
+
+The walk had to run at a **mobile viewport**, and not for convenience. The `Edit` button that opens
+`EditQueryDrawer` from Query Centre lives inside `isMobile && mobileDetailOn` (`Queries.tsx:5545`),
+so on desktop it is not rendered at all. Tracing every call site:
+
+| Entry point | Reachable |
+|---|---|
+| `Queries.tsx:5545` | **mobile detail view only** |
+| `Dashboard.tsx` ×3 | to-do task rows |
+| `EditAgentHost.tsx` | from inside the agent drawer |
+
+So on a desktop Query Centre there is **no Edit control for a query at all**. That is not something
+this work caused, and it materially changes F7's user-facing reach — the silent denial was hitting
+mobile users, the dashboard's task rows and the agent drawer, not the desktop hub. Worth a look;
+it may well be deliberate.
+
+### Three wrong-element traps in one walk, recorded because they are the pattern
+
+1. `getByRole("button", { name: /^Edit$/ })` — no such control on desktop (F10 above).
+2. `getByRole("button", { name: /Save/i }).first()` resolved to the **quick-note composer's**
+   permanently-disabled `qn-send` button and retried it for four minutes. The drawer's Save has no
+   class and no accessible name of its own; it is anchored structurally now, as `.f11-discard +
+   button`.
+3. The first adaptive run picked a package the query already had, so nothing went dirty and Save
+   stayed disabled — the *same* affectedKeys logic as the probe caveat above, arriving through the
+   UI.
+
+Each looked like a broken app and each was a broken probe. That is the third stream running in which
+the measurement, not the subject, was the thing at fault.

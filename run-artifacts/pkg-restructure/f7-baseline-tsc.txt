@@ -1,0 +1,6 @@
+tests/e2e/pkgRestructure.measure.ts(298,15): error TS2339: Property 'stage' does not exist on type 'unknown'.
+tests/e2e/pkgRestructure.measure.ts(298,39): error TS2339: Property 'stepWidths' does not exist on type 'unknown'.
+tests/e2e/pkgRestructure.measure.ts(298,67): error TS2339: Property 'plateHeights' does not exist on type 'unknown'.
+tests/e2e/pkgRestructure.measure.ts(299,22): error TS2339: Property 'stepWidths' does not exist on type 'unknown'.
+tests/e2e/pkgRestructure.measure.ts(299,58): error TS2339: Property 'onScreen' does not exist on type 'unknown'.
+tests/e2e/pkgRestructure.measure.ts(299,77): error TS2339: Property 'ticks' does not exist on type 'unknown'.
