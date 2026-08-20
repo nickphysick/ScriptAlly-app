@@ -11,21 +11,26 @@
  * burgundy in the disc, 62px / 0.9 stroke / 30% ink as the motif. That is the ref's own
  * specification, reached from one source rather than two.
  *
- * ⚠️ THE PROFILE BAND IS THE ONE THAT NAMES A PERSON. Its `name`/`sub` are the writer's own name
- * and email, passed in at render; the static entry below carries only the words around them. The
- * other five are fixed labels about the app, not about the reader.
+ * ⚠️ NO BAND NAMES A PERSON ANY MORE, AND PROFILE'S IS THE ONE THAT CHANGED. It used to substitute
+ * the writer's name and email at render, so the identity was repeated on every section card — and
+ * the only element that could have stayed still while you navigated was the one that moved most.
+ * Identity appears ONCE now, in the account header above the grid; every band is a fixed label
+ * about a SECTION rather than about the reader.
+ *
+ * ⚠️ AND THE MONO PRE-LABEL IS GONE with the old band anatomy. "Account · Settings" above every
+ * section name was a third statement of where you are, beneath a header that says it and beside a
+ * rail that shows it.
  */
 import React from "react";
 import { User as UserIcon, Shield, CreditCard, Bell, SlidersHorizontal, Database } from "lucide-react";
 import { AccountSectionId } from "../../lib/accountRoutes";
 
 export interface SectionBand {
-  /** The mono pre-label above the name. */
-  pre: string;
-  /** The Playfair line. Profile substitutes the writer's name. */
+  /** The Playfair line — the SECTION's name, always. */
   name: string;
-  /** The one-line sub-line. Profile substitutes the account email. */
+  /** The one-line sub-line beneath it. */
   sub: string;
+  /** The section's mark. Worn by the rail item, and by the body watermark where there is one. */
   Icon: React.ComponentType<any>;
 }
 
@@ -36,12 +41,12 @@ export interface SectionBand {
  * missing section is a worse fault than a plainer sentence.
  */
 export const SECTION_BANDS: Record<AccountSectionId, SectionBand> = {
-  profile: { pre: "Account settings for", name: "", sub: "", Icon: UserIcon },
-  security: { pre: "Account · Settings", name: "Sign-in & security", sub: "How you access your account", Icon: Shield },
-  plan: { pre: "Account · Settings", name: "Plan & billing", sub: "What your plan includes", Icon: CreditCard },
-  notifications: { pre: "Account · Settings", name: "Notifications", sub: "What ScriptAlly emails you about", Icon: Bell },
-  preferences: { pre: "Account · Settings", name: "Preferences", sub: "How your workspace behaves", Icon: SlidersHorizontal },
-  data: { pre: "Account · Settings", name: "Your data", sub: "Export or remove what's stored", Icon: Database },
+  profile: { name: "Profile", sub: "Your name and where you write from", Icon: UserIcon },
+  security: { name: "Sign-in & security", sub: "How you access your account", Icon: Shield },
+  plan: { name: "Plan & billing", sub: "What your plan includes", Icon: CreditCard },
+  notifications: { name: "Notifications", sub: "What ScriptAlly emails you about", Icon: Bell },
+  preferences: { name: "Preferences", sub: "How your workspace behaves", Icon: SlidersHorizontal },
+  data: { name: "Your data", sub: "Export or remove what's stored", Icon: Database },
 };
 
 /* ⚠️ NO INITIALS HELPER LIVES HERE. `initialsOf` in `lib/searchSuggestionsCore` is the app's one

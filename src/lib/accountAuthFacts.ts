@@ -24,5 +24,6 @@ export function readAuthFacts(): AuthFacts | null {
     providerIds: u.providerData.map((p) => p.providerId),
     emailVerified: u.emailVerified,
     email: u.email,
+    createdAt: u.metadata.creationTime ?? null,
   };
 }

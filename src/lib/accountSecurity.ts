@@ -21,6 +21,10 @@ export interface AuthFacts {
   providerIds: string[];
   emailVerified: boolean;
   email: string | null;
+  /** When the account was created, as Firebase reports it. The header's "Joined" row reads this;
+   *  there is no stored equivalent on the user document and inventing one would mean backfilling
+   *  every existing writer with a guess. */
+  createdAt: string | null;
 }
 
 /** How the password block should render. */

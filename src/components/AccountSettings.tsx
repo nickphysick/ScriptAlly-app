@@ -52,10 +52,11 @@ import { useToast } from "./toast/ToastProvider";
 import { validateDisplayName } from "../lib/accountValidation";
 import { MountPanel } from "./MountPanel";
 import { SECTION_BANDS } from "./settings/sectionBands";
-import { initialsOf } from "../lib/searchSuggestionsCore";
 import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
 import { PlanComparison } from "./plans/PlanComparison";
+import { AccountHeader } from "./settings/AccountHeader";
+import { accountFacts, sentCount } from "../lib/accountHeaderFacts";
 import {
   pageGround,
   PAGE_GRAIN,
@@ -309,69 +310,42 @@ const InertNotice: React.FC<{ children: React.ReactNode }> = ({ children }) => (
    why the frame is a real clipping container rather than an overlay border. One card, one place. */
 
 /**
- * A section card: the sage band header + body, inside MountPanel's clipping frame.
+ * A section card: a slim sage head + the body, inside MountPanel's clipping frame.
  *
- * ⚠️ THE BAND CARRIES NO RADIUS AND NO MARGIN. The frame's `overflow: hidden` rounds it and stops
- * the fill at the frame border. The design ref instead draws the frame as a `::before` overlay
- * and then hand-matches `border-radius: 8px 8px 0 0` + `margin: 6px 6px 0` on the band to fake
- * the same result — an overlay border cannot contain a fill, so the fill reaches the card's outer
- * edge at the corners. Do not port that.
+ * ⚠️ THE HEAD NO LONGER CARRIES AN IDENTITY. It was disc · pre-label · name · sub-line, with the
+ * writer's monogram, name and email substituted in on Profile — which meant the page repeated who
+ * you are on every section and had nothing that stayed still while you moved between them.
+ * Identity is the account header's job now, once, above the grid. What is left here is what a
+ * section head is for: which section this is, and one line saying what it covers.
  *
- * The band's anatomy is the ref's: disc · mono pre-label · Playfair name · sub-line, with the
- * section's own mark repeated faint and large at the right.
+ * ⚠️ THE BAND STILL CARRIES NO RADIUS AND NO MARGIN. The frame's `overflow: hidden` rounds it and
+ * stops the fill at the frame border — the ref draws this as a `::before` overlay and then
+ * hand-matches a radius on the band to fake the same result, which an overlay border cannot do.
  */
 const SectionCard: React.FC<{
   section: SectionId;
-  /** Overrides the band's Playfair line — Profile puts the writer's name here. */
-  name?: string;
-  /** Overrides the band's sub-line — Profile puts the account email here. */
-  sub?: string;
-  /** Replaces the disc's icon with initials (Profile only). */
-  disc?: string;
-  danger?: boolean;
   headingId?: string;
   children: React.ReactNode;
-}> = ({ section, name, sub, disc, danger, headingId, children }) => {
+}> = ({ section, headingId, children }) => {
   const band = SECTION_BANDS[section];
-  const Icon = band.Icon;
-  const ink = danger ? DANGER_INK : burgundy;
   return (
-    <MountPanel style={{ marginBottom: 20 }}>
+    <MountPanel className="acct-card">
       <div
         className="acct-band"
-        style={{
-          background: danger ? DANGER_BAND : sageBandGradient,
-          borderBottom: `1px solid ${danger ? DANGER_RULE : sageBandRule}`,
-        }}
+        style={{ background: sageBandGradient, borderBottom: `1px solid ${sageBandRule}` }}
       >
-        <Icon
-          className="acct-band-motif"
-          width={62}
-          height={62}
-          strokeWidth={0.9}
-          style={{ color: bodyInk, opacity: 0.3 }}
-          aria-hidden="true"
-        />
-        <span className="acct-band-id">
-          <span className="acct-band-disc" aria-hidden="true" style={danger ? { color: DANGER_INK } : undefined}>
-            {disc ?? <Icon width={16} height={16} strokeWidth={1.8} style={{ color: ink }} />}
-          </span>
-          <span style={{ minWidth: 0 }}>
-            <span className="acct-band-pre">{band.pre}</span>
-            <span
-              id={headingId}
-              role="heading"
-              aria-level={2}
-              className="acct-band-name"
-              style={{ display: "block", color: danger ? DANGER_INK : headingInk }}
-            >
-              {name ?? band.name}
-            </span>
-            {(sub ?? band.sub) && <span className="acct-band-sub" style={{ display: "block" }}>{sub ?? band.sub}</span>}
-          </span>
+        <span
+          id={headingId}
+          role="heading"
+          aria-level={2}
+          className="acct-band-name"
+          style={{ color: headingInk }}
+        >
+          {band.name}
         </span>
+        <span className="acct-band-sub">{band.sub}</span>
       </div>
-      <div style={{ padding: 18 }}>{children}</div>
+      <div className="acct-cardbody">{children}</div>
     </MountPanel>
   );
 };
@@ -703,6 +677,15 @@ export const AccountSettings: React.FC<{
    */
   const pwMode = passwordMode(authFacts?.providerIds ?? ["password"]);
   const pendingDeletion = scheduledDeletion(currentUser.scheduledDeletion);
+  /* ⚠️ EVERY FACT IS ALREADY IN MEMORY — no new read, no new field. The plan is on the user doc,
+     the joined date rides the auth metadata settings already reads for providers, and the counts
+     are the collections the db context loads for every page. */
+  const headerFacts = accountFacts({
+    plan: `${currentUser.plan} plan`,
+    creationTime: authFacts?.createdAt,
+    manuscriptCount: manuscripts.length,
+    sentCount: sentCount(queries),
+  });
   const notify = notifyPrefs(currentUser.notifyPrefs);
   const marketingOn = marketingGranted(currentUser.marketingConsent);
   const timezone = resolveTimeZone(currentUser.workspacePrefs?.timezone);
@@ -883,7 +866,7 @@ export const AccountSettings: React.FC<{
      only caller has been deleted is dormant code that reads as a feature. */
 
   const profileSection = (
-    <SectionCard section="profile" name={currentUser.name || "Your account"} sub={currentUser.email} disc={initialsOf(currentUser.name || currentUser.email)} headingId="acct-h-profile">
+    <SectionCard section="profile" headingId="acct-h-profile">
       {/* ⚠️ NO AUTHOR-PHOTO CONTROL, AND NO DISABLED PLACEHOLDER FOR ONE. Firebase Storage is not
           configured in this project — no `storage.rules`, no storage block in either hosting
           config, no `firebase/storage` import anywhere in src. A "Change photo" button that
@@ -1398,16 +1381,13 @@ export const AccountSettings: React.FC<{
         .acct-input:focus { border-color: ${burgundy}; box-shadow: 0 0 0 3px rgba(124,58,42,0.12); }
       `}</style>
 
-      {/* ⚠️ NO SUBTITLE, AND NO `PageHeader`. The bar above already carries the saved-status line
-          and the breadcrumb already reads Setup / Account, so "Manage your profile, plan and
-          preferences." was the third statement of the same fact inside one screen-height. The
-          title is plain Playfair in ink — no italic accent word: that treatment is an artefact of
-          the form-11 demo file, not a heading style this app has. */}
-      <header className="acct-head" style={{ position: "relative", zIndex: 1 }}>
-        <h1 className="acct-title">Account settings</h1>
-      </header>
-
+      {/* ⚠️ THE HEADER IS RENDERED HERE, OUTSIDE THE SECTION SUBTREE, so nothing about it can
+          change when the route does. It is the page's fixed point and its top edge — the two
+          things the old centred title could not be, because it moved nothing and anchored nothing.
+          There is no page title any more: this says whose account it is, which the title never
+          did. */}
       <div className="acct-plane" style={{ position: "relative", zIndex: 1 }}>
+        <AccountHeader name={currentUser.name} email={currentUser.email} facts={headerFacts} />
         <div className={`acct-grid${active === "plan" ? " acct-grid--wide" : ""}`}>
           <div className="acct-rail">
             <Rail active={active} onSelect={goSection} />

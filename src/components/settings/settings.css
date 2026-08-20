@@ -35,21 +35,116 @@
    element whose `grid-template-columns` reads it, so the override lands at the resolution site. */
 .acct-grid--wide { --acct-col: 660px; }
 
-/* ── Page header — plain Playfair in ink, centred, NO subtitle ──────────────
-   The bar already carries the saved-status line and the breadcrumb already says Settings, so a
-   subtitle here would be the third statement of the same fact above the fold. */
-.acct-head {
-  flex: none;
-  padding: 22px 24px 18px;
-  text-align: center;
+/* ── The account header — the page's fixed point and its top edge ───────────
+   ⚠️ THE PAGE TITLE IS GONE. A centred "Account settings" over an empty plane was the second of
+   the three faults this rework fixes: the content had nothing to sit against. The header is the
+   top edge now, it is full width, and it is IDENTICAL in all six sections — the first fault was
+   that every section card repeated the identity, so nothing on screen held still while you
+   navigated. */
+.acct-hdr { margin-bottom: 22px; }
+
+/* The row lives INSIDE MountPanel's clipping frame, so the tinted panel's fill and the
+   illustration that bleeds past its corner are both stopped at the frame border — the same reason
+   the sage band carries no radius of its own. */
+.acct-hdr-row {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
 }
-.acct-title {
+
+.acct-hdr-main {
+  flex: 1;
+  min-width: 0;
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.acct-hdr-av {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #f5e2da;
+  border: 1px solid rgba(124, 58, 42, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: 30px;
+  font-size: 19px;
   font-weight: 500;
+  color: #7c3a2a;
+}
+
+.acct-hdr-who { min-width: 0; }
+.acct-hdr-pre {
+  display: block;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: #9c8878;
+}
+.acct-hdr-name {
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
+  font-size: 26px;
+  font-weight: 500;
+  color: #2b1a14;
   line-height: 1.1;
+  margin: 2px 0 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.acct-hdr-mail {
+  display: block;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 300;
+  color: #8a7a6c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ⚠️ A FIXED 280px, AND IT DROPS RATHER THAN SQUEEZES. Three key/value rows stop reading as rows
+   the moment the values wrap, and 280 is where they stop wrapping. */
+.acct-hdr-side {
+  width: 280px;
+  flex-shrink: 0;
+  border-left: 0.5px solid #ece0d2;
+  background: linear-gradient(135deg, #f6f1ea 0%, #f1ece4 100%);
+  padding: 20px 22px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.acct-hdr-facts { position: relative; z-index: 2; margin: 0; }
+.acct-hdr-fact { display: flex; align-items: baseline; gap: 8px; padding: 3px 0; }
+.acct-hdr-k {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a08e7c;
+  width: 74px;
+  flex-shrink: 0;
+  margin: 0;
+}
+.acct-hdr-v {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12px;
   color: #3a1c14;
   margin: 0;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .acct-hdr-row { flex-direction: column; }
+  .acct-hdr-side { width: auto; border-left: 0; border-top: 0.5px solid #ece0d2; }
 }
 
 /* ── The scroll plane — the ONE scroll region on this page ──────────────────── */
@@ -58,7 +153,7 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 24px 64px;
+  padding: 30px 40px 70px;
 }
 
 /* ── Rail + content ─────────────────────────────────────────────────────────
@@ -91,7 +186,6 @@
   }
   .acct-rail { position: static; }
   .acct-plane { padding-inline: 16px; }
-  .acct-head { padding-inline: 16px; }
 }
 
 /* ── Rail items ─────────────────────────────────────────────────────────────
@@ -146,74 +240,39 @@
   .acct-navitem { width: auto; }
 }
 
-/* ── The section band ───────────────────────────────────────────────────────
-   The band lives INSIDE MountPanel's clipping frame and therefore carries no radius and no
-   margin of its own: the frame's `overflow: hidden` rounds it and stops the fill at the frame
-   border. The design ref draws this as a `::before` overlay with a hand-matched
-   `border-radius: 8px 8px 0 0` and `margin: 6px 6px 0` on the band — an overlay border cannot
-   contain a fill, which is the spill this structure exists to prevent. */
+/* ── The section head — slim, and about the SECTION ─────────────────────────
+   It lives INSIDE MountPanel's clipping frame and therefore carries no radius and no margin of
+   its own: the frame's `overflow: hidden` rounds it and stops the fill at the frame border. The
+   design ref draws that frame as a `::before` overlay and then hand-matches
+   `border-radius: 8px 8px 0 0` on the band to fake the clip — an overlay border cannot contain a
+   fill, which is the spill this structure exists to prevent.
+
+   ⚠️ THE DISC, THE PRE-LABEL AND THE MOTIF ARE GONE FROM HERE. The disc and the writer's name
+   moved to the account header (identity appears once); the pre-label was a third statement of
+   where you are; and the section's mark moved down into the body as the watermark, where it fills
+   the space a short section leaves rather than decorating a header that is already legible. */
 .acct-band {
-  position: relative;
-  overflow: hidden;
-  min-height: 78px;
-  padding: 16px 22px 14px;
   display: flex;
-  align-items: center;
-}
-.acct-band-motif {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  z-index: 1;
-}
-.acct-band-id {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  position: relative;
-  z-index: 2;
-  min-width: 0;
-}
-.acct-band-disc {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #fdfaf5;
-  border: 1px solid rgba(124, 58, 42, 0.25);
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.05);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: 14px;
-  font-weight: 500;
-  color: #7c3a2a;
-}
-.acct-band-pre {
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #5a6e58;
-  margin-bottom: 1px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 24px;
 }
 .acct-band-name {
   font-family: var(--font-serif, "Playfair Display", Georgia, serif);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 500;
-  color: #2e3a2c;
-  line-height: 1.1;
+  line-height: 1.2;
 }
 .acct-band-sub {
   font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
   font-size: 11px;
   font-weight: 300;
   color: #6a7e68;
-  margin-top: 1px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
 }
+
+/* The section body. Its own padding, so the card can carry a floor height in Phase 2 without the
+   body's spacing being tangled up in it. */
+.acct-cardbody { padding: 22px 26px 26px; }
