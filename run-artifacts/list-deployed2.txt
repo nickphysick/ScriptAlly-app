@@ -1,0 +1,31 @@
+── list port · 15 assertions · 1 RED · 14 green
+  green  1 · no checkbox control renders in any row
+           0 tick/checkbox controls across 14 rows
+  green  2 · a row gains no controls on hover — the row is the only control
+           rest=0 hover=0 (want 0/0 — the row div carries the click)
+  green  3 · every task renders — rows equal what the group heads claim
+           rows=14 groupSum=14
+  green  4 · the footer states that same number, and never 'of'
+           foot="14 tasks · 6 need you nowExport CSV" n=14 rows=14
+  green  5 · no show-more control renders, and the mechanism is gone from the source
+           dom=0 · source still holds: nothing
+  green  6 · every meta line is a single line box at 1440
+           0 of 10 wrapped
+  green  7a · a dated row's figure is Playfair 15px
+           11 dated · first font="Playfair Display", serif size=15px
+  green  7b · an absent row carries no figure at all
+           3 absent, 0 still carry a figure
+  green  7c · every right cell reads as the contract's sentence fragment
+           14 cells
+  green  8 · each bucket's deed is the contract's string
+           checked decide,send,close,fix,note
+  green  9 · no deed or meta line uses a retired verb
+           checked 14 rows
+  green  10 · group heads are sticky and stay in the card after a 400px scroll
+           heads=3 position=sticky visible-after-scroll=3
+  green  11 · the list body scrolls; the document does not
+           docOverflow=0 body=477/937
+  green  12 · each pill's fill is the contract's hex
+           checked decide,send,close,fix,note
+  RED    6b · at the card's design width, meta lines still do not wrap
+           NOT PROVEN — card is 116px at a 392 viewport, so nothing can wrap. /todo is not adapted below the shell's breakpoint (parked); out of this brief's scope.

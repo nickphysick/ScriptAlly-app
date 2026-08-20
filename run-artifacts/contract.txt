@@ -1,0 +1,187 @@
+── contract · 93 assertions · 2 RED · 91 green
+  green  D7/D8/D9/D10 · no @container anywhere in the pane's rules
+           none
+  green  D7 · the rail is fluid, not a fixed px track
+           absent
+  green  D7 · the split is a grid whose tracks refuse to be sized by their content
+           .tdw-split{--tdw-hair:var(--tdb-panel-hair);display:grid;grid-template-columns:min(340px,34%) minmax(0,1fr);grid-templat
+  green  D7 · neither column carries a flex basis a grid would ignore
+           .tdw-split>.tdw-rail{min-width:0}
+  green  D9 · tiles are repeat(auto-fit, minmax(150px, 1fr))
+           .tdk-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));backgroun
+  green  D1 three cards, each with its OWN rim · send
+           cards=3 rims=3 ownRim=3 want=3
+  green  D2 workrow is a SIBLING of the header card, not a descendant · send
+           sibling=true insideHeader=false
+  green  D3 form sits in its own rim, with the contract's padding · send
+           rim=true pad=21px 24px 22px
+  green  D4 timeline sits in its own rim, head+foot on --rimline · send
+           rim=true head=rgba(124, 58, 42, 0.13) foot=rgba(124, 58, 42, 0.13)
+  green  D5 group class is on the COLUMN · send
+           col=u-now band=g-urgent
+  green  D11 band padding 20/24/18 and nofig when figureless · send
+           pad=20px 24px 18px nofig=false wantNofig=false
+  green  D12 deed is 27px · send
+           deed=27px
+  green  D13 tile padding 14/20/15, label weight 500 · send
+           pad=14px 20px 15px 0px weight=500
+  green  D6 figure present per contract · send
+           fig=1 want=true
+  green  D6 tiles present per contract · send
+           tiles=4 want=true
+  green  D6 timeline present per contract · send
+           story=634 want=true
+  green  G1 rim: overflow hidden, burgundy, radius 9 · send
+           rims=3
+  green  G2 band carries its group gradient · send
+           linear-gradient(135deg, rgb(245, 226, 218) 0%, rgb(239, 213,
+  green  G3 band bottom rule present · send
+           after=rgba(0, 0, 0, 0) border=rgb(238, 205, 195)
+  green  G4 deed ink set · send
+           rgb(30, 26, 22)
+  green  G5 sub tint set · send
+           rgb(138, 64, 48)
+  green  G6 absent data is muted mono · send
+           10px|uppercase|rgb(168, 158, 145)
+  green  G7 no pill or tier label in the band · send
+           none
+  green  G8 no gendered pronoun · send
+           clean
+  green  G9 no [object Object] · send
+           clean
+  green  G10 timeline mono header + count · send
+           8.5px|uppercase count=true
+  green  G11 timeline footer link is burgundy · send
+           rgb(124, 58, 42)
+  green  F fluid: tile dividers use --rimline · send
+           rgba(124, 58, 42, 0.13)
+  RED    chase · reachable on this account
+           no card — journey not exercised
+  green  D1 three cards, each with its OWN rim · close
+           cards=3 rims=3 ownRim=3 want=3
+  green  D2 workrow is a SIBLING of the header card, not a descendant · close
+           sibling=true insideHeader=false
+  green  D3 form sits in its own rim, with the contract's padding · close
+           rim=true pad=21px 24px 22px
+  green  D4 timeline sits in its own rim, head+foot on --rimline · close
+           rim=true head=rgba(124, 58, 42, 0.13) foot=rgba(124, 58, 42, 0.13)
+  green  D5 group class is on the COLUMN · close
+           col=u-house band=g-housekeeping
+  green  D11 band padding 20/24/18 and nofig when figureless · close
+           pad=20px 24px 18px nofig=false wantNofig=false
+  green  D12 deed is 27px · close
+           deed=27px
+  green  D13 tile padding 14/20/15, label weight 500 · close
+           pad=14px 20px 15px 0px weight=500
+  green  D6 figure present per contract · close
+           fig=1 want=true
+  green  D6 tiles present per contract · close
+           tiles=2 want=true
+  green  D6 timeline present per contract · close
+           story=634 want=true
+  green  G1 rim: overflow hidden, burgundy, radius 9 · close
+           rims=3
+  green  G2 band carries its group gradient · close
+           linear-gradient(135deg, rgb(220, 224, 217) 0%, rgb(208, 214,
+  green  G3 band bottom rule present · close
+           after=rgba(0, 0, 0, 0) border=rgb(200, 208, 197)
+  green  G4 deed ink set · close
+           rgb(90, 110, 88)
+  green  G5 sub tint set · close
+           rgb(90, 110, 88)
+  green  G6 absent data is muted mono · close
+           none-rendered
+  green  G7 no pill or tier label in the band · close
+           none
+  green  G8 no gendered pronoun · close
+           clean
+  green  G9 no [object Object] · close
+           clean
+  green  G10 timeline mono header + count · close
+           8.5px|uppercase count=true
+  green  G11 timeline footer link is burgundy · close
+           rgb(124, 58, 42)
+  green  F fluid: tile dividers use --rimline · close
+           rgba(124, 58, 42, 0.13)
+  RED    fix1 · reachable on this account
+           no card — journey not exercised
+  green  D1 three cards, each with its OWN rim · fixN
+           cards=2 rims=2 ownRim=2 want=2
+  green  D2 workrow is a SIBLING of the header card, not a descendant · fixN
+           sibling=true insideHeader=false
+  green  D3 form sits in its own rim, with the contract's padding · fixN
+           rim=true pad=21px 24px 22px
+  green  D5 group class is on the COLUMN · fixN
+           col=u-house band=g-housekeeping
+  green  D11 band padding 20/24/18 and nofig when figureless · fixN
+           pad=20px 24px 18px nofig=true wantNofig=true
+  green  D12 deed is 27px · fixN
+           deed=27px
+  green  D13 tile padding 14/20/15, label weight 500 · fixN
+           pad=- weight=-
+  green  D6 figure present per contract · fixN
+           fig=0 want=false
+  green  D6 tiles present per contract · fixN
+           tiles=0 want=false
+  green  D6 timeline present per contract · fixN
+           story=-1 want=false
+  green  G1 rim: overflow hidden, burgundy, radius 9 · fixN
+           rims=2
+  green  G2 band carries its group gradient · fixN
+           linear-gradient(135deg, rgb(220, 224, 217) 0%, rgb(208, 214,
+  green  G3 band bottom rule present · fixN
+           after=rgba(0, 0, 0, 0) border=rgb(200, 208, 197)
+  green  G4 deed ink set · fixN
+           rgb(90, 110, 88)
+  green  G5 sub tint set · fixN
+           rgb(90, 110, 88)
+  green  G6 absent data is muted mono · fixN
+           none-rendered
+  green  G7 no pill or tier label in the band · fixN
+           none
+  green  G8 no gendered pronoun · fixN
+           clean
+  green  G9 no [object Object] · fixN
+           clean
+  green  F fluid: tile dividers use --rimline · fixN
+           -
+  green  D1 three cards, each with its OWN rim · note
+           cards=2 rims=2 ownRim=2 want=2
+  green  D2 workrow is a SIBLING of the header card, not a descendant · note
+           sibling=true insideHeader=false
+  green  D3 form sits in its own rim, with the contract's padding · note
+           rim=true pad=21px 24px 22px
+  green  D5 group class is on the COLUMN · note
+           col=u-yours band=g-yours
+  green  D11 band padding 20/24/18 and nofig when figureless · note
+           pad=20px 24px 18px nofig=false wantNofig=false
+  green  D12 deed is 27px · note
+           deed=27px
+  green  D13 tile padding 14/20/15, label weight 500 · note
+           pad=14px 20px 15px 0px weight=500
+  green  D6 figure present per contract · note
+           fig=1 want=true
+  green  D6 tiles present per contract · note
+           tiles=2 want=true
+  green  D6 timeline present per contract · note
+           story=-1 want=false
+  green  G1 rim: overflow hidden, burgundy, radius 9 · note
+           rims=2
+  green  G2 band carries its group gradient · note
+           linear-gradient(135deg, rgb(246, 239, 221) 0%, rgb(231, 217,
+  green  G3 band bottom rule present · note
+           after=rgba(0, 0, 0, 0) border=rgb(231, 217, 184)
+  green  G4 deed ink set · note
+           rgb(125, 98, 29)
+  green  G5 sub tint set · note
+           rgb(125, 116, 105)
+  green  G6 absent data is muted mono · note
+           none-rendered
+  green  G7 no pill or tier label in the band · note
+           none
+  green  G8 no gendered pronoun · note
+           clean
+  green  G9 no [object Object] · note
+           clean
+  green  F fluid: tile dividers use --rimline · note
+           rgba(124, 58, 42, 0.13)

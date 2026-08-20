@@ -3,7 +3,7 @@ picked send row: true
  "picked": true,
  "trackingBlocks": [],
  "storyCards": [
-  "tdk-story tdk-story--card 1136,516 192×234"
+  "tdk-story tdk-story--card 694,1403 634×234"
  ],
  "eventTexts": [],
  "tlEntries": [
@@ -12,18 +12,19 @@ picked send row: true
   "Your turnToday | h=40 | nameW=-",
   "Your turn | h=19 | nameW=-"
  ],
- "tlCardW": "1136,516 192×234",
+ "tlCardW": "694,1403 634×234",
  "fold": {
   "paneH": 518,
-  "paneContent": 1195
+  "paneContent": 1461
  },
- "tileCount": 3,
+ "tileCount": 4,
  "tileTexts": [
   "Ana's waited10weeks",
   "Requested5 June",
+  "Their window8 weeks",
   "Sent previouslyNone sent"
  ],
- "tileGrid": "211.328px 211.328px 211.328px 0px",
+ "tileGrid": "158.5px 158.5px 158.5px 158.5px",
  "figKids": [
   "n:\"10\" \"Playfair Display\" 33px",
   "u:\"weeks\" \"JetBrains Mono\" 8.5px"

@@ -1,19 +1,19 @@
 {
  "state": "REST (card, before entering the journey)",
- "workrow": "686,508 650×477",
- "workrowStyle": "grid wrap=nowrap cols=426px 208px",
+ "workrow": "686,508 650×690",
+ "workrowStyle": "flex wrap=wrap cols=none",
  "workrowKids": [
-  "tdk-fc 686,508 426×477 flex=0 1 auto",
-  "tdk-fc 1128,508 208×250 flex=0 1 auto"
+  "tdk-fc 686,508 650×424 flex=999 1 420px",
+  "tdk-fc 686,948 650×250 flex=1 1 300px"
  ],
- "storyCard": "742,555 314×83",
- "actCard": "694,516 410×461",
+ "storyCard": "742,555 538×64",
+ "actCard": "694,516 634×408",
  "tlNames": [
-  "tdk-tlm=16 SPAN=16 SPAN=16 sa-statusdot__pulse=29 [object SVGAnimatedString]=10 [object SVGAnimatedString]=3 [object SVGAnimatedString]=3 tdk-tle=132 B=76 via=55 tdk-tlq=132 tdk-tlw=132",
-  "tdk-tlm=16 tdk-tldisc=9 tdk-tle=132 B=50 tdk-tlw=132"
+  "tdk-tlm=16 SPAN=16 SPAN=16 sa-statusdot__pulse=29 [object SVGAnimatedString]=10 [object SVGAnimatedString]=3 [object SVGAnimatedString]=3 tdk-tle=574 B=76 via=55 tdk-tlq=574 tdk-tlw=574",
+  "tdk-tlm=16 tdk-tldisc=9 tdk-tle=574 B=50 tdk-tlw=574"
  ],
  "actInner": [
   "tdk-scroll:\"The record shows a request and nothing sent against it. Logging the se\""
  ],
- "paneFold": "518/790"
+ "paneFold": "518/1003"
 }
