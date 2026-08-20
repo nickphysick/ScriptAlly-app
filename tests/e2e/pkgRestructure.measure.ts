@@ -409,3 +409,29 @@ test("phase 4 — the rail actually opens what it says it opens", async ({ page 
   writeFileSync(`${ART}/p4-flows.txt`, JSON.stringify(steps, null, 2) + "\n");
   console.log(JSON.stringify(steps, null, 2));
 });
+
+/** F8 — the rail's well tint. Measured, because "the rows step off the panel" is a colour claim. */
+test("F8 — the rail body wells are cream, containers stay white", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const r = await page.evaluate(`(() => {
+    const root = document.querySelector(".pkg-root");
+    const bg = (el) => el ? getComputedStyle(el).backgroundColor : null;
+    const panels = Array.from(root.querySelectorAll(".pkgo-panel"));
+    return {
+      panelBgs: panels.map((p) => bg(p)),
+      wellBgs: panels.map((p) => bg(p.querySelector(".pkgo-body"))),
+      rowBgs: Array.from(root.querySelectorAll(".pkgo-row")).slice(0, 3).map((x) => bg(x)),
+      ghostBgs: Array.from(root.querySelectorAll(".pkgo-ghost")).map((x) => bg(x)),
+      headBg: bg(root.querySelector(".pkgo-head")),
+      /* the step is only real if the two differ */
+      rowDiffersFromWell: (() => {
+        const row = root.querySelector(".pkgo-row"), well = root.querySelector(".pkgo-body");
+        if (!row || !well) return null;
+        return getComputedStyle(row).backgroundColor !== getComputedStyle(well).backgroundColor;
+      })(),
+    };
+  })()`);
+  await page.screenshot({ path: `${OUT}/f8-well-1440.png`, fullPage: true });
+  writeFileSync(`${ART}/f8-well.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});

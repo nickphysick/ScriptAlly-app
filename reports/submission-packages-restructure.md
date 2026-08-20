@@ -1126,3 +1126,117 @@ it may well be deliberate.
 
 Each looked like a broken app and each was a broken probe. That is the third stream running in which
 the measurement, not the subject, was the thing at fault.
+
+---
+
+## F8 — the rail's well
+
+**The fix is one value on one shared class**, and it goes on the panel BODY rather than on the rows:
+
+```css
+.pkgo-body { padding: 10px; background: var(--pkgo-well); }   /* --pkgo-well: var(--shell-panel) */
+```
+
+Tinting the well rather than lightening the rows is what keeps D4 intact — **containers stay pure
+white**; only the interior the rows sit in takes the page cream. Sage heads, hairlines, radii,
+spacing and the ghosts are untouched, and the ghosts' dashed borders now sit directly on the cream
+exactly as specified.
+
+**It reads an existing token rather than restating a hex.** `--shell-panel` is `#f2ede7` and its own
+definition in `index.css` names this precise job — *"in-page grouping surface — content, NOT chrome
+fill"*. `--shell-parch` holds the identical value but means *the active fill* (nav pills, open menu
+triggers), so reading that one here would be borrowing a token for a meaning it does not have — the
+kind of thing that comes apart the day someone retunes one of them.
+
+### Measured at 1440 (not asserted from CSS)
+
+| | Populated | First visit |
+|---|---|---|
+| Panel background | `rgb(255,255,255)` ×3 | `rgb(255,255,255)` ×3 |
+| **Well background** | **`rgb(242,237,231)`** ×3 | **`rgb(242,237,231)`** ×3 |
+| Row background | `rgb(255,255,255)` | — (no rows) |
+| Ghost fill | — | `rgba(0,0,0,0)` ×3 — transparent, so the cream shows through the dashed frame |
+| **Row differs from well** | **true** | n/a |
+
+`rowDiffersFromWell` is the assertion that matters: the step is measured as a real difference between
+two computed colours, not inferred from the declaration that was supposed to produce it.
+
+Screenshots: `f8-well-1440.png` (populated), `f8-well-empty-1440.png` (first visit).
+
+> **A guard from another stream fired while capturing these, and it was right to.** `auth.setup.ts`
+> has gained an `assertLocalBundleIsDev` check that refuses to measure a localhost target while
+> `dist/` holds a production bundle — *"measuring would point the harness account at prod"*. That is
+> F4's hazard hardened into the harness by whoever hit it next. It tripped on me because the `vite
+> build` I run as a gate leaves `dist/` in production mode; my target was the `vite dev` server, so
+> this was a false positive the guard could not distinguish — and the fix is the right one anyway:
+> `npm run build:dev`, which also stops the next session tripping over my prod `dist/`. Recorded
+> because the guard is new, correct, and will fire on anyone who runs a production build in this
+> checkout.
+
+**⚠️ Dev hosting still shows the FLAT version.** This is a CSS-only change and **no hosting deploy
+was made** — only `firestore:rules` went out today. The deployed site will pick this up on the next
+hosting deploy; until then the rail there is white-on-white.
+
+*Incidental confirmation, visible in the first-visit screenshot:* with the seed cleared, the
+infographic's three step numbers are outlined and carry no tick chips. Nothing was reset to make that
+happen — the progress is derived from the records, so removing them un-ticks it (D2/D3).
+
+### Gates
+
+| Gate | Baseline | Close |
+|---|---|---|
+| `tsc --noEmit` | **exit 2 — 6 errors (mine, fixed)** | **exit 0** |
+| `vite build` | exit 0, no diagnostics | **exit 0, no diagnostics** |
+| `vitest run` | 335 files / 5718 tests, all passing | see below |
+
+**Full suite at close: `VITEST_EXIT=0` — 336 files, 5731 tests, zero failures** (baseline was 335 /
+5718). The +1 file is `packageLinkRule.test.ts`; the rest arrived from other streams during the run.
+Duration 17.8s against last night's 231s — the contention that produced the worker RPC timeouts has
+gone.
+
+---
+
+## Close
+
+### Commits
+
+| | Commit | What |
+|---|---|---|
+| — | *(not made)* | **Step A1 was a no-op** — `firestore.rules` was already clean and `writerExpectedDate` already committed at `6461c541`. Nothing was parked, so no attribution commit exists. |
+| 1 | **`33b52b69`** | `packageId` into the query update allowlist + `packageLinkRule.test.ts` + the six tsc errors I shipped last night |
+| 2 | **`96cad727`** | dev rules deploy record, the `rulesProbe` case, and the `EditQueryDrawer` walk proving persistence |
+| 3 | **`<this>`** | F8 — the rail's cream well |
+
+Three commits, as budgeted — the slot Step A1 would have used went to the A4 proof, which the brief
+gave no commit of its own.
+
+### Rules deploy
+
+`firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev` →
+released to `projects/scriptally-dev/releases/cloud.firestore`, `updateTime`
+**2026-08-20T08:33:44.860297Z**. Verified by timestamp, not by the success line. Prod untouched. No
+hosting deploy.
+
+### `git diff --name-only HEAD` at close
+
+Only other streams' paths remain modified — `reports/audit/`, `reports/card-conformance/`,
+`reports/pane/`, `run-artifacts/audit-*`, `run-artifacts/qc-*`, `run-artifacts/list-port-deployed.txt`,
+`run-artifacts/frame-DEPLOYED2.txt`. **No `src/`, `firestore.rules` or `tests/e2e/` file of mine is
+left uncommitted.**
+
+Two differences from last night's baseline, both other streams' and both benign: `AccountSettings.tsx`
+and `src/components/settings/` have been committed (settings stream), and `firestore.rules` — which
+the brief expected to be dirty — was already clean.
+
+### Open flags after today
+
+| | Flag | State |
+|---|---|---|
+| F1–F3 | Analytics reuse · reply derivation · no migration | nothing needed |
+| F4 | `build:dev` guard | **resolved** — it was the `dist/` race; the guard passed cleanly during last night's deploy |
+| F5 | title clipped at 1440 | goes away with F6 |
+| **F6** | header card doesn't align with the body | **still your call** |
+| F7 | `packageId` allowlist | **fixed, deployed to dev, proved twice** |
+| **F8** | rail well | **fixed** — but dev hosting still shows the flat version until the next hosting deploy |
+| F9 | two how-it-works surfaces | worth a look, not urgent |
+| **F10** | **new** — the desktop Query Centre has no control that opens the Edit Query drawer | worth a look; may be deliberate |

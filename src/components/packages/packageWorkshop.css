@@ -73,6 +73,17 @@
   --pkgo-dash: rgba(124, 58, 42, 0.35); /* ghost panels — dashed means provisional (D6) */
   --pkgo-dash-soft: rgba(124, 58, 42, 0.30);
 
+  /* ⚠️ THE RAIL'S WELL — the fix for F8, and it reads an EXISTING token rather than restating a hex.
+     D4 substituted the ref's parchment for white on every container, which was right for the panels
+     themselves and cost the rail its row-on-panel step: the ref's rows are white ON parchment, so
+     white-on-white left the rows carried by a hairline alone. Tinting the BODY rather than lightening
+     the rows keeps D4 intact — containers stay pure white — and restores the step from the other
+     side. `--shell-panel` is `#f2ede7`, the page cream, and its own definition names this exact job:
+     "in-page grouping surface — content, NOT chrome fill". `--shell-parch` holds the same value but
+     means "the active fill" (nav pills, open menus), so reading it here would be borrowing a token
+     for a meaning it does not have. */
+  --pkgo-well: var(--shell-panel);
+
   /* ══ the header card (D5) ══
      ⚠️ TOKENS, NOT A RULE FORK. `.wsh` reads `--wsh-plate-*` through `var()` inside its own rule,
      so an override on this ancestor resolves AT THE USE SITE and every consuming declaration
