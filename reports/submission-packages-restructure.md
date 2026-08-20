@@ -861,3 +861,83 @@ Strictly better than baseline on every gate.
 * **Illustrations** remain dashed placeholders (D8).
 * **`--header-inset`** left at the shell default (F6).
 * **`firestore.rules`** untouched (F7 flagged, not fixed).
+
+---
+
+## Dev deploy — 20 Aug, on Nick's instruction
+
+The brief said no deploys; Nick asked for one the next morning so he could review in the browser.
+Dev deploys are his to ask for (CLAUDE.md Deployment), so this went ahead. **Hosting only** — no
+rules and no functions changed in this work, and a rules deploy is a separate act with a separate
+blast radius.
+
+### Pre-flight
+
+| Check | Result |
+|---|---|
+| `git fetch` → behind `origin/main` | **0** — not a stale-main deploy |
+| Ahead | 22 (several streams' unpushed work) |
+| My five commits present in HEAD | ✓ all five |
+| `SubmissionPackages.tsx` at HEAD renders `PackagesOverview` | ✓ |
+
+The stale-main check is the one that has cost a session before — a behind-main deploy looks exactly
+like another stream's feature being reverted.
+
+### **F4 is resolved, and it was the race**
+
+`npm run build:dev` — the command that aborted during the build phase — **passed cleanly**:
+
+```
+✓ built in 8.81s
+✓ build target OK: bundle targets scriptally-dev (dev); gen-lang-client-0801391782 absent.
+```
+
+`BUILDDEV_EXIT=0`, no errors, no CSS diagnostics in the whole log. So the earlier abort was a
+concurrent session's prod build landing in the shared `dist/` between my build and the guard's read,
+exactly as the evidence suggested. **The guard was right and the repo was fine.** F4 needs nothing
+further; it is left in the report as the record of a false alarm correctly diagnosed.
+
+Independently verified before deploying rather than trusting the guard: the bundle contains
+`projectId:"scriptally-dev"`, **zero** occurrences of the prod id, and the restructure itself
+(`pkgo-grid`, `pkgo-panel`, `pkgo-step`, "Fed up of guessing…" in the JS; `pkgo-grid`, `pkgo-plate`
+in the CSS).
+
+### Deploy
+
+```
+firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev
+→ ✔ Deploy complete!   https://scriptally-dev.web.app
+```
+
+The project is named explicitly, per the standing rule that a bare deploy resolves `.firebaserc`'s
+default — which is **prod**.
+
+### Verified ON THE DEPLOYED SITE
+
+This is the measurement `playwright.config.ts` was built for and the one Phases 1–4 could not take,
+since nothing was deployed then. Re-run against `https://scriptally-dev.web.app`, signed in:
+
+| Gate | Deployed |
+|---|---|
+| Rail width | **300px** |
+| Header sage border | **5px** `rgb(154, 168, 150)` |
+| Header square / white | `0px`, `rgb(255,255,255)` |
+| Filled controls | **1** — `New package` |
+| Tab strip / `.pkgw-strip` gone | ✓ / ✓ |
+| Panels · steps | Materials · Packages · Tracking · 3 steps |
+| Horizontal overflow | **0** |
+
+And the flows, driven on the deployed build: material row → **Workshop** with the materials editor
+open · ← Overview → back · Tracking row → **Tracking** (the analytics view) · ← Overview → back.
+
+Evidence: `reports/pkg-restructure/deployed-1440.png`, `run-artifacts/pkg-restructure/deployed-1440.txt`.
+
+### ⚠️ One thing to expect when you look
+
+The screenshots show the **harness account**, which carries the 4 materials / 2 packages
+`seedPackages.mjs` wrote. **Your own account will almost certainly show the first-visit state** —
+three dashed ghost panels, chips reading `0`, no Tracking chip, and no ticks on the infographic.
+That is correct behaviour, not a broken page: every state here is derived from your records, and you
+have no materials or packages on that manuscript. Add one material and step 1 ticks.
+
+The seeded data lives only on `harness@scriptally.test` and cannot appear in your view.
