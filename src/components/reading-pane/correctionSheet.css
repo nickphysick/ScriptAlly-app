@@ -1,0 +1,99 @@
+/**
+ * The correction surfaces — fork, edit, consequence sheet.
+ *
+ * ⚠️ ONE CHASSIS FOR ALL THREE (ref 171): square corners, a 5px sage top edge, a Playfair question
+ * and a mono subject line. They are three moments of one act, and a writer moving between them
+ * should feel the same surface rather than three dialogs that happen to be adjacent.
+ */
+.cor-sheet {
+  width: min(520px, calc(100vw - 32px));
+  background: var(--white, #fffdfb);
+  border: 1px solid var(--line, #e6dccd);
+  border-radius: 0;                    /* square — the chassis is a sheet, not a card */
+  box-shadow: 0 18px 44px rgba(40, 28, 20, 0.16);
+  overflow: hidden;
+}
+.cor-top { height: 5px; background: var(--sage-edge, #c8d0c5); }
+.cor-body { padding: 18px 20px 16px; }
+
+/* ⚠️ THE QUESTION IS PLAYFAIR AND THE SUBJECT IS MONO — the question is prose addressed to a
+   person; the subject names a record, which is the register the app states facts in. */
+.cor-q { margin: 0 0 4px; font-family: var(--f12-serif, "Playfair Display", serif); font-size: 20px; font-weight: 600; color: var(--ink, #1a1917); }
+.cor-subj { font-family: var(--f12-mono, "JetBrains Mono", monospace); font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted, #7d7469); margin-bottom: 14px; }
+
+/* ── the fork's two branches ─────────────────────────────────────────────────────────────── */
+.cor-branch {
+  display: flex; gap: 11px; width: 100%; text-align: left; margin-bottom: 8px;
+  padding: 12px 13px; border: 1px solid var(--line, #e6dccd); background: var(--panel, #fffdfb);
+  border-radius: 10px; cursor: pointer; font: inherit; transition: background .12s, border-color .12s;
+}
+.cor-branch:hover { background: var(--paper, #faf6f0); border-color: var(--muted, #7d7469); }
+.cor-branch:focus-visible { outline: 2px solid var(--sage-edge, #c8d0c5); outline-offset: 2px; }
+.cor-bglyph { flex: none; font-size: 15px; line-height: 1.3; color: var(--muted, #7d7469); }
+.cor-btx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.cor-btx b { font-size: 13.5px; font-weight: 600; color: var(--ink, #1a1917); }
+.cor-btx i { font-style: normal; font-size: 12px; line-height: 1.45; color: var(--ink-2, #4a443c); }
+
+/* ── the edit form ───────────────────────────────────────────────────────────────────────── */
+.cor-fl { display: block; font-family: var(--f12-mono, monospace); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted, #7d7469); margin: 10px 0 4px; }
+.cor-in, .cor-ta {
+  width: 100%; font: inherit; font-size: 13px; padding: 8px 10px;
+  border: 1px solid var(--line, #e6dccd); border-radius: 8px; background: var(--white, #fffdfb); color: var(--ink, #1a1917);
+}
+.cor-ta { resize: vertical; min-height: 62px; }
+.cor-in:focus-visible, .cor-ta:focus-visible { outline: none; border-color: var(--sage-edge, #c8d0c5); box-shadow: 0 0 0 3px rgba(200, 208, 197, .35); }
+/* ⚠️ THE ERROR IS QUIET AND POINTS SOMEWHERE — a refusal that only refuses leaves the writer with
+   the same intention and nowhere to take it. */
+.cor-err { margin-top: 6px; font-size: 12px; line-height: 1.45; color: var(--burg, #7c3a2a); }
+.cor-note-quiet { font-size: 12px; color: var(--muted, #7d7469); }
+
+.cor-acts { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
+.cor-grow { flex: 1; }
+.cor-remove { font: inherit; font-size: 12px; padding: 0; border: 0; background: none; color: var(--burg, #7c3a2a); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.cor-cancel-inline, .cor-cancel {
+  font-family: "Inter", sans-serif; font-size: 11.5px; height: 29px; padding: 0 12px; border-radius: 8px;
+  cursor: pointer; border: 1px solid var(--btn-line, #e6dccd); background: var(--white, #fffdfb); color: var(--ink-2, #4a443c);
+}
+.cor-cancel-inline:hover, .cor-cancel:hover { background: var(--paper, #faf6f0); color: var(--ink, #1a1917); }
+/* ⚠️ SAVE REUSES THE PINK TREATMENT AND ITS INERT STATE — the same pair the notes composer and the
+   expected-time control use, so every Save in this pane says the same thing the same way. */
+.cor-save {
+  height: 29px; padding: 0 13px; border: 1px solid var(--qc-rim-pink, #ebcfc2); border-radius: 8px;
+  background: var(--pink, #f8e7dc); font-family: "Inter", sans-serif; font-size: 11.5px; font-weight: 600;
+  color: var(--ink, #1a1917); cursor: pointer; transition: opacity .15s;
+}
+.cor-save--off { opacity: 0.45; cursor: default; }
+
+/* ── the consequence bodies ──────────────────────────────────────────────────────────────── */
+.cor-tlhead { font-family: var(--f12-mono, monospace); font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted, #7d7469); margin-bottom: 8px; }
+.cor-tl, .cor-ledger { border: 1px solid var(--line, #e6dccd); border-radius: 10px; padding: 12px 13px; background: var(--paper, #faf6f0); }
+.cor-tlrow { display: flex; align-items: center; gap: 9px; padding: 4px 0; font-size: 13px; color: var(--ink, #1a1917); }
+.cor-tlmk { flex: none; display: inline-flex; }
+/* ⚠️ STRUCK AND FADED, NOT ABSENT — the rung is shown leaving rather than already gone, which is
+   what makes the preview readable as a CHANGE to a record the writer already knows. */
+.cor-tlrow--gone { opacity: 0.45; }
+.cor-tlrow--gone .cor-tlttl { text-decoration: line-through; }
+/* the connector through the removed rungs is dashed, the page's own "not established fact" */
+.cor-tlrow--gone .cor-tlmk { filter: grayscale(1); }
+.cor-tlsum { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line, #e6dccd); font-size: 12px; line-height: 1.5; color: var(--ink-2, #4a443c); }
+
+.cor-ledrow { display: flex; align-items: baseline; gap: 10px; padding: 5px 0; font-size: 13px; }
+.cor-ledlbl { flex: none; width: 84px; font-family: var(--f12-mono, monospace); font-size: 8.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted, #7d7469); }
+.cor-ledval { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; color: var(--ink, #1a1917); }
+.cor-ledval s { color: var(--muted, #7d7469); }
+.cor-arrow { color: var(--muted, #7d7469); }
+
+/* ── the stacked actions ─────────────────────────────────────────────────────────────────── */
+.cor-sheetacts { display: flex; flex-direction: column; gap: 7px; margin-top: 16px; }
+.cor-act {
+  display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left;
+  padding: 10px 13px; border: 1px solid var(--line, #e6dccd); border-radius: 10px;
+  background: var(--white, #fffdfb); cursor: pointer; font: inherit; transition: background .12s, border-color .12s;
+}
+.cor-act:hover { background: var(--paper, #faf6f0); border-color: var(--muted, #7d7469); }
+.cor-act:focus-visible { outline: 2px solid var(--sage-edge, #c8d0c5); outline-offset: 2px; }
+.cor-act b { font-size: 13px; font-weight: 600; color: var(--ink, #1a1917); }
+.cor-act i { font-style: normal; font-size: 11.5px; color: var(--muted, #7d7469); }
+.cor-act--danger b { color: var(--burg, #7c3a2a); }
+/* Cancel is quiet at the foot and never competes with the actions above it. */
+.cor-sheetacts .cor-cancel { align-self: flex-start; margin-top: 3px; }
