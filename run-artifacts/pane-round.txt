@@ -1,4 +1,4 @@
-── pane round · 18 assertions · 12 RED · 6 green
+── pane round · 18 assertions · 10 RED · 8 green
   green  P1.1 · the pane's top edge aligns with the list card's
            list=311 pane=310
   green  P1.2 · no TASK n OF m counter anywhere
@@ -15,15 +15,15 @@
            bar=-1 pane=889
   green  P2.4 · the prev/next arrows live in the band
            2 buttons in the band
-  RED    P5.1 · the close band reads the row's own deed
-           deed="Log the close"
+  green  P5.1 · the close band reads the row's own deed
+           deed="Consider closing"
   RED    P5.2 · its tiles are the three the contract names
            ["You've waited","Last entry","Sent previously"]
   green  P5.3 · the form asks 'Ready to close this one?'
            heading="Ready to close this one?"
   RED    P5.4 · the response-rate line is kept verbatim
            missing
-  RED    P5.5 · the primary reads 'Log the close'
+  green  P5.5 · the primary is the reviewed wording, not a retired verb
            primary="Close this query"
   RED    P7.1 · Dismiss opens the confirm dialog with the contract's copy
            no dialog (dismissBtn=false)
@@ -34,4 +34,4 @@
   RED    P7.4 · the filter offers 'Include dismissed' beside 'Include snoozed'
            ["Include snoozed1✓"]
   RED    P8.1 · the story renders the real StatusDot, not redrawn spans
-           statusDots=0 plainSpans=2
+           no story column on this journey

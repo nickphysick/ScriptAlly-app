@@ -18,7 +18,7 @@
  * missing date rendered as a sentence in the middle column is the fault this separation prevents.
  */
 import { BoardCard } from "./todoBoard";
-import { Bucket, cardBucket } from "./todoBuckets";
+import { Bucket, cardBucket, taskDeed } from "./todoBuckets";
 import { elapsedParts } from "./elapsed";
 
 /** what the row can be told beyond the card itself — every one optional, every one falling back */
@@ -49,22 +49,13 @@ export interface RowInputs {
  * ⚠️ ONE STRING PER BUCKET, and the send pair is the only split. Everything else says the same
  * thing on every row of its group, which is what makes a column of deeds scannable.
  */
-export function listDeed(i: RowInputs): string {
-  const b = cardBucket(i.card);
-  switch (b) {
-    case "send": return i.partial ? "Send your partial" : "Send your full manuscript";
-    case "decide": return "Reply to the offer";
-    case "chase": return "Worth a nudge";
-    case "close": return "Consider closing";
-    case "fix": return "Fill in what you sent";
-    /* a note is the writer's own words — the row renders `title` verbatim and never a deed */
-    case "note": return i.card.title;
-    default: {
-      const unhandled: never = b;
-      return unhandled;
-    }
-  }
-}
+/**
+ * ⚠️ THE ROW AND THE BAND CALL THE SAME FUNCTION NOW. This used to hold its own copy of the table,
+ * which is how the pane came to say "Log the close" beside a row saying "Consider closing" — two
+ * correct-looking switches, one card, two words. The table lives in `taskDeed`; this passes the
+ * one thing the row knows and the card does not: whether the send is a partial.
+ */
+export const listDeed = (i: RowInputs): string => taskDeed(i.card, i.partial);
 
 /* ── the meta ─────────────────────────────────────────────────────────────────────────────── */
 
@@ -192,6 +183,17 @@ export interface PaneCopy {
   primary: string;
 }
 
+/**
+ * ⚠️ THE PRIMARIES ARE FIRST-PERSON OR PLAIN-CONSEQUENCE, NEVER A RETIRED VERB. The pane contract
+ * asked for "Log as sent", "Log the close" and "Log {n} queries" — all three reintroduce "log",
+ * which the language review retired, and all three contradict the table the review settled. Newest
+ * would have won on the tiebreak rule; the newer wording was the regression, so it does not.
+ *
+ * ⚠️ THE BULK PRIMARY IS "Record {n} queries" AND THAT IS A JUDGEMENT CALL, recorded as one.
+ * "Fill in {n} queries" would echo the deed exactly ("Fill in what you sent"); "Record" names what
+ * the writer is doing to their OWN records, which is the distinction the review drew when it
+ * retired "record" as a HEADING verb while leaving the app free to say "Will record:" about itself.
+ */
 export const PANE_COPY: Record<Bucket, PaneCopy> = {
   send:   { heading: "Sent it? Note it here",      primary: "I've sent it" },
   chase:  { heading: null,                          primary: "I've nudged them" },

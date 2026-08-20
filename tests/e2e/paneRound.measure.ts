@@ -113,8 +113,12 @@ test("pane round", async ({ page }) => {
       /Ready to close this one\\?/.test(close.heading), `heading="${close.heading}"`);
   add("P5.4 · the response-rate line is kept verbatim", close.rate === true,
       close.rate ? "present" : "missing");
-  add("P5.5 · the primary reads 'Log the close'",
-      /Log the close/.test(close.primary), `primary="${close.primary}"`);
+  /* ⚠️ "Close this query", NOT the contract's "Log the close" — corrected at review. "log" is on
+     the retired-verbs list and the settled primary grammar is first-person or plain-consequence.
+     Newest-wins is the tiebreak, but the newer wording was the regression, so it loses. */
+  add("P5.5 · the primary is the reviewed wording, not a retired verb",
+      /Close this query/.test(close.primary) && !/\blog\b/i.test(close.primary),
+      `primary="${close.primary}"`);
 
   /* ══ PHASE 7 · dismiss ═══════════════════════════════════════════════════════════════════ */
   const dlg = await page.evaluate(`(() => {

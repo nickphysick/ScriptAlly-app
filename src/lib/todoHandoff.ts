@@ -16,7 +16,7 @@
  */
 import { BoardCard } from "./todoBoard";
 import { sendSpecFor } from "./todoDock";
-import { ADDED_LABEL, cardBucket, rowDeed, Bucket } from "./todoBuckets";
+import { ADDED_LABEL, cardBucket, taskDeed, Bucket } from "./todoBuckets";
 
 export interface HandoffLink {
   /** The href, or null where the record has nothing to build one from. */
@@ -398,7 +398,12 @@ export function panePresence(c: BoardCard): PanePresence {
  * row states "Log the close". Two names for one task, and the pane would have carried the one the
  * writer had not just read. `rowDeed` is what the row renders; reusing it is the whole point.
  */
-export const bandDeed = (c: BoardCard): string => rowDeed(c);
+/**
+ * ⚠️ ONE DEED, AND `bandDeed` IS NOW ONLY A NAME FOR IT. It delegated to `rowDeed`, which held a
+ * table of its own carrying three retired verbs — so the band said "Log the close" while the row
+ * said "Consider closing". Both call `taskDeed`; there is nothing left for them to disagree about.
+ */
+export const bandDeed = (c: BoardCard): string => taskDeed(c);
 
 /**
  * The sub-line — the facts, in the app's existing sentence grammar. The pre-line already reads as

@@ -13,7 +13,7 @@ import { BoardCard } from "./todoBoard";
 import { liveFamily } from "./todoFamily";
 import {
   cardBucket, bucketFamily, bucketAgreesWithFamily, BUCKET_ORDER, BUCKET_LABEL,
-  rowDeed, rowMeta, rowFigure, elapsedFigure, possessive, firstName, daysSince, waitAnchorMs,
+  rowDeed, taskDeed, rowMeta, rowFigure, elapsedFigure, possessive, firstName, daysSince, waitAnchorMs,
 } from "./todoBuckets";
 
 const card = (over: Partial<BoardCard> = {}): BoardCard => ({
@@ -76,9 +76,14 @@ describe("⚠️ SIX BUCKETS, AND EVERY CARD KIND LANDS IN EXACTLY ONE", () => {
 
 describe("⚠️ LINE ONE IS THE DEED ALONE — no agent, no agency, no date", () => {
   it("the acts themselves, derived from the task", () => {
-    expect(rowDeed(card({ taskType: "full_requested" }))).toBe("Send your full");
-    expect(rowDeed(card({ taskType: "nudge_overdue" }))).toBe("Chase your query");
-    expect(rowDeed(card({ taskType: "no_response_close" }))).toBe("Log the close");
+    /* ⚠️ THE REVIEWED WORDING, AND ONE FUNCTION BEHIND IT (pane round, Phase 2). These three were
+       the old table's — "Chase your query" and "Log the close" both use verbs the language review
+       retired, and the row had already moved to the new words while the pane had not. `rowDeed` is
+       a deprecated alias for `taskDeed` now; the identity between the row and the band is asserted
+       in `deedSynonyms.test.ts`, which is the claim that actually protects this. */
+    expect(taskDeed(card({ taskType: "full_requested" }))).toBe("Send your full manuscript");
+    expect(taskDeed(card({ taskType: "nudge_overdue" }))).toBe("Worth a nudge");
+    expect(taskDeed(card({ taskType: "no_response_close" }))).toBe("Consider closing");
   });
 
   it("⚠️ NO AGENT NAME REACHES LINE ONE, whatever the card's own title says", () => {

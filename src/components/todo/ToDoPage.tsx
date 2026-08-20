@@ -121,7 +121,7 @@ import {
    locked away from this component (tasks-consolidation P2). */
 import { taskGroups, railChips, chipGroups, chipMatchesCard, RailChipId } from "../../lib/todoGroups";
 import { paneRestLine, showingLine, tasksCsv } from "../../lib/todoHandoff";
-import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket, BUCKET_LABEL, rowDeed } from "../../lib/todoBuckets";
+import { rowFigure, daysSince, waitAnchorMs, RowFigure, cardBucket, BUCKET_LABEL, taskDeed } from "../../lib/todoBuckets";
 import { rowPrimaryLabel } from "../../lib/taskRow";
 import { SnoozeDial } from "./SnoozeDial";
 import { isTerminalStatus } from "../../lib/agentList";
@@ -1663,7 +1663,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
             <AnchoredPanel anchor={snoozeAnchor} ariaLabel="Snooze this task" variant="panel"
               onClose={(back) => { const a = snoozeAnchor; setSnoozeAnchor(null); if (back) a?.focus(); }}>
               <SnoozePanel
-                deed={rowDeed(docked.card)}
+                deed={taskDeed(docked.card)}
                 onCancel={() => { const a = snoozeAnchor; setSnoozeAnchor(null); a?.focus(); }}
                 onConfirm={(days, when) => { snoozeCard(docked.card!, days, when); setSnoozeAnchor(null); }}
               />

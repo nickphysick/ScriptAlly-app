@@ -140,18 +140,40 @@ export function bucketAgreesWithFamily(c: BoardCard): boolean {
  *
  * A writer's own item keeps its own words — it is the one card whose text the writer wrote.
  */
-export function rowDeed(c: BoardCard): string {
+/**
+ * ⚠️ ONE DEED FOR ONE CARD, AND THIS IS IT. There were THREE wordings in the app for the same card
+ * — `listDeed` said "Consider closing", `rowDeed` said "Log the close", and the note branch reads
+ * `card.title` — so the row and the pane described the same task in different words on one screen.
+ * That is the three-activity-stores disease in copy, and the fix is the same: collapse the
+ * synonyms rather than route each caller to the right one.
+ *
+ * ⚠️ AND `rowDeed`'S OLD TABLE CARRIED THREE RETIRED VERBS — "Answer the offer", "Chase your
+ * query", "Log the close". The language review retired log · record · mark · chase as user-facing
+ * words; the row had already moved and the pane had not, which is exactly how a synonym survives.
+ *
+ * ⚠️ THE NOTE BRANCH IS NOT A SYNONYM. A note's deed IS the writer's own words, so `card.title` is
+ * the right read there and the only one — that is a different fact, not a third wording.
+ */
+export function taskDeed(c: BoardCard, partial?: boolean): string {
   if (c.userTaskId || c.nature || c.stream === "nt") return c.title;
-  switch (c.taskType) {
-    case "partial_requested": return "Send your partial";
-    case "full_requested": return "Send your full";
-    case "revise_resubmit": return "Send your revision";
-    case "offer_received": return "Answer the offer";
-    case "nudge_overdue": return "Chase your query";
-    case "no_response_close": return "Log the close";
+  const isPartial = partial ?? c.taskType === "partial_requested";
+  switch (cardBucket(c)) {
+    case "send": return isPartial ? "Send your partial" : "Send your full manuscript";
+    case "decide": return "Reply to the offer";
+    case "chase": return "Worth a nudge";
+    case "close": return "Consider closing";
+    case "fix": return "Fill in what you sent";
+    case "note": return c.title;
     default: return c.title;
   }
 }
+
+/**
+ * @deprecated Use `taskDeed`. Kept as a thin alias so the two remaining callers keep compiling
+ * while they move; it returns the SAME string `taskDeed` does, so a caller cannot get the old
+ * wording by reaching for the old name.
+ */
+export const rowDeed = (c: BoardCard): string => taskDeed(c);
 
 /* ── the figure column ────────────────────────────────────────────────────────────────────────── */
 
