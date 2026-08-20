@@ -83,6 +83,7 @@ test("1+4 · the preview matches the outcome, and a note-only edit raises no she
   await page.locator(".cor-save").click();
   await page.waitForTimeout(2500);
   const sheetAfterNote = await page.locator(".cor-tl, .cor-ledger").count();
+  if (sheetAfterNote) console.log(`  4 · THE SHEET SAID: ${(await page.locator(".cor-tlsum, .cor-ledrow").allTextContents()).join(" | ")}`);
   console.log(`  4 · sheet after a note-only edit: ${sheetAfterNote} (expect 0)`);
   expect(sheetAfterNote, "a note-only edit raised a consequence sheet").toBe(0);
 
@@ -128,9 +129,21 @@ test("1+4 · the preview matches the outcome, and a note-only edit raises no she
    */
   const predicted = preview.filter((p) => !p.gone).map((p) => p.title);
   console.log(`  1 · predicted survivors: ${predicted.join(" | ")}`);
-  /* the precondition: the excluded rows are the SAME rows, or the exclusion is hiding something */
-  expect(after.projections.join("|"), "a projection moved — it is no longer safe to exclude them")
-    .toBe(before.projections.join("|"));
+  /**
+   * ⚠️ THE PRECONDITION IS "NOTHING THE PREVIEW MODELS WAS EXCLUDED", not "the excluded rows never
+   * move". The first form was wrong and this run proved it: a date edit RE-ANCHORS the waiting
+   * projection, which is the feature working, and the check failed on it. What must be true is that
+   * every excluded row is one the preview cannot contain — and the honest test of that is the ⋯,
+   * because a row carrying one is log-derived by definition and a projection never has one.
+   */
+  const excludedCorrectable = await page.evaluate(() =>
+    Array.from(document.querySelectorAll(".tl-ev"))
+      .filter((e) => e.querySelector(".tl-waitmark, .tl-ghostmark"))
+      .filter((e) => !!e.querySelector(".tl-more")).length);
+  console.log(`  excluded rows that are actually correctable: ${excludedCorrectable} (must be 0)`);
+  expect(excludedCorrectable, "a log-derived row was excluded from the comparison").toBe(0);
+  if (after.projections.join("|") !== before.projections.join("|"))
+    console.log(`  (the projection re-anchored, as a date edit should: ${before.projections.join("|")} → ${after.projections.join("|")})`);
   expect(outcome.join("|"), "PREVIEW DIVERGED FROM OUTCOME — two derivations exist").toBe(predicted.join("|"));
 });
 

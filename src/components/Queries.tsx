@@ -3938,9 +3938,17 @@ export const Queries: React.FC<{
                      * consequences of a date they never meant.
                      */
                     onSave={(d) => {
+                      /* ⚠️ THE DATE IS ONLY REWRITTEN WHEN IT CHANGED. Sending it always normalised
+                         the event's time to midday on every save, so editing a note silently moved
+                         the event by hours — invisible on the page, and enough to shift the waiting
+                         anchor's underlying value. The preview then had a real difference to report
+                         about a fact the writer had not touched. Both halves are fixed: the diff
+                         compares what it STATES, and the write no longer moves what was not edited. */
+                      const dateChanged = d.dateISO !== correcting.entry.dateISO;
+                      const nextIso = new Date(`${d.dateISO}T12:00:00`).toISOString();
                       const proposed = trackingEvents.map((e: any) =>
                         e.id === correcting.entry.activityId
-                          ? { ...e, createdAt: new Date(`${d.dateISO}T12:00:00`).toISOString(), note: d.note }
+                          ? { ...e, ...(dateChanged ? { createdAt: nextIso } : {}), note: d.note }
                           : e);
                       const diff = previewFor(proposed);
                       /* ⚠️ THE PRIOR VALUES ARE CAPTURED BEFORE THE WRITE, not read back after it.
@@ -3953,12 +3961,12 @@ export const Queries: React.FC<{
                       const wasNote = correcting.entry.note;
                       const commit = async () => {
                         await editActivity(activeQuery.id, correcting.entry.activityId, {
-                          date: new Date(`${d.dateISO}T12:00:00`).toISOString(),
+                          ...(dateChanged ? { date: nextIso } : {}),
                           details: d.note,
                         });
                         await finishCorrection(
                           `${correcting.entry.label} corrected`,
-                          async () => { await editActivity(activeQuery.id, correcting.entry.activityId, { date: wasDate, details: wasNote }); },
+                          async () => { await editActivity(activeQuery.id, correcting.entry.activityId, { ...(dateChanged ? { date: wasDate } : {}), details: wasNote }); },
                           activeQuery.id,
                         );
                       };

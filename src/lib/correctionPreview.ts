@@ -141,25 +141,36 @@ export function previewCorrection(input: PreviewInput): CorrectionDiff {
     changes.push({ surface: "chapters", before: chaptersBefore.join(" · ") || "none", after: chaptersAfter.join(" · ") || "none" });
   }
 
-  /* the waiting anchor — what the tracker counts from, and which event that is */
+  /**
+   * ⚠️ A CHANGE IS SOMETHING THE WRITER CAN SEE — compare the SENTENCE, never the milliseconds
+   * behind it.
+   *
+   * Measured on the deployed page: a note-only edit raised a sheet listing two changes whose before
+   * and after were the SAME WORDS — "your send on 16 Jul 2026 → your send on 16 Jul 2026". The
+   * derivation was right and the comparison was too fine: saving normalises the event's time to
+   * midday, which moves the anchor by hours while leaving the day it states untouched. Comparing
+   * `ms` therefore reported a consequence that did not exist.
+   *
+   * ⚠️ AND THAT DEFEATS THE RULE THE WHOLE SHEET RESTS ON — "an empty diff raises no sheet". A sheet
+   * that appears to say nothing changed is how a writer learns to dismiss it without reading, which
+   * is precisely what this surface must never become. These two facts are stated to the day; if two
+   * states are stated identically, there is no consequence to show.
+   */
   const anchorBefore = waitAnchor(asStored(current), null);
   const anchorAfter = waitAnchor(asStored(proposed), null);
-  if (anchorBefore?.ms !== anchorAfter?.ms || anchorBefore?.kind !== anchorAfter?.kind) {
-    const say = (a: typeof anchorBefore) =>
-      a == null ? "nothing to count from" : `${a.kind === "reply" ? "their reply" : "your send"} on ${fmt(a.ms)}`;
-    changes.push({ surface: "anchor", before: say(anchorBefore), after: say(anchorAfter) });
-  }
+  const sayAnchor = (a: typeof anchorBefore) =>
+    a == null ? "nothing to count from" : `${a.kind === "reply" ? "their reply" : "your send"} on ${fmt(a.ms)}`;
+  const anchorSaid = { before: sayAnchor(anchorBefore), after: sayAnchor(anchorAfter) };
+  if (anchorSaid.before !== anchorSaid.after) changes.push({ surface: "anchor", ...anchorSaid });
 
   /* whose window wins — the attribution the bar and the sentence both read */
   const winBefore = resolveExpectedDate(query, anchorBefore?.ms ?? null, agencyWeeks, null);
   const winAfter = resolveExpectedDate(query, anchorAfter?.ms ?? null, agencyWeeks, null);
-  if (winBefore.source !== winAfter.source || winBefore.ms !== winAfter.ms) {
-    changes.push({
-      surface: "window",
-      before: `${sourceWord(winBefore.source)} · ${fmt(winBefore.ms)}`,
-      after: `${sourceWord(winAfter.source)} · ${fmt(winAfter.ms)}`,
-    });
-  }
+  const winSaid = {
+    before: `${sourceWord(winBefore.source)} · ${fmt(winBefore.ms)}`,
+    after: `${sourceWord(winAfter.source)} · ${fmt(winAfter.ms)}`,
+  };
+  if (winSaid.before !== winSaid.after) changes.push({ surface: "window", ...winSaid });
 
   return {
     empty: removed.length === 0 && added.length === 0 && !reordered && changes.length === 0,

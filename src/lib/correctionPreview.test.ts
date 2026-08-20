@@ -144,3 +144,44 @@ describe("Phase 1 · which body the sheet renders", () => {
     expect(previewBody(d)).toBe("ledger");
   });
 });
+
+describe("⚠️ a change is something the writer can SEE", () => {
+  /**
+   * The fault this guards was measured on the deployed page: a note-only edit raised a sheet whose
+   * two rows read "your send on 16 Jul 2026 → your send on 16 Jul 2026". Saving normalises an
+   * event's time to midday, so the anchor moved by hours while the day it states did not — and the
+   * comparison was on milliseconds rather than on the sentence.
+   */
+  it("does not report a consequence when both sides state the same thing", async () => {
+    const { buildTimelineRows } = await import("../components/reading-pane/QueryTimeline");
+    const at = (iso: string) => ({ id: "e1", data: { type: "Queried", createdAt: iso, note: "" } });
+    const rest = [{ id: "e0", data: { type: "Partial Requested", createdAt: "2026-05-02T09:00:00.000Z", note: "" } }];
+    const build = (docs: any[]) =>
+      buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), { id: "q1", status: "Queried" } as never, null) as never;
+
+    /* same calendar day, different time — the stated fact is identical */
+    const diff = previewCorrection({
+      current: [at("2026-05-01T22:35:00.000Z"), ...rest] as never,
+      proposed: [at("2026-05-01T11:00:00.000Z"), ...rest] as never,
+      buildRows: build,
+      agencyWeeks: 8,
+      query: { id: "q1" },
+    });
+    expect(diff.changes.filter((c) => c.surface === "anchor" || c.surface === "window")).toEqual([]);
+  });
+
+  it("⚠️ still reports one when the day itself moves", async () => {
+    const { buildTimelineRows } = await import("../components/reading-pane/QueryTimeline");
+    const at = (iso: string) => ({ id: "e1", data: { type: "Queried", createdAt: iso, note: "" } });
+    const build = (docs: any[]) =>
+      buildTimelineRows(docs.map((d) => ({ id: d.id, ...d.data })), { id: "q1", status: "Queried" } as never, null) as never;
+    const diff = previewCorrection({
+      current: [at("2026-05-01T11:00:00.000Z")] as never,
+      proposed: [at("2026-06-14T11:00:00.000Z")] as never,
+      buildRows: build,
+      agencyWeeks: 8,
+      query: { id: "q1" },
+    });
+    expect(diff.changes.some((c) => c.surface === "anchor")).toBe(true);
+  });
+});
