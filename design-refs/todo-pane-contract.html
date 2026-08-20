@@ -43,10 +43,14 @@ body>*{position:relative;z-index:2;}
 .l-ph{flex:1;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.14em;text-transform:uppercase;color:#c0b0a0;text-align:center;line-height:2;}
 
 /* ═══ THE PANE — fixed band, scrolling middle, fixed action bar ═══ */
-.pane{background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.pane{display:flex;flex-direction:column;min-width:0;gap:12px;}
+/* Form 11 card chassis: outer card = white + edge + 6px rim padding; .rim = burgundy hairline, smaller radius, overflow hidden */
+.fc{background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);}
+.rim{border:1px solid rgba(124,58,42,0.28);border-radius:9px;overflow:hidden;}
+.hdr{flex:0 0 auto;}
 
 /* fixed band — reduced height, carries prev/next since the counter row is gone */
-.band{flex:0 0 auto;padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;}
+.band{padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative;}
 .band::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;}
 .pane.u-now .band{background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2));}
 .pane.u-now .band::after{background:var(--u-now-rule);}
@@ -64,7 +68,7 @@ body>*{position:relative;z-index:2;}
 .b-nav button:hover{background:#fffdfa;}
 
 /* tiles inside the fixed header */
-.tiles{flex:0 0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));border-bottom:1px solid var(--hair);}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));background:var(--white);}
 .tile{padding:10px 18px 11px;border-right:1px solid rgba(124,58,42,0.10);min-width:0;}
 .tile:last-child{border-right:0;}
 .tile .k{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500;}
@@ -73,10 +77,12 @@ body>*{position:relative;z-index:2;}
 .tile .v.absent{color:#c0b0a0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;}
 
 /* scrolling middle */
-.mid{flex:1 1 auto;min-height:0;overflow-y:auto;padding:18px 20px 20px;display:flex;gap:16px;align-items:flex-start;}
+.mid{flex:1 1 auto;min-height:0;overflow-y:auto;display:flex;gap:12px;align-items:flex-start;padding:2px;}
 .mid::-webkit-scrollbar{width:9px;}
 .mid::-webkit-scrollbar-thumb{background:#e2d6c8;border-radius:5px;border:2px solid var(--white);}
 .formcol{flex:1 1 460px;min-width:0;}
+.formcol .rim,.storycol .rim{background:var(--white);}
+.formpad{padding:18px 18px 20px;}
 .storycol{flex:0 1 280px;min-width:230px;}
 
 .f-lbl{font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin:0 0 7px;display:block;font-weight:500;}
@@ -110,10 +116,11 @@ textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
 /* expectations block */
 .expect{background:var(--field);border:0.5px solid var(--hair2);border-radius:11px;padding:14px 15px;margin-bottom:16px;}
 .expect .f-lbl{margin-top:0;}
+.opttag{font-size:7.5px;letter-spacing:0.12em;color:#b3a494;font-weight:400;margin-left:2px;}
 .inherit{font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5;}
 
 /* story column with real StatusDots */
-.story{background:var(--white);border:0.5px solid var(--hair2);border-radius:11px;overflow:hidden;}
+.story{background:var(--white);}
 .story-h{display:flex;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--hair);}
 .story-h .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500;}
 .story-h .c{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#c0b0a0;letter-spacing:0.1em;text-transform:uppercase;}
@@ -129,7 +136,7 @@ textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
 .story-f a{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none;}
 
 /* ═══ fixed action bar ═══ */
-.actbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--hair);background:var(--white);}
+.actbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05);}
 .willrec{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .willrec b{color:var(--ink2);font-weight:500;}
 .ab{cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s;}
@@ -179,7 +186,7 @@ textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
 
   <!-- ═══ SEND A PARTIAL ═══ -->
   <div class="pane u-now" id="p-send">
-    <div class="band">
+    <div class="fc hdr"><div class="rim"><div class="band">
       <div style="min-width:0;">
         <div class="deed">Send your <em>partial</em></div>
         <div class="b-sub">Greg Panetta asked for it · 28 June</div>
@@ -192,45 +199,46 @@ textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
       <div class="tile"><div class="k">Sent previously</div><div class="v">2 items<small>letter · synopsis</small></div></div>
     </div>
 
+    </div></div>
     <div class="mid">
-      <div class="formcol">
+      <div class="formcol"><div class="fc"><div class="rim"><div class="formpad">
         <div class="f-h">Sent it? Note it here</div>
         <div class="f-sub">Nothing is sent from here — this records what you sent.</div>
 
         <div class="sect">
-          <span class="f-lbl">What are you sending?</span>
+          <span class="f-lbl" data-req="unit">What are you sending?</span>
           <div class="f-sub" style="margin:-3px 0 9px;">Pick the unit you actually sent in — one only.</div>
           <div class="unitrow">
             <button class="unitpill" data-u="pages" onclick="tu(this)">Pages</button>
-            <button class="unitpill on" data-u="chapters" onclick="tu(this)">Chapters</button>
+            <button class="unitpill" data-u="chapters" onclick="tu(this)">Chapters</button>
             <button class="unitpill" data-u="words" onclick="tu(this)">Words</button>
           </div>
-          <div class="cnt show" data-c="chapters"><span class="cf"><input type="number" min="1" value="3" data-inc="1" style="padding-right:92px;"><span class="sfx">chapters</span><span class="step"><button onclick="bump(this,1)">▲</button><button onclick="bump(this,-1)">▼</button></span></span></div>
+          <div class="cnt" data-c="chapters"><span class="cf"><input type="number" min="1" value="3" data-inc="1" style="padding-right:92px;"><span class="sfx">chapters</span><span class="step"><button onclick="bump(this,1)">▲</button><button onclick="bump(this,-1)">▼</button></span></span></div>
           <div class="cnt" data-c="pages"><span class="cf"><input type="number" min="1" value="10" data-inc="5" style="padding-right:92px;"><span class="sfx">pages</span><span class="step"><button onclick="bump(this,1)">▲</button><button onclick="bump(this,-1)">▼</button></span></span></div>
           <div class="cnt" data-c="words"><span class="cf"><input type="number" min="500" value="10000" data-inc="500" style="padding-right:92px;"><span class="sfx">words</span><span class="step"><button onclick="bump(this,1)">▲</button><button onclick="bump(this,-1)">▼</button></span></span></div>
-          <input class="txt" placeholder="Anything else going with it? e.g. author bio" style="margin-top:4px;">
+          <input class="txt" placeholder="Anything else going with it? — optional, e.g. author bio" style="margin-top:4px;">
         </div>
 
         <div class="sect">
-          <span class="f-lbl">When</span>
-          <div class="seg"><button class="on">Today</button><button>Yesterday</button><button>Another date…</button></div>
+          <span class="f-lbl" data-req="when">When</span>
+          <div class="seg"><button>Today</button><button>Yesterday</button><button>Another date…</button></div>
         </div>
 
         <div class="expect">
-          <span class="f-lbl">When do you expect to hear back?</span>
-          <div class="seg" style="margin-bottom:11px;"><button>4 weeks</button><button class="on">6 weeks</button><button>8 weeks</button><button>12 weeks</button><button>A date…</button></div>
-          <span class="f-lbl">Remind you to nudge?</span>
-          <div class="seg"><button>On the day</button><button class="on">The week before</button><button>A custom date…</button><button>No reminder</button></div>
+          <span class="f-lbl" data-req="expect">When do you expect to hear back?</span>
+          <div class="seg" style="margin-bottom:11px;"><button>4 weeks</button><button>6 weeks</button><button>8 weeks</button><button>12 weeks</button><button>Another date…</button></div>
+          <span class="f-lbl" data-req="remind">Remind you to nudge?</span>
+          <div class="seg"><button>On the day</button><button>The week before</button><button>A custom date…</button><button>No reminder</button></div>
           <div class="inherit">The reminder lands here, on your list, when the time comes.</div>
         </div>
 
         <div class="sect">
-          <span class="f-lbl">Anything else?</span>
+          <span class="f-lbl">Anything else? <span class="opttag">OPTIONAL</span></span>
           <textarea class="note-in" placeholder="Add any further details you want to keep on file"></textarea>
         </div>
-      </div>
+      </div></div></div></div>
 
-      <div class="storycol">
+      <div class="storycol"><div class="fc"><div class="rim">
         <div class="story">
           <div class="story-h"><span class="t">The story so far</span><span class="c">2 entries</span></div>
           <div class="story-b">
@@ -242,20 +250,20 @@ textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
           </div>
           <div class="story-f"><a href="#">Open the full query →</a></div>
         </div>
-      </div>
+      </div></div></div>
     </div>
 
     <div class="actbar">
       <span class="willrec">Will record: <b>Partial sent · first 3 chapters · today</b> · reply expected ~9 Oct · nudge 2 Oct</span>
       <button class="ab quiet" onclick="openSnooze()">Snooze</button>
       <button class="ab quiet" onclick="openDismiss()">Dismiss</button>
-      <button class="ab go">Log as sent</button>
+      <button class="ab go" onclick="gate(this)">Log as sent</button>
     </div>
   </div>
 
   <!-- ═══ CONSIDER CLOSING ═══ -->
   <div class="pane u-house" id="p-close" style="display:none;">
-    <div class="band">
+    <div class="fc hdr"><div class="rim"><div class="band">
       <div style="min-width:0;">
         <div class="deed">Consider <em>closing</em></div>
         <div class="b-sub">Sophie Dunn, Curtis Vane · quiet for 4 weeks</div>
@@ -267,20 +275,21 @@ textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
       <div class="tile"><div class="k">Most recent interaction</div><div class="v">Nudge sent<small>23 July · via email</small></div></div>
       <div class="tile"><div class="k">Sent previously</div><div class="v">2 items<small>letter · first 5,000 words</small></div></div>
     </div>
+    </div></div>
     <div class="mid">
-      <div class="formcol">
+      <div class="formcol"><div class="fc"><div class="rim"><div class="formpad">
         <div class="f-h">Ready to close this one?</div>
         <div class="f-sub">Closing records no response — not a rejection, so your response rate stays honest. It does not tell the agent anything.</div>
         <div class="sect">
           <span class="f-lbl">When</span>
-          <div class="seg"><button class="on">Today</button><button>Yesterday</button><button>Another date…</button></div>
+          <div class="seg"><button>Today</button><button>Yesterday</button><button>Another date…</button></div>
         </div>
         <div class="sect">
-          <span class="f-lbl">Anything else?</span>
+          <span class="f-lbl">Anything else? <span class="opttag">OPTIONAL</span></span>
           <textarea class="note-in" placeholder="Add any further details you want to keep on file"></textarea>
         </div>
       </div>
-      <div class="storycol">
+      <div class="storycol"><div class="fc"><div class="rim">
         <div class="story">
           <div class="story-h"><span class="t">The story so far</span><span class="c">2 entries</span></div>
           <div class="story-b">
@@ -298,13 +307,13 @@ textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
       <span class="willrec">Will record: <b>Closed · no response · today</b></span>
       <button class="ab quiet" onclick="openSnooze()">Snooze</button>
       <button class="ab quiet" onclick="openDismiss()">Dismiss</button>
-      <button class="ab go">Log the close</button>
+      <button class="ab go" onclick="gate(this)">Log the close</button>
     </div>
   </div>
 
   <!-- ═══ BULK FILL-IN (corrected) ═══ -->
   <div class="pane u-house" id="p-bulk" style="display:none;">
-    <div class="band">
+    <div class="fc hdr"><div class="rim"><div class="band">
       <div style="min-width:0;">
         <div class="deed">Fill in <em>what you sent</em></div>
         <div class="b-sub">10 imported queries are missing their materials · from your import on 12 August</div>
@@ -312,8 +321,9 @@ textarea.note-in:focus,input.txt:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
       <div class="b-nav"><button>‹</button><button>›</button></div>
     </div>
     <!-- no tiles: nothing to summarise that the sub-line doesn't say -->
+    </div></div>
     <div class="mid">
-      <div class="formcol" style="flex-basis:100%;">
+      <div class="formcol" style="flex-basis:100%;"><div class="fc"><div class="rim"><div class="formpad">
         <div class="f-h">What went with each query?</div>
         <div class="f-sub">Work down the list. Anything left untouched stays unrecorded — nothing is filled in for you. This fills in your own record; the queries do not move.</div>
         <div class="chip" style="margin-bottom:10px;">Table renders here as shipped in the list round — full-word heads, tick cells, per-row sample editor</div>
@@ -373,6 +383,21 @@ function bump(btn,dir){
   const min=parseInt(input.min,10)||1;
   const v=(parseInt(input.value,10)||0)+dir*inc;
   input.value=Math.max(min,v);
+}
+/* Gate: always clickable; incomplete click scrolls to the first missing required field and flashes it */
+function gate(btn){
+  const pane=btn.closest('.pane');
+  const missing=[...pane.querySelectorAll('.f-lbl[data-req]')].find(l=>{
+    const sect=l.closest('.sect')||l.closest('.expect');
+    return !sect.querySelector('.seg button.on, .unitpill.on');
+  });
+  if(missing){
+    missing.scrollIntoView({behavior:'smooth',block:'center'});
+    missing.style.transition='color .2s'; missing.style.color='var(--burg)';
+    setTimeout(()=>missing.style.color='',1200);
+    return;
+  }
+  alert('All required fields chosen — commits through the one existing write path.');
 }
 function openDismiss(){document.getElementById('dismissDlg').classList.add('open');}
 function closeDismiss(){document.getElementById('dismissDlg').classList.remove('open');}
