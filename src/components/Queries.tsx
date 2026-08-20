@@ -100,7 +100,7 @@ import { subcollectionDocToDerivable } from "../lib/recomputeQuery";
 /* the correction pack — one engine, one set of guards, one undo contract */
 import { previewCorrection, type CorrectionDiff } from "../lib/correctionPreview";
 import { canCorrect, rootGuard, dependencyGuard, type GuardEvent } from "../lib/correctionGuards";
-import { undoMessage } from "../lib/correctionUndo";
+import { undoMessage, undoStillValid, type PendingUndo } from "../lib/correctionUndo";
 import { CorrectionFork, CorrectionEdit, ConsequenceSheet } from "./reading-pane/CorrectionSheet";
 import { TasksPopover } from "./TasksPopover";
 import { MountCard } from "./MountCard";
@@ -1040,9 +1040,40 @@ export const Queries: React.FC<{
   }));
 
   /** ⚠️ ONE TOAST PER OPERATION, and the undo retires when a newer write lands (Phase 4). */
-  const finishCorrection = async (msg: string, restore: () => Promise<void>) => {
+  /**
+   * ⚠️ A PENDING UNDO RETIRES WHEN A NEWER WRITE LANDS ON THE SAME QUERY, and the check that found
+   * this had two toasts on screen at once — the older still offering to restore a record the second
+   * write had moved past. Pressing it would not have restored a previous state; it would have
+   * produced a THIRD one nobody chose, which is the failure `undoStillValid` was written to prevent
+   * and which nothing was calling.
+   *
+   * ⚠️ THE SIGNAL IS THE SET OF ACTIVITY IDS, read live at PRESS TIME rather than captured. The feed
+   * is already an `onSnapshot` in this page, so the ids are current whatever the writer has done in
+   * the meantime — including on a query they have since navigated away from, which a check against
+   * the selected query's own log could not see.
+   *
+   * ⚠️ AND A RETIRED UNDO SAYS SO INSTEAD OF GOING QUIET. A button that silently does nothing is the
+   * empty-closure fault wearing a different face; this one explains why it cannot act.
+   */
+  const activitiesRef = useRef(activities);
+  useEffect(() => { activitiesRef.current = activities; }, [activities]);
+
+  const finishCorrection = async (msg: string, restore: () => Promise<void>, queryId?: string) => {
     setCorrecting(null);
-    showToast({ message: msg, undo: () => void restore() });
+    const qid = queryId ?? selectedQueryId ?? "";
+    const idsAfter = activitiesRef.current.filter((a: any) => a.queryId === qid).map((a: any) => a.id);
+    const pending: PendingUndo = { queryId: qid, idsAfter, restore, message: msg };
+    showToast({
+      message: msg,
+      undo: () => {
+        const now = activitiesRef.current.filter((a: any) => a.queryId === qid).map((a: any) => a.id);
+        if (!undoStillValid(pending, now)) {
+          showToast({ message: "That can't be undone now — this query has changed since." });
+          return;
+        }
+        void restore();
+      },
+    });
   };
 
   /** The subject line's date — the app's short spelling, so the sheet names the event as the row does. */
@@ -1091,7 +1122,7 @@ export const Queries: React.FC<{
          The undo contract (Phase 4) is one toast per operation; a loop of single deletes would have
          no inverse to give it, which is how the first wiring came to offer an Undo that did nothing. */
       const restore = await deleteActivities(Array.from(doomed));
-      await finishCorrection(undoMessage(entry.label, agentPrimary(activeAgent), doomed.size), restore);
+      await finishCorrection(undoMessage(entry.label, agentPrimary(activeAgent), doomed.size), restore, activeQuery?.id);
     };
 
     setCorrecting({
