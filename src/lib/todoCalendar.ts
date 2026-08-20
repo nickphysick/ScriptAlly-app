@@ -24,7 +24,8 @@
  * activity log (the SAME clearing union the Done column reads: CLEARING_ACTIVITY_TYPES +
  * completed user tasks). They never roll.
  */
-import { Activity, Agent, Query, TaskFlag, UserTask } from "../types";
+import { Activity, ActivityType, Agent, Query, QueryStatus, TaskFlag, UserTask } from "../types";
+import { HOLDING_REPLY_TYPE } from "./holdingReply";
 import { BoardCard, terseDoneLabel } from "./todoBoard";
 import { BoardColumns } from "./todoColumns";
 import { agentPrimary } from "./agentDisplay";
@@ -246,4 +247,191 @@ export function calFoldCap(rowPx: number): number {
      would let a cell promise a pip it then has to take back to make room for the fold line */
   const fits = Math.floor(room / CAL_PIP_H);
   return Math.max(1, Math.min(CAL_CELL_CAP, fits));
+}
+
+/* ══ THE RECORD LAYER (record-layer pack, Phase 2; ref design-refs/calendar-month-focus-v2.html) ═
+ *
+ * ⚠️ THE CALENDAR SHOWED FORWARD WORK ONLY, AND THAT IS WHY IT COULD NOT ANSWER "WHAT HAPPENED IN
+ * AUGUST". A partial sent on the 12th is a card until its task is done, and then it is nothing —
+ * the day empties, because every citizen of the grid above is a LIVE card from the shared feed.
+ * This layer is the other half: the querying record, derived from `activities`, recessive beneath
+ * the live work, and never a card.
+ *
+ * ⚠️ IT IS DERIVED AND IT READS NOTHING NEW. `activities` is already loaded unwindowed
+ * (`db.tsx:521` snapshots the whole collection) and the page already holds it, so the record costs
+ * one pass over an array in memory — no new query, no new hook, no new field.
+ *
+ * ⚠️ THE GLOBAL FEED IS COARSE, AND THAT SHAPES THIS WHOLE FILE. `ActivityType` has twelve members;
+ * every agent reply — partial requested, full requested, R&R, rejection — is ONE `STATUS_CHANGED`
+ * row whose meaning lives in `resultingStatus`. So the rule is two tables rather than one list: the
+ * TYPE names the event where it can, and where it cannot it defers to the STATUS. Both tables are
+ * `Record<…>` over their enum, so a new member of either fails the build until somebody says which
+ * side of the record it falls on — the exhaustiveness guard this codebase already uses for task
+ * kinds, for the same reason: the next kind should not ship classified by a default.
+ *
+ * ⚠️ AND THE SAFE DEFAULT IS EXCLUSION. A missing row is recoverable — the entry is still in the
+ * query's own timeline. A noisy record is not: once agent edits and manuscript renames are on the
+ * grid, the record stops being the querying story and becomes an audit log, which is a different
+ * (and unasked-for) product. Anything ambiguous is `null` here, with its reason beside it.
+ */
+
+/** Who authored the event. Colour follows this and nothing else. */
+export type RecordDir = "out" | "in";
+
+export interface RecordSpec {
+  /** The pip's words. Plain and factual — no adjectives, no verdicts, no speed or quality. */
+  label: string;
+  dir: RecordDir;
+}
+
+/** The marker for a type that carries no meaning of its own — its `resultingStatus` names it. */
+export const BY_STATUS = "by-status" as const;
+export type RecordRule = RecordSpec | typeof BY_STATUS | null;
+
+/**
+ * The global feed's `activityType` universe: the enum, plus the one type written into it by cast.
+ * `HOLDING_REPLY_TYPE` is Title Case because that is the GLOBAL feed's spelling — the per-query
+ * nested twin is "Holding reply". Quoting the constant rather than the literal keeps the two apart.
+ */
+export type RecordType = ActivityType | typeof HOLDING_REPLY_TYPE;
+
+/**
+ * ⚠️ THE WHITELIST, STATED ONCE. `null` is a decision, not an omission — each carries its reason.
+ *
+ * ⚠️ DIRECTION HERE IS AUTHORSHIP, AND IT IS DELIBERATELY *NOT* `statusDirection`. That function
+ * (StatusDot.tsx) classifies PIPELINE direction and says so in its own comment: it calls an Offer
+ * "out" because an offer moves the writer's side forward, and it collapses Rejected, Withdrawn and
+ * No Response into one "closed". Both are right for a list spine and wrong here. An offer is
+ * something the AGENT sent you; painting it as writer-authored is exactly the quiet untruth this
+ * layer exists to avoid, and a two-valued `dir` cannot hold "closed" at all. So the tables declare
+ * label and direction together, and `StatusDot` is untouched.
+ */
+export const RECORD_TYPES: Record<RecordType, RecordRule> = {
+  /* the conversation, in the writer's hand */
+  [ActivityType.QUERY_SENT]: { label: "Query sent", dir: "out" },
+  [ActivityType.NUDGE_SENT]: { label: "Nudge sent", dir: "out" },
+  /* the writer's answer to an offer. These keep their OWN label rather than deferring: an offer
+     declined stamps `resultingStatus: WITHDRAWN`, so refining it by status would file the most
+     consequential decision in the record under the generic word "Closed". */
+  [ActivityType.OFFER_ACCEPTED]: { label: "Offer accepted", dir: "out" },
+  [ActivityType.OFFER_DECLINED]: { label: "Offer declined", dir: "out" },
+  /* the agency's holding line — they replied, with no decision yet */
+  [HOLDING_REPLY_TYPE]: { label: "Holding reply", dir: "in" },
+
+  /* generic types: the status names the event (see RECORD_STATUS) */
+  [ActivityType.STATUS_CHANGED]: BY_STATUS,
+  [ActivityType.MATERIALS_SENT]: BY_STATUS,
+
+  /* ⚠️ NOT THE RECORD — reference data and its upkeep. Adding an agent, correcting an agency's
+     name or renaming a manuscript are things the writer did to their FILES, not to a submission.
+     The querying record is what passed between the writer and an agency. */
+  [ActivityType.AGENT_ADDED]: null,
+  [ActivityType.AGENT_UPDATED]: null,
+  [ActivityType.AGENT_DELETED]: null,
+  [ActivityType.MANUSCRIPT_ADDED]: null,
+  [ActivityType.MANUSCRIPT_UPDATED]: null,
+  [ActivityType.MANUSCRIPT_DELETED]: null,
+};
+
+/**
+ * ⚠️ THE THREE CLOSURES SHARE ONE WORD AND DIFFER IN AUTHORSHIP. "Closed" is what the pack asks
+ * for and it is true of all three; which of them it was is one click away in the expanded row, and
+ * on the grid a month of the word "Rejected" would be a running commentary rather than a record.
+ * The DIRECTION still separates them, because that part is a fact: a rejection came from the
+ * agency; a withdrawal and a no-response close are both the writer's own act.
+ */
+export const RECORD_STATUS: Record<QueryStatus, RecordSpec | null> = {
+  [QueryStatus.QUERIED]: { label: "Query sent", dir: "out" },
+  [QueryStatus.PARTIAL_REQUESTED]: { label: "Partial requested", dir: "in" },
+  [QueryStatus.PARTIAL_SENT]: { label: "Partial sent", dir: "out" },
+  [QueryStatus.FULL_REQUESTED]: { label: "Full requested", dir: "in" },
+  [QueryStatus.FULL_SENT]: { label: "Full sent", dir: "out" },
+  [QueryStatus.REVISE_RESUBMIT]: { label: "Revise & resubmit", dir: "in" },
+  [QueryStatus.OFFER]: { label: "Offer received", dir: "in" },
+  [QueryStatus.REJECTED]: { label: "Closed", dir: "in" },
+  [QueryStatus.WITHDRAWN]: { label: "Closed", dir: "out" },
+  [QueryStatus.NO_RESPONSE]: { label: "Closed", dir: "out" },
+};
+
+export interface RecordItem {
+  key: string;
+  ymd: string;
+  label: string;
+  dir: RecordDir;
+  queryId: string;
+  activityId: string;
+  /** Display name — `agentPrimary`, the same helper every other agent-naming surface reads. */
+  agent: string;
+}
+
+/**
+ * Resolve one activity to its record spec, or null when it is not of the record.
+ *
+ * The rule in one sentence: **the type names the event unless the type is generic, in which case
+ * the status does** — and anything the tables leave unclassified is excluded.
+ */
+export function recordSpecFor(
+  activityType: string,
+  resultingStatus?: string,
+): RecordSpec | null {
+  const rule = RECORD_TYPES[activityType as RecordType];
+  if (rule === undefined || rule === null) return null;
+  if (rule !== BY_STATUS) return rule;
+  /* generic type — the status is the whole meaning. A pre-migration row carrying none cannot be
+     classified, and an unclassifiable row is excluded rather than guessed at. */
+  if (!resultingStatus) return null;
+  return RECORD_STATUS[resultingStatus as QueryStatus] ?? null;
+}
+
+/**
+ * The record for the visible days. Pure: one pass over the activities already in memory.
+ *
+ * `range` is the visible day list — the same array `calendarDays` receives, so the two placement
+ * functions cannot come to disagree about which days are on screen.
+ *
+ * ⚠️ AN ORPHANED ACTIVITY IS EXCLUDED. Every record row offers OPEN QUERY, so a row whose query no
+ * longer exists is a control that cannot work; and its agent could not be named either, since
+ * `Activity` carries no `agentId` and the agent is only reachable through the query.
+ */
+export function recordDays(
+  activities: Activity[],
+  queries: Query[],
+  agents: Agent[],
+  range: readonly string[],
+): Map<string, RecordItem[]> {
+  const byDay = new Map<string, RecordItem[]>();
+  const visible = new Set(range);
+  if (visible.size === 0) return byDay;
+
+  const queryById = new Map(queries.map((q) => [q.id, q]));
+  const agentById = new Map(agents.map((a) => [a.id, a]));
+
+  /* sort by the activity's own date so a day reads in the order the events happened; the id is the
+     tie-break, so two events stamped at the same instant keep a stable order between renders */
+  const ordered = [...activities].sort((a, b) => {
+    const d = String(a.date ?? "").localeCompare(String(b.date ?? ""));
+    return d !== 0 ? d : String(a.id).localeCompare(String(b.id));
+  });
+
+  for (const act of ordered) {
+    const ymd = isoToYmd(act.date);
+    if (!ymd || !visible.has(ymd)) continue;
+    const spec = recordSpecFor(act.activityType as string, act.resultingStatus as string | undefined);
+    if (!spec) continue;
+    const query = queryById.get(act.queryId);
+    if (!query) continue;
+    const agent = agentById.get(query.agentId);
+    const list = byDay.get(ymd) ?? [];
+    list.push({
+      key: `rec-${act.id}`,
+      ymd,
+      label: spec.label,
+      dir: spec.dir,
+      queryId: act.queryId,
+      activityId: act.id,
+      agent: agent ? agentPrimary(agent) : "",
+    });
+    byDay.set(ymd, list);
+  }
+  return byDay;
 }

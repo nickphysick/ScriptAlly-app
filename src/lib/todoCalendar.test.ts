@@ -14,7 +14,9 @@ import { BoardCard } from "./todoBoard";
 import {
   monthGridDays, weekDays, monthLabel, weekLabel, shiftMonth, shiftWeek, sameMonth,
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
+  recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
 } from "./todoCalendar";
+import { HOLDING_REPLY_TYPE } from "./holdingReply";
 import { CAL_PIP, CAL_LEGEND } from "./todoFamily";
 
 const here = __dirname;
@@ -222,5 +224,151 @@ describe("⚠️ the fold threshold derives from the cell, never from a flat con
   it("an unmeasured grid reads as the old flat cap — nothing renders emptier while it settles", () => {
     expect(calFoldCap(0)).toBe(CAL_CELL_CAP);
     expect(calFoldCap(-5)).toBe(CAL_CELL_CAP);
+  });
+});
+
+/* ══ THE RECORD LAYER (record-layer pack, Phase 2) ══════════════════════════════════════════ */
+
+const AGENT = { id: "a1", name: "Marcus Reed", agency: "Reed Literary" } as unknown as Agent;
+const act = (over: Partial<Activity>): Activity => ({
+  id: "act1", userId: "u", queryId: "q1", manuscriptId: "m1",
+  activityType: ActivityType.STATUS_CHANGED, description: "", date: "2026-08-12T09:00:00Z",
+  details: "", ...over,
+} as Activity);
+/** The one query every record fixture hangs off, so a row always has something to route to. */
+const RQ = [q({ id: "q1", agentId: "a1" })];
+const rec = (activities: Activity[], range: readonly string[] = AUG) =>
+  recordDays(activities, RQ, [AGENT], range);
+
+describe("⚠️ the record's whitelist is stated once, and exclusion is the safe default", () => {
+  it("the conversation is on the record — sends, requests, replies, nudges, offers, closures", () => {
+    const cases: Array<[Partial<Activity>, string, "out" | "in"]> = [
+      [{ activityType: ActivityType.QUERY_SENT }, "Query sent", "out"],
+      [{ activityType: ActivityType.NUDGE_SENT }, "Nudge sent", "out"],
+      [{ activityType: HOLDING_REPLY_TYPE as unknown as ActivityType }, "Holding reply", "in"],
+      [{ resultingStatus: QueryStatus.PARTIAL_REQUESTED }, "Partial requested", "in"],
+      [{ resultingStatus: QueryStatus.FULL_REQUESTED }, "Full requested", "in"],
+      [{ resultingStatus: QueryStatus.REVISE_RESUBMIT }, "Revise & resubmit", "in"],
+      [{ resultingStatus: QueryStatus.OFFER }, "Offer received", "in"],
+      [{ activityType: ActivityType.MATERIALS_SENT, resultingStatus: QueryStatus.PARTIAL_SENT }, "Partial sent", "out"],
+      [{ activityType: ActivityType.MATERIALS_SENT, resultingStatus: QueryStatus.FULL_SENT }, "Full sent", "out"],
+    ];
+    for (const [over, label, dir] of cases) {
+      const got = rec([act(over)]).get("2026-08-12") ?? [];
+      expect(got.map((r) => r.label), `${JSON.stringify(over)}`).toEqual([label]);
+      expect(got[0].dir, label).toBe(dir);
+    }
+  });
+
+  it("⚠️ reference-data upkeep is NOT the record — it is what the writer did to their files", () => {
+    for (const t of [
+      ActivityType.AGENT_ADDED, ActivityType.AGENT_UPDATED, ActivityType.AGENT_DELETED,
+      ActivityType.MANUSCRIPT_ADDED, ActivityType.MANUSCRIPT_UPDATED, ActivityType.MANUSCRIPT_DELETED,
+    ]) {
+      expect(rec([act({ activityType: t })]).size, t).toBe(0);
+    }
+  });
+
+  it("⚠️ a generic type with no resultingStatus is EXCLUDED, never guessed at", () => {
+    // STATUS_CHANGED carries no meaning of its own; a pre-migration row without a status
+    // cannot be classified, and a missing row is recoverable where a wrong one is not.
+    expect(rec([act({ activityType: ActivityType.STATUS_CHANGED })]).size).toBe(0);
+    expect(recordSpecFor(ActivityType.STATUS_CHANGED)).toBeNull();
+    // an activityType the tables have never heard of is excluded rather than defaulting in
+    expect(recordSpecFor("Something Invented Later")).toBeNull();
+  });
+
+  it("⚠️ THE TABLES ARE EXHAUSTIVE — a new member of either enum must be classified, not defaulted", () => {
+    // The Record<> types make this a compile error too; asserted at runtime so the guard survives
+    // a future `as` cast that would silence tsc.
+    for (const t of Object.values(ActivityType)) {
+      expect(Object.prototype.hasOwnProperty.call(RECORD_TYPES, t), `RECORD_TYPES is missing ${t}`).toBe(true);
+    }
+    expect(Object.prototype.hasOwnProperty.call(RECORD_TYPES, HOLDING_REPLY_TYPE)).toBe(true);
+    for (const s of Object.values(QueryStatus)) {
+      expect(Object.prototype.hasOwnProperty.call(RECORD_STATUS, s), `RECORD_STATUS is missing ${s}`).toBe(true);
+    }
+  });
+});
+
+describe("⚠️ direction is AUTHORSHIP, and deliberately not statusDirection", () => {
+  it("an offer reads INCOMING — the agent sent it, whatever the pipeline direction says", () => {
+    // statusDirection(OFFER) is "out" (an offer moves the writer's side forward). Here the
+    // question is who wrote it, and painting an agent's offer as the writer's is the untruth
+    // this layer exists to avoid.
+    expect(RECORD_STATUS[QueryStatus.OFFER]).toEqual({ label: "Offer received", dir: "in" });
+  });
+
+  it("⚠️ the three closures share one word and split on authorship", () => {
+    // statusDirection collapses all three into "closed", which a two-valued dir cannot hold.
+    expect(RECORD_STATUS[QueryStatus.REJECTED]).toEqual({ label: "Closed", dir: "in" });
+    expect(RECORD_STATUS[QueryStatus.WITHDRAWN]).toEqual({ label: "Closed", dir: "out" });
+    expect(RECORD_STATUS[QueryStatus.NO_RESPONSE]).toEqual({ label: "Closed", dir: "out" });
+  });
+
+  it("⚠️ an offer DECLINED keeps its own label — it stamps WITHDRAWN and must not read 'Closed'", () => {
+    // The most consequential decision in the record, filed under the generic word, is exactly
+    // what refining OFFER_DECLINED by its resultingStatus would produce.
+    const got = rec([act({ activityType: ActivityType.OFFER_DECLINED, resultingStatus: QueryStatus.WITHDRAWN })]);
+    expect(got.get("2026-08-12")?.[0].label).toBe("Offer declined");
+    expect(got.get("2026-08-12")?.[0].dir).toBe("out");
+  });
+
+  it("⚠️ no verdict words, no adjectives about quality or speed", () => {
+    const labels = [...Object.values(RECORD_TYPES), ...Object.values(RECORD_STATUS)]
+      .filter((r): r is { label: string; dir: "out" | "in" } => !!r && r !== BY_STATUS)
+      .map((r) => r.label);
+    expect(labels.length).toBeGreaterThan(0);
+    for (const l of labels) {
+      expect(l, l).not.toMatch(/quick|slow|fast|good|bad|great|poor|finally|only|already|still/i);
+      // "overdue" does not exist in this product
+      expect(l.toLowerCase(), l).not.toContain("overdue");
+    }
+  });
+});
+
+describe("the record buckets by day, beside the live work", () => {
+  it("buckets on the activity's own date, in the order the events happened", () => {
+    const got = rec([
+      act({ id: "b", date: "2026-08-12T15:00:00Z", resultingStatus: QueryStatus.FULL_REQUESTED }),
+      act({ id: "a", date: "2026-08-12T09:00:00Z", activityType: ActivityType.QUERY_SENT }),
+      act({ id: "c", date: "2026-08-14T09:00:00Z", activityType: ActivityType.NUDGE_SENT }),
+    ]);
+    expect(got.get("2026-08-12")?.map((r) => r.label)).toEqual(["Query sent", "Full requested"]);
+    expect(got.get("2026-08-14")?.map((r) => r.label)).toEqual(["Nudge sent"]);
+    expect(got.get("2026-08-13")).toBeUndefined();
+  });
+
+  it("carries the agent's display name, the query and the activity — the row's routing", () => {
+    const r = rec([act({ activityType: ActivityType.QUERY_SENT })]).get("2026-08-12")![0];
+    expect(r).toMatchObject({
+      key: "rec-act1", ymd: "2026-08-12", queryId: "q1", activityId: "act1", agent: "Marcus Reed",
+    });
+  });
+
+  it("⚠️ an orphaned activity is excluded — OPEN QUERY would have nowhere to go", () => {
+    expect(recordDays([act({ queryId: "gone" })], RQ, [AGENT], AUG).size).toBe(0);
+    // the query survives without its agent: the row still routes, and simply names nobody
+    const noAgent = recordDays([act({ activityType: ActivityType.QUERY_SENT })], RQ, [], AUG);
+    expect(noAgent.get("2026-08-12")?.[0].agent).toBe("");
+  });
+
+  it("a day holding live cards ALSO holds its record — the two layers are independent", () => {
+    const day = "2026-08-12";
+    const live = calendarDays({
+      ...EMPTY,
+      cols: { todo: [card({ key: "t1", userTaskId: "t1", nature: "task", dueYmd: day })], today: [], snoozed: [], done: [] },
+      queries: RQ,
+    }, AUG);
+    const record = rec([act({ date: `${day}T09:00:00Z`, activityType: ActivityType.QUERY_SENT })]);
+    expect(live.get(day)?.items.map((i) => i.family)).toEqual(["task"]);
+    expect(record.get(day)?.map((r) => r.label)).toEqual(["Query sent"]);
+  });
+
+  it("an empty range yields an empty map, and days outside it are never bucketed", () => {
+    expect(rec([act({ activityType: ActivityType.QUERY_SENT })], []).size).toBe(0);
+    // 12 Aug is real, but a September grid does not contain it
+    expect(rec([act({ activityType: ActivityType.QUERY_SENT })], monthGridDays("2026-10-05")).size).toBe(0);
+    expect(rec([]).size).toBe(0);
   });
 });
