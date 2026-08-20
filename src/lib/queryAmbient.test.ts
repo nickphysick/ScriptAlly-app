@@ -349,7 +349,16 @@ describe("Bar P3 artefacts — end-anchors + hollow-circle milestones + hover/ta
   it("the wait states both ends of its bar, and only where there is a bar", () => {
     const at = tl.indexOf('ballHolder === "agent" && waiting');
     const branch = tl.slice(at, tl.indexOf('title="Nudge"', at));
-    expect(branch).toContain("Sent {fmtShort(waiting.sentMs!)}");
+    /**
+     * ⚠️ THE START ANCHOR NAMES ITS OWN EVENT (§3a), so this can no longer pin the word "Sent".
+     * It read "Sent 18 Aug" where 18 August was the day the AGENT replied — right figure, wrong
+     * noun — and the label is derived from `anchorKind` now. The claim is that BOTH nouns are
+     * reachable and that the date beside them is the anchor's, which is stronger than the literal
+     * it replaces: the old form would have passed with the reply case unimplemented.
+     */
+    expect(branch, "the start anchor lost its date").toContain("fmtShort(waiting.sentMs!)");
+    expect(branch, "an outbound anchor is not named as a send").toContain('"Sent"');
+    expect(branch, "a holding reply is still labelled as something the writer sent").toContain('anchorKind === "reply" ? "Replied"');
     expect(branch).toContain("Expected by ~${fmtShort(waiting.expMs!)}");
     expect(branch).toContain("Window expired ${fmtShort(waiting.expMs!)}");
     expect(branch, "the bar's end label went back to the query-status word").not.toContain("Window closed");

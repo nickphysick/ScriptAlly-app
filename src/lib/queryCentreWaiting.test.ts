@@ -73,8 +73,17 @@ describe("§3 · waiting and the nudge are timeline events", () => {
     for (const t of ["trackingBar(", "geo.overdueZone", "geo.markerPct", "geo.graceTickPct", "deriveEscalation("]) {
       expect(tl, `the escalation ladder is back: ${t}`).not.toContain(t);
     }
-    /* the one bar: a fill to the elapsed proportion, and a spent hatch once the window has passed */
-    expect(tl, "the wait lost its bar").toContain('className={`tl-wbar${past ? " tl-wbar--past" : ""}`}');
+    /**
+     * the one bar: a fill to the elapsed proportion, and a spent hatch once the window has passed
+     *
+     * ⚠️ THE CLAIM, NOT THE PUNCTUATION. This pinned the class expression character for character
+     * and went red the moment §2 appended the provenance modifier — a change it had no business
+     * having an opinion about. What it means is "there is ONE bar element, and its past state is a
+     * modifier on it"; both survive any further modifier, and neither can be satisfied by the two
+     * bars this test exists to forbid.
+     */
+    expect(tl, "the wait lost its bar").toMatch(/className=\{`tl-wbar\$\{past \? " tl-wbar--past"/);
+    expect((tl.match(/`tl-wbar\$/g) || []).length, "there is more than one bar again").toBe(1);
     expect(tl, "the bar is not gated on a real window").toContain("const dated = stated && waiting.sentMs != null && waiting.expMs != null;");
   });
 

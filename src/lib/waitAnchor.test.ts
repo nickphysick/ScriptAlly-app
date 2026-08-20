@@ -11,9 +11,9 @@
  * 1 May" from the log. The log is recompute's INPUT, and the input is what always exists.
  */
 import { describe, it, expect } from "vitest";
-import { queryAmbientStatus } from "./queryAmbient";
+import { queryAmbientStatus, agentRepliesForManuscript, recordPlaceLine } from "./queryAmbient";
 import { waitAnchor } from "./holdingReply";
-import { HOLDING_REPLY_NESTED_TYPE } from "./holdingReply";
+import { HOLDING_REPLY_NESTED_TYPE, HOLDING_REPLY_TYPE } from "./holdingReply";
 import { QueryStatus } from "../types";
 
 const DAY = 86400000;
@@ -99,5 +99,60 @@ describe("§1 · waitAnchor reads outbound through the CTA engine", () => {
   it("the field is the fallback, and the log outranks it", () => {
     expect(waitAnchor([], NOW - 90 * DAY)).toEqual({ ms: NOW - 90 * DAY, kind: "send" });
     expect(waitAnchor([rung(QueryStatus.PARTIAL_SENT, 5)], NOW - 90 * DAY)).toEqual({ ms: NOW - 5 * DAY, kind: "send" });
+  });
+});
+
+/**
+ * §3 — the two loose ends.
+ *
+ * ⚠️ 3b IS ASSERTED THROUGH `recordPlaceLine`, THE REAL CALLER, not against the count alone. The
+ * ordinal is what a writer reads; a test on the raw number would pass while the sentence stayed
+ * wrong, and the repo's own rule is to derive a test's input from whatever builds it in production.
+ */
+describe("§3 · the anchor's noun, and what counts as a reply", () => {
+  const rung = (status: QueryStatus, daysAgo: number) => ({ type: status, createdAt: iso(NOW - daysAgo * DAY) });
+  const q = { id: "q", status: QueryStatus.PARTIAL_SENT, dateSent: iso(NOW - 100 * DAY) } as never;
+
+  it("3a · the anchor names its own event", () => {
+    const outbound = queryAmbientStatus(q, "agent", undefined, NOW, 8, [rung(QueryStatus.PARTIAL_SENT, 40)]);
+    expect(outbound.anchorKind, "an outbound send is not being named as a send").toBe("send");
+
+    const replied = queryAmbientStatus(q, "agent", undefined, NOW, 8,
+      [rung(QueryStatus.PARTIAL_SENT, 40), { type: HOLDING_REPLY_NESTED_TYPE, createdAt: iso(NOW - 4 * DAY) }]);
+    expect(replied.anchorKind, "the bar would still say SENT above a reply date").toBe("reply");
+  });
+});
+
+describe("§3b · a holding reply is a reply", () => {
+  const act = (over: Record<string, unknown>) => ({ manuscriptId: "m1", queryId: "q1", ...over });
+  const decided = act({ resultingStatus: QueryStatus.FULL_REQUESTED });
+  const holding = act({ activityType: HOLDING_REPLY_TYPE });
+
+  it("counts it alongside the decisions", () => {
+    expect(agentRepliesForManuscript([decided], "m1")).toBe(1);
+    expect(agentRepliesForManuscript([decided, holding], "m1"),
+      "an acknowledgement is not being counted as a response received").toBe(2);
+  });
+
+  /** ⚠️ THE SENTENCE IS THE POINT — asserted through the caller that writes it. */
+  it("and the ordinal the writer reads moves with it", () => {
+    const line = (activities: never[]) => recordPlaceLine({
+      manuscriptTitle: "The Smoke Test",
+      priorRepliesForManuscript: agentRepliesForManuscript(activities, "m1"),
+    });
+    expect(line([decided] as never)).toContain("2nd response");
+    expect(line([decided, holding] as never), "the ordinal ignored a reply the writer had recorded")
+      .toContain("3rd response");
+  });
+
+  /** ⚠️ SILENCE IS STILL NOT A REPLY — the widening must not have swept anything else in. */
+  it("a closed-with-no-reply query still counts nothing", () => {
+    expect(agentRepliesForManuscript([act({ resultingStatus: QueryStatus.NO_RESPONSE })] as never, "m1")).toBe(0);
+    expect(agentRepliesForManuscript([act({ resultingStatus: QueryStatus.PARTIAL_SENT })] as never, "m1"),
+      "the writer's own send is being counted as a reply from the agent").toBe(0);
+  });
+
+  it("this query's own history is still excluded", () => {
+    expect(agentRepliesForManuscript([holding], "m1", "q1")).toBe(0);
   });
 });

@@ -14,7 +14,7 @@ import { Query, QueryStatus } from "../types";
 import { elapsedPhrase } from "./elapsed";
 /* §1 (provenance pack) — the writer's own date, read through the one accessor that knows the field. */
 import { writerExpectedMs, resolveExpectedDate, type ExpectedSource } from "./expectedDate";
-import { replyStatedWindow, waitAnchor, waitAnchorMs, type StoredHoldingReply } from "./holdingReply";
+import { replyStatedWindow, waitAnchor, waitAnchorMs, HOLDING_REPLY_TYPE, type StoredHoldingReply } from "./holdingReply";
 import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
@@ -523,7 +523,7 @@ export interface PlaceLineInput {
  * holds only while that set stays honest.
  */
 export function agentRepliesForManuscript(
-  activities: readonly { manuscriptId?: string; queryId?: string; resultingStatus?: QueryStatus }[],
+  activities: readonly { manuscriptId?: string; queryId?: string; resultingStatus?: QueryStatus; activityType?: unknown }[],
   manuscriptId: string | undefined,
   excludeQueryId?: string,
 ): number | undefined {
@@ -532,8 +532,19 @@ export function agentRepliesForManuscript(
     (a) =>
       a.manuscriptId === manuscriptId &&
       a.queryId !== excludeQueryId &&
-      a.resultingStatus !== undefined &&
-      AGENT_RESPONSE_STATUSES.has(a.resultingStatus),
+      /**
+       * ⚠️ §3b · A HOLDING REPLY IS A REPLY. The sentence this feeds reads "the Nth response you've
+       * received", and an acknowledgement IS a response received — it is only not a DECISION. The
+       * set below is `AGENT_RESPONSE_STATUSES`, which is keyed on `resultingStatus`, and a holding
+       * reply carries none by construction, so it could never have been counted here.
+       *
+       * ⚠️ CHECKED AGAINST THE ONE CALLER FIRST, per the pack's condition. There is exactly one:
+       * `recordPlaceLine`, which says "response received" and not "response that decided" — so
+       * including it makes that ordinal true rather than changing what it means. No caller wanted
+       * "decided", which is why this changes rather than being reported and left.
+       */
+      ((a.resultingStatus !== undefined && AGENT_RESPONSE_STATUSES.has(a.resultingStatus))
+        || a.activityType === HOLDING_REPLY_TYPE),
   ).length;
 }
 
