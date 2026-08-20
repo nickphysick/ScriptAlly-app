@@ -1173,9 +1173,8 @@ Screenshots: `f8-well-1440.png` (populated), `f8-well-empty-1440.png` (first vis
 > because the guard is new, correct, and will fire on anyone who runs a production build in this
 > checkout.
 
-**⚠️ Dev hosting still shows the FLAT version.** This is a CSS-only change and **no hosting deploy
-was made** — only `firestore:rules` went out today. The deployed site will pick this up on the next
-hosting deploy; until then the rail there is white-on-white.
+**~~Dev hosting still shows the FLAT version.~~ Superseded — hosting deployed 20 Aug on Nick's ask.**
+See "Hosting deploy" below.
 
 *Incidental confirmation, visible in the first-visit screenshot:* with the seed cleared, the
 infographic's three step numbers are outlined and carry no tick chips. Nothing was reset to make that
@@ -1251,3 +1250,49 @@ under F8.
 | **F8** | rail well | **fixed** — but dev hosting still shows the flat version until the next hosting deploy |
 | F9 | two how-it-works surfaces | worth a look, not urgent |
 | **F10** | **new** — the desktop Query Centre has no control that opens the Edit Query drawer | worth a look; may be deliberate |
+
+
+---
+
+## Hosting deploy — 20 Aug, so F8 is visible
+
+Asked for after the rules-only deploy, to see F8 on the dev site.
+
+**Pre-flight:** `git fetch` → **0 behind** `origin/main` (49 ahead); all three of today's commits
+present. `npm run build:dev` → `BUILDDEV_EXIT=0` and the guard passed —
+*"✓ build target OK: bundle targets scriptally-dev (dev); gen-lang-client-0801391782 absent."*
+
+**⚠️ Built and deployed back-to-back, deliberately.** `dist/` is shared mutable state across the
+sessions in this checkout — that is what F4 turned out to be, and what the new `auth.setup.ts` guard
+now defends the harness against. There is no such guard on the deploy path, so the only protection
+is leaving no gap: build, verify, deploy, in one sequence.
+
+**Verified in the bundle before deploying**, rather than trusting the build:
+
+```
+dist/assets/index-C09cFF0t.css
+  --pkgo-well: var(--shell-panel)
+  .pkgo-body{padding:10px;background:var(--pkgo-well)}
+```
+
+```
+firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev
+→ ✔ Deploy complete!   https://scriptally-dev.web.app
+```
+
+**Verified ON the deployed site** (re-measured, not assumed):
+
+| | Deployed |
+|---|---|
+| Panel background | `rgb(255,255,255)` ×3 — containers still pure white (D4 intact) |
+| **Well background** | **`rgb(242,237,231)`** ×3 |
+| Row background | `rgb(255,255,255)` |
+| **Row differs from well** | **true** — the step is real on the shipped CSS |
+
+Evidence: `reports/pkg-restructure/f8-deployed-1440.png`,
+`run-artifacts/pkg-restructure/f8-deployed.txt`.
+
+Both of today's fixes are now live on dev: **F7** in the rules (deployed 08:33) and **F8** in the
+hosting bundle. As before, the populated rail is the harness account — **your own account will show
+the first-visit state**, three dashed ghosts on the cream well, which is the correct derived
+rendering rather than a fault.
