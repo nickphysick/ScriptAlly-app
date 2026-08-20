@@ -956,12 +956,29 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       expectWeeks: 6, remindDaysBefore: 7 });
   /* the answers reset with the card — a half-filled form carried onto another task is answers
      about the wrong query, which is the sweep's own rule applied to one card */
+  /**
+   * ⚠️ THE RESET KEYS ON THE CARD ALONE, AND THE SEEDS ARE READ THROUGH A REF (pane round, found by
+   * measurement, not by reading).
+   *
+   * `seedRows` and `seedExpect` are `useCallback`s over `queries` and `agents` — arrays that arrive
+   * new from a Firestore snapshot — so listing them as dependencies re-ran this effect on ordinary
+   * re-renders and WIPED THE FORM UNDER THE WRITER. On the page it looked like a click that did
+   * nothing: choose a unit, and the row count goes straight back to zero. No test could see it —
+   * every unit assertion passes on a component that is re-mounted between them, and `tsc` asks for
+   * exactly the dependency list that causes it.
+   *
+   * The ref keeps the effect honest without lying to the linter about what it reads: the card's key
+   * is the only thing that should clear a half-filled form, because a form carried onto another
+   * task is answers about the wrong query.
+   */
+  const seeds = React.useRef({ rows: seedRows, expect: seedExpect });
+  seeds.current = { rows: seedRows, expect: seedExpect };
   React.useEffect(() => {
     setPaneBody({
-      rows: seedRows(paneCard ?? null), alongside: "", when: "Today", also: "",
-      expectWeeks: seedExpect(paneCard ?? null), remindDaysBefore: 7,
+      rows: seeds.current.rows(paneCard ?? null), alongside: "", when: "Today", also: "",
+      expectWeeks: seeds.current.expect(paneCard ?? null), remindDaysBefore: 7,
     });
-  }, [paneCard?.key, seedRows, seedExpect]);
+  }, [paneCard?.key]);
 
   /**
    * ⚠️ WHAT A LIST ROW NEEDS BEYOND ITS CARD, and every one of these is a lookup rather than a new

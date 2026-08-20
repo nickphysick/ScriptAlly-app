@@ -11,6 +11,19 @@ import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
 const OUT = process.env.SA_PR_OUT ?? "run-artifacts/pane-round.txt";
+
+/**
+ * ⚠️ THE REPORT IS DELETED AT MODULE LOAD, NOT INSIDE THE TEST — and the difference is the whole
+ * point. A run that dies in SETUP never reaches the test body, so an unlink in there is skipped by
+ * exactly the failures that leave a stale file behind: a dev server that stopped, an expired
+ * session. This has now produced a confident report of results nobody measured THREE times in this
+ * sequence, the third time from the fix for the second. Module scope runs during collection, which
+ * happens before the setup project — so the file is gone whatever happens next.
+ *
+ * Absent beats stale: with no file the next reader gets an error, and with a stale one they get a
+ * wrong answer that looks exactly like a right one.
+ */
+rmSync(OUT, { force: true });
 const VIS = `(e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }`;
 
 /** open the first row whose pill reads `kind`; returns false when the account has none */
@@ -24,12 +37,6 @@ const OPEN = (kind: string) => `(() => {
 })()`;
 
 test("pane round", async ({ page }) => {
-  /* ⚠️ THE REPORT IS DELETED BEFORE THE RUN, NOT ONLY WRITTEN AFTER IT. A run that dies in setup —
-     a dev server that stopped, an expired session — leaves the PREVIOUS run's file sitting there,
-     indistinguishable from a fresh one. That has been read as current twice in this sequence, both
-     times producing a confident report of results nobody had measured. Absent beats stale: with no
-     file, the next reader gets an error instead of a wrong answer. */
-  rmSync(OUT, { force: true });
   const out: R[] = [];
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
   await ensureSignedIn(page);
@@ -211,6 +218,73 @@ test("pane round", async ({ page }) => {
   add("P8.1 · the story renders the real StatusDot, not redrawn spans",
       !!dots && dots.marks > 0 && dots.plain === 0 && dots.slots >= dots.marks,
       dots ? `svgDots=${dots.marks}/${dots.slots} rungs · redrawnSpans=${dots.plain}` : "no story column on this journey");
+
+  /* ══ PHASES 3 & 4 · the send form ════════════════════════════════════════════════════════ */
+  await page.evaluate(OPEN("Send"));
+  await page.waitForTimeout(1400);
+  const send = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const all = (s) => [...document.querySelectorAll(s)].filter(vis);
+    /* textContent, NOT innerText: innerText returns the CSS-TRANSFORMED text, and these labels
+       are uppercased. The source text is what the component wrote, and it is what these patterns
+       are about. (No backticks in this comment — see the note above the test.) */
+    const fc = all(".tpn .formcol")[0];
+    const txt = (fc ? fc.textContent : "") || "";
+    const units = all(".tpn .ssp-units button");
+    return {
+      /* Case-insensitive, and no backslash: the f-lbl text is uppercased by CSS, and a regex
+         escape inside this template does not reliably survive to the browser. The question marks
+         are simply dropped from the patterns, which costs nothing. */
+      asks: /what are you sending/i.test(txt),
+      alongside: all(".tpn .txt").length,
+      units: units.map((b) => (b.textContent||"").trim()),
+      /* the arithmetic of selection — one on, and the role that announces it */
+      on: units.filter((b) => b.getAttribute("aria-checked") === "true").length,
+      role: (all(".tpn .ssp-units")[0]||{}).getAttribute ? all(".tpn .ssp-units")[0].getAttribute("role") : null,
+      expect: /when do you expect to hear back/i.test(txt) && /remind you to nudge/i.test(txt),
+      lands: /the reminder lands here, on your list/i.test(txt),
+      will: (all(".tpn .willrec")[0] || {}).textContent || "",
+      /* carried so a failure here is diagnosable without a second run */
+      head: txt.replace(/\s+/g, " ").slice(0, 90),
+    };
+  })()`) as any;
+  add("P3.1 · the send form asks what went, not what was asked for",
+      !!send && send.asks && send.alongside >= 1,
+      send ? `asks=${send.asks} freeText=${send.alongside} · "${send.head}"` : "-");
+  /* ⚠️ AT MOST ONE AT REST, NOT EXACTLY ONE. The form seeds from what the agency ASKED for, and a
+     query whose record holds no sample seeds nothing — which is honest: guessing a unit would state
+     a measure nobody chose. The exactly-one claim belongs to P3.3, after a choice is made. */
+  add("P3.2 · the unit is single-select, and says so to a screen reader",
+      !!send && send.units.length === 3 && send.on <= 1 && send.role === "radiogroup",
+      send ? `${JSON.stringify(send.units)} on=${send.on} role=${send.role}` : "-");
+
+  /* ⚠️ CLICK A SECOND UNIT AND THE FIRST MUST GO. A source lock proves the branch was written;
+     only the page proves the writer cannot end up with two measures of one parcel. */
+  const swapped = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const units = [...document.querySelectorAll(".tpn .ssp-units button")].filter(vis);
+    const off = units.find((b) => b.getAttribute("aria-checked") !== "true");
+    if (!off) return null;
+    off.click();
+    return true;
+  })()`);
+  await page.waitForTimeout(500);
+  const after = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const units = [...document.querySelectorAll(".tpn .ssp-units button")].filter(vis);
+    return { on: units.filter((b) => b.getAttribute("aria-checked") === "true").length,
+             amounts: [...document.querySelectorAll(".tpn .ssp-amt")].filter(vis).length };
+  })()`) as any;
+  add("P3.3 · choosing a second unit REPLACES the first — one parcel, one measure",
+      !!swapped && !!after && after.on === 1 && after.amounts === 1,
+      after ? `unitsOn=${after.on} amountRows=${after.amounts}` : "-");
+
+  add("P4.1 · the expectation block asks both questions and says where the reminder goes",
+      !!send && send.expect && send.lands,
+      send ? `asked=${send.expect} lands=${send.lands}` : "-");
+  add("P4.2 · Will record states the parcel and both derived dates",
+      !!send && /reply expected ~/i.test(send.will) && /nudge /i.test(send.will),
+      send ? `will="${send.will}"` : "-");
 
   const red = out.filter((r) => !r.ok);
   const lines = [`── pane round · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`];
