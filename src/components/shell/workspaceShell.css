@@ -565,8 +565,16 @@
 .qa-wrap { padding: 0 0 30px; height: 100%; display: flex; flex-direction: column; }
 /* the grid must take the remaining height, or it measures zero and the page reads as unconverted */
 /* ⚠️ ONE RULE PER SELECTOR — this was declared twice, identically. A duplicate is harmless until
-   a lock slices on `indexOf(".qa-wpg {")` and reads whichever half comes first. */
-.qa-wpg { flex: 1; min-height: 0; }
+   a lock slices on `indexOf(".qa-wpg {")` and reads whichever half comes first. That is also why
+   `--wpg-foot` is declared HERE rather than in the page's own stylesheet: a second `.qa-wpg` block
+   in another file would put this selector back in exactly that position.
+   ⚠️ `--wpg-foot` IS THE FLOATING FEEDBACK DOCK'S CLEARANCE, CONTRIBUTED RATHER THAN SET. The
+   scroller's `padding-bottom` is a `calc()` SUM of this and the working state's reclaim; declaring
+   `padding-bottom` on the page instead lands at the same 0-2-0 specificity as the grid's own rule,
+   wins on source order and silently deletes the reclaim — the collision that cost three pages
+   their scroll invariance. `.sa-fbdock` is fixed at `bottom: 84px` under a ~40px pill, so it
+   occupies the last ~124px of the viewport at the right edge; 132 clears it with air. */
+.qa-wpg { flex: 1; min-height: 0; --wpg-foot: 132px; }
 
 
 /* ══════════════════ APP SHELL v2 — one ground, one window ══════════════════

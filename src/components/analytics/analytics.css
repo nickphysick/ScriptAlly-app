@@ -1,0 +1,334 @@
+/**
+ * Analytics — page styles (ref design-refs/scriptally-analytics-v6-ideas.html).
+ *
+ * ⚠️ NO CAP, AND THE MOCKUP'S 1560 IS DELIBERATELY NOT HERE. Caps are retired app-wide for grid
+ * pages (`--wpg-cap` and `--sa-col-max` both went): every row is full container width and states
+ * its own inset as padding, which the grid already applies from `--content-gutter`. A max-width
+ * column reintroduced here would put this page's chrome and its content at two different widths,
+ * which is the fault the retirement was for.
+ *
+ * ⚠️ ONE RULE PER SELECTOR. A second block for the same class makes any lock that finds its rule
+ * with `indexOf(".x {")` read whichever comes first — this stylesheet has that as an invariant
+ * because `workspacePageGrid.css` was caught by it twice.
+ *
+ * ⚠️ EVERY COLOUR IS A LITERAL, DELIBERATELY. This page is a chart surface with its own locked
+ * Burgundy & Sage scheme (see CHART in lib/analytics.ts); it is not themed, because a chart whose
+ * series changed hue per theme would need three legends. The one thing it must never restyle is
+ * `StatusDot`, which brings its own theming with it.
+ */
+
+/* ⚠️ THE PAGE ROOT AND THE GRID ROOT ARE NOT HERE — they are `.qa-wrap` and `.qa-wpg` in
+   `shell/workspaceShell.css`, where they have always been, and they keep their names.
+   `workspacePageGrid.test.tsx`'s width-chain lock reads that file for `.qa-wrap` by name; renaming
+   the root would leave the lock looking for a selector that no longer exists, finding no blocks,
+   and passing vacuously — the failure shape this codebase keeps re-teaching. The pill clearance
+   (`--wpg-foot`) is declared on `.qa-wpg` in that same file, so each selector still has exactly one
+   rule in one place. Everything below is this page's own furniture. */
+
+/* ── header: the mono sub-line and the range/export controls ─────────────────
+   ⚠️ THE SUB-LINE IS MONO BECAUSE IT IS A TALLY, not a sentence. It replaces the placeholder's
+   prose description in the same slot, so the header's own layout is untouched. */
+.qa-wrap .wsh-sub {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: #9a8c80;
+}
+.an-head { display: flex; align-items: center; gap: 12px; flex: none; }
+.an-range { display: flex; background: #fdfaf5; border: 1px solid #ece3d7; border-radius: 12px; padding: 3px; gap: 2px; flex: none; }
+.an-range button {
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 10px; letter-spacing: 0.07em; font-weight: 500; text-transform: uppercase;
+  color: #8a7a6c; background: transparent; border: 1px solid transparent; border-radius: 9px;
+  padding: 9px 15px; cursor: pointer; transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.an-range button:hover { color: #7c3a2a; }
+.an-range button[aria-pressed="true"] { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; }
+/* ⚠️ NO BURGUNDY-FILLED BUTTONS ON THIS PAGE. Export and Share are parchment with a hairline —
+   a solid primary here would outrank the figures it sits beside. */
+.an-btn {
+  flex: none; background: #fff; border: 1px solid #ece3d7; border-radius: 12px;
+  padding: 11px 18px; font-size: 13px; color: #3a2a20;
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  transition: background .15s ease;
+}
+.an-btn:hover { background: #fdfaf5; }
+.an-btn svg { width: 15px; height: 15px; stroke: #5c4a3e; fill: none; stroke-width: 1.6; }
+
+/* ── focus ───────────────────────────────────────────────────────────────────
+   ⚠️ ONE VISIBLE RING FOR EVERY INTERACTIVE THING ON THE PAGE, including the ones drawn in SVG.
+   Phase 8 makes every figure a door; a door with no focus state is a door only a mouse can open. */
+.qa-wrap :focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; border-radius: 8px; }
+
+/* ── illustration slots ──────────────────────────────────────────────────────
+   Plates sized for the final artwork. Swap the inner <svg>; keep the box. */
+.an-illo {
+  flex: none; border-radius: 14px; background: #fdfaf5; border: 1px dashed #e4d9cb;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.an-illo--stat { width: 54px; height: 54px; }
+.an-illo--empty { width: 120px; height: 120px; border-radius: 20px; }
+.an-illo--hero { width: 168px; height: 150px; border-radius: 22px; }
+.an-illo--stat svg { width: 32px; height: 32px; }
+.an-illo--empty svg { width: 74px; height: 74px; }
+.an-illo--hero svg { width: 104px; height: 104px; }
+
+/* ── the stat strip ──────────────────────────────────────────────────────────
+   ONE panel, hairline-divided — five stats that read as one object rather than five cards. */
+.an-strip {
+  background: #fff; border: 1px solid #ece3d7; border-radius: 18px;
+  display: flex; box-shadow: 0 1px 3px rgba(58, 28, 20, 0.03);
+}
+.an-stat { flex: 1; display: flex; align-items: center; gap: 14px; padding: 20px; border-left: 1px solid #f0e8dc; min-width: 0; }
+.an-stat:first-child { border-left: none; }
+.an-stat-txt { min-width: 0; }
+.an-stat-k { font-size: 12.5px; color: #6a5a50; }
+.an-stat-v { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 31px; font-weight: 500; color: #2b1a12; line-height: 1.1; margin-top: 2px; }
+/* the guarded form is a fraction, and a fraction needs less room to shout with */
+.an-stat-v--frac { font-size: 22px; padding-top: 6px; }
+.an-stat-v small { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 17px; color: #8a7a6c; }
+.an-stat-m { font-size: 11px; color: #9a8c80; font-weight: 300; margin-top: 4px; }
+/* ⚠️ THE PREVIOUS-PERIOD LINE IS PLAIN TEXT — no arrow, no colour, no up-or-down. A rising median
+   is a fact about a set of agents, not a failure of the person reading it. */
+.an-stat-prev { font-size: 10.5px; color: #b0a294; font-weight: 300; margin-top: 3px; }
+
+/* ── the early-state hint ────────────────────────────────────────────────────
+   ⚠️ A ROADMAP, NOT A SCOLD. It says when each figure firms up; it never says the writer has too
+   few queries out. */
+.an-early { background: #fdfaf5; border: 1px dashed #e4d9cb; border-radius: 12px; padding: 12px 18px; font-size: 12px; color: #7a6a5c; margin-top: 14px; line-height: 1.6; }
+.an-early b { font-family: 'Caveat', cursive; font-size: 16px; color: #7c3a2a; font-weight: 500; }
+
+/* ── the empty page ──────────────────────────────────────────────────────────
+   ⚠️ ZERO QUERIES IS ITS OWN STATE, not a page of zeroes. Five stats reading 0 and four empty
+   charts describe a broken page; one line describes an account that has not started yet. */
+.an-blank { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 56px 20px; }
+.an-blank p { color: #9a8c80; font-size: 13px; font-weight: 300; line-height: 1.7; max-width: 340px; }
+
+/* ── panels + the twelve-column grid ─────────────────────────────────────────
+   ⚠️ THE GRID IS DECLARED WITH ITS COLUMNS AND EVERY CHILD SPANS THEM EXPLICITLY. Auto-placement
+   never overlaps, so a panel without a span would be pushed into an implicit column and the row
+   would silently grow sideways — the fault that put 688px of phantom margin on nine pages. */
+.an-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 18px; }
+.an-grid + .an-grid { margin-top: 18px; }
+.an-strip + .an-grid { margin-top: 20px; }
+.an-early + .an-grid { margin-top: 18px; }
+.an-span12 { grid-column: span 12; }
+.an-span8 { grid-column: span 8; }
+.an-span7 { grid-column: span 7; }
+.an-span6 { grid-column: span 6; }
+.an-span5 { grid-column: span 5; }
+.an-span4 { grid-column: span 4; }
+.an-panel {
+  background: #fff; border: 1px solid #ece3d7; border-radius: 16px; overflow: hidden;
+  display: flex; flex-direction: column; min-width: 0;
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.03);
+}
+.an-ph { background: #dde3da; padding: 13px 18px; display: flex; align-items: center; gap: 11px; flex: none; }
+.an-ph h2 { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 16.5px; font-weight: 500; color: #2e3a2c; margin: 0; }
+.an-hi { width: 19px; height: 19px; flex: none; }
+.an-note { margin-left: auto; font-size: 11px; color: #5f7360; font-weight: 300; text-align: right; }
+.an-pb { padding: 18px 20px 20px; flex: 1; min-height: 0; }
+
+/* ── the journey funnel ──────────────────────────────────────────────────────
+   ⚠️ THE STAGES SHARE THE SPACE AND THE CONVERSIONS DO NOT. A conversion is a fixed 112px column
+   so the three of them stay the same width as the stages either side of them grow. */
+.an-funnelrow { display: flex; gap: 20px; align-items: center; }
+.an-funnel { display: flex; align-items: stretch; padding: 6px 0 2px; flex: 1; min-width: 0; }
+.an-fstage {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center;
+  text-align: center; padding: 8px 10px; border-radius: 12px; transition: background .15s ease;
+}
+/* ⚠️ THE DOT IS A FIXED BOX. StatusDot draws at the size it is given; letting the flex column
+   stretch it would put four differently-sized dots on one row as the labels below them wrap. */
+.an-fdot { width: 56px; height: 56px; margin-bottom: 12px; flex: none; }
+.an-fnum { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 42px; font-weight: 500; color: #2b1a12; line-height: 1; }
+.an-fname { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9px; letter-spacing: 0.17em; font-weight: 500; text-transform: uppercase; color: #9c8878; margin-top: 9px; }
+.an-fdesc { font-size: 11px; color: #8a7a6c; font-weight: 300; margin-top: 5px; max-width: 180px; line-height: 1.5; }
+.an-fconv { width: 112px; flex: none; display: flex; flex-direction: column; align-items: center; padding-top: 18px; }
+.an-arrow { width: 100%; height: 18px; }
+.an-fpct { font-family: var(--font-serif, 'Playfair Display', serif); font-style: italic; font-size: 16px; color: #7c3a2a; margin-top: 6px; white-space: nowrap; }
+.an-fpl { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #b0a294; margin-top: 3px; }
+
+/* the three-column reference strip beneath the funnel */
+.an-readnum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid #f0e8dc; margin-top: 14px; }
+.an-rn { padding: 14px 18px 2px; border-left: 1px solid #f0e8dc; min-width: 0; }
+.an-rn:first-child { border-left: none; padding-left: 2px; }
+.an-rk { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 8.5px; letter-spacing: 0.15em; font-weight: 500; text-transform: uppercase; color: #9c8878; display: flex; align-items: center; gap: 8px; }
+.an-rt { font-size: 11.5px; color: #6a5a50; font-weight: 300; margin-top: 6px; line-height: 1.55; }
+/* the one Caveat on the page — a margin note, and the only handwritten thing here */
+.an-ffoot { border-top: 1px solid #f0e8dc; margin-top: 12px; padding-top: 12px; font-size: 11px; color: #8a7a6c; font-weight: 300; display: flex; gap: 9px; align-items: baseline; }
+.an-ffoot em { font-family: 'Caveat', cursive; font-style: normal; font-size: 16px; color: #7c3a2a; flex: none; }
+
+/* ── charts ──────────────────────────────────────────────────────────────────
+   ⚠️ THE SVG IS DRAWN AT REAL PIXEL WIDTH, never scaled to fit. A scaled viewBox takes the type
+   with it, so an axis label would be a different size on a wide window than a narrow one. */
+.an-chartwrap { width: 100%; min-width: 0; }
+.an-chart { width: 100%; display: block; }
+.an-axis { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9px; letter-spacing: 0.05em; fill: #9c8878; }
+.an-axis--big { letter-spacing: 0.12em; }
+/* a range change re-draws the bars; the transition is what stops that reading as a flicker */
+.an-bar { transition: height .35s cubic-bezier(.22, 1, .36, 1), y .35s cubic-bezier(.22, 1, .36, 1); }
+.an-bar:hover { filter: brightness(0.97); }
+.an-mark { cursor: default; }
+.an-legend { display: flex; gap: 18px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0e8dc; flex-wrap: wrap; }
+.an-leg { display: flex; align-items: center; gap: 7px; font-size: 11px; color: #6a5a50; }
+.an-sw { width: 11px; height: 11px; border-radius: 3.5px; flex: none; box-sizing: border-box; }
+/* the event marks, restated in the legend as the diamonds they are */
+.an-swd { width: 11px; height: 11px; flex: none; transform: rotate(45deg); border: 1.2px solid #7c3a2a; box-sizing: border-box; }
+.an-swd--full { background: #fdfaf5; }
+.an-swd--offer { background: #7c3a2a; }
+.an-guardnote { margin-top: 12px; padding-top: 11px; border-top: 1px solid #f0e8dc; font-size: 11px; color: #9a8c80; font-weight: 300; line-height: 1.5; }
+
+/* ── the donut ───────────────────────────────────────────────────────────────
+   The ring gives the shape, the rows give the figures — each doing what it is good at. */
+/* ⚠️ THE PANEL BODY IS THE CONTAINER, AND THIS IS A CONTAINER QUERY RATHER THAN A MEDIA QUERY.
+   The donut sits in a four-column panel whose width depends on the window AND on the grid, so the
+   viewport is the wrong thing to ask: at 1440 the body is ~274px and the list was crushed to a
+   single character per label, while the same panel at 1920 has room for both. It asks its own box.
+   ⚠️ AND IT STACKS BELOW THE THRESHOLD RATHER THAN SHRINKING THE RING. A smaller donut would make
+   the one thing the panel is for harder to read in order to keep a layout nobody asked for. */
+.an-pb { container-type: inline-size; }
+.an-donutwrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+@container (min-width: 340px) {
+  .an-donutwrap { flex-direction: row; align-items: center; gap: 8px; }
+}
+.an-donutwrap svg { flex: none; }
+.an-donuttotal { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 30px; fill: #2b1a12; }
+.an-arc { transition: opacity .14s ease; }
+.an-arc:hover { opacity: 0.86; }
+.an-dlist { flex: 1 1 auto; align-self: stretch; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.an-drow { display: flex; align-items: center; gap: 9px; font-size: 12px; color: #3a1c14; padding: 5px 8px; border-radius: 9px; transition: background .14s ease; min-width: 0; }
+.an-drow:hover { background: #fdfaf5; }
+.an-dname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.an-dn { margin-left: auto; font-family: var(--font-serif, 'Playfair Display', serif); font-size: 16px; color: #2b1a12; }
+.an-dp { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9px; color: #9c8878; width: 34px; text-align: right; flex: none; }
+
+/* ── the tooltip ─────────────────────────────────────────────────────────────
+   ⚠️ ONE TIP, `position: fixed`, RENDERED AT PAGE LEVEL. Inside a panel it would be clipped by the
+   panel's own `overflow: hidden`; inside the scroller it would move with the content while the
+   pointer did not. `pointer-events: none` so it can never sit between the pointer and the mark it
+   is describing. */
+.an-tip {
+  position: fixed; z-index: 200; background: #2e2418; color: #f5ede8; border-radius: 10px;
+  padding: 8px 12px; font-size: 11.5px; pointer-events: none; max-width: 250px; line-height: 1.5;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+}
+.an-tip b { color: #f5e2da; font-weight: 500; }
+.an-tipk { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #b8a898; display: block; margin-bottom: 2px; }
+.an-tipd { margin-top: 2px; }
+
+/* ── a panel with nothing in it yet ──────────────────────────────────────────
+   ⚠️ IT STATES WHAT WILL FILL IT, WHICH IS THE ONLY USEFUL THING AN EMPTY PANEL CAN SAY. */
+.an-emptystate { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14px 18px 20px; gap: 14px; }
+.an-emptystate p { color: #9a8c80; font-size: 12px; font-weight: 300; line-height: 1.6; max-width: 280px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .an-bar { transition: none; }
+}
+
+/* ── the histogram's value labels ────────────────────────────────────────────
+   The count sits above its own bar rather than behind a hover: a distribution is read by
+   comparing heights, and the figures are what make a near-tie legible. */
+.an-barval { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 15px; fill: #2b1a12; }
+
+/* ── the aging chart ─────────────────────────────────────────────────────────
+   ⚠️ THE WHOLE GROUP IS THE TARGET, not the 18px circle inside it. A dot, its stem and its arrow
+   are one query; hovering the stem and getting nothing would read as a dead spot. */
+.an-dotg { cursor: default; }
+.an-dotg:hover circle { filter: brightness(0.97); }
+/* legend keys drawn as the marks they describe, rather than as generic squares */
+.an-swc { width: 11px; height: 11px; border-radius: 50%; flex: none; background: #f5e2da; border: 1px solid #7c3a2a; box-sizing: border-box; }
+.an-swl { width: 14px; border-top: 1px dashed #9c8878; display: inline-block; flex: none; }
+
+/* ── on the horizon ──────────────────────────────────────────────────────────
+   Cards wrap rather than scroll: this is a short list by construction (four weeks of windows),
+   and a horizontal scroller would hide the later dates behind a gesture. */
+.an-horizonrow { display: flex; gap: 14px; flex-wrap: wrap; }
+.an-hcard {
+  flex: 1 1 190px; min-width: 190px; background: #fdfaf5; border: 1px solid #ece3d7;
+  border-radius: 12px; padding: 13px 15px; display: flex; align-items: center; gap: 12px;
+  transition: box-shadow .15s ease;
+}
+.an-hcard:hover { box-shadow: 0 3px 12px rgba(58, 28, 20, 0.08); }
+.an-hn { min-width: 0; }
+.an-hcard b { display: block; font-size: 12.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.an-hcard i { font-style: normal; font-size: 10.5px; color: #9a8c80; font-weight: 300; display: block; }
+.an-hd { margin-left: auto; text-align: right; flex: none; }
+.an-hd b { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 21px; overflow: visible; }
+.an-horizonempty { color: #9a8c80; font-size: 12px; font-weight: 300; padding: 6px 2px; line-height: 1.6; }
+
+/* ── fulls under consideration ───────────────────────────────────────────── */
+.an-fullrow { display: flex; align-items: center; gap: 13px; padding: 12px 8px; border-bottom: 1px solid #f4ede3; transition: background .14s ease; }
+.an-fullrow:hover { background: #fdfaf5; }
+.an-fullrow:last-of-type { border-bottom: none; }
+.an-fi { flex: none; width: 30px; height: 30px; display: inline-flex; }
+.an-fullname { min-width: 0; }
+.an-fullrow b { display: block; font-size: 13px; font-weight: 500; }
+.an-fullrow i { font-style: normal; font-size: 11px; color: #9a8c80; font-weight: 300; }
+.an-fd { margin-left: auto; text-align: right; flex: none; }
+.an-fd b { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 20px; font-weight: 500; }
+
+/* ── latest responses ────────────────────────────────────────────────────────
+   ⚠️ A REAL TABLE. Four columns of the same four things per row is a table by definition, and the
+   header association a `<th scope="col">` gives is not worth rebuilding out of divs. */
+.an-table { width: 100%; border-collapse: collapse; }
+.an-table th { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9px; letter-spacing: 0.17em; font-weight: 500; text-transform: uppercase; color: #9c8878; text-align: left; padding: 2px 10px 10px; border-bottom: 1px solid #f0e8dc; }
+.an-table th:last-child, .an-table td:last-child { text-align: right; }
+.an-table td { padding: 10px; border-bottom: 1px solid #f4ede3; font-size: 12.5px; color: #3a1c14; }
+.an-table tr:last-child td { border-bottom: none; }
+.an-table tbody tr { transition: background .14s ease; }
+.an-table tbody tr:hover { background: #fdfaf5; }
+.an-agname { font-weight: 500; display: block; }
+.an-agsub { font-size: 11px; color: #9a8c80; font-weight: 300; }
+.an-tdate { color: #6a5a50; white-space: nowrap; }
+.an-days { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 16px; color: #2b1a12; white-space: nowrap; }
+.an-days small { font-family: inherit; font-size: 10.5px; color: #9a8c80; }
+.an-chip { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase; padding: 4px 10px 4px 6px; border-radius: 13px; border: 1px solid #ece3d7; background: #fdfaf5; color: #6a5a50; white-space: nowrap; }
+
+/* ── doors ───────────────────────────────────────────────────────────────────
+   ⚠️ THE CLICKABLE THINGS ARE REAL `<button>`s, so they arrive with a button's own appearance.
+   These rules take that back off — the page's cards and rows must look exactly as they did — while
+   keeping everything a button gives: keyboard reach, Enter/Space, and a focus ring.
+   ⚠️ `text-align: left` MATTERS. A button centres its text by default, which silently re-typesets
+   every row this class touches. */
+.an-fstage, .an-drow, .an-hcard, .an-fullrow, .an-rowbtn {
+  font: inherit; color: inherit; text-align: left; background: none; border: none;
+  appearance: none; -webkit-appearance: none; cursor: pointer;
+}
+.an-fstage { width: 100%; }
+.an-drow, .an-hcard, .an-fullrow { width: 100%; box-sizing: border-box; }
+/* the two that carry their own frame keep it — `border: none` above would have taken it */
+.an-hcard { border: 1px solid #ece3d7; }
+.an-fullrow { border-bottom: 1px solid #f4ede3; border-radius: 0; }
+.an-fullrow:last-of-type { border-bottom: none; }
+.an-fstage:hover { background: #fdfaf5; }
+.an-rowbtn { padding: 0; display: block; }
+.an-trow { cursor: pointer; }
+
+/* ── the share card ──────────────────────────────────────────────────────────
+   ⚠️ `position: fixed` AT THE VIEWPORT, above the shell's own furniture. The scrim has to cover
+   the sidebar and the top bar too, or it is a card floating in the middle of a live page. */
+.an-shareov {
+  position: fixed; inset: 0; background: rgba(43, 26, 18, 0.35);
+  display: flex; align-items: center; justify-content: center; z-index: 400;
+}
+.an-sharecard {
+  background: #fdfaf5; border-radius: 20px; padding: 34px 40px 26px;
+  width: min(560px, calc(100vw - 40px)); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); text-align: center;
+}
+.an-sharecard h3 { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 24px; font-weight: 500; color: #2b1a12; margin: 0; }
+.an-ssub { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: #9c8878; margin-top: 7px; }
+.an-sfunnel { display: flex; justify-content: space-between; margin: 26px 8px 6px; gap: 8px; }
+.an-sfs { flex: 1; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.an-sn { font-family: var(--font-serif, 'Playfair Display', serif); font-size: 30px; color: #2b1a12; margin-top: 9px; }
+.an-sl { font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: #9c8878; margin-top: 4px; }
+.an-swm { border-top: 1px solid #ece0d2; margin-top: 22px; padding-top: 14px; display: flex; align-items: center; justify-content: space-between; font-family: var(--font-mono, 'JetBrains Mono', monospace); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #b0a294; }
+.an-sactions { display: flex; gap: 10px; justify-content: center; margin-top: 22px; }
+.an-sbtn { border-radius: 11px; padding: 10px 18px; font-size: 12.5px; font-family: inherit; cursor: pointer; border: 1px solid #ece3d7; background: #fff; color: #3a2a20; }
+.an-sbtn[disabled] { cursor: default; color: #b0a294; }
+/* the one filled control on this page, and it is a dismissal rather than a primary action */
+.an-sbtn--go { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; }
+/* the Share button in the journey panel's band */
+.an-sharebtn { margin-left: 12px; background: #fdfaf5; border: 1px solid #cfd8cc; border-radius: 10px; padding: 6px 13px; font-size: 11.5px; font-family: inherit; color: #3e4e3c; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; flex: none; }
+.an-sharebtn:hover { background: #fff; }
+.an-sharebtn svg { width: 13px; height: 13px; stroke: #3e4e3c; fill: none; stroke-width: 1.7; }

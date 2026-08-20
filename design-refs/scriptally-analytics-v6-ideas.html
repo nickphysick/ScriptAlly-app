@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<title>ScriptAlly — Analytics v6 · ideas demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{font-family:'Inter',sans-serif;color:#3a1c14;background:#f2ede7;overflow:hidden;font-size:13px;}
+
+/* ---------- App shell (locked nav — replicated, not restyled) ---------- */
+.shell{display:grid;grid-template-columns:336px 1fr;height:100vh;}
+.side{background:#f2ede7;padding:18px 16px 16px 20px;display:flex;flex-direction:column;overflow-y:auto;}
+.logo{display:flex;align-items:center;gap:10px;padding:6px 4px 20px;}
+.logo svg{width:40px;height:40px;}
+.logo span{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#2b1a12;}
+.mscard{background:#fdfaf5;border:1px solid #e7ddd2;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(58,28,20,0.04);margin-bottom:22px;}
+.msthumb{width:40px;height:44px;background:#dde5da;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.mscard b{font-size:14px;font-weight:600;display:block;color:#2b1a12;}
+.mscard i{font-style:normal;font-size:11.5px;color:#9a8c80;}
+.navsec{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.17em;font-weight:500;color:#9c8878;text-transform:uppercase;padding:16px 10px 8px;}
+.navitem{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:#3a2a20;font-size:14px;cursor:pointer;border:1px solid transparent;}
+.navitem svg{width:18px;height:18px;stroke:#5c4a3e;flex:none;}
+.navitem:hover{background:#ece5dc;}
+.navitem.active{background:#fdfaf5;border-color:#e7ddd2;box-shadow:0 1px 3px rgba(58,28,20,0.05);font-weight:500;}
+.navitem .cnt{margin-left:auto;color:#7c3a2a;font-size:12px;display:flex;align-items:center;gap:5px;}
+.navitem .cnt::before{content:'';width:6px;height:6px;border-radius:50%;background:#7c3a2a;display:inline-block;}
+.userrow{margin-top:auto;display:flex;align-items:center;gap:12px;padding:14px 10px 10px;border-top:1px solid #e7ddd2;}
+.uav{width:40px;height:40px;border-radius:50%;background:#fdfaf5;border:1px solid #e0d5c8;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:#7c3a2a;}
+.userrow b{display:block;font-size:14px;font-weight:600;color:#2b1a12;}
+.userrow i{font-style:normal;font-size:11.5px;color:#9a8c80;}
+.upgrade{margin-top:12px;background:#f5e2da;border:1px solid #e8c8bc;color:#7c3a2a;border-radius:22px;padding:12px;text-align:center;font-size:13.5px;font-weight:500;cursor:pointer;}
+.upgrade:hover{background:#efd5ca;}
+
+/* ---------- Main column ---------- */
+.main{display:flex;flex-direction:column;min-width:0;height:100vh;}
+.topbar{display:flex;align-items:center;gap:14px;padding:16px 28px 12px 12px;flex:none;}
+.crumbs{font-family:'Playfair Display',serif;font-size:19px;color:#2b1a12;display:flex;gap:10px;align-items:baseline;}
+.crumbs .sep{color:#c9beb2;}
+.crumbs .here{font-weight:600;}
+.saved{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.17em;color:#9c8878;text-transform:uppercase;border-left:1px solid #e0d5c8;padding-left:16px;margin-left:4px;}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.search{width:280px;background:#fdfaf5;border:1px solid #e7ddd2;border-radius:22px;padding:9px 16px;color:#9a8c80;font-size:13px;display:flex;justify-content:space-between;}
+.newbtn{background:#2b1a12;color:#f5ede8;border-radius:22px;padding:10px 20px;font-size:13.5px;display:flex;align-items:center;gap:7px;}
+
+/* Workspace plane — matches Query Centre / Dashboard: one parchment plane, cream page behind */
+.ws{flex:1;min-height:0;overflow-y:auto;scrollbar-gutter:stable both-edges;background:#fdfaf5;border:1px solid #ece3d7;border-right:none;border-bottom:none;border-radius:20px 0 0 0;}
+.wrap{max-width:1560px;margin:0 auto;padding:26px 32px 56px;}
+
+/* ---------- Page header card (mirrors Query Centre header) ---------- */
+.phead{background:#fff;border:1px solid #ece3d7;border-radius:18px;padding:20px 24px;display:flex;align-items:center;gap:18px;margin-bottom:20px;box-shadow:0 1px 3px rgba(58,28,20,0.03);}
+.pico{width:52px;height:52px;border-radius:14px;background:#fdfaf5;border:1px solid #ece3d7;display:flex;align-items:center;justify-content:center;flex:none;}
+.pico svg{width:24px;height:24px;stroke:#3a2a20;fill:none;stroke-width:1.5;}
+.phead h1{font-family:'Playfair Display',serif;font-size:36px;font-weight:500;color:#2b1a12;line-height:1.05;}
+.phead .sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;color:#9a8c80;margin-top:5px;}
+.range{margin-left:auto;display:flex;background:#fdfaf5;border:1px solid #ece3d7;border-radius:12px;padding:3px;gap:2px;flex:none;}
+.range button{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.07em;font-weight:500;text-transform:uppercase;color:#8a7a6c;background:transparent;border:1px solid transparent;border-radius:9px;padding:9px 15px;cursor:pointer;transition:all 0.15s;}
+.range button:hover{color:#7c3a2a;}
+.range button.on{background:#f5e2da;border-color:#e8c8bc;color:#7c3a2a;}
+.exportbtn{flex:none;background:#fff;border:1px solid #ece3d7;border-radius:12px;padding:11px 18px;font-size:13px;color:#3a2a20;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.exportbtn:hover{background:#fdfaf5;}
+.exportbtn svg{width:15px;height:15px;stroke:#5c4a3e;fill:none;stroke-width:1.6;}
+
+/* ---------- Panels (sage header + white body, as on Dashboard / Query Centre) ---------- */
+.panel{background:#fff;border:1px solid #ece3d7;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(58,28,20,0.03);}
+.ph{background:#dde3da;padding:13px 18px;display:flex;align-items:center;gap:11px;flex:none;}
+.ph svg.hi{width:19px;height:19px;stroke:#5a6e58;fill:none;stroke-width:1.6;flex:none;}
+.ph h2{font-family:'Playfair Display',serif;font-size:16.5px;font-weight:500;color:#2e3a2c;}
+.ph .note{margin-left:auto;font-size:11px;color:#5f7360;font-weight:300;text-align:right;}
+.pb{padding:18px 20px 20px;flex:1;min-height:0;}
+
+/* Layout */
+.grid{display:grid;gap:18px;grid-template-columns:repeat(12,1fr);}
+.grid + .grid{margin-top:18px;}
+.span12{grid-column:span 12;}
+.span8{grid-column:span 8;}
+.span7{grid-column:span 7;}
+.span6{grid-column:span 6;}
+.span5{grid-column:span 5;}
+.span4{grid-column:span 4;}
+
+/* ---------- Stat strip (one panel, hairline-divided — as on Dashboard) ---------- */
+.statstrip{background:#fff;border:1px solid #ece3d7;border-radius:18px;display:flex;margin-bottom:20px;box-shadow:0 1px 3px rgba(58,28,20,0.03);}
+.st{flex:1;display:flex;align-items:center;gap:14px;padding:20px 20px;border-left:1px solid #f0e8dc;min-width:0;}
+.st:first-child{border-left:none;}
+.st .txt{min-width:0;}
+.st .k{font-size:12.5px;color:#6a5a50;}
+.st .v{font-family:'Playfair Display',serif;font-size:31px;font-weight:500;color:#2b1a12;line-height:1.1;margin-top:2px;}
+.st .v small{font-family:'Playfair Display',serif;font-size:17px;color:#8a7a6c;}
+.st .v.frac{font-size:22px;padding-top:6px;}
+.st .m{font-size:11px;color:#9a8c80;font-weight:300;margin-top:4px;}
+
+/* === ILLUSTRATION SLOTS ===============================================
+   Every .illo is a placeholder plate sized for a final watercolour/line
+   illustration. Swap the inner <svg> for the artwork; keep the plate.
+   ===================================================================== */
+.illo{flex:none;width:54px;height:54px;border-radius:14px;background:#fdfaf5;border:1px dashed #e4d9cb;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.illo svg{width:32px;height:32px;}
+.illo.lg{width:120px;height:120px;border-radius:20px;}
+.illo.lg svg{width:74px;height:74px;}
+.illo.xl{width:168px;height:150px;border-radius:22px;}
+.illo.xl svg{width:104px;height:104px;}
+
+/* Funnel */
+.funnel{display:flex;align-items:stretch;padding:6px 0 2px;}
+.fstage{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 10px;border-radius:12px;transition:background 0.15s;}
+.fstage:hover{background:#fdfaf5;}
+.fdot{width:56px;height:56px;margin-bottom:12px;}
+.fnum{font-family:'Playfair Display',serif;font-size:42px;font-weight:500;color:#2b1a12;line-height:1;}
+.fname{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.17em;font-weight:500;text-transform:uppercase;color:#9c8878;margin-top:9px;}
+.fdesc{font-size:11px;color:#8a7a6c;font-weight:300;margin-top:5px;max-width:180px;line-height:1.5;}
+.fconv{width:112px;flex:none;display:flex;flex-direction:column;align-items:center;padding-top:18px;}
+.fconv .arrow{width:100%;height:18px;}
+.fconv .pct{font-family:'Playfair Display',serif;font-style:italic;font-size:16px;color:#7c3a2a;margin-top:6px;white-space:nowrap;}
+.fconv .pl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:#b0a294;margin-top:3px;}
+.funnelrow{display:flex;gap:20px;align-items:center;}
+.readnum{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid #f0e8dc;margin-top:14px;}
+.rn{padding:14px 18px 2px;border-left:1px solid #f0e8dc;}
+.rn:first-child{border-left:none;padding-left:2px;}
+.rn .rk{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.15em;font-weight:500;text-transform:uppercase;color:#9c8878;display:flex;align-items:center;gap:8px;}
+.rn .rt{font-size:11.5px;color:#6a5a50;font-weight:300;margin-top:6px;line-height:1.55;}
+.ffoot{border-top:1px solid #f0e8dc;margin-top:12px;padding-top:12px;font-size:11px;color:#8a7a6c;font-weight:300;display:flex;gap:9px;align-items:baseline;}
+.ffoot em{font-family:'Caveat',cursive;font-style:normal;font-size:16px;color:#7c3a2a;flex:none;}
+
+/* Charts */
+.chart{width:100%;display:block;}
+.axis{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.05em;fill:#9c8878;}
+.axis.big{letter-spacing:0.12em;}
+.gridline{stroke:#f0e8dc;stroke-width:1;}
+.legend{display:flex;gap:18px;margin-top:12px;padding-top:12px;border-top:1px solid #f0e8dc;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:7px;font-size:11px;color:#6a5a50;}
+.sw{width:11px;height:11px;border-radius:3.5px;flex:none;}
+.guardnote{margin-top:12px;padding-top:11px;border-top:1px solid #f0e8dc;font-size:11px;color:#9a8c80;font-weight:300;line-height:1.5;}
+
+/* Donut */
+.donutwrap{display:flex;align-items:center;gap:8px;}
+.dlist{flex:1;display:flex;flex-direction:column;gap:7px;min-width:0;}
+.drow{display:flex;align-items:center;gap:9px;font-size:12px;color:#3a1c14;padding:5px 8px;border-radius:9px;transition:background 0.14s;}
+.drow:hover{background:#fdfaf5;}
+.drow .n{margin-left:auto;font-family:'Playfair Display',serif;font-size:16px;color:#2b1a12;}
+.drow .p{font-family:'JetBrains Mono',monospace;font-size:9px;color:#9c8878;width:34px;text-align:right;}
+
+/* Fulls */
+.fullrow{display:flex;align-items:center;gap:13px;padding:12px 8px;border-bottom:1px solid #f4ede3;transition:background 0.14s;}
+.fullrow:hover{background:#fdfaf5;}
+.fullrow:last-of-type{border-bottom:none;}
+.fullrow .fi{flex:none;width:30px;height:30px;}
+.fullrow b{display:block;font-size:13px;font-weight:500;}
+.fullrow i{font-style:normal;font-size:11px;color:#9a8c80;font-weight:300;}
+.fullrow .fd{margin-left:auto;text-align:right;}
+.fullrow .fd b{font-family:'Playfair Display',serif;font-size:20px;font-weight:500;}
+.emptystate{display:flex;flex-direction:column;align-items:center;text-align:center;padding:14px 18px 20px;gap:14px;}
+.emptystate p{color:#9a8c80;font-size:12px;font-weight:300;line-height:1.6;max-width:280px;}
+
+/* Table */
+table{width:100%;border-collapse:collapse;}
+th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.17em;font-weight:500;text-transform:uppercase;color:#9c8878;text-align:left;padding:2px 10px 10px;border-bottom:1px solid #f0e8dc;}
+th:last-child,td:last-child{text-align:right;}
+td{padding:10px;border-bottom:1px solid #f4ede3;font-size:12.5px;color:#3a1c14;}
+tr:last-child td{border-bottom:none;}
+tbody tr{transition:background 0.14s;}
+tbody tr:hover{background:#fdfaf5;}
+td .agname{font-weight:500;display:block;}
+td .agsub{font-size:11px;color:#9a8c80;font-weight:300;}
+td .days{font-family:'Playfair Display',serif;font-size:16px;color:#2b1a12;}
+td .days small{font-family:'Inter',sans-serif;font-size:10.5px;color:#9a8c80;}
+.chip{display:inline-flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.09em;text-transform:uppercase;padding:4px 10px 4px 6px;border-radius:13px;border:1px solid #ece3d7;background:#fdfaf5;color:#6a5a50;}
+
+/* Tooltip */
+#tip{position:fixed;z-index:200;background:#2e2418;color:#f5ede8;border-radius:10px;padding:8px 12px;font-size:11.5px;pointer-events:none;opacity:0;transition:opacity 0.12s;box-shadow:0 6px 18px rgba(0,0,0,0.22);max-width:250px;line-height:1.5;}
+#tip b{color:#f5e2da;font-weight:500;}
+#tip .tk{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.14em;text-transform:uppercase;color:#b8a898;display:block;margin-bottom:2px;}
+
+.bar-anim{transition:height 0.6s cubic-bezier(0.22,1,0.36,1), y 0.6s cubic-bezier(0.22,1,0.36,1);}
+
+/* ===== ideas-demo additions ===== */
+.banner{background:#fff8ef;border:1px solid #ecd9bd;border-radius:14px;padding:13px 18px;display:flex;align-items:center;gap:14px;margin-bottom:18px;font-size:12px;color:#7a6248;flex-wrap:wrap;}
+.banner b{font-weight:600;color:#5c4326;}
+.ideachip{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;font-weight:500;background:#f7ecd9;border:1px solid #e6d2ae;color:#8a6a3a;border-radius:9px;padding:3px 8px;text-transform:uppercase;flex:none;}
+.earlybtn{margin-left:auto;background:#fff;border:1px solid #ecd9bd;border-radius:10px;padding:8px 14px;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:#8a6a3a;cursor:pointer;flex:none;}
+.earlybtn.on{background:#f7ecd9;}
+.earlyhint{background:#fdfaf5;border:1px dashed #e4d9cb;border-radius:12px;padding:12px 18px;font-size:12px;color:#7a6a5c;margin:-6px 0 20px;line-height:1.6;}
+.dd{font-size:10.5px;color:#b0a294;font-weight:300;margin-top:3px;}
+.clicky{cursor:pointer;}
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(10px);background:#2e2418;color:#f5ede8;border-radius:12px;padding:11px 18px;font-size:12.5px;opacity:0;pointer-events:none;transition:opacity 0.18s, transform 0.18s;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,0.25);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast b{color:#f5e2da;font-weight:500;}
+.sharebtn{margin-left:12px;background:#fdfaf5;border:1px solid #cfd8cc;border-radius:10px;padding:6px 13px;font-size:11.5px;color:#3e4e3c;cursor:pointer;display:inline-flex;align-items:center;gap:7px;flex:none;}
+.sharebtn:hover{background:#fff;}
+.horizonrow{display:flex;gap:14px;flex-wrap:wrap;}
+.hcard{flex:1;min-width:190px;background:#fdfaf5;border:1px solid #ece3d7;border-radius:12px;padding:13px 15px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:box-shadow 0.15s;}
+.hcard:hover{box-shadow:0 3px 12px rgba(58,28,20,0.08);}
+.hcard .hn{min-width:0;}
+.hcard b{display:block;font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hcard i{font-style:normal;font-size:10.5px;color:#9a8c80;font-weight:300;display:block;}
+.hcard .hd{margin-left:auto;text-align:right;flex:none;}
+.hcard .hd b{font-family:'Playfair Display',serif;font-size:21px;overflow:visible;}
+#shareov{position:fixed;inset:0;background:rgba(43,26,18,0.35);display:none;align-items:center;justify-content:center;z-index:400;}
+#shareov.show{display:flex;}
+.sharecard{background:#fdfaf5;border-radius:20px;padding:34px 40px 26px;width:560px;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;}
+.sharecard h3{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;color:#2b1a12;}
+.sharecard .ssub{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.16em;text-transform:uppercase;color:#9c8878;margin-top:7px;}
+.sfunnel{display:flex;justify-content:space-between;margin:26px 8px 6px;gap:8px;}
+.sfs{flex:1;text-align:center;}
+.sfs .n{font-family:'Playfair Display',serif;font-size:30px;color:#2b1a12;margin-top:9px;}
+.sfs .l{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.14em;text-transform:uppercase;color:#9c8878;margin-top:4px;}
+.swm{border-top:1px solid #ece0d2;margin-top:22px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:#b0a294;}
+.sactions{display:flex;gap:10px;justify-content:center;margin-top:22px;}
+.sactions button{border-radius:11px;padding:10px 18px;font-size:12.5px;cursor:pointer;border:1px solid #ece3d7;background:#fff;color:#3a2a20;}
+.sactions button.p{background:#f5e2da;border-color:#e8c8bc;color:#7c3a2a;}
+@media (prefers-reduced-motion: reduce){.bar-anim{transition:none;}}
+</style>
+</head>
+<body>
+<div id="tip"></div>
+<div id="toast"></div>
+<div id="shareov">
+  <div class="sharecard">
+    <h3 id="shTitle">Murphy's Day Out — the journey so far</h3>
+    <div class="ssub" id="shSub"></div>
+    <div class="sfunnel" id="shFunnel"></div>
+    <div class="swm"><span>Tracked with ScriptAlly</span><span id="shDate"></span></div>
+    <div class="sactions">
+      <button onclick="toast('In the build this exports the card as a PNG')" class="p">Download PNG</button>
+      <button onclick="document.getElementById('shareov').classList.remove('show')">Close</button>
+    </div>
+  </div>
+</div>
+<div class="shell">
+
+  <!-- ============ SIDEBAR (locked component — replica) ============ -->
+  <aside class="side">
+    <div class="logo">
+      <svg viewBox="0 0 40 40" fill="none"><path d="M4 22 L34 8 L20 26 L16 22 Z" fill="#2b1a12"/><path d="M16 22 L18 32 L21 26" fill="#2b1a12"/><path d="M8 30 q4 -3 8 0 q4 3 8 0" stroke="#2b1a12" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+      <span>ScriptAlly</span>
+    </div>
+    <div class="mscard">
+      <div class="msthumb">📗</div>
+      <div><b>Murphy's Day …</b><i>Thriller · 50,000 words</i></div>
+    </div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="8" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/><rect x="13" y="13" width="8" height="8" rx="1.5"/></svg>Dashboard</div>
+    <div class="navsec">Queries</div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 12 L21 4 L13 15 L10 12 Z"/><path d="M10 12 L11 19 L13 15"/></svg>Query Centre</div>
+    <div class="navitem active"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 19 L4 5"/><path d="M4 19 L20 19"/><path d="M7 14 L11 9 L14 12 L19 6"/></svg>Analytics</div>
+    <div class="navsec">Agents</div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19 c0-3 2.5-5 5.5-5 s5.5 2 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14 c2.8 0 4.5 1.8 4.5 4.4"/></svg>Contact list</div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 L13.5 13.5 L8.5 15.5 L10.5 10.5 Z"/></svg>Discover</div>
+    <div class="navsec">Materials</div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M5 4 v16"/><path d="M9 4 v16"/><path d="M13 5 l4 15"/></svg>Manuscripts</div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="4" y="5" width="10" height="14" rx="1.5"/><path d="M8 9 h2 M8 12 h2"/><rect x="10" y="7" width="10" height="12" rx="1.5" fill="#f2ede7"/></svg>Comparable titles</div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M5 4 h11 l3 3 v13 h-14 Z"/><path d="M9 12 h6 M9 15 h6"/></svg>Submission packages</div>
+    <div class="navsec">Tasks</div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 6 l1.5 1.5 L8 5"/><path d="M11 6.5 h9"/><path d="M4 12.5 l1.5 1.5 L8 11.5"/><path d="M11 13 h9"/><path d="M4 19 l1.5 1.5 L8 18"/><path d="M11 19.5 h9"/></svg>To-do list<span class="cnt">16</span></div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10 h16 M8 3 v4 M16 3 v4"/></svg>Calendar</div>
+    <div class="navitem"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M5 4 h14 v12 l-4 4 h-10 Z"/><path d="M15 20 v-4 h4"/></svg>Noteboard</div>
+    <div class="navsec">Account</div>
+    <div class="userrow">
+      <div class="uav">BC</div>
+      <div><b>Bethany Carter</b><i>Free plan</i></div>
+    </div>
+    <div class="upgrade">Upgrade</div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <div class="topbar">
+      <div class="crumbs">ScriptAlly <span class="sep">/</span> Queries <span class="sep">/</span> <span class="here">Analytics</span></div>
+      <div class="saved">All changes saved</div>
+      <div class="tb-right">
+        <div class="search"><span>Search</span><span style="font-family:'JetBrains Mono',monospace;font-size:10px;">⌘K</span></div>
+        <div class="newbtn">＋ New</div>
+      </div>
+    </div>
+
+    <div class="ws" id="ws-cscroll">
+      <div class="wrap">
+
+        <div class="banner">
+          <b>Ideas demo</b>
+          <span><span class="ideachip">Idea 1</span> every number is a door — click any segment, bar, dot, stage or row</span>
+          <span><span class="ideachip">Idea 2</span> previous-period context under the stats</span>
+          <button class="earlybtn" id="earlybtn">Idea 6 · Preview first-week view</button>
+        </div>
+
+        <!-- Page header -->
+        <div class="phead">
+          <div class="pico"><svg viewBox="0 0 24 24"><path d="M4 19 V5"/><path d="M4 19 H20"/><path d="M7 14 L11 9 L14 12 L19 6"/></svg></div>
+          <div>
+            <h1>Analytics</h1>
+            <div class="sub" id="pheadsub"></div>
+          </div>
+          <div class="range" id="range">
+            <button data-r="all" class="on">All time</button>
+            <button data-r="6">Last 6 months</button>
+            <button data-r="3">Last 3 months</button>
+          </div>
+          <div class="exportbtn"><svg viewBox="0 0 24 24"><path d="M12 4 v11"/><path d="M8 12 l4 4 4-4"/><path d="M5 19 h14"/></svg>Export</div>
+        </div>
+
+        <!-- Stat strip (illustration slots) -->
+        <div class="statstrip" id="stats"></div>
+        <div class="earlyhint" id="earlyhint" hidden><b style="font-family:'Caveat',cursive;font-size:16px;color:#7c3a2a;font-weight:500;">Early days —</b> percentages appear once about 20 queries are out. Reply-time and window charts fill in as agents respond; the journey card takes shape with every send.</div>
+
+        <!-- Journey -->
+        <div class="grid">
+          <div class="panel span12">
+            <div class="ph">
+              <svg class="hi" viewBox="0 0 24 24"><path d="M3 12 L21 4 L13 15 L10 12 Z"/><path d="M10 12 L11 19 L13 15"/></svg>
+              <h2>The journey so far</h2>
+              <button class="sharebtn" id="sharebtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3e4e3c" stroke-width="1.7"><path d="M12 15 V4"/><path d="M8 7.5 L12 3.5 L16 7.5"/><path d="M5 12 v7 h14 v-7"/></svg>Share card <span class="ideachip">Idea 7</span></button>
+              <span class="note" id="funnelNote"></span>
+            </div>
+            <div class="pb">
+              <div class="funnelrow">
+                <div class="funnel" id="funnel" style="flex:1;"></div>
+                <!-- ILLUSTRATION SLOT · journey hero · ~168×150 · suggested: a watercolour desk scene or a road of envelopes -->
+                <div class="illo xl">
+                  <svg viewBox="0 0 100 100" fill="none">
+                    <path d="M14 66 q18 -14 36 -6 t36 -20" stroke="#d8c9b8" stroke-width="1.4" stroke-dasharray="3 5" stroke-linecap="round"/>
+                    <rect x="22" y="52" width="22" height="15" rx="2" stroke="#c9beb2" stroke-width="1.3"/>
+                    <path d="M22 53 l11 8 l11 -8" stroke="#c9beb2" stroke-width="1.3"/>
+                    <path d="M62 28 l20 8 l-13 4 l-3 9 l-4 -11 z" stroke="#c9beb2" stroke-width="1.3" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="readnum" id="readnum"></div>
+              <div class="ffoot"><em>For reference —</em> querying communities commonly cite 5–10% queried-to-requested as a working rate. The figure is self-reported, varies widely by genre and list fit, and only settles once a fair number of queries are out.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline + status -->
+        <div class="grid">
+          <div class="panel span8">
+            <div class="ph">
+              <svg class="hi" viewBox="0 0 24 24"><path d="M4 19 V5"/><path d="M4 19 H20"/><path d="M7 14 L11 9 L14 12 L19 6"/></svg>
+              <h2>Sending and hearing back</h2>
+              <span class="ideachip">Idea 3</span>
+              <span class="note">Queries sent and responses received, by month · ◆ marks fulls and offers</span>
+            </div>
+            <div class="pb">
+              <svg class="chart" id="timeline" height="240"></svg>
+              <div class="legend">
+                <span class="leg"><span class="sw" style="background:#f5e2da;border:1px solid #7c3a2a;"></span>Queries sent</span>
+                <span class="leg"><span class="sw" style="background:#a9bca4;"></span>Responses received</span>
+              </div>
+            </div>
+          </div>
+          <div class="panel span4">
+            <div class="ph">
+              <svg class="hi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4 a8 8 0 0 1 8 8"/><circle cx="12" cy="12" r="3"/></svg>
+              <h2>Where things stand</h2>
+            </div>
+            <div class="pb">
+              <div class="donutwrap">
+                <svg id="donut" width="168" height="168" viewBox="0 0 168 168"></svg>
+                <div class="dlist" id="dlist"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reply times + aging -->
+        <div class="grid">
+          <div class="panel span6">
+            <div class="ph">
+              <svg class="hi" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M12 7 v5.4 l3.4 2"/></svg>
+              <h2>How long replies take</h2>
+              <span class="note" id="histoNote"></span>
+            </div>
+            <div class="pb">
+              <svg class="chart" id="histo" height="200"></svg>
+              <div class="guardnote">Query responses only. Full manuscripts sit on their own timeline — see “Fulls under consideration”.</div>
+            </div>
+          </div>
+          <div class="panel span6">
+            <div class="ph">
+              <svg class="hi" viewBox="0 0 24 24"><path d="M6 3.5 h12"/><path d="M6 20.5 h12"/><path d="M7.5 3.5 c0 5 9 5 9 0"/><path d="M7.5 20.5 c0 -5 9 -5 9 0"/></svg>
+              <h2>Queries still out</h2>
+              <span class="note" id="agingNote"></span>
+            </div>
+            <div class="pb">
+              <svg class="chart" id="aging" height="200"></svg>
+              <div class="legend">
+                <span class="leg"><span class="sw" style="background:#f5e2da;border:1px solid #7c3a2a;border-radius:50%;"></span>Awaiting a first response</span>
+                <span class="leg"><span style="width:14px;border-top:1px dashed #9c8878;display:inline-block;"></span>Each agency’s own stated window</span>
+                <span class="leg" id="autoclosekey"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- On the horizon -->
+        <div class="grid">
+          <div class="panel span12">
+            <div class="ph">
+              <svg class="hi" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10 h16 M8 3 v4 M16 3 v4"/></svg>
+              <h2>On the horizon</h2>
+              <span class="ideachip">Idea 5</span>
+              <span class="note" id="horizonNote"></span>
+            </div>
+            <div class="pb"><div class="horizonrow" id="horizon"></div></div>
+          </div>
+        </div>
+
+        <!-- Fulls + latest responses -->
+        <div class="grid">
+          <div class="panel span5">
+            <div class="ph">
+              <svg class="hi" viewBox="0 0 24 24"><path d="M5 4 h11 l3 3 v13 h-14 Z"/><path d="M9 12 h6 M9 15.5 h6"/></svg>
+              <h2>Fulls under consideration</h2>
+              <span class="note" id="fullsNote"></span>
+            </div>
+            <div class="pb" id="fulls" style="padding-top:8px;"></div>
+          </div>
+          <div class="panel span7">
+            <div class="ph">
+              <svg class="hi" viewBox="0 0 24 24"><path d="M4 6 h16 v12 h-16 Z"/><path d="M4 7 l8 6 l8 -6"/></svg>
+              <h2>Latest responses</h2>
+              <span class="note">Most recent first</span>
+            </div>
+            <div class="pb" style="padding-top:12px;">
+              <table>
+                <thead><tr><th>Agent</th><th>Sent</th><th>Response</th><th>Wait</th></tr></thead>
+                <tbody id="resplog"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   Single source of truth: the query log. Every panel derives from it.
+   o : open | pass | cnr (closed once the agency's window elapsed) |
+       partial | full | offer
+   r : days to first response (null if none)
+   w : agency's stated response window, in weeks
+   fs: days after send when the full went out (fulls only)
+   ========================================================================= */
+const TODAY = new Date('2026-08-13');
+const Q = [
+  {a:'Rachel Emberton', g:'Emberton Literary',   s:'2026-01-06', o:'offer',   r:19,  w:8},
+  {a:'Tom Osei',        g:'Greenhouse & Wilde',  s:'2026-01-06', o:'pass',    r:11,  w:6},
+  {a:'Sophie Calder',   g:'Calder & Frost',      s:'2026-01-07', o:'pass',    r:26,  w:8},
+  {a:'James Whitlock',  g:'Whitlock Agency',     s:'2026-01-08', o:'pass',    r:44,  w:12},
+  {a:'Priya Nair',      g:'Nair Associates',     s:'2026-01-09', o:'pass',    r:38,  w:8},
+  {a:'Eleanor Voss',    g:'Voss & Hart',         s:'2026-01-12', o:'pass',    r:63,  w:12},
+  {a:'Daniel Okafor',   g:'Okafor Literary',     s:'2026-01-13', o:'cnr',     r:null, w:8},
+  {a:'Harriet Lund',    g:'Lund Book Agency',    s:'2026-01-14', o:'cnr',     r:null, w:12},
+  {a:'Marcus Feld',     g:'Feld & Associates',   s:'2026-03-02', o:'full',    r:16, fs:18, w:8},
+  {a:'Anna Szabo',      g:'Ledger Literary',     s:'2026-03-02', o:'partial', r:23,  w:12},
+  {a:'Owen Pritchard',  g:'Pritchard & Gale',    s:'2026-03-03', o:'pass',    r:6,   w:6},
+  {a:'Yasmin Cole',     g:'Cole Represents',     s:'2026-03-03', o:'pass',    r:14,  w:8},
+  {a:'Gregor Ilves',    g:'Ilves Agency',        s:'2026-03-04', o:'pass',    r:21,  w:8},
+  {a:'Beth Marlow',     g:'Marlow & Finch',      s:'2026-03-05', o:'pass',    r:29,  w:12},
+  {a:'Callum Reid',     g:'Reid Literary',       s:'2026-03-06', o:'pass',    r:35,  w:8},
+  {a:'Ingrid Halvorsen',g:'Halvorsen Books',     s:'2026-03-09', o:'pass',    r:52,  w:12},
+  {a:'Felix Aldana',    g:'Aldana & Moor',       s:'2026-03-10', o:'pass',    r:71,  w:12},
+  {a:'Susannah Perch',  g:'Perch Literary',      s:'2026-03-11', o:'cnr',     r:null, w:8},
+  {a:'Leo Brandt',      g:'Brandt Agency',       s:'2026-03-12', o:'cnr',     r:null, w:6},
+  {a:'Cora Nightly',    g:'Nightly & Dunn',      s:'2026-03-13', o:'cnr',     r:null, w:12},
+  {a:'Theo Marchetti',  g:'Marchetti Rights',    s:'2026-05-04', o:'full',    r:12, fs:14, w:8},
+  {a:'Nadia Reyes',     g:'Reyes Literary',      s:'2026-05-04', o:'partial', r:27,  w:8},
+  {a:'Iris Blackwood',  g:'Blackwood & Petty',   s:'2026-05-05', o:'partial', r:41,  w:12},
+  {a:'Hugo Lindqvist',  g:'Lindqvist Agency',    s:'2026-05-05', o:'pass',    r:4,   w:6},
+  {a:'Maeve Callahan',  g:'Callahan Books',      s:'2026-05-06', o:'pass',    r:9,   w:8},
+  {a:'Robert Tan',      g:'Tan & Sherwood',      s:'2026-05-07', o:'pass',    r:18,  w:8},
+  {a:'Livia Crane',     g:'Crane Literary',      s:'2026-05-08', o:'pass',    r:25,  w:12},
+  {a:'Angus Petrie',    g:'Petrie & Sons',       s:'2026-05-11', o:'pass',    r:47,  w:12},
+  {a:'Delphine Mercier',g:'Mercier Agency',      s:'2026-05-12', o:'pass',    r:88,  w:12},
+  {a:'Sam Kettering',   g:'Kettering Literary',  s:'2026-05-13', o:'open',    r:null, w:12},
+  {a:'June Adeyemi',    g:'Adeyemi & Barnes',    s:'2026-05-13', o:'open',    r:null, w:16},
+  {a:'Patrick Vale',    g:'Vale Represents',     s:'2026-05-14', o:'open',    r:null, w:14},
+  {a:'Klara Novak',     g:'Novak Literary',      s:'2026-05-15', o:'open',    r:null, w:12},
+  {a:'Ed Fairweather',  g:'Fairweather & Co.',   s:'2026-05-18', o:'open',    r:null, w:13},
+  {a:'Rosa Delgado',    g:'Delgado Book Agency', s:'2026-07-06', o:'partial', r:17,  w:8},
+  {a:'Miles Thackeray', g:'Thackeray Literary',  s:'2026-07-06', o:'pass',    r:8,   w:6},
+  {a:'Vera Kowalski',   g:'Kowalski & Frame',    s:'2026-07-07', o:'open',    r:null, w:8},
+  {a:'Arthur Penn',     g:'Penn Literary',       s:'2026-07-08', o:'open',    r:null, w:12},
+  {a:'Sana Iqbal',      g:'Iqbal Agency',        s:'2026-07-09', o:'open',    r:null, w:6},
+  {a:'Freddie Marsh',   g:'Marsh & Wilding',     s:'2026-07-10', o:'open',    r:null, w:8},
+  {a:'Georgia Lock',    g:'Lock Literary',       s:'2026-07-13', o:'open',    r:null, w:12},
+  {a:'Ben Carraway',    g:'Carraway Books',      s:'2026-07-14', o:'open',    r:null, w:6},
+];
+Q.forEach(q=>{ q.sd = new Date(q.s); q.daysOut = Math.round((TODAY - q.sd)/86400000); });
+
+/* Idea 6 — a first-week dataset, to show how guards + empty states read for a new user */
+const QE = [
+  {a:'Rachel Emberton', g:'Emberton Literary',  s:'2026-08-04', o:'pass', r:6,    w:8},
+  {a:'Tom Osei',        g:'Greenhouse & Wilde', s:'2026-08-04', o:'open', r:null, w:6},
+  {a:'Priya Nair',      g:'Nair Associates',    s:'2026-08-06', o:'open', r:null, w:12},
+  {a:'Sophie Calder',   g:'Calder & Frost',     s:'2026-08-10', o:'open', r:null, w:8},
+];
+QE.forEach(q=>{ q.sd = new Date(q.s); q.daysOut = Math.round((TODAY - q.sd)/86400000); });
+let earlyMode = false;
+
+const INK='#2b1a12', BURG='#7c3a2a', PINK='#f5e2da', MUT='#9c8878';
+
+/* ---------------------------------------------------------------------
+   CHART PALETTE — Burgundy & Sage.
+   Chart fills borrowed straight from the StatusDot system: burgundy/pink
+   for outgoing (the writer's action), sage for incoming (the agent's).
+   Settled states drop to warm neutrals. StatusDot colours untouched.
+   --------------------------------------------------------------------- */
+const C = {
+  sent:'#f5e2da', sentEdge:'#7c3a2a',   // outgoing — what you sent
+  resp:'#a9bca4',                        // incoming — what came back
+  open:'#efd5ca',                        // live, waiting
+  inplay:'#8a9e88',                      // live, with an agent
+  offer:'#7c3a2a',                       // the one solid mark
+  pass:'#ded5ca',                        // settled — warm neutral
+  elapsed:'#efe9e2',                     // settled — lightest
+  dotFill:'#f5e2da', dotEdge:'#7c3a2a',
+  lateFill:'#efd5ca', lateEdge:'#7c3a2a',
+};
+const REQ = ['partial','full','offer'];
+const isReq = q => REQ.includes(q.o);
+const MIN_N = 20;                                   // sample-size guard
+const safePct = (n,d,min=MIN_N)=> d>=min ? Math.round(n/d*100)+'%' : `${n} of ${d}`;
+const guarded = (n,d,min=MIN_N)=> d<min;
+
+const tip = document.getElementById('tip');
+let toastT = null;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.innerHTML = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function showTip(e, html){ tip.innerHTML = html; tip.style.opacity = 1;
+  const x = Math.min(e.clientX + 14, window.innerWidth - 270); tip.style.left = x+'px'; tip.style.top = (e.clientY + 14)+'px'; }
+function hideTip(){ tip.style.opacity = 0; }
+function bindTip(el, htmlFn){ el.addEventListener('mousemove', e=>showTip(e, htmlFn())); el.addEventListener('mouseleave', hideTip); }
+const fmtD = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const svgNS = 'http://www.w3.org/2000/svg';
+const el = (t,at)=>{ const n=document.createElementNS(svgNS,t); for(const k in at) n.setAttribute(k,at[k]); return n; };
+
+/* ---------- StatusDot (locked visual language) ---------- */
+function dotSVG(kind, size){
+  const s = size, c = s/2, r = s/2 - s*0.09, sw = Math.max(2, s*0.12);
+  let inner = '';
+  if(kind==='empty') inner = `<circle cx="${c}" cy="${c}" r="${r}" fill="${PINK}" stroke="${BURG}" stroke-width="${sw}"/>`;
+  if(kind==='half')  inner = `<circle cx="${c}" cy="${c}" r="${r}" fill="${PINK}" stroke="${BURG}" stroke-width="${sw}"/>
+    <path d="M ${c} ${c-r} A ${r} ${r} 0 0 1 ${c} ${c+r} Z" fill="${BURG}" opacity="0.9"/>`;
+  if(kind==='fullr') inner = `<circle cx="${c}" cy="${c}" r="${r}" fill="${PINK}" stroke="${BURG}" stroke-width="${sw}"/>
+    <circle cx="${c}" cy="${c}" r="${r*0.62}" fill="${BURG}" opacity="0.9"/>`;
+  if(kind==='offer') inner = `<circle cx="${c}" cy="${c}" r="${r+sw/2}" fill="${BURG}"/>
+    <path d="M ${c-r*0.42} ${c+r*0.02} L ${c-r*0.1} ${c+r*0.36} L ${c+r*0.48} ${c-r*0.34}" stroke="#fdfaf5" stroke-width="${sw*0.9}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}">${inner}</svg>`;
+}
+
+/* ---------- ILLUSTRATION PLACEHOLDERS ----------------------------------
+   Line stand-ins at the sizes the final artwork should occupy.
+   ---------------------------------------------------------------------- */
+const ILLO = {
+  plane:`<svg viewBox="0 0 40 40" fill="none" stroke="#c9beb2" stroke-width="1.4" stroke-linejoin="round"><path d="M6 21 L34 9 L21 31 L18 23 Z"/><path d="M18 23 L34 9"/></svg>`,
+  hourglass:`<svg viewBox="0 0 40 40" fill="none" stroke="#c9beb2" stroke-width="1.4"><path d="M13 8 h14"/><path d="M13 32 h14"/><path d="M15 8 c0 8 10 8 10 0"/><path d="M15 32 c0 -8 10 -8 10 0"/></svg>`,
+  pages:`<svg viewBox="0 0 40 40" fill="none" stroke="#c9beb2" stroke-width="1.4" stroke-linejoin="round"><path d="M11 8 h13 l5 5 v19 h-18 Z"/><path d="M16 20 h9 M16 25 h9"/></svg>`,
+  ratio:`<svg viewBox="0 0 40 40" fill="none" stroke="#c9beb2" stroke-width="1.4"><circle cx="20" cy="20" r="12"/><path d="M20 8 a12 12 0 0 1 8.5 20.5" stroke="#d8bfb4"/><circle cx="20" cy="20" r="4.5"/></svg>`,
+  clock:`<svg viewBox="0 0 40 40" fill="none" stroke="#c9beb2" stroke-width="1.4"><circle cx="20" cy="20" r="12"/><path d="M20 12 v8.5 l5 3"/></svg>`,
+  post:`<svg viewBox="0 0 60 60" fill="none" stroke="#c9beb2" stroke-width="1.5" stroke-linejoin="round"><rect x="10" y="18" width="40" height="27" rx="3"/><path d="M10 20 l20 15 l20 -15"/><path d="M22 12 q8 -6 16 0" stroke-dasharray="3 4"/></svg>`,
+};
+const illo = (key, cls='') => `<!-- ILLUSTRATION SLOT --><div class="illo ${cls}">${ILLO[key]}</div>`;
+
+/* ---------- Range ---------- */
+let range = 'all';
+function inRange(q){
+  if(range==='all') return true;
+  const months = range==='6' ? 6 : 3;
+  const from = new Date(TODAY); from.setMonth(from.getMonth()-months);
+  return q.sd >= from;
+}
+function BASE(){ return earlyMode ? QE : Q; }
+function D(){ return BASE().filter(inRange); }
+document.getElementById('range').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('.range button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); range = b.dataset.r; renderAll();
+});
+function median(arr){ if(!arr.length) return null; const a=[...arr].sort((x,y)=>x-y); const m=Math.floor(a.length/2);
+  return a.length%2 ? a[m] : Math.round((a[m-1]+a[m])/2); }
+
+/* ---------- Stat strip ---------- */
+function statSet(qs){
+  const sent = qs.length, reqs = qs.filter(isReq).length;
+  return {sent, reqs, rate: sent?Math.round(reqs/sent*100):null,
+          med: median(qs.filter(q=>q.r!=null).map(q=>q.r))};
+}
+/* Idea 2 — the same figures for the window immediately before this one.
+   Factual comparison against the writer's own past; never graded. */
+function prevPeriod(){
+  if(range==='all') return null;
+  const months = range==='6' ? 6 : 3;
+  const from  = new Date(TODAY); from.setMonth(from.getMonth()-months);
+  const from2 = new Date(TODAY); from2.setMonth(from2.getMonth()-months*2);
+  const qs = BASE().filter(q=>q.sd>=from2 && q.sd<from);
+  return qs.length ? {label:`previous ${months} months`, ...statSet(qs)} : null;
+}
+function renderStats(){
+  const d = D();
+  const sent = d.length;
+  const open = d.filter(q=>q.o==='open').length;
+  const parts = d.filter(q=>q.o==='partial').length;
+  const fullsN = d.filter(q=>q.o==='full'||q.o==='offer').length;
+  const reqs = d.filter(isReq).length;
+  const med = median(d.filter(q=>q.r!=null).map(q=>q.r));
+  const responded = d.filter(q=>q.r!=null).length;
+  const rateGuarded = guarded(reqs, sent);
+  const pv = prevPeriod();
+  document.getElementById('pheadsub').textContent =
+    `${sent} queries · ${open} awaiting reply`;
+  document.getElementById('earlyhint').hidden = !earlyMode;
+  const items = [
+    {ill:'plane',     k:'Queries sent', v:sent, m: range==='all' ? (earlyMode?'Since last week':'Since January') : 'In this period',
+      dd: pv ? `${pv.label}: ${pv.sent} sent` : null},
+    {ill:'hourglass', k:'Still out',    v:open, m:'Awaiting a first response'},
+    {ill:'pages',     k:'Requests',     v:reqs, m:`${parts} partial · ${fullsN} full`,
+      dd: pv ? `${pv.label}: ${pv.reqs}` : null},
+    rateGuarded
+      ? {ill:'ratio', k:'Request rate', v:`${reqs} of ${sent}`, frac:true, m:'Too few queries yet for a steady percentage',
+         dd: pv ? `${pv.label}: ${pv.reqs} of ${pv.sent}` : null}
+      : {ill:'ratio', k:'Request rate', v:sent?Math.round(reqs/sent*100):0, suf:'%', m:`${reqs} of ${sent} queries`,
+         dd: pv && pv.rate!=null ? `${pv.label}: ${guarded(pv.reqs,pv.sent)?pv.reqs+' of '+pv.sent:pv.rate+'%'}` : null},
+    {ill:'clock',     k:'Median wait',  v:med==null?'—':med, suf:med==null?'':' days', m:`${responded} responses · queries only`,
+      dd: pv && pv.med!=null ? `${pv.label}: ${pv.med} days` : null},
+  ];
+  document.getElementById('stats').innerHTML = items.map(i=>`
+    <div class="st">
+      ${illo(i.ill)}
+      <div class="txt">
+        <div class="k">${i.k}</div>
+        <div class="v${i.frac?' frac':''}">${i.v}<small>${i.suf||''}</small></div>
+        <div class="m">${i.m}</div>
+        ${i.dd?`<div class="dd">${i.dd}</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+/* ---------- Journey funnel (UK-aware) ---------- */
+function renderFunnel(){
+  const d = D();
+  const sent = d.length;
+  const parts = d.filter(q=>q.o==='partial').length;
+  const reqs = d.filter(isReq).length;
+  const fulls = d.filter(q=>q.o==='full'||q.o==='offer').length;
+  const offers = d.filter(q=>q.o==='offer').length;
+  const stages = [
+    {dot:'empty', n:sent,   name:'Queried',            desc:'Letter, synopsis and opening chapters out with agents'},
+    {dot:'half',  n:reqs,   name:'Material requested', desc: reqs? `Asked to read more — ${parts} partial · ${fulls} straight to full` : 'Agents who asked to read more'},
+    {dot:'fullr', n:fulls,  name:'Full manuscript',    desc:'Reading the whole book'},
+    {dot:'offer', n:offers, name:'Offer',              desc:'Offers of representation'},
+  ];
+  let html = '';
+  stages.forEach((s,i)=>{
+    html += `<div class="fstage">
+      <div class="fdot">${dotSVG(s.dot,56)}</div>
+      <div class="fnum">${s.n}</div>
+      <div class="fname">${s.name}</div>
+      <div class="fdesc">${s.desc}</div>
+    </div>`;
+    if(i < stages.length-1){
+      html += `<div class="fconv">
+        <svg class="arrow" viewBox="0 0 112 18">
+          <path d="M6 9 H96" stroke="${BURG}" stroke-width="1" opacity="${0.55 - i*0.12}" stroke-dasharray="1 4" stroke-linecap="round"/>
+          <path d="M96 9 l-7 -4 M96 9 l-7 4" stroke="${BURG}" stroke-width="1" opacity="${0.55 - i*0.12}" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="pct">${safePct(stages[i+1].n, s.n)}</div>
+        <div class="pl">went on</div>
+      </div>`;
+    }
+  });
+  document.getElementById('funnel').innerHTML = html;
+  document.querySelectorAll('.fstage').forEach((elm,i)=>{
+    elm.classList.add('clicky');
+    elm.addEventListener('click', ()=>toast(`Would open <b>Query Centre</b> filtered to <b>${stages[i].name}</b> (${stages[i].n})`));
+  });
+  document.getElementById('funnelNote').textContent =
+    `${reqs} of ${sent} submissions drew a request for more material`;
+  document.getElementById('readnum').innerHTML = `
+    <div class="rn"><div class="rk">${dotSVG('empty',13)} Queried → requested</div>
+      <div class="rt">Querying convention reads this transition as a measure of the letter and the opening chapters — the material every agent sees first.</div></div>
+    <div class="rn"><div class="rk">${dotSVG('half',13)} Requested → full</div>
+      <div class="rt">Read as a measure of the sample material — whether the pages hold an agent who already liked the pitch.</div></div>
+    <div class="rn"><div class="rk">${dotSVG('fullr',13)} Full → offer</div>
+      <div class="rt">Read as a measure of the manuscript as a whole. Fulls sit with agents far longer than queries do.</div></div>`;
+}
+
+/* ---------- Timeline ---------- */
+function monthKey(d){ return d.getFullYear()*12 + d.getMonth(); }
+function renderTimeline(){
+  const svg = document.getElementById('timeline'); svg.innerHTML='';
+  const d = D();
+  const startK = range==='all' ? monthKey(new Date('2026-01-01'))
+               : monthKey(new Date(new Date(TODAY).setMonth(TODAY.getMonth()-(range==='6'?5:2))));
+  const endK = monthKey(TODAY);
+  const months = []; for(let k=startK;k<=endK;k++) months.push(k);
+  const sends = months.map(k => d.filter(q=>monthKey(q.sd)===k).length);
+  const resps = months.map(k => d.filter(q=>{
+    if(q.r==null) return false;
+    const rd = new Date(q.sd); rd.setDate(rd.getDate()+q.r);
+    return monthKey(rd)===k;
+  }).length);
+  const W = svg.clientWidth || 860, H = 240, padL=30, padB=28, padT=14;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const maxV = Math.max(...sends, ...resps, 4);
+  const plotW = W-padL-14, plotH = H-padT-padB;
+  const slot = plotW/months.length, bw = Math.min(26, slot*0.28);
+  for(let i=0;i<=4;i++){
+    const y = padT + plotH - (plotH*i/4);
+    svg.appendChild(el('line',{x1:padL,x2:W-14,y1:y,y2:y,class:'gridline'}));
+    const t = el('text',{x:padL-8,y:y+3,class:'axis','text-anchor':'end'}); t.textContent = Math.round(maxV*i/4); svg.appendChild(t);
+  }
+  const MN = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  months.forEach((k,i)=>{
+    const cx = padL + slot*i + slot/2;
+    const t = el('text',{x:cx,y:H-8,class:'axis big','text-anchor':'middle'}); t.textContent = MN[k%12]; svg.appendChild(t);
+    [{v:sends[i], fill:C.sent, stroke:C.sentEdge, x:cx-bw-2, label:'sent'},
+     {v:resps[i], fill:C.resp, stroke:'none', x:cx+2,  label:'received'}].forEach(p=>{
+      const h = plotH * p.v/maxV;
+      const r = el('rect',{x:p.x, y:padT+plotH, width:bw, height:0, rx:3, fill:p.fill, class:'bar-anim'});
+      if(p.stroke!=='none'){ r.setAttribute('stroke',p.stroke); r.setAttribute('stroke-width','1'); }
+      svg.appendChild(r);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{ r.setAttribute('y', padT+plotH-h); r.setAttribute('height', h); }));
+      bindTip(r, ()=>`<span class="tk">${MN[k%12]} 2026</span><b>${p.v}</b> ${p.label==='sent'?'quer'+(p.v===1?'y':'ies')+' sent':'response'+(p.v===1?'':'s')+' received'}`);
+    });
+  });
+  /* Idea 3 — event marks: fulls and offers pinned to the month they arrived */
+  const evs = d.filter(q=>q.r!=null && (q.o==='offer'||q.o==='full')).map(q=>{
+    const rd = new Date(q.sd); rd.setDate(rd.getDate()+q.r);
+    return {q, rd, k:monthKey(rd), label: q.o==='offer' ? 'Offer' : 'Full requested'};
+  }).filter(e=>months.includes(e.k));
+  const stack = {};
+  evs.forEach(e=>{
+    const i = months.indexOf(e.k);
+    const cx = padL + slot*i + slot/2;
+    stack[e.k] = (stack[e.k]||0);
+    const cy = padT + 8 + stack[e.k]*16; stack[e.k]++;
+    const dsz = 5.5;
+    const dia = el('path',{d:`M ${cx} ${cy-dsz} L ${cx+dsz} ${cy} L ${cx} ${cy+dsz} L ${cx-dsz} ${cy} Z`,
+      fill: e.q.o==='offer' ? BURG : '#fdfaf5', stroke:BURG, 'stroke-width':1.2, class:'clicky'});
+    svg.appendChild(dia);
+    bindTip(dia, ()=>`<span class="tk">${e.label} · ${fmtD(e.rd)}</span><b>${e.q.a}</b><br>${e.q.g}`);
+    dia.addEventListener('click', ()=>toast(`Would open <b>${e.q.a}</b> in the Query Centre`));
+  });
+}
+
+/* ---------- Donut ---------- */
+function renderDonut(){
+  const d = D();
+  const segs = [
+    {name:'Still out',        n:d.filter(q=>q.o==='open').length,    col:C.open, note:'Awaiting a first response'},
+    {name:'Requests in play', n:d.filter(q=>q.o==='partial'||q.o==='full').length, col:C.inplay, note:'Material with agents now'},
+    {name:'Offer',            n:d.filter(q=>q.o==='offer').length,   col:C.offer, note:'Offers of representation'},
+    {name:'Pass',             n:d.filter(q=>q.o==='pass').length,    col:C.pass, note:'Responded and stepped aside'},
+    {name:'Window elapsed',   n:d.filter(q=>q.o==='cnr').length,     col:C.elapsed, note:'Closed once the agency’s stated window passed'},
+  ].filter(s=>s.n>0);
+  const total = segs.reduce((a,s)=>a+s.n,0);
+  const svg = document.getElementById('donut'); svg.innerHTML='';
+  const c=84, R=64, SW=22, circ = 2*Math.PI*R;
+  let acc = 0;
+  segs.forEach(s=>{
+    const frac = s.n/total;
+    const arc = el('circle',{cx:c,cy:c,r:R,fill:'none',stroke:s.col,'stroke-width':SW,
+      'stroke-dasharray':`${circ*frac-2} ${circ-(circ*frac-2)}`,
+      'stroke-dashoffset': -acc*circ + circ*0.25});
+    svg.appendChild(arc);
+    arc.classList.add('clicky');
+    arc.addEventListener('click', ()=>toast(`Would open <b>Query Centre</b> filtered to <b>${s.name}</b> (${s.n})`));
+    bindTip(arc, ()=>`<span class="tk">${s.name}</span><b>${s.n}</b> of ${total} queries · ${Math.round(s.n/total*100)}%<br>${s.note}`);
+    acc += frac;
+  });
+  const t1 = el('text',{x:c,y:c-2,'text-anchor':'middle',style:'font-family:Playfair Display,serif;font-size:30px;fill:'+INK});
+  t1.textContent = total; svg.appendChild(t1);
+  const t2 = el('text',{x:c,y:c+18,'text-anchor':'middle',class:'axis big'}); t2.textContent='QUERIES'; svg.appendChild(t2);
+  document.getElementById('dlist').innerHTML = segs.map(s=>`
+    <div class="drow clicky"><span class="sw" style="background:${s.col};"></span>${s.name}
+      <span class="n">${s.n}</span><span class="p">${Math.round(s.n/total*100)}%</span></div>`).join('');
+  document.querySelectorAll('#dlist .drow').forEach((r,i)=>
+    r.addEventListener('click', ()=>toast(`Would open <b>Query Centre</b> filtered to <b>${segs[i].name}</b> (${segs[i].n})`)));
+}
+
+/* ---------- Reply-time histogram (queries only) ---------- */
+function renderHisto(){
+  const d = D().filter(q=>q.r!=null);
+  const buckets = [
+    {lab:'< 1 wk', lo:0, hi:7}, {lab:'1–2 wk', lo:7, hi:14}, {lab:'2–4 wk', lo:14, hi:30},
+    {lab:'1–2 mo', lo:30, hi:60}, {lab:'2–3 mo', lo:60, hi:90}, {lab:'3 mo +', lo:90, hi:1e9},
+  ];
+  buckets.forEach(b=> b.n = d.filter(q=>q.r>=b.lo && q.r<b.hi).length);
+  const med = median(d.map(q=>q.r));
+  document.getElementById('histoNote').textContent = med==null ? 'No responses yet in this period' : `Median wait: ${med} days · ${d.length} responses`;
+  const svg = document.getElementById('histo'); svg.innerHTML='';
+  const W = svg.clientWidth || 620, H=200, padL=26, padB=26, padT=12;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const maxV = Math.max(...buckets.map(b=>b.n),3);
+  const plotW=W-padL-14, plotH=H-padT-padB, slot=plotW/buckets.length, bw=Math.min(52, slot*0.55);
+  for(let i=0;i<=3;i++){
+    const y = padT+plotH-(plotH*i/3);
+    svg.appendChild(el('line',{x1:padL,x2:W-14,y1:y,y2:y,class:'gridline'}));
+    const t = el('text',{x:padL-8,y:y+3,class:'axis','text-anchor':'end'}); t.textContent=Math.round(maxV*i/3); svg.appendChild(t);
+  }
+  buckets.forEach((b,i)=>{
+    const cx = padL+slot*i+slot/2, h = plotH*b.n/maxV;
+    const r = el('rect',{x:cx-bw/2, y:padT+plotH, width:bw, height:0, rx:4, fill:C.resp, class:'bar-anim'});
+    svg.appendChild(r);
+    r.classList.add('clicky');
+    r.addEventListener('click', ()=>toast(`Would open the <b>${b.n}</b> response${b.n===1?'':'s'} that arrived in <b>${b.lab}</b>`));
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ r.setAttribute('y',padT+plotH-h); r.setAttribute('height',h); }));
+    bindTip(r, ()=>`<span class="tk">${b.lab}</span><b>${b.n}</b> response${b.n===1?'':'s'} arrived in this window`);
+    const t = el('text',{x:cx,y:H-8,class:'axis big','text-anchor':'middle'}); t.textContent=b.lab; svg.appendChild(t);
+    if(b.n){
+      const v = el('text',{x:cx,'text-anchor':'middle',style:'font-family:Playfair Display,serif;font-size:15px;fill:'+INK, class:'bar-anim'});
+      v.textContent=b.n; v.setAttribute('y',padT+plotH-4);
+      requestAnimationFrame(()=>requestAnimationFrame(()=> v.setAttribute('y', padT+plotH-h-7)));
+      svg.appendChild(v);
+    }
+  });
+}
+
+/* ---------- Aging, normalised to each agency's stated window ---------- */
+function renderAging(){
+  const d = D().filter(q=>q.o==='open').map(q=>({...q, frac:q.daysOut/(q.w*7)})).sort((a,b)=>a.frac-b.frac);
+  const past = d.filter(q=>q.frac>=1).length;
+  const autoclosed = D().filter(q=>q.o==='cnr').length;
+  document.getElementById('agingNote').textContent =
+    d.length ? `${d.length} open · ${past ? past+' past their agency’s stated window' : 'all within their agencies’ stated windows'}` : 'No open queries in this period';
+  document.getElementById('autoclosekey').innerHTML = autoclosed
+    ? `<span class="sw" style="background:#efe9e2;border:1px solid #e2dbd1;border-radius:50%;"></span>${autoclosed} closed once their window passed`
+    : '';
+  const svg = document.getElementById('aging'); svg.innerHTML='';
+  const W = svg.clientWidth || 620, H=200, padL=26, padR=20, padT=18, padB=26;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const maxF = 1.4;
+  const x = f => padL + (W-padL-padR) * Math.min(f,maxF)/maxF;
+  const baseY = H-padB;
+  svg.appendChild(el('line',{x1:padL,x2:W-padR,y1:baseY,y2:baseY,class:'gridline'}));
+  [0,0.25,0.5,0.75,1,1.25].forEach(f=>{
+    const t = el('text',{x:x(f),y:H-8,class:'axis big','text-anchor':'middle'});
+    t.textContent = f===0?'sent':(f===1?'window':Math.round(f*100)+'%'); svg.appendChild(t);
+    svg.appendChild(el('line',{x1:x(f),x2:x(f),y1:baseY,y2:baseY+4,stroke:'#e0d5c8','stroke-width':1}));
+  });
+  svg.appendChild(el('line',{x1:x(1),x2:x(1),y1:padT-4,y2:baseY,stroke:MUT,'stroke-width':1,'stroke-dasharray':'3 4'}));
+  const rl = el('text',{x:x(1),y:padT-8,class:'axis','text-anchor':'middle'}); rl.textContent='STATED WINDOW'; svg.appendChild(rl);
+  const lanes = [];
+  d.forEach(q=>{
+    const px = x(q.frac);
+    let lane = 0; while(lanes[lane]!=null && px - lanes[lane] < 26) lane++;
+    lanes[lane] = px;
+    const cy = baseY - 22 - lane*30;
+    const g = el('g',{});
+    const late = q.frac>=1;
+    g.appendChild(el('line',{x1:px,x2:px,y1:cy+10,y2:baseY,stroke:'#ece3d7','stroke-width':1}));
+    g.appendChild(el('circle',{cx:px,cy:cy,r:9,fill:late?C.lateFill:C.dotFill,stroke:late?C.lateEdge:C.dotEdge,'stroke-width':late?1.7:1.1}));
+    g.appendChild(el('path',{d:`M ${px-3} ${cy} h6 M ${px+1} ${cy-2.4} l2.4 2.4 -2.4 2.4`,stroke:late?C.lateEdge:C.dotEdge,'stroke-width':1.1,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'}));
+    g.classList.add('clicky');
+    g.addEventListener('click', ()=>toast(`Would open <b>${q.a}</b> — ${q.g} in the Query Centre`));
+    svg.appendChild(g);
+    bindTip(g, ()=>`<span class="tk">${q.daysOut} days of a ${q.w}-week window · ${Math.round(q.frac*100)}%</span><b>${q.a}</b><br>${q.g} · sent ${fmtD(q.sd)}${late?'<br>Past the agency’s stated window':''}`);
+  });
+}
+
+/* ---------- Fulls under consideration ---------- */
+function renderFulls(){
+  const d = D().filter(q=>q.o==='full' && q.fs!=null).map(q=>({...q, dwell:q.daysOut-q.fs})).sort((a,b)=>b.dwell-a.dwell);
+  document.getElementById('fullsNote').textContent = d.length ? `${d.length} full${d.length===1?'':'s'} out` : '';
+  const host = document.getElementById('fulls');
+  if(!d.length){
+    host.innerHTML = `<div class="emptystate">
+      ${illo('post','lg')}
+      <p>No full manuscripts out at the moment. When an agent asks for the whole book, its time with them is tracked here.</p>
+    </div>`;
+    return;
+  }
+  host.innerHTML = d.map(q=>`
+    <div class="fullrow">
+      <div class="fi">${dotSVG('fullr',30)}</div>
+      <div><b>${q.a}</b><i>${q.g} · full sent ${fmtD(new Date(q.sd.getTime()+q.fs*86400000))}</i></div>
+      <div class="fd"><b>${q.dwell}</b><i>days with the agent</i></div>
+    </div>`).join('') +
+    `<div class="guardnote">Fulls commonly sit for months — their waits are kept apart from query waits so neither skews the other.</div>`;
+}
+
+/* ---------- Latest responses ---------- */
+function renderLog(){
+  const d = D().filter(q=>q.r!=null)
+    .map(q=>({...q, rd:(()=>{const t=new Date(q.sd); t.setDate(t.getDate()+q.r); return t;})()}))
+    .sort((a,b)=>b.rd-a.rd).slice(0,7);
+  const chip = q=>{
+    if(q.o==='offer')   return `<span class="chip">${dotSVG('offer',13)} Offer</span>`;
+    if(q.o==='full')    return `<span class="chip">${dotSVG('fullr',13)} Full request</span>`;
+    if(q.o==='partial') return `<span class="chip">${dotSVG('half',13)} Partial request</span>`;
+    return `<span class="chip"><span style="width:11px;height:11px;border-radius:50%;background:#fff;border:1.5px solid #cfc4b6;display:inline-block;"></span> Pass</span>`;
+  };
+  document.getElementById('resplog').innerHTML = d.map(q=>`
+    <tr class="clicky" data-a="${q.a}" data-g="${q.g}">
+      <td><span class="agname">${q.a}</span><span class="agsub">${q.g}</span></td>
+      <td style="color:#6a5a50;">${fmtD(q.sd)}</td>
+      <td>${chip(q)}</td>
+      <td><span class="days">${q.r}<small> days</small></span></td>
+    </tr>`).join('');
+  document.querySelectorAll('#resplog tr').forEach(r=>
+    r.addEventListener('click', ()=>toast(`Would open <b>${r.dataset.a}</b> — ${r.dataset.g} in the Query Centre`)));
+}
+
+/* Idea 5 — the one forward-looking panel: stated windows closing soon */
+function renderHorizon(){
+  const opens = D().filter(q=>q.o==='open').map(q=>{
+    const end = new Date(q.sd.getTime() + q.w*7*86400000);
+    return {...q, end, daysLeft: Math.round((end-TODAY)/86400000)};
+  });
+  const soon = opens.filter(q=>q.daysLeft>0 && q.daysLeft<=28).sort((a,b)=>a.daysLeft-b.daysLeft);
+  const past = opens.filter(q=>q.daysLeft<=0).length;
+  document.getElementById('horizonNote').textContent = soon.length
+    ? `${soon.length} stated window${soon.length===1?'':'s'} close in the next four weeks${past?` · ${past} already past`:''}`
+    : (past ? `${past} already past their stated window` : '');
+  const host = document.getElementById('horizon');
+  if(!soon.length){
+    host.innerHTML = `<div style="color:#9a8c80;font-size:12px;font-weight:300;padding:6px 2px;">No stated windows close in the next four weeks. As a window approaches, the query appears here with its date.</div>`;
+    return;
+  }
+  host.innerHTML = soon.map(q=>`
+    <div class="hcard" data-a="${q.a}" data-g="${q.g}">
+      ${dotSVG('empty',26)}
+      <div class="hn"><b>${q.a}</b><i>${q.g} · window closes ${fmtD(q.end)}</i></div>
+      <div class="hd"><b>${q.daysLeft}</b><i>day${q.daysLeft===1?'':'s'}</i></div>
+    </div>`).join('');
+  host.querySelectorAll('.hcard').forEach(c=>
+    c.addEventListener('click', ()=>toast(`Would open <b>${c.dataset.a}</b> — ${c.dataset.g} in the Query Centre`)));
+}
+
+function renderAll(){
+  renderStats(); renderFunnel(); renderTimeline(); renderDonut();
+  renderHisto(); renderAging(); renderHorizon(); renderFulls(); renderLog();
+}
+
+/* Idea 7 — shareable journey card */
+document.getElementById('sharebtn').addEventListener('click', ()=>{
+  const d = D();
+  const sent = d.length, reqs = d.filter(isReq).length,
+        fulls = d.filter(q=>q.o==='full'||q.o==='offer').length,
+        offers = d.filter(q=>q.o==='offer').length;
+  document.getElementById('shSub').textContent =
+    `${sent} queries · ${safePct(reqs,sent)} drew a request`;
+  document.getElementById('shFunnel').innerHTML = [
+    ['empty','Queried',sent],['half','Requested',reqs],['fullr','Full ms',fulls],['offer','Offer',offers]
+  ].map(([k,l,n])=>`<div class="sfs">${dotSVG(k,40)}<div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+  document.getElementById('shDate').textContent = TODAY.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('shareov').classList.add('show');
+});
+document.getElementById('shareov').addEventListener('click', e=>{
+  if(e.target.id==='shareov') e.target.classList.remove('show');
+});
+
+/* Idea 6 — first-week preview toggle */
+document.getElementById('earlybtn').addEventListener('click', ()=>{
+  earlyMode = !earlyMode;
+  document.getElementById('earlybtn').classList.toggle('on', earlyMode);
+  document.getElementById('earlybtn').textContent = earlyMode ? 'Idea 6 · Back to full dataset' : 'Idea 6 · Preview first-week view';
+  renderAll();
+});
+renderAll();
+window.addEventListener('resize', ()=>{ renderTimeline(); renderHisto(); renderAging(); });
+</script>
+</body>
+</html>
