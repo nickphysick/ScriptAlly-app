@@ -21,7 +21,12 @@
  *
  * ⚠️ DEV ONLY, PROJECT NAMED EXPLICITLY, same rail as `seed.mjs`: `.firebaserc`'s default is PROD.
  *
- *   node tests/e2e/seed.mjs && node tests/e2e/seedPackages.mjs
+ *   node tests/e2e/seedPackages.mjs --clean && node tests/e2e/seedPackages.mjs
+ *
+ * ⚠️ RUN `--clean` FIRST IF THE FIXTURE MAY ALREADY EXIST. `setDoc` over an existing document is an
+ * UPDATE at the rules layer, and this script recomputes `createdDate` on every run — a key the
+ * versions update allowlist does not carry, so `hasOnly` denies the whole write. It is only
+ * idempotent against an absent fixture; clean-then-seed always works.
  *
  * To undo: `node tests/e2e/seedPackages.mjs --clean` removes every document it created.
  */

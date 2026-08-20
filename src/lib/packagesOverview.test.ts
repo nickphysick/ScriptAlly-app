@@ -17,9 +17,9 @@
 import { describe, it, expect } from "vitest";
 import {
   materialRows, materialDetail, addedLabel, packageRows, sentLine,
-  trackingRows, howItWorks, packagedQueries, replyCount,
+  trackingRows, howItWorks, packagedQueries, replyCount, packageTiles, tileFooter,
 } from "./packagesOverview";
-import { packageMetrics, UNFILLED_SLOT } from "./packageMetrics";
+import { packageMetrics, UNFILLED_SLOT, isRequest as isRequestExport } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES } from "../components/packages/typeMeta";
 import { ComponentType, QueryStatus } from "../types";
 import type { ManuscriptVersion, SubmissionPackage, Query } from "../types";
@@ -254,5 +254,65 @@ describe("howItWorks — the infographic doubles as progress", () => {
      un-ticks step 2 with no flag to clear. */
   it("un-ticks when the records go away", () => {
     expect(howItWorks(0, 0, 0)[1].tick).toBeNull();
+  });
+});
+
+describe("packageTiles — the working stage's grid (flow pack D7)", () => {
+  const versions = [
+    v("q1", ComponentType.QUERY_LETTER, "Hook-first", daysAgo(4)),
+    v("s1", ComponentType.SYNOPSIS, "One-page", daysAgo(6)),
+    v("p1", ComponentType.SAMPLE_PAGES, "Chapters 1-3", daysAgo(9)),
+  ];
+  const withSample = pkg("pk1", "Standard UK", "q1", "s1", "p1");
+  const noSample = pkg("pk2", "Letter + synopsis", "q1", "s1", UNFILLED_SLOT);
+
+  it("always renders three slot rows, in canonical order", () => {
+    const t = packageTiles([noSample], versions, [])[0];
+    expect(t.slots.map((s) => s.label)).toEqual(["Covering letter", "Synopsis", "Sample pages"]);
+  });
+
+  /* ⚠️ THE ROW SURVIVES AN EMPTY SLOT. A row that vanishes states nothing; a null name lets the
+     component say "Not included", which states that the slot was considered and left out. */
+  it("keeps the sample row with a null name when the slot is empty", () => {
+    const t = packageTiles([noSample], versions, [])[0];
+    expect(t.slots[2]).toEqual({ label: "Sample pages", name: null });
+  });
+
+  it("resolves filled slots to their material names", () => {
+    const t = packageTiles([withSample], versions, [])[0];
+    expect(t.slots.map((s) => s.name)).toEqual(["Hook-first", "One-page", "Chapters 1-3"]);
+  });
+
+  /* two derivations against each other, never a literal on both sides */
+  it("reports the same figures the engine does", () => {
+    const queries = [
+      q("1", "pk1", QueryStatus.QUERIED),
+      q("2", "pk1", QueryStatus.FULL_REQUESTED),
+      q("3", "pk1", QueryStatus.REJECTED, { hasAgentResponded: true }),
+    ];
+    const t = packageTiles([withSample], versions, queries)[0];
+    const m = packageMetrics("pk1", queries);
+    expect(t.sent).toBe(m.sent);
+    expect(t.replies).toBe(m.responses);
+    expect(t.requests).toBe(queries.filter(isRequestExport).length);
+  });
+
+  it("states absence in words when nothing has gone out", () => {
+    const foot = tileFooter(packageTiles([withSample], versions, [])[0]);
+    expect(foot).toEqual({ idle: "Not yet sent — attach it when you log a query" });
+  });
+
+  it("shows the scorecard in direction order once it has", () => {
+    const queries = [q("1", "pk1", QueryStatus.QUERIED), q("2", "pk1", QueryStatus.FULL_REQUESTED)];
+    const foot = tileFooter(packageTiles([withSample], versions, queries)[0]) as Record<string, string>;
+    expect(foot.out).toBe("→ 2 sent");
+    expect(foot.replied).toBe("← 1 replied");
+    expect(foot.requests).toBe("1 request");
+  });
+
+  it("agrees with its noun at two requests", () => {
+    const queries = [q("1", "pk1", QueryStatus.FULL_REQUESTED), q("2", "pk1", QueryStatus.PARTIAL_REQUESTED)];
+    const foot = tileFooter(packageTiles([withSample], versions, queries)[0]) as Record<string, string>;
+    expect(foot.requests).toBe("2 requests");
   });
 });

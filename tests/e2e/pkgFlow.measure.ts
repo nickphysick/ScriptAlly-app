@@ -305,3 +305,69 @@ test("phase 3 — locked with nothing, unlocks at letter+synopsis, builds and ed
   writeFileSync(`${ART}/p3-gate.txt`, JSON.stringify(log, null, 2) + "\n");
   console.log(JSON.stringify(log, null, 2));
 });
+
+/** The working stage: tiles, ghost tile, and the rail index's jump-and-flash. */
+const STAGE4 = `(() => {
+  const root = document.querySelector(".pkg-root");
+  if (!root) return { error: "no .pkg-root" };
+  const tiles = Array.from(root.querySelectorAll(".pkgf-tile:not(.pkgf-tile--ghost)"));
+  const cs = (el, p) => el ? getComputedStyle(el).getPropertyValue(p).trim() : null;
+  return {
+    onboardingShown: !!root.querySelector(".pkgo-prob"),
+    workHead: (root.querySelector(".pkgf-workhead h2")?.textContent || "").trim() || null,
+    workTag: (root.querySelector(".pkgf-worktag")?.textContent || "").trim() || null,
+    tileCount: tiles.length,
+    ghostTile: !!root.querySelector(".pkgf-tile--ghost"),
+    ghostText: (root.querySelector(".pkgf-tile--ghost")?.textContent || "").trim() || null,
+    tiles: tiles.map((t) => ({
+      name: (t.querySelector("h4")?.textContent || "").trim(),
+      slots: Array.from(t.querySelectorAll(".pkgf-slot")).map((s) => ({
+        label: (s.querySelector(".pkgf-slt")?.textContent || "").trim(),
+        name: (s.querySelector(".pkgf-sln")?.textContent || "").trim(),
+        none: !!s.querySelector(".pkgf-sln--none"),
+      })),
+      foot: (t.querySelector(".pkgf-tfoot")?.textContent || "").trim(),
+      /* D7: 3px sage top edge */
+      topBorder: cs(t, "border-top-width"),
+      topColor: cs(t, "border-top-color"),
+    })),
+    /* the rail index is slim — name + send state, no composition */
+    railHasComposition: !!root.querySelector(".pkgo-panel .pkgo-comp"),
+  };
+})()`;
+
+test("phase 4 — the working stage: tiles, ghost tile, rail index jump", async ({ page }) => {
+  const log: Record<string, unknown>[] = [];
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+
+  log.push({ at: "with packages", stage: await page.evaluate(STAGE4) });
+  await page.screenshot({ path: `${OUT}/p4-working.png`, fullPage: true });
+
+  /* the rail index jumps to a tile and flashes it — it does NOT open the builder */
+  const pkgPanelRow = page.locator(".pkgo-panel", { hasText: "Packages" }).locator(".pkgo-row").first();
+  await pkgPanelRow.click();
+  await page.waitForTimeout(300);
+  const afterJump = await page.evaluate(`(() => {
+    const root = document.querySelector(".pkg-root");
+    return {
+      flashed: !!root.querySelector(".pkgf-tile--flash"),
+      flashedName: (root.querySelector(".pkgf-tile--flash h4")?.textContent || "").trim() || null,
+      builderOpened: !!document.querySelector(".pkgf-backdrop"),
+    };
+  })()`);
+  log.push({ at: "after clicking a rail package row", ...(afterJump as object) });
+
+  writeFileSync(`${ART}/p4-stage.txt`, JSON.stringify(log, null, 2) + "\n");
+  console.log(JSON.stringify(log, null, 2));
+});
+
+/** The other half of D6's switch: materials present, no packages → the onboarding stage returns. */
+test("phase 4 — onboarding stage returns when the last package goes", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  const r = await page.evaluate(STAGE4);
+  await page.screenshot({ path: `${OUT}/p4-onboarding.png`, fullPage: true });
+  writeFileSync(`${ART}/p4-onboarding.txt`, JSON.stringify(r, null, 2) + "\n");
+  console.log(JSON.stringify(r, null, 2));
+});

@@ -24,9 +24,11 @@ import React from "react";
 import { ManuscriptVersion, SubmissionPackage, Query } from "../../types";
 import {
   materialRows, packageRows, trackingRows, packagedQueries, replyCount, howItWorks,
+  packageTiles, tileFooter,
 } from "../../lib/packagesOverview";
 import { canBuildPackage } from "../../lib/materialDraft";
 import "./packagesOverview.css";
+import "./packagesFlow.css";
 
 export interface PackagesOverviewProps {
   versions: ManuscriptVersion[];
@@ -179,6 +181,21 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
   const steps = howItWorks(versions.length, packages.length, live);
   /* D4's gate, derived — never a stored flag. */
   const unlocked = canBuildPackage(versions);
+  const tiles = packageTiles(packages, versions, queries);
+
+  /**
+   * ⚠️ THE RAIL'S PACKAGE ROWS ARE AN INDEX OF THE GRID, NOT A SECOND LIST OF PACKAGES (D7). Clicking
+   * one scrolls its tile into view and flashes it; it does NOT open the builder. Two surfaces that
+   * both opened the editor would make the rail a duplicate control rather than a way of finding
+   * something — and the tile itself is what opens the builder.
+   */
+  const tileRefs = React.useRef<Record<string, HTMLButtonElement | null>>({});
+  const [flashed, setFlashed] = React.useState<string | null>(null);
+  const jumpToTile = (id: string) => {
+    tileRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    setFlashed(id);
+    window.setTimeout(() => setFlashed((cur) => (cur === id ? null : cur)), 1300);
+  };
 
   return (
     <div className="pkgo-grid">
@@ -234,11 +251,11 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
           ) : (
             <div className="pkgo-reg">
               {pkgs.map((p) => (
-                <button key={p.id} type="button" className="pkgo-row" onClick={() => onOpenPackage(p.id)}>
+                <button key={p.id} type="button" className="pkgo-row" onClick={() => jumpToTile(p.id)}>
                   <span className="pkgo-name">{p.name}</span>
-                  {/* A package with every slot empty says nothing here rather than printing a blank
-                      line — the row's own version of "absence omits itself". */}
-                  {p.composition && <span className="pkgo-comp">{p.composition}</span>}
+                  {/* ⚠️ THE COMPOSITION LINE IS GONE FROM THE RAIL (D7). It lives on the tile now, in
+                      three labelled rows; repeating it here made the rail a small copy of the grid
+                      rather than an index of it. Name and send state are what you scan for. */}
                   <span className="pkgo-detail">{p.sentLine}</span>
                 </button>
               ))}
@@ -266,6 +283,71 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
       </aside>
 
       <div className="pkgo-stage">
+        {/* ⚠️ TWO STATES, DERIVED FROM THE DATA (D6). No package → the onboarding stage; any package
+            → the working one. There is no stored "has onboarded" flag, so deleting your last package
+            takes you back to the explanation, which is the honest thing for a page whose whole job
+            is to describe what packages are. */}
+        {packages.length > 0 ? (
+          <>
+            <section>
+              <div className="pkgf-workhead">
+                <h2>Your packages</h2>
+                <span className="pkgf-worktag">
+                  {packages.length} {packages.length === 1 ? "package" : "packages"}
+                </span>
+              </div>
+              <div className="pkgf-tiles">
+                {tiles.map((t) => {
+                  const foot = tileFooter(t);
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      data-tile={t.id}
+                      ref={(el) => { tileRefs.current[t.id] = el; }}
+                      className={`pkgf-tile${flashed === t.id ? " pkgf-tile--flash" : ""}`}
+                      onClick={() => onOpenPackage(t.id)}
+                    >
+                      <h4>{t.name}</h4>
+                      <div className="pkgf-slots">
+                        {t.slots.map((sl) => (
+                          <span key={sl.label} className="pkgf-slot">
+                            <span className="pkgf-slt">{sl.label}</span>
+                            <span className={`pkgf-sln${sl.name ? "" : " pkgf-sln--none"}`}>
+                              {sl.name ?? "Not included"}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="pkgf-tfoot">
+                        {"idle" in foot ? (
+                          <span className="pkgf-idle">{foot.idle}</span>
+                        ) : (
+                          <>
+                            <span className="pkgf-out">{foot.out}</span>
+                            <span className="pkgf-in">{foot.replied}</span>
+                            <span className="pkgf-in">{foot.requests}</span>
+                          </>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+                {/* The ghost tile is last, and it is the only way to add from the grid. */}
+                <button type="button" className="pkgf-tile pkgf-tile--ghost" onClick={onNewPackage}>
+                  <span>
+                    <span className="pkgo-gtitle">Build another package</span>
+                    <span className="pkgo-gsub" style={{ display: "block" }}>
+                      A different letter, a different length of synopsis.
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </section>
+            {/* Phase 5 mounts the tracking dashboard here. */}
+          </>
+        ) : (
+        <>
         {/* ⚠️ THE PROBLEM STATEMENT IS THE OLD `.pkgw-strip`, PROMOTED — not a second pitch. The
             page used to carry this same sentence as a thin strip above the tab row; the ref makes
             it the stage's opening card, so the strip is removed rather than left to say the same
@@ -312,6 +394,8 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
             })}
           </div>
         </section>
+        </>
+        )}
       </div>
     </div>
   );

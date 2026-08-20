@@ -238,3 +238,85 @@
   background: var(--pkg-pink); border: 1px solid var(--pkg-pinkline);
   border-radius: 8px; padding: 9px 11px; margin-bottom: 4px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE WORKING STAGE — package tiles (D6, D7)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgf-workhead {
+  display: flex; align-items: baseline; gap: 14px;
+  border-bottom: 1px solid var(--pkgo-hairline); padding-bottom: 10px; margin-bottom: 16px;
+}
+.pkgf-workhead h2 { font-family: var(--font-serif); font-size: 22px; font-weight: 600; color: var(--pkg-ink); }
+.pkgf-worktag {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em;
+  color: var(--pkg-muted); text-transform: uppercase;
+}
+
+/* ⚠️ `auto-fill` WITH A REAL MINIMUM (260px), not `auto-fit` with a zero one. auto-fit collapses
+   empty tracks, which is how a stat block once resolved to two real columns followed by a hundred
+   phantom `0px` ones and rendered correctly only by luck. A real minimum means a track either fits
+   a tile or is not created. */
+.pkgf-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+
+.pkgf-tile {
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-top: 3px solid var(--pkgo-sage-deep);
+  border-radius: 12px;
+  padding: 16px 16px 13px;
+  display: flex; flex-direction: column; gap: 12px;
+  cursor: pointer; text-align: left; font-family: inherit;
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.pkgf-tile:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(58, 28, 20, 0.09); }
+.pkgf-tile h4 { font-family: var(--font-serif); font-size: 17px; font-weight: 600; color: var(--pkg-ink); }
+
+.pkgf-slots { display: flex; flex-direction: column; gap: 5px; }
+.pkgf-slot { display: flex; align-items: baseline; gap: 8px; }
+.pkgf-slt {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.12em;
+  color: var(--pkg-muted); text-transform: uppercase; flex: 0 0 58px;
+}
+.pkgf-sln { font-size: 12px; font-weight: 600; color: var(--pkg-ink); }
+/* "Not included" is a stated choice, so it is quieter than a name but still present. */
+.pkgf-sln--none { color: var(--pkg-muted); font-weight: 400; }
+
+/* ⚠️ THE SCORECARD READS IN DIRECTION COLOURS (D7): burgundy for what went OUT, sage for what came
+   BACK. That is the app's two-way vocabulary, and it is why the arrows are part of the string rather
+   than decoration — "→ 6 sent" and "← 2 replied" say which way the traffic went before you read the
+   number. `margin-top:auto` pins the footer to the bottom so tiles of different heights still line
+   their scorecards up. */
+.pkgf-tfoot {
+  border-top: 1px solid var(--pkgo-hairline-soft); padding-top: 9px; margin-top: auto;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.04em;
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+.pkgf-out { color: var(--pkg-burg); }
+.pkgf-in { color: var(--pkgo-sage-ink); }
+.pkgf-idle { color: var(--pkg-muted); letter-spacing: 0.02em; }
+
+.pkgf-tile--ghost {
+  border: 1.5px dashed var(--pkgo-dash); border-top-width: 1.5px;
+  align-items: center; justify-content: center; text-align: center;
+  background: var(--pkgo-surface); min-height: 150px;
+}
+.pkgf-tile--ghost:hover {
+  transform: none; box-shadow: none;
+  background: rgba(245, 226, 218, 0.3); border-color: var(--pkg-pinkline);
+}
+.pkgf-tile--ghost .pkgo-gtitle { font-style: italic; }
+
+/* ⚠️ THE FLASH IS HOW THE RAIL AND THE GRID STAY ONE PLACE. Clicking a package in the rail index
+   scrolls its tile into view and flashes it, rather than opening anything — the rail is an index of
+   the grid, not a second list of packages. Disabled under reduced motion, where the scroll alone
+   does the job. */
+@keyframes pkgfFlash {
+  0%   { box-shadow: 0 0 0 3px rgba(232, 200, 188, 0.9); }
+  100% { box-shadow: 0 0 0 3px rgba(232, 200, 188, 0); }
+}
+.pkgf-tile--flash { animation: pkgfFlash 1.2s ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .pkgf-tile--flash { animation: none; }
+  .pkgf-tile { transition: none; }
+}

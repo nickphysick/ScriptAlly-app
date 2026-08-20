@@ -425,3 +425,80 @@ instinct. The brief's "never a placeholder" rule is read as being about *materia
 | `tsc --noEmit` | exit 0 |
 | `vite build` | exit 0; whole log grepped — no diagnostics |
 | Targeted suites (5 files) | **115 passed** |
+
+---
+
+## Phase 4 — Stage states + tiles
+
+**What shipped:** D6's two-state stage, the tile grid, the ghost tile, the rail's jump-and-flash, and
+the R5 entry-point retirement.
+
+### D6's switch, proved in both directions
+
+| Fixture | `onboardingShown` | work head | tiles | ghost tile |
+|---|---|---|---|---|
+| 2 packages | **false** | `Your packages` · `2 packages` | **2** | **true** |
+| materials, **0 packages** | **true** | — | **0** | false |
+
+Derived from `packages.length`, with no stored flag — so deleting your last package takes you back to
+the explanation, which is the honest behaviour for a page whose job is to describe what packages are.
+
+### Tiles, measured (D7)
+
+```
+Standard UK          Covering letter  Hook-first
+                     Synopsis         One-page
+                     Sample pages     Chapters 1-3
+                     → 6 sent  ← 2 replied  2 requests
+border-top: 3px  rgb(154, 168, 150)      ← the sage edge
+```
+
+* **All three slot rows always render.** An empty sample says `Not included` rather than vanishing —
+  a row that disappears states nothing, and the tile has to be readable as a complete description of
+  what goes in the envelope.
+* **The scorecard is in direction colours**: burgundy `→` for what went out, sage `←` for what came
+  back. The arrows are part of the string, not decoration, so the direction reads before the number.
+* **The figures are derived**, not counters. The ref's mockup stores `sent`/`replies` on the package
+  because a mockup has nowhere else to put them; here they come from `packageMetrics` at read time,
+  so deleting a query moves the tile and nothing can drift.
+
+### The rail is an index of the grid, not a second list
+
+Clicking a package row in the rail: **`flashed: true`, `flashedName: "Standard UK"`,
+`builderOpened: false`.** It scrolls the tile into view and flashes it — it does **not** open the
+builder. Two surfaces that both opened the editor would make the rail a duplicate control rather
+than a way of finding something; the tile itself is what opens the builder.
+
+The rail rows also lost their composition line (`railHasComposition: false`) — that lives on the tile
+now, in three labelled rows. Repeating it made the rail a small copy of the grid.
+
+### R5 — the entry points are retired
+
+**Zero routes from this page into the Workshop remain**, verified on comment-stripped source:
+
+```
+setView("workshop") in live code: 0
+```
+
+All eight of R5's entry points are gone or repointed: the six overview/header ones now open the two
+modals; Analytics' own two (`onOpenPackage`, `onNewPackage`) were the last routes in and now open the
+builder — leaving them would have made a *recommendation* the one way to reach a surface the page had
+otherwise retired. `WorkshopTab` and `AnalyticsTab` remain on disk and remain mounted by `#/pkg-lab`
+(D9). Tracking's route into Analytics is Phase 5's to retire.
+
+### ⚠️ The seed is only idempotent against an absent fixture
+
+Re-seeding over an existing fixture was denied. `setDoc` on a document that already exists is an
+**update** at the rules layer, and `seedPackages.mjs` recomputes `createdDate` on every run — a key
+the versions update allowlist does not carry, so `hasOnly` denies the whole write. Clean-then-seed
+always works; the script's docstring now says so. Same shape as F7 and the `wordCount` allowlist, met
+for the third time in this build — which is the argument for adding the allowlist entry at the same
+moment as the field, every time.
+
+### Phase 4 gates
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | exit 0 |
+| `vite build` | exit 0; whole log grepped — no diagnostics |
+| Targeted suites (5 files) | **122 passed** (+7 for `packageTiles`) |

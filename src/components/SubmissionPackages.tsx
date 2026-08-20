@@ -76,6 +76,11 @@ export const SubmissionPackages: React.FC = () => {
      values and this is three, because the overview is a real destination rather than a third tab:
      the rail IS the navigation now, and Workshop and Analytics are what it opens. The strip's
      component survives untouched for the DEV `#/pkg-lab` route, which still mounts it. */
+  /* ⚠️ EVERY OVERVIEW ENTRY POINT INTO THE WORKSHOP IS RETIRED (flow pack D9, R5's list). Materials
+     open the modal, packages open the builder, and the header's `New package` opens the builder too
+     — so `view` no longer has anything on this page that sets it to "workshop". The Workshop and
+     Analytics COMPONENTS stay on disk and stay mounted by `#/pkg-lab`; what is gone is this page's
+     routes into them. The state itself survives for Tracking (Phase 5 decides its fate). */
   const [view, setView] = useState<PkgView>("overview");
   // Bumped by the header's "＋ New package" — the workshop opens a fresh draft on each change.
   const [newPkgSignal, setNewPkgSignal] = useState(0);
@@ -405,8 +410,16 @@ export const SubmissionPackages: React.FC = () => {
                 scope={scope}
                 onScope={setScope}
                 onOpenQueries={() => navigate("/queries")}
-                onOpenPackage={(pid) => { setView("workshop"); setOpenPkg(pid); }}
-                onNewPackage={() => { setView("workshop"); setNewPkgSignal((n) => n + 1); }}
+                /* ⚠️ ANALYTICS' OWN TWO HAND-OFFS GO TO THE BUILDER, NOT THE WORKSHOP (R5 #7/#8).
+                   They were the last routes from this page into the Workshop; leaving them would
+                   have made a recommendation the one way to reach a surface the page had otherwise
+                   retired. Phase 5 retires Tracking's route into Analytics as well, at which point
+                   neither component is reachable from here at all. */
+                onOpenPackage={(pid) => {
+                  setPkgEditing(msPackages.find((p) => p.id === pid) ?? null);
+                  setPkgModal(true);
+                }}
+                onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
                 onTryExample={startTour}
               />
             </div>

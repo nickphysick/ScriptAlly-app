@@ -248,3 +248,67 @@ export function howItWorks(materialCount: number, packageCount: number, liveCoun
     { done: liveCount > 0, live: liveCount > 0, tick: liveCount > 0 ? "● LIVE" : null },
   ];
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE WORKING STAGE — package tiles (flow pack D7)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+export interface TileSlot { label: string; name: string | null }
+
+export interface PackageTile {
+  id: string;
+  name: string;
+  /** Three rows, always — an empty sample says "Not included" rather than vanishing. */
+  slots: TileSlot[];
+  sent: number;
+  replies: number;
+  requests: number;
+}
+
+/**
+ * One tile per package, with its composition and its scorecard.
+ *
+ * ⚠️ ALL THREE SLOT ROWS ALWAYS RENDER, even when the sample is empty. A row that disappears states
+ * nothing; `Not included` states that the slot was considered and left out — which is the same split
+ * the Submission-packages pane already makes with its `—`, and what earns the tile the right to be
+ * read as a complete description of what goes in the envelope.
+ *
+ * ⚠️ AND THE FIGURES ARE `packageMetrics`'s, NOT COUNTERS. The ref's mockup stores `sent`/`replies`
+ * on the package because a mockup has nowhere else to put them; here they are derived from the
+ * queries at read time (D1), so nothing can drift and deleting a query moves the tile.
+ */
+export function packageTiles(
+  packages: SubmissionPackage[],
+  versions: ManuscriptVersion[],
+  queries: Query[],
+): PackageTile[] {
+  const byId = new Map(versions.map((v) => [v.id, v]));
+  return packages.map((p) => {
+    const m = packageMetrics(p.id, queries);
+    const mine = queries.filter((q) => q.packageId === p.id);
+    return {
+      id: p.id,
+      name: p.packageName,
+      slots: BUILDER_TYPES.map((t) => {
+        const id = p[SLOT_FIELD[t]];
+        return {
+          label: TYPE_META[t].label,
+          name: isSlotFilled(id) ? byId.get(id)?.versionName ?? null : null,
+        };
+      }),
+      sent: m.sent,
+      replies: m.responses,
+      requests: mine.filter(isRequest).length,
+    };
+  });
+}
+
+/** The tile's footer, in the ref's words. Absence is a sentence; presence is three counts. */
+export function tileFooter(t: PackageTile): { idle: string } | { out: string; replied: string; requests: string } {
+  if (t.sent === 0) return { idle: "Not yet sent — attach it when you log a query" };
+  return {
+    out: `→ ${t.sent} sent`,
+    replied: `← ${t.replies} replied`,
+    requests: `${t.requests} ${t.requests === 1 ? "request" : "requests"}`,
+  };
+}

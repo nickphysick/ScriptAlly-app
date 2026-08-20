@@ -1,0 +1,10 @@
+{
+  "onboardingShown": true,
+  "workHead": null,
+  "workTag": null,
+  "tileCount": 0,
+  "ghostTile": false,
+  "ghostText": null,
+  "tiles": [],
+  "railHasComposition": false
+}

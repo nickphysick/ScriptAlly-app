@@ -1,0 +1,68 @@
+[
+  {
+    "at": "with packages",
+    "stage": {
+      "onboardingShown": false,
+      "workHead": "Your packages",
+      "workTag": "2 packages",
+      "tileCount": 2,
+      "ghostTile": true,
+      "ghostText": "Build another packageA different letter, a different length of synopsis.",
+      "tiles": [
+        {
+          "name": "Standard UK",
+          "slots": [
+            {
+              "label": "Covering letter",
+              "name": "Hook-first",
+              "none": false
+            },
+            {
+              "label": "Synopsis",
+              "name": "One-page",
+              "none": false
+            },
+            {
+              "label": "Sample pages",
+              "name": "Chapters 1-3",
+              "none": false
+            }
+          ],
+          "foot": "→ 6 sent← 2 replied2 requests",
+          "topBorder": "3px",
+          "topColor": "rgb(154, 168, 150)"
+        },
+        {
+          "name": "Comps-led variant",
+          "slots": [
+            {
+              "label": "Covering letter",
+              "name": "Comps-forward",
+              "none": false
+            },
+            {
+              "label": "Synopsis",
+              "name": "One-page",
+              "none": false
+            },
+            {
+              "label": "Sample pages",
+              "name": "Chapters 1-3",
+              "none": false
+            }
+          ],
+          "foot": "→ 2 sent← 0 replied0 requests",
+          "topBorder": "3px",
+          "topColor": "rgb(154, 168, 150)"
+        }
+      ],
+      "railHasComposition": false
+    }
+  },
+  {
+    "at": "after clicking a rail package row",
+    "flashed": true,
+    "flashedName": "Standard UK",
+    "builderOpened": false
+  }
+]
