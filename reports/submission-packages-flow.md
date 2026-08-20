@@ -244,3 +244,102 @@ rules that forbid it. The F7 lesson applied to the probe itself.
 | `vite build` | exit 0, no diagnostics | **exit 0, no diagnostics** |
 | Targeted suites (6 files incl. the new lock) | — | **90 passed** |
 | Full `vitest` | 6 files / 24 tests failed (other streams) | unchanged by this phase — no shared file touched |
+
+---
+
+## Phase 2 — Material modal + register
+
+**What shipped:** the add/edit modal on both entry paths, source labels in the register, and D10's
+white wells. Materials no longer hand off to the Workshop.
+
+### The chassis, measured (D3)
+
+The ref's rim → frame → band, verified on the rendered modal rather than read off the CSS:
+
+| | Measured |
+|---|---|
+| `.pkgf-modal` (the rim) | `border-top-width: 0px`, `padding-top: 10px` |
+| `.pkgf-frame` | `border-top-width: 1px`, `overflow: hidden` |
+| band inside the frame | **true** |
+
+That order is the whole point: the frame's `overflow:hidden` is what stops the sage band's colour at
+the hairline. Put the band outside the frame, or give the rim the border, and you get a band
+overlapping its own edge — the overlay-border bug this arrangement exists to prevent.
+
+### Driven, not asserted
+
+Ran against the page with motion suppression lifted:
+
+| Step | Result |
+|---|---|
+| `+ ADD` → modal | type step, tiles reading `2 held` · `1 held` · `1 held` |
+| pick Covering letter | form step; name pre-filled **`Voice-led`** — the third rung, because the first two are already used — and selected |
+| segmented control | `PASTE TEXT` on · **`ATTACH FILE` disabled with its `SOON` tag** · `NAME ONLY` available |
+| save a pasted material | register row → **`Text · 5 words`** |
+| save a name-only material | register row → **`Ref · flow-ref.docx`** |
+| reopen the pasted one | opens on the FORM, title `Edit material`, save `Save changes`, body restored |
+| edit the body | → **`Text · 7 words`** — the count moves with the text |
+| reopen the name-only one | `NAME ONLY` on, filename `flow-ref.docx` restored |
+| switch it ref → paste | → **`Text · 4 words`**, filename cleared |
+
+That last row is the case the unit tests exist for: without the unset, the register would go on
+reporting a filename for a material whose content is now text, and nothing would error.
+
+### ⚠️ Driving the page found a real bug the unit tests could not
+
+Opening a material to **edit** flashed the type-picker grid for a frame before showing the form. The
+probe caught it as `onTypeStep: true` on a modal whose title already read `Edit material`, with
+`name: null` and `seg: []`.
+
+Cause: the draft was seeded in a `useEffect`, so the first render of an edit still had `type === null`
+and painted the "what kind of thing is this?" step. Fixed by seeding the `useState` **initialisers**
+from props and having the host mount the modal only while open, with a `key` — so every opening is a
+fresh mount. That also removes, by construction, the stale-state hazard the effect was written to
+avoid. After the fix the same probe reads `onTypeStep: false`, `name: "Flow edit paste"`,
+`saveLabel: "Save changes"`, `PASTE TEXT` already on.
+
+### ⚠️ And the test mutated the fixture it depended on
+
+The reopening test originally reopened materials the ADD test had left behind. Run twice, the second
+run found a ref material the first run had already switched to paste, and timed out looking for a
+File-name field that no longer existed. Then, once both tests created their own, they collided on the
+same names — `strict mode violation: resolved to 4 elements`.
+
+Both are the same fault: **a measurement that changes what it measures**, which `rulesProbe.mjs`
+already had to learn. Fixed with `tests/e2e/cleanFlowTest.mjs` (removes only versions named
+`Flow …`, dev harness account only) and by giving each test its own material names. Neither the app
+nor the design was at fault in either case.
+
+### D10 — the wells are white again
+
+`805c0485`'s cream tint is reverted; measured `rgb(255, 255, 255)` on both the panel and its body.
+F8 was the right answer to "why do the rows not read as rows" while rows were all the panel held; the
+flow ref answers it differently and keeps every container white. Reverted rather than layered — two
+half-applied treatments read worse than either one whole. `--pkgo-well` is left defined and now read
+by nothing; removing it is a tidy-up for whoever next touches that token block.
+
+### The register's detail line is now the material's SOURCE
+
+`Text · N words` / `Ref · file.docx`, superseding the restructure's `added N ago`. That line existed
+because the register had nothing else true to say about a material; now that each has a recorded
+source, describing what the record **is** beats describing when it arrived. `materialDetail` and
+`addedLabel` are kept and still locked — the rule they encode (never label a created date as an
+edit, never invent a version number) is why this line is not "edited 4 days ago".
+
+### ⚠️ One tension with D3, resolved the same way as the register rows
+
+D3 says the modal's single filled control is its Save. The probe reports **two** filled things: `Save
+material` and the **active segment** of the mode control, which the ref itself fills with pink
+(`.mode-seg button.on{background:var(--pink-cta)}`). A selected segment is a *state indicator*, not a
+competing action, and the ref draws both — so the ref wins and the rule is read as "no second action
+competes with Save". Noted here rather than silently, and Phase 6's probe will exclude segment-on
+states explicitly, as it already excludes white row-buttons.
+
+### Phase 2 gates
+
+| Gate | Result |
+|---|---|
+| `tsc --noEmit` | exit 0 |
+| `vite build` | exit 0; whole log grepped — no diagnostics |
+| Targeted suites (5 files) | **115 passed** |
+| New unit tests | `materialDraft.test.ts` — **36 cases** |

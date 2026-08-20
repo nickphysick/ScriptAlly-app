@@ -122,11 +122,14 @@
 }
 .pkgo-add:hover { background: rgba(255, 255, 255, 0.55); }
 
-/* ⚠️ THE WELL IS WHY THE ROWS READ AS ROWS (F8). The panel is white per D4; its BODY takes the page
-   cream, so the white register rows and the dashed ghosts sit ON something instead of dissolving
-   into it. One value, one shared class — no layout, spacing or radius moves with it, which is what
-   keeps this a tint rather than a redesign. */
-.pkgo-body { padding: 10px; background: var(--pkgo-well); }
+/* ⚠️ WHITE AGAIN — F8's cream well is REVERTED by the flow pack (D10). The tint was the right answer
+   to the question "why do the rows not read as rows" while the rows were the only thing in the
+   panel; the flow ref answers it differently and keeps every container and well pure white, with
+   the row's own hairline and hover shadow doing the separating. Reverting rather than layering a
+   second opinion on top: two half-applied treatments read worse than either one whole.
+   `--pkgo-well` stays defined in packageWorkshop.css — it is one token, it is now read by nothing,
+   and removing it is a tidy-up for whoever next touches that block. */
+.pkgo-body { padding: 10px; background: var(--pkgo-surface); }
 
 /* ══════════════════════════════════════════════════════════════════════════════
    BACK TO THE OVERVIEW

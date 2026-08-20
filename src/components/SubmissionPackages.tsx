@@ -20,12 +20,15 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
 import { resolveActivePackage } from "../lib/packageMetrics";
-import { ComponentType } from "../types";
+import { ComponentType, ManuscriptVersion } from "../types";
 import { useNavigate } from "react-router-dom";
 import { PackageSaveFields } from "./packages/PackageWorkshop";
 import { WorkshopTab } from "./packages/WorkshopTab";
 import { AnalyticsTab, AnalyticsScope } from "./packages/AnalyticsTab";
 import { PackagesOverview } from "./packages/PackagesOverview";
+import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
+import { createPayload, updatePayload } from "../lib/materialDraft";
+import { deleteField } from "firebase/firestore";
 import { Tour } from "./Tour";
 import { EXAMPLE_VERSIONS, EXAMPLE_PACKAGES, EXAMPLE_QUERIES, EXAMPLE_AGENTS, WORKSHOP_TOUR_STEPS } from "./packages/tourExample";
 import { FONT_SERIF } from "../lib/designTokens";
@@ -79,6 +82,10 @@ export const SubmissionPackages: React.FC = () => {
   const [openMatSignal, setOpenMatSignal] = useState(0);
   // The rail asked the workshop to open one material for editing.
   const [openMat, setOpenMat] = useState<string | null>(null);
+  /* The material modal (flow pack Phase 2). `matModal` is the open flag; `matEditing` is the record
+     being edited, or null when adding. Both local — a modal is not a destination. */
+  const [matModal, setMatModal] = useState(false);
+  const [matEditing, setMatEditing] = useState<ManuscriptVersion | null>(null);
   // Analytics scope: "all" or a package id. Local UI state, like the tab itself.
   const [scope, setScope] = useState<AnalyticsScope>("all");
   // A recommendation asked the Workshop tab to open a particular package.
@@ -127,6 +134,29 @@ export const SubmissionPackages: React.FC = () => {
     if (!msId) return undefined;
     return addVersion({ manuscriptId: msId, componentType: type, versionName: name, fileAttached: false, contentDraft, contentType: "text" });
   };
+  /**
+   * The material modal's write. Create or update, through the SAME primitives the Workshop editor
+   * uses (R2) — this page adds no second persistence path.
+   *
+   * ⚠️ `unset` BECOMES `deleteField()` HERE, and only here. `lib/materialDraft` decides WHAT a mode
+   * switch has to clear and is unit-locked on it; the Firestore sentinel is a detail of the write,
+   * so it lives at the write. Turning a pasted material into a name-only one has to clear the body
+   * and its count, and a `0` there would say the document is empty rather than unread.
+   */
+  const saveMaterial = async (d: MaterialDraftResult) => {
+    if (!msId) return;
+    if (matEditing) {
+      const { set, unset } = updatePayload(d);
+      const fields: Record<string, unknown> = { ...set };
+      for (const key of unset) fields[key] = deleteField();
+      await updateVersion(matEditing.id, fields);
+    } else {
+      await addVersion(createPayload(d, msId) as Parameters<typeof addVersion>[0]);
+    }
+    setMatModal(false);
+    setMatEditing(null);
+  };
+
   const savePackage = async (baseId: string | null, fields: PackageSaveFields): Promise<string | undefined> => {
     if (!msId) return undefined;
     if (baseId) { await updatePackage(baseId, fields); return baseId; }
@@ -278,8 +308,15 @@ export const SubmissionPackages: React.FC = () => {
               versions={msVersions}
               packages={msPackages}
               queries={msQueries}
-              onAddMaterial={() => { setView("workshop"); setOpenMatSignal((n) => n + 1); }}
-              onOpenMaterial={(id) => { setView("workshop"); setOpenMat(id); }}
+              /* ⚠️ THESE NO LONGER HAND OFF TO THE WORKSHOP (D9). Both open the new modal in place;
+                 the Workshop's own materials editor stays on disk and stays reachable from
+                 `#/pkg-lab`, but this page does not send anyone to it any more. */
+              onAddMaterial={() => { setMatEditing(null); setMatModal(true); }}
+              onOpenMaterial={(id) => {
+                const v = msVersions.find((x) => x.id === id) ?? null;
+                setMatEditing(v);
+                setMatModal(true);
+              }}
               onNewPackage={() => { setView("workshop"); setNewPkgSignal((n) => n + 1); }}
               onOpenPackage={(id) => { setView("workshop"); setOpenPkg(id); }}
               onOpenTracking={() => setView("analytics")}
@@ -336,6 +373,19 @@ export const SubmissionPackages: React.FC = () => {
       {tourActive && (
         <Tour steps={WORKSHOP_TOUR_STEPS} onDone={endTour} badge="Example data — cleared when the tour ends" />
       )}
+
+      {/* The material modal — mounted at page level so it overlays whatever surface is showing. */}
+      {/* ⚠️ MOUNTED ONLY WHILE OPEN, AND KEYED. A fresh mount per opening is what lets the modal seed
+          its draft in `useState` initialisers instead of an effect — which is what removed the
+          type-grid flash when opening a material to edit. The key makes reopening a DIFFERENT
+          material a remount rather than a stale-state hazard. */}
+      {matModal && <MaterialModal
+        key={matEditing?.id ?? "new-material"}
+        editing={matEditing}
+        versions={msVersions}
+        onClose={() => { setMatModal(false); setMatEditing(null); }}
+        onSave={saveMaterial}
+      />}
       </WorkspacePageGrid>
     </div>
   );

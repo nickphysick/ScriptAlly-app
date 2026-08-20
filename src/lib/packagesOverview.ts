@@ -23,6 +23,7 @@ import { packageMetrics, isRequest, isSlotFilled } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES, SLOT_FIELD } from "../components/packages/typeMeta";
 import { versionMeta } from "./packageMetrics";
 import { agoLabel, daysBetween } from "./elapsed";
+import { sourceLabel } from "./materialDraft";
 
 /* ══════════════════════════════════════════════════════════════════════════════
    MATERIALS
@@ -34,23 +35,19 @@ export interface MaterialRow {
   typeLabel: string;
   /** The writer's own name for this version. */
   name: string;
-  /** Mono detail line. Never empty — falls back to the added date alone. */
+  /** Mono detail line — the material's SOURCE (`Text · N words` / `Ref · file`). Never empty. */
   detail: string;
 }
 
 /**
  * The Materials register.
  *
- * ⚠️ THE DETAIL LINE SAYS "added", NOT THE REF'S "edited", AND THAT IS A CORRECTNESS FIX RATHER
- * THAN A WORDING PREFERENCE. `ManuscriptVersion` carries exactly one timestamp, `createdDate`.
- * Rendering it under an "edited" label would state something the record does not know — the same
- * fault as the Manuscripts tile deriving an "Added" date from the earliest activity, where a
- * first-query date wore the wrong label and looked entirely plausible.
- *
- * ⚠️ AND THERE IS NO "v3". The ref's version numbers are not a field: `versionName` is free text
- * (the ref's own "Hook-first" is the name). An ordinal derived from creation order would be a
- * number the data does not hold and that the writer never chose, so the line carries only what is
- * real — a word count where there is a draft to count, and the added date.
+ * ⚠️ THE DETAIL LINE IS NOW THE MATERIAL'S SOURCE, NOT ITS AGE (flow pack D2) — `Text · 412 words`,
+ * `Ref · hook-first.docx`. The restructure's "added N ago" was what the register could honestly say
+ * when a material had no recorded source; now that every one does, describing what the record IS
+ * beats describing when it arrived. `materialDetail` / `addedLabel` below are kept and still locked:
+ * the rule they encode — never label a created date as an edit, never invent a version number — is
+ * the reason this line is not "edited 4 days ago", and it applies wherever a date is next shown.
  *
  * Grouped by `BUILDER_TYPES` canonical order, newest first inside each type. Full Manuscript is
  * absent because `BUILDER_TYPES` excludes it — the standing law that it is not a package material.
@@ -66,7 +63,13 @@ export function materialRows(versions: ManuscriptVersion[], now: number): Materi
         id: v.id,
         typeLabel: TYPE_META[type].label,
         name: v.versionName,
-        detail: materialDetail(v, now),
+        /* ⚠️ THE SOURCE LABEL SUPERSEDES THE RESTRUCTURE'S "added N ago" (flow pack D2). That line
+           existed because the register had nothing else true to say about a material; each one now
+           has a real source, which is both more useful and more honest — it describes what the
+           record IS rather than when it arrived. `materialDetail` and `addedLabel` survive below,
+           still unit-locked, because the honesty rule they encode (never call a created date an
+           edit) is worth keeping wherever a date is next shown. */
+        detail: sourceLabel(v),
       });
     }
   }

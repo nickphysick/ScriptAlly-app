@@ -1,0 +1,183 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages — the ecosystem flow: modals, package tiles, and the tracking dashboard.
+ * Design authority: design-refs/submission-packages-flow.html.
+ *
+ * ⚠️ ONE RULE PER SELECTOR, AND THE TOKENS ARE NOT HERE. `.pkgw`'s token block lives in
+ * packageWorkshop.css and stays the only one; this file declares `.pkgf-*` classes, which nothing
+ * else in the app owns. A second `.pkgw { … }` block in a second file is the ambiguity that has
+ * caught `workspacePageGrid.css` twice.
+ *
+ * ⚠️ THE MODAL CHASSIS IS RIM → FRAME → BAND, and the order is the whole point (D3). The white
+ * `.pkgf-modal` is a 10px rim; the hairline `.pkgf-frame` sits inside it with `overflow:hidden`; the
+ * sage band sits inside the FRAME. That is what makes the band's colour stop exactly at the
+ * hairline — the canonical Form 11 clipping. Putting the band outside the frame, or giving the rim
+ * the border, produces a band that overlaps its own edge, which is the bug this arrangement exists
+ * to prevent.
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   MODAL CHASSIS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgf-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(58, 28, 20, 0.32);
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 9vh 20px 40px;
+  overflow-y: auto;
+}
+
+.pkgf-modal {
+  background: var(--pkgo-surface);
+  border-radius: 14px;
+  padding: 10px;                       /* the rim */
+  width: 560px;
+  max-width: 100%;
+  box-shadow: 0 24px 60px rgba(58, 28, 20, 0.28);
+}
+
+.pkgf-frame {
+  border: 1px solid var(--pkgo-hairline);
+  border-radius: 8px;
+  overflow: hidden;                    /* what clips the band to the hairline */
+}
+
+.pkgf-band {
+  background: linear-gradient(180deg, var(--pkgo-sage-a), var(--pkgo-sage-b));
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pkgf-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pkg-ink);
+}
+
+.pkgf-close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--pkg-ink-soft);
+  padding: 2px 4px;
+}
+.pkgf-close:hover { color: var(--pkg-ink); }
+
+.pkgf-body { padding: 20px 22px 22px; background: var(--pkgo-surface); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   TYPE TILES — step one of the add flow
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgf-typegrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+
+.pkgf-typetile {
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 10px;
+  padding: 16px 12px 14px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--pkgo-surface);
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.pkgf-typetile:hover { border-color: var(--pkg-pinkline); box-shadow: 0 4px 12px rgba(58, 28, 20, 0.07); }
+.pkgf-typetile svg { width: 34px; height: 34px; stroke: var(--pkg-burg); margin-bottom: 8px; }
+.pkgf-tname { font-family: var(--font-serif); font-size: 15px; font-weight: 600; display: block; color: var(--pkg-ink); }
+.pkgf-tcount {
+  font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em;
+  color: var(--pkg-muted); display: block; margin-top: 4px; text-transform: uppercase;
+}
+
+.pkgf-hint {
+  font-size: 11.5px; color: var(--pkg-muted); margin-top: 14px; line-height: 1.55; text-align: center;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   FORM STEP
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgf-crumb {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  color: var(--pkg-muted); text-transform: uppercase; cursor: pointer;
+  margin-bottom: 14px; display: inline-block;
+  background: none; border: none; padding: 0;
+}
+.pkgf-crumb:hover { color: var(--pkg-burg); }
+
+.pkgf-fld { margin-bottom: 14px; }
+.pkgf-fld label {
+  display: block; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--pkg-ink-soft); margin-bottom: 6px;
+}
+.pkgf-fld input[type="text"],
+.pkgf-fld textarea,
+.pkgf-fld select {
+  width: 100%; font-size: 13px; color: var(--pkg-ink);
+  border: 1px solid var(--pkgo-hairline-soft); border-radius: 8px;
+  padding: 9px 11px; background: var(--pkgo-surface); outline: none;
+  box-sizing: border-box;
+}
+.pkgf-fld input:focus, .pkgf-fld textarea:focus, .pkgf-fld select:focus {
+  border-color: var(--pkg-pinkline); box-shadow: 0 0 0 3px rgba(232, 200, 188, 0.3);
+}
+.pkgf-fld textarea { min-height: 120px; resize: vertical; line-height: 1.6; font-family: inherit; }
+.pkgf-sub { font-size: 10.5px; color: var(--pkg-muted); margin-top: 5px; line-height: 1.5; }
+
+.pkgf-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+/* The modal's own controls. Its Save is the only filled thing inside it (D3). */
+.pkgf-btn {
+  font-size: 12.5px; font-weight: 600;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--pkgo-hairline); background: transparent; color: var(--pkg-ink);
+  transition: background 0.15s;
+}
+.pkgf-btn:hover { background: rgba(58, 28, 20, 0.04); }
+.pkgf-btn--primary { background: var(--pkg-pink); border-color: var(--pkg-pinkline); color: var(--pkg-burg); }
+.pkgf-btn--primary:hover { background: #f0d6cb; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   CONTENT MODE SEGMENTED CONTROL
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgf-seg {
+  display: flex; border: 1px solid var(--pkgo-hairline-soft); border-radius: 8px;
+  overflow: hidden; margin-bottom: 10px;
+}
+.pkgf-seg button {
+  flex: 1; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.1em;
+  padding: 8px 4px; background: var(--pkgo-surface); border: none; cursor: pointer;
+  color: var(--pkg-muted); border-right: 1px solid var(--pkgo-hairline-soft);
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+}
+.pkgf-seg button:last-child { border-right: none; }
+.pkgf-seg button:hover:not(:disabled) { background: rgba(245, 226, 218, 0.3); }
+.pkgf-seg button.on { background: var(--pkg-pink); color: var(--pkg-burg); font-weight: 700; }
+
+/* ⚠️ DISABLED, NOT HIDDEN (D2). ATTACH FILE needs Firebase Storage, which this app does not have —
+   see F-A. Removing it would make the app look as though attaching were never intended; showing it
+   greyed with a SOON tag says "not yet", which is the truth. `cursor: not-allowed` and no hover, so
+   it never reads as a control that simply failed. */
+.pkgf-seg button:disabled { cursor: not-allowed; opacity: 0.55; }
+.pkgf-soon {
+  font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.12em;
+  border: 1px solid var(--pkgo-hairline-soft); border-radius: 999px;
+  padding: 1px 5px; color: var(--pkg-muted);
+}

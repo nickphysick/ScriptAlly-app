@@ -1,0 +1,179 @@
+[
+  {
+    "at": "landing",
+    "register": {
+      "chip": "4",
+      "rows": [
+        {
+          "type": "Covering letter",
+          "name": "Hook-first",
+          "detail": "Text"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Comps-forward",
+          "detail": "Text"
+        },
+        {
+          "type": "Synopsis",
+          "name": "One-page",
+          "detail": "Text"
+        },
+        {
+          "type": "Sample pages",
+          "name": "Chapters 1-3",
+          "detail": "Text · 520 words"
+        }
+      ],
+      "wellBg": "rgb(255, 255, 255)",
+      "panelBg": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "at": "modal opened (type step)",
+    "modal": {
+      "open": true,
+      "title": "Add a material",
+      "onTypeStep": true,
+      "tiles": [
+        {
+          "name": "Covering letter",
+          "held": "2 held"
+        },
+        {
+          "name": "Synopsis",
+          "held": "1 held"
+        },
+        {
+          "name": "Sample pages",
+          "held": "1 held"
+        }
+      ],
+      "nameValue": null,
+      "seg": [],
+      "saveLabel": "",
+      "chassis": {
+        "modalBorder": "0px",
+        "modalPad": "10px",
+        "frameBorder": "1px",
+        "frameOverflow": "hidden",
+        "bandInsideFrame": true
+      },
+      "filled": []
+    }
+  },
+  {
+    "at": "type picked",
+    "modal": {
+      "open": true,
+      "title": "Add a material",
+      "onTypeStep": false,
+      "tiles": [],
+      "nameValue": "Voice-led",
+      "seg": [
+        {
+          "label": "PASTE TEXT",
+          "on": true,
+          "disabled": false
+        },
+        {
+          "label": "ATTACH FILESOON",
+          "on": false,
+          "disabled": true
+        },
+        {
+          "label": "NAME ONLY",
+          "on": false,
+          "disabled": false
+        }
+      ],
+      "saveLabel": "Save material",
+      "chassis": {
+        "modalBorder": "0px",
+        "modalPad": "10px",
+        "frameBorder": "1px",
+        "frameOverflow": "hidden",
+        "bandInsideFrame": true
+      },
+      "filled": [
+        "PASTE TEXT",
+        "Save material"
+      ]
+    }
+  },
+  {
+    "at": "after paste save",
+    "register": {
+      "chip": "5",
+      "rows": [
+        {
+          "type": "Covering letter",
+          "name": "Flow paste test",
+          "detail": "Text · 5 words"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Hook-first",
+          "detail": "Text"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Comps-forward",
+          "detail": "Text"
+        },
+        {
+          "type": "Synopsis",
+          "name": "One-page",
+          "detail": "Text"
+        },
+        {
+          "type": "Sample pages",
+          "name": "Chapters 1-3",
+          "detail": "Text · 520 words"
+        }
+      ],
+      "wellBg": "rgb(255, 255, 255)",
+      "panelBg": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "at": "after name-only save",
+    "register": {
+      "chip": "6",
+      "rows": [
+        {
+          "type": "Covering letter",
+          "name": "Flow paste test",
+          "detail": "Text · 5 words"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Hook-first",
+          "detail": "Text"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Comps-forward",
+          "detail": "Text"
+        },
+        {
+          "type": "Synopsis",
+          "name": "Flow ref test",
+          "detail": "Ref · flow-ref.docx"
+        },
+        {
+          "type": "Synopsis",
+          "name": "One-page",
+          "detail": "Text"
+        },
+        {
+          "type": "Sample pages",
+          "name": "Chapters 1-3",
+          "detail": "Text · 520 words"
+        }
+      ],
+      "wellBg": "rgb(255, 255, 255)",
+      "panelBg": "rgb(255, 255, 255)"
+    }
+  }
+]

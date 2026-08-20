@@ -1,0 +1,149 @@
+[
+  {
+    "at": "reopened pasted",
+    "title": "Edit material",
+    "onTypeStep": false,
+    "name": "Flow edit paste",
+    "saveLabel": "Save changes",
+    "seg": [
+      {
+        "label": "PASTE TEXT",
+        "on": true,
+        "disabled": false
+      },
+      {
+        "label": "ATTACH FILESOON",
+        "on": false,
+        "disabled": true
+      },
+      {
+        "label": "NAME ONLY",
+        "on": false,
+        "disabled": false
+      }
+    ],
+    "body": "one two three four five"
+  },
+  {
+    "at": "after editing the body",
+    "register": {
+      "chip": "8",
+      "rows": [
+        {
+          "type": "Covering letter",
+          "name": "Flow edit paste",
+          "detail": "Text · 7 words"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Flow paste test",
+          "detail": "Text · 5 words"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Hook-first",
+          "detail": "Text"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Comps-forward",
+          "detail": "Text"
+        },
+        {
+          "type": "Synopsis",
+          "name": "Flow edit ref",
+          "detail": "Ref · flow-ref.docx"
+        },
+        {
+          "type": "Synopsis",
+          "name": "Flow ref test",
+          "detail": "Ref · flow-ref.docx"
+        },
+        {
+          "type": "Synopsis",
+          "name": "One-page",
+          "detail": "Text"
+        },
+        {
+          "type": "Sample pages",
+          "name": "Chapters 1-3",
+          "detail": "Text · 520 words"
+        }
+      ],
+      "wellBg": "rgb(255, 255, 255)",
+      "panelBg": "rgb(255, 255, 255)"
+    }
+  },
+  {
+    "at": "reopened name-only",
+    "seg": [
+      {
+        "label": "PASTE TEXT",
+        "on": false,
+        "disabled": false
+      },
+      {
+        "label": "ATTACH FILESOON",
+        "on": false,
+        "disabled": true
+      },
+      {
+        "label": "NAME ONLY",
+        "on": true,
+        "disabled": false
+      }
+    ],
+    "refValue": "flow-ref.docx",
+    "name": "Flow edit ref"
+  },
+  {
+    "at": "after ref→paste switch",
+    "register": {
+      "chip": "8",
+      "rows": [
+        {
+          "type": "Covering letter",
+          "name": "Flow edit paste",
+          "detail": "Text · 7 words"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Flow paste test",
+          "detail": "Text · 5 words"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Hook-first",
+          "detail": "Text"
+        },
+        {
+          "type": "Covering letter",
+          "name": "Comps-forward",
+          "detail": "Text"
+        },
+        {
+          "type": "Synopsis",
+          "name": "Flow edit ref",
+          "detail": "Text · 4 words"
+        },
+        {
+          "type": "Synopsis",
+          "name": "Flow ref test",
+          "detail": "Ref · flow-ref.docx"
+        },
+        {
+          "type": "Synopsis",
+          "name": "One-page",
+          "detail": "Text"
+        },
+        {
+          "type": "Sample pages",
+          "name": "Chapters 1-3",
+          "detail": "Text · 520 words"
+        }
+      ],
+      "wellBg": "rgb(255, 255, 255)",
+      "panelBg": "rgb(255, 255, 255)"
+    }
+  }
+]
