@@ -13,7 +13,20 @@
 /* Fork reshape — ONE outlined style for every chip: no fill, no bold, no "primary". Each chip is told
    apart by its direction-coloured StatusDot (and the close chip's × glyph), never by a filled tone.
    tc-primary / tc-terminal / tc-nudge / tc-close all fall through to the base .tc-chip look. */
-.tc-chip.tc-reopen { border-style: dashed; }
+/**
+ * ⚠️ `.tc-reopen` NOW FALLS THROUGH TOO, and its dashed border is retired — it was the ONE exception
+ * to the rule stated directly above it.
+ *
+ * ⚠️ IT WAS DILUTING A GRAMMAR TWO FEATURES DEPEND ON. On the timeline, dashed means "not
+ * established fact": the scheduled-nudge ghost, and now the writer's own estimate. This chip is an
+ * ACTION, and nothing about it is provisional — a third meaning for the same signal, three inches
+ * from the other two.
+ *
+ * ⚠️ AND IT WAS DISTINGUISHING IT FROM CHIPS THAT ARE NEVER ON SCREEN WITH IT, which is why nothing
+ * is lost. `composerChips` returns `{ chips: [REOPEN], otherChips: [] }` for a closed query — Reopen
+ * is the only chip in the only state it appears in. It still carries its own burgundy `QUERIED`
+ * StatusDot and the label "Reopen this query", which is how every other chip is told apart anyway.
+ */
 /* The single SUGGESTED action is distinguished ONLY by a subtle pulse — identical border/background/
    weight to the others, plus a gentle burgundy halo. CSS-only; NO var() inside the % selectors (the
    recurring silent-failure trap); reduced motion honoured. Applied to exactly one chip (Phase 3). */
