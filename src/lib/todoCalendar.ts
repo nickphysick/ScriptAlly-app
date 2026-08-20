@@ -214,8 +214,26 @@ export const CAL_CELL_CAP = 3;
  * the last, which is silent and illegible. One too few is merely one fewer.
  */
 export const CAL_PIP_H = 25;
-/** The date line at the cell's head, plus the cell's vertical padding and border. */
-export const CAL_CELL_CHROME = 26;
+/**
+ * The date line at the cell's head, plus the cell's vertical padding and border.
+ *
+ * ⚠️ 33, NOT 26 — the numeral moved into a fixed 20px box (fixes pack, Phase 3) so the head row
+ * grew from ~13px to 20px, and the cell's border is now right+bottom only. 20 + 12 padding + 1
+ * border = 33. **It is a claim about a rendered cell, so it is verified by measurement, not by
+ * this arithmetic** — `tests/e2e/calFold.measure.ts` reports the real `.cal-d` and cell heights,
+ * and the acceptance run checks that no cell overflows.
+ */
+export const CAL_CELL_CHROME = 33;
+
+/**
+ * The "+N MORE" line's own height — browser-measured at 12px (6px mono + 3px padding-top).
+ *
+ * ⚠️ IT IS NOT A PIP, AND RESERVING A WHOLE PIP SLOT FOR IT COSTS A ROW. The first version of the
+ * counter's reservation took one slot out of the cap, which is 25px for a 12px line: on a 900px
+ * viewport that turned a two-pip cell into a ONE-pip cell, measured. The fold reserves the
+ * counter's real height instead.
+ */
+export const CAL_MORE_H = 12;
 
 /**
  * ⚠️ THE FOLD DERIVES FROM THE CELL, NOT FROM A CONSTANT. `CAL_CELL_CAP` was a flat 3 whatever
@@ -232,10 +250,22 @@ export const CAL_CELL_CHROME = 26;
  */
 export function calFoldCap(rowPx: number): number {
   if (!rowPx || rowPx <= 0) return CAL_CELL_CAP;
-  const room = rowPx - CAL_CELL_CHROME;
-  /* one row is reserved for the "+N MORE" line itself whenever anything folds — counting it here
-     would let a cell promise a pip it then has to take back to make room for the fold line */
-  const fits = Math.floor(room / CAL_PIP_H);
+  const fits = Math.floor((rowPx - CAL_CELL_CHROME) / CAL_PIP_H);
+  return Math.max(1, Math.min(CAL_CELL_CAP, fits));
+}
+
+/**
+ * How many pips fit ALONGSIDE the "+N MORE" line — the cap for a day that folds.
+ *
+ * ⚠️ TWO CAPS, BECAUSE THE COUNTER IS SHORTER THAN A PIP. A single cap has to assume the worst and
+ * reserve a full pip's height for a 12px line, which measurably costs a row. Asking the question
+ * twice — "how many fit alone" and "how many fit beside the counter" — lets a cell show everything
+ * when it can and still show as much as possible when it cannot. At the sizes that ship these are
+ * often the SAME number, which is exactly the row the single-cap version was throwing away.
+ */
+export function calFoldCapFolded(rowPx: number): number {
+  if (!rowPx || rowPx <= 0) return Math.max(1, CAL_CELL_CAP - 1);
+  const fits = Math.floor((rowPx - CAL_CELL_CHROME - CAL_MORE_H) / CAL_PIP_H);
   return Math.max(1, Math.min(CAL_CELL_CAP, fits));
 }
 
@@ -530,7 +560,9 @@ export const REC_LEGEND: { dir: RecordDir; label: string }[] = [
  */
 export interface CellSlots<T, R> { shownItems: T[]; shownRecs: R[]; overflow: number }
 
-export function cellSlots<T, R>(items: readonly T[], recs: readonly R[], cap: number): CellSlots<T, R> {
+export function cellSlots<T, R>(
+  items: readonly T[], recs: readonly R[], cap: number, capFolded = Math.max(0, cap - 1),
+): CellSlots<T, R> {
   const cells = Math.max(0, cap);
   const total = items.length + recs.length;
   /* ⚠️ THE COUNTER TAKES A SLOT, AND UNTIL NOW IT DID NOT (fixes pack, Phase 1). `calFoldCap`'s
@@ -539,7 +571,7 @@ export function cellSlots<T, R>(items: readonly T[], recs: readonly R[], cap: nu
      fixed-height flex column, so the overflow was absorbed by SHRINKING every pip — the failure is
      silent and looks like an empty month.
      The ref's rule, and now the code's: everything fits, or one slot goes to the counter. */
-  const room = total <= cells ? cells : Math.max(0, cells - 1);
+  const room = total <= cells ? cells : Math.max(0, Math.min(capFolded, cells));
   const shownItems = items.slice(0, room);
   const shownRecs = recs.slice(0, Math.max(0, room - shownItems.length));
   const overflow = total - shownItems.length - shownRecs.length;

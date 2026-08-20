@@ -30,7 +30,7 @@ import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
 import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, monthLabel,
-  shiftMonth, sameMonth, calFoldCap,
+  shiftMonth, sameMonth, calFoldCap, calFoldCapFolded,
   RecordItem, recordDays, cellSlots, exchangeLine, REC_TONE, REC_LEGEND,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
@@ -252,6 +252,8 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
     return () => ro.disconnect();
   }, []);
   const cellCap = calFoldCap(rowPx);
+  /* the cap for a day that folds — the counter is 12px, not a whole pip (see calFoldCapFolded) */
+  const cellCapFolded = calFoldCapFolded(rowPx);
 
   const [facetOpen, setFacetOpen] = useState(false);
   const [anchor, setAnchor] = useState(today);
@@ -444,7 +446,7 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                  ⚠️ THE RECORD FOLDS WITH EVERYTHING ELSE (record-layer P3), and the arithmetic is
                  `cellSlots` rather than three expressions here — a rule this easy to get subtly
                  wrong belongs somewhere a test can call it. `calFoldCap` is untouched. */
-              const { shownItems: shown, shownRecs, overflow } = cellSlots(items, recs, cellCap);
+              const { shownItems: shown, shownRecs, overflow } = cellSlots(items, recs, cellCap, cellCapFolded);
               const past = ymd < today;
               const off = !sameMonth(ymd, anchor);
               return (
@@ -455,7 +457,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                   onClick={() => selectDay(ymd)}
                 >
                   <div className="cal-d">
-                    {Number(ymd.slice(8))}
+                    {/* ⚠️ THE NUMERAL IS ITS OWN BOX (fixes pack, Phase 3) — a bare text node has
+                        nothing for today's disc to sit on, and nothing to hold the row's height
+                        when a day is empty. */}
+                    <span className="cal-dn">{Number(ymd.slice(8))}</span>
                     {items.length + recs.length > 0 && <span className="cal-c2">{items.length + recs.length}</span>}
                   </div>
                   {shown.map((it) => (

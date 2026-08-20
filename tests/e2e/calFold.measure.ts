@@ -24,7 +24,7 @@ const WIDTHS = [1440, 1920];
 
 /** The page's own constants, restated here ONLY so the report can show the arithmetic. */
 const CAL_PIP_H = 25;   /* corrected in Phase 1 — browser-measured 24.75, rounded up */
-const CAL_CELL_CHROME = 26;
+const CAL_CELL_CHROME = 33;  /* Phase 3 — the numeral's 20px box */
 const CAL_CELL_CAP = 3;
 
 /** The shipped `calFoldCap`, mirrored so the report can state what the page computes today. */

@@ -16,6 +16,7 @@ import {
   cardActionYmd, calendarDays, CAL_CELL_CAP, calFoldCap, toYmd,
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
+  calFoldCapFolded, CAL_MORE_H,
   CAL_PIP_H,
   exchangeLine,
   REC_TONE, REC_LEGEND,
@@ -160,7 +161,7 @@ describe("the fold, the map, the wiring", () => {
     expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b"]);
     expect(cellSlots(["a", "b", "c", "d"], [], CAL_CELL_CAP).overflow).toBe(2);
     expect(cellSlots(["a", "b", "c"], [], CAL_CELL_CAP).shownItems).toEqual(["a", "b", "c"]);
-    expect(pageSrc).toContain("cellSlots(items, recs, cellCap)");
+    expect(pageSrc).toContain("cellSlots(items, recs, cellCap, cellCapFolded)");
     expect(pageSrc).toContain("calFoldCap(rowPx)");
     expect(pageSrc).toContain("+{overflow} MORE");
   });
@@ -221,12 +222,28 @@ describe("⚠️ the fold threshold derives from the cell, never from a flat con
      the same six pixels. The old numbers described a pip six pixels shorter than the one that
      ships, which is precisely how a cap promised room that did not exist. */
   it("a tall row shows the ceiling; a short one folds sooner", () => {
-    // 26px chrome + 3 × 25px pips = 101px of row for the full three
-    expect(calFoldCap(120)).toBe(CAL_CELL_CAP); // room 94 — three fit
-    expect(calFoldCap(101)).toBe(3);            // room 75 — exactly three
-    expect(calFoldCap(90)).toBe(2);             // room 64 — two
-    expect(calFoldCap(60)).toBe(1);             // room 34 — one
-    expect(calFoldCap(46)).toBe(1);             // room 20 — the floor holds at one
+    /* ⚠️ RENUMBERED AGAIN 20 Aug (fixes pack, Phase 3): the numeral moved into a fixed 20px box,
+       so `CAL_CELL_CHROME` went 26 -> 33. The claim is still the claim; the row simply has seven
+       fewer pixels to give away. */
+    // 33px chrome + 3 × 25px pips = 108px of row for the full three
+    expect(calFoldCap(120)).toBe(CAL_CELL_CAP); // room 87 — three fit
+    expect(calFoldCap(108)).toBe(3);            // room 75 — exactly three
+    expect(calFoldCap(95)).toBe(2);             // room 62 — two
+    expect(calFoldCap(70)).toBe(1);             // room 37 — one
+    expect(calFoldCap(46)).toBe(1);             // room 13 — the floor holds at one
+  });
+
+  it("⚠️ TWO CAPS — the counter is 12px, not a whole pip, and that is worth a row", () => {
+    // measured on the deployed page: reserving a full pip slot for the counter turned a two-pip
+    // cell into a one-pip cell at a 900px viewport. Beside the counter, two still fit.
+    expect(CAL_MORE_H).toBe(12);
+    expect(calFoldCapFolded(104)).toBe(calFoldCap(104)); // the shipping size — same number
+    expect(calFoldCapFolded(120)).toBe(3);
+    // and it never claims more than the unfolded cap, nor less than one
+    for (const px of [0, 20, 46, 60, 80, 104, 120, 300]) {
+      expect(calFoldCapFolded(px)).toBeLessThanOrEqual(Math.max(calFoldCap(px), 1));
+      expect(calFoldCapFolded(px)).toBeGreaterThanOrEqual(1);
+    }
   });
 
   it("⚠️ AT LEAST ONE PIP ALWAYS SHOWS — a cell that folds everything says only '+3 MORE'", () => {
@@ -421,6 +438,8 @@ describe("⚠️ the record is recessive, and it folds with everything else", ()
   it("⚠️ the fold counts BOTH layers — a record pip is a pip", () => {
     expect(cellSlots([], ["r", "s", "t", "u"], 3).overflow).toBe(2);
     expect(cellSlots(["a", "b"], ["r", "s"], 3).overflow).toBe(2);
+    // and with a folded cap of 3 (the counter fitting beside three), only one folds
+    expect(cellSlots([], ["r", "s", "t", "u"], 3, 3).overflow).toBe(1);
     // the record alone, well within the cap, folds nothing
     expect(cellSlots([], ["r"], 3)).toEqual({ shownItems: [], shownRecs: ["r"], overflow: 0 });
     // an empty day, and the degenerate cap, both stay honest
@@ -428,7 +447,7 @@ describe("⚠️ the record is recessive, and it folds with everything else", ()
     expect(cellSlots(["a"], ["r"], 0)).toEqual({ shownItems: [], shownRecs: [], overflow: 2 });
     // calFoldCap is consumed unchanged — this pack does not touch the measured fold
     expect(pageSrc).toContain("calFoldCap(rowPx)");
-    expect(pageSrc).toContain("cellSlots(items, recs, cellCap)");
+    expect(pageSrc).toContain("cellSlots(items, recs, cellCap, cellCapFolded)");
     expect(calFoldCap(0)).toBe(CAL_CELL_CAP);
   });
 
@@ -790,9 +809,14 @@ describe("⚠️ the counter takes a slot (fixes pack, Phase 1)", () => {
   it("⚠️ THE BOUNDARY: one more than the cap gives cap-1 pips AND the counter its own line", () => {
     // the bug this replaces drew 3 pips + a counter into room for 3, and the flex column absorbed
     // it by squashing every pip to 8px — measured on dev, both widths
+    // with no folded cap given, the default is the ref's cap-1
     const r = cellSlots(["a", "b", "c", "d"], [], 3);
     expect(r.shownItems).toEqual(["a", "b"]);
     expect(r.overflow).toBe(2);
+    // and when the measurement says the counter fits BESIDE three, three show
+    const wide = cellSlots(["a", "b", "c", "d"], [], 3, 3);
+    expect(wide.shownItems).toEqual(["a", "b", "c"]);
+    expect(wide.overflow).toBe(1);
     expect(r.shownItems.length + (r.overflow > 0 ? 1 : 0)).toBeLessThanOrEqual(3);
   });
 
@@ -803,6 +827,10 @@ describe("⚠️ the counter takes a slot (fixes pack, Phase 1)", () => {
         const r = cellSlots(items, [], cap);
         const lines = r.shownItems.length + r.shownRecs.length + (r.overflow > 0 ? 1 : 0);
         expect(lines, `n=${n} cap=${cap} => ${JSON.stringify(r)}`).toBeLessThanOrEqual(cap);
+        // the folded cap can never make a cell show MORE pips than the unfolded one allows
+        const rf = cellSlots(items, [], cap, cap);
+        expect(rf.shownItems.length + rf.shownRecs.length).toBeLessThanOrEqual(cap);
+        expect(rf.shownItems.length + rf.shownRecs.length + rf.overflow).toBe(n);
         // and nothing is ever lost or invented
         expect(r.shownItems.length + r.shownRecs.length + r.overflow).toBe(n);
       }
@@ -880,7 +908,7 @@ describe("⚠️ the month is ONE panel, ruled — not forty-two floating cards"
   it("⚠️ THE PAST IS A MUTED NUMERAL AND NOTHING ELSE — no wash", () => {
     // a wash across three weeks of a month reads as three weeks of alarm; that tint belongs to the
     // urgency band, which is the To-do list's alone
-    expect(calCss).toContain(".cal-cell.past .cal-d { color: #c3b3a4; }");
+    expect(calCss).toContain(".cal-cell.past .cal-dn { color: #c3b3a4; }");
     expect(calCss).not.toMatch(/\.cal-cell\.past\s*\{[^}]*background/);
     // and nothing on this page reaches for the urgency band's pink
     const decl = decls(calCss);

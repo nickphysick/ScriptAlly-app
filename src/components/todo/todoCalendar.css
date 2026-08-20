@@ -112,23 +112,43 @@
 .cal-cell:nth-child(7n + 6),
 .cal-cell:nth-child(7n + 7) { background: #fbf7f0; }
 .cal-cell.off { background: #f8f4ed; }
-.cal-cell.off .cal-d { color: #cfc2b3; }
+.cal-cell.off .cal-dn { color: #cfc2b3; }
 
 /* ⚠️ THE PAST IS A MUTED NUMERAL AND NOTHING ELSE (fixes pack, Phase 2). It wore a wash, and a
    wash across three weeks of a month reads as three weeks of alarm — that tint belongs to the
    urgency band, which is the To-do list's alone. The day is over; the app says so quietly. */
-.cal-cell.past .cal-d { color: #c3b3a4; }
-.cal-cell.today { border: 1.5px solid #2a1a13; }
+.cal-cell.past .cal-dn { color: #c3b3a4; }
+/* the today OUTLINE is retired — see `.cal-cell.today .cal-dn` above. The cell keeps its
+   hairline rules like every other day; only the numeral is marked. */
 
 .cal-d {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 8px; color: #b3a394; display: flex;
+  font-size: 10.5px; font-weight: 500; color: #b3a394; display: flex;
+  align-items: flex-start; flex: none;
 }
-.cal-cell.today .cal-d { color: #2b2118; font-weight: 700; }
-.cal-c2 { margin-left: auto; font-size: 6.5px; color: #c3b6a6; }
+/* ⚠️ A FIXED 20px BOX, ANCHORED TOP-LEFT — not centred in whatever the row leaves. The cell's
+   layout then holds identically whether or not the day has pips, which is what stops an empty
+   month and a busy one reading as two different grids. */
+.cal-dn {
+  width: 20px; height: 20px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; line-height: 1;
+}
+.cal-c2 { margin-left: auto; font-size: 6.5px; color: #c3b6a6; line-height: 20px; }
 
+/* ⚠️ TODAY IS A DISC, NOT A BOX (fixes pack, Phase 3). The cell wore a 1.5px near-black outline —
+   a leftover that read as a selection, competing with the actual selected-day ring. The mark
+   belongs on the NUMERAL: a solid burgundy disc with a parchment numeral, and the cell itself
+   unmarked. Today AND selected therefore shows both, and they cannot be confused for each other. */
+.cal-cell.today .cal-dn { background: #7c3a2a; color: #fdfaf5; font-weight: 600; }
+
+/* ⚠️ `flex: none` IS THE BELT TO THE FOLD'S BRACES. A pip that can shrink is how three of them
+   became 8px tall with clipped text while every count assertion passed — the cell absorbed an
+   overflow instead of the fold preventing one. The cap now reserves the right room, and this makes
+   the failure LOUD (a visible overflow) rather than silent (a squashed, unreadable stack) if it
+   ever miscounts again. */
 .cal-pip {
-  display: block; width: 100%; text-align: left; border: 1px solid transparent;
+  display: block; width: 100%; text-align: left; border: 1px solid transparent; flex: none;
   border-radius: 5px; font-size: 8.5px; font-weight: 600; font-family: inherit;
   padding: 3px 6px; margin-top: 4px; cursor: pointer;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -136,9 +156,12 @@
 .cal-pip.struck { text-decoration: line-through; }
 .cal-pip.inert { cursor: default; }
 
+/* ⚠️ PINNED TO THE CELL FOOT, so the pip stack reads from the top and the fold reads from the
+   bottom — the counter is the cell's last word, not the next item in the list. */
 .cal-more2 {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 6px; color: #b3a394; padding: 3px 2px 0;
+  font-size: 6px; letter-spacing: 0.12em; color: #b3a394;
+  padding: 3px 2px 0; margin-top: auto; text-align: center; flex: none;
 }
 .cal-rolled {
   display: block;
