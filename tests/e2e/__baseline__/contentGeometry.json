@@ -1,0 +1,204 @@
+{
+  "1280|Query Centre": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": null,
+    "scrollPad": "35px"
+  },
+  "1280|Analytics": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1280|Contact list": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1280|Discover": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1280|Manuscripts": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": null,
+    "scrollPad": "80px"
+  },
+  "1280|Comparable titles": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1280|Submission packages": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1280|To-do list": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": null,
+    "scrollPad": "35px"
+  },
+  "1280|Calendar": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": {
+      "left": 297,
+      "right": 73
+    },
+    "scrollPad": "35px"
+  },
+  "1280|Noteboard": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": {
+      "left": 297,
+      "right": 73
+    },
+    "scrollPad": "35px"
+  },
+  "1440|Query Centre": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": null,
+    "scrollPad": "35px"
+  },
+  "1440|Analytics": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1440|Contact list": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1440|Discover": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1440|Manuscripts": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": null,
+    "scrollPad": "80px"
+  },
+  "1440|Comparable titles": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1440|Submission packages": {
+    "content": {
+      "left": 342,
+      "right": 118
+    },
+    "row": {
+      "left": 342,
+      "right": 118
+    },
+    "scrollPad": "80px"
+  },
+  "1440|To-do list": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": null,
+    "scrollPad": "35px"
+  },
+  "1440|Calendar": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": {
+      "left": 297,
+      "right": 73
+    },
+    "scrollPad": "35px"
+  },
+  "1440|Noteboard": {
+    "content": {
+      "left": 297,
+      "right": 73
+    },
+    "row": {
+      "left": 297,
+      "right": 73
+    },
+    "scrollPad": "35px"
+  }
+}

@@ -166,7 +166,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * edges at three window widths rather than naming a figure — a hardcoded number here would have
    * to be edited every time either token moved, which is how a lock stops describing the design.
    */
-  it("⚠️ ONE INSET, NOT TWO — the masthead shares the content's gutter exactly", () => {
+  it("⚠️ THE MASTHEAD ESCAPES THE CONTENT GUTTER TO ITS OWN INSET, through one token", () => {
     /* ⚠️ THIS REVERSES WHAT STOOD HERE, ON THE PACK'S TERMS. The old rule was a RELATIONSHIP:
        content = window − 2×gutter, header = content − 2×inset, so the plate sat `--header-inset`
        inside the cards it floated above. A plate was an object and an object needs a margin.
@@ -179,9 +179,19 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(gutter, "the content gutter is not declared on :root — every width below is unresolvable").toBeTruthy();
     expect(Number(gutter![1]), "the gutter went to zero — content would touch the window edge").toBeGreaterThan(0);
 
-    /* the scroller states the gutter; nothing inside it restates one */
+    /* ⚠️ THE SCROLLER READS `--wpg-gutter`, NOT `--content-gutter` DIRECTLY (masthead rethink,
+       step 2). The value is the same on seven pages and `--content-gutter-tight` on three; what
+       changed is that the MASTHEAD reads the same token to cancel exactly this padding, so the two
+       cannot drift. The claim here is unchanged: the gutter stays inside the scrollport, or the
+       scrollbar comes out of the content column again. */
     expect(block(".wpg-scroll"), "the gutter left the scrollport, so the scrollbar comes out of the content column again")
-      .toContain("padding-inline: var(--content-gutter)");
+      .toContain("padding-inline: var(--wpg-gutter)");
+    expect(block(".wpg"), "the grid stopped defaulting the gutter — the two tight pages override it, the rest inherit")
+      .toContain("--wpg-gutter: var(--content-gutter)");
+    /* ⚠️ AND THE MASTHEAD CANCELS EXACTLY THAT TOKEN — one expression, neither gutter's number in
+       it, so a page with 80 and a page with 35 land on the same vertical. */
+    expect(block(".wpg-mast"), "the masthead's escape stopped reading the gutter it cancels")
+      .toContain("margin-inline: calc(var(--masthead-inset) - var(--wpg-gutter))");
     for (const sel of [".wpg-tools", ".wpg-scroll"]) {
       expect(block(sel), `${sel} took a max-width — widths are relationships, not caps`).not.toContain("max-width");
     }

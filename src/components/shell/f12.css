@@ -1712,7 +1712,22 @@
  * ⚠️ AND IT IS 35, NOT 50, BECAUSE THE SCROLLBAR GUTTER IS ALREADY PAYING 15. Writing 50 here would
  * land the content at 65 and look like an arithmetic slip six months from now.
  */
-.qc-wpg .wpg-scroll { padding-inline: var(--content-gutter-tight); }
+/* ⚠️ THE TOKEN ON THE GRID ROOT, NOT THE ROW'S PADDING (masthead rethink, step 2). Overriding the
+   declaration set this page's content gutter and left the MASTHEAD reading the shell's 80 to cancel
+   — so its escape would have been 45px wrong, and wrong only here. `--wpg-gutter` is read by the
+   scroll row for its padding and by the masthead to cancel exactly that padding: one token, two
+   consumers, no way for them to disagree. The VALUE is unchanged. */
+/* ⚠️ `.wpg.qc-wpg`, NOT `.qc-wpg` — 0-2-0 AGAINST THE COMPONENT'S 0-1-0, AND THE FIRST VERSION LOST.
+   Both selectors match the SAME element (the grid root carries `wpg` and `qc-wpg` together), so at
+   equal specificity the cascade resolves on bundle source order — and `workspacePageGrid.css` is
+   emitted later, so the component's default silently beat this page's override. The content
+   geometry lock caught it: this page's scroll padding read 80px where it has always been 35.
+
+   ⚠️ AND RAISING SPECIFICITY IS RIGHT HERE, THOUGH IT IS THE WRONG FIX ELSEWHERE. CLAUDE.md's rule
+   is that a page and a component contributing to ONE property must each contribute a token and let
+   the property SUM them, because raising specificity makes one REPLACE the other. Replacing is
+   exactly what is wanted here: this page's gutter IS a different value, not an addition to one. */
+.wpg.qc-wpg { --wpg-gutter: var(--content-gutter-tight); }
 
 /* ── §1 · THE TWO CONTROL CELLS ───────────────────────────────────────────────────────────────
    Row 1 of the split. Left cell = what the list IS (count, sub-count) and the two controls that

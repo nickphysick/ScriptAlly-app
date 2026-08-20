@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — masthead rethink</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --white:#fff;--content:#fefcfa;--paper:#faf6f0;--ground:#f7f4ee;--band:#f2ede7;
+  --burg:#7c3a2a;--burgd:#632e22;--ink:#3a1c14;--ink2:#311e19;
+  --edge:#e4ddd1;--rim:#e9e1d4;--hair:#e8e2d8;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --sage-a:#d7ddd5;--sage-b:#d5dbd3;
+  --cgut:38px;--btn-h:32px;--mmk:52px;--minih:51px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:#e9e4dc;font-family:'Inter',sans-serif;color:var(--ink);padding:15px 18px 34px}
+ .bar{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+ .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#7d7267;margin:0 4px 0 10px}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:1px solid #cfc6b8;border-radius:7px;background:#f4efe7;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#fdfaf5;border-color:var(--ink)}
+ .hint{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#9b8d81;margin:0 2px 8px}
+ .note{font-size:12.5px;color:#5d5048;margin:0 2px 11px;max-width:1180px;line-height:1.6;min-height:40px}
+ .note b{color:var(--ink)}
+
+ .shell{display:flex;width:100%;max-width:1500px;height:640px;background:var(--ground);border-radius:13px;overflow:hidden;box-shadow:0 2px 6px rgba(58,28,20,.08),0 14px 34px rgba(58,28,20,.10)}
+ .side{flex:0 0 172px;background:#fff;border-right:1px solid var(--hair);padding:13px 10px;display:flex;flex-direction:column;gap:5px}
+ .logo{display:flex;align-items:center;gap:7px;font-family:'Playfair Display',serif;font-size:14px}
+ .logo .m{width:19px;height:19px;border-radius:50%;background:#e7ecf3;display:grid;place-items:center;font-size:10px;color:#5b6c85}
+ .navh{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:#a2968c;margin:6px 4px 0}
+ .nv{font-size:11px;padding:5px 7px;border-radius:7px;color:#4d3b33}
+ .nv.on{background:var(--ground);font-weight:600}
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .top{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 15px 9px;font-size:11.5px;color:#6b5a51}
+ .top b{color:var(--ink);font-weight:600}
+ .top .sp{flex:1}
+ .window{position:relative;background:var(--content);border:1px solid var(--edge);border-radius:14px 14px 0 0;margin:0 12px;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+
+ .btn{display:inline-flex;align-items:center;gap:7px;height:var(--btn-h);padding:0 12px;border-radius:8px;border:1px solid #e2d8ca;
+      background:var(--white);color:#4d3b33;font-size:12px;font-weight:500;white-space:nowrap;cursor:pointer}
+ .btn:hover{background:var(--paper)}
+ .btn svg{width:13px;height:13px;flex:0 0 13px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+ .btn.primary{background:#3a2118;border-color:#3a2118;color:#fdfaf5;font-weight:600}
+ .btn.ghost{border-color:transparent;background:transparent;color:#8a7a70;padding:0 9px}
+ .btn.ghost:hover{background:var(--paper);color:var(--ink)}
+
+ .scroll{flex:1;min-height:0;overflow-y:scroll;scrollbar-gutter:stable both-edges;padding:0 var(--cgut) 30px;position:relative}
+ .scroll::-webkit-scrollbar{width:11px}
+ .scroll::-webkit-scrollbar-thumb{background:#d5c9b8;border-radius:8px;border:3px solid var(--content)}
+
+ .mast{display:flex;align-items:center;gap:16px;padding:26px 0 20px;
+       transition:max-height .26s cubic-bezier(.4,0,.2,1),padding .26s,opacity .18s;max-height:200px;overflow:hidden}
+ .mmk{flex:0 0 var(--mmk);width:var(--mmk);height:var(--mmk);display:grid;place-items:center}
+ .mmk svg{width:calc(var(--mmk)*.68);height:calc(var(--mmk)*.68);stroke:var(--burg);fill:none;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+ .mtx h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;line-height:1.02;color:var(--ink2)}
+ .mtx p{font-size:13.5px;color:#8a7a70;margin-top:6px}
+ .msp{flex:1}
+ .mrule{height:1px;background:var(--rim);margin-bottom:16px;transition:opacity .2s}
+ body.hidden .mast{max-height:0;padding:0;opacity:0}
+ body.hidden .mrule{opacity:0}
+
+ /* half-height sticky name bar, scroll pages */
+ .mini{position:sticky;top:0;z-index:22;height:0;overflow:hidden;background:var(--content);
+       display:flex;align-items:center;gap:12px;transition:height .22s cubic-bezier(.4,0,.2,1)}
+ body.scrollpage.stuck .mini{height:var(--minih)}
+ body.fillpage.hidden .mini{height:var(--minih)}
+ .miniexp{display:none;margin-left:auto}
+ body.fillpage.hidden .miniexp{display:inline-flex}
+ .mini .mn{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink2)}
+ .mini .mmini{width:22px;height:22px;display:grid;place-items:center}
+ .mini .mmini svg{width:18px;height:18px;stroke:var(--burg);fill:none;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+ body.nomark .mini .mmini{display:none}
+
+ .crow{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:9px;background:var(--content);
+       padding:12px 0 14px;transition:top .22s cubic-bezier(.4,0,.2,1),box-shadow .18s,padding .2s}
+ body.scrollpage.stuck .crow{top:var(--minih);padding:10px 0 14px;
+   box-shadow:0 1px 0 var(--rim),0 10px 14px -12px rgba(58,28,20,.16)}
+ body.fillpage .crow{position:static}
+ body.fillpage .mini{position:static}
+ .cnt{font-family:'Playfair Display',serif;font-size:18px;font-weight:500;white-space:nowrap;line-height:1}
+ .cnt i{font-style:normal;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:#a2968c;margin-left:9px}
+ .sp{flex:1}
+
+ /* fade hem — starts BELOW the sticky chrome, not at the scroller's top */
+ .hem{position:absolute;left:0;right:0;height:34px;pointer-events:none;z-index:18;opacity:0;transition:opacity .18s}
+ .hem.top{background:linear-gradient(to bottom,var(--content) 18%,rgba(254,252,250,0))}
+ body.stuck .hem.top{opacity:1}
+ body.nohem .hem{display:none}
+
+ .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+ .ag{border:1px solid var(--rim);border-radius:13px;overflow:hidden;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.04)}
+ .agh{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:8px 12px;display:flex;justify-content:space-between;align-items:center}
+ .agchip{border:1px solid #cbd3c7;background:#fff;border-radius:999px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;padding:2px 8px;color:#3f4c3c}
+ .stars{color:#c8a047;font-size:9px}
+ .agb{padding:14px}
+ .agn{font-family:'Playfair Display',serif;font-size:18px;font-weight:500}
+ .agy{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6b5a51}
+ .meta{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#a2968c;margin-top:7px}
+ .agf{display:flex;gap:8px;padding:12px 14px 14px}
+ .bp{background:#3a2118;color:#fdfaf5;border-radius:999px;padding:7px 13px;font-size:11px;font-weight:600}
+ .bo{border:1px solid #ded4c6;border-radius:999px;padding:7px 13px;font-size:11px;color:#b3a79b}
+
+ /* fill page */
+ .cols{display:grid;grid-template-columns:290px minmax(0,1fr);gap:16px;min-height:0;flex:1}
+ .pnl{border:1px solid var(--rim);border-radius:13px;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.04);display:flex;flex-direction:column;min-height:0}
+ .pnl .ph{padding:10px 12px;border-bottom:1px solid #f2ece2;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#a2968c}
+ .pnl .pb{flex:1;min-height:0;overflow:auto;padding:8px}
+ .qr{display:flex;align-items:center;gap:9px;padding:8px;border-radius:9px}
+ .qr:hover{background:var(--paper)}
+ .qr.sel{background:var(--band)}
+ .avr{width:26px;height:26px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--burgd);flex:0 0 26px}
+ .qm b{font-size:12px;display:block}
+ .qm span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;color:#a2968c}
+ body.fillpage .scroll{overflow:hidden;display:flex;flex-direction:column}
+ body.fillpage .grid{display:none}
+ body.scrollpage .cols{display:none}
+
+</style></head><body class="scrollpage">
+
+<div class="bar">
+ <span class="lab" style="margin-left:0">PAGE TYPE</span>
+ <button class="tab on" data-p="scrollpage">SCROLL (CONTACT LIST)</button>
+ <button class="tab" data-p="fillpage">FILL (QUERY CENTRE)</button>
+ <span class="lab">MINI BAR</span>
+ <button class="tab on" data-m="mark">NAME + MARK</button>
+ <button class="tab" data-m="nomark">NAME ONLY</button>
+ <span class="lab">MINI HEIGHT</span>
+ <button class="tab" data-h="44">44</button>
+ <button class="tab on" data-h="51">51</button>
+ <span class="lab">FADE HEM</span>
+ <button class="tab on" data-f="on">BELOW CHROME</button>
+ <button class="tab" data-f="off">OFF</button>
+</div>
+<div class="hint">SCROLL PAGE: SCROLL INSIDE THE WINDOW &nbsp;&middot;&nbsp; FILL PAGE: USE THE HIDE BUTTON</div>
+<div class="note" id="note"></div>
+
+<div class="shell">
+ <aside class="side">
+  <div class="logo"><span class="m">S</span>ScriptAlly</div>
+  <div class="navh">QUERIES</div><div class="nv">Query Centre</div><div class="nv">Analytics</div>
+  <div class="navh">AGENTS</div><div class="nv on">Contact list</div><div class="nv">Discover</div>
+  <div class="navh">MATERIALS</div><div class="nv">Manuscripts</div><div class="nv">Comparable titles</div>
+ </aside>
+ <div class="main">
+  <div class="top">ScriptAlly&nbsp; / &nbsp;Agents&nbsp; / &nbsp;<b id="crumb">Contact list</b><span class="sp"></span></div>
+  <div class="window">
+   <div class="scroll" id="sc">
+     <div class="hem top" id="hem"></div>
+
+     <div class="mast">
+       <span class="mmk"><svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M19 8h4M21 6v4"/></svg></span>
+       <div class="mtx"><h1 id="ttl">Contact list</h1><p id="dsc">Everyone you're querying, watching, or saving for later.</p></div>
+       <span class="msp"></span>
+       <button class="btn ghost" id="hide"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>Hide</button>
+     </div>
+     <div class="mrule"></div>
+
+     <div class="mini">
+       <span class="mmini"><svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg></span>
+       <span class="mn" id="mn">Contact list</span>
+       <button class="btn ghost miniexp" id="show"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+     </div>
+
+     
+
+     <div class="crow">
+       <div class="cnt" id="cnt">16 agents<i>4 WITH LIVE QUERIES</i></div>
+       <span class="sp"></span>
+       <button class="btn">Filters</button><button class="btn">Group</button><button class="btn">Sort</button>
+       <button class="btn primary">&#65291; Add new agent</button>
+     </div>
+
+     <div class="grid" id="grid"></div>
+
+     <div class="cols">
+       <div class="pnl"><div class="ph">25 QUERIES</div><div class="pb" id="ql"></div></div>
+       <div class="pnl"><div class="ph">READING PANE</div><div class="pb" style="padding:20px;color:#a2968c;font-size:12.5px">The query you have selected opens here.</div></div>
+     </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<script>
+const AG=[["Penhallow Literary","Agent not specified"],["Aisha Kapoor","The Lantern Agency"],
+["Daniel O'Rourke","Inkwell &amp; Stone"],["Eleanor Whitfield","Greenfield Literary"],
+["Fenella Str","Brightwater Books"],["Greg Panetta","Marlowe Literary"],
+["Priya Raman","No agency"],["Marcus Reed","Hartley &amp; Co"],["Nina Alvarez","Redgate Books"],
+["Tom Ellery","Curtis Vane"],["Sophie Dunn","Curtis Vane"],["Ada Mensah","Copperline Agency"]];
+document.getElementById('grid').innerHTML=AG.map(([n,a])=>`<div class="ag">
+ <div class="agh"><span class="agchip">ACTIVE QUERIES</span><span class="stars">&#9733;&#9733;&#9733;&#9734;&#9734;</span></div>
+ <div class="agb"><div class="agn">${n}</div><div class="agy">${a}</div><div class="meta">~6 WEEKS &middot; EMAIL</div></div>
+ <div class="agf"><span class="bp">&#9992; Log query</span><span class="bo">View website</span></div></div>`).join('');
+document.getElementById('ql').innerHTML=AG.slice(0,9).map(([n,a],k)=>`<div class="qr${k===0?' sel':''}">
+ <span class="avr">${n.slice(0,2).toUpperCase()}</span><div class="qm"><b>${n}</b><span>${a.toUpperCase()}</span></div></div>`).join('');
+
+const N={scrollpage:"<b>Scroll page.</b> The masthead scrolls away and a half-height bar takes its place — page name, optionally the mark — with the control row sticking directly beneath it. Two stacked sticky rows: identity above, controls below.",
+fillpage:"<b>Fill page.</b> Nothing scrolls, so <b>Hide</b> sits at the end of the masthead. It folds down to the same one-row bar the scroll pages collapse to — mark, page name, and a chevron to bring it back. One collapsed state everywhere; only the trigger differs."};
+const sc=document.getElementById('sc'), note=document.getElementById('note');
+sc.addEventListener('scroll',()=>document.body.classList.toggle('stuck',sc.scrollTop>4));
+document.getElementById('hide').onclick=()=>document.body.classList.add('hidden');
+document.getElementById('show').onclick=()=>document.body.classList.remove('hidden');
+document.querySelectorAll('.tab[data-p]').forEach(b=>b.onclick=()=>{
+ const fill=b.dataset.p==='fillpage';
+ document.body.classList.toggle('fillpage',fill);
+ document.body.classList.toggle('scrollpage',!fill);
+ document.body.classList.remove('hidden');
+ document.getElementById('ttl').textContent=fill?'Query Centre':'Contact list';
+ document.getElementById('mn').textContent=fill?'Query Centre':'Contact list';
+ document.getElementById('crumb').textContent=fill?'Query Centre':'Contact list';
+ document.getElementById('dsc').textContent=fill?'Every query, every response — track every step of your journey so far.':"Everyone you're querying, watching, or saving for later.";
+ document.getElementById('cnt').innerHTML=fill?'25 queries<i>16 AWAITING</i>':'16 agents<i>4 WITH LIVE QUERIES</i>';
+ note.innerHTML=N[b.dataset.p];
+ document.querySelectorAll('.tab[data-p]').forEach(x=>x.classList.toggle('on',x===b));});
+document.querySelectorAll('.tab[data-m]').forEach(b=>b.onclick=()=>{
+ document.body.classList.toggle('nomark',b.dataset.m==='nomark');
+ document.querySelectorAll('.tab[data-m]').forEach(x=>x.classList.toggle('on',x===b));});
+document.querySelectorAll('.tab[data-h]').forEach(b=>b.onclick=()=>{
+ document.documentElement.style.setProperty('--minih',b.dataset.h+'px');
+ document.querySelectorAll('.tab[data-h]').forEach(x=>x.classList.toggle('on',x===b));});
+document.querySelectorAll('.tab[data-f]').forEach(b=>b.onclick=()=>{
+ document.body.classList.toggle('nohem',b.dataset.f==='off');
+ document.querySelectorAll('.tab[data-f]').forEach(x=>x.classList.toggle('on',x===b));});
+note.innerHTML=N.scrollpage;
+</script></body></html>

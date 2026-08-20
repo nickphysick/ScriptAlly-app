@@ -33,6 +33,32 @@
      only occupy one cell when BOTH are explicitly positioned, so `grid-column: 1` is not
      decoration on any of these four rules — remove it from one and that row leaves the column. */
   grid-template-columns: minmax(0, 1fr);
+  /**
+   * ══ THE MASTHEAD'S WIDTH SYSTEM (masthead rethink, step 2) ═════════════════════════════════
+   *
+   * ⚠️ THE MASTHEAD'S WIDTH IS A WINDOW CONCERN; THE CONTENT'S IS A PAGE CONCERN. They were the
+   * same number until now, and that was the accident: the masthead is a child of the scroll row, so
+   * it inherited whatever gutter the page's CONTENT wanted — 80px on most pages, 35 on the two
+   * master–detail surfaces. Two pages' mastheads therefore sat 45px apart while claiming to be the
+   * same object. The masthead now runs at the window's width minus a single inset, every page.
+   *
+   * ⚠️ `--wpg-gutter` IS A REAL MIRROR — two consumers of ONE token, and it stays real. The scroll
+   * row reads it for its padding and the masthead reads it to cancel exactly that padding, so the
+   * two cannot drift: change the gutter and the masthead's escape follows it for free. This is not
+   * the shape of the `--wpg-foot` mirror that had to be retired at the last pack's step 4 — that
+   * one read the TOP gap's token for a BOTTOM inset, and died when one end of it stopped existing.
+   * Here both ends are the same edge, measured from opposite directions.
+   *
+   * ⚠️ 16px FROM THE SCROLL ROW'S PADDING-BOX EDGE, WHICH IS THE WINDOW'S EDGE UNDER OVERLAY
+   * SCROLLBARS AND 16 + ~15 UNDER CLASSIC ONES. That variance is `scrollbar-gutter: stable
+   * both-edges`, an existing app-wide decision that content already pays; compensating for it here
+   * would make the masthead the only element in the app that fights it. Stated, not corrected.
+   *
+   * ⚠️ AND THE ESCAPE NEVER EXCEEDS THE PADDING IT CANCELS (16 < 35 < 80), so it is absorbed
+   * entirely and creates no horizontal overflow in a row whose `overflow-x` is `auto`.
+   */
+  --wpg-gutter: var(--content-gutter);
+  --masthead-inset: 16px;
   height: 100%;
   min-height: 0;
   /* ⚠️ THE GRID ITSELF NEVER SCROLLS. Only row 3 does; anything escaping here is a bug in a row. */
@@ -159,7 +185,10 @@
      was hiding a width loss caused by a cap in the wrong place — treating a symptom. The cap is
      gone and the width is now correct; the reservation is doing its actual job. The cost is the
      scrollbar's width off each side of the nominal gutter, under 1.5% at any real window. */
-  padding-inline: var(--content-gutter);
+  /* ⚠️ THE TOKEN, NOT `--content-gutter` DIRECTLY — the two tight pages override `--wpg-gutter` on
+     the grid root rather than restating this declaration, which is what keeps the masthead's escape
+     in step with whatever gutter a page actually uses. */
+  padding-inline: var(--wpg-gutter);
   /* ⚠️ NO TOP PADDING, AND THE WHOLE "WHICH ELEMENT PAYS THE GAP" QUESTION GOES WITH IT. The gap
      used to sit above whatever came FIRST below the chrome hairline — the toolbar row on pages that
      had one, this row on pages that did not — which needed `.wpg--tools` to zero one of them so it
@@ -419,7 +448,20 @@
  * hang an absolutely-positioned ornament off their title, and a wrapper that clips would cut it the
  * day a title grew long enough to push it near the edge. Fill pages have no ornaments.
  */
-.wpg-mast { min-width: 0; }
+/**
+ * ⚠️ THE ESCAPE IS ON THE WRAPPER, NEVER ON `.wsh` — and that is not tidiness. On a fill page
+ * `.wpg-mast` carries `overflow: hidden` (it is the fold container), so a negative margin on the
+ * header INSIDE it would be clipped by its own wrapper: broken on fill pages only, and only while
+ * the masthead is visible, which is the expensive kind of wrong.
+ *
+ * ⚠️ IT CANCELS THE PAGE'S GUTTER AND RE-APPLIES THE MASTHEAD'S OWN INSET, in one expression, so
+ * the result is the same on a page with an 80px gutter and a page with 35. Neither number appears
+ * here.
+ */
+.wpg-mast {
+  min-width: 0;
+  margin-inline: calc(var(--masthead-inset) - var(--wpg-gutter));
+}
 .wpg--fill > .wpg-scroll > .wpg-mast {
   flex: none;
   overflow: hidden;
