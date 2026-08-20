@@ -1,0 +1,173 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The two plan columns.
+ *
+ * ⚠️ THE ROWS LINE UP BECAUSE BOTH COLUMNS RENDER THE SAME LIST IN THE SAME ORDER, and because
+ * `.plc-rows` is a subgrid-free flex column whose items share `align-items: stretch` and a
+ * min-height. Matching heights are what let the eye read across; a descriptor on one side only
+ * would shear the two lists apart, which is why `PlanRow.sub` belongs to the ROW rather than to a
+ * side.
+ *
+ * ⚠️ AND THE CTA SLOT IS `margin-top: auto` IN BOTH. The columns are equal height and the slot
+ * sits on the floor of each, so "button" and "Your plan" land on the same line.
+ */
+
+.plc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.plc-col {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 0.5px solid #e0d5c8;
+  border-radius: 11px;
+  padding: 16px 16px 14px;
+  min-width: 0;
+}
+
+/* ⚠️ A 2.5px SAGE EDGE AND A WARM TINT — never a burgundy fill. The current column is being
+   IDENTIFIED, not selected: burgundy is this app's action colour, and a burgundy-filled column
+   would read as the one you are about to choose rather than the one you already have. The
+   padding-top is reduced by the extra border so the two columns' contents stay on one line. */
+.plc-col--current {
+  background: #fbf7f1;
+  border-color: #c9d3c4;
+  border-top: 2.5px solid #8a9e88;
+  padding-top: 14px;
+}
+
+.plc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.plc-name { font-size: 19px; font-weight: 500; }
+
+.plc-chip {
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #5a6e58;
+  background: rgba(138, 158, 136, 0.14);
+  border: 0.5px solid rgba(138, 158, 136, 0.4);
+  border-radius: 999px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.plc-price { font-size: 20px; font-weight: 500; margin: 2px 0 0; line-height: 1.2; }
+/* Always rendered, empty or not — see the component's note. The min-height keeps the reserved
+   line the same height as an occupied one whatever the font metrics do. */
+.plc-pricenote {
+  min-height: 13px;
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9c8878;
+  margin: 3px 0 0;
+}
+
+.plc-rows {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The 44px floor is what keeps a row with a descriptor and a row without it from shearing the two
+   columns apart at the same index. */
+.plc-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 9px 0;
+  border-top: 0.5px solid #efe5da;
+}
+.plc-row:first-child { border-top: none; }
+
+.plc-rowhead { display: flex; flex-direction: column; min-width: 0; }
+.plc-label { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.plc-sub { font-size: 11px; line-height: 1.4; margin-top: 2px; }
+
+.plc-figure {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 11.5px;
+  color: #3a1c14;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-top: 1px;
+}
+
+.plc-mark { flex-shrink: 0; display: inline-flex; align-items: center; padding-top: 1px; }
+.plc-mark--yes svg { width: 15px; height: 15px; color: #8a9e88; stroke-width: 2.4; }
+.plc-mark--no { color: #c8b8a8; font-size: 14px; line-height: 1; }
+
+/* ⚠️ THE SLOT HAS A HEIGHT OF ITS OWN — reserving it is not enough on its own. Both fillings are
+   bottom-anchored by `margin-top: auto`, and a 38px button beside ~31px of text therefore START
+   8px apart: browser-measured, CTA tops 871 against 863 on columns that were otherwise the same
+   height to the pixel. A fixed slot makes both begin on one line, which is what "the eye reads
+   button-versus-no-button" needs. */
+/* ⚠️ ONE HEIGHT TOKEN, APPLIED TO BOTH FILLINGS — a `min-height` guess is not enough. The first
+   attempt reserved 38px because that is what a 13.5px button with 9px padding and a 1px border
+   ought to be; the browser made it 40.3, so the button's slot grew and the two CTAs still started
+   2px apart. A guessed number tracks the font metrics of the day. Both fillings now take the SAME
+   declared height, so neither can be sized by its own content.
+   ⚠️ AND `box-sizing` IS DECLARED HERE rather than inherited: a rule whose maths depends on the
+   box model should state it (CLAUDE.md — a harness once measured a whole pane wrong for exactly
+   this reason). */
+.plc-cta {
+  --plc-cta-h: 40px;
+  margin-top: auto;
+  padding-top: 14px;
+  min-height: calc(14px + var(--plc-cta-h));
+  display: flex;
+  align-items: center;
+}
+
+.plc-btn,
+.plc-yours {
+  box-sizing: border-box;
+  height: var(--plc-cta-h);
+}
+
+.plc-yours {
+  display: flex;
+  align-items: center;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ⚠️ SOFT PINK, AND IT SAYS "See Pro plans". There is no checkout to start — no Stripe, and the
+   rules deny a client-side plan change — so the control opens the plans page. A button labelled
+   Upgrade would be the one element on this card promising something the app cannot do. */
+.plc-btn {
+  width: 100%;
+  font-size: 13.5px;
+  font-weight: 500;
+  background: #f5e2da;
+  border: 1px solid #e8c8bc;
+  border-radius: 8px;
+  padding: 0 14px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.plc-btn:hover { background: #f0d6cb; }
+.plc-btn:focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; }
+
+/* Below the settings column's own breakpoint the pair stacks — two 300px columns of feature rows
+   are unreadable long before the page runs out of width. */
+@media (max-width: 620px) {
+  .plc-grid { grid-template-columns: minmax(0, 1fr); }
+}

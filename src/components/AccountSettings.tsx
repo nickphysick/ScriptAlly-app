@@ -30,6 +30,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
+import { UserPlan } from "../types";
 import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, deletionConfirmed } from "../lib/dataExport";
 import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
@@ -46,6 +47,7 @@ import { SECTION_BANDS } from "./settings/sectionBands";
 import { initialsOf } from "../lib/searchSuggestionsCore";
 import "./settings/settings.css";
 import { CountryCombobox } from "./forms";
+import { PlanComparison } from "./plans/PlanComparison";
 import {
   pageGround,
   PAGE_GRAIN,
@@ -70,7 +72,6 @@ import {
   Trash2,
   LogOut,
   Check,
-  ChevronRight,
   Download,
   Upload,
   KeyRound,
@@ -785,17 +786,10 @@ export const AccountSettings: React.FC<{
   }, [currentUser, manuscripts, versions, packages, agents, queries, activities, notes, userTasks]);
 
   const initial = (currentUser.name || currentUser.email || "?").trim().charAt(0).toUpperCase();
-  const fmtDate = (iso?: string) => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    return isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
-  };
-  const statusLabel: Record<typeof currentUser.subscriptionStatus, string> = {
-    trialing: "Free trial",
-    active: "Active subscription",
-    canceled: "Cancelled",
-    none: "No active subscription",
-  };
+  /* ⚠️ `fmtDate` AND `statusLabel` ARE GONE WITH THE OLD PLAN BLOCK. They formatted a trial start
+     date and a subscription-status word for a card that now renders `PlanComparison` — and a
+     reachability sweep found each referenced exactly once, at its own declaration. A helper whose
+     only caller has been deleted is dormant code that reads as a feature. */
 
   const profileSection = (
     <SectionCard section="profile" name={currentUser.name || "Your account"} sub={currentUser.email} disc={initialsOf(currentUser.name || currentUser.email)} headingId="acct-h-profile">
@@ -986,34 +980,26 @@ export const AccountSettings: React.FC<{
 
   const planSection = (
     <SectionCard section="plan" headingId="acct-h-plan">
-      <div className="flex items-center justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
-        <div style={{ minWidth: 0 }}>
-          <p style={{ fontFamily: FONT_SERIF, fontSize: 18, color: bodyInk, lineHeight: 1.2 }}>{currentUser.plan} plan</p>
-          <p style={{ ...helpText, marginTop: 2 }}>
-            {statusLabel[currentUser.subscriptionStatus] ?? currentUser.subscriptionStatus}
-            {currentUser.subscriptionStatus === "trialing" && currentUser.trialStartDate
-              ? ` · started ${fmtDate(currentUser.trialStartDate)}`
-              : ""}
-          </p>
-        </div>
-        {/* In-app upgrade CTAs target /plans (a workspace route in the capsule shell — the
-            focus tier is retired); the public /pricing keeps the marketing tier. */}
-        <button onClick={() => onNavigate("plans")} style={primaryBtn}>
-          View plans &amp; upgrade <ChevronRight style={{ width: 15, height: 15 }} aria-hidden="true" />
-        </button>
-      </div>
+      <PlanComparison
+        currentPlan={currentUser.plan === UserPlan.PRO ? "pro" : "free"}
+        onSeePlans={() => onNavigate("plans")}
+      />
 
-      <div style={{ marginTop: 20, paddingTop: 4 }}>
-        <InertRow
-          first
-          title="Manage billing"
-          desc="Update your payment method, view invoices and receipts."
-          control={
-            <button type="button" disabled aria-disabled="true" style={{ ...ghostBtn, padding: "7px 12px", fontSize: 13, borderColor: "#d8cdc0", color: "#6a5a50", opacity: 0.55, cursor: "not-allowed" }}>
-              Manage billing
-            </button>
-          }
-        />
+      {/* ── Billing ────────────────────────────────────────────────────────────
+          ⚠️ NO USAGE BLOCK ANYWHERE ON THIS CARD — no meters, no counts, no "where you stand".
+          The card answers "what do I get" and stops; position against a limit is not what anyone
+          opens this page for, and it is the half that ages into nagging.
+          ⚠️ AND CSV EXPORT IS NOT MENTIONED HERE. It is a data right, it lives in Your data, and
+          naming it beside a plan comparison invites the reading that it is a plan feature. */}
+      <div style={{ marginTop: 22, paddingTop: 18, borderTop: "0.5px solid #efe5da" }}>
+        <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 3 }}>Billing</p>
+        {/* The empty state IS the state: there is no payment path in the app at all, so every
+            account reads this. It says what will appear and when, rather than pretending a
+            payment method is merely missing. */}
+        <p style={helpText}>
+          No payment details on file. Your payment method and invoices will appear here once a paid
+          plan starts.
+        </p>
       </div>
     </SectionCard>
   );

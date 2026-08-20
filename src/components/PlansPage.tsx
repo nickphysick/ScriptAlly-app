@@ -14,6 +14,9 @@
 import React from "react";
 import { MountPanel } from "./MountPanel";
 import { PageHeader } from "./shell/PageHeader";
+import { PlanComparison } from "./plans/PlanComparison";
+import { useScriptAllyDb } from "../lib/db";
+import { isProUser } from "../lib/suggestComps";
 import {
   parchment,
   sageBandGradient,
@@ -120,190 +123,15 @@ const ComingSoonPill: React.FC = () => (
 );
 
 /* ── Plan card ────────────────────────────────────────────────────────────── */
-interface PlanProps {
-  title: string;
-  strapline: string;
-  Emblem: React.ComponentType<any>;
-  amount: string;
-  per: string;
-  pill?: string;
-  features: string[];
-}
+/* ⚠️ `PlanProps`, `PlanCard`, `Row`, `Cell`, `GROUPS`, `FOOTNOTES`, `cell` and `CompareCard` ARE
+   ALL DELETED. Between them they stated what the plans include FOUR times on one page — two hero
+   cards with their own feature arrays, and a grouped matrix with a third list under them — and
+   quoted a price (£3.99 / £35) that no code path in this app can charge. The rows now live in
+   `lib/planComparison`, the price comes from the locked `PRICING_TIERS`, and both this page and
+   the settings card render the one `PlanComparison`.
 
-const PlanCard: React.FC<PlanProps> = ({ title, strapline, Emblem, amount, per, pill, features }) => (
-  <MountPanel fill style={{ height: "100%" }}>
-    <BandHeader title={title} Emblem={Emblem} strapline={strapline} />
-    <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "20px 22px 22px" }}>
-      {/* price block: amount + per baseline-aligned in an inner wrapper, pill a centred sibling */}
-      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", rowGap: 6, marginBottom: 20 }}>
-        <span style={{ display: "inline-flex", alignItems: "baseline" }}>
-          <span style={{ fontFamily: FONT_SERIF, fontSize: 34, fontWeight: 500, color: burgundy, lineHeight: 1 }}>{amount}</span>
-          <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: mutedInk, marginLeft: 6 }}>{per}</span>
-        </span>
-        {pill && (
-          <span
-            style={{ marginLeft: 10, background: statusSageFill, color: sageText, border: "1px solid #cfdac9", borderRadius: 999, fontFamily: FONT_MONO, fontSize: 9.5, padding: "4px 9px", whiteSpace: "nowrap" }}
-          >
-            {pill}
-          </span>
-        )}
-      </div>
-
-      {/* feature list grows so the CTA pins to the bottom and both cards' CTAs align */}
-      <ul style={{ flex: 1, listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 11 }}>
-        {features.map((f) => (
-          <li key={f} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-            <span style={{ marginTop: 1 }}><Tick /></span>
-            <span style={{ fontFamily: FONT_SANS, fontSize: 13.5, color: bodyInk, lineHeight: 1.4 }}>{f}</span>
-          </li>
-        ))}
-      </ul>
-
-      {/* No payment path exists, so no button pretends otherwise — the InertRow grammar from
-          AccountSettings (hairline top, dimmed, aria-disabled, label + pill) states it plainly. */}
-      <div
-        aria-disabled="true"
-        style={{ marginTop: 22, paddingTop: 16, borderTop: "0.5px solid #efe5da", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, opacity: 0.72 }}
-      >
-        <span style={{ fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk }}>
-          Plan selection
-        </span>
-        <ComingSoonPill />
-      </div>
-    </div>
-  </MountPanel>
-);
-
-/* ── Compare-plans matrix data ───────────────────────────────────────────── */
-type Cell = boolean | string;
-interface Row {
-  label: string;
-  sub?: string;
-  note?: string; // amber footnote marker
-  free: Cell;
-  pro: Cell;
-}
-const GROUPS: { name: string; rows: Row[] }[] = [
-  {
-    name: "Tracking",
-    rows: [
-      { label: "Manuscripts", free: "1", pro: "Unlimited" },
-      { label: "Queries logged", free: "Unlimited", pro: "Unlimited" },
-      { label: "Agents tracked", free: "Unlimited", pro: "Unlimited" },
-      { label: "Analytics & query pipeline", free: true, pro: true },
-      { label: "Reminders & follow-up nudges", free: true, pro: true },
-    ],
-  },
-  {
-    name: "Documents",
-    rows: [
-      {
-        label: "Submission package builder",
-        note: "②",
-        sub: "Pair your best query letter, synopsis and pages into bespoke submission packages — then see at a glance which combination charms the most agents.",
-        free: false,
-        pro: true,
-      },
-    ],
-  },
-  {
-    name: "Advanced time savers",
-    rows: [
-      {
-        label: "Smart Import (onboarding)",
-        note: "①",
-        sub: "Bring the spreadsheet you've been wrangling and we'll spin it into a living database in moments.",
-        free: true,
-        pro: true,
-      },
-      {
-        label: "Smart email-paste",
-        sub: "Drop your email straight into ScriptAlly and we'll log the details in your database, completely hassle-free.",
-        free: false,
-        pro: true,
-      },
-    ],
-  },
-  {
-    name: "Community",
-    rows: [
-      {
-        label: "Contributes to community data",
-        note: "③",
-        sub: "Share your agent intel and response times to sharpen everyone's odds — your manuscripts and synopses always stay yours alone, never shared.",
-        free: true,
-        pro: true,
-      },
-      { label: "Agent matching & community access", free: false, pro: true },
-    ],
-  },
-];
-
-const FOOTNOTES: { marker: string; strong: string; rest: string }[] = [
-  { marker: "①", strong: "Smart Import", rest: " stays free — it's the front door. A free user importing several books triggers a gentle “we found 3 manuscripts — Pro unlocks the rest” moment rather than failing." },
-  { marker: "②", strong: "Submission package builder", rest: " is the Pro tool for combining query/synopsis/manuscript versions and tracking which performs best. Free users still record what they sent on each query in the normal log flow." },
-  { marker: "③", strong: "Community", rest: " — every user feeds the shared pool that powers matching, but only agent details and response analytics. Manuscripts and synopses are never shared. Pro unlocks the matching insights and community access." },
-];
-
-const cell = (v: Cell) =>
-  typeof v === "boolean"
-    ? v
-      ? <Tick />
-      : <NoMark />
-    : <span style={{ fontFamily: FONT_MONO, fontSize: 12, color: bodyInk }}>{v}</span>;
-
-const CompareCard: React.FC = () => (
-  <MountPanel>
-    <BandHeader title="Compare plans" Emblem={List} mono="feature by feature" />
-    <div style={{ padding: "8px 22px 20px" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ borderBottom: `1px solid ${sageBandRule}` }}>
-            <th style={{ textAlign: "left", padding: "12px 0 10px", fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk, fontWeight: 500 }}>Feature</th>
-            <th style={{ width: 130, textAlign: "center", padding: "12px 0 10px", fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: mutedInk, fontWeight: 500 }}>Free</th>
-            <th style={{ width: 130, textAlign: "center", padding: "12px 0 10px", fontFamily: FONT_MONO, fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", color: burgundy, fontWeight: 600 }}>Pro</th>
-          </tr>
-        </thead>
-        <tbody>
-          {GROUPS.map((g) => (
-            <React.Fragment key={g.name}>
-              <tr>
-                <td colSpan={3} style={{ fontFamily: FONT_MONO, fontSize: 9.5, letterSpacing: "0.1em", textTransform: "uppercase", color: sageText, padding: "16px 0 6px" }}>{g.name}</td>
-              </tr>
-              {g.rows.map((r) => (
-                <tr key={r.label} style={{ borderTop: "0.5px solid #efe5da" }}>
-                  <td style={{ padding: "10px 14px 10px 0", verticalAlign: "top" }}>
-                    <div style={{ fontFamily: FONT_SANS, fontSize: 13.5, color: bodyInk, lineHeight: 1.35 }}>
-                      {r.label}
-                      {r.note && <sup style={{ color: AMBER, fontSize: 9, marginLeft: 3 }}>{r.note}</sup>}
-                    </div>
-                    {r.sub && <div style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: mutedInk, lineHeight: 1.4, marginTop: 3, maxWidth: 520 }}>{r.sub}</div>}
-                  </td>
-                  <td style={{ textAlign: "center", verticalAlign: "top", padding: "10px 0" }}>
-                    <span style={{ display: "inline-flex", justifyContent: "center" }}>{cell(r.free)}</span>
-                  </td>
-                  <td style={{ textAlign: "center", verticalAlign: "top", padding: "10px 0" }}>
-                    <span style={{ display: "inline-flex", justifyContent: "center" }}>{cell(r.pro)}</span>
-                  </td>
-                </tr>
-              ))}
-            </React.Fragment>
-          ))}
-        </tbody>
-      </table>
-
-      <div style={{ marginTop: 18, display: "flex", flexDirection: "column", gap: 8 }}>
-        {FOOTNOTES.map((fn) => (
-          <p key={fn.marker} style={{ fontFamily: FONT_SANS, fontSize: 11.5, color: mutedInk, lineHeight: 1.45, margin: 0 }}>
-            <span style={{ color: AMBER, marginRight: 5 }}>{fn.marker}</span>
-            <strong style={{ color: bodyInk, fontWeight: 600 }}>{fn.strong}</strong>
-            {fn.rest}
-          </p>
-        ))}
-      </div>
-    </div>
-  </MountPanel>
-);
+   Two of the deleted matrix's claims were also wrong: it listed "Submission package builder" and
+   "Agent matching & community access" as Pro-only, and neither is gated anywhere in the code. */
 
 /* ── Founding-members card (pink band) ───────────────────────────────────── */
 const FounderCard: React.FC = () => (
@@ -343,7 +171,9 @@ const FounderCard: React.FC = () => (
   </MountPanel>
 );
 
-export const PlansPage: React.FC = () => (
+export const PlansPage: React.FC = () => {
+  const { currentUser } = useScriptAllyDb();
+  return (
   // No bespoke ground (capsule law — fixes P5 re-homing): the page inherits the content capsule.
   <div className="min-h-screen pb-16 font-sans" style={{ color: bodyInk }}>
 
@@ -365,25 +195,19 @@ export const PlansPage: React.FC = () => (
         description="Free covers the tracking; Pro adds the tools that think alongside you." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
       />
 
-      {/* plan cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 20, marginBottom: 20 }}>
-        <PlanCard
-          title="Free"
-          strapline="Query with confidence"
-          Emblem={BookOpen}
-          amount="£0"
-          per="forever"
-          features={["Unlimited queries & agents", "Full analytics & pipeline", "Reminders & follow-up nudges", "Smart Import on setup"]}
-        />
-        <PlanCard
-          title="Pro"
-          strapline="Query with downright aplomb"
-          Emblem={Star}
-          amount="£3.99"
-          per="/ month"
-          pill="or £35/year · save ~27%"
-          features={["Multiple manuscripts", "Submission package A/B testing", "Community-backed agent discovery", "Smart email drop"]}
-        />
+      {/* ⚠️ ONE COMPARISON, SHARED WITH THE SETTINGS CARD (`components/plans/PlanComparison`).
+          What stood here was TWO hardcoded plan cards — "£3.99 / month", "or £35/year · save ~27%"
+          and a four-item feature list each — above a separate `GROUPS` matrix with a THIRD list of
+          features. Four statements of what Pro includes, on one page, none of them reading the
+          same source.
+          ⚠️ AND THE PRICE WAS FICTION. There is no Stripe, no checkout, and `firestore.rules`
+          denies a client-side plan change as its central guard; the locked marketing copy has said
+          "Price to be confirmed · no payment path yet" the whole time. The figure is deleted
+          rather than moved.
+          No `onSeePlans` here — the CTA would point at this page, so the slot states the tier's
+          own locked action word. */}
+      <div style={{ marginBottom: 20 }}>
+        <PlanComparison currentPlan={isProUser(currentUser) ? "pro" : "free"} />
       </div>
 
       {/* founding members */}
@@ -391,8 +215,9 @@ export const PlansPage: React.FC = () => (
         <FounderCard />
       </div>
 
-      {/* compare matrix */}
-      <CompareCard />
+      {/* ⚠️ NO SECOND MATRIX. `CompareCard`, `GROUPS`, `FOOTNOTES`, `PlanCard` and `cell` are all
+          deleted — the comparison above is the page's one statement of what the plans include. */}
     </div>
   </div>
-);
+  );
+};
