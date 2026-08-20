@@ -503,8 +503,10 @@ export const REC_LEGEND: { dir: RecordDir; label: string }[] = [
   { dir: "in", label: "THEY REPLIED" },
 ];
 
-/** The muted ink every record pip and row wears — never a card pip's ink. */
-export const REC_INK = "#7d6b5d";
+/* ⚠️ NO `REC_INK` CONSTANT. The record's muted ink does not vary by item, so it lives in the
+   stylesheet with every other fixed colour on this page; only the DOT varies (by direction), which
+   is why that one is data-driven and inline. A constant nothing reads is a slot a later change
+   fills without anyone deciding it should exist. */
 
 /**
  * ⚠️ THE CELL'S SLOT ARITHMETIC IS A FUNCTION, NOT A LINE OF JSX — because a source-string lock

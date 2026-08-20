@@ -17,7 +17,7 @@ import {
   recordDays, recordSpecFor, RECORD_TYPES, RECORD_STATUS, BY_STATUS,
   cellSlots,
   exchangeLine,
-  REC_TONE, REC_LEGEND, REC_INK,
+  REC_TONE, REC_LEGEND,
 } from "./todoCalendar";
 import { HOLDING_REPLY_TYPE } from "./holdingReply";
 import { CAL_PIP, CAL_LEGEND } from "./todoFamily";
@@ -445,7 +445,8 @@ describe("⚠️ the record's tones are calendar-local, and the legend still ren
     expect(REC_TONE.out.dot).toBe("#b9a48f");
     expect(REC_TONE.in.dot).toBe("#8a9e88");
     expect(Object.keys(REC_TONE).sort()).toEqual(["in", "out"]);
-    expect(REC_INK).toBe("#7d6b5d");
+    // the ink does not vary by item, so it lives in the stylesheet, and is asserted there
+    expect(calCss).toContain("#7d6b5d");
   });
 
   it("⚠️ CAL_PIP IS NOT WIDENED — the record is a layer, not a fifth family", () => {

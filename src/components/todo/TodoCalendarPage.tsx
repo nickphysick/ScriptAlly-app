@@ -30,8 +30,8 @@ import { assembleBoardColumns, liveBoardCards } from "../../lib/todoColumns";
 import { BoardCard } from "../../lib/todoBoard";
 import {
   CalendarItem, calendarDays, monthGridDays, monthLabel,
-  shiftMonth, sameMonth, CAL_CELL_CAP, calFoldCap,
-  RecordItem, recordDays, cellSlots, exchangeLine, REC_TONE, REC_LEGEND, REC_INK,
+  shiftMonth, sameMonth, calFoldCap,
+  RecordItem, recordDays, cellSlots, exchangeLine, REC_TONE, REC_LEGEND,
 } from "../../lib/todoCalendar";
 import { CAL_PIP, CAL_LEGEND } from "../../lib/todoFamily";
 import { tagUsageCounts, toggleTagSel, matchesTags } from "../../lib/todoTags";
