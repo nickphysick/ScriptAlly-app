@@ -29,6 +29,8 @@
  * them is off it. Any stop between commits leaves a working app.
  */
 import React from "react";
+import { ChevronDown } from "lucide-react";
+import { OneScreenMark, MarkName } from "../dashboard/OneScreenMark";
 import "./workspacePageGrid.css";
 
 /**
@@ -196,6 +198,30 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    */
   const [stuckH, setStuckH] = React.useState(0);
   const toolsRef = React.useRef<HTMLDivElement>(null);
+  const miniRef = React.useRef<HTMLDivElement>(null);
+
+  /**
+   * ⚠️ THE MINI BAR'S IDENTITY IS READ OFF THE MASTHEAD ELEMENT, NOT PASSED A SECOND TIME.
+   *
+   * The bar states the page's mark and its name — exactly the two things the page already handed
+   * this component inside `masthead`. Taking them as props as well would put the same two literals
+   * at every call site twice, and the day one of them was corrected the bar and the masthead would
+   * disagree about what page you are on. Reading the element's own props is the single source; no
+   * DOM query is involved, and nothing here traverses anything (the lock forbidding `querySelector`
+   * in this file still holds).
+   *
+   * ⚠️ IT THROWS IN DEVELOPMENT RATHER THAN DEGRADING. A page that wraps its header in something
+   * would make the introspection return nothing, and a mini bar with no name is a strip of chrome
+   * that says less than the page it covers — silent, and only visible once you scroll.
+   */
+  const identity = (React.isValidElement(masthead) ? masthead.props : {}) as { mark?: MarkName; title?: string };
+  if (process.env.NODE_ENV !== "production" && (!identity.mark || !identity.title)) {
+    throw new Error(
+      "WorkspacePageGrid could not read a mark and a title from its `masthead` element. The mini " +
+      "bar states the page's identity and takes it from there rather than being passed it twice; " +
+      "pass a `PageHeader` with `variant=\"workspace\"`, `mark` and `title`, directly and unwrapped.",
+    );
+  }
   /**
    * ⚠️ THE THIRD INPUT — ENGAGEMENT (collapse-on-engagement).
    *
@@ -209,6 +235,16 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * `scrollTop 0`, where the sentinel says it must be resting.
    */
   const [engaged, setEngaged] = React.useState(false);
+  /**
+   * ⚠️ HIDE IS PER-VISIT AND DELIBERATELY NOT PERSISTED. Component state only: the masthead is back
+   * on the next visit to the page, because a writer who folded it once to get at a list should not
+   * have to un-fold it every day. No `localStorage`, and no key to migrate later.
+   *
+   * ⚠️ THE SETTER IS ONLY REACHED FROM THE MINI BAR TODAY (step 3). The masthead's Hide button —
+   * the thing that sets it true — lands at step 4 with the removal of the click-anywhere vanish it
+   * replaces, so this is false for the whole of this commit and the fill mini bar does not render.
+   */
+  const [hidden, setHidden] = React.useState(false);
   /* ⚠️ AN `||` OF THREE, STILL A PRIORITY OF NONE, and the header still receives ONE boolean and
      never learns which of them fired. A journey opened part-way down a scrolled page is still
      working; a click after a journey closes is still working. Everything below reads this value. */
@@ -263,7 +299,12 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
       /* ⚠️ ONE EVALUATION FOR ALL THREE — the same reason the hems live in this component at all.
          A second listener measuring the chrome would be a second answer to "where is this scroller",
          and the two would disagree on exactly the frames anyone would notice. */
-      const chrome = top > 2 ? (toolsRef.current?.getBoundingClientRect().height ?? 0) : 0;
+      /* ⚠️ THE MINI BAR JOINS THE STUCK CHROME — both sticky elements, summed. The hem's lock
+         asserts this figure against the RENDERED chrome from the other direction, so a third sticky
+         element added later without being included here fails there rather than silently. */
+      const chrome = top > 2
+        ? (miniRef.current?.getBoundingClientRect().height ?? 0) + (toolsRef.current?.getBoundingClientRect().height ?? 0)
+        : 0;
       setStuckH((prev) => (prev === chrome ? prev : chrome));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
@@ -412,6 +453,35 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
           {/* ⚠️ THE WRAPPER IS THE GRID'S, AND THE COLLAPSE IS ON IT RATHER THAN ON THE HEADER.
               The grid owns when a page is working; it must not also know what class the header
               wears. One element, one job: `.wpg-mast` animates, `PageHeader` renders. */}
+          {/**
+            * ⚠️ THE MINI BAR IS THE ONLY CHROME THE MASTHEAD SYSTEM KEEPS ON SCREEN — mark and page
+            * name, 51px, one component on both page types.
+            *
+            * ⚠️ IT COMES BEFORE THE MASTHEAD IN THE MARKUP AND THAT IS DELIBERATE. On a scrolling
+            * page it is `sticky; top: 0` and grows 0 → 51 when stuck, so the control row beneath it
+            * takes `top: 51` and the two stack — identity above, controls below. Ordering it after
+            * the masthead would put it below the row in the stack the moment both were pinned.
+            *
+            * ⚠️ ON A FILL PAGE IT IS STATIC AND APPEARS ONLY WHILE THE MASTHEAD IS HIDDEN. Nothing
+            * can hide one yet — the Hide button lands at step 4 — so on a fill page this renders
+            * nothing today. Stated rather than left to be discovered: the component is whole, its
+            * fill path is simply not reachable until its trigger exists.
+            */}
+          {(!fill || hidden) && (
+            <div ref={miniRef} className={`wpg-mini${stuck ? " wpg-mini--stuck" : ""}${fill ? " wpg-mini--static" : ""}`}>
+              <span className="wpg-mini-mark" aria-hidden="true"><OneScreenMark name={identity.mark!} /></span>
+              <span className="wpg-mini-name">{identity.title}</span>
+              {/* ⚠️ THE RESTORE CONTROL IS A FILL-PAGE AFFORDANCE ONLY, AND IT IS NOT RENDERED
+                  ELSEWHERE RATHER THAN HIDDEN BY CSS. On a scrolling page the masthead comes back by
+                  scrolling up; a chevron there would be a second way to do a thing the page already
+                  does, and a control that does nothing the moment you scroll. */}
+              {fill && (
+                <button type="button" className="wpg-mini-show" onClick={() => setHidden(false)} aria-label="Show the page header">
+                  <ChevronDown aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          )}
           <div className="wpg-mast" ref={mastRef}>{masthead}</div>
           {/* ⚠️ THE CONTROL ROW FOLLOWS THE MASTHEAD, INSIDE THE SCROLLER, and it has to be here
               rather than a grid row above it for one reason: the masthead must come FIRST. Left as

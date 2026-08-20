@@ -121,10 +121,17 @@ describe("the workspace variant", () => {
        above it. That ORDER is the contract: the control row anchors, so it has to come second. */
     const out = renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />);
     expect(out).not.toContain("wsh-wrap");
-    /* ⚠️ `.wpg-mast` SITS BETWEEN THEM NOW (step 3) — the grid's own wrapper, which is what animates
-       the fill-page collapse. The claim is unchanged: the masthead OPENS the scroll row, because
-       the control row beneath it is what anchors. */
-    expect(out).toMatch(/<div class="wpg-scroll"[^>]*><div class="wpg-mast"><header class="wsh"><div class="wsh-row">/);
+    /* ⚠️ THE MINI BAR NOW OPENS THE SCROLL ROW, AND THE MASTHEAD FOLLOWS IT (masthead rethink,
+       step 3). The bar is `sticky; top: 0` and grows 0 → 51 when stuck, so it has to come FIRST in
+       the markup or the control row would sit above it in the stack the moment both were pinned.
+       The claim this case has always made is unchanged and is asserted as an ORDER rather than as
+       one adjacency: identity, then masthead, then controls, then content — all inside the
+       scroller, none of it in a chrome row above it. */
+    const order = ["wpg-scroll", "wpg-mini", "wpg-mast", "wsh-row"].map((k) => out.indexOf(k));
+    for (const [i, k] of ["wpg-scroll", "wpg-mini", "wpg-mast", "wsh-row"].entries()) {
+      expect(order[i], `${k} is not in the rendered output`).toBeGreaterThan(-1);
+      if (i) expect(order[i], `${k} does not follow ${["wpg-scroll", "wpg-mini", "wpg-mast", "wsh-row"][i - 1]}`).toBeGreaterThan(order[i - 1]);
+    }
   });
 
   it("⚠️ THERE IS NO CONDENSED STATE — the band and its classes are unreachable", () => {

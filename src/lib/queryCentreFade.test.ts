@@ -26,6 +26,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { PageHeader } from "../components/shell/PageHeader";
 import { WorkspacePageGrid } from "../components/shell/WorkspacePageGrid";
 
 const read = (rel: string) => readFileSync(new URL(rel, import.meta.url), "utf8");
@@ -72,10 +73,10 @@ describe("§1 · mechanism 2 — the page's own foot does not fade", () => {
    */
   it("a fill page renders no hems, and a normal page still does", () => {
     const fill = renderToStaticMarkup(
-      React.createElement(WorkspacePageGrid, { fill: true, masthead: null, children: "body" }),
+      React.createElement(WorkspacePageGrid, { fill: true, masthead: React.createElement(PageHeader, { variant: "workspace", title: "Test page", mark: "todo" }), children: "body" }),
     );
     const normal = renderToStaticMarkup(
-      React.createElement(WorkspacePageGrid, { masthead: null, children: "body" }),
+      React.createElement(WorkspacePageGrid, { masthead: React.createElement(PageHeader, { variant: "workspace", title: "Test page", mark: "todo" }), children: "body" }),
     );
     expect(fill, "the fill page's foot fade came back").not.toMatch(/["\s`]wpg-hem["\s`]/);
     expect(normal, "the opt-out escaped onto every page in the shell").toContain("wpg-hem");

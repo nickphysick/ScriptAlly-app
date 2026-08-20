@@ -46,6 +46,8 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
     /* what the component measured and published — the offset the hem is supposed to take */
     published: getComputedStyle(g).getPropertyValue("--wpg-stuck-h").trim(),
     hasRow: !!row,
+    /* the mini bar's rendered height — what the control row is supposed to be stuck beneath */
+    miniH: r((g.querySelector(".wpg-mini") as HTMLElement | null)?.getBoundingClientRect().height ?? -1),
     rowTop: row ? r(row.getBoundingClientRect().top - scb.top) : -1,
     rowBottom: row ? r(row.getBoundingClientRect().bottom - scb.top) : -1,
     /* ⚠️ THE STUCK CHROME'S HEIGHT, MEASURED HERE TOO AND FROM THE OTHER DIRECTION. The component
@@ -85,7 +87,12 @@ test("the top hem starts below the stuck chrome, on every scrolling page", async
 
     expect(s.hemOn, `${name}: the top hem is not showing after scrolling — nothing to overlap`).toBe(true);
     expect(s.hasRow, `${name}: no control row — this page cannot exercise the overlap`).toBe(true);
-    expect(s.rowTop, `${name}: the control row is not stuck to the scroller's top`).toBeLessThanOrEqual(1);
+    /* ⚠️ AMENDED (masthead rethink, step 3): the control row is stuck BENEATH the mini bar now, not
+       at the scroller's top — two stacked stickies, identity above and controls below. Asserted
+       against the bar's MEASURED height rather than 51, so the pair stays coupled here exactly as
+       the shared token couples them in the stylesheet. */
+    expect(s.miniH, `${name}: no mini bar rendered — the control row has nothing to be stuck beneath`).toBeGreaterThan(0);
+    expect(s.rowTop, `${name}: the control row is at ${s.rowTop}, not beneath the ${s.miniH}px mini bar`).toBeCloseTo(s.miniH, 0);
 
     /* ⚠️ THE COMPONENT'S MEASUREMENT AND THE RENDERED BOX MUST AGREE. Two derivations of one figure,
        from opposite directions — `offsetHeight` in the component, the rendered rect here. */

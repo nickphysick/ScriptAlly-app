@@ -43,8 +43,19 @@ const block = (selector: string): string => {
   return out.join(" ");
 };
 
+/**
+ * ⚠️ A REAL HEADER, NOT A STUB, AND THE GRID NOW INSISTS ON IT. The mini bar states the page's mark
+ * and name and reads both off the `masthead` element it is handed — one source, rather than the same
+ * two literals typed at every call site twice. So a `<span />` in that slot throws in development,
+ * which is the guard working: it caught seven cases in this file the moment it landed.
+ *
+ * ⚠️ AND `plate` USED TO BE THE MARKER SOME OF THESE ASSERTED ORDER WITH. The title is the marker
+ * now — it is text the header actually renders, rather than a word invented for a test.
+ */
+const MAST = <PageHeader variant="workspace" title="Test page" mark="todo" />;
+
 describe("the grid — the scroller owns the page (in-flow masthead)", () => {
-  it("⚠️ ONE STICKY ELEMENT, AND ITS `top` IS 0 — no offset encodes another element's height", () => {
+  it("⚠️ TWO STACKED STICKIES, AND NO OFFSET ENCODES ANOTHER ELEMENT'S HEIGHT AS A LITERAL", () => {
     /* ⚠️ THIS RULE IS AMENDED, NOT ABANDONED, AND THE DISTINCTION IS THE WHOLE OF IT. What it
        forbade was a sticky element whose `top` encoded ANOTHER element's height as a literal —
        `calc(56px + gap)`, silently wrong by 32px on the Tasks family, the same fault as the banned
@@ -61,15 +72,43 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        `not.toMatch(/top\s*:\s*(?!0)/)` and it flagged `top: 0` — `\s*` backtracks to zero width, so
        the lookahead tested the SPACE rather than the digit and passed. Reading each declaration and
        comparing it says what is meant, and cannot be defeated by backtracking. */
+    /**
+     * ⚠️ AMENDED (masthead rethink, step 3): a `top` may be `0`, OR a token that the element whose
+     * height it is reads for that height. The control row now takes `top: var(--wpg-mini-h)` because
+     * the mini bar sits above it — two stacked stickies, identity over controls.
+     *
+     * ⚠️ AND THE RULE IT AMENDS IS NOT WEAKENED, because what made the original fault a fault was
+     * never "an offset that is not zero". It was `calc(56px + gap)` — another element's height
+     * copied as a LITERAL, which was silently wrong by 32px on the Tasks family the day that height
+     * differed. A shared token cannot be wrong: the bar reads it for its height and the row reads it
+     * for its offset, so they move together or not at all. A literal here is still forbidden.
+     */
     for (const value of tops) {
-      expect(value, `a non-zero \`top\` offset appeared (\`top: ${value}\`) — that is another element's height encoded as a literal, the \`calc(100vh - 64px)\` fault`).toBe("0");
+      const ok = value === "0" || /^var\(--[a-z0-9-]+\)$/.test(value);
+      expect(ok, `\`top: ${value}\` is neither 0 nor a shared token — another element's height as a literal is the \`calc(100vh - 64px)\` fault`).toBe(true);
+      if (value !== "0") {
+        /* the token must be read for a HEIGHT somewhere in this sheet, or it is a literal wearing a
+           token's clothes */
+        const tok = value.slice(4, -1);
+        expect(cssRules, `\`top: ${value}\` names a token nothing sizes itself with — that is a literal in disguise`)
+          .toMatch(new RegExp(`height:\\s*var\\(${tok}\\)`));
+      }
     }
-    /* ⚠️ AND EXACTLY ONE ELEMENT MAY STICK. Two stickies in one scroller is the arrangement this
-       grid was built to replace: the second has to clear the first, which is where the literal
-       comes from. The control row is it. */
+    /**
+     * ⚠️ TWO STICKY ELEMENTS NOW, AND THE ONE-ONLY RULE IS AMENDED RATHER THAN DROPPED. It read
+     * "exactly one element may stick — the second has to clear the first, which is where the
+     * literal comes from", and that was the right fear: clearing is exactly how `calc(56px + gap)`
+     * got written.
+     *
+     * ⚠️ WHAT MAKES TWO SAFE IS THAT THE CLEARANCE IS A SHARED TOKEN, NOT A MEASUREMENT COPIED
+     * ACROSS. The mini bar reads `--wpg-mini-h` for its height and the control row reads the same
+     * token for its `top`, so they cannot disagree — asserted directly above. A third sticky would
+     * have to clear the SUM of two, which is arithmetic, and that is where this rule bites again.
+     */
     const sticky = [...cssRules.matchAll(/position\s*:\s*sticky/g)];
-    expect(sticky.length, "more than one element sticks — the second would have to clear the first, and that is where the encoded height comes back").toBe(1);
-    expect(block(".wpg-tools"), "the sticky element is not the control row").toContain("position: sticky");
+    expect(sticky.length, "a third sticky element appeared — it would have to clear the sum of the other two, and that is where an encoded height comes back").toBe(2);
+    expect(block(".wpg-tools"), "the control row stopped sticking").toContain("position: sticky");
+    expect(block(".wpg-mini"), "the mini bar stopped sticking").toContain("position: sticky");
   });
 
   it("the scroll row is `minmax(0, 1fr)` — a plain `1fr` grows to its content and never scrolls", () => {
@@ -579,7 +618,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        union drives `wpg--working` on the grid root and the stylesheet reads it there. Same single
        boolean, same union, one fewer mechanism; the probe moves to where the value actually goes. */
     const html = renderToStaticMarkup(
-      <WorkspacePageGrid masthead={<span />} condensed>{null}</WorkspacePageGrid>,
+      <WorkspacePageGrid masthead={MAST} condensed>{null}</WorkspacePageGrid>,
     );
     /* there is nothing to scroll in this environment, so `stuck` can only be false here — which is
        exactly the case worth locking: the mode alone must be enough */
@@ -636,9 +675,21 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     for (const gone of ["restorable", "restore"]) {
       expect(live, `\`${gone}\` came back — see the note in this case before reinstating it`).not.toContain(gone);
     }
+    /**
+     * ⚠️ THE POINTER HALF OF THIS IS RETIRED, AND THIS CASE'S OWN NOTE ASKED FOR EXACTLY THAT: "if a
+     * restore ever comes back, this case is what should stop it long enough to ask why." It came
+     * back, it was asked, and the answer is on the record — a click-anywhere vanish is replaced by
+     * an explicit Hide, and an explicit Hide needs an explicit way back.
+     *
+     * ⚠️ WHAT CHANGED IS THAT THERE IS A CONTROL NOW. The old affordance was a BARE BAND with a
+     * pointer cursor and nothing drawn — a surface that promised something invisible. The restore is
+     * a chevron button on the mini bar: visible, labelled, and only on fill pages. The pointer
+     * belongs to it, and to nothing else in this sheet.
+     */
     const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(css, "a pointer cursor came back to the header — it would promise a control that does not exist")
-      .not.toContain("cursor: pointer");
+    const pointerRules = [...css.matchAll(/([^{}]+)\{[^}]*cursor:\s*pointer[^}]*\}/g)].map((m) => m[1].trim());
+    expect(pointerRules, `a pointer cursor appeared on something other than the restore control: ${pointerRules.join(" · ")}`)
+      .toEqual([".wpg-mini-show"]);
   });
 
   /**
@@ -671,7 +722,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
   });
 
   it("without the mode, an unscrolled page is at rest", () => {
-    const html = renderToStaticMarkup(<WorkspacePageGrid masthead={<span />}>{null}</WorkspacePageGrid>);
+    const html = renderToStaticMarkup(<WorkspacePageGrid masthead={MAST}>{null}</WorkspacePageGrid>);
     expect(html, "the grid condenses by default — every page would open in the working state").not.toContain("wpg--working");
   });
 
@@ -681,7 +732,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        There is no chrome row; the class the grid still carries is the root's, and it is what step 3
        will drive the fill-page collapse from. The union below is the part that matters and it is
        unchanged. */
-    const html = renderToStaticMarkup(<WorkspacePageGrid masthead={<span />} condensed>{null}</WorkspacePageGrid>);
+    const html = renderToStaticMarkup(<WorkspacePageGrid masthead={MAST} condensed>{null}</WorkspacePageGrid>);
     expect(html, "the root stopped carrying the working state — nothing downstream could read it").toContain("wpg--working");
     expect(html, "a plate row came back").not.toContain("wpg-plate");
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
@@ -731,7 +782,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
 
   it("the scroller holds masthead → control row → content, and NO control row without one", () => {
     const withBar = renderToStaticMarkup(
-      <WorkspacePageGrid masthead={<i>plate</i>} toolbar={<i>tools</i>}>body</WorkspacePageGrid>,
+      <WorkspacePageGrid masthead={MAST} toolbar={<i>tools</i>}>body</WorkspacePageGrid>,
     );
     expect(withBar).toContain("wpg-scroll");
     expect(withBar).toContain("wpg-tools");
@@ -739,10 +790,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        of the scroller, above it, pinned by construction. Both are inside it now: the masthead first,
        so it can leave, then the control row, which is what stays. */
     expect(withBar.indexOf("wpg-scroll")).toBeLessThan(withBar.indexOf("wpg-tools"));
-    expect(withBar.indexOf("wpg-scroll"), "the masthead is not inside the scroller").toBeLessThan(withBar.indexOf("plate"));
-    expect(withBar.indexOf("plate"), "the masthead does not come before the control row").toBeLessThan(withBar.indexOf("wpg-tools"));
+    expect(withBar.indexOf("wpg-scroll"), "the masthead is not inside the scroller").toBeLessThan(withBar.indexOf("Test page"));
+    expect(withBar.indexOf("Test page"), "the masthead does not come before the control row").toBeLessThan(withBar.indexOf("wpg-tools"));
 
-    const bare = renderToStaticMarkup(<WorkspacePageGrid masthead={<i>plate</i>}>body</WorkspacePageGrid>);
+    const bare = renderToStaticMarkup(<WorkspacePageGrid masthead={MAST}>body</WorkspacePageGrid>);
     expect(bare, "an empty toolbar row rendered — it would draw its hairline with nothing above it, and reserve space the page does not use").not.toContain("wpg-tools");
   });
 
@@ -762,7 +813,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        ever rendered on the first paint every page would flash a hairline and a shadow on mount —
        and worse, it would be claiming the row is holding still against content that has not moved. */
     const html = renderToStaticMarkup(
-      <WorkspacePageGrid masthead={<span />} toolbar={<i>tools</i>}>{null}</WorkspacePageGrid>,
+      <WorkspacePageGrid masthead={MAST} toolbar={<i>tools</i>}>{null}</WorkspacePageGrid>,
     );
     expect(html).toContain("wpg-tools");
     expect(html, "the row rendered stuck before anything scrolled").not.toContain("wpg-tools--stuck");

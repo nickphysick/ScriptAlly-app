@@ -59,6 +59,8 @@
    */
   --wpg-gutter: var(--content-gutter);
   --masthead-inset: 16px;
+  /* the mini bar's height, read by the bar itself and by the control row's stuck offset */
+  --wpg-mini-h: 51px;
   height: 100%;
   min-height: 0;
   /* ⚠️ THE GRID ITSELF NEVER SCROLLS. Only row 3 does; anything escaping here is a bug in a row. */
@@ -140,8 +142,20 @@
    * day the honest behaviour is for the row to anchor rather than slide away.
    */
   position: sticky;
-  top: 0;
-  /* above the content that passes beneath it, below the hems (3) which must stay over everything */
+  /**
+   * ⚠️ `top: 51px` — THE MINI BAR'S HEIGHT, AND THIS IS THE ONE `top` IN THE FILE THAT IS NOT 0.
+   *
+   * That deserves stating, because this grid was built to remove exactly this shape: a sticky
+   * element whose `top` encodes another element's height as a literal — `calc(56px + gap)`, wrong
+   * by 32px on the Tasks family, the same fault as the banned `calc(100vh - 64px)`.
+   *
+   * ⚠️ WHAT MADE THAT ONE WRONG WAS THAT THE HEIGHT VARIED AND THE LITERAL DID NOT. The mini bar is
+   * 51px on every page and in every state — it is a fixed rule, not a measurement, and the matrix
+   * asserts it page against page. The two are stated as ONE token so they cannot drift: the bar
+   * reads it for its height, this reads it for its offset.
+   */
+  top: var(--wpg-mini-h);
+  /* above the content that passes beneath it, below the mini bar (3) and the hems (4) */
   z-index: 2;
   background: var(--ws-window);
   /* ⚠️ THE HAIRLINE IS A SHADOW, NOT A BORDER, so the row's height is identical in both states and
@@ -277,7 +291,10 @@
 .wpg-hem {
   grid-row: 1;
   grid-column: 1;
-  z-index: 3;
+  /* ⚠️ ABOVE BOTH STICKY ROWS (the mini bar at 3, the control row at 2). The hem starts BELOW the
+     chrome — see its `margin-top` — so it never draws on them; the z-index is about the content it
+     fades, which passes under both. */
+  z-index: 4;
   height: var(--wpg-hem-h, 44px);
   pointer-events: none;
   opacity: 0;
@@ -481,4 +498,133 @@
   /* the STATE still changes — the masthead must still go, or the height it was collapsing to give
      back is never given back. Only the tweening goes, exactly as everywhere else in this file. */
   .wpg--fill > .wpg-scroll > .wpg-mast { transition: none; }
+}
+
+/**
+ * ⚠️ A FILL PAGE'S CONTROL ROW IS STATIC — AND THIS IS A BUG THE MEASUREMENT FOUND, not a tidy-up.
+ *
+ * `position: sticky; top: 51px` does not only pin an element when it would scroll away; it CLAMPS
+ * the element into the region at or below 51px. On a fill page nothing scrolls, so once the
+ * masthead folds, the row's natural position is 0 — above the threshold — and sticky pushes it DOWN
+ * to 51. Measured on Calendar: the masthead collapsed correctly from 118 to 0 and the content below
+ * it rose by only 67 of those 118 pixels, the missing 51 being a gap held open for a mini bar that
+ * a fill page does not render at rest.
+ *
+ * ⚠️ AND `top: 0` WOULD HAVE HIDDEN IT RATHER THAN FIXED IT. That is what the row had before this
+ * step, and it is why nothing showed: clamping to 0 is a no-op when the natural position is already
+ * 0. The honest statement is that a row on a page where nothing scrolls is not sticky at all —
+ * "sticky" there claims a behaviour that cannot occur, and the next offset added to it would
+ * reintroduce exactly this.
+ */
+.wpg--fill > .wpg-scroll > .wpg-tools { position: static; }
+
+/* ══ THE MINI BAR (masthead rethink, step 3; ref 171-masthead-rethink-v2.html) ═════════════════
+ *
+ * ⚠️ THE ONLY CHROME THE MASTHEAD SYSTEM KEEPS ON SCREEN — mark and page name, and nothing else.
+ * One component and one treatment on both page types: it is what the masthead collapses TO, so a
+ * scroll page and a fill page must not end up with two different answers to "where am I".
+ *
+ * ⚠️ IT RUNS AT THE MASTHEAD'S WIDTH, NOT THE CONTENT'S — the same escape, for the same reason.
+ * A bar that sat at the content gutter while the masthead it replaces sat 64px wider would read as
+ * a different object arriving rather than the same one folding.
+ *
+ * ⚠️ AND ITS GROUND IS OPAQUE. On a scrolling page it is sticky and content passes beneath it; a
+ * transparent bar would show the list running through the page's own name.
+ */
+.wpg-mini {
+  box-sizing: border-box;
+  flex: none;
+  min-width: 0;
+  margin-inline: calc(var(--masthead-inset) - var(--wpg-gutter));
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  overflow: hidden;
+  background: var(--ws-window);
+  /* ⚠️ 0 → 51 ON SCROLL PAGES, so at rest it costs nothing and the masthead is the page's identity.
+     The height is the transition, which is why it is stated here and not only on the stuck rule. */
+  height: 0;
+  transition: height .18s cubic-bezier(.4, 0, .2, 1);
+}
+/**
+ * ⚠️ TWO STACKED STICKY ROWS: IDENTITY ABOVE, CONTROLS BELOW. The bar takes `top: 0` and the
+ * control row's stuck position becomes `top: 51px` — see `.wpg-tools`. The row's own hairline and
+ * shadow are unchanged and now draw beneath the bar rather than at the scroller's edge.
+ *
+ * ⚠️ Z-ORDER: the bar sits ABOVE the control row (3 against its 2) because content passing under
+ * the pair must disappear behind the identity, not emerge over it. The hems are above both, at 4.
+ */
+/**
+ * ⚠️⚠️ THIS GROWTH IS PAID FOR BY THE BROWSER'S SCROLL ANCHORING — DO NOT DISABLE IT ON THIS TREE.
+ *
+ * The bar takes `--wpg-mini-h` of FLOW the instant the page sticks, so everything below it moves
+ * down by that much and `scrollHeight` grows by the same. What stops the reader seeing a lurch is
+ * scroll anchoring: the browser raises `scrollTop` by the identical amount, so a 10px wheel tick
+ * moves the content 10px and not 61. Measured on Contact list — `scrollTop` 0 → 61, landmark 10px.
+ *
+ * ⚠️ `overflow-anchor: none` ANYWHERE ON AN ANCESTOR OF `.wpg-scroll` BREAKS THIS, and it is a
+ * common thing to reach for when chasing an unrelated flicker. The symptom would be content
+ * lurching half a bar-height down on the first scroll tick of every scrolling page — which reads as
+ * a mini-bar bug and is not one. `stickyRow.measure.ts` fails first and says so.
+ */
+.wpg-mini--stuck { height: var(--wpg-mini-h); }
+.wpg-mini {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+/* ⚠️ A FILL PAGE'S BAR IS STATIC AND FULL HEIGHT THE MOMENT IT RENDERS. Nothing scrolls there, so
+   there is nothing to stick to and no `stuck` state to grow from — it appears because the writer
+   folded the masthead, and it appears whole. */
+.wpg-mini--static { position: static; height: var(--wpg-mini-h); }
+
+.wpg-mini-mark { flex: none; display: inline-flex; }
+/* ⚠️ 22px, AND IT OVERRIDES BOTH MARK FAMILIES. `OneScreenMark` renders an illustration or a
+   plated monoline glyph, and the masthead sizes them 52 and 38 respectively; in the bar they are
+   one size, because the bar is a label rather than a plate and a 52px drawing in a 51px row would
+   be the row. */
+.wpg-mini-mark .os-mark {
+  width: 22px; height: 22px; flex: 0 0 22px;
+  background: none; border: none; box-shadow: none; border-radius: 0;
+}
+.wpg-mini-mark .os-mark img { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
+.wpg-mini-mark .os-mark svg { width: 15px; height: 15px; }
+/**
+ * ⚠️ THE NAME TAKES `--shell-ink`, AND THE REF'S `--ink2` IS A DELIBERATE DEVIATION. In this app
+ * `--ink-2` is declared inside `.t-f12` — Query Centre and the Tasks family — and nowhere else, so
+ * seven of the ten pages would resolve it to nothing. That is precisely the "a `var()` on a token
+ * nobody defines" trap now recorded in CLAUDE.md, and it would have rendered as a silent per-page
+ * divergence in the one thing the matrix exists to hold equal. `--shell-ink` is what the masthead's
+ * own title uses, which is the honest partner for a bar that IS that title folded.
+ */
+.wpg-mini-name {
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--shell-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* the restore control — a ghost, pushed to the bar's end */
+.wpg-mini-show {
+  margin-left: auto;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: var(--shell-muted);
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.wpg-mini-show:hover { background: var(--ws-window); border-color: var(--ws-edge); color: var(--shell-ink); }
+.wpg-mini-show svg { width: 15px; height: 15px; }
+@media (prefers-reduced-motion: reduce) {
+  /* the STATE still changes — only the tween goes, as everywhere else in this file */
+  .wpg-mini, .wpg-mini-show { transition: none; }
 }

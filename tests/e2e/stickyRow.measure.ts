@@ -16,7 +16,7 @@
  * cycles. The unit lock checks the arithmetic of the compensating margin; this checks the pixels.
  */
 import { test, expect, Page } from "@playwright/test";
-import { openRoute, scrollbarWidth } from "./measure";
+import { openRoute, scrollbarWidth, liftMotionSuppression } from "./measure";
 
 const SCROLLING: [string, string][] = [
   ["Contact list", "/agents"],
@@ -42,6 +42,9 @@ const read = (page: Page) => page.evaluate(() => {
   return {
     position: cs.position,
     top: cs.top,
+    /* the mini bar above it — the row's `top` is supposed to BE this, and the two are one token */
+    miniH: r((g.querySelector(".wpg-mini") as HTMLElement | null)?.getBoundingClientRect().height ?? -1),
+    miniStuckH: r((g.querySelector(".wpg-mini--stuck") as HTMLElement | null)?.getBoundingClientRect().height ?? 0),
     zIndex: cs.zIndex,
     background: cs.backgroundColor,
     padTop: r(parseFloat(cs.paddingTop)),
@@ -110,7 +113,17 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
 
     /* ── the contract ── */
     expect(rest.position, `${name}: the control row is not sticky`).toBe("sticky");
-    expect(rest.top, `${name}: the row takes a non-zero top offset — that is another element's height encoded as a literal`).toBe("0px");
+    /**
+     * ⚠️ AMENDED (masthead rethink, step 3). This asserted `top: 0px`, on the rule that a non-zero
+     * offset is another element's height encoded as a literal — the `calc(56px + gap)` fault. The
+     * mini bar sits above the row now, so the offset is non-zero by design.
+     *
+     * ⚠️ WHAT MADE THE ORIGINAL FAULT A FAULT IS UNCHANGED AND IS WHAT IS ASSERTED: the clearance
+     * must be DERIVED, not matched. So the row's `top` is compared against the mini bar's own
+     * rendered height, measured on the same page in the same state — if the two ever disagree, one
+     * of them has been given a number of its own.
+     */
+    expect(rest.top, `${name}: the row's top is "${rest.top}" — it should clear the mini bar`).not.toBe("0px");
     expect(rest.stuckClass, `${name}: the row rendered stuck before anything scrolled`).toBe(false);
 
     /* ⚠️ ONLY PAGES THAT ACTUALLY OVERFLOW CAN BE ASKED ABOUT STICKING. A short page at 1440×900 is
@@ -119,26 +132,41 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
     if (rest.maxScroll > 10) {
       const mastGone = moved.mastGone;
       expect(moved.stuckClass, `${name}: the row did not stick after scrolling ${moved.scrollTop}px`).toBe(true);
-      expect(moved.rowTop, `${name}: the row is not pinned to the scroller's top edge once stuck`).toBeLessThanOrEqual(1);
+      expect(moved.miniStuckH, `${name}: the mini bar did not grow when the page stuck`).toBeGreaterThan(0);
+      expect(moved.rowTop, `${name}: the row is at ${moved.rowTop} once stuck, not beneath the ${moved.miniStuckH}px mini bar`)
+        .toBeCloseTo(moved.miniStuckH, 0);
+      /* the row's declared offset and the bar's rendered height are one figure, from two directions */
+      expect(parseFloat(moved.top), `${name}: the row declares top ${moved.top} but the bar renders ${moved.miniStuckH}px`)
+        .toBeCloseTo(moved.miniStuckH, 0);
       expect(moved.shadow, `${name}: the stuck row draws no edge`).not.toBe("none");
       /**
-       * ⚠️ MAX SCROLL IS THE WHOLE POINT, AND THIS IS THE PROPERTY THE DELETED PADDING EXISTED TO
-       * GUARANTEE. Identical in both states, or a barely-overflowing page clamps, unsticks and
-       * cycles. 1px of tolerance for sub-pixel layout, not 4.
+       * ══ THE INVARIANCE, RESTATED AS WHAT IT WAS ALWAYS PROTECTING ═══════════════════════════
        *
-       * ⚠️ IT IS TRUE BY CONSTRUCTION NOW RATHER THAN BY COMPENSATION, which is exactly why it has
-       * to keep being MEASURED. `--wpg-reclaim-pad` used to hold this by adding back, in the
-       * scroller's foot, precisely what a condensing header took out of the flow — five tokens of
-       * arithmetic. The masthead is content and changes no heights, so nothing needs adding back
-       * and the padding is retired (step 4). A property that holds by construction is one nobody
-       * thinks to check, and the construction is a paragraph of CSS anyone can change.
+       * ⚠️ MAX SCROLL IS NO LONGER CONSTANT, AND IT SHOULD NOT BE. The mini bar grows 0 → 51 inside
+       * the scroller when the page sticks, so `scrollHeight` grows by exactly that — measured on
+       * Contact list, 1092 → 1143. Asserting equality here would be asserting that the bar does not
+       * exist.
        *
-       * ⚠️ AND THE CLAIM IS ONLY WORTH ANYTHING IF THE MASTHEAD ACTUALLY LEFT — see the assertion
-       * below. Max scroll being constant across a scroll that never moved the masthead out of view
-       * is a measurement of nothing.
+       * ⚠️ SO WHAT IS ASSERTED IS THE PROPERTY THE EQUALITY WAS A PROXY FOR: THE CONTENT DOES NOT
+       * JUMP. The original fear, in the words of the rule it replaces, was "a page overflowing by
+       * less than the reclaim is clamped to 0, the header returns, and it cycles" — a number moving
+       * was only ever bad because of what it did to the reader's eye and to `scrollTop`.
+       *
+       * ⚠️ AND THE BROWSER IS WHAT MAKES IT SAFE, WHICH IS WORTH STATING BECAUSE IT IS NOT OBVIOUS.
+       * Chrome's SCROLL ANCHORING absorbs the insertion: measured on Contact list, a 10px wheel tick
+       * takes `scrollTop` from 0 to 61 — the 10 the user asked for plus the 51 the bar just took —
+       * and a content landmark moves exactly 10px. The reader sees a 10px scroll. Without anchoring
+       * the same content would lurch half a bar-height down on the first tick, which is why this is
+       * measured rather than reasoned about.
+       *
+       * ⚠️ AND THE OSCILLATION CANNOT RETURN, because the change is a GROWTH and it happens on the
+       * way down. Unsticking only occurs at `scrollTop <= 2`, where there is nothing to clamp.
        */
-      expect(mastGone, `${name}: the masthead is still in view after scrolling ${moved.scrollTop}px — the invariance claim is about a state the page never reached`).toBe(true);
-      expect(Math.abs(moved.maxScroll - rest.maxScroll), `${name}: max scroll moved ${rest.maxScroll} → ${moved.maxScroll} when the row stuck`).toBeLessThanOrEqual(1);
+      expect(moved.miniStuckH, `${name}: no mini bar — the growth below would be unexplained`).toBeGreaterThan(0);
+      expect(moved.maxScroll - rest.maxScroll, `${name}: max scroll moved ${rest.maxScroll} → ${moved.maxScroll}, which is not the mini bar's ${moved.miniStuckH}px`)
+        .toBeCloseTo(moved.miniStuckH, 0);
+      expect(back.maxScroll, `${name}: max scroll did not return to its resting value once the bar folded away`)
+        .toBeCloseTo(rest.maxScroll, 0);
       expect(moved.marginBox, `${name}: the row's margin box changed when it stuck — that is what moves max scroll`).toBeCloseTo(rest.marginBox, 0);
       expect(back.stuckClass, `${name}: the row stayed stuck after returning to the top`).toBe(false);
       expect(moved.coverProbe, `${name}: the probe went off-screen — its answer means nothing`).not.toBe("OFF-SCREEN");
@@ -148,4 +176,56 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
     }
   }
   console.log(lines.join("\n"));
+});
+
+test("⚠️ THE CONTENT DOES NOT JUMP WHEN THE MINI BAR ARRIVES", async ({ page }) => {
+  /**
+   * The bar takes 51px of flow the instant the page sticks, and everything after it moves down by
+   * that much. What stops the reader seeing a lurch is the browser's scroll anchoring, which raises
+   * `scrollTop` by the same 51 — so this asserts the OUTCOME rather than trusting the mechanism:
+   * after a small wheel tick, a content landmark must have moved by the tick, not by the bar.
+   *
+   * ⚠️ A SMALL TICK ON PURPOSE. A 600px scroll would swamp a 51px error; the fault this guards
+   * against is visible precisely at the threshold, on the first tick that crosses it.
+   *
+   * ⚠️⚠️ SCROLL ANCHORING IS LOAD-BEARING HERE, AND IT IS A BROWSER BEHAVIOUR THIS CODEBASE DOES
+   * NOT CONTROL. If this case fails with the landmark moving ~51px instead of ~10, the most likely
+   * cause is NOT the mini bar: it is that `overflow-anchor: none` has been added somewhere on an
+   * ancestor of the scroller — a common fix for an unrelated flicker, and it silently disables the
+   * compensation this depends on. Check for it before touching anything in this pack.
+   *
+   * It also VARIES BY BROWSER: Chrome and Firefox implement anchoring, Safari's behaviour differs,
+   * and the harness only ever asks Chromium. So this case proves the property holds where it is
+   * measured, and does not prove it holds everywhere — which is the honest reading of any
+   * single-engine measurement, and worth remembering before it is quoted as settled.
+   */
+  await openRoute(page, "/agents", { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  const probe = () => page.evaluate(() => {
+    const g = [...document.querySelectorAll(".wpg.agl-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    const sc = g.querySelector(".wpg-scroll") as HTMLElement;
+    const mini = g.querySelector(".wpg-mini") as HTMLElement;
+    const card = g.querySelector("[data-agent-card]") as HTMLElement | null;
+    return {
+      scrollTop: Math.round(sc.scrollTop),
+      mini: Math.round(mini.getBoundingClientRect().height),
+      cardY: card ? Math.round(card.getBoundingClientRect().top) : -1,
+    };
+  });
+  const before = await probe();
+  expect(before.mini, "the bar already has height at rest").toBe(0);
+  expect(before.cardY, "no content landmark on the page — the probe has nothing to watch").toBeGreaterThan(0);
+
+  const TICK = 10;
+  await page.mouse.move(700, 500);
+  await page.mouse.wheel(0, TICK);
+  await page.waitForTimeout(450);
+  const after = await probe();
+
+  expect(after.mini, "the bar did not appear — the jump this case guards against cannot occur, so it is asserting nothing").toBeGreaterThan(0);
+  /* ⚠️ THE CONTENT MOVED BY THE TICK, NOT BY THE BAR. A 2px tolerance for sub-pixel scroll, not 51. */
+  expect(before.cardY - after.cardY, `the content moved ${before.cardY - after.cardY}px for a ${TICK}px scroll — the mini bar's ${after.mini}px arrival is being paid by the reader's eye`)
+    .toBeCloseTo(TICK, 0);
+  /* and the browser paid it in `scrollTop`, which is the mechanism — recorded, not relied upon */
+  console.log(`\ncontent-jump: tick ${TICK}px · scrollTop ${before.scrollTop} → ${after.scrollTop} · bar ${after.mini} · landmark moved ${before.cardY - after.cardY}px`);
 });
