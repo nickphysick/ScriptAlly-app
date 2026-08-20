@@ -29,11 +29,37 @@ import { resolve } from "node:path";
  * which said the write was fine, before the request payload named `gen-lang-client-…` in its URL.
  * Nothing in prod was modified, and nothing should have been at risk of it.
  *
- * The check is skipped for a remote BASE_URL, where `dist/` is not what is being served.
+ * The check is skipped for a remote BASE_URL, and for a local server that is not serving a built
+ * bundle at all — see `servesBuiltBundle`.
  */
-export function assertLocalBundleIsDev(): void {
+/**
+ * ⚠️ ASK THE SERVER WHAT IT SERVES — DO NOT ASSUME IT IS `dist/`.
+ *
+ * `.claude/launch.json` carries both kinds on localhost: `npm run dev` (a Vite dev server, which
+ * serves SOURCE and is current the instant a file is saved) and `vite preview` (which serves the
+ * built `dist/`). Every check below is about the BUNDLE, and against a dev server they are not
+ * merely unnecessary — the staleness one would refuse a perfectly good measurement every time a
+ * source file is newer than the last build, which on a working night is always. Written on the
+ * unexamined belief that port 3000 was a preview server; it is `npm run dev`.
+ *
+ * The tell is in the served document: a built page links `/assets/index-*.js`; a Vite dev page
+ * links `/src/main.tsx` and `/@vite/client`. One request settles it. A server that cannot be
+ * reached returns false and is left to Playwright's own connection error, which says what is
+ * wrong far more plainly than a guess from this function could.
+ */
+async function servesBuiltBundle(base: string): Promise<boolean> {
+  try {
+    const html = await (await fetch(base, { redirect: "follow" })).text();
+    return /\/assets\/index-[A-Za-z0-9_-]+\.js/.test(html);
+  } catch {
+    return false;
+  }
+}
+
+export async function assertLocalBundleIsDev(): Promise<void> {
   const base = process.env.SA_E2E_BASE_URL ?? "";
   if (!/^https?:\/\/(localhost|127\.0\.0\.1)/.test(base)) return;
+  if (!(await servesBuiltBundle(base))) return;
   const dir = resolve(process.cwd(), "dist/assets");
   if (!existsSync(dir)) throw new Error(`No dist/ to serve. Run \`npm run build:dev\` first.`);
   const js = readdirSync(dir).filter((f) => f.endsWith(".js"));

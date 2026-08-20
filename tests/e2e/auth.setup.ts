@@ -35,7 +35,7 @@ function passwordFromEnvLocal(): string | null {
 
 
 setup("authenticate", async ({ page }) => {
-  assertLocalBundleIsDev();
+  await assertLocalBundleIsDev();
   const password = passwordFromEnvLocal();
   if (!password) {
     throw new Error(

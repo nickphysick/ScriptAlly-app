@@ -7,9 +7,10 @@
  */
 import { test, expect } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
-import { writeFileSync } from "node:fs";
+import { writeFileSync, rmSync } from "node:fs";
 
 type R = { id: string; ok: boolean; note: string };
+const OUT = process.env.SA_PR_OUT ?? "run-artifacts/pane-round.txt";
 const VIS = `(e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }`;
 
 /** open the first row whose pill reads `kind`; returns false when the account has none */
@@ -23,6 +24,12 @@ const OPEN = (kind: string) => `(() => {
 })()`;
 
 test("pane round", async ({ page }) => {
+  /* ⚠️ THE REPORT IS DELETED BEFORE THE RUN, NOT ONLY WRITTEN AFTER IT. A run that dies in setup —
+     a dev server that stopped, an expired session — leaves the PREVIOUS run's file sitting there,
+     indistinguishable from a fresh one. That has been read as current twice in this sequence, both
+     times producing a confident report of results nobody had measured. Absent beats stale: with no
+     file, the next reader gets an error instead of a wrong answer. */
+  rmSync(OUT, { force: true });
   const out: R[] = [];
   const add = (id: string, ok: boolean, note = "") => out.push({ id, ok, note });
   await ensureSignedIn(page);
@@ -200,7 +207,7 @@ test("pane round", async ({ page }) => {
   const lines = [`── pane round · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`];
   for (const r of out) lines.push(`  ${r.ok ? "green" : "RED  "}  ${r.id}\n           ${r.note}`);
   const report = lines.join("\n");
-  writeFileSync(process.env.SA_PR_OUT ?? "run-artifacts/pane-round.txt", report);
+  writeFileSync(OUT, report);
   console.log("\n" + report + "\n");
   expect(red, `${red.length} red`).toHaveLength(0);
 });

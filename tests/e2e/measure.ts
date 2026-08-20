@@ -115,7 +115,7 @@ export async function ensureSignedIn(page: Page) {
      a cached `storageState` is still valid — so a run that reuses the session never reached the
      check, and could measure a production or a stale bundle with nothing said. Every measure spec
      calls this function; the guard belongs where the traffic is. */
-  assertLocalBundleIsDev();
+  await assertLocalBundleIsDev();
   /* ⚠️ WAIT FOR ONE OF THE TWO, DO NOT COUNT IMMEDIATELY. Checking `count()` straight after a
      `goto` reads a document the app has not rendered into yet, so it always looked signed-out —
      and then tried to sign in again, on a route that redirects away from the form when the session
