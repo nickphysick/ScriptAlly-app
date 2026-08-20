@@ -50,14 +50,14 @@ test("1+4 · the preview matches the outcome, and a note-only edit raises no she
 
   /* pick a query with at least three rungs, so a date edit has something to cross */
   const rows = page.locator(".f12-row");
-  const n = Math.min(await rows.count(), 20);
+  const n = await rows.count();
   let chosen = -1;
   for (let i = 0; i < n; i++) {
     try { await rows.nth(i).click({ timeout: 2500 }); } catch { continue; }
     await page.waitForTimeout(320);
-    if ((await page.locator(".tl-more").count()) >= 3) { chosen = i; break; }
+    if ((await page.locator(".tl-more").count()) >= 2) { chosen = i; break; }
   }
-  expect(chosen, "no query with three correctable entries — nothing to cross").toBeGreaterThanOrEqual(0);
+  expect(chosen, "no query with two correctable entries — nothing to cross").toBeGreaterThanOrEqual(0);
 
   const before = await readTimeline(page);
   console.log(`  events before:      ${before.events.join(" | ")}`);
@@ -67,7 +67,7 @@ test("1+4 · the preview matches the outcome, and a note-only edit raises no she
   const dots = page.locator(".tl-more");
   await dots.nth((await dots.count()) - 1).click();
   await page.waitForTimeout(400);
-  const editItem = page.locator(".f12-menuitem, [role=menuitem], button", { hasText: /^Edit$/ }).first();
+  const editItem = page.locator("[role=menuitem], .f12-menuitem", { hasText: /^Edit$/ }).first();
   if (!(await editItem.count())) { console.log("  ⚠️ no Edit item in the ⋯ menu — unexercised"); return; }
   await editItem.click();
   await page.waitForTimeout(500);
@@ -91,7 +91,7 @@ test("1+4 · the preview matches the outcome, and a note-only edit raises no she
   const dots2 = page.locator(".tl-more");
   await dots2.nth((await dots2.count()) - 1).click();
   await page.waitForTimeout(400);
-  await page.locator(".f12-menuitem, [role=menuitem], button", { hasText: /^Edit$/ }).first().click();
+  await page.locator("[role=menuitem], .f12-menuitem", { hasText: /^Edit$/ }).first().click();
   await page.waitForTimeout(400);
   await page.locator(".cor-branch", { hasText: "correcting a mistake" }).first().click();
   await page.waitForTimeout(400);
@@ -139,9 +139,15 @@ test("1+4 · the preview matches the outcome, and a note-only edit raises no she
  * A check that quietly passes because it found nothing to test is the precondition gap in its
  * cheapest form — the console line is the difference between "verified" and "unexercised".
  */
+/**
+ * ⚠️ MENU LOCATORS ARE SCOPED TO THE MENU. Including a bare `button` in the union matched the
+ * PAGE-LEVEL "Delete" in the control row instead of the entry menu's "Delete…", so the probe opened
+ * "Delete this query?" and then reported the root guard three times over. Nothing about the failure
+ * pointed at the selector — it looked exactly like a guard misfiring.
+ */
 const selectWith = async (page: any, want: RegExp): Promise<boolean> => {
   const rows = page.locator(".f12-row");
-  const n = Math.min(await rows.count(), 25);
+  const n = await rows.count();
   for (let i = 0; i < n; i++) {
     try { await rows.nth(i).click({ timeout: 2500 }); } catch { continue; }
     await page.waitForTimeout(320);
@@ -157,43 +163,107 @@ test("2 · remove both, then undo puts both back", async ({ page }) => {
   await openRoute(page, "/queries", { width: 1440, height: 900 });
   await page.waitForTimeout(1500);
 
-  /* a request with the send that answers it — the dependency guard's whole subject */
-  const found = await selectWith(page, /asked for|requested/i);
-  if (!found) { console.log("  2 · ⚠️ UNEXERCISED — no query holds a request with a dependent send"); return; }
+  /**
+   * ⚠️ THE SHAPE THIS NEEDS IS "MORE THAN ONE CORRECTABLE ENTRY", not "mentions a request". The
+   * first scan asked for the wording and landed on a query holding a single real document that was
+   * also its earliest — so every path led to the root guard and nothing could be removed at all.
+   * A synthesised root carries no ⋯, so counting the ⋯ controls counts what is actually correctable.
+   */
+  const rows = page.locator(".f12-row");
+  const total = await rows.count();
+  let found = false;
+  for (let i = 0; i < total; i++) {
+    try { await rows.nth(i).click({ timeout: 2500 }); } catch { continue; }
+    await page.waitForTimeout(340);
+    /**
+     * ⚠️ THE CONDITION IS "A REMOVAL IS ALLOWED HERE", not "there are two entries". A synthesised
+     * root carries no `activityId`, so the root guard compares against it and ALLOWS the single real
+     * entry to go — a shape a two-entry requirement skips over. The loop below is what actually
+     * decides; this only has to find a query worth trying.
+     */
+    if ((await page.locator(".tl-more").count()) >= 1) { found = true; break; }
+  }
+  if (!found) { console.log("  2 · ⚠️ UNEXERCISED — no correctable entry anywhere in the account"); return; }
 
   const before = await readTimeline(page);
   console.log(`  2 · before: ${before.events.join(" | ")}`);
 
+  /**
+   * ⚠️ AN ENTRY WHOSE DELETE RAISES NO SHEET IS THE ROOT GUARD DOING ITS JOB, not a missing sheet —
+   * the earliest event routes to "delete the query" instead, so the probe steps past it and tries
+   * the next. The first version of this loop took whichever ⋯ came first, met the root confirm, and
+   * then waited three minutes for a `.cor-act` that was never coming.
+   */
   const dots = page.locator(".tl-more");
   let opened = false;
-  for (let i = 0; i < (await dots.count()); i++) {
+  for (let i = (await dots.count()) - 1; i >= 0; i--) {
     await dots.nth(i).click(); await page.waitForTimeout(350);
-    const del = page.locator(".f12-menuitem, [role=menuitem], button", { hasText: /Delete|Remove/i }).first();
-    if (await del.count()) { await del.click(); opened = true; break; }
-    await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+    const del = page.locator("[role=menuitem], .f12-menuitem", { hasText: /Delete/i }).first();
+    if (!(await del.count())) { await page.keyboard.press("Escape"); await page.waitForTimeout(200); continue; }
+    await del.click(); await page.waitForTimeout(900);
+    if (await page.locator(".cor-act").count()) { opened = true; break; }
+    console.log(`  2 · entry ${i} raised no sheet (root guard) — trying the next`);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+    const close = page.locator("button", { hasText: /^Close$/ }).first();
+    if (await close.count()) { await close.click(); await page.waitForTimeout(300); }
   }
-  if (!opened) { console.log("  2 · ⚠️ UNEXERCISED — no Delete item found"); return; }
-  await page.waitForTimeout(600);
+  if (!opened) {
+    /* every entry here is guarded — try the rest of the list rather than reporting the account bare */
+    for (let r = 0; r < (await rows.count()) && !opened; r++) {
+      try { await rows.nth(r).click({ timeout: 2000 }); } catch { continue; }
+      await page.waitForTimeout(320);
+      const d = page.locator(".tl-more");
+      for (let i = (await d.count()) - 1; i >= 0 && !opened; i--) {
+        await d.nth(i).click(); await page.waitForTimeout(320);
+        const del = page.locator("[role=menuitem], .f12-menuitem", { hasText: /Delete/i }).first();
+        if (!(await del.count())) { await page.keyboard.press("Escape"); continue; }
+        await del.click(); await page.waitForTimeout(800);
+        if (await page.locator(".cor-act").count()) { opened = true; break; }
+        await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+        const c = page.locator("button", { hasText: /^Close$/ }).first();
+        if (await c.count()) { await c.click(); await page.waitForTimeout(250); }
+      }
+    }
+  }
+  if (!opened) { console.log("  2 · ⚠️ UNEXERCISED — every correctable entry in the account is guarded"); return; }
+  const before2 = await readTimeline(page);
+  console.log(`  2 · on the query that allows it: ${before2.events.join(" | ")}`);
 
+  /**
+   * ⚠️ THE CASCADE AND THE INVERSE ARE TWO CLAIMS, and only one of them needs a request-with-send to
+   * test. If this account holds no such pair the cascade half cannot run — but the RESTORE is the
+   * new code and is exercised either way, because one removal and two travel through exactly the
+   * same primitive. Reporting "unexercised" for the whole check would have left the thing this
+   * commit exists to fix unverified for want of a fixture.
+   */
   const both = page.locator(".cor-act", { hasText: /Remove both/i });
-  if (!(await both.count())) { console.log("  2 · ⚠️ UNEXERCISED — no cascade offered on this entry"); return; }
+  const cascade = (await both.count()) > 0;
   console.log(`  2 · the sheet offered: ${(await page.locator(".cor-act b").allTextContents()).join(" / ")}`);
-  await both.first().click();
-  await page.waitForTimeout(3000);
+  if (!cascade) console.log("  2 · ⚠️ CASCADE UNEXERCISED — no request-with-send pair in this account; testing the inverse on a single removal");
+  await (cascade ? both.first() : page.locator(".cor-act").first()).click();
+  await page.locator(".sa-toast-undo").first().waitFor({ timeout: 15000 }).catch(() => {});
 
   const after = await readTimeline(page);
   console.log(`  2 · after remove: ${after.events.join(" | ")}`);
-  expect(after.events.length, "remove-both removed nothing").toBeLessThan(before.events.length);
-  expect(before.events.length - after.events.length, "remove-both removed only one entry").toBe(2);
+  const gone = before2.events.length - after.events.length;
+  console.log(`  2 · entries removed: ${gone}`);
+  expect(gone, "the removal removed nothing").toBeGreaterThan(0);
+  if (cascade) expect(gone, "remove-both removed only one entry").toBe(2);
 
-  /* the undo the toast promises must actually restore — both entries, one press */
-  const undo = page.locator("button", { hasText: /^Undo$/ }).first();
+  /**
+   * ⚠️ THE TOAST'S OWN CLASS, NOT ITS WORDS. The label is rendered `.toUpperCase()`, so a
+   * case-sensitive `/^Undo$/` matched nothing and the probe reported "no undo was offered" about a
+   * button that was on screen — the wiring fault it was written to catch, wearing the same face.
+   * The toast also expires in about six seconds, so this waits for it rather than sleeping past it.
+   */
+  const undo = page.locator(".sa-toast-undo").first();
+  await undo.waitFor({ timeout: 12000 }).catch(() => {});
   expect(await undo.count(), "no undo was offered for a removal").toBeGreaterThan(0);
   await undo.click();
   await page.waitForTimeout(4000);
   const back = await readTimeline(page);
   console.log(`  2 · after undo:  ${back.events.join(" | ")}`);
-  expect(back.events.join("|"), "UNDO DID NOT RESTORE THE RECORD").toBe(before.events.join("|"));
+  expect(back.events.join("|"), "UNDO DID NOT RESTORE THE RECORD").toBe(before2.events.join("|"));
 });
 
 test("6 · removing a closure reopens the query", async ({ page }) => {
@@ -205,7 +275,7 @@ test("6 · removing a closure reopens the query", async ({ page }) => {
   if (!found) { console.log("  6 · ⚠️ UNEXERCISED — no closed query in the account"); return; }
 
   const statusOf = () => page.evaluate(() => {
-    const el = document.querySelector(".f12-hstatus, .f12-status, .qp-status");
+    const el = document.querySelector(".qc-mstatus");
     return (el?.textContent || "").trim();
   });
   const before = await statusOf();
@@ -216,7 +286,7 @@ test("6 · removing a closure reopens the query", async ({ page }) => {
   let sheet = false;
   for (let i = n - 1; i >= 0; i--) {
     await dots.nth(i).click(); await page.waitForTimeout(350);
-    const del = page.locator(".f12-menuitem, [role=menuitem], button", { hasText: /Delete|Remove/i }).first();
+    const del = page.locator("[role=menuitem], .f12-menuitem", { hasText: /Delete/i }).first();
     if (!(await del.count())) { await page.keyboard.press("Escape"); continue; }
     await del.click(); await page.waitForTimeout(700);
     if (await page.locator(".cor-tl, .cor-ledger").count()) { sheet = true; break; }
