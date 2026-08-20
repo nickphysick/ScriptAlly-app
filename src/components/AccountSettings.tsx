@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Account settings — rebuilt onto the Form 11 / dashboard design system:
- * the dashboard ground (pageGround + fixed page grain), a sticky left section rail,
+ * the app's shared ground (no page paint of its own), a left section rail,
  * and parchment cards carrying the sage-band uniform header (3px burgundy rule + Playfair
  * title + far-right lucide emblem). Section/danger cards use CardShell — the same three-layer
  * clipping structure the app already uses correctly (the onboarding "Database populated" card):
@@ -60,8 +60,6 @@ import { RailAside } from "./settings/RailAside";
 import { SettingsIllo, hasSectionWatermark } from "./settings/SettingsIllo";
 import { accountFacts, sentCount } from "../lib/accountHeaderFacts";
 import {
-  pageGround,
-  PAGE_GRAIN,
   parchment,
   PAPER_TEXTURE,
   mountShadow,
@@ -1420,10 +1418,15 @@ export const AccountSettings: React.FC<{
     data: dataSection,
   };
 
+  /* ⚠️ SETTINGS PAINTS NO GROUND OF ITS OWN — AND THE FIX WAS SUBTRACTION, NOT A NEW COLOUR.
+        It used to lay `pageGround` (kraft #F5F0EA plus a radial glow) and a fixed grain over the
+        shell, which made it the ONLY page not wearing the shared ground: browser-measured,
+        `.ws-work` is rgb(254,252,250) on every route including this one, and settings covered it
+        with rgb(245,240,234). Painting #FEFCFA here instead would have looked identical today and
+        drifted the day the token moved. Deleting the override lets `--ws-window` show through, so
+     settings follows the app's ground for free. */
   return (
-    <div className="acct-page font-sans" style={{ background: pageGround, color: bodyInk }}>
-      {/* Fixed page grain — over the kraft ground, under the positioned cards (matches the dashboard). */}
-      <div aria-hidden="true" style={{ position: "fixed", inset: 0, opacity: 0.25, pointerEvents: "none", zIndex: 0, backgroundImage: PAGE_GRAIN }} />
+    <div className="acct-page font-sans" style={{ color: bodyInk }}>
 
       {/* On-brand field focus ring (scoped; inline can't express :focus). The rail's own states
           live in settings.css beside the chassis they belong to. */}
