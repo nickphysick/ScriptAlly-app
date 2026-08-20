@@ -117,17 +117,32 @@
   min-height: 0;
   width: 100%;
 }
-/* ⚠️ ROW 3 KEEPS THIS PAGE'S FLEX COLUMN, because its contents (the strip, the tabs, the workshop)
-   were laid out by `.pkgw`'s own `display:flex; flex-direction:column; gap:14px` and that gap is the
-   page's vertical rhythm. Moving them into a block scroll row would collapse every gap at once. */
-.pkgw .wpg-scroll { display: flex; flex-direction: column; gap: 14px; }
-/* ⚠️ EVERY CHILD, because this page's rhythm is the scroll row's own `gap` — a single wrapper
-   would collapse those gaps into one. `<style>` is display:none and takes no gap. */
+/**
+ * ⚠️ THE RHYTHM MOVED OFF THE SCROLL ROW AND ONTO THE PAGE'S OWN BODY (in-flow masthead, step 5).
+ *
+ * This rule read `.pkgw .wpg-scroll { display:flex; flex-direction:column; gap:14px }` and its
+ * reason was sound at the time: the page's panels are separated by that gap, and they were the
+ * scroll row's only children. Since step 1 the MASTHEAD and the CONTROL ROW are children of that
+ * row too — so the page's body rhythm was being applied to the grid's chrome, and this page's
+ * control row measured 14px lower than every other page's.
+ *
+ * ⚠️ THE OLD COMMENT ARGUED AGAINST EXACTLY THIS FIX: "Moving them into a block scroll row would
+ * collapse every gap at once." It would, if the wrapper were a plain block. `.pkgw-body` carries
+ * the same `display:flex; flex-direction:column; gap:14px`, so every gap between the page's own
+ * children is reproduced exactly, one level down, and the grid's rows are outside it.
+ *
+ * ⚠️ AND THE SCROLL ROW GOES BACK TO BEING A BLOCK, which is what every other scrolling page's is.
+ * A page-specific `display` on a grid row is a page doing the grid's job — the same family as a
+ * page stating its own cap or its own gutter, both of which this sheet already refuses to do.
+ */
+.pkgw-body { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* ⚠️ EVERY CHILD OF THE BODY, because this page's rhythm is that container's own `gap`.
+   `<style>` is display:none and takes no gap. */
 /* ⚠️ NO CAP AND NO PAGE GUTTER (header spec §1). Both moved to the grid: row 3 carries
    `--content-gutter` as padding, so this page's content is the window minus the gutter and
    nothing here states a width. A `max-width` here would re-create the centred column whose
    scrollbar ate 15px of content under classic scrollbars. */
-.pkgw .wpg-scroll > * { width: 100%; }
+.pkgw-body > * { width: 100%; }
 
 /* ── Tabs ─────────────────────────────────────────────────────────────────────
    A sibling block beneath PageHeader, never inside it: PageHeader draws title +

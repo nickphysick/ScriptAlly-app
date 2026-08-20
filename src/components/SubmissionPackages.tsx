@@ -293,6 +293,24 @@ export const SubmissionPackages: React.FC = () => {
           </div>
         </>
       ) : undefined}>
+      {/**
+        * ⚠️ THE PAGE'S BODY CARRIES THE PAGE'S RHYTHM — the grid's chrome must not be inside it
+        * (in-flow masthead, step 5).
+        *
+        * `.pkgw .wpg-scroll` was `display: flex; flex-direction: column; gap: 14px`, because this
+        * page's panels are separated by that gap and it was the scroller's own children they were
+        * separating. The masthead and the control row are children of that scroller now, so the
+        * page's BODY rhythm was being applied to the grid's CHROME: measured at 1440×900, this
+        * page's control row sat 14px lower than every other page's — 16px of masthead margin plus
+        * 14px of page gap.
+        *
+        * ⚠️ THE RULE'S OWN COMMENT ARGUED AGAINST THIS FIX AND WAS WRONG: "a single wrapper would
+        * collapse those gaps into one." True of a PLAIN wrapper; not of one carrying the same
+        * `display: flex; gap: 14px`, which reproduces the rhythm exactly one level down. It is the
+        * third comment in this pack that was true when written and stopped being true when
+        * something moved underneath it.
+        */}
+      <div className="pkgw-body">
       {/* ⚠️ `.pkgw-strip` IS RETIRED FROM THIS PAGE (restructure). It carried the scorecard sentence
           as a thin band above the tab row; the overview's problem-statement card is that same
           sentence promoted to the stage, in the ref's own words. Keeping both would state the
@@ -364,6 +382,7 @@ export const SubmissionPackages: React.FC = () => {
         onClose={() => { setPkgModal(false); setPkgEditing(null); }}
         onSave={savePackageDraft}
       />}
+      </div>
       </WorkspacePageGrid>
     </div>
   );

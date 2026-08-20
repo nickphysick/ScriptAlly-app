@@ -200,3 +200,56 @@ Re-measured on all five scrolling pages after every deletion: **max scroll ident
 The cause: `.pkgw .wpg-scroll { display: flex; flex-direction: column; gap: 14px }`. That gap is the page's own vertical rhythm and was written when its panels were the scroller's only children. **The masthead and the control row are children of that scroller now**, so the page's body rhythm applies to the grid's chrome — 16px of masthead margin plus 14px of page gap.
 
 The clean fix is for the page to wrap its own body in an element carrying the flex column and the gap, leaving the scroller a block like every other page. The rule's own comment says a wrapper "would collapse those gaps into one", which is true of a plain wrapper and not of one that carries the same `display: flex; gap: 14px`. **Left for step 5**, where the cross-page equality matrix lives and will assert it rather than accept it.
+
+
+---
+
+## Step 5 — the matrix
+
+`tests/e2e/mastheadMatrix.measure.ts`, all ten in-scope pages, 1440×900, built dev bundle. **Green.**
+
+```
+Query Centre          h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 52 (art) · sub 24.9 · actionable 0 · rowTop —
+Analytics             h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 38       · sub 24.9 · actionable 0 · rowTop 118.5
+Contact list          h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 52 (art) · sub 24.9 · actionable 0 · rowTop 118.5
+Discover              h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 38       · sub 24.9 · actionable 0 · rowTop 118.5
+Manuscripts           h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 52 (art) · sub 24.9 · actionable 0 · rowTop —
+Comparable titles     h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 38       · sub 24.9 · actionable 0 · rowTop 118.5
+Submission packages   h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 38       · sub 24.9 · actionable 0 · rowTop 118.5
+To-do list            h     85 · pad 26/20 · mb 16 · title 30/600 · mark 38       · sub none · actionable 0 · rowTop —
+Calendar              h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 38       · sub 24.9 · actionable 0 · rowTop 118.5
+Noteboard             h  102.5 · pad 26/20 · mb 16 · title 30/600 · mark 38       · sub 24.9 · actionable 0 · rowTop 118.5
+```
+
+Every reading is compared **page against page**, never to a constant — a file of `toBe(102)` would pass while all ten drifted together, which is the failure this pack was cleaning up after. Two mark sizes and exactly two: 52 bare where there is artwork, 38 plated where there is not. `actionable 0` is asserted **structurally** (`button, a, input, select, textarea, [role=button]`), never against a list of labels, because a name list passes the day someone adds a control it has never heard of.
+
+### The Packages 14px, fixed rather than accepted
+
+`.pkgw .wpg-scroll { display: flex; gap: 14px }` was the page's body rhythm, written when its panels were the scroller's only children. The chrome moved in at step 1, so the rhythm reached it. The body now lives in `.pkgw-body`, carrying the same `display: flex; gap: 14px`, and the scroll row is a block like every other scrolling page's. **`rowTop` 132.5 → 118.5**, matching all seven pages that have a control row.
+
+The rule's own comment argued against exactly this fix — *"a single wrapper would collapse those gaps into one"* — which is true of a plain wrapper and not of one carrying the same flex and gap. **Third comment in this pack that was true when written and stopped being true when something moved underneath it**, after `.qa-wrap .wsh-sub` ("the sub-line is mono because it is a tally") and `.pkgw .wsh` ("this comes out of the plate's interior").
+
+### ⚠️ THE HEIGHT CLAIM WAS WRONG TWICE, AND THE MATRIX CAUGHT BOTH
+
+Worth recording because the *first* version looked obviously right:
+
+1. **`same("height")` — blanket equality.** Failed on To-do (85 against 102.5). To-do is title-only, and "no description element — no reserved space" is the step-1 rule; forcing equality would have made a solo page fake a height it has no content for. The fixed-height plate that *did* that is exactly what this pack deleted.
+2. **"the difference is the description's box" — 24.9.** Also wrong: the measured delta is 17.5. `.wsh-row` centres the mark against the text column, so whichever is **taller** sets the row — on a title-only page the 38px mark is taller than the 31px title and owns the height, and a description only buys height once the text column passes the mark.
+
+The assertion is now the derivation itself, per page:
+
+> `height = padding-top + max(mark, title + description) + padding-bottom + hairline`
+
+which is strictly stronger than group equality: it names every input that may contribute, so a page growing 6px from something unnamed fails even if another page happens to grow by the same amount. Group agreement is asserted too, because that is the thing a reader actually notices.
+
+### The Dashboard
+
+Asserted on the **rendered page** — zero `.wpg`, zero `.wsh`, zero `.wpg-tools` — rather than by not having opened its files. It could acquire the grid through a shared component without anyone editing `Dashboard.tsx`, and that is precisely how it would happen.
+
+### The three measurement files
+
+| | |
+|---|---|
+| `mastheadMatrix.measure.ts` | cross-page equality, the height derivation, no actionable elements, the Dashboard exclusion |
+| `stickyRow.measure.ts` | the five scrolling pages: sticky, `top: 0`, ground on the token, stuck only past the threshold, **max scroll invariant with the masthead proved out of view** |
+| `mastheadVanish.measure.ts` | the five fill pages: present on arrival, gone on the first content click, full height reclaimed; a click on the masthead does nothing; the Manuscripts dossier both ways |
