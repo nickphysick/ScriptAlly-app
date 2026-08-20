@@ -83,10 +83,13 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
   const total = items.length + recs.length;
 
   /* ⚠️ THE COUNT LINE STATES WHAT IS THERE, and says nothing when there is nothing. "0 ITEMS" on a
-     free day is a tally nobody asked for; the empty state below speaks for that case instead. */
+     free day is a tally nobody asked for; the empty state below speaks for that case instead.
+     ⚠️ ONE DEVIATION FROM THE REF, AND IT IS A CORRECTNESS ONE. The ref counts only the LIVE items
+     (`items.length ? … : ''`), so a day holding nothing but history renders no line at all — the
+     panel would show an "On the record" section under a blank head. The total counts both layers
+     and the record clause names its share, which is true of every day rather than most of them. */
   const countLine = total === 0 ? "" : [
     `${total} ITEM${total === 1 ? "" : "S"}`,
-    yours.length ? `${yours.length} YOURS` : "",
     recs.length ? `${recs.length} ON THE RECORD` : "",
   ].filter(Boolean).join(" · ");
 
@@ -508,6 +511,10 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
                 {l.label}
               </span>
             ))}
+            {/* ⚠️ THE RECORD IS ONE LAYER, NOT TWO MORE FAMILIES. Its entries wear the layer's own
+                dot (6px, solid, no frame) and sit behind a rule, so a reader counts four card
+                families and one record rather than six peers. */}
+            {showRecord && <i className="cal-legsep" />}
             {showRecord && REC_LEGEND.map((l) => (
               <span key={l.dir}>
                 <i className="cal-legdot" style={{ background: REC_TONE[l.dir].dot }} />

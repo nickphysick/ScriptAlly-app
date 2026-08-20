@@ -234,6 +234,10 @@
 .cal-recdot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
 /* the legend's record swatch is a dot, matching the pip; the live families keep their square */
 .cal-legend i.cal-legdot { width: 6px; height: 6px; border-radius: 50%; border-color: transparent; }
+/* the rule that groups the record's two entries away from the four card families */
+.cal-legend i.cal-legsep {
+  width: 1px; height: 11px; border: 0; border-radius: 0; background: #e7dcce; margin: 0 2px;
+}
 
 /* ⚠️ THE RECORD'S SWITCH, AND THE RULE THAT SEPARATES IT FROM THE FACETS (record-layer P4). The
    separator is not decoration: the facet control speaks the shared TODO_FACETS vocabulary that the
@@ -299,9 +303,13 @@
   font-size: 6.5px; letter-spacing: 0.13em;
 }
 .cal-fpdate { font-family: "Playfair Display", Georgia, serif; font-size: 28px; color: #2e2118; margin-top: 3px; }
+/* ⚠️ 9px, THE REF'S SIZE. It shipped at 6.5px, which is why a line that was in the DOM the whole
+   time read as missing — the review reported it absent. Legibility is the difference between a
+   count line and a decoration. */
 .cal-fpcount {
   font-family: "JetBrains Mono", ui-monospace, monospace;
-  font-size: 6.5px; letter-spacing: 0.14em; color: #b3a394; margin-top: 5px;
+  font-size: 9px; letter-spacing: 0.13em; text-transform: uppercase;
+  color: #b3a394; margin-top: 6px;
 }
 
 /* the panel is the only scroller on this page */

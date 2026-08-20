@@ -968,3 +968,49 @@ describe("⚠️ the record's chip reads as one control", () => {
     expect(pageSrc).toMatch(/className="cal-nav calm-nav"[^>]*aria-label="Previous"/);
   });
 });
+
+/* ══ THE PANEL HEAD + LEGEND (fixes pack, Phase 5) ══════════════════════════════════════════ */
+
+describe("⚠️ the count line, and the legend's one record layer", () => {
+  it("⚠️ 9px, THE REF'S SIZE — it shipped at 6.5px and the review read it as missing", () => {
+    const m = /^\.cal-fpcount\s*\{([^}]*)\}/m.exec(calCss);
+    expect(m, ".cal-fpcount has no rule").not.toBeNull();
+    expect(m![1]).toContain("font-size: 9px");
+    expect(m![1]).toContain("letter-spacing: 0.13em");
+    expect(m![1]).toContain("text-transform: uppercase");
+    expect(m![1]).not.toContain("6.5px");
+  });
+
+  it("the line names the total and the record's share, and singulars agree", () => {
+    expect(pageSrc).toContain('`${total} ITEM${total === 1 ? "" : "S"}`');
+    expect(pageSrc).toContain('recs.length ? `${recs.length} ON THE RECORD` : ""');
+  });
+
+  it("⚠️ AN EMPTY DAY STATES NO TALLY — '0 ITEMS' is a count nobody asked for", () => {
+    expect(pageSrc).toContain('const countLine = total === 0 ? "" : [');
+    expect(pageSrc).toContain("{countLine && <div className=\"cal-fpcount\">{countLine}</div>}");
+  });
+
+  it("⚠️ the deviation from the ref is deliberate: a history-only day still gets a line", () => {
+    // the ref reads `items.length ? … : ''`, counting only the LIVE items — so a day holding
+    // nothing but record entries renders an "On the record" section under a blank head.
+    expect(pageSrc).toContain("const total = items.length + recs.length;");
+    expect(decls(pageSrc)).not.toMatch(/countLine\s*=\s*items\.length\s*===?\s*0/);
+  });
+
+  it("⚠️ the legend reads FOUR families and ONE record layer, not six peers", () => {
+    // the record's dots keep the layer's treatment; a rule separates the two groups
+    expect(pageSrc).toContain('<i className="cal-legsep" />');
+    expect(pageSrc).toContain('<i className="cal-legdot"');
+    expect(CAL_LEGEND).toHaveLength(4);
+    expect(REC_LEGEND).toHaveLength(2);
+    const sep = /^\.cal-legend i\.cal-legsep\s*\{([^}]*)\}/m.exec(calCss);
+    expect(sep, "the legend separator has no rule").not.toBeNull();
+    expect(sep![1]).toContain("width: 1px");
+    // still rendered FROM the records — no label or tone written into the page
+    expect(pageSrc).toContain("REC_LEGEND.map");
+    expect(pageSrc).toContain("CAL_LEGEND.map");
+    expect(decls(pageSrc)).not.toContain("YOU SENT");
+    expect(decls(pageSrc)).not.toContain("THEY REPLIED");
+  });
+});
