@@ -1,0 +1,33 @@
+# gitleaks - repo configuration
+#
+# WARNING: THE DEFAULT RULESET STAYS ON. This file adds exactly one allowlist entry and nothing
+# else, so every other rule keeps its teeth. The point is not to quieten the scanner; it is to make
+# a RED CI mean something again - a scanner that cries wolf on a value the codebase publishes on
+# purpose is a scanner nobody reads.
+#
+# WARNING: WHAT IS ALLOWLISTED, AND WHY IT IS NOT A SECRET. The admin Firebase UID.
+# `firestore.rules` says so in its own comment - "The UID is NOT secret - security is enforced by
+# this rule, not by hiding the value" - and it is `export const ADMIN_UID` in
+# `src/lib/seedCommunityAgents.ts`, so it ships to every browser that loads the app. A UID is an
+# opaque identifier, not a credential: you cannot authenticate with it. gitleaks' `generic-api-key`
+# rule fires on it only because 28 random characters look like entropy.
+#
+# WARNING: IT IS ALLOWLISTED BY VALUE, NOT BY FILE OR FINGERPRINT - deliberately. A fingerprint
+# pins one finding in one file at one commit, so the same UID re-trips the rule the next time
+# anyone touches the two files that legitimately hold it, or quotes them in a log. Matching the
+# string covers every future home of the same non-secret while leaving the rest of the ruleset
+# strict.
+#
+# WARNING: IF THIS UID EVER CHANGES, CHANGE IT HERE TOO. The value is pinned in three places now
+# (firestore.rules, seedCommunityAgents.ts, this file); the first two already carry a "MUST stay in
+# sync" note. A stale entry here fails SAFE - the scanner goes red rather than quiet.
+title = "ScriptAlly"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "The admin Firebase UID - public by design (see the note above)."
+regexes = [
+  '''r8kbaKbmguNfaoJTb9wH4BetJab2''',
+]

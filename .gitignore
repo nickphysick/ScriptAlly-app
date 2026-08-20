@@ -29,3 +29,13 @@ DIARY_CAROUSEL_REPORT.md
 LOCATION_BUILD_REPORT.md
 MOBILE_RECON.md
 RECON_PACKAGES_REDESIGN.md
+
+# ⚠️ RAW `firebase --debug` TRANSCRIPTS ARE NEVER COMMITTED (20 Aug 2026).
+# Two of them reached a PUBLIC repo under run-artifacts/ before this rule existed. They carry the
+# signed-in user's email address and the OAuth scope list the CLI requested — neither is secret in
+# the credential sense (no token material was present, swept and confirmed), but neither is meant
+# to be published either, and a debug log is not evidence anybody reads.
+# The run-artifacts/ directory itself stays TRACKED on purpose — it is where measurement output
+# lives. Only the deploy transcripts are excluded, by name.
+run-artifacts/**/*-deploy.txt
+run-artifacts/*-deploy.txt
