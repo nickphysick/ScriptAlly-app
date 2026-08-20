@@ -75,7 +75,12 @@ test("§2 — the offer and the control, where a query has no stated window", as
       eyebrow: (e.querySelector(".sa-label")?.textContent || "").trim(),
       value: (e.querySelector(".tl-setwin-val")?.textContent || "").replace(/\s+/g, " ").trim(),
       readout: (e.querySelector(".sa-wk-read")?.textContent || "").trim(),
-      keys: (e.querySelector(".tl-setwin-k")?.textContent || "").trim(),
+      /* §1 — the hint is retired; the foot's two buttons say what it said. */
+      hint: e.querySelectorAll(".tl-setwin-k").length,
+      cancel: (e.querySelector(".tl-setwin-cancel")?.textContent || "").trim(),
+      save: (e.querySelector(".qn-send")?.textContent || "").trim(),
+      saveOff: !!e.querySelector(".qn-send.qn-send--off"),
+      saveDisabled: (e.querySelector(".qn-send") as HTMLButtonElement | null)?.disabled ?? null,
       range: !!rg,
       /* §4 — the SHARED slider, so its id must be instance-unique and not the old constant */
       rangeId: rg?.id || "",
@@ -84,7 +89,7 @@ test("§2 — the offer and the control, where a query has no stated window", as
       offerStillThere: !!document.querySelector(".tl-ask"),
     };
   });
-  console.log(`  editor · "${ed?.eyebrow}" · readout "${ed?.readout}" · "${ed?.value}" · "${ed?.keys}" · range #${ed?.rangeId} ×${ed?.dupes}`);
+  console.log(`  editor · "${ed?.eyebrow}" · readout "${ed?.readout}" · "${ed?.value}" · save "${ed?.save}"/faded=${ed?.saveOff} · cancel "${ed?.cancel}" · range #${ed?.rangeId} ×${ed?.dupes}`);
   expect(ed, "the offer opened nothing").not.toBeNull();
   expect(ed!.range, "the control is not a slider").toBe(true);
   expect(ed!.eyebrow, "the eyebrow does not keep the estimate the writer's").toBe("Your expected response time");
@@ -94,7 +99,45 @@ test("§2 — the offer and the control, where a query has no stated window", as
      slider was built; a duplicate here would mean the reuse recreated the fault it removed. */
   expect(ed!.rangeId, "the shared slider is back on its hardcoded id").not.toBe("sa-wk");
   expect(ed!.dupes, "two elements share this slider's id").toBe(1);
-  expect(ed!.keys, "the control does not say how to commit it").toContain("Enter to save");
+  /**
+   * §1 — SAVE AND CANCEL ARE BUTTONS NOW, and the printed hint is gone. Keyboard-only commit is an
+   * accelerator, never the only route; this control was the one editor in the pane behaving that
+   * way while the notes composer below it has a visible Save.
+   *
+   * ⚠️ SAVE IS PRESENT BUT INERT AT OPEN, not absent — a control that appears as you interact moves
+   * the thing under the pointer. Asserted as BOTH faded and disabled, because either alone is a
+   * different bug: faded-but-live commits on a click the writer read as unavailable, and
+   * disabled-but-solid says nothing about why it will not respond.
+   */
+  expect(ed!.hint, "the retired hint line is still rendered").toBe(0);
+  expect(ed!.cancel, "the foot has no Cancel").toBe("Cancel");
+  expect(ed!.save, "the foot has no Save").toBe("Save");
+  expect(ed!.saveOff, "Save is not faded at open — it offers to write what is already there").toBe(true);
+  expect(ed!.saveDisabled, "Save looks inert but would still commit").toBe(true);
+
+  /**
+   * ⚠️ AND IT COMES ALIVE ON A CHANGE — driven as a WRITER would, with the keyboard on the focused
+   * slider, not by assigning `.value` in the page.
+   *
+   * ⚠️ THAT FIRST ATTEMPT FAILED AND THE CODE WAS FINE. Assigning `input.value` directly does not
+   * reach a React controlled input: React tracks the node's value and the synthetic `onChange`
+   * never fires, so the probe changed the DOM, watched Save stay faded, and reported it as the
+   * feature not working. A range input answers arrow keys natively, which is both the real path and
+   * the one that cannot lie about it.
+   */
+  const live = await page.locator(".tl-setwin input[type=range]").count() > 0;
+  if (live) {
+    await page.locator(".tl-setwin input[type=range]").focus();
+    await page.keyboard.press("ArrowRight");
+    await page.waitForTimeout(250);
+    const after = await page.evaluate(() => ({
+      off: !!document.querySelector(".tl-setwin .qn-send.qn-send--off"),
+      disabled: (document.querySelector(".tl-setwin .qn-send") as HTMLButtonElement | null)?.disabled ?? null,
+    }));
+    console.log(`  after a change · faded=${after.off} disabled=${after.disabled}`);
+    expect(after.off, "Save stayed faded after the value changed").toBe(false);
+    expect(after.disabled, "Save stayed inert after the value changed").toBe(false);
+  }
   /* ⚠️ IT TAKES THE OFFER'S PLACE rather than opening beside it — the offer's whole job was to
      ask a question the control now answers. */
   expect(ed!.offerStillThere, "the control opened beside the offer instead of replacing it").toBe(false);

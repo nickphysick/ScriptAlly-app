@@ -609,18 +609,33 @@ const TlProjection: React.FC<{
  * beneath the track; the ticks were scaffolding for a figure this control already shows. A tick
  * scale added to the shared component for one caller would be the same debt pointing the other way.
  *
- * ⚠️ ENTER SAVES AND ESC CANCELS, stated on the control rather than assumed. A range input answers
- * arrow keys for free; without the hint nothing says the value is not already committed.
+ * ⚠️ SAVE AND CANCEL ARE BUTTONS; ENTER AND ESC ARE ACCELERATORS. This committed on Enter alone,
+ * with a printed hint saying so — which makes a keyboard the only route to a control a pointer can
+ * otherwise fully operate, and left this the one editor in the pane behaving that way while the
+ * notes composer a few inches below has a visible Save. The hint went with the buttons: it existed
+ * to say what the control would not show, and a foot that states its own two actions says it
+ * better than a line of mono ever did.
+ *
+ * ⚠️ SAVE IS PRESENT BUT INERT UNTIL THE VALUE CHANGES, not absent. A control that appears as you
+ * interact moves the thing under the pointer — the notes composer's own note records that fault —
+ * so this reuses `qn-send`/`qn-send--off` rather than restyling a second pink button. One
+ * treatment, two callers.
  *
  * ⚠️ THE EYEBROW SAYS `YOUR`. The same word that keeps the estimate the writer's in the display
  * belongs on the control that sets it — a control labelled "Expected response time" would read as
  * though it were recording something the agency had said.
  */
 const SET_WINDOW_MAX = 16;
+const SET_WINDOW_DEFAULT_WEEKS = 6;
 const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> = ({ anchorMs, onSave }) => {
   const [open, setOpen] = useState(false);
-  const [weeks, setWeeks] = useState(6);
+  const [weeks, setWeeks] = useState(SET_WINDOW_DEFAULT_WEEKS);
   const resolved = anchorMs + weeks * 7 * 86400000;
+  /* ⚠️ "CHANGED" IS COMPARED TO THE VALUE THE PANEL OPENED WITH, not to whether the slider has been
+     touched. Dragging away and back again leaves nothing to save, and a live Save over an unchanged
+     value would offer to write what is already there. */
+  const dirty = weeks !== SET_WINDOW_DEFAULT_WEEKS;
+  const commit = () => { onSave(new Date(resolved).toISOString()); setOpen(false); };
 
   if (!open) {
     return (
@@ -634,7 +649,11 @@ const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> =
     <div
       className="tl-setwin"
       onKeyDown={(e) => {
-        if (e.key === "Enter") { e.preventDefault(); onSave(new Date(resolved).toISOString()); setOpen(false); }
+        /* ⚠️ ENTER COMMITS WHATEVER IS SHOWING, INCLUDING THE DEFAULT — the accelerator is not gated
+           on `dirty`. A writer who opens the control, reads "around 5 September" and presses Enter
+           has chosen that date; refusing it because they did not move the slider would make the key
+           behave differently from the value in front of them. */
+        if (e.key === "Enter") { e.preventDefault(); commit(); }
         if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOpen(false); }
       }}
     >
@@ -643,7 +662,15 @@ const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> =
           on one line, which is what the local copy's eyebrow and value row were doing by hand. */}
       <WeekSlider label="Your expected response time" value={weeks} onChange={setWeeks} min={1} max={SET_WINDOW_MAX} />
       <div className="tl-setwin-val">around {exactDate(resolved).replace(/ \d{4}$/, "")}</div>
-      <div className="tl-setwin-k">Enter to save · Esc to cancel</div>
+      <div className="tl-setwin-acts">
+        <button type="button" className="tl-setwin-cancel" onClick={() => setOpen(false)}>Cancel</button>
+        <button
+          type="button"
+          className={`qn-send${dirty ? "" : " qn-send--off"}`}
+          disabled={!dirty}
+          onClick={commit}
+        >Save</button>
+      </div>
     </div>
   );
 };

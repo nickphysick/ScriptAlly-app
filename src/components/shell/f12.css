@@ -1354,7 +1354,25 @@
 .tl-setwin .sa-fld { margin: 0; }
 .tl-setwin .sa-label { font-family: var(--f12-mono); font-size: 7.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
 .tl-setwin-val { margin-top: 8px; font-family: "Inter", sans-serif; font-size: 11.5px; color: var(--faint); }
-.tl-setwin-k { margin-top: 9px; font-family: var(--f12-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--qc-tx-off); }
+/**
+ * ⚠️ `.tl-setwin-k` IS RETIRED — the printed `ENTER TO SAVE · ESC TO CANCEL` line. It existed to say
+ * what the control would not show; the foot shows it now, and a hint beside two buttons that name
+ * the same two acts is the instruction repeated in a quieter voice.
+ *
+ * ⚠️ THE FOOT REUSES `qn-send`, THE NOTES COMPOSER'S SAVE, rather than restyling a second pink
+ * button — including its `--off` inert state, so the two editors in this pane cannot drift apart in
+ * treatment or in when they let you commit. Cancel is plain and takes the secondary chassis the
+ * offer buttons already use.
+ */
+.tl-setwin-acts { display: flex; align-items: center; gap: 8px; margin-top: 11px; }
+.tl-setwin-cancel {
+  margin-left: auto; font-family: "Inter", sans-serif; font-size: 11.5px; height: 29px; padding: 0 12px;
+  border-radius: 8px; cursor: pointer; border: 1px solid var(--btn-line); background: var(--white); color: var(--ink-2);
+}
+.tl-setwin-cancel:hover { background: var(--paper); color: var(--ink); }
+/* ⚠️ Save sits AFTER Cancel and loses `qn-send`'s own `margin-left: auto`, which would push it away
+   from the button it is paired with; the row's auto-margin is Cancel's now. */
+.tl-setwin-acts .qn-send { margin-left: 0; }
 
 /* ══ §5 · WHAT A NUDGE LEAVES BEHIND ═════════════════════════════════════════════════════════
  *
