@@ -29,7 +29,7 @@
  * them is off it. Any stop between commits leaves a working app.
  */
 import React from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { OneScreenMark, MarkName } from "../dashboard/OneScreenMark";
 import "./workspacePageGrid.css";
 
@@ -141,25 +141,23 @@ export interface WorkspacePageGridProps {
    */
   fill?: boolean;
   /**
-   * ⚠️ THE MODE HALF OF THE WORKING STATE (spec §4). The strip means the user is WORKING rather
-   * than browsing. On a scrolling page, scrolling is the proxy for that — the sentinel reports it.
-   * On a workspace page nothing scrolls, and the real signal is entering a journey: Query Centre
-   * strips on `log a query` and on `record a response`, and returns on leaving.
+   * ⚠️ `condensed` IS DELETED (masthead rethink, step 4), AND WITH IT THE UNION IT WAS HALF OF.
    *
-   * ⚠️ THE UNION IS TAKEN HERE, AND THE HEADER NEVER LEARNS WHICH HALF FIRED. It receives one
-   * boolean through context, so a page cannot grow a second way of being condensed and the header
-   * cannot start behaving differently depending on why.
+   * It was the MODE input to `stuck || condensedByMode || engaged` — the masthead folding when the
+   * user "started working": scrolling on a scrolling page, a first click in the content area on a
+   * fill one, entering a journey. Manuscripts passed `condensed={!!selected}`, so opening a dossier
+   * folded it too.
    *
-   * ⚠️ NEVER SYNTHESISE A SCROLL SIGNAL TO GET THIS. A non-scrolling page that fakes a scroll
-   * position to make itself strip has two sources of truth for one state and no way to reconcile
-   * them. Pages that neither scroll nor open a journey keep the card permanently, and that is
-   * correct rather than a gap.
+   * ⚠️ THE FOLD HAS ONE TRIGGER NOW AND THE WRITER OWNS IT. Guessing at "started working" is what
+   * produced the click-anywhere vanish this pack replaces; an explicit Hide needs no guess.
+   *
+   * ⚠️ `stuck` SURVIVES AND IS NO LONGER A UNION — it drives the mini bar's growth, the control
+   * row's stuck treatment and the hem's offset, all derived from `scrollTop` alone.
    */
-  condensed?: boolean;
 }
 
 export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
-  masthead, toolbar, children, className, scrollLabel, dock, fill = false, condensed: condensedByMode = false,
+  masthead, toolbar, children, className, scrollLabel, dock, fill = false,
 }) => {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = React.useState(false);
@@ -223,18 +221,14 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
     );
   }
   /**
-   * ⚠️ THE THIRD INPUT — ENGAGEMENT (collapse-on-engagement).
+   * ⚠️ ENGAGEMENT IS DELETED (masthead rethink, step 4) — the state, the `pointerdown` handlers on
+   * the scroller and the dock, the containment test that stopped a click on the masthead folding
+   * it, and the latch that left a header folded after a journey closed.
    *
-   * THE RULE: the header collapses when the user starts working. On a scrolling page, scrolling is
-   * the signal. On a fill page, the first click inside the content area is.
-   *
-   * ⚠️ FILL PAGES ONLY, and that is the whole reason it exists. Five pages never collapsed because
-   * they never scroll — their panes do — so the sentinel had nothing to report and the card stayed
-   * forever on the pages with the least room to spare. A scrolling page already has its signal, and
-   * making a click collapse one too would fight the sentinel: the click would strip it at
-   * `scrollTop 0`, where the sentinel says it must be resting.
+   * All of it existed to INFER that the writer had started working. Hide is them saying so, and an
+   * explicit trigger needs no inference: a click in the content area does nothing to the masthead
+   * now, and leaving a journey leaves whatever state the writer chose.
    */
-  const [engaged, setEngaged] = React.useState(false);
   /**
    * ⚠️ HIDE IS PER-VISIT AND DELIBERATELY NOT PERSISTED. Component state only: the masthead is back
    * on the next visit to the page, because a writer who folded it once to get at a list should not
@@ -245,24 +239,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * replaces, so this is false for the whole of this commit and the fill mini bar does not render.
    */
   const [hidden, setHidden] = React.useState(false);
-  /* ⚠️ AN `||` OF THREE, STILL A PRIORITY OF NONE, and the header still receives ONE boolean and
-     never learns which of them fired. A journey opened part-way down a scrolled page is still
-     working; a click after a journey closes is still working. Everything below reads this value. */
-  const condensed = stuck || condensedByMode || engaged;
 
-  /**
-   * ⚠️ ENTERING A JOURNEY LATCHES ENGAGEMENT, so LEAVING one leaves the header collapsed. You were
-   * working before it and you still are — restoring the card on exit would hand back the browsing
-   * chrome at the moment you have the most to do.
-   *
-   * ⚠️ AND IT IS A LATCH RATHER THAN A READ OF `condensedByMode`. The union already covers the time
-   * the journey is open; what this is for is the moment AFTER it closes, when mode has gone false
-   * again. A journey can also be opened from the shell's own menus without any click landing in the
-   * content area, so the click handler cannot be relied on to have fired.
-   */
-  React.useEffect(() => {
-    if (fill && condensedByMode) setEngaged(true);
-  }, [fill, condensedByMode]);
+  /* the journey latch went with engagement — see the note above */
 
   /**
    * ⚠️ THE STATE IS A PURE FUNCTION OF `scrollTop`, AND THE CLAMP IT USED TO FEAR IS IMPOSSIBLE.
@@ -354,25 +332,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * ⚠️ POINTERDOWN, NOT CLICK. A drag inside the content — reordering a To-do card, dragging a comp
    * — never produces a `click`, and it is the least ambiguous act of working there is.
    */
-  /**
-   * ⚠️ A CLICK ON THE MASTHEAD IS NOT ENGAGEMENT, AND THIS IS WHERE THAT SURVIVED THE MOVE.
-   *
-   * The old rule was structural: the header was row 1 and only rows 2–4 carried the handler, so
-   * "clicking the header is not working on the page" needed no code. The masthead is inside the
-   * scroller now, so a click on it BUBBLES to the scroller and would collapse the very thing under
-   * the pointer — a control that hides itself when you touch it, which is the fault the original
-   * rule named.
-   *
-   * ⚠️ A CONTAINMENT TEST, NOT `stopPropagation`. Stopping the event would change what every other
-   * listener sees in order to fix what this one does; asking whether the event started inside the
-   * masthead changes nothing and says exactly what is meant.
-   */
+  /* the masthead's own box — the fold's transition target */
   const mastRef = React.useRef<HTMLDivElement>(null);
-  const engage = React.useCallback((e: React.PointerEvent) => {
-    if (!fill) return;
-    if (mastRef.current?.contains(e.target as Node)) return;
-    setEngaged(true);
-  }, [fill]);
 
   /**
    * ⚠️ THERE IS NO RESTORE, AND THAT IS A DECISION RATHER THAN A DEFERRAL (in-flow masthead).
@@ -409,7 +370,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
       const now = el.getBoundingClientRect().height > 0;
       /* ⚠️ ONLY THE HIDDEN → SHOWN EDGE. Resetting on every observation would clear engagement on
          any reflow — a window resize, a pane opening — and the header would pop back mid-task. */
-      if (now && !shown) setEngaged(false);
+      if (now && !shown) setHidden(false);
       shown = now;
     });
     ro.observe(el);
@@ -427,7 +388,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
            arbitration died with the chrome rows. Grepped before removing: no stylesheet in `src/`
            reads it. A class the markup emits and nothing consumes is what a bundle sweep exists to
            find, and leaving it would imply a rule someone would go looking for. */
-        className={`wpg${condensed ? " wpg--working" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}
+        className={`wpg${hidden ? " wpg--hidden" : ""}${fill ? " wpg--fill" : ""}${className ? ` ${className}` : ""}`}
       >
         {/* ⚠️ THE CHROME ROWS ARE GONE. Rows 1 and 2 were the plate and the toolbar, pinned as
             siblings of the scroller; both now sit INSIDE it, which is the whole of this pack. The
@@ -437,7 +398,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         <div
           className="wpg-scroll"
           ref={scrollRef}
-          onPointerDown={engage}
           /* a scrollable region must be reachable by keyboard, and named when it is */
           tabIndex={0}
           role={scrollLabel ? "region" : undefined}
@@ -482,7 +442,30 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
               )}
             </div>
           )}
-          <div className="wpg-mast" ref={mastRef}>{masthead}</div>
+          <div className="wpg-mast" ref={mastRef}>
+            {masthead}
+            {/**
+              * ⚠️ HIDE IS THE ONE EXCEPTION TO THE NO-ACTIONS RULE, AND IT IS THE GRID'S RATHER THAN
+              * THE PAGE'S. `PageHeader` still throws if a PAGE hands it an action — that guard is
+              * what keeps every other control off the masthead — and this is rendered BESIDE the
+              * header rather than through it, so no page-facing prop was opened up to allow it.
+              *
+              * ⚠️ ABSOLUTELY POSITIONED, FOR THE REASON THE PRO PILL ALREADY IS: the masthead's
+              * height is a function of the mark and the title, and nothing hung on it may change
+              * that. A flex sibling would be inside that arithmetic, and the matrix asserts it is
+              * not. The ref flexes it against a spacer, which lands in the same place on screen.
+              *
+              * ⚠️ FILL PAGES ONLY. A scrolling page's masthead leaves by scrolling, so a Hide there
+              * would be a second way to do what the page already does — and a control that becomes
+              * pointless the moment you scroll past it.
+              */}
+            {fill && !hidden && (
+              <button type="button" className="wpg-mast-hide" onClick={() => setHidden(true)}>
+                <ChevronUp aria-hidden="true" />
+                Hide
+              </button>
+            )}
+          </div>
           {/* ⚠️ THE CONTROL ROW FOLLOWS THE MASTHEAD, INSIDE THE SCROLLER, and it has to be here
               rather than a grid row above it for one reason: the masthead must come FIRST. Left as
               row 2 of the grid it would have been pinned ABOVE a masthead that had moved into the
@@ -536,7 +519,7 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         {/* ⚠️ ROW 4, AFTER THE HEMS — the hems are absolute-ish grid items in row 3, so the dock
             must be its own row or it would share their cell and overlap the scroller's foot. */}
         {/* the dock is a content row too — acting in it is working on the page */}
-        {dock && <div className="wpg-dock" onPointerDown={engage}>{dock}</div>}
+        {dock && <div className="wpg-dock">{dock}</div>}
       </div>
   );
 };

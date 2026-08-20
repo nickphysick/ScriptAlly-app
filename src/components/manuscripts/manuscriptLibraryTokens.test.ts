@@ -223,8 +223,14 @@ describe("the dossier condenses the header by mode", () => {
     expect(PAGE).not.toContain("⚠️");
   });
 
-  it("passes the grid's existing `condensed` prop, driven by whether a dossier is open", () => {
-    expect(PAGE).toContain("condensed={!!selected}");
+  it("no longer folds the masthead when a dossier opens — that is the writer's call", () => {
+    /* ⚠️ AMENDED (masthead rethink, step 4): the dossier no longer folds the masthead. It used to
+       pass `condensed={!!selected}` — sound reasoning (the panes scroll internally, so the header
+       was spending height nobody was choosing from) with the wrong MECHANISM: it inferred that the
+       writer had started working, which is the guess the click-anywhere vanish also made. The fold
+       is an explicit Hide now, on this page as on every fill page. */
+    expect(PAGE, "the dossier folds the masthead again — that decision is the writer's now")
+      .not.toContain("condensed={");
   });
 
   /* ⚠️ AND SYNTHESISES NO SCROLL SIGNAL TO GET THERE — two sources of truth for one state, with no

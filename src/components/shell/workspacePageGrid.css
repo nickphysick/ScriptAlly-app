@@ -489,8 +489,10 @@
     opacity .18s ease;
 }
 /* ⚠️ THE HAIRLINE GOES WITH IT — it belongs to the masthead, and a rule left hanging over content
-   that has risen to the top would read as the page's own top edge, which is what the band was. */
-.wpg--fill.wpg--working > .wpg-scroll > .wpg-mast {
+   that has risen to the top would read as the page's own top edge, which is what the band was.
+   ⚠️ AND THE TRIGGER IS `wpg--hidden` NOW, NOT `wpg--working` (step 4): one explicit act by the
+   writer, rather than three inferences about whether they had started working. */
+.wpg--fill.wpg--hidden > .wpg-scroll > .wpg-mast {
   max-height: 0;
   opacity: 0;
 }
@@ -628,3 +630,41 @@
   /* the STATE still changes — only the tween goes, as everywhere else in this file */
   .wpg-mini, .wpg-mini-show { transition: none; }
 }
+
+
+/* ══ HIDE — the masthead's one action (masthead rethink, step 4; ref 171) ══════════════════════
+ *
+ * ⚠️ ABSOLUTE, SO IT IS OUTSIDE THE MASTHEAD'S HEIGHT ARITHMETIC. The rule the matrix holds is that
+ * a masthead's height is a function of its mark and its title and nothing else — the same reason
+ * the two `Pro` pills are positioned out of the title's line box. A flex sibling here would be in
+ * that sum, and the day someone gave this button a taller shape three pages would grow.
+ *
+ * ⚠️ VERTICALLY CENTRED ON THE MASTHEAD'S OWN BOX, not on the text: the header's padding is 26/20,
+ * so centring on the content would sit it visibly high.
+ *
+ * ⚠️ A GHOST, NOT A BUTTON WITH A FRAME. It is chrome for chrome — the only control the masthead
+ * carries — and anything with a fill would read as the page's action rather than the header's.
+ */
+.wpg--fill > .wpg-scroll > .wpg-mast { position: relative; }
+.wpg-mast-hide {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--shell-muted);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.wpg-mast-hide:hover { background: var(--ws-window); color: var(--shell-ink); }
+.wpg-mast-hide svg { width: 15px; height: 15px; flex: none; }
+@media (prefers-reduced-motion: reduce) { .wpg-mast-hide { transition: none; } }

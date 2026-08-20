@@ -66,7 +66,14 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        So the check that mattered is unchanged and still runs over the whole sheet: every `top` in
        this file must be exactly 0. The day one is not, something above the scroller is being
        measured into a rule again. */
-    const tops = [...cssRules.matchAll(/(?:^|[;{\s])top\s*:\s*([^;}]+)/gm)].map((m) => m[1].trim());
+    /* ⚠️ STICKY RULES ONLY, AND THE FIRST VERSION SWEPT THE WHOLE SHEET. The claim has always been
+       about a sticky element's CLEARANCE — an offset that encodes what sits above it. A `top: 50%`
+       on an absolutely-positioned button is a centring device and has nothing to do with it; the
+       unscoped version flagged Hide's centring as "another element's height as a literal", which is
+       the assertion drifting off its own subject. */
+    const stickyBlocks = [...cssRules.matchAll(/\{[^}]*position:\s*sticky[^}]*\}/g)].map((m) => m[0]);
+    expect(stickyBlocks.length, "no sticky rules found — this case would be asserting nothing").toBeGreaterThan(0);
+    const tops = stickyBlocks.flatMap((b) => [...b.matchAll(/(?:^|[;{\s])top\s*:\s*([^;}]+)/gm)].map((m) => m[1].trim()));
     expect(tops.length, "no `top` is declared at all — the sticky row lost its anchor").toBeGreaterThan(0);
     /* ⚠️ EXTRACT THE VALUE, DO NOT LOOK AHEAD PAST IT. The first draft was
        `not.toMatch(/top\s*:\s*(?!0)/)` and it flagged `top: 0` — `\s*` backtracks to zero width, so
@@ -604,61 +611,36 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(srcCode, "the grid stopped holding a ref to its own scroller").toContain("ref={scrollRef}");
   });
 
-  /**
-   * ⚠️ THE UNION DRIVER (spec §4). `condensed = stuck || mode`, and the point is that the header
-   * never learns which half fired — it takes one boolean through context, so a page cannot grow a
-   * second way of being condensed and the header cannot behave differently depending on why.
-   *
-   * ⚠️ `||`, NOT A PRIORITY. A journey opened part-way down a scrolled page is still working, and
-   * closing it while the page is still scrolled must not restore the card. Either half alone is
-   * sufficient and neither can veto the other.
-   */
-  it("⚠️ the mode half condenses with no scrolling at all", () => {
-    /* ⚠️ OBSERVED ON THE ROOT'S CLASS, NOT THROUGH A CONTEXT (step 4). The context is deleted — the
-       union drives `wpg--working` on the grid root and the stylesheet reads it there. Same single
-       boolean, same union, one fewer mechanism; the probe moves to where the value actually goes. */
-    const html = renderToStaticMarkup(
-      <WorkspacePageGrid masthead={MAST} condensed>{null}</WorkspacePageGrid>,
-    );
-    /* there is nothing to scroll in this environment, so `stuck` can only be false here — which is
-       exactly the case worth locking: the mode alone must be enough */
-    expect(html, "the mode input does not reach the root — a workspace page would never strip, because nothing scrolls on it").toContain("wpg--working");
+  it("⚠️ THE FOLD HAS ONE TRIGGER, AND IT IS THE WRITER'S", () => {
+    /**
+     * ⚠️ THIS CASE'S SUBJECT IS RETIRED (masthead rethink, step 4). It asserted the MODE half of a
+     * three-input union — `stuck || condensedByMode || engaged` — reaching the header without any
+     * scrolling, because a workspace page could never strip otherwise.
+     *
+     * Every one of those inputs was an INFERENCE that the writer had started working, and the
+     * click-anywhere vanish is what that inference produced. The fold is an explicit Hide now: one
+     * trigger, on fill pages, pressed by the person it affects. What is asserted is that no
+     * inference survives — no prop, no engagement state, no latch.
+     */
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    for (const gone of ["condensedByMode", "engaged", "setEngaged", "onPointerDown"]) {
+      expect(src, `\`${gone}\` came back — the masthead is inferring engagement again`).not.toContain(gone);
+    }
+    /* the one trigger, and it is a button the writer presses */
+    expect(src, "the fold has no explicit trigger").toContain("setHidden(true)");
+    expect(src, "the fold's state is persisted — Hide is per-visit by decision").not.toContain("localStorage");
   });
 
-  /**
-   * ══ COLLAPSE ON ENGAGEMENT ═══════════════════════════════════════════════════════════════════
-   *
-   * THE RULE: the header collapses when the user starts working. On a scrolling page, scrolling is
-   * the signal. On a fill page, the first click inside the content area is.
-   *
-   * ⚠️ IT EXISTS BECAUSE FIVE PAGES COULD NEVER COLLAPSE AT ALL. A fill page's panes scroll and the
-   * row does not, so the sentinel had nothing to report — the card stayed forever on exactly the
-   * pages with the least room to spare. Query Centre was the only one with a way out, and only
-   * because a journey sets the mode.
-   */
-  it("⚠️ ENGAGEMENT LISTENS ON THE SCROLLER, NEVER ON THE DOCUMENT", () => {
-    /* ⚠️ THE ROW-BY-ROW WIRING IS GONE BECAUSE THE ROWS ARE. Engagement used to be attached to the
-       toolbar row and the scroll row individually, so that row 1 — the header — could be excluded:
-       clicking a header is not working on the page. Both are inside the scroller now, so one
-       handler on the scroller covers the content by construction.
-
-       ⚠️ WHAT MUST NOT CHANGE IS THE OTHER HALF: never a document-level listener. One would fire
-       for the sidebar, the breadcrumb and the top bar — none of which is working on this page — and
-       would then need a `closest()` test against markup the grid does not own to guess its way back
-       out. Asserted at source, because there is no jsdom here to dispatch into. */
+  it("⚠️ NOTHING LISTENS FOR ENGAGEMENT ANY MORE", () => {
+    /* The scroller and the dock carried `pointerdown` handlers that folded the masthead on the
+       first click in the content area. That is deleted with the inference it served: a click in the
+       content does nothing to the masthead now. The document-level half of the old rule is worth
+       keeping as an absence — one would fire for the sidebar, the breadcrumb and the top bar. */
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
     const live = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(live, "engagement went to the document — it would fire for the whole shell")
-      .not.toMatch(/document\.addEventListener\(\s*["'`]pointerdown/);
-    /* ⚠️ POINTERDOWN, NOT CLICK — a drag inside the content never produces a `click`, and it is the
-       least ambiguous act of working there is. */
-    expect(live, "the scroller stopped reporting engagement").toMatch(/className="wpg-scroll"[\s\S]{0,200}onPointerDown=\{engage\}/);
-    /* ⚠️ STILL GATED ON `fill`, and the shape changed with step 3's containment test — an early
-       `if (!fill) return` rather than a wrapped `if (fill)`. The claim is what matters: a scrolling
-       page already has its own signal, and a click that engaged one would strip it at `scrollTop 0`
-       where the sentinel says it must be resting. */
-    expect(live, "`engage` stopped being gated on `fill` — a scrolling page has its own signal and the two would fight")
-      .toMatch(/const engage[\s\S]{0,200}if \(!fill\) return;/);
+    expect(live, "a pointerdown listener came back").not.toContain("onPointerDown");
+    expect(live, "engagement went to the document").not.toMatch(/document\.addEventListener\(\s*["\'`]pointerdown/);
   });
 
   it("⚠️ THERE IS NO RESTORE AFFORDANCE — the band it belonged to is gone", () => {
@@ -688,8 +670,12 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      */
     const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const pointerRules = [...css.matchAll(/([^{}]+)\{[^}]*cursor:\s*pointer[^}]*\}/g)].map((m) => m[1].trim());
-    expect(pointerRules, `a pointer cursor appeared on something other than the restore control: ${pointerRules.join(" · ")}`)
-      .toEqual([".wpg-mini-show"]);
+    /* ⚠️ TWO CONTROLS NOW, AND BOTH ARE REAL (step 4): Hide on the masthead and the chevron that
+       reverses it on the mini bar. The rule this case protects is unchanged — a pointer cursor may
+       only appear on something that IS a control, never on a bare surface promising something
+       invisible, which is what the retired click-to-restore band was. */
+    expect(pointerRules.sort(), `a pointer cursor appeared on something that is not one of the two fold controls: ${pointerRules.join(" · ")}`)
+      .toEqual([".wpg-mast-hide", ".wpg-mini-show"]);
   });
 
   /**
@@ -700,7 +686,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    */
   it("⚠️ A PAGE VISIT RESETS IT — keyed on hidden → shown, not on unmount", () => {
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(src, "the visit reset is gone — a collapsed page would still be collapsed on every future arrival").toMatch(/setEngaged\(false\)/);
+    expect(src, "the visit reset is gone — a folded masthead would stay folded on every future arrival").toMatch(/setHidden\(false\)/);
     expect(src, "the reset is not observing the grid root — there is nothing else that reports hidden → shown")
       .toMatch(/rootRef/);
     /* ⚠️ THE EDGE, NOT EVERY OBSERVATION. Resetting on each callback would clear engagement on any
@@ -715,10 +701,21 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * The latch is what makes that true after `condensedByMode` has gone false again — and a journey
    * can be opened from the shell's own menus, so no click need ever have landed in the content.
    */
-  it("⚠️ ENTERING A JOURNEY LATCHES ENGAGEMENT, so leaving one does not restore the card", () => {
-    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(src, "the journey latch is gone — closing a journey would hand back the resting card")
-      .toMatch(/if \(fill && condensedByMode\) setEngaged\(true\);/);
+  it("⚠️ THE JOURNEY LATCH IS RETIRED — leaving a journey leaves what the writer chose", () => {
+    /**
+     * ⚠️ THIS CASE'S SUBJECT IS DELETED (masthead rethink, step 4). The latch set engagement when a
+     * journey opened, so that CLOSING one left the header collapsed: "you were working before it
+     * and you still are", which was sound while the app was inferring whether you were working.
+     *
+     * It is not inferring any more. The fold is an explicit Hide, so a journey opening or closing
+     * has no business touching it — leaving one leaves the masthead exactly as the writer left it,
+     * folded or not. Asserted as an absence, because a latch quietly re-added would take the
+     * decision back off them.
+     */
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(src, "a journey latch came back — the fold is the writer's, not a mode's").not.toMatch(/setHidden\(true\)[\s\S]{0,40}condensed/);
+    expect(src, "the grid reads a mode again").not.toContain("condensedByMode");
   });
 
   it("without the mode, an unscrolled page is at rest", () => {
@@ -726,35 +723,19 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(html, "the grid condenses by default — every page would open in the working state").not.toContain("wpg--working");
   });
 
-  it("⚠️ the row and the header read ONE value, so they cannot disagree", () => {
-    /* ⚠️ THE ROW'S HALF OF THIS IS GONE WITH THE ROW. `.wpg-plate--working` was how the CHROME ROW
-       took the same boolean as the header inside it, so the two could not disagree about the state.
-       There is no chrome row; the class the grid still carries is the root's, and it is what step 3
-       will drive the fill-page collapse from. The union below is the part that matters and it is
-       unchanged. */
-    const html = renderToStaticMarkup(<WorkspacePageGrid masthead={MAST} condensed>{null}</WorkspacePageGrid>);
-    expect(html, "the root stopped carrying the working state — nothing downstream could read it").toContain("wpg--working");
+  it("⚠️ THE ROOT CARRIES THE FOLD, AND NOTHING ELSE DERIVES IT", () => {
+    /* The union this case guarded is gone (step 4); what it was really protecting is not — one
+       place computes the state, and the stylesheet reads it off the root. */
+    const html = renderToStaticMarkup(
+      <WorkspacePageGrid masthead={MAST} fill>{null}</WorkspacePageGrid>,
+    );
+    expect(html, "a fill page arrives folded").not.toContain("wpg--hidden");
     expect(html, "a plate row came back").not.toContain("wpg-plate");
     const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    /* ⚠️ THREE INPUTS NOW, STILL ONE UNION AND STILL ONE BOOLEAN OUT (collapse-on-engagement).
-       `engaged` joined `stuck` and the mode; the header receives the same single value and still
-       never learns which of them fired. The count is asserted as well as the shape, because the
-       failure this guards against is a SECOND mechanism appearing beside it rather than a third
-       term joining it. */
-    expect(src, "the union is not computed in one place — two derivations of one state is how the row and the header come to disagree")
-      .toMatch(/const condensed = stuck \|\| condensedByMode \|\| engaged;/);
-    /* ⚠️ THE PROVIDER-COUNT ASSERTION IS RETIRED WITH THE PROVIDER (step 4). It guarded against a
-       SECOND context appearing beside the first, so the header could not have two answers to one
-       question. There is no context: the union lands on the root's class, and a class is singular
-       by construction — an element cannot carry two of it. The guard's real subject is the line
-       above, which is that the union is computed in exactly one place. */
-    /* ⚠️ ONE WRITER AGAIN, AND FEWER IS THE POINT. The observer era had two — one to set on the
-       sentinel moving, one to clear on resize. The derived version has a single `evaluate()` that
-       both the scroll listener and the ResizeObserver call, so there is exactly one place the
-       state is computed and no second path that can disagree with it. What the lock is for is
-       unchanged: no page-level code may write it, and nothing may synthesise a scroll position. */
-    expect((src.match(/setStuck\(/g) ?? []).length, "the state is written from more than one place — two derivations of one boolean is how they come to disagree").toBe(1);
-    expect(src, "the reclaim moved back into JS — it is a stylesheet calc now, shared by the height and the padding").not.toContain("reclaimedPx");
+    /* ⚠️ ONE WRITER, WHICH IS WHAT THE UNION CASE WAS FOR. No page-level code may set it and
+       nothing may synthesise a scroll position to reach it. */
+    expect((src.match(/setStuck\(/g) ?? []).length, "the stuck state is written from more than one place").toBe(1);
+    expect((src.match(/setHidden\(/g) ?? []).length, "the fold is written from more than the two controls that own it").toBe(3);
   });
 
   it("⚠️ THE CONTEXT IS DELETED, AND THE PROBLEM ITS `null` SOLVED CANNOT ARISE", () => {
@@ -845,9 +826,9 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        where the sentinel says it must be resting. */
     const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
     expect(live, "the collapse is not scoped to fill pages")
-      .toContain(".wpg--fill.wpg--working > .wpg-scroll > .wpg-mast");
+      .toContain(".wpg--fill.wpg--hidden > .wpg-scroll > .wpg-mast");
     /* it goes to NOTHING — no band, no strip, no residue to click */
-    const gone = block(".wpg--fill.wpg--working > .wpg-scroll > .wpg-mast").replace(/\s+/g, " ");
+    const gone = block(".wpg--fill.wpg--hidden > .wpg-scroll > .wpg-mast").replace(/\s+/g, " ");
     expect(gone, "the masthead collapses to a band rather than to nothing").toContain("max-height: 0");
     expect(gone, "the masthead is still painted when collapsed").toContain("opacity: 0");
     /* ⚠️ AND `max-height` NEEDS A DEFINITE REST VALUE or there is nothing to transition from. */
@@ -855,47 +836,37 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       .toMatch(/max-height:\s*\d+px/);
   });
 
-  it("⚠️ A GRID THAT ARRIVES WORKING ARRIVES COLLAPSED — never one frame of full masthead", () => {
+  it("⚠️ NO PAGE CAN MAKE A MASTHEAD ARRIVE FOLDED", () => {
     /**
-     * ⚠️ THIS IS THE CASE THAT CANNOT BE REACHED BY CLICKING, AND IT IS THE ONE THAT WOULD FAIL
-     * SILENTLY. A fill page whose `condensed` prop is true at FIRST PAINT — a dossier or a journey
-     * restored on mount — must render with the working class already on the root, so the stylesheet
-     * collapses the masthead from the very first frame. If the class arrived a frame later the page
-     * would draw a full masthead and then snatch it away, which reads as a glitch rather than as a
-     * page that knows you are working.
+     * ⚠️ THIS INVERTS ITS OWN SUBJECT (masthead rethink, step 4), AND THE INVERSION IS THE POINT.
      *
-     * ⚠️ NO LIVE PAGE REACHES IT TODAY — verified, not assumed: `AllManuscripts` initialises
-     * `openId` to `null` and never seeds it from storage (it WRITES the active-manuscript pointer
-     * for the comps and packages sub-pages, and never reads it back into its own view state), and
-     * Query Centre passes no `condensed` at all. This is here so that the day one of them restores
-     * a selection on mount, the behaviour is already decided.
+     * It asserted that a fill page whose `condensed` was true at FIRST PAINT arrived with the
+     * masthead already collapsed — never drawing one frame of it and snatching it away. That was
+     * the right claim while a page could put the header into a folded state on mount.
+     *
+     * No page can. `condensed` is deleted, the fold is `hidden`, and `hidden` starts false and is
+     * set by one button. So the stronger statement is available: the masthead is present on arrival
+     * on every page, always, and the frame-of-flicker case cannot arise at all.
      */
     const html = renderToStaticMarkup(
-      <WorkspacePageGrid masthead={<PageHeader variant="workspace" title="Manuscripts" mark="manuscripts" />} fill condensed>
+      <WorkspacePageGrid masthead={<PageHeader variant="workspace" title="Manuscripts" mark="manuscripts" />} fill>
         {null}
       </WorkspacePageGrid>,
     );
-    expect(html, "a grid that arrives working does not say so on its root — the stylesheet cannot collapse what it cannot see")
-      .toContain("wpg--working");
-    expect(html).toContain("wpg--fill");
-    /* the wrapper is present in both states — it is what animates, so it cannot be conditional */
-    expect(html, "the masthead wrapper is conditional — there would be nothing to transition").toContain("wpg-mast");
+    expect(html, "a page arrived folded — no page may set that state").not.toContain("wpg--hidden");
+    expect(html, "the masthead is not rendered on arrival").toContain("wsh-title");
+    expect(html, "the mini bar rendered beside a visible masthead").not.toContain("wpg-mini-name");
   });
 
-  it("⚠️ A CLICK ON THE MASTHEAD IS NOT ENGAGEMENT — and it is a containment test, not a stopPropagation", () => {
-    /* The old rule was structural: the header was row 1 and only rows 2-4 carried the handler. Now
-       the masthead is INSIDE the scroller, so its clicks bubble to the same handler — and a header
-       that collapsed when you clicked it would be a control that hides itself when used.
-       ⚠️ `stopPropagation` WOULD HAVE CHANGED WHAT EVERY OTHER LISTENER SEES in order to fix what
-       this one does. Asking whether the event began inside the masthead changes nothing. */
-    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8");
-    const live = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    expect(live, "engagement no longer excludes the masthead — it would collapse under the pointer")
-      .toMatch(/mastRef\.current\?\.contains\(e\.target as Node\)/);
-    expect(live, "the masthead wrapper lost its ref — the containment test has nothing to ask")
-      .toMatch(/className="wpg-mast" ref=\{mastRef\}/);
-    expect(live, "a stopPropagation appeared on the masthead — that changes what every other listener sees")
-      .not.toMatch(/wpg-mast[\s\S]{0,120}stopPropagation/);
+  it("⚠️ A CLICK ON THE MASTHEAD DOES NOTHING — because no click anywhere does", () => {
+    /* The containment test existed so a click on the header would not fold the header. With the
+       click trigger gone there is nothing to exclude it from: the only thing that folds the
+       masthead is its own Hide button. */
+    const src = readFileSync(resolve(__dirname, "WorkspacePageGrid.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(src, "a containment test came back — it would only be needed if clicks folded again").not.toContain("contains(e.target");
+    const setters = src.match(/setHidden\(true\)/g) ?? [];
+    expect(setters.length, "the fold is set from more than the Hide button").toBe(1);
   });
 
   it("⚠️ THE CENSUS — every page that renders a masthead renders it through the grid", () => {

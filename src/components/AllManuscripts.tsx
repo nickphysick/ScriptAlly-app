@@ -212,18 +212,16 @@ export const AllManuscripts: React.FC<AllManuscriptsProps> = ({ onNavigate }) =>
            Measured twice in this repo. `fill` makes the scroll row a flex column; the library grid
            opts back out with `flex: 0 0 auto` so a growing shelf still scrolls the page. */
         fill
-        /*
-         * ⚠️ THE DOSSIER IS A SECOND CONSUMER OF `condensedByMode`, not a second mechanism. Opening
-         * a manuscript turns the page into a workspace whose panes scroll internally, so the
-         * resting header card is spending height on chrome nobody is choosing from — and the height
-         * it releases goes to the pane body, which is already the flex child that grows.
+        /**
+         * ⚠️ `condensed={!!selected}` IS DELETED (masthead rethink, step 4). Opening a dossier used
+         * to fold the masthead: the page becomes a workspace whose panes scroll internally, so the
+         * header was spending height on chrome nobody was choosing from.
          *
-         * ⚠️ AND IT CANNOT BE SCROLL-DRIVEN HERE. This page's scroll row never moves in the dossier
-         * (the pane body scrolls instead), so a sentinel would never fire. `WorkspacePageGrid` takes
-         * the union `stuck || condensedByMode` and the header receives ONE boolean, so it never
-         * learns which half fired — exactly as Query Centre's journeys already work.
+         * The reasoning was sound and the MECHANISM was the problem — it inferred that the writer
+         * had started working, which is the same guess the click-anywhere vanish made. The fold is
+         * an explicit Hide now, on this page as on every other fill page, and opening a dossier
+         * leaves the masthead exactly as the writer left it.
          */
-        condensed={!!selected}
         masthead={
           <PageHeader
             variant="workspace"

@@ -139,13 +139,14 @@ describe("the workspace variant", () => {
        flash 88 → 56 → 88 on mount. The state itself is gone: no band, no label register, no
        cross-fade. Asserted against the RENDERED output in both grid states, so a `condensed` grid
        cannot bring it back through a path the markup forgot about. */
-    for (const condensed of [false, true]) {
-      const out = renderToStaticMarkup(
-        <WorkspacePageGrid masthead={<PageHeader variant="workspace" title="T" mark="todo" />} condensed={condensed}>{null}</WorkspacePageGrid>
-      );
-      expect(out).not.toContain("wsh--scrolled");
-      expect(out).not.toContain("wsh--swap");
-    }
+    /* ⚠️ THE `condensed` PROP IS RETIRED (masthead rethink, step 4), so there is no longer a mode to
+       toggle here. The claim is unchanged and is if anything simpler: the band's classes are
+       unreachable from any state the grid can be in. */
+    const out = renderToStaticMarkup(
+      <WorkspacePageGrid masthead={<PageHeader variant="workspace" title="T" mark="todo" />}>{null}</WorkspacePageGrid>
+    );
+    expect(out).not.toContain("wsh--scrolled");
+    expect(out).not.toContain("wsh--swap");
   });
 
   it("⚠️ NO DESCRIPTION → NO ELEMENT, AND NO SOLO STEP EITHER", () => {
