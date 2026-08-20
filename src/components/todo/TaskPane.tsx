@@ -28,18 +28,48 @@
  * crossed over: no styles, no layout, no markup.
  */
 import React from "react";
+import { QueryStatus } from "../../types";
+import { StatusDot } from "../StatusDot";
 import "./taskPane.css";
 
-/** One rung of the mockup's `tl` array: `['', 'Query sent', '3 Jun · via email']`. */
-export interface TaskPaneEvent {
+/**
+ * ⚠️ THE STORY HAS TWO KINDS OF ENTRY, AND THE TYPE SAYS SO (pane round, Phase 8).
+ *
+ * A STATUS event is drawn by the real `StatusDot` — the app's one drawing of a query status,
+ * never recreated locally. A MARK is everything else the log holds: a nudge is the writer touching
+ * the agent, not a status the query reached, and `NUDGE_SENT` has no `resultingStatus` precisely
+ * because of that. The terminus is a third thing again — it is where the rail stops, not something
+ * that happened.
+ *
+ * ⚠️ THE SPLIT IS HERE BECAUSE `StatusDot` WILL NOT REFUSE. Its prop is `QueryStatus | string`, so
+ * "Nudge sent" and "Your turn" would go straight through it and render whatever the fallback
+ * happens to be — a follow-up wearing the mark of a status it does not have. A permissive
+ * signature is not a licence to pass anything; the caller that knows the difference is the one
+ * that has to state it, and a discriminated union makes forgetting a compile error.
+ */
+interface RungBase {
   key: string;
-  /** the mockup's own four kinds — `''` outgoing · `in` incoming · `minor` quiet · `now` terminus */
-  kind: "" | "in" | "minor" | "now";
   /** `.tl-e .t` — what happened */
   t: string;
   /** `.tl-e .d` — when, and how, in the mono beneath */
   d: string;
 }
+/** A rung that IS a query status. Nothing but an exact enum string reaches `StatusDot`. */
+export interface TaskPaneStatusEvent extends RungBase {
+  kind: "status";
+  status: QueryStatus;
+}
+/** A rung that is NOT a status — today a nudge; a note kind arriving later needs no new branch. */
+export interface TaskPaneMarkEvent extends RungBase {
+  kind: "mark";
+  /** `.tl-e.in` — the agent caused it. Presentation only; it does not make the rung a status. */
+  incoming?: boolean;
+}
+/** The terminus: `['now', 'Your turn', 'Today']`. Part of the data, never appended by the pane. */
+export interface TaskPaneNowEvent extends RungBase {
+  kind: "now";
+}
+export type TaskPaneEvent = TaskPaneStatusEvent | TaskPaneMarkEvent | TaskPaneNowEvent;
 
 /** One cell of the mockup's `tiles` array: `['Send to', '<a>Jonathan Marsh</a>', 'j.marsh@…']`. */
 export interface TaskPaneTile {
@@ -108,6 +138,48 @@ export interface TaskPaneProps {
  */
 const entryCount = (tl: TaskPaneEvent[]): number => tl.filter((e) => e.kind !== "now").length;
 
+/**
+ * ⚠️ ONE RUNG, THREE CASES, CLOSED WITH `never`. The next entry kind cannot be added without
+ * saying how it is drawn — which is the guard the app-wide rule asks for and the reason the union
+ * exists rather than a `kind` string with a default branch.
+ */
+function rung(e: TaskPaneEvent): React.ReactNode {
+  switch (e.kind) {
+    case "status":
+      return (
+        <div className="tl-e" key={e.key}>
+          {/* the real dot, at the dense-timeline size `QueryTimeline` already uses; decorative
+              because the event's own title sits beside it and states the same thing in words */}
+          <span className="sd"><StatusDot status={e.status} overrideSize={12} decorative /></span>
+          <div className="t">{e.t}</div>
+          <div className="d">{e.d}</div>
+        </div>
+      );
+    case "mark":
+      return (
+        <div className={e.incoming ? "tl-e minor in" : "tl-e minor"} key={e.key}>
+          {/* ⚠️ EMPTY ON PURPOSE. `.sd` is a SLOT when a status dot goes in it and the GLYPH when
+              nothing does, so a non-status rung needs no class the contract does not have. */}
+          <span className="sd" />
+          <div className="t">{e.t}</div>
+          <div className="d">{e.d}</div>
+        </div>
+      );
+    case "now":
+      return (
+        <div className="tl-e now" key={e.key}>
+          <span className="sd" />
+          <div className="t">{e.t}</div>
+          <div className="d">{e.d}</div>
+        </div>
+      );
+    default: {
+      const unhandled: never = e;
+      return unhandled;
+    }
+  }
+}
+
 export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }) => {
   return (
     <div className="tpn">
@@ -162,13 +234,18 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
           {d.tl && (
             <div className="storycol">
               <div className="story">
-                {d.tl.map((e) => (
-                  <div className={e.kind ? `tl-e ${e.kind}` : "tl-e"} key={e.key}>
-                    <span className="dot" />
-                    <div className="t">{e.t}</div>
-                    <div className="d">{e.d}</div>
-                  </div>
-                ))}
+                {/* ⚠️ THE HEAD AND THE RAIL WERE IN THE STYLESHEET AND NOT IN THE MARKUP. `.tl-head`,
+                    `.tl-in` and `.tl` had rules — including the rail's own `::before` hairline —
+                    and nothing rendered them, so the story was a bare stack of rungs beside a
+                    stylesheet describing a card. A rule that reaches no element is the trap this
+                    repo has a standing note about; here it had reached none for a whole phase. */}
+                <div className="tl-head">
+                  <span className="t">The story so far</span>
+                  <span className="c">{entryCount(d.tl)} {entryCount(d.tl) === 1 ? "entry" : "entries"}</span>
+                </div>
+                <div className="tl-in">
+                  <div className="tl">{d.tl.map(rung)}</div>
+                </div>
                 {d.onOpenQuery && (
                   <div className="tl-foot">
                     <a href="#" onClick={(ev) => { ev.preventDefault(); d.onOpenQuery?.(); }}>

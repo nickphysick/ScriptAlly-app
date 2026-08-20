@@ -195,13 +195,22 @@ test("pane round", async ({ page }) => {
     const vis = ${VIS};
     const story = [...document.querySelectorAll(".tpn .tl, .tpn .story")].find(vis);
     if (!story) return null;
-    const marks = [...story.querySelectorAll(".sa-statusdot, [data-statusdot]")].filter(vis).length;
+    /* ⚠️ THE OLD SELECTOR COULD NEVER MATCH. It hunted \`.sa-statusdot, [data-statusdot]\` —
+       neither of which \`StatusDot\` renders: its root is a bare <span> taking whatever
+       \`className\` the caller passes, and its only own class (\`sa-statusdot__pulse\`) appears on
+       four statuses out of ten. So this reported zero whatever the pane did, which is the
+       vacuous-probe shape this run keeps closing. What the component DOES render is an inline
+       <svg> glyph, and what a redrawn dot renders is a bordered span with no child at all. */
+    const slots = [...story.querySelectorAll(".tl-e .sd")].filter(vis);
+    const marks = slots.filter((s) => s.querySelector("svg")).length;
     const plain = [...story.querySelectorAll("span.dot")].filter(vis).length;
-    return { marks, plain };
+    /* and the mark rungs are still drawn — a story of statuses alone would satisfy the above
+       while having quietly dropped the nudge */
+    return { marks, plain, slots: slots.length };
   })()`) as any;
   add("P8.1 · the story renders the real StatusDot, not redrawn spans",
-      !!dots && dots.marks > 0 && dots.plain === 0,
-      dots ? `statusDots=${dots.marks} plainSpans=${dots.plain}` : "no story column on this journey");
+      !!dots && dots.marks > 0 && dots.plain === 0 && dots.slots >= dots.marks,
+      dots ? `svgDots=${dots.marks}/${dots.slots} rungs · redrawnSpans=${dots.plain}` : "no story column on this journey");
 
   const red = out.filter((r) => !r.ok);
   const lines = [`── pane round · ${out.length} assertions · ${red.length} RED · ${out.length - red.length} green`];

@@ -1739,6 +1739,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     })(),
                     events: dockTimeline(paneCard).map((e) => ({
                       key: e.key, label: e.label, when: e.when, via: e.via,
+                      /* ⚠️ THE LOG'S OWN STATUS, CARRIED WHOLE (Phase 8). `dockTimeline` already
+                         sets it from `resultingStatus ?? type` — the same pair the derivation
+                         reads — and a nudge has none. The pane decides what that means; this
+                         hands it over without a second opinion. */
+                      status: e.status,
                       /* the mockup's `in` rung — an event the AGENT caused */
                       incoming: /requested|offer|rejected|response|reply/i.test(e.label),
                     })),

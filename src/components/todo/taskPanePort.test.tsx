@@ -23,7 +23,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import React from "react";
+import { QueryStatus } from "../../types";
 import { TaskPane, TaskPaneJourney } from "./TaskPane";
+import { StatusDot } from "../StatusDot";
 import { TaskPaneBody } from "./TaskPaneBody";
 
 const REF = readFileSync(join(process.cwd(), "design-refs/todo-pane-contract.html"), "utf8");
@@ -60,10 +62,13 @@ const SEND: TaskPaneJourney = {
   will: "Full sent · today · via email",
   quiet: { label: "Copy Jonathan's email", onPress: () => {} },
   prim: "Log the send",
+  /* ⚠️ THE FIXTURE STATES BOTH KINDS (Phase 8): two real statuses, one non-status mark, and the
+     terminus. A fixture of statuses alone would leave the mark branch unrendered by any test. */
   tl: [
-    { key: "1", kind: "", t: "Query sent", d: "3 Jun · via email" },
-    { key: "2", kind: "in", t: "Partial requested", d: "1 Jul" },
-    { key: "3", kind: "now", t: "Your turn", d: "Today" },
+    { key: "1", kind: "status", status: QueryStatus.QUERIED, t: "Query sent", d: "3 Jun · via email" },
+    { key: "2", kind: "status", status: QueryStatus.PARTIAL_REQUESTED, t: "Partial requested", d: "1 Jul" },
+    { key: "3", kind: "mark", t: "Nudge sent", d: "23 Jul · via email" },
+    { key: "4", kind: "now", t: "Your turn", d: "Today" },
   ],
   onOpenQuery: () => {},
 };
@@ -92,7 +97,14 @@ describe("1 · the pane's class names are the mockup's", () => {
        carried and the mockup has no control for it — it navigates by clicking a list row. Those
        classes carry a `tpn-` prefix precisely so this assertion can tell them apart from a name
        that was invented while porting. */
-    const invented = [...rendered].filter((c) => !mockClasses.has(c) && !/^tpn(-|$)/.test(c));
+    /* ⚠️ AND A SHARED COMPONENT BRINGS ITS OWN VOCABULARY, WHICH IS THE POINT (Phase 8). The story
+       renders the real `StatusDot`, whose internals are `sa-`-namespaced. Requiring those to be
+       contract words would mean the pane could only satisfy this case by REDRAWING a status dot in
+       local CSS — the one thing the app-wide rule forbids — so the case would be pushing against
+       the law it sits beside. The exemption is the NAMESPACE, not a list of strings, so it cannot
+       go stale as that component changes. */
+    const invented = [...rendered]
+      .filter((c) => !mockClasses.has(c) && !/^tpn(-|$)/.test(c) && !/^sa-/.test(c));
     expect(invented, `classes not in the mockup: ${invented.join(" ")}`).toHaveLength(0);
   });
 
@@ -169,6 +181,33 @@ describe("2 · every element of the mockup's Send journey exists in the rendered
       <TaskPane journey={{ ...SEND, tiles: null, tl: null }} onPrimary={() => {}} />);
     expect(noTl, "the story column survived a journey with no story").not.toContain("storycol");
     expect(noTl, "an empty tile row rendered").not.toContain('class="tiles"');
+  });
+
+  /**
+   * ⚠️ THE STORY'S TWO KINDS OF ENTRY, ASSERTED AGAINST THE SHARED COMPONENT ITSELF (Phase 8).
+   *
+   * Not "a dot is present" — the pane's status rung must contain BYTE-FOR-BYTE what `StatusDot`
+   * renders for that status. That is the only form of this claim that cannot be satisfied by a
+   * local recreation, and a recreation is exactly what was there: `.tl-e .dot` drew a white disc
+   * with a burgundy ring in CSS, which is a status dot redrawn by hand.
+   *
+   * ⚠️ AND THE NON-STATUS RUNG MUST NOT CONTAIN ONE. `StatusDot` takes `QueryStatus | string` and
+   * will render a neutral dot for "Nudge sent" rather than refusing — so a nudge could wear the
+   * mark of a status with nothing going red. Both directions, in one case.
+   */
+  it("a status rung IS the shared StatusDot; a nudge rung has no dot at all", () => {
+    const html = renderToStaticMarkup(<TaskPane journey={SEND} onPrimary={() => {}} />);
+    const real = renderToStaticMarkup(<StatusDot status={QueryStatus.QUERIED} overrideSize={12} decorative />);
+    expect(real, "the fixture's own dot rendered nothing to compare against").toContain("<svg");
+    expect(html, "the status rung is not the shared component's output").toContain(real);
+
+    /* the nudge rung: an empty slot, and no second dot beyond the two status rungs */
+    expect(html).toContain('<span class="sd"></span>');
+    const dots = html.split("<svg").length - 1;
+    expect(dots, "a non-status rung was given a status dot").toBe(2);
+
+    /* and the retired hand-drawn span is gone from the markup entirely */
+    expect(html, "the redrawn dot is back").not.toMatch(/["\s`]dot["\s`]/);
   });
 
   it("the paper is the mockup's three, set on `.v`", () => {

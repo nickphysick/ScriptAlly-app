@@ -20,6 +20,7 @@
  * rest of the page has already settled.
  */
 import React from "react";
+import { QueryStatus } from "../types";
 import { BoardCard } from "./todoBoard";
 import { GROUP_CLASS, liveFamily } from "./todoFamily";
 import { anchorNoun, bandDeed, bandSubline, bandPreline, panePresence } from "./todoHandoff";
@@ -34,8 +35,14 @@ export interface JourneyInputs {
   facts: { k: string; v: string }[];
   /** what already went to this agent, formatted through the one formatter */
   sentPreviously: string | null;
-  /** the activity-log timeline, in order */
-  events: { key: string; label: string; when: string; via?: string; incoming?: boolean; minor?: boolean }[];
+  /**
+   * The activity-log timeline, oldest first.
+   *
+   * ⚠️ `status` IS THE LOG'S OWN `resultingStatus ?? type`, PASSED THROUGH UNJUDGED. It is a
+   * QueryStatus on a status change and an activity type otherwise; deciding which is `toEntry`'s
+   * job, above, and doing it at the call site would put that test in two places.
+   */
+  events: { key: string; label: string; when: string; via?: string; status?: string; incoming?: boolean; minor?: boolean }[];
   /** the verb the list row states, so the pane cannot name the deed differently */
   primaryLabel: string;
   /** what pressing the primary will write */
@@ -63,10 +70,27 @@ function deedNode(c: BoardCard): React.ReactNode {
   return <>{m[1]}<em>{m[2]}</em></>;
 }
 
-/** the mockup's `tl` kinds, from what the event already knows */
-function eventKind(e: JourneyInputs["events"][number]): TaskPaneEvent["kind"] {
-  if (e.minor) return "minor";
-  return e.incoming ? "in" : "";
+/**
+ * ⚠️ THE BOUNDARY WHERE A STRING BECOMES A STATUS (pane round, Phase 8). The log's rung carries
+ * `resultingStatus ?? type`, which is a status on a status change and an ACTIVITY TYPE otherwise —
+ * `NUDGE_SENT` among them. Nothing downstream can tell those apart by looking, so the telling
+ * happens once, here, against the enum itself.
+ *
+ * ⚠️ DERIVED FROM `QueryStatus`, NEVER A HAND-WRITTEN LIST. A tenth status added to the enum is
+ * admitted the moment it exists; a list here would have quietly demoted it to a mark and drawn a
+ * hollow circle where a real dot belonged.
+ */
+const QUERY_STATUSES = new Set<string>(Object.values(QueryStatus));
+const asQueryStatus = (s: string | undefined): QueryStatus | null =>
+  s && QUERY_STATUSES.has(s) ? (s as QueryStatus) : null;
+
+/** one log rung → one typed entry; the status test decides which kind it is */
+function toEntry(e: JourneyInputs["events"][number]): TaskPaneEvent {
+  const status = asQueryStatus(e.status);
+  const base = { key: e.key, t: e.label, d: e.via ? `${e.when} · ${e.via}` : e.when };
+  return status
+    ? { ...base, kind: "status", status }
+    : { ...base, kind: "mark", ...(e.incoming ? { incoming: true } : {}) };
 }
 
 export function buildJourney(input: JourneyInputs): TaskPaneJourney {
@@ -125,12 +149,7 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
    */
   const tl: TaskPaneEvent[] | null = presence.timeline
     ? [
-        ...input.events.map((e) => ({
-          key: e.key,
-          kind: eventKind(e),
-          t: e.label,
-          d: e.via ? `${e.when} · ${e.via}` : e.when,
-        })),
+        ...input.events.map(toEntry),
         { key: "__now", kind: "now" as const, t: "Your turn", d: "Today" },
       ]
     : null;
