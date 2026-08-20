@@ -95,6 +95,8 @@ import { TaskPane } from "./TaskPane";
 import { TaskPaneBody, SendBodyValues, EXPECT_WEEKS } from "./TaskPaneBody";
 import { buildJourney } from "../../lib/taskPaneJourney";
 import { journeyKind, firstMissing, isBulkCard, type GateAnswers, type ReqField } from "../../lib/paneGate";
+import { BulkFillTable } from "./BulkFillTable";
+import { rowHasAnswer } from "../../lib/materialsSweep";
 import { liveFamily } from "../../lib/todoFamily";
 import { DockTimelineEvent } from "./timelineEvent";
 import { assembleBoardColumns, isSweepCard, DropPlan, dropPlan, TodoColumnId, liveBoardCards } from "../../lib/todoColumns";
@@ -444,6 +446,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * gate should say about a table nobody has filled in.
    */
   const [bulkTouched, setBulkTouched] = useState(0);
+  /**
+   * ⚠️ THE COHORT'S ROWS, HELD BY THE PAGE. Seeded from `recordSweepFor` — the SAME derivation the
+   * card was raised by, never a second scan — and reset with the card, exactly as the send form's
+   * answers are: a half-filled table carried onto another cohort is answers about other queries.
+   */
+  const [bulkRows, setBulkRows] = useState<RecordSweepRow[]>([]);
   const filterAnchor = React.useRef<HTMLElement | null>(null);
   const sortAnchor = React.useRef<HTMLElement | null>(null);
   // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
@@ -983,10 +991,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * is the only thing that should clear a half-filled form, because a form carried onto another
    * task is answers about the wrong query.
    */
-  const seeds = React.useRef({ rows: seedRows });
-  seeds.current = { rows: seedRows };
+  const seeds = React.useRef({ rows: seedRows, sweep: recordSweepFor });
+  seeds.current = { rows: seedRows, sweep: recordSweepFor };
   React.useEffect(() => {
     setPaneBody({ rows: seeds.current.rows(paneCard ?? null), ...BLANK });
+    const cohort = paneCard ? seeds.current.sweep(paneCard) : undefined;
+    setBulkRows(cohort ?? []);
+    setBulkTouched(0);
   }, [paneCard?.key]);
 
   /**
@@ -1100,6 +1111,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         /* ⚠️ A NOTE STATES ITS RECORD FROM THE START, because it has no questions to answer: the
            tick IS the act and it carries today's date. The em dash is for a form whose questions
            are unanswered, and a note has none to answer. */
+        /* the cohort states its own count, from the same source the primary and the band read */
+        if (isBulkCard(paneCard)) return `Materials on ${bulkTouched} ${bulkTouched === 1 ? "query" : "queries"}`;
         if (paneCard.userTaskId) return "Ticked off · today";
         /* nothing chosen, nothing stated — the em dash IS the honest sentence at rest.
            The "Will record:" prefix belongs to the strip's own markup; this supplies the RECORD. */
@@ -1908,6 +1921,15 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     ...(paneCard.userTaskId ? { noteAdded: noteAgo(paneCard) } : {}),
                     will: paneWill,
                     body: (
+                      isBulkCard(paneCard) ? (
+                        <BulkFillTable rows={bulkRows} onChange={(next) => {
+                          setBulkRows(next);
+                          /* ⚠️ ONE COUNT, FROM THE ARRAY THE TABLE RENDERS — the band, the strip and
+                             the primary all read this, so the three cannot disagree about one
+                             table. `rowHasAnswer` is the sweep's own test, not a second one. */
+                          setBulkTouched(next.filter(rowHasAnswer).length);
+                        }} />
+                      ) : (
                       <TaskPaneBody
                         /* ⚠️ THE QUESTION IS ASKED ONLY WHERE A PARCEL IS GOING — `sendSpecFor` is
                            what already decides partial-versus-full, so this cannot come to disagree
@@ -1922,7 +1944,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                         value={paneBody}
                         onChange={setPaneBody}
                       />
-                    ),
+                    )),
                     /* the band's buttons are the mockup's `btns` array — carried behaviour, its markup */
                     /* ⚠️ THE BAND CARRIES NO VERBS (frame2 Phase 3). Snooze and Dismiss both live in the
                        command bar and act on the open task; the band's copies put two of each on one screen,

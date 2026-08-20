@@ -109,8 +109,14 @@ export function copyFirstDown(rows: readonly RecordSweepRow[]): RecordSweepRow[]
  * it and saves without reading has recorded a guess as a fact, and nothing downstream can tell the
  * two apart afterwards.
  */
+/**
+ * ⚠️ THE CONTRACT'S OWN SENTENCE, VERBATIM (finishing round, Phase 6). It read "…what each agency
+ * asks for … Check each row before recording" — true, and two sentences where the contract has one.
+ * The second half was an instruction; the line's job is to say what the fill IS, so that the writer
+ * knows the ticks it produced are a starting point rather than a record.
+ */
 export const SWEEP_CAVEAT =
-  "Requirements are what each agency asks for — not proof of what you sent. Check each row before recording.";
+  "Requirements are what the agent asks for — not proof of what you sent.";
 
 /** What one row will write, in words — the same reading the single form's strip states. */
 export const sweepRowSummary = (r: RecordSweepRow): string | null => willRecordText(r.rows, "and");

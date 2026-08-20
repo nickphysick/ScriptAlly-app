@@ -113,8 +113,10 @@ export interface TaskPaneJourney {
   prim: string;
   /** disables `.b-primary` — the mockup styles the state, so the pane can offer it */
   primDisabled?: boolean;
-  /** the timeline card — `null` hides it, and the workrow drops to one column */
+  /** the timeline card — `null` hides it, and the mid drops to one column */
   tl: TaskPaneEvent[] | null;
+  /** a cohort's numbers — present only on the bulk journey; see `taskPaneJourney` */
+  bulk?: { count: number; touched: number };
   /** `.tl-foot a` */
   onOpenQuery?: () => void;
   /** ⚠️ THE ACTION BAR'S VERBS, on the pane because that is where the open task is (Phase 1/2).
@@ -280,7 +282,13 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
               onClick={(e) => d.onSnooze?.(e.currentTarget)}>Snooze</button>
           )}
           {d.onDismiss && (
-            <button type="button" className="ab quiet" onClick={d.onDismiss}>Dismiss</button>
+            /* ⚠️ "Dismiss all" ON A COHORT, and the title says what "all" means. It dismisses the
+               COHORT TASK, not n queries — the queries are untouched, which is the distinction the
+               confirm dialog spends a paragraph on and this button has one word for. */
+            <button type="button" className="ab quiet" onClick={d.onDismiss}
+              title={d.bulk ? "Dismisses the whole cohort task — the queries are unchanged" : undefined}>
+              {d.bulk ? "Dismiss all" : "Dismiss"}
+            </button>
           )}
           <button type="button" className="ab go" disabled={d.primDisabled} onClick={onPrimary}>
             {d.prim}

@@ -115,8 +115,14 @@ describe("no material-naming surface hard-codes the token as display copy", () =
   /* ⚠️ AND THE DELETION IS ASSERTED, so the file cannot quietly come back with its own copy of the
      material names. The claim the retired case made — display moved, storage did not — is now
      structural: there is no second surface holding the token. */
-  it("⚠️ the retired PaneJourney is gone, not merely unmounted", () => {
+  /* ⚠️ BOTH HALVES OF THE DEAD PAIR ARE GONE, AND THE LOCK KEEPS THEM GONE. `PaneJourney` went
+     with the send form's rebuild; `PaneRecordSweep` went with the bulk table that was lifted OUT
+     of it — deleting the source before lifting from it would have been the wrong order, which is
+     why it survived one round longer and why that survival was recorded rather than silent. */
+  it("⚠️ the retired pane pair is gone, not merely unmounted", () => {
     expect(existsSync(join(root, "components/todo/PaneJourney.tsx"))).toBe(false);
+    expect(existsSync(join(root, "components/todo/PaneRecordSweep.tsx"))).toBe(false);
+    expect(existsSync(join(root, "components/todo/paneRecordSweep.css"))).toBe(false);
   });
 });
 

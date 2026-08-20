@@ -13,6 +13,7 @@
 import { describe, it, expect } from "vitest";
 import { firstMissing, gateOpen, requiredFor, journeyKind, isBulkCard, type JourneyKind, type GateAnswers } from "./paneGate";
 import { BoardCard } from "./todoBoard";
+import { recordSweepRow, fillFromAsks, copyFirstDown, type RecordSweepRow } from "./materialsSweep";
 
 const NOTHING: GateAnswers = { unit: false, when: false, expect: false, remind: false, rows: false };
 const ALL: GateAnswers = { unit: true, when: true, expect: true, remind: true, rows: true };
@@ -84,5 +85,37 @@ describe("⚠️ bulk is its own journey, not a flag on fix", () => {
   it("a cohort needs one touched row and nothing else", () => {
     expect(gateOpen("bulk", NOTHING)).toBe(false);
     expect(gateOpen("bulk", { ...NOTHING, rows: true })).toBe(true);
+  });
+});
+
+/**
+ * ⚠️ THE TWO FILLS DO DIFFERENT THINGS, and the difference is the whole reason there are two.
+ * One reads each agency's own requirements — so rows differ where the agencies differ; the other
+ * says "the same as the first". A single template applied to every row would state that every send
+ * carried the same parcel, which is the claim neither button is allowed to make.
+ */
+describe("⚠️ the bulk table's two fills", () => {
+  const row = (queryId: string, asks: string[], sentMs: number): RecordSweepRow =>
+    recordSweepRow({ queryId, agentName: `A-${queryId}`, dateSent: new Date(sentMs).toISOString() } as never,
+      { sentOn: "1 Jan 2026", agentMaterials: asks });
+
+  it("filling from requirements gives DIFFERENT rows where the agencies differ", () => {
+    const before = [row("a", ["Query Letter"], 1), row("b", ["Query Letter", "Synopsis"], 2)];
+    const after = fillFromAsks(before);
+    const on = (r: RecordSweepRow) => r.rows.filter((x) => x.on).map((x) => x.key).sort().join(",");
+    expect(on(after[0])).not.toBe(on(after[1]));
+    /* and a row whose agent records nothing is LEFT UNTOUCHED — an empty requirement is not a
+       statement that nothing was sent */
+    const none = fillFromAsks([row("c", [], 3)]);
+    expect(none[0].rows.some((x) => x.on)).toBe(false);
+  });
+
+  it("copy-down propagates the FIRST row, and only it", () => {
+    const before = [row("a", ["Query Letter", "Synopsis"], 1), row("b", [], 2), row("c", [], 3)];
+    const filled = fillFromAsks([before[0]]).concat(before.slice(1));
+    const after = copyFirstDown(filled);
+    const on = (r: RecordSweepRow) => r.rows.filter((x) => x.on).map((x) => x.key).sort().join(",");
+    expect(on(after[1])).toBe(on(after[0]));
+    expect(on(after[2])).toBe(on(after[0]));
   });
 });

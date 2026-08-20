@@ -172,7 +172,18 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
        `cardFootHint`, which is the sentence about ticking it off — the SAME sentence the form's
        meta line carries, so the pane said it twice, three inches apart. The band now states the
        provenance, which is the thing a sub-line is for; the form keeps the sentence. */
-    sub: isNote ? (input.noteAdded ? `Your own note · added ${input.noteAdded}` : "Your own note") : bandSubline(c, bandPreline(c)),
+    /* ⚠️ A COHORT'S SUB-LINE STATES THE COHORT (finishing round, Phase 6). `bandSubline` composes
+       a preline with an AGENT, and a bulk card has none — so it fell through to the preline alone
+       and the band read "A gap on the record for", a sentence stopped in the middle of itself. The
+       count is the subject here, and it comes from the same `bulkCount` the row states.
+       ⚠️ AND THE IMPORT DATE IS ABSENT BECAUSE NOTHING STORES ONE — see the report. The earliest
+       `dateSent` in the cohort would be a FIRST-QUERY date wearing an import label, which is the
+       fault the Manuscripts tile already paid for once. The clause is omitted, not invented. */
+    sub: isNote
+      ? (input.noteAdded ? `Your own note · added ${input.noteAdded}` : "Your own note")
+      : input.bulk
+        ? `${input.bulk.count} imported ${input.bulk.count === 1 ? "query is" : "queries are"} missing their materials`
+        : bandSubline(c, bandPreline(c)),
     btns: input.btns,
     tiles,
     /* ⚠️ THE PANE'S WORDS COME FROM THE ONE TABLE, not from the row's verb. `primaryLabel` is what
@@ -194,6 +205,7 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
        point at the first missing field, and a table cannot, because every row is equally the one
        meant. A button reading "Log 0 queries" says what it would do; a disabled button with a
        generic label would say only that something is wrong. */
+    bulk: input.bulk,
     prim: input.bulk
       ? `Log ${input.bulk.touched} ${input.bulk.touched === 1 ? "query" : "queries"}`
       : paneCopy(c).primary,

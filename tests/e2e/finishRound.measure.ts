@@ -317,7 +317,9 @@ test("finishing round", async ({ page }) => {
         heads,
         sent,
         showAll: all(".tpn .bulk-showall").length,
-        fills: all(".tpn .bulk-fill button").map((b) => (b.textContent || "").trim()),
+        /* the contract's own class is .fillrow with .fb buttons — this hunted a name I invented
+           while writing the assertion before the markup existed, and reported an empty array */
+        fills: all(".tpn .fillrow .fb").map((b) => (b.textContent || "").trim()),
         caveat: (all(".tpn .formcol")[0] || {}).textContent || "",
         bandSub: ((all(".tpn .b-sub")[0] || {}).textContent || "").trim(),
         dismissAll: all(".tpn .actbar button").map((b) => (b.textContent || "").trim()),
@@ -340,10 +342,14 @@ test("finishing round", async ({ page }) => {
         && table.fills.some((f: string) => /Copy the first row down/.test(f))
         && /Requirements are what the agent asks for — not proof of what you sent\./.test(table.caveat),
       table ? JSON.stringify(table.fills) : "-");
-  add("P6.5 · the band states the full sub-line, and the truncated one is unreproducible",
-      !!table && /imported queries are missing their materials/.test(table.bandSub)
-        && /from your import on/.test(table.bandSub)
-        && !/^A gap on the record for/.test(table.bandSub),
+  /* ⚠️ THE IMPORT CLAUSE IS NOT ASSERTED, AND THE REASON IS A FALSE PREMISE IN THE BRIEF. Nothing
+     in the model stores when an import happened; the only date available is the earliest `dateSent`
+     in the cohort, which is a FIRST-QUERY date wearing an import label — the exact fault the
+     Manuscripts tile paid for. So the clause is omitted from the page and from this assertion,
+     rather than the assertion being satisfied by a plausible wrong number. */
+  add("P6.5 · the band states the cohort, and the truncated sub-line is unreproducible",
+      !!table && /\d+ imported quer(y is|ies are) missing their materials/.test(table.bandSub)
+        && !/A gap on the record for/.test(table.bandSub),
       table ? `sub="${table.bandSub}"` : "-");
   add("P6.6 · the bar offers Dismiss all beside the counted primary",
       !!table && table.dismissAll.some((b: string) => /Dismiss all/.test(b)),
