@@ -123,17 +123,22 @@ describe("1 · the pane's class names are the mockup's", () => {
     for (const c of ["pane", "band", "deed", "b-sub", "mid", "formcol", "actbar", "willrec"]) {
       expect(rendered.has(c), `${c} is missing from the rendered pane`).toBe(true);
     }
-    /* ⚠️ THREE ZONES IN ORDER, INSIDE ONE CARD — band, then middle, then action bar. The
-       materials contract's three framed cards are retired with their wrappers; a `.fc` or `.rim`
-       surviving here would mean the old chassis came back beside the new one. */
+    /* ⚠️ THREE ZONES IN ORDER, AND NOW THREE CARDS — REVERSED DELIBERATELY (finishing round,
+       Phase 1). This forbade `.fc`, on the previous round's reading that the pane contract had
+       retired the Form 11 card-in-card. The UPDATED contract (md5 52473130) draws the opposite: a
+       transparent pane column holding `.fc > .rim` cards for the header, the form and the story.
+       So the prohibition is deleted rather than argued with, and what it was protecting — the zone
+       ORDER — is asserted as it always was, alongside the card count it now expects. */
     const band = HTML.indexOf('class="band"');
     const mid = HTML.indexOf('class="mid"');
     const bar = HTML.indexOf('class="actbar"');
     expect(band).toBeGreaterThan(-1);
     expect(mid).toBeGreaterThan(band);
     expect(bar).toBeGreaterThan(mid);
-    expect(HTML, "the retired card-in-card is back").not.toContain('class="fc"');
-    expect(HTML, "the retired rim is back").not.toContain('class="rim"');
+    /* a query journey: header + form + story. The rim is what clips the band's tint, so its
+       presence is the structural half of the claim the measurement makes about the corners. */
+    expect((HTML.match(/class="rim"/g) || []).length, "a query journey draws three rim cards").toBe(3);
+    expect(HTML, "the header card lost its fixed-zone class").toContain('class="fc hdr"');
   });
 
   it("the mockup's own scoping is the only edit to its stylesheet", () => {

@@ -188,11 +188,21 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
           states, spending ~40px to hold the pane's top edge below the list's. The arrows survive,
           in the band, where the contract puts them; the count does not survive at all, because the
           one that mattered is beside the rows it counts. */}
-      {/* ⚠️ ONE CARD, THREE ZONES (pane round, Phase 2) — the pane contract's chassis, which
-          supersedes the materials contract's card-in-card. That drew `.v` → `.fc` → `.rim` around
-          the band, then a `.workrow` of two more framed cards; this draws a fixed band, a middle
-          that scrolls, and an action bar pinned to the foot. The rims went with it. */}
+      {/* ⚠️ THREE CARDS ON THE GROUND, NOT ONE CARD WITH THREE ZONES (finishing round, Phase 1).
+          The previous round read the contract's chassis as one white card and dropped the rims;
+          the contract draws the Form 11 grammar INSIDE the fixed-zone architecture — a transparent
+          pane column with a 12px gap, and three `.fc > .rim` cards standing on the ground:
+
+            header  fixed   band + tiles, tint clipped BY the rim
+            mid     scrolls form card · story card, each its own `.fc > .rim`
+            actbar  fixed   its own white strip
+
+          ⚠️ THE TINT IS CLIPPED BY THE RIM, NEVER LAID OVER IT. `.rim` carries `overflow:hidden`,
+          so the band's gradient meets the rim's 9px radius on all four corners. An overlay approach
+          — a tinted absolute layer inside a square box — reads correct at the top and wrong at the
+          corners, and there is no value you can nudge to fix it. */}
       <div className={`pane ${d.cls}`}>
+        <div className="fc hdr"><div className="rim">
         <div className="band">
           <div style={{ minWidth: 0 }}>
             <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
@@ -221,18 +231,19 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
             ))}
           </div>
         )}
+        </div></div>
 
         {/* ⚠️ THE ONLY SCROLLING ELEMENT IN THE PANE. `flex: 1 1 auto; min-height: 0; overflow-y:
             auto` — the band above and the bar below are `flex: 0 0 auto`, so a long form scrolls
             between them and never takes the primary off screen. */}
         <div className="mid">
-          <div className="formcol">
+          <div className="formcol"><div className="fc"><div className="rim"><div className="formpad">
             {d.actTitle && <div className="f-h">{d.actTitle}</div>}
             {d.actSub && <div className="f-sub">{d.actSub}</div>}
             {d.body}
-          </div>
+          </div></div></div></div>
           {d.tl && (
-            <div className="storycol">
+            <div className="storycol"><div className="fc"><div className="rim">
               <div className="story">
                 {/* ⚠️ THE HEAD AND THE RAIL WERE IN THE STYLESHEET AND NOT IN THE MARKUP. `.tl-head`,
                     `.tl-in` and `.tl` had rules — including the rail's own `::before` hairline —
@@ -254,7 +265,7 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                   </div>
                 )}
               </div>
-            </div>
+            </div></div></div>
           )}
         </div>
 

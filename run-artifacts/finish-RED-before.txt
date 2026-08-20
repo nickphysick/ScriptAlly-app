@@ -1,0 +1,55 @@
+── finishing round · 27 assertions · 22 RED · 5 green
+  RED    P1.1 · a query journey draws three rim cards; bulk and note draw two
+           send=0 close=0 note=0 bulk=0
+  RED    P1.2 · the pane column is transparent on the ground, gap 12
+           bg=rgb(255, 255, 255) gap=normal
+  RED    P1.3 · the band tint reaches all four corners inside the rim, which clips
+           onScreen=true hits=[1,1,1,1] rimOverflow=
+  green  P1.4 · the mid is the only scrolling box in the pane
+           ["mid"]
+  green  P2.1 · the mid aligns its cards to the start, so they hug rather than stretch
+           align-items=flex-start
+  RED    P2.2 · no card in the pane declares a minimum height
+           send=[] note=[]
+  RED    P2.3 · a note's form card is content-driven; Send's is taller
+           note 0/451 = 0.00 · send 0
+  green  P2.4 · the action bar stays at the pane's foot on the shortest journey
+           bar=888 pane=889
+  RED    P3.1 · no option is pre-selected on first render, on any journey
+           send=3 close=1 note=1 bulk=1
+  RED    P3.2 · the strip starts at an em dash and states nothing unchosen
+           will="Will record: I've sent it · today · reply expected ~15 Oct · nudge 8 Oct"
+  RED    P3.3 · the agent's stated window is shown, not chosen
+           missing
+  RED    P3.4 · expect-back offers Another date
+           occurrences=1
+  RED    P4.1 · the primaries are the owner's override wording
+           send="I've sent it" close="Close this query" note="Tick it off" bulk="Record what went"
+  green  P4.2 · no asterisk marks a required field anywhere in the pane
+           first * at: send=-1 close=-1 note=-1 bulk=-1
+  RED    P4.3 · exactly one OPTIONAL tag on each journey that has an optional field
+           send=0 close=0 note=0 bulk=0
+  RED    P4.4 · bulk is the stated exception — inert at zero, with its count showing
+           disabled=false prim="Record what went"
+  green  P4.5 · every other primary stays clickable while incomplete
+           send=false close=false note=false
+  RED    P4.6 · an incomplete click writes nothing and lands focus in the form
+           scrollTop 0→0 · active=BODY inPane=false tookOver=false
+  RED    P5.1 · the finishing sentence appears exactly once in the pane, total
+           count=2
+  RED    P5.2 · a note has no When segment
+           segs=1
+  RED    P5.3 · the note's own words are the centrepiece, Caveat at 26px
+           no .notetext on the note journey
+  RED    P6.1 · the bulk table renders one row per query, five visible with the rest folded
+           rows=0 showAll=0
+  RED    P6.2 · its columns are the contract's six
+           []
+  RED    P6.3 · rows are ordered oldest sent first
+           []
+  RED    P6.4 · both fill actions are offered, with the requirements caveat verbatim
+           []
+  RED    P6.5 · the band states the full sub-line, and the truncated one is unreproducible
+           sub="A gap on the record for"
+  RED    P6.6 · the bar offers Dismiss all beside the counted primary
+           ["Snooze","Dismiss","Record what went"]

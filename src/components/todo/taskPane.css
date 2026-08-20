@@ -26,7 +26,11 @@
 .tpn {
   --ground:#f7f4ee; --window:#fefcfa; --white:#ffffff; --field:#fdfbf7;
   --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
-  --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#ece4d9;
+  --hair:#e7ddd2; --hair2:#e0d5c8;
+  /* ⚠️ THE CONTRACT'S VALUE. Three were in play — this file had #ece4d9, the brief's prose says
+     #e6dccd, and the contract says #e8e0d8. The files are the contract (owner's instruction), so
+     the prose's value is recorded as a disagreement in the report rather than applied here. */
+  --edge:#e8e0d8;
   --burg:#7c3a2a;
   /* ⚠️ `--sage`, `--pink`, `--pink-b` and `--pink-h` ARE DELIBERATELY NOT REDEFINED HERE, and that
      is adaptation 4 doing its job rather than an omission. The ref sets all four; leaving them set
@@ -48,7 +52,7 @@
   --dash:#efe6da;
 }
 
-.tpn .pane { min-width:0; }
+
 .tpn .u-now .band { background:linear-gradient(135deg,var(--u-now-1) 0%,var(--u-now-2) 100%); }
 .tpn .u-now .band::after { background:var(--u-now-rule); }
 .tpn .u-house .band { background:linear-gradient(135deg,var(--u-house-1) 0%,var(--u-house-2) 100%); }
@@ -290,7 +294,10 @@
  * ⚠️ SCOPED UNDER `.tpn`, class names untouched — the same treatment every port here carries.
  * ═════════════════════════════════════════════════════════════════════════════════════════════ */
 
-.tpn .pane { background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07);display:flex;flex-direction:column;overflow:hidden;min-width:0; }
+/* ⚠️ THE PANE IS A TRANSPARENT COLUMN ON THE GROUND (finishing round, Phase 1) — its card
+   treatment moved onto the three `.fc` cards it now holds. It used to BE the card, which is what
+   left no room for the rims. */
+.tpn .pane { display:flex;flex-direction:column;min-width:0;gap:12px; }
 .tpn .band { flex:0 0 auto;padding:13px 20px 12px;display:flex;align-items:center;justify-content:space-between;gap:16px;position:relative; }
 .tpn .band::after { content:'';position:absolute;bottom:0;left:0;right:0;height:1px; }
 .tpn .pane.u-now .band { background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2)); }
@@ -310,7 +317,17 @@
 .tpn .tile .v { font-family:'Playfair Display',serif;font-size:15px;font-weight:500;color:var(--ink2);margin-top:3px;line-height:1.2; }
 .tpn .tile .v small { font-family:'Inter',sans-serif;font-size:10px;color:var(--muted2);font-weight:300;display:block;margin-top:1px; }
 .tpn .tile .v.absent { color:#c0b0a0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase; }
-.tpn .mid { flex:1 1 auto;min-height:0;overflow-y:auto;padding:18px 20px 20px;display:flex;gap:16px;align-items:flex-start; }
+/* ⚠️ THE MID'S PADDING IS 2px NOW, NOT 20 — the cards inside it carry their own (`.formpad`), and
+   the mid's job is only to hold the scroll and leave 2px so a card's shadow is not clipped by its
+   own scrollport. */
+.tpn .mid { flex:1 1 auto;min-height:0;overflow-y:auto;padding:2px;display:flex;gap:12px;align-items:flex-start; }
+/* ⚠️ THE FORM 11 CARD, and the pane holds three of them. `.fc` is the white card with the app's
+   edge; `.rim` is the burgundy hairline inside it, and its `overflow:hidden` is what CLIPS the
+   band's tint to the 9px radius rather than letting a square fill run under a rounded border. */
+.tpn .fc { background:var(--white);border:1px solid var(--edge);border-radius:12px;padding:6px;box-shadow:0 1px 2px rgba(58,28,20,0.05),0 8px 26px rgba(58,28,20,0.07); }
+.tpn .rim { border:1px solid rgba(124,58,42,0.28);border-radius:9px;overflow:hidden; }
+.tpn .hdr { flex:0 0 auto; }
+.tpn .formpad { padding:18px 18px 20px; }
 .tpn .mid::-webkit-scrollbar { width:9px; }
 .tpn .mid::-webkit-scrollbar-thumb { background:#e2d6c8;border-radius:5px;border:2px solid var(--white); }
 .tpn .formcol { flex:1 1 460px;min-width:0; }
@@ -318,8 +335,12 @@
 .tpn .f-h { font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2); }
 .tpn .f-sub { font-size:11.5px;color:var(--muted2);font-weight:300;margin:3px 0 15px;line-height:1.5; }
 .tpn .sect { margin-bottom:16px; }
-.tpn .story { background:var(--white);border:0.5px solid var(--hair2);border-radius:11px;overflow:hidden; }
-.tpn .actbar { flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--hair);background:var(--white); }
+/* the story's frame IS its rim now — a second border inside one would draw two hairlines */
+.tpn .story { background:var(--white); }
+/* ⚠️ THE BAR IS ITS OWN STRIP, not a footer with a rule above it. It stands on the ground beside
+   the cards, so it needs the card's own edge and radius rather than a hairline against a box it is
+   no longer inside. */
+.tpn .actbar { flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05); }
 .tpn .willrec { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
 .tpn .willrec b { color:var(--ink2);font-weight:500; }
 .tpn .ab { cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s; }
@@ -344,11 +365,8 @@
    this the action bar sat wherever the content ended — measured 718 against a pane bottom of 889,
    which is a "fixed" bar 171px up the card. */
 .tpn { display: flex; flex-direction: column; }
-.tpn .pane {
-  flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column;
-  background: var(--white); border: 1px solid var(--edge); border-radius: 12px; overflow: hidden;
-  box-shadow: 0 1px 2px rgba(58,28,20,0.05), 0 8px 26px rgba(58,28,20,0.07);
-}
+/* the pane still FILLS its column — only its paint moved to the cards */
+.tpn > .pane { flex: 1; min-height: 0; }
 
 /* ⚠️ THE MIDDLE WRAPS BY MEASURE (pane round, Phase 2) — the fluid rule the retired `.workrow`
    carried, on the element that replaced it. The form column asks for most of the surplus and the
