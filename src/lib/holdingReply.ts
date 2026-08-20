@@ -33,6 +33,8 @@
  * `QueryStatus` member, which is what keeps it invisible to derivation.
  */
 import type { Activity } from "../types";
+import { normalizeResultingStatus } from "./queryDerivation";
+import { isSendStatus } from "./timelineChapters";
 
 /** The GLOBAL feed's `activityType`. Rules-validated; quoted in `firestore.rules`. */
 export const HOLDING_REPLY_TYPE = "Holding Reply" as const;
@@ -183,11 +185,52 @@ export function replyStatedWindow(
  * measures from here — "what am I waiting on now". Both true, different questions.
  */
 export function waitAnchorMs(lastSendMs: number | null, events: readonly StoredHoldingReply[] | null | undefined): number | null {
+  return waitAnchor(events, lastSendMs)?.ms ?? null;
+}
+
+/** What the wait is currently measured from, and WHICH KIND of event that is. */
+export interface WaitAnchor {
+  ms: number;
+  /** `send` — the writer's last outbound. `reply` — the agent's last holding reply. */
+  kind: "send" | "reply";
+}
+
+/**
+ * ⚠️ §1b · THE ANCHOR COMES FROM THE ACTIVITY LOG, and the field is only a fallback.
+ *
+ * `queryAmbientStatus` picked the send date by STATUS — `dateSent` at Queried, `partialSentDate`
+ * at Partial Sent, `fullSentDate` at Full Sent — so a query whose derived stage date was absent had
+ * no anchor AT ALL, even with `dateSent` sitting on the record and both rungs drawn on the card
+ * above. Those three fields are `recomputeQuery`'s output; the log is its input, and the input is
+ * the thing that always exists.
+ *
+ * ⚠️ OUTBOUND IS `isSendStatus`, THE CTA ENGINE'S OWN ANSWER, never a list of three statuses
+ * written out here. A send is exactly a status some request can target, plus the first query —
+ * so a new send stage joins this derivation without an edit, and cannot come to disagree with the
+ * chapters or the command bar about what counts as sending something.
+ *
+ * ⚠️ AND THE KIND RIDES WITH THE INSTANT (§3a), because the label above the bar names the event:
+ * "Sent 1 May" for an outbound and "Replied 18 Aug" for a holding reply. Deriving the two
+ * separately is how the figure and the word come to describe different events.
+ */
+export function waitAnchor(
+  events: readonly StoredHoldingReply[] | null | undefined,
+  fallbackSendMs: number | null,
+): WaitAnchor | null {
+  const sends = (events || [])
+    .map((e) => ({ s: normalizeResultingStatus((e as { type?: unknown }).type), t: at(e.createdAt) }))
+    .filter((e) => e.s !== null && isSendStatus(e.s) && !Number.isNaN(e.t))
+    .map((e) => e.t);
+  const lastSend = sends.length ? Math.max(...sends) : fallbackSendMs;
+
   const replies = holdingReplyTimes(events);
   const lastReply = replies.length ? replies[replies.length - 1] : null;
-  if (lastSendMs == null) return lastReply;
-  if (lastReply == null) return lastSendMs;
-  return Math.max(lastSendMs, lastReply);
+
+  if (lastSend == null) return lastReply == null ? null : { ms: lastReply, kind: "reply" };
+  if (lastReply == null) return { ms: lastSend, kind: "send" };
+  /* ⚠️ A TIE KEEPS THE REPLY. Same instant means an import stamped both with one ordering key;
+     the reply is the later thing in any real sequence, and it is the one the writer is waiting on. */
+  return lastReply >= lastSend ? { ms: lastReply, kind: "reply" } : { ms: lastSend, kind: "send" };
 }
 
 /** Has the agent been in touch on this query, whether or not they decided anything? */

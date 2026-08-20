@@ -14,7 +14,7 @@ import { Query, QueryStatus } from "../types";
 import { elapsedPhrase } from "./elapsed";
 /* §1 (provenance pack) — the writer's own date, read through the one accessor that knows the field. */
 import { writerExpectedMs, resolveExpectedDate, type ExpectedSource } from "./expectedDate";
-import { replyStatedWindow, waitAnchorMs, type StoredHoldingReply } from "./holdingReply";
+import { replyStatedWindow, waitAnchor, waitAnchorMs, type StoredHoldingReply } from "./holdingReply";
 import { getPrimaryAction } from "./queryPrimaryAction";
 /* ⚠️ THE CANONICAL "an agent replied" SET, imported from its owner rather than restated. It is the
    same five rungs `recomputeQuery` derives `hasAgentResponded` from, so the place line and the
@@ -149,6 +149,13 @@ export interface AmbientStatus {
      manuscript, on that day — not the agency's standing policy, which is why it is a fourth value
      rather than being folded into `agent`. */
   windowSource: ExpectedSource;
+  /**
+   * ⚠️ §3a · WHAT THE ANCHOR IS, so the bar's start label can name it. It read "SENT 18 AUG" where
+   * 18 August was the date the AGENT replied — the arithmetic right, the word wrong. Derived with
+   * the instant rather than beside it, because a label and a figure computed separately are free to
+   * describe different events.
+   */
+  anchorKind: "send" | "reply";
 }
 
 /** Derive the open-state numbers for a query, given the CTA engine's ball-holder + markKind. */
@@ -182,7 +189,7 @@ export function queryAmbientStatus(
 ): AmbientStatus {
   const base: AmbientStatus = {
     mode: "closed", nDays: 0, sentMs: null, expMs: null, widthPct: 0, overdue: false, daysOverdue: 0,
-    sendWhat: "resubmission", eventLabel: "", writerDaysAgo: null, windowStated: false, windowSource: null,
+    sendWhat: "resubmission", eventLabel: "", writerDaysAgo: null, windowStated: false, windowSource: null, anchorKind: "send",
   };
 
   if (ballHolder === "agent") {
@@ -202,9 +209,20 @@ export function queryAmbientStatus(
      * answers "how long has this been going"; this card answers "what am I waiting on now". Both
      * true, and the visible difference between them is the point, not a bug to reconcile.
      */
+    /**
+     * ⚠️ §1b · THE ANCHOR IS THE LOG'S, AND THE STATUS-KEYED FIELD IS ONLY A FALLBACK.
+     *
+     * `sendIso` above picks ONE of three derived date fields by status, so a query at Partial Sent
+     * whose `partialSentDate` had not been derived read as having no send date at all — with
+     * `dateSent` on the record and both rungs drawn on the card directly above. Those fields are
+     * `recomputeQuery`'s OUTPUT; the log is its input, and the input is what always exists.
+     *
+     * ⚠️ THE FIELD STAYS AS THE FALLBACK BECAUSE `events` IS OPTIONAL. Callers that pass no log get
+     * exactly their previous behaviour, which is what keeps this additive.
+     */
     const rawSentMs = sendIso ? getTime(sendIso) : NaN;
-    const anchored = waitAnchorMs(Number.isNaN(rawSentMs) ? null : rawSentMs, events);
-    const sentMs = anchored ?? rawSentMs;
+    const anchor = waitAnchor(events, Number.isNaN(rawSentMs) ? null : rawSentMs);
+    const sentMs = anchor ? anchor.ms : NaN;
     if (!Number.isNaN(sentMs) && sentMs != null) {
       const nDays = Math.max(0, Math.floor((now - sentMs) / DAY));
       /**
@@ -259,6 +277,8 @@ export function queryAmbientStatus(
         daysOverdue: Math.max(0, Math.floor((now - expMs) / DAY)),
         windowStated: resolved.source !== null,
         windowSource: resolved.source,
+        /* §3a — what the anchor IS, so the label can name the event rather than assume a send. */
+        anchorKind: anchor?.kind ?? "send",
       };
     }
     // P4 — no stage send date to derive from: fall back to the stored responseDeadline OVERRIDE (a

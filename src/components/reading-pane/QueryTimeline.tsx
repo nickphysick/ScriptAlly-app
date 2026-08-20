@@ -181,6 +181,12 @@ export interface QueryTimelineProps {
    * PDF path, a future read-only view — renders the same line without an affordance on it.
    */
   onEditSendMethod?: (anchor: HTMLElement) => void;
+  /**
+   * §1c — open the page's own send-date editor. ABSENT means the sentence renders without an
+   * offer, the same convention `onEditSendMethod` follows: a caller with no editor to open gets
+   * the statement, never a dead control.
+   */
+  onSetSendDate?: (anchor: HTMLElement) => void;
 }
 
 /**
@@ -651,7 +657,7 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
   onOpenReminder?: () => void;
   /** §6c — create the reminder task through the existing task-creation path. */
   onRemindLater?: () => void;
-}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {
+}> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {
   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);
 
   const rows = buildTimelineRows(events, query, agent);
@@ -853,10 +859,28 @@ export const QueryTimeline: React.FC<QueryTimelineProps & {
                 </div>
               </div>
             ) : (
-              /* ⚠️ A STATED WINDOW WITH NO SEND DATE: the chip above says what they said, and there
-                 is nothing to measure it from. No bar, and no sentence claiming they stated nothing
-                 — which is what this branch used to print. */
-              <div className="tl-wbody">No send date recorded, so that window has no closing date.</div>
+              /**
+               * ⚠️ §1c · THE SENTENCE WAS INVERTED. It read "no send date recorded, so that window
+               * has no CLOSING date" — but the window has a closing date, stated by the agency; what
+               * it lacks is an OPENING one. Naming the wrong end left the writer looking for a
+               * missing deadline when the missing thing was the day they posted it.
+               *
+               * ⚠️ AND IT NOW OFFERS THE FIX. The card knows exactly which field is absent, so
+               * saying so and stopping wastes the one moment the writer has the answer in mind.
+               *
+               * ⚠️ NO BAR IN THIS STATE, WHICH IS THE POINT OF THE BRANCH — a proportion needs both
+               * ends, and a track drawn from nothing would invent the fact the sentence is admitting
+               * the record does not hold.
+               */
+              <>
+                <div className="tl-wbody">No send date recorded, so this window can&rsquo;t be measured.</div>
+                {onSetSendDate && (
+                  <div className="tl-ask">
+                    <span>Add the date you sent it and the bar will fill</span>
+                    <button type="button" className="tl-ask-a" onClick={(e) => onSetSendDate(e.currentTarget)}>Set send date</button>
+                  </div>
+                )}
+              </>
             )}
 
             {/**

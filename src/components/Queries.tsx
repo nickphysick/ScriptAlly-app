@@ -5362,6 +5362,15 @@ export const Queries: React.FC<{
                                 (methodPickTrigRef as React.MutableRefObject<HTMLElement | null>).current = anchor;
                                 setMethodPickOpen(true);
                               }}
+                              /* §1c — the no-send-date offer opens the page's OWN date editor, the
+                                 same one the stat cell's "Change the date this was sent" opens. A
+                                 second date control for the same field is how two surfaces come to
+                                 write it differently. */
+                              onSetSendDate={(anchor) => {
+                                (dateTrigRef as React.MutableRefObject<HTMLElement | null>).current = anchor;
+                                setDateDraft(toDateInputValue(activeQuery.dateSent));
+                                setDateEdit("sent");
+                              }}
                             />
                           );
                         })()}
