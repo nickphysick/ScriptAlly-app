@@ -1,0 +1,1499 @@
+
+ RUN  v3.2.6 /Users/nickphysick/ScriptAlly-app
+
+·x············-································xxxxx··xxx·x···xxxxxx··xxx·······················x·x·············································x···································································································x···········································································-······································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································x·····································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································stdout | functions/src/suggestCompsCore.test.ts > the request shape > sends no sampling parameters
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > gives the model web search
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > the request shape > names the current model and asks for adaptive thinking
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > retries once on unparseable output, then succeeds
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > retries once on unparseable output, then succeeds
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > gives up after the retry
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > gives up after the retry
+suggestComps: tokens in=1 out=1
+
+stdout | functions/src/suggestCompsCore.test.ts > proposeCandidates > surfaces a refusal without spending a retry
+suggestComps: tokens in=1 out=1
+
+···················································································································································································································································································································································································································································································································································································································································································································································································································································································································stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > parses a good first response (strips fences)
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > retries once on malformed, then succeeds
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > retries once on malformed, then succeeds
+assistAgentData: rule=dq_responseTime agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > throws MalformedAssistError when both attempts fail
+assistAgentData: rule=dq_mswl agents=2 tokens in=? out=?
+
+stdout | functions/src/assistAgentDataCore.test.ts > assistFromModel > throws MalformedAssistError when both attempts fail
+assistAgentData: rule=dq_mswl agents=2 tokens in=? out=?
+
+···································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································································stderr | src/lib/timelineEvent.test.ts > F1 · a type this build does not know > resolves to `unknown` rather than claiming a direction
+[ScriptAlly] timeline: activity type "Holding Reply" is not in this build's ActivityType. Its events are drawn as "unknown" and cut from the story feed rather than guessed at — this client is older than the record.
+[ScriptAlly] timeline: activity type "Something Nobody Has Written Yet" is not in this build's ActivityType. Its events are drawn as "unknown" and cut from the story feed rather than guessed at — this client is older than the record.
+
+····················································································································································································································································································································································································
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 24 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/marketing/marketingLinks.test.tsx > the support address is stated once > no source file hardcodes the retired support address
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/marketing/marketingLinks.test.tsx:111:3
+    109|    * for a UK GDPR request, so this is the one that has to work.
+    110|    */
+    111|   it("no source file hardcodes the retired support address", async () …
+       |   ^
+    112|     const { readFileSync, readdirSync, statSync } = await import("fs");
+    113|     const walk = (dir: string): string[] =>
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/24]⎯
+
+ FAIL  src/lib/queryAmbient.test.ts > Bar P3 artefacts — end-anchors + hollow-circle milestones + hover/tap pop-ups > the wait states both ends of its bar, and only where there is a bar
+AssertionError: expected 'ballHolder === "agent" && waiting && …' to contain 'Sent {fmtShort(waiting.sentMs!)}'
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- Sent {fmtShort(waiting.sentMs!)}[39m
+[31m+ ballHolder === "agent" && waiting && (() => {[39m
+[31m+         const now = Date.now();[39m
+[31m+         const who = chasedBy(agent);[39m
+[31m+         /* the scheduled follow-up, if one is still ahead — it has its own event below, and this[39m
+[31m+            only decides whether the wait is the timeline's last node */[39m
+[31m+         /* ⚠️ §2 (policy pack) · `reminderMs` IS DELETED AND THIS ROW NOW ASKS THE GHOST'S OWN[39m
+[31m+            SOURCE. It read `query.nudgeDate` — the retired projection this file's own §6b note says[39m
+[31m+            was replaced by the task store — while the ghost beneath renders from `reminder`. So a[39m
+[31m+            reminder set on the to-do list left `nudgeDate` untouched, this row came out `last`, and[39m
+[31m+            `.tl-ev--last { padding-bottom: 0 }` fused the ghost to the sentence above it. Two[39m
+[31m+            derivations of one fact, disagreeing exactly where it showed. */[39m
+[31m+         /* the AGENCY's own figure — not the house window, and not the writer's override */[39m
+[31m+         const statedWeeks = typeof agent?.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0[39m
+[31m+           ? agent.responseTimeWeeks : null;[39m
+[31m+         const stated = waiting.windowStated;[39m
+[31m+         const past = stated && waiting.overdue;[39m
+[31m+         /* a bar needs a window AND both of its ends */[39m
+[31m+         const dated = stated && waiting.sentMs != null && waiting.expMs != null;[39m
+[31m+         const pct = dated ? Math.max(0, Math.min(100, ((now - waiting.sentMs!) / (waiting.expMs! - waiting.sentMs!)) * 100)) : 0;[39m
+[31m+[39m
+[31m+         return ([39m
+[31m+           <TlProjection[39m
+[31m+             status={query.status}[39m
+[31m+             title={past ? "No reply" : "Waiting to hear back"}[39m
+[31m+             date={waiting.sentMs != null ? elapsedPhrase(waiting.nDays).toUpperCase() : undefined}[39m
+[31m+             tone={stated && !past ? "sage" : "oat"}[39m
+[31m+             /* §2 — dashed ring for a window the WRITER set. Same source as the bar and the[39m
+[31m+                sentence; three surfaces, one fact, so they cannot come to disagree. */[39m
+[31m+             est={waiting.windowSource === "writer" && !past}[39m
+[31m+             last={!reminder}[39m
+[31m+             /**[39m
+[31m+              * ⚠️ THE CHIP IS GONE, AND THE ATTRIBUTION TOOK ITS PLACE IN ROW 1. `Priya says 6 weeks`[39m
+[31m+              * sat on its own surface so a claim could not be read as one of the app's own sentences[39m
+[31m+              * — the right instinct, the wrong device. It cost a body part to say four words and it[39m
+[31m+              * could only ever carry the AGENCY's version; the qualifier carries whoever actually[39m
+[31m+              * said it, and the writer's own estimate finally has a voice.[39m
+[31m+              *[39m
+[31m+              * ⚠️ AND THE EXPIRY DATE IS NOT RESTATED HERE. The chip appended "· window expired 23[39m
+[31m+              * July" beside the bar's own "WINDOW EXPIRED 23 JUL"; one fact, one surface.[39m
+[31m+              */[39m
+[31m+             qual={(() => {[39m
+[31m+               const a = windowAttribution({[39m
+[31m+                 source: waiting.windowSource, who, weeks: statedWeeks, expMs: waiting.expMs, past: !!past, formatDate: exactDate,[39m
+[31m+               });[39m
+[31m+               return a ? <span className="tl-qual">— {a.lead}<b>{a.strong}</b></span> : undefined;[39m
+[31m+             })()}[39m
+[31m+           >[39m
+[31m+[39m
+[31m+             {/**[39m
+[31m+               * ⚠️ §3 · THE BODY LINE ASKS WHETHER A WINDOW WAS STATED, NOT WHETHER A BAR CAN BE[39m
+[31m+               * DRAWN — and conflating the two is what made the card contradict itself. It read[39m
+[31m+               * `dated ? bar : body`, and `dated` also requires both ENDS: so a query with a stated[39m
+[31m+               * window and no recorded send date fell to the else branch and printed "…do not state[39m
+[31m+               * a response time" directly beneath a chip quoting the weeks they stated.[39m
+[31m+               *[39m
+[31m+               * ⚠️ THREE OUTCOMES, NOT TWO. No window → the fact and the offer. A window with both[39m
+[31m+               * ends → the bar. A window with no send date → the chip alone: there is a window and[39m
+[31m+               * nothing to measure it from, and neither of the other two says that honestly.[39m
+[31m+               */}[39m
+[31m+             {!stated ? ([39m
+[31m+               /**[39m
+[31m+                * ⚠️ NO BAR AND NO END LABELS — there is nothing to measure against, and a track for a[39m
+[31m+                * window that does not exist would invent the fact the sentence beneath it is[39m
+[31m+                * admitting the record does not hold. Same rule as the nudge confirm's bar.[39m
+[31m+                *[39m
+[31m+                * ⚠️ AND THE COPY IS THE AGENCY'S ABSENCE, NOT THE WRITER'S OVERSIGHT. It read[39m
+[31m+                * "Awaiting response — no expected date set", which quietly made a missing agency[39m
+[31m+                * figure sound like something the writer had failed to fill in.[39m
+[31m+                */[39m
+[31m+               <>[39m
+[31m+                 <div className="tl-wbody">{who.name} {who.plural ? "do" : "does"} not state a response time.</div>[39m
+[31m+                 {onSetExpectedDate && ([39m
+[31m+                   <SetWindow anchorMs={waiting.sentMs ?? now} onSave={onSetExpectedDate} />[39m
+[31m+                 )}[39m
+[31m+               </>[39m
+[31m+             ) : dated ? ([39m
+[31m+               /* ⚠️ §1 · THE BAR AND ITS END LABELS ARE ONE BODY PART, not two. As siblings they took[39m
+[31m+                  the block's gap between them and the footer drifted away from the track it labels;[39m
+[31m+                  a label belongs to its bar the way a caption belongs to a figure. */[39m
+[31m+               <div>[39m
+[31m+                 {/* §2 — the bar carries the provenance the sentence above states. `est` is read[39m
+[31m+                     from the SAME resolver the sentence is: `windowSource`, never a second signal. */}[39m
+[31m+                 <div className={`tl-wbar${past ? " tl-wbar--past" : ""}${waiting.windowSource === "writer" ? " tl-wbar--est" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>[39m
+[31m+                 <div className="tl-wbarf">[39m
+[31m+                   {/* ⚠️ §3a · THE LABEL NAMES THE ANCHOR'S OWN EVENT. It read "Sent 18 Aug" where[39m
+[31m+                       18 August was the day the AGENT replied — the arithmetic right and the word[39m
+[31m+                       wrong. Derived from `anchorKind`, which is computed WITH the instant rather[39m
+[31m+                       than beside it, so the figure and the noun cannot describe different events. */}[39m
+[31m+                   <span>{waiting.anchorKind === "reply" ? "Replied" : "Sent"} {fmtShort(waiting.sentMs!)}</span>[39m
+[31m+                   {/* ⚠️ THE END LABEL NAMES ITS OWNER TOO, so the bar cannot be misread once the[39m
+[31m+                       line above it has been. A window the WRITER set never "expires" — nothing was[39m
+[31m+                       promised — so its label states whose figure it is in both states, where an[39m
+[31m+                       agency's window expires on the day they named. */}[39m
+[31m+                   <span>{waiting.windowSource === "writer"[39m
+[31m+                     ? `Your estimate · ${fmtShort(waiting.expMs!)}`[39m
+[31m+                     : past ? `Window expired ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>[39m
+[31m+                 </div>[39m
+[31m+               </div>[39m
+[31m+             ) : ([39m
+[31m+               /**[39m
+[31m+                * ⚠️ §1c · THE SENTENCE WAS INVERTED. It read "no send date recorded, so that window[39m
+[31m+                * has no CLOSING date" — but the window has a closing date, stated by the agency; what[39m
+[31m+                * it lacks is an OPENING one. Naming the wrong end left the writer looking for a[39m
+[31m+                * missing deadline when the missing thing was the day they posted it.[39m
+[31m+                *[39m
+[31m+                * ⚠️ AND IT NOW OFFERS THE FIX. The card knows exactly which field is absent, so[39m
+[31m+                * saying so and stopping wastes the one moment the writer has the answer in mind.[39m
+[31m+                *[39m
+[31m+                * ⚠️ NO BAR IN THIS STATE, WHICH IS THE POINT OF THE BRANCH — a proportion needs both[39m
+[31m+                * ends, and a track drawn from nothing would invent the fact the sentence is admitting[39m
+[31m+                * the record does not hold.[39m
+[31m+                */[39m
+[31m+               <>[39m
+[31m+                 <div className="tl-wbody">No send date recorded, so this window can&rsquo;t be measured.</div>[39m
+[31m+                 {onSetSendDate && ([39m
+[31m+                   <div className="tl-ask">[39m
+[31m+                     <span>Add the date you sent it and the bar will fill</span>[39m
+[31m+                     <button type="button" className="tl-ask-a" onClick={(e) => onSetSendDate(e.currentTarget)}>Set send date</button>[39m
+[31m+                   </div>[39m
+[31m+                 )}[39m
+[31m+               </>[39m
+[31m+             )}[39m
+[31m+[39m
+[31m+             {/**[39m
+[31m+               * §6a — THE SILENCE GETS A FIGURE, in Playfair, so the card has one finding rather than[39m
+[31m+               * a bar and a chip to compare. It measures from the STATED close and renders only when[39m
+[31m+               * a window was stated: `pastWindowLine` returns null otherwise, because the house[39m
+[31m+               * assumption is the app's own arithmetic and a figure counted from it would be[39m
+[31m+               * attributed to the agency.[39m
+[31m+               */}[39m
+[31m+             {(() => {[39m
+[31m+               const line = pastWindowLine(waiting.expMs, now, stated, lastHoldingReplyMs);[39m
+[31m+               return line ? <div className="tl-pastfig"><b>{line.figure}</b> {line.tail}</div> : null;[39m
+[31m+             })()}[39m
+[31m+[39m
+[31m+             {/**[39m
+[31m+               * §1 (policy pack) — THE AGENCY'S OWN POLICY, OR NOTHING. This read "Many agencies[39m
+[31m+               * treat silence as a pass." on every past-window state: a true observation about the[39m
+[31m+               * trade, printed on one specific query's tracker where it was attributable to nobody.[39m
+[31m+               * `silencePolicyLine` returns a sentence only where the agency has actually stated that[39m
+[31m+               * silence means no, and null everywhere else — no generic fallback and no house[39m
+[31m+               * assumption, the same rule the window bar already follows.[39m
+[31m+               */}[39m
+[31m+             {(() => {[39m
+[31m+               const policy = silencePolicyLine({[39m
+[31m+                 /* ⚠️ `exactDate`, NOT `fmtShort` — this is PROSE, and the timeline's meta format is a[39m
+[31m+                    bare uppercase day and month. "their window expired 23 JUL" mid-sentence reads as a[39m
+[31m+                    system tag; `elapsed.ts` is where this app spells a date in full, and the note at[39m
+[31m+                    the head of this file says exactly why a second formatter is not written here. */[39m
+[31m+                 policy: agent?.noResponseMeansNo, who, windowExpiredMs: waiting.expMs ?? null, now, formatDate: exactDate,[39m
+[31m+                 repliedSinceMs: lastHoldingReplyMs,[39m
+[31m+               });[39m
+[31m+               return policy ? <div className="tl-conv">{policy}</div> : null;[39m
+[31m+             })()}[39m
+[31m+[39m
+[31m+             {/**[39m
+[31m+               * §5b (nudge pack) — the nudge history, beneath whatever state the wait is in. It is[39m
+[31m+               * the most useful fact in a long silence and it exists nowhere else on the card.[39m
+[31m+               */}[39m
+[31m+             {nudges.length > 0 && <div className="tl-nhist">{nudgeHistoryLine(nudges, (ms) => fmtShort(ms).toUpperCase())}</div>}[39m
+[31m+[39m
+[31m+             {/**[39m
+[31m+               * §5c (nudge pack) — closure offered once, on facts: at least one unanswered nudge AND[39m
+[31m+               * a window expired more than six months ago. Both answers, equal standing.[39m
+[31m+               */}[39m
+[31m+             {offer.show && ([39m
+[31m+               <div className="tl-offer">[39m
+[31m+                 <div className="tl-offer-f">{offer.facts}</div>[39m
+[31m+                 <div className="tl-offer-a">[39m
+[31m+                   {onMarkClosed && <button type="button" className="tl-offer-go" onClick={onMarkClosed}>Mark closed</button>}[39m
+[31m+                   {onKeepTracking && <button type="button" className="tl-offer-keep" onClick={onKeepTracking}>Keep tracking</button>}[39m
+[31m+                 </div>[39m
+[31m+               </div>[39m
+[31m+             )}[39m
+[31m+[39m
+[31m+             {/**[39m
+[31m+               * §6c — WHEN NOTHING IS PENDING, THE OFFER CARRIES THE NEXT STEP. Three actions of[39m
+[31m+               * equal standing: nudge now, set a reminder, or close it.[39m
+[31m+               *[39m
+[31m+               * ⚠️ IT NEVER SHOWS BESIDE THE CLOSURE OFFER, and not by a guard — the two triggers are[39m
+[31m+               * opposites. The closure offer needs an unanswered nudge; this one needs nothing[39m
+[31m+               * pending, which a recent nudge is.[39m
+[31m+               *[39m
+[31m+               * ⚠️ AND IT NEEDS NO DISMISSAL FLAG OF ITS OWN: each of its three actions makes its own[39m
+[31m+               * trigger false, so it self-dismisses by construction. It honours the closure offer's[39m
+[31m+               * flag all the same, because a writer who said "keep tracking" has answered the card's[39m
+[31m+               * offer as such.[39m
+[31m+               */}[39m
+[31m+             {past && !offer.show && (() => {[39m
+[31m+               const next = nextStepOffer({[39m
+[31m+                 times: nudges, reminder, now,[39m
+[31m+                 dismissed: (query as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,[39m
+[31m+               });[39m
+[31m+               if (!next.show) return null;[39m
+[31m+               return ([39m
+[31m+                 <div className="tl-offer">[39m
+[31m+                   <div className="tl-offer-f">{next.facts}</div>[39m
+[31m+                   <div className="tl-offer-a">[39m
+[31m+                     {onNudge && <button type="button" className="tl-offer-go" onClick={onNudge}>Nudge now</button>}[39m
+[31m+                     {onRemindLater && <button type="button" className="tl-offer-keep" onClick={onRemindLater}>Remind me later</button>}[39m
+[31m+                     {onMarkClosed && <button type="button" className="tl-offer-keep" onClick={onMarkClosed}>Mark closed</button>}[39m
+[31m+                   </div>[39m
+[31m+                 </div>[39m
+[31m+               );[39m
+[31m+             })()}[39m
+[31m+           </TlProjection>[39m
+[31m+         );[39m
+[31m+       })()}[39m
+[31m+[39m
+[31m+       {/**[39m
+[31m+         * ══ §6b · THE FUTURE GETS A GHOST RUNG ════════════════════════════════════════════════[39m
+[31m+         *[39m
+[31m+         * ⚠️ SOLID IS WHAT HAPPENED; HOLLOW IS WHAT HAS NOT. The ring is dashed with no fill, the[39m
+[31m+         * connector into it is dashed, the ink is faint and the date is ahead — so the rung is[39m
+[31m+         * unmistakably not-yet without a word saying so.[39m
+[31m+         *[39m
+[31m+         * ⚠️ IT RENDERS THE WRITER'S OWN REMINDER, NOT THE APP'S NOTICING. The caller derives it[39m
+[31m+         * from the stored `UserTask` store (undone, scoped to this query, dated ahead) rather than[39m
+[31m+         * from the derived task feed — see `scheduledReminder`. A ghost drawn from a suggestion[39m
+[31m+         * would show a future nobody scheduled.[39m
+[31m+         *[39m
+[31m+         * ⚠️ AND IT GOES WHEN THE TASK DOES, because it IS the task: completing or deleting the[39m
+[31m+         * reminder removes it from the store the caller reads, and nothing here is cached.[39m
+[31m+         *[39m
+[31m+         * ⚠️ THE OLD `nudgeDate` PROJECTION IS RETIRED WITH IT. That drew a rung from a field on the[39m
+[31m+         * QUERY — a second record of a reminder whose real home is the to-do list — so a completed[39m
+[31m+         * task left a phantom future on the timeline.[39m
+[31m+         */}[39m
+[31m+       {ballHolder === "agent" && waiting && reminder && ([39m
+[31m+         <div className="tl-ev tl-ev--ghost tl-ev--last">[39m
+[31m+           <div className="tl-evmark"><span className="tl-ghostmark" aria-hidden="true">🔔</span></div>[39m
+[31m+           {/**[39m
+[31m+             * ⚠️ §3 · A PENDING OBJECT, NOT AN EVENT — option C. §1 gave every event two rows, and[39m
+[31m+             * this one kept failing to fit them because it is not an event: nothing happened. So it[39m
+[31m+             * stops being written in the event grammar and becomes a dashed panel hanging off the[39m
+[31m+             * rail below the record.[39m
+[31m+             *[39m
+[31m+             * ⚠️ THE PANEL IS THE LINK, which is what removes the fragment. The sentence used to[39m
+[31m+             * carry a link in its middle — "Nudge reminder set · from your to-do list · SCHEDULED[39m
+[31m+             * FOR MON 1 SEP" — three things competing on one line, one of them a prefix explaining a[39m
+[31m+             * slot. The whole panel is the target now, so the words are just the two facts: what is[39m
+[31m+             * set, and when.[39m
+[31m+             *[39m
+[31m+             * ⚠️ SOLID IS WHAT HAPPENED; DASHED IS WHAT HAS NOT. No fill, no shadow, faint ink[39m
+[31m+             * throughout, on the page ground rather than a surface of its own.[39m
+[31m+             *[39m
+[31m+             * ⚠️ AND IT IS THE ONLY OBJECT ON THIS TIMELINE ALLOWED OUTSIDE THE TWO-ROW GRAMMAR,[39m
+[31m+             * precisely because it is not an event. Nothing else may take this shape — a second[39m
+[31m+             * dashed panel would make "not yet" a decoration rather than a statement.[39m
+[31m+             */}[39m
+[31m+           <div className="tl-rowbody">[39m
+[31m+             {onOpenReminder ? ([39m
+[31m+               <button type="button" className="tl-ghostpanel" onClick={onOpenReminder} title="Open this reminder on your to-do list">[39m
+[31m+                 <span className="tl-ghostwho">Nudge reminder set</span>[39m
+[31m+                 <span className="tl-ghostwhen">{reminder.dueDate ? fmtDay(new Date(`${reminder.dueDate}T12:00:00`).getTime()) : ""}</span>[39m
+[31m+               </button>[39m
+[31m+             ) : ([39m
+[31m+               <div className="tl-ghostpanel">[39m
+[31m+                 <span className="tl-ghostwho">Nudge reminder set</span>[39m
+[31m+                 <span className="tl-ghostwhen">{reminder.dueDate ? fmtDay(new Date(`${reminder.dueDate}T12:00:00`).getTime()) : ""}</span>[39m
+[31m+               </div>[39m
+[31m+             )}[39m
+[31m+           </div>[39m
+[31m+         </div>[39m
+[31m+       )}[39m
+[31m+[39m
+[31m+       {ballHolder === "writer" && ([39m
+[31m+         /* YOUR MOVE (P2) — soft-pink fill + ink border, no divider beneath; Playfair title + burgundy[39m
+[31m+            sub. The ACTION lives in the fork/command bar (one home for actions). */[39m
+[31m+         /* ⚠️ THE EVENTS' GAP, NOT A NUMBER OF ITS OWN (§6). This block follows the last history[39m
+[31m+            row, so its `marginTop: 16` was a fifth spacing sitting where the eye had just learned[39m
+[31m+            to expect 22 (browser-measured). It is not an event — no marker, no connector — but the distance[39m
+[31m+            between it and what precedes it is the same distance as everywhere else. */[39m
+[31m+         <div style={{ marginLeft: 4, marginTop: "var(--tl-gap)" }}>[39m
+[31m+           <div style={{ background: "var(--pink, #f5e2da)", border: "1px solid var(--ink, #1e1a16)", borderRadius: 11, padding: "12px 14px" }}>[39m
+[31m+             <span style={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 15, color: "var(--ink, #1e1a16)" }}>Your move — send the {sendWhat}</span>[39m
+[31m+             {ambient.writerDaysAgo != null && ([39m
+[31m+               <small style={{ display: "block", fontWeight: 500, fontSize: 11.5, color: "var(--burg, #7c3a2a)", marginTop: 3 }}>[39m
+[31m+                 {agent?.name?.split(" ")[0] || "The agent"} asked for it {elapsedPhrase(ambient.writerDaysAgo)} ago[39m
+[31m+               </small>[39m
+[31m+             )}[39m
+[31m+           </div>[39m
+[31m+         </div>[39m
+[31m+       )}[39m
+[31m+       {/* ballHolder === null (closed / Offer): no trailing block — history only. */}[39m
+[31m+[39m
+[31m+       {/* 5b — the correction menu for the hovered entry (portalled; not clipped by the card scroll) */}[39m
+[31m+       {menu && ([39m
+[31m+         <F12Menu[39m
+[31m+           open[39m
+[31m+           onClose={() => setMenu(null)}[39m
+[31m+           style={menu.style}[39m
+[31m+           ariaLabel="Correct entry"[39m
+[31m+           /* ⚠️ EDIT RENDERS ONLY WHEN IT HAS SOMEWHERE TO GO. It used to render unconditionally and[39m
+[31m+              call `onEditEntry?.()`, which is silent when the handler is absent — and it became[39m
+[31m+              absent the moment the inline composer that hosted the correction editor was removed[39m
+[31m+              (record-response §1). An always-present menu item backed by an optional handler is a[39m
+[31m+              button that does nothing, and nothing says so. Correcting an entry is its own work;[39m
+[31m+              until it lands, the item is absent rather than dead. */[39m
+[31m+           items={[[39m
+[31m+             ...(onEditEntry ? [{ label: "Edit", icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>, onClick: () => onEditEntry(menu.entry) }] : []),[39m
+[31m+             { label: "Delete…", danger: true, icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>, onClick: () => onDeleteEntry?.(menu.entry) },[39m
+[31m+           ]}[39m
+[31m+         />[39m
+[31m+       )}[39m
+[31m+     </div>[39m
+[31m+   );[39m
+[31m+ };[39m
+
+ ❯ src/lib/queryAmbient.test.ts:352:20
+    350|     const at = tl.indexOf('ballHolder === "agent" && waiting');
+    351|     const branch = tl.slice(at, tl.indexOf('title="Nudge"', at));
+    352|     expect(branch).toContain("Sent {fmtShort(waiting.sentMs!)}");
+       |                    ^
+    353|     expect(branch).toContain("Expected by ~${fmtShort(waiting.expMs!)}…
+    354|     expect(branch).toContain("Window expired ${fmtShort(waiting.expMs!…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/24]⎯
+
+ FAIL  src/lib/queryCentreWaiting.test.ts > §3 · waiting and the nudge are timeline events > the bar is one derivation now, and the escalation ladder has left the pane
+AssertionError: the wait lost its bar: expected '\nimport React, { useState } from "re…' to contain 'className={`tl-wbar${past ? " tl-wbar…'
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- className={`tl-wbar${past ? " tl-wbar--past" : ""}`}[39m
+[31m+[39m
+[31m+ import React, { useState } from "react";[39m
+[31m+ import { StatusDot } from "../StatusDot";[39m
+[31m+ import { Query, QueryStatus, Agent, QueryMaterial } from "../../types";[39m
+[31m+ import { formatQueryMaterial } from "../../lib/materials";[39m
+[31m+ import { queryAmbientStatus } from "../../lib/queryAmbient";[39m
+[31m+ import { elapsedPhrase, exactDate } from "../../lib/elapsed";[39m
+[31m+[39m
+[31m+ import { sendMethodLabel } from "../../lib/agentDisplay";[39m
+[31m+[39m
+[31m+ import { WeekSlider } from "../forms/WeekSlider";[39m
+[31m+ import { NUDGE_NESTED_TYPE } from "../../lib/logNudge";[39m
+[31m+ import { HOLDING_REPLY_NESTED_TYPE, HOLDING_REPLY_LABEL, replyStatedWindow, holdingReplyTimes } from "../../lib/holdingReply";[39m
+[31m+ import { dropSupersededProvisional } from "../../lib/queryDerivation";[39m
+[31m+ import { chapterise } from "../../lib/timelineChapters";[39m
+[31m+ import { nudgeOutcomeLabel, nudgeTimes, nudgeHistoryLine, closureOffer, chasedBy, pastWindowLine, nextStepOffer, silencePolicyLine, windowAttribution, type ReminderTask } from "../../lib/nudgeState";[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+ const TL_MARK = 27;[39m
+[31m+ import { F12Menu } from "../shell/F12Shell";[39m
+[31m+[39m
+[31m+[39m
+[31m+ export interface TimelineEntryRef { activityId: string; status: QueryStatus; label: string; dateISO: string; note: string; }[39m
+[31m+[39m
+[31m+ const FONT_MONO = "'JetBrains Mono', monospace";[39m
+[31m+[39m
+[31m+ const TL_TITLES: Record<QueryStatus, string> = {[39m
+[31m+   [QueryStatus.QUERIED]: "Query sent",[39m
+[31m+   [QueryStatus.PARTIAL_REQUESTED]: "Partial requested",[39m
+[31m+   [QueryStatus.PARTIAL_SENT]: "Partial sent",[39m
+[31m+   [QueryStatus.FULL_REQUESTED]: "Full requested",[39m
+[31m+   [QueryStatus.FULL_SENT]: "Full sent",[39m
+[31m+   [QueryStatus.REVISE_RESUBMIT]: "Revise & resubmit requested",[39m
+[31m+   [QueryStatus.OFFER]: "Offer of representation",[39m
+[31m+   [QueryStatus.REJECTED]: "Query rejected",[39m
+[31m+   [QueryStatus.WITHDRAWN]: "Query withdrawn",[39m
+[31m+   [QueryStatus.NO_RESPONSE]: "Closed — no response",[39m
+[31m+ };[39m
+[31m+ const FONT_SERIF = "'Playfair Display', serif";[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+ const getTime = (val: any): number => {[39m
+[31m+   if (!val) return Date.now();[39m
+[31m+   if (val.toDate) return val.toDate().getTime();[39m
+[31m+   if (val.seconds) return val.seconds * 1000;[39m
+[31m+   const t = new Date(val).getTime();[39m
+[31m+   return isNaN(t) ? Date.now() : t;[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ const fmtDay = (ms: number): string => {[39m
+[31m+   const d = new Date(ms);[39m
+[31m+   if (isNaN(d.getTime())) return "";[39m
+[31m+   return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }).toUpperCase();[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ const fmtShort = (ms: number): string => {[39m
+[31m+   const d = new Date(ms);[39m
+[31m+   if (isNaN(d.getTime())) return "";[39m
+[31m+   return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }).toUpperCase();[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ const MatPill: React.FC<{ children: React.ReactNode }> = ({ children }) => ([39m
+[31m+   <span style={{ display: "inline-flex", alignItems: "center", fontFamily: "'Inter',sans-serif", fontSize: 11, fontWeight: 500, color: "#6a5b4c", background: "#fdfaf5", border: "1px solid #ddcdbb", borderRadius: 999, padding: "4px 11px" }}>{children}</span>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+ export interface RowSpec {[39m
+[31m+   key: string;[39m
+[31m+   [39m
+[31m+   [39m
+[31m+   kind?: "nudge" | "holding";[39m
+[31m+   status: QueryStatus;[39m
+[31m+   title: string;[39m
+[31m+   date?: string;[39m
+[31m+   sub?: string;[39m
+[31m+   pills?: string[];[39m
+[31m+   [39m
+[31m+   activityId?: string;[39m
+[31m+   dateISO?: string;[39m
+[31m+   note?: string;[39m
+[31m+   [39m
+[31m+   timeMs?: number;[39m
+[31m+   [39m
+[31m+   subEditable?: boolean;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ const isoDay = (ms: number): string => {[39m
+[31m+   const d = new Date(ms);[39m
+[31m+   return isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);[39m
+[31m+ };[39m
+[31m+[39m
+[31m+[39m
+[31m+ export interface QueryTimelinePrimaryAction {[39m
+[31m+   ballHolder: "agent" | "writer" | null;[39m
+[31m+   markKind?: "partial" | "full" | "resubmit";[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ export interface QueryTimelineProps {[39m
+[31m+   query: Query;[39m
+[31m+   agent: Agent | null;[39m
+[31m+   events: any[];[39m
+[31m+   [39m
+[31m+   primaryAction?: QueryTimelinePrimaryAction;[39m
+[31m+   [39m
+[31m+   onEditEntry?: (entry: TimelineEntryRef) => void;[39m
+[31m+   onDeleteEntry?: (entry: TimelineEntryRef) => void;[39m
+[31m+   [39m
+[31m+   onNudge?: () => void;[39m
+[31m+   [39m
+[31m+   onSetExpectedDate?: (iso: string) => void;[39m
+[31m+   [39m
+[31m+   onEditSendMethod?: (anchor: HTMLElement) => void;[39m
+[31m+   [39m
+[31m+   onSetSendDate?: (anchor: HTMLElement) => void;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+[39m
+[31m+ export function buildTimelineRows(events: any[], query: Query, agent: Agent | null): RowSpec[] {[39m
+[31m+   const validEnumValues = Object.values(QueryStatus);[39m
+[31m+[39m
+[31m+   [39m
+[31m+   const kept = dropSupersededProvisional(events || [], (evt: any) => ({[39m
+[31m+     status: evt?.resultingStatus ?? evt?.type,[39m
+[31m+     provisional: evt?.dateProvisional === true,[39m
+[31m+   }));[39m
+[31m+[39m
+[31m+   const raw = kept.filter((evt) => validEnumValues.includes(evt.type as QueryStatus));[39m
+[31m+   const byType: Record<string, any> = {};[39m
+[31m+   raw.forEach((evt) => {[39m
+[31m+     const t = evt.type as string;[39m
+[31m+     if (!byType[t] || getTime(evt.createdAt) < getTime(byType[t].createdAt)) byType[t] = evt;[39m
+[31m+   });[39m
+[31m+   const statusEvents = Object.values(byType).sort((a, b) => getTime(a.createdAt) - getTime(b.createdAt));[39m
+[31m+[39m
+[31m+   if (!statusEvents.some((e) => e.type === QueryStatus.QUERIED) && query.dateSent) {[39m
+[31m+     statusEvents.unshift({ type: QueryStatus.QUERIED, createdAt: query.dateSent });[39m
+[31m+   }[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+   const queryMaterials: string[] = Array.isArray(query.materialsWanted)[39m
+[31m+     ? (query.materialsWanted as (string | QueryMaterial)[]).map(formatQueryMaterial).filter(Boolean)[39m
+[31m+     : [];[39m
+[31m+[39m
+[31m+   const statusRows: RowSpec[] = statusEvents.map((evt, i) => {[39m
+[31m+     const status = evt.type as QueryStatus;[39m
+[31m+     const baseTitle = TL_TITLES[status] || status;[39m
+[31m+     const title = status === QueryStatus.FULL_SENT && (query.revisionRound ?? 1) >= 2 ? `${baseTitle} (v${query.revisionRound})` : baseTitle;[39m
+[31m+     let sub: string | undefined;[39m
+[31m+     [39m
+[31m+     if (status === QueryStatus.QUERIED) sub = sendMethodLabel(query.sendMethod) || "Email";[39m
+[31m+     else if (status === QueryStatus.PARTIAL_REQUESTED || status === QueryStatus.FULL_REQUESTED) sub = `${agent?.name?.split(" ")[0] || "The agent"} asked for ${status === QueryStatus.PARTIAL_REQUESTED ? "a partial" : "the full"}`;[39m
+[31m+     return {[39m
+[31m+       key: `s-${status}-${i}`,[39m
+[31m+       status,[39m
+[31m+       title,[39m
+[31m+       date: fmtShort(getTime(evt.createdAt)),[39m
+[31m+       sub,[39m
+[31m+       pills: status === QueryStatus.QUERIED && queryMaterials.length ? queryMaterials : undefined,[39m
+[31m+       subEditable: status === QueryStatus.QUERIED,[39m
+[31m+       activityId: typeof evt.id === "string" ? evt.id : undefined, // synthesised root has no id[39m
+[31m+       dateISO: isoDay(getTime(evt.createdAt)),[39m
+[31m+       note: typeof evt.note === "string" ? evt.note : "",[39m
+[31m+       timeMs: getTime(evt.createdAt),[39m
+[31m+     };[39m
+[31m+   });[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+   const nudgeRows: RowSpec[] = (events || [])[39m
+[31m+     .filter((evt) => evt.type === NUDGE_NESTED_TYPE)[39m
+[31m+     .map((evt, i) => ({[39m
+[31m+       key: `n-${typeof evt.id === "string" ? evt.id : i}`,[39m
+[31m+       kind: "nudge" as const,[39m
+[31m+       status: QueryStatus.QUERIED,[39m
+[31m+       title: "Nudged",[39m
+[31m+       date: fmtShort(getTime(evt.createdAt)),[39m
+[31m+       sub: sendMethodLabel(query.sendMethod) || "Email",[39m
+[31m+       activityId: typeof evt.id === "string" ? evt.id : undefined,[39m
+[31m+       dateISO: isoDay(getTime(evt.createdAt)),[39m
+[31m+       note: typeof evt.note === "string" ? evt.note : "",[39m
+[31m+       timeMs: getTime(evt.createdAt),[39m
+[31m+     }));[39m
+[31m+[39m
+[31m+   [39m
+[31m+   const holdingRows: RowSpec[] = (events || [])[39m
+[31m+     .filter((evt) => evt.type === HOLDING_REPLY_NESTED_TYPE)[39m
+[31m+     .map((evt, i) => ({[39m
+[31m+       key: `h-${typeof evt.id === "string" ? evt.id : i}`,[39m
+[31m+       kind: "holding" as const,[39m
+[31m+       status: QueryStatus.PARTIAL_REQUESTED, // decorative only — the incoming ring[39m
+[31m+       title: HOLDING_REPLY_LABEL,[39m
+[31m+       date: fmtShort(getTime(evt.createdAt)),[39m
+[31m+       activityId: typeof evt.id === "string" ? evt.id : undefined,[39m
+[31m+       dateISO: isoDay(getTime(evt.createdAt)),[39m
+[31m+       [39m
+[31m+       note: typeof evt.note === "string" ? evt.note : "",[39m
+[31m+       timeMs: getTime(evt.createdAt),[39m
+[31m+     }));[39m
+[31m+[39m
+[31m+   const merged = [...statusRows, ...nudgeRows, ...holdingRows].sort((a, b) => (a.timeMs ?? 0) - (b.timeMs ?? 0));[39m
+[31m+[39m
+[31m+   [39m
+[31m+   return merged.map((row) => (row.kind === "nudge"[39m
+[31m+     ? { ...row, title: nudgeOutcomeLabel(row.timeMs ?? 0, merged) }[39m
+[31m+     : row));[39m
+[31m+ }[39m
+[31m+[39m
+[31m+[39m
+[31m+[39m
+[31m+ const TlEvent: React.FC<{ last?: boolean; minor?: boolean; mark: React.ReactNode; children: React.ReactNode }> = ({ last = false, minor = false, mark, children }) => ([39m
+[31m+   <div className={`tl-ev${last ? " tl-ev--last" : ""}${minor ? " tl-ev--minor" : ""}`}>[39m
+[31m+     <div className="tl-evmark">{mark}</div>[39m
+[31m+     [39m
+[31m+     <div className="tl-evline" aria-hidden="true" />[39m
+[31m+     {children}[39m
+[31m+   </div>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+ export const TimelineRows: React.FC<{[39m
+[31m+   rows: RowSpec[];[39m
+[31m+   onMenuOpen?: (entry: TimelineEntryRef, style: React.CSSProperties) => void;[39m
+[31m+   [39m
+[31m+   continues?: boolean;[39m
+[31m+   onEditSendMethod?: (anchor: HTMLElement) => void;[39m
+[31m+   [39m
+[31m+   sentExtra?: React.ReactNode;[39m
+[31m+   [39m
+[31m+   chaptered?: boolean;[39m
+[31m+ }> = ({ rows, onMenuOpen, continues = false, onEditSendMethod, sentExtra, chaptered = false }) => {[39m
+[31m+   [39m
+[31m+   const book = chaptered ? chapterise(rows) : null;[39m
+[31m+   const render = (row: RowSpec, isLast: boolean) => {[39m
+[31m+       [39m
+[31m+       const showsExtra = !!sentExtra && row.status === QueryStatus.QUERIED && !row.kind;[39m
+[31m+       [39m
+[31m+       if (row.kind) {[39m
+[31m+         return ([39m
+[31m+           <TlEvent key={row.key} last={isLast} minor mark={<span className="tl-minormark" aria-hidden="true" />}>[39m
+[31m+             [39m
+[31m+             <div className="tl-rowbody">[39m
+[31m+               <div className="tl-r1">[39m
+[31m+                 <span className="tl-ttl tl-ttl--quiet">{row.title}</span>[39m
+[31m+                 <span className="tl-meta">[39m
+[31m+                   {row.date && <span>{row.date}</span>}[39m
+[31m+                   {row.activityId && onMenuOpen && ([39m
+[31m+                     <span className="f12-popwrap" style={{ display: "inline-flex" }}>[39m
+[31m+                       <button[39m
+[31m+                         type="button"[39m
+[31m+                         className="tl-more"[39m
+[31m+                         aria-label="Correct this entry"[39m
+[31m+                         title="Correct this entry"[39m
+[31m+                         onClick={(e) => {[39m
+[31m+                           const r = e.currentTarget.getBoundingClientRect();[39m
+[31m+                           onMenuOpen([39m
+[31m+                             { activityId: row.activityId!, status: row.status, label: row.title, dateISO: row.dateISO || "", note: row.note || "" },[39m
+[31m+                             { position: "fixed", top: r.bottom + 4, left: Math.max(8, r.right - 184) },[39m
+[31m+                           );[39m
+[31m+                         }}[39m
+[31m+                       >⋯</button>[39m
+[31m+                     </span>[39m
+[31m+                   )}[39m
+[31m+                 </span>[39m
+[31m+               </div>[39m
+[31m+             </div>[39m
+[31m+           </TlEvent>[39m
+[31m+         );[39m
+[31m+       }[39m
+[31m+       return ([39m
+[31m+         <TlEvent key={row.key} last={isLast} mark={<StatusDot status={row.status} overrideSize={TL_MARK} />}>[39m
+[31m+           <div className="tl-rowbody">[39m
+[31m+             <div className="tl-r1">[39m
+[31m+               [39m
+[31m+               <span className="tl-ttl">{row.title}</span>[39m
+[31m+               [39m
+[31m+               {row.subEditable && row.sub && onEditSendMethod && ([39m
+[31m+                 <span className="tl-qual">[39m
+[31m+                   {"· "}[39m
+[31m+                   <button type="button" className="qp-inplace" onClick={(e) => onEditSendMethod(e.currentTarget)} title="Change how this query was sent">{row.sub}</button>[39m
+[31m+                 </span>[39m
+[31m+               )}[39m
+[31m+               <span className="tl-meta">[39m
+[31m+                 {row.date && <span>{row.date}</span>}[39m
+[31m+                 {row.activityId && onMenuOpen && ([39m
+[31m+                   <span className="f12-popwrap" style={{ display: "inline-flex" }}>[39m
+[31m+                     <button[39m
+[31m+                       type="button"[39m
+[31m+                       className="tl-more"[39m
+[31m+                       aria-label="Correct this entry"[39m
+[31m+                       title="Correct this entry"[39m
+[31m+                       onClick={(e) => {[39m
+[31m+                         const r = e.currentTarget.getBoundingClientRect();[39m
+[31m+                         onMenuOpen([39m
+[31m+                           { activityId: row.activityId!, status: row.status, label: row.title, dateISO: row.dateISO || "", note: row.note || "" },[39m
+[31m+                           { position: "fixed", top: r.bottom + 4, left: Math.max(8, r.right - 184) },[39m
+[31m+                         );[39m
+[31m+                       }}[39m
+[31m+                     >⋯</button>[39m
+[31m+                   </span>[39m
+[31m+                 )}[39m
+[31m+               </span>[39m
+[31m+             </div>[39m
+[31m+             [39m
+[31m+             <div className="tl-body">[39m
+[31m+             [39m
+[31m+             {row.sub && !(row.subEditable && onEditSendMethod) && <div style={{ fontFamily: "'Inter',sans-serif", fontSize: 12, color: "#9a8d7e" }}>{row.sub}</div>}[39m
+[31m+             [39m
+[31m+             {row.pills && row.pills.length > 0 && !showsExtra && ([39m
+[31m+               <div className="tl-pills" style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{row.pills.map((p, pi) => <MatPill key={pi}>{p}</MatPill>)}</div>[39m
+[31m+             )}[39m
+[31m+             [39m
+[31m+             {showsExtra && sentExtra}[39m
+[31m+             </div>[39m
+[31m+           </div>[39m
+[31m+         </TlEvent>[39m
+[31m+       );[39m
+[31m+   };[39m
+[31m+[39m
+[31m+   if (!book) return <>{rows.map((row, i) => render(row, i === rows.length - 1 && !continues))}</>;[39m
+[31m+[39m
+[31m+   return ([39m
+[31m+     <>[39m
+[31m+       {book.chapters.map((chapter, ci) => {[39m
+[31m+         const lastChapter = ci === book.chapters.length - 1;[39m
+[31m+         return ([39m
+[31m+           <div className="tl-chap" key={ci}>[39m
+[31m+             [39m
+[31m+             {book.labelled && <div className="tl-chaplab">{chapter.label}</div>}[39m
+[31m+             {chapter.rows.map((row, ri) => {[39m
+[31m+               [39m
+[31m+               const endsChapter = ri === chapter.rows.length - 1;[39m
+[31m+               return render(row, endsChapter && !(lastChapter && continues));[39m
+[31m+             })}[39m
+[31m+           </div>[39m
+[31m+         );[39m
+[31m+       })}[39m
+[31m+     </>[39m
+[31m+   );[39m
+[31m+ };[39m
+[31m+[39m
+[31m+[39m
+[31m+ const TlProjection: React.FC<{[39m
+[31m+   status: QueryStatus | string;[39m
+[31m+   title: string;[39m
+[31m+   date?: string;[39m
+[31m+   [39m
+[31m+   qual?: React.ReactNode;[39m
+[31m+   last?: boolean;[39m
+[31m+   [39m
+[31m+   tone?: "sage" | "oat";[39m
+[31m+   [39m
+[31m+   est?: boolean;[39m
+[31m+   children?: React.ReactNode;[39m
+[31m+ }> = ({ status, title, date, qual, last = false, tone, est = false, children }) => ([39m
+[31m+   <TlEvent last={last} mark={tone[39m
+[31m+     ? <span className={`tl-waitmark tl-waitmark--${tone}${est ? " tl-waitmark--est" : ""}`} aria-hidden="true">[39m
+[31m+         <svg viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4A2 2 0 0 0 17 6.2V2" /></svg>[39m
+[31m+       </span>[39m
+[31m+     : <StatusDot status={status} overrideSize={TL_MARK} ghost decorative />}>[39m
+[31m+     [39m
+[31m+     <div className="tl-rowbody">[39m
+[31m+       <div className="tl-r1">[39m
+[31m+         <span className="tl-ttl tl-ttl--quiet">{title}</span>[39m
+[31m+         {qual}[39m
+[31m+         {date && <span className="tl-meta">{date}</span>}[39m
+[31m+       </div>[39m
+[31m+       <div className="tl-body">{children}</div>[39m
+[31m+     </div>[39m
+[31m+   </TlEvent>[39m
+[31m+ );[39m
+[31m+[39m
+[31m+[39m
+[31m+ const SET_WINDOW_MAX = 16;[39m
+[31m+ const SetWindow: React.FC<{ anchorMs: number; onSave: (iso: string) => void }> = ({ anchorMs, onSave }) => {[39m
+[31m+   const [open, setOpen] = useState(false);[39m
+[31m+   const [weeks, setWeeks] = useState(6);[39m
+[31m+   const resolved = anchorMs + weeks * 7 * 86400000;[39m
+[31m+[39m
+[31m+   if (!open) {[39m
+[31m+     return ([39m
+[31m+       <div className="tl-ask">[39m
+[31m+         <span>Enter an expected response date for more accurate tracking</span>[39m
+[31m+         <button type="button" className="tl-ask-a" onClick={() => setOpen(true)}>Set a date</button>[39m
+[31m+       </div>[39m
+[31m+     );[39m
+[31m+   }[39m
+[31m+   return ([39m
+[31m+     <div[39m
+[31m+       className="tl-setwin"[39m
+[31m+       onKeyDown={(e) => {[39m
+[31m+         if (e.key === "Enter") { e.preventDefault(); onSave(new Date(resolved).toISOString()); setOpen(false); }[39m
+[31m+         if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); setOpen(false); }[39m
+[31m+       }}[39m
+[31m+     >[39m
+[31m+       [39m
+[31m+       <WeekSlider label="Your expected response time" value={weeks} onChange={setWeeks} min={1} max={SET_WINDOW_MAX} />[39m
+[31m+       <div className="tl-setwin-val">around {exactDate(resolved).replace(/ \d{4}$/, "")}</div>[39m
+[31m+       <div className="tl-setwin-k">Enter to save · Esc to cancel</div>[39m
+[31m+     </div>[39m
+[31m+   );[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ export const QueryTimeline: React.FC<QueryTimelineProps & {[39m
+[31m+   sentExtra?: React.ReactNode;[39m
+[31m+   onMarkClosed?: () => void;[39m
+[31m+   [39m
+[31m+   onKeepTracking?: () => void;[39m
+[31m+   [39m
+[31m+   reminder?: ReminderTask | null;[39m
+[31m+   [39m
+[31m+   onOpenReminder?: () => void;[39m
+[31m+   [39m
+[31m+   onRemindLater?: () => void;[39m
+[31m+ }> = ({ query, agent, events, primaryAction, onEditEntry, onDeleteEntry, onNudge, onSetExpectedDate, onEditSendMethod, onSetSendDate, sentExtra, onMarkClosed, onKeepTracking, reminder = null, onOpenReminder, onRemindLater }) => {[39m
+[31m+   const [menu, setMenu] = useState<{ entry: TimelineEntryRef; style: React.CSSProperties } | null>(null);[39m
+[31m+[39m
+[31m+   const rows = buildTimelineRows(events, query, agent);[39m
+[31m+[39m
+[31m+[39m
+[31m+   const ballHolder = primaryAction?.ballHolder ?? null;[39m
+[31m+   [39m
+[31m+   [39m
+[31m+   const ambient = queryAmbientStatus(query, ballHolder, primaryAction?.markKind, Date.now(), agent?.responseTimeWeeks, events);[39m
+[31m+   const waiting = ambient.mode === "waiting" ? ambient : null;[39m
+[31m+   const sendWhat = ambient.sendWhat;[39m
+[31m+[39m
+[31m+   [39m
+[31m+   const nudges = nudgeTimes(events, NUDGE_NESTED_TYPE, (v) => getTime(v));[39m
+[31m+   [39m
+[31m+   const holdingTimes = holdingReplyTimes(events as never);[39m
+[31m+   const lastHoldingReplyMs = holdingTimes.length ? holdingTimes[holdingTimes.length - 1] : null;[39m
+[31m+   const offer = closureOffer({[39m
+[31m+     times: nudges,[39m
+[31m+     [39m
+[31m+     repliedSinceMs: lastHoldingReplyMs,[39m
+[31m+     [39m
+[31m+     windowExpiredMs: waiting?.windowStated ? waiting.expMs ?? null : null,[39m
+[31m+     now: Date.now(),[39m
+[31m+     dismissed: (query as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,[39m
+[31m+     [39m
+[31m+     policy: agent?.noResponseMeansNo,[39m
+[31m+     [39m
+[31m+     reminderScheduled: !!reminder,[39m
+[31m+   });[39m
+[31m+[39m
+[31m+   const sage = waiting ? !waiting.overdue : true; // sage within window, calm grey once past it[39m
+[31m+   const wcol = sage[39m
+[31m+     ? { pillBg: "#eef2ec", pillBd: "#cdd9c8", pillTx: "#3f5340", dim: "#5a6e58", barBg: "#e6ece4", barFill: "linear-gradient(90deg,#a9c0a4,#8aa886)" }[39m
+[31m+     : { pillBg: "#eee9e2", pillBd: "#ddd4c6", pillTx: "#6a5f52", dim: "#8a7d6c", barBg: "#e7e0d6", barFill: "linear-gradient(90deg,#bdb3a4,#a89c8a)" };[39m
+[31m+[39m
+[31m+   return ([39m
+[31m+     <div>[39m
+[31m+       [39m
+[31m+       [39m
+[31m+       <TimelineRows[39m
+[31m+         rows={rows}[39m
+[31m+         chaptered[39m
+[31m+         onEditSendMethod={onEditSendMethod}[39m
+[31m+         onMenuOpen={onEditEntry || onDeleteEntry ? (entry, style) => setMenu({ entry, style }) : undefined}[39m
+[31m+         continues={ballHolder === "agent" && !!waiting}[39m
+[31m+         sentExtra={sentExtra}[39m
+[31m+       />[39m
+[31m+[39m
+[31m+       [39m
+[31m+       [39m
+[31m+       {ballHolder === "agent" && waiting && (() => {[39m
+[31m+         const now = Date.now();[39m
+[31m+         const who = chasedBy(agent);[39m
+[31m+         [39m
+[31m+         [39m
+[31m+         [39m
+[31m+         const statedWeeks = typeof agent?.responseTimeWeeks === "number" && agent.responseTimeWeeks > 0[39m
+[31m+           ? agent.responseTimeWeeks : null;[39m
+[31m+         const stated = waiting.windowStated;[39m
+[31m+         const past = stated && waiting.overdue;[39m
+[31m+         [39m
+[31m+         const dated = stated && waiting.sentMs != null && waiting.expMs != null;[39m
+[31m+         const pct = dated ? Math.max(0, Math.min(100, ((now - waiting.sentMs!) / (waiting.expMs! - waiting.sentMs!)) * 100)) : 0;[39m
+[31m+[39m
+[31m+         return ([39m
+[31m+           <TlProjection[39m
+[31m+             status={query.status}[39m
+[31m+             title={past ? "No reply" : "Waiting to hear back"}[39m
+[31m+             date={waiting.sentMs != null ? elapsedPhrase(waiting.nDays).toUpperCase() : undefined}[39m
+[31m+             tone={stated && !past ? "sage" : "oat"}[39m
+[31m+             [39m
+[31m+             est={waiting.windowSource === "writer" && !past}[39m
+[31m+             last={!reminder}[39m
+[31m+             [39m
+[31m+             qual={(() => {[39m
+[31m+               const a = windowAttribution({[39m
+[31m+                 source: waiting.windowSource, who, weeks: statedWeeks, expMs: waiting.expMs, past: !!past, formatDate: exactDate,[39m
+[31m+               });[39m
+[31m+               return a ? <span className="tl-qual">— {a.lead}<b>{a.strong}</b></span> : undefined;[39m
+[31m+             })()}[39m
+[31m+           >[39m
+[31m+[39m
+[31m+             [39m
+[31m+             {!stated ? ([39m
+[31m+               [39m
+[31m+               <>[39m
+[31m+                 <div className="tl-wbody">{who.name} {who.plural ? "do" : "does"} not state a response time.</div>[39m
+[31m+                 {onSetExpectedDate && ([39m
+[31m+                   <SetWindow anchorMs={waiting.sentMs ?? now} onSave={onSetExpectedDate} />[39m
+[31m+                 )}[39m
+[31m+               </>[39m
+[31m+             ) : dated ? ([39m
+[31m+               [39m
+[31m+               <div>[39m
+[31m+                 [39m
+[31m+                 <div className={`tl-wbar${past ? " tl-wbar--past" : ""}${waiting.windowSource === "writer" ? " tl-wbar--est" : ""}`}><i style={{ width: `${past ? 100 : pct}%` }} /></div>[39m
+[31m+                 <div className="tl-wbarf">[39m
+[31m+                   [39m
+[31m+                   <span>{waiting.anchorKind === "reply" ? "Replied" : "Sent"} {fmtShort(waiting.sentMs!)}</span>[39m
+[31m+                   [39m
+[31m+                   <span>{waiting.windowSource === "writer"[39m
+[31m+                     ? `Your estimate · ${fmtShort(waiting.expMs!)}`[39m
+[31m+                     : past ? `Window expired ${fmtShort(waiting.expMs!)}` : `Expected by ~${fmtShort(waiting.expMs!)}`}</span>[39m
+[31m+                 </div>[39m
+[31m+               </div>[39m
+[31m+             ) : ([39m
+[31m+               [39m
+[31m+               <>[39m
+[31m+                 <div className="tl-wbody">No send date recorded, so this window can&rsquo;t be measured.</div>[39m
+[31m+                 {onSetSendDate && ([39m
+[31m+                   <div className="tl-ask">[39m
+[31m+                     <span>Add the date you sent it and the bar will fill</span>[39m
+[31m+                     <button type="button" className="tl-ask-a" onClick={(e) => onSetSendDate(e.currentTarget)}>Set send date</button>[39m
+[31m+                   </div>[39m
+[31m+                 )}[39m
+[31m+               </>[39m
+[31m+             )}[39m
+[31m+[39m
+[31m+             [39m
+[31m+             {(() => {[39m
+[31m+               const line = pastWindowLine(waiting.expMs, now, stated, lastHoldingReplyMs);[39m
+[31m+               return line ? <div className="tl-pastfig"><b>{line.figure}</b> {line.tail}</div> : null;[39m
+[31m+             })()}[39m
+[31m+[39m
+[31m+             [39m
+[31m+             {(() => {[39m
+[31m+               const policy = silencePolicyLine({[39m
+[31m+                 [39m
+[31m+                 policy: agent?.noResponseMeansNo, who, windowExpiredMs: waiting.expMs ?? null, now, formatDate: exactDate,[39m
+[31m+                 repliedSinceMs: lastHoldingReplyMs,[39m
+[31m+               });[39m
+[31m+               return policy ? <div className="tl-conv">{policy}</div> : null;[39m
+[31m+             })()}[39m
+[31m+[39m
+[31m+             [39m
+[31m+             {nudges.length > 0 && <div className="tl-nhist">{nudgeHistoryLine(nudges, (ms) => fmtShort(ms).toUpperCase())}</div>}[39m
+[31m+[39m
+[31m+             [39m
+[31m+             {offer.show && ([39m
+[31m+               <div className="tl-offer">[39m
+[31m+                 <div className="tl-offer-f">{offer.facts}</div>[39m
+[31m+                 <div className="tl-offer-a">[39m
+[31m+                   {onMarkClosed && <button type="button" className="tl-offer-go" onClick={onMarkClosed}>Mark closed</button>}[39m
+[31m+                   {onKeepTracking && <button type="button" className="tl-offer-keep" onClick={onKeepTracking}>Keep tracking</button>}[39m
+[31m+                 </div>[39m
+[31m+               </div>[39m
+[31m+             )}[39m
+[31m+[39m
+[31m+             [39m
+[31m+             {past && !offer.show && (() => {[39m
+[31m+               const next = nextStepOffer({[39m
+[31m+                 times: nudges, reminder, now,[39m
+[31m+                 dismissed: (query as { closureOfferDismissed?: boolean }).closureOfferDismissed === true,[39m
+[31m+               });[39m
+[31m+               if (!next.show) return null;[39m
+[31m+               return ([39m
+[31m+                 <div className="tl-offer">[39m
+[31m+                   <div className="tl-offer-f">{next.facts}</div>[39m
+[31m+                   <div className="tl-offer-a">[39m
+[31m+                     {onNudge && <button type="button" className="tl-offer-go" onClick={onNudge}>Nudge now</button>}[39m
+[31m+                     {onRemindLater && <button type="button" className="tl-offer-keep" onClick={onRemindLater}>Remind me later</button>}[39m
+[31m+                     {onMarkClosed && <button type="button" className="tl-offer-keep" onClick={onMarkClosed}>Mark closed</button>}[39m
+[31m+                   </div>[39m
+[31m+                 </div>[39m
+[31m+               );[39m
+[31m+             })()}[39m
+[31m+           </TlProjection>[39m
+[31m+         );[39m
+[31m+       })()}[39m
+[31m+[39m
+[31m+       [39m
+[31m+       {ballHolder === "agent" && waiting && reminder && ([39m
+[31m+         <div className="tl-ev tl-ev--ghost tl-ev--last">[39m
+[31m+           <div className="tl-evmark"><span className="tl-ghostmark" aria-hidden="true">🔔</span></div>[39m
+[31m+           [39m
+[31m+           <div className="tl-rowbody">[39m
+[31m+             {onOpenReminder ? ([39m
+[31m+               <button type="button" className="tl-ghostpanel" onClick={onOpenReminder} title="Open this reminder on your to-do list">[39m
+[31m+                 <span className="tl-ghostwho">Nudge reminder set</span>[39m
+[31m+                 <span className="tl-ghostwhen">{reminder.dueDate ? fmtDay(new Date(`${reminder.dueDate}T12:00:00`).getTime()) : ""}</span>[39m
+[31m+               </button>[39m
+[31m+             ) : ([39m
+[31m+               <div className="tl-ghostpanel">[39m
+[31m+                 <span className="tl-ghostwho">Nudge reminder set</span>[39m
+[31m+                 <span className="tl-ghostwhen">{reminder.dueDate ? fmtDay(new Date(`${reminder.dueDate}T12:00:00`).getTime()) : ""}</span>[39m
+[31m+               </div>[39m
+[31m+             )}[39m
+[31m+           </div>[39m
+[31m+         </div>[39m
+[31m+       )}[39m
+[31m+[39m
+[31m+       {ballHolder === "writer" && ([39m
+[31m+         [39m
+[31m+         [39m
+[31m+         <div style={{ marginLeft: 4, marginTop: "var(--tl-gap)" }}>[39m
+[31m+           <div style={{ background: "var(--pink, #f5e2da)", border: "1px solid var(--ink, #1e1a16)", borderRadius: 11, padding: "12px 14px" }}>[39m
+[31m+             <span style={{ fontFamily: FONT_SERIF, fontWeight: 600, fontSize: 15, color: "var(--ink, #1e1a16)" }}>Your move — send the {sendWhat}</span>[39m
+[31m+             {ambient.writerDaysAgo != null && ([39m
+[31m+               <small style={{ display: "block", fontWeight: 500, fontSize: 11.5, color: "var(--burg, #7c3a2a)", marginTop: 3 }}>[39m
+[31m+                 {agent?.name?.split(" ")[0] || "The agent"} asked for it {elapsedPhrase(ambient.writerDaysAgo)} ago[39m
+[31m+               </small>[39m
+[31m+             )}[39m
+[31m+           </div>[39m
+[31m+         </div>[39m
+[31m+       )}[39m
+[31m+       [39m
+[31m+[39m
+[31m+       [39m
+[31m+       {menu && ([39m
+[31m+         <F12Menu[39m
+[31m+           open[39m
+[31m+           onClose={() => setMenu(null)}[39m
+[31m+           style={menu.style}[39m
+[31m+           ariaLabel="Correct entry"[39m
+[31m+           [39m
+[31m+           items={[[39m
+[31m+             ...(onEditEntry ? [{ label: "Edit", icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>, onClick: () => onEditEntry(menu.entry) }] : []),[39m
+[31m+             { label: "Delete…", danger: true, icon: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" /></svg>, onClick: () => onDeleteEntry?.(menu.entry) },[39m
+[31m+           ]}[39m
+[31m+         />[39m
+[31m+       )}[39m
+[31m+     </div>[39m
+[31m+   );[39m
+[31m+ };[39m
+[31m+[39m
+
+ ❯ src/lib/queryCentreWaiting.test.ts:77:41
+     75|     }
+     76|     /* the one bar: a fill to the elapsed proportion, and a spent hatc…
+     77|     expect(tl, "the wait lost its bar").toContain('className={`tl-wbar…
+       |                                         ^
+     78|     expect(tl, "the bar is not gated on a real window").toContain("con…
+     79|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/24]⎯
+
+ FAIL  src/lib/todoCalendar.test.ts > ⚠️ the fold threshold derives from the cell, never from a flat constant > a tall row shows the ceiling; a short one folds sooner
+AssertionError: expected 2 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 2[39m
+
+ ❯ src/lib/todoCalendar.test.ts:234:28
+    232|     expect(calFoldCap(108)).toBe(3);            // room 75 — exactly t…
+    233|     expect(calFoldCap(95)).toBe(2);             // room 62 — two
+    234|     expect(calFoldCap(70)).toBe(1);             // room 37 — one
+       |                            ^
+    235|     expect(calFoldCap(46)).toBe(1);             // room 13 — the floor…
+    236|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/24]⎯
+
+ FAIL  src/lib/todoCalendar.test.ts > ⚠️ the fold threshold derives from the cell, never from a flat constant > ⚠️ AT LEAST ONE PIP ALWAYS SHOWS — a cell that folds everything says only '+3 MORE'
+AssertionError: expected 2 to be 1 // Object.is equality
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 1[39m
+[31m+ 2[39m
+
+ ❯ src/lib/todoCalendar.test.ts:254:28
+    252|     /* which tells you the day is busy but not what it holds — the fol…
+    253|        list, not replace it. */
+    254|     expect(calFoldCap(30)).toBe(1);
+       |                            ^
+    255|     expect(calFoldCap(1)).toBe(1);
+    256|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ five groups, derived — never a second derivation > the order descends from 'someone is waiting' to 'nothing is waiting'
+AssertionError: expected [ 'urgent', 'housekeeping', …(4) ] to deeply equal [ 'urgent', 'housekeeping', …(3) ]
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[2m  [[22m
+[2m    "urgent",[22m
+[2m    "housekeeping",[22m
+[2m    "yours",[22m
+[2m    "snoozed",[22m
+[31m+   "dismissed",[39m
+[2m    "done",[22m
+[2m  ][22m
+
+ ❯ src/lib/todoGroups.test.ts:36:30
+     34| describe("⚠️ five groups, derived — never a second derivation", () => {
+     35|   it("the order descends from 'someone is waiting' to 'nothing is wait…
+     36|     expect(TASK_GROUP_ORDER).toEqual(["urgent", "housekeeping", "yours…
+       |                              ^
+     37|   });
+     38| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ five groups, derived — never a second derivation > each card lands in exactly ONE group, and the live groups partition the live cards
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:46:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ five groups, derived — never a second derivation > ⚠️ THE BOARD'S To-do/Today SPLIT IS RETIRED, not reproduced — both flatten into the kinds
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:57:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ five groups, derived — never a second derivation > ⚠️ AN EMPTY GROUP DOES NOT RENDER — never a heading over nothing
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:65:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ five groups, derived — never a second derivation > every rendered group carries a name and a PLAIN description, never a caption
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:71:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ only Housekeeping folds — and never what needs you now > housekeeping opens at a readable length and says what it holds back
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:110:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ only Housekeeping folds — and never what needs you now > ⚠️ THE URGENT GROUP IS NEVER FOLDED — hiding what needs you now is the one thing forbidden
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:120:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ only Housekeeping folds — and never what needs you now > a short housekeeping group offers no fold at all
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:127:15
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ the stat chips — one derivation, cards as the unit > ⚠️ 'Outstanding' IS NOT the sum of the visible groups, and that is deliberate
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:152:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE CHIPS ARE THE GROUPS PLUS 'ALL' — never a second facet vocabulary > the order, and the words, come from the group meta rather than from literals
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ railChips src/lib/todoGroups.ts:178:18
+ ❯ src/lib/todoGroups.test.ts:190:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE CHIPS ARE THE GROUPS PLUS 'ALL' — never a second facet vocabulary > each chip's count IS its group's card count
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:209:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE CHIPS ARE THE GROUPS PLUS 'ALL' — never a second facet vocabulary > ⚠️ 'ALL' IS WHAT IS OUTSTANDING — the three live kinds, not the sum of every group
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ railChips src/lib/todoGroups.ts:178:18
+ ❯ src/lib/todoGroups.test.ts:225:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE CHIPS ARE THE GROUPS PLUS 'ALL' — never a second facet vocabulary > the Snoozed chip renders only when something is asleep; the kinds render at zero
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ railChips src/lib/todoGroups.ts:178:18
+ ❯ src/lib/todoGroups.test.ts:237:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE CHIPS ARE THE GROUPS PLUS 'ALL' — never a second facet vocabulary > ⚠️ DONE IS NOT A CHIP — you do not look FOR finished work, and All is where it is
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ railChips src/lib/todoGroups.ts:178:18
+ ❯ src/lib/todoGroups.test.ts:247:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE CHIPS ARE THE GROUPS PLUS 'ALL' — never a second facet vocabulary > a chip shows its own group and nothing else; All shows everything
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:254:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE SNOOZED PARTITION AT THE BOUNDARY DATE > a card returning today is live, and appears in exactly one group
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:298:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE SNOOZED PARTITION AT THE BOUNDARY DATE > a card still asleep is in Snoozed and NOWHERE else
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:306:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/24]⎯
+
+ FAIL  src/lib/todoGroups.test.ts > ⚠️ THE SNOOZED PARTITION AT THE BOUNDARY DATE > no card is counted twice — the chips and the panels agree at the boundary
+TypeError: Cannot read properties of undefined (reading 'length')
+ ❯ src/lib/todoGroups.ts:118:36
+    116| 
+    117|   const all: TaskGroup[] = TASK_GROUP_ORDER.map((id) => ({ id, ...TASK…
+    118|   return all.filter((g) => g.cards.length > 0);
+       |                                    ^
+    119| }
+    120| 
+ ❯ taskGroups src/lib/todoGroups.ts:118:14
+ ❯ src/lib/todoGroups.test.ts:320:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/24]⎯
+
+ FAIL  src/components/todo/tasksAuditBoundary.test.tsx > ⚠️ the choke: day-level, one clock — yesterday / TODAY / tomorrow > ⚠️ every consumer reads THIS boundary: the engine's suppression delegates; no instant compare survives
+AssertionError: expected '/**\n * @license\n * SPDX-License-Ide…' to contain 'export function isFlagSuppressing(fla…'
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- [7mexport function isFlagSuppressing(flag: TaskFlag[27m, now: number): boolean {[39m
+[31m+ /**[39m
+[31m+  * @license[39m
+[31m+  * SPDX-License-Identifier: Apache-2.0[39m
+[31m+  *[39m
+[31m+  * taskFlags — pure helpers for the stance store (`users/{uid}/taskFlags`): the deterministic doc-id[39m
+[31m+  * composite, the derived-task ↔ flag match, and whether a flag currently suppresses its task. The[39m
+[31m+  * components (taskType/queryId/agentId/rule) are stored as FIELDS as well as folded into the id, so[39m
+[31m+  * re-deriving the id later is a migration, not data loss. See `TaskFlag` in types.ts.[39m
+[31m+  */[39m
+[31m+[39m
+[31m+ import { TaskFlag, DismissedTask } from "../types";[39m
+[31m+[39m
+[31m+ /** Derived task types keyed to an AGENT record (its relatedRecordId is an agentId). */[39m
+[31m+ const AGENT_TASK_TYPES: ReadonlySet<string> = new Set(["data_quality_poor", "dream_agent_unqueried"]);[39m
+[31m+[39m
+[31m+ /** A far-future snooze that reads as "muted indefinitely" (until the Phase 5 mute model lands). */[39m
+[31m+ export const MUTED_UNTIL = "3000-01-01T00:00:00.000Z";[39m
+[31m+[39m
+[31m+ export interface TaskFlagKey {[39m
+[31m+   taskType: string;[39m
+[31m+   queryId?: string;[39m
+[31m+   agentId?: string;[39m
+[31m+   rule?: string;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /** Deterministic composite id. Firestore-safe (fields are snake_case / ids), re-derivable. */[39m
+[31m+ export function taskFlagId(key: TaskFlagKey): string {[39m
+[31m+   return [key.taskType, `q_${key.queryId ?? ""}`, `a_${key.agentId ?? ""}`, `r_${key.rule ?? ""}`].join("__");[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /** The flag key for a derived engine Task — classifies relatedRecordId as query- vs agent-court. */[39m
+[31m+ export function flagKeyForTask(taskType: string, relatedRecordId: string): TaskFlagKey {[39m
+[31m+   return AGENT_TASK_TYPES.has(taskType) ? { taskType, agentId: relatedRecordId } : { taskType, queryId: relatedRecordId };[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /** Does this flag point at that derived task? (matches on the stored components, not the id). */[39m
+[31m+ export function flagMatchesTask(flag: TaskFlag, taskType: string, relatedRecordId: string): boolean {[39m
+[31m+   if (flag.taskType !== taskType) return false;[39m
+[31m+   return flag.queryId === relatedRecordId || flag.agentId === relatedRecordId;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /** Should this flag hide its derived task right now? — snoozed into the future (far-future = muted). */[39m
+[31m+ /* ── THE RETURN BOUNDARY (tasks-audit P1) — the ONE classification every consumer uses ─────────[39m
+[31m+    ⚠️ THE BUG THIS SETTLES: nothing owned the boundary. The engine suppressed by the INSTANT[39m
+[31m+    (`until > now`) while other readers compared their own ways, and an offer's quiet-reminder flag[39m
+[31m+    (which never suppresses — "I need time" keeps the card on the board, quieter) was ALSO picked[39m
+[31m+    up by the flags-built Snoozed column: "Tom Ellery has made an offer" rendered in BOTH To do and[39m
+[31m+    Snoozed, twice in the calendar's today cell.[39m
+[31m+    THE LAW: the boundary is the DAY, from the same local clock the calendar uses. An item with[39m
+[31m+    snoozedUntil on a day AFTER today is SLEEPING; on today or before it is RETURNED — it renders[39m
+[31m+    once, in the lanes, carrying the return chip on the return day only. No stored state flips:[39m
+[31m+    the same derivation answers differently after midnight. */[39m
+[31m+[39m
+[31m+ const localYmdOf = (ms: number): string => {[39m
+[31m+   const d = new Date(ms);[39m
+[31m+   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;[39m
+[31m+ };[39m
+[31m+[39m
+[31m+ /** SLEEPING: the return day is still ahead. (Day-level — "BACK 7 AUG" on 7 Aug means BACK.) */[39m
+[31m+ [7mexport function flagSleeps(flag: Pick<TaskFlag, "snoozedUntil">[27m, now[7mMs[27m: number): boolean {[39m
+[32m-   [7mreturn flagSleeps(flag, now);[27m[39m
+[32m- }[39m
+[31m+   [7mif (!flag.snoozedUntil) return false;[27m[39m
+[31m+   const until = Date.parse(flag.snoozedUntil);[39m
+[31m+   if (Number.isNaN(until)) return false;[39m
+[31m+   return localYmdOf(until) > localYmdOf(nowMs); // YYYY-MM-DD compares lexically[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /** RETURNED TODAY: the return day IS today — the chip + the parchment pip, this day only. */[39m
+[31m+ export function flagReturnedToday(flag: Pick<TaskFlag, "snoozedUntil">, nowMs: number): boolean {[39m
+[31m+   if (!flag.snoozedUntil) return false;[39m
+[31m+   const until = Date.parse(flag.snoozedUntil);[39m
+[31m+   if (Number.isNaN(until)) return false;[39m
+[31m+   return localYmdOf(until) === localYmdOf(nowMs);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /**[39m
+[31m+  * DISMISSED: the writer said no, without a date (pane round, Phase 7).[39m
+[31m+  *[39m
+[31m+  * ⚠️ IT IS ITS OWN STATE, NOT A FAR-FUTURE SNOOZE. `MUTED_UNTIL` already means "muted[39m
+[31m+  * indefinitely" and would have carried a dismissal with no schema change at all — but it is what[39m
+[31m+  * the housekeeping GROUP MUTE writes, so reusing it would have retitled every muted rule group as[39m
+[31m+  * "dismissed" the moment the filter learned the word. Two acts, two fields, and the writer's own[39m
+[31m+  * distinction between "not this group, ever" and "not this task" survives.[39m
+[31m+  *[39m
+[31m+  * ⚠️ AND `skippedAt` NEEDED NO RULES DEPLOY: it is already in `isValidTaskFlag`'s allowlist, has[39m
+[31m+  * been since the flag store was written, and until now nothing wrote it and nothing read it. A[39m
+[31m+  * field in the allowlist with no writer is exactly what a dismissal wanted.[39m
+[31m+  */[39m
+[31m+ export function flagDismissed(flag: Pick<TaskFlag, "skippedAt">): boolean {[39m
+[31m+   return typeof flag.skippedAt === "string" && flag.skippedAt.length > 0;[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /** ⚠️ DELEGATES to the boundary (tasks-audit P1) — this compared instants, so a snooze written[39m
+[31m+  *  at 09:00 "until tomorrow" returned at 09:00 sharp while day-level readers still called it[39m
+[31m+  *  sleeping. One clock, one boundary, everywhere.[39m
+[31m+  *[39m
+[31m+  *  ⚠️ AND A DISMISSAL SUPPRESSES WITH NO CLOCK AT ALL — "it won't come back on its own" is the[39m
+[31m+  *  promise the confirm dialog makes, so there is no date to compare against. */[39m
+[31m+ export function isFlagSuppressing(flag: TaskFlag, now: number): boolean {[39m
+[31m+   return flagSleeps(flag, now) || flagDismissed(flag);[39m
+[31m+ }[39m
+[31m+[39m
+[31m+ /** Migrate one legacy DismissedTask into a TaskFlag (permanent → indefinite mute; else the snooze). */[39m
+[31m+ export function buildTaskFlagFromDismissed(d: DismissedTask, userId: string): TaskFlag {[39m
+[31m+   const key = flagKeyForTask(d.taskType, d.relatedRecordId);[39m
+[31m+   const snoozedUntil = d.dismissType === "permanent" ? MUTED_UNTIL : d.resurfaceDate;[39m
+[31m+   return {[39m
+[31m+     id: taskFlagId(key),[39m
+[31m+     userId,[39m
+[31m+     taskType: d.taskType,[39m
+[31m+     ...(key.queryId ? { queryId: key.queryId } : {}),[39m
+[31m+     ...(key.agentId ? { agentId: key.agentId } : {}),[39m
+[31m+     snoozeCount: 1,[39m
+[31m+     ...(snoozedUntil ? { snoozedUntil } : {}),[39m
+[31m+   };[39m
+[31m+ }[39m
+[31m+[39m
+
+ ❯ src/components/todo/tasksAuditBoundary.test.tsx:65:22
+     63|   });
+     64| 
+     65|   it("⚠️ every consumer reads THIS boundary: the engine's suppression …
+       |                      ^
+     66|     /* ⚠️ THE CLAIM IS THE DELEGATION, NOT THE BODY (pane round, Phase…
+     67|        function verbatim, so it went red the day a SECOND state was ad…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/24]⎯
+
+
+ Test Files  6 failed | 333 passed (339)
+      Tests  24 failed | 5757 passed | 2 skipped (5783)
+   Start at  11:00:00
+   Duration  298.16s (transform 315.93s, setup 0ms, collect 921.38s, tests 77.15s, environment 84ms, prepare 113.82s)
+

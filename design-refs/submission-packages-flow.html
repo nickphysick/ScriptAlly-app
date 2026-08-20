@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submission packages — ecosystem flow mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7;
+    --white:#ffffff;
+    --sage-a:#d7ddd5;
+    --sage-b:#d5dbd3;
+    --sage-deep:#9aa896;
+    --sage-ink:#5c7053;
+    --pink-band:#f3e0d6;
+    --pink-cta:#f5e2da;
+    --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a;
+    --ink:#3a1c14;
+    --ink-soft:rgba(58,28,20,.62);
+    --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16);
+    --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  [hidden]{display:none !important;}
+  body{
+    background:var(--page);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    padding:36px 40px 80px;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---------- mockup harness ---------- */
+  .harness{
+    position:fixed;top:14px;right:16px;z-index:200;
+    display:flex;align-items:center;gap:8px;
+    background:var(--ink);color:#fff;
+    padding:7px 8px 7px 14px;border-radius:999px;
+    box-shadow:0 6px 18px rgba(58,28,20,.25);
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;
+  }
+  .harness span{opacity:.65;}
+  .harness button{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+    border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;
+    padding:4px 10px;border-radius:999px;cursor:pointer;
+  }
+  .harness button:disabled{opacity:.35;cursor:default;}
+
+  .canvas{max-width:1240px;margin:0 auto;}
+
+  /* ---------- header card ---------- */
+  .head-card{
+    background:var(--white);
+    border-top:5px solid var(--sage-deep);
+    box-shadow:0 10px 28px rgba(58,28,20,.09), 0 2px 6px rgba(58,28,20,.05);
+    padding:26px 30px 24px;
+    display:flex;align-items:center;gap:20px;
+    margin-bottom:26px;
+  }
+  .head-disc{
+    width:52px;height:52px;border-radius:50%;
+    background:var(--white);border:1px solid var(--hairline);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  }
+  .head-disc svg{width:24px;height:24px;stroke:var(--burgundy);}
+  .head-main{flex:1;min-width:0;}
+  .head-title-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  h1{font-family:'Playfair Display',serif;font-size:34px;font-weight:700;letter-spacing:-.01em;}
+  .pill-pro{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;
+    color:var(--burgundy);border:1px solid var(--pink-cta-edge);background:var(--pink-cta);
+    padding:3px 10px;border-radius:999px;position:relative;top:-4px;
+  }
+  .head-sub{font-size:13.5px;color:var(--ink-soft);margin-top:5px;max-width:560px;line-height:1.5;}
+  .head-actions{display:flex;gap:10px;flex:0 0 auto;}
+  .btn{
+    font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;
+    padding:9px 16px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--hairline);background:transparent;color:var(--ink);
+    transition:background .15s;
+  }
+  .btn:hover{background:rgba(58,28,20,.04);}
+  .btn.primary{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+  .btn.primary:hover{background:#f0d6cb;}
+  .btn:disabled{opacity:.45;cursor:default;}
+  .btn:disabled:hover{background:var(--pink-cta);}
+  .btn svg{width:13px;height:13px;stroke:currentColor;}
+
+  .body-grid{display:grid;grid-template-columns:300px 1fr;gap:26px;align-items:start;}
+
+  /* ---------- left rail ---------- */
+  .rail{display:flex;flex-direction:column;gap:18px;}
+  .rail-panel{
+    background:var(--white);
+    border:1px solid var(--hairline-soft);
+    border-radius:12px;
+    overflow:hidden;
+  }
+  .rail-head{
+    background:linear-gradient(180deg,var(--sage-a),var(--sage-b));
+    padding:10px 14px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .rail-head .lbl{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;
+    letter-spacing:.16em;color:var(--ink);text-transform:uppercase;
+  }
+  .rail-head .meta{display:flex;align-items:center;gap:8px;}
+  .count-chip{
+    font-family:'JetBrains Mono',monospace;font-size:9px;
+    background:rgba(255,255,255,.7);border:1px solid rgba(58,28,20,.12);
+    padding:1px 7px;border-radius:999px;color:var(--ink-soft);
+  }
+  .rail-add{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;
+    border:1px solid rgba(58,28,20,.22);background:transparent;color:var(--ink);
+    padding:3px 8px;border-radius:6px;cursor:pointer;
+  }
+  .rail-add:hover{background:rgba(255,255,255,.55);}
+  .rail-add:disabled{opacity:.4;cursor:default;}
+  .rail-body{padding:10px;background:var(--white);}
+
+  .ghost{
+    border:1.5px dashed rgba(124,58,42,.35);
+    border-radius:10px;
+    padding:18px 14px;
+    text-align:center;cursor:pointer;
+    transition:background .15s,border-color .15s;
+    background:var(--white);
+  }
+  .ghost:hover{background:rgba(245,226,218,.35);border-color:var(--pink-cta-edge);}
+  .ghost.next{border-color:var(--pink-cta-edge);background:rgba(245,226,218,.22);}
+  .ghost.locked{cursor:default;}
+  .ghost.locked:hover{background:var(--white);border-color:rgba(124,58,42,.35);}
+  .ghost.inert{cursor:default;}
+  .ghost.inert:hover{background:var(--white);border-color:rgba(124,58,42,.35);}
+  .ghost .g-title{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--burgundy);}
+  .ghost.locked .g-title{color:var(--ink-faint);}
+  .ghost .g-sub{font-size:11px;color:var(--ink-faint);margin-top:4px;line-height:1.5;}
+
+  /* unlock checklist inside locked ghost */
+  .g-check{margin-top:10px;display:flex;flex-direction:column;gap:4px;text-align:left;}
+  .g-check .ck{
+    display:flex;align-items:center;gap:7px;
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;
+    color:var(--ink-faint);padding:4px 8px;border-radius:6px;
+  }
+  .g-check .ck.have{color:var(--sage-ink);}
+  .g-check .ck.need{color:var(--burgundy);cursor:pointer;border:1px dashed var(--pink-cta-edge);}
+  .g-check .ck.need:hover{background:var(--pink-cta);}
+  .g-check .ck .dot{
+    width:14px;height:14px;border-radius:50%;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;font-size:9px;
+    border:1px solid currentColor;
+  }
+  .g-check .ck.have .dot{background:var(--sage-a);border-color:var(--sage-deep);}
+
+  .reg{display:flex;flex-direction:column;gap:6px;}
+  .reg-row{
+    background:var(--white);
+    border:1px solid var(--hairline-soft);
+    border-radius:8px;
+    padding:9px 11px;
+    cursor:pointer;
+    transition:border-color .15s, box-shadow .15s;
+    text-align:left;width:100%;font-family:inherit;
+  }
+  .reg-row:hover{border-color:var(--pink-cta-edge);box-shadow:0 2px 8px rgba(58,28,20,.06);}
+  .reg-row.flash{animation:rowflash 1.2s ease-out;}
+  @keyframes rowflash{
+    0%{background:var(--pink-cta);border-color:var(--pink-cta-edge);}
+    100%{background:var(--white);border-color:var(--hairline-soft);}
+  }
+  .reg-type{
+    font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.14em;
+    color:var(--ink-faint);text-transform:uppercase;display:block;margin-bottom:3px;
+  }
+  .reg-name{font-size:12.5px;font-weight:600;color:var(--ink);}
+  .reg-detail{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink-faint);margin-top:3px;}
+  .reg-comp{font-size:10.5px;color:var(--ink-soft);margin-top:3px;line-height:1.5;}
+
+  /* tracking nudge */
+  .nudge{
+    border:1px solid var(--pink-cta-edge);
+    background:rgba(245,226,218,.3);
+    border-radius:8px;padding:10px 12px;
+    font-size:11px;color:var(--ink-soft);line-height:1.55;
+  }
+  .nudge strong{color:var(--burgundy);font-weight:600;}
+  .nudge .nudge-link{
+    display:inline-block;margin-top:6px;
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;
+    color:var(--burgundy);cursor:pointer;text-decoration:underline;text-underline-offset:2px;
+  }
+
+  /* ---------- right stage ---------- */
+  .stage{display:flex;flex-direction:column;gap:24px;}
+  .prob{
+    background:var(--white);
+    border:1px solid var(--hairline-soft);
+    border-radius:12px;
+    padding:30px 34px 28px;
+    position:relative;overflow:hidden;
+  }
+  .prob::after{
+    content:"";position:absolute;right:-30px;top:-30px;width:150px;height:150px;
+    border-radius:50%;background:var(--pink-band);opacity:.5;
+  }
+  .prob-hand{
+    font-family:'Caveat',cursive;font-size:34px;font-weight:600;color:var(--burgundy);
+    line-height:1.15;position:relative;z-index:1;
+  }
+  .prob-sub{font-size:13.5px;color:var(--ink-soft);margin-top:10px;max-width:640px;line-height:1.6;position:relative;z-index:1;}
+  .prob-sub strong{color:var(--ink);font-weight:600;}
+
+  .hiw-head, .work-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--hairline);padding-bottom:10px;margin-bottom:16px;}
+  .hiw-head h2, .work-head h2{font-family:'Playfair Display',serif;font-size:22px;font-weight:600;}
+  .hiw-head .tag, .work-head .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+
+  /* ---------- package tiles ---------- */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+  .tile{
+    background:var(--white);
+    border:1px solid var(--hairline-soft);
+    border-top:3px solid var(--sage-deep);
+    border-radius:12px;
+    padding:16px 16px 13px;
+    display:flex;flex-direction:column;gap:12px;
+    cursor:pointer;text-align:left;font-family:inherit;
+    transition:transform .18s, box-shadow .18s;
+  }
+  .tile:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(58,28,20,.09);}
+  .tile.flash{animation:rowflash 1.2s ease-out;}
+  .tile h4{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;color:var(--ink);}
+  .tile .slots{display:flex;flex-direction:column;gap:5px;}
+  .tile .slot{display:flex;align-items:baseline;gap:8px;}
+  .tile .sl-t{
+    font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;
+    color:var(--ink-faint);text-transform:uppercase;flex:0 0 58px;
+  }
+  .tile .sl-n{font-size:12px;font-weight:600;color:var(--ink);}
+  .tile .sl-n.none{color:var(--ink-faint);font-weight:400;}
+  .tile .t-foot{
+    border-top:1px solid var(--hairline-soft);padding-top:9px;margin-top:auto;
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.04em;
+    display:flex;gap:12px;flex-wrap:wrap;
+  }
+  .tile .t-foot .out{color:var(--burgundy);}
+  .tile .t-foot .in{color:var(--sage-ink);}
+  .tile .t-foot .idle{color:var(--ink-faint);letter-spacing:.02em;}
+  .tile.ghost-tile{
+    border:1.5px dashed rgba(124,58,42,.35);border-top-width:1.5px;
+    align-items:center;justify-content:center;text-align:center;
+    background:var(--white);min-height:150px;
+  }
+  .tile.ghost-tile:hover{transform:none;box-shadow:none;background:rgba(245,226,218,.3);border-color:var(--pink-cta-edge);}
+  .tile.ghost-tile .g-title{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--burgundy);}
+  .tile.ghost-tile .g-sub{font-size:11px;color:var(--ink-faint);margin-top:4px;}
+
+  /* ---------- tracking dashboard ---------- */
+  .statstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+  .stat{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:12px;
+    padding:14px 18px 13px;
+  }
+  .stat .n{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;line-height:1;}
+  .stat .l{
+    font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-faint);margin-top:6px;display:flex;align-items:center;gap:6px;
+  }
+  .stat .l .dir{font-size:10px;}
+  .stat.out .l .dir{color:var(--burgundy);}
+  .stat.in .l .dir{color:var(--sage-ink);}
+
+  .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+  .dash-rows{display:flex;flex-direction:column;gap:12px;padding:4px 4px 6px;}
+  .drow .dr-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:5px;}
+  .drow .dr-name{font-size:12.5px;font-weight:600;color:var(--ink);}
+  .drow .dr-name .dr-eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;
+    color:var(--ink-faint);text-transform:uppercase;display:block;margin-bottom:2px;font-weight:400;
+  }
+  .drow .dr-meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-soft);white-space:nowrap;}
+  .bar{height:8px;border-radius:4px;background:rgba(58,28,20,.06);overflow:hidden;}
+  .bar .b-sent{height:100%;background:var(--pink-band);border-radius:4px;position:relative;overflow:hidden;}
+  .bar .b-in{height:100%;background:var(--sage-deep);border-radius:4px 0 0 4px;}
+  .dash-ghosts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;}
+  .barkey{
+    display:flex;gap:16px;padding:2px 4px 8px;
+    font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:var(--ink-faint);text-transform:uppercase;
+  }
+  .barkey .k{display:flex;align-items:center;gap:5px;}
+  .barkey .sw{width:14px;height:7px;border-radius:3px;}
+
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .step{
+    background:var(--white);
+    border:1px solid var(--hairline-soft);
+    border-radius:12px;
+    padding:18px 18px 20px;
+    display:flex;flex-direction:column;gap:14px;
+    transition:transform .18s, box-shadow .18s;
+  }
+  .step:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(58,28,20,.08);}
+  .step-eyebrow{
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;
+  }
+  .step-num{
+    width:22px;height:22px;border-radius:50%;
+    border:1px solid var(--burgundy);color:var(--burgundy);
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .step.done .step-num{background:var(--sage-deep);border-color:var(--sage-deep);color:#fff;}
+  .tick{
+    display:none;align-items:center;gap:5px;
+    font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;
+    color:var(--sage-ink);background:rgba(215,221,213,.55);border:1px solid rgba(154,168,150,.55);
+    padding:2px 8px;border-radius:999px;
+  }
+  .step.done .tick{display:inline-flex;}
+  .tick.pink{color:var(--burgundy);background:var(--pink-cta);border-color:var(--pink-cta-edge);}
+  .step.live{border-color:var(--pink-cta-edge);box-shadow:0 6px 18px rgba(124,58,42,.07);}
+  .step.live .tick{display:inline-flex;}
+  .plate{
+    border:1.5px dashed rgba(124,58,42,.3);
+    border-radius:10px;height:150px;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;
+    background:var(--white);
+  }
+  .plate svg{width:64px;height:64px;stroke:rgba(124,58,42,.55);}
+  .plate .plate-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--ink-faint);text-transform:uppercase;}
+  .step h3{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;}
+  .step p{font-size:12.5px;color:var(--ink-soft);line-height:1.6;}
+  .step p strong{color:var(--ink);font-weight:600;}
+
+  /* ---------- modal chassis (Form 11: card rim → frame → band inside) ---------- */
+  .backdrop{
+    position:fixed;inset:0;background:rgba(58,28,20,.32);
+    z-index:100;display:flex;align-items:flex-start;justify-content:center;
+    padding:9vh 20px 40px;
+    opacity:0;pointer-events:none;transition:opacity .18s;
+  }
+  .backdrop.open{opacity:1;pointer-events:auto;}
+  .modal{
+    background:var(--white);
+    border-radius:14px;
+    padding:10px; /* the rim */
+    width:560px;max-width:100%;
+    box-shadow:0 24px 60px rgba(58,28,20,.28);
+    transform:translateY(8px);transition:transform .18s;
+  }
+  .backdrop.open .modal{transform:none;}
+  .frame{
+    border:1px solid var(--hairline);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .m-band{
+    background:linear-gradient(180deg,var(--sage-a),var(--sage-b));
+    padding:11px 16px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .m-band .m-title{
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ink);
+  }
+  .m-close{
+    border:none;background:transparent;cursor:pointer;
+    font-size:16px;line-height:1;color:var(--ink-soft);padding:2px 4px;
+  }
+  .m-close:hover{color:var(--ink);}
+  .m-body{padding:20px 22px 22px;background:var(--white);}
+
+  /* type tiles */
+  .type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .type-tile{
+    border:1px solid var(--hairline-soft);border-radius:10px;
+    padding:16px 12px 14px;text-align:center;cursor:pointer;background:var(--white);
+    transition:border-color .15s, box-shadow .15s;
+    font-family:inherit;
+  }
+  .type-tile:hover{border-color:var(--pink-cta-edge);box-shadow:0 4px 12px rgba(58,28,20,.07);}
+  .type-tile svg{width:34px;height:34px;stroke:var(--burgundy);margin-bottom:8px;}
+  .type-tile .t-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;display:block;}
+  .type-tile .t-count{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;color:var(--ink-faint);display:block;margin-top:4px;text-transform:uppercase;}
+  .m-hint{font-size:11.5px;color:var(--ink-faint);margin-top:14px;line-height:1.55;text-align:center;}
+
+  /* form step */
+  .m-crumb{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;
+    color:var(--ink-faint);text-transform:uppercase;cursor:pointer;margin-bottom:14px;display:inline-block;
+  }
+  .m-crumb:hover{color:var(--burgundy);}
+  .fld{margin-bottom:14px;}
+  .fld label{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;
+  }
+  .fld input[type=text], .fld textarea, .fld select{
+    width:100%;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink);
+    border:1px solid var(--hairline-soft);border-radius:8px;
+    padding:9px 11px;background:var(--white);outline:none;
+  }
+  .fld input:focus, .fld textarea:focus, .fld select:focus{border-color:var(--pink-cta-edge);box-shadow:0 0 0 3px rgba(232,200,188,.3);}
+  .fld textarea{min-height:120px;resize:vertical;line-height:1.6;}
+  .fld .sub{font-size:10.5px;color:var(--ink-faint);margin-top:5px;}
+  .m-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;}
+
+  .comp-preview{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink-soft);
+    border:1px dashed var(--hairline);border-radius:8px;padding:9px 11px;margin-bottom:14px;
+    line-height:1.6;
+  }
+  .comp-preview b{color:var(--burgundy);font-weight:700;}
+
+  /* styled selects — dropdowns of saved materials */
+  .fld select{
+    appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237c3a2a' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;
+    padding-right:32px;cursor:pointer;
+  }
+
+  /* content mode segmented control */
+  .mode-seg{
+    display:flex;border:1px solid var(--hairline-soft);border-radius:8px;
+    overflow:hidden;margin-bottom:10px;
+  }
+  .mode-seg button{
+    flex:1;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;
+    padding:8px 4px;background:var(--white);border:none;cursor:pointer;color:var(--ink-faint);
+    border-right:1px solid var(--hairline-soft);
+  }
+  .mode-seg button:last-child{border-right:none;}
+  .mode-seg button:hover{background:rgba(245,226,218,.3);}
+  .mode-seg button.on{background:var(--pink-cta);color:var(--burgundy);font-weight:700;}
+
+  /* dropzone */
+  .dropzone{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    border:1.5px dashed rgba(124,58,42,.3);border-radius:8px;
+    padding:22px 14px;cursor:pointer;text-align:center;
+    font-size:12px;color:var(--ink-faint);
+    transition:background .15s,border-color .15s;
+  }
+  .dropzone:hover{background:rgba(245,226,218,.3);border-color:var(--pink-cta-edge);}
+  .dropzone.has-file{
+    border-style:solid;border-color:var(--sage-deep);
+    color:var(--ink);background:rgba(215,221,213,.25);
+  }
+  .dropzone .dz-icon{width:18px;height:18px;stroke:var(--burgundy);flex:0 0 auto;}
+
+  @media (max-width:1080px){
+    .body-grid{grid-template-columns:1fr;}
+    .steps{grid-template-columns:1fr;}
+    .type-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="harness">
+  <span>DEMO</span>
+  <button onclick="seedExamples()">EXAMPLE MATERIALS</button>
+  <button onclick="resetAll()">EMPTY</button>
+  <button id="h-reply" onclick="simulateReply()" disabled>SIMULATE ACTIVITY</button>
+</div>
+
+<div class="canvas">
+
+  <div class="head-card">
+    <div class="head-disc">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/>
+      </svg>
+    </div>
+    <div class="head-main">
+      <div class="head-title-row">
+        <h1>Submission packages</h1>
+        <span class="pill-pro">◈ PRO</span>
+      </div>
+      <div class="head-sub">Bundle your materials once, then send them without rebuilding each time.</div>
+    </div>
+    <div class="head-actions">
+      <button class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V4H6.5A2.5 2.5 0 0 0 4 6.5v13z"/></svg>
+        Murphy's Day Out
+      </button>
+      <button class="btn primary" id="hdr-newpkg" onclick="openPkgModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        New package
+      </button>
+    </div>
+  </div>
+
+  <div class="body-grid">
+
+    <!-- ============ rail ============ -->
+    <div class="rail">
+
+      <div class="rail-panel">
+        <div class="rail-head">
+          <span class="lbl">Materials</span>
+          <span class="meta">
+            <span class="count-chip" id="mat-count">0</span>
+            <button class="rail-add" onclick="openMatModal()">+ ADD</button>
+          </span>
+        </div>
+        <div class="rail-body" id="mat-body"></div>
+      </div>
+
+      <div class="rail-panel">
+        <div class="rail-head">
+          <span class="lbl">Packages</span>
+          <span class="meta">
+            <span class="count-chip" id="pkg-count">0</span>
+            <button class="rail-add" id="pkg-add" onclick="openPkgModal()">+ NEW</button>
+          </span>
+        </div>
+        <div class="rail-body" id="pkg-body"></div>
+      </div>
+
+    </div>
+
+    <!-- ============ stage ============ -->
+    <div class="stage">
+
+      <!-- onboarding state: no packages yet -->
+      <div id="stage-onboard">
+      <div class="prob" style="margin-bottom:24px;">
+        <div class="prob-hand">Fed up of guessing which materials are landing with agents?</div>
+        <div class="prob-sub">
+          Every package keeps its own scorecard. ScriptAlly records <strong>which letter, synopsis and pages went to each agent</strong> — so the answer sits on the page, not in your head.
+        </div>
+      </div>
+
+      <div>
+        <div class="hiw-head">
+          <h2>How it works</h2>
+          <span class="tag">Three steps</span>
+        </div>
+        <div class="steps">
+
+          <div class="step" id="step1">
+            <div class="step-eyebrow"><span class="step-num">1</span><span class="tick" id="tick1"></span></div>
+            <div class="plate">
+              <svg viewBox="0 0 64 64" fill="none" stroke-width="1.2" stroke-linecap="round">
+                <rect x="10" y="14" width="28" height="38" rx="2"/>
+                <path d="M16 22h16M16 28h16M16 34h10"/>
+                <rect x="24" y="10" width="28" height="38" rx="2" fill="#ffffff"/>
+                <path d="M30 18h16M30 24h16M30 30h12M30 36h16M30 42h8"/>
+              </svg>
+              <span class="plate-lbl">Illustration</span>
+            </div>
+            <h3>Add your materials</h3>
+            <p>Versions of your <strong>covering letter, synopsis and sample pages</strong> — written here or pasted in. Most writers keep two or three of each.</p>
+          </div>
+
+          <div class="step" id="step2">
+            <div class="step-eyebrow"><span class="step-num">2</span><span class="tick" id="tick2"></span></div>
+            <div class="plate">
+              <svg viewBox="0 0 64 64" fill="none" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M32 8l20 10v18L32 46 12 36V18L32 8z"/>
+                <path d="M32 24l20-6M32 24v22M32 24L12 18"/>
+                <path d="M22 13l20 10" stroke-dasharray="2 3"/>
+              </svg>
+              <span class="plate-lbl">Illustration</span>
+            </div>
+            <h3>Arrange them into packages</h3>
+            <p>Pick one of each and give the combination a name. <span id="step2-gate">Unlocks once you hold <strong>a covering letter and a synopsis</strong>.</span> Attach a package when you log a query.</p>
+          </div>
+
+          <div class="step" id="step3">
+            <div class="step-eyebrow"><span class="step-num">3</span><span class="tick" id="tick3"></span></div>
+            <div class="plate">
+              <svg viewBox="0 0 64 64" fill="none" stroke-width="1.2" stroke-linecap="round">
+                <path d="M10 52h44M10 52V14"/>
+                <rect x="17" y="36" width="7" height="16"/>
+                <rect x="29" y="26" width="7" height="26"/>
+                <rect x="41" y="18" width="7" height="34"/>
+                <path d="M18 30c8-4 14-10 30-14" stroke-dasharray="2 3"/>
+              </svg>
+              <span class="plate-lbl">Illustration</span>
+            </div>
+            <h3>Track what comes back</h3>
+            <p>Replies land against the package that went out. Tracking shows <strong>which materials sit behind each response and request</strong> — reported, not guessed.</p>
+          </div>
+
+        </div>
+      </div>
+      </div><!-- /stage-onboard -->
+
+      <!-- working state: packages exist -->
+      <div id="stage-work" hidden>
+        <div class="work-head">
+          <h2>Your packages</h2>
+          <span class="tag" id="tiles-tag"></span>
+        </div>
+        <div class="tiles" id="pkg-tiles"></div>
+
+        <div class="work-head" style="margin-top:34px;">
+          <h2>Tracking</h2>
+          <span class="tag">Reported, not guessed</span>
+        </div>
+        <div id="trk-dash"></div>
+      </div><!-- /stage-work -->
+
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADD MATERIAL MODAL ============ -->
+<div class="backdrop" id="mat-backdrop" onclick="if(event.target===this)closeMatModal()">
+  <div class="modal">
+    <div class="frame">
+      <div class="m-band">
+        <span class="m-title" id="mat-modal-title">Add a material</span>
+        <button class="m-close" onclick="closeMatModal()">×</button>
+      </div>
+      <div class="m-body">
+
+        <!-- step 1: pick type -->
+        <div id="mat-step-type">
+          <div class="type-grid">
+            <button class="type-tile" onclick="pickType('letter')">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 8l9 6 9-6"/></svg>
+              <span class="t-name">Covering letter</span>
+              <span class="t-count" id="tc-letter">0 held</span>
+            </button>
+            <button class="type-tile" onclick="pickType('synopsis')">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 9h7M9 13h7M9 17h5"/></svg>
+              <span class="t-name">Synopsis</span>
+              <span class="t-count" id="tc-synopsis">0 held</span>
+            </button>
+            <button class="type-tile" onclick="pickType('sample')">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M5 4h8l4 4v12H5z"/><path d="M13 4v4h4"/><path d="M8 12h8M8 16h6"/></svg>
+              <span class="t-name">Sample pages</span>
+              <span class="t-count" id="tc-sample">0 held</span>
+            </button>
+          </div>
+          <div class="m-hint">Pick what you're adding. You can keep as many versions of each as you like.</div>
+        </div>
+
+        <!-- step 2: name + content -->
+        <div id="mat-step-form" hidden>
+          <span class="m-crumb" onclick="backToType()">‹ Change type</span>
+          <div class="fld">
+            <label id="mat-name-label">Name this version</label>
+            <input type="text" id="mat-name" autocomplete="off">
+            <div class="sub">A short handle you'll recognise in a list — not the document's title.</div>
+          </div>
+          <div class="fld">
+            <label>Content</label>
+            <div class="mode-seg">
+              <button type="button" id="mode-paste" class="on" onclick="setMode('paste')">PASTE TEXT</button>
+              <button type="button" id="mode-file" onclick="setMode('file')">ATTACH FILE</button>
+              <button type="button" id="mode-ref" onclick="setMode('ref')">NAME ONLY</button>
+            </div>
+            <div id="pane-paste">
+              <textarea id="mat-content" placeholder="Write it here, or paste it in."></textarea>
+              <div class="sub" id="mat-content-sub"></div>
+            </div>
+            <div id="pane-file" hidden>
+              <label class="dropzone" id="dropzone">
+                <input type="file" id="mat-file" accept=".doc,.docx,.pdf" hidden onchange="fileChosen()">
+                <svg class="dz-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M12 16V4M8 8l4-4 4 4"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+                <span id="drop-label">Drop a Word or PDF here, or click to choose</span>
+              </label>
+              <div class="sub">The document is kept with this material, so you know exactly which file it is.</div>
+            </div>
+            <div id="pane-ref" hidden>
+              <input type="text" id="mat-ref" placeholder="e.g. Hook-first v3.docx" autocomplete="off">
+              <div class="sub">Just the file name, for your own reference — nothing is uploaded.</div>
+            </div>
+          </div>
+          <div class="m-actions">
+            <button class="btn" onclick="closeMatModal()">Cancel</button>
+            <button class="btn primary" id="mat-save" onclick="saveMaterial()">Save material</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BUILD PACKAGE MODAL ============ -->
+<div class="backdrop" id="pkg-backdrop" onclick="if(event.target===this)closePkgModal()">
+  <div class="modal">
+    <div class="frame">
+      <div class="m-band">
+        <span class="m-title">Build a package</span>
+        <button class="m-close" onclick="closePkgModal()">×</button>
+      </div>
+      <div class="m-body">
+        <div class="m-hint" style="text-align:left;margin-top:0;margin-bottom:16px;">Choose one of each from the materials you've saved. Nothing new is created here.</div>
+        <div class="fld">
+          <label>Package name</label>
+          <input type="text" id="pkg-name" autocomplete="off">
+          <div class="sub">e.g. Standard UK, Comps-led variant, US agencies.</div>
+        </div>
+        <div class="fld">
+          <label>Covering letter</label>
+          <select id="pkg-letter" onchange="updateComp()"></select>
+        </div>
+        <div class="fld">
+          <label>Synopsis</label>
+          <select id="pkg-synopsis" onchange="updateComp()"></select>
+        </div>
+        <div class="fld">
+          <label>Sample pages</label>
+          <select id="pkg-sample" onchange="updateComp()"></select>
+          <div class="sub">Optional — some agents ask for the letter alone or letter and synopsis.</div>
+        </div>
+        <div class="comp-preview" id="comp-preview"></div>
+        <div class="m-actions">
+          <button class="btn" onclick="closePkgModal()">Cancel</button>
+          <button class="btn primary" onclick="savePackage()">Save package</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------------- state ----------------
+  let materials = []; // {id, type, name}
+  let packages  = []; // {id, name, letterId, synopsisId, sampleId|null, sent, replies}
+  let uid = 1;
+  let editingId = null;
+  let currentType = null;
+
+  const TYPE_LABEL = {letter:'Covering letter', synopsis:'Synopsis', sample:'Sample pages'};
+  const TYPE_DEFAULTS = {
+    letter:  ['Hook-first','Comps-forward','Voice-led'],
+    synopsis:['One-page','Two-page'],
+    sample:  ['Chapters 1–3','First fifty pages']
+  };
+  const CONTENT_SUB = {
+    letter:  'Your pitch — hook, comps, bio.',
+    synopsis:'The whole story, ending included.',
+    sample:  'Word count is taken from what you paste.'
+  };
+
+  const $ = id => document.getElementById(id);
+  const byType = t => materials.filter(m => m.type === t);
+  const matName = id => (materials.find(m => m.id === id) || {}).name || '—';
+  const canBuild = () => byType('letter').length > 0 && byType('synopsis').length > 0;
+  const totalReplies = () => packages.reduce((n,p) => n + p.replies, 0);
+  const totalSent = () => packages.reduce((n,p) => n + p.sent, 0);
+
+  let currentMode = 'paste';
+  function sourceLabel(m){
+    if (m.mode === 'file') return `${m.fileName} · attached`;
+    if (m.mode === 'ref')  return `Ref · ${m.fileName}`;
+    return m.words > 0 ? `Text · ${m.words} ${m.words===1?'word':'words'}` : 'Text';
+  }
+  function setMode(mode){
+    currentMode = mode;
+    ['paste','file','ref'].forEach(x => {
+      $('mode-'+x).classList.toggle('on', x === mode);
+      $('pane-'+x).hidden = x !== mode;
+    });
+  }
+  function fileChosen(){
+    const f = $('mat-file').files[0];
+    if (f){
+      $('drop-label').textContent = f.name;
+      $('dropzone').classList.add('has-file');
+    }
+  }
+  function resetContentPanes(){
+    setMode('paste');
+    $('mat-content').value = '';
+    $('mat-ref').value = '';
+    $('mat-file').value = '';
+    $('drop-label').textContent = 'Drop a Word or PDF here, or click to choose';
+    $('dropzone').classList.remove('has-file');
+  }
+
+  // ---------------- rendering ----------------
+  function render(){
+    // materials
+    $('mat-count').textContent = materials.length;
+    const mb = $('mat-body');
+    if (materials.length === 0){
+      mb.innerHTML = `<div class="ghost" onclick="openMatModal()">
+        <div class="g-title">Add a material</div>
+        <div class="g-sub">A covering letter, synopsis or sample — written here or pasted in.</div>
+      </div>`;
+    } else {
+      mb.innerHTML = `<div class="reg">` + materials.map(m => `
+        <button class="reg-row" data-id="${m.id}" onclick="editMaterial(${m.id})">
+          <span class="reg-type">${TYPE_LABEL[m.type]}</span>
+          <span class="reg-name">${m.name}</span>
+          <div class="reg-detail">${sourceLabel(m)}</div>
+        </button>`).join('') + `</div>`;
+    }
+
+    // packages
+    $('pkg-count').textContent = packages.length;
+    const pb = $('pkg-body');
+    const unlocked = canBuild();
+    $('pkg-add').disabled = !unlocked;
+    $('hdr-newpkg').disabled = !unlocked;
+    if (packages.length === 0){
+      if (!unlocked){
+        pb.innerHTML = `<div class="ghost locked">
+          <div class="g-title">No packages yet</div>
+          <div class="g-sub">A package is a covering letter, a synopsis and — if you want one — a sample, bundled under a name.<br><br>You'll be able to build one once you've added a covering letter and a synopsis to your materials.</div>
+        </div>`;
+      } else {
+        pb.innerHTML = `<div class="ghost next" onclick="openPkgModal()">
+          <div class="g-title">Build a package</div>
+          <div class="g-sub">Pick one of each material and name the combination.</div>
+        </div>`;
+      }
+    } else {
+      pb.innerHTML = `<div class="reg">` + packages.map(p => `
+        <button class="reg-row" data-id="p${p.id}" onclick="flashTile(${p.id})">
+          <span class="reg-name">${p.name}</span>
+          <div class="reg-detail">${p.sent === 0 ? 'Not yet sent' : `Sent with ${p.sent} ${p.sent===1?'query':'queries'}`}</div>
+        </button>`).join('') + `</div>`;
+    }
+
+    // ---- stage switch ----
+    const working = packages.length > 0;
+    $('stage-onboard').hidden = working;
+    $('stage-work').hidden = !working;
+
+    if (working){
+      // ---- package tiles ----
+      $('tiles-tag').textContent = `${packages.length} ${packages.length===1?'package':'packages'}`;
+      $('pkg-tiles').innerHTML = packages.map(p => {
+        const foot = p.sent === 0
+          ? `<span class="idle">Not yet sent — attach it when you log a query</span>`
+          : `<span class="out">→ ${p.sent} sent</span><span class="in">← ${p.replies} replied</span><span class="in">${p.requests} ${p.requests===1?'request':'requests'}</span>`;
+        return `
+        <button class="tile" data-tile="${p.id}" onclick="editPackage(${p.id})">
+          <h4>${p.name}</h4>
+          <div class="slots">
+            <span class="slot"><span class="sl-t">Letter</span><span class="sl-n">${matName(p.letterId)}</span></span>
+            <span class="slot"><span class="sl-t">Synopsis</span><span class="sl-n">${matName(p.synopsisId)}</span></span>
+            <span class="slot"><span class="sl-t">Sample</span><span class="sl-n${p.sampleId?'':' none'}">${p.sampleId ? matName(p.sampleId) : 'Not included'}</span></span>
+          </div>
+          <div class="t-foot">${foot}</div>
+        </button>`;
+      }).join('') + `
+        <button class="tile ghost-tile" onclick="openPkgModal()">
+          <span><span class="g-title">Build another package</span>
+          <span class="g-sub" style="display:block;">A different letter, a different length of synopsis.</span></span>
+        </button>`;
+
+      // ---- tracking dashboard ----
+      const dash = $('trk-dash');
+      if (totalSent() === 0){
+        dash.innerHTML = `
+          <div class="nudge" style="max-width:640px;">
+            Attach <strong>${packages[0].name}</strong> when you log your next query — replies land back here against it.
+            <span class="nudge-link">Log a query ›</span>
+          </div>
+          <div class="dash-ghosts">
+            <div class="ghost inert"><div class="g-title" style="color:var(--ink-faint);">Replies by package</div>
+              <div class="g-sub">Appears once a package goes out with a query.</div></div>
+            <div class="ghost inert"><div class="g-title" style="color:var(--ink-faint);">Requests by material</div>
+              <div class="g-sub">Shows which materials sit behind each request.</div></div>
+          </div>`;
+      } else {
+        const sent = totalSent(), reps = totalReplies(),
+              reqs = packages.reduce((n,p)=>n+p.requests,0);
+        const maxSent = Math.max(...packages.map(p=>p.sent), 1);
+        const pkgRows = packages.filter(p=>p.sent>0).map(p => `
+          <div class="drow">
+            <div class="dr-top">
+              <span class="dr-name">${p.name}</span>
+              <span class="dr-meta">${p.replies} of ${p.sent} replied</span>
+            </div>
+            <div class="bar"><div class="b-sent" style="width:${p.sent/maxSent*100}%"><div class="b-in" style="width:${p.sent?p.replies/p.sent*100:0}%"></div></div></div>
+          </div>`).join('');
+        const ms = matStats();
+        const maxMs = Math.max(...ms.map(x=>x.sent), 1);
+        const matRows = ms.map(x => `
+          <div class="drow">
+            <div class="dr-top">
+              <span class="dr-name"><span class="dr-eyebrow">${TYPE_LABEL[x.m.type]}</span>${x.m.name}</span>
+              <span class="dr-meta">${x.req} ${x.req===1?'request':'requests'} from ${x.sent} sent</span>
+            </div>
+            <div class="bar"><div class="b-sent" style="width:${x.sent/maxMs*100}%"><div class="b-in" style="width:${x.sent?x.req/x.sent*100:0}%"></div></div></div>
+          </div>`).join('');
+        dash.innerHTML = `
+          <div class="statstrip">
+            <div class="stat out"><div class="n">${sent}</div><div class="l"><span class="dir">→</span>Queries sent with a package</div></div>
+            <div class="stat in"><div class="n">${reps}</div><div class="l"><span class="dir">←</span>Replies received</div></div>
+            <div class="stat in"><div class="n">${reqs}</div><div class="l"><span class="dir">←</span>Requests for more</div></div>
+          </div>
+          <div class="dash-grid">
+            <div class="rail-panel">
+              <div class="rail-head"><span class="lbl">Replies by package</span></div>
+              <div class="rail-body">
+                <div class="barkey"><span class="k"><span class="sw" style="background:var(--pink-band);"></span>Sent</span><span class="k"><span class="sw" style="background:var(--sage-deep);"></span>Replied</span></div>
+                <div class="dash-rows">${pkgRows}</div>
+              </div>
+            </div>
+            <div class="rail-panel">
+              <div class="rail-head"><span class="lbl">Requests by material</span></div>
+              <div class="rail-body">
+                <div class="barkey"><span class="k"><span class="sw" style="background:var(--pink-band);"></span>Sent</span><span class="k"><span class="sw" style="background:var(--sage-deep);"></span>Requested</span></div>
+                <div class="dash-rows">${matRows}</div>
+              </div>
+            </div>
+          </div>`;
+      }
+    }
+
+    // infographic
+    const s1 = $('step1'), s2 = $('step2'), s3 = $('step3');
+    s1.classList.toggle('done', materials.length > 0);
+    $('tick1').textContent = `✓ ${materials.length} ADDED`;
+    s2.classList.toggle('done', packages.length > 0);
+    $('tick2').textContent = `✓ ${packages.length} BUILT`;
+    $('step2-gate').hidden = canBuild();
+    const live = totalSent() > 0;
+    s3.classList.toggle('live', live);
+    $('tick3').className = 'tick pink';
+    $('tick3').textContent = live ? '● LIVE' : '';
+
+    // harness
+    $('h-reply').disabled = packages.length === 0;
+  }
+
+  // ---------------- material modal ----------------
+  function openMatModal(preselect){
+    editingId = null;
+    $('mat-modal-title').textContent = 'Add a material';
+    $('mat-save').textContent = 'Save material';
+    ['letter','synopsis','sample'].forEach(t => $('tc-'+t).textContent = `${byType(t).length} held`);
+    if (preselect){ pickType(preselect); }
+    else { showTypeStep(); }
+    $('mat-backdrop').classList.add('open');
+  }
+  function showTypeStep(){
+    $('mat-step-type').hidden = false;
+    $('mat-step-form').hidden = true;
+  }
+  function pickType(t){
+    currentType = t;
+    $('mat-step-type').hidden = true;
+    $('mat-step-form').hidden = false;
+    $('mat-name-label').textContent = `Name this ${TYPE_LABEL[t].toLowerCase()}`;
+    const used = byType(t).map(m => m.name);
+    const suggestion = TYPE_DEFAULTS[t].find(n => !used.includes(n)) || `${TYPE_LABEL[t]} ${used.length+1}`;
+    $('mat-name').value = suggestion;
+    resetContentPanes();
+    $('mat-content-sub').textContent = CONTENT_SUB[t];
+    setTimeout(() => $('mat-name').select(), 50);
+  }
+  function backToType(){ if (editingId === null) showTypeStep(); }
+  function captureContent(m){
+    m.mode = currentMode;
+    if (currentMode === 'paste'){
+      m.content = $('mat-content').value;
+      m.words = m.content.trim().split(/\s+/).filter(Boolean).length;
+      m.fileName = null;
+    } else if (currentMode === 'file'){
+      const f = $('mat-file').files[0];
+      m.fileName = f ? f.name : (m.fileName || 'document.docx');
+      m.words = 0; m.content = '';
+    } else {
+      m.fileName = $('mat-ref').value.trim() || 'untitled.docx';
+      m.words = 0; m.content = '';
+    }
+  }
+  function saveMaterial(){
+    const name = $('mat-name').value.trim() || TYPE_LABEL[currentType];
+    if (editingId !== null){
+      const m = materials.find(x => x.id === editingId);
+      if (m){ m.name = name; captureContent(m); }
+    } else {
+      const m = {id: uid++, type: currentType, name};
+      captureContent(m);
+      materials.push(m);
+    }
+    const newId = editingId !== null ? editingId : uid - 1;
+    closeMatModal();
+    render();
+    flashRow(String(newId));
+  }
+  function editMaterial(id){
+    const m = materials.find(x => x.id === id);
+    if (!m) return;
+    editingId = id;
+    currentType = m.type;
+    $('mat-modal-title').textContent = 'Edit material';
+    $('mat-save').textContent = 'Save changes';
+    $('mat-step-type').hidden = true;
+    $('mat-step-form').hidden = false;
+    $('mat-name-label').textContent = `Name this ${TYPE_LABEL[m.type].toLowerCase()}`;
+    $('mat-name').value = m.name;
+    resetContentPanes();
+    setMode(m.mode || 'paste');
+    if (m.mode === 'paste'){ $('mat-content').value = m.content || ''; }
+    if (m.mode === 'file' && m.fileName){
+      $('drop-label').textContent = m.fileName;
+      $('dropzone').classList.add('has-file');
+    }
+    if (m.mode === 'ref'){ $('mat-ref').value = m.fileName || ''; }
+    $('mat-content-sub').textContent = CONTENT_SUB[m.type];
+    $('mat-backdrop').classList.add('open');
+  }
+  function closeMatModal(){ $('mat-backdrop').classList.remove('open'); }
+
+  // ---------------- package modal ----------------
+  let editingPkgId = null;
+  function openPkgModal(){
+    if (!canBuild()) return;
+    editingPkgId = null;
+    document.querySelector('#pkg-backdrop .m-title').textContent = 'Build a package';
+    const fill = (sel, type, optional) => {
+      const el = $(sel);
+      el.innerHTML = (optional ? `<option value="">Not included</option>` : '') +
+        byType(type).map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+    };
+    fill('pkg-letter','letter',false);
+    fill('pkg-synopsis','synopsis',false);
+    fill('pkg-sample','sample',true);
+    $('pkg-name').value = packages.length === 0 ? 'Standard UK' : `Variant ${packages.length+1}`;
+    updateComp();
+    $('pkg-backdrop').classList.add('open');
+    setTimeout(() => $('pkg-name').select(), 50);
+  }
+  function updateComp(){
+    const l = matName(+$('pkg-letter').value);
+    const s = matName(+$('pkg-synopsis').value);
+    const p = $('pkg-sample').value ? matName(+$('pkg-sample').value) : null;
+    $('comp-preview').innerHTML = `THIS PACKAGE SENDS &nbsp;→&nbsp; <b>${l}</b> · <b>${s}</b>${p ? ` · <b>${p}</b>` : ''}`;
+  }
+  function savePackage(){
+    if (editingPkgId !== null){
+      const p = packages.find(x => x.id === editingPkgId);
+      if (p){
+        p.name = $('pkg-name').value.trim() || p.name;
+        p.letterId = +$('pkg-letter').value;
+        p.synopsisId = +$('pkg-synopsis').value;
+        p.sampleId = $('pkg-sample').value ? +$('pkg-sample').value : null;
+      }
+      closePkgModal();
+      render();
+      flashTile(editingPkgId);
+      editingPkgId = null;
+      return;
+    }
+    packages.push({
+      id: uid++,
+      name: $('pkg-name').value.trim() || 'Untitled package',
+      letterId: +$('pkg-letter').value,
+      synopsisId: +$('pkg-synopsis').value,
+      sampleId: $('pkg-sample').value ? +$('pkg-sample').value : null,
+      sent: 0, replies: 0, requests: 0
+    });
+    closePkgModal();
+    render();
+    flashTile(uid - 1);
+  }
+  function closePkgModal(){ $('pkg-backdrop').classList.remove('open'); }
+
+  // ---------------- helpers / harness ----------------
+  function matStats(){
+    return materials.map(m => {
+      const pks = packages.filter(p => [p.letterId, p.synopsisId, p.sampleId].includes(m.id));
+      const sent = pks.reduce((n,p)=>n+p.sent,0);
+      const req  = pks.reduce((n,p)=>n+p.requests,0);
+      return {m, sent, req};
+    }).filter(x => x.sent > 0);
+  }
+  function flashRow(id){
+    const row = document.querySelector(`.reg-row[data-id="${id}"]`);
+    if (row){
+      row.classList.add('flash');
+      setTimeout(() => row.classList.remove('flash'), 1300);
+    }
+  }
+  function flashTile(id){
+    const t = document.querySelector(`.tile[data-tile="${id}"]`);
+    if (t){
+      t.scrollIntoView({behavior:'smooth', block:'nearest'});
+      t.classList.add('flash');
+      setTimeout(() => t.classList.remove('flash'), 1300);
+    }
+  }
+  function editPackage(id){
+    const p = packages.find(x => x.id === id);
+    if (!p) return;
+    openPkgModal();
+    editingPkgId = id;
+    document.querySelector('#pkg-backdrop .m-title').textContent = 'Edit package';
+    $('pkg-name').value = p.name;
+    $('pkg-letter').value = p.letterId;
+    $('pkg-synopsis').value = p.synopsisId;
+    $('pkg-sample').value = p.sampleId || '';
+    updateComp();
+  }
+
+  // deterministic activity script so the demo always reads well
+  const ACTIVITY = [
+    {pkg:0, sent:1}, {pkg:0, sent:1}, {pkg:1, sent:1},
+    {pkg:0, reply:1}, {pkg:0, sent:1}, {pkg:1, reply:1, request:1},
+    {pkg:0, sent:1}, {pkg:0, reply:1, request:1}, {pkg:1, sent:1}
+  ];
+  let actIdx = 0;
+  function simulateReply(){
+    if (packages.length === 0) return;
+    const ev = ACTIVITY[actIdx % ACTIVITY.length]; actIdx++;
+    const p = packages[Math.min(ev.pkg, packages.length - 1)];
+    p.sent += ev.sent || 0;
+    p.replies += ev.reply || 0;
+    p.requests += ev.request || 0;
+    render();
+    flashTile(p.id);
+  }
+  function seedExamples(){
+    materials = [
+      {id:1, type:'letter',   name:'Hook-first',      mode:'paste', content:'', words:412, fileName:null},
+      {id:2, type:'letter',   name:'Comps-forward',   mode:'ref',   content:'', words:0, fileName:'comps-forward-v1.docx'},
+      {id:3, type:'synopsis', name:'One-page',        mode:'paste', content:'', words:638, fileName:null},
+      {id:4, type:'synopsis', name:'Two-page',        mode:'file',  content:'', words:0, fileName:'synopsis-two-page.pdf'},
+      {id:5, type:'sample',   name:'Chapters 1–3',    mode:'file',  content:'', words:0, fileName:'murphy-ch1-3.docx'},
+      {id:6, type:'sample',   name:'First fifty pages',mode:'ref',  content:'', words:0, fileName:'murphy-first50.docx'}
+    ];
+    packages = [
+      {id:7, name:'Standard UK',      letterId:1, synopsisId:3, sampleId:5, sent:6, replies:2, requests:1},
+      {id:8, name:'Comps-led variant',letterId:2, synopsisId:3, sampleId:5, sent:3, replies:1, requests:1},
+      {id:9, name:'Letter + synopsis',letterId:1, synopsisId:4, sampleId:null, sent:0, replies:0, requests:0}
+    ];
+    uid = 10; actIdx = 0;
+    closeMatModal(); closePkgModal();
+    render();
+  }
+  function resetAll(){
+    materials = []; packages = []; uid = 1; actIdx = 0;
+    closeMatModal(); closePkgModal();
+    render();
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape'){ closeMatModal(); closePkgModal(); }
+  });
+
+  seedExamples();
+</script>
+</body>
+</html>
