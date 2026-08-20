@@ -31,6 +31,10 @@ import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { useScriptAllyDb } from "../lib/db";
 import { UserPlan } from "../types";
+import {
+  notifyPrefs, NotifyPrefs, marketingGranted, marketingConsentRecord, ALWAYS_SENT_LINE,
+  resolveTimeZone, tzOptions, TZ_HELPER,
+} from "../lib/accountPrefs";
 import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, deletionConfirmed } from "../lib/dataExport";
 import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
@@ -167,25 +171,13 @@ const ghostBtn: React.CSSProperties = {
 };
 const helpText: React.CSSProperties = { fontFamily: FONT_SANS, fontSize: 12.5, color: mutedInk, lineHeight: 1.45 };
 
-/* ── Small inert affordances ─────────────────────────────────────────────── */
-const ComingSoonPill: React.FC = () => (
-  <span
-    style={{
-      fontFamily: FONT_MONO,
-      fontSize: 9,
-      letterSpacing: "0.08em",
-      textTransform: "uppercase",
-      color: mutedInk,
-      background: "rgba(124,58,42,0.06)",
-      border: "0.5px solid rgba(124,58,42,0.16)",
-      borderRadius: 999,
-      padding: "3px 8px",
-      whiteSpace: "nowrap",
-    }}
-  >
-    Coming soon
-  </span>
-);
+/* ⚠️ `ComingSoonPill`, `InertToggle` AND `InertRow` ARE GONE — a three-symbol cascade found by a
+   reachability sweep rather than by reading. `InertRow` was the only caller of the other two, and
+   once Notifications and Preferences got live controls nothing called `InertRow`. Counting
+   references outside each declaration took the cluster from "one obviously dead" to "three
+   actually dead". They drew the coming-soon rows this build has been removing one at a time.
+   `InertNotice` below SURVIVES: a section whose behaviour is not switched on yet still has to say
+   so, and that is a statement rather than a dead control. */
 
 /**
  * The email's Verified / Unverified chip.
@@ -217,45 +209,28 @@ const VerifiedChip: React.FC<{ verified: boolean }> = ({ verified }) => (
   </span>
 );
 
-/** A purely visual, non-interactive toggle (off, dimmed) — marks a setting as not-yet-live. */
-const InertToggle: React.FC<{ on?: boolean }> = ({ on = false }) => (
-  <span
-    aria-hidden="true"
-    style={{
-      width: 38,
-      height: 22,
-      borderRadius: 999,
-      background: on ? sageAccent : "#e2d7c9",
-      position: "relative",
-      display: "inline-block",
-      flexShrink: 0,
-      opacity: 0.55,
-    }}
-  >
-    <span
-      style={{
-        position: "absolute",
-        top: 2,
-        left: on ? 18 : 2,
-        width: 18,
-        height: 18,
-        borderRadius: "50%",
-        background: "#fff",
-        boxShadow: "0 1px 2px rgba(58,28,20,0.2)",
-      }}
-    />
-  </span>
+/** A group heading inside a section — mono, muted, the same grammar as the rail's SETTINGS label. */
+const GroupLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p style={{ ...labelStyle, marginTop: 18, marginBottom: 2, color: mutedInk }}>{children}</p>
 );
 
-/** One inert preference row: label + description on the left, an inert control + Coming soon on the right. */
-const InertRow: React.FC<{ title: string; desc: string; control?: React.ReactNode; first?: boolean }> = ({
-  title,
-  desc,
-  control,
-  first,
-}) => (
+/**
+ * A LIVE toggle row — the instant-commit half of the save model.
+ *
+ * ⚠️ IT IS A `role="switch"` BUTTON, NOT A CHECKBOX PAINTED TO LOOK LIKE ONE. The state has to
+ * reach a screen reader as on/off, and `aria-checked` on a switch is the one that does.
+ *
+ * ⚠️ AND IT COMMITS ON CHANGE, WITH NO SAVE BUTTON ANYWHERE NEAR IT. Flicking a switch is the
+ * whole decision; asking for a confirmation afterwards would be asking twice.
+ */
+const ToggleRow: React.FC<{
+  title: string;
+  desc: string;
+  on: boolean;
+  onChange: (next: boolean) => void;
+  first?: boolean;
+}> = ({ title, desc, on, onChange, first }) => (
   <div
-    aria-disabled="true"
     style={{
       display: "flex",
       alignItems: "center",
@@ -263,17 +238,46 @@ const InertRow: React.FC<{ title: string; desc: string; control?: React.ReactNod
       gap: 14,
       padding: "14px 0",
       borderTop: first ? "none" : "0.5px solid #efe5da",
-      opacity: 0.72,
     }}
   >
     <div style={{ minWidth: 0 }}>
       <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>{title}</p>
       <p style={helpText}>{desc}</p>
     </div>
-    <div className="flex items-center" style={{ gap: 10, flexShrink: 0 }}>
-      {control ?? <InertToggle />}
-      <ComingSoonPill />
-    </div>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={title}
+      onClick={() => onChange(!on)}
+      style={{
+        width: 38,
+        height: 22,
+        borderRadius: 999,
+        background: on ? sageAccent : "#e2d7c9",
+        border: "none",
+        padding: 0,
+        position: "relative",
+        flexShrink: 0,
+        cursor: "pointer",
+        transition: "background 0.15s",
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          top: 2,
+          left: on ? 18 : 2,
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          background: "#fff",
+          boxShadow: "0 1px 2px rgba(58,28,20,0.2)",
+          transition: "left 0.15s",
+        }}
+      />
+    </button>
   </div>
 );
 
@@ -679,6 +683,9 @@ export const AccountSettings: React.FC<{
    * mid-edit cannot strand the bar.
    */
   const pwMode = passwordMode(authFacts?.providerIds ?? ["password"]);
+  const notify = notifyPrefs(currentUser.notifyPrefs);
+  const marketingOn = marketingGranted(currentUser.marketingConsent);
+  const timezone = resolveTimeZone(currentUser.workspacePrefs?.timezone);
   const nameChanged = name.trim() !== (currentUser.name ?? "").trim();
   const nameValid = validateDisplayName(name).ok;
   useDirtyField(DIRTY_DISPLAY_NAME, nameChanged);
@@ -741,6 +748,41 @@ export const AccountSettings: React.FC<{
       setVerifyMsg("Verification email sent. Click the link, then reload this page.");
     } catch {
       setVerifyMsg("Couldn't send it just now. Please try again.");
+    }
+  };
+
+  /* ── The instant-commit writes ────────────────────────────────────────────
+     ⚠️ EACH MERGES INTO ITS MAP RATHER THAN REPLACING IT. `updateUserProfile` sends the fields it
+     is given, so writing `{ notifyPrefs: { nudges: false } }` would DROP `weeklyDigest` — a map
+     is one allowlist entry, which also makes it one thing to overwrite by accident. */
+  const saveNotify = async (patch: Partial<NotifyPrefs>, what: string) => {
+    const next = { ...notify, ...patch };
+    try {
+      await updateUserProfile({ notifyPrefs: next });
+      savedReceipt(what);
+    } catch {
+      showToast({ message: `Couldn't save ${what.toLowerCase()}. Try again?`, replaces: "settings-saved" });
+    }
+  };
+
+  /* ⚠️ THE RECORD IS REWRITTEN IN BOTH DIRECTIONS, never deleted on withdrawal — the evidence that
+     consent existed, and the moment it stopped, is the half a regulator asks about. */
+  const saveMarketing = async (granted: boolean) => {
+    try {
+      await updateUserProfile({ marketingConsent: marketingConsentRecord(granted) });
+      savedReceipt(granted ? "Product news on" : "Product news off");
+    } catch {
+      showToast({ message: "Couldn't save that. Try again?", replaces: "settings-saved" });
+    }
+  };
+
+  const saveTimezone = async (tz: string) => {
+    if (tz === timezone) return;
+    try {
+      await updateUserProfile({ workspacePrefs: { ...(currentUser.workspacePrefs ?? {}), timezone: tz } });
+      savedReceipt("Time zone");
+    } catch {
+      showToast({ message: "Couldn't save your time zone. Try again?", replaces: "settings-saved" });
     }
   };
 
@@ -1006,21 +1048,50 @@ export const AccountSettings: React.FC<{
 
   const notificationsSection = (
     <SectionCard section="notifications" headingId="acct-h-notifications">
+      {/* ⚠️ THE NOTICE IS WHAT MAKES THESE TOGGLES HONEST. There is no email-sending
+          infrastructure in this app and no scheduler to run one — `functions/` holds eight
+          callables and zero scheduled jobs, and even "contact us" writes a Firestore document
+          rather than posting mail. So these record what you want FOR WHEN THERE IS. Without the
+          notice they would claim to govern a live behaviour, which is the fault that removed Pen
+          name and the sessions button; with it, they are a stored decision that will be honoured
+          the day a job exists. */}
       <InertNotice>
-        Email notifications aren't switched on yet — these preferences are coming soon, so nothing is saved here for now.
+        ScriptAlly doesn't send these emails yet. What you choose here is stored and will be
+        honoured from the day it does.
       </InertNotice>
-      <InertRow first title="Follow-up reminders" desc="Email me when a query is due a nudge." />
-      <InertRow title="Weekly digest" desc="A Monday summary of what's coming up." />
-      <InertRow title="Product updates" desc="Occasional news about new ScriptAlly features." />
-      <InertRow
-        title="Reminder timing"
-        desc="When to send a follow-up reminder."
-        control={
-          <select disabled aria-disabled="true" className="acct-input" style={{ ...inputStyle, width: "auto", padding: "7px 10px", fontSize: 13, opacity: 0.6, cursor: "not-allowed" }}>
-            <option>On the due date</option>
-          </select>
-        }
+
+      <GroupLabel>About your querying</GroupLabel>
+      <ToggleRow
+        first
+        title="Nudge reminders"
+        desc="When a query is due a nudge."
+        on={notify.nudges}
+        onChange={(v) => saveNotify({ nudges: v }, "Nudge reminders")}
       />
+      <ToggleRow
+        title="Weekly digest"
+        desc="A Monday summary of what's coming up."
+        on={notify.weeklyDigest}
+        onChange={(v) => saveNotify({ weeklyDigest: v }, "Weekly digest")}
+      />
+
+      {/* ⚠️ MARKETING IS ITS OWN GROUP, AND ITS OWN STORED FIELD. Under UK PECR consent must be
+          affirmative, evidenced and withdrawable in one action — so it defaults OFF, is never
+          pre-ticked, writes a timestamped record in BOTH directions, and takes effect on the
+          click rather than on a Save. Withdrawal rewrites the record rather than deleting it: the
+          evidence that consent existed, and when it stopped, is the half a regulator asks about. */}
+      <GroupLabel>Marketing</GroupLabel>
+      <ToggleRow
+        first
+        title="Product news"
+        desc="Occasional news about new ScriptAlly features."
+        on={marketingOn}
+        onChange={saveMarketing}
+      />
+
+      <p style={{ ...helpText, marginTop: 16, paddingTop: 14, borderTop: "0.5px solid #efe5da" }}>
+        {ALWAYS_SENT_LINE}
+      </p>
     </SectionCard>
   );
 
@@ -1068,13 +1139,18 @@ export const AccountSettings: React.FC<{
 
   const preferencesSection = (
     <SectionCard section="preferences" headingId="acct-h-preferences">
-      {/* Theme — functional today (applies to the Queries page). Persisted on the user profile. */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "14px 0", borderBottom: "0.5px solid #efe5da", marginBottom: 4 }}>
+      <GroupLabel>Workspace</GroupLabel>
+
+      {/* Theme — the one setting on this card that changes something the moment you click it.
+          The three that ship are the segmented switcher's own list (design-refs/themes.md); the
+          value written is `queriesTheme`, which the AppShell root reads as .t-capp / .t-bold /
+          .t-edn. Instant commit, receipt, no Save button. */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14, padding: "14px 0" }}>
         <div style={{ minWidth: 0 }}>
           <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Theme</p>
-          <p style={helpText}>The look of your Queries page. (Coming to the rest of the app later.)</p>
+          <p style={helpText}>The look of your workspace.</p>
         </div>
-        <div role="radiogroup" aria-label="Queries page theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
+        <div role="radiogroup" aria-label="Workspace theme" style={{ display: "inline-flex", gap: 3, flexShrink: 0, background: "#f3ece2", border: "1px solid #e2d6c6", borderRadius: 10, padding: 3 }}>
           {([["cappuccino", "Cappuccino"], ["bold", "Bold Pastille"], ["editorial", "Editorial"]] as const).map(([val, label]) => {
             const on = (currentUser?.queriesTheme ?? "cappuccino") === val;
             return (
@@ -1083,7 +1159,7 @@ export const AccountSettings: React.FC<{
                 type="button"
                 role="radio"
                 aria-checked={on}
-                onClick={() => updateUserProfile({ queriesTheme: val })}
+                onClick={() => { void updateUserProfile({ queriesTheme: val }); savedReceipt("Theme"); }}
                 style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: on ? 700 : 500, color: on ? bodyInk : "#8a7d6c", background: on ? "#fffefb" : "transparent", border: on ? "1px solid #d8cebf" : "1px solid transparent", boxShadow: on ? "0 1px 2px rgba(29,23,18,.10)" : "none", borderRadius: 8, padding: "6px 13px", cursor: "pointer", whiteSpace: "nowrap" }}
               >
                 {label}
@@ -1092,28 +1168,40 @@ export const AccountSettings: React.FC<{
           })}
         </div>
       </div>
-      <InertNotice>
-        ScriptAlly doesn't apply these app-wide yet — they're coming soon. Dates currently follow your device's UK locale.
-      </InertNotice>
-      <InertRow
-        first
-        title="Time zone"
-        desc="Used for deadlines and reminder timing."
-        control={
-          <select disabled aria-disabled="true" className="acct-input" style={{ ...inputStyle, width: "auto", padding: "7px 10px", fontSize: 13, opacity: 0.6, cursor: "not-allowed" }}>
-            <option>Europe/London</option>
-          </select>
-        }
-      />
-      <InertRow
-        title="Date format"
-        desc="How dates appear across the app."
-        control={
-          <select disabled aria-disabled="true" className="acct-input" style={{ ...inputStyle, width: "auto", padding: "7px 10px", fontSize: 13, opacity: 0.6, cursor: "not-allowed" }}>
-            <option>DD/MM/YYYY</option>
-          </select>
-        }
-      />
+
+      {/* ⚠️ TIME ZONE IS STORED AND NOTHING READS IT YET, AND THE HELPER SAYS SO. Dates already
+          render in the device's zone — the same zone, for almost every writer — and wiring this to
+          DISPLAY would mean threading it through 93 `toLocaleDateString` call sites, several in
+          files this build must not touch. It is stored for the scheduled work that does not exist
+          yet: a reminder at 9am local needs a server to know which 9am.
+          ⚠️ AND THE VALUE IS RESOLVED, NEVER BACKFILLED. An account with nothing stored reads as
+          its BROWSER's zone, not Europe/London — pinning a writer in Chicago to London would give
+          them wrong day boundaries with nothing on screen to explain it. */}
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 14, padding: "14px 0", borderTop: "0.5px solid #efe5da" }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Time zone</p>
+          <p style={helpText}>{TZ_HELPER}</p>
+        </div>
+        <select
+          id="account-timezone"
+          aria-label="Time zone"
+          value={timezone}
+          onChange={(e) => saveTimezone(e.target.value)}
+          className="acct-input"
+          style={{ ...inputStyle, width: "auto", maxWidth: 200, padding: "7px 10px", fontSize: 13, flexShrink: 0 }}
+        >
+          {tzOptions(timezone).map((z) => <option key={z} value={z}>{z}</option>)}
+        </select>
+      </div>
+
+      {/* ⚠️ NO DATE-FORMAT AND NO WEEK-START CONTROL. Both are pure DISPLAY claims, and every date
+          in this app renders through one of 93 `toLocaleDateString("en-GB", …)` calls — several of
+          them in files this build must not touch. A stored "MM/DD/YYYY" beside a page full of
+          "20 August 2026" is not a deferred preference, it is a visible untruth, and it is the
+          same fault that removed Pen name, the author-photo control and the sessions button. They
+          arrive with a shared formatter, not before one. */}
+
+      <GroupLabel>Tasks</GroupLabel>
       {taskSettingsRow}
     </SectionCard>
   );

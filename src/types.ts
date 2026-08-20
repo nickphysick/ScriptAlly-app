@@ -69,6 +69,23 @@ export interface User {
   // time, never stored. Rules-gated like the goal fields.
   tourCompletedAt?: string;
   tourDismissed?: boolean;
+  /* Settings → Notifications. ONE MAP (the todoPrefs precedent): one allowlist entry, one write
+     path. Readers go through `notifyPrefs()`, which is total. Nothing sends email yet — see
+     lib/accountPrefs. */
+  notifyPrefs?: { nudges?: boolean; weeklyDigest?: boolean };
+  /* ⚠️ ITS OWN FIELD, NOT A KEY IN `notifyPrefs` — a consent RECORD, with the moment it was made.
+     UK PECR wants affirmative, evidenced and withdrawable; absent === never granted, and nothing
+     but a person clicking may create it. Withdrawal REWRITES it with granted:false rather than
+     deleting it, so the evidence that consent existed, and when it stopped, survives. */
+  marketingConsent?: { granted: boolean; at: string };
+  /* Settings → Preferences. IANA zone only; date format and week-start are deliberately absent —
+     they would be display claims against 93 call sites that all render en-GB (lib/accountPrefs).
+     Resolved at READ time (`resolveTimeZone`), never backfilled. */
+  workspacePrefs?: { timezone?: string };
+  /* Settings → Your data. The scheduled-deletion window: when it was asked for, and the date
+     after which a purge job may run. ⚠️ NO SUCH JOB EXISTS — this records the request and the
+     cancel path only (see lib/accountDeletion). */
+  scheduledDeletion?: { requestedAt: string; purgeAfter: string };
   // The To-do board's first-visit spotlight tour has run (ISO timestamp; set on Done OR skip — the
   // hasSeenTour pattern). Absent === never seen; the ? popover's "Replay the tour" ignores it.
   // NOTE: in the committed user-update allowlist (firestore.rules); live behaviour tracks the
