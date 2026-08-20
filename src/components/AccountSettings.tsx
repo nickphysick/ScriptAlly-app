@@ -57,6 +57,7 @@ import { CountryCombobox } from "./forms";
 import { PlanComparison } from "./plans/PlanComparison";
 import { AccountHeader } from "./settings/AccountHeader";
 import { RailAside } from "./settings/RailAside";
+import { SettingsIllo, hasSectionWatermark } from "./settings/SettingsIllo";
 import { accountFacts, sentCount } from "../lib/accountHeaderFacts";
 import {
   pageGround,
@@ -346,7 +347,13 @@ const SectionCard: React.FC<{
         </span>
         <span className="acct-band-sub">{band.sub}</span>
       </div>
-      <div className="acct-cardbody">{children}</div>
+      <div className="acct-cardbody">
+        {children}
+        {/* ⚠️ LAST IN THE BODY AND UNDER IT. The watermark is what stops a 520px card looking empty
+            behind a short section; it is decoration, so it is aria-hidden, takes no pointer events,
+            and sits beneath everything the body renders. */}
+        {hasSectionWatermark(section) && <SettingsIllo slot="section" section={section} />}
+      </div>
     </MountPanel>
   );
 };

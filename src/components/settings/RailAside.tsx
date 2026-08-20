@@ -17,11 +17,12 @@
 import React from "react";
 import { MountPanel } from "../MountPanel";
 import { planAllowanceLine } from "../../lib/planComparison";
+import { SettingsIllo } from "./SettingsIllo";
 
 export const RailAside: React.FC<{ plan: "free" | "pro" }> = ({ plan }) => (
   <MountPanel className="acct-aside">
     <div className="acct-aside-in">
-      {/* The illustration slot lands here in Phase 4, above the text. */}
+      <SettingsIllo slot="aside" />
       <div className="acct-aside-txt">
         <span className="acct-aside-k">Your plan</span>
         <span className="acct-aside-v">{plan === "pro" ? "Pro" : "Free"}</span>

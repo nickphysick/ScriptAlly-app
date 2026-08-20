@@ -210,3 +210,59 @@ test("the aside hides below 900px rather than becoming a full-width band", async
   console.log("aside @800 display:", shown);
   expect(shown).toBe("none");
 });
+
+/* ═══ PHASE 4 — illustration slots ═══════════════════════════════════════════ */
+
+test("the three slots render where they belong, and only where they should", async ({ page }) => {
+  const rows: string[] = [];
+  for (const r of ACCOUNT_ROUTES) {
+    await openRoute(page, r.path, { width: 1440, height: 900 });
+    const g = await page.evaluate(() => ({
+      header: document.querySelectorAll(".acct-illo--header").length,
+      aside: document.querySelectorAll(".acct-illo--aside").length,
+      section: document.querySelectorAll("#acct-panel .acct-illo--section").length,
+    }));
+    rows.push(`${r.id.padEnd(15)} header ${g.header}  aside ${g.aside}  watermark ${g.section}`);
+    expect(g.header, `${r.id} header slot`).toBe(1);
+    expect(g.aside, `${r.id} aside slot`).toBe(1);
+    /* ⚠️ PLAN AND YOUR DATA CARRY NO WATERMARK, DELIBERATELY — Plan's body is full, and a
+       decorative flourish beside a permanent-deletion control is the wrong note. */
+    const expected = r.id === "plan" || r.id === "data" ? 0 : 1;
+    expect(g.section, `${r.id} watermark`).toBe(expected);
+  }
+  console.log("\nILLUSTRATION SLOTS\n" + rows.join("\n"));
+});
+
+/* ⚠️ ASKED OF THE BROWSER, NOT READ OFF A z-index. A stacking declaration is a claim; what is at a
+   control's coordinates is the answer. And the rect is proved on screen FIRST — `elementFromPoint`
+   outside the viewport returns null, so a probe on an off-screen control is satisfied by nothing
+   at all (CLAUDE.md's off-screen-probe trap). */
+test("no illustration ever intercepts a pointer", async ({ page }) => {
+  for (const id of ["profile", "security", "notifications", "preferences"]) {
+    const path = ACCOUNT_ROUTES.find((r) => r.id === id)!.path;
+    await openRoute(page, path, { width: 1440, height: 900 });
+
+    const probe = await page.evaluate(() => {
+      const illo = document.querySelector("#acct-panel .acct-illo--section") as SVGElement | null;
+      if (!illo) return null;
+      const r = illo.getBoundingClientRect();
+      const onScreen = r.top >= 0 && r.left >= 0 && r.bottom <= innerHeight && r.right <= innerWidth;
+      const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      const hit = document.elementFromPoint(cx, cy);
+      return {
+        onScreen,
+        pointerEvents: getComputedStyle(illo).pointerEvents,
+        ariaHidden: illo.getAttribute("aria-hidden"),
+        /* what the browser says is under the pointer AT THE MARK'S OWN CENTRE */
+        hitIsIllo: hit === illo || (hit ? illo.contains(hit) : false),
+        hitTag: hit ? hit.tagName.toLowerCase() : null,
+      };
+    });
+    console.log(`${id.padEnd(15)} ${JSON.stringify(probe)}`);
+    expect(probe, `${id}: the watermark must exist`).not.toBeNull();
+    expect(probe!.onScreen, `${id}: the rect must be on screen or the probe proves nothing`).toBe(true);
+    expect(probe!.pointerEvents).toBe("none");
+    expect(probe!.ariaHidden).toBe("true");
+    expect(probe!.hitIsIllo, `${id}: the mark took the hit at its own centre`).toBe(false);
+  }
+});

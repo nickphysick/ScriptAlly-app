@@ -252,3 +252,26 @@
 /* The section body. Its own padding, so the card can carry a floor height in Phase 2 without the
    body's spacing being tangled up in it. */
 .acct-cardbody { padding: 22px 26px 26px; }
+
+/* ── Illustration slots ─────────────────────────────────────────────────────
+   ⚠️ EVERY SLOT IS DECORATION: absolutely placed, `pointer-events: none`, and beneath the content
+   it sits behind. The section watermark is the one that matters — it lies under a card body full
+   of controls, and a mark that swallowed a click would be a far worse trade than an empty corner.
+   The measurement asks the browser what is at a control's coordinates rather than reading these
+   declarations, because a z-index is a claim and an `elementFromPoint` is an answer. */
+.acct-illo { position: absolute; pointer-events: none; }
+
+/* Header panel — bottom-right, bleeding past the corner; MountPanel's frame clips it. */
+.acct-illo--header { right: -10px; bottom: -14px; opacity: 0.4; z-index: 1; }
+
+/* Rail aside — top-centre, in the space the bottom-aligned text leaves above it. */
+.acct-illo--aside { left: 50%; top: 26px; transform: translateX(-50%); opacity: 0.5; z-index: 1; }
+
+/* Section body — bottom-right, behind the content. `z-index: 0` against the body's own stacking
+   context, with the content above it by source order. */
+.acct-illo--section { right: 22px; bottom: 18px; opacity: 0.28; z-index: 0; }
+
+/* ⚠️ THE BODY'S CONTENT NEEDS ITS OWN STACKING, or a watermark drawn after it in source order
+   paints on top of the controls. The two-column body and every direct child of the card body sit
+   above the mark deliberately. */
+.acct-cardbody > *:not(.acct-illo) { position: relative; z-index: 1; }

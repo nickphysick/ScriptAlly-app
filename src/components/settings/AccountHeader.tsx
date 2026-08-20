@@ -22,6 +22,7 @@ import React from "react";
 import { MountPanel } from "../MountPanel";
 import { AccountFact } from "../../lib/accountHeaderFacts";
 import { initialsOf } from "../../lib/searchSuggestionsCore";
+import { SettingsIllo } from "./SettingsIllo";
 
 export const AccountHeader: React.FC<{
   name: string;
@@ -47,7 +48,7 @@ export const AccountHeader: React.FC<{
           already the narrowest a three-row key/value list reads at; taking width off it wraps the
           values onto second lines and the "rows" stop being rows. */}
       <div className="acct-hdr-side">
-        {/* The illustration slot lands here in Phase 4, behind the facts. */}
+        <SettingsIllo slot="header" />
         <dl className="acct-hdr-facts">
           {facts.map((f) => (
             <div key={f.key} className="acct-hdr-fact">
