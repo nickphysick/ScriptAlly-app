@@ -114,7 +114,14 @@ describe("the deletion confirm", () => {
   });
 
   it("refuses the word DELETE", () => {
+    /* ⚠️ SUPERSEDED IN SPIRIT, KEPT AS A CASE. The predicate no longer knows what "the account
+       email" is — its second argument is whatever must be typed — so this now asserts the general
+       rule it always encoded: a value that is not the expected one does not confirm. The app's
+       expected value is `DELETION_CONFIRM_WORD`; see accountDeletion.ts for why the word beat the
+       address. */
     expect(deletionConfirmed("DELETE", "m@webb.co.uk")).toBe(false);
+    expect(deletionConfirmed("m@webb.co.uk", "DELETE")).toBe(false);
+    expect(deletionConfirmed("DELETE", "DELETE")).toBe(true);
   });
 
   /**

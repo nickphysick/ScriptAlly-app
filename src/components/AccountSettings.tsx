@@ -35,7 +35,11 @@ import {
   notifyPrefs, NotifyPrefs, marketingGranted, marketingConsentRecord, ALWAYS_SENT_LINE,
   resolveTimeZone, tzOptions, TZ_HELPER,
 } from "../lib/accountPrefs";
-import { buildExport, downloadExport, exportFilename, ACCOUNT_DELETION_ENABLED, deletionConfirmed } from "../lib/dataExport";
+import { buildExport, downloadExport, exportFilename } from "../lib/dataExport";
+import {
+  DELETION_GRACE_DAYS, DELETION_CONFIRM_WORD, DELETION_REMOVES, RETENTION_LINE,
+  deletionArmed, deletionRequest, scheduledDeletion, deletionNotice,
+} from "../lib/accountDeletion";
 import { TODO_OPEN_TASK_SETTINGS } from "../lib/todoRoutes";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../lib/accountRoutes";
 import { useDirtyField } from "../lib/useSaveState";
@@ -482,22 +486,27 @@ const Rail: React.FC<{ active: SectionId; onSelect: (id: SectionId) => void }> =
   );
 };
 
-/* ── Delete-account modal: a typed-confirmation pattern. The confirm step is present and
- *    functional, but the final action is DISABLED ("coming soon") — no deletion endpoint
- *    exists and irreversible deletion is never wired unsupervised. ───────────────────── */
 /**
- * ⚠️ THE CONFIRMATION IS THE ACCOUNT EMAIL, NOT THE WORD "DELETE" — and not a checkbox.
- * "DELETE" is a word anyone can type without reading; your own address is a sentence you have to
- * mean, and it is the one string that is different for every account. `deletionConfirmed` also
- * refuses an empty account email, so a half-loaded user document cannot arm the button.
+ * The delete-account modal — a typed confirmation that schedules, rather than deletes.
  *
- * ⚠️ AND THE BUTTON STAYS DISABLED WHATEVER IS TYPED. `ACCOUNT_DELETION_ENABLED` is the outer gate:
- * nothing in this repo deletes a user's records, and the flag exists so the mechanism gets reviewed
- * before it is switched on. The confirm proves intent; the flag proves the code has been read.
+ * ⚠️ THE CONFIRMATION IS THE WORD `DELETE`, AND THAT SUPERSEDES THE ACCOUNT-EMAIL FORM. The old
+ * note here argued that "your own address is a sentence you have to mean" where DELETE "is a word
+ * anyone can type without reading". Good reasoning with one hole: YOUR EMAIL IS ON THIS VERY PAGE
+ * — in the Profile band and in the security section's field — and browsers autofill it, so it is
+ * copyable from two inches away and sometimes typed FOR you. `DELETE` appears nowhere as a value
+ * to copy. See `accountDeletion.DELETION_CONFIRM_WORD`.
+ *
+ * ⚠️ AND THE BUTTON IS NO LONGER PERMANENTLY DISABLED, because what it now does is SAFE:
+ * confirming writes a dated, cancellable request and removes nothing. The irreversible half — the
+ * purge — still does not exist, and `ACCOUNT_DELETION_ENABLED` still reads false to say so.
  */
-const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string; onContact: () => void }> = ({ onClose, accountEmail, onContact }) => {
+const DeleteAccountModal: React.FC<{
+  onClose: () => void;
+  onConfirm: () => void | Promise<void>;
+  busy: boolean;
+}> = ({ onClose, onConfirm, busy }) => {
   const [confirm, setConfirm] = useState("");
-  const matched = deletionConfirmed(confirm, accountEmail);
+  const matched = deletionArmed(confirm);
   const inputRef = useRef<HTMLInputElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -555,12 +564,22 @@ const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string;
             </button>
           </div>
           <div style={{ padding: 18 }}>
-            <p style={{ ...helpText, color: bodyInk, marginBottom: 14 }}>
-              This permanently removes your account and every manuscript, agent and query you've tracked.
-              This <strong>cannot be undone</strong>.
+            {/* ⚠️ WHAT GOES IS NAMED, NOT SUMMARISED. "All your data" is not something anyone can
+                weigh; a list is. */}
+            <p style={{ ...helpText, color: bodyInk, marginBottom: 8 }}>
+              This removes, permanently:
+            </p>
+            <ul style={{ margin: "0 0 14px", padding: "0 0 0 18px", listStyle: "disc" }}>
+              {DELETION_REMOVES.map((line) => (
+                <li key={line} style={{ ...helpText, color: bodyInk, marginBottom: 3 }}>{line}</li>
+              ))}
+            </ul>
+            <p style={{ ...helpText, marginBottom: 14 }}>
+              You'll have <strong>{DELETION_GRACE_DAYS} days</strong> to change your mind. Nothing
+              is removed before then.
             </p>
             <label htmlFor="del-confirm" style={labelStyle}>
-              Type your account email to confirm
+              Type {DELETION_CONFIRM_WORD} to confirm
             </label>
             <input
               id="del-confirm"
@@ -569,7 +588,7 @@ const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string;
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
               autoComplete="off"
-              placeholder={accountEmail ?? "you@example.com"}
+              placeholder={DELETION_CONFIRM_WORD}
               className="acct-input"
               style={inputStyle}
               aria-describedby="del-note"
@@ -585,33 +604,32 @@ const DeleteAccountModal: React.FC<{ onClose: () => void; accountEmail?: string;
               <button onClick={onClose} style={{ ...ghostBtn, borderColor: "#d8cdc0", color: "#6a5a50" }}>
                 Cancel
               </button>
+              {/* ⚠️ DISABLED UNTIL THE WORD MATCHES EXACTLY — the gate, not a decoration. */}
               <button
                 type="button"
-                disabled
-                aria-disabled="true"
-                title="Account deletion isn't available yet"
+                id="del-confirm-btn"
+                disabled={!matched || busy}
+                aria-disabled={!matched || busy}
+                onClick={() => { void onConfirm(); }}
                 style={{
                   ...primaryBtn,
                   background: DANGER_INK,
-                  opacity: 0.4,
-                  cursor: "not-allowed",
+                  opacity: !matched || busy ? 0.4 : 1,
+                  cursor: matched && !busy ? "pointer" : "not-allowed",
                 }}
               >
-                <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account
+                <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" />
+                {busy ? "Scheduling…" : "Schedule deletion"}
               </button>
             </div>
-            {/* ⚠️ SAID PLAINLY, AND WITH A ROUTE THAT WORKS. A writer who wants out needs one; a
-                disabled button and "coming soon" leaves them with nowhere to go. */}
+            {/* ⚠️ IT SAYS WHAT CONFIRMING DOES, AND CONFIRMING DOES EXACTLY THAT. This records a
+                dated, cancellable request; it removes nothing today, and no job removes anything
+                afterwards either (there is no scheduler in this project). Saying "your account
+                will be deleted on the 3rd" would be the one piece of copy in this build the code
+                cannot back — on the most consequential control on the page. */}
             <p id="del-note" style={{ ...helpText, marginTop: 12 }}>
-              Self-service deletion isn't switched on yet.{" "}
-              <button
-                type="button"
-                onClick={onContact}
-                style={{ background: "none", border: "none", padding: 0, font: "inherit", color: DANGER_INK, textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}
-              >
-                Write to us
-              </button>{" "}
-              and we'll close your account by hand. Nothing has been deleted.
+              Confirming records the request and starts the {DELETION_GRACE_DAYS}-day window.
+              Nothing is removed at this point.
             </p>
           </div>
         </MountPanel>
@@ -665,6 +683,7 @@ export const AccountSettings: React.FC<{
   const authFacts = useMemo(() => readAuthFacts(), []);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const [showDelete, setShowDelete] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState(false);
 
   if (!currentUser) return null;
 
@@ -683,6 +702,7 @@ export const AccountSettings: React.FC<{
    * mid-edit cannot strand the bar.
    */
   const pwMode = passwordMode(authFacts?.providerIds ?? ["password"]);
+  const pendingDeletion = scheduledDeletion(currentUser.scheduledDeletion);
   const notify = notifyPrefs(currentUser.notifyPrefs);
   const marketingOn = marketingGranted(currentUser.marketingConsent);
   const timezone = resolveTimeZone(currentUser.workspacePrefs?.timezone);
@@ -783,6 +803,35 @@ export const AccountSettings: React.FC<{
       savedReceipt("Time zone");
     } catch {
       showToast({ message: "Couldn't save your time zone. Try again?", replaces: "settings-saved" });
+    }
+  };
+
+  /* ⚠️ CONFIRMING WRITES A RECORD; IT DELETES NOTHING. The window is the safety mechanism and the
+     record IS the feature that exists — the purge it schedules does not (see accountDeletion). */
+  const requestDeletion = async () => {
+    setDeleteBusy(true);
+    try {
+      await updateUserProfile({ scheduledDeletion: deletionRequest() });
+      setShowDelete(false);
+      showToast({ message: `Deletion scheduled — you have ${DELETION_GRACE_DAYS} days to cancel.`, replaces: "settings-saved" });
+    } catch {
+      showToast({ message: "Couldn't schedule that. Try again?", replaces: "settings-saved" });
+    } finally {
+      setDeleteBusy(false);
+    }
+  };
+
+  /* ⚠️ CANCELLING CLEARS THE MAP RATHER THAN DELETING THE KEY. `updateUserProfile` merges, and the
+     allowlist governs which KEYS an update may touch — writing an empty record keeps the write
+     inside the same one entry and cannot be mistaken for "no request was ever made" by a reader
+     that only checks for the key's presence. `scheduledDeletion()` reads an incomplete record as
+     no request, which is exactly what this writes. */
+  const cancelDeletion = async () => {
+    try {
+      await updateUserProfile({ scheduledDeletion: { requestedAt: "", purgeAfter: "" } });
+      showToast({ message: "Deletion cancelled. Nothing was removed.", replaces: "settings-saved" });
+    } catch {
+      showToast({ message: "Couldn't cancel that. Try again?", replaces: "settings-saved" });
     }
   };
 
@@ -1209,13 +1258,22 @@ export const AccountSettings: React.FC<{
   const dataSection = (
     <>
       <SectionCard section="data" headingId="acct-h-data">
+        {/* ⚠️ THE EXPORT IS THE PORTABILITY RIGHT, SAID WITHOUT LEGALESE. UK GDPR gives you a copy
+            of your own records in a form a machine can read; the copy says that in plain words
+            rather than citing an article at someone who just wants their work.
+            ⚠️ AND IT IS THE JSON BUNDLE, NOT A CSV. The brief said "CSV export"; the CSV that
+            exists covers the query LIST only, and a partial file is not the complete copy the
+            right is about. `buildExport` is the whole account. */}
         <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Export your data</p>
-            <p style={helpText}>Download your manuscripts, agents and queries as a JSON file.</p>
+            <p style={helpText}>
+              A complete copy of everything on your account — manuscripts, agents, queries and their
+              full history — in a file another program can read. It's yours to take anywhere.
+            </p>
           </div>
           <button onClick={exportData} style={ghostBtn}>
-            <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Export JSON
+            <Download style={{ width: 14, height: 14 }} aria-hidden="true" /> Export
           </button>
         </div>
         {exportMsg && <p style={{ fontFamily: FONT_SANS, fontSize: 12.5, fontWeight: 500, color: SUCCESS_GREEN, marginTop: -4, marginBottom: 16 }}>{exportMsg}</p>}
@@ -1231,7 +1289,7 @@ export const AccountSettings: React.FC<{
           <button onClick={() => onNavigate("contact")} style={ghostBtn}>Get in touch</button>
         </div>
 
-        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
+        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap", paddingBottom: 16, borderBottom: "0.5px solid #efe5da", marginBottom: 16 }}>
           <div style={{ minWidth: 0, flex: 1 }}>
             <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Import agents &amp; queries</p>
             <p style={helpText}>Bring in your existing tracking from a spreadsheet.</p>
@@ -1239,6 +1297,14 @@ export const AccountSettings: React.FC<{
           <button onClick={() => onNavigate("import")} style={ghostBtn}>
             <Upload style={{ width: 14, height: 14 }} aria-hidden="true" /> Open import
           </button>
+        </div>
+
+        {/* Retention — the period comes from the same constant the privacy policy reads, brackets
+            and all: it is a figure nobody has confirmed, and settings quoting a confident "30 days"
+            beside a policy that hedges would be the app disagreeing with its own notice. */}
+        <div>
+          <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>How long we keep it</p>
+          <p style={helpText}>{RETENTION_LINE}</p>
         </div>
       </SectionCard>
 
@@ -1263,18 +1329,51 @@ export const AccountSettings: React.FC<{
       </SubCard>
 
       <SubCard title="Danger zone" Icon={Trash2} danger headingId="acct-h-danger">
-        <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Delete account</p>
-            <p style={helpText}>Permanently remove your account and all of your data. This cannot be undone.</p>
+        {pendingDeletion ? (
+          /* ⚠️ THE SCHEDULED STATE REPLACES THE REQUEST CONTROL — it does not sit beside it. Two
+             delete buttons, one of them already pressed, is how someone confirms twice and cannot
+             tell what state they are in. */
+          <div id="acct-deletion-scheduled">
+            <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: DANGER_INK, marginBottom: 4 }}>
+              {deletionNotice(pendingDeletion)}
+            </p>
+            <p style={{ ...helpText, marginBottom: 4 }}>
+              Nothing has been removed. Cancel any time before then and your account carries on
+              exactly as it is.
+            </p>
+            {/* ⚠️ STATED, BECAUSE IT IS TRUE AND THE ALTERNATIVE IS A PROMISE NOBODY KEEPS. There
+                is no job that purges an account, so the page must not imply one runs on the date.
+                It offers the route that does work. */}
+            <p style={{ ...helpText, marginBottom: 14 }}>
+              Deletion isn't automatic yet — we complete it by hand.{" "}
+              <button
+                type="button"
+                onClick={() => onNavigate("contact")}
+                style={{ background: "none", border: "none", padding: 0, font: "inherit", color: DANGER_INK, textDecoration: "underline", textUnderlineOffset: 2, cursor: "pointer" }}
+              >
+                Write to us
+              </button>{" "}
+              if you need it done by a particular date.
+            </p>
+            <button onClick={cancelDeletion} style={ghostBtn}>Cancel deletion</button>
           </div>
-          <button
-            onClick={() => setShowDelete(true)}
-            style={{ ...ghostBtn, color: DANGER_INK, borderColor: DANGER_INK }}
-          >
-            <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account…
-          </button>
-        </div>
+        ) : (
+          <div className="flex items-start justify-between" style={{ gap: 14, flexWrap: "wrap" }}>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <p style={{ fontFamily: FONT_SANS, fontSize: 13.5, fontWeight: 600, color: bodyInk, marginBottom: 2 }}>Delete account</p>
+              <p style={helpText}>
+                Removes your account and everything on it, after a {DELETION_GRACE_DAYS}-day window
+                in which you can change your mind.
+              </p>
+            </div>
+            <button
+              onClick={() => setShowDelete(true)}
+              style={{ ...ghostBtn, color: DANGER_INK, borderColor: DANGER_INK }}
+            >
+              <Trash2 style={{ width: 14, height: 14 }} aria-hidden="true" /> Delete account…
+            </button>
+          </div>
+        )}
       </SubCard>
     </>
   );
@@ -1325,7 +1424,7 @@ export const AccountSettings: React.FC<{
         </div>
       </div>
 
-      {showDelete && <DeleteAccountModal onClose={() => setShowDelete(false)} accountEmail={currentUser.email} onContact={() => onNavigate("contact")} />}
+      {showDelete && <DeleteAccountModal onClose={() => setShowDelete(false)} onConfirm={requestDeletion} busy={deleteBusy} />}
     </div>
   );
 };

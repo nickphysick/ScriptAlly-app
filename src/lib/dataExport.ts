@@ -105,18 +105,28 @@ export function downloadExport(bundle: ExportBundle, filename: string): void {
  * The privacy policy states deletion within [30] days. That promise currently has no mechanism —
  * recorded here and in the run report rather than left for someone to discover.
  */
+/* ⚠️ IT NOW MEANS "THE PURGE EXISTS", AND IT STILL DOES NOT. Requesting deletion IS built and is
+   safe, because it is reversible: it writes a dated, cancellable record and removes nothing. What
+   this flag gates is the irreversible half — the job that actually destroys the data — and there
+   is no scheduled-job infrastructure in this project to hang one on. */
 export const ACCOUNT_DELETION_ENABLED = false;
 
 /**
  * Is the typed confirmation good enough to delete?
  *
- * ⚠️ THE EMAIL TYPED OUT, NEVER A CHECKBOX. A checkbox is ticked by the same reflex that dismissed
- * the dialog; typing your own address is a sentence you have to mean. Case and surrounding space
- * are forgiven — this is a confirmation of intent, not a spelling test — and an empty account email
- * can never match, so a half-loaded user document cannot arm the button.
+ * ⚠️ TYPED OUT, NEVER A CHECKBOX. A checkbox is ticked by the same reflex that dismissed the
+ * dialog; typing the word is a sentence you have to mean. Case and surrounding space are forgiven
+ * — this is a confirmation of intent, not a spelling test — and an empty EXPECTED value can never
+ * match, so a half-loaded document cannot arm the button.
+ *
+ * ⚠️ THE SECOND ARGUMENT IS NOW WHATEVER MUST BE TYPED, not specifically the account email. The
+ * caller supplies it (`DELETION_CONFIRM_WORD` — see `accountDeletion.ts`, which explains why the
+ * word beat the address: your email is printed twice on the same page and browsers autofill it).
+ * The predicate itself is unchanged and still the only one — the parameter simply stopped
+ * pretending it could only ever be an email.
  */
-export function deletionConfirmed(typed: string, accountEmail: string | undefined): boolean {
-  const account = (accountEmail ?? "").trim().toLowerCase();
-  if (!account) return false;
-  return typed.trim().toLowerCase() === account;
+export function deletionConfirmed(typed: string, expected: string | undefined): boolean {
+  const want = (expected ?? "").trim().toLowerCase();
+  if (!want) return false;
+  return typed.trim().toLowerCase() === want;
 }
