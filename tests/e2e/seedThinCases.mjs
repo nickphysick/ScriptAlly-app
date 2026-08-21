@@ -107,7 +107,19 @@ async function wipe() {
   }
   for (const coll of ["queries", "agents", "manuscripts", "tasks", "taskFlags", "activities"]) {
     for (const d of (await getDocs(collection(db, "users", uid, coll))).docs) {
-      if (d.id.startsWith(PREFIX)) { await deleteDoc(d.ref); gone++; }
+      /**
+       * ⚠️ CONTAINS, NOT STARTS WITH — and the difference is a whole journey.
+       *
+       * The app derives its own flag ids from the task's fields: a nudge on `thin-q-chase` is
+       * `nudge_overdue__q_thin-q-chase__a___r_`, which does NOT begin with the prefix. So every
+       * previous run left the app's flags behind while removing the fixture's, and the next run's
+       * freshly seeded query arrived already suppressed. Measured: `replyTask` returns "nudge" for
+       * the chase case and the board showed no Chase row at all.
+       *
+       * Same residue class as the muted close rule this file already documents, one field along —
+       * and the same cost: a journey nobody could reach, for reasons nothing on screen explained.
+       */
+      if (d.id.startsWith(PREFIX) || d.id.includes(PREFIX)) { await deleteDoc(d.ref); gone++; }
     }
   }
   return gone;

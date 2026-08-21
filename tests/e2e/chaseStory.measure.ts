@@ -10,9 +10,10 @@
  */
 import { test } from "@playwright/test";
 import { ensureSignedIn } from "./measure";
-import { writeFileSync, rmSync } from "node:fs";
+import { writeFileSync, rmSync, mkdirSync } from "node:fs";
 const OUT = "run-artifacts/chase-story.txt";
 rmSync(OUT, { force: true });
+mkdirSync("reports/chase-round", { recursive: true });
 const VIS = `(e) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }`;
 
 test("chase story", async ({ page }) => {
@@ -65,6 +66,7 @@ test("chase story", async ({ page }) => {
     out.push("  status: " + d.statusWord);
     out.push("  rungs (" + d.rungs.length + "): " + JSON.stringify(d.rungs));
     out.push("  tiles: " + JSON.stringify(d.tiles.slice(0, 4)));
+    await page.screenshot({ path: "reports/chase-round/pane-" + pill.toLowerCase() + ".png" });
 
     /**
      * ⚠️ THE CLAIM, NAMED BY SUBJECT. A story that renders only its terminus is the fault this

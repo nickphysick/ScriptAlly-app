@@ -1,5 +1,10 @@
-census: {"Decide":2,"Close":4,"Fix":28,"Note":4}
-Chase: NO ROW
+census: {"Decide":2,"Chase":2,"Close":4,"Fix":28,"Note":4}
+Chase — ChaseWorth a nudgeQuiet for 9 weeks — past their sta
+  deed: Nudge Tobias Quint at Quint Literary about The Quiet Fixture
+  status: Queried
+  rungs (2): ["Query sent22 Jun · via email","Your turnToday"]
+  tiles: ["You've waited8 weeks","QueriedQuery sent22 Jun · via email","Their window4 weeks","Sent previouslyCovering letter"]
+  ASSERT Chase · story opens on the send: PASS · ends on the terminus: PASS · rungs beyond the terminus: 1
 Send: NO ROW
 Close — CloseConsider closingRosalind Vale · Vale & Marchett
   deed: Consider closing your query for The Quiet Fixture to Rosalin
