@@ -19,6 +19,7 @@ import {
   materialRows, materialDetail, addedLabel, packageRows, sentLine,
   trackingRows, howItWorks, packagedQueries, replyCount, packageTiles, tileFooter,
   materialColumns, packagesUsing, usageLine,
+  isRetired, removalChoice, resolveSlot, MISSING_SLOT,
 } from "./packagesOverview";
 import { packageMetrics, UNFILLED_SLOT, isRequest as isRequestExport, packagesUsingVersion } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES } from "../components/packages/typeMeta";
@@ -149,9 +150,23 @@ describe("packageRows", () => {
     expect(row.sentLine).toBe(sentLine(packageMetrics("pk1", queries).sent));
   });
 
-  it("omits a slot whose version has been deleted rather than printing a blank", () => {
+  /**
+   * ⚠️ THIS ASSERTION IS REVERSED FROM WHAT IT SAID, DELIBERATELY (Ruling 2). It used to require
+   * that a slot whose material is gone be OMITTED, and called that honest. It is not: the resulting
+   * line — "Hook-first · Chapters 1-3" — describes a package the writer does not have, one
+   * deliberately built without a synopsis. The archive model is what made the state reachable at
+   * all, so it is also what made the old wording testable and wrong.
+   */
+  it("names a slot whose version is gone rather than dropping it", () => {
     const orphaned = [pkg("pk2", "Half", "q1", "gone", "p1")];
-    expect(packageRows(orphaned, versions, queries)[0].composition).toBe("Hook-first · Chapters 1-3");
+    expect(packageRows(orphaned, versions, queries)[0].composition)
+      .toBe(`Hook-first · ${MISSING_SLOT} · Chapters 1-3`);
+  });
+
+  /** An UNFILLED slot still contributes nothing — the two states must not collapse back together. */
+  it("keeps an unfilled slot out of the composition line", () => {
+    const noSyn = [pkg("pk4", "No synopsis", "q1", UNFILLED_SLOT, "p1")];
+    expect(packageRows(noSyn, versions, queries)[0].composition).toBe("Hook-first · Chapters 1-3");
   });
 
   it("has a null composition when every slot is unfilled", () => {
@@ -276,7 +291,20 @@ describe("packageTiles — the working stage's grid (flow pack D7)", () => {
      component say "Not included", which states that the slot was considered and left out. */
   it("keeps the sample row with a null name when the slot is empty", () => {
     const t = packageTiles([noSample], versions, [])[0];
-    expect(t.slots[2]).toEqual({ label: "Sample pages", name: null });
+    expect(t.slots[2]).toEqual({ label: "Sample pages", name: null, state: "empty" });
+  });
+
+  /**
+   * ⚠️ THE THREE STATES, ASSERTED AS THREE. `name` alone could not tell "left blank" from "the
+   * material is gone" — both were `null` — so a package that once held a letter rendered exactly
+   * like one that never had one. That is the state the archive model made reachable.
+   */
+  it("tells an empty slot apart from one whose material is gone", () => {
+    const orphaned = pkg("pk5", "Orphan", "gone", UNFILLED_SLOT, "p1");
+    const t = packageTiles([orphaned], versions, [])[0];
+    expect(t.slots.map((sl) => sl.state)).toEqual(["missing", "empty", "held"]);
+    expect(t.slots[0].name).toBe(MISSING_SLOT);
+    expect(t.slots[1].name).toBeNull();
   });
 
   it("resolves filled slots to their material names", () => {
@@ -408,5 +436,97 @@ describe("materialColumns — the broadsheet's three type columns (D3)", () => {
         expect(sheet.usage).toBe(usageLine(sheet.usedIn));
       }
     }
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE ARCHIVE MODEL (Ruling 2)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+describe("isRetired — absent means Active", () => {
+  /**
+   * ⚠️ THE DEFAULT IS THE WHOLE TEST. Every material and package written before the field existed
+   * has no `status`; a `=== "Active"` predicate reads all of them as retired and empties the page.
+   * That is a one-character mistake with a total blast radius, so it is asserted first.
+   */
+  it("reads a record with no status as active", () => {
+    expect(isRetired({})).toBe(false);
+    expect(isRetired({ status: undefined })).toBe(false);
+  });
+
+  it("reads Active as active and Retired as retired", () => {
+    expect(isRetired({ status: "Active" })).toBe(false);
+    expect(isRetired({ status: "Retired" })).toBe(true);
+  });
+});
+
+/* Built with the module's own helpers, so the fixtures are the shape the app writes. */
+const ARCH_VERSIONS = [
+  v("q1", ComponentType.QUERY_LETTER, "Hook-first", daysAgo(4)),
+  v("q2", ComponentType.QUERY_LETTER, "Comps-forward", daysAgo(9)),
+  v("s1", ComponentType.SYNOPSIS, "One-page", daysAgo(6)),
+  v("p1", ComponentType.SAMPLE_PAGES, "Chapters 1-3", daysAgo(2)),
+];
+const ARCH_PACKAGES = [pkg("pk1", "Hook + one-page", "q1", "s1", "p1")];
+
+describe("removalChoice — the data decides, not the writer", () => {
+  it("deletes a material nothing holds", () => {
+    const free = [pkg("pkA", "Other", "q9", "s9", UNFILLED_SLOT)];
+    expect(removalChoice("q1", free)).toEqual({ kind: "delete", usedIn: 0, packageNames: [] });
+  });
+
+  it("archives a material a package holds, and names the packages", () => {
+    const held = [pkg("pkA", "Hook + one-page", "q1", "s1", UNFILLED_SLOT)];
+    expect(removalChoice("q1", held)).toEqual({ kind: "archive", usedIn: 1, packageNames: ["Hook + one-page"] });
+  });
+
+  /**
+   * ⚠️ A RETIRED PACKAGE STILL COUNTS. It is a record of what was sent; deleting the material out
+   * from under it would damage a package the writer archived rather than discarded. The band hides
+   * retired packages — this question is not about the band.
+   */
+  it("counts a retired package as a holder", () => {
+    const retired = [{ ...pkg("pkR", "Old bundle", "q1", "s1", UNFILLED_SLOT), status: "Retired" as const }];
+    expect(removalChoice("q1", retired).kind).toBe("archive");
+  });
+
+  /** The sheet's number and the choice's number are the same derivation, so they cannot disagree. */
+  it("counts what the sheet prints", () => {
+    for (const col of materialColumns(ARCH_VERSIONS, ARCH_PACKAGES)) {
+      for (const sheet of col.sheets) {
+        const choice = removalChoice(sheet.id, ARCH_PACKAGES);
+        expect(choice.usedIn).toBe(sheet.usedIn);
+        expect(choice.kind).toBe(sheet.usedIn === 0 ? "delete" : "archive");
+      }
+    }
+  });
+});
+
+describe("archiving a material does not damage the packages holding it", () => {
+  /**
+   * ⚠️ THE INVARIANT THE WHOLE MODEL RESTS ON, and it is one filter away from being false. The band
+   * lists Active only; a package's slots resolve against the FULL list. Filter both against the
+   * same set and archiving becomes indistinguishable from deleting — which is the one thing it
+   * exists to avoid.
+   */
+  it("leaves the band and stays in the package", () => {
+    const held = [pkg("pkA", "Hook + one-page", "q1", "s1", UNFILLED_SLOT)];
+    const archived = ARCH_VERSIONS.map((x) => (x.id === "q1" ? { ...x, status: "Retired" as const } : x));
+
+    const listed = materialColumns(archived, held).flatMap((c) => c.sheets).map((sh) => sh.id);
+    expect(listed, "an archived material is still in the working list").not.toContain("q1");
+
+    const tile = packageTiles(held, archived, [])[0];
+    expect(tile.slots[0].state, "archiving broke the package that held it").toBe("held");
+    expect(tile.slots[0].name).toBe(ARCH_VERSIONS.find((x) => x.id === "q1")!.versionName);
+  });
+
+  /** And the count follows: the band's `held` drops by one, the package's is unchanged. */
+  it("drops the band count without touching the package", () => {
+    const held = [pkg("pkA", "Hook + one-page", "q1", "s1", UNFILLED_SLOT)];
+    const before = materialColumns(ARCH_VERSIONS, held)[0].held;
+    const archived = ARCH_VERSIONS.map((x) => (x.id === "q1" ? { ...x, status: "Retired" as const } : x));
+    expect(materialColumns(archived, held)[0].held).toBe(before - 1);
+    expect(packageRows(held, archived, [])[0].composition).toContain("Hook-first");
   });
 });

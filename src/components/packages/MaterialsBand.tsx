@@ -15,14 +15,17 @@
  * stored, and the usage line reads the SAME number the archive guard will read in Phase 3, so a sheet
  * can never say a material is free while the guard says it is held.
  *
- * ⚠️ NO DELETE CONTROL YET, DELIBERATELY. The ref draws a hover-revealed bin on every sheet; that
- * affordance arrives with the archive model (Phase 3), because a bin wired to a hard delete is the
- * thing Nick's Ruling 2 struck. An absent control is honest; a bin that refuses is not.
+ * ⚠️ THE BIN DOES NOT ALWAYS DELETE, AND THAT IS THE POINT (Ruling 2). A material nothing holds is
+ * deleted; one a package holds is ARCHIVED — it leaves this band and stays readable by the packages
+ * that use it. `RemovePopover` reads `removalChoice` and writes its own label from it, so the word
+ * on the button and the act behind it are the same object. The ref's version refused instead, and
+ * told the writer to dismantle a package first.
  */
 import React from "react";
 import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../../types";
 import { materialColumns } from "../../lib/packagesOverview";
 import { IllustrationSlot } from "./IllustrationSlot";
+import { RemovePopover } from "./RemovePopover";
 import "./packagesBroadsheet.css";
 
 /**
@@ -46,10 +49,17 @@ export interface MaterialsBandProps {
   onAddMaterial: (type: ComponentType) => void;
   /** Opens the modal on an existing material. */
   onOpenMaterial: (id: string) => void;
+  /**
+   * ⚠️ TWO HANDLERS, BECAUSE THERE ARE TWO ACTS — and the band does not choose between them.
+   * `removalChoice` reads the data inside the popover and calls whichever the data names, so this
+   * component cannot offer "Archive" and perform a delete.
+   */
+  onDeleteMaterial: (id: string) => void | Promise<unknown>;
+  onArchiveMaterial: (id: string) => void | Promise<unknown>;
 }
 
 export const MaterialsBand: React.FC<MaterialsBandProps> = ({
-  versions, packages, onAddMaterial, onOpenMaterial,
+  versions, packages, onAddMaterial, onOpenMaterial, onDeleteMaterial, onArchiveMaterial,
 }) => {
   const cols = materialColumns(versions, packages);
 
@@ -91,15 +101,14 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
             </div>
 
             {col.sheets.map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                className="pkgb-sheet"
-                onClick={() => onOpenMaterial(s.id)}
-                data-material={s.id}
-              >
+              /* ⚠️ A `div` HOLDING TWO CONTROLS, not a button holding a button — the latter is
+                 invalid HTML and recovers however the parser feels like. The name is the real
+                 control and stretches over the card; the bin sits above it. */
+              <div key={s.id} className="pkgb-sheet" data-material={s.id}>
                 <span className="pkgb-stype">{s.typeLabel}</span>
-                <span className="pkgb-sname">{s.name}</span>
+                <button type="button" className="pkgb-sopen pkgb-sname" onClick={() => onOpenMaterial(s.id)}>
+                  {s.name}
+                </button>
                 <span className="pkgb-ssrc">{s.source}</span>
                 {/* The usage line's number is bold and its words are not — `In **2** packages`. */}
                 <span className="pkgb-suse">
@@ -107,7 +116,15 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
                     ? <>In <b>{s.usedIn}</b> {s.usedIn === 1 ? "package" : "packages"}</>
                     : s.usage}
                 </span>
-              </button>
+                <RemovePopover
+                  id={s.id}
+                  name={s.name}
+                  typeLabel={s.typeLabel}
+                  packages={packages}
+                  onDelete={onDeleteMaterial}
+                  onArchive={onArchiveMaterial}
+                />
+              </div>
             ))}
 
             {/* ⚠️ THE GHOST IS PER COLUMN AND ALWAYS PRESENT, not an empty state. It is the column's

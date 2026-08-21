@@ -43,7 +43,7 @@ import { ChevronDown, ShieldCheck, Plus } from "lucide-react";
 import "./packages/packageWorkshop.css";
 
 export const SubmissionPackages: React.FC = () => {
-  const { currentUser, manuscripts, versions, packages, queries, addVersion, updateVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, versions, packages, queries, addVersion, updateVersion, deleteVersion, archiveVersion, addPackage, updatePackage, updateUserProfile } = useScriptAllyDb();
   const navigate = useNavigate();
 
   const [activeMsId, setActiveMsId] = useState<string | null>(() =>
@@ -356,6 +356,12 @@ export const SubmissionPackages: React.FC = () => {
             packages={msPackages}
             onAddMaterial={(type) => { setMatEditing(null); setMatPreselect(type); setMatModal(true); }}
             onOpenMaterial={openMaterial}
+            /* ⚠️ THE PAGE PASSES BOTH WRITERS AND CHOOSES NEITHER (Ruling 2). Which one runs is
+               decided inside the popover from `removalChoice`, off the same packages this page
+               already hands the band — so the sheet's usage line, the popover's wording and the
+               act performed are three readings of one number. */
+            onDeleteMaterial={deleteVersion}
+            onArchiveMaterial={archiveVersion}
           />
           <PackagesOverview
               versions={msVersions}

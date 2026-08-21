@@ -272,6 +272,18 @@ export interface ManuscriptVersion {
   contentType?: "text" | "link" | "file" | "ref";
   contentLink?: string;
   /**
+   * Put away — the archive model (broadsheet Ruling 2), and the reason there is no blocked delete.
+   *
+   * ⚠️ AN ARCHIVED MATERIAL STAYS RESOLVABLE BY EVERY PACKAGE THAT USES IT. That is the entire
+   * point: the materials band lists Active only, while a package's slots resolve against the FULL
+   * version list, so putting a letter away never turns a package that holds it into a package
+   * missing one. Filtering both against the same set would make archiving indistinguishable from
+   * deleting, which is the thing it exists to avoid.
+   *
+   * ⚠️ ABSENT MEANS ACTIVE — no backfill. See RecordStatus.
+   */
+  status?: RecordStatus;
+  /**
    * Words in `contentDraft`, counted at WRITE time (flow pack D1).
    *
    * ⚠️ STORED, WHERE THE REST OF THIS PAGE DERIVES — and the exception is deliberate. Everything the
@@ -288,6 +300,21 @@ export interface ManuscriptVersion {
   wordCount?: number;
 }
 
+/**
+ * Whether a record is in the working set or has been put away.
+ *
+ * ⚠️ ONE VOCABULARY FOR TWO COLLECTIONS, AND IT WAS ALREADY HALF WRITTEN. `SubmissionPackage.status`
+ * has carried this exact union inline since the Package Builder; the broadsheet's archive model
+ * needed the same idea for materials, so the union is NAMED rather than typed a second time. A
+ * second inline copy is how two collections end up with "Retired" and "Archived" meaning the same
+ * thing, and every filter then has to know which one it is looking at.
+ *
+ * ⚠️ ABSENT MEANS ACTIVE. Every material and every package written before this field existed has no
+ * `status`, and backfilling one would be a write across the whole collection to state a default the
+ * readers can already infer. `isRetired()` in lib/packagesOverview.ts is the one place that decides.
+ */
+export type RecordStatus = "Active" | "Retired";
+
 export interface SubmissionPackage {
   id: string;
   manuscriptId: string;
@@ -296,7 +323,7 @@ export interface SubmissionPackage {
   queryLetterVersionId: string;
   synopsisVersionId: string;
   samplePagesVersionId: string;
-  status: "Active" | "Retired";
+  status: RecordStatus;
   createdDate: string; // ISO String
 }
 

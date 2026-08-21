@@ -75,18 +75,32 @@ describe("every entry point names its type (D3)", () => {
 
 describe("the sheets (D3)", () => {
   /**
-   * ⚠️ NO DELETE CONTROL THIS PHASE, AND THAT IS THE ASSERTION. The ref draws a hover-revealed bin
-   * on every sheet; wiring one to a hard delete is the thing Ruling 2 struck. It arrives with the
-   * archive model, and until then an absent control is honest where a refusing one is not.
-   *
-   * ⚠️ THE CLASS TOKEN IS BOUNDED. A bare `not.toContain("pkgb-del")` would be satisfied by any
-   * longer class starting with it, and would equally have missed a genuine `pkgb-del` written with
-   * a template literal.
+   * ⚠️ THE BAND HANDS BOTH WRITERS OVER AND CHOOSES NEITHER (Ruling 2). If this component ever
+   * branched on `usedIn` itself there would be two places deciding what removal means — one in the
+   * band and one in `removalChoice` — and the sheet could then offer "Archive" while something
+   * downstream deleted. Passing both handlers straight through is what makes that impossible.
    */
-  it("offers no delete affordance yet", () => {
+  it("delegates the removal branch rather than choosing it", () => {
     const src = decls(band);
-    expect(src).not.toMatch(/["\s`]pkgb-del["\s`]/);
-    expect(src.toLowerCase()).not.toContain("delete");
+    expect(src).toContain("<RemovePopover");
+    expect(src).toContain("onDelete={onDeleteMaterial}");
+    expect(src).toContain("onArchive={onArchiveMaterial}");
+    /* ⚠️ NOT a sweep for `usedIn` — the band reads it legitimately, to bold the number in "In 2
+       packages". A first draft forbade the identifier outright and went red on that display branch,
+       which is the too-broad-assertion fault: it would have been "fixed" by weakening the render.
+       The claim is about the ACT, so the sweep is for the things that perform one. */
+    expect(src, "the band named an act").not.toMatch(/removalChoice|archiveVersion|deleteVersion/);
+  });
+
+  /**
+   * ⚠️ A `button` INSIDE A `button` IS INVALID HTML, and the sheet holds two controls now. The
+   * browser closes the outer one and the parse recovers in a way nothing here tests, so the check
+   * is that the sheet is not a button at all.
+   */
+  it("keeps the sheet a div so it can hold two controls", () => {
+    const src = decls(band);
+    expect(src).toMatch(/<div key=\{s\.id\} className="pkgb-sheet"/);
+    expect(src).not.toMatch(/<button[^>]*className="pkgb-sheet"/);
   });
 
   it("prints the usage line's number from the derivation, not from a stored field", () => {

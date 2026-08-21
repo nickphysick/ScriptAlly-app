@@ -81,3 +81,53 @@ describe("firestore.rules · the materials model", () => {
     expect(allowedKeys.length).toBeGreaterThan(5);
   });
 });
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE ARCHIVE FIELD (broadsheet Ruling 2)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+describe("a material can be put away", () => {
+  /**
+   * ⚠️ THE VALIDATOR AND THE ALLOWLIST, SEPARATELY, FOR THE THIRD TIME IN THIS FILE. Archiving IS an
+   * update and nothing else — a `status` perfectly validated above and missing from `hasOnly` below
+   * would deny every archive silently while the rules said the document was fine. That is exactly
+   * what `packageId` did for months (F7); it is not a shape worth learning twice.
+   */
+  it("admits an absent status, and only the two values", () => {
+    expect(decls).toMatch(/!data\.keys\(\)\.hasAll\(\['status'\]\)/);
+    expect(decls).toContain("data.status == 'Active'");
+    expect(decls).toContain("data.status == 'Retired'");
+  });
+
+  it("lists status among the updatable keys", () => {
+    expect(versionsUpdateAllowlist).toContain("'status'");
+  });
+
+  /**
+   * ⚠️ AND THE ARCHIVE MODEL EXISTS *BECAUSE* THE ALTERNATIVE CANNOT BE WRITTEN HERE. "Refuse to
+   * delete a material while any package references it" is a predicate over a COLLECTION, and rules
+   * have no query capability — only get()/exists()/getAfter() on a known path. So `delete` stays
+   * open and the protection is a field update, which rules can hold. This asserts the delete is
+   * still permitted, because a future tightening that removed it would break the OTHER branch: a
+   * material nothing holds must be deletable, or the page offers a button that cannot work.
+   */
+  it("still permits deleting a version outright", () => {
+    expect(sliceBetween(rules, "match /versions/{versionId}", "// ROUTE: SubmissionPackages", "versions block"))
+      .toMatch(/allow get, delete: if isOwner\(userId\)/);
+  });
+});
+
+describe("a package can be put away, and already could", () => {
+  /**
+   * ⚠️ NOTHING WAS ADDED HERE — the package half of the archive model was already complete, and
+   * checking before building is what found that. `SubmissionPackage.status` has carried
+   * "Active" | "Retired" since the Package Builder, `retirePackage` writes it, three surfaces
+   * filter on it, and the allowlist already lists it. Asserted so a later tidy cannot quietly
+   * remove the half that predates the model it now serves.
+   */
+  it("keeps status in the packages update allowlist", () => {
+    const block = sliceBetween(rules, "match /packages/{packageId}", "// ROUTE: Agents", "packages block");
+    expect(block).toMatch(/hasOnly\(\[[^\]]*'status'/);
+    expect(block).toMatch(/allow get, delete: if isOwner\(userId\)/);
+  });
+});

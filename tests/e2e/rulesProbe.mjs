@@ -93,6 +93,31 @@ if (!vsnap.exists()) {
     () => (before.wordCount === undefined ? Promise.resolve() : updateDoc(vref, { wordCount: before.wordCount })));
   await attempt("contentType 'ref' (name only)", "flow P1", () => updateDoc(vref, { contentType: "ref" }),
     () => updateDoc(vref, { contentType: before.contentType ?? "text" }));
+  /* ⚠️ THE ARCHIVE MODEL'S ONE WRITE (broadsheet Ruling 2). Archiving IS an update and nothing
+     else, so `status` had to reach the versions hasOnly allowlist or every archive would be denied
+     silently while the validator said the document was fine — the F7 shape one collection along.
+     The seed carries no `status`, so writing "Retired" is a real change and lands in affectedKeys;
+     the undo unsets it rather than writing "Active", which would leave the fixture in a state the
+     app never puts it in. */
+  await attempt("status 'Retired' (archive)", "broadsheet P3", () => updateDoc(vref, { status: "Retired" }),
+    () => updateDoc(vref, before.status === undefined ? { status: deleteField() } : { status: before.status }));
+  /* And the value is bounded — a third string must be refused, or the field is free text. */
+  await attempt("status 'Nonsense' (must be DENIED)", "broadsheet P3", () => updateDoc(vref, { status: "Nonsense" }),
+    () => updateDoc(vref, before.status === undefined ? { status: deleteField() } : { status: before.status }));
+}
+
+/* ── the other branch: a material NOTHING holds must be deletable (Ruling 2) ────────────────── */
+console.log("\nversions — the delete branch, on a throwaway document:");
+{
+  /* ⚠️ ON A DOCUMENT THE PROBE CREATES, NEVER ON A SEEDED ONE. This attempt is a real delete; run
+     against seed-mat-ql1 it would remove a fixture three other probes depend on, and the next run's
+     baseline would be this run's damage. */
+  const tref = doc(db, "users", uid, "versions", "probe-throwaway-mat");
+  await attempt("create a throwaway material", "long-standing",
+    () => setDoc(tref, { id: "probe-throwaway-mat", manuscriptId: "seed-ms-1", userId: uid,
+      componentType: "Query Letter", versionName: "Probe throwaway", fileAttached: false,
+      createdDate: new Date().toISOString() }));
+  await attempt("delete it outright", "long-standing", () => deleteDoc(tref));
 }
 
 console.log("\nglobal activity feed (isValidActivity's enumerated activityType):");

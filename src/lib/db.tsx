@@ -97,6 +97,10 @@ import { resolveGenre, matchKey } from "./genres";
 import { commitAgentEdits, AgentEditPatch, AgentExtraWrite, SaveAgentResult } from "./saveAgentEdits";
 import { computeAgentDeadlineWrites } from "./computeAgentDeadlineWrites";
 import { computeResponseDeadline } from "./responseDeadline";
+/* ⚠️ THE SAME PREDICATE THE PAGE READS. `deleteVersion`'s last check and the material sheet's
+   usage line must agree about "does a package hold this", so both go through one function rather
+   than each filtering the three slot fields for itself. */
+import { packagesUsingVersion } from "./packageMetrics";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
 /* §1 (provenance pack) — the one-time move of the expected date into the field that names its owner. */
@@ -232,7 +236,27 @@ interface DbContextType {
   addVersion: (v: Omit<ManuscriptVersion, "id" | "userId" | "createdDate">) => Promise<string>;
   /** `unknown` values so a mode switch can pass `deleteField()` to UNSET rather than write a zero. */
   updateVersion: (id: string, fields: Partial<Record<"versionName" | "contentDraft" | "fileAttached" | "fileName" | "notes" | "contentType" | "contentLink" | "wordCount", unknown>>) => Promise<void>;
-  deleteVersion: (id: string) => Promise<void>;
+  /**
+   * Delete a material outright. Returns `false` WITHOUT writing when a package still holds it.
+   *
+   * ⚠️ THE CALLER DECIDES BETWEEN THIS AND `archiveVersion`, and it decides from `removalChoice`
+   * (lib/packagesOverview.ts) — the same derivation the material's usage line prints. This guard is
+   * a last check before an irreversible act, not the model: "refuse while any package references
+   * it" is a predicate over a COLLECTION, and Firestore rules have no query capability, so it could
+   * never be enforced anywhere but here. That is why archiving exists (broadsheet Ruling 2).
+   */
+  deleteVersion: (id: string) => Promise<boolean>;
+  /**
+   * Put a material away — one field on one document, which is a thing the rules CAN hold.
+   *
+   * ⚠️ IT STAYS RESOLVABLE BY EVERY PACKAGE THAT HOLDS IT. Archiving removes it from the working
+   * list and changes nothing else; a package built with it still names it. See `RecordStatus`.
+   *
+   * ⚠️ AND THERE IS NO INVERSE YET — flag F-H. Nothing in the UI brings an archived material back,
+   * so no `unarchiveVersion` is written: a writer that no surface can reach is a claim that the
+   * feature exists. It arrives with the surface, not before it.
+   */
+  archiveVersion: (id: string) => Promise<void>;
 
   // Package Actions
   addPackage: (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">) => Promise<{ success: boolean; error?: string; id?: string }>;
@@ -1477,17 +1501,35 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
-  const deleteVersion = async (id: string) => {
-    if (!currentUser) return;
-    const isLocked = packages.some(p => p.queryLetterVersionId === id || p.synopsisVersionId === id || p.samplePagesVersionId === id);
-    if (isLocked) {
-      alert("This version is locked in one of your packages. Modify or retire the package before deleting.");
-      return;
-    }
+  const deleteVersion = async (id: string): Promise<boolean> => {
+    if (!currentUser) return false;
+    /* ⚠️ NO `alert()` HERE ANY MORE, and the alert was the struck D9 model wearing a browser dialog:
+       "this version is locked in one of your packages — modify or retire the package before
+       deleting" told the writer to go and dismantle something in order to tidy something else.
+       Ruling 2 replaced that with archiving, so the refusal is now a RESULT the caller acts on
+       rather than a dead end. Nothing called this function at the time it was rewritten — the three
+       `onDeleteVersion` chains are all fed by PkgLab's local state — so a stale guard was free to
+       sit here contradicting the live model until someone wired it up and was surprised. */
+    const held = packagesUsingVersion(id, packages).length > 0;
+    if (held) return false;
     try {
       await deleteDoc(doc(db, "users", currentUser.id, "versions", id));
+      return true;
     } catch (e) {
       handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/versions/${id}`);
+      return false;
+    }
+  };
+
+  const archiveVersion = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      /* One field, one document. `status` is in the versions update allowlist — it had to ride the
+         same commit as the field itself, or hasOnly would deny every archive silently (the F7
+         shape, one collection along). */
+      await updateDoc(doc(db, "users", currentUser.id, "versions", id), { status: "Retired" });
+    } catch (e) {
+      handleFirestoreError(e, OperationType.UPDATE, `users/${currentUser.id}/versions/${id}`);
     }
   };
 
@@ -3001,6 +3043,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addVersion,
         updateVersion,
         deleteVersion,
+        archiveVersion,
         addPackage,
         updatePackage,
         retirePackage,

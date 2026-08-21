@@ -150,6 +150,12 @@ service cloud.firestore {
         // repurposing link, which would relabel every stored URL as a filename.
         && (!data.keys().hasAll(['contentType']) || (data.contentType is string && (data.contentType == 'text' || data.contentType == 'link' || data.contentType == 'file' || data.contentType == 'ref')))
         && (!data.keys().hasAll(['contentLink']) || (data.contentLink is string && data.contentLink.size() <= 2048))
+        // ⚠️ ABSENT-OR-ONE-OF-TWO. The archive model (broadsheet Ruling 2): a material is put away by
+        // a single-document field update, which is a thing rules CAN express — unlike "refuse to
+        // delete this if any package references it", which needs a collection scan and cannot be
+        // written here at all. Absent means Active, so nothing is backfilled and every material
+        // written before this field existed stays valid.
+        && (!data.keys().hasAll(['status']) || (data.status is string && (data.status == 'Active' || data.status == 'Retired')))
         // ⚠️ ABSENT-OR-INT, NEVER NULL. `is int` is false for null, so "not counted" must mean the key
         // is omitted — the absent-means-absent idiom this file already uses for every optional field.
         // A ref or file material carries no wordCount at all rather than a 0, which would assert the
@@ -586,7 +592,11 @@ service cloud.firestore {
           // ⚠️ `wordCount` MUST BE HERE OR EVERY EDIT THAT CHANGES PASTED TEXT IS DENIED — hasOnly fails
           // the WHOLE write on one unlisted changed key, silently. Exactly the F7 shape, one
           // collection along; added with the field rather than after someone reports a dead Save.
-          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount'])
+          // ⚠️ 'status' RIDES THE SAME COMMIT AS THE FIELD, for the reason F7 cost a day: a field can
+          // be perfectly validated above and still be undeployable, because isValidVersion runs on
+          // every write while hasOnly runs only on updates. Archiving IS an update and nothing else,
+          // so leaving it out here would deny every archive silently while the validator said yes.
+          incoming().diff(existing()).affectedKeys().hasOnly(['versionName', 'fileAttached', 'fileName', 'contentDraft', 'notes', 'contentType', 'contentLink', 'wordCount', 'status'])
         );
       }
 

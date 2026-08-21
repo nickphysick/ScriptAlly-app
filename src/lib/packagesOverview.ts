@@ -18,7 +18,7 @@
  *
  * Pure: no Firestore, no clock of its own (`now` is injected), no React.
  */
-import { ManuscriptVersion, SubmissionPackage, Query, ComponentType } from "../types";
+import { ManuscriptVersion, SubmissionPackage, Query, ComponentType, RecordStatus } from "../types";
 import { packageMetrics, isRequest, isSlotFilled, packagesUsingVersion } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES, SLOT_FIELD } from "../components/packages/typeMeta";
 import { versionMeta } from "./packageMetrics";
@@ -116,9 +116,13 @@ export interface PackageRow {
  *
  * ⚠️ THE COMPOSITION LINE IS RESOLVED FROM REAL REFERENCES. `SubmissionPackage` holds three
  * version ids, so each name is looked up rather than reconstructed from prose — the legacy
- * free-text `*Details` fields the brief asked about do not exist in this codebase. A slot pointing
- * at a version that has since been deleted resolves to nothing and is simply omitted, which is
- * honest: the package no longer contains it.
+ * free-text `*Details` fields the brief asked about do not exist in this codebase.
+ *
+ * ⚠️ AND A SLOT WHOSE MATERIAL IS GONE IS NAMED, NOT OMITTED — CORRECTED with the archive model.
+ * This docstring used to say the opposite, and called it honest: "resolves to nothing and is simply
+ * omitted... the package no longer contains it". It is not honest, because the reader cannot tell
+ * the resulting line from a package deliberately built without a letter. `resolveSlot` returns
+ * `MISSING_SLOT` and the line says so.
  */
 export function packageRows(
   packages: SubmissionPackage[],
@@ -127,11 +131,12 @@ export function packageRows(
 ): PackageRow[] {
   const byId = new Map(versions.map((v) => [v.id, v]));
   return packages.map((p) => {
-    const names = BUILDER_TYPES.map((t) => {
-      const id = p[SLOT_FIELD[t]];
-      if (!isSlotFilled(id)) return null;
-      return byId.get(id)?.versionName ?? null;
-    }).filter((n): n is string => !!n && n.trim().length > 0);
+    /* ⚠️ A MISSING MATERIAL IS NAMED, NOT DROPPED. Omitting it made the composition line describe a
+       package the writer does not have — "One-page · Chapters 1-3" for a bundle whose letter is
+       gone reads as a package deliberately built without one. */
+    const names = BUILDER_TYPES
+      .map((t) => resolveSlot(p[SLOT_FIELD[t]], byId).name)
+      .filter((n): n is string => !!n && n.trim().length > 0);
     const { sent } = packageMetrics(p.id, queries);
     return {
       id: p.id,
@@ -253,7 +258,40 @@ export function howItWorks(materialCount: number, packageCount: number, liveCoun
    THE WORKING STAGE — package tiles (flow pack D7)
    ══════════════════════════════════════════════════════════════════════════════ */
 
-export interface TileSlot { label: string; name: string | null }
+/**
+ * ⚠️ A SLOT HAS THREE STATES, NOT TWO — and it read as two for the whole of the flow pack. `name`
+ * alone cannot tell "the writer left this blank" apart from "the material this pointed at is gone":
+ * both resolved to `null`, so a package that once carried a letter rendered identically to one that
+ * never had one. `MISSING_SLOT` is what the archive model made findable — nothing else on this page
+ * could delete a referenced material, so the state existed and could not be reached.
+ *
+ * `empty`   — the writer left the slot blank (the sentinel `""`).
+ * `held`    — filled and resolvable; `name` is the material's.
+ * `missing` — filled, and the material it names is not in the collection.
+ */
+export type SlotState = "empty" | "held" | "missing";
+
+/** What a package says about a slot whose material is gone. Stated, never blank. */
+export const MISSING_SLOT = "No longer available";
+
+export interface TileSlot { label: string; name: string | null; state: SlotState }
+
+/**
+ * Resolve one slot against the FULL version list — retired materials included.
+ *
+ * ⚠️ THE FULL LIST, DELIBERATELY. Archiving a material must not turn every package holding it into a
+ * package missing one; that is the difference between putting something away and destroying it, and
+ * resolving against the band's Active-only set would erase it.
+ */
+export function resolveSlot(
+  id: string | undefined,
+  byId: Map<string, ManuscriptVersion>,
+): { name: string | null; state: SlotState } {
+  if (!isSlotFilled(id)) return { name: null, state: "empty" };
+  const v = byId.get(id);
+  if (!v || !v.versionName?.trim()) return { name: MISSING_SLOT, state: "missing" };
+  return { name: v.versionName, state: "held" };
+}
 
 export interface PackageTile {
   id: string;
@@ -289,13 +327,10 @@ export function packageTiles(
     return {
       id: p.id,
       name: p.packageName,
-      slots: BUILDER_TYPES.map((t) => {
-        const id = p[SLOT_FIELD[t]];
-        return {
-          label: TYPE_META[t].label,
-          name: isSlotFilled(id) ? byId.get(id)?.versionName ?? null : null,
-        };
-      }),
+      slots: BUILDER_TYPES.map((t) => ({
+        label: TYPE_META[t].label,
+        ...resolveSlot(p[SLOT_FIELD[t]], byId),
+      })),
       sent: m.sent,
       replies: m.responses,
       requests: mine.filter(isRequest).length,
@@ -359,7 +394,11 @@ export function materialColumns(
 ): MaterialColumn[] {
   return BUILDER_TYPES.map((type) => {
     const mine = versions
-      .filter((v) => v.componentType === type)
+      /* ⚠️ ACTIVE ONLY HERE, AND THE FULL LIST EVERYWHERE A PACKAGE RESOLVES A SLOT. An archived
+         material leaves the working list and stays readable by the packages that hold it — filter
+         both against this same set and archiving becomes indistinguishable from deleting, which is
+         the one thing it exists to avoid. */
+      .filter((v) => v.componentType === type && !isRetired(v))
       .sort((a, b) => Date.parse(b.createdDate ?? "") - Date.parse(a.createdDate ?? ""));
     return {
       type,
@@ -407,3 +446,52 @@ export const packagesUsing = (versionId: string, packages: SubmissionPackage[]):
  */
 export const usageLine = (used: number): string =>
   used === 0 ? "Not in a package yet" : `In ${used} ${used === 1 ? "package" : "packages"}`;
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE ARCHIVE MODEL (Ruling 2) — put away, or delete when nothing holds it
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * ⚠️ ABSENT MEANS ACTIVE, AND THIS IS THE ONE PLACE THAT DECIDES IT. Every material and every
+ * package written before the field existed has no `status`; a `=== "Active"` test would read all
+ * of them as retired and empty the page. One predicate, negated where the question is the other
+ * way round, so the two readings cannot drift apart.
+ */
+export const isRetired = (r: { status?: RecordStatus }): boolean => r.status === "Retired";
+
+/**
+ * What removing this material means — and it is a fact about the data, never a preference.
+ *
+ * ⚠️ THIS REPLACES D9's BLOCKED DELETE, WHICH COULD NOT BE ENFORCED WHERE IT MATTERED. "Refuse to
+ * delete a material while any package references it" is a predicate over a COLLECTION, and Firestore
+ * rules have no query capability — only `get()`/`exists()` on a known path. The guard could therefore
+ * only ever live in the client, which is not a guard: anything with the credentials could delete the
+ * record and leave three packages pointing at nothing. Archiving is a single-document field update,
+ * which rules CAN express, so the model moved to where it can actually be held.
+ *
+ * ⚠️ AND THE TWO OUTCOMES ARE NOT A CHOICE OFFERED TO THE WRITER. A material nothing uses is deleted,
+ * because keeping it would be filing away something that was never filed. A material a package holds
+ * is archived, because deleting it would quietly damage that package. Offering both would be asking
+ * the writer to answer a question the data has already answered.
+ */
+export type RemovalKind = "delete" | "archive";
+
+export interface RemovalChoice {
+  kind: RemovalKind;
+  /** How many packages hold it — 0 for a delete, ≥1 for an archive. Same number the sheet prints. */
+  usedIn: number;
+  /** The packages by name, for the confirmation to name what it is protecting. */
+  packageNames: string[];
+}
+
+export function removalChoice(versionId: string, packages: SubmissionPackage[]): RemovalChoice {
+  /* ⚠️ RETIRED PACKAGES COUNT. One holding this material is still a record of what was sent, and
+     deleting the material out from under it would damage a package the writer archived rather than
+     discarded. The band hides retired packages; this question is not about the band. */
+  const holders = packagesUsing(versionId, packages);
+  return {
+    kind: holders.length === 0 ? "delete" : "archive",
+    usedIn: holders.length,
+    packageNames: holders.map((p) => p.packageName),
+  };
+}
