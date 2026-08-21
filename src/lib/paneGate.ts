@@ -76,6 +76,14 @@ export function requirementsFor(kind: JourneyKind): Requirement[] {
   return requiredFor(kind).map((f) => ({ ...REQ[f], isAnswered: (a: GateAnswers) => a[f] }));
 }
 
+/**
+ * The section a field lives in. Exported because the pane needs it to scroll, and because a second
+ * copy of this map inside the component is what a restatement looks like — one that was also a
+ * `const` read from a deferred callback, which threw `Cannot access before initialization` at
+ * runtime with a clean typecheck. `tsc` cannot see a TDZ across a `setTimeout`.
+ */
+export const anchorFor = (f: ReqField): string => REQ[f].id;
+
 /** Those still unanswered, in the form's own order. */
 export const unanswered = (kind: JourneyKind, a: GateAnswers): Requirement[] =>
   requirementsFor(kind).filter((r) => !r.isAnswered(a));

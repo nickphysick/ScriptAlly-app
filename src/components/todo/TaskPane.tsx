@@ -117,6 +117,16 @@ export interface TaskPaneJourney {
   tl: TaskPaneEvent[] | null;
   /** a cohort's numbers — present only on the bulk journey; see `taskPaneJourney` */
   bulk?: { count: number; touched: number };
+  /**
+   * ⚠️ WHAT IS STILL UNANSWERED, FROM THE ONE DECLARATION (steer round, Phase 5). The chip counts
+   * this, the line names it, and the square sits on its first entry — three readings of one array
+   * rather than three derivations that can drift.
+   */
+  missing?: { id: string; name: string }[];
+  /** the writer pressed an incomplete primary; the bar states what is still owed */
+  showMissing?: boolean;
+  /** jump to a section and flash its label — the same route the square marks */
+  onJump?: (id: string) => void;
   /** `.tl-foot a` */
   onOpenQuery?: () => void;
   /** ⚠️ THE ACTION BAR'S VERBS, on the pane because that is where the open task is (Phase 1/2).
@@ -281,7 +291,27 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
             actual values the primary will write, so the button is never the only description of
             what pressing it does. */}
         <div className="actbar">
-          <span className="willrec">Will record: <b>{d.will}</b></span>
+          {/* ⚠️ THE STRIP YIELDS TO THE MISSING LINE, IT DOES NOT COMPETE WITH IT. Both in the bar
+              at once is two sentences fighting for one row, and the will-record is restated in the
+              form — so when the writer has just been told what is still owed, that is what the bar
+              says. It comes back the moment the line clears. */}
+          {!(d.showMissing && d.missing && d.missing.length > 0) && (
+            <span className="willrec">Will record: <b>{d.will}</b></span>
+          )}
+          {d.showMissing && d.missing && d.missing.length > 0 && (
+            /* ⚠️ IT WRAPS RATHER THAN TRUNCATING. A line that says which answers are missing is
+                useless with the last two clipped off — which is what `text-overflow: ellipsis`
+                would do to it, and why this is not the will-record strip wearing different words. */
+            <span className="miss">
+              Still to answer:{" "}
+              {d.missing.map((m, i) => (
+                <React.Fragment key={m.id}>
+                  {i > 0 && (i === d.missing!.length - 1 ? " and " : ", ")}
+                  <a href="#" onClick={(e) => { e.preventDefault(); d.onJump?.(m.id); }}>{m.name}</a>
+                </React.Fragment>
+              ))}
+            </span>
+          )}
           {d.onSnooze && (
             <button type="button" className="ab quiet"
               onClick={(e) => d.onSnooze?.(e.currentTarget)}>Snooze</button>
@@ -295,8 +325,20 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
               {d.bulk ? "Dismiss all" : "Dismiss"}
             </button>
           )}
+          {/* ⚠️ THE COUNT RIDES ON THE PRIMARY, NOT BESIDE IT. A number elsewhere in the bar is a
+              fact about the form; on the button it is a fact about what pressing it will do — and
+              the button is where the writer's hand already is. Absent when complete, because a
+              chip reading "0 to answer" is a control describing its own emptiness. */}
           <button type="button" className="ab go" disabled={d.primDisabled} onClick={onPrimary}>
             {d.prim}
+            {/* ⚠️ NEVER ON BULK, WHICH ALREADY COUNTS IN ITS LABEL. "Log 0 queries" beside a chip
+                reading "1 to answer" is two numbers on one button counting different things — the
+                queries filled in, and the requirements outstanding — and the reader has no way to
+                know that. The cohort's count is the label's job; the chip is for the journeys whose
+                label has no number in it. */}
+            {!d.bulk && d.missing && d.missing.length > 0 && (
+              <span className="n">{d.missing.length} to answer</span>
+            )}
           </button>
         </div>
       </div>

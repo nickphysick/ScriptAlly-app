@@ -49,6 +49,11 @@ export interface JourneyInputs {
   noteAdded?: string;
   /** a note's own added date, for the form's meta line — "18 Aug" */
   noteAddedDate?: string;
+  /** what is still unanswered — the ONE list the chip, the line and the square all read */
+  missing?: { id: string; name: string }[];
+  /** the writer pressed an incomplete primary */
+  showMissing?: boolean;
+  onJump?: (id: string) => void;
   /** what pressing the primary will write */
   will: string;
   body: React.ReactNode;
@@ -206,6 +211,9 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
        meant. A button reading "Log 0 queries" says what it would do; a disabled button with a
        generic label would say only that something is wrong. */
     bulk: input.bulk,
+    missing: input.missing,
+    showMissing: input.showMissing,
+    onJump: input.onJump,
     prim: input.bulk
       ? `Log ${input.bulk.touched} ${input.bulk.touched === 1 ? "query" : "queries"}`
       : paneCopy(c).primary,

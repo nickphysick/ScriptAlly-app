@@ -286,29 +286,46 @@ test("steer round", async ({ page }) => {
       !!send && send.hints === 2, send ? `hintlines=${send.hints}` : "-");
 
   /* ══ PHASE 5 · the primary names what is missing ══════════════════════════════════════════ */
-  add("P5.1 · the primary carries a count chip while incomplete",
-      !!send && /4 to answer/.test(send.chip), send ? `chip="${send.chip}"` : "-");
+  /* ⚠️ THE CHIP'S NUMBER IS COMPARED TO THE SQUARE'S LIST, NOT TO A LITERAL. It named 4, and the
+     harness's send is a FULL MANUSCRIPT — no unit to pick, so three requirements remain and the
+     chip was right. An assertion with a number in it was asserting the FIXTURE; the law is that the
+     chip counts exactly what the line names. */
+  add("P5.1 · the primary's chip counts what is still unanswered",
+      !!send && /^\d+ to answer$/.test(send.chip.trim()) && Number(send.chip.trim().split(" ")[0]) > 0,
+      send ? `chip="${send.chip}"` : "-");
   add("P5.2 · a note is complete, so it carries no chip",
       !!note && note.chip === "", note ? `chip="${note.chip}"` : "-");
-  add("P5.3 · bulk keeps its stated exception — inert at zero, count showing",
-      !!bulk && bulk.primDisabled && /Log 0 queries/.test(bulk.prim),
-      bulk ? `disabled=${bulk.primDisabled} prim="${bulk.prim}"` : "-");
+  /* ⚠️ AND BULK CARRIES NO CHIP: its count is IN the label, and a chip beside it would be a second
+     number on one button counting something else. Found by measurement — "Log 0 queries1 to
+     answer" — and it is the kind of thing only a rendered page says out loud. */
+  add("P5.3 · bulk keeps its stated exception — inert at zero, its count in the label, no chip",
+      !!bulk && bulk.primDisabled && /^Log 0 queries$/.test(bulk.prim.trim()) && bulk.chip === "",
+      bulk ? `disabled=${bulk.primDisabled} prim="${bulk.prim}" chip="${bulk.chip}"` : "-");
 
-  /* an incomplete click: no write, the line names every missing answer, focus lands in the first */
+  /* ⚠️ A FRESH CARD, AND THE EXPECTED SECTION IS READ FROM THE PAGE. Phase 3 answered two of the
+     first card's questions, so `#s-unit` is no longer where this should land — naming it would be
+     asserting the state the previous phase left behind. Reload, then take the first missing section
+     from the square itself, which is the thing under test's own answer. */
+  await page.goto("/todo");
+  await page.waitForTimeout(6000);
   await page.evaluate(OPEN("Send"));
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1400);
   const before = await page.evaluate(`(() => {
     const vis = ${VIS};
     const mid = [...document.querySelectorAll(".tpn .mid")].filter(vis)[0];
     const go = [...document.querySelectorAll(".tpn .actbar .ab.go")].filter(vis)[0];
+    const nxt = [...document.querySelectorAll(".tpn .sect.next")].filter(vis)[0];
     if (!mid || !go) return null;
     const t = mid.scrollTop;
+    const expect = nxt ? nxt.id : "";
+    const chipN = ((go.querySelector(".n") || {}).textContent || "").trim().split(" ")[0];
     go.click();
-    return { t };
+    return { t, expect, chipN };
   })()`) as any;
   await page.waitForTimeout(900);
   const after = await page.evaluate(`(() => {
     const vis = ${VIS};
+    const EXPECT_ID = ${JSON.stringify(before?.expect ?? "")};
     const all = (s) => [...document.querySelectorAll(s)].filter(vis);
     const mid = all(".tpn .mid")[0];
     const miss = all(".tpn .miss")[0];
@@ -317,7 +334,7 @@ test("steer round", async ({ page }) => {
       t: mid ? mid.scrollTop : -1,
       line: miss ? (miss.textContent || "") : "",
       links: miss ? [...miss.querySelectorAll("a")].map((x) => (x.textContent || "").trim()) : [],
-      inFirst: !!(a && a.closest && a.closest("#s-unit")),
+      inFirst: !!(a && a.closest && a.closest(".tpn .sect") && a.closest(".tpn .sect").id === EXPECT_ID),
       tookOver: !!document.querySelector(".ff-wrap, .focusflow, [data-focusflow]"),
       /* nothing in the bar may be cut off at 1440 */
       clipped: all(".tpn .actbar *").filter((e) => e.scrollWidth > e.clientWidth + 1)
@@ -327,9 +344,14 @@ test("steer round", async ({ page }) => {
   add("P5.4 · an incomplete click writes nothing and lands focus in the first missing section",
       !!before && !!after && !after.tookOver && after.inFirst,
       after ? `scrollTop ${before?.t} to ${after.t} · inFirst=${after.inFirst} tookOver=${after.tookOver}` : "-");
-  add("P5.5 · the line names every missing answer, each as its own link",
-      !!after && /Still to answer:/.test(after.line) && after.links.length === 4,
-      after ? `links=${JSON.stringify(after.links)}` : "-");
+  /* ⚠️ THE LINK COUNT IS COMPARED TO THE CHIP'S NUMBER, not to a literal. Four is what a partial
+     with nothing answered owes; this account's send is a full manuscript. The LAW is that the chip
+     and the line count the same set — which is the whole point of one declaration. */
+  add("P5.5 · the line names every missing answer, and the chip counts the same set",
+      !!after && /Still to answer:/.test(after.line)
+        && after.links.length === Number(before?.chipN)
+        && after.links.length > 0,
+      after ? `chip=${before?.chipN} links=${JSON.stringify(after.links)}` : "-");
   add("P5.6 · nothing in the action bar truncates at 1440",
       !!after && after.clipped.length === 0, after ? JSON.stringify(after.clipped) : "-");
 

@@ -95,7 +95,7 @@ import { ArtSlot } from "./ArtSlot";
 import { TaskPane } from "./TaskPane";
 import { TaskPaneBody, SendBodyValues, EXPECT_WEEKS } from "./TaskPaneBody";
 import { buildJourney } from "../../lib/taskPaneJourney";
-import { journeyKind, firstMissing, isBulkCard, unanswered, missingPhrase, type GateAnswers, type ReqField } from "../../lib/paneGate";
+import { journeyKind, firstMissing, isBulkCard, unanswered, missingPhrase, anchorFor, type GateAnswers, type ReqField } from "../../lib/paneGate";
 import { BulkFillTable } from "./BulkFillTable";
 import { rowHasAnswer } from "../../lib/materialsSweep";
 import { liveFamily } from "../../lib/todoFamily";
@@ -446,6 +446,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * gate should say about a table nobody has filled in.
    */
   const [bulkTouched, setBulkTouched] = useState(0);
+  /* ⚠️ THE BAR STATES WHAT IS OWED ONLY AFTER THE WRITER HAS ASKED. It is the answer to pressing
+     the primary, not a standing complaint about an unfinished form — and it clears with the card. */
+  const [showMissing, setShowMissing] = useState(false);
   /**
    * ⚠️ THE COHORT'S ROWS, HELD BY THE PAGE. Seeded from `recordSweepFor` — the SAME derivation the
    * card was raised by, never a second scan — and reset with the card, exactly as the send form's
@@ -998,6 +1001,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   seeds.current = { rows: seedRows, sweep: recordSweepFor };
   React.useEffect(() => {
     setPaneBody({ rows: seeds.current.rows(paneCard ?? null), ...BLANK });
+    setShowMissing(false);
     const cohort = paneCard ? seeds.current.sweep(paneCard) : undefined;
     setBulkRows(cohort ?? []);
     setBulkTouched(0);
@@ -1967,6 +1971,13 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     onDismiss: paneVerbs.dismiss.disabled ? undefined : () => setDismissOpen(true),
                     /* the cohort's numbers, where this IS a cohort — absent everywhere else, so a
                        single journey can never accidentally wear a counted primary */
+                    /* ⚠️ THE ONE LIST, HANDED OVER ONCE. The chip counts it, the line names it and
+                       the square sits on its first entry — so the three cannot come to disagree,
+                       because there is one array between them. */
+                    missing: unanswered(journeyKind(paneCard), gateAnswers(paneCard))
+                      .map((r) => ({ id: r.id, name: r.name })),
+                    showMissing,
+                    onJump: jumpToSection,
                     ...(isBulkCard(paneCard)
                       ? { bulk: { count: listRowInputs(paneCard).bulkCount ?? 0, touched: bulkTouched } }
                       : {}),
@@ -3334,7 +3345,19 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   function dockPrimary(card: BoardCard) {
     const kind = journeyKind(card);
     const missing = firstMissing(kind, gateAnswers(card));
-    if (missing) { showMissing(missing); return; }
+    if (missing) {
+      /* ⚠️ THE BAR NAMES ALL OF THEM AND THE PANE GOES TO THE FIRST. Naming only the first would
+         make the writer press the button once per missing answer to discover the next. */
+      setShowMissing(true);
+      /* ⚠️ AFTER THE RENDER, NOT BEFORE IT. `setShowMissing` re-renders the pane, and React had not
+         flushed when the jump ran — so focus was placed on a node the very next render replaced,
+         and both the caret and the scroll were discarded. Measured: `activeElement` came back BODY
+         and `scrollTop` never moved, with the missing line correctly on screen beside them. The
+         next tick is after the flush. */
+      setTimeout(() => jumpToSection(anchorFor(missing)), 0);
+      return;
+    }
+    setShowMissing(false);
     const spec = sendSpecFor(card);
     if (spec) {
       setFlowPrefill({
@@ -3353,20 +3376,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * is the same key the declaration uses — so a field the gate can require is a field the pane can
    * point at, by construction rather than through a second lookup table.
    */
-  function showMissing(field: ReqField) {
-    const label = document.querySelector<HTMLElement>(`.tpn [data-req="${field}"]`);
-    if (!label) return;
-    label.scrollIntoView({ block: "center", behavior: "smooth" });
-    /* the control the label names — the first focusable thing in its own section */
-    const sect = label.closest(".sect, .expect") ?? label.parentElement;
-    const focusable = sect?.querySelector<HTMLElement>("button, input, textarea, [tabindex]");
-    (focusable ?? label).focus?.();
+  /**
+   * ⚠️ ONE JUMP, BY SECTION ID — the same anchor the declaration names, so the button, the links in
+   * the missing line and the steer square all reach a section by one route. It took a `ReqField`
+   * and looked the label up by `data-req`, which was a second address for the same place.
+   */
+  function jumpToSection(id: string) {
+    const sect = document.querySelector<HTMLElement>(`.tpn #${id}`);
+    if (!sect) return;
+    sect.scrollIntoView({ block: "center", behavior: "smooth" });
+    const focusable = sect.querySelector<HTMLElement>("button, input, textarea, [tabindex]");
+    const label = sect.querySelector<HTMLElement>(".f-lbl");
+    (focusable ?? label ?? sect).focus?.();
     /* ⚠️ THE FLASH IS RETRIGGERABLE. Adding a class that is already there restarts no animation, so
-       a second click on the same missing field would look like the page ignoring it. */
-    label.classList.remove("askme");
-    void label.offsetWidth;
-    label.classList.add("askme");
+       a second press on the same missing answer would look like the page ignoring it. */
+    if (label) { label.classList.remove("askme"); void label.offsetWidth; label.classList.add("askme"); }
   }
+
+/* (the field → anchor map is `anchorFor` in `paneGate`, beside the declaration it reads. It was a
+   `const` here, below the function that read it from inside a `setTimeout` — which threw
+   `Cannot access 'REQ_ANCHOR' before initialization` at runtime while `tsc` stayed clean, because
+   a TDZ is invisible across a deferred callback. It was also a second copy of ids the declaration
+   already holds, which is the reason it should never have been local.) */
 
 /* (`paneSentISO` is `sentDateISO` now, beside the strip that reads it. It returned TODAY for an
    unanswered When and for "Another date…" alike — a real date standing in for an unmade choice,
