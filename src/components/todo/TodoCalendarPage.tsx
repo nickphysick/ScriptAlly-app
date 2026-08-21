@@ -43,7 +43,12 @@ import "./taskChrome.css";
 import "./todoCalendar.css";
 
 export interface TodoCalendarPageProps {
-  onNavigate: (tab: string, subPageName?: string) => void;
+  /** ⚠️ THE SAME SIGNATURE `ToDoPage` AND `FocusFlow` USE, deliberately (`ToDoPage.tsx:275`,
+   *  `FocusFlow.tsx:132`). It was narrower here — no `opts` — which typechecks, because a function
+   *  taking fewer arguments satisfies one taking more. That is exactly what makes it dangerous: a
+   *  flow routing to an agent would have had its `agentId` dropped at this boundary with nothing
+   *  failing. App.tsx already passes `handleNavigate`, which accepts the third argument. */
+  onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
   onNavigatePath?: (p: string) => void;
 }
 
@@ -234,7 +239,7 @@ const CalDayPanel: React.FC<CalDayPanelProps> = ({
   );
 };
 
-export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePath = () => {} }) => {
+export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigate, onNavigatePath = () => {} }) => {
   const {
     tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser,
   } = useScriptAllyDb();
@@ -618,8 +623,18 @@ export const TodoCalendarPage: React.FC<TodoCalendarPageProps> = ({ onNavigatePa
         <FocusFlow
           items={[{ kind: "card", card: flowCard }]}
           onClose={() => setFlowCard(null)}
-          onNavigate={() => {}}
-          onToast={() => {}}
+          /* ⚠️ THESE WERE BOTH `() => {}`, AND THE COST WAS NOT COSMETIC. The write FocusFlow makes
+             is shared and was always correct; what was missing was the receipt — and this app
+             offers UNDO ON THE TOAST. So a completion made from the calendar could not be reversed,
+             while the identical completion made from `/todo` could. Silence read as "nothing
+             happened" and removed the one control that could take it back.
+             ⚠️ IT IS `ToDoPage`'s WIRING, NOT A SECOND ONE (`ToDoPage.tsx:2162`): the same
+             `useTodoToast` flash this page already holds for its tag-creation failures, and the
+             page's own navigation prop. No new toast, no new host, no new copy — the receipts and
+             their Undo are whatever the shared hook already produces, which is the only way the
+             two pages can be relied on to say the same thing. */
+          onNavigate={onNavigate}
+          onToast={flash}
         />
       )}
     </div>

@@ -1325,3 +1325,48 @@ describe("⚠️ rolled-forward: the marker goes, the provenance travels with th
     expect(pageSrc).toContain('import { shortDate } from "../../lib/recordingCalendar";');
   });
 });
+
+/* ══ THE FLOW'S FEEDBACK (calendar-toast pack) ══════════════════════════════════════════════ */
+
+describe("⚠️ a completion made from the calendar is not silent", () => {
+  const todoSrc = readFileSync(join(here, "..", "components", "todo", "ToDoPage.tsx"), "utf8");
+
+  it("⚠️ NEITHER HANDLER IS A NO-OP — that cost the Undo, not just the confirmation", () => {
+    /* FocusFlow's write is shared and was always correct; the receipt was missing, and this app
+       offers UNDO ON THE TOAST. So the same completion could be reversed from /todo and not from
+       the calendar. */
+    expect(pageSrc).toContain("onToast={flash}");
+    expect(pageSrc).toContain("onNavigate={onNavigate}");
+    const i = pageSrc.indexOf("<FocusFlow");
+    expect(i, "the calendar no longer mounts FocusFlow").toBeGreaterThan(-1);
+    const mount = pageSrc.slice(i, pageSrc.indexOf("/>", i));
+    expect(mount).not.toMatch(/onToast=\{\(\)\s*=>\s*\{\s*\}\}/);
+    expect(mount).not.toMatch(/onNavigate=\{\(\)\s*=>\s*\{\s*\}\}/);
+  });
+
+  it("⚠️ IT IS ToDoPage'S WIRING, NOT A SECOND ONE — asserted against ToDoPage itself", () => {
+    /* Two derivations against each other rather than against a literal: if ToDoPage ever stops
+       passing its flash, this says so instead of quietly describing a page nobody matches. */
+    expect(todoSrc).toContain("onToast={flash}");
+    expect(todoSrc).toContain("useTodoToast()");
+    expect(pageSrc).toContain("useTodoToast()");
+    // one hook instance on this page, feeding both the tag writes and the flow
+    expect((pageSrc.match(/useTodoToast\(\)/g) ?? []).length).toBe(1);
+  });
+
+  it("the page already hosts the toast, so nothing new was mounted for it", () => {
+    expect(pageSrc).toContain('className="tdb-toast"');
+    expect(pageSrc).toContain("toast.action");
+    // and no calendar-local toast copy was authored — the shared hook produces it
+    expect(decls(pageSrc)).not.toMatch(/flash\(\s*["'`]/);
+  });
+
+  it("⚠️ THE PROP IS THE SAME SIGNATURE ToDoPage AND FocusFlow USE", () => {
+    /* It was narrower — no `opts` — which typechecks, because a function taking fewer arguments
+       satisfies one taking more. That is what made it dangerous: a flow routing to an agent would
+       have had its agentId dropped here with nothing failing. */
+    const sig = "onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;";
+    expect(pageSrc).toContain(sig);
+    expect(todoSrc).toContain(sig);
+  });
+});
