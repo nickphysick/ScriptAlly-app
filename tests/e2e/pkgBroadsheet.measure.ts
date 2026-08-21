@@ -9,10 +9,27 @@ import { test, expect } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { deleteField } from "firebase/firestore";
-import { patchDoc, readField } from "./devWrite";
+import { patchDoc, readField, deleteVersionDoc } from "./devWrite";
 const OUT = "reports/pkg-broadsheet"; const ART = "run-artifacts/pkg-broadsheet";
 mkdirSync(OUT, { recursive: true }); mkdirSync(ART, { recursive: true });
 const ROUTE = "/manuscripts/packages";
+
+/**
+ * ⚠️ EVERY DOCUMENT A TEST CREATES IS REGISTERED HERE AND SWEPT AFTERWARDS, PASS OR FAIL. The
+ * delete drive creates a material and removes it through the UI at the end — which does nothing at
+ * all when the drive fails half way, and three failed runs left THREE identically-named materials
+ * on the harness account. That then poisoned every later run: the probe that finds "the one called
+ * X" had three to choose from, and the counts other tests assert were off by three. A test that
+ * creates state must remove it on the failing path too, which means a register and an afterEach —
+ * not a delete at the end of the happy path.
+ */
+const MADE_IDS: string[] = [];
+test.afterEach(async () => {
+  while (MADE_IDS.length) {
+    const id = MADE_IDS.pop()!;
+    await deleteVersionDoc(id).catch(() => {});
+  }
+});
 
 /** The hero, measured. */
 export const HERO = `(() => {
@@ -302,7 +319,7 @@ test("phase 3 — the bin offers archive for a held material and delete for a fr
   expect(sheets.length, "materials to drive — seed first").toBeGreaterThan(1);
 
   const held = sheets.find((s) => s.use.startsWith("In "));
-  const free = sheets.find((s) => s.use === "Not in a package yet");
+  const free = sheets.find((s) => s.use === "Not in a package");
   expect(held, "no held material in the fixture").toBeTruthy();
 
   const openPop = async (id: string) => {
@@ -360,8 +377,13 @@ test("phase 3 — archiving removes a material from the band without touching it
     return {
       sheets: Array.from(root.querySelectorAll(".pkgb-sheet")).map((s) => s.querySelector(".pkgb-sname").textContent.trim()),
       counts: Array.from(root.querySelectorAll(".pkgb-matcolhead .pkgb-statline")).map((e) => e.textContent.trim()),
-      /* the rail still lists packages this phase; §4 moves them to a band */
-      packageRows: Array.from(root.querySelectorAll(".pkgo-rail .pkgo-row")).map((r) => r.textContent.replace(/\\s+/g, " ").trim()),
+      /* THE CARDS, NOT THE RAIL'S ROWS. This read the rail's rows — retired by section 4, which
+         deleted the rail — so it silently became an empty array and the "archiving damaged a
+         package" assertion compared [] to [] and passed having measured nothing. A probe outliving
+         the element it names is the vacuous-pass family, and here it was my own later phase that
+         aged it out. (No backticks in this comment: it is inside a template literal.) */
+      packageRows: Array.from(root.querySelectorAll(".pkgb-pkgcard")).map((c) =>
+        (c.querySelector(".pkgb-slots")?.textContent || "").replace(/\\s+/g, " ").trim()),
     };
   })()`);
 
@@ -414,7 +436,15 @@ test("phase 3 — a material nothing holds is deleted, not archived", async ({ p
   await openRoute(page, ROUTE, { width: 1440, height: 900 });
   await liftMotionSuppression(page);
 
-  const NAME = "Broadsheet free letter";
+  /**
+   * ⚠️ A UNIQUE NAME PER RUN, AND A CLEAN-UP THAT RUNS ON FAILURE. A fixed name plus a delete that
+   * only happens at the END left THREE identically-named materials on the harness account after
+   * three failed runs — and then poisoned every later run, because the probe that finds "the one
+   * called X" had three to choose from and the counts every other test asserts were off by three.
+   * A test that creates state must remove it even when it fails; the id is captured as soon as it
+   * exists so the finally block has something to delete.
+   */
+  const NAME = `Broadsheet free letter ${Date.now()}`;
   await page.locator(".pkg-root .pkgb-matcol").first().locator(".pkgb-add").click();
   await page.locator("#pkgf-mat-name").fill(NAME);
   await page.locator(".pkgf-fld textarea").fill("a body nothing will ever reference");
@@ -426,8 +456,9 @@ test("phase 3 — a material nothing holds is deleted, not archived", async ({ p
       .find((x) => x.querySelector(".pkgb-sname").textContent.trim() === ${JSON.stringify(NAME)});
     return s ? { id: s.dataset.material, use: s.querySelector(".pkgb-suse").textContent.trim() } : null;
   })()`) as { id: string; use: string } | null;
+  if (made?.id) MADE_IDS.push(made.id);
   expect(made, "the material was not created — nothing to delete").toBeTruthy();
-  expect(made!.use, "a brand new material is in no package").toBe("Not in a package yet");
+  expect(made!.use, "a brand new material is in no package").toBe("Not in a package");
 
   await page.hover(`.pkg-root .pkgb-sheet[data-material="${made!.id}"]`);
   await page.click(`.pkg-root .pkgb-sheet[data-material="${made!.id}"] .pkgb-rem`);
@@ -452,6 +483,7 @@ test("phase 3 — a material nothing holds is deleted, not archived", async ({ p
   writeFileSync(`${ART}/p3-delete.txt`, JSON.stringify({ made, pop, remaining: gone }, null, 2) + "\n");
   console.log(JSON.stringify({ made, pop, remaining: gone }, null, 2));
   expect(gone, "the delete left the material on the page").toBe(0);
+  MADE_IDS.length = 0; // the page's own delete succeeded; nothing left to sweep
 });
 
 /**
@@ -473,11 +505,12 @@ test("phase 3 — a slot whose material is gone says so", async ({ page }) => {
   const readSlots = () => page.evaluate(`(() => {
     const root = document.querySelector(".pkg-root");
     return {
-      tiles: Array.from(root.querySelectorAll(".pkgf-tile:not(.pkgf-tile--ghost)")).map((t) => ({
-        name: (t.querySelector("h3, .pkgf-tname")?.textContent || "").trim(),
-        rows: Array.from(t.querySelectorAll(".pkgf-slot, .pkgf-srow")).map((r) => r.textContent.replace(/\\s+/g, " ").trim()),
+      /* Same retirement: the flow pack's tiles became §4's package cards. */
+      tiles: Array.from(root.querySelectorAll(".pkgb-pkgcard")).map((t) => ({
+        name: (t.querySelector(".pkgb-pkgname")?.textContent || "").trim(),
+        rows: Array.from(t.querySelectorAll(".pkgb-slot")).map((r) => r.textContent.replace(/\\s+/g, " ").trim()),
       })),
-      railRows: Array.from(root.querySelectorAll(".pkgo-rail .pkgo-row")).map((r) => r.textContent.replace(/\\s+/g, " ").trim()),
+      /* (the rail's rows are gone — §4. Nothing reads them here; the claim is about the tiles.) */
     };
   })()`);
 

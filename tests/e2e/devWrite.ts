@@ -63,3 +63,17 @@ export async function patchDoc(collection: string, id: string, fields: Record<st
   const { db, uid } = await devDb();
   await updateDoc(doc(db, "users", uid, collection, id), fields);
 }
+
+/**
+ * Remove a material the harness created.
+ *
+ * ⚠️ FOR SWEEPING A TEST'S OWN LEFTOVERS, NEVER FOR DRIVING THE FEATURE. A drive that deletes
+ * through Firestore proves the rules allow it and nothing about the page; the delete branch is
+ * exercised by clicking the bin. This exists so a drive that fails half way does not leave a
+ * document behind to poison the next run.
+ */
+export async function deleteVersionDoc(id: string): Promise<void> {
+  const { db, uid } = await devDb();
+  const { deleteDoc } = await import("firebase/firestore");
+  await deleteDoc(doc(db, "users", uid, "versions", id));
+}

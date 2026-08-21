@@ -217,7 +217,7 @@ describe("materialColumns — the broadsheet's three type columns (D3)", () => {
 
   it("states absence in words rather than as a zero", () => {
     const free = materialColumns(versions, packages)[0].sheets.find((s) => s.name === "Comps-forward")!;
-    expect(free.usage).toBe("Not in a package yet");
+    expect(free.usage).toBe("Not in a package");
     expect(free.usage).not.toContain("0");
     expect(free.usedIn).toBe(0);
   });

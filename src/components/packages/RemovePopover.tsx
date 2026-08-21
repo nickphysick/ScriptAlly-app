@@ -129,9 +129,25 @@ export const RemovePopover: React.FC<RemovePopoverProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLSpanElement>(null);
-  /* Anchored right: the trigger sits at the sheet's right edge, and a 280px panel hung off its left
-     would reach into the next column. `useFixedMenu` also escapes the scroller's clip. */
-  const { triggerRef, menuStyle } = useFixedMenu<HTMLButtonElement>(open, { align: "right" });
+  const menuRef = useRef<HTMLDivElement>(null);
+  /**
+   * Anchored right: the trigger sits at the record's right edge, and a 280px panel hung off its left
+   * would reach into the next column. `useFixedMenu` also escapes the scroller's clip.
+   *
+   * ⚠️ `placement: "auto"`, AND IT TOOK THE DEPLOYED PAGE TO SHOW WHY. This opened downward always.
+   * That fitted while the hero was a short void; the re-cut made the band taller, the sheets moved
+   * down the viewport, and at 900px the popover opened BELOW THE FOLD — measured off screen on dev,
+   * with the modal itself perfectly correct. A confirmation you cannot see is worse than no
+   * confirmation: the writer clicks a bin, nothing appears, and the obvious next move is to click
+   * it again.
+   *
+   * ⚠️ AND `auto` NEEDS `menuRef` — it decides by measuring the menu's REAL height, so without the
+   * ref it cannot know whether the panel fits and silently keeps opening down. The option would
+   * look applied and change nothing.
+   */
+  const { triggerRef, menuStyle } = useFixedMenu<HTMLButtonElement>(open, {
+    align: "right", placement: "auto", menuRef,
+  });
 
   /* Dismissal follows the shell's pattern: pointerdown outside, Escape. Escape is NOT stopped — this
      sits inside a page that owns its own Escape handling, and swallowing the key here would reach
@@ -169,7 +185,7 @@ export const RemovePopover: React.FC<RemovePopoverProps> = ({
       </button>
 
       {open && (
-        <div className="pkgb-pop" style={menuStyle} role="dialog" aria-label={copy.heading}>
+        <div ref={menuRef} className="pkgb-pop" style={menuStyle} role="dialog" aria-label={copy.heading}>
           <h5>{copy.heading}</h5>
           <p>{copy.body}</p>
           <div className="pkgb-popacts">

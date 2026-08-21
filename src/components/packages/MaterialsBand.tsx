@@ -121,10 +121,14 @@ export const MaterialsBand: React.FC<MaterialsBandProps> = ({
                   <span className="pkgb-smeta">
                     <span>{s.source}</span>
                     <span className="pkgb-sdot" aria-hidden="true" />
+                    {/* ⚠️ THE NUMBER IS BOLD AND THE WORDS ARE NOT, but the WORDS are `usageLine`'s
+                        — split here rather than restated. Rendering the sentence inline left the
+                        lib's `usageLine` saying "Not in a package yet" with nobody reading it: two
+                        wordings for one fact on a page that claims single-sourced figures. */}
                     <span className="pkgb-suse">
                       {s.usedIn > 0
                         ? <>In <b>{s.usedIn}</b> {s.usedIn === 1 ? "package" : "packages"}</>
-                        : "Not in a package"}
+                        : s.usage}
                     </span>
                   </span>
                   <RemovePopover

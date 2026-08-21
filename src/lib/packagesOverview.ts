@@ -191,7 +191,7 @@ export interface MaterialSheet {
   name: string;
   /** `Text · N words` / `Ref · file.docx` — the flow pack's source label. */
   source: string;
-  /** `In N packages` / `Not in a package yet` — derived, never stored. */
+  /** `In N packages` / `Not in a package` — derived, never stored. */
   usage: string;
   /** How many packages reference it — the delete guard reads the same number. */
   usedIn: number;
@@ -276,9 +276,15 @@ export const packagesUsing = (versionId: string, packages: SubmissionPackage[]):
  * ⚠️ ZERO IS A SENTENCE HERE, NOT A COUNT. "In 0 packages" is true and reads as a malfunction; the
  * line is prose about where a material sits, so absence is stated in words — the same split the
  * package row makes with "Not sent yet".
+ *
+ * ⚠️ AND IT IS THE ONLY WORDING, WHICH IT BRIEFLY WAS NOT. The re-cut's one-line meta took the
+ * ref's shorter "Not in a package" and rendered it INLINE in the band, leaving this function saying
+ * "Not in a package yet" and nobody reading it: two sentences for one fact, differing by a word, on
+ * a page whose whole claim is that its figures are single-sourced. The band reads this again; the
+ * shorter wording won because the ref chose it and the meta line is tight.
  */
 export const usageLine = (used: number): string =>
-  used === 0 ? "Not in a package yet" : `In ${used} ${used === 1 ? "package" : "packages"}`;
+  used === 0 ? "Not in a package" : `In ${used} ${used === 1 ? "package" : "packages"}`;
 
 /* ══════════════════════════════════════════════════════════════════════════════
    THE ARCHIVE MODEL (Ruling 2) — put away, or delete when nothing holds it

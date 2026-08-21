@@ -185,3 +185,25 @@ describe("the artist's commission survives, in the report (D5)", () => {
     }
   });
 });
+
+describe("the removal popover can be positioned at all", () => {
+  const css = read("../components/packages/packagesBroadsheet.css");
+  const rule = sliceBetween(css, ".pkgb-remwrap {", "}", ".pkgb-remwrap rule");
+
+  /**
+   * ⚠️ A TRANSFORMED ANCESTOR BECOMES THE CONTAINING BLOCK FOR `position: fixed` DESCENDANTS, and
+   * the popover is a fixed descendant of this wrapper. `translateY(-50%)` here — added to centre
+   * the bin on the sheet's edge — put the confirmation off screen on the deployed page, with every
+   * declaration in the popover's own stylesheet correct. Playwright named it: "element is outside
+   * of the viewport". A comment would not have stopped the next person re-centring it that way.
+   */
+  it("centres the bin without a transform", () => {
+    expect(rule, "a transform here re-parents the popover's fixed positioning").not.toContain("transform");
+  });
+
+  it("uses the box to centre instead", () => {
+    expect(rule).toContain("align-items: center");
+    expect(rule).toMatch(/top: 0/);
+    expect(rule).toMatch(/bottom: 0/);
+  });
+});

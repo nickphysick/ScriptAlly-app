@@ -321,7 +321,18 @@
    REMOVAL — the bin, and the archive/delete popover (Ruling 2)
    ══════════════════════════════════════════════════════════════════════════════ */
 
-.pkgb-remwrap { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); z-index: 2; }
+/* ⚠️ NO `transform` HERE, AND THE REASON IS NOT COSMETIC. A transformed element becomes the
+   containing block for `position: fixed` DESCENDANTS — so `translateY(-50%)` on this wrapper made
+   the removal popover inside it resolve against a 24px box instead of the viewport, and
+   `useFixedMenu`'s coordinates put it off screen. Playwright reported it exactly: "element is
+   outside of the viewport", on a popover whose own CSS was perfectly correct.
+   Same mechanism as the transform that isolates a `mix-blend-mode` group: the rule applies, the
+   browser honours it, and a different thing silently stops working. Centring is done with the box
+   instead — top/bottom 0 and a flex centre — which cannot establish a containing block. */
+.pkgb-remwrap {
+  position: absolute; right: 9px; top: 0; bottom: 0; z-index: 2;
+  display: flex; align-items: center;
+}
 
 /* ⚠️ HOVER *AND* FOCUS-VISIBLE. The ref reveals this on hover alone, which makes it unreachable for
    anyone driving by keyboard — the control is present in the tab order and invisible while focused,
