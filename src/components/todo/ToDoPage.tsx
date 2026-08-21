@@ -3423,6 +3423,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         materials: materialsWantedFromRows(paneBody.rows),
         /* the writer's own words, to the activity's `details` — see `recordMaterialsSent` */
         ...(paneBody.also.trim() ? { note: paneBody.also.trim() } : {}),
+        /**
+         * ⚠️ THE REMINDER, RESOLVED TO A DATE AT WRITE TIME (reminder round, Phase 1). The form
+         * holds a LEAD or a chosen day; the record holds a date, because a lead is meaningless
+         * without the reply date it hangs off and that date is settled here.
+         *
+         * ⚠️ `No reminder` WRITES NOTHING AND STAYS DISTINGUISHABLE FROM "not asked". Both leave the
+         * key absent, which is the same STORED state — and that is correct: the difference lives in
+         * the form, not the record. An app that stored "the writer declined a reminder" would be
+         * keeping a fact about a conversation rather than about a query.
+         */
+        ...(() => {
+          const r = paneBody.remind;
+          if (!r || r.kind === "none") return {};
+          if (r.kind === "date") return r.ymd ? { nudgeDate: new Date(`${r.ymd}T12:00:00`).toISOString() } : {};
+          const e = paneBody.expect;
+          const from = sentDateISO();
+          let replyMs: number | null = null;
+          if (e?.kind === "date" && e.ymd) replyMs = new Date(`${e.ymd}T12:00:00`).getTime();
+          else if (e?.kind === "weeks" && from) replyMs = agentWindowMs(new Date(`${from}T12:00:00`).getTime(), e.weeks);
+          /* a lead with no reply date to hang off is not a date — omitted rather than guessed */
+          return replyMs == null ? {} : { nudgeDate: new Date(replyMs - r.days * 86400000).toISOString() };
+        })(),
         /* ⚠️ THE EXPECTATION, RESOLVED TO A DATE BEFORE IT TRAVELS. The form holds "6 weeks" or an
            explicit day; the record holds a date. Resolving here — through `agentWindowMs`, the one
            place a window becomes a date — means the strip's promise and the stored value come from

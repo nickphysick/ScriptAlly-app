@@ -193,7 +193,7 @@ export type StagedPayload =
      payload had no member, so `markSentWriteArgs` had nothing to pass and `recordMaterialsSent` —
      which accepts and writes the field — was never given it. The form compelled an answer, the strip
      stated it had been recorded, and nothing was written. */
-  | { kind: "mark-sent"; cardKey: string; label?: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean; method?: string; materials?: string[]; writerExpectedDate?: string; note?: string }
+  | { kind: "mark-sent"; cardKey: string; label?: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean; method?: string; materials?: string[]; writerExpectedDate?: string; note?: string; nudgeDate?: string }
   | { kind: "nudge"; cardKey: string; label?: string; queryId: string; checkBackDate: string; note?: string; nudgeDate?: string; method?: string }
   | { kind: "snooze"; cardKey: string; label?: string; taskType: string; relatedRecordId: string; days: number }
   | { kind: "mute-item"; cardKey: string; label?: string; taskType: string; relatedRecordId: string }
@@ -204,7 +204,7 @@ export type StagedPayload =
  *  payload then pass through here, so the two can never write differently. */
 export function markSentWriteArgs(p: Extract<StagedPayload, { kind: "mark-sent" }>): {
   queryId: string; targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
-  sentDate: string; isResubmit: boolean; writerExpectedDate?: string; note?: string;
+  sentDate: string; isResubmit: boolean; writerExpectedDate?: string; note?: string; nudgeDate?: string;
 } {
   return {
     queryId: p.queryId,
@@ -216,6 +216,12 @@ export function markSentWriteArgs(p: Extract<StagedPayload, { kind: "mark-sent" 
        stamping today — which is the difference between "not asked" and "answered with a guess". */
     ...(p.writerExpectedDate ? { writerExpectedDate: p.writerExpectedDate } : {}),
     ...(p.note ? { note: p.note } : {}),
+    /* ⚠️ `nudgeDate` IS THE REMINDER'S FIELD, AND IT IS THE ONE THE MODEL ALREADY HAS. Its own
+       declaration reads "set when a nudge reminder is chosen"; it is in `isValidQuery`, in the
+       update allowlist, and `recordMaterialsSent` has accepted and written it all along. A new
+       `writerNudgeDate` would have been symmetrical with `writerExpectedDate` and needed a RULES
+       DEPLOY — which is Nick's to run — to say something the model already says. */
+    ...(p.nudgeDate ? { nudgeDate: p.nudgeDate } : {}),
   };
 }
 

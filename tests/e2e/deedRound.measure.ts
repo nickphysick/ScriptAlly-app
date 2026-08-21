@@ -238,6 +238,52 @@ test("deed round", async ({ page }) => {
       /^[1-9]\d* to answer$/.test(chipAfter),
       `chip="${chipAfter}"`);
 
+  /* ══ THE CLOSE JOURNEY — measured for the first time ══════════════════════════════════════
+     No Close row rendered on this account for four rounds. The cause was not the derivation: the
+     account carried `no_response_close` in `mutedTaskRules`, left by another fixture whose --clean
+     nobody ran, and `taskSurvivesMute` removed the task after `replyTask` had correctly produced
+     it. With the mute cleared the pane can finally be looked at. */
+  const closeShape = await (async () => {
+    await page.goto("/todo"); await page.waitForTimeout(6000);
+    if (!(await page.evaluate(OPEN("Close")))) return null;
+    await page.waitForTimeout(1400);
+    return await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const all = (s) => [...document.querySelectorAll(s)].filter(vis);
+      const cs = (e) => getComputedStyle(e);
+      const deed = all(".tpn .deed")[0];
+      const go = all(".tpn .actbar .ab.go")[0];
+      return {
+        deed: deed ? (deed.textContent || "").replace(/[ ]+/g, " ").trim() : "",
+        tiles: all(".tpn .tile .k").map((e) => (e.textContent || "").trim()),
+        storyBg: all(".tpn .story-h")[0] ? cs(all(".tpn .story-h")[0]).backgroundImage : "",
+        storyStat: (all(".tpn .story-h .stat")[0] || {}).textContent || "",
+        heading: (all(".tpn .formcol .f-h")[0] || {}).textContent || "",
+        rate: (all(".tpn .formcol")[0] || {}).textContent || "",
+        prim: go ? (go.textContent || "") : "",
+        chip: go ? ((go.querySelector(".n") || {}).textContent || "").trim() : "",
+        nextId: (all(".tpn .sect.next")[0] || {}).id || "",
+      };
+    })()`) as any;
+  })();
+  add("P6.1 · the Close journey renders, and its deed is the contract's sentence",
+      !!closeShape && /^Consider closing your query for .+/.test(closeShape.deed),
+      closeShape ? `"${closeShape.deed}"` : "NOT RUN — no Close row");
+  add("P6.2 · its three tiles are the ones the contract names",
+      !!closeShape && closeShape.tiles.length === 3
+        && /waited/i.test(closeShape.tiles[0]) && /most recent interaction/i.test(closeShape.tiles[1])
+        && /sent previously/i.test(closeShape.tiles[2]),
+      closeShape ? JSON.stringify(closeShape.tiles) : "-");
+  add("P6.3 · the story panel wears the sage header and the query's status word",
+      !!closeShape && /linear-gradient/.test(closeShape.storyBg)
+        && /215, 221, 213/.test(closeShape.storyBg) && closeShape.storyStat.trim().length > 0,
+      closeShape ? `stat="${closeShape.storyStat}"` : "-");
+  add("P6.4 · it gates on When alone, and the response-rate line is verbatim",
+      !!closeShape && closeShape.nextId === "s-when" && closeShape.chip === "1 to answer"
+        && /response rate stays honest/.test(closeShape.rate)
+        && /Ready to close this one\?/.test(closeShape.heading),
+      closeShape ? `next=#${closeShape.nextId} chip="${closeShape.chip}"` : "-");
+
   add("P0 · the suite reached at least two journeys",
       [send, note, bulk, close].filter(Boolean).length >= 2,
       `measured: ${[["send", send], ["note", note], ["bulk", bulk], ["close", close]].filter(([, v]) => v).map(([k]) => k).join(", ") || "none"}`);

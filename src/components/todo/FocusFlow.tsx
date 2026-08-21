@@ -139,7 +139,7 @@ export interface FocusFlowProps {
    * pane collected it, the strip promised it, and the takeover boundary dropped it. Additive: every
    * existing caller passes what it always passed.
    */
-  prefill?: { sentDate?: string; method?: string; materials?: string[]; writerExpectedDate?: string; note?: string };
+  prefill?: { sentDate?: string; method?: string; materials?: string[]; writerExpectedDate?: string; note?: string; nudgeDate?: string };
   /** "sweep" = the speed grammar: one summary per screen, big ✓/⏸/skip, keyboard D·S·→ (F·N on
    *  housekeeping, Enter opens an offer). Sweep quick-✓s use the Phase-C defaults + a brief inline
    *  receipt, write IMMEDIATELY (Undo on the toast) and never stage. Default: the full journey. */
@@ -195,6 +195,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
      than re-asked: the journey does not ask this question, so it has nothing of its own to keep. */
   const expectedFromPane = prefill?.writerExpectedDate;
   const noteFromPane = prefill?.note;
+  const nudgeFromPane = prefill?.nudgeDate;
   const [copied, setCopied] = useState(false);
   const [extrasOpen, setExtrasOpen] = useState(false); // "+ I sent something else too"
   const [backdated, setBackdated] = useState(false); // the quiet "I sent it earlier" day picker
@@ -436,6 +437,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
            did not answer — the key is omitted rather than defaulted. */
         ...(expectedFromPane ? { writerExpectedDate: expectedFromPane } : {}),
         ...(noteFromPane ? { note: noteFromPane } : {}),
+        ...(nudgeFromPane ? { nudgeDate: nudgeFromPane } : {}),
       });
     };
     return journeySheet({
@@ -606,6 +608,7 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
             materials: chosen,
             ...(expectedFromPane ? { writerExpectedDate: expectedFromPane } : {}),
         ...(noteFromPane ? { note: noteFromPane } : {}),
+        ...(nudgeFromPane ? { nudgeDate: nudgeFromPane } : {}),
           });
         },
       },

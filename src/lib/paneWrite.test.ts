@@ -57,3 +57,38 @@ describe("⚠️ the mark-sent payload carries what the form asked for", () => {
       .targetStatus).toBe(QueryStatus.PARTIAL_SENT);
   });
 });
+
+/**
+ * ⚠️ THE REMINDER REACHES THE WRITE (reminder round, Phase 1), through `nudgeDate` — the field the
+ * model already had, whose own declaration reads "set when a nudge reminder is chosen". A
+ * symmetrical `writerNudgeDate` would have needed a rules deploy to say the same thing.
+ */
+describe("⚠️ the reminder reaches the write", () => {
+  it("a resolved reminder date reaches the write args", () => {
+    const args = markSentWriteArgs({ ...base, nudgeDate: "2026-09-11T12:00:00.000Z" });
+    expect(args.nudgeDate).toBe("2026-09-11T12:00:00.000Z");
+  });
+
+  /**
+   * ⚠️ "No reminder" AND "not asked" LEAVE THE SAME STORED STATE, and that is correct rather than a
+   * gap. The difference between them lives in the FORM — one is an answer the gate accepts, the
+   * other leaves the primary gated — and a query that recorded "the writer declined a reminder"
+   * would be keeping a fact about a conversation rather than about a query.
+   */
+  it("no reminder writes nothing, and so does an unanswered one", () => {
+    expect("nudgeDate" in markSentWriteArgs(base)).toBe(false);
+    expect("nudgeDate" in markSentWriteArgs({ ...base, nudgeDate: "" })).toBe(false);
+  });
+
+  it("the expectation and the reminder travel together without colliding", () => {
+    const args = markSentWriteArgs({
+      ...base,
+      writerExpectedDate: "2026-09-18T12:00:00.000Z",
+      nudgeDate: "2026-09-11T12:00:00.000Z",
+    });
+    expect(args.writerExpectedDate).toBe("2026-09-18T12:00:00.000Z");
+    expect(args.nudgeDate).toBe("2026-09-11T12:00:00.000Z");
+    /* and neither moves the query */
+    expect(args.targetStatus).toBe(QueryStatus.FULL_SENT);
+  });
+});

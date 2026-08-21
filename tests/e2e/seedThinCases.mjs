@@ -30,7 +30,7 @@
  *   node tests/e2e/seedThinCases.mjs --pro     # …and set the plan to Pro
  *   node tests/e2e/seedThinCases.mjs --clean   # remove it, restore the plan
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, writeFileSync, rmSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc, getDoc, getDocs, deleteDoc, collection, writeBatch } from "firebase/firestore";
@@ -68,6 +68,19 @@ const uref = doc(db, "users", uid);
 const profile = (await getDoc(uref)).data() ?? {};
 
 /**
+ * ⚠️ WHAT THIS FIXTURE CHANGED IS REMEMBERED IN A LOCAL FILE, NOT ON THE USER DOCUMENT — and the
+ * reason is the same `affectedKeys` allowlist that made delete-then-create necessary. A marker
+ * field like `thinCasesPriorMute` is not in `isValidUser`'s update list, so writing it is DENIED
+ * with the same `permission-denied` a stale ruleset gives. Measured, twice, in two rounds.
+ *
+ * A local file is the right home anyway: this is a dev tool's bookkeeping about what it borrowed,
+ * not a fact about the writer's account. Gitignored by living under `run-artifacts/`.
+ */
+const MEMO = "run-artifacts/.thin-cases-restore.json";
+const memo = existsSync(MEMO) ? JSON.parse(readFileSync(MEMO, "utf8")) : {};
+const remember = (patch) => writeFileSync(MEMO, JSON.stringify({ ...memo, ...patch }, null, 2));
+
+/**
  * ⚠️ IT ALWAYS CLEANS BEFORE IT WRITES, AND THAT IS WHAT MAKES IT RE-RUNNABLE — not the
  * deterministic ids. A second `setDoc` on an existing document is an UPDATE, and this app's update
  * rules are `affectedKeys().hasOnly([...])` allowlists that are deliberately narrower than the
@@ -88,12 +101,32 @@ async function wipe() {
   return gone;
 }
 
+/**
+ * ⚠️ THE RULE MUTE IS WHY NO CLOSE ROW HAS EVER RENDERED (reminder round, Phase 3), and it was
+ * never a bug in the derivation. `replyTask` returns "close" for this fixture exactly as its header
+ * says it will; `taskSurvivesMute` then removes the task, because the account carries
+ * `mutedTaskRules: ["no_response_close", "dq_materials"]` — seeded by `seedSetAside.mjs`, whose own
+ * `--clean` nobody ran. A whole journey was unmeasurable for four rounds because of fixture residue
+ * on a shared account.
+ *
+ * ⚠️ SO THIS FIXTURE CLEARS IT AND PUTS IT BACK. It remembers whether the rule was muted when it
+ * arrived, rather than assuming it was not — another stream may be measuring the mute deliberately,
+ * and `seedSetAside.mjs` is exactly that stream.
+ */
+const MUTE_FOR_CLOSE = "no_response_close";
+
 if (clean) {
   const gone = await wipe();
-  if (profile.thinCasesPriorPlan) {
-    await setDoc(uref, { plan: profile.thinCasesPriorPlan, thinCasesPriorPlan: null }, { merge: true });
-    console.log(`plan restored to ${profile.thinCasesPriorPlan}`);
+  if (memo.priorMute === true) {
+    const back = new Set(profile.mutedTaskRules ?? []); back.add(MUTE_FOR_CLOSE);
+    await setDoc(uref, { mutedTaskRules: [...back] }, { merge: true });
+    console.log(`restored the ${MUTE_FOR_CLOSE} mute it found`);
   }
+  if (memo.priorPlan) {
+    await setDoc(uref, { plan: memo.priorPlan }, { merge: true });
+    console.log(`plan restored to ${memo.priorPlan}`);
+  }
+  rmSync(MEMO, { force: true });
   console.log(`removed ${gone} thin-case documents`);
   process.exit(0);
 }
@@ -101,6 +134,17 @@ if (clean) {
 /* every run starts from nothing of its own — see `wipe` */
 const cleared = await wipe();
 if (cleared) console.log(`cleared ${cleared} documents from a previous run`);
+
+{
+  const muted = new Set(profile.mutedTaskRules ?? []);
+  const wasMuted = muted.has(MUTE_FOR_CLOSE);
+  if (wasMuted) {
+    muted.delete(MUTE_FOR_CLOSE);
+    await setDoc(uref, { mutedTaskRules: [...muted] }, { merge: true });
+    remember({ priorMute: true });
+    console.log(`unmuted ${MUTE_FOR_CLOSE} (it was muted; --clean puts it back)`);
+  }
+}
 
 const MS = `${PREFIX}ms`;
 /* ⚠️ THE SHAPE IS `seed.mjs`'S, FIELD FOR FIELD. `isValidManuscript` and `isValidAgent` are
@@ -225,7 +269,8 @@ for (const k of SNOOZED) {
 }
 
 if (pro) {
-  await setDoc(uref, { plan: "Pro", thinCasesPriorPlan: profile.plan ?? "Free" }, { merge: true });
+  remember({ priorPlan: profile.plan ?? "Free" });
+  await setDoc(uref, { plan: "Pro" }, { merge: true });
   console.log(`plan set to Pro (was ${profile.plan ?? "Free"}; --clean restores it)`);
 }
 
