@@ -388,12 +388,11 @@ export function panePresence(c: BoardCard): PanePresence {
  * row states "Log the close". Two names for one task, and the pane would have carried the one the
  * writer had not just read. `rowDeed` is what the row renders; reusing it is the whole point.
  */
-/**
- * ⚠️ ONE DEED, AND `bandDeed` IS NOW ONLY A NAME FOR IT. It delegated to `rowDeed`, which held a
- * table of its own carrying three retired verbs — so the band said "Log the close" while the row
- * said "Consider closing". Both call `taskDeed`; there is nothing left for them to disagree about.
- */
-export const bandDeed = (c: BoardCard): string => taskDeed(c);
+/* (`bandDeed` is deleted — chase round, Phase 1. A one-line alias for `taskDeed` with NO renderer
+   anywhere in `src/`, whose only effect was to make `deedSynonyms.test.ts` look as though it
+   asserted something about the band: it compared `bandDeed` with `listDeed`, both `taskDeed`, so it
+   compared a function with itself. The band renders `deedSentence`, and the test now says so.) */
+
 
 /**
  * The sub-line — the facts, in the app's existing sentence grammar. The pre-line already reads as

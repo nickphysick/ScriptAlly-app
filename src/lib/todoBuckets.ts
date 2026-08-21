@@ -227,13 +227,55 @@ export function deedSentence(c: BoardCard, p: DeedParts = {}): DeedSpan[] {
         ? [{ text: "Fill in what you sent with " }, { text: `${n} imported queries`, em: true }, ...forTitle()]
         : [{ text: "Fill in what you sent" }, ...forTitle(), ...to()];
     }
+    /**
+     * ⚠️ THE CHASE NAMES WHO IT CONCERNS (chase round, Phase 1). It had no template, so it fell
+     * through to the short deed — "Worth a nudge" — and once the sub-line was removed there was
+     * nothing on the card saying which agent it was about. The row keeps the summary; the band is
+     * the sentence.
+     *
+     * ⚠️ IT DEGRADES BY DROPPING, NEVER BY PLACEHOLDER. No agency loses " at …"; no agent loses the
+     * name and leans on the agency; neither leaves "them", which is the app's own pronoun for an
+     * agent whose pronouns it does not know and never asks for.
+     */
+    case "chase": {
+      const about = (): DeedSpan[] => (t ? [{ text: " about " }, { text: t, em: true }] : []);
+      if (ag && agy) return [{ text: "Nudge " }, { text: ag, em: true }, { text: " at " }, { text: agy, em: true }, ...about()];
+      if (ag) return [{ text: "Nudge " }, { text: ag, em: true }, ...about()];
+      if (agy) return [{ text: "Nudge " }, { text: agy, em: true }, ...about()];
+      return [{ text: "Nudge them" }, ...about()];
+    }
     /* a note is the writer's own words, and nothing is added to them */
     case "note": return [{ text: c.title }];
-    /* the two the contract does not template keep the short deed as their sentence — stated rather
-       than invented, because a sentence nobody wrote is worse than a phrase that already works */
+    /**
+     * ⚠️ `decide` KEEPS THE SHORT DEED, AND THAT IS DECLARED IN `DEED_FORM` RATHER THAN LEFT AS A
+     * FALL-THROUGH. An offer hands off to its own takeover, which names the agent in its own band;
+     * templating one here would put a second sentence about the same act on the same screen. The
+     * declaration is what stops the next bucket inheriting this silently.
+     */
     default: return [{ text: taskDeed(c) }];
   }
 }
+
+/**
+ * ⚠️ WHICH BUCKETS COMPOSE A SENTENCE, DECLARED — exhaustive, closed with `never`, so a new bucket
+ * cannot arrive holding another bucket's answer.
+ *
+ * `sentence` — a composed template naming the subject.
+ * `own`      — the writer's own words, which nothing is added to.
+ * `short`    — deliberately the row's short deed; the reason lives at its `case` above.
+ *
+ * The test asserts this against `deedSentence` itself rather than restating the strings: a bucket
+ * declared `sentence` whose output equals the short deed has lost its template, and a bucket
+ * declared `short` whose output does not is being templated without saying so.
+ */
+export const DEED_FORM: Record<Bucket, "sentence" | "own" | "short"> = {
+  send: "sentence",
+  close: "sentence",
+  fix: "sentence",
+  chase: "sentence",
+  note: "own",
+  decide: "short",
+};
 
 /* ── the figure column ────────────────────────────────────────────────────────────────────────── */
 
