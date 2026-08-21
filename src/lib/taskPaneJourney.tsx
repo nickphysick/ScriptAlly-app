@@ -49,6 +49,8 @@ export interface JourneyInputs {
   noteAdded?: string;
   /** a send whose material is a partial — the sentence's only split */
   partial?: boolean;
+  /** the query's status word, through `getStatusLabel` — never mapped again here */
+  statusWord?: string;
   /** a note's own added date, for the form's meta line — "18 Aug" */
   noteAddedDate?: string;
   /** what is still unanswered — the ONE list the chip, the line and the square all read */
@@ -57,7 +59,10 @@ export interface JourneyInputs {
   showMissing?: boolean;
   onJump?: (id: string) => void;
   /** what pressing the primary will write */
-  will: string;
+  /** ⚠️ A NODE, NOT A STRING (deed round, Phase 2). The strip is prose with two emphasised dates
+   *  in it; a string could only carry them by holding markup, which is how a display string becomes
+   *  something the next reader has to escape. */
+  will: React.ReactNode;
   body: React.ReactNode;
   btns?: { label: string; onPress: (anchor: HTMLElement) => void }[];
   quiet?: { label: string; onPress: () => void };
@@ -231,6 +236,7 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
        point at the first missing field, and a table cannot, because every row is equally the one
        meant. A button reading "Log 0 queries" says what it would do; a disabled button with a
        generic label would say only that something is wrong. */
+    statusWord: input.statusWord,
     bulk: input.bulk,
     missing: input.missing,
     showMissing: input.showMissing,

@@ -96,6 +96,8 @@ import { TaskPane } from "./TaskPane";
 import { TaskPaneBody, SendBodyValues, EXPECT_WEEKS } from "./TaskPaneBody";
 import { buildJourney } from "../../lib/taskPaneJourney";
 import { journeyKind, firstMissing, isBulkCard, unanswered, missingPhrase, anchorFor, type GateAnswers, type ReqField } from "../../lib/paneGate";
+import { agentWindowMs } from "../../lib/expectedDate";
+import { getStatusLabel } from "../StatusPill";
 import { BulkFillTable } from "./BulkFillTable";
 import { rowHasAnswer } from "../../lib/materialsSweep";
 import { liveFamily } from "../../lib/todoFamily";
@@ -1091,67 +1093,73 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   }, [paneCard]);
 
   /* what the primary will write, in the mockup's own `Will record:` grammar */
-  const paneWill = paneCard
-    /* ⚠️ THE WILL-RECORD LINE TAKES THE PANE'S OWN VERB (frame2 Phase 4). It printed
-       `rowPrimaryLabel`, which for a note is "Complete" — a retired word, rendered in the one place
-       nobody looks for copy. The pane's table is the pane's language throughout. */
-    /* ⚠️ THE PARCEL IS IN THE LINE, THROUGH THE ONE FORMATTER. `formatSampleSpecs` is what the
-       `Sent previously` tile reads, so the strip stating what WILL be recorded and the tile stating
-       what WAS cannot describe the same parcel in two grammars. Absent where there is no sample. */
-    /* ⚠️ THE STRIP GROWS ONLY WITH ACTUAL CHOICES (finishing round, Phase 3), and it starts at an
-       em dash. It used to open reading "today · reply expected ~15 Oct · nudge 8 Oct" over a form
-       nobody had touched — three facts stated as the writer's before they had said any of them.
-       Every part below is absent until its question is answered, and with none answered the strip
-       says "—", which is the honest sentence: nothing yet. */
-    ? (() => {
-        /* ⚠️ THE STRIP STATES WHAT WILL BE WRITTEN, NOT WHAT THE BUTTON SAYS. It led with
-           `paneCopy(...).primary` — the BUTTON'S label — so it read "Log as sent · today", which is
-           the control describing itself. The contract's own strip reads "Partial sent · first 3
-           chapters · today": the STATUS the record will carry, then the facts. `sendSpecFor` is
-           what already decides partial-versus-full, so the strip and the deed cannot disagree. */
-        const spec = sendSpecFor(paneCard);
-        const parts = [
-          spec ? formatSampleSpecs(paneBody.rows, "and") : null,
-          dayPart(paneBody.when),
-          ...(spec ? paneExpectParts() : []),
-        ].filter(Boolean);
-        /* ⚠️ A NOTE STATES ITS RECORD FROM THE START, because it has no questions to answer: the
-           tick IS the act and it carries today's date. The em dash is for a form whose questions
-           are unanswered, and a note has none to answer. */
-        /* the cohort states its own count, from the same source the primary and the band read */
-        if (isBulkCard(paneCard)) return `Materials on ${bulkTouched} ${bulkTouched === 1 ? "query" : "queries"}`;
-        if (paneCard.userTaskId) return "Ticked off · today";
-        /* nothing chosen, nothing stated — the em dash IS the honest sentence at rest.
-           The "Will record:" prefix belongs to the strip's own markup; this supplies the RECORD. */
-        if (!parts.length) return "—";
-        const lead = spec ? spec.targetStatus : paneCopy(paneCard).heading ?? "";
-        return [lead, ...parts].filter(Boolean).join(" · ");
-      })()
-    : "";
+  /**
+   * ⚠️ THE STRIP IS PROSE NOW (deed round, Phase 2). It was a mono field-string —
+   * "PARTIAL SENT · FIRST 3 CHAPTERS · TODAY · REPLY EXPECTED ~1 OCT" — which is a database row
+   * read aloud. A writer about to commit something wants to hear what they are committing in the
+   * language they would use to describe it: "Your full — 3 chapters — sent 13 August. Reply
+   * expected around 1 October; a nudge reminder lands here 24 September."
+   *
+   * ⚠️ EMPHASIS FALLS ON THE TWO FUTURE DATES AND NOTHING ELSE. They are the only parts a writer
+   * will want to find again later; the rest is what they have just told the form. Bolding the
+   * whole record would be emphasis meaning "this is a record", which every word here already is.
+   *
+   * ⚠️ AND THE DATES ARE RESOLVED, NOT ECHOED. "6 weeks" is what the writer picked; "1 October" is
+   * what will be stored, and the strip's whole job is to say what will be stored. The arithmetic is
+   * `agentWindowMs` in `expectedDate.ts` — the one place a window becomes a date — never a local
+   * `setDate` loop, so the strip cannot come to disagree with the write.
+   */
+  const paneWill: React.ReactNode = !paneCard ? "" : (() => {
+    if (isBulkCard(paneCard)) {
+      return bulkTouched > 0
+        ? <>materials on <b>{bulkTouched}</b> {bulkTouched === 1 ? "query" : "queries"}</>
+        : "nothing yet";
+    }
+    if (paneCard.userTaskId) return "Your note, ticked off today.";
 
-  /** a note's created date, formatted for the form's meta line — "18 Aug" */
-  function noteAddedDate(c: BoardCard): string {
-    const t = c.userTaskId ? userTasks.find((x) => x.id === c.userTaskId) : undefined;
-    const iso = isoOf(t?.createdAt);
-    return iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—";
-  }
-  /** and its age in words, for the band — the rail's own elapsed formatter, never a second one */
-  function noteAgo(c: BoardCard): string {
-    const d = listRowInputs(c).days;
-    if (typeof d !== "number") return "";
-    const p = elapsedParts(d);
-    return `${p.figure} ${p.unit} ago`;
-  }
+    const spec = sendSpecFor(paneCard);
+    const longDay = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
 
-  /** the chosen day, in the strip's words — absent until chosen, and never a placeholder date */
-  function dayPart(w: SendBodyValues["when"]): string | null {
-    if (!w) return null;
-    if (w.kind === "today") return "today";
-    if (w.kind === "yesterday") return "yesterday";
-    return w.ymd ? new Date(`${w.ymd}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : null;
-  }
+    /* the first sentence: what went, and when */
+    const parcel = spec ? formatSampleSpecs(paneBody.rows, "and") : null;
+    const sentIso = sentDateISO();
+    const noun = spec ? (spec.material === "full" ? "Your full" : "Your partial") : null;
+    /* ⚠️ THE NOUN TRAVELS WITH THE PARCEL, NEVER ALONE. "Your full" is read off the CARD, not
+       given by the writer — so on its own it is the strip stating something nobody said, which is
+       the pre-filled-answer fault in miniature. It appears once there is a measure beside it, and a
+       full manuscript (which has no unit to pick) waits for the date instead. */
+    let one = "";
+    if (parcel) one = noun ? `${noun} — ${parcel}` : parcel;
+    if (sentIso) one += one ? ` — sent ${longDay(new Date(`${sentIso}T12:00:00`).getTime())}`
+                            : `Sent ${longDay(new Date(`${sentIso}T12:00:00`).getTime())}`;
 
-  /** the day the send is dated from — the writer's own choice, falling back to nothing */
+    /* the second: what happens next, with the two dates emphasised */
+    const two: React.ReactNode[] = [];
+    const e = paneBody.expect;
+    let replyMs: number | null = null;
+    if (e?.kind === "date" && e.ymd) replyMs = new Date(`${e.ymd}T12:00:00`).getTime();
+    else if (e?.kind === "weeks" && sentIso) {
+      replyMs = agentWindowMs(new Date(`${sentIso}T12:00:00`).getTime(), e.weeks);
+    }
+    if (replyMs != null) two.push(<>Reply expected around <b>{longDay(replyMs)}</b></>);
+    const r = paneBody.remind;
+    if (r?.kind === "none") {
+      /* ⚠️ AN EXPLICIT CHOICE READS AS ONE. "No reminder" is an answer the writer gave, so the
+         sentence says it — omitting the clause would render the same string as never having asked. */
+      two.push(<>no nudge reminder</>);
+    } else if (r?.kind === "lead" && replyMs != null) {
+      two.push(<>a nudge reminder lands here <b>{longDay(replyMs - r.days * 86400000)}</b></>);
+    }
+
+    if (!one && !two.length) return "—";
+    return <>
+      {one ? `${one}. ` : ""}
+      {two.map((n, i) => <React.Fragment key={i}>{i > 0 ? "; " : ""}{n}</React.Fragment>)}
+      {two.length ? "." : ""}
+    </>;
+  })();
+
+  /** the day the send is dated from — the writer's own choice, and nothing when they have not said */
   function sentDateISO(): string | null {
     const w = paneBody.when;
     if (!w) return null;
@@ -1161,31 +1169,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return localYMD(d.getTime());
   }
 
-  /**
-   * ⚠️ THE TWO DATES THE EXPECTATION IMPLIES, and each appears only once its own question is
-   * answered. A window with no send date behind it cannot state a reply date — it would be counting
-   * weeks from a day nobody named — so both halves check their inputs rather than assuming today.
-   */
-  function paneExpectParts(): string[] {
-    const e = paneBody.expect;
-    if (!e) return [];
-    const day = (d: Date) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-    let reply: Date | null = null;
-    if (e.kind === "date") reply = e.ymd ? new Date(`${e.ymd}T12:00:00`) : null;
-    else {
-      const from = sentDateISO();
-      if (from) { reply = new Date(`${from}T12:00:00`); reply.setDate(reply.getDate() + e.weeks * 7); }
-    }
-    if (!reply) return [];
-    const out = [`reply expected ~${day(reply)}`];
-    const r = paneBody.remind;
-    if (r && r.kind === "lead") {
-      const nudge = new Date(reply); nudge.setDate(nudge.getDate() - r.days);
-      out.push(`nudge ${day(nudge)}`);
-    }
-    if (r && r.kind === "none") out.push("no reminder");
-    return out;
+  /** a note's created date, for the form's meta line — "18 Aug" */
+  function noteAddedDate(c: BoardCard): string {
+    const t = c.userTaskId ? userTasks.find((x) => x.id === c.userTaskId) : undefined;
+    const iso = isoOf(t?.createdAt);
+    return iso ? new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : "—";
   }
+
+  /** and its age in words, for the band — the rail's own elapsed formatter, never a second one */
+  function noteAgo(c: BoardCard): string {
+    const d = listRowInputs(c).days;
+    if (typeof d !== "number") return "";
+    const p = elapsedParts(d);
+    return `${p.figure} ${p.unit} ago`;
+  }
+
+  /* (`dayPart` and `paneExpectParts` are retired with the field-string strip they served — the
+     prose builder above states the same facts as a sentence, and resolves its dates through
+     `agentWindowMs` rather than a local `setDate` loop.) */
 
   /** What the rail is showing — the groups it draws, flattened. One derivation, two readers. */
   function railShown(): number {
@@ -1923,6 +1924,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                     })),
                     primaryLabel: rowPrimaryLabel(paneCard, groupColumn(cardBucket(paneCard) === "note" ? "yours" : "urgent")),
                     ...(paneCard.userTaskId ? { noteAdded: noteAgo(paneCard) } : {}),
+                    /* ⚠️ THROUGH THE APP'S ONE STATUS-WORD FUNCTION. `getStatusLabel` is what the
+                       Query Centre's pill reads, so the story header and that pill cannot come to
+                       call one status two things — which is the whole reason this is the Query
+                       Centre's grammar rather than a lookalike. */
+                    ...(() => {
+                      const q = paneCard.relatedRecordId ? queries.find((x) => x.id === paneCard.relatedRecordId) : undefined;
+                      return q?.status ? { statusWord: getStatusLabel(q.status) } : {};
+                    })(),
                     will: paneWill,
                     body: (
                       isBulkCard(paneCard) ? (

@@ -376,7 +376,13 @@
    the cards, so it needs the card's own edge and radius rather than a hairline against a box it is
    no longer inside. */
 .tpn .actbar { flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05); }
-.tpn .willrec { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+/* ⚠️ PROSE, NOT A FIELD STRING (deed round, Phase 2). It was uppercase mono with `·` separators and
+   `text-overflow: ellipsis` — a database row read aloud, and clipped. It is a sentence now: Inter,
+   sentence case, wrapping, capped at a readable measure. The mono survives on the LEAD-IN alone,
+   which is a label rather than the content. */
+.tpn .willrec { font-size:12px;color:#6a584a;font-weight:300;line-height:1.5;min-width:0;max-width:56ch;margin-right:auto; }
+.tpn .willrec b { color:var(--ink2);font-weight:500; }
+.tpn .willrec .lead { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:7px; }
 .tpn .willrec b { color:var(--ink2);font-weight:500; }
 .tpn .ab { cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s; }
 .tpn .ab.quiet { background:var(--white);border:1px solid var(--edge);color:#57534e; }
@@ -493,3 +499,12 @@
    it, and the reason this is its own element rather than that strip wearing different words. */
 .tpn .miss { font-size:11.5px;color:var(--ink2);font-weight:300;line-height:1.5;margin-right:auto;min-width:0;flex:1 1 240px; }
 .tpn .miss a { color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer; }
+
+/* ── the story header, in the Query Centre's grammar (deed round, Phase 3) ───────────────────
+   ⚠️ THE SAGE BAND IS THE TRACKING PANEL'S, ported by VALUE rather than by importing its rule —
+   the two surfaces are in different stylesheets and a shared selector between them would couple a
+   task pane to a query page. Same gradient, same rule colour, stated here. */
+.tpn .tl-head.story-h { background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid rgba(90,110,88,0.20); }
+.tpn .story-h .t { font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500; }
+/* the status word — Playfair, and the only thing on this row that is not a label */
+.tpn .story-h .stat { font-family:'Playfair Display',serif;font-size:12.5px;color:#2e3a2c;font-weight:500; }

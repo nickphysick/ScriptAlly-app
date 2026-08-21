@@ -115,6 +115,12 @@ export interface TaskPaneJourney {
   primDisabled?: boolean;
   /** the timeline card — `null` hides it, and the mid drops to one column */
   tl: TaskPaneEvent[] | null;
+  /**
+   * ⚠️ THE QUERY'S STATUS, ALREADY LABELLED. It arrives as the string `getStatusLabel` produces —
+   * the app's ONE status-word function — rather than as a status this component would have to map.
+   * A second map here is how the pane and the Query Centre come to call one status two things.
+   */
+  statusWord?: string;
   /** a cohort's numbers — present only on the bulk journey; see `taskPaneJourney` */
   bulk?: { count: number; touched: number };
   /**
@@ -270,9 +276,15 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
                     and nothing rendered them, so the story was a bare stack of rungs beside a
                     stylesheet describing a card. A rule that reaches no element is the trap this
                     repo has a standing note about; here it had reached none for a whole phase. */}
-                <div className="tl-head">
+                {/* ⚠️ THE STORY HEADER SPEAKS THE QUERY CENTRE'S VOICE (deed round, Phase 3): the
+                    sage band the Tracking panel wears, with the query's own STATUS on the right in
+                    Playfair. It was an entry COUNT — "3 entries" — which is a fact about the list
+                    rather than about the query, and the one thing a writer glancing at a story
+                    wants is where the query stands. Same grammar on both surfaces, so the two read
+                    as one app rather than two. */}
+                <div className="tl-head story-h">
                   <span className="t">The story so far</span>
-                  <span className="c">{entryCount(d.tl)} {entryCount(d.tl) === 1 ? "entry" : "entries"}</span>
+                  {d.statusWord && <span className="stat">{d.statusWord}</span>}
                 </div>
                 <div className="tl-in">
                   <div className="tl">{d.tl.map(rung)}</div>
@@ -297,8 +309,15 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
               at once is two sentences fighting for one row, and the will-record is restated in the
               form — so when the writer has just been told what is still owed, that is what the bar
               says. It comes back the moment the line clears. */}
+          {/* ⚠️ THE LEAD-IN IS THE ONLY MONO LEFT, and it is a LABEL — "This records" names what
+              follows and then gets out of the way. The sentence after it is Inter, sentence case and
+              wrapping; the whole strip used to be uppercase mono, which is a database row read
+              aloud. Emphasis inside it is the journey's, on the two future dates.
+              ⚠️ AND THE COMMENT SITS OUTSIDE THE `&&` — a braced comment is a CHILD, and there is
+              no child position at the head of an expression. Third time in two rounds; the shape to
+              recognise is `{cond && (` followed by `{/*`. */}
           {!(d.showMissing && d.missing && d.missing.length > 0) && (
-            <span className="willrec">Will record: <b>{d.will}</b></span>
+            <span className="willrec"><span className="lead">This records</span>{d.will}</span>
           )}
           {d.showMissing && d.missing && d.missing.length > 0 && (
             /* ⚠️ IT WRAPS RATHER THAN TRUNCATING. A line that says which answers are missing is
