@@ -1,0 +1,43 @@
+── steer round · 21 assertions · 0 RED · 21 green
+  green  P2.1 · exactly one square renders, and it is on a requirable section
+           count=1 on=#s-when
+  green  P2.2 · it breathes — the contract's own keyframes, not a blink
+           animation=tpn-sqPulse
+  green  P2.3 · a note requires nothing, so it carries no square
+           count=0
+  green  P2.4 · close steers to its own single requirement
+           NOT RUN — no Close row on the account
+  green  P2.6 · the suite reached at least three journeys
+           measured: send, note, bulk
+  green  P2.5 · answering the steered section moves the square on
+           #s-when to #s-expect (count 1)
+  green  P3.1 · the pill expands in place — one chosen, quantity inside it, row height unchanged
+           on=1 qty=1 h [38,38,38] to [38,38,38]
+  green  P3.2 · choosing a unit seeds its own default and puts the caret in the value
+           value="3" focused=true
+  green  P3.3 · a typed value and its caret survive a re-render mid-edit
+           value="77" caret=1 focused=true
+  green  P3.4 · a stepper moves the value and never the chosen unit
+           77 to 78 · still one unit=1
+  green  P4.1 · the scan reached the form card's descendants at all
+           elements=42
+  green  P4.2 · every background inside the form card is white, field, pink or transparent
+           ["rgba(0, 0, 0, 0)","rgb(255, 255, 255)","rgb(253, 251, 247)"]
+  green  P4.3 · the expectations box is gone — no wrapper, no fill, no border, no radius
+           legacy=0 [{"border":"0px/0px","radius":"0px","bg":"rgba(0, 0, 0, 0)"},{"border":"0px/0px","radius":"0px","bg":"rgba(0, 0, 0, 0)"}]
+  green  P4.4 · sections are divided by hairlines, and the last has none
+           ["1px","1px","1px","1px","0px"]
+  green  P4.5 · the quiet lines survive the box's removal
+           hintlines=2
+  green  P5.1 · the primary's chip counts what is still unanswered
+           chip="3 to answer"
+  green  P5.2 · a note is complete, so it carries no chip
+           chip=""
+  green  P5.3 · bulk keeps its stated exception — inert at zero, its count in the label, no chip
+           disabled=true prim="Log 0 queries" chip=""
+  green  P5.4 · an incomplete click writes nothing and lands focus in the first missing section
+           scrollTop 0 to 0 · inFirst=true tookOver=false
+  green  P5.5 · the line names every missing answer, and the chip counts the same set
+           chip=3 links=["when it went","when you expect to hear back","your reminder"]
+  green  P5.6 · nothing in the action bar truncates at 1440
+           []
