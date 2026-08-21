@@ -37,14 +37,21 @@ function fn(name: string): string {
 describe("⚠️ NO MATERIALS PATH WRITES A STATUS", () => {
   const STATUS_WRITES = ["updateQueryStatus", "recordMaterialsSent", "recomputeQuery", "undoQueryStatus"];
 
-  it.each(["commitMaterialsFromPane", "commitRecordSweep", "leaveMaterialsUnrecorded", "dismissRecordSweep"])(
+  it.each(["writeQueryMaterials", "commitMaterialsFromPane", "commitRecordSweep", "leaveMaterialsUnrecorded", "dismissRecordSweep"])(
     "%s performs no status write", (name) => {
       const body = fn(name);
       for (const w of STATUS_WRITES) expect(body, `${name} calls ${w}`).not.toContain(w);
     });
 
+  /**
+   * ⚠️ RETARGETED AT THE FUNCTION THAT PERFORMS THE WRITE (popup round, Phase 1). It read
+   * `commitMaterialsFromPane`, which now DELEGATES: the bare `updateQuery` was lifted into
+   * `writeQueryMaterials` so a send can record its parcel without also raising the fill-in
+   * journey's receipt. The lock followed the write rather than the name — pointed at the delegating
+   * function it would have gone green on a body that no longer writes anything at all.
+   */
   it("the two recording paths write the SAME single field, and only it", () => {
-    for (const name of ["commitMaterialsFromPane", "commitRecordSweep"]) {
+    for (const name of ["writeQueryMaterials", "commitRecordSweep"]) {
       const body = fn(name);
       expect(body).toContain("materialsWanted");
       /* no other query field may ride along */
@@ -52,6 +59,17 @@ describe("⚠️ NO MATERIALS PATH WRITES A STATUS", () => {
         expect(body, `${name} also writes ${f}`).not.toContain(f);
       }
     }
+  });
+
+  /**
+   * ⚠️ AND THE SEND'S PARCEL GOES THROUGH THAT SAME WRITER, never an inline `updateQuery`. A send
+   * records two things about two records; the moment it grows its own materials write, the fill-in
+   * journey and the send can start recording different shapes of the same fact.
+   */
+  it("the send arm records its parcel through the one materials writer", () => {
+    const arm = fn("commitFromPane");
+    expect(arm, "the send arm stopped writing the parcel").toContain("writeQueryMaterials");
+    expect(arm, "the entrance grew its own query write").not.toContain("updateQuery(");
   });
 
   it("⚠️ the two escape paths write NO material data at all", () => {

@@ -114,6 +114,7 @@ import { TagDef } from "../../types";
 import { dockQueue, resolveDocked, collapseTimelineDuplicates } from "../../lib/todoDock";
 import { dropSupersededProvisional, normalizeResultingStatus } from "../../lib/queryDerivation";
 import { JourneyKind, JourneySendValues } from "../../lib/paneJourney";
+import { paneCommits, paneCommitValues } from "../../lib/paneCommit";
 import { CLOSE_REASONS } from "../../lib/todoJourneys";
 /* ⚠️ THE DECISIONS BEHIND completion, snooze and dock entry live in lib/todoActions now — this
    page performs them, it no longer decides them (tasks-consolidation, extraction commit). */
@@ -2920,8 +2921,20 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     flash(sweepOutcome(done, total, cohort.rule));
   }
 
-  /** The one entrance — it routes to the bucket's own write, each of which is the EXISTING one. */
-  async function commitFromPane(card: BoardCard, v: JourneySendValues) {
+  /**
+   * The one entrance — it routes to the bucket's own write, each of which is the EXISTING one.
+   *
+   * ⚠️ IT RETURNS WHETHER ANYTHING WAS WRITTEN, and that is not bookkeeping (popup round, Phase 1).
+   * The pane advances to the next task after a commit; advancing after a write that failed — or one
+   * that returned early because there was nothing to save — would carry the writer away from a card
+   * still owed, having told them it was done. Every arm reports for itself.
+   */
+  async function commitFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {
+    /* ⚠️ THE COHORT IS DECIDED BY THE CARD, NOT BY A JOURNEY KIND. `paneJourneyKind` has no member
+       for bulk — it predates the table — and the rows live in the page's own state rather than in
+       the values object, because the table edits fifteen queries and `JourneySendValues` describes
+       one. `commitRecordSweep` is the existing per-row `updateQuery`, unchanged. */
+    if (isBulkCard(card)) return commitRecordSweep(card, bulkRows);
     const kind = paneJourneyKind(card);
     if (kind === "chase") return commitChaseFromPane(card, v);
     if (kind === "close") return commitCloseFromPane(card, v);
@@ -2931,9 +2944,24 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        of `quickDone`'s user-task arm: the same write, its own receipt, its own undo. The board lock
        caught it, and it was right to — an inline completion is how the undo was bypassed once
        already. One primitive, four entrances. */
-    if (kind === "note") return quickDone(card);
+    if (kind === "note") {
+      /* ⚠️ `completionVia` DECIDES WHETHER A TICK CAN WRITE AT ALL, and it is asked rather than
+         assumed: a kind it answers "none" for has nothing to record, so there is nothing to advance
+         past. `quickDone` surfaces its own failure toast where the write is attempted and denied. */
+      if (completionVia(card) === "none") return false;
+      await quickDone(card);
+      return true;
+    }
     if (kind === "fix") return commitFixFromPane(card, v);
     if (kind === "materials") return commitMaterialsFromPane(card, v);
+    /**
+     * ⚠️ A SEND RECORDS THE PARCEL BEFORE IT RECORDS THE SEND, and in that order deliberately. The
+     * two live on different records — `materialsWanted` on the query, the send itself in the
+     * activity — so there is no single write that does both. Parcel first means a status write that
+     * fails leaves the parcel recorded (recoverable), where the other order would leave a query
+     * marked sent with no record of what went. One receipt covers both: `commitSendFromPane`'s.
+     */
+    await writeQueryMaterials(card, v.recordRows);
     return commitSendFromPane(card, v);
   }
 
@@ -2956,30 +2984,36 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * create pane already writes (`draftMaterialsToQuery`) and what this bucket's own predicate
    * already reads, so the gap closes today and the migration stays exactly as open as it was.
    */
-  /**
-   * ⚠️ THE SEND FORM'S PARCEL, THROUGH THE EXISTING WRITER (write round, Phase 1). A thin adapter
-   * rather than a second path: `commitMaterialsFromPane` already writes one query's materials and
-   * is what the single fill-in journey calls, so this hands it the pane's rows and nothing else
-   * changes. Extended additively — the fill-in's own call is untouched.
-   *
-   * ⚠️ NOTHING TICKED IS NOT A SAVE, which the writer below already enforces: a send with no parcel
-   * (a full manuscript has no unit to pick) leaves `materialsWanted` exactly as it was, rather than
-   * clearing it to an empty list. Overwriting a record with nothing is not the same as recording
-   * that nothing went.
-   */
-  function commitSendMaterials(card: BoardCard) {
-    void commitMaterialsFromPane(card, { recordRows: paneBody.rows } as JourneySendValues);
-  }
+  /* (`commitSendMaterials` is deleted, not orphaned — popup round, Phase 1. It existed to write the
+     send form's parcel BEFORE the takeover opened to record the send, which is the split this round
+     removes: `commitFromPane`'s send arm now writes the parcel and the send in one press, through
+     `writeQueryMaterials` and `commitSendFromPane`. Leaving it standing with no caller is the shape
+     this file keeps having to sweep up.) */
 
-  async function commitMaterialsFromPane(card: BoardCard, v: JourneySendValues) {
+
+  /**
+   * ⚠️ THE PARCEL'S OWN WRITE, WITHOUT A RECEIPT (popup round, Phase 1). A SEND records two things
+   * about two records — what was in the envelope, on the query; and that it went, in the activity —
+   * and it must announce itself ONCE. The fill-in journey, where recording the parcel IS the whole
+   * act, keeps the receipt; the send calls this and lets its own `doneToast` speak for both.
+   *
+   * ⚠️ AND IT RETURNS THE INVERSE, so a caller can undo. Nothing ticked returns `null` and writes
+   * nothing: overwriting a record with an empty list is not the same as recording that nothing went.
+   */
+  async function writeQueryMaterials(card: BoardCard, rows: MaterialRow[]): Promise<(() => Promise<void>) | null> {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
-    if (!q) return;
-    const wanted = materialsWantedFromRows(v.recordRows);
-    /* nothing ticked is not a save — the escape hatch is how you leave without recording */
-    if (!wanted.length) return;
+    if (!q) return null;
+    const wanted = materialsWantedFromRows(rows);
+    if (!wanted.length) return null;
     const before = q.materialsWanted;
     await updateQuery(q.id, { materialsWanted: wanted });
-    const undo = () => updateQuery(q.id, { materialsWanted: before ?? [] });
+    return async () => { await updateQuery(q.id, { materialsWanted: before ?? [] }); };
+  }
+
+  async function commitMaterialsFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {
+    const undo = await writeQueryMaterials(card, v.recordRows);
+    /* nothing ticked is not a save — the escape hatch is how you leave without recording */
+    if (!undo) return false;
     setOverlay(card.key, {
       kind: "receipt", lane: "hk",
       title: card.who || "Recorded",
@@ -2987,6 +3021,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       undo,
     });
     doneToast(card, async () => { await undo(); clearOverlay(card.key); flash("Restored"); });
+    return true;
   }
 
   /**
@@ -3033,9 +3068,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * one-query form, so the bulk path cannot record something the single path could not — and a row
    * the writer skipped or left empty is not written at all.
    */
-  async function commitRecordSweep(card: BoardCard, rows: RecordSweepRow[]) {
+  async function commitRecordSweep(card: BoardCard, rows: RecordSweepRow[]): Promise<boolean> {
     const writes = sweepWrites(rows);
-    if (!writes.length) return;
+    if (!writes.length) return false;
     const before = new Map(writes.map((w) => [w.queryId, queries.find((q) => q.id === w.queryId)?.materialsWanted]));
     for (const w of writes) await updateQuery(w.queryId, { materialsWanted: w.materialsWanted });
     const undo = async () => {
@@ -3048,6 +3083,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       undo,
     });
     doneToast(card, async () => { await undo(); clearOverlay(card.key); flash("Restored"); });
+    return true;
   }
 
   /**
@@ -3102,16 +3138,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    *             OFFER status historically true, so status alone can never clear the card.
    *   time    → `upsertTaskFlag`'s snooze, capped at the reply-by.
    */
-  async function commitOfferFromPane(card: BoardCard, v: JourneySendValues) {
+  async function commitOfferFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
-    if (!q || !v.branch) return;
+    if (!q || !v.branch) return false;
 
     if (v.branch === "decide") {
-      if (!v.decision) return;
+      if (!v.decision) return false;
       const r = await recordOfferDecision(q.id, v.decision);
-      if (!r.success) { flash(r.error || "Couldn’t record the decision — try again."); return; }
+      if (!r.success) { flash(r.error || "Couldn’t record the decision — try again."); return false; }
       flash(v.decision === "accepted" ? "Recorded — congratulations." : "Recorded — the querying continues.");
-      return;
+      return true;
     }
 
     if (v.branch === "time") {
@@ -3149,9 +3185,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * path's stated defaults. Undo deletes the NUDGE_SENT activity, which fully unwinds it (twins,
    * `nudgeDate` fields and the flag) — the same inverse the quick rail already uses.
    */
-  async function commitChaseFromPane(card: BoardCard, v: JourneySendValues) {
+  async function commitChaseFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
-    if (!q) return;
+    if (!q) return false;
     const nowIso = new Date().toISOString();
     const base = quickNudgePayload({ cardKey: card.key, label: card.title, queryId: q.id, method: q.sendMethod, nowIso });
     const p = {
@@ -3161,7 +3197,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       ...(v.note.trim() ? { note: v.note.trim() } : {}),
     };
     const r = await logNudge(...nudgeWriteArgs(p, nowIso));
-    if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return; }
+    if (!r.success) { flash(r.error || "Couldn’t log the nudge."); return false; }
     const undo = async () => {
       const acts = activitiesRef.current
         .filter((a) => a.queryId === q.id && a.activityType === ActivityType.NUDGE_SENT)
@@ -3169,6 +3205,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       if (acts[0]?.id) await deleteActivity(acts[0].id);
     };
     doneToast(card, async () => { await undo(); flash("Restored"); });
+    return true;
   }
 
   /**
@@ -3176,20 +3213,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * why the reason is the thing that gates the commit. `CLOSE_REASONS` in `lib/todoJourneys.ts` owns
    * the mapping — read, never restated, so the journey and every other close surface agree.
    */
-  async function commitCloseFromPane(card: BoardCard, v: JourneySendValues) {
+  async function commitCloseFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
-    if (!q || !v.reason) return;
+    if (!q || !v.reason) return false;
     const target = CLOSE_REASONS.find((r) => r.key === v.reason);
-    if (!target) return;
+    if (!target) return false;
     const prev = q.status as QueryStatus;
     try {
       await updateQueryStatus(q.id, target.status, v.note.trim() || `Closed — ${target.label.toLowerCase()}`);
     } catch {
-      flash("Couldn’t close that — try again?", { label: "Try again", fn: () => commitCloseFromPane(card, v) });
-      return;
+      flash("Couldn’t close that — try again?", { label: "Try again", fn: () => { void commitCloseFromPane(card, v); } });
+      return false;
     }
     const undo = () => undoQueryStatus(q.id, prev, target.status);
     doneToast(card, async () => { await undo(); flash("Restored"); });
+    return true;
   }
 
   /**
@@ -3202,9 +3240,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * so writing `0` or `""` for a question they skipped would not clear the gap, it would restate it
    * as a fact. Absence is a first-class state on this record and the write respects it.
    */
-  async function commitFixFromPane(card: BoardCard, v: JourneySendValues) {
+  async function commitFixFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {
     const ag = card.relatedRecordId ? agents.find((a) => a.id === card.relatedRecordId) : undefined;
-    if (!ag) return;
+    if (!ag) return false;
     const fields: Partial<Agent> = {};
     if (v.fixResponseWeeks.trim()) {
       fields.responseTimeWeeks = Number(v.fixResponseWeeks);
@@ -3212,12 +3250,12 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     if (v.fixMaterials.length) fields.materialsWanted = v.fixMaterials;
     if (v.fixMswl.trim()) fields.mswlNotes = v.fixMswl.trim();
-    if (!Object.keys(fields).length) return;
+    if (!Object.keys(fields).length) return false;
     try {
       await updateAgent(ag.id, fields);
     } catch {
-      flash("Couldn’t save that — try again?", { label: "Try again", fn: () => commitFixFromPane(card, v) });
-      return;
+      flash("Couldn’t save that — try again?", { label: "Try again", fn: () => { void commitFixFromPane(card, v); } });
+      return false;
     }
     /* ⚠️ THE FLAG IS RESOLVED ONLY AFTER THE WRITE LANDS. Resolving first would clear the card on a
        failed save, which is the one outcome worse than the card staying. */
@@ -3229,13 +3267,14 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
        So the receipt says what happened and offers nothing it cannot deliver — `doneToast` takes an
        undo arm as a REQUIRED argument, which is the signature doing its job. */
     flash("Saved to the profile.");
+    return true;
   }
 
-  async function commitSendFromPane(card: BoardCard, v: JourneySendValues) {
+  async function commitSendFromPane(card: BoardCard, v: JourneySendValues): Promise<boolean> {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
-    if (!q) return;
+    if (!q) return false;
     const action = getPrimaryAction(q.status as QueryStatus);
-    if (action.kind !== "mark-sent") return;
+    if (action.kind !== "mark-sent") return false;
     const nowIso = new Date().toISOString();
     const base = quickSendPayload({
       cardKey: card.key, label: card.title, taskType: card.taskType, queryId: q.id,
@@ -3249,16 +3288,23 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       method: v.method,
       materials: [...v.materials, ...(v.also.trim() ? [v.also.trim()] : [])],
       ...(v.note.trim() ? { note: v.note.trim() } : {}),
+      /* ⚠️ THE EXPECTATION AND THE REMINDER TRAVEL WITH THE SEND (popup round, Phase 1). The pane
+         REQUIRES both, and this committer had no member for either — so the day the primary began
+         writing in place, the form's two hardest-won answers would have been demanded and then
+         dropped. `markSentWriteArgs` has accepted both all along; nothing downstream changes. */
+      ...(v.writerExpectedDate ? { writerExpectedDate: v.writerExpectedDate } : {}),
+      ...(v.nudgeDate ? { nudgeDate: v.nudgeDate } : {}),
     };
     const prev = q.status as QueryStatus;
     try {
       await recordMaterialsSent(markSentWriteArgs(p));
     } catch {
-      flash("Couldn’t record that — try again?", { label: "Try again", fn: () => commitSendFromPane(card, v) });
-      return;
+      flash("Couldn’t record that — try again?", { label: "Try again", fn: () => { void commitSendFromPane(card, v); } });
+      return false;
     }
     const undo = () => undoQueryStatus(q.id, prev, p.targetStatus);
     doneToast(card, async () => { await undo(); flash("Restored"); });
+    return true;
   }
 
   /**
@@ -3439,60 +3485,50 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       return;
     }
     setShowMissing(false);
-    const spec = sendSpecFor(card);
-    if (spec) {
-      setFlowPrefill({
-        /* ⚠️ ONLY A DATE THE WRITER CHOSE TRAVELS. Unanswered, the key is omitted and the journey
-           opens on its own default — which is honest, where sending today's date as though it had
-           been picked is not. */
-        ...(sentDateISO() ? { sentDate: sentDateISO() as string } : {}),
-        materials: materialsWantedFromRows(paneBody.rows),
-        /* the writer's own words, to the activity's `details` — see `recordMaterialsSent` */
-        ...(paneBody.also.trim() ? { note: paneBody.also.trim() } : {}),
-        /**
-         * ⚠️ THE REMINDER, RESOLVED TO A DATE AT WRITE TIME (reminder round, Phase 1). The form
-         * holds a LEAD or a chosen day; the record holds a date, because a lead is meaningless
-         * without the reply date it hangs off and that date is settled here.
-         *
-         * ⚠️ `No reminder` WRITES NOTHING AND STAYS DISTINGUISHABLE FROM "not asked". Both leave the
-         * key absent, which is the same STORED state — and that is correct: the difference lives in
-         * the form, not the record. An app that stored "the writer declined a reminder" would be
-         * keeping a fact about a conversation rather than about a query.
-         */
-        ...(() => {
-          const r = paneBody.remind;
-          if (!r || r.kind === "none") return {};
-          if (r.kind === "date") return r.ymd ? { nudgeDate: new Date(`${r.ymd}T12:00:00`).toISOString() } : {};
-          const e = paneBody.expect;
-          const from = sentDateISO();
-          let replyMs: number | null = null;
-          if (e?.kind === "date" && e.ymd) replyMs = new Date(`${e.ymd}T12:00:00`).getTime();
-          else if (e?.kind === "weeks" && from) replyMs = agentWindowMs(new Date(`${from}T12:00:00`).getTime(), e.weeks);
-          /* a lead with no reply date to hang off is not a date — omitted rather than guessed */
-          return replyMs == null ? {} : { nudgeDate: new Date(replyMs - r.days * 86400000).toISOString() };
-        })(),
-        /* ⚠️ THE EXPECTATION, RESOLVED TO A DATE BEFORE IT TRAVELS. The form holds "6 weeks" or an
-           explicit day; the record holds a date. Resolving here — through `agentWindowMs`, the one
-           place a window becomes a date — means the strip's promise and the stored value come from
-           the same arithmetic rather than two. */
-        ...(() => {
-          const e = paneBody.expect;
-          if (!e) return {};
-          if (e.kind === "date") return e.ymd ? { writerExpectedDate: new Date(`${e.ymd}T12:00:00`).toISOString() } : {};
-          const from = sentDateISO();
-          if (!from) return {};
-          const ms = agentWindowMs(new Date(`${from}T12:00:00`).getTime(), e.weeks);
-          return ms == null ? {} : { writerExpectedDate: new Date(ms).toISOString() };
-        })(),
-      });
-      /* ⚠️ THE PARCEL GOES THROUGH THE EXISTING QUERY-MATERIALS WRITER, not a second one.
-         `commitMaterialsFromPane` is what the single fill-in journey already calls; the send form
-         had no writer for `materialsWanted` at all, so the unit and count reached the receipt LINE
-         and never the record. The `Query.materialsWanted` vs `Activity.materials` question is
-         untouched — this uses whichever the existing writer uses. */
-      void commitSendMaterials(card);
+
+    /**
+     * ⚠️ THE PRIMARY COMMITS HERE, AND NOTHING OPENS (popup round, Phase 1).
+     *
+     * It used to hand off: `setFlowPrefill(...)` then `openFlowCards([card])`, so a pane that had
+     * just gated four required answers raised a takeover asking the same questions again — most
+     * visibly on the close journey, where the "Stale query" dialog offered to consider closing a
+     * record the writer had already answered for. The prefill existed only to carry the pane's
+     * answers ACROSS that boundary. With no boundary there is nothing to carry, and the answers go
+     * where they were always going: `commitFromPane`, which routes to the bucket's own writer.
+     *
+     * ⚠️ TWO JOURNEYS STILL HAND OFF, DECLARED RATHER THAN LEFT OVER — `paneCommits` names them and
+     * says why. An offer and an agent-record gap ask questions this form does not draw, so
+     * committing them here would run a writer with nothing to write, behind a button claiming it
+     * had recorded something.
+     */
+    const jk = paneJourneyKind(card);
+    const bulk = isBulkCard(card);
+    if (!bulk && !(jk && paneCommits(jk))) {
+      openFlowCards([card]);
+      return;
     }
-    openFlowCards([card]);
+
+    /* ⚠️ THE NEXT CARD IS READ BEFORE THE WRITE. The board is derived, so the instant this commits,
+       the card being stood on leaves `dockable` and its index is gone — a lookup afterwards would
+       find the card that has taken its place, or nothing at all. */
+    const at = dockable.findIndex((c) => c.key === card.key);
+    const nextKey = at >= 0 ? (dockable[at + 1]?.key ?? dockable[at - 1]?.key) : undefined;
+
+    const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
+    void (async () => {
+      const wrote = await commitFromPane(card, paneCommitValues({
+        kind: bulk ? "bulk" : jk!,
+        body: paneBody,
+        ...(q?.sendMethod ? { queryMethod: q.sendMethod } : {}),
+        now: new Date(),
+      }));
+      /* ⚠️ NOTHING WRITTEN, NOTHING ADVANCED. A failed or empty commit leaves the writer where they
+         are, beside the toast that says so — moving on would report success by moving. */
+      if (!wrote) return;
+      /* the card is gone from the derived board; the pane follows to the next, or to the empty
+         state when there is none, which is what `paneCard` resolving to nothing already draws */
+      if (nextKey) setDockKey(nextKey);
+    })();
   }
 
   /**

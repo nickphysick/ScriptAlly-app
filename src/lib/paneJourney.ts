@@ -231,6 +231,18 @@ export interface JourneySendValues {
    * which group.
    */
   notifyHolding: string[];
+  /**
+   * ⚠️ THE TWO ANSWERS THAT HAD NO HOME (popup round, Phase 1). The pane's send form asks when a
+   * reply is expected and when to be reminded; both are REQUIRED there. They reached the record
+   * only while the pane handed off to the takeover, through a prefill — so the moment the primary
+   * committed in place they would have been dropped, silently, by a form that had just demanded
+   * them. Resolved to instants at the boundary: the form holds a window and a lead, the record
+   * holds dates, and `paneCommitValues` is the one place that arithmetic happens.
+   *
+   * Optional because the older journeys never asked; absent stays distinguishable from answered.
+   */
+  writerExpectedDate?: string;
+  nudgeDate?: string;
 }
 
 export type SendMethod = "Email" | "Agency portal" | "Post";
