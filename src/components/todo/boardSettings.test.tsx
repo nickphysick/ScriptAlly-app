@@ -28,7 +28,9 @@ const app = readFileSync(join(here, "..", "..", "App.tsx"), "utf8");
 
 describe("⚠️ BOTH ARE SHEETS OVER THE PAGE, NEVER ROUTES", () => {
   it("neither has a route — managing settings is a detour from the work, not a destination", () => {
-    for (const name of ["TaskSettingsSheet", "TagsSheet"]) {
+    /* `TaskSettingsSheet` left this list by being deleted; the claim is about what the ROUTER
+       knows, and a deleted component cannot be routed to. */
+    for (const name of ["TagsPane", "SetAsidePanel"]) {
       expect(app, name).not.toContain(name);
     }
   });

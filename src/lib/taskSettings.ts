@@ -52,17 +52,12 @@ export const GROUP_LABEL: Record<TaskSettingGroup, string> = {
   rituals: "Rituals",
 };
 
-/** A switch is ON when its key is NOT in the muted set. */
-export function typeIsOn(key: TaskSettingKey, muted?: string[] | null): boolean {
-  return !(muted ?? []).includes(key);
-}
-
-/** The next `mutedTaskRules` array after flipping a switch — pure; the component writes it via
- *  updateUserProfile. ON removes the key; OFF adds it (deduped). */
-export function setTypeMute(key: TaskSettingKey, muted: string[] | null | undefined, on: boolean): string[] {
-  const cur = muted ?? [];
-  return on ? cur.filter((k) => k !== key) : Array.from(new Set([...cur, key]));
-}
+/* ⚠️ `typeIsOn` AND `setTypeMute` ARE GONE. They were the retired settings sheet's switch ↔
+   `mutedTaskRules` mapping, and nothing else ever called them: the board's set-aside panel removes
+   a rule key directly as the inverse of the hiding, and `TASK_SETTING_ROWS` survives because the
+   ledger reads it for the rules' plain-English names.
+   ⚠️ `HIDDEN_RULE_KEYS` STAYS, and is NOT an orphan despite reading as one from outside this file —
+   it is private and `hiddenItems` filters on it. A sweep counting external readers says zero. */
 
 // ── HIDDEN RIGHT NOW (Phase 3) ──────────────────────────────────────────────
 

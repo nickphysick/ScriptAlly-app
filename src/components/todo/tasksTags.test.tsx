@@ -24,7 +24,8 @@ const noteboard = readFileSync(join(here, "TodoNoteboardPage.tsx"), "utf8");
    retired component's own markup it is retired with it; what survives is read here. */
 const dock = readFileSync(join(here, "TaskPane.tsx"), "utf8");
 const picker = readFileSync(join(here, "TagPicker.tsx"), "utf8");
-const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
+/* the retired sheet was the tags door; the board's "Set aside & tags" panel is now */
+const panel = readFileSync(join(here, "SetAsidePanel.tsx"), "utf8");
 /* board-optimise P5: the tag CRUD moved to its OWN sheet — these locks follow it there, and the
    settings sheet is asserted to keep only the DOOR. */
 const tagsSheet = readFileSync(join(here, "TagsSheet.tsx"), "utf8");
@@ -162,9 +163,9 @@ describe("⚠️ The tags sheet: rename, recolour, delete — with usage counts"
     expect(tagsSheet).toContain("tags.some((t) => t.id !== id && t.label === label)");
     expect(tagsSheet).toContain("TAG_COLOURS.map((c) =>");
     expect(tagsSheet).toContain("tagUsageCounts(userTasks)");
-    // and the settings sheet keeps only the door
-    expect(settings).toContain("setTagsOpen(true)");
-    expect(settings).not.toContain("recolourTag");
+    // and the panel keeps only the pane — the CRUD is not duplicated into its host
+    expect(panel).toContain("<TagsPane />");
+    expect(panel).not.toContain("recolourTag");
   });
 
   it("⚠️ deleting DETACHES from items and never deletes them", () => {

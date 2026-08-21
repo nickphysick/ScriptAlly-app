@@ -10,11 +10,20 @@
  *
  * ⚠️ EVERY LINE OF THE MECHANISM IS AN EXTRACTION, and that is the first thing locked here. It
  * existed twice — `todo/FocusFlow.tsx` and `todo/TaskSettingsSheet.tsx`, the same twenty lines
- * copied — and the whole point of §3 is that there is now ONE of it and both old call sites use it.
- * A primitive that ships beside two surviving copies is a third copy.
+ * copied — and the whole point of §3 is that there is now ONE of it and every call site uses it.
+ * A primitive that ships beside a surviving copy is another copy.
+ *
+ * ⚠️ THE LAW IS DERIVED NOW, NOT SPECIMEN-BY-SPECIMEN. It used to name its two subjects, and one of
+ * them — `TaskSettingsSheet` — was retired, which would have taken the assertion with it: a lock
+ * that names its examples goes stale the day an example leaves, and the tempting fix is to delete
+ * the half that no longer resolves. So it scans `src/` for callers of `useOverlay(` and asserts
+ * over WHATEVER IT FINDS. A new sheet is covered the moment it composes the primitive, and no
+ * retirement can quietly narrow the rule.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "fs";
+import { readFileSync, readdirSync } from "fs";
+import { fileURLToPath } from "url";
+import { join } from "path";
 import { emptyDraft, draftDirty } from "./queryDraft";
 import { emptyResponseDraft } from "./responseDraft";
 
@@ -23,13 +32,34 @@ const overlay = read("../components/shell/useOverlay.ts");
 const sheet = read("../components/queries/QueryJourneySheet.tsx");
 const queries = read("../components/Queries.tsx");
 const flow = read("../components/todo/FocusFlow.tsx");
-const settings = read("../components/todo/TaskSettingsSheet.tsx");
+
+/** Every file under `src/` that composes the overlay primitive, found rather than listed. */
+function overlayCallers(): { name: string; src: string }[] {
+  const root = fileURLToPath(new URL("..", import.meta.url));
+  const out: { name: string; src: string }[] = [];
+  const walk = (dir: string) => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name.startsWith(".") || e.name === "node_modules") continue;
+      const full = join(dir, e.name);
+      if (e.isDirectory()) { walk(full); continue; }
+      if (!/\.tsx?$/.test(e.name) || /\.test\./.test(e.name)) continue;
+      const src = readFileSync(full, "utf8");
+      if (src.includes("useOverlay(") && !full.endsWith("useOverlay.ts")) out.push({ name: e.name, src });
+    }
+  };
+  walk(root);
+  return out;
+}
 const code = queries.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 const overlayCode = overlay.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
 describe("§3 · the extraction actually replaced both copies", () => {
-  it("the two old call sites compose the primitive and keep no copy of it", () => {
-    for (const [name, src] of [["FocusFlow", flow], ["TaskSettingsSheet", settings]] as const) {
+  it("every caller composes the primitive and keeps no copy of it", () => {
+    const callers = overlayCallers();
+    /* ⚠️ THE POPULATION IS ASSERTED FIRST. An empty list satisfies every claim below it and would
+       pass having checked nothing — the vacuous-set shape this repo keeps meeting. */
+    expect(callers.length, "no useOverlay callers found — the scan is measuring nothing").toBeGreaterThan(1);
+    for (const { name, src } of callers) {
       expect(src, `${name} does not compose the primitive`).toContain("useOverlay(rootRef");
       /* the tell-tale lines of the inlined version — if any survive, the extraction added a third
          implementation instead of removing two */
@@ -46,7 +76,11 @@ describe("§3 · the extraction actually replaced both copies", () => {
   it("the one real difference between them survived the merge", () => {
     expect(flow, "FocusFlow's backdrop stopped nudging — a stray click would discard staged work")
       .toMatch(/onScrimClick:[^\n]*setNudged\(true\)/);
-    expect(settings, "the settings sheet's backdrop stopped closing").toContain("onScrimClick: onClose");
+    /* ⚠️ THE SPECIMEN FOR "closes on a stray click" IS THE JOURNEY SHEET NOW. The settings sheet
+       was the original, and it is retired; the law is about the DIFFERENCE surviving, not about
+       which file demonstrates it, and the journey sheet carries the same meaning — nothing is
+       staged, so a backdrop click closes. */
+    expect(sheet, "the journey sheet's backdrop stopped closing").toMatch(/onScrimClick:\s*onRequestClose/);
   });
 
   /* ⚠️ AND ONE ACCIDENTAL DIFFERENCE DID NOT. One selector list had `select` and `textarea` and the

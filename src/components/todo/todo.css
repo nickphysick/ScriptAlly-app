@@ -294,34 +294,14 @@
    the DRAWER FOOT now (workbench; the fixed corner button is retired). The sheet reuses the
    `.tdb-ff*` journey presentation; only its body rows are new. */
 .tdb-tsetgroup { margin-top: 22px; }
-.tdb-tsetgl { display: flex; align-items: center; gap: 8px; font-family: var(--f12-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-.tdb-tsetgd { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-.tdb-tsetgd.urgent { background: var(--pink-btn); outline: 1px solid var(--pink-b); }
-.tdb-tsetgd.housekeeping { background: var(--hk-sage-2); outline: 1px solid var(--hk-spine); }
-.tdb-tsetgd.rituals { background: var(--hk-cof-2); outline: 1px solid var(--hk-cof-edge); }
-.tdb-tsetgd.hidden { background: var(--paper); outline: 1px solid var(--line); }
+/* ⚠️ STILL LIVE — the TAGS PANE renders a `.tdb-tsetrow` per tag. It was removed with the retired
+   settings sheet's other `tdb-tset*` rules and put straight back: a class-prefix sweep is a
+   reachability question, and the only honest answer comes from grepping what RENDERS it. */
 .tdb-tsetrow { display: flex; align-items: center; gap: 16px; padding: 13px 2px; border-bottom: 1px solid var(--hairline); }
 .tdb-tsetrow:last-child { border-bottom: none; }
-.tdb-tsettx { flex: 1; min-width: 0; }
-.tdb-tsett { font-size: 14.5px; font-weight: 600; color: var(--ink); }
-.tdb-tsets { font-size: 12.5px; color: var(--sub); margin-top: 2px; line-height: 1.45; }
-.tdb-tsetlock { flex: none; font-family: var(--f12-mono); font-size: 8px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink-2); background: var(--paper); border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; }
 /* the switch — sage on-state, neutral off; a pill track + knob, 0.15s */
-.tdb-tsetsw { flex: none; position: relative; width: 42px; height: 24px; border-radius: 99px; background: var(--line); border: none; cursor: pointer; transition: background 0.15s; }
-.tdb-tsetsw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--white, #fff); box-shadow: 0 1px 2px rgba(58, 42, 26, 0.25); transition: transform 0.15s; }
-.tdb-tsetsw.on { background: var(--hk-spine); }
-.tdb-tsetsw.on::after { transform: translateX(18px); }
-.tdb-tsetsw:focus-visible { outline: 2px solid var(--hk-ink); outline-offset: 2px; }
 /* hidden list */
 .tdb-tsetempty { font-family: var(--f12-serif); font-style: italic; font-size: 14px; color: var(--muted); padding: 6px 2px 2px; }
-.tdb-tsethid { display: flex; flex-direction: column; max-height: 260px; overflow-y: auto; }
-.tdb-tsethrow { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-bottom: 1px solid var(--hairline); }
-.tdb-tsethrow:last-child { border-bottom: none; }
-.tdb-tsethx { flex: 1; min-width: 0; font-size: 13.5px; color: var(--ink-2); }
-.tdb-tsethx b { color: var(--ink); font-weight: 600; }
-.tdb-tsethm { display: block; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
-.tdb-tsetrestore { flex: none; font-size: 12.5px; font-weight: 600; padding: 6px 14px; border-radius: 99px; background: var(--white, #fff); border: 1px solid var(--hk-spine); color: var(--hk-ink); cursor: pointer; }
-.tdb-tsetrestore:hover { background: var(--hk-sage); }
 .tdb-tsetfoot { font-size: 12px; color: var(--muted); line-height: 1.5; margin-top: 14px; }
 /* the fork's board-side doorway to Task settings */
 .tdb-nsettings { display: block; width: 100%; text-align: left; font-family: var(--f12-mono); font-size: 8.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); padding: 9px 2px 2px; margin-top: 4px; border-top: 1px solid var(--hairline); background: none; }
@@ -1429,25 +1409,8 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-briefart .art-cap { display: none; }  /* the banner is decoration; the card carries the words */
 
 /* ── board-optimise P5: the settings sheet's behaviour controls + the two doors ── */
-.tdb-tsetsel, .tdb-tsetnum {
-  font: inherit; font-size: 12.5px; color: #2b2118; background: #fff;
-  border: 1px solid #e2d8c8; border-radius: 8px; height: 32px; padding: 0 9px; outline: none;
-}
-.tdb-tsetnum { width: 62px; text-align: center; }
-.tdb-tsetsel:focus, .tdb-tsetnum:focus { border-color: #cbb89a; }
 
 /* a DOOR reads as a row you can walk through — the whole row is the target, the arrow says so */
-.tdb-tsetdoor {
-  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
-  background: transparent; border: 0; font: inherit; cursor: pointer;
-  padding: 11px 2px; border-top: 1px solid #f0e9dd;
-}
-.tdb-tsetdoor:hover { background: #faf7f1; }
-.tdb-tsetdoor .tdb-tsettx { display: flex; flex-direction: column; gap: 2px; }
-.tdb-tsetgo {
-  margin-left: auto; font-size: 11.5px; font-weight: 600; color: var(--burg, #7c3a2a);
-  white-space: nowrap;
-}
 
 /* ══ THE JOURNEY'S MATERIALS STEP (journeys pack, Phase 3; ref todo-workspace-v14.html) ════════
    ⚠️ THE CONDITIONAL ROW'S REASON RIDES ON THE ROW, not in a tooltip — an explanation you have to

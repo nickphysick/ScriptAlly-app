@@ -14,6 +14,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const flow = readFileSync(join(here, "FocusFlow.tsx"), "utf8");
 const hub = readFileSync(join(here, "..", "reading-pane", "QueryTimeline.tsx"), "utf8");
 const css = readFileSync(join(here, "todo.css"), "utf8");
+/* the tags pane wears the same sheet chrome the retired settings sheet demonstrated */
+const tags = readFileSync(join(here, "TagsSheet.tsx"), "utf8");
 
 describe("B2 — the sheet renders the HUB'S timeline (reuse, not imitation)", () => {
   it("FocusFlow imports the shared TimelineRows + buildTimelineRows from the reading pane", () => {
@@ -82,7 +84,6 @@ describe("B3 — the duplicate-send guard wires all three write moments (source 
 });
 
 describe("C1 — anatomy + exit (ref todo-sheet-restyle-v1.html; both sheets)", () => {
-  const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
   it("the wrapper/overflow split: the sheet clips (band corners), the exit lives on the wrapper", () => {
     expect(css).toMatch(/\.tdb-ffsheet \{[^}]*overflow: hidden/);
     expect(css).toContain(".tdb-ffwrap { position: relative; width: min(860px, 92vw);");
@@ -98,10 +99,18 @@ describe("C1 — anatomy + exit (ref todo-sheet-restyle-v1.html; both sheets)", 
     expect(css).toContain('@media (max-width: 760px) { .tdb-ffx { top: 12px; right: 12px; } }');
     expect(flow).toContain('strokeWidth="2.4" strokeLinecap="round"');
   });
-  it("Task Settings carries the same corner exit (always the clean immediate close — no staged model)", () => {
-    expect(settings).toContain('className="tdb-ffx" aria-label="Back to my desk" onClick={onClose}');
-    expect(settings).not.toContain("tdb-ffbar");
-    expect(settings).not.toContain("tdb-ffexit");
+  /* ⚠️ THE SECOND SPECIMEN FOR THE CORNER EXIT WAS `TaskSettingsSheet`, WHICH IS DELETED. Its
+     sibling law — the exit is a corner control on the WRAPPER, never a footer bar — is unchanged
+     and still demonstrated by the journey sheet above, so what goes is the duplicate subject rather
+     than the rule. The retired variant of it (a bar, an inline exit) is asserted extinct across the
+     whole surface instead of on one file, which is a stronger claim than the one it replaces. */
+  it("no sheet grew a footer bar or an inline exit in place of the corner control", () => {
+    const journey = readFileSync(join(here, "..", "queries", "QueryJourneySheet.tsx"), "utf8");
+    for (const [name, src] of [["journey sheet", journey], ["focus flow", flow], ["tags pane", tags]] as const) {
+      expect(src, `${name} grew a footer bar`).not.toContain("tdb-ffbar");
+      expect(src, `${name} grew an inline exit`).not.toContain("tdb-ffexit");
+    }
+    expect(css).toContain(".tdb-ffx { position: absolute; top: -16px; right: -16px;");
   });
   it("the zoned E band proves on the send journey: pink family, kicker→headline→sub left, the plane right", () => {
     expect(flow).toContain('band("pink", sendKicker(c, { queries, taskFlags }, Date.now()), emTitle(c), c.subtitle || undefined, { art: "send"');
@@ -144,8 +153,7 @@ describe("C2 — families across every mode; ceremony D; the manifest; mobile", 
     expect(flow).toContain('journeyBand("cof", "Closing the record"');
     expect(flow).toContain('journeyBand("paper", "Crossing it off"');
     expect(flow).toContain('journeyBand(decide ? "pink" : "cof", decide ? "Answering the offer" : "Tidying the record"');
-    const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
-    expect(settings).toContain('<div className="tdb-fband paper">');
+      expect(tags).toContain('<div className="tdb-fband paper">');
     // no step composes its own kicker outside a band any more (uniform reach — halt (f) clear)
     expect(flow).not.toContain('<div className="tdb-ffstream off">');
     expect(flow).not.toContain('<div className="tdb-ffstream hk">');

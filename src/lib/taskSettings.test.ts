@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, it, expect } from "vitest";
-import { TASK_SETTING_ROWS, typeIsOn, setTypeMute, hiddenItems } from "./taskSettings";
+import { TASK_SETTING_ROWS, hiddenItems } from "./taskSettings";
 import { MUTED_UNTIL } from "./taskFlags";
 import { Agent, Query, QueryStatus, TaskFlag } from "../types";
 
@@ -22,18 +22,9 @@ describe("TASK_SETTING_ROWS — the approved v2 rows (Offers the only locked row
   });
 });
 
-describe("typeIsOn / setTypeMute — the switch ↔ mutedTaskRules mapping", () => {
-  it("absent key = ON; present = OFF", () => {
-    expect(typeIsOn("nudge_overdue", [])).toBe(true);
-    expect(typeIsOn("nudge_overdue", ["nudge_overdue"])).toBe(false);
-  });
-  it("OFF adds the key (deduped); ON removes it — round-trips", () => {
-    expect(setTypeMute("nudge_overdue", [], false)).toEqual(["nudge_overdue"]);
-    expect(setTypeMute("nudge_overdue", ["nudge_overdue"], false)).toEqual(["nudge_overdue"]); // dedup
-    expect(setTypeMute("nudge_overdue", ["nudge_overdue", "dq_mswl"], true)).toEqual(["dq_mswl"]);
-    expect(setTypeMute("dq_mswl", undefined, false)).toEqual(["dq_mswl"]);
-  });
-});
+/* ⚠️ THE SWITCH-MAPPING TESTS WENT WITH THEIR FUNCTIONS. `typeIsOn`/`setTypeMute` were the retired
+   sheet's mapping between a switch and `mutedTaskRules`; the board's set-aside panel removes a rule
+   key directly, and `boardSettings.test.tsx` locks that path against the surface that runs it. */
 
 describe("hiddenItems — rule-mutes + permanent dismisses + live snoozes (Phase 3)", () => {
   const NOW = Date.parse("2026-07-17T12:00:00Z");
