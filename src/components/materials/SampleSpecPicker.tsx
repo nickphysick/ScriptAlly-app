@@ -105,10 +105,38 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
   const patch = (row: QtyRow, amount: string) =>
     onChange(rows.map((r) => (r === row ? { ...r, amount } : r)));
 
+  /**
+   * ⚠️ THE EXPANDING PILL, AND THE ONE THING IT MUST NOT DO IS RE-RENDER ITS INPUT WHILE FOCUSED
+   * (steer round, Phase 3).
+   *
+   * This is the wipe-on-snapshot fault from the finishing round, one level down. There, an effect
+   * reset the whole form on every Firestore snapshot; here, the same snapshot re-renders the picker
+   * and a controlled input would take its value back from props MID-KEYSTROKE — the caret jumps to
+   * the end, or the digits you just typed vanish. It cannot be seen in a unit test, because a unit
+   * test never has a snapshot arrive while a field has focus.
+   *
+   * So the field holds a DRAFT while it owns the caret, and reads from props only when it does not.
+   * The draft is the writer's; the props are the record's; the only moment they must agree is when
+   * the writer stops typing.
+   */
+  const [draft, setDraft] = React.useState<string | null>(null);
+  const commit = (row: QtyRow, raw: string) => {
+    const cfg = UNIT_CFG[row.unit];
+    const n = parseInt(raw.replace(/[^0-9]/g, ""), 10);
+    /* ⚠️ CLAMPED TO THE UNIT'S OWN MIN, never to a house number. 500 words is a floor for words and
+       nonsense for chapters, which is why the floor lives in `UNIT_CFG` beside the step. */
+    patch(row, String(Number.isFinite(n) ? Math.max(cfg.min, n) : cfg.min));
+    setDraft(null);
+  };
+
   return (
     <div className="ssp" data-join={join}>
-      <div className="ssp-units" role={mode === "sent" ? "radiogroup" : "group"} aria-label="Sample unit">
-        {SAMPLE_UNITS.map((u) => (
+      <div className="ssp-units units" role={mode === "sent" ? "radiogroup" : "group"} aria-label="Sample unit">
+        {SAMPLE_UNITS.map((u) => {
+          const on = chosen.includes(u);
+          const row = rows.find((r): r is QtyRow => isQty(r) && r.on && r.unit === u);
+          const cfg = UNIT_CFG[u];
+          return (
           <button
             key={u}
             type="button"
@@ -116,18 +144,67 @@ export const SampleSpecPicker: React.FC<SampleSpecPickerProps> = ({
                tells a screen reader it may pick several; `radio`/`radiogroup` says one of three,
                which is what `"sent"` enforces. */
             {...(mode === "sent"
-              ? { role: "radio" as const, "aria-checked": chosen.includes(u) }
-              : { "aria-pressed": chosen.includes(u) })}
-            className={chosen.includes(u) ? "on" : ""}
+              ? { role: "radio" as const, "aria-checked": on }
+              : { "aria-pressed": on })}
+            className={mode === "sent" ? (on ? "upill on" : "upill") : (on ? "on" : "")}
             disabled={disabled}
-            onClick={() => toggleUnit(u)}
+            onClick={() => {
+              /* ⚠️ THE CHOSEN PILL CANNOT TOGGLE OFF in `sent`. Something was sent; un-choosing the
+                 unit would leave a parcel with no measure, which is not a state the record has. */
+              if (mode === "sent" && on) return;
+              toggleUnit(u);
+              /* choosing a unit puts the caret where the next answer goes */
+              if (mode === "sent") setTimeout(() => {
+                document.getElementById(`${idPrefix}-${u.toLowerCase()}`)?.focus();
+              }, 0);
+            }}
           >
             {u}
+            {/* ⚠️ THE QUANTITY LIVES INSIDE THE PILL, ON THE SAME ROW — the row's height never
+                changes, which is what makes this an expansion rather than a second control
+                appearing. Rendered only in `sent`; `wanted` keeps its separate amount rows. */}
+            {mode === "sent" && on && row && (
+              <span
+                className="qty"
+                /* ⚠️ ONE stopPropagation AT THE ZONE, NOT A GUARD PER BUTTON. Every click in here
+                   is inside the pill, so without this a stepper press re-triggers the pill's own
+                   select handler — and on the CHOSEN pill that is a no-op today, which is exactly
+                   how it would go unnoticed until a fourth unit made it re-seed the amount. */
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <button type="button" aria-label={`Fewer ${u.toLowerCase()}`} disabled={disabled}
+                  onClick={() => patch(row, stepAmount(row.amount, u, -1))}>−</button>
+                <input
+                  id={`${idPrefix}-${u.toLowerCase()}`}
+                  type="text" inputMode="numeric"
+                  aria-label={`Amount in ${u.toLowerCase()}`}
+                  disabled={disabled}
+                  value={draft ?? row.amount}
+                  onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, ""))}
+                  onBlur={(e) => commit(row, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") { commit(row, (e.target as HTMLInputElement).value); return; }
+                    if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+                    e.preventDefault();
+                    setDraft(null);
+                    patch(row, stepAmount(row.amount, u, e.key === "ArrowUp" ? 1 : -1));
+                  }}
+                />
+                <span className="u">{u.toLowerCase()}</span>
+                <button type="button" aria-label={`More ${u.toLowerCase()}`} disabled={disabled}
+                  onClick={() => patch(row, stepAmount(row.amount, u, 1))}>+</button>
+              </span>
+            )}
           </button>
-        ))}
+          );
+        })}
       </div>
 
-      {qtyRows.map((row) => {
+      {/* ⚠️ `wanted` KEEPS ITS SEPARATE AMOUNT ROWS, UNCHANGED. A requirement can name two units
+          at once ("three chapters or fifty pages") and two expanded pills on one line would be a
+          row of controls rather than a choice. The expansion is `sent`'s alone. */}
+      {mode === "wanted" && qtyRows.map((row) => {
         const cfg = UNIT_CFG[row.unit];
         const id = `${idPrefix}-${row.unit.toLowerCase()}`;
         return (

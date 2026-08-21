@@ -156,6 +156,112 @@ test("steer round", async ({ page }) => {
       !!moved && moved.clicked && !!nowOn && nowOn.count === 1 && nowOn.id !== moved.was,
       moved ? `#${moved.was} to #${nowOn?.id} (count ${nowOn?.count})` : "-");
 
+  /* ══ PHASE 3 · the expanding pill ═════════════════════════════════════════════════════════ */
+  await page.evaluate(OPEN("Send"));
+  await page.waitForTimeout(1200);
+  const pill0 = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const all = (s) => [...document.querySelectorAll(s)].filter(vis);
+    const pills = all(".tpn .upill");
+    if (!pills.length) return null;
+    const h = pills.map((p) => Math.round(p.getBoundingClientRect().height));
+    /* choose the first unit and read the row's height before and after */
+    pills[0].click();
+    return { count: pills.length, heightsBefore: h, chose: (pills[0].textContent || "").trim() };
+  })()`) as any;
+  await page.waitForTimeout(600);
+  const pill1 = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const all = (s) => [...document.querySelectorAll(s)].filter(vis);
+    const pills = all(".tpn .upill");
+    const on = all(".tpn .upill.on");
+    const qty = all(".tpn .upill.on .qty");
+    const input = all(".tpn .upill.on .qty input")[0];
+    return {
+      heightsAfter: pills.map((p) => Math.round(p.getBoundingClientRect().height)),
+      onCount: on.length,
+      hasQty: qty.length,
+      value: input ? input.value : "",
+      focused: !!(input && document.activeElement === input),
+    };
+  })()`) as any;
+  add("P3.1 · the pill expands in place — one chosen, quantity inside it, row height unchanged",
+      !!pill0 && !!pill1 && pill1.onCount === 1 && pill1.hasQty === 1
+        && JSON.stringify(pill0.heightsBefore) === JSON.stringify(pill1.heightsAfter),
+      pill1 ? `on=${pill1.onCount} qty=${pill1.hasQty} h ${JSON.stringify(pill0?.heightsBefore)} to ${JSON.stringify(pill1.heightsAfter)}` : "no unit pills");
+  add("P3.2 · choosing a unit seeds its own default and puts the caret in the value",
+      !!pill1 && pill1.value !== "" && pill1.focused,
+      pill1 ? `value="${pill1.value}" focused=${pill1.focused}` : "-");
+
+  /* ⚠️ THE TYPED VALUE MUST SURVIVE A RE-RENDER MID-EDIT. This is the wipe-on-snapshot fault one
+     level down: a controlled input takes its value back from props when an unrelated state change
+     re-renders the picker. The re-render is forced by clicking a WHEN option programmatically —
+     a programmatic click does not move focus in Chromium, so the caret stays where the writer put
+     it and the only thing that changes is React's render pass. Exactly what a snapshot does. */
+  const typed = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const input = [...document.querySelectorAll(".tpn .upill.on .qty input")].filter(vis)[0];
+    if (!input) return null;
+    input.focus();
+    const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+    setter.call(input, "77");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.setSelectionRange(1, 1);
+    const when = [...document.querySelectorAll(".tpn #s-when .seg button")].filter(vis)[0];
+    if (when) when.click();
+    return { fired: !!when };
+  })()`) as any;
+  await page.waitForTimeout(600);
+  const survived = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const input = [...document.querySelectorAll(".tpn .upill.on .qty input")].filter(vis)[0];
+    if (!input) return null;
+    return {
+      value: input.value,
+      caret: input.selectionStart,
+      stillFocused: document.activeElement === input,
+    };
+  })()`) as any;
+  add("P3.3 · a typed value and its caret survive a re-render mid-edit",
+      !!typed && typed.fired && !!survived && survived.value === "77"
+        && survived.caret === 1 && survived.stillFocused,
+      survived ? `value="${survived.value}" caret=${survived.caret} focused=${survived.stillFocused}` : "-");
+
+  /* steppers honour the unit's own increment, and never change which unit is chosen */
+  const stepped = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const input = [...document.querySelectorAll(".tpn .upill.on .qty input")].filter(vis)[0];
+    const plus = [...document.querySelectorAll(".tpn .upill.on .qty button")].filter(vis)[1];
+    if (!input || !plus) return null;
+    /* ⚠️ BLUR AND CLICK ARE TWO EVENTS, AND THE PROBE MUST BE TOO. Firing both in one tick reads
+       the stepper's closure before React has flushed the commit — the value went 77 to 4, which
+       looked like the typed number being discarded and was the PROBE collapsing two user actions
+       into one. A writer who tabs out and then presses + gets a re-render in between. */
+    input.blur();
+    return { before: input.value, unitBefore: (document.querySelector(".tpn .upill.on") || {}).textContent || "" };
+  })()`) as any;
+  await page.waitForTimeout(500);
+  await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const plus = [...document.querySelectorAll(".tpn .upill.on .qty button")].filter(vis)[1];
+    if (plus) plus.click();
+  })()`);
+  await page.waitForTimeout(500);
+  const afterStep = await page.evaluate(`(() => {
+    const vis = ${VIS};
+    const input = [...document.querySelectorAll(".tpn .upill.on .qty input")].filter(vis)[0];
+    return {
+      after: input ? input.value : "",
+      unitAfter: (document.querySelector(".tpn .upill.on") || {}).textContent || "",
+      onCount: [...document.querySelectorAll(".tpn .upill.on")].filter(vis).length,
+    };
+  })()`) as any;
+  add("P3.4 · a stepper moves the value and never the chosen unit",
+      !!stepped && !!afterStep && afterStep.after !== stepped.before
+        && afterStep.onCount === 1
+        && afterStep.unitAfter.replace(/[0-9−+]/g, "").trim() === stepped.unitBefore.replace(/[0-9−+]/g, "").trim(),
+      afterStep ? `${stepped?.before} to ${afterStep.after} · still one unit=${afterStep.onCount}` : "-");
+
   /* ══ PHASE 4 · paper and rules ═══════════════════════════════════════════════════════════ */
   /* ⚠️ THE POPULATION IS ASSERTED FIRST. An empty node list yields no offending background and
      would pass having measured nothing — the vacuous shape this project keeps closing. */
