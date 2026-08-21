@@ -263,6 +263,7 @@ test("deed round", async ({ page }) => {
         prim: go ? (go.textContent || "") : "",
         chip: go ? ((go.querySelector(".n") || {}).textContent || "").trim() : "",
         nextId: (all(".tpn .sect.next")[0] || {}).id || "",
+        will: (all(".tpn .willrec")[0] || {}).textContent || "",
       };
     })()`) as any;
   })();
@@ -283,6 +284,29 @@ test("deed round", async ({ page }) => {
         && /response rate stays honest/.test(closeShape.rate)
         && /Ready to close this one\?/.test(closeShape.heading),
       closeShape ? `next=#${closeShape.nextId} chip="${closeShape.chip}"` : "-");
+
+  /* ⚠️ THE STRIP MUST STATE THE ACT ABOUT TO HAPPEN. Closing read "This records Sent 21 August" —
+     the send grammar, on a journey that is not a send — and it survived four rounds because this
+     journey could not be rendered at all. Found in the first screenshot of it anyone has taken.
+     ⚠️ AND IT IS READ AFTER ANSWERING, because the strip is correctly an em dash at rest: the
+     shape above is captured BEFORE the one question is answered, which is what P6.4 needs. */
+  const closeWill = closeShape ? await (async () => {
+    await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const n = [...document.querySelectorAll(".tpn .sect.next")].filter(vis)[0];
+      const b = n && n.querySelector(".seg button");
+      if (b) b.click();
+    })()`);
+    await page.waitForTimeout(700);
+    return await page.evaluate(`(() => {
+      const vis = ${VIS};
+      const w = [...document.querySelectorAll(".tpn .willrec")].filter(vis)[0];
+      return w ? (w.textContent || "") : "";
+    })()`) as string;
+  })() : null;
+  add("P6.5 · a close states a close, not a send",
+      closeWill ? (!/\bSent\b/.test(closeWill) && /closed as/i.test(closeWill)) : true,
+      closeWill ? `"${closeWill}"` : "NOT RUN — no Close row");
 
   add("P0 · the suite reached at least two journeys",
       [send, note, bulk, close].filter(Boolean).length >= 2,

@@ -1117,6 +1117,22 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     }
     if (paneCard.userTaskId) return "Your note, ticked off today.";
 
+    /**
+     * ⚠️ A CLOSE IS NOT A SEND, AND THE STRIP WAS SAYING IT WAS (reminder round, found in the first
+     * screenshot of this journey anyone has ever taken). Every non-note, non-bulk journey fell
+     * through to the send grammar, so closing a query read "This records Sent 21 August." — a
+     * sentence about an act that is not the one about to happen. It went unnoticed for four rounds
+     * because the Close journey could not be rendered at all: the account had its rule muted.
+     *
+     * ⚠️ AND IT SAYS WHAT CLOSING MEANS, not just when. "No response" is the distinction the form's
+     * own verbatim line spends a sentence on — closing is not a rejection — so the record's summary
+     * should not quietly drop it.
+     */
+    if (cardBucket(paneCard) === "close") {
+      const day = dayPartLong(paneBody.when);
+      return day ? <>Closed as <b>no response</b>, {day}.</> : "—";
+    }
+
     const spec = sendSpecFor(paneCard);
     const longDay = (ms: number) => new Date(ms).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
 
@@ -1184,6 +1200,16 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     if (days === 7) return "the week before";
     if (days === 1) return "the day before";
     return `${days} days before`;
+  }
+
+  /** the chosen day in words, for a strip that reads as a sentence — absent until it is chosen */
+  function dayPartLong(w: SendBodyValues["when"]): string | null {
+    if (!w) return null;
+    if (w.kind === "today") return "today";
+    if (w.kind === "yesterday") return "yesterday";
+    return w.ymd
+      ? `on ${new Date(`${w.ymd}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "long" })}`
+      : null;
   }
 
   /** the day the send is dated from — the writer's own choice, and nothing when they have not said */

@@ -113,6 +113,9 @@ Not "harder than expected" — **the design decision is upstream of the code.** 
 
 Both are yours, not mine at 2am. The recon stands; Phase 2 is not built.
 
-⚠️ **And one correction to the table above:** `FocusFlow.tsx:1098` writes **`Agent.materialsWanted`**
-— the agency's requirements — not the query's. The query's materials writer is
-`commitMaterialsFromPane` (`ToDoPage.tsx:2909`) via `updateQuery`, which is what Phase 1 reuses.
+⚠️ **CORRECTION, AT THE TOP OF WHERE IT MATTERS — this recon got a writer wrong.** The table above
+originally named `FocusFlow.tsx:1098` as the query's materials writer. **It writes
+`Agent.materialsWanted` — the agency's REQUIREMENTS — not the query's sent materials.** The query's
+writer is `commitMaterialsFromPane` (`ToDoPage.tsx:2909`) via `updateQuery`, and that is what the
+write round reused. Corrected here rather than only in a commit message, because a recon is the
+document the next round reads first and a wrong pointer in it propagates.
