@@ -24,6 +24,11 @@ import { PageHeader } from "../shell/PageHeader";
 import { WorkspacePageGrid, PageTally } from "../shell/WorkspacePageGrid";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
+import { genreDisplay } from "../../lib/genres";
+/* ⚠️ THE SHARED ASSET, NOT A TRACED COPY. `ManuscriptPlate`, `ManuscriptLibraryCard` and
+   `OneScreenAuthor` all render this exact PNG on a white plate; tracing it here would fork
+   one illustration into two that drift. One asset, one home. */
+import manuscriptIcon from "../../assets/shell/manuscript-icon.png";
 import {
   CompDraft,
   isVerified,
@@ -36,7 +41,11 @@ import {
   MAX_COMPS,
 } from "../../lib/comps";
 import { QueryFormat, compAge, compCounts, compMedia, compRole, currentYear, queryLine } from "../../lib/compsPage";
-import { CompsSavedMark, InYourQueryMark, VerifiedMark, CompsEmptySketch, ScoutEmptySketch } from "./compMarks";
+/* ⚠️ `CompsSavedMark` / `InYourQueryMark` / `VerifiedMark` ARE NO LONGER IMPORTED. The hero's
+   stat rail became the ref's bare number-and-label fact row, so nothing renders them. They are
+   RETAINED in compMarks.tsx rather than deleted — they are finished illustration work and
+   whether they come back is a design call, not a sweep. Flagged in the report. */
+import { CompsEmptySketch, ScoutEmptySketch } from "./compMarks";
 import { useToast } from "../toast/ToastProvider";
 import {
   CompSuggestion,
@@ -495,6 +504,17 @@ export const ComparableTitlesPage: React.FC<{
   const qline = queryLine(comps, activeMs?.title ?? "", format, now);
   /* derived at render from the record, like every other count on this page — never stored */
   const verifiedCount = comps.filter(isVerified).length;
+  /**
+   * The tile's pills — primary genre then age category, both resolved for DISPLAY through the shared
+   * `genreDisplay` rather than rendered as stored ids.
+   *
+   * ⚠️ ABSENCE OMITS THE PILL, it never renders an empty one. A manuscript created without an age
+   * category has two facts about it, not three, and a blank pill would state a category it does not
+   * have.
+   */
+  const msPills = activeMs
+    ? [genreDisplay(activeMs.genre), activeMs.ageCategory].filter((x): x is string => !!x && !!x.trim())
+    : [];
 
   /**
    * ⚠️ AN UNDO INVERTS THE CURRENT LIST, NEVER THE ONE IT WAS BORN WITH. A receipt lives six
@@ -649,10 +669,86 @@ export const ComparableTitlesPage: React.FC<{
           </div>
         ) : (
           <>
-            {/* ══ THE HERO — the composed line is the page; the list is the instrument that builds
-                it (baked decision 1). ══ */}
+            {/* ══ THE PAGE HERO — title block left, active manuscript right (v2 §1). ══
+
+                ⚠️ NO `<h1>` HERE, DELIBERATELY. The ref draws its own title because it is a
+                standalone mockup with no masthead above it; in the app `PageHeader` already renders
+                "Comparable titles" on the plate, and building the ref's heading as drawn would put
+                the same words on screen twice. Nick's call — the plate keeps the title, the hero
+                keeps everything else. If the plate is ever retired from this page, the heading comes
+                back HERE and not anywhere else.
+
+                ⚠️ AND THE EYEBROW IS NOT A HEADING SUBSTITUTE — it is the section label the ref
+                draws, mono and quiet. It must never grow into a second title. */}
             <div className="ct-hero">
               <div className="ct-hero-l">
+                <div className="ct-eyebrow">
+                  <span className="ct-lbl">Materials · Positioning</span>
+                </div>
+                <p className="ct-hero-sub">
+                  The books your manuscript sits beside, gathered and put to work — in your query
+                  letter, and in every submission that follows.
+                </p>
+                {/* ⚠️ THREE DERIVED FACTS, AND THE THIRD IS `Verified` RATHER THAN THE REF'S
+                    "Letters using comps". Nothing in this app links a comp to a letter — packages
+                    carry three version ids and no comps, and `CompTitle` carries an `inQuery` intent
+                    and no usage record — so that figure has no data behind it and would be a number
+                    invented to fill a hole in the model. `Verified` is real, derived by `isVerified`
+                    at render, and already on the page. See the report's follow-up note.
+
+                    ⚠️ ALL THREE READ `compCounts`/`isVerified`, NEVER A SECOND DERIVATION — the same
+                    functions the toolbar tally reads, so the two figures cannot disagree. */}
+                <div className="ct-hero-facts">
+                  <div className="ct-hero-fact">
+                    <div className="n">{counts.total}</div>
+                    <div className="t">Comps recorded</div>
+                  </div>
+                  <div className="ct-hero-fact">
+                    <div className="n">{counts.inQuery}</div>
+                    <div className="t">In your query line</div>
+                  </div>
+                  <div className="ct-hero-fact">
+                    <div className="n">{verifiedCount}</div>
+                    <div className="t">Verified</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ⚠️ THE TILE STATES, IT NEVER APPRAISES. Its foot line is a count of what is on the
+                  shelf — never "enough", "still needs" or any other verdict about the writer's list.
+
+                  ⚠️ AND EVERY ROW OMITS ITSELF WHEN ABSENT. No word count → no word-count line; no
+                  genre → no pills. A dash or a zero here would assert something the record does not
+                  say. */}
+              <div className="ct-mstile">
+                <span className="ct-lbl">Active manuscript</span>
+                <div className="ct-msplate">
+                  <img src={manuscriptIcon} alt="" />
+                </div>
+                <div className="ct-mstitle">{activeMs.title}</div>
+                {msPills.length > 0 && (
+                  <div className="ct-mspills">
+                    {msPills.map((label) => (
+                      <span key={label} className="ct-mspill">{label}</span>
+                    ))}
+                  </div>
+                )}
+                {activeMs.wordCount > 0 && (
+                  <div className="ct-mswc">{activeMs.wordCount.toLocaleString("en-GB")} words</div>
+                )}
+                <div className="ct-msrule" />
+                <div className="ct-mscomps">
+                  {counts.total === 0
+                    ? "No comps yet"
+                    : `${counts.total} ${counts.total === 1 ? "comp" : "comps"} on the shelf`}
+                </div>
+              </div>
+            </div>
+
+            {/* ══ THE QUERY LINE — the composed line is the page; the list is the instrument that
+                builds it (baked decision 1). Phase 3 gives it its own card. ══ */}
+            <div className="ct-qline">
+              <div className="ct-qline-l">
                 <div className="ct-eyebrow">
                   <span className="ct-lbl">Query letter line</span>
                   <span className="ct-chip ms">{activeMs.title}</span>
@@ -696,31 +792,6 @@ export const ComparableTitlesPage: React.FC<{
                     </button>
                   )}
                   {qline.caption && <span className="ct-hero-cap">{qline.caption}</span>}
-                </div>
-              </div>
-              {/* ⚠️ THREE STACKED ROWS WITH ILLUSTRATED MARKS — baked decision 3, not a box row.
-                  All three counts are computed from the comps array; nothing here is stored. */}
-              <div className="ct-hero-r">
-                <div className="ct-hstat">
-                  <span className="mark"><CompsSavedMark /></span>
-                  <div>
-                    <div className="n">{counts.total}</div>
-                    <div className="l">Comps saved</div>
-                  </div>
-                </div>
-                <div className="ct-hstat">
-                  <span className="mark"><InYourQueryMark /></span>
-                  <div>
-                    <div className="n">{counts.inQuery}</div>
-                    <div className="l">In your query</div>
-                  </div>
-                </div>
-                <div className="ct-hstat">
-                  <span className="mark"><VerifiedMark /></span>
-                  <div>
-                    <div className="n">{verifiedCount}</div>
-                    <div className="l">Verified</div>
-                  </div>
                 </div>
               </div>
             </div>

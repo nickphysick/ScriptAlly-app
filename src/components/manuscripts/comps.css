@@ -135,7 +135,31 @@
    here states a width. The v5 ref's 1460/44 are placeholders from a standalone file — this app
    retired `--wpg-cap` precisely because a cap in the wrong place ate content under classic
    scrollbars. */
+/* ⚠️ THE PLATE AND THE SHEET NOW COMPUTE THE SAME MEASURE — and they did not before.
+ *
+ * THE FAULT, arithmetically: the masthead is `min(var(--work-max), 100% - 2 * var(--mast-gutter))`
+ * = `min(1660, W - 70)`, while the scroll column is
+ * `min(var(--wpg-measure, 100%), 100% - 2 * var(--wpg-gutter, var(--content-gutter)))`. This page
+ * declared NEITHER token, so the column resolved to `min(100%, W - 160)` = `W - 160`. Below the cap
+ * that is a CONSTANT 90px difference — the plate hanging 45px past the sheet on each side, at every
+ * width, not an edge case that only appears once a cap binds.
+ *
+ * THE FIX IS TO MAKE BOTH SIDES COMPUTE THE SAME EXPRESSION rather than to nudge one until it looks
+ * right: `--wpg-measure: var(--work-max)` and `--mast-gutter: var(--content-gutter)` give
+ * `min(1660, W - 160)` on both, identical at EVERY width including past the cap. The content keeps
+ * its own 80px gutter and does not move; only the plate narrows to meet it.
+ *
+ * ⚠️ AND THE SELECTOR IS `.ct-wpg.wpg`, NOT `.ct-wpg`, DELIBERATELY. `WorkspacePageGrid` puts this
+ * page's class on ITS OWN root — `wpg ct-wpg` on one element — so `.wpg`'s `--mast-gutter: 35px` and
+ * a bare `.ct-wpg` override are both 0-1-0 and the winner is whichever stylesheet the bundler emits
+ * last. That is not a thing to leave to chance in a bundle; 0-2-0 decides it here.
+ *
+ * ⚠️ THIS IS PAGE-SCOPED ON PURPOSE. The 45px step is shared-chrome behaviour on every page that
+ * declares no measure, and `workspacePageGrid.css` calls the difference deliberate. Query Centre
+ * already opts out the same way (`--wpg-measure: var(--work-max)`), so this is a precedented page
+ * choice — NOT a change to the grid's law, which would move nine other pages. */
 .ct-wpg { flex: 1; min-height: 0; width: 100%; }
+.ct-wpg.wpg { --wpg-measure: var(--work-max); --mast-gutter: var(--content-gutter); }
 /* ⚠️ NO TOP PADDING, EVER — the gap under the header belongs to `--content-top-gap` and is paid
    ONCE, by whichever row is first below the hairline. This carried 22px, so the page rendered a
    92px gap against a 70px token: not the grid paying twice, but a bare wrapper adding a second
@@ -152,18 +176,79 @@
 }
 
 /* ── the hero: the composed query line, and what it is made of ── */
+/* ══ THE PAGE HERO — title block left, active-manuscript tile right (v2 §1) ══
+
+   ⚠️ THIS IS NOT A CARD. It sits directly on the page ground, the way the ref draws it — the cards
+   below it are the mounted objects and a framed hero above them would make four boxes in a stack.
+   The tile is the only bounded thing here, and that is what makes it read as a separate object. */
 .ct-hero {
+  display: grid; grid-template-columns: minmax(0, 1fr) 268px; gap: 34px;
+  align-items: start; padding: 4px 0 26px;
+}
+/* ⚠️ THE TILE DROPS BELOW, IT NEVER SHRINKS. Its plate, title and pills are sized for 268px; letting
+   the track shrink squeezes the title into three lines long before the page is genuinely narrow. */
+@media (max-width: 980px) { .ct-hero { grid-template-columns: minmax(0, 1fr); gap: 22px; } }
+.ct-hero-l { min-width: 0; }
+/* the standfirst — a description of what the page is for, never advice about the writer's own list */
+.ct-hero-sub {
+  margin: 13px 0 0; max-width: 620px; font-size: 14.5px; line-height: 1.62; color: var(--ct-ink-soft);
+}
+/* ⚠️ A ROW, NOT A CARD ROW — three bare facts under a rule, per the ref. Numerals are Playfair so
+   they read as figures in a sentence rather than as dashboard metrics. */
+.ct-hero-facts {
+  display: flex; gap: 40px; flex-wrap: wrap; margin-top: 22px; padding-top: 20px;
+  border-top: 1px solid var(--ct-band-hair);
+}
+.ct-hero-fact .n {
+  font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 600; line-height: 1;
+  color: var(--ct-ink);
+}
+.ct-hero-fact .t {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--ct-label); margin-top: 8px; white-space: nowrap;
+}
+
+/* ── the active-manuscript tile ── */
+.ct-mstile {
+  background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-radius: 16px;
+  box-shadow: var(--ct-panel-sh); padding: 16px 18px 18px; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.ct-mstile > .ct-lbl { align-self: flex-start; }
+/* the white plate the dashboard author tile and the manuscript plate both use — one treatment */
+.ct-msplate {
+  width: 96px; height: 96px; margin: 12px 0 10px; border-radius: 12px; background: #ffffff;
+  border: 1px solid var(--ct-taupe-bd); display: flex; align-items: center; justify-content: center;
+}
+/* ⚠️ `contain`, AND NO BLEND MODE. The asset carries its own white field; `multiply` would darken
+   the plate rather than drop it, and no mix-blend-mode survives anywhere in src/ today. */
+.ct-msplate img { width: 68px; height: 68px; object-fit: contain; display: block; }
+/* ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR — a tighter line box crops the descenders, and a manuscript
+   title is exactly where a `y` or a `g` turns up. */
+.ct-mstitle {
+  font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; line-height: 1.3;
+  color: var(--ct-ink); overflow-wrap: anywhere;
+}
+.ct-mspills { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px; }
+.ct-mspill {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .09em; text-transform: uppercase;
+  background: var(--ct-sect); color: var(--ct-ink-soft); border: 1px solid var(--ct-band-hair);
+  border-radius: 20px; padding: 3px 9px;
+}
+.ct-mswc {
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--ct-label); margin-top: 11px;
+}
+.ct-msrule { width: 42px; height: 1px; background: var(--ct-band-hair); margin: 14px 0 12px; }
+/* ⚠️ A COUNT, NOT A VERDICT. "3 comps on the shelf" — never "enough", "still needs" or "a good spread". */
+.ct-mscomps { font-size: 12.5px; color: var(--ct-ink-soft); }
+
+/* ══ THE QUERY LINE ══ */
+.ct-qline {
   background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-radius: 20px;
-  box-shadow: var(--ct-panel-sh); display: grid; grid-template-columns: minmax(0, 1fr) auto; overflow: hidden;
+  box-shadow: var(--ct-panel-sh); overflow: hidden;
 }
-@media (max-width: 900px) { .ct-hero { grid-template-columns: minmax(0, 1fr); } }
-/* ⚠️ CENTRED AGAINST THE RAIL. The rail's three stat rows set the card's height; the left column
-   stretched to match and anchored its content at the top, leaving a void under the format toggle
-   whenever the line was short — which is exactly the zero-ticked first-run state. */
-.ct-hero-l {
-  padding: 26px 34px 24px; min-width: 0;
-  display: flex; flex-direction: column; justify-content: center;
-}
+.ct-qline-l { padding: 26px 34px 24px; min-width: 0; }
 .ct-eyebrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 /* ⚠️ PLAYFAIR ROMAN IN INK — baked decision 2, an explicit correction. No italics, no burgundy.
    WEIGHT is the only emphasis device: the manuscript title 700, the comp titles 600. Colour,
@@ -195,20 +280,9 @@
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .11em;
   text-transform: uppercase; color: var(--ct-label);
 }
-.ct-hero-r {
-  border-left: 1px solid var(--ct-band-hair); display: flex; flex-direction: column; justify-content: center;
-  padding: 14px 24px; min-width: 246px;
-}
-@media (max-width: 900px) { .ct-hero-r { border-left: none; border-top: 1px solid var(--ct-band-hair); } }
-/* ⚠️ THREE STACKED ROWS, NOT A HORIZONTAL BOX ROW — baked decision 3. */
-.ct-hstat { display: flex; align-items: center; gap: 14px; padding: 10px 0; }
-.ct-hstat + .ct-hstat { border-top: 1px solid var(--ct-band-hair); }
-.ct-hstat .mark { width: 44px; height: 44px; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; }
-.ct-hstat .n { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 600; line-height: 1; color: var(--ct-ink); }
-.ct-hstat .l {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em;
-  text-transform: uppercase; color: var(--ct-label); margin-top: 6px; white-space: nowrap;
-}
+/* ⚠️ `.ct-hero-r` / `.ct-hstat` ARE RETIRED (v2 §1). The three-stacked-rows stat rail beside the
+   query line is gone — its facts are the hero's fact row now, and the space it held is the
+   manuscript tile's. Baked decision 3 described THAT rail and no longer describes anything. */
 
 /* ── the comp rows ── */
 /* ⚠️ `align-items: start` ON BOTH ROW GRIDS — baked decision 4, and it was the alignment fix. Rows
