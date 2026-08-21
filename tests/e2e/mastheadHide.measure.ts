@@ -149,7 +149,12 @@ test("Hide folds the masthead, the chevron brings it back — on every fill page
 
     expect(folded.hidden, `${name}: Hide did not fold the masthead`).toBe(true);
     expect(folded.mastH, `${name}: the masthead did not fold to nothing`).toBeLessThanOrEqual(1);
-    expect(folded.miniH, `${name}: no mini bar took its place`).toBe(51);
+    /* ⚠️ PRESENT AND NON-TRIVIAL, NOT A NUMBER (masthead measure, §3). The bar's height is now
+       derived from its type — `2 × padding + the name's line box` — and `miniBar.measure.ts` owns
+       that derivation. This file owns HIDE'S BEHAVIOUR, so what it needs is that something real
+       took the masthead's place; pinning 51 here just duplicated a constant into a second file for
+       it to go stale in. */
+    expect(folded.miniH, `${name}: no mini bar took its place`).toBeGreaterThan(20);
     expect(folded.hasShow, `${name}: the mini bar carries no way back`).toBe(true);
     expect(folded.hasHide, `${name}: Hide is still rendered on a folded masthead`).toBe(false);
 
@@ -161,7 +166,12 @@ test("Hide folds the masthead, the chevron brings it back — on every fill page
     expect(back.miniH, `${name}: the mini bar survived the restore`).toBe(-1);
 
     restH.push(rest!.mastH);
-    miniH.push(51);
+    /* ⚠️ THE MEASURED VALUE, NOT A LITERAL — AND IT USED TO BE `51`. Pushing a constant into the
+       set below made the page-to-page check vacuous: ten copies of one number always collapse to
+       one distinct value, so it passed by construction while claiming "page against page, never a
+       constant" three lines later. The same family as an off-screen `elementsFromPoint` — an
+       assertion satisfied by what it was handed rather than by what it measured. */
+    miniH.push(folded.miniH);
   }
   console.log(lines.join("\n"));
 

@@ -142,9 +142,9 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
       /**
        * ══ THE INVARIANCE, RESTATED AS WHAT IT WAS ALWAYS PROTECTING ═══════════════════════════
        *
-       * ⚠️ MAX SCROLL IS NO LONGER CONSTANT, AND IT SHOULD NOT BE. The mini bar grows 0 → 51 inside
+       * ⚠️ MAX SCROLL IS NO LONGER CONSTANT, AND IT SHOULD NOT BE. The mini bar grows 0 → its own
        * the scroller when the page sticks, so `scrollHeight` grows by exactly that — measured on
-       * Contact list, 1092 → 1143. Asserting equality here would be asserting that the bar does not
+       * Contact list, 1095 → 1138. Asserting equality here would be asserting that the bar does not
        * exist.
        *
        * ⚠️ SO WHAT IS ASSERTED IS THE PROPERTY THE EQUALITY WAS A PROXY FOR: THE CONTENT DOES NOT
@@ -154,7 +154,7 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
        *
        * ⚠️ AND THE BROWSER IS WHAT MAKES IT SAFE, WHICH IS WORTH STATING BECAUSE IT IS NOT OBVIOUS.
        * Chrome's SCROLL ANCHORING absorbs the insertion: measured on Contact list, a 10px wheel tick
-       * takes `scrollTop` from 0 to 61 — the 10 the user asked for plus the 51 the bar just took —
+       * takes `scrollTop` from 0 to 53 — the 10 the user asked for plus the 43 the bar just took —
        * and a content landmark moves exactly 10px. The reader sees a 10px scroll. Without anchoring
        * the same content would lurch half a bar-height down on the first tick, which is why this is
        * measured rather than reasoned about.
@@ -163,8 +163,15 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
        * way down. Unsticking only occurs at `scrollTop <= 2`, where there is nothing to clamp.
        */
       expect(moved.miniStuckH, `${name}: no mini bar — the growth below would be unexplained`).toBeGreaterThan(0);
-      expect(moved.maxScroll - rest.maxScroll, `${name}: max scroll moved ${rest.maxScroll} → ${moved.maxScroll}, which is not the mini bar's ${moved.miniStuckH}px`)
-        .toBeCloseTo(moved.miniStuckH, 0);
+      /* ⚠️ 1px, AND THE REASON IS THE UNITS RATHER THAN THE MEASUREMENT. `scrollHeight` is an
+         INTEGER; the bar's height is derived from its type and lands on 42.7. An integer delta can
+         never equal a fractional height exactly, so a 0.5 tolerance fails on a page that is behaving
+         perfectly — measured, Submission packages: bar 42.7, max scroll 303 → 345, a delta of 42.
+         This was exact while the bar was a round 51 and stopped being exact when the height started
+         deriving, which is a fact about `scrollHeight`, not a loosening of the claim. */
+      expect(Math.abs((moved.maxScroll - rest.maxScroll) - moved.miniStuckH),
+        `${name}: max scroll moved ${rest.maxScroll} → ${moved.maxScroll} (${moved.maxScroll - rest.maxScroll}), which is not the mini bar's ${moved.miniStuckH}px`)
+        .toBeLessThanOrEqual(1);
       expect(back.maxScroll, `${name}: max scroll did not return to its resting value once the bar folded away`)
         .toBeCloseTo(rest.maxScroll, 0);
       expect(moved.marginBox, `${name}: the row's margin box changed when it stuck — that is what moves max scroll`).toBeCloseTo(rest.marginBox, 0);
@@ -180,9 +187,9 @@ test("the sticky control row, on all five scrolling pages", async ({ page }) => 
 
 test("⚠️ THE CONTENT DOES NOT JUMP WHEN THE MINI BAR ARRIVES", async ({ page }) => {
   /**
-   * The bar takes 51px of flow the instant the page sticks, and everything after it moves down by
+   * The bar takes ~43px of flow the instant the page sticks, and everything after it moves down by
    * that much. What stops the reader seeing a lurch is the browser's scroll anchoring, which raises
-   * `scrollTop` by the same 51 — so this asserts the OUTCOME rather than trusting the mechanism:
+   * `scrollTop` by the same 43 — so this asserts the OUTCOME rather than trusting the mechanism:
    * after a small wheel tick, a content landmark must have moved by the tick, not by the bar.
    *
    * ⚠️ A SMALL TICK ON PURPOSE. A 600px scroll would swamp a 51px error; the fault this guards
@@ -223,7 +230,7 @@ test("⚠️ THE CONTENT DOES NOT JUMP WHEN THE MINI BAR ARRIVES", async ({ page
   const after = await probe();
 
   expect(after.mini, "the bar did not appear — the jump this case guards against cannot occur, so it is asserting nothing").toBeGreaterThan(0);
-  /* ⚠️ THE CONTENT MOVED BY THE TICK, NOT BY THE BAR. A 2px tolerance for sub-pixel scroll, not 51. */
+  /* ⚠️ THE CONTENT MOVED BY THE TICK, NOT BY THE BAR. A 2px tolerance for sub-pixel scroll, not 43. */
   expect(before.cardY - after.cardY, `the content moved ${before.cardY - after.cardY}px for a ${TICK}px scroll — the mini bar's ${after.mini}px arrival is being paid by the reader's eye`)
     .toBeCloseTo(TICK, 0);
   /* and the browser paid it in `scrollTop`, which is the mechanism — recorded, not relied upon */

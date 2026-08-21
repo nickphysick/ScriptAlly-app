@@ -5,8 +5,17 @@
  * THE MINI BAR — the only chrome the masthead system keeps on screen (masthead rethink, step 3).
  *
  * ⚠️ ON A SCROLLING PAGE IT IS THE SECOND OF TWO STACKED STICKIES: identity above at `top: 0`,
- * controls below at `top: 51`. That is the claim worth measuring, because both halves are pinned
- * and a stacking or offset error puts one through the other — visible only after a scroll.
+ * controls below at exactly the bar's height. That is the claim worth measuring, because both
+ * halves are pinned and a stacking or offset error puts one through the other — visible only after
+ * a scroll.
+ *
+ * ⚠️ THE HEIGHT IS DERIVED HERE, NOT PINNED (masthead measure, §3). It was `51`, a number that
+ * suited a bar carrying a 22px mark beside the name. The mark is gone — the marks are ILLUSTRATIONS
+ * and they read as drawings at 52px and as smudges at 22 — so the bar is now the page's NAME, and
+ * its height is `2 × padding + the name's line box`. Asserting 43 instead of 51 would just be the
+ * next number to go stale; this reads the padding token and the name's own type off the page and
+ * checks the bar against them, so a type change that forgets the height fails HERE rather than as
+ * content sliding under the control row three pages later.
  */
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, liftMotionSuppression } from "./measure";
@@ -58,7 +67,12 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
       : "",
     nameSize: nameEl ? getComputedStyle(nameEl).fontSize : "",
     nameWeight: nameEl ? getComputedStyle(nameEl).fontWeight : "",
+    /* ⚠️ ASSERTED ABSENT SINCE §3, and `-1` is the pass. Kept as a reading rather than deleted:
+       "the bar renders no mark" is the claim, and a claim needs something measured to carry it. */
     markW: markEl ? r(markEl.getBoundingClientRect().width) : -1,
+    /* the two halves of the derivation, both read off the rendered page */
+    padToken: parseFloat(getComputedStyle(g).getPropertyValue("--wpg-mini-pad")) || -1,
+    nameLine: nameEl ? r(parseFloat(getComputedStyle(nameEl).lineHeight)) : -1,
     /* ⚠️ STRUCTURAL — the restore chevron is a fill-page affordance and must not merely be hidden
        on scroll pages, it must not be rendered. */
     actionable: mini.querySelectorAll("button, a, input, [role='button']").length,
@@ -88,14 +102,22 @@ test("the mini bar stacks under nothing and over the control row, on every scrol
 
     lines.push(`${name.padEnd(21)} bar ${s.h} @top ${s.top} · ${s.left}/${s.right} · "${s.name}" ${s.nameSize}/${s.nameWeight} · mark ${s.markW} · row @${s.rowTop}→${s.rowBottom} · actionable ${s.actionable}`);
 
-    expect(s.h, `${name}: the mini bar is ${s.h}px stuck, not 51`).toBe(51);
+    /* ⚠️ TWO DERIVATIONS AGAINST EACH OTHER, never against a literal. The bar's measured height
+       must equal the padding token plus the name's own line box — so the day someone changes the
+       type and forgets the token, this fails naming both numbers. */
+    const derived = s.padToken * 2 + s.nameLine;
+    expect(s.padToken, `${name}: --wpg-mini-pad does not resolve — the height is not derived from anything`).toBeGreaterThan(0);
+    expect(s.h, `${name}: the bar measures ${s.h}px, but padding ${s.padToken}×2 + line box ${s.nameLine} derives ${derived}`)
+      .toBeCloseTo(derived, 0);
     expect(s.top, `${name}: the mini bar is not pinned to the scroller's top`).toBeLessThanOrEqual(0.5);
     /* the two stacked stickies: controls begin exactly where identity ends */
-    expect(s.rowTop, `${name}: the control row is at ${s.rowTop}, not beneath the 51px bar`).toBeCloseTo(51, 0);
+    expect(s.rowTop, `${name}: the control row is at ${s.rowTop}, and the bar ends at ${s.h}`).toBeCloseTo(s.h, 0);
     /* ⚠️ THE BAR AND THE MASTHEAD STATE THE SAME PAGE — two renders of one source, asserted against
        each other rather than against a literal, so a page that renamed one and not the other fails. */
     expect(s.name, `${name}: the mini bar says "${s.name}" and the masthead says "${s.mastTitle}"`).toBe(s.mastTitle);
     expect(s.name.length, `${name}: the mini bar states no name`).toBeGreaterThan(0);
+    /* ⚠️ THE FOLDED BAR CARRIES THE NAME ALONE (masthead measure, §3) — no mark, on any page. */
+    expect(s.markW, `${name}: the mini bar draws a ${s.markW}px mark — at that size an illustration is a smudge, not a smaller drawing`).toBe(-1);
     /* ⚠️ NOT MERELY HIDDEN — not rendered. */
     expect(s.actionable, `${name}: the mini bar carries ${s.actionable} control(s) on a scrolling page`).toBe(0);
     expect(s.background, `${name}: the mini bar is transparent — content would run through the page's own name`).not.toContain("rgba(0, 0, 0, 0)");

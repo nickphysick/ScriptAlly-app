@@ -30,7 +30,6 @@
  */
 import React from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { OneScreenMark, MarkName } from "../dashboard/OneScreenMark";
 import "./workspacePageGrid.css";
 
 /**
@@ -212,8 +211,11 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * would make the introspection return nothing, and a mini bar with no name is a strip of chrome
    * that says less than the page it covers — silent, and only visible once you scroll.
    */
-  const identity = (React.isValidElement(masthead) ? masthead.props : {}) as { mark?: MarkName; title?: string };
-  if (process.env.NODE_ENV !== "production" && (!identity.mark || !identity.title)) {
+  /* ⚠️ THE TITLE ALONE, SINCE §3 — the folded bar carries no mark, so requiring one here would be
+     demanding a prop for a thing that is not rendered. The masthead still takes a `mark`; the grid
+     no longer has an opinion about it. */
+  const identity = (React.isValidElement(masthead) ? masthead.props : {}) as { title?: string };
+  if (process.env.NODE_ENV !== "production" && !identity.title) {
     throw new Error(
       "WorkspacePageGrid could not read a mark and a title from its `masthead` element. The mini " +
       "bar states the page's identity and takes it from there rather than being passed it twice; " +
@@ -429,7 +431,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             */}
           {(!fill || hidden) && (
             <div ref={miniRef} className={`wpg-mini${stuck ? " wpg-mini--stuck" : ""}${fill ? " wpg-mini--static" : ""}`}>
-              <span className="wpg-mini-mark" aria-hidden="true"><OneScreenMark name={identity.mark!} /></span>
               <span className="wpg-mini-name">{identity.title}</span>
               {/* ⚠️ THE RESTORE CONTROL IS A FILL-PAGE AFFORDANCE ONLY, AND IT IS NOT RENDERED
                   ELSEWHERE RATHER THAN HIDDEN BY CSS. On a scrolling page the masthead comes back by

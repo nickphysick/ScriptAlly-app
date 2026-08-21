@@ -50,8 +50,24 @@
    * content inside whatever container the page already uses, so it cannot drift from the work at any
    * viewport — there is no second number to keep in step, and no escape to get wrong.
    */
-  /* the mini bar's height, read by the bar itself and by the control row's stuck offset */
-  --wpg-mini-h: 51px;
+  /**
+   * ⚠️ THE FOLDED BAR'S HEIGHT IS DERIVED FROM ITS TYPE, NOT PINNED (masthead measure, §3). It was
+   * `51px`, which was right for a bar carrying a 22px mark beside the name; the mark is gone, so a
+   * fixed number would now be holding open space for something that is not there.
+   *
+   * ⚠️ AND IT IS READ BY THE CONTROL ROW'S STUCK OFFSET, which is why it has to derive rather than
+   * be re-measured by eye. `.wpg-tools { top: var(--wpg-mini-h) }` — the two elements stack, and a
+   * number that drifted from the type would show the content sliding through the gap.
+   *
+   * ⚠️ THE 9px IS EXPRESSED HERE RATHER THAN AS `padding`, deliberately: the bar animates its
+   * height from 0, and a padded border-box CANNOT collapse below its own padding — it would floor
+   * at 18px and the bar would never leave. So the arithmetic is stated once, in the token, and the
+   * flex centring places the line inside it.
+   */
+  --wpg-mini-pad: 9px;
+  --wpg-mini-fs: 19px;
+  --wpg-mini-lh: 1.3;
+  --wpg-mini-h: calc(var(--wpg-mini-pad) * 2 + var(--wpg-mini-fs) * var(--wpg-mini-lh));
   height: 100%;
   min-height: 0;
   /* ⚠️ THE GRID ITSELF NEVER SCROLLS. Only row 3 does; anything escaping here is a bug in a row. */
@@ -545,19 +561,29 @@
  * ⚠️ AND ITS GROUND IS OPAQUE. On a scrolling page it is sticky and content passes beneath it; a
  * transparent bar would show the list running through the page's own name.
  */
+/* ⚠️ ONE RULE FOR THIS SELECTOR. There were two, thirty-six lines apart, which is the ambiguity
+   this file names as its own invariant: a lock that finds its rule with `indexOf(".wpg-mini {")`
+   reads whichever comes first and silently asserts against half the declarations. */
 .wpg-mini {
   box-sizing: border-box;
   flex: none;
   min-width: 0;
+  /* ⚠️ CENTRED, LIKE THE MASTHEAD IT IS A FOLD OF (masthead measure, §3). The name is the only
+     thing in the flow; the chevron is absolute, so it cannot pull the centre off true. There is no
+     `gap` left to state — the mark that it separated from the name is gone. */
   display: flex;
   align-items: center;
-  gap: 11px;
+  justify-content: center;
   overflow: hidden;
   background: var(--ws-window);
-  /* ⚠️ 0 → 51 ON SCROLL PAGES, so at rest it costs nothing and the masthead is the page's identity.
-     The height is the transition, which is why it is stated here and not only on the stuck rule. */
+  /* ⚠️ 0 → `--wpg-mini-h` ON SCROLL PAGES, so at rest it costs nothing and the masthead is the
+     page's identity. The height is the transition, which is why it is stated here and not only on
+     the stuck rule. */
   height: 0;
   transition: height .18s cubic-bezier(.4, 0, .2, 1);
+  position: sticky;
+  top: 0;
+  z-index: 3;
 }
 /**
  * ⚠️ TWO STACKED STICKY ROWS: IDENTITY ABOVE, CONTROLS BELOW. The bar takes `top: 0` and the
@@ -573,7 +599,7 @@
  * The bar takes `--wpg-mini-h` of FLOW the instant the page sticks, so everything below it moves
  * down by that much and `scrollHeight` grows by the same. What stops the reader seeing a lurch is
  * scroll anchoring: the browser raises `scrollTop` by the identical amount, so a 10px wheel tick
- * moves the content 10px and not 61. Measured on Contact list — `scrollTop` 0 → 61, landmark 10px.
+ * moves the content 10px and not 53. Measured on Contact list — `scrollTop` 0 → 53, landmark 10px.
  *
  * ⚠️ `overflow-anchor: none` ANYWHERE ON AN ANCESTOR OF `.wpg-scroll` BREAKS THIS, and it is a
  * common thing to reach for when chasing an unrelated flicker. The symptom would be content
@@ -581,27 +607,25 @@
  * a mini-bar bug and is not one. `stickyRow.measure.ts` fails first and says so.
  */
 .wpg-mini--stuck { height: var(--wpg-mini-h); }
-.wpg-mini {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-}
 /* ⚠️ A FILL PAGE'S BAR IS STATIC AND FULL HEIGHT THE MOMENT IT RENDERS. Nothing scrolls there, so
    there is nothing to stick to and no `stuck` state to grow from — it appears because the writer
    folded the masthead, and it appears whole. */
-.wpg-mini--static { position: static; height: var(--wpg-mini-h); }
+/* ⚠️ `relative`, NOT `static` — AND THE CHEVRON IS WHY. Sticky is wrong here (on a page that
+   cannot scroll it does not idle, it CLAMPS — see the note above), but plain `static` would take
+   away the containing block the absolutely-positioned chevron needs, and the chevron exists ONLY on
+   these pages. It would have flown to whatever ancestor happened to be positioned. `relative` at
+   `top: 0` moves nothing and keeps the context. */
+.wpg-mini--static { position: relative; height: var(--wpg-mini-h); }
 
-.wpg-mini-mark { flex: none; display: inline-flex; }
-/* ⚠️ 22px, AND IT OVERRIDES BOTH MARK FAMILIES. `OneScreenMark` renders an illustration or a
-   plated monoline glyph, and the masthead sizes them 52 and 38 respectively; in the bar they are
-   one size, because the bar is a label rather than a plate and a 52px drawing in a 51px row would
-   be the row. */
-.wpg-mini-mark .os-mark {
-  width: 22px; height: 22px; flex: 0 0 22px;
-  background: none; border: none; box-shadow: none; border-radius: 0;
-}
-.wpg-mini-mark .os-mark img { width: 100%; height: 100%; object-fit: contain; display: block; mix-blend-mode: multiply; }
-.wpg-mini-mark .os-mark svg { width: 15px; height: 15px; }
+/**
+ * ⚠️ THE FOLDED BAR CARRIES THE NAME ALONE — THE MARK IS GONE (masthead measure, §3). It rode here
+ * at 22px, and the reason it goes is a fact about the artwork rather than about the layout: the
+ * marks are ILLUSTRATIONS, and they read as drawings at 52px and as smudges at 22. A mark reduced
+ * past legibility is not a smaller mark, it is a stain that used to be one.
+ *
+ * ⚠️ SO THE BAR IS NOT THE MASTHEAD IN MINIATURE — it is the masthead's NAME. That is also why its
+ * height stopped being a fixed 51: the number was holding room for the mark.
+ */
 /**
  * ⚠️ THE NAME TAKES `--shell-ink`, AND THE REF'S `--ink2` IS A DELIBERATE DEVIATION. In this app
  * `--ink-2` is declared inside `.t-f12` — Query Centre and the Tasks family — and nowhere else, so
@@ -612,7 +636,10 @@
  */
 .wpg-mini-name {
   font-family: var(--font-serif);
-  font-size: 19px;
+  /* ⚠️ THE SAME TWO TOKENS THE BAR'S HEIGHT IS DERIVED FROM. Restating 19 and 1.3 here is exactly
+     how the height and the type would drift apart, and the drift would show as content sliding
+     under the control row rather than as anything that looks like a typography change. */
+  font-size: var(--wpg-mini-fs);
   font-weight: 600;
   /* ⚠️ MEASURED CLIPPED ON DEV: 22px of ink in a 19px box. `overflow: hidden` stays — it is what
      the ellipsis truncation needs — so the line box is the fix.
@@ -621,15 +648,23 @@
      descenders, so a line box the size of the em IS the ink. It became a bug the moment the same
      declaration was applied to mixed-case Playfair. THE RULE: `line-height: 1` is only ever safe on
      uppercase-only text. */
-  line-height: 1.3;
+  line-height: var(--wpg-mini-lh);
   color: var(--shell-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* the restore control — a ghost, pushed to the bar's end */
+/**
+ * ⚠️ ABSOLUTE, FOR THE REASON HIDE IS (masthead measure, §3). The bar centres its name; a control
+ * in the flex row would push that name off centre by half the control's width, and `margin-left:
+ * auto` — which is what it used — does it by the control's whole width. It is also outside the
+ * bar's height arithmetic, which is now a derivation the control must not participate in.
+ */
 .wpg-mini-show {
-  margin-left: auto;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   flex: none;
   display: inline-flex;
   align-items: center;

@@ -122,7 +122,7 @@ describe("the workspace variant", () => {
     const out = renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />);
     expect(out).not.toContain("wsh-wrap");
     /* ⚠️ THE MINI BAR NOW OPENS THE SCROLL ROW, AND THE MASTHEAD FOLLOWS IT (masthead rethink,
-       step 3). The bar is `sticky; top: 0` and grows 0 → 51 when stuck, so it has to come FIRST in
+       step 3). The bar is `sticky; top: 0` and grows 0 → `--wpg-mini-h` when stuck, so it has to come FIRST in
        the markup or the control row would sit above it in the stack the moment both were pinned.
        The claim this case has always made is unchanged and is asserted as an ORDER rather than as
        one adjacency: identity, then masthead, then controls, then content — all inside the
