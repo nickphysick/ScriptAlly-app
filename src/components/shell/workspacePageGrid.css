@@ -558,6 +558,44 @@
  * never settles, so the reclaim is 0 and this is a zero-height box. `flex: none` because a fill
  * page's scroller is a flex column and it must not be stretched into one.
  */
+/**
+ * ══ THE FOLD'S CHEVRON — ON THE WINDOW'S BORDER, NEVER THROUGH IT (pinned chrome, §3; ref 175) ══
+ *
+ * A fill page cannot scroll, so its masthead cannot leave by scrolling; Hide folds it, and what
+ * remains is this — one badge, centred, half in and half out of the window's top edge.
+ *
+ * ⚠️ IT SITS ON THE LINE AND MUST NOT CUT IT. The badge is a SIBLING of `.ws-window`, portalled into
+ * `.ws-winwrap` and positioned over the edge. A child would be clipped by the window's `overflow:
+ * hidden` and its 16px radius; an element spliced INTO the border's run would break the one
+ * continuous line the window is drawn with. The lock asserts the border renders uninterrupted at
+ * full width with the fold active — and its red is produced by parenting this inside the window.
+ *
+ * ⚠️ ITS GROUND IS THE WINDOW'S OWN, so the border appears to pass behind it rather than stopping at
+ * it: the badge reads as resting on the line, which is the whole of the drawing.
+ */
+.wpg-chevfold {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+  width: 38px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ws-edge);
+  border-radius: 999px;
+  background: var(--ws-window);
+  box-shadow: 0 1px 3px rgba(58, 28, 20, 0.10);
+  color: var(--shell-muted);
+  cursor: pointer;
+  padding: 0;
+  transition: color .15s, border-color .15s;
+}
+.wpg-chevfold:hover { color: var(--shell-ink); border-color: var(--ws-edge-strong, var(--ws-edge)); }
+.wpg-chevfold svg { width: 12px; height: 12px; }
+@media (prefers-reduced-motion: reduce) { .wpg-chevfold { transition: none; } }
+
 .wpg-reclaim {
   flex: none;
   /* ⚠️ THE GAP AND THE RECLAIM IN ONE BOX. The gap used to be the slab's `margin-bottom`; margins
@@ -667,6 +705,10 @@
    that has risen to the top would read as the page's own top edge, which is what the band was.
    ⚠️ AND THE TRIGGER IS `wpg--hidden` NOW, NOT `wpg--working` (step 4): one explicit act by the
    writer, rather than three inferences about whether they had started working. */
+/* ⚠️ THE HAIRLINE FOLDS WITH THE MASTHEAD (pinned chrome, §3). Hide removes the page's title; a
+   line left behind would be a boundary with nothing above it — chrome marking the edge of nothing.
+   The control row is NOT folded: it holds the page's controls, and Hide is about the title. */
+.wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome { border-bottom-color: transparent; }
 .wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast {
   max-height: 0;
   opacity: 0;

@@ -243,10 +243,50 @@ test("⚠️ THE CONTENT DOES NOT JUMP WHEN THE CHROME PINS", async ({ page }) =
   expect(before.cardY, "no content landmark on the page — the probe has nothing to watch").toBeGreaterThan(0);
 
   const TICK = 10;
-  await page.mouse.move(700, 500);
-  await page.mouse.wheel(0, TICK);
-  await page.waitForTimeout(450);
+  /**
+   * ⚠️ OVER THE SCROLLER'S MEASURED CENTRE, NEVER A HARDCODED POINT. `(700, 500)` worked until it
+   * did not: a wheel is delivered to whatever is under the pointer, so a fixed coordinate is a bet
+   * about layout that fails silently — `scrollTop 0 → 0` and a message about the settle.
+   */
+  const at = await page.evaluate(() => {
+    const g = [...document.querySelectorAll(".wpg.agl-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    const b = (g.querySelector(".wpg-scroll") as HTMLElement).getBoundingClientRect();
+    return { x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2) };
+  });
+  /**
+   * ⚠️ LET THE ARRIVAL SETTLE BEFORE A 10px WHEEL. The big scrolls elsewhere in this file land
+   * immediately after `openRoute`; a TEN-pixel one, issued in the same breath, was dropped — the
+   * page read `0 → 0` while the identical gesture 600ms later moved it every time. A small input is
+   * the one that gets lost, and this case needs a small one on purpose.
+   */
+  await page.waitForTimeout(400);
+  await page.mouse.move(at.x, at.y);
+  /**
+   * ⚠️ CHROMIUM DROPS A SMALL FIRST WHEEL HERE, AND THE CASE NEEDS A SMALL ONE BY DESIGN. Proved
+   * rather than guessed: at the same coordinates, in the same test, a 10px tick left `scrollTop` at
+   * 0 and an immediately following 600px tick moved it to 600. A big scroll would swamp the error
+   * this case exists to find, so the tick stays small and is RE-ISSUED until the page moves.
+   *
+   * ⚠️ RE-ISSUING IS SAFE BECAUSE THE CLAIM IS RELATIVE. What is asserted is that the landmark moves
+   * as far as the page ACTUALLY scrolled — not as far as the wheel asked for — so however many ticks
+   * it took, the comparison is between two measured numbers.
+   */
+  for (let i = 0; i < 4; i += 1) {
+    await page.mouse.wheel(0, TICK);
+    await page.waitForTimeout(250);
+    const t = await page.evaluate(() => {
+      const g = [...document.querySelectorAll(".wpg.agl-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+      return (g?.querySelector(".wpg-scroll") as HTMLElement | null)?.scrollTop ?? 0;
+    });
+    if (t > 2) break;
+  }
+  await page.waitForTimeout(400);   /* the .22s settle, once the page has moved */
   const after = await probe();
+
+  /* ⚠️ THE REAL PRECONDITION FIRST — the page must have SCROLLED. If it did not, the chrome cannot
+     have settled, and a message about the settle names the symptom rather than the cause. */
+  const moved = after.scrollTop - before.scrollTop;
+  expect(moved, `the wheel did not scroll the page (${before.scrollTop} → ${after.scrollTop}) — nothing below is about the settle`).toBeGreaterThan(2);
 
   /**
    * ⚠️ THE PRECONDITION, ASSERTED BEFORE THE CLAIM. The settle takes roughly 62px of chrome out of
@@ -265,8 +305,7 @@ test("⚠️ THE CONTENT DOES NOT JUMP WHEN THE CHROME PINS", async ({ page }) =
    * compare are the landmark's movement and the scroll's, and the wheel's imprecision has no place
    * in either.
    */
-  const scrolled = after.scrollTop - before.scrollTop;
-  expect(scrolled, `the wheel moved nothing — there is no scroll for the content to track`).toBeGreaterThan(2);
+  const scrolled = moved;
   expect(before.cardY - after.cardY, `the content moved ${before.cardY - after.cardY}px while the page scrolled ${scrolled}px — the chrome's ${chromeDelta}px settle is being paid by the reader's eye`)
     .toBeCloseTo(scrolled, 0);
   /* and the browser paid it in `scrollTop`, which is the mechanism — recorded, not relied upon */

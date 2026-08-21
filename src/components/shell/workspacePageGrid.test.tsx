@@ -687,12 +687,15 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
      */
     const css = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const pointerRules = [...css.matchAll(/([^{}]+)\{[^}]*cursor:\s*pointer[^}]*\}/g)].map((m) => m[1].trim());
-    /* ⚠️ TWO CONTROLS NOW, AND BOTH ARE REAL (step 4): Hide on the masthead and the chevron that
-       reverses it on the mini bar. The rule this case protects is unchanged — a pointer cursor may
-       only appear on something that IS a control, never on a bare surface promising something
-       invisible, which is what the retired click-to-restore band was. */
-    expect(pointerRules.sort(), `a pointer cursor appeared on something that is not one of the two fold controls: ${pointerRules.join(" · ")}`)
-      .toEqual([".wpg-mast-hide", ".wpg-mini-show"]);
+    /* ⚠️ TWO CONTROLS, AND BOTH ARE REAL: Hide on the masthead, and the chevron badge on the
+       window's border that reverses it (pinned chrome, §3). The rule this case protects is
+       unchanged — a pointer cursor may only appear on something that IS a control, never on a bare
+       surface promising something invisible, which is what the retired click-to-restore band was.
+       ⚠️ `.wpg-mini-show` IS STILL LISTED AND MUST NOT BE, PAST §4 — the mini bar no longer renders
+       anywhere, so its rule is a pointer cursor on an element nothing mounts. §4 deletes it, and
+       this list is where that deletion is proved. */
+    expect(pointerRules.sort(), `a pointer cursor appeared on something that is not one of the fold controls: ${pointerRules.join(" · ")}`)
+      .toEqual([".wpg-chevfold", ".wpg-mast-hide", ".wpg-mini-show"]);
   });
 
   /**

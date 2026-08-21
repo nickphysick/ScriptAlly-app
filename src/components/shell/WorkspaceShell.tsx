@@ -43,6 +43,7 @@ import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import "./primitives.css";
 import manuscriptMark from "../../assets/shell/manuscript-icon.png";
 import "./workspaceShell.css";
+import { WINWRAP_ID } from "./shellSlots";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -713,6 +714,18 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               </div>
           </header>
 
+          {/**
+            * ⚠️ A WRAPPER SO THE CHEVRON CAN STRADDLE THE WINDOW'S TOP BORDER (pinned chrome, §3;
+            * ref 175). The window clips — `overflow: hidden` and a 16px radius — so a badge INSIDE
+            * it cannot sit half outside, and one that interrupted the border's run would cut the
+            * line it is supposed to rest on. The badge is therefore a SIBLING, absolutely positioned
+            * over the edge, and this box is what it positions against.
+            *
+            * ⚠️ IT TAKES THE WINDOW'S PLACE IN THE COLUMN, not an extra layer of height: `flex: 1;
+            * min-height: 0` moves up here and the window fills it. A wrapper that sized itself would
+            * put a second height chain between the shell and every page.
+            */}
+          <div className="ws-winwrap" id={WINWRAP_ID}>
           <div className="ws-window">
             {/* ⚠️ `sv2-stagepad` RIDES WITH THE SCROLLER, and it is not decoration: below md it
                 adds the floating tab bar's clearance. It followed the stage element here. */}
@@ -725,6 +738,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               <div className={`ws-work${fit ? " ws-work--fit" : ""}`}>{children}</div>
               {footFade}
             </div>
+          </div>
           </div>
       </div>
 

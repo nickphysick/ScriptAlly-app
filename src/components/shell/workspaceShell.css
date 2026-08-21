@@ -771,6 +771,10 @@
    and each of them was a hand-written `#ffffff` matching this one by coincidence. A literal here
    is the one that makes all five wrong at once — and wrong INVISIBLY, because a fade to a
    near-match reads as a pale stripe rather than as a colour anyone can name. */
+/* ⚠️ THE WRAPPER HOLDS THE COLUMN'S SLOT AND THE WINDOW FILLS IT (pinned chrome, §3) — see the note
+   in `WorkspaceShell.tsx`. It exists so the fold's chevron can straddle the window's top border
+   without being clipped by the radius or interrupting the border's run. */
+.ws-winwrap { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .ws-window {
   flex: 1; min-height: 0; background: var(--ws-window);
   border: 1px solid var(--ws-edge); border-radius: 16px;

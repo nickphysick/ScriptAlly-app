@@ -29,8 +29,10 @@
  * them is off it. Any stop between commits leaves a working app.
  */
 import React from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import "./workspacePageGrid.css";
+import { WINWRAP_ID } from "./shellSlots";
 
 /**
  * ⚠️ `PlateCondensedContext` IS DELETED (in-flow masthead, step 4), AND ITS LAST READER WENT AT
@@ -201,6 +203,13 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
   const chromeRef = React.useRef<HTMLDivElement>(null);
   /* the slab's RESTING height, remembered so the settle's reclaim can be derived rather than pinned */
   const restHRef = React.useRef(0);
+  /**
+   * ⚠️ RESOLVED IN AN EFFECT, NOT DURING RENDER. The shell mounts around this component, so the
+   * host exists by the time effects run and does not during the first render — reading it inline
+   * would portal into `null` on mount and never retry. Held in state so finding it re-renders once.
+   */
+  const [badgeHost, setBadgeHost] = React.useState<HTMLElement | null>(null);
+  React.useEffect(() => { setBadgeHost(document.getElementById(WINWRAP_ID)); }, []);
   const miniRef = React.useRef<HTMLDivElement>(null);
 
   /**
@@ -298,9 +307,22 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        * actually passing beneath it.
        */
       const h = chromeRef.current?.getBoundingClientRect().height ?? 0;
-      /* the resting posture's height, remembered while the page is AT the top — the only state in
-         which the slab is measurably un-settled */
-      if (top <= 2 && h > 0) restHRef.current = h;
+      /**
+       * ⚠️ THE RESTING HEIGHT IS ONLY READ WHEN NOTHING IS ANIMATING, and the version without that
+       * guard was wrong in a way that only a small scroll exposed.
+       *
+       * `top <= 2` is true again the moment a settled page scrolls back towards the top — while the
+       * slab is still EASING open. Capturing then records a half-settled box as the resting height,
+       * so the next settle's reclaim is short by whatever the transition had left to run. Measured:
+       * a scroll that landed on 4px moved a content landmark 59px, which is the whole settle paid by
+       * the reader's eye, on a compensation that was working perfectly two ticks earlier.
+       *
+       * ⚠️ AND IT IS THE SUBTREE, NOT THE SLAB. The slab's own box is not what transitions — the
+       * masthead's padding, the mark's size and the title's face are, and the slab's height merely
+       * follows them. Asking only this element reports "nothing is animating" throughout.
+       */
+      const settling = chromeRef.current?.getAnimations?.({ subtree: true }).length ?? 0;
+      if (top <= 2 && h > 0 && settling === 0) restHRef.current = h;
       const chrome = top > 2 ? h : 0;
       setStuckH((prev) => (prev === chrome ? prev : chrome));
       /**
@@ -467,23 +489,6 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * nothing today. Stated rather than left to be discovered: the component is whole, its
             * fill path is simply not reachable until its trigger exists.
             */}
-          {/* ⚠️ THE MINI BAR IS OFF THE SCROLL PAGES AS OF §1 — the slab supersedes it there, and
-              two stickies at `top: 0` is the arrangement the slab exists to end. Its FILL role
-              survives until §3 replaces it with the chevron, and the component dies in §4. */}
-          {fill && hidden && (
-            <div ref={miniRef} className={`wpg-mini${stuck ? " wpg-mini--stuck" : ""}${fill ? " wpg-mini--static" : ""}`}>
-              <span className="wpg-mini-name">{identity.title}</span>
-              {/* ⚠️ THE RESTORE CONTROL IS A FILL-PAGE AFFORDANCE ONLY, AND IT IS NOT RENDERED
-                  ELSEWHERE RATHER THAN HIDDEN BY CSS. On a scrolling page the masthead comes back by
-                  scrolling up; a chevron there would be a second way to do a thing the page already
-                  does, and a control that does nothing the moment you scroll. */}
-              {fill && (
-                <button type="button" className="wpg-mini-show" onClick={() => setHidden(false)} aria-label="Show the page header">
-                  <ChevronDown aria-hidden="true" />
-                </button>
-              )}
-            </div>
-          )}
           {/**
             * ⚠️ ONE SLAB — MASTHEAD AND CONTROL ROW IN ONE STICKY WRAPPER (pinned chrome, §1; ref 174
             * option C). They were two independent stickies, each with its own hairline and its own
@@ -562,6 +567,31 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             */}
           <div className="wpg-reclaim" aria-hidden="true" />
           {children}
+          {/**
+            * ⚠️ THE FOLD'S ONE CONTROL, PORTALLED OUT TO THE WINDOW'S EDGE (pinned chrome, §3).
+            *
+            * It has to leave this subtree: the window clips at its radius, so a badge rendered here
+            * could never straddle its top border — and straddling is the drawing. The portal is the
+            * smallest way to say that; the alternative is lifting `hidden` into the shell, which
+            * would move a page-level state two components up to solve a positioning problem.
+            *
+            * ⚠️ FILL PAGES ONLY. A scrolling page's masthead comes back by scrolling, so a chevron
+            * there would be a second way to do what the page already does — and a control that
+            * becomes pointless the moment you scroll past it.
+            */}
+          {fill && hidden && badgeHost
+            ? createPortal(
+                <button
+                  type="button"
+                  className="wpg-chevfold"
+                  onClick={() => setHidden(false)}
+                  aria-label="Show the page header"
+                >
+                  <ChevronDown aria-hidden="true" />
+                </button>,
+                badgeHost,
+              )
+            : null}
         </div>
         {/* ⚠️ THE HEMS ARE GRID CHILDREN OF ROW 3, NOT CHILDREN OF THE SCROLLER. Inside the
             scrollport they would scroll with the content, which is what makes the obvious version
