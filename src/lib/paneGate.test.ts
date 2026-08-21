@@ -11,7 +11,7 @@
  * cannot make that claim: it can only pass a value the type system already permits.
  */
 import { describe, it, expect } from "vitest";
-import { firstMissing, gateOpen, requiredFor, journeyKind, isBulkCard, type JourneyKind, type GateAnswers } from "./paneGate";
+import { firstMissing, gateOpen, requiredFor, journeyKind, isBulkCard, requirementsFor, unanswered, missingPhrase, type JourneyKind, type GateAnswers } from "./paneGate";
 import { BoardCard } from "./todoBoard";
 import { recordSweepRow, fillFromAsks, copyFirstDown, type RecordSweepRow } from "./materialsSweep";
 
@@ -117,5 +117,57 @@ describe("⚠️ the bulk table's two fills", () => {
     const on = (r: RecordSweepRow) => r.rows.filter((x) => x.on).map((x) => x.key).sort().join(",");
     expect(on(after[1])).toBe(on(after[0]));
     expect(on(after[2])).toBe(on(after[0]));
+  });
+});
+
+/**
+ * ⚠️ FOUR SURFACES, ONE LIST (steer round, Phase 1). The square, the chip, the missing line and the
+ * scroll target are four statements about one set. This asserts they cannot come apart — not that
+ * each reads the right variable, which is the assertion that let the deed synonyms drift for months.
+ */
+describe("⚠️ the four surfaces read one declaration", () => {
+  it("with two answers missing, chip, line and square all name the same two", () => {
+    const a: GateAnswers = { unit: true, when: false, expect: true, remind: false, rows: false };
+    const missing = unanswered("send", a);
+
+    /* the chip's number */
+    expect(missing).toHaveLength(2);
+    /* the line's names, through the one grammar */
+    expect(missingPhrase(missing.map((m) => m.name))).toBe("when it went and your reminder");
+    /* the square's anchor and the scroll target — the same first entry, not two lookups */
+    expect(missing[0].id).toBe("s-when");
+    expect(firstMissing("send", a)).toBe(missing[0].field);
+  });
+
+  it("the phrase is one grammar, whatever the count", () => {
+    expect(missingPhrase([])).toBe("");
+    expect(missingPhrase(["one"])).toBe("one");
+    expect(missingPhrase(["one", "two"])).toBe("one and two");
+    expect(missingPhrase(["one", "two", "three"])).toBe("one, two and three");
+  });
+
+  /**
+   * ⚠️ AND EVERY DECLARED ANCHOR MUST BE AN ANCHOR THE PANE RENDERS. A requirement the square
+   * cannot sit on, or the scroll cannot reach, would gate the primary and point at nothing.
+   * Scanned over the WHOLE body, not the first level — P5.1's lesson from the finish round.
+   */
+  it("every requirement's id is a section the form renders", async () => {
+    const fs = await import("node:fs");
+    const body = fs.readFileSync(new URL("../components/todo/TaskPaneBody.tsx", import.meta.url), "utf8");
+    const table = fs.readFileSync(new URL("../components/todo/BulkFillTable.tsx", import.meta.url), "utf8");
+    const src = body + table;
+    const ids = new Set([...src.matchAll(/id="(s-[a-z]+)"/g)].map((m) => m[1]));
+    for (const k of KINDS) {
+      for (const r of requirementsFor(k)) {
+        expect(ids.has(r.id), `${k} requires "${r.name}" at #${r.id} and no section carries it`).toBe(true);
+      }
+    }
+  });
+
+  it("a note declares nothing, so no surface has anything to say", () => {
+    const none: GateAnswers = { unit: false, when: false, expect: false, remind: false, rows: false };
+    expect(requirementsFor("note")).toEqual([]);
+    expect(unanswered("note", none)).toEqual([]);
+    expect(missingPhrase([])).toBe("");
   });
 });

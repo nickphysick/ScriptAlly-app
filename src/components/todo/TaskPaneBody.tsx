@@ -153,7 +153,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         so the question stood over an empty row — a question the page then declined to answer.
         Absence is a value: no sample, no section. */}
     {sample && (
-      <div className="sect">
+      <div className="sect" id="s-unit">
         <label className="f-lbl" data-req="unit">What are you sending?</label>
         <div className="f-sub" style={{ margin: "-3px 0 9px" }}>
           Pick the unit you actually sent in — one only.
@@ -178,7 +178,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
     {/* ⚠️ A NOTE HAS NO `When`. Ticking it off IS the act and the tick carries its own date, so the
         question has no subject — an empty segmented control here would be asking the writer to date
         something that has not happened. Absent, not disabled. */}
-    {!note && <div className="sect">
+    {!note && <div className="sect" id="s-when">
       <label className="f-lbl" data-req="when">When</label>
       <div className="seg">
         {DAY_OPTIONS.map((o) => (
@@ -205,8 +205,14 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
     {/* ⚠️ THE EXPECTATION BLOCK IS THE SEND JOURNEY'S ALONE. It asks when a reply is due and when
         to be reminded — both facts about a parcel in transit — so a nudge, a close and a note have
         nothing to answer here and the block is absent rather than disabled. */}
-    {sample && (
-      <div className="expect">
+    {/* ⚠️ TWO ORDINARY SECTIONS, NOT A BOX (steer round, Phase 4). These sat inside a field-tinted,
+        bordered `.expect` wrapper — a card within the card, and a TINT around things that are not
+        touchable. The law the contract now carries: A BACKGROUND TINT INSIDE THE FORM CARD MEANS
+        THE THING IS TOUCHABLE. The questions keep their quiet hint lines and nothing else.
+        ⚠️ AND THE COMMENT IS OUTSIDE THE `&&`, not braced inside it — a braced comment is a CHILD,
+        and there is no child position at the head of an expression. */}
+    {sample && (<>
+      <div className="sect" id="s-expect">
         <label className="f-lbl" data-req="expect">When do you expect to hear back?</label>
         <div className="seg" style={{ marginBottom: 11 }}>
           {EXPECT_WEEKS.map((w) => (
@@ -228,8 +234,10 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         {/* ⚠️ THE AGENCY'S OWN FIGURE, STATED AND NOT CHOSEN. Absent where the record holds none —
             a line reading "Their stated window is —" would be the app talking about its own gap. */}
         {typeof statedWeeks === "number" && statedWeeks > 0 && (
-          <div className="stated">Their stated window is {statedWeeks} weeks.</div>
+          <div className="hintline">Their stated window is {statedWeeks} weeks.</div>
         )}
+      </div>
+      <div className="sect" id="s-remind">
         <label className="f-lbl" data-req="remind">Remind you to nudge?</label>
         <div className="seg">
           {REMIND_OPTIONS.map((o) => (
@@ -244,15 +252,17 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         {/* ⚠️ AND IT SAYS WHERE THE REMINDER GOES. The contract's own line, and it is the honest
             one: this app has no notification delivery of any kind, so a reminder that implied a
             push or an email would be promising something nothing sends. It lands on this list. */}
-        <div className="inherit">The reminder lands here, on your list, when the time comes.</div>
+        <div className="hintline">The reminder lands here, on your list, when the time comes.</div>
       </div>
-    )}
+    </>)}
 
     {/* ⚠️ THE ONE OPTIONAL FIELD ON THIS FORM, AND IT SAYS SO. Everything above is required and
         carries no mark — Option B, where the exception is named rather than the rule. */}
+    <div className="sect">
     <label className="f-lbl" style={note ? { marginTop: 16 } : undefined}>Anything else? <span className="opttag">OPTIONAL</span></label>
-    <textarea className="note-in" placeholder="e.g. included the revised opening"
+    <textarea className="note-in" placeholder="Add any further details you want to keep on file"
       value={value.also} onChange={(e) => onChange({ ...value, also: e.target.value })} />
+    </div>
 
     {upsell && <div className="upsell">{upsell}</div>}
   </>

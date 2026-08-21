@@ -31,6 +31,66 @@ export type JourneyKind = "send" | "decide" | "chase" | "close" | "fix" | "bulk"
 /** The keys the pane's labels carry as `data-req`, so the gate can find the field it names. */
 export type ReqField = "unit" | "when" | "expect" | "remind" | "rows";
 
+/**
+ * ⚠️ A REQUIREMENT IS DATA, AND FOUR SURFACES READ IT (steer round, Phase 1).
+ *
+ * The steer square (the first unanswered), the count chip (how many are unanswered), the missing
+ * line (their NAMES) and the scroll target (the first unanswered again) are four statements about
+ * one set. Before this they were four readings: a key, a boolean, a hand-written phrase and a
+ * `data-req` lookup — which is four chances for the page to say "2 to answer" beside a square on a
+ * section the line does not mention.
+ *
+ * They cannot disagree now because there is nothing to disagree with: one array, read four times.
+ *
+ * ⚠️ `name` IS THE WRITER'S PHRASE, NOT THE LABEL. The missing line reads "Still to answer: what
+ * you're sending, when it went and your reminder" — a sentence — while the section's own label is
+ * a mono heading ("WHAT ARE YOU SENDING?"). Splicing headings into prose produces a sentence
+ * shouting in the middle, so the phrase is declared beside the id rather than derived from it.
+ *
+ * ⚠️ AND `id` IS THE SECTION'S DOM ANCHOR. It is what the square is set on and what the scroll
+ * jumps to, so a requirement the gate can name is a section the pane can reach — by construction,
+ * not by a second table.
+ */
+export interface Requirement {
+  /** the section's DOM anchor — `s-unit`, `s-when`, … */
+  id: string;
+  /** the phrase the missing line uses, mid-sentence and lower case */
+  name: string;
+  /** the field key, kept so `data-req` and the answers map stay in step */
+  field: ReqField;
+  /** answered? — a predicate over the journey's own state */
+  isAnswered: (a: GateAnswers) => boolean;
+}
+
+/** The declaration, one entry per requirable answer. `id` is the anchor the pane renders. */
+const REQ: Record<ReqField, Omit<Requirement, "isAnswered">> = {
+  unit:   { id: "s-unit",   name: "what you're sending",         field: "unit" },
+  when:   { id: "s-when",   name: "when it went",                field: "when" },
+  expect: { id: "s-expect", name: "when you expect to hear back", field: "expect" },
+  remind: { id: "s-remind", name: "your reminder",               field: "remind" },
+  rows:   { id: "s-rows",   name: "at least one query",          field: "rows" },
+};
+
+/** The journey's requirements, as data — the ONE list all four surfaces read. */
+export function requirementsFor(kind: JourneyKind): Requirement[] {
+  return requiredFor(kind).map((f) => ({ ...REQ[f], isAnswered: (a: GateAnswers) => a[f] }));
+}
+
+/** Those still unanswered, in the form's own order. */
+export const unanswered = (kind: JourneyKind, a: GateAnswers): Requirement[] =>
+  requirementsFor(kind).filter((r) => !r.isAnswered(a));
+
+/**
+ * ⚠️ THE MISSING LINE'S GRAMMAR, BUILT ONCE. "a, b and c" — an Oxford-less list with "and" before
+ * the last, and a bare phrase when there is one. Assembled here so the sentence cannot come out
+ * differently on a journey with two requirements than on one with four.
+ */
+export function missingPhrase(names: string[]): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  return `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+}
+
 /** A bulk card stands for a SET; every other fill-in stands for one query. */
 export const isBulkCard = (c: BoardCard): boolean => c.taskType === "materials_unrecorded_bulk";
 

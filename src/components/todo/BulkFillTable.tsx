@@ -80,7 +80,10 @@ export const BulkFillTable: React.FC<BulkFillTableProps> = ({ rows, onChange }) 
         <span className="caveat">{SWEEP_CAVEAT}</span>
       </div>
 
-      <table className="bulk">
+      {/* ⚠️ THE COHORT'S OWN ANCHOR. `s-rows` is what the declaration names, so the square and the
+          scroll reach the table by the same route every other requirement is reached — there is no
+          special case for the one journey whose answer is "touch a row". */}
+      <table className="bulk" id="s-rows">
         <thead>
           <tr>
             <th>Agent</th>
