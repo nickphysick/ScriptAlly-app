@@ -66,7 +66,10 @@
 .tpn .u-yours .b-sub { color:#8a7a5c; }
 .tpn .act .sub { font-size:12px;color:var(--muted2);font-weight:300;margin-top:3px;margin-bottom:17px;line-height:1.5; }
 .tpn .act .sub a, .tpn .act a.lk { color:var(--burg);text-decoration:none;border-bottom:1px solid rgba(124,58,42,0.3); }
-.tpn .f-lbl { font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:7px;display:block;font-weight:500; }
+/* ⚠️ FLEX, NOT BLOCK — the contract's own change, and the steer square is why: a `::before` on a
+   block label sits on the text's baseline and rides up and down with the cap height. As a flex row
+   with `align-items:center` the square is centred on the line whatever the label says. */
+.tpn .f-lbl { font-family:'JetBrains Mono',monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin:0 0 8px;display:flex;gap:7px;align-items:center;font-weight:500; }
 .tpn .chip { display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--ink2);background:var(--field);border:0.5px solid var(--hair2);border-radius:8px;padding:5px 10px; }
 .tpn .chip .tick { color:var(--sage);font-size:11px; }
 .tpn .seg { display:flex;gap:8px;flex-wrap:wrap; }
@@ -439,3 +442,25 @@
 .tpn .samp { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted2);border-bottom:1px dashed #d5c7b5;white-space:nowrap;background:none;border-top:0;border-left:0;border-right:0;padding:0; }
 .tpn .bulk-foot { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;margin-top:10px; }
 .tpn .bulk-foot a { color:var(--burg);text-decoration:none; }
+
+/* ── the steer square (steer round, Phase 2) ────────────────────────────────────────────────
+   ⚠️ A 7px BURGUNDY SQUARE BEFORE THE NEXT UNANSWERED LABEL, and it is a PSEUDO-ELEMENT on the
+   section rather than a node in the markup. One class on one section decides it, so there is no
+   way for two squares to render — the fault a per-section boolean invites.
+   ⚠️ AND IT BREATHES RATHER THAN BLINKS: scale 1 → 0.72 with opacity 1 → 0.55, 1.6s, infinite. A
+   blink is an alarm; this is a finger pointing at where you are up to. */
+.tpn .sect.next > .f-lbl::before {
+  content: ''; width: 7px; height: 7px; background: var(--burg); border-radius: 2px;
+  display: inline-block; flex-shrink: 0;
+  animation: tpn-sqPulse 1.6s ease-in-out infinite;
+}
+@keyframes tpn-sqPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.72); opacity: 0.55; }
+}
+/* ⚠️ REDUCED MOTION KEEPS THE SQUARE AND DROPS THE BREATH. The square is the INFORMATION — where
+   you are up to — and the animation is emphasis. Hiding it would take the answer away from the
+   reader who asked for less movement, not less help. */
+@media (prefers-reduced-motion: reduce) {
+  .tpn .sect.next > .f-lbl::before { animation: none; }
+}

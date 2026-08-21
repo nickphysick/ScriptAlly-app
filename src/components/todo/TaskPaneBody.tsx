@@ -123,6 +123,17 @@ export interface TaskPaneBodyProps {
    * so asking when it happened is asking about an event that has not happened yet.
    */
   note?: { text: string; added: string };
+  /**
+   * ⚠️ THE STEER SQUARE'S SECTION — the id of the FIRST unanswered requirement, from the one
+   * declaration (steer round, Phase 2). `null` when the journey is complete and on journeys that
+   * require nothing, and in both cases no square renders at all: a marker pointing at the next
+   * thing to do is a lie when there is no next thing.
+   *
+   * ⚠️ IT IS AN ID, NOT A BOOLEAN PER SECTION. Passing "am I next?" down to each section would
+   * make every section a place the answer could be wrong; passing the id means exactly one can
+   * match, by construction.
+   */
+  nextId?: string | null;
   /** the free-plan `.upsell`; omitted for Pro */
   upsell?: React.ReactNode;
 }
@@ -137,7 +148,10 @@ const todayYmd = (): string => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
-export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, note, statedWeeks, upsell }) => (
+export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sample, note, statedWeeks, nextId, upsell }) => {
+  /* one helper, so no section can decide for itself whether it is next */
+  const sect = (id: string) => (id === nextId ? "sect next" : "sect");
+  return (
   <>
     {/* ⚠️ THE WRITER'S OWN SENTENCE, AT READING SIZE. It was a label above a form; it is the thing
         the pane is about, so it is the first thing in it and it is set in the hand the list writes
@@ -153,7 +167,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         so the question stood over an empty row — a question the page then declined to answer.
         Absence is a value: no sample, no section. */}
     {sample && (
-      <div className="sect" id="s-unit">
+      <div className={sect("s-unit")} id="s-unit">
         <label className="f-lbl" data-req="unit">What are you sending?</label>
         <div className="f-sub" style={{ margin: "-3px 0 9px" }}>
           Pick the unit you actually sent in — one only.
@@ -178,7 +192,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
     {/* ⚠️ A NOTE HAS NO `When`. Ticking it off IS the act and the tick carries its own date, so the
         question has no subject — an empty segmented control here would be asking the writer to date
         something that has not happened. Absent, not disabled. */}
-    {!note && <div className="sect" id="s-when">
+    {!note && <div className={sect("s-when")} id="s-when">
       <label className="f-lbl" data-req="when">When</label>
       <div className="seg">
         {DAY_OPTIONS.map((o) => (
@@ -212,7 +226,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
         ⚠️ AND THE COMMENT IS OUTSIDE THE `&&`, not braced inside it — a braced comment is a CHILD,
         and there is no child position at the head of an expression. */}
     {sample && (<>
-      <div className="sect" id="s-expect">
+      <div className={sect("s-expect")} id="s-expect">
         <label className="f-lbl" data-req="expect">When do you expect to hear back?</label>
         <div className="seg" style={{ marginBottom: 11 }}>
           {EXPECT_WEEKS.map((w) => (
@@ -237,7 +251,7 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
           <div className="hintline">Their stated window is {statedWeeks} weeks.</div>
         )}
       </div>
-      <div className="sect" id="s-remind">
+      <div className={sect("s-remind")} id="s-remind">
         <label className="f-lbl" data-req="remind">Remind you to nudge?</label>
         <div className="seg">
           {REMIND_OPTIONS.map((o) => (
@@ -266,4 +280,5 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
 
     {upsell && <div className="upsell">{upsell}</div>}
   </>
-);
+  );
+};

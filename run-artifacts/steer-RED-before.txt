@@ -1,0 +1,31 @@
+── steer round · 15 assertions · 6 RED · 9 green
+  RED    P2.1 · exactly one square renders, on the first unanswered section
+           count=1 on=#s-when
+  green  P2.2 · it breathes — the contract's own keyframes, not a blink
+           animation=tpn-sqPulse
+  green  P2.3 · a note requires nothing, so it carries no square
+           count=0
+  RED    P2.4 · close steers to its own single requirement
+           -
+  green  P4.1 · the scan reached the form card's descendants at all
+           elements=42
+  green  P4.2 · every background inside the form card is white, field, pink or transparent
+           ["rgba(0, 0, 0, 0)","rgb(255, 255, 255)","rgb(253, 251, 247)"]
+  green  P4.3 · the expectations box is gone — no wrapper, no fill, no border, no radius
+           legacy=0 [{"border":"0px/0px","radius":"0px","bg":"rgba(0, 0, 0, 0)"},{"border":"0px/0px","radius":"0px","bg":"rgba(0, 0, 0, 0)"}]
+  RED    P4.4 · sections are divided by hairlines, and the last has none
+           ["0px","0px","0px","0px","0px"]
+  green  P4.5 · the quiet lines survive the box's removal
+           hintlines=2
+  RED    P5.1 · the primary carries a count chip while incomplete
+           chip=""
+  green  P5.2 · a note is complete, so it carries no chip
+           chip=""
+  green  P5.3 · bulk keeps its stated exception — inert at zero, count showing
+           disabled=true prim="Log 0 queries"
+  RED    P5.4 · an incomplete click writes nothing and lands focus in the first missing section
+           scrollTop 0 to 0 · inFirst=false tookOver=false
+  RED    P5.5 · the line names every missing answer, each as its own link
+           links=[]
+  green  P5.6 · nothing in the action bar truncates at 1440
+           []

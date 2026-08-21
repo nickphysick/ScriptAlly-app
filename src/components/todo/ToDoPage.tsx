@@ -95,7 +95,7 @@ import { ArtSlot } from "./ArtSlot";
 import { TaskPane } from "./TaskPane";
 import { TaskPaneBody, SendBodyValues, EXPECT_WEEKS } from "./TaskPaneBody";
 import { buildJourney } from "../../lib/taskPaneJourney";
-import { journeyKind, firstMissing, isBulkCard, type GateAnswers, type ReqField } from "../../lib/paneGate";
+import { journeyKind, firstMissing, isBulkCard, unanswered, missingPhrase, type GateAnswers, type ReqField } from "../../lib/paneGate";
 import { BulkFillTable } from "./BulkFillTable";
 import { rowHasAnswer } from "../../lib/materialsSweep";
 import { liveFamily } from "../../lib/todoFamily";
@@ -1941,6 +1941,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
                         note={paneCard.userTaskId
                           ? { text: paneCard.title, added: noteAddedDate(paneCard) }
                           : undefined}
+                        /* ⚠️ THE SQUARE'S SECTION, FROM THE ONE DECLARATION. `unanswered` is what
+                           the chip counts and the line names, so the marker cannot point somewhere
+                           the sentence does not mention. `null` when complete — and on a note,
+                           which requires nothing, so there is never a next thing to point at. */
+                        nextId={unanswered(journeyKind(paneCard), gateAnswers(paneCard))[0]?.id ?? null}
                         value={paneBody}
                         onChange={setPaneBody}
                       />
