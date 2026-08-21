@@ -2,22 +2,29 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ONE MEASURE — the masthead and the page's content share edges (masthead measure, §1).
+ * TWO MEASURES — the content takes its page's, the masthead takes one constant.
  *
- * ⚠️ THIS REPLACES A LOCK THAT ASSERTED THE WRONG THING AND PASSED. The previous pack made the
- * masthead a WINDOW concern — 16px from the window edge, deliberately independent of content — and
- * this file asserted exactly that, at 1280 and 1440, green. On a wide monitor the masthead ran to
- * the walls while the work sat in a narrower measure: 135px out on Query Centre at 2300, with Hide
- * half a screen from anything.
+ * ⚠️ THIS IS THE THIRD POSITION ON MASTHEAD WIDTH, AND THIS FILE HAS NOW ASSERTED ALL THREE. First
+ * the masthead measured from the WINDOW (16px inset, independent of content) — wrong on a wide
+ * monitor, where it ran to the walls while the work sat in a narrower column. Then it took each
+ * PAGE's measure, which this file asserted as "masthead edges EQUAL content edges" — and that was
+ * wrong in the opposite direction: pages do not share a gutter, so the masthead's left edge moved
+ * between 35px and 80px as you changed page. A page header that moves when the page changes is the
+ * one thing a page header exists not to do.
  *
- * ⚠️ TWO WIDTHS ON THE SAME SIDE OF EVERY CAP ARE ONE WIDTH. The old pair, 1280 and 1440, sit below
- * every measure this app uses, so nothing could disagree at either. **2300 is in the list now, and
- * it is the width that does the work** — it is where `--work-max` bites and where a masthead with a
- * rule of its own separates from the content.
+ * ⚠️ SO THE CLAIM IS CROSS-PAGE EQUALITY AGAIN — the thing §1 deleted, now correct because there is
+ * ONE gutter for the masthead. The masthead's left offset is identical on all ten pages, at every
+ * width. `--mast-gutter` is defined once and no page overrides it, so this holds by construction
+ * rather than by ten values being kept in step.
  *
- * THE CLAIM IS NOW MUCH SIMPLER, WHICH IS THE POINT: the masthead's left and right offsets EQUAL
- * the first content column's, on every page at every width. Not a number — a relationship, and one
- * that holds by construction because the masthead has no width rule of its own.
+ * ⚠️ AND CONTENT MUST NOT HAVE MOVED. That is the gate the amendment is measured against: the gutter
+ * moved off the scroll row and onto the measures inside it, which is exactly the kind of change that
+ * shifts something by a few pixels and is never noticed. Byte-identical at 1280 and 1440 against the
+ * pre-pack baseline; 2300 is captured here for the first time.
+ *
+ * ⚠️ 2300 IS THE WIDTH THAT DOES THE WORK. 1280 and 1440 both sit below every cap this app uses, so
+ * they agree about everything and prove nothing about a wide monitor — the finding that let the
+ * window-inset system pass its own lock for a whole pack.
  *
  * Usage:  SA_BASELINE=1 npx playwright test tests/e2e/contentGeometry.measure.ts   → write baseline
  *         npx playwright test tests/e2e/contentGeometry.measure.ts                 → diff against it
@@ -77,8 +84,15 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
     contentClass: content ? (content.className || content.tagName).toString().split(" ")[0] : "none",
     row: box(row),
     scrollPad: getComputedStyle(sc).paddingLeft,
-    /* what the pack DOES move — recorded so a diff says which half changed */
-    masthead: box(mast),
+    /**
+     * ⚠️ THE MASTHEAD'S INK, NOT ITS BOX — `.wsh` inside `.wpg-mast`, which is the padded measure.
+     * The box's edge is 35px outside the ink, so comparing the BOX against a page's content edge is
+     * off by exactly one `--mast-gutter` and reads as the constant having been chosen wrongly.
+     * What a reader sees line up is the mark and the title, and those sit at the ink.
+     */
+    masthead: box(g.querySelector(".wsh") as HTMLElement),
+    /* the measure box too, so a diff can say which of the two moved */
+    mastBox: box(mast),
   };
 }, cls);
 
@@ -95,7 +109,14 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
       const r = await read(page, cls);
       expect(r, `${name} @${w}: no visible grid with class .${cls}`).not.toBeNull();
       expect(r!.content, `${name} @${w}: no content element after the chrome — the probe has nothing to hold still`).not.toBeNull();
-      now[`${w}|${name}`] = { content: r!.content, row: r!.row, scrollPad: r!.scrollPad };
+      /**
+       * ⚠️ `scrollPad` LEFT THE INVARIANT SET, AND IT HAD TO. It was recorded to prove the gutter had
+       * not moved; §A moves it deliberately — off the scroll row and onto the measures inside it — so
+       * it now reads `0px` on every page and would fail this diff on every page, correctly and
+       * uselessly. What it stood proxy for is the CONTENT's inset, which `content.left` measures
+       * directly and which must not have moved by so much as a pixel.
+       */
+      now[`${w}|${name}`] = { content: r!.content, row: r!.row };
       mast[`${w}|${name}`] = { masthead: r!.masthead };
       lines.push(
         `${String(w).padEnd(5)} ${name.padEnd(21)} content "${r!.contentClass}" ${r!.content!.left}/${r!.content!.right}` +
@@ -105,22 +126,61 @@ test("content geometry is unchanged by the masthead's width system", async ({ pa
   console.log("\n" + lines.join("\n"));
 
   /**
-   * ⚠️ THE MASTHEAD AND THE CONTENT SHARE EDGES — the whole of §1, asserted per page and per width.
+   * ⚠️ THE MASTHEAD IS IN THE SAME PLACE ON EVERY PAGE — the claim of §A, at each width.
    *
-   * It is a RELATIONSHIP, not a figure: the two numbers may be anything, and they must be the same
-   * two numbers. That is what makes it hold at a viewport nobody measured, and it is why the
-   * masthead is given no width rule of its own — a rule would be a second number to keep in step,
-   * which is precisely what the window-inset system was and precisely how it drifted.
+   * Asserted page-against-page rather than against a number, so it holds at a viewport nobody
+   * measured; and asserted at all three widths, because the cap binds only at the widest and a law
+   * that holds at one width is a coincidence.
    */
   for (const w of WIDTHS) {
-    for (const { name } of PAGES) {
-      const k = `${w}|${name}`;
-      const m = mast[k]!.masthead!;
-      const c = (now[k] as { content: { left: number; right: number } }).content;
-      expect(m.left, `${name} @${w}: the masthead starts at ${m.left} and the content at ${c.left} — the header has drifted from the work`)
+    const lefts = PAGES.map(({ name }) => ({ name, v: mast[`${w}|${name}`]!.masthead!.left }));
+    const rights = PAGES.map(({ name }) => ({ name, v: mast[`${w}|${name}`]!.masthead!.right }));
+    for (const [edge, set] of [["left", lefts], ["right", rights]] as const) {
+      const vals = [...new Set(set.map((x) => x.v))];
+      expect(vals, `@${w}: the masthead's ${edge} edge differs across pages — ${JSON.stringify(set.map((x) => [x.name, x.v]))}`)
+        .toHaveLength(1);
+    }
+  }
+
+  /**
+   * ⚠️ AND ON THE PAGES WHOSE GUTTER *IS* THE MASTHEAD'S, THE TWO STILL COINCIDE. That is what makes
+   * 35 the right value rather than an arbitrary one: Query Centre and the three Tasks pages take
+   * `--content-gutter-tight`, and their content lines up with the masthead exactly. On the wider
+   * pages the masthead sits outside the content, deliberately — a constant does not bend to a page.
+   *
+   * ⚠️ THIS IS THE HALF OF §1'S CLAIM THAT SURVIVES, and keeping it is what stops `--mast-gutter`
+   * drifting to a number that matches no page at all.
+   */
+  const TIGHT = ["Query Centre", "To-do list", "Calendar", "Noteboard"];
+  const contentOf = (k: string) => (now[k] as { content: { left: number; right: number } }).content;
+  for (const w of [1280, 1440]) {
+    for (const name of TIGHT) {
+      const m = mast[`${w}|${name}`]!.masthead!;
+      const c = contentOf(`${w}|${name}`);
+      expect(m.left, `${name} @${w}: the masthead starts at ${m.left} and the content at ${c.left} — the constant gutter no longer matches the tight pages it was chosen for`)
         .toBeCloseTo(c.left, 0);
-      expect(m.right, `${name} @${w}: the masthead ends ${m.right} from the edge and the content ${c.right}`)
-        .toBeCloseTo(c.right, 0);
+    }
+  }
+  /**
+   * ⚠️ AT 2300 ONLY QUERY CENTRE STILL MATCHES, AND THE REASON IS A LIVE INCONSISTENCY RATHER THAN A
+   * FAULT IN THIS PACK. The masthead caps at `--work-max` on every page. Query Centre caps its
+   * content at the same token, so the two stay together at any width. The three Tasks pages cap
+   * their content at NOTHING — `--wpg-measure` is unset on `.tpl-wpg` — so at 2300 the board runs to
+   * 297 from the window edge while the masthead sits at 432 inside its measure.
+   *
+   * ⚠️ NOT ASSERTED AWAY AND NOT SILENTLY FIXED. Giving `.tpl-wpg` the shared cap would align them —
+   * and would also narrow three pages' content on a wide monitor, which is a product decision and
+   * not this pack's to take. What IS asserted is the direction: the masthead may sit INSIDE the
+   * content it titles, never outside it, which is the failure the whole pack has been chasing.
+   */
+  for (const name of TIGHT) {
+    const m = mast[`2300|${name}`]!.masthead!;
+    const c = contentOf(`2300|${name}`);
+    if (name === "Query Centre") {
+      expect(m.left, `${name} @2300: it caps its content at the shared measure, so the masthead must sit on it`).toBeCloseTo(c.left, 0);
+    } else {
+      expect(m.left, `${name} @2300: the masthead starts at ${m.left}, OUTSIDE its content at ${c.left} — a header wider than the work it titles is the fault this pack exists to fix`)
+        .toBeGreaterThanOrEqual(c.left);
     }
   }
 

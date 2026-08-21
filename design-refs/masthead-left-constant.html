@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — masthead, left and constant</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --white:#fff;--content:#fefcfa;--paper:#faf6f0;--ground:#f7f4ee;--band:#f2ede7;
+  --burg:#7c3a2a;--burgd:#632e22;--ink:#3a1c14;--ink2:#311e19;
+  --edge:#e4ddd1;--rim:#e9e1d4;--hair:#e8e2d8;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --sage-a:#d7ddd5;--sage-b:#d5dbd3;
+  --work-max:1240px;        /* shared centring cap */
+  --mast-gutter:56px;       /* ONE value, every page */
+  --page-gutter:35px;       /* per page, unchanged */
+  --mini-pad:9px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:#e9e4dc;font-family:'Inter',sans-serif;color:var(--ink);padding:15px 18px 34px}
+ .bar{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+ .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#7d7267;margin:0 4px 0 10px}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:1px solid #cfc6b8;border-radius:7px;background:#f4efe7;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#fdfaf5;border-color:var(--ink)}
+ .note{font-size:12.5px;color:#5d5048;margin:0 2px 11px;max-width:1180px;line-height:1.6;min-height:38px}
+ .note b{color:var(--ink)}
+ .rd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;color:#8a7a70;margin:0 2px 9px}
+ .rd b{color:#b0402c}
+
+ .shell{display:flex;width:100%;background:var(--ground);border-radius:13px;overflow:hidden;height:600px;
+        box-shadow:0 2px 6px rgba(58,28,20,.08),0 14px 34px rgba(58,28,20,.10)}
+ .side{flex:0 0 168px;background:#fff;border-right:1px solid var(--hair);padding:12px 9px}
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .topbar{display:flex;align-items:center;gap:11px;padding:0 15px;background:#fff;border-bottom:1px solid var(--hair);height:52px;flex:0 0 auto}
+ .topbar .brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;line-height:1.3}
+ .topbar .crumb{font-size:12.5px;color:#6b5a51;line-height:1.3}
+ .topbar .crumb b{color:var(--ink);font-weight:600}
+ .topbar .sp{flex:1}
+ .window{position:relative;background:var(--content);border:1px solid var(--edge);border-radius:14px 14px 0 0;margin:10px 12px 0;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+
+ /* ── the masthead's own measure: identical on every page ── */
+ .mast-measure{width:100%;max-width:var(--work-max);margin-inline:auto;padding-inline:var(--mast-gutter)}
+ /* ── the page's measure: whatever it already was ── */
+ .page-measure{width:100%;max-width:var(--work-max);margin-inline:auto;padding-inline:var(--page-gutter)}
+
+ .mast{position:relative;display:flex;align-items:center;gap:16px;padding:24px 0 18px;
+       transition:max-height .26s cubic-bezier(.4,0,.2,1),padding .26s,opacity .18s;max-height:240px;overflow:hidden}
+ .mmk{flex:0 0 52px;width:52px;height:52px;display:grid;place-items:center}
+ .mmk svg{width:36px;height:36px;stroke:var(--burg);fill:none;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round}
+ .mtx h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;line-height:1.3;color:var(--ink2)}
+ .mtx p{font-size:13.5px;color:#8a7a70;margin-top:3px;line-height:1.45}
+ .hidebtn{position:absolute;right:0;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:6px;
+          height:32px;padding:0 10px;border-radius:8px;border:1px solid transparent;background:transparent;color:#8a7a70;font-size:12px;cursor:pointer}
+ .hidebtn:hover{background:var(--paper);color:var(--ink)}
+ .hidebtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ body.folded .mast{max-height:0;padding:0;opacity:0}
+
+ .mini{position:relative;display:none;align-items:center;min-height:calc(var(--mini-pad)*2 + 19px*1.3);padding:var(--mini-pad) 0}
+ body.folded .mini{display:flex}
+ .mini .mn{font-family:'Playfair Display',serif;font-size:19px;font-weight:600;color:var(--ink2);line-height:1.3}
+ .mini .exp{position:absolute;right:0;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:8px;
+            border:1px solid transparent;background:transparent;color:#8a7a70;display:grid;place-items:center;cursor:pointer}
+ .mini .exp:hover{background:var(--paper);color:var(--ink)}
+ .mini .exp svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+ .mrule{height:1px;background:var(--rim)}
+
+ .crow{display:flex;align-items:center;gap:9px;padding:14px 0}
+ .cbtn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:8px;border:1px solid #e2d8ca;
+       background:var(--white);color:#4d3b33;font-size:12px;font-weight:500;white-space:nowrap}
+ .cbtn.pink{background:var(--pink);border-color:var(--pinkb);color:var(--ink2);font-weight:600}
+ .sp{flex:1}
+ .work{flex:1;min-height:0;overflow:hidden;padding-bottom:18px}
+ .cols{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px;height:100%}
+ .pnl{border:1px solid var(--rim);border-radius:13px;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.04);overflow:hidden}
+ .pnl .ph{padding:9px 12px;border-bottom:1px solid #f2ece2;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;color:#a2968c}
+ .row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid #f8f3ec}
+ .avr{width:26px;height:26px;border-radius:50%;background:var(--pink);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--burgd)}
+ .row b{font-size:12px;font-weight:600;display:block}
+ .row span{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.09em;color:#a2968c}
+ .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;height:100%}
+ .cd{border:1px solid var(--rim);border-radius:13px;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.04);padding:14px}
+ .cd b{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;display:block}
+ .cd i{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6b5a51}
+ body[data-p="qc"] .grid3{display:none}
+ body[data-p="cl"] .cols{display:none}
+
+ /* guides */
+ .gv{position:absolute;top:0;bottom:0;width:1px;pointer-events:none;display:none;z-index:40}
+ body.guide .gv{display:block}
+ .gv.m{background:rgba(176,64,44,.75)}
+ .gv.c{background:rgba(90,130,110,.75)}
+</style></head><body data-p="qc">
+
+<div class="bar">
+ <span class="lab" style="margin-left:0">PAGE</span>
+ <button class="tab on" data-p="qc">QUERY CENTRE &middot; 35px CONTENT</button>
+ <button class="tab" data-p="cl">CONTACT LIST &middot; 80px CONTENT</button>
+ <span class="lab">MASTHEAD GUTTER</span>
+ <button class="tab" data-g="35">35</button>
+ <button class="tab on" data-g="56">56</button>
+ <button class="tab" data-g="80">80</button>
+ <span class="lab">GUIDES</span>
+ <button class="tab" id="gd">SHOW</button>
+ <span class="lab">STATE</span>
+ <button class="tab" id="fold">FOLD</button>
+</div>
+<div class="rd" id="rd"></div>
+<div class="note">Left aligned, one illustration. The masthead runs on <b>its own measure with one gutter value app-wide</b> &mdash; so its left edge is in the same place on every page, whatever that page's content gutter is. Switch pages with guides on: the red line (masthead) holds still while the green line (content) moves.</div>
+
+<div class="shell">
+ <aside class="side"></aside>
+ <div class="main">
+  <div class="topbar"><span class="brand">ScriptAlly</span>
+    <span class="crumb">ScriptAlly&nbsp; / &nbsp;Queries&nbsp; / &nbsp;<b id="crumb">Query Centre</b></span><span class="sp"></span></div>
+  <div class="window" id="win">
+   <span class="gv m" id="gm"></span><span class="gv c" id="gc"></span>
+
+   <div class="mast-measure" id="mm">
+     <div class="mast">
+       <span class="mmk" id="mk"><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></span>
+       <div class="mtx"><h1 id="ttl">Query Centre</h1><p id="dsc">Every query, every response &mdash; track every step of your journey so far</p></div>
+       <button class="hidebtn" id="hide"><svg viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>Hide</button>
+     </div>
+     <div class="mini"><span class="mn" id="mn">Query Centre</span>
+       <button class="exp" id="show"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button></div>
+     <div class="mrule"></div>
+   </div>
+
+   <div class="page-measure" id="pm">
+     <div class="crow">
+       <span class="cbtn pink">&#65291; Log new query</span><span class="sp"></span>
+       <span class="cbtn">Record response</span><span class="cbtn">Nudge</span><span class="cbtn">Mark closed</span><span class="cbtn">Delete</span>
+     </div>
+     <div class="work">
+       <div class="cols">
+         <div class="pnl"><div class="ph">25 QUERIES</div>
+           <div class="row"><span class="avr">SD</span><div><b>Sophie Dunn</b><span>CURTIS VANE</span></div></div>
+           <div class="row"><span class="avr">WT</span><div><b>William Tan</b><span>FOXGLOVE LITERARY</span></div></div>
+           <div class="row"><span class="avr">MR</span><div><b>Marcus Reed</b><span>BLOOMSBURY QUILL</span></div></div>
+         </div>
+         <div class="pnl"><div class="ph">READING PANE</div></div>
+       </div>
+       <div class="grid3">
+         <div class="cd"><b>Penhallow Literary</b><i>Agent not specified</i></div>
+         <div class="cd"><b>Aisha Kapoor</b><i>The Lantern Agency</i></div>
+         <div class="cd"><b>Daniel O'Rourke</b><i>Inkwell &amp; Stone</i></div>
+       </div>
+     </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<script>
+const R=document.documentElement.style, win=document.getElementById('win');
+const PAGES={qc:{g:'35px',t:'Query Centre',d:'Every query, every response — track every step of your journey so far',
+                 mk:'M22 2 11 13M22 2l-7 20-4-9-9-4Z'},
+             cl:{g:'80px',t:'Contact list',d:"Everyone you're querying, watching, or saving for later",
+                 mk:'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M19 8h4M21 6v4'}};
+function draw(){
+ requestAnimationFrame(()=>{
+  const w=win.getBoundingClientRect();
+  const m=document.querySelector('.mast').getBoundingClientRect();
+  const c=document.querySelector('.crow').getBoundingClientRect();
+  document.getElementById('gm').style.left=(m.left-w.left)+'px';
+  document.getElementById('gc').style.left=(c.left-w.left)+'px';
+  document.getElementById('rd').innerHTML='masthead left <b>'+Math.round(m.left-w.left)+'px</b> &nbsp;&middot;&nbsp; content left <b>'+Math.round(c.left-w.left)+'px</b>';
+ });
+}
+document.querySelectorAll('.tab[data-p]').forEach(b=>b.onclick=()=>{
+ const p=PAGES[b.dataset.p]; document.body.dataset.p=b.dataset.p;
+ R.setProperty('--page-gutter',p.g);
+ document.getElementById('ttl').textContent=p.t;
+ document.getElementById('mn').textContent=p.t;
+ document.getElementById('crumb').textContent=p.t;
+ document.getElementById('dsc').textContent=p.d;
+ document.getElementById('mk').innerHTML='<svg viewBox="0 0 24 24"><path d="'+p.mk+'"/></svg>';
+ document.querySelectorAll('.tab[data-p]').forEach(x=>x.classList.toggle('on',x===b));
+ draw();});
+document.querySelectorAll('.tab[data-g]').forEach(b=>b.onclick=()=>{
+ R.setProperty('--mast-gutter',b.dataset.g+'px');
+ document.querySelectorAll('.tab[data-g]').forEach(x=>x.classList.toggle('on',x===b)); draw();});
+document.getElementById('gd').onclick=function(){const on=document.body.classList.toggle('guide');
+ this.textContent=on?'HIDE':'SHOW';this.classList.toggle('on',on);};
+const F=document.getElementById('fold');
+const setF=on=>{document.body.classList.toggle('folded',on);F.textContent=on?'UNFOLD':'FOLD';F.classList.toggle('on',on);draw();};
+F.onclick=()=>setF(!document.body.classList.contains('folded'));
+document.getElementById('hide').onclick=()=>setF(true);
+document.getElementById('show').onclick=()=>setF(false);
+window.addEventListener('resize',draw); draw();
+</script></body></html>

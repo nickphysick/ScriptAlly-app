@@ -1721,7 +1721,10 @@
    escape to a window inset; that whole system is reverted — the masthead is a sibling of the
    content and takes the page's measure by construction, so there is nothing to cancel. The VALUE
    has never changed. */
-.qc-wpg .wpg-scroll { padding-inline: var(--content-gutter-tight); }
+/* ⚠️ THE PAGE'S CONTENT GUTTER, NOT THE SCROLL ROW'S PADDING (masthead left-constant, §A). The
+   value is unchanged and the content does not move; what changed is that the masthead no longer
+   sits inside it. */
+.qc-wpg { --wpg-gutter: var(--content-gutter-tight); }
 /* ⚠️ THE ONE PAGE THAT CAPS ITS WORK SURFACE, AND IT SAYS SO ONCE. `--work-max` is the shared
    work-surface measure (the dashboard's one-screen reads it too); naming it here puts the masthead,
    the mini bar and the panes on the same edges by construction. */

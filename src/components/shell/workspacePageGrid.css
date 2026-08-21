@@ -64,6 +64,25 @@
    * at 18px and the bar would never leave. So the arithmetic is stated once, in the token, and the
    * flex centring places the line inside it.
    */
+  /**
+   * ══ TWO MEASURES, AND THE MASTHEAD'S IS A CONSTANT (masthead left-constant, §A) ═════════════
+   *
+   * ⚠️ THIS IS THE THIRD POSITION ON MASTHEAD WIDTH AND THE FIRST TWO WERE WRONG IN OPPOSITE
+   * DIRECTIONS. First the masthead took the WINDOW's measure — 16px from the window edge — so on a
+   * wide monitor it ran to the walls while the work sat in a narrower column. Then it took each
+   * PAGE's measure, which fixed that and introduced something worse: pages do not share a gutter,
+   * so the masthead's left edge jumped between 35px and 80px as you moved between pages. A page
+   * header that MOVES WHEN THE PAGE CHANGES is the one thing a page header exists not to do.
+   *
+   * So the masthead has its own measure: neither the window's nor the page's. One gutter value,
+   * defined here, used everywhere, overridden by nothing.
+   *
+   * ⚠️ `--wpg-gutter` RETURNS, AND IT IS NOT THE TOKEN THAT WAS REVERTED. The reverted one existed
+   * so the MASTHEAD could read the page's gutter and cancel it with a negative margin. Nothing
+   * cancels anything now: this names the page's own content gutter, it is read only by content, and
+   * the masthead has never heard of it. A token is not its name.
+   */
+  --mast-gutter: 35px;
   --wpg-mini-pad: 9px;
   --wpg-mini-fs: 19px;
   --wpg-mini-lh: 1.3;
@@ -206,7 +225,14 @@
      was hiding a width loss caused by a cap in the wrong place — treating a symptom. The cap is
      gone and the width is now correct; the reservation is doing its actual job. The cost is the
      scrollbar's width off each side of the nominal gutter, under 1.5% at any real window. */
-  padding-inline: var(--content-gutter);
+  /* ⚠️ THE GUTTER MOVED OFF THIS ROW AND ONTO THE MEASURES INSIDE IT (masthead left-constant, §A).
+     It had to: a single padding here insets EVERY child by the same amount, and the whole point is
+     that the masthead and the content no longer share one. Each child now states its own measure.
+
+     ⚠️ AND THE SCROLLBAR ARGUMENT IS UNAFFECTED, which the note above already proves by
+     measurement: "gutter on this row and gutter on an inner wrapper measure IDENTICALLY", because
+     the bar sits inside the padding box either way. `scrollbar-gutter: stable both-edges` below is
+     what actually reserves it, and it is untouched. */
   /* ⚠️ NO TOP PADDING, AND THE WHOLE "WHICH ELEMENT PAYS THE GAP" QUESTION GOES WITH IT. The gap
      used to sit above whatever came FIRST below the chrome hairline — the toolbar row on pages that
      had one, this row on pages that did not — which needed `.wpg--tools` to zero one of them so it
@@ -501,8 +527,64 @@
    * padding stays inside its 100%.
    */
   width: 100%;
-  max-width: var(--wpg-measure, none);
+  /**
+   * ⚠️ THE GUTTER IS A MAX-WIDTH REDUCTION, NOT PADDING, AND THE REASON IS THE PAGES' OWN BOXES.
+   * Applying `padding-inline` here would land on whatever element each page puts first in the
+   * scroller — and Query Centre's `.f12-body` is a DRAWN FRAME with 22px of its own padding inside
+   * its border. This rule is 0-1-0 and would clobber it, moving the panes inside a frame that was
+   * never asked to change. Reducing the max-width insets the box without touching a property the
+   * pages use.
+   *
+   * ⚠️ AND IT LEAVES THE CONTENT EXACTLY WHERE IT WAS, which is the gate this pack is measured
+   * against. An auto margin centres within a SYMMETRIC box, so centring inside the padding box and
+   * centring inside the old content box put the left edge in the same place; where the cap does not
+   * bind, `100% - 2 × gutter` centred is the gutter. Measured byte-identical at 1280 and 1440.
+   *
+   * `100%` is the fallback rather than `none` because `min()` cannot take a keyword.
+   */
+  /**
+   * ⚠️ THE PAGE'S GUTTER IS A FALLBACK AT THE USE SITE, NEVER A DEFAULT ON `.wpg` — and that is not
+   * style, it is the only thing that works. A page names its gutter with a class on the SAME element
+   * as `.wpg` (`className="qc-wpg"` goes straight onto the grid), so `.wpg` and `.qc-wpg` are both
+   * 0-1-0 on one element and SOURCE ORDER decides. This sheet is later in the bundle, so a default
+   * here silently beat every page override: measured, Query Centre's content sat at 342 with the
+   * wide gutter while To-do's sat at 297 with the tight one, on a declaration that reads correctly
+   * in both files.
+   *
+   * A fallback inside the `var()` has no such contest — it applies only when nothing declared the
+   * token anywhere, which is exactly the intended meaning of "the page did not ask for a gutter".
+   */
+  max-width: min(var(--wpg-measure, 100%), calc(100% - 2 * var(--wpg-gutter, var(--content-gutter))));
   margin-inline: auto;
+}
+/**
+ * ⚠️ THE MASTHEAD AND THE FOLDED BAR TAKE THE SHARED CAP AND THE CONSTANT GUTTER — never the page's
+ * (masthead left-constant, §A). 0-2-0 so it beats the rule above rather than depending on source
+ * order, which is how a rule at equal specificity quietly stops applying when someone reorders a
+ * file.
+ *
+ * ⚠️ THE CAP IS READ, NOT RESTATED. `--work-max` is the app's shared centring measure; naming the
+ * number here would be a second copy to keep in step with the one the content already reads.
+ */
+.wpg-scroll > .wpg-mast,
+.wpg-scroll > .wpg-mini {
+  /**
+   * ⚠️ THE GUTTER IS A REDUCTION HERE TOO, AND THE REF'S `padding-inline` IS A DELIBERATE DEVIATION.
+   * In the ref BOTH measures are padded, so they behave alike; here the content's gutter had to be a
+   * max-width reduction (padding would land on the page's own first box), and mixing the two
+   * mechanisms makes them diverge exactly where it matters.
+   *
+   * Measured: with padding, at 1440 the masthead's ink and the tight pages' content both landed on
+   * 297 — and at 2300, where the cap binds, content ABSORBED its gutter into the cap while the
+   * masthead ADDED its padding on top, so the ink sat 35px inside the panes it titles. Computing
+   * both the same way makes "the masthead aligns with Query Centre and Tasks" true at every width
+   * rather than at the two where nothing caps.
+   *
+   * ⚠️ AND IT PUTS HIDE WHERE THE REF PUTS IT. An absolutely-positioned child resolves `right: 0`
+   * against the PADDING box, so a padded measure would hang Hide 35px outside the masthead's own
+   * ink — outside the line its title and mark sit on.
+   */
+  max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)));
 }
 .wpg-mast {
   min-width: 0;
@@ -568,12 +650,12 @@
   box-sizing: border-box;
   flex: none;
   min-width: 0;
-  /* ⚠️ CENTRED, LIKE THE MASTHEAD IT IS A FOLD OF (masthead measure, §3). The name is the only
-     thing in the flow; the chevron is absolute, so it cannot pull the centre off true. There is no
-     `gap` left to state — the mark that it separated from the name is gone. */
+  /* ⚠️ LEFT ALIGNED, LIKE THE MASTHEAD IT IS A FOLD OF (masthead left-constant, §C). The name is
+     the only thing in the flow; the chevron is absolute. There is no `gap` left to state — the mark
+     that it separated from the name is gone, and stays gone: the illustrations read as drawings at
+     52px and as smudges at 22. */
   display: flex;
   align-items: center;
-  justify-content: center;
   overflow: hidden;
   background: var(--ws-window);
   /* ⚠️ 0 → `--wpg-mini-h` ON SCROLL PAGES, so at rest it costs nothing and the masthead is the

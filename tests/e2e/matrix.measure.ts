@@ -102,13 +102,29 @@ const readState = (page: Page) => page.evaluate(() => {
        * child matching it is inside the shared measure rather than stating one. `none` on the nine
        * pages that cap nothing, where this excuses exactly nothing.
        */
-      const mastEl = g.querySelector(".wpg-mast") as HTMLElement | null;
-      const shared = mastEl ? getComputedStyle(mastEl).maxWidth : "none";
+      /**
+       * ⚠️ THE GRID APPLIES A MEASURE TO EVERY DIRECT CHILD, so a computed `max-width` on the page's
+       * first element is the GRID's and not the page's — and computed style cannot tell them apart.
+       * It is `min(--wpg-measure, 100% - 2 × --wpg-gutter)` (masthead left-constant, §A), where the
+       * gutter is a REDUCTION rather than padding precisely so it does not land on the page's own
+       * box. Derived here from the scroller's own width and the resolved token rather than read off
+       * another element, because after §A the masthead's measure is a DIFFERENT one and comparing
+       * against it would excuse the wrong value.
+       */
+      /* ⚠️ DERIVED FROM THE SCROLLER AND THE TOKENS, NEVER FROM THE ELEMENT UNDER TEST — my first
+         version read the cap off `content` itself, which is the box this is meant to be validating,
+         so it agreed with whatever it found. */
+      const gut = parseFloat(getComputedStyle(sc).getPropertyValue("--wpg-gutter")) || 0;
+      const raw = getComputedStyle(sc).getPropertyValue("--wpg-measure").trim();
+      const cap = raw ? parseFloat(raw) : Infinity;
+      const gridMeasure = Math.min(Number.isFinite(cap) ? cap : Infinity, sc.clientWidth - 2 * gut);
+      const shared = `${Math.round(gridMeasure)}px (gutter ${gut}, cap ${raw || "none"})`;
       let el = content;
       for (let i = 0; el && i < 3; i += 1) {
         const c = getComputedStyle(el);
         const bad: string[] = [];
-        if (c.maxWidth !== "none" && c.maxWidth !== shared) bad.push(`maxW ${c.maxWidth}`);
+        const mw = c.maxWidth === "none" ? Infinity : parseFloat(c.maxWidth);
+        if (mw !== Infinity && Math.abs(mw - gridMeasure) > 1) bad.push(`maxW ${c.maxWidth} (grid applies ${shared})`);
         if (c.marginLeft === "auto" || c.marginRight === "auto") bad.push("auto margin");
         /* ⚠️ A BORDERED BOX'S PADDING IS ITS OWN, AND THAT IS A REAL DISTINCTION RATHER THAN AN
            EXEMPTION FOR THE PAGE THAT FAILED. Query Centre's `.f12-body` draws the workspace
@@ -253,7 +269,15 @@ const readState = (page: Page) => page.evaluate(() => {
     stackedFades: [...sc.querySelectorAll(".tbd-fade, .sv2-fade, [class*='-fade']")]
       .filter((el) => (el as HTMLElement).getBoundingClientRect().height > 0)
       .map((el) => el.className.toString().slice(0, 24)),
-    gutter: getComputedStyle(sc).paddingLeft,
+    /**
+     * ⚠️ THE PAGE'S GUTTER IS A TOKEN NOW, NOT THIS ROW'S PADDING (masthead left-constant, §A). It
+     * moved off the scroll row and onto the measures inside it, because one padding here insets
+     * every child equally and the masthead no longer shares the page's inset. Reading `paddingLeft`
+     * returns `0px` and derives an expected content inset of 15 — a confident, precise, wrong number
+     * about a page that is behaving correctly.
+     */
+    gutter: getComputedStyle(sc).getPropertyValue("--wpg-gutter").trim()
+      || getComputedStyle(sc).getPropertyValue("--content-gutter").trim(),
     /**
      * ⚠️ THE SCROLL ROW RESERVES A CLASSIC SCROLLBAR GUTTER ON BOTH EDGES, and the content sits
      * inside it. `scrollbar-gutter: stable both-edges` — measured `offsetWidth 1170` against

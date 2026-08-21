@@ -248,14 +248,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
          element draws its own closing hairline and the gap beneath it — see pageHeader.css. */
       <header className="wsh">
         <div className="wsh-row">
-          {/**
-            * ⚠️ TWO MARKS, THE SECOND MIRRORED, AND THE ROW CENTRED BETWEEN THEM (masthead measure,
-            * §2; ref 173). The masthead is a title page rather than a left-aligned header bar.
-            *
-            * ⚠️ THE SECOND IS `aria-hidden` AND SO IS THE FIRST — they are one ornament rendered
-            * twice, not two facts. A screen reader that announced the page's mark twice would be
-            * reporting a symmetry that means nothing to it.
-            */}
+          {/* ⚠️ ONE MARK, LEFT OF THE TEXT (masthead left-constant, §B). The mirrored second mark
+              of the centred layout is deleted; `OneScreenMark` carries its own `aria-hidden`. */}
           {mark && (
             <span className="wsh-mark">
               <OneScreenMark name={mark} />
@@ -270,11 +264,6 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
                 in flow there is no height to keep, so a title-only page is simply shorter. */}
             {description && <p className="wsh-sub">{description}</p>}
           </div>
-          {mark && (
-            <span className="wsh-mark wsh-mark--mirror">
-              <OneScreenMark name={mark} />
-            </span>
-          )}
         </div>
       </header>
     );

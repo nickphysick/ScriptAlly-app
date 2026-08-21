@@ -212,7 +212,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * edges at three window widths rather than naming a figure — a hardcoded number here would have
    * to be edited every time either token moved, which is how a lock stops describing the design.
    */
-  it("⚠️ THE MASTHEAD TAKES THE PAGE'S MEASURE AND STATES NO WIDTH OF ITS OWN", () => {
+  it("⚠️ TWO MEASURES — the content takes its page's, the masthead takes one constant", () => {
     /* ⚠️ THIS REVERSES WHAT STOOD HERE, ON THE PACK'S TERMS. The old rule was a RELATIONSHIP:
        content = window − 2×gutter, header = content − 2×inset, so the plate sat `--header-inset`
        inside the cards it floated above. A plate was an object and an object needs a margin.
@@ -225,23 +225,67 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(gutter, "the content gutter is not declared on :root — every width below is unresolvable").toBeTruthy();
     expect(Number(gutter![1]), "the gutter went to zero — content would touch the window edge").toBeGreaterThan(0);
 
-    /* ⚠️ `--wpg-gutter` AND THE ESCAPE ARE REVERTED (masthead measure, §1). Step 2 of the previous
-       pack routed the gutter through a token so the MASTHEAD could cancel it with a negative margin
-       and reach a 16px window inset — a width rule of its own, which is exactly how it drifted from
-       the content it titles. The scroller reads the shell's gutter directly again. */
-    expect(block(".wpg-scroll"), "the gutter left the scrollport, so the scrollbar comes out of the content column again")
-      .toContain("padding-inline: var(--content-gutter)");
-    /* comments stripped: this file's prose NAMES both retired tokens, so a bare search finds the
+    /**
+     * ⚠️ THE GUTTER MOVED OFF THE SCROLL ROW AND ONTO THE MEASURES INSIDE IT (masthead
+     * left-constant, §A). One padding here insets EVERY child equally, and the whole point of this
+     * amendment is that the masthead and the content no longer share a gutter.
+     *
+     * ⚠️ THE SCROLLBAR CLAIM IS UNTOUCHED, and the stylesheet's own note proves why by measurement:
+     * gutter on this row and gutter on an inner measure came out IDENTICAL, because the bar sits
+     * inside the padding box either way. `scrollbar-gutter: stable both-edges` is what reserves it.
+     */
+    expect(block(".wpg-scroll"), "the scroll row went back to padding every child by the same amount")
+      .not.toContain("padding-inline:");
+    expect(block(".wpg-scroll"), "the scrollbar reservation went — the gutters jitter when a list filters down")
+      .toContain("scrollbar-gutter: stable both-edges");
+    /* comments stripped: this file's prose NAMES the retired token, so a bare search finds the
        explanation and calls it the code */
     const declsOnly = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
-    for (const gone of ["--masthead-inset", "--wpg-gutter"]) {
-      expect(declsOnly, `\`${gone}\` came back — the masthead would have a width rule of its own again`).not.toContain(gone);
-    }
-    /* ⚠️ AND THE MASTHEAD TAKES THE PAGE'S MEASURE RATHER THAN STATING ONE. `none` by default, so a
-       page that caps its work surface names it once and every child of the scroller — masthead, mini
-       bar, control row, content — is inside it. */
-    expect(block(".wpg-scroll > *"), "the scroller's children stopped sharing one measure")
-      .toContain("max-width: var(--wpg-measure, none)");
+    /**
+     * ⚠️ `--wpg-gutter` IS BACK AND `--masthead-inset` IS NOT, AND THE DIFFERENCE IS THE POINT. The
+     * two were forbidden together while the masthead took the page's measure; what was wrong was
+     * never the token's NAME but the MECHANISM it served — the masthead reading the page's gutter in
+     * order to CANCEL it with a negative margin and reach a fixed inset from the window edge.
+     * `--wpg-gutter` now names the page's own content gutter, is read only by content, and the
+     * masthead has never heard of it.
+     *
+     * ⚠️ SO THE ASSERTION IS ABOUT THE MECHANISM, NOT THE VOCABULARY. A forbidden-name list would
+     * have had to be relaxed here, and would then have been guarding nothing at all.
+     */
+    expect(declsOnly, "`--masthead-inset` came back — the masthead is measuring from the window again")
+      .not.toContain("--masthead-inset");
+    expect(declsOnly, "a negative inline margin came back — that is the escape the window-inset system used, and the fault was the escape rather than the token")
+      .not.toMatch(/margin-inline:\s*calc\(\s*-/);
+    /**
+     * ⚠️ TWO MEASURES, AND THE MASTHEAD'S IS THE CONSTANT ONE (masthead left-constant, §A). This
+     * asserted the masthead took the PAGE's measure — the second of three positions on masthead
+     * width, and wrong: pages do not share a gutter, so the masthead's left edge moved between 35
+     * and 80 as you changed page.
+     *
+     * Content keeps `--wpg-measure` and its page's gutter, expressed as a max-width REDUCTION rather
+     * than as padding — padding here would land on the page's own first element and clobber the
+     * inner padding of a drawn frame like Query Centre's.
+     */
+    expect(block(".wpg-scroll > *"), "the scroller's children stopped taking the page's measure")
+      .toContain("max-width: min(var(--wpg-measure, 100%), calc(100% - 2 * var(--wpg-gutter, var(--content-gutter))))");
+    /* ⚠️ AND THE PAGE'S GUTTER IS A FALLBACK, NOT A DEFAULT ON `.wpg`. A page's class sits on the
+       SAME element as `.wpg`, so a default here is 0-1-0 against 0-1-0 and source order decides —
+       this sheet is later, so it beat every override. Measured: Query Centre took the wide gutter. */
+    expect(block(".wpg"), "the page gutter went back to being declared on the grid, where it outranks every page")
+      .not.toContain("--wpg-gutter:");
+    /* ⚠️ 0-2-0 ON PURPOSE — at equal specificity this would depend on source order, which is how a
+       rule quietly stops applying the day someone reorders a file. */
+    const mastMeasure = cssRules.slice(cssRules.indexOf(".wpg-scroll > .wpg-mast"));
+    /* ⚠️ THE SAME EXPRESSION SHAPE AS THE CONTENT'S, deliberately — mixing a reduction with padding
+       made the two diverge the moment the cap bound: measured, the masthead's ink sat 35px inside
+       the panes it titles at 2300 while matching them exactly at 1440. One shape, both measures. */
+    expect(mastMeasure, "the masthead stopped taking the shared cap and the one constant gutter")
+      .toContain("max-width: min(var(--work-max), calc(100% - 2 * var(--mast-gutter)))");
+    /* the cap is READ, never restated — `--work-max` is the app's shared centring measure and the
+       content reads the same token through `--wpg-measure` */
+    expect(mastMeasure, "the masthead restated the cap as a number instead of reading the shared token")
+      .not.toMatch(/max-width:[^;]*\d{3,4}px/);
+    expect(block(".wpg"), "the constant gutter is not defined on the grid").toContain("--mast-gutter: 35px");
     /* ⚠️ `width: 100%` IS PART OF THE CLAIM, NOT TIDINESS. Without it an auto inline margin stops a
        FLEX child stretching, so on the five fill pages the masthead and the content both shrank to
        their own contents — the fix breaking both sides of the comparison it exists to hold. */

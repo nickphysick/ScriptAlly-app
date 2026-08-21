@@ -278,22 +278,28 @@ describe("the masthead is content, not chrome", () => {
     for (const plate of ["border: 1px solid var(--shell-line)", "border-radius: 9px"]) {
       expect(decls(all(hdrCss, ".wsh-mark .os-mark")), `the plate came back (\`${plate}\`)`).not.toContain(plate);
     }
-    /* ⚠️ THE MIRROR IS ON THE DRAWING, NOT THE BOX, AND THAT IS THE BLEND GROUP. A `transform` on
-       `.wsh-mark--mirror` would form a stacking context, isolating `mix-blend-mode` beneath it — so
-       the right-hand mark would stop multiplying while the left one still did, and one drawing would
-       render as two different things anywhere but on white. */
-    expect(all(hdrCss, ".wsh-mark--mirror .os-mark > *"), "the mirror stopped flipping the drawing")
-      .toContain("transform: scaleX(-1)");
-    expect(decls(all(hdrCss, ".wsh-mark--mirror")), "the mirror moved onto the BOX — it isolates the blend group there")
-      .not.toMatch(/\.wsh-mark--mirror\s*\{[^}]*transform/);
+    /* ⚠️ THE MIRRORED SECOND MARK IS DELETED (masthead left-constant, §B) — one mark, left of the
+       text. Its FINDING is not deleted with it: the flip had to sit on the drawing rather than the
+       box, because a `transform` forms a stacking context and isolates `mix-blend-mode` beneath it.
+       That lives in CLAUDE.md and in the entrance-animation note, both of which stay. */
+    expect(live, "the mirrored mark came back — the row carries one mark now")
+      .not.toMatch(/["\s.]wsh-mark--mirror[\s.{,]/);
   });
 
-  it("⚠️ THE ROW IS CENTRED AND HIDE IS NOT IN IT", () => {
-    /* A title page, not a header bar: mark · text · mirrored mark, centred between them. Hide's
-       absolute positioning is load-bearing rather than cosmetic — ANY in-flow control on one side
-       shifts the centred block off true by half its own width, and it would do so silently. */
-    expect(all(hdrCss, ".wsh-row"), "the masthead row stopped centring").toContain("justify-content: center");
-    expect(all(hdrCss, ".wsh-txt"), "the text block stopped centring").toContain("text-align: center");
+  it("⚠️ THE ROW IS LEFT ALIGNED AND HIDE IS NOT IN IT", () => {
+    /**
+     * ⚠️ THE CENTRING ASSERTION IS DELETED, NOT ADAPTED — it described a layout that no longer
+     * exists (masthead left-constant, §B).
+     *
+     * ⚠️ HIDE'S ABSOLUTE POSITIONING IS STILL LOAD-BEARING, FOR A DIFFERENT REASON. It was "an
+     * in-flow control on one side shifts the centred block off true by half its width". Nothing is
+     * centred now — but a control at the row's end still STRETCHES the flex row, which moves the
+     * description's wrap point. The claim is about the control's position; it was never about a
+     * centre, and it does not go with one.
+     */
+    const rowDecls = decls(all(hdrCss, ".wsh-row"));
+    expect(rowDecls, "the masthead row went back to centring").not.toContain("justify-content: center");
+    expect(decls(all(hdrCss, ".wsh-txt")), "the text block went back to centring").not.toContain("text-align: center");
     const grid = readFileSync(resolve(__dirname, "workspacePageGrid.css"), "utf8");
     const hide = /\.wpg-mast-hide\s*\{([^}]*)\}/.exec(grid);
     expect(hide, "Hide has no rule at all").toBeTruthy();

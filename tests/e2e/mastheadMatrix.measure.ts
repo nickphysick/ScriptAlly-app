@@ -77,13 +77,9 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     illustrated: !!mark?.querySelector("img"),
     markCount: mast.querySelectorAll(".wsh-mark").length,
     /**
-     * ⚠️ THE CENTRED BLOCK AGAINST THE MEASURE'S OWN CENTRE (masthead measure, §2), and it is read
-     * WITH Hide in the document, because Hide is the thing most likely to break it. Any control that
-     * joins the flex row shifts the centred block off true by half its own width — silently, and by
-     * an amount that looks like a rounding error until you put a ruler on it.
+     * ⚠️ HIDE'S PRESENCE, read on the pages that draw it. The centring readings this note used to
+     * introduce are deleted with the centred layout (masthead left-constant, §B).
      */
-    txtMid: (() => { const b = mast.querySelector(".wsh-txt")?.getBoundingClientRect(); return b ? r(b.left + b.width / 2) : -1; })(),
-    mastMid: (() => { const b = mast.getBoundingClientRect(); return r(b.left + b.width / 2); })(),
     hidePresent: !!wrap.querySelector(".wpg-mast-hide"),
     /**
      * ⚠️ STRUCTURAL, NEVER A LIST OF LABELS. A name list passes the day someone adds a control this
@@ -282,24 +278,19 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   const sizes = new Set(rows.map((x) => x.r.markW));
   expect([...sizes], `the marks are not all one size: ${rows.map((x) => `${x.name} ${x.r.markW}`).join(", ")}`).toEqual([52]);
 
-  /* ⚠️ AND THERE ARE TWO OF THEM, the second mirrored — a title page rather than a header bar. */
-  for (const { name, r } of rows) {
-    expect(r.markCount, `${name} draws ${r.markCount} mark(s) — the masthead is mark · text · mirrored mark`).toBe(2);
-  }
-
   /**
-   * ⚠️ THE TEXT SITS ON THE MEASURE'S CENTRE, AND HIDE IS IN THE DOCUMENT WHILE THIS IS READ.
+   * ⚠️ ONE MARK, LEFT OF THE TEXT (masthead left-constant, §B). The mirrored second mark is gone
+   * with the centred layout; the CENTRING assertion that stood here is DELETED rather than adapted,
+   * because it described a layout that no longer exists.
    *
-   * This is the assertion §2 turns on. Hide is absolutely positioned for one reason: an in-flow
-   * control on ONE side of a centred row pushes the row off centre by half its own width. That is
-   * ~40px here — visible, but not obviously WRONG to the eye, which is why it needs a ruler rather
-   * than a screenshot. A tolerance of 1px covers subpixel rounding and nothing else.
+   * ⚠️ HIDE IS STILL ASSERTED PRESENT ON EVERY FILL PAGE, and its absolute positioning is still
+   * load-bearing — for a different reason, which the unit lock now states: nothing is centred, but a
+   * control at the row's end still STRETCHES the flex row and moves the description's wrap point.
    */
   for (const { name, r } of rows) {
+    expect(r.markCount, `${name} draws ${r.markCount} mark(s) — the masthead carries one`).toBe(1);
     const fill = PAGES.find((p) => p.name === name)!.fill;
-    if (fill) expect(r.hidePresent, `${name} is a fill page and drew no Hide — the centring is untested on the case that breaks it`).toBe(true);
-    expect(Math.abs(r.txtMid - r.mastMid), `${name}: the title block's centre is ${r.txtMid} against the measure's ${r.mastMid} — something in the row is taking width on one side`)
-      .toBeLessThanOrEqual(1);
+    if (fill) expect(r.hidePresent, `${name} is a fill page and drew no Hide`).toBe(true);
   }
 
   /* ⚠️ AND THE CONTROL ROW SITS THE SAME DISTANCE BELOW ON EVERY PAGE THAT HAS ONE. This is where

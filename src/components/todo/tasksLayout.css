@@ -41,7 +41,9 @@
  */
 /* ⚠️ THE ROW'S PADDING AGAIN (masthead measure, §1) — see the note on `.qc-wpg` in f12.css. The
    `--wpg-gutter` token and the masthead escape it fed are reverted; the VALUE is unchanged. */
-.tpl-wpg .wpg-scroll { padding-inline: var(--content-gutter-tight); }
+/* ⚠️ THE PAGE'S CONTENT GUTTER, NOT THE SCROLL ROW'S PADDING (masthead left-constant, §A) — the
+   value is unchanged, and the masthead no longer sits inside it. */
+.tpl-wpg { --wpg-gutter: var(--content-gutter-tight); }
 /* ⚠️ THE PAGE-SCOPED `--content-top-gap` OVERRIDES ARE DELETED (in-flow masthead, step 4).
    Both states set it to 0 so this page's content sat flush under the chrome hairline instead of
    taking the shell's 44px. There is no chrome hairline and no gap token: the masthead states its

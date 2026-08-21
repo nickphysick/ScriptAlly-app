@@ -270,9 +270,8 @@
      of a fixed-height card. In flow the masthead is sized by its contents and inset by the scroll
      row's gutter — which is what puts its mark on the same vertical as the content below it, on
      every page, without either of them naming a number.
-     ⚠️ CENTRED (masthead measure, §2). Mark · text · mirrored mark, the row centred between them —
-     a title page rather than a left-aligned header bar. */
-  display: flex; align-items: center; justify-content: center; gap: 22px;
+     ⚠️ LEFT ALIGNED, ONE MARK (masthead left-constant, §B) — superseding the centred layout. */
+  display: flex; align-items: center; gap: 16px;
 }
 
 /* ⚠️ THE FLEX CONTRACT, and the truncation ORDER: the description truncates first. Title and
@@ -287,15 +286,12 @@
    animates the masthead as a whole rather than each of its parts separately.
    ⚠️ ONE SIZE FOR BOTH FAMILIES (masthead measure, §2) — 52px, illustrated or monoline. */
 .wsh-mark { flex: 0 0 52px; }
-/* ⚠️ THE SECOND MARK IS THE FIRST, FLIPPED — one drawing, rendered twice. A separate asset would be
-   two things to keep in step for a symmetry that is purely optical. The flip is applied to the
-   DRAWING, further down; see the note there for why it cannot live on this box. */
 /* ⚠️ 64 → 88 (preset B) — the illustrated mark only. The 38px monoline glyph on its parchment
    plate is the OTHER mark family and is deliberately untouched: it is a plated icon, not a
    drawing, and scaling it with the illustration would turn a small badge into a large blank tile.
    Two legitimate rest sizes, 38 and 88, and the matrix asserts exactly those two. */
 
-.wsh-txt { display: flex; flex-direction: column; min-width: 0; flex: 0 1 auto; text-align: center; }
+.wsh-txt { display: flex; flex-direction: column; min-width: 0; flex: 0 1 auto; }
 /* ⚠️ 600 IS A TOKEN, NOT A LITERAL, AND IT MUST NOT PROPAGATE (amendment 12). Every other Playfair
    heading in the shell is 500; this plate is the one place that goes heavier, so the weight is
    named where it is used and read once. A bare `600` here would be indistinguishable from the
@@ -406,7 +402,7 @@
      `#8a7a70`: this rule carried the near-identical literal `#6b5a51` for its whole life, and
      importing a fifth warm ink from a document drawn against its own palette is how a scale drifts.
      Size from the ref, colour from the scale. */
-  margin: 4px 0 0; font-size: 13.5px; color: var(--shell-ink-soft);
+  margin: 3px 0 0; font-size: 13.5px; color: var(--shell-ink-soft);
   /* ⚠️ IT DECLARES ITS OWN LINE-HEIGHT OR IT INHERITS THE PAGE'S, AND THE PAGES DISAGREE. Measured
      on the built dev bundle at 1440×900 with every other value identical — same 26/20 padding, same
      30px title, same 16px margin, nothing between the masthead and the control row — the text block
@@ -464,16 +460,13 @@
 .wsh-mark .os-mark svg { width: 36px; height: 36px; stroke: var(--shell-ink); stroke-width: 1.5; }
 .agl-anim .wsh .wsh-mark .os-mark img { opacity: 0; }
 
-/**
- * ⚠️ THE MIRROR IS ON THE DRAWING, NOT ON THE BOX — and that is not tidiness, it is the blend group.
- * A `transform` creates a stacking context, which ISOLATES `mix-blend-mode` in everything beneath
- * it: `transform` on `.wsh-mark--mirror` would stop the right-hand mark multiplying while the
- * left-hand one still did, so the two copies of one drawing would differ the moment the header sat
- * on anything but white. Transforming the blending element ITSELF does not isolate it — the
- * stacking context it forms governs its descendants, not its own compositing with the backdrop.
- * This is the same trap the note above describes for the entrance animation, one level down.
- */
-.wsh-mark--mirror .os-mark > * { transform: scaleX(-1); }
+/* ⚠️ THE MIRRORED SECOND MARK IS DELETED (masthead left-constant, §B) — one mark, left aligned.
+   ⚠️ ITS FINDING IS NOT DELETED WITH IT, and it was the expensive half: the flip had to go on the
+   DRAWING rather than on the box, because a `transform` forms a stacking context and ISOLATES
+   `mix-blend-mode` beneath it — so the right-hand mark would have stopped multiplying while the
+   left-hand one still did, invisibly on white and visibly on anything else. That is recorded in
+   CLAUDE.md, and the entrance-animation note above names the same trap one level up. Nothing here
+   should be read as retiring it. */
 
 /**
  * ⚠️ REDUCED MOTION KILLS THE TRANSITIONS, NEVER THE STATES. The plate must still condense — the
