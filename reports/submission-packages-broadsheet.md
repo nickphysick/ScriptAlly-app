@@ -335,3 +335,80 @@ mid-flight. It currently is.
 | shared header file in the diff | — | **none** |
 
 Screenshots: `reports/pkg-broadsheet/p1b-1440.png`, `p1b-1920.png`.
+
+---
+
+## Phase 5 — HELD AT THE GATE. Nothing deployed.
+
+**Branch taken at Step 0: the HOLD STANDS.** The header session's work is not settled, so this
+phase stopped before Phase 5A. This is the gate doing its job, not a failure.
+
+### What is outstanding (checked 21 Aug, HEAD `71debcac`)
+
+All six named files are still modified in the working tree — **415 changed lines**, nothing staged:
+
+| File | Δ lines |
+|---|---|
+| `src/components/shell/workspacePageGrid.test.tsx` | 168 |
+| `src/components/shell/workspacePageGrid.css` | 165 |
+| `src/components/shell/WorkspacePageGrid.tsx` | 41 |
+| `src/components/shell/pageHeaderDefault.test.tsx` | 27 |
+| `src/components/shell/pageHeader.test.tsx` | 12 |
+| `src/components/shell/pageHeader.css` | 2 |
+
+**The 168-line rewrite of `workspacePageGrid.test.tsx` is the file carrying the census lock this
+page conforms to.** Deploying over an in-flight rewrite of the check that governs this page's
+masthead is exactly the case the hold was written for.
+
+### And their work is visibly mid-DESIGN, not mid-landing
+
+Two untracked design refs, both written today at 13:43 — after Phase 4 closed:
+
+- `design-refs/174-pinned-chrome-options.html` (9,831b)
+- `design-refs/175-sticky-masthead-chevron.html` (13,033b)
+
+A file named `…-options` is a comparison of alternatives. They are choosing between pinned-chrome
+treatments and a sticky-masthead chevron, on a numbered pack whose last landed commit is
+`8a9660e0 masthead — left aligned, one mark, constant across pages` (preceded by "masthead rethink,
+step 4" and "step 5"). That is a session mid-decision, not one tidying up.
+
+### A second reason, which the gate does not name and which matters as much
+
+`origin/main` is **38 commits behind local `main`** — nothing has been pushed. A deploy now would
+carry 38 unpushed commits from four concurrent sessions, of which the header rework is only
+partly landed. The deploy record Phase 5D asks for could not honestly name what shipped.
+
+### ⚠️ AND RUNNING PHASE 5A ANYWAY WOULD HAVE BEEN A MISTAKE
+
+5A is local verification and deploys nothing, so there is a surface argument for doing it now and
+leaving only 5B–5D for later. It is wrong, and for this build's own recorded reason: a local build
+today contains the header session's in-flight shell, so every geometry number 5A produced would
+describe a masthead that is about to change. That is the *"true readings about the wrong build"*
+shape — the most expensive failure this project has, because a wrong number gets investigated and a
+right number about the wrong subject gets believed. The measurements are worth taking once, against
+the shell that ships.
+
+### State of this build while it waits — clean, and verified so
+
+- `git diff --name-only HEAD` filtered to this stream's paths: **empty**. Nothing of Phases 1–4 is
+  uncommitted; every outstanding file belongs to the header or to-do sessions.
+- Full suite at HEAD, with their WIP present in the tree: **360 files / 6126 tests green**.
+- `workspacePageGrid.test.tsx` — **33/33 green, including the census entry for Submission
+  packages**. The conform ruling is holding as their rework moves: this page renders
+  `PageHeader variant="workspace"` and the census is satisfied without an entry being edited,
+  weakened or amended.
+
+### What unblocks it
+
+`WorkspacePageGrid.tsx`, `pageHeader.css`, `pageHeader.test.tsx`, `pageHeaderDefault.test.tsx`,
+`workspacePageGrid.css` and `workspacePageGrid.test.tsx` committed and settled. Then Step 0's other
+branch: rebase onto current `origin/main`, re-confirm the census, and run 5A → 5D unchanged.
+
+### Carried into Phase 5, unchanged
+
+- **Dev rules are ahead of dev hosting** and have been since Phase 3. The archive path is proven at
+  rules level (`status "Retired"` ACCEPTED, `status "Nonsense"` DENIED, delete of an unreferenced
+  material ACCEPTED) and against a local build (13 measurements at 1440/1920). It has **never been
+  proven end to end on the deployed site**, which is what 5C exists for.
+- The slot inventory (5D) is the illustrator's deliverable and is still to be tabulated from the
+  deployed page, not from source.
