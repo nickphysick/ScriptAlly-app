@@ -183,6 +183,31 @@
    and the grid offers it as one (`var(--wpg-measure, 100%)`). The masthead's gutter is not that
    kind of token. */
 .ct-wpg.wpg { --wpg-measure: var(--work-max); }
+
+/* ⚠️ THE SHARED STICKY SLAB IS HIDDEN ON THIS PAGE ONLY (v2.1 §1) — hidden rather than restyled,
+ * because what it does is behaviour, not appearance.
+ *
+ * `.wpg-chrome` is `position: sticky; top: 0` with an opaque fill, a base hairline, a scroll shadow
+ * that fades in on `--stuck`, and a settled posture that shrinks the mark to 34px and the title to
+ * 22px as content passes beneath it. This page wants a header that simply leaves with the content,
+ * on the SHEET's measure rather than the masthead's constant 35px gutter. Neither is reachable by
+ * styling the slab: the first is behaviour, and the second is a cross-page constant that
+ * `contentGeometry.measure.ts` exists to protect — one a previous pass of mine wrongly overrode.
+ *
+ * ⚠️ `masthead={null}` ALONE IS NOT ENOUGH, which is the whole reason this rule exists. The grid
+ * renders `.wpg-chrome` UNCONDITIONALLY, so declining its contents leaves an empty sticky box that
+ * still draws its hairline across the top of the page.
+ *
+ * ⚠️ AND IT IS PAGE-SCOPED BY DESCENDANCY, WHICH IS THE SAFE SHAPE. `.ct-wpg .wpg-chrome` is 0-2-0
+ * and names an element INSIDE this page's own grid, so it cannot reach another page's chrome
+ * whatever source order the bundler emits. Nothing in the shared component or its stylesheet is
+ * edited, and every other page is byte-identical.
+ *
+ * ⚠️ THE GRID'S ARITHMETIC SURVIVES IT. `chromeRef` measures the slab to give the scroll hems their
+ * clearance; a hidden box measures 0, which is the correct clearance for a slab that is not there.
+ * The `.wpg-reclaim` spacer keeps its 16px `--wpg-chrome-gap`, which is now simply the page's top
+ * margin — a sensible one, so it is left rather than zeroed. */
+.ct-wpg .wpg-chrome { display: none; }
 /* ⚠️ NO TOP PADDING, EVER — the gap under the header belongs to `--content-top-gap` and is paid
    ONCE, by whichever row is first below the hairline. This carried 22px, so the page rendered a
    92px gap against a 70px token: not the grid paying twice, but a bare wrapper adding a second
@@ -199,37 +224,49 @@
 }
 
 /* ── the hero: the composed query line, and what it is made of ── */
-/* ══ THE PAGE HERO — title block left, active-manuscript tile right (v2 §1) ══
+/* ══ THE PAGE HEADER — static, inside the sheet (v2.1 §1) ══
+ *
+ * ⚠️ NOTHING STICKY, NOTHING FLOATING. No `position`, no background, no shadow — the four things the
+ * shared slab carried, and the four reasons it could not simply be restyled into this. The only
+ * rule here is the hairline UNDER the block, which belongs to the header rather than the viewport.
+ *
+ * ⚠️ `.ct-hero` AND ITS PARTS ARE RETIRED WITH IT — the eyebrow, the standfirst, the three-fact row
+ * and the `0 comps` tally are all gone. The tile survives them and moved into `.ct-toprow`; its
+ * comps line is the only count above the fold now. */
+.ct-pagehead {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 4px 0 20px; margin-bottom: 24px;
+  border-bottom: 1px solid var(--ct-band-hair);
+}
+/* the shared mark, sized by its container exactly as `PageHeader` sizes it */
+.ct-pagemark { flex: 0 0 34px; display: flex; align-items: center; justify-content: center; }
+.ct-pagemark .os-mark { width: 34px; height: 34px; flex-basis: 34px; }
+.ct-pagemark .os-mark img, .ct-pagemark .os-mark svg { width: 34px; height: 34px; }
+/* ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR — "Comparable titles" carries a `p`, and a tighter line box
+   crops it. This is the largest text on the page, so it is the most visible place to get it wrong.
+   Plain ink, one weight: no italic accent word, no burgundy `<em>`, no colour-shifted word. */
+.ct-pagehead h1 {
+  margin: 0; font-family: 'Playfair Display', serif; font-size: 38px; font-weight: 600;
+  line-height: 1.3; letter-spacing: -.015em; color: var(--ct-ink);
+}
+.ct-pagehead p { margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: var(--ct-ink-soft); }
 
-   ⚠️ THIS IS NOT A CARD. It sits directly on the page ground, the way the ref draws it — the cards
-   below it are the mounted objects and a framed hero above them would make four boxes in a stack.
-   The tile is the only bounded thing here, and that is what makes it read as a separate object. */
-.ct-hero {
-  display: grid; grid-template-columns: minmax(0, 1fr) 268px; gap: 34px;
-  align-items: start; padding: 4px 0 26px;
+/* ══ THE TOP ROW — tile left, query line right (v2.1 §2) ══
+ *
+ * ⚠️ `align-items: stretch` IS THE POINT: both columns share one height, and the card's insides take
+ * it from here rather than from a number. `.ct-qline` below carries the flex chain that turns that
+ * shared height into a line at the top and controls pinned at the foot.
+ *
+ * ⚠️ `minmax(0, 1fr)` ON THE RIGHT TRACK, never a bare `1fr` — a `1fr` track's automatic minimum is
+ * min-content, so one long unbroken query line would push the card past the row. */
+.ct-toprow {
+  display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px;
+  align-items: stretch; margin-bottom: 20px;
 }
-/* ⚠️ THE TILE DROPS BELOW, IT NEVER SHRINKS. Its plate, title and pills are sized for 268px; letting
-   the track shrink squeezes the title into three lines long before the page is genuinely narrow. */
-@media (max-width: 980px) { .ct-hero { grid-template-columns: minmax(0, 1fr); gap: 22px; } }
-.ct-hero-l { min-width: 0; }
-/* the standfirst — a description of what the page is for, never advice about the writer's own list */
-.ct-hero-sub {
-  margin: 13px 0 0; max-width: 620px; font-size: 14.5px; line-height: 1.62; color: var(--ct-ink-soft);
-}
-/* ⚠️ A ROW, NOT A CARD ROW — three bare facts under a rule, per the ref. Numerals are Playfair so
-   they read as figures in a sentence rather than as dashboard metrics. */
-.ct-hero-facts {
-  display: flex; gap: 40px; flex-wrap: wrap; margin-top: 22px; padding-top: 20px;
-  border-top: 1px solid var(--ct-band-hair);
-}
-.ct-hero-fact .n {
-  font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 600; line-height: 1;
-  color: var(--ct-ink);
-}
-.ct-hero-fact .t {
-  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .13em;
-  text-transform: uppercase; color: var(--ct-label); margin-top: 8px; white-space: nowrap;
-}
+/* ⚠️ THE TILE GOES FIRST WHEN IT STACKS — it is the page's scope, and scope reads before the thing
+   it scopes. Source order already does that; it is stated so nobody "improves" the order later. */
+@media (max-width: 980px) { .ct-toprow { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+
 
 /* ── the active-manuscript tile ── */
 .ct-mstile {
@@ -267,11 +304,40 @@
 .ct-mscomps { font-size: 12.5px; color: var(--ct-ink-soft); }
 
 /* ══ THE QUERY LINE ══ */
+/* ⚠️ THE CARD FILLS THE ROW, AND IT DOES IT WITH A FLEX CHAIN RATHER THAN A HEIGHT (v2.1 §2). The
+   tile sets the row's height; a fixed height here would have to be kept in step with a tile whose
+   own height depends on the title's wrap, the pills and whether a word count exists. Every link in
+   the chain is needed — `.ct-qline` stretches as a grid item, its body grows inside it, and the
+   actions row is pushed to the foot by `margin-top: auto`. Break any one and the controls float in
+   the middle of a taller frame. */
 .ct-qline {
   background: var(--ct-card); border: var(--ct-bdw) solid var(--ct-bd); border-radius: 20px;
   box-shadow: var(--ct-panel-sh); overflow: hidden;
+  display: flex; flex-direction: column;
 }
-.ct-qline-l { padding: 26px 34px 24px; min-width: 0; }
+/* ⚠️ `min-height: 0` ON THE GROWING CHILD, or its content cannot shrink below its min-content height
+   and the card pushes the row taller instead of fitting it. */
+.ct-qline-l { padding: 26px 34px 24px; min-width: 0; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* ⚠️ THE LINE AND THE SLOT SHARE A ROW; the LINE keeps the flexible column so a long sentence still
+   has room, and the slot is the fixed one. `1fr / 156px`, per the ref. */
+.ct-qsplit { display: grid; grid-template-columns: minmax(0, 1fr) 156px; gap: 20px; align-items: start; }
+.ct-qslot {
+  width: 156px; height: 118px; border: 1px dashed var(--ct-taupe-bd); border-radius: 10px;
+  background: var(--ct-sect); display: flex; align-items: center; justify-content: center;
+  padding: 0 8px; align-self: start;
+}
+.ct-qslot span {
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .06em;
+  color: var(--ct-label); text-align: center; overflow-wrap: anywhere;
+}
+/* ⚠️ THE SLOT HIDES RATHER THAN SQUASHING. A slot that shrinks with its column stops being the size
+   it is briefed at, and the illustrator would be drawing for a box that does not exist at that
+   width. Below the stack point the line simply takes the whole body. */
+@media (max-width: 980px) {
+  .ct-qsplit { grid-template-columns: minmax(0, 1fr); }
+  .ct-qslot { display: none; }
+}
 .ct-eyebrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 /* ⚠️ PLAYFAIR ROMAN IN INK — baked decision 2, an explicit correction. No italics, no burgundy.
    WEIGHT is the only emphasis device: the manuscript title 700, the comp titles 600. Colour,
@@ -327,7 +393,10 @@
   border-radius: 50%; background: var(--ct-mocha); color: var(--ct-card); flex: 0 0 auto;
   font-family: 'JetBrains Mono', monospace; font-size: 8.5px; font-weight: 600;
 }
-.ct-qline-ctl { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
+/* ⚠️ `margin-top: auto` IS WHAT PINS THE CONTROLS TO THE FOOT — the last link in the fill chain.
+   The 18px is kept as a MINIMUM gap for the case where the card is exactly its content height
+   and there is no free space for `auto` to consume. */
+.ct-qline-ctl { display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 18px; flex-wrap: wrap; }
 
 /* ══ FIELD NOTES — what a good comp does (v2 §2) ══ */
 .ct-fnotes { margin-bottom: 20px; }

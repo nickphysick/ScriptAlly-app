@@ -7,10 +7,11 @@
  * Route /manuscripts/comps; reached from the rail and each plate's MANAGE → link.
  * Single visual source of truth: design-refs/comparable-titles-flat.html.
  *
- * Workspace-fills layout (masthead flex-none over a two-panel split that fills the stage and scrolls
- * internally). The masthead is the standard PageHeader with the manuscript selector in its
- * tools slot (ChromeSlab and HubHeaderBar are both long deleted — shell rollout Phase 6 /
- * follow-up P3).
+ * ⚠️ THIS PAGE DECLINES THE SHARED MASTHEAD (v2.1). `WorkspacePageGrid` is mounted with
+ * `masthead={null}` and no toolbar, and the sticky `.wpg-chrome` slab is hidden page-scoped; the
+ * header is a static `.ct-pagehead` inside the sheet, carrying the page's only `<h1>`. The previous
+ * sentence here described the standard `PageHeader` in the grid's masthead slot with a manuscript
+ * selector in its tools — none of which is true any more.
  * Store only facts + one intent (`inQuery`); role / query line / composition / age are derived
  * at render (src/lib/compsPage.ts). Comp writes go through the shared updateManuscript path (a first
  * write on a legacy-string doc converts it to the structured array); every write runs through
@@ -20,8 +21,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, Plus, Copy, Check, X, Sparkles, Lock, RefreshCw, BookOpen, Star, GripVertical } from "lucide-react";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompMedia, CompTitle, Manuscript } from "../../types";
-import { PageHeader } from "../shell/PageHeader";
-import { WorkspacePageGrid, PageTally } from "../shell/WorkspacePageGrid";
+/* ⚠️ `PageHeader` IS NO LONGER IMPORTED — this page declines the shared masthead
+   (`masthead={null}`) and draws its own static header inside the sheet. The MARK is still
+   the shared one: `OneScreenMark` is what `PageHeader` itself renders for `mark="comps"`,
+   so the glyph cannot drift from the one every other page shows. */
+import { OneScreenMark } from "../dashboard/OneScreenMark";
+import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { BrandDropdown } from "../forms/BrandDropdown";
 import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { genreDisplay } from "../../lib/genres";
@@ -676,7 +681,6 @@ export const ComparableTitlesPage: React.FC<{
   const counts = compCounts(comps);
   const qline = queryLine(comps, activeMs?.title ?? "", format, now);
   /* derived at render from the record, like every other count on this page — never stored */
-  const verifiedCount = comps.filter(isVerified).length;
   /**
    * The tile's pills — primary genre then age category, both resolved for DISPLAY through the shared
    * `genreDisplay` rather than rendered as stored ids.
@@ -794,43 +798,28 @@ export const ComparableTitlesPage: React.FC<{
       <WorkspacePageGrid
         className="ct-wpg"
         scrollLabel="Comparable titles"
-        masthead={
-          <PageHeader
-          variant="workspace"
-          mark="comps"
-          /* ⚠️ NO COUNT ON THE PLATE — the slot is gone from the variant, and the shelf total moved to
-             the tally slot in the row below rather than being dropped. THE RULE: the plate carries
-             IDENTITY, the toolbar carries TALLIES and view state — the same split the Contact list has
-             always had with its "16 OF 16". */
-          title="Comparable titles"
-          description="The books your manuscript sits beside, gathered and query-ready." /* PROVISIONAL copy (flyouts P3) — listed for Nick's review */
-          />
-        }
-        toolbar={
-          /* ⚠️ THIS ROW IS THE PAGE'S ANCHOR, AND ON THIS PAGE IT IS THE COUNT ALONE (in-flow
-             masthead, step 1). Comps has no page-level verbs: adding and removing happen inside the
-             panel that holds the list, and the manuscript selector is the shell's. So the row
-             carries what remains — the tally — and its job here is not to hold controls but to keep
-             a fact on screen once the masthead has scrolled away.
-
-             ⚠️ AND A LONE TALLY IS THE FAULT THIS REPO ALREADY RECORDED, which is why it is stated
-             rather than repeated by accident: Manuscripts' `{n} MANUSCRIPTS · {m} IN SUBMISSION`
-             read as a stray caption in its own row because `margin-left: auto` pushed it away from
-             nothing. This one leads the row and is pushed away from nothing on the RIGHT, which is
-             where a page's controls will land the day it grows some.
-
-             ⚠️ REUSING `compCounts`, NEVER A SECOND DERIVATION — the same function the hero's stat
-             rail reads, so the two figures cannot disagree. */
-          activeMs ? (
-            <PageTally
-              value={`${counts.total} ${counts.total === 1 ? "comp" : "comps"}`}
-              note={counts.inQuery > 0 ? `${counts.inQuery} IN YOUR QUERY` : undefined}
-            />
-          ) : undefined
-        }
-          /* ⚠️ NO TOOLBAR ROW ON THIS PAGE (Amendment 1 §1). The tally moved into the hero's stat
-             rail and the manuscript selector is the shell's; what remained would have been an empty
-             row drawing a hairline over nothing. The grid renders neither when the prop is absent. */
+        /**
+         * ⚠️ `masthead={null}` IS THE OPT-OUT, AND IT NEEDED NO EDIT TO THE SHARED GRID (v2.1 §1).
+         * The prop is REQUIRED but typed `React.ReactNode`, and that type admits `null` — so a page
+         * can decline the shared masthead without the component learning a new prop and without any
+         * other page changing. `PageHeader` is not rendered here at all, so its rules are neither
+         * touched nor bent.
+         *
+         * ⚠️ WHY THE SHARED ONE HAD TO GO RATHER THAN BE RESTYLED. `.wpg-chrome` is a STICKY slab —
+         * `position: sticky; top: 0`, an opaque fill, a base hairline, a scroll shadow that fades in
+         * on `--stuck`, and a settled posture that shrinks the mark to 34px and the title to 22px as
+         * you scroll. This page wants a header that simply leaves with the content, and it wants it
+         * on the SHEET's measure rather than the masthead's constant 35px gutter. Neither is
+         * reachable by styling: the first is behaviour, and the second is the cross-page constant
+         * that `contentGeometry.measure.ts` exists to protect (and which a previous pass of mine
+         * wrongly overrode). A page-local header inside the sheet is the only shape that gets both
+         * without moving anything else.
+         *
+         * ⚠️ AND THE TOOLBAR GOES WITH IT. Its `PageTally` was the `0 comps` line; the tile's own
+         * comps line is the page's count now. A tally pinned above a header that no longer exists
+         * would be a fact anchored to nothing.
+         */
+        masthead={null}
       >
       <div className="ct-pagebody">
         {!activeMs ? (
@@ -842,53 +831,33 @@ export const ComparableTitlesPage: React.FC<{
           </div>
         ) : (
           <>
-            {/* ══ THE PAGE HERO — title block left, active manuscript right (v2 §1). ══
+            {/* ══ THE PAGE HEADER — static, inside the sheet, and the page's only h1 (v2.1 §1).
 
-                ⚠️ NO `<h1>` HERE, DELIBERATELY. The ref draws its own title because it is a
-                standalone mockup with no masthead above it; in the app `PageHeader` already renders
-                "Comparable titles" on the plate, and building the ref's heading as drawn would put
-                the same words on screen twice. Nick's call — the plate keeps the title, the hero
-                keeps everything else. If the plate is ever retired from this page, the heading comes
-                back HERE and not anywhere else.
+                ⚠️ IT SCROLLS AWAY BECAUSE IT IS CONTENT. No `position: sticky`, no fill, no base
+                hairline of its own beyond the rule under the block, and no scroll shadow — the
+                shared slab carried all four and that is precisely what this replaces.
 
-                ⚠️ AND THE EYEBROW IS NOT A HEADING SUBSTITUTE — it is the section label the ref
-                draws, mono and quiet. It must never grow into a second title. */}
-            <div className="ct-hero">
-              <div className="ct-hero-l">
-                <div className="ct-eyebrow">
-                  <span className="ct-lbl">Materials · Positioning</span>
-                </div>
-                <p className="ct-hero-sub">
-                  The books your manuscript sits beside, gathered and put to work — in your query
-                  letter, and in every submission that follows.
-                </p>
-                {/* ⚠️ THREE DERIVED FACTS, AND THE THIRD IS `Verified` RATHER THAN THE REF'S
-                    "Letters using comps". Nothing in this app links a comp to a letter — packages
-                    carry three version ids and no comps, and `CompTitle` carries an `inQuery` intent
-                    and no usage record — so that figure has no data behind it and would be a number
-                    invented to fill a hole in the model. `Verified` is real, derived by `isVerified`
-                    at render, and already on the page. See the report's follow-up note.
+                ⚠️ PLAIN PLAYFAIR IN INK, ONE WEIGHT. No italic accent word and no burgundy `<em>`:
+                a heading that changes colour mid-sentence reads as two things, and the reader has
+                to work out which half is the point.
 
-                    ⚠️ ALL THREE READ `compCounts`/`isVerified`, NEVER A SECOND DERIVATION — the same
-                    functions the toolbar tally reads, so the two figures cannot disagree. */}
-                <div className="ct-hero-facts">
-                  <div className="ct-hero-fact">
-                    <div className="n">{counts.total}</div>
-                    <div className="t">Comps recorded</div>
-                  </div>
-                  <div className="ct-hero-fact">
-                    <div className="n">{counts.inQuery}</div>
-                    <div className="t">In your query line</div>
-                  </div>
-                  <div className="ct-hero-fact">
-                    <div className="n">{verifiedCount}</div>
-                    <div className="t">Verified</div>
-                  </div>
-                </div>
+                ⚠️ THE MARK IS THE SHARED `OneScreenMark`, NOT A TRACED COPY — the same glyph the
+                masthead drew for `mark="comps"`. Its size comes from the container here exactly as
+                it does in `PageHeader`, because the component takes a name and nothing else. */}
+            <header className="ct-pagehead">
+              <span className="ct-pagemark"><OneScreenMark name="comps" /></span>
+              <div>
+                <h1>Comparable titles</h1>
+                <p>The books your manuscript sits beside, gathered and query-ready.</p>
               </div>
+            </header>
 
+            {/* ══ THE TOP ROW — active manuscript left, the query line right (v2.1 §2) ══ */}
+            <div className="ct-toprow">
               {/* ⚠️ THE TILE STATES, IT NEVER APPRAISES. Its foot line is a count of what is on the
-                  shelf — never "enough", "still needs" or any other verdict about the writer's list.
+                  shelf — never "enough", "still needs" or any other verdict about the writer's list,
+                  and it is the only count above the fold now that the fact row and the tally are
+                  gone.
 
                   ⚠️ AND EVERY ROW OMITS ITSELF WHEN ABSENT. No word count → no word-count line; no
                   genre → no pills. A dash or a zero here would assert something the record does not
@@ -916,10 +885,14 @@ export const ComparableTitlesPage: React.FC<{
                     : `${counts.total} ${counts.total === 1 ? "comp" : "comps"} on the shelf`}
                 </div>
               </div>
-            </div>
 
-            <FieldNotesCard />
 
+              {/* ⚠️ THE CARD IS THE ROW'S RIGHT COLUMN NOW (v2.1 §2). It is the same `MountCard`
+                  composition, moved — band, format toggle, tick-chips and actions are untouched.
+                  What is new is that it must FILL a row whose height the tile sets, which is why
+                  its body is a flex column and its actions row takes `margin-top: auto` rather
+                  than a fixed height: the line stays at the top and the controls stay at the
+                  bottom whatever the tile does. */}
             {/* ══ THE QUERY LETTER LINE (v2 §3) — the composed line is the page; the chips below it
                 are the instrument that builds it (baked decision 1). ══ */}
             <section className="ct-panel ct-qline">
@@ -948,6 +921,7 @@ export const ComparableTitlesPage: React.FC<{
                 </div>
               </div>
               <div className="ct-qline-l">
+                <div className="ct-qsplit">
                 {/* ⚠️ `aria-live="polite"` ON THE LINE, announcing ONCE per tick. It is the region
                     that changes, so the whole recomposed sentence is read — not each fragment as it
                     arrives, which is what marking the segments live would produce. */}
@@ -961,6 +935,15 @@ export const ComparableTitlesPage: React.FC<{
                       ))
                     : qline.prompt}
                 </div>
+                  {/* ⚠️ 156×118, AND IT HIDES RATHER THAN SQUASHING UNDER 980px. A slot that
+                      shrinks with the column stops being the size it is briefed at, and the
+                      illustrator would be drawing for a box that does not exist at that width. The
+                      LINE keeps the flexible column, so a long sentence still has room. */}
+                  <div className="ct-qslot" data-slot="comp-query-line" aria-hidden="true">
+                    <span>comp-query-line</span>
+                  </div>
+                </div>
+
                 {/* ⚠️ THE TICK LIVES HERE NOW, NOT ON THE CARD (v2 §3). A chip sits directly under
                     the sentence it changes, so ticking one is visibly composition rather than a
                     property being set on a record three sections down.
@@ -1014,6 +997,9 @@ export const ComparableTitlesPage: React.FC<{
                 </div>
               </div>
             </section>
+            </div>
+
+            <FieldNotesCard />
 
             <div className="ct-split">
             {/* ── Your comps ── */}
