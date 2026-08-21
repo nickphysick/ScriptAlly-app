@@ -149,7 +149,12 @@ test("deed round", async ({ page }) => {
   /* ══ PHASE 4 · custom date opens the calendar ═════════════════════════════════════════════ */
   await page.evaluate(OPEN("Send"));
   await page.waitForTimeout(1300);
-  const reveals: Record<string, boolean> = {};
+  const reveals: Record<string, unknown> = {};
+  /* which journey the pane is actually showing when P4 runs — the diagnostic that was missing */
+  reveals["deed"] = await page.evaluate(`(() => {
+    const d = document.querySelector(".tpn .deed");
+    return d ? (d.textContent || "").slice(0, 34) : "(no pane)";
+  })()`);
   for (const [row, label] of [["s-when", "Another date…"], ["s-expect", "Another date…"], ["s-remind", "A custom date…"]] as const) {
     reveals[row] = await page.evaluate(`(() => {
       const vis = ${VIS};
@@ -162,15 +167,19 @@ test("deed round", async ({ page }) => {
     })()`) as boolean;
     await page.waitForTimeout(700);
     reveals[row + ":field"] = await page.evaluate(`(() => {
-      const vis = ${VIS};
       const sect = document.querySelector(".tpn #${row}");
       if (!sect) return false;
-      return [...sect.querySelectorAll("input, .bdp, [role=dialog], button")].filter(vis)
-        .some((e) => /date/i.test(e.className + " " + (e.getAttribute("placeholder") || "") + " " + (e.getAttribute("aria-label") || "")));
-    })()`) as boolean;
+      /* The picker's own class is sa-dp, not anything containing the word "date". This hunted the
+         word and found nothing on three rows that were all rendering correctly — a probe searching
+         for a name it invented rather than the one the component uses.
+         (No backticks in this comment. See the file header: one inside a page.evaluate template
+         terminates the string, the file fails to COLLECT, and the previous run's report survives on
+         disk looking current.) */
+      return sect.querySelectorAll(".sa-dp").length;
+    })()`);
   }
   add("P4.1 · the custom option reveals a date field on all three rows",
-      ["s-when", "s-expect", "s-remind"].every((r) => reveals[r] && reveals[r + ":field"]),
+      ["s-when", "s-expect", "s-remind"].every((r) => reveals[r] === true && Number(reveals[r + ":field"]) > 0),
       JSON.stringify(reveals));
 
   /* a revealed-but-empty field is not an answer: the chip must not have counted it */

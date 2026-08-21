@@ -47,6 +47,13 @@ export type ExpectChoice =
   | { kind: "date"; ymd: string };
 export type RemindChoice =
   | { kind: "lead"; days: number }
+  /**
+   * ⚠️ A REMINDER CAN BE A DATE, AND THE UNION HAD NO MEMBER FOR IT (deed round, Phase 4). "A custom
+   * date…" mapped to `{ kind: "lead", days: 14 }` — so it selected, revealed nothing, and SILENTLY
+   * INVENTED A FORTNIGHT the writer never picked. Not a missing control: a fabricated answer, in
+   * the one place this app's premise is that the record is true.
+   */
+  | { kind: "date"; ymd: string }
   | { kind: "none" };
 
 export interface SendBodyValues {
@@ -99,7 +106,8 @@ export const remindIsOn = (v: RemindChoice | null, label: string): boolean =>
   !!v && ((v.kind === "none" && label === "No reminder")
        || (v.kind === "lead" && v.days === 0 && label === "On the day")
        || (v.kind === "lead" && v.days === 7 && label === "The week before")
-       || (v.kind === "lead" && v.days !== 0 && v.days !== 7 && label === "A custom date…"));
+       /* the custom option is the DATE member now — it was a lead with an invented number */
+       || (v.kind === "date" && label === "A custom date…"));
 
 export interface TaskPaneBodyProps {
   value: SendBodyValues;
@@ -259,10 +267,21 @@ export const TaskPaneBody: React.FC<TaskPaneBodyProps> = ({ value, onChange, sam
               className={remindIsOn(value.remind, o.label) ? "on" : undefined}
               onClick={() => {
                 const made = o.make();
-                onChange({ ...value, remind: made === "picker" ? { kind: "lead", days: 14 } : made });
+                /* ⚠️ THE PICKER OPENS EMPTY, and an empty date is NOT an answer — the gate checks
+                   the date's presence, not the pill's selection. Seeding a number here is exactly
+                   what this phase removes. */
+                onChange({ ...value, remind: made === "picker" ? { kind: "date", ymd: "" } : made });
               }}>{o.label}</button>
           ))}
         </div>
+        {/* ⚠️ THE SAME COMPONENT AND THE SAME REVEAL PATH AS `When` — not a second date field. The
+            reminder row had none at all, which is why the option selected and showed nothing. */}
+        {value.remind?.kind === "date" && (
+          <div style={{ marginTop: 8 }}>
+            <BrandDatePicker value={value.remind.ymd} placeholder="Pick the day to be reminded"
+              onChange={(ymd) => onChange({ ...value, remind: { kind: "date", ymd } })} />
+          </div>
+        )}
         {/* ⚠️ AND IT SAYS WHERE THE REMINDER GOES. The contract's own line, and it is the honest
             one: this app has no notification delivery of any kind, so a reminder that implied a
             push or an email would be promising something nothing sends. It lands on this list. */}

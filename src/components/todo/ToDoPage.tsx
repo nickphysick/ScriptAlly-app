@@ -1149,6 +1149,9 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       two.push(<>no nudge reminder</>);
     } else if (r?.kind === "lead" && replyMs != null) {
       two.push(<>a nudge reminder lands here <b>{longDay(replyMs - r.days * 86400000)}</b></>);
+    } else if (r?.kind === "date" && r.ymd) {
+      /* a date the writer picked is stated as itself — it is not a lead off anything */
+      two.push(<>a nudge reminder lands here <b>{longDay(new Date(`${r.ymd}T12:00:00`).getTime())}</b></>);
     }
 
     if (!one && !two.length) return "—";
@@ -3334,7 +3337,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
       unit: wholeThing || picked,
       when: !!paneBody.when && (paneBody.when.kind !== "date" || !!paneBody.when.ymd),
       expect: !!paneBody.expect && (paneBody.expect.kind !== "date" || !!paneBody.expect.ymd),
-      remind: !!paneBody.remind,
+      /* ⚠️ A REVEALED-BUT-EMPTY DATE IS NOT AN ANSWER (deed round, Phase 4). The predicate read the
+         PILL's selection, so choosing "A custom date…" satisfied the gate before a date existed —
+         the same class of fault as the pre-filled answers the steer round removed, one layer down:
+         a question counted as answered because a control had been touched. */
+      remind: !!paneBody.remind && (paneBody.remind.kind !== "date" || !!paneBody.remind.ymd),
       rows: bulkTouched > 0,
     };
   }
