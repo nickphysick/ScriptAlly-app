@@ -95,16 +95,16 @@ describe("the copy the brief fixed, verbatim", () => {
   }
 });
 
-/* ⚠️ THE RETENTION LINE CARRIES NO NUMBER, because none was confirmed. The v5 brief made the
-   period a required input and it arrived blank; the instruction for that case is to ship without a
-   figure and keep the constant's brackets. A bracketed "[30]" reaching a reader would be worse
-   than no figure at all. */
-describe("retention states no period nobody has confirmed", () => {
+/* ⚠️ THE RETENTION PERIOD IS CONFIRMED — 30 days, the figure the backup cycle gives and the one the
+   privacy policy had been hedging at. It shipped WITHOUT a number for one commit, while the shared
+   constant was still the placeholder "[30]"; the rule that produced that gap is worth keeping in
+   view — a bracketed placeholder reaching a reader is worse than no figure, and only the business
+   can turn one into a commitment. */
+describe("retention states the confirmed period, and no placeholder", () => {
   const text = everySection();
 
-  it("says the plain thing and shows no placeholder", () => {
-    expect(text).toContain("it's removed from our backups soon afterwards");
+  it("gives the number and shows no brackets", () => {
+    expect(text).toContain("it's gone from our backups within 30 days");
     expect(text).not.toContain("[30]");
-    expect(text).not.toMatch(/within \d+ days/);
   });
 });

@@ -42,13 +42,20 @@ export const ICO_REGISTRATION_NOTE = "[ICO registration number: pending.]";
 export const DATA_REGION = "[europe-west2 — London]";
 
 /**
- * Deletion window, in days, as the privacy policy states it.
+ * Deletion window, in days. CONFIRMED — thirty days is what the backup cycle actually gives us,
+ * and it is the figure the privacy policy had been hedging at all along.
  *
- * ⚠️ THE POLICY PROMISES THIS AND NO CODE ENFORCES IT. Account deletion ships disabled (see
- * `ACCOUNT_DELETION_ENABLED`), so the thirty days describe an intention rather than a mechanism.
- * Recorded here so the disagreement is visible from both ends.
+ * ⚠️ IT WAS THE LITERAL STRING "[30]" UNTIL 21 Aug 2026, and the brackets were doing real work: a
+ * placeholder nobody had confirmed, rendered as-is by the policy so that no surface quoted a
+ * number the business had not agreed to. Both settings and the policy read THIS constant, so the
+ * confirmation was one edit and the two cannot now disagree.
+ *
+ * ⚠️ AND IT STILL DESCRIBES AN INTENTION AT THE PURGE END. Account deletion schedules and cancels,
+ * but no job purges — there is no scheduler in `functions/`. The thirty days are a commitment the
+ * backups honour, not a countdown any code runs; see `ACCOUNT_DELETION_ENABLED` and the deletion
+ * section's own copy, which promises only what exists.
  */
-export const DELETION_WINDOW_DAYS = "[30]";
+export const DELETION_WINDOW_DAYS = 30;
 
 /** The date both legal documents state at the top of the band. */
 export const LEGAL_LAST_UPDATED = "15 Aug 2026";

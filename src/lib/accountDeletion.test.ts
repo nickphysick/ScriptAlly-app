@@ -36,8 +36,9 @@ describe("the confirmation arms only on the exact word", () => {
 describe("the grace window", () => {
   it("is 14 days, and lands inside the policy's own stated period", () => {
     expect(DELETION_GRACE_DAYS).toBe(14);
-    const policy = Number(DELETION_WINDOW_DAYS.replace(/\D/g, ""));
-    expect(DELETION_GRACE_DAYS).toBeLessThan(policy);
+    /* ⚠️ THE CONSTANT IS A NUMBER NOW — it was the placeholder string "[30]" and this had to strip
+       the brackets to compare. Confirmed 21 Aug 2026; the comparison is direct. */
+    expect(DELETION_GRACE_DAYS).toBeLessThan(DELETION_WINDOW_DAYS);
   });
 
   it("a request stamps now and 14 days out", () => {
@@ -121,18 +122,13 @@ describe("what the writer is told they will lose", () => {
 
   /* One source for the retention period, shared with the privacy policy — including its brackets,
      which mark it as a figure nobody has confirmed. */
-  /* ⚠️ THE LINE NOW CARRIES NO PERIOD AT ALL, AND THAT IS THE INSTRUCTION. `DELETION_WINDOW_DAYS`
-     is still the placeholder "[30]" that the privacy policy renders; the v5 copy brief made the
-     retention period a REQUIRED INPUT and it arrived blank, with an explicit rule for that case —
-     ship without a figure, leave the constant's brackets alone, flag it. A bracketed placeholder
-     reaching a reader is worse than no figure, and inventing a confirmed one is not a formatting
-     decision. When a period is agreed, one edit to the constant fixes settings and the policy
-     together and this line takes its number back. */
-  it("states no retention period, because none has been confirmed", () => {
+  /* ⚠️ THE PERIOD IS CONFIRMED AND SHARED. It shipped without a figure for one commit while
+     `DELETION_WINDOW_DAYS` was still the placeholder "[30]" — a bracketed placeholder reaching a
+     reader is worse than no figure. Both settings and the privacy policy read the ONE constant, so
+     they state the same number or neither does. */
+  it("states the confirmed period, from the constant the policy also reads", () => {
+    expect(DELETION_WINDOW_DAYS).toBe(30);
+    expect(RETENTION_LINE).toContain("within 30 days");
     expect(RETENTION_LINE).not.toContain("[");
-    expect(RETENTION_LINE).not.toMatch(/\d+\s*days?/);
-    expect(RETENTION_LINE).toContain("soon afterwards");
-    /* the placeholder is untouched where it lives — this build did not turn it into a promise */
-    expect(DELETION_WINDOW_DAYS).toBe("[30]");
   });
 });

@@ -183,7 +183,7 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         blocks: [
           p(
             "Your records are kept for as long as your account exists. If you delete your account, " +
-            "your data is deleted from our systems within ", { b: DELETION_WINDOW_DAYS },
+            "your data is deleted from our systems within ", { b: String(DELETION_WINDOW_DAYS) },
             " days, allowing for backup cycles. Waitlist emails are deleted once launch " +
             "invitations have gone out or on request, whichever is sooner.",
           ),

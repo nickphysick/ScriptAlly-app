@@ -16,6 +16,7 @@
  * question is asked.
  */
 import { deletionConfirmed } from "./dataExport";
+import { DELETION_WINDOW_DAYS } from "./companyInfo";
 
 /**
  * ⚠️ FOURTEEN DAYS, AND THE WINDOW IS THE WHOLE SAFETY MECHANISM. An account deletion that took
@@ -101,19 +102,15 @@ export function deletionNotice(s: ScheduledDeletion, now: Date = new Date()): st
 /**
  * The retention sentence.
  *
- * ⚠️ NO NUMBER, BECAUSE NOBODY HAS CONFIRMED ONE. `companyInfo.DELETION_WINDOW_DAYS` is the literal
- * string "[30]" — a placeholder the privacy policy also renders — and the v5 copy brief made the
- * period a REQUIRED INPUT that arrived blank. The instruction for that case is explicit: ship
- * without a figure, keep the constant's brackets, and flag it. Turning a placeholder into a
- * retention commitment in a privacy notice is not a formatting fix and is not this build's call.
- *
- * The sentence therefore says what is true and no more. When a period is confirmed, ONE edit to
- * `DELETION_WINDOW_DAYS` fixes settings and the policy together, and this line takes the number
- * back.
+ * ⚠️ THE PERIOD IS CONFIRMED AND COMES FROM `companyInfo.DELETION_WINDOW_DAYS`, which the privacy
+ * policy reads too — so settings and the notice state one number or neither. It shipped WITHOUT a
+ * figure for one commit, while the constant was still the placeholder "[30]": a bracketed
+ * placeholder reaching a reader is worse than no figure, and turning one into a retention
+ * commitment is a business decision rather than a formatting fix. Confirmed 21 Aug 2026.
  */
 export const RETENTION_LINE =
-  "Your data is kept while your account exists. If you delete your account, it's removed from our " +
-  "backups soon afterwards.";
+  `Your data is kept while your account exists. If you delete your account, it's gone from our ` +
+  `backups within ${DELETION_WINDOW_DAYS} days.`;
 
 /** Exactly what goes, named. Vague reassurance is not consent to lose your work. */
 export const DELETION_REMOVES = [
