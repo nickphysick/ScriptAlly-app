@@ -591,11 +591,21 @@
    rule with `indexOf(".ct-upsell {")` reads whichever comes first, and this file's own invariant is
    one rule per selector. */
 .ct-upsell { text-align: center; padding-top: 6px; }
-.ct-upsell .lockwrap { position: relative; z-index: 2; background: linear-gradient(180deg, transparent, var(--ct-card) 30%); padding-top: 30px; }
+/* ⚠️ A FLEX COLUMN, NOT A BLOCK — and that was the other half of the fault. As a block its
+   children's vertical margins COLLAPSED out through its edges, so the box measured 88px around 181px
+   of content and everything below the fold was clipped by the card. Margins cannot collapse inside a
+   flex container, so the height is simply the sum of what is in it. `gap` replaces the margins for
+   the same reason: one spacing mechanism that cannot collapse. */
+.ct-upsell .lockwrap {
+  position: relative; z-index: 2; background: linear-gradient(180deg, transparent, var(--ct-card) 26%);
+  padding-top: 26px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  /* the veil — it sits over the ghost's lower half, but IN FLOW, so the parent still counts it */
+  margin-top: -34px;
+}
 .ct-upsell .lock { width: 44px; height: 44px; border-radius: 50%; background: var(--ct-scout-deep); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 4px 14px rgba(47, 71, 97, .26); }
 .ct-upsell .lock svg { width: 19px; height: 19px; }
-.ct-upsell h3 { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; margin-bottom: 8px; color: var(--ct-ink); }
-.ct-upsell p { font-size: 11.5px; color: var(--ct-scout-ink); line-height: 1.55; margin-bottom: 16px; }
+.ct-upsell h3 { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; line-height: 1.3; margin: 0; color: var(--ct-ink); }
+.ct-upsell p { font-size: 11.5px; color: var(--ct-scout-ink); line-height: 1.55; margin: 0; max-width: 330px; }
 
 /* no-manuscript empty state */
 .ct-blank { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%; text-align: center; color: var(--ct-ink-soft); }
@@ -826,15 +836,23 @@
  * one. This is the card whose footer promises nothing is invented; putting made-up books behind
  * frosted glass to sell it would break the promise inside the card that makes it.
  */
-.ct-upsell { position: relative; }
+/* ⚠️ A FLEX COLUMN SO THE BOX IS THE SUM OF WHAT IS IN IT. Measured as a block it reported h=88
+   around scrollH=155 — the card then clipped its own upgrade button, and no unit lock could see it
+   because every declaration was valid. Flex removes both causes at once: margins cannot collapse
+   through a flex container, and nothing here can fall out of flow. */
+.ct-upsell { position: relative; display: flex; flex-direction: column; }
 /* ⚠️ BLURRED, INERT AND SHAPED LIKE A CARD, holding no real title — it is a picture of a suggestion,
    not a suggestion. `pointer-events: none` stops a mouse; `inert` in the markup is what stops a Tab. */
-.ct-upsell .ghost { filter: blur(3px); opacity: .5; pointer-events: none; margin-bottom: -40px; }
+/* ⚠️ THE OVERLAP IS A CLAMPED HEIGHT, NOT A NEGATIVE MARGIN — measured, and the margin was wrong.
+   `margin-bottom: -40px` was tuned for a THREE-row ghost; against the single v2 teaser it pulled the
+   lockwrap above the ghost's own top, and because `.ct-panel` clips, the card ate its own upgrade
+   button — 77px of it, with the paragraph cut mid-sentence. A negative margin removes flow height
+   while the content still paints, so the card's height stops describing what is in it. */
+.ct-upsell .ghost { filter: blur(3px); opacity: .5; pointer-events: none; max-height: 96px; overflow: hidden; }
 .ct-upsell .ghost .ct-srow { border: 1px solid var(--ct-band-hair); border-radius: 10px; }
 .ct-upsell .ghost .ct-cmain { text-align: left; }
 .ct-upsell .ghost .bar { display: block; height: 9px; border-radius: 4px; background: var(--ct-band-hair); margin-bottom: 7px; }
 .ct-upsell .ghost .bar.w70 { width: 70%; } .ct-upsell .ghost .bar.w40 { width: 40%; } .ct-upsell .ghost .bar.w90 { width: 90%; }
-.ct-upsell .ghost .bar.btn { width: 100%; height: 26px; border-radius: 8px; margin: auto 0 0; }
 
 /* ⚠️ THE FILLED SLATE CTA READS THE APP'S OWN `--slate`, NOT A PAGE COPY. The tier colour is one
    colour everywhere — the same decision `.ct-tag.pro` already carries — so comps' Pro action cannot
@@ -848,17 +866,24 @@
 }
 .ct-btn-slate:hover { background: var(--slate-deep, var(--ct-scout-deep)); }
 .ct-upsell .ghost .bar.btn { width: 100%; height: 28px; border-radius: 9px; margin: 0; }
-.ct-upsell .lockwrap {
-  position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 20px;
-  background: linear-gradient(rgba(254, 253, 248, .15), var(--ct-card) 66%);
-}
-.ct-upsell .lock {
-  width: 46px; height: 46px; border-radius: 50%; background: var(--ct-sect); border: 1px solid var(--ct-taupe-bd);
-  color: var(--ct-scout-deep); display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
-}
-.ct-upsell .lock svg { width: 19px; height: 19px; }
-.ct-upsell h3 { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; margin-bottom: 8px; color: var(--ct-ink); }
+/* ⚠️ `.ct-upsell .lockwrap` / `.lock` / `.lock svg` WERE DECLARED A SECOND TIME HERE, and the second
+ * lockwrap was `position: absolute; inset: 0` — THE CAUSE of the clipped upgrade button, found by
+ * measuring rather than by reading.
+ *
+ * THE SHAPE OF THE FAULT: an absolutely-positioned overlay contributes NOTHING to its parent's
+ * height, so `.ct-upsell` measured the 82px ghost while the overlay it hosted needed 155px, and
+ * `.ct-panel`'s `overflow: hidden` ate the difference — the paragraph cut mid-sentence and the CTA
+ * gone entirely. It worked only while the ghost was three skeleton rows tall enough to host the
+ * overlay by accident. The v2 teaser is ONE card, and the accident stopped holding.
+ *
+ * ⚠️ AND IT SURVIVED TWO EARLIER PASSES OF THIS SAME FILE. I consolidated the duplicated
+ * `.ct-upsell` and `.ct-upsell .ghost` rules and did not think to check whether their CHILDREN were
+ * duplicated too — so I edited the in-flow rule above while a later absolute one quietly won. A
+ * duplicate selector is not one mistake, it is a standing invitation to edit the wrong half.
+ *
+ * The survivor is the in-flow flex rule above: the card's height is now the sum of what is in it,
+ * and the veil is a negative margin small enough that the box still accounts for its own content. */
+.ct-upsell h3 { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 600; line-height: 1.3; margin: 0; color: var(--ct-ink); }
 .ct-upsell p { font-size: 11.5px; color: var(--ct-ink-soft); line-height: 1.55; margin-bottom: 16px; max-width: 320px; }
 
 @media (prefers-reduced-motion: reduce) {
