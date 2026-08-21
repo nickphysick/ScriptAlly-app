@@ -48,12 +48,33 @@ import { resolve } from "node:path";
  * wrong far more plainly than a guess from this function could.
  */
 async function servesBuiltBundle(base: string): Promise<boolean> {
-  try {
-    const html = await (await fetch(base, { redirect: "follow" })).text();
-    return /\/assets\/index-[A-Za-z0-9_-]+\.js/.test(html);
-  } catch {
-    return false;
+  /**
+   * ⚠️⚠️ THIS FUNCTION USED TO FAIL OPEN, AND IT DISABLED THE WHOLE GUARD SILENTLY.
+   *
+   * A `catch { return false }` meant "could not reach the server" was reported as "not serving a
+   * built bundle", and the caller reads that as permission to skip EVERY check. Proved by planting
+   * the production project id in `dist/assets` and watching a measurement pass.
+   *
+   * ⚠️ AND THE THING IT COULD NOT REACH WAS RUNNING. `vite preview` binds IPv4 only; Node resolves
+   * `localhost` to `::1` first and undici does not fall back, so `fetch` threw `fetch failed`
+   * against a server `curl` and Chromium both talk to happily. **Node and the browser disagree about
+   * `localhost`** — so this function's failure says nothing whatever about the page being measured,
+   * which is precisely why it must not be read as an answer.
+   *
+   * So: try the literal host, then 127.0.0.1, and if neither can be reached DO NOT skip — fall
+   * through to the bundle checks. Refusing a good run costs a rebuild; passing a prod one costs what
+   * the note at the top of this file describes.
+   */
+  for (const url of [base, base.replace("//localhost", "//127.0.0.1")]) {
+    try {
+      const html = await (await fetch(url, { redirect: "follow" })).text();
+      return /\/assets\/index-[A-Za-z0-9_-]+\.js/.test(html);
+    } catch {
+      /* try the next address */
+    }
   }
+  /* unreachable from Node — assume it may be serving `dist/` and check it */
+  return true;
 }
 
 export async function assertLocalBundleIsDev(): Promise<void> {
