@@ -2,32 +2,33 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * TagsSheet — tag management in its OWN sheet (board-optimise pack, Phase 5; ref
- * design-refs/board-optimised.html §3, the "Tags" frame).
+ * TagsPane — tag management, as a pane of the board's "Set aside & tags" panel.
  *
- * ⚠️ A SHEET OVER THE PAGE, NEVER A ROUTE. Managing your tags is a detour from the work, not a
- * destination: a route would take the board off screen, put an entry in history, and make the
- * back button the way out of a rename. It opens over Task settings, which opened over the page.
+ * ⚠️ IT WAS A MODAL SHEET AND ITS ONLY DOOR WAS `TaskSettingsSheet`, which is retired. When that
+ * sheet was unmounted, tag management went with it: you could still put a tag ON a task through
+ * the ⋯ menu's picker, but you could no longer rename, recolour or delete a tag you had made.
+ * That was unreachable on main and on dev until this pane restored it.
  *
- * ⚠️ WHY IT LEFT TASK SETTINGS. Rename/recolour/delete are a different KIND of work from "how
- * the desk behaves" — four fixed behaviours that never grow, beside a list that grows with the
- * writer. Inlined, the sheet was two sheets wearing one heading, and the tag rows pushed the
- * behaviours off the first screen the moment anyone had six tags.
+ * ⚠️ STILL NOT A ROUTE. Managing your tags is a detour from the work, not a destination — a route
+ * would take the board off screen, put an entry in history, and make the back button the way out
+ * of a rename. It is a pane of a panel anchored to the list's own tool row.
+ *
+ * ⚠️ AND IT IS THE SAME CRUD, REHOUSED RATHER THAN REDESIGNED. Rename normalises and holds
+ * uniqueness; recolour stays inside the family palette; delete DETACHES from every item first and
+ * then drops the definition, behind an arm-then-confirm. Not one write path changed.
  *
  * ⚠️ DELETE DETACHES, IT NEVER DELETES ITEMS: the id is removed from every task carrying it and
  * then the definition leaves the user doc. The notes and tasks survive whole — losing a note
  * because you retired a label would be the app punishing tidiness.
  */
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
-import { lockStageScroll } from "../../lib/stageScroll";
 import { TAG_PALETTE } from "../../lib/todoFamily";
 import { TAG_COLOURS, normaliseTagLabel, tagUsageCounts } from "../../lib/todoTags";
 import { TagColour } from "../../types";
 
-export const TagsSheet: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+export const TagsPane: React.FC = () => {
   const { currentUser, updateUserProfile, updateUserTask, userTasks } = useScriptAllyDb();
-  const rootRef = useRef<HTMLDivElement>(null);
 
   const tags = currentUser?.tags ?? [];
   const counts = tagUsageCounts(userTasks);
@@ -36,19 +37,10 @@ export const TagsSheet: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [renameDraft, setRenameDraft] = useState("");
   const [armedDelete, setArmedDelete] = useState<string | null>(null);
 
-  /* the journey presentation the other sheets use: capture focus, lock the stage's scroll,
-     return focus on close. */
-  useLayoutEffect(() => {
-    const invoker = document.activeElement as HTMLElement | null;
-    const release = lockStageScroll();
-    rootRef.current?.focus();
-    return () => { release(); invoker?.focus?.(); };
-  }, []);
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { e.stopPropagation(); onClose(); } };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  /* ⚠️ NO SCROLL LOCK, NO FOCUS CAPTURE AND NO ESCAPE HANDLER HERE ANY MORE. This was a modal
+     sheet and owned all three; it is a PANE inside `AnchoredPanel` now, and the panel owns them
+     for every pane it holds. A pane keeping its own copy would be the second implementation the
+     `useOverlay` extraction exists to prevent, and its Escape would race the panel's. */
 
   const renameTag = async (id: string) => {
     const label = normaliseTagLabel(renameDraft);
@@ -73,21 +65,7 @@ export const TagsSheet: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div
-      className="tdb-ff"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="tdb-tags-heading"
-      ref={rootRef}
-      tabIndex={-1}
-      onClick={(e) => {
-        const t = e.target as HTMLElement;
-        if (t.classList.contains("tdb-ff") || t.classList.contains("tdb-ffstage")) onClose();
-      }}
-    >
-      <div className="tdb-ffstage">
-        <div className="tdb-ffwrap">
-          <div className="tdb-ffsheet tdb-tset">
+    <div className="tdb-tsetgroupwrap">
             <div className="tdb-fband paper">
               <div className="tdb-fbtx">
                 <div className="tdb-ffstream off">TAGS</div>
@@ -152,14 +130,8 @@ export const TagsSheet: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
               </div>
             </div>
-          </div>
-          <button type="button" className="tdb-ffx" aria-label="Back to Task settings" onClick={onClose}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
 
-export default TagsSheet;
+export default TagsPane;

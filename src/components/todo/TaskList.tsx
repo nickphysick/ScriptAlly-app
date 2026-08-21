@@ -42,6 +42,13 @@ export interface TaskListProps {
   sortActive?: boolean;
   onSort: (anchor: HTMLElement) => void;
   sortMenu?: React.ReactNode;
+  /** ⚠️ THE THIRD DOOR — "Set aside & tags". Same shape as filter and sort, because it is the same
+   *  kind of thing: a control on the tool row that opens an anchored panel. Its count is the
+   *  ledger's, so the row can say there is something waiting without being opened. */
+  asideActive?: boolean;
+  asideCount?: number;
+  onAside: (anchor: HTMLElement) => void;
+  asideMenu?: React.ReactNode;
 }
 
 /** the contract's three group tints, keyed by its own group ids */
@@ -61,6 +68,15 @@ const FilterIcon = () => (
     <polygon points="22 3 2 3 10 12.5 10 19 14 21 14 12.5 22 3" />
   </svg>
 );
+/** An archive tray — what is put aside, not thrown away. */
+const AsideIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+    strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M3 8h18v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z" />
+    <path d="M2 4h20v4H2z" />
+    <path d="M10 12h4" />
+  </svg>
+);
 const SortIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
     <path d="M11 5h10M11 9h7M11 13h4M3 17V3M3 3L1 5.5M3 3l2 2.5M7 7v14M7 21l-2-2.5M7 21l2-2.5"
@@ -76,6 +92,7 @@ const PlusIcon = () => (
 export const TaskList: React.FC<TaskListProps> = ({
   groups, selectedKey, onOpen, rowInputs, search, onSearch, onAdd, onExport,
   filterActive, onFilter, filterMenu, sortActive, onSort, sortMenu,
+  asideActive, asideCount, onAside, asideMenu,
 }) => {
   /**
    * ⚠️ ONE ARRAY, COUNTED ONCE. The rows map over `g.cards`; the head prints `g.cards.length`; the
@@ -114,6 +131,16 @@ export const TaskList: React.FC<TaskListProps> = ({
             <SortIcon />
           </button>
           {sortMenu}
+        </span>
+        <span className="l-menuwrap" onPointerDown={(e) => e.stopPropagation()}>
+          <button type="button" title="Set aside & tags" aria-label="Set aside and tags"
+            aria-haspopup="dialog" aria-expanded={!!asideActive}
+            className={asideActive ? "l-icon active" : "l-icon"}
+            onClick={(e) => onAside(e.currentTarget)}>
+            <AsideIcon />
+            {!!asideCount && <span className="l-icondot" aria-hidden="true" />}
+          </button>
+          {asideMenu}
         </span>
         {/* ⚠️ THE ONLY FILLED CONTROL IN THE LIST — the command-bar rule: one primary per surface */}
         <button type="button" className="l-add" title="Add a task" aria-label="Add a task" onClick={onAdd}>

@@ -13,7 +13,10 @@ import {
 } from "../../lib/todoPrefs";
 
 const here = __dirname;
-const settings = readFileSync(join(here, "TaskSettingsSheet.tsx"), "utf8");
+const panel = readFileSync(join(here, "SetAsidePanel.tsx"), "utf8");
+const list = readFileSync(join(here, "TaskList.tsx"), "utf8");
+/* the four preference fields live on /account/tasks now — the sheet that held them is retired */
+const tasksPage = readFileSync(join(here, "..", "AccountSettings.tsx"), "utf8");
 const tagsSheet = readFileSync(join(here, "TagsSheet.tsx"), "utf8");
 const board = readFileSync(join(here, "TodoBoard.tsx"), "utf8");
 const listPage = readFileSync(join(here, "ToDoPage.tsx"), "utf8");
@@ -37,22 +40,32 @@ describe("⚠️ BOTH ARE SHEETS OVER THE PAGE, NEVER ROUTES", () => {
      ⚠️ TAGS STILL INLINES ITS OWN and has not been migrated: it was not one of the two copies §3
      extracted, and folding a third call site in unreviewed is how an extraction quietly changes
      behaviour. Stated rather than skipped, so the remaining copy is visible. */
-  it("both are modal dialogs that lock the stage's scroll and return focus on close", () => {
+  /* ⚠️ REPOINTED OFF THE RETIRED SHEET, AND THE LAW TIGHTENED WHILE IT MOVED. It used to require
+     that each sheet either composed `useOverlay` OR inlined the lock itself; the tags surface is a
+     PANE now, inside `AnchoredPanel`, so the honest claim is that exactly ONE thing owns the
+     overlay duties for it. A pane keeping its own copy would be the second implementation the
+     extraction exists to prevent, and its Escape would race the panel's. */
+  it("the overlay duties are owned once, by the panel — never also by a pane inside it", () => {
     const overlay = readFileSync(new URL("../shell/useOverlay.ts", import.meta.url), "utf8");
     expect(overlay, "the primitive stopped locking the stage").toContain("lockStageScroll()");
     expect(overlay, "the primitive stopped returning focus to the invoker").toContain("invoker?.focus?.()");
-    for (const [name, src] of [["settings", settings], ["tags", tagsSheet]] as const) {
-      expect(src, name).toContain('role="dialog"');
-      expect(src, name).toContain('aria-modal="true"');
-      const composed = src.includes("useOverlay(");
-      const inlined = src.includes("lockStageScroll()") && src.includes("invoker?.focus?.()");
-      expect(composed || inlined, `${name} neither composes useOverlay nor locks and restores itself`).toBe(true);
+
+    const anchored = readFileSync(join(here, "AnchoredPanel.tsx"), "utf8");
+    expect(anchored, "the panel stopped closing on Escape").toContain("Escape");
+    expect(anchored, "the panel stopped returning focus to its trigger").toContain("returnFocus");
+
+    for (const [name, src] of [["tags pane", tagsSheet], ["set-aside panel", panel]] as const) {
+      expect(src.includes("lockStageScroll()"), `${name} kept its own scroll lock`).toBe(false);
+      expect(src.includes("useOverlay("), `${name} composes the primitive a second time`).toBe(false);
     }
   });
 
-  it("the tags sheet opens OVER task settings, from its door", () => {
-    expect(settings).toContain("{tagsOpen && <TagsSheet");
-    expect(settings).toContain("setTagsOpen(true)");
+  /* ⚠️ THE DOOR MOVED TO THE BOARD, because its old one was retired and took tag management with
+     it — unreachable on main and on dev until this pane restored it. */
+  it("tag management is reachable from the board's own tool row", () => {
+    expect(panel, "the panel does not render the tags pane").toContain("<TagsPane />");
+    expect(list, "the list's tool row has no set-aside door").toContain("onAside(e.currentTarget)");
+    expect(list).toContain('aria-label="Set aside and tags"');
   });
 });
 
@@ -87,21 +100,20 @@ describe("⚠️ the four behaviours — one stored map, a TOTAL reader, real de
     expect(TODO_PREFS_DEFAULT.weeklyBriefing).toBe(true);
   });
 
-  it("every row renders, each with its plain-spoken subtitle", () => {
-    /* ⚠️ THREE ROWS NOW — "A good day is" is retired (see the describe below). */
-    expect(TODO_PREF_ROWS.map((r) => r.title)).toEqual([
-      "Stale threshold", "Roll unfinished work forward", "Weekly review briefing",
-    ]);
-    for (const r of TODO_PREF_ROWS) {
-      expect(settings, r.title).toContain(r.title);
-      expect(settings, r.sub).toContain(r.sub);
-      expect(r.sub.length, r.title).toBeGreaterThan(10); // a subtitle that explains, not a label twice
+  /* ⚠️ `TODO_PREF_ROWS` HAS NO READER AND THIS LOCK HAD BEEN ASSERTING AGAINST A DEAD COMPONENT
+     SINCE 6de4856a. The rows moved to /account/tasks with copy written for that page, so the honest
+     claim is not "the sheet renders these titles" but "the page owns all four fields". The data
+     survives unread; it is listed in the report rather than deleted, because whether the page
+     should read it is a copy decision rather than a cleanup. */
+  it("all four behaviours have a home, and it is the settings page", () => {
+    for (const key of ["rollForward", "weeklyBriefing", "staleMonths", "types"]) {
+      expect(tasksPage, key).toContain(key);
     }
   });
 
   it("⚠️ ONE FIELD, ONE WRITE PATH — the map is merged, never four flat writes", () => {
-    expect(settings).toContain("updateUserProfile({ todoPrefs: { ...prefs, ...patch } })");
-    expect(settings).toContain("todoPrefs(currentUser?.todoPrefs)");
+    expect(tasksPage).toContain("updateUserProfile({ todoPrefs: { ...prefs, ...patch } })");
+    expect(tasksPage).toContain("todoPrefs(currentUser.todoPrefs)");
   });
 
   it("…and the rules allow it, in the validator AND the update allowlist", () => {
@@ -142,8 +154,9 @@ describe("⚠️ the good-day setting is RETIRED — control, reader and field",
   });
 
   it("the control is gone from the sheet, and the field from the prefs model", () => {
-    expect(code(settings)).not.toContain("A good day is");
-    expect(code(settings)).not.toContain("goodDay");
+    /* repointed off the retired sheet — the control's home is the settings page now */
+    expect(code(tasksPage)).not.toContain("A good day is");
+    expect(code(tasksPage)).not.toContain("goodDay");
     const prefs = readFileSync(join(here, "..", "..", "lib", "todoPrefs.ts"), "utf8");
     expect(code(prefs)).not.toContain("goodDay");
     expect(prefs).not.toContain("GOOD_DAY_MIN");
@@ -159,27 +172,47 @@ describe("⚠️ the good-day setting is RETIRED — control, reader and field",
   });
 });
 
-describe("⚠️ the dismissed-items ledger is a DOOR that states its count", () => {
-  it("the door names the section and carries the figure", () => {
-    expect(settings).toContain("Dismissed items");
-    expect(settings).toContain("in the ledger — restorable");
-    expect(settings).toContain("Review →");
+/**
+ * ⚠️ THE LEDGER MOVED TO THE BOARD, AND THESE ASSERTIONS MOVED WITH IT. They are the only record of
+ * what the feature does, and it went unreachable for a fortnight because nobody had one to read.
+ */
+describe("⚠️ the set-aside ledger lives on the board, and states its own count", () => {
+  it("the door is on the list's tool row and carries the figure", () => {
+    expect(list).toContain('aria-label="Set aside and tags"');
+    expect(list).toContain("asideCount");
   });
 
   it("the count is DERIVED from the same hiddenItems the list renders — never a second tally", () => {
-    expect(settings).toContain("hiddenItems(muted, taskFlags, agents, queries");
-    expect(settings).toContain("{hidden.length} in the ledger");
+    expect(listPage).toContain("hiddenItems(currentUser?.mutedTaskRules, taskFlags, agents, queries");
+    expect(panel).toContain("hiddenItems(muted, taskFlags, agents, queries");
   });
 
   it("the restore path is unchanged — rule removal or flag unset, no novel write", () => {
-    expect(settings).toContain("mutedTaskRules: (muted ?? []).filter((k) => k !== r.rule)");
-    expect(settings).toContain("upsertTaskFlag(r.flag, { snoozedUntil: null })");
-    expect(settings).toContain("Nothing here is deleted — only set aside.");
+    expect(panel).toContain("mutedTaskRules: (muted ?? []).filter((k) => k !== r.rule)");
+    expect(panel).toContain("upsertTaskFlag(r.flag, { snoozedUntil: null })");
+    expect(panel).toContain("Nothing here is deleted — only set aside.");
   });
 
-  it("an empty ledger offers no door to open", () => {
-    expect(settings).toContain('hidden.length === 0 ? "Nothing set aside"');
-    expect(settings).toContain("{hidden.length > 0 && <span className=\"tdb-tsetgo\">");
+  /* ⚠️ THE REVERSAL, RECORDED. The old rule was "an empty ledger offers no door to open" — the
+     door hid at zero. It is inverted: a door that only appears once you have already set something
+     aside is unfindable at the moment you need it, because the writer looking for it has just
+     hidden something and does not yet know the surface exists. It is always reachable and says
+     plainly when it holds nothing. */
+  it("the door is ALWAYS reachable, and the empty state says what it means", () => {
+    expect(panel).toContain("Nothing set aside. When you snooze or dismiss something");
+    expect(list, "the door is rendered unconditionally").not.toContain("asideCount > 0 &&");
+  });
+
+  /* ⚠️ THE CLASS IS BUILT FROM THE DATA, so the literal `sap-row--rule` never appears in the
+     component — asserting it against source is the concatenation trap. The claim is split: the
+     panel derives the modifier from `h.kind`, and the stylesheet distinguishes all three. */
+  it("all three kinds of hiding share one row grammar", () => {
+    expect(panel, "the modifier is derived from the item's kind").toContain("sap-row sap-row--${h.kind}");
+    expect(panel, "the meta line is the data's, not the component's").toContain("{h.meta}");
+    const css = readFileSync(join(here, "setAside.css"), "utf8");
+    for (const kind of ["rule", "dismissed", "snoozed"]) {
+      expect(css, kind).toContain(`.sap-row--${kind}`);
+    }
   });
 });
 
@@ -209,16 +242,16 @@ describe("⚠️ tag CRUD lives in the tags sheet — and DELETE DETACHES", () =
   it("delete is arm-then-confirm inline — no native dialogs anywhere in either sheet", () => {
     expect(tagsSheet).toContain("armedDelete === t.id ?");
     expect(tagsSheet).toContain("Sure?");
-    for (const src of [settings, tagsSheet]) {
+    for (const src of [panel, tagsSheet]) {
       for (const native of ["window.confirm", "window.alert", "window.prompt"]) {
         expect(src).not.toContain(native);
       }
     }
   });
 
-  it("the settings sheet keeps only the DOOR — the CRUD is not duplicated", () => {
-    expect(settings).not.toContain("recolourTag");
-    expect(settings).not.toContain("const deleteTag");
-    expect(settings).toContain("Manage →");
+  it("the panel keeps only the PANE — the CRUD is not duplicated into it", () => {
+    expect(panel).not.toContain("recolourTag");
+    expect(panel).not.toContain("const deleteTag");
+    expect(panel).toContain("<TagsPane />");
   });
 });

@@ -92,3 +92,14 @@
 .tlc .l-icon { position: relative; }
 .tlc .l-icon.active { background:var(--pink);border-color:var(--pink-b);color:var(--burg); }
 .tlc .l-icon.active::after { content:'';position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--burg);border:1.5px solid var(--white); }
+
+/* ⚠️ THE SET-ASIDE DOT MARKS CONTENT, NOT AN ACTIVE STATE. `.l-icon.active::after` says "this
+   control is open"; this says "there is something waiting behind it", which the writer needs to
+   know WITHOUT opening it — the door is always reachable now, so without a mark a full ledger and
+   an empty one look identical. It is muted rather than burgundy so it reads as a note, not an
+   alert, and it yields to the active dot when the panel is open. */
+.tlc .l-icon .l-icondot {
+  position: absolute; top: -2px; right: -2px; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--muted2); border: 1.5px solid var(--white);
+}
+.tlc .l-icon.active .l-icondot { display: none; }

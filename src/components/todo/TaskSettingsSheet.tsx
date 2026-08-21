@@ -12,7 +12,7 @@
 import React, { useRef, useState } from "react";
 import { useScriptAllyDb } from "../../lib/db";
 import { todoPrefs, STALE_MONTHS_CHOICES, staleLabel, TASK_TYPE_KEYS, TASK_TYPE_LABEL, TASK_TYPE_GLOSS } from "../../lib/todoPrefs";
-import { TagsSheet } from "./TagsSheet";
+import TagsPane from "./TagsSheet";
 import { useOverlay } from "../shell/useOverlay";
 import { TASK_SETTING_ROWS, GROUP_LABEL, TaskSettingGroup, typeIsOn, setTypeMute, hiddenItems, HiddenItem } from "../../lib/taskSettings";
 
@@ -239,7 +239,7 @@ export const TaskSettingsSheet: React.FC<{ onClose: () => void }> = ({ onClose }
             </div>
           </div>
           </div>
-          {tagsOpen && <TagsSheet onClose={() => setTagsOpen(false)} />}
+          {tagsOpen && <TagsPane />}
       <button type="button" className="tdb-ffx" aria-label="Back to my desk" onClick={onClose}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden><line x1="6" y1="6" x2="18" y2="18" /><line x1="18" y1="6" x2="6" y2="18" /></svg>
           </button>

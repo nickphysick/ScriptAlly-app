@@ -74,6 +74,8 @@ import { TODO_ROUTES } from "../../lib/todoRoutes";
 import { TodoCommandBar } from "./TodoCommandBar";
 import { AnchoredPanel } from "./AnchoredPanel";
 import { FilterMenu, SortMenu, SnoozePanel } from "./TodoFrameMenus";
+import { SetAsidePanel } from "./SetAsidePanel";
+import { hiddenItems } from "../../lib/taskSettings";
 import { TaskDismissDialog } from "./TaskDismissDialog";
 import {
   applyView, groupCounts as viewGroupCounts, GroupId, isFiltered, isSorted, ListView, parseView,
@@ -451,6 +453,7 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    */
   const [bulkRows, setBulkRows] = useState<RecordSweepRow[]>([]);
   const filterAnchor = React.useRef<HTMLElement | null>(null);
+  const asideAnchor = React.useRef<HTMLElement | null>(null);
   const sortAnchor = React.useRef<HTMLElement | null>(null);
   // Drawer filters (Phase 4) — session-only; all-visible defaults (hiding is the writer's act).
   const [filters, setFilters] = useState<TodoFilterState>(DEFAULT_FILTERS);
@@ -723,6 +726,8 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
   const [cbDial, setCbDial] = useState(false);
   /* the list card's two menus — mutually exclusive, both dismissed the same three ways */
   const [filterOpen, setFilterOpen] = useState(false);
+  /* the board's third door — "Set aside & tags" (see SetAsidePanel for why it is one door) */
+  const [asideOpen, setAsideOpen] = useState(false);
   const boardScroll = useRef(0);
 
   /**
@@ -3499,6 +3504,18 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
         <AnchoredPanel anchor={sortAnchor.current} ariaLabel="Sort tasks"
           onClose={(back) => { setSortOpen(false); if (back) sortAnchor.current?.focus(); }}>
           <SortMenu view={view} onChange={setView} />
+        </AnchoredPanel>
+      ) : null}
+      /* ⚠️ THE COUNT IS DERIVED FROM THE SAME `hiddenItems` THE PANEL RENDERS — never a second
+         tally. A door that states a figure the surface behind it disagrees with is worse than a
+         door that states none. */
+      asideActive={asideOpen}
+      asideCount={hiddenItems(currentUser?.mutedTaskRules, taskFlags, agents, queries, Date.now()).length}
+      onAside={(el) => { asideAnchor.current = el; setFilterOpen(false); setSortOpen(false); setAsideOpen((v) => !v); }}
+      asideMenu={asideOpen && asideAnchor.current ? (
+        <AnchoredPanel anchor={asideAnchor.current} ariaLabel="Set aside and tags" variant="panel"
+          onClose={(back) => { setAsideOpen(false); if (back) asideAnchor.current?.focus(); }}>
+          <SetAsidePanel />
         </AnchoredPanel>
       ) : null}
     />

@@ -1,0 +1,93 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * "Set aside & tags" — the panel's own chrome.
+ *
+ * ⚠️ IT HAS ITS OWN RULES RATHER THAN BORROWING `.cal-daypanel`. Those classes were removed with
+ * the day modal — "page and stylesheet together" — and three live modals still render them, so
+ * they paint nothing at all today. Borrowing them would have made a fourth unstyled surface.
+ *
+ * ⚠️ AND IT SCROLLS INTERNALLY WITH A CEILING. The ledger's length is the writer's, not the
+ * designer's: someone who has snoozed thirty things must not get a panel taller than the viewport
+ * with its Restore buttons off screen.
+ */
+
+/* ⚠️ IT FILLS THE PANEL RATHER THAN DECLARING ITS OWN WIDTH. `.tdf .panel` is a fixed 288 with
+   16px of padding — the width the filter, sort and snooze panels already share — and a pane that
+   set its own 340 simply overflowed it: browser-measured, 340 inside 288 with 70px of horizontal
+   overflow, which reads as the panel being see-through because the list shows down its side. A
+   door that borrows an established container takes that container's measure. */
+.sap { width: 100%; display: flex; flex-direction: column; }
+
+.sap-tabs { display: flex; gap: 4px; flex: 0 0 auto; }
+.sap-tab {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 10px; border: 0; border-radius: 9px 9px 0 0; background: transparent; cursor: pointer;
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12.5px; color: #6a5a50; transition: background 0.12s, color 0.12s;
+}
+.sap-tab:hover { background: rgba(124, 58, 42, 0.05); }
+/* the app's selected-option grammar — soft pink fill, burgundy ink; never a burgundy fill */
+.sap-tab.on { background: #f5e2da; color: #7c3a2a; font-weight: 500; }
+.sap-tab:focus-visible { outline: 2px solid #8a9e88; outline-offset: -2px; }
+
+.sap-count {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 9px; padding: 1px 5px; border-radius: 999px;
+  background: rgba(124, 58, 42, 0.1); color: #7c3a2a;
+}
+
+/* The panel supplies the outer padding; this adds only the gap under the tab rule. */
+.sap-body { border-top: 1px solid #ece0d2; padding-top: 12px; margin-top: 8px; max-height: 55vh; overflow-y: auto; }
+
+.sap-empty,
+.sap-foot {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 11.5px; font-weight: 300; color: #8a7a6c; line-height: 1.55; margin: 0;
+}
+.sap-foot { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid #efe5da; }
+
+.sap-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.sap-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  background: #fff; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 9px 11px;
+}
+/* ⚠️ THE KIND IS A LEADING EDGE, NOT A COLOURED ROW. Three kinds of hiding sit in one list and the
+   eye needs to group them without the list becoming three lists. */
+.sap-row--rule { border-left: 2.5px solid #c8d1c5; }
+.sap-row--dismissed { border-left: 2.5px solid #e8c8bc; }
+.sap-row--snoozed { border-left: 2.5px solid #efe4cc; }
+
+.sap-rowmain { display: flex; flex-direction: column; min-width: 0; }
+.sap-label {
+  font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
+  font-size: 12.5px; color: #3a1c14; overflow-wrap: anywhere;
+}
+.sap-meta {
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 8.5px; letter-spacing: 0.12em; color: #a08e7c; margin-top: 2px;
+}
+
+.sap-restore {
+  flex-shrink: 0; padding: 6px 11px; border-radius: 8px; cursor: pointer;
+  background: #fff; border: 1px solid #7c3a2a; color: #7c3a2a;
+  font-family: var(--font-serif, "Playfair Display", Georgia, serif); font-size: 12.5px;
+}
+.sap-restore:hover { background: #faf3ef; }
+.sap-restore:focus-visible { outline: 2px solid #8a9e88; outline-offset: 2px; }
+
+/* ── The tags pane, at panel scale ─────────────────────────────────────────
+   ⚠️ THE BAND WAS DRAWN FOR A FULL-WIDTH MODAL AND HAD TO COME DOWN. `tdb-ffq` is a 28px Playfair
+   heading — right across a sheet, and most of a 254px panel on its own: measured, the heading and
+   its sub-line filled the pane before a single tag appeared. Only SIZE changes here; the words,
+   the CRUD and every write path are the sheet's, untouched. */
+.sap-body .tdb-tsetgroupwrap { display: block; }
+.sap-body .tdb-fband { padding: 0 0 10px; background: none; border: 0; }
+.sap-body .tdb-ffq { font-size: 15px; line-height: 1.2; }
+.sap-body .tdb-fbsub { font-size: 11px; line-height: 1.5; margin-top: 4px; }
+.sap-body .tdb-ffstream { font-size: 8.5px; letter-spacing: 0.13em; }
+.sap-body .tdb-ffbody { padding: 0; }
+.sap-body .tdb-tsetempty,
+.sap-body .tdb-tsetfoot { font-size: 11px; line-height: 1.5; }
