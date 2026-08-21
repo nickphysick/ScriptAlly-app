@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submission packages — re-cut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --page:#f2ede7; --white:#ffffff;
+    --sage-a:#d7ddd5; --sage-b:#d5dbd3; --sage-deep:#9aa896; --sage-ink:#5c7053;
+    --pink-band:#f3e0d6; --pink-cta:#f5e2da; --pink-cta-edge:#e8c8bc;
+    --burgundy:#7c3a2a; --ink:#3a1c14;
+    --ink-soft:rgba(58,28,20,.62); --ink-faint:rgba(58,28,20,.40);
+    --hairline:rgba(124,58,42,.16); --hairline-soft:rgba(58,28,20,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  [hidden]{display:none!important;}
+  body{background:var(--page);font-family:'Inter',sans-serif;color:var(--ink);padding:0 0 90px;-webkit-font-smoothing:antialiased;}
+  .canvas{max-width:1240px;margin:0 auto;padding:0 40px;}
+
+  .harness{
+    position:fixed;top:14px;right:16px;z-index:300;display:flex;align-items:center;gap:8px;
+    background:var(--ink);color:#fff;padding:7px 8px 7px 14px;border-radius:999px;
+    box-shadow:0 6px 18px rgba(58,28,20,.25);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;
+  }
+  .harness span{opacity:.65;}
+  .harness button{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;border:1px solid rgba(255,255,255,.35);background:transparent;color:#fff;padding:4px 10px;border-radius:999px;cursor:pointer;}
+  .harness button.on{background:#fff;color:var(--ink);border-color:#fff;}
+
+  /* simulated conformed PageHeader (NOT part of this design — shell-owned) */
+  .shellhead{
+    max-width:1240px;margin:0 auto 26px;padding:26px 40px 0;
+    display:flex;align-items:flex-start;gap:16px;
+  }
+  .shellhead .sh-icon{
+    width:44px;height:44px;border-radius:10px;border:1px solid var(--hairline);
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;background:var(--white);
+  }
+  .shellhead .sh-icon svg{width:21px;height:21px;stroke:var(--burgundy);}
+  .shellhead h1{font-family:'Playfair Display',serif;font-size:33px;font-weight:700;letter-spacing:-.01em;line-height:1.1;}
+  .shellhead .sh-sub{font-size:13px;color:var(--ink-soft);margin-top:3px;}
+  .shellhead .sh-badge{margin-left:auto;}
+
+  .btn{font-family:'Inter',sans-serif;font-size:12.5px;font-weight:600;padding:9px 16px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--hairline);background:transparent;color:var(--ink);transition:background .15s;}
+  .btn:hover{background:rgba(58,28,20,.04);}
+  .btn.primary{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+  .btn.primary:hover{background:#f0d6cb;}
+  .btn.sm{padding:6px 12px;font-size:11.5px;}
+
+  .plate{
+    border:1.5px dashed rgba(124,58,42,.3);border-radius:12px;
+    display:flex;align-items:center;justify-content:center;flex-direction:column;gap:7px;
+    background:rgba(255,255,255,.5);text-align:center;padding:12px;
+  }
+  .plate svg{stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.82;}
+  .plate .p-brief{font-family:'Caveat',cursive;font-size:14px;color:var(--ink-faint);line-height:1.15;}
+  .plate.disc{border-radius:50%;}
+  .plate.nolabel .p-brief{display:none;}
+
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;color:var(--ink-faint);text-transform:uppercase;font-weight:700;}
+  .statline{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;color:var(--ink-soft);}
+  .statline b{color:var(--ink);font-weight:700;}
+  .out{color:var(--burgundy);} .in{color:var(--sage-ink);}
+  .bar{height:8px;border-radius:4px;background:rgba(58,28,20,.07);overflow:hidden;}
+  .bar .b-sent{height:100%;background:var(--pink-band);border-radius:4px;overflow:hidden;}
+  .bar .b-in{height:100%;background:var(--sage-deep);border-radius:4px 0 0 4px;}
+
+  /* ============ HERO — re-cut for the conformed shell ============ */
+  /* No title (PageHeader owns it). Blush is the whole band; the left is a
+     content column, not a void. Height comes from the illustration. */
+  .hero{
+    background:var(--white);
+    border-top:4px solid var(--sage-deep);
+    border-radius:16px;
+    display:grid;grid-template-columns:1fr 330px;gap:38px;
+    padding:30px 34px;align-items:center;margin-bottom:44px;
+    box-shadow:0 8px 24px rgba(58,28,20,.08);
+    border:1px solid var(--hairline-soft);border-top:4px solid var(--sage-deep);
+  }
+  .hero-l{display:flex;flex-direction:column;gap:16px;align-items:flex-start;}
+  .hero-prob{
+    font-family:'Caveat',cursive;font-size:34px;font-weight:600;color:var(--burgundy);
+    line-height:1.1;transform:rotate(-.6deg);max-width:560px;
+  }
+  .hero-say{font-size:13px;color:var(--ink-soft);line-height:1.6;max-width:520px;}
+  .hero-say b{color:var(--ink);font-weight:600;}
+  .hero-foot{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .hero-foot .rule{width:1px;height:26px;background:rgba(124,58,42,.22);}
+  .hero-plate{height:168px;background:var(--pink-band);border-color:rgba(124,58,42,.26);}
+
+  /* ============ bands ============ */
+  .band{margin-bottom:44px;}
+  .band-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--hairline);padding-bottom:9px;margin-bottom:20px;}
+  .band-head h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;}
+  .band-head .tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;color:var(--ink-faint);text-transform:uppercase;}
+  .band-head .spacer{flex:1;}
+
+  /* materials: true 3-col grid, aligned rows via subgrid-ish structure */
+  .mat-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:start;}
+  .mat-col{display:grid;grid-template-rows:auto 1fr auto;gap:12px;height:100%;}
+  .mat-col-head{
+    display:flex;align-items:center;gap:13px;
+    padding-bottom:11px;border-bottom:1px solid var(--hairline-soft);
+  }
+  .mat-col-head .plate{width:76px;height:76px;flex:0 0 auto;padding:6px;}
+  
+  .mat-col-head .mch-t{flex:1;min-width:0;}
+  .mat-col-head .mch-t .eyebrow{display:block;color:var(--ink);margin-bottom:3px;}
+  .mat-col-head .mch-t .statline{font-size:9px;}
+  .mat-col-head .add{
+    font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;
+    border:1px solid rgba(58,28,20,.22);background:var(--white);color:var(--ink);
+    padding:5px 10px;border-radius:6px;cursor:pointer;flex:0 0 auto;
+  }
+  .mat-col-head .add:hover{background:var(--pink-cta);border-color:var(--pink-cta-edge);color:var(--burgundy);}
+  .mat-stack{display:flex;flex-direction:column;gap:10px;}
+
+  .sheet{
+    position:relative;background:var(--white);border:1px solid var(--hairline-soft);
+    border-radius:10px 14px 10px 10px;padding:13px 36px 12px 15px;
+    box-shadow:0 2px 6px rgba(58,28,20,.05);cursor:pointer;overflow:hidden;transition:box-shadow .15s;
+  }
+  .sheet:hover{box-shadow:0 6px 16px rgba(58,28,20,.09);}
+  .sheet::before{
+    content:"";position:absolute;top:0;right:0;width:15px;height:15px;
+    background:linear-gradient(225deg, var(--page) 48%, rgba(58,28,20,.12) 50%, var(--white) 52%);
+    border-bottom-left-radius:6px;
+  }
+  .sheet .s-type{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.14em;color:var(--ink-faint);text-transform:uppercase;display:block;margin-bottom:4px;}
+  .sheet .s-name{font-size:13.5px;font-weight:600;display:block;}
+  .sheet .s-meta{
+    display:flex;align-items:center;gap:9px;margin-top:6px;
+    font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);
+  }
+  .sheet .s-meta .dot{width:2.5px;height:2.5px;border-radius:50%;background:var(--ink-faint);flex:0 0 auto;}
+  .sheet .s-meta .use{font-family:'Inter',sans-serif;font-size:10px;}
+  .sheet .s-meta .use b{color:var(--ink-soft);font-weight:600;}
+  .sheet .del{
+    position:absolute;right:9px;top:50%;transform:translateY(-50%);
+    width:24px;height:24px;border-radius:6px;border:none;background:transparent;cursor:pointer;
+    opacity:0;transition:opacity .15s, background .15s;display:flex;align-items:center;justify-content:center;
+  }
+  .sheet:hover .del{opacity:1;}
+  .sheet .del:hover{background:rgba(124,58,42,.08);}
+  .sheet .del svg{width:13px;height:13px;stroke:var(--burgundy);}
+
+  .ghost{
+    border:1.5px dashed rgba(124,58,42,.32);border-radius:10px;padding:14px;text-align:center;
+    cursor:pointer;background:transparent;transition:background .15s,border-color .15s;font-family:inherit;width:100%;
+  }
+  .ghost:hover{background:rgba(245,226,218,.4);border-color:var(--pink-cta-edge);}
+  .ghost .g-t{font-family:'Playfair Display',serif;font-style:italic;font-size:14px;color:var(--burgundy);}
+  .ghost .g-s{font-size:10.5px;color:var(--ink-faint);margin-top:3px;line-height:1.5;display:block;}
+  .mat-col .ghost{align-self:end;}
+
+  /* empty column: keeps the row height honest */
+  .col-empty{
+    border:1.5px dashed rgba(124,58,42,.22);border-radius:10px;
+    padding:20px 14px;text-align:center;color:var(--ink-faint);font-size:11px;line-height:1.55;
+    display:flex;align-items:center;justify-content:center;min-height:88px;
+  }
+
+  /* packages */
+  .pkg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;}
+  .pkg-card{
+    background:var(--white);border:1px solid var(--hairline-soft);border-radius:14px;
+    box-shadow:0 4px 14px rgba(58,28,20,.06);padding:20px 22px 14px;cursor:pointer;position:relative;
+    display:flex;flex-direction:column;gap:14px;transition:box-shadow .15s, transform .15s;min-height:200px;
+  }
+  .pkg-card:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(58,28,20,.10);}
+  .stamp{
+    position:absolute;top:16px;right:16px;width:62px;height:72px;
+    background:rgba(255,255,255,.6);border:1.5px dashed rgba(124,58,42,.3);border-radius:4px;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:5px;
+  }
+  .stamp svg{stroke:var(--burgundy);stroke-width:1.1;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:.7;}
+  .pkg-card h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:600;padding-right:72px;}
+  .pkg-card .slots{display:flex;flex-direction:column;gap:7px;}
+  .pkg-card .slot{display:flex;align-items:baseline;gap:12px;}
+  .pkg-card .slot .sl-t{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;flex:0 0 58px;}
+  .pkg-card .slot .sl-n{font-size:13px;font-weight:600;}
+  .pkg-card .slot .sl-n.none{color:var(--ink-faint);font-weight:400;font-style:italic;}
+  .pkg-foot{
+    border-top:1px solid var(--hairline-soft);padding-top:10px;margin-top:auto;
+    font-family:'JetBrains Mono',monospace;font-size:9px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+  }
+  .pkg-foot .idle{color:var(--ink-faint);}
+  .pkg-foot .spacer{flex:1;}
+  .pkg-foot .del{width:24px;height:24px;border-radius:6px;border:none;background:transparent;cursor:pointer;opacity:0;transition:opacity .15s,background .15s;display:flex;align-items:center;justify-content:center;}
+  .pkg-card:hover .pkg-foot .del{opacity:1;}
+  .pkg-foot .del:hover{background:rgba(124,58,42,.08);}
+  .pkg-foot .del svg{width:13px;height:13px;stroke:var(--burgundy);}
+  .ghost.pkg-ghost{min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+  .ghost.pkg-ghost .plate{width:88px;height:88px;padding:6px;}
+  
+
+  /* tracking */
+  .nudge{
+    background:var(--white);border:1px solid var(--pink-cta-edge);border-left:3px solid var(--burgundy);
+    border-radius:10px;padding:14px 18px;font-size:12.5px;color:var(--ink-soft);line-height:1.6;
+    margin-bottom:18px;display:flex;align-items:center;gap:14px;
+  }
+  .nudge b{color:var(--burgundy);font-weight:600;}
+  .nudge .n-link{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.08em;color:var(--burgundy);white-space:nowrap;cursor:pointer;border-bottom:1px solid var(--pink-cta-edge);}
+  .statstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:18px;}
+  .stat{background:var(--white);border:1px solid var(--hairline-soft);border-radius:12px;padding:18px 20px;display:grid;grid-template-columns:1fr 70px;gap:14px;align-items:center;}
+  .stat .n{font-family:'Playfair Display',serif;font-size:34px;font-weight:600;line-height:1;}
+  .stat .l{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);margin-top:7px;display:flex;gap:6px;align-items:center;line-height:1.4;}
+  .stat .plate{width:70px;height:70px;padding:5px;}
+  
+  .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;margin-bottom:18px;}
+  .panel{background:var(--white);border:1px solid var(--hairline-soft);border-radius:12px;overflow:hidden;}
+  .panel-band{background:linear-gradient(180deg,var(--sage-a),var(--sage-b));padding:11px 17px;display:flex;justify-content:space-between;align-items:center;}
+  .panel-band .eyebrow{color:var(--ink);}
+  .panel-body{padding:14px 17px 16px;display:flex;flex-direction:column;gap:14px;}
+  .drow .dr-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;gap:12px;}
+  .drow .dr-name{font-size:12.5px;font-weight:600;}
+  .drow .dr-name .dr-eyebrow{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.12em;color:var(--ink-faint);text-transform:uppercase;display:block;font-weight:400;margin-bottom:3px;}
+  .drow .dr-meta{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-soft);white-space:nowrap;}
+  .ledger .lrow{display:grid;grid-template-columns:74px 16px 1fr auto;gap:14px;align-items:center;padding:10px 0;border-bottom:1px dotted rgba(58,28,20,.16);font-size:12.5px;}
+  .ledger .lrow:last-child{border-bottom:none;}
+  .ledger .l-date{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-faint);}
+  .ledger .l-dir{font-family:'JetBrains Mono',monospace;font-size:12px;}
+  .ledger .l-pkg{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink-soft);}
+  .ghost-panel{
+    border:1.5px dashed rgba(124,58,42,.3);border-radius:12px;background:transparent;
+    padding:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;min-height:170px;text-align:center;
+  }
+  .ghost-panel .plate{width:86px;height:86px;padding:6px;}
+  
+  .ghost-panel .gp-t{font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--ink-faint);}
+  .ghost-panel .gp-s{font-size:11px;color:var(--ink-faint);line-height:1.55;max-width:260px;}
+
+  .hownote{background:var(--white);border:1px solid var(--hairline-soft);border-radius:14px;display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;}
+  .hn-cell{padding:22px 24px;display:flex;gap:16px;align-items:flex-start;border-right:1px solid var(--hairline-soft);}
+  .hn-cell:last-child{border-right:none;}
+  .hn-cell .plate{width:64px;height:64px;flex:0 0 auto;padding:5px;}
+  
+  .hn-cell .hn-t{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:6px;}
+  .hn-cell p{font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+
+  .pop-backdrop{position:fixed;inset:0;z-index:250;}
+  .pop{position:fixed;z-index:260;width:290px;background:var(--white);border:1px solid var(--hairline);border-radius:12px;box-shadow:0 16px 40px rgba(58,28,20,.22);padding:17px 19px 15px;}
+  .pop h5{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;margin-bottom:7px;}
+  .pop p{font-size:11.5px;color:var(--ink-soft);line-height:1.55;}
+  .pop p b{color:var(--ink);font-weight:600;}
+  .pop .pop-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:13px;}
+
+  @media (max-width:1080px){
+    .hero,.mat-cols,.dash-grid,.hownote{grid-template-columns:1fr;}
+    .hn-cell{border-right:none;border-bottom:1px solid var(--hairline-soft);}
+  }
+</style>
+</head>
+<body>
+
+<div class="harness">
+  <span>DEMO</span>
+  <button id="hb-data" class="on" onclick="toggleData()">FULL</button>
+  <button id="hb-act" class="on" onclick="toggleAct()">ACTIVITY</button>
+</div>
+
+<!-- simulated conformed PageHeader — shell-owned, shown for context only -->
+<div class="shellhead">
+  <div class="sh-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"/></svg>
+  </div>
+  <div>
+    <h1>Submission packages</h1>
+    <div class="sh-sub">Bundle your materials once, then send them without rebuilding each time.</div>
+  </div>
+</div>
+
+<div class="canvas" id="root"></div>
+
+<div id="pop-layer" hidden>
+  <div class="pop-backdrop" onclick="closePop()"></div>
+  <div class="pop" id="pop"></div>
+</div>
+
+<script>
+  let FULL = true, ACT = true;
+  let materials = [], packages = [];
+  const TYPES = ['letter','synopsis','sample'];
+  const TYPE_LABEL = {letter:'Covering letter', synopsis:'Synopsis', sample:'Sample pages'};
+  const TYPE_PLURAL = {letter:'Covering letters', synopsis:'Synopses', sample:'Sample pages'};
+  const TYPE_ICON = {letter:'envelope', synopsis:'scroll', sample:'pages'};
+  const TYPE_ADD = {letter:'Add a letter', synopsis:'Add a synopsis', sample:'Add sample pages'};
+
+  function seed(){
+    materials = FULL ? [
+      {id:1,type:'letter',name:'Hook-first',src:'Text · 412 words'},
+      {id:2,type:'letter',name:'Comps-forward',src:'Ref · comps-forward-v1.docx'},
+      {id:3,type:'synopsis',name:'One-page',src:'Text · 638 words'},
+      {id:4,type:'synopsis',name:'Two-page',src:'Text · 1,240 words'},
+      {id:5,type:'sample',name:'Chapters 1–3',src:'Text · 7,412 words'},
+      {id:6,type:'sample',name:'First fifty pages',src:'Ref · murphy-first50.docx'}
+    ] : [
+      {id:1,type:'letter',name:'Hook-first',src:'Text · 412 words'},
+      {id:3,type:'synopsis',name:'One-page',src:'Text · 638 words'}
+    ];
+    packages = FULL ? [
+      {id:10,name:'Standard UK',letterId:1,synopsisId:3,sampleId:5,sent:ACT?6:0,replies:ACT?2:0,requests:ACT?1:0,stampIcon:'parcel'},
+      {id:11,name:'Comps-led variant',letterId:2,synopsisId:3,sampleId:5,sent:ACT?3:0,replies:ACT?1:0,requests:ACT?1:0,stampIcon:'typewriter'},
+      {id:12,name:'Letter + synopsis',letterId:1,synopsisId:4,sampleId:null,sent:0,replies:0,requests:0,stampIcon:'inkwell'}
+    ] : [
+      {id:10,name:'Standard UK',letterId:1,synopsisId:3,sampleId:null,sent:ACT?6:0,replies:ACT?2:0,requests:ACT?1:0,stampIcon:'parcel'}
+    ];
+  }
+
+  const $ = id => document.getElementById(id);
+
+  // line-art icon library — stand-ins until the illustrator delivers
+  const ICON = {
+    envelope:`<path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h19A2.5 2.5 0 0 1 28 8.5v15a2.5 2.5 0 0 1-2.5 2.5h-19A2.5 2.5 0 0 1 4 23.5z"/><path d="M4.6 7.6 16 17 27.4 7.6"/><circle cx="16" cy="21.5" r="3.2"/>`,
+    scroll:`<path d="M8 5h13a3 3 0 0 1 3 3v16a3 3 0 0 0 3 3H11a3 3 0 0 1-3-3z"/><path d="M8 5a3 3 0 0 0-3 3v2h3"/><path d="M12 11h8M12 15h8M12 19h5"/>`,
+    pages:`<path d="M9 4h9l5 5v17a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M18 4v5h5"/><path d="M11 14h10M11 18h10M11 22h6"/><path d="M20 2.5v6" stroke-dasharray="1.5 2"/>`,
+    parcel:`<path d="M16 4 28 10v12L16 28 4 22V10z"/><path d="M16 15 28 10M16 15v13M16 15 4 10"/><path d="M10 7l12 6"/><circle cx="16" cy="15" r="2.4"/>`,
+    parcelOpen:`<path d="M4 13 16 7l12 6v11l-12 6-12-6z"/><path d="M16 19 28 13M16 19v11M16 19 4 13"/><path d="M11 4.5 16 7l5-2.5" stroke-dasharray="2 2"/>`,
+    desk:`<path d="M3 24h26M5 24V12a2 2 0 0 1 2-2h6"/><path d="M13 6h10l4 4v9a1.5 1.5 0 0 1-1.5 1.5H14.5A1.5 1.5 0 0 1 13 19z"/><path d="M23 6v4h4"/><path d="M16 12h7M16 15.5h7"/><circle cx="8.5" cy="17" r="2.6"/><path d="M8.5 14.4v-3"/>`,
+    postbox:`<path d="M8 12a8 8 0 0 1 16 0v14H8z"/><path d="M12 12h8" stroke-width="2"/><path d="M11 20h10"/><path d="M16 26v3"/>`,
+    doormat:`<path d="M4 22h24l-2 5H6z"/><path d="M9 22v5M15 22v5M21 22v5"/><path d="M11 6h12v11H11z"/><path d="M11 6l6 5 6-5"/>`,
+    magnifier:`<path d="M7 5h11l4 4v6" /><path d="M18 5v4h4"/><path d="M7 5v18a2 2 0 0 0 2 2h5"/><path d="M10 11h8M10 15h5"/><circle cx="21" cy="21" r="5.5"/><path d="M25 25l3.5 3.5"/>`,
+    chart:`<path d="M5 26h22M5 26V5"/><rect x="9" y="17" width="4" height="9"/><rect x="15" y="12" width="4" height="14"/><rect x="21" y="7" width="4" height="19"/>`,
+    tally:`<path d="M7 5h14a2 2 0 0 1 2 2v18a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M9.5 11v6M12.5 11v6M15.5 11v6M8.5 19l8-9"/><path d="M9.5 23h9"/>`,
+    outgoing:`<path d="M4 15h13a2 2 0 0 0 2-2V7l9 9-9 9v-6a2 2 0 0 0-2-2H4z" stroke-dasharray="0"/><path d="M4 9h7M4 21h7" stroke-dasharray="2 2.5"/>`,
+    opened:`<path d="M5 14 16 6l11 8v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/><path d="M5 14l11 8 11-8"/><path d="M10 12V4h12v8"/>`,
+    bookmark:`<path d="M8 4h13l4 4v18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><path d="M21 4v4h4"/><path d="M10 12h9M10 16h6"/><path d="M17 20h6v8l-3-2.5L17 28z" fill="rgba(124,58,42,.1)"/>`,
+    typewriter:`<path d="M6 14h20l2 8H4z"/><path d="M9 14V7h14v7"/><path d="M12 10h8"/><path d="M10 22v3h12v-3"/>`,
+    inkwell:`<path d="M10 16h12v8a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3z"/><path d="M9 16h14"/><path d="M20 16 25 5l3 1.5-4 10.5"/>`,
+    postmark:`<circle cx="16" cy="16" r="10" stroke-dasharray="3 2.5"/><path d="M9 13h14M9 19h14"/><path d="M13 13v6M19 13v6"/>`
+  };
+  const icon = (name, px) =>
+    `<svg viewBox="0 0 32 32" width="${px}" height="${px}" xmlns="http://www.w3.org/2000/svg">${ICON[name]||''}</svg>`;
+  const byType = t => materials.filter(m=>m.type===t);
+  const mat = id => materials.find(m=>m.id===id);
+  const matName = id => (mat(id)||{}).name || '—';
+  const usedIn = mid => packages.filter(p=>[p.letterId,p.synopsisId,p.sampleId].includes(mid));
+  const totalSent = () => packages.reduce((n,p)=>n+p.sent,0);
+  const totalReplies = () => packages.reduce((n,p)=>n+p.replies,0);
+  const totalReqs = () => packages.reduce((n,p)=>n+p.requests,0);
+  const plate = (iconName, px, cls='', style='', caption='') =>
+    `<div class="plate ${cls} ${caption?'':'nolabel'}" style="${style}">${icon(iconName, px)}${caption?`<span class="p-brief">${caption}</span>`:''}</div>`;
+
+  function render(){
+    const sent=totalSent(), reps=totalReplies(), reqs=totalReqs();
+
+    const matCols = TYPES.map(t=>{
+      const list = byType(t);
+      return `<div class="mat-col">
+        <div class="mat-col-head">
+          ${plate(TYPE_ICON[t], 40, 'disc', 'width:76px;height:76px;')}
+          <div class="mch-t"><span class="eyebrow">${TYPE_PLURAL[t]}</span><span class="statline">${list.length} held</span></div>
+          <button class="add" onclick="stub()">+ ADD</button>
+        </div>
+        <div class="mat-stack">
+          ${list.length ? list.map(m=>{
+            const u = usedIn(m.id).length;
+            return `<div class="sheet" onclick="stub()">
+              <span class="s-type">${TYPE_LABEL[t]}</span>
+              <span class="s-name">${m.name}</span>
+              <div class="s-meta"><span>${m.src}</span><span class="dot"></span><span class="use">${u?`In <b>${u}</b> package${u===1?'':'s'}`:'Not in a package'}</span></div>
+              <button class="del" title="Delete" onclick="delMaterial(event,${m.id})"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
+            </div>`;
+          }).join('') : `<div class="col-empty">None yet — most writers keep two or three versions.</div>`}
+        </div>
+        <button class="ghost" onclick="stub()"><span class="g-t">${TYPE_ADD[t]}</span></button>
+      </div>`;
+    }).join('');
+
+    const pkgCards = packages.map(p=>{
+      const foot = p.sent===0
+        ? `<span class="idle">Not yet sent — attach it when you log a query</span>`
+        : `<span class="out">→ ${p.sent} sent</span><span class="in">← ${p.replies} replied</span><span class="in">${p.requests} request${p.requests===1?'':'s'}</span>`;
+      return `<div class="pkg-card" onclick="stub()">
+        <div class="stamp">${icon(p.stampIcon, 36)}</div>
+        <h3>${p.name}</h3>
+        <div class="slots">
+          <span class="slot"><span class="sl-t">Letter</span><span class="sl-n">${matName(p.letterId)}</span></span>
+          <span class="slot"><span class="sl-t">Synopsis</span><span class="sl-n">${matName(p.synopsisId)}</span></span>
+          <span class="slot"><span class="sl-t">Sample</span><span class="sl-n${p.sampleId?'':' none'}">${p.sampleId?matName(p.sampleId):'Not included'}</span></span>
+        </div>
+        <div class="pkg-foot">${foot}<span class="spacer"></span>
+          <button class="del" title="Delete" onclick="delPackage(event,${p.id})"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg></button>
+        </div>
+      </div>`;
+    }).join('');
+
+    const maxSent = Math.max(...packages.map(p=>p.sent),1);
+    const matAgg = materials.map(m=>{
+      const pks=usedIn(m.id);
+      return {m,sent:pks.reduce((n,p)=>n+p.sent,0),req:pks.reduce((n,p)=>n+p.requests,0)};
+    }).filter(x=>x.sent>0);
+    const maxMs = Math.max(...matAgg.map(x=>x.sent),1);
+
+    const track = sent===0
+      ? `<div class="nudge">Attach <b>${packages[0]?packages[0].name:'a package'}</b> when you log your next query — replies land back here against it.<span class="n-link">Log a query ›</span></div>
+         <div class="dash-grid" style="margin-bottom:0;">
+           <div class="ghost-panel">${plate('chart', 52)}<span class="gp-t">Replies by package</span><span class="gp-s">Appears once a package goes out with a query.</span></div>
+           <div class="ghost-panel">${plate('tally', 52)}<span class="gp-t">Requests by material</span><span class="gp-s">Shows which materials sit behind each request.</span></div>
+         </div>`
+      : `<div class="statstrip">
+           <div class="stat"><div><div class="n">${sent}</div><div class="l"><span class="out">→</span>Queries sent<br>with a package</div></div>${plate('outgoing', 40, '', 'width:70px;height:70px;')}</div>
+           <div class="stat"><div><div class="n">${reps}</div><div class="l"><span class="in">←</span>Replies<br>received</div></div>${plate('opened', 40, '', 'width:70px;height:70px;')}</div>
+           <div class="stat"><div><div class="n">${reqs}</div><div class="l"><span class="in">←</span>Requests<br>for more</div></div>${plate('bookmark', 40, '', 'width:70px;height:70px;')}</div>
+         </div>
+         <div class="dash-grid">
+           <div class="panel"><div class="panel-band"><span class="eyebrow">Replies by package</span></div><div class="panel-body">
+             ${packages.filter(p=>p.sent>0).map(p=>`<div class="drow"><div class="dr-top"><span class="dr-name">${p.name}</span><span class="dr-meta">${p.replies} of ${p.sent} replied</span></div><div class="bar"><div class="b-sent" style="width:${p.sent/maxSent*100}%"><div class="b-in" style="width:${p.replies/p.sent*100}%"></div></div></div></div>`).join('')}
+           </div></div>
+           <div class="panel"><div class="panel-band"><span class="eyebrow">Requests by material</span></div><div class="panel-body">
+             ${matAgg.map(x=>`<div class="drow"><div class="dr-top"><span class="dr-name"><span class="dr-eyebrow">${TYPE_LABEL[x.m.type]}</span>${x.m.name}</span><span class="dr-meta">${x.req} request${x.req===1?'':'s'} from ${x.sent} sent</span></div><div class="bar"><div class="b-sent" style="width:${x.sent/maxMs*100}%"><div class="b-in" style="width:${x.sent?x.req/x.sent*100:0}%"></div></div></div></div>`).join('')}
+           </div></div>
+         </div>
+         <div class="panel"><div class="panel-band"><span class="eyebrow">Latest activity</span></div><div class="panel-body ledger" style="gap:0;">
+           <div class="lrow"><span class="l-date">18 AUG</span><span class="l-dir in">←</span><span><b>Full request</b> from R. Osei</span><span class="l-pkg">Comps-led variant</span></div>
+           <div class="lrow"><span class="l-date">14 AUG</span><span class="l-dir in">←</span><span><b>Reply</b> from A. Whitmore</span><span class="l-pkg">Standard UK</span></div>
+           <div class="lrow"><span class="l-date">12 AUG</span><span class="l-dir out">→</span><span><b>Query sent</b> to J. Fairfax</span><span class="l-pkg">Standard UK</span></div>
+           <div class="lrow"><span class="l-date">09 AUG</span><span class="l-dir out">→</span><span><b>Query sent</b> to R. Osei</span><span class="l-pkg">Comps-led variant</span></div>
+         </div></div>`;
+
+    $('root').innerHTML = `
+      <div class="hero">
+        <div class="hero-l">
+          <div class="hero-prob">Fed up of guessing which materials are landing with agents?</div>
+          <div class="hero-say">Every package keeps its own scorecard. ScriptAlly records <b>which letter, synopsis and pages went to each agent</b> — so the answer sits on the page, not in your head.</div>
+          <div class="hero-foot">
+            <button class="btn primary">＋ New package</button>
+            <div class="rule"></div>
+            <span class="statline"><b>${materials.length}</b> materials · <b>${packages.length}</b> package${packages.length===1?'':'s'} · <b>${sent}</b> sent</span>
+          </div>
+        </div>
+        ${plate('desk', 92, 'hero-plate')}
+      </div>
+
+      <div class="band">
+        <div class="band-head"><h2>Your materials</h2><span class="tag">${materials.length} held</span></div>
+        <div class="mat-cols">${matCols}</div>
+      </div>
+
+      <div class="band">
+        <div class="band-head"><h2>Your packages</h2><span class="tag">${packages.length} built</span></div>
+        <div class="pkg-grid">${pkgCards}
+          <button class="ghost pkg-ghost" onclick="stub()">${plate('parcelOpen', 54)}<span class="g-t">Build another package</span><span class="g-s">A different letter, a different length of synopsis.</span></button>
+        </div>
+      </div>
+
+      <div class="band">
+        <div class="band-head"><h2>Tracking</h2><span class="tag">Reported, not guessed</span></div>
+        ${track}
+      </div>
+
+      <div class="band" style="margin-bottom:0;">
+        <div class="hownote">
+          <div class="hn-cell">${plate('postbox', 34, 'disc')}<div><div class="hn-t out">→ Sent</div><p>Counted when a query goes out with a package attached. The package records exactly which letter, synopsis and pages went.</p></div></div>
+          <div class="hn-cell">${plate('doormat', 34, 'disc')}<div><div class="hn-t in">← Replies</div><p>Any agent response lands against the package that went out — so every figure traces back to real correspondence.</p></div></div>
+          <div class="hn-cell">${plate('magnifier', 34, 'disc')}<div><div class="hn-t in">← Requests</div><p>Partial and full requests are credited to each material in the package that earned them. Counts, never guesses.</p></div></div>
+        </div>
+      </div>`;
+  }
+
+  function showPop(x,y,html){
+    $('pop').innerHTML=html; $('pop-layer').hidden=false;
+    const pop=$('pop'), pw=290, ph=pop.offsetHeight||170;
+    pop.style.left=Math.min(Math.max(12,x-pw/2),window.innerWidth-pw-12)+'px';
+    pop.style.top=Math.min(y+10,window.innerHeight-ph-12)+'px';
+  }
+  function closePop(){$('pop-layer').hidden=true;}
+  function delMaterial(ev,id){
+    ev.stopPropagation();
+    const m=mat(id), uses=usedIn(id), r=ev.currentTarget.getBoundingClientRect();
+    if(uses.length) showPop(r.left,r.bottom,`<h5>Archive ${m.name}?</h5><p><b>${m.name}</b> is part of ${uses.length===1?'a package':uses.length+' packages'}: <b>${uses.map(p=>p.name).join(', ')}</b>. Archiving keeps it working inside ${uses.length===1?'that package':'those packages'} and takes it out of your library.</p><div class="pop-actions"><button class="btn sm" onclick="closePop()">Cancel</button><button class="btn sm" onclick="doDelMaterial(${id})">Archive</button></div>`);
+    else showPop(r.left,r.bottom,`<h5>Delete ${m.name}?</h5><p>This ${TYPE_LABEL[m.type].toLowerCase()} will be removed. This can't be undone.</p><div class="pop-actions"><button class="btn sm" onclick="closePop()">Cancel</button><button class="btn sm" onclick="doDelMaterial(${id})">Delete</button></div>`);
+  }
+  function doDelMaterial(id){materials=materials.filter(m=>m.id!==id);closePop();render();}
+  function delPackage(ev,id){
+    ev.stopPropagation();
+    const p=packages.find(x=>x.id===id), r=ev.currentTarget.getBoundingClientRect();
+    if(p.sent>0) showPop(r.left,r.bottom,`<h5>Archive ${p.name}?</h5><p><b>${p.name}</b> has been sent with ${p.sent} ${p.sent===1?'query':'queries'}. Archiving keeps its record with those queries and takes it out of your packages.</p><div class="pop-actions"><button class="btn sm" onclick="closePop()">Cancel</button><button class="btn sm" onclick="doDelPackage(${id})">Archive</button></div>`);
+    else showPop(r.left,r.bottom,`<h5>Delete ${p.name}?</h5><p>It hasn't been sent with any queries. The materials inside it stay in your library.</p><div class="pop-actions"><button class="btn sm" onclick="closePop()">Cancel</button><button class="btn sm" onclick="doDelPackage(${id})">Delete</button></div>`);
+  }
+  function doDelPackage(id){packages=packages.filter(p=>p.id!==id);closePop();render();}
+  function stub(){}
+  function toggleData(){FULL=!FULL;$('hb-data').classList.toggle('on',FULL);$('hb-data').textContent=FULL?'FULL':'SPARSE';seed();render();}
+  function toggleAct(){ACT=!ACT;$('hb-act').classList.toggle('on',ACT);seed();render();}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closePop();});
+  seed();render();
+</script>
+</body>
+</html>
