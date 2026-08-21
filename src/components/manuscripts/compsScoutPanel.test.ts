@@ -38,14 +38,33 @@ function rule(selector: string): string {
 describe("the suggestion row — the pack's alignment spec, exactly", () => {
   const row = rule(".ct-srow");
 
-  it("is 26px · 1fr · 104px with a 12px column gap", () => {
-    const cols = row.match(/grid-template-columns\s*:([^;]*);/)![1].trim();
-    expect(cols).toBe("26px minmax(0, 1fr) 104px");
-    expect(row).toMatch(/column-gap\s*:\s*12px/);
+  /**
+   * ⚠️ RETARGETED (v2 §4), AND THE CLAIM IS NOW THAT THE TWO CARDS SHARE ONE GRID. The old spec was
+   * `26px minmax(0,1fr) 104px` with the numeral in column one; the suggestion now takes the comp
+   * card's shape — 44px spine · flexible main · fixed aside — because "Add to comps" turns a
+   * suggestion INTO a comp, and a card that changes shape when it is accepted makes the writer
+   * re-find the thing they just added.
+   *
+   * ⚠️ SO THE SPINE WIDTH IS ASSERTED AGAINST `.ct-crow`'S, not against a literal. Two derivations
+   * against each other: a `toBe("44px")` on both sides would go green the day someone changed both
+   * in the same wrong direction, which is the whole failure mode this file exists to catch.
+   */
+  it("shares the comp card's grid, so a suggestion and a comp are the same object", () => {
+    const sugg = row.match(/grid-template-columns\s*:([^;]*);/)![1].trim().split(/\s+/);
+    const comp = rule(".ct-crow").match(/grid-template-columns\s*:([^;]*);/)![1].trim().split(/\s+/);
+    expect(sugg[0], "the spine widths have drifted apart").toBe(comp[0]);
+    expect(sugg.slice(1, -1).join(" "), "the main track has drifted").toBe(comp.slice(1, -1).join(" "));
+    expect(sugg).toHaveLength(comp.length);
   });
 
-  it("aligns to start, never centre", () => {
-    expect(row.match(/align-items\s*:([^;]*);/)![1].trim()).toBe("start");
+  /**
+   * ⚠️ `stretch`, NOT `start` — and the value had to change. The spine is a full-height coloured
+   * edge; `start` collapses it to the height of its own rotated text and leaves the card's left edge
+   * part-painted. The old lock guarded a five-cell row sharing one line box, where content really
+   * could drag its neighbours' controls; independent grid cells cannot do that.
+   */
+  it("stretches, so the spine fills the card", () => {
+    expect(row.match(/align-items\s*:([^;]*);/)![1].trim()).toBe("stretch");
   });
 
   /**
@@ -53,10 +72,12 @@ describe("the suggestion row — the pack's alignment spec, exactly", () => {
    * change that silently reverts the fix — a long title would push its own ADD leftwards while its
    * neighbours' stayed put.
    */
-  it("never lets the action column size to its contents", () => {
+  it("never lets the aside size to its contents", () => {
     const last = row.match(/grid-template-columns\s*:([^;]*);/)![1].trim().split(/\s+/).pop()!;
+    /* ⚠️ EXTRACTED AND COMPARED, never pattern-excluded — a `(?!auto)` lookahead after `\s*`
+       backtracks to zero width and matches `auto`, which this repo has been bitten by twice. */
     expect(["auto", "min-content", "max-content", "fit-content"]).not.toContain(last);
-    expect(last).toBe("104px");
+    expect(last).toMatch(/^\d+px$/);
   });
 
   /**
@@ -118,9 +139,24 @@ describe("the free state shows the shape, never invented books", () => {
     expect(ghost).not.toMatch(/\bs\.title\b|\bs\.author\b|suggestions/);
   });
 
-  it("offers the upgrade in pink and routes it at the existing CTA", () => {
-    expect(src).toContain("See Pro plans");
+  /**
+   * ⚠️ THE UPGRADE IS SLATE NOW, NOT PINK (v2 §4) — and the two are different jobs, which is why the
+   * change is not a drift. Pink is the WRITER'S verb (Add to comps): a thing they do inside a
+   * feature they already have. The upgrade is the TIER, and the tier is slate everywhere in this
+   * app. `.ct-btn-slate` reads the app's own `--slate` rather than a page copy, so comps' Pro action
+   * cannot drift from the Package Builder's or the manuscript plate's.
+   *
+   * ⚠️ AND NO COUNT OR QUOTA MAY APPEAR IN THIS COPY. Free comps are unlimited and the Pro boundary
+   * is the Scout itself, so "up to N" would state a limit that does not exist, and a library total
+   * would state a library this Scout does not have.
+   */
+  it("offers the upgrade in slate, routed at the existing CTA, with no quota language", () => {
+    expect(src).toContain("ct-btn-slate");
     expect(src).toContain("onClick={onUpgrade}");
+    const free = sliceBetween(src, "if (!isPro) {", "const sent = run");
+    expect(free).not.toMatch(/up to \d|\bquota\b|\bremaining\b|\d[\d,]* verified titles/i);
+    /* the pink verb must not have followed it in — that would make one colour mean two things */
+    expect(free).not.toContain("ct-btn-pink");
   });
 
   /** ⚠️ A FREE USER NEVER DISPATCHES — the panel returns before any send control exists. */

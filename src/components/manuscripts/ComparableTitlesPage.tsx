@@ -269,36 +269,61 @@ function lastSentOut(runAt: string): string | null {
  */
 const ScoutRow: React.FC<{
   s: CompSuggestion;
-  index: number;
   onShelf: boolean;
   leaving: boolean;
   onAdd: () => void;
   onDismiss: () => void;
-}> = ({ s, index, onShelf, leaving, onAdd, onDismiss }) => {
+}> = ({ s, onShelf, leaving, onAdd, onDismiss }) => {
   const facts = factsChip(s);
+  /* ⚠️ "Matched on" NAMES FACTS, AND IT IS THE MODEL'S OWN AXIS SPLIT — never a score and never a
+     ranking. "Thriller · Adult" is a fact about the query that surfaced this title; "87% match" or
+     "Strong fit" would be a verdict about the writer's book, and no amount of hedging makes one into
+     the other. If a future edit needs a number here, it is the wrong number. */
+  const matched = compFacets(s);
+  const spineText = [String(s.year), (s.media ?? "book").toUpperCase()].join(" · ");
   return (
     <div className={`ct-srow${leaving ? " gone" : ""}`}>
-      {/* a spine for the column, and the count legible at a glance */}
-      <div className="idx">{String(index + 1).padStart(2, "0")}</div>
-      <div>
-        <div className="t">{s.title}</div>
-        <div className="a">{s.author} · {s.year}</div>
+      {/* ⚠️ THE SAME SPINE AS THE COMP CARD (v2 §4), so a suggestion and a recorded comp read as the
+          same kind of object — which is exactly what "Add to comps" turns one into. */}
+      <div className={`ct-spine${(s.media ?? "book") === "book" ? "" : " screen"}`} aria-hidden="true">
+        <span className="yr">{spineText}</span>
+      </div>
+
+      <div className="ct-cmain">
+        <div className="ct-ctop">
+          <span className="ct-ctitle">{s.title}</span>
+          <span className="ct-cauthor">{s.author}</span>
+        </div>
+        {s.publisher && (
+          <div className="ct-cmeta"><span><b>{s.publisher}</b></span></div>
+        )}
+        {matched.length > 0 && (
+          <div className="ct-matchline">
+            <span className="ct-lbl">Matched on</span>
+            {matched.map((m) => <span key={m} className="ct-mchip">{m}</span>)}
+          </div>
+        )}
         {/* roman, not italic — it is a statement about the book, not a quotation */}
         <div className="why">{s.why}</div>
-        <div className="ct-chips">
-          {/* ⚠️ THE SAME CHIP AS THE COMP ROW'S — one component, one colour, both cards. */}
-          <span className="ct-chip verified"><Check /> Verified · {s.verification.catalogue}</span>
-          {facts && <span className="ct-chip facts">{facts}</span>}
-        </div>
       </div>
-      <div className="sacts">
-        {/* ⚠️ ADD IS PINK. Blue marks the tier; the verb belongs to the writer, like every action. */}
-        <button type="button" className="ct-sadd" disabled={onShelf} onClick={onAdd}>
-          {onShelf ? <Check /> : <Plus />}{onShelf ? "Added" : "Add"}
-        </button>
-        <button type="button" className="ct-sdismiss" aria-label={`Dismiss ${s.title}`} onClick={onDismiss}>
-          <X />
-        </button>
+
+      <div className="ct-saside">
+        {/* ⚠️ THE SHARED CHIP, NAMING ITS CATALOGUE — the SAME component and colour as the comp
+            card's. One claim, one treatment, both cards: a verification that read one way in the
+            list and another in the panel would be two different claims about the same fact. This
+            is also the page's provenance line; the ref draws library provenance ("Named on 3 agent
+            wish lists"), which needs a library this Scout does not have. */}
+        <span className="ct-chip verified"><Check /> Verified · {s.verification.catalogue}</span>
+        {facts && <span className="ct-chip facts">{facts}</span>}
+        <div className="sacts">
+          {/* ⚠️ ADD IS PINK. Blue marks the tier; the verb belongs to the writer, like every action. */}
+          <button type="button" className="ct-sadd" disabled={onShelf} onClick={onAdd}>
+            {onShelf ? <Check /> : <Plus />}{onShelf ? "Added" : "Add to comps"}
+          </button>
+          <button type="button" className="ct-sdismiss" aria-label={`Dismiss ${s.title}`} onClick={onDismiss}>
+            <X />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -361,22 +386,38 @@ const ScoutPanel: React.FC<{
     return (
       <div className="ct-body">
         <div className="ct-upsell">
-          <div className="ghost" aria-hidden="true">
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="ct-srow skeleton">
-                <div className="idx">{String(i + 1).padStart(2, "0")}</div>
-                <div>
-                  <span className="bar w70" /><span className="bar w40" /><span className="bar w90" />
-                </div>
-                <div className="sacts"><span className="bar btn" /></div>
+          {/* ⚠️ ONE BLURRED TEASER, AND IT IS DECORATION — `aria-hidden`, `inert`, and holding no
+              real title. A screen reader must not read it and a Tab must not land in it: it is a
+              picture of a card, not a card. `inert` is what actually removes it from the tab order;
+              `aria-hidden` alone hides it from the reader while leaving it focusable, which is the
+              worst of both — a control a keyboard user can reach and cannot hear.
+
+              ⚠️ AND IT SHOWS NO NAMED TITLE. A blurred card carrying a real suggestion would be
+              showing a free user the answer and charging them to read it; a placeholder shape says
+              "there is something here" without pretending to be a specific book. */}
+          <div className="ghost" aria-hidden="true" inert>
+            <div className="ct-srow skeleton">
+              <div className="ct-spine" />
+              <div className="ct-cmain">
+                <span className="bar w70" /><span className="bar w40" /><span className="bar w90" />
               </div>
-            ))}
+              <div className="ct-saside"><span className="bar btn" /></div>
+            </div>
           </div>
           <div className="lockwrap">
             <div className="lock"><Lock /></div>
-            <h3>Unlock the Scout</h3>
-            <p>Verified, recent comps matched to your book — found for you, added straight to your list.</p>
-            <button type="button" className="ct-btn-pink" onClick={onUpgrade}>See Pro plans</button>
+            {/* ⚠️ NO COUNT AND NO "up to N". The ref's heading names 1,240 library titles; there is
+                no library behind this Scout and no quota on this plan — free comps are unlimited and
+                the Pro boundary is the Scout itself. A number here would be either invented or a
+                limit that does not exist. */}
+            <h3>The Scout finds titles shelved beside manuscripts like yours</h3>
+            <p>
+              Pro sends the Scout out to find recent comps in your category, each checked against a
+              real catalogue and shown with the facts it matched on.
+            </p>
+            <button type="button" className="ct-btn-slate" onClick={onUpgrade}>
+              See what the Scout finds — Pro
+            </button>
           </div>
         </div>
       </div>
@@ -429,11 +470,10 @@ const ScoutPanel: React.FC<{
         </div>
       )}
 
-      {phase === "done" && visible.map((s, i) => (
+      {phase === "done" && visible.map((s) => (
         <ScoutRow
           key={s.title}
           s={s}
-          index={i}
           onShelf={shelfTitles.some((t) => t.trim().toLowerCase() === s.title.trim().toLowerCase())}
           leaving={leaving === s.title}
           onAdd={() => slideOut(s.title, () => onAddToShelf(suggestionToComp(s)))}
@@ -1087,9 +1127,13 @@ export const ComparableTitlesPage: React.FC<{
                             stores neither a reading date nor any link between a comp and a letter,
                             so both rows are absent rather than dashed or guessed. */}
                         <div className="ct-caside">
+                          {/* ⚠️ THE SAME CHIP AS THE SUGGESTION'S, CATALOGUE AND ALL. A comp added
+                              from the Scout carries its `verification` across, so the chip must not
+                              change wording when the card changes kind — that would read as the
+                              claim weakening on the way into the list. */}
                           {isVerified(c) && (
                             <span className="ct-chip verified">
-                              <Check /> Verified
+                              <Check /> Verified · {c.verification!.catalogue}
                             </span>
                           )}
                           {foundVia && (

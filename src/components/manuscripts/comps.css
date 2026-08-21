@@ -585,8 +585,12 @@
 .ct-chip.verified svg { width: 10px; height: 10px; }
 
 /* Pro upsell (free tier) */
+/* ⚠️ `.ct-upsell` AND `.ct-upsell .ghost` WERE EACH DECLARED TWICE, here and again below the Scout
+   block, with different blur and opacity values — so which one applied depended on source order and
+   nothing said so. Folded into ONE declaration each (the later block), because a lock that finds a
+   rule with `indexOf(".ct-upsell {")` reads whichever comes first, and this file's own invariant is
+   one rule per selector. */
 .ct-upsell { text-align: center; padding-top: 6px; }
-.ct-upsell .ghost { filter: blur(3px); opacity: .45; pointer-events: none; margin-bottom: -40px; }
 .ct-upsell .lockwrap { position: relative; z-index: 2; background: linear-gradient(180deg, transparent, var(--ct-card) 30%); padding-top: 30px; }
 .ct-upsell .lock { width: 44px; height: 44px; border-radius: 50%; background: var(--ct-scout-deep); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; box-shadow: 0 4px 14px rgba(47, 71, 97, .26); }
 .ct-upsell .lock svg { width: 19px; height: 19px; }
@@ -724,10 +728,13 @@
 .ct-btn-blue:disabled { opacity: .6; cursor: default; }
 
 /*
- * ⚠️ THIS GRID IS THE PACK'S ALIGNMENT SPEC, EXACTLY: `26px minmax(0,1fr) 104px`, `align-items:start`.
- * The action column is FIXED so every row's right edge is flush whatever the title's length — sizing
- * it to content is what made the previous version ragged, and is the one change that silently
- * reverts this. The why-line lives INSIDE column two rather than spanning the grid, which is what
+ * ⚠️ SUPERSEDED (v2 §4). This described the OLD Scout row — `26px minmax(0,1fr) 104px`,
+ * `align-items: start`, the numeral in column one. The suggestion now takes the comp card's grid
+ * (44px spine · minmax(0,1fr) main · 150px aside, `align-items: stretch`), so a suggestion and a
+ * recorded comp are the same object. What survives from the paragraph below is the rule that still
+ * binds: the aside is a FIXED width so every card's right edge is flush whatever the title's length,
+ * and sizing it to content is the one change that silently reverts that. The why-line lives INSIDE
+ * the main column rather than spanning the grid, which is what
  * stopped it running underneath the buttons.
  */
 /*
@@ -739,22 +746,42 @@
 .ct-band.blue { background: linear-gradient(135deg, var(--ct-scout-band-a), var(--ct-scout-band-b)); }
 .ct-band.blue .ic { color: var(--ct-scout-deep); }
 
+/* ⚠️ THE SUGGESTION TAKES THE COMP CARD'S GRID (v2 §4) — spine · main · aside — so a suggestion and
+   a recorded comp read as the same kind of object. That is not decoration: "Add to comps" turns one
+   into the other, and a card that changes shape when it is accepted makes the writer re-find it.
+   The aside is narrower than the comp card's because it holds actions rather than fact rows. */
 .ct-srow {
-  display: grid; grid-template-columns: 26px minmax(0, 1fr) 104px; column-gap: 12px;
-  padding: 14px 18px 15px; align-items: start;
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) 150px; gap: 0;
+  align-items: stretch; overflow: hidden;
 }
 .ct-srow + .ct-srow { border-top: 1px solid var(--ct-band-hair); }
-.ct-srow:hover { background: var(--ct-scout-hover); }
-.ct-srow .idx {
-  font-family: 'JetBrains Mono', monospace; font-size: 9.5px; color: var(--ct-label);
-  text-align: right; padding-top: 3px;
+/* ⚠️ "Matched on" NAMES FACTS, NEVER A SCORE. These chips say what the query ran against — the
+   category, the audience — and the Scout does not rank, score or order by fit. A percentage or a
+   "Strong fit" chip here is a verdict about the writer's book, and it must not appear in any form,
+   tooltips and aria text included. */
+.ct-matchline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.ct-mchip {
+  font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .08em; text-transform: uppercase;
+  background: var(--ct-scout-bg); color: var(--ct-scout-ink); border: 1px solid var(--ct-scout-bd);
+  border-radius: 5px; padding: 3px 8px;
 }
-.ct-srow .t { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--ct-ink); }
-.ct-srow .a { font-size: 11.5px; color: var(--ct-label); margin-top: 3px; }
+.ct-saside {
+  border-left: 1px solid var(--ct-band-hair); padding: 16px 14px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 9px;
+}
+.ct-saside .sacts { display: flex; align-items: center; gap: 6px; margin-top: auto; padding-top: 10px; }
+/* ⚠️ THE SUGGESTION'S SPINE READS THE SCOUT'S OWN BLUE, not the comp card's pink — the tier colour
+   is the one thing that should differ between the two cards, because it is the one thing that IS
+   different about them. */
+.ct-srow .ct-spine { background: linear-gradient(160deg, var(--ct-scout-band-a), var(--ct-scout-band-b)); }
+.ct-srow .ct-spine .yr { color: var(--ct-scout-deep); }
+
+.ct-srow:hover { background: var(--ct-scout-hover); }
+/* ⚠️ `.ct-srow .idx` / `.t` / `.a` ARE RETIRED (v2 §4). The numeral became the spine, and the title
+   and author moved onto the comp card's own `.ct-ctitle` / `.ct-cauthor` so the two cards cannot
+   drift apart typographically — which was the point of giving them one grid. */
 /* roman, not italic — a statement about the book, not a quotation from it */
-.ct-srow .why { font-size: 12px; color: var(--ct-ink-soft); margin-top: 7px; line-height: 1.5; font-style: normal; }
-.ct-srow .ct-chips { margin-top: 9px; }
-.ct-srow .sacts { display: flex; gap: 6px; justify-content: flex-end; padding-top: 1px; }
+.ct-srow .why { font-size: 12px; color: var(--ct-ink-soft); margin-top: 9px; line-height: 1.5; font-style: normal; }
 .ct-chip.facts { background: var(--ct-scout-bg); color: var(--ct-scout-ink); border: 1px solid var(--ct-scout-bd); }
 /* ⚠️ PINK. Blue marks the tier; the verb belongs to the writer. */
 .ct-sadd {
@@ -798,9 +825,26 @@
  * frosted glass to sell it would break the promise inside the card that makes it.
  */
 .ct-upsell { position: relative; }
-.ct-upsell .ghost { filter: blur(3px); opacity: .5; pointer-events: none; }
+/* ⚠️ BLURRED, INERT AND SHAPED LIKE A CARD, holding no real title — it is a picture of a suggestion,
+   not a suggestion. `pointer-events: none` stops a mouse; `inert` in the markup is what stops a Tab. */
+.ct-upsell .ghost { filter: blur(3px); opacity: .5; pointer-events: none; margin-bottom: -40px; }
+.ct-upsell .ghost .ct-srow { border: 1px solid var(--ct-band-hair); border-radius: 10px; }
+.ct-upsell .ghost .ct-cmain { text-align: left; }
 .ct-upsell .ghost .bar { display: block; height: 9px; border-radius: 4px; background: var(--ct-band-hair); margin-bottom: 7px; }
 .ct-upsell .ghost .bar.w70 { width: 70%; } .ct-upsell .ghost .bar.w40 { width: 40%; } .ct-upsell .ghost .bar.w90 { width: 90%; }
+.ct-upsell .ghost .bar.btn { width: 100%; height: 26px; border-radius: 8px; margin: auto 0 0; }
+
+/* ⚠️ THE FILLED SLATE CTA READS THE APP'S OWN `--slate`, NOT A PAGE COPY. The tier colour is one
+   colour everywhere — the same decision `.ct-tag.pro` already carries — so comps' Pro action cannot
+   drift from the Package Builder's or the manuscript plate's. They are the same value, not two
+   values someone matched by hand and has to keep matching.
+   ⚠️ AND IT IS DISTINCT FROM `.ct-btn-blue`, which is the Scout's GHOST action (send it out). A
+   filled button is the upgrade; an outlined one is a verb inside a feature you already have. */
+.ct-btn-slate {
+  background: var(--slate); border: 1px solid var(--slate-deep, var(--ct-scout-deep)); color: #ffffff;
+  border-radius: 10px; padding: 10px 18px; font-size: 12.5px; font-weight: 600; cursor: pointer;
+}
+.ct-btn-slate:hover { background: var(--slate-deep, var(--ct-scout-deep)); }
 .ct-upsell .ghost .bar.btn { width: 100%; height: 28px; border-radius: 9px; margin: 0; }
 .ct-upsell .lockwrap {
   position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
