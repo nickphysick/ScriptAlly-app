@@ -377,7 +377,12 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        and the control row, clearing the masthead's own hairline. Those two are one object now and
        the hairline is at the object's foot, so the air belongs below the whole of it. */
     expect(body, "the masthead kept a bottom margin — the gap belongs below the slab now").not.toContain("margin-bottom");
-    expect(block(".wpg-scroll > .wpg-chrome"), "the slab lost the gap to whatever follows it").toContain("margin-bottom: 16px");
+    /* ⚠️ THE GAP IS THE SPACER'S HEIGHT, NOT THE SLAB'S MARGIN (pinned chrome, §2). A margin here
+       collapsed with the content's own and stopped collapsing once the spacer gained height, adding
+       one whole gap to the column on every settle — measured, max scroll 1918 → 1934. */
+    expect(block(".wpg-scroll > .wpg-chrome"), "the slab took a margin again — it will collapse against the content's").not.toContain("margin-bottom");
+    expect(block(".wpg-reclaim"), "the spacer stopped carrying the gap to whatever follows the chrome")
+      .toContain("height: calc(var(--wpg-chrome-gap) + var(--wpg-reclaim-pad, 0px))");
 
     /* ⚠️ AND NEITHER GRID ROW MAY RE-ADD ONE. A `padding-top` on the scroller would sit ABOVE the
        masthead — pushing the page's title down while claiming to be the gap under it — and the
@@ -565,7 +570,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
    * stylesheet's own file. It must equal the reclaim exactly and must not be transitioned: easing
    * it opens a frame in which max scroll is wrong, which is the clamp again, just harder to see.
    */
-  it("⚠️ THE RECLAIM PADDING IS DELETED — nothing changes height when the page scrolls", () => {
+  it("⚠️ THE SETTLE'S RECLAIM IS A SPACER, NOT SCROLLER PADDING", () => {
     /* ⚠️ THIS INVERTS ITS OWN SUBJECT, AND THE INVERSION WAS MEASURED RATHER THAN REASONED. The
        case used to REQUIRE `--wpg-reclaim-pad`: row 1 shrank when the header stripped, growing
        `clientHeight`, so max scroll fell by the same amount unless `scrollHeight` was grown to
@@ -583,8 +588,25 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        at 0-2-0, later in the bundle. A page and a component contributing to one property must SUM
        through tokens; raising specificity makes one replace the other. */
     const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(live, "the reclaim came back — it compensates for a collapse that no longer happens")
-      .not.toContain("--wpg-reclaim-pad");
+    /**
+     * ⚠️ THE RECLAIM IS BACK AT §2, AND IT IS A DIFFERENT MECHANISM FOR A DIFFERENT COLLAPSE — which
+     * is why the assertion moved rather than being relaxed. The version deleted here was
+     * `padding-bottom` on the SCROLLER, compensating for a header that no longer changed height, and
+     * it fired on every anchor.
+     *
+     * What is compensated now genuinely happens: the SLAB settles when it pins and gives up ~62px
+     * inside the scroller. That is the SHRINK direction — a page overflowing by less than the settle
+     * would be clamped to 0, un-settle, and cycle.
+     *
+     * ⚠️ AND IT IS A SPACER, NOT SCROLLER PADDING. Padding fixed `scrollHeight` and left the flow to
+     * collapse: measured, a 10px wheel tick moved a content landmark 67px. A box between the slab
+     * and the content holds the flow still AND keeps the column's total constant, with one number
+     * doing both jobs.
+     */
+    expect(live, "the reclaim went back onto the scroller's padding — that fixes max scroll and lets the content collapse under the reader")
+      .not.toContain("padding-bottom: calc(var(--wpg-foot, 0px) + var(--wpg-reclaim-pad");
+    expect(block(".wpg-reclaim"), "the spacer stopped holding the settle's reclaim")
+      .toContain("var(--wpg-reclaim-pad, 0px)");
     expect(live, "the working state started re-declaring the gap token — `manuscriptLibrary.css` reads it for its foot padding")
       .not.toContain("--content-top-gap-work");
     expect(block(".wpg-scroll"), "the foot padding stopped being a sum — a page's own contribution would replace the component's")

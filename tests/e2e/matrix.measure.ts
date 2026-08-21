@@ -76,7 +76,7 @@ const readState = (page: Page) => page.evaluate(() => {
   /* ⚠️ `wpg-chrome` JOINS THE LIST (pinned chrome, §1) — masthead and control row live inside one
      sticky slab now, so the scroller's first child is the SLAB and a finder that does not know it
      reports the chrome as the page's content. It did: "content starts at 15" on Query Centre. */
-  const CHROME = ["wpg-chrome", "wpg-mast", "wpg-mini", "wpg-tools"];
+  const CHROME = ["wpg-chrome", "wpg-mast", "wpg-mini", "wpg-tools", "wpg-reclaim"];
   const isChrome = (el: Element) => CHROME.some((c) => el.classList.contains(c));
   const content = [...sc.children].find((el) => !isChrome(el)) as HTMLElement | null;
   return {

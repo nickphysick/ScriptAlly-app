@@ -194,9 +194,13 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    * and invisible is still the wrong side of a boundary the lock asserts.
    */
   const [stuckH, setStuckH] = React.useState(0);
+  /* what the settle takes out of `scrollHeight`, given back as padding so max scroll cannot move */
+  const [reclaim, setReclaim] = React.useState(0);
   const toolsRef = React.useRef<HTMLDivElement>(null);
   /* the slab — one box whose rendered height IS the stuck chrome, so the hem has one thing to read */
   const chromeRef = React.useRef<HTMLDivElement>(null);
+  /* the slab's RESTING height, remembered so the settle's reclaim can be derived rather than pinned */
+  const restHRef = React.useRef(0);
   const miniRef = React.useRef<HTMLDivElement>(null);
 
   /**
@@ -293,8 +297,30 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
        * no longer that tall — a gap of about half the chrome, in the one state where anything is
        * actually passing beneath it.
        */
-      const chrome = top > 2 ? (chromeRef.current?.getBoundingClientRect().height ?? 0) : 0;
+      const h = chromeRef.current?.getBoundingClientRect().height ?? 0;
+      /* the resting posture's height, remembered while the page is AT the top — the only state in
+         which the slab is measurably un-settled */
+      if (top <= 2 && h > 0) restHRef.current = h;
+      const chrome = top > 2 ? h : 0;
       setStuckH((prev) => (prev === chrome ? prev : chrome));
+      /**
+       * ⚠️ THE SETTLE SHRINKS THE SLAB, AND SHRINK IS THE DANGEROUS DIRECTION (§2). The slab is
+       * inside the scroller, so its box is part of `scrollHeight`: settling takes ~62px out of the
+       * scrollable content the instant the page pins. On a page overflowing by less than that, the
+       * browser clamps `scrollTop` back to 0, `stuck` goes false, the slab un-settles and the page
+       * grows again — shrink, clamp, un-shrink, repeat. The mini bar was safe because it GREW.
+       *
+       * ⚠️ SO THE RECLAIM IS GIVEN BACK AS PADDING ON THE SCROLLER, and this is the shape the file
+       * deliberately kept when `--wpg-reclaim-pad` was deleted at the end of the in-flow pack: the
+       * padding is a `calc()` sum precisely so a page and this component can each contribute without
+       * one replacing the other.
+       *
+       * ⚠️ AND IT IS MEASURED, NOT CONSTANT. The settle's delta differs by page — a page with no
+       * control row reclaims less, a title that wraps reclaims more — so a literal would be right
+       * for one page on one day.
+       */
+      const reclaim = top > 2 ? Math.max(0, restHRef.current - h) : 0;
+      setReclaim((prev) => (Math.abs(prev - reclaim) < 0.5 ? prev : reclaim));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
     const onScroll = () => { if (!frame) frame = requestAnimationFrame(evaluate); };
@@ -393,7 +419,10 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
         ref={rootRef}
         /* ⚠️ A CUSTOM PROPERTY RATHER THAN A CLASS, because the value is a MEASUREMENT and classes
            carry states. The stylesheet reads it; nothing else needs to know it exists. */
-        style={{ ["--wpg-stuck-h" as string]: `${stuckH}px` } as React.CSSProperties}
+        style={{
+          ["--wpg-stuck-h" as string]: `${stuckH}px`,
+          ["--wpg-reclaim-pad" as string]: `${reclaim}px`,
+        } as React.CSSProperties}
         /* ⚠️ `wpg--tools` IS GONE FROM THIS LIST. It existed for ONE rule — `.wpg--tools > .wpg-scroll`,
            which zeroed the scroller's top gap when a toolbar row had already paid it — and that
            arbitration died with the chrome rows. Grepped before removing: no stylesheet in `src/`
@@ -511,6 +540,27 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             <div ref={toolsRef} className="wpg-tools">{toolbar}</div>
           )}
           </div>
+          {/**
+            * ⚠️ THE SETTLE'S RECLAIM, HELD OPEN IN THE FLOW (pinned chrome, §2).
+            *
+            * The slab loses ~62px when it pins, and it is INSIDE the scroller — so without this,
+            * everything below it rises by that much. Measured: a 10px wheel tick moved a content
+            * landmark 67px. Scroll anchoring does not absorb it, because the change is not content
+            * arriving above the anchor; it is the anchor's own offset shrinking.
+            *
+            * ⚠️ AND KEEPING THE FLOW STILL IS WHAT MAKES THE SETTLE WORTH HAVING. The slab is
+            * PINNED: shrinking it uncovers 62px of content that was behind it. Letting the flow
+            * collapse as well moves the page under the reader to reveal the same 62px twice.
+            *
+            * ⚠️ AN ELEMENT RATHER THAN A MARGIN, and that is the CLAUDE.md rule about collapsing:
+            * a `margin-bottom` on the slab would collapse against the next sibling's `margin-top`
+            * and compensate by the LARGER of the two rather than the sum. A box cannot collapse.
+            *
+            * ⚠️ AND IT REPLACES THE SCROLLER'S RECLAIM PADDING, which fixed `scrollHeight` and left
+            * the flow to move. This does both: the slab's loss and the spacer's gain are the same
+            * number, so the column's height never changes and neither does anything's position.
+            */}
+          <div className="wpg-reclaim" aria-hidden="true" />
           {children}
         </div>
         {/* ⚠️ THE HEMS ARE GRID CHILDREN OF ROW 3, NOT CHILDREN OF THE SCROLLER. Inside the

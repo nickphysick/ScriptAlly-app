@@ -225,13 +225,41 @@ describe("the masthead is content, not chrome", () => {
       .not.toContain("margin-bottom");
   });
 
-  it("⚠️ NO TRANSITIONS AT ALL — there is no state to tween between", () => {
-    /* Every transition the masthead carried eased the condense: height, padding, background,
-       border-colour, radius, shadow, the title's size, the mark's box, the button ladder. With one
-       state they animate nothing, and a transition with nothing to interpolate is the residue that
-       makes the next reader believe a state still exists. */
-    for (const sel of [".wsh", ".wsh-row", ".wsh-title", ".wsh-sub", ".wsh-mark", ".wsh-txt"]) {
-      expect(decls(all(hdrCss, sel)), `${sel} kept a transition — the condense it eased is gone`)
+  it("⚠️ THE MASTHEAD TWEENS THE SETTLE AND NOTHING ELSE", () => {
+    /**
+     * ⚠️ THIS CASE IS REVERSED, AND THE REASON IT WAS EVER "NO TRANSITIONS AT ALL" STILL STANDS. The
+     * masthead's old transitions eased a CONDENSE — height, background, border-colour, radius,
+     * shadow, a button ladder — and that state was deleted; a transition with nothing to interpolate
+     * is residue that makes the next reader believe a state still exists.
+     *
+     * ⚠️ THERE IS A SECOND POSTURE AGAIN (pinned chrome, §2), so the geometry properties tween by
+     * design. What must NOT come back is the CARD: a masthead that eased its own ground, frame,
+     * radius or shadow would be animating itself into chrome, which is what the whole system removed.
+     * So the claim is now about WHICH properties, which is a stronger statement than "none".
+     *
+     * ⚠️ AND THEY RIDE THE REST RULES, not the stuck ones — a transition declared only on the
+     * settled posture eases the way down and snaps on the way back.
+     */
+    const SETTLING = ["padding", "font-size", "width", "height", "flex-basis", "opacity", "max-height", "margin"];
+    const FORBIDDEN = ["background", "border-color", "border-radius", "box-shadow", "color"];
+    for (const sel of [".wsh", ".wsh-title", ".wsh-sub", ".wsh-mark", ".wsh-mark .os-mark"]) {
+      const t = /transition:([^;}]*)/.exec(decls(all(hdrCss, sel)));
+      if (!t) continue;
+      /* ⚠️ STRIP THE TIMING FUNCTIONS BEFORE SPLITTING — `cubic-bezier(.4, 0, .2, 1)` carries commas,
+         so a naive split on "," reports `0`, `0.2` and `1)` as transitioned properties. */
+      const props = t[1].replace(/\([^)]*\)/g, "").split(",").map((x) => x.trim().split(/\s+/)[0]).filter(Boolean);
+      expect(props.length, `${sel} declares a transition with no property in it`).toBeGreaterThan(0);
+      for (const prop of props) {
+        expect(SETTLING, `${sel} tweens \`${prop}\` — the settle moves geometry and type, never paint`)
+          .toContain(prop);
+        expect(FORBIDDEN, `${sel} eases \`${prop}\` — that is the masthead animating itself into a card`)
+          .not.toContain(prop);
+      }
+    }
+    /* ⚠️ AND THE ROW AND THE TEXT BLOCK TWEEN NOTHING — they hold no settling property of their own,
+       so a transition there would be easing something nobody declared. */
+    for (const sel of [".wsh-row", ".wsh-txt"]) {
+      expect(decls(all(hdrCss, sel)), `${sel} gained a transition — nothing about it changes between postures`)
         .not.toContain("transition");
     }
   });

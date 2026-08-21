@@ -100,13 +100,28 @@ const check = (rows: Record<string, unknown>[], probes: Probe[], lines: string[]
   for (const p of probes) {
     const row = rows.find((x) => x.sel === p.sel);
     if (!row || !row.present) { lines.push(`   ${p.sel.padEnd(16)} — not rendered here`); continue; }
-    const clipped = row.scrollH !== row.clientH;
+    /**
+     * ⚠️ A BOX THAT DOES NOT CLIP CANNOT CROP, and `scrollHeight` reports overflow either way. The
+     * settled masthead title measured 37px of scroll in a 29px box and nothing was cut: its
+     * `overflow` is `visible`, and what overflowed was the `PRO` pill — an ornament positioned
+     * ABSOLUTELY for the express purpose of staying out of the title's line box.
+     *
+     * ⚠️ THIS DOES NOT WEAKEN THE THREE REAL CASES. Every one of them clips: `.ws-bwm` and
+     * `.wpg-mini-name` carry `overflow: hidden` for their ellipsis truncation, and an ancestor cut
+     * is a separate reading with its own branch. What is removed is a flag on a box that paints
+     * every pixel it reports.
+     *
+     * ⚠️ AND THE RATIO CHECK IS UNTOUCHED, which is the half that matters most here: a Playfair box
+     * under 1.3× is reported whether or not today's string happens to have a descender in it.
+     */
+    const clips = String(row.overflow) !== "visible";
+    const clipped = row.scrollH !== row.clientH && clips;
     const cropped = !!row.croppedBy;
     const serif = String(row.font).toLowerCase().includes("playfair");
     const tight = serif && Number(row.ratio) < 1.3;
     lines.push(
       `   ${p.sel.padEnd(16)} "${row.text}" ${row.font} ${row.size}/${row.lineHeight} (${row.ratio}×) ` +
-      `client ${row.clientH} scroll ${row.scrollH}${clipped ? "  ⚠ CLIPPED" : ""}${tight ? "  ⚠ TIGHT" : ""}` +
+      `client ${row.clientH} scroll ${row.scrollH}${clipped ? "  ⚠ CLIPPED" : ""}${row.scrollH !== row.clientH && !clips ? "  (overflows, not clipped)" : ""}${tight ? "  ⚠ TIGHT" : ""}` +
       `${cropped ? `  ⚠ CROPPED BY ${row.croppedBy}` : ""}`);
     if (cropped) {
       faults.push(`${p.what} (${p.sel}) is CROPPED BY AN ANCESTOR — ${row.croppedBy}. Its own box is whole; something above it is cutting the pixels.`);
@@ -139,6 +154,35 @@ test("no Playfair in the shell's chrome is cropped by its own box", async ({ pag
   expect(/[gjpqy]/.test(withDescender), `the sampled chrome carries no descender at all ("${withDescender}") — this case would pass on a clipped box`).toBe(true);
   check(await measure(page, CHROME.map((c) => c.sel)), CHROME, lines);
 
+  /**
+   * ⚠️ THE SETTLED POSTURE TOO (pinned chrome, §2). The settled title is 22px Playfair rendering the
+   * same mixed-case page name, so the rule that made `line-height: 1` a bug at 30 makes it a bug
+   * here — and a title checked only at rest is checked in the posture the reader spends least time
+   * in. Measured on a SCROLLING page, because a fill page cannot pin and so has no settled posture.
+   *
+   * ⚠️ AND ON SUBMISSION PACKAGES SPECIFICALLY, BECAUSE ITS NAME HAS A DESCENDER IN IT. My first
+   * version used Contact list — five scrolling pages and only one of their titles carries a `g`.
+   * The precondition caught it immediately, which is the whole reason it is written before the
+   * claim: "Contact list" would have passed on a box clipping every descender it never renders.
+   */
+  await openRoute(page, "/manuscripts/packages", { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
+  await page.mouse.move(700, 500);
+  await page.mouse.wheel(0, 600);
+  await page.waitForTimeout(700);
+  const settled = await page.evaluate(() => {
+    const g = [...document.querySelectorAll(".wpg.pkgw-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;
+    const t = g.querySelector(".wsh-title") as HTMLElement | null;
+    return { size: t ? getComputedStyle(t).fontSize : "-", text: t?.textContent ?? "" };
+  });
+  /* the precondition: it actually settled, and the sample actually has a descender in it */
+  expect(settled.size, "the chrome did not settle — the check below would be about the resting title").toBe("22px");
+  expect(/[gjpqy]/.test(settled.text), `the settled title ("${settled.text}") carries no descender — this would pass on a clipped box`).toBe(true);
+  lines.push("\n══ /manuscripts/packages — settled");
+  check(await measure(page, [".wsh-title"]), [{ sel: ".wsh-title", what: "the settled masthead title" }], lines);
+
+  await openRoute(page, "/queries", { width: 1440, height: 900 });
+  await liftMotionSuppression(page);
   /* the folded bar — only exists once a fill page's masthead is hidden */
   const pt = await page.evaluate(() => {
     const g = [...document.querySelectorAll(".wpg.qc-wpg")].find((e) => e.getBoundingClientRect().height > 0) as HTMLElement;

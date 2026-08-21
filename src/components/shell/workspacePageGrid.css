@@ -83,6 +83,8 @@
    * the masthead has never heard of it. A token is not its name.
    */
   --mast-gutter: 35px;
+  /* the air between the chrome's closing hairline and the page's content */
+  --wpg-chrome-gap: 16px;
   --wpg-mini-pad: 9px;
   --wpg-mini-fs: 19px;
   --wpg-mini-lh: 1.3;
@@ -130,6 +132,9 @@
    Giving it a frame would make it read as a second plate stacked under the first, which is the
    arrangement amendment 9 exists to undo. */
 .wpg-tools {
+  /* rest 14/14, settling to 0/12 (§2) — the transition rides on the REST rule so both directions
+     ease; declared only on the stuck rule it would snap on the way back. */
+  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
   /* ⚠️ EVERY BOX WHOSE MATHS DEPENDS ON THE BOX MODEL DECLARES IT — the house rule, and the
      render harness is why: it loads a hand-picked stylesheet list without Tailwind's preflight, so
      an inherited `border-box` silently becomes `content-box` and every padded row measures wide. */
@@ -146,7 +151,7 @@
      bottom padding alone — the 16px margin that used to sit between them moved to the SLAB's base,
      because the hairline it was clearing moved there too. Masthead and controls are one object; the
      gap belongs below the object, not inside it. */
-  padding: 12px 0;
+  padding: 14px 0;
   /* ⚠️ `flex: none` — on a fill page the scroller is a flex COLUMN, and without this the control
      row would shrink as the panes below claim the space. Same reason the masthead states it. */
   flex: none;
@@ -539,6 +544,32 @@
  * ⚠️ NO INTERNAL DIVIDER. Option B's 45% whisper between title and tools is REJECTED — not built and
  * not left behind a flag. `.wsh`'s own `border-bottom` is deleted rather than hidden.
  */
+/**
+ * ⚠️ THE SPACER HOLDS THE FLOW STILL WHILE THE SLAB SETTLES (pinned chrome, §2). Its height is
+ * exactly what the slab gave up, so the scroll column's total never changes: max scroll holds, and
+ * nothing below the chrome moves under the reader.
+ *
+ * ⚠️ NO TRANSITION OF ITS OWN, DELIBERATELY. The published figure is re-derived from the slab's
+ * rendered box on every frame the `ResizeObserver` reports — which, during a transition, is every
+ * frame. Giving this its own easing would make the two curves independent, and the sum would drift
+ * mid-animation, which is the only moment anyone would see it.
+ *
+ * ⚠️ AND IT IS INERT ON A FILL PAGE rather than scoped off one: a fill page cannot scroll, so it
+ * never settles, so the reclaim is 0 and this is a zero-height box. `flex: none` because a fill
+ * page's scroller is a flex column and it must not be stretched into one.
+ */
+.wpg-reclaim {
+  flex: none;
+  /* ⚠️ THE GAP AND THE RECLAIM IN ONE BOX. The gap used to be the slab's `margin-bottom`; margins
+     COLLAPSE, and this box stops them collapsing the moment it has height — which added a whole gap
+     to the column on every settle. Summing them here means nothing can collapse and the column's
+     total is `slab + gap + reclaim`, constant by construction. */
+  height: calc(var(--wpg-chrome-gap) + var(--wpg-reclaim-pad, 0px));
+  /* ⚠️ IT IS NOT PART OF ANY MEASURE — a full-width, zero-content box, so `.wpg-scroll > *`'s
+     max-width would make it narrower than the column for no reason anyone could see. */
+  max-width: none;
+  width: 100%;
+}
 .wpg-scroll > .wpg-chrome {
   position: sticky;
   top: 0;
@@ -547,8 +578,10 @@
   /* opaque, or the content passes through the page's own title */
   background: var(--ws-window);
   border-bottom: 1px solid var(--ws-edge);
-  /* the gap the masthead's own `margin-bottom` used to pay, now below the whole slab */
-  margin-bottom: 16px;
+  /* ⚠️ NO MARGIN — THE GAP IS THE SPACER'S HEIGHT (see `.wpg-reclaim`). A `margin-bottom` here
+     COLLAPSED with the content's own `margin-top` at rest and stopped collapsing the moment the
+     spacer between them gained height, so the column grew by exactly one gap on every settle:
+     measured, max scroll 1918 → 1934. One box, no collapsing, one arithmetic. */
   /* ⚠️ FULL WIDTH — 0-2-0, so it beats `.wpg-scroll > *` on specificity rather than source order */
   max-width: none;
   width: 100%;
@@ -561,6 +594,27 @@
 .wpg-scroll > .wpg-chrome.wpg-chrome--stuck {
   box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0.18);
 }
+/**
+ * ══ SETTLE ON PIN — ONE OBJECT, TWO POSTURES (pinned chrome, §2; ref 174 option C) ════════════
+ *
+ * At rest it is the full masthead; once anything passes beneath it the chrome settles to about half
+ * its height and the page keeps its title without keeping its title page. The trigger is the
+ * EXISTING stuck boolean — no second mechanism, no second threshold.
+ *
+ * ⚠️ THE SETTLED POSTURE IS DECLARED ON THE SLAB AND REACHES INTO THE MASTHEAD, which is the one
+ * place this file styles `PageHeader`'s internals. The alternative is a second class threaded
+ * through the component, and the grid already owns when a page is working — it must not also have
+ * to tell the header what to wear. One element, one job, stated at the boundary.
+ */
+.wpg-chrome--stuck .wsh { padding: 13px 0 10px; }
+.wpg-chrome--stuck .wsh-mark { flex-basis: 34px; }
+.wpg-chrome--stuck .wsh-mark .os-mark { width: 34px; height: 34px; flex-basis: 34px; }
+.wpg-chrome--stuck .wsh-mark .os-mark svg { width: 25px; height: 25px; }
+.wpg-chrome--stuck .wsh-title { font-size: 22px; }
+/* ⚠️ THE DESCRIPTION FOLDS RATHER THAN HIDING — opacity AND the box, or the space it occupied stays
+   and the settle reclaims nothing. `display: none` would jump instead of easing. */
+.wpg-chrome--stuck .wsh-sub { opacity: 0; max-height: 0; margin-top: 0; }
+.wpg-chrome--stuck .wpg-tools { padding: 0 0 12px; }
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — only the tween goes, as everywhere else in this file */
   .wpg-scroll > .wpg-chrome { transition: none; }

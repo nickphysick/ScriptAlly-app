@@ -251,6 +251,11 @@
      horizontal inset is NOT here: the scroll row's own gutter pays it, so the masthead lines up
      with the content beneath it by construction. */
   padding: 24px 0 18px;
+  /* ⚠️ THE SETTLE (pinned chrome, §2; ref 174 option C). One object, two postures — the slab
+     tightens once anything passes beneath it, and every part of the masthead moves together on one
+     curve. The transitions live on the REST rules so both directions ease; a transition declared
+     only on the stuck rule snaps on the way back. */
+  transition: padding .22s cubic-bezier(.4, 0, .2, 1);
   /* the hairline that closes it, then 16px of air to the control row (`--mrule` in the QC ref).
      `--rim` in the refs is this app's `--ws-edge` — the window's own edge tone. */
 }
@@ -283,7 +288,7 @@
 /* ⚠️ NO TRANSITION — it tweened the mark THROUGH the condense, and nothing condenses; the fold
    animates the masthead as a whole rather than each of its parts separately.
    ⚠️ ONE SIZE FOR BOTH FAMILIES (masthead measure, §2) — 52px, illustrated or monoline. */
-.wsh-mark { flex: 0 0 52px; }
+.wsh-mark { flex: 0 0 52px; transition: flex-basis .22s cubic-bezier(.4, 0, .2, 1); }
 /* ⚠️ 64 → 88 (preset B) — the illustrated mark only. The 38px monoline glyph on its parchment
    plate is the OTHER mark family and is deliberately untouched: it is a plated icon, not a
    drawing, and scaling it with the illustration would turn a small badge into a large blank tile.
@@ -335,7 +340,12 @@
      descenders, so a line box the size of the em IS the ink. It became a bug the moment the same
      declaration was applied to mixed-case Playfair. THE RULE: `line-height: 1` is only ever safe on
      uppercase-only text. */
+  /* ⚠️ 1.3 IN BOTH POSTURES (pinned chrome, §2). The settled title is 22px and Playfair's
+     descenders fall below the baseline at any size — `line-height: 1` is only ever safe on
+     uppercase-only text, and the settled posture is the same mixed-case page name. The descender
+     lock measures both postures for exactly this reason. */
   line-height: 1.3;
+  transition: font-size .22s cubic-bezier(.4, 0, .2, 1);
   /* the positioning context for any ornament a page hangs on the title — see below */
   position: relative;
 }
@@ -401,6 +411,21 @@
      importing a fifth warm ink from a document drawn against its own palette is how a scale drifts.
      Size from the ref, colour from the scale. */
   margin: 3px 0 0; font-size: 13.5px; color: var(--shell-ink-soft);
+  /**
+   * ⚠️ THE CEILING IS THREE LINES, NOT THE REF'S 24px, AND THE DIFFERENCE IS THE WRAP. A
+   * `max-height` collapse needs a definite rest value to travel from, and the ref pins 24 — enough
+   * for the one line its own demo draws. A description that wrapped would be CLIPPED by that, and
+   * clipping real copy to make an animation linear is the wrong trade. Derived from the type so it
+   * cannot drift from the size it is a ceiling for.
+   *
+   * The cost is that a one-line description spends part of the .22s collapsing space it never
+   * occupied. That is the half of it worth paying.
+   */
+  max-height: calc(3 * 1.45 * 13.5px);
+  overflow: hidden;
+  transition: opacity .18s cubic-bezier(.4, 0, .2, 1),
+              max-height .22s cubic-bezier(.4, 0, .2, 1),
+              margin .22s cubic-bezier(.4, 0, .2, 1);
   /* ⚠️ IT DECLARES ITS OWN LINE-HEIGHT OR IT INHERITS THE PAGE'S, AND THE PAGES DISAGREE. Measured
      on the built dev bundle at 1440×900 with every other value identical — same 26/20 padding, same
      30px title, same 16px margin, nothing between the masthead and the control row — the text block
@@ -448,6 +473,8 @@
 .wsh-mark .os-mark {
   width: 52px; height: 52px; flex: 0 0 52px;
   background: none; border: none; box-shadow: none; border-radius: 0;
+  transition: width .22s cubic-bezier(.4, 0, .2, 1), height .22s cubic-bezier(.4, 0, .2, 1),
+              flex-basis .22s cubic-bezier(.4, 0, .2, 1);
 }
 .wsh-mark .os-mark img {
   width: 100%; height: 100%; object-fit: contain; display: block;
@@ -455,7 +482,10 @@
 }
 /* 36px in a 52px box — ref 173's `.mmk`. The monoline glyphs were drawn for a 38px plate at 20px
    and scale as vectors, so this is the same drawing larger, not a different weight. */
-.wsh-mark .os-mark svg { width: 36px; height: 36px; stroke: var(--shell-ink); stroke-width: 1.5; }
+.wsh-mark .os-mark svg {
+  width: 36px; height: 36px; stroke: var(--shell-ink); stroke-width: 1.5;
+  transition: width .22s cubic-bezier(.4, 0, .2, 1), height .22s cubic-bezier(.4, 0, .2, 1);
+}
 .agl-anim .wsh .wsh-mark .os-mark img { opacity: 0; }
 
 /* ⚠️ THE MIRRORED SECOND MARK IS DELETED (masthead left-constant, §B) — one mark, left aligned.

@@ -58,6 +58,7 @@ const read = (page: Page) => page.evaluate(() => {
     marginBottom: r(parseFloat(cs.marginBottom)),
     shadow: cs.boxShadow,
     stuckClass: row.className.includes("wpg-chrome--stuck"),
+    reclaim: getComputedStyle(g).getPropertyValue("--wpg-reclaim-pad").trim(),
     hasTools: !!tools,
     /* the row's own margin box — what `scrollHeight` actually counts */
     marginBox: r(rb.height + parseFloat(cs.marginBottom)),
@@ -175,15 +176,21 @@ test("the sticky chrome slab, on every scrolling page", async ({ page }) => {
        * scroll anchoring is what made the bar's growth invisible, and the small-tick probe is what
        * proved it rather than reasoning about it.
        */
+      /* ⚠️ THE PRECONDITION FIRST: the slab must actually have SETTLED. Max scroll being unchanged
+         is trivially true of a chrome that did not move, which is the state this assertion was
+         protecting at §1 and is exactly what it must not be satisfied by now. */
+      expect(rest.marginBox - moved.marginBox, `${name}: the slab did not settle when it pinned (${rest.marginBox} → ${moved.marginBox}) — the compensation below would be guarding nothing`)
+        .toBeGreaterThan(20);
       expect(Math.abs(moved.maxScroll - rest.maxScroll),
-        `${name}: max scroll moved ${rest.maxScroll} → ${moved.maxScroll} when the slab pinned — nothing in the chrome changes height at §1`)
+        `${name}: max scroll moved ${rest.maxScroll} → ${moved.maxScroll} when the slab settled — the reclaim is not being given back, and a page overflowing by less than the settle would be clamped to 0 and cycle`)
         .toBeLessThanOrEqual(1);
       expect(back.maxScroll, `${name}: max scroll did not return to its resting value once the page came back to the top`)
         .toBeCloseTo(rest.maxScroll, 0);
-      /* ⚠️ §1 ONLY: the slab's box is unchanged between the two states, because nothing yet tightens
-         when it pins. §2 makes it settle DELIBERATELY, and this assertion is replaced there by a
-         compensation that keeps max scroll constant — the shrink direction is the dangerous one. */
-      expect(moved.marginBox, `${name}: the slab's margin box changed when it stuck — that is what moves max scroll`).toBeCloseTo(rest.marginBox, 0);
+      /* ⚠️ AND THE RECLAIM IS PUBLISHED AS A MEASURED FIGURE, NOT A CONSTANT — two derivations of one
+         number, from opposite directions: the component's `restH − settledH`, and the box difference
+         measured here. A page with no control row settles by less; a literal would be right once. */
+      expect(parseFloat(moved.reclaim), `${name}: the published reclaim (${moved.reclaim}) disagrees with the ${rest.marginBox - moved.marginBox}px the slab actually gave up`)
+        .toBeCloseTo(rest.marginBox - moved.marginBox, 0);
       expect(back.stuckClass, `${name}: the row stayed stuck after returning to the top`).toBe(false);
       expect(moved.coverProbe, `${name}: the probe went off-screen — its answer means nothing`).not.toBe("OFF-SCREEN");
       expect(moved.coverProbe, `${name}: content shows through the sticky row`).toContain("ROW (");
@@ -242,20 +249,26 @@ test("⚠️ THE CONTENT DOES NOT JUMP WHEN THE CHROME PINS", async ({ page }) =
   const after = await probe();
 
   /**
-   * ⚠️ AT §1 THE CHROME DOES NOT CHANGE HEIGHT, SO THIS CASE IS A BASELINE RATHER THAN A GUARD, AND
-   * SAYING SO IS THE POINT. It was written against the mini bar, which grew 0 → its own height
-   * inside the scroller and had to be absorbed by scroll anchoring or the reader saw a lurch. The
-   * slab neither grows nor shrinks when it pins — yet.
-   *
-   * ⚠️ §2 IS WHAT MAKES IT LOAD-BEARING, and in the worse direction: the settle takes roughly half
-   * the chrome out of the flow the instant the page pins. The precondition — that the chrome's
-   * height actually MOVED — is asserted there, because a probe for a jump that cannot happen is
-   * satisfied by nothing happening, which is this repo's most-repeated vacuous green.
+   * ⚠️ THE PRECONDITION, ASSERTED BEFORE THE CLAIM. The settle takes roughly 62px of chrome out of
+   * the flow the instant the page pins — the SHRINK direction, which is the one that can clamp
+   * `scrollTop` and cycle. A probe for a jump that cannot happen is satisfied by nothing happening,
+   * and that is this repo's most-repeated vacuous green.
    */
   const chromeDelta = Math.abs(after.chrome - before.chrome);
-  /* ⚠️ THE CONTENT MOVED BY THE TICK, NOT BY THE CHROME. A 2px tolerance for sub-pixel scroll. */
-  expect(before.cardY - after.cardY, `the content moved ${before.cardY - after.cardY}px for a ${TICK}px scroll — the chrome's ${chromeDelta}px change is being paid by the reader's eye`)
-    .toBeCloseTo(TICK, 0);
+  expect(chromeDelta, `the chrome did not change height on a ${TICK}px tick (${before.chrome} → ${after.chrome}) — the jump this case guards against cannot occur, so it is asserting nothing`)
+    .toBeGreaterThan(20);
+  /**
+   * ⚠️ THE CONTENT MOVES BY WHAT `scrollTop` ACTUALLY DID, NOT BY WHAT THE WHEEL ASKED FOR. A wheel
+   * event is a request: Chromium delivered 8px of a 10px tick here and the assertion failed on the
+   * difference, about a page whose content had tracked the scroll exactly. The claim is that the
+   * chrome's 62px settle is paid by the CHROME and not by the reader's eye — so the two figures to
+   * compare are the landmark's movement and the scroll's, and the wheel's imprecision has no place
+   * in either.
+   */
+  const scrolled = after.scrollTop - before.scrollTop;
+  expect(scrolled, `the wheel moved nothing — there is no scroll for the content to track`).toBeGreaterThan(2);
+  expect(before.cardY - after.cardY, `the content moved ${before.cardY - after.cardY}px while the page scrolled ${scrolled}px — the chrome's ${chromeDelta}px settle is being paid by the reader's eye`)
+    .toBeCloseTo(scrolled, 0);
   /* and the browser paid it in `scrollTop`, which is the mechanism — recorded, not relied upon */
   console.log(`\ncontent-jump: tick ${TICK}px · scrollTop ${before.scrollTop} → ${after.scrollTop} · chrome ${before.chrome} → ${after.chrome} · landmark moved ${before.cardY - after.cardY}px`);
 });

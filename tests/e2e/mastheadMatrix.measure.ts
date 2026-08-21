@@ -76,6 +76,8 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
       return r(b.height + parseFloat(getComputedStyle(e).marginTop));
     })(),
     titleWeight: getComputedStyle(title).fontWeight,
+    /* the line box, so the descender rule can be checked at BOTH sizes rather than only at 30px */
+    titleLine: getComputedStyle(title).lineHeight,
     markW: mark ? r(mark.getBoundingClientRect().width) : -1,
     markH: mark ? r(mark.getBoundingClientRect().height) : 0,
     titleH: r(title.getBoundingClientRect().height),
@@ -337,4 +339,59 @@ test("⚠️ THE DASHBOARD IS UNTOUCHED — it renders none of this chrome", asy
   expect(seen.grids, "the dashboard grew a WorkspacePageGrid").toBe(0);
   expect(seen.mastheads, "the dashboard grew a masthead").toBe(0);
   expect(seen.rows, "the dashboard grew a control row").toBe(0);
+});
+
+/**
+ * ⚠️ THE SETTLED POSTURE, MEASURED AS A DERIVATION (pinned chrome, §2; ref 174 option C).
+ *
+ * The chrome is one object with two postures, so the matrix has to see both — a masthead asserted
+ * only at rest is asserted in the state the reader spends least time in. The height is derived per
+ * posture rather than pinned, which is this repo's standing standard: `padding + max(mark, title
+ * [+ description])`, with the description's box genuinely gone from the settled sum rather than
+ * merely invisible.
+ *
+ * ⚠️ AND THE TITLE KEEPS `line-height: 1.3` AT 22px. Playfair's descenders fall below the baseline
+ * at every size; the settled title is the same mixed-case page name in a smaller box, so the rule
+ * that made `line-height: 1` a bug at 30px makes it a bug here too.
+ */
+test("⚠️ THE SETTLED POSTURE IS THE SAME OBJECT, HALF THE HEIGHT", async ({ page }) => {
+  const rows: { name: string; r: Awaited<ReturnType<typeof readMasthead>> }[] = [];
+  const lines: string[] = [];
+  for (const { name, route, cls, fill } of PAGES) {
+    if (fill) continue;   /* a fill page cannot pin, so it has no settled posture to measure */
+    await openRoute(page, route, { width: 1440, height: 900 });
+    await liftMotionSuppression(page);
+    await page.mouse.move(700, 500);
+    await page.mouse.wheel(0, 600);
+    /* ⚠️ WAIT PAST THE .22s SETTLE. A transitioned property reports where it STARTED, and this file
+       exists to measure where it ENDED. */
+    await page.waitForTimeout(700);
+    const r = await readMasthead(page, cls);
+    expect(r, `${name}: no grid`).not.toBeNull();
+    rows.push({ name, r });
+    lines.push(`${name.padEnd(21)} h ${String(r!.height).padStart(6)} · pad ${r!.padTop}/${r!.padBottom} · title ${r!.titleSize}/${r!.titleWeight} lh ${r!.titleLine} · mark ${r!.markW} · sub ${r!.subH}`);
+  }
+  console.log("\n══ SETTLED\n" + lines.join("\n"));
+  expect(rows.length, "no scrolling page reached a settled posture — this case measured nothing").toBeGreaterThan(3);
+
+  for (const { name, r } of rows) {
+    /* the precondition: it actually settled, or every claim below is about the resting posture */
+    expect(parseFloat(r!.titleSize), `${name}: the title is still ${r!.titleSize} — the chrome did not settle, so nothing below is about the settled posture`).toBe(22);
+    expect(r!.padTop, `${name}: the settled masthead's top padding`).toBe("13px");
+    expect(r!.padBottom, `${name}: the settled masthead's bottom padding`).toBe("10px");
+    expect(r!.markW, `${name}: the settled mark is ${r!.markW}px`).toBe(34);
+    /* ⚠️ THE DESCRIPTION IS GONE FROM THE SUM, not merely transparent — an invisible box that still
+       takes height reclaims nothing, which is the whole point of settling. */
+    expect(r!.subH, `${name}: the settled description still occupies ${r!.subH}px`).toBe(0);
+    /* ⚠️ 1.3 AT 22px TOO — the descender rule is about the typeface, not the size. */
+    expect(parseFloat(r!.titleLine) / 22, `${name}: the settled title's line box is ${r!.titleLine} against a 22px face`).toBeCloseTo(1.3, 2);
+    const derived = r!.padSum + Math.max(r!.markH, r!.titleH + r!.subH);
+    expect(r!.height, `${name}: the settled masthead is ${r!.height}px, but mark ${r!.markH} / title ${r!.titleH} / description ${r!.subH} / padding ${r!.padSum} derive ${derived}`)
+      .toBeCloseTo(derived, 0);
+  }
+  /* page against page, never a constant */
+  for (const k of ["height", "padTop", "padBottom", "titleSize", "markW", "subH"] as const) {
+    const vals = [...new Set(rows.map((x) => String(x.r![k])))];
+    expect(vals, `the settled ${k} differs across pages: ${JSON.stringify(rows.map((x) => [x.name, x.r![k]]))}`).toHaveLength(1);
+  }
 });

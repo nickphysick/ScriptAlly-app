@@ -65,7 +65,7 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   /* ⚠️ THE SLAB IS CHROME (pinned chrome, §1) — masthead and control row live inside `.wpg-chrome`
      now, so the scroller's first child is the slab and a content finder that does not know it
      reports the CHROME as the page's content. It did: "content \"wpg-chrome\"" on all ten pages. */
-  const CHROME = ["wpg-chrome", "wpg-mast", "wpg-mini", "wpg-tools"];
+  const CHROME = ["wpg-chrome", "wpg-mast", "wpg-mini", "wpg-tools", "wpg-reclaim"];
   const row = g.querySelector(".wpg-tools") as HTMLElement | null;
   const win = document.documentElement.clientWidth;
   /**
