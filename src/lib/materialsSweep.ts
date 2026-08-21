@@ -47,6 +47,25 @@ export interface RecordSweepRow {
 export const rowHasAnswer = (r: RecordSweepRow): boolean =>
   !r.skipped && materialsWantedFromRows(r.rows).length > 0;
 
+/**
+ * ⚠️ ONE ROW'S TICK, AS A FUNCTION (chase round, Phase 4). It was inline in `BulkFillTable`, which
+ * meant the only way to find out whether a tick reached the model was to click one in a browser —
+ * and when it stopped reaching, nothing could say so: the component named a key the model does not
+ * have (`"letter"` for `queryLetter`), so the map found nothing, returned an equivalent array, and
+ * handed it back. No error, no change, no test that could have seen it.
+ *
+ * Here it is testable against the real row builder, which is the assertion that bites: a toggle
+ * whose key nothing carries leaves `sweepAnsweredCount` at zero, and that is now a red test rather
+ * than a dead column.
+ */
+export function toggleRowMaterial(
+  rows: readonly RecordSweepRow[], queryId: string, key: MaterialRow["key"],
+): RecordSweepRow[] {
+  return rows.map((r) => (r.queryId === queryId
+    ? { ...r, rows: r.rows.map((y) => (y.key === key ? { ...y, on: !y.on } : y)) }
+    : r));
+}
+
 /** The figure the primary states — never a percentage, never a progress bar. */
 export const sweepAnsweredCount = (rows: readonly RecordSweepRow[]): number =>
   rows.filter(rowHasAnswer).length;

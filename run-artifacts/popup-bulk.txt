@@ -1,9 +1,11 @@
-docked, primary = Log 0 queries
-table: {"table":true,"ticks":10,"first":{"label":"Covering letter — Rosalind Vale","disabled":false,"pressed":"false","cls":"tick"},"rows":5}
-  at 80ms: aria-pressed = false · primary = Log 0 queries
-  at 250ms: aria-pressed = false · primary = Log 0 queries
-  at 600ms: aria-pressed = false · primary = Log 0 queries
-  at 1200ms: aria-pressed = false · primary = Log 0 queries
-  at 2500ms: aria-pressed = false · primary = Log 0 queries
-after a real click, primary = Log 0 queries
-first tick now: false/tick
+PASS  P4.0 the cohort opens with its table and nothing ticked   [10 ticks · primary: Log 0 queries]
+PASS  P4.1 a real click flips the tick   [at 120ms: aria-pressed=true]
+PASS  P4.2 and it survives 2.5s   [at 2.6s: aria-pressed=true]
+PASS  P4.3 the primary counts one   [primary: Log 1 query]
+PASS  P4.4 the will-record sentence tracks   [will: This recordsmaterials on 1 query]
+PASS  P4.5 ticking a second row makes it two   [primary: Log 2 queries]
+PASS  P4.6 the primary is enabled   [disabled=false]
+PASS  P4.7 pressing writes, and says so   [Done — “20 queries have no record of what you sent”Undo]
+PASS  P4.8 nothing opened over the page   [none]
+
+9 / 9 green

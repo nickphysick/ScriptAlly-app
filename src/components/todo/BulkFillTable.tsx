@@ -27,7 +27,7 @@ import { Check } from "lucide-react";
 import { SampleSpecPicker } from "../materials/SampleSpecPicker";
 import { snapToUnit, type MaterialRow } from "../../lib/agentMaterials";
 import {
-  SWEEP_CAVEAT, SWEEP_VISIBLE_ROWS, copyFirstDown, fillFromAsks, rowHasAnswer,
+  SWEEP_CAVEAT, SWEEP_VISIBLE_ROWS, copyFirstDown, fillFromAsks, rowHasAnswer, toggleRowMaterial,
   type RecordSweepRow,
 } from "../../lib/materialsSweep";
 
@@ -36,9 +36,30 @@ export interface BulkFillTableProps {
   onChange: (rows: RecordSweepRow[]) => void;
 }
 
-/** the three tick columns, in the contract's order — named once, here */
-const TICKS: { key: string; head: string }[] = [
-  { key: "letter", head: "Covering letter" },
+/**
+ * The binary tick columns, in the contract's order — named once, here.
+ *
+ * ⚠️ THE KEY IS `MaterialRow["key"]`, NOT `string`, AND THAT IS THE FIX (chase round, Phase 4).
+ *
+ * It said `"letter"`. The canonical key is `queryLetter`, so `r.rows.find(x => x.key === "letter")`
+ * returned `undefined` on every row: the cell rendered unticked, and `toggle` mapped the row array
+ * looking for a key nothing carried, produced an IDENTICAL array, and handed it back through
+ * `onChange`. No error, no state change, no clue. Measured: a real pointer click left
+ * `aria-pressed="false"` at 80, 250, 600, 1200 and 2500ms — it never flipped, and was not being
+ * wiped either, which is the signature of a handler that ran and had nothing to change.
+ *
+ * The whole cohort journey was therefore uncompletable: the primary read "Log 0 queries" for ever,
+ * because `rowHasAnswer` counts what `materialsWantedFromRows` encodes and nothing was ever on.
+ *
+ * Typing the key against the model is what stops it recurring — `"letter"` no longer compiles. A
+ * string literal here can be wrong in a way that renders, which is the worst kind.
+ *
+ * ⚠️ THE OTHER TWO CELLS DO NOT SHARE THE FAULT, checked rather than assumed: the sample matches on
+ * `kind === "qty"` and the free text on `key === "other"`, which is a real key. Only this list
+ * restated one.
+ */
+const TICKS: { key: MaterialRow["key"]; head: string }[] = [
+  { key: "queryLetter", head: "Covering letter" },
   { key: "synopsis", head: "Synopsis" },
 ];
 
@@ -62,8 +83,10 @@ export const BulkFillTable: React.FC<BulkFillTableProps> = ({ rows, onChange }) 
   const setMats = (queryId: string, next: MaterialRow[]) =>
     onChange(rows.map((r) => (r.queryId === queryId ? { ...r, rows: next } : r)));
 
-  const toggle = (r: RecordSweepRow, key: string) =>
-    setMats(r.queryId, r.rows.map((y) => (y.key === key ? { ...y, on: !y.on } : y)));
+  /* the tick's own logic lives in `materialsSweep`, where it can be tested against the real row
+     builder — see `toggleRowMaterial` for what it cost to have it inline */
+  const toggle = (r: RecordSweepRow, key: MaterialRow["key"]) =>
+    onChange(toggleRowMaterial(rows, r.queryId, key));
 
   return (
     <>
