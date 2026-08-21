@@ -23,8 +23,8 @@ import React from "react";
 import { QueryStatus } from "../types";
 import { BoardCard } from "./todoBoard";
 import { GROUP_CLASS, liveFamily } from "./todoFamily";
-import { anchorNoun, bandDeed, bandSubline, bandPreline, panePresence } from "./todoHandoff";
-import { cardFootHint } from "./todoBuckets";
+import { anchorNoun, bandSubline, bandPreline, bandUnder, panePresence } from "./todoHandoff";
+import { cardFootHint, deedSentence, type DeedParts } from "./todoBuckets";
 import { paneCopy } from "./taskListRow";
 import type { TaskPaneEvent, TaskPaneJourney, TaskPaneTile } from "../components/todo/TaskPane";
 
@@ -47,6 +47,8 @@ export interface JourneyInputs {
   primaryLabel: string;
   /** a note's age, already formatted — "2 days ago". Absent on every other journey. */
   noteAdded?: string;
+  /** a send whose material is a partial — the sentence's only split */
+  partial?: boolean;
   /** a note's own added date, for the form's meta line — "18 Aug" */
   noteAddedDate?: string;
   /** what is still unanswered — the ONE list the chip, the line and the square all read */
@@ -77,12 +79,14 @@ export interface JourneyInputs {
  * rather than parsed out of a string. The emphasis falls on the OBJECT — what is being sent, chased
  * or logged — because that is the word you scan for; the verb is the same on every card in a group.
  */
-function deedNode(c: BoardCard): React.ReactNode {
-  const text = bandDeed(c);
-  /* the object is everything after the first two words ("Send your …", "Chase your …", "Log the …") */
-  const m = /^(\S+\s+\S+\s+)(.+)$/.exec(text);
-  if (!m) return text;
-  return <>{m[1]}<em>{m[2]}</em></>;
+function deedNode(c: BoardCard, parts: DeedParts): React.ReactNode {
+  /* ⚠️ `<i>`, NOT `<em>`, AND NO COLOUR. The emphasis is typographic — italic in the heading's own
+     ink — because a heading that shifts colour mid-sentence reads as two things, and the reader
+     has to work out which half is the point. The stylesheet enforces `color: inherit`; this picks
+     the spans. `<em>` carried a burgundy rule for three rounds and is retired with it. */
+  const spans = deedSentence(c, parts);
+  if (spans.length === 1 && !spans[0].em) return spans[0].text;
+  return <>{spans.map((s, i) => (s.em ? <i key={i}>{s.text}</i> : <React.Fragment key={i}>{s.text}</React.Fragment>))}</>;
 }
 
 /**
@@ -171,7 +175,16 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
 
   return {
     cls: `u-${GROUP_CLASS[liveFamily(c)]}` as TaskPaneJourney["cls"],
-    deed: isNote ? c.title : deedNode(c),
+    /* ⚠️ THE SENTENCE'S PARTS COME FROM THE CARD THE LIST ALREADY BUILT — `msTitle`, `who`, and the
+       agency the band already splits out of `record`. Nothing is looked up again, so the pane and
+       the row cannot name different people. */
+    deed: isNote ? c.title : deedNode(c, {
+      title: c.msTitle,
+      agent: c.who,
+      agency: bandUnder(c),
+      ...(typeof input.partial === "boolean" ? { partial: input.partial } : {}),
+      ...(input.bulk ? { bulkCount: input.bulk.count } : {}),
+    }),
     hand: isNote,
     /* ⚠️ THE NOTE'S SUB-LINE SAYS WHOSE IT IS AND HOW OLD (finishing round, Phase 5). It printed
        `cardFootHint`, which is the sentence about ticking it off — the SAME sentence the form's
@@ -184,11 +197,19 @@ export function buildJourney(input: JourneyInputs): TaskPaneJourney {
        ⚠️ AND THE IMPORT DATE IS ABSENT BECAUSE NOTHING STORES ONE — see the report. The earliest
        `dateSent` in the cohort would be a FIRST-QUERY date wearing an import label, which is the
        fault the Manuscripts tile already paid for once. The clause is omitted, not invented. */
+    /**
+     * ⚠️ THE SUB-LINE GOES WHERE THE DEED BECAME A SENTENCE (deed round, Phase 1). It existed to
+     * name the agent and the agency the deed could not fit; the sentence names them, and a second
+     * line repeating the pair three millimetres below is the same fact twice. The request DATE it
+     * also carried is in the tiles, which is where a date belongs.
+     *
+     * ⚠️ THE NOTE KEEPS ITS SUB-LINE, and that is not an exception being carved — a note's deed is
+     * the WRITER'S OWN WORDS, so it never gained a sentence to absorb the provenance. "Your own
+     * note · added 2 days ago" is the only place that fact is stated.
+     */
     sub: isNote
       ? (input.noteAdded ? `Your own note · added ${input.noteAdded}` : "Your own note")
-      : input.bulk
-        ? `${input.bulk.count} imported ${input.bulk.count === 1 ? "query is" : "queries are"} missing their materials`
-        : bandSubline(c, bandPreline(c)),
+      : "",
     btns: input.btns,
     tiles,
     /* ⚠️ THE PANE'S WORDS COME FROM THE ONE TABLE, not from the row's verb. `primaryLabel` is what

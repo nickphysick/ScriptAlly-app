@@ -1,0 +1,31 @@
+── deed round · 15 assertions · 12 RED · 3 green
+  RED    P1.1 · the coverage scan reached every heading and their descendants
+           headings=2 descendants=1
+  RED    P1.2 · no element inside a heading shifts colour
+           ["deed > EM. rgb(124, 58, 42) vs rgb(58, 28, 20)","deed > EM. rgb(64, 90, 60) vs rgb(46, 58, 44)"]
+  RED    P1.3 · the send deed is the contract's sentence, italic and uncoloured
+           "Send your full manuscript" i=0 em=1
+  RED    P1.4 · it is Playfair 19/400 at 1.3, not the old 21/500 at 1.12
+           21px/500 lh=23.52px
+  green  P1.5 · no placeholder text ever appears inside a deed
+           Send your full manuscript | Fill in what you sent
+  RED    P1.6 · the sub-line is gone from send, close and bulk; the note keeps its own
+           send=1 close=undefined bulk=1 note=1
+  RED    P1.7 · the bulk deed counts its cohort in the sentence
+           "Fill in what you sent"
+  RED    P2.1 · the strip has a mono lead-in and prose after it
+           lead="" transform=uppercase
+  green  P2.2 · nothing chosen renders the em-dash form, with no field separators
+           "Will record: —"
+  RED    P2.3 · a note states its own sentence
+           "Will record: Ticked off · today"
+  RED    P2.4 · bulk states nothing yet rather than a count of nothing
+           "Will record: Materials on 0 queries"
+  RED    P3.1 · the story header carries the sage gradient
+           
+  RED    P3.2 · the right-hand side is the query's status word, not an entry count
+           stat="" counts=0
+  RED    P4.1 · the custom option reveals a date field on all three rows
+           {"s-when":true,"s-when:field":false,"s-expect":true,"s-expect:field":false,"s-remind":true,"s-remind:field":false}
+  green  P4.2 · a revealed but empty date does not count as an answer
+           chip="2 to answer"

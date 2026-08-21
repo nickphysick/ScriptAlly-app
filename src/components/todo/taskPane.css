@@ -310,8 +310,15 @@
 .tpn .pane.u-now .band::after { background:var(--u-now-rule); }
 .tpn .pane.u-house .band { background:linear-gradient(135deg,var(--u-house-1),var(--u-house-2)); }
 .tpn .pane.u-house .band::after { background:var(--u-house-rule); }
-.tpn .deed { font-family:'Playfair Display',serif;font-size:21px;font-weight:500;color:var(--ink2);line-height:1.12; }
-.tpn .deed em { font-style:italic;color:var(--burg); }
+/* ⚠️ A HEADING MAY NOT CARRY COLOUR-SHIFTED EMPHASIS (deed round, Phase 1 — repo law, also in
+   CLAUDE.md). `.deed em` was burgundy for three rounds: a heading that changes colour mid-sentence
+   reads as two things, and the reader has to work out which half is the point. Emphasis is
+   TYPOGRAPHIC — italic in the heading's own ink — and `color: inherit` is what makes that
+   structural rather than a value someone has to remember not to change.
+   ⚠️ AND `line-height` GOES 1.12 → 1.3, which the standing Playfair rule already required: 1.12 on
+   mixed-case Playfair crops descenders, and the deed now renders whole sentences full of them. */
+.tpn .deed { font-family:'Playfair Display',serif;font-size:19px;font-weight:400;color:var(--ink2);line-height:1.3;max-width:72ch; }
+.tpn .deed i { font-style:italic;font-weight:500;color:inherit; }
 .tpn .b-sub { font-size:11px;font-weight:300;margin-top:3px; }
 .tpn .b-nav { display:flex;gap:6px;flex-shrink:0; }
 .tpn .b-nav button { cursor:pointer;width:28px;height:28px;border-radius:8px;background:rgba(255,253,250,0.8);border:0.5px solid rgba(58,28,20,0.13);color:var(--ink2);display:flex;align-items:center;justify-content:center; }

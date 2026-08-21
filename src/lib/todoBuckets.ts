@@ -175,6 +175,66 @@ export function taskDeed(c: BoardCard, partial?: boolean): string {
  */
 export const rowDeed = (c: BoardCard): string => taskDeed(c);
 
+/**
+ * ⚠️ THE BAND'S DEED IS A SENTENCE (deed round, Phase 1), built from the same bucket table
+ * `taskDeed` reads — the verb keeps one home and this adds the objects around it.
+ *
+ * The LIST ROW keeps the short deed, deliberately. A column of forty sentences is unreadable and a
+ * column of forty short deeds is what makes it scannable. That is not the synonym fault the earlier
+ * round closed — that was two DIFFERENT short deeds for one act. This is one act, named once,
+ * stated briefly in a list and fully in a pane.
+ *
+ * ⚠️ AND IT DEGRADES BY DROPPING, NEVER BY PLACEHOLDER. No agency ends the sentence at the agent;
+ * no agent ends it at the title. "agent not specified" is honest in a META line, where absence is
+ * the subject — inside a sentence about what you are about to do it is the app narrating its own
+ * gaps at the writer.
+ */
+export interface DeedParts {
+  title?: string;
+  agent?: string;
+  agency?: string;
+  /** a partial rather than the full — the send pair's only split */
+  partial?: boolean;
+  /** how many queries a cohort stands for */
+  bulkCount?: number;
+}
+
+/** one span of the sentence. `em` renders `<i>` — italic in the heading's own ink, never coloured. */
+export interface DeedSpan { text: string; em?: boolean }
+
+export function deedSentence(c: BoardCard, p: DeedParts = {}): DeedSpan[] {
+  const t = (p.title ?? "").trim();
+  const ag = (p.agent ?? "").trim();
+  const agy = (p.agency ?? "").trim();
+  const forTitle = (): DeedSpan[] => (t ? [{ text: " for " }, { text: t, em: true }] : []);
+  const to = (): DeedSpan[] => {
+    const out: DeedSpan[] = [];
+    if (ag) out.push({ text: " to " }, { text: ag, em: true });
+    if (agy) out.push({ text: " at " }, { text: agy, em: true });
+    return out;
+  };
+
+  switch (cardBucket(c)) {
+    case "send": {
+      const what = (p.partial ?? c.taskType === "partial_requested") ? "partial manuscript" : "full manuscript";
+      return [{ text: "Send your " }, { text: what, em: true }, ...forTitle(), ...to()];
+    }
+    case "close":
+      return [{ text: "Consider closing your query" }, ...forTitle(), ...to()];
+    case "fix": {
+      const n = p.bulkCount ?? 0;
+      return n > 1
+        ? [{ text: "Fill in what you sent with " }, { text: `${n} imported queries`, em: true }, ...forTitle()]
+        : [{ text: "Fill in what you sent" }, ...forTitle(), ...to()];
+    }
+    /* a note is the writer's own words, and nothing is added to them */
+    case "note": return [{ text: c.title }];
+    /* the two the contract does not template keep the short deed as their sentence — stated rather
+       than invented, because a sentence nobody wrote is worse than a phrase that already works */
+    default: return [{ text: taskDeed(c) }];
+  }
+}
+
 /* ── the figure column ────────────────────────────────────────────────────────────────────────── */
 
 /** Whose move it is — the colour of the label, and nothing else. */

@@ -218,7 +218,9 @@ export const TaskPane: React.FC<TaskPaneProps> = ({ journey: d, onPrimary, nav }
         <div className="band">
           <div style={{ minWidth: 0 }}>
             <div className={d.hand ? "deed hand" : "deed"}>{d.deed}</div>
-            <div className="b-sub">{d.sub}</div>
+            {/* absent, not empty — a rendered `.b-sub` holding nothing is a blank line under the
+                deed, and blank space under a heading reads as something that failed to load */}
+            {d.sub ? <div className="b-sub">{d.sub}</div> : null}
           </div>
           {/* ⚠️ THE ARROWS LIVE HERE, not in a counter row above the card — Phase 1's retirement. */}
           {nav && (
