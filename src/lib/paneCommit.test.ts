@@ -213,3 +213,32 @@ describe("⚠️ the primary commits, and mounts nothing", () => {
     }
   });
 });
+
+/**
+ * ⚠️ WHAT DIED AND WHAT SURVIVED (popup round, Phase 2).
+ *
+ * The takeover is NOT pane-only, so it does not die: `FocusFlow` is the Calendar's item sheet, the
+ * Sunday review's engine and the sweep's. What died is the page's own orphans — functions the pane
+ * path was built around, left with no caller when `PaneJourney.tsx` was deleted.
+ */
+describe("⚠️ the takeover survives; the pane's orphans do not", () => {
+  it("FocusFlow keeps a caller that is not the pane, and is named here so no sweep takes it", () => {
+    const cal = read("../components/todo/TodoCalendarPage.tsx");
+    expect(cal, "the Calendar stopped mounting FocusFlow — it may now look dead").toContain("<FocusFlow");
+    expect(cal).toContain('from "./FocusFlow"');
+  });
+
+  /**
+   * ⚠️ THE PANE STILL REACHES IT, AND MUST — for the two journeys `paneCommits` declares false. A
+   * lock forbidding the mount outright would be wrong: it would strand an offer and an agent-record
+   * gap with no surface at all.
+   */
+  it("the pane's hand-off survives for exactly the journeys it is declared for", () => {
+    expect(page, "the pane lost its hand-off entirely").toContain("openFlowCards([card])");
+  });
+
+  it.each(["commitSendMaterials", "commitSweep", "dismissRecordSweep", "leaveMaterialsUnrecorded"])(
+    "%s stays deleted", (name) => {
+      expect(page, `${name} came back`).not.toMatch(new RegExp(`function\\s+${name}\\s*\\(`));
+    });
+});

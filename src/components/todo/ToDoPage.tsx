@@ -2889,37 +2889,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     };
   }
 
-  /**
-   * ⚠️ ONE `updateAgent` PER ANSWERED AGENT — the same primitive the `fix` journey uses, and never
-   * a batch. There is no apply-to-all above it and none here: sixteen wrong records written by one
-   * press is worse than the gap those sixteen have today.
-   *
-   * ⚠️ AND A PARTIAL RESULT IS REPORTED AS ONE. Some writes can fail while others land, so the
-   * receipt counts what ACTUALLY succeeded rather than what was attempted — a toast saying
-   * "Recorded 16" over eleven successful writes is the kind of lie that is only found months later.
-   */
-  async function commitSweep(card: BoardCard, rows: SweepRow[]) {
-    const cohort = dockSweep(card);
-    if (!cohort) return;
-    let done = 0;
-    for (let i = 0; i < cohort.members.length; i++) {
-      const fields = sweepFields(cohort.rule, rows[i] ?? emptySweepRow());
-      if (!fields) continue;
-      const id = cohort.members[i].agentId;
-      try {
-        await updateAgent(id, fields);
-        /* the flag resolves only after its own write lands — the `fix` journey's rule, per agent */
-        resolveTaskFlag(flagKeyForTask("data_quality_poor", id));
-        done++;
-      } catch {
-        /* keep going: the remaining agents are independent records, and stopping at the first
-           failure would discard answers the writer has already given for all of them */
-      }
-    }
-    const total = cohort.members.length;
-    if (done === 0) { flash("Couldn’t save those — try again?"); return; }
-    flash(sweepOutcome(done, total, cohort.rule));
-  }
+  /* (`commitSweep` is deleted — popup round, Phase 2. It was the page's copy of the agent-gaps
+     COHORT write, built for a pane sweep that was never drawn, and it had no caller. The grouped
+     housekeeping batch still lives in `FocusFlow`, which the Calendar and the Sunday review both
+     open, so nothing a writer can reach has changed.) */
+
 
   /**
    * The one entrance — it routes to the bucket's own write, each of which is the EXISTING one.
@@ -3024,23 +2998,11 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return true;
   }
 
-  /**
-   * ⚠️ THE ESCAPE HATCH WRITES NO MATERIAL DATA — that is the entire reason it exists rather than
-   * being "save with nothing ticked". It suppresses the task through the same permanent-dismiss
-   * path every other card uses, so the query is untouched and the row does not come back.
-   */
-  function leaveMaterialsUnrecorded(card: BoardCard) {
-    if (!card.relatedRecordId) return;
-    dismissTask("materials_unrecorded", card.relatedRecordId, "permanent");
-    const undo = () => upsertTaskFlag(
-      flagKeyForTask("materials_unrecorded", card.relatedRecordId!), { snoozedUntil: null });
-    setOverlay(card.key, {
-      kind: "dismissed", lane: "hk",
-      text: "Left unrecorded — the query is unchanged.",
-      undo,
-    });
-    flash("Left unrecorded", { label: "Undo", fn: async () => { await undo(); clearOverlay(card.key); flash("Restored"); } });
-  }
+  /* (`leaveMaterialsUnrecorded` is deleted — popup round, Phase 2. The single fill-in's escape
+     hatch, never wired to a control. Leaving without recording is what the pane's Dismiss verb
+     does, and `commitMaterialsFromPane` already refuses to write an empty parcel — so the two
+     halves of "leave it alone" both survive without a third path.) */
+
 
   /**
    * ⚠️ THE BULK COHORT IS THE SAME DERIVATION THE CARD WAS RAISED BY — `queriesMissingMaterials`,
@@ -3086,25 +3048,10 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
     return true;
   }
 
-  /**
-   * ⚠️ ONE PRESS FOR THE WHOLE SET — fourteen tasks must not need dismissing one at a time. It
-   * writes no material data: each query is suppressed through the same permanent-dismiss path the
-   * single form's escape hatch uses.
-   */
-  function dismissRecordSweep(card: BoardCard, rows: RecordSweepRow[]) {
-    for (const r of rows) dismissTask("materials_unrecorded", r.queryId, "permanent");
-    dismissTask("materials_unrecorded_bulk", MATERIALS_BULK_RECORD_ID, "permanent");
-    const undo = async () => {
-      for (const r of rows) await upsertTaskFlag(flagKeyForTask("materials_unrecorded", r.queryId), { snoozedUntil: null });
-      await upsertTaskFlag(flagKeyForTask("materials_unrecorded_bulk", MATERIALS_BULK_RECORD_ID), { snoozedUntil: null });
-    };
-    setOverlay(card.key, {
-      kind: "dismissed", lane: "hk",
-      text: `Left unrecorded — ${rows.length} ${rows.length === 1 ? "query is" : "queries are"} unchanged.`,
-      undo,
-    });
-    flash("Left unrecorded", { label: "Undo", fn: async () => { await undo(); clearOverlay(card.key); flash("Restored"); } });
-  }
+  /* (`dismissRecordSweep` is deleted — popup round, Phase 2. The cohort's "leave the whole set
+     unrecorded" press, with no caller: the pane's own Dismiss verb suppresses the cohort card, and
+     the table's rows are queries the writer can still answer one at a time.) */
+
 
   /**
    * ⚠️ THE RECORD CONTEXT IS READ, NEVER GUESSED. The date is the query's own `dateSent`; the

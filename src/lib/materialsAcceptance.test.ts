@@ -37,7 +37,7 @@ function fn(name: string): string {
 describe("⚠️ NO MATERIALS PATH WRITES A STATUS", () => {
   const STATUS_WRITES = ["updateQueryStatus", "recordMaterialsSent", "recomputeQuery", "undoQueryStatus"];
 
-  it.each(["writeQueryMaterials", "commitMaterialsFromPane", "commitRecordSweep", "leaveMaterialsUnrecorded", "dismissRecordSweep"])(
+  it.each(["writeQueryMaterials", "commitMaterialsFromPane", "commitRecordSweep"])(
     "%s performs no status write", (name) => {
       const body = fn(name);
       for (const w of STATUS_WRITES) expect(body, `${name} calls ${w}`).not.toContain(w);
@@ -72,9 +72,20 @@ describe("⚠️ NO MATERIALS PATH WRITES A STATUS", () => {
     expect(arm, "the entrance grew its own query write").not.toContain("updateQuery(");
   });
 
-  it("⚠️ the two escape paths write NO material data at all", () => {
+  /**
+   * ⚠️ THE TWO ESCAPE PATHS ARE RETIRED, AND THE RULE OUTLIVES THEM (popup round, Phase 2).
+   * `leaveMaterialsUnrecorded` and `dismissRecordSweep` were page-side functions with no caller —
+   * a control was never wired to either. Leaving without recording is the pane's Dismiss verb, and
+   * `commitMaterialsFromPane` already refuses to write an empty parcel.
+   *
+   * Stated as a RETIREMENT rather than repointed at a survivor: an anchor that is gone usually
+   * means the subject is gone, and a lock hunting a replacement anchor is how a bounded slice
+   * silently widens to the rest of the file. This claim is stronger than the one it replaces —
+   * it holds over the whole page rather than over two function bodies.
+   */
+  it("⚠️ the two unwired escape paths stay retired", () => {
     for (const name of ["leaveMaterialsUnrecorded", "dismissRecordSweep"]) {
-      expect(fn(name)).not.toContain("materialsWanted");
+      expect(code, `${name} came back`).not.toMatch(new RegExp(`function\\s+${name}\\s*\\(`));
     }
   });
 
