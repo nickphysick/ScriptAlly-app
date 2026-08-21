@@ -133,7 +133,13 @@ export interface FocusFlowProps {
   onToast: (msg: string, action?: { label: string; fn: () => void }) => void;
   /** Seed the send capture (a receipt's "Edit details" re-opens the journey pre-filled with what
    *  the quick-✓ logged; the quick write is undone first so Save never double-writes). */
-  prefill?: { sentDate?: string; method?: string; materials?: string[] };
+  /**
+   * ⚠️ THE PREFILL CARRIES THE EXPECTATION NOW (write round, Phase 1). It was
+   * `{ sentDate?, method?, materials? }` — no member for the answer the send form REQUIRES — so the
+   * pane collected it, the strip promised it, and the takeover boundary dropped it. Additive: every
+   * existing caller passes what it always passed.
+   */
+  prefill?: { sentDate?: string; method?: string; materials?: string[]; writerExpectedDate?: string; note?: string };
   /** "sweep" = the speed grammar: one summary per screen, big ✓/⏸/skip, keyboard D·S·→ (F·N on
    *  housekeeping, Enter opens an offer). Sweep quick-✓s use the Phase-C defaults + a brief inline
    *  receipt, write IMMEDIATELY (Undo on the toast) and never stage. Default: the full journey. */
@@ -185,6 +191,10 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
   const [mats, setMats] = useState<Record<string, boolean>>(() => Object.fromEntries((prefill?.materials ?? []).map((m) => [m, true])));
   const [sentDate, setSentDate] = useState(prefill?.sentDate ?? todayISO());
   const [method, setMethod] = useState(prefill?.method ?? "Email");
+  /* the writer's stated expectation, travelling from the pane to the one commit path. Held rather
+     than re-asked: the journey does not ask this question, so it has nothing of its own to keep. */
+  const expectedFromPane = prefill?.writerExpectedDate;
+  const noteFromPane = prefill?.note;
   const [copied, setCopied] = useState(false);
   const [extrasOpen, setExtrasOpen] = useState(false); // "+ I sent something else too"
   const [backdated, setBackdated] = useState(false); // the quiet "I sent it earlier" day picker
@@ -422,6 +432,10 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
         sentDate: journeyEventISO(sentDate, new Date().toISOString()),
         isResubmit: action.markKind === "resubmit", method: q.sendMethod || "Email",
         materials: [assumed.label, ...extrasOn],
+        /* the pane's stated expectation, carried through to the one write. Absent when the writer
+           did not answer — the key is omitted rather than defaulted. */
+        ...(expectedFromPane ? { writerExpectedDate: expectedFromPane } : {}),
+        ...(noteFromPane ? { note: noteFromPane } : {}),
       });
     };
     return journeySheet({
@@ -590,6 +604,8 @@ export const FocusFlow: React.FC<FocusFlowProps> = ({ items, onClose, onNavigate
             sentDate: journeyEventISO(sentDate, new Date().toISOString()),
             isResubmit: action.markKind === "resubmit", method,
             materials: chosen,
+            ...(expectedFromPane ? { writerExpectedDate: expectedFromPane } : {}),
+        ...(noteFromPane ? { note: noteFromPane } : {}),
           });
         },
       },

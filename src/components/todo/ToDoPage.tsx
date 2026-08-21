@@ -2906,6 +2906,21 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
    * create pane already writes (`draftMaterialsToQuery`) and what this bucket's own predicate
    * already reads, so the gap closes today and the migration stays exactly as open as it was.
    */
+  /**
+   * ⚠️ THE SEND FORM'S PARCEL, THROUGH THE EXISTING WRITER (write round, Phase 1). A thin adapter
+   * rather than a second path: `commitMaterialsFromPane` already writes one query's materials and
+   * is what the single fill-in journey calls, so this hands it the pane's rows and nothing else
+   * changes. Extended additively — the fill-in's own call is untouched.
+   *
+   * ⚠️ NOTHING TICKED IS NOT A SAVE, which the writer below already enforces: a send with no parcel
+   * (a full manuscript has no unit to pick) leaves `materialsWanted` exactly as it was, rather than
+   * clearing it to an empty list. Overwriting a record with nothing is not the same as recording
+   * that nothing went.
+   */
+  function commitSendMaterials(card: BoardCard) {
+    void commitMaterialsFromPane(card, { recordRows: paneBody.rows } as JourneySendValues);
+  }
+
   async function commitMaterialsFromPane(card: BoardCard, v: JourneySendValues) {
     const q = card.relatedRecordId ? queries.find((x) => x.id === card.relatedRecordId) : undefined;
     if (!q) return;
@@ -3382,7 +3397,28 @@ export const ToDoPage: React.FC<ToDoPageProps> = ({ onNavigate }) => {
            been picked is not. */
         ...(sentDateISO() ? { sentDate: sentDateISO() as string } : {}),
         materials: materialsWantedFromRows(paneBody.rows),
+        /* the writer's own words, to the activity's `details` — see `recordMaterialsSent` */
+        ...(paneBody.also.trim() ? { note: paneBody.also.trim() } : {}),
+        /* ⚠️ THE EXPECTATION, RESOLVED TO A DATE BEFORE IT TRAVELS. The form holds "6 weeks" or an
+           explicit day; the record holds a date. Resolving here — through `agentWindowMs`, the one
+           place a window becomes a date — means the strip's promise and the stored value come from
+           the same arithmetic rather than two. */
+        ...(() => {
+          const e = paneBody.expect;
+          if (!e) return {};
+          if (e.kind === "date") return e.ymd ? { writerExpectedDate: new Date(`${e.ymd}T12:00:00`).toISOString() } : {};
+          const from = sentDateISO();
+          if (!from) return {};
+          const ms = agentWindowMs(new Date(`${from}T12:00:00`).getTime(), e.weeks);
+          return ms == null ? {} : { writerExpectedDate: new Date(ms).toISOString() };
+        })(),
       });
+      /* ⚠️ THE PARCEL GOES THROUGH THE EXISTING QUERY-MATERIALS WRITER, not a second one.
+         `commitMaterialsFromPane` is what the single fill-in journey already calls; the send form
+         had no writer for `materialsWanted` at all, so the unit and count reached the receipt LINE
+         and never the record. The `Query.materialsWanted` vs `Activity.materials` question is
+         untouched — this uses whichever the existing writer uses. */
+      void commitSendMaterials(card);
     }
     openFlowCards([card]);
   }

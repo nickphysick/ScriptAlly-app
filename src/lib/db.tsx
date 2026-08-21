@@ -262,6 +262,17 @@ interface DbContextType {
   addPackage: (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">) => Promise<{ success: boolean; error?: string; id?: string }>;
   updatePackage: (id: string, fields: Partial<Pick<SubmissionPackage, "packageName" | "queryLetterVersionId" | "synopsisVersionId" | "samplePagesVersionId">>) => Promise<void>;
   retirePackage: (id: string) => Promise<void>;
+  /**
+   * Delete a package outright. Returns `false` WITHOUT writing when any query was sent with it.
+   *
+   * ⚠️ SAME SHAPE AS `deleteVersion`, SAME REASON (broadsheet Ruling 2). A sent package is the
+   * record of what was in an envelope, and `Query.packageId` is a real reference the analytics read
+   * through — deleting it would leave those queries pointing at nothing and lose the answer to
+   * "what did I actually send them" for correspondence already out in the world. The protection is
+   * `retirePackage`, a single-document field update, because a rule cannot ask "does any query
+   * reference this": that is a predicate over a collection and rules have no query capability.
+   */
+  deletePackage: (id: string) => Promise<boolean>;
   // The user-chosen active package for a manuscript (single writer — one field, last write wins).
   // Pass "" to clear. Pre-fills packageId on newly logged queries; never auto-set by the app.
   setActivePackage: (manuscriptId: string, packageId: string) => Promise<void>;
@@ -1574,6 +1585,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  const deletePackage = async (id: string): Promise<boolean> => {
+    if (!currentUser) return false;
+    /* A last check before an irreversible act — not the model. See the interface note above. */
+    if (queries.some((q) => q.packageId === id)) return false;
+    try {
+      await deleteDoc(doc(db, "users", currentUser.id, "packages", id));
+      return true;
+    } catch (e) {
+      handleFirestoreError(e, OperationType.DELETE, `users/${currentUser.id}/packages/${id}`);
+      return false;
+    }
+  };
+
   const retirePackage = async (id: string) => {
     if (!currentUser) return;
     try {
@@ -2142,9 +2166,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        closed at the seam. */
     writerExpectedDate?: string;
     nudgeDate?: string;
+    /**
+     * ⚠️ THE WRITER'S OWN WORDS ABOUT THIS SEND (write round, Phase 1). The send form's "Anything
+     * else? — further details you want to keep on file" had no destination at all: it never entered
+     * the prefill, so it never reached a payload, so it was discarded on commit. It belongs on the
+     * ACTIVITY's `details`, beside the expectation phrase already written there — that is the field
+     * the timeline reads, and "on file" is what the label promised.
+     */
+    note?: string;
   }) => {
     if (!currentUser) return;
-    const { queryId, targetStatus, sentDate, isResubmit, writerExpectedDate, nudgeDate } = args;
+    const { queryId, targetStatus, sentDate, isResubmit, writerExpectedDate, nudgeDate, note } = args;
     const targetQ = queries.find(q => q.id === queryId);
     if (!targetQ) return;
 
@@ -2175,7 +2207,13 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       resubmit: isResubmit,
       round: descriptionRound,
     });
-    const details = writerExpectedDate ? `Expected a response by ${formatHumanDate(writerExpectedDate)}` : "";
+    /* ⚠️ THE WRITER'S NOTE COMES FIRST, the derived phrase second. The note is what a person chose
+       to say; the expectation is the app restating a field. Joined only where both exist, so a send
+       with neither still writes an empty string rather than a stray separator. */
+    const details = [
+      (note ?? "").trim() || null,
+      writerExpectedDate ? `Expected a response by ${formatHumanDate(writerExpectedDate)}` : null,
+    ].filter(Boolean).join(" · ");
 
     const activity: Omit<Activity, "id"> = {
       userId: currentUser.id,
@@ -3047,6 +3085,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         addPackage,
         updatePackage,
         retirePackage,
+        deletePackage,
         setActivePackage,
         addAgent,
         updateAgent,

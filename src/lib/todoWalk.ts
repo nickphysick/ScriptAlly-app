@@ -188,7 +188,12 @@ export function journeyEventISO(day: string | undefined, nowIso: string): string
  * `label` is display-only (the review row's text), set at stage time.
  */
 export type StagedPayload =
-  | { kind: "mark-sent"; cardKey: string; label?: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean; method?: string; materials?: string[] }
+  /* ⚠️ `writerExpectedDate` JOINS THE PAYLOAD (write round, Phase 1). The send form has asked for it
+     since the steer round and REQUIRED it since the finish round, and it was discarded here: the
+     payload had no member, so `markSentWriteArgs` had nothing to pass and `recordMaterialsSent` —
+     which accepts and writes the field — was never given it. The form compelled an answer, the strip
+     stated it had been recorded, and nothing was written. */
+  | { kind: "mark-sent"; cardKey: string; label?: string; queryId: string; targetStatus: QueryStatus; sentDate: string; isResubmit: boolean; method?: string; materials?: string[]; writerExpectedDate?: string; note?: string }
   | { kind: "nudge"; cardKey: string; label?: string; queryId: string; checkBackDate: string; note?: string; nudgeDate?: string; method?: string }
   | { kind: "snooze"; cardKey: string; label?: string; taskType: string; relatedRecordId: string; days: number }
   | { kind: "mute-item"; cardKey: string; label?: string; taskType: string; relatedRecordId: string }
@@ -197,8 +202,21 @@ export type StagedPayload =
 
 /** The EXACT args the one mark-sent write path takes — quick-✓ and the journey both build their
  *  payload then pass through here, so the two can never write differently. */
-export function markSentWriteArgs(p: Extract<StagedPayload, { kind: "mark-sent" }>): { queryId: string; targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT; sentDate: string; isResubmit: boolean } {
-  return { queryId: p.queryId, targetStatus: p.targetStatus as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT, sentDate: p.sentDate, isResubmit: p.isResubmit };
+export function markSentWriteArgs(p: Extract<StagedPayload, { kind: "mark-sent" }>): {
+  queryId: string; targetStatus: QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT;
+  sentDate: string; isResubmit: boolean; writerExpectedDate?: string; note?: string;
+} {
+  return {
+    queryId: p.queryId,
+    targetStatus: p.targetStatus as QueryStatus.PARTIAL_SENT | QueryStatus.FULL_SENT,
+    sentDate: p.sentDate,
+    isResubmit: p.isResubmit,
+    /* ⚠️ OMITTED WHEN UNANSWERED, never defaulted. `recordMaterialsSent` writes the field only when
+       the key is present, so an absent expectation leaves the query's column untouched rather than
+       stamping today — which is the difference between "not asked" and "answered with a guess". */
+    ...(p.writerExpectedDate ? { writerExpectedDate: p.writerExpectedDate } : {}),
+    ...(p.note ? { note: p.note } : {}),
+  };
 }
 
 /** The EXACT args the one nudge write path (logNudge) takes. Phase 1: the journey's picked day now
