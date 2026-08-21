@@ -52,10 +52,10 @@ body>*{position:relative;z-index:2;}
 .u-now .band{background:linear-gradient(135deg,var(--u-now-1),var(--u-now-2));border-bottom:1px solid var(--u-now-rule);}
 .u-house .band{background:linear-gradient(135deg,var(--u-house-1),var(--u-house-2));border-bottom:1px solid var(--u-house-rule);}
 .u-yours .band{background:linear-gradient(135deg,var(--u-yours-1),var(--u-yours-2));border-bottom:1px solid var(--u-yours-rule);}
-.deed{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;color:var(--ink2);line-height:1.12;}
-.deed em{font-style:italic;color:var(--burg);}
-.u-house .deed{color:#2e3a2c;}.u-house .deed em{color:#405a3c;}
-.u-yours .deed{color:#4a3d22;}.u-yours .deed em{color:#8a7440;}
+.deed{font-family:'Playfair Display',serif;font-size:19px;font-weight:400;color:var(--ink2);line-height:1.3;max-width:72ch;}
+.deed i{font-style:italic;font-weight:500;color:inherit;}  /* emphasis = same ink, NEVER burgundy */
+.u-house .deed{color:#2e3a2c;}
+.u-yours .deed{color:#4a3d22;}
 .b-sub{font-size:11px;font-weight:300;margin-top:3px;}
 .u-now .b-sub{color:#8a6558;}.u-house .b-sub{color:#5f7059;}.u-yours .b-sub{color:#8a7a5c;}
 .b-nav{display:flex;gap:6px;flex-shrink:0;}
@@ -119,8 +119,9 @@ input.txt:focus,textarea.note-in:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
 
 
 /* story */
-.story-h{display:flex;justify-content:space-between;padding:11px 15px;border-bottom:1px solid var(--hair);}
-.story-h .t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:500;}
+.story-h{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;background:linear-gradient(135deg,#d7ddd5,#d5dbd3);border-bottom:1px solid rgba(90,110,88,0.20);}
+.story-h .stat{font-family:'Playfair Display',serif;font-size:12.5px;color:#2e3a2c;font-weight:500;}
+.story-h .t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#3c4a3a;font-weight:500;}
 .story-h .c{font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#c0b0a0;letter-spacing:0.1em;text-transform:uppercase;}
 .story-b{padding:13px 15px;}
 .tl{position:relative;padding-left:20px;}
@@ -135,7 +136,8 @@ input.txt:focus,textarea.note-in:focus{border-color:#8a9e88;box-shadow:0 0 0 3px
 
 /* ═══ action bar ═══ */
 .actbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--white);border:1px solid var(--edge);border-radius:12px;box-shadow:0 1px 2px rgba(58,28,20,0.05);flex-wrap:wrap;}
-.willrec{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.willrec{font-size:12px;color:#6a584a;font-weight:300;line-height:1.5;min-width:0;max-width:56ch;}
+.willrec .lead{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-right:7px;}
 .willrec b{color:var(--ink2);font-weight:500;}
 .miss{font-size:11px;color:var(--burg);font-weight:400;line-height:1.45;margin-left:auto;}
 .miss a{color:var(--burg);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-weight:500;}
@@ -209,8 +211,7 @@ table.bulk{width:100%;border-collapse:collapse;}
     <div class="fc hdr"><div class="rim">
       <div class="band">
         <div style="min-width:0;">
-          <div class="deed">Send your <em>full manuscript</em></div>
-          <div class="b-sub">Jonathan Marsh asked for it · 2 April</div>
+          <div class="deed">Send your <i>full manuscript</i> for <i>Murphy's Day Out</i> to <i>Jonathan Marsh</i> at <i>The Marsh Agency</i></div>
         </div>
         <div class="b-nav"><button>‹</button><button>›</button></div>
       </div>
@@ -263,7 +264,7 @@ table.bulk{width:100%;border-collapse:collapse;}
       </div></div></div></div>
 
       <div class="storycol"><div class="fc"><div class="rim">
-        <div class="story-h"><span class="t">The story so far</span><span class="c">2 entries</span></div>
+        <div class="story-h"><span class="t">The story so far</span><span class="stat">Partial requested</span></div>
         <div class="story-b"><div class="tl">
           <div class="tl-e"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg></span><div class="t">Query sent</div><div class="d">2 Apr · via email</div></div>
           <div class="tl-e"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/><path d="M6 1 A5 5 0 0 1 9.76 3.5 L6 6 Z" fill="#7c3d3d"/></svg></span><div class="t">Full requested</div><div class="d">2 Apr · via email</div></div>
@@ -274,7 +275,7 @@ table.bulk{width:100%;border-collapse:collapse;}
     </div>
 
     <div class="actbar">
-      <span class="willrec" id="wr-send">Will record: —</span>
+      <span class="willrec" id="wr-send"><span class="lead">This records</span>—</span>
       <span class="miss" id="miss-send" style="display:none;"></span>
       <span class="spacer" id="sp-send"></span>
       <button class="ab quiet">Snooze</button>
@@ -304,7 +305,7 @@ table.bulk{width:100%;border-collapse:collapse;}
       </div></div></div></div>
     </div>
     <div class="actbar">
-      <span class="willrec">Will record: <b>Ticked off · today</b></span>
+      <span class="willrec"><span class="lead">This records</span>Your note, ticked off today.</span>
       <span class="spacer"></span>
       <button class="ab quiet">Snooze</button><button class="ab quiet" onclick="openDismiss()">Dismiss</button>
       <button class="ab go">Tick it off</button>
@@ -315,7 +316,7 @@ table.bulk{width:100%;border-collapse:collapse;}
   <div class="pane u-house" id="p-close">
     <div class="fc hdr"><div class="rim">
       <div class="band">
-        <div><div class="deed">Consider <em>closing</em></div><div class="b-sub">Sophie Dunn, Curtis Vane · quiet for 4 weeks</div></div>
+        <div><div class="deed">Consider closing your query for <i>Murphy's Day Out</i> to <i>Sophie Dunn</i> at <i>Curtis Vane</i></div></div>
         <div class="b-nav"><button>‹</button><button>›</button></div>
       </div>
       <div class="tiles">
@@ -340,7 +341,7 @@ table.bulk{width:100%;border-collapse:collapse;}
         </div>
       </div></div></div></div>
       <div class="storycol"><div class="fc"><div class="rim">
-        <div class="story-h"><span class="t">The story so far</span><span class="c">2 entries</span></div>
+        <div class="story-h"><span class="t">The story so far</span><span class="stat">Nudge sent</span></div>
         <div class="story-b"><div class="tl">
           <div class="tl-e"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg></span><div class="t">Query sent</div><div class="d">14 Mar · via email</div></div>
           <div class="tl-e"><span class="sd"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#7c3d3d" stroke-width="1.5"/></svg></span><div class="t">Nudge sent</div><div class="d">23 Jul · via email</div></div>
@@ -350,7 +351,7 @@ table.bulk{width:100%;border-collapse:collapse;}
       </div></div></div>
     </div>
     <div class="actbar">
-      <span class="willrec">Will record: —</span>
+      <span class="willrec"><span class="lead">This records</span>—</span>
       <span class="spacer"></span>
       <button class="ab quiet">Snooze</button><button class="ab quiet" onclick="openDismiss()">Dismiss</button>
       <button class="ab go">Log the close<span class="n">1 to answer</span></button>
@@ -361,7 +362,7 @@ table.bulk{width:100%;border-collapse:collapse;}
   <div class="pane u-house" id="p-bulk">
     <div class="fc hdr"><div class="rim">
       <div class="band">
-        <div><div class="deed">Fill in <em>what you sent</em></div><div class="b-sub">15 imported queries are missing their materials</div></div>
+        <div><div class="deed">Fill in what you sent with <i>15 imported queries</i> for <i>Murphy's Day Out</i></div></div>
         <div class="b-nav"><button>‹</button><button>›</button></div>
       </div>
     </div></div>
@@ -386,7 +387,7 @@ table.bulk{width:100%;border-collapse:collapse;}
       </div></div></div></div>
     </div>
     <div class="actbar">
-      <span class="willrec">Will record: <b id="wr-bulk">Materials on 0 queries</b></span>
+      <span class="willrec"><span class="lead">This records</span><b id="wr-bulk">nothing yet</b></span>
       <span class="spacer"></span>
       <button class="ab quiet">Snooze</button><button class="ab quiet" onclick="openDismiss()">Dismiss all</button>
       <button class="ab go" id="go-bulk" disabled>Log 0 queries</button>
@@ -474,7 +475,19 @@ function sync(){
   const w=document.querySelector('[data-s="s-when"] .on'); if(w)bits.push(w.textContent.toLowerCase());
   const e=document.querySelector('[data-s="s-expect"] .on'); if(e)bits.push('reply expected in '+e.textContent.toLowerCase());
   const r=document.querySelector('[data-s="s-remind"] .on'); if(r)bits.push('nudge: '+r.textContent.toLowerCase());
-  document.getElementById('wr-send').innerHTML='Will record: '+(bits.length?'<b>'+bits.join(' \u00b7 ')+'</b>':'\u2014');
+  let sent='\u2014';
+  if(bits.length){
+    const u=document.querySelector('.upill.on'), w=document.querySelector('[data-s="s-when"] .on');
+    const e=document.querySelector('[data-s="s-expect"] .on'), r=document.querySelector('[data-s="s-remind"] .on');
+    let one='';
+    if(u)one='Your full \u2014 '+(+u.dataset.val).toLocaleString('en-GB')+' '+u.getAttribute('data-u').toLowerCase();
+    if(w)one+=(one?' \u2014 sent ':'Sent ')+w.textContent.toLowerCase();
+    const two=[];
+    if(e)two.push('Reply expected around <b>'+e.textContent.toLowerCase()+' from then</b>');
+    if(r)two.push(/no reminder/i.test(r.textContent)?'no nudge reminder':'a nudge reminder lands here <b>'+r.textContent.toLowerCase()+'</b>');
+    sent=(one?one+'. ':'')+(two.length?two.join('; ')+'.':'');
+  }
+  document.getElementById('wr-send').innerHTML='<span class="lead">This records</span>'+sent;
 }
 function tryGo(){
   const missing=REQ.filter(r=>!r.done());
@@ -513,7 +526,7 @@ function bulk(){
       +'<td><input style="width:110px;background:var(--field);border:0.5px solid var(--hair2);border-radius:7px;padding:5px 8px;font-size:10.5px;outline:none;" placeholder="\u2014" value="'+s.oth+'" onchange="oth('+i+',this.value)"></td>';
     tb.appendChild(tr);});
   const n=st.filter(s=>s.cl||s.sy||s.sm||s.oth).length;
-  document.getElementById('wr-bulk').textContent='Materials on '+n+(n===1?' query':' queries');
+  document.getElementById('wr-bulk').textContent=n===0?'nothing yet':('materials on '+n+(n===1?' query':' queries'));
   const g=document.getElementById('go-bulk');g.textContent='Log '+n+(n===1?' query':' queries');g.disabled=n===0;
 }
 function tg(i,k){st[i][k]=!st[i][k];bulk();}
