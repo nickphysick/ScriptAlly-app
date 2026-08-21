@@ -284,6 +284,54 @@
    query line is gone — its facts are the hero's fact row now, and the space it held is the
    manuscript tile's. Baked decision 3 described THAT rail and no longer describes anything. */
 
+/* ══ FIELD NOTES — what a good comp does (v2 §2) ══ */
+.ct-fnotes { margin-bottom: 20px; }
+/* ⚠️ THE BAND WRAPS ON THIS CARD ONLY. It carries a title, a chip, a two-way segment AND a
+   collapse control — more than any other band on the page — and `.ct-band` is a nowrap flex
+   row, so at a narrow measure the segment would be pushed out of its own header. */
+.ct-fnotes .ct-band { flex-wrap: wrap; row-gap: 10px; }
+/* the band's own controls, pushed to the right of the title and the chip */
+.ct-fnhead { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.ct-fncollapse {
+  display: inline-flex; align-items: center; gap: 6px; background: transparent; border: none;
+  font-family: 'JetBrains Mono', monospace; font-size: 8.5px; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--ct-hdrsub); cursor: pointer; padding: 4px 2px;
+}
+.ct-fncollapse svg { width: 12px; height: 12px; transform: rotate(180deg); transition: transform .18s ease; }
+.ct-fncollapse.shut svg { transform: rotate(0deg); }
+@media (prefers-reduced-motion: reduce) { .ct-fncollapse svg { transition: none; } }
+
+.ct-fnbody { padding: 22px 20px 18px; }
+/* ⚠️ FIVE COLUMNS, COLLAPSING TO TWO — not `auto-fit`. `repeat(auto-fit, minmax(0, 1fr))` is the
+   declaration that grew a hundred phantom `0px` tracks on the stat block: a zero minimum gives
+   auto-fit no reason to stop. An explicit count cannot do that. */
+.ct-fngrid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px 20px; }
+@media (max-width: 980px) { .ct-fngrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ct-fncell { min-width: 0; }
+/* the illustrator's slot — 120×64, dashed, and it states its own name until the artwork lands */
+.ct-fnslot {
+  width: 120px; max-width: 100%; height: 64px; border: 1px dashed var(--ct-taupe-bd); border-radius: 8px;
+  background: var(--ct-sect); display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px; padding: 0 6px;
+}
+.ct-fnslot span {
+  font-family: 'JetBrains Mono', monospace; font-size: 7px; letter-spacing: .06em; color: var(--ct-label);
+  text-align: center; overflow-wrap: anywhere;
+}
+/* ⚠️ 1.3 MINIMUM ON MIXED-CASE PLAYFAIR — "Places it on a shelf" and "Piling them on" both carry
+   descenders, and a tighter line box crops them. */
+.ct-fncell h4 {
+  margin: 0; font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600;
+  line-height: 1.3; color: var(--ct-ink);
+}
+.ct-fncell p { margin: 7px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--ct-ink-soft); }
+/* ⚠️ THE ATTRIBUTION CARRIES THE CARD'S HONESTY — it is what stops five cells reading as house
+   rules. It is not a footnote to trim. */
+.ct-fnattr {
+  margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--ct-band-hair);
+  font-size: 11.5px; line-height: 1.55; color: var(--ct-label);
+}
+
 /* ── the comp rows ── */
 /* ⚠️ `align-items: start` ON BOTH ROW GRIDS — baked decision 4, and it was the alignment fix. Rows
    centred, so any row carrying a match line dragged its neighbours' tick and buttons out of line.
