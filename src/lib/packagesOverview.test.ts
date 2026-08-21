@@ -20,7 +20,7 @@ import {
   trackingRows, howItWorks, packagedQueries, replyCount, packageTiles, tileFooter,
   materialColumns, packagesUsing, usageLine,
 } from "./packagesOverview";
-import { packageMetrics, UNFILLED_SLOT, isRequest as isRequestExport } from "./packageMetrics";
+import { packageMetrics, UNFILLED_SLOT, isRequest as isRequestExport, packagesUsingVersion } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES } from "../components/packages/typeMeta";
 import { ComponentType, QueryStatus } from "../types";
 import type { ManuscriptVersion, SubmissionPackage, Query } from "../types";
@@ -376,5 +376,37 @@ describe("materialColumns — the broadsheet's three type columns (D3)", () => {
   it("ignores an unfilled slot rather than matching the empty sentinel", () => {
     const noSample = [pkg("pk9", "No sample", "q1", "s1", UNFILLED_SLOT)];
     expect(packagesUsing(UNFILLED_SLOT, noSample)).toEqual([]);
+  });
+
+  /**
+   * ⚠️ TWO DERIVATIONS AGAINST EACH OTHER, NOT AGAINST A LITERAL. `packagesUsing` drives the usage
+   * line a writer reads and the number the archive guard will refuse on; `packagesUsingVersion`
+   * drives `componentMetrics`, `mostUsedVersionOfType` and `materialUsage`. `packagesUsing` was
+   * briefly its OWN filter over the same slots — two answers to one question, agreeing on every
+   * input the app can produce, which is how that pair survives until somebody edits one of them.
+   * A `toEqual(["pk1"])` on both sides would go green the day both moved the same wrong way.
+   *
+   * ⚠️ AND THE IDS ARE TAKEN FROM THE FIXTURE, NOT TYPED. Every real material id is a Firestore
+   * document id — the sentinel case above is the one input the app cannot produce, and it is
+   * asserted separately because the guard, unlike the matching, genuinely is this module's own.
+   */
+  it("reconciles with packageMetrics rather than restating its matching", () => {
+    const two = [...packages, pkg("pk2", "Second", "q1", "s1", UNFILLED_SLOT)];
+    const ids = versions.map((v) => v.id);
+    expect(ids.length).toBeGreaterThan(2);
+    for (const id of ids) {
+      expect(packagesUsing(id, two).map((p) => p.id), `disagreed about ${id}`)
+        .toEqual(packagesUsingVersion(id, two).map((p) => p.id));
+    }
+  });
+
+  /** The sheet's words and the guard's number are the same derivation, so they cannot disagree. */
+  it("prints the number the guard will read", () => {
+    for (const col of materialColumns(versions, packages)) {
+      for (const sheet of col.sheets) {
+        expect(sheet.usedIn).toBe(packagesUsing(sheet.id, packages).length);
+        expect(sheet.usage).toBe(usageLine(sheet.usedIn));
+      }
+    }
   });
 });

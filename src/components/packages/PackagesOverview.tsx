@@ -23,7 +23,7 @@
 import React from "react";
 import { ManuscriptVersion, SubmissionPackage, Query } from "../../types";
 import {
-  materialRows, packageRows, packagedQueries, howItWorks, packageTiles, tileFooter,
+  packageRows, packagedQueries, howItWorks, packageTiles, tileFooter,
 } from "../../lib/packagesOverview";
 import { canBuildPackage } from "../../lib/materialDraft";
 import {
@@ -39,9 +39,7 @@ export interface PackagesOverviewProps {
   /** Injected so every derived date is testable and the component holds no clock. */
   now?: number;
   /** Open the existing materials editor on a blank new material. */
-  onAddMaterial: () => void;
   /** Open the existing materials editor on one material. */
-  onOpenMaterial: (id: string) => void;
   /** Open a fresh package draft — the same signal the header's `New package` sends. */
   onNewPackage: () => void;
   /** Open one package for editing in the Workshop. */
@@ -210,9 +208,8 @@ const BarPanel: React.FC<{ label: string; backLabel: string; rows: BarRow[] }> =
 
 export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
   versions, packages, queries, now = Date.now(),
-  onAddMaterial, onOpenMaterial, onNewPackage, onOpenPackage, onLogQuery,
+  onNewPackage, onOpenPackage, onLogQuery,
 }) => {
-  const mats = materialRows(versions, now);
   const pkgs = packageRows(packages, versions, queries);
   const live = packagedQueries(packages, queries).length;
   const steps = howItWorks(versions.length, packages.length, live);
@@ -242,26 +239,12 @@ export const PackagesOverview: React.FC<PackagesOverviewProps> = ({
   return (
     <div className="pkgo-grid">
       <aside className="pkgo-rail" aria-label="Registers">
-        <Panel label="Materials" chip={String(versions.length)} action={{ label: "+ ADD", onClick: onAddMaterial }}>
-          {mats.length === 0 ? (
-            <Ghost
-              title="Add a material"
-              sub="A covering letter, synopsis or sample — written here or pasted in."
-              onClick={onAddMaterial}
-            />
-          ) : (
-            <div className="pkgo-reg">
-              {mats.map((m) => (
-                <button key={m.id} type="button" className="pkgo-row" onClick={() => onOpenMaterial(m.id)}>
-                  <span className="pkgo-type">{m.typeLabel}</span>
-                  <span className="pkgo-name">{m.name}</span>
-                  <span className="pkgo-detail">{m.detail}</span>
-                </button>
-              ))}
-            </div>
-          )}
-        </Panel>
-
+        {/* ⚠️ THE MATERIALS PANEL IS RETIRED (D1, broadsheet Phase 2). Materials are now a full
+            band on the stage — three type columns of sheets, each carrying its own source and usage
+            line. A rail register listing the same materials beside it would be a second index of one
+            thing, and the day the two disagree nothing in the app says which is the answer. The
+            band's `+ ADD` and its per-column ghosts are the entry points; both open the same modal
+            this panel opened. */}
         <Panel
           label="Packages"
           chip={String(packages.length)}

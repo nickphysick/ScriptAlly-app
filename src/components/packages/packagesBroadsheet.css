@@ -109,10 +109,17 @@
   margin-bottom: 36px;
 }
 
+/* ⚠️ `justify-content: center`, AND IT IS A DEVIATION THE CONFORM RULING CAUSED — flag F-I.
+   The ref pins this column to the top because it holds four things: title, subtitle, stat line,
+   actions. Ruling 1 moved the first two into the shared `PageHeader`, so the column holds two, and
+   pinned to the top against the taller blush panel it left ~150px of visible dead space (seen in the
+   screenshot, invisible to every measurement — nothing was wrong, there was just nothing there).
+   Centring is one declaration and reverses in one word if Nick would rather the ref's alignment. */
 .pkgb-hero-l {
   padding: 34px 38px 30px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 14px;
   align-items: flex-start;
   min-width: 0;
@@ -226,3 +233,96 @@
 @media (max-width: 1080px) {
   .pkgb-hero { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   THE MATERIALS BAND — three type columns (D3)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠️ `minmax(0, 1fr)`, NOT `1fr`. A bare `1fr` carries an `auto` minimum, so one long material name
+   makes its column wider than its third and the other two shrink — the grid growing instead of the
+   text wrapping. The zero minimum is what makes "three equal columns" a property of the grid rather
+   than of the content that happens to be in it. */
+.pkgb-matcols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+.pkgb-matcol { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+.pkgb-matcolhead { display: flex; align-items: center; gap: 12px; padding-bottom: 4px; }
+.pkgb-mchtext { flex: 1; min-width: 0; }
+.pkgb-eyebrow {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.18em;
+  color: var(--pkg-ink); text-transform: uppercase; font-weight: 700; display: block;
+}
+.pkgb-matcolhead .pkgb-statline { font-size: 8.5px; }
+
+/* The per-column entry point. Outlined — the band's only filled control is in the hero band. */
+.pkgb-add {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em;
+  border: 1px solid rgba(58, 28, 20, 0.22); background: transparent; color: var(--pkg-ink);
+  padding: 3px 8px; border-radius: 6px; cursor: pointer; flex: 0 0 auto;
+}
+.pkgb-add:hover { background: rgba(245, 226, 218, 0.4); }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   SHEETS
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ⚠️ THE DOG-EAR IS A `::before`, NOT AN IMAGE OR A CLIPPED CORNER. It reads as a folded page because
+   the gradient turns over at exactly 50% — page colour above the fold, a hairline at the crease,
+   card colour below. The asymmetric radius (`10px 14px 10px 10px`) is what makes the folded corner
+   look cut rather than rounded off. */
+.pkgb-sheet {
+  position: relative;
+  background: var(--pkgo-surface);
+  border: 1px solid var(--pkgo-hairline-soft);
+  border-radius: 10px 14px 10px 10px;
+  padding: 11px 34px 10px 14px;
+  box-shadow: 0 2px 6px rgba(58, 28, 20, 0.05);
+  cursor: pointer;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  display: block;
+}
+.pkgb-sheet:hover { box-shadow: 0 6px 16px rgba(58, 28, 20, 0.09); }
+.pkgb-sheet::before {
+  content: "";
+  position: absolute; top: 0; right: 0; width: 15px; height: 15px;
+  background: linear-gradient(225deg, var(--pkgo-fold) 48%, rgba(58, 28, 20, 0.12) 50%, var(--pkgo-surface) 52%);
+  border-bottom-left-radius: 6px;
+}
+.pkgb-stype {
+  font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.14em;
+  color: var(--pkg-muted); text-transform: uppercase; display: block; margin-bottom: 3px;
+}
+.pkgb-sname { font-size: 13px; font-weight: 600; color: var(--pkg-ink); overflow-wrap: anywhere; display: block; }
+/* ⚠️ `display: block` ON BOTH, AND THE MEASUREMENT COULD NOT SEE WHY. The ref draws these as
+   `<div>`s; here they are `<span>`s, so `margin-top` applied to nothing and the two lines ran
+   together as "TextIn 1 package". Every probe read them correctly, because a probe queries the two
+   elements SEPARATELY and each one's text was right — it took the screenshot to see that the page
+   had joined them. Vertical margin is inert on an inline box; the block is what makes the rule real. */
+.pkgb-ssrc { display: block; font-family: var(--font-mono); font-size: 8.5px; color: var(--pkg-muted); margin-top: 3px; }
+.pkgb-suse { display: block; font-size: 10px; color: var(--pkg-muted); margin-top: 4px; }
+.pkgb-suse b { color: var(--pkg-ink-soft); font-weight: 600; }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   GHOSTS — the per-column entry at the foot of each column
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+.pkgb-ghost {
+  border: 1.5px dashed var(--pkgo-dash);
+  border-radius: 10px; padding: 13px; text-align: center;
+  cursor: pointer; background: transparent; width: 100%;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.pkgb-ghost:hover { background: rgba(245, 226, 218, 0.3); border-color: var(--pkg-pinkline); }
+.pkgb-gt { font-family: var(--font-serif); font-style: italic; font-size: 14px; color: var(--pkg-burg); }
+.pkgb-gs { font-size: 11px; color: var(--pkg-muted); margin-top: 4px; display: block; }
+
+@media (max-width: 1080px) { .pkgb-matcols { grid-template-columns: minmax(0, 1fr); } }

@@ -19,7 +19,7 @@
  * Pure: no Firestore, no clock of its own (`now` is injected), no React.
  */
 import { ManuscriptVersion, SubmissionPackage, Query, ComponentType } from "../types";
-import { packageMetrics, isRequest, isSlotFilled } from "./packageMetrics";
+import { packageMetrics, isRequest, isSlotFilled, packagesUsingVersion } from "./packageMetrics";
 import { TYPE_META, BUILDER_TYPES, SLOT_FIELD } from "../components/packages/typeMeta";
 import { versionMeta } from "./packageMetrics";
 import { agoLabel, daysBetween } from "./elapsed";
@@ -381,12 +381,24 @@ export function materialColumns(
   });
 }
 
-/** Every package referencing this material, by any slot. The one definition of "referenced". */
+/**
+ * Every package referencing this material, by any slot.
+ *
+ * ⚠️ THE MATCHING IS `packagesUsingVersion`'s, NOT A SECOND COPY OF IT. This function was first
+ * written as its own `BUILDER_TYPES.some(...)` filter, which made two definitions of "does this
+ * package reference this material" — one here driving the usage line a writer reads, one in
+ * `packageMetrics` driving `componentMetrics`, `mostUsedVersionOfType` and `materialUsage`. They
+ * agreed on every input the app can produce, which is exactly how that pair survives until the day
+ * someone edits one of them.
+ *
+ * ⚠️ WHAT IS GENUINELY THIS FUNCTION'S OWN IS THE SENTINEL GUARD. An unfilled slot is `""`, so
+ * `packagesUsingVersion("", …)` matches every package with an empty slot — correct for a raw
+ * predicate, wrong for a question phrased "which packages hold THIS material". No caller can reach
+ * it (`materialColumns` passes a Firestore document id), and the guard states the boundary rather
+ * than relying on that staying true.
+ */
 export const packagesUsing = (versionId: string, packages: SubmissionPackage[]): SubmissionPackage[] =>
-  packages.filter((p) => BUILDER_TYPES.some((t) => {
-    const id = p[SLOT_FIELD[t]];
-    return isSlotFilled(id) && id === versionId;
-  }));
+  isSlotFilled(versionId) ? packagesUsingVersion(versionId, packages) : [];
 
 /**
  * ⚠️ ZERO IS A SENTENCE HERE, NOT A COUNT. "In 0 packages" is true and reads as a malfunction; the

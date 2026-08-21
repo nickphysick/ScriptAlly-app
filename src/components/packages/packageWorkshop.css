@@ -84,6 +84,16 @@
      for a meaning it does not have. */
   --pkgo-well: var(--shell-panel);
 
+  /* ⚠️ THE DOG-EAR'S FOLD-BACK IS A DRAWN VALUE, NOT THE GROUND — and copying the ref here would
+     have made the fold invisible. The ref turns its folded corner over to `--page` (#f2ede7) because
+     its sheets sit on cream: page-above-the-fold against a white sheet is a real step. In the app the
+     sheets sit on the content window, `--ws-window` = rgb(254,252,250) — one point off the sheet's
+     own white, so a fold painted the ground colour would be a corner nobody could see. The value is
+     therefore stated: it is the BACK of a turned-over corner, which is a thing being drawn, not a
+     ground being inherited. If the content window ever gains a real tint, this becomes a candidate
+     to read it instead. */
+  --pkgo-fold: #f2ede7;
+
   /* ⚠️ THE `--wsh-plate-radius` / `--wsh-plate-sh` OVERRIDES ARE DELETED (in-flow masthead, step 1).
      They squared this page's masthead corners and gave it the ref's more-lifted cast — both
      modifiers of a CARD, and the masthead has no card treatment left to modify: no fill, no border,

@@ -23,10 +23,11 @@
  */
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useScriptAllyDb } from "../lib/db";
-import { ManuscriptVersion, SubmissionPackage } from "../types";
+import { ComponentType, ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
 import { PackagesOverview } from "./packages/PackagesOverview";
 import { PackagesHeroBand } from "./packages/PackagesHeroBand";
+import { MaterialsBand } from "./packages/MaterialsBand";
 import { WaxSeal } from "./packages/IllustrationSlot";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
@@ -71,6 +72,11 @@ export const SubmissionPackages: React.FC = () => {
      being edited, or null when adding. Both local — a modal is not a destination. */
   const [matModal, setMatModal] = useState(false);
   const [matEditing, setMatEditing] = useState<ManuscriptVersion | null>(null);
+  /* ⚠️ THE TYPE THE MODAL OPENS ON, AND IT IS PART OF THE MODAL'S KEY. The band's three columns each
+     add a material of their own type, so `+ ADD` under Synopses must skip the type step and land on
+     Synopsis. Keying the mount on it means clicking Letters after Synopses is a remount rather than a
+     stale draft seeded from the previous type — the same reason `matEditing.id` is in the key. */
+  const [matPreselect, setMatPreselect] = useState<ComponentType | null>(null);
   /* The package builder (flow pack Phase 3). */
   const [pkgModal, setPkgModal] = useState(false);
   const [pkgEditing, setPkgEditing] = useState<SubmissionPackage | null>(null);
@@ -132,6 +138,14 @@ export const SubmissionPackages: React.FC = () => {
     }
     setMatModal(false);
     setMatEditing(null);
+    setMatPreselect(null);
+  };
+
+  /** Open the modal on an existing material. One opener, so every surface opens it the same way. */
+  const openMaterial = (id: string) => {
+    setMatEditing(msVersions.find((x) => x.id === id) ?? null);
+    setMatPreselect(null);
+    setMatModal(true);
   };
 
   /**
@@ -335,19 +349,20 @@ export const SubmissionPackages: React.FC = () => {
             canBuild={canBuildPackage(msVersions)}
             onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
           />
+          {/* ⚠️ THE MATERIALS BAND REPLACES THE RAIL'S MATERIALS PANEL (D1) — mounted here and
+              deleted there in the same commit, so the two never coexist. */}
+          <MaterialsBand
+            versions={msVersions}
+            packages={msPackages}
+            onAddMaterial={(type) => { setMatEditing(null); setMatPreselect(type); setMatModal(true); }}
+            onOpenMaterial={openMaterial}
+          />
           <PackagesOverview
               versions={msVersions}
               packages={msPackages}
               queries={msQueries}
-              /* ⚠️ THESE NO LONGER HAND OFF TO THE WORKSHOP (D9). Both open the new modal in place;
-                 the Workshop's own materials editor stays on disk and stays reachable from
-                 `#/pkg-lab`, but this page does not send anyone to it any more. */
-              onAddMaterial={() => { setMatEditing(null); setMatModal(true); }}
-              onOpenMaterial={(id) => {
-                const v = msVersions.find((x) => x.id === id) ?? null;
-                setMatEditing(v);
-                setMatModal(true);
-              }}
+              /* ⚠️ NO `onAddMaterial` / `onOpenMaterial` ANY MORE — the rail's Materials panel is
+                 gone and the band above owns both entry points (D1). */
               /* ⚠️ THE BUILDER, NOT THE WORKSHOP (D9). Same retirement as the material entries. */
               onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
               onOpenPackage={(id) => {
@@ -372,10 +387,11 @@ export const SubmissionPackages: React.FC = () => {
           type-grid flash when opening a material to edit. The key makes reopening a DIFFERENT
           material a remount rather than a stale-state hazard. */}
       {matModal && <MaterialModal
-        key={matEditing?.id ?? "new-material"}
+        key={matEditing?.id ?? `new-${matPreselect ?? "material"}`}
         editing={matEditing}
         versions={msVersions}
-        onClose={() => { setMatModal(false); setMatEditing(null); }}
+        preselect={matPreselect}
+        onClose={() => { setMatModal(false); setMatEditing(null); setMatPreselect(null); }}
         onSave={saveMaterial}
       />}
 

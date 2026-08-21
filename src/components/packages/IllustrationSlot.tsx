@@ -65,6 +65,13 @@ export const IllustrationSlot: React.FC<IllustrationSlotProps> = ({
  * the app's Pro marker becomes a wax seal everywhere is a separate decision — see F-A. Nothing
  * outside this page imports it, which is what keeps that decision open rather than made by accident.
  */
+/*
+ * ⚠️ `role="img"` SO THE HEADING'S ACCESSIBLE NAME STAYS A SENTENCE. The seal renders inside the
+ * masthead's `<h1>` (it is passed as `titleAdornment`), and as a bare span its letters concatenated
+ * onto the title: the heading announced as "Submission packagesPRO", measured. Treating it as an
+ * image with a label makes it a separate node, so the name reads as two things rather than one
+ * malformed word — and the visible letters stay exactly as drawn.
+ */
 export const WaxSeal: React.FC = () => (
-  <span className="pkgb-wax" title="Pro">PRO</span>
+  <span className="pkgb-wax" role="img" aria-label="Pro" title="Pro">PRO</span>
 );
