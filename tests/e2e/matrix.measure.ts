@@ -73,7 +73,10 @@ const readState = (page: Page) => page.evaluate(() => {
    * DOM. This is the grid declaring which of its own children it rendered — one component's
    * furniture, owned and locked elsewhere (`mastheadMatrix`, `miniBar`, `stickyRow`).
    */
-  const CHROME = ["wpg-mast", "wpg-mini", "wpg-tools"];
+  /* ⚠️ `wpg-chrome` JOINS THE LIST (pinned chrome, §1) — masthead and control row live inside one
+     sticky slab now, so the scroller's first child is the SLAB and a finder that does not know it
+     reports the chrome as the page's content. It did: "content starts at 15" on Query Centre. */
+  const CHROME = ["wpg-chrome", "wpg-mast", "wpg-mini", "wpg-tools"];
   const isChrome = (el: Element) => CHROME.some((c) => el.classList.contains(c));
   const content = [...sc.children].find((el) => !isChrome(el)) as HTMLElement | null;
   return {
@@ -433,7 +436,24 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
      * reading that caught a `ResizeObserver` saying nothing while its scroller's children grew.
      */
     const state = (reading: string) => reading.split("@")[0];
-    for (const r of scrollers) {
+    /**
+     * ⚠️ THE FADE CLAIMS ARE GOVERNED BY `fill`, NOT BY `canScroll`, AND MIXING THE TWO WAS A LATENT
+     * FAULT THIS FILE CARRIED. Hems are mounted per `fill` — a fill page has none, by construction —
+     * while `scrollers` is measured per `canScroll`. The two agree on nine pages and disagree on the
+     * one that is BOTH: Manuscripts at 1280×800, whose content is 676px tall and overflows by 130
+     * even though its panes are supposed to own the scrolling. It landed in `scrollers`, was asked
+     * for a fade it correctly does not have, and reported `absent` as "a top fade at the top of the
+     * page".
+     *
+     * ⚠️ IT DID NOT FIRE UNTIL NOW BECAUSE THE PAGE ONLY OVERFLOWS AT THE NARROWER VIEWPORT and only
+     * with enough manuscripts. Measured identical before and after this pack's §1 — 130px either way
+     * — so the trap was already here and the classification, not the chrome, is what was wrong.
+     *
+     * ⚠️ AND THE OVERFLOW ITSELF IS A REAL FINDING, LEFT ALONE DELIBERATELY. A fill page that scrolls
+     * contradicts what `fill` declares; `.msv-wrap` is `flex: 0 1 auto`, so it is content-sized
+     * rather than filling. That is Manuscripts' own height chain and not this pack's to change.
+     */
+    for (const r of all.filter((x) => x.canScroll && !x.fill)) {
       const [restTop, restBot] = String(r.hemRest).split(" ");
       expect(state(restTop), `${r.page}: a top fade at the top of the page — it reads as a rendering fault`).toBe("off");
       expect(state(restBot), `${r.page}: no bottom fade with content below the fold — the observer is not seeing the content grow`).toBe("on");

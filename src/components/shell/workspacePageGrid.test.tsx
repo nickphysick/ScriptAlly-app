@@ -55,67 +55,39 @@ const block = (selector: string): string => {
 const MAST = <PageHeader variant="workspace" title="Test page" mark="todo" />;
 
 describe("the grid — the scroller owns the page (in-flow masthead)", () => {
-  it("⚠️ TWO STACKED STICKIES, AND NO OFFSET ENCODES ANOTHER ELEMENT'S HEIGHT AS A LITERAL", () => {
-    /* ⚠️ THIS RULE IS AMENDED, NOT ABANDONED, AND THE DISTINCTION IS THE WHOLE OF IT. What it
-       forbade was a sticky element whose `top` encoded ANOTHER element's height as a literal —
-       `calc(56px + gap)`, silently wrong by 32px on the Tasks family, the same fault as the banned
-       `calc(100vh - 64px)`. The control row is sticky now (step 2) and takes `top: 0`, which
-       encodes nothing: there is no chrome above the scroller for it to clear, because the masthead
-       is inside the scroller with it.
-
-       So the check that mattered is unchanged and still runs over the whole sheet: every `top` in
-       this file must be exactly 0. The day one is not, something above the scroller is being
-       measured into a rule again. */
-    /* ⚠️ STICKY RULES ONLY, AND THE FIRST VERSION SWEPT THE WHOLE SHEET. The claim has always been
-       about a sticky element's CLEARANCE — an offset that encodes what sits above it. A `top: 50%`
-       on an absolutely-positioned button is a centring device and has nothing to do with it; the
-       unscoped version flagged Hide's centring as "another element's height as a literal", which is
-       the assertion drifting off its own subject. */
+  it("⚠️ ONE SLAB, ONE STICKY, AND NO OFFSET ENCODES ANOTHER ELEMENT'S HEIGHT", () => {
+    /**
+     * ⚠️ THE RULE IS AMENDED FOR THE THIRD TIME AND HAS NEVER BEEN WEAKENED. What it forbids is a
+     * sticky element whose `top` encodes ANOTHER element's height — `calc(56px + gap)`, silently
+     * wrong by 32px on the Tasks family. It has been through: one sticky at `top: 0`; two stacked,
+     * where the row's `top: var(--wpg-mini-h)` was allowed because the bar READ the same token for
+     * its height, so the two could not drift.
+     *
+     * ⚠️ NOW THERE IS NOTHING TO CLEAR, WHICH IS THE STRONGEST FORM OF THE RULE (pinned chrome, §1).
+     * The masthead and the control row are one SLAB, and the slab is the only sticky element in the
+     * scroller — so every `top` is 0 again, not by agreement between two tokens but because there is
+     * no second pinned thing for anything to sit beneath.
+     */
     const stickyBlocks = [...cssRules.matchAll(/\{[^}]*position:\s*sticky[^}]*\}/g)].map((m) => m[0]);
     expect(stickyBlocks.length, "no sticky rules found — this case would be asserting nothing").toBeGreaterThan(0);
-    const tops = stickyBlocks.flatMap((b) => [...b.matchAll(/(?:^|[;{\s])top\s*:\s*([^;}]+)/gm)].map((m) => m[1].trim()));
-    expect(tops.length, "no `top` is declared at all — the sticky row lost its anchor").toBeGreaterThan(0);
-    /* ⚠️ EXTRACT THE VALUE, DO NOT LOOK AHEAD PAST IT. The first draft was
-       `not.toMatch(/top\s*:\s*(?!0)/)` and it flagged `top: 0` — `\s*` backtracks to zero width, so
-       the lookahead tested the SPACE rather than the digit and passed. Reading each declaration and
-       comparing it says what is meant, and cannot be defeated by backtracking. */
-    /**
-     * ⚠️ AMENDED (masthead rethink, step 3): a `top` may be `0`, OR a token that the element whose
-     * height it is reads for that height. The control row now takes `top: var(--wpg-mini-h)` because
-     * the mini bar sits above it — two stacked stickies, identity over controls.
-     *
-     * ⚠️ AND THE RULE IT AMENDS IS NOT WEAKENED, because what made the original fault a fault was
-     * never "an offset that is not zero". It was `calc(56px + gap)` — another element's height
-     * copied as a LITERAL, which was silently wrong by 32px on the Tasks family the day that height
-     * differed. A shared token cannot be wrong: the bar reads it for its height and the row reads it
-     * for its offset, so they move together or not at all. A literal here is still forbidden.
-     */
-    for (const value of tops) {
-      const ok = value === "0" || /^var\(--[a-z0-9-]+\)$/.test(value);
-      expect(ok, `\`top: ${value}\` is neither 0 nor a shared token — another element's height as a literal is the \`calc(100vh - 64px)\` fault`).toBe(true);
-      if (value !== "0") {
-        /* the token must be read for a HEIGHT somewhere in this sheet, or it is a literal wearing a
-           token's clothes */
-        const tok = value.slice(4, -1);
-        expect(cssRules, `\`top: ${value}\` names a token nothing sizes itself with — that is a literal in disguise`)
-          .toMatch(new RegExp(`height:\\s*var\\(${tok}\\)`));
-      }
+    /* ⚠️ EXTRACT THE VALUE, DO NOT LOOK AHEAD PAST IT. `not.toMatch(/top\s*:\s*(?!0)/)` flagged
+       `top: 0` — `\s*` backtracks to zero width, so the lookahead tested the SPACE rather than the
+       digit and every value passed. Read each declaration and compare it. */
+    const tops = stickyBlocks.flatMap((b2) => [...b2.matchAll(/(?:^|[;{\s])top\s*:\s*([^;}]+)/gm)].map((m) => m[1].trim()));
+    expect(tops.length, "no `top` is declared at all — the slab lost its anchor").toBeGreaterThan(0);
+    for (const t of tops) {
+      expect(t, `a sticky element clears ${t} — something above the scroller is being measured into a rule again`).toBe("0");
     }
-    /**
-     * ⚠️ TWO STICKY ELEMENTS NOW, AND THE ONE-ONLY RULE IS AMENDED RATHER THAN DROPPED. It read
-     * "exactly one element may stick — the second has to clear the first, which is where the
-     * literal comes from", and that was the right fear: clearing is exactly how `calc(56px + gap)`
-     * got written.
-     *
-     * ⚠️ WHAT MAKES TWO SAFE IS THAT THE CLEARANCE IS A SHARED TOKEN, NOT A MEASUREMENT COPIED
-     * ACROSS. The mini bar reads `--wpg-mini-h` for its height and the control row reads the same
-     * token for its `top`, so they cannot disagree — asserted directly above. A third sticky would
-     * have to clear the SUM of two, which is arithmetic, and that is where this rule bites again.
-     */
-    const sticky = [...cssRules.matchAll(/position\s*:\s*sticky/g)];
-    expect(sticky.length, "a third sticky element appeared — it would have to clear the sum of the other two, and that is where an encoded height comes back").toBe(2);
-    expect(block(".wpg-tools"), "the control row stopped sticking").toContain("position: sticky");
-    expect(block(".wpg-mini"), "the mini bar stopped sticking").toContain("position: sticky");
+    /* ⚠️ AND EXACTLY ONE STICKY BOX IN THE SCROLLER — structural, counted, because "one slab" is the
+       claim and a second pinned element is precisely what §1 removed. */
+    /* ⚠️ THE SUBJECT OF THE SELECTOR, NOT ITS FIRST CLASS. My first version captured the first
+       `.wpg-*` it saw and reported `.wpg-scroll` as sticky — the ANCESTOR in `.wpg-scroll >
+       .wpg-chrome`, which is a scrollport and could not be. The assertion read as a real second
+       sticky element and was an artefact of the regex. */
+    const stickySubjects = [...cssRules.matchAll(/([^{}]+)\{[^}]*position:\s*sticky[^}]*\}/g)]
+      .map((m) => m[1].trim().split(/[\s>]+/).filter(Boolean).pop()!);
+    expect([...new Set(stickySubjects)], `more than one element is sticky: ${stickySubjects.join(", ")}`)
+      .toEqual([".wpg-chrome"]);
   });
 
   it("the scroll row is `minmax(0, 1fr)` — a plain `1fr` grows to its content and never scrolls", () => {
@@ -139,65 +111,31 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
       .not.toContain("grid-row");
   });
 
-  it("⚠️ THE CONTROL ROW IS INVISIBLE AT REST — its ground is the scroller's own", () => {
-    /* ⚠️ THE RULE IS UNCHANGED IN INTENT: it is controls, not a second plate. What changed is that a
-       sticky element MUST paint an opaque ground or the content passes straight through it — so the
-       row now has a background, and the whole of the claim is WHICH one. Painting the scroller's own
-       token means at rest it is indistinguishable from the content around it, which is the
-       condition that keeps it from reading as chrome. */
+  it("⚠️ THE CONTROL ROW IS INVISIBLE AT REST — it is controls, not a second plate", () => {
+    /**
+     * ⚠️ THE ROW NO LONGER PAINTS ITS OWN GROUND, AND THAT IS THE POINT (pinned chrome, §1). It had
+     * one because it was independently sticky and content would have passed through it. Inside the
+     * slab the slab paints it — and two boxes painting one ground is how a seam appears the day one
+     * of them is retinted, which is the fault `.wpg-hem` already taught this file with `#ffffff`.
+     *
+     * The rest of the claim is unchanged and still worth holding: controls, not a plate.
+     */
     const t = block(".wpg-tools").replace(/\s+/g, " ");
-    const bg = /(?:^|[;\s])background\s*:\s*([^;}]+)/.exec(t);
-    expect(bg, "the sticky row paints no ground — content would show through it").toBeTruthy();
-    /* ⚠️ THE TOKEN, NEVER A LITERAL — and `.wpg-hem` is why this is asserted rather than trusted.
-       It read `#ffffff` "BECAUSE THE WINDOW IS WHITE", which was true until the window went to
-       #fefcfa, and two hardcoded hems then painted a lighter band across every scroller in the app. */
-    expect(bg![1].trim(), "the row's ground is a literal — it will be wrong the next time the window is retoned")
-      .toBe("var(--ws-window)");
-
-    /* still not a plate: no frame, no radius, and no border of its own in EITHER state */
+    expect(t, "the control row paints its own ground again — the slab already paints it")
+      .not.toMatch(/(^|[;\s])background\s*:/);
     expect(t, "the control row gained a full border").not.toMatch(/(^|[;\s])border\s*:/);
     expect(t, "the control row gained a radius — that is a card").not.toMatch(/(^|[;\s])border-radius\s*:/);
-    /* ⚠️ AND NO `border-bottom`, WHICH IS THE ORIGINAL CLAUSE AND STILL RIGHT FOR A NEW REASON. It
-       used to draw one, so every toolbar page rendered TWO lines 20px apart. Now the stuck hairline
-       is a SHADOW (`0 1px 0`), so the row's height is identical in both states — a real border would
-       add a pixel on the frame the class lands, which is a layout shift on every scroll. */
-    expect(t, "the control row drew a real hairline — the stuck edge is a shadow so the height cannot move")
+    expect(t, "the control row drew a hairline — the slab's base is the only line in the chrome")
       .not.toMatch(/(^|[;\s])border-bottom\s*:/);
-
-    /* ⚠️ AND THE EDGE AND SHADOW BELONG TO THE STUCK STATE ONLY. At rest both are declared at zero
-       alpha rather than omitted, so they TRANSITION rather than snapping in — but neither may be
-       visible until the row has actually anchored. */
-    const stuck = block(".wpg-tools--stuck").replace(/\s+/g, " ");
-    expect(stuck, "the stuck state draws no hairline").toContain("0 1px 0 var(--ws-edge)");
-    expect(stuck, "the stuck state changes the row's padding by more than the 12 → 10 step").toContain("padding: 10px 0 14px");
-    expect(stuck, "the stuck state swaps the fill — same ground in both states, or the row announces itself as chrome")
-      .not.toMatch(/(^|[;\s])background\s*:/);
-
-    /* ⚠️ THE ROW'S MARGIN BOX MUST BE IDENTICAL IN BOTH STATES, and the arithmetic is checked here
-       rather than trusted. The row is INSIDE the scroller, so its height is part of `scrollHeight`:
-       tightening the padding without giving the difference back would drop max scroll by the same
-       amount the moment it sticks, and a page overflowing by a few pixels would then clamp, unstick
-       and cycle — the exact shape `--wpg-reclaim-pad` was built for on a different element. */
-    /* ⚠️ THE SHORTHAND IS EXPANDED, NEVER READ AS ONE NUMBER. `padding: 12px 0` and
-       `padding: 10px 0 14px` have different vertical totals and the same first value — reading
-       `[0]` alone would call them equal, which is precisely the bug this case exists to catch.
-       ⚠️ AND `margin-bottom` IS NOT PART OF THE SUM ANY MORE. It was, and it silently did nothing:
-       adjacent siblings' margins COLLAPSE, so the compensation was absorbed by the next element's
-       `margin-top` and the row still shrank by 4. Padding cannot collapse. */
-    const vbox = (rule: string) => {
-      const m = /(?:^|[;\s])padding\s*:\s*([^;}]+)/.exec(rule);
-      expect(m, "no padding declared").toBeTruthy();
-      const v = m![1].trim().split(/\s+/).map((x) => Number(x.replace("px", "")));
-      const top = v[0];
-      const bottom = v.length >= 3 ? v[2] : v[0];
-      return top + bottom;
-    };
-    expect(stuck, "the compensation went back to a margin — adjacent margins collapse, so it would do nothing")
-      .not.toMatch(/(^|[;\s])margin/);
-    const restBox = vbox(t);
-    const stuckBox = vbox(stuck);
-    expect(stuckBox, `the stuck row's margin box is ${stuckBox}px against the resting ${restBox}px — max scroll moves when it sticks, and a barely-overflowing page will clamp and cycle`)
-      .toBe(restBox);
+    /* ⚠️ AND THE SLAB CARRIES BOTH, ONCE. One line at the base, one shadow beneath it, and the
+       shadow only while pinned — the arrangement ref 174 draws as option C and calls the fix for
+       "the clash" of two lines and two shadows a few pixels apart. */
+    const slab = block(".wpg-scroll > .wpg-chrome").replace(/\s+/g, " ");
+    expect(slab, "the slab lost its base hairline").toMatch(/border-bottom:\s*1px solid var\(--ws-edge\)/);
+    expect(slab, "the slab's ground is a literal — it will be wrong the next time the window is retoned")
+      .toMatch(/background:\s*var\(--ws-window\)/);
+    expect(block(".wpg-scroll > .wpg-chrome.wpg-chrome--stuck"), "the slab casts no shadow when pinned")
+      .toMatch(/box-shadow:[^;]*rgba\(58, 28, 20, 0\.18\)/);
   });
 
   /**
@@ -435,7 +373,11 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     expect(wsh, "the masthead has no rule at all").toBeTruthy();
     const body = wsh![1].replace(/\/\*[\s\S]*?\*\//g, "");
     expect(body, "the masthead stopped stating its own vertical air").toContain("padding: 24px 0 18px");
-    expect(body, "the masthead lost the gap to whatever follows it").toContain("margin-bottom: 16px");
+    /* ⚠️ THE GAP MOVED TO THE SLAB'S BASE (pinned chrome, §1) — it used to sit between the masthead
+       and the control row, clearing the masthead's own hairline. Those two are one object now and
+       the hairline is at the object's foot, so the air belongs below the whole of it. */
+    expect(body, "the masthead kept a bottom margin — the gap belongs below the slab now").not.toContain("margin-bottom");
+    expect(block(".wpg-scroll > .wpg-chrome"), "the slab lost the gap to whatever follows it").toContain("margin-bottom: 16px");
 
     /* ⚠️ AND NEITHER GRID ROW MAY RE-ADD ONE. A `padding-top` on the scroller would sit ABOVE the
        masthead — pushing the page's title down while claiming to be the gap under it — and the
@@ -879,13 +821,13 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
        where the sentinel says it must be resting. */
     const live = cssRules.replace(/\/\*[\s\S]*?\*\//g, "");
     expect(live, "the collapse is not scoped to fill pages")
-      .toContain(".wpg--fill.wpg--hidden > .wpg-scroll > .wpg-mast");
+      .toContain(".wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast");
     /* it goes to NOTHING — no band, no strip, no residue to click */
-    const gone = block(".wpg--fill.wpg--hidden > .wpg-scroll > .wpg-mast").replace(/\s+/g, " ");
+    const gone = block(".wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast").replace(/\s+/g, " ");
     expect(gone, "the masthead collapses to a band rather than to nothing").toContain("max-height: 0");
     expect(gone, "the masthead is still painted when collapsed").toContain("opacity: 0");
     /* ⚠️ AND `max-height` NEEDS A DEFINITE REST VALUE or there is nothing to transition from. */
-    expect(block(".wpg--fill > .wpg-scroll > .wpg-mast"), "no resting max-height — the collapse would snap")
+    expect(block(".wpg--fill > .wpg-scroll > .wpg-chrome > .wpg-mast"), "no resting max-height — the collapse would snap")
       .toMatch(/max-height:\s*\d+px/);
   });
 

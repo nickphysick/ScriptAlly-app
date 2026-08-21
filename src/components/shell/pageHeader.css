@@ -253,8 +253,6 @@
   padding: 24px 0 18px;
   /* the hairline that closes it, then 16px of air to the control row (`--mrule` in the QC ref).
      `--rim` in the refs is this app's `--ws-edge` — the window's own edge tone. */
-  border-bottom: 1px solid var(--ws-edge);
-  margin-bottom: 16px;
 }
 
 

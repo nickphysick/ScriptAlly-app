@@ -55,7 +55,13 @@ const readMasthead = (page: Page, cls: string) => page.evaluate((c) => {
     height: r(mast.getBoundingClientRect().height),
     padTop: cs.paddingTop, padBottom: cs.paddingBottom,
     marginBottom: cs.marginBottom,
+    /* ⚠️ THE MASTHEAD DRAWS NO LINE (pinned chrome, §1) — the SLAB's base carries it, full width,
+       once. Kept as a reading so "it drew one again" is a measurable claim rather than an absence. */
     borderBottom: cs.borderBottomWidth,
+    slabLine: (() => {
+      const slab = g.querySelector(".wpg-chrome") as HTMLElement | null;
+      return slab ? getComputedStyle(slab).borderBottomWidth : "absent";
+    })(),
     /* the card treatment that must be absent on every page */
     background: cs.backgroundColor, radius: cs.borderTopLeftRadius, shadow: cs.boxShadow,
     borderTop: cs.borderTopWidth, borderLeft: cs.borderLeftWidth,
@@ -150,7 +156,16 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
   same("padTop", "the masthead's top padding");
   same("padBottom", "the masthead's bottom padding");
   same("marginBottom", "the gap from the masthead to what follows");
-  same("borderBottom", "the masthead's closing hairline");
+  /* ⚠️ THE MASTHEAD DRAWS NO LINE AND THE SLAB DRAWS ONE — asserted as two positive claims rather
+     than as one absence, because "the hairline is 0 everywhere" is also true of a build that lost it
+     altogether (pinned chrome, §1). */
+  for (const { name, r } of rows) {
+    expect(r.borderBottom, `${name}: the masthead drew its own hairline again — the slab's base is the one line`).toBe("0px");
+  }
+  same("slabLine", "the slab's base hairline");
+  for (const { name, r } of rows) {
+    expect(parseFloat(String(r.slabLine)), `${name}: the chrome slab has no base hairline`).toBeGreaterThan(0);
+  }
   same("titleSize", "the title size");
   same("titleWeight", "the title weight");
   same("background", "the masthead's ground");
@@ -180,6 +195,8 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
    * fails even if some other page happens to grow by the same amount.
    */
   for (const { name, r } of rows) {
+    /* ⚠️ `padSum` NO LONGER INCLUDES A BORDER — the masthead has none since §1, and the slab's line
+       is outside the masthead's box entirely. The derivation is the same shape with one term gone. */
     const derived = r.padSum + Math.max(r.markH, r.titleH + r.subH);
     expect(r.height, `${name}: the masthead is ${r.height}px, but mark ${r.markH} / title ${r.titleH} / description ${r.subH} / padding ${r.padSum} derive ${derived} — it is spending height on something unnamed`)
       .toBeCloseTo(derived, 0);
@@ -208,7 +225,8 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
     expect(r.shadow, `${name}: the masthead has a shadow`).toBe("none");
     expect(r.borderTop, `${name}: the masthead has a top border`).toBe("0px");
     expect(r.borderLeft, `${name}: the masthead has a side border`).toBe("0px");
-    expect(r.borderBottom, `${name}: the masthead lost its closing hairline`).toBe("1px");
+    /* the closing hairline is the SLAB's now, and it is asserted on the slab a few cases below */
+    expect(r.borderBottom, `${name}: the masthead drew its own hairline again — it would stop at the masthead's measure while the slab's shadow ran full width`).toBe("0px");
     /**
      * ⚠️ ONE ACTION ON A FILL PAGE, NONE ON A SCROLLING ONE — and the exception is exactly one thing.
      *
@@ -268,8 +286,11 @@ test("⚠️ THE MASTHEAD IS IDENTICAL ON EVERY IN-SCOPE PAGE", async ({ page })
    */
   for (const { name, r } of rows) {
     const fill = PAGES.find((p) => p.name === name)!.fill;
-    expect(r.miniPresent, `${name}: a ${fill ? "fill" : "scrolling"} page ${r.miniPresent ? "renders" : "does not render"} a mini bar at rest`).toBe(!fill);
-    if (!fill) expect(r.miniActionable, `${name}: the mini bar carries ${r.miniActionable} control(s) on a scrolling page`).toBe(0);
+    /* ⚠️ NO PAGE RENDERS A MINI BAR AT REST (pinned chrome, §1). It used to be present-on-scroll-
+       pages, absent-on-fill; the slab supersedes it on the scrolling side and §3 replaces its fill
+       role with the chevron. */
+    expect(r.miniPresent, `${name}: a mini bar is rendered at rest`).toBe(false);
+    void fill;
   }
 
   /* ⚠️ ONE MARK SIZE, BOTH FAMILIES (masthead measure, §2). The two-size rule — illustrated 52 bare,

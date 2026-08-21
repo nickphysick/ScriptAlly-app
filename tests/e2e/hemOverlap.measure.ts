@@ -60,9 +60,14 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
      * this disagree with a correctly-published `--wpg-stuck-h` of 42.69, which reads as the
      * component mis-measuring itself rather than as the probe having nothing to look at.
      */
+    /**
+     * ⚠️ THE SLAB'S FOOT (pinned chrome, §1). Masthead and control row are one sticky block now, so
+     * the stuck chrome has ONE bottom edge and there is nothing to choose between. This used to pick
+     * the last of two independently sticky elements.
+     */
     chromeBottom: (() => {
-      const last = row ?? mini;
-      return last ? r(last.getBoundingClientRect().bottom - scb.top) : 0;
+      const slab = g.querySelector(".wpg-chrome") as HTMLElement | null;
+      return slab ? r(slab.getBoundingClientRect().bottom - scb.top) : 0;
     })(),
   };
 }, cls);
@@ -105,14 +110,14 @@ test("the top hem starts below the stuck chrome, on every scrolling page", async
      * bar and a row on most pages, a bar alone on that one. The mini bar is the part that is always
      * there, so it is what stays asserted; the row's position is asserted only where there is a row.
      */
-    expect(s.miniH, `${name}: no mini bar rendered — there is no stuck chrome for the hem to clear`).toBeGreaterThan(0);
+    expect(s.chromeBottom, `${name}: the chrome slab has no foot — there is nothing for the hem to clear`).toBeGreaterThan(0);
     /* ⚠️ AMENDED (masthead rethink, step 3): the control row is stuck BENEATH the mini bar now, not
        at the scroller's top — two stacked stickies, identity above and controls below. Asserted
        against the bar's MEASURED height rather than 51, so the pair stays coupled here exactly as
        the shared token couples them in the stylesheet. */
-    if (s.hasRow) {
-      expect(s.rowTop, `${name}: the control row is at ${s.rowTop}, not beneath the ${s.miniH}px mini bar`).toBeCloseTo(s.miniH, 0);
-    }
+    /* ⚠️ NOTHING TO STACK ANY MORE (pinned chrome, §1). The control row was asserted to sit beneath
+       the mini bar because they were two stacked stickies; they are one slab, so the row's position
+       inside it is the slab's own composition and not a clearance anything has to agree about. */
 
     /* ⚠️ THE COMPONENT'S MEASUREMENT AND THE RENDERED BOX MUST AGREE. Two derivations of one figure,
        from opposite directions — `offsetHeight` in the component, the rendered rect here. */

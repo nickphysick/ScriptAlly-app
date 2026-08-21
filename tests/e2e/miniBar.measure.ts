@@ -81,67 +81,26 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   };
 }, cls);
 
-test("the mini bar stacks under nothing and over the control row, on every scrolling page", async ({ page }) => {
-  const lines: string[] = [];
-  const seen: { name: string; h: number; edges: string; markW: number; size: string; weight: string; rowTop: number }[] = [];
-
+test("⚠️ NO SCROLLING PAGE RENDERS A MINI BAR — the slab supersedes it", async ({ page }) => {
+  /**
+   * ⚠️ THIS CASE IS INVERTED, NOT WEAKENED (pinned chrome, §1). It asserted the bar's presence,
+   * height, edges, mark and type across the five scrolling pages, and every one of those claims
+   * described the two-sticky arrangement the slab replaced: identity pinned above, controls pinned
+   * beneath, each with its own line and shadow.
+   *
+   * ⚠️ AND IT IS AN ABSENCE WITH A POPULATION, so it cannot pass by measuring nothing: every page in
+   * the list must have rendered a grid before its bar can be meaningfully absent from it.
+   */
+  let checked = 0;
   for (const { name, route, cls } of SCROLLING) {
     await openRoute(page, route, { width: 1440, height: 900 });
     await liftMotionSuppression(page);
-
     const rest = await read(page, cls);
-    expect(rest, `${name}: no grid`).not.toBeNull();
-    expect(rest!.present, `${name}: no mini bar rendered on a scrolling page`).toBe(true);
-    /* ⚠️ AT REST IT COSTS NOTHING — the masthead is the page's identity until it leaves. */
-    expect(rest!.h, `${name}: the mini bar has height before anything scrolled`).toBe(0);
-
-    await page.mouse.move(700, 500);
-    await page.mouse.wheel(0, 600);
-    await page.waitForTimeout(450);
-    const s = (await read(page, cls))!;
-
-    lines.push(`${name.padEnd(21)} bar ${s.h} @top ${s.top} · ${s.left}/${s.right} · "${s.name}" ${s.nameSize}/${s.nameWeight} · mark ${s.markW} · row @${s.rowTop}→${s.rowBottom} · actionable ${s.actionable}`);
-
-    /* ⚠️ TWO DERIVATIONS AGAINST EACH OTHER, never against a literal. The bar's measured height
-       must equal the padding token plus the name's own line box — so the day someone changes the
-       type and forgets the token, this fails naming both numbers. */
-    const derived = s.padToken * 2 + s.nameLine;
-    expect(s.padToken, `${name}: --wpg-mini-pad does not resolve — the height is not derived from anything`).toBeGreaterThan(0);
-    expect(s.h, `${name}: the bar measures ${s.h}px, but padding ${s.padToken}×2 + line box ${s.nameLine} derives ${derived}`)
-      .toBeCloseTo(derived, 0);
-    expect(s.top, `${name}: the mini bar is not pinned to the scroller's top`).toBeLessThanOrEqual(0.5);
-    /* the two stacked stickies: controls begin exactly where identity ends */
-    /* ⚠️ THE PRECONDITION FIRST — `-1` means the page renders NO control row, which is a real state
-       (Submission packages lost its row to another stream's restructure) and not a row at -1. The
-       claim below is about where a row sits when there IS one; running it against a page that has
-       none reports a page that is behaving correctly as broken. The population is asserted after the
-       loop so a run where NOBODY has a row cannot pass by having nothing to check. */
-    if (s.rowTop >= 0) {
-      expect(s.rowTop, `${name}: the control row is at ${s.rowTop}, and the bar ends at ${s.h}`).toBeCloseTo(s.h, 0);
-    }
-    /* ⚠️ THE BAR AND THE MASTHEAD STATE THE SAME PAGE — two renders of one source, asserted against
-       each other rather than against a literal, so a page that renamed one and not the other fails. */
-    expect(s.name, `${name}: the mini bar says "${s.name}" and the masthead says "${s.mastTitle}"`).toBe(s.mastTitle);
-    expect(s.name.length, `${name}: the mini bar states no name`).toBeGreaterThan(0);
-    /* ⚠️ THE FOLDED BAR CARRIES THE NAME ALONE (masthead measure, §3) — no mark, on any page. */
-    expect(s.markW, `${name}: the mini bar draws a ${s.markW}px mark — at that size an illustration is a smudge, not a smaller drawing`).toBe(-1);
-    /* ⚠️ NOT MERELY HIDDEN — not rendered. */
-    expect(s.actionable, `${name}: the mini bar carries ${s.actionable} control(s) on a scrolling page`).toBe(0);
-    expect(s.background, `${name}: the mini bar is transparent — content would run through the page's own name`).not.toContain("rgba(0, 0, 0, 0)");
-
-    seen.push({ name, h: s.h, edges: `${s.left}/${s.right}`, markW: s.markW, size: s.nameSize, weight: s.nameWeight, rowTop: s.rowTop });
+    expect(rest, `${name}: no grid — the absence below would be about a page that did not render`).not.toBeNull();
+    expect(rest!.present, `${name}: a mini bar is still rendered on a scrolling page`).toBe(false);
+    checked += 1;
   }
-  console.log("\n" + lines.join("\n"));
-  /* ⚠️ AND THE STACKING CLAIM MEASURED SOMETHING: if no page rendered a control row, every skip
-     above was silent and the pair-of-stickies claim went untested. */
-  expect(seen.filter((x) => x.rowTop >= 0).length, "no page rendered a control row — the two-stacked-stickies claim was skipped on every page")
-    .toBeGreaterThan(1);
-
-  /* page against page, never constants */
-  for (const k of ["h", "edges", "markW", "size", "weight"] as const) {
-    const vals = new Set(seen.map((x) => String(x[k])));
-    expect([...vals], `the mini bar's ${k} differs page to page: ${seen.map((x) => `${x.name} ${x[k]}`).join(", ")}`).toHaveLength(1);
-  }
+  expect(checked, "no scrolling page was measured at all").toBe(SCROLLING.length);
 });
 
 test("⚠️ A FILL PAGE RENDERS NO MINI BAR UNTIL ITS MASTHEAD IS HIDDEN", async ({ page }) => {

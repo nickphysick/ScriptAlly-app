@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="UTF-8">
+<title>ScriptAlly — pinned chrome, neatened</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+ :root{
+  --white:#fff;--content:#fefcfa;--paper:#faf6f0;--ground:#f7f4ee;
+  --burg:#7c3a2a;--ink:#3a1c14;--ink2:#311e19;
+  --edge:#e4ddd1;--rim:#e9e1d4;--hair:#e8e2d8;--pink:#f5e2da;--pinkb:#e8c8bc;
+  --work-max:1240px;--mast-gutter:35px;--page-gutter:35px;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{background:#e9e4dc;font-family:'Inter',sans-serif;color:var(--ink);padding:15px 18px 34px}
+ .bar{display:flex;gap:6px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+ .lab{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:#7d7267;margin:0 4px 0 10px}
+ .tab{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:6px 10px;border:1px solid #cfc6b8;border-radius:7px;background:#f4efe7;cursor:pointer;color:var(--ink)}
+ .tab.on{background:var(--ink);color:#fdfaf5;border-color:var(--ink)}
+ .hint{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:#9b8d81;margin:0 2px 8px}
+ .note{font-size:12.5px;color:#5d5048;margin:0 2px 11px;max-width:1180px;line-height:1.6;min-height:56px}
+ .note b{color:var(--ink)}
+
+ .shell{display:flex;width:100%;background:var(--ground);border-radius:13px;overflow:hidden;height:600px;
+        box-shadow:0 2px 6px rgba(58,28,20,.08),0 14px 34px rgba(58,28,20,.10)}
+ .side{flex:0 0 168px;background:#fff;border-right:1px solid var(--hair)}
+ .main{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+ .topbar{display:flex;align-items:center;gap:11px;padding:0 15px;background:#fff;border-bottom:1px solid var(--hair);height:50px;flex:0 0 auto}
+ .topbar .brand{font-family:'Playfair Display',serif;font-size:17px;font-weight:600;line-height:1.3}
+ .topbar .crumb{font-size:12.5px;color:#6b5a51;line-height:1.3}
+ .topbar .crumb b{color:var(--ink);font-weight:600}
+ .window{background:var(--content);border:1px solid var(--edge);border-radius:14px 14px 0 0;margin:10px 12px 0;
+         flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+ .scroll{flex:1;min-height:0;overflow-y:scroll;scrollbar-gutter:stable both-edges}
+
+ .mm{width:100%;max-width:var(--work-max);margin-inline:auto;padding-inline:var(--mast-gutter)}
+ .pm{width:100%;max-width:var(--work-max);margin-inline:auto;padding-inline:var(--page-gutter)}
+
+ /* ══ the chrome: masthead + control row, one sticky wrapper ══ */
+ .chrome{position:sticky;top:0;z-index:20;background:var(--content)}
+
+ .mast{position:relative;display:flex;align-items:center;gap:16px;padding:24px 0 18px;
+       transition:padding .22s cubic-bezier(.4,0,.2,1)}
+ .mk{flex:0 0 52px;width:52px;height:52px;display:grid;place-items:center;transition:all .22s}
+ .mk svg{width:36px;height:36px;stroke:var(--burg);fill:none;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round;transition:all .22s}
+ .mtx h1{font-family:'Playfair Display',serif;font-size:30px;font-weight:600;line-height:1.3;color:var(--ink2);transition:font-size .22s}
+ .mtx p{font-size:13.5px;color:#8a7a70;margin-top:3px;line-height:1.45;transition:opacity .18s,max-height .22s,margin .22s;max-height:24px;overflow:hidden}
+ .crow{display:flex;align-items:center;gap:9px;padding:14px 0;transition:padding .22s}
+ .cbtn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 12px;border-radius:8px;border:1px solid #e2d8ca;
+       background:var(--white);color:#4d3b33;font-size:12px;font-weight:500;white-space:nowrap}
+ .cbtn.pink{background:var(--pink);border-color:var(--pinkb);color:var(--ink2);font-weight:600}
+ .sp{flex:1}
+
+ .inrule{height:1px;background:var(--rim);transition:opacity .2s}
+ .outrule{height:1px;background:var(--rim);transition:opacity .2s}
+ .chrome{box-shadow:0 10px 14px -12px rgba(58,28,20,0);transition:box-shadow .2s}
+
+ /* ── D · today: each part carries its own line and shadow ── */
+ body[data-v="d"] .inrule{margin-inline:auto;max-width:var(--work-max);padding:0}
+ body[data-v="d"] .chrome{box-shadow:none}
+ body[data-v="d"] .mhead{transition:box-shadow .2s}
+ body[data-v="d"].stuck .mhead{box-shadow:0 10px 14px -12px rgba(58,28,20,.16)}
+ body[data-v="d"] .crowrap{transition:box-shadow .2s}
+ body[data-v="d"].stuck .crowrap{box-shadow:0 1px 0 var(--rim),0 10px 14px -12px rgba(58,28,20,.12)}
+ body[data-v="d"] .outrule{opacity:0}
+
+ /* ── A · one slab, one line ── */
+ body[data-v="a"] .inrule{opacity:0}
+ body[data-v="a"].stuck .chrome{box-shadow:0 12px 16px -13px rgba(58,28,20,.18)}
+
+ /* ── B · whisper divider ── */
+ body[data-v="b"] .inrule{opacity:.45}
+ body[data-v="b"].stuck .chrome{box-shadow:0 12px 16px -13px rgba(58,28,20,.18)}
+
+ /* ── C · settle on pin: slab + the chrome tightens once stuck ── */
+ body[data-v="c"] .inrule{opacity:0}
+ body[data-v="c"].stuck .chrome{box-shadow:0 12px 16px -13px rgba(58,28,20,.18)}
+ body[data-v="c"].stuck .mast{padding:13px 0 10px}
+ body[data-v="c"].stuck .mk{flex-basis:34px;width:34px;height:34px}
+ body[data-v="c"].stuck .mk svg{width:25px;height:25px}
+ body[data-v="c"].stuck .mtx h1{font-size:22px}
+ body[data-v="c"].stuck .mtx p{opacity:0;max-height:0;margin-top:0}
+ body[data-v="c"].stuck .crow{padding:0 0 12px}
+
+ .work{padding:18px 0 24px}
+ .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+ .cd{border:1px solid var(--rim);border-radius:13px;background:var(--white);box-shadow:0 1px 2px rgba(58,28,20,.04);padding:16px;min-height:118px}
+ .cd b{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;display:block}
+ .cd i{font-family:'Playfair Display',serif;font-style:italic;font-size:12.5px;color:#6b5a51}
+ .cd .mt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;color:#a2968c;margin-top:8px}
+</style></head><body data-v="a">
+
+<div class="bar">
+ <span class="lab" style="margin-left:0">PINNED CHROME</span>
+ <button class="tab on" data-v="a">A &middot; ONE SLAB, ONE LINE</button>
+ <button class="tab" data-v="b">B &middot; WHISPER DIVIDER</button>
+ <button class="tab" data-v="c">C &middot; SETTLE ON PIN</button>
+ <button class="tab" data-v="d">D &middot; TODAY (THE CLASH)</button>
+</div>
+<div class="hint">SCROLL INSIDE THE WINDOW AND WATCH THE SEAM</div>
+<div class="note" id="note"></div>
+
+<div class="shell">
+ <aside class="side"></aside>
+ <div class="main">
+  <div class="topbar"><span class="brand">ScriptAlly</span>
+    <span class="crumb">ScriptAlly&nbsp; / &nbsp;Agents&nbsp; / &nbsp;<b>Contact list</b></span></div>
+  <div class="window">
+   <div class="scroll" id="sc">
+
+    <div class="chrome">
+      <div class="mhead">
+        <div class="mm">
+          <div class="mast">
+            <span class="mk"><svg viewBox="0 0 24 24"><path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M19 8h4M21 6v4"/></svg></span>
+            <div class="mtx"><h1>Contact list</h1><p>Everyone you're querying, watching, or saving for later</p></div>
+          </div>
+        </div>
+        <div class="inrule"></div>
+      </div>
+      <div class="crowrap">
+        <div class="pm"><div class="crow">
+          <span class="cbtn pink">&#65291; Add new agent</span><span class="sp"></span>
+          <span class="cbtn">Filters</span><span class="cbtn">Group</span><span class="cbtn">Sort</span>
+        </div></div>
+      </div>
+      <div class="outrule"></div>
+    </div>
+
+    <div class="pm"><div class="work"><div class="grid3" id="g3"></div></div></div>
+
+   </div>
+  </div>
+ </div>
+</div>
+
+<script>
+const AG=[["Penhallow Literary","Agent not specified"],["Aisha Kapoor","The Lantern Agency"],["Daniel O'Rourke","Inkwell & Stone"],
+["Eleanor Whitfield","Greenfield Literary"],["Fenella Str","Brightwater Books"],["Greg Panetta","Marlowe Literary"],
+["Priya Raman","No agency"],["Marcus Reed","Hartley & Co"],["Nina Alvarez","Redgate Books"],["Tom Ellery","Curtis Vane"],
+["Sophie Dunn","Curtis Vane"],["Ada Mensah","Copperline Agency"]];
+document.getElementById('g3').innerHTML=AG.map(([n,a])=>`<div class="cd"><b>${n}</b><i>${a}</i><div class="mt">~6 WEEKS &middot; EMAIL</div></div>`).join('');
+const N={
+a:"<b>A &middot; One slab, one line.</b> Masthead and control row share one sticky block with one full-width hairline at its base and one shadow beneath that. The masthead's own hairline is gone — the slab's edge is the only line, and it spans the window, so nothing stops short or doubles.",
+b:"<b>B &middot; Whisper divider.</b> The slab from A, plus the internal hairline kept at 45% — a murmur separating title from tools inside one object, with the full line and the shadow still only at the base. For if A reads as too much unstructured height.",
+c:"<b>C &middot; Settle on pin.</b> The slab from A, and once anything passes beneath, the chrome settles: mark 52→34, title 30→22, description folds, paddings tighten. At rest it's the full masthead; working, it takes about half the height. One object, two postures.",
+d:"<b>D &middot; Today.</b> Two sticky blocks, each with its own hairline and its own shadow — the masthead's rule stopping at the measure while the shadow runs full width, and a second line-plus-shadow a few pixels below. This is the clash."};
+const note=document.getElementById('note');
+document.querySelectorAll('.tab[data-v]').forEach(b=>b.onclick=()=>{
+ document.body.dataset.v=b.dataset.v;
+ document.querySelectorAll('.tab[data-v]').forEach(x=>x.classList.toggle('on',x===b));
+ note.innerHTML=N[b.dataset.v];});
+const sc=document.getElementById('sc');
+sc.addEventListener('scroll',()=>document.body.classList.toggle('stuck',sc.scrollTop>4));
+note.innerHTML=N.a;
+</script></body></html>

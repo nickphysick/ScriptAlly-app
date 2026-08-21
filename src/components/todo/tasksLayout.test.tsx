@@ -161,14 +161,18 @@ describe("⚠️ the order: header block → hairline → sidebar and body on th
        every other page. What this file still owns is the row's CONTENT. */
     expect(layoutCss, "the Tasks tool row drew its own hairline again — that is a second line under the header's")
       .not.toMatch(/\.tpl-tools\s*\{[^}]*border-bottom/s);
-    /* ⚠️ THE BAND IS DELETED (in-flow masthead, step 4), AND THE BOUNDARY IS THE MASTHEAD'S OWN
-       HAIRLINE AGAIN. This half of the case tracked where the chrome/content line lived as it moved
-       — the header's bottom edge, then a slate band's ground — and it has moved once more, back to
-       a hairline the masthead draws for itself and takes with it when it goes.
-       What the case protects is unchanged, and it is the assertion above: Tasks must not draw a
-       second line of its own. */
+    /**
+     * ⚠️ THE BOUNDARY HAS MOVED FOUR TIMES AND THIS HALF OF THE CASE HAS FOLLOWED IT EACH TIME — the
+     * header's bottom edge, a slate band's ground, the masthead's own hairline, and now the SLAB's
+     * base (pinned chrome, §1). The masthead's line stopped at its own measure while the shadow ran
+     * full width; the slab's runs the width of the window, once.
+     *
+     * What the case protects is unchanged and is the assertion above: Tasks must not draw a second
+     * line of its own. Where the ONE line lives is asserted where it lives — in the grid's sheet.
+     */
+    const grid = readFileSync(join(here, "..", "shell", "workspacePageGrid.css"), "utf8");
+    expect(grid, "the slab stopped drawing the chrome's closing hairline").toContain("border-bottom: 1px solid var(--ws-edge)");
     const hdr = readFileSync(join(here, "..", "shell", "pageHeader.css"), "utf8");
-    expect(hdr, "the masthead stopped drawing its own closing hairline").toContain("border-bottom: 1px solid var(--ws-edge)");
     expect(hdr.replace(/\/\*[\s\S]*?\*\//g, ""), "the band came back").not.toContain("wsh--scrolled");
   });
 

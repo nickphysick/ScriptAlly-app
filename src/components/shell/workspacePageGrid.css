@@ -142,52 +142,27 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  /* ⚠️ NO HORIZONTAL PADDING AND NO GAP TOKEN. The scroller's gutter insets it, and the air above
-     it is the masthead's own `margin-bottom: 16px` — so 16 + 12 = 28px from hairline to controls,
-     which is what both refs draw. `--content-top-gap` paid that gap when the boundary was a chrome
-     edge two rows up; there is no such boundary now, and the token retires at step 4. */
+  /* ⚠️ NO HORIZONTAL PADDING. Its measure insets it, and the air above it is now the masthead's
+     bottom padding alone — the 16px margin that used to sit between them moved to the SLAB's base,
+     because the hairline it was clearing moved there too. Masthead and controls are one object; the
+     gap belongs below the object, not inside it. */
   padding: 12px 0;
   /* ⚠️ `flex: none` — on a fill page the scroller is a flex COLUMN, and without this the control
      row would shrink as the panes below claim the space. Same reason the masthead states it. */
   flex: none;
   /**
-   * ⚠️ THE ROW IS THE PAGE'S ANCHOR (step 2). The masthead scrolls away because it is content; this
-   * is what stays, and `top: 0` is the whole of it — no offset, because there is no longer any
-   * chrome above it whose height would have to be encoded here. That is the fault the grid was
-   * originally built to remove (`calc(56px + gap)`), and sticky reintroduces it only if something
-   * is pinned above the scroller. Nothing is.
+   * ⚠️ NOT STICKY, AND NOT BECAUSE IT STOPPED MATTERING (pinned chrome, §1). The row is inside the
+   * SLAB now, and the slab is the one sticky element — so the row is pinned exactly as before, by
+   * being part of the thing that pins. Its own `position: sticky`, its `top: var(--wpg-mini-h)`
+   * clearance and its `z-index` are all deleted: an element cannot usefully stick inside a sticky
+   * ancestor, and the clearance was the height of a bar that no longer exists.
    *
-   * ⚠️ IT NEEDS AN OPAQUE GROUND OR CONTENT PASSES THROUGH IT. The ground is the scroller's own —
-   * the window token, never a literal. `.wpg-hem` learnt this the expensive way: it read `#ffffff`
-   * "BECAUSE THE WINDOW IS WHITE", which was true until the window went to #fefcfa and two hardcoded
-   * hems painted a lighter band across every scroller in the app.
-   *
-   * ⚠️ AND IT IS INERT ON A FILL PAGE RATHER THAN SCOPED OFF ONE. A fill page's scroller does not
-   * scroll, so `stuck` can never be true and the row simply never sticks. Left unscoped because a
-   * fill page whose height chain regresses DOES scroll — measured twice in this repo — and on that
-   * day the honest behaviour is for the row to anchor rather than slide away.
+   * ⚠️ THE OPAQUE GROUND WENT WITH THEM, and that is safe for the same reason: the slab paints it.
+   * Two boxes painting one ground is how a seam appears the day one of them is retinted.
    */
-  position: sticky;
-  /**
-   * ⚠️ `top: 51px` — THE MINI BAR'S HEIGHT, AND THIS IS THE ONE `top` IN THE FILE THAT IS NOT 0.
-   *
-   * That deserves stating, because this grid was built to remove exactly this shape: a sticky
-   * element whose `top` encodes another element's height as a literal — `calc(56px + gap)`, wrong
-   * by 32px on the Tasks family, the same fault as the banned `calc(100vh - 64px)`.
-   *
-   * ⚠️ WHAT MADE THAT ONE WRONG WAS THAT THE HEIGHT VARIED AND THE LITERAL DID NOT. The mini bar is
-   * 51px on every page and in every state — it is a fixed rule, not a measurement, and the matrix
-   * asserts it page against page. The two are stated as ONE token so they cannot drift: the bar
-   * reads it for its height, this reads it for its offset.
-   */
-  top: var(--wpg-mini-h);
-  /* above the content that passes beneath it, below the mini bar (3) and the hems (4) */
-  z-index: 2;
-  background: var(--ws-window);
-  /* ⚠️ THE HAIRLINE IS A SHADOW, NOT A BORDER, so the row's height is identical in both states and
-     only the padding moves it. A border would add a pixel on the frame the class lands, which is a
-     layout shift on every scroll away from the top. */
-  box-shadow: 0 1px 0 rgba(var(--ws-window-rgb), 0), 0 10px 14px -12px rgba(58, 28, 20, 0);
+  /* ⚠️ NO GROUND AND NO SHADOW OF ITS OWN (pinned chrome, §1). Both belonged to an independently
+     sticky row; inside the slab the slab paints the ground and carries the one shadow. Two boxes
+     painting one ground is how a seam appears the day either is retinted. */
   transition: box-shadow .18s ease, padding .2s cubic-bezier(.4, 0, .2, 1);
   /* ⚠️ NO BORDER — THE HAIRLINE IS ROW 1'S, AND THIS DREW A SECOND ONE (spec §3). Row 2 carried
      its own `border-bottom`, so any page with a toolbar showed TWO lines in the working state,
@@ -403,39 +378,16 @@
  */
 
 /**
- * ⚠️ STUCK IS A HAIRLINE, A SOFT SHADOW AND 2px OF PADDING — AND NOTHING ELSE (step 2; ref
- * `170-sticky-control-row.html`). Same ground, no fill swap, no border, no radius, no register
- * change. At rest the row must be indistinguishable from the content it sits in; the treatment
- * exists only to say "this is holding still while that moves", which needs an edge and a shadow and
- * nothing more. Anything louder makes it chrome again, which is what this whole pack removed.
+ * ⚠️ `.wpg-tools--stuck` IS DELETED (pinned chrome, §1) — the class, its hairline, its shadow and
+ * its asymmetric padding. The slab carries ONE line and ONE shadow at its base now, so a second
+ * pair a few pixels above is the clash this pack removed.
+ *
+ * ⚠️ AND ITS OSCILLATION GUARD GOES WITH IT, WHICH IS A DELETION RATHER THAN A REGRESSION. The
+ * asymmetric `10px 0 14px` existed because tightening the row on stick removed 4px from
+ * `scrollHeight`, and on a page overflowing by a few pixels that produced shrink → clamp →
+ * un-shrink → repeat. §2 moves the tightening to the SLAB, where the same arithmetic applies and is
+ * paid the same way — see `.wpg-chrome--stuck`. The hazard did not go away; its owner changed.
  */
-.wpg-tools--stuck {
-  padding: 10px 0 14px;
-  /**
-   * ⚠️ THE 4px IT GIVES UP AT THE TOP, IT TAKES BACK AT THE BOTTOM — AND AS PADDING, NOT MARGIN.
-   *
-   * This row is INSIDE the scroller, so its box is part of `scrollHeight`. Tightening 12 → 10 on
-   * both edges removes 4px from the scrollable content while `clientHeight` is unchanged, so max
-   * scroll falls by 4 the instant the row sticks. On a page overflowing by only a few pixels that
-   * is fatal in the way this repo has already documented: scroll to 3, the row sticks, max scroll
-   * becomes 0, the browser clamps `scrollTop` back to 0, `stuck` goes false, the row un-sticks and
-   * max scroll is 3 again — shrink, clamp, un-shrink, repeat.
-   *
-   * ⚠️ THE FIRST VERSION USED `margin-bottom: 4px` AND IT SILENTLY DID NOTHING. Adjacent siblings'
-   * margins COLLAPSE, so the 4px was absorbed by the following element's `margin-top` and the row's
-   * contribution to `scrollHeight` still fell by 4. Measured, not reasoned: with the reclaim
-   * padding removed the delta was exactly −4 with the margin declared. Padding cannot collapse.
-   *
-   * ⚠️ SO THE TIGHTEN IS ASYMMETRIC, DELIBERATELY. 10 above and 14 below: the controls move UP 2px
-   * and the boundary line stays where it was, which is the half of the effect worth having — an
-   * anchored row that has drawn itself closer to the content it is holding above. A symmetric
-   * tighten cannot be had without moving everything below it on every scroll.
-   *
-   * ⚠️ IT IS `2 × (rest − stuckTop)` AND MUST BE RETUNED WITH THE STEP. The unit lock checks that
-   * arithmetic; `stickyRow.measure.ts` checks the pixels it produces.
-   */
-  box-shadow: 0 1px 0 var(--ws-edge), 0 10px 14px -12px rgba(58, 28, 20, 0.18);
-}
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — only the crossfade goes, exactly as the hems do */
   .wpg-tools { transition: none; }
@@ -566,8 +518,67 @@
  * ⚠️ THE CAP IS READ, NOT RESTATED. `--work-max` is the app's shared centring measure; naming the
  * number here would be a second copy to keep in step with the one the content already reads.
  */
+/**
+ * ══ THE SLAB — ONE STICKY BLOCK, ONE LINE, ONE SHADOW (pinned chrome, §1; ref 174 option C) ═══
+ *
+ * ⚠️ IT REPLACES TWO INDEPENDENT STICKIES, and the reason is what the ref calls "the clash": the
+ * masthead's hairline stopped at its own measure while its shadow ran the full width, and a second
+ * hairline-plus-shadow sat a few pixels below it. Two lines, two shadows, one boundary.
+ *
+ * ⚠️ FULL WIDTH, AND ITS CHILDREN KEEP THEIR OWN MEASURES. The base hairline belongs to the WINDOW —
+ * an edge that stops short mid-air on a wide monitor is the fill-page border complaint wearing
+ * another costume. So this box escapes the scroller's measure and the masthead and the control row
+ * take theirs inside it.
+ *
+ * ⚠️ THE HAIRLINE IS ALWAYS DRAWN; ONLY THE SHADOW WAITS FOR THE PIN. Ref 174 draws `.outrule` at
+ * full opacity in every option and gives only `.chrome` a `.stuck` shadow. The pack's sentence —
+ * "one full-width hairline plus one shadow, appearing only when stuck" — reads either way; the ref
+ * settles it, and a scroll page with no line under its masthead at rest would be a larger change
+ * than the pack describes anywhere else.
+ *
+ * ⚠️ NO INTERNAL DIVIDER. Option B's 45% whisper between title and tools is REJECTED — not built and
+ * not left behind a flag. `.wsh`'s own `border-bottom` is deleted rather than hidden.
+ */
+.wpg-scroll > .wpg-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  box-sizing: border-box;
+  /* opaque, or the content passes through the page's own title */
+  background: var(--ws-window);
+  border-bottom: 1px solid var(--ws-edge);
+  /* the gap the masthead's own `margin-bottom` used to pay, now below the whole slab */
+  margin-bottom: 16px;
+  /* ⚠️ FULL WIDTH — 0-2-0, so it beats `.wpg-scroll > *` on specificity rather than source order */
+  max-width: none;
+  width: 100%;
+  /* ⚠️ `flex: none` — on a fill page the scroller is a flex COLUMN and the slab would otherwise
+     shrink as the panes below claim the space, exactly as the masthead and the row each state. */
+  flex: none;
+  box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0);
+  transition: box-shadow .2s cubic-bezier(.4, 0, .2, 1);
+}
+.wpg-scroll > .wpg-chrome.wpg-chrome--stuck {
+  box-shadow: 0 12px 16px -13px rgba(58, 28, 20, 0.18);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* the STATE still changes — only the tween goes, as everywhere else in this file */
+  .wpg-scroll > .wpg-chrome { transition: none; }
+}
+/* ⚠️ THE SLAB'S CHILDREN TAKE THEIR MEASURES HERE, since they are no longer the scroller's own
+   children and `.wpg-scroll > *` no longer reaches them. The control row keeps the PAGE's measure
+   and the masthead keeps its constant one — the two differ deliberately, and §A of the previous
+   pack is why. */
+.wpg-chrome > .wpg-tools {
+  width: 100%;
+  max-width: min(var(--wpg-measure, 100%), calc(100% - 2 * var(--wpg-gutter, var(--content-gutter))));
+  margin-inline: auto;
+}
+.wpg-chrome > .wpg-mast,
 .wpg-scroll > .wpg-mast,
 .wpg-scroll > .wpg-mini {
+  width: 100%;
+  margin-inline: auto;
   /**
    * ⚠️ THE GUTTER IS A REDUCTION HERE TOO, AND THE REF'S `padding-inline` IS A DELIBERATE DEVIATION.
    * In the ref BOTH measures are padded, so they behave alike; here the content's gutter had to be a
@@ -589,7 +600,7 @@
 .wpg-mast {
   min-width: 0;
 }
-.wpg--fill > .wpg-scroll > .wpg-mast {
+.wpg--fill > .wpg-scroll > .wpg-chrome > .wpg-mast {
   flex: none;
   overflow: hidden;
   max-height: 220px;
@@ -602,14 +613,14 @@
    that has risen to the top would read as the page's own top edge, which is what the band was.
    ⚠️ AND THE TRIGGER IS `wpg--hidden` NOW, NOT `wpg--working` (step 4): one explicit act by the
    writer, rather than three inferences about whether they had started working. */
-.wpg--fill.wpg--hidden > .wpg-scroll > .wpg-mast {
+.wpg--fill.wpg--hidden > .wpg-scroll > .wpg-chrome > .wpg-mast {
   max-height: 0;
   opacity: 0;
 }
 @media (prefers-reduced-motion: reduce) {
   /* the STATE still changes — the masthead must still go, or the height it was collapsing to give
      back is never given back. Only the tweening goes, exactly as everywhere else in this file. */
-  .wpg--fill > .wpg-scroll > .wpg-mast { transition: none; }
+  .wpg--fill > .wpg-scroll > .wpg-chrome > .wpg-mast { transition: none; }
 }
 
 /**
@@ -628,7 +639,10 @@
  * "sticky" there claims a behaviour that cannot occur, and the next offset added to it would
  * reintroduce exactly this.
  */
-.wpg--fill > .wpg-scroll > .wpg-tools { position: static; }
+/* ⚠️ THE ROW'S FILL-PAGE `position: static` IS DELETED WITH ITS STICKY — a `static` override on an
+   element that is already static claims a behaviour that cannot occur, which is how the next reader
+   is misled into adding an offset to it. The SLAB carries the sticky now, and the same clamp trap
+   applies to it: see its own note. */
 
 /* ══ THE MINI BAR (masthead rethink, step 3; ref 171-masthead-rethink-v2.html) ═════════════════
  *
@@ -663,9 +677,10 @@
      the stuck rule. */
   height: 0;
   transition: height .18s cubic-bezier(.4, 0, .2, 1);
-  position: sticky;
-  top: 0;
-  z-index: 3;
+  /* ⚠️ NOT STICKY ANY MORE, AND IT WAS ALREADY UNREACHABLE (pinned chrome, §1). The bar renders only
+     on a FILL page while the masthead is hidden, and `.wpg-mini--static` overrides it to `relative`
+     there — so this declaration described a state nothing could enter. The slab is the scroller's
+     one sticky element, and the lock counts them. The bar itself dies at §4. */
 }
 /**
  * ⚠️ TWO STACKED STICKY ROWS: IDENTITY ABOVE, CONTROLS BELOW. The bar takes `top: 0` and the
@@ -780,7 +795,7 @@
  * ⚠️ A GHOST, NOT A BUTTON WITH A FRAME. It is chrome for chrome — the only control the masthead
  * carries — and anything with a fill would read as the page's action rather than the header's.
  */
-.wpg--fill > .wpg-scroll > .wpg-mast { position: relative; }
+.wpg--fill > .wpg-scroll > .wpg-chrome > .wpg-mast { position: relative; }
 .wpg-mast-hide {
   position: absolute;
   right: 0;

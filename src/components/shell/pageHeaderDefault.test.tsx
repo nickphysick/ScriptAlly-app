@@ -114,24 +114,31 @@ describe("the workspace variant", () => {
     expect(out).not.toContain("wsh-count");
   });
 
-  it("⚠️ THE STICKY WRAPPER IS GONE, AND THE MASTHEAD IS THE FIRST THING IN THE SCROLLER", () => {
+  it("⚠️ THE SLAB IS THE FIRST THING IN THE SCROLLER, AND THE MASTHEAD IS THE FIRST THING IN IT", () => {
     /* `.wsh-wrap` reserved a sticky plate's rest height so condensing could not pull the content
        below it upward. Nothing sticks and nothing condenses, so both the wrapper and the
        reservation are deleted — and the masthead now opens the scroll row rather than a chrome row
        above it. That ORDER is the contract: the control row anchors, so it has to come second. */
     const out = renderInGrid(<PageHeader variant="workspace" title="T" mark="todo" />);
     expect(out).not.toContain("wsh-wrap");
-    /* ⚠️ THE MINI BAR NOW OPENS THE SCROLL ROW, AND THE MASTHEAD FOLLOWS IT (masthead rethink,
-       step 3). The bar is `sticky; top: 0` and grows 0 → `--wpg-mini-h` when stuck, so it has to come FIRST in
-       the markup or the control row would sit above it in the stack the moment both were pinned.
-       The claim this case has always made is unchanged and is asserted as an ORDER rather than as
-       one adjacency: identity, then masthead, then controls, then content — all inside the
-       scroller, none of it in a chrome row above it. */
-    const order = ["wpg-scroll", "wpg-mini", "wpg-mast", "wsh-row"].map((k) => out.indexOf(k));
-    for (const [i, k] of ["wpg-scroll", "wpg-mini", "wpg-mast", "wsh-row"].entries()) {
+    /**
+     * ⚠️ THE SLAB OPENS THE SCROLL ROW NOW (pinned chrome, §1). The mini bar used to, because it was
+     * `sticky; top: 0` and the control row stacked beneath it — an ordering that only mattered while
+     * there were TWO pinned things. There is one, and the masthead is the first thing inside it.
+     *
+     * The claim is unchanged in kind and is still asserted as an ORDER rather than as one adjacency:
+     * scroller, then the slab, then the masthead, then the controls — all inside the scrollport, none
+     * of it in a chrome row above.
+     */
+    const KEYS = ["wpg-scroll", "wpg-chrome", "wpg-mast", "wsh-row"];
+    const order = KEYS.map((k) => out.indexOf(k));
+    for (const [i, k] of KEYS.entries()) {
       expect(order[i], `${k} is not in the rendered output`).toBeGreaterThan(-1);
-      if (i) expect(order[i], `${k} does not follow ${["wpg-scroll", "wpg-mini", "wpg-mast", "wsh-row"][i - 1]}`).toBeGreaterThan(order[i - 1]);
+      if (i) expect(order[i], `${k} does not follow ${KEYS[i - 1]}`).toBeGreaterThan(order[i - 1]);
     }
+    /* ⚠️ AND THE MINI BAR IS NOT IN A SCROLL PAGE'S OUTPUT AT ALL — not hidden by CSS, not rendered.
+       Two pinned elements at `top: 0` is the arrangement the slab exists to end. */
+    expect(out, "the mini bar came back to a scrolling page").not.toContain("wpg-mini");
   });
 
   it("⚠️ THERE IS NO CONDENSED STATE — the band and its classes are unreachable", () => {

@@ -195,6 +195,8 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
    */
   const [stuckH, setStuckH] = React.useState(0);
   const toolsRef = React.useRef<HTMLDivElement>(null);
+  /* the slab — one box whose rendered height IS the stuck chrome, so the hem has one thing to read */
+  const chromeRef = React.useRef<HTMLDivElement>(null);
   const miniRef = React.useRef<HTMLDivElement>(null);
 
   /**
@@ -279,12 +281,19 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
       /* ⚠️ ONE EVALUATION FOR ALL THREE — the same reason the hems live in this component at all.
          A second listener measuring the chrome would be a second answer to "where is this scroller",
          and the two would disagree on exactly the frames anyone would notice. */
-      /* ⚠️ THE MINI BAR JOINS THE STUCK CHROME — both sticky elements, summed. The hem's lock
-         asserts this figure against the RENDERED chrome from the other direction, so a third sticky
-         element added later without being included here fails there rather than silently. */
-      const chrome = top > 2
-        ? (miniRef.current?.getBoundingClientRect().height ?? 0) + (toolsRef.current?.getBoundingClientRect().height ?? 0)
-        : 0;
+      /**
+       * ⚠️ ONE BOX NOW, NOT A SUM (pinned chrome, §1). It was the mini bar's height PLUS the control
+       * row's, added here because they were two separate stickies; the slab is one element and its
+       * rendered height answers directly. A sum of parts is how a third sticky element gets
+       * forgotten — and the hem's lock still checks this figure against the rendered chrome from the
+       * other direction, so the two derivations keep each other honest.
+       *
+       * ⚠️ AND IT MUST REPORT THE SETTLED HEIGHT, NOT THE RESTING ONE (§2). The slab tightens when it
+       * pins, so a reading taken from the pre-settle box would leave the hem clearing a slab that is
+       * no longer that tall — a gap of about half the chrome, in the one state where anything is
+       * actually passing beneath it.
+       */
+      const chrome = top > 2 ? (chromeRef.current?.getBoundingClientRect().height ?? 0) : 0;
       setStuckH((prev) => (prev === chrome ? prev : chrome));
     };
     /* rAF-throttled: at most one evaluation per painted frame, however fast the wheel reports */
@@ -429,7 +438,10 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
             * nothing today. Stated rather than left to be discovered: the component is whole, its
             * fill path is simply not reachable until its trigger exists.
             */}
-          {(!fill || hidden) && (
+          {/* ⚠️ THE MINI BAR IS OFF THE SCROLL PAGES AS OF §1 — the slab supersedes it there, and
+              two stickies at `top: 0` is the arrangement the slab exists to end. Its FILL role
+              survives until §3 replaces it with the chevron, and the component dies in §4. */}
+          {fill && hidden && (
             <div ref={miniRef} className={`wpg-mini${stuck ? " wpg-mini--stuck" : ""}${fill ? " wpg-mini--static" : ""}`}>
               <span className="wpg-mini-name">{identity.title}</span>
               {/* ⚠️ THE RESTORE CONTROL IS A FILL-PAGE AFFORDANCE ONLY, AND IT IS NOT RENDERED
@@ -443,6 +455,18 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
               )}
             </div>
           )}
+          {/**
+            * ⚠️ ONE SLAB — MASTHEAD AND CONTROL ROW IN ONE STICKY WRAPPER (pinned chrome, §1; ref 174
+            * option C). They were two independent stickies, each with its own hairline and its own
+            * shadow: the masthead's rule stopping at its measure while its shadow ran full width, and
+            * a second line-plus-shadow a few pixels below. The ref calls that arrangement "the clash"
+            * and draws it as the thing to replace.
+            *
+            * ⚠️ THE SLAB IS FULL WIDTH AND ITS CHILDREN KEEP THEIR OWN MEASURES. The base hairline
+            * belongs to the WINDOW, not to the masthead's measure — an edge that stops short mid-air
+            * is the same fault as the fill-page border complaint in another costume.
+            */}
+          <div className={`wpg-chrome${stuck ? " wpg-chrome--stuck" : ""}`} ref={chromeRef}>
           <div className="wpg-mast" ref={mastRef}>
             {masthead}
             {/**
@@ -484,8 +508,9 @@ export const WorkspacePageGrid: React.FC<WorkspacePageGridProps> = ({
                imperceptible apart, and the same evaluation also drives the top hem — changing the
                number would move the hem's trigger with it, which is a second behaviour for one
                edit. One derivation, one threshold. */
-            <div ref={toolsRef} className={`wpg-tools${stuck ? " wpg-tools--stuck" : ""}`}>{toolbar}</div>
+            <div ref={toolsRef} className="wpg-tools">{toolbar}</div>
           )}
+          </div>
           {children}
         </div>
         {/* ⚠️ THE HEMS ARE GRID CHILDREN OF ROW 3, NOT CHILDREN OF THE SCROLLER. Inside the

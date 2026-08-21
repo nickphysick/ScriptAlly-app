@@ -213,10 +213,16 @@ describe("the masthead is content, not chrome", () => {
       expect(wsh, `.wsh regained \`${prop}\` — the masthead is drawing itself as an object again`)
         .not.toContain(prop);
     }
-    /* what it DOES draw: the closing hairline, and the air around it */
-    expect(wsh).toContain("border-bottom: 1px solid var(--ws-edge)");
+    /* ⚠️ THE CLOSING HAIRLINE IS NOT THE MASTHEAD'S ANY MORE (pinned chrome, §1). It drew one at its
+       own MEASURE, so the line stopped short of the window while the shadow beneath it ran full
+       width — one boundary rendered as two objects of different lengths. The SLAB carries one
+       full-width line at its base, and `workspacePageGrid.test.tsx` asserts it there. */
+    expect(wsh, "the masthead drew its own hairline again — the slab's base is the only line in the chrome")
+      .not.toContain("border-bottom");
     expect(wsh).toContain("padding: 24px 0 18px");   /* 26/20 → 24/18 at §2, per ref 173 */
-    expect(wsh).toContain("margin-bottom: 16px");
+    /* the 16px gap moved to the slab's base with the hairline — asserted in workspacePageGrid.test */
+    expect(wsh, "the masthead kept a bottom margin — that air belongs below the whole slab now")
+      .not.toContain("margin-bottom");
   });
 
   it("⚠️ NO TRANSITIONS AT ALL — there is no state to tween between", () => {

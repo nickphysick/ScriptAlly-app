@@ -62,6 +62,10 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
   if (!g) return null;
   const sc = g.querySelector(".wpg-scroll") as HTMLElement;
   const mast = g.querySelector(".wpg-mast") as HTMLElement;
+  /* ⚠️ THE SLAB IS CHROME (pinned chrome, §1) — masthead and control row live inside `.wpg-chrome`
+     now, so the scroller's first child is the slab and a content finder that does not know it
+     reports the CHROME as the page's content. It did: "content \"wpg-chrome\"" on all ten pages. */
+  const CHROME = ["wpg-chrome", "wpg-mast", "wpg-mini", "wpg-tools"];
   const row = g.querySelector(".wpg-tools") as HTMLElement | null;
   const win = document.documentElement.clientWidth;
   /**
@@ -70,7 +74,8 @@ const read = (page: Page, cls: string) => page.evaluate((c) => {
    * theirs ten different things and a list would rot the first time one was renamed.
    */
   const content = [...sc.children].find(
-    (e) => e !== mast && e !== row && !e.classList.contains("wpg-hem") && (e as HTMLElement).getBoundingClientRect().height > 0,
+    (e) => !CHROME.some((c) => e.classList.contains(c)) && !e.classList.contains("wpg-hem")
+      && (e as HTMLElement).getBoundingClientRect().height > 0,
   ) as HTMLElement | undefined;
   const box = (e: Element | undefined | null) => {
     if (!e) return null;
