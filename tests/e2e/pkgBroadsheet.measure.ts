@@ -20,9 +20,20 @@ export const HERO = `(() => {
   const box = (s) => { const el = root.querySelector(s); if (!el) return null;
     const b = el.getBoundingClientRect(); return { x: Math.round(b.x), w: Math.round(b.width), h: Math.round(b.height) }; };
   const hero = root.querySelector(".pkgb-hero");
+  const ph = root.querySelector(".wsh");
   const body = root.querySelector(".pkgw-body") || root.querySelector(".pkgo-grid");
   return {
     heroPresent: !!hero,
+    /* the shared PageHeader must still be here — this page CONFORMS (F-E) */
+    pageHeaderPresent: !!ph,
+    pageHeaderTitle: (root.querySelector(".wsh-title")?.textContent || "").trim(),
+    pageHeaderBox: (() => { if (!ph) return null; const b = ph.getBoundingClientRect();
+      return { x: Math.round(b.x), w: Math.round(b.width) }; })(),
+    /* one Pro marker, not two */
+    waxInHeader: !!root.querySelector(".wsh .pkgb-wax"),
+    proPillPresent: !!root.querySelector(".pkgw-propill"),
+    bandHasTitle: !!root.querySelector(".pkgb-hero h1"),
+    controlRowPresent: !!root.querySelector(".wpg-tools"),
     hero: box(".pkgb-hero"),
     body: body ? { x: Math.round(body.getBoundingClientRect().x), w: Math.round(body.getBoundingClientRect().width) } : null,
     topBorder: cs(hero, "border-top-width"),
@@ -42,7 +53,6 @@ export const HERO = `(() => {
       disabled: b.disabled,
     })),
     /* the old shared header must be gone from this page */
-    sharedPageHeader: !!root.querySelector(".wsh"),
     controlRow: !!root.querySelector(".wpg-tools"),
     /* ⚠️ THE SERIF-CLIP CHECK, WITH A SUB-PIXEL TOLERANCE — and the tolerance is the finding, not a
        loosening. Playfair at 38px with line-height 1.3 gives a 49.4px line box in a 49px content
@@ -89,3 +99,14 @@ test("recon — the page after the header session's rework", async ({ page }) =>
   writeFileSync(`${ART}/recon.txt`, JSON.stringify(r, null, 2) + "\n");
   console.log(JSON.stringify(r, null, 2));
 });
+
+for (const vp of [{ w: 1440, h: 900 }, { w: 1920, h: 1200 }]) {
+  test(`phase 1b — conformed header + band at ${vp.w}`, async ({ page }) => {
+    await openRoute(page, ROUTE, { width: vp.w, height: vp.h });
+    await liftMotionSuppression(page);
+    const r = await page.evaluate(HERO);
+    await page.screenshot({ path: `${OUT}/p1b-${vp.w}.png`, fullPage: true });
+    writeFileSync(`${ART}/p1b-${vp.w}.txt`, JSON.stringify(r, null, 2) + "\n");
+    console.log(`── ${vp.w} ──\n` + JSON.stringify(r, null, 2));
+  });
+}

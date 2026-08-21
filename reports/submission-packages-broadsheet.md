@@ -266,3 +266,72 @@ because it drifts). That wants a decision too.
 | **F-B** | What the removed rail did that no band covers — **cannot be answered yet**; the rail is still mounted because the bands that replace it are not built. |
 | **F-C** | "Take it out of those packages first" — whether the popover needs an edit shortcut. Unchanged: deliberately not built, one action per popover. |
 | **F-D** | **Answered: agent names ARE reachable**, no wall breached. `Activity` has no `agentId`, so the ledger joins `Activity.queryId → Query.agentId → Agent.name`, and `agents` comes from `useScriptAllyDb()` — the shared data layer, not a Query Centre component. |
+
+---
+
+## Phase 1 (amended) — the page CONFORMS
+
+Ruling 1 applied. The page keeps the shared `PageHeader` with `variant="workspace"`; the census
+stays green **by conforming, not by amendment**; no shared header file is in the diff.
+
+### The wax seal — branch one, and the prop signature that decided it
+
+`PageHeader` already exposes:
+
+```ts
+/** Rendered inline immediately right of the title text, baseline-aligned (Discover's Pro pill).
+ *  Additive and optional — every existing call site is unchanged. */
+titleAdornment?: React.ReactNode;
+```
+
+It takes arbitrary content, so **the seal goes there** and the standard pill is not also rendered.
+Measured: `waxInHeader: true`, `proPillPresent: false` — **one Pro marker, not two.** No shared file
+was changed to make that possible.
+
+### What the band carries — and the one thing removed after seeing it
+
+`PackagesHeroBand` is the ref's hero **minus the title**… and minus the subtitle. The first conformed
+screenshot showed *"Bundle your materials once…"* rendered **twice** — once as `PageHeader`'s
+`description`, once in the band — an inch apart. That is precisely the doubling the ruling avoids for
+the title, so the same reasoning removed it. What is left is the material the header has no slot for:
+
+| | Measured (1440 / 1920) |
+|---|---|
+| band width | **980 / 1460** — fills what the shell gives it, no compensation |
+| top border | **5px `rgb(154,168,150)`** |
+| split | the ref's `1.2fr / 1fr` |
+| stat line | **`4 materials · 2 packages · 8 sent`** — derived |
+| actions | **one filled control**, `＋ New package`; manuscript button outlined |
+| blush panel | `--pink-band`, Caveat statement verbatim, slot **190 × 118** with its brief |
+| band renders an `<h1>` | **false** |
+| control row present | **false** |
+
+**No `toolbar` on the grid.** The band carries the stat line and actions, so a control row would
+state both again a few inches away. Checked first: the three locks naming this page test the root's
+inline padding, the census `variant="workspace"`, and the absence of an inline overflow — **none
+requires a toolbar**, and all three still pass.
+
+### The header session is mid-flight, and one failure is provably theirs
+
+`PageHeader.tsx`, `pageHeader.css`, `workspacePageGrid.css` and `f12.css` are all **modified in the
+working tree** by that session right now. Their test *"THE MASTHEAD TAKES THE PAGE'S MEASURE"* fails
+against their own in-flight CSS.
+
+**Attributed by substitution rather than assumed:** swapping `SubmissionPackages.tsx` for HEAD's
+version and re-running gives *the same failure* — so it is entirely theirs. With my version, the
+**census passes**. Recorded, not fixed, not staged.
+
+⚠️ **This matters for Phase 5**: the deploy condition says not to deploy while their work is visibly
+mid-flight. It currently is.
+
+### Gates
+
+| Gate | Baseline | Amended Phase 1 |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `vite build` | — | **exit 0**, no diagnostics |
+| `vitest run` | 1 file / 1 test (`todo/taskPanePort`) | **1 file / 1 test** — `pageStructure` on `todo/ToDoPage.tsx`, a TDZ bug in the to-do stream's file. Same count; the identity moved because their WIP moved. 357 files / 6099 tests pass |
+| **census test** | — | **green** |
+| shared header file in the diff | — | **none** |
+
+Screenshots: `reports/pkg-broadsheet/p1b-1440.png`, `p1b-1920.png`.

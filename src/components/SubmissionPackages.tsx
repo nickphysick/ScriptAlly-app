@@ -26,7 +26,8 @@ import { useScriptAllyDb } from "../lib/db";
 import { ManuscriptVersion, SubmissionPackage } from "../types";
 import { useNavigate } from "react-router-dom";
 import { PackagesOverview } from "./packages/PackagesOverview";
-import { PackagesHero } from "./packages/PackagesHero";
+import { PackagesHeroBand } from "./packages/PackagesHeroBand";
+import { WaxSeal } from "./packages/IllustrationSlot";
 import { MaterialModal, MaterialDraftResult } from "./packages/MaterialModal";
 import { PackageModal, PackageDraftResult } from "./packages/PackageModal";
 import { canBuildPackage, createPayload, updatePayload } from "../lib/materialDraft";
@@ -263,56 +264,29 @@ export const SubmissionPackages: React.FC = () => {
           eleven pages share. */}
       {/* ⚠️ THE CHROME IS OUT OF THE SCROLLER (amendment 9). The plate is row 1; the strip, the tabs
           and the workshop scroll in row 3. No toolbar → no row 2 and no hairline. */}
-      {/* ⚠️ THE BROADSHEET HERO IS BUILT BUT NOT MOUNTED — RED GATE, see
-            reports/submission-packages-broadsheet.md.
+      {/* ⚠️ THIS PAGE CONFORMS (F-E, ruled). The masthead is the SHARED `PageHeader` with
+          `variant="workspace"`, so the census in `workspacePageGrid.test.tsx` stays green by
+          conforming rather than by gaining an entry, and no shared header file is touched. The
+          broadsheet hero lives on as `PackagesHeroBand`, immediately beneath — everything the ref
+          drew except the page title, which belongs to the header alone.
 
-         `PackagesHero` + `IllustrationSlot` + `packagesBroadsheet.css` are complete and were
-         measured rendering correctly on this page. They are NOT wired in, because
-         `shell/workspacePageGrid.test.tsx` carries a CENSUS LOCK naming this page by hand and
-         requiring `variant="workspace"` in this file — every page must render its masthead through
-         the shared `PageHeader`. Mounting the hero turns that lock red, and the lock is the parallel
-         masthead session's file, which this run is forbidden to touch.
-
-         Conform, or stay an exception as the flagship Pro surface? That is F-E, and it is Nick's
-         ruling to make. To mount the hero afterwards: swap the `masthead` node below for
-         `<PackagesHero title="Submission packages" … />`, drop the `toolbar`, and the census lock
-         needs whatever exemption the ruling implies. */}
+          ⚠️ AND THE WAX SEAL RIDES `titleAdornment`, an existing prop that takes arbitrary content
+          ("rendered inline immediately right of the title text"). It REPLACES the `.pkgw-propill`
+          rather than joining it: one Pro marker, not two. */}
       <WorkspacePageGrid className="pkgw-wpg" scrollLabel="Package Workshop" masthead={
         <PageHeader
           variant="workspace"
           mark="packages"
           title="Submission packages"
           description="Bundle your materials once, then send them without rebuilding each time."
-          titleAdornment={<span className="pkgw-propill"><ShieldCheck aria-hidden="true" />Pro</span>}
-          /* ⚠️ NO ACTIONS SLOT — the manuscript selector and `New package` moved to the control row
-             below (in-flow masthead, step 1). */
+          titleAdornment={<WaxSeal />}
+          /* ⚠️ NO ACTIONS SLOT, AND NO `toolbar` ON THE GRID EITHER. The band below carries the stat
+             line and the actions, per the ref, so a control row would state both a second time a few
+             inches away. No lock requires one: the three that name this page check the root's inline
+             padding, the census `variant="workspace"`, and the absence of an inline overflow — all
+             still satisfied. */
         />
-      }
-      toolbar={activeMs ? (
-        <>
-          {/* ⚠️ TWO FIGURES, AND THE PAIR IS THE POINT. `{n} packages` alone would restate the
-              `Your packages` section tag a few inches below it; the page's tally is what it HOLDS —
-              materials on file and packages built from them — which is the same two-part grammar
-              the Contact list's row has. Both counts come from the arrays the page already renders
-              from, so neither is a second derivation. */}
-          <PageTally
-            value={`${msVersions.length} ${msVersions.length === 1 ? "material" : "materials"}`}
-            note={`${msPackages.length} ${msPackages.length === 1 ? "PACKAGE" : "PACKAGES"}`}
-          />
-          <div className="pkgw-hact">
-            {msSelector}
-            {/* ⚠️ DISABLED IN LOCKSTEP WITH THE RAIL'S `+ NEW` (D4) — one derivation, two renders,
-                so the two controls cannot disagree about whether a package can be built. */}
-            <button
-              type="button" className="svh-btn svh-btn-primary"
-              disabled={!canBuildPackage(msVersions)}
-              onClick={() => { setPkgEditing(null); setPkgModal(true); }}
-            >
-              <Plus aria-hidden="true" style={{ width: 15, height: 15 }} />New package
-            </button>
-          </div>
-        </>
-      ) : undefined}>
+      }>
       {/**
         * ⚠️ THE PAGE'S BODY CARRIES THE PAGE'S RHYTHM — the grid's chrome must not be inside it
         * (in-flow masthead, step 5).
@@ -350,6 +324,17 @@ export const SubmissionPackages: React.FC = () => {
               Workshop (the tour drove it) and wrong here: the overview is where you see what YOU
               have, and a register quietly listing four invented materials is a page lying about
               the writer's own work. The tour never opens on this surface. */}
+          {/* ⚠️ THE BAND SITS DIRECTLY BENEATH THE HEADER, and it is the ref's hero minus the title
+              (F-E, ruled: this page conforms). Rendered inside the page body rather than as chrome,
+              so it scrolls with the content exactly as the masthead above it now does. */}
+          <PackagesHeroBand
+            materials={msVersions.length}
+            packages={msPackages.length}
+            sent={trackingTotals(msPackages, msQueries).sent}
+            manuscriptControl={msSelector}
+            canBuild={canBuildPackage(msVersions)}
+            onNewPackage={() => { setPkgEditing(null); setPkgModal(true); }}
+          />
           <PackagesOverview
               versions={msVersions}
               packages={msPackages}
