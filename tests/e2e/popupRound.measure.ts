@@ -151,7 +151,8 @@ test("popup round", async ({ page }) => {
   await ensureSignedIn(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/todo");
-  await page.waitForTimeout(9000);
+  await page.waitForSelector(".tlc .row", { timeout: 30000 }).catch(() => {});
+  await page.waitForTimeout(4000);
 
   const at_rest = await page.evaluate(READ) as { rows: number; dialogs: string[] };
   add("P0.1 nothing is open at rest", at_rest.dialogs.length === 0,
@@ -169,7 +170,12 @@ test("popup round", async ({ page }) => {
        Note case that pressed a send card's primary, and a fill-in that inherited the pane before
        it. A reload is the cheapest isolation there is. */
     await page.goto("/todo");
-    await page.waitForTimeout(7000);
+    /* ⚠️ WAIT FOR THE BOARD, NOT FOR A NUMBER. A fixed 7s is ample locally and short against the
+       deployed site: the FIRST case looked at a board that had not finished deriving and reported
+       "no Close row would dock" while a census taken a minute later found one. A timeout that
+       passes on one target and fails on another is not a measurement of either. */
+    await page.waitForSelector(".tlc .row", { timeout: 30000 }).catch(() => {});
+    await page.waitForTimeout(4000);
     const before = await page.evaluate(READ) as { rows: number; texts: string[]; docked: string | null };
     /* try each candidate until one actually becomes the selected row */
     let opened: string | null = null;
