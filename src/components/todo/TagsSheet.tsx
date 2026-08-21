@@ -103,6 +103,12 @@ export const TagsPane: React.FC = () => {
                         </button>
                       )}
                       <span className="tdb-tsettagct">{counts.get(t.id) ?? 0} {(counts.get(t.id) ?? 0) === 1 ? "item" : "items"}</span>
+                      {/* ⚠️ THE CONTROLS ARE ONE GROUP, so they can take their own line when the pane
+                          is narrow. Flat in the row, the five swatches and Delete competed with the
+                          label for 254px and "Delete" was clipped by the panel's own edge — the
+                          control the arm-then-confirm guard protects was the part that fell off.
+                          Identity above, controls below; nothing about the CRUD changes. */}
+                      <span className="tdb-tsettagacts">
                       <span className="tdb-tsettagpal" role="group" aria-label={`Colour for #${t.label}`}>
                         {TAG_COLOURS.map((c) => (
                           <button
@@ -121,6 +127,7 @@ export const TagsPane: React.FC = () => {
                       ) : (
                         <button type="button" className="tdb-tsettagdel" onClick={() => setArmedDelete(t.id)}>Delete</button>
                       )}
+                      </span>
                     </div>
                   ))
                 )}

@@ -50,8 +50,14 @@
 
 .sap-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 
+/* ⚠️ THE ROW DOES NOT WRAP, AND `flex-wrap: wrap` IS WHY IT USED TO. A long label — "Missing
+   submission material details" — pushed Restore onto a second line, so three rows had their
+   control on the right edge and one had it underneath: the same control in two places in one
+   list, which reads as two kinds of row. The label is the part that gives, and it can, because
+   `.sap-rowmain` takes the free space and `.sap-label` already wraps inside it. Measured 21 Aug:
+   every Restore now shares one right edge whatever the label's length. */
 .sap-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: nowrap;
   background: #fff; border: 0.5px solid #e0d5c8; border-radius: 9px; padding: 9px 11px;
 }
 /* ⚠️ THE KIND IS A LEADING EDGE, NOT A COLOURED ROW. Three kinds of hiding sit in one list and the
@@ -60,7 +66,7 @@
 .sap-row--dismissed { border-left: 2.5px solid #e8c8bc; }
 .sap-row--snoozed { border-left: 2.5px solid #efe4cc; }
 
-.sap-rowmain { display: flex; flex-direction: column; min-width: 0; }
+.sap-rowmain { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
 .sap-label {
   font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
   font-size: 12.5px; color: #3a1c14; overflow-wrap: anywhere;
@@ -91,3 +97,14 @@
 .sap-body .tdb-ffbody { padding: 0; }
 .sap-body .tdb-tsetempty,
 .sap-body .tdb-tsetfoot { font-size: 11px; line-height: 1.5; }
+
+/* ⚠️ THE TAG ROW IS TWO LINES AT PANEL WIDTH, and that is a fit, not a preference. Swatch + label +
+   count + five 15px swatches + "Delete" measured past the 254px pane on the longer of two tags, and
+   what fell off the end was Delete — so the row was clipping the one control that carries a guard.
+   Labels run to 24 characters, so shrinking the palette only moves the width at which it breaks.
+   Identity on line one, controls on line two, reachable at every label length. */
+.sap-body .tdb-tsetrow { flex-wrap: wrap; gap: 4px 10px; padding: 10px 2px; }
+.sap-body .tdb-tsettagct { margin-left: auto; }
+.sap-body .tdb-tsettagacts { display: flex; align-items: center; gap: 10px; flex: 1 0 100%; }
+.sap-body .tdb-tsettagpal { margin-left: 0; }
+.sap-body .tdb-tsettagdel { margin-left: auto; }
