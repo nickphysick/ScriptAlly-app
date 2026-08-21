@@ -14,27 +14,56 @@ import { openRoute } from "./measure";
 
 const ROUTE = "/manuscripts/comps";
 
-for (const vp of [{ width: 1440, height: 900 }, { width: 2300, height: 1200 }]) {
-  test(`the plate and the sheet share one left edge @ ${vp.width}`, async ({ page }) => {
-    await openRoute(page, ROUTE, vp);
-    const r = await page.evaluate(() => {
-      const grid = [...document.querySelectorAll(".wpg")].find((x) => x.getBoundingClientRect().height > 0);
-      if (!grid) return null;
-      const mast = grid.querySelector(".wpg-mast") as HTMLElement | null;
-      const hero = grid.querySelector(".ct-hero") as HTMLElement | null;
-      if (!mast || !hero) return null;
-      const m = mast.getBoundingClientRect();
-      const h = hero.getBoundingClientRect();
-      return { mastL: Math.round(m.left), mastR: Math.round(m.right), heroL: Math.round(h.left), heroR: Math.round(h.right) };
-    });
-    expect(r, "the grid, masthead or hero did not render").not.toBeNull();
-    console.log(`  ${vp.width}px → plate ${r!.mastL}…${r!.mastR} · sheet ${r!.heroL}…${r!.heroR}`);
-    /* ⚠️ BOTH EDGES, NOT JUST THE LEFT. The two measures are `min()` expressions; a left-only check
-       passes on a page whose right edges diverge past the cap, which is exactly where they used to. */
-    expect(Math.abs(r!.mastL - r!.heroL), "the plate overhangs the sheet on the left").toBeLessThanOrEqual(1);
-    expect(Math.abs(r!.mastR - r!.heroR), "the plate overhangs the sheet on the right").toBeLessThanOrEqual(1);
+/**
+ * ⚠️ THIS ASSERTED THE OPPOSITE, AND IT WAS WRONG. §1 read the 45px step between the masthead and the
+ * content column as a fault and closed it page-scoped with `--mast-gutter: var(--content-gutter)`.
+ * It is not a fault: `--mast-gutter: 35px` is a CONSTANT, and the masthead's left edge is the same on
+ * all ten pages by design (the masthead left-constant pack, §A). Another session's
+ * `contentGeometry.measure.ts` caught it — Comparable titles' masthead measured 342 where every other
+ * page measured 297 — and reverted the override in `39e6f458`.
+ *
+ * ⚠️ AND THE PRECEDENT I REASONED FROM DOES NOT TRANSFER. `--wpg-measure` IS a per-page opt-in: the
+ * grid reads it as `var(--wpg-measure, 100%)` precisely so a page may cap its own content, which is
+ * why Query Centre sets it and why this page still does. `--mast-gutter` has NO fallback and no page
+ * scope. "Both are tokens the page can set" was the reasoning, and the test is not whether a value is
+ * a token — it is whether the component offers it as a knob.
+ *
+ * So this now locks the LESSON rather than the mistake: the page keeps its content cap and must NOT
+ * reach for the masthead's constant again. The cross-page geometry itself belongs to
+ * `contentGeometry.measure.ts` and is deliberately not restated here — two suites asserting one law
+ * is how they come to disagree.
+ */
+test("this page caps its own content and does not touch the masthead's constant", async ({ page }) => {
+  await openRoute(page, ROUTE, { width: 1440, height: 900 });
+  const r = await page.evaluate(() => {
+    const grid = [...document.querySelectorAll(".wpg")].find((x) => x.getBoundingClientRect().height > 0) as HTMLElement;
+    if (!grid) return null;
+    const cs = getComputedStyle(grid);
+    const mast = grid.querySelector(".wpg-mast") as HTMLElement | null;
+    const hero = grid.querySelector(".ct-hero") as HTMLElement | null;
+    if (!mast || !hero) return null;
+    return {
+      mastGutter: cs.getPropertyValue("--mast-gutter").trim(),
+      /* ⚠️ `getPropertyValue` RETURNS THE RESOLVED VALUE, NOT THE LITERAL — it reads "1660px", never
+         "var(--work-max)". So the cap is compared against `--work-max`'s OWN resolved value: two
+         derivations against each other, which also catches the page pinning a hand-typed 1660. */
+      measure: cs.getPropertyValue("--wpg-measure").trim(),
+      workMax: cs.getPropertyValue("--work-max").trim(),
+      mastL: Math.round(mast.getBoundingClientRect().left),
+      heroL: Math.round(hero.getBoundingClientRect().left),
+    };
   });
-}
+  expect(r, "the grid, masthead or hero did not render").not.toBeNull();
+  console.log(`  --mast-gutter "${r!.mastGutter}" · --wpg-measure "${r!.measure}" · plate x${r!.mastL} · sheet x${r!.heroL}`);
+  /* the constant is the shell's and this page must inherit it untouched */
+  expect(r!.mastGutter, "this page has overridden the masthead's cross-page constant again").toBe("35px");
+  /* the content cap is the page's own, and is the half of §1 that was right */
+  expect(r!.workMax, "--work-max is not defined at all").toMatch(/^\d+px$/);
+  expect(r!.measure, "the page lost its content cap, or pinned a literal instead of the token").toBe(r!.workMax);
+  /* the plate therefore sits OUTSIDE the sheet, and that is the intended relationship */
+  expect(r!.mastL, "the plate no longer sits outside the sheet — the constant has moved")
+    .toBeLessThan(r!.heroL);
+});
 
 test("the hero is two columns, and the tile is beside the text rather than under it", async ({ page }) => {
   await openRoute(page, ROUTE, { width: 1440, height: 900 });

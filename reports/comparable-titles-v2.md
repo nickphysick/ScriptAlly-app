@@ -1,8 +1,10 @@
 # Comparable Titles v2 — run report
 
 **Commits** `403da8ee` §1 → `cc27a62e` §2 → `e0529341` §3 → `d141c771` §4 → `d3f5c93e` §5 → `3ec69b6e` §6
-**Branch** `main`, direct. **Not deployed.**
+**Branch** `main`, direct. **Deployed to dev** 21 Aug — https://scriptally-dev.web.app (hosting-only; no rules, no functions).
 **Ref** committed at `design-refs/comparable-titles-v2.html` (see false premise 1).
+
+> **⚠️ CORRECTION — §1's alignment fix was wrong and has been reverted by another session (`39e6f458`). See *The alignment fix was a mistake* below. Everything else here stands, and is measured on the deployed site.**
 
 ---
 
@@ -20,7 +22,7 @@ Five, and two of them changed the work.
 
 Two premises **held**, and one was bigger than described:
 
-- **The header plate was misaligned with the sheet** — and it is a constant **45px per side**, not a cap-binding edge case. Masthead resolves `min(--work-max, 100% − 2·--mast-gutter)` = `min(1660, W−70)`; the scroll column resolves `min(--wpg-measure ?? 100%, 100% − 2·(--wpg-gutter ?? --content-gutter))`, and this page declared neither token, so it came out `W−160`.
+- **The header plate sits 45px outside the sheet on each side** — the measurement was right, ~~and it is a fault~~ **but the verdict was wrong: this is the design.** See the correction below. Masthead resolves `min(--work-max, 100% − 2·--mast-gutter)` = `min(1660, W−70)`; the scroll column resolves `min(--wpg-measure ?? 100%, 100% − 2·(--wpg-gutter ?? --content-gutter))`, and this page declared neither token, so it came out `W−160`.
 - **The hero had dead space to the right** — true of the masthead plate, which carries no tools and no toolbar on this page.
 
 ### The finding that is not in the brief at all
@@ -39,9 +41,8 @@ Two-column hero: eyebrow `MATERIALS · POSITIONING`, standfirst, three-fact row 
 
 - **No `<h1>` in the hero** — Nick's call. `PageHeader` already renders "Comparable titles" on the plate; the ref draws its own only because it is a standalone mockup with no masthead. Building it as drawn would put the same words on screen twice.
 - **The third fact is `Verified`, not "Letters using comps"** — real, derived by `isVerified` at render, and already on the page. See the premise note above.
-- **Alignment fixed page-scoped**: `.ct-wpg.wpg { --wpg-measure: var(--work-max); --mast-gutter: var(--content-gutter) }`. Both sides now compute `min(1660, W−160)` — identical at every width, including past the cap. Only the plate moves; the content keeps its 80px gutter.
-- **The selector is `.ct-wpg.wpg`, not `.ct-wpg`, deliberately.** `WorkspacePageGrid` puts the page's class on its own root, so `.wpg` and `.ct-wpg` are both 0-1-0 on one element and the winner is whichever sheet the bundler emits last. 0-2-0 decides it instead of chance.
-- **Page-scoped on purpose.** The 45px step is shared-chrome behaviour on every page that declares no measure, and `workspacePageGrid.css` calls the difference deliberate. Query Centre already opts out the same way. Changing the grid's law would have moved nine other pages.
+- **~~Alignment fixed page-scoped~~ — REVERTED, and it was my mistake.** I set `--mast-gutter: var(--content-gutter)` alongside `--wpg-measure: var(--work-max)`. The `--wpg-measure` half survives and is right; the `--mast-gutter` half was wrong and is gone. Full account below.
+- **The selector is `.ct-wpg.wpg`, not `.ct-wpg`, deliberately.** `WorkspacePageGrid` puts the page's class on its own root, so `.wpg` and `.ct-wpg` are both 0-1-0 on one element and the winner is whichever sheet the bundler emits last. 0-2-0 decides it instead of chance. (This part was sound and still stands.)
 
 **Gate** tsc clean · build clean · 417 comps tests green.
 
@@ -117,7 +118,7 @@ Six measurements against the real signed-in app, from a throwaway worktree (`dis
 
 | Claim | Measured |
 |---|---|
-| plate and sheet share both edges | **1440: 342…1322 both. 2300: 432…2092 both.** |
+| ~~plate and sheet share both edges~~ | Measured true in the worktree — **on a build carrying a change since reverted.** The live relationship is plate x297 · sheet x342, and that is correct. |
 | hero is two columns | tile 268×296 beside the text, 3 facts, same row |
 | comp card geometry | spine 44×165 filling full height · aside 214px · tracks in order · year inside its track |
 | age chip is neutral | 2019 book → `"Published 2019 · seven years ago"` on `rgb(246,240,232)`, no warning treatment |
@@ -133,6 +134,22 @@ Six measurements against the real signed-in app, from a throwaway worktree (`dis
 **Two earlier fixes were real but not the cause**, and both looked like progress: clamping the ghost and making the lockwrap a flex column took the overflow 77 → 44. The number moved because those genuinely were faults (a negative margin tuned for the old three-row ghost; margins collapsing out of a block so the box measured 88px around 181px). Neither touched the absolute positioning. **When one measurement improves and the claim still fails, the remaining gap is a different fault, not the same one half-fixed.**
 
 Card height now 422px against 420px of content; the CTA sits 23px inside its own card.
+
+---
+
+## The alignment fix was a mistake
+
+**What I did (§1):** read the 45px step between the masthead and the content column as a fault and closed it page-scoped with `.ct-wpg.wpg { --wpg-measure: var(--work-max); --mast-gutter: var(--content-gutter) }`.
+
+**Why it was wrong:** `--mast-gutter: 35px` is a **cross-page constant**. The masthead's left edge is the same on all ten pages by design — the masthead left-constant pack's §A, which states it in as many words: *"35px, defined once. Every page uses it. No page overrides it"*, and names the consequence in the same breath: *"At 35px the masthead aligns exactly with Query Centre and Tasks and SITS OUTSIDE the wider pages' content. That's intended: the masthead is a constant, and constants don't bend to each page."* **The 45px step is the design, not a bug.**
+
+**How it was caught:** another session's `contentGeometry.measure.ts` asserts that constant at 1280, 1440 and 2300. It found Comparable titles' masthead at **342 where every other page measured 297**, and `39e6f458` reverted the override. The `--wpg-measure` half survives — that one *is* a legitimate per-page opt-in and is still right.
+
+**The reasoning error, which is the part worth keeping.** I read `workspacePageGrid.css`'s own comment saying the two measures *"differ deliberately"* — and overrode it anyway, reasoning from Query Centre's `--wpg-measure` precedent. That precedent does not transfer, and their note says exactly why: **the grid reads `var(--wpg-measure, 100%)`, with a fallback, precisely so a page may cap its own content; `--mast-gutter` has no fallback and no page scope.** My test was "is it a token the page can set". The real test is **"does the component offer it as a knob"** — a fallback in the `var()` is the component saying yes, and its absence is the component saying no.
+
+**And my own verification missed it**, which is the second lesson. §6's measurement passed at 1440 in a worktree built *before* the revert landed, so it measured a build that no longer existed by the time I reported it. The deployed site is what caught the divergence — the third time in this pack that looking at the real thing beat reasoning about it.
+
+**Now locked:** `compsV2.measure.ts` asserts the *lesson* rather than the mistake — `--mast-gutter` must read `35px` on this page, and the content cap must equal `--work-max`'s own resolved value (two derivations against each other, so pinning a literal `1660px` fails too). The cross-page geometry stays in `contentGeometry.measure.ts` and is deliberately not restated here; two suites asserting one law is how they come to disagree.
 
 ---
 
@@ -177,6 +194,6 @@ The brief asked for an exported type for the eventual library. **Written here ra
 4. **Illustration slots** — twelve named, dashed, awaiting artwork.
 5. **`.ct-upsell` duplicate-rule family** is cleared, but the file is worth one pass for any other duplicated selector: its own invariant is one rule per selector, and §6 shows what a duplicate costs.
 
-## Not deployed
+## Deployment
 
-Nothing was deployed. No Firestore rules were touched. The harness comps added during measurement were removed in a `finally`; the worktree, its copied `.env.local` and its copied `tests/e2e/.auth/state.json` are deleted.
+**Dev, hosting-only, 21 Aug** — `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`, from a `npm run build:dev` at `07f36ac8`. Pre-flight: 0 behind `origin/main`, no uncommitted source, all seven commits reachable from HEAD. The served bundle was confirmed byte-identical to the built one, and all six measurements re-run green against the live site. **No rules and no functions were touched, and prod was not touched.** No Firestore rules were touched. The harness comps added during measurement were removed in a `finally`; the worktree, its copied `.env.local` and its copied `tests/e2e/.auth/state.json` are deleted.
