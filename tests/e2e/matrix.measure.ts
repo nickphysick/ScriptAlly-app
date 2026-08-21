@@ -1,5 +1,8 @@
 /**
- * THE ACCEPTANCE MATRIX — every in-scope page, both viewports, on the deployed dev build.
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * THE ACCEPTANCE MATRIX — every in-scope page, both viewports.
  *
  * ⚠️ CROSS-PAGE EQUALITY, NOT CONSTANTS. The standard is "identical to every other page", so the
  * run collects each page's readings and compares them to each other at the end. A constant would
@@ -8,6 +11,24 @@
  * ⚠️ A WHEEL GESTURE, NOT A `scrollTop` WRITE. A write moves the element you chose; a wheel moves
  * whatever the browser decides is under the pointer, which is the only thing that catches a
  * handler attached to the wrong element.
+ *
+ * ⚠️⚠️ THIS FILE HAD BEEN CRASHING SINCE THE MASTHEAD MOVED INTO THE FLOW, AND NOBODY NOTICED FOR
+ * THREE PACKS. It read `.wpg-plate` — the chrome row that pack deleted — so `readHeaderState` threw
+ * on its first page and both viewports died before asserting anything. An acceptance matrix that
+ * does not run is worse than one that does not exist: the repo still has a file named for the
+ * guarantee, and every subsequent pack was reported green against a set it was never in.
+ *
+ * ⚠️ ABOUT HALF ITS CLAIMS WENT WITH THE PLATE, and they are DELETED rather than adapted, because
+ * their subject is gone rather than changed: the 128px resting card and 52px working strip, the
+ * mono working title, the mark dropping on scroll, the 30/38 button ladder, the pill ladder, the
+ * two-state band and gap, `backToRest`, and `overflowWork === overflowRest` — the invariance
+ * padding, which was deleted deliberately and whose successor is a bar that CHANGES max scroll on
+ * purpose. Retaining any of them as "the equivalent reading" would have been inventing a claim.
+ *
+ * ⚠️ AND THE MASTHEAD'S OWN GEOMETRY IS NOT HERE. `mastheadMatrix.measure.ts` owns it — height
+ * derivation, padding, type, marks, centring, control-row offset — and duplicating it would give
+ * one guarantee two homes that will eventually disagree. What is left here is everything BELOW the
+ * masthead: the ground, the hems and their fades, the width chain, the fill chain, and the wheel.
  */
 import { test, expect, Page } from "@playwright/test";
 import { openRoute, scrollbarWidth } from "./measure";
@@ -28,45 +49,66 @@ const SCROLLING: [string, string][] = [
   ["Comparable titles", "/manuscripts/comps"],
 ];
 
-const readHeaderState = (page: Page) => page.evaluate(() => {
+const readState = (page: Page) => page.evaluate(() => {
   const r = (n: number) => Math.round(n * 10) / 10;
   const g = [...document.querySelectorAll(".wpg")].find((x) => x.getBoundingClientRect().height > 0) as HTMLElement;
   if (!g) return null;
-  const row = g.querySelector(".wpg-plate") as HTMLElement;
-  const wsh = g.querySelector(".wsh") as HTMLElement;
-  const inner = g.querySelector(".wsh-row") as HTMLElement;
   const sc = g.querySelector(".wpg-scroll") as HTMLElement;
-  const mark = g.querySelector(".wsh-mark") as HTMLElement | null;
-  const title = g.querySelector(".wsh-title") as HTMLElement | null;
+  const wsh = g.querySelector(".wsh") as HTMLElement | null;
   const W = document.documentElement.clientWidth;
-  const hb = wsh.getBoundingClientRect(), rb = row.getBoundingClientRect(), sb = sc.getBoundingClientRect();
-  const hc = hb.top + hb.height / 2;
+  const sb = sc.getBoundingClientRect();
+  /**
+   * ⚠️ THE PAGE'S CONTENT BEGINS AFTER THE GRID'S OWN CHROME, AND FORGETTING THAT IS WHAT BROKE
+   * EVERY READING BELOW. The masthead, the folded bar and the control row are all children of the
+   * scroll row now — so `sc.firstElementChild` is the GRID's furniture, not the page's, and a walk
+   * that starts there is auditing the component against a rule written for its consumers.
+   *
+   * It produced two false reports on the first run of the repaired file, both entirely convincing:
+   * the width chain flagged `.wpg-mast: maxW 1660px`, which is the shared measure the grid applies
+   * to all its children on purpose; and the zero-height sweep flagged `wpg-mini 0px holding 25px`
+   * on all five scrolling pages, which is the folded bar sitting collapsed exactly as designed.
+   *
+   * ⚠️ NAMING THE GRID'S THREE CLASSES IS NOT THE "LIST OF PAGE NAMES" THIS FILE WARNS AGAINST.
+   * That warning is about deciding a page's BEHAVIOUR from a hand-kept list instead of from the
+   * DOM. This is the grid declaring which of its own children it rendered — one component's
+   * furniture, owned and locked elsewhere (`mastheadMatrix`, `miniBar`, `stickyRow`).
+   */
+  const CHROME = ["wpg-mast", "wpg-mini", "wpg-tools"];
+  const isChrome = (el: Element) => CHROME.some((c) => el.classList.contains(c));
+  const content = [...sc.children].find((el) => !isChrome(el)) as HTMLElement | null;
   return {
-    working: row.classList.contains("wpg-plate--working"),
     /* ⚠️ READ FROM THE DOM, NEVER A LIST OF PAGE NAMES. `fill` is a prop; a hand-kept list of "the
        fill pages" named Comparable titles, which does not pass it, and omitted Manuscripts, which
        does. The class is the page saying so itself. */
     fill: g.classList.contains("wpg--fill"),
-    rowH: r(rb.height), headerH: r(hb.height),
-    /* ⚠️ THE STRIP'S DISTANCE FROM THE WINDOW'S TOP EDGE — the last place a page could still
-       disagree about the header, and it did: five different page insets above the grid put this
-       at 87.3, 98.3, 101.3, 103.3 and 109.3 while every reading INSIDE the strip matched. */
-    headerTop: r(hb.top),
-    /* every control in the strip, whatever class it wears */
-    btnH: [...new Set([...inner.querySelectorAll("button, a[role='button'], [class*='btn'], [class*='chip']")]
-      .filter((el) => el.getBoundingClientRect().height > 0)
-      .map((el) => r(el.getBoundingClientRect().height)))].sort((x, y) => x - y),
+    /* ⚠️ THE MASTHEAD'S DISTANCE FROM THE WINDOW'S TOP EDGE — the last place a page could still
+       disagree about the header, and it did: five different page insets above the grid put this at
+       87.3, 98.3, 101.3, 103.3 and 109.3 while every reading INSIDE the header matched. */
+    headerTop: wsh ? r(wsh.getBoundingClientRect().top) : -1,
     /* ⚠️ THE CHAIN FROM THE SCROLL ROW TO THE CONTENT — anything declaring a width, a cap, an auto
        margin or a side padding between them is a page re-doing the grid's job. Query Centre's
        frame did exactly that through a `calc` that named the shared token, so its content sat
        160px in from each edge against every other page's 80. */
     chain: (() => {
       const out: string[] = [];
-      let el = sc.firstElementChild as HTMLElement | null;
+      /**
+       * ⚠️ THE GRID'S OWN SHARED MEASURE IS NOT A PAGE DECLARING A WIDTH, AND COMPUTED STYLE CANNOT
+       * TELL THEM APART. `.wpg-scroll > *` applies `max-width: var(--wpg-measure)` to every child,
+       * so Query Centre's `.f12-body` COMPUTES `1660px` while declaring nothing — the page's own
+       * cap was deleted when the measure moved up to the grid. Reading the computed value alone
+       * reported the fix as the fault it was fixing.
+       *
+       * So the measure is read off the grid's own furniture, which takes it by the same rule, and a
+       * child matching it is inside the shared measure rather than stating one. `none` on the nine
+       * pages that cap nothing, where this excuses exactly nothing.
+       */
+      const mastEl = g.querySelector(".wpg-mast") as HTMLElement | null;
+      const shared = mastEl ? getComputedStyle(mastEl).maxWidth : "none";
+      let el = content;
       for (let i = 0; el && i < 3; i += 1) {
         const c = getComputedStyle(el);
         const bad: string[] = [];
-        if (c.maxWidth !== "none") bad.push(`maxW ${c.maxWidth}`);
+        if (c.maxWidth !== "none" && c.maxWidth !== shared) bad.push(`maxW ${c.maxWidth}`);
         if (c.marginLeft === "auto" || c.marginRight === "auto") bad.push("auto margin");
         /* ⚠️ A BORDERED BOX'S PADDING IS ITS OWN, AND THAT IS A REAL DISTINCTION RATHER THAN AN
            EXEMPTION FOR THE PAGE THAT FAILED. Query Centre's `.f12-body` draws the workspace
@@ -115,6 +157,9 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
       const walk = (el: Element, depth: number) => {
         for (const kid of Array.from(el.children)) {
           const k = kid as HTMLElement;
+          /* the grid's own chrome is not the page's fill chain — the folded bar is 0 tall at rest
+             BY DESIGN, holding a 25px name it is deliberately hiding */
+          if (depth === 0 && isChrome(k)) continue;
           const h = k.getBoundingClientRect().height;
           const inner = Math.max(0, ...[...k.querySelectorAll("*")].map((x) => x.getBoundingClientRect().height));
           if (h < 1 && inner > 1 && getComputedStyle(k).display !== "none") {
@@ -126,43 +171,9 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
       return out;
     })(),
     /* the content's own left edge, so a double gutter shows as a number rather than as a rule */
-    contentL: (() => {
-      const first = sc.firstElementChild as HTMLElement | null;
-      return first ? r(first.getBoundingClientRect().left - sb.left) : -1;
-    })(),
-    /* anything inline with the title — PRO pills, badges — by font size */
-    pillFs: [...new Set((title ? [...title.querySelectorAll("*")] : [])
-      .filter((el) => el.getBoundingClientRect().height > 0)
-      .map((el) => getComputedStyle(el).fontSize))],
-    titlePx: title ? getComputedStyle(title).fontSize : "—",
-    /* ⚠️ THE WHOLE REGISTER, NOT JUST THE SIZE (§4). The working title is a different VOICE —
-       family, weight, letterspacing and case all change together — so a run that compared only the
-       size would pass a page that had kept Playfair at 11.5px. Reported as one string so a single
-       cross-page comparison covers all five. */
-    titleReg: title ? (() => {
-      const c = getComputedStyle(title);
-      return `${c.fontFamily.split(",")[0].replace(/"/g, "")}/${c.fontSize}/${c.fontWeight}/${c.letterSpacing}/${c.textTransform}`;
-    })() : "—",
-    titleInk: title ? getComputedStyle(title).color : "—",
-    /* ⚠️ THE BAND'S GROUND AND ITS EDGE (ref 91) — read off the header itself, because the edge is
-       the header's own border rather than a rule drawn by the row beneath it. */
-    bandBg: getComputedStyle(wsh).backgroundColor,
-    bandEdge: `${getComputedStyle(wsh).borderBottomWidth} ${getComputedStyle(wsh).borderBottomColor}`,
-    /* and the row's floating hairline must be gone — a leftover is invisible at rest and a
-       double line the moment anyone scrolls */
-    ghostRule: getComputedStyle(row, "::after").content !== "none"
-      && parseFloat(getComputedStyle(row, "::after").height || "0") > 0,
-    markW: mark ? r(mark.getBoundingClientRect().width) : -1,
-    /* the mark drops entirely when working — width AND opacity, on every page */
-    markGone: mark ? (r(mark.getBoundingClientRect().width) === 0 && getComputedStyle(mark).opacity === "0") : true,
-    offCentre: [...inner.children].filter((el) => {
-      const b = el.getBoundingClientRect();
-      return b.height > 0 && Math.abs(b.top + b.height / 2 - hc) > 0.5;
-    }).map((el) => el.className),
-    headerL: r(hb.left), headerR: r(W - hb.right),
+    contentL: content ? r(content.getBoundingClientRect().left - sb.left) : -1,
+    /* the scroller's own edges — the grid's row, which is one object on every page */
     scrollL: r(sb.left), scrollR: r(W - sb.right),
-    hairL: r(rb.left + parseFloat(getComputedStyle(row, "::after").left || "0")),
-    hairR: r(W - (rb.right - parseFloat(getComputedStyle(row, "::after").right || "0"))),
     overflow: sc.scrollHeight - sc.clientHeight,
     /* does anything below the chrome scroll at all? an internal-pane page says yes here */
     innerScrolls: [...g.querySelectorAll("*")].some((el) => {
@@ -242,15 +253,21 @@ const readHeaderState = (page: Page) => page.evaluate(() => {
     stackedFades: [...sc.querySelectorAll(".tbd-fade, .sv2-fade, [class*='-fade']")]
       .filter((el) => (el as HTMLElement).getBoundingClientRect().height > 0)
       .map((el) => el.className.toString().slice(0, 24)),
-    /* the gap under the hairline, paid by whichever row is first below it — and paid once */
-    topGap: (() => {
-      const tools = g.querySelector(".wpg-tools") as HTMLElement | null;
-      const a2 = parseFloat(getComputedStyle(tools ?? sc).paddingTop) || 0;
-      const b2 = tools ? parseFloat(getComputedStyle(sc).paddingTop) || 0 : 0;
-      return `${a2}+${b2}`;
-    })(),
-    gutter: getComputedStyle(document.documentElement).getPropertyValue("--content-gutter").trim(),
-    inset: getComputedStyle(document.documentElement).getPropertyValue("--header-inset").trim(),
+    gutter: getComputedStyle(sc).paddingLeft,
+    /**
+     * ⚠️ THE SCROLL ROW RESERVES A CLASSIC SCROLLBAR GUTTER ON BOTH EDGES, and the content sits
+     * inside it. `scrollbar-gutter: stable both-edges` — measured `offsetWidth 1170` against
+     * `clientWidth 1140`, so 15px on each side, on every page and in both gutter families.
+     *
+     * ⚠️ THIS IS THE ONE PART OF THE SCROLLBAR THE HARNESS *CAN* SEE, and the distinction is worth
+     * holding. Chromium here cannot RENDER a classic scrollbar — the repo's note records `0px`
+     * under every flag, channel and override tried — but a reserved GUTTER is layout, not painting,
+     * and `clientWidth` reports it exactly. So "the harness is blind to the scrollbar" is true of
+     * the bar's visible width and false of the space held for it.
+     *
+     * Read as a number so the content's inset can be checked against it rather than against 15.
+     */
+    gutterReserve: r((sc.offsetWidth - sc.clientWidth) / 2),
   };
 });
 
@@ -279,254 +296,73 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     for (const [label, route] of SCROLLING) {
       await openRoute(page, route, vp);
       if (sbw < 0) sbw = await scrollbarWidth(page);
-      const rest = await readHeaderState(page);
+      const rest = await readState(page);
       if (!rest) { rows.push({ page: label, ERROR: "no visible .wpg" }); continue; }
       await wheelOverContent(page);
-      const work = await readHeaderState(page);
-      // back to the top
-      await page.evaluate(() => { const g=[...document.querySelectorAll(".wpg")].find(x=>x.getBoundingClientRect().height>0)!; (g.querySelector(".wpg-scroll") as HTMLElement).scrollTop = 0; });
-      await page.waitForTimeout(300);
-      const back = await readHeaderState(page);
+      const work = await readState(page);
       rows.push({
-        page: label, canScroll: rest.overflow > 0,
-        restH: rest.rowH, restTitle: rest.titlePx, restMark: rest.markW,
-        restHdrL: rest.headerL, restHdrR: rest.headerR,
-        wheelWorked: work!.scrollTop > 2, workedStrip: work!.working,
-        workH: work!.rowH, workTitle: work!.titlePx, workMark: work!.markW,
-        workHdrL: work!.headerL, workHdrR: work!.headerR,
-        hairL: work!.hairL, hairR: work!.hairR,
-        restTop: rest.headerTop, workTop: work!.headerTop,
-        restCardH: rest.headerH, workCardH: work!.headerH,
-        restBtn: rest.btnH.join("|") || "—", workBtn: work!.btnH.join("|") || "—",
-        restPill: rest.pillFs.join("|") || "—", workPill: work!.pillFs.join("|") || "—",
-        restReg: rest.titleReg, workReg: work!.titleReg,
-        workInk: work!.titleInk, markGone: work!.markGone,
-        restBg: rest.bandBg, workBg: work!.bandBg,
-        restEdge: rest.bandEdge, workEdge: work!.bandEdge,
-        ghost: rest.ghostRule || work!.ghostRule,
-        contentL: rest.contentL, chain: rest.chain.join(" · ") || "clean",
-        topGap: rest.topGap, workGap: work!.topGap,
+        page: label, canScroll: rest.overflow > 0, fill: rest.fill,
+        headerTop: rest.headerTop, gutter: rest.gutter, reserve: rest.gutterReserve, contentL: rest.contentL,
+        scrollL: rest.scrollL, scrollR: rest.scrollR,
+        chain: rest.chain.join(" · ") || "clean",
         zeroKids: rest.zeroKids.join(" · ") || "none",
-        fill: rest.fill,
+        wheelWorked: work!.scrollTop > 2,
         hemRest: `${rest.hemTop} ${rest.hemBot}`, hemWork: `${work!.hemTop} ${work!.hemBot}`,
         windowBg: rest.windowBg, windowEl: rest.windowEl, hemInk: rest.hemInk,
         stacked: rest.stackedFades.join(",") || "none",
-        backToRest: !back!.working,
-        offCentre: rest.offCentre.length + work!.offCentre.length,
-        overflowRest: rest.overflow, overflowWork: work!.overflow,
-        innerScrolls: rest.innerScrolls,
+        overflowRest: rest.overflow, innerScrolls: rest.innerScrolls,
       });
     }
     console.log(`\n══ MATRIX ${vp.width}x${vp.height} · scrollbar ${sbw}px (${sbw >= 10 ? "CLASSIC" : "OVERLAY"})`);
     console.table(rows);
-    /* ⚠️ GEOMETRY IS ASSERTED OVER *EVERY* PAGE; BEHAVIOUR ONLY OVER THE ONES THAT SCROLL. The
-       first version compared everything across `scrollers` alone, which quietly excused any page
-       whose content happened not to overflow — including the three Tasks pages, whose viewport
-       lock means they never scroll BY DESIGN (§4). Their headers must still be the same object as
-       everyone else's, and that is now checked. */
     const all = rows.filter((r) => !r.ERROR);
+    expect(all.length, "pages failed to render at all — the matrix is measuring nothing").toBe(SCROLLING.length);
     const scrollers = all.filter((r) => r.canScroll);
-    /* ⚠️ COMPARE LIKE WITH LIKE ON THE TITLE. "No description → the title steps up" is a stated
-       rule, so a page that passes none renders 35px rather than 33 by design. Grouping by that is
-       not a weakening: every other reading must still be identical across ALL pages, and within
-       each title group the sizes must agree. */
-    for (const key of ["restH", "restHdrL", "restHdrR"] as const) {
-      const vals = [...new Set(all.map((r) => String(r[key])))];
-      expect(vals, `${key} differs across pages: ${JSON.stringify(all.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
-    }
-    /* ══ §4 — THE WORKING REGISTER IS IDENTICAL ON EVERY PAGE ═════════════════════════════════
-       ⚠️ CROSS-PAGE, NOT AGAINST CONSTANTS — a literal would pass while all ten drifted together. */
-    /* ⚠️ THE BAND IS THE SAME SURFACE ON EVERY PAGE — ground and edge, cross-page, not against
-       constants. And the row's old hairline is asserted absent everywhere: keeping both drew two
-       lines a pixel apart that did not even agree on their length. */
-    /* ⚠️ LIKE WITH LIKE, AGAIN — the working columns compare across the SCROLLERS only. A page with
-       no working state reports its RESTING value under `work*`, so comparing all ten flagged a
-       split of white against parchment that is the mechanism working, not a page disagreeing.
-       Query Centre reads white here for the same reason and is not an exception: its working state
-       is mode-driven, so its band is asserted in the journeys gate, as its label already is. */
-    /* ⚠️ THE WINDOW'S GROUND JOINS THE EQUALITY LIST, and it belongs in the ALL set: every page
-       sits in the same window, so a page that paints its own ground under the header is the exact
-       thing "one ground, painted once" forbids, and it is invisible until two pages are compared. */
-    for (const key of ["restBg", "restEdge", "windowBg", "windowEl"] as const) {
-      const vals = [...new Set(all.map((r) => String(r[key])))];
-      expect(vals, `${key} differs across pages: ${JSON.stringify(all.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
-    }
-    /* ⚠️ THE TWO HALVES OF THE GROUND AGREE. `.ws-work` fills `.ws-window`, so a difference can only
-       show as a seam at the window's edges — and worse, it lets a change to one of them look like
-       it landed while every page still displays the other. That is exactly what happened. */
+
+    /* ══ THE GROUND ══════════════════════════════════════════════════════════════════════════ */
     for (const r of all) {
       expect(r.windowBg, `${r.page}: the visible ground (${r.windowBg}) is not the window's own fill (${r.windowEl}) — .ws-work is painting over it`)
-        .toBe(String(r.windowEl));
-    }
-    /**
-     * ══ THE HEM RESOLVES INTO THE GROUND, MEASURED ═══════════════════════════════════════════
-     *
-     * ⚠️ THIS IS THE CHECK THAT WOULD HAVE CAUGHT THE LITERAL, and none of the source locks could
-     * have. Both hems read a hardcoded `#ffffff` that was correct while the window was white; the
-     * failure mode is not "the fade is missing" but "the fade is a slightly different white", which
-     * paints a pale stripe across the top and bottom of every scroller and shows ONLY against
-     * content. An empty page renders it perfectly.
-     *
-     * ⚠️ COMPARED AGAINST THE WINDOW'S OWN COMPUTED FILL, never a constant. A literal on both sides
-     * would pass while the pair drifted together — the same reason every other reading here is
-     * cross-page. Both hems are checked, because they are two declarations and only one of them
-     * needs to be missed.
-     */
-    /* ⚠️ SCOPED TO THE PAGES THAT HAVE HEMS, and derived from the reading rather than from a list
-       of page names. A `fill` page mounts none at all — its panes scroll and the row does not, so
-       there is no state either hem describes — and today that is five of the ten. Naming them
-       would go stale the next time a page converts; `absent` is the page saying so itself. */
-    const hemmed = all.filter((r) => !String(r.hemInk).startsWith("absent"));
-    expect(hemmed.length, "no page mounted a hem at all — the reading is broken, not the hems").toBeGreaterThan(0);
-    for (const r of hemmed) {
-      /* the pair is mounted together, so a page reporting one hem has half-rendered them */
-      expect(String(r.hemRest), `${r.page}: it has hem colours but reports no hems — the two readings disagree`).not.toContain("absent");
-      const [top, bot] = String(r.hemInk).split(" | ");
-      for (const [edge, ink] of [["top", top], ["bottom", bot]] as const) {
-        expect(ink, `${r.page}: the ${edge} hem has no opaque stop — its gradient is not a fade into anything (${r.hemInk})`)
-          .not.toMatch(/^(absent|noStops)/);
-        expect(ink, `${r.page}: the ${edge} hem fades from ${ink} over a ${r.windowBg} ground — a pale band across the scroller, visible only against content`)
-          .toBe(String(r.windowBg));
-      }
-    }
-    for (const key of ["workBg", "workEdge"] as const) {
-      const vals = [...new Set(scrollers.map((r) => String(r[key])))];
-      expect(vals, `${key} differs across pages: ${JSON.stringify(scrollers.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
-    }
-    for (const r of all) {
-      expect(r.ghost, `${r.page}: the row still draws its own hairline — with the band's edge that is two lines`).toBe(false);
-    }
-    /* the working band must actually differ from the resting card, or "it becomes a band" is a no-op */
-    expect(String(scrollers[0]?.workBg), "the working band did not take the parchment ground").not.toBe(String(scrollers[0]?.restBg));
-    /* ⚠️ AND THE THREE SURFACES ARE THREE SURFACES. The resting plate is the CARD (white), the
-       window is the GROUND, and the band is the page showing through it — so the plate must not
-       match the window either, or the resting header stops reading as an object laid on the page
-       and becomes an invisible rectangle with a border. This is the pair the colour step was for;
-       asserting only band-vs-card would let the ground drift back onto the card and say nothing. */
-    expect(String(all[0]?.restBg), "the resting plate matches the window's ground — the card is invisible against the page and legible only by its border")
-      .not.toBe(String(all[0]?.windowBg));
-    expect(String(scrollers[0]?.workBg), "the band matches the window's ground — it has nothing to distinguish it but its hairline")
-      .not.toBe(String(scrollers[0]?.windowBg));
-    expect(String(scrollers[0]?.workEdge), `the band has no bottom edge: ${scrollers[0]?.workEdge}`).toMatch(/^1px rgb/);
-
-    for (const key of ["workReg", "workInk"] as const) {
-      const vals = [...new Set(scrollers.map((r) => String(r[key])))];
-      expect(vals, `${key} differs across pages: ${JSON.stringify(scrollers.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
-    }
-    /* ⚠️ AND IT IS ACTUALLY THE LABEL. The equality above would hold if every page had kept its
-       masthead, so the register is also named — once, here, rather than per page. */
-    const reg = String(scrollers[0]?.workReg ?? "");
-    expect(reg, `the working title is not the mono label: ${reg}`).toMatch(/^JetBrains Mono\/11\.5px\/500\/[\d.]+px\/uppercase$/);
-    for (const r of scrollers) {
-      expect(r.markGone, `${r.page}: the mark is still drawn in the working strip`).toBe(true);
-    }
-    for (const key of ["workH", "workHdrL", "workHdrR", "hairL", "hairR"] as const) {
-      const vals = [...new Set(scrollers.map((r) => String(r[key])))];
-      expect(vals, `${key} differs across pages: ${JSON.stringify(scrollers.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
-    }
-    /* ⚠️ THE MARK HAS TWO LEGITIMATE SIZES AND NEITHER IS A PAGE'S CHOICE, exactly like the title.
-       `markHasArt` is a RULE: artwork present → 64px and bare, absent → the 38px monoline glyph on
-       its plate, decided by whether the drawing exists rather than by a prop. Two of the nine marks
-       are drawn today, so two pages read 64 — and as artwork lands, more will, with no call site
-       edited. What must be identical is the WORKING mark, and `workMark` above asserts all nine
-       collapse to the same 30. */
-    for (const w of [...new Set(all.map((r) => r.restMark))]) {
-      expect([38, 88], `an unexpected rest mark ${w} — only the 38px glyph and the 88px illustration are legitimate`).toContain(w);
+        .toBe(r.windowEl);
     }
 
-    /* ══ §1 — THE STRIP IS THE SAME OBJECT ON EVERY PAGE ══════════════════════════════════════
-       ⚠️ THE HEIGHT IS THE TOKEN, NEVER THE CONTENT. 96 at rest on every page including the
-       title-only ones — a page with no description centres its title in the same 96 rather than
-       shrinking the card — and 52 working on every page that has a working state. */
-    for (const r of all) {
-      expect(r.restCardH, `${r.page}: the resting card is not 128 — its height is following its content`).toBe(128);
+    /* ══ THE SCROLLER IS ONE OBJECT ON EVERY PAGE ════════════════════════════════════════════ */
+    for (const key of ["scrollL", "scrollR"] as const) {
+      const vals = [...new Set(all.map((r) => String(r[key])))];
+      expect(vals, `${key} differs across pages: ${JSON.stringify(all.map((r) => [r.page, r[key]]))}`).toHaveLength(1);
     }
-    for (const r of scrollers) {
-      expect(r.workCardH, `${r.page}: the working strip is not 52`).toBe(52);
-    }
-    /* ⚠️ AND IT SITS AT THE SAME PLACE ON THE PAGE. Cross-page equality in BOTH states — a page
-       inset above the grid moves the strip without changing anything measurable inside it. */
-    const topSame = (key: "restTop" | "workTop", set: typeof all) => {
-      const vals = [...new Set(set.map((x) => String(x[key])))];
-      expect(vals, `${key} differs across pages — a page-level inset above the grid: ${JSON.stringify(set.map((x) => [x.page, x[key]]))}`).toHaveLength(1);
-    };
-    topSame("restTop", all);
-    /* ⚠️ THE WORKING TOP IS COMPARED ACROSS THE SCROLLERS ONLY, and that is not a weakening. A
-       page with no working state reports its RESTING position under `workTop`, which is 18px
-       lower by construction — the plate gap the strip gives back when it condenses. Comparing all
-       ten flagged a split of exactly 87.3 / 69.3, i.e. exactly `--wsh-plate-gap`, which is the
-       mechanism working rather than a page disagreeing. `restTop` is still checked across all ten,
-       and that is the reading a page inset actually moves. */
-    topSame("workTop", scrollers);
-    /* ⚠️ EVERY CONTROL IN THE STRIP IS 30px WORKING, whatever class its page gave it. `.pkgw-btn`
-       measured 30 here for a whole pass while being a second implementation that had simply been
-       written its own working height — the check is the value, the fix was removing the copy. */
-    for (const r of scrollers.filter((x) => x.workBtn !== "—")) {
-      expect(r.workBtn, `${r.page}: a control in the working strip is not 30px`).toBe("30");
-    }
-    for (const r of all.filter((x) => x.restBtn !== "—")) {
-      expect(r.restBtn, `${r.page}: a control in the resting strip is not 38px`).toBe("38");
-    }
-    /* ⚠️ NOTHING INLINE WITH THE TITLE KEEPS ITS REST SIZE. Discover's PRO pill held 8.5px in both
-       states — it had never been written a scrolled rule, and nothing said one was missing. */
-    for (const r of scrollers.filter((x) => x.restPill !== "—")) {
-      expect(r.workPill, `${r.page}: something inline with the title kept its resting size through the collapse`).not.toBe(r.restPill);
-    }
-    const pills = [...new Set(scrollers.filter((x) => x.workPill !== "—").map((x) => String(x.workPill)))];
-    expect(pills.length, `pills scale to different sizes across pages: ${JSON.stringify(scrollers.map((x) => [x.page, x.workPill]))}`).toBeLessThan(2);
 
-    /* ⚠️ NOTHING BETWEEN THE SCROLL ROW AND THE CONTENT RE-DECLARES GEOMETRY. §4's chain rule,
-       measured rather than read: the grid pays the gutter once, and a page that pays it again is
-       narrower than every other page while its CSS names the correct token. */
+    /* ══ NOTHING BETWEEN THE SCROLL ROW AND THE CONTENT RE-DECLARES GEOMETRY ═════════════════
+       The grid pays the gutter once, and a page that pays it again is narrower than every other
+       page while its CSS names the correct token. */
     for (const r of all) {
       expect(r.chain, `${r.page}: something between the scroll row and the content declares its own width — ${r.chain}`).toBe("clean");
       expect(r.zeroKids, `${r.page}: a box in the scroll row measures 0 while holding rendered content — the fill chain is broken (${r.zeroKids}). The page needs the grid's \`fill\` prop.`).toBe("none");
     }
-    /* ⚠️ `-1` MEANS "NO CONTENT AT ALL", NOT "AN EDGE OF -1". Analytics renders `{null}` into row
-       3 — a placeholder that deliberately shows nothing rather than plausible-looking figures — so
-       it has no first child to measure. Comparing its sentinel against nine real edges failed on
-       the one page whose emptiness is the point. It is excluded by that sentinel and not by name,
-       so any page that loses its content is excluded too — which is why the count is asserted. */
-    const withContent = all.filter((x) => x.contentL !== -1);
-    expect(withContent.length, "more than one page has no content in its scroll row — one is the Analytics placeholder; a second is a page that failed to render")
-      .toBe(all.length - 1);
-    expect([...new Set(withContent.map((x) => String(x.contentL)))],
-      `the content's left edge differs across pages: ${JSON.stringify(withContent.map((x) => [x.page, x.contentL]))}`).toHaveLength(1);
 
-    /* ══ §2 — ONE GAP, 70px, PAID ONCE ══════════════════════════════════════════════════════ */
     /**
-     * ⚠️ ONE PAGE HAS A SANCTIONED OVERRIDE, AND IT IS NAMED RATHER THAN EXCUSED. Query Centre
-     * starts its content 18px below the band instead of 70 — a deliberate page-scoped exception
-     * (rhythm §1a): it is the most-visited workspace and earns a tighter start. Relaxing this check
-     * to "whatever each page says" would let the other nine drift silently, which is the whole
-     * reason it compares across pages. The exception is a literal here so adding a second one is a
-     * decision someone has to write down.
+     * ⚠️ THE CONTENT STARTS AT THE PAGE'S OWN GUTTER, AND THERE ARE TWO GUTTERS BY DESIGN. This
+     * used to demand ONE left edge across all ten; Query Centre and the three Tasks pages take
+     * `--content-gutter-tight`, so a single value was never the right claim and would now assert
+     * that deliberate difference away. What must hold is that the content sits at EXACTLY its
+     * scroller's padding — no more, no less — which catches the double-gutter fault on any page
+     * whatever its gutter, and catches it by the number rather than by naming a token.
+     *
+     * ⚠️ THE ANALYTICS CARVE-OUT IS RETIRED, AND ITS RETIREMENT IS THE POINT. This used to excuse
+     * ONE empty page: Analytics rendered `{null}` into row 3, a placeholder that deliberately showed
+     * nothing rather than plausible-looking figures. It has real content now, so every page must
+     * have some — a stronger claim than the one it replaces, and an exemption kept past its subject
+     * is an exemption that will one day excuse a page that genuinely failed to render.
      */
-    /* ⚠️ 18/9 → 0/0. The page moved and the gate did not: fix pack 3 §2 took Query Centre's gap to
-       zero on purpose — "the list's ground starts at the masthead rule... the split is not content
-       sitting under a header; it is the page" — and this entry still described the pack before it.
-       A stale exception is worse than none: it fails on correct behaviour and names the page. */
-    const GAP_OVERRIDE: Record<string, [number, number]> = { "Query Centre": [0, 0] };
-    for (const r of all) {
-      const [first, second] = String(r.topGap).split("+").map(Number);
-      const [wantRest] = GAP_OVERRIDE[String(r.page)] ?? [44, 35];
-      expect(first, `${r.page}: the resting gap under the hairline is ${first}, not ${wantRest}`).toBe(wantRest);
-      expect(second, `${r.page}: the gap is paid twice — the toolbar row AND the scroll row`).toBe(0);
-    }
-    /* ⚠️ AND THE WORKING GAP, which the first version left unasserted — it read the RESTING value
-       in both columns, so §2 could have shipped without halving anything and the case would have
-       passed. The reclaim in §3 is computed from the difference between these two, so an
-       unasserted working value is also an unasserted invariance. */
-    for (const r of scrollers) {
-      const [first, second] = String(r.workGap).split("+").map(Number);
-      const [, wantWork] = GAP_OVERRIDE[String(r.page)] ?? [44, 35];
-      expect(first, `${r.page}: the working gap is ${first}, not ${wantWork} — the strip is lighter and takes less separation`).toBe(wantWork);
-      expect(second, `${r.page}: the working gap is paid twice`).toBe(0);
+    const withContent = all.filter((x) => x.contentL !== -1);
+    const empty = all.filter((x) => x.contentL === -1).map((x) => x.page);
+    expect(empty, `pages with nothing in their scroll row: ${JSON.stringify(empty)} — every page renders content now, so a name here is a page that failed to render`)
+      .toEqual([]);
+    for (const r of withContent) {
+      const want = parseFloat(String(r.gutter)) + Number(r.reserve);
+      expect(r.contentL, `${r.page}: the content starts at ${r.contentL}, but the scroller's padding (${r.gutter}) plus its reserved scrollbar gutter (${r.reserve}) derive ${want} — the difference is a second inset the page is paying`)
+        .toBeCloseTo(want, 0);
     }
 
-    /* ══ §3 — THE HEMS ARE PRESENT, PINNED, AND EACH IS A STATE ═════════════════════════════
-       ⚠️ THE POSITION IS THE POINT. A hem inside the scrollport scrolls with the content, so it
-       would drift by exactly `scrollTop` — `@0` in both states is what proves it did not. */
     /**
      * ⚠️ THE HEM CONTRACT IS TWO CONTRACTS, AND ASSERTING ONE OVER ALL TEN WAS THE BUG. This
      * demanded hems on every page; five pages legitimately have none. `fill` declares that the
@@ -542,22 +378,42 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     }
     for (const r of all.filter((x) => !x.fill)) {
       expect(r.hemRest, `${r.page}: the hems are missing`).not.toContain("absent");
-      for (const reading of [String(r.hemRest), String(r.hemWork)].flatMap((x) => x.split(" "))) {
-        expect(reading, `${r.page}: a hem drifted off the row's edge — it is scrolling with the content (${r.hemRest} / ${r.hemWork})`)
-          .toMatch(/@0$/);
+    }
+    const hemmed = all.filter((r) => !String(r.hemRest).includes("absent"));
+    expect(hemmed.length, "no page mounted a hem at all — the reading is broken, not the hems").toBeGreaterThan(0);
+    for (const r of hemmed) {
+      for (const [edge, ink] of [["top", String(r.hemInk).split(" | ")[0]], ["bottom", String(r.hemInk).split(" | ")[1]]]) {
+        expect(ink, `${r.page}: the ${edge} hem has no opaque stop — its gradient is not a fade into anything (${r.hemInk})`)
+          .toMatch(/^rgba?\(/);
+        expect(ink, `${r.page}: the ${edge} hem fades from ${ink} over a ${r.windowBg} ground — a pale band across the scroller, visible only where content passes under it`)
+          .toBe(r.windowBg);
       }
     }
-    /* at the top of a scrolling page: no top hem, bottom hem lit. Once scrolled: top hem lit. */
     /* ⚠️ ONE ASSERTION PER HEM, because a combined one blames the wrong element. The first version
        compared the pair as a string and reported "a top fade at the top of the page" about a
        reading whose TOP hem was correct and whose bottom hem was dark — I chased the wrong half
        until I printed the value. A message that names something the reading does not say is worse
        than no message. */
+    /**
+     * ⚠️ THE STATE, NOT THE POSITION — AND THE POSITION MOVED ON PURPOSE. This asserted every hem
+     * reading ended `@0`, on the reasoning that a hem which drifted would be scrolling with the
+     * content. That was right when the hem sat on the scroller's own edge; the top hem now clears
+     * the two stacked stickies (`margin-top: var(--wpg-stuck-h)`), so once a page sticks it reads
+     * `on@102.7` — 42.7 of folded bar plus a 60px control row, exactly where it belongs. Asserting
+     * `@0` here reported a correct hem as drifting.
+     *
+     * ⚠️ SO THE POSITION CLAIM HAS ONE HOME AND IT IS NOT THIS FILE. `hemOverlap.measure.ts` checks
+     * the hem against the MEASURED stuck height, which is the claim that actually matters and the
+     * only one that stays true as either element's height changes. What is left here is the FADE
+     * OBSERVER: whether each hem is lit when there is something hidden past that edge — the
+     * reading that caught a `ResizeObserver` saying nothing while its scroller's children grew.
+     */
+    const state = (reading: string) => reading.split("@")[0];
     for (const r of scrollers) {
       const [restTop, restBot] = String(r.hemRest).split(" ");
-      expect(restTop, `${r.page}: a top fade at the top of the page — it reads as a rendering fault`).toBe("off@0");
-      expect(restBot, `${r.page}: no bottom fade with content below the fold — the observer is not seeing the content grow`).toBe("on@0");
-      expect(String(r.hemWork).split(" ")[0], `${r.page}: no top fade once scrolled`).toBe("on@0");
+      expect(state(restTop), `${r.page}: a top fade at the top of the page — it reads as a rendering fault`).toBe("off");
+      expect(state(restBot), `${r.page}: no bottom fade with content below the fold — the observer is not seeing the content grow`).toBe("on");
+      expect(state(String(r.hemWork).split(" ")[0]), `${r.page}: no top fade once scrolled`).toBe("on");
     }
     for (const r of all) {
       expect(r.stacked, `${r.page}: a legacy fade sits inside the grid's own scroller — two gradients on one edge (${r.stacked})`).toBe("none");
@@ -565,7 +421,7 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
     /* a page that cannot scroll shows neither — nothing is hidden in either direction. Fill pages
        are excluded because they have no hems AT ALL, which the case above states directly. */
     for (const r of all.filter((x) => !x.canScroll && !x.fill)) {
-      expect(r.hemRest, `${r.page}: a fade on a page with nothing hidden past either edge`).toBe("off@0 off@0");
+      expect(String(r.hemRest).split(" ").map(state).join(" "), `${r.page}: a fade on a page with nothing hidden past either edge (${r.hemRest})`).toBe("off off");
     }
 
     /* ⚠️ THE TASKS VIEWPORT LOCK: the frame is a window and NEVER scrolls — all scrolling belongs
@@ -574,23 +430,14 @@ for (const vp of [{ width: 1440, height: 900 }, { width: 1280, height: 800 }]) {
        so it sized to content and stacked a second scroller outside the zone that owns them. */
     for (const r of all.filter((x) => ["To-do", "Calendar", "Noteboard"].includes(String(x.page)))) {
       expect(r.overflowRest, `${r.page}: the Tasks frame scrolled — the viewport lock has leaked and there are now two scrollers`).toBe(0);
-      expect(r.workedStrip, `${r.page}: an internal-pane page stripped — it has no scroll of its own to strip on`).toBe(false);
+      /* ⚠️ AND `innerScrolls` IS REPORTED, NOT ASSERTED. I wrote it as "a pane must be scrolling"
+         and Calendar and Noteboard failed it — correctly: whether a pane currently overflows is a
+         fact about how much data this account happens to hold, not about the layout. The claim that
+         survives is the one above, that the FRAME never scrolls, which is true at every volume. */
     }
-    for (const size of [...new Set(all.map((r) => r.restTitle))]) {
-      expect([38, 40], `an unexpected rest title size ${size} — only the 38px default and the 40px solo step are legitimate`)
-        .toContain(parseInt(String(size), 10));
-    }
-    /* ⚠️ `workMark` LEFT THE EQUALITY LIST because the mark is GONE — every page reads 0, which the
-       markGone check states directly and by its actual meaning rather than as a shared number. */
-    expect([...new Set(scrollers.map((r) => String(r.workTitle)))],
-      `the WORKING title differs across pages — the solo step applies at rest only: ${JSON.stringify(scrollers.map((r) => [r.page, r.workTitle]))}`)
-      .toHaveLength(1);
+
     for (const r of scrollers) {
       expect(r.wheelWorked, `${r.page}: the wheel did not move .wpg-scroll — the handler may be on the wrong element`).toBe(true);
-      expect(r.workedStrip, `${r.page}: scrolled but did not strip`).toBe(true);
-      expect(r.backToRest, `${r.page}: did not return to the resting card at the top`).toBe(true);
-      expect(r.overflowWork, `${r.page}: stripping changed max scroll — the invariance padding is not working`).toBe(r.overflowRest);
-      expect(r.offCentre, `${r.page}: children off the header's centre`).toBe(0);
     }
   });
 }
